@@ -1,12 +1,16 @@
-﻿namespace SharpFish.Model
+﻿using System.Runtime.CompilerServices;
+
+namespace SharpFish.Model
 {
     public struct BitBoard
     {
         public ulong Board { get; set; }
 
+        public bool Empty => Board == default;
+
         public BitBoard(ulong value) { Board = value; }
 
-        public BitBoard(BoardSquares[] occupiedSquares)
+        public BitBoard(params BoardSquares[] occupiedSquares)
         {
             Board = default;
 
@@ -15,8 +19,6 @@
                 SetBit(square);
             }
         }
-
-        public static int SquareIndex(int rank, int file) => (rank * 8) + file;
 
         public void Print()
         {
@@ -65,20 +67,102 @@
             }
         }
 
-        public bool Empty() => Board == default;
+        /// <summary>
+        /// https://www.chessprogramming.org/General_Setwise_Operations#Separation
+        /// Cannot use (Board & -Board) - 1 due to limitation applying unary - to ulong
+        /// </summary>
+        /// <returns>-1 in case of empty board</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int GetLS1BIndex()
+        {
+            if (Board == default)
+            {
+                return -1;
+            }
+
+            return CountBits(Board ^ (Board - 1)) - 1;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void ResetLS1B()
+        {
+            Board = ResetLS1B(Board);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public int CountBits()
+        {
+            return CountBits(Board);
+        }
+
+        ///// <summary>
+        ///// Brian Kernighan's way
+        ///// TODO: improve for performance
+        ///// </summary>
+        ///// <returns></returns>
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //public int CountBits()
+        //{
+        //    int counter = 0;
+
+        //    var bitboard = new BitBoard(Board);
+
+        //    // Consecutively reset LSB
+        //    while (bitboard.Board != default)
+        //    {
+        //        ++counter;
+        //        bitboard.ResetLS1B();
+        //    }
+
+        //    return counter;
+        //}
 
         /// <summary>
         /// https://www.chessprogramming.org/Population_Count#Single_Populated_Bitboards
         /// </summary>
         public bool IsSinglePopulated()
         {
-            return Board != default && (Board & (Board - 1)) == default;
+            return Board != default && ResetLS1B(Board) == default;
         }
+
+        #region Static methods
+
+        public static int SquareIndex(int rank, int file) => (rank * 8) + file;
+
+        /// <summary>
+        /// https://www.chessprogramming.org/General_Setwise_Operations#LS1BReset
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ulong ResetLS1B(ulong bitboard)
+        {
+            return bitboard & (bitboard - 1);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int CountBits(ulong bitboard)
+        {
+            int counter = 0;
+
+            // Consecutively reset LSB
+            while (bitboard != default)
+            {
+                ++counter;
+                bitboard = ResetLS1B(bitboard);
+            }
+
+            return counter;
+        }
+
+        #endregion
+
+        #region Methods accepting BoardSquares
 
         public bool GetBit(BoardSquares square) => GetBit((int)square);
 
         public void SetBit(BoardSquares square) => SetBit((int)square);
 
         public void PopBit(BoardSquares square) => PopBit((int)square);
+
+        #endregion
     }
 }

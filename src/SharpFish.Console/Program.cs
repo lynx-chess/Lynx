@@ -8,7 +8,8 @@ using System;
 //_5_KingAttacks();
 //_6_Bishop_Occupancy();
 //_7_Rook_Occupancy();
-_8_Slider_Pieces_Attacks();
+//_8_Slider_Pieces_Attacks();
+_9_BitCount();
 
 static void _2_GettingStarted()
 {
@@ -98,4 +99,18 @@ static void _8_Slider_Pieces_Attacks()
     var rookAttacks = AttacksGenerator.GenerateRookAttacksOnTheFly((int)BoardSquares.d4, block);
     block.Print();
     rookAttacks.Print();
+}
+
+static void _9_BitCount()
+{
+    BitBoard bitBoard = new(new[] { BoardSquares.d5, BoardSquares.e4 });
+
+    bitBoard.ResetLS1B();
+    bitBoard.Print();
+
+    var bb = new BitBoard(BoardSquares.d5, BoardSquares.e4);
+
+    Console.WriteLine(bb.GetLS1BIndex());
+    Console.WriteLine(bb.GetLS1BIndex());
+    Console.WriteLine(Constants.Coordinates[bb.GetLS1BIndex()]);
 }
