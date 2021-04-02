@@ -13,7 +13,7 @@ namespace SharpFish
             {
                 for (int file = 0; file < 8; ++file)
                 {
-                    var squareIndex = rank * 8 + file;
+                    var squareIndex = BitBoard.SquareIndex(rank, file);
 
                     if (file > 0)
                     {
@@ -35,7 +35,7 @@ namespace SharpFish
             {
                 for (int file = 0; file < 8; ++file)
                 {
-                    var squareIndex = rank * 8 + file;
+                    var squareIndex = BitBoard.SquareIndex(rank, file);
 
                     if (file < 7)
                     {
@@ -57,7 +57,7 @@ namespace SharpFish
             {
                 for (int file = 0; file < 8; ++file)
                 {
-                    var squareIndex = rank * 8 + file;
+                    var squareIndex = BitBoard.SquareIndex(rank, file);
 
                     if (file > 1)
                     {
@@ -79,7 +79,7 @@ namespace SharpFish
             {
                 for (int file = 0; file < 8; ++file)
                 {
-                    var squareIndex = rank * 8 + file;
+                    var squareIndex = BitBoard.SquareIndex(rank, file);
 
                     if (file < 6)
                     {

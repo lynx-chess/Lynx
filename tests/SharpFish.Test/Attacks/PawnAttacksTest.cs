@@ -46,8 +46,8 @@ namespace SharpFish.Test.Attacks
                     continue;
                 }
 
-                bool aFile = !Constants.NotAFile.GetBit(intSquare);
-                bool hFile = !Constants.NotHFile.GetBit(intSquare);
+                bool aFile = !new BitBoard(Constants.NotAFile).GetBit(intSquare);
+                bool hFile = !new BitBoard(Constants.NotHFile).GetBit(intSquare);
 
                 var attackDiagram = aFile || hFile
                     ? 1UL

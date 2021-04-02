@@ -3,7 +3,7 @@ using BS = SharpFish.Model.BoardSquares;
 
 namespace SharpFish.Test.Attacks
 {
-    public class RooksAttacksTest
+    public class RookOccupancyTest
     {
         [Theory]
         [InlineData(BS.a8, new[] { BS.b8, BS.c8, BS.d8, BS.e8, BS.f8, BS.g8, BS.a2, BS.a3, BS.a4, BS.a5, BS.a6, BS.a7 })]
@@ -18,9 +18,9 @@ namespace SharpFish.Test.Attacks
 
         [InlineData(BS.e4, new[] { BS.b4, BS.c4, BS.d4, BS.f4, BS.g4, BS.e7, BS.e6, BS.e5, BS.e3, BS.e2 })]
         [InlineData(BS.d4, new[] { BS.b4, BS.c4, BS.e4, BS.f4, BS.g4, BS.d7, BS.d6, BS.d5, BS.d3, BS.d2 })]
-        public void MaskRookAttacks(BS rookSquare, BS[] attackedSquares)
+        public void MaskRookOccupancy(BS rookSquare, BS[] attackedSquares)
         {
-            var attacks = AttacksGenerator.MaskRookAttacks((int)rookSquare);
+            var attacks = AttacksGenerator.MaskRookOccupancy((int)rookSquare);
 
             foreach (var attackedSquare in attackedSquares)
             {

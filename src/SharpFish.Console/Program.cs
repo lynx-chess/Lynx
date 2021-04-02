@@ -7,7 +7,8 @@ using System;
 //_4_KnightAttacks();
 //_5_KingAttacks();
 //_6_Bishop_Occupancy();
-_7_Rook_Occupancy();
+//_7_Rook_Occupancy();
+_8_Slider_Pieces_Attacks();
 
 static void _2_GettingStarted()
 {
@@ -63,7 +64,7 @@ static void _5_KingAttacks()
 
 static void _6_Bishop_Occupancy()
 {
-    var occupancy = AttacksGenerator.MaskBishopAttacks((int)BoardSquares.h8);
+    var occupancy = AttacksGenerator.MaskBishopOccupancy((int)BoardSquares.h8);
     occupancy.Print();
 
     AttacksGenerator.InitializeBishopOccupancy();
@@ -71,8 +72,30 @@ static void _6_Bishop_Occupancy()
 
 static void _7_Rook_Occupancy()
 {
-    var occupancy = AttacksGenerator.MaskRookAttacks((int)BoardSquares.e4);
+    var occupancy = AttacksGenerator.MaskRookOccupancy((int)BoardSquares.e4);
     occupancy.Print();
 
     AttacksGenerator.InitializeRookOccupancy();
+}
+
+static void _8_Slider_Pieces_Attacks()
+{
+    // Occupancy bitboard
+    BitBoard block = new();
+
+    block.SetBit(BoardSquares.b6);
+    block.SetBit(BoardSquares.g7);
+    block.SetBit(BoardSquares.f2);
+    block.SetBit(BoardSquares.b2);
+
+    var bishopAttacks = AttacksGenerator.GenerateBishopAttacksOnTheFly((int)BoardSquares.d4, block);
+
+    block.Print();
+    bishopAttacks.Print();
+
+    block = new BitBoard(new[] { BoardSquares.d3, BoardSquares.b4, BoardSquares.d7, BoardSquares.h4 });
+
+    var rookAttacks = AttacksGenerator.GenerateRookAttacksOnTheFly((int)BoardSquares.d4, block);
+    block.Print();
+    rookAttacks.Print();
 }

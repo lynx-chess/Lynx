@@ -6,11 +6,22 @@
 
         public BitBoard(ulong value) { Board = value; }
 
-        public static int SquareIndex(int rank, int file) => rank * 8 + file;
+        public BitBoard(BoardSquares[] occupiedSquares)
+        {
+            Board = default;
+
+            foreach (var square in occupiedSquares)
+            {
+                SetBit(square);
+            }
+        }
+
+        public static int SquareIndex(int rank, int file) => (rank * 8) + file;
 
         public void Print()
         {
-            Logger.WriteLine();
+            const string separator = "____________________________________________________";
+            Logger.WriteLine(separator);
 
             for (var rank = 0; rank < 8; ++rank)
             {
@@ -33,6 +44,7 @@
             Logger.Write("\n    a b c d e f g h\n");
 
             Logger.WriteLine($"\n    Bitboard: {Board} (0x{Board:X})");
+            Logger.WriteLine(separator);
         }
 
         public bool GetBit(int squareIndex)
