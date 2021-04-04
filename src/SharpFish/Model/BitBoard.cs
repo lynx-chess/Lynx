@@ -59,10 +59,7 @@
 
         public void PopBit(int square)
         {
-            if (GetBit(square))
-            {
-                Board ^= (1UL << square);
-            }
+            Board &= ~(1UL << square);
         }
 
         /// <summary>
