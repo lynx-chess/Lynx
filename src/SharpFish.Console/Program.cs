@@ -9,7 +9,8 @@ using System;
 //_6_Bishop_Occupancy();
 //_7_Rook_Occupancy();
 //_8_Slider_Pieces_Attacks();
-_9_BitCount();
+//_9_BitCount();
+_10_SetOccupancy();
 
 static void _2_GettingStarted()
 {
@@ -113,4 +114,36 @@ static void _9_BitCount()
     Console.WriteLine(bb.GetLS1BIndex());
     Console.WriteLine(bb.GetLS1BIndex());
     Console.WriteLine(Constants.Coordinates[bb.GetLS1BIndex()]);
+}
+
+static void _10_SetOccupancy()
+{
+    // Mask piece attacks at given square
+    var occupancyMask = AttacksGenerator.MaskRookOccupancy((int)BoardSquares.a5);
+
+    var occupancy = AttacksGenerator.SetBishopOrRookOccupancy(4095, occupancyMask);
+    occupancy.Print();
+
+    var ind = (int)Math.Pow(2, 6) - 1;
+    occupancy = AttacksGenerator.SetBishopOrRookOccupancy(ind, occupancyMask);
+    occupancy.Print();
+
+    // Loop over occupancy indexes
+    for (int index = 0; index < 4096; ++index)
+    {
+        occupancy = AttacksGenerator.SetBishopOrRookOccupancy(index, occupancyMask);
+        occupancy.Print();
+        Console.ReadKey();
+    }
+
+    occupancyMask = AttacksGenerator.MaskBishopOccupancy((int)BoardSquares.d4);
+    occupancyMask.Print();
+
+    // Loop over occupancy indexes
+    for (int index = 0; index < 64; ++index)
+    {
+        occupancy = AttacksGenerator.SetBishopOrRookOccupancy(index, occupancyMask);
+        occupancy.Print();
+        Console.ReadKey();
+    }
 }

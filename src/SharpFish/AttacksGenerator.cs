@@ -503,6 +503,38 @@ namespace SharpFish
             return attacks;
         }
 
+        /// <summary>
+        /// Populate occupancy sets from Bishop or Rook attack masks
+        /// </summary>
+        /// <param name="index">
+        /// Index within the range of possible occupancies within the bitboard.
+        /// Between 0 and <paramref name="occupancyMask"/>.CountBits() - 1
+        /// </param>
+        /// <param name="occupancyMask">Bishop or rook occupancy (<see cref="AttacksGenerator.MaskBishopOccupancy(int)"/> and <see cref="AttacksGenerator.MaskRookOccupancy(int)"/>)</param>
+        /// <returns>An occupancy set for the given index</returns>
+        public static BitBoard SetBishopOrRookOccupancy(int index, BitBoard occupancyMask)
+        {
+            var bitsInMask = occupancyMask.CountBits();
+            var occupancy = new BitBoard();
+
+            // Loop over the range of bits within attack mask
+            for (int count = 0; count < bitsInMask; ++count)
+            {
+                // Extract LS1B and reset it
+                int squareIndex = occupancyMask.GetLS1BIndex();
+                occupancyMask.PopBit(squareIndex);
+
+                // Make sure occupancy is on board
+                if ((index & (1 << count)) != default)
+                {
+                    // Update occupancy
+                    occupancy.SetBit(squareIndex);
+                }
+            }
+
+            return occupancy;
+        }
+
         public static BitBoard GenerateBishopAttacksOnTheFly(int squareIndex, BitBoard occupiedSquares)
         {
             // Results attack bitboard
