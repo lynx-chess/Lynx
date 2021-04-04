@@ -10,7 +10,11 @@ using System;
 //_7_Rook_Occupancy();
 //_8_Slider_Pieces_Attacks();
 //_9_BitCount();
-_10_SetOccupancy();
+//_10_SetOccupancy();
+//_11_OccupancyBitCountLookupTables();
+//_13_GeneratingMagicNumbersCandidates();
+//_14_GeneratingMagicNumbersByBruteForce();
+_15_InitializingSliderPiecesAttackTables();
 
 static void _2_GettingStarted()
 {
@@ -146,4 +150,76 @@ static void _10_SetOccupancy()
         occupancy.Print();
         Console.ReadKey();
     }
+}
+
+static void _11_OccupancyBitCountLookupTables()
+{
+    for (var rank = 0; rank < 8; ++rank)
+    {
+        for (var file = 0; file < 8; ++file)
+        {
+            int square = BitBoard.SquareIndex(rank, file);
+
+            var bishopOccupancy = AttacksGenerator.MaskBishopOccupancy(square);
+            Console.Write($"{bishopOccupancy.CountBits()}, ");
+        }
+
+        Console.WriteLine();
+    }
+
+    for (var rank = 0; rank < 8; ++rank)
+    {
+        for (var file = 0; file < 8; ++file)
+        {
+            int square = BitBoard.SquareIndex(rank, file);
+
+            var bishopOccupancy = AttacksGenerator.MaskRookOccupancy(square);
+            Console.Write($"{bishopOccupancy.CountBits()}, ");
+        }
+
+        Console.WriteLine();
+    }
+}
+
+static void _13_GeneratingMagicNumbersCandidates()
+{
+    const int randomlyGeneratedSeed = 1160218972;
+    var generator = new Random(randomlyGeneratedSeed);
+
+    var randomNumber = (ulong)generator.Next();
+    // Slice upper (from MS1b side) 16 bits
+    randomNumber &= 0xFFFF;
+
+    // int(uint really), which is 32 bits -> ulong, 64 bits leaves the seconf half of the board empty
+    // The slicing leaves the second quarter empty as well
+    var randomBoard = new BitBoard(randomNumber);
+    randomBoard.Print();
+
+    var candidate = MagicNumberGenerator.GenerateMagicNumber();
+
+    var board = new BitBoard(candidate);
+    board.Print();
+}
+
+static void _14_GeneratingMagicNumbersByBruteForce()
+{
+    MagicNumberGenerator.InitializeMagicNumbers();
+
+    // Should generate something similar to Constants.RookMagicNumbers
+}
+
+static void _15_InitializingSliderPiecesAttackTables()
+{
+    var occupancy = new BitBoard();
+    occupancy.SetBit(BoardSquares.e5);
+    occupancy.SetBit(BoardSquares.d5);
+    occupancy.SetBit(BoardSquares.d8);
+    occupancy.Print();
+
+    var game = new Game();
+    var bishopAttacks = game.GetBishopAttacks((int)BoardSquares.d4, occupancy);
+    bishopAttacks.Print();
+
+    var rookAttacks = game.GetRookAttacks((int)BoardSquares.d4, occupancy);
+    rookAttacks.Print();
 }

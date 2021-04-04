@@ -49,8 +49,8 @@ namespace SharpFish
             {
                 kingAttacks[square] = MaskKingAttacks(square);
 
-                Logger.WriteLine($" {(BoardSquares)square}");
-                kingAttacks[square].Print();
+                //Logger.WriteLine($" {(BoardSquares)square}");
+                //kingAttacks[square].Print();
             }
 
             return kingAttacks;
@@ -84,6 +84,66 @@ namespace SharpFish
             }
 
             return rookAttacks;
+        }
+
+        /// <summary>
+        /// Returns bishop occupancy masks and attacks
+        /// </summary>
+        /// <returns>(BitBoard[64], BitBoard[64, 512])</returns>
+        public static (BitBoard[] BishopOccupancyMasks, BitBoard[,] BishopAttacks) InitializeBishopAttacks()
+        {
+            BitBoard[] occupancyMasks = new BitBoard[64];
+            BitBoard[,] attacks = new BitBoard[64, 512];
+
+            for (int square = 0; square < 64; ++square)
+            {
+                occupancyMasks[square] = MaskBishopOccupancy(square);
+
+                var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
+
+                int occupancyIndexes = (1 << relevantBitsCount);
+
+                for (int index = 0; index < occupancyIndexes; ++index)
+                {
+                    var occupancy = SetBishopOrRookOccupancy(index, occupancyMasks[square]);
+
+                    var magicIndex = (occupancy.Board * Constants.BishopMagicNumbers[square]) >> (64 - relevantBitsCount);
+
+                    attacks[square, magicIndex] = GenerateBishopAttacksOnTheFly(square, occupancy);
+                }
+            }
+
+            return (occupancyMasks, attacks);
+        }
+
+        /// <summary>
+        /// Returns rook occupancy masks and attacks
+        /// </summary>
+        /// <returns>(BitBoard[64], BitBoard[64, 512])</returns>
+        public static (BitBoard[] RookOccupancyMasks, BitBoard[,] RookAttacks) InitializeRookAttacks()
+        {
+            BitBoard[] occupancyMasks = new BitBoard[64];
+            BitBoard[,] attacks = new BitBoard[64, 4096];
+
+            for (int square = 0; square < 64; ++square)
+            {
+                occupancyMasks[square] = MaskRookOccupancy(square);
+
+                var relevantBitsCount = Constants.RookRelevantOccupancyBits[square];
+
+                int occupancyIndexes = (1 << relevantBitsCount);
+
+                for (int index = 0; index < occupancyIndexes; ++index)
+                {
+                    var occupancy = SetBishopOrRookOccupancy(index, occupancyMasks[square]);
+
+                    var magicIndex = (occupancy.Board * Constants.RookMagicNumbers[square]) >> (64 - relevantBitsCount);
+
+                    attacks[square, magicIndex] = GenerateRookAttacksOnTheFly(square, occupancy);
+                }
+            }
+
+            return (occupancyMasks, attacks);
         }
 
         public static BitBoard MaskPawnAttacks(int squareIndex, bool isWhite)
@@ -504,7 +564,7 @@ namespace SharpFish
         }
 
         /// <summary>
-        /// Populate occupancy sets from Bishop or Rook attack masks
+        /// Populate occupancy sets from Bishop or Rook attack masks depending on <paramref name="index"/>
         /// </summary>
         /// <param name="index">
         /// Index within the range of possible occupancies within the bitboard.

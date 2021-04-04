@@ -95,6 +95,25 @@ namespace SharpFish.Test
         }
 
         [Fact]
+        public void CountBits_ulong()
+        {
+            var bitBoard = new BitBoard();
+            Assert.Equal(0, BitBoard.CountBits(bitBoard.Board));
+
+            bitBoard.SetBit(BoardSquares.e4);
+            Assert.Equal(1, BitBoard.CountBits(bitBoard.Board));
+
+            bitBoard.SetBit(BoardSquares.e4);
+            Assert.Equal(1, BitBoard.CountBits(bitBoard.Board));
+
+            bitBoard.SetBit(BoardSquares.d4);
+            Assert.Equal(2, BitBoard.CountBits(bitBoard.Board));
+
+            bitBoard.PopBit(BoardSquares.d4);
+            Assert.Equal(1, BitBoard.CountBits(bitBoard.Board));
+        }
+
+        [Fact]
         public void ResetLS1B()
         {
             // Arrange
