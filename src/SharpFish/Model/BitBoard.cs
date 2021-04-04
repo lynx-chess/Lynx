@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace SharpFish.Model
+﻿namespace SharpFish.Model
 {
     public struct BitBoard
     {
@@ -72,7 +70,7 @@ namespace SharpFish.Model
         /// Cannot use (Board & -Board) - 1 due to limitation applying unary - to ulong
         /// </summary>
         /// <returns>-1 in case of empty board</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int GetLS1BIndex()
         {
             if (Board == default)
@@ -83,13 +81,13 @@ namespace SharpFish.Model
             return CountBits(Board ^ (Board - 1)) - 1;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ResetLS1B()
         {
             Board = ResetLS1B(Board);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int CountBits()
         {
             return CountBits(Board);
@@ -132,13 +130,13 @@ namespace SharpFish.Model
         /// <summary>
         /// https://www.chessprogramming.org/General_Setwise_Operations#LS1BReset
         /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ulong ResetLS1B(ulong bitboard)
         {
             return bitboard & (bitboard - 1);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int CountBits(ulong bitboard)
         {
             int counter = 0;
