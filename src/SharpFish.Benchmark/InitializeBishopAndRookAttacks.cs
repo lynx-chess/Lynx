@@ -99,22 +99,22 @@ namespace SharpFish.Benchmark
 
                     for (int index = 0; index < occupancyIndexes; ++index)
                     {
-                        //if (isBishop)
-                        //{
-                        //var occupancy = AttacksGenerator.SetBishopOrRookOccupancy(index, attackMask);
+                        if (isBishop)
+                        {
+                            var occupancy = AttacksGenerator.SetBishopOrRookOccupancy(index, attackMask);
 
-                        //var magicIndex = (occupancy.Board * Constants.BishopMagicNumbers[square]) >> (64 - relevantBitsCount);
+                            var magicIndex = (occupancy.Board * Constants.BishopMagicNumbers[square]) >> (64 - relevantBitsCount);
 
-                        //_bishopAttacks[square, magicIndex] = AttacksGenerator.GenerateBishopAttacksOnTheFly(square, occupancy);
-                        //}
-                        //else
-                        //{
-                        var occupancy = AttacksGenerator.SetBishopOrRookOccupancy(index, attackMask);
+                            _bishopAttacks[square, magicIndex] = AttacksGenerator.GenerateBishopAttacksOnTheFly(square, occupancy);
+                        }
+                        else
+                        {
+                            var occupancy = AttacksGenerator.SetBishopOrRookOccupancy(index, attackMask);
 
-                        var magicIndex = (occupancy.Board * Constants.RookMagicNumbers[square]) >> (64 - relevantBitsCount);
+                            var magicIndex = (occupancy.Board * Constants.RookMagicNumbers[square]) >> (64 - relevantBitsCount);
 
-                        _rookAttacks[square, magicIndex] = AttacksGenerator.GenerateRookAttacksOnTheFly(square, occupancy);
-                        //}
+                            _rookAttacks[square, magicIndex] = AttacksGenerator.GenerateRookAttacksOnTheFly(square, occupancy);
+                        }
                     }
                 }
             }
