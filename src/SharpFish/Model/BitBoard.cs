@@ -18,6 +18,8 @@
             }
         }
 
+        public void Clear() { Board = default; }
+
         public void Print()
         {
             const string separator = "____________________________________________________";

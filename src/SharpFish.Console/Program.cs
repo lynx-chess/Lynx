@@ -16,7 +16,9 @@ using System.Runtime.InteropServices;
 //_13_GeneratingMagicNumbersCandidates();
 //_14_GeneratingMagicNumbersByBruteForce();
 //_16_InitializingSliderPiecesAttackTables();
-_17_Defining_variables();
+//_17_Defining_variables();
+//_18_Printing_Chess_Board();
+_19_Parse_FEN();
 
 static void _2_GettingStarted()
 {
@@ -248,4 +250,79 @@ static void _17_Defining_variables()
         // Simulating from FEN
         Console.WriteLine($"Piece: {Constants.AsciiPieces[(int)Constants.PiecesByChar['K']]}");
     }
+}
+
+static void _18_Printing_Chess_Board()
+{
+    var game = InitializeChessBoard();
+    game.PrintBoard();
+
+    for (int bbIndex = 0; bbIndex < game.PieceBitBoards.Length; ++bbIndex)
+    {
+        game.PieceBitBoards[bbIndex].Print();
+    }
+}
+
+static Game InitializeChessBoard()
+{
+    var game = new Game();
+
+    game.Side = Side.White;
+    game.EnPassant = BoardSquares.e3;
+
+    game.Castle |= (int)CastlingRights.WK;
+    game.Castle |= (int)CastlingRights.WQ;
+    //game.Castle |= (int)CastlingRights.BK;
+    game.Castle |= (int)CastlingRights.BQ;
+
+    for (int whitePawn = (int)BoardSquares.a2, blackPawn = (int)BoardSquares.a7;
+            whitePawn <= (int)BoardSquares.h2 && blackPawn <= (int)BoardSquares.h7;
+            ++whitePawn, ++blackPawn)
+    {
+        game.PieceBitBoards[(int)Piece.P].SetBit(whitePawn);
+        game.PieceBitBoards[(int)Piece.p].SetBit(blackPawn);
+    }
+
+    game.PieceBitBoards[(int)Piece.R].SetBit(BoardSquares.a1);
+    game.PieceBitBoards[(int)Piece.R].SetBit(BoardSquares.h1);
+    game.PieceBitBoards[(int)Piece.r].SetBit(BoardSquares.a8);
+    game.PieceBitBoards[(int)Piece.r].SetBit(BoardSquares.h8);
+
+    game.PieceBitBoards[(int)Piece.N].SetBit(BoardSquares.b1);
+    game.PieceBitBoards[(int)Piece.N].SetBit(BoardSquares.g1);
+    game.PieceBitBoards[(int)Piece.n].SetBit(BoardSquares.b8);
+    game.PieceBitBoards[(int)Piece.n].SetBit(BoardSquares.g8);
+
+    game.PieceBitBoards[(int)Piece.B].SetBit(BoardSquares.c1);
+    game.PieceBitBoards[(int)Piece.B].SetBit(BoardSquares.f1);
+    game.PieceBitBoards[(int)Piece.b].SetBit(BoardSquares.c8);
+    game.PieceBitBoards[(int)Piece.b].SetBit(BoardSquares.f8);
+
+    game.PieceBitBoards[(int)Piece.Q].SetBit(BoardSquares.d1);
+    game.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.d8);
+
+    game.PieceBitBoards[(int)Piece.K].SetBit(BoardSquares.e1);
+    game.PieceBitBoards[(int)Piece.k].SetBit(BoardSquares.e8);
+
+    return game;
+}
+
+static void _19_Parse_FEN()
+{
+    const string emptyBoard = "8/8/8/8/8/8/8/8 w - - 0 1";
+    const string startPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 ";
+    const string trickyPosition = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1 ";
+    const string killerPosition = "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1";
+    const string cmkPosition = "r2q1rk1/ppp2ppp/2n1bn2/2b1p3/3pP3/3P1NPP/PPP1NPB1/R1BQ1RK1 b - - 0 9 ";
+
+    var game = InitializeChessBoard();
+
+    game.ParseFEN(killerPosition);
+
+    game.PieceBitBoards[(int)Piece.Q].Print();
+
+    game.PrintBoard();
+    game.OccupancyBitBoards[(int)Side.White].Print();
+    game.OccupancyBitBoards[(int)Side.Black].Print();
+    game.OccupancyBitBoards[(int)Side.Both].Print();
 }

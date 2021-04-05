@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SharpFish.Model
+﻿namespace SharpFish.Model
 {
     public enum Side { Black, White, Both }
 }

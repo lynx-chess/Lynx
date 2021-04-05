@@ -9,4 +9,9 @@
     <ProjectReference Include="..\SharpFish\SharpFish.csproj" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+    <NoWarn>CS8321</NoWarn>
+  </PropertyGroup>
+
 </Project>

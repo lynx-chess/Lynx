@@ -33,7 +33,10 @@ namespace SharpFish.Test
         {
             foreach (var value in Enum.GetValues<Piece>())
             {
-                Assert.Equal(value.ToString(), Constants.AsciiPieces[(int)value].ToString());
+                if (value > 0)
+                {
+                    Assert.Equal(value.ToString(), Constants.AsciiPieces[(int)value].ToString());
+                }
             }
         }
 
@@ -42,7 +45,10 @@ namespace SharpFish.Test
         {
             foreach (var value in Enum.GetValues<Piece>())
             {
-                Assert.Equal(value, Constants.PiecesByChar[value.ToString()[0]]);
+                if (value > 0)
+                {
+                    Assert.Equal(value, Constants.PiecesByChar[value.ToString()[0]]);
+                }
             }
         }
     }
