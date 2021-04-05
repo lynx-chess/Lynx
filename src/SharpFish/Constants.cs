@@ -1,4 +1,7 @@
-﻿namespace SharpFish
+﻿using SharpFish.Model;
+using System.Collections.Generic;
+
+namespace SharpFish
 {
     public static class Constants
     {
@@ -78,6 +81,41 @@
             "a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3",
             "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2",
             "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1"
+        };
+
+        /// <summary>
+        /// Following <see cref="Piece"/> order
+        /// </summary>
+        public const string AsciiPieces = "PNBRQKpnbrqk";
+
+        /// <summary>
+        /// Following <see cref="Piece"/> order.
+        /// Don't work stright away in Windows
+        /// </summary>
+        public static readonly string[] UnicodePieces = new string[12]
+        {
+            "♙", "♘", "♗", "♖", "♕", "♔",   // White
+            "♟︎", "♞", "♝", "♜", "♛", "♚"    // Black
+        };
+
+        /// <summary>
+        /// Covert ASCII character pieces to encoded constants
+        /// </summary>
+        public static readonly IReadOnlyDictionary<char, Piece> PiecesByChar = new Dictionary<char, Piece>(12)
+        {
+            ['P'] = Piece.P,
+            ['N'] = Piece.N,
+            ['B'] = Piece.B,
+            ['R'] = Piece.R,
+            ['Q'] = Piece.Q,
+            ['K'] = Piece.K,
+
+            ['p'] = Piece.p,
+            ['n'] = Piece.n,
+            ['b'] = Piece.b,
+            ['r'] = Piece.r,
+            ['q'] = Piece.q,
+            ['k'] = Piece.k,
         };
 
         /// <summary>

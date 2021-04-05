@@ -1,4 +1,6 @@
-﻿using Xunit;
+﻿using SharpFish.Model;
+using System;
+using Xunit;
 
 namespace SharpFish.Test
 {
@@ -23,6 +25,24 @@ namespace SharpFish.Test
                 var mask = AttacksGenerator.MaskRookOccupancy(square);
 
                 Assert.Equal(Constants.RookRelevantOccupancyBits[square], mask.CountBits());
+            }
+        }
+
+        [Fact]
+        public void AsciiPieces()
+        {
+            foreach (var value in Enum.GetValues<Piece>())
+            {
+                Assert.Equal(value.ToString(), Constants.AsciiPieces[(int)value].ToString());
+            }
+        }
+
+        [Fact]
+        public void PiecesByChar()
+        {
+            foreach (var value in Enum.GetValues<Piece>())
+            {
+                Assert.Equal(value, Constants.PiecesByChar[value.ToString()[0]]);
             }
         }
     }

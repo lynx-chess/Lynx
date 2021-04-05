@@ -26,6 +26,19 @@ namespace SharpFish
         /// </summary>
         private readonly BitBoard[,] _rookAttacks;
 
+        private readonly BitBoard[] _pieceBitBoards = new BitBoard[12];
+
+        /// <summary>
+        /// Black, White, Both
+        /// </summary>
+        private readonly BitBoard[] _occupancyBitBoards = new BitBoard[3];
+
+        private Side side = Side.Both;
+
+        private BoardSquares _enpassant = BoardSquares.noSquare;
+
+        private int _castle;
+
         public Game()
         {
             _kingAttacks = AttacksGenerator.InitializeKingAttacks();
@@ -35,6 +48,8 @@ namespace SharpFish
             (_bishopOccupancyMasks, _bishopAttacks) = AttacksGenerator.InitializeBishopAttacks();
             (_rookOccupancyMasks, _rookAttacks) = AttacksGenerator.InitializeRookAttacks();
         }
+
+        public BitBoard[] PieceBitBoards => _pieceBitBoards;
 
         /// <summary>
         /// Get Bishop attacks assuming current board occupancy

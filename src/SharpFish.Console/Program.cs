@@ -1,6 +1,7 @@
 ﻿using SharpFish;
 using SharpFish.Model;
 using System;
+using System.Runtime.InteropServices;
 
 //_2_GettingStarted();
 //_3_PawnAttacks();
@@ -14,7 +15,8 @@ using System;
 //_11_OccupancyBitCountLookupTables();
 //_13_GeneratingMagicNumbersCandidates();
 //_14_GeneratingMagicNumbersByBruteForce();
-_15_InitializingSliderPiecesAttackTables();
+//_16_InitializingSliderPiecesAttackTables();
+_17_Defining_variables();
 
 static void _2_GettingStarted()
 {
@@ -208,7 +210,7 @@ static void _14_GeneratingMagicNumbersByBruteForce()
     // Should generate something similar to Constants.RookMagicNumbers
 }
 
-static void _15_InitializingSliderPiecesAttackTables()
+static void _16_InitializingSliderPiecesAttackTables()
 {
     var occupancy = new BitBoard();
     occupancy.SetBit(BoardSquares.e5);
@@ -222,4 +224,28 @@ static void _15_InitializingSliderPiecesAttackTables()
 
     var rookAttacks = game.GetRookAttacks((int)BoardSquares.d4, occupancy);
     rookAttacks.Print();
+}
+
+static void _17_Defining_variables()
+{
+    var game = new Game();
+
+    var whitePawnBitBoard = game.PieceBitBoards[(int)Piece.P];
+    whitePawnBitBoard.SetBit(BoardSquares.e2);
+    whitePawnBitBoard.Print();
+
+    Console.WriteLine($"Piece: {Constants.PiecesByChar['K']}");
+
+    if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+    {
+        Console.WriteLine($"Piece: {Constants.UnicodePieces[(int)Piece.K]}");
+        // Simulating from FEN
+        Console.WriteLine($"Piece: {Constants.UnicodePieces[(int)Constants.PiecesByChar['K']]}");
+    }
+    else
+    {
+        Console.WriteLine($"Piece: {Constants.AsciiPieces[(int)Piece.K]}");
+        // Simulating from FEN
+        Console.WriteLine($"Piece: {Constants.AsciiPieces[(int)Constants.PiecesByChar['K']]}");
+    }
 }
