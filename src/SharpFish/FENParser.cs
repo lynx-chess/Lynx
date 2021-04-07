@@ -5,7 +5,10 @@ using System.Text.RegularExpressions;
 
 namespace SharpFish
 {
+#pragma warning disable S101 // Types should be named in PascalCase
+
     public static class FENParser
+#pragma warning restore S101 // Types should be named in PascalCase
     {
         private static readonly Regex RanksRegex = new Regex(@"(?<=^|\/)[P|N|B|R|Q|K|p|n|b|r|q|k|\d]{1,8}", RegexOptions.Compiled);
 

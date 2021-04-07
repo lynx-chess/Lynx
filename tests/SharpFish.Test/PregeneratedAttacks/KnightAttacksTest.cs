@@ -1,7 +1,7 @@
 ﻿using Xunit;
 using BS = SharpFish.Model.BoardSquares;
 
-namespace SharpFish.Test.Attacks
+namespace SharpFish.Test.PregeneratedAttacks
 {
     public class KnightAttacksTest
     {
@@ -38,14 +38,21 @@ namespace SharpFish.Test.Attacks
         public void MaskKnightAttacks(BS knightSquare, BS[] attackedSquares)
         {
             var attacks = AttacksGenerator.MaskKnightAttacks((int)knightSquare);
+            ValidateAttacks(attackedSquares, attacks);
 
-            foreach (var attackedSquare in attackedSquares)
+            attacks = Attacks.KnightAttacks[(int)knightSquare];
+            ValidateAttacks(attackedSquares, attacks);
+
+            static void ValidateAttacks(BS[] attackedSquares, Model.BitBoard attacks)
             {
-                Assert.True(attacks.GetBit(attackedSquare));
-                attacks.PopBit(attackedSquare);
-            }
+                foreach (var attackedSquare in attackedSquares)
+                {
+                    Assert.True(attacks.GetBit(attackedSquare));
+                    attacks.PopBit(attackedSquare);
+                }
 
-            Assert.Equal(default, attacks);
+                Assert.Equal(default, attacks);
+            }
         }
     }
 }

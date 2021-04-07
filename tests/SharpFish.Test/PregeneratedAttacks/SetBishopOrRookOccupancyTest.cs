@@ -2,7 +2,7 @@
 using System;
 using Xunit;
 
-namespace SharpFish.Test.Attacks
+namespace SharpFish.Test.PregeneratedAttacks
 {
     public class SetBishopOrRookOccupancyTest
     {

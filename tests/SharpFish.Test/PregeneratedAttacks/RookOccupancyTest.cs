@@ -1,7 +1,7 @@
 ﻿using Xunit;
 using BS = SharpFish.Model.BoardSquares;
 
-namespace SharpFish.Test.Attacks
+namespace SharpFish.Test.PregeneratedAttacks
 {
     public class RookOccupancyTest
     {

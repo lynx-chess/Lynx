@@ -2,17 +2,10 @@
 using Xunit;
 using BS = SharpFish.Model.BoardSquares;
 
-namespace SharpFish.Test.Attacks
+namespace SharpFish.Test.PregeneratedAttacks
 {
-    public class BishopAttacksTest : IClassFixture<GameFixture>
+    public class BishopAttacksTest
     {
-        private readonly GameFixture _fixture;
-
-        public BishopAttacksTest(GameFixture fixture)
-        {
-            _fixture = fixture;
-        }
-
         [Theory]
         [InlineData(BS.a8, new BS[] { }, new[] { BS.b7, BS.c6, BS.d5, BS.e4, BS.f3, BS.g2, BS.h1 })]
         [InlineData(BS.a8, new[] { BS.g2 }, new[] { BS.b7, BS.c6, BS.d5, BS.e4, BS.f3, BS.g2 })]
@@ -40,13 +33,18 @@ namespace SharpFish.Test.Attacks
             var attacks = AttacksGenerator.GenerateBishopAttacksOnTheFly((int)bishopSquare, occupancy);
 
             // Assert
-            foreach (var attackedSquare in attackedSquares)
-            {
-                Assert.True(attacks.GetBit(attackedSquare));
-                attacks.PopBit(attackedSquare);
-            }
+            ValidateAttacks(attackedSquares, attacks);
 
-            Assert.Equal(default, attacks);
+            static void ValidateAttacks(BS[] attackedSquares, BitBoard attacks)
+            {
+                foreach (var attackedSquare in attackedSquares)
+                {
+                    Assert.True(attacks.GetBit(attackedSquare));
+                    attacks.PopBit(attackedSquare);
+                }
+
+                Assert.Equal(default, attacks);
+            }
         }
 
         /// <summary>
@@ -79,7 +77,7 @@ namespace SharpFish.Test.Attacks
             var occupancy = new BitBoard(occupiedSquares);
 
             // Act
-            var attacks = _fixture.Game.GetBishopAttacks((int)bishopSquare, occupancy);
+            var attacks = Attacks.BishopAttacks((int)bishopSquare, occupancy);
 
             // Assert
             foreach (var attackedSquare in attackedSquares)

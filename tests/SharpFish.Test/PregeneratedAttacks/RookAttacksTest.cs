@@ -2,17 +2,10 @@
 using Xunit;
 using BS = SharpFish.Model.BoardSquares;
 
-namespace SharpFish.Test.Attacks
+namespace SharpFish.Test.PregeneratedAttacks
 {
-    public class RookAttacksTest : IClassFixture<GameFixture>
+    public class RookAttacksTest
     {
-        private readonly GameFixture _fixture;
-
-        public RookAttacksTest(GameFixture fixture)
-        {
-            _fixture = fixture;
-        }
-
         [Theory]
         [InlineData(BS.a8, new BS[] { }, new[] { BS.b8, BS.c8, BS.d8, BS.e8, BS.f8, BS.g8, BS.h8, BS.a7, BS.a6, BS.a5, BS.a4, BS.a3, BS.a2, BS.a1 })]
         [InlineData(BS.a8, new[] { BS.g8, BS.a2 }, new[] { BS.b8, BS.c8, BS.d8, BS.e8, BS.f8, BS.g8, BS.a7, BS.a6, BS.a5, BS.a4, BS.a3, BS.a2 })]
@@ -79,16 +72,22 @@ namespace SharpFish.Test.Attacks
             var occupancy = new BitBoard(occupiedSquares);
 
             // Act
-            var attacks = _fixture.Game.GetRookAttacks((int)rookSquare, occupancy);
+            var attacks = Attacks.RookAttacks((int)rookSquare, occupancy);
 
             // Assert
-            foreach (var attackedSquare in attackedSquares)
-            {
-                Assert.True(attacks.GetBit(attackedSquare));
-                attacks.PopBit(attackedSquare);
-            }
+            ValidateAttacks(attackedSquares, attacks);
 
-            Assert.Equal(default, attacks);
+            static void ValidateAttacks(BS[] attackedSquares, BitBoard attacks)
+            {
+                // Assert
+                foreach (var attackedSquare in attackedSquares)
+                {
+                    Assert.True(attacks.GetBit(attackedSquare));
+                    attacks.PopBit(attackedSquare);
+                }
+
+                Assert.Equal(default, attacks);
+            }
         }
     }
 }

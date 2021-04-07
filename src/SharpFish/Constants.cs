@@ -17,7 +17,7 @@ namespace SharpFish
         /// 1   1 1 1 1 1 1 1 1
         ///     a b c d e f g h
         /// </summary>
-        public const ulong FULBoard = ulong.MaxValue;
+        public const ulong FullBoard = ulong.MaxValue;
 
         /// <summary>
         /// 8   0 1 1 1 1 1 1 1
@@ -289,7 +289,12 @@ namespace SharpFish
             0x8918844842082200UL,
             0x4010011029020020UL
 };
+
+        public const string InitialPositionFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 ";
+
+        public const string EmptyBooardFEN = "/8/8/8/8/8/8/8 w - - 0 1";
     }
+
 
     /*
         8  ♜ ♞ ♝ ♛ ♚ ♝ ♞ ♜

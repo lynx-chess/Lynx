@@ -2,7 +2,7 @@ using SharpFish.Model;
 using System;
 using Xunit;
 
-namespace SharpFish.Test.Attacks
+namespace SharpFish.Test.PregeneratedAttacks
 {
     public class PawnAttacksTest
     {
@@ -25,6 +25,12 @@ namespace SharpFish.Test.Attacks
         {
             // Act
             var attacks = AttacksGenerator.MaskPawnAttacks((int)square, isWhite);
+
+            // Assert
+            Assert.Equal(expectedResult, attacks.Board);
+
+            // Act
+            attacks = Attacks.PawnAttacks[isWhite ? 1 : 0, (int)square];
 
             // Assert
             Assert.Equal(expectedResult, attacks.Board);
