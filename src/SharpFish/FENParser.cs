@@ -52,18 +52,18 @@ namespace SharpFish
 
                 if (parts.Length < 4 || !int.TryParse(parts[3], out halfMoveClock))
                 {
-                    Logger.WriteLine("[Warning] No half move clock detected");
+                    Logger.Warn("No half move clock detected");
                 }
 
                 if (parts.Length < 5 || !int.TryParse(parts[4], out fullMoveCounter))
                 {
-                    Logger.WriteLine("[Warning] No full move counter detected");
+                    Logger.Warn("No full move counter detected");
                 }
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Error parsing FEN string {fen}");
-                Console.WriteLine(e.Message);
+                Logger.Error($"Error parsing FEN string {fen}");
+                Logger.Error(e.Message);
                 success = false;
             }
 
@@ -92,7 +92,7 @@ namespace SharpFish
                     }
                     else
                     {
-                        Logger.WriteLine($"Unrecognized character in FEN: {ch} (within {((Group)match).Value})");
+                        Logger.Error($"Unrecognized character in FEN: {ch} (within {((Group)match).Value})");
                         success = false;
                         break;
                     }
@@ -164,7 +164,7 @@ namespace SharpFish
                 if (rank != 3 && rank != 6)
                 {
                     success = false;
-                    Logger.WriteLine($"Invalid en passant square: {enPassantString}");
+                    Logger.Error($"Invalid en passant square: {enPassantString}");
                 }
 
                 // Check that there's an actual pawn to be captured
@@ -181,13 +181,13 @@ namespace SharpFish
                 if (!pawnBitBoard.GetBit(pawnSquare))
                 {
                     success = false;
-                    Logger.WriteLine($"Invalid board: en passant square {enPassantString}, but no {side} pawn located in {pawnBitBoard}");
+                    Logger.Error($"Invalid board: en passant square {enPassantString}, but no {side} pawn located in {pawnBitBoard}");
                 }
             }
             else if (enPassantString != "-")
             {
                 success = false;
-                Logger.WriteLine($"Invalid en passant square: {enPassantString}");
+                Logger.Error($"Invalid en passant square: {enPassantString}");
             }
 
             return (enPassant, success);

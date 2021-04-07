@@ -45,7 +45,7 @@ namespace SharpFish
                 ? AttacksGenerator.MaskBishopOccupancy(squareIndex)
                 : AttacksGenerator.MaskRookOccupancy(squareIndex);
 
-            var relevantOccupancyBits = isBishop // or occupancyMask.CountBits();
+            var relevantOccupancyBits = isBishop // or occupancyMask.CountBits()
                 ? Constants.BishopRelevantOccupancyBits[squareIndex]
                 : Constants.RookRelevantOccupancyBits[squareIndex];
             var occupancyIndexes = 1 << relevantOccupancyBits;

@@ -102,6 +102,14 @@ namespace SharpFish
             }
         }
 
+        public static void PrintCoordinates()
+        {
+            for (int rank = 8; rank >= 1; --rank)
+            {
+                Console.WriteLine($"a{rank}, b{rank}, c{rank}, d{rank}, e{rank}, f{rank}, g{rank}, h{rank},");
+            }
+        }
+
         public static void BishopRelevantOccupancyBits()
         {
             for (var rank = 0; rank < 8; ++rank)

@@ -15,12 +15,6 @@ namespace SharpFish
             {
                 pawnAttacks[0, square] = MaskPawnAttacks(square, isWhite: false);
                 pawnAttacks[1, square] = MaskPawnAttacks(square, isWhite: true);
-
-                //Logger.WriteLine($" {(BoardSquares)square} (White)");
-                //pawnAttacks[1, square].Print();
-
-                //Logger.WriteLine($" {(BoardSquares)square} (Black)");
-                //pawnAttacks[0, square].Print();
             }
 
             return pawnAttacks;
@@ -33,9 +27,6 @@ namespace SharpFish
             for (int square = 0; square < 64; ++square)
             {
                 knightAttacks[square] = MaskKnightAttacks(square);
-
-                //Logger.WriteLine($" {(BoardSquares)square}");
-                //knightAttacks[square].Print();
             }
 
             return knightAttacks;
@@ -48,9 +39,6 @@ namespace SharpFish
             for (int square = 0; square < 64; ++square)
             {
                 kingAttacks[square] = MaskKingAttacks(square);
-
-                //Logger.WriteLine($" {(BoardSquares)square}");
-                //kingAttacks[square].Print();
             }
 
             return kingAttacks;
@@ -63,9 +51,6 @@ namespace SharpFish
             for (int square = 0; square < 64; ++square)
             {
                 bishopAttacks[square] = MaskBishopOccupancy(square);
-
-                //Logger.WriteLine($" {(BoardSquares)square}");
-                //bishopAttacks[square].Print();
             }
 
             return bishopAttacks;
@@ -78,9 +63,6 @@ namespace SharpFish
             for (int square = 0; square < 64; ++square)
             {
                 rookAttacks[square] = MaskRookOccupancy(square);
-
-                //Logger.WriteLine($" {(BoardSquares)square}");
-                //rookAttacks[square].Print();
             }
 
             return rookAttacks;

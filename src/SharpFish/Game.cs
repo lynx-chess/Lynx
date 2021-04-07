@@ -71,7 +71,6 @@ namespace SharpFish
 
                     var piece = -1;
 
-                    //for (int bb = (int)Piece.P; bb <= (int)Piece.k; ++bb)
                     for (int bbIndex = 0; bbIndex < PieceBitBoards.Length; ++bbIndex)
                     {
                         if (PieceBitBoards[bbIndex].GetBit(squareIndex))
@@ -83,9 +82,6 @@ namespace SharpFish
                     var pieceRepresentation = piece == -1
                         ? '.'
                         : Constants.AsciiPieces[piece];
-                    //:(RuntimeInformation.IsOSPlatform(OSPlatform.Linux)
-                    //    ? Constants.UnicodePieces[piece][0]
-                    //    : Constants.AsciiPieces[piece]);
 
                     Console.Write($" {pieceRepresentation}");
                 }

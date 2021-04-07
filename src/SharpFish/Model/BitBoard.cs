@@ -36,7 +36,6 @@
 
                     var squareIndex = SquareIndex(rank, file);
 
-                    //Logger.Write($"|{squareIndex,-2}");
                     Logger.Write($" {(GetBit(squareIndex) ? "1" : "0")}");
                 }
 
@@ -91,28 +90,6 @@
         {
             return CountBits(Board);
         }
-
-        ///// <summary>
-        ///// Brian Kernighan's way
-        ///// TODO: improve for performance
-        ///// </summary>
-        ///// <returns></returns>
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-        //public int CountBits()
-        //{
-        //    int counter = 0;
-
-        //    var bitboard = new BitBoard(Board);
-
-        //    // Consecutively reset LSB
-        //    while (bitboard.Board != default)
-        //    {
-        //        ++counter;
-        //        bitboard.ResetLS1B();
-        //    }
-
-        //    return counter;
-        //}
 
         /// <summary>
         /// https://www.chessprogramming.org/Population_Count#Single_Populated_Bitboards
