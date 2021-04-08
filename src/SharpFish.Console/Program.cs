@@ -1,6 +1,7 @@
 ﻿using SharpFish;
 using SharpFish.Model;
 using System;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 //_2_GettingStarted();
@@ -20,7 +21,9 @@ using System.Runtime.InteropServices;
 //_18_Printing_Chess_Board();
 //_19_Parse_FEN();
 //_20_QueenAttacks();
-_21_IsSqureAttacked();
+//_21_IsSqureAttacked();
+//_22_Generate_Moves();
+_23_King_Moves();
 
 static void _2_GettingStarted()
 {
@@ -343,6 +346,43 @@ static void _21_IsSqureAttacked()
     game.ParseFEN(Constants.InitialPositionFEN);
     game.PrintAttackedSquares(Side.White);
     game.PrintAttackedSquares(Side.Black);
+}
+
+static void _22_Generate_Moves()
+{
+    var game = new Game("r1P1k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1 ");
+    game.PrintBoard();
+
+    //game.OccupancyBitBoards[2].Board |= 0b11100111UL << 8 * 4;
+    var moves = MovesGenerator.GenerateAllMoves(game);
+    foreach (var move in moves)
+    {
+        Console.WriteLine(move);
+    }
+
+    game = new Game("rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1");
+    game.PieceBitBoards[0].Print();
+    game.PieceBitBoards[6].Print();
+    game.PrintBoard();
+    moves = MovesGenerator.GenerateAllMoves(game);
+
+    foreach (var move in moves)
+    {
+        Console.WriteLine(move);
+    }
+}
+
+static void _23_King_Moves()
+{
+    var game = new Game("rn2k2r/pppppppp/8/8/8/8/PPPPPPPP/RN2K2R w KQkq - 0 1");
+    game.PrintBoard();
+
+    var moves = MovesGenerator.GenerateCastleMoves(game, Utils.PieceOffset(game.Side)).ToList();
+
+    foreach (var move in moves)
+    {
+        Console.WriteLine(move);
+    }
 }
 
 static Game InitializeChessBoard()

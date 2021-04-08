@@ -36,17 +36,17 @@ namespace SharpFish
 
         public bool ParseFEN(string fen)
         {
-            bool parseResultError;
+            bool parseResultSuccess;
 
-            (parseResultError, Side, Castle, EnPassant, _, _) =
+            (parseResultSuccess, Side, Castle, EnPassant, _, _) =
                 FENParser.ParseFEN(fen, PieceBitBoards, OccupancyBitBoards);
 
-            if (parseResultError)
+            if (!parseResultSuccess)
             {
                 Console.WriteLine($"Error parsing FEN {fen}");
             }
 
-            return parseResultError;
+            return parseResultSuccess;
         }
 
         /// <summary>

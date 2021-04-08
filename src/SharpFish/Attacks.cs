@@ -97,6 +97,12 @@ namespace SharpFish
                 rookAttacks.Board | bishopAttacks.Board);
         }
 
+        public static bool IsSquaredAttacked(int squaredIndex, Game game) =>
+            IsSquaredAttacked(squaredIndex, game.Side, game.PieceBitBoards, game.OccupancyBitBoards);
+
+        public static bool IsSquaredAttackedBySide(int squaredIndex, Game game, Side sideToMove) =>
+            IsSquaredAttacked(squaredIndex, sideToMove, game.PieceBitBoards, game.OccupancyBitBoards);
+
         public static bool IsSquaredAttacked(int squareIndex, Side sideToMove, BitBoard[] piecePosition, BitBoard[] occupancy)
         {
             if (sideToMove == Side.Both)
@@ -105,11 +111,9 @@ namespace SharpFish
                 return false;
             }
 
-            var offset = (int)Piece.p;
-            offset -= (offset * (int)sideToMove);    // 0 if Side.White, 6 (Piece.p) if Side.Black
+            var offset = Utils.PieceOffset(sideToMove);
 
             // I tried to order them from most to least likely
-
             return
                 IsSquareAttackedByPawns(squareIndex, sideToMove, offset, piecePosition)
                 || IsSquareAttackedByKnights(squareIndex, offset, piecePosition)
@@ -118,9 +122,6 @@ namespace SharpFish
                 || IsSquareAttackedByQueens(offset, bishopAttacks, rookAttacks, piecePosition)
                 || IsSquareAttackedByKing(squareIndex, offset, piecePosition);
         }
-
-        public static bool IsSquaredAttacked(int squaredIndex, Game game) =>
-            IsSquaredAttacked(squaredIndex, game.Side, game.PieceBitBoards, game.OccupancyBitBoards);
 
         private static bool IsSquareAttackedByPawns(int squareIndex, Side sideToMove, int offset, BitBoard[] pieces)
         {

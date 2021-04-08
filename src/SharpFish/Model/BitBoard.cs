@@ -69,15 +69,7 @@
         /// </summary>
         /// <returns>-1 in case of empty board</returns>
         //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int GetLS1BIndex()
-        {
-            if (Board == default)
-            {
-                return -1;
-            }
-
-            return CountBits(Board ^ (Board - 1)) - 1;
-        }
+        public int GetLS1BIndex() => GetLS1BIndex(Board);
 
         //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ResetLS1B()
@@ -86,10 +78,7 @@
         }
 
         //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int CountBits()
-        {
-            return CountBits(Board);
-        }
+        public int CountBits() => CountBits(Board);
 
         /// <summary>
         /// https://www.chessprogramming.org/Population_Count#Single_Populated_Bitboards
@@ -103,9 +92,20 @@
 
         public static int SquareIndex(int rank, int file) => (rank * 8) + file;
 
+        public static int GetLS1BIndex(ulong bitboard)
+        {
+            if (bitboard == default)
+            {
+                return -1;
+            }
+
+            return CountBits(bitboard ^ (bitboard - 1)) - 1;
+        }
+
         /// <summary>
         /// https://www.chessprogramming.org/General_Setwise_Operations#LS1BReset
         /// </summary>
+        /// <returns>Bitboard</returns>
         //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ulong ResetLS1B(ulong bitboard)
         {
