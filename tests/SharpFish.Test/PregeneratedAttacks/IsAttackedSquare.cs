@@ -3,13 +3,13 @@ using Xunit;
 
 namespace SharpFish.Test.PregeneratedAttacks
 {
-    public class IsAttackedSquare : IClassFixture<GameFixture>
+    public class IsAttackedSquare
     {
         private readonly Game _game;
 
-        public IsAttackedSquare(GameFixture fixture)
+        public IsAttackedSquare()
         {
-            _game = fixture.Game;
+            _game = new Game();
         }
 
         [Fact]

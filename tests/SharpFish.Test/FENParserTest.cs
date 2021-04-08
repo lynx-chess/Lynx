@@ -5,14 +5,14 @@ using CR = SharpFish.Model.CastlingRights;
 namespace SharpFish.Test
 {
 #pragma warning disable S101 // Types should be named in PascalCase
-    public class FENParserTest : IClassFixture<GameFixture>
+    public class FENParserTest
 #pragma warning restore S101 // Types should be named in PascalCase
     {
-        private readonly GameFixture _fixture;
+        private readonly Game _game;
 
-        public FENParserTest(GameFixture fixture)
+        public FENParserTest()
         {
-            _fixture = fixture;
+            _game = new Game();
         }
 
         [Fact]
@@ -23,45 +23,45 @@ namespace SharpFish.Test
             // Make sure a previous Fen doesn't change anything
             const string previuosFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
             bool success;
-            (success, _, _, _, _, _) = FENParser.ParseFEN(previuosFen, _fixture.Game.PieceBitBoards, _fixture.Game.OccupancyBitBoards);
+            (success, _, _, _, _, _) = FENParser.ParseFEN(previuosFen, _game.PieceBitBoards, _game.OccupancyBitBoards);
             Assert.True(success);
 
             const string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
             // Act
-            (success, _, _, _, _, _) = FENParser.ParseFEN(fen, _fixture.Game.PieceBitBoards, _fixture.Game.OccupancyBitBoards);
+            (success, _, _, _, _, _) = FENParser.ParseFEN(fen, _game.PieceBitBoards, _game.OccupancyBitBoards);
 
             // Assert
             Assert.True(success);
 
-            var whitePawns = _fixture.Game.PieceBitBoards[(int)Piece.P];
+            var whitePawns = _game.PieceBitBoards[(int)Piece.P];
             Assert.Equal(0b1111_1111UL << (6 * 8), whitePawns.Board);
-            var blackPawns = _fixture.Game.PieceBitBoards[(int)Piece.p];
+            var blackPawns = _game.PieceBitBoards[(int)Piece.p];
             Assert.Equal(0b1111_1111UL << (1 * 8), blackPawns.Board);
 
-            var whiteRooks = _fixture.Game.PieceBitBoards[(int)Piece.R];
+            var whiteRooks = _game.PieceBitBoards[(int)Piece.R];
             Assert.Equal(0b1000_0001UL << (7 * 8), whiteRooks.Board);
-            var blackRooks = _fixture.Game.PieceBitBoards[(int)Piece.r];
+            var blackRooks = _game.PieceBitBoards[(int)Piece.r];
             Assert.Equal(0b1000_0001UL << (0 * 8), blackRooks.Board);
 
-            var whiteKnights = _fixture.Game.PieceBitBoards[(int)Piece.N];
+            var whiteKnights = _game.PieceBitBoards[(int)Piece.N];
             Assert.Equal(0b0100_0010UL << (7 * 8), whiteKnights.Board);
-            var blackKnights = _fixture.Game.PieceBitBoards[(int)Piece.n];
+            var blackKnights = _game.PieceBitBoards[(int)Piece.n];
             Assert.Equal(0b0100_0010UL << (0 * 8), blackKnights.Board);
 
-            var whiteBishops = _fixture.Game.PieceBitBoards[(int)Piece.B];
+            var whiteBishops = _game.PieceBitBoards[(int)Piece.B];
             Assert.Equal(0b0010_0100UL << (7 * 8), whiteBishops.Board);
-            var blackBishops = _fixture.Game.PieceBitBoards[(int)Piece.b];
+            var blackBishops = _game.PieceBitBoards[(int)Piece.b];
             Assert.Equal(0b0010_0100UL << (0 * 8), blackBishops.Board);
 
-            var whiteQueen = _fixture.Game.PieceBitBoards[(int)Piece.Q];
+            var whiteQueen = _game.PieceBitBoards[(int)Piece.Q];
             Assert.Equal(0b0000_1000UL << (int)BoardSquares.a1, whiteQueen.Board);
-            var blackQueen = _fixture.Game.PieceBitBoards[(int)Piece.q];
+            var blackQueen = _game.PieceBitBoards[(int)Piece.q];
             Assert.Equal(0b0000_1000UL << (0 * 8), blackQueen.Board);
 
-            var whiteKing = _fixture.Game.PieceBitBoards[(int)Piece.K];
+            var whiteKing = _game.PieceBitBoards[(int)Piece.K];
             Assert.Equal(0b0001_0000UL << (7 * 8), whiteKing.Board);
-            var blackKing = _fixture.Game.PieceBitBoards[(int)Piece.k];
+            var blackKing = _game.PieceBitBoards[(int)Piece.k];
             Assert.Equal(0b0001_0000UL << (0 * 8), blackKing.Board);
         }
 
@@ -73,52 +73,52 @@ namespace SharpFish.Test
 
             // Act
             bool success;
-            (success, _, _, _, _, _) = FENParser.ParseFEN(fen, _fixture.Game.PieceBitBoards, _fixture.Game.OccupancyBitBoards);
+            (success, _, _, _, _, _) = FENParser.ParseFEN(fen, _game.PieceBitBoards, _game.OccupancyBitBoards);
 
             // Assert
             Assert.True(success);
 
-            Assert.True(_fixture.Game.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.a7));
-            Assert.True(_fixture.Game.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.b4));
-            Assert.True(_fixture.Game.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.c7));
-            Assert.True(_fixture.Game.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.d7));
-            Assert.True(_fixture.Game.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.e6));
-            Assert.True(_fixture.Game.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.f7));
-            Assert.True(_fixture.Game.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.g6));
-            Assert.True(_fixture.Game.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.h3));
+            Assert.True(_game.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.a7));
+            Assert.True(_game.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.b4));
+            Assert.True(_game.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.c7));
+            Assert.True(_game.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.d7));
+            Assert.True(_game.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.e6));
+            Assert.True(_game.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.f7));
+            Assert.True(_game.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.g6));
+            Assert.True(_game.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.h3));
 
-            Assert.True(_fixture.Game.PieceBitBoards[(int)Piece.r].GetBit(BoardSquares.a8));
-            Assert.True(_fixture.Game.PieceBitBoards[(int)Piece.r].GetBit(BoardSquares.h8));
+            Assert.True(_game.PieceBitBoards[(int)Piece.r].GetBit(BoardSquares.a8));
+            Assert.True(_game.PieceBitBoards[(int)Piece.r].GetBit(BoardSquares.h8));
 
-            Assert.True(_fixture.Game.PieceBitBoards[(int)Piece.n].GetBit(BoardSquares.b6));
-            Assert.True(_fixture.Game.PieceBitBoards[(int)Piece.n].GetBit(BoardSquares.f6));
+            Assert.True(_game.PieceBitBoards[(int)Piece.n].GetBit(BoardSquares.b6));
+            Assert.True(_game.PieceBitBoards[(int)Piece.n].GetBit(BoardSquares.f6));
 
-            Assert.True(_fixture.Game.PieceBitBoards[(int)Piece.b].GetBit(BoardSquares.a6));
-            Assert.True(_fixture.Game.PieceBitBoards[(int)Piece.b].GetBit(BoardSquares.g7));
+            Assert.True(_game.PieceBitBoards[(int)Piece.b].GetBit(BoardSquares.a6));
+            Assert.True(_game.PieceBitBoards[(int)Piece.b].GetBit(BoardSquares.g7));
 
-            Assert.True(_fixture.Game.PieceBitBoards[(int)Piece.q].GetBit(BoardSquares.e7));
-            Assert.True(_fixture.Game.PieceBitBoards[(int)Piece.k].GetBit(BoardSquares.e8));
+            Assert.True(_game.PieceBitBoards[(int)Piece.q].GetBit(BoardSquares.e7));
+            Assert.True(_game.PieceBitBoards[(int)Piece.k].GetBit(BoardSquares.e8));
 
-            Assert.True(_fixture.Game.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.a2));
-            Assert.True(_fixture.Game.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.b2));
-            Assert.True(_fixture.Game.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.c2));
-            Assert.True(_fixture.Game.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.d5));
-            Assert.True(_fixture.Game.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.e4));
-            Assert.True(_fixture.Game.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.f2));
-            Assert.True(_fixture.Game.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.g2));
-            Assert.True(_fixture.Game.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.h2));
+            Assert.True(_game.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.a2));
+            Assert.True(_game.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.b2));
+            Assert.True(_game.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.c2));
+            Assert.True(_game.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.d5));
+            Assert.True(_game.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.e4));
+            Assert.True(_game.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.f2));
+            Assert.True(_game.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.g2));
+            Assert.True(_game.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.h2));
 
-            Assert.True(_fixture.Game.PieceBitBoards[(int)Piece.R].GetBit(BoardSquares.a1));
-            Assert.True(_fixture.Game.PieceBitBoards[(int)Piece.R].GetBit(BoardSquares.h1));
+            Assert.True(_game.PieceBitBoards[(int)Piece.R].GetBit(BoardSquares.a1));
+            Assert.True(_game.PieceBitBoards[(int)Piece.R].GetBit(BoardSquares.h1));
 
-            Assert.True(_fixture.Game.PieceBitBoards[(int)Piece.N].GetBit(BoardSquares.c3));
-            Assert.True(_fixture.Game.PieceBitBoards[(int)Piece.N].GetBit(BoardSquares.e5));
+            Assert.True(_game.PieceBitBoards[(int)Piece.N].GetBit(BoardSquares.c3));
+            Assert.True(_game.PieceBitBoards[(int)Piece.N].GetBit(BoardSquares.e5));
 
-            Assert.True(_fixture.Game.PieceBitBoards[(int)Piece.B].GetBit(BoardSquares.d2));
-            Assert.True(_fixture.Game.PieceBitBoards[(int)Piece.B].GetBit(BoardSquares.e2));
+            Assert.True(_game.PieceBitBoards[(int)Piece.B].GetBit(BoardSquares.d2));
+            Assert.True(_game.PieceBitBoards[(int)Piece.B].GetBit(BoardSquares.e2));
 
-            Assert.True(_fixture.Game.PieceBitBoards[(int)Piece.Q].GetBit(BoardSquares.f3));
-            Assert.True(_fixture.Game.PieceBitBoards[(int)Piece.K].GetBit(BoardSquares.e1));
+            Assert.True(_game.PieceBitBoards[(int)Piece.Q].GetBit(BoardSquares.f3));
+            Assert.True(_game.PieceBitBoards[(int)Piece.K].GetBit(BoardSquares.e1));
         }
 
         [Theory]
@@ -133,38 +133,38 @@ namespace SharpFish.Test
             // Make sure a previous Fen doesn't change anything
             const string previuosFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
             bool success;
-            (success, _, _, _, _, _) = FENParser.ParseFEN(previuosFen, _fixture.Game.PieceBitBoards, _fixture.Game.OccupancyBitBoards);
+            (success, _, _, _, _, _) = FENParser.ParseFEN(previuosFen, _game.PieceBitBoards, _game.OccupancyBitBoards);
             Assert.True(success);
 
             // Act
-            (success, _, _, _, _, _) = FENParser.ParseFEN(fen, _fixture.Game.PieceBitBoards, _fixture.Game.OccupancyBitBoards);
+            (success, _, _, _, _, _) = FENParser.ParseFEN(fen, _game.PieceBitBoards, _game.OccupancyBitBoards);
 
             // Assert
             Assert.True(success);
 
             var expectedWhiteOccupancy = 0UL;
-            expectedWhiteOccupancy |= _fixture.Game.PieceBitBoards[(int)Piece.P].Board;
-            expectedWhiteOccupancy |= _fixture.Game.PieceBitBoards[(int)Piece.N].Board;
-            expectedWhiteOccupancy |= _fixture.Game.PieceBitBoards[(int)Piece.B].Board;
-            expectedWhiteOccupancy |= _fixture.Game.PieceBitBoards[(int)Piece.R].Board;
-            expectedWhiteOccupancy |= _fixture.Game.PieceBitBoards[(int)Piece.Q].Board;
-            expectedWhiteOccupancy |= _fixture.Game.PieceBitBoards[(int)Piece.K].Board;
+            expectedWhiteOccupancy |= _game.PieceBitBoards[(int)Piece.P].Board;
+            expectedWhiteOccupancy |= _game.PieceBitBoards[(int)Piece.N].Board;
+            expectedWhiteOccupancy |= _game.PieceBitBoards[(int)Piece.B].Board;
+            expectedWhiteOccupancy |= _game.PieceBitBoards[(int)Piece.R].Board;
+            expectedWhiteOccupancy |= _game.PieceBitBoards[(int)Piece.Q].Board;
+            expectedWhiteOccupancy |= _game.PieceBitBoards[(int)Piece.K].Board;
 
-            Assert.Equal(expectedWhiteOccupancy, _fixture.Game.OccupancyBitBoards[(int)Side.White].Board);
+            Assert.Equal(expectedWhiteOccupancy, _game.OccupancyBitBoards[(int)Side.White].Board);
 
             var expectedBlackOccupancy = 0UL;
-            expectedBlackOccupancy |= _fixture.Game.PieceBitBoards[(int)Piece.p].Board;
-            expectedBlackOccupancy |= _fixture.Game.PieceBitBoards[(int)Piece.n].Board;
-            expectedBlackOccupancy |= _fixture.Game.PieceBitBoards[(int)Piece.b].Board;
-            expectedBlackOccupancy |= _fixture.Game.PieceBitBoards[(int)Piece.r].Board;
-            expectedBlackOccupancy |= _fixture.Game.PieceBitBoards[(int)Piece.q].Board;
-            expectedBlackOccupancy |= _fixture.Game.PieceBitBoards[(int)Piece.k].Board;
+            expectedBlackOccupancy |= _game.PieceBitBoards[(int)Piece.p].Board;
+            expectedBlackOccupancy |= _game.PieceBitBoards[(int)Piece.n].Board;
+            expectedBlackOccupancy |= _game.PieceBitBoards[(int)Piece.b].Board;
+            expectedBlackOccupancy |= _game.PieceBitBoards[(int)Piece.r].Board;
+            expectedBlackOccupancy |= _game.PieceBitBoards[(int)Piece.q].Board;
+            expectedBlackOccupancy |= _game.PieceBitBoards[(int)Piece.k].Board;
 
-            Assert.Equal(expectedBlackOccupancy, _fixture.Game.OccupancyBitBoards[(int)Side.Black].Board);
+            Assert.Equal(expectedBlackOccupancy, _game.OccupancyBitBoards[(int)Side.Black].Board);
 
             var expectedCombinedOccupancy = expectedWhiteOccupancy | expectedBlackOccupancy;
 
-            Assert.Equal(expectedCombinedOccupancy, _fixture.Game.OccupancyBitBoards[(int)Side.Both].Board);
+            Assert.Equal(expectedCombinedOccupancy, _game.OccupancyBitBoards[(int)Side.Both].Board);
         }
 
         [Theory]
@@ -177,7 +177,7 @@ namespace SharpFish.Test
         {
             bool success;
             Side side;
-            (success, side, _, _, _, _) = FENParser.ParseFEN(fen, _fixture.Game.PieceBitBoards, _fixture.Game.OccupancyBitBoards);
+            (success, side, _, _, _, _) = FENParser.ParseFEN(fen, _game.PieceBitBoards, _game.OccupancyBitBoards);
 
             if (expectedSide != Side.Both)
             {
@@ -210,12 +210,12 @@ namespace SharpFish.Test
             // Make sure a previous Fen doesn't change anything
             const string previuosFen = "8/8/8/8/8/8/8/8 w KQkq 1234 0 1";
             bool success;
-            (success, _, _, _, _, _) = FENParser.ParseFEN(previuosFen, _fixture.Game.PieceBitBoards, _fixture.Game.OccupancyBitBoards);
+            (success, _, _, _, _, _) = FENParser.ParseFEN(previuosFen, _game.PieceBitBoards, _game.OccupancyBitBoards);
             Assert.False(success);
 
             // Act
             int castleResult;
-            (success, _, castleResult, _, _, _) = FENParser.ParseFEN(fen, _fixture.Game.PieceBitBoards, _fixture.Game.OccupancyBitBoards);
+            (success, _, castleResult, _, _, _) = FENParser.ParseFEN(fen, _game.PieceBitBoards, _game.OccupancyBitBoards);
 
             // Assert
             if (expectedCastleResult >= 0)
@@ -239,7 +239,7 @@ namespace SharpFish.Test
         {
             bool success;
             BoardSquares enPassant;
-            (success, _, _, enPassant, _, _) = FENParser.ParseFEN(fen, _fixture.Game.PieceBitBoards, _fixture.Game.OccupancyBitBoards);
+            (success, _, _, enPassant, _, _) = FENParser.ParseFEN(fen, _game.PieceBitBoards, _game.OccupancyBitBoards);
 
             Assert.True(success);
             Assert.Equal(expectedEnPassantSquare, enPassant);
@@ -255,7 +255,7 @@ namespace SharpFish.Test
         public void EnPassant_Error(string fen)
         {
             bool success;
-            (success, _, _, _, _, _) = FENParser.ParseFEN(fen, _fixture.Game.PieceBitBoards, _fixture.Game.OccupancyBitBoards);
+            (success, _, _, _, _, _) = FENParser.ParseFEN(fen, _game.PieceBitBoards, _game.OccupancyBitBoards);
 
             Assert.False(success);
         }
@@ -268,7 +268,7 @@ namespace SharpFish.Test
         {
             bool success;
             int halfMoves;
-            (success, _, _, _, halfMoves, _) = FENParser.ParseFEN(fen, _fixture.Game.PieceBitBoards, _fixture.Game.OccupancyBitBoards);
+            (success, _, _, _, halfMoves, _) = FENParser.ParseFEN(fen, _game.PieceBitBoards, _game.OccupancyBitBoards);
 
             Assert.True(success);
             Assert.Equal(expectedHalfMoves, halfMoves);
@@ -282,7 +282,7 @@ namespace SharpFish.Test
         {
             bool success;
             int fullMoveCounter;
-            (success, _, _, _, _, fullMoveCounter) = FENParser.ParseFEN(fen, _fixture.Game.PieceBitBoards, _fixture.Game.OccupancyBitBoards);
+            (success, _, _, _, _, fullMoveCounter) = FENParser.ParseFEN(fen, _game.PieceBitBoards, _game.OccupancyBitBoards);
 
             Assert.True(success);
             Assert.Equal(expectedFullMoveCounter, fullMoveCounter);
