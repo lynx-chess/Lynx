@@ -2,8 +2,10 @@
 using SharpFish.Internal;
 using SharpFish.Model;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using static SharpFish.Model.MoveStruct;
 
 //_2_GettingStarted();
 //_3_PawnAttacks();
@@ -25,7 +27,8 @@ using System.Runtime.InteropServices;
 //_21_IsSqureAttacked();
 //_22_Generate_Moves();
 //_23_Castling_Moves();
-_26_Piece_Moves();
+//_26_Piece_Moves();
+_27_Move_Encoding();
 
 static void _2_GettingStarted()
 {
@@ -400,6 +403,22 @@ static void _26_Piece_Moves()
     {
         Console.WriteLine(move);
     }
+}
+
+static void _27_Move_Encoding()
+{
+    int move = 0;
+
+    // Target square: h1 (63)
+    var targetSquare = BoardSquares.h1;
+
+    // Encode move
+    move = (move | (int)targetSquare) << 6;
+    Console.WriteLine($"{Convert.ToString(move, 2)}");
+
+    // Decode move
+    int square = (move & 0xFC0) >> 6;
+    Console.WriteLine(Constants.Coordinates[square]);
 }
 
 static Game InitializeChessBoard()
