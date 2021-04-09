@@ -1,4 +1,5 @@
-﻿using SharpFish.Model;
+﻿using SharpFish.Internal;
+using SharpFish.Model;
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;

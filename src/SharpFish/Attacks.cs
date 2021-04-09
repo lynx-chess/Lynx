@@ -45,7 +45,7 @@ namespace SharpFish
         /// Get Bishop attacks assuming current board occupancy
         /// </summary>
         /// <param name="squareIndex"></param>
-        /// <param name="occupancy"></param>
+        /// <param name="occupancy">Occupancy of <see cref="Side.Both"/></param>
         /// <returns></returns>
         public static BitBoard BishopAttacks(int squareIndex, BitBoard occupancy)
         {
@@ -60,7 +60,7 @@ namespace SharpFish
         /// Get Rook attacks assuming current board occupancy
         /// </summary>
         /// <param name="squareIndex"></param>
-        /// <param name="occupancy"></param>
+        /// <param name="occupancy">Occupancy of <see cref="Side.Both"/></param>
         /// <returns></returns>
         public static BitBoard RookAttacks(int squareIndex, BitBoard occupancy)
         {
@@ -76,7 +76,7 @@ namespace SharpFish
         /// Use <see cref="QueenAttacks(BitBoard, BitBoard)"/> if rook and bishop attacks are already calculated
         /// </summary>
         /// <param name="squareIndex"></param>
-        /// <param name="occupancy"></param>
+        /// <param name="occupancy">Occupancy of <see cref="Side.Both"/></param>
         /// <returns></returns>
         public static BitBoard QueenAttacks(int squareIndex, BitBoard occupancy)
         {

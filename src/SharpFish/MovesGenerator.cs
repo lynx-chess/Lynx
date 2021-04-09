@@ -1,4 +1,5 @@
-﻿using SharpFish.Model;
+﻿using SharpFish.Internal;
+using SharpFish.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,29 +10,32 @@ namespace SharpFish
 {
     public static class MovesGenerator
     {
-        //private static readonly IReadOnlyDictionary<int, Func<int, BitBoard, ulong>> PieceAttacksDictionary = new Dictionary<int, Func<int, BitBoard, ulong>>
-        //{
-        //    [(int)Piece.P] = (int origin, BitBoard _) => Attacks.PawnAttacks[1, origin].Board,
-        //    [(int)Piece.p] = (int origin, BitBoard _) => Attacks.PawnAttacks[0, origin].Board,
+        /// <summary>
+        /// Checks are not considered
+        /// </summary>
+        private static readonly IReadOnlyDictionary<int, Func<int, BitBoard, ulong>> PieceAttacksDictionary = new Dictionary<int, Func<int, BitBoard, ulong>>
+        {
+            [(int)Piece.P] = (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White, origin].Board,
+            [(int)Piece.p] = (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.Black, origin].Board,
 
-        //    [(int)Piece.K] = (int origin, BitBoard _) => Attacks.KingAttacks[origin].Board,
-        //    [(int)Piece.k] = (int origin, BitBoard _) => Attacks.KingAttacks[origin].Board,
+            [(int)Piece.K] = (int origin, BitBoard _) => Attacks.KingAttacks[origin].Board,
+            [(int)Piece.k] = (int origin, BitBoard _) => Attacks.KingAttacks[origin].Board,
 
-        //    [(int)Piece.N] = (int origin, BitBoard _) => Attacks.KnightAttacks[origin].Board,
-        //    [(int)Piece.n] = (int origin, BitBoard _) => Attacks.KnightAttacks[origin].Board,
+            [(int)Piece.N] = (int origin, BitBoard _) => Attacks.KnightAttacks[origin].Board,
+            [(int)Piece.n] = (int origin, BitBoard _) => Attacks.KnightAttacks[origin].Board,
 
-        //    [(int)Piece.B] = (int origin, BitBoard occupancy) => Attacks.BishopAttacks(origin, occupancy).Board,
-        //    [(int)Piece.b] = (int origin, BitBoard occupancy) => Attacks.BishopAttacks(origin, occupancy).Board,
+            [(int)Piece.B] = (int origin, BitBoard occupancy) => Attacks.BishopAttacks(origin, occupancy).Board,
+            [(int)Piece.b] = (int origin, BitBoard occupancy) => Attacks.BishopAttacks(origin, occupancy).Board,
 
-        //    [(int)Piece.R] = (int origin, BitBoard occupancy) => Attacks.RookAttacks(origin, occupancy).Board,
-        //    [(int)Piece.r] = (int origin, BitBoard occupancy) => Attacks.RookAttacks(origin, occupancy).Board,
+            [(int)Piece.R] = (int origin, BitBoard occupancy) => Attacks.RookAttacks(origin, occupancy).Board,
+            [(int)Piece.r] = (int origin, BitBoard occupancy) => Attacks.RookAttacks(origin, occupancy).Board,
 
-        //    // TODO try to improve performance by re-using bishop and rook attacks
-        //    [(int)Piece.Q] = (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy).Board,
-        //    [(int)Piece.q] = (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy).Board,
-        //};
+            // TODO try to improve performance by re-using bishop and rook attacks
+            [(int)Piece.Q] = (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy).Board,
+            [(int)Piece.q] = (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy).Board,
+        };
 
-        public static List<Move> GenerateAllMoves(Game game)
+        public static List<Move> GenerateAllMoves(Game game, bool capturesOnly = false)
         {
             var moves = new List<Move>();
 
@@ -43,6 +47,12 @@ namespace SharpFish
             var offset = Utils.PieceOffset(game.Side);
 
             moves.AddRange(GeneratePawnMoves(game, offset));
+            moves.AddRange(GenerateCastlingMoves(game, offset));
+            moves.AddRange(GeneratePieceMoves((int)Piece.K + offset, game, capturesOnly));
+            moves.AddRange(GeneratePieceMoves((int)Piece.N + offset, game, capturesOnly));
+            moves.AddRange(GeneratePieceMoves((int)Piece.B + offset, game, capturesOnly));
+            moves.AddRange(GeneratePieceMoves((int)Piece.R + offset, game, capturesOnly));
+            moves.AddRange(GeneratePieceMoves((int)Piece.Q + offset, game, capturesOnly));
 
             return moves;
         }
@@ -132,7 +142,7 @@ namespace SharpFish
         /// <param name="game"></param>
         /// <param name="offset"></param>
         /// <returns></returns>
-        internal static IEnumerable<Move> GenerateCastleMoves(Game game, int offset)
+        internal static IEnumerable<Move> GenerateCastlingMoves(Game game, int offset)
         {
             var piece = (int)Piece.K + offset;
             var oppositeSide = (Side)Utils.OppositeSide(game.Side);
@@ -191,31 +201,79 @@ namespace SharpFish
             }
         }
 
-        internal static IEnumerable<Move> GenerateKingMoves(Game game, int offset)
+        /// <summary>
+        /// Generate Knight, Bishop, Rook and Queen moves
+        /// </summary>
+        /// <param name="piece"><see cref="Piece"/></param>
+        /// <param name="game"></param>
+        /// <param name="capturesOnly"></param>
+        /// <returns></returns>
+        internal static IEnumerable<Move> GeneratePieceMoves(int piece, Game game, bool capturesOnly = false)
         {
-            var piece = (int)Piece.K + offset;
-            var oppositeSide = (Side)Utils.OppositeSide(game.Side);
+            var bitboard = game.PieceBitBoards[piece].Board;
+            int sourceSquare, targetSquare;
 
-            int sourceSquare = game.PieceBitBoards[piece].GetLS1BIndex(); // There's for sure only one
-            int targetSquare;
-
-            // Captures
-            ulong attacks = Attacks.KingAttacks[sourceSquare].Board;
-            while (attacks != default)
+            while (bitboard != default)
             {
-                targetSquare = BitBoard.GetLS1BIndex(attacks);
-                attacks = BitBoard.ResetLS1B(attacks);
+                sourceSquare = BitBoard.GetLS1BIndex(bitboard);
+                bitboard = BitBoard.ResetLS1B(bitboard);
 
-                if (!game.OccupancyBitBoards[(int)game.Side].GetBit(targetSquare)
-                    && !Attacks.IsSquaredAttackedBySide(targetSquare, game, oppositeSide))
+                ulong attacks = PieceAttacksDictionary[piece](sourceSquare, game.OccupancyBitBoards[(int)Side.Both])
+                    & ~game.OccupancyBitBoards[(int)game.Side].Board;
+
+                while (attacks != default)
                 {
-                    var moveType = game.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare)
-                        ? MoveType.Capture
-                        : MoveType.Quiet;
+                    targetSquare = BitBoard.GetLS1BIndex(attacks);
+                    attacks = BitBoard.ResetLS1B(attacks);
 
-                    yield return new Move(piece, sourceSquare, targetSquare, moveType);
+                    if (capturesOnly)
+                    {
+                        if (game.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare))
+                        {
+                            yield return new Move(piece, sourceSquare, targetSquare, MoveType.Capture);
+                        }
+                    }
+                    else
+                    {
+                        yield return new Move(piece, sourceSquare, targetSquare);
+                    }
                 }
             }
+        }
+
+        internal static IEnumerable<Move> GenerateKingMoves(Game game, bool capturesOnly = false)
+        {
+            var offset = Utils.PieceOffset(game.Side);
+
+            return GeneratePieceMoves((int)Piece.K + offset, game, capturesOnly);
+        }
+
+        internal static IEnumerable<Move> GenerateKnightMoves(Game game, bool capturesOnly = false)
+        {
+            var offset = Utils.PieceOffset(game.Side);
+
+            return GeneratePieceMoves((int)Piece.N + offset, game, capturesOnly);
+        }
+
+        internal static IEnumerable<Move> GenerateBishopMoves(Game game, bool capturesOnly = false)
+        {
+            var offset = Utils.PieceOffset(game.Side);
+
+            return GeneratePieceMoves((int)Piece.B + offset, game, capturesOnly);
+        }
+
+        internal static IEnumerable<Move> GenerateRookMoves(Game game, bool capturesOnly = false)
+        {
+            var offset = Utils.PieceOffset(game.Side);
+
+            return GeneratePieceMoves((int)Piece.R + offset, game, capturesOnly);
+        }
+
+        internal static IEnumerable<Move> GenerateQueenMoves(Game game, bool capturesOnly = false)
+        {
+            var offset = Utils.PieceOffset(game.Side);
+
+            return GeneratePieceMoves((int)Piece.Q + offset, game, capturesOnly);
         }
     }
 }

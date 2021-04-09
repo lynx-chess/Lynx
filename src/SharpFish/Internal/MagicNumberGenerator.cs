@@ -1,7 +1,7 @@
 ﻿using SharpFish.Model;
 using System;
 
-namespace SharpFish
+namespace SharpFish.Internal
 {
     public static class MagicNumberGenerator
     {

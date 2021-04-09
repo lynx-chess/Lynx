@@ -1,4 +1,5 @@
 ﻿using SharpFish;
+using SharpFish.Internal;
 using SharpFish.Model;
 using System;
 using System.Linq;
@@ -23,7 +24,8 @@ using System.Runtime.InteropServices;
 //_20_QueenAttacks();
 //_21_IsSqureAttacked();
 //_22_Generate_Moves();
-_23_King_Moves();
+//_23_Castling_Moves();
+_26_Piece_Moves();
 
 static void _2_GettingStarted()
 {
@@ -270,8 +272,8 @@ static void _18_Printing_Chess_Board()
 static void _19_Parse_FEN()
 {
     const string emptyBoard = "8/8/8/8/8/8/8/8 w - - 0 1";
-    const string startPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 ";
-    const string trickyPosition = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1 ";
+    const string startPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    const string trickyPosition = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
     const string killerPosition = "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1";
     const string cmkPosition = "r2q1rk1/ppp2ppp/2n1bn2/2b1p3/3pP3/3P1NPP/PPP1NPB1/R1BQ1RK1 b - - 0 9 ";
 
@@ -293,7 +295,7 @@ static void _20_QueenAttacks()
     Attacks.QueenAttacks((int)BoardSquares.e4, game.OccupancyBitBoards[(int)Side.Both]).Print();
 }
 
-static void _21_IsSqureAttacked()
+static void _21_IsSquareAttacked()
 {
     var game = new Game();
 
@@ -372,13 +374,28 @@ static void _22_Generate_Moves()
     }
 }
 
-static void _23_King_Moves()
+static void _23_Castling_Moves()
 {
     var game = new Game("rn2k2r/pppppppp/8/8/8/8/PPPPPPPP/RN2K2R w KQkq - 0 1");
     game.PrintBoard();
 
-    var moves = MovesGenerator.GenerateCastleMoves(game, Utils.PieceOffset(game.Side)).ToList();
+    var moves = MovesGenerator.GenerateCastlingMoves(game, Utils.PieceOffset(game.Side)).ToList();
 
+    foreach (var move in moves)
+    {
+        Console.WriteLine(move);
+    }
+}
+
+static void _26_Piece_Moves()
+{
+    var game = new Game("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
+    game.PrintBoard();
+
+    var moves = MovesGenerator.GenerateKnightMoves(game).ToList();
+
+    moves = MovesGenerator.GenerateAllMoves(game).ToList();
+    Console.WriteLine($"Expected 48, found: {moves.Count}");
     foreach (var move in moves)
     {
         Console.WriteLine(move);

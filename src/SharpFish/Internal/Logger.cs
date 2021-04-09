@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace SharpFish
+namespace SharpFish.Internal
 {
-    public static class Logger
+    internal static class Logger
     {
         public static void Write(string str)
         {

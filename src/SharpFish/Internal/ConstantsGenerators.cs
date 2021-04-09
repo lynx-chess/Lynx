@@ -1,9 +1,9 @@
 ﻿using SharpFish.Model;
 using System;
 
-namespace SharpFish
+namespace SharpFish.Internal
 {
-    internal static class ConstantGenerators
+    internal static class ConstantsGenerators
     {
         public static ulong NotAFile()
         {

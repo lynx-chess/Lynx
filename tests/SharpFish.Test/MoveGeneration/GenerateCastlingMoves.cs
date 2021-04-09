@@ -4,7 +4,7 @@ using Xunit;
 
 namespace SharpFish.Test.MoveGeneration
 {
-    public class GenerateCastleMoves
+    public class GenerateCastlingMoves
     {
 #pragma warning disable S4144 // Methods should not have identical implementations
 
@@ -17,7 +17,7 @@ namespace SharpFish.Test.MoveGeneration
         {
             var game = new Game(fen);
 
-            var moves = MovesGenerator.GenerateCastleMoves(game, Utils.PieceOffset(game.Side));
+            var moves = MovesGenerator.GenerateCastlingMoves(game, Utils.PieceOffset(game.Side));
 
             Assert.Single(moves.Where(m => m.MoveType == MoveType.ShortCastle));
         }
@@ -33,7 +33,7 @@ namespace SharpFish.Test.MoveGeneration
         {
             var game = new Game(fen);
 
-            var moves = MovesGenerator.GenerateCastleMoves(game, Utils.PieceOffset(game.Side));
+            var moves = MovesGenerator.GenerateCastlingMoves(game, Utils.PieceOffset(game.Side));
 
             Assert.Single(moves.Where(m => m.MoveType == MoveType.LongCastle));
         }
@@ -57,7 +57,7 @@ namespace SharpFish.Test.MoveGeneration
         {
             var game = new Game(fen);
 
-            var moves = MovesGenerator.GenerateCastleMoves(game, Utils.PieceOffset(game.Side));
+            var moves = MovesGenerator.GenerateCastlingMoves(game, Utils.PieceOffset(game.Side));
 
             Assert.Empty(moves.Where(m => m.MoveType == MoveType.ShortCastle));
         }
@@ -81,7 +81,7 @@ namespace SharpFish.Test.MoveGeneration
         {
             var game = new Game(fen);
 
-            var moves = MovesGenerator.GenerateCastleMoves(game, Utils.PieceOffset(game.Side));
+            var moves = MovesGenerator.GenerateCastlingMoves(game, Utils.PieceOffset(game.Side));
 
             Assert.Empty(moves.Where(m => m.MoveType == MoveType.LongCastle));
         }
@@ -103,7 +103,7 @@ namespace SharpFish.Test.MoveGeneration
         {
             var game = new Game(fen);
 
-            var moves = MovesGenerator.GenerateCastleMoves(game, Utils.PieceOffset(game.Side));
+            var moves = MovesGenerator.GenerateCastlingMoves(game, Utils.PieceOffset(game.Side));
 
             Assert.Empty(moves.Where(m => m.MoveType == MoveType.ShortCastle));
         }
@@ -130,7 +130,7 @@ namespace SharpFish.Test.MoveGeneration
         {
             var game = new Game(fen);
 
-            var moves = MovesGenerator.GenerateCastleMoves(game, Utils.PieceOffset(game.Side));
+            var moves = MovesGenerator.GenerateCastlingMoves(game, Utils.PieceOffset(game.Side));
 
             Assert.Empty(moves.Where(m => m.MoveType == MoveType.LongCastle));
         }
@@ -146,7 +146,7 @@ namespace SharpFish.Test.MoveGeneration
         {
             var game = new Game(fen);
 
-            var moves = MovesGenerator.GenerateCastleMoves(game, Utils.PieceOffset(game.Side));
+            var moves = MovesGenerator.GenerateCastlingMoves(game, Utils.PieceOffset(game.Side));
 
             Assert.Empty(moves.Where(m => m.MoveType == MoveType.ShortCastle));
         }
@@ -162,7 +162,7 @@ namespace SharpFish.Test.MoveGeneration
         {
             var game = new Game(fen);
 
-            var moves = MovesGenerator.GenerateCastleMoves(game, Utils.PieceOffset(game.Side));
+            var moves = MovesGenerator.GenerateCastlingMoves(game, Utils.PieceOffset(game.Side));
 
             Assert.Empty(moves.Where(m => m.MoveType == MoveType.LongCastle));
         }

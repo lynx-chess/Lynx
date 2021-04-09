@@ -1,4 +1,6 @@
-﻿namespace SharpFish.Model
+﻿using SharpFish.Internal;
+
+namespace SharpFish.Model
 {
     public struct BitBoard
     {

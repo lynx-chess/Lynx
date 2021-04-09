@@ -292,7 +292,7 @@ namespace SharpFish
 
         public const string InitialPositionFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-        public const string EmptyBooardFEN = "/8/8/8/8/8/8/8 w - - 0 1";
+        public const string EmptyBoardFEN = "/8/8/8/8/8/8/8 w - - 0 1";
     }
 
     /*

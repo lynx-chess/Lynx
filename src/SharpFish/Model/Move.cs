@@ -1,6 +1,6 @@
 ﻿namespace SharpFish.Model
 {
-    public record Move(int Piece, int SourceSquare, int TargetSquare, MoveType MoveType)
+    public record Move(int Piece, int SourceSquare, int TargetSquare, MoveType MoveType = MoveType.Unknown)
     {
         public override string ToString()
         {
@@ -10,6 +10,7 @@
 
     public enum MoveType
     {
+        Unknown,
         Quiet,
         Capture,
         EnPassant,
