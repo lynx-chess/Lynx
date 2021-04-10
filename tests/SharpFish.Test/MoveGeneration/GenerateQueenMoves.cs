@@ -21,7 +21,7 @@ namespace SharpFish.Test.MoveGeneration
         [InlineData("8/8/1P1P1P2/8/1P1q1P2/8/1P1P1P2/8 b - - 0 1", 16)]
         public void QueenMoves_Count(string fen, int expectedMoves)
         {
-            var game = new Game(fen);
+            var game = new Position(fen);
             var offset = Utils.PieceOffset(game.Side);
             var moves = MovesGenerator.GeneratePieceMoves((int)Piece.Q + offset, game);
 
@@ -47,7 +47,7 @@ namespace SharpFish.Test.MoveGeneration
         [Fact]
         public void QueenMoves_White()
         {
-            var game = new Game("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
+            var game = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
             var offset = Utils.PieceOffset(game.Side);
             var piece = (int)Piece.Q + offset;
             var moves = MovesGenerator.GeneratePieceMoves(piece, game);
@@ -108,7 +108,7 @@ namespace SharpFish.Test.MoveGeneration
         [Fact]
         public void QueenMoves_Black()
         {
-            var game = new Game("r3kR1r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1");
+            var game = new Position("r3kR1r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1");
             var offset = Utils.PieceOffset(game.Side);
             var piece = (int)Piece.Q + offset;
             var moves = MovesGenerator.GeneratePieceMoves(piece, game);
@@ -139,7 +139,7 @@ namespace SharpFish.Test.MoveGeneration
         [InlineData("P1P1P3/8/P1q1P3/8/P1P1P1P1/8/4P1q1/7P b - - 0 1", 12)]
         public void QueenMoves_CapturesOnly(string fen, int expectedCaptures)
         {
-            var game = new Game(fen);
+            var game = new Position(fen);
             var offset = Utils.PieceOffset(game.Side);
             var piece = (int)Piece.Q + offset;
             var moves = MovesGenerator.GeneratePieceMoves(piece, game, capturesOnly: true);

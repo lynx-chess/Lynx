@@ -20,7 +20,7 @@ namespace SharpFish.Test.MoveGeneration
         [InlineData("8/8/8/8/3K4/8/8/8 w - - 0 1", 8)]
         public void KingMoves_Count(string fen, int expectedMoves)
         {
-            var game = new Game(fen);
+            var game = new Position(fen);
             var offset = Utils.PieceOffset(game.Side);
             var moves = MovesGenerator.GeneratePieceMoves((int)Piece.K + offset, game);
 
@@ -46,7 +46,7 @@ namespace SharpFish.Test.MoveGeneration
         [Fact]
         public void KingMoves_White()
         {
-            var game = new Game("8/6nQ/6k1/5PB1/8/2N5/nKr5/bp6 w - - 0 1");
+            var game = new Position("8/6nQ/6k1/5PB1/8/2N5/nKr5/bp6 w - - 0 1");
             var offset = Utils.PieceOffset(game.Side);
             var piece = (int)Piece.K + offset;
             var moves = MovesGenerator.GeneratePieceMoves(piece, game);
@@ -99,7 +99,7 @@ namespace SharpFish.Test.MoveGeneration
         [Fact]
         public void KingMoves_Black()
         {
-            var game = new Game("8/6nQ/6k1/5PB1/8/2N5/nKr5/bp6 b - - 0 1");
+            var game = new Position("8/6nQ/6k1/5PB1/8/2N5/nKr5/bp6 b - - 0 1");
             var offset = Utils.PieceOffset(game.Side);
             var piece = (int)Piece.K + offset;
             var moves = MovesGenerator.GeneratePieceMoves(piece, game);
@@ -152,7 +152,7 @@ namespace SharpFish.Test.MoveGeneration
         [Fact]
         public void KingMoves_CapturesOnly_White()
         {
-            var game = new Game("8/6nQ/6k1/5PB1/8/2N5/nKr5/bp6 w - - 0 1");
+            var game = new Position("8/6nQ/6k1/5PB1/8/2N5/nKr5/bp6 w - - 0 1");
             var offset = Utils.PieceOffset(game.Side);
             var piece = (int)Piece.K + offset;
             var moves = MovesGenerator.GeneratePieceMoves(piece, game, capturesOnly: true);
@@ -193,7 +193,7 @@ namespace SharpFish.Test.MoveGeneration
         [Fact]
         public void KingMoves_CapturesOnly_Black()
         {
-            var game = new Game("8/6nQ/6k1/5PB1/8/2N5/nKr5/bp6 b - - 0 1");
+            var game = new Position("8/6nQ/6k1/5PB1/8/2N5/nKr5/bp6 b - - 0 1");
             var offset = Utils.PieceOffset(game.Side);
             var piece = (int)Piece.K + offset;
             var moves = MovesGenerator.GeneratePieceMoves(piece, game, capturesOnly: true);

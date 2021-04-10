@@ -17,7 +17,7 @@ namespace SharpFish.Test.MoveGeneration
         [InlineData("8/8/2N1N3/3r4/2N1N3/8/8/3q4 b - - 0 1", 13)]
         public void RookMoves_Count(string fen, int expectedMoves)
         {
-            var game = new Game(fen);
+            var game = new Position(fen);
             var offset = Utils.PieceOffset(game.Side);
             var moves = MovesGenerator.GeneratePieceMoves((int)Piece.R + offset, game);
 
@@ -43,7 +43,7 @@ namespace SharpFish.Test.MoveGeneration
         [Fact]
         public void RookMoves_White()
         {
-            var game = new Game("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1P/1PPBBPP1/R3K2R w KQkq - 0 1");
+            var game = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1P/1PPBBPP1/R3K2R w KQkq - 0 1");
             var offset = Utils.PieceOffset(game.Side);
             var piece = (int)Piece.R + offset;
             var moves = MovesGenerator.GeneratePieceMoves(piece, game);
@@ -112,7 +112,7 @@ namespace SharpFish.Test.MoveGeneration
         [Fact]
         public void RookMoves_Black()
         {
-            var game = new Game("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1P/1PPBBPP1/R3K2R b KQkq - 0 1");
+            var game = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1P/1PPBBPP1/R3K2R b KQkq - 0 1");
             var offset = Utils.PieceOffset(game.Side);
             var piece = (int)Piece.R + offset;
             var moves = MovesGenerator.GeneratePieceMoves(piece, game);
@@ -177,7 +177,7 @@ namespace SharpFish.Test.MoveGeneration
         [Fact]
         public void RookMoves_CapturesOnly_White()
         {
-            var game = new Game("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1P/1PPBBPP1/R3K2R w KQkq - 0 1");
+            var game = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1P/1PPBBPP1/R3K2R w KQkq - 0 1");
             var offset = Utils.PieceOffset(game.Side);
             var piece = (int)Piece.R + offset;
             var moves = MovesGenerator.GeneratePieceMoves(piece, game, capturesOnly: true);
@@ -207,7 +207,7 @@ namespace SharpFish.Test.MoveGeneration
         [Fact]
         public void RookMoves_CapturesOnly_Black()
         {
-            var game = new Game("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1P/1PPBBPP1/R3K2R b KQkq - 0 1");
+            var game = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1P/1PPBBPP1/R3K2R b KQkq - 0 1");
             var offset = Utils.PieceOffset(game.Side);
             var piece = (int)Piece.R + offset;
             var moves = MovesGenerator.GeneratePieceMoves(piece, game, capturesOnly: true);

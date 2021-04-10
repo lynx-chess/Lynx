@@ -239,7 +239,7 @@ static void _16_InitializingSliderPiecesAttackTables()
 
 static void _17_Defining_variables()
 {
-    var game = new Game();
+    var game = new Position(Constants.EmptyBoardFEN);
 
     var whitePawnBitBoard = game.PieceBitBoards[(int)Piece.P];
     whitePawnBitBoard.SetBit(BoardSquares.e2);
@@ -263,8 +263,8 @@ static void _17_Defining_variables()
 
 static void _18_Printing_Chess_Board()
 {
-    var game = InitializeChessBoard();
-    game.PrintBoard();
+    var game = new Position(Constants.InitialPositionFEN);
+    game.Print();
 
     for (int bbIndex = 0; bbIndex < game.PieceBitBoards.Length; ++bbIndex)
     {
@@ -280,13 +280,11 @@ static void _19_Parse_FEN()
     const string killerPosition = "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1";
     const string cmkPosition = "r2q1rk1/ppp2ppp/2n1bn2/2b1p3/3pP3/3P1NPP/PPP1NPB1/R1BQ1RK1 b - - 0 9 ";
 
-    var game = InitializeChessBoard();
-
-    game.ParseFEN(cmkPosition);
+    var game = new Position(cmkPosition);
 
     game.PieceBitBoards[(int)Piece.Q].Print();
 
-    game.PrintBoard();
+    game.Print();
     game.OccupancyBitBoards[(int)Side.White].Print();
     game.OccupancyBitBoards[(int)Side.Black].Print();
     game.OccupancyBitBoards[(int)Side.Both].Print();
@@ -294,15 +292,13 @@ static void _19_Parse_FEN()
 
 static void _20_QueenAttacks()
 {
-    var game = new Game(Constants.InitialPositionFEN);
+    var game = new Position(Constants.InitialPositionFEN);
     Attacks.QueenAttacks((int)BoardSquares.e4, game.OccupancyBitBoards[(int)Side.Both]).Print();
 }
 
 static void _21_IsSquareAttacked()
 {
-    var game = new Game();
-
-    game.ParseFEN("8/8/8/3p4/8/8/8/8 w - - 0 1");
+    var game = new Position("8/8/8/3p4/8/8/8/8 w - - 0 1");
 
     game.PieceBitBoards[(int)Piece.p].Print();
 
@@ -315,7 +311,7 @@ static void _21_IsSquareAttacked()
 
     Console.WriteLine("=====================================");
 
-    game = new Game();
+    game = new Position(Constants.EmptyBoardFEN);
     game.PieceBitBoards[(int)Piece.n].SetBit(BoardSquares.c6);
     game.PieceBitBoards[(int)Piece.n].SetBit(BoardSquares.f6);
 
@@ -325,7 +321,7 @@ static void _21_IsSquareAttacked()
 
     Console.WriteLine("=====================================");
 
-    game = new Game();
+    game = new Position(Constants.EmptyBoardFEN);
     game.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.b7);
     game.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.d7);
     game.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.f7);
@@ -342,21 +338,21 @@ static void _21_IsSquareAttacked()
 
     Console.WriteLine("=====================================");
 
-    game = new Game();
+    game = new Position(Constants.EmptyBoardFEN);
     game.PieceBitBoards[(int)Piece.K].SetBit(BoardSquares.e4);
     game.PrintAttackedSquares(Side.White);
 
     Console.WriteLine("=====================================");
 
-    game.ParseFEN(Constants.InitialPositionFEN);
+    game = new Position(Constants.InitialPositionFEN);
     game.PrintAttackedSquares(Side.White);
     game.PrintAttackedSquares(Side.Black);
 }
 
 static void _22_Generate_Moves()
 {
-    var game = new Game("r1P1k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1 ");
-    game.PrintBoard();
+    var game = new Position("r1P1k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1 ");
+    game.Print();
 
     //game.OccupancyBitBoards[2].Board |= 0b11100111UL << 8 * 4;
     var moves = MovesGenerator.GenerateAllMoves(game);
@@ -365,10 +361,10 @@ static void _22_Generate_Moves()
         Console.WriteLine(move);
     }
 
-    game = new Game("rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1");
+    game = new Position("rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1");
     game.PieceBitBoards[0].Print();
     game.PieceBitBoards[6].Print();
-    game.PrintBoard();
+    game.Print();
     moves = MovesGenerator.GenerateAllMoves(game);
 
     foreach (var move in moves)
@@ -379,8 +375,8 @@ static void _22_Generate_Moves()
 
 static void _23_Castling_Moves()
 {
-    var game = new Game("rn2k2r/pppppppp/8/8/8/8/PPPPPPPP/RN2K2R w KQkq - 0 1");
-    game.PrintBoard();
+    var game = new Position("rn2k2r/pppppppp/8/8/8/8/PPPPPPPP/RN2K2R w KQkq - 0 1");
+    game.Print();
 
     var moves = MovesGenerator.GenerateCastlingMoves(game, Utils.PieceOffset(game.Side)).ToList();
 
@@ -392,8 +388,8 @@ static void _23_Castling_Moves()
 
 static void _26_Piece_Moves()
 {
-    var game = new Game("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
-    game.PrintBoard();
+    var game = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
+    game.Print();
 
     var moves = MovesGenerator.GenerateKnightMoves(game).ToList();
 
@@ -419,49 +415,4 @@ static void _27_Move_Encoding()
     // Decode move
     int square = (move & 0xFC0) >> 6;
     Console.WriteLine(Constants.Coordinates[square]);
-}
-
-static Game InitializeChessBoard()
-{
-    var game = new Game();
-
-    game.Side = Side.White;
-    game.EnPassant = BoardSquares.e3;
-
-    game.Castle |= (int)CastlingRights.WK;
-    game.Castle |= (int)CastlingRights.WQ;
-    game.Castle |= (int)CastlingRights.BK;
-    game.Castle |= (int)CastlingRights.BQ;
-
-    for (int whitePawn = (int)BoardSquares.a2, blackPawn = (int)BoardSquares.a7;
-            whitePawn <= (int)BoardSquares.h2 && blackPawn <= (int)BoardSquares.h7;
-            ++whitePawn, ++blackPawn)
-    {
-        game.PieceBitBoards[(int)Piece.P].SetBit(whitePawn);
-        game.PieceBitBoards[(int)Piece.p].SetBit(blackPawn);
-    }
-
-    game.PieceBitBoards[(int)Piece.R].SetBit(BoardSquares.a1);
-    game.PieceBitBoards[(int)Piece.R].SetBit(BoardSquares.h1);
-    game.PieceBitBoards[(int)Piece.r].SetBit(BoardSquares.a8);
-    game.PieceBitBoards[(int)Piece.r].SetBit(BoardSquares.h8);
-
-    game.PieceBitBoards[(int)Piece.N].SetBit(BoardSquares.b1);
-    game.PieceBitBoards[(int)Piece.N].SetBit(BoardSquares.g1);
-    game.PieceBitBoards[(int)Piece.n].SetBit(BoardSquares.b8);
-    game.PieceBitBoards[(int)Piece.n].SetBit(BoardSquares.g8);
-
-    game.PieceBitBoards[(int)Piece.B].SetBit(BoardSquares.c1);
-    game.PieceBitBoards[(int)Piece.B].SetBit(BoardSquares.f1);
-    game.PieceBitBoards[(int)Piece.b].SetBit(BoardSquares.c8);
-    game.PieceBitBoards[(int)Piece.b].SetBit(BoardSquares.f8);
-
-    game.PieceBitBoards[(int)Piece.Q].SetBit(BoardSquares.d1);
-    game.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.d8);
-
-    game.PieceBitBoards[(int)Piece.K].SetBit(BoardSquares.e1);
-    game.PieceBitBoards[(int)Piece.k].SetBit(BoardSquares.e8);
-
-    game.ParseFEN(Constants.InitialPositionFEN);
-    return game;
 }

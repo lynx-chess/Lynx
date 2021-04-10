@@ -32,7 +32,7 @@ namespace SharpFish
             [(int)Piece.q] = (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy).Board,
         };
 
-        public static List<Move> GenerateAllMoves(Game game, bool capturesOnly = false)
+        public static List<Move> GenerateAllMoves(Position game, bool capturesOnly = false)
         {
             var moves = new List<Move>();
 
@@ -54,7 +54,7 @@ namespace SharpFish
             return moves;
         }
 
-        internal static IEnumerable<Move> GeneratePawnMoves(Game game, int offset)
+        internal static IEnumerable<Move> GeneratePawnMoves(Position game, int offset)
         {
             int sourceSquare, targetSquare;
 
@@ -139,7 +139,7 @@ namespace SharpFish
         /// <param name="game"></param>
         /// <param name="offset"></param>
         /// <returns></returns>
-        internal static IEnumerable<Move> GenerateCastlingMoves(Game game, int offset)
+        internal static IEnumerable<Move> GenerateCastlingMoves(Position game, int offset)
         {
             var piece = (int)Piece.K + offset;
             var oppositeSide = (Side)Utils.OppositeSide(game.Side);
@@ -205,7 +205,7 @@ namespace SharpFish
         /// <param name="game"></param>
         /// <param name="capturesOnly"></param>
         /// <returns></returns>
-        internal static IEnumerable<Move> GeneratePieceMoves(int piece, Game game, bool capturesOnly = false)
+        internal static IEnumerable<Move> GeneratePieceMoves(int piece, Position game, bool capturesOnly = false)
         {
             var bitboard = game.PieceBitBoards[piece].Board;
             int sourceSquare, targetSquare;
@@ -238,35 +238,35 @@ namespace SharpFish
             }
         }
 
-        internal static IEnumerable<Move> GenerateKingMoves(Game game, bool capturesOnly = false)
+        internal static IEnumerable<Move> GenerateKingMoves(Position game, bool capturesOnly = false)
         {
             var offset = Utils.PieceOffset(game.Side);
 
             return GeneratePieceMoves((int)Piece.K + offset, game, capturesOnly);
         }
 
-        internal static IEnumerable<Move> GenerateKnightMoves(Game game, bool capturesOnly = false)
+        internal static IEnumerable<Move> GenerateKnightMoves(Position game, bool capturesOnly = false)
         {
             var offset = Utils.PieceOffset(game.Side);
 
             return GeneratePieceMoves((int)Piece.N + offset, game, capturesOnly);
         }
 
-        internal static IEnumerable<Move> GenerateBishopMoves(Game game, bool capturesOnly = false)
+        internal static IEnumerable<Move> GenerateBishopMoves(Position game, bool capturesOnly = false)
         {
             var offset = Utils.PieceOffset(game.Side);
 
             return GeneratePieceMoves((int)Piece.B + offset, game, capturesOnly);
         }
 
-        internal static IEnumerable<Move> GenerateRookMoves(Game game, bool capturesOnly = false)
+        internal static IEnumerable<Move> GenerateRookMoves(Position game, bool capturesOnly = false)
         {
             var offset = Utils.PieceOffset(game.Side);
 
             return GeneratePieceMoves((int)Piece.R + offset, game, capturesOnly);
         }
 
-        internal static IEnumerable<Move> GenerateQueenMoves(Game game, bool capturesOnly = false)
+        internal static IEnumerable<Move> GenerateQueenMoves(Position game, bool capturesOnly = false)
         {
             var offset = Utils.PieceOffset(game.Side);
 

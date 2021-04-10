@@ -5,11 +5,11 @@ namespace SharpFish.Test.PregeneratedAttacks
 {
     public class IsAttackedSquare
     {
-        private readonly Game _game;
+        private readonly Position _game;
 
         public IsAttackedSquare()
         {
-            _game = new Game();
+            _game = new Position(Constants.EmptyBoardFEN);
         }
 
         [Fact]
