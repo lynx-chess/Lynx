@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using static SharpFish.Model.MoveStruct;
+using static SharpFish.Model.Move;
 
 //_2_GettingStarted();
 //_3_PawnAttacks();

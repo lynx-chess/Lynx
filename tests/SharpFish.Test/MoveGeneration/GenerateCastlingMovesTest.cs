@@ -4,7 +4,7 @@ using Xunit;
 
 namespace SharpFish.Test.MoveGeneration
 {
-    public class GenerateCastlingMoves
+    public class GenerateCastlingMovesTest
     {
 #pragma warning disable S4144 // Methods should not have identical implementations
 
@@ -19,7 +19,7 @@ namespace SharpFish.Test.MoveGeneration
 
             var moves = MovesGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
 
-            Assert.Single(moves.Where(m => m.MoveType == MoveType.ShortCastle));
+            Assert.Single(moves.Where(m => m.IsCastle() && m.IsShortCastle()));
         }
 
         [Theory]
@@ -35,7 +35,7 @@ namespace SharpFish.Test.MoveGeneration
 
             var moves = MovesGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
 
-            Assert.Single(moves.Where(m => m.MoveType == MoveType.LongCastle));
+            Assert.Single(moves.Where(m => m.IsCastle() && m.IsLongCastle()));
         }
 
         [Theory]
@@ -59,7 +59,7 @@ namespace SharpFish.Test.MoveGeneration
 
             var moves = MovesGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
 
-            Assert.Empty(moves.Where(m => m.MoveType == MoveType.ShortCastle));
+            Assert.Empty(moves.Where(m => m.IsCastle() && m.IsShortCastle()));
         }
 
         [Theory]
@@ -83,7 +83,7 @@ namespace SharpFish.Test.MoveGeneration
 
             var moves = MovesGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
 
-            Assert.Empty(moves.Where(m => m.MoveType == MoveType.LongCastle));
+            Assert.Empty(moves.Where(m => m.IsCastle() && m.IsLongCastle()));
         }
 
         [Theory]
@@ -105,7 +105,7 @@ namespace SharpFish.Test.MoveGeneration
 
             var moves = MovesGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
 
-            Assert.Empty(moves.Where(m => m.MoveType == MoveType.ShortCastle));
+            Assert.Empty(moves.Where(m => m.IsCastle() && m.IsShortCastle()));
         }
 
         [Theory]
@@ -132,7 +132,7 @@ namespace SharpFish.Test.MoveGeneration
 
             var moves = MovesGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
 
-            Assert.Empty(moves.Where(m => m.MoveType == MoveType.LongCastle));
+            Assert.Empty(moves.Where(m => m.IsCastle() && m.IsLongCastle()));
         }
 
         [Theory]
@@ -148,7 +148,7 @@ namespace SharpFish.Test.MoveGeneration
 
             var moves = MovesGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
 
-            Assert.Empty(moves.Where(m => m.MoveType == MoveType.ShortCastle));
+            Assert.Empty(moves.Where(m => m.IsCastle() && m.IsShortCastle()));
         }
 
         [Theory]
@@ -164,7 +164,7 @@ namespace SharpFish.Test.MoveGeneration
 
             var moves = MovesGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
 
-            Assert.Empty(moves.Where(m => m.MoveType == MoveType.LongCastle));
+            Assert.Empty(moves.Where(m => m.IsCastle() && m.IsLongCastle()));
         }
 
 #pragma warning restore S4144 // Methods should not have identical implementations

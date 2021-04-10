@@ -293,6 +293,11 @@ namespace SharpFish
         public const string InitialPositionFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
         public const string EmptyBoardFEN = "/8/8/8/8/8/8/8 w - - 0 1";
+
+        public const int WhiteShortCastleKingSquare = (int)BoardSquares.g1;
+        public const int BlackShortCastleKingSquare = (int)BoardSquares.g8;
+        public const int WhiteLongCastleKingSquare = (int)BoardSquares.c1;
+        public const int BlackLongCastleKingSquare = (int)BoardSquares.c8;
     }
 
     /*

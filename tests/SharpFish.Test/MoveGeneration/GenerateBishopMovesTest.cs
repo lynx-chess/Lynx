@@ -4,7 +4,7 @@ using Xunit;
 
 namespace SharpFish.Test.MoveGeneration
 {
-    public class GenerateBishopMoves
+    public class GenerateBishopMovesTest
     {
         [Theory]
         [InlineData(Constants.EmptyBoardFEN, 0)]
@@ -48,51 +48,51 @@ namespace SharpFish.Test.MoveGeneration
             var piece = (int)Piece.B + offset;
             var moves = MovesGenerator.GeneratePieceMoves(piece, position);
 
-            Assert.Equal(11, moves.Count(m => m.Piece == piece));
+            Assert.Equal(11, moves.Count(m => m.Piece() == piece));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare == (int)BoardSquares.d2
-                && m.TargetSquare == (int)BoardSquares.c1));
+                m.SourceSquare() == (int)BoardSquares.d2
+                && m.TargetSquare() == (int)BoardSquares.c1));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare == (int)BoardSquares.d2
-                && m.TargetSquare == (int)BoardSquares.e3));
+                m.SourceSquare() == (int)BoardSquares.d2
+                && m.TargetSquare() == (int)BoardSquares.e3));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare == (int)BoardSquares.d2
-                && m.TargetSquare == (int)BoardSquares.f4));
+                m.SourceSquare() == (int)BoardSquares.d2
+                && m.TargetSquare() == (int)BoardSquares.f4));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare == (int)BoardSquares.d2
-                && m.TargetSquare == (int)BoardSquares.g5));
+                m.SourceSquare() == (int)BoardSquares.d2
+                && m.TargetSquare() == (int)BoardSquares.g5));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare == (int)BoardSquares.d2
-                && m.TargetSquare == (int)BoardSquares.h6));
+                m.SourceSquare() == (int)BoardSquares.d2
+                && m.TargetSquare() == (int)BoardSquares.h6));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare == (int)BoardSquares.e2
-                && m.TargetSquare == (int)BoardSquares.d1));
+                m.SourceSquare() == (int)BoardSquares.e2
+                && m.TargetSquare() == (int)BoardSquares.d1));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare == (int)BoardSquares.e2
-                && m.TargetSquare == (int)BoardSquares.f1));
+                m.SourceSquare() == (int)BoardSquares.e2
+                && m.TargetSquare() == (int)BoardSquares.f1));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare == (int)BoardSquares.e2
-                && m.TargetSquare == (int)BoardSquares.d3));
+                m.SourceSquare() == (int)BoardSquares.e2
+                && m.TargetSquare() == (int)BoardSquares.d3));
 
             Assert.Equal(1, moves.Count(m =>
-               m.SourceSquare == (int)BoardSquares.e2
-                && m.TargetSquare == (int)BoardSquares.c4));
+               m.SourceSquare() == (int)BoardSquares.e2
+                && m.TargetSquare() == (int)BoardSquares.c4));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare == (int)BoardSquares.e2
-                && m.TargetSquare == (int)BoardSquares.b5));
+                m.SourceSquare() == (int)BoardSquares.e2
+                && m.TargetSquare() == (int)BoardSquares.b5));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare == (int)BoardSquares.e2
-                && m.TargetSquare == (int)BoardSquares.a6));
+                m.SourceSquare() == (int)BoardSquares.e2
+                && m.TargetSquare() == (int)BoardSquares.a6));
         }
 
         /// <summary>
@@ -117,39 +117,39 @@ namespace SharpFish.Test.MoveGeneration
             var piece = (int)Piece.B + offset;
             var moves = MovesGenerator.GeneratePieceMoves(piece, position);
 
-            Assert.Equal(8, moves.Count(m => m.Piece == piece));
+            Assert.Equal(8, moves.Count(m => m.Piece() == piece));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare == (int)BoardSquares.a6
-                && m.TargetSquare == (int)BoardSquares.b5));
+                m.SourceSquare() == (int)BoardSquares.a6
+                && m.TargetSquare() == (int)BoardSquares.b5));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare == (int)BoardSquares.a6
-                && m.TargetSquare == (int)BoardSquares.c4));
+                m.SourceSquare() == (int)BoardSquares.a6
+                && m.TargetSquare() == (int)BoardSquares.c4));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare == (int)BoardSquares.a6
-                && m.TargetSquare == (int)BoardSquares.d3));
+                m.SourceSquare() == (int)BoardSquares.a6
+                && m.TargetSquare() == (int)BoardSquares.d3));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare == (int)BoardSquares.a6
-                && m.TargetSquare == (int)BoardSquares.e2));
+                m.SourceSquare() == (int)BoardSquares.a6
+                && m.TargetSquare() == (int)BoardSquares.e2));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare == (int)BoardSquares.a6
-                && m.TargetSquare == (int)BoardSquares.b7));
+                m.SourceSquare() == (int)BoardSquares.a6
+                && m.TargetSquare() == (int)BoardSquares.b7));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare == (int)BoardSquares.a6
-                && m.TargetSquare == (int)BoardSquares.c8));
+                m.SourceSquare() == (int)BoardSquares.a6
+                && m.TargetSquare() == (int)BoardSquares.c8));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare == (int)BoardSquares.g7
-                && m.TargetSquare == (int)BoardSquares.f8));
+                m.SourceSquare() == (int)BoardSquares.g7
+                && m.TargetSquare() == (int)BoardSquares.f8));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare == (int)BoardSquares.g7
-                && m.TargetSquare == (int)BoardSquares.h6));
+                m.SourceSquare() == (int)BoardSquares.g7
+                && m.TargetSquare() == (int)BoardSquares.h6));
         }
 
         /// <summary>
@@ -174,11 +174,11 @@ namespace SharpFish.Test.MoveGeneration
             var piece = (int)Piece.B + offset;
             var moves = MovesGenerator.GeneratePieceMoves(piece, position, capturesOnly: true);
 
-            Assert.Equal(1, moves.Count(m => m.Piece == piece && m.MoveType == MoveType.Capture));
+            Assert.Equal(1, moves.Count(m => m.Piece() == piece && m.IsCapture()));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare == (int)BoardSquares.e2
-                && m.TargetSquare == (int)BoardSquares.a6));
+                m.SourceSquare() == (int)BoardSquares.e2
+                && m.TargetSquare() == (int)BoardSquares.a6));
         }
 
         /// <summary>
@@ -203,11 +203,11 @@ namespace SharpFish.Test.MoveGeneration
             var piece = (int)Piece.B + offset;
             var moves = MovesGenerator.GeneratePieceMoves(piece, position, capturesOnly: true);
 
-            Assert.Equal(1, moves.Count(m => m.Piece == piece && m.MoveType == MoveType.Capture));
+            Assert.Equal(1, moves.Count(m => m.Piece() == piece && m.IsCapture()));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare == (int)BoardSquares.a6
-                && m.TargetSquare == (int)BoardSquares.e2));
+                m.SourceSquare() == (int)BoardSquares.a6
+                && m.TargetSquare() == (int)BoardSquares.e2));
         }
     }
 }

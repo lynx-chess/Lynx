@@ -4,7 +4,7 @@ using Xunit;
 
 namespace SharpFish.Test.MoveGeneration
 {
-    public class GeneratePawnMoves
+    public class GeneratePawnMovesTest
     {
         [Fact]
         public void QuietMoves()
@@ -16,14 +16,14 @@ namespace SharpFish.Test.MoveGeneration
             for (int square = (int)BoardSquares.a2; square <= (int)BoardSquares.h2; ++square)
             {
                 Assert.Single(whiteMoves.Where(m =>
-                    m.SourceSquare == square
-                    && m.TargetSquare == square - 8
-                    && m.MoveType == MoveType.Quiet));
+                    m.SourceSquare() == square
+                    && m.TargetSquare() == square - 8
+                    && !m.IsCapture()));
 
                 Assert.Single(whiteMoves.Where(m =>
-                    m.SourceSquare == square
-                    && m.TargetSquare == square - 16
-                    && m.MoveType == MoveType.Quiet));
+                    m.SourceSquare() == square
+                    && m.TargetSquare() == square - 16
+                    && !m.IsCapture()));
             }
 
             position = new Position("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1");
@@ -32,14 +32,14 @@ namespace SharpFish.Test.MoveGeneration
             for (int square = (int)BoardSquares.a7; square <= (int)BoardSquares.h7; ++square)
             {
                 Assert.Single(blackMoves.Where(m =>
-                    m.SourceSquare == square
-                    && m.TargetSquare == square + 8
-                    && m.MoveType == MoveType.Quiet));
+                    m.SourceSquare() == square
+                    && m.TargetSquare() == square + 8
+                    && !m.IsCapture()));
 
                 Assert.Single(blackMoves.Where(m =>
-                    m.SourceSquare == square
-                    && m.TargetSquare == square + 16
-                    && m.MoveType == MoveType.Quiet));
+                    m.SourceSquare() == square
+                    && m.TargetSquare() == square + 16
+                    && !m.IsCapture()));
             }
         }
 
@@ -68,80 +68,84 @@ namespace SharpFish.Test.MoveGeneration
 
             Assert.Equal(6, whiteMoves.Count);
             Assert.Single(whiteMoves.Where(m =>
-                m.SourceSquare == (int)BoardSquares.a2
-                && m.TargetSquare == (int)BoardSquares.b3
-                && m.MoveType == MoveType.Capture));
+                m.SourceSquare() == (int)BoardSquares.a2
+                && m.TargetSquare() == (int)BoardSquares.b3
+                && m.IsCapture()));
 
             Assert.Single(whiteMoves.Where(m =>
-                m.SourceSquare == (int)BoardSquares.c2
-                && m.TargetSquare == (int)BoardSquares.b3
-                && m.MoveType == MoveType.Capture));
+                m.SourceSquare() == (int)BoardSquares.c2
+                && m.TargetSquare() == (int)BoardSquares.b3
+                && m.IsCapture()));
 
             position = new Position("8/ppp/1B6/8/8/8/8/8 b - - 0 1");
 
             var blackMoves = MovesGenerator.GeneratePawnMoves(position, offset: Utils.PieceOffset(position.Side)).ToList();
             Assert.Equal(6, whiteMoves.Count);
             Assert.Single(blackMoves.Where(m =>
-                m.SourceSquare == (int)BoardSquares.a7
-                && m.TargetSquare == (int)BoardSquares.b6
-                && m.MoveType == MoveType.Capture));
+                m.SourceSquare() == (int)BoardSquares.a7
+                && m.TargetSquare() == (int)BoardSquares.b6
+                && m.IsCapture()));
 
             Assert.Single(blackMoves.Where(m =>
-                m.SourceSquare == (int)BoardSquares.c7
-                && m.TargetSquare == (int)BoardSquares.b6
-                && m.MoveType == MoveType.Capture));
+                m.SourceSquare() == (int)BoardSquares.c7
+                && m.TargetSquare() == (int)BoardSquares.b6
+                 && m.IsCapture()));
         }
 
         [Fact]
         public void PromotionsWithoutCapturing()
         {
             var position = new Position("8/P6P/8/8/8/8/p6p/8 w - - 0 1");
+            var offset = Utils.PieceOffset(position.Side);
             var whiteMoves = MovesGenerator.GeneratePawnMoves(position, offset: Utils.PieceOffset(position.Side)).ToList();
 
             Assert.Equal(8, whiteMoves.Count);
-            Assert.Equal(2, whiteMoves.Count(m => m.MoveType == MoveType.BishopPromotion));
-            Assert.Equal(2, whiteMoves.Count(m => m.MoveType == MoveType.RookPromotion));
-            Assert.Equal(2, whiteMoves.Count(m => m.MoveType == MoveType.KnightPromotion));
-            Assert.Equal(2, whiteMoves.Count(m => m.MoveType == MoveType.QueenPromotion));
-            Assert.Equal(4, whiteMoves.Count(m => m.TargetSquare == (int)BoardSquares.a8));
-            Assert.Equal(4, whiteMoves.Count(m => m.TargetSquare == (int)BoardSquares.h8));
+            Assert.Equal(2, whiteMoves.Count(m => m.PromotedPiece() == (int)Piece.B + offset && !m.IsCapture()));
+            Assert.Equal(2, whiteMoves.Count(m => m.PromotedPiece() == (int)Piece.R + offset && !m.IsCapture()));
+            Assert.Equal(2, whiteMoves.Count(m => m.PromotedPiece() == (int)Piece.N + offset && !m.IsCapture()));
+            Assert.Equal(2, whiteMoves.Count(m => m.PromotedPiece() == (int)Piece.Q + offset && !m.IsCapture()));
+            Assert.Equal(4, whiteMoves.Count(m => m.TargetSquare() == (int)BoardSquares.a8));
+            Assert.Equal(4, whiteMoves.Count(m => m.TargetSquare() == (int)BoardSquares.h8));
 
             position = new Position("8/P6P/8/8/8/8/p6p/8 b - - 0 1");
+            offset = Utils.PieceOffset(position.Side);
             var blackMoves = MovesGenerator.GeneratePawnMoves(position, offset: 6).ToList();
 
             Assert.Equal(8, blackMoves.Count);
-            Assert.Equal(2, blackMoves.Count(m => m.MoveType == MoveType.BishopPromotion));
-            Assert.Equal(2, blackMoves.Count(m => m.MoveType == MoveType.RookPromotion));
-            Assert.Equal(2, blackMoves.Count(m => m.MoveType == MoveType.KnightPromotion));
-            Assert.Equal(2, blackMoves.Count(m => m.MoveType == MoveType.QueenPromotion));
-            Assert.Equal(4, blackMoves.Count(m => m.TargetSquare == (int)BoardSquares.a1));
-            Assert.Equal(4, blackMoves.Count(m => m.TargetSquare == (int)BoardSquares.h1));
+            Assert.Equal(2, blackMoves.Count(m => m.PromotedPiece() == (int)Piece.B + offset));
+            Assert.Equal(2, blackMoves.Count(m => m.PromotedPiece() == (int)Piece.R + offset));
+            Assert.Equal(2, blackMoves.Count(m => m.PromotedPiece() == (int)Piece.N + offset));
+            Assert.Equal(2, blackMoves.Count(m => m.PromotedPiece() == (int)Piece.Q + offset));
+            Assert.Equal(4, blackMoves.Count(m => m.TargetSquare() == (int)BoardSquares.a1));
+            Assert.Equal(4, blackMoves.Count(m => m.TargetSquare() == (int)BoardSquares.h1));
         }
 
         [Fact]
         public void PromotionsCapturing()
         {
             var position = new Position("BqB2BqB/P6P/8/8/8/8/p6p/bQb2bQb w - - 0 1");
+            var offset = Utils.PieceOffset(position.Side);
             var whiteMoves = MovesGenerator.GeneratePawnMoves(position, offset: Utils.PieceOffset(position.Side)).ToList();
 
             Assert.Equal(8, whiteMoves.Count);
-            Assert.Equal(2, whiteMoves.Count(m => m.MoveType == MoveType.BishopPromotion));
-            Assert.Equal(2, whiteMoves.Count(m => m.MoveType == MoveType.RookPromotion));
-            Assert.Equal(2, whiteMoves.Count(m => m.MoveType == MoveType.KnightPromotion));
-            Assert.Equal(2, whiteMoves.Count(m => m.MoveType == MoveType.QueenPromotion));
-            Assert.Equal(4, whiteMoves.Count(m => m.TargetSquare == (int)BoardSquares.b8));
-            Assert.Equal(4, whiteMoves.Count(m => m.TargetSquare == (int)BoardSquares.g8));
+            Assert.Equal(2, whiteMoves.Count(m => m.PromotedPiece() == (int)Piece.B + offset && m.IsCapture()));
+            Assert.Equal(2, whiteMoves.Count(m => m.PromotedPiece() == (int)Piece.R + offset && m.IsCapture()));
+            Assert.Equal(2, whiteMoves.Count(m => m.PromotedPiece() == (int)Piece.N + offset && m.IsCapture()));
+            Assert.Equal(2, whiteMoves.Count(m => m.PromotedPiece() == (int)Piece.Q + offset && m.IsCapture()));
+            Assert.Equal(4, whiteMoves.Count(m => m.TargetSquare() == (int)BoardSquares.b8));
+            Assert.Equal(4, whiteMoves.Count(m => m.TargetSquare() == (int)BoardSquares.g8));
 
             position = new Position("BqB2BqB/P6P/8/8/8/8/p6p/bQb2bQb b - - 0 1");
+            offset = Utils.PieceOffset(position.Side);
             var blackMoves = MovesGenerator.GeneratePawnMoves(position, offset: Utils.PieceOffset(position.Side)).ToList();
 
             Assert.Equal(8, blackMoves.Count);
-            Assert.Equal(2, blackMoves.Count(m => m.MoveType == MoveType.BishopPromotion));
-            Assert.Equal(2, blackMoves.Count(m => m.MoveType == MoveType.RookPromotion));
-            Assert.Equal(2, blackMoves.Count(m => m.MoveType == MoveType.KnightPromotion));
-            Assert.Equal(2, blackMoves.Count(m => m.MoveType == MoveType.QueenPromotion));
-            Assert.Equal(4, blackMoves.Count(m => m.TargetSquare == (int)BoardSquares.b1));
-            Assert.Equal(4, blackMoves.Count(m => m.TargetSquare == (int)BoardSquares.g1));
+            Assert.Equal(2, blackMoves.Count(m => m.PromotedPiece() == (int)Piece.B + offset && m.IsCapture()));
+            Assert.Equal(2, blackMoves.Count(m => m.PromotedPiece() == (int)Piece.R + offset && m.IsCapture()));
+            Assert.Equal(2, blackMoves.Count(m => m.PromotedPiece() == (int)Piece.N + offset && m.IsCapture()));
+            Assert.Equal(2, blackMoves.Count(m => m.PromotedPiece() == (int)Piece.Q + offset && m.IsCapture()));
+            Assert.Equal(4, blackMoves.Count(m => m.TargetSquare() == (int)BoardSquares.b1));
+            Assert.Equal(4, blackMoves.Count(m => m.TargetSquare() == (int)BoardSquares.g1));
         }
 
         [Theory]
@@ -154,7 +158,7 @@ namespace SharpFish.Test.MoveGeneration
             var position = new Position(fen);
             var moves = MovesGenerator.GeneratePawnMoves(position, offset: Utils.PieceOffset(position.Side));
             Assert.Single(moves);
-            Assert.Single(moves.Where(m => m.MoveType == MoveType.EnPassant));
+            Assert.Single(moves.Where(m => m.IsEnPassant() && m.IsCapture()));
         }
 
         [Theory]
@@ -164,7 +168,7 @@ namespace SharpFish.Test.MoveGeneration
         {
             var position = new Position(fen);
             var moves = MovesGenerator.GeneratePawnMoves(position, offset: Utils.PieceOffset(position.Side));
-            Assert.Equal(2, moves.Count(m => m.MoveType == MoveType.EnPassant));
+            Assert.Equal(2, moves.Count(m => m.IsEnPassant() && m.IsCapture()));
         }
 
         [Theory]

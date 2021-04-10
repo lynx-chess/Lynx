@@ -7,6 +7,7 @@ namespace SharpFish
 {
     public static class MovesGenerator
     {
+        private const int TRUE = 1;
         /// <summary>
         /// Checks are not considered
         /// </summary>
@@ -76,28 +77,28 @@ namespace SharpFish
                 }
 
                 // Pawn pushes
-                var singlePush = sourceSquare + pawnPush;
-                if (!position.OccupancyBitBoards[2].GetBit(singlePush))
+                var singlePushSquare = sourceSquare + pawnPush;
+                if (!position.OccupancyBitBoards[2].GetBit(singlePushSquare))
                 {
-                    var targetRank = (singlePush / 8) + 1;
+                    var targetRank = (singlePushSquare / 8) + 1;
                     if (targetRank == 1 || targetRank == 8)  // Promotion
                     {
-                        yield return new Move(piece, sourceSquare, singlePush, MoveType.QueenPromotion);
-                        yield return new Move(piece, sourceSquare, singlePush, MoveType.RookPromotion);
-                        yield return new Move(piece, sourceSquare, singlePush, MoveType.KnightPromotion);
-                        yield return new Move(piece, sourceSquare, singlePush, MoveType.BishopPromotion);
+                        yield return new Move(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.Q + offset);
+                        yield return new Move(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.R + offset);
+                        yield return new Move(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.N + offset);
+                        yield return new Move(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.B + offset);
                     }
                     else
                     {
-                        yield return new Move(piece, sourceSquare, singlePush, MoveType.Quiet);
+                        yield return new Move(sourceSquare, singlePushSquare, piece);
                     }
 
                     // Inside of the if because singlePush square cannot be occupied either
-                    var doublePush = sourceSquare + (2 * pawnPush);
-                    if (!position.OccupancyBitBoards[2].GetBit(doublePush)
+                    var doublePushSquare = sourceSquare + (2 * pawnPush);
+                    if (!position.OccupancyBitBoards[2].GetBit(doublePushSquare)
                         && ((sourceRank == 2 && position.Side == Side.Black) || (sourceRank == 7 && position.Side == Side.White)))
                     {
-                        yield return new Move(piece, sourceSquare, doublePush, MoveType.Quiet);
+                        yield return new Move(sourceSquare, doublePushSquare, piece, isDoublePawnPush: TRUE);
                     }
                 }
 
@@ -106,7 +107,7 @@ namespace SharpFish
                 // En passant
                 if (attacks.GetBit(position.EnPassant)) /*&& position.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush)*/
                 {
-                    yield return new Move(piece, sourceSquare, (int)position.EnPassant, MoveType.EnPassant);
+                    yield return new Move(sourceSquare, (int)position.EnPassant, piece, isCapture: TRUE, isEnPassant: TRUE);
                 }
 
                 // Captures
@@ -119,14 +120,14 @@ namespace SharpFish
                     var targetRank = (targetSquare / 8) + 1;
                     if (targetRank == 1 || targetRank == 8)  // Capture with promotion
                     {
-                        yield return new Move(piece, sourceSquare, targetSquare, MoveType.QueenPromotion);
-                        yield return new Move(piece, sourceSquare, targetSquare, MoveType.RookPromotion);
-                        yield return new Move(piece, sourceSquare, targetSquare, MoveType.KnightPromotion);
-                        yield return new Move(piece, sourceSquare, targetSquare, MoveType.BishopPromotion);
+                        yield return new Move(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.Q + offset, isCapture: TRUE);
+                        yield return new Move(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.R + offset, isCapture: TRUE);
+                        yield return new Move(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.N + offset, isCapture: TRUE);
+                        yield return new Move(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.B + offset, isCapture: TRUE);
                     }
                     else
                     {
-                        yield return new Move(piece, sourceSquare, targetSquare, MoveType.Capture);
+                        yield return new Move(sourceSquare, targetSquare, piece, isCapture: TRUE);
                     }
                 }
             }
@@ -158,7 +159,7 @@ namespace SharpFish
                         && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.f1, position, oppositeSide)
                         && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.g1, position, oppositeSide))
                     {
-                        yield return new Move(piece, sourceSquare, (int)BoardSquares.g1, MoveType.ShortCastle);
+                        yield return new Move(sourceSquare, Constants.WhiteShortCastleKingSquare, piece, isCastle: TRUE);
                     }
 
                     if (((position.Castle & (int)CastlingRights.WQ) != default)
@@ -169,7 +170,7 @@ namespace SharpFish
                         && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.d1, position, oppositeSide)
                         && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.c1, position, oppositeSide))
                     {
-                        yield return new Move(piece, sourceSquare, (int)BoardSquares.c1, MoveType.LongCastle);
+                        yield return new Move(sourceSquare, Constants.WhiteLongCastleKingSquare, piece, isCastle: TRUE);
                     }
                 }
                 else
@@ -181,7 +182,7 @@ namespace SharpFish
                         && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.f8, position, oppositeSide)
                         && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.g8, position, oppositeSide))
                     {
-                        yield return new Move(piece, sourceSquare, (int)BoardSquares.g8, MoveType.ShortCastle);
+                        yield return new Move(sourceSquare, Constants.BlackShortCastleKingSquare, piece, isCastle: TRUE);
                     }
 
                     if (((position.Castle & (int)CastlingRights.BQ) != default)
@@ -192,7 +193,7 @@ namespace SharpFish
                         && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.d8, position, oppositeSide)
                         && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.c8, position, oppositeSide))
                     {
-                        yield return new Move(piece, sourceSquare, (int)BoardSquares.c8, MoveType.LongCastle);
+                        yield return new Move(sourceSquare, Constants.BlackLongCastleKingSquare, piece, isCastle: TRUE);
                     }
                 }
             }
@@ -223,16 +224,13 @@ namespace SharpFish
                     targetSquare = BitBoard.GetLS1BIndex(attacks);
                     attacks = BitBoard.ResetLS1B(attacks);
 
-                    if (capturesOnly)
+                    if (position.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare))
                     {
-                        if (position.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare))
-                        {
-                            yield return new Move(piece, sourceSquare, targetSquare, MoveType.Capture);
-                        }
+                        yield return new Move(sourceSquare, targetSquare, piece, isCapture: TRUE);
                     }
-                    else
+                    else if (!capturesOnly)
                     {
-                        yield return new Move(piece, sourceSquare, targetSquare);
+                        yield return new Move(sourceSquare, targetSquare, piece);
                     }
                 }
             }
