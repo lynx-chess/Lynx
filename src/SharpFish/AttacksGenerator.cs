@@ -131,7 +131,7 @@ namespace SharpFish
         public static BitBoard MaskPawnAttacks(int squareIndex, bool isWhite)
         {
             // Results attack bitboard
-            BitBoard attacks = new(0UL);
+            ulong attacks = 0UL;
 
             // Piece bitboard
             BitBoard bitBoard = new(0UL);
@@ -149,7 +149,7 @@ namespace SharpFish
                 var right = bitBoard.Board >> 7;
                 if ((right & Constants.NotAFile) != default)
                 {
-                    attacks.Board |= right;
+                    attacks |= right;
                 }
 
                 /*
@@ -160,7 +160,7 @@ namespace SharpFish
                 var left = bitBoard.Board >> 9;
                 if ((left & Constants.NotHFile) != default)
                 {
-                    attacks.Board |= left;
+                    attacks |= left;
                 }
             }
             else
@@ -173,7 +173,7 @@ namespace SharpFish
                 var left = bitBoard.Board << 7;
                 if ((left & Constants.NotHFile) != default)
                 {
-                    attacks.Board |= left;
+                    attacks |= left;
                 }
 
                 /*
@@ -184,17 +184,17 @@ namespace SharpFish
                 var right = bitBoard.Board << 9;
                 if ((right & Constants.NotAFile) != default)
                 {
-                    attacks.Board |= right;
+                    attacks |= right;
                 }
             }
 
-            return attacks;
+            return new BitBoard(attacks);
         }
 
         public static BitBoard MaskKnightAttacks(int squareIndex)
         {
             // Results attack bitboard
-            BitBoard attacks = new(0UL);
+            ulong attacks = 0UL;
 
             // Piece bitboard
             BitBoard bitBoard = new(0UL);
@@ -212,7 +212,7 @@ namespace SharpFish
             var attack = bitBoard.Board >> 17;
             if ((attack & Constants.NotHFile) != default)
             {
-                attacks.Board |= attack;
+                attacks |= attack;
             }
 
             /*
@@ -225,7 +225,7 @@ namespace SharpFish
             attack = bitBoard.Board >> 15;
             if ((attack & Constants.NotAFile) != default)
             {
-                attacks.Board |= attack;
+                attacks |= attack;
             }
 
             /*
@@ -238,7 +238,7 @@ namespace SharpFish
             attack = bitBoard.Board << 15;
             if ((attack & Constants.NotHFile) != default)
             {
-                attacks.Board |= attack;
+                attacks |= attack;
             }
 
             /*
@@ -251,7 +251,7 @@ namespace SharpFish
             attack = bitBoard.Board << 17;
             if ((attack & Constants.NotAFile) != default)
             {
-                attacks.Board |= attack;
+                attacks |= attack;
             }
 
             /*
@@ -264,7 +264,7 @@ namespace SharpFish
             attack = bitBoard.Board >> 10;
             if ((attack & Constants.NotHGFiles) != default)
             {
-                attacks.Board |= attack;
+                attacks |= attack;
             }
 
             /*
@@ -277,7 +277,7 @@ namespace SharpFish
             attack = bitBoard.Board >> 6;
             if ((attack & Constants.NotABFiles) != default)
             {
-                attacks.Board |= attack;
+                attacks |= attack;
             }
 
             /*
@@ -290,7 +290,7 @@ namespace SharpFish
             attack = bitBoard.Board << 6;
             if ((attack & Constants.NotHGFiles) != default)
             {
-                attacks.Board |= attack;
+                attacks |= attack;
             }
 
             /*
@@ -303,16 +303,16 @@ namespace SharpFish
             attack = bitBoard.Board << 10;
             if ((attack & Constants.NotABFiles) != default)
             {
-                attacks.Board |= attack;
+                attacks |= attack;
             }
 
-            return attacks;
+            return new BitBoard(attacks);
         }
 
         public static BitBoard MaskKingAttacks(int squareIndex)
         {
             // Results attack bitboard
-            BitBoard attacks = new(0UL);
+            ulong attacks = 0UL;
 
             // Piece bitboard
             BitBoard bitBoard = new(0UL);
@@ -328,7 +328,7 @@ namespace SharpFish
             var attack = bitBoard.Board >> 9;
             if ((attack & Constants.NotHFile) != default)
             {
-                attacks.Board |= attack;
+                attacks |= attack;
             }
 
             /*
@@ -336,7 +336,7 @@ namespace SharpFish
              * 0 1 0
              * 0 0 0
              */
-            attacks.Board |= bitBoard.Board >> 8;
+            attacks |= bitBoard.Board >> 8;
 
             /*
              * 0 0 X
@@ -346,7 +346,7 @@ namespace SharpFish
             attack = bitBoard.Board >> 7;
             if ((attack & Constants.NotAFile) != default)
             {
-                attacks.Board |= attack;
+                attacks |= attack;
             }
 
             /*
@@ -357,7 +357,7 @@ namespace SharpFish
             attack = bitBoard.Board >> 1;
             if ((attack & Constants.NotHFile) != default)
             {
-                attacks.Board |= attack;
+                attacks |= attack;
             }
 
             /*
@@ -368,7 +368,7 @@ namespace SharpFish
             attack = bitBoard.Board << 1;
             if ((attack & Constants.NotAFile) != default)
             {
-                attacks.Board |= attack;
+                attacks |= attack;
             }
 
             /*
@@ -379,7 +379,7 @@ namespace SharpFish
             attack = bitBoard.Board << 7;
             if ((attack & Constants.NotHFile) != default)
             {
-                attacks.Board |= attack;
+                attacks |= attack;
             }
 
             /*
@@ -387,7 +387,7 @@ namespace SharpFish
              * 0 1 0
              * 0 X 0
              */
-            attacks.Board |= bitBoard.Board << 8;
+            attacks |= bitBoard.Board << 8;
 
             /*
              * 0 0 0
@@ -397,10 +397,10 @@ namespace SharpFish
             attack = bitBoard.Board << 9;
             if ((attack & Constants.NotAFile) != default)
             {
-                attacks.Board |= attack;
+                attacks |= attack;
             }
 
-            return attacks;
+            return new BitBoard(attacks);
         }
 
         /// <summary>
@@ -413,7 +413,7 @@ namespace SharpFish
         public static BitBoard MaskBishopOccupancy(int squareIndex)
         {
             // Results attack bitboard
-            BitBoard attacks = new(0UL);
+            ulong attacks = 0UL;
 
             int rank, file;
 
@@ -432,7 +432,7 @@ namespace SharpFish
              */
             for (rank = targetRank + 1, file = targetFile + 1; rank <= 6 && file <= 6; ++rank, ++file)
             {
-                attacks.Board |= 1UL << BitBoard.SquareIndex(rank, file);
+                attacks |= 1UL << BitBoard.SquareIndex(rank, file);
             }
 
             /*
@@ -444,7 +444,7 @@ namespace SharpFish
              */
             for (rank = targetRank - 1, file = targetFile - 1; rank >= 1 && file >= 1; --rank, --file)
             {
-                attacks.Board |= 1UL << BitBoard.SquareIndex(rank, file);
+                attacks |= 1UL << BitBoard.SquareIndex(rank, file);
             }
 
             /*
@@ -456,7 +456,7 @@ namespace SharpFish
              */
             for (rank = targetRank - 1, file = targetFile + 1; rank >= 1 && file <= 6; --rank, ++file)
             {
-                attacks.Board |= 1UL << BitBoard.SquareIndex(rank, file);
+                attacks |= 1UL << BitBoard.SquareIndex(rank, file);
             }
 
             /*
@@ -468,10 +468,10 @@ namespace SharpFish
              */
             for (rank = targetRank + 1, file = targetFile - 1; rank <= 6 && file >= 1; ++rank, --file)
             {
-                attacks.Board |= 1UL << BitBoard.SquareIndex(rank, file);
+                attacks |= 1UL << BitBoard.SquareIndex(rank, file);
             }
 
-            return attacks;
+            return new BitBoard(attacks);
         }
 
         /// <summary>
@@ -484,7 +484,7 @@ namespace SharpFish
         public static BitBoard MaskRookOccupancy(int squareIndex)
         {
             // Results attack bitboard
-            BitBoard attacks = new(0UL);
+            ulong attacks = 0UL;
 
             int rank, file;
 
@@ -503,7 +503,7 @@ namespace SharpFish
              */
             for (file = targetFile + 1; file <= 6; ++file)
             {
-                attacks.Board |= 1UL << BitBoard.SquareIndex(targetRank, file);
+                attacks |= 1UL << BitBoard.SquareIndex(targetRank, file);
             }
 
             /*
@@ -515,7 +515,7 @@ namespace SharpFish
              */
             for (file = targetFile - 1; file >= 1; --file)
             {
-                attacks.Board |= 1UL << BitBoard.SquareIndex(targetRank, file);
+                attacks |= 1UL << BitBoard.SquareIndex(targetRank, file);
             }
 
             /*
@@ -527,7 +527,7 @@ namespace SharpFish
              */
             for (rank = targetRank + 1; rank <= 6; ++rank)
             {
-                attacks.Board |= 1UL << BitBoard.SquareIndex(rank, targetFile);
+                attacks |= 1UL << BitBoard.SquareIndex(rank, targetFile);
             }
 
             /*
@@ -539,10 +539,10 @@ namespace SharpFish
              */
             for (rank = targetRank - 1; rank >= 1; --rank)
             {
-                attacks.Board |= 1UL << BitBoard.SquareIndex(rank, targetFile);
+                attacks |= 1UL << BitBoard.SquareIndex(rank, targetFile);
             }
 
-            return attacks;
+            return new BitBoard(attacks);
         }
 
         /// <summary>
@@ -580,7 +580,7 @@ namespace SharpFish
         public static BitBoard GenerateBishopAttacksOnTheFly(int squareIndex, BitBoard occupiedSquares)
         {
             // Results attack bitboard
-            BitBoard attacks = new(0UL);
+            ulong attacks = 0UL;
 
             int rank, file;
 
@@ -600,7 +600,7 @@ namespace SharpFish
             for (rank = targetRank + 1, file = targetFile + 1; rank <= 7 && file <= 7; ++rank, ++file)
             {
                 ulong square = 1UL << BitBoard.SquareIndex(rank, file);
-                attacks.Board |= square;
+                attacks |= square;
 
                 if ((square & occupiedSquares.Board) != default)
                 {
@@ -618,7 +618,7 @@ namespace SharpFish
             for (rank = targetRank - 1, file = targetFile - 1; rank >= 0 && file >= 0; --rank, --file)
             {
                 ulong square = 1UL << BitBoard.SquareIndex(rank, file);
-                attacks.Board |= square;
+                attacks |= square;
 
                 if ((square & occupiedSquares.Board) != default)
                 {
@@ -636,7 +636,7 @@ namespace SharpFish
             for (rank = targetRank - 1, file = targetFile + 1; rank >= 0 && file <= 7; --rank, ++file)
             {
                 ulong square = 1UL << BitBoard.SquareIndex(rank, file);
-                attacks.Board |= square;
+                attacks |= square;
 
                 if ((square & occupiedSquares.Board) != default)
                 {
@@ -654,7 +654,7 @@ namespace SharpFish
             for (rank = targetRank + 1, file = targetFile - 1; rank <= 7 && file >= 0; ++rank, --file)
             {
                 ulong square = 1UL << BitBoard.SquareIndex(rank, file);
-                attacks.Board |= square;
+                attacks |= square;
 
                 if ((square & occupiedSquares.Board) != default)
                 {
@@ -662,13 +662,13 @@ namespace SharpFish
                 }
             }
 
-            return attacks;
+            return new BitBoard(attacks);
         }
 
         public static BitBoard GenerateRookAttacksOnTheFly(int squareIndex, BitBoard occupiedSquares)
         {
             // Results attack bitboard
-            BitBoard attacks = new(0UL);
+            ulong attacks = 0UL;
 
             int rank, file;
 
@@ -688,7 +688,7 @@ namespace SharpFish
             for (file = targetFile + 1; file <= 7; ++file)
             {
                 ulong square = 1UL << BitBoard.SquareIndex(targetRank, file);
-                attacks.Board |= square;
+                attacks |= square;
 
                 if ((square & occupiedSquares.Board) != default)
                 {
@@ -706,7 +706,7 @@ namespace SharpFish
             for (file = targetFile - 1; file >= 0; --file)
             {
                 ulong square = 1UL << BitBoard.SquareIndex(targetRank, file);
-                attacks.Board |= square;
+                attacks |= square;
 
                 if ((square & occupiedSquares.Board) != default)
                 {
@@ -724,7 +724,7 @@ namespace SharpFish
             for (rank = targetRank + 1; rank <= 7; ++rank)
             {
                 ulong square = 1UL << BitBoard.SquareIndex(rank, targetFile);
-                attacks.Board |= square;
+                attacks |= square;
 
                 if ((square & occupiedSquares.Board) != default)
                 {
@@ -742,7 +742,7 @@ namespace SharpFish
             for (rank = targetRank - 1; rank >= 0; --rank)
             {
                 ulong square = 1UL << BitBoard.SquareIndex(rank, targetFile);
-                attacks.Board |= square;
+                attacks |= square;
 
                 if ((square & occupiedSquares.Board) != default)
                 {
@@ -750,7 +750,7 @@ namespace SharpFish
                 }
             }
 
-            return attacks;
+            return new BitBoard(attacks);
         }
     }
 }

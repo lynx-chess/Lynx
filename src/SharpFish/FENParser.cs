@@ -13,18 +13,15 @@ namespace SharpFish
     {
         private static readonly Regex RanksRegex = new Regex(@"(?<=^|\/)[P|N|B|R|Q|K|p|n|b|r|q|k|\d]{1,8}", RegexOptions.Compiled);
 
-        public static (bool Success, Side Side, int Castle, BoardSquares EnPassant, int HalfMoveClock, int FullMoveCounter)
-            ParseFEN(string fen, BitBoard[] pieceBitBoards, BitBoard[] occupancyBitBoards)
+        public static (bool Success, BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, int Castle, BoardSquares EnPassant,
+            int HalfMoveClock, int FullMoveCounter) ParseFEN(string fen)
         {
-            for (int i = 0; i < pieceBitBoards.Length; ++i)
-            {
-                pieceBitBoards[i].Clear();
-            }
+            var pieceBitBoards = new ulong[12] {
+                default, default, default, default,
+                default, default, default, default,
+                default, default, default, default};
 
-            for (int i = 0; i < occupancyBitBoards.Length; ++i)
-            {
-                occupancyBitBoards[i].Clear();
-            }
+            var occupancyBitBoards = new ulong[3] { default, default, default };
 
             bool success = true;
             Side side = Side.Both;
@@ -68,10 +65,10 @@ namespace SharpFish
                 success = false;
             }
 
-            return (success, side, castle, enPassant, halfMoveClock, fullMoveCounter);
+            return (success, pieceBitBoards.Select(ul => new BitBoard(ul)).ToArray(), occupancyBitBoards.Select(ul => new BitBoard(ul)).ToArray(), side, castle, enPassant, halfMoveClock, fullMoveCounter);
         }
 
-        private static (MatchCollection Matches, bool Success) ParseBoard(string fen, BitBoard[] pieceBitBoards, BitBoard[] occupancyBitBoards)
+        private static (MatchCollection Matches, bool Success) ParseBoard(string fen, ulong[] pieceBitBoards, ulong[] occupancyBitBoards)
         {
             bool success = true;
 
@@ -84,7 +81,7 @@ namespace SharpFish
                 {
                     if (Constants.PiecesByChar.TryGetValue(ch, out Piece piece))
                     {
-                        pieceBitBoards[(int)piece].SetBit(BitBoard.SquareIndex(rankIndex, fileIndex));
+                        pieceBitBoards[(int)piece] = BitBoard.SetBit(pieceBitBoards[(int)piece], BitBoard.SquareIndex(rankIndex, fileIndex));
                         ++fileIndex;
                     }
                     else if (int.TryParse($"{ch}", out int emptySquares))
@@ -106,21 +103,21 @@ namespace SharpFish
 
             return (matches, success);
 
-            static void PopulateOccupancies(BitBoard[] pieceBitBoards, BitBoard[] occupancyBitBoards)
+            static void PopulateOccupancies(ulong[] pieceBitBoards, ulong[] occupancyBitBoards)
             {
                 var limit = (int)Piece.K;
                 for (int piece = (int)Piece.P; piece <= limit; ++piece)
                 {
-                    occupancyBitBoards[(int)Side.White].Board |= pieceBitBoards[piece].Board;
+                    occupancyBitBoards[(int)Side.White] |= pieceBitBoards[piece];
                 }
 
                 limit = (int)Piece.k;
                 for (int piece = (int)Piece.p; piece <= limit; ++piece)
                 {
-                    occupancyBitBoards[(int)Side.Black].Board |= pieceBitBoards[piece].Board;
+                    occupancyBitBoards[(int)Side.Black] |= pieceBitBoards[piece];
                 }
 
-                occupancyBitBoards[(int)Side.Both].Board = occupancyBitBoards[(int)Side.White].Board | occupancyBitBoards[(int)Side.Black].Board;
+                occupancyBitBoards[(int)Side.Both] = occupancyBitBoards[(int)Side.White] | occupancyBitBoards[(int)Side.Black];
             }
         }
 
@@ -152,7 +149,7 @@ namespace SharpFish
             return castle;
         }
 
-        private static (BoardSquares EnPassant, bool Success) ParseEnPassant(string enPassantString, BitBoard[] PieceBitBoards, Side side)
+        private static (BoardSquares EnPassant, bool Success) ParseEnPassant(string enPassantString, ulong[] PieceBitBoards, Side side)
         {
             bool success = true;
             BoardSquares enPassant = BoardSquares.noSquare;
@@ -179,7 +176,7 @@ namespace SharpFish
                     ? PieceBitBoards[(int)Piece.p]
                     : PieceBitBoards[(int)Piece.P];
 
-                if (!pawnBitBoard.GetBit(pawnSquare))
+                if (!BitBoard.GetBit(pawnBitBoard, pawnSquare))
                 {
                     success = false;
                     Logger.Error($"Invalid board: en passant square {enPassantString}, but no {side} pawn located in {pawnBitBoard}");

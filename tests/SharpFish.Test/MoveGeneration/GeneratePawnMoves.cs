@@ -9,9 +9,9 @@ namespace SharpFish.Test.MoveGeneration
         [Fact]
         public void QuietMoves()
         {
-            var game = new Game(Constants.InitialPositionFEN);
+            var position = new Position(Constants.InitialPositionFEN);
 
-            var whiteMoves = MovesGenerator.GeneratePawnMoves(game, offset: 0);
+            var whiteMoves = MovesGenerator.GeneratePawnMoves(position, offset: 0);
 
             for (int square = (int)BoardSquares.a2; square <= (int)BoardSquares.h2; ++square)
             {
@@ -26,8 +26,8 @@ namespace SharpFish.Test.MoveGeneration
                     && m.MoveType == MoveType.Quiet));
             }
 
-            game.Side = Side.Black;
-            var blackMoves = MovesGenerator.GeneratePawnMoves(game, offset: 6);
+            position = new Position("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1");
+            var blackMoves = MovesGenerator.GeneratePawnMoves(position, offset: 6);
 
             for (int square = (int)BoardSquares.a7; square <= (int)BoardSquares.h7; ++square)
             {
@@ -54,17 +54,17 @@ namespace SharpFish.Test.MoveGeneration
         [InlineData("8/p1p1p1p1/8/r1r1r1r1/8/8/8/8 b - - 0 1", 4)]
         public void QuietMoves_NoDoublePush(string fen, int expectedMoves)
         {
-            var game = new Game(fen);
-            var moves = MovesGenerator.GeneratePawnMoves(game, offset: Utils.PieceOffset(game.Side));
+            var position = new Position(fen);
+            var moves = MovesGenerator.GeneratePawnMoves(position, offset: Utils.PieceOffset(position.Side));
             Assert.Equal(expectedMoves, moves.Count());
         }
 
         [Fact]
         public void Captures()
         {
-            var game = new Game("8/8/8/8/8/1n6/PPP5/8 w - - 0 1");
+            var position = new Position("8/8/8/8/8/1n6/PPP5/8 w - - 0 1");
 
-            var whiteMoves = MovesGenerator.GeneratePawnMoves(game, offset: Utils.PieceOffset(game.Side)).ToList();
+            var whiteMoves = MovesGenerator.GeneratePawnMoves(position, offset: Utils.PieceOffset(position.Side)).ToList();
 
             Assert.Equal(6, whiteMoves.Count);
             Assert.Single(whiteMoves.Where(m =>
@@ -77,9 +77,9 @@ namespace SharpFish.Test.MoveGeneration
                 && m.TargetSquare == (int)BoardSquares.b3
                 && m.MoveType == MoveType.Capture));
 
-            game = new Game("8/ppp/1B6/8/8/8/8/8 b - - 0 1");
+            position = new Position("8/ppp/1B6/8/8/8/8/8 b - - 0 1");
 
-            var blackMoves = MovesGenerator.GeneratePawnMoves(game, offset: Utils.PieceOffset(game.Side)).ToList();
+            var blackMoves = MovesGenerator.GeneratePawnMoves(position, offset: Utils.PieceOffset(position.Side)).ToList();
             Assert.Equal(6, whiteMoves.Count);
             Assert.Single(blackMoves.Where(m =>
                 m.SourceSquare == (int)BoardSquares.a7
@@ -95,8 +95,8 @@ namespace SharpFish.Test.MoveGeneration
         [Fact]
         public void PromotionsWithoutCapturing()
         {
-            var game = new Game("8/P6P/8/8/8/8/p6p/8 w - - 0 1");
-            var whiteMoves = MovesGenerator.GeneratePawnMoves(game, offset: Utils.PieceOffset(game.Side)).ToList();
+            var position = new Position("8/P6P/8/8/8/8/p6p/8 w - - 0 1");
+            var whiteMoves = MovesGenerator.GeneratePawnMoves(position, offset: Utils.PieceOffset(position.Side)).ToList();
 
             Assert.Equal(8, whiteMoves.Count);
             Assert.Equal(2, whiteMoves.Count(m => m.MoveType == MoveType.BishopPromotion));
@@ -106,8 +106,8 @@ namespace SharpFish.Test.MoveGeneration
             Assert.Equal(4, whiteMoves.Count(m => m.TargetSquare == (int)BoardSquares.a8));
             Assert.Equal(4, whiteMoves.Count(m => m.TargetSquare == (int)BoardSquares.h8));
 
-            game = new Game("8/P6P/8/8/8/8/p6p/8 b - - 0 1");
-            var blackMoves = MovesGenerator.GeneratePawnMoves(game, offset: 6).ToList();
+            position = new Position("8/P6P/8/8/8/8/p6p/8 b - - 0 1");
+            var blackMoves = MovesGenerator.GeneratePawnMoves(position, offset: 6).ToList();
 
             Assert.Equal(8, blackMoves.Count);
             Assert.Equal(2, blackMoves.Count(m => m.MoveType == MoveType.BishopPromotion));
@@ -121,8 +121,8 @@ namespace SharpFish.Test.MoveGeneration
         [Fact]
         public void PromotionsCapturing()
         {
-            var game = new Game("BqB2BqB/P6P/8/8/8/8/p6p/bQb2bQb w - - 0 1");
-            var whiteMoves = MovesGenerator.GeneratePawnMoves(game, offset: Utils.PieceOffset(game.Side)).ToList();
+            var position = new Position("BqB2BqB/P6P/8/8/8/8/p6p/bQb2bQb w - - 0 1");
+            var whiteMoves = MovesGenerator.GeneratePawnMoves(position, offset: Utils.PieceOffset(position.Side)).ToList();
 
             Assert.Equal(8, whiteMoves.Count);
             Assert.Equal(2, whiteMoves.Count(m => m.MoveType == MoveType.BishopPromotion));
@@ -132,8 +132,8 @@ namespace SharpFish.Test.MoveGeneration
             Assert.Equal(4, whiteMoves.Count(m => m.TargetSquare == (int)BoardSquares.b8));
             Assert.Equal(4, whiteMoves.Count(m => m.TargetSquare == (int)BoardSquares.g8));
 
-            game = new Game("BqB2BqB/P6P/8/8/8/8/p6p/bQb2bQb b - - 0 1");
-            var blackMoves = MovesGenerator.GeneratePawnMoves(game, offset: Utils.PieceOffset(game.Side)).ToList();
+            position = new Position("BqB2BqB/P6P/8/8/8/8/p6p/bQb2bQb b - - 0 1");
+            var blackMoves = MovesGenerator.GeneratePawnMoves(position, offset: Utils.PieceOffset(position.Side)).ToList();
 
             Assert.Equal(8, blackMoves.Count);
             Assert.Equal(2, blackMoves.Count(m => m.MoveType == MoveType.BishopPromotion));
@@ -151,8 +151,8 @@ namespace SharpFish.Test.MoveGeneration
         [InlineData("8/8/8/1P6/p7/q7/8/8 b - b3 0 1")]
         public void EnPassant(string fen)
         {
-            var game = new Game(fen);
-            var moves = MovesGenerator.GeneratePawnMoves(game, offset: Utils.PieceOffset(game.Side));
+            var position = new Position(fen);
+            var moves = MovesGenerator.GeneratePawnMoves(position, offset: Utils.PieceOffset(position.Side));
             Assert.Single(moves);
             Assert.Single(moves.Where(m => m.MoveType == MoveType.EnPassant));
         }
@@ -162,8 +162,8 @@ namespace SharpFish.Test.MoveGeneration
         [InlineData("8/8/8/8/p1p6/8/8/8 b - b3 0 1")]
         public void DoubleEnPassant(string fen)
         {
-            var game = new Game(fen);
-            var moves = MovesGenerator.GeneratePawnMoves(game, offset: Utils.PieceOffset(game.Side));
+            var position = new Position(fen);
+            var moves = MovesGenerator.GeneratePawnMoves(position, offset: Utils.PieceOffset(position.Side));
             Assert.Equal(2, moves.Count(m => m.MoveType == MoveType.EnPassant));
         }
 
@@ -178,8 +178,8 @@ namespace SharpFish.Test.MoveGeneration
         [InlineData("8/8/8/1P6/p7/n7/8/8 b - - 0 1")]   // Backwards/inverse capture
         public void ShouldNotGenerateMoves(string fen)
         {
-            var game = new Game(fen);
-            var moves = MovesGenerator.GeneratePawnMoves(game, offset: Utils.PieceOffset(game.Side));
+            var position = new Position(fen);
+            var moves = MovesGenerator.GeneratePawnMoves(position, offset: Utils.PieceOffset(position.Side));
             Assert.Empty(moves);
         }
     }

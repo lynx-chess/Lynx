@@ -4,7 +4,7 @@ namespace SharpFish.Model
 {
     public struct BitBoard
     {
-        public ulong Board { get; set; }
+        public ulong Board { readonly get; private set; }
 
         public bool Empty => Board == default;
 
@@ -20,9 +20,9 @@ namespace SharpFish.Model
             }
         }
 
-        public void Clear() { Board = default; }
+        internal void Clear() { Board = default; }
 
-        public void Print()
+        public readonly void Print()
         {
             const string separator = "____________________________________________________";
             Logger.WriteLine(separator);
@@ -50,7 +50,7 @@ namespace SharpFish.Model
             Logger.WriteLine(separator);
         }
 
-        public bool GetBit(int squareIndex)
+        public readonly bool GetBit(int squareIndex)
         {
             return (Board & (1UL << squareIndex)) != default;
         }
@@ -71,7 +71,7 @@ namespace SharpFish.Model
         /// </summary>
         /// <returns>-1 in case of empty board</returns>
         //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int GetLS1BIndex() => GetLS1BIndex(Board);
+        public readonly int GetLS1BIndex() => GetLS1BIndex(Board);
 
         //[MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ResetLS1B()
@@ -80,12 +80,12 @@ namespace SharpFish.Model
         }
 
         //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int CountBits() => CountBits(Board);
+        public readonly int CountBits() => CountBits(Board);
 
         /// <summary>
         /// https://www.chessprogramming.org/Population_Count#Single_Populated_Bitboards
         /// </summary>
-        public bool IsSinglePopulated()
+        public readonly bool IsSinglePopulated()
         {
             return Board != default && ResetLS1B(Board) == default;
         }
@@ -93,6 +93,16 @@ namespace SharpFish.Model
         #region Static methods
 
         public static int SquareIndex(int rank, int file) => (rank * 8) + file;
+
+        public static ulong SetBit(ulong bitboard, int squareIndex)
+        {
+            return bitboard | (1UL << squareIndex);
+        }
+
+        public static bool GetBit(ulong bitboard, int squareIndex)
+        {
+            return (bitboard & (1UL << squareIndex)) != default;
+        }
 
         public static int GetLS1BIndex(ulong bitboard)
         {
@@ -133,7 +143,7 @@ namespace SharpFish.Model
 
         #region Methods accepting BoardSquares
 
-        public bool GetBit(BoardSquares square) => GetBit((int)square);
+        public readonly bool GetBit(BoardSquares square) => GetBit((int)square);
 
         public void SetBit(BoardSquares square) => SetBit((int)square);
 

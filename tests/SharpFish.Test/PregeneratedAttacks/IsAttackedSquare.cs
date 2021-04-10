@@ -5,11 +5,11 @@ namespace SharpFish.Test.PregeneratedAttacks
 {
     public class IsAttackedSquare
     {
-        private readonly Game _game;
+        private readonly Position _position;
 
         public IsAttackedSquare()
         {
-            _game = new Game();
+            _position = new Position(Constants.EmptyBoardFEN);
         }
 
         [Fact]
@@ -17,15 +17,15 @@ namespace SharpFish.Test.PregeneratedAttacks
         {
             const int square = (int)BoardSquares.e4;
 
-            _game.PieceBitBoards[(int)Piece.p].SetBit(BoardSquares.d3);
-            Assert.False(Attacks.IsSquaredAttacked(square, Side.Black, _game.PieceBitBoards, _game.OccupancyBitBoards));
-            Assert.False(Attacks.IsSquaredAttacked(square, Side.White, _game.PieceBitBoards, _game.OccupancyBitBoards));
+            _position.PieceBitBoards[(int)Piece.p].SetBit(BoardSquares.d3);
+            Assert.False(Attacks.IsSquaredAttacked(square, Side.Black, _position.PieceBitBoards, _position.OccupancyBitBoards));
+            Assert.False(Attacks.IsSquaredAttacked(square, Side.White, _position.PieceBitBoards, _position.OccupancyBitBoards));
 
-            _game.PieceBitBoards[(int)Piece.p].SetBit(BoardSquares.d5);
-            Assert.True(Attacks.IsSquaredAttacked(square, Side.Black, _game.PieceBitBoards, _game.OccupancyBitBoards));
-            Assert.False(Attacks.IsSquaredAttacked(square, Side.White, _game.PieceBitBoards, _game.OccupancyBitBoards));
+            _position.PieceBitBoards[(int)Piece.p].SetBit(BoardSquares.d5);
+            Assert.True(Attacks.IsSquaredAttacked(square, Side.Black, _position.PieceBitBoards, _position.OccupancyBitBoards));
+            Assert.False(Attacks.IsSquaredAttacked(square, Side.White, _position.PieceBitBoards, _position.OccupancyBitBoards));
 
-            _game.PieceBitBoards[(int)Piece.p].Clear();
+            _position.PieceBitBoards[(int)Piece.p].Clear();
         }
 
         [Fact]
@@ -33,15 +33,15 @@ namespace SharpFish.Test.PregeneratedAttacks
         {
             const int square = (int)BoardSquares.e4;
 
-            _game.PieceBitBoards[(int)Piece.P].SetBit(BoardSquares.d5);
-            Assert.False(Attacks.IsSquaredAttacked(square, Side.Black, _game.PieceBitBoards, _game.OccupancyBitBoards));
-            Assert.False(Attacks.IsSquaredAttacked(square, Side.White, _game.PieceBitBoards, _game.OccupancyBitBoards));
+            _position.PieceBitBoards[(int)Piece.P].SetBit(BoardSquares.d5);
+            Assert.False(Attacks.IsSquaredAttacked(square, Side.Black, _position.PieceBitBoards, _position.OccupancyBitBoards));
+            Assert.False(Attacks.IsSquaredAttacked(square, Side.White, _position.PieceBitBoards, _position.OccupancyBitBoards));
 
-            _game.PieceBitBoards[(int)Piece.P].SetBit(BoardSquares.d3);
-            Assert.False(Attacks.IsSquaredAttacked(square, Side.Black, _game.PieceBitBoards, _game.OccupancyBitBoards));
-            Assert.True(Attacks.IsSquaredAttacked(square, Side.White, _game.PieceBitBoards, _game.OccupancyBitBoards));
+            _position.PieceBitBoards[(int)Piece.P].SetBit(BoardSquares.d3);
+            Assert.False(Attacks.IsSquaredAttacked(square, Side.Black, _position.PieceBitBoards, _position.OccupancyBitBoards));
+            Assert.True(Attacks.IsSquaredAttacked(square, Side.White, _position.PieceBitBoards, _position.OccupancyBitBoards));
 
-            _game.PieceBitBoards[(int)Piece.P].Clear();
+            _position.PieceBitBoards[(int)Piece.P].Clear();
         }
 
         [Fact]
@@ -49,15 +49,15 @@ namespace SharpFish.Test.PregeneratedAttacks
         {
             const int square = (int)BoardSquares.e4;
 
-            _game.PieceBitBoards[(int)Piece.n].SetBit(BoardSquares.e7);
-            Assert.False(Attacks.IsSquaredAttacked(square, Side.Black, _game.PieceBitBoards, _game.OccupancyBitBoards));
-            Assert.False(Attacks.IsSquaredAttacked(square, Side.White, _game.PieceBitBoards, _game.OccupancyBitBoards));
+            _position.PieceBitBoards[(int)Piece.n].SetBit(BoardSquares.e7);
+            Assert.False(Attacks.IsSquaredAttacked(square, Side.Black, _position.PieceBitBoards, _position.OccupancyBitBoards));
+            Assert.False(Attacks.IsSquaredAttacked(square, Side.White, _position.PieceBitBoards, _position.OccupancyBitBoards));
 
-            _game.PieceBitBoards[(int)Piece.n].SetBit(BoardSquares.f6);
-            Assert.True(Attacks.IsSquaredAttacked(square, Side.Black, _game.PieceBitBoards, _game.OccupancyBitBoards));
-            Assert.False(Attacks.IsSquaredAttacked(square, Side.White, _game.PieceBitBoards, _game.OccupancyBitBoards));
+            _position.PieceBitBoards[(int)Piece.n].SetBit(BoardSquares.f6);
+            Assert.True(Attacks.IsSquaredAttacked(square, Side.Black, _position.PieceBitBoards, _position.OccupancyBitBoards));
+            Assert.False(Attacks.IsSquaredAttacked(square, Side.White, _position.PieceBitBoards, _position.OccupancyBitBoards));
 
-            _game.PieceBitBoards[(int)Piece.n].Clear();
+            _position.PieceBitBoards[(int)Piece.n].Clear();
         }
 
         [Fact]
@@ -65,15 +65,15 @@ namespace SharpFish.Test.PregeneratedAttacks
         {
             const int square = (int)BoardSquares.e4;
 
-            _game.PieceBitBoards[(int)Piece.N].SetBit(BoardSquares.d3);
-            Assert.False(Attacks.IsSquaredAttacked(square, Side.Black, _game.PieceBitBoards, _game.OccupancyBitBoards));
-            Assert.False(Attacks.IsSquaredAttacked(square, Side.White, _game.PieceBitBoards, _game.OccupancyBitBoards));
+            _position.PieceBitBoards[(int)Piece.N].SetBit(BoardSquares.d3);
+            Assert.False(Attacks.IsSquaredAttacked(square, Side.Black, _position.PieceBitBoards, _position.OccupancyBitBoards));
+            Assert.False(Attacks.IsSquaredAttacked(square, Side.White, _position.PieceBitBoards, _position.OccupancyBitBoards));
 
-            _game.PieceBitBoards[(int)Piece.N].SetBit(BoardSquares.d2);
-            Assert.False(Attacks.IsSquaredAttacked(square, Side.Black, _game.PieceBitBoards, _game.OccupancyBitBoards));
-            Assert.True(Attacks.IsSquaredAttacked(square, Side.White, _game.PieceBitBoards, _game.OccupancyBitBoards));
+            _position.PieceBitBoards[(int)Piece.N].SetBit(BoardSquares.d2);
+            Assert.False(Attacks.IsSquaredAttacked(square, Side.Black, _position.PieceBitBoards, _position.OccupancyBitBoards));
+            Assert.True(Attacks.IsSquaredAttacked(square, Side.White, _position.PieceBitBoards, _position.OccupancyBitBoards));
 
-            _game.PieceBitBoards[(int)Piece.N].Clear();
+            _position.PieceBitBoards[(int)Piece.N].Clear();
         }
 
         [Fact]
@@ -81,15 +81,15 @@ namespace SharpFish.Test.PregeneratedAttacks
         {
             const int square = (int)BoardSquares.e5;
 
-            _game.PieceBitBoards[(int)Piece.b].SetBit(BoardSquares.b7);
-            Assert.False(Attacks.IsSquaredAttacked(square, Side.Black, _game.PieceBitBoards, _game.OccupancyBitBoards));
-            Assert.False(Attacks.IsSquaredAttacked(square, Side.White, _game.PieceBitBoards, _game.OccupancyBitBoards));
+            _position.PieceBitBoards[(int)Piece.b].SetBit(BoardSquares.b7);
+            Assert.False(Attacks.IsSquaredAttacked(square, Side.Black, _position.PieceBitBoards, _position.OccupancyBitBoards));
+            Assert.False(Attacks.IsSquaredAttacked(square, Side.White, _position.PieceBitBoards, _position.OccupancyBitBoards));
 
-            _game.PieceBitBoards[(int)Piece.b].SetBit(BoardSquares.b8);
-            Assert.True(Attacks.IsSquaredAttacked(square, Side.Black, _game.PieceBitBoards, _game.OccupancyBitBoards));
-            Assert.False(Attacks.IsSquaredAttacked(square, Side.White, _game.PieceBitBoards, _game.OccupancyBitBoards));
+            _position.PieceBitBoards[(int)Piece.b].SetBit(BoardSquares.b8);
+            Assert.True(Attacks.IsSquaredAttacked(square, Side.Black, _position.PieceBitBoards, _position.OccupancyBitBoards));
+            Assert.False(Attacks.IsSquaredAttacked(square, Side.White, _position.PieceBitBoards, _position.OccupancyBitBoards));
 
-            _game.PieceBitBoards[(int)Piece.b].Clear();
+            _position.PieceBitBoards[(int)Piece.b].Clear();
         }
 
         [Fact]
@@ -97,15 +97,15 @@ namespace SharpFish.Test.PregeneratedAttacks
         {
             const int square = (int)BoardSquares.e5;
 
-            _game.PieceBitBoards[(int)Piece.B].SetBit(BoardSquares.a2);
-            Assert.False(Attacks.IsSquaredAttacked(square, Side.Black, _game.PieceBitBoards, _game.OccupancyBitBoards));
-            Assert.False(Attacks.IsSquaredAttacked(square, Side.White, _game.PieceBitBoards, _game.OccupancyBitBoards));
+            _position.PieceBitBoards[(int)Piece.B].SetBit(BoardSquares.a2);
+            Assert.False(Attacks.IsSquaredAttacked(square, Side.Black, _position.PieceBitBoards, _position.OccupancyBitBoards));
+            Assert.False(Attacks.IsSquaredAttacked(square, Side.White, _position.PieceBitBoards, _position.OccupancyBitBoards));
 
-            _game.PieceBitBoards[(int)Piece.B].SetBit(BoardSquares.a1);
-            Assert.False(Attacks.IsSquaredAttacked(square, Side.Black, _game.PieceBitBoards, _game.OccupancyBitBoards));
-            Assert.True(Attacks.IsSquaredAttacked(square, Side.White, _game.PieceBitBoards, _game.OccupancyBitBoards));
+            _position.PieceBitBoards[(int)Piece.B].SetBit(BoardSquares.a1);
+            Assert.False(Attacks.IsSquaredAttacked(square, Side.Black, _position.PieceBitBoards, _position.OccupancyBitBoards));
+            Assert.True(Attacks.IsSquaredAttacked(square, Side.White, _position.PieceBitBoards, _position.OccupancyBitBoards));
 
-            _game.PieceBitBoards[(int)Piece.B].Clear();
+            _position.PieceBitBoards[(int)Piece.B].Clear();
         }
 
         [Fact]
@@ -113,15 +113,15 @@ namespace SharpFish.Test.PregeneratedAttacks
         {
             const int square = (int)BoardSquares.e5;
 
-            _game.PieceBitBoards[(int)Piece.r].SetBit(BoardSquares.d7);
-            Assert.False(Attacks.IsSquaredAttacked(square, Side.Black, _game.PieceBitBoards, _game.OccupancyBitBoards));
-            Assert.False(Attacks.IsSquaredAttacked(square, Side.White, _game.PieceBitBoards, _game.OccupancyBitBoards));
+            _position.PieceBitBoards[(int)Piece.r].SetBit(BoardSquares.d7);
+            Assert.False(Attacks.IsSquaredAttacked(square, Side.Black, _position.PieceBitBoards, _position.OccupancyBitBoards));
+            Assert.False(Attacks.IsSquaredAttacked(square, Side.White, _position.PieceBitBoards, _position.OccupancyBitBoards));
 
-            _game.PieceBitBoards[(int)Piece.r].SetBit(BoardSquares.e8);
-            Assert.True(Attacks.IsSquaredAttacked(square, Side.Black, _game.PieceBitBoards, _game.OccupancyBitBoards));
-            Assert.False(Attacks.IsSquaredAttacked(square, Side.White, _game.PieceBitBoards, _game.OccupancyBitBoards));
+            _position.PieceBitBoards[(int)Piece.r].SetBit(BoardSquares.e8);
+            Assert.True(Attacks.IsSquaredAttacked(square, Side.Black, _position.PieceBitBoards, _position.OccupancyBitBoards));
+            Assert.False(Attacks.IsSquaredAttacked(square, Side.White, _position.PieceBitBoards, _position.OccupancyBitBoards));
 
-            _game.PieceBitBoards[(int)Piece.r].Clear();
+            _position.PieceBitBoards[(int)Piece.r].Clear();
         }
 
         [Fact]
@@ -129,15 +129,15 @@ namespace SharpFish.Test.PregeneratedAttacks
         {
             const int square = (int)BoardSquares.e5;
 
-            _game.PieceBitBoards[(int)Piece.R].SetBit(BoardSquares.d1);
-            Assert.False(Attacks.IsSquaredAttacked(square, Side.Black, _game.PieceBitBoards, _game.OccupancyBitBoards));
-            Assert.False(Attacks.IsSquaredAttacked(square, Side.White, _game.PieceBitBoards, _game.OccupancyBitBoards));
+            _position.PieceBitBoards[(int)Piece.R].SetBit(BoardSquares.d1);
+            Assert.False(Attacks.IsSquaredAttacked(square, Side.Black, _position.PieceBitBoards, _position.OccupancyBitBoards));
+            Assert.False(Attacks.IsSquaredAttacked(square, Side.White, _position.PieceBitBoards, _position.OccupancyBitBoards));
 
-            _game.PieceBitBoards[(int)Piece.R].SetBit(BoardSquares.e1);
-            Assert.False(Attacks.IsSquaredAttacked(square, Side.Black, _game.PieceBitBoards, _game.OccupancyBitBoards));
-            Assert.True(Attacks.IsSquaredAttacked(square, Side.White, _game.PieceBitBoards, _game.OccupancyBitBoards));
+            _position.PieceBitBoards[(int)Piece.R].SetBit(BoardSquares.e1);
+            Assert.False(Attacks.IsSquaredAttacked(square, Side.Black, _position.PieceBitBoards, _position.OccupancyBitBoards));
+            Assert.True(Attacks.IsSquaredAttacked(square, Side.White, _position.PieceBitBoards, _position.OccupancyBitBoards));
 
-            _game.PieceBitBoards[(int)Piece.R].Clear();
+            _position.PieceBitBoards[(int)Piece.R].Clear();
         }
 
         [Fact]
@@ -146,29 +146,29 @@ namespace SharpFish.Test.PregeneratedAttacks
             const int square1 = (int)BoardSquares.e5;
             const int square2 = (int)BoardSquares.a5;
 
-            _game.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.b7);
-            _game.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.d7);
-            _game.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.f7);
-            _game.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.h7);
-            _game.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.b3);
-            _game.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.d3);
-            _game.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.f3);
-            _game.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.h3);
-            _game.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.d1);
-            _game.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.c4);
-            _game.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.g4);
-            Assert.False(Attacks.IsSquaredAttacked(square1, Side.Black, _game.PieceBitBoards, _game.OccupancyBitBoards));
-            Assert.False(Attacks.IsSquaredAttacked(square1, Side.White, _game.PieceBitBoards, _game.OccupancyBitBoards));
-            Assert.False(Attacks.IsSquaredAttacked(square2, Side.Black, _game.PieceBitBoards, _game.OccupancyBitBoards));
-            Assert.False(Attacks.IsSquaredAttacked(square2, Side.White, _game.PieceBitBoards, _game.OccupancyBitBoards));
+            _position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.b7);
+            _position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.d7);
+            _position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.f7);
+            _position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.h7);
+            _position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.b3);
+            _position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.d3);
+            _position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.f3);
+            _position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.h3);
+            _position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.d1);
+            _position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.c4);
+            _position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.g4);
+            Assert.False(Attacks.IsSquaredAttacked(square1, Side.Black, _position.PieceBitBoards, _position.OccupancyBitBoards));
+            Assert.False(Attacks.IsSquaredAttacked(square1, Side.White, _position.PieceBitBoards, _position.OccupancyBitBoards));
+            Assert.False(Attacks.IsSquaredAttacked(square2, Side.Black, _position.PieceBitBoards, _position.OccupancyBitBoards));
+            Assert.False(Attacks.IsSquaredAttacked(square2, Side.White, _position.PieceBitBoards, _position.OccupancyBitBoards));
 
-            _game.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.e1);
-            Assert.True(Attacks.IsSquaredAttacked(square1, Side.Black, _game.PieceBitBoards, _game.OccupancyBitBoards));
-            Assert.False(Attacks.IsSquaredAttacked(square1, Side.White, _game.PieceBitBoards, _game.OccupancyBitBoards));
-            Assert.True(Attacks.IsSquaredAttacked(square2, Side.Black, _game.PieceBitBoards, _game.OccupancyBitBoards));
-            Assert.False(Attacks.IsSquaredAttacked(square2, Side.White, _game.PieceBitBoards, _game.OccupancyBitBoards));
+            _position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.e1);
+            Assert.True(Attacks.IsSquaredAttacked(square1, Side.Black, _position.PieceBitBoards, _position.OccupancyBitBoards));
+            Assert.False(Attacks.IsSquaredAttacked(square1, Side.White, _position.PieceBitBoards, _position.OccupancyBitBoards));
+            Assert.True(Attacks.IsSquaredAttacked(square2, Side.Black, _position.PieceBitBoards, _position.OccupancyBitBoards));
+            Assert.False(Attacks.IsSquaredAttacked(square2, Side.White, _position.PieceBitBoards, _position.OccupancyBitBoards));
 
-            _game.PieceBitBoards[(int)Piece.q].Clear();
+            _position.PieceBitBoards[(int)Piece.q].Clear();
         }
 
         [Fact]
@@ -177,29 +177,29 @@ namespace SharpFish.Test.PregeneratedAttacks
             const int square1 = (int)BoardSquares.e5;
             const int square2 = (int)BoardSquares.a5;
 
-            _game.PieceBitBoards[(int)Piece.Q].SetBit(BoardSquares.b7);
-            _game.PieceBitBoards[(int)Piece.Q].SetBit(BoardSquares.d7);
-            _game.PieceBitBoards[(int)Piece.Q].SetBit(BoardSquares.f7);
-            _game.PieceBitBoards[(int)Piece.Q].SetBit(BoardSquares.h7);
-            _game.PieceBitBoards[(int)Piece.Q].SetBit(BoardSquares.b3);
-            _game.PieceBitBoards[(int)Piece.Q].SetBit(BoardSquares.d3);
-            _game.PieceBitBoards[(int)Piece.Q].SetBit(BoardSquares.f3);
-            _game.PieceBitBoards[(int)Piece.Q].SetBit(BoardSquares.h3);
-            _game.PieceBitBoards[(int)Piece.Q].SetBit(BoardSquares.d1);
-            _game.PieceBitBoards[(int)Piece.Q].SetBit(BoardSquares.c4);
-            _game.PieceBitBoards[(int)Piece.Q].SetBit(BoardSquares.g4);
-            Assert.False(Attacks.IsSquaredAttacked(square1, Side.Black, _game.PieceBitBoards, _game.OccupancyBitBoards));
-            Assert.False(Attacks.IsSquaredAttacked(square1, Side.White, _game.PieceBitBoards, _game.OccupancyBitBoards));
-            Assert.False(Attacks.IsSquaredAttacked(square2, Side.Black, _game.PieceBitBoards, _game.OccupancyBitBoards));
-            Assert.False(Attacks.IsSquaredAttacked(square2, Side.White, _game.PieceBitBoards, _game.OccupancyBitBoards));
+            _position.PieceBitBoards[(int)Piece.Q].SetBit(BoardSquares.b7);
+            _position.PieceBitBoards[(int)Piece.Q].SetBit(BoardSquares.d7);
+            _position.PieceBitBoards[(int)Piece.Q].SetBit(BoardSquares.f7);
+            _position.PieceBitBoards[(int)Piece.Q].SetBit(BoardSquares.h7);
+            _position.PieceBitBoards[(int)Piece.Q].SetBit(BoardSquares.b3);
+            _position.PieceBitBoards[(int)Piece.Q].SetBit(BoardSquares.d3);
+            _position.PieceBitBoards[(int)Piece.Q].SetBit(BoardSquares.f3);
+            _position.PieceBitBoards[(int)Piece.Q].SetBit(BoardSquares.h3);
+            _position.PieceBitBoards[(int)Piece.Q].SetBit(BoardSquares.d1);
+            _position.PieceBitBoards[(int)Piece.Q].SetBit(BoardSquares.c4);
+            _position.PieceBitBoards[(int)Piece.Q].SetBit(BoardSquares.g4);
+            Assert.False(Attacks.IsSquaredAttacked(square1, Side.Black, _position.PieceBitBoards, _position.OccupancyBitBoards));
+            Assert.False(Attacks.IsSquaredAttacked(square1, Side.White, _position.PieceBitBoards, _position.OccupancyBitBoards));
+            Assert.False(Attacks.IsSquaredAttacked(square2, Side.Black, _position.PieceBitBoards, _position.OccupancyBitBoards));
+            Assert.False(Attacks.IsSquaredAttacked(square2, Side.White, _position.PieceBitBoards, _position.OccupancyBitBoards));
 
-            _game.PieceBitBoards[(int)Piece.Q].SetBit(BoardSquares.e1);
-            Assert.True(Attacks.IsSquaredAttacked(square1, Side.White, _game.PieceBitBoards, _game.OccupancyBitBoards));
-            Assert.False(Attacks.IsSquaredAttacked(square1, Side.Black, _game.PieceBitBoards, _game.OccupancyBitBoards));
-            Assert.True(Attacks.IsSquaredAttacked(square2, Side.White, _game.PieceBitBoards, _game.OccupancyBitBoards));
-            Assert.False(Attacks.IsSquaredAttacked(square2, Side.Black, _game.PieceBitBoards, _game.OccupancyBitBoards));
+            _position.PieceBitBoards[(int)Piece.Q].SetBit(BoardSquares.e1);
+            Assert.True(Attacks.IsSquaredAttacked(square1, Side.White, _position.PieceBitBoards, _position.OccupancyBitBoards));
+            Assert.False(Attacks.IsSquaredAttacked(square1, Side.Black, _position.PieceBitBoards, _position.OccupancyBitBoards));
+            Assert.True(Attacks.IsSquaredAttacked(square2, Side.White, _position.PieceBitBoards, _position.OccupancyBitBoards));
+            Assert.False(Attacks.IsSquaredAttacked(square2, Side.Black, _position.PieceBitBoards, _position.OccupancyBitBoards));
 
-            _game.PieceBitBoards[(int)Piece.Q].Clear();
+            _position.PieceBitBoards[(int)Piece.Q].Clear();
         }
 
         [Fact]
@@ -207,15 +207,15 @@ namespace SharpFish.Test.PregeneratedAttacks
         {
             const int square = (int)BoardSquares.e5;
 
-            _game.PieceBitBoards[(int)Piece.k].SetBit(BoardSquares.e3);
-            Assert.False(Attacks.IsSquaredAttacked(square, Side.Black, _game.PieceBitBoards, _game.OccupancyBitBoards));
-            Assert.False(Attacks.IsSquaredAttacked(square, Side.White, _game.PieceBitBoards, _game.OccupancyBitBoards));
+            _position.PieceBitBoards[(int)Piece.k].SetBit(BoardSquares.e3);
+            Assert.False(Attacks.IsSquaredAttacked(square, Side.Black, _position.PieceBitBoards, _position.OccupancyBitBoards));
+            Assert.False(Attacks.IsSquaredAttacked(square, Side.White, _position.PieceBitBoards, _position.OccupancyBitBoards));
 
-            _game.PieceBitBoards[(int)Piece.k].SetBit(BoardSquares.e4);
-            Assert.True(Attacks.IsSquaredAttacked(square, Side.Black, _game.PieceBitBoards, _game.OccupancyBitBoards));
-            Assert.False(Attacks.IsSquaredAttacked(square, Side.White, _game.PieceBitBoards, _game.OccupancyBitBoards));
+            _position.PieceBitBoards[(int)Piece.k].SetBit(BoardSquares.e4);
+            Assert.True(Attacks.IsSquaredAttacked(square, Side.Black, _position.PieceBitBoards, _position.OccupancyBitBoards));
+            Assert.False(Attacks.IsSquaredAttacked(square, Side.White, _position.PieceBitBoards, _position.OccupancyBitBoards));
 
-            _game.PieceBitBoards[(int)Piece.k].Clear();
+            _position.PieceBitBoards[(int)Piece.k].Clear();
         }
 
         [Fact]
@@ -223,15 +223,15 @@ namespace SharpFish.Test.PregeneratedAttacks
         {
             const int square = (int)BoardSquares.e5;
 
-            _game.PieceBitBoards[(int)Piece.K].SetBit(BoardSquares.e3);
-            Assert.False(Attacks.IsSquaredAttacked(square, Side.Black, _game.PieceBitBoards, _game.OccupancyBitBoards));
-            Assert.False(Attacks.IsSquaredAttacked(square, Side.White, _game.PieceBitBoards, _game.OccupancyBitBoards));
+            _position.PieceBitBoards[(int)Piece.K].SetBit(BoardSquares.e3);
+            Assert.False(Attacks.IsSquaredAttacked(square, Side.Black, _position.PieceBitBoards, _position.OccupancyBitBoards));
+            Assert.False(Attacks.IsSquaredAttacked(square, Side.White, _position.PieceBitBoards, _position.OccupancyBitBoards));
 
-            _game.PieceBitBoards[(int)Piece.K].SetBit(BoardSquares.e4);
-            Assert.False(Attacks.IsSquaredAttacked(square, Side.Black, _game.PieceBitBoards, _game.OccupancyBitBoards));
-            Assert.True(Attacks.IsSquaredAttacked(square, Side.White, _game.PieceBitBoards, _game.OccupancyBitBoards));
+            _position.PieceBitBoards[(int)Piece.K].SetBit(BoardSquares.e4);
+            Assert.False(Attacks.IsSquaredAttacked(square, Side.Black, _position.PieceBitBoards, _position.OccupancyBitBoards));
+            Assert.True(Attacks.IsSquaredAttacked(square, Side.White, _position.PieceBitBoards, _position.OccupancyBitBoards));
 
-            _game.PieceBitBoards[(int)Piece.K].Clear();
+            _position.PieceBitBoards[(int)Piece.K].Clear();
         }
     }
 }

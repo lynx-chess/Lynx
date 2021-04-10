@@ -1,9 +1,8 @@
-﻿using SharpFish.Model;
-using System;
+﻿using System;
 
-namespace SharpFish
+namespace SharpFish.Model
 {
-    public class Game
+    public readonly struct Position
     {
         /// <summary>
         /// Use <see cref="Piece"/> as index
@@ -15,45 +14,33 @@ namespace SharpFish
         /// </summary>
         public BitBoard[] OccupancyBitBoards { get; }
 
-        public Side Side { get; internal set; }
+        public Side Side { get; }
 
-        public BoardSquares EnPassant { get; internal set; }
+        public BoardSquares EnPassant { get; }
 
-        public int Castle { get; internal set; }
+        public int Castle { get; }
 
-        public Game()
+        public Position(string fen)
         {
-            PieceBitBoards = new BitBoard[12];
-            OccupancyBitBoards = new BitBoard[3];
-            Side = Side.Both;
-            EnPassant = BoardSquares.noSquare;
-        }
+            var parsedFEN = FENParser.ParseFEN(fen);
 
-        public Game(string fen) : this()
-        {
-            ParseFEN(fen);
-        }
-
-        public bool ParseFEN(string fen)
-        {
-            bool parseResultSuccess;
-
-            (parseResultSuccess, Side, Castle, EnPassant, _, _) =
-                FENParser.ParseFEN(fen, PieceBitBoards, OccupancyBitBoards);
-
-            if (!parseResultSuccess)
+            if (!parsedFEN.Success)
             {
                 Console.WriteLine($"Error parsing FEN {fen}");
             }
 
-            return parseResultSuccess;
+            PieceBitBoards = parsedFEN.PieceBitBoards;
+            OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
+            Side = parsedFEN.Side;
+            Castle = parsedFEN.Castle;
+            EnPassant = parsedFEN.EnPassant;
         }
 
         /// <summary>
         /// Combines <see cref="PieceBitBoards"/>, <see cref="Side"/>, <see cref="Castle"/> and <see cref="EnPassant"/>
         /// into a human-friendly representation
         /// </summary>
-        public void PrintBoard()
+        public readonly void Print()
         {
             const string separator = "____________________________________________________";
             Console.WriteLine(separator);
@@ -104,7 +91,7 @@ namespace SharpFish
             Console.WriteLine(separator);
         }
 
-        public void PrintAttackedSquares(Side sideToMove)
+        public readonly void PrintAttackedSquares(Side sideToMove)
         {
             const string separator = "____________________________________________________";
             Console.WriteLine(separator);

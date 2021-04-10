@@ -15,9 +15,9 @@ namespace SharpFish.Test.MoveGeneration
         [InlineData("rbnqk2r/8/8/8/8/8/8/7R b KQkq - 0 1")]         // Attacking the rook
         public void ShortCastle(string fen)
         {
-            var game = new Game(fen);
+            var position = new Position(fen);
 
-            var moves = MovesGenerator.GenerateCastlingMoves(game, Utils.PieceOffset(game.Side));
+            var moves = MovesGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
 
             Assert.Single(moves.Where(m => m.MoveType == MoveType.ShortCastle));
         }
@@ -31,9 +31,9 @@ namespace SharpFish.Test.MoveGeneration
         [InlineData("r3k1nr/8/8/8/8/8/8/1R6 b KQkq - 0 1")]     // Attacking square next to the rook
         public void LongCastle(string fen)
         {
-            var game = new Game(fen);
+            var position = new Position(fen);
 
-            var moves = MovesGenerator.GenerateCastlingMoves(game, Utils.PieceOffset(game.Side));
+            var moves = MovesGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
 
             Assert.Single(moves.Where(m => m.MoveType == MoveType.LongCastle));
         }
@@ -55,9 +55,9 @@ namespace SharpFish.Test.MoveGeneration
         [InlineData("rbnqk2r/pppppppp/8/8/8/8/PPPPPPPP/RN2K2R b q - 0 1")]
         public void ShouldNotShortCastleWhenNoCastlingFlag(string fen)
         {
-            var game = new Game(fen);
+            var position = new Position(fen);
 
-            var moves = MovesGenerator.GenerateCastlingMoves(game, Utils.PieceOffset(game.Side));
+            var moves = MovesGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
 
             Assert.Empty(moves.Where(m => m.MoveType == MoveType.ShortCastle));
         }
@@ -79,9 +79,9 @@ namespace SharpFish.Test.MoveGeneration
         [InlineData("r3k1nr/pppppppp/8/8/8/8/PPPPPPPP/R3KBNR b k - 0 1")]
         public void ShouldNotLongCastleWhenNoCastlingFlag(string fen)
         {
-            var game = new Game(fen);
+            var position = new Position(fen);
 
-            var moves = MovesGenerator.GenerateCastlingMoves(game, Utils.PieceOffset(game.Side));
+            var moves = MovesGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
 
             Assert.Empty(moves.Where(m => m.MoveType == MoveType.LongCastle));
         }
@@ -101,9 +101,9 @@ namespace SharpFish.Test.MoveGeneration
         [InlineData("rnbqkBNr/pppppppp/8/8/8/8/8/8 b KQkq - 0 1")]
         public void ShouldNotShortCastleWhenOccupiedSquares(string fen)
         {
-            var game = new Game(fen);
+            var position = new Position(fen);
 
-            var moves = MovesGenerator.GenerateCastlingMoves(game, Utils.PieceOffset(game.Side));
+            var moves = MovesGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
 
             Assert.Empty(moves.Where(m => m.MoveType == MoveType.ShortCastle));
         }
@@ -128,9 +128,9 @@ namespace SharpFish.Test.MoveGeneration
 
         public void ShouldNotLongCastleWhenOccupiedSquares(string fen)
         {
-            var game = new Game(fen);
+            var position = new Position(fen);
 
-            var moves = MovesGenerator.GenerateCastlingMoves(game, Utils.PieceOffset(game.Side));
+            var moves = MovesGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
 
             Assert.Empty(moves.Where(m => m.MoveType == MoveType.LongCastle));
         }
@@ -144,9 +144,9 @@ namespace SharpFish.Test.MoveGeneration
         [InlineData("rnbqk2r/8/8/8/8/8/8/6R1 b KQkq - 0 1")]
         public void ShouldNotShortCastleWhenAttackedSquares(string fen)
         {
-            var game = new Game(fen);
+            var position = new Position(fen);
 
-            var moves = MovesGenerator.GenerateCastlingMoves(game, Utils.PieceOffset(game.Side));
+            var moves = MovesGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
 
             Assert.Empty(moves.Where(m => m.MoveType == MoveType.ShortCastle));
         }
@@ -160,9 +160,9 @@ namespace SharpFish.Test.MoveGeneration
         [InlineData("r3qk1nr/8/8/8/8/8/8/4R3 b KQkq - 0 1")]
         public void ShouldNotLongCastleWhenAttackedSquares(string fen)
         {
-            var game = new Game(fen);
+            var position = new Position(fen);
 
-            var moves = MovesGenerator.GenerateCastlingMoves(game, Utils.PieceOffset(game.Side));
+            var moves = MovesGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
 
             Assert.Empty(moves.Where(m => m.MoveType == MoveType.LongCastle));
         }
