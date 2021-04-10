@@ -97,11 +97,11 @@ namespace SharpFish
                 rookAttacks.Board | bishopAttacks.Board);
         }
 
-        public static bool IsSquaredAttacked(int squaredIndex, Position game) =>
-            IsSquaredAttacked(squaredIndex, game.Side, game.PieceBitBoards, game.OccupancyBitBoards);
+        public static bool IsSquaredAttacked(int squaredIndex, Position position) =>
+            IsSquaredAttacked(squaredIndex, position.Side, position.PieceBitBoards, position.OccupancyBitBoards);
 
-        public static bool IsSquaredAttackedBySide(int squaredIndex, Position game, Side sideToMove) =>
-            IsSquaredAttacked(squaredIndex, sideToMove, game.PieceBitBoards, game.OccupancyBitBoards);
+        public static bool IsSquaredAttackedBySide(int squaredIndex, Position position, Side sideToMove) =>
+            IsSquaredAttacked(squaredIndex, sideToMove, position.PieceBitBoards, position.OccupancyBitBoards);
 
         public static bool IsSquaredAttacked(int squareIndex, Side sideToMove, BitBoard[] piecePosition, BitBoard[] occupancy)
         {

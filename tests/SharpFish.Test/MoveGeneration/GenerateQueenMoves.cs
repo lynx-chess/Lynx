@@ -21,13 +21,13 @@ namespace SharpFish.Test.MoveGeneration
         [InlineData("8/8/1P1P1P2/8/1P1q1P2/8/1P1P1P2/8 b - - 0 1", 16)]
         public void QueenMoves_Count(string fen, int expectedMoves)
         {
-            var game = new Position(fen);
-            var offset = Utils.PieceOffset(game.Side);
-            var moves = MovesGenerator.GeneratePieceMoves((int)Piece.Q + offset, game);
+            var position = new Position(fen);
+            var offset = Utils.PieceOffset(position.Side);
+            var moves = MovesGenerator.GeneratePieceMoves((int)Piece.Q + offset, position);
 
             Assert.Equal(expectedMoves, moves.Count());
 
-            Assert.Equal(moves, MovesGenerator.GenerateQueenMoves(game));
+            Assert.Equal(moves, MovesGenerator.GenerateQueenMoves(position));
         }
 
         /// <summary>
@@ -47,10 +47,10 @@ namespace SharpFish.Test.MoveGeneration
         [Fact]
         public void QueenMoves_White()
         {
-            var game = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
-            var offset = Utils.PieceOffset(game.Side);
+            var position = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
+            var offset = Utils.PieceOffset(position.Side);
             var piece = (int)Piece.Q + offset;
-            var moves = MovesGenerator.GeneratePieceMoves(piece, game);
+            var moves = MovesGenerator.GeneratePieceMoves(piece, position);
 
             Assert.Equal(9, moves.Count(m => m.Piece == piece));
 
@@ -108,10 +108,10 @@ namespace SharpFish.Test.MoveGeneration
         [Fact]
         public void QueenMoves_Black()
         {
-            var game = new Position("r3kR1r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1");
-            var offset = Utils.PieceOffset(game.Side);
+            var position = new Position("r3kR1r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1");
+            var offset = Utils.PieceOffset(position.Side);
             var piece = (int)Piece.Q + offset;
-            var moves = MovesGenerator.GeneratePieceMoves(piece, game);
+            var moves = MovesGenerator.GeneratePieceMoves(piece, position);
 
             Assert.Equal(4, moves.Count(m => m.Piece == piece));
 
@@ -139,10 +139,10 @@ namespace SharpFish.Test.MoveGeneration
         [InlineData("P1P1P3/8/P1q1P3/8/P1P1P1P1/8/4P1q1/7P b - - 0 1", 12)]
         public void QueenMoves_CapturesOnly(string fen, int expectedCaptures)
         {
-            var game = new Position(fen);
-            var offset = Utils.PieceOffset(game.Side);
+            var position = new Position(fen);
+            var offset = Utils.PieceOffset(position.Side);
             var piece = (int)Piece.Q + offset;
-            var moves = MovesGenerator.GeneratePieceMoves(piece, game, capturesOnly: true);
+            var moves = MovesGenerator.GeneratePieceMoves(piece, position, capturesOnly: true);
 
             Assert.Equal(expectedCaptures, moves.Count(m => m.Piece == piece && m.MoveType == MoveType.Capture));
         }

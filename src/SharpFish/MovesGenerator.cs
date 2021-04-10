@@ -32,36 +32,36 @@ namespace SharpFish
             [(int)Piece.q] = (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy).Board,
         };
 
-        public static List<Move> GenerateAllMoves(Position game, bool capturesOnly = false)
+        public static List<Move> GenerateAllMoves(Position position, bool capturesOnly = false)
         {
             var moves = new List<Move>();
 
-            if (game.Side == Side.Both)
+            if (position.Side == Side.Both)
             {
                 return moves;
             }
 
-            var offset = Utils.PieceOffset(game.Side);
+            var offset = Utils.PieceOffset(position.Side);
 
-            moves.AddRange(GeneratePawnMoves(game, offset));
-            moves.AddRange(GenerateCastlingMoves(game, offset));
-            moves.AddRange(GeneratePieceMoves((int)Piece.K + offset, game, capturesOnly));
-            moves.AddRange(GeneratePieceMoves((int)Piece.N + offset, game, capturesOnly));
-            moves.AddRange(GeneratePieceMoves((int)Piece.B + offset, game, capturesOnly));
-            moves.AddRange(GeneratePieceMoves((int)Piece.R + offset, game, capturesOnly));
-            moves.AddRange(GeneratePieceMoves((int)Piece.Q + offset, game, capturesOnly));
+            moves.AddRange(GeneratePawnMoves(position, offset));
+            moves.AddRange(GenerateCastlingMoves(position, offset));
+            moves.AddRange(GeneratePieceMoves((int)Piece.K + offset, position, capturesOnly));
+            moves.AddRange(GeneratePieceMoves((int)Piece.N + offset, position, capturesOnly));
+            moves.AddRange(GeneratePieceMoves((int)Piece.B + offset, position, capturesOnly));
+            moves.AddRange(GeneratePieceMoves((int)Piece.R + offset, position, capturesOnly));
+            moves.AddRange(GeneratePieceMoves((int)Piece.Q + offset, position, capturesOnly));
 
             return moves;
         }
 
-        internal static IEnumerable<Move> GeneratePawnMoves(Position game, int offset)
+        internal static IEnumerable<Move> GeneratePawnMoves(Position position, int offset)
         {
             int sourceSquare, targetSquare;
 
             var piece = (int)Piece.P + offset;
-            var pawnPush = +8 - ((int)game.Side * 16);          // game.Side == Side.White ? -8 : +8
-            int oppositeSide = Utils.OppositeSide(game.Side);   // game.Side == Side.White ? (int)Side.Black : (int)Side.White
-            var bitboard = game.PieceBitBoards[piece].Board;
+            var pawnPush = +8 - ((int)position.Side * 16);          // position.Side == Side.White ? -8 : +8
+            int oppositeSide = Utils.OppositeSide(position.Side);   // position.Side == Side.White ? (int)Side.Black : (int)Side.White
+            var bitboard = position.PieceBitBoards[piece].Board;
 
             while (bitboard != default)
             {
@@ -71,13 +71,13 @@ namespace SharpFish
                 var sourceRank = (sourceSquare / 8) + 1;
                 if (sourceRank == 1 || sourceRank == 8)
                 {
-                    Logger.Warn($"There's a non-promoted {game.Side} pawn in rank {sourceRank}");
+                    Logger.Warn($"There's a non-promoted {position.Side} pawn in rank {sourceRank}");
                     continue;
                 }
 
                 // Pawn pushes
                 var singlePush = sourceSquare + pawnPush;
-                if (!game.OccupancyBitBoards[2].GetBit(singlePush))
+                if (!position.OccupancyBitBoards[2].GetBit(singlePush))
                 {
                     var targetRank = (singlePush / 8) + 1;
                     if (targetRank == 1 || targetRank == 8)  // Promotion
@@ -94,23 +94,23 @@ namespace SharpFish
 
                     // Inside of the if because singlePush square cannot be occupied either
                     var doublePush = sourceSquare + (2 * pawnPush);
-                    if (!game.OccupancyBitBoards[2].GetBit(doublePush)
-                        && ((sourceRank == 2 && game.Side == Side.Black) || (sourceRank == 7 && game.Side == Side.White)))
+                    if (!position.OccupancyBitBoards[2].GetBit(doublePush)
+                        && ((sourceRank == 2 && position.Side == Side.Black) || (sourceRank == 7 && position.Side == Side.White)))
                     {
                         yield return new Move(piece, sourceSquare, doublePush, MoveType.Quiet);
                     }
                 }
 
-                var attacks = Attacks.PawnAttacks[(int)game.Side, sourceSquare];
+                var attacks = Attacks.PawnAttacks[(int)position.Side, sourceSquare];
 
                 // En passant
-                if (attacks.GetBit(game.EnPassant)) /*&& game.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush)*/
+                if (attacks.GetBit(position.EnPassant)) /*&& position.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush)*/
                 {
-                    yield return new Move(piece, sourceSquare, (int)game.EnPassant, MoveType.EnPassant);
+                    yield return new Move(piece, sourceSquare, (int)position.EnPassant, MoveType.EnPassant);
                 }
 
                 // Captures
-                ulong attackedSquares = attacks.Board & game.OccupancyBitBoards[oppositeSide].Board;
+                ulong attackedSquares = attacks.Board & position.OccupancyBitBoards[oppositeSide].Board;
                 while (attackedSquares != default)
                 {
                     targetSquare = BitBoard.GetLS1BIndex(attackedSquares);
@@ -136,61 +136,61 @@ namespace SharpFish
         /// Obvious moves that put the king in check have been discarded, but the rest still need to be discarded
         /// see FEN position "8/8/8/2bbb3/2bKb3/2bbb3/8/8 w - - 0 1", where 4 legal moves (corners) are found
         /// </summary>
-        /// <param name="game"></param>
+        /// <param name="position"></param>
         /// <param name="offset"></param>
         /// <returns></returns>
-        internal static IEnumerable<Move> GenerateCastlingMoves(Position game, int offset)
+        internal static IEnumerable<Move> GenerateCastlingMoves(Position position, int offset)
         {
             var piece = (int)Piece.K + offset;
-            var oppositeSide = (Side)Utils.OppositeSide(game.Side);
+            var oppositeSide = (Side)Utils.OppositeSide(position.Side);
 
-            int sourceSquare = game.PieceBitBoards[piece].GetLS1BIndex(); // There's for sure only one
+            int sourceSquare = position.PieceBitBoards[piece].GetLS1BIndex(); // There's for sure only one
 
             // Castles
-            if (game.Castle != default)
+            if (position.Castle != default)
             {
-                if (game.Side == Side.White)
+                if (position.Side == Side.White)
                 {
-                    if (((game.Castle & (int)CastlingRights.WK) != default)
-                        && !game.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.f1)
-                        && !game.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.g1)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.e1, game, oppositeSide)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.f1, game, oppositeSide)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.g1, game, oppositeSide))
+                    if (((position.Castle & (int)CastlingRights.WK) != default)
+                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.f1)
+                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.g1)
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.e1, position, oppositeSide)
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.f1, position, oppositeSide)
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.g1, position, oppositeSide))
                     {
                         yield return new Move(piece, sourceSquare, (int)BoardSquares.g1, MoveType.ShortCastle);
                     }
 
-                    if (((game.Castle & (int)CastlingRights.WQ) != default)
-                        && !game.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.d1)
-                        && !game.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.c1)
-                        && !game.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b1)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.e1, game, oppositeSide)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.d1, game, oppositeSide)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.c1, game, oppositeSide))
+                    if (((position.Castle & (int)CastlingRights.WQ) != default)
+                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.d1)
+                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.c1)
+                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b1)
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.e1, position, oppositeSide)
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.d1, position, oppositeSide)
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.c1, position, oppositeSide))
                     {
                         yield return new Move(piece, sourceSquare, (int)BoardSquares.c1, MoveType.LongCastle);
                     }
                 }
                 else
                 {
-                    if (((game.Castle & (int)CastlingRights.BK) != default)
-                        && !game.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.f8)
-                        && !game.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.g8)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.e8, game, oppositeSide)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.f8, game, oppositeSide)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.g8, game, oppositeSide))
+                    if (((position.Castle & (int)CastlingRights.BK) != default)
+                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.f8)
+                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.g8)
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.e8, position, oppositeSide)
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.f8, position, oppositeSide)
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.g8, position, oppositeSide))
                     {
                         yield return new Move(piece, sourceSquare, (int)BoardSquares.g8, MoveType.ShortCastle);
                     }
 
-                    if (((game.Castle & (int)CastlingRights.BQ) != default)
-                        && !game.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.d8)
-                        && !game.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.c8)
-                        && !game.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b8)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.e8, game, oppositeSide)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.d8, game, oppositeSide)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.c8, game, oppositeSide))
+                    if (((position.Castle & (int)CastlingRights.BQ) != default)
+                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.d8)
+                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.c8)
+                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b8)
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.e8, position, oppositeSide)
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.d8, position, oppositeSide)
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.c8, position, oppositeSide))
                     {
                         yield return new Move(piece, sourceSquare, (int)BoardSquares.c8, MoveType.LongCastle);
                     }
@@ -202,12 +202,12 @@ namespace SharpFish
         /// Generate Knight, Bishop, Rook and Queen moves
         /// </summary>
         /// <param name="piece"><see cref="Piece"/></param>
-        /// <param name="game"></param>
+        /// <param name="position"></param>
         /// <param name="capturesOnly"></param>
         /// <returns></returns>
-        internal static IEnumerable<Move> GeneratePieceMoves(int piece, Position game, bool capturesOnly = false)
+        internal static IEnumerable<Move> GeneratePieceMoves(int piece, Position position, bool capturesOnly = false)
         {
-            var bitboard = game.PieceBitBoards[piece].Board;
+            var bitboard = position.PieceBitBoards[piece].Board;
             int sourceSquare, targetSquare;
 
             while (bitboard != default)
@@ -215,8 +215,8 @@ namespace SharpFish
                 sourceSquare = BitBoard.GetLS1BIndex(bitboard);
                 bitboard = BitBoard.ResetLS1B(bitboard);
 
-                ulong attacks = PieceAttacksDictionary[piece](sourceSquare, game.OccupancyBitBoards[(int)Side.Both])
-                    & ~game.OccupancyBitBoards[(int)game.Side].Board;
+                ulong attacks = PieceAttacksDictionary[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
+                    & ~position.OccupancyBitBoards[(int)position.Side].Board;
 
                 while (attacks != default)
                 {
@@ -225,7 +225,7 @@ namespace SharpFish
 
                     if (capturesOnly)
                     {
-                        if (game.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare))
+                        if (position.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare))
                         {
                             yield return new Move(piece, sourceSquare, targetSquare, MoveType.Capture);
                         }
@@ -238,39 +238,39 @@ namespace SharpFish
             }
         }
 
-        internal static IEnumerable<Move> GenerateKingMoves(Position game, bool capturesOnly = false)
+        internal static IEnumerable<Move> GenerateKingMoves(Position position, bool capturesOnly = false)
         {
-            var offset = Utils.PieceOffset(game.Side);
+            var offset = Utils.PieceOffset(position.Side);
 
-            return GeneratePieceMoves((int)Piece.K + offset, game, capturesOnly);
+            return GeneratePieceMoves((int)Piece.K + offset, position, capturesOnly);
         }
 
-        internal static IEnumerable<Move> GenerateKnightMoves(Position game, bool capturesOnly = false)
+        internal static IEnumerable<Move> GenerateKnightMoves(Position position, bool capturesOnly = false)
         {
-            var offset = Utils.PieceOffset(game.Side);
+            var offset = Utils.PieceOffset(position.Side);
 
-            return GeneratePieceMoves((int)Piece.N + offset, game, capturesOnly);
+            return GeneratePieceMoves((int)Piece.N + offset, position, capturesOnly);
         }
 
-        internal static IEnumerable<Move> GenerateBishopMoves(Position game, bool capturesOnly = false)
+        internal static IEnumerable<Move> GenerateBishopMoves(Position position, bool capturesOnly = false)
         {
-            var offset = Utils.PieceOffset(game.Side);
+            var offset = Utils.PieceOffset(position.Side);
 
-            return GeneratePieceMoves((int)Piece.B + offset, game, capturesOnly);
+            return GeneratePieceMoves((int)Piece.B + offset, position, capturesOnly);
         }
 
-        internal static IEnumerable<Move> GenerateRookMoves(Position game, bool capturesOnly = false)
+        internal static IEnumerable<Move> GenerateRookMoves(Position position, bool capturesOnly = false)
         {
-            var offset = Utils.PieceOffset(game.Side);
+            var offset = Utils.PieceOffset(position.Side);
 
-            return GeneratePieceMoves((int)Piece.R + offset, game, capturesOnly);
+            return GeneratePieceMoves((int)Piece.R + offset, position, capturesOnly);
         }
 
-        internal static IEnumerable<Move> GenerateQueenMoves(Position game, bool capturesOnly = false)
+        internal static IEnumerable<Move> GenerateQueenMoves(Position position, bool capturesOnly = false)
         {
-            var offset = Utils.PieceOffset(game.Side);
+            var offset = Utils.PieceOffset(position.Side);
 
-            return GeneratePieceMoves((int)Piece.Q + offset, game, capturesOnly);
+            return GeneratePieceMoves((int)Piece.Q + offset, position, capturesOnly);
         }
     }
 }
