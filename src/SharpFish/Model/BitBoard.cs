@@ -20,7 +20,7 @@ namespace SharpFish.Model
             }
         }
 
-        public void Clear() { Board = default; }
+        internal void Clear() { Board = default; }
 
         public readonly void Print()
         {
