@@ -28,7 +28,14 @@ using static SharpFish.Model.Move;
 //_22_Generate_Moves();
 //_23_Castling_Moves();
 //_26_Piece_Moves();
-_27_Move_Encoding();
+//_27_Move_Encoding();
+_29_Move_List();
+
+
+const string TrickyPosition = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
+const string TrickyPositionReversed = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1";
+const string KillerPosition = "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1";
+const string CmkPosition = "r2q1rk1/ppp2ppp/2n1bn2/2b1p3/3pP3/3P1NPP/PPP1NPB1/R1BQ1RK1 b - - 0 9 ";
 
 static void _2_GettingStarted()
 {
@@ -276,11 +283,8 @@ static void _19_Parse_FEN()
 {
     const string emptyBoard = "8/8/8/8/8/8/8/8 w - - 0 1";
     const string startPosition = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-    const string trickyPosition = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
-    const string killerPosition = "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1";
-    const string cmkPosition = "r2q1rk1/ppp2ppp/2n1bn2/2b1p3/3pP3/3P1NPP/PPP1NPB1/R1BQ1RK1 b - - 0 9 ";
 
-    var position = new Position(cmkPosition);
+    var position = new Position(CmkPosition);
 
     position.PieceBitBoards[(int)Piece.Q].Print();
 
@@ -401,7 +405,7 @@ static void _26_Piece_Moves()
     }
 }
 
-static void _27_Move_Encoding()
+static void _28_Move_Encoding()
 {
     int move = 0;
 
@@ -415,4 +419,25 @@ static void _27_Move_Encoding()
     // Decode move
     int square = (move & 0xFC0) >> 6;
     Console.WriteLine(Constants.Coordinates[square]);
+}
+
+static void _29_Move_List()
+{
+    var position = new Position(TrickyPosition);
+    var moves = MovesGenerator.GenerateAllMoves(position);
+    PrintMoveList(moves);
+
+    position = new Position(TrickyPositionReversed);
+    moves = MovesGenerator.GenerateAllMoves(position);
+    PrintMoveList(moves);
+
+    position = new Position(KillerPosition);
+    position.Print();
+    moves = MovesGenerator.GenerateAllMoves(position);
+    PrintMoveList(moves);
+}
+
+static void _31_Move_State()
+{
+
 }

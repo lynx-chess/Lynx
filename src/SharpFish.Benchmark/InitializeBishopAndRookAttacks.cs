@@ -6,18 +6,18 @@ namespace SharpFish.Benchmark
     public class InitializeBishopAndRookAttacks : BaseBenchmark
     {
         [Benchmark(Baseline = true)]
-        public void CurrentApproach() => new CustomGame();
+        public void CurrentApproach() => new CustomPosition();
 
         [Benchmark]
-        public void CurrentApproachReusingLoop() => new CustomGame("");
+        public void CurrentApproachReusingLoop() => new CustomPosition("");
 
         /// <summary>
         /// As Proposed in https://www.youtube.com/watch?v=1lAM8ffBg0A&list=PLmN0neTso3Jxh8ZIylk74JpwfiWNI76Cs&index=16
         /// </summary>
         [Benchmark]
-        public void InitialApproach() => new CustomGame(0);
+        public void InitialApproach() => new CustomPosition(0);
 
-        public class CustomGame
+        public class CustomPosition
         {
             private readonly BitBoard[,] _pawnAttacks = new BitBoard[2, 64];
             private readonly BitBoard[] _knightAttacks = new BitBoard[64];
@@ -29,7 +29,7 @@ namespace SharpFish.Benchmark
             private readonly BitBoard[,] _bishopAttacks = new BitBoard[64, 512];
             private readonly BitBoard[,] _rookAttacks = new BitBoard[64, 4096];
 
-            public CustomGame()
+            public CustomPosition()
             {
                 _kingAttacks = AttacksGenerator.InitializeKingAttacks();
                 _pawnAttacks = AttacksGenerator.InitializePawnAttacks();
@@ -43,7 +43,7 @@ namespace SharpFish.Benchmark
             /// Current reusing squares loop
             /// </summary>
             /// <param name="_"></param>
-            public CustomGame(string _)
+            public CustomPosition(string _)
             {
                 InitializePawnKnightAndKingAttacks();
 
@@ -55,7 +55,7 @@ namespace SharpFish.Benchmark
             /// Initial approach
             /// </summary>
             /// <param name="_"></param>
-            public CustomGame(int _)
+            public CustomPosition(int _)
             {
                 InitializePawnKnightAndKingAttacks();
 

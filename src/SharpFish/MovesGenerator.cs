@@ -159,7 +159,7 @@ namespace SharpFish
                         && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.f1, position, oppositeSide)
                         && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.g1, position, oppositeSide))
                     {
-                        yield return new Move(sourceSquare, Constants.WhiteShortCastleKingSquare, piece, isCastle: TRUE);
+                        yield return new Move(sourceSquare, Constants.WhiteShortCastleKingSquare, piece, isShortCastle: TRUE);
                     }
 
                     if (((position.Castle & (int)CastlingRights.WQ) != default)
@@ -170,7 +170,7 @@ namespace SharpFish
                         && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.d1, position, oppositeSide)
                         && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.c1, position, oppositeSide))
                     {
-                        yield return new Move(sourceSquare, Constants.WhiteLongCastleKingSquare, piece, isCastle: TRUE);
+                        yield return new Move(sourceSquare, Constants.WhiteLongCastleKingSquare, piece, isLongCastle: TRUE);
                     }
                 }
                 else
@@ -182,7 +182,7 @@ namespace SharpFish
                         && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.f8, position, oppositeSide)
                         && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.g8, position, oppositeSide))
                     {
-                        yield return new Move(sourceSquare, Constants.BlackShortCastleKingSquare, piece, isCastle: TRUE);
+                        yield return new Move(sourceSquare, Constants.BlackShortCastleKingSquare, piece, isShortCastle: TRUE);
                     }
 
                     if (((position.Castle & (int)CastlingRights.BQ) != default)
@@ -193,7 +193,7 @@ namespace SharpFish
                         && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.d8, position, oppositeSide)
                         && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.c8, position, oppositeSide))
                     {
-                        yield return new Move(sourceSquare, Constants.BlackLongCastleKingSquare, piece, isCastle: TRUE);
+                        yield return new Move(sourceSquare, Constants.BlackLongCastleKingSquare, piece, isLongCastle: TRUE);
                     }
                 }
             }

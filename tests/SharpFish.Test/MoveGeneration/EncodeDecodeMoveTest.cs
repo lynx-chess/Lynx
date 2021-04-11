@@ -75,28 +75,23 @@ namespace SharpFish.Test.MoveGeneration
         }
 
         [Theory]
-        [InlineData(BoardSquares.e1, BoardSquares.g1)]
-        [InlineData(BoardSquares.e1, BoardSquares.c1)]
-        [InlineData(BoardSquares.e8, BoardSquares.g8)]
-        [InlineData(BoardSquares.e8, BoardSquares.c8)]
-        public void Castling(BoardSquares sourceSquare, BoardSquares targetSquare)
+        [InlineData(BoardSquares.e1, BoardSquares.g1, true, false)]
+        [InlineData(BoardSquares.e1, BoardSquares.c1, false, true)]
+        [InlineData(BoardSquares.e8, BoardSquares.g8, true, false)]
+        [InlineData(BoardSquares.e8, BoardSquares.c8, false, true)]
+        [InlineData(BoardSquares.e1, BoardSquares.e2, false, false)]
+        [InlineData(BoardSquares.e8, BoardSquares.e7, false, false)]
+        public void Castling(BoardSquares sourceSquare, BoardSquares targetSquare, bool isShortCastle, bool isLongCastle)
         {
-            var move = new Move((int)sourceSquare, (int)targetSquare, (int)Piece.K, isCastle: 1);
+            var move = new Move((int)sourceSquare, (int)targetSquare, (int)Piece.K,
+                isShortCastle: isShortCastle ? 1 : 0, isLongCastle: isLongCastle ? 1 : 0);
 
             Assert.Equal((int)sourceSquare, move.SourceSquare());
             Assert.Equal((int)targetSquare, move.TargetSquare());
-            Assert.True(move.IsCastle());
 
-            if ((int)targetSquare == Constants.WhiteLongCastleKingSquare || (int)targetSquare == Constants.BlackLongCastleKingSquare)
-            {
-                Assert.True(move.IsLongCastle());
-                Assert.False(move.IsShortCastle());
-            }
-            else
-            {
-                Assert.False(move.IsLongCastle());
-                Assert.True(move.IsShortCastle());
-            }
+            Assert.Equal(isShortCastle, move.IsShortCastle());
+            Assert.Equal(isLongCastle, move.IsLongCastle());
+            Assert.Equal(isShortCastle || isLongCastle, move.IsCastle());
         }
 
         [Theory]
