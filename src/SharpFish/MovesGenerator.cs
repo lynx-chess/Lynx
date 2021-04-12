@@ -105,7 +105,8 @@ namespace SharpFish
                 var attacks = Attacks.PawnAttacks[(int)position.Side, sourceSquare];
 
                 // En passant
-                if (attacks.GetBit(position.EnPassant)) /*&& position.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush)*/
+                if (position.EnPassant != BoardSquares.noSquare && attacks.GetBit(position.EnPassant))
+                    // We assume that && position.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush)
                 {
                     yield return new Move(sourceSquare, (int)position.EnPassant, piece, isCapture: TRUE, isEnPassant: TRUE);
                 }

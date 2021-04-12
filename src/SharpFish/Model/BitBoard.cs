@@ -108,7 +108,7 @@ namespace SharpFish.Model
         {
             if (bitboard == default)
             {
-                return -1;
+                return (int)BoardSquares.noSquare;
             }
 
             return CountBits(bitboard ^ (bitboard - 1)) - 1;

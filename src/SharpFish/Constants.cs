@@ -292,12 +292,38 @@ namespace SharpFish
 
         public const string InitialPositionFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-        public const string EmptyBoardFEN = "/8/8/8/8/8/8/8 w - - 0 1";
+        public const string EmptyBoardFEN = "8/8/8/8/8/8/8/8 w - - 0 1";
 
         public const int WhiteShortCastleKingSquare = (int)BoardSquares.g1;
         public const int BlackShortCastleKingSquare = (int)BoardSquares.g8;
         public const int WhiteLongCastleKingSquare = (int)BoardSquares.c1;
         public const int BlackLongCastleKingSquare = (int)BoardSquares.c8;
+
+        public const int WhiteShortCastleRookSquare = (int)BoardSquares.f1;
+        public const int BlackShortCastleRookSquare = (int)BoardSquares.f8;
+        public const int WhiteLongCastleRookSquare = (int)BoardSquares.d1;
+        public const int BlackLongCastleRookSquare = (int)BoardSquares.d8;
+
+        public static readonly Dictionary<int, int> EnPassantCaptureSquares = new(16)
+        {
+            [(int)BoardSquares.a6] = (int)BoardSquares.a6 + 8,
+            [(int)BoardSquares.b6] = (int)BoardSquares.b6 + 8,
+            [(int)BoardSquares.c6] = (int)BoardSquares.c6 + 8,
+            [(int)BoardSquares.d6] = (int)BoardSquares.d6 + 8,
+            [(int)BoardSquares.e6] = (int)BoardSquares.e6 + 8,
+            [(int)BoardSquares.f6] = (int)BoardSquares.f6 + 8,
+            [(int)BoardSquares.g6] = (int)BoardSquares.g6 + 8,
+            [(int)BoardSquares.h6] = (int)BoardSquares.h6 + 8,
+
+            [(int)BoardSquares.a3] = (int)BoardSquares.a3 - 8,
+            [(int)BoardSquares.b3] = (int)BoardSquares.b3 - 8,
+            [(int)BoardSquares.c3] = (int)BoardSquares.c3 - 8,
+            [(int)BoardSquares.d3] = (int)BoardSquares.d3 - 8,
+            [(int)BoardSquares.e3] = (int)BoardSquares.e3 - 8,
+            [(int)BoardSquares.f3] = (int)BoardSquares.f3 - 8,
+            [(int)BoardSquares.g3] = (int)BoardSquares.g3 - 8,
+            [(int)BoardSquares.h3] = (int)BoardSquares.h3 - 8,
+        };
     }
 
     /*

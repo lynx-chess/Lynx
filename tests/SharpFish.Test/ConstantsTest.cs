@@ -51,5 +51,21 @@ namespace SharpFish.Test
                 }
             }
         }
+
+        [Fact]
+        public void EnPassantCaptureSquares()
+        {
+            Assert.Equal((int)BoardSquares.e5, Constants.EnPassantCaptureSquares[(int)BoardSquares.e6]);
+            for (int square = (int)BoardSquares.a6; square <= (int)BoardSquares.h6; ++square)
+            {
+                Assert.Equal(square + 8, Constants.EnPassantCaptureSquares[square]);
+            }
+
+            Assert.Equal((int)BoardSquares.d4, Constants.EnPassantCaptureSquares[(int)BoardSquares.d3]);
+            for (int square = (int)BoardSquares.a3; square <= (int)BoardSquares.h3; ++square)
+            {
+                Assert.Equal(square - 8, Constants.EnPassantCaptureSquares[square]);
+            }
+        }
     }
 }

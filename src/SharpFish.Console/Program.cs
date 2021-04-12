@@ -29,7 +29,8 @@ using static SharpFish.Model.Move;
 //_23_Castling_Moves();
 //_26_Piece_Moves();
 //_27_Move_Encoding();
-_29_Move_List();
+//_29_Move_List();
+_32_Make_Move();
 
 
 const string TrickyPosition = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
@@ -437,7 +438,63 @@ static void _29_Move_List()
     PrintMoveList(moves);
 }
 
-static void _31_Move_State()
+static void _32_Make_Move()
 {
+    // Arrange
+    var position = new Position("r3k2r/1r6/8/3B4/8/8/8/R3K2R w KQkq - 0 1");
+    position.Print();
 
+    position = new Position("r3k2r/8/8/3b4/8/8/6R1/R3K2R b KQkq - 0 1");
+    position.Print();
+
+    var game = new Game(TrickyPosition);
+    var reversedGame = new Game(TrickyPositionReversed);
+    var gameWithPromotion = new Game("r3k2r/pPppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
+    var reversedGameWithPromotionAndCapture = new Game("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PpPBBPPP/R3K2R w KQkq - 0 1");
+    //GeneralMoveTest(game);
+    //CastlingRightsTest(game);
+    //CastlingRightsTest(reversedGame);
+
+    PrintMoveList(gameWithPromotion.GetAllMoves());
+
+    GeneralMoveTest(gameWithPromotion);
+
+    static void GeneralMoveTest(Game game)
+    {
+
+        foreach (var move in game.GetAllMoves())
+        {
+            game.CurrentPosition.Print();
+
+            move.Print();
+            game.MakeMove(move);
+            game.CurrentPosition.Print();
+
+            Console.WriteLine("White occupancy:");
+            game.CurrentPosition.OccupancyBitBoards[(int)Side.White].Print();
+
+            Console.WriteLine("Black occupancy:");
+            game.CurrentPosition.OccupancyBitBoards[(int)Side.Black].Print();
+
+            game.RevertMove();
+        }
+    }
+
+    static void CastlingRightsTest(Game game)
+    {
+        foreach (var move in game.GetAllMoves())
+        {
+            if (move.Piece() == (int)Piece.R || (move.Piece() == (int)Piece.r)
+             || move.Piece() == (int)Piece.K || (move.Piece() == (int)Piece.k))
+            {
+                game.CurrentPosition.Print();
+
+                move.Print();
+                game.MakeMove(move);
+                game.CurrentPosition.Print();
+
+                game.RevertMove();
+            }
+        }
+    }
 }

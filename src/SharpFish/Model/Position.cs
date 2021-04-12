@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Text;
 
 namespace SharpFish.Model
 {
@@ -34,6 +36,247 @@ namespace SharpFish.Model
             Side = parsedFEN.Side;
             Castle = parsedFEN.Castle;
             EnPassant = parsedFEN.EnPassant;
+        }
+
+        /// <summary>
+        /// Clone constructor
+        /// </summary>
+        /// <param name="position"></param>
+        public Position(Position position)
+        {
+            PieceBitBoards = new BitBoard[12];
+            Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
+
+            OccupancyBitBoards = new BitBoard[3];
+            Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
+
+            Side = position.Side;
+            Castle = position.Castle;
+            EnPassant = position.EnPassant;
+        }
+
+        public Position(Position position, Move move) : this(position)
+        {
+            var oldSide = Side;
+            var offset = Utils.PieceOffset(oldSide);
+            var oppositeSide = Utils.OppositeSide(oldSide);
+
+            int sourceSquare = move.SourceSquare();
+            int targetSquare = move.TargetSquare();
+            int piece = move.Piece();
+            int promotedPiece = move.PromotedPiece();
+
+            var newPiece = piece;
+            if (promotedPiece != default)
+            {
+                newPiece = promotedPiece;
+            }
+
+            EnPassant = BoardSquares.noSquare;
+
+            PieceBitBoards[piece].PopBit(sourceSquare);
+            OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
+
+            PieceBitBoards[newPiece].SetBit(targetSquare);
+            OccupancyBitBoards[(int)Side].SetBit(targetSquare);
+
+            if (move.IsCapture())
+            {
+                var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
+                var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
+
+                if (move.IsEnPassant())
+                {
+                    var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
+                    Debug.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare));
+
+                    PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
+                    OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
+                }
+                else
+                {
+                    var limit = (int)Piece.K + oppositeSideOffset;
+                    for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
+                    {
+                        if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
+                        {
+                            PieceBitBoards[pieceIndex].PopBit(targetSquare);
+                            break;
+                        }
+                    }
+
+                    OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
+
+                    // Remove castling rights when a rook in the corners is captured
+                    if (Castle != default)
+                    {
+                        switch (targetSquare)
+                        {
+                            case (int)BoardSquares.a1:
+                                Castle &= ~(int)CastlingRights.WQ;
+                                break;
+                            case (int)BoardSquares.h1:
+                                Castle &= ~(int)CastlingRights.WK;
+                                break;
+                            case (int)BoardSquares.a8:
+                                Castle &= ~(int)CastlingRights.BQ;
+                                break;
+                            case (int)BoardSquares.h8:
+                                Castle &= ~(int)CastlingRights.BK;
+                                break;
+                        }
+                    }
+                }
+            }
+            else if (move.IsDoublePawnPush())
+            {
+                EnPassant = (BoardSquares)targetSquare;
+            }
+            else if (move.IsShortCastle())
+            {
+                var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
+                var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
+                var rookIndex = (int)Piece.R + offset;
+
+                PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
+                OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+
+                PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
+                OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+            }
+            else if (move.IsLongCastle())
+            {
+                var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
+                var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
+                var rookIndex = (int)Piece.R + offset;
+
+                PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
+                OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+
+                PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
+                OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+            }
+
+            if (piece == (int)Piece.K + offset)
+            {
+                Castle = RemoveCastlingRights(Castle, oldSide);
+            }
+            else if (piece == (int)Piece.R + offset)
+            {
+                // Pop corresponding Side castle bit
+                var kingQueenOffset = sourceSquare == ((int)BoardSquares.a8 + (7 * 8 * (int)oldSide))
+                    ? 1
+                    : 0;
+
+                var colorOffset = 2 - (2 * (int)oldSide);
+                Castle &= ~(1 << (kingQueenOffset + colorOffset));
+            }
+
+            Side = (Side)oppositeSide;
+            OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
+
+            static int RemoveCastlingRights(int castle, Side side)
+            {
+                var colorOffset = 2 - (2 * (int)side);
+                return castle & ~(0b11 << colorOffset);
+            }
+        }
+
+        public readonly bool IsValid() => throw new NotImplementedException();
+
+        public readonly string FEN()
+        {
+            var sb = new StringBuilder(100);
+
+            var squaresPerFile = 0;
+
+            int squaresWithoutPiece = 0;
+            int lengthBeforeSlash = sb.Length;
+            for (int square = 0; square < 64; ++square)
+            {
+                int foundPiece = -1;
+                for (var pieceBoardIndex = 0; pieceBoardIndex < 12; ++pieceBoardIndex)
+                {
+                    if (PieceBitBoards[pieceBoardIndex].GetBit(square))
+                    {
+                        foundPiece = pieceBoardIndex;
+                        break;
+                    }
+                }
+
+                if (foundPiece != -1)
+                {
+                    if (squaresWithoutPiece != 0)
+                    {
+                        sb.Append(squaresWithoutPiece);
+                        squaresWithoutPiece = 0;
+                    }
+
+                    sb.Append(Constants.AsciiPieces[foundPiece]);
+                }
+                else
+                {
+                    ++squaresWithoutPiece;
+                }
+
+                squaresPerFile = (squaresPerFile + 1) % 8;
+                if (squaresPerFile == 0)
+                {
+                    if (squaresWithoutPiece != 0)
+                    {
+                        sb.Append(squaresWithoutPiece);
+                        squaresWithoutPiece = 0;
+                    }
+
+                    if (square != 63)
+                    {
+
+                        if (sb.Length == lengthBeforeSlash)
+                        {
+                            sb.Append('8');
+                        }
+                        sb.Append('/');
+                        lengthBeforeSlash = sb.Length;
+                        squaresWithoutPiece = 0;
+                    }
+                }
+            }
+
+            sb.Append(' ');
+            sb.Append(Side == Side.White ? 'w' : 'b');
+
+            sb.Append(' ');
+            var length = sb.Length;
+
+            if ((Castle & (int)CastlingRights.WK) != default)
+            {
+                sb.Append('K');
+            }
+            if ((Castle & (int)CastlingRights.WQ) != default)
+            {
+                sb.Append('Q');
+            }
+            if ((Castle & (int)CastlingRights.BK) != default)
+            {
+                sb.Append('k');
+            }
+            if ((Castle & (int)CastlingRights.BQ) != default)
+            {
+                sb.Append('q');
+            }
+
+            if (sb.Length == length)
+            {
+                sb.Append('-');
+            }
+
+            sb.Append(' ');
+
+            sb.Append(EnPassant == BoardSquares.noSquare ? "-" : Constants.Coordinates[(int)EnPassant]);
+
+            sb.Append(" 0 1");
+
+            return sb.ToString();
         }
 
         /// <summary>

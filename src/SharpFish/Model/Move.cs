@@ -58,26 +58,22 @@ namespace SharpFish.Model
 
         public readonly bool IsCastle() => (EncodedMove & 0x180_0000) >> 23 != default;
 
-        public readonly string Print()
+        public readonly void Print()
         {
-            if (IsCastle() == default)
-            {
-                return
+            Console.WriteLine(
+                IsCastle() == default
+                ?
                     Constants.AsciiPieces[Piece()] +
                     Constants.Coordinates[SourceSquare()] +
                     (IsCapture() == default ? "" : "x") +
                     Constants.Coordinates[TargetSquare()] +
                     (PromotedPiece() == default ? "" : $"={Constants.AsciiPieces[PromotedPiece()]}") +
-                    (IsEnPassant() == default ? "" : "e.p.");
-            }
-            else
-            {
-                return IsShortCastle() ? "O-O" : "O-O-O";
-            }
+                    (IsEnPassant() == default ? "" : "e.p.")
+                : (IsShortCastle() ? "O-O" : "O-O-O"));
         }
 
 
-        public string PrintUCI()
+        public string UCIString()
         {
             return
                 Constants.Coordinates[SourceSquare()] +
