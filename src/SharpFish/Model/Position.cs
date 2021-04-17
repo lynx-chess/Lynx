@@ -157,32 +157,24 @@ namespace SharpFish.Model
                 OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
             }
 
-            if (piece == (int)Piece.K + offset)
-            {
-                Castle = RemoveCastlingRights(Castle, oldSide);
-            }
-            else if (piece == (int)Piece.R + offset)
-            {
-                // Pop corresponding Side castle bit
-                var kingQueenOffset = sourceSquare == ((int)BoardSquares.a8 + (7 * 8 * (int)oldSide))
-                    ? 1
-                    : 0;
-
-                var colorOffset = 2 - (2 * (int)oldSide);
-                Castle &= ~(1 << (kingQueenOffset + colorOffset));
-            }
-
             Side = (Side)oppositeSide;
             OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
 
-            static int RemoveCastlingRights(int castle, Side side)
-            {
-                var colorOffset = 2 - (2 * (int)side);
-                return castle & ~(0b11 << colorOffset);
-            }
+            // Updating castling rights
+            Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
+            Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
         }
 
-        public readonly bool IsValid() => throw new NotImplementedException();
+        /// <summary>
+        /// False if the <see cref="Side"/> to move king has been captured or is in check
+        /// </summary>
+        /// <returns></returns>
+        public readonly bool IsValid()
+        {
+            var kingSquare = PieceBitBoards[(int)Piece.K + Utils.PieceOffset(Side)].GetLS1BIndex();
+
+            return kingSquare >= 0 && Attacks.IsSquaredAttackedBySide(kingSquare, this, (Side)Utils.OppositeSide(Side));
+        }
 
         public readonly string FEN()
         {

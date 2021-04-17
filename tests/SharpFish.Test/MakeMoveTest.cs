@@ -945,7 +945,7 @@ namespace SharpFish.Test
         /// Nc3 should enable castling rights
         /// </summary>
         [Fact]
-        public void MovingAPieceOutOfTheCastleWayEnablesCastlingRights()
+        public void MovingAPieceOutOfTheCastleWayShouldAllowCastling()
         {
             Assert.False(true);
         }
@@ -954,16 +954,18 @@ namespace SharpFish.Test
         /// Ra2 - Ra1 - Nc3 shouldn't enable castling rights
         /// </summary>
         [Fact]
-        public void MovingAPieceOutOfTheCastleWayShouldNotEnableCastlingRights_CastlingRightsLostForever()
+        public void MovingAPieceOutOfTheCastleWayShouldNotAllowCastling_IfNoCastlingRights()
         {
             Assert.False(true);
+
+
         }
 
         /// <summary>
         /// Nc3b2 should disable castling rights
         /// </summary>
         [Fact]
-        public void MovingAPieceIntoTheCastleWayRemovesCastlingRights()
+        public void MovingAPieceIntoTheCastleWayShouldNotAllowCastling()
         {
             Assert.False(true);
         }
