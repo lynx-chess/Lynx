@@ -17,7 +17,7 @@ namespace SharpFish.Model
         {
         }
 
-        public Game(string fen): this(new Position(fen))
+        public Game(string fen) : this(new Position(fen))
         {
         }
 
@@ -32,20 +32,33 @@ namespace SharpFish.Model
         public List<Move> GetAllMoves() => MovesGenerator.GenerateAllMoves(CurrentPosition);
         public List<Move> GetAllMovesWithCaptures() => MovesGenerator.GenerateAllMoves(CurrentPosition, capturesOnly: true);
 
-        public void RevertMove()
+        public void RevertLastMove()
         {
             if (PositionHistory.Count != 0)
             {
                 CurrentPosition = PositionHistory.Last();
                 PositionHistory.Remove(CurrentPosition);
             }
+
+            if (MoveHistory.Count != 0)
+            {
+                MoveHistory.RemoveAt(MoveHistory.Count - 1);
+            }
         }
 
-        public void MakeMove(Move moveToPlay)
+        public bool MakeMove(Move moveToPlay)
         {
             PositionHistory.Add(CurrentPosition);
             CurrentPosition = new Position(CurrentPosition, moveToPlay);
             MoveHistory.Add(moveToPlay);
+
+            if (!CurrentPosition.IsValid())
+            {
+                RevertLastMove();
+                return false;
+            }
+
+            return true;
         }
     }
 }

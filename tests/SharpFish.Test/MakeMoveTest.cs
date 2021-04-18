@@ -941,35 +941,6 @@ namespace SharpFish.Test
             Assert.NotEqual(default, newPosition.Castle & (int)CastlingRights.BQ);
         }
 
-        /// <summary>
-        /// Nc3 should enable castling rights
-        /// </summary>
-        [Fact]
-        public void MovingAPieceOutOfTheCastleWayShouldAllowCastling()
-        {
-            Assert.False(true);
-        }
-
-        /// <summary>
-        /// Ra2 - Ra1 - Nc3 shouldn't enable castling rights
-        /// </summary>
-        [Fact]
-        public void MovingAPieceOutOfTheCastleWayShouldNotAllowCastling_IfNoCastlingRights()
-        {
-            Assert.False(true);
-
-
-        }
-
-        /// <summary>
-        /// Nc3b2 should disable castling rights
-        /// </summary>
-        [Fact]
-        public void MovingAPieceIntoTheCastleWayShouldNotAllowCastling()
-        {
-            Assert.False(true);
-        }
-
         #endregion
     }
 }

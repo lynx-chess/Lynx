@@ -76,13 +76,20 @@ namespace SharpFish.Test
             }
         }
 
-
-        [Fact]
-        public void IsValid()
+        [Theory]
+        [InlineData(Constants.InitialPositionFEN, true)]
+        [InlineData(Constants.EmptyBoardFEN, false)]
+        [InlineData("K/8/8/8/8/8/8/8 w - - 0 1", false)]
+        [InlineData("K/8/8/8/8/8/8/8 b - - 0 1", false)]
+        [InlineData("k/8/8/8/8/8/8/8 w - - 0 1", false)]
+        [InlineData("k/8/8/8/8/8/8/8 b - - 0 1", false)]
+        [InlineData("r1bqkbnr/pppp2pp/2n2p2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 0 1", false)]
+        [InlineData("r1bqkbnr/pppp2pp/2n2p2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 1", true)]
+        [InlineData("r1bqk1nr/pppp2pp/2n2p2/4p3/1bB1P3/3P4/PPP2PPP/RNBQK1NR b KQkq - 0 1", false)]
+        [InlineData("r1bqk1nr/pppp2pp/2n2p2/4p3/1bB1P3/3P4/PPP2PPP/RNBQK1NR w KQkq - 0 1", true)]
+        public void IsValid(string fen, bool shouldBeValid)
         {
-            Assert.True(false);
-
-
+            Assert.Equal(shouldBeValid, new Position(fen).IsValid());
         }
     }
 }

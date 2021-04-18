@@ -166,14 +166,16 @@ namespace SharpFish.Model
         }
 
         /// <summary>
-        /// False if the <see cref="Side"/> to move king has been captured or is in check
+        /// False if any of the kings has been captured, or if the opponent king is in check
         /// </summary>
         /// <returns></returns>
         public readonly bool IsValid()
         {
             var kingSquare = PieceBitBoards[(int)Piece.K + Utils.PieceOffset(Side)].GetLS1BIndex();
+            var oppositeKingSquare = PieceBitBoards[(int)Piece.K + Utils.PieceOffset((Side)Utils.OppositeSide(Side))].GetLS1BIndex();
 
-            return kingSquare >= 0 && Attacks.IsSquaredAttackedBySide(kingSquare, this, (Side)Utils.OppositeSide(Side));
+            return kingSquare >= 0 && oppositeKingSquare >= 0
+                && !Attacks.IsSquaredAttacked(oppositeKingSquare, Side, PieceBitBoards, OccupancyBitBoards);
         }
 
         public readonly string FEN()

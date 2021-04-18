@@ -21,8 +21,8 @@ namespace SharpFish.Benchmark
         {
             for (int i = 0; i < iterations; ++i)
             {
-                _ = OppositeSiteImplementations.Array[(int)Side.Black];
-                _ = OppositeSiteImplementations.Array[(int)Side.White];
+                _ = PieceOffsetImplementations.Array[(int)Side.Black];
+                _ = PieceOffsetImplementations.Array[(int)Side.White];
             }
         }
 
@@ -36,8 +36,8 @@ namespace SharpFish.Benchmark
         {
             for (int i = 0; i < iterations; ++i)
             {
-                _ = OppositeSiteImplementations.Method(Side.Black);
-                _ = OppositeSiteImplementations.Method(Side.White);
+                _ = PieceOffsetImplementations.Method(Side.Black);
+                _ = PieceOffsetImplementations.Method(Side.White);
             }
         }
     }
