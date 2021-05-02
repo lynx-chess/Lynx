@@ -28,7 +28,7 @@ jobs:
       run: dotnet build -c Release
 
     - name: Run CI tests
-      run: dotnet test -c Release --no-build --filter "TestCategory!=LongRunning&TestCategory!=ExtraLongRunning"
+      run: dotnet test -c Release --no-build
 
   long-running-tests:
     needs: build
@@ -56,4 +56,4 @@ jobs:
       run: dotnet build -c Release
 
     - name: Run long-running tests
-      run: dotnet test -c Release --no-build  -v=normal --filter "TestCategory=LongRunning"
+      run: dotnet test -c Release --no-build -v=normal --filter "TestCategory=LongRunning"
