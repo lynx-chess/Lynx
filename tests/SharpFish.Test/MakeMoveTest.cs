@@ -285,6 +285,88 @@ namespace SharpFish.Test
 
         #endregion
 
+        #region DoublePawnPush
+
+        [Fact]
+        public void DoublePawnPush_White()
+        {
+            // Arrange
+            var position = new Position("4k3/8/8/8/2p5/8/1P6/4K3 w - - 0 1");
+
+            Assert.True(position.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.b2));
+            Assert.True(position.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.c4));
+            Assert.False(position.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.b4));
+            Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.b2));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.c4));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b2));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.c4));
+            Assert.False(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b4));
+
+            var moves = MovesGenerator.GenerateAllMoves(position);
+            var enPassant = moves.Single(m => m.IsDoublePawnPush());
+
+            // Act
+            var newPosition = new Position(position, enPassant);
+
+            // Assert
+            Assert.Equal(BoardSquares.b3, newPosition.EnPassant);
+
+            Assert.True(newPosition.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.b4));
+            Assert.True(newPosition.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.c4));
+            Assert.False(newPosition.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.b2));
+            Assert.False(newPosition.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.b3));
+
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.b4));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.b2));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.b3));
+
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b4));
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.c4));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b2));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b3));
+        }
+
+        [Fact]
+        public void DoublePawnPush_Black()
+        {
+            // Arrange
+            var position = new Position("4k3/2p5/8/1P6/8/8/8/4K3 b - - 0 1");
+
+            Assert.True(position.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.c7));
+            Assert.True(position.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.b5));
+            Assert.False(position.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.c5));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.c7));
+            Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.b5));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.c7));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b5));
+            Assert.False(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.c5));
+
+            var moves = MovesGenerator.GenerateAllMoves(position);
+            var enPassant = moves.Single(m => m.IsDoublePawnPush());
+
+            // Act
+            var newPosition = new Position(position, enPassant);
+
+            // Assert
+            Assert.Equal(BoardSquares.c6, newPosition.EnPassant);
+
+            Assert.True(newPosition.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.c5));
+            Assert.True(newPosition.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.b5));
+            Assert.False(newPosition.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.c7));
+            Assert.False(newPosition.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.c6));
+
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.c5));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.c2));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.b6));
+
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b5));
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.c5));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.c7));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.c6));
+        }
+
+        #endregion
+
         #region EnPassant
 
         [Fact]

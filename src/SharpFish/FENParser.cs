@@ -50,12 +50,12 @@ namespace SharpFish
 
                 if (parts.Length < 4 || !int.TryParse(parts[3], out halfMoveClock))
                 {
-                    Logger.Warn("No half move clock detected");
+                    Logger.Debug("No half move clock detected");
                 }
 
                 if (parts.Length < 5 || !int.TryParse(parts[4], out fullMoveCounter))
                 {
-                    Logger.Warn("No full move counter detected");
+                    Logger.Debug("No full move counter detected");
                 }
             }
             catch (Exception e)

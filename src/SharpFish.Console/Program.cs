@@ -3,6 +3,7 @@ using SharpFish.Internal;
 using SharpFish.Model;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using static SharpFish.Model.Move;
@@ -30,7 +31,8 @@ using static SharpFish.Model.Move;
 //_26_Piece_Moves();
 //_27_Move_Encoding();
 //_29_Move_List();
-_32_Make_Move();
+//_32_Make_Move();
+_42_Perft();
 
 
 const string TrickyPosition = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
@@ -499,3 +501,19 @@ static void _32_Make_Move()
     }
 }
 
+static void _42_Perft()
+{
+    // Leaf nodes (number of positions) reached dring the test if the move generator at a given depth
+
+    var pos = new Position(TrickyPosition);
+
+    for (int depth = 0; depth < 7; ++depth)
+    {
+        var sw = new Stopwatch();
+        sw.Start();
+        var nodes = MovesGenerator.Perft(pos, depth);
+        sw.Stop();
+
+        Console.WriteLine($"Depth {depth}\tNodes: {nodes}\tTime: {sw.ElapsedMilliseconds}ms");
+    }
+}

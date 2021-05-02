@@ -88,7 +88,7 @@ namespace SharpFish.Model
                 if (move.IsEnPassant())
                 {
                     var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                    Debug.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare));
+                    Debug.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
 
                     PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
                     OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
@@ -130,7 +130,11 @@ namespace SharpFish.Model
             }
             else if (move.IsDoublePawnPush())
             {
-                EnPassant = (BoardSquares)targetSquare;
+                var pawnPush = +8 - ((int)oldSide * 16);
+                var enPassantSquare = sourceSquare + pawnPush;
+                Debug.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant squre : {enPassantSquare}");
+
+                EnPassant = (BoardSquares)enPassantSquare;
             }
             else if (move.IsShortCastle())
             {
