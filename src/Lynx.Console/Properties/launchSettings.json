@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "SharpFish.Console": {
+    "Lynx.Console": {
       "commandName": "Project"
     },
     "WSL 2": {
