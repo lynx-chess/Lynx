@@ -35,12 +35,12 @@ jobs:
 
     - name: Run ${{ github.event.inputs.new_package_version }} benchmark
       run: dotnet run -c Release --no-build --filter ${{ github.event.inputs.new_package_version }}
-      working-directory: ./src/SharpFish.Benchmark
+      working-directory: ./src/Lynx.Benchmark
 
     - name: 'Upload ${{ matrix.os }} artifacts'
       continue-on-error: true
       uses: actions/upload-artifact@v2
       with:
         name: artifacts-${{ matrix.os }}-${{ github.run_number }}
-        path: ./src/SharpFish.Benchmark/BenchmarkDotNet.Artifacts/results/
+        path: ./src/Lynx.Benchmark/BenchmarkDotNet.Artifacts/results/
         if-no-files-found: error
