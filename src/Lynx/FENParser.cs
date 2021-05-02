@@ -179,7 +179,7 @@ namespace Lynx
                 if (!BitBoard.GetBit(pawnBitBoard, pawnSquare))
                 {
                     success = false;
-                    Logger.Error($"Invalid board: en passant square {enPassantString}, but no {side} pawn located in {pawnBitBoard}");
+                    Logger.Error($"Invalid board: en passant square {enPassantString}, but no {side} pawn located in {pawnSquare}");
                 }
             }
             else if (enPassantString != "-")
