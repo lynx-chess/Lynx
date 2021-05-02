@@ -31,8 +31,8 @@ using static Lynx.Model.Move;
 //_27_Move_Encoding();
 //_29_Move_List();
 //_32_Make_Move();
-_42_Perft();
-
+//_42_Perft();
+_43_Perft();
 
 const string TrickyPosition = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
 const string TrickyPositionReversed = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1";
@@ -507,9 +507,15 @@ static void _42_Perft()
     {
         var sw = new Stopwatch();
         sw.Start();
-        var nodes = MoveGenerator.Perft(pos, depth);
+        var nodes = Perft.Results(pos, depth);
         sw.Stop();
 
         Console.WriteLine($"Depth {depth}\tNodes: {nodes}\tTime: {sw.ElapsedMilliseconds}ms");
     }
+}
+
+static void _43_Perft()
+{
+    Perft.Divide(new Position(Constants.InitialPositionFEN), 5);
+    Perft.Divide(new Position(TrickyPosition), 5);
 }

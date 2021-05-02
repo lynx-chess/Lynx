@@ -3,7 +3,7 @@ name: CI
 on:
   workflow_dispatch:
     inputs:
-      Benchmark:
+      benchmark_name:
         description: 'Benchmark name'
         default: '*'
         required: false
@@ -33,7 +33,7 @@ jobs:
     - name: Build
       run: dotnet build -c Release
 
-    - name: Run ${{ github.event.inputs.new_package_version }} benchmark
+    - name: Run ${{ github.event.inputs.benchmark_name }} benchmark
       run: dotnet run -c Release --no-build --filter ${{ github.event.inputs.new_package_version }}
       working-directory: ./src/Lynx.Benchmark
 
@@ -41,6 +41,6 @@ jobs:
       continue-on-error: true
       uses: actions/upload-artifact@v2
       with:
-        name: artifacts-${{ matrix.os }}-${{ github.run_number }}
+        name: artifacts-${{ matrix.os }}-${{ github.benchmark_name }}
         path: ./src/Lynx.Benchmark/BenchmarkDotNet.Artifacts/results/
         if-no-files-found: error

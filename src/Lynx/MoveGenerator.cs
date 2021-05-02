@@ -55,26 +55,6 @@ namespace Lynx
             return moves;
         }
 
-        public static long Perft(Position position, int depth, long nodes = 0)
-        {
-            if (depth != 0)
-            {
-                foreach (var move in GenerateAllMoves(position))
-                {
-                    var newPosition = new Position(position, move);
-
-                    if (newPosition.IsValid())
-                    {
-                        nodes = Perft(newPosition, depth - 1, nodes);
-                    }
-                }
-
-                return nodes;
-            }
-
-            return ++nodes;
-        }
-
         internal static IEnumerable<Move> GeneratePawnMoves(Position position, int offset)
         {
             int sourceSquare, targetSquare;
