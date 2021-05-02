@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        #os: [ubuntu-latest, windows-latest, macOS-latest]
+        os: [ubuntu-latest]
+      fail-fast: false
+
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+
+    steps:
+    - uses: actions/checkout@v2.3.4
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1.7.2
+      with:
+        dotnet-version: 5.0.x
+
+    - name: Build
+      run: dotnet build -c Release
+
+    - name: Run CI tests
+      run: dotnet test -c Release --no-build --filter "TestCategory!=LongRunning&TestCategory!=ExtraLongRunning"
+
+  long-running-tests:
+    needs: build
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        #os: [ubuntu-latest, windows-latest, macOS-latest]
+        os: [ubuntu-latest]
+      fail-fast: false
+
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+
+    steps:
+    - uses: actions/checkout@v2.3.4
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1.7.2
+      with:
+        dotnet-version: 5.0.x
+
+    - name: Build
+      run: dotnet build -c Release
+
+    - name: Run long-running tests
+      run: dotnet test -c Release --no-build  -v=normal --filter "TestCategory=LongRunning"

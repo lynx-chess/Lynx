@@ -14,6 +14,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A70D03B5-17BC-4017-9053-15715998735E}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		.github\workflows\benchmarks.yml = .github\workflows\benchmarks.yml
+		.github\workflows\ci.yml = .github\workflows\ci.yml
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpFish.NUnit.Test", "tests\SharpFish.NUnit.Test\SharpFish.NUnit.Test.csproj", "{43CC4641-6B53-4956-93BA-FF5B43CBAEE0}"
