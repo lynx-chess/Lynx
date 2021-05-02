@@ -3,7 +3,7 @@ using System;
 
 namespace Lynx.Internal
 {
-    internal static class ConstantsGenerators
+    internal static class ConstantGenerator
     {
         public static ulong NotAFile()
         {
@@ -118,7 +118,7 @@ namespace Lynx.Internal
                 {
                     int square = BitBoard.SquareIndex(rank, file);
 
-                    var bishopOccupancy = AttacksGenerator.MaskBishopOccupancy(square);
+                    var bishopOccupancy = AttackGenerator.MaskBishopOccupancy(square);
                     Console.Write($"{bishopOccupancy.CountBits()}, ");
                 }
 
@@ -134,7 +134,7 @@ namespace Lynx.Internal
                 {
                     int square = BitBoard.SquareIndex(rank, file);
 
-                    var bishopOccupancy = AttacksGenerator.MaskRookOccupancy(square);
+                    var bishopOccupancy = AttackGenerator.MaskRookOccupancy(square);
                     Console.Write($"{bishopOccupancy.CountBits()}, ");
                 }
 

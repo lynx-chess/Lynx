@@ -1,5 +1,5 @@
 ﻿using Xunit;
-using BS = Lynx.Model.BoardSquares;
+using BS = Lynx.Model.BoardSquare;
 
 namespace Lynx.Test.PregeneratedAttacks
 {
@@ -25,7 +25,7 @@ namespace Lynx.Test.PregeneratedAttacks
         [InlineData(BS.d4, new[] { BS.g7, BS.f6, BS.e5, BS.c3, BS.b2, BS.b6, BS.c5, BS.e3, BS.f2 })]
         public void MaskBishopOccupancy(BS bishopSquare, BS[] attackedSquares)
         {
-            var attacks = AttacksGenerator.MaskBishopOccupancy((int)bishopSquare);
+            var attacks = AttackGenerator.MaskBishopOccupancy((int)bishopSquare);
 
             foreach (var attackedSquare in attackedSquares)
             {

@@ -11,7 +11,7 @@ namespace Lynx.Test
         {
             for (int square = 0; square < 64; ++square)
             {
-                var mask = AttacksGenerator.MaskBishopOccupancy(square);
+                var mask = AttackGenerator.MaskBishopOccupancy(square);
 
                 Assert.Equal(Constants.BishopRelevantOccupancyBits[square], mask.CountBits());
             }
@@ -22,7 +22,7 @@ namespace Lynx.Test
         {
             for (int square = 0; square < 64; ++square)
             {
-                var mask = AttacksGenerator.MaskRookOccupancy(square);
+                var mask = AttackGenerator.MaskRookOccupancy(square);
 
                 Assert.Equal(Constants.RookRelevantOccupancyBits[square], mask.CountBits());
             }
@@ -55,14 +55,14 @@ namespace Lynx.Test
         [Fact]
         public void EnPassantCaptureSquares()
         {
-            Assert.Equal((int)BoardSquares.e5, Constants.EnPassantCaptureSquares[(int)BoardSquares.e6]);
-            for (int square = (int)BoardSquares.a6; square <= (int)BoardSquares.h6; ++square)
+            Assert.Equal((int)BoardSquare.e5, Constants.EnPassantCaptureSquares[(int)BoardSquare.e6]);
+            for (int square = (int)BoardSquare.a6; square <= (int)BoardSquare.h6; ++square)
             {
                 Assert.Equal(square + 8, Constants.EnPassantCaptureSquares[square]);
             }
 
-            Assert.Equal((int)BoardSquares.d4, Constants.EnPassantCaptureSquares[(int)BoardSquares.d3]);
-            for (int square = (int)BoardSquares.a3; square <= (int)BoardSquares.h3; ++square)
+            Assert.Equal((int)BoardSquare.d4, Constants.EnPassantCaptureSquares[(int)BoardSquare.d3]);
+            for (int square = (int)BoardSquare.a3; square <= (int)BoardSquare.h3; ++square)
             {
                 Assert.Equal(square - 8, Constants.EnPassantCaptureSquares[square]);
             }

@@ -31,12 +31,12 @@ namespace Lynx.Benchmark
 
             public CustomPosition()
             {
-                _kingAttacks = AttacksGenerator.InitializeKingAttacks();
-                _pawnAttacks = AttacksGenerator.InitializePawnAttacks();
-                _knightAttacks = AttacksGenerator.InitializeKnightAttacks();
+                _kingAttacks = AttackGenerator.InitializeKingAttacks();
+                _pawnAttacks = AttackGenerator.InitializePawnAttacks();
+                _knightAttacks = AttackGenerator.InitializeKnightAttacks();
 
-                (_bishopOccupancyMasks, _bishopAttacks) = AttacksGenerator.InitializeBishopAttacks();
-                (_rookOccupancyMasks, _rookAttacks) = AttacksGenerator.InitializeRookAttacks();
+                (_bishopOccupancyMasks, _bishopAttacks) = AttackGenerator.InitializeBishopAttacks();
+                (_rookOccupancyMasks, _rookAttacks) = AttackGenerator.InitializeRookAttacks();
             }
 
             /// <summary>
@@ -47,8 +47,8 @@ namespace Lynx.Benchmark
             {
                 InitializePawnKnightAndKingAttacks();
 
-                (_bishopOccupancyMasks, _bishopAttacks) = AttacksGenerator.InitializeBishopAttacks();
-                (_rookOccupancyMasks, _rookAttacks) = AttacksGenerator.InitializeRookAttacks();
+                (_bishopOccupancyMasks, _bishopAttacks) = AttackGenerator.InitializeBishopAttacks();
+                (_rookOccupancyMasks, _rookAttacks) = AttackGenerator.InitializeRookAttacks();
             }
 
             /// <summary>
@@ -67,12 +67,12 @@ namespace Lynx.Benchmark
             {
                 for (int square = 0; square < 64; ++square)
                 {
-                    _pawnAttacks[0, square] = AttacksGenerator.MaskPawnAttacks(square, isWhite: false);
-                    _pawnAttacks[1, square] = AttacksGenerator.MaskPawnAttacks(square, isWhite: true);
+                    _pawnAttacks[0, square] = AttackGenerator.MaskPawnAttacks(square, isWhite: false);
+                    _pawnAttacks[1, square] = AttackGenerator.MaskPawnAttacks(square, isWhite: true);
 
-                    _knightAttacks[square] = AttacksGenerator.MaskKnightAttacks(square);
+                    _knightAttacks[square] = AttackGenerator.MaskKnightAttacks(square);
 
-                    _kingAttacks[square] = AttacksGenerator.MaskKingAttacks(square);
+                    _kingAttacks[square] = AttackGenerator.MaskKingAttacks(square);
                 }
             }
 
@@ -80,8 +80,8 @@ namespace Lynx.Benchmark
             {
                 for (int square = 0; square < 64; ++square)
                 {
-                    _bishopOccupancyMasks[square] = AttacksGenerator.MaskBishopOccupancy(square);
-                    _rookOccupancyMasks[square] = AttacksGenerator.MaskRookOccupancy(square);
+                    _bishopOccupancyMasks[square] = AttackGenerator.MaskBishopOccupancy(square);
+                    _rookOccupancyMasks[square] = AttackGenerator.MaskRookOccupancy(square);
 
                     var attackMask = isBishop
                                         ? _bishopOccupancyMasks[square]
@@ -96,19 +96,19 @@ namespace Lynx.Benchmark
                     {
                         if (isBishop)
                         {
-                            var occupancy = AttacksGenerator.SetBishopOrRookOccupancy(index, attackMask);
+                            var occupancy = AttackGenerator.SetBishopOrRookOccupancy(index, attackMask);
 
                             var magicIndex = (occupancy.Board * Constants.BishopMagicNumbers[square]) >> (64 - relevantBitsCount);
 
-                            _bishopAttacks[square, magicIndex] = AttacksGenerator.GenerateBishopAttacksOnTheFly(square, occupancy);
+                            _bishopAttacks[square, magicIndex] = AttackGenerator.GenerateBishopAttacksOnTheFly(square, occupancy);
                         }
                         else
                         {
-                            var occupancy = AttacksGenerator.SetBishopOrRookOccupancy(index, attackMask);
+                            var occupancy = AttackGenerator.SetBishopOrRookOccupancy(index, attackMask);
 
                             var magicIndex = (occupancy.Board * Constants.RookMagicNumbers[square]) >> (64 - relevantBitsCount);
 
-                            _rookAttacks[square, magicIndex] = AttacksGenerator.GenerateRookAttacksOnTheFly(square, occupancy);
+                            _rookAttacks[square, magicIndex] = AttackGenerator.GenerateRookAttacksOnTheFly(square, occupancy);
                         }
                     }
                 }

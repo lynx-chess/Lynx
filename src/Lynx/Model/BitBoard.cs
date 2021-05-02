@@ -10,7 +10,7 @@ namespace Lynx.Model
 
         public BitBoard(ulong value) { Board = value; }
 
-        public BitBoard(params BoardSquares[] occupiedSquares)
+        public BitBoard(params BoardSquare[] occupiedSquares)
         {
             Board = default;
 
@@ -108,7 +108,7 @@ namespace Lynx.Model
         {
             if (bitboard == default)
             {
-                return (int)BoardSquares.noSquare;
+                return (int)BoardSquare.noSquare;
             }
 
             return CountBits(bitboard ^ (bitboard - 1)) - 1;
@@ -143,11 +143,11 @@ namespace Lynx.Model
 
         #region Methods accepting BoardSquares
 
-        public readonly bool GetBit(BoardSquares square) => GetBit((int)square);
+        public readonly bool GetBit(BoardSquare square) => GetBit((int)square);
 
-        public void SetBit(BoardSquares square) => SetBit((int)square);
+        public void SetBit(BoardSquare square) => SetBit((int)square);
 
-        public void PopBit(BoardSquares square) => PopBit((int)square);
+        public void PopBit(BoardSquare square) => PopBit((int)square);
 
         #endregion
     }

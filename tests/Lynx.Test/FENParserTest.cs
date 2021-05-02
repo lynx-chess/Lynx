@@ -49,7 +49,7 @@ namespace Lynx.Test
             Assert.Equal(0b0010_0100UL << (0 * 8), blackBishops.Board);
 
             var whiteQueen = pieceBitBoards[(int)Piece.Q];
-            Assert.Equal(0b0000_1000UL << (int)BoardSquares.a1, whiteQueen.Board);
+            Assert.Equal(0b0000_1000UL << (int)BoardSquare.a1, whiteQueen.Board);
             var blackQueen = pieceBitBoards[(int)Piece.q];
             Assert.Equal(0b0000_1000UL << (0 * 8), blackQueen.Board);
 
@@ -73,47 +73,47 @@ namespace Lynx.Test
             // Assert
             Assert.True(success);
 
-            Assert.True(pieceBitBoards[(int)Piece.p].GetBit(BoardSquares.a7));
-            Assert.True(pieceBitBoards[(int)Piece.p].GetBit(BoardSquares.b4));
-            Assert.True(pieceBitBoards[(int)Piece.p].GetBit(BoardSquares.c7));
-            Assert.True(pieceBitBoards[(int)Piece.p].GetBit(BoardSquares.d7));
-            Assert.True(pieceBitBoards[(int)Piece.p].GetBit(BoardSquares.e6));
-            Assert.True(pieceBitBoards[(int)Piece.p].GetBit(BoardSquares.f7));
-            Assert.True(pieceBitBoards[(int)Piece.p].GetBit(BoardSquares.g6));
-            Assert.True(pieceBitBoards[(int)Piece.p].GetBit(BoardSquares.h3));
+            Assert.True(pieceBitBoards[(int)Piece.p].GetBit(BoardSquare.a7));
+            Assert.True(pieceBitBoards[(int)Piece.p].GetBit(BoardSquare.b4));
+            Assert.True(pieceBitBoards[(int)Piece.p].GetBit(BoardSquare.c7));
+            Assert.True(pieceBitBoards[(int)Piece.p].GetBit(BoardSquare.d7));
+            Assert.True(pieceBitBoards[(int)Piece.p].GetBit(BoardSquare.e6));
+            Assert.True(pieceBitBoards[(int)Piece.p].GetBit(BoardSquare.f7));
+            Assert.True(pieceBitBoards[(int)Piece.p].GetBit(BoardSquare.g6));
+            Assert.True(pieceBitBoards[(int)Piece.p].GetBit(BoardSquare.h3));
 
-            Assert.True(pieceBitBoards[(int)Piece.r].GetBit(BoardSquares.a8));
-            Assert.True(pieceBitBoards[(int)Piece.r].GetBit(BoardSquares.h8));
+            Assert.True(pieceBitBoards[(int)Piece.r].GetBit(BoardSquare.a8));
+            Assert.True(pieceBitBoards[(int)Piece.r].GetBit(BoardSquare.h8));
 
-            Assert.True(pieceBitBoards[(int)Piece.n].GetBit(BoardSquares.b6));
-            Assert.True(pieceBitBoards[(int)Piece.n].GetBit(BoardSquares.f6));
+            Assert.True(pieceBitBoards[(int)Piece.n].GetBit(BoardSquare.b6));
+            Assert.True(pieceBitBoards[(int)Piece.n].GetBit(BoardSquare.f6));
 
-            Assert.True(pieceBitBoards[(int)Piece.b].GetBit(BoardSquares.a6));
-            Assert.True(pieceBitBoards[(int)Piece.b].GetBit(BoardSquares.g7));
+            Assert.True(pieceBitBoards[(int)Piece.b].GetBit(BoardSquare.a6));
+            Assert.True(pieceBitBoards[(int)Piece.b].GetBit(BoardSquare.g7));
 
-            Assert.True(pieceBitBoards[(int)Piece.q].GetBit(BoardSquares.e7));
-            Assert.True(pieceBitBoards[(int)Piece.k].GetBit(BoardSquares.e8));
+            Assert.True(pieceBitBoards[(int)Piece.q].GetBit(BoardSquare.e7));
+            Assert.True(pieceBitBoards[(int)Piece.k].GetBit(BoardSquare.e8));
 
-            Assert.True(pieceBitBoards[(int)Piece.P].GetBit(BoardSquares.a2));
-            Assert.True(pieceBitBoards[(int)Piece.P].GetBit(BoardSquares.b2));
-            Assert.True(pieceBitBoards[(int)Piece.P].GetBit(BoardSquares.c2));
-            Assert.True(pieceBitBoards[(int)Piece.P].GetBit(BoardSquares.d5));
-            Assert.True(pieceBitBoards[(int)Piece.P].GetBit(BoardSquares.e4));
-            Assert.True(pieceBitBoards[(int)Piece.P].GetBit(BoardSquares.f2));
-            Assert.True(pieceBitBoards[(int)Piece.P].GetBit(BoardSquares.g2));
-            Assert.True(pieceBitBoards[(int)Piece.P].GetBit(BoardSquares.h2));
+            Assert.True(pieceBitBoards[(int)Piece.P].GetBit(BoardSquare.a2));
+            Assert.True(pieceBitBoards[(int)Piece.P].GetBit(BoardSquare.b2));
+            Assert.True(pieceBitBoards[(int)Piece.P].GetBit(BoardSquare.c2));
+            Assert.True(pieceBitBoards[(int)Piece.P].GetBit(BoardSquare.d5));
+            Assert.True(pieceBitBoards[(int)Piece.P].GetBit(BoardSquare.e4));
+            Assert.True(pieceBitBoards[(int)Piece.P].GetBit(BoardSquare.f2));
+            Assert.True(pieceBitBoards[(int)Piece.P].GetBit(BoardSquare.g2));
+            Assert.True(pieceBitBoards[(int)Piece.P].GetBit(BoardSquare.h2));
 
-            Assert.True(pieceBitBoards[(int)Piece.R].GetBit(BoardSquares.a1));
-            Assert.True(pieceBitBoards[(int)Piece.R].GetBit(BoardSquares.h1));
+            Assert.True(pieceBitBoards[(int)Piece.R].GetBit(BoardSquare.a1));
+            Assert.True(pieceBitBoards[(int)Piece.R].GetBit(BoardSquare.h1));
 
-            Assert.True(pieceBitBoards[(int)Piece.N].GetBit(BoardSquares.c3));
-            Assert.True(pieceBitBoards[(int)Piece.N].GetBit(BoardSquares.e5));
+            Assert.True(pieceBitBoards[(int)Piece.N].GetBit(BoardSquare.c3));
+            Assert.True(pieceBitBoards[(int)Piece.N].GetBit(BoardSquare.e5));
 
-            Assert.True(pieceBitBoards[(int)Piece.B].GetBit(BoardSquares.d2));
-            Assert.True(pieceBitBoards[(int)Piece.B].GetBit(BoardSquares.e2));
+            Assert.True(pieceBitBoards[(int)Piece.B].GetBit(BoardSquare.d2));
+            Assert.True(pieceBitBoards[(int)Piece.B].GetBit(BoardSquare.e2));
 
-            Assert.True(pieceBitBoards[(int)Piece.Q].GetBit(BoardSquares.f3));
-            Assert.True(pieceBitBoards[(int)Piece.K].GetBit(BoardSquares.e1));
+            Assert.True(pieceBitBoards[(int)Piece.Q].GetBit(BoardSquare.f3));
+            Assert.True(pieceBitBoards[(int)Piece.K].GetBit(BoardSquare.e1));
         }
 
         [Theory]
@@ -227,15 +227,15 @@ namespace Lynx.Test
         }
 
         [Theory]
-        [InlineData("rnbqkbnr/pppp1ppp/8/8/3pP3/8/PPPP1PPP/RNBQKBNR b Qq e3 0 1", BoardSquares.e3)]
-        [InlineData("rnbqkbnr/ppppp1pp/8/8/4pP2/8/PPPPP1PP/RNBQKBNR b Qq f3 0 1", BoardSquares.f3)]
-        [InlineData("rnbqkbnr/pp1ppppp/8/1Pp5/8/8/P1PPPPPP/RNBQKBNR w KQkq c6 0 1", BoardSquares.c6)]
-        [InlineData("rnbqkbnr/ppp1pppp/8/2Pp4/8/8/PP1PPPPP/RNBQKBNR w KQkq d6 0 1", BoardSquares.d6)]
-        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", BoardSquares.noSquare)]
-        public void EnPassant(string fen, BoardSquares expectedEnPassantSquare)
+        [InlineData("rnbqkbnr/pppp1ppp/8/8/3pP3/8/PPPP1PPP/RNBQKBNR b Qq e3 0 1", BoardSquare.e3)]
+        [InlineData("rnbqkbnr/ppppp1pp/8/8/4pP2/8/PPPPP1PP/RNBQKBNR b Qq f3 0 1", BoardSquare.f3)]
+        [InlineData("rnbqkbnr/pp1ppppp/8/1Pp5/8/8/P1PPPPPP/RNBQKBNR w KQkq c6 0 1", BoardSquare.c6)]
+        [InlineData("rnbqkbnr/ppp1pppp/8/2Pp4/8/8/PP1PPPPP/RNBQKBNR w KQkq d6 0 1", BoardSquare.d6)]
+        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", BoardSquare.noSquare)]
+        public void EnPassant(string fen, BoardSquare expectedEnPassantSquare)
         {
             bool success;
-            BoardSquares enPassant;
+            BoardSquare enPassant;
             (success, _, _, _, _, enPassant, _, _) = FENParser.ParseFEN(fen);
 
             Assert.True(success);

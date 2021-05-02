@@ -55,13 +55,13 @@ namespace Lynx.Test
             for (int piece = 0; piece < position.PieceBitBoards.Length; ++piece)
             {
                 position.PieceBitBoards[piece].ResetLS1B();
-                position.PieceBitBoards[piece].SetBit((int)BoardSquares.e5 + piece);
+                position.PieceBitBoards[piece].SetBit((int)BoardSquare.e5 + piece);
             }
 
             for (int occupancy = 0; occupancy < position.OccupancyBitBoards.Length; ++occupancy)
             {
                 position.OccupancyBitBoards[occupancy].ResetLS1B();
-                position.OccupancyBitBoards[occupancy].SetBit((int)BoardSquares.g7 + occupancy);
+                position.OccupancyBitBoards[occupancy].SetBit((int)BoardSquare.g7 + occupancy);
             }
 
             // Assert

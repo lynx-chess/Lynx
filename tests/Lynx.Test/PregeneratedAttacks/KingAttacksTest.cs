@@ -1,5 +1,5 @@
 ﻿using Xunit;
-using BS = Lynx.Model.BoardSquares;
+using BS = Lynx.Model.BoardSquare;
 
 namespace Lynx.Test.PregeneratedAttacks
 {
@@ -27,7 +27,7 @@ namespace Lynx.Test.PregeneratedAttacks
         [InlineData(BS.d5, new[] { BS.c6, BS.d6, BS.e6, BS.c5, BS.e5, BS.c4, BS.d4, BS.e4 })]
         public void MaskKingAttacks(BS kingSquare, BS[] attackedSquares)
         {
-            var attacks = AttacksGenerator.MaskKingAttacks((int)kingSquare);
+            var attacks = AttackGenerator.MaskKingAttacks((int)kingSquare);
             ValidateAttacks(attackedSquares, attacks);
 
             attacks = Attacks.KingAttacks[(int)kingSquare];

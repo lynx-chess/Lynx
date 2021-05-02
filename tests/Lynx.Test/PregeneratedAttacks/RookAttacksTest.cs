@@ -1,6 +1,6 @@
 ﻿using Lynx.Model;
 using Xunit;
-using BS = Lynx.Model.BoardSquares;
+using BS = Lynx.Model.BoardSquare;
 
 namespace Lynx.Test.PregeneratedAttacks
 {
@@ -30,7 +30,7 @@ namespace Lynx.Test.PregeneratedAttacks
             var occupiedBoard = new BitBoard(occupiedSquares);
 
             // Act
-            var attacks = AttacksGenerator.GenerateRookAttacksOnTheFly((int)rookSquare, occupiedBoard);
+            var attacks = AttackGenerator.GenerateRookAttacksOnTheFly((int)rookSquare, occupiedBoard);
 
             // Assert
             foreach (var attackedSquare in attackedSquares)
@@ -43,7 +43,7 @@ namespace Lynx.Test.PregeneratedAttacks
         }
 
         /// <summary>
-        /// Implicitly tests <see cref="AttacksGenerator.InitializeRookAttacks"/> and <see cref="Constants.RookMagicNumbers"/>
+        /// Implicitly tests <see cref="AttackGenerator.InitializeRookAttacks"/> and <see cref="Constants.RookMagicNumbers"/>
         /// </summary>
         /// <param name="rookSquare"></param>
         /// <param name="occupiedSquares"></param>

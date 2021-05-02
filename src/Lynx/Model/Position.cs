@@ -18,7 +18,7 @@ namespace Lynx.Model
 
         public Side Side { get; }
 
-        public BoardSquares EnPassant { get; }
+        public BoardSquare EnPassant { get; }
 
         public int Castle { get; }
 
@@ -72,7 +72,7 @@ namespace Lynx.Model
                 newPiece = promotedPiece;
             }
 
-            EnPassant = BoardSquares.noSquare;
+            EnPassant = BoardSquare.noSquare;
 
             PieceBitBoards[piece].PopBit(sourceSquare);
             OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
@@ -112,16 +112,16 @@ namespace Lynx.Model
                     {
                         switch (targetSquare)
                         {
-                            case (int)BoardSquares.a1:
+                            case (int)BoardSquare.a1:
                                 Castle &= ~(int)CastlingRights.WQ;
                                 break;
-                            case (int)BoardSquares.h1:
+                            case (int)BoardSquare.h1:
                                 Castle &= ~(int)CastlingRights.WK;
                                 break;
-                            case (int)BoardSquares.a8:
+                            case (int)BoardSquare.a8:
                                 Castle &= ~(int)CastlingRights.BQ;
                                 break;
-                            case (int)BoardSquares.h8:
+                            case (int)BoardSquare.h8:
                                 Castle &= ~(int)CastlingRights.BK;
                                 break;
                         }
@@ -134,7 +134,7 @@ namespace Lynx.Model
                 var enPassantSquare = sourceSquare + pawnPush;
                 Debug.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant squre : {enPassantSquare}");
 
-                EnPassant = (BoardSquares)enPassantSquare;
+                EnPassant = (BoardSquare)enPassantSquare;
             }
             else if (move.IsShortCastle())
             {
@@ -270,7 +270,7 @@ namespace Lynx.Model
 
             sb.Append(' ');
 
-            sb.Append(EnPassant == BoardSquares.noSquare ? "-" : Constants.Coordinates[(int)EnPassant]);
+            sb.Append(EnPassant == BoardSquare.noSquare ? "-" : Constants.Coordinates[(int)EnPassant]);
 
             sb.Append(" 0 1");
 
@@ -321,7 +321,7 @@ namespace Lynx.Model
 
             Console.WriteLine();
             Console.WriteLine($"    Side:\t{Side}");
-            Console.WriteLine($"    Enpassant:\t{(EnPassant == BoardSquares.noSquare ? "no" : Constants.Coordinates[(int)EnPassant])}");
+            Console.WriteLine($"    Enpassant:\t{(EnPassant == BoardSquare.noSquare ? "no" : Constants.Coordinates[(int)EnPassant])}");
             Console.WriteLine($"    Castling:\t" +
                 $"{((Castle & (int)CastlingRights.WK) != default ? 'K' : '-')}" +
                 $"{((Castle & (int)CastlingRights.WQ) != default ? 'Q' : '-')} | " +

@@ -19,11 +19,11 @@ namespace Lynx.Test.MoveGeneration
         {
             var position = new Position(fen);
             var offset = Utils.PieceOffset(position.Side);
-            var moves = MovesGenerator.GeneratePieceMoves((int)Piece.N + offset, position);
+            var moves = MoveGenerator.GeneratePieceMoves((int)Piece.N + offset, position);
 
             Assert.Equal(expectedMoves, moves.Count());
 
-            Assert.Equal(moves, MovesGenerator.GenerateKnightMoves(position));
+            Assert.Equal(moves, MoveGenerator.GenerateKnightMoves(position));
         }
 
         /// <summary>
@@ -46,53 +46,53 @@ namespace Lynx.Test.MoveGeneration
             var position = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
             var offset = Utils.PieceOffset(position.Side);
             var piece = (int)Piece.N + offset;
-            var moves = MovesGenerator.GeneratePieceMoves(piece, position);
+            var moves = MoveGenerator.GeneratePieceMoves(piece, position);
 
             Assert.Equal(11, moves.Count(m => m.Piece() == piece));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquares.c3
-                && m.TargetSquare() == (int)BoardSquares.a4));
+                m.SourceSquare() == (int)BoardSquare.c3
+                && m.TargetSquare() == (int)BoardSquare.a4));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquares.c3
-                && m.TargetSquare() == (int)BoardSquares.b5));
+                m.SourceSquare() == (int)BoardSquare.c3
+                && m.TargetSquare() == (int)BoardSquare.b5));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquares.c3
-                && m.TargetSquare() == (int)BoardSquares.b1));
+                m.SourceSquare() == (int)BoardSquare.c3
+                && m.TargetSquare() == (int)BoardSquare.b1));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquares.c3
-                && m.TargetSquare() == (int)BoardSquares.d1));
+                m.SourceSquare() == (int)BoardSquare.c3
+                && m.TargetSquare() == (int)BoardSquare.d1));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquares.e5
-                && m.TargetSquare() == (int)BoardSquares.c4));
+                m.SourceSquare() == (int)BoardSquare.e5
+                && m.TargetSquare() == (int)BoardSquare.c4));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquares.e5
-                && m.TargetSquare() == (int)BoardSquares.c6));
+                m.SourceSquare() == (int)BoardSquare.e5
+                && m.TargetSquare() == (int)BoardSquare.c6));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquares.e5
-                && m.TargetSquare() == (int)BoardSquares.g4));
+                m.SourceSquare() == (int)BoardSquare.e5
+                && m.TargetSquare() == (int)BoardSquare.g4));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquares.e5
-                && m.TargetSquare() == (int)BoardSquares.d3));
+                m.SourceSquare() == (int)BoardSquare.e5
+                && m.TargetSquare() == (int)BoardSquare.d3));
 
             Assert.Equal(1, moves.Count(m =>
-               m.SourceSquare() == (int)BoardSquares.e5
-                && m.TargetSquare() == (int)BoardSquares.d7));
+               m.SourceSquare() == (int)BoardSquare.e5
+                && m.TargetSquare() == (int)BoardSquare.d7));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquares.e5
-                && m.TargetSquare() == (int)BoardSquares.f7));
+                m.SourceSquare() == (int)BoardSquare.e5
+                && m.TargetSquare() == (int)BoardSquare.f7));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquares.e5
-                && m.TargetSquare() == (int)BoardSquares.g6));
+                m.SourceSquare() == (int)BoardSquare.e5
+                && m.TargetSquare() == (int)BoardSquare.g6));
         }
 
         /// <summary>
@@ -115,49 +115,49 @@ namespace Lynx.Test.MoveGeneration
             var position = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1");
             var offset = Utils.PieceOffset(position.Side);
             var piece = (int)Piece.N + offset;
-            var moves = MovesGenerator.GeneratePieceMoves(piece, position);
+            var moves = MoveGenerator.GeneratePieceMoves(piece, position);
 
             Assert.Equal(10, moves.Count(m => m.Piece() == piece));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquares.b6
-                && m.TargetSquare() == (int)BoardSquares.c8));
+                m.SourceSquare() == (int)BoardSquare.b6
+                && m.TargetSquare() == (int)BoardSquare.c8));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquares.b6
-                && m.TargetSquare() == (int)BoardSquares.d5));
+                m.SourceSquare() == (int)BoardSquare.b6
+                && m.TargetSquare() == (int)BoardSquare.d5));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquares.b6
-                && m.TargetSquare() == (int)BoardSquares.c4));
+                m.SourceSquare() == (int)BoardSquare.b6
+                && m.TargetSquare() == (int)BoardSquare.c4));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquares.b6
-                && m.TargetSquare() == (int)BoardSquares.a4));
+                m.SourceSquare() == (int)BoardSquare.b6
+                && m.TargetSquare() == (int)BoardSquare.a4));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquares.f6
-                && m.TargetSquare() == (int)BoardSquares.g8));
+                m.SourceSquare() == (int)BoardSquare.f6
+                && m.TargetSquare() == (int)BoardSquare.g8));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquares.f6
-                && m.TargetSquare() == (int)BoardSquares.h7));
+                m.SourceSquare() == (int)BoardSquare.f6
+                && m.TargetSquare() == (int)BoardSquare.h7));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquares.f6
-                && m.TargetSquare() == (int)BoardSquares.h5));
+                m.SourceSquare() == (int)BoardSquare.f6
+                && m.TargetSquare() == (int)BoardSquare.h5));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquares.f6
-                && m.TargetSquare() == (int)BoardSquares.g4));
+                m.SourceSquare() == (int)BoardSquare.f6
+                && m.TargetSquare() == (int)BoardSquare.g4));
 
             Assert.Equal(1, moves.Count(m =>
-               m.SourceSquare() == (int)BoardSquares.f6
-                && m.TargetSquare() == (int)BoardSquares.e4));
+               m.SourceSquare() == (int)BoardSquare.f6
+                && m.TargetSquare() == (int)BoardSquare.e4));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquares.f6
-                && m.TargetSquare() == (int)BoardSquares.d5));
+                m.SourceSquare() == (int)BoardSquare.f6
+                && m.TargetSquare() == (int)BoardSquare.d5));
         }
 
         /// <summary>
@@ -180,21 +180,21 @@ namespace Lynx.Test.MoveGeneration
             var position = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
             var offset = Utils.PieceOffset(position.Side);
             var piece = (int)Piece.N + offset;
-            var moves = MovesGenerator.GeneratePieceMoves(piece, position, capturesOnly: true);
+            var moves = MoveGenerator.GeneratePieceMoves(piece, position, capturesOnly: true);
 
             Assert.Equal(3, moves.Count(m => m.Piece() == piece && m.IsCapture()));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquares.e5
-                && m.TargetSquare() == (int)BoardSquares.d7));
+                m.SourceSquare() == (int)BoardSquare.e5
+                && m.TargetSquare() == (int)BoardSquare.d7));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquares.e5
-                && m.TargetSquare() == (int)BoardSquares.f7));
+                m.SourceSquare() == (int)BoardSquare.e5
+                && m.TargetSquare() == (int)BoardSquare.f7));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquares.e5
-                && m.TargetSquare() == (int)BoardSquares.g6));
+                m.SourceSquare() == (int)BoardSquare.e5
+                && m.TargetSquare() == (int)BoardSquare.g6));
         }
 
         /// <summary>
@@ -217,21 +217,21 @@ namespace Lynx.Test.MoveGeneration
             var position = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1");
             var offset = Utils.PieceOffset(position.Side);
             var piece = (int)Piece.N + offset;
-            var moves = MovesGenerator.GeneratePieceMoves(piece, position, capturesOnly: true);
+            var moves = MoveGenerator.GeneratePieceMoves(piece, position, capturesOnly: true);
 
             Assert.Equal(3, moves.Count(m => m.Piece() == piece && m.IsCapture()));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquares.b6
-                && m.TargetSquare() == (int)BoardSquares.d5));
+                m.SourceSquare() == (int)BoardSquare.b6
+                && m.TargetSquare() == (int)BoardSquare.d5));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquares.f6
-                && m.TargetSquare() == (int)BoardSquares.e4));
+                m.SourceSquare() == (int)BoardSquare.f6
+                && m.TargetSquare() == (int)BoardSquare.e4));
 
             Assert.Equal(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquares.f6
-                && m.TargetSquare() == (int)BoardSquares.d5));
+                m.SourceSquare() == (int)BoardSquare.f6
+                && m.TargetSquare() == (int)BoardSquare.d5));
         }
     }
 }

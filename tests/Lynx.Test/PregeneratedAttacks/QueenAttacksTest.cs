@@ -1,13 +1,13 @@
 ﻿using Lynx.Model;
 using Xunit;
-using BS = Lynx.Model.BoardSquares;
+using BS = Lynx.Model.BoardSquare;
 
 namespace Lynx.Test.PregeneratedAttacks
 {
     public class QueenAttacksTest
     {
         /// <summary>
-        /// Implicitly tests <see cref="AttacksGenerator.InitializeBishopAttacks"/> and <see cref="Constants.BishopMagicNumbers"/>
+        /// Implicitly tests <see cref="AttackGenerator.InitializeBishopAttacks"/> and <see cref="Constants.BishopMagicNumbers"/>
         /// </summary>
         /// <param name="bishopSquare"></param>
         /// <param name="occupiedSquares"></param>

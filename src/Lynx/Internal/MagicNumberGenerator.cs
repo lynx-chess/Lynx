@@ -42,8 +42,8 @@ namespace Lynx.Internal
             ulong[] usedAttacks = new ulong[4096];
 
             var occupancyMask = isBishop
-                ? AttacksGenerator.MaskBishopOccupancy(squareIndex)
-                : AttacksGenerator.MaskRookOccupancy(squareIndex);
+                ? AttackGenerator.MaskBishopOccupancy(squareIndex)
+                : AttackGenerator.MaskRookOccupancy(squareIndex);
 
             var relevantOccupancyBits = isBishop // or occupancyMask.CountBits()
                 ? Constants.BishopRelevantOccupancyBits[squareIndex]
@@ -52,11 +52,11 @@ namespace Lynx.Internal
 
             for (int index = 0; index < occupancyIndexes; ++index)
             {
-                occupancies[index] = AttacksGenerator.SetBishopOrRookOccupancy(index, occupancyMask);
+                occupancies[index] = AttackGenerator.SetBishopOrRookOccupancy(index, occupancyMask);
 
                 attacks[index] = isBishop
-                    ? AttacksGenerator.GenerateBishopAttacksOnTheFly(squareIndex, occupancies[index])
-                    : AttacksGenerator.GenerateRookAttacksOnTheFly(squareIndex, occupancies[index]);
+                    ? AttackGenerator.GenerateBishopAttacksOnTheFly(squareIndex, occupancies[index])
+                    : AttackGenerator.GenerateRookAttacksOnTheFly(squareIndex, occupancies[index]);
             }
 
             // Test magic numbers

@@ -102,7 +102,7 @@ namespace Lynx.Test
 
         private static void Validate(string fen, int depth, long expectedNumberOfNodes)
         {
-            Assert.AreEqual(expectedNumberOfNodes, MovesGenerator.Perft(new Position(fen), depth));
+            Assert.AreEqual(expectedNumberOfNodes, MoveGenerator.Perft(new Position(fen), depth));
         }
     }
 }

@@ -343,9 +343,9 @@ namespace Lynx.Benchmark
         {
             for (int i = 0; i < iterations; ++i)
             {
-                var square = (int)BoardSquares.e1;
+                var square = (int)BoardSquare.e1;
 
-                var occupancyMask = new BitBoardOpsReadonly(AttacksGenerator.MaskBishopOccupancy(square).Board);
+                var occupancyMask = new BitBoardOpsReadonly(AttackGenerator.MaskBishopOccupancy(square).Board);
 
                 var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
 
@@ -364,9 +364,9 @@ namespace Lynx.Benchmark
         {
             for (int i = 0; i < iterations; ++i)
             {
-                var square = (int)BoardSquares.e1;
+                var square = (int)BoardSquare.e1;
 
-                var occupancyMask = new BitBoardOps(AttacksGenerator.MaskBishopOccupancy(square).Board);
+                var occupancyMask = new BitBoardOps(AttackGenerator.MaskBishopOccupancy(square).Board);
 
                 var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
 
@@ -385,9 +385,9 @@ namespace Lynx.Benchmark
         {
             for (int i = 0; i < iterations; ++i)
             {
-                var square = (int)BoardSquares.e1;
+                var square = (int)BoardSquare.e1;
 
-                var occupancyMask = new BitBoardOpsClass(AttacksGenerator.MaskBishopOccupancy(square).Board);
+                var occupancyMask = new BitBoardOpsClass(AttackGenerator.MaskBishopOccupancy(square).Board);
 
                 var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
 
@@ -406,9 +406,9 @@ namespace Lynx.Benchmark
         {
             for (int i = 0; i < iterations; ++i)
             {
-                var square = (int)BoardSquares.e1;
+                var square = (int)BoardSquare.e1;
 
-                var occupancyMask = new BitBoardOpsRecord(AttacksGenerator.MaskBishopOccupancy(square).Board);
+                var occupancyMask = new BitBoardOpsRecord(AttackGenerator.MaskBishopOccupancy(square).Board);
 
                 var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
 
@@ -427,9 +427,9 @@ namespace Lynx.Benchmark
         {
             for (int i = 0; i < iterations; ++i)
             {
-                var square = (int)BoardSquares.e1;
+                var square = (int)BoardSquare.e1;
 
-                var occupancyMask = AttacksGenerator.MaskBishopOccupancy(square).Board;
+                var occupancyMask = AttackGenerator.MaskBishopOccupancy(square).Board;
 
                 var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
 
@@ -447,9 +447,9 @@ namespace Lynx.Benchmark
         {
             for (int i = 0; i < iterations; ++i)
             {
-                var square = (int)BoardSquares.e1;
+                var square = (int)BoardSquare.e1;
 
-                var occupancyMask = new BitBoardOpsProperRecord(AttacksGenerator.MaskBishopOccupancy(square).Board);
+                var occupancyMask = new BitBoardOpsProperRecord(AttackGenerator.MaskBishopOccupancy(square).Board);
 
                 var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
 

@@ -46,8 +46,8 @@ namespace Lynx.Test
         }
 
         [Theory]
-        [InlineData(Side.White, (int)BoardSquares.h1)]
-        [InlineData(Side.Black, (int)BoardSquares.h8)]
+        [InlineData(Side.White, (int)BoardSquare.h1)]
+        [InlineData(Side.Black, (int)BoardSquare.h8)]
         public void ShortCastleRookSourceSquare(Side sideToMove, int expectedRookSquare)
         {
             Assert.Equal(expectedRookSquare, Utils.ShortCastleRookSourceSquare(sideToMove));
@@ -55,8 +55,8 @@ namespace Lynx.Test
         }
 
         [Theory]
-        [InlineData(Side.White, (int)BoardSquares.a1)]
-        [InlineData(Side.Black, (int)BoardSquares.a8)]
+        [InlineData(Side.White, (int)BoardSquare.a1)]
+        [InlineData(Side.Black, (int)BoardSquare.a8)]
         public void LongCastleRookSourceSquare(Side sideToMove, int expectedRookSquare)
         {
             Assert.Equal(expectedRookSquare, Utils.LongCastleRookSourceSquare(sideToMove));

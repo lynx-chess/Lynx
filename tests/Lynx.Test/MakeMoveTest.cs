@@ -27,14 +27,14 @@ namespace Lynx.Test
         {
             // Arrange
             var position = new Position("4k3/8/8/3b4/4N3/8/8/4K3 b - - 0 1");
-            Assert.True(position.PieceBitBoards[(int)Piece.b].GetBit(BoardSquares.d5));
-            Assert.True(position.PieceBitBoards[(int)Piece.N].GetBit(BoardSquares.e4));
-            Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.e4));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.d5));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.e4));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.d5));
+            Assert.True(position.PieceBitBoards[(int)Piece.b].GetBit(BoardSquare.d5));
+            Assert.True(position.PieceBitBoards[(int)Piece.N].GetBit(BoardSquare.e4));
+            Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.e4));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.d5));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e4));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.d5));
 
-            var moves = MovesGenerator.GenerateAllMoves(position);
+            var moves = MoveGenerator.GenerateAllMoves(position);
 
             var captureMove = moves.Single(m => m.IsCapture());
 
@@ -42,16 +42,16 @@ namespace Lynx.Test
             var newPosition = new Position(position, captureMove);
 
             // Assert
-            Assert.False(newPosition.PieceBitBoards[(int)Piece.b].GetBit(BoardSquares.d5));
-            Assert.False(newPosition.PieceBitBoards[(int)Piece.N].GetBit(BoardSquares.e4));
-            Assert.True(newPosition.PieceBitBoards[(int)Piece.b].GetBit(BoardSquares.e4));
+            Assert.False(newPosition.PieceBitBoards[(int)Piece.b].GetBit(BoardSquare.d5));
+            Assert.False(newPosition.PieceBitBoards[(int)Piece.N].GetBit(BoardSquare.e4));
+            Assert.True(newPosition.PieceBitBoards[(int)Piece.b].GetBit(BoardSquare.e4));
 
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.e4));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.d5));
-            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.e4));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.e4));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.d5));
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.e4));
 
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.d5));
-            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.e4));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.d5));
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e4));
         }
 
         /// <summary>
@@ -73,30 +73,30 @@ namespace Lynx.Test
         {
             // Arrange
             var position = new Position("4k3/8/8/3B4/4n3/8/8/4K3 w - - 0 1");
-            Assert.True(position.PieceBitBoards[(int)Piece.B].GetBit(BoardSquares.d5));
-            Assert.True(position.PieceBitBoards[(int)Piece.n].GetBit(BoardSquares.e4));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.e4));
-            Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.d5));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.e4));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.d5));
+            Assert.True(position.PieceBitBoards[(int)Piece.B].GetBit(BoardSquare.d5));
+            Assert.True(position.PieceBitBoards[(int)Piece.n].GetBit(BoardSquare.e4));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.e4));
+            Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.d5));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e4));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.d5));
 
-            var moves = MovesGenerator.GenerateAllMoves(position);
+            var moves = MoveGenerator.GenerateAllMoves(position);
             var captureMove = moves.Single(m => m.IsCapture());
 
             // Act
             var newPosition = new Position(position, captureMove);
 
             // Assert
-            Assert.False(newPosition.PieceBitBoards[(int)Piece.B].GetBit(BoardSquares.d5));
-            Assert.False(newPosition.PieceBitBoards[(int)Piece.n].GetBit(BoardSquares.e4));
-            Assert.True(newPosition.PieceBitBoards[(int)Piece.B].GetBit(BoardSquares.e4));
+            Assert.False(newPosition.PieceBitBoards[(int)Piece.B].GetBit(BoardSquare.d5));
+            Assert.False(newPosition.PieceBitBoards[(int)Piece.n].GetBit(BoardSquare.e4));
+            Assert.True(newPosition.PieceBitBoards[(int)Piece.B].GetBit(BoardSquare.e4));
 
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.e4));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.d5));
-            Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.e4));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.e4));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.d5));
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.e4));
 
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.d5));
-            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.e4));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.d5));
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e4));
         }
 
         #endregion
@@ -122,28 +122,28 @@ namespace Lynx.Test
         {
             // Arrange
             var position = new Position("4k3/1P6/8/8/8/8/8/4K3 w - - 0 1");
-            Assert.True(position.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.b7));
-            Assert.False(position.PieceBitBoards[(int)Piece.N].GetBit(BoardSquares.b8));
-            Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.b7));
-            Assert.False(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.b8));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b7));
-            Assert.False(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b8));
+            Assert.True(position.PieceBitBoards[(int)Piece.P].GetBit(BoardSquare.b7));
+            Assert.False(position.PieceBitBoards[(int)Piece.N].GetBit(BoardSquare.b8));
+            Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.b7));
+            Assert.False(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.b8));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b7));
+            Assert.False(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b8));
 
-            var moves = MovesGenerator.GenerateAllMoves(position);
+            var moves = MoveGenerator.GenerateAllMoves(position);
             var promotionMove = moves.Single(m => m.PromotedPiece() == (int)Piece.N);
 
             // Act
             var newPosition = new Position(position, promotionMove);
 
             // Assert
-            Assert.False(newPosition.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.b7));
-            Assert.True(newPosition.PieceBitBoards[(int)Piece.N].GetBit(BoardSquares.b8));
+            Assert.False(newPosition.PieceBitBoards[(int)Piece.P].GetBit(BoardSquare.b7));
+            Assert.True(newPosition.PieceBitBoards[(int)Piece.N].GetBit(BoardSquare.b8));
 
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.b7));
-            Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.b8));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.b7));
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.b8));
 
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b7));
-            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b8));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b7));
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b8));
         }
 
         /// <summary>
@@ -165,28 +165,28 @@ namespace Lynx.Test
         {
             // Arrange
             var position = new Position("4k3/8/8/8/8/8/1p6/4K3 b - - 0 1");
-            Assert.True(position.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.b2));
-            Assert.False(position.PieceBitBoards[(int)Piece.n].GetBit(BoardSquares.b1));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.b2));
-            Assert.False(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.b1));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b2));
-            Assert.False(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b1));
+            Assert.True(position.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.b2));
+            Assert.False(position.PieceBitBoards[(int)Piece.n].GetBit(BoardSquare.b1));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.b2));
+            Assert.False(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.b1));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b2));
+            Assert.False(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b1));
 
-            var moves = MovesGenerator.GenerateAllMoves(position);
+            var moves = MoveGenerator.GenerateAllMoves(position);
             var promotionMove = moves.Single(m => m.PromotedPiece() == (int)Piece.n);
 
             // Act
             var newPosition = new Position(position, promotionMove);
 
             // Assert
-            Assert.False(newPosition.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.b2));
-            Assert.True(newPosition.PieceBitBoards[(int)Piece.n].GetBit(BoardSquares.b1));
+            Assert.False(newPosition.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.b2));
+            Assert.True(newPosition.PieceBitBoards[(int)Piece.n].GetBit(BoardSquare.b1));
 
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.b2));
-            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.b1));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.b2));
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.b1));
 
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b2));
-            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b1));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b2));
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b1));
         }
 
         /// <summary>
@@ -208,32 +208,32 @@ namespace Lynx.Test
         {
             // Arrange
             var position = new Position("rk6/1P6/8/8/8/8/8/4K3 w - - 0 1");
-            Assert.True(position.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.b7));
-            Assert.False(position.PieceBitBoards[(int)Piece.N].GetBit(BoardSquares.a8));
-            Assert.True(position.PieceBitBoards[(int)Piece.r].GetBit(BoardSquares.a8));
-            Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.b7));
-            Assert.False(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.a8));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.a8));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b7));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.a8));
+            Assert.True(position.PieceBitBoards[(int)Piece.P].GetBit(BoardSquare.b7));
+            Assert.False(position.PieceBitBoards[(int)Piece.N].GetBit(BoardSquare.a8));
+            Assert.True(position.PieceBitBoards[(int)Piece.r].GetBit(BoardSquare.a8));
+            Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.b7));
+            Assert.False(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.a8));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.a8));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b7));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a8));
 
-            var moves = MovesGenerator.GenerateAllMoves(position);
+            var moves = MoveGenerator.GenerateAllMoves(position);
             var promotionMove = moves.Single(m => m.PromotedPiece() == (int)Piece.N);
 
             // Act
             var newPosition = new Position(position, promotionMove);
 
             // Assert
-            Assert.False(newPosition.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.b7));
-            Assert.True(newPosition.PieceBitBoards[(int)Piece.N].GetBit(BoardSquares.a8));
-            Assert.False(newPosition.PieceBitBoards[(int)Piece.r].GetBit(BoardSquares.a8));
+            Assert.False(newPosition.PieceBitBoards[(int)Piece.P].GetBit(BoardSquare.b7));
+            Assert.True(newPosition.PieceBitBoards[(int)Piece.N].GetBit(BoardSquare.a8));
+            Assert.False(newPosition.PieceBitBoards[(int)Piece.r].GetBit(BoardSquare.a8));
 
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.b7));
-            Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.a8));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.a8));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.b7));
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.a8));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.a8));
 
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b7));
-            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.a8));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b7));
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a8));
         }
 
         /// <summary>
@@ -255,32 +255,32 @@ namespace Lynx.Test
         {
             // Arrange
             var position = new Position("4k3/8/8/8/8/8/1p6/RK6 b - - 0 1");
-            Assert.True(position.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.b2));
-            Assert.False(position.PieceBitBoards[(int)Piece.n].GetBit(BoardSquares.a1));
-            Assert.True(position.PieceBitBoards[(int)Piece.R].GetBit(BoardSquares.a1));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.b2));
-            Assert.False(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.a1));
-            Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.a1));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b2));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.a1));
+            Assert.True(position.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.b2));
+            Assert.False(position.PieceBitBoards[(int)Piece.n].GetBit(BoardSquare.a1));
+            Assert.True(position.PieceBitBoards[(int)Piece.R].GetBit(BoardSquare.a1));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.b2));
+            Assert.False(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.a1));
+            Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.a1));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b2));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a1));
 
-            var moves = MovesGenerator.GenerateAllMoves(position);
+            var moves = MoveGenerator.GenerateAllMoves(position);
             var promotionMove = moves.Single(m => m.PromotedPiece() == (int)Piece.n);
 
             // Act
             var newPosition = new Position(position, promotionMove);
 
             // Assert
-            Assert.False(newPosition.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.b2));
-            Assert.True(newPosition.PieceBitBoards[(int)Piece.n].GetBit(BoardSquares.a1));
-            Assert.False(newPosition.PieceBitBoards[(int)Piece.R].GetBit(BoardSquares.a1));
+            Assert.False(newPosition.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.b2));
+            Assert.True(newPosition.PieceBitBoards[(int)Piece.n].GetBit(BoardSquare.a1));
+            Assert.False(newPosition.PieceBitBoards[(int)Piece.R].GetBit(BoardSquare.a1));
 
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.b2));
-            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.a1));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.a1));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.b2));
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.a1));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.a1));
 
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b2));
-            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.a1));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b2));
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a1));
         }
 
         #endregion
@@ -293,37 +293,37 @@ namespace Lynx.Test
             // Arrange
             var position = new Position("4k3/8/8/8/2p5/8/1P6/4K3 w - - 0 1");
 
-            Assert.True(position.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.b2));
-            Assert.True(position.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.c4));
-            Assert.False(position.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.b4));
-            Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.b2));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.c4));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b2));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.c4));
-            Assert.False(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b4));
+            Assert.True(position.PieceBitBoards[(int)Piece.P].GetBit(BoardSquare.b2));
+            Assert.True(position.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.c4));
+            Assert.False(position.PieceBitBoards[(int)Piece.P].GetBit(BoardSquare.b4));
+            Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.b2));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.c4));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b2));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c4));
+            Assert.False(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b4));
 
-            var moves = MovesGenerator.GenerateAllMoves(position);
+            var moves = MoveGenerator.GenerateAllMoves(position);
             var enPassant = moves.Single(m => m.IsDoublePawnPush());
 
             // Act
             var newPosition = new Position(position, enPassant);
 
             // Assert
-            Assert.Equal(BoardSquares.b3, newPosition.EnPassant);
+            Assert.Equal(BoardSquare.b3, newPosition.EnPassant);
 
-            Assert.True(newPosition.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.b4));
-            Assert.True(newPosition.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.c4));
-            Assert.False(newPosition.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.b2));
-            Assert.False(newPosition.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.b3));
+            Assert.True(newPosition.PieceBitBoards[(int)Piece.P].GetBit(BoardSquare.b4));
+            Assert.True(newPosition.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.c4));
+            Assert.False(newPosition.PieceBitBoards[(int)Piece.P].GetBit(BoardSquare.b2));
+            Assert.False(newPosition.PieceBitBoards[(int)Piece.P].GetBit(BoardSquare.b3));
 
-            Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.b4));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.b2));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.b3));
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.b4));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.b2));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.b3));
 
-            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b4));
-            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.c4));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b2));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b3));
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b4));
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c4));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b2));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b3));
         }
 
         [Fact]
@@ -332,37 +332,37 @@ namespace Lynx.Test
             // Arrange
             var position = new Position("4k3/2p5/8/1P6/8/8/8/4K3 b - - 0 1");
 
-            Assert.True(position.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.c7));
-            Assert.True(position.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.b5));
-            Assert.False(position.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.c5));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.c7));
-            Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.b5));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.c7));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b5));
-            Assert.False(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.c5));
+            Assert.True(position.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.c7));
+            Assert.True(position.PieceBitBoards[(int)Piece.P].GetBit(BoardSquare.b5));
+            Assert.False(position.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.c5));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.c7));
+            Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.b5));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c7));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b5));
+            Assert.False(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c5));
 
-            var moves = MovesGenerator.GenerateAllMoves(position);
+            var moves = MoveGenerator.GenerateAllMoves(position);
             var enPassant = moves.Single(m => m.IsDoublePawnPush());
 
             // Act
             var newPosition = new Position(position, enPassant);
 
             // Assert
-            Assert.Equal(BoardSquares.c6, newPosition.EnPassant);
+            Assert.Equal(BoardSquare.c6, newPosition.EnPassant);
 
-            Assert.True(newPosition.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.c5));
-            Assert.True(newPosition.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.b5));
-            Assert.False(newPosition.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.c7));
-            Assert.False(newPosition.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.c6));
+            Assert.True(newPosition.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.c5));
+            Assert.True(newPosition.PieceBitBoards[(int)Piece.P].GetBit(BoardSquare.b5));
+            Assert.False(newPosition.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.c7));
+            Assert.False(newPosition.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.c6));
 
-            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.c5));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.c2));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.b6));
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.c5));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.c2));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.b6));
 
-            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b5));
-            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.c5));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.c7));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.c6));
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b5));
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c5));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c7));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c6));
         }
 
         #endregion
@@ -375,33 +375,33 @@ namespace Lynx.Test
             // Arrange
             var position = new Position("4k3/8/8/1Pp5/8/8/8/4K3 w - c6 0 1");
 
-            Assert.True(position.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.b5));
-            Assert.True(position.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.c5));
-            Assert.False(position.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.c6));
-            Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.b5));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.c5));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b5));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.c5));
-            Assert.False(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.c6));
+            Assert.True(position.PieceBitBoards[(int)Piece.P].GetBit(BoardSquare.b5));
+            Assert.True(position.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.c5));
+            Assert.False(position.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.c6));
+            Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.b5));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.c5));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b5));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c5));
+            Assert.False(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c6));
 
-            var moves = MovesGenerator.GenerateAllMoves(position);
+            var moves = MoveGenerator.GenerateAllMoves(position);
             var enPassant = moves.Single(m => m.IsEnPassant());
 
             // Act
             var newPosition = new Position(position, enPassant);
 
             // Assert
-            Assert.True(newPosition.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.c6));
-            Assert.False(newPosition.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.c5));
-            Assert.False(newPosition.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.b5));
+            Assert.True(newPosition.PieceBitBoards[(int)Piece.P].GetBit(BoardSquare.c6));
+            Assert.False(newPosition.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.c5));
+            Assert.False(newPosition.PieceBitBoards[(int)Piece.P].GetBit(BoardSquare.b5));
 
-            Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.c6));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.b5));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.c5));
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.c6));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.b5));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.c5));
 
-            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.c6));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.c5));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b5));
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c6));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c5));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b5));
         }
 
         [Fact]
@@ -410,32 +410,32 @@ namespace Lynx.Test
             // Arrange
             var position = new Position("4k3/8/8/8/1Pp5/8/8/4K3 b - b3 0 1");
 
-            Assert.True(position.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.b4));
-            Assert.True(position.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.c4));
-            Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.b4));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.c4));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b4));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.c4));
-            Assert.False(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b3));
+            Assert.True(position.PieceBitBoards[(int)Piece.P].GetBit(BoardSquare.b4));
+            Assert.True(position.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.c4));
+            Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.b4));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.c4));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b4));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c4));
+            Assert.False(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b3));
 
-            var moves = MovesGenerator.GenerateAllMoves(position);
+            var moves = MoveGenerator.GenerateAllMoves(position);
             var enPassant = moves.Single(m => m.IsEnPassant());
 
             // Act
             var newPosition = new Position(position, enPassant);
 
             // Assert
-            Assert.True(newPosition.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.b3));
-            Assert.False(newPosition.PieceBitBoards[(int)Piece.p].GetBit(BoardSquares.c4));
-            Assert.False(newPosition.PieceBitBoards[(int)Piece.P].GetBit(BoardSquares.b4));
+            Assert.True(newPosition.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.b3));
+            Assert.False(newPosition.PieceBitBoards[(int)Piece.p].GetBit(BoardSquare.c4));
+            Assert.False(newPosition.PieceBitBoards[(int)Piece.P].GetBit(BoardSquare.b4));
 
-            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.b3));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.b4));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.c4));
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.b3));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.b4));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.c4));
 
-            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b3));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.c4));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b4));
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b3));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c4));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b4));
         }
 
         [Theory]
@@ -446,7 +446,7 @@ namespace Lynx.Test
         {
             var position = new Position(fen);
 
-            foreach (var move in MovesGenerator.GenerateAllMoves(position).Where(m => m.IsDoublePawnPush()))
+            foreach (var move in MoveGenerator.GenerateAllMoves(position).Where(m => m.IsDoublePawnPush()))
             {
                 var newPosition = new Position(position, move);
                 Assert.NotEqual(position.EnPassant, newPosition.EnPassant);
@@ -464,12 +464,12 @@ namespace Lynx.Test
         {
             var position = new Position(fen);
 
-            Assert.NotEqual(BoardSquares.noSquare, position.EnPassant);
+            Assert.NotEqual(BoardSquare.noSquare, position.EnPassant);
 
-            foreach (var move in MovesGenerator.GenerateAllMoves(position).Where(m => !m.IsDoublePawnPush()))
+            foreach (var move in MoveGenerator.GenerateAllMoves(position).Where(m => !m.IsDoublePawnPush()))
             {
                 var newPosition = new Position(position, move);
-                Assert.Equal(BoardSquares.noSquare, newPosition.EnPassant);
+                Assert.Equal(BoardSquare.noSquare, newPosition.EnPassant);
             }
         }
 
@@ -482,21 +482,21 @@ namespace Lynx.Test
         {
             // Arrange
             var position = new Position("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1");
-            Assert.True(position.PieceBitBoards[(int)Piece.K].GetBit(BoardSquares.e1));
-            Assert.True(position.PieceBitBoards[(int)Piece.R].GetBit(BoardSquares.a1));
-            Assert.True(position.PieceBitBoards[(int)Piece.R].GetBit(BoardSquares.h1));
-            Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.e1));
-            Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.a1));
-            Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.h1));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.e1));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.a1));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.h1));
+            Assert.True(position.PieceBitBoards[(int)Piece.K].GetBit(BoardSquare.e1));
+            Assert.True(position.PieceBitBoards[(int)Piece.R].GetBit(BoardSquare.a1));
+            Assert.True(position.PieceBitBoards[(int)Piece.R].GetBit(BoardSquare.h1));
+            Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.e1));
+            Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.a1));
+            Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.h1));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e1));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a1));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.h1));
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.WK);
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.WQ);
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.BK);
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.BQ);
 
-            var moves = MovesGenerator.GenerateAllMoves(position);
+            var moves = MoveGenerator.GenerateAllMoves(position);
             var shortCastling = moves.Single(m => m.IsShortCastle());
 
             // Act
@@ -505,21 +505,21 @@ namespace Lynx.Test
             // Assert - position and occupancy after castling
             Assert.True(newPosition.PieceBitBoards[(int)Piece.K].GetBit(Constants.WhiteShortCastleKingSquare));
             Assert.True(newPosition.PieceBitBoards[(int)Piece.R].GetBit(Constants.WhiteShortCastleRookSquare));
-            Assert.True(newPosition.PieceBitBoards[(int)Piece.R].GetBit(BoardSquares.a1));
-            Assert.False(newPosition.PieceBitBoards[(int)Piece.K].GetBit(BoardSquares.e1));
-            Assert.False(newPosition.PieceBitBoards[(int)Piece.R].GetBit(BoardSquares.h1));
+            Assert.True(newPosition.PieceBitBoards[(int)Piece.R].GetBit(BoardSquare.a1));
+            Assert.False(newPosition.PieceBitBoards[(int)Piece.K].GetBit(BoardSquare.e1));
+            Assert.False(newPosition.PieceBitBoards[(int)Piece.R].GetBit(BoardSquare.h1));
 
             Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(Constants.WhiteShortCastleKingSquare));
             Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(Constants.WhiteShortCastleRookSquare));
-            Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.a1));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.e1));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.h1));
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.a1));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.e1));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.h1));
 
             Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(Constants.WhiteShortCastleKingSquare));
             Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(Constants.WhiteShortCastleRookSquare));
-            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.a1));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.e1));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.h1));
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a1));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e1));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.h1));
 
             // Assert - Castling rights
             Assert.Equal(default, newPosition.Castle & (int)CastlingRights.WK);
@@ -533,21 +533,21 @@ namespace Lynx.Test
         {
             // Arrange
             var position = new Position("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1");
-            Assert.True(position.PieceBitBoards[(int)Piece.K].GetBit(BoardSquares.e1));
-            Assert.True(position.PieceBitBoards[(int)Piece.R].GetBit(BoardSquares.a1));
-            Assert.True(position.PieceBitBoards[(int)Piece.R].GetBit(BoardSquares.h1));
-            Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.e1));
-            Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.a1));
-            Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.h1));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.e1));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.a1));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.h1));
+            Assert.True(position.PieceBitBoards[(int)Piece.K].GetBit(BoardSquare.e1));
+            Assert.True(position.PieceBitBoards[(int)Piece.R].GetBit(BoardSquare.a1));
+            Assert.True(position.PieceBitBoards[(int)Piece.R].GetBit(BoardSquare.h1));
+            Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.e1));
+            Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.a1));
+            Assert.True(position.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.h1));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e1));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a1));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.h1));
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.WK);
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.WQ);
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.BK);
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.BQ);
 
-            var moves = MovesGenerator.GenerateAllMoves(position);
+            var moves = MoveGenerator.GenerateAllMoves(position);
             var shortCastling = moves.Single(m => m.IsLongCastle());
 
             // Act
@@ -556,21 +556,21 @@ namespace Lynx.Test
             // Assert - position and occupancy after castling
             Assert.True(newPosition.PieceBitBoards[(int)Piece.K].GetBit(Constants.WhiteLongCastleKingSquare));
             Assert.True(newPosition.PieceBitBoards[(int)Piece.R].GetBit(Constants.WhiteLongCastleRookSquare));
-            Assert.True(newPosition.PieceBitBoards[(int)Piece.R].GetBit(BoardSquares.h1));
-            Assert.False(newPosition.PieceBitBoards[(int)Piece.K].GetBit(BoardSquares.e1));
-            Assert.False(newPosition.PieceBitBoards[(int)Piece.R].GetBit(BoardSquares.a1));
+            Assert.True(newPosition.PieceBitBoards[(int)Piece.R].GetBit(BoardSquare.h1));
+            Assert.False(newPosition.PieceBitBoards[(int)Piece.K].GetBit(BoardSquare.e1));
+            Assert.False(newPosition.PieceBitBoards[(int)Piece.R].GetBit(BoardSquare.a1));
 
             Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(Constants.WhiteLongCastleKingSquare));
             Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(Constants.WhiteLongCastleRookSquare));
-            Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.h1));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.e1));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquares.a1));
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.h1));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.e1));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.White].GetBit(BoardSquare.a1));
 
             Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(Constants.WhiteLongCastleKingSquare));
             Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(Constants.WhiteLongCastleRookSquare));
-            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.h1));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.e1));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.a1));
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.h1));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e1));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a1));
 
             // Assert - Castling rights
             Assert.Equal(default, newPosition.Castle & (int)CastlingRights.WK);
@@ -584,21 +584,21 @@ namespace Lynx.Test
         {
             // Arrange
             var position = new Position("r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1");
-            Assert.True(position.PieceBitBoards[(int)Piece.k].GetBit(BoardSquares.e8));
-            Assert.True(position.PieceBitBoards[(int)Piece.r].GetBit(BoardSquares.a8));
-            Assert.True(position.PieceBitBoards[(int)Piece.r].GetBit(BoardSquares.h8));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.e8));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.a8));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.h8));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.e8));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.a8));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.h8));
+            Assert.True(position.PieceBitBoards[(int)Piece.k].GetBit(BoardSquare.e8));
+            Assert.True(position.PieceBitBoards[(int)Piece.r].GetBit(BoardSquare.a8));
+            Assert.True(position.PieceBitBoards[(int)Piece.r].GetBit(BoardSquare.h8));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.e8));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.a8));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.h8));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e8));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a8));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.h8));
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.WK);
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.WQ);
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.BK);
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.BQ);
 
-            var moves = MovesGenerator.GenerateAllMoves(position);
+            var moves = MoveGenerator.GenerateAllMoves(position);
             var shortCastling = moves.Single(m => m.IsShortCastle());
 
             // Act
@@ -607,21 +607,21 @@ namespace Lynx.Test
             // Assert - position and occupancy after castling
             Assert.True(newPosition.PieceBitBoards[(int)Piece.k].GetBit(Constants.BlackShortCastleKingSquare));
             Assert.True(newPosition.PieceBitBoards[(int)Piece.r].GetBit(Constants.BlackShortCastleRookSquare));
-            Assert.True(newPosition.PieceBitBoards[(int)Piece.r].GetBit(BoardSquares.a8));
-            Assert.False(newPosition.PieceBitBoards[(int)Piece.k].GetBit(BoardSquares.e8));
-            Assert.False(newPosition.PieceBitBoards[(int)Piece.r].GetBit(BoardSquares.h8));
+            Assert.True(newPosition.PieceBitBoards[(int)Piece.r].GetBit(BoardSquare.a8));
+            Assert.False(newPosition.PieceBitBoards[(int)Piece.k].GetBit(BoardSquare.e8));
+            Assert.False(newPosition.PieceBitBoards[(int)Piece.r].GetBit(BoardSquare.h8));
 
             Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(Constants.BlackShortCastleKingSquare));
             Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(Constants.BlackShortCastleRookSquare));
-            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.a8));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.e8));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.h8));
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.a8));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.e8));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.h8));
 
             Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(Constants.BlackShortCastleKingSquare));
             Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(Constants.BlackShortCastleRookSquare));
-            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.a8));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.e8));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.h8));
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a8));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e8));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.h8));
 
             // Assert - Castling rights
             Assert.Equal(default, newPosition.Castle & (int)CastlingRights.BK);
@@ -635,21 +635,21 @@ namespace Lynx.Test
         {
             // Arrange
             var position = new Position("r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1");
-            Assert.True(position.PieceBitBoards[(int)Piece.k].GetBit(BoardSquares.e8));
-            Assert.True(position.PieceBitBoards[(int)Piece.r].GetBit(BoardSquares.a8));
-            Assert.True(position.PieceBitBoards[(int)Piece.r].GetBit(BoardSquares.h8));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.e8));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.a8));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.h8));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.e8));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.a8));
-            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.h8));
+            Assert.True(position.PieceBitBoards[(int)Piece.k].GetBit(BoardSquare.e8));
+            Assert.True(position.PieceBitBoards[(int)Piece.r].GetBit(BoardSquare.a8));
+            Assert.True(position.PieceBitBoards[(int)Piece.r].GetBit(BoardSquare.h8));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.e8));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.a8));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.h8));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e8));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a8));
+            Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.h8));
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.WK);
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.WQ);
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.BK);
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.BQ);
 
-            var moves = MovesGenerator.GenerateAllMoves(position);
+            var moves = MoveGenerator.GenerateAllMoves(position);
             var shortCastling = moves.Single(m => m.IsLongCastle());
 
             // Act
@@ -658,21 +658,21 @@ namespace Lynx.Test
             // Assert - position and occupancy after castling
             Assert.True(newPosition.PieceBitBoards[(int)Piece.k].GetBit(Constants.BlackLongCastleKingSquare));
             Assert.True(newPosition.PieceBitBoards[(int)Piece.r].GetBit(Constants.BlackLongCastleRookSquare));
-            Assert.True(newPosition.PieceBitBoards[(int)Piece.r].GetBit(BoardSquares.h8));
-            Assert.False(newPosition.PieceBitBoards[(int)Piece.k].GetBit(BoardSquares.e8));
-            Assert.False(newPosition.PieceBitBoards[(int)Piece.r].GetBit(BoardSquares.a8));
+            Assert.True(newPosition.PieceBitBoards[(int)Piece.r].GetBit(BoardSquare.h8));
+            Assert.False(newPosition.PieceBitBoards[(int)Piece.k].GetBit(BoardSquare.e8));
+            Assert.False(newPosition.PieceBitBoards[(int)Piece.r].GetBit(BoardSquare.a8));
 
             Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(Constants.BlackLongCastleKingSquare));
             Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(Constants.BlackLongCastleRookSquare));
-            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.h8));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.e8));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquares.a8));
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.h8));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.e8));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Black].GetBit(BoardSquare.a8));
 
             Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(Constants.BlackLongCastleKingSquare));
             Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(Constants.BlackLongCastleRookSquare));
-            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.h8));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.e8));
-            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.a8));
+            Assert.True(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.h8));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e8));
+            Assert.False(newPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a8));
 
             // Assert - Castling rights
             Assert.Equal(default, newPosition.Castle & (int)CastlingRights.BK);
@@ -691,7 +691,7 @@ namespace Lynx.Test
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.BK);
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.BQ);
 
-            var moves = MovesGenerator.GenerateAllMoves(position);
+            var moves = MoveGenerator.GenerateAllMoves(position);
             var quietKingMove = moves.First(m => !m.IsCastle() && m.Piece() == (int)Piece.K + Utils.PieceOffset(position.Side));
 
             // Act
@@ -714,7 +714,7 @@ namespace Lynx.Test
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.BK);
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.BQ);
 
-            var moves = MovesGenerator.GenerateAllMoves(position);
+            var moves = MoveGenerator.GenerateAllMoves(position);
             var quietKingMove = moves.First(m => !m.IsCastle() && m.Piece() == (int)Piece.K + Utils.PieceOffset(position.Side));
 
             // Act
@@ -737,11 +737,11 @@ namespace Lynx.Test
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.BK);
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.BQ);
 
-            var moves = MovesGenerator.GenerateAllMoves(position);
+            var moves = MoveGenerator.GenerateAllMoves(position);
             var rookMove = moves.First(m =>
                 m.Piece() == (int)Piece.R + Utils.PieceOffset(position.Side)
                 && !m.IsCapture()
-                && m.SourceSquare() == (int)BoardSquares.a8 + (7 * 8 * (int)position.Side));
+                && m.SourceSquare() == (int)BoardSquare.a8 + (7 * 8 * (int)position.Side));
 
             // Act
             var newPosition = new Position(position, rookMove);
@@ -763,11 +763,11 @@ namespace Lynx.Test
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.BK);
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.BQ);
 
-            var moves = MovesGenerator.GenerateAllMoves(position);
+            var moves = MoveGenerator.GenerateAllMoves(position);
             var rookMove = moves.First(m =>
                 m.Piece() == (int)Piece.R + Utils.PieceOffset(position.Side)
                 && !m.IsCapture()
-                && m.SourceSquare() == (int)BoardSquares.h8 + (7 * 8 * (int)position.Side));
+                && m.SourceSquare() == (int)BoardSquare.h8 + (7 * 8 * (int)position.Side));
 
             // Act
             var newPosition = new Position(position, rookMove);
@@ -789,11 +789,11 @@ namespace Lynx.Test
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.BK);
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.BQ);
 
-            var moves = MovesGenerator.GenerateAllMoves(position);
+            var moves = MoveGenerator.GenerateAllMoves(position);
             var rookMove = moves.First(m =>
                 m.Piece() == (int)Piece.R + Utils.PieceOffset(position.Side)
                 && !m.IsCapture()
-                && m.SourceSquare() == (int)BoardSquares.a8 + (7 * 8 * (int)position.Side));
+                && m.SourceSquare() == (int)BoardSquare.a8 + (7 * 8 * (int)position.Side));
 
             // Act
             var newPosition = new Position(position, rookMove);
@@ -815,11 +815,11 @@ namespace Lynx.Test
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.BK);
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.BQ);
 
-            var moves = MovesGenerator.GenerateAllMoves(position);
+            var moves = MoveGenerator.GenerateAllMoves(position);
             var rookMove = moves.First(m =>
                 m.Piece() == (int)Piece.R + Utils.PieceOffset(position.Side)
                 && !m.IsCapture()
-                && m.SourceSquare() == (int)BoardSquares.h8 + (7 * 8 * (int)position.Side));
+                && m.SourceSquare() == (int)BoardSquare.h8 + (7 * 8 * (int)position.Side));
 
             // Act
             var newPosition = new Position(position, rookMove);
@@ -841,13 +841,13 @@ namespace Lynx.Test
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.BK);
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.BQ);
 
-            var moves = MovesGenerator.GenerateAllMoves(position);
+            var moves = MoveGenerator.GenerateAllMoves(position);
             var rookCapture = moves.First(m =>
                 m.Piece() == (int)Piece.B + Utils.PieceOffset(position.Side)
                 && m.IsCapture()
-                && m.SourceSquare() == (int)BoardSquares.d5);
+                && m.SourceSquare() == (int)BoardSquare.d5);
 
-            Assert.Equal((int)BoardSquares.a8, rookCapture.TargetSquare());
+            Assert.Equal((int)BoardSquare.a8, rookCapture.TargetSquare());
 
             // Act
             var newPosition = new Position(position, rookCapture);
@@ -869,13 +869,13 @@ namespace Lynx.Test
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.BK);
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.BQ);
 
-            var moves = MovesGenerator.GenerateAllMoves(position);
+            var moves = MoveGenerator.GenerateAllMoves(position);
             var rookCapture = moves.First(m =>
                 m.Piece() == (int)Piece.B + Utils.PieceOffset(position.Side)
                 && m.IsCapture()
-                && m.SourceSquare() == (int)BoardSquares.e5);
+                && m.SourceSquare() == (int)BoardSquare.e5);
 
-            Assert.Equal((int)BoardSquares.h8, rookCapture.TargetSquare());
+            Assert.Equal((int)BoardSquare.h8, rookCapture.TargetSquare());
 
             // Act
             var newPosition = new Position(position, rookCapture);
@@ -897,13 +897,13 @@ namespace Lynx.Test
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.BK);
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.BQ);
 
-            var moves = MovesGenerator.GenerateAllMoves(position);
+            var moves = MoveGenerator.GenerateAllMoves(position);
             var rookCapture = moves.First(m =>
                 m.Piece() == (int)Piece.B + Utils.PieceOffset(position.Side)
                 && m.IsCapture()
-                && m.SourceSquare() == (int)BoardSquares.e5);
+                && m.SourceSquare() == (int)BoardSquare.e5);
 
-            Assert.Equal((int)BoardSquares.a1, rookCapture.TargetSquare());
+            Assert.Equal((int)BoardSquare.a1, rookCapture.TargetSquare());
 
             // Act
             var newPosition = new Position(position, rookCapture);
@@ -925,13 +925,13 @@ namespace Lynx.Test
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.BK);
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.BQ);
 
-            var moves = MovesGenerator.GenerateAllMoves(position);
+            var moves = MoveGenerator.GenerateAllMoves(position);
             var rookCapture = moves.First(m =>
                 m.Piece() == (int)Piece.B + Utils.PieceOffset(position.Side)
                 && m.IsCapture()
-                && m.SourceSquare() == (int)BoardSquares.d5);
+                && m.SourceSquare() == (int)BoardSquare.d5);
 
-            Assert.Equal((int)BoardSquares.h1, rookCapture.TargetSquare());
+            Assert.Equal((int)BoardSquare.h1, rookCapture.TargetSquare());
 
             // Act
             var newPosition = new Position(position, rookCapture);
@@ -967,11 +967,11 @@ namespace Lynx.Test
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.BK);
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.BQ);
 
-            var moves = MovesGenerator.GenerateAllMoves(position);
+            var moves = MoveGenerator.GenerateAllMoves(position);
             var rookCapture = moves.First(m =>
                 m.Piece() == (int)Piece.B + Utils.PieceOffset(position.Side)
                 && m.IsCapture()
-                && m.SourceSquare() == (int)BoardSquares.d5);
+                && m.SourceSquare() == (int)BoardSquare.d5);
 
             // Act
             var newPosition = new Position(position, rookCapture);
@@ -1007,11 +1007,11 @@ namespace Lynx.Test
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.BK);
             Assert.NotEqual(default, position.Castle & (int)CastlingRights.BQ);
 
-            var moves = MovesGenerator.GenerateAllMoves(position);
+            var moves = MoveGenerator.GenerateAllMoves(position);
             var rookCapture = moves.First(m =>
                 m.Piece() == (int)Piece.B + Utils.PieceOffset(position.Side)
                 && m.IsCapture()
-                && m.SourceSquare() == (int)BoardSquares.d5);
+                && m.SourceSquare() == (int)BoardSquare.d5);
 
             // Act
             var newPosition = new Position(position, rookCapture);

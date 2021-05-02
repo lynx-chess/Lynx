@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Lynx
 {
-    public static class MovesGenerator
+    public static class MoveGenerator
     {
         private const int TRUE = 1;
         /// <summary>
@@ -125,7 +125,7 @@ namespace Lynx
                 var attacks = Attacks.PawnAttacks[(int)position.Side, sourceSquare];
 
                 // En passant
-                if (position.EnPassant != BoardSquares.noSquare && attacks.GetBit(position.EnPassant))
+                if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
                 // We assume that position.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
                 {
                     yield return new Move(sourceSquare, (int)position.EnPassant, piece, isCapture: TRUE, isEnPassant: TRUE);
@@ -174,22 +174,22 @@ namespace Lynx
                 if (position.Side == Side.White)
                 {
                     if (((position.Castle & (int)CastlingRights.WK) != default)
-                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.f1)
-                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.g1)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.e1, position, oppositeSide)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.f1, position, oppositeSide)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.g1, position, oppositeSide))
+                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.f1)
+                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.g1)
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.e1, position, oppositeSide)
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.f1, position, oppositeSide)
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.g1, position, oppositeSide))
                     {
                         yield return new Move(sourceSquare, Constants.WhiteShortCastleKingSquare, piece, isShortCastle: TRUE);
                     }
 
                     if (((position.Castle & (int)CastlingRights.WQ) != default)
-                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.d1)
-                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.c1)
-                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b1)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.e1, position, oppositeSide)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.d1, position, oppositeSide)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.c1, position, oppositeSide))
+                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.d1)
+                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c1)
+                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b1)
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.e1, position, oppositeSide)
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.d1, position, oppositeSide)
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.c1, position, oppositeSide))
                     {
                         yield return new Move(sourceSquare, Constants.WhiteLongCastleKingSquare, piece, isLongCastle: TRUE);
                     }
@@ -197,22 +197,22 @@ namespace Lynx
                 else
                 {
                     if (((position.Castle & (int)CastlingRights.BK) != default)
-                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.f8)
-                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.g8)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.e8, position, oppositeSide)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.f8, position, oppositeSide)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.g8, position, oppositeSide))
+                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.f8)
+                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.g8)
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.e8, position, oppositeSide)
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.f8, position, oppositeSide)
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.g8, position, oppositeSide))
                     {
                         yield return new Move(sourceSquare, Constants.BlackShortCastleKingSquare, piece, isShortCastle: TRUE);
                     }
 
                     if (((position.Castle & (int)CastlingRights.BQ) != default)
-                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.d8)
-                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.c8)
-                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquares.b8)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.e8, position, oppositeSide)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.d8, position, oppositeSide)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquares.c8, position, oppositeSide))
+                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.d8)
+                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c8)
+                        && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b8)
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.e8, position, oppositeSide)
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.d8, position, oppositeSide)
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.c8, position, oppositeSide))
                     {
                         yield return new Move(sourceSquare, Constants.BlackLongCastleKingSquare, piece, isLongCastle: TRUE);
                     }

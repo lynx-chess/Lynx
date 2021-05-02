@@ -56,7 +56,7 @@ namespace Lynx
         {
             GuardAgainstSideBoth(side);
 
-            return (int)BoardSquares.h8 + (7 * 8 * side);
+            return (int)BoardSquare.h8 + (7 * 8 * side);
         }
 
         public static int LongCastleRookSourceSquare(Side side) => LongCastleRookSourceSquare((int)side);
@@ -64,7 +64,7 @@ namespace Lynx
         {
             GuardAgainstSideBoth(side);
 
-            return (int)BoardSquares.a8 + (7 * 8 * side);
+            return (int)BoardSquare.a8 + (7 * 8 * side);
         }
 
         [Conditional("DEBUG")]

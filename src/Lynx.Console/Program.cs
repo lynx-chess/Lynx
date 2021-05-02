@@ -42,11 +42,11 @@ const string CmkPosition = "r2q1rk1/ppp2ppp/2n1bn2/2b1p3/3pP3/3P1NPP/PPP1NPB1/R1
 static void _2_GettingStarted()
 {
     var board = new BitBoard(4UL);
-    board.SetBit(BoardSquares.e4);
+    board.SetBit(BoardSquare.e4);
     board.Print();
-    board.PopBit(BoardSquares.e4);
+    board.PopBit(BoardSquare.e4);
     board.Print();
-    board.PopBit(BoardSquares.e4);
+    board.PopBit(BoardSquare.e4);
     board.Print();
 
     Console.ReadKey();
@@ -54,57 +54,57 @@ static void _2_GettingStarted()
 
 static void _3_PawnAttacks()
 {
-    var whiteAttacks = AttacksGenerator.MaskPawnAttacks((int)BoardSquares.e4, isWhite: true);
-    var blackAttacks = AttacksGenerator.MaskPawnAttacks((int)BoardSquares.e4, isWhite: false);
+    var whiteAttacks = AttackGenerator.MaskPawnAttacks((int)BoardSquare.e4, isWhite: true);
+    var blackAttacks = AttackGenerator.MaskPawnAttacks((int)BoardSquare.e4, isWhite: false);
 
     whiteAttacks.Print();
     blackAttacks.Print();
 
-    AttacksGenerator.InitializePawnAttacks();
+    AttackGenerator.InitializePawnAttacks();
 }
 
 static void _4_KnightAttacks()
 {
-    var attacks = AttacksGenerator.MaskKnightAttacks((int)BoardSquares.e4);
+    var attacks = AttackGenerator.MaskKnightAttacks((int)BoardSquare.e4);
     attacks.Print();
 
-    attacks = AttacksGenerator.MaskKnightAttacks((int)BoardSquares.h4);
+    attacks = AttackGenerator.MaskKnightAttacks((int)BoardSquare.h4);
     attacks.Print();
 
-    attacks = AttacksGenerator.MaskKnightAttacks((int)BoardSquares.a4);
+    attacks = AttackGenerator.MaskKnightAttacks((int)BoardSquare.a4);
     attacks.Print();
 
-    AttacksGenerator.InitializeKnightAttacks();
+    AttackGenerator.InitializeKnightAttacks();
 }
 
 static void _5_KingAttacks()
 {
-    var attacks = AttacksGenerator.MaskKingAttacks((int)BoardSquares.e4);
+    var attacks = AttackGenerator.MaskKingAttacks((int)BoardSquare.e4);
     attacks.Print();
 
-    attacks = AttacksGenerator.MaskKingAttacks((int)BoardSquares.h4);
+    attacks = AttackGenerator.MaskKingAttacks((int)BoardSquare.h4);
     attacks.Print();
 
-    attacks = AttacksGenerator.MaskKingAttacks((int)BoardSquares.a4);
+    attacks = AttackGenerator.MaskKingAttacks((int)BoardSquare.a4);
     attacks.Print();
 
-    AttacksGenerator.InitializeKingAttacks();
+    AttackGenerator.InitializeKingAttacks();
 }
 
 static void _6_Bishop_Occupancy()
 {
-    var occupancy = AttacksGenerator.MaskBishopOccupancy((int)BoardSquares.h8);
+    var occupancy = AttackGenerator.MaskBishopOccupancy((int)BoardSquare.h8);
     occupancy.Print();
 
-    AttacksGenerator.InitializeBishopOccupancy();
+    AttackGenerator.InitializeBishopOccupancy();
 }
 
 static void _7_Rook_Occupancy()
 {
-    var occupancy = AttacksGenerator.MaskRookOccupancy((int)BoardSquares.e4);
+    var occupancy = AttackGenerator.MaskRookOccupancy((int)BoardSquare.e4);
     occupancy.Print();
 
-    AttacksGenerator.InitializeRookOccupancy();
+    AttackGenerator.InitializeRookOccupancy();
 }
 
 static void _8_Slider_Pieces_Attacks()
@@ -112,31 +112,31 @@ static void _8_Slider_Pieces_Attacks()
     // Occupancy bitboard
     BitBoard block = new();
 
-    block.SetBit(BoardSquares.b6);
-    block.SetBit(BoardSquares.g7);
-    block.SetBit(BoardSquares.f2);
-    block.SetBit(BoardSquares.b2);
+    block.SetBit(BoardSquare.b6);
+    block.SetBit(BoardSquare.g7);
+    block.SetBit(BoardSquare.f2);
+    block.SetBit(BoardSquare.b2);
 
-    var bishopAttacks = AttacksGenerator.GenerateBishopAttacksOnTheFly((int)BoardSquares.d4, block);
+    var bishopAttacks = AttackGenerator.GenerateBishopAttacksOnTheFly((int)BoardSquare.d4, block);
 
     block.Print();
     bishopAttacks.Print();
 
-    block = new BitBoard(new[] { BoardSquares.d3, BoardSquares.b4, BoardSquares.d7, BoardSquares.h4 });
+    block = new BitBoard(new[] { BoardSquare.d3, BoardSquare.b4, BoardSquare.d7, BoardSquare.h4 });
 
-    var rookAttacks = AttacksGenerator.GenerateRookAttacksOnTheFly((int)BoardSquares.d4, block);
+    var rookAttacks = AttackGenerator.GenerateRookAttacksOnTheFly((int)BoardSquare.d4, block);
     block.Print();
     rookAttacks.Print();
 }
 
 static void _9_BitCount()
 {
-    BitBoard bitBoard = new(new[] { BoardSquares.d5, BoardSquares.e4 });
+    BitBoard bitBoard = new(new[] { BoardSquare.d5, BoardSquare.e4 });
 
     bitBoard.ResetLS1B();
     bitBoard.Print();
 
-    var bb = new BitBoard(BoardSquares.d5, BoardSquares.e4);
+    var bb = new BitBoard(BoardSquare.d5, BoardSquare.e4);
 
     Console.WriteLine(bb.GetLS1BIndex());
     Console.WriteLine(bb.GetLS1BIndex());
@@ -146,30 +146,30 @@ static void _9_BitCount()
 static void _10_SetOccupancy()
 {
     // Mask piece attacks at given square
-    var occupancyMask = AttacksGenerator.MaskRookOccupancy((int)BoardSquares.a5);
+    var occupancyMask = AttackGenerator.MaskRookOccupancy((int)BoardSquare.a5);
 
-    var occupancy = AttacksGenerator.SetBishopOrRookOccupancy(4095, occupancyMask);
+    var occupancy = AttackGenerator.SetBishopOrRookOccupancy(4095, occupancyMask);
     occupancy.Print();
 
     var ind = (int)Math.Pow(2, 6) - 1;
-    occupancy = AttacksGenerator.SetBishopOrRookOccupancy(ind, occupancyMask);
+    occupancy = AttackGenerator.SetBishopOrRookOccupancy(ind, occupancyMask);
     occupancy.Print();
 
     // Loop over occupancy indexes
     for (int index = 0; index < 4096; ++index)
     {
-        occupancy = AttacksGenerator.SetBishopOrRookOccupancy(index, occupancyMask);
+        occupancy = AttackGenerator.SetBishopOrRookOccupancy(index, occupancyMask);
         occupancy.Print();
         Console.ReadKey();
     }
 
-    occupancyMask = AttacksGenerator.MaskBishopOccupancy((int)BoardSquares.d4);
+    occupancyMask = AttackGenerator.MaskBishopOccupancy((int)BoardSquare.d4);
     occupancyMask.Print();
 
     // Loop over occupancy indexes
     for (int index = 0; index < 64; ++index)
     {
-        occupancy = AttacksGenerator.SetBishopOrRookOccupancy(index, occupancyMask);
+        occupancy = AttackGenerator.SetBishopOrRookOccupancy(index, occupancyMask);
         occupancy.Print();
         Console.ReadKey();
     }
@@ -183,7 +183,7 @@ static void _11_OccupancyBitCountLookupTables()
         {
             int square = BitBoard.SquareIndex(rank, file);
 
-            var bishopOccupancy = AttacksGenerator.MaskBishopOccupancy(square);
+            var bishopOccupancy = AttackGenerator.MaskBishopOccupancy(square);
             Console.Write($"{bishopOccupancy.CountBits()}, ");
         }
 
@@ -196,7 +196,7 @@ static void _11_OccupancyBitCountLookupTables()
         {
             int square = BitBoard.SquareIndex(rank, file);
 
-            var bishopOccupancy = AttacksGenerator.MaskRookOccupancy(square);
+            var bishopOccupancy = AttackGenerator.MaskRookOccupancy(square);
             Console.Write($"{bishopOccupancy.CountBits()}, ");
         }
 
@@ -234,15 +234,15 @@ static void _14_GeneratingMagicNumbersByBruteForce()
 static void _16_InitializingSliderPiecesAttackTables()
 {
     var occupancy = new BitBoard();
-    occupancy.SetBit(BoardSquares.e5);
-    occupancy.SetBit(BoardSquares.d5);
-    occupancy.SetBit(BoardSquares.d8);
+    occupancy.SetBit(BoardSquare.e5);
+    occupancy.SetBit(BoardSquare.d5);
+    occupancy.SetBit(BoardSquare.d8);
     occupancy.Print();
 
-    var bishopAttacks = Attacks.BishopAttacks((int)BoardSquares.d4, occupancy);
+    var bishopAttacks = Attacks.BishopAttacks((int)BoardSquare.d4, occupancy);
     bishopAttacks.Print();
 
-    var rookAttacks = Attacks.RookAttacks((int)BoardSquares.d4, occupancy);
+    var rookAttacks = Attacks.RookAttacks((int)BoardSquare.d4, occupancy);
     rookAttacks.Print();
 }
 
@@ -251,7 +251,7 @@ static void _17_Defining_variables()
     var position = new Position(Constants.EmptyBoardFEN);
 
     var whitePawnBitBoard = position.PieceBitBoards[(int)Piece.P];
-    whitePawnBitBoard.SetBit(BoardSquares.e2);
+    whitePawnBitBoard.SetBit(BoardSquare.e2);
     whitePawnBitBoard.Print();
 
     Console.WriteLine($"Piece: {Constants.PiecesByChar['K']}");
@@ -296,7 +296,7 @@ static void _19_Parse_FEN()
 static void _20_QueenAttacks()
 {
     var position = new Position(Constants.InitialPositionFEN);
-    Attacks.QueenAttacks((int)BoardSquares.e4, position.OccupancyBitBoards[(int)Side.Both]).Print();
+    Attacks.QueenAttacks((int)BoardSquare.e4, position.OccupancyBitBoards[(int)Side.Both]).Print();
 }
 
 static void _21_IsSquareAttacked()
@@ -305,44 +305,44 @@ static void _21_IsSquareAttacked()
 
     position.PieceBitBoards[(int)Piece.p].Print();
 
-    Attacks.PawnAttacks[(int)Side.White, (int)BoardSquares.e4].Print();
+    Attacks.PawnAttacks[(int)Side.White, (int)BoardSquare.e4].Print();
 
     var and = new BitBoard(
         position.PieceBitBoards[(int)Piece.p].Board & Attacks.PawnAttacks[(int)Side.White,
-        (int)BoardSquares.e4].Board);
+        (int)BoardSquare.e4].Board);
     and.Print();
 
     Console.WriteLine("=====================================");
 
     position = new Position(Constants.EmptyBoardFEN);
-    position.PieceBitBoards[(int)Piece.n].SetBit(BoardSquares.c6);
-    position.PieceBitBoards[(int)Piece.n].SetBit(BoardSquares.f6);
+    position.PieceBitBoards[(int)Piece.n].SetBit(BoardSquare.c6);
+    position.PieceBitBoards[(int)Piece.n].SetBit(BoardSquare.f6);
 
     position.PrintAttackedSquares(Side.Black);
 
-    Console.WriteLine(Attacks.IsSquaredAttacked((int)BoardSquares.e4, Side.Black, position.PieceBitBoards, position.OccupancyBitBoards));
+    Console.WriteLine(Attacks.IsSquaredAttacked((int)BoardSquare.e4, Side.Black, position.PieceBitBoards, position.OccupancyBitBoards));
 
     Console.WriteLine("=====================================");
 
     position = new Position(Constants.EmptyBoardFEN);
-    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.b7);
-    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.d7);
-    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.f7);
-    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.h7);
-    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.b3);
-    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.d3);
-    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.f3);
-    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.h3);
-    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.d1);
-    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.c4);
-    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquares.g4);
+    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquare.b7);
+    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquare.d7);
+    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquare.f7);
+    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquare.h7);
+    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquare.b3);
+    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquare.d3);
+    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquare.f3);
+    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquare.h3);
+    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquare.d1);
+    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquare.c4);
+    position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquare.g4);
 
     position.PrintAttackedSquares(Side.Black);
 
     Console.WriteLine("=====================================");
 
     position = new Position(Constants.EmptyBoardFEN);
-    position.PieceBitBoards[(int)Piece.K].SetBit(BoardSquares.e4);
+    position.PieceBitBoards[(int)Piece.K].SetBit(BoardSquare.e4);
     position.PrintAttackedSquares(Side.White);
 
     Console.WriteLine("=====================================");
@@ -358,7 +358,7 @@ static void _22_Generate_Moves()
     position.Print();
 
     //position.OccupancyBitBoards[2].Board |= 0b11100111UL << 8 * 4;
-    var moves = MovesGenerator.GenerateAllMoves(position);
+    var moves = MoveGenerator.GenerateAllMoves(position);
     foreach (var move in moves)
     {
         Console.WriteLine(move);
@@ -368,7 +368,7 @@ static void _22_Generate_Moves()
     position.PieceBitBoards[0].Print();
     position.PieceBitBoards[6].Print();
     position.Print();
-    moves = MovesGenerator.GenerateAllMoves(position);
+    moves = MoveGenerator.GenerateAllMoves(position);
 
     foreach (var move in moves)
     {
@@ -381,7 +381,7 @@ static void _23_Castling_Moves()
     var position = new Position("rn2k2r/pppppppp/8/8/8/8/PPPPPPPP/RN2K2R w KQkq - 0 1");
     position.Print();
 
-    var moves = MovesGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side)).ToList();
+    var moves = MoveGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side)).ToList();
 
     foreach (var move in moves)
     {
@@ -394,9 +394,9 @@ static void _26_Piece_Moves()
     var position = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
     position.Print();
 
-    var moves = MovesGenerator.GenerateKnightMoves(position).ToList();
+    var moves = MoveGenerator.GenerateKnightMoves(position).ToList();
 
-    moves = MovesGenerator.GenerateAllMoves(position).ToList();
+    moves = MoveGenerator.GenerateAllMoves(position).ToList();
     Console.WriteLine($"Expected 48, found: {moves.Count}");
     foreach (var move in moves)
     {
@@ -409,7 +409,7 @@ static void _28_Move_Encoding()
     int move = 0;
 
     // Target square: h1 (63)
-    var targetSquare = BoardSquares.h1;
+    var targetSquare = BoardSquare.h1;
 
     // Encode move
     move = (move | (int)targetSquare) << 6;
@@ -423,16 +423,16 @@ static void _28_Move_Encoding()
 static void _29_Move_List()
 {
     var position = new Position(TrickyPosition);
-    var moves = MovesGenerator.GenerateAllMoves(position);
+    var moves = MoveGenerator.GenerateAllMoves(position);
     PrintMoveList(moves);
 
     position = new Position(TrickyPositionReversed);
-    moves = MovesGenerator.GenerateAllMoves(position);
+    moves = MoveGenerator.GenerateAllMoves(position);
     PrintMoveList(moves);
 
     position = new Position(KillerPosition);
     position.Print();
-    moves = MovesGenerator.GenerateAllMoves(position);
+    moves = MoveGenerator.GenerateAllMoves(position);
     PrintMoveList(moves);
 }
 
@@ -507,7 +507,7 @@ static void _42_Perft()
     {
         var sw = new Stopwatch();
         sw.Start();
-        var nodes = MovesGenerator.Perft(pos, depth);
+        var nodes = MoveGenerator.Perft(pos, depth);
         sw.Stop();
 
         Console.WriteLine($"Depth {depth}\tNodes: {nodes}\tTime: {sw.ElapsedMilliseconds}ms");

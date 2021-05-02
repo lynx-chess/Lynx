@@ -13,7 +13,7 @@ namespace Lynx
     {
         private static readonly Regex RanksRegex = new Regex(@"(?<=^|\/)[P|N|B|R|Q|K|p|n|b|r|q|k|\d]{1,8}", RegexOptions.Compiled);
 
-        public static (bool Success, BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, int Castle, BoardSquares EnPassant,
+        public static (bool Success, BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, int Castle, BoardSquare EnPassant,
             int HalfMoveClock, int FullMoveCounter) ParseFEN(string fen)
         {
             var pieceBitBoards = new ulong[12] {
@@ -27,7 +27,7 @@ namespace Lynx
             Side side = Side.Both;
             int castle = 0;
             int halfMoveClock = 0, fullMoveCounter = 1;
-            BoardSquares enPassant = BoardSquares.noSquare;
+            BoardSquare enPassant = BoardSquare.noSquare;
 
             try
             {
@@ -149,12 +149,12 @@ namespace Lynx
             return castle;
         }
 
-        private static (BoardSquares EnPassant, bool Success) ParseEnPassant(string enPassantString, ulong[] PieceBitBoards, Side side)
+        private static (BoardSquare EnPassant, bool Success) ParseEnPassant(string enPassantString, ulong[] PieceBitBoards, Side side)
         {
             bool success = true;
-            BoardSquares enPassant = BoardSquares.noSquare;
+            BoardSquare enPassant = BoardSquare.noSquare;
 
-            if (Enum.TryParse(enPassantString, ignoreCase: true, out BoardSquares result))
+            if (Enum.TryParse(enPassantString, ignoreCase: true, out BoardSquare result))
             {
                 enPassant = result;
 

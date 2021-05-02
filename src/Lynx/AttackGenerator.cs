@@ -2,7 +2,7 @@
 
 namespace Lynx
 {
-    public static class AttacksGenerator
+    public static class AttackGenerator
     {
         /// <summary>
         /// BitBoard[isWhite, square]
@@ -552,7 +552,7 @@ namespace Lynx
         /// Index within the range of possible occupancies within the bitboard.
         /// Between 0 and <paramref name="occupancyMask"/>.CountBits() - 1
         /// </param>
-        /// <param name="occupancyMask">Bishop or rook occupancy (<see cref="AttacksGenerator.MaskBishopOccupancy(int)"/> and <see cref="AttacksGenerator.MaskRookOccupancy(int)"/>)</param>
+        /// <param name="occupancyMask">Bishop or rook occupancy (<see cref="AttackGenerator.MaskBishopOccupancy(int)"/> and <see cref="AttackGenerator.MaskRookOccupancy(int)"/>)</param>
         /// <returns>An occupancy set for the given index</returns>
         public static BitBoard SetBishopOrRookOccupancy(int index, BitBoard occupancyMask)
         {

@@ -21,8 +21,8 @@ namespace Lynx.Benchmark
 
             for (int square = 0; square < data; ++square)
             {
-                pawnAttacks[0, square] = AttacksGenerator.MaskPawnAttacks(square, isWhite: false);
-                pawnAttacks[1, square] = AttacksGenerator.MaskPawnAttacks(square, isWhite: true);
+                pawnAttacks[0, square] = AttackGenerator.MaskPawnAttacks(square, isWhite: false);
+                pawnAttacks[1, square] = AttackGenerator.MaskPawnAttacks(square, isWhite: true);
             }
         }
 
@@ -38,8 +38,8 @@ namespace Lynx.Benchmark
 
             Parallel.For(0, data, (square) =>
             {
-                pawnAttacks[0, square] = AttacksGenerator.MaskPawnAttacks(square, isWhite: false);
-                pawnAttacks[1, square] = AttacksGenerator.MaskPawnAttacks(square, isWhite: true);
+                pawnAttacks[0, square] = AttackGenerator.MaskPawnAttacks(square, isWhite: false);
+                pawnAttacks[1, square] = AttackGenerator.MaskPawnAttacks(square, isWhite: true);
             });
         }
 
@@ -57,7 +57,7 @@ namespace Lynx.Benchmark
             {
                 Parallel.For(0, data, (square) =>
                 {
-                    pawnAttacks[n, square] = AttacksGenerator.MaskPawnAttacks(square, isWhite: false);
+                    pawnAttacks[n, square] = AttackGenerator.MaskPawnAttacks(square, isWhite: false);
                 });
             });
         }
@@ -76,7 +76,7 @@ namespace Lynx.Benchmark
             {
                 Parallel.For(0, 2, (n) =>
                 {
-                    pawnAttacks[n, square] = AttacksGenerator.MaskPawnAttacks(square, isWhite: false);
+                    pawnAttacks[n, square] = AttackGenerator.MaskPawnAttacks(square, isWhite: false);
                 });
             });
         }

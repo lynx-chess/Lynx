@@ -53,12 +53,12 @@ namespace Lynx.Benchmark
         {
             for (int i = 0; i < iterations; ++i)
             {
-                EncodeMoveImplementation.EncodeMoveBool((int)BoardSquares.a1, (int)BoardSquares.h8, (int)Piece.q);
-                EncodeMoveImplementation.EncodeMoveBool((int)BoardSquares.a7, (int)BoardSquares.a8, (int)Piece.K, promotedPiece: (int)Piece.N);
-                EncodeMoveImplementation.EncodeMoveBool((int)BoardSquares.a7, (int)BoardSquares.b8, (int)Piece.K, promotedPiece: (int)Piece.N, isCapture: true);
-                EncodeMoveImplementation.EncodeMoveBool((int)BoardSquares.e2, (int)BoardSquares.e4, (int)Piece.K, isDoublePawnPush: true);
-                EncodeMoveImplementation.EncodeMoveBool((int)BoardSquares.c7, (int)BoardSquares.b6, (int)Piece.K, enPassant: true, isCapture: true);
-                EncodeMoveImplementation.EncodeMoveBool((int)BoardSquares.e8, (int)BoardSquares.g8, (int)Piece.k, isCastle: true);
+                EncodeMoveImplementation.EncodeMoveBool((int)BoardSquare.a1, (int)BoardSquare.h8, (int)Piece.q);
+                EncodeMoveImplementation.EncodeMoveBool((int)BoardSquare.a7, (int)BoardSquare.a8, (int)Piece.K, promotedPiece: (int)Piece.N);
+                EncodeMoveImplementation.EncodeMoveBool((int)BoardSquare.a7, (int)BoardSquare.b8, (int)Piece.K, promotedPiece: (int)Piece.N, isCapture: true);
+                EncodeMoveImplementation.EncodeMoveBool((int)BoardSquare.e2, (int)BoardSquare.e4, (int)Piece.K, isDoublePawnPush: true);
+                EncodeMoveImplementation.EncodeMoveBool((int)BoardSquare.c7, (int)BoardSquare.b6, (int)Piece.K, enPassant: true, isCapture: true);
+                EncodeMoveImplementation.EncodeMoveBool((int)BoardSquare.e8, (int)BoardSquare.g8, (int)Piece.k, isCastle: true);
             }
         }
 
@@ -72,12 +72,12 @@ namespace Lynx.Benchmark
         {
             for (int i = 0; i < iterations; ++i)
             {
-                EncodeMoveImplementation.EncodeMoveInt((int)BoardSquares.a1, (int)BoardSquares.h8, (int)Piece.q);
-                EncodeMoveImplementation.EncodeMoveInt((int)BoardSquares.a7, (int)BoardSquares.a8, (int)Piece.K, promotedPiece: (int)Piece.N);
-                EncodeMoveImplementation.EncodeMoveInt((int)BoardSquares.a7, (int)BoardSquares.b8, (int)Piece.K, promotedPiece: (int)Piece.N, isCapture: 1);
-                EncodeMoveImplementation.EncodeMoveInt((int)BoardSquares.e2, (int)BoardSquares.e4, (int)Piece.K, isDoublePawnPush: 1);
-                EncodeMoveImplementation.EncodeMoveInt((int)BoardSquares.c7, (int)BoardSquares.b6, (int)Piece.K, enPassant: 1, isCapture: 1);
-                EncodeMoveImplementation.EncodeMoveInt((int)BoardSquares.e8, (int)BoardSquares.g8, (int)Piece.k, isCastle: 1);
+                EncodeMoveImplementation.EncodeMoveInt((int)BoardSquare.a1, (int)BoardSquare.h8, (int)Piece.q);
+                EncodeMoveImplementation.EncodeMoveInt((int)BoardSquare.a7, (int)BoardSquare.a8, (int)Piece.K, promotedPiece: (int)Piece.N);
+                EncodeMoveImplementation.EncodeMoveInt((int)BoardSquare.a7, (int)BoardSquare.b8, (int)Piece.K, promotedPiece: (int)Piece.N, isCapture: 1);
+                EncodeMoveImplementation.EncodeMoveInt((int)BoardSquare.e2, (int)BoardSquare.e4, (int)Piece.K, isDoublePawnPush: 1);
+                EncodeMoveImplementation.EncodeMoveInt((int)BoardSquare.c7, (int)BoardSquare.b6, (int)Piece.K, enPassant: 1, isCapture: 1);
+                EncodeMoveImplementation.EncodeMoveInt((int)BoardSquare.e8, (int)BoardSquare.g8, (int)Piece.k, isCastle: 1);
             }
         }
     }

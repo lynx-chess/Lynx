@@ -29,8 +29,8 @@ namespace Lynx.Model
             PositionHistory = new(150);
         }
 
-        public List<Move> GetAllMoves() => MovesGenerator.GenerateAllMoves(CurrentPosition);
-        public List<Move> GetAllMovesWithCaptures() => MovesGenerator.GenerateAllMoves(CurrentPosition, capturesOnly: true);
+        public List<Move> GetAllMoves() => MoveGenerator.GenerateAllMoves(CurrentPosition);
+        public List<Move> GetAllMovesWithCaptures() => MoveGenerator.GenerateAllMoves(CurrentPosition, capturesOnly: true);
 
         public void RevertLastMove()
         {

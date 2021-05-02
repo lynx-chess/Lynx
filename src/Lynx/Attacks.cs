@@ -33,12 +33,12 @@ namespace Lynx
 
         static Attacks()
         {
-            KingAttacks = AttacksGenerator.InitializeKingAttacks();
-            PawnAttacks = AttacksGenerator.InitializePawnAttacks();
-            KnightAttacks = AttacksGenerator.InitializeKnightAttacks();
+            KingAttacks = AttackGenerator.InitializeKingAttacks();
+            PawnAttacks = AttackGenerator.InitializePawnAttacks();
+            KnightAttacks = AttackGenerator.InitializeKnightAttacks();
 
-            (_bishopOccupancyMasks, _bishopAttacks) = AttacksGenerator.InitializeBishopAttacks();
-            (_rookOccupancyMasks, _rookAttacks) = AttacksGenerator.InitializeRookAttacks();
+            (_bishopOccupancyMasks, _bishopAttacks) = AttackGenerator.InitializeBishopAttacks();
+            (_rookOccupancyMasks, _rookAttacks) = AttackGenerator.InitializeRookAttacks();
         }
 
         /// <summary>

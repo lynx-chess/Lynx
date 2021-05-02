@@ -17,7 +17,7 @@ namespace Lynx.Test.MoveGeneration
         {
             var position = new Position(fen);
 
-            var moves = MovesGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
+            var moves = MoveGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
 
             Assert.Single(moves.Where(m => m.IsCastle()));
             Assert.Single(moves.Where(m => m.IsShortCastle()));
@@ -35,7 +35,7 @@ namespace Lynx.Test.MoveGeneration
         {
             var position = new Position(fen);
 
-            var moves = MovesGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
+            var moves = MoveGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
 
             Assert.Single(moves.Where(m => m.IsCastle()));
             Assert.Single(moves.Where(m => m.IsLongCastle()));
@@ -61,7 +61,7 @@ namespace Lynx.Test.MoveGeneration
         {
             var position = new Position(fen);
 
-            var moves = MovesGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
+            var moves = MoveGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
 
             Assert.Empty(moves.Where(m => m.IsShortCastle()));
         }
@@ -85,7 +85,7 @@ namespace Lynx.Test.MoveGeneration
         {
             var position = new Position(fen);
 
-            var moves = MovesGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
+            var moves = MoveGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
 
             Assert.Empty(moves.Where(m => m.IsLongCastle()));
         }
@@ -107,7 +107,7 @@ namespace Lynx.Test.MoveGeneration
         {
             var position = new Position(fen);
 
-            var moves = MovesGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
+            var moves = MoveGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
 
             Assert.Empty(moves.Where(m => m.IsShortCastle()));
         }
@@ -134,7 +134,7 @@ namespace Lynx.Test.MoveGeneration
         {
             var position = new Position(fen);
 
-            var moves = MovesGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
+            var moves = MoveGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
 
             Assert.Empty(moves.Where(m => m.IsLongCastle()));
         }
@@ -150,7 +150,7 @@ namespace Lynx.Test.MoveGeneration
         {
             var position = new Position(fen);
 
-            var moves = MovesGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
+            var moves = MoveGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
 
             Assert.Empty(moves.Where(m => m.IsShortCastle()));
         }
@@ -166,7 +166,7 @@ namespace Lynx.Test.MoveGeneration
         {
             var position = new Position(fen);
 
-            var moves = MovesGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
+            var moves = MoveGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
 
             Assert.Empty(moves.Where(m => m.IsLongCastle()));
         }

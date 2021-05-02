@@ -56,7 +56,7 @@ namespace Lynx.Benchmark
 
             public Side Side { get; }
 
-            public BoardSquares EnPassant { get; }
+            public BoardSquare EnPassant { get; }
 
             public int Castle { get; }
 
