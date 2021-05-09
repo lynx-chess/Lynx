@@ -117,8 +117,8 @@ namespace Lynx.UCI.Commands.Engine
     ///	    "option name NalimovPath type string default c:\\n"
     ///	    "option name Clear Hash type button\n"
     /// </summary>
-#pragma warning restore RCS1243 // Duplicate word in a comment.
     public class OptionCommand : EngineBaseCommand
+#pragma warning restore RCS1243 // Duplicate word in a comment.
     {
         public const string Id = "option";
 
