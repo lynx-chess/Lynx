@@ -32,6 +32,7 @@
 
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,6 +43,8 @@ namespace Lynx.Benchmark
     {
         public readonly struct Position
         {
+            private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
+
             public string FEN { get; }
 
             /// <summary>
@@ -64,11 +67,6 @@ namespace Lynx.Benchmark
             {
                 FEN = fen;
                 var parsedFEN = FENParser.ParseFEN(fen);
-
-                if (!parsedFEN.Success)
-                {
-                    Console.WriteLine($"Error parsing FEN {fen}");
-                }
 
                 PieceBitBoards = parsedFEN.PieceBitBoards;
                 OccupancyBitBoards = parsedFEN.OccupancyBitBoards;

@@ -1,17 +1,14 @@
 ﻿using Lynx.Internal;
 using Lynx.Model;
 using Lynx.UCI.Commands.GUI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
+using NLog;
 using System.Threading.Tasks;
 
 namespace Lynx
 {
     public class Engine
     {
+        private Logger _logger;
         private bool _isNewGameCommandSupported;
         private bool _isNewGameComing;
         private bool _isPondering;
@@ -64,6 +61,7 @@ namespace Lynx
             Game = new Game();
             IsReady = true;
             _isNewGameComing = true;
+            _logger = LogManager.GetCurrentClassLogger();
         }
 
         public void NewGame()
@@ -85,7 +83,7 @@ namespace Lynx
 
                 if (lastMove is null || !Game.MakeMove(lastMove.Value))
                 {
-                    Logger.Warn($"Position couldn't be adjusted using last move in position command: {rawPositionCommand}" +
+                    _logger.Warn($"Position couldn't be adjusted using last move in position command: {rawPositionCommand}" +
                         "Retrying parsing the whole game");
 
                     _isNewGameComing = false;

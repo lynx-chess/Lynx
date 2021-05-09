@@ -1,10 +1,25 @@
 ﻿using Lynx;
 using Lynx.Cli;
+using Microsoft.Extensions.Configuration;
+using NLog;
+using NLog.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+
+var emvironmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
+
+var config = new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{emvironmentName}.json", optional: true, reloadOnChange: true)
+    .AddEnvironmentVariables()
+    .Build();
+
+LogManager.Configuration = new NLogLoggingConfiguration(config.GetSection("NLog"));
+
+//LogManager.LoadConfiguration("nlog.config");
 
 var opts = new BoundedChannelOptions(1_000)
 {
@@ -57,4 +72,4 @@ finally
     source.Cancel();
 }
 
-Thread.Sleep(5_000);
+Thread.Sleep(2_000);

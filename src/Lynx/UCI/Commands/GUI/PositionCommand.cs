@@ -1,8 +1,6 @@
-﻿using Lynx.Internal;
-using Lynx.Model;
+﻿using Lynx.Model;
+using NLog;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -23,6 +21,8 @@ namespace Lynx.UCI.Commands.GUI
         public const string StartPositionString = "startpos";
         public const string MovesString = "moves";
 
+        private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
+
         private static readonly Regex FenRegex = new(
             "(?<=fen).+?(?=moves|$)",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -38,9 +38,12 @@ namespace Lynx.UCI.Commands.GUI
 
             var initialPosition = isInitialPosition
                     ? Constants.InitialPositionFEN
-                    : FenRegex.Match(positionCommand).Value;
+                    : FenRegex.Match(positionCommand).Value.Trim();
 
-            Debug.Assert(!string.IsNullOrEmpty(initialPosition));
+            if (string.IsNullOrEmpty(initialPosition))
+            {
+                Logger.Error($"Error parsing position command {positionCommand}: no initial position found");
+            }
 
             var moves = MovesRegex.Match(positionCommand).Value.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
 

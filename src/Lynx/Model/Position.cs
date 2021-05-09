@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
@@ -7,6 +8,8 @@ namespace Lynx.Model
 {
     public readonly struct Position
     {
+        private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
+
         /// <summary>
         /// Use <see cref="Piece"/> as index
         /// </summary>
@@ -29,7 +32,7 @@ namespace Lynx.Model
 
             if (!parsedFEN.Success)
             {
-                Console.WriteLine($"Error parsing FEN {fen}");
+                Logger.Error($"Error parsing FEN {fen}");
             }
 
             PieceBitBoards = parsedFEN.PieceBitBoards;

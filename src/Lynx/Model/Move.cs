@@ -1,4 +1,4 @@
-﻿using Lynx.Internal;
+﻿using NLog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,6 +9,8 @@ namespace Lynx.Model
 {
     public readonly struct Move
     {
+        private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
+
         /// <summary>
         ///     Binary move bits            Hexadecimal
         /// 0000 0000 0000 0000 0000 0011 1111      0x3F        Source square (63 bits)
@@ -62,7 +64,11 @@ namespace Lynx.Model
         /// <returns></returns>
         public static Move? ParseFromUCIString(string UCIString, List<Move> moveList)
         {
-            Debug.Assert(UCIString.Length == 4 || UCIString.Length == 5);
+            if (UCIString.Length != 4 && UCIString.Length != 5)
+            {
+                Logger.Error($"Error parsing move from {UCIString}");
+                return null;
+            }
 
             var sourceSquare = (UCIString[0] - 'a') + ((8 - (UCIString[1] - '0')) * 8);
             var targetSquare = (UCIString[2] - 'a') + ((8 - (UCIString[3] - '0')) * 8);

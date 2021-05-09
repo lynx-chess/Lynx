@@ -1,4 +1,5 @@
 ﻿using Lynx.Internal;
+using NLog;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,6 +7,8 @@ namespace Lynx.Model
 {
     public class Game
     {
+        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+
         public List<Move> MoveHistory { get; }
         public List<Position> PositionHistory { get; }
 
@@ -35,7 +38,7 @@ namespace Lynx.Model
 
                 if (parsedMove is null)
                 {
-                    Logger.Error($"Error parsing game with fen {fen} and moves {string.Join(' ', movesUCIString)}");
+                    _logger.Error($"Error parsing game with fen {fen} and moves {string.Join(' ', movesUCIString)}");
                     break;
                 }
 

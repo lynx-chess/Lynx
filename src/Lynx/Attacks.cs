@@ -1,14 +1,13 @@
 ﻿using Lynx.Model;
+using NLog;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Lynx
 {
     public static class Attacks
     {
+        private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
+
         private static readonly BitBoard[] _bishopOccupancyMasks;
         private static readonly BitBoard[] _rookOccupancyMasks;
 
@@ -107,7 +106,7 @@ namespace Lynx
         {
             if (sideToMove == Side.Both)
             {
-                Console.WriteLine($"[Warn] {nameof(IsSquaredAttacked)} doesn't support Side.Both");
+                Logger.Warn($"{nameof(IsSquaredAttacked)} doesn't support Side.Both");
                 return false;
             }
 

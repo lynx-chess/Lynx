@@ -1,4 +1,4 @@
-﻿using Lynx.Internal;
+﻿using System;
 
 namespace Lynx.Model
 {
@@ -25,7 +25,7 @@ namespace Lynx.Model
         public readonly void Print()
         {
             const string separator = "____________________________________________________";
-            Logger.WriteLine(separator);
+            Console.WriteLine(separator);
 
             for (var rank = 0; rank < 8; ++rank)
             {
@@ -33,21 +33,21 @@ namespace Lynx.Model
                 {
                     if (file == 0)
                     {
-                        Logger.Write($"{8 - rank}  ");
+                        Console.Write($"{8 - rank}  ");
                     }
 
                     var squareIndex = SquareIndex(rank, file);
 
-                    Logger.Write($" {(GetBit(squareIndex) ? "1" : "0")}");
+                    Console.Write($" {(GetBit(squareIndex) ? "1" : "0")}");
                 }
 
-                Logger.WriteLine();
+                Console.WriteLine();
             }
 
-            Logger.Write("\n    a b c d e f g h\n");
+            Console.Write("\n    a b c d e f g h\n");
 
-            Logger.WriteLine($"\n    Bitboard: {Board} (0x{Board:X})");
-            Logger.WriteLine(separator);
+            Console.WriteLine($"\n    Bitboard: {Board} (0x{Board:X})");
+            Console.WriteLine(separator);
         }
 
         public readonly bool GetBit(int squareIndex)

@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <Version>0.1-alpha</Version>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <NoWarn>$(NoWarn),S101,RCS1090</NoWarn>
   </PropertyGroup>
 

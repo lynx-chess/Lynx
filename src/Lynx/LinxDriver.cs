@@ -2,6 +2,7 @@
 using Lynx.Model;
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
+using NLog;
 using System;
 using System.Threading;
 using System.Threading.Channels;
@@ -14,34 +15,45 @@ namespace Lynx
         private readonly ChannelReader<string> _uciReader;
         private readonly Channel<string> _engineWriter;
         private readonly Engine _engine;
+        private readonly ILogger _logger;
 
         public LinxDriver(ChannelReader<string> uciReader, Channel<string> engineWriter, Engine engine)
         {
             _uciReader = uciReader;
             _engineWriter = engineWriter;
             _engine = engine;
+            _logger = LogManager.GetCurrentClassLogger();
             _engine.OnReady += NotifyReadyOK;
             _engine.OnSearchFinished += NotifyBestMove;
         }
 
         public async Task Run(CancellationToken cancellationToken)
         {
-            while (await _uciReader.WaitToReadAsync(cancellationToken) && !cancellationToken.IsCancellationRequested)
+            try
             {
-                if (_uciReader.TryRead(out var input) && !string.IsNullOrWhiteSpace(input))
+                while (await _uciReader.WaitToReadAsync(cancellationToken) && !cancellationToken.IsCancellationRequested)
                 {
-                    await HandleCommand(input, cancellationToken);
+                    if (_uciReader.TryRead(out var input) && !string.IsNullOrWhiteSpace(input))
+                    {
+                        await HandleCommand(input, cancellationToken);
+                    }
                 }
             }
-
-            Console.WriteLine($"Finishing {nameof(LinxDriver)}");
+            catch (Exception e)
+            {
+                _logger.Fatal(e);
+            }
+            finally
+            {
+                _logger.Info($"Finishing {nameof(LinxDriver)}");
+            }
         }
 
         private async Task HandleCommand(string rawCommand, CancellationToken cancellationToken)
         {
-            Console.WriteLine($"[GUI]\t{rawCommand}");
+            _logger.Debug($"[GUI]\t{rawCommand}");
 
-            var commandItems = rawCommand.Split(" ", StringSplitOptions.RemoveEmptyEntries);
+            var commandItems = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             switch (commandItems[0].ToLowerInvariant())
             {
                 case DebugCommand.Id:
@@ -65,7 +77,9 @@ namespace Lynx
                     }
                     break;
                 case PositionCommand.Id:
+                    _engine.Game.CurrentPosition.Print();
                     _engine.AdjustPosition(rawCommand);
+                    _engine.Game.CurrentPosition.Print();
                     break;
                 case QuitCommand.Id:
                     _engineWriter.Writer.Complete();
@@ -74,6 +88,11 @@ namespace Lynx
                     _engine.Registration = new RegisterCommand(rawCommand);
                     break;
                 case SetOptionCommand.Id:
+                    if(commandItems.Length <2)
+                    {
+                        break;
+                    }
+
                     switch (commandItems[1].ToLowerInvariant())
                     {
                         case "Ponder":
@@ -93,7 +112,7 @@ namespace Lynx
                                 break;
                             }
                         default:
-                            Logger.Warn($"Unsupported option: {rawCommand}");
+                            _logger.Warn($"Unsupported option: {rawCommand}");
                             break;
                     }
                     break;
@@ -115,7 +134,7 @@ namespace Lynx
                     break;
 
                 default:
-                    Logger.Warn($"Unknown command received: {rawCommand}");
+                    _logger.Warn($"Unknown command received: {rawCommand}");
                     break;
             }
         }

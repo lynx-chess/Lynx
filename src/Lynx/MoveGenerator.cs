@@ -1,5 +1,5 @@
-﻿using Lynx.Internal;
-using Lynx.Model;
+﻿using Lynx.Model;
+using NLog;
 using System;
 using System.Collections.Generic;
 
@@ -7,6 +7,8 @@ namespace Lynx
 {
     public static class MoveGenerator
     {
+        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+
         private const int TRUE = 1;
         /// <summary>
         /// Checks are not considered
@@ -72,7 +74,7 @@ namespace Lynx
                 var sourceRank = (sourceSquare / 8) + 1;
                 if (sourceRank == 1 || sourceRank == 8)
                 {
-                    Logger.Warn($"There's a non-promoted {position.Side} pawn in rank {sourceRank}");
+                    _logger.Warn($"There's a non-promoted {position.Side} pawn in rank {sourceRank}");
                     continue;
                 }
 

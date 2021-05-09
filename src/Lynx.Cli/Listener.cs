@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
@@ -8,21 +9,32 @@ namespace Lynx.Cli
     public class Listener
     {
         private readonly Channel<string> _guiInputReader;
+        private readonly ILogger _logger;
 
         public Listener(Channel<string> guiInputReader)
         {
             _guiInputReader = guiInputReader;
+            _logger = LogManager.GetCurrentClassLogger();
         }
 
         public async Task Run(CancellationToken cancellationToken)
         {
-            while (!cancellationToken.IsCancellationRequested)
+            try
             {
-                var input = Console.ReadLine();
-                await _guiInputReader.Writer.WriteAsync(input!, cancellationToken);
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    var input = Console.ReadLine();
+                    await _guiInputReader.Writer.WriteAsync(input!, cancellationToken);
+                }
             }
-
-            Console.WriteLine($"Finishing {nameof(Listener)}");
+            catch (Exception e)
+            {
+                _logger.Fatal(e);
+            }
+            finally
+            {
+                _logger.Info($"Finishing {nameof(Writer)}");
+            }
         }
     }
 }

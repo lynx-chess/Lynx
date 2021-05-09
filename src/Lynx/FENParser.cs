@@ -1,5 +1,5 @@
-﻿using Lynx.Internal;
-using Lynx.Model;
+﻿using Lynx.Model;
+using NLog;
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -8,11 +8,15 @@ namespace Lynx
 {
     public static class FENParser
     {
+        private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
+
         private static readonly Regex RanksRegex = new(@"(?<=^|\/)[P|N|B|R|Q|K|p|n|b|r|q|k|\d]{1,8}", RegexOptions.Compiled);
 
         public static (bool Success, BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, int Castle, BoardSquare EnPassant,
             int HalfMoveClock, int FullMoveCounter) ParseFEN(string fen)
         {
+            fen = fen.Trim();
+
             var pieceBitBoards = new ulong[12] {
                 default, default, default, default,
                 default, default, default, default,
@@ -71,6 +75,12 @@ namespace Lynx
 
             var rankIndex = 0;
             var matches = RanksRegex.Matches(fen);
+
+            if (matches.Count != 8)
+            {
+                return (matches, false);
+            }
+
             foreach (var match in matches)
             {
                 var fileIndex = 0;

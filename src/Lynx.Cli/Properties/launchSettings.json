@@ -1,11 +1,16 @@
 {
   "profiles": {
     "Lynx.Cli": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
     },
     "WSL 2": {
       "commandName": "WSL2",
-      "environmentVariables": {},
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
       "distributionName": ""
     }
   }
