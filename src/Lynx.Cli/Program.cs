@@ -19,8 +19,6 @@ var config = new ConfigurationBuilder()
 
 LogManager.Configuration = new NLogLoggingConfiguration(config.GetSection("NLog"));
 
-//LogManager.LoadConfiguration("nlog.config");
-
 var opts = new BoundedChannelOptions(1_000)
 {
     SingleReader = true,
