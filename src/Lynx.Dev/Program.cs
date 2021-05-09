@@ -1,4 +1,6 @@
-﻿using Lynx;
+﻿#pragma warning disable S125,S1481
+
+using Lynx;
 using Lynx.Internal;
 using Lynx.Model;
 using System;
@@ -32,7 +34,8 @@ using static Lynx.Model.Move;
 //_29_Move_List();
 //_32_Make_Move();
 //_42_Perft();
-_43_Perft();
+//_43_Perft();
+_44_ParseUCI();
 
 const string TrickyPosition = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
 const string TrickyPositionReversed = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1";
@@ -359,6 +362,7 @@ static void _22_Generate_Moves()
 
     //position.OccupancyBitBoards[2].Board |= 0b11100111UL << 8 * 4;
     var moves = MoveGenerator.GenerateAllMoves(position);
+
     foreach (var move in moves)
     {
         Console.WriteLine(move);
@@ -519,3 +523,11 @@ static void _43_Perft()
     Perft.Divide(new Position(Constants.InitialPositionFEN), 5);
     Perft.Divide(new Position(TrickyPosition), 5);
 }
+
+static void _44_ParseUCI()
+{
+    var position = new Position("r1b1k2r/pPppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q2/P1PB1PpP/R3KB1R w KQkq - 0 1");
+    position.Print();
+}
+
+#pragma warning restore S125, S1481

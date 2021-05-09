@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
@@ -277,6 +278,8 @@ namespace Lynx.Model
             return sb.ToString();
         }
 
+        public List<Move> AllPossibleMoves() => MoveGenerator.GenerateAllMoves(this);
+
         /// <summary>
         /// Combines <see cref="PieceBitBoards"/>, <see cref="Side"/>, <see cref="Castle"/> and <see cref="EnPassant"/>
         /// into a human-friendly representation
@@ -284,7 +287,7 @@ namespace Lynx.Model
         public readonly void Print()
         {
             const string separator = "____________________________________________________";
-            Console.WriteLine(separator);
+            Console.WriteLine(separator + Environment.NewLine);
 
             for (var rank = 0; rank < 8; ++rank)
             {

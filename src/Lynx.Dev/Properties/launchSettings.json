@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "Lynx.Console": {
+    "Lynx.Dev": {
       "commandName": "Project"
     },
     "WSL 2": {

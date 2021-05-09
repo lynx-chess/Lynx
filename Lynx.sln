@@ -8,17 +8,22 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 		.github\workflows\benchmarks.yml = .github\workflows\benchmarks.yml
 		.github\workflows\ci.yml = .github\workflows\ci.yml
+		Directory.Build.props = Directory.Build.props
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lynx", "src\Lynx\Lynx.csproj", "{49B1405C-D78E-4026-AE2C-5398CE9E3754}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lynx.Benchmark", "src\Lynx.Benchmark\Lynx.Benchmark.csproj", "{4288CBA1-156C-435D-845F-4D60A20B10A4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lynx.Console", "src\Lynx.Console\Lynx.Console.csproj", "{340823FF-5384-4BE2-975D-F9AEDBF118CA}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lynx.NUnit.Test", "tests\Lynx.NUnit.Test\Lynx.NUnit.Test.csproj", "{F8E28CFB-E6E3-4B39-92C1-FDF07E620C79}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lynx.Test", "tests\Lynx.Test\Lynx.Test.csproj", "{9E1E8AC3-89CC-4013-8415-41967126246B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lynx.Dev", "src\Lynx.Dev\Lynx.Dev.csproj", "{25C9C733-F43B-4E8D-BD89-FC0D9CDFED36}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lynx.Cli", "src\Lynx.Cli\Lynx.Cli.csproj", "{465383BC-C4CB-478B-A5D1-3C9C1E425534}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dev_test", "dev_test", "{D656F9EF-DEF3-42C9-BB12-09961D43B844}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,10 +39,6 @@ Global
 		{4288CBA1-156C-435D-845F-4D60A20B10A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4288CBA1-156C-435D-845F-4D60A20B10A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4288CBA1-156C-435D-845F-4D60A20B10A4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{340823FF-5384-4BE2-975D-F9AEDBF118CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{340823FF-5384-4BE2-975D-F9AEDBF118CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{340823FF-5384-4BE2-975D-F9AEDBF118CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{340823FF-5384-4BE2-975D-F9AEDBF118CA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F8E28CFB-E6E3-4B39-92C1-FDF07E620C79}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F8E28CFB-E6E3-4B39-92C1-FDF07E620C79}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F8E28CFB-E6E3-4B39-92C1-FDF07E620C79}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -46,9 +47,23 @@ Global
 		{9E1E8AC3-89CC-4013-8415-41967126246B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E1E8AC3-89CC-4013-8415-41967126246B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E1E8AC3-89CC-4013-8415-41967126246B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{25C9C733-F43B-4E8D-BD89-FC0D9CDFED36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{25C9C733-F43B-4E8D-BD89-FC0D9CDFED36}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{25C9C733-F43B-4E8D-BD89-FC0D9CDFED36}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{25C9C733-F43B-4E8D-BD89-FC0D9CDFED36}.Release|Any CPU.Build.0 = Release|Any CPU
+		{465383BC-C4CB-478B-A5D1-3C9C1E425534}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{465383BC-C4CB-478B-A5D1-3C9C1E425534}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{465383BC-C4CB-478B-A5D1-3C9C1E425534}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{465383BC-C4CB-478B-A5D1-3C9C1E425534}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4288CBA1-156C-435D-845F-4D60A20B10A4} = {D656F9EF-DEF3-42C9-BB12-09961D43B844}
+		{F8E28CFB-E6E3-4B39-92C1-FDF07E620C79} = {D656F9EF-DEF3-42C9-BB12-09961D43B844}
+		{9E1E8AC3-89CC-4013-8415-41967126246B} = {D656F9EF-DEF3-42C9-BB12-09961D43B844}
+		{25C9C733-F43B-4E8D-BD89-FC0D9CDFED36} = {D656F9EF-DEF3-42C9-BB12-09961D43B844}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {44D1B1AC-75A9-4AB8-9FF9-A4A182D84F0F}

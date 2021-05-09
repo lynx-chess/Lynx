@@ -1,0 +1,60 @@
+﻿using Lynx;
+using Lynx.Cli;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Channels;
+using System.Threading.Tasks;
+
+var opts = new BoundedChannelOptions(1_000)
+{
+    SingleReader = true,
+    SingleWriter = true
+};
+
+var uciChannel = Channel.CreateBounded<string>(opts);
+var engineChannel = Channel.CreateBounded<string>(opts);
+
+using CancellationTokenSource source = new();
+CancellationToken cancellationToken = source.Token;
+
+var tasks = new List<Task>
+{
+    Task.Run(() => new Writer(engineChannel).Run(cancellationToken)),
+    Task.Run(() => new LinxDriver(uciChannel, engineChannel, new Engine()).Run(cancellationToken)),
+    Task.Run(() => new Listener(uciChannel).Run(cancellationToken)),
+    uciChannel.Reader.Completion,
+    engineChannel.Reader.Completion
+};
+
+try
+{
+    await Task.WhenAny(tasks);
+}
+catch (AggregateException ae)
+{
+    foreach (var e in ae.InnerExceptions)
+    {
+        if (e is TaskCanceledException taskCanceledException)
+        {
+            Console.WriteLine("Cancellation requested: {taskCanceledException.Message}");
+        }
+        else
+        {
+            Console.WriteLine("Exception: " + e.GetType().Name);
+        }
+    }
+}
+catch (Exception e)
+{
+    Console.WriteLine("Unexpected exception");
+    Console.WriteLine(e.Message);
+}
+finally
+{
+    engineChannel.Writer.TryComplete();
+    uciChannel.Writer.TryComplete();
+    source.Cancel();
+}
+
+Thread.Sleep(5_000);

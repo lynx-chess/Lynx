@@ -15,6 +15,7 @@ jobs:
 
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      PROJECT_NAME: Lynx
 
     steps:
     - uses: actions/checkout@v2
@@ -42,7 +43,7 @@ jobs:
         reporttypes: 'HtmlInline_AzurePipelines_Dark;SonarQube'
         assemblyfilters: '+*'
         classfilters: '+*;-*Exception'
-        filefilters: '+*'
+        filefilters: '+*;-*ConstantGenerator;-*MagicNumberGenerator;-*Logger'
         verbosity: 'Info'
         title: '${{ env.PROJECT_NAME }} #${{ github.run_number }} (${{ env.GITHUB_REF_SLUG }})'
         tag: '${{ github.run_number }}_${{ github.run_id }}'

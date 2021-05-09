@@ -6,12 +6,9 @@ using System.Text.RegularExpressions;
 
 namespace Lynx
 {
-#pragma warning disable S101 // Types should be named in PascalCase
-
     public static class FENParser
-#pragma warning restore S101 // Types should be named in PascalCase
     {
-        private static readonly Regex RanksRegex = new Regex(@"(?<=^|\/)[P|N|B|R|Q|K|p|n|b|r|q|k|\d]{1,8}", RegexOptions.Compiled);
+        private static readonly Regex RanksRegex = new(@"(?<=^|\/)[P|N|B|R|Q|K|p|n|b|r|q|k|\d]{1,8}", RegexOptions.Compiled);
 
         public static (bool Success, BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, int Castle, BoardSquare EnPassant,
             int HalfMoveClock, int FullMoveCounter) ParseFEN(string fen)
@@ -123,10 +120,13 @@ namespace Lynx
 
         private static Side ParseSide(string sideString)
         {
+#pragma warning disable S3358 // Ternary operators should not be nested
             bool isWhite = sideString.Equals("w", StringComparison.OrdinalIgnoreCase);
+
             return isWhite || sideString.Equals("b", StringComparison.OrdinalIgnoreCase)
                 ? (isWhite ? Side.White : Side.Black)
                 : throw new($"Unrecognized side: {sideString}");
+#pragma warning restore S3358 // Ternary operators should not be nested
         }
 
         private static int ParseCastlingRights(string castleString)

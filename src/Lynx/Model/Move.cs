@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Lynx.Internal;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -25,6 +27,18 @@ namespace Lynx.Model
 
         internal Move(int n) { EncodedMove = n; }
 
+        /// <summary>
+        /// 'Encode' constractor
+        /// </summary>
+        /// <param name="sourceSquare"></param>
+        /// <param name="targetSquare"></param>
+        /// <param name="piece"></param>
+        /// <param name="promotedPiece"></param>
+        /// <param name="isCapture"></param>
+        /// <param name="isDoublePawnPush"></param>
+        /// <param name="isEnPassant"></param>
+        /// <param name="isShortCastle"></param>
+        /// <param name="isLongCastle"></param>
         public Move(
             int sourceSquare, int targetSquare, int piece, int promotedPiece = default,
             int isCapture = default, int isDoublePawnPush = default, int isEnPassant = default,
@@ -36,6 +50,61 @@ namespace Lynx.Model
                 | (isEnPassant << 22)
                 | (isShortCastle << 23)
                 | (isLongCastle << 24);
+        }
+
+        /// <summary>
+        /// Returns the move from <paramref name="moveList"/> indicated by <paramref name="UCIString"/>
+        /// </summary>
+        /// <param name="UCIString"></param>
+        /// <param name="moveList"></param>
+        /// <exception cref="InvalidOperationException"></exception>
+        /// <exception cref="IndexOutOfRangeException"></exception>
+        /// <returns></returns>
+        public static Move? ParseFromUCIString(string UCIString, List<Move> moveList)
+        {
+            Debug.Assert(UCIString.Length == 4 || UCIString.Length == 5);
+
+            var sourceSquare = (UCIString[0] - 'a') + ((8 - (UCIString[1] - '0')) * 8);
+            var targetSquare = (UCIString[2] - 'a') + ((8 - (UCIString[3] - '0')) * 8);
+
+            var candidateMoves = moveList.Where(move => move.SourceSquare() == sourceSquare && move.TargetSquare() == targetSquare);
+
+            if (UCIString.Length == 4)
+            {
+                if (candidateMoves.Count() != 1)
+                {
+                    Logger.Error($"Error parsing move from {UCIString}");
+                    return null;
+                }
+
+                var move = candidateMoves.First();
+                Debug.Assert(move.PromotedPiece() == default);
+
+                return move;
+            }
+            else
+            {
+                var promotedPiece = (int)Enum.Parse<Piece>(UCIString[4].ToString());
+
+                bool predicate(Move m)
+                {
+                    var actualPromotedPiece = m.PromotedPiece();
+
+                    return actualPromotedPiece == promotedPiece
+                    || actualPromotedPiece == promotedPiece - 6;
+                }
+
+                if (candidateMoves.Count() != 1)
+                {
+                    Logger.Error($"Error parsing move: {UCIString}");
+                    return null;
+                }
+
+                var move = candidateMoves.First(predicate);
+                Debug.Assert(candidateMoves.Count(predicate) == 1);
+
+                return move;
+            }
         }
 
         public readonly int SourceSquare() => EncodedMove & 0x3F;
@@ -58,10 +127,10 @@ namespace Lynx.Model
 
         public readonly bool IsCastle() => (EncodedMove & 0x180_0000) >> 23 != default;
 
-        public readonly void Print()
+        public override string ToString()
         {
-            Console.WriteLine(
-                IsCastle() == default
+#pragma warning disable S3358 // Ternary operators should not be nested
+            return IsCastle() == default
                 ?
                     Constants.AsciiPieces[Piece()] +
                     Constants.Coordinates[SourceSquare()] +
@@ -69,9 +138,14 @@ namespace Lynx.Model
                     Constants.Coordinates[TargetSquare()] +
                     (PromotedPiece() == default ? "" : $"={Constants.AsciiPieces[PromotedPiece()]}") +
                     (IsEnPassant() == default ? "" : "e.p.")
-                : (IsShortCastle() ? "O-O" : "O-O-O"));
+                : (IsShortCastle() ? "O-O" : "O-O-O");
+#pragma warning restore S3358 // Ternary operators should not be nested
         }
 
+        public readonly void Print()
+        {
+            Console.WriteLine(ToString());
+        }
 
         public string UCIString()
         {
@@ -94,15 +168,15 @@ namespace Lynx.Model
             {
                 var move = moves.ElementAt(i);
 
-                sb.Append($"{i + 1,-3}")
-                  .Append($"{Constants.AsciiPieces[move.Piece()],-3}")
-                  .Append($"{Constants.Coordinates[move.SourceSquare()],-4}")
-                  .Append($"{isCapture(move.IsCapture()),-2}")
-                  .Append($"{Constants.Coordinates[move.TargetSquare()],-4}")
-                  .Append($"{bts(move.IsDoublePawnPush()),-4}")
-                  .Append($"{bts(move.IsEnPassant()),-3}")
-                  .Append($"{bts(move.IsShortCastle()),-4}")
-                  .Append($"{bts(move.IsLongCastle()),-4}")
+                sb.AppendFormat("{0,-3}", i + 1)
+                  .AppendFormat("{0,-3}", Constants.AsciiPieces[move.Piece()])
+                  .AppendFormat("{0,-4}", Constants.Coordinates[move.SourceSquare()])
+                  .AppendFormat("{0,-2}", isCapture(move.IsCapture()))
+                  .AppendFormat("{0,-4}", Constants.Coordinates[move.TargetSquare()])
+                  .AppendFormat("{0,-4}", bts(move.IsDoublePawnPush()))
+                  .AppendFormat("{0,-3}", bts(move.IsEnPassant()))
+                  .AppendFormat("{0,-4}", bts(move.IsShortCastle()))
+                  .AppendFormat("{0,-4}", bts(move.IsLongCastle()))
                   .Append(Environment.NewLine);
             }
 

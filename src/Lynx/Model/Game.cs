@@ -1,8 +1,6 @@
-﻿using System;
+﻿using Lynx.Internal;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Lynx.Model
 {
@@ -27,6 +25,22 @@ namespace Lynx.Model
 
             MoveHistory = new(150);
             PositionHistory = new(150);
+        }
+
+        public Game(string fen, List<string> movesUCIString) : this(fen)
+        {
+            foreach (var moveString in movesUCIString)
+            {
+                var parsedMove = Move.ParseFromUCIString(moveString, GetAllMoves());
+
+                if (parsedMove is null)
+                {
+                    Logger.Error($"Error parsing game with fen {fen} and moves {string.Join(' ', movesUCIString)}");
+                    break;
+                }
+
+                MakeMove(parsedMove.Value);
+            }
         }
 
         public List<Move> GetAllMoves() => MoveGenerator.GenerateAllMoves(CurrentPosition);

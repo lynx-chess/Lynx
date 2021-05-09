@@ -4,9 +4,7 @@ using CR = Lynx.Model.CastlingRights;
 
 namespace Lynx.Test
 {
-#pragma warning disable S101 // Types should be named in PascalCase
     public class FENParserTest
-#pragma warning restore S101 // Types should be named in PascalCase
     {
         [Fact]
         public void PieceBitBoards_InitialPosition()
