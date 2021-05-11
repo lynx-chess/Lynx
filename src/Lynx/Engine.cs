@@ -2,6 +2,9 @@
 using Lynx.Model;
 using Lynx.UCI.Commands.GUI;
 using NLog;
+using System;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Lynx
@@ -101,7 +104,15 @@ namespace Lynx
         public Move BestMove()
         {
             // TODO
-            return Game.GetAllMoves()[0];
+            foreach (var move in Game.GetAllMoves().OrderBy(_ => Guid.NewGuid()))
+            {
+                if (Game.MakeMove(move))
+                {
+                    return move;
+                }
+            }
+
+            return default;
         }
 
         public Move? MoveToPonder()
@@ -116,12 +127,13 @@ namespace Lynx
             _isPondering = goCommand.Ponder;
 
             // TODO
+            Thread.Sleep(1_000);
+            StopSearching();
         }
 
         public void StopSearching()
         {
             IsSearching = false;
-
             // TODO
         }
     }

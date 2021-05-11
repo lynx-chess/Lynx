@@ -9,11 +9,15 @@ using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 
-var emvironmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
+#if DEBUG
+Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
+#endif
+
+var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
 
 var config = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-    .AddJsonFile($"appsettings.{emvironmentName}.json", optional: true, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{environmentName}.json", optional: true, reloadOnChange: true)
     .AddEnvironmentVariables()
     .Build();
 

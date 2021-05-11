@@ -22,7 +22,7 @@
     ///		x nodes searched, the engine should send this info regularly
     ///	* pv <move1> ... <movei>
     ///		the best line found
-    ///	*multipv <num>
+    ///	* multipv <num>
     ///		this for the multi pv mode.
     ///		for the best move / pv add "multipv 1" in the string when you send the pv.
     ///		in k-best mode always send all k variants in k strings together.

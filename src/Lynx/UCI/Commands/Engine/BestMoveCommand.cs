@@ -17,12 +17,10 @@ namespace Lynx.UCI.Commands.Engine
 
         public static string BestMove(Move move, Move? moveToPonder = null)
         {
-            var ponder = moveToPonder?.UCIString();
-
             return $"bestmove {move.UCIString()}" +
-                 ponder is null
-                    ? string.Empty
-                    : $" ponder {ponder}";
+                (moveToPonder.HasValue
+                    ? $" ponder {moveToPonder!.Value}"
+                    : string.Empty);
         }
     }
 }

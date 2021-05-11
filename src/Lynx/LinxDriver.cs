@@ -88,7 +88,7 @@ namespace Lynx
                     _engine.Registration = new RegisterCommand(rawCommand);
                     break;
                 case SetOptionCommand.Id:
-                    if(commandItems.Length <2)
+                    if (commandItems.Length < 2)
                     {
                         break;
                     }
@@ -128,6 +128,8 @@ namespace Lynx
                     {
                         await SendCommand(availableOption, cancellationToken);
                     }
+
+                    await SendCommand(UciOKCommand.Id, cancellationToken);
                     break;
                 case UCINewGameCommand.Id:
                     _engine.NewGame();

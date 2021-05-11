@@ -28,6 +28,7 @@ namespace Lynx.Cli
                     if (!string.IsNullOrWhiteSpace(output))
                     {
                         _logger.Debug($"[Lynx]\t{output}");
+                        Console.WriteLine(output);
                     }
                 }
             }
