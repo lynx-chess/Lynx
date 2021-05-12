@@ -64,11 +64,7 @@ namespace Lynx.Model
         /// <returns></returns>
         public static Move? ParseFromUCIString(string UCIString, List<Move> moveList)
         {
-            if (UCIString.Length != 4 && UCIString.Length != 5)
-            {
-                Logger.Error($"Error parsing move from {UCIString}");
-                return null;
-            }
+            Debug.Assert(UCIString.Length == 4 || UCIString.Length == 5);
 
             var sourceSquare = (UCIString[0] - 'a') + ((8 - (UCIString[1] - '0')) * 8);
             var targetSquare = (UCIString[2] - 'a') + ((8 - (UCIString[3] - '0')) * 8);
@@ -77,13 +73,8 @@ namespace Lynx.Model
 
             if (UCIString.Length == 4)
             {
-                if (candidateMoves.Count() != 1)
-                {
-                    Logger.Error($"Error parsing move from {UCIString}");
-                    return null;
-                }
-
                 var move = candidateMoves.First();
+                Debug.Assert(candidateMoves.Count() == 1);
                 Debug.Assert(move.PromotedPiece() == default);
 
                 return move;
@@ -100,13 +91,8 @@ namespace Lynx.Model
                     || actualPromotedPiece == promotedPiece - 6;
                 }
 
-                if (candidateMoves.Count() != 1)
-                {
-                    Logger.Error($"Error parsing move: {UCIString}");
-                    return null;
-                }
-
                 var move = candidateMoves.First(predicate);
+                Debug.Assert(candidateMoves.Count() == 4);
                 Debug.Assert(candidateMoves.Count(predicate) == 1);
 
                 return move;
