@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 
@@ -62,7 +63,7 @@ namespace Lynx.Model
         /// <exception cref="InvalidOperationException"></exception>
         /// <exception cref="IndexOutOfRangeException"></exception>
         /// <returns></returns>
-        public static Move? ParseFromUCIString(string UCIString, List<Move> moveList)
+        public static bool TryParseFromUCIString(string UCIString, List<Move> moveList, [NotNullWhen(true)] out Move? move)
         {
             Debug.Assert(UCIString.Length == 4 || UCIString.Length == 5);
 
@@ -73,11 +74,17 @@ namespace Lynx.Model
 
             if (UCIString.Length == 4)
             {
-                var move = candidateMoves.First();
-                Debug.Assert(candidateMoves.Count() == 1);
-                Debug.Assert(move.PromotedPiece() == default);
+                move = candidateMoves.FirstOrDefault();
 
-                return move;
+                if (move.Equals(default(Move)))
+                {
+                    Logger.Warn($"Unable to link last move string {UCIString} to a valid move in the current position. That move may have already been played");
+                    move = null;
+                    return false;
+                }
+
+                Debug.Assert(move.Value.PromotedPiece() == default);
+                return true;
             }
             else
             {
@@ -91,11 +98,18 @@ namespace Lynx.Model
                     || actualPromotedPiece == promotedPiece - 6;
                 }
 
-                var move = candidateMoves.First(predicate);
+                move = candidateMoves.FirstOrDefault(predicate);
+                if (move.Equals(default(Move)))
+                {
+                    Logger.Warn($"Unable to link move {UCIString} to a valid move in the current position. That move may have already been played");
+                    move = null;
+                    return false;
+                }
+
                 Debug.Assert(candidateMoves.Count() == 4);
                 Debug.Assert(candidateMoves.Count(predicate) == 1);
 
-                return move;
+                return true;
             }
         }
 
@@ -144,8 +158,7 @@ namespace Lynx.Model
             return
                 Constants.Coordinates[SourceSquare()] +
                 Constants.Coordinates[TargetSquare()] +
-                (PromotedPiece() == default ? "" : $"{Constants.AsciiPieces[PromotedPiece()].ToString().ToLowerInvariant()}") +
-                (IsEnPassant() == default ? "" : "e.p.");
+                (PromotedPiece() == default ? "" : $"{Constants.AsciiPieces[PromotedPiece()].ToString().ToLowerInvariant()}");
         }
 
         public static void PrintMoveList(IEnumerable<Move> moves)

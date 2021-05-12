@@ -81,21 +81,25 @@ namespace Lynx
         {
             if (_isNewGameComing || !_isNewGameCommandSupported)
             {
-                Game = PositionCommand.ParseGame(rawPositionCommand);
-                _isNewGameComing = false;
+                ParseWholeGame(rawPositionCommand);
             }
             else
             {
-                var lastMove = PositionCommand.ParseLastMoveOnly(rawPositionCommand, Game);
-
-                if (lastMove is null || !Game.MakeMove(lastMove.Value))
+                if (!PositionCommand.TryParseLastMove(rawPositionCommand, Game, out var lastMove)
+                    || !Game.MakeMove(lastMove.Value))
                 {
-                    _logger.Warn($"Position couldn't be adjusted using last move in position command: {rawPositionCommand}" +
+                    _logger.Warn(
+                        $"Position couldn't be adjusted using last move in position command: {rawPositionCommand}" + Environment.NewLine +
                         "Retrying parsing the whole game");
 
-                    _isNewGameComing = false;
-                    AdjustPosition(rawPositionCommand);
+                    ParseWholeGame(rawPositionCommand);
                 }
+            }
+
+            void ParseWholeGame(string rawPositionCommand)
+            {
+                Game = PositionCommand.ParseGame(rawPositionCommand);
+                _isNewGameComing = false;
             }
         }
 

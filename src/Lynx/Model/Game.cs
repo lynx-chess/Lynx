@@ -34,9 +34,7 @@ namespace Lynx.Model
         {
             foreach (var moveString in movesUCIString)
             {
-                var parsedMove = Move.ParseFromUCIString(moveString, GetAllMoves());
-
-                if (parsedMove is null)
+                if (!Move.TryParseFromUCIString(moveString, GetAllMoves(), out var parsedMove))
                 {
                     _logger.Error($"Error parsing game with fen {fen} and moves {string.Join(' ', movesUCIString)}");
                     break;

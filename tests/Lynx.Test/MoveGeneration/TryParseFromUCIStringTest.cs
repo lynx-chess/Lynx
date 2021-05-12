@@ -3,7 +3,7 @@ using Xunit;
 
 namespace Lynx.Test.MoveGeneration
 {
-    public class ParseFromUCIStringTest
+    public class TryParseFromUCIStringTest
     {
         /// <summary>
         /// 8   r . b . k . . r
@@ -38,14 +38,12 @@ namespace Lynx.Test.MoveGeneration
             var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
             // Act
-            var nullableMove = Move.ParseFromUCIString(UCIString, moves);
+            Assert.True(Move.TryParseFromUCIString(UCIString, moves, out var move));
 
             // Assert
-            Assert.NotNull(nullableMove);
-            var move = nullableMove!.Value;
-            Assert.Equal((int)sourceSquare, move.SourceSquare());
-            Assert.Equal((int)targetSquare, move.TargetSquare());
-            Assert.Equal((int)promotedPiece, move.PromotedPiece());
+            Assert.Equal((int)sourceSquare, move!.Value.SourceSquare());
+            Assert.Equal((int)targetSquare, move!.Value.TargetSquare());
+            Assert.Equal((int)promotedPiece, move!.Value.PromotedPiece());
         }
 
         /// <summary>
@@ -81,14 +79,12 @@ namespace Lynx.Test.MoveGeneration
             var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
             // Act
-            var nullableMove = Move.ParseFromUCIString(UCIString, moves);
+            Assert.True(Move.TryParseFromUCIString(UCIString, moves, out var move));
 
             // Assert
-            Assert.NotNull(nullableMove);
-            var move = nullableMove!.Value;
-            Assert.Equal((int)sourceSquare, move.SourceSquare());
-            Assert.Equal((int)targetSquare, move.TargetSquare());
-            Assert.Equal((int)promotedPiece, move.PromotedPiece());
+            Assert.Equal((int)sourceSquare, move!.Value.SourceSquare());
+            Assert.Equal((int)targetSquare, move!.Value.TargetSquare());
+            Assert.Equal((int)promotedPiece, move!.Value.PromotedPiece());
         }
 
         [Theory]
@@ -100,11 +96,9 @@ namespace Lynx.Test.MoveGeneration
             const string fen = Constants.InitialPositionFEN;
             var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
-            // Act
-            var move = Move.ParseFromUCIString(UCIString, moves);
-
-            // Assert
-            Assert.Null(move);
+            // Act & Assert
+            Assert.False(Move.TryParseFromUCIString(UCIString, moves, out var result));
+            Assert.Null(result);
         }
     }
 }

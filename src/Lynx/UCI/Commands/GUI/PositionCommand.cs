@@ -1,6 +1,7 @@
 ﻿using Lynx.Model;
 using NLog;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -50,22 +51,22 @@ namespace Lynx.UCI.Commands.GUI
             return new Game(initialPosition, moves);
         }
 
-        public static Move? ParseLastMoveOnly(string positionCommand, Game game)
+        public static bool TryParseLastMove(string positionCommand, Game game, [NotNullWhen(true)] out Move? lastMove)
         {
-            var lastMove = positionCommand
+            var moveString = positionCommand
                     .Split(' ', StringSplitOptions.RemoveEmptyEntries)
                     .Last();
 
-            var move = Move.ParseFromUCIString(
-                lastMove,
-                game.CurrentPosition.AllPossibleMoves());
-
-            if (move is null)
+            if (!Move.TryParseFromUCIString(
+                moveString,
+                game.CurrentPosition.AllPossibleMoves(),
+                out lastMove))
             {
-                Logger.Error($"Error parsing move {lastMove} from position command {positionCommand}");
+                Logger.Warn($"Error parsing last move {lastMove} from position command {positionCommand}");
+                return false;
             }
 
-            return move;
+            return true;
         }
     }
 }
