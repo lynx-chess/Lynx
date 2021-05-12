@@ -118,7 +118,6 @@ namespace Lynx
                     break;
                 case StopCommand.Id:
                     _engine.StopSearching();
-                    await NotifyBestMove(_engine.BestMove(), _engine.MoveToPonder());
                     break;
                 case UCICommand.Id:
                     await SendCommand(IdCommand.Name, cancellationToken);

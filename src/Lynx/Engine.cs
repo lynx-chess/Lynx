@@ -43,10 +43,14 @@ namespace Lynx
             get => _isSearching;
             set
             {
-                _isSearching = value;
-                if (!value)
+                if (_isSearching && !value)
                 {
-                    OnSearchFinished?.Invoke(BestMove(), MoveToPonder());
+                    _isSearching = value;
+                    OnSearchFinished?.Invoke(BestMove(), MoveToPonder()).Wait();
+                }
+                else
+                {
+                    _isSearching = value;
                 }
             }
         }
@@ -127,7 +131,7 @@ namespace Lynx
             _isPondering = goCommand.Ponder;
 
             // TODO
-            Thread.Sleep(1_000);
+            Thread.Sleep(100);
             StopSearching();
         }
 

@@ -71,7 +71,7 @@ finally
 {
     engineChannel.Writer.TryComplete();
     uciChannel.Writer.TryComplete();
-    source.Cancel();
+    //source.Cancel();
 }
 
 Thread.Sleep(2_000);
