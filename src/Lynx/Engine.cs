@@ -3,6 +3,7 @@ using Lynx.Model;
 using Lynx.UCI.Commands.GUI;
 using NLog;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -111,16 +112,9 @@ namespace Lynx
 
         public Move BestMove()
         {
-            // TODO
-            foreach (var move in Game.GetAllMoves().OrderBy(_ => Guid.NewGuid()))
-            {
-                if (Game.MakeMove(move))
-                {
-                    return move;
-                }
-            }
-
-            return default;
+            //return FindRandomMove();
+            var game = FindBestMove_Naive(Game.CurrentPosition);
+            return game.MoveHistory.Last();
         }
 
         public Move? MoveToPonder()
@@ -135,7 +129,6 @@ namespace Lynx
             _isPondering = goCommand.Ponder;
 
             // TODO
-            Thread.Sleep(100);
             StopSearching();
         }
 
@@ -143,6 +136,87 @@ namespace Lynx
         {
             IsSearching = false;
             // TODO
+        }
+
+
+        private Move FindRandomMove()
+        {
+            foreach (var move in Game.GetAllMoves().OrderBy(_ => Guid.NewGuid()))
+            {
+                if (Game.MakeMove(move))
+                {
+                    return move;
+                }
+            }
+
+            return default;
+        }
+
+        private Game FindBestMove_Naive(Position position, int depth = 3, Game? game = null)
+        {
+            if (game is null)
+            {
+                game = new Game();
+            }
+
+            if (depth == 0)
+            {
+                game.PositionHistory.Add(position);
+                return game;
+            }
+
+            var positionMoveList = new List<(Move Move, Position Position)>(150);
+
+            foreach (var move in MoveGenerator.GenerateAllMoves(position))
+            {
+                var newPosition = new Position(position, move);
+                if (newPosition.IsValid())
+                {
+                    positionMoveList.Add((move, newPosition));
+                }
+            }
+
+            var optimalPair = positionMoveList.OrderBy(pair => EvaluatePosition_Naive(pair.Position, depth - 1)).First();
+            game.MoveHistory.Add(optimalPair.Move);
+            game.PositionHistory.Add(optimalPair.Position);
+
+            return game;
+        }
+
+        private int EvaluatePosition_Naive(Position position, int depth)
+        {
+            if (depth == 0)
+            {
+                return position.Evaluate();
+            }
+
+            var positions = new List<Position>(150);
+
+            foreach (var move in MoveGenerator.GenerateAllMoves(position))
+            {
+                var newPosition = new Position(position, move);
+                if (newPosition.IsValid())
+                {
+                    positions.Add(newPosition);
+                }
+            }
+
+            if (positions.Count == 0)
+            {
+                if (Attacks.IsSquaredAttackedBySide(
+                    position.PieceBitBoards[(int)Piece.K + Utils.PieceOffset(position.Side)].GetLS1BIndex(),
+                    position,
+                    (Side)Utils.OppositeSide(position.Side)))
+                {
+                    return int.MinValue;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+
+            return positions.Max(p => EvaluatePosition_Naive(p, depth - 1));
         }
     }
 }

@@ -283,6 +283,27 @@ namespace Lynx.Model
 
         public List<Move> AllPossibleMoves() => MoveGenerator.GenerateAllMoves(this);
 
+        public int Evaluate()
+        {
+            var white =
+                PieceBitBoards[(int)Piece.P].CountBits()
+                + (3 * PieceBitBoards[(int)Piece.N].CountBits())
+                + (3 * PieceBitBoards[(int)Piece.B].CountBits())
+                + (5 * PieceBitBoards[(int)Piece.R].CountBits())
+                + (8 * PieceBitBoards[(int)Piece.Q].CountBits());
+
+            var black =
+                PieceBitBoards[(int)Piece.p].CountBits()
+                + (3 * PieceBitBoards[(int)Piece.n].CountBits())
+                + (3 * PieceBitBoards[(int)Piece.b].CountBits())
+                + (5 * PieceBitBoards[(int)Piece.r].CountBits())
+                + (8 * PieceBitBoards[(int)Piece.q].CountBits());
+
+            return Side == Side.White
+                ? white - black
+                : black - white;
+        }
+
         /// <summary>
         /// Combines <see cref="PieceBitBoards"/>, <see cref="Side"/>, <see cref="Castle"/> and <see cref="EnPassant"/>
         /// into a human-friendly representation

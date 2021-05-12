@@ -60,5 +60,11 @@ namespace Lynx
                 }
             }
         }
+
+        public static GameParameters? Parameters { get; set; }
+    }
+
+    public class GameParameters
+    {
     }
 }

@@ -37,7 +37,7 @@ namespace Lynx
 
         public static List<Move> GenerateAllMoves(Position position, bool capturesOnly = false)
         {
-            var moves = new List<Move>();
+            var moves = new List<Move>(150);
 
             if (position.Side == Side.Both)
             {

@@ -21,6 +21,8 @@ var config = new ConfigurationBuilder()
     .AddEnvironmentVariables()
     .Build();
 
+Configuration.Parameters = config.GetSection(nameof(GameParameters)).Get<GameParameters>();
+
 LogManager.Configuration = new NLogLoggingConfiguration(config.GetSection("NLog"));
 
 var opts = new BoundedChannelOptions(1_000)
