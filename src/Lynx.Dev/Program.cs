@@ -1,6 +1,4 @@
-﻿#pragma warning disable S125,S1481
-
-using Lynx;
+﻿using Lynx;
 using Lynx.Internal;
 using Lynx.Model;
 using System;
@@ -35,7 +33,8 @@ using static Lynx.Model.Move;
 //_32_Make_Move();
 //_42_Perft();
 //_43_Perft();
-_44_ParseUCI();
+//_44_ParseUCI();
+_49_Rudimetary_Evaluation();
 
 const string TrickyPosition = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
 const string TrickyPositionReversed = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1";
@@ -530,4 +529,20 @@ static void _44_ParseUCI()
     position.Print();
 }
 
-#pragma warning restore S125, S1481
+static void _49_Rudimetary_Evaluation()
+{
+    var position = new Position(Constants.InitialPositionFEN);
+
+    foreach (var move in MoveGenerator.GenerateAllMoves(position))
+    {
+        var newBlackPosition = new Position(position, move);
+        if (newBlackPosition.IsValid())
+        {
+            var newWhitePosition = new Position(newBlackPosition, newBlackPosition.AllPossibleMoves().First());
+            if (newBlackPosition.IsValid())
+            {
+                Console.WriteLine($"{move} | {newWhitePosition.MaterialEvaluation()} | {newWhitePosition.MaterialAndPositionalEvaluation()}");
+            }
+        }
+    }
+}

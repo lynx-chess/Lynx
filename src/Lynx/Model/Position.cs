@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 
 namespace Lynx.Model
@@ -281,27 +282,48 @@ namespace Lynx.Model
             return sb.ToString();
         }
 
+        public int StaticEvaluation() => MaterialAndPositionalEvaluation();
+
         public List<Move> AllPossibleMoves() => MoveGenerator.GenerateAllMoves(this);
 
-        public int Evaluate()
+        public int MaterialEvaluation()
         {
-            var white =
-                PieceBitBoards[(int)Piece.P].CountBits()
-                + (3 * PieceBitBoards[(int)Piece.N].CountBits())
-                + (3 * PieceBitBoards[(int)Piece.B].CountBits())
-                + (5 * PieceBitBoards[(int)Piece.R].CountBits())
-                + (8 * PieceBitBoards[(int)Piece.Q].CountBits());
-
-            var black =
-                PieceBitBoards[(int)Piece.p].CountBits()
-                + (3 * PieceBitBoards[(int)Piece.n].CountBits())
-                + (3 * PieceBitBoards[(int)Piece.b].CountBits())
-                + (5 * PieceBitBoards[(int)Piece.r].CountBits())
-                + (8 * PieceBitBoards[(int)Piece.q].CountBits());
+            var eval = 0;
+            for (int pieceIndex = 0; pieceIndex < PieceBitBoards.Length; ++pieceIndex)
+            {
+                eval += (EvaluationConstants.MaterialScore[pieceIndex] * PieceBitBoards[pieceIndex].CountBits());
+            }
 
             return Side == Side.White
-                ? white - black
-                : black - white;
+                ? eval
+                : -eval;
+        }
+
+        public int MaterialAndPositionalEvaluation()
+        {
+            var eval = 0;
+
+            for (int pieceIndex = 0; pieceIndex < PieceBitBoards.Length; ++pieceIndex)
+            {
+                // Bitboard 'copy'. Use long directly to avoid the extra allocations
+                var bitboard = PieceBitBoards[pieceIndex].Board;
+
+                while (bitboard != default)
+                {
+                    var pieceSquareIndex = BitBoard.GetLS1BIndex(bitboard);
+                    bitboard = BitBoard.ResetLS1B(bitboard);
+
+                    // Material evaluation
+                    eval += EvaluationConstants.MaterialScore[pieceIndex];
+
+                    // Positional evaluation
+                    eval += EvaluationConstants.PositionalScore[pieceIndex][pieceSquareIndex];
+                }
+            }
+
+            return Side == Side.White
+                ? eval
+                : -eval;
         }
 
         /// <summary>

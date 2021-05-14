@@ -10,7 +10,7 @@
 
   <PropertyGroup>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
-    <NoWarn>CS8321</NoWarn>
+    <NoWarn>CS8321,S125,S1481</NoWarn>
   </PropertyGroup>
 
 </Project>

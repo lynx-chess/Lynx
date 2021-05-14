@@ -91,5 +91,32 @@ namespace Lynx.Test
         {
             Assert.Equal(shouldBeValid, new Position(fen).IsValid());
         }
+
+        [Theory]
+        [InlineData(Constants.InitialPositionFEN, 0)]
+        [InlineData("rnbqkbnr/ppppppp1/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", +100)]
+        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPP1/RNBQKBNR w KQkq - 0 1", -100)]
+        [InlineData("rnbqkbnr/ppppppp1/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1", -100)]
+        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPP1/RNBQKBNR b KQkq - 0 1", +100)]
+        [InlineData("rnbqkb1r/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", +300)]
+        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKB1R w KQkq - 0 1", -300)]
+        [InlineData("rnbqkb1r/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1", -300)]
+        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKB1R b KQkq - 0 1", +300)]
+        [InlineData("rnbqk1nr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", +350)]
+        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQK1NR w KQkq - 0 1", -350)]
+        [InlineData("rnbqk1nr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1", -350)]
+        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQK1NR b KQkq - 0 1", +350)]
+        [InlineData("rnbqkbn1/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", +500)]
+        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBN1 w KQkq - 0 1", -500)]
+        [InlineData("rnbqkbn1/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1", -500)]
+        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBN1 b KQkq - 0 1", +500)]
+        [InlineData("rnb1kbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", +900)]
+        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNB1KBNR w KQkq - 0 1", -900)]
+        [InlineData("rnb1kbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1", -900)]
+        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNB1KBNR b KQkq - 0 1", +900)]
+        public void Evaluate(string fen, int expectedEvaluationValue)
+        {
+            Assert.Equal(expectedEvaluationValue, new Position(fen).MaterialEvaluation());
+        }
     }
 }
