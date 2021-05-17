@@ -377,6 +377,7 @@ namespace Lynx.Model
                 $"{((Castle & (int)CastlingRights.BK) != default ? 'k' : '-')}" +
                 $"{((Castle & (int)CastlingRights.BQ) != default ? 'q' : '-')}"
                 );
+            Console.WriteLine($"    FEN:\t{FEN()}");
 
             Console.WriteLine(separator);
         }

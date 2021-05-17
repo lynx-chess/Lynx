@@ -66,5 +66,6 @@ namespace Lynx
 
     public class GameParameters
     {
+        public int Depth { get; set; }
     }
 }

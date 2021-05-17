@@ -1,9 +1,10 @@
-﻿using Lynx.Internal;
-using Lynx.Model;
+﻿using Lynx.Model;
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
@@ -33,9 +34,51 @@ namespace Lynx
             {
                 while (await _uciReader.WaitToReadAsync(cancellationToken) && !cancellationToken.IsCancellationRequested)
                 {
-                    if (_uciReader.TryRead(out var input) && !string.IsNullOrWhiteSpace(input))
+                    if (_uciReader.TryRead(out var rawCommand) && !string.IsNullOrWhiteSpace(rawCommand))
                     {
-                        await HandleCommand(input, cancellationToken);
+                        _logger.Debug($"[GUI]\t{rawCommand}");
+
+                        var commandItems = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                        switch (commandItems[0].ToLowerInvariant())
+                        {
+                            case DebugCommand.Id:
+                                HandleDebug(rawCommand);
+                                break;
+                            case GoCommand.Id:
+                                await HandleGo(rawCommand);
+                                break;
+                            case IsReadyCommand.Id:
+                                await HandleIsReady(cancellationToken);
+                                break;
+                            case PonderHitCommand.Id:
+                                HandlePonderHit();
+                                break;
+                            case PositionCommand.Id:
+                                HandlePosition(rawCommand);
+                                break;
+                            case QuitCommand.Id:
+                                HandleQuit();
+                                break;
+                            case RegisterCommand.Id:
+                                HandleRegister(rawCommand);
+                                break;
+                            case SetOptionCommand.Id:
+                                HandleSetOption(rawCommand, commandItems);
+                                break;
+                            case StopCommand.Id:
+                                HandleStop();
+                                break;
+                            case UCICommand.Id:
+                                await HandleUCI(cancellationToken);
+                                break;
+                            case UCINewGameCommand.Id:
+                                HandleNewGame();
+                                break;
+
+                            default:
+                                _logger.Warn($"Unknown command received: {rawCommand}");
+                                break;
+                        }
                     }
                 }
             }
@@ -49,96 +92,111 @@ namespace Lynx
             }
         }
 
-        private async Task HandleCommand(string rawCommand, CancellationToken cancellationToken)
-        {
-            _logger.Debug($"[GUI]\t{rawCommand}");
+        #region Command handlers
 
-            var commandItems = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            switch (commandItems[0].ToLowerInvariant())
+        private void HandlePosition(string command)
+        {
+#if DEBUG
+            _engine.Game.CurrentPosition.Print();
+#endif
+
+            _engine.AdjustPosition(command);
+#if DEBUG
+            _engine.Game.CurrentPosition.Print();
+
+            //foreach (var move in MoveGenerator.GenerateAllMoves(_engine.Game.CurrentPosition))
+            //{
+            //    var newBlackPosition = new Position(_engine.Game.CurrentPosition, move);
+            //    if (newBlackPosition.IsValid())
+            //    {
+            //        var newWhitePosition = new Position(newBlackPosition, newBlackPosition.AllPossibleMoves()[0]);
+            //        if (newBlackPosition.IsValid())
+            //        {
+            //            Console.WriteLine($"{move,-6} | {newWhitePosition.MaterialEvaluation(),-5} | {newWhitePosition.MaterialAndPositionalEvaluation(),-5}");
+            //        }
+            //    }
+            //}
+#endif
+        }
+
+        private async Task HandleGo(string command)
+        {
+            var goCommand = new GoCommand();
+            await goCommand.Parse(command);
+            _engine.StartSearching(goCommand);
+        }
+
+        private void HandleStop() => _engine.StopSearching();
+
+        private async Task HandleUCI(CancellationToken cancellationToken)
+        {
+            await SendCommand(IdCommand.Name, cancellationToken);
+            await SendCommand(IdCommand.Version, cancellationToken);
+
+            foreach (var availableOption in OptionCommand.AvailableOptions)
             {
-                case DebugCommand.Id:
-                    Configuration.IsDebug = DebugCommand.Parse(rawCommand);
-                    break;
-                case GoCommand.Id:
-                    var goCommand = new GoCommand();
-                    await goCommand.Parse(rawCommand);
-                    _engine.StartSearching(goCommand);
-                    break;
-                case IsReadyCommand.Id:
-                    if (_engine.IsReady)
+                await SendCommand(availableOption, cancellationToken);
+            }
+
+            await SendCommand(UciOKCommand.Id, cancellationToken);
+        }
+
+        private async Task HandleIsReady(CancellationToken cancellationToken)
+        {
+            if (_engine.IsReady)
+            {
+                await SendCommand(ReadyOKCommand.Id, cancellationToken);
+            }
+        }
+
+        private void HandlePonderHit()
+        {
+            if (Configuration.IsPonder)
+            {
+                _engine.PonderHit();
+            }
+        }
+
+        private void HandleSetOption(string command, string[] commandItems)
+        {
+            if (commandItems.Length < 2)
+            {
+                return;
+            }
+
+            switch (commandItems[1].ToLowerInvariant())
+            {
+                case "Ponder":
                     {
-                        await SendCommand(ReadyOKCommand.Id, cancellationToken);
-                    }
-                    break;
-                case PonderHitCommand.Id:
-                    if (Configuration.IsPonder)
-                    {
-                        _engine.PonderHit();
-                    }
-                    break;
-                case PositionCommand.Id:
-                    _engine.Game.CurrentPosition.Print();
-                    _engine.AdjustPosition(rawCommand);
-                    _engine.Game.CurrentPosition.Print();
-                    break;
-                case QuitCommand.Id:
-                    _engineWriter.Writer.Complete();
-                    break;
-                case RegisterCommand.Id:
-                    _engine.Registration = new RegisterCommand(rawCommand);
-                    break;
-                case SetOptionCommand.Id:
-                    if (commandItems.Length < 2)
-                    {
+                        if (bool.TryParse(commandItems[3], out var value))
+                        {
+                            Configuration.IsPonder = value;
+                        }
                         break;
                     }
-
-                    switch (commandItems[1].ToLowerInvariant())
+                case "UCI_AnalyseMode":
                     {
-                        case "Ponder":
-                            {
-                                if (bool.TryParse(commandItems[3], out var value))
-                                {
-                                    Configuration.IsPonder = value;
-                                }
-                                break;
-                            }
-                        case "UCI_AnalyseMode":
-                            {
-                                if (bool.TryParse(commandItems[3], out var value))
-                                {
-                                    Configuration.UCI_AnalyseMode = value;
-                                }
-                                break;
-                            }
-                        default:
-                            _logger.Warn($"Unsupported option: {rawCommand}");
-                            break;
+                        if (bool.TryParse(commandItems[3], out var value))
+                        {
+                            Configuration.UCI_AnalyseMode = value;
+                        }
+                        break;
                     }
-                    break;
-                case StopCommand.Id:
-                    _engine.StopSearching();
-                    break;
-                case UCICommand.Id:
-                    await SendCommand(IdCommand.Name, cancellationToken);
-                    await SendCommand(IdCommand.Version, cancellationToken);
-
-                    foreach (var availableOption in OptionCommand.AvailableOptions)
-                    {
-                        await SendCommand(availableOption, cancellationToken);
-                    }
-
-                    await SendCommand(UciOKCommand.Id, cancellationToken);
-                    break;
-                case UCINewGameCommand.Id:
-                    _engine.NewGame();
-                    break;
-
                 default:
-                    _logger.Warn($"Unknown command received: {rawCommand}");
+                    _logger.Warn($"Unsupported option: {command}");
                     break;
             }
         }
+
+        private void HandleNewGame() => _engine.NewGame();
+
+        private static void HandleDebug(string command) => Configuration.IsDebug = DebugCommand.Parse(command);
+
+        private void HandleQuit() => _engineWriter.Writer.Complete();
+
+        private void HandleRegister(string rawCommand) => _engine.Registration = new RegisterCommand(rawCommand);
+
+        #endregion
 
         private async Task NotifyReadyOK()
         {
