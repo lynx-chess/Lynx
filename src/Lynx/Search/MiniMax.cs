@@ -1,5 +1,7 @@
 ﻿using Lynx.Model;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 
 namespace Lynx.Search
 {
@@ -25,7 +27,7 @@ namespace Lynx.Search
             {
                 var maxEval = int.MinValue;
 
-                var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position);
+                var pseudoLegalMoves = position.AllPossibleMoves();
                 for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count; ++moveIndex)
                 {
                     var newPosition = new Position(position, pseudoLegalMoves[moveIndex]);
@@ -64,16 +66,6 @@ namespace Lynx.Search
         public class Result
         {
             public List<Move> Moves { get; set; } = new List<Move>(150);
-
-            public Result()
-            {
-
-            }
-            public Result(Move move)
-            {
-                Moves = new List<Move>(150);
-                Moves.Add(move);
-            }
         }
 
         /// <summary>
@@ -89,7 +81,7 @@ namespace Lynx.Search
                 return position.StaticEvaluation();
             }
 
-            var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position);
+            var pseudoLegalMoves = position.AllPossibleMoves();
             Move? bestMove = null;
 
             if (position.Side == Side.White)
@@ -118,7 +110,7 @@ namespace Lynx.Search
                 }
                 else // No IsValid() positions found -> Draw by Stalemate or Loss by Checkmate
                 {
-                    return EvaluateFinalPosition(position);
+                    return position.EvaluateFinalPosition(depth);
                 }
             }
             else
@@ -149,25 +141,34 @@ namespace Lynx.Search
                 }
                 else
                 {
-                    return EvaluateFinalPosition(position);
+                    return position.EvaluateFinalPosition(depth);
                 }
             }
         }
 
         /// <summary>
         /// Second MiniMax algorithm implementation
-        /// Trying to return the right moves
+        /// Tracks the right moves back to the user
         /// </summary>
         /// <param name="position"></param>
-        /// <param name="depth"></param>
-        public static (int Evaluation, Result? MoveList) MiniMax_InitialImplementation_2(Position position, int depth)
+        /// <param name="depthLeft"></param>
+        public static (int Evaluation, Result MoveList) MiniMax_InitialImplementation_2(Position position, int depthLeft)
         {
-            if (depth == 0)
+            var pseudoLegalMoves = position.AllPossibleMoves();
+
+            if (depthLeft == 0)
             {
-                return (position.StaticEvaluation(), null);
+                var result = new Result();
+                if (pseudoLegalMoves.Any(move => new Position(position, move).IsValid()))
+                {
+                    return (position.StaticEvaluation(), result);
+                }
+                else
+                {
+                    return (position.EvaluateFinalPosition(depthLeft), result);
+                }
             }
 
-            var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position);
             Move? bestMove = null;
             Result? existingMoveList = null;
 
@@ -176,37 +177,35 @@ namespace Lynx.Search
                 var maxEval = int.MinValue;
                 for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count; ++moveIndex)
                 {
-                    var newPosition = new Position(position, pseudoLegalMoves[moveIndex]);
+                    var move = pseudoLegalMoves[moveIndex];
+                    var newPosition = new Position(position, move);
                     if (!newPosition.IsValid())
                     {
                         continue;
                     }
 
-                    var (evaluation, bestMoveExistingMoveList) = MiniMax_InitialImplementation_2(newPosition, depth - 1);
+                    var (evaluation, bestMoveExistingMoveList) = MiniMax_InitialImplementation_2(newPosition, depthLeft - 1);
+
+                    //System.Console.WriteLine($"Depth: {depth} | Move: {move} | Eval: {evaluation}");
 
                     if (evaluation > maxEval)
                     {
                         maxEval = evaluation;
                         existingMoveList = bestMoveExistingMoveList;
-                        bestMove = pseudoLegalMoves[moveIndex];
+                        bestMove = move;
                     }
                 }
 
                 if (bestMove is not null)
                 {
-                    if (existingMoveList is null)
-                    {
-                        existingMoveList = new Result(bestMove!.Value);
-                    }
-                    else
-                    {
-                        existingMoveList.Moves.Add(bestMove!.Value);
-                    }
+                    Debug.Assert(existingMoveList is not null);
+                    existingMoveList!.Moves.Add(bestMove!.Value);
+
                     return (maxEval, existingMoveList);
                 }
                 else
                 {
-                    return (EvaluateFinalPosition(position, depth), existingMoveList);
+                    return (position.EvaluateFinalPosition(depthLeft), new Result());
                 }
             }
             else
@@ -215,37 +214,35 @@ namespace Lynx.Search
 
                 for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count; ++moveIndex)
                 {
-                    var newPosition = new Position(position, pseudoLegalMoves[moveIndex]);
+                    var move = pseudoLegalMoves[moveIndex];
+                    var newPosition = new Position(position, move);
                     if (!newPosition.IsValid())
                     {
                         continue;
                     }
 
-                    var (evaluation, bestMoveExistingMoveList) = MiniMax_InitialImplementation_2(newPosition, depth - 1);
+                    var (evaluation, bestMoveExistingMoveList) = MiniMax_InitialImplementation_2(newPosition, depthLeft - 1);
+
+                    //System.Console.WriteLine($"Depth: {depth} | Move: {move} | Eval: {evaluation}");
 
                     if (evaluation < minEval)
                     {
                         minEval = evaluation;
                         existingMoveList = bestMoveExistingMoveList;
-                        bestMove = pseudoLegalMoves[moveIndex];
+                        bestMove = move;
                     }
                 }
 
                 if (bestMove is not null)
                 {
-                    if (existingMoveList is null)
-                    {
-                        existingMoveList = new Result(bestMove!.Value);
-                    }
-                    else
-                    {
-                        existingMoveList.Moves.Add(bestMove!.Value);
-                    }
+                    Debug.Assert(existingMoveList is not null);
+                    existingMoveList!.Moves.Add(bestMove!.Value);
+
                     return (minEval, existingMoveList);
                 }
                 else
                 {
-                    return (EvaluateFinalPosition(position, depth), existingMoveList);
+                    return (position.EvaluateFinalPosition(depthLeft), new Result());
                 }
             }
         }

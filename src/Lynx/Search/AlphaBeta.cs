@@ -136,7 +136,7 @@ namespace Lynx.Search
 
                 return legalMovesFound
                     ? maxEval
-                    : EvaluateFinalPosition(position);
+                    : position.EvaluateFinalPosition(depth);
             }
             else
             {
@@ -163,7 +163,7 @@ namespace Lynx.Search
 
                 return legalMovesFound
                     ? minEval
-                    : EvaluateFinalPosition(position);
+                    : position.EvaluateFinalPosition(depth);
             }
         }
     }

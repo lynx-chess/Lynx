@@ -182,6 +182,14 @@ namespace Lynx
                         }
                         break;
                     }
+                case "Depth":
+                    {
+                        if (int.TryParse(commandItems[3], out var value))
+                        {
+                            Configuration.Parameters.Depth = value;
+                        }
+                        break;
+                    }
                 default:
                     _logger.Warn($"Unsupported option: {command}");
                     break;

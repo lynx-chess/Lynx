@@ -282,11 +282,11 @@ namespace Lynx.Model
             return sb.ToString();
         }
 
-        public int StaticEvaluation() => MaterialAndPositionalEvaluation();
+        public int StaticEvaluation() => EvaluateMaterialAndPosition();
 
         public List<Move> AllPossibleMoves() => MoveGenerator.GenerateAllMoves(this);
 
-        public int MaterialEvaluation()
+        public int EvaluateMaterial()
         {
             var eval = 0;
             for (int pieceIndex = 0; pieceIndex < PieceBitBoards.Length; ++pieceIndex)
@@ -294,12 +294,10 @@ namespace Lynx.Model
                 eval += (EvaluationConstants.MaterialScore[pieceIndex] * PieceBitBoards[pieceIndex].CountBits());
             }
 
-            return Side == Side.White
-                ? eval
-                : -eval;
+            return eval;
         }
 
-        public int MaterialAndPositionalEvaluation()
+        public int EvaluateMaterialAndPosition()
         {
             var eval = 0;
 
@@ -321,9 +319,35 @@ namespace Lynx.Model
                 }
             }
 
-            return Side == Side.White
-                ? eval
-                : -eval;
+            return eval;
+        }
+
+        internal const int CheckMateEvaluation = 1_000_000_000;
+
+        private const int DepthFactor = 1_000_000;
+
+        /// <summary>
+        /// Assuming a current position has no legal moves (<see cref="AllPossibleMoves"/> doesn't produce any <see cref="IsValid"/> position),
+        /// this method determines if a position is a result of either a loss by Checkmate or a draw by stalemate
+        /// </summary>
+        /// <param name="depthLeft">Modulates the output, favouring positions with higher Depth left (i.e. Checkmate in less moves)</param>
+        /// <returns>At least <see cref="CheckMateEvaluation"/> if Position.Side lost (more extreme values when <paramref name="depthLeft"/> increases)
+        /// or 0 if Position.Side was stalemated</returns>
+        public int EvaluateFinalPosition(int depthLeft = default)
+        {
+            if (Attacks.IsSquaredAttackedBySide(
+                PieceBitBoards[(int)Piece.K + Utils.PieceOffset(Side)].GetLS1BIndex(),
+                this,
+                (Side)Utils.OppositeSide(Side)))
+            {
+                return Side == Side.White
+                    ? -CheckMateEvaluation - (DepthFactor * depthLeft)
+                    : CheckMateEvaluation + (DepthFactor * depthLeft);
+            }
+            else
+            {
+                return default;
+            }
         }
 
         /// <summary>

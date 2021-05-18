@@ -129,6 +129,7 @@ namespace Lynx.UCI.Commands.Engine
             //"option name NalimovPath type string default C:/...",
             //"option name NalimovCache type spin default 1 min 1 max 32
             "option name Ponder type check",
+            $"option name Depth type spin default 3 min 1 max {int.MaxValue}"
             //"option name OwnBook type check",
             //"option name MultiPV type spin default 1",
             //"option name UCI_ShowCurrLine type check default false",      // Interesting

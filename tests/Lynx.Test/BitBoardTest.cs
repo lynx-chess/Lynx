@@ -154,7 +154,9 @@ namespace Lynx.Test
         [InlineData(new BoardSquare[] { BoardSquare.e4, BoardSquare.f4 }, (int)BoardSquare.e4)]
         public void GetLS1BIndex(BoardSquare[] occupiedSquares, int expectedLS1B)
         {
-            Assert.Equal(expectedLS1B, new BitBoard(occupiedSquares).GetLS1BIndex());
+            var bitboard = new BitBoard(occupiedSquares);
+            Assert.Equal(expectedLS1B, bitboard.GetLS1BIndex());
+            Assert.Equal(expectedLS1B, BitBoard.GetLS1BIndex(bitboard.Board));
 
             if (expectedLS1B != -1)
             {

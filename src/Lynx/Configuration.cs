@@ -61,11 +61,11 @@ namespace Lynx
             }
         }
 
-        public static GameParameters? Parameters { get; set; }
+        public static GameParameters Parameters { get; set; } = new GameParameters();
     }
 
     public class GameParameters
     {
-        public int Depth { get; set; }
+        public int Depth { get; set; } = 3;
     }
 }
