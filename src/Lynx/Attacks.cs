@@ -1,14 +1,10 @@
 ﻿using Lynx.Model;
-using NLog;
-using System;
 using System.Diagnostics;
 
 namespace Lynx
 {
     public static class Attacks
     {
-        private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
-
         private static readonly BitBoard[] _bishopOccupancyMasks;
         private static readonly BitBoard[] _rookOccupancyMasks;
 

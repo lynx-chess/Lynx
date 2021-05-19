@@ -25,7 +25,7 @@ using System.Threading.Tasks;
 
 namespace Lynx.Benchmark
 {
-    public class IsSquareAttacked_multithreading : BaseBenchmark
+    public class IsSquareAttacked_parallel : BaseBenchmark
     {
         private readonly Position[] _positions = new[]
         {
@@ -180,12 +180,6 @@ namespace Lynx.Benchmark
                 return (rookAttacks.Board & piecePosition[(int)Piece.R + offset].Board) != default;
             }
 
-            private static bool IsSquareAttackedByQueens(int offset, BitBoard bishopAttacks, BitBoard rookAttacks, BitBoard[] piecePosition)
-            {
-                var queenAttacks = Attacks.QueenAttacks(rookAttacks, bishopAttacks);
-                return (queenAttacks.Board & piecePosition[(int)Piece.Q + offset].Board) != default;
-            }
-
             private static bool IsSquareAttackedByQueens(int squareIndex, int offset, BitBoard[] piecePosition, BitBoard[] occupancy)
             {
                 var queenAttacks = Attacks.QueenAttacks(squareIndex, occupancy[(int)Side.Both]);
@@ -255,12 +249,6 @@ namespace Lynx.Benchmark
             {
                 var rookAttacks = Attacks.RookAttacks(squareIndex, occupancy[(int)Side.Both]);
                 return (rookAttacks.Board & piecePosition[(int)Piece.R + offset].Board) != default;
-            }
-
-            private static bool IsSquareAttackedByQueens(int offset, BitBoard bishopAttacks, BitBoard rookAttacks, BitBoard[] piecePosition)
-            {
-                var queenAttacks = Attacks.QueenAttacks(rookAttacks, bishopAttacks);
-                return (queenAttacks.Board & piecePosition[(int)Piece.Q + offset].Board) != default;
             }
 
             private static bool IsSquareAttackedByQueens(int squareIndex, int offset, BitBoard[] piecePosition, BitBoard[] occupancy)

@@ -464,7 +464,6 @@ static void _32_Make_Move()
 
     static void GeneralMoveTest(Game game)
     {
-
         foreach (var move in game.GetAllMoves())
         {
             game.CurrentPosition.Print();
@@ -540,7 +539,7 @@ static void _49_Rudimetary_Evaluation()
         var newBlackPosition = new Position(position, move);
         if (newBlackPosition.IsValid())
         {
-            var newWhitePosition = new Position(newBlackPosition, newBlackPosition.AllPossibleMoves().First());
+            var newWhitePosition = new Position(newBlackPosition, newBlackPosition.AllPossibleMoves()[0]);
             if (newBlackPosition.IsValid())
             {
                 Console.WriteLine($"{move} | {newWhitePosition.EvaluateMaterial()} | {newWhitePosition.EvaluateMaterialAndPosition()}");
