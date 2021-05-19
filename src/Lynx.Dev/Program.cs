@@ -1,6 +1,7 @@
 ﻿using Lynx;
 using Lynx.Internal;
 using Lynx.Model;
+using Lynx.Search;
 using System;
 using System.Diagnostics;
 using System.Linq;
@@ -34,7 +35,8 @@ using static Lynx.Model.Move;
 //_42_Perft();
 //_43_Perft();
 //_44_ParseUCI();
-_49_Rudimetary_Evaluation();
+//_49_Rudimetary_Evaluation();
+Search();
 
 const string TrickyPosition = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
 const string TrickyPositionReversed = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1";
@@ -544,5 +546,63 @@ static void _49_Rudimetary_Evaluation()
                 Console.WriteLine($"{move} | {newWhitePosition.EvaluateMaterial()} | {newWhitePosition.EvaluateMaterialAndPosition()}");
             }
         }
+    }
+}
+
+static void Search()
+{
+    const string fen = "7k/6b1/7p/2p1pPpP/2P3P1/5P2/7N/7K w - - 0 1";
+
+    {
+        var game = new Game(fen);
+        var (evaluation, moveList) = SearchAlgorithms.MiniMax_InitialImplementation_2(game.CurrentPosition, Configuration.Parameters.Depth);
+        Console.WriteLine($"Evaluation: {evaluation}");
+
+        var bestMove = moveList!.Moves.Last();
+        Console.WriteLine($"Best move: {bestMove}");
+    }
+
+    Console.WriteLine("=====================================================================================");
+
+    /*
+     * 8   . . . . . . . k
+     * 7   . . . . . . b .
+     * 6   . . . . . . . p
+     * 5   . . p . p P p P
+     * 4   . . P . . . P .
+     * 3   . . . . . P . .
+     * 2   . . . . . . . N
+     * 1   . . . . . . . K
+     *     a b c d e f g h
+     *
+     *          o
+     *            \ f5f6
+     *             * -----------
+     *     e5e4  /   \  h8h7     \  g7f8
+     *          /     \           \
+     *         o       o ----      o
+     *    f6g7 |  f6f7 | \   \
+     *         |       |  \   \
+     *         *       *   *   *
+     *       +415    +415  ??  ??
+     *
+     *  o -> White
+     *  * -> Black
+     *
+     *       1/     f5f6
+     *       2/     e5e4
+     *       3/     f6g7 + resto de hermanos
+     *       2.a/   e5e4 -> +415
+     *       4/     h8h7
+     *       5/     f6f7 -> +415
+     *       4.a8   h8h7 >= +415 -> Las blancas nunca van a hacer algo peor que eso
+     */
+    {
+        var game = new Game(fen);
+        var (evaluation, moveList) = SearchAlgorithms.AlphaBeta(game.CurrentPosition, Configuration.Parameters.Depth);
+        Console.WriteLine($"Evaluation: {evaluation}");
+
+        var bestMove = moveList!.Moves.Last();
+        Console.WriteLine($"Best move: {bestMove}");
     }
 }

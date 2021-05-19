@@ -1,9 +1,7 @@
 ﻿using Lynx.Model;
-using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Lynx.Search
 {
@@ -16,7 +14,7 @@ namespace Lynx.Search
         /// <param name="depth"></param>
         /// <param name="isWhite"></param>
         /// <param name="alpha">
-        /// Best score Shite can achieve, assuming best play by Black.
+        /// Best score White can achieve, assuming best play by Black.
         /// Defaults to the worse possible score for white, Int.MinValue.
         /// </param>
         /// <param name="beta">
@@ -89,9 +87,9 @@ namespace Lynx.Search
         /// Alpha-beta algorithm implementation
         /// </summary>
         /// <param name="position"></param>
-        /// <param name="depth"></param>
+        /// <param name="depthLeft"></param>
         /// <param name="alpha">
-        /// Best score Shite can achieve, assuming best play by Black.
+        /// Best score White can achieve, assuming best play by Black.
         /// Defaults to the worse possible score for white, Int.MinValue.
         /// </param>
         /// <param name="beta">
@@ -99,17 +97,25 @@ namespace Lynx.Search
         /// Defaults to the works possible score for Black, Int.MaxValue
         /// </param>
         /// <returns></returns>
-        private static int RealAlphaBeta(Position position, int depth, int alpha = int.MinValue, int beta = int.MaxValue)
+        public static (int Evaluation, Result MoveList) AlphaBeta(Position position, int depthLeft, int alpha = int.MinValue, int beta = int.MaxValue)
         {
-            static bool IsGameFinished(Position position) => throw new();
+            var pseudoLegalMoves = position.AllPossibleMoves();
 
-            if (depth == 0 || IsGameFinished(position))
+            if (depthLeft == 0)
             {
-                return position.StaticEvaluation();
+                var result = new Result();
+                if (pseudoLegalMoves.Any(move => new Position(position, move).IsValid()))
+                {
+                    return (position.StaticEvaluation(), result);
+                }
+                else
+                {
+                    return (position.EvaluateFinalPosition(depthLeft), result);
+                }
             }
 
-            var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position);
-            bool legalMovesFound = false;
+            Move? bestMove = null;
+            Result? existingMoveList = null;
 
             if (position.Side == Side.White)
             {
@@ -117,26 +123,46 @@ namespace Lynx.Search
 
                 for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count; ++moveIndex)
                 {
+                    var move = pseudoLegalMoves[moveIndex];
                     var newPosition = new Position(position, pseudoLegalMoves[moveIndex]);
                     if (!newPosition.IsValid())
                     {
                         continue;
                     }
-                    legalMovesFound = true;
+                    PrintPreMove(position, depthLeft, move);
 
-                    var eval = RealAlphaBeta(newPosition, depth - 1, alpha, beta);
-                    maxEval = Max(maxEval, eval);   // Branch prediction optimized - should have started with most likely positions
-                    alpha = Max(alpha, eval);       // maxTODO optimize branch prediction -> Should alpha be generally greater than eval?
+                    var (evaluation, bestMoveExistingMoveList) = AlphaBeta(newPosition, depthLeft - 1, alpha, beta);
+
+                    PrintMove(depthLeft, move, evaluation, position);
+
+                    if (evaluation > maxEval)
+                    {
+                        maxEval = evaluation;
+                        existingMoveList = bestMoveExistingMoveList;
+                        bestMove = move;
+                    }
+
+                    // maxEval = Max(maxEval, evaluation);   // Branch prediction optimized - should have started with most likely positions
+                    alpha = Max(alpha, evaluation);       // TODO optimize branch prediction -> Should alpha be generally greater than eval?
 
                     if (beta <= alpha)
                     {
+                        Logger.Trace($"Prunning: {bestMove} is enough");
                         break;
                     }
                 }
 
-                return legalMovesFound
-                    ? maxEval
-                    : position.EvaluateFinalPosition(depth);
+                if (bestMove is not null)
+                {
+                    Debug.Assert(existingMoveList is not null);
+                    existingMoveList!.Moves.Add(bestMove!.Value);
+
+                    return (maxEval, existingMoveList);
+                }
+                else
+                {
+                    return (position.EvaluateFinalPosition(depthLeft), new Result());
+                }
             }
             else
             {
@@ -144,16 +170,28 @@ namespace Lynx.Search
 
                 for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count; ++moveIndex)
                 {
+                    var move = pseudoLegalMoves[moveIndex];
                     var newPosition = new Position(position, pseudoLegalMoves[moveIndex]);
                     if (!newPosition.IsValid())
                     {
                         continue;
                     }
-                    legalMovesFound = true;
 
-                    var eval = RealAlphaBeta(newPosition, depth - 1, alpha, beta);
-                    minEval = Min(minEval, eval);   // Branch prediction optimized - should have started with most likely positions
-                    beta = Min(beta, eval);        // TODO optimize branch prediction -> Should beta be generally less than eval?
+                    PrintPreMove(position, depthLeft, move);
+
+                    var (evaluation, bestMoveExistingMoveList) = AlphaBeta(newPosition, depthLeft - 1, alpha, beta);
+
+                    PrintMove(depthLeft, move, evaluation, position);
+
+                    // minEval = Min(minEval, evaluation);   // Branch prediction optimized - should have started with most likely positions
+                    beta = Min(beta, evaluation);        // TODO optimize branch prediction -> Should beta be generally less than eval?
+
+                    if (evaluation < minEval)
+                    {
+                        minEval = evaluation;
+                        existingMoveList = bestMoveExistingMoveList;
+                        bestMove = move;
+                    }
 
                     if (beta <= alpha)
                     {
@@ -161,9 +199,17 @@ namespace Lynx.Search
                     }
                 }
 
-                return legalMovesFound
-                    ? minEval
-                    : position.EvaluateFinalPosition(depth);
+                if (bestMove is not null)
+                {
+                    Debug.Assert(existingMoveList is not null);
+                    existingMoveList!.Moves.Add(bestMove!.Value);
+
+                    return (minEval, existingMoveList);
+                }
+                else
+                {
+                    return (position.EvaluateFinalPosition(depthLeft), new Result());
+                }
             }
         }
     }

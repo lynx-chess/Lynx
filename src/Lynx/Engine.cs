@@ -128,10 +128,11 @@ namespace Lynx
             //var evaluation = MiniMax_InitialImplementation(Game.CurrentPosition, Configuration.Parameters?.Depth ?? 3, result);
             //_logger.Debug($"Evaluation: {evaluation}");
 
-            var result = MiniMax_InitialImplementation_2(Game.CurrentPosition, Configuration.Parameters.Depth);
-            _logger.Debug($"Evaluation: {result.Evaluation}");
+            //var (evaluation, moveList) = MiniMax_InitialImplementation_2(Game.CurrentPosition, Configuration.Parameters.Depth);
+            var (evaluation, moveList) = AlphaBeta(Game.CurrentPosition, Configuration.Parameters.Depth);
+            _logger.Debug($"Evaluation: {evaluation}");
 
-            var bestMove = result.MoveList!.Moves.Last();   // TODO: MoveList can be empty if the initial position is stalement or checkmate
+            var bestMove = moveList!.Moves.Last();   // TODO: MoveList can be empty if the initial position is stalement or checkmate
 
             Game.MakeMove(bestMove);
 
@@ -158,7 +159,6 @@ namespace Lynx
             IsSearching = false;
             // TODO
         }
-
 
         private Move FindRandomMove()
         {

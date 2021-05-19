@@ -1,7 +1,7 @@
 ﻿using Lynx.Model;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 
 namespace Lynx.Search
 {
@@ -61,11 +61,6 @@ namespace Lynx.Search
 
                 return minEval;
             }
-        }
-
-        public class Result
-        {
-            public List<Move> Moves { get; set; } = new List<Move>(150);
         }
 
         /// <summary>
@@ -175,6 +170,7 @@ namespace Lynx.Search
             if (position.Side == Side.White)
             {
                 var maxEval = int.MinValue;
+
                 for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count; ++moveIndex)
                 {
                     var move = pseudoLegalMoves[moveIndex];
@@ -184,9 +180,11 @@ namespace Lynx.Search
                         continue;
                     }
 
+                    PrintPreMove(position, depthLeft, move);
+
                     var (evaluation, bestMoveExistingMoveList) = MiniMax_InitialImplementation_2(newPosition, depthLeft - 1);
 
-                    //System.Console.WriteLine($"Depth: {depth} | Move: {move} | Eval: {evaluation}");
+                    PrintMove(depthLeft, move, evaluation, position);
 
                     if (evaluation > maxEval)
                     {
@@ -221,9 +219,11 @@ namespace Lynx.Search
                         continue;
                     }
 
+                    PrintPreMove(position, depthLeft, move);
+
                     var (evaluation, bestMoveExistingMoveList) = MiniMax_InitialImplementation_2(newPosition, depthLeft - 1);
 
-                    //System.Console.WriteLine($"Depth: {depth} | Move: {move} | Eval: {evaluation}");
+                    PrintMove(depthLeft, move, evaluation, position);
 
                     if (evaluation < minEval)
                     {
