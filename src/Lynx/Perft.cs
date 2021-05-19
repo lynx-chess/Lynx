@@ -6,7 +6,7 @@ namespace Lynx
 {
     /// <summary>
     /// <see cref="https://www.chessprogramming.org/Perft"/>
-    /// Calculates thelLeaf nodes (number of positions) reached during the test of the move generator at a given depth
+    /// Calculates the leaf nodes (number of positions) reached during the test of the move generator at a given depth
     /// </summary>
     public static class Perft
     {
@@ -50,7 +50,7 @@ namespace Lynx
                 {
                     var newPosition = new Position(position, move);
 
-                    if (newPosition.IsValid())
+                    if (newPosition.WasProduceByAValidMove())
                     {
                         nodes = ResultsImpl(newPosition, depth - 1, nodes);
                     }
@@ -70,7 +70,7 @@ namespace Lynx
                 {
                     var newPosition = new Position(position, move);
 
-                    if (newPosition.IsValid())
+                    if (newPosition.WasProduceByAValidMove())
                     {
                         var cummulativeNodes = nodes;
 

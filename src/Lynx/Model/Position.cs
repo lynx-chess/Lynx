@@ -175,7 +175,7 @@ namespace Lynx.Model
         }
 
         /// <summary>
-        /// False if any of the kings has been captured, or if the opponent king is in check
+        /// False if any of the kings has been captured, or if the opponent king is in check.
         /// </summary>
         /// <returns></returns>
         public readonly bool IsValid()
@@ -185,6 +185,19 @@ namespace Lynx.Model
 
             return kingSquare >= 0 && oppositeKingSquare >= 0
                 && !Attacks.IsSquaredAttacked(oppositeKingSquare, Side, PieceBitBoards, OccupancyBitBoards);
+        }
+
+        /// <summary>
+        /// Lightweight version of <see cref="IsValid"/>
+        /// False if the opponent king is in check.
+        /// This method is meant to be invoked only after <see cref="Position(Position, Move)"/>
+        /// </summary>
+        /// <returns></returns>
+        public bool WasProduceByAValidMove()
+        {
+            var oppositeKingSquare = PieceBitBoards[(int)Piece.K + Utils.PieceOffset((Side)Utils.OppositeSide(Side))].GetLS1BIndex();
+
+            return oppositeKingSquare >= 0 && !Attacks.IsSquaredAttacked(oppositeKingSquare, Side, PieceBitBoards, OccupancyBitBoards);
         }
 
         public readonly string FEN()

@@ -1,6 +1,7 @@
 ﻿using Lynx.Model;
 using NLog;
 using System;
+using System.Diagnostics;
 
 namespace Lynx
 {
@@ -104,11 +105,7 @@ namespace Lynx
 
         public static bool IsSquaredAttacked(int squareIndex, Side sideToMove, BitBoard[] piecePosition, BitBoard[] occupancy)
         {
-            if (sideToMove == Side.Both)
-            {
-                Logger.Warn($"{nameof(IsSquaredAttacked)} doesn't support Side.Both");
-                return false;
-            }
+            Debug.Assert(sideToMove != Side.Both);
 
             var offset = Utils.PieceOffset(sideToMove);
 

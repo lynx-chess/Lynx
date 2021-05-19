@@ -67,7 +67,7 @@ namespace Lynx.Model
             CurrentPosition = new Position(CurrentPosition, moveToPlay);
             MoveHistory.Add(moveToPlay);
 
-            if (!CurrentPosition.IsValid())
+            if (!CurrentPosition.WasProduceByAValidMove())
             {
                 RevertLastMove();
                 return false;

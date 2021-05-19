@@ -104,7 +104,7 @@ namespace Lynx.Search
             if (depthLeft == 0)
             {
                 var result = new Result();
-                if (pseudoLegalMoves.Any(move => new Position(position, move).IsValid()))
+                if (pseudoLegalMoves.Any(move => new Position(position, move).WasProduceByAValidMove()))
                 {
                     return (position.StaticEvaluation(), result);
                 }
@@ -125,7 +125,7 @@ namespace Lynx.Search
                 {
                     var move = pseudoLegalMoves[moveIndex];
                     var newPosition = new Position(position, pseudoLegalMoves[moveIndex]);
-                    if (!newPosition.IsValid())
+                    if (!newPosition.WasProduceByAValidMove())
                     {
                         continue;
                     }
@@ -172,7 +172,7 @@ namespace Lynx.Search
                 {
                     var move = pseudoLegalMoves[moveIndex];
                     var newPosition = new Position(position, pseudoLegalMoves[moveIndex]);
-                    if (!newPosition.IsValid())
+                    if (!newPosition.WasProduceByAValidMove())
                     {
                         continue;
                     }

@@ -74,6 +74,12 @@ namespace Lynx
                             case UCINewGameCommand.Id:
                                 HandleNewGame();
                                 break;
+                            case "perft":
+                                HandlePerft(rawCommand);
+                                break;
+                            case "divide":
+                                HandleDivide(rawCommand);
+                                break;
 
                             default:
                                 _logger.Warn($"Unknown command received: {rawCommand}");
@@ -203,6 +209,26 @@ namespace Lynx
         private void HandleQuit() => _engineWriter.Writer.Complete();
 
         private void HandleRegister(string rawCommand) => _engine.Registration = new RegisterCommand(rawCommand);
+
+        private void HandlePerft(string rawCommand)
+        {
+            var items = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            if (items.Length >= 2 && int.TryParse(items[1], out int depth) && depth >=1)
+            {
+                Perft.Results(_engine.Game.CurrentPosition, depth);
+            }
+        }
+
+        private void HandleDivide(string rawCommand)
+        {
+            var items = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            if (items.Length >= 2 && int.TryParse(items[1], out int depth) && depth >= 1)
+            {
+                Perft.Results(_engine.Game.CurrentPosition, depth);
+            }
+        }
 
         #endregion
 
