@@ -554,7 +554,7 @@ static void Search()
 
     {
         var game = new Game(fen);
-        var (evaluation, moveList) = SearchAlgorithms.MiniMax_InitialImplementation_2(game.CurrentPosition, Configuration.Parameters.Depth);
+        var (evaluation, moveList) = SearchAlgorithms.MiniMax(game.CurrentPosition, Configuration.Parameters.Depth);
         Console.WriteLine($"Evaluation: {evaluation}");
 
         var bestMove = moveList!.Moves.Last();

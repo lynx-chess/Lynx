@@ -1,67 +1,59 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 
 namespace Lynx.Search
 {
     public static partial class SearchAlgorithms
     {
-        /// <summary>
-        /// MiniMax algorithm
-        /// </summary>
-        /// <param name="position"></param>
-        /// <param name="depth"></param>
-        /// <param name="isWhite"></param>
-        /// <returns></returns>
-        private static int Theoretical_MiniMax(Position position, int depth, bool isWhite)
-        {
-            static bool IsGameFinished(Position position) => throw new();
+        //private static int Theoretical_MiniMax(Position position, int depth, bool isWhite)
+        //{
+        //    static bool IsGameFinished(Position position) => throw new();
 
-            if (depth == 0 || IsGameFinished(position))
-            {
-                return position.StaticEvaluation();
-            }
+        //    if (depth == 0 || IsGameFinished(position))
+        //    {
+        //        return position.StaticEvaluation();
+        //    }
 
-            if (isWhite)
-            {
-                var maxEval = int.MinValue;
+        //    if (isWhite)
+        //    {
+        //        var maxEval = int.MinValue;
 
-                var pseudoLegalMoves = position.AllPossibleMoves();
-                for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count; ++moveIndex)
-                {
-                    var newPosition = new Position(position, pseudoLegalMoves[moveIndex]);
-                    if (!newPosition.IsValid())
-                    {
-                        continue;
-                    }
+        //        var pseudoLegalMoves = position.AllPossibleMoves();
+        //        for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count; ++moveIndex)
+        //        {
+        //            var newPosition = new Position(position, pseudoLegalMoves[moveIndex]);
+        //            if (!newPosition.IsValid())
+        //            {
+        //                continue;
+        //            }
 
-                    var eval = Theoretical_MiniMax(newPosition, depth - 1, isWhite: false);
-                    maxEval = Max(maxEval, eval);
-                }
+        //            var eval = Theoretical_MiniMax(newPosition, depth - 1, isWhite: false);
+        //            maxEval = Max(maxEval, eval);
+        //        }
 
-                return maxEval;
-            }
-            else
-            {
-                var minEval = int.MaxValue;
+        //        return maxEval;
+        //    }
+        //    else
+        //    {
+        //        var minEval = int.MaxValue;
 
-                var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position);
-                for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count; ++moveIndex)
-                {
-                    var newPosition = new Position(position, pseudoLegalMoves[moveIndex]);
-                    if (!newPosition.IsValid())
-                    {
-                        continue;
-                    }
+        //        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position);
+        //        for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count; ++moveIndex)
+        //        {
+        //            var newPosition = new Position(position, pseudoLegalMoves[moveIndex]);
+        //            if (!newPosition.IsValid())
+        //            {
+        //                continue;
+        //            }
 
-                    var eval = Theoretical_MiniMax(newPosition, depth - 1, isWhite: true);
-                    minEval = Min(minEval, eval);
-                }
+        //            var eval = Theoretical_MiniMax(newPosition, depth - 1, isWhite: true);
+        //            minEval = Min(minEval, eval);
+        //        }
 
-                return minEval;
-            }
-        }
+        //        return minEval;
+        //    }
+        //}
 
         /// <summary>
         /// MiniMax algorithm implementation
@@ -147,7 +139,7 @@ namespace Lynx.Search
         /// </summary>
         /// <param name="position"></param>
         /// <param name="depthLeft"></param>
-        public static (int Evaluation, Result MoveList) MiniMax_InitialImplementation_2(Position position, int depthLeft)
+        public static (int Evaluation, Result MoveList) MiniMax(Position position, int depthLeft)
         {
             var pseudoLegalMoves = position.AllPossibleMoves();
 
@@ -182,7 +174,7 @@ namespace Lynx.Search
 
                     PrintPreMove(position, depthLeft, move);
 
-                    var (evaluation, bestMoveExistingMoveList) = MiniMax_InitialImplementation_2(newPosition, depthLeft - 1);
+                    var (evaluation, bestMoveExistingMoveList) = MiniMax(newPosition, depthLeft - 1);
 
                     PrintMove(depthLeft, move, evaluation, position);
 
@@ -221,7 +213,7 @@ namespace Lynx.Search
 
                     PrintPreMove(position, depthLeft, move);
 
-                    var (evaluation, bestMoveExistingMoveList) = MiniMax_InitialImplementation_2(newPosition, depthLeft - 1);
+                    var (evaluation, bestMoveExistingMoveList) = MiniMax(newPosition, depthLeft - 1);
 
                     PrintMove(depthLeft, move, evaluation, position);
 
