@@ -343,10 +343,10 @@ namespace Lynx.Model
         /// Assuming a current position has no legal moves (<see cref="AllPossibleMoves"/> doesn't produce any <see cref="IsValid"/> position),
         /// this method determines if a position is a result of either a loss by Checkmate or a draw by stalemate
         /// </summary>
-        /// <param name="depthLeft">Modulates the output, favouring positions with higher Depth left (i.e. Checkmate in less moves)</param>
-        /// <returns>At least <see cref="CheckMateEvaluation"/> if Position.Side lost (more extreme values when <paramref name="depthLeft"/> increases)
+        /// <param name="depth">Modulates the output, favouring positions with lower depth left (i.e. Checkmate in less moves)</param>
+        /// <returns>At least <see cref="CheckMateEvaluation"/> if Position.Side lost (more extreme values when <paramref name="depth"/> increases)
         /// or 0 if Position.Side was stalemated</returns>
-        public int EvaluateFinalPosition(int depthLeft = default)
+        public int EvaluateFinalPosition(int depth)
         {
             if (Attacks.IsSquaredAttackedBySide(
                 PieceBitBoards[(int)Piece.K + Utils.PieceOffset(Side)].GetLS1BIndex(),
@@ -354,8 +354,8 @@ namespace Lynx.Model
                 (Side)Utils.OppositeSide(Side)))
             {
                 return Side == Side.White
-                    ? -CheckMateEvaluation - (DepthFactor * depthLeft)
-                    : CheckMateEvaluation + (DepthFactor * depthLeft);
+                    ? -CheckMateEvaluation + (DepthFactor * depth)
+                    : CheckMateEvaluation - (DepthFactor * depth);
             }
             else
             {

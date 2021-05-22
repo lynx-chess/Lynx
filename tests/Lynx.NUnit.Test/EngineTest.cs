@@ -10,6 +10,10 @@ namespace Lynx.NUnit.Test
     {
         [TestCase("8/8/1p2k3/3bn3/3K4/8/7r/1q6 b - - 0 1", new[] { "b1d3" },
             Category = "LongRunning", Explicit = true, Description = "Mate in 1")]
+        public void BestMove_Mate_in_1(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
+        {
+            TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
+        }
 
         [TestCase("8/pN3R2/1b2k1K1/n4R2/pp1p4/3B1P1n/3B1PNP/3r3Q w - -", new[] { "d2f4" },
             Category = "LongRunning", Explicit = true, Description = "Mate in 2, https://gameknot.com/chess-puzzle.pl?pz=114463")]
@@ -19,6 +23,10 @@ namespace Lynx.NUnit.Test
             Category = "LongRunning", Explicit = true, Description = "Mate in 2, https://gameknot.com/chess-puzzle.pl?pz=1669")]
         [TestCase("RNBKRNRQ/PPPPPPPP/8/pppppppp/rnbqkbnr/8/8/8 b - -", new[] { "g4h6" },
             Category = "LongRunning", Explicit = true, Description = "Mate in 2, https://gameknot.com/chess-puzzle.pl?pz=1630")]
+        public void BestMove_Mate_in_2(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
+        {
+            TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
+        }
 
         [TestCase("4rqk1/3R1prR/p1p5/1p2PQp1/5p2/1P6/P1B2PP1/6K1 w - -", new[] { "f5h3" },
             Category = "LongRunning", Explicit = true, Description = "Mate in 3, https://gameknot.com/chess-puzzle.pl?pz=111285")]
@@ -28,6 +36,10 @@ namespace Lynx.NUnit.Test
             Category = "LongRunning", Explicit = true, Description = "Mate in 3, https://gameknot.com/chess-puzzle.pl?pz=248898")]
         [TestCase("nb5B/1N1Q4/6RK/3pPP2/RrrkN3/2pP3b/qpP1PP2/3n4 w - -", new[] { "g6g3" },
             Category = "LongRunning", Explicit = true, Description = "Mate in 3, https://gameknot.com/chess-puzzle.pl?pz=228148")]
+        public void BestMove_Mate_in_3(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
+        {
+            TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
+        }
 
         [TestCase("r2k3r/p1p2ppp/2p5/2P5/6nq/2NB4/PPPP2PP/R1BQR1K1 w - - 0 13", null, new[] { "g2h3" },
             Category = "LongRunning", Explicit = true, Description = "Avoid Mate in 2, fails with initial implementation of MiniMax depth 4")]
@@ -50,12 +62,27 @@ namespace Lynx.NUnit.Test
             "g3f4", "g3g4", "g3h4",
             "g1h3", "g1f3", "g1e2"
         }, Category = "LongRunning", Explicit = true, Description = "Used to return an illegal move in the very first versions")]
-        public void BestMove(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
+        public void BestMove_Regression(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
         {
-            var engine = new Engine();
+            TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
+        }
+
+        [NonParallelizable]
+        [TestCase("r2qkb1r/ppp2ppp/2n2n2/1B1p1b2/3P4/2N2N2/PPP2PPP/R1BQ1RK1 b kq - 0 1", 1,
+            null,
+            new[] { "f5c2", "f5d3", "f5h3", "f8c5", "f8a3" },
+            Category = "LongRunning", Explicit = true, Description = "Avoid trading pawn for minor piece or sacrificing pieces for nothing")]
+        public void BestMove_Quiescence(string fen, int depth, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
+        {
+            Configuration.Parameters.Depth = depth;
+            TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
+        }
+
+        private static void TestBestMove(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString)
+        {
             // Arrange
+            var engine = new Engine();
             engine.SetGame(new Game(fen));
-            //Configuration.Parameters.Depth = 5;
 
             // Act
             var bestMoveFound = engine.BestMove();

@@ -36,7 +36,8 @@ using static Lynx.Model.Move;
 //_43_Perft();
 //_44_ParseUCI();
 //_49_Rudimetary_Evaluation();
-Search();
+//_50_MiniMax_AlphaBeta();
+_52_Quiescence_Search();
 
 const string TrickyPosition = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
 const string TrickyPositionReversed = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1";
@@ -548,7 +549,7 @@ static void _49_Rudimetary_Evaluation()
     }
 }
 
-static void Search()
+static void _50_MiniMax_AlphaBeta()
 {
     const string fen = "7k/6b1/7p/2p1pPpP/2P3P1/5P2/7N/7K w - - 0 1";
 
@@ -598,10 +599,25 @@ static void Search()
      */
     {
         var game = new Game(fen);
-        var (evaluation, moveList) = SearchAlgorithms.AlphaBeta(game.CurrentPosition, Configuration.Parameters.Depth);
+        var (evaluation, moveList) = SearchAlgorithms.AlphaBeta_InitialImplementation(game.CurrentPosition, Configuration.Parameters.Depth);
         Console.WriteLine($"Evaluation: {evaluation}");
 
         var bestMove = moveList!.Moves.Last();
         Console.WriteLine($"Best move: {bestMove}");
     }
+}
+
+static void _52_Quiescence_Search()
+{
+    const string fen = "8/1p4pp/kPp5/p1P3PP/KpP5/1Pp2P2/2P5/8 w - - 0 1";
+
+    var game = new Game(fen);
+
+    game.CurrentPosition.Print();
+
+    var (evaluation, moveList) = SearchAlgorithms.AlphaBeta_Quiescence(game.CurrentPosition, Configuration.Parameters.Depth - 1);
+    Console.WriteLine($"Evaluation: {evaluation}");
+
+    var bestMove = moveList!.Moves.Last();
+    Console.WriteLine($"Best move: {bestMove}");
 }

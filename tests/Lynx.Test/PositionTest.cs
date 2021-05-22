@@ -150,7 +150,7 @@ namespace Lynx.Test
             Assert.Empty(position.AllPossibleMoves().Where(move => new Position(position, move).IsValid()));
 
             // Act
-            var noDepthResult = position.EvaluateFinalPosition();
+            var noDepthResult = position.EvaluateFinalPosition(default);
             var depthOneResult = position.EvaluateFinalPosition(1);
             var depthTwoResult = position.EvaluateFinalPosition(2);
 

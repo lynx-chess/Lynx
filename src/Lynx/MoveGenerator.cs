@@ -46,7 +46,7 @@ namespace Lynx
 
             var offset = Utils.PieceOffset(position.Side);
 
-            moves.AddRange(GeneratePawnMoves(position, offset));
+            moves.AddRange(GeneratePawnMoves(position, offset, capturesOnly));
             moves.AddRange(GenerateCastlingMoves(position, offset));
             moves.AddRange(GeneratePieceMoves((int)Piece.K + offset, position, capturesOnly));
             moves.AddRange(GeneratePieceMoves((int)Piece.N + offset, position, capturesOnly));
@@ -57,7 +57,7 @@ namespace Lynx
             return moves;
         }
 
-        internal static IEnumerable<Move> GeneratePawnMoves(Position position, int offset)
+        internal static IEnumerable<Move> GeneratePawnMoves(Position position, int offset, bool capturesOnly = false)
         {
             int sourceSquare, targetSquare;
 
@@ -82,6 +82,7 @@ namespace Lynx
                 var singlePushSquare = sourceSquare + pawnPush;
                 if (!position.OccupancyBitBoards[2].GetBit(singlePushSquare))
                 {
+                    // Single pawn push
                     var targetRank = (singlePushSquare / 8) + 1;
                     if (targetRank == 1 || targetRank == 8)  // Promotion
                     {
@@ -90,17 +91,21 @@ namespace Lynx
                         yield return new Move(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.N + offset);
                         yield return new Move(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.B + offset);
                     }
-                    else
+                    else if (!capturesOnly)
                     {
                         yield return new Move(sourceSquare, singlePushSquare, piece);
                     }
 
+                    // Double pawn push
                     // Inside of the if because singlePush square cannot be occupied either
-                    var doublePushSquare = sourceSquare + (2 * pawnPush);
-                    if (!position.OccupancyBitBoards[2].GetBit(doublePushSquare)
-                        && ((sourceRank == 2 && position.Side == Side.Black) || (sourceRank == 7 && position.Side == Side.White)))
+                    if (!capturesOnly)
                     {
-                        yield return new Move(sourceSquare, doublePushSquare, piece, isDoublePawnPush: TRUE);
+                        var doublePushSquare = sourceSquare + (2 * pawnPush);
+                        if (!position.OccupancyBitBoards[2].GetBit(doublePushSquare)
+                            && ((sourceRank == 2 && position.Side == Side.Black) || (sourceRank == 7 && position.Side == Side.White)))
+                        {
+                            yield return new Move(sourceSquare, doublePushSquare, piece, isDoublePawnPush: TRUE);
+                        }
                     }
                 }
 
