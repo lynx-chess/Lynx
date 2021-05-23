@@ -299,6 +299,8 @@ namespace Lynx.Model
 
         public List<Move> AllPossibleMoves() => MoveGenerator.GenerateAllMoves(this);
 
+        public List<Move> AllCapturesMoves() => MoveGenerator.GenerateAllMoves(this, capturesOnly: true);
+
         public int EvaluateMaterial()
         {
             var eval = 0;

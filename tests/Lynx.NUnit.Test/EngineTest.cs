@@ -72,6 +72,14 @@ namespace Lynx.NUnit.Test
             null,
             new[] { "f5c2", "f5d3", "f5h3", "f8c5", "f8a3" },
             Category = "LongRunning", Explicit = true, Description = "Avoid trading pawn for minor piece or sacrificing pieces for nothing")]
+        [TestCase("r2qkb1r/1pp2ppp/p1n2n2/1B1p1b2/3P4/2N2N2/PPP2PPP/R1BQ1RK1 w kq - 0 2", 1,
+            new[] { "b5c6", "b5a4" },
+            new[] { "b5c1", "c3d5" },
+            Category = "LongRunning", Explicit = true, Description = "Originally, evaluated Bxc6 as -230, worse than the real losing alternatives")]
+        [TestCase("r1bq1b1r/ppppk2p/2n1pp2/3n2B1/3P4/P4N2/1PP2PPP/RN1QKB1R w KQ - 0 1", 1,
+            new[] { "g5h4", "g5e3", "g5d2", "g5d1", "c2c4" },
+            new[] { "a3a4" },
+            Category = "LongRunning", Explicit = true, Description = "Avoid allowing pieces to be captured")]
         public void BestMove_Quiescence(string fen, int depth, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
         {
             Configuration.Parameters.Depth = depth;

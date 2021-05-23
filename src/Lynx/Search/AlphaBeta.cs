@@ -222,7 +222,6 @@ namespace Lynx.Search
                 var result = new Result();
                 if (pseudoLegalMoves.Any(move => new Position(position, move).WasProduceByAValidMove()))
                 {
-                    //return (position.StaticEvaluation(), result);
                     return QuiescenceSearch(position, plies, alpha, beta);
                 }
                 else
@@ -357,13 +356,16 @@ namespace Lynx.Search
                 beta = Min(beta, staticEvaluation);
             }
 
-            if (beta <= alpha)
+            if (beta <= alpha || plies >= Configuration.Parameters.QuescienceSearchDepth)
             {
                 PrintMessage(plies - 1, "Prunning before starting quiescence search");
-                return (staticEvaluation, new Result());
+
+                return position.Side == Side.White
+                    ? (alpha, new Result())
+                    : (beta, new Result());
             }
 
-            var movesToEvaluate = MoveGenerator.GenerateAllMoves(position, capturesOnly: true);
+            var movesToEvaluate = position.AllCapturesMoves();
 
             Move? bestMove = null;
             Result? existingMoveList = null;
@@ -414,7 +416,7 @@ namespace Lynx.Search
                 {
                     return movesToEvaluate.Count > 0
                         ? (position.EvaluateFinalPosition(plies), new Result())
-                        : (position.StaticEvaluation(), new Result());
+                        : (staticEvaluation, new Result());
                 }
             }
             else
@@ -434,15 +436,15 @@ namespace Lynx.Search
 
                     var (evaluation, bestMoveExistingMoveList) = QuiescenceSearch(newPosition, plies + 1, alpha, beta);
 
-                    // minEval = Min(minEval, evaluation);   // Branch prediction optimized - should have started with most likely positions
-                    beta = Min(beta, evaluation);        // TODO optimize branch prediction -> Should beta be generally less than eval?
-
                     if (evaluation < minEval)
                     {
                         minEval = evaluation;
                         existingMoveList = bestMoveExistingMoveList;
                         bestMove = move;
                     }
+
+                    // minEval = Min(minEval, evaluation);   // Branch prediction optimized - should have started with most likely positions
+                    beta = Min(beta, evaluation);        // TODO optimize branch prediction -> Should beta be generally less than eval?
 
                     PrintMove(plies, move, evaluation, position, beta <= alpha);
 
@@ -463,7 +465,7 @@ namespace Lynx.Search
                 {
                     return movesToEvaluate.Count > 0
                         ? (position.EvaluateFinalPosition(plies), new Result())
-                        : (position.StaticEvaluation(), new Result());
+                        : (staticEvaluation, new Result());
                 }
             }
         }
