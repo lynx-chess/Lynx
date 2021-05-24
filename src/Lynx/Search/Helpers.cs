@@ -11,6 +11,9 @@ namespace Lynx.Search
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
+        private const int MinValue = -2 * Position.CheckMateEvaluation;
+        private const int MaxValue = +2 * Position.CheckMateEvaluation;
+
         public class Result
         {
             public List<Move> Moves { get; set; } = new List<Move>(150);
@@ -76,7 +79,7 @@ namespace Lynx.Search
             //Console.WriteLine($"{depthStr}{move} ({position.Side}, {depthLeft}) | {evaluation}");
             //Console.WriteLine($"{depthStr}{move} | {evaluation}");
 
-            Logger.Trace($"{depthStr}{(isQuiescence ? "[Qui] " : "")}{move,-6}| {evaluation}{(prune ? " | prunning" : "")}");
+            Logger.Trace($"{depthStr}{(isQuiescence ? "[Qui] " : "")}{move,-6} | {evaluation}{(prune ? " | prunning" : "")}");
 
             //Console.ResetColor();
         }

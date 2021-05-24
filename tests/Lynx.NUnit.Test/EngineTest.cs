@@ -47,6 +47,11 @@ namespace Lynx.NUnit.Test
         [TestCase("r2k3r/p1p2ppp/2p5/2P5/6nq/2NB4/PPPP2PP/R1BQR1K1 w - - 0 13", null, new[] { "g2h3", "e1e4" },
             Category = "LongRunning", Explicit = true, Description = "Avoid Mate in 4, fails with MiniMax depth 4")]
 
+        [TestCase("q5k1/2p5/1bb1pQ2/1p6/1P6/5N2/P4PPP/3RK2R b K - 0 1", null, new[] { "a8a2"},
+            Category = "LongRunning", Explicit = true, Description = "Avoid Mate in 3, seen with NegaMax depth 4 (but weirdly not with AlphaBeta depth 4)")]
+
+        [Test]
+
         [TestCase("r2qr1k1/ppp2ppp/5n2/2nPp3/1b4b1/P1NPP1P1/1P2NPBP/R1BQ1RK1 b - - 0 1", new[] { "b4c3", "g4e2" }, new[] { "b4a5" },
             Category = "LongRunning", Explicit = true, Description = "Fails with simple MiniMax depth 3 and 4: b4a5 is played")]
 
@@ -75,7 +80,7 @@ namespace Lynx.NUnit.Test
         [TestCase("r2qkb1r/1pp2ppp/p1n2n2/1B1p1b2/3P4/2N2N2/PPP2PPP/R1BQ1RK1 w kq - 0 2", 1,
             new[] { "b5c6", "b5a4" },
             new[] { "b5c1", "c3d5" },
-            Category = "LongRunning", Explicit = true, Description = "Originally, evaluated Bxc6 as -230, worse than the real losing alternatives")]
+            Category = "LongRunning", Explicit = true, Description = "Originally, it captured in c1")]
         [TestCase("r1bq1b1r/ppppk2p/2n1pp2/3n2B1/3P4/P4N2/1PP2PPP/RN1QKB1R w KQ - 0 1", 1,
             new[] { "g5h4", "g5e3", "g5d2", "g5d1", "c2c4" },
             new[] { "a3a4" },

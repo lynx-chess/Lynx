@@ -17,7 +17,7 @@ namespace Lynx.Search
 
         //    if (isWhite)
         //    {
-        //        var maxEval = int.MinValue;
+        //        var maxEval = MinValue;
 
         //        var pseudoLegalMoves = position.AllPossibleMoves();
         //        for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count; ++moveIndex)
@@ -36,7 +36,7 @@ namespace Lynx.Search
         //    }
         //    else
         //    {
-        //        var minEval = int.MaxValue;
+        //        var minEval = MaxValue;
 
         //        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position);
         //        for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count; ++moveIndex)
@@ -73,7 +73,7 @@ namespace Lynx.Search
 
             if (position.Side == Side.White)
             {
-                var maxEval = int.MinValue;
+                var maxEval = MinValue;
                 for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count; ++moveIndex)
                 {
                     var newPosition = new Position(position, pseudoLegalMoves[moveIndex]);
@@ -102,7 +102,7 @@ namespace Lynx.Search
             }
             else
             {
-                var minEval = int.MaxValue;
+                var minEval = MaxValue;
 
                 for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count; ++moveIndex)
                 {
@@ -161,7 +161,7 @@ namespace Lynx.Search
 
             if (position.Side == Side.White)
             {
-                var maxEval = int.MinValue;
+                var maxEval = MinValue;
 
                 for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count; ++moveIndex)
                 {
@@ -200,7 +200,7 @@ namespace Lynx.Search
             }
             else
             {
-                var minEval = int.MaxValue;
+                var minEval = MaxValue;
 
                 for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count; ++moveIndex)
                 {

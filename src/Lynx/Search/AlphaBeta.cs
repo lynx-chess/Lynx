@@ -7,7 +7,7 @@ namespace Lynx.Search
 {
     public static partial class SearchAlgorithms
     {
-        //private static int AlphaBeta_Theoretical(Position position, int depth, bool isWhite, int alpha = int.MinValue, int beta = int.MaxValue)
+        //private static int AlphaBeta_Theoretical(Position position, int depth, bool isWhite, int alpha = MinValue, int beta = MaxValue)
         //{
         //    static bool IsGameFinished(Position position) => throw new();
 
@@ -18,7 +18,7 @@ namespace Lynx.Search
 
         //    if (isWhite)
         //    {
-        //        var maxEval = int.MinValue;
+        //        var maxEval = MinValue;
 
         //        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position);
         //        for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count; ++moveIndex)
@@ -43,7 +43,7 @@ namespace Lynx.Search
         //    }
         //    else
         //    {
-        //        var minEval = int.MaxValue;
+        //        var minEval = MaxValue;
 
         //        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position);
         //        for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count; ++moveIndex)
@@ -75,14 +75,14 @@ namespace Lynx.Search
         /// <param name="depthLeft"></param>
         /// <param name="alpha">
         /// Best score White can achieve, assuming best play by Black.
-        /// Defaults to the worse possible score for white, Int.MinValue.
+        /// Defaults to the worse possible score for white, MinValue.
         /// </param>
         /// <param name="beta">
         /// Best score Black can achieve, assuming best play by White
-        /// Defaults to the works possible score for Black, Int.MaxValue
+        /// Defaults to the worse possible score for Black, MaxValue
         /// </param>
         /// <returns></returns>
-        public static (int Evaluation, Result MoveList) AlphaBeta_InitialImplementation(Position position, int depthLeft, int alpha = int.MinValue, int beta = int.MaxValue)
+        public static (int Evaluation, Result MoveList) AlphaBeta_InitialImplementation(Position position, int depthLeft, int alpha = MinValue, int beta = MaxValue)
         {
             var pseudoLegalMoves = position.AllPossibleMoves();
 
@@ -104,7 +104,7 @@ namespace Lynx.Search
 
             if (position.Side == Side.White)
             {
-                var maxEval = int.MinValue;
+                var maxEval = MinValue;
 
                 for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count; ++moveIndex)
                 {
@@ -152,7 +152,7 @@ namespace Lynx.Search
             }
             else
             {
-                var minEval = int.MaxValue;
+                var minEval = MaxValue;
 
                 for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count; ++moveIndex)
                 {
@@ -206,14 +206,14 @@ namespace Lynx.Search
         /// <param name="plies"></param>
         /// <param name="alpha">
         /// Best score White can achieve, assuming best play by Black.
-        /// Defaults to the worse possible score for white, Int.MinValue.
+        /// Defaults to the worse possible score for white, MinValue.
         /// </param>
         /// <param name="beta">
         /// Best score Black can achieve, assuming best play by White
-        /// Defaults to the works possible score for Black, Int.MaxValue
+        /// Defaults to the worse possible score for Black, MaxValue
         /// </param>
         /// <returns></returns>
-        public static (int Evaluation, Result MoveList) AlphaBeta_Quiescence(Position position, int plies = default, int alpha = int.MinValue, int beta = int.MaxValue)
+        public static (int Evaluation, Result MoveList) AlphaBeta_Quiescence(Position position, int plies = default, int alpha = MinValue, int beta = MaxValue)
         {
             var pseudoLegalMoves = position.AllPossibleMoves();
 
@@ -222,7 +222,7 @@ namespace Lynx.Search
                 var result = new Result();
                 if (pseudoLegalMoves.Any(move => new Position(position, move).WasProduceByAValidMove()))
                 {
-                    return QuiescenceSearch(position, plies, alpha, beta);
+                    return QuiescenceSearch_AlphaBeta(position, plies, alpha, beta);
                 }
                 else
                 {
@@ -235,7 +235,7 @@ namespace Lynx.Search
 
             if (position.Side == Side.White)
             {
-                var maxEval = int.MinValue;
+                var maxEval = MinValue;
 
                 for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count; ++moveIndex)
                 {
@@ -282,7 +282,7 @@ namespace Lynx.Search
             }
             else
             {
-                var minEval = int.MaxValue;
+                var minEval = MaxValue;
 
                 for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count; ++moveIndex)
                 {
@@ -330,20 +330,20 @@ namespace Lynx.Search
         }
 
         /// <summary>
-        /// Quiescence search implementation
+        /// Quiescence search implementation, AlphaBeta style
         /// </summary>
         /// <param name="position"></param>
         /// <param name="plies"></param>
         /// <param name="alpha">
         /// Best score White can achieve, assuming best play by Black.
-        /// Defaults to the worse possible score for white, Int.MinValue.
+        /// Defaults to the worse possible score for white, MinValue.
         /// </param>
         /// <param name="beta">
         /// Best score Black can achieve, assuming best play by White
-        /// Defaults to the works possible score for Black, Int.MaxValue
+        /// Defaults to the works possible score for Black, MaxValue
         /// </param>
         /// <returns></returns>
-        public static (int Evaluation, Result MoveList) QuiescenceSearch(Position position, int plies = default, int alpha = int.MinValue, int beta = int.MaxValue)
+        public static (int Evaluation, Result MoveList) QuiescenceSearch_AlphaBeta(Position position, int plies, int alpha, int beta)
         {
             var staticEvaluation = position.StaticEvaluation();
 
@@ -372,7 +372,7 @@ namespace Lynx.Search
 
             if (position.Side == Side.White)
             {
-                var maxEval = int.MinValue;
+                var maxEval = MinValue;
 
                 for (int moveIndex = 0; moveIndex < movesToEvaluate.Count; ++moveIndex)
                 {
@@ -385,7 +385,12 @@ namespace Lynx.Search
 
                     PrintPreMove(position, plies, move, isQuiescence: true);
 
-                    var (evaluation, bestMoveExistingMoveList) = QuiescenceSearch(newPosition, plies + 1, alpha, beta);
+                    var (evaluation, bestMoveExistingMoveList) = QuiescenceSearch_AlphaBeta(newPosition, plies + 1, alpha, beta);
+
+                    //if (evaluation == 996000000)
+                    //{
+                    //    PrintMessage(plies, $"MaxEval: {maxEval}, Alpha: {alpha}, beta: {beta}");
+                    //}
 
                     if (evaluation > maxEval)
                     {
@@ -394,7 +399,6 @@ namespace Lynx.Search
                         bestMove = move;
                     }
 
-                    // maxEval = Max(maxEval, evaluation);   // Branch prediction optimized - should have started with most likely positions
                     alpha = Max(alpha, evaluation);       // TODO optimize branch prediction -> Should alpha be generally greater than eval?
 
                     PrintMove(plies, move, evaluation, position, isQuiescence: true, beta <= alpha);
@@ -414,6 +418,8 @@ namespace Lynx.Search
                 }
                 else
                 {
+                    // TODO: What happens with positions like r1b1k2r/p1p3pp/2B3n1/8/1bP5/4K3/P5Pq/R1BQ3R b kq - 0 1 or r1b2rk1/p1p3pp/2p3n1/4q3/1bP1B3/4K3/P5PP/R1BQ3R w - - 2 3
+                    // MovesToEvaluate that are captures, there are 2, but none of them is valid
                     return movesToEvaluate.Count > 0
                         ? (position.EvaluateFinalPosition(plies), new Result())
                         : (staticEvaluation, new Result());
@@ -421,7 +427,7 @@ namespace Lynx.Search
             }
             else
             {
-                var minEval = int.MaxValue;
+                var minEval = MaxValue;
 
                 for (int moveIndex = 0; moveIndex < movesToEvaluate.Count; ++moveIndex)
                 {
@@ -432,9 +438,9 @@ namespace Lynx.Search
                         continue;
                     }
 
-                    PrintPreMove(position, plies, move);
+                    PrintPreMove(position, plies, move, isQuiescence: true);
 
-                    var (evaluation, bestMoveExistingMoveList) = QuiescenceSearch(newPosition, plies + 1, alpha, beta);
+                    var (evaluation, bestMoveExistingMoveList) = QuiescenceSearch_AlphaBeta(newPosition, plies + 1, alpha, beta);
 
                     if (evaluation < minEval)
                     {
@@ -446,7 +452,7 @@ namespace Lynx.Search
                     // minEval = Min(minEval, evaluation);   // Branch prediction optimized - should have started with most likely positions
                     beta = Min(beta, evaluation);        // TODO optimize branch prediction -> Should beta be generally less than eval?
 
-                    PrintMove(plies, move, evaluation, position, beta <= alpha);
+                    PrintMove(plies, move, evaluation, position, isQuiescence: true, beta <= alpha);
 
                     if (beta <= alpha)
                     {
@@ -463,6 +469,8 @@ namespace Lynx.Search
                 }
                 else
                 {
+                    // TODO: What happens with positions like r1b1k2r/p1p3pp/2B3n1/8/1bP5/4K3/P5Pq/R1BQ3R b kq - 0 1 or r1b2rk1/p1p3pp/2p3n1/4q3/1bP1B3/4K3/P5PP/R1BQ3R w - - 2 3
+                    // MovesToEvaluate that are captures, there are 2, but none of them is valid
                     return movesToEvaluate.Count > 0
                         ? (position.EvaluateFinalPosition(plies), new Result())
                         : (staticEvaluation, new Result());

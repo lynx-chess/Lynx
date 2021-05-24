@@ -295,7 +295,17 @@ namespace Lynx.Model
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Positive scores favour White, negative ones favour Black
+        /// </summary>
+        /// <returns></returns>
         public int StaticEvaluation() => EvaluateMaterialAndPosition();
+
+        /// <summary>
+        /// Positive scores always favour playing <see cref="Side"/>
+        /// </summary>
+        /// <returns></returns>
+        public int StaticEvaluation_NegaMax() => EvaluateMaterialAndPosition_NegaMax();
 
         public List<Move> AllPossibleMoves() => MoveGenerator.GenerateAllMoves(this);
 
@@ -335,6 +345,33 @@ namespace Lynx.Model
             }
 
             return eval;
+        }
+
+        public int EvaluateMaterialAndPosition_NegaMax()
+        {
+            var eval = 0;
+
+            for (int pieceIndex = 0; pieceIndex < PieceBitBoards.Length; ++pieceIndex)
+            {
+                // Bitboard 'copy'. Use long directly to avoid the extra allocations
+                var bitboard = PieceBitBoards[pieceIndex].Board;
+
+                while (bitboard != default)
+                {
+                    var pieceSquareIndex = BitBoard.GetLS1BIndex(bitboard);
+                    bitboard = BitBoard.ResetLS1B(bitboard);
+
+                    // Material evaluation
+                    eval += EvaluationConstants.MaterialScore[pieceIndex];
+
+                    // Positional evaluation
+                    eval += EvaluationConstants.PositionalScore[pieceIndex][pieceSquareIndex];
+                }
+            }
+
+            return Side == Side.White
+                ? eval
+                : -eval;
         }
 
         internal const int CheckMateEvaluation = 1_000_000_000;
