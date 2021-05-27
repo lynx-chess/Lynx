@@ -385,7 +385,7 @@ namespace Lynx.Model
         /// <param name="depth">Modulates the output, favouring positions with lower depth left (i.e. Checkmate in less moves)</param>
         /// <returns>At least <see cref="CheckMateEvaluation"/> if Position.Side lost (more extreme values when <paramref name="depth"/> increases)
         /// or 0 if Position.Side was stalemated</returns>
-        public int EvaluateFinalPosition(int depth)
+        public int EvaluateFinalPosition_AlphaBeta(int depth)
         {
             if (Attacks.IsSquaredAttackedBySide(
                 PieceBitBoards[(int)Piece.K + Utils.PieceOffset(Side)].GetLS1BIndex(),
@@ -395,6 +395,28 @@ namespace Lynx.Model
                 return Side == Side.White
                     ? -CheckMateEvaluation + (DepthFactor * depth)
                     : CheckMateEvaluation - (DepthFactor * depth);
+            }
+            else
+            {
+                return default;
+            }
+        }
+
+        /// <summary>
+        /// Assuming a current position has no legal moves (<see cref="AllPossibleMoves"/> doesn't produce any <see cref="IsValid"/> position),
+        /// this method determines if a position is a result of either a loss by Checkmate or a draw by stalemate
+        /// </summary>
+        /// <param name="depth">Modulates the output, favouring positions with lower depth left (i.e. Checkmate in less moves)</param>
+        /// <returns>At least <see cref="CheckMateEvaluation"/> if Position.Side lost (more extreme values when <paramref name="depth"/> increases)
+        /// or 0 if Position.Side was stalemated</returns>
+        public int EvaluateFinalPosition_NegaMax(int depth)
+        {
+            if (Attacks.IsSquaredAttackedBySide(
+                PieceBitBoards[(int)Piece.K + Utils.PieceOffset(Side)].GetLS1BIndex(),
+                this,
+                (Side)Utils.OppositeSide(Side)))
+            {
+                return -CheckMateEvaluation + (DepthFactor * depth);
             }
             else
             {

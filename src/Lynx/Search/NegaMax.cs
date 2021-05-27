@@ -70,7 +70,7 @@ namespace Lynx.Search
                 }
                 else
                 {
-                    return (position.EvaluateFinalPosition(plies), result);
+                    return (position.EvaluateFinalPosition_NegaMax(plies), result);
                 }
             }
 
@@ -120,7 +120,7 @@ namespace Lynx.Search
             }
             else
             {
-                return (position.EvaluateFinalPosition(plies), new Result());
+                return (position.EvaluateFinalPosition_NegaMax(plies), new Result());
             }
         }
 
@@ -151,7 +151,7 @@ namespace Lynx.Search
                 }
                 else
                 {
-                    return (position.EvaluateFinalPosition(plies), result);
+                    return (position.EvaluateFinalPosition_NegaMax(plies), result);
                 }
             }
 
@@ -201,7 +201,7 @@ namespace Lynx.Search
             }
             else
             {
-                return (position.EvaluateFinalPosition(plies), new Result());
+                return (position.EvaluateFinalPosition_NegaMax(plies), new Result());
             }
         }
 
@@ -286,7 +286,7 @@ namespace Lynx.Search
                 // TODO: What happens with positions like r1b1k2r/p1p3pp/2B3n1/8/1bP5/4K3/P5Pq/R1BQ3R b kq - 0 1 or r1b2rk1/p1p3pp/2p3n1/4q3/1bP1B3/4K3/P5PP/R1BQ3R w - - 2 3
                 // MovesToEvaluate that are captures, there are 2, but none of them is valid
                 return movesToEvaluate.Count > 0
-                    ? (position.EvaluateFinalPosition(plies), new Result())
+                    ? (position.EvaluateFinalPosition_NegaMax(plies), new Result())
                     : (staticEvaluation, new Result());
             }
         }

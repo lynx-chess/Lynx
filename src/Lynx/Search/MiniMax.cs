@@ -97,7 +97,7 @@ namespace Lynx.Search
                 }
                 else // No IsValid() positions found -> Draw by Stalemate or Loss by Checkmate
                 {
-                    return position.EvaluateFinalPosition(depth);
+                    return position.EvaluateFinalPosition_AlphaBeta(depth);
                 }
             }
             else
@@ -128,7 +128,7 @@ namespace Lynx.Search
                 }
                 else
                 {
-                    return position.EvaluateFinalPosition(depth);
+                    return position.EvaluateFinalPosition_AlphaBeta(depth);
                 }
             }
         }
@@ -152,7 +152,7 @@ namespace Lynx.Search
                 }
                 else
                 {
-                    return (position.EvaluateFinalPosition(depthLeft), result);
+                    return (position.EvaluateFinalPosition_AlphaBeta(depthLeft), result);
                 }
             }
 
@@ -195,7 +195,7 @@ namespace Lynx.Search
                 }
                 else
                 {
-                    return (position.EvaluateFinalPosition(depthLeft), new Result());
+                    return (position.EvaluateFinalPosition_AlphaBeta(depthLeft), new Result());
                 }
             }
             else
@@ -234,7 +234,7 @@ namespace Lynx.Search
                 }
                 else
                 {
-                    return (position.EvaluateFinalPosition(depthLeft), new Result());
+                    return (position.EvaluateFinalPosition_AlphaBeta(depthLeft), new Result());
                 }
             }
         }

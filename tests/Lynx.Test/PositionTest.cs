@@ -143,16 +143,16 @@ namespace Lynx.Test
         [InlineData("8/7p/6p1/6P1/6PK/5k1P/8/8 w - - 0 1", 0)]
         [InlineData("7k/8/8/8/8/8/1K5R/6R1 b - - 0 1", +Position.CheckMateEvaluation)]
         [InlineData("7K/8/8/8/8/8/1k5r/6r1 w - - 0 1", -Position.CheckMateEvaluation)]
-        public void EvaluateFinalPosition(string fen, int expectedEvaluationValue)
+        public void EvaluateFinalPosition_AlphaBeta(string fen, int expectedEvaluationValue)
         {
             // Arrange
             var position = new Position(fen);
             Assert.Empty(position.AllPossibleMoves().Where(move => new Position(position, move).IsValid()));
 
             // Act
-            var noDepthResult = position.EvaluateFinalPosition(default);
-            var depthOneResult = position.EvaluateFinalPosition(1);
-            var depthTwoResult = position.EvaluateFinalPosition(2);
+            var noDepthResult = position.EvaluateFinalPosition_AlphaBeta(default);
+            var depthOneResult = position.EvaluateFinalPosition_AlphaBeta(1);
+            var depthTwoResult = position.EvaluateFinalPosition_AlphaBeta(2);
 
             Assert.Equal(expectedEvaluationValue, noDepthResult);
 
@@ -160,15 +160,42 @@ namespace Lynx.Test
             {
                 Assert.Equal(Side.Black, position.Side);
 
-                Assert.True(noDepthResult < depthOneResult);
-                Assert.True(depthOneResult < depthTwoResult);
+                Assert.True(noDepthResult > depthOneResult);
+                Assert.True(depthOneResult > depthTwoResult);
             }
             else if (expectedEvaluationValue < 0)
             {
                 Assert.Equal(Side.White, position.Side);
 
-                Assert.True(noDepthResult > depthOneResult);
-                Assert.True(depthOneResult > depthTwoResult);
+                Assert.True(noDepthResult < depthOneResult);
+                Assert.True(depthOneResult < depthTwoResult);
+            }
+        }
+
+        [Theory]
+        [InlineData("7k/8/8/8/8/3B4/1K6/6Q1 b - - 0 1", 0)]
+        [InlineData("7K/8/8/8/8/3b4/1k6/6q1 w - - 0 1", 0)]
+        [InlineData("8/5K2/7p/6pk/6p1/6P1/7P/8 b - - 0 1", 0)]
+        [InlineData("8/7p/6p1/6P1/6PK/5k1P/8/8 w - - 0 1", 0)]
+        [InlineData("7k/8/8/8/8/8/1K5R/6R1 b - - 0 1", -Position.CheckMateEvaluation)]
+        [InlineData("7K/8/8/8/8/8/1k5r/6r1 w - - 0 1", -Position.CheckMateEvaluation)]
+        public void EvaluateFinalPosition_NegaMax(string fen, int expectedEvaluationValue)
+        {
+            // Arrange
+            var position = new Position(fen);
+            Assert.Empty(position.AllPossibleMoves().Where(move => new Position(position, move).IsValid()));
+
+            // Act
+            var noDepthResult = position.EvaluateFinalPosition_NegaMax(default);
+            var depthOneResult = position.EvaluateFinalPosition_NegaMax(1);
+            var depthTwoResult = position.EvaluateFinalPosition_NegaMax(2);
+
+            if (expectedEvaluationValue < 0)
+            {
+                Assert.Equal(expectedEvaluationValue, noDepthResult);
+
+                Assert.True(noDepthResult < depthOneResult);
+                Assert.True(depthOneResult < depthTwoResult);
             }
         }
     }
