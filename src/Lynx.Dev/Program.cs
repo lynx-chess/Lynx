@@ -599,7 +599,7 @@ static void _50_MiniMax_AlphaBeta()
      */
     {
         var game = new Game(fen);
-        var (evaluation, moveList) = SearchAlgorithms.AlphaBeta_InitialImplementation(game.CurrentPosition, Configuration.Parameters.Depth);
+        var (evaluation, moveList) = SearchAlgorithms.AlphaBeta(game.CurrentPosition, Configuration.Parameters.Depth);
         Console.WriteLine($"Evaluation: {evaluation}");
 
         var bestMove = moveList!.Moves.Last();
