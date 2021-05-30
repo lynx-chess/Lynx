@@ -85,7 +85,7 @@ namespace Lynx.NUnit.Test
             Category = "LongRunning", Explicit = true, Description = "Avoid allowing pieces to be captured")]
         public void BestMove_Quiescence(string fen, int depth, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
         {
-            Configuration.Parameters.Depth = depth;
+            // TODO fix concurrency issue Configuration.Parameters.Depth = depth;
             TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
         }
 
