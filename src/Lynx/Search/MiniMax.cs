@@ -58,12 +58,14 @@ namespace Lynx.Search
         /// <summary>
         /// MiniMax algorithm implementation
         /// I quickly made up a possibly wrong way of tracking the moves
+        /// DepthLeft decreases instead of increaasing
+        /// This currently doesn`t fully work as expected due to the Position.Evaluate function, which favours mates in longer lines
         /// </summary>
         /// <param name="position"></param>
         /// <param name="depth"></param>
-        public static int MiniMax_InitialImplementation(Position position, int depth, Result evaluation)
+        public static int MiniMax_InitialImplementation(Position position, int depthLeft, Result evaluation)
         {
-            if (depth == 0)
+            if (depthLeft == 0)
             {
                 return position.StaticEvaluation();
             }
@@ -82,7 +84,7 @@ namespace Lynx.Search
                         continue;
                     }
 
-                    var eval = MiniMax_InitialImplementation(newPosition, depth - 1, evaluation);
+                    var eval = MiniMax_InitialImplementation(newPosition, depthLeft - 1, evaluation);
                     if (eval > maxEval)
                     {
                         maxEval = eval;
@@ -97,7 +99,7 @@ namespace Lynx.Search
                 }
                 else // No IsValid() positions found -> Draw by Stalemate or Loss by Checkmate
                 {
-                    return position.EvaluateFinalPosition_AlphaBeta(depth);
+                    return position.EvaluateFinalPosition_AlphaBeta(depthLeft);
                 }
             }
             else
@@ -112,7 +114,7 @@ namespace Lynx.Search
                         continue;
                     }
 
-                    var eval = MiniMax_InitialImplementation(newPosition, depth - 1, evaluation);
+                    var eval = MiniMax_InitialImplementation(newPosition, depthLeft - 1, evaluation);
 
                     if (eval < minEval)
                     {
@@ -128,7 +130,7 @@ namespace Lynx.Search
                 }
                 else
                 {
-                    return position.EvaluateFinalPosition_AlphaBeta(depth);
+                    return position.EvaluateFinalPosition_AlphaBeta(depthLeft);
                 }
             }
         }
@@ -138,12 +140,12 @@ namespace Lynx.Search
         /// Tracks the right moves back to the user
         /// </summary>
         /// <param name="position"></param>
-        /// <param name="depthLeft"></param>
-        public static (int Evaluation, Result MoveList) MiniMax(Position position, int depthLeft)
+        /// <param name="plies"></param>
+        public static (int Evaluation, Result MoveList) MiniMax(Position position, int plies = default)
         {
             var pseudoLegalMoves = position.AllPossibleMoves();
 
-            if (depthLeft == 0)
+            if (plies == Configuration.Parameters.Depth)
             {
                 var result = new Result();
                 if (pseudoLegalMoves.Any(move => new Position(position, move).IsValid()))
@@ -152,7 +154,7 @@ namespace Lynx.Search
                 }
                 else
                 {
-                    return (position.EvaluateFinalPosition_AlphaBeta(depthLeft), result);
+                    return (position.EvaluateFinalPosition_AlphaBeta(plies), result);
                 }
             }
 
@@ -172,11 +174,11 @@ namespace Lynx.Search
                         continue;
                     }
 
-                    PrintPreMove(position, depthLeft, move);
+                    PrintPreMove(position, plies, move);
 
-                    var (evaluation, bestMoveExistingMoveList) = MiniMax(newPosition, depthLeft - 1);
+                    var (evaluation, bestMoveExistingMoveList) = MiniMax(newPosition, plies + 1);
 
-                    PrintMove(depthLeft, move, evaluation, position);
+                    PrintMove(plies, move, evaluation, position);
 
                     if (evaluation > maxEval)
                     {
@@ -195,7 +197,7 @@ namespace Lynx.Search
                 }
                 else
                 {
-                    return (position.EvaluateFinalPosition_AlphaBeta(depthLeft), new Result());
+                    return (position.EvaluateFinalPosition_AlphaBeta(plies), new Result());
                 }
             }
             else
@@ -211,11 +213,11 @@ namespace Lynx.Search
                         continue;
                     }
 
-                    PrintPreMove(position, depthLeft, move);
+                    PrintPreMove(position, plies, move);
 
-                    var (evaluation, bestMoveExistingMoveList) = MiniMax(newPosition, depthLeft - 1);
+                    var (evaluation, bestMoveExistingMoveList) = MiniMax(newPosition, plies + 1);
 
-                    PrintMove(depthLeft, move, evaluation, position);
+                    PrintMove(plies, move, evaluation, position);
 
                     if (evaluation < minEval)
                     {
@@ -234,7 +236,7 @@ namespace Lynx.Search
                 }
                 else
                 {
-                    return (position.EvaluateFinalPosition_AlphaBeta(depthLeft), new Result());
+                    return (position.EvaluateFinalPosition_AlphaBeta(plies), new Result());
                 }
             }
         }

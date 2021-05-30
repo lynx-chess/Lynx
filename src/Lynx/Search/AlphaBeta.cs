@@ -72,7 +72,7 @@ namespace Lynx.Search
         /// Alpha-beta algorithm implementation
         /// </summary>
         /// <param name="position"></param>
-        /// <param name="depthLeft"></param>
+        /// <param name="plies"></param>
         /// <param name="alpha">
         /// Best score White can achieve, assuming best play by Black.
         /// Defaults to the worse possible score for white, MinValue.
@@ -82,11 +82,11 @@ namespace Lynx.Search
         /// Defaults to the worse possible score for Black, MaxValue
         /// </param>
         /// <returns></returns>
-        public static (int Evaluation, Result MoveList) AlphaBeta_InitialImplementation(Position position, int depthLeft, int alpha = MinValue, int beta = MaxValue)
+        public static (int Evaluation, Result MoveList) AlphaBeta(Position position, int plies = default, int alpha = MinValue, int beta = MaxValue)
         {
             var pseudoLegalMoves = position.AllPossibleMoves();
 
-            if (depthLeft == 0)
+            if (plies == Configuration.Parameters.Depth)
             {
                 var result = new Result();
                 if (pseudoLegalMoves.Any(move => new Position(position, move).WasProduceByAValidMove()))
@@ -95,7 +95,7 @@ namespace Lynx.Search
                 }
                 else
                 {
-                    return (position.EvaluateFinalPosition_AlphaBeta(depthLeft), result);
+                    return (position.EvaluateFinalPosition_AlphaBeta(plies), result);
                 }
             }
 
@@ -115,11 +115,11 @@ namespace Lynx.Search
                         continue;
                     }
 
-                    PrintPreMove(position, depthLeft, move);
+                    PrintPreMove(position, plies, move);
 
-                    var (evaluation, bestMoveExistingMoveList) = AlphaBeta_InitialImplementation(newPosition, depthLeft - 1, alpha, beta);
+                    var (evaluation, bestMoveExistingMoveList) = AlphaBeta(newPosition, plies + 1, alpha, beta);
 
-                    PrintMove(depthLeft, move, evaluation, position);
+                    PrintMove(plies, move, evaluation, position);
 
                     if (evaluation > maxEval)
                     {
@@ -147,7 +147,7 @@ namespace Lynx.Search
                 }
                 else
                 {
-                    return (position.EvaluateFinalPosition_AlphaBeta(depthLeft), new Result());
+                    return (position.EvaluateFinalPosition_AlphaBeta(plies), new Result());
                 }
             }
             else
@@ -163,11 +163,11 @@ namespace Lynx.Search
                         continue;
                     }
 
-                    PrintPreMove(position, depthLeft, move);
+                    PrintPreMove(position, plies, move);
 
-                    var (evaluation, bestMoveExistingMoveList) = AlphaBeta_InitialImplementation(newPosition, depthLeft - 1, alpha, beta);
+                    var (evaluation, bestMoveExistingMoveList) = AlphaBeta(newPosition, plies + 1, alpha, beta);
 
-                    PrintMove(depthLeft, move, evaluation, position);
+                    PrintMove(plies, move, evaluation, position);
 
                     // minEval = Min(minEval, evaluation);   // Branch prediction optimized - should have started with most likely positions
                     beta = Min(beta, evaluation);        // TODO optimize branch prediction -> Should beta be generally less than eval?
@@ -194,7 +194,7 @@ namespace Lynx.Search
                 }
                 else
                 {
-                    return (position.EvaluateFinalPosition_AlphaBeta(depthLeft), new Result());
+                    return (position.EvaluateFinalPosition_AlphaBeta(plies), new Result());
                 }
             }
         }
