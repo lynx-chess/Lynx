@@ -19,7 +19,7 @@ namespace Lynx.Search
         {
             if (depthLeft == 0)
             {
-                return position.StaticEvaluation();
+                return position.StaticEvaluation_MiniMax();
             }
 
             var pseudoLegalMoves = position.AllPossibleMoves();
@@ -102,7 +102,7 @@ namespace Lynx.Search
                 var result = new Result();
                 if (pseudoLegalMoves.Any(move => new Position(position, move).IsValid()))
                 {
-                    return (position.StaticEvaluation(), result);
+                    return (position.StaticEvaluation_MiniMax(), result);
                 }
                 else
                 {

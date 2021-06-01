@@ -30,7 +30,7 @@ namespace Lynx.Search
                 var result = new Result();
                 if (pseudoLegalMoves.Any(move => new Position(position, move).WasProduceByAValidMove()))
                 {
-                    return (position.StaticEvaluation(), result);
+                    return (position.StaticEvaluation_MiniMax(), result);
                 }
                 else
                 {
@@ -280,7 +280,7 @@ namespace Lynx.Search
         /// <returns></returns>
         public static (int Evaluation, Result MoveList) QuiescenceSearch_MiniMax_AlphaBeta(Position position, int plies, int alpha, int beta)
         {
-            var staticEvaluation = position.StaticEvaluation();
+            var staticEvaluation = position.StaticEvaluation_MiniMax();
 
             if (position.Side == Side.White)
             {

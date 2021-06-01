@@ -543,7 +543,7 @@ static void _49_Rudimetary_Evaluation()
             var newWhitePosition = new Position(newBlackPosition, newBlackPosition.AllPossibleMoves()[0]);
             if (newBlackPosition.IsValid())
             {
-                Console.WriteLine($"{move} | {newWhitePosition.EvaluateMaterial()} | {newWhitePosition.EvaluateMaterialAndPosition()}");
+                Console.WriteLine($"{move} | {newWhitePosition.EvaluateMaterial()} | {newWhitePosition.EvaluateMaterialAndPosition_MiniMax()}");
             }
         }
     }

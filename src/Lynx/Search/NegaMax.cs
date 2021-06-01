@@ -105,7 +105,7 @@ namespace Lynx.Search
         {
             var pseudoLegalMoves = position.AllPossibleMoves();
 
-            if (plies == Configuration.Parameters.Depth)
+            if (plies >= Configuration.Parameters.Depth)
             {
                 var result = new Result();
                 if (pseudoLegalMoves.Any(move => new Position(position, move).WasProduceByAValidMove()))

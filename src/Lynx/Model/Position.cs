@@ -299,7 +299,7 @@ namespace Lynx.Model
         /// Positive scores favour White, negative ones favour Black
         /// </summary>
         /// <returns></returns>
-        public int StaticEvaluation() => EvaluateMaterialAndPosition();
+        public int StaticEvaluation_MiniMax() => EvaluateMaterialAndPosition_MiniMax();
 
         /// <summary>
         /// Positive scores always favour playing <see cref="Side"/>
@@ -322,7 +322,7 @@ namespace Lynx.Model
             return eval;
         }
 
-        public int EvaluateMaterialAndPosition()
+        public int EvaluateMaterialAndPosition_MiniMax()
         {
             var eval = 0;
 

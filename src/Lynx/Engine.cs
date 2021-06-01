@@ -254,7 +254,7 @@ namespace Lynx
                 var newPosition = new Position(Game.CurrentPosition, move);
                 if (newPosition.IsValid())
                 {
-                    var eval = newPosition.EvaluateMaterialAndPosition();
+                    var eval = newPosition.EvaluateMaterialAndPosition_MiniMax();
                     Console.WriteLine($"{move,-6} | {newPosition.EvaluateMaterial(),-5} | {eval,-5}");
                     evalMoveList.Add((move, eval));
                 }
@@ -270,7 +270,7 @@ namespace Lynx
                 var newPosition = new Position(Game.CurrentPosition, move);
                 if (newPosition.IsValid())
                 {
-                    var eval = newPosition.EvaluateMaterialAndPosition();
+                    var eval = newPosition.EvaluateMaterialAndPosition_MiniMax();
                     Console.WriteLine($"{move,-6} | {newPosition.EvaluateMaterial(),-5} | {eval,-5}");
                 }
             }
