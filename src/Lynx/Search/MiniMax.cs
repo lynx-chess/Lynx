@@ -6,55 +6,6 @@ namespace Lynx.Search
 {
     public static partial class SearchAlgorithms
     {
-        //private static int Theoretical_MiniMax(Position position, int depth, bool isWhite)
-        //{
-        //    static bool IsGameFinished(Position position) => throw new();
-
-        //    if (depth == 0 || IsGameFinished(position))
-        //    {
-        //        return position.StaticEvaluation();
-        //    }
-
-        //    if (isWhite)
-        //    {
-        //        var maxEval = MinValue;
-
-        //        var pseudoLegalMoves = position.AllPossibleMoves();
-        //        for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count; ++moveIndex)
-        //        {
-        //            var newPosition = new Position(position, pseudoLegalMoves[moveIndex]);
-        //            if (!newPosition.IsValid())
-        //            {
-        //                continue;
-        //            }
-
-        //            var eval = Theoretical_MiniMax(newPosition, depth - 1, isWhite: false);
-        //            maxEval = Max(maxEval, eval);
-        //        }
-
-        //        return maxEval;
-        //    }
-        //    else
-        //    {
-        //        var minEval = MaxValue;
-
-        //        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position);
-        //        for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count; ++moveIndex)
-        //        {
-        //            var newPosition = new Position(position, pseudoLegalMoves[moveIndex]);
-        //            if (!newPosition.IsValid())
-        //            {
-        //                continue;
-        //            }
-
-        //            var eval = Theoretical_MiniMax(newPosition, depth - 1, isWhite: true);
-        //            minEval = Min(minEval, eval);
-        //        }
-
-        //        return minEval;
-        //    }
-        //}
-
         /// <summary>
         /// MiniMax algorithm implementation
         /// I quickly made up a possibly wrong way of tracking the moves
@@ -62,7 +13,8 @@ namespace Lynx.Search
         /// This currently doesn`t fully work as expected due to the Position.Evaluate function, which favours mates in longer lines
         /// </summary>
         /// <param name="position"></param>
-        /// <param name="depth"></param>
+        /// <param name="depthLeft"></param>
+        /// <param name="evaluation"></param>
         public static int MiniMax_InitialImplementation(Position position, int depthLeft, Result evaluation)
         {
             if (depthLeft == 0)

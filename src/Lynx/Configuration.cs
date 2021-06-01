@@ -68,6 +68,6 @@ namespace Lynx
     {
         public int Depth { get; set; } = 5;
 
-        public int QuescienceSearchDepth { get; set; } = 8;
+        public int QuiescenceSearchDepth { get; set; } = 8;
     }
 }
