@@ -126,15 +126,15 @@ namespace Lynx
             //PrintMovesStaticEval();
             //var result = new Result();
             //var evaluation = MiniMax_InitialImplementation(Game.CurrentPosition, Configuration.Parameters?.Depth ?? 3, result);
-            
+
             //var (evaluation, moveList) = MiniMax(Game.CurrentPosition);
 
             //var (evaluation, moveList) = AlphaBeta(Game.CurrentPosition);
 
-            var (evaluation, moveList) = AlphaBeta_Quiescence(Game.CurrentPosition);
+            //var (evaluation, moveList) = AlphaBeta_Quiescence(Game.CurrentPosition);
 
             //var (evaluation, moveList) = NegaMax_InitialImplementation(Game.CurrentPosition);
-            //var (evaluation, moveList) = NegaMax_Quiescence(Game.CurrentPosition);
+            var (evaluation, moveList) = NegaMax_Quiescence(Game.CurrentPosition);
             _logger.Debug($"Evaluation: {evaluation}");
 
             var bestMove = moveList!.Moves.Last();   // TODO: MoveList can be empty if the initial position is stalement or checkmate

@@ -65,6 +65,9 @@ namespace Lynx.NUnit.Test
             "g3f4", "g3g4", "g3h4",
             "g1h3", "g1f3", "g1e2"
         }, Category = "LongRunning", Explicit = true, Description = "Used to return an illegal move in the very first versions")]
+
+        [TestCase("r1bq2k1/1pp1n2p/2nppr1Q/p7/2PP2P1/5N2/PP3P1P/2KR1B1R w - - 0 15", new[] { "h6f6" },
+            Category = "LongRunning", Explicit = true, Description = "AlphaBeta/NegaMax depth 5 spends almost 3 minutes with a simple retake")]
         public void BestMove_Regression(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
         {
             TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
@@ -76,7 +79,7 @@ namespace Lynx.NUnit.Test
             new[] { "f5c2", "f5d3", "f5h3", "f8c5", "f8a3" },
             Category = "LongRunning", Explicit = true, Description = "Avoid trading pawn for minor piece or sacrificing pieces for nothing")]
         [TestCase("r2qkb1r/1pp2ppp/p1n2n2/1B1p1b2/3P4/2N2N2/PPP2PPP/R1BQ1RK1 w kq - 0 2", 1,
-            new[] { "b5c6", "b5a4" },
+            new[] { "b5c6", "b5a4", "f1e1" },
             new[] { "b5c1", "c3d5" },
             Category = "LongRunning", Explicit = true, Description = "Originally, it captured in c1")]
         [TestCase("r1bq1b1r/ppppk2p/2n1pp2/3n2B1/3P4/P4N2/1PP2PPP/RN1QKB1R w KQ - 0 1", 1,
