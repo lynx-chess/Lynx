@@ -109,7 +109,7 @@ namespace Lynx.Search
                 for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count; ++moveIndex)
                 {
                     var move = pseudoLegalMoves[moveIndex];
-                    var newPosition = new Position(position, pseudoLegalMoves[moveIndex]);
+                    var newPosition = new Position(position, move);
                     if (!newPosition.WasProduceByAValidMove())
                     {
                         continue;
@@ -157,7 +157,7 @@ namespace Lynx.Search
                 for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count; ++moveIndex)
                 {
                     var move = pseudoLegalMoves[moveIndex];
-                    var newPosition = new Position(position, pseudoLegalMoves[moveIndex]);
+                    var newPosition = new Position(position, move);
                     if (!newPosition.WasProduceByAValidMove())
                     {
                         continue;
@@ -222,7 +222,7 @@ namespace Lynx.Search
                 var result = new Result();
                 if (pseudoLegalMoves.Any(move => new Position(position, move).WasProduceByAValidMove()))
                 {
-                    return QuiescenceSearch_AlphaBeta(position, plies, alpha, beta);
+                    return QuiescenceSearch_AlphaBeta(position, plies + 1, alpha, beta);
                 }
                 else
                 {
@@ -240,7 +240,7 @@ namespace Lynx.Search
                 for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count; ++moveIndex)
                 {
                     var move = pseudoLegalMoves[moveIndex];
-                    var newPosition = new Position(position, pseudoLegalMoves[moveIndex]);
+                    var newPosition = new Position(position, move);
                     if (!newPosition.WasProduceByAValidMove())
                     {
                         continue;
@@ -287,7 +287,7 @@ namespace Lynx.Search
                 for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count; ++moveIndex)
                 {
                     var move = pseudoLegalMoves[moveIndex];
-                    var newPosition = new Position(position, pseudoLegalMoves[moveIndex]);
+                    var newPosition = new Position(position, move);
                     if (!newPosition.WasProduceByAValidMove())
                     {
                         continue;

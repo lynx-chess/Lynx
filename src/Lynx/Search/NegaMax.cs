@@ -147,7 +147,7 @@ namespace Lynx.Search
                 var result = new Result();
                 if (pseudoLegalMoves.Any(move => new Position(position, move).WasProduceByAValidMove()))
                 {
-                    return QuiescenceSearch_NegaMax(position, plies, alpha, beta);
+                    return QuiescenceSearch_NegaMax(position, plies + 1, alpha, beta);
                 }
                 else
                 {
