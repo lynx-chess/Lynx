@@ -6,8 +6,6 @@ namespace Lynx.Test
     /// <summary>
     /// https://www.chessprogramming.org/Perft_Results
     /// </summary>
-    [Parallelizable(ParallelScope.All)]
-    [TestFixture]
     public class PerftTests
     {
         [TestCase(Constants.InitialPositionFEN, 1, 20)]
