@@ -94,7 +94,7 @@ namespace Lynx.Search
             }
             string depthStr = sb.ToString();
 
-            Logger.Trace($"{depthStr}{message}");
+            Logger.Trace(depthStr + message);
         }
     }
 }

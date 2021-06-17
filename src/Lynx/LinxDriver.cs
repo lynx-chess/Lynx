@@ -214,7 +214,7 @@ namespace Lynx
         {
             var items = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-            if (items.Length >= 2 && int.TryParse(items[1], out int depth) && depth >=1)
+            if (items.Length >= 2 && int.TryParse(items[1], out int depth) && depth >= 1)
             {
                 Perft.Results(_engine.Game.CurrentPosition, depth);
             }

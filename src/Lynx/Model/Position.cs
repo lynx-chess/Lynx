@@ -137,7 +137,7 @@ namespace Lynx.Model
             {
                 var pawnPush = +8 - ((int)oldSide * 16);
                 var enPassantSquare = sourceSquare + pawnPush;
-                Debug.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant squre : {enPassantSquare}");
+                Debug.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
 
                 EnPassant = (BoardSquare)enPassantSquare;
             }

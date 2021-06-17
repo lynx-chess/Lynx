@@ -312,7 +312,7 @@ namespace Lynx.Search
                 for (int moveIndex = 0; moveIndex < movesToEvaluate.Count; ++moveIndex)
                 {
                     var move = movesToEvaluate[moveIndex];
-                    var newPosition = new Position(position, movesToEvaluate[moveIndex]);
+                    var newPosition = new Position(position, move);
                     if (!newPosition.WasProduceByAValidMove())
                     {
                         continue;
@@ -360,7 +360,7 @@ namespace Lynx.Search
                 for (int moveIndex = 0; moveIndex < movesToEvaluate.Count; ++moveIndex)
                 {
                     var move = movesToEvaluate[moveIndex];
-                    var newPosition = new Position(position, movesToEvaluate[moveIndex]);
+                    var newPosition = new Position(position, move);
                     if (!newPosition.WasProduceByAValidMove())
                     {
                         continue;
