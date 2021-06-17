@@ -131,12 +131,14 @@ namespace Lynx
 
             //var (evaluation, moveList) = MiniMax_AlphaBeta(Game.CurrentPosition);
 
-            var (evaluation, moveList) = MiniMax_AlphaBeta_Quiescence(Game.CurrentPosition);
+            //var (evaluation, moveList) = MiniMax_AlphaBeta_Quiescence(Game.CurrentPosition);
 
             //var (evaluation, moveList) = NegaMax(Game.CurrentPosition);
             //var (evaluation, moveList) = NegaMax_AlphaBeta_Quiescence(Game.CurrentPosition);
 
-            //var (evaluation, moveList) = NegaMax_AlphaBeta_Quiescence_Simplified(Game.CurrentPosition, new Dictionary<int, Priority_Queue.SimplePriorityQueue<Move>>(), 5);
+            ///var (evaluation, moveList) = NegaMax_AlphaBeta_Quiescence_InitialImplementation(Game.CurrentPosition, new Dictionary<int, Priority_Queue.SimplePriorityQueue<Move>>(), 5);
+
+            var (evaluation, moveList) = NegaMax_AlphaBeta_Quiescence(Game.CurrentPosition, Configuration.Parameters.Depth);
 
             //var (evaluation, moveList) = NegaMax_AlphaBeta_Quiescence_IDDFS(Game.CurrentPosition);
             _logger.Debug($"Evaluation: {evaluation}");
