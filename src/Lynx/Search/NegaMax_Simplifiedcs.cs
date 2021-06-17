@@ -1,15 +1,36 @@
 ﻿using Lynx.Model;
+using Priority_Queue;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 
 namespace Lynx.Search
 {
     public static partial class SearchAlgorithms
     {
+        public static (int Evaluation, Result MoveList) NegaMax_AlphaBeta_Quiescence_IDDFS(Position position)
+        {
+            var orderedMoves = new Dictionary<int, SimplePriorityQueue<Move>>(10_000);
+
+            Unsafe.SkipInit(out int bestEvaluation);
+            Unsafe.SkipInit(out Result bestResult);
+
+            var sw = new Stopwatch();
+            for (int depth = 1; depth <= Configuration.Parameters.Depth; ++depth)
+            {
+                (bestEvaluation, bestResult) = NegaMax_AlphaBeta_Quiescence_Simplified(position, orderedMoves, depth);
+
+                if (sw.ElapsedMilliseconds > 10_000)
+                {
+                    break;
+                }
+            }
+
+            return (bestEvaluation, bestResult);
+        }
+
         /// <summary>
         /// NegaMax algorithm implementation using alpha-beta prunning and quiescence search
         /// </summary>
@@ -24,16 +45,31 @@ namespace Lynx.Search
         /// Defaults to the worse possible score for Side to move's opponent, Int.MaxValue
         /// </param>
         /// <returns></returns>
-        public static (int Evaluation, Result MoveList) NegaMax_AlphaBeta_Quiescence_Simplified(Position position, int plies = default, int alpha = MinValue, int beta = MaxValue)
+        public static (int Evaluation, Result MoveList) NegaMax_AlphaBeta_Quiescence_Simplified(Position position, Dictionary<int, SimplePriorityQueue<Move>> orderedMoves, int depthLimit, int plies = default, int alpha = MinValue, int beta = MaxValue)
         {
             var pseudoLegalMoves = position.AllPossibleMoves();
-            Console.WriteLine(Configuration.Parameters.Depth);
-            if (plies >= Configuration.Parameters.Depth)
+
+            //var positionId = position.GetHashCode();
+            //IEnumerable<Move> pseudoLegalMoves;
+
+            //if (orderedMoves.TryGetValue(positionId, out var pseudoLegalMovesQueue))
+            //{
+            //    pseudoLegalMoves = pseudoLegalMovesQueue;
+            //    //orderedMoves[positionId].Clear();
+            //}
+            //else
+            //{
+            //    pseudoLegalMoves = position.AllPossibleMoves();
+            //    orderedMoves[positionId] = new();
+            //}
+
+            if (plies >= depthLimit)
             {
                 var result = new Result();
                 if (pseudoLegalMoves.Any(move => new Position(position, move).WasProduceByAValidMove()))
                 {
-                    return QuiescenceSearch_NegaMax_AlphaBeta_Simplified(position, plies + 1, alpha, beta);
+                    return (position.StaticEvaluation_NegaMax(), new Result());
+                    //return QuiescenceSearch_NegaMax_AlphaBeta_Simplified(position, plies + 1, alpha, beta);
                 }
                 else
                 {
@@ -44,10 +80,10 @@ namespace Lynx.Search
             Move? bestMove = null;
             Result? existingMoveList = null;
 
-            for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count; ++moveIndex)
+            for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count(); ++moveIndex)
             {
-                var move = pseudoLegalMoves[moveIndex];
-                var newPosition = new Position(position, pseudoLegalMoves[moveIndex]);
+                var move = pseudoLegalMoves.ElementAt(moveIndex);
+                var newPosition = new Position(position, move);
                 if (!newPosition.WasProduceByAValidMove())
                 {
                     continue;
@@ -55,7 +91,11 @@ namespace Lynx.Search
 
                 PrintPreMove(position, plies, move);
 
-                var (evaluation, bestMoveExistingMoveList) = NegaMax_AlphaBeta_Quiescence(newPosition, plies + 1, -beta, -alpha);
+                var (evaluation, bestMoveExistingMoveList) = NegaMax_AlphaBeta_Quiescence_Simplified(newPosition, orderedMoves, depthLimit, plies + 1, -beta, -alpha);
+                //if (!orderedMoves[positionId].EnqueueWithoutDuplicates(move, evaluation))
+                //{
+                //    orderedMoves[positionId].UpdatePriority(move, evaluation);
+                //}
                 evaluation = -evaluation;
 
                 PrintMove(plies, move, evaluation, position);
@@ -64,7 +104,14 @@ namespace Lynx.Search
                 if (evaluation >= beta)
                 {
                     Logger.Trace($"Prunning: {bestMove} is enough");
-
+                    for (int ignoredMoveIndex = moveIndex + 1; ignoredMoveIndex < pseudoLegalMoves.Count(); ++ignoredMoveIndex)
+                    {
+                        var moveToAdd = pseudoLegalMoves.ElementAt(ignoredMoveIndex);
+                        //if (!orderedMoves[positionId].EnqueueWithoutDuplicates(moveToAdd, 0))
+                        //{
+                        //    orderedMoves[positionId].UpdatePriority(moveToAdd, 0);
+                        //}
+                    }
                     return (beta, existingMoveList ?? new Result());
                 }
 
@@ -128,13 +175,18 @@ namespace Lynx.Search
 
             var movesToEvaluate = position.AllCapturesMoves();
 
+            if (movesToEvaluate.Count == 0)
+            {
+                return (staticEvaluation, new Result());  // TODO check if in check or drawn position
+            }
+
             Move? bestMove = null;
             Result? existingMoveList = null;
 
             for (int moveIndex = 0; moveIndex < movesToEvaluate.Count; ++moveIndex)
             {
                 var move = movesToEvaluate[moveIndex];
-                var newPosition = new Position(position, movesToEvaluate[moveIndex]);
+                var newPosition = new Position(position, move);
                 if (!newPosition.WasProduceByAValidMove())
                 {
                     continue;
@@ -142,7 +194,7 @@ namespace Lynx.Search
 
                 PrintPreMove(position, plies, move, isQuiescence: true);
 
-                var (evaluation, bestMoveExistingMoveList) = QuiescenceSearch_NegaMax_AlphaBeta(newPosition, plies + 1, -beta, -alpha);
+                var (evaluation, bestMoveExistingMoveList) = QuiescenceSearch_NegaMax_AlphaBeta_Simplified(newPosition, plies + 1, -beta, -alpha);
                 evaluation = -evaluation;
 
                 // Fail-hard beta-cutoff (updating alpha after this check)
@@ -222,7 +274,7 @@ namespace Lynx.Search
             for (int moveIndex = 0; moveIndex < movesToEvaluate.Count; ++moveIndex)
             {
                 var move = movesToEvaluate[moveIndex];
-                var newPosition = new Position(position, movesToEvaluate[moveIndex]);
+                var newPosition = new Position(position, move);
                 if (!newPosition.WasProduceByAValidMove())
                 {
                     continue;
