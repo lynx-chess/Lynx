@@ -376,7 +376,7 @@ namespace Lynx.Model
 
         internal const int CheckMateEvaluation = 1_000_000_000;
 
-        private const int DepthFactor = 1_000_000;
+        internal const int DepthFactor = 1_000_000;
 
         /// <summary>
         /// Assuming a current position has no legal moves (<see cref="AllPossibleMoves"/> doesn't produce any <see cref="IsValid"/> position),
