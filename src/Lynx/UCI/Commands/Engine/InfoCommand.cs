@@ -1,4 +1,7 @@
-﻿namespace Lynx.UCI.Commands.Engine
+﻿using System.Linq;
+using static Lynx.Search.SearchAlgorithms;
+
+namespace Lynx.UCI.Commands.Engine
 {
     /// <summary>
     /// info
@@ -72,5 +75,17 @@
     public class InfoCommand : EngineBaseCommand
     {
         public const string Id = "info";
+
+        public static string SearchResultInfo(SearchResult searchResult)
+        {
+            return Id +
+                $" depth {searchResult.TargetDepth}" +
+                $" seldepth {searchResult.DepthReached}" +
+                $" multipv 1" +
+                $" score cp {searchResult.Evaluation}" +
+                $" pv {string.Join(" ", searchResult.Moves.Select(move => move.UCIString()))}";
+        }
+
+
     }
 }

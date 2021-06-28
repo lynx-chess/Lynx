@@ -4,6 +4,7 @@ using NLog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using static Lynx.Search.SearchAlgorithms;
 
@@ -43,10 +44,11 @@ namespace Lynx
             get => _isSearching;
             set
             {
-                if (_isSearching && !value)
+                if (!_isSearching && value)
                 {
                     _isSearching = value;
-                    OnSearchFinished?.Invoke(BestMove(), MoveToPonder()).Wait();
+                    //_searchCancellationTokenSource.TryReset();
+                    //OnSearchFinished?.Invoke(BestMove(_lastGoCommand, _searchCancellationTokenSource.Token), MoveToPonder()).Wait();
                 }
                 else
                 {
@@ -60,8 +62,10 @@ namespace Lynx
         public delegate Task NotifyReadyOKHandler();
         public event NotifyReadyOKHandler? OnReady;
 
-        public delegate Task NotifyBestMove(Move move, Move? moveToPonder);
-        public event NotifyBestMove? OnSearchFinished;
+        public delegate Task NotifyEndOfSearch(SearchResult searchResult, Move? moveToPonder);
+        public event NotifyEndOfSearch? OnSearchFinished;
+
+        private CancellationTokenSource _searchCancellationTokenSource;
 
         public Engine()
         {
@@ -69,6 +73,7 @@ namespace Lynx
             IsReady = true;
             _isNewGameComing = true;
             _logger = LogManager.GetCurrentClassLogger();
+            _searchCancellationTokenSource = new();
         }
 
         internal void SetGame(Game game)
@@ -114,7 +119,42 @@ namespace Lynx
             _isPondering = false;
         }
 
-        public Move BestMove()
+        public SearchResult BestMove() => BestMove(null);
+
+        public SearchResult BestMove(GoCommand? goCommand)
+        {
+            int? millisecondsLeft;
+            int? millisecondsIncrement;
+
+            if (Game.CurrentPosition.Side == Side.White)
+            {
+                millisecondsLeft = goCommand?.WhiteTime;
+                millisecondsIncrement = goCommand?.WhiteIncrement;
+            }
+            else
+            {
+                millisecondsLeft = goCommand?.BlackTime;
+                millisecondsIncrement = goCommand?.BlackIncrement;
+            }
+
+            if (goCommand is not null && millisecondsLeft != 0)
+            {
+                _searchCancellationTokenSource = new CancellationTokenSource();
+                int decisionTime = Convert.ToInt32((0.9 * millisecondsLeft!.Value / goCommand!.MovesToGo) + millisecondsIncrement!.Value);
+                _logger.Info($"Time to move: {0.001 * decisionTime}s");
+                _searchCancellationTokenSource.CancelAfter(decisionTime);
+            }
+
+            var result = NegaMax_AlphaBeta_Quiescence_IDDFS(Game.CurrentPosition, goCommand?.MovesToGo, millisecondsLeft, _searchCancellationTokenSource.Token);
+
+            _logger.Debug($"Evaluation: {result.Evaluation} (depth: {result.TargetDepth}, refutation: {string.Join(", ", result.Moves)})");
+
+            Game.MakeMove(result.BestMove);
+
+            return result;
+        }
+
+        public SearchResult BestMoveOld(int? millisecondsLeft, int? movesToGo)
         {
             // var bestMove =  FindRandomMove();
 
@@ -138,16 +178,14 @@ namespace Lynx
 
             //var (evaluation, moveList) = NegaMax_AlphaBeta_Quiescence_InitialImplementation(Game.CurrentPosition);
 
-            //var (evaluation, moveList) = NegaMax_AlphaBeta_Quiescence(Game.CurrentPosition, Configuration.Parameters.Depth);
+            var (evaluation, moveList) = NegaMax_AlphaBeta_Quiescence(Game.CurrentPosition, Configuration.Parameters.Depth);
 
-            var (evaluation, moveList) = NegaMax_AlphaBeta_Quiescence_IDDFS(Game.CurrentPosition);
             _logger.Debug($"Evaluation: {evaluation}");
-
             var bestMove = moveList!.Moves.Last();   // TODO: MoveList can be empty if the initial position is stalement or checkmate
-
             Game.MakeMove(bestMove);
 
-            return bestMove;
+
+            return new SearchResult(bestMove, evaluation, Configuration.Parameters.Depth, moveList.MaxDepth ?? Configuration.Parameters.Depth, moveList.Moves);
         }
 
         public Move? MoveToPonder()
@@ -158,15 +196,19 @@ namespace Lynx
 
         public void StartSearching(GoCommand goCommand)
         {
-            IsSearching = true;
             _isPondering = goCommand.Ponder;
-
-            // TODO
-            StopSearching();
+            IsSearching = true;
+            Task.Run(() =>
+            {
+                var searchResult = BestMove(goCommand);
+                OnSearchFinished?.Invoke(searchResult, searchResult.Moves.Count >= 2 ? searchResult.Moves.ElementAt(1) : null);
+            });
+            // TODO: if ponder, continue with PonderAction, which is searching indefinitely for a move
         }
 
         public void StopSearching()
         {
+            _searchCancellationTokenSource.Cancel();
             IsSearching = false;
             // TODO
         }
@@ -281,6 +323,5 @@ namespace Lynx
                 }
             }
         }
-
     }
 }

@@ -16,8 +16,12 @@ namespace Lynx.Search
 
         public class Result
         {
+            public int? MaxDepth { get; set; }
+
             public List<Move> Moves { get; set; } = new List<Move>(150);
         }
+
+        public record SearchResult(Move BestMove, double Evaluation, int TargetDepth, int DepthReached,  List<Move> Moves);
 
         /// <summary>
         /// Branch-optimized for <paramref name="mostLikely"/>

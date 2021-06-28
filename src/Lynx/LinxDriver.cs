@@ -3,11 +3,10 @@ using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using static Lynx.Search.SearchAlgorithms;
 
 namespace Lynx
 {
@@ -237,9 +236,10 @@ namespace Lynx
             await _engineWriter.Writer.WriteAsync(ReadyOKCommand.Id);
         }
 
-        private async Task NotifyBestMove(Move move, Move? moveToPonder)
+        private async Task NotifyBestMove(SearchResult searchResult, Move? moveToPonder)
         {
-            await _engineWriter.Writer.WriteAsync(BestMoveCommand.BestMove(move, moveToPonder));
+            await _engineWriter.Writer.WriteAsync(InfoCommand.SearchResultInfo(searchResult));
+            await _engineWriter.Writer.WriteAsync(BestMoveCommand.BestMove(searchResult.BestMove, moveToPonder));
         }
 
         private async Task SendCommand(string command, CancellationToken cancellationToken)
