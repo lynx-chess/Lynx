@@ -27,10 +27,10 @@ namespace Lynx.Search
 
             if (plies >= depthLimit)
             {
+                ++nodes;
                 var result = new Result();
                 if (pseudoLegalMoves.Any(move => new Position(position, move).WasProduceByAValidMove()))
                 {
-                    ++nodes;
                     return QuiescenceSearch_NegaMax_AlphaBeta(position, Configuration.Parameters.QuiescenceSearchDepth, ref nodes , plies + 1, alpha, beta);
                 }
                 else
@@ -55,7 +55,6 @@ namespace Lynx.Search
 
                 PrintPreMove(position, plies, move);
 
-                ++nodes;
                 var (evaluation, bestMoveExistingMoveList) = NegaMax_AlphaBeta_Quiescence(newPosition, depthLimit, ref nodes, plies + 1, -beta, -alpha);
                 evaluation = -evaluation;
 
@@ -113,6 +112,7 @@ namespace Lynx.Search
             // Fail-hard beta-cutoff (updating alpha after this check)
             if (staticEvaluation >= beta)
             {
+                ++nodes;
                 PrintMessage(plies - 1, "Prunning before starting quiescence search");
                 return (staticEvaluation, new Result() {  MaxDepth = plies });
             }
@@ -125,14 +125,16 @@ namespace Lynx.Search
 
             if (plies >= quiescenceDepthLimit)
             {
-                return (alpha, new Result());   // Alpha?
+                ++nodes;
+                return (alpha, new Result { MaxDepth = plies });   // Alpha?
             }
 
             var movesToEvaluate = position.AllCapturesMoves();
 
             if (movesToEvaluate.Count == 0)
             {
-                return (staticEvaluation, new Result());  // TODO check if in check or drawn position
+                ++nodes;
+                return (staticEvaluation, new Result { MaxDepth = plies });  // TODO check if in check or drawn position
             }
 
             Move? bestMove = null;
@@ -151,7 +153,6 @@ namespace Lynx.Search
 
                 PrintPreMove(position, plies, move, isQuiescence: true);
 
-                ++nodes;
                 var (evaluation, bestMoveExistingMoveList) = QuiescenceSearch_NegaMax_AlphaBeta(newPosition, quiescenceDepthLimit, ref nodes, plies + 1,  -beta, -alpha, cancellationToken);
                 evaluation = -evaluation;
 
@@ -176,6 +177,7 @@ namespace Lynx.Search
 
             if (bestMove is null)
             {
+                ++nodes;
                 return (position.EvaluateFinalPosition_NegaMax(plies), new Result() { MaxDepth = plies });
             }
 

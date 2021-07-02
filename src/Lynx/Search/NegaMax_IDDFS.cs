@@ -26,7 +26,7 @@ namespace Lynx.Search
                 do
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    ++nodes;
+                    nodes = 0;
                     (bestEvaluation, bestResult) = NegaMax_AlphaBeta_Quiescence_IDDFS(position, orderedMoves, depthLimit: depth, nodes: ref nodes, plies: 0, alpha: MinValue, beta: MaxValue, cancellationToken);
                 } while (stopSearchCondition(++depth));
             }
@@ -95,19 +95,19 @@ namespace Lynx.Search
 
             if (plies >= depthLimit)
             {
+                ++nodes;
 
                 while (pseudoLegalMoves.TryDequeue(out var candidateMove, out _))
                 {
                     if (new Position(position, candidateMove).WasProduceByAValidMove())
                     {
                         orderedMoves.Remove(positionId);
-                        ++nodes;
                         return QuiescenceSearch_NegaMax_AlphaBeta(position, Configuration.Parameters.QuiescenceSearchDepth, ref nodes, plies + 1, alpha, beta, cancellationToken);
                     }
                 }
 
                 orderedMoves.Remove(positionId);
-                return (position.EvaluateFinalPosition_NegaMax(plies), new Result() { MaxDepth = plies });
+                return (position.EvaluateFinalPosition_NegaMax(plies), new Result { MaxDepth = plies });
             }
 
             Move? bestMove = null;
@@ -127,7 +127,6 @@ namespace Lynx.Search
 
                 PrintPreMove(position, plies, move);
 
-                ++nodes;
                 var (evaluation, bestMoveExistingMoveList) = NegaMax_AlphaBeta_Quiescence_IDDFS(newPosition, orderedMoves, depthLimit, ref nodes, plies + 1, -beta, -alpha, cancellationToken);
 
                 // Since SimplePriorityQueue has lower priority at the top, we do this before inverting the sign of the evaluation
@@ -166,6 +165,7 @@ namespace Lynx.Search
             orderedMoves[positionId] = newPriorityQueue;
             if (bestMove is null)
             {
+                ++nodes;
                 return (position.EvaluateFinalPosition_NegaMax(plies), new Result());
             }
 
