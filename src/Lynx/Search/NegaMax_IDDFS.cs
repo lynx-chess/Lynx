@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace Lynx.Search
@@ -15,18 +14,20 @@ namespace Lynx.Search
             int bestEvaluation = 0;
             Result? bestResult = new();
             int depth = 1;
+            int nodes = 0;
+            var sw = new Stopwatch();
 
             try
             {
                 var orderedMoves = new Dictionary<string, PriorityQueue<Move, int>>(10_000);
 
-                var sw = new Stopwatch();
                 sw.Start();
 
                 do
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    (bestEvaluation, bestResult) = NegaMax_AlphaBeta_Quiescence_IDDFS(position, orderedMoves, depth, cancellationToken);
+                    ++nodes;
+                    (bestEvaluation, bestResult) = NegaMax_AlphaBeta_Quiescence_IDDFS(position, orderedMoves, depthLimit: depth, nodes: ref nodes, plies: 0, alpha: MinValue, beta: MaxValue, cancellationToken);
                 } while (stopSearchCondition(++depth));
             }
             catch (OperationCanceledException)
@@ -40,13 +41,17 @@ namespace Lynx.Search
                     Environment.NewLine + e.Message + Environment.NewLine + e.StackTrace);
                 --depth;
             }
+            finally
+            {
+                sw.Stop();
+            }
 
             bestResult?.Moves.Reverse();
-            return new SearchResult(bestResult!.Moves.FirstOrDefault(), bestEvaluation, depth, bestResult!.MaxDepth ?? depth, bestResult!.Moves);
+            return new SearchResult(bestResult!.Moves.FirstOrDefault(), bestEvaluation, depth - 1, bestResult!.MaxDepth ?? depth - 1, nodes, sw.ElapsedMilliseconds, Convert.ToInt64(nodes / (0.001 * sw.ElapsedMilliseconds)), bestResult!.Moves);
 
             bool stopSearchCondition(int depth)
             {
-                if (millisecondsLeft is null)
+                if (millisecondsLeft == 0)
                 {
                     return depth <= Configuration.Parameters.Depth;
                 }
@@ -71,9 +76,9 @@ namespace Lynx.Search
         /// Defaults to the worse possible score for Side to move's opponent, Int.MaxValue
         /// </param>
         /// <returns></returns>
-        private static (int Evaluation, Result MoveList) NegaMax_AlphaBeta_Quiescence_IDDFS(Position position, Dictionary<string, PriorityQueue<Move, int>> orderedMoves, int depthLimit, CancellationToken cancellationToken, int plies = default, int alpha = MinValue, int beta = MaxValue)
+        private static (int Evaluation, Result MoveList) NegaMax_AlphaBeta_Quiescence_IDDFS(Position position, Dictionary<string, PriorityQueue<Move, int>> orderedMoves, int depthLimit, ref int nodes, int plies, int alpha = MinValue, int beta = MaxValue, CancellationToken? cancellationToken = null)
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            cancellationToken?.ThrowIfCancellationRequested();
 
             var positionId = position.FEN();
 
@@ -96,7 +101,8 @@ namespace Lynx.Search
                     if (new Position(position, candidateMove).WasProduceByAValidMove())
                     {
                         orderedMoves.Remove(positionId);
-                        return QuiescenceSearch_NegaMax_AlphaBeta(position, Configuration.Parameters.QuiescenceSearchDepth, plies + 1, alpha, beta, cancellationToken);
+                        ++nodes;
+                        return QuiescenceSearch_NegaMax_AlphaBeta(position, Configuration.Parameters.QuiescenceSearchDepth, ref nodes, plies + 1, alpha, beta, cancellationToken);
                     }
                 }
 
@@ -121,7 +127,8 @@ namespace Lynx.Search
 
                 PrintPreMove(position, plies, move);
 
-                var (evaluation, bestMoveExistingMoveList) = NegaMax_AlphaBeta_Quiescence_IDDFS(newPosition, orderedMoves, depthLimit, cancellationToken, plies + 1, -beta, -alpha);
+                ++nodes;
+                var (evaluation, bestMoveExistingMoveList) = NegaMax_AlphaBeta_Quiescence_IDDFS(newPosition, orderedMoves, depthLimit, ref nodes, plies + 1, -beta, -alpha, cancellationToken);
 
                 // Since SimplePriorityQueue has lower priority at the top, we do this before inverting the sign of the evaluation
                 newPriorityQueue.Enqueue(move, evaluation);

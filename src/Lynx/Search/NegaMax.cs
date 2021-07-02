@@ -21,7 +21,7 @@ namespace Lynx.Search
         /// Defaults to the worse possible score for Side to move's opponent, Int.MaxValue
         /// </param>
         /// <returns></returns>
-        public static (int Evaluation, Result MoveList) NegaMax_AlphaBeta_Quiescence(Position position, int depthLimit, int plies = default, int alpha = MinValue, int beta = MaxValue)
+        public static (int Evaluation, Result MoveList) NegaMax_AlphaBeta_Quiescence(Position position, int depthLimit, ref int nodes, int plies = default, int alpha = MinValue, int beta = MaxValue)
         {
             var pseudoLegalMoves = position.AllPossibleMoves();
 
@@ -30,7 +30,8 @@ namespace Lynx.Search
                 var result = new Result();
                 if (pseudoLegalMoves.Any(move => new Position(position, move).WasProduceByAValidMove()))
                 {
-                    return QuiescenceSearch_NegaMax_AlphaBeta(position, Configuration.Parameters.QuiescenceSearchDepth, plies + 1, alpha, beta);
+                    ++nodes;
+                    return QuiescenceSearch_NegaMax_AlphaBeta(position, Configuration.Parameters.QuiescenceSearchDepth, ref nodes , plies + 1, alpha, beta);
                 }
                 else
                 {
@@ -54,7 +55,8 @@ namespace Lynx.Search
 
                 PrintPreMove(position, plies, move);
 
-                var (evaluation, bestMoveExistingMoveList) = NegaMax_AlphaBeta_Quiescence(newPosition, depthLimit, plies + 1, -beta, -alpha);
+                ++nodes;
+                var (evaluation, bestMoveExistingMoveList) = NegaMax_AlphaBeta_Quiescence(newPosition, depthLimit, ref nodes, plies + 1, -beta, -alpha);
                 evaluation = -evaluation;
 
                 PrintMove(plies, move, evaluation, position);
@@ -102,9 +104,9 @@ namespace Lynx.Search
         /// Defaults to the works possible score for Black, Int.MaxValue
         /// </param>
         /// <returns></returns>
-        public static (int Evaluation, Result MoveList) QuiescenceSearch_NegaMax_AlphaBeta(Position position, int quiescenceDepthLimit, int plies, int alpha, int beta, CancellationToken? cancellationToken = null)
+        public static (int Evaluation, Result MoveList) QuiescenceSearch_NegaMax_AlphaBeta(Position position, int quiescenceDepthLimit, ref int nodes, int plies,  int alpha, int beta, CancellationToken? cancellationToken = null)
         {
-            cancellationToken?.ThrowIfCancellationRequested();
+            //cancellationToken?.ThrowIfCancellationRequested();
 
             var staticEvaluation = position.StaticEvaluation_NegaMax();
 
@@ -149,7 +151,8 @@ namespace Lynx.Search
 
                 PrintPreMove(position, plies, move, isQuiescence: true);
 
-                var (evaluation, bestMoveExistingMoveList) = QuiescenceSearch_NegaMax_AlphaBeta(newPosition, quiescenceDepthLimit, plies + 1, -beta, -alpha, cancellationToken);
+                ++nodes;
+                var (evaluation, bestMoveExistingMoveList) = QuiescenceSearch_NegaMax_AlphaBeta(newPosition, quiescenceDepthLimit, ref nodes, plies + 1,  -beta, -alpha, cancellationToken);
                 evaluation = -evaluation;
 
                 PrintMove(plies, move, evaluation, position);

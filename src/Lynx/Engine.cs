@@ -123,6 +123,7 @@ namespace Lynx
 
         public SearchResult BestMove(GoCommand? goCommand)
         {
+            _searchCancellationTokenSource = new CancellationTokenSource();
             int? millisecondsLeft;
             int? millisecondsIncrement;
 
@@ -139,8 +140,10 @@ namespace Lynx
 
             if (goCommand is not null && millisecondsLeft != 0)
             {
-                _searchCancellationTokenSource = new CancellationTokenSource();
-                int decisionTime = Convert.ToInt32((0.9 * millisecondsLeft!.Value / goCommand!.MovesToGo) + millisecondsIncrement!.Value);
+                int decisionTime =
+                    goCommand.MovesToGo > Configuration.Parameters.KeyMovesBeforeMovesToGo
+                    ? Convert.ToInt32((Configuration.Parameters.CoefficientBeforeKeyMovesBeforeMovesToGo * millisecondsLeft!.Value / goCommand!.MovesToGo) + millisecondsIncrement!.Value)
+                    : Convert.ToInt32((Configuration.Parameters.CoefficientAfterKeyMovesBeforeMovesToGo * (millisecondsLeft!.Value - 1) / goCommand!.MovesToGo) + millisecondsIncrement!.Value);
                 _logger.Info($"Time to move: {0.001 * decisionTime}s");
                 _searchCancellationTokenSource.CancelAfter(decisionTime);
             }
@@ -178,14 +181,15 @@ namespace Lynx
 
             //var (evaluation, moveList) = NegaMax_AlphaBeta_Quiescence_InitialImplementation(Game.CurrentPosition);
 
-            var (evaluation, moveList) = NegaMax_AlphaBeta_Quiescence(Game.CurrentPosition, Configuration.Parameters.Depth);
+            int nodes = default;
+            var (evaluation, moveList) = NegaMax_AlphaBeta_Quiescence(Game.CurrentPosition, Configuration.Parameters.Depth, ref nodes);
 
             _logger.Debug($"Evaluation: {evaluation}");
             var bestMove = moveList!.Moves.Last();   // TODO: MoveList can be empty if the initial position is stalement or checkmate
             Game.MakeMove(bestMove);
 
 
-            return new SearchResult(bestMove, evaluation, Configuration.Parameters.Depth, moveList.MaxDepth ?? Configuration.Parameters.Depth, moveList.Moves);
+            return new SearchResult(bestMove, evaluation, Configuration.Parameters.Depth, moveList.MaxDepth ?? Configuration.Parameters.Depth, 0, 0, 0, moveList.Moves);
         }
 
         public Move? MoveToPonder()

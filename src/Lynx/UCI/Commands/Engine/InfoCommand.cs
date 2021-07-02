@@ -83,6 +83,9 @@ namespace Lynx.UCI.Commands.Engine
                 $" seldepth {searchResult.DepthReached}" +
                 $" multipv 1" +
                 $" score cp {searchResult.Evaluation}" +
+                $" nodes {searchResult.Nodes}" +
+                $" nps {searchResult.NodesPerSecond}" +
+                $" time {searchResult.Time}" +
                 $" pv {string.Join(" ", searchResult.Moves.Select(move => move.UCIString()))}";
         }
 

@@ -69,5 +69,11 @@ namespace Lynx
         public int Depth { get; set; } = 5;
 
         public int QuiescenceSearchDepth { get; set; } = 8;
+
+        public double CoefficientBeforeKeyMovesBeforeMovesToGo { get; set; } = 1.5;
+
+        public int KeyMovesBeforeMovesToGo { get; set; } = 10;
+
+        public double CoefficientAfterKeyMovesBeforeMovesToGo { get; set; } = 0.9;
     }
 }
