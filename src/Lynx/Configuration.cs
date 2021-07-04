@@ -75,5 +75,7 @@ namespace Lynx
         public int KeyMovesBeforeMovesToGo { get; set; } = 10;
 
         public double CoefficientAfterKeyMovesBeforeMovesToGo { get; set; } = 0.9;
+
+        public int TotalMovesWhenNoMovesToGoProvided { get; set; } = 100;
     }
 }

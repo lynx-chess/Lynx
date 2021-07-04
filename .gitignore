@@ -351,3 +351,5 @@ MigrationBackup/
 
 # global.json
 global.json
+
+*.profraw

@@ -16,6 +16,7 @@ namespace Lynx
         private bool _isNewGameCommandSupported;
         private bool _isNewGameComing;
         private bool _isPondering;
+        private Move? _moveToPonder;
 
         public RegisterCommand? Registration { get; set; }
 
@@ -115,7 +116,7 @@ namespace Lynx
 
         public void PonderHit()
         {
-            Game.MakeMove(MoveToPonder()!.Value);   // TODO: do we also receive the position command? If so, remove this line
+            Game.MakeMove(_moveToPonder!.Value);   // TODO: do we also receive the position command? If so, remove this line
             _isPondering = false;
         }
 
@@ -140,10 +141,25 @@ namespace Lynx
 
             if (goCommand is not null && millisecondsLeft != 0)
             {
-                int decisionTime =
-                    goCommand.MovesToGo > Configuration.Parameters.KeyMovesBeforeMovesToGo
-                    ? Convert.ToInt32((Configuration.Parameters.CoefficientBeforeKeyMovesBeforeMovesToGo * millisecondsLeft!.Value / goCommand!.MovesToGo) + millisecondsIncrement!.Value)
-                    : Convert.ToInt32((Configuration.Parameters.CoefficientAfterKeyMovesBeforeMovesToGo * (millisecondsLeft!.Value - 1) / goCommand!.MovesToGo) + millisecondsIncrement!.Value);
+                int decisionTime;
+                if (goCommand.MovesToGo == default)
+                {
+                    decisionTime = Convert.ToInt32(millisecondsLeft!.Value / Configuration.Parameters.TotalMovesWhenNoMovesToGoProvided);
+                }
+                else
+                {
+                    if (goCommand.MovesToGo > Configuration.Parameters.KeyMovesBeforeMovesToGo)
+                    {
+                        decisionTime = Convert.ToInt32(Configuration.Parameters.CoefficientBeforeKeyMovesBeforeMovesToGo * millisecondsLeft!.Value / goCommand!.MovesToGo);
+                    }
+                    else
+                    {
+                        decisionTime = Convert.ToInt32(Configuration.Parameters.CoefficientAfterKeyMovesBeforeMovesToGo * (millisecondsLeft!.Value - 1) / goCommand!.MovesToGo);
+                    }
+                }
+
+                decisionTime += millisecondsIncrement!.Value;
+
                 _logger.Info($"Time to move: {0.001 * decisionTime}s");
                 _searchCancellationTokenSource.CancelAfter(decisionTime);
             }
@@ -192,20 +208,22 @@ namespace Lynx
             return new SearchResult(bestMove, evaluation, Configuration.Parameters.Depth, moveList.MaxDepth ?? Configuration.Parameters.Depth, 0, 0, 0, moveList.Moves);
         }
 
-        public Move? MoveToPonder()
-        {
-            // TODO
-            return default;
-        }
-
         public void StartSearching(GoCommand goCommand)
         {
             _isPondering = goCommand.Ponder;
             IsSearching = true;
             Task.Run(() =>
             {
-                var searchResult = BestMove(goCommand);
-                OnSearchFinished?.Invoke(searchResult, searchResult.Moves.Count >= 2 ? searchResult.Moves.ElementAt(1) : null);
+                try
+                {
+                    var searchResult = BestMove(goCommand);
+                    _moveToPonder = searchResult.Moves.Count >= 2 ? searchResult.Moves[1] : null;
+                    OnSearchFinished?.Invoke(searchResult, _moveToPonder);
+                }
+                catch (Exception e)
+                {
+                    _logger.Fatal(e.Message + Environment.NewLine + e.StackTrace);
+                }
             });
             // TODO: if ponder, continue with PonderAction, which is searching indefinitely for a move
         }

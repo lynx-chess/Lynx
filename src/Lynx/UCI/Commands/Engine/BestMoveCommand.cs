@@ -19,7 +19,7 @@ namespace Lynx.UCI.Commands.Engine
         {
             return $"bestmove {move.UCIString()}" +
                 (moveToPonder.HasValue
-                    ? $" ponder {moveToPonder!.Value}"
+                    ? $" ponder {moveToPonder!.Value.UCIString()}"
                     : string.Empty);
         }
     }
