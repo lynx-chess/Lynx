@@ -51,13 +51,13 @@ namespace Lynx.Search
 
             bool stopSearchCondition(int depth)
             {
-                if (millisecondsLeft == 0)
+                if (millisecondsLeft > 0)
                 {
-                    return depth <= Configuration.Parameters.Depth;
+                    return depth <= 3 * Configuration.Parameters.Depth;
                 }
                 else
                 {
-                    return depth <= 3 * Configuration.Parameters.Depth;
+                    return depth <= Configuration.Parameters.Depth;
                 }
             }
         }
