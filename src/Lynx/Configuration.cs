@@ -77,5 +77,11 @@ namespace Lynx
         public double CoefficientAfterKeyMovesBeforeMovesToGo { get; set; } = 0.9;
 
         public int TotalMovesWhenNoMovesToGoProvided { get; set; } = 100;
+
+        public int MinMoveTime { get; set; } = 1000;        // 1 second
+
+        public int MaxMoveTime { get; set; } = 3_600_000;   // 1 hour
+
+        public int MinTimeToClamp { get; set; } = 5_000;    // 5 seconds
     }
 }

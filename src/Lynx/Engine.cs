@@ -141,24 +141,7 @@ namespace Lynx
 
             if (goCommand is not null && millisecondsLeft != 0)
             {
-                int decisionTime;
-                if (goCommand.MovesToGo == default)
-                {
-                    decisionTime = Convert.ToInt32(millisecondsLeft!.Value / Configuration.Parameters.TotalMovesWhenNoMovesToGoProvided);
-                }
-                else
-                {
-                    if (goCommand.MovesToGo > Configuration.Parameters.KeyMovesBeforeMovesToGo)
-                    {
-                        decisionTime = Convert.ToInt32(Configuration.Parameters.CoefficientBeforeKeyMovesBeforeMovesToGo * millisecondsLeft!.Value / goCommand!.MovesToGo);
-                    }
-                    else
-                    {
-                        decisionTime = Convert.ToInt32(Configuration.Parameters.CoefficientAfterKeyMovesBeforeMovesToGo * (millisecondsLeft!.Value - 1) / goCommand!.MovesToGo);
-                    }
-                }
-
-                decisionTime += millisecondsIncrement!.Value;
+                int decisionTime = CalculateDecisionTime(goCommand, millisecondsLeft, millisecondsIncrement);
 
                 _logger.Info($"Time to move: {0.001 * decisionTime}s");
                 _searchCancellationTokenSource.CancelAfter(decisionTime);
@@ -171,6 +154,35 @@ namespace Lynx
             Game.MakeMove(result.BestMove);
 
             return result;
+        }
+
+        private static int CalculateDecisionTime(GoCommand goCommand, int? millisecondsLeft, int? millisecondsIncrement)
+        {
+            int decisionTime;
+            if (goCommand.MovesToGo == default)
+            {
+                decisionTime = Convert.ToInt32(millisecondsLeft!.Value / Configuration.Parameters.TotalMovesWhenNoMovesToGoProvided);
+            }
+            else
+            {
+                if (goCommand.MovesToGo > Configuration.Parameters.KeyMovesBeforeMovesToGo)
+                {
+                    decisionTime = Convert.ToInt32(Configuration.Parameters.CoefficientBeforeKeyMovesBeforeMovesToGo * millisecondsLeft!.Value / goCommand!.MovesToGo);
+                }
+                else
+                {
+                    decisionTime = Convert.ToInt32(Configuration.Parameters.CoefficientAfterKeyMovesBeforeMovesToGo * (millisecondsLeft!.Value - 1) / goCommand!.MovesToGo);
+                }
+            }
+
+            decisionTime += millisecondsIncrement!.Value;
+
+            if (millisecondsLeft > Configuration.Parameters.MinTimeToClamp)
+            {
+                decisionTime = Math.Clamp(decisionTime, Configuration.Parameters.MinMoveTime, Configuration.Parameters.MaxMoveTime);
+            }
+
+            return decisionTime;
         }
 
         public SearchResult BestMoveOld(int? millisecondsLeft, int? movesToGo)
