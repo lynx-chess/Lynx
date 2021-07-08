@@ -67,7 +67,7 @@ namespace Lynx.Search
                         bestMove = move;
                     }
 
-                    alpha = Max(alpha, evaluation);       // TODO optimize branch prediction -> Should alpha be generally greater than eval?
+                    alpha = Max(alpha, evaluation);
 
                     if (beta <= alpha)
                     {
@@ -107,7 +107,7 @@ namespace Lynx.Search
 
                     PrintMove(plies, move, evaluation, position);
 
-                    beta = Min(beta, evaluation);        // TODO optimize branch prediction -> Should beta be generally less than eval?
+                    beta = Min(beta, evaluation);
 
                     if (evaluation < minEval)
                     {
@@ -194,7 +194,7 @@ namespace Lynx.Search
                         bestMove = move;
                     }
 
-                    alpha = Max(alpha, evaluation);       // TODO optimize branch prediction -> Should alpha be generally greater than eval?
+                    alpha = Max(alpha, evaluation);
 
                     PrintMove(plies, move, evaluation, position, beta <= alpha);
 
@@ -240,7 +240,7 @@ namespace Lynx.Search
                         bestMove = move;
                     }
 
-                    beta = Min(beta, evaluation);        // TODO optimize branch prediction -> Should beta be generally less than eval?
+                    beta = Min(beta, evaluation);
 
                     PrintMove(plies, move, evaluation, position, beta <= alpha);
 
@@ -329,7 +329,7 @@ namespace Lynx.Search
                         bestMove = move;
                     }
 
-                    alpha = Max(alpha, evaluation);       // TODO optimize branch prediction -> Should alpha be generally greater than eval?
+                    alpha = Max(alpha, evaluation);
 
                     PrintMove(plies, move, evaluation, position, isQuiescence: true, beta <= alpha);
 
@@ -377,7 +377,7 @@ namespace Lynx.Search
                         bestMove = move;
                     }
 
-                    beta = Min(beta, evaluation);        // TODO optimize branch prediction -> Should beta be generally less than eval?
+                    beta = Min(beta, evaluation);
 
                     PrintMove(plies, move, evaluation, position, isQuiescence: true, beta <= alpha);
 

@@ -222,7 +222,7 @@ namespace Lynx.Search
                     bestMove = move;
                 }
 
-                alpha = Max(alpha, evaluation);       // TODO optimize branch prediction -> Should alpha be generally greater than eval?
+                alpha = Max(alpha, evaluation);
 
                 PrintMove(plies, move, evaluation, position, isQuiescence: true, beta <= alpha);
 

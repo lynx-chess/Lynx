@@ -74,7 +74,7 @@ namespace Lynx.Search
                     return (maxEval, new Result()); // The refutation doesn't matter, since it'll be pruned
                 }
 
-                alpha = Max(alpha, evaluation);
+                alpha = Max(alpha, evaluation); // TODO optimize branch prediction -> Should alpha be generally greater than eval ?
             }
 
             if (bestMove is null)
@@ -172,7 +172,7 @@ namespace Lynx.Search
                     return (maxEval, new Result()); // The refutation doesn't matter, since it'll be pruned
                 }
 
-                alpha = Max(alpha, evaluation);
+                alpha = Max(alpha, evaluation); // TODO optimize branch prediction -> Should alpha be generally greater than eval?
             }
 
             if (bestMove is null)
@@ -188,91 +188,78 @@ namespace Lynx.Search
             return (alpha, existingMoveList);
         }
 
-        /// <summary>
-        /// Quiescence search implementation, NegaMax alpha-beta style
-        /// </summary>
-        /// <param name="position"></param>
-        /// <param name="plies"></param>
-        /// <param name="alpha">
-        /// Best score White can achieve, assuming best play by Black.
-        /// Defaults to the worse possible score for white, Int.MinValue.
-        /// </param>
-        /// <param name="beta">
-        /// Best score Black can achieve, assuming best play by White
-        /// Defaults to the works possible score for Black, Int.MaxValue
-        /// </param>
-        /// <returns></returns>
-        public static (int Evaluation, Result MoveList) QuiescenceSearch_NegaMax_AlphaBeta_Simplified_2(Position position, int plies, int alpha, int beta)
-        {
-            var staticEvaluation = position.StaticEvaluation_NegaMax();
+        // Another attemp to simplify, didn't work
+        //public static (int Evaluation, Result MoveList) QuiescenceSearch_NegaMax_AlphaBeta_Simplified_2(Position position, int plies, int alpha, int beta)
+        //{
+        //    var staticEvaluation = position.StaticEvaluation_NegaMax();
 
-            // Fail-hard beta-cutoff (updating alpha after this check)
-            if (staticEvaluation >= beta)
-            {
-                PrintMessage(plies - 1, "Prunning before starting quiescence search");
-                return (beta, new Result());
-            }
+        //    // Fail-hard beta-cutoff (updating alpha after this check)
+        //    if (staticEvaluation >= beta)
+        //    {
+        //        PrintMessage(plies - 1, "Prunning before starting quiescence search");
+        //        return (beta, new Result());
+        //    }
 
-            // Better move
-            if (staticEvaluation > alpha)
-            {
-                alpha = staticEvaluation;
-            }
+        //    // Better move
+        //    if (staticEvaluation > alpha)
+        //    {
+        //        alpha = staticEvaluation;
+        //    }
 
-            if (plies >= Configuration.Parameters.QuiescenceSearchDepth)
-            {
-                return (alpha, new Result());   // Alpha?
-            }
+        //    if (plies >= Configuration.Parameters.QuiescenceSearchDepth)
+        //    {
+        //        return (alpha, new Result());   // Alpha?
+        //    }
 
-            var movesToEvaluate = position.AllCapturesMoves();
+        //    var movesToEvaluate = position.AllCapturesMoves();
 
-            Move? bestMove = null;
-            Result? existingMoveList = null;
-            int maxEval = MinValue;
+        //    Move? bestMove = null;
+        //    Result? existingMoveList = null;
+        //    int maxEval = MinValue;
 
-            for (int moveIndex = 0; moveIndex < movesToEvaluate.Count; ++moveIndex)
-            {
-                var move = movesToEvaluate[moveIndex];
-                var newPosition = new Position(position, move);
-                if (!newPosition.WasProduceByAValidMove())
-                {
-                    continue;
-                }
+        //    for (int moveIndex = 0; moveIndex < movesToEvaluate.Count; ++moveIndex)
+        //    {
+        //        var move = movesToEvaluate[moveIndex];
+        //        var newPosition = new Position(position, move);
+        //        if (!newPosition.WasProduceByAValidMove())
+        //        {
+        //            continue;
+        //        }
 
-                PrintPreMove(position, plies, move, isQuiescence: true);
+        //        PrintPreMove(position, plies, move, isQuiescence: true);
 
-                var (evaluation, bestMoveExistingMoveList) = QuiescenceSearch_NegaMax_AlphaBeta_Simplified_2(newPosition, plies + 1, -beta, -alpha);
-                evaluation = -evaluation;
+        //        var (evaluation, bestMoveExistingMoveList) = QuiescenceSearch_NegaMax_AlphaBeta_Simplified_2(newPosition, plies + 1, -beta, -alpha);
+        //        evaluation = -evaluation;
 
-                // Better move found
-                if (evaluation > maxEval)
-                {
-                    // PV node (move)
-                    maxEval = evaluation;
-                    existingMoveList = bestMoveExistingMoveList;
-                    bestMove = move;
-                }
+        //        // Better move found
+        //        if (evaluation > maxEval)
+        //        {
+        //            // PV node (move)
+        //            maxEval = evaluation;
+        //            existingMoveList = bestMoveExistingMoveList;
+        //            bestMove = move;
+        //        }
 
-                PrintMove(plies, move, evaluation, position, isQuiescence: true, beta <= alpha);
+        //        PrintMove(plies, move, evaluation, position, isQuiescence: true, beta <= alpha);
 
-                // Fail-hard beta-cutoff (updating alpha after this check)
-                if (beta <= alpha)
-                {
-                    return (beta, new Result());
-                }
+        //        // Fail-hard beta-cutoff (updating alpha after this check)
+        //        if (beta <= alpha)
+        //        {
+        //            return (beta, new Result());
+        //        }
 
-                alpha = Max(alpha, MaxValue);
-            }
+        //        alpha = Max(alpha, MaxValue);
+        //    }
 
-            if (bestMove is null)
-            {
-                return (position.EvaluateFinalPosition_NegaMax(plies), new Result());
-            }
+        //    if (bestMove is null)
+        //    {
+        //        return (position.EvaluateFinalPosition_NegaMax(plies), new Result());
+        //    }
 
-            Debug.Assert(existingMoveList is not null);
-            existingMoveList!.Moves.Add(bestMove!.Value);
+        //    Debug.Assert(existingMoveList is not null);
+        //    existingMoveList!.Moves.Add(bestMove!.Value);
 
-            return (maxEval, existingMoveList);
-        }
+        //    return (maxEval, existingMoveList);
+        //}
     }
 }
