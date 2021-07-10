@@ -15,8 +15,7 @@ jobs:
 
     strategy:
       matrix:
-        #os: [ubuntu-latest, windows-latest, macOS-latest]
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, windows-latest, macOS-latest]
       fail-fast: false
 
     env:
@@ -35,13 +34,14 @@ jobs:
       run: dotnet build -c Release
 
     - name: Run ${{ github.event.inputs.benchmark_name }} benchmark
-      run: dotnet run -c Release --no-build --filter ${{ github.event.inputs.new_package_version }}
+      run: dotnet run -c Release --no-build --filter '${{ github.event.inputs.benchmark_name }}'
       working-directory: ./src/Lynx.Benchmark
 
     - name: 'Upload ${{ matrix.os }} artifacts'
       continue-on-error: true
       uses: actions/upload-artifact@v2
       with:
-        name: artifacts-${{ matrix.os }}-${{ github.benchmark_name }}
+        name: artifacts-${{ matrix.os }}-${{ github.run_number }}
+        # Can't include 'github.event.inputs.benchmark_name' in the name, since * is an invalid character
         path: ./src/Lynx.Benchmark/BenchmarkDotNet.Artifacts/results/
         if-no-files-found: error

@@ -69,13 +69,22 @@ namespace Lynx.NUnit.Test
             TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
         }
 
-        [TestCase("4n3/bp2k2p/p2p2pP/P1nP1pP1/N1P2P2/2BB4/3K4/8 w - - 9 42", new[] { "a5c5" },
-    Category = "LongRunning", Explicit = true, Description = "Foresee bishop sacrifice - https://lichess.org/training/5OHnu")]
-        [TestCase("4n3/1p2k2p/p2p2pP/P1bP1pP1/2P2P2/2BB4/3K4/8 w - - 0 43", new[] { "c3f5" },
-    Category = "LongRunning", Explicit = true, Description = "Bishop sacrifice - https://lichess.org/VaY6zfHI/white#84")]
-        public void Sacrifices(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
+        [TestCase("8/8/4NQ2/7k/2P4p/1q2P2P/5P2/6K1 b - - 5 52", new[] { "b3b1", "b3d1" },
+    Category = "LongRunning", Explicit = true, Description = "Force stalemate - https://lichess.org/sM5ekwnW/black#103")]
+        [TestCase("8/8/4NQ2/7k/2P4p/4P2P/5PK1/3q4 b - - 7 53", new[] { "d1h1", "d1g1", "d1f1" },
+    Category = "LongRunning", Explicit = true, Description = "Force stalemate - https://lichess.org/sM5ekwnW/black#105")]
+        public void ForceStaleMate(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
         {
             TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
         }
+
+    //    [TestCase("4n3/bp2k2p/p2p2pP/P1nP1pP1/N1P2P2/2BB4/3K4/8 w - - 9 42", new[] { "a5c5" },
+    //Category = "LongRunning", Explicit = true, Description = "Foresee bishop sacrifice - https://lichess.org/training/5OHnu")]
+    //    [TestCase("4n3/1p2k2p/p2p2pP/P1bP1pP1/2P2P2/2BB4/3K4/8 w - - 0 43", new[] { "c3f5" },
+    //Category = "LongRunning", Explicit = true, Description = "Bishop sacrifice - https://lichess.org/VaY6zfHI/white#84")]
+    //    public void Sacrifices(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
+    //    {
+    //        TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
+    //    }
     }
 }
