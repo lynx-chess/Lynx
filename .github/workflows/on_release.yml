@@ -10,8 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: 'Tag: ${{ github.ref }}'
-    - name: Repository Dispatch
+    - name: 'Repository Dispatch (tag: ${{ github.ref }})'
       uses: peter-evans/repository-dispatch@v1
       with:
         token: ${{ secrets.REPO_ACCESS_TOKEN }}
