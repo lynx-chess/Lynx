@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <Version>0.1.0-alpha</Version>
+    <Version>0.1.0-alpha.1</Version>
     <Authors>Eduardo Cáceres</Authors>
     <ApplicationIcon>$(MSBuildThisFileDirectory)\resources\icon.ico</ApplicationIcon>
     <RepositoryUrl>https://github.com/eduherminio/Lynx</RepositoryUrl>
