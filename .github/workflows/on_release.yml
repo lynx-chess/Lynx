@@ -1,0 +1,20 @@
+name: Notify release
+
+on:
+  release:
+    types: [released]
+
+jobs:
+  release-lynx-bot:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 'Tag: ${{ github.ref }}'
+    - name: Repository Dispatch
+      uses: peter-evans/repository-dispatch@v1
+      with:
+        token: ${{ secrets.REPO_ACCESS_TOKEN }}
+        repository: lynx-chess/Lynx_BOT
+        event-type: lynx-release
+        client-payload: '{"tag": "github.ref", "sha": "${{ github.sha }}"}'

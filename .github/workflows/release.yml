@@ -26,7 +26,6 @@ on:
 
 jobs:
   publish-artifacts:
-    needs: build
 
     runs-on: ubuntu-latest
 
@@ -50,6 +49,13 @@ jobs:
         dotnet-version: '6.0.x'
         include-prerelease: true
 
+    - name: Set version to ${{ github.event.inputs.new_engine_version }}
+      shell: pwsh
+      run: |
+        $input_path = "Directory.Build.props"
+        $regex = "(?<=<Version>).*(?=</Version>)"
+        (Get-Content $input_path) -Replace $regex, '${{ github.event.inputs.new_engine_version }}' | Out-File $input_path
+
     - name: Publish ${{ matrix.runtime-identifier }} version
       run: dotnet publish src/Lynx.Cli/Lynx.Cli.csproj -c Release --runtime ${{ matrix.runtime-identifier }} -o artifacts/${{ matrix.runtime-identifier }}
 
@@ -64,7 +70,7 @@ jobs:
         if-no-files-found: error
 
     - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-${{ matrix.runtime-identifier }} artifact
-      if: ${{ github.event.inputs.new_engine_version != '' }}
+      if: ${{ github.event.inputs.new_engine_version == '' }}
       uses: actions/upload-artifact@v2
       with:
         name: Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-${{ matrix.runtime-identifier }}
@@ -103,16 +109,16 @@ jobs:
       run: |
         git switch ${{ env.GITHUB_REF_SLUG }}
         git status
-        #git commit -am "Release v${{ github.event.inputs.new_engine_version }}"
-        #git push
+        git commit -am "Release v${{ github.event.inputs.new_engine_version }}"
+        git push
 
     - name: Create git tag
       if: github.event.inputs.should_tag_new_version == 'true'
       run: |
         git switch ${{ env.GITHUB_REF_SLUG }}
-        #git status
-        #git tag -a v${{ github.event.inputs.new_engine_version }} -m "v${{ github.event.inputs.new_engine_version }}"
-        #git push --tags
+        git status
+        git tag -a v${{ github.event.inputs.new_engine_version }} -m "v${{ github.event.inputs.new_engine_version }}"
+        git push --tags
 
     - uses: actions/download-artifact@v2
       if: github.event.inputs.should_create_github_release == 'true' && github.event.inputs.should_tag_new_version == 'true'
@@ -121,18 +127,17 @@ jobs:
 
     - name: Compress artifacts again
       if: github.event.inputs.should_create_github_release == 'true' && github.event.inputs.should_tag_new_version == 'true'
-      run: for i in artifacts/*; do zip -0 -r -q "${i%/}.zip" "$i" & done; wait
+      run: for i in artifacts/*; do zip -0 -r -q -j "${i%/}.zip" "$i" & done; wait
 
     - name: Create GitHub release and upload assets
       if: github.event.inputs.should_create_github_release == 'true' && github.event.inputs.should_tag_new_version == 'true'
       env:
-        GITHUB_TOKEN: ${{ secrets.GitHubToken }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        ls -al artifacts/
-#        set -x
-#        assets=()
-#        for asset in artifacts/*; do
-#          assets+=("-a" "$asset")
-#        done
-#        tag_name="v${{ github.event.inputs.new_engine_version }}"
-#        hub release create "${assets[@]}" --draft --message "$tag_name" "$tag_name"
+        set -x
+        assets=()
+        for asset in artifacts/*.zip; do
+          assets+=("-a" "$asset")
+        done
+        tag_name="v${{ github.event.inputs.new_engine_version }}"
+        hub release create "${assets[@]}" --draft --message "$tag_name" "$tag_name"
