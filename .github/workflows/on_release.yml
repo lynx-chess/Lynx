@@ -10,10 +10,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: 'Repository Dispatch (tag: ${{ github.ref }})'
+    - name: "Extract tag from '${{ github.ref }}'"
+      shell: pwsh
+      run: |
+        $tag = "${{ github.ref }}".Replace("refs/tags/", "")
+        echo "RELEASE_TAG=$tag" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+
+    - name: 'Repository Dispatch (tag: ${{ env.RELEASE_TAG }})'
       uses: peter-evans/repository-dispatch@v1
       with:
         token: ${{ secrets.REPO_ACCESS_TOKEN }}
         repository: lynx-chess/Lynx_BOT
         event-type: lynx-release
-        client-payload: '{"tag": "github.ref", "sha": "${{ github.sha }}"}'
+        client-payload: '{"tag": "${{ env.RELEASE_TAG }}", "sha": "${{ github.sha }}"}'
