@@ -9,10 +9,8 @@ namespace Lynx.Search
 {
     public static partial class SearchAlgorithms
     {
-        public static SearchResult NegaMax_AlphaBeta_Quiescence_IDDFS(Position position, int? minDepth, CancellationToken cancellationToken, CancellationToken absoluteCancellationToken)
+        public static SearchResult NegaMax_AlphaBeta_Quiescence_IDDFS(Position position, int minDepth, int? maxDepth, CancellationToken cancellationToken, CancellationToken absoluteCancellationToken)
         {
-            var minDepthToCancel = minDepth ?? Configuration.Parameters.MinDepth;
-
             int bestEvaluation = 0;
             Result? bestResult = new();
             int depth = 1;
@@ -28,13 +26,13 @@ namespace Lynx.Search
                 do
                 {
                     absoluteCancellationToken.ThrowIfCancellationRequested();
-                    if (depth > minDepthToCancel)
+                    if (depth > minDepth)
                     {
                         cancellationToken.ThrowIfCancellationRequested();
                     }
                     nodes = 0;
-                    (bestEvaluation, bestResult) = NegaMax_AlphaBeta_Quiescence_IDDFS(position, orderedMoves, minDepth: minDepthToCancel, depthLimit: depth, nodes: ref nodes, plies: 0, alpha: MinValue, beta: MaxValue, cancellationToken);
-                } while (stopSearchCondition(++depth, minDepth));
+                    (bestEvaluation, bestResult) = NegaMax_AlphaBeta_Quiescence_IDDFS(position, orderedMoves, minDepth: minDepth, depthLimit: depth, nodes: ref nodes, plies: 0, alpha: MinValue, beta: MaxValue, cancellationToken);
+                } while (stopSearchCondition(++depth, maxDepth));
             }
             catch (OperationCanceledException)
             {

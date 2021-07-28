@@ -42,17 +42,58 @@ namespace Lynx.NUnit.Test
         [TestCase(
             1_000,      // 1s
             1_000,      // 1s increment
-            10,         // 50 moves left
-            900)]       // 0
-        [TestCase(
-            182_000,    // 3min
-            2_000,      // 2s increment
-            0,         // 50 moves left
+            10,         // 10 moves left
             900)]       // 0.9s, millisecondsLeft - decisionTime  < 1_000 -> decisionTime *= 0.9
+        [TestCase(
+            182_000,    // 3min (> FirstTimeLimitWhenNoMovesToGoProvided)
+            2_000,      // 2s increment
+            0,          // No moves to go
+            7400,       // 7.4s, millisecondsIncrement + FirstCoefficientWhenNoMovesToGoProvided * (millisecondsLeft - millisecondsIncrement) / TotalMovesWhenNoMovesToGoProvided - (Game.MoveHistory.Count / 2)
+            0)]         // Beginning of a 3 + 2 game
+        [TestCase(
+            182_000,    // 3min (> FirstTimeLimitWhenNoMovesToGoProvided)
+            2_000,      // 2s increment
+            0,          // No moves to go
+            9714,       // 9.7s, millisecondsIncrement + FirstCoefficientWhenNoMovesToGoProvided * (millisecondsLeft - millisecondsIncrement) / TotalMovesWhenNoMovesToGoProvided - (Game.MoveHistory.Count / 2)
+            60)]        // ~Endgame of a longer game: 30 moves each
+        [TestCase(
+            62000,      // 1min (< FirstTimeLimitWhenNoMovesToGoProvided, > SecondTimeLimitWhenNoMovesToGoProvided)
+            2_000,      // 2s increment
+            0,          // No moves to go
+            3200,       // 3.2s, millisecondsIncrement + SecondCoefficientWhenNoMovesToGoProvided * (millisecondsLeft - millisecondsIncrement) / TotalMovesWhenNoMovesToGoProvided - (Game.MoveHistory.Count / 2)
+            0)]         // Beginning of 1 + 2 game
+        [TestCase(
+            62000,      // 1min (< FirstTimeLimitWhenNoMovesToGoProvided, > SecondTimeLimitWhenNoMovesToGoProvided)
+            2_000,      // 2s increment
+            0,          // No moves to go
+            3500,       // 3.5s, millisecondsIncrement + SecondCoefficientWhenNoMovesToGoProvided * (millisecondsLeft - millisecondsIncrement) / TotalMovesWhenNoMovesToGoProvided - (Game.MoveHistory.Count / 2)
+            40)]        // ~Middlegame of a 3 + 2 game: 40 moves: 20 moves each
+        [TestCase(
+            27000,      // 25s (< SecondTimeLimitWhenNoMovesToGoProvided)
+            2_000,      // 2s increment
+            0,          // No moves to go
+            2357,       // 2.4s, millisecondsIncrement + SecondCoefficientWhenNoMovesToGoProvided * (millisecondsLeft - millisecondsIncrement) / TotalMovesWhenNoMovesToGoProvided - (Game.MoveHistory.Count / 2)
+            60)]        // ~Endgame of a 3 + 2 game: 60 moves: 30 moves each
+        [TestCase(
+            31000,      // 31s (< FirstTimeLimitWhenNoMovesToGoProvided, > SecondTimeLimitWhenNoMovesToGoProvided)
+            0,          // No increment
+            0,          // No moves to go
+            885,        // 0.88s, millisecondsIncrement + (millisecondsLeft - millisecondsIncrement) / TotalMovesWhenNoMovesToGoProvided - (Game.MoveHistory.Count / 2)
+            60)]        // ~Endgame of a 3 + 2 game: 60 moves: 30 moves each
+        [TestCase(
+            29000,      // 29s (< SecondTimeLimitWhenNoMovesToGoProvided)
+            0,          // No increment
+            0,          // No moves to go
+            414,        // 0.41, millisecondsIncrement + (millisecondsLeft - millisecondsIncrement) / TotalMovesWhenNoMovesToGoProvided - (Game.MoveHistory.Count / 2 ))
+            60)]        // ~Endgame of a 3 + 2 game: 60 moves: 30 moves each
         public void CalculateDecisionTime(
-            int millisecondsLeft, int millisecondsIncrement, int movesToGo,int expectedTimeToMove)
+            int millisecondsLeft, int millisecondsIncrement, int movesToGo, double expectedTimeToMove, int moveHistoryCount = 0)
         {
             var engine = new Engine();
+            for (int moveIndex = 0; moveIndex < moveHistoryCount; ++moveIndex)
+            {
+                engine.Game.MoveHistory.Add(new());
+            }
             var timeToMove = engine.CalculateDecisionTime(movesToGo, millisecondsLeft, millisecondsIncrement);
 
             Assert.AreEqual(expectedTimeToMove, timeToMove);
