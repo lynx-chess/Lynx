@@ -205,7 +205,11 @@ namespace Lynx
 
         private static void HandleDebug(string command) => Configuration.IsDebug = DebugCommand.Parse(command);
 
-        private void HandleQuit() => _engineWriter.Writer.Complete();
+        private void HandleQuit()
+        {
+            _logger.Info($"Average depth: {_engine.AverageDepth}");
+            _engineWriter.Writer.Complete();
+        }
 
         private void HandleRegister(string rawCommand) => _engine.Registration = new RegisterCommand(rawCommand);
 

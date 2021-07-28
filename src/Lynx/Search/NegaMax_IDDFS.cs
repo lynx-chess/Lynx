@@ -9,8 +9,10 @@ namespace Lynx.Search
 {
     public static partial class SearchAlgorithms
     {
-        public static SearchResult NegaMax_AlphaBeta_Quiescence_IDDFS(Position position, int? movesToGo, int? millisecondsLeft, CancellationToken cancellationToken)
+        public static SearchResult NegaMax_AlphaBeta_Quiescence_IDDFS(Position position, int? minDepth, CancellationToken cancellationToken)
         {
+            var minDepthToCancel = minDepth ?? Configuration.Parameters.MinDepth;
+
             int bestEvaluation = 0;
             Result? bestResult = new();
             int depth = 1;
@@ -25,21 +27,22 @@ namespace Lynx.Search
 
                 do
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
+                    if (depth > minDepthToCancel)
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                    }
                     nodes = 0;
-                    (bestEvaluation, bestResult) = NegaMax_AlphaBeta_Quiescence_IDDFS(position, orderedMoves, depthLimit: depth, nodes: ref nodes, plies: 0, alpha: MinValue, beta: MaxValue, cancellationToken);
-                } while (stopSearchCondition(++depth));
+                    (bestEvaluation, bestResult) = NegaMax_AlphaBeta_Quiescence_IDDFS(position, orderedMoves, minDepth: minDepthToCancel, depthLimit: depth, nodes: ref nodes, plies: 0, alpha: MinValue, beta: MaxValue, cancellationToken);
+                } while (stopSearchCondition(++depth, minDepth));
             }
             catch (OperationCanceledException)
             {
                 Logger.Info("Search cancellation requested, best move will be returned");
-                --depth;
             }
             catch (Exception e)
             {
-                Logger.Error($"Unexpected error ocurred during the search, best move will be returned" +
+                Logger.Error("Unexpected error ocurred during the search, best move will be returned" +
                     Environment.NewLine + e.Message + Environment.NewLine + e.StackTrace);
-                --depth;
             }
             finally
             {
@@ -47,18 +50,16 @@ namespace Lynx.Search
             }
 
             bestResult?.Moves.Reverse();
-            return new SearchResult(bestResult!.Moves.FirstOrDefault(), bestEvaluation, depth - 1, bestResult!.MaxDepth ?? depth - 1, nodes, sw.ElapsedMilliseconds, Convert.ToInt64(nodes / (0.001 * sw.ElapsedMilliseconds)), bestResult!.Moves);
+            return new SearchResult(bestResult!.Moves.FirstOrDefault(), bestEvaluation, depth, bestResult!.MaxDepth ?? depth, nodes, sw.ElapsedMilliseconds, Convert.ToInt64(nodes / (0.001 * sw.ElapsedMilliseconds)), bestResult!.Moves);
 
-            bool stopSearchCondition(int depth)
+            static bool stopSearchCondition(int depth, int? depthLimit)
             {
-                if (millisecondsLeft > 0)
+                if (depthLimit is not null)
                 {
-                    return depth <= 3 * Configuration.Parameters.Depth;
+                    return depth <= depthLimit;
                 }
-                else
-                {
-                    return depth <= Configuration.Parameters.Depth;
-                }
+
+                return true;
             }
         }
 
@@ -76,9 +77,12 @@ namespace Lynx.Search
         /// Defaults to the worse possible score for Side to move's opponent, Int.MaxValue
         /// </param>
         /// <returns></returns>
-        private static (int Evaluation, Result MoveList) NegaMax_AlphaBeta_Quiescence_IDDFS(Position position, Dictionary<string, PriorityQueue<Move, int>> orderedMoves, int depthLimit, ref int nodes, int plies, int alpha = MinValue, int beta = MaxValue, CancellationToken? cancellationToken = null)
+        private static (int Evaluation, Result MoveList) NegaMax_AlphaBeta_Quiescence_IDDFS(Position position, Dictionary<string, PriorityQueue<Move, int>> orderedMoves, int minDepth, int depthLimit, ref int nodes, int plies, int alpha = MinValue, int beta = MaxValue, CancellationToken? cancellationToken = null)
         {
-            cancellationToken?.ThrowIfCancellationRequested();
+            if (plies + 1 > minDepth)
+            {
+                cancellationToken?.ThrowIfCancellationRequested();
+            }
 
             var positionId = position.FEN();
 
@@ -86,7 +90,7 @@ namespace Lynx.Search
             {
                 // We make sure that the dequeuing process doesn't affect deeper evaluations, in case the position is repeated
                 orderedMoves.Remove(positionId);
-                Debug.Assert(pseudoLegalMoves.Count != 0);
+                //Debug.Assert(pseudoLegalMoves.Count != 0);    // It can be 0 in stalemate positions
             }
             else
             {
@@ -127,7 +131,7 @@ namespace Lynx.Search
 
                 PrintPreMove(position, plies, move);
 
-                var (evaluation, bestMoveExistingMoveList) = NegaMax_AlphaBeta_Quiescence_IDDFS(newPosition, orderedMoves, depthLimit, ref nodes, plies + 1, -beta, -alpha, cancellationToken);
+                var (evaluation, bestMoveExistingMoveList) = NegaMax_AlphaBeta_Quiescence_IDDFS(newPosition, orderedMoves, minDepth, depthLimit, ref nodes, plies + 1, -beta, -alpha, cancellationToken);
 
                 // Since SimplePriorityQueue has lower priority at the top, we do this before inverting the sign of the evaluation
                 newPriorityQueue.Enqueue(move, evaluation);

@@ -6,7 +6,7 @@ namespace Lynx.Test
     /// <summary>
     /// https://www.chessprogramming.org/Perft_Results
     /// </summary>
-    public class PerftTests
+    public class PerftTest
     {
         [TestCase(Constants.InitialPositionFEN, 1, 20)]
         [TestCase(Constants.InitialPositionFEN, 2, 400)]
