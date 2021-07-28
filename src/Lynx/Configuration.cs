@@ -86,22 +86,18 @@ namespace Lynx
 
         public int FirstTimeLimitWhenNoMovesToGoProvided { get; set; } = 120_000;
 
-        public int FirstMultiplierWhenNoMovesToGoProvided { get; set; } = 3;
+        public int FirstCoefficientWhenNoMovesToGoProvided { get; set; } = 3;
 
         public int SecondTimeLimitWhenNoMovesToGoProvided { get; set; } = 30_000;
 
-        public int SecondMultiplierWhenNoMovesToGoProvided { get; set; } = 2;
+        public int SecondCoefficientWhenNoMovesToGoProvided { get; set; } = 2;
 
         #endregion
 
         public int MinDepth { get; set; } = 5;
 
+        public int MinMoveTime { get; set; } = 1_000;
+
         public int MinDepthWhenLessThanMinMoveTime { get; set; } = 3;
-
-        public int MinMoveTime { get; set; } = 1_000;       // 1 second
-
-        public int MaxMoveTime { get; set; } = 3_600_000;   // 1 hour
-
-        public int MinTimeToClamp { get; set; } = 5_000;    // 5 seconds
     }
 }

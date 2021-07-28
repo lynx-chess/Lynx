@@ -132,7 +132,8 @@ namespace Lynx
             _absoluteSearchCancellationTokenSource = new CancellationTokenSource();
             int? millisecondsLeft;
             int? millisecondsIncrement;
-            int? depthLimit = null;
+            int minDepth = Configuration.Parameters.MinDepth;
+            int? maxDepth = null;
 
             if (Game.CurrentPosition.Side == Side.White)
             {
@@ -151,21 +152,21 @@ namespace Lynx
 
                 if (decisionTime > Configuration.Parameters.MinMoveTime)
                 {
-                    _logger.Info($"Time to move: {0.001 * decisionTime}s");
+                    _logger.Info($"Time to move: {0.001 * decisionTime}s, min. {minDepth} plies");
                     _searchCancellationTokenSource.CancelAfter(decisionTime);
                 }
-                else
+                else // Ignore decisionTime and limit search to MinDepthWhenLessThanMinMoveTime plies
                 {
-                    _logger.Info($"Depth limited to {Configuration.Parameters.MinDepthWhenLessThanMinMoveTime} plies");
-                    depthLimit = Configuration.Parameters.MinDepthWhenLessThanMinMoveTime;
+                    _logger.Info($"Depth limited to {Configuration.Parameters.MinDepthWhenLessThanMinMoveTime} plies due to time trouble");
+                    maxDepth = Configuration.Parameters.MinDepthWhenLessThanMinMoveTime;
                 }
             }
             else // EngineTest
             {
-                depthLimit = Configuration.Parameters.Depth;
+                minDepth = Configuration.Parameters.Depth;
             }
 
-            var result = NegaMax_AlphaBeta_Quiescence_IDDFS(Game.CurrentPosition, depthLimit, _searchCancellationTokenSource.Token, _absoluteSearchCancellationTokenSource.Token);
+            var result = NegaMax_AlphaBeta_Quiescence_IDDFS(Game.CurrentPosition, minDepth, maxDepth, _searchCancellationTokenSource.Token, _absoluteSearchCancellationTokenSource.Token);
             _logger.Debug($"Evaluation: {result.Evaluation} (depth: {result.TargetDepth}, refutation: {string.Join(", ", result.Moves)})");
 
             Game.MakeMove(result.BestMove);
@@ -181,14 +182,14 @@ namespace Lynx
 
             if (movesToGo == default)
             {
-                int movesLeft = (2 * Configuration.Parameters.TotalMovesWhenNoMovesToGoProvided) - Game.MoveHistory.Count;
+                int movesLeft = Configuration.Parameters.TotalMovesWhenNoMovesToGoProvided - (Game.MoveHistory.Count >> 1);
                 if (millisecondsLeft >= Configuration.Parameters.FirstTimeLimitWhenNoMovesToGoProvided)
                 {
-                    decisionTime = Configuration.Parameters.FirstMultiplierWhenNoMovesToGoProvided * millisecondsLeft / movesLeft;
+                    decisionTime = Configuration.Parameters.FirstCoefficientWhenNoMovesToGoProvided * millisecondsLeft / movesLeft;
                 }
                 else if (millisecondsLeft >= Configuration.Parameters.SecondTimeLimitWhenNoMovesToGoProvided)
                 {
-                    decisionTime = Configuration.Parameters.SecondMultiplierWhenNoMovesToGoProvided * millisecondsLeft / movesLeft;
+                    decisionTime = Configuration.Parameters.SecondCoefficientWhenNoMovesToGoProvided * millisecondsLeft / movesLeft;
                 }
                 else
                 {
@@ -209,10 +210,10 @@ namespace Lynx
 
             decisionTime += millisecondsIncrement;
 
-            if (millisecondsLeft > Configuration.Parameters.MinTimeToClamp)
-            {
-                decisionTime = Math.Clamp(decisionTime, Configuration.Parameters.MinMoveTime, Configuration.Parameters.MaxMoveTime);
-            }
+            //if (millisecondsLeft > Configuration.Parameters.MinTimeToClamp)
+            //{
+            //    decisionTime = Math.Clamp(decisionTime, Configuration.Parameters.MinMoveTime, Configuration.Parameters.MaxMoveTime);
+            //}
 
             if (millisecondsLeft + millisecondsIncrement - decisionTime < 1_000)    // i.e. x + 10s, 10s left in the clock
             {
