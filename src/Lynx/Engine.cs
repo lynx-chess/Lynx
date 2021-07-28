@@ -68,6 +68,7 @@ namespace Lynx
         public event NotifyEndOfSearch? OnSearchFinished;
 
         private CancellationTokenSource _searchCancellationTokenSource;
+        private CancellationTokenSource _absoluteSearchCancellationTokenSource;
 
         public Engine()
         {
@@ -77,6 +78,7 @@ namespace Lynx
             _isNewGameComing = true;
             _logger = LogManager.GetCurrentClassLogger();
             _searchCancellationTokenSource = new();
+            _absoluteSearchCancellationTokenSource = new();
         }
 
         internal void SetGame(Game game)
@@ -127,6 +129,7 @@ namespace Lynx
         public SearchResult BestMove(GoCommand? goCommand)
         {
             _searchCancellationTokenSource = new CancellationTokenSource();
+            _absoluteSearchCancellationTokenSource = new CancellationTokenSource();
             int? millisecondsLeft;
             int? millisecondsIncrement;
             int? depthLimit = null;
@@ -162,7 +165,7 @@ namespace Lynx
                 depthLimit = Configuration.Parameters.Depth;
             }
 
-            var result = NegaMax_AlphaBeta_Quiescence_IDDFS(Game.CurrentPosition, depthLimit, _searchCancellationTokenSource.Token);
+            var result = NegaMax_AlphaBeta_Quiescence_IDDFS(Game.CurrentPosition, depthLimit, _searchCancellationTokenSource.Token, _absoluteSearchCancellationTokenSource.Token);
             _logger.Debug($"Evaluation: {result.Evaluation} (depth: {result.TargetDepth}, refutation: {string.Join(", ", result.Moves)})");
 
             Game.MakeMove(result.BestMove);
@@ -276,7 +279,7 @@ namespace Lynx
 
         public void StopSearching()
         {
-            _searchCancellationTokenSource.Cancel();
+            _absoluteSearchCancellationTokenSource.Cancel();
             IsSearching = false;
             // TODO
         }

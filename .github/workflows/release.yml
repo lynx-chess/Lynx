@@ -57,7 +57,7 @@ jobs:
       run: dotnet publish src/Lynx.Cli/Lynx.Cli.csproj -c Release --runtime ${{ matrix.runtime-identifier }} -o artifacts/${{ matrix.runtime-identifier }}
 
     - name: Upload Lynx-${{ matrix.runtime-identifier }} artifact
-      if: ${{ github.event.inputs.new_engine_version != '' }}
+      if: github.event.inputs.new_engine_version != ''
       uses: actions/upload-artifact@v2
       with:
         name: Lynx-${{ github.event.inputs.new_engine_version }}-${{ matrix.runtime-identifier }}
@@ -67,7 +67,7 @@ jobs:
         if-no-files-found: error
 
     - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-${{ matrix.runtime-identifier }} artifact
-      if: ${{ github.event.inputs.new_engine_version == '' }}
+      if: github.event.inputs.new_engine_version == ''
       uses: actions/upload-artifact@v2
       with:
         name: Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-${{ matrix.runtime-identifier }}
@@ -78,7 +78,7 @@ jobs:
 
   release:
     needs: publish-artifacts
-    if: ${{ github.event.inputs.new_engine_version != '' }}
+    if: github.event.inputs.new_engine_version != ''
 
     runs-on: ubuntu-latest
 
