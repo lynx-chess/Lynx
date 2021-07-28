@@ -9,7 +9,7 @@
   <PropertyGroup>
     <Version>0.1.0</Version>
     <Authors>Eduardo Cáceres</Authors>
-    <ApplicationIcon>$(MSBuildThisFileDirectory)\resources\icon.ico</ApplicationIcon>
+    <ApplicationIcon>$(MSBuildThisFileDirectory)/resources/icon.ico</ApplicationIcon>
     <RepositoryUrl>https://github.com/eduherminio/Lynx</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>

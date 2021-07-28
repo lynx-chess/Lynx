@@ -3,7 +3,7 @@
 namespace Lynx.NUnit.Test
 {
     [NonParallelizable]
-    public class NonParallelizable : BaseTest
+    public class NonParallelizableTest : BaseTest
     {
         [TestCase("r2qkb1r/ppp2ppp/2n2n2/1B1p1b2/3P4/2N2N2/PPP2PPP/R1BQ1RK1 b kq - 0 1", 1, 8,
             null,

@@ -17,6 +17,7 @@ namespace Lynx
         private bool _isNewGameComing;
         private bool _isPondering;
         private Move? _moveToPonder;
+        public double AverageDepth { get; private set; }
 
         public RegisterCommand? Registration { get; set; }
 
@@ -70,6 +71,7 @@ namespace Lynx
 
         public Engine()
         {
+            AverageDepth = 0;
             Game = new Game();
             IsReady = true;
             _isNewGameComing = true;
@@ -127,6 +129,7 @@ namespace Lynx
             _searchCancellationTokenSource = new CancellationTokenSource();
             int? millisecondsLeft;
             int? millisecondsIncrement;
+            int? depthLimit = null;
 
             if (Game.CurrentPosition.Side == Side.White)
             {
@@ -141,45 +144,76 @@ namespace Lynx
 
             if (goCommand is not null && millisecondsLeft != 0)
             {
-                int decisionTime = CalculateDecisionTime(goCommand, millisecondsLeft, millisecondsIncrement);
+                int decisionTime = Convert.ToInt32(CalculateDecisionTime(goCommand.MovesToGo, millisecondsLeft ?? 0, millisecondsIncrement ?? 0));
 
-                _logger.Info($"Time to move: {0.001 * decisionTime}s");
-                _searchCancellationTokenSource.CancelAfter(decisionTime);
+                if (decisionTime > Configuration.Parameters.MinMoveTime)
+                {
+                    _logger.Info($"Time to move: {0.001 * decisionTime}s");
+                    _searchCancellationTokenSource.CancelAfter(decisionTime);
+                }
+                else
+                {
+                    _logger.Info($"Depth limited to {Configuration.Parameters.MinDepthWhenLessThanMinMoveTime} plies");
+                    depthLimit = Configuration.Parameters.MinDepthWhenLessThanMinMoveTime;
+                }
+            }
+            else // EngineTest
+            {
+                depthLimit = Configuration.Parameters.Depth;
             }
 
-            var result = NegaMax_AlphaBeta_Quiescence_IDDFS(Game.CurrentPosition, goCommand?.MovesToGo, millisecondsLeft, _searchCancellationTokenSource.Token);
-
+            var result = NegaMax_AlphaBeta_Quiescence_IDDFS(Game.CurrentPosition, depthLimit, _searchCancellationTokenSource.Token);
             _logger.Debug($"Evaluation: {result.Evaluation} (depth: {result.TargetDepth}, refutation: {string.Join(", ", result.Moves)})");
 
             Game.MakeMove(result.BestMove);
+            AverageDepth += (result.DepthReached - AverageDepth) / Game.MoveHistory.Count;
 
             return result;
         }
 
-        private static int CalculateDecisionTime(GoCommand goCommand, int? millisecondsLeft, int? millisecondsIncrement)
+        internal double CalculateDecisionTime(int movesToGo, int millisecondsLeft, int millisecondsIncrement)
         {
-            int decisionTime;
-            if (goCommand.MovesToGo == default)
+            double decisionTime;
+            millisecondsLeft -= millisecondsIncrement; // Since we're going to spend them, shouldn't take into account for our calculations
+
+            if (movesToGo == default)
             {
-                decisionTime = Convert.ToInt32(millisecondsLeft!.Value / Configuration.Parameters.TotalMovesWhenNoMovesToGoProvided);
-            }
-            else
-            {
-                if (goCommand.MovesToGo > Configuration.Parameters.KeyMovesBeforeMovesToGo)
+                int movesLeft = (2 * Configuration.Parameters.TotalMovesWhenNoMovesToGoProvided) - Game.MoveHistory.Count;
+                if (millisecondsLeft >= Configuration.Parameters.FirstTimeLimitWhenNoMovesToGoProvided)
                 {
-                    decisionTime = Convert.ToInt32(Configuration.Parameters.CoefficientBeforeKeyMovesBeforeMovesToGo * millisecondsLeft!.Value / goCommand!.MovesToGo);
+                    decisionTime = Configuration.Parameters.FirstMultiplierWhenNoMovesToGoProvided * millisecondsLeft / movesLeft;
+                }
+                else if (millisecondsLeft >= Configuration.Parameters.SecondTimeLimitWhenNoMovesToGoProvided)
+                {
+                    decisionTime = Configuration.Parameters.SecondMultiplierWhenNoMovesToGoProvided * millisecondsLeft / movesLeft;
                 }
                 else
                 {
-                    decisionTime = Convert.ToInt32(Configuration.Parameters.CoefficientAfterKeyMovesBeforeMovesToGo * (millisecondsLeft!.Value - 1) / goCommand!.MovesToGo);
+                    decisionTime = millisecondsLeft / movesLeft;
+                }
+            }
+            else
+            {
+                if (movesToGo > Configuration.Parameters.KeyMovesBeforeMovesToGo)
+                {
+                    decisionTime = Configuration.Parameters.CoefficientBeforeKeyMovesBeforeMovesToGo * millisecondsLeft / movesToGo;
+                }
+                else
+                {
+                    decisionTime = Configuration.Parameters.CoefficientAfterKeyMovesBeforeMovesToGo * millisecondsLeft / movesToGo;
                 }
             }
 
-            decisionTime += millisecondsIncrement!.Value;
+            decisionTime += millisecondsIncrement;
 
             if (millisecondsLeft > Configuration.Parameters.MinTimeToClamp)
             {
                 decisionTime = Math.Clamp(decisionTime, Configuration.Parameters.MinMoveTime, Configuration.Parameters.MaxMoveTime);
+            }
+
+            if (millisecondsLeft + millisecondsIncrement - decisionTime < 1_000)    // i.e. x + 10s, 10s left in the clock
+            {
+                decisionTime *= 0.9;
             }
 
             return decisionTime;

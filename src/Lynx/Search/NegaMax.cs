@@ -31,7 +31,7 @@ namespace Lynx.Search
                 var result = new Result();
                 if (pseudoLegalMoves.Any(move => new Position(position, move).WasProduceByAValidMove()))
                 {
-                    return QuiescenceSearch_NegaMax_AlphaBeta(position, Configuration.Parameters.QuiescenceSearchDepth, ref nodes , plies + 1, alpha, beta);
+                    return QuiescenceSearch_NegaMax_AlphaBeta(position, Configuration.Parameters.QuiescenceSearchDepth, ref nodes, plies + 1, alpha, beta);
                 }
                 else
                 {
@@ -103,7 +103,7 @@ namespace Lynx.Search
         /// Defaults to the works possible score for Black, Int.MaxValue
         /// </param>
         /// <returns></returns>
-        public static (int Evaluation, Result MoveList) QuiescenceSearch_NegaMax_AlphaBeta(Position position, int quiescenceDepthLimit, ref int nodes, int plies,  int alpha, int beta, CancellationToken? cancellationToken = null)
+        public static (int Evaluation, Result MoveList) QuiescenceSearch_NegaMax_AlphaBeta(Position position, int quiescenceDepthLimit, ref int nodes, int plies, int alpha, int beta, CancellationToken? cancellationToken = null)
         {
             //cancellationToken?.ThrowIfCancellationRequested();
 
@@ -114,7 +114,7 @@ namespace Lynx.Search
             {
                 ++nodes;
                 PrintMessage(plies - 1, "Prunning before starting quiescence search");
-                return (staticEvaluation, new Result() {  MaxDepth = plies });
+                return (staticEvaluation, new Result() { MaxDepth = plies });
             }
 
             // Better move
@@ -153,7 +153,7 @@ namespace Lynx.Search
 
                 PrintPreMove(position, plies, move, isQuiescence: true);
 
-                var (evaluation, bestMoveExistingMoveList) = QuiescenceSearch_NegaMax_AlphaBeta(newPosition, quiescenceDepthLimit, ref nodes, plies + 1,  -beta, -alpha, cancellationToken);
+                var (evaluation, bestMoveExistingMoveList) = QuiescenceSearch_NegaMax_AlphaBeta(newPosition,quiescenceDepthLimit, ref nodes, plies + 1, -beta, -alpha, cancellationToken);
                 evaluation = -evaluation;
 
                 PrintMove(plies, move, evaluation, position);

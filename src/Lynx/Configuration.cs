@@ -70,15 +70,35 @@ namespace Lynx
 
         public int QuiescenceSearchDepth { get; set; } = 8;
 
+        #region MovesToGo provided
+
         public double CoefficientBeforeKeyMovesBeforeMovesToGo { get; set; } = 1.5;
 
         public int KeyMovesBeforeMovesToGo { get; set; } = 10;
 
-        public double CoefficientAfterKeyMovesBeforeMovesToGo { get; set; } = 0.9;
+        public double CoefficientAfterKeyMovesBeforeMovesToGo { get; set; } = 0.95;
 
         public int TotalMovesWhenNoMovesToGoProvided { get; set; } = 100;
 
-        public int MinMoveTime { get; set; } = 1000;        // 1 second
+        #endregion
+
+        #region No MovesToGo provided
+
+        public int FirstTimeLimitWhenNoMovesToGoProvided { get; set; } = 120_000;
+
+        public int FirstMultiplierWhenNoMovesToGoProvided { get; set; } = 3;
+
+        public int SecondTimeLimitWhenNoMovesToGoProvided { get; set; } = 30_000;
+
+        public int SecondMultiplierWhenNoMovesToGoProvided { get; set; } = 2;
+
+        #endregion
+
+        public int MinDepth { get; set; } = 5;
+
+        public int MinDepthWhenLessThanMinMoveTime { get; set; } = 3;
+
+        public int MinMoveTime { get; set; } = 1_000;       // 1 second
 
         public int MaxMoveTime { get; set; } = 3_600_000;   // 1 hour
 
