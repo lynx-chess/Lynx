@@ -163,7 +163,7 @@ namespace Lynx
             }
             else // EngineTest
             {
-                minDepth = Configuration.Parameters.Depth;
+                maxDepth = Configuration.Parameters.MinDepth;
             }
 
             var result = NegaMax_AlphaBeta_Quiescence_IDDFS(Game.CurrentPosition, minDepth, maxDepth, _searchCancellationTokenSource.Token, _absoluteSearchCancellationTokenSource.Token);
