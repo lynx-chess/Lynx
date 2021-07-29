@@ -14,7 +14,8 @@ namespace Lynx.NUnit.Test
             engine.SetGame(new Game(fen));
 
             // Act
-            var bestMoveFound = engine.BestMove().BestMove;
+            var searchResult = engine.BestMove();
+            var bestMoveFound = searchResult.BestMove;
 
             // Assert
             if (allowedUCIMoveString is not null)
