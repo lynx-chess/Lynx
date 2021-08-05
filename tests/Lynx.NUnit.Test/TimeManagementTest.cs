@@ -84,8 +84,14 @@ namespace Lynx.NUnit.Test
             29000,      // 29s (< SecondTimeLimitWhenNoMovesToGoProvided)
             0,          // No increment
             0,          // No moves to go
-            414,        // 0.41, millisecondsIncrement + (millisecondsLeft - millisecondsIncrement) / TotalMovesWhenNoMovesToGoProvided - (Game.MoveHistory.Count / 2 ))
+            414,        // 0.41s, millisecondsIncrement + (millisecondsLeft - millisecondsIncrement) / TotalMovesWhenNoMovesToGoProvided - (Game.MoveHistory.Count / 2 ))
             60)]        // ~Endgame of a 3 + 2 game: 60 moves: 30 moves each
+        [TestCase(
+            5710,       // 5.7s
+            5000,       // 5s increment
+            0,          // No moves to go
+            5000,       // 5s, millisecondsIncrement
+            200)]       // Over default TotalMovesWhenNoMovesToGoProvided (100), https://lichess.org/GxfJjvUu/black#201
         public void CalculateDecisionTime(
             int millisecondsLeft, int millisecondsIncrement, int movesToGo, double expectedTimeToMove, int moveHistoryCount = 0)
         {
