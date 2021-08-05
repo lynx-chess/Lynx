@@ -177,23 +177,27 @@ namespace Lynx
 
         internal double CalculateDecisionTime(int movesToGo, int millisecondsLeft, int millisecondsIncrement)
         {
-            double decisionTime;
+            double decisionTime = 0;
             millisecondsLeft -= millisecondsIncrement; // Since we're going to spend them, shouldn't take into account for our calculations
 
             if (movesToGo == default)
             {
                 int movesLeft = Configuration.Parameters.TotalMovesWhenNoMovesToGoProvided - (Game.MoveHistory.Count >> 1);
-                if (millisecondsLeft >= Configuration.Parameters.FirstTimeLimitWhenNoMovesToGoProvided)
+
+                if (movesLeft > 0)
                 {
-                    decisionTime = Configuration.Parameters.FirstCoefficientWhenNoMovesToGoProvided * millisecondsLeft / movesLeft;
-                }
-                else if (millisecondsLeft >= Configuration.Parameters.SecondTimeLimitWhenNoMovesToGoProvided)
-                {
-                    decisionTime = Configuration.Parameters.SecondCoefficientWhenNoMovesToGoProvided * millisecondsLeft / movesLeft;
-                }
-                else
-                {
-                    decisionTime = millisecondsLeft / movesLeft;
+                    if (millisecondsLeft >= Configuration.Parameters.FirstTimeLimitWhenNoMovesToGoProvided)
+                    {
+                        decisionTime = Configuration.Parameters.FirstCoefficientWhenNoMovesToGoProvided * millisecondsLeft / movesLeft;
+                    }
+                    else if (millisecondsLeft >= Configuration.Parameters.SecondTimeLimitWhenNoMovesToGoProvided)
+                    {
+                        decisionTime = Configuration.Parameters.SecondCoefficientWhenNoMovesToGoProvided * millisecondsLeft / movesLeft;
+                    }
+                    else
+                    {
+                        decisionTime = millisecondsLeft / movesLeft;
+                    }
                 }
             }
             else

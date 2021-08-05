@@ -90,8 +90,14 @@ namespace Lynx.NUnit.Test
             5710,       // 5.7s
             5000,       // 5s increment
             0,          // No moves to go
-            5000,       // 5s, millisecondsIncrement
-            200)]       // Over default TotalMovesWhenNoMovesToGoProvided (100), https://lichess.org/GxfJjvUu/black#201
+            4500,       // 4.5s, millisecondsIncrement * 0.9
+            200)]       // Over default TotalMovesWhenNoMovesToGoProvided (100), https://lichess.org/GxfJjvUu/black
+        [TestCase(
+            6001,       // 6s
+            5000,       // 5s increment
+            0,          // No moves to go
+            5000,       // 5, millisecondsIncrement
+            200)]       // Over default TotalMovesWhenNoMovesToGoProvided (100), https://lichess.org/GxfJjvUu/black
         public void CalculateDecisionTime(
             int millisecondsLeft, int millisecondsIncrement, int movesToGo, double expectedTimeToMove, int moveHistoryCount = 0)
         {
