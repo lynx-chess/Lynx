@@ -98,6 +98,6 @@ namespace Lynx
 
         public int MinMoveTime { get; set; } = 1_000;
 
-        public int MinDepthWhenLessThanMinMoveTime { get; set; } = 3;
+        public int DepthWhenLessThanMinMoveTime { get; set; } = 3;
     }
 }

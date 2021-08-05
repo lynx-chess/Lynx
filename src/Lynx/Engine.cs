@@ -157,8 +157,8 @@ namespace Lynx
                 }
                 else // Ignore decisionTime and limit search to MinDepthWhenLessThanMinMoveTime plies
                 {
-                    _logger.Info($"Depth limited to {Configuration.Parameters.MinDepthWhenLessThanMinMoveTime} plies due to time trouble");
-                    maxDepth = Configuration.Parameters.MinDepthWhenLessThanMinMoveTime;
+                    _logger.Info($"Depth limited to {Configuration.Parameters.DepthWhenLessThanMinMoveTime} plies due to time trouble");
+                    maxDepth = Configuration.Parameters.DepthWhenLessThanMinMoveTime;
                 }
             }
             else // EngineTest
