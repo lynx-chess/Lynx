@@ -54,7 +54,7 @@ jobs:
         (Get-Content $input_path) -Replace $regex, '${{ github.event.inputs.new_engine_version }}' | Out-File $input_path
 
     - name: Publish ${{ matrix.runtime-identifier }} version
-      run: dotnet publish src/Lynx.Cli/Lynx.Cli.csproj -c Release --runtime ${{ matrix.runtime-identifier }} -o artifacts/${{ matrix.runtime-identifier }}
+      run: dotnet publish src/Lynx.Cli/Lynx.Cli.csproj -c Release --runtime ${{ matrix.runtime-identifier }} --self-contained -o artifacts/${{ matrix.runtime-identifier }}
 
     - name: Upload Lynx-${{ matrix.runtime-identifier }} artifact
       if: github.event.inputs.new_engine_version != ''
