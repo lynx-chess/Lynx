@@ -37,6 +37,14 @@ namespace Lynx.NUnit.Test
             TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
         }
 
+        [TestCase("6k1/1R6/5K2/3p1N2/1P3n2/8/8/3r4 w - -", new[] { "f5h6" },
+            Category = "LongRunning", Explicit = true, Description = "Mate in 4, https://gameknot.com/chess-puzzle.pl?pz=260253",
+            Ignore = "Not good enough yet")]
+        public void BestMove_Mate_in_4(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
+        {
+            TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
+        }
+
         [TestCase("r2k3r/p1p2ppp/2p5/2P5/6nq/2NB4/PPPP2PP/R1BQR1K1 w - - 0 13", null, new[] { "g2h3" },
             Category = "LongRunning", Explicit = true, Description = "Avoid Mate in 2, fails with initial implementation of MiniMax depth 4")]
 
@@ -64,8 +72,20 @@ namespace Lynx.NUnit.Test
 
         [TestCase("r1bq2k1/1pp1n2p/2nppr1Q/p7/2PP2P1/5N2/PP3P1P/2KR1B1R w - - 0 15", new[] { "h6f6" },
             Category = "LongRunning", Explicit = true, Description = "AlphaBeta/NegaMax depth 5 spends almost 3 minutes with a simple retake")]
-        //[TestCase("3rk2r/ppq1pp2/2p1n1pp/7n/4P3/2P1BQP1/P1P2PBP/R3R1K1 w k - 0 18", null, new[] { "e3a7" },
-        //    Category = "LongRunning", Explicit = true, Description = "At depth 3 White takes the pawn")]
+
+        [TestCase("3rk2r/ppq1pp2/2p1n1pp/7n/4P3/2P1BQP1/P1P2PBP/R3R1K1 w k - 0 18", null, new[] { "e3a7" },
+            Category = "LongRunning", Explicit = true, Description = "At depth 3 White takes the pawn",
+            Ignore = "Not good enough yet")]
+        [TestCase("r1bqk2r/ppp2ppp/2n1p3/8/Q1pP4/2b2NP1/P3PPBP/1RB2RK1 b kq - 1 10", null, new[] { "c3d4" },
+            Category = "LongRunning", Explicit = true, Description = "It failed at depth 6 in https://lichess.org/nZVw6G5D/black#19",
+            Ignore = "Not good enough yet")]
+        [TestCase("r1bqkb1r/ppp2ppp/2n1p3/3pP3/3Pn3/5P2/PPP1N1PP/R1BQKBNR b KQkq - 0 1", null, new[] { "f8b4" },
+            Category = "LongRunning", Explicit = true, Description = "It failed at depth 5 in https://lichess.org/rtTsj9Sr/black",
+            Ignore = "Not good enough yet")]
+
+        [TestCase("6k1/1R6/5Kn1/3p1N2/1P6/8/8/3r4 b - - 10 37", new[] { "g6f8" }, new[] { "g6f4" },
+            Category = "LongRunning", Explicit = true, Description = "Avoid mate in 4 https://gameknot.com/chess-puzzle.pl?pz=260253",
+            Ignore = "Not good enough yet")]
         public void BestMove_Regression(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
         {
             TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
@@ -80,13 +100,13 @@ namespace Lynx.NUnit.Test
             TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
         }
 
-    //    [TestCase("4n3/bp2k2p/p2p2pP/P1nP1pP1/N1P2P2/2BB4/3K4/8 w - - 9 42", new[] { "a5c5" },
-    //Category = "LongRunning", Explicit = true, Description = "Foresee bishop sacrifice - https://lichess.org/training/5OHnu")]
-    //    [TestCase("4n3/1p2k2p/p2p2pP/P1bP1pP1/2P2P2/2BB4/3K4/8 w - - 0 43", new[] { "c3f5" },
-    //Category = "LongRunning", Explicit = true, Description = "Bishop sacrifice - https://lichess.org/VaY6zfHI/white#84")]
-    //    public void Sacrifices(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
-    //    {
-    //        TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
-    //    }
+        //    [TestCase("4n3/bp2k2p/p2p2pP/P1nP1pP1/N1P2P2/2BB4/3K4/8 w - - 9 42", new[] { "a5c5" },
+        //Category = "LongRunning", Explicit = true, Description = "Foresee bishop sacrifice - https://lichess.org/training/5OHnu")]
+        //    [TestCase("4n3/1p2k2p/p2p2pP/P1bP1pP1/2P2P2/2BB4/3K4/8 w - - 0 43", new[] { "c3f5" },
+        //Category = "LongRunning", Explicit = true, Description = "Bishop sacrifice - https://lichess.org/VaY6zfHI/white#84")]
+        //    public void Sacrifices(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
+        //    {
+        //        TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
+        //    }
     }
 }
