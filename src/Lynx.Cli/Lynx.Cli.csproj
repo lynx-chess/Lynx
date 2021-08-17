@@ -5,9 +5,8 @@
     <ServerGarbageCollection>true</ServerGarbageCollection>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+  <PropertyGroup>
     <PublishSingleFile>true</PublishSingleFile>
-    <SelfContained>true</SelfContained>
     <PublishTrimmed>true</PublishTrimmed>
     <TrimMode>link</TrimMode>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
