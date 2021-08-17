@@ -32,7 +32,7 @@ namespace Lynx.Search
                     }
                     nodes = 0;
                     (bestEvaluation, bestResult) = NegaMax_AlphaBeta_Quiescence_IDDFS(position, orderedMoves, minDepth: minDepth, depthLimit: depth, nodes: ref nodes, plies: 0, alpha: MinValue, beta: MaxValue, cancellationToken);
-                } while (stopSearchCondition(++depth, maxDepth));
+                } while (stopSearchCondition(++depth, maxDepth, bestEvaluation));
             }
             catch (OperationCanceledException)
             {
@@ -51,8 +51,13 @@ namespace Lynx.Search
             bestResult?.Moves.Reverse();
             return new SearchResult(bestResult!.Moves.FirstOrDefault(), bestEvaluation, depth, bestResult!.MaxDepth ?? depth, nodes, sw.ElapsedMilliseconds, Convert.ToInt64(Math.Clamp(nodes / (0.001 * sw.ElapsedMilliseconds + 1), 0, Int64.MaxValue)), bestResult!.Moves);
 
-            static bool stopSearchCondition(int depth, int? depthLimit)
+            static bool stopSearchCondition(int depth, int? depthLimit, int bestEvaluation)
             {
+                if(Math.Abs(bestEvaluation) > 0.1 * Position.CheckMateEvaluation)   // Mate detected
+                {
+                    return false;
+                }
+
                 if (depthLimit is not null)
                 {
                     return depth <= depthLimit;
