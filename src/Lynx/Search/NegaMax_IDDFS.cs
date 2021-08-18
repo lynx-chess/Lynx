@@ -49,7 +49,7 @@ namespace Lynx.Search
             }
 
             bestResult?.Moves.Reverse();
-            return new SearchResult(bestResult!.Moves.FirstOrDefault(), bestEvaluation, depth, bestResult!.MaxDepth ?? depth, nodes, sw.ElapsedMilliseconds, Convert.ToInt64(Math.Clamp(nodes / (0.001 * sw.ElapsedMilliseconds), 0, Int64.MaxValue)), bestResult!.Moves);
+            return new SearchResult(bestResult!.Moves.FirstOrDefault(), bestEvaluation, depth, bestResult!.MaxDepth ?? depth, nodes, sw.ElapsedMilliseconds, Convert.ToInt64(Math.Clamp(nodes / (0.001 * sw.ElapsedMilliseconds + 1), 0, Int64.MaxValue)), bestResult!.Moves);
 
             static bool stopSearchCondition(int depth, int? depthLimit)
             {
