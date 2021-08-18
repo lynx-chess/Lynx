@@ -9,6 +9,10 @@ namespace Lynx.Model
 {
     public readonly struct Position
     {
+        internal const int CheckMateEvaluation = 1_000_000_000;
+
+        internal const int DepthFactor = 1_000_000;
+
         private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
 
         /// <summary>
@@ -373,10 +377,6 @@ namespace Lynx.Model
                 ? eval
                 : -eval;
         }
-
-        internal const int CheckMateEvaluation = 1_000_000_000;
-
-        internal const int DepthFactor = 1_000_000;
 
         /// <summary>
         /// Assuming a current position has no legal moves (<see cref="AllPossibleMoves"/> doesn't produce any <see cref="IsValid"/> position),
