@@ -53,7 +53,7 @@ namespace Lynx.Search
 
             static bool stopSearchCondition(int depth, int? depthLimit, int bestEvaluation)
             {
-                if(Math.Abs(bestEvaluation) > 0.1 * Position.CheckMateEvaluation)   // Mate detected
+                if (Math.Abs(bestEvaluation) > 0.1 * Position.CheckMateEvaluation)   // Mate detected
                 {
                     return false;
                 }

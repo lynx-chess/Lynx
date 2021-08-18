@@ -154,7 +154,7 @@ namespace Lynx.Search
 
                 PrintPreMove(position, plies, move, isQuiescence: true);
 
-                var (evaluation, bestMoveExistingMoveList) = QuiescenceSearch_NegaMax_AlphaBeta(newPosition,quiescenceDepthLimit, ref nodes, plies + 1, -beta, -alpha, cancellationToken, absoluteCancellationToken);
+                var (evaluation, bestMoveExistingMoveList) = QuiescenceSearch_NegaMax_AlphaBeta(newPosition, quiescenceDepthLimit, ref nodes, plies + 1, -beta, -alpha, cancellationToken, absoluteCancellationToken);
                 evaluation = -evaluation;
 
                 PrintMove(plies, move, evaluation, position);
@@ -179,7 +179,12 @@ namespace Lynx.Search
             if (bestMove is null)
             {
                 ++nodes;
-                return (position.EvaluateFinalPosition_NegaMax(plies), new Result() { MaxDepth = plies });
+
+                var eval = position.AllPossibleMoves().Any(move => new Position(position, move).WasProduceByAValidMove())
+                    ? position.StaticEvaluation_NegaMax()
+                    : position.EvaluateFinalPosition_NegaMax(plies);
+
+                return (eval, new Result() { MaxDepth = plies });
             }
 
             // Node fails low
