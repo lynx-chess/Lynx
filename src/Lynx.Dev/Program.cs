@@ -37,7 +37,9 @@ using static Lynx.Model.Move;
 //_44_ParseUCI();
 //_49_Rudimetary_Evaluation();
 //_50_MiniMax_AlphaBeta();
-_52_Quiescence_Search();
+//_52_Quiescence_Search();
+//_53_MVVLVA();
+_54_ScoreMove();
 
 const string TrickyPosition = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
 const string TrickyPositionReversed = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1";
@@ -620,4 +622,48 @@ static void _52_Quiescence_Search()
 
     var bestMove = moveList!.Moves.Last();
     Console.WriteLine($"Best move: {bestMove}");
+}
+
+static void _53_MVVLVA()
+{
+    const string fen = "r2q1rk1/ppp2ppp/2n1bn2/2b1p3/3pP3/3P1NPP/PPP1NPB1/R1BQ1RK1 b - - 0 9";
+
+    for (int attacker = (int)Piece.P; attacker <= (int)Piece.K; ++attacker)
+    {
+        for (int victim = (int)Piece.p; victim <= (int)Piece.k; ++victim)
+        {
+            var score = EvaluationConstants.MostValueableVictimLeastValuableAttacker[attacker, victim];
+            Console.WriteLine($"Score {(Piece)attacker}x{(Piece)victim}: {score}");
+        }
+        Console.WriteLine();
+    }
+
+    for (int attacker = (int)Piece.p; attacker <= (int)Piece.k; ++attacker)
+    {
+        for (int victim = (int)Piece.P; victim <= (int)Piece.K; ++victim)
+        {
+            var score = EvaluationConstants.MostValueableVictimLeastValuableAttacker[attacker, victim];
+            Console.WriteLine($"Score {(Piece)attacker}x{(Piece)victim}: {score}");
+        }
+        Console.WriteLine();
+    }
+}
+
+static void _54_ScoreMove()
+{
+    var position = new Position(KillerPosition);
+    position.Print();
+
+    foreach (var move in position.AllCapturesMoves())
+    {
+        Console.WriteLine($"{move} {move.Score(position)}");
+    }
+
+    position = new Position(TrickyPosition);
+    position.Print();
+
+    foreach (var move in position.AllCapturesMoves())
+    {
+        Console.WriteLine($"{move} {move.Score(position)}");
+    }
 }
