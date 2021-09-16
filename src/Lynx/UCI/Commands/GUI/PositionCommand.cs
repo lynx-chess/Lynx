@@ -35,7 +35,7 @@ namespace Lynx.UCI.Commands.GUI
         public static Game ParseGame(string positionCommand)
         {
             var items = positionCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            bool isInitialPosition = string.Equals(items[1], StartPositionString, StringComparison.OrdinalIgnoreCase);
+            bool isInitialPosition = string.Equals(items.ElementAtOrDefault(1), StartPositionString, StringComparison.OrdinalIgnoreCase);
 
             var initialPosition = isInitialPosition
                     ? Constants.InitialPositionFEN
