@@ -7,6 +7,7 @@ namespace Lynx
         private static int _isDebug = 0;
         private static int _UCI_AnalyseMode = 0;
         private static int _ponder = 0;
+        private static int _hash = 0;
 
         public static bool IsDebug
         {
@@ -54,6 +55,12 @@ namespace Lynx
                     Interlocked.CompareExchange(ref _ponder, 0, 1);
                 }
             }
+        }
+
+        public static int Hash
+        {
+            get => _hash;
+            set => Interlocked.Exchange(ref _hash, value);
         }
 
         public static GameParameters Parameters { get; set; } = new GameParameters();

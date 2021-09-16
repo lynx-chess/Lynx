@@ -164,35 +164,45 @@ namespace Lynx
 
         private void HandleSetOption(string command, string[] commandItems)
         {
-            if (commandItems.Length < 2)
+            if (commandItems.Length < 3 || !string.Equals(commandItems[1], "name", StringComparison.OrdinalIgnoreCase))
             {
                 return;
             }
 
-            switch (commandItems[1].ToLowerInvariant())
+            switch (commandItems[2].ToLowerInvariant())
             {
-                case "Ponder":
+                case "ponder":
                     {
-                        if (bool.TryParse(commandItems[3], out var value))
+                        if (bool.TryParse(commandItems[4], out var value))
                         {
                             Configuration.IsPonder = value;
                         }
+                        _logger.Warn("Ponder not supported yet");
                         break;
                     }
-                case "UCI_AnalyseMode":
+                case "uci_analysemode":
                     {
-                        if (bool.TryParse(commandItems[3], out var value))
+                        if (bool.TryParse(commandItems[4], out var value))
                         {
                             Configuration.UCI_AnalyseMode = value;
                         }
                         break;
                     }
-                case "Depth":
+                case "depth":
                     {
-                        if (int.TryParse(commandItems[3], out var value))
+                        if (int.TryParse(commandItems[4], out var value))
                         {
                             Configuration.Parameters.Depth = value;
                         }
+                        break;
+                    }
+                case "hash":
+                    {
+                        if (int.TryParse(commandItems[4], out var value))
+                        {
+                            Configuration.Parameters.Depth = value;
+                        }
+                        _logger.Warn("Hash size modification not supported yet");
                         break;
                     }
                 default:
