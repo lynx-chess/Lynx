@@ -21,7 +21,7 @@ var config = new ConfigurationBuilder()
     .AddEnvironmentVariables()
     .Build();
 
-Configuration.Parameters = config.GetSection(nameof(GameParameters)).Get<GameParameters>();
+config.GetRequiredSection(nameof(GameParameters)).Bind(Configuration.Parameters);
 
 LogManager.Configuration = new NLogLoggingConfiguration(config.GetSection("NLog"));
 
