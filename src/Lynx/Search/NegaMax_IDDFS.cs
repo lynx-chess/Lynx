@@ -111,7 +111,7 @@ namespace Lynx.Search
                     if (new Position(position, candidateMove).WasProduceByAValidMove())
                     {
                         orderedMoves.Remove(positionId);
-                        return QuiescenceSearch_NegaMax_AlphaBeta(position, Configuration.Parameters.QuiescenceSearchDepth, ref nodes, plies + 1, alpha, beta, cancellationToken, absoluteCancellationToken);
+                        return QuiescenceSearch_NegaMax_AlphaBeta(position, Configuration.EngineSettings.QuiescenceSearchDepth, ref nodes, plies + 1, alpha, beta, cancellationToken, absoluteCancellationToken);
                     }
                 }
 

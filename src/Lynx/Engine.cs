@@ -132,7 +132,7 @@ namespace Lynx
             _absoluteSearchCancellationTokenSource = new CancellationTokenSource();
             int? millisecondsLeft;
             int? millisecondsIncrement;
-            int minDepth = Configuration.Parameters.MinDepth;
+            int minDepth = Configuration.EngineSettings.MinDepth;
             int? maxDepth = null;
 
             if (Game.CurrentPosition.Side == Side.White)
@@ -150,20 +150,20 @@ namespace Lynx
             {
                 int decisionTime = Convert.ToInt32(CalculateDecisionTime(goCommand.MovesToGo, millisecondsLeft ?? 0, millisecondsIncrement ?? 0));
 
-                if (decisionTime > Configuration.Parameters.MinMoveTime)
+                if (decisionTime > Configuration.EngineSettings.MinMoveTime)
                 {
                     _logger.Info($"Time to move: {0.001 * decisionTime}s, min. {minDepth} plies");
                     _searchCancellationTokenSource.CancelAfter(decisionTime);
                 }
                 else // Ignore decisionTime and limit search to MinDepthWhenLessThanMinMoveTime plies
                 {
-                    _logger.Info($"Depth limited to {Configuration.Parameters.DepthWhenLessThanMinMoveTime} plies due to time trouble");
-                    maxDepth = Configuration.Parameters.DepthWhenLessThanMinMoveTime;
+                    _logger.Info($"Depth limited to {Configuration.EngineSettings.DepthWhenLessThanMinMoveTime} plies due to time trouble");
+                    maxDepth = Configuration.EngineSettings.DepthWhenLessThanMinMoveTime;
                 }
             }
             else // EngineTest
             {
-                maxDepth = Configuration.Parameters.MinDepth;
+                maxDepth = Configuration.EngineSettings.MinDepth;
             }
 
             var result = NegaMax_AlphaBeta_Quiescence_IDDFS(Game.CurrentPosition, minDepth, maxDepth, _searchCancellationTokenSource.Token, _absoluteSearchCancellationTokenSource.Token);
@@ -182,17 +182,17 @@ namespace Lynx
 
             if (movesToGo == default)
             {
-                int movesLeft = Configuration.Parameters.TotalMovesWhenNoMovesToGoProvided - (Game.MoveHistory.Count >> 1);
+                int movesLeft = Configuration.EngineSettings.TotalMovesWhenNoMovesToGoProvided - (Game.MoveHistory.Count >> 1);
 
                 if (movesLeft > 0)
                 {
-                    if (millisecondsLeft >= Configuration.Parameters.FirstTimeLimitWhenNoMovesToGoProvided)
+                    if (millisecondsLeft >= Configuration.EngineSettings.FirstTimeLimitWhenNoMovesToGoProvided)
                     {
-                        decisionTime = Configuration.Parameters.FirstCoefficientWhenNoMovesToGoProvided * millisecondsLeft / movesLeft;
+                        decisionTime = Configuration.EngineSettings.FirstCoefficientWhenNoMovesToGoProvided * millisecondsLeft / movesLeft;
                     }
-                    else if (millisecondsLeft >= Configuration.Parameters.SecondTimeLimitWhenNoMovesToGoProvided)
+                    else if (millisecondsLeft >= Configuration.EngineSettings.SecondTimeLimitWhenNoMovesToGoProvided)
                     {
-                        decisionTime = Configuration.Parameters.SecondCoefficientWhenNoMovesToGoProvided * millisecondsLeft / movesLeft;
+                        decisionTime = Configuration.EngineSettings.SecondCoefficientWhenNoMovesToGoProvided * millisecondsLeft / movesLeft;
                     }
                     else
                     {
@@ -202,13 +202,13 @@ namespace Lynx
             }
             else
             {
-                if (movesToGo > Configuration.Parameters.KeyMovesBeforeMovesToGo)
+                if (movesToGo > Configuration.EngineSettings.KeyMovesBeforeMovesToGo)
                 {
-                    decisionTime = Configuration.Parameters.CoefficientBeforeKeyMovesBeforeMovesToGo * millisecondsLeft / movesToGo;
+                    decisionTime = Configuration.EngineSettings.CoefficientBeforeKeyMovesBeforeMovesToGo * millisecondsLeft / movesToGo;
                 }
                 else
                 {
-                    decisionTime = Configuration.Parameters.CoefficientAfterKeyMovesBeforeMovesToGo * millisecondsLeft / movesToGo;
+                    decisionTime = Configuration.EngineSettings.CoefficientAfterKeyMovesBeforeMovesToGo * millisecondsLeft / movesToGo;
                 }
             }
 
@@ -252,14 +252,14 @@ namespace Lynx
             //var (evaluation, moveList) = NegaMax_AlphaBeta_Quiescence_InitialImplementation(Game.CurrentPosition);
 
             int nodes = default;
-            var (evaluation, moveList) = NegaMax_AlphaBeta_Quiescence(Game.CurrentPosition, Configuration.Parameters.Depth, ref nodes);
+            var (evaluation, moveList) = NegaMax_AlphaBeta_Quiescence(Game.CurrentPosition, Configuration.EngineSettings.Depth, ref nodes);
 
             _logger.Debug($"Evaluation: {evaluation}");
             var bestMove = moveList!.Moves.Last();   // TODO: MoveList can be empty if the initial position is stalement or checkmate
             Game.MakeMove(bestMove);
 
 
-            return new SearchResult(bestMove, evaluation, Configuration.Parameters.Depth, moveList.MaxDepth ?? Configuration.Parameters.Depth, 0, 0, 0, moveList.Moves);
+            return new SearchResult(bestMove, evaluation, Configuration.EngineSettings.Depth, moveList.MaxDepth ?? Configuration.EngineSettings.Depth, 0, 0, 0, moveList.Moves);
         }
 
         public void StartSearching(GoCommand goCommand)

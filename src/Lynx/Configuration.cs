@@ -63,10 +63,17 @@ namespace Lynx
             set => Interlocked.Exchange(ref _hash, value);
         }
 
-        public static GameParameters Parameters { get; set; } = new GameParameters();
+        public static EngineSettings EngineSettings { get; set; } = new EngineSettings();
+
+        public static GeneralSettings GeneralSettings { get; set; } = new GeneralSettings();
     }
 
-    public class GameParameters
+    public class GeneralSettings
+    {
+        public bool DisableLogging { get; set; } = false;
+    }
+
+    public class EngineSettings
     {
         public int Depth { get; set; } = 5;
 

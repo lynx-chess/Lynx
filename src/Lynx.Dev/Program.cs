@@ -555,7 +555,7 @@ static void _50_MiniMax_AlphaBeta()
 
     {
         var game = new Game(fen);
-        var (evaluation, moveList) = SearchAlgorithms.MiniMax(game.CurrentPosition, Configuration.Parameters.Depth);
+        var (evaluation, moveList) = SearchAlgorithms.MiniMax(game.CurrentPosition, Configuration.EngineSettings.Depth);
         Console.WriteLine($"Evaluation: {evaluation}");
 
         var bestMove = moveList!.Moves.Last();
@@ -599,7 +599,7 @@ static void _50_MiniMax_AlphaBeta()
      */
     {
         var game = new Game(fen);
-        var (evaluation, moveList) = SearchAlgorithms.MiniMax_AlphaBeta(game.CurrentPosition, Configuration.Parameters.Depth);
+        var (evaluation, moveList) = SearchAlgorithms.MiniMax_AlphaBeta(game.CurrentPosition, Configuration.EngineSettings.Depth);
         Console.WriteLine($"Evaluation: {evaluation}");
 
         var bestMove = moveList!.Moves.Last();
@@ -615,7 +615,7 @@ static void _52_Quiescence_Search()
 
     game.CurrentPosition.Print();
 
-    var (evaluation, moveList) = SearchAlgorithms.MiniMax_AlphaBeta_Quiescence(game.CurrentPosition, Configuration.Parameters.Depth - 1);
+    var (evaluation, moveList) = SearchAlgorithms.MiniMax_AlphaBeta_Quiescence(game.CurrentPosition, Configuration.EngineSettings.Depth - 1);
     Console.WriteLine($"Evaluation: {evaluation}");
 
     var bestMove = moveList!.Moves.Last();
