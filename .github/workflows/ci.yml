@@ -2,6 +2,8 @@ name: Build
 
 on:
   push:
+  schedule:
+    - cron:  '1 0 * * 1'    # Mondays at 00:01
 
 jobs:
   build:
@@ -30,6 +32,9 @@ jobs:
 
     - name: Build
       run: dotnet build -c Release
+
+    - name: Publish
+      run: dotnet publish -c Release --runtime linux-x64 /p:Optimized=true
 
     - name: Run CI tests
       run: dotnet test -c Release --no-build --collect:"XPlat Code Coverage"
