@@ -22,19 +22,19 @@ namespace Lynx.NUnit.Test
             Category = "NonParallelizable", Explicit = true, Description = "Mate in 6 with quiescence, https://gameknot.com/chess-puzzle.pl?pz=257112")]
         public void BestMove_Quiescence(string fen, int depth, int quiescenceSearchDepth, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
         {
-            int originalDepth = Configuration.Parameters.Depth;
-            int originalQuiescenceSearchDepth = Configuration.Parameters.QuiescenceSearchDepth;
+            int originalDepth = Configuration.EngineSettings.Depth;
+            int originalQuiescenceSearchDepth = Configuration.EngineSettings.QuiescenceSearchDepth;
 
             try
             {
-                Configuration.Parameters.Depth = depth;
-                Configuration.Parameters.QuiescenceSearchDepth = quiescenceSearchDepth;
+                Configuration.EngineSettings.Depth = depth;
+                Configuration.EngineSettings.QuiescenceSearchDepth = quiescenceSearchDepth;
                 TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
             }
             finally
             {
-                Configuration.Parameters.Depth = originalDepth;
-                Configuration.Parameters.QuiescenceSearchDepth = originalQuiescenceSearchDepth;
+                Configuration.EngineSettings.Depth = originalDepth;
+                Configuration.EngineSettings.QuiescenceSearchDepth = originalQuiescenceSearchDepth;
             }
         }
     }

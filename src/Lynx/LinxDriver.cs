@@ -192,7 +192,7 @@ namespace Lynx
                     {
                         if (int.TryParse(commandItems[4], out var value))
                         {
-                            Configuration.Parameters.Depth = value;
+                            Configuration.EngineSettings.Depth = value;
                         }
                         break;
                     }
@@ -200,7 +200,7 @@ namespace Lynx
                     {
                         if (int.TryParse(commandItems[4], out var value))
                         {
-                            Configuration.Parameters.Depth = value;
+                            Configuration.EngineSettings.Depth = value;
                         }
                         _logger.Warn("Hash size modification not supported yet");
                         break;

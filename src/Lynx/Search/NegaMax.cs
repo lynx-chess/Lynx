@@ -31,7 +31,7 @@ namespace Lynx.Search
                 var result = new Result();
                 if (pseudoLegalMoves.Any(move => new Position(position, move).WasProduceByAValidMove()))
                 {
-                    return QuiescenceSearch_NegaMax_AlphaBeta(position, Configuration.Parameters.QuiescenceSearchDepth, ref nodes, plies + 1, alpha, beta);
+                    return QuiescenceSearch_NegaMax_AlphaBeta(position, Configuration.EngineSettings.QuiescenceSearchDepth, ref nodes, plies + 1, alpha, beta);
                 }
                 else
                 {

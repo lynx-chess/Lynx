@@ -24,7 +24,7 @@ namespace Lynx.Search
         {
             var pseudoLegalMoves = position.AllPossibleMoves();
 
-            if (plies == Configuration.Parameters.Depth)
+            if (plies == Configuration.EngineSettings.Depth)
             {
                 var result = new Result();
                 if (pseudoLegalMoves.Any(move => new Position(position, move).WasProduceByAValidMove()))
@@ -153,7 +153,7 @@ namespace Lynx.Search
         {
             var pseudoLegalMoves = position.AllPossibleMoves();
 
-            if (plies == Configuration.Parameters.Depth)
+            if (plies == Configuration.EngineSettings.Depth)
             {
                 var result = new Result();
                 if (pseudoLegalMoves.Any(move => new Position(position, move).WasProduceByAValidMove()))
@@ -290,7 +290,7 @@ namespace Lynx.Search
                 beta = Min(beta, staticEvaluation);
             }
 
-            if (beta <= alpha || plies >= Configuration.Parameters.QuiescenceSearchDepth)
+            if (beta <= alpha || plies >= Configuration.EngineSettings.QuiescenceSearchDepth)
             {
                 PrintMessage(plies - 1, "Prunning before starting quiescence search");
 

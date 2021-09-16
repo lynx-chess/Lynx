@@ -21,9 +21,13 @@ var config = new ConfigurationBuilder()
     .AddEnvironmentVariables()
     .Build();
 
-config.GetRequiredSection(nameof(GameParameters)).Bind(Configuration.Parameters);
+config.GetRequiredSection(nameof(EngineSettings)).Bind(Configuration.EngineSettings);
+config.GetRequiredSection(nameof(GeneralSettings)).Bind(Configuration.GeneralSettings);
 
-LogManager.Configuration = new NLogLoggingConfiguration(config.GetSection("NLog"));
+if (!Configuration.GeneralSettings.DisableLogging)
+{
+    LogManager.Configuration = new NLogLoggingConfiguration(config.GetSection("NLog"));
+}
 
 var opts = new BoundedChannelOptions(1_000)
 {
