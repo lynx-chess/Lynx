@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Text;
 
 namespace Lynx.Model
@@ -250,7 +249,6 @@ namespace Lynx.Model
 
                     if (square != 63)
                     {
-
                         if (sb.Length == lengthBeforeSlash)
                         {
                             sb.Append('8');
