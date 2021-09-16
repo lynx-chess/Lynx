@@ -1,7 +1,6 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 
 namespace Lynx.Search
 {
