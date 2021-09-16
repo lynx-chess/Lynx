@@ -12,6 +12,13 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macOS-latest]
+        include:
+          - os: ubuntu-latest
+            runtime-identifier: linux-x64
+          - os: windows-latest
+            runtime-identifier: win-x64
+          - os: macOS-latest
+            runtime-identifier: osx-x64
       fail-fast: false
 
     env:
@@ -32,9 +39,6 @@ jobs:
 
     - name: Build
       run: dotnet build -c Release
-
-    - name: Publish
-      run: dotnet publish -c Release --runtime linux-x64 /p:Optimized=true
 
     - name: Run CI tests
       run: dotnet test -c Release --no-build --collect:"XPlat Code Coverage"
@@ -60,6 +64,18 @@ jobs:
       with:
         name: ${{ env.PROJECT_NAME }}-coverage-ci-${{ github.run_number }}
         path: coveragereport/
+        if-no-files-found: error
+
+    - name: Publish
+      run: dotnet publish src/Lynx.Cli/Lynx.Cli.csproj -c Release --runtime ${{ matrix.runtime-identifier }} /p:Optimized=true -o artifacts/${{ matrix.runtime-identifier }}
+
+    - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-${{ matrix.runtime-identifier }} artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-${{ matrix.runtime-identifier }}
+        path: |
+          artifacts/${{ matrix.runtime-identifier }}/
+          !artifacts/**/*.pdb
         if-no-files-found: error
 
   long-running-tests:
