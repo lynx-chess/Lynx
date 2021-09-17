@@ -4,6 +4,9 @@ using System.Collections.Generic;
 
 namespace Lynx.Benchmark
 {
+    /// <summary>
+    /// <see cref="Utils.PieceOffset(int)"/>
+    /// </summary>
     public static class PieceOffsetImplementations
     {
         public static int Method(Side side) => 6 - (6 * (int)side);

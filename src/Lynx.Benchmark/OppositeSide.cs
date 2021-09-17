@@ -28,6 +28,9 @@ using System.Collections.Generic;
 
 namespace Lynx.Benchmark
 {
+    /// <summary>
+    /// <see cref="Utils.OppositeSide(Side)"/>
+    /// </summary>
     public static class OppositeSiteImplementations
     {
         public static int Method_Substraction(Side side) => (int)Side.White - (int)side;
