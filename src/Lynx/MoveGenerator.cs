@@ -2,6 +2,7 @@
 using NLog;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Lynx
 {
@@ -35,6 +36,12 @@ namespace Lynx
             [(int)Piece.q] = (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy).Board,
         };
 
+        /// <summary>
+        /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
+        /// </summary>
+        /// <param name="position"></param>
+        /// <param name="capturesOnly">Filters out all moves but captures</param>
+        /// <returns></returns>
         public static List<Move> GenerateAllMoves(Position position, bool capturesOnly = false)
         {
             var moves = new List<Move>(150);
@@ -54,7 +61,7 @@ namespace Lynx
             moves.AddRange(GeneratePieceMoves((int)Piece.R + offset, position, capturesOnly));
             moves.AddRange(GeneratePieceMoves((int)Piece.Q + offset, position, capturesOnly));
 
-            return moves;
+            return moves.OrderByDescending(move => move.Score(position)).ToList();
         }
 
         internal static IEnumerable<Move> GeneratePawnMoves(Position position, int offset, bool capturesOnly = false)

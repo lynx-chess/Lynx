@@ -133,6 +133,44 @@ namespace Lynx.Model
 
         public readonly bool IsCastle() => (EncodedMove & 0x180_0000) >> 23 != default;
 
+        private readonly Side Side() => Piece() >= (int)Model.Piece.p ? Model.Side.Black : Model.Side.White;
+        private readonly Side OppositeSide() => Piece() >= (int)Model.Piece.p ? Model.Side.White : Model.Side.Black;
+
+        /// <summary>
+        /// Returns the score evaluation of a move taking into account <see cref="EvaluationConstants.MostValueableVictimLeastValuableAttacker"/>
+        /// </summary>
+        /// <param name="position">The position that precedes a move</param>
+        /// <returns>The higher the score is, the more valuable is the captured piece and the less valuable is the piece that makes the such capture</returns>
+        public readonly int Score(Position position)
+        {
+            int score = 0;
+
+            if (IsCapture())
+            {
+                var sourcePiece = Piece();
+                int targetPiece = (int)Model.Piece.P;    // Important to initialize to P or p, due to en-passant captures
+
+                var targetSquare = TargetSquare();
+                var oppositeSide = OppositeSide();
+                var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
+                var oppositePawnIndex = (int)Model.Piece.P + oppositeSideOffset;
+
+                var limit = (int)Model.Piece.K + oppositeSideOffset;
+                for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
+                {
+                    if (position.PieceBitBoards[pieceIndex].GetBit(targetSquare))
+                    {
+                        targetPiece = pieceIndex;
+                        break;
+                    }
+                }
+
+                score += EvaluationConstants.MostValueableVictimLeastValuableAttacker[sourcePiece, targetPiece];
+            }
+
+            return score;
+        }
+
         public override string ToString()
         {
 #pragma warning disable S3358 // Ternary operators should not be nested
