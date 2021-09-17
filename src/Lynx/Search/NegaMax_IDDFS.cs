@@ -31,7 +31,7 @@ namespace Lynx.Search
                         cancellationToken.ThrowIfCancellationRequested();
                     }
                     nodes = 0;
-                    (bestEvaluation, bestResult) = NegaMax_AlphaBeta_Quiescence_IDDFS(position, orderedMoves, minDepth: minDepth, depthLimit: depth, nodes: ref nodes, plies: 0, alpha: MinValue, beta: MaxValue, cancellationToken);
+                    (bestEvaluation, bestResult) = NegaMax_AlphaBeta_Quiescence_IDDFS(position, orderedMoves, minDepth: minDepth, depthLimit: depth, nodes: ref nodes, plies: 0, alpha: MinValue, beta: MaxValue, cancellationToken, absoluteCancellationToken);
 
                     Logger.Debug($"Time {sw.ElapsedMilliseconds} Depth {depth}, eval {bestEvaluation}, nodes {nodes} pv {string.Join(',', bestResult.Moves.Reverse<Move>().Select(m => m))}");
                 } while (stopSearchCondition(++depth, maxDepth, bestEvaluation));
