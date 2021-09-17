@@ -136,6 +136,11 @@ namespace Lynx.Model
         private readonly Side Side() => Piece() >= (int)Model.Piece.p ? Model.Side.Black : Model.Side.White;
         private readonly Side OppositeSide() => Piece() >= (int)Model.Piece.p ? Model.Side.White : Model.Side.Black;
 
+        /// <summary>
+        /// Returns the score evaluation of a move taking into account <see cref="EvaluationConstants.MostValueableVictimLeastValuableAttacker"/>
+        /// </summary>
+        /// <param name="position">The position that precedes a move</param>
+        /// <returns>The higher the score is, the more valuable is the captured piece and the less valuable is the piece that makes the such capture</returns>
         public readonly int Score(Position position)
         {
             int score = 0;
@@ -160,12 +165,7 @@ namespace Lynx.Model
                     }
                 }
 
-                Console.WriteLine($"{(Piece)sourcePiece}x{(Piece)targetPiece}");
                 score += EvaluationConstants.MostValueableVictimLeastValuableAttacker[sourcePiece, targetPiece];
-            }
-            else
-            {
-
             }
 
             return score;
