@@ -169,7 +169,10 @@ namespace Lynx
             var result = NegaMax_AlphaBeta_Quiescence_IDDFS(Game.CurrentPosition, minDepth, maxDepth, _searchCancellationTokenSource.Token, _absoluteSearchCancellationTokenSource.Token);
             _logger.Debug($"Evaluation: {result.Evaluation} (depth: {result.TargetDepth}, refutation: {string.Join(", ", result.Moves)})");
 
-            Game.MakeMove(result.BestMove);
+            if (!result.isCancelled)
+            {
+                Game.MakeMove(result.BestMove);
+            }
             AverageDepth += (result.DepthReached - AverageDepth) / Game.MoveHistory.Count;
 
             return result;
@@ -259,7 +262,7 @@ namespace Lynx
             Game.MakeMove(bestMove);
 
 
-            return new SearchResult(bestMove, evaluation, Configuration.EngineSettings.Depth, moveList.MaxDepth ?? Configuration.EngineSettings.Depth, 0, 0, 0, moveList.Moves);
+            return new SearchResult(bestMove, evaluation, Configuration.EngineSettings.Depth, moveList.MaxDepth ?? Configuration.EngineSettings.Depth, 0, 0, 0, moveList.Moves, isCancelled: false);
         }
 
         public void StartSearching(GoCommand goCommand)

@@ -21,7 +21,7 @@ namespace Lynx.Search
             public List<Move> Moves { get; set; } = new List<Move>(150);
         }
 
-        public record SearchResult(Move BestMove, double Evaluation, int TargetDepth, int DepthReached, int Nodes, long Time, long NodesPerSecond, List<Move> Moves);
+        public record SearchResult(Move BestMove, double Evaluation, int TargetDepth, int DepthReached, int Nodes, long Time, long NodesPerSecond, List<Move> Moves, bool isCancelled);
 
         /// <summary>
         /// Branch-optimized for <paramref name="mostLikely"/>

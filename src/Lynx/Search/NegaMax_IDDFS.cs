@@ -16,6 +16,7 @@ namespace Lynx.Search
             int depth = 1;
             int nodes = 0;
             var sw = new Stopwatch();
+            bool isCancelled = false;
 
             try
             {
@@ -38,6 +39,7 @@ namespace Lynx.Search
             }
             catch (OperationCanceledException)
             {
+                isCancelled = true;
                 Logger.Info("Search cancellation requested, best move will be returned");
             }
             catch (Exception e)
@@ -51,7 +53,7 @@ namespace Lynx.Search
             }
 
             bestResult?.Moves.Reverse();
-            return new SearchResult(bestResult!.Moves.FirstOrDefault(), bestEvaluation, depth, bestResult!.MaxDepth ?? depth, nodes, sw.ElapsedMilliseconds, Convert.ToInt64(Math.Clamp(nodes / (0.001 * sw.ElapsedMilliseconds + 1), 0, Int64.MaxValue)), bestResult!.Moves);
+            return new SearchResult(bestResult!.Moves.FirstOrDefault(), bestEvaluation, depth, bestResult!.MaxDepth ?? depth, nodes, sw.ElapsedMilliseconds, Convert.ToInt64(Math.Clamp(nodes / (0.001 * sw.ElapsedMilliseconds + 1), 0, Int64.MaxValue)), bestResult!.Moves, isCancelled);
 
             static bool stopSearchCondition(int depth, int? depthLimit, int bestEvaluation)
             {
