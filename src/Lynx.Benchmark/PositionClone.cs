@@ -43,8 +43,6 @@ namespace Lynx.Benchmark
     {
         public readonly struct Position
         {
-            private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
-
             public string FEN { get; }
 
             /// <summary>
