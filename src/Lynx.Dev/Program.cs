@@ -399,7 +399,7 @@ static void _23_Castling_Moves()
 
 static void _26_Piece_Moves()
 {
-    var position = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
+    var position = new Position(TrickyPosition);
     position.Print();
 
     var moves = MoveGenerator.GenerateKnightMoves(position).ToList();
@@ -456,7 +456,6 @@ static void _32_Make_Move()
     var game = new Game(TrickyPosition);
     var reversedGame = new Game(TrickyPositionReversed);
     var gameWithPromotion = new Game("r3k2r/pPppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
-    var reversedGameWithPromotionAndCapture = new Game("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PpPBBPPP/R3K2R w KQkq - 0 1");
     //GeneralMoveTest(game);
     //CastlingRightsTest(game);
     //CastlingRightsTest(reversedGame);

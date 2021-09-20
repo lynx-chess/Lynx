@@ -1,5 +1,4 @@
 ﻿using Lynx.UCI.Commands.GUI;
-using Microsoft.VisualStudio.TestPlatform.PlatformAbstractions.Interfaces;
 using NUnit.Framework;
 using System.Threading.Tasks;
 
