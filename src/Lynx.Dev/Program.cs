@@ -626,8 +626,6 @@ static void _52_Quiescence_Search()
 
 static void _53_MVVLVA()
 {
-    const string fen = "r2q1rk1/ppp2ppp/2n1bn2/2b1p3/3pP3/3P1NPP/PPP1NPB1/R1BQ1RK1 b - - 0 9";
-
     for (int attacker = (int)Piece.P; attacker <= (int)Piece.K; ++attacker)
     {
         for (int victim = (int)Piece.p; victim <= (int)Piece.k; ++victim)
