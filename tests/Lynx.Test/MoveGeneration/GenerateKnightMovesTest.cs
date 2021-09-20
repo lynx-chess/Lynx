@@ -43,7 +43,7 @@ namespace Lynx.Test.MoveGeneration
         [Fact]
         public void KnightMoves_White()
         {
-            var position = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
+            var position = new Position(Constants.TrickyTestPositionFEN);
             var offset = Utils.PieceOffset(position.Side);
             var piece = (int)Piece.N + offset;
             var moves = MoveGenerator.GeneratePieceMoves(piece, position);
@@ -177,7 +177,7 @@ namespace Lynx.Test.MoveGeneration
         [Fact]
         public void KnightMoves_CapturesOnly_White()
         {
-            var position = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
+            var position = new Position(Constants.TrickyTestPositionFEN);
             var offset = Utils.PieceOffset(position.Side);
             var piece = (int)Piece.N + offset;
             var moves = MoveGenerator.GeneratePieceMoves(piece, position, capturesOnly: true);

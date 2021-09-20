@@ -2,8 +2,6 @@
 using Lynx.UCI.Commands.GUI;
 using NLog;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using static Lynx.Search.SearchAlgorithms;
@@ -210,41 +208,6 @@ namespace Lynx
             return decisionTime;
         }
 
-        public SearchResult BestMoveOld(int? millisecondsLeft, int? movesToGo)
-        {
-            // var bestMove =  FindRandomMove();
-
-            //var game = FindBestMove_Naive(Game.CurrentPosition);
-            //var bestMove = game.MoveHistory.Last();
-
-            //var bestMove = FindBestMove_Depth1();
-
-            //PrintMovesStaticEval();
-            //var result = new Result();
-            //var evaluation = MiniMax_InitialImplementation(Game.CurrentPosition, Configuration.Parameters?.Depth ?? 3, result);
-
-            //var (evaluation, moveList) = MiniMax(Game.CurrentPosition);
-
-            //var (evaluation, moveList) = MiniMax_AlphaBeta(Game.CurrentPosition);
-
-            //var (evaluation, moveList) = MiniMax_AlphaBeta_Quiescence(Game.CurrentPosition);
-
-            //var (evaluation, moveList) = NegaMax(Game.CurrentPosition);
-            //var (evaluation, moveList) = NegaMax_AlphaBeta_Quiescence(Game.CurrentPosition);
-
-            //var (evaluation, moveList) = NegaMax_AlphaBeta_Quiescence_InitialImplementation(Game.CurrentPosition);
-
-            int nodes = default;
-            var (evaluation, moveList) = NegaMax_AlphaBeta_Quiescence(Game.CurrentPosition, Configuration.EngineSettings.Depth, ref nodes);
-
-            _logger.Debug($"Evaluation: {evaluation}");
-            var bestMove = moveList!.Moves.Last();   // TODO: MoveList can be empty if the initial position is stalement or checkmate
-            Game.MakeMove(bestMove);
-
-
-            return new SearchResult(bestMove, evaluation, Configuration.EngineSettings.Depth, moveList.MaxDepth ?? Configuration.EngineSettings.Depth, 0, 0, 0, moveList.Moves, isCancelled: false);
-        }
-
         public void StartSearching(GoCommand goCommand)
         {
             _isPondering = goCommand.Ponder;
@@ -270,117 +233,6 @@ namespace Lynx
             _absoluteSearchCancellationTokenSource.Cancel();
             IsSearching = false;
             // TODO
-        }
-
-        private Move FindRandomMove()
-        {
-            foreach (var move in Game.GetAllMoves().OrderBy(_ => Guid.NewGuid()))
-            {
-                if (Game.MakeMove(move))
-                {
-                    return move;
-                }
-            }
-
-            return default;
-        }
-
-        private Game FindBestMove_Naive(Position position, int depth = 3, Game? game = null)
-        {
-            if (game is null)
-            {
-                game = new Game();
-            }
-
-            if (depth == 0)
-            {
-                game.PositionHistory.Add(position);
-                return game;
-            }
-
-            var positionMoveList = new List<(Move Move, Position Position)>(150);
-
-            foreach (var move in MoveGenerator.GenerateAllMoves(position))
-            {
-                var newPosition = new Position(position, move);
-                if (newPosition.IsValid())
-                {
-                    positionMoveList.Add((move, newPosition));
-                }
-            }
-
-            var optimalPair = positionMoveList.OrderBy(pair => EvaluatePosition_Naive(pair.Position, depth - 1)).First();
-            game.MoveHistory.Add(optimalPair.Move);
-            game.PositionHistory.Add(optimalPair.Position);
-
-            return game;
-        }
-
-        private int EvaluatePosition_Naive(Position position, int depth)
-        {
-            if (depth == 0)
-            {
-                return position.EvaluateMaterial();
-            }
-
-            var positions = new List<Position>(150);
-
-            foreach (var move in MoveGenerator.GenerateAllMoves(position))
-            {
-                var newPosition = new Position(position, move);
-                if (newPosition.IsValid())
-                {
-                    positions.Add(newPosition);
-                }
-            }
-
-            if (positions.Count == 0)
-            {
-                if (Attacks.IsSquaredAttackedBySide(
-                    position.PieceBitBoards[(int)Piece.K + Utils.PieceOffset(position.Side)].GetLS1BIndex(),
-                    position,
-                    (Side)Utils.OppositeSide(position.Side)))
-                {
-                    return int.MinValue;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-
-            return positions.Max(p => EvaluatePosition_Naive(p, depth - 1));
-        }
-
-        private Move FindBestMove_Depth1()
-        {
-            var evalMoveList = new List<(Move Move, int eval)>(150);
-
-            foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition))
-            {
-                var newPosition = new Position(Game.CurrentPosition, move);
-                if (newPosition.IsValid())
-                {
-                    var eval = newPosition.EvaluateMaterialAndPosition_MiniMax();
-                    Console.WriteLine($"{move,-6} | {newPosition.EvaluateMaterial(),-5} | {eval,-5}");
-                    evalMoveList.Add((move, eval));
-                }
-            }
-
-            return evalMoveList.OrderByDescending(l => l.eval).First().Move;
-        }
-
-        private void PrintMovesStaticEval()
-        {
-            foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition))
-            {
-                var newPosition = new Position(Game.CurrentPosition, move);
-                if (newPosition.IsValid())
-                {
-                    var eval = newPosition.EvaluateMaterialAndPosition_MiniMax();
-                    Console.WriteLine($"{move,-6} | {newPosition.EvaluateMaterial(),-5} | {eval,-5}");
-                }
-            }
         }
     }
 }

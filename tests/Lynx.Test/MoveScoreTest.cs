@@ -1,9 +1,5 @@
 ﻿using Lynx.Model;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Lynx.Test
@@ -24,7 +20,7 @@ namespace Lynx.Test
         /// This tests indirectly <see cref="EvaluationConstants.MostValueableVictimLeastValuableAttacker"/>
         /// </summary>
         [Theory]
-        [InlineData("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1")]
+        [InlineData(Constants.TrickyTestPositionFEN)]
         public void MoveScore(string fen)
         {
             var position = new Position(fen);

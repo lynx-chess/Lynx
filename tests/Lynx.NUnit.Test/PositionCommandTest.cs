@@ -1,5 +1,4 @@
 ﻿using Lynx.UCI.Commands.GUI;
-using Microsoft.VisualStudio.TestPlatform.PlatformAbstractions.Interfaces;
 using NUnit.Framework;
 using System.Threading.Tasks;
 
@@ -8,7 +7,7 @@ namespace Lynx.NUnit.Test
     /// <summary>
     /// https://github.com/lynx-chess/Lynx/issues/31
     /// </summary>
-    internal class PositionCommandTest
+    public class PositionCommandTest
     {
         [TestCase]
         public async Task StopCommandShouldNotModifyPositionOrAddMoveToMoveHistory()
