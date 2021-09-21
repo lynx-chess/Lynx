@@ -124,12 +124,12 @@ namespace Lynx.UCI.Commands.Engine
 
         public static readonly List<string> AvailableOptions = new()
         {
-            "option name Hash type spin default 1 min 1 max 128",
-            "option name UCI_AnalyseMode type check",
+            //"option name Hash type spin default 1 min 1 max 128",
+            //"option name UCI_AnalyseMode type check",
             //"option name NalimovPath type string default C:/...",
             //"option name NalimovCache type spin default 1 min 1 max 32
-            "option name Ponder type check",
-            $"option name Depth type spin default 3 min 1 max {int.MaxValue}"
+            //"option name Ponder type check",
+            //$"option name Depth type spin default 3 min 1 max {int.MaxValue}"
             //"option name OwnBook type check",
             //"option name MultiPV type spin default 1",
             //"option name UCI_ShowCurrLine type check default false",      // Interesting
