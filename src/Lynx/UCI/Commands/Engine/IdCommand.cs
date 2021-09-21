@@ -17,8 +17,11 @@ namespace Lynx.UCI.Commands.Engine
 
         private static string GetVersion()
         {
-            return Assembly.GetAssembly(typeof(IdCommand))!.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
-                ?? "Uknown";
+            return
+                Assembly.GetAssembly(typeof(IdCommand))
+                !.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                ?.InformationalVersion?.Split('+')?[0]
+                ?? "Unknown";
         }
 
         public static string Name => $"id name Lynx {GetVersion()}";
