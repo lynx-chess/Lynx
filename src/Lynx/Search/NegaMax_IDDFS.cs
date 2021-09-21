@@ -9,68 +9,6 @@ namespace Lynx.Search
 {
     public static partial class SearchAlgorithms
     {
-        public static SearchResult NegaMax_AlphaBeta_Quiescence_IDDFS(Position position, int minDepth, int? maxDepth, CancellationToken cancellationToken, CancellationToken absoluteCancellationToken)
-        {
-            int bestEvaluation = 0;
-            Result? bestResult = new();
-            int depth = 1;
-            int nodes = 0;
-            var sw = new Stopwatch();
-            bool isCancelled = false;
-
-            try
-            {
-                var orderedMoves = new Dictionary<string, PriorityQueue<Move, int>>(10_000);
-
-                sw.Start();
-
-                do
-                {
-                    absoluteCancellationToken.ThrowIfCancellationRequested();
-                    if (depth > minDepth)
-                    {
-                        cancellationToken.ThrowIfCancellationRequested();
-                    }
-                    nodes = 0;
-                    (bestEvaluation, bestResult) = NegaMax_AlphaBeta_Quiescence_IDDFS(position, orderedMoves, minDepth: minDepth, depthLimit: depth, nodes: ref nodes, plies: 0, alpha: MinValue, beta: MaxValue, cancellationToken, absoluteCancellationToken);
-
-                    Logger.Debug($"Time {sw.ElapsedMilliseconds} Depth {depth}, eval {bestEvaluation}, nodes {nodes} pv {string.Join(',', bestResult.Moves.Reverse<Move>().Select(m => m))}");
-                } while (stopSearchCondition(++depth, maxDepth, bestEvaluation));
-            }
-            catch (OperationCanceledException)
-            {
-                isCancelled = true;
-                Logger.Info("Search cancellation requested, best move will be returned");
-            }
-            catch (Exception e)
-            {
-                Logger.Error("Unexpected error ocurred during the search, best move will be returned" +
-                    Environment.NewLine + e.Message + Environment.NewLine + e.StackTrace);
-            }
-            finally
-            {
-                sw.Stop();
-            }
-
-            bestResult?.Moves.Reverse();
-            return new SearchResult(bestResult!.Moves.FirstOrDefault(), bestEvaluation, depth, bestResult!.MaxDepth ?? depth, nodes, sw.ElapsedMilliseconds, Convert.ToInt64(Math.Clamp(nodes / (0.001 * sw.ElapsedMilliseconds + 1), 0, Int64.MaxValue)), bestResult!.Moves, isCancelled);
-
-            static bool stopSearchCondition(int depth, int? depthLimit, int bestEvaluation)
-            {
-                if (Math.Abs(bestEvaluation) > 0.1 * Position.CheckMateEvaluation)   // Mate detected
-                {
-                    return false;
-                }
-
-                if (depthLimit is not null)
-                {
-                    return depth <= depthLimit;
-                }
-
-                return true;
-            }
-        }
-
         /// <summary>
         /// NegaMax algorithm implementation using alpha-beta prunning, quiescence search and Iterative Deepeting Depth-First Search (IDDFS)
         /// </summary>

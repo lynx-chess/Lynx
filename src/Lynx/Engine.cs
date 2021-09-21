@@ -1,8 +1,10 @@
 ﻿using Lynx.Model;
+using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
 using System;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using static Lynx.Search.SearchAlgorithms;
 
@@ -11,6 +13,7 @@ namespace Lynx
     public class Engine
     {
         private readonly Logger _logger;
+        private readonly ChannelWriter<string> _engineWriter;
         private bool _isNewGameCommandSupported;
         private bool _isNewGameComing;
         private bool _isPondering;
@@ -20,23 +23,6 @@ namespace Lynx
         public RegisterCommand? Registration { get; set; }
 
         public Game Game { get; private set; }
-
-        private bool _isReady;
-        /// <summary>
-        /// Ready for <see cref="IsReadyCommand"/> purposes. Normally true
-        /// </summary>
-        public bool IsReady
-        {
-            get => _isReady;
-            private set
-            {
-                _isReady = value;
-                if (value)
-                {
-                    OnReady?.Invoke();
-                }
-            }
-        }
 
         private bool _isSearching;
         public bool IsSearching
@@ -59,24 +45,18 @@ namespace Lynx
 
         public bool PendingConfirmation { get; set; }
 
-        public delegate Task NotifyReadyOKHandler();
-        public event NotifyReadyOKHandler? OnReady;
-
-        public delegate Task NotifyEndOfSearch(SearchResult searchResult, Move? moveToPonder);
-        public event NotifyEndOfSearch? OnSearchFinished;
-
         private CancellationTokenSource _searchCancellationTokenSource;
         private CancellationTokenSource _absoluteSearchCancellationTokenSource;
 
-        public Engine()
+        public Engine(ChannelWriter<string> engineWriter)
         {
             AverageDepth = 0;
             Game = new Game();
-            IsReady = true;
             _isNewGameComing = true;
             _logger = LogManager.GetCurrentClassLogger();
             _searchCancellationTokenSource = new();
             _absoluteSearchCancellationTokenSource = new();
+            _engineWriter = engineWriter;
         }
 
         internal void SetGame(Game game)
@@ -144,7 +124,7 @@ namespace Lynx
                 maxDepth = Configuration.EngineSettings.MinDepth;
             }
 
-            var result = NegaMax_AlphaBeta_Quiescence_IDDFS(Game.CurrentPosition, minDepth, maxDepth, _searchCancellationTokenSource.Token, _absoluteSearchCancellationTokenSource.Token);
+            var result = IDDFS(Game.CurrentPosition, minDepth, maxDepth, _engineWriter, _searchCancellationTokenSource.Token, _absoluteSearchCancellationTokenSource.Token);
             _logger.Debug($"Evaluation: {result.Evaluation} (depth: {result.TargetDepth}, refutation: {string.Join(", ", result.Moves)})");
 
             if (!result.isCancelled)
@@ -212,13 +192,13 @@ namespace Lynx
         {
             _isPondering = goCommand.Ponder;
             IsSearching = true;
-            Task.Run(() =>
+            Task.Run(async () =>
             {
                 try
                 {
                     var searchResult = BestMove(goCommand);
                     _moveToPonder = searchResult.Moves.Count >= 2 ? searchResult.Moves[1] : null;
-                    OnSearchFinished?.Invoke(searchResult, _moveToPonder);
+                    await _engineWriter.WriteAsync(BestMoveCommand.BestMove(searchResult.BestMove, _moveToPonder));
                 }
                 catch (Exception e)
                 {
@@ -232,7 +212,6 @@ namespace Lynx
         {
             _absoluteSearchCancellationTokenSource.Cancel();
             IsSearching = false;
-            // TODO
         }
     }
 }
