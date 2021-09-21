@@ -23,8 +23,6 @@ namespace Lynx
             _engineWriter = engineWriter;
             _engine = engine;
             _logger = LogManager.GetCurrentClassLogger();
-            _engine.OnReady += NotifyReadyOK;
-            _engine.OnSearchFinished += NotifyBestMove;
         }
 
         public async Task Run(CancellationToken cancellationToken)
@@ -108,19 +106,6 @@ namespace Lynx
             _engine.AdjustPosition(command);
 #if DEBUG
             _engine.Game.CurrentPosition.Print();
-
-            //foreach (var move in MoveGenerator.GenerateAllMoves(_engine.Game.CurrentPosition))
-            //{
-            //    var newBlackPosition = new Position(_engine.Game.CurrentPosition, move);
-            //    if (newBlackPosition.IsValid())
-            //    {
-            //        var newWhitePosition = new Position(newBlackPosition, newBlackPosition.AllPossibleMoves()[0]);
-            //        if (newBlackPosition.IsValid())
-            //        {
-            //            Console.WriteLine($"{move,-6} | {newWhitePosition.MaterialEvaluation(),-5} | {newWhitePosition.MaterialAndPositionalEvaluation(),-5}");
-            //        }
-            //    }
-            //}
 #endif
         }
 
@@ -148,10 +133,7 @@ namespace Lynx
 
         private async Task HandleIsReady(CancellationToken cancellationToken)
         {
-            if (_engine.IsReady)
-            {
-                await SendCommand(ReadyOKCommand.Id, cancellationToken);
-            }
+            await SendCommand(ReadyOKCommand.Id, cancellationToken);
         }
 
         private void HandlePonderHit()
@@ -244,11 +226,6 @@ namespace Lynx
         }
 
         #endregion
-
-        private async Task NotifyReadyOK()
-        {
-            await _engineWriter.Writer.WriteAsync(ReadyOKCommand.Id);
-        }
 
         private async Task NotifyBestMove(SearchResult searchResult, Move? moveToPonder)
         {
