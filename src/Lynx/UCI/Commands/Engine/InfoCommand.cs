@@ -88,7 +88,5 @@ namespace Lynx.UCI.Commands.Engine
                 $" time {searchResult.Time}" +
                 $" pv {string.Join(" ", searchResult.Moves.Select(move => move.UCIString()))}";
         }
-
-
     }
 }
