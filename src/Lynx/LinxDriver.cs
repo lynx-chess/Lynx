@@ -155,7 +155,7 @@ namespace Lynx
             {
                 case "ponder":
                     {
-                        if (bool.TryParse(commandItems[4], out var value))
+                        if (commandItems.Length > 4 && bool.TryParse(commandItems[4], out var value))
                         {
                             Configuration.IsPonder = value;
                         }
@@ -164,7 +164,7 @@ namespace Lynx
                     }
                 case "uci_analysemode":
                     {
-                        if (bool.TryParse(commandItems[4], out var value))
+                        if (commandItems.Length > 4 && bool.TryParse(commandItems[4], out var value))
                         {
                             Configuration.UCI_AnalyseMode = value;
                         }
@@ -172,7 +172,7 @@ namespace Lynx
                     }
                 case "depth":
                     {
-                        if (int.TryParse(commandItems[4], out var value))
+                        if (commandItems.Length > 4 && int.TryParse(commandItems[4], out var value))
                         {
                             Configuration.EngineSettings.Depth = value;
                         }
@@ -180,7 +180,7 @@ namespace Lynx
                     }
                 case "hash":
                     {
-                        if (int.TryParse(commandItems[4], out var value))
+                        if (commandItems.Length > 4 && int.TryParse(commandItems[4], out var value))
                         {
                             Configuration.Hash = value;
                         }
