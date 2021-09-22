@@ -29,14 +29,8 @@ if (!Configuration.GeneralSettings.DisableLogging)
     LogManager.Configuration = new NLogLoggingConfiguration(config.GetSection("NLog"));
 }
 
-var opts = new BoundedChannelOptions(1_000)
-{
-    SingleReader = true,
-    SingleWriter = true
-};
-
-var uciChannel = Channel.CreateBounded<string>(opts);
-var engineChannel = Channel.CreateBounded<string>(opts);
+var uciChannel = Channel.CreateBounded<string>(new BoundedChannelOptions(100) { SingleReader = true, SingleWriter = true });
+var engineChannel = Channel.CreateBounded<string>(new BoundedChannelOptions(100) { SingleReader = true, SingleWriter = false });
 
 using CancellationTokenSource source = new();
 CancellationToken cancellationToken = source.Token;
