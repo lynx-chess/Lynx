@@ -1,5 +1,7 @@
 ﻿using Lynx.UCI.Commands.GUI;
+using Moq;
 using NUnit.Framework;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 
 namespace Lynx.NUnit.Test
@@ -10,10 +12,10 @@ namespace Lynx.NUnit.Test
     public class PositionCommandTest
     {
         [TestCase]
-        public async Task StopCommandShouldNotModifyPositionOrAddMoveToMoveHistory()
+        public async Task PositionCommandShouldNotTakeIntoAccountInternalState()
         {
             // Arrange
-            var engine = new Engine();
+            var engine = new Engine(new Mock<ChannelWriter<string>>().Object);
             engine.NewGame();
             engine.AdjustPosition($"position fen {Constants.InitialPositionFEN} moves e2e4");
 

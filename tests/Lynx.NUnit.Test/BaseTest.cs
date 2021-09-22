@@ -1,7 +1,11 @@
 ﻿using Lynx.Model;
+using Moq;
 using NUnit.Framework;
 using System;
 using System.Linq;
+using System.Threading;
+using System.Threading.Channels;
+using System.Threading.Tasks;
 
 namespace Lynx.NUnit.Test
 {
@@ -9,8 +13,14 @@ namespace Lynx.NUnit.Test
     {
         protected static void TestBestMove(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString)
         {
+            var mock = new Mock<ChannelWriter<string>>();
+
+            mock
+                .Setup(m => m.WriteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .Returns(ValueTask.CompletedTask);
+
             // Arrange
-            var engine = new Engine();
+            var engine = new Engine(mock.Object);
             engine.SetGame(new Game(fen));
 
             // Act

@@ -1,4 +1,6 @@
-﻿using NUnit.Framework;
+﻿using Moq;
+using NUnit.Framework;
+using System.Threading.Channels;
 
 namespace Lynx.NUnit.Test
 {
@@ -101,7 +103,7 @@ namespace Lynx.NUnit.Test
         public void CalculateDecisionTime(
             int millisecondsLeft, int millisecondsIncrement, int movesToGo, double expectedTimeToMove, int moveHistoryCount = 0)
         {
-            var engine = new Engine();
+            var engine = new Engine(new Mock<ChannelWriter<string>>().Object);
             for (int moveIndex = 0; moveIndex < moveHistoryCount; ++moveIndex)
             {
                 engine.Game.MoveHistory.Add(new());

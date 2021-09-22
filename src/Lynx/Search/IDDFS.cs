@@ -40,7 +40,7 @@ namespace Lynx.Search
                     if (bestResult is not null)
                     {
                         bestResult.Moves.Reverse();
-                        searchResult = new SearchResult(bestResult.Moves.FirstOrDefault(), bestEvaluation, depth, bestResult.MaxDepth ?? depth, nodes, sw.ElapsedMilliseconds, Convert.ToInt64(Math.Clamp(nodes / ((0.001 * sw.ElapsedMilliseconds) + 1), 0, Int64.MaxValue)), bestResult.Moves, isCancelled);
+                        searchResult = new SearchResult(bestResult.Moves.FirstOrDefault(), bestEvaluation, depth, bestResult.MaxDepth ?? depth, nodes, sw.ElapsedMilliseconds, Convert.ToInt64(Math.Clamp(nodes / ((0.001 * sw.ElapsedMilliseconds) + 1), 0, Int64.MaxValue)), bestResult.Moves);
 
                         Task.Run(async () => await engineWriter.WriteAsync(InfoCommand.SearchResultInfo(searchResult)));
                     }
@@ -61,7 +61,15 @@ namespace Lynx.Search
                 sw.Stop();
             }
 
-            return searchResult ?? new(default, bestEvaluation, depth, depth, nodes, sw.ElapsedMilliseconds, Convert.ToInt64(Math.Clamp(nodes / ((0.001 * sw.ElapsedMilliseconds) + 1), 0, Int64.MaxValue)), new List<Move>(), isCancelled);
+            if (searchResult is not null)
+            {
+                searchResult.IsCancelled = isCancelled;
+                return searchResult;
+            }
+            else
+            {
+                return new(default, bestEvaluation, depth, depth, nodes, sw.ElapsedMilliseconds, Convert.ToInt64(Math.Clamp(nodes / ((0.001 * sw.ElapsedMilliseconds) + 1), 0, Int64.MaxValue)), new List<Move>());
+            }
 
             static bool stopSearchCondition(int depth, int? depthLimit, int bestEvaluation)
             {
