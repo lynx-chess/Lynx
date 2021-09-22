@@ -127,11 +127,11 @@ namespace Lynx
             var result = IDDFS(Game.CurrentPosition, minDepth, maxDepth, _engineWriter, _searchCancellationTokenSource.Token, _absoluteSearchCancellationTokenSource.Token);
             _logger.Debug($"Evaluation: {result.Evaluation} (depth: {result.TargetDepth}, refutation: {string.Join(", ", result.Moves)})");
 
-            if (!result.isCancelled)
+            if (!result.IsCancelled && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
             {
                 Game.MakeMove(result.BestMove);
+                AverageDepth += (result.DepthReached - AverageDepth) / Game.MoveHistory.Count;
             }
-            AverageDepth += (result.DepthReached - AverageDepth) / Game.MoveHistory.Count;
 
             return result;
         }
