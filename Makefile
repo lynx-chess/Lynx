@@ -3,6 +3,7 @@
 OUTPUT_DIR:=artifacts/Lynx/
 
 ifeq ($(OS),Windows_NT)
+    RUNTIME=win-x64
     ifeq ($(PROCESSOR_ARCHITEW6432),AMD64)
         RUNTIME=win-x64
     else
@@ -16,6 +17,7 @@ else
     UNAME_S := $(shell uname -s)
 	UNAME_P := $(shell uname -p)
     ifeq ($(UNAME_S),Linux)
+		RUNTIME=linux-x64
 		ifeq ($(UNAME_P),x86_64)
 			RUNTIME=linux-x64
 		else ifneq ($(filter aarch64%,$(UNAME_P)),)
@@ -26,6 +28,7 @@ else
 			RUNTIME=linux-arm
 		endif
 	else ifeq ($(UNAME_S),Darwin)
+		RUNTIME=osx-x64
 		ifeq ($(UNAME_P),x86_64)
 			RUNTIME=osx-x64
 		else ifneq ($(filter arm%,$(UNAME_P)),)
