@@ -23,7 +23,7 @@ Lichess bot can be played directly, but a chess GUI that supports UCI protocol i
 
 Requirements:
 
-- [.NET 6 SDK](https://dotnet.microsoft.com/download/dotnet/6.0). You can find instructions about how to install it in your preferred OS/Distro [here](https://dotnet.microsoft.com/download/dotnet/6.0).
+- [.NET 6 SDK](https://dotnet.microsoft.com/download/dotnet/6.0). You can find instructions about how to install it in your preferred OS/Distro either [here](https://docs.microsoft.com/en-us/dotnet/core/install/) or [here](https://github.com/dotnet/core/tree/main/release-notes/6.0).
 
 Instructions:
 
@@ -32,6 +32,13 @@ Instructions:
   Disclaimer: I do not use the Makefile myself, which means it is not fully tested and may occasionally get out of date.
 
 - Alternatively, you can get the exact `dotnet publish (...)` command from [`release.yml`](https://github.com/lynx-chess/Lynx/blob/main/.github/workflows/release.yml) that is used by the CI to create the binaries and run it yourself (with the right [runtime identifier](https://docs.microsoft.com/en-us/dotnet/core/rid-catalog#using-rids)).
+
+   Examples:
+
+  ```bash
+  dotnet publish src/Lynx.Cli/Lynx.Cli.csproj -c Release --runtime linux-x64 --self-contained /p:Optimized=true -o /home/your_user/engines/Lynx
+  dotnet publish src/Lynx.Cli/Lynx.Cli.csproj -c Release --runtime win-x64 --self-contained /p:Optimized=true -o C:/Users/your_user/engines/Lynx
+  ```
 
 ---
 
