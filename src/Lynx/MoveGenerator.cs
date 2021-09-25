@@ -42,7 +42,7 @@ namespace Lynx
         /// <param name="position"></param>
         /// <param name="capturesOnly">Filters out all moves but captures</param>
         /// <returns></returns>
-        public static List<Move> GenerateAllMoves(Position position, bool capturesOnly = false)
+        public static List<Move> GenerateAllMoves(Position position, int[,]? killerMoves = null, int? plies = null, bool capturesOnly = false)
         {
             var moves = new List<Move>(150);
 
@@ -61,7 +61,7 @@ namespace Lynx
             moves.AddRange(GeneratePieceMoves((int)Piece.R + offset, position, capturesOnly));
             moves.AddRange(GeneratePieceMoves((int)Piece.Q + offset, position, capturesOnly));
 
-            return moves.OrderByDescending(move => move.Score(position)).ToList();
+            return moves.OrderByDescending(move => move.Score(position, killerMoves, plies)).ToList();
         }
 
         internal static IEnumerable<Move> GeneratePawnMoves(Position position, int offset, bool capturesOnly = false)

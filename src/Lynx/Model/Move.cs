@@ -141,7 +141,7 @@ namespace Lynx.Model
         /// </summary>
         /// <param name="position">The position that precedes a move</param>
         /// <returns>The higher the score is, the more valuable is the captured piece and the less valuable is the piece that makes the such capture</returns>
-        public readonly int Score(Position position)
+        public readonly int Score(Position position, int[,]? killerMoves = null, int? plies = null)
         {
             int score = 0;
 
@@ -165,7 +165,31 @@ namespace Lynx.Model
                     }
                 }
 
-                score += EvaluationConstants.MostValueableVictimLeastValuableAttacker[sourcePiece, targetPiece];
+                score += EvaluationConstants.MostValueableVictimLeastValuableAttacker[sourcePiece, targetPiece] + 100_000;
+                // TODO:  without adding 10_000, it performs better in KillerPosition, but seems to be an exception?
+            }
+            else
+            {
+                if (killerMoves is not null && plies is not null)
+                {
+                    // 1st killer move
+                    if (killerMoves[0, plies.Value] == EncodedMove)
+                    {
+                        return 9_000;
+                    }
+
+                    // 2nd killer move
+                    else if (killerMoves[1, plies.Value] == EncodedMove)
+                    {
+                        return 8_000;
+                    }
+
+                    // History move
+                    //else if (historyMoves is not null)
+                    //{
+                    //    return historyMoves[Piece(), TargetSquare()];
+                    //}
+                }
             }
 
             return score;
