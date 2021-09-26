@@ -10,6 +10,8 @@ namespace Lynx.Model
 {
     public readonly struct Move
     {
+        public const int CaptureBaseScore = 100_000;
+
         private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
 
         /// <summary>
@@ -141,7 +143,7 @@ namespace Lynx.Model
         /// </summary>
         /// <param name="position">The position that precedes a move</param>
         /// <returns>The higher the score is, the more valuable is the captured piece and the less valuable is the piece that makes the such capture</returns>
-        public readonly int Score(Position position)
+        public readonly int Score(Position position, int[,]? killerMoves = null, int? plies = null)
         {
             int score = 0;
 
@@ -165,7 +167,24 @@ namespace Lynx.Model
                     }
                 }
 
-                score += EvaluationConstants.MostValueableVictimLeastValuableAttacker[sourcePiece, targetPiece];
+                score += CaptureBaseScore + EvaluationConstants.MostValueableVictimLeastValuableAttacker[sourcePiece, targetPiece];
+            }
+            else
+            {
+                if (killerMoves is not null && plies is not null)
+                {
+                    // 1st killer move
+                    if (killerMoves[0, plies.Value] == EncodedMove)
+                    {
+                        return 9_000;
+                    }
+
+                    // 2nd killer move
+                    else if (killerMoves[1, plies.Value] == EncodedMove)
+                    {
+                        return 8_000;
+                    }
+                }
             }
 
             return score;

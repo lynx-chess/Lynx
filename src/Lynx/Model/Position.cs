@@ -309,7 +309,7 @@ namespace Lynx.Model
         /// <returns></returns>
         public int StaticEvaluation_NegaMax() => EvaluateMaterialAndPosition_NegaMax();
 
-        public List<Move> AllPossibleMoves() => MoveGenerator.GenerateAllMoves(this);
+        public List<Move> AllPossibleMoves(int[,]? killerMoves = null, int? plies = null) => MoveGenerator.GenerateAllMoves(this, killerMoves, plies);
 
         public List<Move> AllCapturesMoves() => MoveGenerator.GenerateAllMoves(this, capturesOnly: true);
 

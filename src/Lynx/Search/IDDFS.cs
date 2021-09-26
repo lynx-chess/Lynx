@@ -24,6 +24,7 @@ namespace Lynx.Search
             try
             {
                 var orderedMoves = new Dictionary<string, PriorityQueue<Move, int>>(10_000);
+                var killerMoves = new int[2, 64];
 
                 sw.Start();
 
@@ -35,7 +36,7 @@ namespace Lynx.Search
                         cancellationToken.ThrowIfCancellationRequested();
                     }
                     nodes = 0;
-                    (bestEvaluation, Result? bestResult) = NegaMax_AlphaBeta_Quiescence_IDDFS(position, orderedMoves, minDepth: minDepth, depthLimit: depth, nodes: ref nodes, plies: 0, alpha: MinValue, beta: MaxValue, cancellationToken, absoluteCancellationToken);
+                    (bestEvaluation, Result? bestResult) = NegaMax_AlphaBeta_Quiescence_IDDFS(position, orderedMoves, killerMoves, minDepth: minDepth, depthLimit: depth, nodes: ref nodes, plies: 0, alpha: MinValue, beta: MaxValue, cancellationToken, absoluteCancellationToken);
 
                     if (bestResult is not null)
                     {

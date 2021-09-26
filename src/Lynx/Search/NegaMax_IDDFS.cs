@@ -23,7 +23,7 @@ namespace Lynx.Search
         /// Defaults to the worse possible score for Side to move's opponent, Int.MaxValue
         /// </param>
         /// <returns></returns>
-        private static (int Evaluation, Result MoveList) NegaMax_AlphaBeta_Quiescence_IDDFS(Position position, Dictionary<string, PriorityQueue<Move, int>> orderedMoves, int minDepth, int depthLimit, ref int nodes, int plies, int alpha = MinValue, int beta = MaxValue, CancellationToken? cancellationToken = null, CancellationToken? absoluteCancellationToken = null)
+        private static (int Evaluation, Result MoveList) NegaMax_AlphaBeta_Quiescence_IDDFS(Position position, Dictionary<string, PriorityQueue<Move, int>> orderedMoves, int[,] killerMoves, int minDepth, int depthLimit, ref int nodes, int plies, int alpha = MinValue, int beta = MaxValue, CancellationToken? cancellationToken = null, CancellationToken? absoluteCancellationToken = null)
         {
             absoluteCancellationToken?.ThrowIfCancellationRequested();
             if (plies + 1 > minDepth)
@@ -41,7 +41,7 @@ namespace Lynx.Search
             }
             else
             {
-                pseudoLegalMoves = new(position.AllPossibleMoves().Select(i => (i, 1)));
+                pseudoLegalMoves = new(position.AllPossibleMoves(killerMoves, plies).Select(i => (i, 1)));
             }
 
             if (plies >= depthLimit)
@@ -78,7 +78,7 @@ namespace Lynx.Search
 
                 PrintPreMove(position, plies, move);
 
-                var (evaluation, bestMoveExistingMoveList) = NegaMax_AlphaBeta_Quiescence_IDDFS(newPosition, orderedMoves, minDepth, depthLimit, ref nodes, plies + 1, -beta, -alpha, cancellationToken, absoluteCancellationToken);
+                var (evaluation, bestMoveExistingMoveList) = NegaMax_AlphaBeta_Quiescence_IDDFS(newPosition, orderedMoves, killerMoves, minDepth, depthLimit, ref nodes, plies + 1, -beta, -alpha, cancellationToken, absoluteCancellationToken);
 
                 // Since SimplePriorityQueue has lower priority at the top, we do this before inverting the sign of the evaluation
                 newPriorityQueue.Enqueue(move, evaluation);
@@ -106,6 +106,12 @@ namespace Lynx.Search
                         newPriorityQueue.Enqueue(nonEvaluatedMove, nonEvaluatedMovesEval);
                     }
                     orderedMoves[positionId] = newPriorityQueue;
+
+                    //if (!move.IsCapture())
+                    {
+                        killerMoves[1, plies] = killerMoves[0, plies];
+                        killerMoves[0, plies] = move.EncodedMove;
+                    }
 
                     return (beta, new Result());
                 }

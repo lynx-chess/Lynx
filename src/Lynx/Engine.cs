@@ -130,9 +130,10 @@ namespace Lynx
             if (!result.IsCancelled && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
             {
                 Game.MakeMove(result.BestMove);
-                AverageDepth += (result.DepthReached - AverageDepth) / Game.MoveHistory.Count;
             }
 
+            AverageDepth += (result.DepthReached - AverageDepth) / Game.MoveHistory.Count;
+            
             return result;
         }
 
