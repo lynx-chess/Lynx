@@ -167,8 +167,7 @@ namespace Lynx.Model
                     }
                 }
 
-                score += EvaluationConstants.MostValueableVictimLeastValuableAttacker[sourcePiece, targetPiece] + CaptureBaseScore;
-                // TODO:  without adding 10_000, it performs better in KillerPosition, but seems to be an exception?
+                score += CaptureBaseScore + EvaluationConstants.MostValueableVictimLeastValuableAttacker[sourcePiece, targetPiece];
             }
             else
             {
