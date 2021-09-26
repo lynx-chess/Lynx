@@ -10,6 +10,8 @@ namespace Lynx.Model
 {
     public readonly struct Move
     {
+        public const int CaptureBaseScore = 100_000;
+
         private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
 
         /// <summary>
@@ -165,7 +167,7 @@ namespace Lynx.Model
                     }
                 }
 
-                score += EvaluationConstants.MostValueableVictimLeastValuableAttacker[sourcePiece, targetPiece] + 100_000;
+                score += EvaluationConstants.MostValueableVictimLeastValuableAttacker[sourcePiece, targetPiece] + CaptureBaseScore;
                 // TODO:  without adding 10_000, it performs better in KillerPosition, but seems to be an exception?
             }
             else

@@ -65,7 +65,7 @@ namespace Lynx.Test
             var allMoves = position.AllPossibleMoves();
 
             Assert.Equal(moveWithHighestScore, allMoves[0].UCIString());
-            Assert.Equal(EvaluationConstants.MostValueableVictimLeastValuableAttacker[0,0], allMoves[0].Score(position));
+            Assert.Equal(Move.CaptureBaseScore + EvaluationConstants.MostValueableVictimLeastValuableAttacker[0,0], allMoves[0].Score(position));
         }
     }
 }
