@@ -183,12 +183,6 @@ namespace Lynx.Model
                     {
                         return 8_000;
                     }
-
-                    // History move
-                    //else if (historyMoves is not null)
-                    //{
-                    //    return historyMoves[Piece(), TargetSquare()];
-                    //}
                 }
             }
 

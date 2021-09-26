@@ -116,16 +116,6 @@ namespace Lynx.Search
                     return (beta, new Result());
                 }
 
-                //if(evaluation > alpha)
-                //{
-                //    alpha = evaluation;
-
-                //    //if (!move.IsCapture())
-                //    {
-                //        historyMoves[move.Piece(), move.TargetSquare()] += plies << 2;
-                //    }
-                //    // TODO history moves
-                //}
                 alpha = Max(alpha, evaluation);
             }
 

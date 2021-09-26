@@ -25,7 +25,6 @@ namespace Lynx.Search
             {
                 var orderedMoves = new Dictionary<string, PriorityQueue<Move, int>>(10_000);
                 var killerMoves = new int[2, 64];
-                var historyMoves = new int[12, 64];
 
                 sw.Start();
 

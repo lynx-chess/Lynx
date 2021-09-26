@@ -64,8 +64,6 @@ If you're a Linux user and are new to .NET ecosystem, the conversation in [this 
 
 - Killer heuristic
 
-- History heuristic
-
 ---
 
 More details to follow.
