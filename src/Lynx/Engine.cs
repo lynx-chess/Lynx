@@ -124,7 +124,7 @@ namespace Lynx
                 maxDepth = Configuration.EngineSettings.MinDepth;
             }
 
-            var result = IDDFS(Game.CurrentPosition, minDepth, maxDepth, _engineWriter, _searchCancellationTokenSource.Token, _absoluteSearchCancellationTokenSource.Token);
+            var result = IDDFS(Game.CurrentPosition, Game.PositionFENHistory, minDepth, maxDepth, _engineWriter, _searchCancellationTokenSource.Token, _absoluteSearchCancellationTokenSource.Token);
             _logger.Debug($"Evaluation: {result.Evaluation} (depth: {result.TargetDepth}, refutation: {string.Join(", ", result.Moves)})");
 
             if (!result.IsCancelled && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
@@ -133,7 +133,7 @@ namespace Lynx
             }
 
             AverageDepth += (result.DepthReached - AverageDepth) / Game.MoveHistory.Count;
-            
+
             return result;
         }
 

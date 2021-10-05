@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -31,11 +32,11 @@ namespace Lynx.Search
                 var result = new Result();
                 if (pseudoLegalMoves.Any(move => new Position(position, move).WasProduceByAValidMove()))
                 {
-                    return QuiescenceSearch_NegaMax_AlphaBeta(position, Configuration.EngineSettings.QuiescenceSearchDepth, ref nodes, plies + 1, alpha, beta);
+                    return QuiescenceSearch_NegaMax_AlphaBeta(position, new(), Configuration.EngineSettings.QuiescenceSearchDepth, ref nodes, plies + 1, alpha, beta);
                 }
                 else
                 {
-                    return (position.EvaluateFinalPosition_NegaMax(plies), result);
+                    return (position.EvaluateFinalPosition_NegaMax(plies, new()), result);
                 }
             }
 
@@ -79,7 +80,7 @@ namespace Lynx.Search
 
             if (bestMove is null)
             {
-                return (position.EvaluateFinalPosition_NegaMax(plies), new Result());
+                return (position.EvaluateFinalPosition_NegaMax(plies, new()), new Result());
             }
 
             // Node fails low
@@ -103,12 +104,12 @@ namespace Lynx.Search
         /// Defaults to the works possible score for Black, Int.MaxValue
         /// </param>
         /// <returns></returns>
-        public static (int Evaluation, Result MoveList) QuiescenceSearch_NegaMax_AlphaBeta(Position position, int quiescenceDepthLimit, ref int nodes, int plies, int alpha, int beta, CancellationToken? cancellationToken = null, CancellationToken? absoluteCancellationToken = null)
+        public static (int Evaluation, Result MoveList) QuiescenceSearch_NegaMax_AlphaBeta(Position position, Dictionary<string, int> positionHistory, int quiescenceDepthLimit, ref int nodes, int plies, int alpha, int beta, CancellationToken? cancellationToken = null, CancellationToken? absoluteCancellationToken = null)
         {
             absoluteCancellationToken?.ThrowIfCancellationRequested();
             //cancellationToken?.ThrowIfCancellationRequested();
 
-            var staticEvaluation = position.StaticEvaluation_NegaMax();
+            var staticEvaluation = position.StaticEvaluation_NegaMax(positionHistory);
 
             // Fail-hard beta-cutoff (updating alpha after this check)
             if (staticEvaluation >= beta)
@@ -153,8 +154,18 @@ namespace Lynx.Search
                 }
 
                 PrintPreMove(position, plies, move, isQuiescence: true);
-
-                var (evaluation, bestMoveExistingMoveList) = QuiescenceSearch_NegaMax_AlphaBeta(newPosition, quiescenceDepthLimit, ref nodes, plies + 1, -beta, -alpha, cancellationToken, absoluteCancellationToken);
+                var newPositionFEN = newPosition.FEN();
+                positionHistory.TryGetValue(newPositionFEN, out int repetitions);
+                positionHistory[newPositionFEN] = ++repetitions;
+                var (evaluation, bestMoveExistingMoveList) = QuiescenceSearch_NegaMax_AlphaBeta(newPosition, positionHistory, quiescenceDepthLimit, ref nodes, plies + 1, -beta, -alpha, cancellationToken, absoluteCancellationToken);
+                if (repetitions == 1)
+                {
+                    positionHistory.Remove(newPositionFEN);
+                }
+                else
+                {
+                    --positionHistory[newPositionFEN];
+                }
                 evaluation = -evaluation;
 
                 PrintMove(plies, move, evaluation, position);
@@ -181,8 +192,8 @@ namespace Lynx.Search
                 ++nodes;
 
                 var eval = position.AllPossibleMoves().Any(move => new Position(position, move).WasProduceByAValidMove())
-                    ? position.StaticEvaluation_NegaMax()
-                    : position.EvaluateFinalPosition_NegaMax(plies);
+                    ? position.StaticEvaluation_NegaMax(positionHistory)
+                    : position.EvaluateFinalPosition_NegaMax(plies, positionHistory);
 
                 return (eval, new Result() { MaxDepth = plies });
             }

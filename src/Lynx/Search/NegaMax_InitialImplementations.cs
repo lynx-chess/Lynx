@@ -29,11 +29,11 @@ namespace Lynx.Search
                 var result = new Result();
                 if (pseudoLegalMoves.Any(move => new Position(position, move).WasProduceByAValidMove()))
                 {
-                    return (position.StaticEvaluation_NegaMax(), result);
+                    return (position.StaticEvaluation_NegaMax(new()), result);
                 }
                 else
                 {
-                    return (position.EvaluateFinalPosition_NegaMax(plies), result);
+                    return (position.EvaluateFinalPosition_NegaMax(plies, new()), result);
                 }
             }
 
@@ -83,7 +83,7 @@ namespace Lynx.Search
             }
             else
             {
-                return (position.EvaluateFinalPosition_NegaMax(plies), new Result());
+                return (position.EvaluateFinalPosition_NegaMax(plies, new()), new Result());
             }
         }
 
@@ -114,7 +114,7 @@ namespace Lynx.Search
                 }
                 else
                 {
-                    return (position.EvaluateFinalPosition_NegaMax(plies), result);
+                    return (position.EvaluateFinalPosition_NegaMax(plies, new()), result);
                 }
             }
 
@@ -164,7 +164,7 @@ namespace Lynx.Search
             }
             else
             {
-                return (position.EvaluateFinalPosition_NegaMax(plies), new Result());
+                return (position.EvaluateFinalPosition_NegaMax(plies, new()), new Result());
             }
         }
 
@@ -184,7 +184,7 @@ namespace Lynx.Search
         /// <returns></returns>
         public static (int Evaluation, Result MoveList) QuiescenceSearch_NegaMax_AlphaBeta_InitialImplementation(Position position, int plies, int alpha, int beta)
         {
-            var staticEvaluation = position.StaticEvaluation_NegaMax();
+            var staticEvaluation = position.StaticEvaluation_NegaMax(new());
 
             alpha = Max(alpha, staticEvaluation);
 
@@ -242,7 +242,7 @@ namespace Lynx.Search
             else
             {
                 return movesToEvaluate.Count > 0
-                    ? (position.EvaluateFinalPosition_NegaMax(plies), new Result())
+                    ? (position.EvaluateFinalPosition_NegaMax(plies, new()), new Result())
                     : (staticEvaluation, new Result());
             }
         }
