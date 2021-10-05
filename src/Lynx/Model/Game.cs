@@ -10,6 +10,7 @@ namespace Lynx.Model
 
         public List<Move> MoveHistory { get; }
         public List<Position> PositionHistory { get; }
+        public Dictionary<string, int> PositionFENHistory { get; }
 
         public Position CurrentPosition { get; private set; }
 
@@ -27,6 +28,7 @@ namespace Lynx.Model
 
             MoveHistory = new(150);
             PositionHistory = new(150);
+            PositionFENHistory = new() { [position.FEN()] = 1 };
         }
 
         public Game(string fen, List<string> movesUCIString) : this(fen)
@@ -71,6 +73,9 @@ namespace Lynx.Model
                 RevertLastMove();
                 return false;
             }
+
+            PositionFENHistory.TryGetValue(CurrentPosition.FEN(), out int repetitions);
+            PositionFENHistory[CurrentPosition.FEN()] = ++repetitions;
 
             return true;
         }

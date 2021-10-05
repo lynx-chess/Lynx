@@ -12,7 +12,7 @@ namespace Lynx.Search
 {
     public static partial class SearchAlgorithms
     {
-        public static SearchResult IDDFS(Position position, int minDepth, int? maxDepth, ChannelWriter<string> engineWriter, CancellationToken cancellationToken, CancellationToken absoluteCancellationToken)
+        public static SearchResult IDDFS(Position position, Dictionary<string, int> positionHistory, int minDepth, int? maxDepth, ChannelWriter<string> engineWriter, CancellationToken cancellationToken, CancellationToken absoluteCancellationToken)
         {
             int bestEvaluation = 0;
             SearchResult? searchResult = null;
@@ -24,7 +24,7 @@ namespace Lynx.Search
             try
             {
                 var orderedMoves = new Dictionary<string, PriorityQueue<Move, int>>(10_000);
-                var killerMoves = new int[2, 64];
+                var killerMoves = new int[2, EvaluationConstants.MaxPlies];
 
                 sw.Start();
 
@@ -36,7 +36,7 @@ namespace Lynx.Search
                         cancellationToken.ThrowIfCancellationRequested();
                     }
                     nodes = 0;
-                    (bestEvaluation, Result? bestResult) = NegaMax_AlphaBeta_Quiescence_IDDFS(position, orderedMoves, killerMoves, minDepth: minDepth, depthLimit: depth, nodes: ref nodes, plies: 0, alpha: MinValue, beta: MaxValue, cancellationToken, absoluteCancellationToken);
+                    (bestEvaluation, Result? bestResult) = NegaMax_AlphaBeta_Quiescence_IDDFS(position, positionHistory, orderedMoves, killerMoves, minDepth: minDepth, depthLimit: depth, nodes: ref nodes, plies: 0, alpha: MinValue, beta: MaxValue, cancellationToken, absoluteCancellationToken);
 
                     if (bestResult is not null)
                     {

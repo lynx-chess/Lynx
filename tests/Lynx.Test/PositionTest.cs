@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
@@ -186,9 +187,9 @@ namespace Lynx.Test
             Assert.Empty(position.AllPossibleMoves().Where(move => new Position(position, move).IsValid()));
 
             // Act
-            var noDepthResult = position.EvaluateFinalPosition_NegaMax(default);
-            var depthOneResult = position.EvaluateFinalPosition_NegaMax(1);
-            var depthTwoResult = position.EvaluateFinalPosition_NegaMax(2);
+            var noDepthResult = position.EvaluateFinalPosition_NegaMax(default, new());
+            var depthOneResult = position.EvaluateFinalPosition_NegaMax(1, new());
+            var depthTwoResult = position.EvaluateFinalPosition_NegaMax(2, new());
 
             if (expectedEvaluationValue < 0)
             {
@@ -197,6 +198,61 @@ namespace Lynx.Test
                 Assert.True(noDepthResult < depthOneResult);
                 Assert.True(depthOneResult < depthTwoResult);
             }
+        }
+
+        [Fact]
+        public void EvaluateFinalPosition_NegaMax_Threefold()
+        {
+            var winningPosition = new Position("7k/8/5KR1/8/8/8/5R2/K7 w - - 0 1");
+
+            var game = new Game(winningPosition);
+            var repeatedMoves = new List<Move>
+            {
+                new ((int)BoardSquare.f2, (int)BoardSquare.e2, (int)Piece.R),
+                new ((int)BoardSquare.h8, (int)BoardSquare.h7, (int)Piece.k),
+                new ((int)BoardSquare.e2, (int)BoardSquare.f2, (int)Piece.R),
+                new ((int)BoardSquare.h7, (int)BoardSquare.h8, (int)Piece.k),
+                new ((int)BoardSquare.f2, (int)BoardSquare.e2, (int)Piece.R),
+                new ((int)BoardSquare.h8, (int)BoardSquare.h7, (int)Piece.k),
+                new ((int)BoardSquare.e2, (int)BoardSquare.f2, (int)Piece.R),
+                new ((int)BoardSquare.h7, (int)BoardSquare.h8, (int)Piece.k),   // Triple position repetition
+                new ((int)BoardSquare.f2, (int)BoardSquare.a2, (int)Piece.R),   // Other random move
+                new ((int)BoardSquare.h8, (int)BoardSquare.h7, (int)Piece.k),
+                new ((int)BoardSquare.f2, (int)BoardSquare.h2, (int)Piece.R)    // Mate
+            };
+
+            repeatedMoves.ForEach(move => Assert.True(game.MakeMove(move)));
+
+            Assert.Equal(repeatedMoves.Count, game.MoveHistory.Count);
+
+            var eval = winningPosition.EvaluateMaterialAndPosition_NegaMax(game.PositionFENHistory);
+            Assert.Equal(0, eval);
+        }
+
+        [Fact]
+        public void EvaluateMaterialAndPosition_NegaMax_Threefold()
+        {
+            // https://lichess.org/MgWVifcK
+            var winningPosition = new Position("6k1/6b1/1p6/2p5/P7/1K4R1/8/r7 b - - 7 52");
+
+            var game = new Game(winningPosition);
+            var repeatedMoves = new List<Move>
+            {
+                new ((int)BoardSquare.a1, (int)BoardSquare.b1, (int)Piece.r),
+                new ((int)BoardSquare.b3, (int)BoardSquare.a2, (int)Piece.K),
+                new ((int)BoardSquare.b1, (int)BoardSquare.a1, (int)Piece.r),
+                new ((int)BoardSquare.a2, (int)BoardSquare.b3, (int)Piece.K),
+                new ((int)BoardSquare.a1, (int)BoardSquare.b1, (int)Piece.r),
+                new ((int)BoardSquare.b3, (int)BoardSquare.a2, (int)Piece.K),
+                new ((int)BoardSquare.b1, (int)BoardSquare.a1, (int)Piece.r),
+                new ((int)BoardSquare.a2, (int)BoardSquare.b3, (int)Piece.K),
+            };
+
+            repeatedMoves.ForEach(move => Assert.True(game.MakeMove(move)));
+            Assert.Equal(repeatedMoves.Count, game.MoveHistory.Count);
+
+            var eval = winningPosition.EvaluateMaterialAndPosition_NegaMax(game.PositionFENHistory);
+            Assert.Equal(0, eval);
         }
     }
 }

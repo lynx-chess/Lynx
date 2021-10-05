@@ -1,12 +1,20 @@
-﻿using NUnit.Framework;
+﻿using Lynx.Model;
+using Moq;
+using NUnit.Framework;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Channels;
+using System.Threading.Tasks;
 
 namespace Lynx.NUnit.Test
 {
-    public class EngineTest : BaseTest
+    public class EngineBestMoveTest : BaseTest
     {
         [TestCase("8/8/1p2k3/3bn3/3K4/8/7r/1q6 b - - 0 1", new[] { "b1d3" },
             Category = "LongRunning", Explicit = true, Description = "Mate in 1")]
-        public void BestMove_Mate_in_1(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
+        public void Mate_in_1(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
         {
             TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
         }
@@ -19,7 +27,7 @@ namespace Lynx.NUnit.Test
             Category = "LongRunning", Explicit = true, Description = "Mate in 2, https://gameknot.com/chess-puzzle.pl?pz=1669")]
         [TestCase("RNBKRNRQ/PPPPPPPP/8/pppppppp/rnbqkbnr/8/8/8 b - -", new[] { "g4h6" },
             Category = "LongRunning", Explicit = true, Description = "Mate in 2, https://gameknot.com/chess-puzzle.pl?pz=1630")]
-        public void BestMove_Mate_in_2(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
+        public void Mate_in_2(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
         {
             TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
         }
@@ -32,7 +40,7 @@ namespace Lynx.NUnit.Test
             Category = "LongRunning", Explicit = true, Description = "Mate in 3, https://gameknot.com/chess-puzzle.pl?pz=248898")]
         [TestCase("nb5B/1N1Q4/6RK/3pPP2/RrrkN3/2pP3b/qpP1PP2/3n4 w - -", new[] { "g6g3" },
             Category = "LongRunning", Explicit = true, Description = "Mate in 3, https://gameknot.com/chess-puzzle.pl?pz=228148")]
-        public void BestMove_Mate_in_3(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
+        public void Mate_in_3(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
         {
             TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
         }
@@ -40,7 +48,7 @@ namespace Lynx.NUnit.Test
         [TestCase("6k1/1R6/5K2/3p1N2/1P3n2/8/8/3r4 w - -", new[] { "f5h6" },
             Category = "LongRunning", Explicit = true, Description = "Mate in 4, https://gameknot.com/chess-puzzle.pl?pz=260253",
             Ignore = "Not good enough yet")]
-        public void BestMove_Mate_in_4(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
+        public void Mate_in_4(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
         {
             TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
         }
@@ -86,7 +94,7 @@ namespace Lynx.NUnit.Test
         [TestCase("6k1/1R6/5Kn1/3p1N2/1P6/8/8/3r4 b - - 10 37", new[] { "g6f8" }, new[] { "g6f4" },
             Category = "LongRunning", Explicit = true, Description = "Avoid mate in 4 https://gameknot.com/chess-puzzle.pl?pz=260253",
             Ignore = "Not good enough yet")]
-        public void BestMove_Regression(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
+        public void Regression(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
         {
             TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
         }
@@ -98,6 +106,101 @@ namespace Lynx.NUnit.Test
         public void ForceStaleMate(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
         {
             TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
+        }
+
+        [TestCase(Category = "LongRunning", Explicit = true)]
+        public void AvodTripleRepetitionWhenWinningPosition()
+        {
+            // Arrange
+
+            // https://gameknot.com/chess-puzzle.pl?pz=247493
+            const string fen = "r6k/p3b1pp/2pq4/Qp2n1NK/4P1P1/P3Br1P/1P2RP2/8 b - - 0 1";
+
+            var mock = new Mock<ChannelWriter<string>>();
+
+            mock
+                .Setup(m => m.WriteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .Returns(ValueTask.CompletedTask);
+
+            var engine = new Engine(mock.Object);
+            engine.SetGame(new Game(fen));
+
+            var repeatedMoves = new List<Move>
+            {
+                new ((int)BoardSquare.d6, (int)BoardSquare.c7, (int)Piece.q),
+                new ((int)BoardSquare.h5, (int)BoardSquare.h4, (int)Piece.K),
+                new ((int)BoardSquare.c7, (int)BoardSquare.d6, (int)Piece.q),
+                new ((int)BoardSquare.h4, (int)BoardSquare.h5, (int)Piece.K),
+                new ((int)BoardSquare.d6, (int)BoardSquare.c7, (int)Piece.q),
+                new ((int)BoardSquare.h5, (int)BoardSquare.h4, (int)Piece.K)
+            };
+
+            Move movesThatAllowsRepetition = new((int)BoardSquare.c7, (int)BoardSquare.d6, (int)Piece.q);
+
+            var sb = new StringBuilder($"position fen {fen} moves");
+            foreach(var move in repeatedMoves)
+            {
+                sb.Append($" {move.UCIString()}");
+                engine.AdjustPosition(sb.ToString());
+            }
+
+            Assert.AreEqual(repeatedMoves.Count, engine.Game.MoveHistory.Count);
+
+            // Act
+            var searchResult = engine.BestMove();
+            var bestMoveFound = searchResult.BestMove;
+
+            // Assert
+            Assert.AreNotEqual(movesThatAllowsRepetition.UCIString(), bestMoveFound.UCIString(), "No triple repetition avoided");
+            Assert.Less(searchResult.Evaluation, Position.CheckMateEvaluation - (20 * Position.DepthFactor), "Mate not detected");
+        }
+
+        [TestCase(Category = "LongRunning", Explicit = true)]
+        public void ForceTripleRepetitionWhenLosingPosition()
+        {
+            // Arrange
+
+            const string fen = "7B/8/7k/8/5KR1/8/5R2/K7 w - - 0 1";
+
+            var mock = new Mock<ChannelWriter<string>>();
+
+            mock
+                .Setup(m => m.WriteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .Returns(ValueTask.CompletedTask);
+
+            var engine = new Engine(mock.Object);
+            engine.SetGame(new Game(fen));
+
+            var repeatedMoves = new List<Move>
+            {
+                new ((int)BoardSquare.f2, (int)BoardSquare.e2, (int)Piece.R),
+                new ((int)BoardSquare.h6, (int)BoardSquare.h7, (int)Piece.k),
+                new ((int)BoardSquare.e2, (int)BoardSquare.f2, (int)Piece.R),
+                new ((int)BoardSquare.h7, (int)BoardSquare.h6, (int)Piece.k),
+                new ((int)BoardSquare.f2, (int)BoardSquare.e2, (int)Piece.R),
+                new ((int)BoardSquare.h6, (int)BoardSquare.h7, (int)Piece.k),
+                new ((int)BoardSquare.e2, (int)BoardSquare.f2, (int)Piece.R),
+            };
+
+            Move movesThatAllowsRepetition = new((int)BoardSquare.h7, (int)BoardSquare.h6, (int)Piece.k);
+
+            var sb = new StringBuilder($"position fen {fen} moves");
+            foreach (var move in repeatedMoves)
+            {
+                sb.Append(' ');
+                sb.Append(move.UCIString());
+                engine.AdjustPosition(sb.ToString());
+            }
+
+            Assert.AreEqual(repeatedMoves.Count, engine.Game.MoveHistory.Count);
+
+            // Act
+            var searchResult = engine.BestMove();
+            var bestMoveFound = searchResult.BestMove;
+
+            // Assert
+            Assert.AreEqual(movesThatAllowsRepetition.UCIString(), bestMoveFound.UCIString(), "No triple repetition forced");
+            Assert.AreEqual(0, searchResult.Evaluation, "No drawn position detected");
         }
 
         //    [TestCase("4n3/bp2k2p/p2p2pP/P1nP1pP1/N1P2P2/2BB4/3K4/8 w - - 9 42", new[] { "a5c5" },

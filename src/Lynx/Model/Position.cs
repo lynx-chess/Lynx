@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 
 namespace Lynx.Model
@@ -307,7 +308,7 @@ namespace Lynx.Model
         /// Positive scores always favour playing <see cref="Side"/>
         /// </summary>
         /// <returns></returns>
-        public int StaticEvaluation_NegaMax() => EvaluateMaterialAndPosition_NegaMax();
+        public int StaticEvaluation_NegaMax(Dictionary<string, int> positionHistory) => EvaluateMaterialAndPosition_NegaMax(positionHistory);
 
         public List<Move> AllPossibleMoves(int[,]? killerMoves = null, int? plies = null) => MoveGenerator.GenerateAllMoves(this, killerMoves, plies);
 
@@ -349,9 +350,14 @@ namespace Lynx.Model
             return eval;
         }
 
-        public int EvaluateMaterialAndPosition_NegaMax()
+        public int EvaluateMaterialAndPosition_NegaMax(Dictionary<string, int> positionHistory)
         {
             var eval = 0;
+
+            if (positionHistory.Values.Any(val => val >= 3))
+            {
+                return eval;
+            }
 
             for (int pieceIndex = 0; pieceIndex < PieceBitBoards.Length; ++pieceIndex)
             {
@@ -407,8 +413,13 @@ namespace Lynx.Model
         /// <param name="depth">Modulates the output, favouring positions with lower depth left (i.e. Checkmate in less moves)</param>
         /// <returns>At least <see cref="CheckMateEvaluation"/> if Position.Side lost (more extreme values when <paramref name="depth"/> increases)
         /// or 0 if Position.Side was stalemated</returns>
-        public int EvaluateFinalPosition_NegaMax(int depth)
+        public int EvaluateFinalPosition_NegaMax(int depth, Dictionary<string, int> positionHistory)
         {
+            if (positionHistory.Values.Any(val => val >= 3))
+            {
+                return 0;
+            }
+
             if (Attacks.IsSquaredAttackedBySide(
                 PieceBitBoards[(int)Piece.K + Utils.PieceOffset(Side)].GetLS1BIndex(),
                 this,
