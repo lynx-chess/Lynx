@@ -108,7 +108,7 @@ namespace Lynx.NUnit.Test
             TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
         }
 
-        [Test]
+        [TestCase(Category = "LongRunning", Explicit = true)]
         public void AvodTripleRepetitionWhenWinningPosition()
         {
             // Arrange
@@ -155,7 +155,7 @@ namespace Lynx.NUnit.Test
             Assert.Less(searchResult.Evaluation, Position.CheckMateEvaluation - (20 * Position.DepthFactor), "Mate not detected");
         }
 
-        [Test]
+        [TestCase(Category = "LongRunning", Explicit = true)]
         public void ForceTripleRepetitionWhenLosingPosition()
         {
             // Arrange
@@ -187,7 +187,8 @@ namespace Lynx.NUnit.Test
             var sb = new StringBuilder($"position fen {fen} moves");
             foreach (var move in repeatedMoves)
             {
-                sb.Append($" {move.UCIString()}");
+                sb.Append(' ');
+                sb.Append(move.UCIString());
                 engine.AdjustPosition(sb.ToString());
             }
 
