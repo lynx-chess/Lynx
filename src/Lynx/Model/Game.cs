@@ -12,6 +12,8 @@ namespace Lynx.Model
         public List<Position> PositionHistory { get; }
         public Dictionary<string, int> PositionFENHistory { get; }
 
+        public int MovesWithoutCaptureOrPawnMove { get; set; }
+
         public Position CurrentPosition { get; private set; }
 
         public Game() : this(Constants.InitialPositionFEN)
@@ -76,6 +78,8 @@ namespace Lynx.Model
 
             PositionFENHistory.TryGetValue(CurrentPosition.FEN(), out int repetitions);
             PositionFENHistory[CurrentPosition.FEN()] = ++repetitions;
+
+            MovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveToPlay, MovesWithoutCaptureOrPawnMove);
 
             return true;
         }

@@ -187,9 +187,9 @@ namespace Lynx.Test
             Assert.Empty(position.AllPossibleMoves().Where(move => new Position(position, move).IsValid()));
 
             // Act
-            var noDepthResult = position.EvaluateFinalPosition_NegaMax(default, new());
-            var depthOneResult = position.EvaluateFinalPosition_NegaMax(1, new());
-            var depthTwoResult = position.EvaluateFinalPosition_NegaMax(2, new());
+            var noDepthResult = position.EvaluateFinalPosition_NegaMax(default, new(), default);
+            var depthOneResult = position.EvaluateFinalPosition_NegaMax(1, new(), default);
+            var depthTwoResult = position.EvaluateFinalPosition_NegaMax(2, new(), default);
 
             if (expectedEvaluationValue < 0)
             {
@@ -225,7 +225,7 @@ namespace Lynx.Test
 
             Assert.Equal(repeatedMoves.Count, game.MoveHistory.Count);
 
-            var eval = winningPosition.EvaluateMaterialAndPosition_NegaMax(game.PositionFENHistory);
+            var eval = winningPosition.EvaluateMaterialAndPosition_NegaMax(game.PositionFENHistory, default);
             Assert.Equal(0, eval);
         }
 
@@ -251,8 +251,93 @@ namespace Lynx.Test
             repeatedMoves.ForEach(move => Assert.True(game.MakeMove(move)));
             Assert.Equal(repeatedMoves.Count, game.MoveHistory.Count);
 
-            var eval = winningPosition.EvaluateMaterialAndPosition_NegaMax(game.PositionFENHistory);
+            var eval = winningPosition.EvaluateMaterialAndPosition_NegaMax(game.PositionFENHistory, default);
             Assert.Equal(0, eval);
+        }
+
+        [Fact]
+        public void EvaluateFinalPosition_NegaMax_50MovesRule()
+        {
+            var winningPosition = new Position("7k/8/5KR1/8/8/8/5R2/K7 w - - 0 1");
+
+            var game = new Game(winningPosition);
+            var nonCaptureOrPawnMoveMoves = new List<Move>
+            {
+                new ((int)BoardSquare.f2, (int)BoardSquare.e2, (int)Piece.R),
+                new ((int)BoardSquare.h8, (int)BoardSquare.h7, (int)Piece.k),
+                new ((int)BoardSquare.e2, (int)BoardSquare.f2, (int)Piece.R),
+                new ((int)BoardSquare.h7, (int)BoardSquare.h8, (int)Piece.k)
+            };
+
+            for (int i = 0; i < 48; ++i)
+            {
+                Assert.True(game.MakeMove(nonCaptureOrPawnMoveMoves.ElementAt(i % nonCaptureOrPawnMoveMoves.Count)));
+            }
+
+            Assert.True(game.MakeMove(nonCaptureOrPawnMoveMoves[0]));
+            Assert.True(game.MakeMove(nonCaptureOrPawnMoveMoves[1]));
+            Assert.True(game.MakeMove(new Move((int)BoardSquare.e2, (int)BoardSquare.h2, (int)Piece.R)));   // Mate on move 51
+
+            Assert.Equal(51, game.MoveHistory.Count);
+
+            var eval = winningPosition.EvaluateMaterialAndPosition_NegaMax(new(), game.MovesWithoutCaptureOrPawnMove);
+            Assert.Equal(0, eval);
+        }
+
+        [Fact]
+        public void EvaluateMaterialAndPosition_NegaMax_50MovesRule()
+        {
+            // https://lichess.org/MgWVifcK
+            var winningPosition = new Position("6k1/6b1/1p6/2p5/P7/1K4R1/8/r7 b - - 7 52");
+
+            var game = new Game(winningPosition);
+            var nonCaptureOrPawnMoveMoves = new List<Move>
+            {
+                new ((int)BoardSquare.a1, (int)BoardSquare.b1, (int)Piece.r),
+                new ((int)BoardSquare.b3, (int)BoardSquare.a2, (int)Piece.K),
+                new ((int)BoardSquare.b1, (int)BoardSquare.a1, (int)Piece.r),
+                new ((int)BoardSquare.a2, (int)BoardSquare.b3, (int)Piece.K)
+            };
+
+            for (int i = 0; i < 50; ++i)
+            {
+                Assert.True(game.MakeMove(nonCaptureOrPawnMoveMoves.ElementAt(i % nonCaptureOrPawnMoveMoves.Count)));
+            }
+
+            Assert.Equal(50, game.MoveHistory.Count);
+
+            var eval = winningPosition.EvaluateMaterialAndPosition_NegaMax(new(), game.MovesWithoutCaptureOrPawnMove);
+            Assert.Equal(0, eval);
+        }
+
+        [Fact]
+        public void EvaluateMaterialAndPosition_NegaMax_50MovesRule_Promotion()
+        {
+            // https://lichess.org/MgWVifcK
+            var winningPosition = new Position("6k1/6b1/1p6/2p5/P7/1K4R1/7p/r7 b - - 7 52");
+
+            var game = new Game(winningPosition);
+            var nonCaptureOrPawnMoveMoves = new List<Move>
+            {
+                new ((int)BoardSquare.a1, (int)BoardSquare.b1, (int)Piece.r),
+                new ((int)BoardSquare.b3, (int)BoardSquare.a2, (int)Piece.K),
+                new ((int)BoardSquare.b1, (int)BoardSquare.a1, (int)Piece.r),
+                new ((int)BoardSquare.a2, (int)BoardSquare.b3, (int)Piece.K)
+            };
+
+            for (int i = 0; i < 48; ++i)
+            {
+                Assert.True(game.MakeMove(nonCaptureOrPawnMoveMoves.ElementAt(i % nonCaptureOrPawnMoveMoves.Count)));
+            }
+
+            Assert.True(game.MakeMove(new ((int)BoardSquare.h2, (int)BoardSquare.h1, (int)Piece.p, promotedPiece: (int)(Piece.q))));   // Promotion
+            Assert.True(game.MakeMove(new ((int)BoardSquare.b3, (int)BoardSquare.c4, (int)Piece.K)));
+            Assert.True(game.MakeMove(nonCaptureOrPawnMoveMoves[2]));
+
+            Assert.Equal(51, game.MoveHistory.Count);
+
+            var eval = winningPosition.EvaluateMaterialAndPosition_NegaMax(new(), game.MovesWithoutCaptureOrPawnMove);
+            Assert.NotEqual(0, eval);
         }
     }
 }

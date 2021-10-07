@@ -1,5 +1,6 @@
 ﻿using Lynx.Model;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Lynx
@@ -65,6 +66,44 @@ namespace Lynx
             GuardAgainstSideBoth(side);
 
             return (int)BoardSquare.a8 + (7 * 8 * side);
+        }
+
+        public static int UpdatePositionHistory(string newPositionFEN, Dictionary<string, int> positionHistory)
+        {
+            positionHistory.TryGetValue(newPositionFEN, out int repetitions);
+
+            return positionHistory[newPositionFEN] = ++repetitions;
+        }
+
+        public static void RevertPositionHistory(string newPositionFEN, Dictionary<string, int> positionHistory, int repetitions)
+        {
+            if (repetitions == 1)
+            {
+                positionHistory.Remove(newPositionFEN);
+            }
+            else
+            {
+                --positionHistory[newPositionFEN];
+            }
+        }
+
+        // Chaking movesWithoutCaptureOrPawnMove >= 50 since a caoture/pawn move don't necessarily 'clear' the variable.
+        // i.e. at depth 2 0.0, 50 rules move apply
+        // If the engine searches at depth 4, 50 rules must apply even if at depth 3 a capture happened
+        public static int Update50movesRule(Move moveToPlay, int movesWithoutCaptureOrPawnMove)
+        {
+            if (moveToPlay.IsCapture())
+            {
+                return movesWithoutCaptureOrPawnMove >= 50 ? movesWithoutCaptureOrPawnMove : 0;
+            }
+            else
+            {
+                var pieceToMove = moveToPlay.Piece();
+
+                return ((pieceToMove == (int)Piece.P || pieceToMove == (int)Piece.p)) && movesWithoutCaptureOrPawnMove < 50
+                    ? 0
+                    : movesWithoutCaptureOrPawnMove + 1;
+            }
         }
 
         [Conditional("DEBUG")]

@@ -1,5 +1,4 @@
 ﻿using Lynx.Model;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -10,7 +9,7 @@ namespace Lynx.Search
     public static partial class SearchAlgorithms
     {
         /// <summary>
-        /// NegaMax algorithm implementation using alpha-beta prunning, quiescence search and Iterative Deepeting Depth-First Search (IDDFS)
+        /// NegaMax algorithm implementation using alpha-beta pruning, quiescence search and Iterative Deepeting Depth-First Search (IDDFS)
         /// </summary>
         /// <param name="position"></param>
         /// <param name="plies"></param>
@@ -23,7 +22,7 @@ namespace Lynx.Search
         /// Defaults to the worse possible score for Side to move's opponent, Int.MaxValue
         /// </param>
         /// <returns></returns>
-        private static (int Evaluation, Result MoveList) NegaMax_AlphaBeta_Quiescence_IDDFS(Position position, Dictionary<string, int> positionHistory, Dictionary<string, PriorityQueue<Move, int>> orderedMoves, int[,] killerMoves, int minDepth, int depthLimit, ref int nodes, int plies, int alpha = MinValue, int beta = MaxValue, CancellationToken? cancellationToken = null, CancellationToken? absoluteCancellationToken = null)
+        private static (int Evaluation, Result MoveList) NegaMax_AlphaBeta_Quiescence_IDDFS(Position position, Dictionary<string, int> positionHistory, int movesWithoutCaptureOrPawnMove, Dictionary<string, PriorityQueue<Move, int>> orderedMoves, int[,] killerMoves, int minDepth, int depthLimit, ref int nodes, int plies, int alpha = MinValue, int beta = MaxValue, CancellationToken? cancellationToken = null, CancellationToken? absoluteCancellationToken = null)
         {
             absoluteCancellationToken?.ThrowIfCancellationRequested();
             if (plies + 1 > minDepth)
@@ -53,12 +52,12 @@ namespace Lynx.Search
                     if (new Position(position, candidateMove).WasProduceByAValidMove())
                     {
                         orderedMoves.Remove(positionId);
-                        return QuiescenceSearch_NegaMax_AlphaBeta(position, positionHistory, Configuration.EngineSettings.QuiescenceSearchDepth, ref nodes, plies + 1, alpha, beta, cancellationToken, absoluteCancellationToken);
+                        return QuiescenceSearch_NegaMax_AlphaBeta(position, positionHistory, movesWithoutCaptureOrPawnMove, Configuration.EngineSettings.QuiescenceSearchDepth, ref nodes, plies + 1, alpha, beta, cancellationToken, absoluteCancellationToken);
                     }
                 }
 
                 orderedMoves.Remove(positionId);
-                return (position.EvaluateFinalPosition_NegaMax(plies, positionHistory), new Result { MaxDepth = plies });
+                return (position.EvaluateFinalPosition_NegaMax(plies, positionHistory, movesWithoutCaptureOrPawnMove), new Result { MaxDepth = plies });
             }
 
             Move? bestMove = null;
@@ -77,18 +76,15 @@ namespace Lynx.Search
                 }
 
                 PrintPreMove(position, plies, move);
+
                 var newPositionFEN = newPosition.FEN();
-                positionHistory.TryGetValue(newPositionFEN, out int repetitions);
-                positionHistory[newPositionFEN] = ++repetitions;
-                var (evaluation, bestMoveExistingMoveList) = NegaMax_AlphaBeta_Quiescence_IDDFS(newPosition, positionHistory, orderedMoves, killerMoves, minDepth, depthLimit, ref nodes, plies + 1, -beta, -alpha, cancellationToken, absoluteCancellationToken);
-                if (repetitions == 1)
-                {
-                    positionHistory.Remove(newPositionFEN);
-                }
-                else
-                {
-                    --positionHistory[newPositionFEN];
-                }
+
+                var oldValue = movesWithoutCaptureOrPawnMove;
+                movesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, movesWithoutCaptureOrPawnMove);
+                var repetitions = Utils.UpdatePositionHistory(newPositionFEN, positionHistory);
+                var (evaluation, bestMoveExistingMoveList) = NegaMax_AlphaBeta_Quiescence_IDDFS(newPosition, positionHistory, movesWithoutCaptureOrPawnMove, orderedMoves, killerMoves, minDepth, depthLimit, ref nodes, plies + 1, -beta, -alpha, cancellationToken, absoluteCancellationToken);
+                movesWithoutCaptureOrPawnMove = oldValue;
+                Utils.RevertPositionHistory(newPositionFEN, positionHistory, repetitions);
 
                 // Since SimplePriorityQueue has lower priority at the top, we do this before inverting the sign of the evaluation
                 newPriorityQueue.Enqueue(move, evaluation);
@@ -107,7 +103,7 @@ namespace Lynx.Search
                 // Fail-hard beta-cutoff
                 if (evaluation >= beta)
                 {
-                    Logger.Trace($"Prunning: {bestMove} is enough");
+                    Logger.Trace($"Pruning: {bestMove} is enough");
 
                     // Add the non-evaluated moves with a higher priority than the existing one, so that they're evaluated later.
                     var nonEvaluatedMovesEval = -evaluation + 100_000;  // Using the inverted evaluation
@@ -133,7 +129,7 @@ namespace Lynx.Search
             if (bestMove is null)
             {
                 ++nodes;
-                return (position.EvaluateFinalPosition_NegaMax(plies, positionHistory), new Result());
+                return (position.EvaluateFinalPosition_NegaMax(plies, positionHistory, movesWithoutCaptureOrPawnMove), new Result());
             }
 
             // Node fails low
