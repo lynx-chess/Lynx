@@ -87,20 +87,31 @@ namespace Lynx
             }
         }
 
-        // Chaking movesWithoutCaptureOrPawnMove >= 50 since a caoture/pawn move don't necessarily 'clear' the variable.
-        // i.e. at depth 2 0.0, 50 rules move apply
-        // If the engine searches at depth 4, 50 rules must apply even if at depth 3 a capture happened
+        /// <summary>
+        /// Updates <paramref name="movesWithoutCaptureOrPawnMove"/>
+        /// </summary>
+        /// <param name="moveToPlay"></param>
+        /// <param name="movesWithoutCaptureOrPawnMove"></param>
+        /// <remarks>
+        /// Checking movesWithoutCaptureOrPawnMove >= 50 since a capture/pawn move doesn't necessarily 'clear' the variable.
+        /// i.e. while the engine is searching:
+        ///     At depth 2, 50 rules move applied and eval is 0
+        ///     At depth 3, there's a capture, but the eval should still be 0
+        ///     At depth 4 there's no capture, but the eval should still be 0
+        /// </remarks>
         public static int Update50movesRule(Move moveToPlay, int movesWithoutCaptureOrPawnMove)
         {
             if (moveToPlay.IsCapture())
             {
-                return movesWithoutCaptureOrPawnMove >= 50 ? movesWithoutCaptureOrPawnMove : 0;
+                return movesWithoutCaptureOrPawnMove >= 50
+                    ? movesWithoutCaptureOrPawnMove
+                    : 0;
             }
             else
             {
                 var pieceToMove = moveToPlay.Piece();
 
-                return ((pieceToMove == (int)Piece.P || pieceToMove == (int)Piece.p)) && movesWithoutCaptureOrPawnMove < 50
+                return (pieceToMove == (int)Piece.P || pieceToMove == (int)Piece.p) && movesWithoutCaptureOrPawnMove < 50
                     ? 0
                     : movesWithoutCaptureOrPawnMove + 1;
             }
