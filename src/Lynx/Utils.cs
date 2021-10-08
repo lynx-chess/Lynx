@@ -1,5 +1,6 @@
 ﻿using Lynx.Model;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Lynx
@@ -65,6 +66,55 @@ namespace Lynx
             GuardAgainstSideBoth(side);
 
             return (int)BoardSquare.a8 + (7 * 8 * side);
+        }
+
+        public static int UpdatePositionHistory(string newPositionFEN, Dictionary<string, int> positionHistory)
+        {
+            positionHistory.TryGetValue(newPositionFEN, out int repetitions);
+
+            return positionHistory[newPositionFEN] = ++repetitions;
+        }
+
+        public static void RevertPositionHistory(string newPositionFEN, Dictionary<string, int> positionHistory, int repetitions)
+        {
+            if (repetitions == 1)
+            {
+                positionHistory.Remove(newPositionFEN);
+            }
+            else
+            {
+                --positionHistory[newPositionFEN];
+            }
+        }
+
+        /// <summary>
+        /// Updates <paramref name="movesWithoutCaptureOrPawnMove"/>
+        /// </summary>
+        /// <param name="moveToPlay"></param>
+        /// <param name="movesWithoutCaptureOrPawnMove"></param>
+        /// <remarks>
+        /// Checking movesWithoutCaptureOrPawnMove >= 50 since a capture/pawn move doesn't necessarily 'clear' the variable.
+        /// i.e. while the engine is searching:
+        ///     At depth 2, 50 rules move applied and eval is 0
+        ///     At depth 3, there's a capture, but the eval should still be 0
+        ///     At depth 4 there's no capture, but the eval should still be 0
+        /// </remarks>
+        public static int Update50movesRule(Move moveToPlay, int movesWithoutCaptureOrPawnMove)
+        {
+            if (moveToPlay.IsCapture())
+            {
+                return movesWithoutCaptureOrPawnMove >= 50
+                    ? movesWithoutCaptureOrPawnMove
+                    : 0;
+            }
+            else
+            {
+                var pieceToMove = moveToPlay.Piece();
+
+                return (pieceToMove == (int)Piece.P || pieceToMove == (int)Piece.p) && movesWithoutCaptureOrPawnMove < 50
+                    ? 0
+                    : movesWithoutCaptureOrPawnMove + 1;
+            }
         }
 
         [Conditional("DEBUG")]
