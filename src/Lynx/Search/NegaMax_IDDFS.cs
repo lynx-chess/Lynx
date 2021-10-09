@@ -30,7 +30,7 @@ namespace Lynx.Search
                 cancellationToken?.ThrowIfCancellationRequested();
             }
 
-            var positionId = position.FEN();
+            var positionId = position.FEN;
 
             if (orderedMoves.TryGetValue(positionId, out var pseudoLegalMoves))
             {
@@ -77,7 +77,7 @@ namespace Lynx.Search
 
                 PrintPreMove(position, plies, move);
 
-                var newPositionFEN = newPosition.FEN();
+                var newPositionFEN = newPosition.FEN;
 
                 var oldValue = movesWithoutCaptureOrPawnMove;
                 movesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, movesWithoutCaptureOrPawnMove);
