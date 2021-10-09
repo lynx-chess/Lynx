@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Lynx.Model
 {
-    public struct Position
+    public class Position
     {
         internal const int CheckMateEvaluation = 1_000_000_000;
 
@@ -174,7 +174,7 @@ namespace Lynx.Model
         /// False if any of the kings has been captured, or if the opponent king is in check.
         /// </summary>
         /// <returns></returns>
-        public readonly bool IsValid()
+        public bool IsValid()
         {
             var kingSquare = PieceBitBoards[(int)Piece.K + Utils.PieceOffset(Side)].GetLS1BIndex();
             var oppositeKingSquare = PieceBitBoards[(int)Piece.K + Utils.PieceOffset((Side)Utils.OppositeSide(Side))].GetLS1BIndex();
@@ -196,7 +196,7 @@ namespace Lynx.Model
             return oppositeKingSquare >= 0 && !Attacks.IsSquaredAttacked(oppositeKingSquare, Side, PieceBitBoards, OccupancyBitBoards);
         }
 
-        private readonly string CalculateFEN()
+        private string CalculateFEN()
         {
             var sb = new StringBuilder(100);
 
@@ -482,7 +482,7 @@ namespace Lynx.Model
             Console.WriteLine(separator);
         }
 
-        public readonly void PrintAttackedSquares(Side sideToMove)
+        public void PrintAttackedSquares(Side sideToMove)
         {
             const string separator = "____________________________________________________";
             Console.WriteLine(separator);
