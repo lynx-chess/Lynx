@@ -298,10 +298,13 @@ namespace Lynx.Model
         internal string CalculateId()
         {
             var sb = new StringBuilder(260);    // 252 = 12 * $"{ulong.MaxValue}".Length + 2
-            foreach (var item in PieceBitBoards)
+
+            for (int index = 0; index < PieceBitBoards.Length; ++index)
             {
-                sb.Append(item.Board.ToString());
+                sb.Append(PieceBitBoards[index].Board);
+#if DEBUG
                 sb.Append('|');
+#endif
             }
 
             sb.Append((int)Side);
