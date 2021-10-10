@@ -36,7 +36,7 @@ namespace Lynx.Search
                         cancellationToken.ThrowIfCancellationRequested();
                     }
                     nodes = 0;
-                    (bestEvaluation, Result? bestResult) = NegaMax_AlphaBeta_Quiescence_IDDFS(position, positionHistory, movesWithoutCaptureOrPawnMove, orderedMoves, killerMoves, minDepth: minDepth, depthLimit: depth, nodes: ref nodes, plies: 0, alpha: MinValue, beta: MaxValue, cancellationToken, absoluteCancellationToken);
+                    (bestEvaluation, Result? bestResult) = NegaMax(position, positionHistory, movesWithoutCaptureOrPawnMove, orderedMoves, killerMoves, minDepth: minDepth, depthLimit: depth, nodes: ref nodes, plies: 0, alpha: MinValue, beta: MaxValue, cancellationToken, absoluteCancellationToken);
 
                     if (bestResult is not null)
                     {

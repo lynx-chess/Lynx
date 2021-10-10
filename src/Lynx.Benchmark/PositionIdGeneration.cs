@@ -279,7 +279,7 @@ namespace Lynx.Benchmark
 
             return newPosition.FEN;
         }
-        
+
         [Benchmark]
         [ArgumentsSource(nameof(Data))]
         public string RecordClass_FENCalculatedOnTheFly(string fen)
@@ -303,7 +303,7 @@ namespace Lynx.Benchmark
 
             return newPosition.FEN;
         }
-        
+
         [Benchmark]
         [ArgumentsSource(nameof(Data))]
         public string RecordStruct_FENCalculatedOnTheFly(string fen)

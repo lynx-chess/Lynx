@@ -111,69 +111,6 @@ namespace Lynx.Test
         }
 
         [Theory]
-        [InlineData(Constants.InitialPositionFEN, 0)]
-        [InlineData("rnbqkbnr/ppppppp1/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", +100)]
-        [InlineData("rnbqkbnr/ppppppp1/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1", +100)]
-        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPP1/RNBQKBNR w KQkq - 0 1", -100)]
-        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPP1/RNBQKBNR b KQkq - 0 1", -100)]
-        [InlineData("rnbqkb1r/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", +300)]
-        [InlineData("rnbqkb1r/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1", +300)]
-        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKB1R w KQkq - 0 1", -300)]
-        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKB1R b KQkq - 0 1", -300)]
-        [InlineData("rnbqk1nr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", +350)]
-        [InlineData("rnbqk1nr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1", +350)]
-        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQK1NR w KQkq - 0 1", -350)]
-        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQK1NR b KQkq - 0 1", -350)]
-        [InlineData("rnbqkbn1/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", +500)]
-        [InlineData("rnbqkbn1/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1", +500)]
-        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBN1 w KQkq - 0 1", -500)]
-        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBN1 b KQkq - 0 1", -500)]
-        [InlineData("rnb1kbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", +900)]
-        [InlineData("rnb1kbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1", +900)]
-        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNB1KBNR w KQkq - 0 1", -900)]
-        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNB1KBNR b KQkq - 0 1", -900)]
-        public void EvaluateMaterial(string fen, int expectedEvaluationValue)
-        {
-            Assert.Equal(expectedEvaluationValue, new Position(fen).EvaluateMaterial());
-        }
-
-        [Theory]
-        [InlineData("7k/8/8/8/8/3B4/1K6/6Q1 b - - 0 1", 0)]
-        [InlineData("7K/8/8/8/8/3b4/1k6/6q1 w - - 0 1", 0)]
-        [InlineData("8/5K2/7p/6pk/6p1/6P1/7P/8 b - - 0 1", 0)]
-        [InlineData("8/7p/6p1/6P1/6PK/5k1P/8/8 w - - 0 1", 0)]
-        [InlineData("7k/8/8/8/8/8/1K5R/6R1 b - - 0 1", +Position.CheckMateEvaluation)]
-        [InlineData("7K/8/8/8/8/8/1k5r/6r1 w - - 0 1", -Position.CheckMateEvaluation)]
-        public void EvaluateFinalPosition_AlphaBeta(string fen, int expectedEvaluationValue)
-        {
-            // Arrange
-            var position = new Position(fen);
-            Assert.Empty(position.AllPossibleMoves().Where(move => new Position(position, move).IsValid()));
-
-            // Act
-            var noDepthResult = position.EvaluateFinalPosition_AlphaBeta(default);
-            var depthOneResult = position.EvaluateFinalPosition_AlphaBeta(1);
-            var depthTwoResult = position.EvaluateFinalPosition_AlphaBeta(2);
-
-            Assert.Equal(expectedEvaluationValue, noDepthResult);
-
-            if (expectedEvaluationValue > 0)
-            {
-                Assert.Equal(Side.Black, position.Side);
-
-                Assert.True(noDepthResult > depthOneResult);
-                Assert.True(depthOneResult > depthTwoResult);
-            }
-            else if (expectedEvaluationValue < 0)
-            {
-                Assert.Equal(Side.White, position.Side);
-
-                Assert.True(noDepthResult < depthOneResult);
-                Assert.True(depthOneResult < depthTwoResult);
-            }
-        }
-
-        [Theory]
         [InlineData("7k/8/8/8/8/3B4/1K6/6Q1 b - - 0 1", 0)]
         [InlineData("7K/8/8/8/8/3b4/1k6/6q1 w - - 0 1", 0)]
         [InlineData("8/5K2/7p/6pk/6p1/6P1/7P/8 b - - 0 1", 0)]
@@ -187,9 +124,9 @@ namespace Lynx.Test
             Assert.Empty(position.AllPossibleMoves().Where(move => new Position(position, move).IsValid()));
 
             // Act
-            var noDepthResult = position.EvaluateFinalPosition_NegaMax(default, new(), default);
-            var depthOneResult = position.EvaluateFinalPosition_NegaMax(1, new(), default);
-            var depthTwoResult = position.EvaluateFinalPosition_NegaMax(2, new(), default);
+            var noDepthResult = position.EvaluateFinalPosition(default, new(), default);
+            var depthOneResult = position.EvaluateFinalPosition(1, new(), default);
+            var depthTwoResult = position.EvaluateFinalPosition(2, new(), default);
 
             if (expectedEvaluationValue < 0)
             {
@@ -225,7 +162,7 @@ namespace Lynx.Test
 
             Assert.Equal(repeatedMoves.Count, game.MoveHistory.Count);
 
-            var eval = winningPosition.EvaluateMaterialAndPosition_NegaMax(game.PositionFENHistory, default);
+            var eval = winningPosition.StaticEvaluation(game.PositionFENHistory, default);
             Assert.Equal(0, eval);
         }
 
@@ -251,7 +188,7 @@ namespace Lynx.Test
             repeatedMoves.ForEach(move => Assert.True(game.MakeMove(move)));
             Assert.Equal(repeatedMoves.Count, game.MoveHistory.Count);
 
-            var eval = winningPosition.EvaluateMaterialAndPosition_NegaMax(game.PositionFENHistory, default);
+            var eval = winningPosition.StaticEvaluation(game.PositionFENHistory, default);
             Assert.Equal(0, eval);
         }
 
@@ -271,7 +208,7 @@ namespace Lynx.Test
 
             for (int i = 0; i < 48; ++i)
             {
-                Assert.True(game.MakeMove(nonCaptureOrPawnMoveMoves.ElementAt(i % nonCaptureOrPawnMoveMoves.Count)));
+                Assert.True(game.MakeMove(nonCaptureOrPawnMoveMoves[i % nonCaptureOrPawnMoveMoves.Count]));
             }
 
             Assert.True(game.MakeMove(nonCaptureOrPawnMoveMoves[0]));
@@ -280,7 +217,7 @@ namespace Lynx.Test
 
             Assert.Equal(51, game.MoveHistory.Count);
 
-            var eval = winningPosition.EvaluateMaterialAndPosition_NegaMax(new(), game.MovesWithoutCaptureOrPawnMove);
+            var eval = winningPosition.StaticEvaluation(new(), game.MovesWithoutCaptureOrPawnMove);
             Assert.Equal(0, eval);
         }
 
@@ -301,12 +238,12 @@ namespace Lynx.Test
 
             for (int i = 0; i < 50; ++i)
             {
-                Assert.True(game.MakeMove(nonCaptureOrPawnMoveMoves.ElementAt(i % nonCaptureOrPawnMoveMoves.Count)));
+                Assert.True(game.MakeMove(nonCaptureOrPawnMoveMoves[i % nonCaptureOrPawnMoveMoves.Count]));
             }
 
             Assert.Equal(50, game.MoveHistory.Count);
 
-            var eval = winningPosition.EvaluateMaterialAndPosition_NegaMax(new(), game.MovesWithoutCaptureOrPawnMove);
+            var eval = winningPosition.StaticEvaluation(new(), game.MovesWithoutCaptureOrPawnMove);
             Assert.Equal(0, eval);
         }
 
@@ -327,7 +264,7 @@ namespace Lynx.Test
 
             for (int i = 0; i < 48; ++i)
             {
-                Assert.True(game.MakeMove(nonCaptureOrPawnMoveMoves.ElementAt(i % nonCaptureOrPawnMoveMoves.Count)));
+                Assert.True(game.MakeMove(nonCaptureOrPawnMoveMoves[i % nonCaptureOrPawnMoveMoves.Count]));
             }
 
             Assert.True(game.MakeMove(new ((int)BoardSquare.h2, (int)BoardSquare.h1, (int)Piece.p, promotedPiece: (int)(Piece.q))));   // Promotion
@@ -336,7 +273,7 @@ namespace Lynx.Test
 
             Assert.Equal(51, game.MoveHistory.Count);
 
-            var eval = winningPosition.EvaluateMaterialAndPosition_NegaMax(new(), game.MovesWithoutCaptureOrPawnMove);
+            var eval = winningPosition.StaticEvaluation(new(), game.MovesWithoutCaptureOrPawnMove);
             Assert.NotEqual(0, eval);
         }
     }
