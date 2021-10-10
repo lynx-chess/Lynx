@@ -417,7 +417,7 @@ static void _28_Move_Encoding()
     int move = 0;
 
     // Target square: h1 (63)
-    var targetSquare = BoardSquare.h1;
+    const BoardSquare targetSquare = BoardSquare.h1;
 
     // Encode move
     move = (move | (int)targetSquare) << 6;
@@ -534,93 +534,93 @@ static void _44_ParseUCI()
 
 static void _49_Rudimetary_Evaluation()
 {
-    var position = new Position(Constants.InitialPositionFEN);
+    //var position = new Position(Constants.InitialPositionFEN);
 
-    foreach (var move in MoveGenerator.GenerateAllMoves(position))
-    {
-        var newBlackPosition = new Position(position, move);
-        if (newBlackPosition.IsValid())
-        {
-            var newWhitePosition = new Position(newBlackPosition, newBlackPosition.AllPossibleMoves()[0]);
-            if (newBlackPosition.IsValid())
-            {
-                Console.WriteLine($"{move} | {newWhitePosition.EvaluateMaterial()} | {newWhitePosition.EvaluateMaterialAndPosition_MiniMax()}");
-            }
-        }
-    }
+    //foreach (var move in MoveGenerator.GenerateAllMoves(position))
+    //{
+    //    var newBlackPosition = new Position(position, move);
+    //    if (newBlackPosition.IsValid())
+    //    {
+    //        var newWhitePosition = new Position(newBlackPosition, newBlackPosition.AllPossibleMoves()[0]);
+    //        if (newBlackPosition.IsValid())
+    //        {
+    //            Console.WriteLine($"{move} | {newWhitePosition.EvaluateMaterial()} | {newWhitePosition.EvaluateMaterialAndPosition_MiniMax()}");
+    //        }
+    //    }
+    //}
 }
 
 static void _50_MiniMax_AlphaBeta()
 {
-    const string fen = "7k/6b1/7p/2p1pPpP/2P3P1/5P2/7N/7K w - - 0 1";
+    //const string fen = "7k/6b1/7p/2p1pPpP/2P3P1/5P2/7N/7K w - - 0 1";
 
-    {
-        var game = new Game(fen);
-        var (evaluation, moveList) = SearchAlgorithms.MiniMax(game.CurrentPosition, Configuration.EngineSettings.Depth);
-        Console.WriteLine($"Evaluation: {evaluation}");
+    //{
+    //    var game = new Game(fen);
+    //    var (evaluation, moveList) = SearchAlgorithms.MiniMax(game.CurrentPosition, Configuration.EngineSettings.Depth);
+    //    Console.WriteLine($"Evaluation: {evaluation}");
 
-        var bestMove = moveList!.Moves.Last();
-        Console.WriteLine($"Best move: {bestMove}");
-    }
+    //    var bestMove = moveList!.Moves.Last();
+    //    Console.WriteLine($"Best move: {bestMove}");
+    //}
 
-    Console.WriteLine("=====================================================================================");
+    //Console.WriteLine("=====================================================================================");
 
-    /*
-     * 8   . . . . . . . k
-     * 7   . . . . . . b .
-     * 6   . . . . . . . p
-     * 5   . . p . p P p P
-     * 4   . . P . . . P .
-     * 3   . . . . . P . .
-     * 2   . . . . . . . N
-     * 1   . . . . . . . K
-     *     a b c d e f g h
-     *
-     *          o
-     *            \ f5f6
-     *             * -----------
-     *     e5e4  /   \  h8h7     \  g7f8
-     *          /     \           \
-     *         o       o ----      o
-     *    f6g7 |  f6f7 | \   \
-     *         |       |  \   \
-     *         *       *   *   *
-     *       +415    +415  ??  ??
-     *
-     *  o -> White
-     *  * -> Black
-     *
-     *       1/     f5f6
-     *       2/     e5e4
-     *       3/     f6g7 + resto de hermanos
-     *       2.a/   e5e4 -> +415
-     *       4/     h8h7
-     *       5/     f6f7 -> +415
-     *       4.a8   h8h7 >= +415 -> Las blancas nunca van a hacer algo peor que eso
-     */
-    {
-        var game = new Game(fen);
-        var (evaluation, moveList) = SearchAlgorithms.MiniMax_AlphaBeta(game.CurrentPosition, Configuration.EngineSettings.Depth);
-        Console.WriteLine($"Evaluation: {evaluation}");
+    //*
+    // * 8   . . . . . . . k
+    // * 7   . . . . . . b .
+    // * 6   . . . . . . . p
+    // * 5   . . p . p P p P
+    // * 4   . . P . . . P .
+    // * 3   . . . . . P . .
+    // * 2   . . . . . . . N
+    // * 1   . . . . . . . K
+    // *     a b c d e f g h
+    // *
+    // *          o
+    // *            \ f5f6
+    // *             * -----------
+    // *     e5e4  /   \  h8h7     \  g7f8
+    // *          /     \           \
+    // *         o       o ----      o
+    // *    f6g7 |  f6f7 | \   \
+    // *         |       |  \   \
+    // *         *       *   *   *
+    // *       +415    +415  ??  ??
+    // *
+    // *  o -> White
+    // *  * -> Black
+    // *
+    // *       1/     f5f6
+    // *       2/     e5e4
+    // *       3/     f6g7 + resto de hermanos
+    // *       2.a/   e5e4 -> +415
+    // *       4/     h8h7
+    // *       5/     f6f7 -> +415
+    // *       4.a8   h8h7 >= +415 -> Las blancas nunca van a hacer algo peor que eso
+    // */
+    //{
+    //    var game = new Game(fen);
+    //    var (evaluation, moveList) = SearchAlgorithms.MiniMax_AlphaBeta(game.CurrentPosition, Configuration.EngineSettings.Depth);
+    //    Console.WriteLine($"Evaluation: {evaluation}");
 
-        var bestMove = moveList!.Moves.Last();
-        Console.WriteLine($"Best move: {bestMove}");
-    }
+    //    var bestMove = moveList!.Moves.Last();
+    //    Console.WriteLine($"Best move: {bestMove}");
+    //}
 }
 
 static void _52_Quiescence_Search()
 {
-    const string fen = "8/1p4pp/kPp5/p1P3PP/KpP5/1Pp2P2/2P5/8 w - - 0 1";
+    //const string fen = "8/1p4pp/kPp5/p1P3PP/KpP5/1Pp2P2/2P5/8 w - - 0 1";
 
-    var game = new Game(fen);
+    //var game = new Game(fen);
 
-    game.CurrentPosition.Print();
+    //game.CurrentPosition.Print();
 
-    var (evaluation, moveList) = SearchAlgorithms.MiniMax_AlphaBeta_Quiescence(game.CurrentPosition, Configuration.EngineSettings.Depth - 1);
-    Console.WriteLine($"Evaluation: {evaluation}");
+    //var (evaluation, moveList) = SearchAlgorithms.MiniMax_AlphaBeta_Quiescence(game.CurrentPosition, Configuration.EngineSettings.Depth - 1);
+    //Console.WriteLine($"Evaluation: {evaluation}");
 
-    var bestMove = moveList!.Moves.Last();
-    Console.WriteLine($"Best move: {bestMove}");
+    //var bestMove = moveList!.Moves.Last();
+    //Console.WriteLine($"Best move: {bestMove}");
 }
 
 static void _53_MVVLVA()

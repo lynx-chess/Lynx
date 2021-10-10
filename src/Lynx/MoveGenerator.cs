@@ -11,6 +11,7 @@ namespace Lynx
         private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
 
         private const int TRUE = 1;
+
         /// <summary>
         /// Checks are not considered
         /// </summary>

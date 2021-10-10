@@ -1,4 +1,4 @@
-﻿using NLog;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -290,58 +290,11 @@ namespace Lynx.Model
         }
 
         /// <summary>
-        /// Positive scores favour White, negative ones favour Black
+        /// Evaluates material and position in a NegaMax style.
+        /// That is, positive scores always favour playing <see cref="Side"/>.
         /// </summary>
         /// <returns></returns>
-        public int StaticEvaluation_MiniMax() => EvaluateMaterialAndPosition_MiniMax();
-
-        /// <summary>
-        /// Positive scores always favour playing <see cref="Side"/>
-        /// </summary>
-        /// <returns></returns>
-        public int StaticEvaluation_NegaMax(Dictionary<string, int> positionHistory, int movesWithoutCaptureOrPawnMove) => EvaluateMaterialAndPosition_NegaMax(positionHistory, movesWithoutCaptureOrPawnMove);
-
-        public List<Move> AllPossibleMoves(int[,]? killerMoves = null, int? plies = null) => MoveGenerator.GenerateAllMoves(this, killerMoves, plies);
-
-        public List<Move> AllCapturesMoves() => MoveGenerator.GenerateAllMoves(this, capturesOnly: true);
-
-        public int EvaluateMaterial()
-        {
-            var eval = 0;
-            for (int pieceIndex = 0; pieceIndex < PieceBitBoards.Length; ++pieceIndex)
-            {
-                eval += (EvaluationConstants.MaterialScore[pieceIndex] * PieceBitBoards[pieceIndex].CountBits());
-            }
-
-            return eval;
-        }
-
-        public int EvaluateMaterialAndPosition_MiniMax()
-        {
-            var eval = 0;
-
-            for (int pieceIndex = 0; pieceIndex < PieceBitBoards.Length; ++pieceIndex)
-            {
-                // Bitboard 'copy'. Use long directly to avoid the extra allocations
-                var bitboard = PieceBitBoards[pieceIndex].Board;
-
-                while (bitboard != default)
-                {
-                    var pieceSquareIndex = BitBoard.GetLS1BIndex(bitboard);
-                    bitboard = BitBoard.ResetLS1B(bitboard);
-
-                    // Material evaluation
-                    eval += EvaluationConstants.MaterialScore[pieceIndex];
-
-                    // Positional evaluation
-                    eval += EvaluationConstants.PositionalScore[pieceIndex][pieceSquareIndex];
-                }
-            }
-
-            return eval;
-        }
-
-        public int EvaluateMaterialAndPosition_NegaMax(Dictionary<string, int> positionHistory, int movesWithoutCaptureOrPawnMove)
+        public int StaticEvaluation(Dictionary<string, int> positionHistory, int movesWithoutCaptureOrPawnMove)
         {
             var eval = 0;
 
@@ -373,38 +326,19 @@ namespace Lynx.Model
                 : -eval;
         }
 
-        /// <summary>
-        /// Assuming a current position has no legal moves (<see cref="AllPossibleMoves"/> doesn't produce any <see cref="IsValid"/> position),
-        /// this method determines if a position is a result of either a loss by Checkmate or a draw by stalemate
-        /// </summary>
-        /// <param name="depth">Modulates the output, favouring positions with lower depth left (i.e. Checkmate in less moves)</param>
-        /// <returns>At least <see cref="CheckMateEvaluation"/> if Position.Side lost (more extreme values when <paramref name="depth"/> increases)
-        /// or 0 if Position.Side was stalemated</returns>
-        public int EvaluateFinalPosition_AlphaBeta(int depth)
-        {
-            if (Attacks.IsSquaredAttackedBySide(
-                PieceBitBoards[(int)Piece.K + Utils.PieceOffset(Side)].GetLS1BIndex(),
-                this,
-                (Side)Utils.OppositeSide(Side)))
-            {
-                return Side == Side.White
-                    ? -CheckMateEvaluation + (DepthFactor * depth)
-                    : CheckMateEvaluation - (DepthFactor * depth);
-            }
-            else
-            {
-                return default;
-            }
-        }
+        public List<Move> AllPossibleMoves(int[,]? killerMoves = null, int? plies = null) => MoveGenerator.GenerateAllMoves(this, killerMoves, plies);
+
+        public List<Move> AllCapturesMoves() => MoveGenerator.GenerateAllMoves(this, capturesOnly: true);
 
         /// <summary>
         /// Assuming a current position has no legal moves (<see cref="AllPossibleMoves"/> doesn't produce any <see cref="IsValid"/> position),
-        /// this method determines if a position is a result of either a loss by Checkmate or a draw by stalemate
+        /// this method determines if a position is a result of either a loss by Checkmate or a draw by stalemate.
+        /// NegaMax style
         /// </summary>
         /// <param name="depth">Modulates the output, favouring positions with lower depth left (i.e. Checkmate in less moves)</param>
         /// <returns>At least <see cref="CheckMateEvaluation"/> if Position.Side lost (more extreme values when <paramref name="depth"/> increases)
         /// or 0 if Position.Side was stalemated</returns>
-        public int EvaluateFinalPosition_NegaMax(int depth, Dictionary<string, int> positionHistory, int movesWithoutCaptureOrPawnMove)
+        public int EvaluateFinalPosition(int depth, Dictionary<string, int> positionHistory, int movesWithoutCaptureOrPawnMove)
         {
             if (positionHistory.Values.Any(val => val >= 3) || movesWithoutCaptureOrPawnMove >= 50)
             {

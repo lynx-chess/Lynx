@@ -227,12 +227,6 @@ namespace Lynx
 
         #endregion
 
-        private async Task NotifyBestMove(SearchResult searchResult, Move? moveToPonder)
-        {
-            await _engineWriter.Writer.WriteAsync(InfoCommand.SearchResultInfo(searchResult));
-            await _engineWriter.Writer.WriteAsync(BestMoveCommand.BestMove(searchResult.BestMove, moveToPonder));
-        }
-
         private async Task SendCommand(string command, CancellationToken cancellationToken)
         {
             await _engineWriter.Writer.WriteAsync(command, cancellationToken);
