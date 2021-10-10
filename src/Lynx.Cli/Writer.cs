@@ -21,15 +21,10 @@ namespace Lynx.Cli
         {
             try
             {
-                while (await _engineOutputReader.WaitToReadAsync(cancellationToken) && !cancellationToken.IsCancellationRequested)
+                await foreach (var output in _engineOutputReader.ReadAllAsync(cancellationToken))
                 {
-                    _engineOutputReader.TryRead(out var output);
-
-                    if (!string.IsNullOrWhiteSpace(output))
-                    {
-                        _logger.Debug($"[Lynx]\t{output}");
-                        Console.WriteLine(output);
-                    }
+                    _logger.Debug($"[Lynx]\t{output}");
+                    Console.WriteLine(output);
                 }
             }
             catch (Exception e)

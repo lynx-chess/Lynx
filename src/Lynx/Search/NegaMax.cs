@@ -154,7 +154,7 @@ namespace Lynx.Search
                 }
 
                 PrintPreMove(position, plies, move, isQuiescence: true);
-                var newPositionFEN = newPosition.FEN();
+                var newPositionFEN = newPosition.FEN;
 
                 var oldValue = movesWithoutCaptureOrPawnMove;
                 movesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, movesWithoutCaptureOrPawnMove);

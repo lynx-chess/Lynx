@@ -33,7 +33,7 @@ namespace Lynx.Cli
             }
             finally
             {
-                _logger.Info($"Finishing {nameof(Writer)}");
+                _logger.Info($"Finishing {nameof(Listener)}");
             }
         }
     }

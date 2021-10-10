@@ -7,13 +7,21 @@ using System.Text;
 
 namespace Lynx.Model
 {
-    public readonly struct Position
+    public class Position
     {
         internal const int CheckMateEvaluation = 1_000_000_000;
 
         internal const int DepthFactor = 1_000_000;
 
         private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
+
+        private string? _fen;
+
+        public string FEN
+        {
+            get => _fen ??= CalculateFEN();
+            init => _fen = value;
+        }
 
         /// <summary>
         /// Use <see cref="Piece"/> as index
@@ -33,6 +41,7 @@ namespace Lynx.Model
 
         public Position(string fen)
         {
+            _fen = null;    // Otherwise halfmove and fullmove numbers may interfere whenever FEN is being used as key of a dictionary
             var parsedFEN = FENParser.ParseFEN(fen);
 
             if (!parsedFEN.Success)
@@ -53,6 +62,7 @@ namespace Lynx.Model
         /// <param name="position"></param>
         public Position(Position position)
         {
+            _fen = position.FEN;
             PieceBitBoards = new BitBoard[12];
             Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
 
@@ -66,6 +76,7 @@ namespace Lynx.Model
 
         public Position(Position position, Move move) : this(position)
         {
+            _fen = null;
             var oldSide = Side;
             var offset = Utils.PieceOffset(oldSide);
             var oppositeSide = Utils.OppositeSide(oldSide);
@@ -115,26 +126,6 @@ namespace Lynx.Model
                     }
 
                     OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
-
-                    // Remove castling rights when a rook in the corners is captured
-                    if (Castle != default)
-                    {
-                        switch (targetSquare)
-                        {
-                            case (int)BoardSquare.a1:
-                                Castle &= ~(int)CastlingRights.WQ;
-                                break;
-                            case (int)BoardSquare.h1:
-                                Castle &= ~(int)CastlingRights.WK;
-                                break;
-                            case (int)BoardSquare.a8:
-                                Castle &= ~(int)CastlingRights.BQ;
-                                break;
-                            case (int)BoardSquare.h8:
-                                Castle &= ~(int)CastlingRights.BK;
-                                break;
-                        }
-                    }
                 }
             }
             else if (move.IsDoublePawnPush())
@@ -182,7 +173,7 @@ namespace Lynx.Model
         /// False if any of the kings has been captured, or if the opponent king is in check.
         /// </summary>
         /// <returns></returns>
-        public readonly bool IsValid()
+        public bool IsValid()
         {
             var kingSquare = PieceBitBoards[(int)Piece.K + Utils.PieceOffset(Side)].GetLS1BIndex();
             var oppositeKingSquare = PieceBitBoards[(int)Piece.K + Utils.PieceOffset((Side)Utils.OppositeSide(Side))].GetLS1BIndex();
@@ -204,7 +195,7 @@ namespace Lynx.Model
             return oppositeKingSquare >= 0 && !Attacks.IsSquaredAttacked(oppositeKingSquare, Side, PieceBitBoards, OccupancyBitBoards);
         }
 
-        public readonly string FEN()
+        private string CalculateFEN()
         {
             var sb = new StringBuilder(100);
 
@@ -437,7 +428,7 @@ namespace Lynx.Model
         /// Combines <see cref="PieceBitBoards"/>, <see cref="Side"/>, <see cref="Castle"/> and <see cref="EnPassant"/>
         /// into a human-friendly representation
         /// </summary>
-        public readonly void Print()
+        public void Print()
         {
             const string separator = "____________________________________________________";
             Console.WriteLine(separator + Environment.NewLine);
@@ -484,12 +475,12 @@ namespace Lynx.Model
                 $"{((Castle & (int)CastlingRights.BK) != default ? 'k' : '-')}" +
                 $"{((Castle & (int)CastlingRights.BQ) != default ? 'q' : '-')}"
                 );
-            Console.WriteLine($"    FEN:\t{FEN()}");
+            Console.WriteLine($"    FEN:\t{FEN}");
 
             Console.WriteLine(separator);
         }
 
-        public readonly void PrintAttackedSquares(Side sideToMove)
+        public void PrintAttackedSquares(Side sideToMove)
         {
             const string separator = "____________________________________________________";
             Console.WriteLine(separator);

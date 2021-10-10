@@ -30,7 +30,7 @@ namespace Lynx.Model
 
             MoveHistory = new(150);
             PositionHistory = new(150);
-            PositionFENHistory = new() { [position.FEN()] = 1 };
+            PositionFENHistory = new() { [position.FEN] = 1 };
         }
 
         public Game(string fen, List<string> movesUCIString) : this(fen)
@@ -76,8 +76,8 @@ namespace Lynx.Model
                 return false;
             }
 
-            PositionFENHistory.TryGetValue(CurrentPosition.FEN(), out int repetitions);
-            PositionFENHistory[CurrentPosition.FEN()] = ++repetitions;
+            PositionFENHistory.TryGetValue(CurrentPosition.FEN, out int repetitions);
+            PositionFENHistory[CurrentPosition.FEN] = ++repetitions;
 
             MovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveToPlay, MovesWithoutCaptureOrPawnMove);
 

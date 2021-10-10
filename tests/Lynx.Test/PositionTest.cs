@@ -17,10 +17,10 @@ namespace Lynx.Test
         public void FEN(string fen)
         {
             var position = new Position(fen);
-            Assert.Equal(fen, position.FEN());
+            Assert.Equal(fen, position.FEN);
 
             var newPosition = new Position(position);
-            Assert.Equal(fen, newPosition.FEN());
+            Assert.Equal(fen, newPosition.FEN);
         }
 
         [Theory]
