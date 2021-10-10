@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Lynx.Model
@@ -16,12 +17,17 @@ namespace Lynx.Model
         private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
 
         private string? _fen;
+        private string? _id;
 
         public string FEN
         {
             get => _fen ??= CalculateFEN();
             init => _fen = value;
         }
+
+        public string Id => _id ??= CalculateId();
+
+        public string UniqueIdentifier => Id;
 
         /// <summary>
         /// Use <see cref="Piece"/> as index
@@ -195,7 +201,7 @@ namespace Lynx.Model
             return oppositeKingSquare >= 0 && !Attacks.IsSquaredAttacked(oppositeKingSquare, Side, PieceBitBoards, OccupancyBitBoards);
         }
 
-        private string CalculateFEN()
+        internal string CalculateFEN()
         {
             var sb = new StringBuilder(100);
 
@@ -285,6 +291,18 @@ namespace Lynx.Model
             sb.Append(EnPassant == BoardSquare.noSquare ? "-" : Constants.Coordinates[(int)EnPassant]);
 
             sb.Append(" 0 1");
+
+            return sb.ToString();
+        }
+
+        internal string CalculateId()
+        {
+            var sb = new StringBuilder(256);    // 256 = 13 * $"{ulong.MaxValue}".Length
+            foreach (var item in PieceBitBoards)
+            {
+                sb.Append(item.ToString());
+                sb.Append('|');
+            }
 
             return sb.ToString();
         }

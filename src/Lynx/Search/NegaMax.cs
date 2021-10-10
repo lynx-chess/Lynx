@@ -77,14 +77,12 @@ namespace Lynx.Search
 
                 PrintPreMove(position, plies, move);
 
-                var newPositionFEN = newPosition.FEN;
-
                 var oldValue = movesWithoutCaptureOrPawnMove;
                 movesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, movesWithoutCaptureOrPawnMove);
-                var repetitions = Utils.UpdatePositionHistory(newPositionFEN, positionHistory);
+                var repetitions = Utils.UpdatePositionHistory(newPosition, positionHistory);
                 var (evaluation, bestMoveExistingMoveList) = NegaMax(newPosition, positionHistory, movesWithoutCaptureOrPawnMove, orderedMoves, killerMoves, minDepth, depthLimit, ref nodes, plies + 1, -beta, -alpha, cancellationToken, absoluteCancellationToken);
                 movesWithoutCaptureOrPawnMove = oldValue;
-                Utils.RevertPositionHistory(newPositionFEN, positionHistory, repetitions);
+                Utils.RevertPositionHistory(newPosition, positionHistory, repetitions);
 
                 // Since SimplePriorityQueue has lower priority at the top, we do this before inverting the sign of the evaluation
                 newPriorityQueue.Enqueue(move, evaluation);
@@ -203,14 +201,13 @@ namespace Lynx.Search
                 }
 
                 PrintPreMove(position, plies, move, isQuiescence: true);
-                var newPositionFEN = newPosition.FEN;
 
                 var oldValue = movesWithoutCaptureOrPawnMove;
                 movesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, movesWithoutCaptureOrPawnMove);
-                var repetitions = Utils.UpdatePositionHistory(newPositionFEN, positionHistory);
+                var repetitions = Utils.UpdatePositionHistory(newPosition, positionHistory);
                 var (evaluation, bestMoveExistingMoveList) = QuiescenceSearch(newPosition, positionHistory, movesWithoutCaptureOrPawnMove, quiescenceDepthLimit, ref nodes, plies + 1, -beta, -alpha, cancellationToken, absoluteCancellationToken);
                 movesWithoutCaptureOrPawnMove = oldValue;
-                Utils.RevertPositionHistory(newPositionFEN, positionHistory, repetitions);
+                Utils.RevertPositionHistory(newPosition, positionHistory, repetitions);
 
                 evaluation = -evaluation;
 

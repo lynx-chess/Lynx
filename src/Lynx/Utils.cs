@@ -68,22 +68,25 @@ namespace Lynx
             return (int)BoardSquare.a8 + (7 * 8 * side);
         }
 
-        public static int UpdatePositionHistory(string newPositionFEN, Dictionary<string, int> positionHistory)
+        public static int UpdatePositionHistory(Position newPosition, Dictionary<string, int> positionHistory)
         {
-            positionHistory.TryGetValue(newPositionFEN, out int repetitions);
+            var id = newPosition.UniqueIdentifier;
 
-            return positionHistory[newPositionFEN] = ++repetitions;
+            positionHistory.TryGetValue(id, out int repetitions);
+            return positionHistory[id] = ++repetitions;
         }
 
-        public static void RevertPositionHistory(string newPositionFEN, Dictionary<string, int> positionHistory, int repetitions)
+        public static void RevertPositionHistory(Position newPosition, Dictionary<string, int> positionHistory, int repetitions)
         {
+            var id = newPosition.UniqueIdentifier;
+
             if (repetitions == 1)
             {
-                positionHistory.Remove(newPositionFEN);
+                positionHistory.Remove(id);
             }
             else
             {
-                --positionHistory[newPositionFEN];
+                --positionHistory[id];
             }
         }
 
