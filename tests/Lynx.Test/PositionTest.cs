@@ -193,6 +193,67 @@ namespace Lynx.Test
         }
 
         [Fact]
+        public void EvaluateMaterialAndPosition_NegaMax_Threefold_CastleRightsRemoval()
+        {
+            // Arrange
+
+            // Position without castling rights
+            var winningPosition = new Position("1n2k2r/8/8/8/8/8/4PPPP/1N2K2R w - - 0 1");
+
+            var game = new Game(winningPosition);
+            var repeatedMoves = new List<Move>
+            {
+                new ((int)BoardSquare.b1, (int)BoardSquare.c3, (int)Piece.N),
+                new ((int)BoardSquare.b8, (int)BoardSquare.c6, (int)Piece.n),
+                new ((int)BoardSquare.c3, (int)BoardSquare.b1, (int)Piece.N),
+                new ((int)BoardSquare.c6, (int)BoardSquare.b8, (int)Piece.n),
+                new ((int)BoardSquare.e1, (int)BoardSquare.d1, (int)Piece.K),
+                new ((int)BoardSquare.b8, (int)BoardSquare.c6, (int)Piece.n),
+                new ((int)BoardSquare.d1, (int)BoardSquare.e1, (int)Piece.K),
+                new ((int)BoardSquare.c6, (int)BoardSquare.b8, (int)Piece.n)
+            };
+
+            repeatedMoves.ForEach(move => Assert.True(game.MakeMove(move)));
+            Assert.Equal(repeatedMoves.Count, game.MoveHistory.Count);
+
+            var eval = winningPosition.StaticEvaluation(game.PositionFENHistory, default);
+            Assert.Equal(0, eval);
+
+            // Position with castling rights, lost in move Ke1d1
+            winningPosition = new Position("1n2k2r/8/8/8/8/8/4PPPP/1N2K2R w Kk - 0 1");
+
+            game = new Game(winningPosition);
+            repeatedMoves = new List<Move>
+            {
+                new ((int)BoardSquare.b1, (int)BoardSquare.c3, (int)Piece.N),
+                new ((int)BoardSquare.b8, (int)BoardSquare.c6, (int)Piece.n),
+                new ((int)BoardSquare.c3, (int)BoardSquare.b1, (int)Piece.N),
+                new ((int)BoardSquare.c6, (int)BoardSquare.b8, (int)Piece.n),
+                new ((int)BoardSquare.e1, (int)BoardSquare.d1, (int)Piece.K),
+                new ((int)BoardSquare.b8, (int)BoardSquare.c6, (int)Piece.n),
+                new ((int)BoardSquare.d1, (int)BoardSquare.e1, (int)Piece.K),
+                new ((int)BoardSquare.c6, (int)BoardSquare.b8, (int)Piece.n)
+            };
+
+            // Act
+            repeatedMoves.ForEach(move => Assert.True(game.MakeMove(move)));
+            Assert.Equal(repeatedMoves.Count, game.MoveHistory.Count);
+
+            eval = winningPosition.StaticEvaluation(game.PositionFENHistory, default);
+            Assert.NotEqual(0, eval);
+
+            repeatedMoves.TakeLast(4).ToList().ForEach(move => Assert.True(game.MakeMove(move)));
+            Assert.Equal(repeatedMoves.Count + 4, game.MoveHistory.Count);
+            eval = winningPosition.StaticEvaluation(game.PositionFENHistory, default);
+            Assert.NotEqual(0, eval);
+
+            repeatedMoves.TakeLast(4).ToList().ForEach(move => Assert.True(game.MakeMove(move)));
+            Assert.Equal(repeatedMoves.Count + 8, game.MoveHistory.Count);
+            eval = winningPosition.StaticEvaluation(game.PositionFENHistory, default);
+            Assert.Equal(0, eval);
+        }
+
+        [Fact]
         public void EvaluateFinalPosition_NegaMax_50MovesRule()
         {
             var winningPosition = new Position("7k/8/5KR1/8/8/8/5R2/K7 w - - 0 1");
@@ -267,8 +328,8 @@ namespace Lynx.Test
                 Assert.True(game.MakeMove(nonCaptureOrPawnMoveMoves[i % nonCaptureOrPawnMoveMoves.Count]));
             }
 
-            Assert.True(game.MakeMove(new ((int)BoardSquare.h2, (int)BoardSquare.h1, (int)Piece.p, promotedPiece: (int)(Piece.q))));   // Promotion
-            Assert.True(game.MakeMove(new ((int)BoardSquare.b3, (int)BoardSquare.c4, (int)Piece.K)));
+            Assert.True(game.MakeMove(new((int)BoardSquare.h2, (int)BoardSquare.h1, (int)Piece.p, promotedPiece: (int)(Piece.q))));   // Promotion
+            Assert.True(game.MakeMove(new((int)BoardSquare.b3, (int)BoardSquare.c4, (int)Piece.K)));
             Assert.True(game.MakeMove(nonCaptureOrPawnMoveMoves[2]));
 
             Assert.Equal(51, game.MoveHistory.Count);
