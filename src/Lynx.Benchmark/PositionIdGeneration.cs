@@ -1,15 +1,16 @@
 ﻿/*
  * 
- *  | Method |         newPosition |       Mean |    Error |    StdDev |     Median | Ratio | RatioSD |  Gen 0 | Allocated |
- *  |------- |-------------------- |-----------:|---------:|----------:|-----------:|------:|--------:|-------:|----------:|
- *  |    FEN | Lynx.Model.Position |   955.9 ns | 18.90 ns |  25.87 ns |   954.0 ns |  1.00 |    0.00 | 0.1945 |     408 B |
- *  |    FEN | Lynx.Model.Position | 1,226.2 ns | 98.16 ns | 289.43 ns | 1,086.5 ns |  1.05 |    0.07 | 0.2060 |     432 B |
- *  |    FEN | Lynx.Model.Position |   993.1 ns | 19.72 ns |  41.15 ns |   997.3 ns |  1.05 |    0.06 | 0.2060 |     432 B |
- *  |    FEN | Lynx.Model.Position | 1,054.8 ns | 21.02 ns |  46.58 ns | 1,048.6 ns |  1.10 |    0.06 | 0.2022 |     424 B |
- *  |     Id | Lynx.Model.Position |   479.8 ns |  9.10 ns |  18.80 ns |   478.2 ns |  0.50 |    0.03 | 0.6580 |   1,376 B |
- *  |     Id | Lynx.Model.Position |   501.7 ns | 10.07 ns |  15.08 ns |   500.6 ns |  0.52 |    0.02 | 0.6580 |   1,376 B |
- *  |     Id | Lynx.Model.Position |   521.2 ns | 10.33 ns |  16.39 ns |   518.1 ns |  0.55 |    0.03 | 0.6580 |   1,376 B |
- *  |     Id | Lynx.Model.Position |   455.6 ns |  8.37 ns |  12.52 ns |   455.7 ns |  0.48 |    0.02 | 0.6580 |   1,376 B | 
+ *  | Method |         newPosition |       Mean |   Error |  StdDev | Ratio |  Gen 0 | Allocated |
+ *  |------- |-------------------- |-----------:|--------:|--------:|------:|-------:|----------:|
+ *  |    FEN | Lynx.Model.Position | 1,149.0 ns | 2.03 ns | 1.90 ns |  1.00 | 0.0210 |     408 B |
+ *  |    FEN | Lynx.Model.Position | 1,205.7 ns | 2.52 ns | 2.23 ns |  1.05 | 0.0229 |     432 B |
+ *  |    FEN | Lynx.Model.Position | 1,217.1 ns | 4.07 ns | 3.61 ns |  1.06 | 0.0229 |     432 B |
+ *  |    FEN | Lynx.Model.Position | 1,215.4 ns | 1.23 ns | 1.09 ns |  1.06 | 0.0210 |     424 B |
+ *  |     Id | Lynx.Model.Position |   910.5 ns | 6.59 ns | 5.84 ns |  0.79 | 0.0763 |   1,440 B |
+ *  |     Id | Lynx.Model.Position |   953.3 ns | 3.51 ns | 3.28 ns |  0.83 | 0.0782 |   1,488 B |
+ *  |     Id | Lynx.Model.Position |   986.9 ns | 8.48 ns | 7.93 ns |  0.86 | 0.0820 |   1,536 B |
+ *  |     Id | Lynx.Model.Position |   871.7 ns | 6.84 ns | 6.40 ns |  0.76 | 0.0734 |   1,384 B |
+ *
  *
  */
 
@@ -19,7 +20,6 @@ using System.Collections.Generic;
 
 namespace Lynx.Benchmark
 {
-    [SimpleJob]
     public class PositionIdGeneration : BaseBenchmark
     {
         [Benchmark(Baseline = true)]
