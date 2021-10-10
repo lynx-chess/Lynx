@@ -41,8 +41,7 @@ namespace Lynx.Model
 
         public Position(string fen)
         {
-            _fen = fen;
-
+            _fen = null;    // Otherwise halfmove and fullmove numbers may interfere whenever FEN is being used as key of a dictionary
             var parsedFEN = FENParser.ParseFEN(fen);
 
             if (!parsedFEN.Success)
@@ -63,7 +62,7 @@ namespace Lynx.Model
         /// <param name="position"></param>
         public Position(Position position)
         {
-            _fen = null;
+            _fen = position.FEN;
             PieceBitBoards = new BitBoard[12];
             Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
 
@@ -200,7 +199,7 @@ namespace Lynx.Model
         {
             var sb = new StringBuilder(100);
 
-            var squaresPerRow = 0;
+            var squaresPerFile = 0;
 
             int squaresWithoutPiece = 0;
             int lengthBeforeSlash = sb.Length;
@@ -231,8 +230,8 @@ namespace Lynx.Model
                     ++squaresWithoutPiece;
                 }
 
-                squaresPerRow = (squaresPerRow + 1) % 8;
-                if (squaresPerRow == 0)
+                squaresPerFile = (squaresPerFile + 1) % 8;
+                if (squaresPerFile == 0)
                 {
                     if (squaresWithoutPiece != 0)
                     {
