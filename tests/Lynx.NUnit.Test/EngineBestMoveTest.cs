@@ -109,7 +109,7 @@ namespace Lynx.NUnit.Test
         }
 
         [TestCase(Category = "LongRunning", Explicit = true)]
-        public void AvodThreefoldRepetitionWhenWinningPosition()
+        public void AvoidThreefoldRepetitionWhenWinningPosition()
         {
             // Arrange
 
