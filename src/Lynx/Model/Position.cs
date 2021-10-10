@@ -286,8 +286,7 @@ namespace Lynx.Model
 
             sb.Append(" 0 1");
 
-            var fen = sb.ToString();
-            return fen;
+            return sb.ToString();
         }
 
         /// <summary>
