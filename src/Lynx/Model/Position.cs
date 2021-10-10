@@ -297,12 +297,33 @@ namespace Lynx.Model
 
         internal string CalculateId()
         {
-            var sb = new StringBuilder(256);    // 256 = 13 * $"{ulong.MaxValue}".Length
+            var sb = new StringBuilder(260);    // 252 = 12 * $"{ulong.MaxValue}".Length + 2
             foreach (var item in PieceBitBoards)
             {
-                sb.Append(item.ToString());
+                sb.Append(item.Board.ToString());
                 sb.Append('|');
             }
+
+            sb.Append((int)Side);
+
+            if ((Castle & (int)CastlingRights.WK) != default)
+            {
+                sb.Append('K');
+            }
+            if ((Castle & (int)CastlingRights.WQ) != default)
+            {
+                sb.Append('Q');
+            }
+            if ((Castle & (int)CastlingRights.BK) != default)
+            {
+                sb.Append('k');
+            }
+            if ((Castle & (int)CastlingRights.BQ) != default)
+            {
+                sb.Append('q');
+            }
+
+            sb.Append((int)EnPassant);
 
             return sb.ToString();
         }
