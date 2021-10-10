@@ -30,7 +30,7 @@ namespace Lynx.Search
                 cancellationToken?.ThrowIfCancellationRequested();
             }
 
-            var positionId = position.FEN;
+            var positionId = position.UniqueIdentifier;
 
             if (orderedMoves.TryGetValue(positionId, out var pseudoLegalMoves))
             {
