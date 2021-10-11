@@ -68,7 +68,6 @@ namespace Lynx.Model
         /// <param name="position"></param>
         public Position(Position position)
         {
-            _fen = position.FEN;
             PieceBitBoards = new BitBoard[12];
             Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
 
@@ -82,7 +81,6 @@ namespace Lynx.Model
 
         public Position(Position position, Move move) : this(position)
         {
-            _fen = null;
             var oldSide = Side;
             var offset = Utils.PieceOffset(oldSide);
             var oppositeSide = Utils.OppositeSide(oldSide);
