@@ -47,8 +47,8 @@ namespace Lynx.Model
             }
         }
 
-        public List<Move> GetAllMoves() => MoveGenerator.GenerateAllMoves(CurrentPosition);
-        public List<Move> GetAllMovesWithCaptures() => MoveGenerator.GenerateAllMoves(CurrentPosition, capturesOnly: true);
+        public IOrderedEnumerable<Move> GetAllMoves() => MoveGenerator.GenerateAllMoves(CurrentPosition);
+        public IOrderedEnumerable<Move> GetAllMovesWithCaptures() => MoveGenerator.GenerateAllMoves(CurrentPosition, capturesOnly: true);
 
         public void RevertLastMove()
         {

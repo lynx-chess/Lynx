@@ -180,7 +180,7 @@ namespace Lynx.Search
 
             var movesToEvaluate = position.AllCapturesMoves();
 
-            if (movesToEvaluate.Count == 0)
+            if (!movesToEvaluate.Any())
             {
                 ++nodes;
                 return (staticEvaluation, new Result { MaxDepth = plies });  // TODO check if in check or drawn position
@@ -191,9 +191,8 @@ namespace Lynx.Search
 
             var maxEval = MinValue;
 
-            for (int moveIndex = 0; moveIndex < movesToEvaluate.Count; ++moveIndex)
+            foreach (var move in movesToEvaluate)
             {
-                var move = movesToEvaluate[moveIndex];
                 var newPosition = new Position(position, move);
                 if (!newPosition.WasProduceByAValidMove())
                 {

@@ -25,7 +25,7 @@ namespace Lynx.Test
         {
             var position = new Position(fen);
 
-            var allMoves = position.AllPossibleMoves();
+            var allMoves = position.AllPossibleMoves().ToList();
 
             Assert.Equal("e2a6", allMoves[0].UCIString());     // BxB
             Assert.Equal("f3f6", allMoves[1].UCIString());     // QxN
@@ -62,7 +62,7 @@ namespace Lynx.Test
         {
             var position = new Position(fen);
 
-            var allMoves = position.AllPossibleMoves();
+            var allMoves = position.AllPossibleMoves().ToList();
 
             Assert.Equal(moveWithHighestScore, allMoves[0].UCIString());
             Assert.Equal(Move.CaptureBaseScore + EvaluationConstants.MostValueableVictimLeastValuableAttacker[0,0], allMoves[0].Score(position));

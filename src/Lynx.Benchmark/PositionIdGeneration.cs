@@ -17,6 +17,7 @@
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Lynx.Benchmark
 {
@@ -51,10 +52,10 @@ namespace Lynx.Benchmark
 
         public static IEnumerable<Position> Data => new[] {
             //Constants.EmptyBoardFEN,
-            new Position(Positions[0], Positions[0].AllPossibleMoves()[0]),
-            new Position(Positions[1], Positions[1].AllPossibleMoves()[0]),
-            new Position(Positions[2], Positions[2].AllPossibleMoves()[0]),
-            new Position(Positions[3], Positions[3].AllPossibleMoves()[0])
+            new Position(Positions[0], Positions[0].AllPossibleMoves().First()),
+            new Position(Positions[1], Positions[1].AllPossibleMoves().First()),
+            new Position(Positions[2], Positions[2].AllPossibleMoves().First()),
+            new Position(Positions[3], Positions[3].AllPossibleMoves().First())
         };
     }
 }
