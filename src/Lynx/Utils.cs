@@ -72,8 +72,9 @@ namespace Lynx
         {
             var id = newPosition.UniqueIdentifier;
 
-            positionHistory.TryGetValue(id, out int repetitions);
-            return positionHistory[id] = ++repetitions;
+            return positionHistory.TryAdd(id, 1)
+                ? 1
+                : ++positionHistory[id];
         }
 
         public static void RevertPositionHistory(Position newPosition, Dictionary<string, int> positionHistory, int repetitions)
