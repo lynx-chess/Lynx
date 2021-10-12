@@ -65,7 +65,7 @@ namespace Lynx.Model
         /// <exception cref="InvalidOperationException"></exception>
         /// <exception cref="IndexOutOfRangeException"></exception>
         /// <returns></returns>
-        public static bool TryParseFromUCIString(string UCIString, List<Move> moveList, [NotNullWhen(true)] out Move? move)
+        public static bool TryParseFromUCIString(string UCIString, IOrderedEnumerable<Move> moveList, [NotNullWhen(true)] out Move? move)
         {
             Debug.Assert(UCIString.Length == 4 || UCIString.Length == 5);
 
