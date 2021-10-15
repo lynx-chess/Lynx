@@ -16,7 +16,6 @@ namespace Lynx.Model
         private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
 
         private string? _fen;
-        private readonly long _hash;
 
         public string FEN
         {
@@ -24,7 +23,7 @@ namespace Lynx.Model
             init => _fen = value;
         }
 
-        public long UniqueIdentifier => _hash;
+        public long UniqueIdentifier { get; }
 
         /// <summary>
         /// Use <see cref="Piece"/> as index
@@ -58,7 +57,7 @@ namespace Lynx.Model
             Castle = parsedFEN.Castle;
             EnPassant = parsedFEN.EnPassant;
 
-            _hash = ZobristTable.PositionHash(this);
+            UniqueIdentifier = ZobristTable.PositionHash(this);
         }
 
         /// <summary>
@@ -67,7 +66,7 @@ namespace Lynx.Model
         /// <param name="position"></param>
         public Position(Position position)
         {
-            _hash = position._hash;
+            UniqueIdentifier = position.UniqueIdentifier;
             PieceBitBoards = new BitBoard[12];
             Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
 
@@ -198,7 +197,7 @@ namespace Lynx.Model
             PieceBitBoards[newPiece].SetBit(targetSquare);
             OccupancyBitBoards[(int)Side].SetBit(targetSquare);
 
-            _hash ^=
+            UniqueIdentifier ^=
                 ZobristTable.SideHash()
                 ^ ZobristTable.PieceHash(sourceSquare, piece)
                 ^ ZobristTable.PieceHash(targetSquare, newPiece)
@@ -217,7 +216,7 @@ namespace Lynx.Model
 
                     PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
                     OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
-                    _hash ^= ZobristTable.PieceHash(capturedPawnSquare, oppositePawnIndex);
+                    UniqueIdentifier ^= ZobristTable.PieceHash(capturedPawnSquare, oppositePawnIndex);
                 }
                 else
                 {
@@ -227,7 +226,7 @@ namespace Lynx.Model
                         if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
                         {
                             PieceBitBoards[pieceIndex].PopBit(targetSquare);
-                            _hash ^= ZobristTable.PieceHash(targetSquare, pieceIndex);
+                            UniqueIdentifier ^= ZobristTable.PieceHash(targetSquare, pieceIndex);
                             break;
                         }
                     }
@@ -242,7 +241,7 @@ namespace Lynx.Model
                 Debug.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
 
                 EnPassant = (BoardSquare)enPassantSquare;
-                _hash ^= ZobristTable.EnPassantHash(enPassantSquare);
+                UniqueIdentifier ^= ZobristTable.EnPassantHash(enPassantSquare);
             }
             else if (move.IsShortCastle())
             {
@@ -256,7 +255,7 @@ namespace Lynx.Model
                 PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
                 OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
 
-                _hash ^=
+                UniqueIdentifier ^=
                     ZobristTable.PieceHash(rookSourceSquare, rookIndex)
                     ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
             }
@@ -272,7 +271,7 @@ namespace Lynx.Model
                 PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
                 OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
 
-                _hash ^=
+                UniqueIdentifier ^=
                     ZobristTable.PieceHash(rookSourceSquare, rookIndex)
                     ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
             }
@@ -284,7 +283,7 @@ namespace Lynx.Model
             Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
             Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
 
-            _hash ^= ZobristTable.CastleHash(Castle);
+            UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
         }
 
         /// <summary>
