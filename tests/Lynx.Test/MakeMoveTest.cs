@@ -439,8 +439,8 @@ namespace Lynx.Test
         }
 
         [Theory]
-        [InlineData("rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1")]
-        [InlineData("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1")]
+        [InlineData(Constants.KillerPositionFEN)]
+        [InlineData(Constants.TrickyPositionReversedFEN)]
         [InlineData(Constants.TrickyTestPositionFEN)]
         public void DoublePawnPushEnablesEnPassant(string fen)
         {
@@ -458,7 +458,7 @@ namespace Lynx.Test
         [InlineData("r3kb2/1b4PP/p2ppppp/N1p1qn1r/2B2N2/1PPPPPP1/1p4B1/R2QK2R w KQq c6 0 1")]
         [InlineData("r3kb2/1b6/p2pppp1/N1p1qn1r/2B2NPp/1PPPPP2/1p3B2/R2QK2R b KQq g3 0 1")]
         [InlineData("r3kb2/1b6/p2pppp1/N1p1qn1r/2B2NP1/1PPPPP2/1p3B2/R2QK2R b KQq g3 0 1")]
-        [InlineData("rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1")]
+        [InlineData(Constants.KillerPositionFEN)]
         [InlineData("4k3/8/8/1Pp5/8/8/8/4K3 w - c6 0 1")]
         public void AnyMoveDisablesEnPassant(string fen)
         {

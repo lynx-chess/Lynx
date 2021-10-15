@@ -11,8 +11,8 @@ namespace Lynx.Test
         [InlineData(Constants.EmptyBoardFEN)]
         [InlineData(Constants.InitialPositionFEN)]
         [InlineData(Constants.TrickyTestPositionFEN)]
-        [InlineData("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1")]
-        [InlineData("rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1")]
+        [InlineData(Constants.TrickyPositionReversedFEN)]
+        [InlineData(Constants.KillerPositionFEN)]
         [InlineData("r2q1rk1/ppp2ppp/2n1bn2/2b1p3/3pP3/3P1NPP/PPP1NPB1/R1BQ1RK1 b - - 0 1")]
         public void FEN(string fen)
         {
@@ -27,9 +27,9 @@ namespace Lynx.Test
         [InlineData(Constants.EmptyBoardFEN)]
         [InlineData(Constants.InitialPositionFEN)]
         [InlineData(Constants.TrickyTestPositionFEN)]
-        [InlineData("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1")]
-        [InlineData("rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1")]
-        [InlineData("r2q1rk1/ppp2ppp/2n1bn2/2b1p3/3pP3/3P1NPP/PPP1NPB1/R1BQ1RK1 b - - 0 9 ")]
+        [InlineData(Constants.TrickyPositionReversedFEN)]
+        [InlineData(Constants.KillerPositionFEN)]
+        [InlineData(Constants.CmkPositionFEN)]
         public void CloneConstructor(string fen)
         {
             // Arrange
@@ -39,6 +39,8 @@ namespace Lynx.Test
             var clonedPosition = new Position(position);
 
             // Assert
+            Assert.Equal(position.FEN, clonedPosition.FEN);
+            Assert.Equal(position.UniqueIdentifier, clonedPosition.UniqueIdentifier);
             Assert.Equal(position.Side, clonedPosition.Side);
             Assert.Equal(position.Castle, clonedPosition.Castle);
             Assert.Equal(position.EnPassant, clonedPosition.EnPassant);
@@ -89,9 +91,19 @@ namespace Lynx.Test
         [InlineData("r1bqkbnr/pppp2pp/2n2p2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 1", true)]
         [InlineData("r1bqk1nr/pppp2pp/2n2p2/4p3/1bB1P3/3P4/PPP2PPP/RNBQK1NR b KQkq - 0 1", false)]
         [InlineData("r1bqk1nr/pppp2pp/2n2p2/4p3/1bB1P3/3P4/PPP2PPP/RNBQK1NR w KQkq - 0 1", true)]
+        [InlineData("r1k5/1K6/8/8/8/8/8/8 w - - 0 1", false)]
         public void IsValid(string fen, bool shouldBeValid)
         {
             Assert.Equal(shouldBeValid, new Position(fen).IsValid());
+        }
+
+        [Fact]
+        public void CustomIsValid()
+        {
+            var origin = new Position("r2k4/1K6/8/8/8/8/8/8 b - - 0 1");
+            var move = new Move((int)BoardSquare.b7, (int)BoardSquare.a8, (int)Piece.K, isCapture: 1);
+
+            var newPosition = new Position(origin, move);
         }
 
         [Theory]
