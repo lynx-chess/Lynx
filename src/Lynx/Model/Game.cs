@@ -76,8 +76,7 @@ namespace Lynx.Model
                 return false;
             }
 
-            PositionHashHistory.TryGetValue(CurrentPosition.UniqueIdentifier, out int repetitions);
-            PositionHashHistory[CurrentPosition.UniqueIdentifier] = ++repetitions;
+            Utils.UpdatePositionHistory(CurrentPosition, PositionHashHistory);
 
             MovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveToPlay, MovesWithoutCaptureOrPawnMove);
 
