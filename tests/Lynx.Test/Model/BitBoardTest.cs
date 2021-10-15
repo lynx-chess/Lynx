@@ -1,12 +1,12 @@
 ﻿using Lynx.Model;
 using System;
-using Xunit;
+using NUnit.Framework;
 
-namespace Lynx.Test
+namespace Lynx.Test.Model
 {
     public class BitBoardTest
     {
-        [Fact]
+        [Test]
         public void GetBit()
         {
             foreach (var square in Enum.GetValues<BoardSquare>())
@@ -17,7 +17,7 @@ namespace Lynx.Test
             }
         }
 
-        [Fact]
+        [Test]
         public void SetBit()
         {
             foreach (var square in Enum.GetValues<BoardSquare>())
@@ -33,7 +33,7 @@ namespace Lynx.Test
             }
         }
 
-        [Fact]
+        [Test]
         public void PopBit()
         {
             foreach (var square in Enum.GetValues<BoardSquare>())
@@ -52,7 +52,7 @@ namespace Lynx.Test
             }
         }
 
-        [Fact]
+        [Test]
         public void Empty()
         {
             var bitBoard = new BitBoard();
@@ -62,7 +62,7 @@ namespace Lynx.Test
             Assert.False(bitBoard.Empty);
         }
 
-        [Fact]
+        [Test]
         public void IsSinglePopulated()
         {
             var bitBoard = new BitBoard();
@@ -75,45 +75,45 @@ namespace Lynx.Test
             Assert.False(bitBoard.IsSinglePopulated());
         }
 
-        [Fact]
+        [Test]
         public void CountBits()
         {
             var bitBoard = new BitBoard();
-            Assert.Equal(0, bitBoard.CountBits());
+            Assert.AreEqual(0, bitBoard.CountBits());
 
             bitBoard.SetBit(BoardSquare.e4);
-            Assert.Equal(1, bitBoard.CountBits());
+            Assert.AreEqual(1, bitBoard.CountBits());
 
             bitBoard.SetBit(BoardSquare.e4);
-            Assert.Equal(1, bitBoard.CountBits());
+            Assert.AreEqual(1, bitBoard.CountBits());
 
             bitBoard.SetBit(BoardSquare.d4);
-            Assert.Equal(2, bitBoard.CountBits());
+            Assert.AreEqual(2, bitBoard.CountBits());
 
             bitBoard.PopBit(BoardSquare.d4);
-            Assert.Equal(1, bitBoard.CountBits());
+            Assert.AreEqual(1, bitBoard.CountBits());
         }
 
-        [Fact]
+        [Test]
         public void CountBits_ulong()
         {
             var bitBoard = new BitBoard();
-            Assert.Equal(0, BitBoard.CountBits(bitBoard.Board));
+            Assert.AreEqual(0, BitBoard.CountBits(bitBoard.Board));
 
             bitBoard.SetBit(BoardSquare.e4);
-            Assert.Equal(1, BitBoard.CountBits(bitBoard.Board));
+            Assert.AreEqual(1, BitBoard.CountBits(bitBoard.Board));
 
             bitBoard.SetBit(BoardSquare.e4);
-            Assert.Equal(1, BitBoard.CountBits(bitBoard.Board));
+            Assert.AreEqual(1, BitBoard.CountBits(bitBoard.Board));
 
             bitBoard.SetBit(BoardSquare.d4);
-            Assert.Equal(2, BitBoard.CountBits(bitBoard.Board));
+            Assert.AreEqual(2, BitBoard.CountBits(bitBoard.Board));
 
             bitBoard.PopBit(BoardSquare.d4);
-            Assert.Equal(1, BitBoard.CountBits(bitBoard.Board));
+            Assert.AreEqual(1, BitBoard.CountBits(bitBoard.Board));
         }
 
-        [Fact]
+        [Test]
         public void ResetLS1B()
         {
             // Arrange
@@ -127,7 +127,7 @@ namespace Lynx.Test
             Assert.False(bitBoard.GetBit(BoardSquare.d5));
         }
 
-        [Fact]
+        [Test]
         public void ResetLS1B_ulong()
         {
             // Arrange
@@ -144,23 +144,22 @@ namespace Lynx.Test
             Assert.False(result.GetBit(BoardSquare.d5));
         }
 
-        [Theory]
-        [InlineData(new BoardSquare[] { }, -1)]
-        [InlineData(new BoardSquare[] { BoardSquare.e4 }, (int)BoardSquare.e4)]
-        [InlineData(new BoardSquare[] { BoardSquare.a8 }, (int)BoardSquare.a8)]
-        [InlineData(new BoardSquare[] { BoardSquare.h1 }, (int)BoardSquare.h1)]
-        [InlineData(new BoardSquare[] { BoardSquare.a8, BoardSquare.h1 }, (int)BoardSquare.a8)]
-        [InlineData(new BoardSquare[] { BoardSquare.d5, BoardSquare.e4 }, (int)BoardSquare.d5)]
-        [InlineData(new BoardSquare[] { BoardSquare.e4, BoardSquare.f4 }, (int)BoardSquare.e4)]
+        [TestCase(new BoardSquare[] { }, -1)]
+        [TestCase(new BoardSquare[] { BoardSquare.e4 }, (int)BoardSquare.e4)]
+        [TestCase(new BoardSquare[] { BoardSquare.a8 }, (int)BoardSquare.a8)]
+        [TestCase(new BoardSquare[] { BoardSquare.h1 }, (int)BoardSquare.h1)]
+        [TestCase(new BoardSquare[] { BoardSquare.a8, BoardSquare.h1 }, (int)BoardSquare.a8)]
+        [TestCase(new BoardSquare[] { BoardSquare.d5, BoardSquare.e4 }, (int)BoardSquare.d5)]
+        [TestCase(new BoardSquare[] { BoardSquare.e4, BoardSquare.f4 }, (int)BoardSquare.e4)]
         public void GetLS1BIndex(BoardSquare[] occupiedSquares, int expectedLS1B)
         {
             var bitboard = new BitBoard(occupiedSquares);
-            Assert.Equal(expectedLS1B, bitboard.GetLS1BIndex());
-            Assert.Equal(expectedLS1B, BitBoard.GetLS1BIndex(bitboard.Board));
+            Assert.AreEqual(expectedLS1B, bitboard.GetLS1BIndex());
+            Assert.AreEqual(expectedLS1B, BitBoard.GetLS1BIndex(bitboard.Board));
 
             if (expectedLS1B != -1)
             {
-                Assert.Equal(((BoardSquare)expectedLS1B).ToString(), Constants.Coordinates[expectedLS1B]);
+                Assert.AreEqual(((BoardSquare)expectedLS1B).ToString(), Constants.Coordinates[expectedLS1B]);
             }
         }
     }

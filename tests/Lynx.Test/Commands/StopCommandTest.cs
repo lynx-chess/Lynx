@@ -1,38 +1,41 @@
 ﻿using Lynx.UCI.Commands.GUI;
 using Moq;
 using NUnit.Framework;
+using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 
-namespace Lynx.NUnit.Test
+namespace Lynx.Test.Commands
 {
     /// <summary>
     /// https://github.com/lynx-chess/Lynx/issues/31
     /// </summary>
-    public class PositionCommandTest
+    public class StopCommandTest
     {
-        [TestCase]
-        public async Task PositionCommandShouldNotTakeIntoAccountInternalState()
+        [TestCase(Constants.TrickyTestPositionFEN)]
+        public async Task StopCommandShouldNotModifyPositionOrAddMoveToMoveHistory(string initialPositionFEN)
         {
             // Arrange
             var engine = new Engine(new Mock<ChannelWriter<string>>().Object);
             engine.NewGame();
-            engine.AdjustPosition($"position fen {Constants.InitialPositionFEN} moves e2e4");
+            engine.AdjustPosition($"position fen {initialPositionFEN}");
 
             // A command that guarantees ~5s thinking time
             var goCommand = new GoCommand();
             await goCommand.Parse("go wtime 1 btime 1 winc 5000 binc 5000");
 
             var resultTask = Task.Run(() => engine.BestMove());
-
-            engine.StopSearching();
-            await resultTask;
+            // Wait 2s so that there's some best move available
+            Thread.Sleep(2000);
 
             // Act
-            engine.AdjustPosition($"position fen {Constants.InitialPositionFEN} moves d2d4");
+            engine.StopSearching();
 
             // Assert
-            Assert.AreEqual(1, engine.Game.MoveHistory.Count);
+            Assert.AreNotEqual(default, (await resultTask).BestMove.EncodedMove);
+
+            Assert.AreEqual(initialPositionFEN, engine.Game.CurrentPosition.FEN);
+            Assert.IsEmpty(engine.Game.MoveHistory);
         }
     }
 }

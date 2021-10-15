@@ -42,10 +42,10 @@ using static Lynx.Model.Move;
 //_54_ScoreMove();
 ZobristTable();
 
-const string TrickyPosition = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
-const string TrickyPositionReversed = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1";
-const string KillerPosition = "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1";
-const string CmkPosition = "r2q1rk1/ppp2ppp/2n1bn2/2b1p3/3pP3/3P1NPP/PPP1NPB1/R1BQ1RK1 b - - 0 9";
+const string TrickyPosition = Constants.TrickyTestPositionFEN;
+const string TrickyPositionReversed = Constants.TrickyTestPositionReversedFEN;
+const string KillerPosition = Constants.KillerTestPositionFEN;
+const string CmkPosition = Constants.CmkTestPositionFEN;
 
 static void _2_GettingStarted()
 {

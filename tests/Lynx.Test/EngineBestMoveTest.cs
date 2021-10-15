@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 
-namespace Lynx.NUnit.Test
+namespace Lynx.Test
 {
     public class EngineBestMoveTest : BaseTest
     {
@@ -233,7 +233,7 @@ namespace Lynx.NUnit.Test
             var sb = new StringBuilder($"position fen {fen} moves");
             for (int i = 0; i < 48; ++i)
             {
-                var move = nonCaptureOrPawnMoveMoves.ElementAt(i % nonCaptureOrPawnMoveMoves.Count);
+                var move = nonCaptureOrPawnMoveMoves[i % nonCaptureOrPawnMoveMoves.Count];
                 sb.Append($" {move.UCIString()}");
                 engine.AdjustPosition(sb.ToString());
             }
@@ -280,7 +280,7 @@ namespace Lynx.NUnit.Test
             var sb = new StringBuilder($"position fen {fen} moves");
             for (int i = 0; i < 48; ++i)
             {
-                var move = nonCaptureOrPawnMoveMoves.ElementAt(i % nonCaptureOrPawnMoveMoves.Count);
+                var move = nonCaptureOrPawnMoveMoves[i % nonCaptureOrPawnMoveMoves.Count];
                 sb.Append($" {move.UCIString()}");
                 engine.AdjustPosition(sb.ToString());
             }

@@ -1,61 +1,55 @@
 ﻿using Lynx.Model;
-using Xunit;
+using NUnit.Framework;
 
 namespace Lynx.Test
 {
     public class UtilsTest
     {
-        [Theory]
-        [InlineData(Side.Black, 6)]
-        [InlineData(Side.White, 0)]
+        [TestCase(Side.Black, 6)]
+        [TestCase(Side.White, 0)]
         public void PieceOffSetBySide(Side sideToMove, int expectedOffset)
         {
-            Assert.Equal(expectedOffset, Utils.PieceOffset(sideToMove));
-            Assert.Equal(expectedOffset, Utils.PieceOffset((int)sideToMove));
+            Assert.AreEqual(expectedOffset, Utils.PieceOffset(sideToMove));
+            Assert.AreEqual(expectedOffset, Utils.PieceOffset((int)sideToMove));
         }
 
-        [Theory]
-        [InlineData(Side.Black, (int)Side.White)]
-        [InlineData(Side.White, (int)Side.Black)]
+        [TestCase(Side.Black, (int)Side.White)]
+        [TestCase(Side.White, (int)Side.Black)]
         public void OppositeSide(Side sideToMove, int expectedSide)
         {
-            Assert.Equal(expectedSide, Utils.OppositeSide(sideToMove));
+            Assert.AreEqual(expectedSide, Utils.OppositeSide(sideToMove));
         }
 
-        [Theory]
-        [InlineData(Side.White, Constants.WhiteShortCastleRookSquare)]
-        [InlineData(Side.Black, Constants.BlackShortCastleRookSquare)]
+        [TestCase(Side.White, Constants.WhiteShortCastleRookSquare)]
+        [TestCase(Side.Black, Constants.BlackShortCastleRookSquare)]
         public void ShortCastleRookTargetSquare(Side sideToMove, int expectedRookSquare)
         {
-            Assert.Equal(expectedRookSquare, Utils.ShortCastleRookTargetSquare(sideToMove));
-            Assert.Equal(expectedRookSquare, Utils.ShortCastleRookTargetSquare((int)sideToMove));
+            Assert.AreEqual(expectedRookSquare, Utils.ShortCastleRookTargetSquare(sideToMove));
+            Assert.AreEqual(expectedRookSquare, Utils.ShortCastleRookTargetSquare((int)sideToMove));
         }
 
-        [Theory]
-        [InlineData(Side.White, Constants.WhiteLongCastleRookSquare)]
-        [InlineData(Side.Black, Constants.BlackLongCastleRookSquare)]
+        [TestCase(Side.White, Constants.WhiteLongCastleRookSquare)]
+        [TestCase(Side.Black, Constants.BlackLongCastleRookSquare)]
         public void LongCastleRookTargetSquare(Side sideToMove, int expectedRookSquare)
         {
-            Assert.Equal(expectedRookSquare, Utils.LongCastleRookTargetSquare(sideToMove));
-            Assert.Equal(expectedRookSquare, Utils.LongCastleRookTargetSquare((int)sideToMove));
+            Assert.AreEqual(expectedRookSquare, Utils.LongCastleRookTargetSquare(sideToMove));
+            Assert.AreEqual(expectedRookSquare, Utils.LongCastleRookTargetSquare((int)sideToMove));
         }
 
-        [Theory]
-        [InlineData(Side.White, (int)BoardSquare.h1)]
-        [InlineData(Side.Black, (int)BoardSquare.h8)]
+        [TestCase(Side.White, (int)BoardSquare.h1)]
+        [TestCase(Side.Black, (int)BoardSquare.h8)]
         public void ShortCastleRookSourceSquare(Side sideToMove, int expectedRookSquare)
         {
-            Assert.Equal(expectedRookSquare, Utils.ShortCastleRookSourceSquare(sideToMove));
-            Assert.Equal(expectedRookSquare, Utils.ShortCastleRookSourceSquare((int)sideToMove));
+            Assert.AreEqual(expectedRookSquare, Utils.ShortCastleRookSourceSquare(sideToMove));
+            Assert.AreEqual(expectedRookSquare, Utils.ShortCastleRookSourceSquare((int)sideToMove));
         }
 
-        [Theory]
-        [InlineData(Side.White, (int)BoardSquare.a1)]
-        [InlineData(Side.Black, (int)BoardSquare.a8)]
+        [TestCase(Side.White, (int)BoardSquare.a1)]
+        [TestCase(Side.Black, (int)BoardSquare.a8)]
         public void LongCastleRookSourceSquare(Side sideToMove, int expectedRookSquare)
         {
-            Assert.Equal(expectedRookSquare, Utils.LongCastleRookSourceSquare(sideToMove));
-            Assert.Equal(expectedRookSquare, Utils.LongCastleRookSourceSquare((int)sideToMove));
+            Assert.AreEqual(expectedRookSquare, Utils.LongCastleRookSourceSquare(sideToMove));
+            Assert.AreEqual(expectedRookSquare, Utils.LongCastleRookSourceSquare((int)sideToMove));
         }
     }
 }

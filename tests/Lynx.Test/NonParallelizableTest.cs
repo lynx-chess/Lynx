@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 
-namespace Lynx.NUnit.Test
+namespace Lynx.Test
 {
     [NonParallelizable]
     public class NonParallelizableTest : BaseTest

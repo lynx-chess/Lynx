@@ -1,5 +1,5 @@
 ﻿using Lynx.Model;
-using Xunit;
+using NUnit.Framework;
 
 namespace Lynx.Test.MoveGeneration
 {
@@ -16,21 +16,20 @@ namespace Lynx.Test.MoveGeneration
         /// 1   R . . . K B . R
         ///     a b c d e f g h
         /// </summary>
-        [Theory]
-        [InlineData("b7b8q", BoardSquare.b7, BoardSquare.b8, Piece.Q)]
-        [InlineData("b7b8r", BoardSquare.b7, BoardSquare.b8, Piece.R)]
-        [InlineData("b7b8n", BoardSquare.b7, BoardSquare.b8, Piece.N)]
-        [InlineData("b7b8b", BoardSquare.b7, BoardSquare.b8, Piece.B)]
-        [InlineData("b7a8q", BoardSquare.b7, BoardSquare.a8, Piece.Q)]
-        [InlineData("b7a8r", BoardSquare.b7, BoardSquare.a8, Piece.R)]
-        [InlineData("b7a8n", BoardSquare.b7, BoardSquare.a8, Piece.N)]
-        [InlineData("b7a8b", BoardSquare.b7, BoardSquare.a8, Piece.B)]
-        [InlineData("b7c8q", BoardSquare.b7, BoardSquare.c8, Piece.Q)]
-        [InlineData("b7c8r", BoardSquare.b7, BoardSquare.c8, Piece.R)]
-        [InlineData("b7c8n", BoardSquare.b7, BoardSquare.c8, Piece.N)]
-        [InlineData("b7c8b", BoardSquare.b7, BoardSquare.c8, Piece.B)]
-        [InlineData("e1d1", BoardSquare.e1, BoardSquare.d1, default(Piece))]
-        [InlineData("e1c1", BoardSquare.e1, (BoardSquare)Constants.WhiteLongCastleKingSquare, default(Piece))]
+        [TestCase("b7b8q", BoardSquare.b7, BoardSquare.b8, Piece.Q)]
+        [TestCase("b7b8r", BoardSquare.b7, BoardSquare.b8, Piece.R)]
+        [TestCase("b7b8n", BoardSquare.b7, BoardSquare.b8, Piece.N)]
+        [TestCase("b7b8b", BoardSquare.b7, BoardSquare.b8, Piece.B)]
+        [TestCase("b7a8q", BoardSquare.b7, BoardSquare.a8, Piece.Q)]
+        [TestCase("b7a8r", BoardSquare.b7, BoardSquare.a8, Piece.R)]
+        [TestCase("b7a8n", BoardSquare.b7, BoardSquare.a8, Piece.N)]
+        [TestCase("b7a8b", BoardSquare.b7, BoardSquare.a8, Piece.B)]
+        [TestCase("b7c8q", BoardSquare.b7, BoardSquare.c8, Piece.Q)]
+        [TestCase("b7c8r", BoardSquare.b7, BoardSquare.c8, Piece.R)]
+        [TestCase("b7c8n", BoardSquare.b7, BoardSquare.c8, Piece.N)]
+        [TestCase("b7c8b", BoardSquare.b7, BoardSquare.c8, Piece.B)]
+        [TestCase("e1d1", BoardSquare.e1, BoardSquare.d1, default(Piece))]
+        [TestCase("e1c1", BoardSquare.e1, (BoardSquare)Constants.WhiteLongCastleKingSquare, default(Piece))]
         public void ParseFromUCIString_White(string UCIString, BoardSquare sourceSquare, BoardSquare targetSquare, Piece promotedPiece)
         {
             // Arrange
@@ -41,9 +40,9 @@ namespace Lynx.Test.MoveGeneration
             Assert.True(Move.TryParseFromUCIString(UCIString, moves, out var move));
 
             // Assert
-            Assert.Equal((int)sourceSquare, move!.Value.SourceSquare());
-            Assert.Equal((int)targetSquare, move!.Value.TargetSquare());
-            Assert.Equal((int)promotedPiece, move!.Value.PromotedPiece());
+            Assert.AreEqual((int)sourceSquare, move!.Value.SourceSquare());
+            Assert.AreEqual((int)targetSquare, move!.Value.TargetSquare());
+            Assert.AreEqual((int)promotedPiece, move!.Value.PromotedPiece());
         }
 
         /// <summary>
@@ -57,21 +56,20 @@ namespace Lynx.Test.MoveGeneration
         /// 1   R . . . K B . R
         ///     a b c d e f g h
         /// </summary>
-        [Theory]
-        [InlineData("g2g1q", BoardSquare.g2, BoardSquare.g1, Piece.q)]
-        [InlineData("g2g1r", BoardSquare.g2, BoardSquare.g1, Piece.r)]
-        [InlineData("g2g1n", BoardSquare.g2, BoardSquare.g1, Piece.n)]
-        [InlineData("g2g1b", BoardSquare.g2, BoardSquare.g1, Piece.b)]
-        [InlineData("g2h1q", BoardSquare.g2, BoardSquare.h1, Piece.q)]
-        [InlineData("g2h1r", BoardSquare.g2, BoardSquare.h1, Piece.r)]
-        [InlineData("g2h1n", BoardSquare.g2, BoardSquare.h1, Piece.n)]
-        [InlineData("g2h1b", BoardSquare.g2, BoardSquare.h1, Piece.b)]
-        [InlineData("g2f1q", BoardSquare.g2, BoardSquare.f1, Piece.q)]
-        [InlineData("g2f1r", BoardSquare.g2, BoardSquare.f1, Piece.r)]
-        [InlineData("g2f1n", BoardSquare.g2, BoardSquare.f1, Piece.n)]
-        [InlineData("g2f1b", BoardSquare.g2, BoardSquare.f1, Piece.b)]
-        [InlineData("e8f8", BoardSquare.e8, BoardSquare.f8, default(Piece))]
-        [InlineData("e8g8", BoardSquare.e8, (BoardSquare)Constants.BlackShortCastleKingSquare, default(Piece))]
+        [TestCase("g2g1q", BoardSquare.g2, BoardSquare.g1, Piece.q)]
+        [TestCase("g2g1r", BoardSquare.g2, BoardSquare.g1, Piece.r)]
+        [TestCase("g2g1n", BoardSquare.g2, BoardSquare.g1, Piece.n)]
+        [TestCase("g2g1b", BoardSquare.g2, BoardSquare.g1, Piece.b)]
+        [TestCase("g2h1q", BoardSquare.g2, BoardSquare.h1, Piece.q)]
+        [TestCase("g2h1r", BoardSquare.g2, BoardSquare.h1, Piece.r)]
+        [TestCase("g2h1n", BoardSquare.g2, BoardSquare.h1, Piece.n)]
+        [TestCase("g2h1b", BoardSquare.g2, BoardSquare.h1, Piece.b)]
+        [TestCase("g2f1q", BoardSquare.g2, BoardSquare.f1, Piece.q)]
+        [TestCase("g2f1r", BoardSquare.g2, BoardSquare.f1, Piece.r)]
+        [TestCase("g2f1n", BoardSquare.g2, BoardSquare.f1, Piece.n)]
+        [TestCase("g2f1b", BoardSquare.g2, BoardSquare.f1, Piece.b)]
+        [TestCase("e8f8", BoardSquare.e8, BoardSquare.f8, default(Piece))]
+        [TestCase("e8g8", BoardSquare.e8, (BoardSquare)Constants.BlackShortCastleKingSquare, default(Piece))]
         public void ParseFromUCIString_Black(string UCIString, BoardSquare sourceSquare, BoardSquare targetSquare, Piece promotedPiece)
         {
             // Arrange
@@ -82,14 +80,13 @@ namespace Lynx.Test.MoveGeneration
             Assert.True(Move.TryParseFromUCIString(UCIString, moves, out var move));
 
             // Assert
-            Assert.Equal((int)sourceSquare, move!.Value.SourceSquare());
-            Assert.Equal((int)targetSquare, move!.Value.TargetSquare());
-            Assert.Equal((int)promotedPiece, move!.Value.PromotedPiece());
+            Assert.AreEqual((int)sourceSquare, move!.Value.SourceSquare());
+            Assert.AreEqual((int)targetSquare, move!.Value.TargetSquare());
+            Assert.AreEqual((int)promotedPiece, move!.Value.PromotedPiece());
         }
 
-        [Theory]
-        [InlineData("e2e5")]
-        [InlineData("e7e8q")]
+        [TestCase("e2e5")]
+        [TestCase("e7e8q")]
         public void ParseFromUCIString_Error(string UCIString)
         {
             // Arrange
