@@ -68,7 +68,7 @@ namespace Lynx
             return (int)BoardSquare.a8 + (7 * 8 * side);
         }
 
-        public static int UpdatePositionHistory(Position newPosition, Dictionary<string, int> positionHistory)
+        public static int UpdatePositionHistory(Position newPosition, Dictionary<long, int> positionHistory)
         {
             var id = newPosition.UniqueIdentifier;
 
@@ -77,7 +77,7 @@ namespace Lynx
                 : ++positionHistory[id];
         }
 
-        public static void RevertPositionHistory(Position newPosition, Dictionary<string, int> positionHistory, int repetitions)
+        public static void RevertPositionHistory(Position newPosition, Dictionary<long, int> positionHistory, int repetitions)
         {
             var id = newPosition.UniqueIdentifier;
 

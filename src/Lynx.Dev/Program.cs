@@ -39,7 +39,8 @@ using static Lynx.Model.Move;
 //_50_MiniMax_AlphaBeta();
 //_52_Quiescence_Search();
 //_53_MVVLVA();
-_54_ScoreMove();
+//_54_ScoreMove();
+ZobristTable();
 
 const string TrickyPosition = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
 const string TrickyPositionReversed = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1";
@@ -372,7 +373,7 @@ static void _22_Generate_Moves()
         Console.WriteLine(move);
     }
 
-    position = new Position("rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1");
+    position = new Position(KillerPosition);
     position.PieceBitBoards[0].Print();
     position.PieceBitBoards[6].Print();
     position.Print();
@@ -663,4 +664,63 @@ static void _54_ScoreMove()
     {
         Console.WriteLine($"{move} {move.Score(position)}");
     }
+}
+
+static void ZobristTable()
+{
+    var zobristTable = InitializeZobristTable();
+}
+
+static long[,] InitializeZobristTable()
+{
+    var randomInstance = new Random(int.MaxValue);
+    var zobristTable = new long[64, 12];
+
+    for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
+    {
+        for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
+        {
+            zobristTable[squareIndex, pieceIndex] = randomInstance.NextInt64();
+        }
+    }
+
+    return zobristTable;
+}
+
+static long CalculatePositionHash(long[,] zobristTable, Position position)
+{
+    long positionHash = 0;
+
+    for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
+    {
+        for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
+        {
+            if (position.PieceBitBoards[pieceIndex].GetBit(squareIndex))
+            {
+                positionHash ^= zobristTable[squareIndex, pieceIndex];
+            }
+        }
+    }
+
+    return positionHash;
+}
+
+static long UpdatePositionHash(long[,] zobristTable, long positionHash, Position originalPosition, Move move)
+{
+    var side = originalPosition.Side;
+    var sourcePiece = move.Piece();
+    var piece = move.PromotedPiece();
+    if (piece == default)
+    {
+        piece = sourcePiece;
+    }
+
+    var sourceSquare = move.SourceSquare();
+    var targetSquare = move.TargetSquare();
+    var enPassant = move.IsEnPassant();
+
+    return positionHash
+        ^ zobristTable[sourcePiece, sourceSquare]
+        ^ zobristTable[piece, targetSquare]
+        ^ zobristTable[piece, targetSquare];
 }

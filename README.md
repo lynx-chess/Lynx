@@ -64,6 +64,8 @@ If you're a Linux user and are new to .NET ecosystem, the conversation in [this 
 
 - Killer heuristic
 
+- Zobrist hashing [[1](https://www.chessprogramming.org/Zobrist_Hashing)]
+
 ---
 
 More details to follow.

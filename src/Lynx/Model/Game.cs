@@ -10,7 +10,7 @@ namespace Lynx.Model
 
         public List<Move> MoveHistory { get; }
         public List<Position> PositionHistory { get; }
-        public Dictionary<string, int> PositionFENHistory { get; }
+        public Dictionary<long, int> PositionHashHistory { get; }
 
         public int MovesWithoutCaptureOrPawnMove { get; set; }
 
@@ -30,7 +30,7 @@ namespace Lynx.Model
 
             MoveHistory = new(150);
             PositionHistory = new(150);
-            PositionFENHistory = new() { [position.UniqueIdentifier] = 1 };
+            PositionHashHistory = new() { [position.UniqueIdentifier] = 1 };
         }
 
         public Game(string fen, List<string> movesUCIString) : this(fen)
@@ -76,8 +76,8 @@ namespace Lynx.Model
                 return false;
             }
 
-            PositionFENHistory.TryGetValue(CurrentPosition.UniqueIdentifier, out int repetitions);
-            PositionFENHistory[CurrentPosition.UniqueIdentifier] = ++repetitions;
+            PositionHashHistory.TryGetValue(CurrentPosition.UniqueIdentifier, out int repetitions);
+            PositionHashHistory[CurrentPosition.UniqueIdentifier] = ++repetitions;
 
             MovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveToPlay, MovesWithoutCaptureOrPawnMove);
 
