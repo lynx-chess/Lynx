@@ -37,6 +37,10 @@ namespace Lynx.Test
             TransversePosition(originalPosition, fenDictionary);
         }
 
+        /// <summary>
+        /// TODO: mark as long running
+        /// </summary>
+        /// <param name="fen"></param>
         [Theory]
         [InlineData(Constants.TrickyTestPositionFEN)]
         [InlineData(Constants.KillerPositionFEN)]
