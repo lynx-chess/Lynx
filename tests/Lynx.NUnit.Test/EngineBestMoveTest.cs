@@ -240,7 +240,7 @@ namespace Lynx.NUnit.Test
 
             Assert.AreEqual(48, engine.Game.MoveHistory.Count);
 
-            engine.Game.PositionFENHistory.Clear(); // Make sure we don't take account threefold repetition
+            engine.Game.PositionHashHistory.Clear(); // Make sure we don't take account threefold repetition
 
             // Act
             var searchResult = engine.BestMove();
@@ -289,7 +289,7 @@ namespace Lynx.NUnit.Test
             engine.AdjustPosition(sb.ToString());
 
             Assert.AreEqual(49, engine.Game.MoveHistory.Count);
-            engine.Game.PositionFENHistory.Clear(); // Make sure we don't take account threefold repetition
+            engine.Game.PositionHashHistory.Clear(); // Make sure we don't take account threefold repetition
 
             // Act
             var searchResult = engine.BestMove();

@@ -16,8 +16,7 @@ namespace Lynx.Model
         private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
 
         private string? _fen;
-        private string? _id;
-        private long _hash;
+        private readonly long _hash;
 
         public string FEN
         {
@@ -25,10 +24,7 @@ namespace Lynx.Model
             init => _fen = value;
         }
 
-        //public string Id => _id ??= CalculateId();
-        public string Id => _hash.ToString();
-
-        public string UniqueIdentifier => Id;
+        public long UniqueIdentifier => _hash;
 
         /// <summary>
         /// Use <see cref="Piece"/> as index
@@ -221,7 +217,7 @@ namespace Lynx.Model
 
                     PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
                     OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
-                    _hash ^= ZobristTable.PieceHash(capturedPawnSquare, (int)Piece.P + offset);
+                    _hash ^= ZobristTable.PieceHash(capturedPawnSquare, oppositePawnIndex);
                 }
                 else
                 {
@@ -411,48 +407,12 @@ namespace Lynx.Model
             return sb.ToString();
         }
 
-        internal string CalculateId()
-        {
-            var sb = new StringBuilder(260);    // 252 = 12 * $"{ulong.MaxValue}".Length + 2
-
-            for (int index = 0; index < PieceBitBoards.Length; ++index)
-            {
-                sb.Append(PieceBitBoards[index].Board);
-#if DEBUG
-                sb.Append('|');
-#endif
-            }
-
-            sb.Append((int)Side);
-
-            if ((Castle & (int)CastlingRights.WK) != default)
-            {
-                sb.Append('K');
-            }
-            if ((Castle & (int)CastlingRights.WQ) != default)
-            {
-                sb.Append('Q');
-            }
-            if ((Castle & (int)CastlingRights.BK) != default)
-            {
-                sb.Append('k');
-            }
-            if ((Castle & (int)CastlingRights.BQ) != default)
-            {
-                sb.Append('q');
-            }
-
-            sb.Append((int)EnPassant);
-
-            return sb.ToString();
-        }
-
         /// <summary>
         /// Evaluates material and position in a NegaMax style.
         /// That is, positive scores always favour playing <see cref="Side"/>.
         /// </summary>
         /// <returns></returns>
-        public int StaticEvaluation(Dictionary<string, int> positionHistory, int movesWithoutCaptureOrPawnMove)
+        public int StaticEvaluation(Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove)
         {
             var eval = 0;
 
@@ -496,7 +456,7 @@ namespace Lynx.Model
         /// <param name="depth">Modulates the output, favouring positions with lower depth left (i.e. Checkmate in less moves)</param>
         /// <returns>At least <see cref="CheckMateEvaluation"/> if Position.Side lost (more extreme values when <paramref name="depth"/> increases)
         /// or 0 if Position.Side was stalemated</returns>
-        public int EvaluateFinalPosition(int depth, Dictionary<string, int> positionHistory, int movesWithoutCaptureOrPawnMove)
+        public int EvaluateFinalPosition(int depth, Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove)
         {
             if (positionHistory.Values.Any(val => val >= 3) || movesWithoutCaptureOrPawnMove >= 50)
             {

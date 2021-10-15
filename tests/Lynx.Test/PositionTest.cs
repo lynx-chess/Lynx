@@ -174,7 +174,7 @@ namespace Lynx.Test
 
             Assert.Equal(repeatedMoves.Count, game.MoveHistory.Count);
 
-            var eval = winningPosition.StaticEvaluation(game.PositionFENHistory, default);
+            var eval = winningPosition.StaticEvaluation(game.PositionHashHistory, default);
             Assert.Equal(0, eval);
         }
 
@@ -200,7 +200,7 @@ namespace Lynx.Test
             repeatedMoves.ForEach(move => Assert.True(game.MakeMove(move)));
             Assert.Equal(repeatedMoves.Count, game.MoveHistory.Count);
 
-            var eval = winningPosition.StaticEvaluation(game.PositionFENHistory, default);
+            var eval = winningPosition.StaticEvaluation(game.PositionHashHistory, default);
             Assert.Equal(0, eval);
         }
 
@@ -228,7 +228,7 @@ namespace Lynx.Test
             repeatedMoves.ForEach(move => Assert.True(game.MakeMove(move)));
             Assert.Equal(repeatedMoves.Count, game.MoveHistory.Count);
 
-            var eval = winningPosition.StaticEvaluation(game.PositionFENHistory, default);
+            var eval = winningPosition.StaticEvaluation(game.PositionHashHistory, default);
             Assert.Equal(0, eval);
 
             // Position with castling rights, lost in move Ke1d1
@@ -251,17 +251,17 @@ namespace Lynx.Test
             repeatedMoves.ForEach(move => Assert.True(game.MakeMove(move)));
             Assert.Equal(repeatedMoves.Count, game.MoveHistory.Count);
 
-            eval = winningPosition.StaticEvaluation(game.PositionFENHistory, default);
+            eval = winningPosition.StaticEvaluation(game.PositionHashHistory, default);
             Assert.NotEqual(0, eval);
 
             repeatedMoves.TakeLast(4).ToList().ForEach(move => Assert.True(game.MakeMove(move)));
             Assert.Equal(repeatedMoves.Count + 4, game.MoveHistory.Count);
-            eval = winningPosition.StaticEvaluation(game.PositionFENHistory, default);
+            eval = winningPosition.StaticEvaluation(game.PositionHashHistory, default);
             Assert.NotEqual(0, eval);
 
             repeatedMoves.TakeLast(4).ToList().ForEach(move => Assert.True(game.MakeMove(move)));
             Assert.Equal(repeatedMoves.Count + 8, game.MoveHistory.Count);
-            eval = winningPosition.StaticEvaluation(game.PositionFENHistory, default);
+            eval = winningPosition.StaticEvaluation(game.PositionHashHistory, default);
             Assert.Equal(0, eval);
         }
 

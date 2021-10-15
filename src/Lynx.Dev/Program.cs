@@ -671,9 +671,6 @@ static void ZobristTable()
     var zobristTable = InitializeZobristTable();
 }
 
-/// <summary>
-/// TODO: Side, EnPassant and castle/no-castle possibilities
-/// </summary>
 static long[,] InitializeZobristTable()
 {
     var randomInstance = new Random(int.MaxValue);

@@ -12,7 +12,7 @@ namespace Lynx.Search
 {
     public static partial class SearchAlgorithms
     {
-        public static SearchResult IDDFS(Position position, Dictionary<string, int> positionHistory, int movesWithoutCaptureOrPawnMove, int minDepth, int? maxDepth, ChannelWriter<string> engineWriter, CancellationToken cancellationToken, CancellationToken absoluteCancellationToken)
+        public static SearchResult IDDFS(Position position, Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove, int minDepth, int? maxDepth, ChannelWriter<string> engineWriter, CancellationToken cancellationToken, CancellationToken absoluteCancellationToken)
         {
             int bestEvaluation = 0;
             SearchResult? searchResult = null;
@@ -23,7 +23,7 @@ namespace Lynx.Search
 
             try
             {
-                var orderedMoves = new Dictionary<string, PriorityQueue<Move, int>>(10_000);
+                var orderedMoves = new Dictionary<long, PriorityQueue<Move, int>>(10_000);
                 var killerMoves = new int[2, EvaluationConstants.MaxPlies];
 
                 sw.Start();

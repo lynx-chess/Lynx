@@ -29,7 +29,7 @@ namespace Lynx.Test
         {
             var originalPosition = new Position(fen);
 
-            var fenDictionary = new Dictionary<string, (string Move, string Hash)>()
+            var fenDictionary = new Dictionary<string, (string Move, long Hash)>()
             {
                 [originalPosition.FEN] = ("", originalPosition.UniqueIdentifier)
             };
@@ -44,7 +44,7 @@ namespace Lynx.Test
         {
             var originalPosition = new Position(fen);
 
-            var fenDictionary = new Dictionary<string, (string Move, string Hash)>()
+            var fenDictionary = new Dictionary<string, (string Move, long Hash)>()
             {
                 [originalPosition.FEN] = ("", originalPosition.UniqueIdentifier)
             };
@@ -52,7 +52,7 @@ namespace Lynx.Test
             TransversePosition(originalPosition, fenDictionary);
         }
 
-        private static void TransversePosition(Position originalPosition, Dictionary<string, (string Move, string Hash)> fenDictionary, int maxDepth = 10, int depth = 0)
+        private static void TransversePosition(Position originalPosition, Dictionary<string, (string Move, long Hash)> fenDictionary, int maxDepth = 10, int depth = 0)
         {
             foreach (var move in originalPosition.AllPossibleMoves())
             {

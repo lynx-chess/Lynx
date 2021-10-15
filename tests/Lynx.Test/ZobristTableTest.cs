@@ -73,7 +73,7 @@ namespace Lynx.Test
         [Fact]
         public void SideHash()
         {
-            Assert.Equal(_zobristTable[63, (int)Piece.p], ZobristTable.SideHash());
+            Assert.Equal(_zobristTable[(int)BoardSquare.h8, (int)Piece.p], ZobristTable.SideHash());
         }
 
         [Theory]

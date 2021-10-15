@@ -124,7 +124,7 @@ namespace Lynx
                 maxDepth = Configuration.EngineSettings.MinDepth;
             }
 
-            var result = IDDFS(Game.CurrentPosition, Game.PositionFENHistory, Game.MovesWithoutCaptureOrPawnMove, minDepth, maxDepth, _engineWriter, _searchCancellationTokenSource.Token, _absoluteSearchCancellationTokenSource.Token);
+            var result = IDDFS(Game.CurrentPosition, Game.PositionHashHistory, Game.MovesWithoutCaptureOrPawnMove, minDepth, maxDepth, _engineWriter, _searchCancellationTokenSource.Token, _absoluteSearchCancellationTokenSource.Token);
             _logger.Debug($"Evaluation: {result.Evaluation} (depth: {result.TargetDepth}, refutation: {string.Join(", ", result.Moves)})");
 
             if (!result.IsCancelled && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)

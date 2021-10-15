@@ -18,6 +18,7 @@ using BenchmarkDotNet.Attributes;
 using Lynx.Model;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Lynx.Benchmark
 {
@@ -57,5 +58,49 @@ namespace Lynx.Benchmark
             new Position(Positions[2], Positions[2].AllPossibleMoves().First()),
             new Position(Positions[3], Positions[3].AllPossibleMoves().First())
         };
+    }
+
+    internal static class PositionExtensions
+    {
+        /// <summary>
+        /// Used to be part of Position
+        /// </summary>
+        /// <param name="position"></param>
+        /// <returns></returns>
+        internal static string CalculateId(this Position position)
+        {
+            var sb = new StringBuilder(260);    // 252 = 12 * $"{ulong.MaxValue}".Length + 2
+
+            for (int index = 0; index < position.PieceBitBoards.Length; ++index)
+            {
+                sb.Append(position.PieceBitBoards[index].Board);
+#if DEBUG
+                sb.Append('|');
+#endif
+            }
+
+            sb.Append((int)position.Side);
+
+            if ((position.Castle & (int)CastlingRights.WK) != default)
+            {
+                sb.Append('K');
+            }
+            if ((position.Castle & (int)CastlingRights.WQ) != default)
+            {
+                sb.Append('Q');
+            }
+            if ((position.Castle & (int)CastlingRights.BK) != default)
+            {
+                sb.Append('k');
+            }
+            if ((position.Castle & (int)CastlingRights.BQ) != default)
+            {
+                sb.Append('q');
+            }
+
+            sb.Append((int)position.EnPassant);
+
+            return sb.ToString();
+        }
     }
 }
