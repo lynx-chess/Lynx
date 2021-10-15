@@ -1,5 +1,5 @@
 ﻿using Lynx.Model;
-using Xunit;
+using NUnit.Framework;
 
 namespace Lynx.Test.PregeneratedAttacks
 {
@@ -12,7 +12,7 @@ namespace Lynx.Test.PregeneratedAttacks
             _position = new Position(Constants.EmptyBoardFEN);
         }
 
-        [Fact]
+        [Test]
         public void IsAttackedByBlackPawn()
         {
             const int square = (int)BoardSquare.e4;
@@ -28,7 +28,7 @@ namespace Lynx.Test.PregeneratedAttacks
             _position.PieceBitBoards[(int)Piece.p].Clear();
         }
 
-        [Fact]
+        [Test]
         public void IsAttackedByWhitePawn()
         {
             const int square = (int)BoardSquare.e4;
@@ -44,7 +44,7 @@ namespace Lynx.Test.PregeneratedAttacks
             _position.PieceBitBoards[(int)Piece.P].Clear();
         }
 
-        [Fact]
+        [Test]
         public void IsAttackedByBlackKnight()
         {
             const int square = (int)BoardSquare.e4;
@@ -60,7 +60,7 @@ namespace Lynx.Test.PregeneratedAttacks
             _position.PieceBitBoards[(int)Piece.n].Clear();
         }
 
-        [Fact]
+        [Test]
         public void IsAttackedByWhiteKnight()
         {
             const int square = (int)BoardSquare.e4;
@@ -76,7 +76,7 @@ namespace Lynx.Test.PregeneratedAttacks
             _position.PieceBitBoards[(int)Piece.N].Clear();
         }
 
-        [Fact]
+        [Test]
         public void IsAttackedByBlackBishop()
         {
             const int square = (int)BoardSquare.e5;
@@ -92,7 +92,7 @@ namespace Lynx.Test.PregeneratedAttacks
             _position.PieceBitBoards[(int)Piece.b].Clear();
         }
 
-        [Fact]
+        [Test]
         public void IsAttackedByWhiteBishop()
         {
             const int square = (int)BoardSquare.e5;
@@ -108,7 +108,7 @@ namespace Lynx.Test.PregeneratedAttacks
             _position.PieceBitBoards[(int)Piece.B].Clear();
         }
 
-        [Fact]
+        [Test]
         public void IsAttackedByBlackRook()
         {
             const int square = (int)BoardSquare.e5;
@@ -124,7 +124,7 @@ namespace Lynx.Test.PregeneratedAttacks
             _position.PieceBitBoards[(int)Piece.r].Clear();
         }
 
-        [Fact]
+        [Test]
         public void IsAttackedByWhiteRook()
         {
             const int square = (int)BoardSquare.e5;
@@ -140,7 +140,7 @@ namespace Lynx.Test.PregeneratedAttacks
             _position.PieceBitBoards[(int)Piece.R].Clear();
         }
 
-        [Fact]
+        [Test]
         public void IsAttackedByBlackQueen()
         {
             const int square1 = (int)BoardSquare.e5;
@@ -171,7 +171,7 @@ namespace Lynx.Test.PregeneratedAttacks
             _position.PieceBitBoards[(int)Piece.q].Clear();
         }
 
-        [Fact]
+        [Test]
         public void IsAttackedByWhiteQueen()
         {
             const int square1 = (int)BoardSquare.e5;
@@ -202,7 +202,7 @@ namespace Lynx.Test.PregeneratedAttacks
             _position.PieceBitBoards[(int)Piece.Q].Clear();
         }
 
-        [Fact]
+        [Test]
         public void IsAttackedByBlackKing()
         {
             const int square = (int)BoardSquare.e5;
@@ -218,7 +218,7 @@ namespace Lynx.Test.PregeneratedAttacks
             _position.PieceBitBoards[(int)Piece.k].Clear();
         }
 
-        [Fact]
+        [Test]
         public void IsAttackedByWhiteKing()
         {
             const int square = (int)BoardSquare.e5;

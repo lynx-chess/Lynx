@@ -1,35 +1,33 @@
 ﻿using Lynx.Model;
 using System.Collections.Generic;
 using System.Linq;
-using Xunit;
+using NUnit.Framework;
 
-namespace Lynx.Test
+namespace Lynx.Test.Model
 {
     public class PositionTest
     {
-        [Theory]
-        [InlineData(Constants.EmptyBoardFEN)]
-        [InlineData(Constants.InitialPositionFEN)]
-        [InlineData(Constants.TrickyTestPositionFEN)]
-        [InlineData(Constants.TrickyPositionReversedFEN)]
-        [InlineData(Constants.KillerPositionFEN)]
-        [InlineData("r2q1rk1/ppp2ppp/2n1bn2/2b1p3/3pP3/3P1NPP/PPP1NPB1/R1BQ1RK1 b - - 0 1")]
+        [TestCase(Constants.EmptyBoardFEN)]
+        [TestCase(Constants.InitialPositionFEN)]
+        [TestCase(Constants.TrickyTestPositionFEN)]
+        [TestCase(Constants.TrickyTestPositionReversedFEN)]
+        [TestCase(Constants.KillerTestPositionFEN)]
+        [TestCase("r2q1rk1/ppp2ppp/2n1bn2/2b1p3/3pP3/3P1NPP/PPP1NPB1/R1BQ1RK1 b - - 0 1")]
         public void FEN(string fen)
         {
             var position = new Position(fen);
-            Assert.Equal(fen, position.FEN);
+            Assert.AreEqual(fen, position.FEN);
 
             var newPosition = new Position(position);
-            Assert.Equal(fen, newPosition.FEN);
+            Assert.AreEqual(fen, newPosition.FEN);
         }
 
-        [Theory]
-        [InlineData(Constants.EmptyBoardFEN)]
-        [InlineData(Constants.InitialPositionFEN)]
-        [InlineData(Constants.TrickyTestPositionFEN)]
-        [InlineData(Constants.TrickyPositionReversedFEN)]
-        [InlineData(Constants.KillerPositionFEN)]
-        [InlineData(Constants.CmkPositionFEN)]
+        [TestCase(Constants.EmptyBoardFEN)]
+        [TestCase(Constants.InitialPositionFEN)]
+        [TestCase(Constants.TrickyTestPositionFEN)]
+        [TestCase(Constants.TrickyTestPositionReversedFEN)]
+        [TestCase(Constants.KillerTestPositionFEN)]
+        [TestCase(Constants.CmkTestPositionFEN)]
         public void CloneConstructor(string fen)
         {
             // Arrange
@@ -39,20 +37,20 @@ namespace Lynx.Test
             var clonedPosition = new Position(position);
 
             // Assert
-            Assert.Equal(position.FEN, clonedPosition.FEN);
-            Assert.Equal(position.UniqueIdentifier, clonedPosition.UniqueIdentifier);
-            Assert.Equal(position.Side, clonedPosition.Side);
-            Assert.Equal(position.Castle, clonedPosition.Castle);
-            Assert.Equal(position.EnPassant, clonedPosition.EnPassant);
+            Assert.AreEqual(position.FEN, clonedPosition.FEN);
+            Assert.AreEqual(position.UniqueIdentifier, clonedPosition.UniqueIdentifier);
+            Assert.AreEqual(position.Side, clonedPosition.Side);
+            Assert.AreEqual(position.Castle, clonedPosition.Castle);
+            Assert.AreEqual(position.EnPassant, clonedPosition.EnPassant);
 
             for (int piece = 0; piece < position.PieceBitBoards.Length; ++piece)
             {
-                Assert.Equal(position.PieceBitBoards[piece].Board, clonedPosition.PieceBitBoards[piece].Board);
+                Assert.AreEqual(position.PieceBitBoards[piece].Board, clonedPosition.PieceBitBoards[piece].Board);
             }
 
             for (int occupancy = 0; occupancy < position.OccupancyBitBoards.Length; ++occupancy)
             {
-                Assert.Equal(position.OccupancyBitBoards[occupancy].Board, clonedPosition.OccupancyBitBoards[occupancy].Board);
+                Assert.AreEqual(position.OccupancyBitBoards[occupancy].Board, clonedPosition.OccupancyBitBoards[occupancy].Board);
             }
 
             // Act: modify original, to ensure they're not sharing references to the same memory object
@@ -71,69 +69,66 @@ namespace Lynx.Test
             // Assert
             for (int piece = 0; piece < position.PieceBitBoards.Length; ++piece)
             {
-                Assert.NotEqual(position.PieceBitBoards[piece].Board, clonedPosition.PieceBitBoards[piece].Board);
+                Assert.AreNotEqual(position.PieceBitBoards[piece].Board, clonedPosition.PieceBitBoards[piece].Board);
             }
 
             for (int occupancy = 0; occupancy < position.OccupancyBitBoards.Length; ++occupancy)
             {
-                Assert.NotEqual(position.OccupancyBitBoards[occupancy].Board, clonedPosition.OccupancyBitBoards[occupancy].Board);
+                Assert.AreNotEqual(position.OccupancyBitBoards[occupancy].Board, clonedPosition.OccupancyBitBoards[occupancy].Board);
             }
         }
 
-        [Theory]
-        [InlineData(Constants.InitialPositionFEN, true)]
-        [InlineData(Constants.EmptyBoardFEN, false)]
-        [InlineData("K/8/8/8/8/8/8/8 w - - 0 1", false)]
-        [InlineData("K/8/8/8/8/8/8/8 b - - 0 1", false)]
-        [InlineData("k/8/8/8/8/8/8/8 w - - 0 1", false)]
-        [InlineData("k/8/8/8/8/8/8/8 b - - 0 1", false)]
-        [InlineData("r1bqkbnr/pppp2pp/2n2p2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 0 1", false)]
-        [InlineData("r1bqkbnr/pppp2pp/2n2p2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 1", true)]
-        [InlineData("r1bqk1nr/pppp2pp/2n2p2/4p3/1bB1P3/3P4/PPP2PPP/RNBQK1NR b KQkq - 0 1", false)]
-        [InlineData("r1bqk1nr/pppp2pp/2n2p2/4p3/1bB1P3/3P4/PPP2PPP/RNBQK1NR w KQkq - 0 1", true)]
-        [InlineData("r1k5/1K6/8/8/8/8/8/8 w - - 0 1", false)]
+        [TestCase(Constants.InitialPositionFEN, true)]
+        [TestCase(Constants.EmptyBoardFEN, false)]
+        [TestCase("K/8/8/8/8/8/8/8 w - - 0 1", false)]
+        [TestCase("K/8/8/8/8/8/8/8 b - - 0 1", false)]
+        [TestCase("k/8/8/8/8/8/8/8 w - - 0 1", false)]
+        [TestCase("k/8/8/8/8/8/8/8 b - - 0 1", false)]
+        [TestCase("r1bqkbnr/pppp2pp/2n2p2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 0 1", false)]
+        [TestCase("r1bqkbnr/pppp2pp/2n2p2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 1", true)]
+        [TestCase("r1bqk1nr/pppp2pp/2n2p2/4p3/1bB1P3/3P4/PPP2PPP/RNBQK1NR b KQkq - 0 1", false)]
+        [TestCase("r1bqk1nr/pppp2pp/2n2p2/4p3/1bB1P3/3P4/PPP2PPP/RNBQK1NR w KQkq - 0 1", true)]
+        [TestCase("r1k5/1K6/8/8/8/8/8/8 w - - 0 1", false)]
         public void IsValid(string fen, bool shouldBeValid)
         {
-            Assert.Equal(shouldBeValid, new Position(fen).IsValid());
+            Assert.AreEqual(shouldBeValid, new Position(fen).IsValid());
         }
 
-        [Fact]
+        [Test]
         public void CustomIsValid()
         {
             var origin = new Position("r2k4/1K6/8/8/8/8/8/8 b - - 0 1");
             var move = new Move((int)BoardSquare.b7, (int)BoardSquare.a8, (int)Piece.K, isCapture: 1);
 
-            var newPosition = new Position(origin, move);
+            Assert.NotNull(new Position(origin, move));
         }
 
-        [Theory]
-        [InlineData(Constants.InitialPositionFEN, true)]
-        [InlineData(Constants.EmptyBoardFEN, false)]
-        [InlineData("K/8/8/8/8/8/8/8 w - - 0 1", false)]
-        [InlineData("K/8/8/8/8/8/8/8 b - - 0 1", true)]
-        [InlineData("k/8/8/8/8/8/8/8 w - - 0 1", true)]
-        [InlineData("k/8/8/8/8/8/8/8 b - - 0 1", false)]
-        [InlineData("r1bqkbnr/pppp2pp/2n2p2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 0 1", false)]
-        [InlineData("r1bqkbnr/pppp2pp/2n2p2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 1", true)]
-        [InlineData("r1bqk1nr/pppp2pp/2n2p2/4p3/1bB1P3/3P4/PPP2PPP/RNBQK1NR b KQkq - 0 1", false)]
-        [InlineData("r1bqk1nr/pppp2pp/2n2p2/4p3/1bB1P3/3P4/PPP2PPP/RNBQK1NR w KQkq - 0 1", true)]
+        [TestCase(Constants.InitialPositionFEN, true)]
+        [TestCase(Constants.EmptyBoardFEN, false)]
+        [TestCase("K/8/8/8/8/8/8/8 w - - 0 1", false)]
+        [TestCase("K/8/8/8/8/8/8/8 b - - 0 1", true)]
+        [TestCase("k/8/8/8/8/8/8/8 w - - 0 1", true)]
+        [TestCase("k/8/8/8/8/8/8/8 b - - 0 1", false)]
+        [TestCase("r1bqkbnr/pppp2pp/2n2p2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 0 1", false)]
+        [TestCase("r1bqkbnr/pppp2pp/2n2p2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 1", true)]
+        [TestCase("r1bqk1nr/pppp2pp/2n2p2/4p3/1bB1P3/3P4/PPP2PPP/RNBQK1NR b KQkq - 0 1", false)]
+        [TestCase("r1bqk1nr/pppp2pp/2n2p2/4p3/1bB1P3/3P4/PPP2PPP/RNBQK1NR w KQkq - 0 1", true)]
         public void WasProduceByAValidMove(string fen, bool shouldBeValid)
         {
-            Assert.Equal(shouldBeValid, new Position(fen).WasProduceByAValidMove());
+            Assert.AreEqual(shouldBeValid, new Position(fen).WasProduceByAValidMove());
         }
 
-        [Theory]
-        [InlineData("7k/8/8/8/8/3B4/1K6/6Q1 b - - 0 1", 0)]
-        [InlineData("7K/8/8/8/8/3b4/1k6/6q1 w - - 0 1", 0)]
-        [InlineData("8/5K2/7p/6pk/6p1/6P1/7P/8 b - - 0 1", 0)]
-        [InlineData("8/7p/6p1/6P1/6PK/5k1P/8/8 w - - 0 1", 0)]
-        [InlineData("7k/8/8/8/8/8/1K5R/6R1 b - - 0 1", -Position.CheckMateEvaluation)]
-        [InlineData("7K/8/8/8/8/8/1k5r/6r1 w - - 0 1", -Position.CheckMateEvaluation)]
+        [TestCase("7k/8/8/8/8/3B4/1K6/6Q1 b - - 0 1", 0)]
+        [TestCase("7K/8/8/8/8/3b4/1k6/6q1 w - - 0 1", 0)]
+        [TestCase("8/5K2/7p/6pk/6p1/6P1/7P/8 b - - 0 1", 0)]
+        [TestCase("8/7p/6p1/6P1/6PK/5k1P/8/8 w - - 0 1", 0)]
+        [TestCase("7k/8/8/8/8/8/1K5R/6R1 b - - 0 1", -Position.CheckMateEvaluation)]
+        [TestCase("7K/8/8/8/8/8/1k5r/6r1 w - - 0 1", -Position.CheckMateEvaluation)]
         public void EvaluateFinalPosition_NegaMax(string fen, int expectedEvaluationValue)
         {
             // Arrange
             var position = new Position(fen);
-            Assert.Empty(position.AllPossibleMoves().Where(move => new Position(position, move).IsValid()));
+            Assert.IsEmpty(position.AllPossibleMoves().Where(move => new Position(position, move).IsValid()));
 
             // Act
             var noDepthResult = position.EvaluateFinalPosition(default, new(), default);
@@ -142,14 +137,14 @@ namespace Lynx.Test
 
             if (expectedEvaluationValue < 0)
             {
-                Assert.Equal(expectedEvaluationValue, noDepthResult);
+                Assert.AreEqual(expectedEvaluationValue, noDepthResult);
 
                 Assert.True(noDepthResult < depthOneResult);
                 Assert.True(depthOneResult < depthTwoResult);
             }
         }
 
-        [Fact]
+        [Test]
         public void EvaluateFinalPosition_NegaMax_Threefold()
         {
             var winningPosition = new Position("7k/8/5KR1/8/8/8/5R2/K7 w - - 0 1");
@@ -172,13 +167,13 @@ namespace Lynx.Test
 
             repeatedMoves.ForEach(move => Assert.True(game.MakeMove(move)));
 
-            Assert.Equal(repeatedMoves.Count, game.MoveHistory.Count);
+            Assert.AreEqual(repeatedMoves.Count, game.MoveHistory.Count);
 
             var eval = winningPosition.StaticEvaluation(game.PositionHashHistory, default);
-            Assert.Equal(0, eval);
+            Assert.AreEqual(0, eval);
         }
 
-        [Fact]
+        [Test]
         public void EvaluateMaterialAndPosition_NegaMax_Threefold()
         {
             // https://lichess.org/MgWVifcK
@@ -198,13 +193,13 @@ namespace Lynx.Test
             };
 
             repeatedMoves.ForEach(move => Assert.True(game.MakeMove(move)));
-            Assert.Equal(repeatedMoves.Count, game.MoveHistory.Count);
+            Assert.AreEqual(repeatedMoves.Count, game.MoveHistory.Count);
 
             var eval = winningPosition.StaticEvaluation(game.PositionHashHistory, default);
-            Assert.Equal(0, eval);
+            Assert.AreEqual(0, eval);
         }
 
-        [Fact]
+        [Test]
         public void EvaluateMaterialAndPosition_NegaMax_Threefold_CastleRightsRemoval()
         {
             // Arrange
@@ -226,10 +221,10 @@ namespace Lynx.Test
             };
 
             repeatedMoves.ForEach(move => Assert.True(game.MakeMove(move)));
-            Assert.Equal(repeatedMoves.Count, game.MoveHistory.Count);
+            Assert.AreEqual(repeatedMoves.Count, game.MoveHistory.Count);
 
             var eval = winningPosition.StaticEvaluation(game.PositionHashHistory, default);
-            Assert.Equal(0, eval);
+            Assert.AreEqual(0, eval);
 
             // Position with castling rights, lost in move Ke1d1
             winningPosition = new Position("1n2k2r/8/8/8/8/8/4PPPP/1N2K2R w Kk - 0 1");
@@ -249,23 +244,23 @@ namespace Lynx.Test
 
             // Act
             repeatedMoves.ForEach(move => Assert.True(game.MakeMove(move)));
-            Assert.Equal(repeatedMoves.Count, game.MoveHistory.Count);
+            Assert.AreEqual(repeatedMoves.Count, game.MoveHistory.Count);
 
             eval = winningPosition.StaticEvaluation(game.PositionHashHistory, default);
-            Assert.NotEqual(0, eval);
-
-            repeatedMoves.TakeLast(4).ToList().ForEach(move => Assert.True(game.MakeMove(move)));
-            Assert.Equal(repeatedMoves.Count + 4, game.MoveHistory.Count);
-            eval = winningPosition.StaticEvaluation(game.PositionHashHistory, default);
-            Assert.NotEqual(0, eval);
+            Assert.AreNotEqual(0, eval);
 
             repeatedMoves.TakeLast(4).ToList().ForEach(move => Assert.True(game.MakeMove(move)));
-            Assert.Equal(repeatedMoves.Count + 8, game.MoveHistory.Count);
+            Assert.AreEqual(repeatedMoves.Count + 4, game.MoveHistory.Count);
             eval = winningPosition.StaticEvaluation(game.PositionHashHistory, default);
-            Assert.Equal(0, eval);
+            Assert.AreNotEqual(0, eval);
+
+            repeatedMoves.TakeLast(4).ToList().ForEach(move => Assert.True(game.MakeMove(move)));
+            Assert.AreEqual(repeatedMoves.Count + 8, game.MoveHistory.Count);
+            eval = winningPosition.StaticEvaluation(game.PositionHashHistory, default);
+            Assert.AreEqual(0, eval);
         }
 
-        [Fact]
+        [Test]
         public void EvaluateFinalPosition_NegaMax_50MovesRule()
         {
             var winningPosition = new Position("7k/8/5KR1/8/8/8/5R2/K7 w - - 0 1");
@@ -288,13 +283,13 @@ namespace Lynx.Test
             Assert.True(game.MakeMove(nonCaptureOrPawnMoveMoves[1]));
             Assert.True(game.MakeMove(new Move((int)BoardSquare.e2, (int)BoardSquare.h2, (int)Piece.R)));   // Mate on move 51
 
-            Assert.Equal(51, game.MoveHistory.Count);
+            Assert.AreEqual(51, game.MoveHistory.Count);
 
             var eval = winningPosition.StaticEvaluation(new(), game.MovesWithoutCaptureOrPawnMove);
-            Assert.Equal(0, eval);
+            Assert.AreEqual(0, eval);
         }
 
-        [Fact]
+        [Test]
         public void EvaluateMaterialAndPosition_NegaMax_50MovesRule()
         {
             // https://lichess.org/MgWVifcK
@@ -314,13 +309,13 @@ namespace Lynx.Test
                 Assert.True(game.MakeMove(nonCaptureOrPawnMoveMoves[i % nonCaptureOrPawnMoveMoves.Count]));
             }
 
-            Assert.Equal(50, game.MoveHistory.Count);
+            Assert.AreEqual(50, game.MoveHistory.Count);
 
             var eval = winningPosition.StaticEvaluation(new(), game.MovesWithoutCaptureOrPawnMove);
-            Assert.Equal(0, eval);
+            Assert.AreEqual(0, eval);
         }
 
-        [Fact]
+        [Test]
         public void EvaluateMaterialAndPosition_NegaMax_50MovesRule_Promotion()
         {
             // https://lichess.org/MgWVifcK
@@ -344,10 +339,10 @@ namespace Lynx.Test
             Assert.True(game.MakeMove(new((int)BoardSquare.b3, (int)BoardSquare.c4, (int)Piece.K)));
             Assert.True(game.MakeMove(nonCaptureOrPawnMoveMoves[2]));
 
-            Assert.Equal(51, game.MoveHistory.Count);
+            Assert.AreEqual(51, game.MoveHistory.Count);
 
             var eval = winningPosition.StaticEvaluation(new(), game.MovesWithoutCaptureOrPawnMove);
-            Assert.NotEqual(0, eval);
+            Assert.AreNotEqual(0, eval);
         }
     }
 }

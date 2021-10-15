@@ -1,13 +1,13 @@
 ﻿using Lynx.Model;
 using System.Collections.Generic;
 using System.Linq;
-using Xunit;
+using NUnit.Framework;
 
 namespace Lynx.Test
 {
     public class ZobristHashGeneration
     {
-        [Fact]
+        [Test]
         public void Repetition_InitialPosition()
         {
             var originalPosition = new Position(Constants.InitialPositionFEN);
@@ -17,14 +17,13 @@ namespace Lynx.Test
             position = new Position(position, position.AllPossibleMoves().Single(m => m.UCIString() == "f3g1"));
             position = new Position(position, position.AllPossibleMoves().Single(m => m.UCIString() == "f6g8"));
 
-            Assert.Equal(originalPosition.UniqueIdentifier, position.UniqueIdentifier);
+            Assert.AreEqual(originalPosition.UniqueIdentifier, position.UniqueIdentifier);
         }
 
-        [Theory]
-        [InlineData("4k3/1P6/8/8/8/8/8/4K3 w - - 0 1")] // Promotion White
-        [InlineData("4k3/8/8/8/8/8/1p6/4K3 b - - 0 1")] // Promotion Black
-        [InlineData("rk6/1P6/8/8/8/8/8/4K3 w - - 0 1")] // Promotion with capture White
-        [InlineData("4k3/8/8/8/8/8/1p6/RK6 b - - 0 1")] // Promotion with capture Black
+        [TestCase("4k3/1P6/8/8/8/8/8/4K3 w - - 0 1", Description = "White promotion")]
+        [TestCase("4k3/8/8/8/8/8/1p6/4K3 b - - 0 1", Description = "Black promotion")]
+        [TestCase("rk6/1P6/8/8/8/8/8/4K3 w - - 0 1", Description = "White promotion and capture")]
+        [TestCase("4k3/8/8/8/8/8/1p6/RK6 b - - 0 1", Description = "Blackpromotion and capture")]
         public void Promotion(string fen)
         {
             var originalPosition = new Position(fen);
@@ -37,13 +36,8 @@ namespace Lynx.Test
             TransversePosition(originalPosition, fenDictionary);
         }
 
-        /// <summary>
-        /// TODO: mark as long running
-        /// </summary>
-        /// <param name="fen"></param>
-        [Theory]
-        [InlineData(Constants.TrickyTestPositionFEN)]
-        [InlineData(Constants.KillerPositionFEN)]
+        [TestCase(Constants.TrickyTestPositionFEN, Category = "LongRunning", Explicit = true)]
+        [TestCase(Constants.KillerTestPositionFEN, Category = "LongRunning", Explicit = true)]
         public void EnPassant(string fen)
         {
             var originalPosition = new Position(fen);
@@ -68,13 +62,7 @@ namespace Lynx.Test
 
                 if (fenDictionary.TryGetValue(newPosition.FEN, out var pair))
                 {
-                    if (pair.Hash != newPosition.UniqueIdentifier)
-                    {
-                        var expectedHash = ZobristTable.PositionHash(new Position(newPosition.FEN));
-
-                        var errorMessage = $"From {originalPosition.FEN} using {move}: {newPosition.FEN}";
-                        throw new(errorMessage);
-                    }
+                    Assert.AreEqual(pair.Hash, newPosition.UniqueIdentifier, $"From {originalPosition.FEN} using {move}: {newPosition.FEN}");
                 }
                 else
                 {
@@ -86,7 +74,7 @@ namespace Lynx.Test
                     TransversePosition(newPosition, fenDictionary, maxDepth, ++depth);
                 }
 
-                Assert.Equal(fenDictionary.Count, fenDictionary.Values.Distinct().Count());
+                Assert.AreEqual(fenDictionary.Count, fenDictionary.Values.Distinct().Count());
             }
         }
     }

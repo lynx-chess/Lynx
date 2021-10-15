@@ -1,12 +1,12 @@
 ﻿/*
  * No clear conclusions
- * 
+ *
  *  BenchmarkDotNet=v0.13.1, OS=Windows 10.0.19042.1237 (20H2/October2020Update)
  *  Intel Core i7-5500U CPU 2.40GHz (Broadwell), 1 CPU, 4 logical and 2 physical cores
  *  .NET SDK=6.0.100-rc.1.21463.6
  *    [Host]     : .NET 6.0.0 (6.0.21.45113), X64 RyuJIT
  *    DefaultJob : .NET 6.0.0 (6.0.21.45113), X64 RyuJIT
- * 
+ *
  *  |                                               Method |                  fen |     Mean |    Error |   StdDev |   Median | Ratio | RatioSD |  Gen 0 | Allocated |
  *  |----------------------------------------------------- |--------------------- |---------:|---------:|---------:|---------:|------:|--------:|-------:|----------:|
  *  |                         Struct_FENCalculatedOnTheFly | r2q1r(...)- 0 1 [68] | 22.07 us | 0.845 us | 2.411 us | 21.24 us |  1.00 |    0.00 | 4.9133 |     10 KB |
@@ -63,15 +63,15 @@
  *  |    RecordClass_FENCalculatedWithinTheMoveConstructor | rnbqk(...)- 0 1 [56] | 14.76 us | 0.291 us | 0.461 us | 14.70 us |  0.93 |    0.04 | 4.9896 |     10 KB |
  *  |                   RecordStruct_FENCalculatedOnTheFly | rnbqk(...)- 0 1 [56] | 14.72 us | 0.292 us | 0.577 us | 14.58 us |  0.92 |    0.05 | 4.3335 |      9 KB |
  *  |   RecordStruct_FENCalculatedWithinTheMoveConstructor | rnbqk(...)- 0 1 [56] | 15.18 us | 0.301 us | 0.709 us | 15.10 us |  0.95 |    0.06 | 4.9133 |     10 KB |
- *  
- *  
+ *
+ *
  *  BenchmarkDotNet=v0.13.1, OS=Windows 10.0.17763.2183 (1809/October2018Update/Redstone5)
  *  Intel Xeon Platinum 8272CL CPU 2.60GHz, 1 CPU, 2 logical and 2 physical cores
  *  .NET SDK=6.0.100-rc.1.21458.32
  *    [Host]     : .NET 6.0.0 (6.0.21.45113), X64 RyuJIT
  *    DefaultJob : .NET 6.0.0 (6.0.21.45113), X64 RyuJIT
- *  
- *  
+ *
+ *
  *  |                                               Method |                  fen |     Mean |    Error |   StdDev | Ratio | RatioSD |  Gen 0 | Allocated |
  *  |----------------------------------------------------- |--------------------- |---------:|---------:|---------:|------:|--------:|-------:|----------:|
  *  |                         **Struct_FENCalculatedOnTheFly** | **r2q1r(...)- 0 1 [68]** | **15.04 μs** | **0.103 μs** | **0.097 μs** |  **1.00** |    **0.00** | **0.5341** |     **10 KB** |
@@ -128,15 +128,15 @@
  *  |    RecordClass_FENCalculatedWithinTheMoveConstructor | rnbqk(...)- 0 1 [56] | 12.12 μs | 0.233 μs | 0.229 μs |  1.06 |    0.03 | 0.5493 |     10 KB |
  *  |                   RecordStruct_FENCalculatedOnTheFly | rnbqk(...)- 0 1 [56] | 11.79 μs | 0.125 μs | 0.117 μs |  1.03 |    0.02 | 0.4730 |      9 KB |
  *  |   RecordStruct_FENCalculatedWithinTheMoveConstructor | rnbqk(...)- 0 1 [56] | 11.28 μs | 0.079 μs | 0.074 μs |  0.99 |    0.02 | 0.5341 |     10 KB |
- *  
- *  
+ *
+ *
  *  BenchmarkDotNet=v0.13.1, OS=ubuntu 20.04
  *  Intel Xeon Platinum 8272CL CPU 2.60GHz, 1 CPU, 2 logical and 2 physical cores
  *  .NET SDK=6.0.100-rc.1.21458.32
  *    [Host]     : .NET 6.0.0 (6.0.21.45113), X64 RyuJIT
  *    DefaultJob : .NET 6.0.0 (6.0.21.45113), X64 RyuJIT
- *  
- *  
+ *
+ *
  *  ```
  *  |                                               Method |                  fen |     Mean |    Error |   StdDev | Ratio | RatioSD |  Gen 0 | Allocated |
  *  |----------------------------------------------------- |--------------------- |---------:|---------:|---------:|------:|--------:|-------:|----------:|
@@ -194,7 +194,7 @@
  *  |    RecordClass_FENCalculatedWithinTheMoveConstructor | rnbqk(...)- 0 1 [56] | 12.44 μs | 0.138 μs | 0.129 μs |  1.00 |    0.02 | 0.5493 |     10 KB |
  *  |                   RecordStruct_FENCalculatedOnTheFly | rnbqk(...)- 0 1 [56] | 12.36 μs | 0.240 μs | 0.236 μs |  0.99 |    0.01 | 0.4730 |      9 KB |
  *  |   RecordStruct_FENCalculatedWithinTheMoveConstructor | rnbqk(...)- 0 1 [56] | 12.43 μs | 0.119 μs | 0.112 μs |  1.00 |    0.02 | 0.5341 |     10 KB |
- *  
+ *
 */
 
 using BenchmarkDotNet.Attributes;
@@ -339,7 +339,7 @@ namespace Lynx.Benchmark
         };
     }
 
-    struct StructCustomPosition
+    internal struct StructCustomPosition
     {
         private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
 

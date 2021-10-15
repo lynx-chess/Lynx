@@ -1,12 +1,12 @@
 ﻿using Lynx.Model;
 using System;
-using Xunit;
+using NUnit.Framework;
 
 namespace Lynx.Test.PregeneratedAttacks
 {
     public class SetBishopOrRookOccupancyTest
     {
-        [Fact]
+        [Test]
         public void SetBishopOccupancy()
         {
             // Arrange
@@ -21,12 +21,11 @@ namespace Lynx.Test.PregeneratedAttacks
             // Act
             occupancy = AttackGenerator.SetBishopOrRookOccupancy(maxIndex, occupancyMask);
             // Assert
-            Assert.Equal(occupancyMask.Board, occupancy.Board);
+            Assert.AreEqual(occupancyMask.Board, occupancy.Board);
         }
 
-        [Theory]
-        [InlineData(BoardSquare.a8)]
-        [InlineData(BoardSquare.a7)]
+        [TestCase(BoardSquare.a8)]
+        [TestCase(BoardSquare.a7)]
         public void SetRookOccupancy(BoardSquare rookSquare)
         {
             // Arrange
@@ -42,12 +41,12 @@ namespace Lynx.Test.PregeneratedAttacks
             var index = (int)Math.Pow(2, 6) - 1;
             occupancy = AttackGenerator.SetBishopOrRookOccupancy(index, occupancyMask);
             // Assert
-            Assert.Equal(0b01111110UL << 8 * ((int)rookSquare / 8), occupancy.Board);
+            Assert.AreEqual(0b01111110UL << 8 * ((int)rookSquare / 8), occupancy.Board);
 
             // Act - max occupancy
             occupancy = AttackGenerator.SetBishopOrRookOccupancy(maxIndex, occupancyMask);
             // Assert
-            Assert.Equal(occupancyMask.Board, occupancy.Board);
+            Assert.AreEqual(occupancyMask.Board, occupancy.Board);
         }
     }
 }

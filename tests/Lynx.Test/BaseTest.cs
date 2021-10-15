@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 
-namespace Lynx.NUnit.Test
+namespace Lynx.Test
 {
     public abstract class BaseTest
     {

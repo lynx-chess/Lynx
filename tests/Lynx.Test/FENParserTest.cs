@@ -1,12 +1,12 @@
 ﻿using Lynx.Model;
-using Xunit;
+using NUnit.Framework;
 using CR = Lynx.Model.CastlingRights;
 
 namespace Lynx.Test
 {
     public class FENParserTest
     {
-        [Fact]
+        [Test]
         public void PieceBitBoards_InitialPosition()
         {
             // Arrange
@@ -27,37 +27,37 @@ namespace Lynx.Test
             Assert.True(success);
 
             var whitePawns = pieceBitBoards[(int)Piece.P];
-            Assert.Equal(0b1111_1111UL << (6 * 8), whitePawns.Board);
+            Assert.AreEqual(0b1111_1111UL << (6 * 8), whitePawns.Board);
             var blackPawns = pieceBitBoards[(int)Piece.p];
-            Assert.Equal(0b1111_1111UL << (1 * 8), blackPawns.Board);
+            Assert.AreEqual(0b1111_1111UL << (1 * 8), blackPawns.Board);
 
             var whiteRooks = pieceBitBoards[(int)Piece.R];
-            Assert.Equal(0b1000_0001UL << (7 * 8), whiteRooks.Board);
+            Assert.AreEqual(0b1000_0001UL << (7 * 8), whiteRooks.Board);
             var blackRooks = pieceBitBoards[(int)Piece.r];
-            Assert.Equal(0b1000_0001UL << (0 * 8), blackRooks.Board);
+            Assert.AreEqual(0b1000_0001UL << (0 * 8), blackRooks.Board);
 
             var whiteKnights = pieceBitBoards[(int)Piece.N];
-            Assert.Equal(0b0100_0010UL << (7 * 8), whiteKnights.Board);
+            Assert.AreEqual(0b0100_0010UL << (7 * 8), whiteKnights.Board);
             var blackKnights = pieceBitBoards[(int)Piece.n];
-            Assert.Equal(0b0100_0010UL << (0 * 8), blackKnights.Board);
+            Assert.AreEqual(0b0100_0010UL << (0 * 8), blackKnights.Board);
 
             var whiteBishops = pieceBitBoards[(int)Piece.B];
-            Assert.Equal(0b0010_0100UL << (7 * 8), whiteBishops.Board);
+            Assert.AreEqual(0b0010_0100UL << (7 * 8), whiteBishops.Board);
             var blackBishops = pieceBitBoards[(int)Piece.b];
-            Assert.Equal(0b0010_0100UL << (0 * 8), blackBishops.Board);
+            Assert.AreEqual(0b0010_0100UL << (0 * 8), blackBishops.Board);
 
             var whiteQueen = pieceBitBoards[(int)Piece.Q];
-            Assert.Equal(0b0000_1000UL << (int)BoardSquare.a1, whiteQueen.Board);
+            Assert.AreEqual(0b0000_1000UL << (int)BoardSquare.a1, whiteQueen.Board);
             var blackQueen = pieceBitBoards[(int)Piece.q];
-            Assert.Equal(0b0000_1000UL << (0 * 8), blackQueen.Board);
+            Assert.AreEqual(0b0000_1000UL << (0 * 8), blackQueen.Board);
 
             var whiteKing = pieceBitBoards[(int)Piece.K];
-            Assert.Equal(0b0001_0000UL << (7 * 8), whiteKing.Board);
+            Assert.AreEqual(0b0001_0000UL << (7 * 8), whiteKing.Board);
             var blackKing = pieceBitBoards[(int)Piece.k];
-            Assert.Equal(0b0001_0000UL << (0 * 8), blackKing.Board);
+            Assert.AreEqual(0b0001_0000UL << (0 * 8), blackKing.Board);
         }
 
-        [Fact]
+        [Test]
         public void PieceBitBoards()
         {
             // Arrange
@@ -114,12 +114,11 @@ namespace Lynx.Test
             Assert.True(pieceBitBoards[(int)Piece.K].GetBit(BoardSquare.e1));
         }
 
-        [Theory]
-        [InlineData("8/8/8/8/8/8/8/8 w - - 0 1")]
-        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 ")]
-        [InlineData(Constants.TrickyTestPositionFEN)]
-        [InlineData(Constants.KillerPositionFEN)]
-        [InlineData(Constants.CmkPositionFEN)]
+        [TestCase("8/8/8/8/8/8/8/8 w - - 0 1")]
+        [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 ")]
+        [TestCase(Constants.TrickyTestPositionFEN)]
+        [TestCase(Constants.KillerTestPositionFEN)]
+        [TestCase(Constants.CmkTestPositionFEN)]
         public void OccupancyBitBoards(string fen)
         {
             // Arrange
@@ -145,7 +144,7 @@ namespace Lynx.Test
             expectedWhiteOccupancy |= pieceBitBoards[(int)Piece.Q].Board;
             expectedWhiteOccupancy |= pieceBitBoards[(int)Piece.K].Board;
 
-            Assert.Equal(expectedWhiteOccupancy, occupancyBitBoards[(int)Side.White].Board);
+            Assert.AreEqual(expectedWhiteOccupancy, occupancyBitBoards[(int)Side.White].Board);
 
             var expectedBlackOccupancy = 0UL;
             expectedBlackOccupancy |= pieceBitBoards[(int)Piece.p].Board;
@@ -155,19 +154,18 @@ namespace Lynx.Test
             expectedBlackOccupancy |= pieceBitBoards[(int)Piece.q].Board;
             expectedBlackOccupancy |= pieceBitBoards[(int)Piece.k].Board;
 
-            Assert.Equal(expectedBlackOccupancy, occupancyBitBoards[(int)Side.Black].Board);
+            Assert.AreEqual(expectedBlackOccupancy, occupancyBitBoards[(int)Side.Black].Board);
 
             var expectedCombinedOccupancy = expectedWhiteOccupancy | expectedBlackOccupancy;
 
-            Assert.Equal(expectedCombinedOccupancy, occupancyBitBoards[(int)Side.Both].Board);
+            Assert.AreEqual(expectedCombinedOccupancy, occupancyBitBoards[(int)Side.Both].Board);
         }
 
-        [Theory]
-        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", Side.White)]
-        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR W KQkq - 0 1", Side.White)]
-        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1", Side.Black)]
-        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR B KQkq - 0 1", Side.Black)]
-        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR A KQkq - 0 1", Side.Both)]
+        [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", Side.White)]
+        [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR W KQkq - 0 1", Side.White)]
+        [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1", Side.Black)]
+        [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR B KQkq - 0 1", Side.Black)]
+        [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR A KQkq - 0 1", Side.Both)]
         public void SideToMove(string fen, Side expectedSide)
         {
             bool success;
@@ -177,28 +175,27 @@ namespace Lynx.Test
             if (expectedSide != Side.Both)
             {
                 Assert.True(success);
-                Assert.Equal(expectedSide, side);
+                Assert.AreEqual(expectedSide, side);
             }
             else
             {
                 Assert.False(success);
-                Assert.Equal(Side.Both, side);
+                Assert.AreEqual(Side.Both, side);
             }
         }
 
-        [Theory]
-        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", (int)CR.WK | (int)CR.WQ | (int)CR.BK | (int)CR.BQ)]
-        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w Qkq - 0 1", (int)CR.WQ | (int)CR.BK | (int)CR.BQ)]
-        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w Kkq - 0 1", (int)CR.WK | (int)CR.BK | (int)CR.BQ)]
-        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQq - 0 1", (int)CR.WK | (int)CR.WQ | (int)CR.BQ)]
-        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQk - 0 1", (int)CR.WK | (int)CR.WQ | (int)CR.BK)]
-        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQ - 0 1", (int)CR.WK | (int)CR.WQ)]
-        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w kq - 0 1", (int)CR.BK | (int)CR.BQ)]
-        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w Qq - 0 1", (int)CR.WQ | (int)CR.BQ)]
-        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w Kk - 0 1", (int)CR.WK | (int)CR.BK)]
-        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 0 1", 0)]
-        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w A - 0 1", -1)]
-        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KA - 0 1", -1)]
+        [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", (int)CR.WK | (int)CR.WQ | (int)CR.BK | (int)CR.BQ)]
+        [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w Qkq - 0 1", (int)CR.WQ | (int)CR.BK | (int)CR.BQ)]
+        [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w Kkq - 0 1", (int)CR.WK | (int)CR.BK | (int)CR.BQ)]
+        [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQq - 0 1", (int)CR.WK | (int)CR.WQ | (int)CR.BQ)]
+        [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQk - 0 1", (int)CR.WK | (int)CR.WQ | (int)CR.BK)]
+        [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQ - 0 1", (int)CR.WK | (int)CR.WQ)]
+        [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w kq - 0 1", (int)CR.BK | (int)CR.BQ)]
+        [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w Qq - 0 1", (int)CR.WQ | (int)CR.BQ)]
+        [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w Kk - 0 1", (int)CR.WK | (int)CR.BK)]
+        [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 0 1", 0)]
+        [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w A - 0 1", -1)]
+        [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KA - 0 1", -1)]
         public void CastlingRights(string fen, int expectedCastleResult)
         {
             // Arrange
@@ -216,7 +213,7 @@ namespace Lynx.Test
             if (expectedCastleResult >= 0)
             {
                 Assert.True(success);
-                Assert.Equal(expectedCastleResult, castleResult);
+                Assert.AreEqual(expectedCastleResult, castleResult);
             }
             else
             {
@@ -224,12 +221,11 @@ namespace Lynx.Test
             }
         }
 
-        [Theory]
-        [InlineData("rnbqkbnr/pppp1ppp/8/8/3pP3/8/PPPP1PPP/RNBQKBNR b Qq e3 0 1", BoardSquare.e3)]
-        [InlineData("rnbqkbnr/ppppp1pp/8/8/4pP2/8/PPPPP1PP/RNBQKBNR b Qq f3 0 1", BoardSquare.f3)]
-        [InlineData("rnbqkbnr/pp1ppppp/8/1Pp5/8/8/P1PPPPPP/RNBQKBNR w KQkq c6 0 1", BoardSquare.c6)]
-        [InlineData("rnbqkbnr/ppp1pppp/8/2Pp4/8/8/PP1PPPPP/RNBQKBNR w KQkq d6 0 1", BoardSquare.d6)]
-        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", BoardSquare.noSquare)]
+        [TestCase("rnbqkbnr/pppp1ppp/8/8/3pP3/8/PPPP1PPP/RNBQKBNR b Qq e3 0 1", BoardSquare.e3)]
+        [TestCase("rnbqkbnr/ppppp1pp/8/8/4pP2/8/PPPPP1PP/RNBQKBNR b Qq f3 0 1", BoardSquare.f3)]
+        [TestCase("rnbqkbnr/pp1ppppp/8/1Pp5/8/8/P1PPPPPP/RNBQKBNR w KQkq c6 0 1", BoardSquare.c6)]
+        [TestCase("rnbqkbnr/ppp1pppp/8/2Pp4/8/8/PP1PPPPP/RNBQKBNR w KQkq d6 0 1", BoardSquare.d6)]
+        [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", BoardSquare.noSquare)]
         public void EnPassant(string fen, BoardSquare expectedEnPassantSquare)
         {
             bool success;
@@ -237,16 +233,15 @@ namespace Lynx.Test
             (success, _, _, _, _, enPassant, _, _) = FENParser.ParseFEN(fen);
 
             Assert.True(success);
-            Assert.Equal(expectedEnPassantSquare, enPassant);
+            Assert.AreEqual(expectedEnPassantSquare, enPassant);
         }
 
-        [Theory]
-        [InlineData("8/8/8/8/8/8/8/8 w KQkq e6 0 1")]
-        [InlineData("8/8/8/8/8/8/8/8 w KQkq e7 0 1")]
-        [InlineData("rnbqkbnr/pppp1ppp/8/8/3pP3/8/PPPP1PPP/RNBQKBNR b Qq a3 0 1")]  // e3 could be
-        [InlineData("rnbqkbnr/ppppp1pp/8/8/4pP2/8/PPPPP1PP/RNBQKBNR b Qq b3 0 1")]  // f3 could be
-        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq i1 0 1")]
-        [InlineData("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq i3 0 1")]
+        [TestCase("8/8/8/8/8/8/8/8 w KQkq e6 0 1")]
+        [TestCase("8/8/8/8/8/8/8/8 w KQkq e7 0 1")]
+        [TestCase("rnbqkbnr/pppp1ppp/8/8/3pP3/8/PPPP1PPP/RNBQKBNR b Qq a3 0 1")]  // e3 could be
+        [TestCase("rnbqkbnr/ppppp1pp/8/8/4pP2/8/PPPPP1PP/RNBQKBNR b Qq b3 0 1")]  // f3 could be
+        [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq i1 0 1")]
+        [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq i3 0 1")]
         public void EnPassant_Error(string fen)
         {
             bool success;
@@ -255,10 +250,9 @@ namespace Lynx.Test
             Assert.False(success);
         }
 
-        [Theory]
-        [InlineData("8/8/8/8/8/8/8/8 w KQkq - 0 1", 0)]
-        [InlineData("8/8/8/8/8/8/8/8 w KQkq - 1 1", 1)]
-        [InlineData("8/8/8/8/8/8/8/8 w KQkq - 51 1", 51)]
+        [TestCase("8/8/8/8/8/8/8/8 w KQkq - 0 1", 0)]
+        [TestCase("8/8/8/8/8/8/8/8 w KQkq - 1 1", 1)]
+        [TestCase("8/8/8/8/8/8/8/8 w KQkq - 51 1", 51)]
         public void HalfMoveClock(string fen, int expectedHalfMoves)
         {
             bool success;
@@ -266,13 +260,12 @@ namespace Lynx.Test
             (success, _, _, _, _, _, halfMoves, _) = FENParser.ParseFEN(fen);
 
             Assert.True(success);
-            Assert.Equal(expectedHalfMoves, halfMoves);
+            Assert.AreEqual(expectedHalfMoves, halfMoves);
         }
 
-        [Theory]
-        [InlineData("8/8/8/8/8/8/8/8 w KQkq - 0 1", 1)]
-        [InlineData("8/8/8/8/8/8/8/8 w KQkq - 0 50", 50)]
-        [InlineData("8/8/8/8/8/8/8/8 w KQkq - 0 100", 100)]
+        [TestCase("8/8/8/8/8/8/8/8 w KQkq - 0 1", 1)]
+        [TestCase("8/8/8/8/8/8/8/8 w KQkq - 0 50", 50)]
+        [TestCase("8/8/8/8/8/8/8/8 w KQkq - 0 100", 100)]
         public void FullMoveCounter(string fen, int expectedFullMoveCounter)
         {
             bool success;
@@ -280,7 +273,7 @@ namespace Lynx.Test
             (success, _, _, _, _, _, _, fullMoveCounter) = FENParser.ParseFEN(fen);
 
             Assert.True(success);
-            Assert.Equal(expectedFullMoveCounter, fullMoveCounter);
+            Assert.AreEqual(expectedFullMoveCounter, fullMoveCounter);
         }
     }
 }

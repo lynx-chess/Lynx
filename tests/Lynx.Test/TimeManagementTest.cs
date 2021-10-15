@@ -2,7 +2,7 @@
 using NUnit.Framework;
 using System.Threading.Channels;
 
-namespace Lynx.NUnit.Test
+namespace Lynx.Test
 {
     public class TimeManagementTest
     {
