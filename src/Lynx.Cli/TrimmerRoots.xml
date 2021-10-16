@@ -1,0 +1,6 @@
+<linker>
+  <assembly fullname="Lynx" />
+  <type fullname="Lynx.Configuration" preserve="all" />
+  <type fullname="Lynx.GeneralSettings" preserve="all" />
+  <type fullname="Lynx.EngineSettings" preserve="all" />
+</linker>
