@@ -1,8 +1,8 @@
-﻿// TODO inline
-
+﻿using Lynx.Model;
 using System;
+using System.Runtime.CompilerServices;
 
-namespace Lynx.Model
+namespace Lynx
 {
     /// <summary>
     /// White pawns in file 1 are used to encode en-passant pawns
@@ -17,6 +17,7 @@ namespace Lynx.Model
             Table = Initialize();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long PieceHash(int boardSquare, int piece) => Table[boardSquare, piece];
 
         /// <summary>
@@ -24,6 +25,7 @@ namespace Lynx.Model
         /// </summary>
         /// <param name="enPassantSquare"></param>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long EnPassantHash(int enPassantSquare)
         {
             if (enPassantSquare == (int)BoardSquare.noSquare)
@@ -47,6 +49,7 @@ namespace Lynx.Model
         /// Uses <see cref="Piece.p"/> and <see cref="BoardSquare.h8"/>
         /// </summary>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long SideHash()
         {
             return Table[(int)BoardSquare.h8, (int)Piece.p];
@@ -59,6 +62,7 @@ namespace Lynx.Model
         /// </summary>
         /// <param name="castle"></param>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long CastleHash(int castle)
         {
             long combinedHash = 0;
@@ -91,6 +95,7 @@ namespace Lynx.Model
         /// </summary>
         /// <param name="position"></param>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long PositionHash(Position position)
         {
             long positionHash = 0;
@@ -117,6 +122,7 @@ namespace Lynx.Model
         /// Initializes Zobrist table (long[64, 12])
         /// </summary>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static long[,] Initialize()
         {
             var zobristTable = new long[64, 12];

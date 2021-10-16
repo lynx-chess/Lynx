@@ -11,6 +11,17 @@
  *  |     Id | Lynx.Model.Position |   986.9 ns | 8.48 ns | 7.93 ns |  0.86 | 0.0820 |   1,536 B |
  *  |     Id | Lynx.Model.Position |   871.7 ns | 6.84 ns | 6.40 ns |  0.76 | 0.0734 |   1,384 B |
  *
+ *  Inline version of Id
+ *  |    Method |         newPosition |     Mean |    Error |   StdDev |  Gen 0 | Allocated |
+ *  |---------- |-------------------- |---------:|---------:|---------:|-------:|----------:|
+ *  |        Id | Lynx.Model.Position | 476.4 ns |  9.55 ns | 19.51 ns | 0.6580 |      1 KB |
+ *  |        Id | Lynx.Model.Position | 528.7 ns | 10.35 ns | 28.17 ns | 0.6580 |      1 KB |
+ *  |        Id | Lynx.Model.Position | 524.1 ns | 10.55 ns | 24.44 ns | 0.6580 |      1 KB |
+ *  |        Id | Lynx.Model.Position | 461.7 ns |  9.19 ns | 17.92 ns | 0.6580 |      1 KB |
+ *  | IdInlined | Lynx.Model.Position | 472.4 ns |  9.52 ns | 17.89 ns | 0.6580 |      1 KB |
+ *  | IdInlined | Lynx.Model.Position | 481.8 ns |  9.56 ns | 11.74 ns | 0.6580 |      1 KB |
+ *  | IdInlined | Lynx.Model.Position | 481.8 ns |  9.66 ns | 21.62 ns | 0.6580 |      1 KB |
+ *  | IdInlined | Lynx.Model.Position | 487.4 ns |  9.85 ns | 25.94 ns | 0.6580 |      1 KB |
  *
  */
 

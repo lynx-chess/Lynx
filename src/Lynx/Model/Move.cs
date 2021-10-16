@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Lynx.Model
@@ -30,8 +31,6 @@ namespace Lynx.Model
         /// </summary>
         public int EncodedMove { get; }
 
-        internal Move(int n) { EncodedMove = n; }
-
         /// <summary>
         /// 'Encode' constractor
         /// </summary>
@@ -44,6 +43,7 @@ namespace Lynx.Model
         /// <param name="isEnPassant"></param>
         /// <param name="isShortCastle"></param>
         /// <param name="isLongCastle"></param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Move(
             int sourceSquare, int targetSquare, int piece, int promotedPiece = default,
             int isCapture = default, int isDoublePawnPush = default, int isEnPassant = default,
@@ -115,27 +115,39 @@ namespace Lynx.Model
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly int SourceSquare() => EncodedMove & 0x3F;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly int TargetSquare() => (EncodedMove & 0xFC0) >> 6;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly int Piece() => (EncodedMove & 0xF000) >> 12;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly int PromotedPiece() => (EncodedMove & 0xF0000) >> 16;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool IsCapture() => (EncodedMove & 0x10_0000) >> 20 != default;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool IsDoublePawnPush() => (EncodedMove & 0x20_0000) >> 21 != default;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool IsEnPassant() => (EncodedMove & 0x40_0000) >> 22 != default;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool IsShortCastle() => (EncodedMove & 0x80_0000) >> 23 != default;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool IsLongCastle() => (EncodedMove & 0x100_0000) >> 24 != default;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool IsCastle() => (EncodedMove & 0x180_0000) >> 23 != default;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private readonly Side Side() => Piece() >= (int)Model.Piece.p ? Model.Side.Black : Model.Side.White;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private readonly Side OppositeSide() => Piece() >= (int)Model.Piece.p ? Model.Side.White : Model.Side.Black;
 
         /// <summary>
@@ -143,6 +155,7 @@ namespace Lynx.Model
         /// </summary>
         /// <param name="position">The position that precedes a move</param>
         /// <returns>The higher the score is, the more valuable is the captured piece and the less valuable is the piece that makes the such capture</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly int Score(Position position, int[,]? killerMoves = null, int? plies = null)
         {
             int score = 0;

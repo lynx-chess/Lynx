@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace Lynx.Model
 {
@@ -8,9 +9,10 @@ namespace Lynx.Model
 
         public bool Empty => Board == default;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public BitBoard(ulong value) { Board = value; }
 
-        public BitBoard(params BoardSquare[] occupiedSquares)
+        internal BitBoard(params BoardSquare[] occupiedSquares)
         {
             Board = default;
 
@@ -50,16 +52,19 @@ namespace Lynx.Model
             Console.WriteLine(separator);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool GetBit(int squareIndex)
         {
             return (Board & (1UL << squareIndex)) != default;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetBit(int square)
         {
             Board |= (1UL << square);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void PopBit(int square)
         {
             Board &= ~(1UL << square);
@@ -70,21 +75,22 @@ namespace Lynx.Model
         /// Cannot use (Board & -Board) - 1 due to limitation applying unary - to ulong
         /// </summary>
         /// <returns>-1 in case of empty board</returns>
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly int GetLS1BIndex() => GetLS1BIndex(Board);
 
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ResetLS1B()
         {
             Board = ResetLS1B(Board);
         }
 
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly int CountBits() => CountBits(Board);
 
         /// <summary>
         /// https://www.chessprogramming.org/Population_Count#Single_Populated_Bitboards
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool IsSinglePopulated()
         {
             return Board != default && ResetLS1B(Board) == default;
@@ -92,18 +98,22 @@ namespace Lynx.Model
 
         #region Static methods
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int SquareIndex(int rank, int file) => (rank * 8) + file;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ulong SetBit(ulong bitboard, int squareIndex)
         {
             return bitboard | (1UL << squareIndex);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool GetBit(ulong bitboard, int squareIndex)
         {
             return (bitboard & (1UL << squareIndex)) != default;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int GetLS1BIndex(ulong bitboard)
         {
             if (bitboard == default)
@@ -118,13 +128,13 @@ namespace Lynx.Model
         /// https://www.chessprogramming.org/General_Setwise_Operations#LS1BReset
         /// </summary>
         /// <returns>Bitboard</returns>
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ulong ResetLS1B(ulong bitboard)
         {
             return bitboard & (bitboard - 1);
         }
 
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int CountBits(ulong bitboard)
         {
             int counter = 0;
@@ -143,10 +153,13 @@ namespace Lynx.Model
 
         #region Methods accepting BoardSquares
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool GetBit(BoardSquare square) => GetBit((int)square);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetBit(BoardSquare square) => SetBit((int)square);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void PopBit(BoardSquare square) => PopBit((int)square);
 
         #endregion
