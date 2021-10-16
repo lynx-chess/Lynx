@@ -36,48 +36,57 @@ namespace Lynx.Benchmark
         };
 
         [Benchmark]
-        public void SingleThread()
+        public bool SingleThread()
         {
+            var b = false;
             foreach (var position in _positions)
             {
                 for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
                 {
                     if (SingleThreadImpl.IsSquaredAttacked_ExternalMethods(squareIndex, position.Side, position.PieceBitBoards, position.OccupancyBitBoards))
                     {
-                        ;
+                        b = true;
                     }
                 }
             }
+
+            return b;
         }
 
         [Benchmark]
-        public async Task WhenAll()
+        public async Task<bool> WhenAll()
         {
+            var b = false;
             foreach (var position in _positions)
             {
                 for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
                 {
                     if (await WhenAllImpl.IsSquaredAttacked_WhenAll(squareIndex, position.Side, position.PieceBitBoards, position.OccupancyBitBoards))
                     {
-                        ;
+                        b = true;
                     }
                 }
             }
+
+            return b;
         }
 
         [Benchmark]
-        public async Task WhenAny()
+        public async Task<bool> WhenAny()
         {
+            var b = false;
             foreach (var position in _positions)
             {
                 for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
                 {
                     if (await WhenAnyImpl.IsSquaredAttacked_WhenAny(squareIndex, position.Side, position.PieceBitBoards, position.OccupancyBitBoards))
                     {
-                        ;
+                        b = true;
                     }
                 }
             }
+
+            return b;
         }
 
         private static class SingleThreadImpl

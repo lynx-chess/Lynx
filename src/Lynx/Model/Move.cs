@@ -13,7 +13,7 @@ namespace Lynx.Model
     {
         public const int CaptureBaseScore = 100_000;
 
-        private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
 
         /// <summary>
         ///     Binary move bits            Hexadecimal
@@ -80,7 +80,7 @@ namespace Lynx.Model
 
                 if (move.Equals(default(Move)))
                 {
-                    Logger.Warn($"Unable to link last move string {UCIString} to a valid move in the current position. That move may have already been played");
+                    _logger.Warn($"Unable to link last move string {UCIString} to a valid move in the current position. That move may have already been played");
                     move = null;
                     return false;
                 }
@@ -103,7 +103,7 @@ namespace Lynx.Model
                 move = candidateMoves.FirstOrDefault(predicate);
                 if (move.Equals(default(Move)))
                 {
-                    Logger.Warn($"Unable to link move {UCIString} to a valid move in the current position. That move may have already been played");
+                    _logger.Warn($"Unable to link move {UCIString} to a valid move in the current position. That move may have already been played");
                     move = null;
                     return false;
                 }
@@ -145,11 +145,6 @@ namespace Lynx.Model
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool IsCastle() => (EncodedMove & 0x180_0000) >> 23 != default;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private readonly Side Side() => Piece() >= (int)Model.Piece.p ? Model.Side.Black : Model.Side.White;
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private readonly Side OppositeSide() => Piece() >= (int)Model.Piece.p ? Model.Side.White : Model.Side.Black;
-
         /// <summary>
         /// Returns the score evaluation of a move taking into account <see cref="EvaluationConstants.MostValueableVictimLeastValuableAttacker"/>
         /// </summary>
@@ -166,7 +161,7 @@ namespace Lynx.Model
                 int targetPiece = (int)Model.Piece.P;    // Important to initialize to P or p, due to en-passant captures
 
                 var targetSquare = TargetSquare();
-                var oppositeSide = OppositeSide();
+                var oppositeSide = Utils.OppositeSide(position.Side);
                 var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
                 var oppositePawnIndex = (int)Model.Piece.P + oppositeSideOffset;
 

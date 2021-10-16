@@ -17,7 +17,7 @@ namespace Lynx
         /// Indexed by <see cref="Piece"/>.
         /// Checks are not considered
         /// </summary>
-        private static readonly Func<int, BitBoard, ulong>[] PieceAttacks = new Func<int, BitBoard, ulong>[]
+        private static readonly Func<int, BitBoard, ulong>[] _pieceAttacks = new Func<int, BitBoard, ulong>[]
         {
             (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White, origin].Board,
             (int origin, BitBoard _) => Attacks.KnightAttacks[origin].Board,
@@ -233,7 +233,7 @@ namespace Lynx
                 sourceSquare = BitBoard.GetLS1BIndex(bitboard);
                 bitboard = BitBoard.ResetLS1B(bitboard);
 
-                ulong attacks = PieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
+                ulong attacks = _pieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
                     & ~position.OccupancyBitBoards[(int)position.Side].Board;
 
                 while (attacks != default)

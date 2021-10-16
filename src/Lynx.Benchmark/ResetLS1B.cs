@@ -50,8 +50,9 @@ namespace Lynx.Benchmark
         /// <param name="iterations"></param>
         [Benchmark(Baseline = true)]
         [ArgumentsSource(nameof(Data))]
-        public void GetAndReset(int iterations)
+        public int GetAndReset(int iterations)
         {
+            int ls1b = 0;
             ulong bitboard = 6060551578861568;
             ulong bitboard2 = 335588096;
 
@@ -59,16 +60,18 @@ namespace Lynx.Benchmark
             {
                 while (bitboard != default)
                 {
-                    var ls1b = ResetLS1BImplementations.GetLS1BIndex(bitboard);
+                    ls1b = ResetLS1BImplementations.GetLS1BIndex(bitboard);
                     bitboard = ResetLS1BImplementations.ResetLS1B(bitboard);
                 }
 
                 while (bitboard2 != default)
                 {
-                    var ls1b = ResetLS1BImplementations.GetLS1BIndex(bitboard2);
+                    ls1b = ResetLS1BImplementations.GetLS1BIndex(bitboard2);
                     bitboard2 = ResetLS1BImplementations.ResetLS1B(bitboard2);
                 }
             }
+
+            return ls1b;
         }
 
         /// <summary>
@@ -77,8 +80,9 @@ namespace Lynx.Benchmark
         /// <param name="iterations"></param>
         [Benchmark]
         [ArgumentsSource(nameof(Data))]
-        public void GetAndPop(int iterations)
+        public int GetAndPop(int iterations)
         {
+            int ls1b = 0;
             ulong bitboard = 6060551578861568;
             ulong bitboard2 = 335588096;
 
@@ -86,16 +90,18 @@ namespace Lynx.Benchmark
             {
                 while (bitboard != default)
                 {
-                    var ls1b = ResetLS1BImplementations.GetLS1BIndex(bitboard);
+                    ls1b = ResetLS1BImplementations.GetLS1BIndex(bitboard);
                     bitboard = ResetLS1BImplementations.PopBit(bitboard, ls1b);
                 }
 
                 while (bitboard2 != default)
                 {
-                    var ls1b = ResetLS1BImplementations.GetLS1BIndex(bitboard2);
+                    ls1b = ResetLS1BImplementations.GetLS1BIndex(bitboard2);
                     bitboard2 = ResetLS1BImplementations.PopBit(bitboard2, ls1b);
                 }
             }
+
+            return ls1b;
         }
     }
 }

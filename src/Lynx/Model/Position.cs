@@ -14,7 +14,7 @@ namespace Lynx.Model
 
         internal const int DepthFactor = 1_000_000;
 
-        private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
 
         private string? _fen;
 
@@ -49,7 +49,7 @@ namespace Lynx.Model
 
             if (!parsedFEN.Success)
             {
-                Logger.Error($"Error parsing FEN {fen}");
+                _logger.Error($"Error parsing FEN {fen}");
             }
 
             PieceBitBoards = parsedFEN.PieceBitBoards;
@@ -433,6 +433,7 @@ namespace Lynx.Model
 
             Console.Write("\n    a b c d e f g h\n");
 
+#pragma warning disable RCS1214 // Unnecessary interpolated string.
             Console.WriteLine();
             Console.WriteLine($"    Side:\t{Side}");
             Console.WriteLine($"    Enpassant:\t{(EnPassant == BoardSquare.noSquare ? "no" : Constants.Coordinates[(int)EnPassant])}");
@@ -443,6 +444,7 @@ namespace Lynx.Model
                 $"{((Castle & (int)CastlingRights.BQ) != default ? 'q' : '-')}"
                 );
             Console.WriteLine($"    FEN:\t{FEN}");
+#pragma warning restore RCS1214 // Unnecessary interpolated string.
 
             Console.WriteLine(separator);
         }

@@ -10,15 +10,15 @@ namespace Lynx
     /// </summary>
     public static class ZobristTable
     {
-        private static readonly long[,] Table;
+        private static readonly long[,] _table;
 
         static ZobristTable()
         {
-            Table = Initialize();
+            _table = Initialize();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long PieceHash(int boardSquare, int piece) => Table[boardSquare, piece];
+        public static long PieceHash(int boardSquare, int piece) => _table[boardSquare, piece];
 
         /// <summary>
         /// Uses <see cref="Piece.P"/> and squares <see cref="BoardSquare.a1"/>-<see cref="BoardSquare.h1"/>
@@ -42,7 +42,7 @@ namespace Lynx
 
             var file = enPassantSquare % 8;
 
-            return Table[file, (int)Piece.P];
+            return _table[file, (int)Piece.P];
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace Lynx
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long SideHash()
         {
-            return Table[(int)BoardSquare.h8, (int)Piece.p];
+            return _table[(int)BoardSquare.h8, (int)Piece.p];
         }
 
         /// <summary>
@@ -69,22 +69,22 @@ namespace Lynx
 
             if ((castle & (int)CastlingRights.WK) != default)
             {
-                combinedHash ^= Table[(int)BoardSquare.a8, (int)Piece.p];        // a8
+                combinedHash ^= _table[(int)BoardSquare.a8, (int)Piece.p];        // a8
             }
 
             if ((castle & (int)CastlingRights.WQ) != default)
             {
-                combinedHash ^= Table[(int)BoardSquare.b8, (int)Piece.p];        // b8
+                combinedHash ^= _table[(int)BoardSquare.b8, (int)Piece.p];        // b8
             }
 
             if ((castle & (int)CastlingRights.BK) != default)
             {
-                combinedHash ^= Table[(int)BoardSquare.c8, (int)Piece.p];        // c8
+                combinedHash ^= _table[(int)BoardSquare.c8, (int)Piece.p];        // c8
             }
 
             if ((castle & (int)CastlingRights.BQ) != default)
             {
-                combinedHash ^= Table[(int)BoardSquare.d8, (int)Piece.p];        // d8
+                combinedHash ^= _table[(int)BoardSquare.d8, (int)Piece.p];        // d8
             }
 
             return combinedHash;

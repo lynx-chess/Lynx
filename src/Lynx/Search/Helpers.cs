@@ -10,7 +10,7 @@ namespace Lynx.Search
 {
     public static partial class SearchAlgorithms
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         private const int MinValue = -2 * Position.CheckMateEvaluation;
         private const int MaxValue = +2 * Position.CheckMateEvaluation;
@@ -39,18 +39,6 @@ namespace Lynx.Search
             return lessLikely <= mostLikely ? mostLikely : lessLikely;
         }
 
-        /// <summary>
-        /// Branch-optimized for <paramref name="mostLikely"/>
-        /// </summary>
-        /// <param name="mostLikely"></param>
-        /// <param name="lessLikely"></param>
-        /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int Min(int mostLikely, int lessLikely)
-        {
-            return lessLikely >= mostLikely ? mostLikely : lessLikely;
-        }
-
         [Conditional("DEBUG")]
         private static void PrintPreMove(Position position, int plies, Move move, bool isQuiescence = false)
         {
@@ -64,12 +52,12 @@ namespace Lynx.Search
             //if (plies < Configuration.Parameters.Depth - 1)
             {
                 //Console.WriteLine($"{Environment.NewLine}{depthStr}{move} ({position.Side}, {depth})");
-                Logger.Trace($"{Environment.NewLine}{depthStr}{(isQuiescence ? "[Qui] " : "")}{move} ({position.Side}, {plies})");
+                _logger.Trace($"{Environment.NewLine}{depthStr}{(isQuiescence ? "[Qui] " : "")}{move} ({position.Side}, {plies})");
             }
         }
 
         [Conditional("DEBUG")]
-        private static void PrintMove(int plies, Move move, int evaluation, Position position, bool isQuiescence = false, bool prune = false)
+        private static void PrintMove(int plies, Move move, int evaluation, bool isQuiescence = false, bool prune = false)
         {
             var sb = new StringBuilder();
             for (int i = 0; i <= plies; ++i)
@@ -89,7 +77,7 @@ namespace Lynx.Search
             //Console.WriteLine($"{depthStr}{move} ({position.Side}, {depthLeft}) | {evaluation}");
             //Console.WriteLine($"{depthStr}{move} | {evaluation}");
 
-            Logger.Trace($"{depthStr}{(isQuiescence ? "[Qui] " : "")}{move,-6} | {evaluation}{(prune ? " | prunning" : "")}");
+            _logger.Trace($"{depthStr}{(isQuiescence ? "[Qui] " : "")}{move,-6} | {evaluation}{(prune ? " | prunning" : "")}");
 
             //Console.ResetColor();
         }
@@ -104,7 +92,7 @@ namespace Lynx.Search
             }
             string depthStr = sb.ToString();
 
-            Logger.Trace(depthStr + message);
+            _logger.Trace(depthStr + message);
         }
     }
 }
