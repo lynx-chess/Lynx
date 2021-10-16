@@ -3,6 +3,7 @@ using NLog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Lynx.Search
@@ -32,6 +33,7 @@ namespace Lynx.Search
         /// <param name="mostLikely"></param>
         /// <param name="lessLikely"></param>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int Max(int mostLikely, int lessLikely)
         {
             return lessLikely <= mostLikely ? mostLikely : lessLikely;
@@ -43,6 +45,7 @@ namespace Lynx.Search
         /// <param name="mostLikely"></param>
         /// <param name="lessLikely"></param>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int Min(int mostLikely, int lessLikely)
         {
             return lessLikely >= mostLikely ? mostLikely : lessLikely;

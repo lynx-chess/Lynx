@@ -3,6 +3,7 @@ using NLog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Lynx
 {
@@ -42,6 +43,7 @@ namespace Lynx
         /// <param name="position"></param>
         /// <param name="capturesOnly">Filters out all moves but captures</param>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IOrderedEnumerable<Move> GenerateAllMoves(Position position, int[,]? killerMoves = null, int? plies = null, bool capturesOnly = false)
         {
 #if DEBUG
@@ -64,6 +66,7 @@ namespace Lynx
             return moves.OrderByDescending(move => move.Score(position, killerMoves, plies));
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static IEnumerable<Move> GeneratePawnMoves(Position position, int offset, bool capturesOnly = false)
         {
             int sourceSquare, targetSquare;
@@ -155,6 +158,7 @@ namespace Lynx
         /// <param name="position"></param>
         /// <param name="offset"></param>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static IEnumerable<Move> GenerateCastlingMoves(Position position, int offset)
         {
             var piece = (int)Piece.K + offset;
@@ -221,6 +225,7 @@ namespace Lynx
         /// <param name="position"></param>
         /// <param name="capturesOnly"></param>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static IEnumerable<Move> GeneratePieceMoves(int piece, Position position, bool capturesOnly = false)
         {
             var bitboard = position.PieceBitBoards[piece].Board;
@@ -251,6 +256,7 @@ namespace Lynx
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static IEnumerable<Move> GenerateKingMoves(Position position, bool capturesOnly = false)
         {
             var offset = Utils.PieceOffset(position.Side);
@@ -258,6 +264,7 @@ namespace Lynx
             return GeneratePieceMoves((int)Piece.K + offset, position, capturesOnly);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static IEnumerable<Move> GenerateKnightMoves(Position position, bool capturesOnly = false)
         {
             var offset = Utils.PieceOffset(position.Side);
@@ -265,6 +272,7 @@ namespace Lynx
             return GeneratePieceMoves((int)Piece.N + offset, position, capturesOnly);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static IEnumerable<Move> GenerateBishopMoves(Position position, bool capturesOnly = false)
         {
             var offset = Utils.PieceOffset(position.Side);
@@ -272,6 +280,7 @@ namespace Lynx
             return GeneratePieceMoves((int)Piece.B + offset, position, capturesOnly);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static IEnumerable<Move> GenerateRookMoves(Position position, bool capturesOnly = false)
         {
             var offset = Utils.PieceOffset(position.Side);
@@ -279,6 +288,7 @@ namespace Lynx
             return GeneratePieceMoves((int)Piece.R + offset, position, capturesOnly);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static IEnumerable<Move> GenerateQueenMoves(Position position, bool capturesOnly = false)
         {
             var offset = Utils.PieceOffset(position.Side);

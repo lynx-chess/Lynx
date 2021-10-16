@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace Lynx
 {
@@ -11,12 +12,14 @@ namespace Lynx
         /// Side.White -> 0
         /// Side.Black -> 6
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int PieceOffset(Side side) => PieceOffset((int)side);
 
         /// <summary>
         /// Side.White -> 0
         /// Side.Black -> 6
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int PieceOffset(int side)
         {
             GuardAgainstSideBoth(side);
@@ -29,6 +32,7 @@ namespace Lynx
         /// </summary>
         /// <param name="side"></param>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int OppositeSide(Side side)
         {
             GuardAgainstSideBoth((int)side);
@@ -36,7 +40,9 @@ namespace Lynx
             return (int)side ^ 1;     // or  (int)Side.White - (int)side
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int ShortCastleRookTargetSquare(Side side) => ShortCastleRookTargetSquare((int)side);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int ShortCastleRookTargetSquare(int side)
         {
             GuardAgainstSideBoth(side);
@@ -44,7 +50,9 @@ namespace Lynx
             return Constants.BlackShortCastleRookSquare + (7 * 8 * side);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int LongCastleRookTargetSquare(Side side) => LongCastleRookTargetSquare((int)side);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int LongCastleRookTargetSquare(int side)
         {
             GuardAgainstSideBoth(side);
@@ -52,7 +60,9 @@ namespace Lynx
             return Constants.BlackLongCastleRookSquare + (7 * 8 * side);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int ShortCastleRookSourceSquare(Side side) => ShortCastleRookSourceSquare((int)side);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int ShortCastleRookSourceSquare(int side)
         {
             GuardAgainstSideBoth(side);
@@ -60,7 +70,9 @@ namespace Lynx
             return (int)BoardSquare.h8 + (7 * 8 * side);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int LongCastleRookSourceSquare(Side side) => LongCastleRookSourceSquare((int)side);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int LongCastleRookSourceSquare(int side)
         {
             GuardAgainstSideBoth(side);
@@ -68,6 +80,7 @@ namespace Lynx
             return (int)BoardSquare.a8 + (7 * 8 * side);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int UpdatePositionHistory(Position newPosition, Dictionary<long, int> positionHistory)
         {
             var id = newPosition.UniqueIdentifier;
@@ -77,6 +90,7 @@ namespace Lynx
                 : ++positionHistory[id];
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void RevertPositionHistory(Position newPosition, Dictionary<long, int> positionHistory, int repetitions)
         {
             var id = newPosition.UniqueIdentifier;
@@ -103,6 +117,7 @@ namespace Lynx
         ///     At depth 3, there's a capture, but the eval should still be 0
         ///     At depth 4 there's no capture, but the eval should still be 0
         /// </remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Update50movesRule(Move moveToPlay, int movesWithoutCaptureOrPawnMove)
         {
             if (moveToPlay.IsCapture())

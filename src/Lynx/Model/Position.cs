@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Lynx.Model
@@ -64,6 +65,7 @@ namespace Lynx.Model
         /// Clone constructor
         /// </summary>
         /// <param name="position"></param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Position(Position position)
         {
             UniqueIdentifier = position.UniqueIdentifier;
@@ -78,6 +80,7 @@ namespace Lynx.Model
             EnPassant = position.EnPassant;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Position(Position position, Move move) : this(position)
         {
             var oldSide = Side;
@@ -196,6 +199,7 @@ namespace Lynx.Model
         /// False if any of the kings has been captured, or if the opponent king is in check.
         /// </summary>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsValid()
         {
             var kingSquare = PieceBitBoards[(int)Piece.K + Utils.PieceOffset(Side)].GetLS1BIndex();
@@ -211,6 +215,7 @@ namespace Lynx.Model
         /// This method is meant to be invoked only after <see cref="Position(Position, Move)"/>
         /// </summary>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool WasProduceByAValidMove()
         {
             var oppositeKingSquare = PieceBitBoards[(int)Piece.K + Utils.PieceOffset((Side)Utils.OppositeSide(Side))].GetLS1BIndex();
@@ -218,6 +223,7 @@ namespace Lynx.Model
             return oppositeKingSquare >= 0 && !Attacks.IsSquaredAttacked(oppositeKingSquare, Side, PieceBitBoards, OccupancyBitBoards);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal string CalculateFEN()
         {
             var sb = new StringBuilder(100);
@@ -317,6 +323,7 @@ namespace Lynx.Model
         /// That is, positive scores always favour playing <see cref="Side"/>.
         /// </summary>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int StaticEvaluation(Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove)
         {
             var eval = 0;
@@ -349,8 +356,10 @@ namespace Lynx.Model
                 : -eval;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IOrderedEnumerable<Move> AllPossibleMoves(int[,]? killerMoves = null, int? plies = null) => MoveGenerator.GenerateAllMoves(this, killerMoves, plies);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IOrderedEnumerable<Move> AllCapturesMoves() => MoveGenerator.GenerateAllMoves(this, capturesOnly: true);
 
         /// <summary>
@@ -361,6 +370,7 @@ namespace Lynx.Model
         /// <param name="depth">Modulates the output, favouring positions with lower depth left (i.e. Checkmate in less moves)</param>
         /// <returns>At least <see cref="CheckMateEvaluation"/> if Position.Side lost (more extreme values when <paramref name="depth"/> increases)
         /// or 0 if Position.Side was stalemated</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int EvaluateFinalPosition(int depth, Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove)
         {
             if (positionHistory.Values.Any(val => val >= 3) || movesWithoutCaptureOrPawnMove >= 50)
