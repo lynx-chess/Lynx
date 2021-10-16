@@ -26,7 +26,7 @@ namespace Lynx
             -1_000_000,
         };
 
-        private static readonly int[] PawnPositionalScore = new int[64]
+        private static readonly int[] _pawnPositionalScore = new int[64]
         {
             90,  90,  90,  90,  90,  90,  90,  90,
             30,  30,  30,  40,  40,  30,  30,  30,
@@ -38,7 +38,7 @@ namespace Lynx
              0,   0,   0,   0,   0,   0,   0,   0
         };
 
-        private static readonly int[] KnightPositionalScore = new int[64]
+        private static readonly int[] _knightPositionalScore = new int[64]
         {
             -10,   0,   0,   0,   0,   0,   0,  -10,
             -5,   0,   0,  10,  10,   0,   0,  -5,
@@ -50,7 +50,7 @@ namespace Lynx
             -10, -10,   0,   0,   0,   0, -10,  -10
          };
 
-        private static readonly int[] BishopPositionalScore = new int[64]
+        private static readonly int[] _bishopPositionalScore = new int[64]
         {
              0,   0,   0,   0,   0,   0,   0,   0,
              0,   0,   0,   0,   0,   0,   0,   0,
@@ -62,7 +62,7 @@ namespace Lynx
              0,   0, -10,   0,   0, -10,   0,   0
         };
 
-        private static readonly int[] RookPositionalScore = new int[64]
+        private static readonly int[] _rookPositionalScore = new int[64]
         {
             50,  50,  50,  50,  50,  50,  50,  50,
             50,  50,  50,  50,  50,  50,  50,  50,
@@ -74,7 +74,7 @@ namespace Lynx
              0,   0,   0,  20,  20,   0,   0,   0
         };
 
-        private static readonly int[] QueenPositionalScore = new int[64]
+        private static readonly int[] _queenPositionalScore = new int[64]
         {
              0,  0,  0,  0,  0,  0,  0,  0,
              0,  0,  0,  0,  0,  0,  0,  0,
@@ -89,7 +89,7 @@ namespace Lynx
         /// <summary>
         /// Could have two: one for opening/middle game, avoiding the center, and another one for endgames, seeking the center
         /// </summary>
-        private static readonly int[] KingPositionalScore = new int[64]
+        private static readonly int[] _kingPositionalScore = new int[64]
         {
              0,   0,   0,   0,   0,   0,   0,   0,
              0,   0,   5,   5,   5,   5,   0,   0,
@@ -101,7 +101,7 @@ namespace Lynx
              0,   0,   10,  0, -15,   0,  15,   0
         };
 
-        private static readonly int[] MirrorScore = new int[64]
+        private static readonly int[] _mirrorScore = new int[64]
         {
             (int)a1, (int)b1, (int)c1, (int)d1, (int)e1, (int)f1, (int)g1, (int)h1,
             (int)a2, (int)b2, (int)c2, (int)d2, (int)e2, (int)f2, (int)g2, (int)h2,
@@ -113,13 +113,13 @@ namespace Lynx
             (int)a8, (int)b8, (int)c8, (int)d8, (int)e8, (int)f8, (int)g8, (int)h8
         };
 
-        private static int PPS(BoardSquare square) => -PawnPositionalScore[MirrorScore[(int)square]];
-        private static int NPS(BoardSquare square) => -KnightPositionalScore[MirrorScore[(int)square]];
-        private static int BPS(BoardSquare square) => -BishopPositionalScore[MirrorScore[(int)square]];
-        private static int RPS(BoardSquare square) => -RookPositionalScore[MirrorScore[(int)square]];
-        private static int KPS(BoardSquare square) => -KingPositionalScore[MirrorScore[(int)square]];
+        private static int PPS(BoardSquare square) => -_pawnPositionalScore[_mirrorScore[(int)square]];
+        private static int NPS(BoardSquare square) => -_knightPositionalScore[_mirrorScore[(int)square]];
+        private static int BPS(BoardSquare square) => -_bishopPositionalScore[_mirrorScore[(int)square]];
+        private static int RPS(BoardSquare square) => -_rookPositionalScore[_mirrorScore[(int)square]];
+        private static int KPS(BoardSquare square) => -_kingPositionalScore[_mirrorScore[(int)square]];
 
-        private static readonly int[] PawnPositionalScore_Black = new int[64]
+        private static readonly int[] _pawnPositionalScore_Black = new int[64]
         {
             PPS(a8), PPS(b8), PPS(c8), PPS(d8), PPS(e8), PPS(f8), PPS(g8), PPS(h8),
             PPS(a7), PPS(b7), PPS(c7), PPS(d7), PPS(e7), PPS(f7), PPS(g7), PPS(h7),
@@ -131,7 +131,7 @@ namespace Lynx
             PPS(a1), PPS(b1), PPS(c1), PPS(d1), PPS(e1), PPS(f1), PPS(g1), PPS(h1)
         };
 
-        private static readonly int[] KnightPositionalScore_Black = new int[64]
+        private static readonly int[] _knightPositionalScore_Black = new int[64]
         {
             NPS(a8), NPS(b8), NPS(c8), NPS(d8), NPS(e8), NPS(f8), NPS(g8), NPS(h8),
             NPS(a7), NPS(b7), NPS(c7), NPS(d7), NPS(e7), NPS(f7), NPS(g7), NPS(h7),
@@ -143,7 +143,7 @@ namespace Lynx
             NPS(a1), NPS(b1), NPS(c1), NPS(d1), NPS(e1), NPS(f1), NPS(g1), NPS(h1)
         };
 
-        private static readonly int[] BishopPositionalScore_Black = new int[64]
+        private static readonly int[] _bishopPositionalScore_Black = new int[64]
         {
             BPS(a8), BPS(b8), BPS(c8), BPS(d8), BPS(e8), BPS(f8), BPS(g8), BPS(h8),
             BPS(a7), BPS(b7), BPS(c7), BPS(d7), BPS(e7), BPS(f7), BPS(g7), BPS(h7),
@@ -155,7 +155,7 @@ namespace Lynx
             BPS(a1), BPS(b1), BPS(c1), BPS(d1), BPS(e1), BPS(f1), BPS(g1), BPS(h1)
         };
 
-        private static readonly int[] RookPositionalScore_Black = new int[64]
+        private static readonly int[] _rookPositionalScore_Black = new int[64]
         {
             RPS(a8), RPS(b8), RPS(c8), RPS(d8), RPS(e8), RPS(f8), RPS(g8), RPS(h8),
             RPS(a7), RPS(b7), RPS(c7), RPS(d7), RPS(e7), RPS(f7), RPS(g7), RPS(h7),
@@ -167,7 +167,7 @@ namespace Lynx
             RPS(a1), RPS(b1), RPS(c1), RPS(d1), RPS(e1), RPS(f1), RPS(g1), RPS(h1)
         };
 
-        private static readonly int[] KingPositionalScore_Black = new int[64]
+        private static readonly int[] _kingPositionalScore_Black = new int[64]
         {
             KPS(a8), KPS(b8), KPS(c8), KPS(d8), KPS(e8), KPS(f8), KPS(g8), KPS(h8),
             KPS(a7), KPS(b7), KPS(c7), KPS(d7), KPS(e7), KPS(f7), KPS(g7), KPS(h7),
@@ -181,19 +181,19 @@ namespace Lynx
 
         public static readonly int[][] PositionalScore = new int[12][]
         {
-            PawnPositionalScore,
-            KnightPositionalScore,
-            BishopPositionalScore,
-            RookPositionalScore,
-            QueenPositionalScore,
-            KingPositionalScore,
+            _pawnPositionalScore,
+            _knightPositionalScore,
+            _bishopPositionalScore,
+            _rookPositionalScore,
+            _queenPositionalScore,
+            _kingPositionalScore,
 
-            PawnPositionalScore_Black,
-            KnightPositionalScore_Black,
-            BishopPositionalScore_Black,
-            RookPositionalScore_Black,
-            QueenPositionalScore,
-            KingPositionalScore_Black,
+            _pawnPositionalScore_Black,
+            _knightPositionalScore_Black,
+            _bishopPositionalScore_Black,
+            _rookPositionalScore_Black,
+            _queenPositionalScore,
+            _kingPositionalScore_Black,
         };
 
         /// <summary>

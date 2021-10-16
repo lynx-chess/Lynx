@@ -5,7 +5,7 @@ namespace Lynx.Internal
 {
     public static class MagicNumberGenerator
     {
-        private static readonly Random _generator = new Random(1160218972);
+        private static readonly Random _generator = new (1160218972);
 
         public static ulong GetRandomU64()
         {

@@ -89,7 +89,7 @@ namespace Lynx.Search
 
                 evaluation = -evaluation;
 
-                PrintMove(plies, move, evaluation, position);
+                PrintMove(plies, move, evaluation);
 
                 if (evaluation > maxEval)
                 {
@@ -101,7 +101,7 @@ namespace Lynx.Search
                 // Fail-hard beta-cutoff
                 if (evaluation >= beta)
                 {
-                    Logger.Trace($"Pruning: {bestMove} is enough");
+                    _logger.Trace($"Pruning: {bestMove} is enough");
 
                     // Add the non-evaluated moves with a higher priority than the existing one, so that they're evaluated later.
                     var nonEvaluatedMovesEval = -evaluation + 100_000;  // Using the inverted evaluation
@@ -210,7 +210,7 @@ namespace Lynx.Search
 
                 evaluation = -evaluation;
 
-                PrintMove(plies, move, evaluation, position);
+                PrintMove(plies, move, evaluation);
 
                 if (evaluation > maxEval)
                 {
@@ -222,7 +222,7 @@ namespace Lynx.Search
                 // Fail-hard beta-cutoff
                 if (evaluation >= beta)
                 {
-                    Logger.Trace($"Pruning: {bestMove} is enough to discard this line");
+                    _logger.Trace($"Pruning: {bestMove} is enough to discard this line");
                     return (maxEval, new Result()); // The refutation doesn't matter, since it'll be pruned
                 }
 

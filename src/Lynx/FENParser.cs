@@ -8,9 +8,9 @@ namespace Lynx
 {
     public static class FENParser
     {
-        private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
 
-        private static readonly Regex RanksRegex = new(@"(?<=^|\/)[P|N|B|R|Q|K|p|n|b|r|q|k|\d]{1,8}", RegexOptions.Compiled);
+        private static readonly Regex _ranksRegex = new(@"(?<=^|\/)[P|N|B|R|Q|K|p|n|b|r|q|k|\d]{1,8}", RegexOptions.Compiled);
 
         public static (bool Success, BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, int Castle, BoardSquare EnPassant,
             int HalfMoveClock, int FullMoveCounter) ParseFEN(string fen)
@@ -51,18 +51,18 @@ namespace Lynx
 
                 if (parts.Length < 4 || !int.TryParse(parts[3], out halfMoveClock))
                 {
-                    Logger.Debug("No half move clock detected");
+                    _logger.Debug("No half move clock detected");
                 }
 
                 if (parts.Length < 5 || !int.TryParse(parts[4], out fullMoveCounter))
                 {
-                    Logger.Debug("No full move counter detected");
+                    _logger.Debug("No full move counter detected");
                 }
             }
             catch (Exception e)
             {
-                Logger.Error($"Error parsing FEN string {fen}");
-                Logger.Error(e.Message);
+                _logger.Error($"Error parsing FEN string {fen}");
+                _logger.Error(e.Message);
                 success = false;
             }
 
@@ -74,7 +74,7 @@ namespace Lynx
             bool success = true;
 
             var rankIndex = 0;
-            var matches = RanksRegex.Matches(fen);
+            var matches = _ranksRegex.Matches(fen);
 
             if (matches.Count != 8)
             {
@@ -97,7 +97,7 @@ namespace Lynx
                     }
                     else
                     {
-                        Logger.Error($"Unrecognized character in FEN: {ch} (within {((Group)match).Value})");
+                        _logger.Error($"Unrecognized character in FEN: {ch} (within {((Group)match).Value})");
                         success = false;
                         break;
                     }
@@ -172,7 +172,7 @@ namespace Lynx
                 if (rank != 3 && rank != 6)
                 {
                     success = false;
-                    Logger.Error($"Invalid en passant square: {enPassantString}");
+                    _logger.Error($"Invalid en passant square: {enPassantString}");
                 }
 
                 // Check that there's an actual pawn to be captured
@@ -189,13 +189,13 @@ namespace Lynx
                 if (!BitBoard.GetBit(pawnBitBoard, pawnSquare))
                 {
                     success = false;
-                    Logger.Error($"Invalid board: en passant square {enPassantString}, but no {side} pawn located in {pawnSquare}");
+                    _logger.Error($"Invalid board: en passant square {enPassantString}, but no {side} pawn located in {pawnSquare}");
                 }
             }
             else if (enPassantString != "-")
             {
                 success = false;
-                Logger.Error($"Invalid en passant square: {enPassantString}");
+                _logger.Error($"Invalid en passant square: {enPassantString}");
             }
 
             return (enPassant, success);

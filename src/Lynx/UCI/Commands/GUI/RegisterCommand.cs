@@ -54,7 +54,8 @@ namespace Lynx.UCI.Commands.GUI
                 }
                 else
                 {
-                    sb.Append($"{item} ");
+                    sb.Append(item);
+                    sb.Append(' ');
                 }
             }
 

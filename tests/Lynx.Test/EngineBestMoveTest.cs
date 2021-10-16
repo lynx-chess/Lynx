@@ -140,7 +140,7 @@ namespace Lynx.Test
             var sb = new StringBuilder($"position fen {fen} moves");
             foreach (var move in repeatedMoves)
             {
-                sb.Append($" {move.UCIString()}");
+                sb.Append(' ').Append(move.UCIString());
                 engine.AdjustPosition(sb.ToString());
             }
 
@@ -234,7 +234,7 @@ namespace Lynx.Test
             for (int i = 0; i < 48; ++i)
             {
                 var move = nonCaptureOrPawnMoveMoves[i % nonCaptureOrPawnMoveMoves.Count];
-                sb.Append($" {move.UCIString()}");
+                sb.Append(' ').Append(move.UCIString());
                 engine.AdjustPosition(sb.ToString());
             }
 
@@ -281,11 +281,11 @@ namespace Lynx.Test
             for (int i = 0; i < 48; ++i)
             {
                 var move = nonCaptureOrPawnMoveMoves[i % nonCaptureOrPawnMoveMoves.Count];
-                sb.Append($" {move.UCIString()}");
+                sb.Append(' ').Append(move.UCIString());
                 engine.AdjustPosition(sb.ToString());
             }
 
-            sb.Append($" {nonCaptureOrPawnMoveMoves[0].UCIString()}");
+            sb.Append(' ').Append(nonCaptureOrPawnMoveMoves[0].UCIString());
             engine.AdjustPosition(sb.ToString());
 
             Assert.AreEqual(49, engine.Game.MoveHistory.Count);

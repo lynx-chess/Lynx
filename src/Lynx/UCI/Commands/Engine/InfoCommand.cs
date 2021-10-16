@@ -78,6 +78,7 @@ namespace Lynx.UCI.Commands.Engine
 
         public static string SearchResultInfo(SearchResult searchResult)
         {
+#pragma warning disable RCS1214 // Unnecessary interpolated string.
             return Id +
                 $" depth {searchResult.TargetDepth}" +
                 $" seldepth {searchResult.DepthReached}" +
@@ -87,6 +88,7 @@ namespace Lynx.UCI.Commands.Engine
                 $" nps {searchResult.NodesPerSecond}" +
                 $" time {searchResult.Time}" +
                 $" pv {string.Join(" ", searchResult.Moves.Select(move => move.UCIString()))}";
+#pragma warning restore RCS1214 // Unnecessary interpolated string.
         }
     }
 }

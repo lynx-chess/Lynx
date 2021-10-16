@@ -40,8 +40,7 @@ namespace Lynx.Benchmark
         public int DequeueReusingVariable()
         {
             int total = 0;
-            int n;
-            while(_queue.TryDequeue(out n, out _))
+            while (_queue.TryDequeue(out int n, out _))
             {
                 total += n;
             }

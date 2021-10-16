@@ -42,33 +42,39 @@ namespace Lynx.Benchmark
         };
 
         [Benchmark(Baseline = true)]
-        public void LocalMethods()
+        public bool LocalMethods()
         {
+            var b = false;
             foreach (var position in _positions)
             {
                 for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
                 {
                     if (LocalMethodsImpl.IsSquaredAttacked_LocalMethods(squareIndex, position.Side, position.PieceBitBoards, position.OccupancyBitBoards))
                     {
-                        ;
+                        b = true;
                     }
                 }
             }
+
+            return b;
         }
 
         [Benchmark]
-        public void ExternalMethods()
+        public bool ExternalMethods()
         {
+            var b = false;
             foreach (var position in _positions)
             {
                 for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
                 {
                     if (ExternalMethodsImpl.IsSquaredAttacked_ExternalMethods(squareIndex, position.Side, position.PieceBitBoards, position.OccupancyBitBoards))
                     {
-                        ;
+                        b = true;
                     }
                 }
             }
+
+            return b;
         }
 
         private static class ExternalMethodsImpl

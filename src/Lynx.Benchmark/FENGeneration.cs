@@ -197,6 +197,8 @@
  *
 */
 
+#pragma warning disable RCS1163 // Unused parameter.
+
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
 using NLog;
@@ -341,7 +343,7 @@ namespace Lynx.Benchmark
 
     internal struct StructCustomPosition
     {
-        private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
 
         private string? _fen;
 
@@ -375,7 +377,7 @@ namespace Lynx.Benchmark
 
             if (!parsedFEN.Success)
             {
-                Logger.Error($"Error parsing FEN {fen}");
+                _logger.Error($"Error parsing FEN {fen}");
             }
 
             PieceBitBoards = parsedFEN.PieceBitBoards;
@@ -506,6 +508,7 @@ namespace Lynx.Benchmark
         /// <param name="move"></param>
         /// <param name="calculateFen"></param>
         public StructCustomPosition(StructCustomPosition position, Move move, bool calculateFen) : this(position)
+
         {
             var oldSide = Side;
             var offset = Utils.PieceOffset(oldSide);
@@ -698,9 +701,9 @@ namespace Lynx.Benchmark
         }
     }
 
-    readonly struct ReadonlyStructCustomPosition
+    internal readonly struct ReadonlyStructCustomPosition
     {
-        private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
 
         public string FEN { get; private init; }
 
@@ -728,7 +731,7 @@ namespace Lynx.Benchmark
 
             if (!parsedFEN.Success)
             {
-                Logger.Error($"Error parsing FEN {fen}");
+                _logger.Error($"Error parsing FEN {fen}");
             }
 
             PieceBitBoards = parsedFEN.PieceBitBoards;
@@ -1052,9 +1055,9 @@ namespace Lynx.Benchmark
         }
     }
 
-    class ClassCustomPosition
+    internal class ClassCustomPosition
     {
-        private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
 
         private string? _fen;
 
@@ -1088,7 +1091,7 @@ namespace Lynx.Benchmark
 
             if (!parsedFEN.Success)
             {
-                Logger.Error($"Error parsing FEN {fen}");
+                _logger.Error($"Error parsing FEN {fen}");
             }
 
             PieceBitBoards = parsedFEN.PieceBitBoards;
@@ -1411,9 +1414,9 @@ namespace Lynx.Benchmark
         }
     }
 
-    record class RecordClassCustomPosition
+    internal record class RecordClassCustomPosition
     {
-        private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
 
         private string? _fen;
 
@@ -1447,7 +1450,7 @@ namespace Lynx.Benchmark
 
             if (!parsedFEN.Success)
             {
-                Logger.Error($"Error parsing FEN {fen}");
+                _logger.Error($"Error parsing FEN {fen}");
             }
 
             PieceBitBoards = parsedFEN.PieceBitBoards;
@@ -1770,9 +1773,9 @@ namespace Lynx.Benchmark
         }
     }
 
-    record struct RecordStructCustomPosition
+    internal record struct RecordStructCustomPosition
     {
-        private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
 
         private string? _fen;
 
@@ -1806,7 +1809,7 @@ namespace Lynx.Benchmark
 
             if (!parsedFEN.Success)
             {
-                Logger.Error($"Error parsing FEN {fen}");
+                _logger.Error($"Error parsing FEN {fen}");
             }
 
             PieceBitBoards = parsedFEN.PieceBitBoards;
@@ -2129,7 +2132,7 @@ namespace Lynx.Benchmark
         }
     }
 
-    static class FENHelpers
+    internal static class FENHelpers
     {
         public static StringBuilder UpdateFirstPartOfFEN(StructCustomPosition position, int sourceSquare, int targetSquare, int piece)
         {
@@ -2674,3 +2677,5 @@ namespace Lynx.Benchmark
         }
     }
 }
+
+#pragma warning restore RCS1163 // Unused parameter.

@@ -77,3 +77,5 @@ dotnet_diagnostic.CS8667.severity = error
 dotnet_diagnostic.CS8714.severity = error
 #CS8618: Non-nullable property is uninitialized. Consider declaring the property as nullable.
 dotnet_diagnostic.CS8618.severity = error
+# IDE0079: Remove unnecessary suppression
+dotnet_diagnostic.IDE0079.severity = none

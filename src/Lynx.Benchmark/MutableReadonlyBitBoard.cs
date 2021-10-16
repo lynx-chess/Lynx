@@ -43,7 +43,9 @@ namespace Lynx.Benchmark
 
         private struct MutableReadonly
         {
+#pragma warning disable RCS1170 // Use read-only auto-implemented property.
             public ulong Board { readonly get; private set; }
+#pragma warning restore RCS1170 // Use read-only auto-implemented property.
 
             public MutableReadonly(ulong n)
             {
@@ -51,8 +53,8 @@ namespace Lynx.Benchmark
             }
         }
 
-        private Mutable MutableBoard = new(1234);
-        private MutableReadonly MutableReadonlyBoard = new(1234);
+        private Mutable _mutableBoard = new(1234);
+        private MutableReadonly _mutableReadonlyBoard = new(1234);
 
         public static IEnumerable<int> Data => new[] { 1, 10, 1_000, 10_000 };
 
@@ -61,7 +63,7 @@ namespace Lynx.Benchmark
         public ulong MutableBitBoardByType(int iterations)
         {
             var result = 0UL;
-            for (int i = 0; i < iterations; ++i) result += AddMutableByType(MutableBoard, MutableBoard);
+            for (int i = 0; i < iterations; ++i) result += AddMutableByType(_mutableBoard, _mutableBoard);
             return result;
         }
 
@@ -70,7 +72,7 @@ namespace Lynx.Benchmark
         public ulong MutableBitBoardByRef(int iterations)
         {
             var result = 0UL;
-            for (int i = 0; i < iterations; ++i) result += AddMutableByRef(in MutableBoard, in MutableBoard);
+            for (int i = 0; i < iterations; ++i) result += AddMutableByRef(in _mutableBoard, in _mutableBoard);
             return result;
         }
 
@@ -79,7 +81,7 @@ namespace Lynx.Benchmark
         public ulong MutableReadonlyBitBoardByType(int iterations)
         {
             var result = 0UL;
-            for (int i = 0; i < iterations; ++i) result += AddMutableReadonlyByType(MutableReadonlyBoard, MutableReadonlyBoard);
+            for (int i = 0; i < iterations; ++i) result += AddMutableReadonlyByType(_mutableReadonlyBoard, _mutableReadonlyBoard);
             return result;
         }
 
@@ -88,13 +90,15 @@ namespace Lynx.Benchmark
         public ulong MutableReadonlyBitBoardByRef(int iterations)
         {
             var result = 0UL;
-            for (int i = 0; i < iterations; ++i) result += AddMutableReadonlyByRef(in MutableReadonlyBoard, in MutableReadonlyBoard);
+            for (int i = 0; i < iterations; ++i) result += AddMutableReadonlyByRef(in _mutableReadonlyBoard, in _mutableReadonlyBoard);
             return result;
         }
 
+#pragma warning disable RCS1242 // Do not pass non-read-only struct by read-only reference. That's the purpose of the test
         private ulong AddMutableByType(Mutable a, Mutable b) => a.Board + b.Board;
         private ulong AddMutableByRef(in Mutable a, in Mutable b) => a.Board + b.Board;
         private ulong AddMutableReadonlyByType(MutableReadonly a, MutableReadonly b) => a.Board + b.Board;
         private ulong AddMutableReadonlyByRef(in MutableReadonly a, in MutableReadonly b) => a.Board + b.Board;
+#pragma warning restore RCS1242 // Do not pass non-read-only struct by read-only reference.
     }
 }

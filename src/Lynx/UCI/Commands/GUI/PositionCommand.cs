@@ -22,13 +22,13 @@ namespace Lynx.UCI.Commands.GUI
         public const string StartPositionString = "startpos";
         public const string MovesString = "moves";
 
-        private static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
 
-        private static readonly Regex FenRegex = new(
+        private static readonly Regex _fenRegex = new(
             "(?<=fen).+?(?=moves|$)",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly Regex MovesRegex = new(
+        private static readonly Regex _movesRegex = new(
             "(?<=moves).+?(?=$)",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
@@ -39,14 +39,14 @@ namespace Lynx.UCI.Commands.GUI
 
             var initialPosition = isInitialPosition
                     ? Constants.InitialPositionFEN
-                    : FenRegex.Match(positionCommand).Value.Trim();
+                    : _fenRegex.Match(positionCommand).Value.Trim();
 
             if (string.IsNullOrEmpty(initialPosition))
             {
-                Logger.Error($"Error parsing position command {positionCommand}: no initial position found");
+                _logger.Error($"Error parsing position command {positionCommand}: no initial position found");
             }
 
-            var moves = MovesRegex.Match(positionCommand).Value.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
+            var moves = _movesRegex.Match(positionCommand).Value.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
 
             return new Game(initialPosition, moves);
         }
@@ -62,7 +62,7 @@ namespace Lynx.UCI.Commands.GUI
                 game.CurrentPosition.AllPossibleMoves(),
                 out lastMove))
             {
-                Logger.Warn($"Error parsing last move {lastMove} from position command {positionCommand}");
+                _logger.Warn($"Error parsing last move {lastMove} from position command {positionCommand}");
                 return false;
             }
 

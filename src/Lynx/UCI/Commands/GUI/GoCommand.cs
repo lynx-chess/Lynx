@@ -54,43 +54,43 @@ namespace Lynx.UCI.Commands.GUI
 
         private const string GoSubcommands = "searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite";
 
-        private static readonly Regex SearchMovesRegex = new(
+        private static readonly Regex _searchMovesRegex = new(
             $"(?<=searchmoves).+?(?={GoSubcommands}|$)",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly Regex WhiteTimeRegex = new(
+        private static readonly Regex _whiteTimeRegex = new(
             $"(?<=wtime).+?(?={GoSubcommands}|$)",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly Regex BlackTimeRegex = new(
+        private static readonly Regex _blackTimeRegex = new(
             $"(?<=btime).+?(?={GoSubcommands}|$)",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly Regex WhiteIncrementRegex = new(
+        private static readonly Regex _whiteIncrementRegex = new(
             $"(?<=winc).+?(?={GoSubcommands}|$)",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly Regex BlackIncrementRegex = new(
+        private static readonly Regex _blackIncrementRegex = new(
             $"(?<=binc).+?(?={GoSubcommands}|$)",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly Regex MovesToGoRegex = new(
+        private static readonly Regex _movesToGoRegex = new(
             $"(?<=movestogo).+?(?={GoSubcommands}|$)",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly Regex DepthRegex = new(
+        private static readonly Regex _depthRegex = new(
             $"(?<=depth).+?(?={GoSubcommands}|$)",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly Regex NodesRegex = new(
+        private static readonly Regex _nodesRegex = new(
             $"(?<=nodes).+?(?={GoSubcommands}|$)",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly Regex MateRegex = new(
+        private static readonly Regex _mateRegex = new(
             $"(?<=mate).+?(?={GoSubcommands}|$)",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly Regex MoveTimeRegex = new(
+        private static readonly Regex _moveTimeRegex = new(
             $"(?<=movetime).+?(?={GoSubcommands}|$)",
             RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
@@ -113,13 +113,13 @@ namespace Lynx.UCI.Commands.GUI
             {
                 Task.Run(() =>
                 {
-                    var match = SearchMovesRegex.Match(command);
+                    var match = _searchMovesRegex.Match(command);
 
                     SearchMoves = match.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
                 }),
                 Task.Run(() =>
                 {
-                    var match = WhiteTimeRegex.Match(command);
+                    var match = _whiteTimeRegex.Match(command);
 
                     if(int.TryParse(match.Value, out var value))
                     {
@@ -128,7 +128,7 @@ namespace Lynx.UCI.Commands.GUI
                 }),
                 Task.Run(() =>
                 {
-                    var match = BlackTimeRegex.Match(command);
+                    var match = _blackTimeRegex.Match(command);
 
                     if(int.TryParse(match.Value, out var value))
                     {
@@ -137,7 +137,7 @@ namespace Lynx.UCI.Commands.GUI
                 }),
                 Task.Run(() =>
                 {
-                    var match = WhiteIncrementRegex.Match(command);
+                    var match = _whiteIncrementRegex.Match(command);
 
                     if(int.TryParse(match.Value, out var value))
                     {
@@ -146,7 +146,7 @@ namespace Lynx.UCI.Commands.GUI
                 }),
                 Task.Run(() =>
                 {
-                    var match = BlackIncrementRegex.Match(command);
+                    var match = _blackIncrementRegex.Match(command);
 
                     if(int.TryParse(match.Value, out var value))
                     {
@@ -155,7 +155,7 @@ namespace Lynx.UCI.Commands.GUI
                 }),
                 Task.Run(() =>
                 {
-                    var match = MovesToGoRegex.Match(command);
+                    var match = _movesToGoRegex.Match(command);
 
                     if(int.TryParse(match.Value, out var value))
                     {
@@ -164,7 +164,7 @@ namespace Lynx.UCI.Commands.GUI
                 }),
                 Task.Run(() =>
                 {
-                    var match = DepthRegex.Match(command);
+                    var match = _depthRegex.Match(command);
 
                     if(int.TryParse(match.Value, out var value))
                     {
@@ -173,7 +173,7 @@ namespace Lynx.UCI.Commands.GUI
                 }),
                 Task.Run(() =>
                 {
-                    var match = NodesRegex.Match(command);
+                    var match = _nodesRegex.Match(command);
 
                     if(int.TryParse(match.Value, out var value))
                     {
@@ -182,7 +182,7 @@ namespace Lynx.UCI.Commands.GUI
                 }),
                 Task.Run(() =>
                 {
-                    var match = MateRegex.Match(command);
+                    var match = _mateRegex.Match(command);
 
                     if(int.TryParse(match.Value, out var value))
                     {
@@ -191,7 +191,7 @@ namespace Lynx.UCI.Commands.GUI
                 }),
                 Task.Run(() =>
                 {
-                    var match = MoveTimeRegex.Match(command);
+                    var match = _moveTimeRegex.Match(command);
 
                     if(int.TryParse(match.Value, out var value))
                     {

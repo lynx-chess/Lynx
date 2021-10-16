@@ -53,7 +53,7 @@ namespace Lynx.Benchmark
                     var sourceSquare = BitBoard.GetLS1BIndex(bitboard);
                     bitboard = BitBoard.ResetLS1B(bitboard);
 
-                    ulong attacks = PieceAttacksDictionary[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both]);
+                    ulong attacks = _pieceAttacksDictionary[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both]);
 
                     sum += attacks;
                 }
@@ -78,7 +78,7 @@ namespace Lynx.Benchmark
                     var sourceSquare = BitBoard.GetLS1BIndex(bitboard);
                     bitboard = BitBoard.ResetLS1B(bitboard);
 
-                    ulong attacks = PieceAttacksArray[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both]);
+                    ulong attacks = _pieceAttacksArray[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both]);
 
                     sum += attacks;
                 }
@@ -87,7 +87,7 @@ namespace Lynx.Benchmark
             return sum;
         }
 
-        private static readonly Func<int, BitBoard, ulong>[] PieceAttacksArray = new Func<int, BitBoard, ulong>[]
+        private static readonly Func<int, BitBoard, ulong>[] _pieceAttacksArray = new Func<int, BitBoard, ulong>[]
         {
             (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White, origin].Board,
             (int origin, BitBoard _) => Attacks.KnightAttacks[origin].Board,
@@ -104,7 +104,7 @@ namespace Lynx.Benchmark
             (int origin, BitBoard _) => Attacks.KingAttacks[origin].Board,
         };
 
-        private static readonly IReadOnlyDictionary<int, Func<int, BitBoard, ulong>> PieceAttacksDictionary = new Dictionary<int, Func<int, BitBoard, ulong>>
+        private static readonly IReadOnlyDictionary<int, Func<int, BitBoard, ulong>> _pieceAttacksDictionary = new Dictionary<int, Func<int, BitBoard, ulong>>
         {
             [(int)Piece.P] = (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White, origin].Board,
             [(int)Piece.p] = (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.Black, origin].Board,

@@ -42,10 +42,12 @@ using static Lynx.Model.Move;
 //_54_ScoreMove();
 ZobristTable();
 
+#pragma warning disable IDE0059 // Unnecessary assignment of a value
 const string TrickyPosition = Constants.TrickyTestPositionFEN;
 const string TrickyPositionReversed = Constants.TrickyTestPositionReversedFEN;
 const string KillerPosition = Constants.KillerTestPositionFEN;
 const string CmkPosition = Constants.CmkTestPositionFEN;
+#pragma warning restore IDE0059 // Unnecessary assignment of a value
 
 static void _2_GettingStarted()
 {
@@ -668,7 +670,12 @@ static void _54_ScoreMove()
 
 static void ZobristTable()
 {
+    var pos = new Position(KillerPosition);
     var zobristTable = InitializeZobristTable();
+    var hash = CalculatePositionHash(zobristTable, pos);
+    var updatedHash = UpdatePositionHash(zobristTable, hash, pos.AllPossibleMoves().First());
+
+    Console.WriteLine(updatedHash);
 }
 
 static long[,] InitializeZobristTable()
@@ -705,9 +712,9 @@ static long CalculatePositionHash(long[,] zobristTable, Position position)
     return positionHash;
 }
 
-static long UpdatePositionHash(long[,] zobristTable, long positionHash, Position originalPosition, Move move)
+static long UpdatePositionHash(long[,] zobristTable, long positionHash, Move move)
 {
-    var side = originalPosition.Side;
+    // TODO: side, enpassant, etc.
     var sourcePiece = move.Piece();
     var piece = move.PromotedPiece();
     if (piece == default)
@@ -717,7 +724,6 @@ static long UpdatePositionHash(long[,] zobristTable, long positionHash, Position
 
     var sourceSquare = move.SourceSquare();
     var targetSquare = move.TargetSquare();
-    var enPassant = move.IsEnPassant();
 
     return positionHash
         ^ zobristTable[sourcePiece, sourceSquare]

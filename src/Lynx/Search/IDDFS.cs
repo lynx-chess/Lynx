@@ -50,11 +50,11 @@ namespace Lynx.Search
             catch (OperationCanceledException)
             {
                 isCancelled = true;
-                Logger.Info("Search cancellation requested, best move will be returned");
+                _logger.Info("Search cancellation requested, best move will be returned");
             }
             catch (Exception e)
             {
-                Logger.Error("Unexpected error ocurred during the search, best move will be returned" +
+                _logger.Error("Unexpected error ocurred during the search, best move will be returned" +
                     Environment.NewLine + e.Message + Environment.NewLine + e.StackTrace);
             }
             finally

@@ -25,6 +25,8 @@
  *  | OOP_ProperRecord |       1000 | 7,296.272 us | 101.5335 us |  84.7851 us | 7,270.618 us |  1.26 |    0.03 | 375.0000 |     - |     - |  792000 B |
 */
 
+#pragma warning disable RCS1118 // Mark local variable as const.
+
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
 using System.Collections.Generic;
@@ -462,8 +464,6 @@ namespace Lynx.Benchmark
             }
         }
 
-
-
         private static BitBoardOpsReadonly SetBishopOrRookOccupancy_Static(int index, in BitBoardOpsReadonly occupancyMask)
         {
             var occ = occupancyMask.Board;
@@ -607,3 +607,5 @@ namespace Lynx.Benchmark
         }
     }
 }
+
+#pragma warning restore RCS1118 // Mark local variable as const.

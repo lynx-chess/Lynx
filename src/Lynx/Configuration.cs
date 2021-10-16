@@ -5,7 +5,9 @@ namespace Lynx
     public static class Configuration
     {
         private static int _isDebug = 0;
+#pragma warning disable IDE1006 // Naming Styles
         private static int _UCI_AnalyseMode = 0;
+#pragma warning restore IDE1006 // Naming Styles
         private static int _ponder = 0;
         private static int _hash = 0;
 

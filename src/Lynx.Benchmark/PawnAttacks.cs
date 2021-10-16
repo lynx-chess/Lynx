@@ -54,12 +54,8 @@ namespace Lynx.Benchmark
             BitBoard[,] pawnAttacks = new BitBoard[2, data];
 
             Parallel.For(0, 2, (n) =>
-            {
                 Parallel.For(0, data, (square) =>
-                {
-                    pawnAttacks[n, square] = AttackGenerator.MaskPawnAttacks(square, isWhite: false);
-                });
-            });
+                    pawnAttacks[n, square] = AttackGenerator.MaskPawnAttacks(square, isWhite: false)));
         }
 
         /// <summary>
@@ -73,12 +69,8 @@ namespace Lynx.Benchmark
             BitBoard[,] pawnAttacks = new BitBoard[2, data];
 
             Parallel.For(0, data, (square) =>
-            {
                 Parallel.For(0, 2, (n) =>
-                {
-                    pawnAttacks[n, square] = AttackGenerator.MaskPawnAttacks(square, isWhite: false);
-                });
-            });
+                    pawnAttacks[n, square] = AttackGenerator.MaskPawnAttacks(square, isWhite: false)));
         }
     }
 }
