@@ -26,11 +26,11 @@
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
   </ItemGroup>
 
-  <!--<ItemGroup Condition="!$(AssemblyName.EndsWith('Test')) AND !$(AssemblyName.EndsWith('Benchmark')) AND !$(AssemblyName.EndsWith('Dev'))">    
+  <!--<ItemGroup Condition="!$(AssemblyName.EndsWith('Test')) AND !$(AssemblyName.EndsWith('Benchmark')) AND !$(AssemblyName.EndsWith('Dev'))">
      <PackageReference Include="ClrHeapAllocationAnalyzer" Version="3.0.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
-    </PackageReference> 
+    </PackageReference>
   </ItemGroup>-->
 
 </Project>
