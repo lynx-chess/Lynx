@@ -14,9 +14,13 @@ namespace Lynx
     {
         private readonly Logger _logger;
         private readonly ChannelWriter<string> _engineWriter;
+
+#pragma warning disable IDE0052, CS0414 // Remove unread private members
         private bool _isNewGameCommandSupported;
         private bool _isNewGameComing;
         private bool _isPondering;
+#pragma warning restore IDE0052, CS0414 // Remove unread private members
+
         private Move? _moveToPonder;
         public double AverageDepth { get; private set; }
 
