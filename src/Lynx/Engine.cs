@@ -125,7 +125,7 @@ namespace Lynx
             }
             else // EngineTest
             {
-                maxDepth = Configuration.EngineSettings.MinDepth;
+                maxDepth = Configuration.EngineSettings.Depth;
             }
 
             var result = IDDFS(Game.CurrentPosition, Game.PositionHashHistory, Game.MovesWithoutCaptureOrPawnMove, minDepth, maxDepth, _engineWriter, _searchCancellationTokenSource.Token, _absoluteSearchCancellationTokenSource.Token);

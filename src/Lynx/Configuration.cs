@@ -105,10 +105,10 @@ namespace Lynx
 
         #endregion
 
-        public int MinDepth { get; set; } = 5;
+        public int MinDepth { get; set; } = 4;
 
         public int MinMoveTime { get; set; } = 1_000;
 
-        public int DepthWhenLessThanMinMoveTime { get; set; } = 3;
+        public int DepthWhenLessThanMinMoveTime { get; set; } = 2;
     }
 }

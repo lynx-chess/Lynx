@@ -31,7 +31,7 @@ namespace Lynx.Search
                 do
                 {
                     absoluteCancellationToken.ThrowIfCancellationRequested();
-                    if (depth > minDepth)
+                    if (depth - 1 > minDepth)
                     {
                         cancellationToken.ThrowIfCancellationRequested();
                     }

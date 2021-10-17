@@ -25,7 +25,7 @@ namespace Lynx.Search
         private static (int Evaluation, Result MoveList) NegaMax(Position position, Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove, Dictionary<long, PriorityQueue<Move, int>> orderedMoves, int[,] killerMoves, int minDepth, int depthLimit, ref int nodes, int plies, int alpha = MinValue, int beta = MaxValue, CancellationToken? cancellationToken = null, CancellationToken? absoluteCancellationToken = null)
         {
             absoluteCancellationToken?.ThrowIfCancellationRequested();
-            if (plies + 1 > minDepth)
+            if (plies > minDepth)
             {
                 cancellationToken?.ThrowIfCancellationRequested();
             }
