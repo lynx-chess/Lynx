@@ -96,6 +96,7 @@ namespace Lynx
             int? millisecondsIncrement;
             int minDepth = Configuration.EngineSettings.MinDepth;
             int? maxDepth = null;
+            int? decisionTime = null;
 
             if (Game.CurrentPosition.Side == Side.White)
             {
@@ -110,12 +111,12 @@ namespace Lynx
 
             if (goCommand is not null && millisecondsLeft != 0)
             {
-                int decisionTime = Convert.ToInt32(CalculateDecisionTime(goCommand.MovesToGo, millisecondsLeft ?? 0, millisecondsIncrement ?? 0));
+                decisionTime = Convert.ToInt32(CalculateDecisionTime(goCommand.MovesToGo, millisecondsLeft ?? 0, millisecondsIncrement ?? 0));
 
                 if (decisionTime > Configuration.EngineSettings.MinMoveTime)
                 {
                     _logger.Info($"Time to move: {0.001 * decisionTime}s, min. {minDepth} plies");
-                    _searchCancellationTokenSource.CancelAfter(decisionTime);
+                    _searchCancellationTokenSource.CancelAfter(decisionTime.Value);
                 }
                 else // Ignore decisionTime and limit search to MinDepthWhenLessThanMinMoveTime plies
                 {
@@ -128,8 +129,8 @@ namespace Lynx
                 maxDepth = Configuration.EngineSettings.Depth;
             }
 
-            var result = IDDFS(Game.CurrentPosition, Game.PositionHashHistory, Game.MovesWithoutCaptureOrPawnMove, minDepth, maxDepth, _engineWriter, _searchCancellationTokenSource.Token, _absoluteSearchCancellationTokenSource.Token);
-            _logger.Debug($"Evaluation: {result.Evaluation} (depth: {result.TargetDepth}, refutation: {string.Join(", ", result.Moves)})");
+            var result = IDDFS(Game.CurrentPosition, Game.PositionHashHistory, Game.MovesWithoutCaptureOrPawnMove, minDepth, maxDepth, decisionTime, _engineWriter, _searchCancellationTokenSource.Token, _absoluteSearchCancellationTokenSource.Token);
+            _logger.Info($"Evaluation: {result.Evaluation} (depth: {result.TargetDepth}, refutation: {string.Join(", ", result.Moves)})");
 
             if (!result.IsCancelled && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
             {

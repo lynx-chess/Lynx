@@ -12,7 +12,7 @@ namespace Lynx.Search
 {
     public static partial class SearchAlgorithms
     {
-        public static SearchResult IDDFS(Position position, Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove, int minDepth, int? maxDepth, ChannelWriter<string> engineWriter, CancellationToken cancellationToken, CancellationToken absoluteCancellationToken)
+        public static SearchResult IDDFS(Position position, Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove, int minDepth, int? maxDepth, int? decisionTime, ChannelWriter<string> engineWriter, CancellationToken cancellationToken, CancellationToken absoluteCancellationToken)
         {
             int bestEvaluation = 0;
             SearchResult? searchResult = null;
@@ -45,16 +45,16 @@ namespace Lynx.Search
 
                         Task.Run(async () => await engineWriter.WriteAsync(InfoCommand.SearchResultInfo(searchResult)));
                     }
-                } while (stopSearchCondition(++depth, maxDepth, bestEvaluation));
+                } while (stopSearchCondition(++depth, maxDepth, bestEvaluation, decisionTime, sw));
             }
             catch (OperationCanceledException)
             {
                 isCancelled = true;
-                _logger.Info("Search cancellation requested, best move will be returned");
+                _logger.Info($"Search cancellation requested after {sw.ElapsedMilliseconds}ms, best move will be returned");
             }
             catch (Exception e)
             {
-                _logger.Error("Unexpected error ocurred during the search, best move will be returned" +
+                _logger.Error($"Unexpected error ocurred during the search at depth {depth}, best move will be returned" +
                     Environment.NewLine + e.Message + Environment.NewLine + e.StackTrace);
             }
             finally
@@ -72,16 +72,27 @@ namespace Lynx.Search
                 return new(default, bestEvaluation, depth, depth, nodes, sw.ElapsedMilliseconds, Convert.ToInt64(Math.Clamp(nodes / ((0.001 * sw.ElapsedMilliseconds) + 1), 0, Int64.MaxValue)), new List<Move>());
             }
 
-            static bool stopSearchCondition(int depth, int? depthLimit, int bestEvaluation)
+            static bool stopSearchCondition(int depth, int? maxDepth, int bestEvaluation, int? decisionTime, Stopwatch stopWatch)
             {
-                if (Math.Abs(bestEvaluation) > 0.1 * Position.CheckMateEvaluation)   // Mate detected
+                if (Math.Abs(bestEvaluation) > 0.1 * Position.CheckMateEvaluation)
                 {
+                    _logger.Info($"Stopping at depth {depth - 1}: mate detected");
                     return false;
                 }
 
-                if (depthLimit is not null)
+                if (maxDepth is not null)
                 {
-                    return depth <= depthLimit;
+                    _logger.Info($"Stopping at depth {depth - 1}: max. depth reached");
+                    return depth <= maxDepth;
+                }
+
+                var elapsedMilliseconds = stopWatch.ElapsedMilliseconds;
+                var minTimeToConsiderStopSearching = Configuration.EngineSettings.MinElapsedTimeToConsiderStopSearching;
+                var decisionTimePercentageToStopSearching = Configuration.EngineSettings.DecisionTimePercentageToStopSearching;
+                if (decisionTime is not null && elapsedMilliseconds > minTimeToConsiderStopSearching && elapsedMilliseconds > decisionTimePercentageToStopSearching * decisionTime)
+                {
+                    _logger.Info($"Stopping at depth {depth - 1}: {elapsedMilliseconds} > {Configuration.EngineSettings.DecisionTimePercentageToStopSearching * decisionTime} (elapsed time > [{minTimeToConsiderStopSearching}, {decisionTimePercentageToStopSearching} * decision time])");
+                    return false;
                 }
 
                 return true;

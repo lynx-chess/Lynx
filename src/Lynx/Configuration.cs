@@ -110,5 +110,9 @@ namespace Lynx
         public int MinMoveTime { get; set; } = 1_000;
 
         public int DepthWhenLessThanMinMoveTime { get; set; } = 2;
+
+        public int MinElapsedTimeToConsiderStopSearching { get; set; } = 1_000;
+
+        public double DecisionTimePercentageToStopSearching { get; set; } = 0.5;
     }
 }
