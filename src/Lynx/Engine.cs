@@ -124,9 +124,19 @@ namespace Lynx
                     maxDepth = Configuration.EngineSettings.DepthWhenLessThanMinMoveTime;
                 }
             }
-            else // EngineTest
+            else
             {
-                maxDepth = Configuration.EngineSettings.Depth;
+                if (goCommand?.MoveTime > 0)
+                {
+                    minDepth = 0;
+                    decisionTime = (int)(0.95 * goCommand.MoveTime);
+                    _logger.Info($"Time to move: {0.001 * decisionTime}s, min. {minDepth} plies");
+                    _searchCancellationTokenSource.CancelAfter(decisionTime.Value);
+                }
+                else // EngineTest
+                {
+                    maxDepth = Configuration.EngineSettings.Depth;
+                }
             }
 
             var result = IDDFS(Game.CurrentPosition, Game.PositionHashHistory, Game.MovesWithoutCaptureOrPawnMove, minDepth, maxDepth, decisionTime, _engineWriter, _searchCancellationTokenSource.Token, _absoluteSearchCancellationTokenSource.Token);
