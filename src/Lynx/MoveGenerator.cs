@@ -23,6 +23,7 @@ namespace Lynx
             (int origin, BitBoard _) => Attacks.KnightAttacks[origin].Board,
             (int origin, BitBoard occupancy) => Attacks.BishopAttacks(origin, occupancy).Board,
             (int origin, BitBoard occupancy) => Attacks.RookAttacks(origin, occupancy).Board,
+            // TODO try to improve performance by re-using bishop and rook attacks
             (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy).Board,
             (int origin, BitBoard _) => Attacks.KingAttacks[origin].Board,
 
@@ -30,6 +31,7 @@ namespace Lynx
             (int origin, BitBoard _) => Attacks.KnightAttacks[origin].Board,
             (int origin, BitBoard occupancy) => Attacks.BishopAttacks(origin, occupancy).Board,
             (int origin, BitBoard occupancy) => Attacks.RookAttacks(origin, occupancy).Board,
+            // TODO try to improve performance by re-using bishop and rook attacks
             (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy).Board,
             (int origin, BitBoard _) => Attacks.KingAttacks[origin].Board,
         };
