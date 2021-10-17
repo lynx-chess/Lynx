@@ -43,7 +43,7 @@ namespace Lynx.UCI.Commands.GUI
 
             if (string.IsNullOrEmpty(initialPosition))
             {
-                _logger.Error($"Error parsing position command {positionCommand}: no initial position found");
+                _logger.Error($"Error parsing position command '{positionCommand}': no initial position found");
             }
 
             var moves = _movesRegex.Match(positionCommand).Value.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();

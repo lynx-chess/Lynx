@@ -82,8 +82,12 @@ namespace Lynx.Search
 
                 if (maxDepth is not null)
                 {
-                    _logger.Info($"Stopping at depth {depth - 1}: max. depth reached");
-                    return depth <= maxDepth;
+                    bool shouldContinue = depth <= maxDepth;
+                    if (!shouldContinue)
+                    {
+                        _logger.Info($"Stopping at depth {depth - 1}: max. depth reached");
+                    }
+                    return shouldContinue;
                 }
 
                 var elapsedMilliseconds = stopWatch.ElapsedMilliseconds;
