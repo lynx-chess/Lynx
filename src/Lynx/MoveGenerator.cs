@@ -81,11 +81,14 @@ namespace Lynx
                 bitboard = BitBoard.ResetLS1B(bitboard);
 
                 var sourceRank = (sourceSquare / 8) + 1;
+
+#if DEBUG
                 if (sourceRank == 1 || sourceRank == 8)
                 {
                     _logger.Warn($"There's a non-promoted {position.Side} pawn in rank {sourceRank}");
                     continue;
                 }
+#endif
 
                 // Pawn pushes
                 var singlePushSquare = sourceSquare + pawnPush;
@@ -170,10 +173,11 @@ namespace Lynx
             {
                 if (position.Side == Side.White)
                 {
+                    bool ise1Attacked = Attacks.IsSquaredAttackedBySide((int)BoardSquare.e1, position, oppositeSide);
                     if (((position.Castle & (int)CastlingRights.WK) != default)
                         && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.f1)
                         && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.g1)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.e1, position, oppositeSide)
+                        && !ise1Attacked
                         && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.f1, position, oppositeSide)
                         && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.g1, position, oppositeSide))
                     {
@@ -184,7 +188,7 @@ namespace Lynx
                         && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.d1)
                         && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c1)
                         && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b1)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.e1, position, oppositeSide)
+                        && !ise1Attacked
                         && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.d1, position, oppositeSide)
                         && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.c1, position, oppositeSide))
                     {
@@ -193,10 +197,11 @@ namespace Lynx
                 }
                 else
                 {
+                    bool ise8Attacked = Attacks.IsSquaredAttackedBySide((int)BoardSquare.e8, position, oppositeSide);
                     if (((position.Castle & (int)CastlingRights.BK) != default)
                         && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.f8)
                         && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.g8)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.e8, position, oppositeSide)
+                        && !ise8Attacked
                         && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.f8, position, oppositeSide)
                         && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.g8, position, oppositeSide))
                     {
@@ -207,7 +212,7 @@ namespace Lynx
                         && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.d8)
                         && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c8)
                         && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b8)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.e8, position, oppositeSide)
+                        && !ise8Attacked
                         && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.d8, position, oppositeSide)
                         && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.c8, position, oppositeSide))
                     {
