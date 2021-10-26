@@ -22,12 +22,12 @@ namespace Lynx.Search
         /// Defaults to the worse possible score for Side to move's opponent, Int.MaxValue
         /// </param>
         /// <returns></returns>
-        private static (int Evaluation, Result MoveList) NegaMax(Position position, Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove, Dictionary<long, PriorityQueue<Move, int>> orderedMoves, int[,] killerMoves, int minDepth, int depthLimit, ref int nodes, int plies, int alpha = MinValue, int beta = MaxValue, CancellationToken? cancellationToken = null, CancellationToken? absoluteCancellationToken = null)
+        private static (int Evaluation, Result MoveList) NegaMax(Position position, Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove, Dictionary<long, PriorityQueue<Move, int>> orderedMoves, int[,] killerMoves, int minDepth, int depthLimit, ref int nodes, int plies, int alpha, int beta, CancellationToken cancellationToken, CancellationToken absoluteCancellationToken)
         {
-            absoluteCancellationToken?.ThrowIfCancellationRequested();
+            absoluteCancellationToken.ThrowIfCancellationRequested();
             if (plies > minDepth)
             {
-                cancellationToken?.ThrowIfCancellationRequested();
+                cancellationToken.ThrowIfCancellationRequested();
             }
 
             var positionId = position.UniqueIdentifier;
@@ -151,10 +151,10 @@ namespace Lynx.Search
         /// Defaults to the works possible score for Black, Int.MaxValue
         /// </param>
         /// <returns></returns>
-        public static (int Evaluation, Result MoveList) QuiescenceSearch(Position position, Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove, int quiescenceDepthLimit, ref int nodes, int plies, int alpha, int beta, CancellationToken? cancellationToken = null, CancellationToken? absoluteCancellationToken = null)
+        public static (int Evaluation, Result MoveList) QuiescenceSearch(Position position, Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove, int quiescenceDepthLimit, ref int nodes, int plies, int alpha, int beta, CancellationToken cancellationToken, CancellationToken absoluteCancellationToken)
         {
-            absoluteCancellationToken?.ThrowIfCancellationRequested();
-            //cancellationToken?.ThrowIfCancellationRequested();
+            absoluteCancellationToken.ThrowIfCancellationRequested();
+            //cancellationToken.ThrowIfCancellationRequested();
 
             var staticEvaluation = position.StaticEvaluation(positionHistory, movesWithoutCaptureOrPawnMove);
 
