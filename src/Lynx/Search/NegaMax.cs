@@ -42,6 +42,10 @@ namespace Lynx.Search
                 {
                     if (new Position(position, candidateMove).WasProduceByAValidMove())
                     {
+<<<<<<< HEAD
+=======
+                        //        orderedMoves.Remove(positionId);
+>>>>>>> a20dde4... Avoid invoking Quiescence search with extra depth
                         return QuiescenceSearch(position, positionHistory, movesWithoutCaptureOrPawnMove, Configuration.EngineSettings.QuiescenceSearchDepth, ref nodes, plies, alpha, beta, cancellationToken, absoluteCancellationToken);
                     }
                 }
