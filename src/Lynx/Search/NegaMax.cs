@@ -242,7 +242,13 @@ namespace Lynx.Search
 
             // Node fails low
             Debug.Assert(existingMoveList is not null);
-            existingMoveList!.Moves.Add(bestMove!.Value);
+
+            // If the best quiescence move produces no gain, don't add it to the PV
+            // because there might be better, unexplored non-quiescence alternatives (unless a Zugzwang-style position with only captures as moves)
+            if (maxEval >= alpha)
+            {
+                existingMoveList!.Moves.Add(bestMove!.Value);
+            }
 
             return (alpha, existingMoveList);
         }
