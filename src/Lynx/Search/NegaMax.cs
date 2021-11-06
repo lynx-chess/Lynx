@@ -91,17 +91,10 @@ namespace Lynx.Search
 
                 PrintMove(plies, move, evaluation);
 
-                if (evaluation > maxEval)
-                {
-                    maxEval = evaluation;
-                    existingMoveList = bestMoveExistingMoveList;
-                    bestMove = move;
-                }
-
                 // Fail-hard beta-cutoff
                 if (evaluation >= beta)
                 {
-                    _logger.Trace($"Pruning: {bestMove} is enough");
+                    _logger.Trace($"Pruning: {move} is enough");
 
                     // Add the non-evaluated moves with a higher priority than the existing one, so that they're evaluated later.
                     var nonEvaluatedMovesEval = -evaluation + 100_000;  // Using the inverted evaluation
@@ -117,7 +110,14 @@ namespace Lynx.Search
                         killerMoves[0, plies] = move.EncodedMove;
                     }
 
-                    return (beta, new Result());
+                    return (beta, new Result());    // TODO return evaluation?
+                }
+
+                if (evaluation > maxEval)
+                {
+                    maxEval = evaluation;
+                    existingMoveList = bestMoveExistingMoveList;
+                    bestMove = move;
                 }
 
                 alpha = Max(alpha, evaluation);
@@ -212,18 +212,18 @@ namespace Lynx.Search
 
                 PrintMove(plies, move, evaluation);
 
+                // Fail-hard beta-cutoff
+                if (evaluation >= beta)
+                {
+                    _logger.Trace($"Pruning: {move} is enough to discard this line");
+                    return (evaluation, new Result()); // The refutation doesn't matter, since it'll be pruned
+                }
+
                 if (evaluation > maxEval)
                 {
                     maxEval = evaluation;
                     existingMoveList = bestMoveExistingMoveList;
                     bestMove = move;
-                }
-
-                // Fail-hard beta-cutoff
-                if (evaluation >= beta)
-                {
-                    _logger.Trace($"Pruning: {bestMove} is enough to discard this line");
-                    return (maxEval, new Result()); // The refutation doesn't matter, since it'll be pruned
                 }
 
                 alpha = Max(alpha, evaluation); // TODO optimize branch prediction -> Should alpha be generally greater than eval?
