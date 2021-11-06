@@ -34,31 +34,17 @@ namespace Lynx.Search
 
             var positionId = position.UniqueIdentifier;
 
-            //if (orderedMoves.TryGetValue(positionId, out var pseudoLegalMoves))
-            //{
-            //    // We make sure that the dequeuing process doesn't affect deeper evaluations, in case the position is repeated
-            //    orderedMoves.Remove(positionId);
-            //    //Debug.Assert(pseudoLegalMoves.Count != 0);    // It can be 0 in stalemate positions
-            //}
-            //else
-            //{
-            //    pseudoLegalMoves = new(position.AllPossibleMoves(killerMoves, plies).Select(i => (i, 1)));
-            //}
             var pseudoLegalMoves = position.AllPossibleMoves(killerMoves, plies);
 
             if (plies >= depthLimit)
             {
                 foreach (var candidateMove in pseudoLegalMoves)
-                //while (pseudoLegalMoves.TryDequeue(out var candidateMove, out _))
                 {
                     if (new Position(position, candidateMove).WasProduceByAValidMove())
                     {
-                        //        orderedMoves.Remove(positionId);
                         return QuiescenceSearch(position, positionHistory, movesWithoutCaptureOrPawnMove, Configuration.EngineSettings.QuiescenceSearchDepth, ref nodes, plies, alpha, beta, cancellationToken, absoluteCancellationToken);
                     }
                 }
-
-                //orderedMoves.Remove(positionId);
 
                 return (position.EvaluateFinalPosition(plies, positionHistory, movesWithoutCaptureOrPawnMove), new Result { MaxDepth = plies });
             }
@@ -66,11 +52,9 @@ namespace Lynx.Search
             Move? bestMove = null;
             Result? existingMoveList = null;
 
-            //PriorityQueue<Move, int> newPriorityQueue = new(pseudoLegalMoves.Count);
             var isAnyMoveValid = false;
 
             foreach (var move in pseudoLegalMoves)
-            //while (pseudoLegalMoves.TryDequeue(out Move move, out _))
             {
                 var newPosition = new Position(position, move);
                 if (!newPosition.WasProduceByAValidMove())
@@ -88,9 +72,6 @@ namespace Lynx.Search
                 movesWithoutCaptureOrPawnMove = oldValue;
                 Utils.RevertPositionHistory(newPosition, positionHistory, repetitions);
 
-                // Since SimplePriorityQueue has lower priority at the top, we do this before inverting the sign of the evaluation
-                //newPriorityQueue.Enqueue(move, evaluation);
-
                 evaluation = -evaluation;
 
                 PrintMove(plies, move, evaluation);
@@ -99,14 +80,6 @@ namespace Lynx.Search
                 if (evaluation >= beta)
                 {
                     _logger.Trace($"Pruning: {move} is enough");
-
-                    // Add the non-evaluated moves with a higher priority than the existing one, so that they're evaluated later.
-                    var nonEvaluatedMovesEval = -evaluation + 100_000;  // Using the inverted evaluation
-                    //while (pseudoLegalMoves.TryDequeue(out Move nonEvaluatedMove, out _))
-                    //{
-                    //    newPriorityQueue.Enqueue(nonEvaluatedMove, nonEvaluatedMovesEval);
-                    //}
-                    //orderedMoves[positionId] = newPriorityQueue;
 
                     //if (!move.IsCapture())
                     {
@@ -125,8 +98,6 @@ namespace Lynx.Search
                 }
             }
 
-            //orderedMoves[positionId] = newPriorityQueue;
-
             if (bestMove is null)
             {
                 Result result = new() { MaxDepth = plies };
@@ -139,6 +110,7 @@ namespace Lynx.Search
             // Node fails low
             Debug.Assert(existingMoveList is not null);
             existingMoveList!.Moves.Add(bestMove.Value);
+
             return (alpha, existingMoveList);
         }
 
