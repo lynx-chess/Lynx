@@ -107,10 +107,7 @@ jobs:
 
     - name: Run long-running tests
       run: dotnet test -c Release --no-build -v=normal --filter "TestCategory=LongRunning" # --collect:"XPlat Code Coverage"
-
-    #- name: Run non-parallelizable tests
-    #  run: dotnet test -c Release --no-build -v=normal --filter "TestCategory=NonParallelizable"  # --collect:"XPlat Code Coverage"
-
+      
     # Merging code coverage: Coverlet issue https://github.com/coverlet-coverage/coverlet/issues/1192
 
     #- uses: actions/download-artifact@v2
@@ -141,3 +138,59 @@ jobs:
     #    name: ${{ env.PROJECT_NAME }}-coverage-ci-${{ github.run_number }}
     #    path: coveragereport/
     #    if-no-files-found: error
+
+  non-parallelizable-tests:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+      fail-fast: false
+
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      PROJECT_NAME: Lynx
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '6.0.100-rc.2.21505.57'
+        include-prerelease: true
+
+    - name: Build
+      run: dotnet build -c Release
+
+    - name: Run non-parallelizable tests
+      run: dotnet test -c Release --no-build -v=normal --filter "TestCategory=NonParallelizable" --collect:"XPlat Code Coverage"
+
+    - uses: actions/download-artifact@v2
+      if: matrix.os == 'ubuntu-latest'
+      with:
+        name: ${{ env.PROJECT_NAME }}-coverage-ci-${{ github.run_number }}
+        path: artifacts/partial-coverage/
+
+    - name: '[Ubuntu] Generate test coverage report'
+      if: matrix.os == 'ubuntu-latest'
+      uses: danielpalme/ReportGenerator-GitHub-Action@4.8.12
+      with:
+        reports: 'artifacts/partial-coverage/**/*.cobertura.xml;tests/**/*.cobertura.xml'
+        targetdir: 'coveragereport'
+        reporttypes: 'HtmlInline_AzurePipelines_Dark;SonarQube;Cobertura'
+        assemblyfilters: '+*'
+        classfilters: '+*;-*Exception;-*ConstantGenerator;-*MagicNumberGenerator'
+        filefilters: '+*'
+        verbosity: 'Info'
+        title: '${{ env.PROJECT_NAME }} #${{ github.run_number }} (${{ env.GITHUB_REF_SLUG }})'
+        tag: '${{ github.run_number }}_${{ github.run_id }}'
+        customSettings: 'numberOfReportsParsedInParallel=3;numberOfReportsMergedInParallel=3'
+
+    - name: '[Ubuntu] Upload test coverage report'
+      if: matrix.os == 'ubuntu-latest'
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ env.PROJECT_NAME }}-coverage-ci-${{ github.run_number }}
+        path: coveragereport/
+        if-no-files-found: error
