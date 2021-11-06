@@ -54,7 +54,7 @@ namespace Lynx.Search
                     if (new Position(position, candidateMove).WasProduceByAValidMove())
                     {
                         //        orderedMoves.Remove(positionId);
-                        return QuiescenceSearch(position, positionHistory, movesWithoutCaptureOrPawnMove, Configuration.EngineSettings.QuiescenceSearchDepth, ref nodes, plies + 1, alpha, beta, cancellationToken, absoluteCancellationToken);
+                        return QuiescenceSearch(position, positionHistory, movesWithoutCaptureOrPawnMove, Configuration.EngineSettings.QuiescenceSearchDepth, ref nodes, plies, alpha, beta, cancellationToken, absoluteCancellationToken);
                     }
                 }
 
