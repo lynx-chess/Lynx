@@ -134,6 +134,7 @@ namespace Lynx.Search
             }
 
             // Node fails low
+            Debug.Assert(existingMoveList is not null);
             existingMoveList!.Moves.Add(bestMove.Value);
             return (alpha, existingMoveList);
         }
