@@ -177,7 +177,7 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       uses: danielpalme/ReportGenerator-GitHub-Action@4.8.12
       with:
-        reports: 'artifacts/partial-coverage/**/*.cobertura.xml;tests/**/*.cobertura.xml'
+        reports: 'artifacts/partial-coverage/Cobertura.xml;tests/**/*.cobertura.xml'
         targetdir: 'coveragereport'
         reporttypes: 'HtmlInline_AzurePipelines_Dark;SonarQube;Cobertura'
         assemblyfilters: '+*'
