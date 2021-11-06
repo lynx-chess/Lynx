@@ -82,8 +82,6 @@ jobs:
         if-no-files-found: error
 
   long-running-tests:
-    needs: build
-
     runs-on: ${{ matrix.os }}
 
     strategy:
