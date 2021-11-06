@@ -38,6 +38,15 @@ jobs:
         dotnet-version: '6.0.100-rc.2.21505.57'
         include-prerelease: true
 
+    - name: Nuget cache
+      uses: actions/cache@v2
+      with:
+        path:
+          ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
     - name: Build
       run: dotnet build -c ${{ matrix.configuration }}
 
@@ -102,12 +111,21 @@ jobs:
         dotnet-version: '6.0.100-rc.2.21505.57'
         include-prerelease: true
 
+    - name: Nuget cache
+      uses: actions/cache@v2
+      with:
+        path:
+          ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
     - name: Build
       run: dotnet build -c Release
 
     - name: Run long-running tests
       run: dotnet test -c Release --no-build -v=normal --filter "TestCategory=LongRunning" # --collect:"XPlat Code Coverage"
-      
+
   non-parallelizable-tests:
     runs-on: ${{ matrix.os }}
 
@@ -128,6 +146,15 @@ jobs:
       with:
         dotnet-version: '6.0.100-rc.2.21505.57'
         include-prerelease: true
+
+    - name: Nuget cache
+      uses: actions/cache@v2
+      with:
+        path:
+          ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
 
     - name: Build
       run: dotnet build -c Release
@@ -171,13 +198,13 @@ jobs:
       with:
         name: ${{ env.PROJECT_NAME }}-build-coverage-ci-${{ github.run_number }}
         path: artifacts/partial-coverage/build/
-    
+
     - name: Download non-parallelizable coverage
       uses: actions/download-artifact@v2
       with:
         name: ${{ env.PROJECT_NAME }}-non-parallelizable-coverage-ci-${{ github.run_number }}
         path: artifacts/partial-coverage/non-parallelizable/
-     
+
     #Coverlet issue https://github.com/coverlet-coverage/coverlet/issues/1192
     #- name: Download long-running coverage
     #  uses: actions/download-artifact@v2
