@@ -30,6 +30,8 @@ namespace Lynx.Search
                 cancellationToken.ThrowIfCancellationRequested();
             }
 
+            ++nodes;
+
             var positionId = position.UniqueIdentifier;
 
             if (orderedMoves.TryGetValue(positionId, out var pseudoLegalMoves))
@@ -45,8 +47,6 @@ namespace Lynx.Search
 
             if (plies >= depthLimit)
             {
-                ++nodes;
-
                 while (pseudoLegalMoves.TryDequeue(out var candidateMove, out _))
                 {
                     if (new Position(position, candidateMove).WasProduceByAValidMove())
@@ -125,7 +125,6 @@ namespace Lynx.Search
 
             if (bestMove is null)
             {
-                ++nodes;
                 Result result = new() { MaxDepth = plies };
 
                 return isAnyMoveValid
@@ -158,12 +157,13 @@ namespace Lynx.Search
             absoluteCancellationToken.ThrowIfCancellationRequested();
             //cancellationToken.ThrowIfCancellationRequested();
 
+            ++nodes;
+
             var staticEvaluation = position.StaticEvaluation(positionHistory, movesWithoutCaptureOrPawnMove);
 
             // Fail-hard beta-cutoff (updating alpha after this check)
             if (staticEvaluation >= beta)
             {
-                ++nodes;
                 PrintMessage(plies - 1, "Pruning before starting quiescence search");
                 return (staticEvaluation, new Result() { MaxDepth = plies });
             }
@@ -176,7 +176,6 @@ namespace Lynx.Search
 
             if (plies >= quiescenceDepthLimit)
             {
-                ++nodes;
                 return (alpha, new Result { MaxDepth = plies });   // Alpha?
             }
 
@@ -230,8 +229,6 @@ namespace Lynx.Search
 
             if (bestMove is null)
             {
-                ++nodes;
-
                 var eval = isAnyMoveValid || position.AllPossibleMoves().Any(move => new Position(position, move).WasProduceByAValidMove())
                     ? alpha
                     : position.EvaluateFinalPosition(plies, positionHistory, movesWithoutCaptureOrPawnMove);
