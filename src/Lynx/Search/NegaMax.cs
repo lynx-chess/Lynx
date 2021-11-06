@@ -63,9 +63,8 @@ namespace Lynx.Search
             Move? bestMove = null;
             Result? existingMoveList = null;
 
-            var maxEval = MinValue;
-
             PriorityQueue<Move, int> newPriorityQueue = new(pseudoLegalMoves.Count);
+            var isAnyMoveValid = false;
 
             while (pseudoLegalMoves.TryDequeue(out Move move, out _))
             {
@@ -74,6 +73,7 @@ namespace Lynx.Search
                 {
                     continue;
                 }
+                isAnyMoveValid = true;
 
                 PrintPreMove(position, plies, move);
 
@@ -113,28 +113,30 @@ namespace Lynx.Search
                     return (beta, new Result());    // TODO return evaluation?
                 }
 
-                if (evaluation > maxEval)
+                if (evaluation > alpha)
                 {
-                    maxEval = evaluation;
+                    alpha = evaluation;
                     existingMoveList = bestMoveExistingMoveList;
                     bestMove = move;
                 }
-
-                alpha = Max(alpha, evaluation);
             }
 
             orderedMoves[positionId] = newPriorityQueue;
+
             if (bestMove is null)
             {
                 ++nodes;
-                return (position.EvaluateFinalPosition(plies, positionHistory, movesWithoutCaptureOrPawnMove), new Result());
+                Result result = new() { MaxDepth = plies };
+
+                return isAnyMoveValid
+                    ? (alpha, result)
+                    : (position.EvaluateFinalPosition(plies, positionHistory, movesWithoutCaptureOrPawnMove), result);
             }
 
             // Node fails low
             Debug.Assert(existingMoveList is not null);
-            existingMoveList!.Moves.Add(bestMove!.Value);
-
-            return (maxEval, existingMoveList);
+            existingMoveList!.Moves.Add(bestMove.Value);
+            return (alpha, existingMoveList);
         }
 
         /// <summary>
@@ -182,14 +184,12 @@ namespace Lynx.Search
 
             if (!movesToEvaluate.Any())
             {
-                ++nodes;
                 return (staticEvaluation, new Result { MaxDepth = plies });  // TODO check if in check or drawn position
             }
 
             Move? bestMove = null;
             Result? existingMoveList = null;
-
-            var maxEval = MinValue;
+            bool isAnyMoveValid = false;
 
             foreach (var move in movesToEvaluate)
             {
@@ -198,6 +198,7 @@ namespace Lynx.Search
                 {
                     continue;
                 }
+                isAnyMoveValid = true;
 
                 PrintPreMove(position, plies, move, isQuiescence: true);
 
@@ -219,22 +220,20 @@ namespace Lynx.Search
                     return (evaluation, new Result()); // The refutation doesn't matter, since it'll be pruned
                 }
 
-                if (evaluation > maxEval)
+                if (evaluation > alpha)
                 {
-                    maxEval = evaluation;
+                    alpha = evaluation;
                     existingMoveList = bestMoveExistingMoveList;
                     bestMove = move;
                 }
-
-                alpha = Max(alpha, evaluation); // TODO optimize branch prediction -> Should alpha be generally greater than eval?
             }
 
             if (bestMove is null)
             {
                 ++nodes;
 
-                var eval = position.AllPossibleMoves().Any(move => new Position(position, move).WasProduceByAValidMove())
-                    ? position.StaticEvaluation(positionHistory, movesWithoutCaptureOrPawnMove)
+                var eval = isAnyMoveValid || position.AllPossibleMoves().Any(move => new Position(position, move).WasProduceByAValidMove())
+                    ? alpha
                     : position.EvaluateFinalPosition(plies, positionHistory, movesWithoutCaptureOrPawnMove);
 
                 return (eval, new Result() { MaxDepth = plies });
@@ -242,13 +241,7 @@ namespace Lynx.Search
 
             // Node fails low
             Debug.Assert(existingMoveList is not null);
-
-            // If the best quiescence move produces no gain, don't add it to the PV
-            // because there might be better, unexplored non-quiescence alternatives (unless a Zugzwang-style position with only captures as moves)
-            if (maxEval >= alpha)
-            {
-                existingMoveList!.Moves.Add(bestMove!.Value);
-            }
+            existingMoveList!.Moves.Add(bestMove!.Value);
 
             return (alpha, existingMoveList);
         }
