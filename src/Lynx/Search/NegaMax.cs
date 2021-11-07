@@ -1,6 +1,5 @@
 ﻿using Lynx.Model;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
@@ -22,7 +21,7 @@ namespace Lynx.Search
         /// Defaults to the worse possible score for Side to move's opponent, Int.MaxValue
         /// </param>
         /// <returns></returns>
-        private static (int Evaluation, Result MoveList) NegaMax(Position position, Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove, /*Dictionary<long, PriorityQueue<Move, int>> orderedMoves,*/ int[,] killerMoves, int minDepth, int depthLimit, ref int nodes, int plies, int alpha, int beta, CancellationToken cancellationToken, CancellationToken absoluteCancellationToken)
+        private static (int Evaluation, int MaxDepth) NegaMax(Position position, Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove, Move[] pvTable, int pvIndex, int[,] killerMoves, int minDepth, int depthLimit, ref int nodes, int plies, int alpha, int beta, CancellationToken cancellationToken, CancellationToken absoluteCancellationToken)
         {
             absoluteCancellationToken.ThrowIfCancellationRequested();
             if (plies > minDepth)
@@ -44,11 +43,10 @@ namespace Lynx.Search
                     }
                 }
 
-                return (position.EvaluateFinalPosition(plies, positionHistory, movesWithoutCaptureOrPawnMove), new Result { MaxDepth = plies });
+                return (position.EvaluateFinalPosition(plies, positionHistory, movesWithoutCaptureOrPawnMove), plies);
             }
 
             Move? bestMove = null;
-            Result? existingMoveList = null;
 
             var isAnyMoveValid = false;
 
@@ -85,31 +83,23 @@ namespace Lynx.Search
                         killerMoves[0, plies] = move.EncodedMove;
                     }
 
-                    return (beta, new Result());    // TODO return evaluation?
+                    return (beta, plies);    // TODO return evaluation?
                 }
 
                 if (evaluation > alpha)
                 {
                     alpha = evaluation;
-                    existingMoveList = bestMoveExistingMoveList;
                     bestMove = move;
                 }
             }
 
             if (bestMove is null)
             {
-                Result result = new() { MaxDepth = plies };
-
-                return isAnyMoveValid
-                    ? (alpha, result)
-                    : (position.EvaluateFinalPosition(plies, positionHistory, movesWithoutCaptureOrPawnMove), result);
+                return (isAnyMoveValid ? alpha : position.EvaluateFinalPosition(plies, positionHistory, movesWithoutCaptureOrPawnMove), plies);
             }
 
             // Node fails low
-            Debug.Assert(existingMoveList is not null);
-            existingMoveList!.Moves.Add(bestMove.Value);
-
-            return (alpha, existingMoveList);
+            return (alpha, plies);
         }
 
         /// <summary>
@@ -126,7 +116,7 @@ namespace Lynx.Search
         /// Defaults to the works possible score for Black, Int.MaxValue
         /// </param>
         /// <returns></returns>
-        public static (int Evaluation, Result MoveList) QuiescenceSearch(Position position, Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove, int quiescenceDepthLimit, ref int nodes, int plies, int alpha, int beta, CancellationToken cancellationToken, CancellationToken absoluteCancellationToken)
+        public static (int Evaluation, int MaxDepth) QuiescenceSearch(Position position, Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove, Move[] pvTable, int pvIndex, int quiescenceDepthLimit, ref int nodes, int plies, int alpha, int beta, CancellationToken cancellationToken, CancellationToken absoluteCancellationToken)
         {
             absoluteCancellationToken.ThrowIfCancellationRequested();
             //cancellationToken.ThrowIfCancellationRequested();
@@ -139,7 +129,7 @@ namespace Lynx.Search
             if (staticEvaluation >= beta)
             {
                 PrintMessage(plies - 1, "Pruning before starting quiescence search");
-                return (staticEvaluation, new Result() { MaxDepth = plies });
+                return (staticEvaluation, plies);
             }
 
             // Better move
@@ -150,18 +140,17 @@ namespace Lynx.Search
 
             if (plies >= quiescenceDepthLimit)
             {
-                return (alpha, new Result { MaxDepth = plies });   // Alpha?
+                return (alpha, plies);   // Alpha?
             }
 
             var movesToEvaluate = position.AllCapturesMoves();
 
             if (!movesToEvaluate.Any())
             {
-                return (staticEvaluation, new Result { MaxDepth = plies });  // TODO check if in check or drawn position
+                return (staticEvaluation, plies);  // TODO check if in check or drawn position
             }
 
             Move? bestMove = null;
-            Result? existingMoveList = null;
             bool isAnyMoveValid = false;
 
             foreach (var move in movesToEvaluate)
@@ -190,13 +179,12 @@ namespace Lynx.Search
                 if (evaluation >= beta)
                 {
                     _logger.Trace($"Pruning: {move} is enough to discard this line");
-                    return (evaluation, new Result()); // The refutation doesn't matter, since it'll be pruned
+                    return (evaluation, plies); // The refutation doesn't matter, since it'll be pruned
                 }
 
                 if (evaluation > alpha)
                 {
                     alpha = evaluation;
-                    existingMoveList = bestMoveExistingMoveList;
                     bestMove = move;
                 }
             }
@@ -207,14 +195,11 @@ namespace Lynx.Search
                     ? alpha
                     : position.EvaluateFinalPosition(plies, positionHistory, movesWithoutCaptureOrPawnMove);
 
-                return (eval, new Result() { MaxDepth = plies });
+                return (eval, plies);
             }
 
             // Node fails low
-            Debug.Assert(existingMoveList is not null);
-            existingMoveList!.Moves.Add(bestMove!.Value);
-
-            return (alpha, existingMoveList);
+            return (alpha, plies);
         }
     }
 }

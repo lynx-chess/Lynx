@@ -1,6 +1,5 @@
 ﻿using Lynx.Model;
 using NLog;
-using NLog.Targets;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -15,13 +14,6 @@ namespace Lynx.Search
 
         private const int MinValue = -2 * Position.CheckMateEvaluation;
         private const int MaxValue = +2 * Position.CheckMateEvaluation;
-
-        public class Result
-        {
-            public int? MaxDepth { get; set; }
-
-            public List<Move> Moves { get; set; } = new List<Move>(150);
-        }
 
         public record SearchResult(Move BestMove, double Evaluation, int TargetDepth, int DepthReached, int Nodes, long Time, long NodesPerSecond, List<Move> Moves)
         {
@@ -40,19 +32,6 @@ namespace Lynx.Search
             //PrintPvTable(pvTable, target, source);
             Array.Copy(pvTable, source, pvTable, target, moveCountToCopy);
             //PrintPvTable(pvTable);
-        }
-
-
-        /// <summary>
-        /// Branch-optimized for <paramref name="mostLikely"/>
-        /// </summary>
-        /// <param name="mostLikely"></param>
-        /// <param name="lessLikely"></param>
-        /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int Max(int mostLikely, int lessLikely)
-        {
-            return lessLikely <= mostLikely ? mostLikely : lessLikely;
         }
 
         [Conditional("DEBUG")]

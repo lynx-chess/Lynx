@@ -37,25 +37,14 @@ namespace Lynx.Search
                         cancellationToken.ThrowIfCancellationRequested();
                     }
                     nodes = 0;
-                    (bestEvaluation, Result bestResult) = NegaMax(position, positionHistory, movesWithoutCaptureOrPawnMove,  /*orderedMoves,*/ pvTable, pvIndex: 0, killerMoves, minDepth: minDepth, depthLimit: depth, nodes: ref nodes, plies: 0, alpha: MinValue, beta: MaxValue, cancellationToken, absoluteCancellationToken);
 
-                    if (bestResult is not null)
-                    {
-                        var pvMoves = pvTable.TakeWhile(m => m.EncodedMove != default).ToList();
-                        searchResult = new SearchResult(pvMoves.FirstOrDefault(), bestEvaluation, depth, bestResult.MaxDepth ?? depth, nodes, sw.ElapsedMilliseconds, Convert.ToInt64(Math.Clamp(nodes / ((0.001 * sw.ElapsedMilliseconds) + 1), 0, Int64.MaxValue)), pvMoves);
+                    (bestEvaluation, int maxDepthReached) = NegaMax(position, positionHistory, movesWithoutCaptureOrPawnMove, pvTable, pvIndex: 0, killerMoves, minDepth: minDepth, depthLimit: depth, nodes: ref nodes, plies: 0, alpha: MinValue, beta: MaxValue, cancellationToken, absoluteCancellationToken);
 
-                        Task.Run(async () => await engineWriter.WriteAsync(InfoCommand.SearchResultInfo(searchResult)));
+                    var pvMoves = pvTable.TakeWhile(m => m.EncodedMove != default).ToList();
+                    searchResult = new SearchResult(pvMoves.FirstOrDefault(), bestEvaluation, depth, maxDepthReached, nodes, sw.ElapsedMilliseconds, Convert.ToInt64(Math.Clamp(nodes / ((0.001 * sw.ElapsedMilliseconds) + 1), 0, Int64.MaxValue)), pvMoves);
 
-                        bestResult.Moves.Reverse();
-                        var bestResultMovesString = string.Join(' ', bestResult.Moves.Select(m => m.ToString()));
-                        var pvMovesString = string.Join(' ', pvMoves);
+                    Task.Run(async () => await engineWriter.WriteAsync(InfoCommand.SearchResultInfo(searchResult)));
 
-                        if (bestResultMovesString != pvMovesString)
-                        {
-                            _logger.Error("Unexpected mismatch between best result moves and pv table moves");
-                            _logger.Error($"Best result moves :{bestResultMovesString} vs PV table moves: {pvMovesString}");
-                        }
-                    }
                 } while (stopSearchCondition(++depth, maxDepth, bestEvaluation, nodes, decisionTime, sw));
             }
             catch (OperationCanceledException)
