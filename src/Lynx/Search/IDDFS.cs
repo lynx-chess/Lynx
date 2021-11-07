@@ -23,7 +23,8 @@ namespace Lynx.Search
 
             try
             {
-                //var orderedMoves = new Dictionary<long, PriorityQueue<Move, int>>(10_000);
+                var maxPossibleDepth = Configuration.EngineSettings.MaxDepth;
+                var pvTable = new Move[((maxPossibleDepth * maxPossibleDepth) + maxPossibleDepth) / 2];
                 var killerMoves = new int[2, EvaluationConstants.MaxPlies];
 
                 sw.Start();
@@ -36,16 +37,26 @@ namespace Lynx.Search
                         cancellationToken.ThrowIfCancellationRequested();
                     }
                     nodes = 0;
-                    (bestEvaluation, Result bestResult) = NegaMax(position, positionHistory, movesWithoutCaptureOrPawnMove,  /*orderedMoves,*/ killerMoves, minDepth: minDepth, depthLimit: depth, nodes: ref nodes, plies: 0, alpha: MinValue, beta: MaxValue, cancellationToken, absoluteCancellationToken);
+                    (bestEvaluation, Result bestResult) = NegaMax(position, positionHistory, movesWithoutCaptureOrPawnMove,  /*orderedMoves,*/ pvTable, pvIndex: 0, killerMoves, minDepth: minDepth, depthLimit: depth, nodes: ref nodes, plies: 0, alpha: MinValue, beta: MaxValue, cancellationToken, absoluteCancellationToken);
 
                     if (bestResult is not null)
                     {
-                        bestResult.Moves.Reverse();
-                        searchResult = new SearchResult(bestResult.Moves.FirstOrDefault(), bestEvaluation, depth, bestResult.MaxDepth ?? depth, nodes, sw.ElapsedMilliseconds, Convert.ToInt64(Math.Clamp(nodes / ((0.001 * sw.ElapsedMilliseconds) + 1), 0, Int64.MaxValue)), bestResult.Moves);
+                        var pvMoves = pvTable.TakeWhile(m => m.EncodedMove != default).ToList();
+                        searchResult = new SearchResult(pvMoves.FirstOrDefault(), bestEvaluation, depth, bestResult.MaxDepth ?? depth, nodes, sw.ElapsedMilliseconds, Convert.ToInt64(Math.Clamp(nodes / ((0.001 * sw.ElapsedMilliseconds) + 1), 0, Int64.MaxValue)), pvMoves);
 
                         Task.Run(async () => await engineWriter.WriteAsync(InfoCommand.SearchResultInfo(searchResult)));
+
+                        bestResult.Moves.Reverse();
+                        var bestResultMovesString = string.Join(' ', bestResult.Moves.Select(m => m.ToString()));
+                        var pvMovesString = string.Join(' ', pvMoves);
+
+                        if (bestResultMovesString != pvMovesString)
+                        {
+                            _logger.Error("Unexpected mismatch between best result moves and pv table moves");
+                            _logger.Error($"Best result moves :{bestResultMovesString} vs PV table moves: {pvMovesString}");
+                        }
                     }
-                } while (stopSearchCondition(++depth, maxDepth, bestEvaluation, decisionTime, sw));
+                } while (stopSearchCondition(++depth, maxDepth, bestEvaluation, nodes, decisionTime, sw));
             }
             catch (OperationCanceledException)
             {
@@ -72,7 +83,7 @@ namespace Lynx.Search
                 return new(default, bestEvaluation, depth, depth, nodes, sw.ElapsedMilliseconds, Convert.ToInt64(Math.Clamp(nodes / ((0.001 * sw.ElapsedMilliseconds) + 1), 0, Int64.MaxValue)), new List<Move>());
             }
 
-            static bool stopSearchCondition(int depth, int? maxDepth, int bestEvaluation, int? decisionTime, Stopwatch stopWatch)
+            static bool stopSearchCondition(int depth, int? maxDepth, int bestEvaluation, int nodes, int? decisionTime, Stopwatch stopWatch)
             {
                 if (Math.Abs(bestEvaluation) > 0.1 * Position.CheckMateEvaluation)
                 {
@@ -95,7 +106,7 @@ namespace Lynx.Search
                 var decisionTimePercentageToStopSearching = Configuration.EngineSettings.DecisionTimePercentageToStopSearching;
                 if (decisionTime is not null && elapsedMilliseconds > minTimeToConsiderStopSearching && elapsedMilliseconds > decisionTimePercentageToStopSearching * decisionTime)
                 {
-                    _logger.Info($"Stopping at depth {depth - 1}: {elapsedMilliseconds} > {Configuration.EngineSettings.DecisionTimePercentageToStopSearching * decisionTime} (elapsed time > [{minTimeToConsiderStopSearching}, {decisionTimePercentageToStopSearching} * decision time])");
+                    _logger.Info($"Stopping at depth {depth - 1} (nodes {nodes}): {elapsedMilliseconds} > {Configuration.EngineSettings.DecisionTimePercentageToStopSearching * decisionTime} (elapsed time > [{minTimeToConsiderStopSearching}, {decisionTimePercentageToStopSearching} * decision time])");
                     return false;
                 }
 

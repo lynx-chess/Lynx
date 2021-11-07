@@ -41,6 +41,7 @@ using static Lynx.Model.Move;
 //_53_MVVLVA();
 //_54_ScoreMove();
 ZobristTable();
+PV_Table();
 
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
 const string TrickyPosition = Constants.TrickyTestPositionFEN;
@@ -729,4 +730,38 @@ static long UpdatePositionHash(long[,] zobristTable, long positionHash, Move mov
         ^ zobristTable[sourcePiece, sourceSquare]
         ^ zobristTable[piece, targetSquare]
         ^ zobristTable[piece, targetSquare];
+}
+
+static void PV_Table()
+{
+    // Debugging, Configuration.EngineSettings.MaxDepth = 32
+
+    /*
+     * Watch optimized
+     * 
+     *  $"{pvTable[0].ToString()} {pvTable[1].ToString()}" + $" {pvTable[2].ToString()} {pvTable[3].ToString()}" + $"{pvTable[4].ToString()} {pvTable[5].ToString()}" + $" {pvTable[6].ToString()} {pvTable[7].ToString()}"
+     *  $"           {pvTable[32].ToString()} {pvTable[33].ToString()}" + $" {pvTable[34].ToString()} {pvTable[35].ToString()}" + $"{pvTable[36].ToString()} {pvTable[37].ToString()}" + $" {pvTable[38].ToString()}"
+     *  $"                      {pvTable[63].ToString()} {pvTable[64].ToString()}" + $" {pvTable[65].ToString()} {pvTable[66].ToString()}" + $"{pvTable[67].ToString()} {pvTable[68].ToString()}"
+     *  $"                                 {pvTable[93].ToString()} {pvTable[94].ToString()}" + $" {pvTable[95].ToString()} {pvTable[96].ToString()}" + $"{pvTable[97].ToString()}"
+     *  $"                                            {pvTable[122].ToString()} {pvTable[123].ToString()}" + $" {pvTable[124].ToString()} {pvTable[125].ToString()}"
+     *  $"                                                       {pvTable[150].ToString()} {pvTable[151].ToString()}" + $" {pvTable[152].ToString()}"
+     *  
+     *  $"{pvTable[0]} {pvTable[1]}" + $" {pvTable[2]} {pvTable[3]}" + $"{pvTable[4]} {pvTable[5]}" + $" {pvTable[6]} {pvTable[7]}" + Environment.NewLine +
+     *  $"           {pvTable[32]} {pvTable[33]}" + $" {pvTable[34]} {pvTable[35]}" + $"{pvTable[36]} {pvTable[37]}" + $" {pvTable[38]}" + Environment.NewLine +
+     *  $"                      {pvTable[63]} {pvTable[64]}" + $" {pvTable[65]} {pvTable[66]}" + $"{pvTable[67]} {pvTable[68]}" + Environment.NewLine +
+     *  $"                                 {pvTable[93]} {pvTable[94]}" + $" {pvTable[95]} {pvTable[96]}" + $"{pvTable[97]}" + Environment.NewLine +
+     *  $"                                            {pvTable[122]} {pvTable[123]}" + $" {pvTable[124]} {pvTable[125]}" + Environment.NewLine +
+     *  $"                                                       {pvTable[150]} {pvTable[151]}" + $" {pvTable[152]}" + Environment.NewLine
+     *  
+     *  
+     *  Console optimized
+            Console.WriteLine(
+$"{pvTable[0],-6} {pvTable[1], -6}" + $" {pvTable[2], -6} {pvTable[3], -6}" + $" {pvTable[4], -6} {pvTable[5], -6}" + $" {pvTable[6], -6} {pvTable[7], -6}" + Environment.NewLine +
+$"       {pvTable[32], -6} {pvTable[33], -6}" + $" {pvTable[34], -6} {pvTable[35], -6}" + $" {pvTable[36], -6} {pvTable[37], -6}" + $" {pvTable[38], -6}" + Environment.NewLine +
+$"              {pvTable[63], -6} {pvTable[64], -6}" + $" {pvTable[65], -6} {pvTable[66], -6}" + $" {pvTable[67], -6} {pvTable[68], -6}" + Environment.NewLine +
+$"                     {pvTable[93], -6} {pvTable[94], -6}" + $" {pvTable[95], -6} {pvTable[96], -6}" + $" {pvTable[97], -6}" + Environment.NewLine +
+$"                            {pvTable[122], -6} {pvTable[123], -6}" + $" {pvTable[124], -6} {pvTable[125], -6}" + Environment.NewLine +
+$"                                   {pvTable[150], -6} {pvTable[151], -6}" + $" {pvTable[152], -6}" + Environment.NewLine);
+     *  
+     */
 }

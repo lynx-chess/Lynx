@@ -22,7 +22,7 @@ namespace Lynx.Search
         /// Defaults to the worse possible score for Side to move's opponent, Int.MaxValue
         /// </param>
         /// <returns></returns>
-        private static (int Evaluation, Result MoveList) NegaMax(Position position, Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove, /*Dictionary<long, PriorityQueue<Move, int>> orderedMoves,*/ int[,] killerMoves, int minDepth, int depthLimit, ref int nodes, int plies, int alpha, int beta, CancellationToken cancellationToken, CancellationToken absoluteCancellationToken)
+        private static (int Evaluation, Result MoveList) NegaMax(Position position, Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove, Move[] pvTable, int pvIndex, int[,] killerMoves, int minDepth, int depthLimit, ref int nodes, int plies, int alpha, int beta, CancellationToken cancellationToken, CancellationToken absoluteCancellationToken)
         {
             absoluteCancellationToken.ThrowIfCancellationRequested();
             if (plies > minDepth)
@@ -32,7 +32,8 @@ namespace Lynx.Search
 
             ++nodes;
 
-            var positionId = position.UniqueIdentifier;
+            pvTable[pvIndex] = new Move();
+            var nextPvIndex = pvIndex + Configuration.EngineSettings.MaxDepth - plies;
 
             var pseudoLegalMoves = position.AllPossibleMoves(killerMoves, plies);
 
@@ -42,7 +43,7 @@ namespace Lynx.Search
                 {
                     if (new Position(position, candidateMove).WasProduceByAValidMove())
                     {
-                        return QuiescenceSearch(position, positionHistory, movesWithoutCaptureOrPawnMove, Configuration.EngineSettings.QuiescenceSearchDepth, ref nodes, plies, alpha, beta, cancellationToken, absoluteCancellationToken);
+                        return QuiescenceSearch(position, positionHistory, movesWithoutCaptureOrPawnMove, pvTable, pvIndex, Configuration.EngineSettings.QuiescenceSearchDepth, ref nodes, plies, alpha, beta, cancellationToken, absoluteCancellationToken);
                     }
                 }
 
@@ -68,7 +69,7 @@ namespace Lynx.Search
                 var oldValue = movesWithoutCaptureOrPawnMove;
                 movesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, movesWithoutCaptureOrPawnMove);
                 var repetitions = Utils.UpdatePositionHistory(newPosition, positionHistory);
-                var (evaluation, bestMoveExistingMoveList) = NegaMax(newPosition, positionHistory, movesWithoutCaptureOrPawnMove, /*orderedMoves,*/ killerMoves, minDepth, depthLimit, ref nodes, plies + 1, -beta, -alpha, cancellationToken, absoluteCancellationToken);
+                var (evaluation, bestMoveExistingMoveList) = NegaMax(newPosition, positionHistory, movesWithoutCaptureOrPawnMove, pvTable, nextPvIndex, killerMoves, minDepth, depthLimit, ref nodes, plies + 1, -beta, -alpha, cancellationToken, absoluteCancellationToken);
                 movesWithoutCaptureOrPawnMove = oldValue;
                 Utils.RevertPositionHistory(newPosition, positionHistory, repetitions);
 
@@ -95,6 +96,9 @@ namespace Lynx.Search
                     alpha = evaluation;
                     existingMoveList = bestMoveExistingMoveList;
                     bestMove = move;
+
+                    pvTable[pvIndex] = move;
+                    CopyMoves(pvTable, pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - plies - 1);
                 }
             }
 
@@ -128,12 +132,15 @@ namespace Lynx.Search
         /// Defaults to the works possible score for Black, Int.MaxValue
         /// </param>
         /// <returns></returns>
-        public static (int Evaluation, Result MoveList) QuiescenceSearch(Position position, Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove, int quiescenceDepthLimit, ref int nodes, int plies, int alpha, int beta, CancellationToken cancellationToken, CancellationToken absoluteCancellationToken)
+        public static (int Evaluation, Result MoveList) QuiescenceSearch(Position position, Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove, Move[] pvTable, int pvIndex, int quiescenceDepthLimit, ref int nodes, int plies, int alpha, int beta, CancellationToken cancellationToken, CancellationToken absoluteCancellationToken)
         {
             absoluteCancellationToken.ThrowIfCancellationRequested();
             //cancellationToken.ThrowIfCancellationRequested();
 
             ++nodes;
+
+            pvTable[pvIndex] = new Move();
+            var nextPvIndex = pvIndex + Configuration.EngineSettings.MaxDepth - plies;
 
             var staticEvaluation = position.StaticEvaluation(positionHistory, movesWithoutCaptureOrPawnMove);
 
@@ -180,7 +187,7 @@ namespace Lynx.Search
                 var oldValue = movesWithoutCaptureOrPawnMove;
                 movesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, movesWithoutCaptureOrPawnMove);
                 var repetitions = Utils.UpdatePositionHistory(newPosition, positionHistory);
-                var (evaluation, bestMoveExistingMoveList) = QuiescenceSearch(newPosition, positionHistory, movesWithoutCaptureOrPawnMove, quiescenceDepthLimit, ref nodes, plies + 1, -beta, -alpha, cancellationToken, absoluteCancellationToken);
+                var (evaluation, bestMoveExistingMoveList) = QuiescenceSearch(newPosition, positionHistory, movesWithoutCaptureOrPawnMove, pvTable, nextPvIndex, quiescenceDepthLimit, ref nodes, plies + 1, -beta, -alpha, cancellationToken, absoluteCancellationToken);
                 movesWithoutCaptureOrPawnMove = oldValue;
                 Utils.RevertPositionHistory(newPosition, positionHistory, repetitions);
 
@@ -200,6 +207,9 @@ namespace Lynx.Search
                     alpha = evaluation;
                     existingMoveList = bestMoveExistingMoveList;
                     bestMove = move;
+
+                    pvTable[pvIndex] = move;
+                    CopyMoves(pvTable, pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - plies - 1);
                 }
             }
 
