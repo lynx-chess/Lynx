@@ -32,8 +32,6 @@ namespace Lynx.Search
 
             ++nodes;
 
-            var positionId = position.UniqueIdentifier;
-
             var pseudoLegalMoves = position.AllPossibleMoves(killerMoves, plies);
 
             if (plies >= depthLimit)
@@ -42,13 +40,6 @@ namespace Lynx.Search
                 {
                     if (new Position(position, candidateMove).WasProduceByAValidMove())
                     {
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-                        //        orderedMoves.Remove(positionId);
->>>>>>> a20dde4... Avoid invoking Quiescence search with extra depth
-=======
->>>>>>> e0d4154... Remove legacy, custom implementation comments
                         return QuiescenceSearch(position, positionHistory, movesWithoutCaptureOrPawnMove, Configuration.EngineSettings.QuiescenceSearchDepth, ref nodes, plies, alpha, beta, cancellationToken, absoluteCancellationToken);
                     }
                 }

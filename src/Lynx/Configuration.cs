@@ -107,6 +107,8 @@ namespace Lynx
 
         public int MinDepth { get; set; } = 4;
 
+        public int MaxDepth { get; set; } = 32;
+
         public int MinMoveTime { get; set; } = 1_000;
 
         public int DepthWhenLessThanMinMoveTime { get; set; } = 2;
