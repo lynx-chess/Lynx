@@ -42,7 +42,8 @@ namespace Lynx.Search
                 {
                     if (new Position(position, candidateMove).WasProduceByAValidMove())
                     {
-                        return QuiescenceSearch(position, positionHistory, movesWithoutCaptureOrPawnMove, Configuration.EngineSettings.QuiescenceSearchDepth, ref nodes, plies, alpha, beta, cancellationToken, absoluteCancellationToken);
+                        // Same plies and pvIndex
+                        return QuiescenceSearch(position, positionHistory, movesWithoutCaptureOrPawnMove, pvTable, pvIndex, Configuration.EngineSettings.QuiescenceSearchDepth, ref nodes, plies, alpha, beta, cancellationToken, absoluteCancellationToken);
                     }
                 }
 
@@ -67,7 +68,7 @@ namespace Lynx.Search
                 var oldValue = movesWithoutCaptureOrPawnMove;
                 movesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, movesWithoutCaptureOrPawnMove);
                 var repetitions = Utils.UpdatePositionHistory(newPosition, positionHistory);
-                var (evaluation, bestMoveExistingMoveList) = NegaMax(newPosition, positionHistory, movesWithoutCaptureOrPawnMove, /*orderedMoves,*/ killerMoves, minDepth, depthLimit, ref nodes, plies + 1, -beta, -alpha, cancellationToken, absoluteCancellationToken);
+                var (evaluation, bestMoveExistingMoveList) = NegaMax(newPosition, positionHistory, movesWithoutCaptureOrPawnMove, pvTable, nextPvIndex, killerMoves, minDepth, depthLimit, ref nodes, plies + 1, -beta, -alpha, cancellationToken, absoluteCancellationToken);
                 movesWithoutCaptureOrPawnMove = oldValue;
                 Utils.RevertPositionHistory(newPosition, positionHistory, repetitions);
 
@@ -173,7 +174,7 @@ namespace Lynx.Search
                 var oldValue = movesWithoutCaptureOrPawnMove;
                 movesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, movesWithoutCaptureOrPawnMove);
                 var repetitions = Utils.UpdatePositionHistory(newPosition, positionHistory);
-                var (evaluation, bestMoveExistingMoveList) = QuiescenceSearch(newPosition, positionHistory, movesWithoutCaptureOrPawnMove, quiescenceDepthLimit, ref nodes, plies + 1, -beta, -alpha, cancellationToken, absoluteCancellationToken);
+                var (evaluation, bestMoveExistingMoveList) = QuiescenceSearch(newPosition, positionHistory, movesWithoutCaptureOrPawnMove, pvTable, nextPvIndex, quiescenceDepthLimit, ref nodes, plies + 1, -beta, -alpha, cancellationToken, absoluteCancellationToken);
                 movesWithoutCaptureOrPawnMove = oldValue;
                 Utils.RevertPositionHistory(newPosition, positionHistory, repetitions);
 
