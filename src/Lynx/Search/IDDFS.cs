@@ -23,7 +23,7 @@ namespace Lynx.Search
 
             try
             {
-                var orderedMoves = new Dictionary<long, PriorityQueue<Move, int>>(10_000);
+                //var orderedMoves = new Dictionary<long, PriorityQueue<Move, int>>(10_000);
                 var killerMoves = new int[2, EvaluationConstants.MaxPlies];
 
                 sw.Start();
@@ -36,7 +36,7 @@ namespace Lynx.Search
                         cancellationToken.ThrowIfCancellationRequested();
                     }
                     nodes = 0;
-                    (bestEvaluation, Result bestResult) = NegaMax(position, positionHistory, movesWithoutCaptureOrPawnMove, orderedMoves, killerMoves, minDepth: minDepth, depthLimit: depth, nodes: ref nodes, plies: 0, alpha: MinValue, beta: MaxValue, cancellationToken, absoluteCancellationToken);
+                    (bestEvaluation, Result bestResult) = NegaMax(position, positionHistory, movesWithoutCaptureOrPawnMove,  /*orderedMoves,*/ killerMoves, minDepth: minDepth, depthLimit: depth, nodes: ref nodes, plies: 0, alpha: MinValue, beta: MaxValue, cancellationToken, absoluteCancellationToken);
 
                     if (bestResult is not null)
                     {
@@ -50,7 +50,7 @@ namespace Lynx.Search
             catch (OperationCanceledException)
             {
                 isCancelled = true;
-                _logger.Info($"Search cancellation requested after {sw.ElapsedMilliseconds}ms, best move will be returned");
+                _logger.Info($"Search cancellation requested after {sw.ElapsedMilliseconds}ms (depth {depth}, nodes {nodes}), best move will be returned");
             }
             catch (Exception e)
             {
