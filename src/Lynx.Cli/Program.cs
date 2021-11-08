@@ -1,5 +1,6 @@
 ﻿using Lynx;
 using Lynx.Cli;
+using Lynx.Model;
 using Microsoft.Extensions.Configuration;
 using NLog;
 using NLog.Extensions.Logging;
@@ -48,6 +49,7 @@ var tasks = new List<Task>
 
 try
 {
+    InitializeStaticClasses();
     await Task.WhenAny(tasks);
 }
 catch (AggregateException ae)
@@ -77,3 +79,10 @@ finally
 }
 
 Thread.Sleep(2_000);
+
+static void InitializeStaticClasses()
+{
+    _ = PVTable.Indexes[0];
+    _ = Attacks.KingAttacks;
+    _ = ZobristTable.SideHash();
+}

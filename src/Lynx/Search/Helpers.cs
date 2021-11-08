@@ -15,28 +15,23 @@ namespace Lynx.Search
         private const int MinValue = -2 * Position.CheckMateEvaluation;
         private const int MaxValue = +2 * Position.CheckMateEvaluation;
 
-        public class Result
-        {
-            public int? MaxDepth { get; set; }
-
-            public List<Move> Moves { get; set; } = new List<Move>(150);
-        }
-
         public record SearchResult(Move BestMove, double Evaluation, int TargetDepth, int DepthReached, int Nodes, long Time, long NodesPerSecond, List<Move> Moves)
         {
             public bool IsCancelled { get; set; }
         }
 
-        /// <summary>
-        /// Branch-optimized for <paramref name="mostLikely"/>
-        /// </summary>
-        /// <param name="mostLikely"></param>
-        /// <param name="lessLikely"></param>
-        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int Max(int mostLikely, int lessLikely)
+        private static void CopyMoves(Move[] pvTable, int target, int source, int moveCountToCopy)
         {
-            return lessLikely <= mostLikely ? mostLikely : lessLikely;
+            if (pvTable[source].EncodedMove is default(int))
+            {
+                Array.Clear(pvTable, target, pvTable.Length - target);  // TODO remove?
+                return;
+            }
+
+            //PrintPvTable(pvTable, target, source);
+            Array.Copy(pvTable, source, pvTable, target, moveCountToCopy);
+            //PrintPvTable(pvTable);
         }
 
         [Conditional("DEBUG")]
@@ -93,6 +88,20 @@ namespace Lynx.Search
             string depthStr = sb.ToString();
 
             _logger.Trace(depthStr + message);
+        }
+
+        [Conditional("DEBUG")]
+        private static void PrintPvTable(Move[] pvTable, int target = -1, int source = -1)
+        {
+            Console.WriteLine(
+(target != -1 ? $"src: {source}, tgt: {target}" + Environment.NewLine : "") +
+$" {0,-3} {pvTable[0],-6} {pvTable[1],-6}" + $" {pvTable[2],-6} {pvTable[3],-6}" + $" {pvTable[4],-6} {pvTable[5],-6}" + $" {pvTable[6],-6} {pvTable[7],-6}" + Environment.NewLine +
+$" {32,-3}        {pvTable[32],-6} {pvTable[33],-6}" + $" {pvTable[34],-6} {pvTable[35],-6}" + $" {pvTable[36],-6} {pvTable[37],-6}" + $" {pvTable[38],-6}" + Environment.NewLine +
+$" {63,-3}               {pvTable[63],-6} {pvTable[64],-6}" + $" {pvTable[65],-6} {pvTable[66],-6}" + $" {pvTable[67],-6} {pvTable[68],-6}" + Environment.NewLine +
+$" {93,-3}                      {pvTable[93],-6} {pvTable[94],-6}" + $" {pvTable[95],-6} {pvTable[96],-6}" + $" {pvTable[97],-6}" + Environment.NewLine +
+$" {122,-3}                             {pvTable[122],-6} {pvTable[123],-6}" + $" {pvTable[124],-6} {pvTable[125],-6}" + Environment.NewLine +
+$" {150,-3}                                    {pvTable[150],-6} {pvTable[151],-6}" + $" {pvTable[152],-6}" + Environment.NewLine +
+(target == -1 ? "------------------------------------------------------------------------------------" + Environment.NewLine : ""));
         }
     }
 }
