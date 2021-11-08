@@ -38,7 +38,7 @@ namespace Lynx.Search
                     }
                     nodes = 0;
 
-                    (bestEvaluation, int maxDepthReached) = NegaMax(position, positionHistory, movesWithoutCaptureOrPawnMove, pvTable, pvIndex: 0, killerMoves, minDepth: minDepth, depthLimit: depth, nodes: ref nodes, plies: 0, alpha: MinValue, beta: MaxValue, cancellationToken, absoluteCancellationToken);
+                    (bestEvaluation, int maxDepthReached) = NegaMax(position, positionHistory, movesWithoutCaptureOrPawnMove, pvTable, pvIndex: PVTable.Indexes[0], killerMoves, minDepth: minDepth, depthLimit: depth, nodes: ref nodes, plies: 0, alpha: MinValue, beta: MaxValue, cancellationToken, absoluteCancellationToken);
 
                     var pvMoves = pvTable.TakeWhile(m => m.EncodedMove != default).ToList();
                     searchResult = new SearchResult(pvMoves.FirstOrDefault(), bestEvaluation, depth, maxDepthReached, nodes, sw.ElapsedMilliseconds, Convert.ToInt64(Math.Clamp(nodes / ((0.001 * sw.ElapsedMilliseconds) + 1), 0, Int64.MaxValue)), pvMoves);

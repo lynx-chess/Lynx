@@ -32,7 +32,7 @@ namespace Lynx.Search
             ++nodes;
 
             pvTable[pvIndex] = new Move();
-            var nextPvIndex = pvIndex + Configuration.EngineSettings.MaxDepth - plies;
+            var nextPvIndex = PVTable.Indexes[plies + 1];
 
             var pseudoLegalMoves = position.AllPossibleMoves(killerMoves, plies);
 
@@ -130,7 +130,7 @@ namespace Lynx.Search
             ++nodes;
 
             pvTable[pvIndex] = new Move();
-            var nextPvIndex = pvIndex + Configuration.EngineSettings.MaxDepth - plies;
+            var nextPvIndex = PVTable.Indexes[plies + 1];
 
             var staticEvaluation = position.StaticEvaluation(positionHistory, movesWithoutCaptureOrPawnMove);
 
