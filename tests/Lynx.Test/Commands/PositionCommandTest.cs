@@ -2,7 +2,6 @@
 using Moq;
 using NUnit.Framework;
 using System.Threading.Channels;
-using System.Threading.Tasks;
 
 namespace Lynx.Test.Commands
 {

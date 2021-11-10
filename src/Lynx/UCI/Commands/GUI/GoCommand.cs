@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using System.Text.RegularExpressions;
 
 namespace Lynx.UCI.Commands.GUI
 {

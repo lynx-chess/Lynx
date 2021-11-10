@@ -15,7 +15,6 @@
  */
 
 using BenchmarkDotNet.Attributes;
-using System.Collections.Generic;
 
 namespace Lynx.Benchmark
 {

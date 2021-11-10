@@ -202,10 +202,7 @@
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
 using NLog;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Text;
 
 namespace Lynx.Benchmark

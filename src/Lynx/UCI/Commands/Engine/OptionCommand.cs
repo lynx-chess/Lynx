@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Lynx.UCI.Commands.Engine
+﻿namespace Lynx.UCI.Commands.Engine
 {
 #pragma warning disable RCS1243 // Duplicate word in a comment.
     /// <summary>

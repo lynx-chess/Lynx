@@ -1,7 +1,5 @@
 ﻿using BenchmarkDotNet.Attributes;
 using Lynx.Model;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Lynx.Benchmark
 {

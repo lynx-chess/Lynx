@@ -1,5 +1,4 @@
 ﻿using Lynx.Model;
-using System;
 
 namespace Lynx.Internal
 {

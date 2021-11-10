@@ -4,11 +4,7 @@ using Lynx.Model;
 using Microsoft.Extensions.Configuration;
 using NLog;
 using NLog.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Channels;
-using System.Threading.Tasks;
 
 #if DEBUG
 Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
