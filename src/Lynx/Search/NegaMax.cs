@@ -30,12 +30,11 @@ namespace Lynx.Search
             }
 
             ++Nodes;
+            var pseudoLegalMoves = SortMoves(position.AllPossibleMoves(), position, depth);
 
             var pvIndex = Model.PVTable.Indexes[depth];
             var nextPvIndex = Model.PVTable.Indexes[depth + 1];
-            PVTable[pvIndex] = new Move();
-
-            var pseudoLegalMoves = position.AllPossibleMoves(KillerMoves, depth);
+            PVTable[pvIndex] = new Move();  // After getting psuedoLegalMoves
 
             if (depth >= depthLimit)
             {
@@ -153,9 +152,15 @@ namespace Lynx.Search
                 return (alpha, depth);   // Alpha?
             }
 
-            var movesToEvaluate = position.AllCapturesMoves();
+            var movesToEvaluate = SortCaptures(position.AllCapturesMoves(), position, depth);
 
-            if (!movesToEvaluate.Any())
+            if (!movesToEvaluate.TryGetNonEnumeratedCount(out int moveCount))
+            {
+                _logger.Info("TryGetNonEnumeratedCount didn't work :/");
+                moveCount = movesToEvaluate.Count();
+            }
+
+            if (moveCount == 0)
             {
                 return (staticEvaluation, depth);  // TODO check if in check or drawn position
             }

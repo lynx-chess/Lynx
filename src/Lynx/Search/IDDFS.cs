@@ -20,6 +20,8 @@ namespace Lynx.Search
         private int MovesWithoutCaptureOrPawnMove;
 
         private int Nodes;
+        private bool IsFollowingPV;
+        private bool IsScoringPV;
 
         private CancellationToken CancellationToken;
         private CancellationToken AbsoluteCancellationToken;
@@ -48,6 +50,7 @@ namespace Lynx.Search
             var sw = new Stopwatch();
             bool isCancelled = false;
 
+
             try
             {
                 sw.Start();
@@ -60,6 +63,7 @@ namespace Lynx.Search
                         CancellationToken.ThrowIfCancellationRequested();
                     }
                     Nodes = 0;
+                    IsFollowingPV = true;
 
                     (bestEvaluation, int maxDepthReached) = NegaMax(position, depthLimit: depth, depth: 0, alpha: MinValue, beta: MaxValue);
 

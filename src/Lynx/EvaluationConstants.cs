@@ -225,5 +225,11 @@ namespace Lynx
         };
 
         public const int MaxPlies = 64;
+
+        public const int FirstKillerMoveValue = 9_000;
+
+        public const int SecondKillerMoveValue = 8_000;
+
+        public const int PVMoveValue = 20_000;
     }
 }

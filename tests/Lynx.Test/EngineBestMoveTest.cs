@@ -48,7 +48,16 @@ namespace Lynx.Test
         [TestCase("6k1/1R6/5K2/3p1N2/1P3n2/8/8/3r4 w - -", new[] { "f5h6" },
             Category = "LongRunning", Explicit = true, Description = "Mate in 4, https://gameknot.com/chess-puzzle.pl?pz=260253",
             Ignore = "Not good enough yet")]
+        // TODO http://www.talkchess.com/forum3/viewtopic.php?f=7&t=78583
         public void Mate_in_4(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
+        {
+            TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
+        }
+
+        [TestCase("3R3N/2pR1p2/4k3/N1P5/1q4PK/2B4B/8/8 w - - 0 1", new[] { "c5c6" },
+            Category = "LongRunning", Explicit = true, Description = "Mate in 5, http://talkchess.com/forum3/viewtopic.php?f=7&t=78428&p=908885&hilit=PLEASE+LEARN#p908885",
+            Ignore = "Not good enough yet")]
+        public void Mate_in_5(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
         {
             TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
         }

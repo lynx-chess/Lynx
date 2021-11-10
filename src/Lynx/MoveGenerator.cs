@@ -43,12 +43,12 @@ namespace Lynx
         /// <param name="capturesOnly">Filters out all moves but captures</param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IOrderedEnumerable<Move> GenerateAllMoves(Position position, int[,]? killerMoves = null, int? plies = null, bool capturesOnly = false)
+        public static List<Move> GenerateAllMoves(Position position, bool capturesOnly = false)
         {
 #if DEBUG
             if (position.Side == Side.Both)
             {
-                return Array.Empty<Move>().OrderByDescending(m => m);
+                return new List<Move>();
             }
 #endif
             var offset = Utils.PieceOffset(position.Side);
@@ -62,7 +62,7 @@ namespace Lynx
             moves.AddRange(GeneratePieceMoves((int)Piece.R + offset, position, capturesOnly));
             moves.AddRange(GeneratePieceMoves((int)Piece.Q + offset, position, capturesOnly));
 
-            return moves.OrderByDescending(move => move.Score(position, killerMoves, plies));
+            return moves;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

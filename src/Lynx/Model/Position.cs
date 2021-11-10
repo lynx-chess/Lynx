@@ -357,10 +357,10 @@ namespace Lynx.Model
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IOrderedEnumerable<Move> AllPossibleMoves(int[,]? killerMoves = null, int? plies = null) => MoveGenerator.GenerateAllMoves(this, killerMoves, plies);
+        public List<Move> AllPossibleMoves() => MoveGenerator.GenerateAllMoves(this);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IOrderedEnumerable<Move> AllCapturesMoves() => MoveGenerator.GenerateAllMoves(this, capturesOnly: true);
+        public List<Move> AllCapturesMoves() => MoveGenerator.GenerateAllMoves(this, capturesOnly: true);
 
         /// <summary>
         /// Assuming a current position has no legal moves (<see cref="AllPossibleMoves"/> doesn't produce any <see cref="IsValid"/> position),
