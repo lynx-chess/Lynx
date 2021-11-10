@@ -99,12 +99,12 @@ namespace Lynx
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsSquaredAttacked(int squaredIndex, Position position) =>
-            IsSquaredAttacked(squaredIndex, position.Side, position.PieceBitBoards, position.OccupancyBitBoards);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsSquaredAttackedBySide(int squaredIndex, Position position, Side sideToMove) =>
             IsSquaredAttacked(squaredIndex, sideToMove, position.PieceBitBoards, position.OccupancyBitBoards);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsSquaredAttacked(int squaredIndex, Position position) =>
+            IsSquaredAttacked(squaredIndex, position.Side, position.PieceBitBoards, position.OccupancyBitBoards);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsSquaredAttacked(int squareIndex, Side sideToMove, BitBoard[] piecePosition, BitBoard[] occupancy)

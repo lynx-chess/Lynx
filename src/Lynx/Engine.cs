@@ -12,7 +12,7 @@ namespace Lynx
         private readonly Logger _logger;
         private readonly ChannelWriter<string> _engineWriter;
 
-#pragma warning disable IDE0052, CS0414 // Remove unread private members
+#pragma warning disable IDE0052, CS0414, S4487 // Remove unread private members
         private bool _isNewGameCommandSupported;
         private bool _isNewGameComing;
         private bool _isPondering;
@@ -25,24 +25,7 @@ namespace Lynx
 
         public Game Game { get; private set; }
 
-        private bool _isSearching;
-        public bool IsSearching
-        {
-            get => _isSearching;
-            set
-            {
-                if (!_isSearching && value)
-                {
-                    _isSearching = value;
-                    //_searchCancellationTokenSource.TryReset();
-                    //OnSearchFinished?.Invoke(BestMove(_lastGoCommand, _searchCancellationTokenSource.Token), MoveToPonder()).Wait();
-                }
-                else
-                {
-                    _isSearching = value;
-                }
-            }
-        }
+        public bool IsSearching { get; private set; }
 
         public bool PendingConfirmation { get; set; }
 
@@ -158,6 +141,7 @@ namespace Lynx
 
                 if (movesLeft > 0)
                 {
+#pragma warning disable S2184 // Results of integer division should not be assigned to floating point variables
                     if (millisecondsLeft >= Configuration.EngineSettings.FirstTimeLimitWhenNoMovesToGoProvided)
                     {
                         decisionTime = Configuration.EngineSettings.FirstCoefficientWhenNoMovesToGoProvided * millisecondsLeft / movesLeft;
@@ -170,6 +154,7 @@ namespace Lynx
                     {
                         decisionTime = millisecondsLeft / movesLeft;
                     }
+#pragma warning restore S2184 // Results of integer division should not be assigned to floating point variables
                 }
             }
             else

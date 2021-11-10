@@ -1,5 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 
+#pragma warning disable S4136
+
 namespace Lynx.Model
 {
     public struct BitBoard
@@ -164,3 +166,5 @@ namespace Lynx.Model
         #endregion
     }
 }
+
+#pragma warning restore S4136

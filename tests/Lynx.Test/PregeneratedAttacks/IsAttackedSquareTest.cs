@@ -3,11 +3,11 @@ using NUnit.Framework;
 
 namespace Lynx.Test.PregeneratedAttacks
 {
-    public class IsAttackedSquare
+    public class IsAttackedSquareTest
     {
         private readonly Position _position;
 
-        public IsAttackedSquare()
+        public IsAttackedSquareTest()
         {
             _position = new Position(Constants.EmptyBoardFEN);
         }

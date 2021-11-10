@@ -1,4 +1,6 @@
-﻿namespace Lynx.UCI.Commands.Engine
+﻿using System.Collections.Immutable;
+
+namespace Lynx.UCI.Commands.Engine
 {
 #pragma warning disable RCS1243 // Duplicate word in a comment.
     /// <summary>
@@ -120,21 +122,20 @@
     {
         public const string Id = "option";
 
-        public static readonly List<string> AvailableOptions = new()
-        {
-            //"option name Hash type spin default 1 min 1 max 128",
-            //"option name UCI_AnalyseMode type check",
-            //"option name NalimovPath type string default C:/...",
-            //"option name NalimovCache type spin default 1 min 1 max 32
-            //"option name Ponder type check",
-            //$"option name Depth type spin default 3 min 1 max {int.MaxValue}"
-            //"option name OwnBook type check",
-            //"option name MultiPV type spin default 1",
-            //"option name UCI_ShowCurrLine type check default false",      // Interesting
-            //"option name UCI_ShowRefutations type check default false",
-            //"option name UCI_LimitStrength type check default false",
-            //"option name UCI_Elo type spin",
-            //"option name UCI_Opponent type string",       // Interesting for game logs
-        };
+        public static readonly ImmutableArray<string> AvailableOptions = ImmutableArray.Create<string>();
+
+        //"option name Hash type spin default 1 min 1 max 128",
+        //"option name UCI_AnalyseMode type check",
+        //"option name NalimovPath type string default C:/...",
+        //"option name NalimovCache type spin default 1 min 1 max 32
+        //"option name Ponder type check",
+        //$"option name Depth type spin default 3 min 1 max {int.MaxValue}"
+        //"option name OwnBook type check",
+        //"option name MultiPV type spin default 1",
+        //"option name UCI_ShowCurrLine type check default false",      // Interesting
+        //"option name UCI_ShowRefutations type check default false",
+        //"option name UCI_LimitStrength type check default false",
+        //"option name UCI_Elo type spin",
+        //"option name UCI_Opponent type string",       // Interesting for game logs;
     }
 }

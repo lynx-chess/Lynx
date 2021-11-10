@@ -1,5 +1,5 @@
 ﻿/*
- * 
+ *
  *  | Method |         newPosition |       Mean |   Error |  StdDev | Ratio |  Gen 0 | Allocated |
  *  |------- |-------------------- |-----------:|--------:|--------:|------:|-------:|----------:|
  *  |    FEN | Lynx.Model.Position | 1,149.0 ns | 2.03 ns | 1.90 ns |  1.00 | 0.0210 |     408 B |
@@ -62,10 +62,10 @@ namespace Lynx.Benchmark
 
         public static IEnumerable<Position> Data => new[] {
             //Constants.EmptyBoardFEN,
-            new Position(Positions[0], Positions[0].AllPossibleMoves().First()),
-            new Position(Positions[1], Positions[1].AllPossibleMoves().First()),
-            new Position(Positions[2], Positions[2].AllPossibleMoves().First()),
-            new Position(Positions[3], Positions[3].AllPossibleMoves().First())
+            new Position(Positions[0], Positions[0].AllPossibleMoves()[0]),
+            new Position(Positions[1], Positions[1].AllPossibleMoves()[0]),
+            new Position(Positions[2], Positions[2].AllPossibleMoves()[0]),
+            new Position(Positions[3], Positions[3].AllPossibleMoves()[0])
         };
     }
 

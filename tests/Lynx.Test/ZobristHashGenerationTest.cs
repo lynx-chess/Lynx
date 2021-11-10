@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 namespace Lynx.Test
 {
-    public class ZobristHashGeneration
+    public class ZobristHashGenerationTest
     {
         [Test]
         public void Repetition_InitialPosition()
@@ -18,10 +18,12 @@ namespace Lynx.Test
             Assert.AreEqual(originalPosition.UniqueIdentifier, position.UniqueIdentifier);
         }
 
+#pragma warning disable S4144 // Methods should not have identical implementations
+
         [TestCase("4k3/1P6/8/8/8/8/8/4K3 w - - 0 1", Description = "White promotion")]
         [TestCase("4k3/8/8/8/8/8/1p6/4K3 b - - 0 1", Description = "Black promotion")]
         [TestCase("rk6/1P6/8/8/8/8/8/4K3 w - - 0 1", Description = "White promotion and capture")]
-        [TestCase("4k3/8/8/8/8/8/1p6/RK6 b - - 0 1", Description = "Blackpromotion and capture")]
+        [TestCase("4k3/8/8/8/8/8/1p6/RK6 b - - 0 1", Description = "Black promotion and capture")]
         public void Promotion(string fen)
         {
             var originalPosition = new Position(fen);
@@ -47,6 +49,8 @@ namespace Lynx.Test
 
             TransversePosition(originalPosition, fenDictionary);
         }
+
+#pragma warning restore S4144 // Methods should not have identical implementations
 
         private static void TransversePosition(Position originalPosition, Dictionary<string, (string Move, long Hash)> fenDictionary, int maxDepth = 10, int depth = 0)
         {

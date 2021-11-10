@@ -21,18 +21,18 @@ namespace Lynx.Search
         /// <returns></returns>
         private (int Evaluation, int MaxDepth) NegaMax(Position position, int depthLimit, int depth, int alpha, int beta)
         {
-            AbsoluteCancellationToken.ThrowIfCancellationRequested();
-            if (depth > MinDepth)
+            _absoluteCancellationToken.ThrowIfCancellationRequested();
+            if (depth > _minDepth)
             {
-                CancellationToken.ThrowIfCancellationRequested();
+                _cancellationToken.ThrowIfCancellationRequested();
             }
 
-            ++Nodes;
+            ++_nodes;
             var pseudoLegalMoves = SortMoves(position.AllPossibleMoves(), position, depth);
 
             var pvIndex = Model.PVTable.Indexes[depth];
             var nextPvIndex = Model.PVTable.Indexes[depth + 1];
-            PVTable[pvIndex] = new Move();  // After getting psuedoLegalMoves
+            _pVTable[pvIndex] = new Move();  // After getting psuedoLegalMoves
 
             if (depth >= depthLimit)
             {
@@ -44,7 +44,7 @@ namespace Lynx.Search
                     }
                 }
 
-                return (position.EvaluateFinalPosition(depth, PositionHistory, MovesWithoutCaptureOrPawnMove), depth);
+                return (position.EvaluateFinalPosition(depth, _positionHistory, _movesWithoutCaptureOrPawnMove), depth);
             }
 
             Move? bestMove = null;
@@ -61,11 +61,11 @@ namespace Lynx.Search
 
                 PrintPreMove(position, depth, move);
 
-                var oldValue = MovesWithoutCaptureOrPawnMove;
-                MovesWithoutCaptureOrPawnMove = Update50movesRule(move);
+                var oldValue = _movesWithoutCaptureOrPawnMove;
+                _movesWithoutCaptureOrPawnMove = Update50movesRule(move);
                 var repetitions = UpdatePositionHistory(newPosition);
                 var (evaluation, bestMoveExistingMoveList) = NegaMax(newPosition, depthLimit, depth + 1, -beta, -alpha);
-                MovesWithoutCaptureOrPawnMove = oldValue;
+                _movesWithoutCaptureOrPawnMove = oldValue;
                 RevertPositionHistory(newPosition, repetitions);
 
                 evaluation = -evaluation;
@@ -79,8 +79,8 @@ namespace Lynx.Search
 
                     //if (!move.IsCapture())
                     {
-                        KillerMoves[1, depth] = KillerMoves[0, depth];
-                        KillerMoves[0, depth] = move.EncodedMove;
+                        _killerMoves[1, depth] = _killerMoves[0, depth];
+                        _killerMoves[0, depth] = move.EncodedMove;
                     }
 
                     return (beta, depth);    // TODO return evaluation?
@@ -91,14 +91,14 @@ namespace Lynx.Search
                     alpha = evaluation;
                     bestMove = move;
 
-                    PVTable[pvIndex] = move;
+                    _pVTable[pvIndex] = move;
                     CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - depth - 1);
                 }
             }
 
             if (bestMove is null)
             {
-                return (isAnyMoveValid ? alpha : position.EvaluateFinalPosition(depth, PositionHistory, MovesWithoutCaptureOrPawnMove), depth);
+                return (isAnyMoveValid ? alpha : position.EvaluateFinalPosition(depth, _positionHistory, _movesWithoutCaptureOrPawnMove), depth);
             }
 
             // Node fails low
@@ -121,16 +121,16 @@ namespace Lynx.Search
         /// <returns></returns>
         public (int Evaluation, int MaxDepth) QuiescenceSearch(Position position, int depth, int alpha, int beta)
         {
-            AbsoluteCancellationToken.ThrowIfCancellationRequested();
+            _absoluteCancellationToken.ThrowIfCancellationRequested();
             //cancellationToken.ThrowIfCancellationRequested();
 
-            ++Nodes;
+            ++_nodes;
 
             var pvIndex = Model.PVTable.Indexes[depth];
             var nextPvIndex = Model.PVTable.Indexes[depth + 1];
-            PVTable[pvIndex] = new Move();
+            _pVTable[pvIndex] = new Move();
 
-            var staticEvaluation = position.StaticEvaluation(PositionHistory, MovesWithoutCaptureOrPawnMove);
+            var staticEvaluation = position.StaticEvaluation(_positionHistory, _movesWithoutCaptureOrPawnMove);
 
             // Fail-hard beta-cutoff (updating alpha after this check)
             if (staticEvaluation >= beta)
@@ -172,11 +172,11 @@ namespace Lynx.Search
 
                 PrintPreMove(position, depth, move, isQuiescence: true);
 
-                var oldValue = MovesWithoutCaptureOrPawnMove;
-                MovesWithoutCaptureOrPawnMove = Update50movesRule(move);
+                var oldValue = _movesWithoutCaptureOrPawnMove;
+                _movesWithoutCaptureOrPawnMove = Update50movesRule(move);
                 var repetitions = UpdatePositionHistory(newPosition);
                 var (evaluation, bestMoveExistingMoveList) = QuiescenceSearch(newPosition, depth + 1, -beta, -alpha);
-                MovesWithoutCaptureOrPawnMove = oldValue;
+                _movesWithoutCaptureOrPawnMove = oldValue;
                 RevertPositionHistory(newPosition, repetitions);
 
                 evaluation = -evaluation;
@@ -195,7 +195,7 @@ namespace Lynx.Search
                     alpha = evaluation;
                     bestMove = move;
 
-                    PVTable[pvIndex] = move;
+                    _pVTable[pvIndex] = move;
                     CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - depth - 1);
                 }
             }
@@ -204,7 +204,7 @@ namespace Lynx.Search
             {
                 var eval = isAnyMoveValid || position.AllPossibleMoves().Any(move => new Position(position, move).WasProduceByAValidMove())
                     ? alpha
-                    : position.EvaluateFinalPosition(depth, PositionHistory, MovesWithoutCaptureOrPawnMove);
+                    : position.EvaluateFinalPosition(depth, _positionHistory, _movesWithoutCaptureOrPawnMove);
 
                 return (eval, depth);
             }
