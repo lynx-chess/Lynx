@@ -9,12 +9,7 @@ namespace Lynx
     /// </summary>
     public static class ZobristTable
     {
-        private static readonly long[,] _table;
-
-        static ZobristTable()
-        {
-            _table = Initialize();
-        }
+        private static readonly long[,] _table = Initialize();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long PieceHash(int boardSquare, int piece) => _table[boardSquare, piece];
@@ -33,7 +28,7 @@ namespace Lynx
             }
 
 #if DEBUG
-            if(!Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare))
+            if (!Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare))
             {
                 throw new ArgumentException($"{Constants.Coordinates[enPassantSquare]} is not a valid en-passant square");
             }

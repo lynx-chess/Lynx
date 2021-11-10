@@ -311,7 +311,7 @@ namespace Lynx
         public const int WhiteLongCastleRookSquare = (int)BoardSquare.d1;
         public const int BlackLongCastleRookSquare = (int)BoardSquare.d8;
 
-        public static readonly Dictionary<int, int> EnPassantCaptureSquares = new(16)
+        public static readonly IReadOnlyDictionary<int, int> EnPassantCaptureSquares = new Dictionary<int, int>(16)
         {
             [(int)BoardSquare.a6] = (int)BoardSquare.a6 + 8,
             [(int)BoardSquare.b6] = (int)BoardSquare.b6 + 8,

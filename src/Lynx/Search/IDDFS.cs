@@ -7,34 +7,34 @@ namespace Lynx.Search
 {
     public sealed partial class Search
     {
-        private readonly ChannelWriter<string> EngineWriter;
-        private readonly Dictionary<long, int> PositionHistory;
-        private readonly int MinDepth;
-        private readonly Move[] PVTable;
-        private readonly int[,] KillerMoves;
-        private int MovesWithoutCaptureOrPawnMove;
+        private readonly ChannelWriter<string> _engineWriter;
+        private readonly Dictionary<long, int> _positionHistory;
+        private readonly int _minDepth;
+        private readonly Move[] _pVTable;
+        private readonly int[,] _killerMoves;
 
-        private int Nodes;
-        private bool IsFollowingPV;
-        private bool IsScoringPV;
+        private int _movesWithoutCaptureOrPawnMove;
+        private int _nodes;
+        private bool _isFollowingPV;
+        private bool _isScoringPV;
 
-        private CancellationToken CancellationToken;
-        private CancellationToken AbsoluteCancellationToken;
+        private readonly CancellationToken _cancellationToken;
+        private readonly CancellationToken _absoluteCancellationToken;
 
         public Search(ChannelWriter<string> engineWriter, Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove, int minDepth, CancellationToken cancellationToken, CancellationToken absoluteCancellationToken)
         {
-            EngineWriter = engineWriter;
-            PositionHistory = positionHistory;
-            MovesWithoutCaptureOrPawnMove = movesWithoutCaptureOrPawnMove;
-            MinDepth = minDepth;
-            CancellationToken = cancellationToken;
-            AbsoluteCancellationToken = absoluteCancellationToken;
+            _engineWriter = engineWriter;
+            _positionHistory = positionHistory;
+            _movesWithoutCaptureOrPawnMove = movesWithoutCaptureOrPawnMove;
+            _minDepth = minDepth;
+            _cancellationToken = cancellationToken;
+            _absoluteCancellationToken = absoluteCancellationToken;
 
-            Nodes = 0;
-            KillerMoves = new int[2, EvaluationConstants.MaxPlies];
+            _nodes = 0;
+            _killerMoves = new int[2, EvaluationConstants.MaxPlies];
 
             var maxPossibleDepth = Configuration.EngineSettings.MaxDepth;
-            PVTable = new Move[((maxPossibleDepth * maxPossibleDepth) + maxPossibleDepth) / 2];
+            _pVTable = new Move[((maxPossibleDepth * maxPossibleDepth) + maxPossibleDepth) / 2];
         }
 
         public SearchResult IDDFS(Position position, int? maxDepth, int? decisionTime)
@@ -45,34 +45,35 @@ namespace Lynx.Search
             var sw = new Stopwatch();
             bool isCancelled = false;
 
-
             try
             {
                 sw.Start();
 
                 do
                 {
-                    AbsoluteCancellationToken.ThrowIfCancellationRequested();
-                    if (depth - 1 > MinDepth)
+                    _absoluteCancellationToken.ThrowIfCancellationRequested();
+                    if (depth - 1 > _minDepth)
                     {
-                        CancellationToken.ThrowIfCancellationRequested();
+                        _cancellationToken.ThrowIfCancellationRequested();
                     }
-                    Nodes = 0;
-                    IsFollowingPV = true;
+                    _nodes = 0;
+                    _isFollowingPV = true;
 
                     (bestEvaluation, int maxDepthReached) = NegaMax(position, depthLimit: depth, depth: 0, alpha: MinValue, beta: MaxValue);
 
-                    var pvMoves = PVTable.TakeWhile(m => m.EncodedMove != default).ToList();
-                    searchResult = new SearchResult(pvMoves.FirstOrDefault(), bestEvaluation, depth, maxDepthReached, Nodes, sw.ElapsedMilliseconds, Convert.ToInt64(Math.Clamp(Nodes / ((0.001 * sw.ElapsedMilliseconds) + 1), 0, Int64.MaxValue)), pvMoves);
+                    PrintPvTable();
 
-                    Task.Run(async () => await EngineWriter.WriteAsync(InfoCommand.SearchResultInfo(searchResult)));
+                    var pvMoves = _pVTable.TakeWhile(m => m.EncodedMove != default).ToList();
+                    searchResult = new SearchResult(pvMoves.FirstOrDefault(), bestEvaluation, depth, maxDepthReached, _nodes, sw.ElapsedMilliseconds, Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * sw.ElapsedMilliseconds) + 1), 0, Int64.MaxValue)), pvMoves);
 
-                } while (stopSearchCondition(++depth, maxDepth, bestEvaluation, Nodes, decisionTime, sw));
+                    Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(searchResult)));
+
+                } while (stopSearchCondition(++depth, maxDepth, bestEvaluation, _nodes, decisionTime, sw));
             }
             catch (OperationCanceledException)
             {
                 isCancelled = true;
-                _logger.Info($"Search cancellation requested after {sw.ElapsedMilliseconds}ms (depth {depth}, nodes {Nodes}), best move will be returned");
+                _logger.Info($"Search cancellation requested after {sw.ElapsedMilliseconds}ms (depth {depth}, nodes {_nodes}), best move will be returned");
             }
             catch (Exception e)
             {
@@ -91,7 +92,7 @@ namespace Lynx.Search
             }
             else
             {
-                return new(default, bestEvaluation, depth, depth, Nodes, sw.ElapsedMilliseconds, Convert.ToInt64(Math.Clamp(Nodes / ((0.001 * sw.ElapsedMilliseconds) + 1), 0, Int64.MaxValue)), new List<Move>());
+                return new(default, bestEvaluation, depth, depth, _nodes, sw.ElapsedMilliseconds, Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * sw.ElapsedMilliseconds) + 1), 0, Int64.MaxValue)), new List<Move>());
             }
 
             static bool stopSearchCondition(int depth, int? maxDepth, int bestEvaluation, int nodes, int? decisionTime, Stopwatch stopWatch)

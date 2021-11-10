@@ -21,15 +21,15 @@ namespace Lynx.Search
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private List<Move> SortMoves(List<Move> moves, Position currentPosition, int depth)
         {
-            if (IsFollowingPV)
+            if (_isFollowingPV)
             {
-                IsFollowingPV = false;
+                _isFollowingPV = false;
                 for (int moveIndex = 0; moveIndex < moves.Count; ++moveIndex)
                 {
-                    if (moves[moveIndex].EncodedMove == PVTable[depth].EncodedMove)
+                    if (moves[moveIndex].EncodedMove == _pVTable[depth].EncodedMove)
                     {
-                        IsFollowingPV = true;
-                        IsScoringPV = true;
+                        _isFollowingPV = true;
+                        _isScoringPV = true;
                     }
                 }
             }
@@ -40,24 +40,24 @@ namespace Lynx.Search
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int Score(Move move, Position position, int depth)
         {
-            if (IsScoringPV && move.EncodedMove == PVTable[depth].EncodedMove)
+            if (_isScoringPV && move.EncodedMove == _pVTable[depth].EncodedMove)
             {
-                IsScoringPV = false;
+                _isScoringPV = false;
 
                 return EvaluationConstants.PVMoveValue;
             }
 
-            return move.Score(position, KillerMoves, depth);
+            return move.Score(position, _killerMoves, depth);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private IOrderedEnumerable<Move> SortCaptures(List<Move> moves, Position currentPosition, int depth) => moves.OrderByDescending(move => Score(move, currentPosition, depth));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int UpdatePositionHistory(Position newPosition) => Utils.UpdatePositionHistory(newPosition, PositionHistory);
+        public int UpdatePositionHistory(Position newPosition) => Utils.UpdatePositionHistory(newPosition, _positionHistory);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void RevertPositionHistory(Position newPosition, int repetitions) => Utils.RevertPositionHistory(newPosition, PositionHistory, repetitions);
+        public void RevertPositionHistory(Position newPosition, int repetitions) => Utils.RevertPositionHistory(newPosition, _positionHistory, repetitions);
 
         /// <summary>
         /// Updates <paramref name="MovesWithoutCaptureOrPawnMove"/>
@@ -71,13 +71,13 @@ namespace Lynx.Search
         ///     At depth 4 there's no capture, but the eval should still be 0
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int Update50movesRule(Move moveToPlay) => Utils.Update50movesRule(moveToPlay, MovesWithoutCaptureOrPawnMove);
+        public int Update50movesRule(Move moveToPlay) => Utils.Update50movesRule(moveToPlay, _movesWithoutCaptureOrPawnMove);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CopyPVTableMoves(int target, int source, int moveCountToCopy)
         {
-            //PrintPvTable(pvTable, target, source);
-            Array.Copy(PVTable, source, PVTable, target, moveCountToCopy);
+            //PrintPvTable(target, source);
+            Array.Copy(_pVTable, source, _pVTable, target, moveCountToCopy);
             //PrintPvTable(pvTable);
         }
 
@@ -140,16 +140,16 @@ namespace Lynx.Search
         }
 
         [Conditional("DEBUG")]
-        private static void PrintPvTable(Move[] pvTable, int target = -1, int source = -1)
+        private void PrintPvTable(int target = -1, int source = -1)
         {
             Console.WriteLine(
     (target != -1 ? $"src: {source}, tgt: {target}" + Environment.NewLine : "") +
-    $" {0,-3} {pvTable[0],-6} {pvTable[1],-6}" + $" {pvTable[2],-6} {pvTable[3],-6}" + $" {pvTable[4],-6} {pvTable[5],-6}" + $" {pvTable[6],-6} {pvTable[7],-6}" + Environment.NewLine +
-    $" {32,-3}        {pvTable[32],-6} {pvTable[33],-6}" + $" {pvTable[34],-6} {pvTable[35],-6}" + $" {pvTable[36],-6} {pvTable[37],-6}" + $" {pvTable[38],-6}" + Environment.NewLine +
-    $" {63,-3}               {pvTable[63],-6} {pvTable[64],-6}" + $" {pvTable[65],-6} {pvTable[66],-6}" + $" {pvTable[67],-6} {pvTable[68],-6}" + Environment.NewLine +
-    $" {93,-3}                      {pvTable[93],-6} {pvTable[94],-6}" + $" {pvTable[95],-6} {pvTable[96],-6}" + $" {pvTable[97],-6}" + Environment.NewLine +
-    $" {122,-3}                             {pvTable[122],-6} {pvTable[123],-6}" + $" {pvTable[124],-6} {pvTable[125],-6}" + Environment.NewLine +
-    $" {150,-3}                                    {pvTable[150],-6} {pvTable[151],-6}" + $" {pvTable[152],-6}" + Environment.NewLine +
+    $" {0,-3} {_pVTable[0],-6} {_pVTable[1],-6} {_pVTable[2],-6} {_pVTable[3],-6} {_pVTable[4],-6} {_pVTable[5],-6} {_pVTable[6],-6} {_pVTable[7],-6}" + Environment.NewLine +
+    $" {32,-3}        {_pVTable[32],-6} {_pVTable[33],-6} {_pVTable[34],-6} {_pVTable[35],-6} {_pVTable[36],-6} {_pVTable[37],-6} {_pVTable[38],-6}" + Environment.NewLine +
+    $" {63,-3}               {_pVTable[63],-6} {_pVTable[64],-6} {_pVTable[65],-6} {_pVTable[66],-6} {_pVTable[67],-6} {_pVTable[68],-6}" + Environment.NewLine +
+    $" {93,-3}                      {_pVTable[93],-6} {_pVTable[94],-6} {_pVTable[95],-6} {_pVTable[96],-6} {_pVTable[97],-6}" + Environment.NewLine +
+    $" {122,-3}                             {_pVTable[122],-6} {_pVTable[123],-6} {_pVTable[124],-6} {_pVTable[125],-6}" + Environment.NewLine +
+    $" {150,-3}                                    {_pVTable[150],-6} {_pVTable[151],-6} {_pVTable[152],-6}" + Environment.NewLine +
     (target == -1 ? "------------------------------------------------------------------------------------" + Environment.NewLine : ""));
         }
 
