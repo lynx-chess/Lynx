@@ -12,7 +12,7 @@ namespace Lynx.Model
         public List<Position> PositionHistory { get; }
         public Dictionary<long, int> PositionHashHistory { get; }
 
-        public int MovesWithoutCaptureOrPawnMove { get; set; }
+        public int MovesWithoutCaptureOrPawnMove { get; private set; }
 
         public Position CurrentPosition { get; private set; }
 
