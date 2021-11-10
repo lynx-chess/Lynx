@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Lynx.Cli
 {
-    public class Listener
+    public sealed class Listener
     {
         private readonly Channel<string> _guiInputReader;
         private readonly ILogger _logger;

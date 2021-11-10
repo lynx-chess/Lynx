@@ -70,12 +70,12 @@ namespace Lynx
         public static GeneralSettings GeneralSettings { get; set; } = new GeneralSettings();
     }
 
-    public class GeneralSettings
+    public sealed class GeneralSettings
     {
         public bool DisableLogging { get; set; } = false;
     }
 
-    public class EngineSettings
+    public sealed class EngineSettings
     {
         public int Depth { get; set; } = 5;
 

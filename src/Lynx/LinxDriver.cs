@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Lynx
 {
-    public class LinxDriver
+    public sealed class LinxDriver
     {
         private readonly ChannelReader<string> _uciReader;
         private readonly Channel<string> _engineWriter;

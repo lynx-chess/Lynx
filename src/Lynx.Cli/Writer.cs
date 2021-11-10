@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Lynx.Cli
 {
-    public class Writer
+    public sealed class Writer
     {
         private readonly ChannelReader<string> _engineOutputReader;
         private readonly ILogger _logger;

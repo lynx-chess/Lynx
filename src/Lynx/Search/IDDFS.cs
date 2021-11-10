@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Lynx.Search
 {
-    public partial class Search
+    public sealed partial class Search
     {
         private readonly ChannelWriter<string> EngineWriter;
         private readonly Dictionary<long, int> PositionHistory;

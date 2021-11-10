@@ -4,7 +4,7 @@ using System.Threading;
 
 namespace Lynx.Search
 {
-    public partial class Search
+    public sealed partial class Search
     {
         /// <summary>
         /// NegaMax algorithm implementation using alpha-beta pruning, quiescence search and Iterative Deepeting Depth-First Search (IDDFS)

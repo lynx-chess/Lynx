@@ -18,7 +18,7 @@ namespace Lynx.UCI.Commands.GUI
     ///	   "register later"
     ///	   "register name Stefan MK code 4359874324"
     /// </summary>
-    public class RegisterCommand : GUIBaseCommand
+    public sealed class RegisterCommand : GUIBaseCommand
     {
         public const string Id = "register";
 
