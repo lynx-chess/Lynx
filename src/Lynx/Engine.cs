@@ -141,18 +141,20 @@ namespace Lynx
 
                 if (movesLeft > 0)
                 {
+#pragma warning disable S2184 // Results of integer division should not be assigned to floating point variables
                     if (millisecondsLeft >= Configuration.EngineSettings.FirstTimeLimitWhenNoMovesToGoProvided)
                     {
-                        decisionTime = (double)Configuration.EngineSettings.FirstCoefficientWhenNoMovesToGoProvided * millisecondsLeft / movesLeft;
+                        decisionTime = Configuration.EngineSettings.FirstCoefficientWhenNoMovesToGoProvided * millisecondsLeft / movesLeft;
                     }
                     else if (millisecondsLeft >= Configuration.EngineSettings.SecondTimeLimitWhenNoMovesToGoProvided)
                     {
-                        decisionTime = (double)Configuration.EngineSettings.SecondCoefficientWhenNoMovesToGoProvided * millisecondsLeft / movesLeft;
+                        decisionTime = Configuration.EngineSettings.SecondCoefficientWhenNoMovesToGoProvided * millisecondsLeft / movesLeft;
                     }
                     else
                     {
-                        decisionTime = (double)millisecondsLeft / movesLeft;
+                        decisionTime = millisecondsLeft / movesLeft;
                     }
+#pragma warning restore S2184 // Results of integer division should not be assigned to floating point variables
                 }
             }
             else

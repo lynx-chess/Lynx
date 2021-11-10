@@ -18,25 +18,13 @@ namespace Lynx.Test
             Assert.AreEqual(originalPosition.UniqueIdentifier, position.UniqueIdentifier);
         }
 
-        [TestCase("4k3/1P6/8/8/8/8/8/4K3 w - - 0 1", Description = "White promotion")]
-        [TestCase("4k3/8/8/8/8/8/1p6/4K3 b - - 0 1", Description = "Black promotion")]
-        [TestCase("rk6/1P6/8/8/8/8/8/4K3 w - - 0 1", Description = "White promotion and capture")]
-        [TestCase("4k3/8/8/8/8/8/1p6/RK6 b - - 0 1", Description = "Blackpromotion and capture")]
-        public void Promotion(string fen)
-        {
-            var originalPosition = new Position(fen);
-
-            var fenDictionary = new Dictionary<string, (string Move, long Hash)>()
-            {
-                [originalPosition.FEN] = ("", originalPosition.UniqueIdentifier)
-            };
-
-            TransversePosition(originalPosition, fenDictionary);
-        }
-
-        [TestCase(Constants.TrickyTestPositionFEN, Category = "LongRunning", Explicit = true)]
-        [TestCase(Constants.KillerTestPositionFEN, Category = "LongRunning", Explicit = true)]
-        public void EnPassant(string fen)
+        [TestCase("4k3/1P6/8/8/8/8/8/4K3 w - - 0 1", Description = "Promotion, White promotion")]
+        [TestCase("4k3/8/8/8/8/8/1p6/4K3 b - - 0 1", Description = "Promotion, Black promotion")]
+        [TestCase("rk6/1P6/8/8/8/8/8/4K3 w - - 0 1", Description = "Promotion, White promotion and capture")]
+        [TestCase("4k3/8/8/8/8/8/1p6/RK6 b - - 0 1", Description = "Promotion, Blackpromotion and capture")]
+        [TestCase(Constants.TrickyTestPositionFEN, Category = "LongRunning", Description = "EnPassant", Explicit = true)]
+        [TestCase(Constants.KillerTestPositionFEN, Category = "LongRunning", Description = "EnPassant", Explicit = true)]
+        public void Promotion_EnPassant(string fen)
         {
             var originalPosition = new Position(fen);
 

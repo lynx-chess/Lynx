@@ -216,7 +216,7 @@ namespace Lynx.Benchmark
             var moves = new Position(fen).AllPossibleMoves();
 
             var position = new StructCustomPosition(fen);
-            var newPosition = new StructCustomPosition(position, moves.First());
+            var newPosition = new StructCustomPosition(position, moves[0]);
             return newPosition.FEN;
         }
 
@@ -227,7 +227,7 @@ namespace Lynx.Benchmark
             var moves = new Position(fen).AllPossibleMoves();
 
             var position = new StructCustomPosition(fen);
-            var newPosition = new StructCustomPosition(position, moves.First(), default);
+            var newPosition = new StructCustomPosition(position, moves[0], default);
 
             return newPosition.FEN;
         }
@@ -239,7 +239,7 @@ namespace Lynx.Benchmark
             var moves = new Position(fen).AllPossibleMoves();
 
             var position = new ReadonlyStructCustomPosition(fen);
-            var newPosition = new ReadonlyStructCustomPosition(position, moves.First());
+            var newPosition = new ReadonlyStructCustomPosition(position, moves[0]);
 
             return newPosition.FEN;
         }
@@ -251,7 +251,7 @@ namespace Lynx.Benchmark
             var moves = new Position(fen).AllPossibleMoves();
 
             var position = new ReadonlyStructCustomPosition(fen);
-            var newPosition = new ReadonlyStructCustomPosition(position, moves.First(), default);
+            var newPosition = new ReadonlyStructCustomPosition(position, moves[0], default);
 
             return newPosition.FEN;
         }
@@ -263,7 +263,7 @@ namespace Lynx.Benchmark
             var moves = new Position(fen).AllPossibleMoves();
 
             var position = new ClassCustomPosition(fen);
-            var newPosition = new ClassCustomPosition(position, moves.First());
+            var newPosition = new ClassCustomPosition(position, moves[0]);
 
             return newPosition.FEN;
         }
@@ -275,7 +275,7 @@ namespace Lynx.Benchmark
             var moves = new Position(fen).AllPossibleMoves();
 
             var position = new ClassCustomPosition(fen);
-            var newPosition = new ClassCustomPosition(position, moves.First(), default);
+            var newPosition = new ClassCustomPosition(position, moves[0], default);
 
             return newPosition.FEN;
         }
@@ -287,7 +287,7 @@ namespace Lynx.Benchmark
             var moves = new Position(fen).AllPossibleMoves();
 
             var position = new RecordClassCustomPosition(fen);
-            var newPosition = new RecordClassCustomPosition(position, moves.First());
+            var newPosition = new RecordClassCustomPosition(position, moves[0]);
 
             return newPosition.FEN;
         }
@@ -299,7 +299,7 @@ namespace Lynx.Benchmark
             var moves = new Position(fen).AllPossibleMoves();
 
             var position = new RecordClassCustomPosition(fen);
-            var newPosition = new RecordClassCustomPosition(position, moves.First(), default);
+            var newPosition = new RecordClassCustomPosition(position, moves[0], default);
 
             return newPosition.FEN;
         }
@@ -311,7 +311,7 @@ namespace Lynx.Benchmark
             var moves = new Position(fen).AllPossibleMoves();
 
             var position = new RecordStructCustomPosition(fen);
-            var newPosition = new RecordStructCustomPosition(position, moves.First());
+            var newPosition = new RecordStructCustomPosition(position, moves[0]);
 
             return newPosition.FEN;
         }
@@ -323,7 +323,7 @@ namespace Lynx.Benchmark
             var moves = new Position(fen).AllPossibleMoves();
 
             var position = new RecordStructCustomPosition(fen);
-            var newPosition = new RecordStructCustomPosition(position, moves.First(), default);
+            var newPosition = new RecordStructCustomPosition(position, moves[0], default);
 
             return newPosition.FEN;
         }

@@ -5,10 +5,10 @@ namespace Lynx.Test.MoveGeneration
 {
     public class GenerateCastlingMovesTest
     {
-#pragma warning disable RCS1098 // Methods should not have identical implementations
+#pragma warning disable RCS1098, S4144 // Methods should not have identical implementations
 
         [TestCase("8/8/8/8/8/8/RRRRRRRR/RN2K2R w KQkq - 0 1")]
-        [TestCase("7r/8/8/8/8/8/8/RN2K2R w KQkq - 0 1", Description ="Attacking the rook")]
+        [TestCase("7r/8/8/8/8/8/8/RN2K2R w KQkq - 0 1", Description = "Attacking the rook")]
         [TestCase("rn2k2r/rrrrrrrr/8/8/8/8/8/8 b KQkq - 0 1")]
         [TestCase("rbnqk2r/8/8/8/8/8/8/7R b KQkq - 0 1", Description = "Attacking the rook")]
         public void ShortCastle(string fen)
@@ -162,6 +162,6 @@ namespace Lynx.Test.MoveGeneration
             Assert.IsEmpty(moves.Where(m => m.IsLongCastle()));
         }
 
-#pragma warning restore RCS1098 // Methods should not have identical implementations
+#pragma warning restore RCS1098, S4144 // Methods should not have identical implementations
     }
 }
