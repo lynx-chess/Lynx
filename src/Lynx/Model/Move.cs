@@ -65,7 +65,7 @@ namespace Lynx.Model
         /// <exception cref="InvalidOperationException"></exception>
         /// <exception cref="IndexOutOfRangeException"></exception>
         /// <returns></returns>
-        public static bool TryParseFromUCIString(string UCIString, IOrderedEnumerable<Move> moveList, [NotNullWhen(true)] out Move? move)
+        public static bool TryParseFromUCIString(string UCIString, List<Move> moveList, [NotNullWhen(true)] out Move? move)
         {
             Debug.Assert(UCIString.Length == 4 || UCIString.Length == 5);
 
@@ -184,13 +184,13 @@ namespace Lynx.Model
                     // 1st killer move
                     if (killerMoves[0, plies.Value] == EncodedMove)
                     {
-                        return 9_000;
+                        return EvaluationConstants.FirstKillerMoveValue;
                     }
 
                     // 2nd killer move
                     else if (killerMoves[1, plies.Value] == EncodedMove)
                     {
-                        return 8_000;
+                        return EvaluationConstants.SecondKillerMoveValue;
                     }
                 }
             }

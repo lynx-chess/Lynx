@@ -24,7 +24,7 @@ namespace Lynx.Test.Model
         {
             var position = new Position(fen);
 
-            var allMoves = position.AllPossibleMoves().ToList();
+            var allMoves = position.AllPossibleMoves().OrderByDescending(move => move.Score(position)).ToList();
 
             Assert.AreEqual("e2a6", allMoves[0].UCIString());     // BxB
             Assert.AreEqual("f3f6", allMoves[1].UCIString());     // QxN
@@ -58,12 +58,12 @@ namespace Lynx.Test.Model
         [TestCase("rnbqkbnr/ppp1pppp/8/8/3pP3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1", "d4e3")]
         public void MoveScoreEnPassant(string fen, string moveWithHighestScore)
         {
-            var position = new Position(fen);
+            Position position = new(fen);
 
-            var allMoves = position.AllPossibleMoves().ToList();
+            var allMoves = position.AllPossibleMoves().OrderByDescending(move => move.Score(position)).ToList();
 
             Assert.AreEqual(moveWithHighestScore, allMoves[0].UCIString());
-            Assert.AreEqual(Move.CaptureBaseScore + EvaluationConstants.MostValueableVictimLeastValuableAttacker[0,0], allMoves[0].Score(position));
+            Assert.AreEqual(Move.CaptureBaseScore + EvaluationConstants.MostValueableVictimLeastValuableAttacker[0, 0], allMoves[0].Score(position));
         }
     }
 }

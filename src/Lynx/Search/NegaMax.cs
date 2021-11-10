@@ -30,12 +30,11 @@ namespace Lynx.Search
             }
 
             ++Nodes;
+            var pseudoLegalMoves = SortMoves(position.AllPossibleMoves(), position, depth);
 
             var pvIndex = Model.PVTable.Indexes[depth];
             var nextPvIndex = Model.PVTable.Indexes[depth + 1];
-            PVTable[pvIndex] = new Move();
-
-            var pseudoLegalMoves = position.AllPossibleMoves(KillerMoves, depth);
+            PVTable[pvIndex] = new Move();  // After getting psuedoLegalMoves
 
             if (depth >= depthLimit)
             {
@@ -153,12 +152,13 @@ namespace Lynx.Search
                 return (alpha, depth);   // Alpha?
             }
 
-            var movesToEvaluate = position.AllCapturesMoves();
-
-            if (!movesToEvaluate.Any())
+            var generatedMoves = position.AllCapturesMoves();
+            if (generatedMoves.Count == 0)
             {
                 return (staticEvaluation, depth);  // TODO check if in check or drawn position
             }
+
+            var movesToEvaluate = SortCaptures(generatedMoves, position, depth);
 
             Move? bestMove = null;
             bool isAnyMoveValid = false;
