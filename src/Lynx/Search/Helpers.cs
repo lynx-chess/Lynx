@@ -23,12 +23,6 @@ namespace Lynx.Search
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void CopyMoves(Move[] pvTable, int target, int source, int moveCountToCopy)
         {
-            if (pvTable[source].EncodedMove is default(int))
-            {
-                Array.Clear(pvTable, target, pvTable.Length - target);  // TODO remove?
-                return;
-            }
-
             //PrintPvTable(pvTable, target, source);
             Array.Copy(pvTable, source, pvTable, target, moveCountToCopy);
             //PrintPvTable(pvTable);
