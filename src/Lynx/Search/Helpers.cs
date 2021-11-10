@@ -11,7 +11,7 @@ namespace Lynx.Search
         public bool IsCancelled { get; set; }
     }
 
-    public partial class Search
+    public sealed partial class Search
     {
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 

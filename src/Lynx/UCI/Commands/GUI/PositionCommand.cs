@@ -13,7 +13,7 @@ namespace Lynx.UCI.Commands.GUI
     ///	Note: no "new" command is needed. However, if this position is from a different game than
     ///	the last position sent to the engine, the GUI should have sent a "ucinewgame" inbetween.
     /// </summary>
-    public class PositionCommand : GUIBaseCommand
+    public sealed class PositionCommand : GUIBaseCommand
     {
         public const string Id = "position";
 

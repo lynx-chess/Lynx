@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Lynx.Model
 {
-    public class Position
+    public sealed class Position
     {
         internal const int CheckMateEvaluation = 1_000_000_000;
 

@@ -15,7 +15,7 @@
     ///	   "setoption name Clear Hash\n"
     ///	   "setoption name NalimovPath value c:\chess\tb\4;c:\chess\tb\5\n"
     /// </summary>
-    public class SetOptionCommand : GUIBaseCommand
+    public sealed class SetOptionCommand : GUIBaseCommand
     {
         public const string Id = "setoption";
     }

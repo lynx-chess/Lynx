@@ -7,7 +7,7 @@ using System.Threading.Channels;
 
 namespace Lynx
 {
-    public class Engine
+    public sealed class Engine
     {
         private readonly Logger _logger;
         private readonly ChannelWriter<string> _engineWriter;

@@ -2,7 +2,7 @@
 
 namespace Lynx.Model
 {
-    public class Game
+    public sealed class Game
     {
         private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
 

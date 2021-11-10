@@ -12,7 +12,7 @@
     ///	This command must always be answered with "readyok" and can be sent also when the engine is calculating
     ///	in which case the engine should also immediately answer with "readyok" without stopping the search.
     /// </summary>
-    public class IsReadyCommand : GUIBaseCommand
+    public sealed class IsReadyCommand : GUIBaseCommand
     {
         public const string Id = "isready";
     }
