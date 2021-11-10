@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using Lynx.Search;
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
@@ -6,7 +7,6 @@ using System;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using static Lynx.Search.SearchAlgorithms;
 
 namespace Lynx
 {
@@ -136,7 +136,8 @@ namespace Lynx
                 maxDepth = Configuration.EngineSettings.Depth;
             }
 
-            var result = IDDFS(Game.CurrentPosition, Game.PositionHashHistory, Game.MovesWithoutCaptureOrPawnMove, minDepth, maxDepth, decisionTime, _engineWriter, _searchCancellationTokenSource.Token, _absoluteSearchCancellationTokenSource.Token);
+            var result = new Search.Search(_engineWriter, Game.PositionHashHistory, Game.MovesWithoutCaptureOrPawnMove, minDepth, _searchCancellationTokenSource.Token, _searchCancellationTokenSource.Token)
+                .IDDFS(Game.CurrentPosition, maxDepth, decisionTime);
             _logger.Info($"Evaluation: {result.Evaluation} (depth: {result.TargetDepth}, refutation: {string.Join(", ", result.Moves)})");
 
             if (!result.IsCancelled && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)

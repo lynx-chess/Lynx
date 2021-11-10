@@ -1,5 +1,5 @@
-﻿using System.Linq;
-using static Lynx.Search.SearchAlgorithms;
+﻿using Lynx.Search;
+using System.Linq;
 
 namespace Lynx.UCI.Commands.Engine
 {

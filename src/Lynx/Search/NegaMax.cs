@@ -1,17 +1,17 @@
 ﻿using Lynx.Model;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
 namespace Lynx.Search
 {
-    public static partial class SearchAlgorithms
+    public partial class Search
     {
         /// <summary>
         /// NegaMax algorithm implementation using alpha-beta pruning, quiescence search and Iterative Deepeting Depth-First Search (IDDFS)
         /// </summary>
         /// <param name="position"></param>
-        /// <param name="plies"></param>
+        /// <param name="depthLimit"></param>
+        /// <param name="depth"></param>
         /// <param name="alpha">
         /// Best score the Side to move can achieve, assuming best play by the opponent.
         /// Defaults to the worse possible score for Side to move, Int.MinValue.
@@ -21,37 +21,37 @@ namespace Lynx.Search
         /// Defaults to the worse possible score for Side to move's opponent, Int.MaxValue
         /// </param>
         /// <returns></returns>
-        private static (int Evaluation, int MaxDepth) NegaMax(Position position, Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove, Move[] pvTable, int pvIndex, int[,] killerMoves, int minDepth, int depthLimit, ref int nodes, int plies, int alpha, int beta, CancellationToken cancellationToken, CancellationToken absoluteCancellationToken)
+        private (int Evaluation, int MaxDepth) NegaMax(Position position, int depthLimit, int depth, int alpha, int beta)
         {
-            absoluteCancellationToken.ThrowIfCancellationRequested();
-            if (plies > minDepth)
+            AbsoluteCancellationToken.ThrowIfCancellationRequested();
+            if (depth > MinDepth)
             {
-                cancellationToken.ThrowIfCancellationRequested();
+                CancellationToken.ThrowIfCancellationRequested();
             }
 
-            ++nodes;
+            ++Nodes;
 
-            pvTable[pvIndex] = new Move();
-            var nextPvIndex = PVTable.Indexes[plies + 1];
+            var pvIndex = Model.PVTable.Indexes[depth];
+            var nextPvIndex = Model.PVTable.Indexes[depth + 1];
+            PVTable[pvIndex] = new Move();
 
-            var pseudoLegalMoves = position.AllPossibleMoves(killerMoves, plies);
+            var pseudoLegalMoves = position.AllPossibleMoves(KillerMoves, depth);
 
-            if (plies >= depthLimit)
+            if (depth >= depthLimit)
             {
                 foreach (var candidateMove in pseudoLegalMoves)
                 {
                     if (new Position(position, candidateMove).WasProduceByAValidMove())
                     {
-                        return QuiescenceSearch(position, positionHistory, movesWithoutCaptureOrPawnMove, pvTable, pvIndex, Configuration.EngineSettings.QuiescenceSearchDepth, ref nodes, plies, alpha, beta, cancellationToken, absoluteCancellationToken);
+                        return QuiescenceSearch(position, depth, alpha, beta);
                     }
                 }
 
-                return (position.EvaluateFinalPosition(plies, positionHistory, movesWithoutCaptureOrPawnMove), plies);
+                return (position.EvaluateFinalPosition(depth, PositionHistory, MovesWithoutCaptureOrPawnMove), depth);
             }
 
             Move? bestMove = null;
-
-            var isAnyMoveValid = false;
+            bool isAnyMoveValid = false;
 
             foreach (var move in pseudoLegalMoves)
             {
@@ -62,18 +62,18 @@ namespace Lynx.Search
                 }
                 isAnyMoveValid = true;
 
-                PrintPreMove(position, plies, move);
+                PrintPreMove(position, depth, move);
 
-                var oldValue = movesWithoutCaptureOrPawnMove;
-                movesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, movesWithoutCaptureOrPawnMove);
-                var repetitions = Utils.UpdatePositionHistory(newPosition, positionHistory);
-                var (evaluation, bestMoveExistingMoveList) = NegaMax(newPosition, positionHistory, movesWithoutCaptureOrPawnMove, pvTable, nextPvIndex, killerMoves, minDepth, depthLimit, ref nodes, plies + 1, -beta, -alpha, cancellationToken, absoluteCancellationToken);
-                movesWithoutCaptureOrPawnMove = oldValue;
-                Utils.RevertPositionHistory(newPosition, positionHistory, repetitions);
+                var oldValue = MovesWithoutCaptureOrPawnMove;
+                MovesWithoutCaptureOrPawnMove = Update50movesRule(move);
+                var repetitions = UpdatePositionHistory(newPosition);
+                var (evaluation, bestMoveExistingMoveList) = NegaMax(newPosition, depthLimit, depth + 1, -beta, -alpha);
+                MovesWithoutCaptureOrPawnMove = oldValue;
+                RevertPositionHistory(newPosition, repetitions);
 
                 evaluation = -evaluation;
 
-                PrintMove(plies, move, evaluation);
+                PrintMove(depth, move, evaluation);
 
                 // Fail-hard beta-cutoff
                 if (evaluation >= beta)
@@ -82,11 +82,11 @@ namespace Lynx.Search
 
                     //if (!move.IsCapture())
                     {
-                        killerMoves[1, plies] = killerMoves[0, plies];
-                        killerMoves[0, plies] = move.EncodedMove;
+                        KillerMoves[1, depth] = KillerMoves[0, depth];
+                        KillerMoves[0, depth] = move.EncodedMove;
                     }
 
-                    return (beta, plies);    // TODO return evaluation?
+                    return (beta, depth);    // TODO return evaluation?
                 }
 
                 if (evaluation > alpha)
@@ -94,25 +94,25 @@ namespace Lynx.Search
                     alpha = evaluation;
                     bestMove = move;
 
-                    pvTable[pvIndex] = move;
-                    CopyMoves(pvTable, pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - plies - 1);
+                    PVTable[pvIndex] = move;
+                    CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - depth - 1);
                 }
             }
 
             if (bestMove is null)
             {
-                return (isAnyMoveValid ? alpha : position.EvaluateFinalPosition(plies, positionHistory, movesWithoutCaptureOrPawnMove), plies);
+                return (isAnyMoveValid ? alpha : position.EvaluateFinalPosition(depth, PositionHistory, MovesWithoutCaptureOrPawnMove), depth);
             }
 
             // Node fails low
-            return (alpha, plies);
+            return (alpha, depth);
         }
 
         /// <summary>
         /// Quiescence search implementation, NegaMax alpha-beta style, fail-hard
         /// </summary>
         /// <param name="position"></param>
-        /// <param name="plies"></param>
+        /// <param name="depth"></param>
         /// <param name="alpha">
         /// Best score White can achieve, assuming best play by Black.
         /// Defaults to the worse possible score for white, Int.MinValue.
@@ -122,23 +122,24 @@ namespace Lynx.Search
         /// Defaults to the works possible score for Black, Int.MaxValue
         /// </param>
         /// <returns></returns>
-        public static (int Evaluation, int MaxDepth) QuiescenceSearch(Position position, Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove, Move[] pvTable, int pvIndex, int quiescenceDepthLimit, ref int nodes, int plies, int alpha, int beta, CancellationToken cancellationToken, CancellationToken absoluteCancellationToken)
+        public (int Evaluation, int MaxDepth) QuiescenceSearch(Position position, int depth, int alpha, int beta)
         {
-            absoluteCancellationToken.ThrowIfCancellationRequested();
+            AbsoluteCancellationToken.ThrowIfCancellationRequested();
             //cancellationToken.ThrowIfCancellationRequested();
 
-            ++nodes;
+            ++Nodes;
 
-            pvTable[pvIndex] = new Move();
-            var nextPvIndex = PVTable.Indexes[plies + 1];
+            var pvIndex = Model.PVTable.Indexes[depth];
+            var nextPvIndex = Model.PVTable.Indexes[depth + 1];
+            PVTable[pvIndex] = new Move();
 
-            var staticEvaluation = position.StaticEvaluation(positionHistory, movesWithoutCaptureOrPawnMove);
+            var staticEvaluation = position.StaticEvaluation(PositionHistory, MovesWithoutCaptureOrPawnMove);
 
             // Fail-hard beta-cutoff (updating alpha after this check)
             if (staticEvaluation >= beta)
             {
-                PrintMessage(plies - 1, "Pruning before starting quiescence search");
-                return (staticEvaluation, plies);
+                PrintMessage(depth - 1, "Pruning before starting quiescence search");
+                return (staticEvaluation, depth);
             }
 
             // Better move
@@ -147,16 +148,16 @@ namespace Lynx.Search
                 alpha = staticEvaluation;
             }
 
-            if (plies >= quiescenceDepthLimit)
+            if (depth >= Configuration.EngineSettings.QuiescenceSearchDepth)
             {
-                return (alpha, plies);   // Alpha?
+                return (alpha, depth);   // Alpha?
             }
 
             var movesToEvaluate = position.AllCapturesMoves();
 
             if (!movesToEvaluate.Any())
             {
-                return (staticEvaluation, plies);  // TODO check if in check or drawn position
+                return (staticEvaluation, depth);  // TODO check if in check or drawn position
             }
 
             Move? bestMove = null;
@@ -171,24 +172,24 @@ namespace Lynx.Search
                 }
                 isAnyMoveValid = true;
 
-                PrintPreMove(position, plies, move, isQuiescence: true);
+                PrintPreMove(position, depth, move, isQuiescence: true);
 
-                var oldValue = movesWithoutCaptureOrPawnMove;
-                movesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, movesWithoutCaptureOrPawnMove);
-                var repetitions = Utils.UpdatePositionHistory(newPosition, positionHistory);
-                var (evaluation, bestMoveExistingMoveList) = QuiescenceSearch(newPosition, positionHistory, movesWithoutCaptureOrPawnMove, pvTable, nextPvIndex, quiescenceDepthLimit, ref nodes, plies + 1, -beta, -alpha, cancellationToken, absoluteCancellationToken);
-                movesWithoutCaptureOrPawnMove = oldValue;
-                Utils.RevertPositionHistory(newPosition, positionHistory, repetitions);
+                var oldValue = MovesWithoutCaptureOrPawnMove;
+                MovesWithoutCaptureOrPawnMove = Update50movesRule(move);
+                var repetitions = UpdatePositionHistory(newPosition);
+                var (evaluation, bestMoveExistingMoveList) = QuiescenceSearch(newPosition, depth + 1, -beta, -alpha);
+                MovesWithoutCaptureOrPawnMove = oldValue;
+                RevertPositionHistory(newPosition, repetitions);
 
                 evaluation = -evaluation;
 
-                PrintMove(plies, move, evaluation);
+                PrintMove(depth, move, evaluation);
 
                 // Fail-hard beta-cutoff
                 if (evaluation >= beta)
                 {
                     _logger.Trace($"Pruning: {move} is enough to discard this line");
-                    return (evaluation, plies); // The refutation doesn't matter, since it'll be pruned
+                    return (evaluation, depth); // The refutation doesn't matter, since it'll be pruned
                 }
 
                 if (evaluation > alpha)
@@ -196,8 +197,8 @@ namespace Lynx.Search
                     alpha = evaluation;
                     bestMove = move;
 
-                    pvTable[pvIndex] = move;
-                    CopyMoves(pvTable, pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - plies - 1);
+                    PVTable[pvIndex] = move;
+                    CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - depth - 1);
                 }
             }
 
@@ -205,13 +206,13 @@ namespace Lynx.Search
             {
                 var eval = isAnyMoveValid || position.AllPossibleMoves().Any(move => new Position(position, move).WasProduceByAValidMove())
                     ? alpha
-                    : position.EvaluateFinalPosition(plies, positionHistory, movesWithoutCaptureOrPawnMove);
+                    : position.EvaluateFinalPosition(depth, PositionHistory, MovesWithoutCaptureOrPawnMove);
 
-                return (eval, plies);
+                return (eval, depth);
             }
 
             // Node fails low
-            return (alpha, plies);
+            return (alpha, depth);
         }
     }
 }
