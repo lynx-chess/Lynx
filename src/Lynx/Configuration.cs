@@ -1,6 +1,4 @@
-﻿using System.Threading;
-
-namespace Lynx
+﻿namespace Lynx
 {
     public static class Configuration
     {

@@ -1,8 +1,6 @@
 ﻿using Lynx.Model;
 using NLog;
-using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Lynx.UCI.Commands.GUI

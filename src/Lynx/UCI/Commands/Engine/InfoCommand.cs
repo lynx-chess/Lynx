@@ -1,5 +1,4 @@
 ﻿using Lynx.Search;
-using System.Linq;
 
 namespace Lynx.UCI.Commands.Engine
 {

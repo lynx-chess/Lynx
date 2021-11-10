@@ -1,5 +1,4 @@
 ﻿using Lynx.Model;
-using System;
 using NUnit.Framework;
 
 namespace Lynx.Test

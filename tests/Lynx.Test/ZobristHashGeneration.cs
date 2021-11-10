@@ -1,6 +1,4 @@
 ﻿using Lynx.Model;
-using System.Collections.Generic;
-using System.Linq;
 using NUnit.Framework;
 
 namespace Lynx.Test

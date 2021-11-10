@@ -1,5 +1,4 @@
 ﻿using Lynx.Model;
-using System.Linq;
 using NUnit.Framework;
 
 namespace Lynx.Test.MoveGeneration

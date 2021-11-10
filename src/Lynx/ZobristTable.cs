@@ -1,5 +1,4 @@
 ﻿using Lynx.Model;
-using System;
 using System.Runtime.CompilerServices;
 
 namespace Lynx

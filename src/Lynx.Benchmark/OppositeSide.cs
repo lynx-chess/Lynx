@@ -24,7 +24,6 @@
 
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
-using System.Collections.Generic;
 
 namespace Lynx.Benchmark
 {

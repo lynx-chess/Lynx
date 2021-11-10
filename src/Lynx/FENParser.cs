@@ -1,7 +1,5 @@
 ﻿using Lynx.Model;
 using NLog;
-using System;
-using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Lynx

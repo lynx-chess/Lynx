@@ -1,9 +1,7 @@
 ﻿using Lynx.UCI.Commands.GUI;
 using Moq;
 using NUnit.Framework;
-using System.Threading;
 using System.Threading.Channels;
-using System.Threading.Tasks;
 
 namespace Lynx.Test.Commands
 {
