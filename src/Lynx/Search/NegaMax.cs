@@ -152,18 +152,13 @@ namespace Lynx.Search
                 return (alpha, depth);   // Alpha?
             }
 
-            var movesToEvaluate = SortCaptures(position.AllCapturesMoves(), position, depth);
-
-            if (!movesToEvaluate.TryGetNonEnumeratedCount(out int moveCount))
-            {
-                _logger.Info("TryGetNonEnumeratedCount didn't work :/");
-                moveCount = movesToEvaluate.Count();
-            }
-
-            if (moveCount == 0)
+            var generatedMoves = position.AllCapturesMoves();
+            if (generatedMoves.Count == 0)
             {
                 return (staticEvaluation, depth);  // TODO check if in check or drawn position
             }
+
+            var movesToEvaluate = SortCaptures(generatedMoves, position, depth);
 
             Move? bestMove = null;
             bool isAnyMoveValid = false;
