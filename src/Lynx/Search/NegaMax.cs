@@ -65,7 +65,24 @@ namespace Lynx
                 _movesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, _movesWithoutCaptureOrPawnMove);
                 var repetitions = Utils.UpdatePositionHistory(newPosition, Game.PositionHashHistory);
 
-                int evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha);
+                int evaluation;
+                if (bestMove is not null)
+                {
+                    // Optimistic search, validating that the rest of the moves are worse than bestmove.
+                    // It should produce more cutoffs and therefore be faster.
+                    // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
+                    evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -alpha - 1, -alpha);
+
+                    if (evaluation > alpha && evaluation < beta)
+                    {
+                        // Hipothesis invalidated -> Regular search
+                        evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha);
+                    }
+                }
+                else
+                {
+                    evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha);
+                }
 
                 _movesWithoutCaptureOrPawnMove = oldValue;
                 Utils.RevertPositionHistory(newPosition, Game.PositionHashHistory, repetitions);
