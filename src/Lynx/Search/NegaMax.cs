@@ -19,7 +19,7 @@ namespace Lynx
         /// Defaults to the worse possible score for Side to move's opponent, Int.MaxValue
         /// </param>
         /// <returns></returns>
-        private (int Evaluation, int MaxDepth) NegaMax(Position position, int minDepth, int maxDepth, int depth, int alpha, int beta)
+        private int NegaMax(Position position, int minDepth, int maxDepth, int depth, int alpha, int beta)
         {
             _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
             if (depth > minDepth)
@@ -40,7 +40,7 @@ namespace Lynx
                     }
                 }
 
-                return (position.EvaluateFinalPosition(depth, Game.PositionHashHistory, _movesWithoutCaptureOrPawnMove), depth);
+                return position.EvaluateFinalPosition(depth, Game.PositionHashHistory, _movesWithoutCaptureOrPawnMove);
             }
 
             Move? bestMove = null;
@@ -48,7 +48,6 @@ namespace Lynx
 
             var pvIndex = PVTable.Indexes[depth];
             var nextPvIndex = PVTable.Indexes[depth + 1];
-            _pVTable[pvIndex] = _defaultMove;
 
             foreach (var move in pseudoLegalMoves)
             {
@@ -64,11 +63,11 @@ namespace Lynx
                 var oldValue = _movesWithoutCaptureOrPawnMove;
                 _movesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, _movesWithoutCaptureOrPawnMove);
                 var repetitions = Utils.UpdatePositionHistory(newPosition, Game.PositionHashHistory);
-                var (evaluation, bestMoveExistingMoveList) = NegaMax(newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha);
+
+                int evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha);
+
                 _movesWithoutCaptureOrPawnMove = oldValue;
                 Utils.RevertPositionHistory(newPosition, Game.PositionHashHistory, repetitions);
-
-                evaluation = -evaluation;
 
                 PrintMove(depth, move, evaluation);
 
@@ -82,8 +81,7 @@ namespace Lynx
                         _killerMoves[1, depth] = _killerMoves[0, depth];
                         _killerMoves[0, depth] = move.EncodedMove;
                     }
-
-                    return (beta, depth);    // TODO return evaluation?
+                    return beta;    // TODO return evaluation?
                 }
 
                 if (evaluation > alpha)
@@ -98,11 +96,13 @@ namespace Lynx
 
             if (bestMove is null)
             {
-                return (isAnyMoveValid ? alpha : position.EvaluateFinalPosition(depth, Game.PositionHashHistory, _movesWithoutCaptureOrPawnMove), depth);
+                return isAnyMoveValid
+                    ? alpha
+                    : position.EvaluateFinalPosition(depth, Game.PositionHashHistory, _movesWithoutCaptureOrPawnMove);
             }
 
             // Node fails low
-            return (alpha, depth);
+            return alpha;
         }
 
         /// <summary>
@@ -119,7 +119,7 @@ namespace Lynx
         /// Defaults to the works possible score for Black, Int.MaxValue
         /// </param>
         /// <returns></returns>
-        public (int Evaluation, int MaxDepth) QuiescenceSearch(Position position, int depth, int alpha, int beta)
+        public int QuiescenceSearch(Position position, int depth, int alpha, int beta)
         {
             _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
             //_cancellationToken.Token.ThrowIfCancellationRequested();
@@ -128,7 +128,6 @@ namespace Lynx
 
             var pvIndex = PVTable.Indexes[depth];
             var nextPvIndex = PVTable.Indexes[depth + 1];
-            _pVTable[pvIndex] = _defaultMove;
 
             var staticEvaluation = position.StaticEvaluation(Game.PositionHashHistory, _movesWithoutCaptureOrPawnMove);
 
@@ -136,7 +135,7 @@ namespace Lynx
             if (staticEvaluation >= beta)
             {
                 PrintMessage(depth - 1, "Pruning before starting quiescence search");
-                return (staticEvaluation, depth);
+                return staticEvaluation;
             }
 
             // Better move
@@ -147,13 +146,13 @@ namespace Lynx
 
             if (depth >= Configuration.EngineSettings.QuiescenceSearchDepth)
             {
-                return (alpha, depth);   // Alpha?
+                return alpha;   // Alpha?
             }
 
             var generatedMoves = position.AllCapturesMoves();
             if (generatedMoves.Count == 0)
             {
-                return (staticEvaluation, depth);  // TODO check if in check or drawn position
+                return staticEvaluation;  // TODO check if in check or drawn position
             }
 
             var movesToEvaluate = SortCaptures(generatedMoves, position, depth);
@@ -175,11 +174,11 @@ namespace Lynx
                 var oldValue = _movesWithoutCaptureOrPawnMove;
                 _movesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, _movesWithoutCaptureOrPawnMove);
                 var repetitions = Utils.UpdatePositionHistory(newPosition, Game.PositionHashHistory);
-                var (evaluation, bestMoveExistingMoveList) = QuiescenceSearch(newPosition, depth + 1, -beta, -alpha);
+
+                var evaluation = -QuiescenceSearch(newPosition, depth + 1, -beta, -alpha);
+
                 _movesWithoutCaptureOrPawnMove = oldValue;
                 Utils.RevertPositionHistory(newPosition, Game.PositionHashHistory, repetitions);
-
-                evaluation = -evaluation;
 
                 PrintMove(depth, move, evaluation);
 
@@ -187,7 +186,7 @@ namespace Lynx
                 if (evaluation >= beta)
                 {
                     PrintMessage($"Pruning: {move} is enough to discard this line");
-                    return (evaluation, depth); // The refutation doesn't matter, since it'll be pruned
+                    return evaluation; // The refutation doesn't matter, since it'll be pruned
                 }
 
                 if (evaluation > alpha)
@@ -206,11 +205,11 @@ namespace Lynx
                     ? alpha
                     : position.EvaluateFinalPosition(depth, Game.PositionHashHistory, _movesWithoutCaptureOrPawnMove);
 
-                return (eval, depth);
+                return eval;
             }
 
             // Node fails low
-            return (alpha, depth);
+            return alpha;
         }
     }
 }
