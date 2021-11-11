@@ -48,6 +48,7 @@ namespace Lynx
 
             var pvIndex = PVTable.Indexes[depth];
             var nextPvIndex = PVTable.Indexes[depth + 1];
+            _pVTable[pvIndex] = _defaultMove;
 
             foreach (var move in pseudoLegalMoves)
             {
@@ -126,9 +127,6 @@ namespace Lynx
 
             ++_nodes;
 
-            var pvIndex = PVTable.Indexes[depth];
-            var nextPvIndex = PVTable.Indexes[depth + 1];
-
             var staticEvaluation = position.StaticEvaluation(Game.PositionHashHistory, _movesWithoutCaptureOrPawnMove);
 
             // Fail-hard beta-cutoff (updating alpha after this check)
@@ -156,6 +154,10 @@ namespace Lynx
             }
 
             var movesToEvaluate = SortCaptures(generatedMoves, position, depth);
+
+            var pvIndex = PVTable.Indexes[depth];
+            var nextPvIndex = PVTable.Indexes[depth + 1];
+            _pVTable[pvIndex] = _defaultMove;
 
             Move? bestMove = null;
             bool isAnyMoveValid = false;
