@@ -1,6 +1,4 @@
-﻿using Lynx.Search;
-
-namespace Lynx.UCI.Commands.Engine
+﻿namespace Lynx.UCI.Commands.Engine
 {
     /// <summary>
     /// info

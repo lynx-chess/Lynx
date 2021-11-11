@@ -1,20 +1,17 @@
 ﻿using Lynx.Model;
-using NLog;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace Lynx.Search
+namespace Lynx
 {
     public record SearchResult(Move BestMove, double Evaluation, int TargetDepth, int DepthReached, int Nodes, long Time, long NodesPerSecond, List<Move> Moves)
     {
         public bool IsCancelled { get; set; }
     }
 
-    public sealed partial class Search
+    public sealed partial class Engine
     {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
         private const int MinValue = -2 * Position.CheckMateEvaluation;
         private const int MaxValue = +2 * Position.CheckMateEvaluation;
 
@@ -54,31 +51,11 @@ namespace Lynx.Search
         private IOrderedEnumerable<Move> SortCaptures(List<Move> moves, Position currentPosition, int depth) => moves.OrderByDescending(move => Score(move, currentPosition, depth));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int UpdatePositionHistory(Position newPosition) => Utils.UpdatePositionHistory(newPosition, _positionHistory);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void RevertPositionHistory(Position newPosition, int repetitions) => Utils.RevertPositionHistory(newPosition, _positionHistory, repetitions);
-
-        /// <summary>
-        /// Updates <paramref name="MovesWithoutCaptureOrPawnMove"/>
-        /// </summary>
-        /// <param name="moveToPlay"></param>
-        /// <remarks>
-        /// Checking movesWithoutCaptureOrPawnMove >= 50 since a capture/pawn move doesn't necessarily 'clear' the variable.
-        /// i.e. while the engine is searching:
-        ///     At depth 2, 50 rules move applied and eval is 0
-        ///     At depth 3, there's a capture, but the eval should still be 0
-        ///     At depth 4 there's no capture, but the eval should still be 0
-        /// </remarks>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public int Update50movesRule(Move moveToPlay) => Utils.Update50movesRule(moveToPlay, _movesWithoutCaptureOrPawnMove);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CopyPVTableMoves(int target, int source, int moveCountToCopy)
         {
             //PrintPvTable(target, source);
             Array.Copy(_pVTable, source, _pVTable, target, moveCountToCopy);
-            //PrintPvTable(pvTable);
+            //PrintPvTable();
         }
 
         #region Debugging
