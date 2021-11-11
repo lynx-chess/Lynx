@@ -19,6 +19,13 @@ You can find Lynx:
 
 Lichess bot can be played directly, but a chess GUI that supports UCI protocol is needed to play against the self-contained version.
 
+## Strength
+
+| Lynx version                                                    | CCRL Blitz elo                                                                                                                         |
+|-----------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| [0.6.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.6.0) | [1393](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.6.0%2064-bit#Lynx_0_6_0_64-bit) |
+| [0.4.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.4.0) | [1355](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.4.0%2064-bit#Lynx_0_4_0_64-bit) |
+
 ## Building Lynx
 
 [Lynx release artifacts](https://github.com/lynx-chess/Lynx/releases) are self-contained and require no dependencies to be run.
@@ -62,19 +69,21 @@ If you're a Linux user and are new to .NET ecosystem, the conversation in [this 
 
 - Most Valuable Victim - Least Valuable Aggressor (MVV-LVA) [[1]](https://www.chessprogramming.org/MVV-LVA)
 
-- Killer heuristic
+- Killer heuristic [[1](https://www.chessprogramming.org/Killer_Heuristic)]
 
 - Zobrist hashing [[1](https://www.chessprogramming.org/Zobrist_Hashing)]
 
----
+- Triangular PV-Table [[1](https://www.chessprogramming.org/Triangular_PV-Table)]
 
-More details to follow.
-
----
+- Principal Variation Search [[1](https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm)]
 
 ## Credits
 
-Lynx development is heavily influenced by [`BitBoard Chess Engine in C` YouTube playlist](https://www.youtube.com/playlist?list=PLmN0neTso3Jxh8ZIylk74JpwfiWNI76Cs), where [@maksimKorzh](https://github.com/maksimKorzh) explains how he developed his [BBC](https://github.com/maksimKorzh/bbc) engine.
+Lynx development wouldn't have been possible without:
+
+- [Chess Programming Wiki](https://www.chessprogramming.org/)
+
+-  [`BitBoard Chess Engine in C` YouTube playlist](https://www.youtube.com/playlist?list=PLmN0neTso3Jxh8ZIylk74JpwfiWNI76Cs), where [@maksimKorzh](https://github.com/maksimKorzh) explains how he developed his [BBC](https://github.com/maksimKorzh/bbc) engine
 
 [buildlink]: https://github.com/lynx-chess/Lynx/actions/workflows/ci.yml
 [buildlogo]: https://github.com/lynx-chess/Lynx/actions/workflows/ci.yml/badge.svg
