@@ -140,6 +140,12 @@ namespace Lynx.Search
         }
 
         [Conditional("DEBUG")]
+        private static void PrintMessage(string message)
+        {
+            _logger.Trace(message);
+        }
+
+        [Conditional("DEBUG")]
         private void PrintPvTable(int target = -1, int source = -1)
         {
             Console.WriteLine(

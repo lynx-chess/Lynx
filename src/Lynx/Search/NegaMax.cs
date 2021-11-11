@@ -75,7 +75,7 @@ namespace Lynx.Search
                 // Fail-hard beta-cutoff
                 if (evaluation >= beta)
                 {
-                    _logger.Trace($"Pruning: {move} is enough");
+                    PrintMessage($"Pruning: {move} is enough");
 
                     //if (!move.IsCapture())
                     {
@@ -186,7 +186,7 @@ namespace Lynx.Search
                 // Fail-hard beta-cutoff
                 if (evaluation >= beta)
                 {
-                    _logger.Trace($"Pruning: {move} is enough to discard this line");
+                    PrintMessage($"Pruning: {move} is enough to discard this line");
                     return (evaluation, depth); // The refutation doesn't matter, since it'll be pruned
                 }
 
