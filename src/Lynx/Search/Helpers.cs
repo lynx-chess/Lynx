@@ -53,12 +53,34 @@ namespace Lynx
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void CopyPVTableMoves(int target, int source, int moveCountToCopy)
         {
+            if (_pVTable[source].EncodedMove == default)
+            {
+                Array.Clear(_pVTable, target, _pVTable.Length - target);
+                return;
+            }
+
             //PrintPvTable(target, source);
             Array.Copy(_pVTable, source, _pVTable, target, moveCountToCopy);
             //PrintPvTable();
         }
 
         #region Debugging
+
+        [Conditional("DEBUG")]
+        private void ValidatePVTable()
+        {
+            for (int i = 0; i < PVTable.Indexes[1]; ++i)
+            {
+                if (_pVTable[i].EncodedMove == default)
+                {
+                    for (int j = i + 1; j < PVTable.Indexes[1]; ++j)
+                    {
+                        Debug.Assert(_pVTable[j].EncodedMove == default);
+                    }
+                    break;
+                }
+            }
+        }
 
         [Conditional("DEBUG")]
         private static void PrintPreMove(Position position, int plies, Move move, bool isQuiescence = false)

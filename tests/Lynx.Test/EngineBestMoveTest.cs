@@ -9,20 +9,20 @@ namespace Lynx.Test
     public class EngineBestMoveTest : BaseTest
     {
         [TestCase("8/8/1p2k3/3bn3/3K4/8/7r/1q6 b - - 0 1", new[] { "b1d3" },
-            Category = "LongRunning", Explicit = true, Description = "Mate in 1")]
+            Description = "Mate in 1")]
         public void Mate_in_1(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
         {
             TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
         }
 
         [TestCase("8/pN3R2/1b2k1K1/n4R2/pp1p4/3B1P1n/3B1PNP/3r3Q w - -", new[] { "d2f4" },
-            Category = "LongRunning", Explicit = true, Description = "Mate in 2, https://gameknot.com/chess-puzzle.pl?pz=114463")]
+            Description = "Mate in 2, https://gameknot.com/chess-puzzle.pl?pz=114463")]
         [TestCase("KQ4R1/8/8/8/4N3/8/5p2/6bk w - -", new[] { "b8b2" },
-            Category = "LongRunning", Explicit = true, Description = "Mate in 2, https://gameknot.com/chess-puzzle.pl?pz=1")]
+            Description = "Mate in 2, https://gameknot.com/chess-puzzle.pl?pz=1")]
         [TestCase("8/8/8/8/8/3n1N2/8/3Q1K1k w - -", new[] { "d1b1" },
-            Category = "LongRunning", Explicit = true, Description = "Mate in 2, https://gameknot.com/chess-puzzle.pl?pz=1669")]
+            Description = "Mate in 2, https://gameknot.com/chess-puzzle.pl?pz=1669")]
         [TestCase("RNBKRNRQ/PPPPPPPP/8/pppppppp/rnbqkbnr/8/8/8 b - -", new[] { "g4h6" },
-            Category = "LongRunning", Explicit = true, Description = "Mate in 2, https://gameknot.com/chess-puzzle.pl?pz=1630")]
+            Description = "Mate in 2, https://gameknot.com/chess-puzzle.pl?pz=1630")]
         public void Mate_in_2(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
         {
             TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
@@ -104,16 +104,52 @@ namespace Lynx.Test
             TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
         }
 
+        [Test]
+        public void Regression_KeepNonGoodQuiescenceMoves()
+        {
+            const string fen = Constants.InitialPositionFEN;
+
+            var bestResult = SearchBestResult(fen);
+
+            switch (bestResult.Moves.Count)
+            {
+                case 5:
+                    Assert.AreNotEqual("f6e4", bestResult.Moves[4].UCIString());
+                    break;
+                case 6:
+                    Assert.AreNotEqual("f3e5", bestResult.Moves[5].UCIString());
+                    break;
+                default:
+                    Assert.True(false);
+                    break;
+            }
+
+            Assert.AreEqual(Configuration.EngineSettings.Depth, bestResult.Moves.Count,
+                $"Possible false positive: PV depth ({bestResult.Moves.Count}) expected to be fixed Configuration.EngineSettings.Depth ({Configuration.EngineSettings.Depth})");
+        }
+
+        [TestCase(Category = "LongRunning", Explicit = true)]
+        public void Regression_TrashInPVTable()
+        {
+            var fen = Constants.InitialPositionFEN;
+            var bestResult = SearchBestResult(fen);
+            Assert.False(bestResult.Moves.Count > 5 && bestResult.Moves[5].UCIString() == "d8d5");
+
+            fen = "rq2k2r/ppp2pb1/2n1pnpp/1Q1p1b2/3P1B2/2N1PNP1/PPP2PBP/R3K2R w KQkq - 0 1";
+            bestResult = SearchBestResult(fen);
+            Assert.False(bestResult.Moves.Count > 5 && bestResult.Moves[5].UCIString() == "e5f4");
+        }
+
         [TestCase("8/8/4NQ2/7k/2P4p/1q2P2P/5P2/6K1 b - - 5 52", new[] { "b3b1", "b3d1" },
-    Category = "LongRunning", Explicit = true, Description = "Force stalemate - https://lichess.org/sM5ekwnW/black#103")]
+            Description = "Force stalemate - https://lichess.org/sM5ekwnW/black#103")]
         [TestCase("8/8/4NQ2/7k/2P4p/4P2P/5PK1/3q4 b - - 7 53", new[] { "d1h1", "d1g1", "d1f1" },
-    Category = "LongRunning", Explicit = true, Description = "Force stalemate - https://lichess.org/sM5ekwnW/black#105")]
+            Description = "Force stalemate - https://lichess.org/sM5ekwnW/black#105")]
         public void ForceStaleMate(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
         {
             TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
         }
 
-        [TestCase(Category = "LongRunning", Explicit = true)]
+        [Test]
         public void AvoidThreefoldRepetitionWhenWinningPosition()
         {
             // Arrange
@@ -160,7 +196,7 @@ namespace Lynx.Test
             Assert.Less(searchResult.Evaluation, Position.CheckMateEvaluation - (20 * Position.DepthFactor), "Mate not detected");
         }
 
-        [TestCase(Category = "LongRunning", Explicit = true)]
+        [Test]
         public void ForceThreefoldRepetitionWhenLosingPosition()
         {
             // Arrange
@@ -208,7 +244,7 @@ namespace Lynx.Test
             Assert.AreEqual(0, searchResult.Evaluation, "No drawn position detected");
         }
 
-        [TestCase(Category = "LongRunning", Explicit = true)]
+        [Test]
         public void Avoid50MovesRuleRepetitionWhenWinningPosition()
         {
             // Arrange
@@ -256,7 +292,7 @@ namespace Lynx.Test
             Assert.Less(searchResult.Evaluation, Position.CheckMateEvaluation - (20 * Position.DepthFactor), "Mate not detected");
         }
 
-        [TestCase(Category = "LongRunning", Explicit = true)]
+        [Test]
         public void Force50MovesRuleRepetitionWhenLosingPosition()
         {
             // Arrange
