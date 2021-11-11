@@ -94,7 +94,7 @@ namespace Lynx
                 {
                     PrintMessage($"Pruning: {move} is enough");
 
-                    //if (!move.IsCapture())
+                    if (!move.IsCapture())
                     {
                         _killerMoves[1, depth] = _killerMoves[0, depth];
                         _killerMoves[0, depth] = move.EncodedMove;
