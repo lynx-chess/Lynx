@@ -53,11 +53,13 @@ namespace Lynx
                     _nodes = 0;
                     _isFollowingPV = true;
 
-                    (bestEvaluation, int maxDepthReached) = NegaMax(Game.CurrentPosition, minDepth, maxDepth: depth, depth: 0, alpha: MinValue, beta: MaxValue);
+                    bestEvaluation = NegaMax(Game.CurrentPosition, minDepth, maxDepth: depth, depth: 0, alpha: MinValue, beta: MaxValue);
 
                     PrintPvTable();
 
                     var pvMoves = _pVTable.TakeWhile(m => m.EncodedMove != default).ToList();
+                    var maxDepthReached = PVTable.Indexes.IndexOf(PVTable.Indexes.Reverse().First(index => _pVTable[index].EncodedMove != default)) + 1;
+
                     var elapsedTime = _stopWatch.ElapsedMilliseconds;
                     searchResult = new SearchResult(pvMoves.FirstOrDefault(), bestEvaluation, depth, maxDepthReached, _nodes, elapsedTime, Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * elapsedTime) + 1), 0, Int64.MaxValue)), pvMoves);
 
