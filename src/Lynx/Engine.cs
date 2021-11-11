@@ -1,5 +1,4 @@
 ﻿using Lynx.Model;
-using Lynx.Search;
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
@@ -7,9 +6,9 @@ using System.Threading.Channels;
 
 namespace Lynx
 {
-    public sealed class Engine
+    public sealed partial class Engine
     {
-        private readonly Logger _logger;
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
         private readonly ChannelWriter<string> _engineWriter;
 
 #pragma warning disable IDE0052, CS0414, S4487 // Remove unread private members
@@ -37,7 +36,6 @@ namespace Lynx
             AverageDepth = 0;
             Game = new Game();
             _isNewGameComing = true;
-            _logger = LogManager.GetCurrentClassLogger();
             _searchCancellationTokenSource = new();
             _absoluteSearchCancellationTokenSource = new();
             _engineWriter = engineWriter;
@@ -116,8 +114,7 @@ namespace Lynx
                 maxDepth = Configuration.EngineSettings.Depth;
             }
 
-            var result = new Search.Search(_engineWriter, Game.PositionHashHistory, Game.MovesWithoutCaptureOrPawnMove, minDepth, _searchCancellationTokenSource.Token, _searchCancellationTokenSource.Token)
-                .IDDFS(Game.CurrentPosition, maxDepth, decisionTime);
+            var result = IDDFS(minDepth, maxDepth, decisionTime);
             _logger.Info($"Evaluation: {result.Evaluation} (depth: {result.TargetDepth}, refutation: {string.Join(", ", result.Moves)})");
 
             if (!result.IsCancelled && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)

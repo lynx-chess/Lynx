@@ -1,4 +1,4 @@
-name: Release
+﻿name: Release
 
 on:
 
@@ -118,7 +118,7 @@ jobs:
       run: |
         git switch ${{ env.GITHUB_REF_SLUG }}
         git status
-        git commit -am "Release v${{ github.event.inputs.new_engine_version }}"
+        git commit -am "🚀 Release v${{ github.event.inputs.new_engine_version }}"
         git push
 
     - name: Create git tag
