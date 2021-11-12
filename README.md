@@ -79,6 +79,8 @@ If you're a Linux user and are new to .NET ecosystem, the conversation in [this 
 
 - Principal Variation Search [[1](https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm)]
 
+- Late Move Reductions [[1](https://web.archive.org/web/20150212051846/http://www.glaurungchess.com/lmr.html)] [[2](https://www.chessprogramming.org/Late_Move_Reductions)] [[3](https://talkchess.com/forum3/viewtopic.php?f=7&t=75056#p860118)]
+
 ## Credits
 
 Lynx development wouldn't have been possible without:

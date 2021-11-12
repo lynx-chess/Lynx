@@ -43,6 +43,7 @@ namespace Lynx
                 return position.EvaluateFinalPosition(depth, Game.PositionHashHistory, _movesWithoutCaptureOrPawnMove);
             }
 
+            int movesSearched = 0;
             Move? bestMove = null;
             bool isAnyMoveValid = false;
 
@@ -66,22 +67,54 @@ namespace Lynx
                 var repetitions = Utils.UpdatePositionHistory(newPosition, Game.PositionHashHistory);
 
                 int evaluation;
-                if (bestMove is not null)
-                {
-                    // Optimistic search, validating that the rest of the moves are worse than bestmove.
-                    // It should produce more cutoffs and therefore be faster.
-                    // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
-                    evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -alpha - 1, -alpha);
 
-                    if (evaluation > alpha && evaluation < beta)
-                    {
-                        // Hipothesis invalidated -> Regular search
-                        evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha);
-                    }
+                if (movesSearched == 0)
+                {
+                    evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha);
                 }
                 else
                 {
-                    evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha);
+                    // Late Move Reduction (LMR)
+                    if (movesSearched >= Configuration.EngineSettings.LMR_FullDepthMoves
+                        && depth >= Configuration.EngineSettings.LMR_ReductionLimit
+                        && !_isFollowingPV
+                        && !Utils.InCheck(position)
+                        //&& !Utils.InCheck(newPosition)
+                        && !move.IsCapture()
+                        && move.PromotedPiece() == default)
+                    {
+                        // Search with reduced depth
+                        evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1 + Configuration.EngineSettings.LMR_DepthReduction, -alpha - 1, -alpha);
+                    }
+                    else
+                    {
+                        // Ensuring full depth search takes palce
+                        evaluation = alpha + 1;
+                    }
+
+                    if (evaluation > alpha)
+                    {
+                        if (bestMove is not null)
+                        {
+                            // Principal Variation Search (PVS)
+                            // Optimistic search, validating that the rest of the moves are worse than bestmove.
+                            // It should produce more cutoffs and therefore be faster.
+                            // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
+
+                            // Search with full depth but narrowed score bandwidth
+                            evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -alpha - 1, -alpha);
+
+                            if (evaluation > alpha && evaluation < beta)
+                            {
+                                // Hipothesis invalidated -> search with full depth and full score bandwidth
+                                evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha);
+                            }
+                        }
+                        else
+                        {
+                            evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha);
+                        }
+                    }
                 }
 
                 _movesWithoutCaptureOrPawnMove = oldValue;
@@ -115,6 +148,8 @@ namespace Lynx
                     _pVTable[pvIndex] = move;
                     CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - depth - 1);
                 }
+
+                ++movesSearched;
             }
 
             if (bestMove is null)
