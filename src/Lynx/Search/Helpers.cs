@@ -44,7 +44,7 @@ namespace Lynx
                 return EvaluationConstants.PVMoveValue;
             }
 
-            return move.Score(position, _killerMoves, depth);
+            return move.Score(position, _killerMoves, depth, _historyMoves);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

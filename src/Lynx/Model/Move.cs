@@ -148,7 +148,7 @@ namespace Lynx.Model
         /// <param name="position">The position that precedes a move</param>
         /// <returns>The higher the score is, the more valuable is the captured piece and the less valuable is the piece that makes the such capture</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly int Score(Position position, int[,]? killerMoves = null, int? plies = null)
+        public readonly int Score(Position position, int[,]? killerMoves = null, int? plies = null, int[,]? historyMoves = null)
         {
             int score = 0;
 
@@ -188,6 +188,12 @@ namespace Lynx.Model
                     else if (killerMoves[1, plies.Value] == EncodedMove)
                     {
                         return EvaluationConstants.SecondKillerMoveValue;
+                    }
+
+                    // History move
+                    else if (historyMoves is not null)
+                    {
+                        return historyMoves[Piece(), TargetSquare()];
                     }
                 }
             }
