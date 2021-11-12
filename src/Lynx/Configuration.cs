@@ -114,5 +114,11 @@
         public int MinElapsedTimeToConsiderStopSearching { get; set; } = 1_000;
 
         public double DecisionTimePercentageToStopSearching { get; set; } = 0.5;
+
+        public int LMR_FullDepthMoves { get; set; } = 4;
+
+        public int LMR_ReductionLimit { get; set; } = 3;
+
+        public int LMR_DepthReduction { get; set; } = 1;
     }
 }

@@ -39,6 +39,14 @@ namespace Lynx
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool InCheck(Position position)
+        {
+            var kingSquare = position.PieceBitBoards[(int)Piece.K + PieceOffset(position.Side)].GetLS1BIndex();
+
+            return Attacks.IsSquaredAttacked(kingSquare, position.Side, position.PieceBitBoards, position.OccupancyBitBoards);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int ShortCastleRookTargetSquare(Side side) => ShortCastleRookTargetSquare((int)side);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int ShortCastleRookTargetSquare(int side)

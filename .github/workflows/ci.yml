@@ -127,7 +127,9 @@ jobs:
       run: dotnet build -c Release
 
     - name: Run long-running tests
-      run: dotnet test -c Release --no-build -v=normal --filter "TestCategory=LongRunning" # --collect:"XPlat Code Coverage"
+      run: dotnet test -c Release --no-build --filter "TestCategory=LongRunning" --logger "console;verbosity=normal"
+        # -v=normal https://github.com/dotnet/sdk/issues/16122, --logger "console;verbosity=normal" is a workaround
+        # --collect:"XPlat Code Coverage" https://github.com/coverlet-coverage/coverlet/issues/1192
 
   non-parallelizable-tests:
     runs-on: ${{ matrix.os }}
