@@ -69,6 +69,7 @@ namespace Lynx
         [Conditional("DEBUG")]
         private void ValidatePVTable()
         {
+            var position = Game.CurrentPosition;
             for (int i = 0; i < PVTable.Indexes[1]; ++i)
             {
                 if (_pVTable[i].EncodedMove == default)
@@ -79,6 +80,23 @@ namespace Lynx
                     }
                     break;
                 }
+                var move = _pVTable[i];
+
+                if (!Move.TryParseFromUCIString(
+                   move.UCIString(),
+                   position.AllPossibleMoves(),
+                   out _))
+                {
+                    throw new AssertException($"Unexpected PV move {move.UCIString()} from position {position.FEN}");
+                }
+
+                var newPosition = new Position(position, move);
+
+                if (!newPosition.IsValid())
+                {
+                    throw new AssertException($"Invalid position after move {move.UCIString()} from position {position.FEN}");
+                }
+                position = newPosition;
             }
         }
 

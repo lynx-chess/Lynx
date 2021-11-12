@@ -128,7 +128,7 @@ namespace Lynx.Test
                 $"Possible false positive: PV depth ({bestResult.Moves.Count}) expected to be fixed Configuration.EngineSettings.Depth ({Configuration.EngineSettings.Depth})");
         }
 
-        [TestCase(Category = "LongRunning", Explicit = true)]
+        [Test]
         public void Regression_TrashInPVTable()
         {
             var fen = Constants.InitialPositionFEN;
@@ -138,6 +138,23 @@ namespace Lynx.Test
             fen = "rq2k2r/ppp2pb1/2n1pnpp/1Q1p1b2/3P1B2/2N1PNP1/PPP2PBP/R3K2R w KQkq - 0 1";
             bestResult = SearchBestResult(fen);
             Assert.False(bestResult.Moves.Count > 5 && bestResult.Moves[5].UCIString() == "e5f4");
+        }
+
+        [Test]
+        public void Regression_TrashInPV()
+        {
+            const string positionCommand = "position startpos moves c2c4";
+
+            var mock = new Mock<ChannelWriter<string>>();
+
+            mock
+                .Setup(m => m.WriteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .Returns(ValueTask.CompletedTask);
+
+            var engine = new Engine(mock.Object);
+
+            engine.AdjustPosition(positionCommand);
+            Assert.DoesNotThrow(() => engine.BestMove());
         }
 
         [TestCase("8/8/4NQ2/7k/2P4p/1q2P2P/5P2/6K1 b - - 5 52", new[] { "b3b1", "b3d1" },

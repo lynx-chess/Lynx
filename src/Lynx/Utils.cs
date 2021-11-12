@@ -1,5 +1,6 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
+using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 
 namespace Lynx
@@ -148,6 +149,15 @@ namespace Lynx
             if (side == (int)Side.Both)
             {
                 throw new ArgumentException($"{Side.Both} wasn't expected");
+            }
+        }
+
+        [Conditional("DEBUG")]
+        public static void Assert(bool value, string errorMessage = "Assertion failed")
+        {
+            if (!value)
+            {
+                throw new AssertException(errorMessage);
             }
         }
     }

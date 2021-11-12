@@ -109,7 +109,7 @@ namespace Lynx
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsSquaredAttacked(int squareIndex, Side sideToMove, BitBoard[] piecePosition, BitBoard[] occupancy)
         {
-            Debug.Assert(sideToMove != Side.Both);
+            Utils.Assert(sideToMove != Side.Both);
 
             var offset = Utils.PieceOffset(sideToMove);
 

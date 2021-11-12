@@ -75,7 +75,7 @@ namespace Lynx
                 isCancelled = true;
                 _logger.Info($"Search cancellation requested after {_stopWatch.ElapsedMilliseconds}ms (depth {depth}, nodes {_nodes}), best move will be returned");
             }
-            catch (Exception e)
+            catch (Exception e) when (e is not AssertException)
             {
                 _logger.Error($"Unexpected error ocurred during the search at depth {depth}, best move will be returned" +
                     Environment.NewLine + e.Message + Environment.NewLine + e.StackTrace);

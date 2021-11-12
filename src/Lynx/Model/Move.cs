@@ -64,7 +64,7 @@ namespace Lynx.Model
         /// <returns></returns>
         public static bool TryParseFromUCIString(string UCIString, List<Move> moveList, [NotNullWhen(true)] out Move? move)
         {
-            Debug.Assert(UCIString.Length == 4 || UCIString.Length == 5);
+            Utils.Assert(UCIString.Length == 4 || UCIString.Length == 5);
 
             var sourceSquare = (UCIString[0] - 'a') + ((8 - (UCIString[1] - '0')) * 8);
             var targetSquare = (UCIString[2] - 'a') + ((8 - (UCIString[3] - '0')) * 8);
@@ -82,7 +82,7 @@ namespace Lynx.Model
                     return false;
                 }
 
-                Debug.Assert(move.Value.PromotedPiece() == default);
+                Utils.Assert(move.Value.PromotedPiece() == default);
                 return true;
             }
             else
@@ -105,8 +105,8 @@ namespace Lynx.Model
                     return false;
                 }
 
-                Debug.Assert(candidateMoves.Count() == 4);
-                Debug.Assert(candidateMoves.Count(predicate) == 1);
+                Utils.Assert(candidateMoves.Count() == 4);
+                Utils.Assert(candidateMoves.Count(predicate) == 1);
 
                 return true;
             }
