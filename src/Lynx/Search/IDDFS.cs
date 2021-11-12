@@ -9,6 +9,7 @@ namespace Lynx
         private readonly Stopwatch _stopWatch = new();
         private readonly Move[] _pVTable = new Move[((Configuration.EngineSettings.MaxDepth * Configuration.EngineSettings.MaxDepth) + Configuration.EngineSettings.MaxDepth) / 2];
         private readonly int[,] _killerMoves = new int[2, EvaluationConstants.MaxPlies];
+        private readonly int[,] _historyMoves = new int[12, EvaluationConstants.MaxPlies];
 
         private int _nodes;
         private bool _isFollowingPV;
@@ -30,6 +31,7 @@ namespace Lynx
             _stopWatch.Reset();
 
             Array.Clear(_killerMoves);
+            Array.Clear(_historyMoves);
             Array.Clear(_pVTable);
 
             _movesWithoutCaptureOrPawnMove = Game.MovesWithoutCaptureOrPawnMove;

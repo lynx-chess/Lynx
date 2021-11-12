@@ -71,6 +71,8 @@ If you're a Linux user and are new to .NET ecosystem, the conversation in [this 
 
 - Killer heuristic [[1](https://www.chessprogramming.org/Killer_Heuristic)]
 
+- History heuristic [[1](https://www.chessprogramming.org/History_Heuristic)]
+
 - Zobrist hashing [[1](https://www.chessprogramming.org/Zobrist_Hashing)]
 
 - Triangular PV-Table [[1](https://www.chessprogramming.org/Triangular_PV-Table)]

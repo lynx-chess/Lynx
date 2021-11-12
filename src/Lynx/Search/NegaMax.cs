@@ -107,6 +107,11 @@ namespace Lynx
                     alpha = evaluation;
                     bestMove = move;
 
+                    if (!move.IsCapture())
+                    {
+                        _historyMoves[move.Piece(), move.TargetSquare()] += depth << 2;
+                    }
+
                     _pVTable[pvIndex] = move;
                     CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - depth - 1);
                 }
