@@ -77,6 +77,28 @@ namespace Lynx.Model
             EnPassant = position.EnPassant;
         }
 
+        /// <summary>
+        /// Null moves constructor
+        /// </summary>
+        /// <param name="position"></param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Position(Position position, bool nullMove)
+        {
+            UniqueIdentifier = position.UniqueIdentifier;
+            PieceBitBoards = new BitBoard[12];
+            Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
+
+            OccupancyBitBoards = new BitBoard[3];
+            Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
+
+            Side = (Side)Utils.OppositeSide(position.Side);
+            Castle = position.Castle;
+            EnPassant = BoardSquare.noSquare;
+
+            UniqueIdentifier ^=
+                ZobristTable.SideHash();
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Position(Position position, Move move) : this(position)
         {

@@ -19,7 +19,7 @@ namespace Lynx
         /// Defaults to the worse possible score for Side to move's opponent, Int.MaxValue
         /// </param>
         /// <returns></returns>
-        private int NegaMax(Position position, int minDepth, int maxDepth, int depth, int alpha, int beta)
+        private int NegaMax(Position position, int minDepth, int maxDepth, int depth, int alpha, int beta, bool ancestorWasNullMove = false)
         {
             _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
             if (depth > minDepth)
@@ -33,11 +33,9 @@ namespace Lynx
             var nextPvIndex = PVTable.Indexes[depth + 1];
             _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
-            var pseudoLegalMoves = SortMoves(position.AllPossibleMoves(), position, depth);
-
             if (depth >= maxDepth)
             {
-                foreach (var candidateMove in pseudoLegalMoves)
+                foreach (var candidateMove in position.AllPossibleMoves())
                 {
                     if (new Position(position, candidateMove).WasProduceByAValidMove())
                     {
@@ -48,9 +46,34 @@ namespace Lynx
                 return position.EvaluateFinalPosition(depth, Game.PositionHashHistory, _movesWithoutCaptureOrPawnMove);
             }
 
+            bool isInCheck = Utils.InCheck(position);
+
+            if (depth > Configuration.EngineSettings.NullMovePruning_R
+                && !isInCheck
+                && !ancestorWasNullMove
+                /*TODO: avoid null-move pruning in positions likely to be zugzwang*/)
+            {
+                // Null-move pruning
+                var newPosition = new Position(position, nullMove: true);
+
+                var repetitions = Utils.UpdatePositionHistory(newPosition, Game.PositionHashHistory);
+
+                var evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1 + Configuration.EngineSettings.NullMovePruning_R, -beta, -beta + 1, ancestorWasNullMove: true);
+
+                Utils.RevertPositionHistory(newPosition, Game.PositionHashHistory, repetitions);
+
+                // Fail-hard beta-cutoff
+                if (evaluation >= beta)
+                {
+                    return beta;
+                }
+            }
+
             int movesSearched = 0;
             Move? bestMove = null;
             bool isAnyMoveValid = false;
+
+            var pseudoLegalMoves = SortMoves(position.AllPossibleMoves(), position, depth);
 
             foreach (var move in pseudoLegalMoves)
             {
@@ -63,6 +86,7 @@ namespace Lynx
 
                 PrintPreMove(position, depth, move);
 
+                // Before making a move
                 var oldValue = _movesWithoutCaptureOrPawnMove;
                 _movesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, _movesWithoutCaptureOrPawnMove);
                 var repetitions = Utils.UpdatePositionHistory(newPosition, Game.PositionHashHistory);
@@ -79,7 +103,7 @@ namespace Lynx
                     if (movesSearched >= Configuration.EngineSettings.LMR_FullDepthMoves
                         && depth >= Configuration.EngineSettings.LMR_ReductionLimit
                         && !_isFollowingPV
-                        && !Utils.InCheck(position)
+                        && !isInCheck
                         //&& !Utils.InCheck(newPosition)
                         && !move.IsCapture()
                         && move.PromotedPiece() == default)
@@ -118,6 +142,7 @@ namespace Lynx
                     }
                 }
 
+                // After making a move
                 _movesWithoutCaptureOrPawnMove = oldValue;
                 Utils.RevertPositionHistory(newPosition, Game.PositionHashHistory, repetitions);
 

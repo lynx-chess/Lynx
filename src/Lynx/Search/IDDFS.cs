@@ -2,6 +2,7 @@
 using Lynx.UCI.Commands.Engine;
 using NLog;
 using System.Diagnostics;
+
 namespace Lynx
 {
     public sealed partial class Engine
@@ -61,8 +62,8 @@ namespace Lynx
                     PrintPvTable();
 
                     var pvMoves = _pVTable.TakeWhile(m => m.EncodedMove != default).ToList();
-                    var maxDepthReached = PVTable.Indexes.IndexOf(PVTable.Indexes.Reverse().First(index => _pVTable[index].EncodedMove != default)) + 1;
-
+                    //var maxDepthReached = PVTable.Indexes.IndexOf(PVTable.Indexes.Reverse().First(index => _pVTable[index].EncodedMove != default)) + 1; // TODO fix
+                    var maxDepthReached = depth;
                     var elapsedTime = _stopWatch.ElapsedMilliseconds;
                     searchResult = new SearchResult(pvMoves.FirstOrDefault(), bestEvaluation, depth, maxDepthReached, _nodes, elapsedTime, Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * elapsedTime) + 1), 0, Int64.MaxValue)), pvMoves);
 
