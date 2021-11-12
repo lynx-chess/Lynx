@@ -58,7 +58,7 @@ jobs:
 
     - name: '[Ubuntu] Generate test coverage report'
       if: matrix.os == 'ubuntu-latest' && matrix.configuration == 'Release'
-      uses: danielpalme/ReportGenerator-GitHub-Action@4.8.12
+      uses: danielpalme/ReportGenerator-GitHub-Action@5.0.0
       with:
         reports: 'tests/**/*.cobertura.xml'
         targetdir: 'coveragereport'
@@ -169,7 +169,7 @@ jobs:
 
     - name: '[Ubuntu] Generate test coverage report'
       if: matrix.os == 'ubuntu-latest'
-      uses: danielpalme/ReportGenerator-GitHub-Action@4.8.12
+      uses: danielpalme/ReportGenerator-GitHub-Action@5.0.0
       with:
         reports: 'tests/**/*.cobertura.xml'
         targetdir: 'coveragereport'
@@ -218,7 +218,7 @@ jobs:
     #    path: artifacts/partial-coverage/long-running/
 
     - name: '[Ubuntu] Generate test coverage report'
-      uses: danielpalme/ReportGenerator-GitHub-Action@4.8.12
+      uses: danielpalme/ReportGenerator-GitHub-Action@5.0.0
       with:
         reports: 'artifacts/partial-coverage/**/Cobertura.xml;tests/**/*.cobertura.xml'
         targetdir: 'coveragereport'
