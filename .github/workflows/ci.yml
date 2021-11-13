@@ -54,11 +54,11 @@ jobs:
       run: dotnet build -c ${{ matrix.configuration }}
 
     - name: Run CI tests
-      run: dotnet test -c ${{ matrix.configuration }} --no-build --collect:"XPlat Code Coverage"
+      run: dotnet test -c ${{ matrix.configuration }} --no-build --collect:"XPlat Code Coverage" --logger "console;verbosity=normal"
 
     - name: '[Ubuntu] Generate test coverage report'
       if: matrix.os == 'ubuntu-latest' && matrix.configuration == 'Release'
-      uses: danielpalme/ReportGenerator-GitHub-Action@4.8.12
+      uses: danielpalme/ReportGenerator-GitHub-Action@5.0.0
       with:
         reports: 'tests/**/*.cobertura.xml'
         targetdir: 'coveragereport'
@@ -99,6 +99,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macOS-latest]
+        category: [LongRunning, ExtraLongRunning]
       fail-fast: false
 
     env:
@@ -126,114 +127,114 @@ jobs:
     - name: Build
       run: dotnet build -c Release
 
-    - name: Run long-running tests
-      run: dotnet test -c Release --no-build --filter "TestCategory=LongRunning" --logger "console;verbosity=normal"
+    - name: Run ${{ matrix.category }} tests
+      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" --logger "console;verbosity=normal"
         # -v=normal https://github.com/dotnet/sdk/issues/16122, --logger "console;verbosity=normal" is a workaround
         # --collect:"XPlat Code Coverage" https://github.com/coverlet-coverage/coverlet/issues/1192
 
-  non-parallelizable-tests:
-    runs-on: ${{ matrix.os }}
+  #non-parallelizable-tests:
+  #  runs-on: ${{ matrix.os }}
 
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
-      fail-fast: false
+  #  strategy:
+  #    matrix:
+  #      os: [ubuntu-latest, windows-latest, macOS-latest]
+  #    fail-fast: false
 
-    env:
-      DOTNET_CLI_TELEMETRY_OPTOUT: 1
-      PROJECT_NAME: Lynx
+  #  env:
+  #    DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  #    PROJECT_NAME: Lynx
 
-    steps:
-    - uses: actions/checkout@v2
+  #  steps:
+  #  - uses: actions/checkout@v2
 
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '6.0.100'
-        include-prerelease: true
+  #  - name: Setup .NET Core
+  #    uses: actions/setup-dotnet@v1
+  #    with:
+  #      dotnet-version: '6.0.100'
+  #      include-prerelease: true
 
-    - name: Nuget cache
-      uses: actions/cache@v2
-      with:
-        path:
-          ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-nuget-
+  #  - name: Nuget cache
+  #    uses: actions/cache@v2
+  #    with:
+  #      path:
+  #        ~/.nuget/packages
+  #      key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+  #      restore-keys: |
+  #        ${{ runner.os }}-nuget-
 
-    - name: Build
-      run: dotnet build -c Release
+  #  - name: Build
+  #    run: dotnet build -c Release
 
-    - name: Run non-parallelizable tests
-      run: dotnet test -c Release --no-build -v=normal --filter "TestCategory=NonParallelizable" --collect:"XPlat Code Coverage"
+  #  - name: Run non-parallelizable tests
+  #    run: dotnet test -c Release --no-build -v=normal --filter "TestCategory=NonParallelizable" --collect:"XPlat Code Coverage"
 
-    - name: '[Ubuntu] Generate test coverage report'
-      if: matrix.os == 'ubuntu-latest'
-      uses: danielpalme/ReportGenerator-GitHub-Action@4.8.12
-      with:
-        reports: 'tests/**/*.cobertura.xml'
-        targetdir: 'coveragereport'
-        reporttypes: 'HtmlInline_AzurePipelines_Dark;SonarQube;Cobertura'
-        assemblyfilters: '+*'
-        classfilters: '+*;-*Exception;-*ConstantGenerator;-*MagicNumberGenerator'
-        filefilters: '+*'
-        verbosity: 'Info'
-        title: '${{ env.PROJECT_NAME }} #${{ github.run_number }} (${{ env.GITHUB_REF_SLUG }})'
-        tag: '${{ github.run_number }}_${{ github.run_id }}'
-        customSettings: 'numberOfReportsParsedInParallel=3;numberOfReportsMergedInParallel=3'
+  #  - name: '[Ubuntu] Generate test coverage report'
+  #    if: matrix.os == 'ubuntu-latest'
+  #    uses: danielpalme/ReportGenerator-GitHub-Action@5.0.0
+  #    with:
+  #      reports: 'tests/**/*.cobertura.xml'
+  #      targetdir: 'coveragereport'
+  #      reporttypes: 'HtmlInline_AzurePipelines_Dark;SonarQube;Cobertura'
+  #      assemblyfilters: '+*'
+  #      classfilters: '+*;-*Exception;-*ConstantGenerator;-*MagicNumberGenerator'
+  #      filefilters: '+*'
+  #      verbosity: 'Info'
+  #      title: '${{ env.PROJECT_NAME }} #${{ github.run_number }} (${{ env.GITHUB_REF_SLUG }})'
+  #      tag: '${{ github.run_number }}_${{ github.run_id }}'
+  #      customSettings: 'numberOfReportsParsedInParallel=3;numberOfReportsMergedInParallel=3'
 
-    - name: '[Ubuntu] Upload test coverage report'
-      if: matrix.os == 'ubuntu-latest'
-      uses: actions/upload-artifact@v2
-      with:
-        name: ${{ env.PROJECT_NAME }}-non-parallelizable-coverage-ci-${{ github.run_number }}
-        path: coveragereport/
-        if-no-files-found: error
+  #  - name: '[Ubuntu] Upload test coverage report'
+  #    if: matrix.os == 'ubuntu-latest'
+  #    uses: actions/upload-artifact@v2
+  #    with:
+  #      name: ${{ env.PROJECT_NAME }}-non-parallelizable-coverage-ci-${{ github.run_number }}
+  #      path: coveragereport/
+  #      if-no-files-found: error
 
-  unify-coverage-reports:
-    needs: [build, non-parallelizable-tests] # long-running-tests
-    runs-on: 'ubuntu-latest'
+  #unify-coverage-reports:
+  #  needs: [build, non-parallelizable-tests] # long-running-tests
+  #  runs-on: 'ubuntu-latest'
 
-    env:
-      PROJECT_NAME: Lynx
+  #  env:
+  #    PROJECT_NAME: Lynx
 
-    steps:
-    - name: Download build coverage
-      uses: actions/download-artifact@v2
-      with:
-        name: ${{ env.PROJECT_NAME }}-build-coverage-ci-${{ github.run_number }}
-        path: artifacts/partial-coverage/build/
+  #  steps:
+  #  - name: Download build coverage
+  #    uses: actions/download-artifact@v2
+  #    with:
+  #      name: ${{ env.PROJECT_NAME }}-build-coverage-ci-${{ github.run_number }}
+  #      path: artifacts/partial-coverage/build/
 
-    - name: Download non-parallelizable coverage
-      uses: actions/download-artifact@v2
-      with:
-        name: ${{ env.PROJECT_NAME }}-non-parallelizable-coverage-ci-${{ github.run_number }}
-        path: artifacts/partial-coverage/non-parallelizable/
+  #  - name: Download non-parallelizable coverage
+  #    uses: actions/download-artifact@v2
+  #    with:
+  #      name: ${{ env.PROJECT_NAME }}-non-parallelizable-coverage-ci-${{ github.run_number }}
+  #      path: artifacts/partial-coverage/non-parallelizable/
 
-    #Coverlet issue https://github.com/coverlet-coverage/coverlet/issues/1192
-    #- name: Download long-running coverage
-    #  uses: actions/download-artifact@v2
-    #  with:
-    #    name: ${{ env.PROJECT_NAME }}-long-running-coverage-ci-${{ github.run_number }}
-    #    path: artifacts/partial-coverage/long-running/
+  #  #Coverlet issue https://github.com/coverlet-coverage/coverlet/issues/1192
+  #  #- name: Download long-running coverage
+  #  #  uses: actions/download-artifact@v2
+  #  #  with:
+  #  #    name: ${{ env.PROJECT_NAME }}-long-running-coverage-ci-${{ github.run_number }}
+  #  #    path: artifacts/partial-coverage/long-running/
 
-    - name: '[Ubuntu] Generate test coverage report'
-      uses: danielpalme/ReportGenerator-GitHub-Action@4.8.12
-      with:
-        reports: 'artifacts/partial-coverage/**/Cobertura.xml;tests/**/*.cobertura.xml'
-        targetdir: 'coveragereport'
-        reporttypes: 'HtmlInline_AzurePipelines_Dark;SonarQube;Cobertura'
-        assemblyfilters: '+*'
-        classfilters: '+*;-*Exception;-*ConstantGenerator;-*MagicNumberGenerator'
-        filefilters: '+*'
-        verbosity: 'Info'
-        title: '${{ env.PROJECT_NAME }} #${{ github.run_number }} (${{ env.GITHUB_REF_SLUG }})'
-        tag: '${{ github.run_number }}_${{ github.run_id }}'
-        customSettings: 'numberOfReportsParsedInParallel=3;numberOfReportsMergedInParallel=3'
+  #  - name: '[Ubuntu] Generate test coverage report'
+  #    uses: danielpalme/ReportGenerator-GitHub-Action@5.0.0
+  #    with:
+  #      reports: 'artifacts/partial-coverage/**/Cobertura.xml;tests/**/*.cobertura.xml'
+  #      targetdir: 'coveragereport'
+  #      reporttypes: 'HtmlInline_AzurePipelines_Dark;SonarQube;Cobertura'
+  #      assemblyfilters: '+*'
+  #      classfilters: '+*;-*Exception;-*ConstantGenerator;-*MagicNumberGenerator'
+  #      filefilters: '+*'
+  #      verbosity: 'Info'
+  #      title: '${{ env.PROJECT_NAME }} #${{ github.run_number }} (${{ env.GITHUB_REF_SLUG }})'
+  #      tag: '${{ github.run_number }}_${{ github.run_id }}'
+  #      customSettings: 'numberOfReportsParsedInParallel=3;numberOfReportsMergedInParallel=3'
 
-    - name: '[Ubuntu] Upload unified test coverage report'
-      uses: actions/upload-artifact@v2
-      with:
-        name: ${{ env.PROJECT_NAME }}-coverage-ci-${{ github.run_number }}
-        path: coveragereport/
-        if-no-files-found: error
+  #  - name: '[Ubuntu] Upload unified test coverage report'
+  #    uses: actions/upload-artifact@v2
+  #    with:
+  #      name: ${{ env.PROJECT_NAME }}-coverage-ci-${{ github.run_number }}
+  #      path: coveragereport/
+  #      if-no-files-found: error

@@ -5,15 +5,15 @@ using System.Text;
 
 namespace Lynx
 {
-    public record SearchResult(Move BestMove, double Evaluation, int TargetDepth, int DepthReached, int Nodes, long Time, long NodesPerSecond, List<Move> Moves)
+    public record SearchResult(Move BestMove, double Evaluation, int TargetDepth, int DepthReached, int Nodes, long Time, long NodesPerSecond, List<Move> Moves, int Mate = default)
     {
         public bool IsCancelled { get; set; }
     }
 
     public sealed partial class Engine
     {
-        private const int MinValue = -2 * Position.CheckMateEvaluation;
-        private const int MaxValue = +2 * Position.CheckMateEvaluation;
+        private const int MinValue = -2 * EvaluationConstants.CheckMateEvaluation;
+        private const int MaxValue = +2 * EvaluationConstants.CheckMateEvaluation;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private List<Move> SortMoves(List<Move> moves, Position currentPosition, int depth)
@@ -76,7 +76,7 @@ namespace Lynx
                 {
                     for (int j = i + 1; j < PVTable.Indexes[1]; ++j)
                     {
-                        Debug.Assert(_pVTable[j].EncodedMove == default);
+                        Utils.Assert(_pVTable[j].EncodedMove == default, $"Not expecting a move in _pvTable[{j}]");
                     }
                     break;
                 }
@@ -87,7 +87,9 @@ namespace Lynx
                    position.AllPossibleMoves(),
                    out _))
                 {
-                    throw new AssertException($"Unexpected PV move {move.UCIString()} from position {position.FEN}");
+                    var message = $"Unexpected PV move {move.UCIString()} from position {position.FEN}";
+                    _logger.Error(message);
+                    throw new AssertException(message);
                 }
 
                 var newPosition = new Position(position, move);

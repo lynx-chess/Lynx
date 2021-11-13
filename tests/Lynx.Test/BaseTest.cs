@@ -7,10 +7,13 @@ namespace Lynx.Test
 {
     public abstract class BaseTest
     {
-        protected static void TestBestMove(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString)
+        private const int DefaultSearchDepth = 5;
+
+        protected static SearchResult TestBestMove(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString, int depth = DefaultSearchDepth)
         {
-            SearchResult searchResult = SearchBestResult(fen);
-            var bestMoveFound = searchResult.BestMove;
+            var engine = GetEngine(fen);
+            var seachResult = engine.BestMove(new($"go depth {depth}"));
+            var bestMoveFound = seachResult.BestMove;
 
             if (allowedUCIMoveString is not null)
             {
@@ -21,9 +24,18 @@ namespace Lynx.Test
             {
                 Assert.False(excludedUCIMoveString.Contains(bestMoveFound.UCIString()));
             }
+
+            return seachResult;
         }
 
-        protected static SearchResult SearchBestResult(string fen)
+        protected static Engine GetEngine(string fen)
+        {
+            var engine = GetEngine();
+
+            return SetEnginePosition(engine, fen);
+        }
+
+        protected static Engine GetEngine()
         {
             var mock = new Mock<ChannelWriter<string>>();
 
@@ -31,10 +43,14 @@ namespace Lynx.Test
                 .Setup(m => m.WriteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .Returns(ValueTask.CompletedTask);
 
-            var engine = new Engine(mock.Object);
+            return new Engine(mock.Object);
+        }
+
+        protected static Engine SetEnginePosition(Engine engine, string fen)
+        {
             engine.SetGame(new Game(fen));
 
-            return engine.BestMove();
+            return engine;
         }
     }
 }

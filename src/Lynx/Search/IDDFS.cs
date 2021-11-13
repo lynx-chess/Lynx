@@ -9,8 +9,8 @@ namespace Lynx
     {
         private readonly Stopwatch _stopWatch = new();
         private readonly Move[] _pVTable = new Move[((Configuration.EngineSettings.MaxDepth * Configuration.EngineSettings.MaxDepth) + Configuration.EngineSettings.MaxDepth) / 2];
-        private readonly int[,] _killerMoves = new int[2, EvaluationConstants.MaxPlies];
-        private readonly int[,] _historyMoves = new int[12, EvaluationConstants.MaxPlies];
+        private readonly int[,] _killerMoves = new int[2, Configuration.EngineSettings.MaxDepth];
+        private readonly int[,] _historyMoves = new int[12, 64];
 
         private int _nodes;
         private bool _isFollowingPV;
@@ -20,6 +20,8 @@ namespace Lynx
         /// Copy of <see cref="Game.MovesWithoutCaptureOrPawnMove"/>
         /// </summary>
         private int _movesWithoutCaptureOrPawnMove;
+
+        private readonly int[] _maxDepthReached = new int[Configuration.EngineSettings.MaxDepth];
 
         private readonly Move _defaultMove = new();
 
@@ -41,6 +43,7 @@ namespace Lynx
             SearchResult? searchResult = null;
             int depth = 1;
             bool isCancelled = false;
+            bool isMateDetected = false;
 
             try
             {
@@ -59,17 +62,26 @@ namespace Lynx
                     bestEvaluation = NegaMax(Game.CurrentPosition, minDepth, maxDepth: depth, depth: 0, alpha: MinValue, beta: MaxValue);
 
                     ValidatePVTable();
-                    PrintPvTable();
+                    //PrintPvTable();
 
                     var pvMoves = _pVTable.TakeWhile(m => m.EncodedMove != default).ToList();
-                    //var maxDepthReached = PVTable.Indexes.IndexOf(PVTable.Indexes.Reverse().First(index => _pVTable[index].EncodedMove != default)) + 1; // TODO fix
-                    var maxDepthReached = depth;
+                    var maxDepthReached = _maxDepthReached.Last(item => item != default);
+
+                    int mate = default;
+                    var bestEvaluationAbs = Math.Abs(bestEvaluation);
+                    isMateDetected = bestEvaluationAbs > 0.1 * EvaluationConstants.CheckMateEvaluation;
+                    if (isMateDetected)
+                    {
+                        mate = (int)Math.Ceiling(0.5 * ((EvaluationConstants.CheckMateEvaluation - bestEvaluationAbs) / Position.DepthFactor));
+                        Math.CopySign(bestEvaluation, mate);
+                    }
+
                     var elapsedTime = _stopWatch.ElapsedMilliseconds;
-                    searchResult = new SearchResult(pvMoves.FirstOrDefault(), bestEvaluation, depth, maxDepthReached, _nodes, elapsedTime, Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * elapsedTime) + 1), 0, Int64.MaxValue)), pvMoves);
+                    searchResult = new SearchResult(pvMoves.FirstOrDefault(), bestEvaluation, depth, maxDepthReached, _nodes, elapsedTime, Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * elapsedTime) + 1), 0, Int64.MaxValue)), pvMoves, mate);
 
                     Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(searchResult)));
 
-                } while (stopSearchCondition(++depth, maxDepth, bestEvaluation, _nodes, decisionTime, _stopWatch, _logger)); ;
+                } while (stopSearchCondition(++depth, maxDepth, isMateDetected, _nodes, decisionTime, _stopWatch, _logger));
             }
             catch (OperationCanceledException)
             {
@@ -96,9 +108,9 @@ namespace Lynx
                 return new(default, bestEvaluation, depth, depth, _nodes, _stopWatch.ElapsedMilliseconds, Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * _stopWatch.ElapsedMilliseconds) + 1), 0, Int64.MaxValue)), new List<Move>());
             }
 
-            static bool stopSearchCondition(int depth, int? maxDepth, int bestEvaluation, int nodes, int? decisionTime, Stopwatch stopWatch, ILogger logger)
+            static bool stopSearchCondition(int depth, int? maxDepth, bool isMateDetected, int nodes, int? decisionTime, Stopwatch stopWatch, ILogger logger)
             {
-                if (Math.Abs(bestEvaluation) > 0.1 * Position.CheckMateEvaluation)
+                if (isMateDetected)
                 {
                     logger.Info($"Stopping at depth {depth - 1}: mate detected");
                     return false;

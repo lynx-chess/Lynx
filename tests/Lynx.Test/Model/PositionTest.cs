@@ -120,8 +120,8 @@ namespace Lynx.Test.Model
         [TestCase("7K/8/8/8/8/3b4/1k6/6q1 w - - 0 1", 0)]
         [TestCase("8/5K2/7p/6pk/6p1/6P1/7P/8 b - - 0 1", 0)]
         [TestCase("8/7p/6p1/6P1/6PK/5k1P/8/8 w - - 0 1", 0)]
-        [TestCase("7k/8/8/8/8/8/1K5R/6R1 b - - 0 1", -Position.CheckMateEvaluation)]
-        [TestCase("7K/8/8/8/8/8/1k5r/6r1 w - - 0 1", -Position.CheckMateEvaluation)]
+        [TestCase("7k/8/8/8/8/8/1K5R/6R1 b - - 0 1", -EvaluationConstants.CheckMateEvaluation)]
+        [TestCase("7K/8/8/8/8/8/1k5r/6r1 w - - 0 1", -EvaluationConstants.CheckMateEvaluation)]
         public void EvaluateFinalPosition_NegaMax(string fen, int expectedEvaluationValue)
         {
             // Arrange

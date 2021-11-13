@@ -1,12 +1,14 @@
 ﻿using Lynx.Model;
+using NLog;
 using System.Diagnostics;
-using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 
 namespace Lynx
 {
     public static class Utils
     {
+        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+
         /// <summary>
         /// Side.White -> 0
         /// Side.Black -> 6
@@ -157,6 +159,7 @@ namespace Lynx
         {
             if (!value)
             {
+                _logger.Error(errorMessage);
                 throw new AssertException(errorMessage);
             }
         }

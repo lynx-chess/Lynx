@@ -7,8 +7,6 @@ namespace Lynx.Model
 {
     public sealed class Position
     {
-        internal const int CheckMateEvaluation = 1_000_000_000;
-
         internal const int DepthFactor = 1_000_000;
 
         private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
@@ -402,7 +400,7 @@ namespace Lynx.Model
                 this,
                 (Side)Utils.OppositeSide(Side)))
             {
-                return -CheckMateEvaluation + (DepthFactor * depth);
+                return -EvaluationConstants.CheckMateEvaluation + (DepthFactor * depth);
             }
             else
             {
