@@ -122,7 +122,9 @@ namespace Lynx.UCI.Commands.Engine
     {
         public const string Id = "option";
 
-        public static readonly ImmutableArray<string> AvailableOptions = ImmutableArray.Create<string>();
+        public static readonly ImmutableArray<string> AvailableOptions = ImmutableArray.Create<string>(
+            "option name UCI_Opponent type string",
+            "option name UCI_EngineAbout type string default Lynx by Eduardo Cáceres, see https://github.com/lynx-chess/Lynx");
 
         //"option name Hash type spin default 1 min 1 max 128",
         //"option name UCI_AnalyseMode type check",
@@ -136,6 +138,5 @@ namespace Lynx.UCI.Commands.Engine
         //"option name UCI_ShowRefutations type check default false",
         //"option name UCI_LimitStrength type check default false",
         //"option name UCI_Elo type spin",
-        //"option name UCI_Opponent type string",       // Interesting for game logs;
     }
 }
