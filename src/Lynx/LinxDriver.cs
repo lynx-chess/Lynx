@@ -183,6 +183,22 @@ namespace Lynx
                         _logger.Warn("Hash size modification not supported yet");
                         break;
                     }
+                case "uci_opponent":
+                    {
+                        if (commandItems.Length > 4)
+                        {
+                            _logger.Info($"Game against {string.Join(' ', commandItems.Skip(4).Except(new[] { "none" }))}");
+                        }
+                        break;
+                    }
+                case "uci_engineabout":
+                    {
+                        if (commandItems.Length > 4)
+                        {
+                            _logger.Info($"UCI_EngineAbout: {string.Join(' ', commandItems.Skip(4))}");
+                        }
+                        break;
+                    }
                 default:
                     _logger.Warn($"Unsupported option: {command}");
                     break;

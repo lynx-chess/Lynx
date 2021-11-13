@@ -47,7 +47,6 @@ namespace Lynx.Test.BestMove
         [TestCase("6k1/1R6/5K2/3p1N2/1P3n2/8/8/3r4 w - -", new[] { "f5h6" },
             Category = "LongRunning", Explicit = true,
             Description = "https://gameknot.com/chess-puzzle.pl?pz=260253")]
-        // TODO http://www.talkchess.com/forum3/viewtopic.php?f=7&t=78583
         public void Mate_in_4(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
         {
             TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 8);

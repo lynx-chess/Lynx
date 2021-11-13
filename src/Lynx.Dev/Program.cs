@@ -404,6 +404,7 @@ static void _26_Piece_Moves()
     position.Print();
 
     var moves = MoveGenerator.GenerateKnightMoves(position).ToList();
+    moves.ForEach(m => Console.WriteLine(m));
 
     moves = MoveGenerator.GenerateAllMoves(position).ToList();
     Console.WriteLine($"Expected 48, found: {moves.Count}");
@@ -421,7 +422,9 @@ static void _28_Move_Encoding()
     const BoardSquare targetSquare = BoardSquare.h1;
 
     // Encode move
+#pragma warning disable S2437 // Silly bit operations should not be performed - ¬¬
     move = (move | (int)targetSquare) << 6;
+#pragma warning restore S2437 // Silly bit operations should not be performed
     Console.WriteLine($"{Convert.ToString(move, 2)}");
 
     // Decode move
@@ -671,7 +674,7 @@ static void ZobristTable()
     var pos = new Position(KillerPosition);
     var zobristTable = InitializeZobristTable();
     var hash = CalculatePositionHash(zobristTable, pos);
-    var updatedHash = UpdatePositionHash(zobristTable, hash, pos.AllPossibleMoves().First());
+    var updatedHash = UpdatePositionHash(zobristTable, hash, pos.AllPossibleMoves()[0]);
 
     Console.WriteLine(updatedHash);
 }
@@ -712,7 +715,6 @@ static long CalculatePositionHash(long[,] zobristTable, Position position)
 
 static long UpdatePositionHash(long[,] zobristTable, long positionHash, Move move)
 {
-    // TODO: side, enpassant, etc.
     var sourcePiece = move.Piece();
     var piece = move.PromotedPiece();
     if (piece == default)
@@ -735,22 +737,22 @@ static void PV_Table()
 
     /*
      * Watch optimized
-     * 
+     *
      *  $"{pvTable[0].ToString()} {pvTable[1].ToString()}" + $" {pvTable[2].ToString()} {pvTable[3].ToString()}" + $"{pvTable[4].ToString()} {pvTable[5].ToString()}" + $" {pvTable[6].ToString()} {pvTable[7].ToString()}"
      *  $"           {pvTable[32].ToString()} {pvTable[33].ToString()}" + $" {pvTable[34].ToString()} {pvTable[35].ToString()}" + $"{pvTable[36].ToString()} {pvTable[37].ToString()}" + $" {pvTable[38].ToString()}"
      *  $"                      {pvTable[63].ToString()} {pvTable[64].ToString()}" + $" {pvTable[65].ToString()} {pvTable[66].ToString()}" + $"{pvTable[67].ToString()} {pvTable[68].ToString()}"
      *  $"                                 {pvTable[93].ToString()} {pvTable[94].ToString()}" + $" {pvTable[95].ToString()} {pvTable[96].ToString()}" + $"{pvTable[97].ToString()}"
      *  $"                                            {pvTable[122].ToString()} {pvTable[123].ToString()}" + $" {pvTable[124].ToString()} {pvTable[125].ToString()}"
      *  $"                                                       {pvTable[150].ToString()} {pvTable[151].ToString()}" + $" {pvTable[152].ToString()}"
-     *  
+     *
      *  $"{pvTable[0]} {pvTable[1]}" + $" {pvTable[2]} {pvTable[3]}" + $"{pvTable[4]} {pvTable[5]}" + $" {pvTable[6]} {pvTable[7]}" + Environment.NewLine +
      *  $"           {pvTable[32]} {pvTable[33]}" + $" {pvTable[34]} {pvTable[35]}" + $"{pvTable[36]} {pvTable[37]}" + $" {pvTable[38]}" + Environment.NewLine +
      *  $"                      {pvTable[63]} {pvTable[64]}" + $" {pvTable[65]} {pvTable[66]}" + $"{pvTable[67]} {pvTable[68]}" + Environment.NewLine +
      *  $"                                 {pvTable[93]} {pvTable[94]}" + $" {pvTable[95]} {pvTable[96]}" + $"{pvTable[97]}" + Environment.NewLine +
      *  $"                                            {pvTable[122]} {pvTable[123]}" + $" {pvTable[124]} {pvTable[125]}" + Environment.NewLine +
      *  $"                                                       {pvTable[150]} {pvTable[151]}" + $" {pvTable[152]}" + Environment.NewLine
-     *  
-     *  
+     *
+     *
      *  Console optimized
             Console.WriteLine(
 $"{pvTable[0],-6} {pvTable[1], -6}" + $" {pvTable[2], -6} {pvTable[3], -6}" + $" {pvTable[4], -6} {pvTable[5], -6}" + $" {pvTable[6], -6} {pvTable[7], -6}" + Environment.NewLine +
@@ -759,6 +761,6 @@ $"              {pvTable[63], -6} {pvTable[64], -6}" + $" {pvTable[65], -6} {pvT
 $"                     {pvTable[93], -6} {pvTable[94], -6}" + $" {pvTable[95], -6} {pvTable[96], -6}" + $" {pvTable[97], -6}" + Environment.NewLine +
 $"                            {pvTable[122], -6} {pvTable[123], -6}" + $" {pvTable[124], -6} {pvTable[125], -6}" + Environment.NewLine +
 $"                                   {pvTable[150], -6} {pvTable[151], -6}" + $" {pvTable[152], -6}" + Environment.NewLine);
-     *  
+     *
      */
 }
