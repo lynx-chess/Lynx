@@ -86,7 +86,7 @@ namespace Lynx.Test.BestMove
 
             // Assert
             Assert.AreNotEqual(movesThatAllowsRepetition.UCIString(), bestMoveFound.UCIString(), "No threefold repetition avoided");
-            Assert.Less(searchResult.Evaluation, Position.CheckMateEvaluation - (20 * Position.DepthFactor), "Mate not detected");
+            Assert.Less(searchResult.Evaluation, EvaluationConstants.CheckMateEvaluation - (20 * Position.DepthFactor), "Mate not detected");
         }
 
         [Test]
@@ -182,7 +182,7 @@ namespace Lynx.Test.BestMove
 
             // Assert
             Assert.AreNotEqual(movesThatAllowsRepetition.UCIString(), bestMoveFound.UCIString(), "No 50 moves rule avoided");
-            Assert.Less(searchResult.Evaluation, Position.CheckMateEvaluation - (20 * Position.DepthFactor), "Mate not detected");
+            Assert.Less(searchResult.Evaluation, EvaluationConstants.CheckMateEvaluation - (20 * Position.DepthFactor), "Mate not detected");
         }
 
         [Test]

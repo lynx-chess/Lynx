@@ -5,15 +5,15 @@ using System.Text;
 
 namespace Lynx
 {
-    public record SearchResult(Move BestMove, double Evaluation, int TargetDepth, int DepthReached, int Nodes, long Time, long NodesPerSecond, List<Move> Moves)
+    public record SearchResult(Move BestMove, double Evaluation, int TargetDepth, int DepthReached, int Nodes, long Time, long NodesPerSecond, List<Move> Moves, int Mate = default)
     {
         public bool IsCancelled { get; set; }
     }
 
     public sealed partial class Engine
     {
-        private const int MinValue = -2 * Position.CheckMateEvaluation;
-        private const int MaxValue = +2 * Position.CheckMateEvaluation;
+        private const int MinValue = -2 * EvaluationConstants.CheckMateEvaluation;
+        private const int MaxValue = +2 * EvaluationConstants.CheckMateEvaluation;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private List<Move> SortMoves(List<Move> moves, Position currentPosition, int depth)

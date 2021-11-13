@@ -224,7 +224,7 @@ namespace Lynx
             { 100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600 }
         };
 
-        public const int MaxPlies = 64;
+        public const int CheckMateEvaluation = 1_000_000_000;
 
         public const int FirstKillerMoveValue = 9_000;
 

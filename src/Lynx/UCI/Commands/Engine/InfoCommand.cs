@@ -80,7 +80,7 @@
                 $" depth {searchResult.TargetDepth}" +
                 $" seldepth {searchResult.DepthReached}" +
                 $" multipv 1" +
-                $" score cp {searchResult.Evaluation}" +
+                $" score cp {searchResult.Evaluation}" + (searchResult.Mate == default ? "" : $" mate {searchResult.Mate}") +
                 $" nodes {searchResult.Nodes}" +
                 $" nps {searchResult.NodesPerSecond}" +
                 $" time {searchResult.Time}" +
