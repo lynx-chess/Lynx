@@ -58,7 +58,7 @@ namespace Lynx
                     bestEvaluation = NegaMax(Game.CurrentPosition, minDepth, maxDepth: depth, depth: 0, alpha: MinValue, beta: MaxValue);
 
                     ValidatePVTable();
-                    PrintPvTable();
+                    //PrintPvTable();
 
                     var pvMoves = _pVTable.TakeWhile(m => m.EncodedMove != default).ToList();
                     var maxDepthReached = PVTable.Indexes.IndexOf(PVTable.Indexes.Reverse().First(index => _pVTable[index].EncodedMove != default)) + 1;
