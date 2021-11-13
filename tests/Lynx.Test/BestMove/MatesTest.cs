@@ -13,7 +13,8 @@ namespace Lynx.Test.BestMove
             Description = "https://www.chessgames.com/perl/chessgame?gid=1886010")]
         public void Mate_in_1(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
         {
-            TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 1);
+            var result = TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 1);
+            Assert.AreEqual(1, result.Mate);
         }
 
         [TestCase("8/pN3R2/1b2k1K1/n4R2/pp1p4/3B1P1n/3B1PNP/3r3Q w - -", new[] { "d2f4" },
@@ -26,7 +27,8 @@ namespace Lynx.Test.BestMove
             Description = "https://gameknot.com/chess-puzzle.pl?pz=1630")]
         public void Mate_in_2(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
         {
-            TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 3);
+            var result = TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 3);
+            Assert.AreEqual(2, result.Mate);
         }
 
         [TestCase("4rqk1/3R1prR/p1p5/1p2PQp1/5p2/1P6/P1B2PP1/6K1 w - -", new[] { "f5h3" },
@@ -39,9 +41,13 @@ namespace Lynx.Test.BestMove
         [TestCase("nb5B/1N1Q4/6RK/3pPP2/RrrkN3/2pP3b/qpP1PP2/3n4 w - -", new[] { "g6g3" },
             Category = "LongRunning", Explicit = true,
             Description = "https://gameknot.com/chess-puzzle.pl?pz=228148")]
+        [TestCase("3R3N/2pR1p2/4k3/N1P5/1q4PK/2B4B/8/8 w - - 0 1", new[] { "c5c6" },
+            Category = "LongRunning", Explicit = true,
+            Description = "http://talkchess.com/forum3/viewtopic.php?f=7&t=78428&p=908885")]
         public void Mate_in_3(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
         {
-            TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 5);
+            var result = TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 5);
+            Assert.AreEqual(3, result.Mate);
         }
 
         [TestCase("6k1/1R6/5K2/3p1N2/1P3n2/8/8/3r4 w - -", new[] { "f5h6" },
@@ -49,7 +55,8 @@ namespace Lynx.Test.BestMove
             Description = "https://gameknot.com/chess-puzzle.pl?pz=260253")]
         public void Mate_in_4(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
         {
-            TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 8);
+            var result = TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 8);
+            Assert.AreEqual(4, result.Mate);
         }
 
         /// <summary>
@@ -141,15 +148,44 @@ namespace Lynx.Test.BestMove
             Category = "ExtraLongRunning", Explicit = true)]
         public void Mate_in_4_Collection(string fen, string[]? allowedUCIMoveString)
         {
-            TestBestMove(fen, allowedUCIMoveString, null, depth: 8);
+            var result = TestBestMove(fen, allowedUCIMoveString, null, depth: 8);
+            Assert.AreEqual(4, result.Mate);
         }
 
-        [TestCase("3R3N/2pR1p2/4k3/N1P5/1q4PK/2B4B/8/8 w - - 0 1", new[] { "c5c6" },
+        [TestCase("4r3/4PpPk/5P1P/3R2K1/P2P4/2P5/8/8 w - -", new[] { "d5d8" },
             Category = "LongRunning", Explicit = true,
-            Description = "http://talkchess.com/forum3/viewtopic.php?f=7&t=78428&p=908885")]
+            Description = "https://gameknot.com/chess-puzzle.pl?pz=253500")]
+        [TestCase("r1b1r3/5p1k/p1qbpp2/1p1p4/5P2/PP2PR2/2PN2PP/R2Q2K1 w - -", new[] { "f3g3" },
+            Category = "LongRunning", Explicit = true,
+            Description = "https://gameknot.com/chess-puzzle.pl?pz=196756")]
         public void Mate_in_5(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
         {
-            TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 9);
+            var result = TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 10);
+            Assert.AreEqual(5, result.Mate);
+        }
+
+        [TestCase("1r4k1/5q2/3bp3/3p4/3P2n1/4P3/P1Q1KP2/1N4R1 b - -", new[] { "f7f2" },
+            Category = "ExtraLongRunning", Explicit = true,
+            Description = "https://gameknot.com/chess-puzzle.pl?pz=111491")]
+        [TestCase("1r6/5pkp/1n1Rr1pN/p1p1P1Q1/1b2qB1P/6P1/5P1K/3R4 w - -", new[] { "g5f6" },
+            Category = "ExtraLongRunning", Explicit = true,
+            Description = "https://gameknot.com/chess-puzzle.pl?pz=145711")]
+        public void Mate_in_6(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
+        {
+            var result = TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 12);
+            Assert.AreEqual(6, result.Mate);
+        }
+
+        [TestCase("4r1k1/1p3p1p/rb1R2p1/pQ6/P1p1q3/2P3RP/1P3PP1/6K1 b - -", new[] { "b6f2" },
+            Category = "TooLongToBeRun", Explicit = true,
+            Description = "https://gameknot.com/chess-puzzle.pl?pz=228984")]
+        [TestCase("1k2r3/ppN3pp/5n2/8/6P1/P1p1pK1P/1PPr4/1R2RN2 b - -", new[] { "d2f2" },
+            Category = "TooLongToBeRun", Explicit = true,
+            Description = "https://gameknot.com/chess-puzzle.pl?pz=117353")]
+        public void Mate_in_7(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
+        {
+            var result = TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 14);
+            Assert.AreEqual(7, result.Mate);
         }
     }
 }

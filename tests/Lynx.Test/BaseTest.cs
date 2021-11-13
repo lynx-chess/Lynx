@@ -9,10 +9,11 @@ namespace Lynx.Test
     {
         private const int DefaultSearchDepth = 5;
 
-        protected static void TestBestMove(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString, int depth = DefaultSearchDepth)
+        protected static SearchResult TestBestMove(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString, int depth = DefaultSearchDepth)
         {
             var engine = GetEngine(fen);
-            var bestMoveFound = engine.BestMove(new($"go depth {depth}")).BestMove;
+            var seachResult = engine.BestMove(new($"go depth {depth}"));
+            var bestMoveFound = seachResult.BestMove;
 
             if (allowedUCIMoveString is not null)
             {
@@ -23,6 +24,8 @@ namespace Lynx.Test
             {
                 Assert.False(excludedUCIMoveString.Contains(bestMoveFound.UCIString()));
             }
+
+            return seachResult;
         }
 
         protected static Engine GetEngine(string fen)
