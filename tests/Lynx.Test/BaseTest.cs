@@ -9,7 +9,7 @@ namespace Lynx.Test
     {
         private const int DefaultSearchDepth = 5;
 
-        protected void TestBestMove(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString, int depth = DefaultSearchDepth)
+        protected static void TestBestMove(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString, int depth = DefaultSearchDepth)
         {
             var engine = GetEngine(fen);
             var bestMoveFound = engine.BestMove(new($"go depth {depth}")).BestMove;
