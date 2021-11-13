@@ -103,6 +103,20 @@ namespace Lynx.UCI.Commands.GUI
         public bool Infinite { get; private set; } = default!;
         public bool Ponder { get; private set; } = default!;
 
+        /// <summary>
+        /// Requires invoking <see cref="Parse(string)", allowing the user to make it asynchronously/>
+        /// </summary>
+        public GoCommand() { }
+
+        /// <summary>
+        /// Invokes <see cref="Parse(string)" synchronously/>
+        /// </summary>
+        /// <param name="command"></param>
+        internal GoCommand(string command)
+        {
+            Parse(command).Wait();
+        }
+
         public async Task Parse(string command)
         {
             var taskList = new List<Task>

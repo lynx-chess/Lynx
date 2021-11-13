@@ -87,27 +87,40 @@ namespace Lynx
                 millisecondsIncrement = goCommand?.BlackIncrement;
             }
 
-            if (goCommand is not null && millisecondsLeft != 0)
+            if (goCommand is not null)
             {
-                decisionTime = Convert.ToInt32(CalculateDecisionTime(goCommand.MovesToGo, millisecondsLeft ?? 0, millisecondsIncrement ?? 0));
-
-                if (decisionTime > Configuration.EngineSettings.MinMoveTime)
+                if (millisecondsLeft != 0)
                 {
+                    decisionTime = Convert.ToInt32(CalculateDecisionTime(goCommand.MovesToGo, millisecondsLeft ?? 0, millisecondsIncrement ?? 0));
+
+                    if (decisionTime > Configuration.EngineSettings.MinMoveTime)
+                    {
+                        _logger.Info($"Time to move: {0.001 * decisionTime}s, min. {minDepth} plies");
+                        _searchCancellationTokenSource.CancelAfter(decisionTime.Value);
+                    }
+                    else // Ignore decisionTime and limit search to MinDepthWhenLessThanMinMoveTime plies
+                    {
+                        _logger.Info($"Depth limited to {Configuration.EngineSettings.DepthWhenLessThanMinMoveTime} plies due to time trouble");
+                        maxDepth = Configuration.EngineSettings.DepthWhenLessThanMinMoveTime;
+                    }
+                }
+                else if (goCommand.MoveTime > 0)
+                {
+                    minDepth = 0;
+                    decisionTime = (int)(0.95 * goCommand.MoveTime);
                     _logger.Info($"Time to move: {0.001 * decisionTime}s, min. {minDepth} plies");
                     _searchCancellationTokenSource.CancelAfter(decisionTime.Value);
                 }
-                else // Ignore decisionTime and limit search to MinDepthWhenLessThanMinMoveTime plies
+                else if (goCommand.Depth > 0)
                 {
-                    _logger.Info($"Depth limited to {Configuration.EngineSettings.DepthWhenLessThanMinMoveTime} plies due to time trouble");
-                    maxDepth = Configuration.EngineSettings.DepthWhenLessThanMinMoveTime;
+                    minDepth = goCommand.Depth;
+                    maxDepth = goCommand.Depth;
                 }
-            }
-            else if (goCommand?.MoveTime > 0)
-            {
-                minDepth = 0;
-                decisionTime = (int)(0.95 * goCommand.MoveTime);
-                _logger.Info($"Time to move: {0.001 * decisionTime}s, min. {minDepth} plies");
-                _searchCancellationTokenSource.CancelAfter(decisionTime.Value);
+                else
+                {
+                    _logger.Warn("Unexpected go command");
+                    maxDepth = Configuration.EngineSettings.Depth;
+                }
             }
             else // EngineTest
             {

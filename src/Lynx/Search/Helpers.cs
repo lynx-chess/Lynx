@@ -76,7 +76,7 @@ namespace Lynx
                 {
                     for (int j = i + 1; j < PVTable.Indexes[1]; ++j)
                     {
-                        Debug.Assert(_pVTable[j].EncodedMove == default);
+                        Utils.Assert(_pVTable[j].EncodedMove == default, $"Not expecting a move in _pvTable[{j}]");
                     }
                     break;
                 }
@@ -87,7 +87,9 @@ namespace Lynx
                    position.AllPossibleMoves(),
                    out _))
                 {
-                    throw new AssertException($"Unexpected PV move {move.UCIString()} from position {position.FEN}");
+                    var message = $"Unexpected PV move {move.UCIString()} from position {position.FEN}";
+                    _logger.Error(message);
+                    throw new AssertException(message);
                 }
 
                 var newPosition = new Position(position, move);
