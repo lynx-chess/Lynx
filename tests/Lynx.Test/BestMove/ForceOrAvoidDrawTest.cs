@@ -4,60 +4,10 @@ using NUnit.Framework;
 using System.Text;
 using System.Threading.Channels;
 
-namespace Lynx.Test
+namespace Lynx.Test.BestMove
 {
-    public class EngineBestMoveTest : BaseTest
+    public class ForceOrAvoidDrawTest : BaseTest
     {
-        [TestCase("8/8/1p2k3/3bn3/3K4/8/7r/1q6 b - - 0 1", new[] { "b1d3" },
-            Description = "Mate in 1")]
-        public void Mate_in_1(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
-        {
-            TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
-        }
-
-        [TestCase("8/pN3R2/1b2k1K1/n4R2/pp1p4/3B1P1n/3B1PNP/3r3Q w - -", new[] { "d2f4" },
-            Description = "Mate in 2, https://gameknot.com/chess-puzzle.pl?pz=114463")]
-        [TestCase("KQ4R1/8/8/8/4N3/8/5p2/6bk w - -", new[] { "b8b2" },
-            Description = "Mate in 2, https://gameknot.com/chess-puzzle.pl?pz=1")]
-        [TestCase("8/8/8/8/8/3n1N2/8/3Q1K1k w - -", new[] { "d1b1" },
-            Description = "Mate in 2, https://gameknot.com/chess-puzzle.pl?pz=1669")]
-        [TestCase("RNBKRNRQ/PPPPPPPP/8/pppppppp/rnbqkbnr/8/8/8 b - -", new[] { "g4h6" },
-            Description = "Mate in 2, https://gameknot.com/chess-puzzle.pl?pz=1630")]
-        public void Mate_in_2(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
-        {
-            TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
-        }
-
-        [TestCase("4rqk1/3R1prR/p1p5/1p2PQp1/5p2/1P6/P1B2PP1/6K1 w - -", new[] { "f5h3" },
-            Category = "LongRunning", Explicit = true, Description = "Mate in 3, https://gameknot.com/chess-puzzle.pl?pz=111285")]
-        [TestCase("1b6/2p2N1K/1p2Bp1p/3Pp2R/4kp1p/1N6/p1P1PPb1/r1R4r w - -", new[] { "h7h6" },
-            Category = "LongRunning", Explicit = true, Description = "Mate in 3, https://gameknot.com/chess-puzzle.pl?pz=251481")]
-        [TestCase("5B2/3Q4/8/7p/6N1/6k1/8/5K2 w - -", new[] { "f8h6" },
-            Category = "LongRunning", Explicit = true, Description = "Mate in 3, https://gameknot.com/chess-puzzle.pl?pz=248898")]
-        [TestCase("nb5B/1N1Q4/6RK/3pPP2/RrrkN3/2pP3b/qpP1PP2/3n4 w - -", new[] { "g6g3" },
-            Category = "LongRunning", Explicit = true, Description = "Mate in 3, https://gameknot.com/chess-puzzle.pl?pz=228148")]
-        public void Mate_in_3(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
-        {
-            TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
-        }
-
-        [TestCase("6k1/1R6/5K2/3p1N2/1P3n2/8/8/3r4 w - -", new[] { "f5h6" },
-            Category = "LongRunning", Explicit = true, Description = "Mate in 4, https://gameknot.com/chess-puzzle.pl?pz=260253",
-            Ignore = "Not good enough yet")]
-        // TODO http://www.talkchess.com/forum3/viewtopic.php?f=7&t=78583
-        public void Mate_in_4(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
-        {
-            TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
-        }
-
-        [TestCase("3R3N/2pR1p2/4k3/N1P5/1q4PK/2B4B/8/8 w - - 0 1", new[] { "c5c6" },
-            Category = "LongRunning", Explicit = true, Description = "Mate in 5, http://talkchess.com/forum3/viewtopic.php?f=7&t=78428&p=908885&hilit=PLEASE+LEARN#p908885",
-            Ignore = "Not good enough yet")]
-        public void Mate_in_5(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
-        {
-            TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
-        }
-
         [TestCase("r2k3r/p1p2ppp/2p5/2P5/6nq/2NB4/PPPP2PP/R1BQR1K1 w - - 0 13", null, new[] { "g2h3" },
             Category = "LongRunning", Explicit = true, Description = "Avoid Mate in 2, fails with initial implementation of MiniMax depth 4")]
 
@@ -82,80 +32,6 @@ namespace Lynx.Test
             "g3f4", "g3g4", "g3h4",
             "g1h3", "g1f3", "g1e2"
         }, Category = "LongRunning", Explicit = true, Description = "Used to return an illegal move in the very first versions")]
-
-        [TestCase("r1bq2k1/1pp1n2p/2nppr1Q/p7/2PP2P1/5N2/PP3P1P/2KR1B1R w - - 0 15", new[] { "h6f6" },
-            Category = "LongRunning", Explicit = true, Description = "AlphaBeta/NegaMax depth 5 spends almost 3 minutes with a simple retake")]
-
-        [TestCase("3rk2r/ppq1pp2/2p1n1pp/7n/4P3/2P1BQP1/P1P2PBP/R3R1K1 w k - 0 18", null, new[] { "e3a7" },
-            Category = "LongRunning", Explicit = true, Description = "At depth 3 White takes the pawn",
-            Ignore = "Not good enough yet")]
-        [TestCase("r1bqk2r/ppp2ppp/2n1p3/8/Q1pP4/2b2NP1/P3PPBP/1RB2RK1 b kq - 1 10", null, new[] { "c3d4" },
-            Category = "LongRunning", Explicit = true, Description = "It failed at depth 6 in https://lichess.org/nZVw6G5D/black#19",
-            Ignore = "Not good enough yet")]
-        [TestCase("r1bqkb1r/ppp2ppp/2n1p3/3pP3/3Pn3/5P2/PPP1N1PP/R1BQKBNR b KQkq - 0 1", null, new[] { "f8b4" },
-            Category = "LongRunning", Explicit = true, Description = "It failed at depth 5 in https://lichess.org/rtTsj9Sr/black",
-            Ignore = "Not good enough yet")]
-
-        [TestCase("6k1/1R6/5Kn1/3p1N2/1P6/8/8/3r4 b - - 10 37", new[] { "g6f8" }, new[] { "g6f4" },
-            Category = "LongRunning", Explicit = true, Description = "Avoid mate in 4 https://gameknot.com/chess-puzzle.pl?pz=260253",
-            Ignore = "Not good enough yet")]
-        public void Regression(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
-        {
-            TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
-        }
-
-        [Test]
-        public void Regression_KeepNonGoodQuiescenceMoves()
-        {
-            const string fen = Constants.InitialPositionFEN;
-
-            var bestResult = SearchBestResult(fen);
-
-            switch (bestResult.Moves.Count)
-            {
-                case 5:
-                    Assert.AreNotEqual("f6e4", bestResult.Moves[4].UCIString());
-                    break;
-                case 6:
-                    Assert.AreNotEqual("f3e5", bestResult.Moves[5].UCIString());
-                    break;
-                default:
-                    Assert.True(false);
-                    break;
-            }
-
-            Assert.AreEqual(Configuration.EngineSettings.Depth, bestResult.Moves.Count,
-                $"Possible false positive: PV depth ({bestResult.Moves.Count}) expected to be fixed Configuration.EngineSettings.Depth ({Configuration.EngineSettings.Depth})");
-        }
-
-        [Test]
-        public void Regression_TrashInPVTable()
-        {
-            var fen = Constants.InitialPositionFEN;
-            var bestResult = SearchBestResult(fen);
-            Assert.False(bestResult.Moves.Count > 5 && bestResult.Moves[5].UCIString() == "d8d5");
-
-            fen = "rq2k2r/ppp2pb1/2n1pnpp/1Q1p1b2/3P1B2/2N1PNP1/PPP2PBP/R3K2R w KQkq - 0 1";
-            bestResult = SearchBestResult(fen);
-            Assert.False(bestResult.Moves.Count > 5 && bestResult.Moves[5].UCIString() == "e5f4");
-        }
-
-        [Test]
-        public void Regression_TrashInPV()
-        {
-            const string positionCommand = "position startpos moves c2c4";
-
-            var mock = new Mock<ChannelWriter<string>>();
-
-            mock
-                .Setup(m => m.WriteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-                .Returns(ValueTask.CompletedTask);
-
-            var engine = new Engine(mock.Object);
-
-            engine.AdjustPosition(positionCommand);
-            Assert.DoesNotThrow(() => engine.BestMove());
-        }
 
         [TestCase("8/8/4NQ2/7k/2P4p/1q2P2P/5P2/6K1 b - - 5 52", new[] { "b3b1", "b3d1" },
             Description = "Force stalemate - https://lichess.org/sM5ekwnW/black#103")]
@@ -357,14 +233,5 @@ namespace Lynx.Test
             Assert.AreEqual(movesThatAllowsRepetition.UCIString(), bestMoveFound.UCIString(), "No 50 moves rule forced");
             Assert.AreEqual(0, searchResult.Evaluation, "No drawn position detected");
         }
-
-        //    [TestCase("4n3/bp2k2p/p2p2pP/P1nP1pP1/N1P2P2/2BB4/3K4/8 w - - 9 42", new[] { "a5c5" },
-        //Category = "LongRunning", Explicit = true, Description = "Foresee bishop sacrifice - https://lichess.org/training/5OHnu")]
-        //    [TestCase("4n3/1p2k2p/p2p2pP/P1bP1pP1/2P2P2/2BB4/3K4/8 w - - 0 43", new[] { "c3f5" },
-        //Category = "LongRunning", Explicit = true, Description = "Bishop sacrifice - https://lichess.org/VaY6zfHI/white#84")]
-        //    public void Sacrifices(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
-        //    {
-        //        TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
-        //    }
     }
 }
