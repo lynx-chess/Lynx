@@ -28,6 +28,7 @@ namespace Lynx
             }
 
             ++_nodes;
+            _maxDepthReached[depth] = depth;
 
             var pvIndex = PVTable.Indexes[depth];
             var nextPvIndex = PVTable.Indexes[depth + 1];
@@ -184,6 +185,7 @@ namespace Lynx
             //_cancellationToken.Token.ThrowIfCancellationRequested();
 
             ++_nodes;
+            _maxDepthReached[depth] = depth;
 
             var pvIndex = PVTable.Indexes[depth];
             var nextPvIndex = PVTable.Indexes[depth + 1];

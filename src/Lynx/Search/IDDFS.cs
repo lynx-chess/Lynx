@@ -2,6 +2,7 @@
 using Lynx.UCI.Commands.Engine;
 using NLog;
 using System.Diagnostics;
+
 namespace Lynx
 {
     public sealed partial class Engine
@@ -19,6 +20,8 @@ namespace Lynx
         /// Copy of <see cref="Game.MovesWithoutCaptureOrPawnMove"/>
         /// </summary>
         private int _movesWithoutCaptureOrPawnMove;
+
+        private readonly int[] _maxDepthReached = new int[Configuration.EngineSettings.MaxDepth];
 
         private readonly Move _defaultMove = new();
 
@@ -61,14 +64,14 @@ namespace Lynx
                     //PrintPvTable();
 
                     var pvMoves = _pVTable.TakeWhile(m => m.EncodedMove != default).ToList();
-                    var maxDepthReached = PVTable.Indexes.IndexOf(PVTable.Indexes.Reverse().First(index => _pVTable[index].EncodedMove != default)) + 1;
+                    var maxDepthReached = _maxDepthReached.Last(item => item != default);
 
                     var elapsedTime = _stopWatch.ElapsedMilliseconds;
                     searchResult = new SearchResult(pvMoves.FirstOrDefault(), bestEvaluation, depth, maxDepthReached, _nodes, elapsedTime, Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * elapsedTime) + 1), 0, Int64.MaxValue)), pvMoves);
 
                     Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(searchResult)));
 
-                } while (stopSearchCondition(++depth, maxDepth, bestEvaluation, _nodes, decisionTime, _stopWatch, _logger)); ;
+                } while (stopSearchCondition(++depth, maxDepth, bestEvaluation, _nodes, decisionTime, _stopWatch, _logger));
             }
             catch (OperationCanceledException)
             {
