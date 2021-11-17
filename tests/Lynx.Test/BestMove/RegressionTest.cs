@@ -5,11 +5,41 @@ namespace Lynx.Test.BestMove
 {
     public class RegressionTest : BaseTest
     {
+        [TestCase("r2k3r/p1p2ppp/2p5/2P5/6nq/2NB4/PPPP2PP/R1BQR1K1 w - - 0 13", null, new[] { "g2h3" },
+            Description = "Avoid Mate in 2, fails with initial implementation of MiniMax depth 4")]
+
+        [TestCase("r2k3r/p1p2ppp/2p5/2P5/6nq/2NB4/PPPP2PP/R1BQR1K1 w - - 0 13", null, new[] { "g2h3", "e1e4" },
+            Description = "Avoid Mate in 4, fails with MiniMax depth 4")]
+
+        [TestCase("q5k1/2p5/1bb1pQ2/1p6/1P6/5N2/P4PPP/3RK2R b K - 0 1", null, new[] { "a8a2" },
+            Description = "Avoid Mate in 3, seen with NegaMax depth 4 (but weirdly not with AlphaBeta depth 4)")]
+
+        [TestCase("r2qr1k1/ppp2ppp/5n2/2nPp3/1b4b1/P1NPP1P1/1P2NPBP/R1BQ1RK1 b - - 0 1", new[] { "b4c3", "g4e2" }, new[] { "b4a5" },
+            Description = "Fails with simple MiniMax depth 3 and 4: b4a5 is played")]
+
+        [TestCase("r2qkb1r/ppp2ppp/2n2n2/3pp3/8/PPP3Pb/3PPP1P/RNBQK1NR w KQkq - 0 1", new[] { "g1h3" },
+            Description = "Used to fail")]
+
+        [TestCase("8/n2k4/bpr4p/1q1p4/4pp1b/P3P1Pr/R2K4/1r2n1Nr w - - 0 1", new[]
+        {
+            "a3a4",
+            "a2a1", "a2b2", "a2c2",
+            "e3f4", "f3g4",
+            "g3f4", "g3g4", "g3h4",
+            "g3f4", "g3g4", "g3h4",
+            "g1h3", "g1f3", "g1e2"
+        }, Description = "Used to return an illegal move in the very first versions")]
+
+        public void GeneralRegression(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
+        {
+            TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 5);
+        }
+
         [TestCase("r1bq2k1/1pp1n2p/2nppr1Q/p7/2PP2P1/5N2/PP3P1P/2KR1B1R w - - 0 15", new[] { "h6f6" },
             Category = "LongRunning", Explicit = true, Description = "AlphaBeta/NegaMax depth 5 spends almost 3 minutes with a simple retake")]
         public void SlowRecapture(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
         {
-            TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
+            TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 5);
         }
 
         [TestCase("6k1/1R6/5Kn1/3p1N2/1P6/8/8/3r4 b - - 10 37", new[] { "g6f8" }, new[] { "g6f4" },
