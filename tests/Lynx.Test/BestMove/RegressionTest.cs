@@ -6,7 +6,7 @@ namespace Lynx.Test.BestMove
     public class RegressionTest : BaseTest
     {
         [TestCase("r1bq2k1/1pp1n2p/2nppr1Q/p7/2PP2P1/5N2/PP3P1P/2KR1B1R w - - 0 15", new[] { "h6f6" },
-            Category = "LongRunning", Explicit = true, Description = "AlphaBeta/NegaMax depth 5 spends almost 3 minutes with a simple retake")]
+            Description = "AlphaBeta/NegaMax depth 5 spends almost 3 minutes with a simple retake")]
         public void SlowRecapture(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
         {
             TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
