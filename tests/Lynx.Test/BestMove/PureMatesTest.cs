@@ -84,7 +84,7 @@ namespace Lynx.Test.BestMove
             Category = "NoPruning", Explicit = true)]
         [TestCase("4N3/1p6/3B2nN/pPpk4/4R1Pp/P1p2P2/K1P1b3/3n4 w - - 0 1", new[] { "d6h2" },
             Category = "NoPruning", Explicit = true)]
-        [TestCase("3r1n2/2bp2p1/1p1kp1Pp/4N2p/Pp2B2Q/7P/1P3P1B/K7 w - - 0 1", new[] { "e4g2", "e4d3", "e4b1", "e4f1", "e4a8" },
+        [TestCase("3r1n2/2bp2p1/1p1kp1Pp/4N2p/Pp2B2Q/7P/1P3P1B/K7 w - - 0 1", new[] { "e4g2", "e4d3", "e4h1", "e4f3", "e4a8" },
             Category = "LongRunning", Explicit = true)]
         [TestCase("3K4/8/6R1/p3k1pp/2bp1R1p/n1b1P3/2p2N2/2B4B w - - 0 1", new[] { "g6g5", "c1d2" },
             Category = "NoPruning", Explicit = true)]
