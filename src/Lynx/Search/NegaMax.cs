@@ -8,6 +8,7 @@ namespace Lynx
         /// NegaMax algorithm implementation using alpha-beta pruning, quiescence search and Iterative Deepeting Depth-First Search (IDDFS)
         /// </summary>
         /// <param name="position"></param>
+        /// <param name="minDepth"></param>
         /// <param name="maxDepth"></param>
         /// <param name="depth"></param>
         /// <param name="alpha">
@@ -18,8 +19,10 @@ namespace Lynx
         /// Best score Side's to move's opponent can achieve, assuming best play by Side to move.
         /// Defaults to the worse possible score for Side to move's opponent, Int.MaxValue
         /// </param>
+        /// <param name="isVerifyingNullMoveCutOff">Indicates if the search is verifying an ancestors null-move that failed high, or the root node</param>
+        /// <param name="ancestorWasNullMove">Indicates whether the immediate ancestor node was a null move</param>
         /// <returns></returns>
-        private int NegaMax(Position position, int minDepth, int maxDepth, int depth, int alpha, int beta, bool verify, bool ancestorWasNullMove = false)
+        private int NegaMax(Position position, int minDepth, int maxDepth, int depth, int alpha, int beta, bool isVerifyingNullMoveCutOff, bool ancestorWasNullMove = false)
         {
             _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
             if (depth > minDepth)
@@ -53,23 +56,24 @@ namespace Lynx
             if (depth > Configuration.EngineSettings.NullMovePruning_R
                 && !isInCheck
                 && !ancestorWasNullMove
-                && (!verify || depth < maxDepth - 1))    // verify == true and depth == maxDepth -1 -> No null pruning, since verification will not be possible)
+                && (!isVerifyingNullMoveCutOff || depth < maxDepth - 1))    // verify == true and depth == maxDepth -1 -> No null pruning, since verification will not be possible)
+                                                                            // following pv?
             {
                 // Null-move pruning
                 var newPosition = new Position(position, nullMove: true);
 
                 var repetitions = Utils.UpdatePositionHistory(newPosition, Game.PositionHashHistory);
 
-                var evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1 + Configuration.EngineSettings.NullMovePruning_R, -beta, -beta + 1, verify, ancestorWasNullMove: true);
+                var evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1 + Configuration.EngineSettings.NullMovePruning_R, -beta, -beta + 1, isVerifyingNullMoveCutOff, ancestorWasNullMove: true);
 
                 Utils.RevertPositionHistory(newPosition, Game.PositionHashHistory, repetitions);
 
                 if (evaluation >= beta) // Fail high
                 {
-                    if (verify)
+                    if (isVerifyingNullMoveCutOff)
                     {
                         ++depth;
-                        verify = false;
+                        isVerifyingNullMoveCutOff = false;
                         isFailHigh = true;
                     }
                     else
@@ -108,7 +112,7 @@ namespace Lynx
 
                 if (movesSearched == 0)
                 {
-                    evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha, verify);
+                    evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
                 }
                 else
                 {
@@ -122,7 +126,7 @@ namespace Lynx
                         && move.PromotedPiece() == default)
                     {
                         // Search with reduced depth
-                        evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1 + Configuration.EngineSettings.LMR_DepthReduction, -alpha - 1, -alpha, verify);
+                        evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1 + Configuration.EngineSettings.LMR_DepthReduction, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
                     }
                     else
                     {
@@ -140,17 +144,17 @@ namespace Lynx
                             // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
 
                             // Search with full depth but narrowed score bandwidth
-                            evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -alpha - 1, -alpha, verify);
+                            evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
 
                             if (evaluation > alpha && evaluation < beta)
                             {
                                 // Hipothesis invalidated -> search with full depth and full score bandwidth
-                                evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha, verify);
+                                evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
                             }
                         }
                         else
                         {
-                            evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha, verify);
+                            evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
                         }
                     }
                 }
@@ -191,12 +195,12 @@ namespace Lynx
                 ++movesSearched;
             }
 
-            // If there is a fail-high report, but no cutoff was found, the position is a zugzwang and has to be re-searched with the original depth */
+            // If there is a fail-high report, but no cutoff was found, the position is a zugzwang and has to be re-searched with the original depth
             if (isFailHigh && alpha < beta)
             {
                 --depth;
                 isFailHigh = false;
-                verify = true;
+                isVerifyingNullMoveCutOff = true;
                 goto searchAgain;
             }
 
