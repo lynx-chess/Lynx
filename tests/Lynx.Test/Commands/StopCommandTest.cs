@@ -20,7 +20,7 @@ namespace Lynx.Test.Commands
 
             // A command that guarantees ~5s thinking time
             var goCommand = new GoCommand();
-            await goCommand.Parse("go wtime 1 btime 1 winc 5000 binc 5000");
+            await goCommand.Parse($"go depth {Configuration.EngineSettings.MaxDepth}");
 
             var resultTask = Task.Run(() => engine.BestMove());
             // Wait 2s so that there's some best move available

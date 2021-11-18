@@ -8,6 +8,7 @@ namespace Lynx
         /// NegaMax algorithm implementation using alpha-beta pruning, quiescence search and Iterative Deepeting Depth-First Search (IDDFS)
         /// </summary>
         /// <param name="position"></param>
+        /// <param name="minDepth"></param>
         /// <param name="maxDepth"></param>
         /// <param name="depth"></param>
         /// <param name="alpha">
@@ -18,8 +19,10 @@ namespace Lynx
         /// Best score Side's to move's opponent can achieve, assuming best play by Side to move.
         /// Defaults to the worse possible score for Side to move's opponent, Int.MaxValue
         /// </param>
+        /// <param name="isVerifyingNullMoveCutOff">Indicates if the search is verifying an ancestors null-move that failed high, or the root node</param>
+        /// <param name="ancestorWasNullMove">Indicates whether the immediate ancestor node was a null move</param>
         /// <returns></returns>
-        private int NegaMax(Position position, int minDepth, int maxDepth, int depth, int alpha, int beta)
+        private int NegaMax(Position position, int minDepth, int maxDepth, int depth, int alpha, int beta, bool isVerifyingNullMoveCutOff, bool ancestorWasNullMove = false)
         {
             _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
             if (depth > minDepth)
@@ -34,11 +37,9 @@ namespace Lynx
             var nextPvIndex = PVTable.Indexes[depth + 1];
             _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
-            var pseudoLegalMoves = SortMoves(position.AllPossibleMoves(), position, depth);
-
             if (depth >= maxDepth)
             {
-                foreach (var candidateMove in pseudoLegalMoves)
+                foreach (var candidateMove in position.AllPossibleMoves())
                 {
                     if (new Position(position, candidateMove).WasProduceByAValidMove())
                     {
@@ -49,9 +50,47 @@ namespace Lynx
                 return position.EvaluateFinalPosition(depth, Game.PositionHashHistory, _movesWithoutCaptureOrPawnMove);
             }
 
+            bool isInCheck = Utils.InCheck(position);
+            bool isFailHigh = false;    // In order to detect zugzwangs
+
+            if (depth > Configuration.EngineSettings.NullMovePruning_R
+                && !isInCheck
+                && !ancestorWasNullMove
+                && (!isVerifyingNullMoveCutOff || depth < maxDepth - 1))    // verify == true and depth == maxDepth -1 -> No null pruning, since verification will not be possible)
+                                                                            // following pv?
+            {
+                // Null-move pruning
+                var newPosition = new Position(position, nullMove: true);
+
+                var repetitions = Utils.UpdatePositionHistory(newPosition, Game.PositionHashHistory);
+
+                var evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1 + Configuration.EngineSettings.NullMovePruning_R, -beta, -beta + 1, isVerifyingNullMoveCutOff, ancestorWasNullMove: true);
+
+                Utils.RevertPositionHistory(newPosition, Game.PositionHashHistory, repetitions);
+
+                if (evaluation >= beta) // Fail high
+                {
+                    if (isVerifyingNullMoveCutOff)
+                    {
+                        ++depth;
+                        isVerifyingNullMoveCutOff = false;
+                        isFailHigh = true;
+                    }
+                    else
+                    {
+                        // cutoff in a sub-tree with fail-high report
+                        return evaluation;
+                    }
+                }
+            }
+
+            searchAgain:
+
             int movesSearched = 0;
             Move? bestMove = null;
             bool isAnyMoveValid = false;
+
+            var pseudoLegalMoves = SortMoves(position.AllPossibleMoves(), position, depth);
 
             foreach (var move in pseudoLegalMoves)
             {
@@ -64,6 +103,7 @@ namespace Lynx
 
                 PrintPreMove(position, depth, move);
 
+                // Before making a move
                 var oldValue = _movesWithoutCaptureOrPawnMove;
                 _movesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, _movesWithoutCaptureOrPawnMove);
                 var repetitions = Utils.UpdatePositionHistory(newPosition, Game.PositionHashHistory);
@@ -72,7 +112,7 @@ namespace Lynx
 
                 if (movesSearched == 0)
                 {
-                    evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha);
+                    evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
                 }
                 else
                 {
@@ -80,13 +120,13 @@ namespace Lynx
                     if (movesSearched >= Configuration.EngineSettings.LMR_FullDepthMoves
                         && depth >= Configuration.EngineSettings.LMR_ReductionLimit
                         && !_isFollowingPV
-                        && !Utils.InCheck(position)
+                        && !isInCheck
                         //&& !Utils.InCheck(newPosition)
                         && !move.IsCapture()
                         && move.PromotedPiece() == default)
                     {
                         // Search with reduced depth
-                        evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1 + Configuration.EngineSettings.LMR_DepthReduction, -alpha - 1, -alpha);
+                        evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1 + Configuration.EngineSettings.LMR_DepthReduction, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
                     }
                     else
                     {
@@ -104,21 +144,22 @@ namespace Lynx
                             // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
 
                             // Search with full depth but narrowed score bandwidth
-                            evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -alpha - 1, -alpha);
+                            evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
 
                             if (evaluation > alpha && evaluation < beta)
                             {
                                 // Hipothesis invalidated -> search with full depth and full score bandwidth
-                                evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha);
+                                evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
                             }
                         }
                         else
                         {
-                            evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha);
+                            evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
                         }
                     }
                 }
 
+                // After making a move
                 _movesWithoutCaptureOrPawnMove = oldValue;
                 Utils.RevertPositionHistory(newPosition, Game.PositionHashHistory, repetitions);
 
@@ -152,6 +193,15 @@ namespace Lynx
                 }
 
                 ++movesSearched;
+            }
+
+            // If there is a fail-high report, but no cutoff was found, the position is a zugzwang and has to be re-searched with the original depth
+            if (isFailHigh && alpha < beta)
+            {
+                --depth;
+                isFailHigh = false;
+                isVerifyingNullMoveCutOff = true;
+                goto searchAgain;
             }
 
             if (bestMove is null)

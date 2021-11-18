@@ -59,7 +59,7 @@ namespace Lynx
                     _nodes = 0;
                     _isFollowingPV = true;
 
-                    bestEvaluation = NegaMax(Game.CurrentPosition, minDepth, maxDepth: depth, depth: 0, alpha: MinValue, beta: MaxValue);
+                    bestEvaluation = NegaMax(Game.CurrentPosition, minDepth, maxDepth: depth, depth: 0, alpha: MinValue, beta: MaxValue, isVerifyingNullMoveCutOff: true);
 
                     ValidatePVTable();
                     //PrintPvTable();
