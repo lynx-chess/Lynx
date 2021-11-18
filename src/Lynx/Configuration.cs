@@ -121,6 +121,6 @@
 
         public int LMR_DepthReduction { get; set; } = 1;
 
-        public int NullMovePruning_R { get; set; } = 2;
+        public int NullMovePruning_R { get; set; } = 3;
     }
 }

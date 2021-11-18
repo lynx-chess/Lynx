@@ -19,7 +19,7 @@ namespace Lynx
         /// Defaults to the worse possible score for Side to move's opponent, Int.MaxValue
         /// </param>
         /// <returns></returns>
-        private int NegaMax(Position position, int minDepth, int maxDepth, int depth, int alpha, int beta, bool ancestorWasNullMove = false)
+        private int NegaMax(Position position, int minDepth, int maxDepth, int depth, int alpha, int beta, bool verify, bool ancestorWasNullMove = false)
         {
             _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
             if (depth > minDepth)
@@ -48,27 +48,39 @@ namespace Lynx
             }
 
             bool isInCheck = Utils.InCheck(position);
+            bool isFailHigh = false;    // In order to detect zugzwangs
 
             if (depth > Configuration.EngineSettings.NullMovePruning_R
                 && !isInCheck
                 && !ancestorWasNullMove
-                /*TODO: avoid null-move pruning in positions likely to be zugzwang*/)
+                && (!verify || depth < maxDepth - 1))    // verify == true and depth == maxDepth -1 -> No null pruning, since verification will not be possible)
             {
                 // Null-move pruning
                 var newPosition = new Position(position, nullMove: true);
 
                 var repetitions = Utils.UpdatePositionHistory(newPosition, Game.PositionHashHistory);
 
-                var evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1 + Configuration.EngineSettings.NullMovePruning_R, -beta, -beta + 1, ancestorWasNullMove: true);
+                var evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1 + Configuration.EngineSettings.NullMovePruning_R, -beta, -beta + 1, verify, ancestorWasNullMove: true);
 
                 Utils.RevertPositionHistory(newPosition, Game.PositionHashHistory, repetitions);
 
-                // Fail-hard beta-cutoff
-                if (evaluation >= beta)
+                if (evaluation >= beta) // Fail high
                 {
-                    return beta;
+                    if (verify)
+                    {
+                        ++depth;
+                        verify = false;
+                        isFailHigh = true;
+                    }
+                    else
+                    {
+                        // cutoff in a sub-tree with fail-high report
+                        return evaluation;
+                    }
                 }
             }
+
+            searchAgain:
 
             int movesSearched = 0;
             Move? bestMove = null;
@@ -96,7 +108,7 @@ namespace Lynx
 
                 if (movesSearched == 0)
                 {
-                    evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha);
+                    evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha, verify);
                 }
                 else
                 {
@@ -110,7 +122,7 @@ namespace Lynx
                         && move.PromotedPiece() == default)
                     {
                         // Search with reduced depth
-                        evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1 + Configuration.EngineSettings.LMR_DepthReduction, -alpha - 1, -alpha);
+                        evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1 + Configuration.EngineSettings.LMR_DepthReduction, -alpha - 1, -alpha, verify);
                     }
                     else
                     {
@@ -128,17 +140,17 @@ namespace Lynx
                             // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
 
                             // Search with full depth but narrowed score bandwidth
-                            evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -alpha - 1, -alpha);
+                            evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -alpha - 1, -alpha, verify);
 
                             if (evaluation > alpha && evaluation < beta)
                             {
                                 // Hipothesis invalidated -> search with full depth and full score bandwidth
-                                evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha);
+                                evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha, verify);
                             }
                         }
                         else
                         {
-                            evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha);
+                            evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha, verify);
                         }
                     }
                 }
@@ -177,6 +189,15 @@ namespace Lynx
                 }
 
                 ++movesSearched;
+            }
+
+            // If there is a fail-high report, but no cutoff was found, the position is a zugzwang and has to be re-searched with the original depth */
+            if (isFailHigh && alpha < beta)
+            {
+                --depth;
+                isFailHigh = false;
+                verify = true;
+                goto searchAgain;
             }
 
             if (bestMove is null)
