@@ -787,7 +787,7 @@ static void CountBits()
 
         Console.WriteLine($"{oldC} | {newC}");
     }
-    Console.WriteLine($"=========================================================================");
+    Console.WriteLine("=========================================================================");
 
     static int Check_LS1B_And_Reset(Position position)
     {
@@ -866,7 +866,7 @@ static void GetLS1BIndex()
 
         Console.WriteLine($"{oldC} | {newC}");
     }
-    Console.WriteLine($"=========================================================================");
+    Console.WriteLine("=========================================================================");
 
     static int Original_GetLS1BIndex(Position position)
     {

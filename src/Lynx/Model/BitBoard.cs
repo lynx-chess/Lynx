@@ -133,6 +133,7 @@ public struct BitBoard
     /// <summary>
     /// https://www.chessprogramming.org/General_Setwise_Operations#LS1BReset
     /// </summary>
+    /// <param name="bitboard"></param>
     /// <returns>Bitboard</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong ResetLS1B(ulong bitboard)
