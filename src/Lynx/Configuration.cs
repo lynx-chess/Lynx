@@ -87,11 +87,13 @@
 
         public double CoefficientAfterKeyMovesBeforeMovesToGo { get; set; } = 0.95;
 
-        public int TotalMovesWhenNoMovesToGoProvided { get; set; } = 100;
-
         #endregion
 
         #region No MovesToGo provided
+
+        public int TotalMovesWhenNoMovesToGoProvided { get; set; } = 100;
+
+        public int FixedMovesLeftWhenNoMovesToGoProvidedAndOverTotalMovesWhenNoMovesToGoProvided { get; set; } = 20;
 
         public int FirstTimeLimitWhenNoMovesToGoProvided { get; set; } = 120_000;
 

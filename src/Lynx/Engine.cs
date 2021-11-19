@@ -142,30 +142,32 @@ namespace Lynx
 
         internal double CalculateDecisionTime(int movesToGo, int millisecondsLeft, int millisecondsIncrement)
         {
-            double decisionTime = 0;
+            double decisionTime;
             millisecondsLeft -= millisecondsIncrement; // Since we're going to spend them, shouldn't take into account for our calculations
 
             if (movesToGo == default)
             {
                 int movesLeft = Configuration.EngineSettings.TotalMovesWhenNoMovesToGoProvided - (Game.MoveHistory.Count >> 1);
 
-                if (movesLeft > 0)
+                if (movesLeft <= 0)
                 {
-#pragma warning disable S2184 // Results of integer division should not be assigned to floating point variables
-                    if (millisecondsLeft >= Configuration.EngineSettings.FirstTimeLimitWhenNoMovesToGoProvided)
-                    {
-                        decisionTime = Configuration.EngineSettings.FirstCoefficientWhenNoMovesToGoProvided * millisecondsLeft / movesLeft;
-                    }
-                    else if (millisecondsLeft >= Configuration.EngineSettings.SecondTimeLimitWhenNoMovesToGoProvided)
-                    {
-                        decisionTime = Configuration.EngineSettings.SecondCoefficientWhenNoMovesToGoProvided * millisecondsLeft / movesLeft;
-                    }
-                    else
-                    {
-                        decisionTime = millisecondsLeft / movesLeft;
-                    }
-#pragma warning restore S2184 // Results of integer division should not be assigned to floating point variables
+                    movesLeft = Configuration.EngineSettings.FixedMovesLeftWhenNoMovesToGoProvidedAndOverTotalMovesWhenNoMovesToGoProvided;
                 }
+
+#pragma warning disable S2184 // Results of integer division should not be assigned to floating point variables
+                if (millisecondsLeft >= Configuration.EngineSettings.FirstTimeLimitWhenNoMovesToGoProvided)
+                {
+                    decisionTime = Configuration.EngineSettings.FirstCoefficientWhenNoMovesToGoProvided * millisecondsLeft / movesLeft;
+                }
+                else if (millisecondsLeft >= Configuration.EngineSettings.SecondTimeLimitWhenNoMovesToGoProvided)
+                {
+                    decisionTime = Configuration.EngineSettings.SecondCoefficientWhenNoMovesToGoProvided * millisecondsLeft / movesLeft;
+                }
+                else
+                {
+                    decisionTime = millisecondsLeft / movesLeft;
+                }
+#pragma warning restore S2184 // Results of integer division should not be assigned to floating point variables
             }
             else
             {
@@ -186,6 +188,7 @@ namespace Lynx
             //    decisionTime = Math.Clamp(decisionTime, Configuration.Parameters.MinMoveTime, Configuration.Parameters.MaxMoveTime);
             //}
 
+            // If time left after taking all decision time < 1s
             if (millisecondsLeft + millisecondsIncrement - decisionTime < 1_000)    // i.e. x + 10s, 10s left in the clock
             {
                 decisionTime *= 0.9;
