@@ -20,7 +20,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <NoWarn>$(NoWarn),1591,S101,RCS1090</NoWarn>
+    <NoWarn>$(NoWarn),1591,S101,RCS1090,S3903</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

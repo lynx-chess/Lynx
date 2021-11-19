@@ -24,9 +24,9 @@ public struct BitBoard
         }
     }
 
-    internal void Clear() { Board = default; }
+    internal void Clear() => Board = default;
 
-    public readonly void Print()
+    internal readonly void Print()
     {
         const string separator = "____________________________________________________";
         Console.WriteLine(separator);
