@@ -92,14 +92,38 @@ namespace Lynx.Test
             5710,       // 5.7s
             5000,       // 5s increment
             0,          // No moves to go
-            4500,       // 4.5s, millisecondsIncrement * 0.9
+            4531.5,     // 0.9 * 5035, 0.9 * (millisecondsIncrement + (millisecondsLeft - millisecondsIncrement) / FixedMovesLeftWhenNoMovesToGoProvidedAndOverTotalMovesWhenNoMovesToGoProvided)
             200)]       // Over default TotalMovesWhenNoMovesToGoProvided (100), https://lichess.org/GxfJjvUu/black
         [TestCase(
             6001,       // 6s
             5000,       // 5s increment
             0,          // No moves to go
-            5000,       // 5, millisecondsIncrement
+            4545,      // 0.9 * 5050, 0.9 * (millisecondsIncrement + (millisecondsLeft - millisecondsIncrement) / FixedMovesLeftWhenNoMovesToGoProvidedAndOverTotalMovesWhenNoMovesToGoProvided)
             200)]       // Over default TotalMovesWhenNoMovesToGoProvided (100), https://lichess.org/GxfJjvUu/black
+        [TestCase(
+            6001,       // 6s
+            5000,       // 5s increment
+            0,          // No moves to go
+            4545,       // 0.9 * 5050, 0.9 * (millisecondsIncrement + (millisecondsLeft - millisecondsIncrement) / FixedMovesLeftWhenNoMovesToGoProvidedAndOverTotalMovesWhenNoMovesToGoProvided)
+            250)]       // Over default TotalMovesWhenNoMovesToGoProvided (100), https://lichess.org/GxfJjvUu/black
+        [TestCase(
+            1100,       // 1.1s
+            1000,       // 1s increment
+            0,          // No moves to go
+            904.5,      // 0.9, 0.9 * (millisecondsIncrement + (millisecondsLeft - millisecondsIncrement) / FixedMovesLeftWhenNoMovesToGoProvidedAndOverTotalMovesWhenNoMovesToGoProvided)
+            210)]       // Over default TotalMovesWhenNoMovesToGoProvided (100)
+        [TestCase(
+            2100,       // 2.1s
+            1000,       // 1s increment
+            0,          // No moves to go
+            1055,       // 1 + 1.1/20, (millisecondsIncrement + (millisecondsLeft - millisecondsIncrement) / FixedMovesLeftWhenNoMovesToGoProvidedAndOverTotalMovesWhenNoMovesToGoProvided)
+            210)]       // Over default TotalMovesWhenNoMovesToGoProvided (100)
+        [TestCase(
+            21000,      // 21s
+            1000,       // 1s increment
+            0,          // No moves to go
+            2000,       // 2, (millisecondsIncrement + (millisecondsLeft - millisecondsIncrement) / FixedMovesLeftWhenNoMovesToGoProvidedAndOverTotalMovesWhenNoMovesToGoProvided)
+            210)]       // Over default TotalMovesWhenNoMovesToGoProvided (100)
         public void CalculateDecisionTime(
             int millisecondsLeft, int millisecondsIncrement, int movesToGo, double expectedTimeToMove, int moveHistoryCount = 0)
         {
