@@ -1,144 +1,143 @@
 ﻿using Lynx.Model;
 
-namespace Lynx.Internal
+namespace Lynx.Internal;
+
+internal static class ConstantGenerator
 {
-    internal static class ConstantGenerator
+    public static ulong NotAFile()
     {
-        public static ulong NotAFile()
+        BitBoard b = new();
+
+        for (int rank = 0; rank < 8; ++rank)
         {
-            BitBoard b = new();
-
-            for (int rank = 0; rank < 8; ++rank)
+            for (int file = 0; file < 8; ++file)
             {
-                for (int file = 0; file < 8; ++file)
-                {
-                    var squareIndex = BitBoard.SquareIndex(rank, file);
+                var squareIndex = BitBoard.SquareIndex(rank, file);
 
-                    if (file > 0)
-                    {
-                        b.SetBit(squareIndex);
-                    }
+                if (file > 0)
+                {
+                    b.SetBit(squareIndex);
                 }
             }
-
-            b.Print();
-
-            return b.Board;
         }
 
-        public static ulong NotHFile()
+        b.Print();
+
+        return b.Board;
+    }
+
+    public static ulong NotHFile()
+    {
+        BitBoard b = new();
+
+        for (int rank = 0; rank < 8; ++rank)
         {
-            BitBoard b = new();
-
-            for (int rank = 0; rank < 8; ++rank)
+            for (int file = 0; file < 8; ++file)
             {
-                for (int file = 0; file < 8; ++file)
-                {
-                    var squareIndex = BitBoard.SquareIndex(rank, file);
+                var squareIndex = BitBoard.SquareIndex(rank, file);
 
-                    if (file < 7)
-                    {
-                        b.SetBit(squareIndex);
-                    }
+                if (file < 7)
+                {
+                    b.SetBit(squareIndex);
                 }
             }
-
-            b.Print();
-
-            return b.Board;
         }
 
-        public static ulong NotABFiles()
+        b.Print();
+
+        return b.Board;
+    }
+
+    public static ulong NotABFiles()
+    {
+        BitBoard b = new();
+
+        for (int rank = 0; rank < 8; ++rank)
         {
-            BitBoard b = new();
-
-            for (int rank = 0; rank < 8; ++rank)
+            for (int file = 0; file < 8; ++file)
             {
-                for (int file = 0; file < 8; ++file)
-                {
-                    var squareIndex = BitBoard.SquareIndex(rank, file);
+                var squareIndex = BitBoard.SquareIndex(rank, file);
 
-                    if (file > 1)
-                    {
-                        b.SetBit(squareIndex);
-                    }
+                if (file > 1)
+                {
+                    b.SetBit(squareIndex);
                 }
             }
-
-            b.Print();
-
-            return b.Board;
         }
 
-        public static ulong NotHGFiles()
+        b.Print();
+
+        return b.Board;
+    }
+
+    public static ulong NotHGFiles()
+    {
+        BitBoard b = new();
+
+        for (int rank = 0; rank < 8; ++rank)
         {
-            BitBoard b = new();
-
-            for (int rank = 0; rank < 8; ++rank)
+            for (int file = 0; file < 8; ++file)
             {
-                for (int file = 0; file < 8; ++file)
-                {
-                    var squareIndex = BitBoard.SquareIndex(rank, file);
+                var squareIndex = BitBoard.SquareIndex(rank, file);
 
-                    if (file < 6)
-                    {
-                        b.SetBit(squareIndex);
-                    }
+                if (file < 6)
+                {
+                    b.SetBit(squareIndex);
                 }
             }
-
-            b.Print();
-
-            return b.Board;
         }
 
-        public static void PrintSquares()
+        b.Print();
+
+        return b.Board;
+    }
+
+    public static void PrintSquares()
+    {
+        for (int rank = 8; rank >= 1; --rank)
         {
-            for (int rank = 8; rank >= 1; --rank)
-            {
-                //Console.WriteLine($"a{rank}, b{rank}, c{rank}, d{rank}, e{rank}, f{rank}, g{rank}, h{rank},");
-                Console.WriteLine($"\"a{rank}\", \"b{rank}\", \"c{rank}\", \"d{rank}\", \"e{rank}\", \"f{rank}\", \"g{rank}\", \"h{rank}\",");
-            }
+            //Console.WriteLine($"a{rank}, b{rank}, c{rank}, d{rank}, e{rank}, f{rank}, g{rank}, h{rank},");
+            Console.WriteLine($"\"a{rank}\", \"b{rank}\", \"c{rank}\", \"d{rank}\", \"e{rank}\", \"f{rank}\", \"g{rank}\", \"h{rank}\",");
         }
+    }
 
-        public static void PrintCoordinates()
+    public static void PrintCoordinates()
+    {
+        for (int rank = 8; rank >= 1; --rank)
         {
-            for (int rank = 8; rank >= 1; --rank)
-            {
-                Console.WriteLine($"a{rank}, b{rank}, c{rank}, d{rank}, e{rank}, f{rank}, g{rank}, h{rank},");
-            }
+            Console.WriteLine($"a{rank}, b{rank}, c{rank}, d{rank}, e{rank}, f{rank}, g{rank}, h{rank},");
         }
+    }
 
-        public static void BishopRelevantOccupancyBits()
+    public static void BishopRelevantOccupancyBits()
+    {
+        for (var rank = 0; rank < 8; ++rank)
         {
-            for (var rank = 0; rank < 8; ++rank)
+            for (var file = 0; file < 8; ++file)
             {
-                for (var file = 0; file < 8; ++file)
-                {
-                    int square = BitBoard.SquareIndex(rank, file);
+                int square = BitBoard.SquareIndex(rank, file);
 
-                    var bishopOccupancy = AttackGenerator.MaskBishopOccupancy(square);
-                    Console.Write($"{bishopOccupancy.CountBits()}, ");
-                }
-
-                Console.WriteLine();
+                var bishopOccupancy = AttackGenerator.MaskBishopOccupancy(square);
+                Console.Write($"{bishopOccupancy.CountBits()}, ");
             }
+
+            Console.WriteLine();
         }
+    }
 
-        public static void RookRelevantOccupancyBits()
+    public static void RookRelevantOccupancyBits()
+    {
+        for (var rank = 0; rank < 8; ++rank)
         {
-            for (var rank = 0; rank < 8; ++rank)
+            for (var file = 0; file < 8; ++file)
             {
-                for (var file = 0; file < 8; ++file)
-                {
-                    int square = BitBoard.SquareIndex(rank, file);
+                int square = BitBoard.SquareIndex(rank, file);
 
-                    var bishopOccupancy = AttackGenerator.MaskRookOccupancy(square);
-                    Console.Write($"{bishopOccupancy.CountBits()}, ");
-                }
-
-                Console.WriteLine();
+                var bishopOccupancy = AttackGenerator.MaskRookOccupancy(square);
+                Console.Write($"{bishopOccupancy.CountBits()}, ");
             }
+
+            Console.WriteLine();
         }
     }
 }

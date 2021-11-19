@@ -22,12 +22,12 @@
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
 
-namespace Lynx.Benchmark
+namespace Lynx.Benchmark;
+
+public class MoveGeneratorArrayVsDictionary : BaseBenchmark
 {
-    public class MoveGeneratorArrayVsDictionary : BaseBenchmark
+    public static IEnumerable<string> Data => new[]
     {
-        public static IEnumerable<string> Data => new[]
-        {
             Constants.InitialPositionFEN,
             Constants.TrickyTestPositionFEN,
             Constants.TrickyTestPositionReversedFEN,
@@ -35,58 +35,58 @@ namespace Lynx.Benchmark
             Constants.KillerTestPositionFEN
         };
 
-        [Benchmark(Baseline = true)]
-        [ArgumentsSource(nameof(Data))]
-        public ulong Dictionary(string fen)
+    [Benchmark(Baseline = true)]
+    [ArgumentsSource(nameof(Data))]
+    public ulong Dictionary(string fen)
+    {
+        ulong sum = 0;
+        var position = new Position(fen);
+
+        for (int piece = (int)Piece.P; piece <= (int)Piece.k; ++piece)
         {
-            ulong sum = 0;
-            var position = new Position(fen);
+            var bitboard = position.PieceBitBoards[piece].Board;
 
-            for (int piece = (int)Piece.P; piece <= (int)Piece.k; ++piece)
+            while (bitboard != default)
             {
-                var bitboard = position.PieceBitBoards[piece].Board;
+                var sourceSquare = BitBoard.GetLS1BIndex(bitboard);
+                bitboard = BitBoard.ResetLS1B(bitboard);
 
-                while (bitboard != default)
-                {
-                    var sourceSquare = BitBoard.GetLS1BIndex(bitboard);
-                    bitboard = BitBoard.ResetLS1B(bitboard);
+                ulong attacks = _pieceAttacksDictionary[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both]);
 
-                    ulong attacks = _pieceAttacksDictionary[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both]);
-
-                    sum += attacks;
-                }
+                sum += attacks;
             }
-
-            return sum;
         }
 
-        [Benchmark]
-        [ArgumentsSource(nameof(Data))]
-        public ulong Array(string fen)
+        return sum;
+    }
+
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public ulong Array(string fen)
+    {
+        ulong sum = 0;
+        var position = new Position(fen);
+
+        for (int piece = (int)Piece.P; piece <= (int)Piece.k; ++piece)
         {
-            ulong sum = 0;
-            var position = new Position(fen);
+            var bitboard = position.PieceBitBoards[piece].Board;
 
-            for (int piece = (int)Piece.P; piece <= (int)Piece.k; ++piece)
+            while (bitboard != default)
             {
-                var bitboard = position.PieceBitBoards[piece].Board;
+                var sourceSquare = BitBoard.GetLS1BIndex(bitboard);
+                bitboard = BitBoard.ResetLS1B(bitboard);
 
-                while (bitboard != default)
-                {
-                    var sourceSquare = BitBoard.GetLS1BIndex(bitboard);
-                    bitboard = BitBoard.ResetLS1B(bitboard);
+                ulong attacks = _pieceAttacksArray[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both]);
 
-                    ulong attacks = _pieceAttacksArray[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both]);
-
-                    sum += attacks;
-                }
+                sum += attacks;
             }
-
-            return sum;
         }
 
-        private static readonly Func<int, BitBoard, ulong>[] _pieceAttacksArray = new Func<int, BitBoard, ulong>[]
-        {
+        return sum;
+    }
+
+    private static readonly Func<int, BitBoard, ulong>[] _pieceAttacksArray = new Func<int, BitBoard, ulong>[]
+    {
             (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White, origin].Board,
             (int origin, BitBoard _) => Attacks.KnightAttacks[origin].Board,
             (int origin, BitBoard occupancy) => Attacks.BishopAttacks(origin, occupancy).Board,
@@ -100,27 +100,26 @@ namespace Lynx.Benchmark
             (int origin, BitBoard occupancy) => Attacks.RookAttacks(origin, occupancy).Board,
             (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy).Board,
             (int origin, BitBoard _) => Attacks.KingAttacks[origin].Board,
-        };
+    };
 
-        private static readonly IReadOnlyDictionary<int, Func<int, BitBoard, ulong>> _pieceAttacksDictionary = new Dictionary<int, Func<int, BitBoard, ulong>>
-        {
-            [(int)Piece.P] = (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White, origin].Board,
-            [(int)Piece.p] = (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.Black, origin].Board,
+    private static readonly IReadOnlyDictionary<int, Func<int, BitBoard, ulong>> _pieceAttacksDictionary = new Dictionary<int, Func<int, BitBoard, ulong>>
+    {
+        [(int)Piece.P] = (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White, origin].Board,
+        [(int)Piece.p] = (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.Black, origin].Board,
 
-            [(int)Piece.K] = (int origin, BitBoard _) => Attacks.KingAttacks[origin].Board,
-            [(int)Piece.k] = (int origin, BitBoard _) => Attacks.KingAttacks[origin].Board,
+        [(int)Piece.K] = (int origin, BitBoard _) => Attacks.KingAttacks[origin].Board,
+        [(int)Piece.k] = (int origin, BitBoard _) => Attacks.KingAttacks[origin].Board,
 
-            [(int)Piece.N] = (int origin, BitBoard _) => Attacks.KnightAttacks[origin].Board,
-            [(int)Piece.n] = (int origin, BitBoard _) => Attacks.KnightAttacks[origin].Board,
+        [(int)Piece.N] = (int origin, BitBoard _) => Attacks.KnightAttacks[origin].Board,
+        [(int)Piece.n] = (int origin, BitBoard _) => Attacks.KnightAttacks[origin].Board,
 
-            [(int)Piece.B] = (int origin, BitBoard occupancy) => Attacks.BishopAttacks(origin, occupancy).Board,
-            [(int)Piece.b] = (int origin, BitBoard occupancy) => Attacks.BishopAttacks(origin, occupancy).Board,
+        [(int)Piece.B] = (int origin, BitBoard occupancy) => Attacks.BishopAttacks(origin, occupancy).Board,
+        [(int)Piece.b] = (int origin, BitBoard occupancy) => Attacks.BishopAttacks(origin, occupancy).Board,
 
-            [(int)Piece.R] = (int origin, BitBoard occupancy) => Attacks.RookAttacks(origin, occupancy).Board,
-            [(int)Piece.r] = (int origin, BitBoard occupancy) => Attacks.RookAttacks(origin, occupancy).Board,
+        [(int)Piece.R] = (int origin, BitBoard occupancy) => Attacks.RookAttacks(origin, occupancy).Board,
+        [(int)Piece.r] = (int origin, BitBoard occupancy) => Attacks.RookAttacks(origin, occupancy).Board,
 
-            [(int)Piece.Q] = (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy).Board,
-            [(int)Piece.q] = (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy).Board,
-        };
-    }
+        [(int)Piece.Q] = (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy).Board,
+        [(int)Piece.q] = (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy).Board,
+    };
 }

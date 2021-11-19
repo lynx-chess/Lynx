@@ -51,106 +51,105 @@
 
 using BenchmarkDotNet.Attributes;
 
-namespace Lynx.Benchmark
+namespace Lynx.Benchmark;
+
+[SimpleJob]
+public class Branching : BaseBenchmark
 {
-    [SimpleJob]
-    public class Branching : BaseBenchmark
+    public static IEnumerable<int> Data => new[] { 1, 10, 1_000, 10_000, 100_000 };
+
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public void IfReturn(int iterations)
     {
-        public static IEnumerable<int> Data => new[] { 1, 10, 1_000, 10_000, 100_000 };
-
-        [Benchmark]
-        [ArgumentsSource(nameof(Data))]
-        public void IfReturn(int iterations)
+        for (int i = 0; i < iterations; ++i)
         {
-            for (int i = 0; i < iterations; ++i)
-            {
-                IfReturnImpl(20);
-            }
+            IfReturnImpl(20);
         }
+    }
 
-        [Benchmark]
-        [ArgumentsSource(nameof(Data))]
-        public void IfElse(int iterations)
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public void IfElse(int iterations)
+    {
+        for (int i = 0; i < iterations; ++i)
         {
-            for (int i = 0; i < iterations; ++i)
-            {
-                IfElseImpl(20);
-            }
+            IfElseImpl(20);
         }
+    }
 
-        /// <summary>
-        /// Seems the best alternative
-        /// </summary>
-        /// <param name="iterations"></param>
-        [Benchmark]
-        [ArgumentsSource(nameof(Data))]
-        public void IfReturnBranchOpt(int iterations)
+    /// <summary>
+    /// Seems the best alternative
+    /// </summary>
+    /// <param name="iterations"></param>
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public void IfReturnBranchOpt(int iterations)
+    {
+        for (int i = 0; i < iterations; ++i)
         {
-            for (int i = 0; i < iterations; ++i)
-            {
-                IfReturnImplBranchOpt(20);
-            }
+            IfReturnImplBranchOpt(20);
         }
+    }
 
-        [Benchmark]
-        [ArgumentsSource(nameof(Data))]
-        public void IfElseBranchOpt(int iterations)
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public void IfElseBranchOpt(int iterations)
+    {
+        for (int i = 0; i < iterations; ++i)
         {
-            for (int i = 0; i < iterations; ++i)
-            {
-                IfElseImplBranchOpt(20);
-            }
+            IfElseImplBranchOpt(20);
         }
+    }
 
-        private static long IfReturnImpl(int depth, long nodes = 0)
+    private static long IfReturnImpl(int depth, long nodes = 0)
+    {
+        if (depth == 0)
         {
-            if (depth == 0)
-            {
-                ++nodes;
-                return nodes;
-            }
-
-            nodes += IfReturnImpl(depth - 1, nodes);
-
+            ++nodes;
             return nodes;
         }
 
-        private static long IfReturnImplBranchOpt(int depth, long nodes = 0)
-        {
-            if (depth != 0)
-            {
-                return nodes + IfReturnImplBranchOpt(depth - 1, nodes);
-            }
+        nodes += IfReturnImpl(depth - 1, nodes);
 
-            return ++nodes;
+        return nodes;
+    }
+
+    private static long IfReturnImplBranchOpt(int depth, long nodes = 0)
+    {
+        if (depth != 0)
+        {
+            return nodes + IfReturnImplBranchOpt(depth - 1, nodes);
         }
 
-        private static long IfElseImpl(int depth, long nodes = 0)
-        {
-            if (depth == 0)
-            {
-                ++nodes;
-            }
-            else
-            {
-                nodes += IfElseImpl(depth - 1, nodes);
-            }
+        return ++nodes;
+    }
 
-            return nodes;
+    private static long IfElseImpl(int depth, long nodes = 0)
+    {
+        if (depth == 0)
+        {
+            ++nodes;
+        }
+        else
+        {
+            nodes += IfElseImpl(depth - 1, nodes);
         }
 
-        private static long IfElseImplBranchOpt(int depth, long nodes = 0)
-        {
-            if (depth != 0)
-            {
-                nodes += IfElseImplBranchOpt(depth - 1, nodes);
-            }
-            else
-            {
-                ++nodes;
-            }
+        return nodes;
+    }
 
-            return nodes;
+    private static long IfElseImplBranchOpt(int depth, long nodes = 0)
+    {
+        if (depth != 0)
+        {
+            nodes += IfElseImplBranchOpt(depth - 1, nodes);
         }
+        else
+        {
+            ++nodes;
+        }
+
+        return nodes;
     }
 }

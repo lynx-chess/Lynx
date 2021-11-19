@@ -1,37 +1,36 @@
 ﻿using NLog;
 using System.Threading.Channels;
 
-namespace Lynx.Cli
+namespace Lynx.Cli;
+
+public sealed class Listener
 {
-    public sealed class Listener
+    private readonly Channel<string> _guiInputReader;
+    private readonly ILogger _logger;
+
+    public Listener(Channel<string> guiInputReader)
     {
-        private readonly Channel<string> _guiInputReader;
-        private readonly ILogger _logger;
+        _guiInputReader = guiInputReader;
+        _logger = LogManager.GetCurrentClassLogger();
+    }
 
-        public Listener(Channel<string> guiInputReader)
+    public async Task Run(CancellationToken cancellationToken)
+    {
+        try
         {
-            _guiInputReader = guiInputReader;
-            _logger = LogManager.GetCurrentClassLogger();
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                var input = Console.ReadLine();
+                await _guiInputReader.Writer.WriteAsync(input!, cancellationToken);
+            }
         }
-
-        public async Task Run(CancellationToken cancellationToken)
+        catch (Exception e)
         {
-            try
-            {
-                while (!cancellationToken.IsCancellationRequested)
-                {
-                    var input = Console.ReadLine();
-                    await _guiInputReader.Writer.WriteAsync(input!, cancellationToken);
-                }
-            }
-            catch (Exception e)
-            {
-                _logger.Fatal(e);
-            }
-            finally
-            {
-                _logger.Info($"Finishing {nameof(Listener)}");
-            }
+            _logger.Fatal(e);
+        }
+        finally
+        {
+            _logger.Info($"Finishing {nameof(Listener)}");
         }
     }
 }

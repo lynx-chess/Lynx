@@ -1,12 +1,11 @@
 ﻿using BenchmarkDotNet.Attributes;
 
-namespace Lynx.Benchmark
+namespace Lynx.Benchmark;
+
+[MarkdownExporterAttribute.GitHub]
+[HtmlExporter]
+[MemoryDiagnoser]
+//[NativeMemoryProfiler]
+public class BaseBenchmark
 {
-    [MarkdownExporterAttribute.GitHub]
-    [HtmlExporter]
-    [MemoryDiagnoser]
-    //[NativeMemoryProfiler]
-    public class BaseBenchmark
-    {
-    }
 }

@@ -1,28 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Runtime.Serialization;
 
-namespace Lynx
+namespace Lynx;
+
+public class AssertException : Exception
 {
-    public class AssertException : Exception
+    public AssertException() : base()
     {
-        public AssertException() : base()
-        {
-        }
+    }
 
-        public AssertException(string? message) : base(message)
-        {
-        }
+    public AssertException(string? message) : base(message)
+    {
+    }
 
-        public AssertException(string? message, Exception? innerException) : base(message, innerException)
-        {
-        }
+    public AssertException(string? message, Exception? innerException) : base(message, innerException)
+    {
+    }
 
-        protected AssertException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
+    protected AssertException(SerializationInfo info, StreamingContext context) : base(info, context)
+    {
     }
 }

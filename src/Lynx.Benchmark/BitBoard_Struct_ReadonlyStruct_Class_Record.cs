@@ -30,580 +30,579 @@
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
 
-namespace Lynx.Benchmark
+namespace Lynx.Benchmark;
+
+public class BitBoard_Struct_ReadonlyStruct_Class_Record : BaseBenchmark
 {
-    public class BitBoard_Struct_ReadonlyStruct_Class_Record : BaseBenchmark
+    private struct BitBoardOps
     {
-        private struct BitBoardOps
+        public ulong Board { readonly get; private set; }
+
+        public BitBoardOps(ulong b)
         {
-            public ulong Board { readonly get; private set; }
-
-            public BitBoardOps(ulong b)
-            {
-                Board = b;
-            }
-
-            public void SetBit(int square)
-            {
-                Board |= (1UL << square);
-            }
-
-            public void PopBit(int square)
-            {
-                Board &= ~(1UL << square);
-            }
-
-            #region unrelated
-
-            public readonly int CountBits() => CountBits(Board);
-            public readonly int GetLS1BIndex() => GetLS1BIndex(Board);
-
-            public static int GetLS1BIndex(ulong bitboard)
-            {
-                if (bitboard == default)
-                {
-                    return -1;
-                }
-
-                return CountBits(bitboard ^ (bitboard - 1)) - 1;
-            }
-            public static ulong ResetLS1B(ulong bitboard)
-            {
-                return bitboard & (bitboard - 1);
-            }
-            public static int CountBits(ulong bitboard)
-            {
-                int counter = 0;
-
-                // Consecutively reset LSB
-                while (bitboard != default)
-                {
-                    ++counter;
-                    bitboard = ResetLS1B(bitboard);
-                }
-
-                return counter;
-            }
-
-            #endregion
+            Board = b;
         }
 
-        private readonly struct BitBoardOpsReadonly
+        public void SetBit(int square)
         {
-            public ulong Board { get; }
-
-            public BitBoardOpsReadonly(ulong b)
-            {
-                Board = b;
-            }
-
-            public static ulong SetBit(ulong bb, int square)
-            {
-                return bb | (1UL << square);
-            }
-
-            public static ulong PopBit(ulong bb, int square)
-            {
-                return bb & ~(1UL << square);
-            }
-
-            #region unrelated
-
-            public static int GetLS1BIndex(ulong bitboard)
-            {
-                if (bitboard == default)
-                {
-                    return -1;
-                }
-
-                return CountBits(bitboard ^ (bitboard - 1)) - 1;
-            }
-            public static ulong ResetLS1B(ulong bitboard)
-            {
-                return bitboard & (bitboard - 1);
-            }
-            public static int CountBits(ulong bitboard)
-            {
-                int counter = 0;
-
-                // Consecutively reset LSB
-                while (bitboard != default)
-                {
-                    ++counter;
-                    bitboard = ResetLS1B(bitboard);
-                }
-
-                return counter;
-            }
-
-            #endregion
+            Board |= (1UL << square);
         }
 
-        private class BitBoardOpsClass
+        public void PopBit(int square)
         {
-            public ulong Board { get; private set; }
-            public BitBoardOpsClass() { }
-            public BitBoardOpsClass(ulong b)
-            {
-                Board = b;
-            }
-
-            public void SetBit(int square)
-            {
-                Board |= (1UL << square);
-            }
-
-            public void PopBit(int square)
-            {
-                Board &= ~(1UL << square);
-            }
-
-            public static ulong SetBit(ulong bb, int square)
-            {
-                return bb | (1UL << square);
-            }
-
-            public static ulong PopBit(ulong bb, int square)
-            {
-                return bb & ~(1UL << square);
-            }
-
-            #region unrelated
-
-            public int CountBits() => CountBits(Board);
-            public int GetLS1BIndex() => GetLS1BIndex(Board);
-
-            public static int GetLS1BIndex(ulong bitboard)
-            {
-                if (bitboard == default)
-                {
-                    return -1;
-                }
-
-                return CountBits(bitboard ^ (bitboard - 1)) - 1;
-            }
-            public static ulong ResetLS1B(ulong bitboard)
-            {
-                return bitboard & (bitboard - 1);
-            }
-            public static int CountBits(ulong bitboard)
-            {
-                int counter = 0;
-
-                // Consecutively reset LSB
-                while (bitboard != default)
-                {
-                    ++counter;
-                    bitboard = ResetLS1B(bitboard);
-                }
-
-                return counter;
-            }
-
-            #endregion
-
+            Board &= ~(1UL << square);
         }
 
-        private record BitBoardOpsRecord
+        #region unrelated
+
+        public readonly int CountBits() => CountBits(Board);
+        public readonly int GetLS1BIndex() => GetLS1BIndex(Board);
+
+        public static int GetLS1BIndex(ulong bitboard)
         {
-            public ulong Board { get; private set; }
-
-            public BitBoardOpsRecord() { }
-            public BitBoardOpsRecord(ulong b)
+            if (bitboard == default)
             {
-                Board = b;
+                return -1;
             }
 
-            public void SetBit(int square)
+            return CountBits(bitboard ^ (bitboard - 1)) - 1;
+        }
+        public static ulong ResetLS1B(ulong bitboard)
+        {
+            return bitboard & (bitboard - 1);
+        }
+        public static int CountBits(ulong bitboard)
+        {
+            int counter = 0;
+
+            // Consecutively reset LSB
+            while (bitboard != default)
             {
-                Board |= (1UL << square);
+                ++counter;
+                bitboard = ResetLS1B(bitboard);
             }
 
-            public void PopBit(int square)
-            {
-                Board &= ~(1UL << square);
-            }
-
-            public static ulong SetBit(ulong bb, int square)
-            {
-                return bb | (1UL << square);
-            }
-
-            public static ulong PopBit(ulong bb, int square)
-            {
-                return bb & ~(1UL << square);
-            }
-
-            #region unrelated
-
-            public int CountBits() => CountBits(Board);
-            public int GetLS1BIndex() => GetLS1BIndex(Board);
-
-            public static int GetLS1BIndex(ulong bitboard)
-            {
-                if (bitboard == default)
-                {
-                    return -1;
-                }
-
-                return CountBits(bitboard ^ (bitboard - 1)) - 1;
-            }
-            public static ulong ResetLS1B(ulong bitboard)
-            {
-                return bitboard & (bitboard - 1);
-            }
-            public static int CountBits(ulong bitboard)
-            {
-                int counter = 0;
-
-                // Consecutively reset LSB
-                while (bitboard != default)
-                {
-                    ++counter;
-                    bitboard = ResetLS1B(bitboard);
-                }
-
-                return counter;
-            }
-
-            #endregion
+            return counter;
         }
 
-        private record BitBoardOpsProperRecord(ulong Board)
+        #endregion
+    }
+
+    private readonly struct BitBoardOpsReadonly
+    {
+        public ulong Board { get; }
+
+        public BitBoardOpsReadonly(ulong b)
         {
-            public static ulong SetBit(ulong bb, int square)
-            {
-                return bb | (1UL << square);
-            }
-
-            public static ulong PopBit(ulong bb, int square)
-            {
-                return bb & ~(1UL << square);
-            }
-
-            #region unrelated
-
-            public int CountBits() => CountBits(Board);
-            public int GetLS1BIndex() => GetLS1BIndex(Board);
-
-            public static int GetLS1BIndex(ulong bitboard)
-            {
-                if (bitboard == default)
-                {
-                    return -1;
-                }
-
-                return CountBits(bitboard ^ (bitboard - 1)) - 1;
-            }
-            public static ulong ResetLS1B(ulong bitboard)
-            {
-                return bitboard & (bitboard - 1);
-            }
-            public static int CountBits(ulong bitboard)
-            {
-                int counter = 0;
-
-                // Consecutively reset LSB
-                while (bitboard != default)
-                {
-                    ++counter;
-                    bitboard = ResetLS1B(bitboard);
-                }
-
-                return counter;
-            }
-
-            #endregion
+            Board = b;
         }
 
-        internal static void SizeTest()
+        public static ulong SetBit(ulong bb, int square)
         {
-            List<ulong> ulongs = new(10_000);
-            List<BitBoardOpsClass> classes = new(10_000);
-            List<BitBoardOpsRecord> records = new(10_000);
-            List<BitBoardOpsProperRecord> properRecords = new(10_000);
-            List<BitBoardOps> structs = new(10_000);
-            List<BitBoardOpsReadonly> readonlyStructs = new(10_000);
+            return bb | (1UL << square);
+        }
 
-            for (ulong i = 0; i < 10_000; ++i)
+        public static ulong PopBit(ulong bb, int square)
+        {
+            return bb & ~(1UL << square);
+        }
+
+        #region unrelated
+
+        public static int GetLS1BIndex(ulong bitboard)
+        {
+            if (bitboard == default)
             {
-                ulongs.Add(i);
-                classes.Add(new(i));
-                records.Add(new(i));
-                properRecords.Add(new(i));
-                structs.Add(new(i));
-                readonlyStructs.Add(new(i));
+                return -1;
+            }
+
+            return CountBits(bitboard ^ (bitboard - 1)) - 1;
+        }
+        public static ulong ResetLS1B(ulong bitboard)
+        {
+            return bitboard & (bitboard - 1);
+        }
+        public static int CountBits(ulong bitboard)
+        {
+            int counter = 0;
+
+            // Consecutively reset LSB
+            while (bitboard != default)
+            {
+                ++counter;
+                bitboard = ResetLS1B(bitboard);
+            }
+
+            return counter;
+        }
+
+        #endregion
+    }
+
+    private class BitBoardOpsClass
+    {
+        public ulong Board { get; private set; }
+        public BitBoardOpsClass() { }
+        public BitBoardOpsClass(ulong b)
+        {
+            Board = b;
+        }
+
+        public void SetBit(int square)
+        {
+            Board |= (1UL << square);
+        }
+
+        public void PopBit(int square)
+        {
+            Board &= ~(1UL << square);
+        }
+
+        public static ulong SetBit(ulong bb, int square)
+        {
+            return bb | (1UL << square);
+        }
+
+        public static ulong PopBit(ulong bb, int square)
+        {
+            return bb & ~(1UL << square);
+        }
+
+        #region unrelated
+
+        public int CountBits() => CountBits(Board);
+        public int GetLS1BIndex() => GetLS1BIndex(Board);
+
+        public static int GetLS1BIndex(ulong bitboard)
+        {
+            if (bitboard == default)
+            {
+                return -1;
+            }
+
+            return CountBits(bitboard ^ (bitboard - 1)) - 1;
+        }
+        public static ulong ResetLS1B(ulong bitboard)
+        {
+            return bitboard & (bitboard - 1);
+        }
+        public static int CountBits(ulong bitboard)
+        {
+            int counter = 0;
+
+            // Consecutively reset LSB
+            while (bitboard != default)
+            {
+                ++counter;
+                bitboard = ResetLS1B(bitboard);
+            }
+
+            return counter;
+        }
+
+        #endregion
+
+    }
+
+    private record BitBoardOpsRecord
+    {
+        public ulong Board { get; private set; }
+
+        public BitBoardOpsRecord() { }
+        public BitBoardOpsRecord(ulong b)
+        {
+            Board = b;
+        }
+
+        public void SetBit(int square)
+        {
+            Board |= (1UL << square);
+        }
+
+        public void PopBit(int square)
+        {
+            Board &= ~(1UL << square);
+        }
+
+        public static ulong SetBit(ulong bb, int square)
+        {
+            return bb | (1UL << square);
+        }
+
+        public static ulong PopBit(ulong bb, int square)
+        {
+            return bb & ~(1UL << square);
+        }
+
+        #region unrelated
+
+        public int CountBits() => CountBits(Board);
+        public int GetLS1BIndex() => GetLS1BIndex(Board);
+
+        public static int GetLS1BIndex(ulong bitboard)
+        {
+            if (bitboard == default)
+            {
+                return -1;
+            }
+
+            return CountBits(bitboard ^ (bitboard - 1)) - 1;
+        }
+        public static ulong ResetLS1B(ulong bitboard)
+        {
+            return bitboard & (bitboard - 1);
+        }
+        public static int CountBits(ulong bitboard)
+        {
+            int counter = 0;
+
+            // Consecutively reset LSB
+            while (bitboard != default)
+            {
+                ++counter;
+                bitboard = ResetLS1B(bitboard);
+            }
+
+            return counter;
+        }
+
+        #endregion
+    }
+
+    private record BitBoardOpsProperRecord(ulong Board)
+    {
+        public static ulong SetBit(ulong bb, int square)
+        {
+            return bb | (1UL << square);
+        }
+
+        public static ulong PopBit(ulong bb, int square)
+        {
+            return bb & ~(1UL << square);
+        }
+
+        #region unrelated
+
+        public int CountBits() => CountBits(Board);
+        public int GetLS1BIndex() => GetLS1BIndex(Board);
+
+        public static int GetLS1BIndex(ulong bitboard)
+        {
+            if (bitboard == default)
+            {
+                return -1;
+            }
+
+            return CountBits(bitboard ^ (bitboard - 1)) - 1;
+        }
+        public static ulong ResetLS1B(ulong bitboard)
+        {
+            return bitboard & (bitboard - 1);
+        }
+        public static int CountBits(ulong bitboard)
+        {
+            int counter = 0;
+
+            // Consecutively reset LSB
+            while (bitboard != default)
+            {
+                ++counter;
+                bitboard = ResetLS1B(bitboard);
+            }
+
+            return counter;
+        }
+
+        #endregion
+    }
+
+    internal static void SizeTest()
+    {
+        List<ulong> ulongs = new(10_000);
+        List<BitBoardOpsClass> classes = new(10_000);
+        List<BitBoardOpsRecord> records = new(10_000);
+        List<BitBoardOpsProperRecord> properRecords = new(10_000);
+        List<BitBoardOps> structs = new(10_000);
+        List<BitBoardOpsReadonly> readonlyStructs = new(10_000);
+
+        for (ulong i = 0; i < 10_000; ++i)
+        {
+            ulongs.Add(i);
+            classes.Add(new(i));
+            records.Add(new(i));
+            properRecords.Add(new(i));
+            structs.Add(new(i));
+            readonlyStructs.Add(new(i));
+        }
+    }
+
+    public static IEnumerable<int> Data => new[] { 1, 10, 1_000/*, 10_000, 100_000 */};
+
+    [Benchmark(Baseline = true)]
+    [ArgumentsSource(nameof(Data))]
+    public void Static(int iterations)
+    {
+        for (int i = 0; i < iterations; ++i)
+        {
+            var square = (int)BoardSquare.e1;
+
+            var occupancyMask = new BitBoardOpsReadonly(AttackGenerator.MaskBishopOccupancy(square).Board);
+
+            var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
+
+            int occupancyIndexes = (1 << relevantBitsCount);
+
+            for (int index = 0; index < occupancyIndexes; ++index)
+            {
+                _ = SetBishopOrRookOccupancy_Static(index, in occupancyMask);
+            }
+        }
+    }
+
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public void OOP(int iterations)
+    {
+        for (int i = 0; i < iterations; ++i)
+        {
+            var square = (int)BoardSquare.e1;
+
+            var occupancyMask = new BitBoardOps(AttackGenerator.MaskBishopOccupancy(square).Board);
+
+            var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
+
+            int occupancyIndexes = (1 << relevantBitsCount);
+
+            for (int index = 0; index < occupancyIndexes; ++index)
+            {
+                _ = SetBishopOrRookOccupancy_OOP(index, occupancyMask);
+            }
+        }
+    }
+
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public void OOP_Class(int iterations)
+    {
+        for (int i = 0; i < iterations; ++i)
+        {
+            var square = (int)BoardSquare.e1;
+
+            var occupancyMask = new BitBoardOpsClass(AttackGenerator.MaskBishopOccupancy(square).Board);
+
+            var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
+
+            int occupancyIndexes = (1 << relevantBitsCount);
+
+            for (int index = 0; index < occupancyIndexes; ++index)
+            {
+                _ = SetBishopOrRookOccupancy_OOP_Class(index, occupancyMask);
+            }
+        }
+    }
+
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public void OOP_Record(int iterations)
+    {
+        for (int i = 0; i < iterations; ++i)
+        {
+            var square = (int)BoardSquare.e1;
+
+            var occupancyMask = new BitBoardOpsRecord(AttackGenerator.MaskBishopOccupancy(square).Board);
+
+            var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
+
+            int occupancyIndexes = (1 << relevantBitsCount);
+
+            for (int index = 0; index < occupancyIndexes; ++index)
+            {
+                _ = SetBishopOrRookOccupancy_OOP_Record(index, occupancyMask);
+            }
+        }
+    }
+
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public void PureUlongs(int iterations)
+    {
+        for (int i = 0; i < iterations; ++i)
+        {
+            var square = (int)BoardSquare.e1;
+
+            var occupancyMask = AttackGenerator.MaskBishopOccupancy(square).Board;
+
+            var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
+
+            int occupancyIndexes = (1 << relevantBitsCount);
+
+            for (int index = 0; index < occupancyIndexes; ++index)
+            {
+                _ = SetBishopOrRookOccupancy_PureUlongs(index, occupancyMask);
+            }
+        }
+    }
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public void OOP_ProperRecord(int iterations)
+    {
+        for (int i = 0; i < iterations; ++i)
+        {
+            var square = (int)BoardSquare.e1;
+
+            var occupancyMask = new BitBoardOpsProperRecord(AttackGenerator.MaskBishopOccupancy(square).Board);
+
+            var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
+
+            int occupancyIndexes = (1 << relevantBitsCount);
+
+            for (int index = 0; index < occupancyIndexes; ++index)
+            {
+                _ = SetBishopOrRookOccupancy_OOP_ProperRecord(index, occupancyMask);
+            }
+        }
+    }
+
+    private static BitBoardOpsReadonly SetBishopOrRookOccupancy_Static(int index, in BitBoardOpsReadonly occupancyMask)
+    {
+        var occ = occupancyMask.Board;
+        var bitsInMask = BitBoardOpsReadonly.CountBits(occ);
+        var occupancy = 0UL;
+
+        // Loop over the range of bits within attack mask
+        for (int count = 0; count < bitsInMask; ++count)
+        {
+            // Extract LS1B and reset it
+            int squareIndex = BitBoardOpsReadonly.GetLS1BIndex(occ);
+            occ = BitBoardOpsReadonly.PopBit(occ, squareIndex);
+
+            // Make sure occupancy is on board
+            if ((index & (1 << count)) != default)
+            {
+                // Update occupancy
+                occupancy = BitBoardOpsReadonly.SetBit(occupancy, squareIndex);
             }
         }
 
-        public static IEnumerable<int> Data => new[] { 1, 10, 1_000/*, 10_000, 100_000 */};
+        return new BitBoardOpsReadonly(occupancy);
+    }
 
-        [Benchmark(Baseline = true)]
-        [ArgumentsSource(nameof(Data))]
-        public void Static(int iterations)
+    private static BitBoardOps SetBishopOrRookOccupancy_OOP(int index, BitBoardOps occupancyMask)
+    {
+        var bitsInMask = occupancyMask.CountBits();
+        var occupancy = new BitBoardOps();
+
+        // Loop over the range of bits within attack mask
+        for (int count = 0; count < bitsInMask; ++count)
         {
-            for (int i = 0; i < iterations; ++i)
+            // Extract LS1B and reset it
+            int squareIndex = occupancyMask.GetLS1BIndex();
+            occupancyMask.PopBit(squareIndex);
+
+            // Make sure occupancy is on board
+            if ((index & (1 << count)) != default)
             {
-                var square = (int)BoardSquare.e1;
-
-                var occupancyMask = new BitBoardOpsReadonly(AttackGenerator.MaskBishopOccupancy(square).Board);
-
-                var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
-
-                int occupancyIndexes = (1 << relevantBitsCount);
-
-                for (int index = 0; index < occupancyIndexes; ++index)
-                {
-                    _ = SetBishopOrRookOccupancy_Static(index, in occupancyMask);
-                }
+                // Update occupancy
+                occupancy.SetBit(squareIndex);
             }
         }
 
-        [Benchmark]
-        [ArgumentsSource(nameof(Data))]
-        public void OOP(int iterations)
+        return occupancy;
+    }
+
+    private static BitBoardOpsClass SetBishopOrRookOccupancy_OOP_Class(int index, BitBoardOpsClass occupancyMask)
+    {
+        var bitsInMask = occupancyMask.CountBits();
+        var occupancyMaskCopy = occupancyMask.Board;
+        var occupancy = new BitBoardOpsClass();
+
+        // Loop over the range of bits within attack mask
+        for (int count = 0; count < bitsInMask; ++count)
         {
-            for (int i = 0; i < iterations; ++i)
+            // Extract LS1B and reset it
+            int squareIndex = BitBoardOpsClass.GetLS1BIndex(occupancyMaskCopy);
+            occupancyMaskCopy = BitBoardOpsClass.PopBit(occupancyMaskCopy, squareIndex);
+
+            // Make sure occupancy is on board
+            if ((index & (1 << count)) != default)
             {
-                var square = (int)BoardSquare.e1;
-
-                var occupancyMask = new BitBoardOps(AttackGenerator.MaskBishopOccupancy(square).Board);
-
-                var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
-
-                int occupancyIndexes = (1 << relevantBitsCount);
-
-                for (int index = 0; index < occupancyIndexes; ++index)
-                {
-                    _ = SetBishopOrRookOccupancy_OOP(index, occupancyMask);
-                }
+                // Update occupancy
+                occupancy.SetBit(squareIndex);
             }
         }
 
-        [Benchmark]
-        [ArgumentsSource(nameof(Data))]
-        public void OOP_Class(int iterations)
+        return occupancy;
+    }
+
+    private static BitBoardOpsRecord SetBishopOrRookOccupancy_OOP_Record(int index, BitBoardOpsRecord occupancyMask)
+    {
+        var bitsInMask = occupancyMask.CountBits();
+        var occ = occupancyMask.Board;
+        var occupancy = new BitBoardOpsRecord();
+
+        // Loop over the range of bits within attack mask
+        for (int count = 0; count < bitsInMask; ++count)
         {
-            for (int i = 0; i < iterations; ++i)
+            // Extract LS1B and reset it
+            int squareIndex = BitBoardOpsRecord.GetLS1BIndex(occ);
+            occ = BitBoardOpsRecord.PopBit(occ, squareIndex);
+
+            // Make sure occupancy is on board
+            if ((index & (1 << count)) != default)
             {
-                var square = (int)BoardSquare.e1;
-
-                var occupancyMask = new BitBoardOpsClass(AttackGenerator.MaskBishopOccupancy(square).Board);
-
-                var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
-
-                int occupancyIndexes = (1 << relevantBitsCount);
-
-                for (int index = 0; index < occupancyIndexes; ++index)
-                {
-                    _ = SetBishopOrRookOccupancy_OOP_Class(index, occupancyMask);
-                }
+                // Update occupancy
+                occupancy.SetBit(squareIndex);
             }
         }
 
-        [Benchmark]
-        [ArgumentsSource(nameof(Data))]
-        public void OOP_Record(int iterations)
+        return occupancy;
+    }
+
+    private static BitBoardOpsProperRecord SetBishopOrRookOccupancy_OOP_ProperRecord(int index, BitBoardOpsProperRecord occupancyMask)
+    {
+        var bitsInMask = occupancyMask.CountBits();
+        var occ = occupancyMask.Board;
+        var occupancy = 0UL;
+
+        // Loop over the range of bits within attack mask
+        for (int count = 0; count < bitsInMask; ++count)
         {
-            for (int i = 0; i < iterations; ++i)
+            // Extract LS1B and reset it
+            int squareIndex = BitBoardOpsProperRecord.GetLS1BIndex(occ);
+            occ = BitBoardOpsProperRecord.PopBit(occ, squareIndex);
+
+            // Make sure occupancy is on board
+            if ((index & (1 << count)) != default)
             {
-                var square = (int)BoardSquare.e1;
-
-                var occupancyMask = new BitBoardOpsRecord(AttackGenerator.MaskBishopOccupancy(square).Board);
-
-                var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
-
-                int occupancyIndexes = (1 << relevantBitsCount);
-
-                for (int index = 0; index < occupancyIndexes; ++index)
-                {
-                    _ = SetBishopOrRookOccupancy_OOP_Record(index, occupancyMask);
-                }
+                // Update occupancy
+                occupancy = BitBoardOpsProperRecord.SetBit(occupancy, squareIndex);
             }
         }
 
-        [Benchmark]
-        [ArgumentsSource(nameof(Data))]
-        public void PureUlongs(int iterations)
+        return new BitBoardOpsProperRecord(occupancy);
+    }
+
+    private static ulong SetBishopOrRookOccupancy_PureUlongs(int index, ulong occupancyMask)
+    {
+        var bitsInMask = BitBoardOpsClass.CountBits(occupancyMask);
+        var occupancy = 0UL;
+
+        // Loop over the range of bits within attack mask
+        for (int count = 0; count < bitsInMask; ++count)
         {
-            for (int i = 0; i < iterations; ++i)
+            // Extract LS1B and reset it
+            int squareIndex = BitBoardOpsClass.GetLS1BIndex(occupancyMask);
+            occupancyMask = BitBoardOpsClass.PopBit(occupancyMask, squareIndex);
+
+            // Make sure occupancy is on board
+            if ((index & (1 << count)) != default)
             {
-                var square = (int)BoardSquare.e1;
-
-                var occupancyMask = AttackGenerator.MaskBishopOccupancy(square).Board;
-
-                var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
-
-                int occupancyIndexes = (1 << relevantBitsCount);
-
-                for (int index = 0; index < occupancyIndexes; ++index)
-                {
-                    _ = SetBishopOrRookOccupancy_PureUlongs(index, occupancyMask);
-                }
-            }
-        }
-        [Benchmark]
-        [ArgumentsSource(nameof(Data))]
-        public void OOP_ProperRecord(int iterations)
-        {
-            for (int i = 0; i < iterations; ++i)
-            {
-                var square = (int)BoardSquare.e1;
-
-                var occupancyMask = new BitBoardOpsProperRecord(AttackGenerator.MaskBishopOccupancy(square).Board);
-
-                var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
-
-                int occupancyIndexes = (1 << relevantBitsCount);
-
-                for (int index = 0; index < occupancyIndexes; ++index)
-                {
-                    _ = SetBishopOrRookOccupancy_OOP_ProperRecord(index, occupancyMask);
-                }
+                // Update occupancy
+                occupancy = BitBoardOpsProperRecord.SetBit(occupancy, squareIndex);
             }
         }
 
-        private static BitBoardOpsReadonly SetBishopOrRookOccupancy_Static(int index, in BitBoardOpsReadonly occupancyMask)
-        {
-            var occ = occupancyMask.Board;
-            var bitsInMask = BitBoardOpsReadonly.CountBits(occ);
-            var occupancy = 0UL;
-
-            // Loop over the range of bits within attack mask
-            for (int count = 0; count < bitsInMask; ++count)
-            {
-                // Extract LS1B and reset it
-                int squareIndex = BitBoardOpsReadonly.GetLS1BIndex(occ);
-                occ = BitBoardOpsReadonly.PopBit(occ, squareIndex);
-
-                // Make sure occupancy is on board
-                if ((index & (1 << count)) != default)
-                {
-                    // Update occupancy
-                    occupancy = BitBoardOpsReadonly.SetBit(occupancy, squareIndex);
-                }
-            }
-
-            return new BitBoardOpsReadonly(occupancy);
-        }
-
-        private static BitBoardOps SetBishopOrRookOccupancy_OOP(int index, BitBoardOps occupancyMask)
-        {
-            var bitsInMask = occupancyMask.CountBits();
-            var occupancy = new BitBoardOps();
-
-            // Loop over the range of bits within attack mask
-            for (int count = 0; count < bitsInMask; ++count)
-            {
-                // Extract LS1B and reset it
-                int squareIndex = occupancyMask.GetLS1BIndex();
-                occupancyMask.PopBit(squareIndex);
-
-                // Make sure occupancy is on board
-                if ((index & (1 << count)) != default)
-                {
-                    // Update occupancy
-                    occupancy.SetBit(squareIndex);
-                }
-            }
-
-            return occupancy;
-        }
-
-        private static BitBoardOpsClass SetBishopOrRookOccupancy_OOP_Class(int index, BitBoardOpsClass occupancyMask)
-        {
-            var bitsInMask = occupancyMask.CountBits();
-            var occupancyMaskCopy = occupancyMask.Board;
-            var occupancy = new BitBoardOpsClass();
-
-            // Loop over the range of bits within attack mask
-            for (int count = 0; count < bitsInMask; ++count)
-            {
-                // Extract LS1B and reset it
-                int squareIndex = BitBoardOpsClass.GetLS1BIndex(occupancyMaskCopy);
-                occupancyMaskCopy = BitBoardOpsClass.PopBit(occupancyMaskCopy, squareIndex);
-
-                // Make sure occupancy is on board
-                if ((index & (1 << count)) != default)
-                {
-                    // Update occupancy
-                    occupancy.SetBit(squareIndex);
-                }
-            }
-
-            return occupancy;
-        }
-
-        private static BitBoardOpsRecord SetBishopOrRookOccupancy_OOP_Record(int index, BitBoardOpsRecord occupancyMask)
-        {
-            var bitsInMask = occupancyMask.CountBits();
-            var occ = occupancyMask.Board;
-            var occupancy = new BitBoardOpsRecord();
-
-            // Loop over the range of bits within attack mask
-            for (int count = 0; count < bitsInMask; ++count)
-            {
-                // Extract LS1B and reset it
-                int squareIndex = BitBoardOpsRecord.GetLS1BIndex(occ);
-                occ = BitBoardOpsRecord.PopBit(occ, squareIndex);
-
-                // Make sure occupancy is on board
-                if ((index & (1 << count)) != default)
-                {
-                    // Update occupancy
-                    occupancy.SetBit(squareIndex);
-                }
-            }
-
-            return occupancy;
-        }
-
-        private static BitBoardOpsProperRecord SetBishopOrRookOccupancy_OOP_ProperRecord(int index, BitBoardOpsProperRecord occupancyMask)
-        {
-            var bitsInMask = occupancyMask.CountBits();
-            var occ = occupancyMask.Board;
-            var occupancy = 0UL;
-
-            // Loop over the range of bits within attack mask
-            for (int count = 0; count < bitsInMask; ++count)
-            {
-                // Extract LS1B and reset it
-                int squareIndex = BitBoardOpsProperRecord.GetLS1BIndex(occ);
-                occ = BitBoardOpsProperRecord.PopBit(occ, squareIndex);
-
-                // Make sure occupancy is on board
-                if ((index & (1 << count)) != default)
-                {
-                    // Update occupancy
-                    occupancy = BitBoardOpsProperRecord.SetBit(occupancy, squareIndex);
-                }
-            }
-
-            return new BitBoardOpsProperRecord(occupancy);
-        }
-
-        private static ulong SetBishopOrRookOccupancy_PureUlongs(int index, ulong occupancyMask)
-        {
-            var bitsInMask = BitBoardOpsClass.CountBits(occupancyMask);
-            var occupancy = 0UL;
-
-            // Loop over the range of bits within attack mask
-            for (int count = 0; count < bitsInMask; ++count)
-            {
-                // Extract LS1B and reset it
-                int squareIndex = BitBoardOpsClass.GetLS1BIndex(occupancyMask);
-                occupancyMask = BitBoardOpsClass.PopBit(occupancyMask, squareIndex);
-
-                // Make sure occupancy is on board
-                if ((index & (1 << count)) != default)
-                {
-                    // Update occupancy
-                    occupancy = BitBoardOpsProperRecord.SetBit(occupancy, squareIndex);
-                }
-            }
-
-            return occupancy;
-        }
+        return occupancy;
     }
 }
 

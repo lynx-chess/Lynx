@@ -1,37 +1,36 @@
 ﻿using NLog;
 using System.Threading.Channels;
 
-namespace Lynx.Cli
+namespace Lynx.Cli;
+
+public sealed class Writer
 {
-    public sealed class Writer
+    private readonly ChannelReader<string> _engineOutputReader;
+    private readonly ILogger _logger;
+
+    public Writer(ChannelReader<string> engineOutputReader)
     {
-        private readonly ChannelReader<string> _engineOutputReader;
-        private readonly ILogger _logger;
+        _engineOutputReader = engineOutputReader;
+        _logger = LogManager.GetCurrentClassLogger();
+    }
 
-        public Writer(ChannelReader<string> engineOutputReader)
+    public async Task Run(CancellationToken cancellationToken)
+    {
+        try
         {
-            _engineOutputReader = engineOutputReader;
-            _logger = LogManager.GetCurrentClassLogger();
+            await foreach (var output in _engineOutputReader.ReadAllAsync(cancellationToken))
+            {
+                _logger.Debug($"[Lynx]\t{output}");
+                Console.WriteLine(output);
+            }
         }
-
-        public async Task Run(CancellationToken cancellationToken)
+        catch (Exception e)
         {
-            try
-            {
-                await foreach (var output in _engineOutputReader.ReadAllAsync(cancellationToken))
-                {
-                    _logger.Debug($"[Lynx]\t{output}");
-                    Console.WriteLine(output);
-                }
-            }
-            catch (Exception e)
-            {
-                _logger.Fatal(e);
-            }
-            finally
-            {
-                _logger.Info($"Finishing {nameof(Writer)}");
-            }
+            _logger.Fatal(e);
+        }
+        finally
+        {
+            _logger.Info($"Finishing {nameof(Writer)}");
         }
     }
 }

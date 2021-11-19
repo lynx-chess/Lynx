@@ -1,127 +1,126 @@
 ﻿using Lynx.Model;
 
-namespace Lynx.Internal
+namespace Lynx.Internal;
+
+public static class MagicNumberGenerator
 {
-    public static class MagicNumberGenerator
+    private static readonly Random _generator = new(1160218972);
+
+    public static ulong GetRandomU64()
     {
-        private static readonly Random _generator = new (1160218972);
-
-        public static ulong GetRandomU64()
+        static ulong GenerateRandomNumber()
         {
-            static ulong GenerateRandomNumber()
-            {
-                // Slicing 16 bits from MS1B side
-                return ((ulong)_generator.Next()) & 0xFFFF;
-            }
-
-            // Define 4 random numbers
-            var n1 = GenerateRandomNumber();
-            var n2 = GenerateRandomNumber();
-            var n3 = GenerateRandomNumber();
-            var n4 = GenerateRandomNumber();
-
-            return n1 | (n2 << 16) | (n3 << 32) | (n4 << 48);
+            // Slicing 16 bits from MS1B side
+            return ((ulong)_generator.Next()) & 0xFFFF;
         }
 
-        public static ulong GenerateMagicNumber()
-        {
+        // Define 4 random numbers
+        var n1 = GenerateRandomNumber();
+        var n2 = GenerateRandomNumber();
+        var n3 = GenerateRandomNumber();
+        var n4 = GenerateRandomNumber();
+
+        return n1 | (n2 << 16) | (n3 << 32) | (n4 << 48);
+    }
+
+    public static ulong GenerateMagicNumber()
+    {
 #pragma warning disable S1764 // Identical expressions should not be used on both sides of a binary operator
-            return GetRandomU64()
-                & GetRandomU64()
-                & GetRandomU64();
+        return GetRandomU64()
+            & GetRandomU64()
+            & GetRandomU64();
 #pragma warning restore S1764 // Identical expressions should not be used on both sides of a binary operator
+    }
+
+    public static ulong FindMagicNumbers(int squareIndex, bool isBishop)
+    {
+        BitBoard[] occupancies = new BitBoard[4096];
+
+        BitBoard[] attacks = new BitBoard[4096];
+
+        ulong[] usedAttacks = new ulong[4096];
+
+        var occupancyMask = isBishop
+            ? AttackGenerator.MaskBishopOccupancy(squareIndex)
+            : AttackGenerator.MaskRookOccupancy(squareIndex);
+
+        var relevantOccupancyBits = isBishop // or occupancyMask.CountBits()
+            ? Constants.BishopRelevantOccupancyBits[squareIndex]
+            : Constants.RookRelevantOccupancyBits[squareIndex];
+        var occupancyIndexes = 1 << relevantOccupancyBits;
+
+        for (int index = 0; index < occupancyIndexes; ++index)
+        {
+            occupancies[index] = AttackGenerator.SetBishopOrRookOccupancy(index, occupancyMask);
+
+            attacks[index] = isBishop
+                ? AttackGenerator.GenerateBishopAttacksOnTheFly(squareIndex, occupancies[index])
+                : AttackGenerator.GenerateRookAttacksOnTheFly(squareIndex, occupancies[index]);
         }
 
-        public static ulong FindMagicNumbers(int squareIndex, bool isBishop)
+        // Test magic numbers
+        for (int randomCount = 0; randomCount < int.MaxValue; ++randomCount)
         {
-            BitBoard[] occupancies = new BitBoard[4096];
+            var magicNumber = GenerateMagicNumber();
 
-            BitBoard[] attacks = new BitBoard[4096];
-
-            ulong[] usedAttacks = new ulong[4096];
-
-            var occupancyMask = isBishop
-                ? AttackGenerator.MaskBishopOccupancy(squareIndex)
-                : AttackGenerator.MaskRookOccupancy(squareIndex);
-
-            var relevantOccupancyBits = isBishop // or occupancyMask.CountBits()
-                ? Constants.BishopRelevantOccupancyBits[squareIndex]
-                : Constants.RookRelevantOccupancyBits[squareIndex];
-            var occupancyIndexes = 1 << relevantOccupancyBits;
-
-            for (int index = 0; index < occupancyIndexes; ++index)
+            // Skip inappropriate magic numbers
+            var n = (occupancyMask.Board * magicNumber) & 0xFF000_000_000_000_00;
+            if (BitBoard.CountBits(n) < 6)
             {
-                occupancies[index] = AttackGenerator.SetBishopOrRookOccupancy(index, occupancyMask);
-
-                attacks[index] = isBishop
-                    ? AttackGenerator.GenerateBishopAttacksOnTheFly(squareIndex, occupancies[index])
-                    : AttackGenerator.GenerateRookAttacksOnTheFly(squareIndex, occupancies[index]);
+                continue;
             }
 
-            // Test magic numbers
-            for (int randomCount = 0; randomCount < int.MaxValue; ++randomCount)
+            // Init used attacks
+            for (int i = 0; i < usedAttacks.Length; ++i) usedAttacks[i] = default;
+
+            int index;
+            bool fail;
+
+            // Test magic index loop
+            for (index = 0, fail = false; !fail && index < occupancyIndexes; ++index)
             {
-                var magicNumber = GenerateMagicNumber();
+                // Initialize magic index
+                int magicIndex = (int)((occupancies[index].Board * magicNumber) >> (64 - relevantOccupancyBits));
 
-                // Skip inappropriate magic numbers
-                var n = (occupancyMask.Board * magicNumber) & 0xFF000_000_000_000_00;
-                if (BitBoard.CountBits(n) < 6)
+                // If magic index works
+                if (usedAttacks[magicIndex] == default)
                 {
-                    continue;
+                    // Init used attacks
+                    usedAttacks[magicIndex] = attacks[index].Board;
                 }
-
-                // Init used attacks
-                for (int i = 0; i < usedAttacks.Length; ++i) usedAttacks[i] = default;
-
-                int index;
-                bool fail;
-
-                // Test magic index loop
-                for (index = 0, fail = false; !fail && index < occupancyIndexes; ++index)
+                else if (usedAttacks[magicIndex] != attacks[index].Board)
                 {
-                    // Initialize magic index
-                    int magicIndex = (int)((occupancies[index].Board * magicNumber) >> (64 - relevantOccupancyBits));
-
-                    // If magic index works
-                    if (usedAttacks[magicIndex] == default)
-                    {
-                        // Init used attacks
-                        usedAttacks[magicIndex] = attacks[index].Board;
-                    }
-                    else if (usedAttacks[magicIndex] != attacks[index].Board)
-                    {
-                        // Magic index doesn't work
-                        fail = true;
-                    }
-                }
-
-                if (!fail)
-                {
-                    return magicNumber;
+                    // Magic index doesn't work
+                    fail = true;
                 }
             }
 
-            Console.WriteLine("Error generating magic numbers");
-            return default;
+            if (!fail)
+            {
+                return magicNumber;
+            }
         }
 
-        /// <summary>
-        /// *Untested*
-        /// </summary>
-        public static void InitializeMagicNumbers()
+        Console.WriteLine("Error generating magic numbers");
+        return default;
+    }
+
+    /// <summary>
+    /// *Untested*
+    /// </summary>
+    public static void InitializeMagicNumbers()
+    {
+        for (int square = 0; square < 64; ++square)
         {
-            for (int square = 0; square < 64; ++square)
-            {
-                // Rook
-                var magicRook = FindMagicNumbers(square, false);
-                Console.WriteLine(magicRook);
+            // Rook
+            var magicRook = FindMagicNumbers(square, false);
+            Console.WriteLine(magicRook);
 
-                Console.WriteLine();
+            Console.WriteLine();
 
-                // Bishop
-                var magicBishop = FindMagicNumbers(square, true);
-                Console.WriteLine(magicBishop);
-            }
+            // Bishop
+            var magicBishop = FindMagicNumbers(square, true);
+            Console.WriteLine(magicBishop);
         }
     }
 }

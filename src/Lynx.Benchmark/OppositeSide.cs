@@ -25,63 +25,62 @@
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
 
-namespace Lynx.Benchmark
+namespace Lynx.Benchmark;
+
+/// <summary>
+/// <see cref="Utils.OppositeSide(Side)"/>
+/// </summary>
+public static class OppositeSiteImplementations
 {
-    /// <summary>
-    /// <see cref="Utils.OppositeSide(Side)"/>
-    /// </summary>
-    public static class OppositeSiteImplementations
+    public static int Method_Substraction(Side side) => (int)Side.White - (int)side;
+
+    public static int Method_BitwiseOr(Side side) => (int)side ^ 1;
+
+    public static readonly int[] Array = new[] { 1, 0 };
+}
+
+public class OppositeSide : BaseBenchmark
+{
+    public static IEnumerable<int> Data => new[] { 1, 10, 1_000, 10_000, 100_000 };
+
+    [Benchmark(Baseline = true)]
+    [ArgumentsSource(nameof(Data))]
+    public void Array(int iterations)
     {
-        public static int Method_Substraction(Side side) => (int)Side.White - (int)side;
-
-        public static int Method_BitwiseOr(Side side) => (int)side ^ 1;
-
-        public static readonly int[] Array = new[] { 1, 0 };
+        for (int i = 0; i < iterations; ++i)
+        {
+            _ = OppositeSiteImplementations.Array[(int)Side.Black];
+            _ = OppositeSiteImplementations.Array[(int)Side.White];
+        }
     }
 
-    public class OppositeSide : BaseBenchmark
+    /// <summary>
+    /// Faster than <see cref="Array(int)"/>
+    /// </summary>
+    /// <param name="iterations"></param>
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public void Method_Substraction(int iterations)
     {
-        public static IEnumerable<int> Data => new[] { 1, 10, 1_000, 10_000, 100_000 };
-
-        [Benchmark(Baseline = true)]
-        [ArgumentsSource(nameof(Data))]
-        public void Array(int iterations)
+        for (int i = 0; i < iterations; ++i)
         {
-            for (int i = 0; i < iterations; ++i)
-            {
-                _ = OppositeSiteImplementations.Array[(int)Side.Black];
-                _ = OppositeSiteImplementations.Array[(int)Side.White];
-            }
+            _ = OppositeSiteImplementations.Method_Substraction(Side.Black);
+            _ = OppositeSiteImplementations.Method_Substraction(Side.White);
         }
+    }
 
-        /// <summary>
-        /// Faster than <see cref="Array(int)"/>
-        /// </summary>
-        /// <param name="iterations"></param>
-        [Benchmark]
-        [ArgumentsSource(nameof(Data))]
-        public void Method_Substraction(int iterations)
+    /// <summary>
+    /// Very similar to <see cref="Method_Substraction(int)"/>
+    /// </summary>
+    /// <param name="iterations"></param>
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public void Method_BitwiseOr(int iterations)
+    {
+        for (int i = 0; i < iterations; ++i)
         {
-            for (int i = 0; i < iterations; ++i)
-            {
-                _ = OppositeSiteImplementations.Method_Substraction(Side.Black);
-                _ = OppositeSiteImplementations.Method_Substraction(Side.White);
-            }
-        }
-
-        /// <summary>
-        /// Very similar to <see cref="Method_Substraction(int)"/>
-        /// </summary>
-        /// <param name="iterations"></param>
-        [Benchmark]
-        [ArgumentsSource(nameof(Data))]
-        public void Method_BitwiseOr(int iterations)
-        {
-            for (int i = 0; i < iterations; ++i)
-            {
-                _ = OppositeSiteImplementations.Method_BitwiseOr(Side.Black);
-                _ = OppositeSiteImplementations.Method_BitwiseOr(Side.White);
-            }
+            _ = OppositeSiteImplementations.Method_BitwiseOr(Side.Black);
+            _ = OppositeSiteImplementations.Method_BitwiseOr(Side.White);
         }
     }
 }

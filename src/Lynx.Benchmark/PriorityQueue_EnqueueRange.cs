@@ -17,39 +17,38 @@
 
 using BenchmarkDotNet.Attributes;
 
-namespace Lynx.Benchmark
+namespace Lynx.Benchmark;
+
+public class PriorityQueue_EnqueueRange : BaseBenchmark
 {
-    public class PriorityQueue_EnqueueRange : BaseBenchmark
+    private const int Priority = 1_1111_111;
+
+    public static IEnumerable<int> Data => new[] { 10, 100, 1_000, 1_000_000 };
+
+    [Benchmark(Baseline = true)]
+    [ArgumentsSource(nameof(Data))]
+    public void EnqueueOneByOne(int itemsCount)
     {
-        private const int Priority = 1_1111_111;
+        var queue = new PriorityQueue<int, int>(itemsCount);
 
-        public static IEnumerable<int> Data => new[] { 10, 100, 1_000, 1_000_000 };
-
-        [Benchmark(Baseline = true)]
-        [ArgumentsSource(nameof(Data))]
-        public void EnqueueOneByOne(int itemsCount)
+        for (int i = 0; i < itemsCount; ++i)
         {
-            var queue = new PriorityQueue<int, int>(itemsCount);
+            queue.Enqueue(i, Priority);
+        }
+    }
 
-            for (int i = 0; i < itemsCount; ++i)
-            {
-                queue.Enqueue(i, Priority);
-            }
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public void EnqueueRange(int itemsCount)
+    {
+        var queue = new PriorityQueue<int, int>(itemsCount);
+        var items = new List<int>(itemsCount);
+
+        for (int i = 0; i < itemsCount; ++i)
+        {
+            items.Add(i);
         }
 
-        [Benchmark]
-        [ArgumentsSource(nameof(Data))]
-        public void EnqueueRange(int itemsCount)
-        {
-            var queue = new PriorityQueue<int, int>(itemsCount);
-            var items = new List<int>(itemsCount);
-
-            for (int i = 0; i < itemsCount; ++i)
-            {
-                items.Add(i);
-            }
-
-            queue.EnqueueRange(items, Priority);
-        }
+        queue.EnqueueRange(items, Priority);
     }
 }

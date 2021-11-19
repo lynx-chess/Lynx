@@ -29,30 +29,30 @@ using BenchmarkDotNet.Attributes;
 using Lynx.Model;
 using System.Text;
 
-namespace Lynx.Benchmark
+namespace Lynx.Benchmark;
+
+public class PositionIdGeneration : BaseBenchmark
 {
-    public class PositionIdGeneration : BaseBenchmark
+    [Benchmark(Baseline = true)]
+    [ArgumentsSource(nameof(Data))]
+    public string FEN(Position newPosition)
     {
-        [Benchmark(Baseline = true)]
-        [ArgumentsSource(nameof(Data))]
-        public string FEN(Position newPosition)
-        {
-            return newPosition.CalculateFEN();
-        }
+        return newPosition.CalculateFEN();
+    }
 
-        /// <summary>
-        /// Twice as faster, but allocates three times more
-        /// </summary>
-        /// <param name="newPosition"></param>
-        /// <returns></returns>
-        [Benchmark]
-        [ArgumentsSource(nameof(Data))]
-        public string Id(Position newPosition)
-        {
-            return newPosition.CalculateId();
-        }
+    /// <summary>
+    /// Twice as faster, but allocates three times more
+    /// </summary>
+    /// <param name="newPosition"></param>
+    /// <returns></returns>
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public string Id(Position newPosition)
+    {
+        return newPosition.CalculateId();
+    }
 
-        public static Position[] Positions => new Position[] {
+    public static Position[] Positions => new Position[] {
             new (Constants.InitialPositionFEN),
             new (Constants.TrickyTestPositionFEN),
             new ("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1"),
@@ -60,56 +60,55 @@ namespace Lynx.Benchmark
             new ("r2q1rk1/ppp2ppp/2n1bn2/2b1p3/3pP3/3P1NPP/PPP1NPB1/R1BQ1RK1 b - - 0 1)")
         };
 
-        public static IEnumerable<Position> Data => new[] {
+    public static IEnumerable<Position> Data => new[] {
             //Constants.EmptyBoardFEN,
             new Position(Positions[0], Positions[0].AllPossibleMoves()[0]),
             new Position(Positions[1], Positions[1].AllPossibleMoves()[0]),
             new Position(Positions[2], Positions[2].AllPossibleMoves()[0]),
             new Position(Positions[3], Positions[3].AllPossibleMoves()[0])
         };
-    }
+}
 
-    internal static class PositionExtensions
+internal static class PositionExtensions
+{
+    /// <summary>
+    /// Used to be part of Position
+    /// </summary>
+    /// <param name="position"></param>
+    /// <returns></returns>
+    internal static string CalculateId(this Position position)
     {
-        /// <summary>
-        /// Used to be part of Position
-        /// </summary>
-        /// <param name="position"></param>
-        /// <returns></returns>
-        internal static string CalculateId(this Position position)
+        var sb = new StringBuilder(260);    // 252 = 12 * $"{ulong.MaxValue}".Length + 2
+
+        for (int index = 0; index < position.PieceBitBoards.Length; ++index)
         {
-            var sb = new StringBuilder(260);    // 252 = 12 * $"{ulong.MaxValue}".Length + 2
-
-            for (int index = 0; index < position.PieceBitBoards.Length; ++index)
-            {
-                sb.Append(position.PieceBitBoards[index].Board);
+            sb.Append(position.PieceBitBoards[index].Board);
 #if DEBUG
-                sb.Append('|');
+            sb.Append('|');
 #endif
-            }
-
-            sb.Append((int)position.Side);
-
-            if ((position.Castle & (int)CastlingRights.WK) != default)
-            {
-                sb.Append('K');
-            }
-            if ((position.Castle & (int)CastlingRights.WQ) != default)
-            {
-                sb.Append('Q');
-            }
-            if ((position.Castle & (int)CastlingRights.BK) != default)
-            {
-                sb.Append('k');
-            }
-            if ((position.Castle & (int)CastlingRights.BQ) != default)
-            {
-                sb.Append('q');
-            }
-
-            sb.Append((int)position.EnPassant);
-
-            return sb.ToString();
         }
+
+        sb.Append((int)position.Side);
+
+        if ((position.Castle & (int)CastlingRights.WK) != default)
+        {
+            sb.Append('K');
+        }
+        if ((position.Castle & (int)CastlingRights.WQ) != default)
+        {
+            sb.Append('Q');
+        }
+        if ((position.Castle & (int)CastlingRights.BK) != default)
+        {
+            sb.Append('k');
+        }
+        if ((position.Castle & (int)CastlingRights.BQ) != default)
+        {
+            sb.Append('q');
+        }
+
+        sb.Append((int)position.EnPassant);
+
+        return sb.ToString();
     }
 }

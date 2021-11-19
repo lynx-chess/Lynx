@@ -1,147 +1,146 @@
 ﻿using Lynx.Model;
 using NUnit.Framework;
 
-namespace Lynx.Test.MoveGeneration
+namespace Lynx.Test.MoveGeneration;
+
+public class GenerateQueenMovesTest
 {
-    public class GenerateQueenMovesTest
+    [TestCase(Constants.EmptyBoardFEN, 0)]
+    [TestCase(Constants.InitialPositionFEN, 0)]
+    [TestCase("8/8/8/8/8/8/PP3PPP/RNBQKBNR w KQkq - 0 1", 14)]
+    [TestCase("rnbqkbnr/pp3ppp/8/8/8/8/8/8 b KQkq - 0 1", 14)]
+    [TestCase("8/pppppppp/8/8/8/8/PP3PPP/RNBQKBNR w KQkq - 0 1", 13)]
+    [TestCase("rnbqkbnr/pp3ppp/8/8/8/8/PPPPPPPP/8 b KQkq - 0 1", 13)]
+    [TestCase("8/8/8/8/3Q4/8/8/8 w - - 0 1", 27)]
+    [TestCase("8/8/8/8/3q4/8/8/8 b - - 0 1", 27)]
+    [TestCase("8/8/1P1P1P2/8/1P1Q1P2/8/1P1P1P2/8 w - - 0 1", 8)]
+    [TestCase("8/8/1p1p1p2/8/1p1q1p2/8/1p1p1p2/8 b - - 0 1", 8)]
+    [TestCase("8/8/1p1p1p2/8/1p1Q1p2/8/1p1p1p2/8 w - - 0 1", 16)]
+    [TestCase("8/8/1P1P1P2/8/1P1q1P2/8/1P1P1P2/8 b - - 0 1", 16)]
+    public void QueenMoves_Count(string fen, int expectedMoves)
     {
-        [TestCase(Constants.EmptyBoardFEN, 0)]
-        [TestCase(Constants.InitialPositionFEN, 0)]
-        [TestCase("8/8/8/8/8/8/PP3PPP/RNBQKBNR w KQkq - 0 1", 14)]
-        [TestCase("rnbqkbnr/pp3ppp/8/8/8/8/8/8 b KQkq - 0 1", 14)]
-        [TestCase("8/pppppppp/8/8/8/8/PP3PPP/RNBQKBNR w KQkq - 0 1", 13)]
-        [TestCase("rnbqkbnr/pp3ppp/8/8/8/8/PPPPPPPP/8 b KQkq - 0 1", 13)]
-        [TestCase("8/8/8/8/3Q4/8/8/8 w - - 0 1", 27)]
-        [TestCase("8/8/8/8/3q4/8/8/8 b - - 0 1", 27)]
-        [TestCase("8/8/1P1P1P2/8/1P1Q1P2/8/1P1P1P2/8 w - - 0 1", 8)]
-        [TestCase("8/8/1p1p1p2/8/1p1q1p2/8/1p1p1p2/8 b - - 0 1", 8)]
-        [TestCase("8/8/1p1p1p2/8/1p1Q1p2/8/1p1p1p2/8 w - - 0 1", 16)]
-        [TestCase("8/8/1P1P1P2/8/1P1q1P2/8/1P1P1P2/8 b - - 0 1", 16)]
-        public void QueenMoves_Count(string fen, int expectedMoves)
-        {
-            var position = new Position(fen);
-            var offset = Utils.PieceOffset(position.Side);
-            var moves = MoveGenerator.GeneratePieceMoves((int)Piece.Q + offset, position);
+        var position = new Position(fen);
+        var offset = Utils.PieceOffset(position.Side);
+        var moves = MoveGenerator.GeneratePieceMoves((int)Piece.Q + offset, position);
 
-            Assert.AreEqual(expectedMoves, moves.Count());
+        Assert.AreEqual(expectedMoves, moves.Count());
 
-            Assert.AreEqual(moves, MoveGenerator.GenerateQueenMoves(position));
-        }
+        Assert.AreEqual(moves, MoveGenerator.GenerateQueenMoves(position));
+    }
 
-        /// <summary>
-        /// 8   r . . . k . . r
-        /// 7   p . p p q p b .
-        /// 6   b n . . p n p .
-        /// 5   . . . P N . . .
-        /// 4   . p . . P . . .
-        /// 3   . . N . . Q . p
-        /// 2   P P P B B P P P
-        /// 1   R . . . K . . R
-        ///     a b c d e f g h
-        ///     Side:       White
-        ///     Enpassant:  no
-        ///     Castling:   KQ | kq
-        /// </summary>
-        [Test]
-        public void QueenMoves_White()
-        {
-            var position = new Position(Constants.TrickyTestPositionFEN);
-            var offset = Utils.PieceOffset(position.Side);
-            var piece = (int)Piece.Q + offset;
-            var moves = MoveGenerator.GeneratePieceMoves(piece, position);
+    /// <summary>
+    /// 8   r . . . k . . r
+    /// 7   p . p p q p b .
+    /// 6   b n . . p n p .
+    /// 5   . . . P N . . .
+    /// 4   . p . . P . . .
+    /// 3   . . N . . Q . p
+    /// 2   P P P B B P P P
+    /// 1   R . . . K . . R
+    ///     a b c d e f g h
+    ///     Side:       White
+    ///     Enpassant:  no
+    ///     Castling:   KQ | kq
+    /// </summary>
+    [Test]
+    public void QueenMoves_White()
+    {
+        var position = new Position(Constants.TrickyTestPositionFEN);
+        var offset = Utils.PieceOffset(position.Side);
+        var piece = (int)Piece.Q + offset;
+        var moves = MoveGenerator.GeneratePieceMoves(piece, position);
 
-            Assert.AreEqual(9, moves.Count(m => m.Piece() == piece));
+        Assert.AreEqual(9, moves.Count(m => m.Piece() == piece));
 
-            Assert.AreEqual(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquare.f3
-                && m.TargetSquare() == (int)BoardSquare.e3));
+        Assert.AreEqual(1, moves.Count(m =>
+            m.SourceSquare() == (int)BoardSquare.f3
+            && m.TargetSquare() == (int)BoardSquare.e3));
 
-            Assert.AreEqual(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquare.f3
-                && m.TargetSquare() == (int)BoardSquare.d3));
+        Assert.AreEqual(1, moves.Count(m =>
+            m.SourceSquare() == (int)BoardSquare.f3
+            && m.TargetSquare() == (int)BoardSquare.d3));
 
-            Assert.AreEqual(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquare.f3
-                && m.TargetSquare() == (int)BoardSquare.f4));
+        Assert.AreEqual(1, moves.Count(m =>
+            m.SourceSquare() == (int)BoardSquare.f3
+            && m.TargetSquare() == (int)BoardSquare.f4));
 
-            Assert.AreEqual(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquare.f3
-                && m.TargetSquare() == (int)BoardSquare.f5));
+        Assert.AreEqual(1, moves.Count(m =>
+            m.SourceSquare() == (int)BoardSquare.f3
+            && m.TargetSquare() == (int)BoardSquare.f5));
 
-            Assert.AreEqual(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquare.f3
-                && m.TargetSquare() == (int)BoardSquare.f6));
+        Assert.AreEqual(1, moves.Count(m =>
+            m.SourceSquare() == (int)BoardSquare.f3
+            && m.TargetSquare() == (int)BoardSquare.f6));
 
-            Assert.AreEqual(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquare.f3
-                && m.TargetSquare() == (int)BoardSquare.g4));
+        Assert.AreEqual(1, moves.Count(m =>
+            m.SourceSquare() == (int)BoardSquare.f3
+            && m.TargetSquare() == (int)BoardSquare.g4));
 
-            Assert.AreEqual(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquare.f3
-                && m.TargetSquare() == (int)BoardSquare.h5));
+        Assert.AreEqual(1, moves.Count(m =>
+            m.SourceSquare() == (int)BoardSquare.f3
+            && m.TargetSquare() == (int)BoardSquare.h5));
 
-            Assert.AreEqual(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquare.f3
-                && m.TargetSquare() == (int)BoardSquare.g3));
+        Assert.AreEqual(1, moves.Count(m =>
+            m.SourceSquare() == (int)BoardSquare.f3
+            && m.TargetSquare() == (int)BoardSquare.g3));
 
-            Assert.AreEqual(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquare.f3
-                && m.TargetSquare() == (int)BoardSquare.h3));
-        }
+        Assert.AreEqual(1, moves.Count(m =>
+            m.SourceSquare() == (int)BoardSquare.f3
+            && m.TargetSquare() == (int)BoardSquare.h3));
+    }
 
-        /// <summary>
-        /// 8   r . . . k R . r
-        /// 7   p . p p q p b .
-        /// 6   b n . . p n p .
-        /// 5   . . . P N . . .
-        /// 4   . p . . P . . .
-        /// 3   . . N . . Q . p
-        /// 2   P P P B B P P P
-        /// 1   R . . . K . . R
-        ///     a b c d e f g h
-        ///     Side:       Black
-        ///     Enpassant:  no
-        ///     Castling:   KQ | kq
-        /// </summary>
-        [Test]
-        public void QueenMoves_Black()
-        {
-            var position = new Position("r3kR1r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1");
-            var offset = Utils.PieceOffset(position.Side);
-            var piece = (int)Piece.Q + offset;
-            var moves = MoveGenerator.GeneratePieceMoves(piece, position);
+    /// <summary>
+    /// 8   r . . . k R . r
+    /// 7   p . p p q p b .
+    /// 6   b n . . p n p .
+    /// 5   . . . P N . . .
+    /// 4   . p . . P . . .
+    /// 3   . . N . . Q . p
+    /// 2   P P P B B P P P
+    /// 1   R . . . K . . R
+    ///     a b c d e f g h
+    ///     Side:       Black
+    ///     Enpassant:  no
+    ///     Castling:   KQ | kq
+    /// </summary>
+    [Test]
+    public void QueenMoves_Black()
+    {
+        var position = new Position("r3kR1r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1");
+        var offset = Utils.PieceOffset(position.Side);
+        var piece = (int)Piece.Q + offset;
+        var moves = MoveGenerator.GeneratePieceMoves(piece, position);
 
-            Assert.AreEqual(4, moves.Count(m => m.Piece() == piece));
+        Assert.AreEqual(4, moves.Count(m => m.Piece() == piece));
 
-            Assert.AreEqual(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquare.e7
-                && m.TargetSquare() == (int)BoardSquare.d8));
+        Assert.AreEqual(1, moves.Count(m =>
+            m.SourceSquare() == (int)BoardSquare.e7
+            && m.TargetSquare() == (int)BoardSquare.d8));
 
-            Assert.AreEqual(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquare.e7
-                && m.TargetSquare() == (int)BoardSquare.f8));
+        Assert.AreEqual(1, moves.Count(m =>
+            m.SourceSquare() == (int)BoardSquare.e7
+            && m.TargetSquare() == (int)BoardSquare.f8));
 
-            Assert.AreEqual(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquare.e7
-                && m.TargetSquare() == (int)BoardSquare.d6));
+        Assert.AreEqual(1, moves.Count(m =>
+            m.SourceSquare() == (int)BoardSquare.e7
+            && m.TargetSquare() == (int)BoardSquare.d6));
 
-            Assert.AreEqual(1, moves.Count(m =>
-                m.SourceSquare() == (int)BoardSquare.e7
-                && m.TargetSquare() == (int)BoardSquare.c5));
-        }
+        Assert.AreEqual(1, moves.Count(m =>
+            m.SourceSquare() == (int)BoardSquare.e7
+            && m.TargetSquare() == (int)BoardSquare.c5));
+    }
 
-        [TestCase("8/8/1p1p1p2/8/1p1Q1p2/8/1p1p1p2/8 w - - 0 1", 8)]
-        [TestCase("8/8/1P1P1P2/8/1P1q1P2/8/1P1P1P2/8 b - - 0 1", 8)]
-        [TestCase("p1p1p3/8/p1Q1p3/8/p1p1p1p1/8/4p1Q1/7p w - - 0 1", 12)]
-        [TestCase("P1P1P3/8/P1q1P3/8/P1P1P1P1/8/4P1q1/7P b - - 0 1", 12)]
-        public void QueenMoves_CapturesOnly(string fen, int expectedCaptures)
-        {
-            var position = new Position(fen);
-            var offset = Utils.PieceOffset(position.Side);
-            var piece = (int)Piece.Q + offset;
-            var moves = MoveGenerator.GeneratePieceMoves(piece, position, capturesOnly: true);
+    [TestCase("8/8/1p1p1p2/8/1p1Q1p2/8/1p1p1p2/8 w - - 0 1", 8)]
+    [TestCase("8/8/1P1P1P2/8/1P1q1P2/8/1P1P1P2/8 b - - 0 1", 8)]
+    [TestCase("p1p1p3/8/p1Q1p3/8/p1p1p1p1/8/4p1Q1/7p w - - 0 1", 12)]
+    [TestCase("P1P1P3/8/P1q1P3/8/P1P1P1P1/8/4P1q1/7P b - - 0 1", 12)]
+    public void QueenMoves_CapturesOnly(string fen, int expectedCaptures)
+    {
+        var position = new Position(fen);
+        var offset = Utils.PieceOffset(position.Side);
+        var piece = (int)Piece.Q + offset;
+        var moves = MoveGenerator.GeneratePieceMoves(piece, position, capturesOnly: true);
 
-            Assert.AreEqual(expectedCaptures, moves.Count(m => m.Piece() == piece && m.IsCapture()));
-        }
+        Assert.AreEqual(expectedCaptures, moves.Count(m => m.Piece() == piece && m.IsCapture()));
     }
 }

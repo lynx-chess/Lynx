@@ -16,45 +16,44 @@
 
 using BenchmarkDotNet.Attributes;
 
-namespace Lynx.Benchmark
+namespace Lynx.Benchmark;
+
+public class PriorityQueue_Dequeue : BaseBenchmark
 {
-    public class PriorityQueue_Dequeue : BaseBenchmark
+    [Params(10, 100, 1_000, 1_000_000)]
+    public int Size { get; set; }
+
+    private PriorityQueue<int, int> _queue = null!;
+
+    [GlobalSetup]
+    public void GlobalSetup()
     {
-        [Params(10, 100, 1_000, 1_000_000)]
-        public int Size { get; set; }
-
-        private PriorityQueue<int, int> _queue = null!;
-
-        [GlobalSetup]
-        public void GlobalSetup()
+        _queue = new(Size);
+        for (int i = 0; i < Size; i++)
         {
-            _queue = new(Size);
-            for (int i = 0; i < Size; i++)
-            {
-                _queue.Enqueue(i, i);
-            }
+            _queue.Enqueue(i, i);
         }
+    }
 
-        [Benchmark(Baseline = true)]
-        public int DequeueReusingVariable()
+    [Benchmark(Baseline = true)]
+    public int DequeueReusingVariable()
+    {
+        int total = 0;
+        while (_queue.TryDequeue(out int n, out _))
         {
-            int total = 0;
-            while (_queue.TryDequeue(out int n, out _))
-            {
-                total += n;
-            }
-            return total;
+            total += n;
         }
+        return total;
+    }
 
-        [Benchmark]
-        public int DequeueRedeclaringVariable()
+    [Benchmark]
+    public int DequeueRedeclaringVariable()
+    {
+        int total = 0;
+        while (_queue.TryDequeue(out int n, out _))
         {
-            int total = 0;
-            while (_queue.TryDequeue(out int n, out _))
-            {
-                total += n;
-            }
-            return total;
+            total += n;
         }
+        return total;
     }
 }

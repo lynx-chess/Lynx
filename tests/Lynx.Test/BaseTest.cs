@@ -3,59 +3,58 @@ using Moq;
 using NUnit.Framework;
 using System.Threading.Channels;
 
-namespace Lynx.Test
+namespace Lynx.Test;
+
+public abstract class BaseTest
 {
-    public abstract class BaseTest
+    private const int DefaultSearchDepth = 10;
+
+    protected static SearchResult TestBestMove(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString, int depth = DefaultSearchDepth)
     {
-        private const int DefaultSearchDepth = 10;
+        var seachResult = SearchBestMove(fen, depth);
+        var bestMoveFound = seachResult.BestMove;
 
-        protected static SearchResult TestBestMove(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString, int depth = DefaultSearchDepth)
+        if (allowedUCIMoveString is not null)
         {
-            var seachResult = SearchBestMove(fen, depth);
-            var bestMoveFound = seachResult.BestMove;
-
-            if (allowedUCIMoveString is not null)
-            {
-                Assert.Contains(bestMoveFound.UCIString(), allowedUCIMoveString);
-            }
-
-            if (excludedUCIMoveString is not null)
-            {
-                Assert.False(excludedUCIMoveString.Contains(bestMoveFound.UCIString()));
-            }
-
-            return seachResult;
+            Assert.Contains(bestMoveFound.UCIString(), allowedUCIMoveString);
         }
 
-        protected static SearchResult SearchBestMove(string fen, int depth = DefaultSearchDepth)
+        if (excludedUCIMoveString is not null)
         {
-            var engine = GetEngine(fen);
-            return engine.BestMove(new($"go depth {depth}"));
+            Assert.False(excludedUCIMoveString.Contains(bestMoveFound.UCIString()));
         }
 
-        protected static Engine GetEngine(string fen)
-        {
-            var engine = GetEngine();
+        return seachResult;
+    }
 
-            return SetEnginePosition(engine, fen);
-        }
+    protected static SearchResult SearchBestMove(string fen, int depth = DefaultSearchDepth)
+    {
+        var engine = GetEngine(fen);
+        return engine.BestMove(new($"go depth {depth}"));
+    }
 
-        protected static Engine GetEngine()
-        {
-            var mock = new Mock<ChannelWriter<string>>();
+    protected static Engine GetEngine(string fen)
+    {
+        var engine = GetEngine();
 
-            mock
-                .Setup(m => m.WriteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-                .Returns(ValueTask.CompletedTask);
+        return SetEnginePosition(engine, fen);
+    }
 
-            return new Engine(mock.Object);
-        }
+    protected static Engine GetEngine()
+    {
+        var mock = new Mock<ChannelWriter<string>>();
 
-        protected static Engine SetEnginePosition(Engine engine, string fen)
-        {
-            engine.SetGame(new Game(fen));
+        mock
+            .Setup(m => m.WriteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Returns(ValueTask.CompletedTask);
 
-            return engine;
-        }
+        return new Engine(mock.Object);
+    }
+
+    protected static Engine SetEnginePosition(Engine engine, string fen)
+    {
+        engine.SetGame(new Game(fen));
+
+        return engine;
     }
 }

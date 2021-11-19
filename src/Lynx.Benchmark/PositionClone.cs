@@ -33,90 +33,90 @@
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
 
-namespace Lynx.Benchmark
+namespace Lynx.Benchmark;
+
+public class PositionClone : BaseBenchmark
 {
-    public class PositionClone : BaseBenchmark
+    public readonly struct Position
     {
-        public readonly struct Position
+        public string FEN { get; }
+
+        /// <summary>
+        /// Use <see cref="Piece"/> as index
+        /// </summary>
+        public BitBoard[] PieceBitBoards { get; }
+
+        /// <summary>
+        /// Black, White, Both
+        /// </summary>
+        public BitBoard[] OccupancyBitBoards { get; }
+
+        public Side Side { get; }
+
+        public BoardSquare EnPassant { get; }
+
+        public int Castle { get; }
+
+        public Position(string fen)
         {
-            public string FEN { get; }
+            FEN = fen;
+            var parsedFEN = FENParser.ParseFEN(fen);
 
-            /// <summary>
-            /// Use <see cref="Piece"/> as index
-            /// </summary>
-            public BitBoard[] PieceBitBoards { get; }
-
-            /// <summary>
-            /// Black, White, Both
-            /// </summary>
-            public BitBoard[] OccupancyBitBoards { get; }
-
-            public Side Side { get; }
-
-            public BoardSquare EnPassant { get; }
-
-            public int Castle { get; }
-
-            public Position(string fen)
-            {
-                FEN = fen;
-                var parsedFEN = FENParser.ParseFEN(fen);
-
-                PieceBitBoards = parsedFEN.PieceBitBoards;
-                OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
-                Side = parsedFEN.Side;
-                Castle = parsedFEN.Castle;
-                EnPassant = parsedFEN.EnPassant;
-            }
-
-            /// <summary>
-            /// 'Pasing FEN' Clone constructor
-            /// </summary>
-            /// <param name="position"></param>
-            public Position(Position position) : this(position.FEN)
-            { }
-
-            /// <summary>
-            /// 'Manual' Clone constructor
-            /// </summary>
-            /// <param name="position"></param>
-            public Position(Position position, int _)
-            {
-                FEN = position.FEN;
-                PieceBitBoards = position.PieceBitBoards
-                    .Select(bb => new BitBoard(bb.Board))
-                    .ToArray();
-
-                OccupancyBitBoards = position.OccupancyBitBoards
-                    .Select(bb => new BitBoard(bb.Board))
-                    .ToArray();
-
-                Side = position.Side;
-                Castle = position.Castle;
-                EnPassant = position.EnPassant;
-            }
-
-            /// <summary>
-            /// 'Manual' Clone constructor using Array.Copy
-            /// </summary>
-            /// <param name="position"></param>
-            public Position(Position position, string _)
-            {
-                FEN = position.FEN;
-
-                PieceBitBoards = new BitBoard[12];
-                Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
-
-                OccupancyBitBoards = new BitBoard[3];
-                Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
-
-                Side = position.Side;
-                Castle = position.Castle;
-                EnPassant = position.EnPassant;
-            }
+            PieceBitBoards = parsedFEN.PieceBitBoards;
+            OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
+            Side = parsedFEN.Side;
+            Castle = parsedFEN.Castle;
+            EnPassant = parsedFEN.EnPassant;
         }
 
-        public static IEnumerable<string> Data => new[] {
+        /// <summary>
+        /// 'Pasing FEN' Clone constructor
+        /// </summary>
+        /// <param name="position"></param>
+        public Position(Position position) : this(position.FEN)
+        { }
+
+        /// <summary>
+        /// 'Manual' Clone constructor
+        /// </summary>
+        /// <param name="position"></param>
+        public Position(Position position, int _)
+        {
+            FEN = position.FEN;
+            PieceBitBoards = position.PieceBitBoards
+                .Select(bb => new BitBoard(bb.Board))
+                .ToArray();
+
+            OccupancyBitBoards = position.OccupancyBitBoards
+                .Select(bb => new BitBoard(bb.Board))
+                .ToArray();
+
+            Side = position.Side;
+            Castle = position.Castle;
+            EnPassant = position.EnPassant;
+        }
+
+        /// <summary>
+        /// 'Manual' Clone constructor using Array.Copy
+        /// </summary>
+        /// <param name="position"></param>
+        public Position(Position position, string _)
+        {
+            FEN = position.FEN;
+
+            PieceBitBoards = new BitBoard[12];
+            Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
+
+            OccupancyBitBoards = new BitBoard[3];
+            Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
+
+            Side = position.Side;
+            Castle = position.Castle;
+            EnPassant = position.EnPassant;
+        }
+    }
+
+    public static IEnumerable<string> Data => new[] {
             Constants.EmptyBoardFEN,
             Constants.InitialPositionFEN,
             Constants.TrickyTestPositionFEN,
@@ -125,36 +125,35 @@ namespace Lynx.Benchmark
             "r2q1rk1/ppp2ppp/2n1bn2/2b1p3/3pP3/3P1NPP/PPP1NPB1/R1BQ1RK1 b - - 0 9 "
         };
 
-        [Benchmark(Baseline = true)]
-        [ArgumentsSource(nameof(Data))]
-        public void ParseFEN(string fen)
-        {
-            var originalPosition = new Position(fen);
-            _ = new Position(originalPosition);
-        }
+    [Benchmark(Baseline = true)]
+    [ArgumentsSource(nameof(Data))]
+    public void ParseFEN(string fen)
+    {
+        var originalPosition = new Position(fen);
+        _ = new Position(originalPosition);
+    }
 
-        /// <summary>
-        /// ~2x faster and 0.5 less memory allocated
-        /// </summary>
-        /// <param name="fen"></param>
-        [Benchmark]
-        [ArgumentsSource(nameof(Data))]
-        public void ManualClone(string fen)
-        {
-            var originalPosition = new Position(fen);
-            _ = new Position(originalPosition, 0);
-        }
+    /// <summary>
+    /// ~2x faster and 0.5 less memory allocated
+    /// </summary>
+    /// <param name="fen"></param>
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public void ManualClone(string fen)
+    {
+        var originalPosition = new Position(fen);
+        _ = new Position(originalPosition, 0);
+    }
 
-        /// <summary>
-        /// ~2x faster and 0.5 less memory allocated
-        /// </summary>
-        /// <param name="fen"></param>
-        [Benchmark]
-        [ArgumentsSource(nameof(Data))]
-        public void ManualClone_ArrayCopy(string fen)
-        {
-            var originalPosition = new Position(fen);
-            _ = new Position(originalPosition, "");
-        }
+    /// <summary>
+    /// ~2x faster and 0.5 less memory allocated
+    /// </summary>
+    /// <param name="fen"></param>
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public void ManualClone_ArrayCopy(string fen)
+    {
+        var originalPosition = new Position(fen);
+        _ = new Position(originalPosition, "");
     }
 }

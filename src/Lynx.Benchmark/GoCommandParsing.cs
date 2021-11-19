@@ -22,11 +22,11 @@
 using BenchmarkDotNet.Attributes;
 using System.Text.RegularExpressions;
 
-namespace Lynx.Benchmark
+namespace Lynx.Benchmark;
+
+public class GoCommandParsing : BaseBenchmark
 {
-    public class GoCommandParsing : BaseBenchmark
-    {
-        public static IEnumerable<string> Data => new[] {
+    public static IEnumerable<string> Data => new[] {
             "go infinite",
             "go infinite searchmoves e2e4 d2d4",
             "go infinite searchmoves e2e4 d2d4 wtime 10000 btime 10000 winc 100",
@@ -34,140 +34,140 @@ namespace Lynx.Benchmark
             "go infinite searchmoves e2e4 d2d4 a2a4 a2a3 b2b4 b2b3 wtime 10000 btime 10000 winc 100 binc 100 movestogo 10 depth50 mate 10 movetime 500"
         };
 
-        [Benchmark(Baseline = true)]
-        [ArgumentsSource(nameof(Data))]
-        public async Task Sequential(string command)
+    [Benchmark(Baseline = true)]
+    [ArgumentsSource(nameof(Data))]
+    public async Task Sequential(string command)
+    {
+        await Task.Run(() => ParseSequentially(command));
+    }
+
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public async Task Parallell(string command)
+    {
+        await ParseInParallel(command);
+    }
+
+    private readonly Regex _searchMovesRegex = new(
+        "(?<=searchmoves).+?(?=searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite|$)",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    private readonly Regex _whiteTimeRegex = new(
+        "(?<=wtime).+?(?=searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite|$)",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    private readonly Regex _blackTimeRegex = new(
+        "(?<=btime).+?(?=searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite|$)",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    private readonly Regex _whiteIncrementRegex = new(
+        "(?<=winc).+?(?=searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite|$)",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    private readonly Regex _blackIncrementRegex = new(
+        "(?<=binc).+?(?=searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite|$)",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    private readonly Regex _movesToGoRegex = new(
+        "(?<=movestogo).+?(?=searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite|$)",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    private readonly Regex _depthRegex = new(
+        "(?<=depth).+?(?=searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite|$)",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    private readonly Regex _nodesRegex = new(
+        "(?<=nodes).+?(?=searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite|$)",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    private readonly Regex _mateRegex = new(
+        "(?<=mate).+?(?=searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite|$)",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    private readonly Regex _moveTimeRegex = new(
+        "(?<=movetime).+?(?=searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite|$)",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    public List<string> SearchMoves { get; private set; } = default!;
+    public int WhiteTime { get; private set; } = default!;
+    public int BlackTime { get; private set; } = default!;
+    public int WhiteIncrement { get; private set; } = default!;
+    public int BlackIncrement { get; private set; } = default!;
+    public int MovesToGo { get; private set; } = default!;
+    public int Depth { get; private set; } = default!;
+    public int Nodes { get; private set; } = default!;
+    public int Mate { get; private set; } = default!;
+    public int MoveTime { get; private set; } = default!;
+    public bool Infinite { get; private set; } = default!;
+    public bool Ponder { get; private set; } = default!;
+
+    private void ParseSequentially(string command)
+    {
+        var match = _searchMovesRegex.Match(command);
+        SearchMoves = match.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
+
+        match = _whiteTimeRegex.Match(command);
+        if (int.TryParse(match.Value, out var value))
         {
-            await Task.Run(() => ParseSequentially(command));
+            WhiteTime = value;
         }
 
-        [Benchmark]
-        [ArgumentsSource(nameof(Data))]
-        public async Task Parallell(string command)
+        match = _blackTimeRegex.Match(command);
+        if (int.TryParse(match.Value, out value))
         {
-            await ParseInParallel(command);
+            BlackTime = value;
         }
 
-        private readonly Regex _searchMovesRegex = new(
-            "(?<=searchmoves).+?(?=searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite|$)",
-            RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-        private readonly Regex _whiteTimeRegex = new(
-            "(?<=wtime).+?(?=searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite|$)",
-            RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-        private readonly Regex _blackTimeRegex = new(
-            "(?<=btime).+?(?=searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite|$)",
-            RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-        private readonly Regex _whiteIncrementRegex = new(
-            "(?<=winc).+?(?=searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite|$)",
-            RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-        private readonly Regex _blackIncrementRegex = new(
-            "(?<=binc).+?(?=searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite|$)",
-            RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-        private readonly Regex _movesToGoRegex = new(
-            "(?<=movestogo).+?(?=searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite|$)",
-            RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-        private readonly Regex _depthRegex = new(
-            "(?<=depth).+?(?=searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite|$)",
-            RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-        private readonly Regex _nodesRegex = new(
-            "(?<=nodes).+?(?=searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite|$)",
-            RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-        private readonly Regex _mateRegex = new(
-            "(?<=mate).+?(?=searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite|$)",
-            RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-        private readonly Regex _moveTimeRegex = new(
-            "(?<=movetime).+?(?=searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite|$)",
-            RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-        public List<string> SearchMoves { get; private set; } = default!;
-        public int WhiteTime { get; private set; } = default!;
-        public int BlackTime { get; private set; } = default!;
-        public int WhiteIncrement { get; private set; } = default!;
-        public int BlackIncrement { get; private set; } = default!;
-        public int MovesToGo { get; private set; } = default!;
-        public int Depth { get; private set; } = default!;
-        public int Nodes { get; private set; } = default!;
-        public int Mate { get; private set; } = default!;
-        public int MoveTime { get; private set; } = default!;
-        public bool Infinite { get; private set; } = default!;
-        public bool Ponder { get; private set; } = default!;
-
-        private void ParseSequentially(string command)
+        match = _whiteIncrementRegex.Match(command);
+        if (int.TryParse(match.Value, out value))
         {
-            var match = _searchMovesRegex.Match(command);
-            SearchMoves = match.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
-
-            match = _whiteTimeRegex.Match(command);
-            if (int.TryParse(match.Value, out var value))
-            {
-                WhiteTime = value;
-            }
-
-            match = _blackTimeRegex.Match(command);
-            if (int.TryParse(match.Value, out value))
-            {
-                BlackTime = value;
-            }
-
-            match = _whiteIncrementRegex.Match(command);
-            if (int.TryParse(match.Value, out value))
-            {
-                WhiteIncrement = value;
-            }
-
-            match = _blackIncrementRegex.Match(command);
-            if (int.TryParse(match.Value, out value))
-            {
-                BlackIncrement = value;
-            }
-
-            match = _movesToGoRegex.Match(command);
-            if (int.TryParse(match.Value, out value))
-            {
-                MovesToGo = value;
-            }
-
-            match = _depthRegex.Match(command);
-            if (int.TryParse(match.Value, out value))
-            {
-                Depth = value;
-            }
-
-            match = _nodesRegex.Match(command);
-            if (int.TryParse(match.Value, out value))
-            {
-                Nodes = value;
-            }
-
-            match = _mateRegex.Match(command);
-            if (int.TryParse(match.Value, out value))
-            {
-                Mate = value;
-            }
-
-            match = _moveTimeRegex.Match(command);
-            if (int.TryParse(match.Value, out value))
-            {
-                MoveTime = value;
-            }
-
-            Infinite = command.Contains("infinite", StringComparison.OrdinalIgnoreCase);
-
-            Ponder = command.Contains("ponder", StringComparison.OrdinalIgnoreCase);
+            WhiteIncrement = value;
         }
 
-        private async Task ParseInParallel(string command)
+        match = _blackIncrementRegex.Match(command);
+        if (int.TryParse(match.Value, out value))
         {
-            var taskList = new List<Task>
+            BlackIncrement = value;
+        }
+
+        match = _movesToGoRegex.Match(command);
+        if (int.TryParse(match.Value, out value))
+        {
+            MovesToGo = value;
+        }
+
+        match = _depthRegex.Match(command);
+        if (int.TryParse(match.Value, out value))
+        {
+            Depth = value;
+        }
+
+        match = _nodesRegex.Match(command);
+        if (int.TryParse(match.Value, out value))
+        {
+            Nodes = value;
+        }
+
+        match = _mateRegex.Match(command);
+        if (int.TryParse(match.Value, out value))
+        {
+            Mate = value;
+        }
+
+        match = _moveTimeRegex.Match(command);
+        if (int.TryParse(match.Value, out value))
+        {
+            MoveTime = value;
+        }
+
+        Infinite = command.Contains("infinite", StringComparison.OrdinalIgnoreCase);
+
+        Ponder = command.Contains("ponder", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private async Task ParseInParallel(string command)
+    {
+        var taskList = new List<Task>
             {
                 Task.Run(() =>
                 {
@@ -260,7 +260,6 @@ namespace Lynx.Benchmark
                 Task.Run(() => Ponder = command.Contains("ponder", StringComparison.OrdinalIgnoreCase))
             };
 
-            await Task.WhenAll(taskList);
-        }
+        await Task.WhenAll(taskList);
     }
 }

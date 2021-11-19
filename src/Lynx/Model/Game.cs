@@ -1,84 +1,83 @@
 ﻿using NLog;
 
-namespace Lynx.Model
+namespace Lynx.Model;
+
+public sealed class Game
 {
-    public sealed class Game
+    private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+
+    public List<Move> MoveHistory { get; }
+    public List<Position> PositionHistory { get; }
+    public Dictionary<long, int> PositionHashHistory { get; }
+
+    public int MovesWithoutCaptureOrPawnMove { get; private set; }
+
+    public Position CurrentPosition { get; private set; }
+
+    public Game() : this(Constants.InitialPositionFEN)
     {
-        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+    }
 
-        public List<Move> MoveHistory { get; }
-        public List<Position> PositionHistory { get; }
-        public Dictionary<long, int> PositionHashHistory { get; }
+    public Game(string fen) : this(new Position(fen))
+    {
+    }
 
-        public int MovesWithoutCaptureOrPawnMove { get; private set; }
+    public Game(Position position)
+    {
+        CurrentPosition = position;
 
-        public Position CurrentPosition { get; private set; }
+        MoveHistory = new(150);
+        PositionHistory = new(150);
+        PositionHashHistory = new() { [position.UniqueIdentifier] = 1 };
+    }
 
-        public Game() : this(Constants.InitialPositionFEN)
+    public Game(string fen, List<string> movesUCIString) : this(fen)
+    {
+        foreach (var moveString in movesUCIString)
         {
-        }
-
-        public Game(string fen) : this(new Position(fen))
-        {
-        }
-
-        public Game(Position position)
-        {
-            CurrentPosition = position;
-
-            MoveHistory = new(150);
-            PositionHistory = new(150);
-            PositionHashHistory = new() { [position.UniqueIdentifier] = 1 };
-        }
-
-        public Game(string fen, List<string> movesUCIString) : this(fen)
-        {
-            foreach (var moveString in movesUCIString)
+            if (!Move.TryParseFromUCIString(moveString, GetAllMoves(), out var parsedMove))
             {
-                if (!Move.TryParseFromUCIString(moveString, GetAllMoves(), out var parsedMove))
-                {
-                    _logger.Error($"Error parsing game with fen {fen} and moves {string.Join(' ', movesUCIString)}");
-                    break;
-                }
-
-                MakeMove(parsedMove.Value);
-            }
-        }
-
-        public List<Move> GetAllMoves() => MoveGenerator.GenerateAllMoves(CurrentPosition);
-        public List<Move> GetAllMovesWithCaptures() => MoveGenerator.GenerateAllMoves(CurrentPosition, capturesOnly: true);
-
-        public void RevertLastMove()
-        {
-            if (PositionHistory.Count != 0)
-            {
-                CurrentPosition = PositionHistory.Last();
-                PositionHistory.Remove(CurrentPosition);
+                _logger.Error($"Error parsing game with fen {fen} and moves {string.Join(' ', movesUCIString)}");
+                break;
             }
 
-            if (MoveHistory.Count != 0)
-            {
-                MoveHistory.RemoveAt(MoveHistory.Count - 1);
-            }
+            MakeMove(parsedMove.Value);
         }
+    }
 
-        public bool MakeMove(Move moveToPlay)
+    public List<Move> GetAllMoves() => MoveGenerator.GenerateAllMoves(CurrentPosition);
+    public List<Move> GetAllMovesWithCaptures() => MoveGenerator.GenerateAllMoves(CurrentPosition, capturesOnly: true);
+
+    public void RevertLastMove()
+    {
+        if (PositionHistory.Count != 0)
         {
-            PositionHistory.Add(CurrentPosition);
-            CurrentPosition = new Position(CurrentPosition, moveToPlay);
-            MoveHistory.Add(moveToPlay);
-
-            if (!CurrentPosition.WasProduceByAValidMove())
-            {
-                RevertLastMove();
-                return false;
-            }
-
-            Utils.UpdatePositionHistory(CurrentPosition, PositionHashHistory);
-
-            MovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveToPlay, MovesWithoutCaptureOrPawnMove);
-
-            return true;
+            CurrentPosition = PositionHistory.Last();
+            PositionHistory.Remove(CurrentPosition);
         }
+
+        if (MoveHistory.Count != 0)
+        {
+            MoveHistory.RemoveAt(MoveHistory.Count - 1);
+        }
+    }
+
+    public bool MakeMove(Move moveToPlay)
+    {
+        PositionHistory.Add(CurrentPosition);
+        CurrentPosition = new Position(CurrentPosition, moveToPlay);
+        MoveHistory.Add(moveToPlay);
+
+        if (!CurrentPosition.WasProduceByAValidMove())
+        {
+            RevertLastMove();
+            return false;
+        }
+
+        Utils.UpdatePositionHistory(CurrentPosition, PositionHashHistory);
+
+        MovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveToPlay, MovesWithoutCaptureOrPawnMove);
+
+        return true;
     }
 }

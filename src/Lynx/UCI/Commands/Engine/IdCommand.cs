@@ -1,31 +1,30 @@
 ﻿using System.Reflection;
 
-namespace Lynx.UCI.Commands.Engine
+namespace Lynx.UCI.Commands.Engine;
+
+/// <summary>
+/// id
+///	* name <x>
+///		this must be sent after receiving the "uci" command to identify the engine,
+///		e.g. "id name Shredder X.Y\n"
+///	* author <x>
+///		this must be sent after receiving the "uci" command to identify the engine,
+///		e.g. "id author Stefan MK\n"
+/// </summary>
+public sealed class IdCommand : EngineBaseCommand
 {
-    /// <summary>
-    /// id
-    ///	* name <x>
-    ///		this must be sent after receiving the "uci" command to identify the engine,
-    ///		e.g. "id name Shredder X.Y\n"
-    ///	* author <x>
-    ///		this must be sent after receiving the "uci" command to identify the engine,
-    ///		e.g. "id author Stefan MK\n"
-    /// </summary>
-    public sealed class IdCommand : EngineBaseCommand
+    public const string IdString = "id";
+
+    private static string GetVersion()
     {
-        public const string IdString = "id";
-
-        private static string GetVersion()
-        {
-            return
-                Assembly.GetAssembly(typeof(IdCommand))
-                !.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-                ?.InformationalVersion?.Split('+')?[0]
-                ?? "Unknown";
-        }
-
-        public static string Name => $"id name Lynx {GetVersion()}";
-
-        public static string Version => "id author Eduardo Cáceres";
+        return
+            Assembly.GetAssembly(typeof(IdCommand))
+            !.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+            ?.InformationalVersion?.Split('+')?[0]
+            ?? "Unknown";
     }
+
+    public static string Name => $"id name Lynx {GetVersion()}";
+
+    public static string Version => "id author Eduardo Cáceres";
 }

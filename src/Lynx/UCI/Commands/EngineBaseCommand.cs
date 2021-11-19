@@ -1,6 +1,5 @@
-﻿namespace Lynx.UCI.Commands
+﻿namespace Lynx.UCI.Commands;
+
+public abstract class EngineBaseCommand
 {
-    public abstract class EngineBaseCommand
-    {
-    }
 }

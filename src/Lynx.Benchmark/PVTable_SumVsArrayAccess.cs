@@ -54,64 +54,63 @@
 
 using BenchmarkDotNet.Attributes;
 
-namespace Lynx.Benchmark
+namespace Lynx.Benchmark;
+
+public class PVTable_SumVsArrayAccess : BaseBenchmark
 {
-    public class PVTable_SumVsArrayAccess : BaseBenchmark
+    private const int MaxDepth = 64;
+
+    public PVTable_SumVsArrayAccess()
     {
-        private const int MaxDepth = 64;
+        _ = PVTable.Indexes[0];
+    }
 
-        public PVTable_SumVsArrayAccess()
+    [Benchmark(Baseline = true)]
+    public int Sum()
+    {
+        var total = 0;
+
+        for (int i = 0; i < 1000; ++i)
         {
-            _ = PVTable.Indexes[0];
-        }
-
-        [Benchmark(Baseline = true)]
-        public int Sum()
-        {
-            var total = 0;
-
-            for (int i = 0; i < 1000; ++i)
+            for (int depth = 0; depth < MaxDepth; ++depth)
             {
-                for (int depth = 0; depth < MaxDepth; ++depth)
-                {
-                    total += 1234 + MaxDepth - depth;
-                }
+                total += 1234 + MaxDepth - depth;
             }
-
-            return total;
         }
 
-        [Benchmark]
-        public int ArrayAccess()
-        {
-            var total = 0;
+        return total;
+    }
 
-            for (int i = 0; i < 1000; ++i)
+    [Benchmark]
+    public int ArrayAccess()
+    {
+        var total = 0;
+
+        for (int i = 0; i < 1000; ++i)
+        {
+            for (int depth = 0; depth < MaxDepth; ++depth)
             {
-                for (int depth = 0; depth < MaxDepth; ++depth)
-                {
-                    total += PVTable.Indexes[depth];
-                }
+                total += PVTable.Indexes[depth];
             }
-
-            return total;
         }
 
-        private static class PVTable
+        return total;
+    }
+
+    private static class PVTable
+    {
+        public static readonly int[] Indexes;
+
+        static PVTable()
         {
-            public static readonly int[] Indexes;
+            Indexes = new int[MaxDepth];
+            int previousPVIndex = 0;
+            Indexes[0] = previousPVIndex;
 
-            static PVTable()
+            for (int depth = 0; depth < MaxDepth - 1; ++depth)
             {
-                Indexes = new int[MaxDepth];
-                int previousPVIndex = 0;
-                Indexes[0] = previousPVIndex;
-
-                for (int depth = 0; depth < MaxDepth - 1; ++depth)
-                {
-                    Indexes[depth + 1] = previousPVIndex + MaxDepth - depth;
-                    previousPVIndex = Indexes[depth + 1];
-                }
+                Indexes[depth + 1] = previousPVIndex + MaxDepth - depth;
+                previousPVIndex = Indexes[depth + 1];
             }
         }
     }

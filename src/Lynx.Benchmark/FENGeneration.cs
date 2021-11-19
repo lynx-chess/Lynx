@@ -202,133 +202,132 @@
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
 using NLog;
-using System.Diagnostics;
 using System.Text;
 
-namespace Lynx.Benchmark
+namespace Lynx.Benchmark;
+
+public class FENGeneration : BaseBenchmark
 {
-    public class FENGeneration : BaseBenchmark
+    [Benchmark(Baseline = true)]
+    [ArgumentsSource(nameof(Data))]
+    public string Struct_FENCalculatedOnTheFly(string fen)
     {
-        [Benchmark(Baseline = true)]
-        [ArgumentsSource(nameof(Data))]
-        public string Struct_FENCalculatedOnTheFly(string fen)
-        {
-            var moves = new Position(fen).AllPossibleMoves();
+        var moves = new Position(fen).AllPossibleMoves();
 
-            var position = new StructCustomPosition(fen);
-            var newPosition = new StructCustomPosition(position, moves[0]);
-            return newPosition.FEN;
-        }
+        var position = new StructCustomPosition(fen);
+        var newPosition = new StructCustomPosition(position, moves[0]);
+        return newPosition.FEN;
+    }
 
-        [Benchmark]
-        [ArgumentsSource(nameof(Data))]
-        public string Struct_FENCalculatedWithinTheMoveConstructor(string fen)
-        {
-            var moves = new Position(fen).AllPossibleMoves();
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public string Struct_FENCalculatedWithinTheMoveConstructor(string fen)
+    {
+        var moves = new Position(fen).AllPossibleMoves();
 
-            var position = new StructCustomPosition(fen);
-            var newPosition = new StructCustomPosition(position, moves[0], default);
+        var position = new StructCustomPosition(fen);
+        var newPosition = new StructCustomPosition(position, moves[0], default);
 
-            return newPosition.FEN;
-        }
+        return newPosition.FEN;
+    }
 
-        [Benchmark]
-        [ArgumentsSource(nameof(Data))]
-        public string ReadonlyStruct_FENCalculatedOnTheFly(string fen)
-        {
-            var moves = new Position(fen).AllPossibleMoves();
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public string ReadonlyStruct_FENCalculatedOnTheFly(string fen)
+    {
+        var moves = new Position(fen).AllPossibleMoves();
 
-            var position = new ReadonlyStructCustomPosition(fen);
-            var newPosition = new ReadonlyStructCustomPosition(position, moves[0]);
+        var position = new ReadonlyStructCustomPosition(fen);
+        var newPosition = new ReadonlyStructCustomPosition(position, moves[0]);
 
-            return newPosition.FEN;
-        }
+        return newPosition.FEN;
+    }
 
-        [Benchmark]
-        [ArgumentsSource(nameof(Data))]
-        public string ReadonlyStruct_FENCalculatedWithinTheMoveConstructor(string fen)
-        {
-            var moves = new Position(fen).AllPossibleMoves();
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public string ReadonlyStruct_FENCalculatedWithinTheMoveConstructor(string fen)
+    {
+        var moves = new Position(fen).AllPossibleMoves();
 
-            var position = new ReadonlyStructCustomPosition(fen);
-            var newPosition = new ReadonlyStructCustomPosition(position, moves[0], default);
+        var position = new ReadonlyStructCustomPosition(fen);
+        var newPosition = new ReadonlyStructCustomPosition(position, moves[0], default);
 
-            return newPosition.FEN;
-        }
+        return newPosition.FEN;
+    }
 
-        [Benchmark]
-        [ArgumentsSource(nameof(Data))]
-        public string Class_FENCalculatedOnTheFly(string fen)
-        {
-            var moves = new Position(fen).AllPossibleMoves();
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public string Class_FENCalculatedOnTheFly(string fen)
+    {
+        var moves = new Position(fen).AllPossibleMoves();
 
-            var position = new ClassCustomPosition(fen);
-            var newPosition = new ClassCustomPosition(position, moves[0]);
+        var position = new ClassCustomPosition(fen);
+        var newPosition = new ClassCustomPosition(position, moves[0]);
 
-            return newPosition.FEN;
-        }
+        return newPosition.FEN;
+    }
 
-        [Benchmark]
-        [ArgumentsSource(nameof(Data))]
-        public string Class_FENCalculatedWithinTheMoveConstructor(string fen)
-        {
-            var moves = new Position(fen).AllPossibleMoves();
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public string Class_FENCalculatedWithinTheMoveConstructor(string fen)
+    {
+        var moves = new Position(fen).AllPossibleMoves();
 
-            var position = new ClassCustomPosition(fen);
-            var newPosition = new ClassCustomPosition(position, moves[0], default);
+        var position = new ClassCustomPosition(fen);
+        var newPosition = new ClassCustomPosition(position, moves[0], default);
 
-            return newPosition.FEN;
-        }
+        return newPosition.FEN;
+    }
 
-        [Benchmark]
-        [ArgumentsSource(nameof(Data))]
-        public string RecordClass_FENCalculatedOnTheFly(string fen)
-        {
-            var moves = new Position(fen).AllPossibleMoves();
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public string RecordClass_FENCalculatedOnTheFly(string fen)
+    {
+        var moves = new Position(fen).AllPossibleMoves();
 
-            var position = new RecordClassCustomPosition(fen);
-            var newPosition = new RecordClassCustomPosition(position, moves[0]);
+        var position = new RecordClassCustomPosition(fen);
+        var newPosition = new RecordClassCustomPosition(position, moves[0]);
 
-            return newPosition.FEN;
-        }
+        return newPosition.FEN;
+    }
 
-        [Benchmark]
-        [ArgumentsSource(nameof(Data))]
-        public string RecordClass_FENCalculatedWithinTheMoveConstructor(string fen)
-        {
-            var moves = new Position(fen).AllPossibleMoves();
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public string RecordClass_FENCalculatedWithinTheMoveConstructor(string fen)
+    {
+        var moves = new Position(fen).AllPossibleMoves();
 
-            var position = new RecordClassCustomPosition(fen);
-            var newPosition = new RecordClassCustomPosition(position, moves[0], default);
+        var position = new RecordClassCustomPosition(fen);
+        var newPosition = new RecordClassCustomPosition(position, moves[0], default);
 
-            return newPosition.FEN;
-        }
+        return newPosition.FEN;
+    }
 
-        [Benchmark]
-        [ArgumentsSource(nameof(Data))]
-        public string RecordStruct_FENCalculatedOnTheFly(string fen)
-        {
-            var moves = new Position(fen).AllPossibleMoves();
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public string RecordStruct_FENCalculatedOnTheFly(string fen)
+    {
+        var moves = new Position(fen).AllPossibleMoves();
 
-            var position = new RecordStructCustomPosition(fen);
-            var newPosition = new RecordStructCustomPosition(position, moves[0]);
+        var position = new RecordStructCustomPosition(fen);
+        var newPosition = new RecordStructCustomPosition(position, moves[0]);
 
-            return newPosition.FEN;
-        }
+        return newPosition.FEN;
+    }
 
-        [Benchmark]
-        [ArgumentsSource(nameof(Data))]
-        public string RecordStruct_FENCalculatedWithinTheMoveConstructor(string fen)
-        {
-            var moves = new Position(fen).AllPossibleMoves();
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public string RecordStruct_FENCalculatedWithinTheMoveConstructor(string fen)
+    {
+        var moves = new Position(fen).AllPossibleMoves();
 
-            var position = new RecordStructCustomPosition(fen);
-            var newPosition = new RecordStructCustomPosition(position, moves[0], default);
+        var position = new RecordStructCustomPosition(fen);
+        var newPosition = new RecordStructCustomPosition(position, moves[0], default);
 
-            return newPosition.FEN;
-        }
+        return newPosition.FEN;
+    }
 
-        public static IEnumerable<string> Data => new[] {
+    public static IEnumerable<string> Data => new[] {
             //Constants.EmptyBoardFEN,
             Constants.InitialPositionFEN,
             Constants.TrickyTestPositionFEN,
@@ -336,2342 +335,2341 @@ namespace Lynx.Benchmark
             "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1",
             "r2q1rk1/ppp2ppp/2n1bn2/2b1p3/3pP3/3P1NPP/PPP1NPB1/R1BQ1RK1 b - - 0 1"
         };
+}
+
+internal struct StructCustomPosition
+{
+    private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+
+    private string? _fen;
+
+    public string FEN
+    {
+        get => _fen ??= CalculateFEN();
+        init => _fen = value;
     }
 
-    internal struct StructCustomPosition
+    /// <summary>
+    /// Use <see cref="Piece"/> as index
+    /// </summary>
+    public BitBoard[] PieceBitBoards { get; }
+
+    /// <summary>
+    /// Black, White, Both
+    /// </summary>
+    public BitBoard[] OccupancyBitBoards { get; }
+
+    public Side Side { get; }
+
+    public BoardSquare EnPassant { get; }
+
+    public int Castle { get; }
+
+    public StructCustomPosition(string fen)
     {
-        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+        _fen = fen;
 
-        private string? _fen;
+        var parsedFEN = FENParser.ParseFEN(fen);
 
-        public string FEN
+        if (!parsedFEN.Success)
         {
-            get => _fen ??= CalculateFEN();
-            init => _fen = value;
+            _logger.Error($"Error parsing FEN {fen}");
         }
 
-        /// <summary>
-        /// Use <see cref="Piece"/> as index
-        /// </summary>
-        public BitBoard[] PieceBitBoards { get; }
+        PieceBitBoards = parsedFEN.PieceBitBoards;
+        OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
+        Side = parsedFEN.Side;
+        Castle = parsedFEN.Castle;
+        EnPassant = parsedFEN.EnPassant;
+    }
 
-        /// <summary>
-        /// Black, White, Both
-        /// </summary>
-        public BitBoard[] OccupancyBitBoards { get; }
+    /// <summary>
+    /// Clone constructor
+    /// </summary>
+    /// <param name="position"></param>
+    public StructCustomPosition(StructCustomPosition position)
+    {
+        _fen = position.FEN;
 
-        public Side Side { get; }
+        PieceBitBoards = new BitBoard[12];
+        Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
 
-        public BoardSquare EnPassant { get; }
+        OccupancyBitBoards = new BitBoard[3];
+        Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
 
-        public int Castle { get; }
+        Side = position.Side;
+        Castle = position.Castle;
+        EnPassant = position.EnPassant;
+    }
 
-        public StructCustomPosition(string fen)
+    public StructCustomPosition(StructCustomPosition position, Move move) : this(position)
+    {
+        _fen = null;
+        var oldSide = Side;
+        var offset = Utils.PieceOffset(oldSide);
+        var oppositeSide = Utils.OppositeSide(oldSide);
+
+        int sourceSquare = move.SourceSquare();
+        int targetSquare = move.TargetSquare();
+        int piece = move.Piece();
+        int promotedPiece = move.PromotedPiece();
+
+        var newPiece = piece;
+        if (promotedPiece != default)
         {
-            _fen = fen;
+            newPiece = promotedPiece;
+        }
 
-            var parsedFEN = FENParser.ParseFEN(fen);
+        EnPassant = BoardSquare.noSquare;
 
-            if (!parsedFEN.Success)
+        PieceBitBoards[piece].PopBit(sourceSquare);
+        OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
+
+        PieceBitBoards[newPiece].SetBit(targetSquare);
+        OccupancyBitBoards[(int)Side].SetBit(targetSquare);
+
+        if (move.IsCapture())
+        {
+            var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
+            var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
+
+            if (move.IsEnPassant())
             {
-                _logger.Error($"Error parsing FEN {fen}");
+                var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
+                Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
+
+                PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
+                OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
             }
-
-            PieceBitBoards = parsedFEN.PieceBitBoards;
-            OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
-            Side = parsedFEN.Side;
-            Castle = parsedFEN.Castle;
-            EnPassant = parsedFEN.EnPassant;
-        }
-
-        /// <summary>
-        /// Clone constructor
-        /// </summary>
-        /// <param name="position"></param>
-        public StructCustomPosition(StructCustomPosition position)
-        {
-            _fen = position.FEN;
-
-            PieceBitBoards = new BitBoard[12];
-            Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
-
-            OccupancyBitBoards = new BitBoard[3];
-            Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
-
-            Side = position.Side;
-            Castle = position.Castle;
-            EnPassant = position.EnPassant;
-        }
-
-        public StructCustomPosition(StructCustomPosition position, Move move) : this(position)
-        {
-            _fen = null;
-            var oldSide = Side;
-            var offset = Utils.PieceOffset(oldSide);
-            var oppositeSide = Utils.OppositeSide(oldSide);
-
-            int sourceSquare = move.SourceSquare();
-            int targetSquare = move.TargetSquare();
-            int piece = move.Piece();
-            int promotedPiece = move.PromotedPiece();
-
-            var newPiece = piece;
-            if (promotedPiece != default)
+            else
             {
-                newPiece = promotedPiece;
-            }
-
-            EnPassant = BoardSquare.noSquare;
-
-            PieceBitBoards[piece].PopBit(sourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
-
-            PieceBitBoards[newPiece].SetBit(targetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(targetSquare);
-
-            if (move.IsCapture())
-            {
-                var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
-                var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
-
-                if (move.IsEnPassant())
+                var limit = (int)Piece.K + oppositeSideOffset;
+                for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
                 {
-                    var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                    Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
-
-                    PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
-                    OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
-                }
-                else
-                {
-                    var limit = (int)Piece.K + oppositeSideOffset;
-                    for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
+                    if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
                     {
-                        if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
-                        {
-                            PieceBitBoards[pieceIndex].PopBit(targetSquare);
-                            break;
-                        }
-                    }
-
-                    OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
-                }
-            }
-            else if (move.IsDoublePawnPush())
-            {
-                var pawnPush = +8 - ((int)oldSide * 16);
-                var enPassantSquare = sourceSquare + pawnPush;
-                Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
-
-                EnPassant = (BoardSquare)enPassantSquare;
-            }
-            else if (move.IsShortCastle())
-            {
-                var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
-                var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
-                var rookIndex = (int)Piece.R + offset;
-
-                PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
-
-                PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
-            }
-            else if (move.IsLongCastle())
-            {
-                var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
-                var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
-                var rookIndex = (int)Piece.R + offset;
-
-                PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
-
-                PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
-            }
-
-            Side = (Side)oppositeSide;
-            OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
-
-            // Updating castling rights
-            Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
-            Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
-        }
-
-        /// <summary>
-        /// https://arxiv.org/ftp/arxiv/papers/2009/2009.03193.pdf
-        /// </summary>
-        /// <param name="position"></param>
-        /// <param name="move"></param>
-        /// <param name="calculateFen"></param>
-        public StructCustomPosition(StructCustomPosition position, Move move, bool calculateFen) : this(position)
-
-        {
-            var oldSide = Side;
-            var offset = Utils.PieceOffset(oldSide);
-            var oppositeSide = Utils.OppositeSide(oldSide);
-
-            int sourceSquare = move.SourceSquare();
-            int targetSquare = move.TargetSquare();
-            int piece = move.Piece();
-            int promotedPiece = move.PromotedPiece();
-
-            var newPiece = piece;
-            if (promotedPiece != default)
-            {
-                newPiece = promotedPiece;
-            }
-
-            StringBuilder fenSb = FENHelpers.UpdateFirstPartOfFEN(position, sourceSquare, targetSquare, piece);
-
-            EnPassant = BoardSquare.noSquare;
-
-            PieceBitBoards[piece].PopBit(sourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
-
-            PieceBitBoards[newPiece].SetBit(targetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(targetSquare);
-
-            if (move.IsCapture())
-            {
-                var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
-                var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
-
-                if (move.IsEnPassant())
-                {
-                    var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                    Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
-
-                    PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
-                    OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
-                }
-                else
-                {
-                    var limit = (int)Piece.K + oppositeSideOffset;
-                    for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
-                    {
-                        if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
-                        {
-                            PieceBitBoards[pieceIndex].PopBit(targetSquare);
-                            break;
-                        }
-                    }
-
-                    OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
-                }
-            }
-            else if (move.IsDoublePawnPush())
-            {
-                var pawnPush = +8 - ((int)oldSide * 16);
-                var enPassantSquare = sourceSquare + pawnPush;
-                Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
-
-                EnPassant = (BoardSquare)enPassantSquare;
-            }
-            else if (move.IsShortCastle())
-            {
-                var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
-                var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
-                var rookIndex = (int)Piece.R + offset;
-
-                PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
-
-                PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
-            }
-            else if (move.IsLongCastle())
-            {
-                var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
-                var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
-                var rookIndex = (int)Piece.R + offset;
-
-                PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
-
-                PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
-            }
-
-            Side = (Side)oppositeSide;
-            OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
-
-            // Updating castling rights
-            Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
-            Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
-
-            _fen = FENHelpers.UpdateSecondPartOfFEN(fenSb, Side, Castle, EnPassant);
-        }
-
-        private readonly string CalculateFEN()
-        {
-            var sb = new StringBuilder(100);
-
-            var squaresPerRow = 0;
-
-            int squaresWithoutPiece = 0;
-            int lengthBeforeSlash = sb.Length;
-            for (int square = 0; square < 64; ++square)
-            {
-                int foundPiece = -1;
-                for (var pieceBoardIndex = 0; pieceBoardIndex < 12; ++pieceBoardIndex)
-                {
-                    if (PieceBitBoards[pieceBoardIndex].GetBit(square))
-                    {
-                        foundPiece = pieceBoardIndex;
+                        PieceBitBoards[pieceIndex].PopBit(targetSquare);
                         break;
                     }
                 }
 
-                if (foundPiece != -1)
-                {
-                    if (squaresWithoutPiece != 0)
-                    {
-                        sb.Append(squaresWithoutPiece);
-                        squaresWithoutPiece = 0;
-                    }
-
-                    sb.Append(Constants.AsciiPieces[foundPiece]);
-                }
-                else
-                {
-                    ++squaresWithoutPiece;
-                }
-
-                squaresPerRow = (squaresPerRow + 1) % 8;
-                if (squaresPerRow == 0)
-                {
-                    if (squaresWithoutPiece != 0)
-                    {
-                        sb.Append(squaresWithoutPiece);
-                        squaresWithoutPiece = 0;
-                    }
-
-                    if (square != 63)
-                    {
-                        if (sb.Length == lengthBeforeSlash)
-                        {
-                            sb.Append('8');
-                        }
-                        sb.Append('/');
-                        lengthBeforeSlash = sb.Length;
-                        squaresWithoutPiece = 0;
-                    }
-                }
+                OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
             }
-
-            sb.Append(' ');
-            sb.Append(Side == Side.White ? 'w' : 'b');
-
-            sb.Append(' ');
-            var length = sb.Length;
-
-            if ((Castle & (int)CastlingRights.WK) != default)
-            {
-                sb.Append('K');
-            }
-            if ((Castle & (int)CastlingRights.WQ) != default)
-            {
-                sb.Append('Q');
-            }
-            if ((Castle & (int)CastlingRights.BK) != default)
-            {
-                sb.Append('k');
-            }
-            if ((Castle & (int)CastlingRights.BQ) != default)
-            {
-                sb.Append('q');
-            }
-
-            if (sb.Length == length)
-            {
-                sb.Append('-');
-            }
-
-            sb.Append(' ');
-
-            sb.Append(EnPassant == BoardSquare.noSquare ? "-" : Constants.Coordinates[(int)EnPassant]);
-
-            sb.Append(" 0 1");
-
-            return sb.ToString();
         }
+        else if (move.IsDoublePawnPush())
+        {
+            var pawnPush = +8 - ((int)oldSide * 16);
+            var enPassantSquare = sourceSquare + pawnPush;
+            Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
+
+            EnPassant = (BoardSquare)enPassantSquare;
+        }
+        else if (move.IsShortCastle())
+        {
+            var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
+            var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
+            var rookIndex = (int)Piece.R + offset;
+
+            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+
+            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+        }
+        else if (move.IsLongCastle())
+        {
+            var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
+            var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
+            var rookIndex = (int)Piece.R + offset;
+
+            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+
+            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+        }
+
+        Side = (Side)oppositeSide;
+        OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
+
+        // Updating castling rights
+        Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
+        Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
     }
 
-    internal readonly struct ReadonlyStructCustomPosition
+    /// <summary>
+    /// https://arxiv.org/ftp/arxiv/papers/2009/2009.03193.pdf
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="move"></param>
+    /// <param name="calculateFen"></param>
+    public StructCustomPosition(StructCustomPosition position, Move move, bool calculateFen) : this(position)
+
     {
-        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+        var oldSide = Side;
+        var offset = Utils.PieceOffset(oldSide);
+        var oppositeSide = Utils.OppositeSide(oldSide);
 
-        public string FEN { get; private init; }
+        int sourceSquare = move.SourceSquare();
+        int targetSquare = move.TargetSquare();
+        int piece = move.Piece();
+        int promotedPiece = move.PromotedPiece();
 
-        /// <summary>
-        /// Use <see cref="Piece"/> as index
-        /// </summary>
-        public BitBoard[] PieceBitBoards { get; }
-
-        /// <summary>
-        /// Black, White, Both
-        /// </summary>
-        public BitBoard[] OccupancyBitBoards { get; }
-
-        public Side Side { get; }
-
-        public BoardSquare EnPassant { get; }
-
-        public int Castle { get; }
-
-        public ReadonlyStructCustomPosition(string fen)
+        var newPiece = piece;
+        if (promotedPiece != default)
         {
-            FEN = fen;
-
-            var parsedFEN = FENParser.ParseFEN(fen);
-
-            if (!parsedFEN.Success)
-            {
-                _logger.Error($"Error parsing FEN {fen}");
-            }
-
-            PieceBitBoards = parsedFEN.PieceBitBoards;
-            OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
-            Side = parsedFEN.Side;
-            Castle = parsedFEN.Castle;
-            EnPassant = parsedFEN.EnPassant;
+            newPiece = promotedPiece;
         }
 
-        /// <summary>
-        /// Clone constructor
-        /// </summary>
-        /// <param name="position"></param>
-        public ReadonlyStructCustomPosition(ReadonlyStructCustomPosition position)
+        StringBuilder fenSb = FENHelpers.UpdateFirstPartOfFEN(position, sourceSquare, targetSquare, piece);
+
+        EnPassant = BoardSquare.noSquare;
+
+        PieceBitBoards[piece].PopBit(sourceSquare);
+        OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
+
+        PieceBitBoards[newPiece].SetBit(targetSquare);
+        OccupancyBitBoards[(int)Side].SetBit(targetSquare);
+
+        if (move.IsCapture())
         {
-            FEN = position.FEN;
+            var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
+            var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
 
-            PieceBitBoards = new BitBoard[12];
-            Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
-
-            OccupancyBitBoards = new BitBoard[3];
-            Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
-
-            Side = position.Side;
-            Castle = position.Castle;
-            EnPassant = position.EnPassant;
-        }
-
-        public ReadonlyStructCustomPosition(ReadonlyStructCustomPosition position, Move move) : this(position)
-        {
-            var oldSide = Side;
-            var offset = Utils.PieceOffset(oldSide);
-            var oppositeSide = Utils.OppositeSide(oldSide);
-
-            int sourceSquare = move.SourceSquare();
-            int targetSquare = move.TargetSquare();
-            int piece = move.Piece();
-            int promotedPiece = move.PromotedPiece();
-
-            var newPiece = piece;
-            if (promotedPiece != default)
+            if (move.IsEnPassant())
             {
-                newPiece = promotedPiece;
+                var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
+                Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
+
+                PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
+                OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
             }
-
-            EnPassant = BoardSquare.noSquare;
-
-            PieceBitBoards[piece].PopBit(sourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
-
-            PieceBitBoards[newPiece].SetBit(targetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(targetSquare);
-
-            if (move.IsCapture())
+            else
             {
-                var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
-                var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
-
-                if (move.IsEnPassant())
+                var limit = (int)Piece.K + oppositeSideOffset;
+                for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
                 {
-                    var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                    Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
-
-                    PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
-                    OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
-                }
-                else
-                {
-                    var limit = (int)Piece.K + oppositeSideOffset;
-                    for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
+                    if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
                     {
-                        if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
-                        {
-                            PieceBitBoards[pieceIndex].PopBit(targetSquare);
-                            break;
-                        }
-                    }
-
-                    OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
-                }
-            }
-            else if (move.IsDoublePawnPush())
-            {
-                var pawnPush = +8 - ((int)oldSide * 16);
-                var enPassantSquare = sourceSquare + pawnPush;
-                Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
-
-                EnPassant = (BoardSquare)enPassantSquare;
-            }
-            else if (move.IsShortCastle())
-            {
-                var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
-                var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
-                var rookIndex = (int)Piece.R + offset;
-
-                PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
-
-                PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
-            }
-            else if (move.IsLongCastle())
-            {
-                var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
-                var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
-                var rookIndex = (int)Piece.R + offset;
-
-                PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
-
-                PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
-            }
-
-            Side = (Side)oppositeSide;
-            OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
-
-            // Updating castling rights
-            Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
-            Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
-
-            FEN = CalculateFEN();
-        }
-
-        /// <summary>
-        /// https://arxiv.org/ftp/arxiv/papers/2009/2009.03193.pdf
-        /// </summary>
-        /// <param name="position"></param>
-        /// <param name="move"></param>
-        /// <param name="calculateFen"></param>
-        public ReadonlyStructCustomPosition(ReadonlyStructCustomPosition position, Move move, bool calculateFen) : this(position)
-        {
-            var oldSide = Side;
-            var offset = Utils.PieceOffset(oldSide);
-            var oppositeSide = Utils.OppositeSide(oldSide);
-
-            int sourceSquare = move.SourceSquare();
-            int targetSquare = move.TargetSquare();
-            int piece = move.Piece();
-            int promotedPiece = move.PromotedPiece();
-
-            var newPiece = piece;
-            if (promotedPiece != default)
-            {
-                newPiece = promotedPiece;
-            }
-
-            StringBuilder fenSb = FENHelpers.UpdateFirstPartOfFEN(position, sourceSquare, targetSquare, piece);
-
-            EnPassant = BoardSquare.noSquare;
-
-            PieceBitBoards[piece].PopBit(sourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
-
-            PieceBitBoards[newPiece].SetBit(targetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(targetSquare);
-
-            if (move.IsCapture())
-            {
-                var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
-                var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
-
-                if (move.IsEnPassant())
-                {
-                    var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                    Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
-
-                    PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
-                    OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
-                }
-                else
-                {
-                    var limit = (int)Piece.K + oppositeSideOffset;
-                    for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
-                    {
-                        if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
-                        {
-                            PieceBitBoards[pieceIndex].PopBit(targetSquare);
-                            break;
-                        }
-                    }
-
-                    OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
-                }
-            }
-            else if (move.IsDoublePawnPush())
-            {
-                var pawnPush = +8 - ((int)oldSide * 16);
-                var enPassantSquare = sourceSquare + pawnPush;
-                Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
-
-                EnPassant = (BoardSquare)enPassantSquare;
-            }
-            else if (move.IsShortCastle())
-            {
-                var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
-                var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
-                var rookIndex = (int)Piece.R + offset;
-
-                PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
-
-                PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
-            }
-            else if (move.IsLongCastle())
-            {
-                var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
-                var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
-                var rookIndex = (int)Piece.R + offset;
-
-                PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
-
-                PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
-            }
-
-            Side = (Side)oppositeSide;
-            OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
-
-            // Updating castling rights
-            Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
-            Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
-
-            FEN = FENHelpers.UpdateSecondPartOfFEN(fenSb, Side, Castle, EnPassant);
-        }
-
-        private readonly string CalculateFEN()
-        {
-            var sb = new StringBuilder(100);
-
-            var squaresPerRow = 0;
-
-            int squaresWithoutPiece = 0;
-            int lengthBeforeSlash = sb.Length;
-            for (int square = 0; square < 64; ++square)
-            {
-                int foundPiece = -1;
-                for (var pieceBoardIndex = 0; pieceBoardIndex < 12; ++pieceBoardIndex)
-                {
-                    if (PieceBitBoards[pieceBoardIndex].GetBit(square))
-                    {
-                        foundPiece = pieceBoardIndex;
+                        PieceBitBoards[pieceIndex].PopBit(targetSquare);
                         break;
                     }
                 }
 
-                if (foundPiece != -1)
-                {
-                    if (squaresWithoutPiece != 0)
-                    {
-                        sb.Append(squaresWithoutPiece);
-                        squaresWithoutPiece = 0;
-                    }
-
-                    sb.Append(Constants.AsciiPieces[foundPiece]);
-                }
-                else
-                {
-                    ++squaresWithoutPiece;
-                }
-
-                squaresPerRow = (squaresPerRow + 1) % 8;
-                if (squaresPerRow == 0)
-                {
-                    if (squaresWithoutPiece != 0)
-                    {
-                        sb.Append(squaresWithoutPiece);
-                        squaresWithoutPiece = 0;
-                    }
-
-                    if (square != 63)
-                    {
-                        if (sb.Length == lengthBeforeSlash)
-                        {
-                            sb.Append('8');
-                        }
-                        sb.Append('/');
-                        lengthBeforeSlash = sb.Length;
-                        squaresWithoutPiece = 0;
-                    }
-                }
+                OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
             }
-
-            sb.Append(' ');
-            sb.Append(Side == Side.White ? 'w' : 'b');
-
-            sb.Append(' ');
-            var length = sb.Length;
-
-            if ((Castle & (int)CastlingRights.WK) != default)
-            {
-                sb.Append('K');
-            }
-            if ((Castle & (int)CastlingRights.WQ) != default)
-            {
-                sb.Append('Q');
-            }
-            if ((Castle & (int)CastlingRights.BK) != default)
-            {
-                sb.Append('k');
-            }
-            if ((Castle & (int)CastlingRights.BQ) != default)
-            {
-                sb.Append('q');
-            }
-
-            if (sb.Length == length)
-            {
-                sb.Append('-');
-            }
-
-            sb.Append(' ');
-
-            sb.Append(EnPassant == BoardSquare.noSquare ? "-" : Constants.Coordinates[(int)EnPassant]);
-
-            sb.Append(" 0 1");
-
-            return sb.ToString();
         }
+        else if (move.IsDoublePawnPush())
+        {
+            var pawnPush = +8 - ((int)oldSide * 16);
+            var enPassantSquare = sourceSquare + pawnPush;
+            Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
+
+            EnPassant = (BoardSquare)enPassantSquare;
+        }
+        else if (move.IsShortCastle())
+        {
+            var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
+            var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
+            var rookIndex = (int)Piece.R + offset;
+
+            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+
+            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+        }
+        else if (move.IsLongCastle())
+        {
+            var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
+            var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
+            var rookIndex = (int)Piece.R + offset;
+
+            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+
+            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+        }
+
+        Side = (Side)oppositeSide;
+        OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
+
+        // Updating castling rights
+        Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
+        Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
+
+        _fen = FENHelpers.UpdateSecondPartOfFEN(fenSb, Side, Castle, EnPassant);
     }
 
-    internal class ClassCustomPosition
+    private readonly string CalculateFEN()
     {
-        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+        var sb = new StringBuilder(100);
 
-        private string? _fen;
+        var squaresPerRow = 0;
 
-        public string FEN
+        int squaresWithoutPiece = 0;
+        int lengthBeforeSlash = sb.Length;
+        for (int square = 0; square < 64; ++square)
         {
-            get => _fen ??= CalculateFEN();
-            init => _fen = value;
-        }
-
-        /// <summary>
-        /// Use <see cref="Piece"/> as index
-        /// </summary>
-        public BitBoard[] PieceBitBoards { get; }
-
-        /// <summary>
-        /// Black, White, Both
-        /// </summary>
-        public BitBoard[] OccupancyBitBoards { get; }
-
-        public Side Side { get; }
-
-        public BoardSquare EnPassant { get; }
-
-        public int Castle { get; }
-
-        public ClassCustomPosition(string fen)
-        {
-            _fen = fen;
-
-            var parsedFEN = FENParser.ParseFEN(fen);
-
-            if (!parsedFEN.Success)
+            int foundPiece = -1;
+            for (var pieceBoardIndex = 0; pieceBoardIndex < 12; ++pieceBoardIndex)
             {
-                _logger.Error($"Error parsing FEN {fen}");
-            }
-
-            PieceBitBoards = parsedFEN.PieceBitBoards;
-            OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
-            Side = parsedFEN.Side;
-            Castle = parsedFEN.Castle;
-            EnPassant = parsedFEN.EnPassant;
-        }
-
-        /// <summary>
-        /// Clone constructor
-        /// </summary>
-        /// <param name="position"></param>
-        public ClassCustomPosition(ClassCustomPosition position)
-        {
-            _fen = position.FEN;
-
-            PieceBitBoards = new BitBoard[12];
-            Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
-
-            OccupancyBitBoards = new BitBoard[3];
-            Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
-
-            Side = position.Side;
-            Castle = position.Castle;
-            EnPassant = position.EnPassant;
-        }
-
-        public ClassCustomPosition(ClassCustomPosition position, Move move) : this(position)
-        {
-            _fen = null;
-            var oldSide = Side;
-            var offset = Utils.PieceOffset(oldSide);
-            var oppositeSide = Utils.OppositeSide(oldSide);
-
-            int sourceSquare = move.SourceSquare();
-            int targetSquare = move.TargetSquare();
-            int piece = move.Piece();
-            int promotedPiece = move.PromotedPiece();
-
-            var newPiece = piece;
-            if (promotedPiece != default)
-            {
-                newPiece = promotedPiece;
-            }
-
-            EnPassant = BoardSquare.noSquare;
-
-            PieceBitBoards[piece].PopBit(sourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
-
-            PieceBitBoards[newPiece].SetBit(targetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(targetSquare);
-
-            if (move.IsCapture())
-            {
-                var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
-                var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
-
-                if (move.IsEnPassant())
+                if (PieceBitBoards[pieceBoardIndex].GetBit(square))
                 {
-                    var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                    Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
-
-                    PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
-                    OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
+                    foundPiece = pieceBoardIndex;
+                    break;
                 }
-                else
+            }
+
+            if (foundPiece != -1)
+            {
+                if (squaresWithoutPiece != 0)
                 {
-                    var limit = (int)Piece.K + oppositeSideOffset;
-                    for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
+                    sb.Append(squaresWithoutPiece);
+                    squaresWithoutPiece = 0;
+                }
+
+                sb.Append(Constants.AsciiPieces[foundPiece]);
+            }
+            else
+            {
+                ++squaresWithoutPiece;
+            }
+
+            squaresPerRow = (squaresPerRow + 1) % 8;
+            if (squaresPerRow == 0)
+            {
+                if (squaresWithoutPiece != 0)
+                {
+                    sb.Append(squaresWithoutPiece);
+                    squaresWithoutPiece = 0;
+                }
+
+                if (square != 63)
+                {
+                    if (sb.Length == lengthBeforeSlash)
                     {
-                        if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
-                        {
-                            PieceBitBoards[pieceIndex].PopBit(targetSquare);
-                            break;
-                        }
+                        sb.Append('8');
                     }
-
-                    OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
+                    sb.Append('/');
+                    lengthBeforeSlash = sb.Length;
+                    squaresWithoutPiece = 0;
                 }
             }
-            else if (move.IsDoublePawnPush())
-            {
-                var pawnPush = +8 - ((int)oldSide * 16);
-                var enPassantSquare = sourceSquare + pawnPush;
-                Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
-
-                EnPassant = (BoardSquare)enPassantSquare;
-            }
-            else if (move.IsShortCastle())
-            {
-                var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
-                var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
-                var rookIndex = (int)Piece.R + offset;
-
-                PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
-
-                PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
-            }
-            else if (move.IsLongCastle())
-            {
-                var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
-                var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
-                var rookIndex = (int)Piece.R + offset;
-
-                PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
-
-                PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
-            }
-
-            Side = (Side)oppositeSide;
-            OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
-
-            // Updating castling rights
-            Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
-            Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
         }
 
-        /// <summary>
-        /// https://arxiv.org/ftp/arxiv/papers/2009/2009.03193.pdf
-        /// </summary>
-        /// <param name="position"></param>
-        /// <param name="move"></param>
-        /// <param name="calculateFen"></param>
-        public ClassCustomPosition(ClassCustomPosition position, Move move, bool calculateFen) : this(position)
+        sb.Append(' ');
+        sb.Append(Side == Side.White ? 'w' : 'b');
+
+        sb.Append(' ');
+        var length = sb.Length;
+
+        if ((Castle & (int)CastlingRights.WK) != default)
         {
-            var oldSide = Side;
-            var offset = Utils.PieceOffset(oldSide);
-            var oppositeSide = Utils.OppositeSide(oldSide);
-
-            int sourceSquare = move.SourceSquare();
-            int targetSquare = move.TargetSquare();
-            int piece = move.Piece();
-            int promotedPiece = move.PromotedPiece();
-
-            var newPiece = piece;
-            if (promotedPiece != default)
-            {
-                newPiece = promotedPiece;
-            }
-
-            StringBuilder fenSb = FENHelpers.UpdateFirstPartOfFEN(position, sourceSquare, targetSquare, piece);
-
-            EnPassant = BoardSquare.noSquare;
-
-            PieceBitBoards[piece].PopBit(sourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
-
-            PieceBitBoards[newPiece].SetBit(targetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(targetSquare);
-
-            if (move.IsCapture())
-            {
-                var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
-                var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
-
-                if (move.IsEnPassant())
-                {
-                    var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                    Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
-
-                    PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
-                    OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
-                }
-                else
-                {
-                    var limit = (int)Piece.K + oppositeSideOffset;
-                    for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
-                    {
-                        if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
-                        {
-                            PieceBitBoards[pieceIndex].PopBit(targetSquare);
-                            break;
-                        }
-                    }
-
-                    OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
-                }
-            }
-            else if (move.IsDoublePawnPush())
-            {
-                var pawnPush = +8 - ((int)oldSide * 16);
-                var enPassantSquare = sourceSquare + pawnPush;
-                Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
-
-                EnPassant = (BoardSquare)enPassantSquare;
-            }
-            else if (move.IsShortCastle())
-            {
-                var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
-                var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
-                var rookIndex = (int)Piece.R + offset;
-
-                PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
-
-                PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
-            }
-            else if (move.IsLongCastle())
-            {
-                var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
-                var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
-                var rookIndex = (int)Piece.R + offset;
-
-                PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
-
-                PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
-            }
-
-            Side = (Side)oppositeSide;
-            OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
-
-            // Updating castling rights
-            Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
-            Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
-
-            _fen = FENHelpers.UpdateSecondPartOfFEN(fenSb, Side, Castle, EnPassant);
+            sb.Append('K');
+        }
+        if ((Castle & (int)CastlingRights.WQ) != default)
+        {
+            sb.Append('Q');
+        }
+        if ((Castle & (int)CastlingRights.BK) != default)
+        {
+            sb.Append('k');
+        }
+        if ((Castle & (int)CastlingRights.BQ) != default)
+        {
+            sb.Append('q');
         }
 
-        private string CalculateFEN()
+        if (sb.Length == length)
         {
-            var sb = new StringBuilder(100);
+            sb.Append('-');
+        }
 
-            var squaresPerRow = 0;
+        sb.Append(' ');
 
-            int squaresWithoutPiece = 0;
-            int lengthBeforeSlash = sb.Length;
-            for (int square = 0; square < 64; ++square)
+        sb.Append(EnPassant == BoardSquare.noSquare ? "-" : Constants.Coordinates[(int)EnPassant]);
+
+        sb.Append(" 0 1");
+
+        return sb.ToString();
+    }
+}
+
+internal readonly struct ReadonlyStructCustomPosition
+{
+    private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+
+    public string FEN { get; private init; }
+
+    /// <summary>
+    /// Use <see cref="Piece"/> as index
+    /// </summary>
+    public BitBoard[] PieceBitBoards { get; }
+
+    /// <summary>
+    /// Black, White, Both
+    /// </summary>
+    public BitBoard[] OccupancyBitBoards { get; }
+
+    public Side Side { get; }
+
+    public BoardSquare EnPassant { get; }
+
+    public int Castle { get; }
+
+    public ReadonlyStructCustomPosition(string fen)
+    {
+        FEN = fen;
+
+        var parsedFEN = FENParser.ParseFEN(fen);
+
+        if (!parsedFEN.Success)
+        {
+            _logger.Error($"Error parsing FEN {fen}");
+        }
+
+        PieceBitBoards = parsedFEN.PieceBitBoards;
+        OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
+        Side = parsedFEN.Side;
+        Castle = parsedFEN.Castle;
+        EnPassant = parsedFEN.EnPassant;
+    }
+
+    /// <summary>
+    /// Clone constructor
+    /// </summary>
+    /// <param name="position"></param>
+    public ReadonlyStructCustomPosition(ReadonlyStructCustomPosition position)
+    {
+        FEN = position.FEN;
+
+        PieceBitBoards = new BitBoard[12];
+        Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
+
+        OccupancyBitBoards = new BitBoard[3];
+        Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
+
+        Side = position.Side;
+        Castle = position.Castle;
+        EnPassant = position.EnPassant;
+    }
+
+    public ReadonlyStructCustomPosition(ReadonlyStructCustomPosition position, Move move) : this(position)
+    {
+        var oldSide = Side;
+        var offset = Utils.PieceOffset(oldSide);
+        var oppositeSide = Utils.OppositeSide(oldSide);
+
+        int sourceSquare = move.SourceSquare();
+        int targetSquare = move.TargetSquare();
+        int piece = move.Piece();
+        int promotedPiece = move.PromotedPiece();
+
+        var newPiece = piece;
+        if (promotedPiece != default)
+        {
+            newPiece = promotedPiece;
+        }
+
+        EnPassant = BoardSquare.noSquare;
+
+        PieceBitBoards[piece].PopBit(sourceSquare);
+        OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
+
+        PieceBitBoards[newPiece].SetBit(targetSquare);
+        OccupancyBitBoards[(int)Side].SetBit(targetSquare);
+
+        if (move.IsCapture())
+        {
+            var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
+            var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
+
+            if (move.IsEnPassant())
             {
-                int foundPiece = -1;
-                for (var pieceBoardIndex = 0; pieceBoardIndex < 12; ++pieceBoardIndex)
+                var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
+                Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
+
+                PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
+                OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
+            }
+            else
+            {
+                var limit = (int)Piece.K + oppositeSideOffset;
+                for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
                 {
-                    if (PieceBitBoards[pieceBoardIndex].GetBit(square))
+                    if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
                     {
-                        foundPiece = pieceBoardIndex;
+                        PieceBitBoards[pieceIndex].PopBit(targetSquare);
                         break;
                     }
                 }
 
-                if (foundPiece != -1)
-                {
-                    if (squaresWithoutPiece != 0)
-                    {
-                        sb.Append(squaresWithoutPiece);
-                        squaresWithoutPiece = 0;
-                    }
-
-                    sb.Append(Constants.AsciiPieces[foundPiece]);
-                }
-                else
-                {
-                    ++squaresWithoutPiece;
-                }
-
-                squaresPerRow = (squaresPerRow + 1) % 8;
-                if (squaresPerRow == 0)
-                {
-                    if (squaresWithoutPiece != 0)
-                    {
-                        sb.Append(squaresWithoutPiece);
-                        squaresWithoutPiece = 0;
-                    }
-
-                    if (square != 63)
-                    {
-                        if (sb.Length == lengthBeforeSlash)
-                        {
-                            sb.Append('8');
-                        }
-                        sb.Append('/');
-                        lengthBeforeSlash = sb.Length;
-                        squaresWithoutPiece = 0;
-                    }
-                }
+                OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
             }
-
-            sb.Append(' ');
-            sb.Append(Side == Side.White ? 'w' : 'b');
-
-            sb.Append(' ');
-            var length = sb.Length;
-
-            if ((Castle & (int)CastlingRights.WK) != default)
-            {
-                sb.Append('K');
-            }
-            if ((Castle & (int)CastlingRights.WQ) != default)
-            {
-                sb.Append('Q');
-            }
-            if ((Castle & (int)CastlingRights.BK) != default)
-            {
-                sb.Append('k');
-            }
-            if ((Castle & (int)CastlingRights.BQ) != default)
-            {
-                sb.Append('q');
-            }
-
-            if (sb.Length == length)
-            {
-                sb.Append('-');
-            }
-
-            sb.Append(' ');
-
-            sb.Append(EnPassant == BoardSquare.noSquare ? "-" : Constants.Coordinates[(int)EnPassant]);
-
-            sb.Append(" 0 1");
-
-            return sb.ToString();
         }
+        else if (move.IsDoublePawnPush())
+        {
+            var pawnPush = +8 - ((int)oldSide * 16);
+            var enPassantSquare = sourceSquare + pawnPush;
+            Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
+
+            EnPassant = (BoardSquare)enPassantSquare;
+        }
+        else if (move.IsShortCastle())
+        {
+            var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
+            var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
+            var rookIndex = (int)Piece.R + offset;
+
+            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+
+            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+        }
+        else if (move.IsLongCastle())
+        {
+            var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
+            var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
+            var rookIndex = (int)Piece.R + offset;
+
+            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+
+            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+        }
+
+        Side = (Side)oppositeSide;
+        OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
+
+        // Updating castling rights
+        Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
+        Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
+
+        FEN = CalculateFEN();
     }
 
-    internal record class RecordClassCustomPosition
+    /// <summary>
+    /// https://arxiv.org/ftp/arxiv/papers/2009/2009.03193.pdf
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="move"></param>
+    /// <param name="calculateFen"></param>
+    public ReadonlyStructCustomPosition(ReadonlyStructCustomPosition position, Move move, bool calculateFen) : this(position)
     {
-        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+        var oldSide = Side;
+        var offset = Utils.PieceOffset(oldSide);
+        var oppositeSide = Utils.OppositeSide(oldSide);
 
-        private string? _fen;
+        int sourceSquare = move.SourceSquare();
+        int targetSquare = move.TargetSquare();
+        int piece = move.Piece();
+        int promotedPiece = move.PromotedPiece();
 
-        public string FEN
+        var newPiece = piece;
+        if (promotedPiece != default)
         {
-            get => _fen ??= CalculateFEN();
-            init => _fen = value;
+            newPiece = promotedPiece;
         }
 
-        /// <summary>
-        /// Use <see cref="Piece"/> as index
-        /// </summary>
-        public BitBoard[] PieceBitBoards { get; }
+        StringBuilder fenSb = FENHelpers.UpdateFirstPartOfFEN(position, sourceSquare, targetSquare, piece);
 
-        /// <summary>
-        /// Black, White, Both
-        /// </summary>
-        public BitBoard[] OccupancyBitBoards { get; }
+        EnPassant = BoardSquare.noSquare;
 
-        public Side Side { get; }
+        PieceBitBoards[piece].PopBit(sourceSquare);
+        OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
 
-        public BoardSquare EnPassant { get; }
+        PieceBitBoards[newPiece].SetBit(targetSquare);
+        OccupancyBitBoards[(int)Side].SetBit(targetSquare);
 
-        public int Castle { get; }
-
-        public RecordClassCustomPosition(string fen)
+        if (move.IsCapture())
         {
-            _fen = fen;
+            var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
+            var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
 
-            var parsedFEN = FENParser.ParseFEN(fen);
-
-            if (!parsedFEN.Success)
+            if (move.IsEnPassant())
             {
-                _logger.Error($"Error parsing FEN {fen}");
+                var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
+                Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
+
+                PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
+                OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
             }
-
-            PieceBitBoards = parsedFEN.PieceBitBoards;
-            OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
-            Side = parsedFEN.Side;
-            Castle = parsedFEN.Castle;
-            EnPassant = parsedFEN.EnPassant;
-        }
-
-        /// <summary>
-        /// Clone constructor
-        /// </summary>
-        /// <param name="position"></param>
-        public RecordClassCustomPosition(RecordClassCustomPosition position)
-        {
-            _fen = position.FEN;
-
-            PieceBitBoards = new BitBoard[12];
-            Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
-
-            OccupancyBitBoards = new BitBoard[3];
-            Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
-
-            Side = position.Side;
-            Castle = position.Castle;
-            EnPassant = position.EnPassant;
-        }
-
-        public RecordClassCustomPosition(RecordClassCustomPosition position, Move move) : this(position)
-        {
-            _fen = null;
-            var oldSide = Side;
-            var offset = Utils.PieceOffset(oldSide);
-            var oppositeSide = Utils.OppositeSide(oldSide);
-
-            int sourceSquare = move.SourceSquare();
-            int targetSquare = move.TargetSquare();
-            int piece = move.Piece();
-            int promotedPiece = move.PromotedPiece();
-
-            var newPiece = piece;
-            if (promotedPiece != default)
+            else
             {
-                newPiece = promotedPiece;
-            }
-
-            EnPassant = BoardSquare.noSquare;
-
-            PieceBitBoards[piece].PopBit(sourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
-
-            PieceBitBoards[newPiece].SetBit(targetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(targetSquare);
-
-            if (move.IsCapture())
-            {
-                var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
-                var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
-
-                if (move.IsEnPassant())
+                var limit = (int)Piece.K + oppositeSideOffset;
+                for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
                 {
-                    var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                    Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
-
-                    PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
-                    OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
-                }
-                else
-                {
-                    var limit = (int)Piece.K + oppositeSideOffset;
-                    for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
+                    if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
                     {
-                        if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
-                        {
-                            PieceBitBoards[pieceIndex].PopBit(targetSquare);
-                            break;
-                        }
-                    }
-
-                    OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
-                }
-            }
-            else if (move.IsDoublePawnPush())
-            {
-                var pawnPush = +8 - ((int)oldSide * 16);
-                var enPassantSquare = sourceSquare + pawnPush;
-                Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
-
-                EnPassant = (BoardSquare)enPassantSquare;
-            }
-            else if (move.IsShortCastle())
-            {
-                var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
-                var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
-                var rookIndex = (int)Piece.R + offset;
-
-                PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
-
-                PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
-            }
-            else if (move.IsLongCastle())
-            {
-                var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
-                var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
-                var rookIndex = (int)Piece.R + offset;
-
-                PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
-
-                PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
-            }
-
-            Side = (Side)oppositeSide;
-            OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
-
-            // Updating castling rights
-            Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
-            Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
-        }
-
-        /// <summary>
-        /// https://arxiv.org/ftp/arxiv/papers/2009/2009.03193.pdf
-        /// </summary>
-        /// <param name="position"></param>
-        /// <param name="move"></param>
-        /// <param name="calculateFen"></param>
-        public RecordClassCustomPosition(RecordClassCustomPosition position, Move move, bool calculateFen) : this(position)
-        {
-            var oldSide = Side;
-            var offset = Utils.PieceOffset(oldSide);
-            var oppositeSide = Utils.OppositeSide(oldSide);
-
-            int sourceSquare = move.SourceSquare();
-            int targetSquare = move.TargetSquare();
-            int piece = move.Piece();
-            int promotedPiece = move.PromotedPiece();
-
-            var newPiece = piece;
-            if (promotedPiece != default)
-            {
-                newPiece = promotedPiece;
-            }
-
-            StringBuilder fenSb = FENHelpers.UpdateFirstPartOfFEN(position, sourceSquare, targetSquare, piece);
-
-            EnPassant = BoardSquare.noSquare;
-
-            PieceBitBoards[piece].PopBit(sourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
-
-            PieceBitBoards[newPiece].SetBit(targetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(targetSquare);
-
-            if (move.IsCapture())
-            {
-                var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
-                var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
-
-                if (move.IsEnPassant())
-                {
-                    var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                    Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
-
-                    PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
-                    OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
-                }
-                else
-                {
-                    var limit = (int)Piece.K + oppositeSideOffset;
-                    for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
-                    {
-                        if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
-                        {
-                            PieceBitBoards[pieceIndex].PopBit(targetSquare);
-                            break;
-                        }
-                    }
-
-                    OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
-                }
-            }
-            else if (move.IsDoublePawnPush())
-            {
-                var pawnPush = +8 - ((int)oldSide * 16);
-                var enPassantSquare = sourceSquare + pawnPush;
-                Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
-
-                EnPassant = (BoardSquare)enPassantSquare;
-            }
-            else if (move.IsShortCastle())
-            {
-                var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
-                var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
-                var rookIndex = (int)Piece.R + offset;
-
-                PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
-
-                PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
-            }
-            else if (move.IsLongCastle())
-            {
-                var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
-                var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
-                var rookIndex = (int)Piece.R + offset;
-
-                PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
-
-                PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
-            }
-
-            Side = (Side)oppositeSide;
-            OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
-
-            // Updating castling rights
-            Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
-            Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
-
-            _fen = FENHelpers.UpdateSecondPartOfFEN(fenSb, Side, Castle, EnPassant);
-        }
-
-        private string CalculateFEN()
-        {
-            var sb = new StringBuilder(100);
-
-            var squaresPerRow = 0;
-
-            int squaresWithoutPiece = 0;
-            int lengthBeforeSlash = sb.Length;
-            for (int square = 0; square < 64; ++square)
-            {
-                int foundPiece = -1;
-                for (var pieceBoardIndex = 0; pieceBoardIndex < 12; ++pieceBoardIndex)
-                {
-                    if (PieceBitBoards[pieceBoardIndex].GetBit(square))
-                    {
-                        foundPiece = pieceBoardIndex;
+                        PieceBitBoards[pieceIndex].PopBit(targetSquare);
                         break;
                     }
                 }
 
-                if (foundPiece != -1)
-                {
-                    if (squaresWithoutPiece != 0)
-                    {
-                        sb.Append(squaresWithoutPiece);
-                        squaresWithoutPiece = 0;
-                    }
-
-                    sb.Append(Constants.AsciiPieces[foundPiece]);
-                }
-                else
-                {
-                    ++squaresWithoutPiece;
-                }
-
-                squaresPerRow = (squaresPerRow + 1) % 8;
-                if (squaresPerRow == 0)
-                {
-                    if (squaresWithoutPiece != 0)
-                    {
-                        sb.Append(squaresWithoutPiece);
-                        squaresWithoutPiece = 0;
-                    }
-
-                    if (square != 63)
-                    {
-                        if (sb.Length == lengthBeforeSlash)
-                        {
-                            sb.Append('8');
-                        }
-                        sb.Append('/');
-                        lengthBeforeSlash = sb.Length;
-                        squaresWithoutPiece = 0;
-                    }
-                }
+                OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
             }
-
-            sb.Append(' ');
-            sb.Append(Side == Side.White ? 'w' : 'b');
-
-            sb.Append(' ');
-            var length = sb.Length;
-
-            if ((Castle & (int)CastlingRights.WK) != default)
-            {
-                sb.Append('K');
-            }
-            if ((Castle & (int)CastlingRights.WQ) != default)
-            {
-                sb.Append('Q');
-            }
-            if ((Castle & (int)CastlingRights.BK) != default)
-            {
-                sb.Append('k');
-            }
-            if ((Castle & (int)CastlingRights.BQ) != default)
-            {
-                sb.Append('q');
-            }
-
-            if (sb.Length == length)
-            {
-                sb.Append('-');
-            }
-
-            sb.Append(' ');
-
-            sb.Append(EnPassant == BoardSquare.noSquare ? "-" : Constants.Coordinates[(int)EnPassant]);
-
-            sb.Append(" 0 1");
-
-            return sb.ToString();
         }
+        else if (move.IsDoublePawnPush())
+        {
+            var pawnPush = +8 - ((int)oldSide * 16);
+            var enPassantSquare = sourceSquare + pawnPush;
+            Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
+
+            EnPassant = (BoardSquare)enPassantSquare;
+        }
+        else if (move.IsShortCastle())
+        {
+            var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
+            var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
+            var rookIndex = (int)Piece.R + offset;
+
+            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+
+            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+        }
+        else if (move.IsLongCastle())
+        {
+            var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
+            var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
+            var rookIndex = (int)Piece.R + offset;
+
+            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+
+            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+        }
+
+        Side = (Side)oppositeSide;
+        OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
+
+        // Updating castling rights
+        Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
+        Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
+
+        FEN = FENHelpers.UpdateSecondPartOfFEN(fenSb, Side, Castle, EnPassant);
     }
 
-    internal record struct RecordStructCustomPosition
+    private readonly string CalculateFEN()
     {
-        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+        var sb = new StringBuilder(100);
 
-        private string? _fen;
+        var squaresPerRow = 0;
 
-        public string FEN
+        int squaresWithoutPiece = 0;
+        int lengthBeforeSlash = sb.Length;
+        for (int square = 0; square < 64; ++square)
         {
-            get => _fen ??= CalculateFEN();
-            init => _fen = value;
-        }
-
-        /// <summary>
-        /// Use <see cref="Piece"/> as index
-        /// </summary>
-        public BitBoard[] PieceBitBoards { get; }
-
-        /// <summary>
-        /// Black, White, Both
-        /// </summary>
-        public BitBoard[] OccupancyBitBoards { get; }
-
-        public Side Side { get; }
-
-        public BoardSquare EnPassant { get; }
-
-        public int Castle { get; }
-
-        public RecordStructCustomPosition(string fen)
-        {
-            _fen = fen;
-
-            var parsedFEN = FENParser.ParseFEN(fen);
-
-            if (!parsedFEN.Success)
+            int foundPiece = -1;
+            for (var pieceBoardIndex = 0; pieceBoardIndex < 12; ++pieceBoardIndex)
             {
-                _logger.Error($"Error parsing FEN {fen}");
-            }
-
-            PieceBitBoards = parsedFEN.PieceBitBoards;
-            OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
-            Side = parsedFEN.Side;
-            Castle = parsedFEN.Castle;
-            EnPassant = parsedFEN.EnPassant;
-        }
-
-        /// <summary>
-        /// Clone constructor
-        /// </summary>
-        /// <param name="position"></param>
-        public RecordStructCustomPosition(RecordStructCustomPosition position)
-        {
-            _fen = position.FEN;
-
-            PieceBitBoards = new BitBoard[12];
-            Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
-
-            OccupancyBitBoards = new BitBoard[3];
-            Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
-
-            Side = position.Side;
-            Castle = position.Castle;
-            EnPassant = position.EnPassant;
-        }
-
-        public RecordStructCustomPosition(RecordStructCustomPosition position, Move move) : this(position)
-        {
-            _fen = null;
-            var oldSide = Side;
-            var offset = Utils.PieceOffset(oldSide);
-            var oppositeSide = Utils.OppositeSide(oldSide);
-
-            int sourceSquare = move.SourceSquare();
-            int targetSquare = move.TargetSquare();
-            int piece = move.Piece();
-            int promotedPiece = move.PromotedPiece();
-
-            var newPiece = piece;
-            if (promotedPiece != default)
-            {
-                newPiece = promotedPiece;
-            }
-
-            EnPassant = BoardSquare.noSquare;
-
-            PieceBitBoards[piece].PopBit(sourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
-
-            PieceBitBoards[newPiece].SetBit(targetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(targetSquare);
-
-            if (move.IsCapture())
-            {
-                var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
-                var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
-
-                if (move.IsEnPassant())
+                if (PieceBitBoards[pieceBoardIndex].GetBit(square))
                 {
-                    var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                    Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
-
-                    PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
-                    OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
+                    foundPiece = pieceBoardIndex;
+                    break;
                 }
-                else
+            }
+
+            if (foundPiece != -1)
+            {
+                if (squaresWithoutPiece != 0)
                 {
-                    var limit = (int)Piece.K + oppositeSideOffset;
-                    for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
+                    sb.Append(squaresWithoutPiece);
+                    squaresWithoutPiece = 0;
+                }
+
+                sb.Append(Constants.AsciiPieces[foundPiece]);
+            }
+            else
+            {
+                ++squaresWithoutPiece;
+            }
+
+            squaresPerRow = (squaresPerRow + 1) % 8;
+            if (squaresPerRow == 0)
+            {
+                if (squaresWithoutPiece != 0)
+                {
+                    sb.Append(squaresWithoutPiece);
+                    squaresWithoutPiece = 0;
+                }
+
+                if (square != 63)
+                {
+                    if (sb.Length == lengthBeforeSlash)
                     {
-                        if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
-                        {
-                            PieceBitBoards[pieceIndex].PopBit(targetSquare);
-                            break;
-                        }
+                        sb.Append('8');
                     }
-
-                    OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
+                    sb.Append('/');
+                    lengthBeforeSlash = sb.Length;
+                    squaresWithoutPiece = 0;
                 }
             }
-            else if (move.IsDoublePawnPush())
-            {
-                var pawnPush = +8 - ((int)oldSide * 16);
-                var enPassantSquare = sourceSquare + pawnPush;
-                Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
-
-                EnPassant = (BoardSquare)enPassantSquare;
-            }
-            else if (move.IsShortCastle())
-            {
-                var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
-                var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
-                var rookIndex = (int)Piece.R + offset;
-
-                PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
-
-                PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
-            }
-            else if (move.IsLongCastle())
-            {
-                var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
-                var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
-                var rookIndex = (int)Piece.R + offset;
-
-                PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
-
-                PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
-            }
-
-            Side = (Side)oppositeSide;
-            OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
-
-            // Updating castling rights
-            Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
-            Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
         }
 
-        /// <summary>
-        /// https://arxiv.org/ftp/arxiv/papers/2009/2009.03193.pdf
-        /// </summary>
-        /// <param name="position"></param>
-        /// <param name="move"></param>
-        /// <param name="calculateFen"></param>
-        public RecordStructCustomPosition(RecordStructCustomPosition position, Move move, bool calculateFen) : this(position)
+        sb.Append(' ');
+        sb.Append(Side == Side.White ? 'w' : 'b');
+
+        sb.Append(' ');
+        var length = sb.Length;
+
+        if ((Castle & (int)CastlingRights.WK) != default)
         {
-            var oldSide = Side;
-            var offset = Utils.PieceOffset(oldSide);
-            var oppositeSide = Utils.OppositeSide(oldSide);
-
-            int sourceSquare = move.SourceSquare();
-            int targetSquare = move.TargetSquare();
-            int piece = move.Piece();
-            int promotedPiece = move.PromotedPiece();
-
-            var newPiece = piece;
-            if (promotedPiece != default)
-            {
-                newPiece = promotedPiece;
-            }
-
-            StringBuilder fenSb = FENHelpers.UpdateFirstPartOfFEN(position, sourceSquare, targetSquare, piece);
-
-            EnPassant = BoardSquare.noSquare;
-
-            PieceBitBoards[piece].PopBit(sourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
-
-            PieceBitBoards[newPiece].SetBit(targetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(targetSquare);
-
-            if (move.IsCapture())
-            {
-                var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
-                var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
-
-                if (move.IsEnPassant())
-                {
-                    var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                    Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
-
-                    PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
-                    OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
-                }
-                else
-                {
-                    var limit = (int)Piece.K + oppositeSideOffset;
-                    for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
-                    {
-                        if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
-                        {
-                            PieceBitBoards[pieceIndex].PopBit(targetSquare);
-                            break;
-                        }
-                    }
-
-                    OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
-                }
-            }
-            else if (move.IsDoublePawnPush())
-            {
-                var pawnPush = +8 - ((int)oldSide * 16);
-                var enPassantSquare = sourceSquare + pawnPush;
-                Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
-
-                EnPassant = (BoardSquare)enPassantSquare;
-            }
-            else if (move.IsShortCastle())
-            {
-                var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
-                var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
-                var rookIndex = (int)Piece.R + offset;
-
-                PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
-
-                PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
-            }
-            else if (move.IsLongCastle())
-            {
-                var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
-                var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
-                var rookIndex = (int)Piece.R + offset;
-
-                PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
-
-                PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
-            }
-
-            Side = (Side)oppositeSide;
-            OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
-
-            // Updating castling rights
-            Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
-            Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
-
-            _fen = FENHelpers.UpdateSecondPartOfFEN(fenSb, Side, Castle, EnPassant);
+            sb.Append('K');
+        }
+        if ((Castle & (int)CastlingRights.WQ) != default)
+        {
+            sb.Append('Q');
+        }
+        if ((Castle & (int)CastlingRights.BK) != default)
+        {
+            sb.Append('k');
+        }
+        if ((Castle & (int)CastlingRights.BQ) != default)
+        {
+            sb.Append('q');
         }
 
-        private string CalculateFEN()
+        if (sb.Length == length)
         {
-            var sb = new StringBuilder(100);
+            sb.Append('-');
+        }
 
-            var squaresPerRow = 0;
+        sb.Append(' ');
 
-            int squaresWithoutPiece = 0;
-            int lengthBeforeSlash = sb.Length;
-            for (int square = 0; square < 64; ++square)
+        sb.Append(EnPassant == BoardSquare.noSquare ? "-" : Constants.Coordinates[(int)EnPassant]);
+
+        sb.Append(" 0 1");
+
+        return sb.ToString();
+    }
+}
+
+internal class ClassCustomPosition
+{
+    private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+
+    private string? _fen;
+
+    public string FEN
+    {
+        get => _fen ??= CalculateFEN();
+        init => _fen = value;
+    }
+
+    /// <summary>
+    /// Use <see cref="Piece"/> as index
+    /// </summary>
+    public BitBoard[] PieceBitBoards { get; }
+
+    /// <summary>
+    /// Black, White, Both
+    /// </summary>
+    public BitBoard[] OccupancyBitBoards { get; }
+
+    public Side Side { get; }
+
+    public BoardSquare EnPassant { get; }
+
+    public int Castle { get; }
+
+    public ClassCustomPosition(string fen)
+    {
+        _fen = fen;
+
+        var parsedFEN = FENParser.ParseFEN(fen);
+
+        if (!parsedFEN.Success)
+        {
+            _logger.Error($"Error parsing FEN {fen}");
+        }
+
+        PieceBitBoards = parsedFEN.PieceBitBoards;
+        OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
+        Side = parsedFEN.Side;
+        Castle = parsedFEN.Castle;
+        EnPassant = parsedFEN.EnPassant;
+    }
+
+    /// <summary>
+    /// Clone constructor
+    /// </summary>
+    /// <param name="position"></param>
+    public ClassCustomPosition(ClassCustomPosition position)
+    {
+        _fen = position.FEN;
+
+        PieceBitBoards = new BitBoard[12];
+        Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
+
+        OccupancyBitBoards = new BitBoard[3];
+        Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
+
+        Side = position.Side;
+        Castle = position.Castle;
+        EnPassant = position.EnPassant;
+    }
+
+    public ClassCustomPosition(ClassCustomPosition position, Move move) : this(position)
+    {
+        _fen = null;
+        var oldSide = Side;
+        var offset = Utils.PieceOffset(oldSide);
+        var oppositeSide = Utils.OppositeSide(oldSide);
+
+        int sourceSquare = move.SourceSquare();
+        int targetSquare = move.TargetSquare();
+        int piece = move.Piece();
+        int promotedPiece = move.PromotedPiece();
+
+        var newPiece = piece;
+        if (promotedPiece != default)
+        {
+            newPiece = promotedPiece;
+        }
+
+        EnPassant = BoardSquare.noSquare;
+
+        PieceBitBoards[piece].PopBit(sourceSquare);
+        OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
+
+        PieceBitBoards[newPiece].SetBit(targetSquare);
+        OccupancyBitBoards[(int)Side].SetBit(targetSquare);
+
+        if (move.IsCapture())
+        {
+            var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
+            var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
+
+            if (move.IsEnPassant())
             {
-                int foundPiece = -1;
-                for (var pieceBoardIndex = 0; pieceBoardIndex < 12; ++pieceBoardIndex)
+                var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
+                Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
+
+                PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
+                OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
+            }
+            else
+            {
+                var limit = (int)Piece.K + oppositeSideOffset;
+                for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
                 {
-                    if (PieceBitBoards[pieceBoardIndex].GetBit(square))
+                    if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
                     {
-                        foundPiece = pieceBoardIndex;
+                        PieceBitBoards[pieceIndex].PopBit(targetSquare);
                         break;
                     }
                 }
 
-                if (foundPiece != -1)
-                {
-                    if (squaresWithoutPiece != 0)
-                    {
-                        sb.Append(squaresWithoutPiece);
-                        squaresWithoutPiece = 0;
-                    }
-
-                    sb.Append(Constants.AsciiPieces[foundPiece]);
-                }
-                else
-                {
-                    ++squaresWithoutPiece;
-                }
-
-                squaresPerRow = (squaresPerRow + 1) % 8;
-                if (squaresPerRow == 0)
-                {
-                    if (squaresWithoutPiece != 0)
-                    {
-                        sb.Append(squaresWithoutPiece);
-                        squaresWithoutPiece = 0;
-                    }
-
-                    if (square != 63)
-                    {
-                        if (sb.Length == lengthBeforeSlash)
-                        {
-                            sb.Append('8');
-                        }
-                        sb.Append('/');
-                        lengthBeforeSlash = sb.Length;
-                        squaresWithoutPiece = 0;
-                    }
-                }
+                OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
             }
-
-            sb.Append(' ');
-            sb.Append(Side == Side.White ? 'w' : 'b');
-
-            sb.Append(' ');
-            var length = sb.Length;
-
-            if ((Castle & (int)CastlingRights.WK) != default)
-            {
-                sb.Append('K');
-            }
-            if ((Castle & (int)CastlingRights.WQ) != default)
-            {
-                sb.Append('Q');
-            }
-            if ((Castle & (int)CastlingRights.BK) != default)
-            {
-                sb.Append('k');
-            }
-            if ((Castle & (int)CastlingRights.BQ) != default)
-            {
-                sb.Append('q');
-            }
-
-            if (sb.Length == length)
-            {
-                sb.Append('-');
-            }
-
-            sb.Append(' ');
-
-            sb.Append(EnPassant == BoardSquare.noSquare ? "-" : Constants.Coordinates[(int)EnPassant]);
-
-            sb.Append(" 0 1");
-
-            return sb.ToString();
         }
+        else if (move.IsDoublePawnPush())
+        {
+            var pawnPush = +8 - ((int)oldSide * 16);
+            var enPassantSquare = sourceSquare + pawnPush;
+            Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
+
+            EnPassant = (BoardSquare)enPassantSquare;
+        }
+        else if (move.IsShortCastle())
+        {
+            var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
+            var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
+            var rookIndex = (int)Piece.R + offset;
+
+            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+
+            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+        }
+        else if (move.IsLongCastle())
+        {
+            var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
+            var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
+            var rookIndex = (int)Piece.R + offset;
+
+            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+
+            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+        }
+
+        Side = (Side)oppositeSide;
+        OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
+
+        // Updating castling rights
+        Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
+        Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
     }
 
-    internal static class FENHelpers
+    /// <summary>
+    /// https://arxiv.org/ftp/arxiv/papers/2009/2009.03193.pdf
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="move"></param>
+    /// <param name="calculateFen"></param>
+    public ClassCustomPosition(ClassCustomPosition position, Move move, bool calculateFen) : this(position)
     {
-        public static StringBuilder UpdateFirstPartOfFEN(StructCustomPosition position, int sourceSquare, int targetSquare, int piece)
+        var oldSide = Side;
+        var offset = Utils.PieceOffset(oldSide);
+        var oppositeSide = Utils.OppositeSide(oldSide);
+
+        int sourceSquare = move.SourceSquare();
+        int targetSquare = move.TargetSquare();
+        int piece = move.Piece();
+        int promotedPiece = move.PromotedPiece();
+
+        var newPiece = piece;
+        if (promotedPiece != default)
         {
-            var fenSegments = position.FEN.Split('/');
-
-            int sourceSegmentIndex = sourceSquare / 8;
-            int sourceFile = sourceSquare % 8;
-            var expandedSourceSegment = new StringBuilder();
-
-            foreach (var item in fenSegments[sourceSegmentIndex])
-            {
-                if (char.IsDigit(item))
-                {
-                    expandedSourceSegment.Append('1', item - '0');
-                }
-                else
-                {
-                    expandedSourceSegment.Append(item);
-                }
-            }
-
-            expandedSourceSegment[sourceFile] = '1';
-
-            var sourceSegment = new StringBuilder(8);
-            int ones = 0;
-            foreach (var item in expandedSourceSegment.ToString())
-            {
-                if (item == '1')
-                {
-                    ++ones;
-                }
-                else
-                {
-                    if (ones != 0)
-                    {
-                        sourceSegment.Append(ones);
-                        ones = 0;
-
-                        sourceSegment.Append(item);
-                    }
-                }
-            }
-
-            if (ones != 0)
-            {
-                sourceSegment.Append(ones);
-            }
-
-            fenSegments[sourceSegmentIndex] = sourceSegment.ToString();
-
-            int targetSegmentIndex = targetSquare / 8;
-            int targetFile = targetSquare % 8;
-            var expandedTargetSegment = new StringBuilder(8);
-            foreach (var item in fenSegments[targetSegmentIndex])
-            {
-                if (char.IsDigit(item))
-                {
-                    expandedTargetSegment.Append('1', item - '0');
-                }
-                else
-                {
-                    expandedTargetSegment.Append(item);
-                }
-            }
-
-            expandedTargetSegment[targetFile] = Constants.AsciiPieces[piece];
-
-            var targetSegment = new StringBuilder();
-            ones = 0;
-            foreach (var item in expandedTargetSegment.ToString())
-            {
-                if (item == '1')
-                {
-                    ++ones;
-                }
-                else
-                {
-                    if (ones != 0)
-                    {
-                        targetSegment.Append(ones);
-                        ones = 0;
-
-                        targetSegment.Append(item);
-                    }
-                }
-            }
-
-            if (ones != 0)
-            {
-                targetSegment.Append(ones);
-            }
-
-            fenSegments[targetSegmentIndex] = targetSegment.ToString();
-
-            fenSegments[7] = fenSegments[7].Split(' ')[0];
-
-            var fenSb = new StringBuilder(string.Join('/', fenSegments));
-            return fenSb;
+            newPiece = promotedPiece;
         }
 
-        public static StringBuilder UpdateFirstPartOfFEN(ReadonlyStructCustomPosition position, int sourceSquare, int targetSquare, int piece)
+        StringBuilder fenSb = FENHelpers.UpdateFirstPartOfFEN(position, sourceSquare, targetSquare, piece);
+
+        EnPassant = BoardSquare.noSquare;
+
+        PieceBitBoards[piece].PopBit(sourceSquare);
+        OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
+
+        PieceBitBoards[newPiece].SetBit(targetSquare);
+        OccupancyBitBoards[(int)Side].SetBit(targetSquare);
+
+        if (move.IsCapture())
         {
-            var fenSegments = position.FEN.Split('/');
+            var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
+            var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
 
-            int sourceSegmentIndex = sourceSquare / 8;
-            int sourceFile = sourceSquare % 8;
-            var expandedSourceSegment = new StringBuilder();
-
-            foreach (var item in fenSegments[sourceSegmentIndex])
+            if (move.IsEnPassant())
             {
-                if (char.IsDigit(item))
-                {
-                    expandedSourceSegment.Append('1', item - '0');
-                }
-                else
-                {
-                    expandedSourceSegment.Append(item);
-                }
+                var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
+                Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
+
+                PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
+                OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
             }
-
-            expandedSourceSegment[sourceFile] = '1';
-
-            var sourceSegment = new StringBuilder(8);
-            int ones = 0;
-            foreach (var item in expandedSourceSegment.ToString())
+            else
             {
-                if (item == '1')
+                var limit = (int)Piece.K + oppositeSideOffset;
+                for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
                 {
-                    ++ones;
-                }
-                else
-                {
-                    if (ones != 0)
+                    if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
                     {
-                        sourceSegment.Append(ones);
-                        ones = 0;
-
-                        sourceSegment.Append(item);
+                        PieceBitBoards[pieceIndex].PopBit(targetSquare);
+                        break;
                     }
                 }
+
+                OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
             }
+        }
+        else if (move.IsDoublePawnPush())
+        {
+            var pawnPush = +8 - ((int)oldSide * 16);
+            var enPassantSquare = sourceSquare + pawnPush;
+            Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
 
-            if (ones != 0)
-            {
-                sourceSegment.Append(ones);
-            }
+            EnPassant = (BoardSquare)enPassantSquare;
+        }
+        else if (move.IsShortCastle())
+        {
+            var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
+            var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
+            var rookIndex = (int)Piece.R + offset;
 
-            fenSegments[sourceSegmentIndex] = sourceSegment.ToString();
+            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
 
-            int targetSegmentIndex = targetSquare / 8;
-            int targetFile = targetSquare % 8;
-            var expandedTargetSegment = new StringBuilder(8);
-            foreach (var item in fenSegments[targetSegmentIndex])
-            {
-                if (char.IsDigit(item))
-                {
-                    expandedTargetSegment.Append('1', item - '0');
-                }
-                else
-                {
-                    expandedTargetSegment.Append(item);
-                }
-            }
+            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+        }
+        else if (move.IsLongCastle())
+        {
+            var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
+            var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
+            var rookIndex = (int)Piece.R + offset;
 
-            expandedTargetSegment[targetFile] = Constants.AsciiPieces[piece];
+            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
 
-            var targetSegment = new StringBuilder();
-            ones = 0;
-            foreach (var item in expandedTargetSegment.ToString())
-            {
-                if (item == '1')
-                {
-                    ++ones;
-                }
-                else
-                {
-                    if (ones != 0)
-                    {
-                        targetSegment.Append(ones);
-                        ones = 0;
-
-                        targetSegment.Append(item);
-                    }
-                }
-            }
-
-            if (ones != 0)
-            {
-                targetSegment.Append(ones);
-            }
-
-            fenSegments[targetSegmentIndex] = targetSegment.ToString();
-
-            fenSegments[7] = fenSegments[7].Split(' ')[0];
-
-            var fenSb = new StringBuilder(string.Join('/', fenSegments));
-            return fenSb;
+            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
         }
 
-        public static StringBuilder UpdateFirstPartOfFEN(ClassCustomPosition position, int sourceSquare, int targetSquare, int piece)
+        Side = (Side)oppositeSide;
+        OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
+
+        // Updating castling rights
+        Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
+        Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
+
+        _fen = FENHelpers.UpdateSecondPartOfFEN(fenSb, Side, Castle, EnPassant);
+    }
+
+    private string CalculateFEN()
+    {
+        var sb = new StringBuilder(100);
+
+        var squaresPerRow = 0;
+
+        int squaresWithoutPiece = 0;
+        int lengthBeforeSlash = sb.Length;
+        for (int square = 0; square < 64; ++square)
         {
-            var fenSegments = position.FEN.Split('/');
-
-            int sourceSegmentIndex = sourceSquare / 8;
-            int sourceFile = sourceSquare % 8;
-            var expandedSourceSegment = new StringBuilder();
-
-            foreach (var item in fenSegments[sourceSegmentIndex])
+            int foundPiece = -1;
+            for (var pieceBoardIndex = 0; pieceBoardIndex < 12; ++pieceBoardIndex)
             {
-                if (char.IsDigit(item))
+                if (PieceBitBoards[pieceBoardIndex].GetBit(square))
                 {
-                    expandedSourceSegment.Append('1', item - '0');
-                }
-                else
-                {
-                    expandedSourceSegment.Append(item);
+                    foundPiece = pieceBoardIndex;
+                    break;
                 }
             }
 
-            expandedSourceSegment[sourceFile] = '1';
-
-            var sourceSegment = new StringBuilder(8);
-            int ones = 0;
-            foreach (var item in expandedSourceSegment.ToString())
+            if (foundPiece != -1)
             {
-                if (item == '1')
+                if (squaresWithoutPiece != 0)
                 {
-                    ++ones;
+                    sb.Append(squaresWithoutPiece);
+                    squaresWithoutPiece = 0;
                 }
-                else
+
+                sb.Append(Constants.AsciiPieces[foundPiece]);
+            }
+            else
+            {
+                ++squaresWithoutPiece;
+            }
+
+            squaresPerRow = (squaresPerRow + 1) % 8;
+            if (squaresPerRow == 0)
+            {
+                if (squaresWithoutPiece != 0)
                 {
-                    if (ones != 0)
+                    sb.Append(squaresWithoutPiece);
+                    squaresWithoutPiece = 0;
+                }
+
+                if (square != 63)
+                {
+                    if (sb.Length == lengthBeforeSlash)
                     {
-                        sourceSegment.Append(ones);
-                        ones = 0;
-
-                        sourceSegment.Append(item);
+                        sb.Append('8');
                     }
+                    sb.Append('/');
+                    lengthBeforeSlash = sb.Length;
+                    squaresWithoutPiece = 0;
                 }
             }
-
-            if (ones != 0)
-            {
-                sourceSegment.Append(ones);
-            }
-
-            fenSegments[sourceSegmentIndex] = sourceSegment.ToString();
-
-            int targetSegmentIndex = targetSquare / 8;
-            int targetFile = targetSquare % 8;
-            var expandedTargetSegment = new StringBuilder(8);
-            foreach (var item in fenSegments[targetSegmentIndex])
-            {
-                if (char.IsDigit(item))
-                {
-                    expandedTargetSegment.Append('1', item - '0');
-                }
-                else
-                {
-                    expandedTargetSegment.Append(item);
-                }
-            }
-
-            expandedTargetSegment[targetFile] = Constants.AsciiPieces[piece];
-
-            var targetSegment = new StringBuilder();
-            ones = 0;
-            foreach (var item in expandedTargetSegment.ToString())
-            {
-                if (item == '1')
-                {
-                    ++ones;
-                }
-                else
-                {
-                    if (ones != 0)
-                    {
-                        targetSegment.Append(ones);
-                        ones = 0;
-
-                        targetSegment.Append(item);
-                    }
-                }
-            }
-
-            if (ones != 0)
-            {
-                targetSegment.Append(ones);
-            }
-
-            fenSegments[targetSegmentIndex] = targetSegment.ToString();
-
-            fenSegments[7] = fenSegments[7].Split(' ')[0];
-
-            var fenSb = new StringBuilder(string.Join('/', fenSegments));
-            return fenSb;
         }
 
-        public static StringBuilder UpdateFirstPartOfFEN(RecordClassCustomPosition position, int sourceSquare, int targetSquare, int piece)
+        sb.Append(' ');
+        sb.Append(Side == Side.White ? 'w' : 'b');
+
+        sb.Append(' ');
+        var length = sb.Length;
+
+        if ((Castle & (int)CastlingRights.WK) != default)
         {
-            var fenSegments = position.FEN.Split('/');
-
-            int sourceSegmentIndex = sourceSquare / 8;
-            int sourceFile = sourceSquare % 8;
-            var expandedSourceSegment = new StringBuilder();
-
-            foreach (var item in fenSegments[sourceSegmentIndex])
-            {
-                if (char.IsDigit(item))
-                {
-                    expandedSourceSegment.Append('1', item - '0');
-                }
-                else
-                {
-                    expandedSourceSegment.Append(item);
-                }
-            }
-
-            expandedSourceSegment[sourceFile] = '1';
-
-            var sourceSegment = new StringBuilder(8);
-            int ones = 0;
-            foreach (var item in expandedSourceSegment.ToString())
-            {
-                if (item == '1')
-                {
-                    ++ones;
-                }
-                else
-                {
-                    if (ones != 0)
-                    {
-                        sourceSegment.Append(ones);
-                        ones = 0;
-
-                        sourceSegment.Append(item);
-                    }
-                }
-            }
-
-            if (ones != 0)
-            {
-                sourceSegment.Append(ones);
-            }
-
-            fenSegments[sourceSegmentIndex] = sourceSegment.ToString();
-
-            int targetSegmentIndex = targetSquare / 8;
-            int targetFile = targetSquare % 8;
-            var expandedTargetSegment = new StringBuilder(8);
-            foreach (var item in fenSegments[targetSegmentIndex])
-            {
-                if (char.IsDigit(item))
-                {
-                    expandedTargetSegment.Append('1', item - '0');
-                }
-                else
-                {
-                    expandedTargetSegment.Append(item);
-                }
-            }
-
-            expandedTargetSegment[targetFile] = Constants.AsciiPieces[piece];
-
-            var targetSegment = new StringBuilder();
-            ones = 0;
-            foreach (var item in expandedTargetSegment.ToString())
-            {
-                if (item == '1')
-                {
-                    ++ones;
-                }
-                else
-                {
-                    if (ones != 0)
-                    {
-                        targetSegment.Append(ones);
-                        ones = 0;
-
-                        targetSegment.Append(item);
-                    }
-                }
-            }
-
-            if (ones != 0)
-            {
-                targetSegment.Append(ones);
-            }
-
-            fenSegments[targetSegmentIndex] = targetSegment.ToString();
-
-            fenSegments[7] = fenSegments[7].Split(' ')[0];
-
-            var fenSb = new StringBuilder(string.Join('/', fenSegments));
-            return fenSb;
+            sb.Append('K');
+        }
+        if ((Castle & (int)CastlingRights.WQ) != default)
+        {
+            sb.Append('Q');
+        }
+        if ((Castle & (int)CastlingRights.BK) != default)
+        {
+            sb.Append('k');
+        }
+        if ((Castle & (int)CastlingRights.BQ) != default)
+        {
+            sb.Append('q');
         }
 
-        public static StringBuilder UpdateFirstPartOfFEN(RecordStructCustomPosition position, int sourceSquare, int targetSquare, int piece)
+        if (sb.Length == length)
         {
-            var fenSegments = position.FEN.Split('/');
-
-            int sourceSegmentIndex = sourceSquare / 8;
-            int sourceFile = sourceSquare % 8;
-            var expandedSourceSegment = new StringBuilder();
-
-            foreach (var item in fenSegments[sourceSegmentIndex])
-            {
-                if (char.IsDigit(item))
-                {
-                    expandedSourceSegment.Append('1', item - '0');
-                }
-                else
-                {
-                    expandedSourceSegment.Append(item);
-                }
-            }
-
-            expandedSourceSegment[sourceFile] = '1';
-
-            var sourceSegment = new StringBuilder(8);
-            int ones = 0;
-            foreach (var item in expandedSourceSegment.ToString())
-            {
-                if (item == '1')
-                {
-                    ++ones;
-                }
-                else
-                {
-                    if (ones != 0)
-                    {
-                        sourceSegment.Append(ones);
-                        ones = 0;
-
-                        sourceSegment.Append(item);
-                    }
-                }
-            }
-
-            if (ones != 0)
-            {
-                sourceSegment.Append(ones);
-            }
-
-            fenSegments[sourceSegmentIndex] = sourceSegment.ToString();
-
-            int targetSegmentIndex = targetSquare / 8;
-            int targetFile = targetSquare % 8;
-            var expandedTargetSegment = new StringBuilder(8);
-            foreach (var item in fenSegments[targetSegmentIndex])
-            {
-                if (char.IsDigit(item))
-                {
-                    expandedTargetSegment.Append('1', item - '0');
-                }
-                else
-                {
-                    expandedTargetSegment.Append(item);
-                }
-            }
-
-            expandedTargetSegment[targetFile] = Constants.AsciiPieces[piece];
-
-            var targetSegment = new StringBuilder();
-            ones = 0;
-            foreach (var item in expandedTargetSegment.ToString())
-            {
-                if (item == '1')
-                {
-                    ++ones;
-                }
-                else
-                {
-                    if (ones != 0)
-                    {
-                        targetSegment.Append(ones);
-                        ones = 0;
-
-                        targetSegment.Append(item);
-                    }
-                }
-            }
-
-            if (ones != 0)
-            {
-                targetSegment.Append(ones);
-            }
-
-            fenSegments[targetSegmentIndex] = targetSegment.ToString();
-
-            fenSegments[7] = fenSegments[7].Split(' ')[0];
-
-            var fenSb = new StringBuilder(string.Join('/', fenSegments));
-            return fenSb;
+            sb.Append('-');
         }
 
-        /// <summary>
-        /// Neeeds to be invoked with the updated <paramref name="side"/>, <paramref name="castle"/> and <paramref name="enPassant"/> properties for the new position
-        /// </summary>
-        /// <param name="fenSb">Result of <see cref="UpdateFirstPartOfFEN(Position, int, int, int)"/></param>
-        /// <param name="side">Update <see cref="Position.Side"/></param>
-        /// <param name="castle">Updated <see cref="Position.Castle"/></param>
-        /// <param name="enPassant">Updated <see cref="Position.EnPassant"/></param>
-        /// <returns></returns>
-        public static string UpdateSecondPartOfFEN(StringBuilder fenSb, Side side, int castle, BoardSquare enPassant)
+        sb.Append(' ');
+
+        sb.Append(EnPassant == BoardSquare.noSquare ? "-" : Constants.Coordinates[(int)EnPassant]);
+
+        sb.Append(" 0 1");
+
+        return sb.ToString();
+    }
+}
+
+internal record class RecordClassCustomPosition
+{
+    private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+
+    private string? _fen;
+
+    public string FEN
+    {
+        get => _fen ??= CalculateFEN();
+        init => _fen = value;
+    }
+
+    /// <summary>
+    /// Use <see cref="Piece"/> as index
+    /// </summary>
+    public BitBoard[] PieceBitBoards { get; }
+
+    /// <summary>
+    /// Black, White, Both
+    /// </summary>
+    public BitBoard[] OccupancyBitBoards { get; }
+
+    public Side Side { get; }
+
+    public BoardSquare EnPassant { get; }
+
+    public int Castle { get; }
+
+    public RecordClassCustomPosition(string fen)
+    {
+        _fen = fen;
+
+        var parsedFEN = FENParser.ParseFEN(fen);
+
+        if (!parsedFEN.Success)
         {
-            fenSb.Append(' ');
-            fenSb.Append(side == Side.White ? 'w' : 'b');
-
-            fenSb.Append(' ');
-            var length = fenSb.Length;
-
-            if ((castle & (int)CastlingRights.WK) != default)
-            {
-                fenSb.Append('K');
-            }
-            if ((castle & (int)CastlingRights.WQ) != default)
-            {
-                fenSb.Append('Q');
-            }
-            if ((castle & (int)CastlingRights.BK) != default)
-            {
-                fenSb.Append('k');
-            }
-            if ((castle & (int)CastlingRights.BQ) != default)
-            {
-                fenSb.Append('q');
-            }
-
-            if (fenSb.Length == length)
-            {
-                fenSb.Append('-');
-            }
-
-            fenSb.Append(' ');
-
-            fenSb.Append(enPassant == BoardSquare.noSquare ? "-" : Constants.Coordinates[(int)enPassant]);
-
-            fenSb.Append(" 0 1");
-
-            return fenSb.ToString();
+            _logger.Error($"Error parsing FEN {fen}");
         }
+
+        PieceBitBoards = parsedFEN.PieceBitBoards;
+        OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
+        Side = parsedFEN.Side;
+        Castle = parsedFEN.Castle;
+        EnPassant = parsedFEN.EnPassant;
+    }
+
+    /// <summary>
+    /// Clone constructor
+    /// </summary>
+    /// <param name="position"></param>
+    public RecordClassCustomPosition(RecordClassCustomPosition position)
+    {
+        _fen = position.FEN;
+
+        PieceBitBoards = new BitBoard[12];
+        Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
+
+        OccupancyBitBoards = new BitBoard[3];
+        Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
+
+        Side = position.Side;
+        Castle = position.Castle;
+        EnPassant = position.EnPassant;
+    }
+
+    public RecordClassCustomPosition(RecordClassCustomPosition position, Move move) : this(position)
+    {
+        _fen = null;
+        var oldSide = Side;
+        var offset = Utils.PieceOffset(oldSide);
+        var oppositeSide = Utils.OppositeSide(oldSide);
+
+        int sourceSquare = move.SourceSquare();
+        int targetSquare = move.TargetSquare();
+        int piece = move.Piece();
+        int promotedPiece = move.PromotedPiece();
+
+        var newPiece = piece;
+        if (promotedPiece != default)
+        {
+            newPiece = promotedPiece;
+        }
+
+        EnPassant = BoardSquare.noSquare;
+
+        PieceBitBoards[piece].PopBit(sourceSquare);
+        OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
+
+        PieceBitBoards[newPiece].SetBit(targetSquare);
+        OccupancyBitBoards[(int)Side].SetBit(targetSquare);
+
+        if (move.IsCapture())
+        {
+            var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
+            var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
+
+            if (move.IsEnPassant())
+            {
+                var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
+                Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
+
+                PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
+                OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
+            }
+            else
+            {
+                var limit = (int)Piece.K + oppositeSideOffset;
+                for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
+                {
+                    if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
+                    {
+                        PieceBitBoards[pieceIndex].PopBit(targetSquare);
+                        break;
+                    }
+                }
+
+                OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
+            }
+        }
+        else if (move.IsDoublePawnPush())
+        {
+            var pawnPush = +8 - ((int)oldSide * 16);
+            var enPassantSquare = sourceSquare + pawnPush;
+            Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
+
+            EnPassant = (BoardSquare)enPassantSquare;
+        }
+        else if (move.IsShortCastle())
+        {
+            var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
+            var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
+            var rookIndex = (int)Piece.R + offset;
+
+            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+
+            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+        }
+        else if (move.IsLongCastle())
+        {
+            var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
+            var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
+            var rookIndex = (int)Piece.R + offset;
+
+            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+
+            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+        }
+
+        Side = (Side)oppositeSide;
+        OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
+
+        // Updating castling rights
+        Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
+        Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
+    }
+
+    /// <summary>
+    /// https://arxiv.org/ftp/arxiv/papers/2009/2009.03193.pdf
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="move"></param>
+    /// <param name="calculateFen"></param>
+    public RecordClassCustomPosition(RecordClassCustomPosition position, Move move, bool calculateFen) : this(position)
+    {
+        var oldSide = Side;
+        var offset = Utils.PieceOffset(oldSide);
+        var oppositeSide = Utils.OppositeSide(oldSide);
+
+        int sourceSquare = move.SourceSquare();
+        int targetSquare = move.TargetSquare();
+        int piece = move.Piece();
+        int promotedPiece = move.PromotedPiece();
+
+        var newPiece = piece;
+        if (promotedPiece != default)
+        {
+            newPiece = promotedPiece;
+        }
+
+        StringBuilder fenSb = FENHelpers.UpdateFirstPartOfFEN(position, sourceSquare, targetSquare, piece);
+
+        EnPassant = BoardSquare.noSquare;
+
+        PieceBitBoards[piece].PopBit(sourceSquare);
+        OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
+
+        PieceBitBoards[newPiece].SetBit(targetSquare);
+        OccupancyBitBoards[(int)Side].SetBit(targetSquare);
+
+        if (move.IsCapture())
+        {
+            var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
+            var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
+
+            if (move.IsEnPassant())
+            {
+                var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
+                Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
+
+                PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
+                OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
+            }
+            else
+            {
+                var limit = (int)Piece.K + oppositeSideOffset;
+                for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
+                {
+                    if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
+                    {
+                        PieceBitBoards[pieceIndex].PopBit(targetSquare);
+                        break;
+                    }
+                }
+
+                OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
+            }
+        }
+        else if (move.IsDoublePawnPush())
+        {
+            var pawnPush = +8 - ((int)oldSide * 16);
+            var enPassantSquare = sourceSquare + pawnPush;
+            Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
+
+            EnPassant = (BoardSquare)enPassantSquare;
+        }
+        else if (move.IsShortCastle())
+        {
+            var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
+            var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
+            var rookIndex = (int)Piece.R + offset;
+
+            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+
+            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+        }
+        else if (move.IsLongCastle())
+        {
+            var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
+            var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
+            var rookIndex = (int)Piece.R + offset;
+
+            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+
+            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+        }
+
+        Side = (Side)oppositeSide;
+        OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
+
+        // Updating castling rights
+        Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
+        Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
+
+        _fen = FENHelpers.UpdateSecondPartOfFEN(fenSb, Side, Castle, EnPassant);
+    }
+
+    private string CalculateFEN()
+    {
+        var sb = new StringBuilder(100);
+
+        var squaresPerRow = 0;
+
+        int squaresWithoutPiece = 0;
+        int lengthBeforeSlash = sb.Length;
+        for (int square = 0; square < 64; ++square)
+        {
+            int foundPiece = -1;
+            for (var pieceBoardIndex = 0; pieceBoardIndex < 12; ++pieceBoardIndex)
+            {
+                if (PieceBitBoards[pieceBoardIndex].GetBit(square))
+                {
+                    foundPiece = pieceBoardIndex;
+                    break;
+                }
+            }
+
+            if (foundPiece != -1)
+            {
+                if (squaresWithoutPiece != 0)
+                {
+                    sb.Append(squaresWithoutPiece);
+                    squaresWithoutPiece = 0;
+                }
+
+                sb.Append(Constants.AsciiPieces[foundPiece]);
+            }
+            else
+            {
+                ++squaresWithoutPiece;
+            }
+
+            squaresPerRow = (squaresPerRow + 1) % 8;
+            if (squaresPerRow == 0)
+            {
+                if (squaresWithoutPiece != 0)
+                {
+                    sb.Append(squaresWithoutPiece);
+                    squaresWithoutPiece = 0;
+                }
+
+                if (square != 63)
+                {
+                    if (sb.Length == lengthBeforeSlash)
+                    {
+                        sb.Append('8');
+                    }
+                    sb.Append('/');
+                    lengthBeforeSlash = sb.Length;
+                    squaresWithoutPiece = 0;
+                }
+            }
+        }
+
+        sb.Append(' ');
+        sb.Append(Side == Side.White ? 'w' : 'b');
+
+        sb.Append(' ');
+        var length = sb.Length;
+
+        if ((Castle & (int)CastlingRights.WK) != default)
+        {
+            sb.Append('K');
+        }
+        if ((Castle & (int)CastlingRights.WQ) != default)
+        {
+            sb.Append('Q');
+        }
+        if ((Castle & (int)CastlingRights.BK) != default)
+        {
+            sb.Append('k');
+        }
+        if ((Castle & (int)CastlingRights.BQ) != default)
+        {
+            sb.Append('q');
+        }
+
+        if (sb.Length == length)
+        {
+            sb.Append('-');
+        }
+
+        sb.Append(' ');
+
+        sb.Append(EnPassant == BoardSquare.noSquare ? "-" : Constants.Coordinates[(int)EnPassant]);
+
+        sb.Append(" 0 1");
+
+        return sb.ToString();
+    }
+}
+
+internal record struct RecordStructCustomPosition
+{
+    private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+
+    private string? _fen;
+
+    public string FEN
+    {
+        get => _fen ??= CalculateFEN();
+        init => _fen = value;
+    }
+
+    /// <summary>
+    /// Use <see cref="Piece"/> as index
+    /// </summary>
+    public BitBoard[] PieceBitBoards { get; }
+
+    /// <summary>
+    /// Black, White, Both
+    /// </summary>
+    public BitBoard[] OccupancyBitBoards { get; }
+
+    public Side Side { get; }
+
+    public BoardSquare EnPassant { get; }
+
+    public int Castle { get; }
+
+    public RecordStructCustomPosition(string fen)
+    {
+        _fen = fen;
+
+        var parsedFEN = FENParser.ParseFEN(fen);
+
+        if (!parsedFEN.Success)
+        {
+            _logger.Error($"Error parsing FEN {fen}");
+        }
+
+        PieceBitBoards = parsedFEN.PieceBitBoards;
+        OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
+        Side = parsedFEN.Side;
+        Castle = parsedFEN.Castle;
+        EnPassant = parsedFEN.EnPassant;
+    }
+
+    /// <summary>
+    /// Clone constructor
+    /// </summary>
+    /// <param name="position"></param>
+    public RecordStructCustomPosition(RecordStructCustomPosition position)
+    {
+        _fen = position.FEN;
+
+        PieceBitBoards = new BitBoard[12];
+        Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
+
+        OccupancyBitBoards = new BitBoard[3];
+        Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
+
+        Side = position.Side;
+        Castle = position.Castle;
+        EnPassant = position.EnPassant;
+    }
+
+    public RecordStructCustomPosition(RecordStructCustomPosition position, Move move) : this(position)
+    {
+        _fen = null;
+        var oldSide = Side;
+        var offset = Utils.PieceOffset(oldSide);
+        var oppositeSide = Utils.OppositeSide(oldSide);
+
+        int sourceSquare = move.SourceSquare();
+        int targetSquare = move.TargetSquare();
+        int piece = move.Piece();
+        int promotedPiece = move.PromotedPiece();
+
+        var newPiece = piece;
+        if (promotedPiece != default)
+        {
+            newPiece = promotedPiece;
+        }
+
+        EnPassant = BoardSquare.noSquare;
+
+        PieceBitBoards[piece].PopBit(sourceSquare);
+        OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
+
+        PieceBitBoards[newPiece].SetBit(targetSquare);
+        OccupancyBitBoards[(int)Side].SetBit(targetSquare);
+
+        if (move.IsCapture())
+        {
+            var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
+            var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
+
+            if (move.IsEnPassant())
+            {
+                var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
+                Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
+
+                PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
+                OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
+            }
+            else
+            {
+                var limit = (int)Piece.K + oppositeSideOffset;
+                for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
+                {
+                    if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
+                    {
+                        PieceBitBoards[pieceIndex].PopBit(targetSquare);
+                        break;
+                    }
+                }
+
+                OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
+            }
+        }
+        else if (move.IsDoublePawnPush())
+        {
+            var pawnPush = +8 - ((int)oldSide * 16);
+            var enPassantSquare = sourceSquare + pawnPush;
+            Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
+
+            EnPassant = (BoardSquare)enPassantSquare;
+        }
+        else if (move.IsShortCastle())
+        {
+            var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
+            var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
+            var rookIndex = (int)Piece.R + offset;
+
+            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+
+            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+        }
+        else if (move.IsLongCastle())
+        {
+            var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
+            var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
+            var rookIndex = (int)Piece.R + offset;
+
+            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+
+            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+        }
+
+        Side = (Side)oppositeSide;
+        OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
+
+        // Updating castling rights
+        Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
+        Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
+    }
+
+    /// <summary>
+    /// https://arxiv.org/ftp/arxiv/papers/2009/2009.03193.pdf
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="move"></param>
+    /// <param name="calculateFen"></param>
+    public RecordStructCustomPosition(RecordStructCustomPosition position, Move move, bool calculateFen) : this(position)
+    {
+        var oldSide = Side;
+        var offset = Utils.PieceOffset(oldSide);
+        var oppositeSide = Utils.OppositeSide(oldSide);
+
+        int sourceSquare = move.SourceSquare();
+        int targetSquare = move.TargetSquare();
+        int piece = move.Piece();
+        int promotedPiece = move.PromotedPiece();
+
+        var newPiece = piece;
+        if (promotedPiece != default)
+        {
+            newPiece = promotedPiece;
+        }
+
+        StringBuilder fenSb = FENHelpers.UpdateFirstPartOfFEN(position, sourceSquare, targetSquare, piece);
+
+        EnPassant = BoardSquare.noSquare;
+
+        PieceBitBoards[piece].PopBit(sourceSquare);
+        OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
+
+        PieceBitBoards[newPiece].SetBit(targetSquare);
+        OccupancyBitBoards[(int)Side].SetBit(targetSquare);
+
+        if (move.IsCapture())
+        {
+            var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
+            var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
+
+            if (move.IsEnPassant())
+            {
+                var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
+                Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
+
+                PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
+                OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
+            }
+            else
+            {
+                var limit = (int)Piece.K + oppositeSideOffset;
+                for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
+                {
+                    if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
+                    {
+                        PieceBitBoards[pieceIndex].PopBit(targetSquare);
+                        break;
+                    }
+                }
+
+                OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
+            }
+        }
+        else if (move.IsDoublePawnPush())
+        {
+            var pawnPush = +8 - ((int)oldSide * 16);
+            var enPassantSquare = sourceSquare + pawnPush;
+            Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
+
+            EnPassant = (BoardSquare)enPassantSquare;
+        }
+        else if (move.IsShortCastle())
+        {
+            var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
+            var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
+            var rookIndex = (int)Piece.R + offset;
+
+            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+
+            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+        }
+        else if (move.IsLongCastle())
+        {
+            var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
+            var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
+            var rookIndex = (int)Piece.R + offset;
+
+            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+
+            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+        }
+
+        Side = (Side)oppositeSide;
+        OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
+
+        // Updating castling rights
+        Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
+        Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
+
+        _fen = FENHelpers.UpdateSecondPartOfFEN(fenSb, Side, Castle, EnPassant);
+    }
+
+    private string CalculateFEN()
+    {
+        var sb = new StringBuilder(100);
+
+        var squaresPerRow = 0;
+
+        int squaresWithoutPiece = 0;
+        int lengthBeforeSlash = sb.Length;
+        for (int square = 0; square < 64; ++square)
+        {
+            int foundPiece = -1;
+            for (var pieceBoardIndex = 0; pieceBoardIndex < 12; ++pieceBoardIndex)
+            {
+                if (PieceBitBoards[pieceBoardIndex].GetBit(square))
+                {
+                    foundPiece = pieceBoardIndex;
+                    break;
+                }
+            }
+
+            if (foundPiece != -1)
+            {
+                if (squaresWithoutPiece != 0)
+                {
+                    sb.Append(squaresWithoutPiece);
+                    squaresWithoutPiece = 0;
+                }
+
+                sb.Append(Constants.AsciiPieces[foundPiece]);
+            }
+            else
+            {
+                ++squaresWithoutPiece;
+            }
+
+            squaresPerRow = (squaresPerRow + 1) % 8;
+            if (squaresPerRow == 0)
+            {
+                if (squaresWithoutPiece != 0)
+                {
+                    sb.Append(squaresWithoutPiece);
+                    squaresWithoutPiece = 0;
+                }
+
+                if (square != 63)
+                {
+                    if (sb.Length == lengthBeforeSlash)
+                    {
+                        sb.Append('8');
+                    }
+                    sb.Append('/');
+                    lengthBeforeSlash = sb.Length;
+                    squaresWithoutPiece = 0;
+                }
+            }
+        }
+
+        sb.Append(' ');
+        sb.Append(Side == Side.White ? 'w' : 'b');
+
+        sb.Append(' ');
+        var length = sb.Length;
+
+        if ((Castle & (int)CastlingRights.WK) != default)
+        {
+            sb.Append('K');
+        }
+        if ((Castle & (int)CastlingRights.WQ) != default)
+        {
+            sb.Append('Q');
+        }
+        if ((Castle & (int)CastlingRights.BK) != default)
+        {
+            sb.Append('k');
+        }
+        if ((Castle & (int)CastlingRights.BQ) != default)
+        {
+            sb.Append('q');
+        }
+
+        if (sb.Length == length)
+        {
+            sb.Append('-');
+        }
+
+        sb.Append(' ');
+
+        sb.Append(EnPassant == BoardSquare.noSquare ? "-" : Constants.Coordinates[(int)EnPassant]);
+
+        sb.Append(" 0 1");
+
+        return sb.ToString();
+    }
+}
+
+internal static class FENHelpers
+{
+    public static StringBuilder UpdateFirstPartOfFEN(StructCustomPosition position, int sourceSquare, int targetSquare, int piece)
+    {
+        var fenSegments = position.FEN.Split('/');
+
+        int sourceSegmentIndex = sourceSquare / 8;
+        int sourceFile = sourceSquare % 8;
+        var expandedSourceSegment = new StringBuilder();
+
+        foreach (var item in fenSegments[sourceSegmentIndex])
+        {
+            if (char.IsDigit(item))
+            {
+                expandedSourceSegment.Append('1', item - '0');
+            }
+            else
+            {
+                expandedSourceSegment.Append(item);
+            }
+        }
+
+        expandedSourceSegment[sourceFile] = '1';
+
+        var sourceSegment = new StringBuilder(8);
+        int ones = 0;
+        foreach (var item in expandedSourceSegment.ToString())
+        {
+            if (item == '1')
+            {
+                ++ones;
+            }
+            else
+            {
+                if (ones != 0)
+                {
+                    sourceSegment.Append(ones);
+                    ones = 0;
+
+                    sourceSegment.Append(item);
+                }
+            }
+        }
+
+        if (ones != 0)
+        {
+            sourceSegment.Append(ones);
+        }
+
+        fenSegments[sourceSegmentIndex] = sourceSegment.ToString();
+
+        int targetSegmentIndex = targetSquare / 8;
+        int targetFile = targetSquare % 8;
+        var expandedTargetSegment = new StringBuilder(8);
+        foreach (var item in fenSegments[targetSegmentIndex])
+        {
+            if (char.IsDigit(item))
+            {
+                expandedTargetSegment.Append('1', item - '0');
+            }
+            else
+            {
+                expandedTargetSegment.Append(item);
+            }
+        }
+
+        expandedTargetSegment[targetFile] = Constants.AsciiPieces[piece];
+
+        var targetSegment = new StringBuilder();
+        ones = 0;
+        foreach (var item in expandedTargetSegment.ToString())
+        {
+            if (item == '1')
+            {
+                ++ones;
+            }
+            else
+            {
+                if (ones != 0)
+                {
+                    targetSegment.Append(ones);
+                    ones = 0;
+
+                    targetSegment.Append(item);
+                }
+            }
+        }
+
+        if (ones != 0)
+        {
+            targetSegment.Append(ones);
+        }
+
+        fenSegments[targetSegmentIndex] = targetSegment.ToString();
+
+        fenSegments[7] = fenSegments[7].Split(' ')[0];
+
+        var fenSb = new StringBuilder(string.Join('/', fenSegments));
+        return fenSb;
+    }
+
+    public static StringBuilder UpdateFirstPartOfFEN(ReadonlyStructCustomPosition position, int sourceSquare, int targetSquare, int piece)
+    {
+        var fenSegments = position.FEN.Split('/');
+
+        int sourceSegmentIndex = sourceSquare / 8;
+        int sourceFile = sourceSquare % 8;
+        var expandedSourceSegment = new StringBuilder();
+
+        foreach (var item in fenSegments[sourceSegmentIndex])
+        {
+            if (char.IsDigit(item))
+            {
+                expandedSourceSegment.Append('1', item - '0');
+            }
+            else
+            {
+                expandedSourceSegment.Append(item);
+            }
+        }
+
+        expandedSourceSegment[sourceFile] = '1';
+
+        var sourceSegment = new StringBuilder(8);
+        int ones = 0;
+        foreach (var item in expandedSourceSegment.ToString())
+        {
+            if (item == '1')
+            {
+                ++ones;
+            }
+            else
+            {
+                if (ones != 0)
+                {
+                    sourceSegment.Append(ones);
+                    ones = 0;
+
+                    sourceSegment.Append(item);
+                }
+            }
+        }
+
+        if (ones != 0)
+        {
+            sourceSegment.Append(ones);
+        }
+
+        fenSegments[sourceSegmentIndex] = sourceSegment.ToString();
+
+        int targetSegmentIndex = targetSquare / 8;
+        int targetFile = targetSquare % 8;
+        var expandedTargetSegment = new StringBuilder(8);
+        foreach (var item in fenSegments[targetSegmentIndex])
+        {
+            if (char.IsDigit(item))
+            {
+                expandedTargetSegment.Append('1', item - '0');
+            }
+            else
+            {
+                expandedTargetSegment.Append(item);
+            }
+        }
+
+        expandedTargetSegment[targetFile] = Constants.AsciiPieces[piece];
+
+        var targetSegment = new StringBuilder();
+        ones = 0;
+        foreach (var item in expandedTargetSegment.ToString())
+        {
+            if (item == '1')
+            {
+                ++ones;
+            }
+            else
+            {
+                if (ones != 0)
+                {
+                    targetSegment.Append(ones);
+                    ones = 0;
+
+                    targetSegment.Append(item);
+                }
+            }
+        }
+
+        if (ones != 0)
+        {
+            targetSegment.Append(ones);
+        }
+
+        fenSegments[targetSegmentIndex] = targetSegment.ToString();
+
+        fenSegments[7] = fenSegments[7].Split(' ')[0];
+
+        var fenSb = new StringBuilder(string.Join('/', fenSegments));
+        return fenSb;
+    }
+
+    public static StringBuilder UpdateFirstPartOfFEN(ClassCustomPosition position, int sourceSquare, int targetSquare, int piece)
+    {
+        var fenSegments = position.FEN.Split('/');
+
+        int sourceSegmentIndex = sourceSquare / 8;
+        int sourceFile = sourceSquare % 8;
+        var expandedSourceSegment = new StringBuilder();
+
+        foreach (var item in fenSegments[sourceSegmentIndex])
+        {
+            if (char.IsDigit(item))
+            {
+                expandedSourceSegment.Append('1', item - '0');
+            }
+            else
+            {
+                expandedSourceSegment.Append(item);
+            }
+        }
+
+        expandedSourceSegment[sourceFile] = '1';
+
+        var sourceSegment = new StringBuilder(8);
+        int ones = 0;
+        foreach (var item in expandedSourceSegment.ToString())
+        {
+            if (item == '1')
+            {
+                ++ones;
+            }
+            else
+            {
+                if (ones != 0)
+                {
+                    sourceSegment.Append(ones);
+                    ones = 0;
+
+                    sourceSegment.Append(item);
+                }
+            }
+        }
+
+        if (ones != 0)
+        {
+            sourceSegment.Append(ones);
+        }
+
+        fenSegments[sourceSegmentIndex] = sourceSegment.ToString();
+
+        int targetSegmentIndex = targetSquare / 8;
+        int targetFile = targetSquare % 8;
+        var expandedTargetSegment = new StringBuilder(8);
+        foreach (var item in fenSegments[targetSegmentIndex])
+        {
+            if (char.IsDigit(item))
+            {
+                expandedTargetSegment.Append('1', item - '0');
+            }
+            else
+            {
+                expandedTargetSegment.Append(item);
+            }
+        }
+
+        expandedTargetSegment[targetFile] = Constants.AsciiPieces[piece];
+
+        var targetSegment = new StringBuilder();
+        ones = 0;
+        foreach (var item in expandedTargetSegment.ToString())
+        {
+            if (item == '1')
+            {
+                ++ones;
+            }
+            else
+            {
+                if (ones != 0)
+                {
+                    targetSegment.Append(ones);
+                    ones = 0;
+
+                    targetSegment.Append(item);
+                }
+            }
+        }
+
+        if (ones != 0)
+        {
+            targetSegment.Append(ones);
+        }
+
+        fenSegments[targetSegmentIndex] = targetSegment.ToString();
+
+        fenSegments[7] = fenSegments[7].Split(' ')[0];
+
+        var fenSb = new StringBuilder(string.Join('/', fenSegments));
+        return fenSb;
+    }
+
+    public static StringBuilder UpdateFirstPartOfFEN(RecordClassCustomPosition position, int sourceSquare, int targetSquare, int piece)
+    {
+        var fenSegments = position.FEN.Split('/');
+
+        int sourceSegmentIndex = sourceSquare / 8;
+        int sourceFile = sourceSquare % 8;
+        var expandedSourceSegment = new StringBuilder();
+
+        foreach (var item in fenSegments[sourceSegmentIndex])
+        {
+            if (char.IsDigit(item))
+            {
+                expandedSourceSegment.Append('1', item - '0');
+            }
+            else
+            {
+                expandedSourceSegment.Append(item);
+            }
+        }
+
+        expandedSourceSegment[sourceFile] = '1';
+
+        var sourceSegment = new StringBuilder(8);
+        int ones = 0;
+        foreach (var item in expandedSourceSegment.ToString())
+        {
+            if (item == '1')
+            {
+                ++ones;
+            }
+            else
+            {
+                if (ones != 0)
+                {
+                    sourceSegment.Append(ones);
+                    ones = 0;
+
+                    sourceSegment.Append(item);
+                }
+            }
+        }
+
+        if (ones != 0)
+        {
+            sourceSegment.Append(ones);
+        }
+
+        fenSegments[sourceSegmentIndex] = sourceSegment.ToString();
+
+        int targetSegmentIndex = targetSquare / 8;
+        int targetFile = targetSquare % 8;
+        var expandedTargetSegment = new StringBuilder(8);
+        foreach (var item in fenSegments[targetSegmentIndex])
+        {
+            if (char.IsDigit(item))
+            {
+                expandedTargetSegment.Append('1', item - '0');
+            }
+            else
+            {
+                expandedTargetSegment.Append(item);
+            }
+        }
+
+        expandedTargetSegment[targetFile] = Constants.AsciiPieces[piece];
+
+        var targetSegment = new StringBuilder();
+        ones = 0;
+        foreach (var item in expandedTargetSegment.ToString())
+        {
+            if (item == '1')
+            {
+                ++ones;
+            }
+            else
+            {
+                if (ones != 0)
+                {
+                    targetSegment.Append(ones);
+                    ones = 0;
+
+                    targetSegment.Append(item);
+                }
+            }
+        }
+
+        if (ones != 0)
+        {
+            targetSegment.Append(ones);
+        }
+
+        fenSegments[targetSegmentIndex] = targetSegment.ToString();
+
+        fenSegments[7] = fenSegments[7].Split(' ')[0];
+
+        var fenSb = new StringBuilder(string.Join('/', fenSegments));
+        return fenSb;
+    }
+
+    public static StringBuilder UpdateFirstPartOfFEN(RecordStructCustomPosition position, int sourceSquare, int targetSquare, int piece)
+    {
+        var fenSegments = position.FEN.Split('/');
+
+        int sourceSegmentIndex = sourceSquare / 8;
+        int sourceFile = sourceSquare % 8;
+        var expandedSourceSegment = new StringBuilder();
+
+        foreach (var item in fenSegments[sourceSegmentIndex])
+        {
+            if (char.IsDigit(item))
+            {
+                expandedSourceSegment.Append('1', item - '0');
+            }
+            else
+            {
+                expandedSourceSegment.Append(item);
+            }
+        }
+
+        expandedSourceSegment[sourceFile] = '1';
+
+        var sourceSegment = new StringBuilder(8);
+        int ones = 0;
+        foreach (var item in expandedSourceSegment.ToString())
+        {
+            if (item == '1')
+            {
+                ++ones;
+            }
+            else
+            {
+                if (ones != 0)
+                {
+                    sourceSegment.Append(ones);
+                    ones = 0;
+
+                    sourceSegment.Append(item);
+                }
+            }
+        }
+
+        if (ones != 0)
+        {
+            sourceSegment.Append(ones);
+        }
+
+        fenSegments[sourceSegmentIndex] = sourceSegment.ToString();
+
+        int targetSegmentIndex = targetSquare / 8;
+        int targetFile = targetSquare % 8;
+        var expandedTargetSegment = new StringBuilder(8);
+        foreach (var item in fenSegments[targetSegmentIndex])
+        {
+            if (char.IsDigit(item))
+            {
+                expandedTargetSegment.Append('1', item - '0');
+            }
+            else
+            {
+                expandedTargetSegment.Append(item);
+            }
+        }
+
+        expandedTargetSegment[targetFile] = Constants.AsciiPieces[piece];
+
+        var targetSegment = new StringBuilder();
+        ones = 0;
+        foreach (var item in expandedTargetSegment.ToString())
+        {
+            if (item == '1')
+            {
+                ++ones;
+            }
+            else
+            {
+                if (ones != 0)
+                {
+                    targetSegment.Append(ones);
+                    ones = 0;
+
+                    targetSegment.Append(item);
+                }
+            }
+        }
+
+        if (ones != 0)
+        {
+            targetSegment.Append(ones);
+        }
+
+        fenSegments[targetSegmentIndex] = targetSegment.ToString();
+
+        fenSegments[7] = fenSegments[7].Split(' ')[0];
+
+        var fenSb = new StringBuilder(string.Join('/', fenSegments));
+        return fenSb;
+    }
+
+    /// <summary>
+    /// Neeeds to be invoked with the updated <paramref name="side"/>, <paramref name="castle"/> and <paramref name="enPassant"/> properties for the new position
+    /// </summary>
+    /// <param name="fenSb">Result of <see cref="UpdateFirstPartOfFEN(Position, int, int, int)"/></param>
+    /// <param name="side">Update <see cref="Position.Side"/></param>
+    /// <param name="castle">Updated <see cref="Position.Castle"/></param>
+    /// <param name="enPassant">Updated <see cref="Position.EnPassant"/></param>
+    /// <returns></returns>
+    public static string UpdateSecondPartOfFEN(StringBuilder fenSb, Side side, int castle, BoardSquare enPassant)
+    {
+        fenSb.Append(' ');
+        fenSb.Append(side == Side.White ? 'w' : 'b');
+
+        fenSb.Append(' ');
+        var length = fenSb.Length;
+
+        if ((castle & (int)CastlingRights.WK) != default)
+        {
+            fenSb.Append('K');
+        }
+        if ((castle & (int)CastlingRights.WQ) != default)
+        {
+            fenSb.Append('Q');
+        }
+        if ((castle & (int)CastlingRights.BK) != default)
+        {
+            fenSb.Append('k');
+        }
+        if ((castle & (int)CastlingRights.BQ) != default)
+        {
+            fenSb.Append('q');
+        }
+
+        if (fenSb.Length == length)
+        {
+            fenSb.Append('-');
+        }
+
+        fenSb.Append(' ');
+
+        fenSb.Append(enPassant == BoardSquare.noSquare ? "-" : Constants.Coordinates[(int)enPassant]);
+
+        fenSb.Append(" 0 1");
+
+        return fenSb.ToString();
     }
 }
 

@@ -1,77 +1,77 @@
 ﻿using Lynx.Model;
 
-namespace Lynx
+namespace Lynx;
+
+public static class Constants
 {
-    public static class Constants
+    /// <summary>
+    /// 0xFFFFFFFFFFFFFFFFUL
+    /// 8   1 1 1 1 1 1 1 1
+    /// 7   1 1 1 1 1 1 1 1
+    /// 6   1 1 1 1 1 1 1 1
+    /// 5   1 1 1 1 1 1 1 1
+    /// 4   1 1 1 1 1 1 1 1
+    /// 3   1 1 1 1 1 1 1 1
+    /// 2   1 1 1 1 1 1 1 1
+    /// 1   1 1 1 1 1 1 1 1
+    ///     a b c d e f g h
+    /// </summary>
+    public const ulong FullBoard = ulong.MaxValue;
+
+    /// <summary>
+    /// 8   0 1 1 1 1 1 1 1
+    /// 7   0 1 1 1 1 1 1 1
+    /// 6   0 1 1 1 1 1 1 1
+    /// 5   0 1 1 1 1 1 1 1
+    /// 4   0 1 1 1 1 1 1 1
+    /// 3   0 1 1 1 1 1 1 1
+    /// 2   0 1 1 1 1 1 1 1
+    /// 1   0 1 1 1 1 1 1 1
+    ///     a b c d e f g h
+    /// </summary>
+    public const ulong NotAFile = 0xFEFEFEFEFEFEFEFE;
+
+    /// <summary>
+    /// 8   1 1 1 1 1 1 1 0
+    /// 7   1 1 1 1 1 1 1 0
+    /// 6   1 1 1 1 1 1 1 0
+    /// 5   1 1 1 1 1 1 1 0
+    /// 4   1 1 1 1 1 1 1 0
+    /// 3   1 1 1 1 1 1 1 0
+    /// 2   1 1 1 1 1 1 1 0
+    /// 1   1 1 1 1 1 1 1 0
+    ///     a b c d e f g h
+    /// </summary>
+    public const ulong NotHFile = 0x7F7F7F7F7F7F7F7F;
+
+    /// <summary>
+    /// 8   1 1 1 1 1 1 0 0
+    /// 7   1 1 1 1 1 1 0 0
+    /// 6   1 1 1 1 1 1 0 0
+    /// 5   1 1 1 1 1 1 0 0
+    /// 4   1 1 1 1 1 1 0 0
+    /// 3   1 1 1 1 1 1 0 0
+    /// 2   1 1 1 1 1 1 0 0
+    /// 1   1 1 1 1 1 1 0 0
+    ///     a b c d e f g h
+    /// </summary>
+    public const ulong NotHGFiles = 0x3F3F3F3F3F3F3F3F;
+
+    /// <summary>
+    /// 8   0 0 1 1 1 1 1 1
+    /// 7   0 0 1 1 1 1 1 1
+    /// 6   0 0 1 1 1 1 1 1
+    /// 5   0 0 1 1 1 1 1 1
+    /// 4   0 0 1 1 1 1 1 1
+    /// 3   0 0 1 1 1 1 1 1
+    /// 2   0 0 1 1 1 1 1 1
+    /// 1   0 0 1 1 1 1 1 1
+    ///     a b c d e f g h
+    /// </summary>
+    public const ulong NotABFiles = 0xFCFCFCFCFCFCFCFC;
+
+    public static readonly string[] Coordinates = new string[64]
     {
-        /// <summary>
-        /// 0xFFFFFFFFFFFFFFFFUL
-        /// 8   1 1 1 1 1 1 1 1
-        /// 7   1 1 1 1 1 1 1 1
-        /// 6   1 1 1 1 1 1 1 1
-        /// 5   1 1 1 1 1 1 1 1
-        /// 4   1 1 1 1 1 1 1 1
-        /// 3   1 1 1 1 1 1 1 1
-        /// 2   1 1 1 1 1 1 1 1
-        /// 1   1 1 1 1 1 1 1 1
-        ///     a b c d e f g h
-        /// </summary>
-        public const ulong FullBoard = ulong.MaxValue;
-
-        /// <summary>
-        /// 8   0 1 1 1 1 1 1 1
-        /// 7   0 1 1 1 1 1 1 1
-        /// 6   0 1 1 1 1 1 1 1
-        /// 5   0 1 1 1 1 1 1 1
-        /// 4   0 1 1 1 1 1 1 1
-        /// 3   0 1 1 1 1 1 1 1
-        /// 2   0 1 1 1 1 1 1 1
-        /// 1   0 1 1 1 1 1 1 1
-        ///     a b c d e f g h
-        /// </summary>
-        public const ulong NotAFile = 0xFEFEFEFEFEFEFEFE;
-
-        /// <summary>
-        /// 8   1 1 1 1 1 1 1 0
-        /// 7   1 1 1 1 1 1 1 0
-        /// 6   1 1 1 1 1 1 1 0
-        /// 5   1 1 1 1 1 1 1 0
-        /// 4   1 1 1 1 1 1 1 0
-        /// 3   1 1 1 1 1 1 1 0
-        /// 2   1 1 1 1 1 1 1 0
-        /// 1   1 1 1 1 1 1 1 0
-        ///     a b c d e f g h
-        /// </summary>
-        public const ulong NotHFile = 0x7F7F7F7F7F7F7F7F;
-
-        /// <summary>
-        /// 8   1 1 1 1 1 1 0 0
-        /// 7   1 1 1 1 1 1 0 0
-        /// 6   1 1 1 1 1 1 0 0
-        /// 5   1 1 1 1 1 1 0 0
-        /// 4   1 1 1 1 1 1 0 0
-        /// 3   1 1 1 1 1 1 0 0
-        /// 2   1 1 1 1 1 1 0 0
-        /// 1   1 1 1 1 1 1 0 0
-        ///     a b c d e f g h
-        /// </summary>
-        public const ulong NotHGFiles = 0x3F3F3F3F3F3F3F3F;
-
-        /// <summary>
-        /// 8   0 0 1 1 1 1 1 1
-        /// 7   0 0 1 1 1 1 1 1
-        /// 6   0 0 1 1 1 1 1 1
-        /// 5   0 0 1 1 1 1 1 1
-        /// 4   0 0 1 1 1 1 1 1
-        /// 3   0 0 1 1 1 1 1 1
-        /// 2   0 0 1 1 1 1 1 1
-        /// 1   0 0 1 1 1 1 1 1
-        ///     a b c d e f g h
-        /// </summary>
-        public const ulong NotABFiles = 0xFCFCFCFCFCFCFCFC;
-
-        public static readonly string[] Coordinates = new string[64]
-        {
             "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
             "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
             "a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6",
@@ -80,48 +80,48 @@ namespace Lynx
             "a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3",
             "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2",
             "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1"
-        };
+    };
 
-        /// <summary>
-        /// Following <see cref="Piece"/> order
-        /// </summary>
-        public const string AsciiPieces = "PNBRQKpnbrqk";
+    /// <summary>
+    /// Following <see cref="Piece"/> order
+    /// </summary>
+    public const string AsciiPieces = "PNBRQKpnbrqk";
 
-        /// <summary>
-        /// Following <see cref="Piece"/> order.
-        /// Don't work stright away in Windows
-        /// </summary>
-        public static readonly string[] UnicodePieces = new string[12]
-        {
+    /// <summary>
+    /// Following <see cref="Piece"/> order.
+    /// Don't work stright away in Windows
+    /// </summary>
+    public static readonly string[] UnicodePieces = new string[12]
+    {
             "♙", "♘", "♗", "♖", "♕", "♔",   // White
             "♟︎", "♞", "♝", "♜", "♛", "♚"    // Black
-        };
+    };
 
-        /// <summary>
-        /// Covert ASCII character pieces to encoded constants
-        /// </summary>
-        public static readonly IReadOnlyDictionary<char, Piece> PiecesByChar = new Dictionary<char, Piece>(12)
-        {
-            ['P'] = Piece.P,
-            ['N'] = Piece.N,
-            ['B'] = Piece.B,
-            ['R'] = Piece.R,
-            ['Q'] = Piece.Q,
-            ['K'] = Piece.K,
+    /// <summary>
+    /// Covert ASCII character pieces to encoded constants
+    /// </summary>
+    public static readonly IReadOnlyDictionary<char, Piece> PiecesByChar = new Dictionary<char, Piece>(12)
+    {
+        ['P'] = Piece.P,
+        ['N'] = Piece.N,
+        ['B'] = Piece.B,
+        ['R'] = Piece.R,
+        ['Q'] = Piece.Q,
+        ['K'] = Piece.K,
 
-            ['p'] = Piece.p,
-            ['n'] = Piece.n,
-            ['b'] = Piece.b,
-            ['r'] = Piece.r,
-            ['q'] = Piece.q,
-            ['k'] = Piece.k,
-        };
+        ['p'] = Piece.p,
+        ['n'] = Piece.n,
+        ['b'] = Piece.b,
+        ['r'] = Piece.r,
+        ['q'] = Piece.q,
+        ['k'] = Piece.k,
+    };
 
-        /// <summary>
-        /// Relevant bishop occupancy bit count per square
-        /// </summary>
-        public static readonly int[] BishopRelevantOccupancyBits = new int[64]
-        {
+    /// <summary>
+    /// Relevant bishop occupancy bit count per square
+    /// </summary>
+    public static readonly int[] BishopRelevantOccupancyBits = new int[64]
+    {
             6, 5, 5, 5, 5, 5, 5, 6,
             5, 5, 5, 5, 5, 5, 5, 5,
             5, 5, 7, 7, 7, 7, 5, 5,
@@ -130,13 +130,13 @@ namespace Lynx
             5, 5, 7, 7, 7, 7, 5, 5,
             5, 5, 5, 5, 5, 5, 5, 5,
             6, 5, 5, 5, 5, 5, 5, 6,
-        };
+    };
 
-        /// <summary>
-        /// Relevant rook occupancy bit count per square
-        /// </summary>
-        public static readonly int[] RookRelevantOccupancyBits = new int[64]
-        {
+    /// <summary>
+    /// Relevant rook occupancy bit count per square
+    /// </summary>
+    public static readonly int[] RookRelevantOccupancyBits = new int[64]
+    {
             12, 11, 11, 11, 11, 11, 11, 12,
             11, 10, 10, 10, 10, 10, 10, 11,
             11, 10, 10, 10, 10, 10, 10, 11,
@@ -145,13 +145,13 @@ namespace Lynx
             11, 10, 10, 10, 10, 10, 10, 11,
             11, 10, 10, 10, 10, 10, 10, 11,
             12, 11, 11, 11, 11, 11, 11, 12
-        };
+    };
 
-        /// <summary>
-        /// https://github.com/maksimKorzh/chess_programming/blob/master/src/bbc/init_magics/bbc.c
-        /// </summary>
-        public static readonly ulong[] RookMagicNumbers = new ulong[64]
-        {
+    /// <summary>
+    /// https://github.com/maksimKorzh/chess_programming/blob/master/src/bbc/init_magics/bbc.c
+    /// </summary>
+    public static readonly ulong[] RookMagicNumbers = new ulong[64]
+    {
             0x8a80104000800020UL,
             0x140002000100040UL,
             0x2801880a0017001UL,
@@ -216,13 +216,13 @@ namespace Lynx
             0x12001008414402UL,
             0x2006104900a0804UL,
             0x1004081002402UL
-        };
+    };
 
-        /// <summary>
-        /// https://github.com/maksimKorzh/chess_programming/blob/master/src/bbc/init_magics/bbc.c
-        /// </summary>
-        public static readonly ulong[] BishopMagicNumbers = new ulong[64]
-        {
+    /// <summary>
+    /// https://github.com/maksimKorzh/chess_programming/blob/master/src/bbc/init_magics/bbc.c
+    /// </summary>
+    public static readonly ulong[] BishopMagicNumbers = new ulong[64]
+    {
             0x40040844404084UL,
             0x2004208a004208UL,
             0x10190041080202UL,
@@ -289,67 +289,67 @@ namespace Lynx
             0x4010011029020020UL
 };
 
-        public const string InitialPositionFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    public const string InitialPositionFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-        public const string TrickyTestPositionFEN = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
-        public const string TrickyTestPositionReversedFEN = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1";
+    public const string TrickyTestPositionFEN = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
+    public const string TrickyTestPositionReversedFEN = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1";
 
-        public const string KillerTestPositionFEN = "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1";
-        public const string CmkTestPositionFEN = "r2q1rk1/ppp2ppp/2n1bn2/2b1p3/3pP3/3P1NPP/PPP1NPB1/R1BQ1RK1 b - - 0 9";
+    public const string KillerTestPositionFEN = "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1";
+    public const string CmkTestPositionFEN = "r2q1rk1/ppp2ppp/2n1bn2/2b1p3/3pP3/3P1NPP/PPP1NPB1/R1BQ1RK1 b - - 0 9";
 
-        public const string ComplexPositionFEN = "rq2k2r/ppp2pb1/2n1pnpp/1Q1p1b2/3P1B2/2N1PNP1/PPP2PBP/R3K2R w KQkq - 0 1";
+    public const string ComplexPositionFEN = "rq2k2r/ppp2pb1/2n1pnpp/1Q1p1b2/3P1B2/2N1PNP1/PPP2PBP/R3K2R w KQkq - 0 1";
 
-        public const string EmptyBoardFEN = "8/8/8/8/8/8/8/8 w - - 0 1";
+    public const string EmptyBoardFEN = "8/8/8/8/8/8/8/8 w - - 0 1";
 
-        public const int WhiteShortCastleKingSquare = (int)BoardSquare.g1;
-        public const int BlackShortCastleKingSquare = (int)BoardSquare.g8;
-        public const int WhiteLongCastleKingSquare = (int)BoardSquare.c1;
-        public const int BlackLongCastleKingSquare = (int)BoardSquare.c8;
+    public const int WhiteShortCastleKingSquare = (int)BoardSquare.g1;
+    public const int BlackShortCastleKingSquare = (int)BoardSquare.g8;
+    public const int WhiteLongCastleKingSquare = (int)BoardSquare.c1;
+    public const int BlackLongCastleKingSquare = (int)BoardSquare.c8;
 
-        public const int WhiteShortCastleRookSquare = (int)BoardSquare.f1;
-        public const int BlackShortCastleRookSquare = (int)BoardSquare.f8;
-        public const int WhiteLongCastleRookSquare = (int)BoardSquare.d1;
-        public const int BlackLongCastleRookSquare = (int)BoardSquare.d8;
+    public const int WhiteShortCastleRookSquare = (int)BoardSquare.f1;
+    public const int BlackShortCastleRookSquare = (int)BoardSquare.f8;
+    public const int WhiteLongCastleRookSquare = (int)BoardSquare.d1;
+    public const int BlackLongCastleRookSquare = (int)BoardSquare.d8;
 
-        public const string WhiteShortCastle = "e1g1";
-        public const string BlackShortCastle = "e8g8";
-        public const string WhiteLongCastle = "e1c1";
-        public const string BlackLongCastle = "e8c8";
+    public const string WhiteShortCastle = "e1g1";
+    public const string BlackShortCastle = "e8g8";
+    public const string WhiteLongCastle = "e1c1";
+    public const string BlackLongCastle = "e8c8";
 
-        public static readonly IReadOnlyDictionary<int, int> EnPassantCaptureSquares = new Dictionary<int, int>(16)
-        {
-            [(int)BoardSquare.a6] = (int)BoardSquare.a6 + 8,
-            [(int)BoardSquare.b6] = (int)BoardSquare.b6 + 8,
-            [(int)BoardSquare.c6] = (int)BoardSquare.c6 + 8,
-            [(int)BoardSquare.d6] = (int)BoardSquare.d6 + 8,
-            [(int)BoardSquare.e6] = (int)BoardSquare.e6 + 8,
-            [(int)BoardSquare.f6] = (int)BoardSquare.f6 + 8,
-            [(int)BoardSquare.g6] = (int)BoardSquare.g6 + 8,
-            [(int)BoardSquare.h6] = (int)BoardSquare.h6 + 8,
+    public static readonly IReadOnlyDictionary<int, int> EnPassantCaptureSquares = new Dictionary<int, int>(16)
+    {
+        [(int)BoardSquare.a6] = (int)BoardSquare.a6 + 8,
+        [(int)BoardSquare.b6] = (int)BoardSquare.b6 + 8,
+        [(int)BoardSquare.c6] = (int)BoardSquare.c6 + 8,
+        [(int)BoardSquare.d6] = (int)BoardSquare.d6 + 8,
+        [(int)BoardSquare.e6] = (int)BoardSquare.e6 + 8,
+        [(int)BoardSquare.f6] = (int)BoardSquare.f6 + 8,
+        [(int)BoardSquare.g6] = (int)BoardSquare.g6 + 8,
+        [(int)BoardSquare.h6] = (int)BoardSquare.h6 + 8,
 
-            [(int)BoardSquare.a3] = (int)BoardSquare.a3 - 8,
-            [(int)BoardSquare.b3] = (int)BoardSquare.b3 - 8,
-            [(int)BoardSquare.c3] = (int)BoardSquare.c3 - 8,
-            [(int)BoardSquare.d3] = (int)BoardSquare.d3 - 8,
-            [(int)BoardSquare.e3] = (int)BoardSquare.e3 - 8,
-            [(int)BoardSquare.f3] = (int)BoardSquare.f3 - 8,
-            [(int)BoardSquare.g3] = (int)BoardSquare.g3 - 8,
-            [(int)BoardSquare.h3] = (int)BoardSquare.h3 - 8,
-        };
+        [(int)BoardSquare.a3] = (int)BoardSquare.a3 - 8,
+        [(int)BoardSquare.b3] = (int)BoardSquare.b3 - 8,
+        [(int)BoardSquare.c3] = (int)BoardSquare.c3 - 8,
+        [(int)BoardSquare.d3] = (int)BoardSquare.d3 - 8,
+        [(int)BoardSquare.e3] = (int)BoardSquare.e3 - 8,
+        [(int)BoardSquare.f3] = (int)BoardSquare.f3 - 8,
+        [(int)BoardSquare.g3] = (int)BoardSquare.g3 - 8,
+        [(int)BoardSquare.h3] = (int)BoardSquare.h3 - 8,
+    };
 
-        /// <summary>
-        /// https://github.com/maksimKorzh/chess_programming/blob/master/src/bbc/make_move_castling_rights/bbc.c#L1474
-        ///                                 CastlingRights  Binary  Decimal
-        ///  K & R didn't move              1111 & 1111  =  1111    15
-        ///  White King moved               1111 & 1100  =  1100    12
-        ///  White kingside Rook moved      1111 & 1110  =  1110    14
-        ///  White queenside Rook moved     1111 & 1101  =  1101    13
-        ///  Black King moved               1111 & 0011  =  1011    3
-        ///  Black kingside Rook moved      1111 & 1011  =  1011    11
-        ///  Black queenside Rook moved     1111 & 0111  =  0111    7
-        /// </summary>
-        public static readonly int[] CastlingRightsUpdateConstants = new int[64]
-        {
+    /// <summary>
+    /// https://github.com/maksimKorzh/chess_programming/blob/master/src/bbc/make_move_castling_rights/bbc.c#L1474
+    ///                                 CastlingRights  Binary  Decimal
+    ///  K & R didn't move              1111 & 1111  =  1111    15
+    ///  White King moved               1111 & 1100  =  1100    12
+    ///  White kingside Rook moved      1111 & 1110  =  1110    14
+    ///  White queenside Rook moved     1111 & 1101  =  1101    13
+    ///  Black King moved               1111 & 0011  =  1011    3
+    ///  Black kingside Rook moved      1111 & 1011  =  1011    11
+    ///  Black queenside Rook moved     1111 & 0111  =  0111    7
+    /// </summary>
+    public static readonly int[] CastlingRightsUpdateConstants = new int[64]
+    {
             7, 15, 15, 15,  3, 15, 15, 11,
             15, 15, 15, 15, 15, 15, 15, 15,
             15, 15, 15, 15, 15, 15, 15, 15,
@@ -358,18 +358,5 @@ namespace Lynx
             15, 15, 15, 15, 15, 15, 15, 15,
             15, 15, 15, 15, 15, 15, 15, 15,
             13, 15, 15, 15, 12, 15, 15, 14
-        };
-    }
-
-    /*
-        8  ♜ ♞ ♝ ♛ ♚ ♝ ♞ ♜
-        7  ♟︎ ♟︎ ♟︎ ♟︎ ♟︎ ♟︎ ♟︎ ♟︎
-        6  .  .  .  .  .  .  .  .
-        5  .  .  .  .  .  .  .  .
-        4  .  .  .  .  .  .  .  .
-        3  .  .  .  .  .  .  .  .
-        2  ♙ ♙ ♙ ♙ ♙ ♙ ♙ ♙
-        1  ♖ ♘ ♗ ♕ ♔ ♗ ♘ ♖
-           a  b  c  d  e  f  g  h
-    */
+    };
 }

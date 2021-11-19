@@ -3,68 +3,67 @@ using NLog;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
-namespace Lynx.UCI.Commands.GUI
+namespace Lynx.UCI.Commands.GUI;
+
+/// <summary>
+/// position[fen | startpos] moves  ....
+/// set up the position described in fenstring on the internal board and
+///	play the moves on the internal chess board.
+///	if the game was played from the start position the string "startpos" will be sent
+///	Note: no "new" command is needed. However, if this position is from a different game than
+///	the last position sent to the engine, the GUI should have sent a "ucinewgame" inbetween.
+/// </summary>
+public sealed class PositionCommand : GUIBaseCommand
 {
-    /// <summary>
-    /// position[fen | startpos] moves  ....
-    /// set up the position described in fenstring on the internal board and
-    ///	play the moves on the internal chess board.
-    ///	if the game was played from the start position the string "startpos" will be sent
-    ///	Note: no "new" command is needed. However, if this position is from a different game than
-    ///	the last position sent to the engine, the GUI should have sent a "ucinewgame" inbetween.
-    /// </summary>
-    public sealed class PositionCommand : GUIBaseCommand
+    public const string Id = "position";
+
+    public const string StartPositionString = "startpos";
+    public const string MovesString = "moves";
+
+    private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+
+    private static readonly Regex _fenRegex = new(
+        "(?<=fen).+?(?=moves|$)",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    private static readonly Regex _movesRegex = new(
+        "(?<=moves).+?(?=$)",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    public static Game ParseGame(string positionCommand)
     {
-        public const string Id = "position";
+        var items = positionCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        bool isInitialPosition = string.Equals(items.ElementAtOrDefault(1), StartPositionString, StringComparison.OrdinalIgnoreCase);
 
-        public const string StartPositionString = "startpos";
-        public const string MovesString = "moves";
+        var initialPosition = isInitialPosition
+                ? Constants.InitialPositionFEN
+                : _fenRegex.Match(positionCommand).Value.Trim();
 
-        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
-
-        private static readonly Regex _fenRegex = new(
-            "(?<=fen).+?(?=moves|$)",
-            RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-        private static readonly Regex _movesRegex = new(
-            "(?<=moves).+?(?=$)",
-            RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-        public static Game ParseGame(string positionCommand)
+        if (string.IsNullOrEmpty(initialPosition))
         {
-            var items = positionCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            bool isInitialPosition = string.Equals(items.ElementAtOrDefault(1), StartPositionString, StringComparison.OrdinalIgnoreCase);
-
-            var initialPosition = isInitialPosition
-                    ? Constants.InitialPositionFEN
-                    : _fenRegex.Match(positionCommand).Value.Trim();
-
-            if (string.IsNullOrEmpty(initialPosition))
-            {
-                _logger.Error($"Error parsing position command '{positionCommand}': no initial position found");
-            }
-
-            var moves = _movesRegex.Match(positionCommand).Value.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
-
-            return new Game(initialPosition, moves);
+            _logger.Error($"Error parsing position command '{positionCommand}': no initial position found");
         }
 
-        public static bool TryParseLastMove(string positionCommand, Game game, [NotNullWhen(true)] out Move? lastMove)
+        var moves = _movesRegex.Match(positionCommand).Value.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
+
+        return new Game(initialPosition, moves);
+    }
+
+    public static bool TryParseLastMove(string positionCommand, Game game, [NotNullWhen(true)] out Move? lastMove)
+    {
+        var moveString = positionCommand
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Last();
+
+        if (!Move.TryParseFromUCIString(
+            moveString,
+            game.CurrentPosition.AllPossibleMoves(),
+            out lastMove))
         {
-            var moveString = positionCommand
-                    .Split(' ', StringSplitOptions.RemoveEmptyEntries)
-                    .Last();
-
-            if (!Move.TryParseFromUCIString(
-                moveString,
-                game.CurrentPosition.AllPossibleMoves(),
-                out lastMove))
-            {
-                _logger.Warn($"Error parsing last move {lastMove} from position command {positionCommand}");
-                return false;
-            }
-
-            return true;
+            _logger.Warn($"Error parsing last move {lastMove} from position command {positionCommand}");
+            return false;
         }
+
+        return true;
     }
 }

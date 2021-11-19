@@ -4,38 +4,38 @@ using NUnit.Framework;
 using System.Text;
 using System.Threading.Channels;
 
-namespace Lynx.Test.BestMove
+namespace Lynx.Test.BestMove;
+
+public class ForceOrAvoidDrawTest : BaseTest
 {
-    public class ForceOrAvoidDrawTest : BaseTest
+    [TestCase("8/8/4NQ2/7k/2P4p/1q2P2P/5P2/6K1 b - - 5 52", new[] { "b3b1", "b3d1" },
+        Description = "Force stalemate - https://lichess.org/sM5ekwnW/black#103, Having issues with null pruning implemeneted")]
+    [TestCase("8/8/4NQ2/7k/2P4p/4P2P/5PK1/3q4 b - - 7 53", new[] { "d1h1", "d1g1", "d1f1" },
+        Description = "Force stalemate - https://lichess.org/sM5ekwnW/black#105")]
+    public void ForceStaleMate(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
     {
-        [TestCase("8/8/4NQ2/7k/2P4p/1q2P2P/5P2/6K1 b - - 5 52", new[] { "b3b1", "b3d1" },
-            Description = "Force stalemate - https://lichess.org/sM5ekwnW/black#103, Having issues with null pruning implemeneted")]
-        [TestCase("8/8/4NQ2/7k/2P4p/4P2P/5PK1/3q4 b - - 7 53", new[] { "d1h1", "d1g1", "d1f1" },
-            Description = "Force stalemate - https://lichess.org/sM5ekwnW/black#105")]
-        public void ForceStaleMate(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
-        {
-            var result = TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 5);
-            Assert.AreEqual(0, result.Evaluation, "No drawn position detected");
-        }
+        var result = TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 5);
+        Assert.AreEqual(0, result.Evaluation, "No drawn position detected");
+    }
 
-        [Test]
-        public void AvoidThreefoldRepetitionWhenWinningPosition()
-        {
-            // Arrange
+    [Test]
+    public void AvoidThreefoldRepetitionWhenWinningPosition()
+    {
+        // Arrange
 
-            // https://gameknot.com/chess-puzzle.pl?pz=247493
-            const string fen = "r6k/p3b1pp/2pq4/Qp2n1NK/4P1P1/P3Br1P/1P2RP2/8 b - - 0 1";
+        // https://gameknot.com/chess-puzzle.pl?pz=247493
+        const string fen = "r6k/p3b1pp/2pq4/Qp2n1NK/4P1P1/P3Br1P/1P2RP2/8 b - - 0 1";
 
-            var mock = new Mock<ChannelWriter<string>>();
+        var mock = new Mock<ChannelWriter<string>>();
 
-            mock
-                .Setup(m => m.WriteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-                .Returns(ValueTask.CompletedTask);
+        mock
+            .Setup(m => m.WriteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Returns(ValueTask.CompletedTask);
 
-            var engine = new Engine(mock.Object);
-            engine.SetGame(new Game(fen));
+        var engine = new Engine(mock.Object);
+        engine.SetGame(new Game(fen));
 
-            var repeatedMoves = new List<Move>
+        var repeatedMoves = new List<Move>
             {
                 new ((int)BoardSquare.d6, (int)BoardSquare.c7, (int)Piece.q),
                 new ((int)BoardSquare.h5, (int)BoardSquare.h4, (int)Piece.K),
@@ -45,43 +45,43 @@ namespace Lynx.Test.BestMove
                 new ((int)BoardSquare.h5, (int)BoardSquare.h4, (int)Piece.K)
             };
 
-            Move movesThatAllowsRepetition = new((int)BoardSquare.c7, (int)BoardSquare.d6, (int)Piece.q);
+        Move movesThatAllowsRepetition = new((int)BoardSquare.c7, (int)BoardSquare.d6, (int)Piece.q);
 
-            var sb = new StringBuilder($"position fen {fen} moves");
-            foreach (var move in repeatedMoves)
-            {
-                sb.Append(' ').Append(move.UCIString());
-                engine.AdjustPosition(sb.ToString());
-            }
-
-            Assert.AreEqual(repeatedMoves.Count, engine.Game.MoveHistory.Count);
-
-            // Act
-            var searchResult = engine.BestMove();
-            var bestMoveFound = searchResult.BestMove;
-
-            // Assert
-            Assert.AreNotEqual(movesThatAllowsRepetition.UCIString(), bestMoveFound.UCIString(), "No threefold repetition avoided");
-            Assert.Less(searchResult.Evaluation, EvaluationConstants.CheckMateEvaluation - (20 * Position.DepthFactor), "Mate not detected");
+        var sb = new StringBuilder($"position fen {fen} moves");
+        foreach (var move in repeatedMoves)
+        {
+            sb.Append(' ').Append(move.UCIString());
+            engine.AdjustPosition(sb.ToString());
         }
 
-        [Test]
-        public void ForceThreefoldRepetitionWhenLosingPosition()
-        {
-            // Arrange
+        Assert.AreEqual(repeatedMoves.Count, engine.Game.MoveHistory.Count);
 
-            const string fen = "7B/8/7k/8/5KR1/8/5R2/8 w - - 0 1";
+        // Act
+        var searchResult = engine.BestMove();
+        var bestMoveFound = searchResult.BestMove;
 
-            var mock = new Mock<ChannelWriter<string>>();
+        // Assert
+        Assert.AreNotEqual(movesThatAllowsRepetition.UCIString(), bestMoveFound.UCIString(), "No threefold repetition avoided");
+        Assert.Less(searchResult.Evaluation, EvaluationConstants.CheckMateEvaluation - (20 * Position.DepthFactor), "Mate not detected");
+    }
 
-            mock
-                .Setup(m => m.WriteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-                .Returns(ValueTask.CompletedTask);
+    [Test]
+    public void ForceThreefoldRepetitionWhenLosingPosition()
+    {
+        // Arrange
 
-            var engine = new Engine(mock.Object);
-            engine.SetGame(new Game(fen));
+        const string fen = "7B/8/7k/8/5KR1/8/5R2/8 w - - 0 1";
 
-            var repeatedMoves = new List<Move>
+        var mock = new Mock<ChannelWriter<string>>();
+
+        mock
+            .Setup(m => m.WriteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Returns(ValueTask.CompletedTask);
+
+        var engine = new Engine(mock.Object);
+        engine.SetGame(new Game(fen));
+
+        var repeatedMoves = new List<Move>
             {
                 new ((int)BoardSquare.f2, (int)BoardSquare.e2, (int)Piece.R),
                 new ((int)BoardSquare.h6, (int)BoardSquare.h7, (int)Piece.k),
@@ -92,45 +92,45 @@ namespace Lynx.Test.BestMove
                 new ((int)BoardSquare.e2, (int)BoardSquare.f2, (int)Piece.R),
             };
 
-            Move movesThatAllowsRepetition = new((int)BoardSquare.h7, (int)BoardSquare.h6, (int)Piece.k);
+        Move movesThatAllowsRepetition = new((int)BoardSquare.h7, (int)BoardSquare.h6, (int)Piece.k);
 
-            var sb = new StringBuilder($"position fen {fen} moves");
-            foreach (var move in repeatedMoves)
-            {
-                sb.Append(' ');
-                sb.Append(move.UCIString());
-                engine.AdjustPosition(sb.ToString());
-            }
-
-            Assert.AreEqual(repeatedMoves.Count, engine.Game.MoveHistory.Count);
-
-            // Act
-            var searchResult = engine.BestMove();
-            var bestMoveFound = searchResult.BestMove;
-
-            // Assert
-            Assert.AreEqual(movesThatAllowsRepetition.UCIString(), bestMoveFound.UCIString(), "No threefold repetition forced");
-            Assert.AreEqual(0, searchResult.Evaluation, "No drawn position detected");
+        var sb = new StringBuilder($"position fen {fen} moves");
+        foreach (var move in repeatedMoves)
+        {
+            sb.Append(' ');
+            sb.Append(move.UCIString());
+            engine.AdjustPosition(sb.ToString());
         }
 
-        [Test]
-        public void Avoid50MovesRuleRepetitionWhenWinningPosition()
-        {
-            // Arrange
+        Assert.AreEqual(repeatedMoves.Count, engine.Game.MoveHistory.Count);
 
-            // https://gameknot.com/chess-puzzle.pl?pz=247493
-            const string fen = "r6k/p1q1b1pp/2p5/Qp2n1N1/4P1PK/P3Br1P/1P2RP2/8 b - - 0 1";
+        // Act
+        var searchResult = engine.BestMove();
+        var bestMoveFound = searchResult.BestMove;
 
-            var mock = new Mock<ChannelWriter<string>>();
+        // Assert
+        Assert.AreEqual(movesThatAllowsRepetition.UCIString(), bestMoveFound.UCIString(), "No threefold repetition forced");
+        Assert.AreEqual(0, searchResult.Evaluation, "No drawn position detected");
+    }
 
-            mock
-                .Setup(m => m.WriteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-                .Returns(ValueTask.CompletedTask);
+    [Test]
+    public void Avoid50MovesRuleRepetitionWhenWinningPosition()
+    {
+        // Arrange
 
-            var engine = new Engine(mock.Object);
-            engine.SetGame(new Game(fen));
+        // https://gameknot.com/chess-puzzle.pl?pz=247493
+        const string fen = "r6k/p1q1b1pp/2p5/Qp2n1N1/4P1PK/P3Br1P/1P2RP2/8 b - - 0 1";
 
-            var nonCaptureOrPawnMoveMoves = new List<Move>
+        var mock = new Mock<ChannelWriter<string>>();
+
+        mock
+            .Setup(m => m.WriteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Returns(ValueTask.CompletedTask);
+
+        var engine = new Engine(mock.Object);
+        engine.SetGame(new Game(fen));
+
+        var nonCaptureOrPawnMoveMoves = new List<Move>
             {
                 new ((int)BoardSquare.c7, (int)BoardSquare.d6, (int)Piece.q),
                 new ((int)BoardSquare.h4, (int)BoardSquare.h5, (int)Piece.K),
@@ -138,46 +138,46 @@ namespace Lynx.Test.BestMove
                 new ((int)BoardSquare.h5, (int)BoardSquare.h4, (int)Piece.K)
             };
 
-            Move movesThatAllowsRepetition = new((int)BoardSquare.c7, (int)BoardSquare.d6, (int)Piece.q);
+        Move movesThatAllowsRepetition = new((int)BoardSquare.c7, (int)BoardSquare.d6, (int)Piece.q);
 
-            var sb = new StringBuilder($"position fen {fen} moves");
-            for (int i = 0; i < 48; ++i)
-            {
-                var move = nonCaptureOrPawnMoveMoves[i % nonCaptureOrPawnMoveMoves.Count];
-                sb.Append(' ').Append(move.UCIString());
-                engine.AdjustPosition(sb.ToString());
-            }
-
-            Assert.AreEqual(48, engine.Game.MoveHistory.Count);
-
-            engine.Game.PositionHashHistory.Clear(); // Make sure we don't take account threefold repetition
-
-            // Act
-            var searchResult = engine.BestMove();
-            var bestMoveFound = searchResult.BestMove;
-
-            // Assert
-            Assert.AreNotEqual(movesThatAllowsRepetition.UCIString(), bestMoveFound.UCIString(), "No 50 moves rule avoided");
-            Assert.Less(searchResult.Evaluation, EvaluationConstants.CheckMateEvaluation - (20 * Position.DepthFactor), "Mate not detected");
+        var sb = new StringBuilder($"position fen {fen} moves");
+        for (int i = 0; i < 48; ++i)
+        {
+            var move = nonCaptureOrPawnMoveMoves[i % nonCaptureOrPawnMoveMoves.Count];
+            sb.Append(' ').Append(move.UCIString());
+            engine.AdjustPosition(sb.ToString());
         }
 
-        [Test]
-        public void Force50MovesRuleRepetitionWhenLosingPosition()
-        {
-            // Arrange
+        Assert.AreEqual(48, engine.Game.MoveHistory.Count);
 
-            const string fen = "8/7B/7k/8/5KR1/8/5R2/8 w - - 0 1";
+        engine.Game.PositionHashHistory.Clear(); // Make sure we don't take account threefold repetition
 
-            var mock = new Mock<ChannelWriter<string>>();
+        // Act
+        var searchResult = engine.BestMove();
+        var bestMoveFound = searchResult.BestMove;
 
-            mock
-                .Setup(m => m.WriteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-                .Returns(ValueTask.CompletedTask);
+        // Assert
+        Assert.AreNotEqual(movesThatAllowsRepetition.UCIString(), bestMoveFound.UCIString(), "No 50 moves rule avoided");
+        Assert.Less(searchResult.Evaluation, EvaluationConstants.CheckMateEvaluation - (20 * Position.DepthFactor), "Mate not detected");
+    }
 
-            var engine = new Engine(mock.Object);
-            engine.SetGame(new Game(fen));
+    [Test]
+    public void Force50MovesRuleRepetitionWhenLosingPosition()
+    {
+        // Arrange
 
-            var nonCaptureOrPawnMoveMoves = new List<Move>
+        const string fen = "8/7B/7k/8/5KR1/8/5R2/8 w - - 0 1";
+
+        var mock = new Mock<ChannelWriter<string>>();
+
+        mock
+            .Setup(m => m.WriteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .Returns(ValueTask.CompletedTask);
+
+        var engine = new Engine(mock.Object);
+        engine.SetGame(new Game(fen));
+
+        var nonCaptureOrPawnMoveMoves = new List<Move>
             {
                 new ((int)BoardSquare.f2, (int)BoardSquare.e2, (int)Piece.R),
                 new ((int)BoardSquare.h6, (int)BoardSquare.h5, (int)Piece.k),
@@ -185,29 +185,28 @@ namespace Lynx.Test.BestMove
                 new ((int)BoardSquare.h5, (int)BoardSquare.h6, (int)Piece.k)
             };
 
-            Move movesThatAllowsRepetition = new((int)BoardSquare.h6, (int)BoardSquare.h5, (int)Piece.k);
+        Move movesThatAllowsRepetition = new((int)BoardSquare.h6, (int)BoardSquare.h5, (int)Piece.k);
 
-            var sb = new StringBuilder($"position fen {fen} moves");
-            for (int i = 0; i < 48; ++i)
-            {
-                var move = nonCaptureOrPawnMoveMoves[i % nonCaptureOrPawnMoveMoves.Count];
-                sb.Append(' ').Append(move.UCIString());
-                engine.AdjustPosition(sb.ToString());
-            }
-
-            sb.Append(' ').Append(nonCaptureOrPawnMoveMoves[0].UCIString());
+        var sb = new StringBuilder($"position fen {fen} moves");
+        for (int i = 0; i < 48; ++i)
+        {
+            var move = nonCaptureOrPawnMoveMoves[i % nonCaptureOrPawnMoveMoves.Count];
+            sb.Append(' ').Append(move.UCIString());
             engine.AdjustPosition(sb.ToString());
-
-            Assert.AreEqual(49, engine.Game.MoveHistory.Count);
-            engine.Game.PositionHashHistory.Clear(); // Make sure we don't take account threefold repetition
-
-            // Act
-            var searchResult = engine.BestMove();
-            var bestMoveFound = searchResult.BestMove;
-
-            // Assert
-            Assert.AreEqual(movesThatAllowsRepetition.UCIString(), bestMoveFound.UCIString(), "No 50 moves rule forced");
-            Assert.AreEqual(0, searchResult.Evaluation, "No drawn position detected");
         }
+
+        sb.Append(' ').Append(nonCaptureOrPawnMoveMoves[0].UCIString());
+        engine.AdjustPosition(sb.ToString());
+
+        Assert.AreEqual(49, engine.Game.MoveHistory.Count);
+        engine.Game.PositionHashHistory.Clear(); // Make sure we don't take account threefold repetition
+
+        // Act
+        var searchResult = engine.BestMove();
+        var bestMoveFound = searchResult.BestMove;
+
+        // Assert
+        Assert.AreEqual(movesThatAllowsRepetition.UCIString(), bestMoveFound.UCIString(), "No 50 moves rule forced");
+        Assert.AreEqual(0, searchResult.Evaluation, "No drawn position detected");
     }
 }

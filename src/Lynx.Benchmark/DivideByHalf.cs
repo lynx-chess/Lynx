@@ -26,49 +26,48 @@
 
 using BenchmarkDotNet.Attributes;
 
-namespace Lynx.Benchmark
+namespace Lynx.Benchmark;
+
+public class DivideByHalf : BaseBenchmark
 {
-    public class DivideByHalf : BaseBenchmark
+    public static IEnumerable<int> Data => new[] { 1, 10, 1_000, 10_000, 100_000 };
+
+    [Benchmark(Baseline = true)]
+    [ArgumentsSource(nameof(Data))]
+    public int Dividing(int data)
     {
-        public static IEnumerable<int> Data => new[] { 1, 10, 1_000, 10_000, 100_000 };
-
-        [Benchmark(Baseline = true)]
-        [ArgumentsSource(nameof(Data))]
-        public int Dividing(int data)
+        int sum = 0;
+        for (int i = 0; i < data; ++i)
         {
-            int sum = 0;
-            for (int i = 0; i < data; ++i)
-            {
-                sum += i / 2;
-            }
-
-            return sum;
+            sum += i / 2;
         }
 
-        [Benchmark]
-        [ArgumentsSource(nameof(Data))]
-        public int Multiplying(int data)
-        {
-            int sum = 0;
-            for (int i = 0; i < data; ++i)
-            {
-                sum += Convert.ToInt32(i * 0.5);
-            }
+        return sum;
+    }
 
-            return sum;
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public int Multiplying(int data)
+    {
+        int sum = 0;
+        for (int i = 0; i < data; ++i)
+        {
+            sum += Convert.ToInt32(i * 0.5);
         }
 
-        [Benchmark]
-        [ArgumentsSource(nameof(Data))]
-        public int RightShiftOperator(int data)
-        {
-            int sum = 0;
-            for (int i = 0; i < data; ++i)
-            {
-                sum += i >> 1;
-            }
+        return sum;
+    }
 
-            return sum;
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public int RightShiftOperator(int data)
+    {
+        int sum = 0;
+        for (int i = 0; i < data; ++i)
+        {
+            sum += i >> 1;
         }
+
+        return sum;
     }
 }

@@ -1,24 +1,23 @@
 ﻿using System.Collections.Immutable;
 
-namespace Lynx.Model
+namespace Lynx.Model;
+
+public static class PVTable
 {
-    public static class PVTable
+    public static readonly ImmutableArray<int> Indexes = Initialize();
+
+    private static ImmutableArray<int> Initialize()
     {
-        public static readonly ImmutableArray<int> Indexes = Initialize();
+        var indexes = new int[Configuration.EngineSettings.MaxDepth];
+        int previousPVIndex = 0;
+        indexes[0] = previousPVIndex;
 
-        private static ImmutableArray<int> Initialize()
+        for (int depth = 0; depth < Configuration.EngineSettings.MaxDepth - 1; ++depth)
         {
-            var indexes = new int[Configuration.EngineSettings.MaxDepth];
-            int previousPVIndex = 0;
-            indexes[0] = previousPVIndex;
-
-            for (int depth = 0; depth < Configuration.EngineSettings.MaxDepth - 1; ++depth)
-            {
-                indexes[depth + 1] = previousPVIndex + Configuration.EngineSettings.MaxDepth - depth;
-                previousPVIndex = indexes[depth + 1];
-            }
-
-            return indexes.ToImmutableArray();
+            indexes[depth + 1] = previousPVIndex + Configuration.EngineSettings.MaxDepth - depth;
+            previousPVIndex = indexes[depth + 1];
         }
+
+        return indexes.ToImmutableArray();
     }
 }

@@ -4,223 +4,222 @@ using Lynx.UCI.Commands.GUI;
 using NLog;
 using System.Threading.Channels;
 
-namespace Lynx
+namespace Lynx;
+
+public sealed partial class Engine
 {
-    public sealed partial class Engine
-    {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-        private readonly ChannelWriter<string> _engineWriter;
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+    private readonly ChannelWriter<string> _engineWriter;
 
 #pragma warning disable IDE0052, CS0414, S4487 // Remove unread private members
-        private bool _isNewGameCommandSupported;
-        private bool _isNewGameComing;
-        private bool _isPondering;
+    private bool _isNewGameCommandSupported;
+    private bool _isNewGameComing;
+    private bool _isPondering;
 #pragma warning restore IDE0052, CS0414 // Remove unread private members
 
-        private Move? _moveToPonder;
-        public double AverageDepth { get; private set; }
+    private Move? _moveToPonder;
+    public double AverageDepth { get; private set; }
 
-        public RegisterCommand? Registration { get; set; }
+    public RegisterCommand? Registration { get; set; }
 
-        public Game Game { get; private set; }
+    public Game Game { get; private set; }
 
-        public bool IsSearching { get; private set; }
+    public bool IsSearching { get; private set; }
 
-        public bool PendingConfirmation { get; set; }
+    public bool PendingConfirmation { get; set; }
 
-        private CancellationTokenSource _searchCancellationTokenSource;
-        private CancellationTokenSource _absoluteSearchCancellationTokenSource;
+    private CancellationTokenSource _searchCancellationTokenSource;
+    private CancellationTokenSource _absoluteSearchCancellationTokenSource;
 
-        public Engine(ChannelWriter<string> engineWriter)
+    public Engine(ChannelWriter<string> engineWriter)
+    {
+        AverageDepth = 0;
+        Game = new Game();
+        _isNewGameComing = true;
+        _searchCancellationTokenSource = new();
+        _absoluteSearchCancellationTokenSource = new();
+        _engineWriter = engineWriter;
+    }
+
+    internal void SetGame(Game game)
+    {
+        Game = game;
+    }
+
+    public void NewGame()
+    {
+        _isNewGameComing = true;
+        _isNewGameCommandSupported = true;
+    }
+
+    public void AdjustPosition(string rawPositionCommand)
+    {
+        Game = PositionCommand.ParseGame(rawPositionCommand);
+        _isNewGameComing = false;
+    }
+
+    public void PonderHit()
+    {
+        Game.MakeMove(_moveToPonder!.Value);   // TODO: do we also receive the position command? If so, remove this line
+        _isPondering = false;
+    }
+
+    public SearchResult BestMove() => BestMove(null);
+
+    public SearchResult BestMove(GoCommand? goCommand)
+    {
+        _searchCancellationTokenSource = new CancellationTokenSource();
+        _absoluteSearchCancellationTokenSource = new CancellationTokenSource();
+        int? millisecondsLeft;
+        int? millisecondsIncrement;
+        int minDepth = Configuration.EngineSettings.MinDepth;
+        int? maxDepth = null;
+        int? decisionTime = null;
+
+        if (Game.CurrentPosition.Side == Side.White)
         {
-            AverageDepth = 0;
-            Game = new Game();
-            _isNewGameComing = true;
-            _searchCancellationTokenSource = new();
-            _absoluteSearchCancellationTokenSource = new();
-            _engineWriter = engineWriter;
+            millisecondsLeft = goCommand?.WhiteTime;
+            millisecondsIncrement = goCommand?.WhiteIncrement;
+        }
+        else
+        {
+            millisecondsLeft = goCommand?.BlackTime;
+            millisecondsIncrement = goCommand?.BlackIncrement;
         }
 
-        internal void SetGame(Game game)
+        if (goCommand is not null)
         {
-            Game = game;
-        }
-
-        public void NewGame()
-        {
-            _isNewGameComing = true;
-            _isNewGameCommandSupported = true;
-        }
-
-        public void AdjustPosition(string rawPositionCommand)
-        {
-            Game = PositionCommand.ParseGame(rawPositionCommand);
-            _isNewGameComing = false;
-        }
-
-        public void PonderHit()
-        {
-            Game.MakeMove(_moveToPonder!.Value);   // TODO: do we also receive the position command? If so, remove this line
-            _isPondering = false;
-        }
-
-        public SearchResult BestMove() => BestMove(null);
-
-        public SearchResult BestMove(GoCommand? goCommand)
-        {
-            _searchCancellationTokenSource = new CancellationTokenSource();
-            _absoluteSearchCancellationTokenSource = new CancellationTokenSource();
-            int? millisecondsLeft;
-            int? millisecondsIncrement;
-            int minDepth = Configuration.EngineSettings.MinDepth;
-            int? maxDepth = null;
-            int? decisionTime = null;
-
-            if (Game.CurrentPosition.Side == Side.White)
+            if (millisecondsLeft != 0)
             {
-                millisecondsLeft = goCommand?.WhiteTime;
-                millisecondsIncrement = goCommand?.WhiteIncrement;
-            }
-            else
-            {
-                millisecondsLeft = goCommand?.BlackTime;
-                millisecondsIncrement = goCommand?.BlackIncrement;
-            }
+                decisionTime = Convert.ToInt32(CalculateDecisionTime(goCommand.MovesToGo, millisecondsLeft ?? 0, millisecondsIncrement ?? 0));
 
-            if (goCommand is not null)
-            {
-                if (millisecondsLeft != 0)
+                if (decisionTime > Configuration.EngineSettings.MinMoveTime)
                 {
-                    decisionTime = Convert.ToInt32(CalculateDecisionTime(goCommand.MovesToGo, millisecondsLeft ?? 0, millisecondsIncrement ?? 0));
-
-                    if (decisionTime > Configuration.EngineSettings.MinMoveTime)
-                    {
-                        _logger.Info($"Time to move: {0.001 * decisionTime}s, min. {minDepth} plies");
-                        _searchCancellationTokenSource.CancelAfter(decisionTime.Value);
-                    }
-                    else // Ignore decisionTime and limit search to MinDepthWhenLessThanMinMoveTime plies
-                    {
-                        _logger.Info($"Depth limited to {Configuration.EngineSettings.DepthWhenLessThanMinMoveTime} plies due to time trouble (decision time: {decisionTime})");
-                        maxDepth = Configuration.EngineSettings.DepthWhenLessThanMinMoveTime;
-                    }
-                }
-                else if (goCommand.MoveTime > 0)
-                {
-                    minDepth = 0;
-                    decisionTime = (int)(0.95 * goCommand.MoveTime);
                     _logger.Info($"Time to move: {0.001 * decisionTime}s, min. {minDepth} plies");
                     _searchCancellationTokenSource.CancelAfter(decisionTime.Value);
                 }
-                else if (goCommand.Depth > 0)
+                else // Ignore decisionTime and limit search to MinDepthWhenLessThanMinMoveTime plies
                 {
-                    minDepth = goCommand.Depth;
-                    maxDepth = goCommand.Depth;
-                }
-                else
-                {
-                    _logger.Warn("Unexpected go command");
-                    maxDepth = Configuration.EngineSettings.Depth;
+                    _logger.Info($"Depth limited to {Configuration.EngineSettings.DepthWhenLessThanMinMoveTime} plies due to time trouble (decision time: {decisionTime})");
+                    maxDepth = Configuration.EngineSettings.DepthWhenLessThanMinMoveTime;
                 }
             }
-            else // EngineTest
+            else if (goCommand.MoveTime > 0)
             {
-                maxDepth = Configuration.EngineSettings.Depth;
+                minDepth = 0;
+                decisionTime = (int)(0.95 * goCommand.MoveTime);
+                _logger.Info($"Time to move: {0.001 * decisionTime}s, min. {minDepth} plies");
+                _searchCancellationTokenSource.CancelAfter(decisionTime.Value);
             }
-
-            var result = IDDFS(minDepth, maxDepth, decisionTime);
-            _logger.Info($"Evaluation: {result.Evaluation} (depth: {result.TargetDepth}, refutation: {string.Join(", ", result.Moves)})");
-
-            if (!result.IsCancelled && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
+            else if (goCommand.Depth > 0)
             {
-                Game.MakeMove(result.BestMove);
-            }
-
-            AverageDepth += (result.DepthReached - AverageDepth) / Game.MoveHistory.Count;
-
-            return result;
-        }
-
-        internal double CalculateDecisionTime(int movesToGo, int millisecondsLeft, int millisecondsIncrement)
-        {
-            double decisionTime;
-            millisecondsLeft -= millisecondsIncrement; // Since we're going to spend them, shouldn't take into account for our calculations
-
-            if (movesToGo == default)
-            {
-                int movesLeft = Configuration.EngineSettings.TotalMovesWhenNoMovesToGoProvided - (Game.MoveHistory.Count >> 1);
-
-                if (movesLeft <= 0)
-                {
-                    movesLeft = Configuration.EngineSettings.FixedMovesLeftWhenNoMovesToGoProvidedAndOverTotalMovesWhenNoMovesToGoProvided;
-                }
-
-#pragma warning disable S2184 // Results of integer division should not be assigned to floating point variables
-                if (millisecondsLeft >= Configuration.EngineSettings.FirstTimeLimitWhenNoMovesToGoProvided)
-                {
-                    decisionTime = Configuration.EngineSettings.FirstCoefficientWhenNoMovesToGoProvided * millisecondsLeft / movesLeft;
-                }
-                else if (millisecondsLeft >= Configuration.EngineSettings.SecondTimeLimitWhenNoMovesToGoProvided)
-                {
-                    decisionTime = Configuration.EngineSettings.SecondCoefficientWhenNoMovesToGoProvided * millisecondsLeft / movesLeft;
-                }
-                else
-                {
-                    decisionTime = millisecondsLeft / movesLeft;
-                }
-#pragma warning restore S2184 // Results of integer division should not be assigned to floating point variables
+                minDepth = goCommand.Depth;
+                maxDepth = goCommand.Depth;
             }
             else
             {
-                if (movesToGo > Configuration.EngineSettings.KeyMovesBeforeMovesToGo)
-                {
-                    decisionTime = Configuration.EngineSettings.CoefficientBeforeKeyMovesBeforeMovesToGo * millisecondsLeft / movesToGo;
-                }
-                else
-                {
-                    decisionTime = Configuration.EngineSettings.CoefficientAfterKeyMovesBeforeMovesToGo * millisecondsLeft / movesToGo;
-                }
+                _logger.Warn("Unexpected go command");
+                maxDepth = Configuration.EngineSettings.Depth;
+            }
+        }
+        else // EngineTest
+        {
+            maxDepth = Configuration.EngineSettings.Depth;
+        }
+
+        var result = IDDFS(minDepth, maxDepth, decisionTime);
+        _logger.Info($"Evaluation: {result.Evaluation} (depth: {result.TargetDepth}, refutation: {string.Join(", ", result.Moves)})");
+
+        if (!result.IsCancelled && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
+        {
+            Game.MakeMove(result.BestMove);
+        }
+
+        AverageDepth += (result.DepthReached - AverageDepth) / Game.MoveHistory.Count;
+
+        return result;
+    }
+
+    internal double CalculateDecisionTime(int movesToGo, int millisecondsLeft, int millisecondsIncrement)
+    {
+        double decisionTime;
+        millisecondsLeft -= millisecondsIncrement; // Since we're going to spend them, shouldn't take into account for our calculations
+
+        if (movesToGo == default)
+        {
+            int movesLeft = Configuration.EngineSettings.TotalMovesWhenNoMovesToGoProvided - (Game.MoveHistory.Count >> 1);
+
+            if (movesLeft <= 0)
+            {
+                movesLeft = Configuration.EngineSettings.FixedMovesLeftWhenNoMovesToGoProvidedAndOverTotalMovesWhenNoMovesToGoProvided;
             }
 
-            decisionTime += millisecondsIncrement;
-
-            //if (millisecondsLeft > Configuration.Parameters.MinTimeToClamp)
-            //{
-            //    decisionTime = Math.Clamp(decisionTime, Configuration.Parameters.MinMoveTime, Configuration.Parameters.MaxMoveTime);
-            //}
-
-            // If time left after taking all decision time < 1s
-            if (millisecondsLeft + millisecondsIncrement - decisionTime < 1_000)    // i.e. x + 10s, 10s left in the clock
+#pragma warning disable S2184 // Results of integer division should not be assigned to floating point variables
+            if (millisecondsLeft >= Configuration.EngineSettings.FirstTimeLimitWhenNoMovesToGoProvided)
             {
-                decisionTime *= 0.9;
+                decisionTime = Configuration.EngineSettings.FirstCoefficientWhenNoMovesToGoProvided * millisecondsLeft / movesLeft;
             }
-
-            return decisionTime;
-        }
-
-        public void StartSearching(GoCommand goCommand)
-        {
-            _isPondering = goCommand.Ponder;
-            IsSearching = true;
-            Task.Run(async () =>
+            else if (millisecondsLeft >= Configuration.EngineSettings.SecondTimeLimitWhenNoMovesToGoProvided)
             {
-                try
-                {
-                    var searchResult = BestMove(goCommand);
-                    _moveToPonder = searchResult.Moves.Count >= 2 ? searchResult.Moves[1] : null;
-                    await _engineWriter.WriteAsync(BestMoveCommand.BestMove(searchResult.BestMove, _moveToPonder));
-                }
-                catch (Exception e)
-                {
-                    _logger.Fatal(e.Message + Environment.NewLine + e.StackTrace);
-                }
-            });
-            // TODO: if ponder, continue with PonderAction, which is searching indefinitely for a move
+                decisionTime = Configuration.EngineSettings.SecondCoefficientWhenNoMovesToGoProvided * millisecondsLeft / movesLeft;
+            }
+            else
+            {
+                decisionTime = millisecondsLeft / movesLeft;
+            }
+#pragma warning restore S2184 // Results of integer division should not be assigned to floating point variables
+        }
+        else
+        {
+            if (movesToGo > Configuration.EngineSettings.KeyMovesBeforeMovesToGo)
+            {
+                decisionTime = Configuration.EngineSettings.CoefficientBeforeKeyMovesBeforeMovesToGo * millisecondsLeft / movesToGo;
+            }
+            else
+            {
+                decisionTime = Configuration.EngineSettings.CoefficientAfterKeyMovesBeforeMovesToGo * millisecondsLeft / movesToGo;
+            }
         }
 
-        public void StopSearching()
+        decisionTime += millisecondsIncrement;
+
+        //if (millisecondsLeft > Configuration.Parameters.MinTimeToClamp)
+        //{
+        //    decisionTime = Math.Clamp(decisionTime, Configuration.Parameters.MinMoveTime, Configuration.Parameters.MaxMoveTime);
+        //}
+
+        // If time left after taking all decision time < 1s
+        if (millisecondsLeft + millisecondsIncrement - decisionTime < 1_000)    // i.e. x + 10s, 10s left in the clock
         {
-            _absoluteSearchCancellationTokenSource.Cancel();
-            IsSearching = false;
+            decisionTime *= 0.9;
         }
+
+        return decisionTime;
+    }
+
+    public void StartSearching(GoCommand goCommand)
+    {
+        _isPondering = goCommand.Ponder;
+        IsSearching = true;
+        Task.Run(async () =>
+        {
+            try
+            {
+                var searchResult = BestMove(goCommand);
+                _moveToPonder = searchResult.Moves.Count >= 2 ? searchResult.Moves[1] : null;
+                await _engineWriter.WriteAsync(BestMoveCommand.BestMove(searchResult.BestMove, _moveToPonder));
+            }
+            catch (Exception e)
+            {
+                _logger.Fatal(e.Message + Environment.NewLine + e.StackTrace);
+            }
+        });
+        // TODO: if ponder, continue with PonderAction, which is searching indefinitely for a move
+    }
+
+    public void StopSearching()
+    {
+        _absoluteSearchCancellationTokenSource.Cancel();
+        IsSearching = false;
     }
 }
