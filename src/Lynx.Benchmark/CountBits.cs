@@ -17,7 +17,6 @@
  *
  */
 
-
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
 using System.Numerics;
@@ -90,7 +89,7 @@ public class CountBits : BaseBenchmark
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int CountBits_PopCount(ulong bitboard) => BitOperations.PopCount(bitboard);
+    private int CountBits_PopCount(ulong bitboard) => BitOperations.PopCount(bitboard);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static ulong ResetLS1B(ulong bitboard)
