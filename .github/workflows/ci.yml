@@ -142,7 +142,6 @@ jobs:
 
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
-      PROJECT_NAME: Lynx
 
     steps:
     - uses: actions/checkout@v2
