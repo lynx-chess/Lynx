@@ -80,6 +80,7 @@ public class PositionClone : BaseBenchmark
         /// 'Manual' Clone constructor
         /// </summary>
         /// <param name="position"></param>
+        /// <param name="_"></param>
         public Position(Position position, int _)
         {
             FEN = position.FEN;
@@ -100,6 +101,7 @@ public class PositionClone : BaseBenchmark
         /// 'Manual' Clone constructor using Array.Copy
         /// </summary>
         /// <param name="position"></param>
+        /// <param name="_"></param>
         public Position(Position position, string _)
         {
             FEN = position.FEN;

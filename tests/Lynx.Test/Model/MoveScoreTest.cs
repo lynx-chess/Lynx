@@ -18,6 +18,7 @@ public class MoveScoreTest
     ///     a b c d e f g h
     /// This tests indirectly <see cref="EvaluationConstants.MostValueableVictimLeastValuableAttacker"/>
     /// </summary>
+    /// <param name="fen"></param>
     [TestCase(Constants.TrickyTestPositionFEN)]
     public void MoveScore(string fen)
     {
@@ -53,6 +54,7 @@ public class MoveScoreTest
     ///     a b c d e f g h
     /// </summary>
     /// <param name="fen"></param>
+    /// <param name="moveWithHighestScore"></param>
     [TestCase("rnbqkbnr/ppp1pppp/8/3pP3/8/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 1", "e5d6")]
     [TestCase("rnbqkbnr/ppp1pppp/8/8/3pP3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1", "d4e3")]
     public void MoveScoreEnPassant(string fen, string moveWithHighestScore)

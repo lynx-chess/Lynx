@@ -78,8 +78,11 @@ public sealed class Position
     /// Null moves constructor
     /// </summary>
     /// <param name="position"></param>
+    /// <param name="nullMove"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#pragma warning disable RCS1163 // Unused parameter.
     public Position(Position position, bool nullMove)
+#pragma warning restore RCS1163 // Unused parameter.
     {
         UniqueIdentifier = position.UniqueIdentifier;
         PieceBitBoards = new BitBoard[12];
@@ -338,6 +341,8 @@ public sealed class Position
     /// Evaluates material and position in a NegaMax style.
     /// That is, positive scores always favour playing <see cref="Side"/>.
     /// </summary>
+    /// <param name="positionHistory"></param>
+    /// <param name="movesWithoutCaptureOrPawnMove"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int StaticEvaluation(Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove)
@@ -384,6 +389,8 @@ public sealed class Position
     /// NegaMax style
     /// </summary>
     /// <param name="depth">Modulates the output, favouring positions with lower depth left (i.e. Checkmate in less moves)</param>
+    /// <param name="positionHistory"></param>
+    /// <param name="movesWithoutCaptureOrPawnMove"></param>
     /// <returns>At least <see cref="CheckMateEvaluation"/> if Position.Side lost (more extreme values when <paramref name="depth"/> increases)
     /// or 0 if Position.Side was stalemated</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

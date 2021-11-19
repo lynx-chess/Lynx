@@ -58,6 +58,7 @@ public readonly struct Move
     /// </summary>
     /// <param name="UCIString"></param>
     /// <param name="moveList"></param>
+    /// <param name="move"></param>
     /// <exception cref="InvalidOperationException"></exception>
     /// <exception cref="IndexOutOfRangeException"></exception>
     /// <returns></returns>
@@ -145,6 +146,9 @@ public readonly struct Move
     /// Returns the score evaluation of a move taking into account <see cref="EvaluationConstants.MostValueableVictimLeastValuableAttacker"/>
     /// </summary>
     /// <param name="position">The position that precedes a move</param>
+    /// <param name="killerMoves"></param>
+    /// <param name="plies"></param>
+    /// <param name="historyMoves"></param>
     /// <returns>The higher the score is, the more valuable is the captured piece and the less valuable is the piece that makes the such capture</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly int Score(Position position, int[,]? killerMoves = null, int? plies = null, int[,]? historyMoves = null)

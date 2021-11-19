@@ -16,6 +16,10 @@ public class TryParseFromUCIStringTest
     /// 1   R . . . K B . R
     ///     a b c d e f g h
     /// </summary>
+    /// <param name="UCIString"></param>
+    /// <param name="sourceSquare"></param>
+    /// <param name="targetSquare"></param>
+    /// <param name="promotedPiece"></param>
     [TestCase("b7b8q", BoardSquare.b7, BoardSquare.b8, Piece.Q)]
     [TestCase("b7b8r", BoardSquare.b7, BoardSquare.b8, Piece.R)]
     [TestCase("b7b8n", BoardSquare.b7, BoardSquare.b8, Piece.N)]
@@ -56,6 +60,10 @@ public class TryParseFromUCIStringTest
     /// 1   R . . . K B . R
     ///     a b c d e f g h
     /// </summary>
+    /// <param name="UCIString"></param>
+    /// <param name="sourceSquare"></param>
+    /// <param name="targetSquare"></param>
+    /// <param name="promotedPiece"></param>
     [TestCase("g2g1q", BoardSquare.g2, BoardSquare.g1, Piece.q)]
     [TestCase("g2g1r", BoardSquare.g2, BoardSquare.g1, Piece.r)]
     [TestCase("g2g1n", BoardSquare.g2, BoardSquare.g1, Piece.n)]

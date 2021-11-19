@@ -13,6 +13,7 @@ public static class Utils
     /// Side.White -> 0
     /// Side.Black -> 6
     /// </summary>
+    /// <param name="side"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int PieceOffset(Side side) => PieceOffset((int)side);
 
@@ -20,6 +21,7 @@ public static class Utils
     /// Side.White -> 0
     /// Side.Black -> 6
     /// </summary>
+    /// <param name="side"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int PieceOffset(int side)
     {
