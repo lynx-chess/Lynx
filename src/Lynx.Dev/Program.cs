@@ -2,6 +2,8 @@
 using Lynx.Internal;
 using Lynx.Model;
 using System.Diagnostics;
+using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using static Lynx.Model.Move;
 
@@ -37,8 +39,10 @@ using static Lynx.Model.Move;
 //_52_Quiescence_Search();
 //_53_MVVLVA();
 //_54_ScoreMove();
-ZobristTable();
-PV_Table();
+//ZobristTable();
+//PV_Table();
+CountBits();
+GetLS1BIndex();
 
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
 const string TrickyPosition = Constants.TrickyTestPositionFEN;
@@ -764,3 +768,166 @@ $"                                   {pvTable[150], -6} {pvTable[151], -6}" + $"
      *
      */
 }
+
+static void CountBits()
+{
+    var Data = new[] {
+        new Position(Constants.InitialPositionFEN),
+        new Position(Constants.TrickyTestPositionFEN),
+        new Position(Constants.TrickyTestPositionReversedFEN),
+        new Position(Constants.CmkTestPositionFEN),
+        new Position(Constants.ComplexPositionFEN),
+        new Position(Constants.KillerTestPositionFEN),
+    };
+
+    foreach (var position in Data)
+    {
+        var oldC = Check_LS1B_And_Reset(position);
+        var newC = BitOperations_PopCount(position);
+
+        Console.WriteLine($"{oldC} | {newC}");
+    }
+    Console.WriteLine($"=========================================================================");
+
+    static int Check_LS1B_And_Reset(Position position)
+    {
+        int counter = 0;
+
+        foreach (var bitboard in position.PieceBitBoards)
+        {
+            counter += CountBits_Naive(bitboard.Board);
+        }
+
+        foreach (var bitboard in position.OccupancyBitBoards)
+        {
+            counter += CountBits_Naive(bitboard.Board);
+        }
+
+        return counter;
+    }
+
+    static int BitOperations_PopCount(Position position)
+    {
+        int counter = 0;
+
+        foreach (var bitboard in position.PieceBitBoards)
+        {
+            counter += CountBits_PopCount(bitboard.Board);
+        }
+
+        foreach (var bitboard in position.OccupancyBitBoards)
+        {
+            counter += CountBits_PopCount(bitboard.Board);
+        }
+
+        return counter;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static int CountBits_Naive(ulong bitboard)
+    {
+        int counter = 0;
+
+        // Consecutively reset LSB
+        while (bitboard != default)
+        {
+            ++counter;
+            bitboard = ResetLS1B(bitboard);
+        }
+
+        return counter;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static int CountBits_PopCount(ulong bitboard) => BitOperations.PopCount(bitboard);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static ulong ResetLS1B(ulong bitboard)
+    {
+        return bitboard & (bitboard - 1);
+    }
+}
+
+static void GetLS1BIndex()
+{
+    var Data = new[] {
+        new Position(Constants.InitialPositionFEN),
+        new Position(Constants.TrickyTestPositionFEN),
+        new Position(Constants.TrickyTestPositionReversedFEN),
+        new Position(Constants.CmkTestPositionFEN),
+        new Position(Constants.ComplexPositionFEN),
+        new Position(Constants.KillerTestPositionFEN),
+    };
+
+    foreach (var position in Data)
+    {
+        var oldC = Original_GetLS1BIndex(position);
+        var newC = BitOperations_GetLS1BIndex(position);
+
+        Console.WriteLine($"{oldC} | {newC}");
+    }
+    Console.WriteLine($"=========================================================================");
+
+    static int Original_GetLS1BIndex(Position position)
+    {
+        int counter = 0;
+
+        foreach (var bitboard in position.PieceBitBoards)
+        {
+            counter += Original_GetLS1BIndex_Impl(bitboard.Board);
+        }
+
+        foreach (var bitboard in position.OccupancyBitBoards)
+        {
+            counter += Original_GetLS1BIndex_Impl(bitboard.Board);
+        }
+
+        return counter;
+    }
+
+    static int BitOperations_GetLS1BIndex(Position position)
+    {
+        int counter = 0;
+
+        foreach (var bitboard in position.PieceBitBoards)
+        {
+            counter += BitOperations_GetLS1BIndex_Impl(bitboard.Board);
+        }
+
+        foreach (var bitboard in position.OccupancyBitBoards)
+        {
+            counter += BitOperations_GetLS1BIndex_Impl(bitboard.Board);
+        }
+
+        return counter;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static int Original_GetLS1BIndex_Impl(ulong bitboard)
+    {
+        if (bitboard == default)
+        {
+            return (int)BoardSquare.noSquare;
+        }
+
+        return CountBits(bitboard ^ (bitboard - 1)) - 1;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static int BitOperations_GetLS1BIndex_Impl(ulong bitboard)
+    {
+        if (bitboard == default)
+        {
+            return (int)BoardSquare.noSquare;
+        }
+
+        return BitOperations.TrailingZeroCount(bitboard);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static int CountBits(ulong bitboard)
+    {
+        return BitOperations.PopCount(bitboard);
+    }
+}
+

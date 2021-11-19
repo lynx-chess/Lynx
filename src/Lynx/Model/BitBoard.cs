@@ -101,7 +101,10 @@ public struct BitBoard
     #region Static methods
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int SquareIndex(int rank, int file) => (rank * 8) + file;
+    public static int SquareIndex(int rank, int file)
+    {
+        return (rank * 8) + file;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong SetBit(ulong bitboard, int squareIndex)
@@ -118,12 +121,13 @@ public struct BitBoard
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int GetLS1BIndex(ulong bitboard)
     {
+        // TODO Try to get rid of this if
         if (bitboard == default)
         {
             return (int)BoardSquare.noSquare;
         }
 
-        return CountBits(bitboard ^ (bitboard - 1)) - 1;
+        return BitOperations.TrailingZeroCount(bitboard);
     }
 
     /// <summary>
