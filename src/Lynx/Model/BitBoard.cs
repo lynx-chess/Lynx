@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Numerics;
+using System.Runtime.CompilerServices;
 
 #pragma warning disable S4136
 
@@ -138,16 +139,7 @@ public struct BitBoard
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int CountBits(ulong bitboard)
     {
-        int counter = 0;
-
-        // Consecutively reset LSB
-        while (bitboard != default)
-        {
-            ++counter;
-            bitboard = ResetLS1B(bitboard);
-        }
-
-        return counter;
+        return BitOperations.PopCount(bitboard);
     }
 
     #endregion
