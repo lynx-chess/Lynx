@@ -81,29 +81,63 @@ public sealed class EngineSettings
 
     #region MovesToGo provided
 
+    /// <summary>
+    /// Coefficient applied to ensure more time is allocated to moves when there are over <see cref="KeyMovesBeforeMovesToGo"/> moves left
+    /// </summary>
     public double CoefficientBeforeKeyMovesBeforeMovesToGo { get; set; } = 1.5;
 
     public int KeyMovesBeforeMovesToGo { get; set; } = 10;
 
+    /// <summary>
+    /// Security coefficient applied to ensure there are no timeouts when there are less than <see cref="KeyMovesBeforeMovesToGo"/>  movesleft
+    /// </summary>
     public double CoefficientAfterKeyMovesBeforeMovesToGo { get; set; } = 0.95;
 
     #endregion
 
     #region No MovesToGo provided
 
+    /// <summary>
+    /// Number of total moves to calculate decision time against
+    /// </summary>
     public int TotalMovesWhenNoMovesToGoProvided { get; set; } = 100;
 
+    /// <summary>
+    /// Number of extra moves to calculate decision time against, when the number of moves exceeds <see cref="TotalMovesWhenNoMovesToGoProvided"/>
+    /// </summary>
     public int FixedMovesLeftWhenNoMovesToGoProvidedAndOverTotalMovesWhenNoMovesToGoProvided { get; set; } = 20;
 
+    /// <summary>
+    /// Min time to apply <see cref="FirstCoefficientWhenNoMovesToGoProvided"/>
+    /// </summary>
     public int FirstTimeLimitWhenNoMovesToGoProvided { get; set; } = 120_000;
 
+    /// <summary>
+    /// Coefficient applied to ensure more time is allocated to moves when there's over <see cref="FirstTimeLimitWhenNoMovesToGoProvided"/> ms on the clock
+    /// </summary>
     public int FirstCoefficientWhenNoMovesToGoProvided { get; set; } = 3;
 
+    /// <summary>
+    /// Min time to apply <see cref="SecondCoefficientWhenNoMovesToGoProvided"/>
+    /// </summary>
     public int SecondTimeLimitWhenNoMovesToGoProvided { get; set; } = 30_000;
 
+    /// <summary>
+    /// Coefficient applied to ensure more time is allocated to moves when there's over <see cref="SecondTimeLimitWhenNoMovesToGoProvided"/> ms on the clock
+    /// </summary>
     public int SecondCoefficientWhenNoMovesToGoProvided { get; set; } = 2;
 
     #endregion
+
+    /// <summary>
+    /// Min. time left in the clock if all decision time is used befire <see cref="CoefficientSecurityTime"/> is used over that decision time
+    /// </summary>
+    public int MinSecurityTime { get; set; } = 1_000;
+
+    /// <summary>
+    /// Coefficient applied to devision tim if the time left in the clock after spending it is less than <see cref="MinSecurityTime"/>
+    /// </summary>
+    public double CoefficientSecurityTime { get; set; } = 0.9;
 
     public int MinDepth { get; set; } = 4;
 

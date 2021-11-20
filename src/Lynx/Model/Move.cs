@@ -219,6 +219,25 @@ public readonly struct Move
 #pragma warning restore S3358 // Ternary operators should not be nested
     }
 
+    /// <summary>
+    /// Typical format when humans write moves
+    /// </summary>
+    /// <returns></returns>
+    public string ToEPDString()
+    {
+        var piece = Piece();
+#pragma warning disable S3358 // Ternary operators should not be nested
+        return IsCastle() == default
+            ?
+                ((piece == (int)Model.Piece.P || piece == (int)Model.Piece.p) && !IsCapture() ? "" : char.ToUpperInvariant(Constants.AsciiPieces[Piece()])) +
+                (IsCapture() == default ? "" : "x") +
+                Constants.Coordinates[TargetSquare()] +
+                (PromotedPiece() == default ? "" : $"={char.ToUpperInvariant(Constants.AsciiPieces[PromotedPiece()])}") +
+                (IsEnPassant() == default ? "" : "e.p.")
+            : (IsShortCastle() ? "O-O" : "O-O-O");
+#pragma warning restore S3358 // Ternary operators should not be nested
+    }
+
     public readonly void Print()
     {
         Console.WriteLine(ToString());
