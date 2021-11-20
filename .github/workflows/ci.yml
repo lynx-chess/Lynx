@@ -135,7 +135,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        category: [WinningAtChess]
+        category: [WinningAtChess_10seconds]
       fail-fast: false
 
     env:
@@ -165,6 +165,7 @@ jobs:
 
     - name: Run ${{ matrix.category }} tests
       run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" --logger "console;verbosity=normal"
+      continue-on-error: true
         # -v=normal https://github.com/dotnet/sdk/issues/16122, --logger "console;verbosity=normal" is a workaround
         # --collect:"XPlat Code Coverage" https://github.com/coverlet-coverage/coverlet/issues/1192
 

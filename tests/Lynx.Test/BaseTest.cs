@@ -7,7 +7,7 @@ namespace Lynx.Test;
 
 public abstract class BaseTest
 {
-    private const int DefaultSearchDepth = 10;
+    protected const int DefaultSearchDepth = 10;
 
     protected static SearchResult TestBestMove(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString, int depth = DefaultSearchDepth)
     {
