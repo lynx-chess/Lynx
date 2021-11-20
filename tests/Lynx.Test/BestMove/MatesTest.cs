@@ -42,7 +42,7 @@ public class MatesTest : BaseTest
     /// <param name="fen"></param>
     /// <param name="allowedUCIMoveString"></param>
     [Explicit]
-    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_4), Category = "ExtraLongRunning")]
+    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_4_Collection), Category = "ExtraLongRunning")]
     public void Mate_in_4_Collection(string fen, string[]? allowedUCIMoveString, string description)
     {
         var result = SearchBestMove(fen);
