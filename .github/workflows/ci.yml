@@ -6,6 +6,42 @@ on:
     - cron:  '1 0 * * 1'    # Mondays at 00:01
 
 jobs:
+
+  make-build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+      fail-fast: false
+
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Inject slug/short variables
+      uses: rlespinasse/github-slug-action@v3.x
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+        include-prerelease: true
+
+    - name: Nuget cache
+      uses: actions/cache@v2
+      with:
+        path:
+          ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Build
+      run: make
+
   build:
     runs-on: ${{ matrix.os }}
 
@@ -93,6 +129,45 @@ jobs:
           !artifacts/**/*.pdb
         if-no-files-found: error
 
+  winning-at-chess:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        category: [WinningAtChess]
+      fail-fast: false
+
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      PROJECT_NAME: Lynx
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+        include-prerelease: true
+
+    - name: Nuget cache
+      uses: actions/cache@v2
+      with:
+        path:
+          ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Build
+      run: dotnet build -c Release
+
+    - name: Run ${{ matrix.category }} tests
+      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" --logger "console;verbosity=normal"
+        # -v=normal https://github.com/dotnet/sdk/issues/16122, --logger "console;verbosity=normal" is a workaround
+        # --collect:"XPlat Code Coverage" https://github.com/coverlet-coverage/coverlet/issues/1192
+
   long-running-tests:
     runs-on: ${{ matrix.os }}
 
@@ -132,40 +207,54 @@ jobs:
         # -v=normal https://github.com/dotnet/sdk/issues/16122, --logger "console;verbosity=normal" is a workaround
         # --collect:"XPlat Code Coverage" https://github.com/coverlet-coverage/coverlet/issues/1192
 
-  make-build:
-    runs-on: ${{ matrix.os }}
+  #unify-coverage-reports:
+  #  needs: [build, non-parallelizable-tests] # long-running-tests
+  #  runs-on: 'ubuntu-latest'
 
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-      fail-fast: false
+  #  env:
+  #    PROJECT_NAME: Lynx
 
-    env:
-      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  #  steps:
+  #  - name: Download build coverage
+  #    uses: actions/download-artifact@v2
+  #    with:
+  #      name: ${{ env.PROJECT_NAME }}-build-coverage-ci-${{ github.run_number }}
+  #      path: artifacts/partial-coverage/build/
 
-    steps:
-    - uses: actions/checkout@v2
+  #  - name: Download non-parallelizable coverage
+  #    uses: actions/download-artifact@v2
+  #    with:
+  #      name: ${{ env.PROJECT_NAME }}-non-parallelizable-coverage-ci-${{ github.run_number }}
+  #      path: artifacts/partial-coverage/non-parallelizable/
 
-    - name: Inject slug/short variables
-      uses: rlespinasse/github-slug-action@v3.x
+  #  #Coverlet issue https://github.com/coverlet-coverage/coverlet/issues/1192
+  #  #- name: Download long-running coverage
+  #  #  uses: actions/download-artifact@v2
+  #  #  with:
+  #  #    name: ${{ env.PROJECT_NAME }}-long-running-coverage-ci-${{ github.run_number }}
+  #  #    path: artifacts/partial-coverage/long-running/
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 6.0.x
-        include-prerelease: true
+  #  - name: '[Ubuntu] Generate test coverage report'
+  #    uses: danielpalme/ReportGenerator-GitHub-Action@5.0.0
+  #    with:
+  #      reports: 'artifacts/partial-coverage/**/Cobertura.xml;tests/**/*.cobertura.xml'
+  #      targetdir: 'coveragereport'
+  #      reporttypes: 'HtmlInline_AzurePipelines_Dark;SonarQube;Cobertura'
+  #      assemblyfilters: '+*'
+  #      classfilters: '+*;-*Exception;-*ConstantGenerator;-*MagicNumberGenerator'
+  #      filefilters: '+*'
+  #      verbosity: 'Info'
+  #      title: '${{ env.PROJECT_NAME }} #${{ github.run_number }} (${{ env.GITHUB_REF_SLUG }})'
+  #      tag: '${{ github.run_number }}_${{ github.run_id }}'
+  #      customSettings: 'numberOfReportsParsedInParallel=3;numberOfReportsMergedInParallel=3'
 
-    - name: Nuget cache
-      uses: actions/cache@v2
-      with:
-        path:
-          ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-nuget-
+  #  - name: '[Ubuntu] Upload unified test coverage report'
+  #    uses: actions/upload-artifact@v2
+  #    with:
+  #      name: ${{ env.PROJECT_NAME }}-coverage-ci-${{ github.run_number }}
+  #      path: coveragereport/
+  #      if-no-files-found: error
 
-    - name: Build
-      run: make
 
   #non-parallelizable-tests:
   #  runs-on: ${{ matrix.os }}
@@ -223,53 +312,5 @@ jobs:
   #    uses: actions/upload-artifact@v2
   #    with:
   #      name: ${{ env.PROJECT_NAME }}-non-parallelizable-coverage-ci-${{ github.run_number }}
-  #      path: coveragereport/
-  #      if-no-files-found: error
-
-  #unify-coverage-reports:
-  #  needs: [build, non-parallelizable-tests] # long-running-tests
-  #  runs-on: 'ubuntu-latest'
-
-  #  env:
-  #    PROJECT_NAME: Lynx
-
-  #  steps:
-  #  - name: Download build coverage
-  #    uses: actions/download-artifact@v2
-  #    with:
-  #      name: ${{ env.PROJECT_NAME }}-build-coverage-ci-${{ github.run_number }}
-  #      path: artifacts/partial-coverage/build/
-
-  #  - name: Download non-parallelizable coverage
-  #    uses: actions/download-artifact@v2
-  #    with:
-  #      name: ${{ env.PROJECT_NAME }}-non-parallelizable-coverage-ci-${{ github.run_number }}
-  #      path: artifacts/partial-coverage/non-parallelizable/
-
-  #  #Coverlet issue https://github.com/coverlet-coverage/coverlet/issues/1192
-  #  #- name: Download long-running coverage
-  #  #  uses: actions/download-artifact@v2
-  #  #  with:
-  #  #    name: ${{ env.PROJECT_NAME }}-long-running-coverage-ci-${{ github.run_number }}
-  #  #    path: artifacts/partial-coverage/long-running/
-
-  #  - name: '[Ubuntu] Generate test coverage report'
-  #    uses: danielpalme/ReportGenerator-GitHub-Action@5.0.0
-  #    with:
-  #      reports: 'artifacts/partial-coverage/**/Cobertura.xml;tests/**/*.cobertura.xml'
-  #      targetdir: 'coveragereport'
-  #      reporttypes: 'HtmlInline_AzurePipelines_Dark;SonarQube;Cobertura'
-  #      assemblyfilters: '+*'
-  #      classfilters: '+*;-*Exception;-*ConstantGenerator;-*MagicNumberGenerator'
-  #      filefilters: '+*'
-  #      verbosity: 'Info'
-  #      title: '${{ env.PROJECT_NAME }} #${{ github.run_number }} (${{ env.GITHUB_REF_SLUG }})'
-  #      tag: '${{ github.run_number }}_${{ github.run_id }}'
-  #      customSettings: 'numberOfReportsParsedInParallel=3;numberOfReportsMergedInParallel=3'
-
-  #  - name: '[Ubuntu] Upload unified test coverage report'
-  #    uses: actions/upload-artifact@v2
-  #    with:
-  #      name: ${{ env.PROJECT_NAME }}-coverage-ci-${{ github.run_number }}
   #      path: coveragereport/
   #      if-no-files-found: error
