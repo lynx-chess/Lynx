@@ -2,7 +2,7 @@
 
 public static class MatePositions
 {
-    public static object[] Mates_in_1 = new object[]
+    public static readonly object[] Mates_in_1 = new object[]
     {
         new object[]{ "8/8/8/N1N5/3N1Q2/8/1bpPPP2/2k1K2R w K - 0 1                      ", new[] { Constants.WhiteShortCastle }, "" },
         new object[]{ "8/8/8/4N1N1/3B3N/8/3PPPpb/R3K1k1 w Q - 0 1                       ", new[] { Constants.WhiteLongCastle }, "" },
@@ -11,7 +11,7 @@ public static class MatePositions
         new object[]{ "5r2/1n6/2p3k1/b1Pb3p/P2PpPpP/4P1P1/1P4KR/4q3 b - f3 0 1          ", new[] { "e4f3" }, "https://www.chessgames.com/perl/chessgame?gid=1886010" }
     };
 
-    public static object[] Mates_in_2 = new object[]
+    public static readonly object[] Mates_in_2 = new object[]
     {
         new object[]{ "8/pN3R2/1b2k1K1/n4R2/pp1p4/3B1P1n/3B1PNP/3r3Q w - -              ", new[] { "d2f4" }, "https://gameknot.com/chess-puzzle.pl?pz=114463" },
         new object[]{ "KQ4R1/8/8/8/4N3/8/5p2/6bk w - -                                  ", new[] { "b8b2" }, "https://gameknot.com/chess-puzzle.pl?pz=1" },
@@ -19,7 +19,7 @@ public static class MatePositions
         new object[]{ "RNBKRNRQ/PPPPPPPP/8/pppppppp/rnbqkbnr/8/8/8 b - -                ", new[] { "g4h6" }, "https://gameknot.com/chess-puzzle.pl?pz=1630" }
     };
 
-    public static object[] Mates_in_3 = new object[]
+    public static readonly object[] Mates_in_3 = new object[]
     {
         new object[]{ "4rqk1/3R1prR/p1p5/1p2PQp1/5p2/1P6/P1B2PP1/6K1 w - -              ", new[] { "f5h3" }, "https://gameknot.com/chess-puzzle.pl?pz=111285" },
         new object[]{ "1b6/2p2N1K/1p2Bp1p/3Pp2R/4kp1p/1N6/p1P1PPb1/r1R4r w - -          ", new[] { "h7h6" }, "https://gameknot.com/chess-puzzle.pl?pz=251481"},
@@ -28,7 +28,7 @@ public static class MatePositions
         new object[]{ "3R3N/2pR1p2/4k3/N1P5/1q4PK/2B4B/8/8 w - - 0 1                    ", new[] { "c5c6" }, "http://talkchess.com/forum3/viewtopic.php?f=7&t=78428&p=908885"}
     };
 
-    public static object[] Mates_in_4 = new object[]
+    public static readonly object[] Mates_in_4 = new object[]
     {
         new object[]{ "6k1/1R6/5K2/3p1N2/1P3n2/8/8/3r4 w - -", new[] { "f5h6" }, "https://gameknot.com/chess-puzzle.pl?pz=260253" }
     };
@@ -36,7 +36,7 @@ public static class MatePositions
     /// <summary>
     /// http://www.talkchess.com/forum3/viewtopic.php?f=7&t=78583
     /// </summary>
-    public static object[] Mates_in_4_Collection = new object[]
+    public static readonly object[] Mates_in_4_Collection = new object[]
     {
         new object[]{ "n7/3p1p2/NpkNp1p1/1p2P3/3Q4/6B1/b7/4K3 w - - 0 1                 ", new[] { "d4g1" }, ""},
         new object[]{ "K6Q/1p6/pPq4P/P2p2P1/4pP1N/7k/n5R1/1n2BB2 w - - 0 1              ", new[] { "f1a6" }, ""},
@@ -81,19 +81,19 @@ public static class MatePositions
         new object[]{ "3k4/7R/8/8/1N1B4/2K5/8/8 w - - 0 1                               ", new[] { "b4d3" }, ""}
     };
 
-    public static object[] Mates_in_5 = new object[]
+    public static readonly object[] Mates_in_5 = new object[]
     {
         new object[]{ "4r3/4PpPk/5P1P/3R2K1/P2P4/2P5/8/8 w - -                          ", new[] { "d5d8" }, "https://gameknot.com/chess-puzzle.pl?pz=253500" },
         new object[]{ "r1b1r3/5p1k/p1qbpp2/1p1p4/5P2/PP2PR2/2PN2PP/R2Q2K1 w - -         ", new[] { "f3g3" }, "https://gameknot.com/chess-puzzle.pl?pz=196756" }
     };
 
-    public static object[] Mates_in_6 = new object[]
+    public static readonly object[] Mates_in_6 = new object[]
     {
         new object[]{ "1r4k1/5q2/3bp3/3p4/3P2n1/4P3/P1Q1KP2/1N4R1 b - -                 ", new[] { "f7f2" }, "https://gameknot.com/chess-puzzle.pl?pz=111491" },
         new object[]{ "1r6/5pkp/1n1Rr1pN/p1p1P1Q1/1b2qB1P/6P1/5P1K/3R4 w - -            ", new[] { "g5f6" }, "https://gameknot.com/chess-puzzle.pl?pz=145711" }
     };
 
-    public static object[] Mates_in_7 = new object[]
+    public static readonly object[] Mates_in_7 = new object[]
     {
         new object[]{ "4r1k1/1p3p1p/rb1R2p1/pQ6/P1p1q3/2P3RP/1P3PP1/6K1 b - -           ", new[] { "b6f2" }, "https://gameknot.com/chess-puzzle.pl?pz=228984" },
         new object[]{ "1k2r3/ppN3pp/5n2/8/6P1/P1p1pK1P/1PPr4/1R2RN2 b - -               ", new[] { "d2f2" }, "https://gameknot.com/chess-puzzle.pl?pz=117353" }
