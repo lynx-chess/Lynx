@@ -75,9 +75,7 @@ public sealed class GeneralSettings
 
 public sealed class EngineSettings
 {
-    public int Depth { get; set; } = 5;
-
-    public int QuiescenceSearchDepth { get; set; } = 8;
+    public int DefaultMaxDepth { get; set; } = 5;
 
     #region MovesToGo provided
 

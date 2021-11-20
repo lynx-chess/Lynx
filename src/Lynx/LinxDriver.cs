@@ -169,8 +169,7 @@ public sealed class LinxDriver
                 {
                     if (commandItems.Length > 4 && int.TryParse(commandItems[4], out var value))
                     {
-                        Configuration.EngineSettings.Depth = value;
-                        Configuration.EngineSettings.QuiescenceSearchDepth = 0;
+                        Configuration.EngineSettings.DefaultMaxDepth = value;
                     }
                     break;
                 }
