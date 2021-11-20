@@ -95,7 +95,7 @@ public static class MatePositions
 
     public static readonly object[] Mates_in_7 = new object[]
     {
-        new object[]{ "4r1k1/1p3p1p/rb1R2p1/pQ6/P1p1q3/2P3RP/1P3PP1/6K1 b - -           ", new[] { "b6f2" }, "https://gameknot.com/chess-puzzle.pl?pz=228984" },
-        new object[]{ "1k2r3/ppN3pp/5n2/8/6P1/P1p1pK1P/1PPr4/1R2RN2 b - -               ", new[] { "d2f2" }, "https://gameknot.com/chess-puzzle.pl?pz=117353" }
+        new object[]{ "4r1k1/1p3p1p/rb1R2p1/pQ6/P1p1q3/2P3RP/1P3PP1/6K1 b - -           ", new[] { "b6f2" }, "https://gameknot.com/chess-puzzle.pl?pz=228984" },    // info depth 14 seldepth 28 multipv 1 score cp 1405 nodes 202487382 nps 511294 time 395029 pv b6f2 g1h2 a6d6 g3g4 e4e1 b5e8 e1e8 g4c4 d6d2 b2b3 e8e5 g2g3
+        new object[]{ "1k2r3/ppN3pp/5n2/8/6P1/P1p1pK1P/1PPr4/1R2RN2 b - -               ", new[] { "d2f2" }, "https://gameknot.com/chess-puzzle.pl?pz=117353" }     // info depth 12 seldepth 26 multipv 1 score cp 160 nodes 102915997 nps 439966 time 232918 pv d2f2 f3g3 f6e4 g3h4 f2f6 c7a6 b7a6 b2c3 b8c8 g4g5 f6f4 h4h5 e4c3
     };
 }

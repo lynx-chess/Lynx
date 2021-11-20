@@ -119,12 +119,12 @@ public sealed partial class Engine
             else
             {
                 _logger.Warn("Unexpected go command");
-                maxDepth = Configuration.EngineSettings.Depth;
+                maxDepth = Configuration.EngineSettings.DefaultMaxDepth;
             }
         }
         else // EngineTest
         {
-            maxDepth = Configuration.EngineSettings.Depth;
+            maxDepth = Configuration.EngineSettings.DefaultMaxDepth;
         }
 
         var result = IDDFS(minDepth, maxDepth, decisionTime);

@@ -256,10 +256,8 @@ public sealed partial class Engine
             alpha = staticEvaluation;
         }
 
-        if (depth >= Configuration.EngineSettings.QuiescenceSearchDepth)
-        {
-            return alpha;   // Alpha?
-        }
+        // Quiescence search limitation
+        //if (depth >= Configuration.EngineSettings.QuiescenceSearchDepth) return alpha;
 
         var generatedMoves = position.AllCapturesMoves();
         if (generatedMoves.Count == 0)
