@@ -7,6 +7,16 @@ namespace Lynx.Test;
 public class TimeManagementTest
 {
     [TestCase(
+        2_000,      // 2s, < 10s
+        11_111,     // 11s increment
+        1,
+        9999.90)]   // 10s, 0.9 * increment
+    [TestCase(
+        2_000,      // 2s, < 10s
+        10_000,     // 10s increment
+        1,
+        9_000)]     // 9s, 0.9 * increment
+    [TestCase(
         300_000,    // 5 min
         0,
         40,         // 40 moves left
@@ -134,6 +144,6 @@ public class TimeManagementTest
         }
         var timeToMove = engine.CalculateDecisionTime(movesToGo, millisecondsLeft, millisecondsIncrement);
 
-        Assert.AreEqual(expectedTimeToMove, timeToMove);
+        Assert.True(Equals(expectedTimeToMove, timeToMove), $"{timeToMove} was expected to be {expectedTimeToMove}");
     }
 }

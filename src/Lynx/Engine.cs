@@ -144,6 +144,7 @@ public sealed partial class Engine
     {
         double decisionTime;
         millisecondsLeft -= millisecondsIncrement; // Since we're going to spend them, shouldn't take into account for our calculations
+        millisecondsLeft = Math.Clamp(millisecondsLeft, 0, int.MaxValue);
 
         if (movesToGo == default)
         {
@@ -189,9 +190,9 @@ public sealed partial class Engine
         //}
 
         // If time left after taking all decision time < 1s
-        if (millisecondsLeft + millisecondsIncrement - decisionTime < 1_000)    // i.e. x + 10s, 10s left in the clock
+        if (millisecondsLeft + millisecondsIncrement - decisionTime < Configuration.EngineSettings.MinSecurityTime)    // i.e. x + 10s, 10s left in the clock
         {
-            decisionTime *= 0.9;
+            decisionTime *= Configuration.EngineSettings.CoefficientSecurityTime;
         }
 
         return decisionTime;
