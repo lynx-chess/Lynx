@@ -4,6 +4,9 @@ namespace Lynx.Test.BestMove;
 
 #pragma warning disable S4144, IDE0060, RCS1163  // Methods should not have identical implementations, unused arguments
 
+/// <summary>
+/// All the tests in this class used to pass when null-pruning wasn't implemented
+/// </summary>
 public class MatesInXTest : BaseTest
 {
     [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_1))]
