@@ -18,11 +18,11 @@ public class StopCommandTest
         engine.NewGame();
         engine.AdjustPosition($"position fen {initialPositionFEN}");
 
-        // A command that guarantees ~5s thinking time
+        // A command that guarantees that the search doesn't finish before the end of the test
         var goCommand = new GoCommand();
         await goCommand.Parse($"go depth {Configuration.EngineSettings.MaxDepth}");
 
-        var resultTask = Task.Run(() => engine.BestMove());
+        var resultTask = Task.Run(() => engine.BestMove(goCommand));
         // Wait 2s so that there's some best move available
         Thread.Sleep(2000);
 

@@ -48,20 +48,6 @@ public sealed class Game
     public List<Move> GetAllMoves() => MoveGenerator.GenerateAllMoves(CurrentPosition);
     public List<Move> GetAllMovesWithCaptures() => MoveGenerator.GenerateAllMoves(CurrentPosition, capturesOnly: true);
 
-    public void RevertLastMove()
-    {
-        if (PositionHistory.Count != 0)
-        {
-            CurrentPosition = PositionHistory.Last();
-            PositionHistory.Remove(CurrentPosition);
-        }
-
-        if (MoveHistory.Count != 0)
-        {
-            MoveHistory.RemoveAt(MoveHistory.Count - 1);
-        }
-    }
-
     public bool MakeMove(Move moveToPlay)
     {
         PositionHistory.Add(CurrentPosition);
@@ -79,5 +65,19 @@ public sealed class Game
         MovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveToPlay, MovesWithoutCaptureOrPawnMove);
 
         return true;
+    }
+
+    internal void RevertLastMove()
+    {
+        if (PositionHistory.Count != 0)
+        {
+            CurrentPosition = PositionHistory.Last();
+            PositionHistory.Remove(CurrentPosition);
+        }
+
+        if (MoveHistory.Count != 0)
+        {
+            MoveHistory.RemoveAt(MoveHistory.Count - 1);
+        }
     }
 }
