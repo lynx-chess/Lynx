@@ -349,7 +349,7 @@ public sealed class Position
     {
         var eval = 0;
 
-        if (positionHistory.Values.Any(val => val >= 3) || movesWithoutCaptureOrPawnMove >= 50)
+        if (positionHistory.Values.Any(val => val >= 3) || movesWithoutCaptureOrPawnMove >= 100)
         {
             return eval;
         }
@@ -396,7 +396,7 @@ public sealed class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int EvaluateFinalPosition(int depth, Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove)
     {
-        if (positionHistory.Values.Any(val => val >= 3) || movesWithoutCaptureOrPawnMove >= 50)
+        if (positionHistory.Values.Any(val => val >= 3) || movesWithoutCaptureOrPawnMove >= 100)
         {
             return 0;
         }

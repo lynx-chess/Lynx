@@ -17,9 +17,9 @@ public sealed partial class Engine
     private bool _isScoringPV;
 
     /// <summary>
-    /// Copy of <see cref="Game.MovesWithoutCaptureOrPawnMove"/>
+    /// Copy of <see cref="Game.HalfMovesWithoutCaptureOrPawnMove"/>
     /// </summary>
-    private int _movesWithoutCaptureOrPawnMove;
+    private int _halfMovesWithoutCaptureOrPawnMove;
 
     private readonly int[] _maxDepthReached = new int[Configuration.EngineSettings.MaxDepth];
 
@@ -37,7 +37,7 @@ public sealed partial class Engine
         Array.Clear(_historyMoves);
         Array.Clear(_pVTable);
 
-        _movesWithoutCaptureOrPawnMove = Game.MovesWithoutCaptureOrPawnMove;
+        _halfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
 
         int bestEvaluation = 0;
         SearchResult? searchResult = null;

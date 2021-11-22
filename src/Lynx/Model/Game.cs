@@ -10,7 +10,7 @@ public sealed class Game
     public List<Position> PositionHistory { get; }
     public Dictionary<long, int> PositionHashHistory { get; }
 
-    public int MovesWithoutCaptureOrPawnMove { get; private set; }
+    public int HalfMovesWithoutCaptureOrPawnMove { get; private set; }
 
     public Position CurrentPosition { get; private set; }
 
@@ -37,7 +37,7 @@ public sealed class Game
         {
             if (!Move.TryParseFromUCIString(moveString, GetAllMoves(), out var parsedMove))
             {
-                _logger.Error($"Error parsing game with fen {fen} and moves {string.Join(' ', movesUCIString)}");
+                _logger.Error($"Error parsing game with fen {fen} and moves {string.Join(' ', movesUCIString)}: error detected in {moveString}");
                 break;
             }
 
@@ -62,7 +62,7 @@ public sealed class Game
 
         Utils.UpdatePositionHistory(CurrentPosition, PositionHashHistory);
 
-        MovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveToPlay, MovesWithoutCaptureOrPawnMove);
+        HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveToPlay, HalfMovesWithoutCaptureOrPawnMove);
 
         return true;
     }

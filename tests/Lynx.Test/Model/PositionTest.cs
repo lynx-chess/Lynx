@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using Lynx.UCI.Commands.GUI;
 using NUnit.Framework;
 
 namespace Lynx.Test.Model;
@@ -122,7 +123,7 @@ public class PositionTest
     [TestCase("8/7p/6p1/6P1/6PK/5k1P/8/8 w - - 0 1", 0)]
     [TestCase("7k/8/8/8/8/8/1K5R/6R1 b - - 0 1", -EvaluationConstants.CheckMateEvaluation)]
     [TestCase("7K/8/8/8/8/8/1k5r/6r1 w - - 0 1", -EvaluationConstants.CheckMateEvaluation)]
-    public void EvaluateFinalPosition_NegaMax(string fen, int expectedEvaluationValue)
+    public void EvaluateFinalPosition(string fen, int expectedEvaluationValue)
     {
         // Arrange
         var position = new Position(fen);
@@ -143,9 +144,9 @@ public class PositionTest
     }
 
     [Test]
-    public void EvaluateFinalPosition_NegaMax_Threefold()
+    public void EvaluateFinalPosition_Threefold()
     {
-        var winningPosition = new Position("7k/8/5KR1/8/8/8/5R2/K7 w - - 0 1");
+        var winningPosition = new Position("7k/8/5KR1/8/8/8/5R2/8 w - - 0 1");
 
         var game = new Game(winningPosition);
         var repeatedMoves = new List<Move>
@@ -172,7 +173,7 @@ public class PositionTest
     }
 
     [Test]
-    public void EvaluateMaterialAndPosition_NegaMax_Threefold()
+    public void StaticEvaluation_Threefold()
     {
         // https://lichess.org/MgWVifcK
         var winningPosition = new Position("6k1/6b1/1p6/2p5/P7/1K4R1/8/r7 b - - 7 52");
@@ -198,7 +199,7 @@ public class PositionTest
     }
 
     [Test]
-    public void EvaluateMaterialAndPosition_NegaMax_Threefold_CastleRightsRemoval()
+    public void StaticEvaluation_Threefold_CastleRightsRemoval()
     {
         // Arrange
 
@@ -259,9 +260,9 @@ public class PositionTest
     }
 
     [Test]
-    public void EvaluateFinalPosition_NegaMax_50MovesRule()
+    public void EvaluateFinalPosition_50MovesRule()
     {
-        var winningPosition = new Position("7k/8/5KR1/8/8/8/5R2/K7 w - - 0 1");
+        var winningPosition = new Position("7k/8/5KR1/8/8/8/5R2/8 w - - 0 1");
 
         var game = new Game(winningPosition);
         var nonCaptureOrPawnMoveMoves = new List<Move>
@@ -272,23 +273,23 @@ public class PositionTest
                 new ((int)BoardSquare.h7, (int)BoardSquare.h8, (int)Piece.k)
             };
 
-        for (int i = 0; i < 48; ++i)
+        for (int i = 0; i < 98; ++i)
         {
             Assert.True(game.MakeMove(nonCaptureOrPawnMoveMoves[i % nonCaptureOrPawnMoveMoves.Count]));
         }
 
-        Assert.True(game.MakeMove(nonCaptureOrPawnMoveMoves[0]));
-        Assert.True(game.MakeMove(nonCaptureOrPawnMoveMoves[1]));
-        Assert.True(game.MakeMove(new Move((int)BoardSquare.e2, (int)BoardSquare.h2, (int)Piece.R)));   // Mate on move 51
+        Assert.True(game.MakeMove(nonCaptureOrPawnMoveMoves[2]));
+        Assert.True(game.MakeMove(nonCaptureOrPawnMoveMoves[3]));
+        Assert.True(game.MakeMove(new Move((int)BoardSquare.f2, (int)BoardSquare.h2, (int)Piece.R)));   // Mate on move 51
 
-        Assert.AreEqual(51, game.MoveHistory.Count);
+        Assert.AreEqual(101, game.MoveHistory.Count);
 
-        var eval = winningPosition.StaticEvaluation(new(), game.MovesWithoutCaptureOrPawnMove);
+        var eval = winningPosition.StaticEvaluation(new(), game.HalfMovesWithoutCaptureOrPawnMove);
         Assert.AreEqual(0, eval);
     }
 
     [Test]
-    public void EvaluateMaterialAndPosition_NegaMax_50MovesRule()
+    public void StaticEvaluation_50MovesRule()
     {
         // https://lichess.org/MgWVifcK
         var winningPosition = new Position("6k1/6b1/1p6/2p5/P7/1K4R1/8/r7 b - - 7 52");
@@ -302,19 +303,19 @@ public class PositionTest
                 new ((int)BoardSquare.a2, (int)BoardSquare.b3, (int)Piece.K)
             };
 
-        for (int i = 0; i < 50; ++i)
+        for (int i = 0; i < 100; ++i)
         {
             Assert.True(game.MakeMove(nonCaptureOrPawnMoveMoves[i % nonCaptureOrPawnMoveMoves.Count]));
         }
 
-        Assert.AreEqual(50, game.MoveHistory.Count);
+        Assert.AreEqual(100, game.MoveHistory.Count);
 
-        var eval = winningPosition.StaticEvaluation(new(), game.MovesWithoutCaptureOrPawnMove);
+        var eval = winningPosition.StaticEvaluation(new(), game.HalfMovesWithoutCaptureOrPawnMove);
         Assert.AreEqual(0, eval);
     }
 
     [Test]
-    public void EvaluateMaterialAndPosition_NegaMax_50MovesRule_Promotion()
+    public void StaticEvaluation_50MovesRule_Promotion()
     {
         // https://lichess.org/MgWVifcK
         var winningPosition = new Position("6k1/6b1/1p6/2p5/P7/1K4R1/7p/r7 b - - 7 52");
@@ -339,7 +340,7 @@ public class PositionTest
 
         Assert.AreEqual(51, game.MoveHistory.Count);
 
-        var eval = winningPosition.StaticEvaluation(new(), game.MovesWithoutCaptureOrPawnMove);
+        var eval = winningPosition.StaticEvaluation(new(), game.HalfMovesWithoutCaptureOrPawnMove);
         Assert.AreNotEqual(0, eval);
     }
 }

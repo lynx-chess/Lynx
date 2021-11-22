@@ -117,33 +117,33 @@ public static class Utils
     }
 
     /// <summary>
-    /// Updates <paramref name="movesWithoutCaptureOrPawnMove"/>
+    /// Updates <paramref name="halfMovesWithoutCaptureOrPawnMove"/>
     /// </summary>
     /// <param name="moveToPlay"></param>
-    /// <param name="movesWithoutCaptureOrPawnMove"></param>
+    /// <param name="halfMovesWithoutCaptureOrPawnMove"></param>
     /// <remarks>
-    /// Checking movesWithoutCaptureOrPawnMove >= 50 since a capture/pawn move doesn't necessarily 'clear' the variable.
+    /// Checking halfMovesWithoutCaptureOrPawnMove >= 100 since a capture/pawn move doesn't necessarily 'clear' the variable.
     /// i.e. while the engine is searching:
     ///     At depth 2, 50 rules move applied and eval is 0
     ///     At depth 3, there's a capture, but the eval should still be 0
     ///     At depth 4 there's no capture, but the eval should still be 0
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int Update50movesRule(Move moveToPlay, int movesWithoutCaptureOrPawnMove)
+    public static int Update50movesRule(Move moveToPlay, int halfMovesWithoutCaptureOrPawnMove)
     {
         if (moveToPlay.IsCapture())
         {
-            return movesWithoutCaptureOrPawnMove >= 50
-                ? movesWithoutCaptureOrPawnMove
+            return halfMovesWithoutCaptureOrPawnMove >= 100
+                ? halfMovesWithoutCaptureOrPawnMove
                 : 0;
         }
         else
         {
             var pieceToMove = moveToPlay.Piece();
 
-            return (pieceToMove == (int)Piece.P || pieceToMove == (int)Piece.p) && movesWithoutCaptureOrPawnMove < 50
+            return (pieceToMove == (int)Piece.P || pieceToMove == (int)Piece.p) && halfMovesWithoutCaptureOrPawnMove < 100
                 ? 0
-                : movesWithoutCaptureOrPawnMove + 1;
+                : halfMovesWithoutCaptureOrPawnMove + 1;
         }
     }
 

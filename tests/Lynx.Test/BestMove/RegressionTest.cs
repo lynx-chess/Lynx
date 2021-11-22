@@ -184,16 +184,29 @@ public class RegressionTest : BaseTest
         " b8a8")]
 
     [TestCase("position startpos moves" +
-        " c2c4 e7e6 b1c3 g8f6 g1f3 f8b4 e2e3 e8g8 d2d4 c7c5 f1d3 d7d5 e1g1 b8c6 c4d5" +
-        " e6d5 d4c5 b4c5 b2b3 f8e8 c1b2 b7b6 f1e1 c8b7 d1b1 h7h5 a2a3 a7a5 e3e4 f6g4" +
-        " e1e2 d5d4 c3d5 g4e5 f3e5 c6e5 d3b5 e8e6 d5f4 e6h6 f4d3 e5d3 b1d3 h6d6 e4e5" +
-        " d6g6 f2f3 d8d5 a1e1 d5f3 d3g6 f3e2 b5e2 f7g6 e2d3 g6g5 a3a4 a8d8 e5e6 d8e8" +
-        " e1e5 h5h4 d3g6 e8e7 g6f7 g8f8 e5g5 b7c8 g5g6 e7a7 g2g3 h4h3 g6g5 a7f7 e6f7" +
-        " f8f7 g5h5 d4d3 h5c5 b6c5 g1f2 c8e6 f2e3 f7g8 e3d3 e6b3 b2c3 c5c4 d3d4 b3a4" +
-        " d4c4 a4d7 c3a5 g7g5 c4d4 g5g4 d4e5 d7c8 e5f4 c8e6 a5c7 e6c8 f4e4 g8g7 c7e5" +
-        " g7f7 e5b2 f7e6 e4f4 e6d5 f4e3 c8d7 e3f4 d7e6 f4e3 d5d6 e3e4 e6d5 e4f4 d5e6" +
-        " f4e3 e6d5 e3f4 d5f3 f4f5 d6d5 f5f4 d5d6 f4f5 d6d5 f5f4 f3d1 f4f5 d1e2 f5f4" +
-        " d5d6")]
+        " g1f3 d7d5 d2d4 g8f6 g2g3 b8c6 f1g2 e7e6 b1c3 f8d6 e1g1 e8g8 f1e1 a8b8 e2e4 d5e4 c3e4 f6e4 e1e4 d6e7" +
+        " b2b3 b7b5 c1b2 c8b7 e4e3 e7f6 f3e5 c6e7 g2b7 b8b7 e5g4 e7f5 g4f6 d8f6 e3e5 f5e7 d1f1 e7c6 f1g2 b7b6" +
+        " e5e4 f8d8 c2c3 f6f5 g3g4 f5g6 a1e1 b6a6 a2a3 c6a5 g2g3 d8c8 g3d3 a6b6 d3d1 f7f5 e4e5 g6g4 d1g4 f5g4" +
+        " e5e6 b6e6 e1e6 a5b3 e6e5 c7c5 e5e2 b3a5 d4c5 c8c5 e2e8 g8f7 e8a8 c5c7 a8b8 a7a6 g1g2 c7c6 b8h8 a5c4" +
+        " b2c1 h7h6 h8a8 g7g5 a8a7 f7g6 a7a8 c6f6 a8g8 g6h5 g8e8 f6f3 c1e3 c4a3 e8d8 a3c2 e3d2 h5g6 g2g1 f3f6" +
+        " d8g8 g6f5 g8d8 c2a3 d2e3 a3c4 e3d4 c4e5 g1g2 h6h5 h2h3 g4h3 g2h3 f6e6 h3g2 f5e4 d4e3 g5g4 d8h8 e6c6" +
+        " e3d4 e5g6 h8e8 e4f5 g2g1 h5h4 g1h2 c6e6 e8a8 f5f4 d4e3 f4f3 h2g1 g4g3 a8a7 g6e7 a7a8 e7d5 a8f8 f3g4" +
+        " f8g8 g4h3 g1f1 d5e3 f2e3 e6e3 g8g5 e3c3 f1e2 g3g2 e2f2 b5b4 g5g2 c3c2 f2e3 c2g2 e3d4 b4b3 d4d5 b3b2" +
+        " d5e5 b2b1q e5f4 b1d3 f4e5 g2g6 e5f4 d3e2 f4f5 e2e6 f5f4 g6g4 f4f3 e6e8 f3f2 g4f4 f2g1 f4f6 g1h1 e8e6" +
+        " h1g1 e6e5 g1h1 e5d5 h1g1 d5d4 g1h1 d4e4 h1g1 f6g6 g1f1 e4d3 f1e1 g6g1 e1f2 g1g2 f2e1 g2g6 e1f2 d3d2" +
+        " f2f3 d2e1 f3f4 e1e2 f4f5 e2e6 f5f4 g6g4 f4f3 e6e8 f3f2 g4f4 f2g1 f4f6 g1h1 e8e6 h1g1 e6e5 g1h1 e5d5")]
+    public void FalseDrawnPositions(string positionCommand)
+    {
+        var engine = GetEngine();
+        engine.AdjustPosition(positionCommand);
+
+        var bestMove = engine.BestMove(new GoCommand($"go depth {Configuration.EngineSettings.MinDepth}"));
+        Assert.NotZero(bestMove.Evaluation);
+
+        engine.AdjustPosition(positionCommand);
+        bestMove = engine.BestMove(new GoCommand($"go depth {Configuration.EngineSettings.DepthWhenLessThanMinMoveTime}"));
+        Assert.NotZero(bestMove.Evaluation);
+    }
 
     [TestCase("position startpos moves" +
         " c2c4 e7e6 b1c3 g8f6 g1f3 f8b4 e2e3 e8g8 d2d4 c7c5 f1d3 d7d5 e1g1 b8c6 c4d5" +
@@ -207,16 +220,12 @@ public class RegressionTest : BaseTest
         " f4e3 e6d5 e3f4 d5f3 f4f5 d6d5 f5f4 d5d6 f4f5 d6d5 f5f4 f3d1 f4f5 d1e2 f5f4" +
         " d5d6 f4e4 d6e6 e4f4 e6d5 f4f5 d5c5 f5f6 c5b6 f6e7 b6a7 e7d8 a7a8 d8e7 a8b8" +
         " e7f8 b8a8 f8e7 a8b8 e7f8 b8a8")]
-    public void FalseDrawnPositions(string positionCommand)
+    public void FalseDrawnPositionBy50MovesRule(string positionCommand)
     {
         var engine = GetEngine();
         engine.AdjustPosition(positionCommand);
 
-        var bestMove = engine.BestMove(new GoCommand($"go depth {Configuration.EngineSettings.MinDepth}"));
-        Assert.True(double.Equals(0d, bestMove.Evaluation));
-
-        engine.AdjustPosition(positionCommand);
-        bestMove = engine.BestMove(new GoCommand($"go depth {Configuration.EngineSettings.DepthWhenLessThanMinMoveTime}"));
-        Assert.True(double.Equals(0d, bestMove.Evaluation));
+        var bestMove = engine.BestMove(new GoCommand($"go depth 1"));
+        Assert.NotZero(bestMove.Evaluation);
     }
 }
