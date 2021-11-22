@@ -36,6 +36,7 @@ public sealed partial class Engine
         Array.Clear(_killerMoves);
         Array.Clear(_historyMoves);
         Array.Clear(_pVTable);
+        Array.Clear(_maxDepthReached);
 
         _halfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
 
