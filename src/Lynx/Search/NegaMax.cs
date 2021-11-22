@@ -47,7 +47,7 @@ public sealed partial class Engine
                 }
             }
 
-            return position.EvaluateFinalPosition(depth, Game.PositionHashHistory, _movesWithoutCaptureOrPawnMove);
+            return position.EvaluateFinalPosition(depth, Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
         }
 
         bool isInCheck = Utils.InCheck(position);
@@ -104,8 +104,8 @@ public sealed partial class Engine
             PrintPreMove(position, depth, move);
 
             // Before making a move
-            var oldValue = _movesWithoutCaptureOrPawnMove;
-            _movesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, _movesWithoutCaptureOrPawnMove);
+            var oldValue = _halfMovesWithoutCaptureOrPawnMove;
+            _halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, _halfMovesWithoutCaptureOrPawnMove);
             var repetitions = Utils.UpdatePositionHistory(newPosition, Game.PositionHashHistory);
 
             int evaluation;
@@ -160,7 +160,7 @@ public sealed partial class Engine
             }
 
             // After making a move
-            _movesWithoutCaptureOrPawnMove = oldValue;
+            _halfMovesWithoutCaptureOrPawnMove = oldValue;
             Utils.RevertPositionHistory(newPosition, Game.PositionHashHistory, repetitions);
 
             PrintMove(depth, move, evaluation);
@@ -208,7 +208,7 @@ public sealed partial class Engine
         {
             return isAnyMoveValid
                 ? alpha
-                : position.EvaluateFinalPosition(depth, Game.PositionHashHistory, _movesWithoutCaptureOrPawnMove);
+                : position.EvaluateFinalPosition(depth, Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
         }
 
         // Node fails low
@@ -241,7 +241,7 @@ public sealed partial class Engine
         var nextPvIndex = PVTable.Indexes[depth + 1];
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
-        var staticEvaluation = position.StaticEvaluation(Game.PositionHashHistory, _movesWithoutCaptureOrPawnMove);
+        var staticEvaluation = position.StaticEvaluation(Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
 
         // Fail-hard beta-cutoff (updating alpha after this check)
         if (staticEvaluation >= beta)
@@ -281,13 +281,13 @@ public sealed partial class Engine
 
             PrintPreMove(position, depth, move, isQuiescence: true);
 
-            var oldValue = _movesWithoutCaptureOrPawnMove;
-            _movesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, _movesWithoutCaptureOrPawnMove);
+            var oldValue = _halfMovesWithoutCaptureOrPawnMove;
+            _halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, _halfMovesWithoutCaptureOrPawnMove);
             var repetitions = Utils.UpdatePositionHistory(newPosition, Game.PositionHashHistory);
 
             var evaluation = -QuiescenceSearch(newPosition, depth + 1, -beta, -alpha);
 
-            _movesWithoutCaptureOrPawnMove = oldValue;
+            _halfMovesWithoutCaptureOrPawnMove = oldValue;
             Utils.RevertPositionHistory(newPosition, Game.PositionHashHistory, repetitions);
 
             PrintMove(depth, move, evaluation);
@@ -313,7 +313,7 @@ public sealed partial class Engine
         {
             var eval = isAnyMoveValid || position.AllPossibleMoves().Any(move => new Position(position, move).WasProduceByAValidMove())
                 ? alpha
-                : position.EvaluateFinalPosition(depth, Game.PositionHashHistory, _movesWithoutCaptureOrPawnMove);
+                : position.EvaluateFinalPosition(depth, Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
 
             return eval;
         }

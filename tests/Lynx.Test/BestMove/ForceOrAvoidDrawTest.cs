@@ -119,7 +119,7 @@ public class ForceOrAvoidDrawTest : BaseTest
         // Arrange
 
         // https://gameknot.com/chess-puzzle.pl?pz=247493
-        const string fen = "r6k/p1q1b1pp/2p5/Qp2n1N1/4P1PK/P3Br1P/1P2RP2/8 b - - 0 1";
+        const string fen = "r6k/p3b1pp/2pq4/Qp2n1NK/4P1P1/P3Br1P/1P2RP2/8 b - - 0 1";
 
         var mock = new Mock<ChannelWriter<string>>();
 
@@ -132,23 +132,23 @@ public class ForceOrAvoidDrawTest : BaseTest
 
         var nonCaptureOrPawnMoveMoves = new List<Move>
             {
-                new ((int)BoardSquare.c7, (int)BoardSquare.d6, (int)Piece.q),
-                new ((int)BoardSquare.h4, (int)BoardSquare.h5, (int)Piece.K),
                 new ((int)BoardSquare.d6, (int)BoardSquare.c7, (int)Piece.q),
-                new ((int)BoardSquare.h5, (int)BoardSquare.h4, (int)Piece.K)
+                new ((int)BoardSquare.h5, (int)BoardSquare.h4, (int)Piece.K),
+                new ((int)BoardSquare.c7, (int)BoardSquare.d6, (int)Piece.q),
+                new ((int)BoardSquare.h4, (int)BoardSquare.h5, (int)Piece.K)
             };
 
         Move movesThatAllowsRepetition = new((int)BoardSquare.c7, (int)BoardSquare.d6, (int)Piece.q);
 
         var sb = new StringBuilder($"position fen {fen} moves");
-        for (int i = 0; i < 48; ++i)
+        for (int i = 0; i < 98; ++i)
         {
             var move = nonCaptureOrPawnMoveMoves[i % nonCaptureOrPawnMoveMoves.Count];
             sb.Append(' ').Append(move.UCIString());
             engine.AdjustPosition(sb.ToString());
         }
 
-        Assert.AreEqual(48, engine.Game.MoveHistory.Count);
+        Assert.AreEqual(98, engine.Game.MoveHistory.Count);
 
         engine.Game.PositionHashHistory.Clear(); // Make sure we don't take account threefold repetition
 
@@ -166,7 +166,7 @@ public class ForceOrAvoidDrawTest : BaseTest
     {
         // Arrange
 
-        const string fen = "8/7B/7k/8/5KR1/8/5R2/8 w - - 0 1";
+        const string fen = "8/7B/8/7k/5KR1/8/4R3/8 w - - 0 1";
 
         var mock = new Mock<ChannelWriter<string>>();
 
@@ -179,26 +179,26 @@ public class ForceOrAvoidDrawTest : BaseTest
 
         var nonCaptureOrPawnMoveMoves = new List<Move>
             {
-                new ((int)BoardSquare.f2, (int)BoardSquare.e2, (int)Piece.R),
-                new ((int)BoardSquare.h6, (int)BoardSquare.h5, (int)Piece.k),
                 new ((int)BoardSquare.e2, (int)BoardSquare.f2, (int)Piece.R),
-                new ((int)BoardSquare.h5, (int)BoardSquare.h6, (int)Piece.k)
+                new ((int)BoardSquare.h5, (int)BoardSquare.h6, (int)Piece.k),
+                new ((int)BoardSquare.f2, (int)BoardSquare.e2, (int)Piece.R),
+                new ((int)BoardSquare.h6, (int)BoardSquare.h5, (int)Piece.k)
             };
 
         Move movesThatAllowsRepetition = new((int)BoardSquare.h6, (int)BoardSquare.h5, (int)Piece.k);
 
         var sb = new StringBuilder($"position fen {fen} moves");
-        for (int i = 0; i < 48; ++i)
+        for (int i = 0; i < 98; ++i)
         {
             var move = nonCaptureOrPawnMoveMoves[i % nonCaptureOrPawnMoveMoves.Count];
             sb.Append(' ').Append(move.UCIString());
             engine.AdjustPosition(sb.ToString());
         }
 
-        sb.Append(' ').Append(nonCaptureOrPawnMoveMoves[0].UCIString());
+        sb.Append(' ').Append(nonCaptureOrPawnMoveMoves[2].UCIString());
         engine.AdjustPosition(sb.ToString());
 
-        Assert.AreEqual(49, engine.Game.MoveHistory.Count);
+        Assert.AreEqual(99, engine.Game.MoveHistory.Count);
         engine.Game.PositionHashHistory.Clear(); // Make sure we don't take account threefold repetition
 
         // Act
