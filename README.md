@@ -81,6 +81,8 @@ If you're a Linux user and are new to .NET ecosystem, the conversation in [this 
 
 - Late Move Reductions [[1](https://web.archive.org/web/20150212051846/http://www.glaurungchess.com/lmr.html)] [[2](https://www.chessprogramming.org/Late_Move_Reductions)] [[3](https://talkchess.com/forum3/viewtopic.php?f=7&t=75056#p860118)]
 
+- Verified null-move pruning [[1](https://www.researchgate.net/publication/297377298_Verified_Null-Move_Pruning)] [[2](https://web.archive.org/web/20071031095933/http://www.brucemo.com/compchess/programming/nullmove.htm)] [[3](https://www.chessprogramming.org/Null_Move_Pruning)]
+
 ## Credits
 
 Lynx development wouldn't have been possible without:
