@@ -26,7 +26,7 @@ public class PerftTest
     [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 2, 2_039)]
     [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 3, 97_862)]
     [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 4, 4_085_603)]
-    [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 5, 193_690_690, Category = "LongRunning", Explicit = true)]
+    [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 5, 193_690_690, Category = "LongRunning", Explicit = true)]       // 2m 30s
     [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 6, 8_031_647_685, Category = "TooLongToBeRun", Explicit = true)]  // 24 min
     public void Position2(string fen, int depth, long expectedNumberOfNodes)
     {
@@ -51,7 +51,7 @@ public class PerftTest
     [TestCase("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1", 3, 9_467)]
     [TestCase("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1", 4, 422_333)]
     [TestCase("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1", 5, 15_833_292, Category = "LongRunning", Explicit = true)]
-    [TestCase("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1", 6, 706_045_033, Category = "TooLongToBeRun", Explicit = true)]
+    [TestCase("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1", 6, 706_045_033, Category = "TooLongToBeRun", Explicit = true)]    // 9m 6s
     public void Position4(string fen, int depth, long expectedNumberOfNodes)
     {
         Validate(fen, depth, expectedNumberOfNodes);
@@ -96,6 +96,9 @@ public class PerftTest
     /// By Martin Sedlak
     /// http://talkchess.com/forum3/viewtopic.php?t=47318
     /// </summary>
+    /// <param name="fen"></param>
+    /// <param name="depth"></param>
+    /// <param name="expectedNumberOfNodes"></param>
     [TestCase("8/5bk1/8/2Pp4/8/1K6/8/8 w - d6 0 1           ", 6, 824064, Description = "avoid illegal en passant capture")]
     [TestCase("8/8/1k6/8/2pP4/8/5BK1/8 b - d3 0 1           ", 6, 824064, Description = "avoid illegal en passant capture")]
     [TestCase("8/8/1k6/2b5/2pP4/8/5K2/8 b - d3 0 1          ", 6, 1440467, Description = "en passant capture checks opponent")]
@@ -123,6 +126,28 @@ public class PerftTest
     [TestCase("8/8/2k5/5q2/5n2/8/5K2/8 b - - 0 1            ", 4, 23527, Description = "double check")]
     [TestCase("8/5k2/8/5N2/5Q2/2K5/8/8 w - - 0 1            ", 4, 23527, Description = "double check")]
     public void MartinSedlakPositions(string fen, int depth, long expectedNumberOfNodes)
+    {
+        Validate(fen, depth, expectedNumberOfNodes);
+    }
+
+    /// <summary>
+    /// By John Merlino
+    /// https://talkchess.com/forum3/viewtopic.php?topic_view=threads&p=509159&t=47318#p509159
+    /// </summary>
+    /// <param name="fen"></param>
+    /// <param name="depth"></param>
+    /// <param name="expectedNumberOfNodes"></param>
+    [TestCase("r3k2r/8/8/8/3pPp2/8/8/R3K1RR b KQkq e3 0 1                           ", 6, 485_647_607, Category = "TooLongToBeRun", Explicit = true)]  // 6m 30s
+    [TestCase("8/7p/p5pb/4k3/P1pPn3/8/P5PP/1rB2RK1 b - d3 0 28                      ", 4, 67_197, Description = "resolving check by en-passant capture of the checking pawn")]
+    [TestCase("8/7p/p5pb/4k3/P1pPn3/8/P5PP/1rB2RK1 b - d3 0 28                      ", 6, 38_633_283, Description = "resolving check by en-passant capture of the checking pawn", Category = "LongRunning", Explicit = true)]
+    [TestCase("8/3K4/2p5/p2b2r1/5k2/8/8/1q6 b - - 1 67                              ", 7, 493_407_574, Category = "LongRunning", Explicit = true)]  // 5m 50s
+    [TestCase("rnbqkb1r/ppppp1pp/7n/4Pp2/8/8/PPPP1PPP/RNBQKBNR w KQkq f6 0 3        ", 6, 244_063_299, Category = "LongRunning", Explicit = true)]  // 3m 45s
+    [TestCase("8/p7/8/1P6/K1k3p1/6P1/7P/8 w - -                                     ", 8, 8_103_790)]
+    [TestCase("n1n5/PPPk4/8/8/8/8/4Kppp/5N1N b - -                                  ", 6, 71_179_139, Category = "LongRunning", Explicit = true)]   // 1m 12s
+    [TestCase("r3k2r/p6p/8/B7/1pp1p3/3b4/P6P/R3K2R w KQkq -                         ", 6, 77_054_993, Category = "LongRunning", Explicit = true)]   // 1m 25s
+    [TestCase("8/5p2/8/2k3P1/p3K3/8/1P6/8 b - -                                     ", 8, 64_451_405, Category = "LongRunning", Explicit = true)]   // 1m 20s)]
+    [TestCase("r3k2r/pb3p2/5npp/n2p4/1p1PPB2/6P1/P2N1PBP/R3K2R w KQkq -             ", 5, 29_179_893, Category = "LongRunning", Explicit = true)]   // 1m 25s
+    public void JohnMerlinoPositions(string fen, int depth, long expectedNumberOfNodes)
     {
         Validate(fen, depth, expectedNumberOfNodes);
     }
