@@ -36,6 +36,7 @@ public sealed partial class Engine
         var pvIndex = PVTable.Indexes[depth];
         var nextPvIndex = PVTable.Indexes[depth + 1];
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
+        bool isInCheck = Utils.InCheck(position);
 
         if (depth >= maxDepth)
         {
@@ -47,10 +48,9 @@ public sealed partial class Engine
                 }
             }
 
-            return position.EvaluateFinalPosition(depth, Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
+            return Position.EvaluateFinalPosition(depth, isInCheck, Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
         }
 
-        bool isInCheck = Utils.InCheck(position);
         bool isFailHigh = false;    // In order to detect zugzwangs
 
         if (depth > Configuration.EngineSettings.NullMovePruning_R
@@ -208,7 +208,7 @@ public sealed partial class Engine
         {
             return isAnyMoveValid
                 ? alpha
-                : position.EvaluateFinalPosition(depth, Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
+                : Position.EvaluateFinalPosition(depth, isInCheck, Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
         }
 
         // Node fails low
@@ -311,11 +311,9 @@ public sealed partial class Engine
 
         if (bestMove is null)
         {
-            var eval = isAnyMoveValid || position.AllPossibleMoves().Any(move => new Position(position, move).WasProduceByAValidMove())
+            return isAnyMoveValid || position.AllPossibleMoves().Any(move => new Position(position, move).WasProduceByAValidMove())
                 ? alpha
-                : position.EvaluateFinalPosition(depth, Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
-
-            return eval;
+                : Position.EvaluateFinalPosition(depth, Utils.InCheck(position), Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
         }
 
         // Node fails low
