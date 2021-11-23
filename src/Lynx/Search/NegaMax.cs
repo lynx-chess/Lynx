@@ -36,7 +36,7 @@ public sealed partial class Engine
         var pvIndex = PVTable.Indexes[depth];
         var nextPvIndex = PVTable.Indexes[depth + 1];
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
-        bool isInCheck = Utils.InCheck(position);
+        bool isInCheck = position.IsInCheck();
 
         if (depth >= maxDepth)
         {
@@ -313,7 +313,7 @@ public sealed partial class Engine
         {
             return isAnyMoveValid || position.AllPossibleMoves().Any(move => new Position(position, move).WasProduceByAValidMove())
                 ? alpha
-                : Position.EvaluateFinalPosition(depth, Utils.InCheck(position), Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
+                : Position.EvaluateFinalPosition(depth, position.IsInCheck(), Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
         }
 
         // Node fails low
