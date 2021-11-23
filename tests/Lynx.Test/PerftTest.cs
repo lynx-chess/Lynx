@@ -92,6 +92,41 @@ public class PerftTest
         Validate(fen, depth, expectedNumberOfNodes);
     }
 
+    /// <summary>
+    /// By Martin Sedlak
+    /// http://talkchess.com/forum3/viewtopic.php?t=47318
+    /// </summary>
+    [TestCase("8/5bk1/8/2Pp4/8/1K6/8/8 w - d6 0 1           ", 6, 824064, Description = "avoid illegal en passant capture")]
+    [TestCase("8/8/1k6/8/2pP4/8/5BK1/8 b - d3 0 1           ", 6, 824064, Description = "avoid illegal en passant capture")]
+    [TestCase("8/8/1k6/2b5/2pP4/8/5K2/8 b - d3 0 1          ", 6, 1440467, Description = "en passant capture checks opponent")]
+    [TestCase("8/5k2/8/2Pp4/2B5/1K6/8/8 w - d6 0 1          ", 6, 1440467, Description = "en passant capture checks opponent")]
+    [TestCase("5k2/8/8/8/8/8/8/4K2R w K - 0 1               ", 6, 661072, Description = "short castling gives check")]
+    [TestCase("4k2r/8/8/8/8/8/8/5K2 b k - 0 1               ", 6, 661072, Description = "short castling gives check")]
+    [TestCase("3k4/8/8/8/8/8/8/R3K3 w Q - 0 1               ", 6, 803711, Description = "long castling gives check")]
+    [TestCase("r3k3/8/8/8/8/8/8/3K4 b q - 0 1               ", 6, 803711, Description = "long castling gives check")]
+    [TestCase("r3k2r/1b4bq/8/8/8/8/7B/R3K2R w KQkq - 0 1    ", 4, 1274206, Description = "castling (including losing cr due to rook capture)")]
+    [TestCase("r3k2r/7b/8/8/8/8/1B4BQ/R3K2R b KQkq - 0 1    ", 4, 1274206, Description = "castling (including losing cr due to rook capture)")]
+    [TestCase("r3k2r/8/3Q4/8/8/5q2/8/R3K2R b KQkq - 0 1     ", 4, 1720476, Description = "castling prevented")]
+    [TestCase("r3k2r/8/5Q2/8/8/3q4/8/R3K2R w KQkq - 0 1     ", 4, 1720476, Description = "castling prevented")]
+    [TestCase("2K2r2/4P3/8/8/8/8/8/3k4 w - - 0 1            ", 6, 3821001, Description = "promote out of check")]
+    [TestCase("3K4/8/8/8/8/8/4p3/2k2R2 b - - 0 1            ", 6, 3821001, Description = "promote out of check")]
+    [TestCase("8/8/1P2K3/8/2n5/1q6/8/5k2 b - - 0 1          ", 5, 1004658, Description = "discovered check")]
+    [TestCase("5K2/8/1Q6/2N5/8/1p2k3/8/8 w - - 0 1          ", 5, 1004658, Description = "discovered check")]
+    [TestCase("4k3/1P6/8/8/8/8/K7/8 w - - 0 1               ", 6, 217342, Description = "promote to give check")]
+    [TestCase("8/k7/8/8/8/8/1p6/4K3 b - - 0 1               ", 6, 217342, Description = "promote to give check")]
+    [TestCase("8/P1k5/K7/8/8/8/8/8 w - - 0 1                ", 6, 92683, Description = "underpromote to check")]
+    [TestCase("8/8/8/8/8/k7/p1K5/8 b - - 0 1                ", 6, 92683, Description = "underpromote to check")]
+    [TestCase("K1k5/8/P7/8/8/8/8/8 w - - 0 1                ", 6, 2217, Description = "self stalemate")]
+    [TestCase("8/8/8/8/8/p7/8/k1K5 b - - 0 1                ", 6, 2217, Description = "self stalemate")]
+    [TestCase("8/k1P5/8/1K6/8/8/8/8 w - - 0 1               ", 7, 567584, Description = "stalemate/checkmate")]
+    [TestCase("8/8/8/8/1k6/8/K1p5/8 b - - 0 1               ", 7, 567584, Description = "stalemate/checkmate")]
+    [TestCase("8/8/2k5/5q2/5n2/8/5K2/8 b - - 0 1            ", 4, 23527, Description = "double check")]
+    [TestCase("8/5k2/8/5N2/5Q2/2K5/8/8 w - - 0 1            ", 4, 23527, Description = "double check")]
+    public void MartinSedlakPositions(string fen, int depth, long expectedNumberOfNodes)
+    {
+        Validate(fen, depth, expectedNumberOfNodes);
+    }
+
     private static void Validate(string fen, int depth, long expectedNumberOfNodes)
     {
         Assert.AreEqual(expectedNumberOfNodes, Perft.ResultsImpl(new Position(fen), depth, default));
