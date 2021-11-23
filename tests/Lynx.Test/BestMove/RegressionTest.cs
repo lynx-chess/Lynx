@@ -72,8 +72,6 @@ public class RegressionTest : BaseTest
                 Assert.True(false);
                 break;
         }
-
-        Assert.AreEqual(depth, bestResult.Moves.Count);
     }
 
     [TestCase(5, Constants.InitialPositionFEN, "d8d5")]

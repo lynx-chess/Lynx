@@ -47,8 +47,9 @@ public static class Utils
     public static bool InCheck(Position position)
     {
         var kingSquare = position.PieceBitBoards[(int)Piece.K + PieceOffset(position.Side)].GetLS1BIndex();
+        var oppositeSide = (Side)OppositeSide(position.Side);
 
-        return Attacks.IsSquaredAttacked(kingSquare, position.Side, position.PieceBitBoards, position.OccupancyBitBoards);
+        return Attacks.IsSquaredAttacked(kingSquare, oppositeSide, position.PieceBitBoards, position.OccupancyBitBoards);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
