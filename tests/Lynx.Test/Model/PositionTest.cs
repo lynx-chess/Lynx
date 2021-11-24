@@ -117,6 +117,22 @@ public class PositionTest
         Assert.AreEqual(shouldBeValid, new Position(fen).WasProduceByAValidMove());
     }
 
+    [TestCase("rnbqkbnr/ppp1pppp/3p4/1B6/8/4P3/PPPP1PPP/RNBQK1NR b KQkq - 1 2", true)]
+    [TestCase("rnbqkbnr/ppp1pppp/3p4/1B6/8/4P3/PPPP1PPP/RNBQK1NR w KQkq - 1 2", false)]
+    [TestCase("rnbqk1nr/pppp1ppp/4p3/8/1b6/3P1N2/PPP1PPPP/RNBQKB1R w KQkq - 2 3", true)]
+    [TestCase("rnbqk1nr/pppp1ppp/4p3/8/1b6/3P1N2/PPP1PPPP/RNBQKB1R b KQkq - 2 3", false)]
+
+    [TestCase("rnb1k1nr/pppp1ppp/4p3/8/1b6/3P3P/PPP1PPP1/RNB1KBNR w KQkq - 1 3", true)]
+    [TestCase("rnb1k1nr/pppp1ppp/4p3/8/1b6/3P3P/PPP1PPP1/RNB1KBNR b KQkq - 1 3", false)]
+    [TestCase("rnb1k1nr/pppp1ppp/4p3/8/1b6/3P3P/PPP1PPP1/RNB1KBNR w KQkq - 1 3", true)]
+    [TestCase("rnb1k1nr/pppp1ppp/4p3/8/1b6/3P3P/PPP1PPP1/RNB1KBNR b KQkq - 1 3", false)]
+    public void IsInCheck(string fen, bool positionInCheck)
+    {
+        var position = new Position(fen);
+
+        Assert.AreEqual(positionInCheck, position.IsInCheck());
+    }
+
     [TestCase("7k/8/8/8/8/3B4/1K6/6Q1 b - - 0 1", 0)]
     [TestCase("7K/8/8/8/8/3b4/1k6/6q1 w - - 0 1", 0)]
     [TestCase("8/5K2/7p/6pk/6p1/6P1/7P/8 b - - 0 1", 0)]
@@ -128,11 +144,12 @@ public class PositionTest
         // Arrange
         var position = new Position(fen);
         Assert.IsEmpty(position.AllPossibleMoves().Where(move => new Position(position, move).IsValid()));
+        var isInCheck = position.IsInCheck();
 
         // Act
-        var noDepthResult = position.EvaluateFinalPosition(default, new(), default);
-        var depthOneResult = position.EvaluateFinalPosition(1, new(), default);
-        var depthTwoResult = position.EvaluateFinalPosition(2, new(), default);
+        var noDepthResult = Position.EvaluateFinalPosition(default, isInCheck, new(), default);
+        var depthOneResult = Position.EvaluateFinalPosition(1, isInCheck, new(), default);
+        var depthTwoResult = Position.EvaluateFinalPosition(2, isInCheck, new(), default);
 
         if (expectedEvaluationValue < 0)
         {

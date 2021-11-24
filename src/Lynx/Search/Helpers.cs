@@ -94,7 +94,7 @@ public sealed partial class Engine
 
             var newPosition = new Position(position, move);
 
-            if (!newPosition.IsValid())
+            if (!newPosition.WasProduceByAValidMove())
             {
                 throw new AssertException($"Invalid position after move {move.UCIString()} from position {position.FEN}");
             }

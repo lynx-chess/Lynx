@@ -80,9 +80,9 @@ public sealed class Position
     /// <param name="position"></param>
     /// <param name="nullMove"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
 #pragma warning disable RCS1163 // Unused parameter.
     public Position(Position position, bool nullMove)
-#pragma warning restore RCS1163 // Unused parameter.
     {
         UniqueIdentifier = position.UniqueIdentifier;
         PieceBitBoards = new BitBoard[12];
@@ -98,6 +98,7 @@ public sealed class Position
         UniqueIdentifier ^=
             ZobristTable.SideHash();
     }
+#pragma warning restore RCS1163 // Unused parameter.
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Position(Position position, Move move) : this(position)
@@ -219,7 +220,7 @@ public sealed class Position
     /// </summary>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsValid()
+    internal bool IsValid()
     {
         var kingSquare = PieceBitBoards[(int)Piece.K + Utils.PieceOffset(Side)].GetLS1BIndex();
         var oppositeKingSquare = PieceBitBoards[(int)Piece.K + Utils.PieceOffset((Side)Utils.OppositeSide(Side))].GetLS1BIndex();
@@ -240,6 +241,15 @@ public sealed class Position
         var oppositeKingSquare = PieceBitBoards[(int)Piece.K + Utils.PieceOffset((Side)Utils.OppositeSide(Side))].GetLS1BIndex();
 
         return oppositeKingSquare >= 0 && !Attacks.IsSquaredAttacked(oppositeKingSquare, Side, PieceBitBoards, OccupancyBitBoards);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsInCheck()
+    {
+        var kingSquare = PieceBitBoards[(int)Piece.K + Utils.PieceOffset(Side)].GetLS1BIndex();
+        var oppositeSide = (Side)Utils.OppositeSide(Side);
+
+        return Attacks.IsSquaredAttacked(kingSquare, oppositeSide, PieceBitBoards, OccupancyBitBoards);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -394,17 +404,14 @@ public sealed class Position
     /// <returns>At least <see cref="CheckMateEvaluation"/> if Position.Side lost (more extreme values when <paramref name="depth"/> increases)
     /// or 0 if Position.Side was stalemated</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int EvaluateFinalPosition(int depth, Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove)
+    public static int EvaluateFinalPosition(int depth, bool isInCheck, Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove)
     {
         if (positionHistory.Values.Any(val => val >= 3) || movesWithoutCaptureOrPawnMove >= 100)
         {
             return 0;
         }
 
-        if (Attacks.IsSquaredAttackedBySide(
-            PieceBitBoards[(int)Piece.K + Utils.PieceOffset(Side)].GetLS1BIndex(),
-            this,
-            (Side)Utils.OppositeSide(Side)))
+        if (isInCheck)
         {
             return -EvaluationConstants.CheckMateEvaluation + (DepthFactor * depth);
         }
