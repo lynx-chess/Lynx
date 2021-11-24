@@ -9,7 +9,6 @@ public struct BitBoard
 {
     public ulong Board { readonly get; private set; }
 
-    // TODO Does removing this property save space?
     public bool Empty => Board == default;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
