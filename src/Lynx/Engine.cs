@@ -116,9 +116,15 @@ public sealed partial class Engine
                 minDepth = goCommand.Depth;
                 maxDepth = goCommand.Depth;
             }
+            else if (goCommand.Infinite)
+            {
+                minDepth = Configuration.EngineSettings.MaxDepth;
+                maxDepth = Configuration.EngineSettings.MaxDepth;
+                _logger.Info($"Infinite search (depth {minDepth})");
+            }
             else
             {
-                _logger.Warn("Unexpected go command");
+                _logger.Warn("Unexpected or unsupported go command");
                 maxDepth = Configuration.EngineSettings.DefaultMaxDepth;
             }
         }

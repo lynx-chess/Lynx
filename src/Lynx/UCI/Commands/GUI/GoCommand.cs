@@ -97,8 +97,8 @@ public sealed class GoCommand : GUIBaseCommand
     public int BlackIncrement { get; private set; } = default!;
     public int MovesToGo { get; private set; } = default!;
     public int Depth { get; private set; } = default!;
-    public int Nodes { get; private set; } = default!;
-    public int Mate { get; private set; } = default!;
+    public int Nodes { get; private set; } = default!;  // Not implemented
+    public int Mate { get; private set; } = default!;   // Not implemented
     public int MoveTime { get; private set; } = default!;
     public bool Infinite { get; private set; } = default!;
     public bool Ponder { get; private set; } = default!;
