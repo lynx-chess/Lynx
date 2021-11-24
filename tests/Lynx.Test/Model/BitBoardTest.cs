@@ -143,7 +143,7 @@ public class BitBoardTest
         Assert.False(result.GetBit(BoardSquare.d5));
     }
 
-    [TestCase(new BoardSquare[] { }, -1)]
+    [TestCase(new BoardSquare[] { }, -1, Ignore = "Not a real case, we always check if beforehand")]
     [TestCase(new BoardSquare[] { BoardSquare.e4 }, (int)BoardSquare.e4)]
     [TestCase(new BoardSquare[] { BoardSquare.a8 }, (int)BoardSquare.a8)]
     [TestCase(new BoardSquare[] { BoardSquare.h1 }, (int)BoardSquare.h1)]

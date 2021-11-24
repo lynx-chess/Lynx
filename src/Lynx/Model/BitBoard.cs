@@ -9,6 +9,7 @@ public struct BitBoard
 {
     public ulong Board { readonly get; private set; }
 
+    // TODO Does removing this property save space?
     public bool Empty => Board == default;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -73,8 +74,9 @@ public struct BitBoard
     }
 
     /// <summary>
-    /// https://www.chessprogramming.org/General_Setwise_Operations#Separation
-    /// Cannot use (Board & -Board) - 1 due to limitation applying unary - to ulong
+    /// https://www.chessprogramming.org/General_Setwise_Operations#Separation.
+    /// Cannot use (Board & -Board) - 1 due to limitation applying unary - to ulong.
+    /// Assumes <see cref="Board"/> != default
     /// </summary>
     /// <returns>-1 in case of empty board</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -118,14 +120,15 @@ public struct BitBoard
         return (bitboard & (1UL << squareIndex)) != default;
     }
 
+    /// <summary>
+    /// Assumes that <paramref name="bitboard"/> != default
+    /// </summary>
+    /// <param name="bitboard"></param>
+    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int GetLS1BIndex(ulong bitboard)
     {
-        // TODO Try to get rid of this if
-        if (bitboard == default)
-        {
-            return (int)BoardSquare.noSquare;
-        }
+        Utils.Assert(bitboard != default);
 
         return BitOperations.TrailingZeroCount(bitboard);
     }
