@@ -13,6 +13,7 @@ public static class MatePositions
 
     public static readonly object[] Mates_in_2 = new object[]
     {
+        new object[]{ "5k2/Q7/8/5K2/8/8/8/8 w - - 0 1                                   ", new[] { "f5f6" }, "https://gameknot.com/chess-puzzle.pl?pz=114463" },
         new object[]{ "8/pN3R2/1b2k1K1/n4R2/pp1p4/3B1P1n/3B1PNP/3r3Q w - -              ", new[] { "d2f4" }, "https://gameknot.com/chess-puzzle.pl?pz=114463" },
         new object[]{ "KQ4R1/8/8/8/4N3/8/5p2/6bk w - -                                  ", new[] { "b8b2" }, "https://gameknot.com/chess-puzzle.pl?pz=1" },
         new object[]{ "8/8/8/8/8/3n1N2/8/3Q1K1k w - -                                   ", new[] { "d1b1" }, "https://gameknot.com/chess-puzzle.pl?pz=1669"},
@@ -30,6 +31,7 @@ public static class MatePositions
 
     public static readonly object[] Mates_in_4 = new object[]
     {
+        new object[]{ "5k2/R7/8/5K2/8/8/8/8 w - - 0 1       ", new[] { "f5e6" }, "" },
         new object[]{ "6k1/1R6/5K2/3p1N2/1P3n2/8/8/3r4 w - -", new[] { "f5h6" }, "https://gameknot.com/chess-puzzle.pl?pz=260253" }
     };
 

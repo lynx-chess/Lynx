@@ -96,7 +96,8 @@ public sealed class Position
         EnPassant = BoardSquare.noSquare;
 
         UniqueIdentifier ^=
-            ZobristTable.SideHash();
+            ZobristTable.SideHash()
+            ^ ZobristTable.EnPassantHash((int)position.EnPassant);
     }
 #pragma warning restore RCS1163 // Unused parameter.
 
