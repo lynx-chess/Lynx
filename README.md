@@ -23,8 +23,8 @@ Lichess bot can be played directly, but a chess GUI that supports UCI protocol i
 
 | Lynx version                                                    | CCRL Blitz elo                                                                                                                         |
 |-----------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
-| [0.6.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.6.0) | [1393](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.6.0%2064-bit#Lynx_0_6_0_64-bit) |
-| [0.4.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.4.0) | [1355](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.4.0%2064-bit#Lynx_0_4_0_64-bit) |
+| [0.6.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.6.0) | [1400](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.6.0%2064-bit#Lynx_0_6_0_64-bit) |
+| [0.4.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.4.0) | [1357](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.4.0%2064-bit#Lynx_0_4_0_64-bit) |
 
 ## Building Lynx
 
@@ -63,11 +63,11 @@ If you're a Linux user and are new to .NET ecosystem, the conversation in [this 
 
 - Static, positional evaluation
 
-- NegaMax [[1]](https://www.chessprogramming.org/Negamax)
+- NegaMax [[1](https://www.chessprogramming.org/Negamax)]
 
-- Iterative Deepening Depth-First Search (IDDFS) [[1]](https://en.wikipedia.org/wiki/Iterative_deepening_depth-first_search), [[2]](https://www.chessprogramming.org/Iterative_Deepening)
+- Iterative Deepening Depth-First Search (IDDFS) [[1](https://en.wikipedia.org/wiki/Iterative_deepening_depth-first_search)] [[2](https://www.chessprogramming.org/Iterative_Deepening)]
 
-- Most Valuable Victim - Least Valuable Aggressor (MVV-LVA) [[1]](https://www.chessprogramming.org/MVV-LVA)
+- Most Valuable Victim - Least Valuable Aggressor (MVV-LVA) [[1](https://www.chessprogramming.org/MVV-LVA)]
 
 - Killer heuristic [[1](https://www.chessprogramming.org/Killer_Heuristic)]
 
@@ -82,6 +82,8 @@ If you're a Linux user and are new to .NET ecosystem, the conversation in [this 
 - Late Move Reductions [[1](https://web.archive.org/web/20150212051846/http://www.glaurungchess.com/lmr.html)] [[2](https://www.chessprogramming.org/Late_Move_Reductions)] [[3](https://talkchess.com/forum3/viewtopic.php?f=7&t=75056#p860118)]
 
 - Verified null-move pruning [[1](https://www.researchgate.net/publication/297377298_Verified_Null-Move_Pruning)] [[2](https://web.archive.org/web/20071031095933/http://www.brucemo.com/compchess/programming/nullmove.htm)] [[3](https://www.chessprogramming.org/Null_Move_Pruning)]
+
+- Aspiration Windows [[1](https://web.archive.org/web/20071031095918/http://www.brucemo.com/compchess/programming/aspiration.htm)] [[2](https://www.chessprogramming.org/Aspiration_Windows)]
 
 ## Credits
 

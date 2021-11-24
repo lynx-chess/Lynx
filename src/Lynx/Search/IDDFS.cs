@@ -41,6 +41,8 @@ public sealed partial class Engine
         _halfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
 
         int bestEvaluation = 0;
+        int alpha = MinValue;
+        int beta = MaxValue;
         SearchResult? searchResult = null;
         int depth = 1;
         bool isCancelled = false;
@@ -60,7 +62,21 @@ public sealed partial class Engine
                 _nodes = 0;
                 _isFollowingPV = true;
 
-                bestEvaluation = NegaMax(Game.CurrentPosition, minDepth, maxDepth: depth, depth: 0, alpha: MinValue, beta: MaxValue, isVerifyingNullMoveCutOff: true);
+                bestEvaluation = NegaMax(Game.CurrentPosition, minDepth, maxDepth: depth, depth: 0, alpha, beta, isVerifyingNullMoveCutOff: true);
+
+                // Aspiration Windows
+                if ((bestEvaluation <= alpha) || (bestEvaluation >= beta))
+                {
+                    alpha = MinValue;   // We fell outside the window, so try again with a
+                    beta = MaxValue;    // full-width window (and the same depth).
+
+                    _logger.Debug($"Outside of aspiration window (depth {depth}, nodes {_nodes})");
+                    depth--;    // The while clause gets executed, so we want to ensure same depth
+                    continue;
+                }
+
+                alpha = bestEvaluation - Configuration.EngineSettings.AspirationWindowAlpha;
+                beta = bestEvaluation + Configuration.EngineSettings.AspirationWindowBeta;
 
                 ValidatePVTable();
                 //PrintPvTable();
@@ -68,9 +84,9 @@ public sealed partial class Engine
                 var pvMoves = _pVTable.TakeWhile(m => m.EncodedMove != default).ToList();
                 var maxDepthReached = _maxDepthReached.Last(item => item != default);
 
-                int mate = default;
                 var bestEvaluationAbs = Math.Abs(bestEvaluation);
                 isMateDetected = bestEvaluationAbs > 0.1 * EvaluationConstants.CheckMateEvaluation;
+                int mate = default;
                 if (isMateDetected)
                 {
                     mate = (int)Math.Ceiling(0.5 * ((EvaluationConstants.CheckMateEvaluation - bestEvaluationAbs) / Position.DepthFactor));
