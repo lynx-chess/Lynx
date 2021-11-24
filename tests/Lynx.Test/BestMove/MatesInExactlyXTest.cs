@@ -24,7 +24,7 @@ public class MatesInExactlyXTest : BaseTest
     }
 
     [Explicit]
-    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_3), Category = "NoPruning")]
+    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_3), Category = Categories.NoPruning)]
     public void Mate_in_Exactly_3(string fen, string[]? allowedUCIMoveString, string description)
     {
         var result = TestBestMove(fen, allowedUCIMoveString, null, depth: 5);
@@ -32,7 +32,7 @@ public class MatesInExactlyXTest : BaseTest
     }
 
     [Explicit]
-    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_4), Category = "NoPruning")]
+    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_4), Category = Categories.NoPruning)]
     public void Mate_in_Exactly_4(string fen, string[]? allowedUCIMoveString, string description)
     {
         var result = TestBestMove(fen, allowedUCIMoveString, null, depth: 8);
@@ -40,7 +40,7 @@ public class MatesInExactlyXTest : BaseTest
     }
 
     [Explicit]
-    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_4_Collection), Category = "NoPruning")]
+    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_4_Collection), Category = Categories.NoPruning)]
     public void Mate_in_Exactly_4_Collection(string fen, string[]? allowedUCIMoveString, string description)
     {
         var result = TestBestMove(fen, allowedUCIMoveString, null, depth: 8);
@@ -48,7 +48,7 @@ public class MatesInExactlyXTest : BaseTest
     }
 
     [Explicit]
-    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_5), Category = "NoPruning")]
+    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_5), Category = Categories.NoPruning)]
     public void Mate_in_Exactly_5(string fen, string[]? allowedUCIMoveString, string description)
     {
         var result = TestBestMove(fen, allowedUCIMoveString, null, depth: 10);
@@ -56,7 +56,7 @@ public class MatesInExactlyXTest : BaseTest
     }
 
     [Explicit]
-    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_6), Category = "TooLongToBeRun")]
+    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_6), Category = Categories.NoPruning)]
     public void Mate_in_Exactly_6(string fen, string[]? allowedUCIMoveString, string description)
     {
         var result = TestBestMove(fen, allowedUCIMoveString, null, depth: 12);
@@ -64,7 +64,7 @@ public class MatesInExactlyXTest : BaseTest
     }
 
     [Explicit]
-    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_7), Category = "TooLongToBeRun")]
+    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_7), Category = Categories.TooLong)]
     public void Mate_in_Exactly_7(string fen, string[]? allowedUCIMoveString, string description)
     {
         var result = TestBestMove(fen, allowedUCIMoveString, null, depth: 14);
