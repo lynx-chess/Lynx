@@ -15,9 +15,9 @@ public class PerftTest
     [TestCase(Constants.InitialPositionFEN, 4, 197_281)]
     [TestCase(Constants.InitialPositionFEN, 5, 4_865_609)]
     [TestCase(Constants.InitialPositionFEN, 6, 119_060_324)]
-    [TestCase(Constants.InitialPositionFEN, 7, 3_195_901_860, Category = Categories.TooLong)]
-    [TestCase(Constants.InitialPositionFEN, 8, 84_998_978_956, Category = Categories.TooLong)]
-    [TestCase(Constants.InitialPositionFEN, 9, 2_439_530_234_167, Category = Categories.TooLong)]
+    [TestCase(Constants.InitialPositionFEN, 7, 3_195_901_860, Category = Categories.TooLong, Explicit = true)]
+    [TestCase(Constants.InitialPositionFEN, 8, 84_998_978_956, Category = Categories.TooLong, Explicit = true)]
+    [TestCase(Constants.InitialPositionFEN, 9, 2_439_530_234_167, Category = Categories.TooLong, Explicit = true)]
     public void InitialPosition(string fen, int depth, long expectedNumberOfNodes)
     {
         Validate(fen, depth, expectedNumberOfNodes);
@@ -27,8 +27,8 @@ public class PerftTest
     [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 2, 2_039)]
     [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 3, 97_862)]
     [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 4, 4_085_603)]
-    [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 5, 193_690_690)]                                     // 2m 30s
-    [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 6, 8_031_647_685, Category = Categories.TooLong)]    // 24 min
+    [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 5, 193_690_690)]                                                      // 2m 30s
+    [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 6, 8_031_647_685, Category = Categories.TooLong, Explicit = true)]    // 24 min
     public void Position2(string fen, int depth, long expectedNumberOfNodes)
     {
         Validate(fen, depth, expectedNumberOfNodes);
@@ -52,7 +52,7 @@ public class PerftTest
     [TestCase("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1", 3, 9_467)]
     [TestCase("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1", 4, 422_333)]
     [TestCase("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1", 5, 15_833_292)]
-    [TestCase("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1", 6, 706_045_033, Category = Categories.TooLong)]    // 9m 6s
+    [TestCase("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1", 6, 706_045_033, Category = Categories.TooLong, Explicit = true)]    // 9m 6s
     public void Position4(string fen, int depth, long expectedNumberOfNodes)
     {
         Validate(fen, depth, expectedNumberOfNodes);
@@ -63,7 +63,7 @@ public class PerftTest
     [TestCase("r2q1rk1/pP1p2pp/Q4n2/bbp1p3/Np6/1B3NBn/pPPP1PPP/R3K2R b KQ - 0 1", 3, 9_467)]
     [TestCase("r2q1rk1/pP1p2pp/Q4n2/bbp1p3/Np6/1B3NBn/pPPP1PPP/R3K2R b KQ - 0 1", 4, 422_333)]
     [TestCase("r2q1rk1/pP1p2pp/Q4n2/bbp1p3/Np6/1B3NBn/pPPP1PPP/R3K2R b KQ - 0 1", 5, 15_833_292)]
-    [TestCase("r2q1rk1/pP1p2pp/Q4n2/bbp1p3/Np6/1B3NBn/pPPP1PPP/R3K2R b KQ - 0 1", 6, 706_045_033, Category = Categories.TooLong)]
+    [TestCase("r2q1rk1/pP1p2pp/Q4n2/bbp1p3/Np6/1B3NBn/pPPP1PPP/R3K2R b KQ - 0 1", 6, 706_045_033, Category = Categories.TooLong, Explicit = true)]
     public void Position4_mirrored(string fen, int depth, long expectedNumberOfNodes)
     {
         Validate(fen, depth, expectedNumberOfNodes);
@@ -84,10 +84,10 @@ public class PerftTest
     [TestCase("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10", 3, 89_890)]
     [TestCase("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10", 4, 3_894_594)]
     [TestCase("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10", 5, 164_075_551)]
-    [TestCase("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10", 6, 6_923_051_137, Category = Categories.TooLong)]
-    [TestCase("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10", 7, 287_188_994_746, Category = Categories.TooLong)]
-    [TestCase("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10", 8, 11_923_589_843_526, Category = Categories.TooLong)]
-    [TestCase("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10", 9, 490_154_852_788_714, Category = Categories.TooLong)]
+    [TestCase("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10", 6, 6_923_051_137, Category = Categories.TooLong, Explicit = true)]
+    [TestCase("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10", 7, 287_188_994_746, Category = Categories.TooLong, Explicit = true)]
+    [TestCase("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10", 8, 11_923_589_843_526, Category = Categories.TooLong, Explicit = true)]
+    [TestCase("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10", 9, 490_154_852_788_714, Category = Categories.TooLong, Explicit = true)]
     public void Position6(string fen, int depth, long expectedNumberOfNodes)
     {
         Validate(fen, depth, expectedNumberOfNodes);
@@ -138,7 +138,7 @@ public class PerftTest
     /// <param name="fen"></param>
     /// <param name="depth"></param>
     /// <param name="expectedNumberOfNodes"></param>
-    [TestCase("r3k2r/8/8/8/3pPp2/8/8/R3K1RR b KQkq e3 0 1                           ", 6, 485_647_607, Category = Categories.TooLong)]  // 6m 30s
+    [TestCase("r3k2r/8/8/8/3pPp2/8/8/R3K1RR b KQkq e3 0 1                           ", 6, 485_647_607, Category = Categories.TooLong, Explicit = true)]  // 6m 30s
     [TestCase("8/7p/p5pb/4k3/P1pPn3/8/P5PP/1rB2RK1 b - d3 0 28                      ", 4, 67_197, Description = "resolving check by en-passant capture of the checking pawn")]
     [TestCase("8/7p/p5pb/4k3/P1pPn3/8/P5PP/1rB2RK1 b - d3 0 28                      ", 6, 38_633_283, Description = "resolving check by en-passant capture of the checking pawn")]
     [TestCase("8/3K4/2p5/p2b2r1/5k2/8/8/1q6 b - - 1 67                              ", 7, 493_407_574)]  // 5m 50s
