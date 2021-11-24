@@ -222,8 +222,11 @@ public sealed class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal bool IsValid()
     {
-        var kingSquare = PieceBitBoards[(int)Piece.K + Utils.PieceOffset(Side)].GetLS1BIndex();
-        var oppositeKingSquare = PieceBitBoards[(int)Piece.K + Utils.PieceOffset((Side)Utils.OppositeSide(Side))].GetLS1BIndex();
+        var kingBitBoard = PieceBitBoards[(int)Piece.K + Utils.PieceOffset(Side)];
+        var kingSquare = kingBitBoard.Board == default ? -1 : kingBitBoard.GetLS1BIndex();
+
+        var oppositeKingBitBoard = PieceBitBoards[(int)Piece.K + Utils.PieceOffset((Side)Utils.OppositeSide(Side))];
+        var oppositeKingSquare = oppositeKingBitBoard.Board == default ? -1 : oppositeKingBitBoard.GetLS1BIndex();
 
         return kingSquare >= 0 && oppositeKingSquare >= 0
             && !Attacks.IsSquaredAttacked(oppositeKingSquare, Side, PieceBitBoards, OccupancyBitBoards);
@@ -238,7 +241,8 @@ public sealed class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool WasProduceByAValidMove()
     {
-        var oppositeKingSquare = PieceBitBoards[(int)Piece.K + Utils.PieceOffset((Side)Utils.OppositeSide(Side))].GetLS1BIndex();
+        var oppositeKingBitBoard = PieceBitBoards[(int)Piece.K + Utils.PieceOffset((Side)Utils.OppositeSide(Side))];
+        var oppositeKingSquare = oppositeKingBitBoard.Board == default ? -1 : oppositeKingBitBoard.GetLS1BIndex();
 
         return oppositeKingSquare >= 0 && !Attacks.IsSquaredAttacked(oppositeKingSquare, Side, PieceBitBoards, OccupancyBitBoards);
     }
