@@ -48,6 +48,7 @@ public sealed partial class Engine
 
     public void NewGame()
     {
+        AverageDepth = 0;
         _isNewGameComing = true;
         _isNewGameCommandSupported = true;
     }
@@ -141,7 +142,7 @@ public sealed partial class Engine
             Game.MakeMove(result.BestMove);
         }
 
-        AverageDepth += (result.DepthReached - AverageDepth) / Game.MoveHistory.Count;
+        AverageDepth += (result.TargetDepth - AverageDepth) / Math.Ceiling(0.5 * Game.MoveHistory.Count);
 
         return result;
     }
