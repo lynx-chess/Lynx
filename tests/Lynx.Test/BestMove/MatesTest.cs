@@ -20,8 +20,7 @@ public class MatesTest : BaseTest
         Assert.AreEqual(2, result.Mate);
     }
 
-    [Explicit]
-    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_3), Category = "LongRunning")]
+    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_3))]
     public void Mate_in_3(string fen, string[]? allowedUCIMoveString, string description)
     {
         var result = SearchBestMove(fen);
@@ -29,7 +28,7 @@ public class MatesTest : BaseTest
     }
 
     [Explicit]
-    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_4), Category = "LongRunning")]
+    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_4), Category = Categories.LongRunning)]
     public void Mate_in_4(string fen, string[]? allowedUCIMoveString, string description)
     {
         var result = SearchBestMove(fen);
@@ -42,7 +41,7 @@ public class MatesTest : BaseTest
     /// <param name="fen"></param>
     /// <param name="allowedUCIMoveString"></param>
     [Explicit]
-    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_4_Collection), Category = "ExtraLongRunning")]
+    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_4_Collection), Category = Categories.LongRunning)]
     public void Mate_in_4_Collection(string fen, string[]? allowedUCIMoveString, string description)
     {
         var result = SearchBestMove(fen);
@@ -50,7 +49,7 @@ public class MatesTest : BaseTest
     }
 
     [Explicit]
-    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_5), Category = "LongRunning")]
+    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_5), Category = Categories.LongRunning)]
     public void Mate_in_5(string fen, string[]? allowedUCIMoveString, string description)
     {
         var result = SearchBestMove(fen);
@@ -58,7 +57,7 @@ public class MatesTest : BaseTest
     }
 
     [Explicit]
-    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_6), Category = "ExtraLongRunning")]
+    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_6), Category = Categories.LongRunning)]
     public void Mate_in_6(string fen, string[]? allowedUCIMoveString, string description)
     {
         var result = SearchBestMove(fen);
@@ -66,11 +65,11 @@ public class MatesTest : BaseTest
     }
 
     [Explicit]
-    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_7), Category = "TooLongToBeRun")]
+    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_7), Category = Categories.LongRunning)]
     public void Mate_in_7(string fen, string[]? allowedUCIMoveString, string description)
     {
-        var result = SearchBestMove(fen);
-        Assert.AreNotEqual(0, result.Mate);
+        var result = SearchBestMove(fen, depth: 14);
+        Assert.AreNotEqual(default, result.Mate);
     }
 }
 
