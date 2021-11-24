@@ -175,7 +175,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macOS-latest]
-        category: [LongRunning, ExtraLongRunning]
+        category: [Perft, LongRunning, ExtraLongRunning]
       fail-fast: false
 
     env:

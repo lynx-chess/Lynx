@@ -36,7 +36,7 @@ build:
 	dotnet build -c Release
 
 test:
-	dotnet test -c Release & dotnet test -c Release --filter "TestCategory=LongRunning"
+	dotnet test -c Release & dotnet test -c Release --filter "TestCategory=LongRunning" & dotnet test -c Release --filter "TestCategory=ExtraLongRunning" & dotnet test -c Release --filter "TestCategory=Perft"
 
 publish:
 	dotnet publish src/Lynx.Cli/Lynx.Cli.csproj -c Release --runtime ${RUNTIME} --self-contained /p:Optimized=true -o ${OUTPUT_DIR}
