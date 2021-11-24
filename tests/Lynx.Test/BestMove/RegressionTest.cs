@@ -223,7 +223,18 @@ public class RegressionTest : BaseTest
         var engine = GetEngine();
         engine.AdjustPosition(positionCommand);
 
-        var bestMove = engine.BestMove(new GoCommand($"go depth 1"));
+        var bestMove = engine.BestMove(new GoCommand("go depth 1"));
         Assert.NotZero(bestMove.Evaluation);
+    }
+
+    [TestCase(Constants.KillerTestPositionFEN)]
+    [TestCase(Constants.TrickyTestPositionFEN)]
+    public void PVTableCrash(string fen)
+    {
+        const int depthWhenMaxDepthInQuiescenceIsReached = 7;
+        var engine = GetEngine(fen);
+
+        var bestMove = engine.BestMove(new GoCommand($"go depth {depthWhenMaxDepthInQuiescenceIsReached }"));
+        Assert.AreEqual(depthWhenMaxDepthInQuiescenceIsReached, bestMove.TargetDepth);
     }
 }
