@@ -92,7 +92,7 @@ public sealed partial class Engine
                 if (isMateDetected)
                 {
                     mate = (int)Math.Ceiling(0.5 * ((EvaluationConstants.CheckMateEvaluation - bestEvaluationAbs) / Position.DepthFactor));
-                    Math.CopySign(bestEvaluation, mate);
+                    mate = (int)Math.CopySign(mate, bestEvaluation);
                 }
 
                 var elapsedTime = _stopWatch.ElapsedMilliseconds;
