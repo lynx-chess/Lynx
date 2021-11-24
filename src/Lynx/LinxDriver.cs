@@ -50,7 +50,7 @@ public sealed class LinxDriver
                             break;
                         case QuitCommand.Id:
                             HandleQuit();
-                            break;
+                            return;
                         case RegisterCommand.Id:
                             HandleRegister(rawCommand);
                             break;
@@ -204,7 +204,11 @@ public sealed class LinxDriver
         }
     }
 
-    private void HandleNewGame() => _engine.NewGame();
+    private void HandleNewGame()
+    {
+        _logger.Info($"Average depth: {_engine.AverageDepth}");
+        _engine.NewGame();
+    }
 
     private static void HandleDebug(string command) => Configuration.IsDebug = DebugCommand.Parse(command);
 
