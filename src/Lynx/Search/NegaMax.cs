@@ -51,15 +51,14 @@ public sealed partial class Engine
             return Position.EvaluateFinalPosition(depth, isInCheck, Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
         }
 
+        // 🔍 Null-move pruning
         bool isFailHigh = false;    // In order to detect zugzwangs
-
         if (depth > Configuration.EngineSettings.NullMovePruning_R
             && !isInCheck
             && !ancestorWasNullMove
             && (!isVerifyingNullMoveCutOff || depth < maxDepth - 1))    // verify == true and depth == maxDepth -1 -> No null pruning, since verification will not be possible)
                                                                         // following pv?
         {
-            // Null-move pruning
             var newPosition = new Position(position, nullMove: true);
 
             var repetitions = Utils.UpdatePositionHistory(newPosition, Game.PositionHashHistory);
@@ -84,7 +83,7 @@ public sealed partial class Engine
             }
         }
 
-        searchAgain:
+        VerifiedNullMovePruning_SearchAgain:
 
         int movesSearched = 0;
         Move? bestMove = null;
@@ -116,12 +115,12 @@ public sealed partial class Engine
             }
             else
             {
-                // Late Move Reduction (LMR)
+                // 🔍 Late Move Reduction (LMR)
                 if (movesSearched >= Configuration.EngineSettings.LMR_FullDepthMoves
                     && depth >= Configuration.EngineSettings.LMR_ReductionLimit
                     && !_isFollowingPV
                     && !isInCheck
-                    //&& !Utils.InCheck(newPosition)
+                    //&& !newPosition.IsInCheck()
                     && !move.IsCapture()
                     && move.PromotedPiece() == default)
                 {
@@ -136,9 +135,9 @@ public sealed partial class Engine
 
                 if (evaluation > alpha)
                 {
+                    // 🔍 Principal Variation Search (PVS)
                     if (bestMove is not null)
                     {
-                        // Principal Variation Search (PVS)
                         // Optimistic search, validating that the rest of the moves are worse than bestmove.
                         // It should produce more cutoffs and therefore be faster.
                         // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
@@ -170,6 +169,7 @@ public sealed partial class Engine
             {
                 PrintMessage($"Pruning: {move} is enough");
 
+                // 🔍 Killer moves
                 if (!move.IsCapture())
                 {
                     _killerMoves[1, depth] = _killerMoves[0, depth];
@@ -183,6 +183,7 @@ public sealed partial class Engine
                 alpha = evaluation;
                 bestMove = move;
 
+                // 🔍 History moves
                 if (!move.IsCapture())
                 {
                     _historyMoves[move.Piece(), move.TargetSquare()] += depth << 2;
@@ -195,13 +196,13 @@ public sealed partial class Engine
             ++movesSearched;
         }
 
-        // If there is a fail-high report, but no cutoff was found, the position is a zugzwang and has to be re-searched with the original depth
+        // [Null-move pruning] If there is a fail-high report, but no cutoff was found, the position is a zugzwang and has to be re-searched with the original depth
         if (isFailHigh && alpha < beta)
         {
             --depth;
             isFailHigh = false;
             isVerifyingNullMoveCutOff = true;
-            goto searchAgain;
+            goto VerifiedNullMovePruning_SearchAgain;
         }
 
         if (bestMove is null)

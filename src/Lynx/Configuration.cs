@@ -156,4 +156,8 @@ public sealed class EngineSettings
     public int LMR_DepthReduction { get; set; } = 1;
 
     public int NullMovePruning_R { get; set; } = 3;
+
+    public int AspirationWindowAlpha { get; set; } = 50;
+
+    public int AspirationWindowBeta { get; set; } = 50;
 }
