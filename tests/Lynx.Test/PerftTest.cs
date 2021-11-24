@@ -41,7 +41,7 @@ public class PerftTest
     [TestCase("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -", 5, 674_624)]
     [TestCase("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -", 6, 11_030_083)]
     [TestCase("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -", 7, 178_633_661)]
-    [TestCase("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -", 8, 3_009_794_393, Category = Categories.TooLong)]
+    [TestCase("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -", 8, 3_009_794_393, Category = Categories.TooLong, Explicit = true)]   // 8 m 10 s
     public void Position3(string fen, int depth, long expectedNumberOfNodes)
     {
         Validate(fen, depth, expectedNumberOfNodes);
