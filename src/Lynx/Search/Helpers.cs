@@ -5,9 +5,21 @@ using System.Text;
 
 namespace Lynx;
 
-public record SearchResult(Move BestMove, double Evaluation, int TargetDepth, int DepthReached, int Nodes, long Time, long NodesPerSecond, List<Move> Moves, int Mate = default)
+public record SearchResult(Move BestMove, double Evaluation, int TargetDepth, int DepthReached, int Nodes, long Time, long NodesPerSecond, List<Move> Moves, int Alpha, int Beta, int Mate = default)
 {
     public bool IsCancelled { get; set; }
+
+    public SearchResult(SearchResult previousSearchResult)
+    {
+        BestMove = previousSearchResult.Moves.ElementAtOrDefault(2);
+        Evaluation = previousSearchResult.Evaluation;
+        TargetDepth = previousSearchResult.TargetDepth - 2;
+        DepthReached = previousSearchResult.DepthReached - 2;
+        Moves = previousSearchResult.Moves.Skip(2).ToList();
+        Alpha = previousSearchResult.Alpha;
+        Beta = previousSearchResult.Beta;
+        Mate = previousSearchResult.Mate == 0 ? 0 : (int)Math.CopySign(Math.Abs(previousSearchResult.Mate) - 1, previousSearchResult.Mate);
+    }
 }
 
 public sealed partial class Engine
@@ -164,7 +176,7 @@ public sealed partial class Engine
         _logger.Trace(message);
     }
 
-    [Conditional("DEBUG")]
+    //[Conditional("DEBUG")]
     private void PrintPvTable(int target = -1, int source = -1)
     {
         Console.WriteLine(

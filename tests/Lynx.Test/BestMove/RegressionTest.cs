@@ -237,4 +237,42 @@ public class RegressionTest : BaseTest
         var bestMove = engine.BestMove(new GoCommand($"go depth {depthWhenMaxDepthInQuiescenceIsReached }"));
         Assert.AreEqual(depthWhenMaxDepthInQuiescenceIsReached, bestMove.TargetDepth);
     }
+
+    [Test]
+    public void PonderingCrash()
+    {
+        var engine = GetEngine();
+        engine.AdjustPosition("position startpos moves" +
+            " e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 a7a6 f2f3 e7e5 d4b3 c8e6 c1e3 h7h5 c3d5 e6d5 e4d5 b8d7" +
+            " f1e2 g7g6 d1d2 f8g7 c2c4 d8c7 e1c1 e8c8 h1e1 d7b6 d2c2 h5h4 a2a3 h4h3 g2h3 h8h3 e2f1 h3h5 h2h3 c8b8" +
+            " c2c3 h5f5 b3d2 d8c8 c1b1 b6d5 c4d5 c7c3 b2c3 f6d5 d2e4 d5c3 e4c3 c8c3 b1b2 c3c6 b2b3 b8c8 a3a4 f5f6" +
+            " h3h4 c6c7 f1h3 c8b8 h3g4 c7c6 e3g5 f6e6 g4e6 f7e6 g5e7 d6d5 e1g1 g7h6 g1g6 h6e3 a4a5 e3d4 f3f4 b7b6" +
+            " a5b6 c6b6 b3a4 b6c6 e7b4 b8b7 f4e5 d4e5 d1e1 e5c7 e1e6 c6c4 e6a6 c4h4 a6e6 h4h1 a4b5 d5d4 g6g7 h1c1" +
+            " g7d7 b7c8 d7d4 c1a1 e6e8 c8b7 d4d7 a1c1 b4a3 c1c2 b5a4 b7c6 d7e7 c2d2 a3c1 d2c2 c1g5 c2c5 g5e3 c5d5" +
+            " e8a8 d5d3 a8a6 c6d5 e7d7 d5e4 d7c7 d3e3 a6a8 e4d5 a8d8 d5e6 a4b5 e3b3 b5c4 b3b1 d8e8 e6f6 c4d3 b1d1" +
+            " d3c2 d1a1 c7d7 f6f5 d7f7 f5g6 e8e7 g6g5 c2d3 a1a2 d3d4 a2a4 d4e5 a4a5 e5d6 a5a2 f7g7 g5f4 g7f7 f4g4" +
+            " f7g7 g4f4 g7f7 f4g4 e7b7 g4g5 d6e5 g5g4 f7f4 g4g5 b7g7 g5h5 f4f7 a2e2 e5d5 h5h6 g7h7 h6g5 h7g7 g5h5" +
+            " d5d4 h5h6 f7a7 h6h5 d4d5 h5h6 d5d6 h6h5 a7f7 h5h6 d6d5 h6h5 f7a7 h5h6 d5d4 h6h5 g7g8 h5h6 d4d5 e2b2" +
+            " d5d6 b2f2 a7a8 h6h7 d6d5 h7h6 d5e5 h6h7 e5d5 h7h6 d5e6 h6h5 g8g1 f2e2 e6f7 e2f2 f7g7 f2f8");
+
+        var searchResult = engine.BestMove();
+
+        engine.AdjustPosition("position startpos moves" +
+            " e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 a7a6 f2f3 e7e5 d4b3 c8e6 c1e3 h7h5 c3d5 e6d5 e4d5 b8d7" +
+            " f1e2 g7g6 d1d2 f8g7 c2c4 d8c7 e1c1 e8c8 h1e1 d7b6 d2c2 h5h4 a2a3 h4h3 g2h3 h8h3 e2f1 h3h5 h2h3 c8b8" +
+            " c2c3 h5f5 b3d2 d8c8 c1b1 b6d5 c4d5 c7c3 b2c3 f6d5 d2e4 d5c3 e4c3 c8c3 b1b2 c3c6 b2b3 b8c8 a3a4 f5f6" +
+            " h3h4 c6c7 f1h3 c8b8 h3g4 c7c6 e3g5 f6e6 g4e6 f7e6 g5e7 d6d5 e1g1 g7h6 g1g6 h6e3 a4a5 e3d4 f3f4 b7b6" +
+            " a5b6 c6b6 b3a4 b6c6 e7b4 b8b7 f4e5 d4e5 d1e1 e5c7 e1e6 c6c4 e6a6 c4h4 a6e6 h4h1 a4b5 d5d4 g6g7 h1c1" +
+            " g7d7 b7c8 d7d4 c1a1 e6e8 c8b7 d4d7 a1c1 b4a3 c1c2 b5a4 b7c6 d7e7 c2d2 a3c1 d2c2 c1g5 c2c5 g5e3 c5d5" +
+            " e8a8 d5d3 a8a6 c6d5 e7d7 d5e4 d7c7 d3e3 a6a8 e4d5 a8d8 d5e6 a4b5 e3b3 b5c4 b3b1 d8e8 e6f6 c4d3 b1d1" +
+            " d3c2 d1a1 c7d7 f6f5 d7f7 f5g6 e8e7 g6g5 c2d3 a1a2 d3d4 a2a4 d4e5 a4a5 e5d6 a5a2 f7g7 g5f4 g7f7 f4g4" +
+            " f7g7 g4f4 g7f7 f4g4 e7b7 g4g5 d6e5 g5g4 f7f4 g4g5 b7g7 g5h5 f4f7 a2e2 e5d5 h5h6 g7h7 h6g5 h7g7 g5h5" +
+            " d5d4 h5h6 f7a7 h6h5 d4d5 h5h6 d5d6 h6h5 a7f7 h5h6 d6d5 h6h5 f7a7 h5h6 d5d4 h6h5 g7g8 h5h6 d4d5 e2b2" +
+            " d5d6 b2f2 a7a8 h6h7 d6d5 h7h6 d5e5 h6h7 e5d5 h7h6 d5e6 h6h5 g8g1 f2e2 e6f7 e2f2 f7g7 f2f8" +
+            $" {searchResult.BestMove.UCIString()} {searchResult.Moves[1].UCIString()}");
+
+        searchResult = engine.BestMove();
+
+        Assert.NotZero(searchResult.BestMove.EncodedMove);
+    }
 }
