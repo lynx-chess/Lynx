@@ -19,7 +19,7 @@ public sealed partial class Engine
     private bool _isScoringPV;
     private SearchResult? _previousSearchResult;
 
-    private readonly int[,] _killerMoves_saved = new int[2, Configuration.EngineSettings.MaxDepth];
+    private readonly int[,] _previousKillerMoves = new int[2, Configuration.EngineSettings.MaxDepth];
 
     /// <summary>
     /// Copy of <see cref="Game.HalfMovesWithoutCaptureOrPawnMove"/>
@@ -36,11 +36,8 @@ public sealed partial class Engine
         _isScoringPV = false;
         _stopWatch.Reset();
 
-        //Array.Clear(_killerMoves);
-        //Array.Clear(_historyMoves);
-        Array.Clear(_maxDepthReached);
-        //Array.Clear(_pVTable);
 
+        Array.Clear(_maxDepthReached);
         _halfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
 
         int bestEvaluation = 0;
@@ -51,25 +48,22 @@ public sealed partial class Engine
         bool isCancelled = false;
         bool isMateDetected = false;
 
-        if (Game.MoveHistory.Count >= 2 && _previousSearchResult?.Moves.Count >= 2
+        if (Game.MoveHistory.Count >= 2
+            && _previousSearchResult?.Moves.Count >= 2
+            && _previousSearchResult.BestMove.EncodedMove != default(int)
             && Game.MoveHistory[^2].EncodedMove == _previousSearchResult.Moves[0].EncodedMove
             && Game.MoveHistory[^1].EncodedMove == _previousSearchResult.Moves[1].EncodedMove)
         {
             _logger.Info("-----------Ponder hit-----------");
-            _previousSearchResult = new SearchResult(_previousSearchResult);
-            searchResult = _previousSearchResult;
 
-            if (_previousSearchResult.BestMove.EncodedMove != default)
-            {
-                Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(_previousSearchResult)));
-            }
+            searchResult = new SearchResult(_previousSearchResult);
 
-            //PrintPvTable();
-            CopyPVTableMoves(0, 2, Configuration.EngineSettings.MaxDepth - 2);
+            Array.Copy(_previousSearchResult.Moves.ToArray(), _pVTable, _previousSearchResult.Moves.Count);
             Array.Clear(_pVTable, PVTable.Indexes[1], _pVTable.Length - PVTable.Indexes[1] - 1);
-            //PrintPvTable();
 
-            Array.Copy(_killerMoves_saved, _killerMoves, _killerMoves.Length);
+            Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(searchResult)));
+
+            Array.Copy(_previousKillerMoves, _killerMoves, _killerMoves.Length);  // TODO: Double check this was the main problem of the first implementation
 
             for (int d = 1; d < Configuration.EngineSettings.MaxDepth - 2; ++d)
             {
@@ -77,24 +71,9 @@ public sealed partial class Engine
                 _killerMoves[1, d] = _killerMoves[1, d + 2];
             }
 
-            depth = _previousSearchResult.TargetDepth;
-            alpha = _previousSearchResult.Alpha;
-            beta = _previousSearchResult.Beta;
-
-            //{
-            //    var sb = new StringBuilder();
-            //    var sb2 = new StringBuilder();
-            //    for (int i = 0; i < Configuration.EngineSettings.MaxDepth; ++i)
-            //    {
-            //        sb.Append(_killerMoves[0, i]);
-            //        sb2.Append(_killerMoves[1, i]);
-            //    }
-
-            //    Console.WriteLine($"alpha {alpha} beta {beta} _isFollowingPV {_isFollowingPV}");
-            //    Console.WriteLine(sb);
-            //    Console.WriteLine(sb2);
-            //    PrintPvTable();
-            //}
+            depth = searchResult.TargetDepth + 1;
+            alpha = searchResult.Alpha;
+            beta = searchResult.Beta;
         }
         else
         {
@@ -152,28 +131,12 @@ public sealed partial class Engine
 
                 var elapsedTime = _stopWatch.ElapsedMilliseconds;
 
-                _previousSearchResult = searchResult;
                 searchResult = new SearchResult(pvMoves.FirstOrDefault(), bestEvaluation, depth, maxDepthReached, _nodes, elapsedTime, Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * elapsedTime) + 1), 0, Int64.MaxValue)), pvMoves, alpha, beta, mate);
 
                 Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(searchResult)));
 
-                Array.Copy(_killerMoves, _killerMoves_saved, _killerMoves.Length);
-
-                //if(depth == 8)
-                //{
-                //    var sb = new StringBuilder();
-                //    var sb2 = new StringBuilder();
-                //    for (int i = 0; i < Configuration.EngineSettings.MaxDepth; ++i)
-                //    {
-                //        sb.Append(_killerMoves[0, i]);
-                //        sb2.Append(_killerMoves[1, i]);
-                //    }
-
-                //    Console.WriteLine($"alpha {alpha} beta {beta} _isFollowingPV {_isFollowingPV}");
-                //    Console.WriteLine(sb);
-                //    Console.WriteLine(sb2);
-                //    PrintPvTable();
-                //}
+                _previousSearchResult = searchResult;
+                Array.Copy(_killerMoves, _previousKillerMoves, _killerMoves.Length);
             } while (stopSearchCondition(++depth, maxDepth, isMateDetected, _nodes, decisionTime, _stopWatch, _logger));
         }
         catch (OperationCanceledException)
@@ -188,8 +151,7 @@ public sealed partial class Engine
         }
         catch (Exception e) when (e is not AssertException)
         {
-            _logger.Error($"Unexpected error ocurred during the search at depth {depth}, best move will be returned" +
-                Environment.NewLine + e.Message + Environment.NewLine + e.StackTrace);
+            _logger.Error(e, $"Unexpected error ocurred during the search at depth {depth}, best move will be returned");
         }
         finally
         {
