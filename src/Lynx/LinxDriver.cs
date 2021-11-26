@@ -26,57 +26,64 @@ public sealed class LinxDriver
         {
             while (await _uciReader.WaitToReadAsync(cancellationToken) && !cancellationToken.IsCancellationRequested)
             {
-                if (_uciReader.TryRead(out var rawCommand) && !string.IsNullOrWhiteSpace(rawCommand))
+                try
                 {
-                    _logger.Debug($"[GUI]\t{rawCommand}");
-
-                    var commandItems = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                    switch (commandItems[0].ToLowerInvariant())
+                    if (_uciReader.TryRead(out var rawCommand) && !string.IsNullOrWhiteSpace(rawCommand))
                     {
-                        case DebugCommand.Id:
-                            HandleDebug(rawCommand);
-                            break;
-                        case GoCommand.Id:
-                            await HandleGo(rawCommand);
-                            break;
-                        case IsReadyCommand.Id:
-                            await HandleIsReady(cancellationToken);
-                            break;
-                        case PonderHitCommand.Id:
-                            HandlePonderHit();
-                            break;
-                        case PositionCommand.Id:
-                            HandlePosition(rawCommand);
-                            break;
-                        case QuitCommand.Id:
-                            HandleQuit();
-                            return;
-                        case RegisterCommand.Id:
-                            HandleRegister(rawCommand);
-                            break;
-                        case SetOptionCommand.Id:
-                            HandleSetOption(rawCommand, commandItems);
-                            break;
-                        case StopCommand.Id:
-                            HandleStop();
-                            break;
-                        case UCICommand.Id:
-                            await HandleUCI(cancellationToken);
-                            break;
-                        case UCINewGameCommand.Id:
-                            HandleNewGame();
-                            break;
-                        case "perft":
-                            HandlePerft(rawCommand);
-                            break;
-                        case "divide":
-                            HandleDivide(rawCommand);
-                            break;
+                        _logger.Debug($"[GUI]\t{rawCommand}");
 
-                        default:
-                            _logger.Warn($"Unknown command received: {rawCommand}");
-                            break;
+                        var commandItems = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                        switch (commandItems[0].ToLowerInvariant())
+                        {
+                            case DebugCommand.Id:
+                                HandleDebug(rawCommand);
+                                break;
+                            case GoCommand.Id:
+                                await HandleGo(rawCommand);
+                                break;
+                            case IsReadyCommand.Id:
+                                await HandleIsReady(cancellationToken);
+                                break;
+                            case PonderHitCommand.Id:
+                                HandlePonderHit();
+                                break;
+                            case PositionCommand.Id:
+                                HandlePosition(rawCommand);
+                                break;
+                            case QuitCommand.Id:
+                                HandleQuit();
+                                return;
+                            case RegisterCommand.Id:
+                                HandleRegister(rawCommand);
+                                break;
+                            case SetOptionCommand.Id:
+                                HandleSetOption(rawCommand, commandItems);
+                                break;
+                            case StopCommand.Id:
+                                HandleStop();
+                                break;
+                            case UCICommand.Id:
+                                await HandleUCI(cancellationToken);
+                                break;
+                            case UCINewGameCommand.Id:
+                                HandleNewGame();
+                                break;
+                            case "perft":
+                                HandlePerft(rawCommand);
+                                break;
+                            case "divide":
+                                HandleDivide(rawCommand);
+                                break;
+
+                            default:
+                                _logger.Warn($"Unknown command received: {rawCommand}");
+                                break;
+                        }
                     }
+                }
+                catch (Exception e)
+                {
+                    _logger.Error(e, "Error trying to read/parse UCI command");
                 }
             }
         }

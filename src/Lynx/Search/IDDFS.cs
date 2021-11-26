@@ -2,7 +2,6 @@
 using Lynx.UCI.Commands.Engine;
 using NLog;
 using System.Diagnostics;
-using System.Text;
 
 namespace Lynx;
 
@@ -36,32 +35,31 @@ public sealed partial class Engine
         _isScoringPV = false;
         _stopWatch.Reset();
 
-
         Array.Clear(_maxDepthReached);
         _halfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
 
         int bestEvaluation = 0;
         int alpha = MinValue;
         int beta = MaxValue;
-        SearchResult? searchResult = null;
+        SearchResult? lastSearchResult = null;
         int depth = 1;
         bool isCancelled = false;
         bool isMateDetected = false;
 
         if (Game.MoveHistory.Count >= 2
             && _previousSearchResult?.Moves.Count >= 2
-            && _previousSearchResult.BestMove.EncodedMove != default(int)
+            && _previousSearchResult.BestMove.EncodedMove != default
             && Game.MoveHistory[^2].EncodedMove == _previousSearchResult.Moves[0].EncodedMove
             && Game.MoveHistory[^1].EncodedMove == _previousSearchResult.Moves[1].EncodedMove)
         {
             _logger.Info("-----------Ponder hit-----------");
 
-            searchResult = new SearchResult(_previousSearchResult);
+            lastSearchResult = new SearchResult(_previousSearchResult);
 
-            Array.Copy(_previousSearchResult.Moves.ToArray(), _pVTable, _previousSearchResult.Moves.Count);
-            Array.Clear(_pVTable, PVTable.Indexes[1], _pVTable.Length - PVTable.Indexes[1] - 1);
+            Array.Clear(_pVTable);
+            Array.Copy(_previousSearchResult.Moves.ToArray(), 2, _pVTable, 0, _previousSearchResult.Moves.Count - 2);
 
-            Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(searchResult)));
+            Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult)));
 
             Array.Copy(_previousKillerMoves, _killerMoves, _killerMoves.Length);  // TODO: Double check this was the main problem of the first implementation
 
@@ -71,9 +69,9 @@ public sealed partial class Engine
                 _killerMoves[1, d] = _killerMoves[1, d + 2];
             }
 
-            depth = searchResult.TargetDepth + 1;
-            alpha = searchResult.Alpha;
-            beta = searchResult.Beta;
+            depth = lastSearchResult.TargetDepth + 1;
+            alpha = lastSearchResult.Alpha;
+            beta = lastSearchResult.Beta;
         }
         else
         {
@@ -116,8 +114,8 @@ public sealed partial class Engine
                 alpha = bestEvaluation - Configuration.EngineSettings.AspirationWindowAlpha;
                 beta = bestEvaluation + Configuration.EngineSettings.AspirationWindowBeta;
 
+                PrintPvTable();
                 ValidatePVTable();
-                //PrintPvTable();
 
                 var pvMoves = _pVTable.TakeWhile(m => m.EncodedMove != default).ToList();
                 var maxDepthReached = _maxDepthReached.LastOrDefault(item => item != default);
@@ -131,12 +129,13 @@ public sealed partial class Engine
 
                 var elapsedTime = _stopWatch.ElapsedMilliseconds;
 
-                searchResult = new SearchResult(pvMoves.FirstOrDefault(), bestEvaluation, depth, maxDepthReached, _nodes, elapsedTime, Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * elapsedTime) + 1), 0, Int64.MaxValue)), pvMoves, alpha, beta, mate);
+                _previousSearchResult = lastSearchResult;
+                lastSearchResult = new SearchResult(pvMoves.FirstOrDefault(), bestEvaluation, depth, maxDepthReached, _nodes, elapsedTime, Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * elapsedTime) + 1), 0, Int64.MaxValue)), pvMoves, alpha, beta, mate);
 
-                Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(searchResult)));
+                Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult)));
 
-                _previousSearchResult = searchResult;
                 Array.Copy(_killerMoves, _previousKillerMoves, _killerMoves.Length);
+
             } while (stopSearchCondition(++depth, maxDepth, isMateDetected, _nodes, decisionTime, _stopWatch, _logger));
         }
         catch (OperationCanceledException)
@@ -144,9 +143,9 @@ public sealed partial class Engine
             isCancelled = true;
             _logger.Info($"Search cancellation requested after {_stopWatch.ElapsedMilliseconds}ms (depth {depth}, nodes {_nodes}), best move will be returned");
 
-            for (int i = 0; i < searchResult?.Moves.Count; ++i)
+            for (int i = 0; i < lastSearchResult?.Moves.Count; ++i)
             {
-                _pVTable[i] = searchResult.Moves[i];
+                _pVTable[i] = lastSearchResult.Moves[i];
             }
         }
         catch (Exception e) when (e is not AssertException)
@@ -158,10 +157,10 @@ public sealed partial class Engine
             _stopWatch.Stop();
         }
 
-        if (searchResult is not null)
+        if (lastSearchResult is not null)
         {
-            searchResult.IsCancelled = isCancelled;
-            return searchResult;
+            lastSearchResult.IsCancelled = isCancelled;
+            return lastSearchResult;
         }
         else
         {
