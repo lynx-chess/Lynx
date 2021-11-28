@@ -16,8 +16,8 @@ public sealed partial class Engine
     private int _nodes;
     private bool _isFollowingPV;
     private bool _isScoringPV;
-    private SearchResult? _previousSearchResult;
 
+    private SearchResult? _previousSearchResult;
     private readonly int[,] _previousKillerMoves = new int[2, Configuration.EngineSettings.MaxDepth];
 
     /// <summary>
@@ -37,7 +37,6 @@ public sealed partial class Engine
 
         Array.Clear(_pVTable);
         Array.Clear(_maxDepthReached);
-        Array.Clear(_killerMoves);
 
         _halfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
 
@@ -62,7 +61,7 @@ public sealed partial class Engine
 
             Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult)));
 
-            for (int d = 1; d < _previousKillerMoves.Length - 2; ++d)
+            for (int d = 1; d < Configuration.EngineSettings.MaxDepth - 2; ++d)
             {
                 _killerMoves[0, d] = _previousKillerMoves[0, d + 2];
                 _killerMoves[1, d] = _previousKillerMoves[1, d + 2];
@@ -74,6 +73,7 @@ public sealed partial class Engine
         }
         else
         {
+            Array.Clear(_killerMoves);
             Array.Clear(_historyMoves);
         }
 
