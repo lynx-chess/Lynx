@@ -35,7 +35,10 @@ public sealed partial class Engine
         _isScoringPV = false;
         _stopWatch.Reset();
 
+        Array.Clear(_pVTable);
         Array.Clear(_maxDepthReached);
+        Array.Clear(_killerMoves);
+
         _halfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
 
         int bestEvaluation = 0;
@@ -52,21 +55,17 @@ public sealed partial class Engine
             && Game.MoveHistory[^2].EncodedMove == _previousSearchResult.Moves[0].EncodedMove
             && Game.MoveHistory[^1].EncodedMove == _previousSearchResult.Moves[1].EncodedMove)
         {
-            _logger.Info("-----------Ponder hit-----------");
+            _logger.Debug("Ponder hit");
 
             lastSearchResult = new SearchResult(_previousSearchResult);
-
-            Array.Clear(_pVTable);
             Array.Copy(_previousSearchResult.Moves.ToArray(), 2, _pVTable, 0, _previousSearchResult.Moves.Count - 2);
 
             Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult)));
 
-            Array.Copy(_previousKillerMoves, _killerMoves, _killerMoves.Length);  // TODO: Double check this was the main problem of the first implementation
-
-            for (int d = 1; d < Configuration.EngineSettings.MaxDepth - 2; ++d)
+            for (int d = 1; d < _previousKillerMoves.Length - 2; ++d)
             {
-                _killerMoves[0, d] = _killerMoves[0, d + 2];
-                _killerMoves[1, d] = _killerMoves[1, d + 2];
+                _killerMoves[0, d] = _previousKillerMoves[0, d + 2];
+                _killerMoves[1, d] = _previousKillerMoves[1, d + 2];
             }
 
             depth = lastSearchResult.TargetDepth + 1;
@@ -75,8 +74,6 @@ public sealed partial class Engine
         }
         else
         {
-            Array.Clear(_pVTable);
-            Array.Clear(_killerMoves);
             Array.Clear(_historyMoves);
         }
 
@@ -114,7 +111,7 @@ public sealed partial class Engine
                 alpha = bestEvaluation - Configuration.EngineSettings.AspirationWindowAlpha;
                 beta = bestEvaluation + Configuration.EngineSettings.AspirationWindowBeta;
 
-                PrintPvTable();
+                //PrintPvTable();
                 ValidatePVTable();
 
                 var pvMoves = _pVTable.TakeWhile(m => m.EncodedMove != default).ToList();
