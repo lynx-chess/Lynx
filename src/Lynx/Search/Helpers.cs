@@ -5,9 +5,21 @@ using System.Text;
 
 namespace Lynx;
 
-public record SearchResult(Move BestMove, double Evaluation, int TargetDepth, int DepthReached, int Nodes, long Time, long NodesPerSecond, List<Move> Moves, int Mate = default)
+public record SearchResult(Move BestMove, double Evaluation, int TargetDepth, int DepthReached, int Nodes, long Time, long NodesPerSecond, List<Move> Moves, int Alpha, int Beta, int Mate = default)
 {
     public bool IsCancelled { get; set; }
+
+    public SearchResult(SearchResult previousSearchResult)
+    {
+        BestMove = previousSearchResult.Moves.ElementAtOrDefault(2);
+        Evaluation = previousSearchResult.Evaluation;
+        TargetDepth = previousSearchResult.TargetDepth - 2;
+        DepthReached = previousSearchResult.DepthReached - 2;
+        Moves = previousSearchResult.Moves.Skip(2).ToList();
+        Alpha = previousSearchResult.Alpha;
+        Beta = previousSearchResult.Beta;
+        Mate = previousSearchResult.Mate == 0 ? 0 : (int)Math.CopySign(Math.Abs(previousSearchResult.Mate) - 1, previousSearchResult.Mate);
+    }
 }
 
 public sealed partial class Engine
@@ -170,11 +182,11 @@ public sealed partial class Engine
         Console.WriteLine(
 (target != -1 ? $"src: {source}, tgt: {target}" + Environment.NewLine : "") +
 $" {0,-3} {_pVTable[0],-6} {_pVTable[1],-6} {_pVTable[2],-6} {_pVTable[3],-6} {_pVTable[4],-6} {_pVTable[5],-6} {_pVTable[6],-6} {_pVTable[7],-6}" + Environment.NewLine +
-$" {32,-3}        {_pVTable[32],-6} {_pVTable[33],-6} {_pVTable[34],-6} {_pVTable[35],-6} {_pVTable[36],-6} {_pVTable[37],-6} {_pVTable[38],-6}" + Environment.NewLine +
-$" {63,-3}               {_pVTable[63],-6} {_pVTable[64],-6} {_pVTable[65],-6} {_pVTable[66],-6} {_pVTable[67],-6} {_pVTable[68],-6}" + Environment.NewLine +
-$" {93,-3}                      {_pVTable[93],-6} {_pVTable[94],-6} {_pVTable[95],-6} {_pVTable[96],-6} {_pVTable[97],-6}" + Environment.NewLine +
-$" {122,-3}                             {_pVTable[122],-6} {_pVTable[123],-6} {_pVTable[124],-6} {_pVTable[125],-6}" + Environment.NewLine +
-$" {150,-3}                                    {_pVTable[150],-6} {_pVTable[151],-6} {_pVTable[152],-6}" + Environment.NewLine +
+$" {64,-3}        {_pVTable[64],-6} {_pVTable[65],-6} {_pVTable[66],-6} {_pVTable[67],-6} {_pVTable[68],-6} {_pVTable[69],-6} {_pVTable[70],-6}" + Environment.NewLine +
+$" {127,-3}               {_pVTable[127],-6} {_pVTable[128],-6} {_pVTable[129],-6} {_pVTable[130],-6} {_pVTable[131],-6} {_pVTable[132],-6}" + Environment.NewLine +
+$" {189,-3}                      {_pVTable[189],-6} {_pVTable[190],-6} {_pVTable[191],-6} {_pVTable[192],-6} {_pVTable[193],-6}" + Environment.NewLine +
+$" {250,-3}                             {_pVTable[250],-6} {_pVTable[251],-6} {_pVTable[252],-6} {_pVTable[253],-6}" + Environment.NewLine +
+$" {310,-3}                                    {_pVTable[310],-6} {_pVTable[311],-6} {_pVTable[312],-6}" + Environment.NewLine +
 (target == -1 ? "------------------------------------------------------------------------------------" + Environment.NewLine : ""));
     }
 

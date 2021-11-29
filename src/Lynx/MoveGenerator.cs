@@ -257,6 +257,8 @@ public static class MoveGenerator
         }
     }
 
+    #region Only for reference, but unused
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static IEnumerable<Move> GenerateKingMoves(Position position, bool capturesOnly = false)
     {
@@ -296,4 +298,6 @@ public static class MoveGenerator
 
         return GeneratePieceMoves((int)Piece.Q + offset, position, capturesOnly);
     }
+
+    #endregion
 }

@@ -32,21 +32,29 @@ public sealed class PositionCommand : GUIBaseCommand
 
     public static Game ParseGame(string positionCommand)
     {
-        var items = positionCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        bool isInitialPosition = string.Equals(items.ElementAtOrDefault(1), StartPositionString, StringComparison.OrdinalIgnoreCase);
-
-        var initialPosition = isInitialPosition
-                ? Constants.InitialPositionFEN
-                : _fenRegex.Match(positionCommand).Value.Trim();
-
-        if (string.IsNullOrEmpty(initialPosition))
+        try
         {
-            _logger.Error($"Error parsing position command '{positionCommand}': no initial position found");
+            var items = positionCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            bool isInitialPosition = string.Equals(items.ElementAtOrDefault(1), StartPositionString, StringComparison.OrdinalIgnoreCase);
+
+            var initialPosition = isInitialPosition
+                    ? Constants.InitialPositionFEN
+                    : _fenRegex.Match(positionCommand).Value.Trim();
+
+            if (string.IsNullOrEmpty(initialPosition))
+            {
+                _logger.Error($"Error parsing position command '{positionCommand}': no initial position found");
+            }
+
+            var moves = _movesRegex.Match(positionCommand).Value.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
+
+            return new Game(initialPosition, moves);
         }
-
-        var moves = _movesRegex.Match(positionCommand).Value.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
-
-        return new Game(initialPosition, moves);
+        catch (Exception e)
+        {
+            _logger.Error(e, $"Error parsing position command '{positionCommand}'");
+            return new Game();
+        }
     }
 
     public static bool TryParseLastMove(string positionCommand, Game game, [NotNullWhen(true)] out Move? lastMove)

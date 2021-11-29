@@ -219,7 +219,7 @@ public sealed partial class Engine
             }
             catch (Exception e)
             {
-                _logger.Fatal(e.Message + Environment.NewLine + e.StackTrace);
+                _logger.Fatal(e, $"Error in {nameof(StartSearching)} while calculating BestMove");
             }
         });
         // TODO: if ponder, continue with PonderAction, which is searching indefinitely for a move
