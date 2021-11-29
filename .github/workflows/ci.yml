@@ -51,11 +51,11 @@ jobs:
         os: [ubuntu-latest, windows-latest, macOS-latest]
         include:
           - os: ubuntu-latest
-            runtime-identifier: [linux-x64, linux-arm64, linux-arm]
+            runtime-identifier: linux-x64
           - os: windows-latest
-            runtime-identifier: [win-x64, win-arm64]
+            runtime-identifier: win-x64
           - os: macOS-latest
-            runtime-identifier: [osx-x64, osx.11.0-arm64]
+            runtime-identifier: osx-x64
       fail-fast: false
 
     env:
@@ -180,6 +180,7 @@ jobs:
 
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      PROJECT_NAME: Lynx
 
     steps:
     - uses: actions/checkout@v2
