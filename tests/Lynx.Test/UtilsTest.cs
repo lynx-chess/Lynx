@@ -7,10 +7,11 @@ public class UtilsTest
 {
     [TestCase(Side.Black, 6)]
     [TestCase(Side.White, 0)]
-    public void PieceOffSetBySide(Side sideToMove, int expectedOffset)
+    public void PieceOffSet(Side sideToMove, int expectedOffset)
     {
         Assert.AreEqual(expectedOffset, Utils.PieceOffset(sideToMove));
         Assert.AreEqual(expectedOffset, Utils.PieceOffset((int)sideToMove));
+        Assert.AreEqual(expectedOffset, Utils.PieceOffset(sideToMove == Side.White));
     }
 
     [TestCase(Side.Black, (int)Side.White)]

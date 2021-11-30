@@ -369,7 +369,12 @@ public sealed class Position
             return eval;
         }
 
-        for (int pieceIndex = 0; pieceIndex < PieceBitBoards.Length; ++pieceIndex)
+        int whiteMaterialEval = 0, blackMaterialEval = 0;
+        var pieceCount = new int[PieceBitBoards.Length];
+
+        var sideLimit = PieceBitBoards.Length / 2;
+
+        for (int pieceIndex = 0; pieceIndex < sideLimit; ++pieceIndex)
         {
             // Bitboard 'copy'. Use long directly to avoid the extra allocations
             var bitboard = PieceBitBoards[pieceIndex].Board;
@@ -379,11 +384,63 @@ public sealed class Position
                 var pieceSquareIndex = BitBoard.GetLS1BIndex(bitboard);
                 bitboard = BitBoard.ResetLS1B(bitboard);
 
+                ++pieceCount[pieceIndex];
+
                 // Material evaluation
-                eval += EvaluationConstants.MaterialScore[pieceIndex];
+                whiteMaterialEval += EvaluationConstants.MaterialScore[pieceIndex];
 
                 // Positional evaluation
                 eval += EvaluationConstants.PositionalScore[pieceIndex][pieceSquareIndex];
+            }
+        }
+
+        for (int pieceIndex = sideLimit; pieceIndex < PieceBitBoards.Length; ++pieceIndex)
+        {
+            // Bitboard 'copy'. Use long directly to avoid the extra allocations
+            var bitboard = PieceBitBoards[pieceIndex].Board;
+
+            while (bitboard != default)
+            {
+                var pieceSquareIndex = BitBoard.GetLS1BIndex(bitboard);
+                bitboard = BitBoard.ResetLS1B(bitboard);
+
+                ++pieceCount[pieceIndex];
+
+                // Material evaluation
+                blackMaterialEval += EvaluationConstants.MaterialScore[pieceIndex];
+
+                // Positional evaluation
+                eval += EvaluationConstants.PositionalScore[pieceIndex][pieceSquareIndex];
+            }
+        }
+
+        eval += whiteMaterialEval + blackMaterialEval;
+
+        // Check if drawn position due to lack of material
+        if (eval >= 0)
+        {
+            whiteMaterialEval -= EvaluationConstants.MaterialScore[(int)Piece.K];
+
+            bool whiteCannotWin = pieceCount[(int)Piece.P] == 0
+                && (whiteMaterialEval <= EvaluationConstants.MaterialScore[(int)Piece.B]            // B or N
+                    || whiteMaterialEval == 2 * EvaluationConstants.MaterialScore[(int)Piece.N]);   // N+N
+
+            if (whiteCannotWin)
+            {
+                eval = 0;
+            }
+        }
+        else
+        {
+            blackMaterialEval -= EvaluationConstants.MaterialScore[(int)Piece.k];
+
+            bool blackCannotWin = pieceCount[(int)Piece.p] == 0
+                && (blackMaterialEval >= EvaluationConstants.MaterialScore[(int)Piece.b]            // b or n
+                    || blackMaterialEval == 2 * EvaluationConstants.MaterialScore[(int)Piece.n]);   // n+n
+
+            if (blackCannotWin)
+            {
+                eval = 0;
             }
         }
 

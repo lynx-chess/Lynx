@@ -360,4 +360,23 @@ public class PositionTest
         var eval = winningPosition.StaticEvaluation(new(), game.HalfMovesWithoutCaptureOrPawnMove);
         Assert.AreNotEqual(0, eval);
     }
+
+    [TestCase("k7/8/8/3B4/8/8/8/7K w - - 0 1", Description = "B")]
+    [TestCase("k7/8/8/3b4/8/8/8/7K w - - 0 1", Description = "b")]
+    [TestCase("k7/8/8/3N4/8/8/8/7K w - - 0 1", Description = "N")]
+    [TestCase("k7/8/8/3N4/8/8/8/7K w - - 0 1", Description = "n")]
+    [TestCase("k7/8/8/2NN4/8/8/8/7K w - - 0 1", Description = "N+N")]
+    [TestCase("k7/8/8/2nn4/8/8/8/7K w - - 0 1", Description = "n+n")]
+    [TestCase("k7/8/8/3B4/8/8/8/7K b - - 0 1", Description = "B")]
+    [TestCase("k7/8/8/3b4/8/8/8/7K b - - 0 1", Description = "b")]
+    [TestCase("k7/8/8/3N4/8/8/8/7K b - - 0 1", Description = "N")]
+    [TestCase("k7/8/8/3N4/8/8/8/7K b - - 0 1", Description = "n")]
+    [TestCase("k7/8/8/2NN4/8/8/8/7K b - - 0 1", Description = "N+N")]
+    [TestCase("k7/8/8/2nn4/8/8/8/7K b - - 0 1", Description = "n+n")]
+    public void StaticEvaluation_DrawDueToLackOfMaterial(string fen)
+    {
+        var position = new Position(fen);
+
+        Assert.AreEqual(0, position.StaticEvaluation(new(), 0));
+    }
 }
