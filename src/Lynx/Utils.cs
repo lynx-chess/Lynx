@@ -29,6 +29,18 @@ public static class Utils
 
         return 6 - (6 * side);
     }
+
+    /// <summary>
+    /// Side.White -> 0
+    /// Side.Black -> 6
+    /// </summary>
+    /// <param name="side"></param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int PieceOffset(bool isWhite)
+    {
+        return 6 - (6 * Unsafe.As<bool, byte>(ref isWhite));
+    }
+
     /// <summary>
     /// Side.Black -> Side.White
     /// Side.White -> Side.Black
