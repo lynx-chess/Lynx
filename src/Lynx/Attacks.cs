@@ -119,6 +119,22 @@ public static class Attacks
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsSquareInCheck(int squareIndex, Side sideToMove, BitBoard[] piecePosition, BitBoard[] occupancy)
+    {
+        Utils.Assert(sideToMove != Side.Both);
+
+        var offset = Utils.PieceOffset(sideToMove);
+
+        // I tried to order them from most to least likely
+        return
+            IsSquareAttackedByRooks(squareIndex, offset, piecePosition, occupancy, out var rookAttacks)
+            || IsSquareAttackedByBishops(squareIndex, offset, piecePosition, occupancy, out var bishopAttacks)
+            || IsSquareAttackedByQueens(offset, bishopAttacks, rookAttacks, piecePosition)
+            || IsSquareAttackedByKnights(squareIndex, offset, piecePosition)
+            || IsSquareAttackedByPawns(squareIndex, sideToMove, offset, piecePosition);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsSquareAttackedByPawns(int squareIndex, Side sideToMove, int offset, BitBoard[] pieces)
     {
         var oppositeColorIndex = ((int)sideToMove + 1) % 2;

@@ -254,7 +254,7 @@ public sealed class Position
         var kingSquare = PieceBitBoards[(int)Piece.K + Utils.PieceOffset(Side)].GetLS1BIndex();
         var oppositeSide = (Side)Utils.OppositeSide(Side);
 
-        return Attacks.IsSquaredAttacked(kingSquare, oppositeSide, PieceBitBoards, OccupancyBitBoards);
+        return Attacks.IsSquareInCheck(kingSquare, oppositeSide, PieceBitBoards, OccupancyBitBoards);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
