@@ -23,7 +23,8 @@ Lichess bot can be played directly, but a chess GUI that supports UCI protocol i
 
 | Lynx version                                                    | CCRL Blitz elo                                                                                                                         |
 |-----------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
-| [0.6.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.6.0) | [1400](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.6.0%2064-bit#Lynx_0_6_0_64-bit) |
+| [0.9.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.9.0) | [1577](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.9.0%2064-bit#Lynx_0_9_0_64-bit) |
+| [0.6.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.6.0) | [1403](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.6.0%2064-bit#Lynx_0_6_0_64-bit) |
 | [0.4.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.4.0) | [1357](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.4.0%2064-bit#Lynx_0_4_0_64-bit) |
 
 ## Building Lynx
