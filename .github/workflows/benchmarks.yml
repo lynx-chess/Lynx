@@ -25,7 +25,7 @@ jobs:
       DOTNET_TC_QuickJitForLoops: 1
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
