@@ -10,5 +10,5 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-    assignees :
+    reviewers:
       - "eduherminio"
