@@ -31,7 +31,7 @@ jobs:
         include-prerelease: true
 
     - name: Nuget cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path:
           ~/.nuget/packages
@@ -78,7 +78,7 @@ jobs:
         include-prerelease: true
 
     - name: Nuget cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path:
           ~/.nuget/packages
@@ -152,7 +152,7 @@ jobs:
         include-prerelease: true
 
     - name: Nuget cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path:
           ~/.nuget/packages
@@ -192,7 +192,7 @@ jobs:
         include-prerelease: true
 
     - name: Nuget cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path:
           ~/.nuget/packages
@@ -279,7 +279,7 @@ jobs:
   #      include-prerelease: true
 
   #  - name: Nuget cache
-  #    uses: actions/cache@v2
+  #    uses: actions/cache@v3
   #    with:
   #      path:
   #        ~/.nuget/packages
