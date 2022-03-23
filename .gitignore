@@ -356,3 +356,9 @@ global.json
 
 # Environment files
 *.env
+
+# Backup files
+*.bak
+
+# Dev files
+appsettings.Development.json
