@@ -1,4 +1,5 @@
-﻿using Lynx.UCI.Commands.Engine;
+﻿using Lynx.Model;
+using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
 using System.Threading.Channels;
@@ -18,6 +19,15 @@ public sealed class LinxDriver
         _engineWriter = engineWriter;
         _engine = engine;
         _logger = LogManager.GetCurrentClassLogger();
+
+        InitializeStaticClasses();
+    }
+
+    public static void InitializeStaticClasses()
+    {
+        _ = PVTable.Indexes[0];
+        _ = Attacks.KingAttacks;
+        _ = ZobristTable.SideHash();
     }
 
     public async Task Run(CancellationToken cancellationToken)
