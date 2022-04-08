@@ -109,7 +109,7 @@ jobs:
 
     - name: '[Ubuntu] Upload test coverage report'
       if: matrix.os == 'ubuntu-latest' && matrix.configuration == 'Release'
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ env.PROJECT_NAME }}-build-coverage-ci-${{ github.run_number }}
         path: coveragereport/
@@ -121,7 +121,7 @@ jobs:
 
     - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-${{ matrix.runtime-identifier }} artifact
       if: matrix.configuration == 'Release'
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-${{ matrix.runtime-identifier }}
         path: |
@@ -250,7 +250,7 @@ jobs:
   #      customSettings: 'numberOfReportsParsedInParallel=3;numberOfReportsMergedInParallel=3'
 
   #  - name: '[Ubuntu] Upload unified test coverage report'
-  #    uses: actions/upload-artifact@v2
+  #    uses: actions/upload-artifact@v3
   #    with:
   #      name: ${{ env.PROJECT_NAME }}-coverage-ci-${{ github.run_number }}
   #      path: coveragereport/
@@ -310,7 +310,7 @@ jobs:
 
   #  - name: '[Ubuntu] Upload test coverage report'
   #    if: matrix.os == 'ubuntu-latest'
-  #    uses: actions/upload-artifact@v2
+  #    uses: actions/upload-artifact@v3
   #    with:
   #      name: ${{ env.PROJECT_NAME }}-non-parallelizable-coverage-ci-${{ github.run_number }}
   #      path: coveragereport/
