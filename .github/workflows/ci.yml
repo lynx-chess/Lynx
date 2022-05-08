@@ -139,7 +139,7 @@ jobs:
         if-no-files-found: error
 
     - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }} NuGet package
-      if: matrix.configuration == 'Release'
+      if: matrix.os == 'ubuntu-latest' && matrix.configuration == 'Release'
       uses: actions/upload-artifact@v3
       with:
         name: Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}
