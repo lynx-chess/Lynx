@@ -119,10 +119,10 @@ jobs:
       if: matrix.os == 'ubuntu-latest' && matrix.configuration == 'Release'
       run: dotnet pack -c Release --no-build src/Lynx/Lynx.csproj --include-symbols -o artifacts/nuget
 
-    #- name: Push NuGet package to GitHub
-    #  if: matrix.os == 'ubuntu-latest' && matrix.configuration == 'Release'
-    #  run: nuget push 'artifacts/nuget/*.nupkg' -ApiKey ${{ secrets.GITHUB_TOKEN }} -Source https://nuget.pkg.github.com/lynx-chess/index.json -SkipDuplicate -Verbosity detailed
-    #  continue-on-error: true
+    - name: Push NuGet package to GitHub
+      if: matrix.os == 'ubuntu-latest' && matrix.configuration == 'Release'
+      run: nuget push 'artifacts/nuget/*.nupkg' -ApiKey ${{ secrets.GITHUB_TOKEN }} -Source https://nuget.pkg.github.com/lynx-chess/index.json -SkipDuplicate -Verbosity detailed
+      continue-on-error: true
 
     - name: Publish CLI
       if: matrix.configuration == 'Release'
