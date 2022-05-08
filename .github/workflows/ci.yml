@@ -144,8 +144,8 @@ jobs:
       with:
         name: Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}
         path: |
-          ${{ env.ARTIFACT_DIR }}/nuget/*.nupkg
-          ${{ env.ARTIFACT_DIR }}/nuget/*.snupkg
+          artifacts/nuget/*.nupkg
+          artifacts/nuget/*.snupkg
         if-no-files-found: error
 
   winning-at-chess:
