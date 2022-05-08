@@ -116,8 +116,13 @@ jobs:
         if-no-files-found: error
 
     - name: Publish library
-      if: matrix.configuration == 'Release'
-      run: dotnet pack -c Release --no-build src/Lynx/Lynx.csproj --include-symbols -o artifacts
+      if: matrix.os == 'ubuntu-latest' && matrix.configuration == 'Release'
+      run: dotnet pack -c Release --no-build src/Lynx/Lynx.csproj --include-symbols -o artifacts/nuget
+
+    #- name: Push NuGet package to GitHub
+    #  if: matrix.os == 'ubuntu-latest' && matrix.configuration == 'Release'
+    #  run: nuget push 'artifacts/nuget/*.nupkg' -ApiKey ${{ secrets.GITHUB_TOKEN }} -Source https://nuget.pkg.github.com/lynx-chess/index.json -SkipDuplicate -Verbosity detailed
+    #  continue-on-error: true
 
     - name: Publish CLI
       if: matrix.configuration == 'Release'
@@ -130,8 +135,17 @@ jobs:
         name: Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-${{ matrix.runtime-identifier }}
         path: |
           artifacts/${{ matrix.runtime-identifier }}/
-          artifacts/*.nupkg
           !artifacts/**/*.pdb
+        if-no-files-found: error
+
+    - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }} NuGet package
+      if: matrix.configuration == 'Release'
+      uses: actions/upload-artifact@v3
+      with:
+        name: Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}
+        path: |
+          ${{ env.ARTIFACT_DIR }}/*.nupkg
+          ${{ env.ARTIFACT_DIR }}/*.snupkg
         if-no-files-found: error
 
   winning-at-chess:
