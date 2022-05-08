@@ -362,3 +362,9 @@ global.json
 
 # Dev files
 appsettings.Development.json
+
+# Zip files
+*.zip
+
+# Deployment file
+.deployment

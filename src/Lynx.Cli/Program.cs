@@ -1,6 +1,5 @@
 ﻿using Lynx;
 using Lynx.Cli;
-using Lynx.Model;
 using Microsoft.Extensions.Configuration;
 using NLog;
 using NLog.Extensions.Logging;
