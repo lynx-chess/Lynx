@@ -17,6 +17,7 @@
 
   <PropertyGroup Condition="'$(DeterministicBuild)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
   </PropertyGroup>
 
   <PropertyGroup>
