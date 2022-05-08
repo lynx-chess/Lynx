@@ -1,5 +1,4 @@
 ﻿using Lynx.Model;
-using Lynx.UCI.Commands.GUI;
 using NUnit.Framework;
 
 namespace Lynx.Test.Model;
