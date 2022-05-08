@@ -87,7 +87,7 @@ jobs:
           ${{ runner.os }}-nuget-
 
     - name: Build
-      run: dotnet build -c ${{ matrix.configuration }} /p:DeterministicBuild=true /p:Optimized=true
+      run: dotnet build -c ${{ matrix.configuration }} /p:DeterministicBuild=true
 
     - name: Run CI tests
       run: dotnet test -c ${{ matrix.configuration }} --no-build --collect:"XPlat Code Coverage" --logger "console;verbosity=normal"
