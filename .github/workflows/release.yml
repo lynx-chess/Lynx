@@ -80,15 +80,6 @@ jobs:
         $regex = "(?<=<Version>).*(?=</Version>)"
         (Get-Content $input_path) -Replace $regex, '${{ github.event.inputs.new_engine_version }}' | Out-File $input_path
 
-    - name: Publish NuGet package
-      if: ${{ matrix.runtime-identifier }} == 'linux-x64'
-      run: dotnet pack -c Release src/Lynx/Lynx.csproj --include-symbols -o artifacts /p:DeterministicBuild=true
-
-    - name: Push NuGet package to GitHub
-      if: ${{ matrix.runtime-identifier }} == 'linux-x64'
-      run: nuget push 'artifacts/*.nupkg' -ApiKey ${{ secrets.GITHUB_TOKEN }} -Source https://nuget.pkg.github.com/lynx-chess/index.json -SkipDuplicate -Verbosity detailed
-      continue-on-error: true
-
     - name: Publish ${{ matrix.runtime-identifier }} version
       run: dotnet publish src/Lynx.Cli/Lynx.Cli.csproj -c Release --runtime ${{ matrix.runtime-identifier }} --self-contained /p:Optimized=true -o artifacts/${{ matrix.runtime-identifier }}
 
@@ -99,7 +90,6 @@ jobs:
         name: Lynx-${{ github.event.inputs.new_engine_version }}-${{ matrix.runtime-identifier }}
         path: |
           artifacts/${{ matrix.runtime-identifier }}/
-          artifacts/*.nupkg
           !artifacts/**/*.pdb
         if-no-files-found: error
 
@@ -112,6 +102,24 @@ jobs:
           artifacts/${{ matrix.runtime-identifier }}/
           !artifacts/**/*.pdb
         if-no-files-found: error
+
+    - name: Publish NuGet package
+      if: github.event.inputs.new_engine_version != '' && ${{ matrix.runtime-identifier }} == 'linux-x64'
+      run: dotnet pack -c Release src/Lynx/Lynx.csproj --include-symbols -o artifacts/nuget /p:DeterministicBuild=true
+
+    - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }} NuGet package
+      if: github.event.inputs.new_engine_version != '' && matrix.os == 'ubuntu-latest' && matrix.configuration == 'Release'
+      uses: actions/upload-artifact@v3
+      with:
+        name: Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}
+        path: |
+          artifacts/nuget/*.nupkg
+          artifacts/nuget/*.snupkg
+        if-no-files-found: error
+
+    - name: Push NuGet package to GitHub
+      if: github.event.inputs.new_engine_version != '' && ${{ matrix.runtime-identifier }} == 'linux-x64'
+      run: nuget push 'artifacts/nuget/*.nupkg' -ApiKey ${{ secrets.GITHUB_TOKEN }} -Source https://nuget.pkg.github.com/lynx-chess/index.json -SkipDuplicate -Verbosity detailed
 
   release:
     needs: publish-artifacts

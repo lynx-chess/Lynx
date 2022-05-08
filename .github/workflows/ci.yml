@@ -87,7 +87,7 @@ jobs:
           ${{ runner.os }}-nuget-
 
     - name: Build
-      run: dotnet build -c ${{ matrix.configuration }} /p:DeterministicBuild=true
+      run: dotnet build -c ${{ matrix.configuration }} /p:DeterministicBuild=true /p:Optimized=true
 
     - name: Run CI tests
       run: dotnet test -c ${{ matrix.configuration }} --no-build --collect:"XPlat Code Coverage" --logger "console;verbosity=normal"
@@ -115,15 +115,6 @@ jobs:
         path: coveragereport/
         if-no-files-found: error
 
-    - name: Publish library
-      if: matrix.os == 'ubuntu-latest' && matrix.configuration == 'Release'
-      run: dotnet pack -c Release --no-build src/Lynx/Lynx.csproj --include-symbols -o artifacts/nuget
-
-    - name: Push NuGet package to GitHub
-      if: matrix.os == 'ubuntu-latest' && matrix.configuration == 'Release'
-      run: nuget push 'artifacts/nuget/*.nupkg' -ApiKey ${{ secrets.GITHUB_TOKEN }} -Source https://nuget.pkg.github.com/lynx-chess/index.json -SkipDuplicate -Verbosity detailed
-      continue-on-error: true
-
     - name: Publish CLI
       if: matrix.configuration == 'Release'
       run: dotnet publish src/Lynx.Cli/Lynx.Cli.csproj -c Release --runtime ${{ matrix.runtime-identifier }} --self-contained /p:Optimized=true -o artifacts/${{ matrix.runtime-identifier }}
@@ -137,6 +128,10 @@ jobs:
           artifacts/${{ matrix.runtime-identifier }}/
           !artifacts/**/*.pdb
         if-no-files-found: error
+
+    - name: Publish library
+      if: matrix.os == 'ubuntu-latest' && matrix.configuration == 'Release'
+      run: dotnet pack -c Release --no-build src/Lynx/Lynx.csproj --include-symbols -o artifacts/nuget
 
     - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }} NuGet package
       if: matrix.os == 'ubuntu-latest' && matrix.configuration == 'Release'

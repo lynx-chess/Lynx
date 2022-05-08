@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <Version>0.9.0-alpha</Version>
+    <Version>0.9.0</Version>
     <Authors>Eduardo Cáceres</Authors>
     <ApplicationIcon>$(MSBuildThisFileDirectory)resources\icon.ico</ApplicationIcon>
     <RepositoryUrl>https://github.com/lynx-chess/Lynx</RepositoryUrl>
@@ -17,7 +17,7 @@
 
   <PropertyGroup Condition="'$(DeterministicBuild)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>xx
   </PropertyGroup>
 
   <PropertyGroup>
