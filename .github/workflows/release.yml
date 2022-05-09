@@ -121,7 +121,7 @@ jobs:
         if-no-files-found: error
 
     - name: Push NuGet package to GitHub
-      if: github.event.inputs.new_engine_version != '' && ${{ matrix.runtime-identifier }} == 'linux-x64' && matrix.runtime-identifier == 'linux-x64' && matrix.configuration == 'Release'
+      if: github.event.inputs.new_engine_version != '' && matrix.runtime-identifier == 'linux-x64' && matrix.configuration == 'Release'
       run: nuget push 'artifacts/nuget/*.nupkg' -ApiKey ${{ secrets.GITHUB_TOKEN }} -Source https://nuget.pkg.github.com/lynx-chess/index.json -SkipDuplicate -Verbosity detailed
 
   release:
