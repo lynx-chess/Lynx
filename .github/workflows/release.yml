@@ -13,6 +13,11 @@ on:
         type: boolean
         default: true
         required: false
+      should_push_new_nuget_version:
+        description: 'Push new NuGet version'
+        type: boolean
+        default: true
+        required: false
       should_tag_new_version:
         description: 'Tag version release. If false, no release will be created either'
         type: boolean
@@ -107,11 +112,11 @@ jobs:
         if-no-files-found: error
 
     - name: Publish NuGet package
-      if: github.event.inputs.new_engine_version != '' && matrix.runtime-identifier == 'linux-x64' && matrix.configuration == 'Release'
+      if: should_push_new_nuget_version == 'true' && github.event.inputs.new_engine_version != '' && matrix.runtime-identifier == 'linux-x64'
       run: dotnet pack -c Release src/Lynx/Lynx.csproj --include-symbols -o artifacts/nuget /p:DeterministicBuild=true
 
     - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }} NuGet package
-      if: github.event.inputs.new_engine_version != '' && matrix.runtime-identifier == 'linux-x64' && matrix.configuration == 'Release'
+      if: should_push_new_nuget_version == 'true' && github.event.inputs.new_engine_version != '' && matrix.runtime-identifier == 'linux-x64'
       uses: actions/upload-artifact@v3
       with:
         name: Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}
@@ -121,7 +126,7 @@ jobs:
         if-no-files-found: error
 
     - name: Push NuGet package to GitHub
-      if: github.event.inputs.new_engine_version != '' && matrix.runtime-identifier == 'linux-x64' && matrix.configuration == 'Release'
+      if: should_push_new_nuget_version == 'true' && github.event.inputs.new_engine_version != '' && matrix.runtime-identifier == 'linux-x64'
       run: nuget push 'artifacts/nuget/*.nupkg' -ApiKey ${{ secrets.GITHUB_TOKEN }} -Source https://nuget.pkg.github.com/lynx-chess/index.json -SkipDuplicate -Verbosity detailed
 
   release:
