@@ -186,15 +186,15 @@ jobs:
 
     - name: Push NuGet package to nuget.org
       if: github.event.inputs.should_push_new_nuget_version == 'true'
-      run: nuget push 'artifacts/nuget/*.nupkg' -ApiKey ${{ secrets.NUGET_APIKEY }} -Source https://api.nuget.org/v3/index.json -SkipDuplicate -Verbosity detailed
+      run: nuget push 'artifacts/Lynx-${{ github.event.inputs.new_engine_version }}-nuget/*.nupkg' -ApiKey ${{ secrets.NUGET_APIKEY }} -Source https://api.nuget.org/v3/index.json -SkipDuplicate -Verbosity detailed
 
     - name: Push NuGet package to GitHub
       if: github.event.inputs.should_push_new_nuget_version == 'true'
-      run: nuget push 'artifacts/nuget/*.nupkg' -ApiKey ${{ secrets.GITHUB_TOKEN }} -Source https://nuget.pkg.github.com/lynx-chess/index.json -SkipDuplicate -Verbosity detailed
+      run: nuget push 'artifacts/Lynx-${{ github.event.inputs.new_engine_version }}-nuget/*.nupkg' -ApiKey ${{ secrets.GITHUB_TOKEN }} -Source https://nuget.pkg.github.com/lynx-chess/index.json -SkipDuplicate -Verbosity detailed
 
     - name: Compress artifacts again
       if: github.event.inputs.should_create_github_release == 'true' && github.event.inputs.should_tag_new_version == 'true'
-      run: for i in artifacts/*[!nuget]; do zip -0 -r -q -j "${i%/}.zip" "$i" & done; wait
+      run: for i in artifacts/*[!-nuget]; do zip -0 -r -q -j "${i%/}.zip" "$i" & done; wait
 
     - name: Create GitHub release and upload assets
       if: github.event.inputs.should_create_github_release == 'true' && github.event.inputs.should_tag_new_version == 'true'
@@ -206,7 +206,7 @@ jobs:
         for asset in artifacts/*.zip; do
           assets+=("-a" "$asset")
         done
-        for asset in artifacts/nuget/*; do
+        for asset in artifacts/Lynx-${{ github.event.inputs.new_engine_version }}-nuget/*; do
           assets+=("-a" "$asset")
         done
         tag_name="v${{ github.event.inputs.new_engine_version }}"
