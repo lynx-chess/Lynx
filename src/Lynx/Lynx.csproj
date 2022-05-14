@@ -34,4 +34,22 @@
     </AssemblyAttribute>
   </ItemGroup>
 
+  <PropertyGroup>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <Title>Lynx</Title>
+    <PackageId>LynxChess.Lynx</PackageId>
+    <PackageTags>Lynx, Chess, Bot, Engine</PackageTags>
+    <Tags>$(PackageTags)</Tags>
+    <Authors>Eduardo Cáceres</Authors>
+    <Description>Lynx chess engine</Description>
+    <PackageDescription>Lynx chess engine</PackageDescription>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/lynx-chess/Lynx</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/lynx-chess/Lynx</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+  </PropertyGroup>
+
 </Project>
