@@ -112,26 +112,32 @@ jobs:
         if-no-files-found: error
 
     - name: Deterministic build
-      if: github.event.inputs.should_push_new_nuget_version == 'true' && github.event.inputs.new_engine_version != '' && matrix.runtime-identifier == 'linux-x64'
+      if: matrix.runtime-identifier == 'linux-x64'
       run: dotnet clean -c Release && dotnet build -c Release /p:DeterministicBuild=true
 
-    - name: Publish NuGet package
-      if: github.event.inputs.should_push_new_nuget_version == 'true' && github.event.inputs.new_engine_version != '' && matrix.runtime-identifier == 'linux-x64'
+    - name: Pack NuGet package
+      if: matrix.runtime-identifier == 'linux-x64'
       run: dotnet pack -c Release --no-build src/Lynx/Lynx.csproj --include-symbols -o artifacts/nuget
 
     - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }} NuGet package
-      if: github.event.inputs.should_push_new_nuget_version == 'true' && github.event.inputs.new_engine_version != '' && matrix.runtime-identifier == 'linux-x64'
+      if: matrix.runtime-identifier == 'linux-x64' && github.event.inputs.new_engine_version != ''
       uses: actions/upload-artifact@v3
       with:
-        name: Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}
+        name: Lynx-${{ github.event.inputs.new_engine_version }}-nuget
         path: |
           artifacts/nuget/*.nupkg
           artifacts/nuget/*.snupkg
         if-no-files-found: error
 
-    - name: Push NuGet package to GitHub
-      if: github.event.inputs.should_push_new_nuget_version == 'true' && github.event.inputs.new_engine_version != '' && matrix.runtime-identifier == 'linux-x64'
-      run: nuget push 'artifacts/nuget/*.nupkg' -ApiKey ${{ secrets.GITHUB_TOKEN }} -Source https://nuget.pkg.github.com/lynx-chess/index.json -SkipDuplicate -Verbosity detailed
+    - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }} NuGet package
+      if: matrix.runtime-identifier == 'linux-x64' && github.event.inputs.new_engine_version == ''
+      uses: actions/upload-artifact@v3
+      with:
+        name: Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-nuget
+        path: |
+          artifacts/nuget/*.nupkg
+          artifacts/nuget/*.snupkg
+        if-no-files-found: error
 
   release:
     needs: publish-artifacts
@@ -175,13 +181,20 @@ jobs:
         git push --tags
 
     - uses: actions/download-artifact@v2
-      if: github.event.inputs.should_create_github_release == 'true' && github.event.inputs.should_tag_new_version == 'true'
       with:
         path: artifacts/
 
+    - name: Push NuGet package to nuget.org
+      if: github.event.inputs.should_push_new_nuget_version == 'true'
+      run: nuget push 'artifacts/nuget/*.nupkg' -ApiKey ${{ secrets.NUGET_APIKEY }} -Source https://api.nuget.org/v3/index.json -SkipDuplicate -Verbosity detailed
+
+    - name: Push NuGet package to GitHub
+      if: github.event.inputs.should_push_new_nuget_version == 'true'
+      run: nuget push 'artifacts/nuget/*.nupkg' -ApiKey ${{ secrets.GITHUB_TOKEN }} -Source https://nuget.pkg.github.com/lynx-chess/index.json -SkipDuplicate -Verbosity detailed
+
     - name: Compress artifacts again
       if: github.event.inputs.should_create_github_release == 'true' && github.event.inputs.should_tag_new_version == 'true'
-      run: for i in artifacts/*; do zip -0 -r -q -j "${i%/}.zip" "$i" & done; wait
+      run: for i in artifacts/*[!nuget]; do zip -0 -r -q -j "${i%/}.zip" "$i" & done; wait
 
     - name: Create GitHub release and upload assets
       if: github.event.inputs.should_create_github_release == 'true' && github.event.inputs.should_tag_new_version == 'true'
@@ -191,6 +204,9 @@ jobs:
         set -x
         assets=()
         for asset in artifacts/*.zip; do
+          assets+=("-a" "$asset")
+        done
+        for asset in artifacts/nuget/*; do
           assets+=("-a" "$asset")
         done
         tag_name="v${{ github.event.inputs.new_engine_version }}"
