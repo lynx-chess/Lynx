@@ -17,7 +17,7 @@ public class GenerateRookMovesTest
     {
         var position = new Position(fen);
         var offset = Utils.PieceOffset(position.Side);
-        var moves = MoveGenerator.GeneratePieceMoves((int)Piece.R + offset, position);
+        var moves = MoveGenerator.GeneratePieceMovesForReference((int)Piece.R + offset, position);
 
         Assert.AreEqual(expectedMoves, moves.Count());
 
@@ -44,7 +44,7 @@ public class GenerateRookMovesTest
         var position = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1P/1PPBBPP1/R3K2R w KQkq - 0 1");
         var offset = Utils.PieceOffset(position.Side);
         var piece = (int)Piece.R + offset;
-        var moves = MoveGenerator.GeneratePieceMoves(piece, position);
+        var moves = MoveGenerator.GeneratePieceMovesForReference(piece, position);
 
         Assert.AreEqual(11, moves.Count(m => m.Piece() == piece));
 
@@ -113,7 +113,7 @@ public class GenerateRookMovesTest
         var position = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1P/1PPBBPP1/R3K2R b KQkq - 0 1");
         var offset = Utils.PieceOffset(position.Side);
         var piece = (int)Piece.R + offset;
-        var moves = MoveGenerator.GeneratePieceMoves(piece, position);
+        var moves = MoveGenerator.GeneratePieceMovesForReference(piece, position);
 
         Assert.AreEqual(10, moves.Count(m => m.Piece() == piece));
 
@@ -178,7 +178,7 @@ public class GenerateRookMovesTest
         var position = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1P/1PPBBPP1/R3K2R w KQkq - 0 1");
         var offset = Utils.PieceOffset(position.Side);
         var piece = (int)Piece.R + offset;
-        var moves = MoveGenerator.GeneratePieceMoves(piece, position, capturesOnly: true);
+        var moves = MoveGenerator.GeneratePieceMovesForReference(piece, position, capturesOnly: true);
 
         Assert.AreEqual(1, moves.Count(m => m.Piece() == piece));
 
@@ -208,7 +208,7 @@ public class GenerateRookMovesTest
         var position = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1P/1PPBBPP1/R3K2R b KQkq - 0 1");
         var offset = Utils.PieceOffset(position.Side);
         var piece = (int)Piece.R + offset;
-        var moves = MoveGenerator.GeneratePieceMoves(piece, position, capturesOnly: true);
+        var moves = MoveGenerator.GeneratePieceMovesForReference(piece, position, capturesOnly: true);
 
         Assert.AreEqual(1, moves.Count(m => m.Piece() == piece));
 

@@ -17,7 +17,7 @@ public class GenerateKnightMovesTest
     {
         var position = new Position(fen);
         var offset = Utils.PieceOffset(position.Side);
-        var moves = MoveGenerator.GeneratePieceMoves((int)Piece.N + offset, position);
+        var moves = MoveGenerator.GeneratePieceMovesForReference((int)Piece.N + offset, position);
 
         Assert.AreEqual(expectedMoves, moves.Count());
 
@@ -44,7 +44,7 @@ public class GenerateKnightMovesTest
         var position = new Position(Constants.TrickyTestPositionFEN);
         var offset = Utils.PieceOffset(position.Side);
         var piece = (int)Piece.N + offset;
-        var moves = MoveGenerator.GeneratePieceMoves(piece, position);
+        var moves = MoveGenerator.GeneratePieceMovesForReference(piece, position);
 
         Assert.AreEqual(11, moves.Count(m => m.Piece() == piece));
 
@@ -113,7 +113,7 @@ public class GenerateKnightMovesTest
         var position = new Position(Constants.TrickyTestPositionReversedFEN);
         var offset = Utils.PieceOffset(position.Side);
         var piece = (int)Piece.N + offset;
-        var moves = MoveGenerator.GeneratePieceMoves(piece, position);
+        var moves = MoveGenerator.GeneratePieceMovesForReference(piece, position);
 
         Assert.AreEqual(10, moves.Count(m => m.Piece() == piece));
 
@@ -178,7 +178,7 @@ public class GenerateKnightMovesTest
         var position = new Position(Constants.TrickyTestPositionFEN);
         var offset = Utils.PieceOffset(position.Side);
         var piece = (int)Piece.N + offset;
-        var moves = MoveGenerator.GeneratePieceMoves(piece, position, capturesOnly: true);
+        var moves = MoveGenerator.GeneratePieceMovesForReference(piece, position, capturesOnly: true);
 
         Assert.AreEqual(3, moves.Count(m => m.Piece() == piece && m.IsCapture()));
 
@@ -215,7 +215,7 @@ public class GenerateKnightMovesTest
         var position = new Position(Constants.TrickyTestPositionReversedFEN);
         var offset = Utils.PieceOffset(position.Side);
         var piece = (int)Piece.N + offset;
-        var moves = MoveGenerator.GeneratePieceMoves(piece, position, capturesOnly: true);
+        var moves = MoveGenerator.GeneratePieceMovesForReference(piece, position, capturesOnly: true);
 
         Assert.AreEqual(3, moves.Count(m => m.Piece() == piece && m.IsCapture()));
 
