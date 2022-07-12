@@ -33,9 +33,11 @@ public sealed class Game
 
     public Game(string fen, List<string> movesUCIString) : this(fen)
     {
+        var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition);
+
         foreach (var moveString in movesUCIString)
         {
-            if (!MoveExtensions.TryParseFromUCIString(moveString, GetAllMoves(), out var parsedMove))
+            if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
             {
                 _logger.Error($"Error parsing game with fen {fen} and moves {string.Join(' ', movesUCIString)}: error detected in {moveString}");
                 break;
@@ -44,9 +46,6 @@ public sealed class Game
             MakeMove(parsedMove.Value);
         }
     }
-
-    public List<Move> GetAllMoves() => MoveGenerator.GenerateAllMoves(CurrentPosition);
-    public List<Move> GetAllMovesWithCaptures() => MoveGenerator.GenerateAllMoves(CurrentPosition, capturesOnly: true);
 
     public bool MakeMove(Move moveToPlay)
     {
