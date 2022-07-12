@@ -467,13 +467,13 @@ static void _32_Make_Move()
     //CastlingRightsTest(game);
     //CastlingRightsTest(reversedGame);
 
-    gameWithPromotion.GetAllMoves().PrintMoveList();
+    MoveGenerator.GenerateAllMoves(gameWithPromotion.CurrentPosition).PrintMoveList();
 
     GeneralMoveTest(gameWithPromotion);
 
     static void GeneralMoveTest(Game game)
     {
-        foreach (var move in game.GetAllMoves())
+        foreach (var move in MoveGenerator.GenerateAllMoves(game.CurrentPosition))
         {
             game.CurrentPosition.Print();
 
@@ -493,7 +493,7 @@ static void _32_Make_Move()
 
     static void CastlingRightsTest(Game game)
     {
-        foreach (var move in game.GetAllMoves())
+        foreach (var move in MoveGenerator.GenerateAllMoves(game.CurrentPosition))
         {
             if (move.Piece() == (int)Piece.R || (move.Piece() == (int)Piece.r)
              || move.Piece() == (int)Piece.K || (move.Piece() == (int)Piece.k))
