@@ -677,7 +677,7 @@ static void ZobristTable()
     var pos = new Position(KillerPosition);
     var zobristTable = InitializeZobristTable();
     var hash = CalculatePositionHash(zobristTable, pos);
-    var updatedHash = UpdatePositionHash(zobristTable, hash, pos.AllPossibleMoves()[0]);
+    var updatedHash = UpdatePositionHash(zobristTable, hash, pos.AllPossibleMoves().First());
 
     Console.WriteLine(updatedHash);
 }
