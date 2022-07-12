@@ -261,7 +261,7 @@ public sealed partial class Engine
         //if (depth >= Configuration.EngineSettings.QuiescenceSearchDepth) return alpha;
 
         var generatedMoves = position.AllCapturesMoves();
-        if (generatedMoves.Count == 0)
+        if (!generatedMoves.Any())
         {
             return staticEvaluation;  // TODO check if in check or drawn position
         }
