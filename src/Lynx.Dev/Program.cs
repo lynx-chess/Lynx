@@ -393,7 +393,7 @@ static void _23_Castling_Moves()
     var position = new Position("rn2k2r/pppppppp/8/8/8/8/PPPPPPPP/RN2K2R w KQkq - 0 1");
     position.Print();
 
-    var moves = MoveGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side)).ToList();
+    var moves = MoveGenerator.GenerateCastlingMovesForReference(position, Utils.PieceOffset(position.Side)).ToList();
 
     foreach (var move in moves)
     {

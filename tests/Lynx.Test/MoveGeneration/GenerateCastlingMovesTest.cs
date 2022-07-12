@@ -15,7 +15,7 @@ public class GenerateCastlingMovesTest
     {
         var position = new Position(fen);
 
-        var moves = MoveGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
+        var moves = MoveGenerator.GenerateCastlingMovesForReference(position, Utils.PieceOffset(position.Side));
 
         Assert.True(1 == moves.Count(m => m.IsCastle()));
         Assert.True(1 == moves.Count(m => m.IsShortCastle()));
@@ -32,7 +32,7 @@ public class GenerateCastlingMovesTest
     {
         var position = new Position(fen);
 
-        var moves = MoveGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
+        var moves = MoveGenerator.GenerateCastlingMovesForReference(position, Utils.PieceOffset(position.Side));
 
         Assert.True(1 == moves.Count(m => m.IsCastle()));
         Assert.True(1 == moves.Count(m => m.IsLongCastle()));
@@ -57,7 +57,7 @@ public class GenerateCastlingMovesTest
     {
         var position = new Position(fen);
 
-        var moves = MoveGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
+        var moves = MoveGenerator.GenerateCastlingMovesForReference(position, Utils.PieceOffset(position.Side));
 
         Assert.IsEmpty(moves.Where(m => m.IsShortCastle()));
     }
@@ -80,7 +80,7 @@ public class GenerateCastlingMovesTest
     {
         var position = new Position(fen);
 
-        var moves = MoveGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
+        var moves = MoveGenerator.GenerateCastlingMovesForReference(position, Utils.PieceOffset(position.Side));
 
         Assert.IsEmpty(moves.Where(m => m.IsLongCastle()));
     }
@@ -101,7 +101,7 @@ public class GenerateCastlingMovesTest
     {
         var position = new Position(fen);
 
-        var moves = MoveGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
+        var moves = MoveGenerator.GenerateCastlingMovesForReference(position, Utils.PieceOffset(position.Side));
 
         Assert.IsEmpty(moves.Where(m => m.IsShortCastle()));
     }
@@ -127,7 +127,7 @@ public class GenerateCastlingMovesTest
     {
         var position = new Position(fen);
 
-        var moves = MoveGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
+        var moves = MoveGenerator.GenerateCastlingMovesForReference(position, Utils.PieceOffset(position.Side));
 
         Assert.IsEmpty(moves.Where(m => m.IsLongCastle()));
     }
@@ -142,7 +142,7 @@ public class GenerateCastlingMovesTest
     {
         var position = new Position(fen);
 
-        var moves = MoveGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
+        var moves = MoveGenerator.GenerateCastlingMovesForReference(position, Utils.PieceOffset(position.Side));
 
         Assert.IsEmpty(moves.Where(m => m.IsShortCastle()));
     }
@@ -157,7 +157,7 @@ public class GenerateCastlingMovesTest
     {
         var position = new Position(fen);
 
-        var moves = MoveGenerator.GenerateCastlingMoves(position, Utils.PieceOffset(position.Side));
+        var moves = MoveGenerator.GenerateCastlingMovesForReference(position, Utils.PieceOffset(position.Side));
 
         Assert.IsEmpty(moves.Where(m => m.IsLongCastle()));
     }
