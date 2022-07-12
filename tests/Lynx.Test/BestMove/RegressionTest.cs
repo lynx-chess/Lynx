@@ -1,4 +1,5 @@
-﻿using Lynx.UCI.Commands.GUI;
+﻿using Lynx.Model;
+using Lynx.UCI.Commands.GUI;
 using NUnit.Framework;
 
 namespace Lynx.Test.BestMove;
@@ -273,6 +274,6 @@ public class RegressionTest : BaseTest
 
         searchResult = engine.BestMove();
 
-        Assert.NotZero(searchResult.BestMove.EncodedMove);
+        Assert.NotZero(searchResult.BestMove);
     }
 }

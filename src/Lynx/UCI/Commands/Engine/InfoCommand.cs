@@ -1,4 +1,6 @@
-﻿namespace Lynx.UCI.Commands.Engine;
+﻿using Lynx.Model;
+
+namespace Lynx.UCI.Commands.Engine;
 
 /// <summary>
 /// info

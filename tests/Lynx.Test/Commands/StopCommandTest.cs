@@ -30,7 +30,7 @@ public class StopCommandTest
         engine.StopSearching();
 
         // Assert
-        Assert.AreNotEqual(default, (await resultTask).BestMove.EncodedMove);
+        Assert.AreNotEqual(default, (await resultTask).BestMove);
 
         Assert.AreEqual(initialPositionFEN, engine.Game.CurrentPosition.FEN);
         Assert.IsEmpty(engine.Game.MoveHistory);

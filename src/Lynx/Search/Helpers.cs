@@ -35,7 +35,7 @@ public sealed partial class Engine
             _isFollowingPV = false;
             for (int moveIndex = 0; moveIndex < moves.Count; ++moveIndex)
             {
-                if (moves[moveIndex].EncodedMove == _pVTable[depth].EncodedMove)
+                if (moves[moveIndex] == _pVTable[depth])
                 {
                     _isFollowingPV = true;
                     _isScoringPV = true;
@@ -49,7 +49,7 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int Score(Move move, Position position, int depth)
     {
-        if (_isScoringPV && move.EncodedMove == _pVTable[depth].EncodedMove)
+        if (_isScoringPV && move == _pVTable[depth])
         {
             _isScoringPV = false;
 
@@ -65,7 +65,7 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void CopyPVTableMoves(int target, int source, int moveCountToCopy)
     {
-        if (_pVTable[source].EncodedMove == default)
+        if (_pVTable[source] == default)
         {
             Array.Clear(_pVTable, target, _pVTable.Length - target);
             return;
@@ -84,17 +84,17 @@ public sealed partial class Engine
         var position = Game.CurrentPosition;
         for (int i = 0; i < PVTable.Indexes[1]; ++i)
         {
-            if (_pVTable[i].EncodedMove == default)
+            if (_pVTable[i] == default)
             {
                 for (int j = i + 1; j < PVTable.Indexes[1]; ++j)
                 {
-                    Utils.Assert(_pVTable[j].EncodedMove == default, $"Not expecting a move in _pvTable[{j}]");
+                    Utils.Assert(_pVTable[j] == default, $"Not expecting a move in _pvTable[{j}]");
                 }
                 break;
             }
             var move = _pVTable[i];
 
-            if (!Move.TryParseFromUCIString(
+            if (!MoveExtensions.TryParseFromUCIString(
                move.UCIString(),
                position.AllPossibleMoves(),
                out _))

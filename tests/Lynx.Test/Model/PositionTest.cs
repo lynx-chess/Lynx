@@ -96,7 +96,7 @@ public class PositionTest
     public void CustomIsValid()
     {
         var origin = new Position("r2k4/1K6/8/8/8/8/8/8 b - - 0 1");
-        var move = new Move((int)BoardSquare.b7, (int)BoardSquare.a8, (int)Piece.K, isCapture: 1);
+        var move = MoveExtensions.New((int)BoardSquare.b7, (int)BoardSquare.a8, (int)Piece.K, isCapture: 1);
 
         Assert.NotNull(new Position(origin, move));
     }
@@ -167,17 +167,17 @@ public class PositionTest
         var game = new Game(winningPosition);
         var repeatedMoves = new List<Move>
             {
-                new ((int)BoardSquare.f2, (int)BoardSquare.e2, (int)Piece.R),
-                new ((int)BoardSquare.h8, (int)BoardSquare.h7, (int)Piece.k),
-                new ((int)BoardSquare.e2, (int)BoardSquare.f2, (int)Piece.R),
-                new ((int)BoardSquare.h7, (int)BoardSquare.h8, (int)Piece.k),
-                new ((int)BoardSquare.f2, (int)BoardSquare.e2, (int)Piece.R),
-                new ((int)BoardSquare.h8, (int)BoardSquare.h7, (int)Piece.k),
-                new ((int)BoardSquare.e2, (int)BoardSquare.f2, (int)Piece.R),
-                new ((int)BoardSquare.h7, (int)BoardSquare.h8, (int)Piece.k),   // Triple position repetition
-                new ((int)BoardSquare.f2, (int)BoardSquare.a2, (int)Piece.R),   // Other random move
-                new ((int)BoardSquare.h8, (int)BoardSquare.h7, (int)Piece.k),
-                new ((int)BoardSquare.f2, (int)BoardSquare.h2, (int)Piece.R)    // Mate
+                MoveExtensions.New((int)BoardSquare.f2, (int)BoardSquare.e2, (int)Piece.R),
+                MoveExtensions.New((int)BoardSquare.h8, (int)BoardSquare.h7, (int)Piece.k),
+                MoveExtensions.New((int)BoardSquare.e2, (int)BoardSquare.f2, (int)Piece.R),
+                MoveExtensions.New((int)BoardSquare.h7, (int)BoardSquare.h8, (int)Piece.k),
+                MoveExtensions.New((int)BoardSquare.f2, (int)BoardSquare.e2, (int)Piece.R),
+                MoveExtensions.New((int)BoardSquare.h8, (int)BoardSquare.h7, (int)Piece.k),
+                MoveExtensions.New((int)BoardSquare.e2, (int)BoardSquare.f2, (int)Piece.R),
+                MoveExtensions.New((int)BoardSquare.h7, (int)BoardSquare.h8, (int)Piece.k),   // Triple position repetition
+                MoveExtensions.New((int)BoardSquare.f2, (int)BoardSquare.a2, (int)Piece.R),   // Other random move
+                MoveExtensions.New((int)BoardSquare.h8, (int)BoardSquare.h7, (int)Piece.k),
+                MoveExtensions.New((int)BoardSquare.f2, (int)BoardSquare.h2, (int)Piece.R)    // Mate
             };
 
         repeatedMoves.ForEach(move => Assert.True(game.MakeMove(move)));
@@ -197,14 +197,14 @@ public class PositionTest
         var game = new Game(winningPosition);
         var repeatedMoves = new List<Move>
             {
-                new ((int)BoardSquare.a1, (int)BoardSquare.b1, (int)Piece.r),
-                new ((int)BoardSquare.b3, (int)BoardSquare.a2, (int)Piece.K),
-                new ((int)BoardSquare.b1, (int)BoardSquare.a1, (int)Piece.r),
-                new ((int)BoardSquare.a2, (int)BoardSquare.b3, (int)Piece.K),
-                new ((int)BoardSquare.a1, (int)BoardSquare.b1, (int)Piece.r),
-                new ((int)BoardSquare.b3, (int)BoardSquare.a2, (int)Piece.K),
-                new ((int)BoardSquare.b1, (int)BoardSquare.a1, (int)Piece.r),
-                new ((int)BoardSquare.a2, (int)BoardSquare.b3, (int)Piece.K),
+                MoveExtensions.New((int)BoardSquare.a1, (int)BoardSquare.b1, (int)Piece.r),
+                MoveExtensions.New((int)BoardSquare.b3, (int)BoardSquare.a2, (int)Piece.K),
+                MoveExtensions.New((int)BoardSquare.b1, (int)BoardSquare.a1, (int)Piece.r),
+                MoveExtensions.New((int)BoardSquare.a2, (int)BoardSquare.b3, (int)Piece.K),
+                MoveExtensions.New((int)BoardSquare.a1, (int)BoardSquare.b1, (int)Piece.r),
+                MoveExtensions.New((int)BoardSquare.b3, (int)BoardSquare.a2, (int)Piece.K),
+                MoveExtensions.New((int)BoardSquare.b1, (int)BoardSquare.a1, (int)Piece.r),
+                MoveExtensions.New((int)BoardSquare.a2, (int)BoardSquare.b3, (int)Piece.K),
             };
 
         repeatedMoves.ForEach(move => Assert.True(game.MakeMove(move)));
@@ -225,14 +225,14 @@ public class PositionTest
         var game = new Game(winningPosition);
         var repeatedMoves = new List<Move>
             {
-                new ((int)BoardSquare.b1, (int)BoardSquare.c3, (int)Piece.N),
-                new ((int)BoardSquare.b8, (int)BoardSquare.c6, (int)Piece.n),
-                new ((int)BoardSquare.c3, (int)BoardSquare.b1, (int)Piece.N),
-                new ((int)BoardSquare.c6, (int)BoardSquare.b8, (int)Piece.n),
-                new ((int)BoardSquare.e1, (int)BoardSquare.d1, (int)Piece.K),
-                new ((int)BoardSquare.b8, (int)BoardSquare.c6, (int)Piece.n),
-                new ((int)BoardSquare.d1, (int)BoardSquare.e1, (int)Piece.K),
-                new ((int)BoardSquare.c6, (int)BoardSquare.b8, (int)Piece.n)
+                MoveExtensions.New((int)BoardSquare.b1, (int)BoardSquare.c3, (int)Piece.N),
+                MoveExtensions.New((int)BoardSquare.b8, (int)BoardSquare.c6, (int)Piece.n),
+                MoveExtensions.New((int)BoardSquare.c3, (int)BoardSquare.b1, (int)Piece.N),
+                MoveExtensions.New((int)BoardSquare.c6, (int)BoardSquare.b8, (int)Piece.n),
+                MoveExtensions.New((int)BoardSquare.e1, (int)BoardSquare.d1, (int)Piece.K),
+                MoveExtensions.New((int)BoardSquare.b8, (int)BoardSquare.c6, (int)Piece.n),
+                MoveExtensions.New((int)BoardSquare.d1, (int)BoardSquare.e1, (int)Piece.K),
+                MoveExtensions.New((int)BoardSquare.c6, (int)BoardSquare.b8, (int)Piece.n)
             };
 
         repeatedMoves.ForEach(move => Assert.True(game.MakeMove(move)));
@@ -247,14 +247,14 @@ public class PositionTest
         game = new Game(winningPosition);
         repeatedMoves = new List<Move>
             {
-                new ((int)BoardSquare.b1, (int)BoardSquare.c3, (int)Piece.N),
-                new ((int)BoardSquare.b8, (int)BoardSquare.c6, (int)Piece.n),
-                new ((int)BoardSquare.c3, (int)BoardSquare.b1, (int)Piece.N),
-                new ((int)BoardSquare.c6, (int)BoardSquare.b8, (int)Piece.n),
-                new ((int)BoardSquare.e1, (int)BoardSquare.d1, (int)Piece.K),
-                new ((int)BoardSquare.b8, (int)BoardSquare.c6, (int)Piece.n),
-                new ((int)BoardSquare.d1, (int)BoardSquare.e1, (int)Piece.K),
-                new ((int)BoardSquare.c6, (int)BoardSquare.b8, (int)Piece.n)
+                MoveExtensions.New((int)BoardSquare.b1, (int)BoardSquare.c3, (int)Piece.N),
+                MoveExtensions.New((int)BoardSquare.b8, (int)BoardSquare.c6, (int)Piece.n),
+                MoveExtensions.New((int)BoardSquare.c3, (int)BoardSquare.b1, (int)Piece.N),
+                MoveExtensions.New((int)BoardSquare.c6, (int)BoardSquare.b8, (int)Piece.n),
+                MoveExtensions.New((int)BoardSquare.e1, (int)BoardSquare.d1, (int)Piece.K),
+                MoveExtensions.New((int)BoardSquare.b8, (int)BoardSquare.c6, (int)Piece.n),
+                MoveExtensions.New((int)BoardSquare.d1, (int)BoardSquare.e1, (int)Piece.K),
+                MoveExtensions.New((int)BoardSquare.c6, (int)BoardSquare.b8, (int)Piece.n)
             };
 
         // Act
@@ -283,10 +283,10 @@ public class PositionTest
         var game = new Game(winningPosition);
         var nonCaptureOrPawnMoveMoves = new List<Move>
             {
-                new ((int)BoardSquare.f2, (int)BoardSquare.e2, (int)Piece.R),
-                new ((int)BoardSquare.h8, (int)BoardSquare.h7, (int)Piece.k),
-                new ((int)BoardSquare.e2, (int)BoardSquare.f2, (int)Piece.R),
-                new ((int)BoardSquare.h7, (int)BoardSquare.h8, (int)Piece.k)
+                MoveExtensions.New((int)BoardSquare.f2, (int)BoardSquare.e2, (int)Piece.R),
+                MoveExtensions.New((int)BoardSquare.h8, (int)BoardSquare.h7, (int)Piece.k),
+                MoveExtensions.New((int)BoardSquare.e2, (int)BoardSquare.f2, (int)Piece.R),
+                MoveExtensions.New((int)BoardSquare.h7, (int)BoardSquare.h8, (int)Piece.k)
             };
 
         for (int i = 0; i < 98; ++i)
@@ -296,7 +296,7 @@ public class PositionTest
 
         Assert.True(game.MakeMove(nonCaptureOrPawnMoveMoves[2]));
         Assert.True(game.MakeMove(nonCaptureOrPawnMoveMoves[3]));
-        Assert.True(game.MakeMove(new Move((int)BoardSquare.f2, (int)BoardSquare.h2, (int)Piece.R)));   // Mate on move 51
+        Assert.True(game.MakeMove(MoveExtensions.New((int)BoardSquare.f2, (int)BoardSquare.h2, (int)Piece.R)));   // Mate on move 51
 
         Assert.AreEqual(101, game.MoveHistory.Count);
 
@@ -313,10 +313,10 @@ public class PositionTest
         var game = new Game(winningPosition);
         var nonCaptureOrPawnMoveMoves = new List<Move>
             {
-                new ((int)BoardSquare.a1, (int)BoardSquare.b1, (int)Piece.r),
-                new ((int)BoardSquare.b3, (int)BoardSquare.a2, (int)Piece.K),
-                new ((int)BoardSquare.b1, (int)BoardSquare.a1, (int)Piece.r),
-                new ((int)BoardSquare.a2, (int)BoardSquare.b3, (int)Piece.K)
+                MoveExtensions.New((int)BoardSquare.a1, (int)BoardSquare.b1, (int)Piece.r),
+                MoveExtensions.New((int)BoardSquare.b3, (int)BoardSquare.a2, (int)Piece.K),
+                MoveExtensions.New((int)BoardSquare.b1, (int)BoardSquare.a1, (int)Piece.r),
+                MoveExtensions.New((int)BoardSquare.a2, (int)BoardSquare.b3, (int)Piece.K)
             };
 
         for (int i = 0; i < 100; ++i)
@@ -339,10 +339,10 @@ public class PositionTest
         var game = new Game(winningPosition);
         var nonCaptureOrPawnMoveMoves = new List<Move>
             {
-                new ((int)BoardSquare.a1, (int)BoardSquare.b1, (int)Piece.r),
-                new ((int)BoardSquare.b3, (int)BoardSquare.a2, (int)Piece.K),
-                new ((int)BoardSquare.b1, (int)BoardSquare.a1, (int)Piece.r),
-                new ((int)BoardSquare.a2, (int)BoardSquare.b3, (int)Piece.K)
+                MoveExtensions.New((int)BoardSquare.a1, (int)BoardSquare.b1, (int)Piece.r),
+                MoveExtensions.New((int)BoardSquare.b3, (int)BoardSquare.a2, (int)Piece.K),
+                MoveExtensions.New((int)BoardSquare.b1, (int)BoardSquare.a1, (int)Piece.r),
+                MoveExtensions.New((int)BoardSquare.a2, (int)BoardSquare.b3, (int)Piece.K)
             };
 
         for (int i = 0; i < 48; ++i)
@@ -350,8 +350,8 @@ public class PositionTest
             Assert.True(game.MakeMove(nonCaptureOrPawnMoveMoves[i % nonCaptureOrPawnMoveMoves.Count]));
         }
 
-        Assert.True(game.MakeMove(new((int)BoardSquare.h2, (int)BoardSquare.h1, (int)Piece.p, promotedPiece: (int)(Piece.q))));   // Promotion
-        Assert.True(game.MakeMove(new((int)BoardSquare.b3, (int)BoardSquare.c4, (int)Piece.K)));
+        Assert.True(game.MakeMove(MoveExtensions.New((int)BoardSquare.h2, (int)BoardSquare.h1, (int)Piece.p, promotedPiece: (int)(Piece.q))));   // Promotion
+        Assert.True(game.MakeMove(MoveExtensions.New((int)BoardSquare.b3, (int)BoardSquare.c4, (int)Piece.K)));
         Assert.True(game.MakeMove(nonCaptureOrPawnMoveMoves[2]));
 
         Assert.AreEqual(51, game.MoveHistory.Count);

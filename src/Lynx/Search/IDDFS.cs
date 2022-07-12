@@ -50,9 +50,9 @@ public sealed partial class Engine
 
         if (Game.MoveHistory.Count >= 2
             && _previousSearchResult?.Moves.Count >= 2
-            && _previousSearchResult.BestMove.EncodedMove != default
-            && Game.MoveHistory[^2].EncodedMove == _previousSearchResult.Moves[0].EncodedMove
-            && Game.MoveHistory[^1].EncodedMove == _previousSearchResult.Moves[1].EncodedMove)
+            && _previousSearchResult.BestMove != default
+            && Game.MoveHistory[^2] == _previousSearchResult.Moves[0]
+            && Game.MoveHistory[^1] == _previousSearchResult.Moves[1])
         {
             _logger.Debug("Ponder hit");
 
@@ -114,7 +114,7 @@ public sealed partial class Engine
                 //PrintPvTable();
                 ValidatePVTable();
 
-                var pvMoves = _pVTable.TakeWhile(m => m.EncodedMove != default).ToList();
+                var pvMoves = _pVTable.TakeWhile(m => m != default).ToList();
                 var maxDepthReached = _maxDepthReached.LastOrDefault(item => item != default);
 
                 int mate = default;

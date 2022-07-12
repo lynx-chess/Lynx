@@ -1,5 +1,6 @@
 ﻿// WACData source: http://www.talkchess.com/forum3/viewtopic.php?f=2&t=67469",
 
+using Lynx.Model;
 using Lynx.UCI.Commands.GUI;
 using NUnit.Framework;
 

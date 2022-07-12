@@ -41,7 +41,7 @@ public class TryParseFromUCIStringTest
         var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         // Act
-        Assert.True(Move.TryParseFromUCIString(UCIString, moves, out var move));
+        Assert.True(MoveExtensions.TryParseFromUCIString(UCIString, moves, out var move));
 
         // Assert
         Assert.AreEqual((int)sourceSquare, move!.Value.SourceSquare());
@@ -85,7 +85,7 @@ public class TryParseFromUCIStringTest
         var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         // Act
-        Assert.True(Move.TryParseFromUCIString(UCIString, moves, out var move));
+        Assert.True(MoveExtensions.TryParseFromUCIString(UCIString, moves, out var move));
 
         // Assert
         Assert.AreEqual((int)sourceSquare, move!.Value.SourceSquare());
@@ -102,7 +102,7 @@ public class TryParseFromUCIStringTest
         var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         // Act & Assert
-        Assert.False(Move.TryParseFromUCIString(UCIString, moves, out var result));
+        Assert.False(MoveExtensions.TryParseFromUCIString(UCIString, moves, out var result));
         Assert.Null(result);
     }
 }
