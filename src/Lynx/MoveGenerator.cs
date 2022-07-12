@@ -45,7 +45,7 @@ public static class MoveGenerator
     /// <param name="capturesOnly">Filters out all moves but captures</param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static List<Move> GenerateAllMoves(Position position, bool capturesOnly = false)
+    public static IEnumerable<Move> GenerateAllMoves(Position position, bool capturesOnly = false)
     {
 #if DEBUG
         if (position.Side == Side.Both)
@@ -64,7 +64,7 @@ public static class MoveGenerator
         GeneratePieceMoves((int)Piece.R + offset, position, capturesOnly);
         GeneratePieceMoves((int)Piece.Q + offset, position, capturesOnly);
 
-        return GeneratedMoves.ToList();
+        return GeneratedMoves;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

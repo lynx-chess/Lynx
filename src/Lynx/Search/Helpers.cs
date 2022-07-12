@@ -28,14 +28,14 @@ public sealed partial class Engine
     private const int MaxValue = +2 * EvaluationConstants.CheckMateEvaluation;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private List<Move> SortMoves(List<Move> moves, Position currentPosition, int depth)
+    private List<Move> SortMoves(IEnumerable<Move> moves, Position currentPosition, int depth)
     {
         if (_isFollowingPV)
         {
             _isFollowingPV = false;
-            for (int moveIndex = 0; moveIndex < moves.Count; ++moveIndex)
+            foreach (var move in moves)
             {
-                if (moves[moveIndex] == _pVTable[depth])
+                if (move == _pVTable[depth])
                 {
                     _isFollowingPV = true;
                     _isScoringPV = true;
@@ -60,7 +60,7 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private IOrderedEnumerable<Move> SortCaptures(List<Move> moves, Position currentPosition, int depth) => moves.OrderByDescending(move => Score(move, currentPosition, depth));
+    private IOrderedEnumerable<Move> SortCaptures(IEnumerable<Move> moves, Position currentPosition, int depth) => moves.OrderByDescending(move => Score(move, currentPosition, depth));
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void CopyPVTableMoves(int target, int source, int moveCountToCopy)

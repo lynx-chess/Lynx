@@ -450,10 +450,10 @@ public sealed class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public List<Move> AllPossibleMoves() => MoveGenerator.GenerateAllMoves(this);
+    public IEnumerable<Move> AllPossibleMoves() => MoveGenerator.GenerateAllMoves(this);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public List<Move> AllCapturesMoves() => MoveGenerator.GenerateAllMoves(this, capturesOnly: true);
+    public IEnumerable<Move> AllCapturesMoves() => MoveGenerator.GenerateAllMoves(this, capturesOnly: true);
 
     /// <summary>
     /// Assuming a current position has no legal moves (<see cref="AllPossibleMoves"/> doesn't produce any <see cref="IsValid"/> position),
