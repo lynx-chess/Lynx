@@ -42,7 +42,7 @@ public static class MoveExtensions
     /// <param name="isShortCastle"></param>
     /// <param name="isLongCastle"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Move New(
+    public static Move Encode(
         int sourceSquare, int targetSquare, int piece, int promotedPiece = default,
         int isCapture = default, int isDoublePawnPush = default, int isEnPassant = default,
         int isShortCastle = default, int isLongCastle = default)
