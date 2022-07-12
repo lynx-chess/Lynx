@@ -7,6 +7,10 @@
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Using Include="System.Int32" Alias="Move" />
+  </ItemGroup >
+
   <PropertyGroup>
     <Version>0.10.0</Version>
     <Authors>Eduardo Cáceres</Authors>

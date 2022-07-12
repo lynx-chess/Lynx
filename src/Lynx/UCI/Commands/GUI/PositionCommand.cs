@@ -63,7 +63,7 @@ public sealed class PositionCommand : GUIBaseCommand
                 .Split(' ', StringSplitOptions.RemoveEmptyEntries)
                 .Last();
 
-        if (!Move.TryParseFromUCIString(
+        if (!MoveExtensions.TryParseFromUCIString(
             moveString,
             game.CurrentPosition.AllPossibleMoves(),
             out lastMove))

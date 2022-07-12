@@ -37,15 +37,15 @@ public class ForceOrAvoidDrawTest : BaseTest
 
         var repeatedMoves = new List<Move>
             {
-                new ((int)BoardSquare.d6, (int)BoardSquare.c7, (int)Piece.q),
-                new ((int)BoardSquare.h5, (int)BoardSquare.h4, (int)Piece.K),
-                new ((int)BoardSquare.c7, (int)BoardSquare.d6, (int)Piece.q),
-                new ((int)BoardSquare.h4, (int)BoardSquare.h5, (int)Piece.K),
-                new ((int)BoardSquare.d6, (int)BoardSquare.c7, (int)Piece.q),
-                new ((int)BoardSquare.h5, (int)BoardSquare.h4, (int)Piece.K)
+                MoveExtensions.New((int)BoardSquare.d6, (int)BoardSquare.c7, (int)Piece.q),
+                MoveExtensions.New((int)BoardSquare.h5, (int)BoardSquare.h4, (int)Piece.K),
+                MoveExtensions.New((int)BoardSquare.c7, (int)BoardSquare.d6, (int)Piece.q),
+                MoveExtensions.New((int)BoardSquare.h4, (int)BoardSquare.h5, (int)Piece.K),
+                MoveExtensions.New((int)BoardSquare.d6, (int)BoardSquare.c7, (int)Piece.q),
+                MoveExtensions.New((int)BoardSquare.h5, (int)BoardSquare.h4, (int)Piece.K)
             };
 
-        Move movesThatAllowsRepetition = new((int)BoardSquare.c7, (int)BoardSquare.d6, (int)Piece.q);
+        Move movesThatAllowsRepetition = MoveExtensions.New((int)BoardSquare.c7, (int)BoardSquare.d6, (int)Piece.q);
 
         var sb = new StringBuilder($"position fen {fen} moves");
         foreach (var move in repeatedMoves)
@@ -83,16 +83,16 @@ public class ForceOrAvoidDrawTest : BaseTest
 
         var repeatedMoves = new List<Move>
             {
-                new ((int)BoardSquare.f2, (int)BoardSquare.e2, (int)Piece.R),
-                new ((int)BoardSquare.h6, (int)BoardSquare.h7, (int)Piece.k),
-                new ((int)BoardSquare.e2, (int)BoardSquare.f2, (int)Piece.R),
-                new ((int)BoardSquare.h7, (int)BoardSquare.h6, (int)Piece.k),
-                new ((int)BoardSquare.f2, (int)BoardSquare.e2, (int)Piece.R),
-                new ((int)BoardSquare.h6, (int)BoardSquare.h7, (int)Piece.k),
-                new ((int)BoardSquare.e2, (int)BoardSquare.f2, (int)Piece.R),
+                MoveExtensions.New((int)BoardSquare.f2, (int)BoardSquare.e2, (int)Piece.R),
+                MoveExtensions.New((int)BoardSquare.h6, (int)BoardSquare.h7, (int)Piece.k),
+                MoveExtensions.New((int)BoardSquare.e2, (int)BoardSquare.f2, (int)Piece.R),
+                MoveExtensions.New((int)BoardSquare.h7, (int)BoardSquare.h6, (int)Piece.k),
+                MoveExtensions.New((int)BoardSquare.f2, (int)BoardSquare.e2, (int)Piece.R),
+                MoveExtensions.New((int)BoardSquare.h6, (int)BoardSquare.h7, (int)Piece.k),
+                MoveExtensions.New((int)BoardSquare.e2, (int)BoardSquare.f2, (int)Piece.R),
             };
 
-        Move movesThatAllowsRepetition = new((int)BoardSquare.h7, (int)BoardSquare.h6, (int)Piece.k);
+        Move movesThatAllowsRepetition = MoveExtensions.New((int)BoardSquare.h7, (int)BoardSquare.h6, (int)Piece.k);
 
         var sb = new StringBuilder($"position fen {fen} moves");
         foreach (var move in repeatedMoves)
@@ -132,13 +132,13 @@ public class ForceOrAvoidDrawTest : BaseTest
 
         var nonCaptureOrPawnMoveMoves = new List<Move>
             {
-                new ((int)BoardSquare.d6, (int)BoardSquare.c7, (int)Piece.q),
-                new ((int)BoardSquare.h5, (int)BoardSquare.h4, (int)Piece.K),
-                new ((int)BoardSquare.c7, (int)BoardSquare.d6, (int)Piece.q),
-                new ((int)BoardSquare.h4, (int)BoardSquare.h5, (int)Piece.K)
+                MoveExtensions.New((int)BoardSquare.d6, (int)BoardSquare.c7, (int)Piece.q),
+                MoveExtensions.New((int)BoardSquare.h5, (int)BoardSquare.h4, (int)Piece.K),
+                MoveExtensions.New((int)BoardSquare.c7, (int)BoardSquare.d6, (int)Piece.q),
+                MoveExtensions.New((int)BoardSquare.h4, (int)BoardSquare.h5, (int)Piece.K)
             };
 
-        Move movesThatAllowsRepetition = new((int)BoardSquare.c7, (int)BoardSquare.d6, (int)Piece.q);
+        Move movesThatAllowsRepetition = MoveExtensions.New((int)BoardSquare.c7, (int)BoardSquare.d6, (int)Piece.q);
 
         var sb = new StringBuilder($"position fen {fen} moves");
         for (int i = 0; i < 98; ++i)
@@ -179,13 +179,13 @@ public class ForceOrAvoidDrawTest : BaseTest
 
         var nonCaptureOrPawnMoveMoves = new List<Move>
             {
-                new ((int)BoardSquare.e2, (int)BoardSquare.f2, (int)Piece.R),
-                new ((int)BoardSquare.h5, (int)BoardSquare.h6, (int)Piece.k),
-                new ((int)BoardSquare.f2, (int)BoardSquare.e2, (int)Piece.R),
-                new ((int)BoardSquare.h6, (int)BoardSquare.h5, (int)Piece.k)
+                MoveExtensions.New((int)BoardSquare.e2, (int)BoardSquare.f2, (int)Piece.R),
+                MoveExtensions.New((int)BoardSquare.h5, (int)BoardSquare.h6, (int)Piece.k),
+                MoveExtensions.New((int)BoardSquare.f2, (int)BoardSquare.e2, (int)Piece.R),
+                MoveExtensions.New((int)BoardSquare.h6, (int)BoardSquare.h5, (int)Piece.k)
             };
 
-        Move movesThatAllowsRepetition = new((int)BoardSquare.h6, (int)BoardSquare.h5, (int)Piece.k);
+        Move movesThatAllowsRepetition = MoveExtensions.New((int)BoardSquare.h6, (int)BoardSquare.h5, (int)Piece.k);
 
         var sb = new StringBuilder($"position fen {fen} moves");
         for (int i = 0; i < 98; ++i)

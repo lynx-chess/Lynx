@@ -173,7 +173,7 @@ public sealed partial class Engine
                 if (!move.IsCapture())
                 {
                     _killerMoves[1, depth] = _killerMoves[0, depth];
-                    _killerMoves[0, depth] = move.EncodedMove;
+                    _killerMoves[0, depth] = move;
                 }
                 return beta;    // TODO return evaluation?
             }

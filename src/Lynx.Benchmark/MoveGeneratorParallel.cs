@@ -1,5 +1,5 @@
 ﻿/*
- * 
+ *
  *  |               Method |                  fen |      Mean |     Error |    StdDev | Ratio | RatioSD |  Gen 0 |  Gen 1 | Allocated |
  *  |--------------------- |--------------------- |----------:|----------:|----------:|------:|--------:|-------:|-------:|----------:|
  *  |         SingleThread | r2q1r(...)- 0 9 [68] |  8.650 us | 0.1549 us | 0.1293 us |  1.00 |    0.00 | 2.3346 |      - |      5 KB |
@@ -36,7 +36,7 @@
  *  |    SingleThreadArray | rnbqk(...)- 0 1 [56] |  7.986 us | 0.1455 us | 0.1361 us |  1.13 |    0.02 | 2.3956 |      - |      5 KB |
  *  | ParallelForEachArray | rnbqk(...)- 0 1 [56] | 20.664 us | 0.1411 us | 0.1251 us |  2.93 |    0.04 | 1.2512 | 0.6104 |      8 KB |
  *  |         WhenAllArray | rnbqk(...)- 0 1 [56] | 19.929 us | 0.0522 us | 0.0435 us |  2.83 |    0.03 | 3.2959 |      - |      7 KB |
- *  
+ *
 */
 
 using BenchmarkDotNet.Attributes;
@@ -222,14 +222,14 @@ public class MoveGeneratorParallel : BaseBenchmark
                     var targetRank = (singlePushSquare / 8) + 1;
                     if (targetRank == 1 || targetRank == 8)  // Promotion
                     {
-                        yield return new Move(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.Q + offset);
-                        yield return new Move(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.R + offset);
-                        yield return new Move(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.N + offset);
-                        yield return new Move(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.B + offset);
+                        yield return MoveExtensions.New(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.Q + offset);
+                        yield return MoveExtensions.New(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.R + offset);
+                        yield return MoveExtensions.New(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.N + offset);
+                        yield return MoveExtensions.New(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.B + offset);
                     }
                     else if (!capturesOnly)
                     {
-                        yield return new Move(sourceSquare, singlePushSquare, piece);
+                        yield return MoveExtensions.New(sourceSquare, singlePushSquare, piece);
                     }
 
                     // Double pawn push
@@ -240,7 +240,7 @@ public class MoveGeneratorParallel : BaseBenchmark
                         if (!position.OccupancyBitBoards[2].GetBit(doublePushSquare)
                             && ((sourceRank == 2 && position.Side == Side.Black) || (sourceRank == 7 && position.Side == Side.White)))
                         {
-                            yield return new Move(sourceSquare, doublePushSquare, piece, isDoublePawnPush: TRUE);
+                            yield return MoveExtensions.New(sourceSquare, doublePushSquare, piece, isDoublePawnPush: TRUE);
                         }
                     }
                 }
@@ -251,7 +251,7 @@ public class MoveGeneratorParallel : BaseBenchmark
                 if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
                 // We assume that position.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
                 {
-                    yield return new Move(sourceSquare, (int)position.EnPassant, piece, isCapture: TRUE, isEnPassant: TRUE);
+                    yield return MoveExtensions.New(sourceSquare, (int)position.EnPassant, piece, isCapture: TRUE, isEnPassant: TRUE);
                 }
 
                 // Captures
@@ -264,14 +264,14 @@ public class MoveGeneratorParallel : BaseBenchmark
                     var targetRank = (targetSquare / 8) + 1;
                     if (targetRank == 1 || targetRank == 8)  // Capture with promotion
                     {
-                        yield return new Move(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.Q + offset, isCapture: TRUE);
-                        yield return new Move(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.R + offset, isCapture: TRUE);
-                        yield return new Move(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.N + offset, isCapture: TRUE);
-                        yield return new Move(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.B + offset, isCapture: TRUE);
+                        yield return MoveExtensions.New(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.Q + offset, isCapture: TRUE);
+                        yield return MoveExtensions.New(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.R + offset, isCapture: TRUE);
+                        yield return MoveExtensions.New(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.N + offset, isCapture: TRUE);
+                        yield return MoveExtensions.New(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.B + offset, isCapture: TRUE);
                     }
                     else
                     {
-                        yield return new Move(sourceSquare, targetSquare, piece, isCapture: TRUE);
+                        yield return MoveExtensions.New(sourceSquare, targetSquare, piece, isCapture: TRUE);
                     }
                 }
             }
@@ -297,7 +297,7 @@ public class MoveGeneratorParallel : BaseBenchmark
                         && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.f1, position, oppositeSide)
                         && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.g1, position, oppositeSide))
                     {
-                        yield return new Move(sourceSquare, Constants.WhiteShortCastleKingSquare, piece, isShortCastle: TRUE);
+                        yield return MoveExtensions.New(sourceSquare, Constants.WhiteShortCastleKingSquare, piece, isShortCastle: TRUE);
                     }
 
                     if (((position.Castle & (int)CastlingRights.WQ) != default)
@@ -308,7 +308,7 @@ public class MoveGeneratorParallel : BaseBenchmark
                         && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.d1, position, oppositeSide)
                         && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.c1, position, oppositeSide))
                     {
-                        yield return new Move(sourceSquare, Constants.WhiteLongCastleKingSquare, piece, isLongCastle: TRUE);
+                        yield return MoveExtensions.New(sourceSquare, Constants.WhiteLongCastleKingSquare, piece, isLongCastle: TRUE);
                     }
                 }
                 else
@@ -320,7 +320,7 @@ public class MoveGeneratorParallel : BaseBenchmark
                         && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.f8, position, oppositeSide)
                         && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.g8, position, oppositeSide))
                     {
-                        yield return new Move(sourceSquare, Constants.BlackShortCastleKingSquare, piece, isShortCastle: TRUE);
+                        yield return MoveExtensions.New(sourceSquare, Constants.BlackShortCastleKingSquare, piece, isShortCastle: TRUE);
                     }
 
                     if (((position.Castle & (int)CastlingRights.BQ) != default)
@@ -331,7 +331,7 @@ public class MoveGeneratorParallel : BaseBenchmark
                         && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.d8, position, oppositeSide)
                         && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.c8, position, oppositeSide))
                     {
-                        yield return new Move(sourceSquare, Constants.BlackLongCastleKingSquare, piece, isLongCastle: TRUE);
+                        yield return MoveExtensions.New(sourceSquare, Constants.BlackLongCastleKingSquare, piece, isLongCastle: TRUE);
                     }
                 }
             }
@@ -358,11 +358,11 @@ public class MoveGeneratorParallel : BaseBenchmark
 
                     if (position.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare))
                     {
-                        yield return new Move(sourceSquare, targetSquare, piece, isCapture: TRUE);
+                        yield return MoveExtensions.New(sourceSquare, targetSquare, piece, isCapture: TRUE);
                     }
                     else if (!capturesOnly)
                     {
-                        yield return new Move(sourceSquare, targetSquare, piece);
+                        yield return MoveExtensions.New(sourceSquare, targetSquare, piece);
                     }
                 }
             }
