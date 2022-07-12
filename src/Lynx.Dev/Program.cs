@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using static Lynx.Model.Move;
 
 //_2_GettingStarted();
 //_3_PawnAttacks();
@@ -440,16 +439,16 @@ static void _29_Move_List()
 {
     var position = new Position(TrickyPosition);
     var moves = MoveGenerator.GenerateAllMoves(position);
-    PrintMoveList(moves);
+    moves.PrintMoveList();
 
     position = new Position(TrickyPositionReversed);
     moves = MoveGenerator.GenerateAllMoves(position);
-    PrintMoveList(moves);
+    moves.PrintMoveList();
 
     position = new Position(KillerPosition);
     position.Print();
     moves = MoveGenerator.GenerateAllMoves(position);
-    PrintMoveList(moves);
+    moves.PrintMoveList();
 }
 
 static void _32_Make_Move()
@@ -468,7 +467,7 @@ static void _32_Make_Move()
     //CastlingRightsTest(game);
     //CastlingRightsTest(reversedGame);
 
-    PrintMoveList(gameWithPromotion.GetAllMoves());
+    gameWithPromotion.GetAllMoves().PrintMoveList();
 
     GeneralMoveTest(gameWithPromotion);
 

@@ -5,27 +5,29 @@ using System.Text;
 
 namespace Lynx.Model;
 
-public readonly struct Move
+/// <summary>
+/// <para>int Value:</para>
+/// <para>
+///     Binary move bits            Hexadecimal
+/// 0000 0000 0000 0000 0000 0011 1111      0x3F        Source square (63 bits)
+/// 0000 0000 0000 0000 1111 1100 0000      0xFC0       Target Square (63 bits)
+/// 0000 0000 0000 1111 0000 0000 0000      0xF000      Piece (11 bits)
+/// 0000 0000 1111 0000 0000 0000 0000      0xF0000     Promoted piece (~11 bits)
+/// 0000 0001 0000 0000 0000 0000 0000      0x10_0000   Capture flag
+/// 0000 0010 0000 0000 0000 0000 0000      0x20_0000   Double pawn push flag
+/// 0000 0100 0000 0000 0000 0000 0000      0x40_0000   Enpassant flag
+/// 0000 1000 0000 0000 0000 0000 0000      0x80_0000   Short castling flag
+/// 0001 0000 0000 0000 0000 0000 0000      0x100_0000  Long castling flag
+/// Total: 24 bits -> fits an int
+/// Could be reduced to 16 bits -> see https://www.chessprogramming.org/Encoding_Moves
+/// </para>
+/// </summary>
+/// </summary>
+public static class MoveExtensions
 {
     public const int CaptureBaseScore = 100_000;
 
     private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
-
-    /// <summary>
-    ///     Binary move bits            Hexadecimal
-    /// 0000 0000 0000 0000 0000 0011 1111      0x3F        Source square (63 bits)
-    /// 0000 0000 0000 0000 1111 1100 0000      0xFC0       Target Square (63 bits)
-    /// 0000 0000 0000 1111 0000 0000 0000      0xF000      Piece (11 bits)
-    /// 0000 0000 1111 0000 0000 0000 0000      0xF0000     Promoted piece (~11 bits)
-    /// 0000 0001 0000 0000 0000 0000 0000      0x10_0000   Capture flag
-    /// 0000 0010 0000 0000 0000 0000 0000      0x20_0000   Double pawn push flag
-    /// 0000 0100 0000 0000 0000 0000 0000      0x40_0000   Enpassant flag
-    /// 0000 1000 0000 0000 0000 0000 0000      0x80_0000   Short castling flag
-    /// 0001 0000 0000 0000 0000 0000 0000      0x100_0000  Long castling flag
-    /// Total: 24 bits -> fits an int
-    /// Could be reduced to 16 bits -> see https://www.chessprogramming.org/Encoding_Moves
-    /// </summary>
-    public int EncodedMove { get; }
 
     /// <summary>
     /// 'Encode' constractor
@@ -40,12 +42,12 @@ public readonly struct Move
     /// <param name="isShortCastle"></param>
     /// <param name="isLongCastle"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public Move(
+    public static Move New(
         int sourceSquare, int targetSquare, int piece, int promotedPiece = default,
         int isCapture = default, int isDoublePawnPush = default, int isEnPassant = default,
         int isShortCastle = default, int isLongCastle = default)
     {
-        EncodedMove = sourceSquare | (targetSquare << 6) | (piece << 12) | (promotedPiece << 16)
+        return sourceSquare | (targetSquare << 6) | (piece << 12) | (promotedPiece << 16)
             | (isCapture << 20)
             | (isDoublePawnPush << 21)
             | (isEnPassant << 22)
@@ -113,34 +115,34 @@ public readonly struct Move
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public readonly int SourceSquare() => EncodedMove & 0x3F;
+    public static int SourceSquare(this Move move) => move & 0x3F;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public readonly int TargetSquare() => (EncodedMove & 0xFC0) >> 6;
+    public static int TargetSquare(this Move move) => (move & 0xFC0) >> 6;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public readonly int Piece() => (EncodedMove & 0xF000) >> 12;
+    public static int Piece(this Move move) => (move & 0xF000) >> 12;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public readonly int PromotedPiece() => (EncodedMove & 0xF0000) >> 16;
+    public static int PromotedPiece(this Move move) => (move & 0xF0000) >> 16;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public readonly bool IsCapture() => (EncodedMove & 0x10_0000) >> 20 != default;
+    public static bool IsCapture(this Move move) => (move & 0x10_0000) >> 20 != default;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public readonly bool IsDoublePawnPush() => (EncodedMove & 0x20_0000) >> 21 != default;
+    public static bool IsDoublePawnPush(this Move move) => (move & 0x20_0000) >> 21 != default;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public readonly bool IsEnPassant() => (EncodedMove & 0x40_0000) >> 22 != default;
+    public static bool IsEnPassant(this Move move) => (move & 0x40_0000) >> 22 != default;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public readonly bool IsShortCastle() => (EncodedMove & 0x80_0000) >> 23 != default;
+    public static bool IsShortCastle(this Move move) => (move & 0x80_0000) >> 23 != default;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public readonly bool IsLongCastle() => (EncodedMove & 0x100_0000) >> 24 != default;
+    public static bool IsLongCastle(this Move move) => (move & 0x100_0000) >> 24 != default;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public readonly bool IsCastle() => (EncodedMove & 0x180_0000) >> 23 != default;
+    public static bool IsCastle(this Move move) => (move & 0x180_0000) >> 23 != default;
 
     /// <summary>
     /// Returns the score evaluation of a move taking into account <see cref="EvaluationConstants.MostValueableVictimLeastValuableAttacker"/>
@@ -151,16 +153,16 @@ public readonly struct Move
     /// <param name="historyMoves"></param>
     /// <returns>The higher the score is, the more valuable is the captured piece and the less valuable is the piece that makes the such capture</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public readonly int Score(Position position, int[,]? killerMoves = null, int? plies = null, int[,]? historyMoves = null)
+    public static int Score(this Move move, Position position, int[,]? killerMoves = null, int? plies = null, int[,]? historyMoves = null)
     {
         int score = 0;
 
-        if (IsCapture())
+        if (move.IsCapture())
         {
-            var sourcePiece = Piece();
+            var sourcePiece = move.Piece();
             int targetPiece = (int)Model.Piece.P;    // Important to initialize to P or p, due to en-passant captures
 
-            var targetSquare = TargetSquare();
+            var targetSquare = move.TargetSquare();
             var oppositeSide = Utils.OppositeSide(position.Side);
             var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
             var oppositePawnIndex = (int)Model.Piece.P + oppositeSideOffset;
@@ -182,13 +184,13 @@ public readonly struct Move
             if (killerMoves is not null && plies is not null)
             {
                 // 1st killer move
-                if (killerMoves[0, plies.Value] == EncodedMove)
+                if (killerMoves[0, plies.Value] == move)
                 {
                     return EvaluationConstants.FirstKillerMoveValue;
                 }
 
                 // 2nd killer move
-                else if (killerMoves[1, plies.Value] == EncodedMove)
+                else if (killerMoves[1, plies.Value] == move)
                 {
                     return EvaluationConstants.SecondKillerMoveValue;
                 }
@@ -196,7 +198,7 @@ public readonly struct Move
                 // History move
                 else if (historyMoves is not null)
                 {
-                    return historyMoves[Piece(), TargetSquare()];
+                    return historyMoves[move.Piece(), move.TargetSquare()];
                 }
             }
         }
@@ -204,18 +206,18 @@ public readonly struct Move
         return score;
     }
 
-    public override string ToString()
+    public static string ToString(this Move move)
     {
 #pragma warning disable S3358 // Ternary operators should not be nested
-        return IsCastle() == default
+        return move.IsCastle() == default
             ?
-                Constants.AsciiPieces[Piece()] +
-                Constants.Coordinates[SourceSquare()] +
-                (IsCapture() == default ? "" : "x") +
-                Constants.Coordinates[TargetSquare()] +
-                (PromotedPiece() == default ? "" : $"={Constants.AsciiPieces[PromotedPiece()]}") +
-                (IsEnPassant() == default ? "" : "e.p.")
-            : (IsShortCastle() ? "O-O" : "O-O-O");
+                Constants.AsciiPieces[move.Piece()] +
+                Constants.Coordinates[move.SourceSquare()] +
+                (move.IsCapture() == default ? "" : "x") +
+                Constants.Coordinates[move.TargetSquare()] +
+                (move.PromotedPiece() == default ? "" : $"={Constants.AsciiPieces[move.PromotedPiece()]}") +
+                (move.IsEnPassant() == default ? "" : "e.p.")
+            : (move.IsShortCastle() ? "O-O" : "O-O-O");
 #pragma warning restore S3358 // Ternary operators should not be nested
     }
 
@@ -223,35 +225,35 @@ public readonly struct Move
     /// Typical format when humans write moves
     /// </summary>
     /// <returns></returns>
-    public string ToEPDString()
+    public static string ToEPDString(this Move move)
     {
-        var piece = Piece();
+        var piece = move.Piece();
 #pragma warning disable S3358 // Ternary operators should not be nested
-        return IsCastle() == default
+        return move.IsCastle() == default
             ?
-                ((piece == (int)Model.Piece.P || piece == (int)Model.Piece.p) && !IsCapture() ? "" : char.ToUpperInvariant(Constants.AsciiPieces[Piece()])) +
-                (IsCapture() == default ? "" : "x") +
-                Constants.Coordinates[TargetSquare()] +
-                (PromotedPiece() == default ? "" : $"={char.ToUpperInvariant(Constants.AsciiPieces[PromotedPiece()])}") +
-                (IsEnPassant() == default ? "" : "e.p.")
-            : (IsShortCastle() ? "O-O" : "O-O-O");
+                ((piece == (int)Model.Piece.P || piece == (int)Model.Piece.p) && !move.IsCapture() ? "" : char.ToUpperInvariant(Constants.AsciiPieces[move.Piece()])) +
+                (move.IsCapture() == default ? "" : "x") +
+                Constants.Coordinates[move.TargetSquare()] +
+                (move.PromotedPiece() == default ? "" : $"={char.ToUpperInvariant(Constants.AsciiPieces[move.PromotedPiece()])}") +
+                (move.IsEnPassant() == default ? "" : "e.p.")
+            : (move.IsShortCastle() ? "O-O" : "O-O-O");
 #pragma warning restore S3358 // Ternary operators should not be nested
     }
 
-    public readonly void Print()
+    public static void Print(this Move move)
     {
-        Console.WriteLine(ToString());
+        Console.WriteLine(move.ToString());
     }
 
-    public string UCIString()
+    public static string UCIString(this Move move)
     {
         return
-            Constants.Coordinates[SourceSquare()] +
-            Constants.Coordinates[TargetSquare()] +
-            (PromotedPiece() == default ? "" : $"{Constants.AsciiPieces[PromotedPiece()].ToString().ToLowerInvariant()}");
+            Constants.Coordinates[move.SourceSquare()] +
+            Constants.Coordinates[move.TargetSquare()] +
+            (move.PromotedPiece() == default ? "" : $"{Constants.AsciiPieces[move.PromotedPiece()].ToString().ToLowerInvariant()}");
     }
 
-    public static void PrintMoveList(IEnumerable<Move> moves)
+    public static void PrintMoveList(this IEnumerable<Move> moves)
     {
         Console.WriteLine($"{"#",-3}{"Pc",-3}{"src",-4}{"x",-2}{"tgt",-4}{"DPP",-4}{"ep",-3}{"O-O",-4}{"O-O-O",-7}\n");
 

@@ -35,7 +35,7 @@ public sealed class Game
     {
         foreach (var moveString in movesUCIString)
         {
-            if (!Move.TryParseFromUCIString(moveString, GetAllMoves(), out var parsedMove))
+            if (!MoveExtensions.TryParseFromUCIString(moveString, GetAllMoves(), out var parsedMove))
             {
                 _logger.Error($"Error parsing game with fen {fen} and moves {string.Join(' ', movesUCIString)}: error detected in {moveString}");
                 break;
