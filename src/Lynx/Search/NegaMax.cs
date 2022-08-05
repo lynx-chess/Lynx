@@ -40,7 +40,7 @@ public sealed partial class Engine
 
         if (depth >= maxDepth)
         {
-            foreach (var candidateMove in position.AllPossibleMoves())
+            foreach (var candidateMove in position.AllPossibleMoves(Game.MovePool))
             {
                 if (new Position(position, candidateMove).WasProduceByAValidMove())
                 {
@@ -89,7 +89,7 @@ public sealed partial class Engine
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
-        var pseudoLegalMoves = SortMoves(position.AllPossibleMoves(), position, depth);
+        var pseudoLegalMoves = SortMoves(position.AllPossibleMoves(Game.MovePool), position, depth);
 
         foreach (var move in pseudoLegalMoves)
         {
@@ -260,7 +260,7 @@ public sealed partial class Engine
         // Quiescence search limitation
         //if (depth >= Configuration.EngineSettings.QuiescenceSearchDepth) return alpha;
 
-        var generatedMoves = position.AllCapturesMoves();
+        var generatedMoves = position.AllCapturesMoves(Game.MovePool);
         if (!generatedMoves.Any())
         {
             return staticEvaluation;  // TODO check if in check or drawn position
@@ -312,7 +312,7 @@ public sealed partial class Engine
 
         if (bestMove is null)
         {
-            return isAnyMoveValid || position.AllPossibleMoves().Any(move => new Position(position, move).WasProduceByAValidMove())
+            return isAnyMoveValid || position.AllPossibleMoves(Game.MovePool).Any(move => new Position(position, move).WasProduceByAValidMove())
                 ? alpha
                 : Position.EvaluateFinalPosition(depth, position.IsInCheck(), Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
         }

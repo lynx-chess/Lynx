@@ -65,7 +65,7 @@ public sealed class PositionCommand : GUIBaseCommand
 
         if (!MoveExtensions.TryParseFromUCIString(
             moveString,
-            game.CurrentPosition.AllPossibleMoves(),
+            game.CurrentPosition.AllPossibleMoves(game.MovePool),
             out lastMove))
         {
             _logger.Warn($"Error parsing last move {lastMove} from position command {positionCommand}");

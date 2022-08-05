@@ -6,6 +6,8 @@ public sealed class Game
 {
     private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
 
+    public Move[] MovePool { get; } = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+
     public List<Move> MoveHistory { get; }
     public List<Position> PositionHistory { get; }
     public Dictionary<long, int> PositionHashHistory { get; }
@@ -33,10 +35,10 @@ public sealed class Game
 
     public Game(string fen, List<string> movesUCIString) : this(fen)
     {
-        var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition);
-
         foreach (var moveString in movesUCIString)
         {
+            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, MovePool);
+
             if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
             {
                 _logger.Error($"Error parsing game with fen {fen} and moves {string.Join(' ', movesUCIString)}: error detected in {moveString}");
