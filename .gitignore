@@ -356,3 +356,6 @@ global.json
 
 # Environment files
 *.env
+
+# VS diagnostic sessions
+*.diagsession

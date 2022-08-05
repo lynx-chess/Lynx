@@ -359,4 +359,11 @@ public static class Constants
             15, 15, 15, 15, 15, 15, 15, 15,
             13, 15, 15, 15, 12, 15, 15, 14
     };
+
+    /// <summary>
+    /// 218 or 224 seems to be the known limit
+    /// https://www.reddit.com/r/chess/comments/9j70dc/position_with_the_most_number_of_legal_moves/
+    /// </summary>
+    public const int MaxNumberOfPossibleMovesInAPosition = 250;
+
 }
