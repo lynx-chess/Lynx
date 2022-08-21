@@ -27,7 +27,6 @@ public class MatesTest : BaseTest
         Assert.AreNotEqual(default, result.Mate);
     }
 
-    [Explicit]
     [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_4), Category = Categories.LongRunning)]
     public void Mate_in_4(string fen, string[]? allowedUCIMoveString, string description)
     {
@@ -40,7 +39,6 @@ public class MatesTest : BaseTest
     /// </summary>
     /// <param name="fen"></param>
     /// <param name="allowedUCIMoveString"></param>
-    [Explicit]
     [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_4_Collection), Category = Categories.LongRunning)]
     public void Mate_in_4_Collection(string fen, string[]? allowedUCIMoveString, string description)
     {
@@ -48,7 +46,6 @@ public class MatesTest : BaseTest
         Assert.AreNotEqual(default, result.Mate);
     }
 
-    [Explicit]
     [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_5), Category = Categories.LongRunning)]
     public void Mate_in_5(string fen, string[]? allowedUCIMoveString, string description)
     {
@@ -56,7 +53,6 @@ public class MatesTest : BaseTest
         Assert.AreNotEqual(default, result.Mate);
     }
 
-    [Explicit]
     [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_6), Category = Categories.LongRunning)]
     public void Mate_in_6(string fen, string[]? allowedUCIMoveString, string description)
     {
@@ -64,7 +60,6 @@ public class MatesTest : BaseTest
         Assert.AreNotEqual(default, result.Mate);
     }
 
-    [Explicit]
     [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_7), Category = Categories.LongRunning)]
     public void Mate_in_7(string fen, string[]? allowedUCIMoveString, string description)
     {

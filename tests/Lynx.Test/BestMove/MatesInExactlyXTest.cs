@@ -23,7 +23,6 @@ public class MatesInExactlyXTest : BaseTest
         Assert.AreEqual(2, result.Mate);
     }
 
-    [Explicit]
     [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_3), Category = Categories.NoPruning)]
     public void Mate_in_Exactly_3(string fen, string[]? allowedUCIMoveString, string description)
     {
@@ -31,16 +30,14 @@ public class MatesInExactlyXTest : BaseTest
         Assert.AreEqual(3, result.Mate);
     }
 
-    [Explicit]
-    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_4), Category = Categories.NoPruning)]
+    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_4), Category = Categories.LongRunning)]
     public void Mate_in_Exactly_4(string fen, string[]? allowedUCIMoveString, string description)
     {
         var result = TestBestMove(fen, allowedUCIMoveString, null, depth: 8);
         Assert.AreEqual(4, result.Mate);
     }
 
-    [Explicit]
-    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_4_Collection), Category = Categories.NoPruning)]
+    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_4_Collection), Category = Categories.LongRunning)]
     public void Mate_in_Exactly_4_Collection(string fen, string[]? allowedUCIMoveString, string description)
     {
         var result = TestBestMove(fen, allowedUCIMoveString, null, depth: 8);
@@ -55,8 +52,7 @@ public class MatesInExactlyXTest : BaseTest
         Assert.AreEqual(5, result.Mate);
     }
 
-    [Explicit]
-    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_6), Category = Categories.NoPruning)]
+    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_6), Category = Categories.LongRunning)]
     public void Mate_in_Exactly_6(string fen, string[]? allowedUCIMoveString, string description)
     {
         var result = TestBestMove(fen, allowedUCIMoveString, null, depth: 12);

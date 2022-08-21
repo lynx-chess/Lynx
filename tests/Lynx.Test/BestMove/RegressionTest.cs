@@ -44,7 +44,7 @@ public class RegressionTest : BaseTest
     }
 
     [TestCase("6k1/1R6/5Kn1/3p1N2/1P6/8/8/3r4 b - - 10 37", new[] { "g6f8" }, new[] { "g6f4" },
-        Category = Categories.LongRunning, Explicit = true, Description = "Avoid mate in 4 https://lichess.org/XkZsoXLA#74",
+        Category = Categories.LongRunning, Description = "Avoid mate in 4 https://lichess.org/XkZsoXLA#74",
         Ignore = "Not good enough yet")]
     public void AvoidMate(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
     {
@@ -103,13 +103,13 @@ public class RegressionTest : BaseTest
     }
 
     [TestCase("3rk2r/ppq1pp2/2p1n1pp/7n/4P3/2P1BQP1/P1P2PBP/R3R1K1 w k - 0 18", null, new[] { "e3a7" },
-        Category = Categories.LongRunning, Explicit = true, Description = "At depth 3 White takes the pawn",
+        Category = Categories.LongRunning, Description = "At depth 3 White takes the pawn",
         Ignore = "Not good enough yet")]
     [TestCase("r1bqk2r/ppp2ppp/2n1p3/8/Q1pP4/2b2NP1/P3PPBP/1RB2RK1 b kq - 1 10", null, new[] { "c3d4" },
-        Category = Categories.LongRunning, Explicit = true, Description = "It failed at depth 6 in https://lichess.org/nZVw6G5D/black#19",
+        Category = Categories.LongRunning, Description = "It failed at depth 6 in https://lichess.org/nZVw6G5D/black#19",
         Ignore = "Not good enough yet")]
     [TestCase("r1bqkb1r/ppp2ppp/2n1p3/3pP3/3Pn3/5P2/PPP1N1PP/R1BQKBNR b KQkq - 0 1", null, new[] { "f8b4" },
-        Category = Categories.LongRunning, Explicit = true, Description = "It failed at depth 5 in https://lichess.org/rtTsj9Sr/black",
+        Category = Categories.LongRunning, Description = "It failed at depth 5 in https://lichess.org/rtTsj9Sr/black",
         Ignore = "Not good enough yet")]
     public void GeneralFailures(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
     {
@@ -235,7 +235,7 @@ public class RegressionTest : BaseTest
         const int depthWhenMaxDepthInQuiescenceIsReached = 7;
         var engine = GetEngine(fen);
 
-        var bestMove = engine.BestMove(new GoCommand($"go depth {depthWhenMaxDepthInQuiescenceIsReached }"));
+        var bestMove = engine.BestMove(new GoCommand($"go depth {depthWhenMaxDepthInQuiescenceIsReached}"));
         Assert.AreEqual(depthWhenMaxDepthInQuiescenceIsReached, bestMove.TargetDepth);
     }
 

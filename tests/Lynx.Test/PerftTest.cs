@@ -6,7 +6,7 @@ namespace Lynx.Test;
 /// <summary>
 /// https://www.chessprogramming.org/Perft_Results
 /// </summary>
-[TestFixture(Category = Categories.Perft, Explicit = true)]
+[TestFixture(Category = Categories.Perft)]
 public class PerftTest
 {
     [TestCase(Constants.InitialPositionFEN, 1, 20)]

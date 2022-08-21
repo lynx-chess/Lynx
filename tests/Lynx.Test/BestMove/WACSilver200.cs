@@ -8,7 +8,6 @@ namespace Lynx.Test.BestMove;
 
 public class WACSilver200 : BaseTest
 {
-    [Explicit]
     [TestCaseSource(typeof(WACData), nameof(WACData.Data), Category = nameof(WinningAtChess_10seconds))]
     /// <summary>
     /// 10s, see first case of <see cref="TimeManagementTest"/>
@@ -20,7 +19,6 @@ public class WACSilver200 : BaseTest
         VerifyBestMove(fen, bestMove, id, new GoCommand($"go btime {2_000} wtime {2_000} winc {11_111} binc {11_111} movestogo {1}"));
     }
 
-    [Explicit]
     [TestCaseSource(typeof(WACData), nameof(WACData.Data), Category = nameof(WinningAtChess_DefaultSearchDepth))]
     /// <summary>
     /// 10s, see first case of <see cref="TimeManagementTest"/>
