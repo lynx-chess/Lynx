@@ -9,7 +9,7 @@
 
 Lynx is a chess engine developed by [@eduherminio](https://github.com/eduherminio).
 
-It's written in C# (.NET 6).
+It's written in C# (.NET 7).
 
 You can find Lynx:
 
@@ -35,7 +35,7 @@ However, you can also choose to build Lynx yourself.
 
 ### Requirements
 
-- [.NET 6 SDK](https://dotnet.microsoft.com/download/dotnet/6.0). You can find instructions about how to install it in your preferred OS/Distro either [here](https://docs.microsoft.com/en-us/dotnet/core/install/) or [here](https://github.com/dotnet/core/tree/main/release-notes/6.0).
+- [.NET 7 SDK](https://dotnet.microsoft.com/download/dotnet/7.0). You can find instructions about how to install it in your preferred OS/Distro either [here](https://docs.microsoft.com/en-us/dotnet/core/install/) or [here](https://github.com/dotnet/core/tree/main/release-notes/7.0).
 
 If you're a Linux user and are new to .NET ecosystem, the conversation in [this issue](https://github.com/lynx-chess/Lynx/issues/33) may help.
 
