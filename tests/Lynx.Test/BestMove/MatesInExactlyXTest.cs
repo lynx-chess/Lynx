@@ -37,6 +37,7 @@ public class MatesInExactlyXTest : BaseTest
         Assert.AreEqual(4, result.Mate);
     }
 
+    [Explicit]
     [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_4_Collection), Category = Categories.LongRunning)]
     public void Mate_in_Exactly_4_Collection(string fen, string[]? allowedUCIMoveString, string description)
     {
