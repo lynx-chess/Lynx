@@ -5,6 +5,7 @@
     <Nullable>Enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+    <TrimMode>partial</TrimMode>
   </PropertyGroup>
 
   <ItemGroup>
