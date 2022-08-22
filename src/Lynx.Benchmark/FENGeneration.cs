@@ -490,7 +490,7 @@ internal struct StructCustomPosition
         }
 
         Side = (Side)oppositeSide;
-        OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
+        OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
 
         // Updating castling rights
         Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
@@ -593,7 +593,7 @@ internal struct StructCustomPosition
         }
 
         Side = (Side)oppositeSide;
-        OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
+        OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
 
         // Updating castling rights
         Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
@@ -843,7 +843,7 @@ internal readonly struct ReadonlyStructCustomPosition
         }
 
         Side = (Side)oppositeSide;
-        OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
+        OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
 
         // Updating castling rights
         Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
@@ -947,7 +947,7 @@ internal readonly struct ReadonlyStructCustomPosition
         }
 
         Side = (Side)oppositeSide;
-        OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
+        OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
 
         // Updating castling rights
         Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
@@ -1204,7 +1204,7 @@ internal class ClassCustomPosition
         }
 
         Side = (Side)oppositeSide;
-        OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
+        OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
 
         // Updating castling rights
         Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
@@ -1306,7 +1306,7 @@ internal class ClassCustomPosition
         }
 
         Side = (Side)oppositeSide;
-        OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
+        OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
 
         // Updating castling rights
         Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
@@ -1563,7 +1563,7 @@ internal record class RecordClassCustomPosition
         }
 
         Side = (Side)oppositeSide;
-        OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
+        OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
 
         // Updating castling rights
         Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
@@ -1665,7 +1665,7 @@ internal record class RecordClassCustomPosition
         }
 
         Side = (Side)oppositeSide;
-        OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
+        OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
 
         // Updating castling rights
         Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
@@ -1922,7 +1922,7 @@ internal record struct RecordStructCustomPosition
         }
 
         Side = (Side)oppositeSide;
-        OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
+        OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
 
         // Updating castling rights
         Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
@@ -2024,7 +2024,7 @@ internal record struct RecordStructCustomPosition
         }
 
         Side = (Side)oppositeSide;
-        OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
+        OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
 
         // Updating castling rights
         Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];

@@ -5,28 +5,25 @@ using System.Runtime.CompilerServices;
 
 namespace Lynx.Model;
 
-public struct BitBoard
+public static class BitBoardExtensions
 {
-    public ulong Board { readonly get; private set; }
+    public static bool Empty(this BitBoard board) => board == default;
 
-    public bool Empty => Board == default;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public BitBoard(ulong value) { Board = value; }
-
-    internal BitBoard(params BoardSquare[] occupiedSquares)
+    public static BitBoard Initialize(params BoardSquare[] occupiedSquares)
     {
-        Board = default;
+        BitBoard board = default;
 
         foreach (var square in occupiedSquares)
         {
-            SetBit(square);
+            board.SetBit(square);
         }
+
+        return board;
     }
 
-    internal void Clear() => Board = default;
+    internal static BitBoard Clear(this ref BitBoard board) => board = default;
 
-    internal readonly void Print()
+    internal static void Print(this BitBoard board)
     {
         const string separator = "____________________________________________________";
         Console.WriteLine(separator);
@@ -42,7 +39,7 @@ public struct BitBoard
 
                 var squareIndex = SquareIndex(rank, file);
 
-                Console.Write($" {(GetBit(squareIndex) ? "1" : "0")}");
+                Console.Write($" {(board.GetBit(squareIndex) ? "1" : "0")}");
             }
 
             Console.WriteLine();
@@ -50,53 +47,35 @@ public struct BitBoard
 
         Console.Write("\n    a b c d e f g h\n");
 
-        Console.WriteLine($"\n    Bitboard: {Board} (0x{Board:X})");
+        Console.WriteLine($"\n    Bitboard: {board} (0x{board:X})");
         Console.WriteLine(separator);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public readonly bool GetBit(int squareIndex)
+    public static bool GetBit(this BitBoard board, int squareIndex)
     {
-        return (Board & (1UL << squareIndex)) != default;
+        return (board & (1UL << squareIndex)) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void SetBit(int square)
+    public static BitBoard SetBit(this ref BitBoard board, int square)
     {
-        Board |= (1UL << square);
+        return board |= (1UL << square);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void PopBit(int square)
+    public static BitBoard PopBit(this ref BitBoard board, int square)
     {
-        Board &= ~(1UL << square);
+        return board &= ~(1UL << square);
     }
-
-    /// <summary>
-    /// https://www.chessprogramming.org/General_Setwise_Operations#Separation.
-    /// Cannot use (Board & -Board) - 1 due to limitation applying unary - to ulong.
-    /// Assumes <see cref="Board"/> != default
-    /// </summary>
-    /// <returns>-1 in case of empty board</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public readonly int GetLS1BIndex() => GetLS1BIndex(Board);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void ResetLS1B()
-    {
-        Board = ResetLS1B(Board);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public readonly int CountBits() => CountBits(Board);
 
     /// <summary>
     /// https://www.chessprogramming.org/Population_Count#Single_Populated_Bitboards
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public readonly bool IsSinglePopulated()
+    public static bool IsSinglePopulated(this BitBoard board)
     {
-        return Board != default && ResetLS1B(Board) == default;
+        return board != default && ResetLS1B(board) == default;
     }
 
     #region Static methods
@@ -107,46 +86,36 @@ public struct BitBoard
         return (rank * 8) + file;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ulong SetBit(ulong bitboard, int squareIndex)
-    {
-        return bitboard | (1UL << squareIndex);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool GetBit(ulong bitboard, int squareIndex)
-    {
-        return (bitboard & (1UL << squareIndex)) != default;
-    }
-
     /// <summary>
-    /// Assumes that <paramref name="bitboard"/> != default
+    /// Assumes that <paramref name="board"/> != default
+    /// https://www.chessprogramming.org/General_Setwise_Operations#Separation.
+    /// Cannot use (Board & -Board) - 1 due to limitation applying unary - to ulong.
     /// </summary>
-    /// <param name="bitboard"></param>
+    /// <param name="board"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int GetLS1BIndex(ulong bitboard)
+    public static int GetLS1BIndex(this BitBoard board)
     {
-        Utils.Assert(bitboard != default);
+        Utils.Assert(board != default);
 
-        return BitOperations.TrailingZeroCount(bitboard);
+        return BitOperations.TrailingZeroCount(board);
     }
 
     /// <summary>
     /// https://www.chessprogramming.org/General_Setwise_Operations#LS1BReset
     /// </summary>
-    /// <param name="bitboard"></param>
+    /// <param name="board"></param>
     /// <returns>Bitboard</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ulong ResetLS1B(ulong bitboard)
+    public static ulong ResetLS1B(this BitBoard board)
     {
-        return bitboard & (bitboard - 1);
+        return board & (board - 1);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int CountBits(ulong bitboard)
+    public static int CountBits(this BitBoard board)
     {
-        return BitOperations.PopCount(bitboard);
+        return BitOperations.PopCount(board);
     }
 
     #endregion
@@ -154,13 +123,13 @@ public struct BitBoard
     #region Methods accepting BoardSquares
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public readonly bool GetBit(BoardSquare square) => GetBit((int)square);
+    public static bool GetBit(this BitBoard board, BoardSquare square) => board.GetBit((int)square);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void SetBit(BoardSquare square) => SetBit((int)square);
+    public static BitBoard SetBit(this ref BitBoard board, BoardSquare square) => board.SetBit((int)square);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void PopBit(BoardSquare square) => PopBit((int)square);
+    public static BitBoard PopBit(this ref BitBoard board, BoardSquare square) => board.PopBit((int)square);
 
     #endregion
 }

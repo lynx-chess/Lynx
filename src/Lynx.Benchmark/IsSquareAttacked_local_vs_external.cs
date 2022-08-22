@@ -97,35 +97,35 @@ public class IsSquareAttacked_local_vs_external : BaseBenchmark
         {
             var oppositeColorIndex = ((int)sideToMove + 1) % 2;
 
-            return (Attacks.PawnAttacks[oppositeColorIndex, squareIndex].Board & pieces[offset].Board) != default;
+            return (Attacks.PawnAttacks[oppositeColorIndex, squareIndex] & pieces[offset]) != default;
         }
 
         private static bool IsSquareAttackedByKnights(int squareIndex, int offset, BitBoard[] piecePosition)
         {
-            return (Attacks.KnightAttacks[squareIndex].Board & piecePosition[(int)Piece.N + offset].Board) != default;
+            return (Attacks.KnightAttacks[squareIndex] & piecePosition[(int)Piece.N + offset]) != default;
         }
 
         private static bool IsSquareAttackedByKing(int squareIndex, int offset, BitBoard[] piecePosition)
         {
-            return (Attacks.KingAttacks[squareIndex].Board & piecePosition[(int)Piece.K + offset].Board) != default;
+            return (Attacks.KingAttacks[squareIndex] & piecePosition[(int)Piece.K + offset]) != default;
         }
 
         private static bool IsSquareAttackedByBishops(int squareIndex, int offset, BitBoard[] piecePosition, BitBoard[] occupancy, out BitBoard bishopAttacks)
         {
             bishopAttacks = Attacks.BishopAttacks(squareIndex, occupancy[(int)Side.Both]);
-            return (bishopAttacks.Board & piecePosition[(int)Piece.B + offset].Board) != default;
+            return (bishopAttacks & piecePosition[(int)Piece.B + offset]) != default;
         }
 
         private static bool IsSquareAttackedByRooks(int squareIndex, int offset, BitBoard[] piecePosition, BitBoard[] occupancy, out BitBoard rookAttacks)
         {
             rookAttacks = Attacks.RookAttacks(squareIndex, occupancy[(int)Side.Both]);
-            return (rookAttacks.Board & piecePosition[(int)Piece.R + offset].Board) != default;
+            return (rookAttacks & piecePosition[(int)Piece.R + offset]) != default;
         }
 
         private static bool IsSquareAttackedByQueens(int offset, BitBoard bishopAttacks, BitBoard rookAttacks, BitBoard[] piecePosition)
         {
             var queenAttacks = Attacks.QueenAttacks(rookAttacks, bishopAttacks);
-            return (queenAttacks.Board & piecePosition[(int)Piece.Q + offset].Board) != default;
+            return (queenAttacks & piecePosition[(int)Piece.Q + offset]) != default;
         }
     }
 
@@ -147,35 +147,35 @@ public class IsSquareAttacked_local_vs_external : BaseBenchmark
             {
                 var oppositeColorIndex = ((int)sideToMove + 1) % 2;
 
-                return (Attacks.PawnAttacks[oppositeColorIndex, squareIndex].Board & pieces[offset].Board) != default;
+                return (Attacks.PawnAttacks[oppositeColorIndex, squareIndex] & pieces[offset]) != default;
             }
 
             static bool IsSquareAttackedByKnights(int squareIndex, int offset, BitBoard[] piecePosition)
             {
-                return (Attacks.KnightAttacks[squareIndex].Board & piecePosition[(int)Piece.N + offset].Board) != default;
+                return (Attacks.KnightAttacks[squareIndex] & piecePosition[(int)Piece.N + offset]) != default;
             }
 
             static bool IsSquareAttackedByKing(int squareIndex, int offset, BitBoard[] piecePosition)
             {
-                return (Attacks.KingAttacks[squareIndex].Board & piecePosition[(int)Piece.K + offset].Board) != default;
+                return (Attacks.KingAttacks[squareIndex] & piecePosition[(int)Piece.K + offset]) != default;
             }
 
             static bool IsSquareAttackedByBishops(int squareIndex, int offset, BitBoard[] piecePosition, BitBoard[] occupancy, out BitBoard bishopAttacks)
             {
                 bishopAttacks = Attacks.BishopAttacks(squareIndex, occupancy[(int)Side.Both]);
-                return (bishopAttacks.Board & piecePosition[(int)Piece.B + offset].Board) != default;
+                return (bishopAttacks & piecePosition[(int)Piece.B + offset]) != default;
             }
 
             static bool IsSquareAttackedByRooks(int squareIndex, int offset, BitBoard[] piecePosition, BitBoard[] occupancy, out BitBoard rookAttacks)
             {
                 rookAttacks = Attacks.RookAttacks(squareIndex, occupancy[(int)Side.Both]);
-                return (rookAttacks.Board & piecePosition[(int)Piece.R + offset].Board) != default;
+                return (rookAttacks & piecePosition[(int)Piece.R + offset]) != default;
             }
 
             static bool IsSquareAttackedByQueens(int offset, BitBoard bishopAttacks, BitBoard rookAttacks, BitBoard[] piecePosition)
             {
                 var queenAttacks = Attacks.QueenAttacks(rookAttacks, bishopAttacks);
-                return (queenAttacks.Board & piecePosition[(int)Piece.Q + offset].Board) != default;
+                return (queenAttacks & piecePosition[(int)Piece.Q + offset]) != default;
             }
         }
     }

@@ -26,7 +26,7 @@ public class RookAttacksTest
     public void GenerateRookAttacksOnTheFly(BS rookSquare, BS[] occupiedSquares, BS[] attackedSquares)
     {
         // Arrange
-        var occupiedBoard = new BitBoard(occupiedSquares);
+        var occupiedBoard = BitBoardExtensions.Initialize(occupiedSquares);
 
         // Act
         var attacks = AttackGenerator.GenerateRookAttacksOnTheFly((int)rookSquare, occupiedBoard);
@@ -67,7 +67,7 @@ public class RookAttacksTest
     public void GetRookAttacks(BS rookSquare, BS[] occupiedSquares, BS[] attackedSquares)
     {
         // Arrange
-        var occupancy = new BitBoard(occupiedSquares);
+        var occupancy = BitBoardExtensions.Initialize(occupiedSquares);
 
         // Act
         var attacks = Attacks.RookAttacks((int)rookSquare, occupancy);

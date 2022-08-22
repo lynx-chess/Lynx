@@ -10,7 +10,7 @@ public class BitBoardTest
     {
         foreach (var square in Enum.GetValues<BoardSquare>())
         {
-            var bitBoard = new BitBoard(1UL << (int)square);
+            var bitBoard = 1UL << (int)square;
 
             Assert.True(bitBoard.GetBit(square));
         }
@@ -55,10 +55,10 @@ public class BitBoardTest
     public void Empty()
     {
         var bitBoard = new BitBoard();
-        Assert.True(bitBoard.Empty);
+        Assert.True(bitBoard.Empty());
 
         bitBoard.SetBit(BoardSquare.e4);
-        Assert.False(bitBoard.Empty);
+        Assert.False(bitBoard.Empty());
     }
 
     [Test]
@@ -97,26 +97,26 @@ public class BitBoardTest
     public void CountBits_ulong()
     {
         var bitBoard = new BitBoard();
-        Assert.AreEqual(0, BitBoard.CountBits(bitBoard.Board));
+        Assert.AreEqual(0, bitBoard.CountBits());
 
         bitBoard.SetBit(BoardSquare.e4);
-        Assert.AreEqual(1, BitBoard.CountBits(bitBoard.Board));
+        Assert.AreEqual(1, bitBoard.CountBits());
 
         bitBoard.SetBit(BoardSquare.e4);
-        Assert.AreEqual(1, BitBoard.CountBits(bitBoard.Board));
+        Assert.AreEqual(1, bitBoard.CountBits());
 
         bitBoard.SetBit(BoardSquare.d4);
-        Assert.AreEqual(2, BitBoard.CountBits(bitBoard.Board));
+        Assert.AreEqual(2, bitBoard.CountBits());
 
         bitBoard.PopBit(BoardSquare.d4);
-        Assert.AreEqual(1, BitBoard.CountBits(bitBoard.Board));
+        Assert.AreEqual(1, bitBoard.CountBits());
     }
 
     [Test]
     public void ResetLS1B()
     {
         // Arrange
-        BitBoard bitBoard = new(new[] { BoardSquare.d5, BoardSquare.e4 });
+        BitBoard bitBoard = BitBoardExtensions.Initialize(new[] { BoardSquare.d5, BoardSquare.e4 });
 
         // Act
         bitBoard.ResetLS1B();
@@ -130,10 +130,10 @@ public class BitBoardTest
     public void ResetLS1B_ulong()
     {
         // Arrange
-        BitBoard bitBoard = new(new[] { BoardSquare.d5, BoardSquare.e4 });
+        BitBoard bitBoard = BitBoardExtensions.Initialize(new[] { BoardSquare.d5, BoardSquare.e4 });
 
         // Act
-        var result = new BitBoard(BitBoard.ResetLS1B(bitBoard.Board));
+        var result = bitBoard.ResetLS1B();
 
         // Assert
         Assert.True(bitBoard.GetBit(BoardSquare.e4));
@@ -152,9 +152,8 @@ public class BitBoardTest
     [TestCase(new BoardSquare[] { BoardSquare.e4, BoardSquare.f4 }, (int)BoardSquare.e4)]
     public void GetLS1BIndex(BoardSquare[] occupiedSquares, int expectedLS1B)
     {
-        var bitboard = new BitBoard(occupiedSquares);
+        var bitboard = BitBoardExtensions.Initialize(occupiedSquares);
         Assert.AreEqual(expectedLS1B, bitboard.GetLS1BIndex());
-        Assert.AreEqual(expectedLS1B, BitBoard.GetLS1BIndex(bitboard.Board));
 
         if (expectedLS1B != -1)
         {

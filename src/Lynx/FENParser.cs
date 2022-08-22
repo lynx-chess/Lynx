@@ -64,7 +64,7 @@ public static class FENParser
             success = false;
         }
 
-        return (success, pieceBitBoards.Select(ul => new BitBoard(ul)).ToArray(), occupancyBitBoards.Select(ul => new BitBoard(ul)).ToArray(), side, castle, enPassant, halfMoveClock, fullMoveCounter);
+        return (success, pieceBitBoards, occupancyBitBoards, side, castle, enPassant, halfMoveClock, fullMoveCounter);
     }
 
     private static (MatchCollection Matches, bool Success) ParseBoard(string fen, ulong[] pieceBitBoards, ulong[] occupancyBitBoards)
@@ -86,7 +86,7 @@ public static class FENParser
             {
                 if (Constants.PiecesByChar.TryGetValue(ch, out Piece piece))
                 {
-                    pieceBitBoards[(int)piece] = BitBoard.SetBit(pieceBitBoards[(int)piece], BitBoard.SquareIndex(rankIndex, fileIndex));
+                    pieceBitBoards[(int)piece] = pieceBitBoards[(int)piece].SetBit(BitBoardExtensions.SquareIndex(rankIndex, fileIndex));
                     ++fileIndex;
                 }
                 else if (int.TryParse($"{ch}", out int emptySquares))
@@ -184,7 +184,7 @@ public static class FENParser
                 ? PieceBitBoards[(int)Piece.p]
                 : PieceBitBoards[(int)Piece.P];
 
-            if (!BitBoard.GetBit(pawnBitBoard, pawnSquare))
+            if (!pawnBitBoard.GetBit(pawnSquare))
             {
                 success = false;
                 _logger.Error($"Invalid board: en passant square {enPassantString}, but no {side} pawn located in {pawnSquare}");

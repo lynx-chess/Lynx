@@ -177,19 +177,19 @@ public class MoveGeneratorParallel : BaseBenchmark
 
         private static readonly Func<int, BitBoard, ulong>[] _pieceAttacks = new Func<int, BitBoard, ulong>[]
         {
-            (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White, origin].Board,
-            (int origin, BitBoard _) => Attacks.KnightAttacks[origin].Board,
-            (int origin, BitBoard occupancy) => Attacks.BishopAttacks(origin, occupancy).Board,
-            (int origin, BitBoard occupancy) => Attacks.RookAttacks(origin, occupancy).Board,
-            (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy).Board,
-            (int origin, BitBoard _) => Attacks.KingAttacks[origin].Board,
+            (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White, origin],
+            (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
+            (int origin, BitBoard occupancy) => Attacks.BishopAttacks(origin, occupancy),
+            (int origin, BitBoard occupancy) => Attacks.RookAttacks(origin, occupancy),
+            (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy),
+            (int origin, BitBoard _) => Attacks.KingAttacks[origin],
 
-            (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.Black, origin].Board,
-            (int origin, BitBoard _) => Attacks.KnightAttacks[origin].Board,
-            (int origin, BitBoard occupancy) => Attacks.BishopAttacks(origin, occupancy).Board,
-            (int origin, BitBoard occupancy) => Attacks.RookAttacks(origin, occupancy).Board,
-            (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy).Board,
-            (int origin, BitBoard _) => Attacks.KingAttacks[origin].Board,
+            (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.Black, origin],
+            (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
+            (int origin, BitBoard occupancy) => Attacks.BishopAttacks(origin, occupancy),
+            (int origin, BitBoard occupancy) => Attacks.RookAttacks(origin, occupancy),
+            (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy),
+            (int origin, BitBoard _) => Attacks.KingAttacks[origin],
         };
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -200,12 +200,12 @@ public class MoveGeneratorParallel : BaseBenchmark
             var piece = (int)Piece.P + offset;
             var pawnPush = +8 - ((int)position.Side * 16);          // position.Side == Side.White ? -8 : +8
             int oppositeSide = Utils.OppositeSide(position.Side);   // position.Side == Side.White ? (int)Side.Black : (int)Side.White
-            var bitboard = position.PieceBitBoards[piece].Board;
+            var bitboard = position.PieceBitBoards[piece];
 
             while (bitboard != default)
             {
-                sourceSquare = BitBoard.GetLS1BIndex(bitboard);
-                bitboard = BitBoard.ResetLS1B(bitboard);
+                sourceSquare = bitboard.GetLS1BIndex();
+                bitboard = bitboard.ResetLS1B();
 
                 var sourceRank = (sourceSquare / 8) + 1;
                 if (sourceRank == 1 || sourceRank == 8)
@@ -255,11 +255,11 @@ public class MoveGeneratorParallel : BaseBenchmark
                 }
 
                 // Captures
-                ulong attackedSquares = attacks.Board & position.OccupancyBitBoards[oppositeSide].Board;
+                ulong attackedSquares = attacks & position.OccupancyBitBoards[oppositeSide];
                 while (attackedSquares != default)
                 {
-                    targetSquare = BitBoard.GetLS1BIndex(attackedSquares);
-                    attackedSquares = BitBoard.ResetLS1B(attackedSquares);
+                    targetSquare = attackedSquares.GetLS1BIndex();
+                    attackedSquares = attackedSquares.ResetLS1B();
 
                     var targetRank = (targetSquare / 8) + 1;
                     if (targetRank == 1 || targetRank == 8)  // Capture with promotion
@@ -340,21 +340,21 @@ public class MoveGeneratorParallel : BaseBenchmark
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static IEnumerable<Move> GeneratePieceMoves(int piece, Position position, bool capturesOnly = false)
         {
-            var bitboard = position.PieceBitBoards[piece].Board;
+            var bitboard = position.PieceBitBoards[piece];
             int sourceSquare, targetSquare;
 
             while (bitboard != default)
             {
-                sourceSquare = BitBoard.GetLS1BIndex(bitboard);
-                bitboard = BitBoard.ResetLS1B(bitboard);
+                sourceSquare = bitboard.GetLS1BIndex();
+                bitboard = bitboard.ResetLS1B();
 
                 ulong attacks = _pieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
-                    & ~position.OccupancyBitBoards[(int)position.Side].Board;
+                    & ~position.OccupancyBitBoards[(int)position.Side];
 
                 while (attacks != default)
                 {
-                    targetSquare = BitBoard.GetLS1BIndex(attacks);
-                    attacks = BitBoard.ResetLS1B(attacks);
+                    targetSquare = attacks.GetLS1BIndex();
+                    attacks = attacks.ResetLS1B();
 
                     if (position.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare))
                     {

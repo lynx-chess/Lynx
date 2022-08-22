@@ -43,12 +43,12 @@ public class PositionTest
 
         for (int piece = 0; piece < position.PieceBitBoards.Length; ++piece)
         {
-            Assert.AreEqual(position.PieceBitBoards[piece].Board, clonedPosition.PieceBitBoards[piece].Board);
+            Assert.AreEqual(position.PieceBitBoards[piece], clonedPosition.PieceBitBoards[piece]);
         }
 
         for (int occupancy = 0; occupancy < position.OccupancyBitBoards.Length; ++occupancy)
         {
-            Assert.AreEqual(position.OccupancyBitBoards[occupancy].Board, clonedPosition.OccupancyBitBoards[occupancy].Board);
+            Assert.AreEqual(position.OccupancyBitBoards[occupancy], clonedPosition.OccupancyBitBoards[occupancy]);
         }
 
         // Act: modify original, to ensure they're not sharing references to the same memory object
@@ -67,12 +67,12 @@ public class PositionTest
         // Assert
         for (int piece = 0; piece < position.PieceBitBoards.Length; ++piece)
         {
-            Assert.AreNotEqual(position.PieceBitBoards[piece].Board, clonedPosition.PieceBitBoards[piece].Board);
+            Assert.AreNotEqual(position.PieceBitBoards[piece], clonedPosition.PieceBitBoards[piece]);
         }
 
         for (int occupancy = 0; occupancy < position.OccupancyBitBoards.Length; ++occupancy)
         {
-            Assert.AreNotEqual(position.OccupancyBitBoards[occupancy].Board, clonedPosition.OccupancyBitBoards[occupancy].Board);
+            Assert.AreNotEqual(position.OccupancyBitBoards[occupancy], clonedPosition.OccupancyBitBoards[occupancy]);
         }
     }
 

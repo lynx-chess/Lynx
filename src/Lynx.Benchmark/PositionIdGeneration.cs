@@ -82,7 +82,7 @@ internal static class PositionExtensions
 
         for (int index = 0; index < position.PieceBitBoards.Length; ++index)
         {
-            sb.Append(position.PieceBitBoards[index].Board);
+            sb.Append(position.PieceBitBoards[index]);
 #if DEBUG
             sb.Append('|');
 #endif
