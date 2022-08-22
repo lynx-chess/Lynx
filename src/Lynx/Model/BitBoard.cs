@@ -75,7 +75,7 @@ public static class BitBoardExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsSinglePopulated(this BitBoard board)
     {
-        return board != default && ResetLS1B(board) == default;
+        return board != default && ResetLS1BNonSideEffect(board) == default;
     }
 
     #region Static methods
@@ -101,15 +101,27 @@ public static class BitBoardExtensions
         return BitOperations.TrailingZeroCount(board);
     }
 
+
     /// <summary>
     /// https://www.chessprogramming.org/General_Setwise_Operations#LS1BReset
     /// </summary>
     /// <param name="board"></param>
     /// <returns>Bitboard</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ulong ResetLS1B(this BitBoard board)
+    public static ulong ResetLS1BNonSideEffect(this BitBoard board)
     {
         return board & (board - 1);
+    }
+
+    /// <summary>
+    /// https://www.chessprogramming.org/General_Setwise_Operations#LS1BReset
+    /// </summary>
+    /// <param name="board"></param>
+    /// <returns>Bitboard</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ulong ResetLS1B(this ref BitBoard board)
+    {
+        return board &= (board - 1);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

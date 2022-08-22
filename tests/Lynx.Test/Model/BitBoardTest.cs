@@ -127,13 +127,13 @@ public class BitBoardTest
     }
 
     [Test]
-    public void ResetLS1B_ulong()
+    public void ResetLS1BNonSideEffect()
     {
         // Arrange
         BitBoard bitBoard = BitBoardExtensions.Initialize(new[] { BoardSquare.d5, BoardSquare.e4 });
 
         // Act
-        var result = bitBoard.ResetLS1B();
+        var result = bitBoard.ResetLS1BNonSideEffect();
 
         // Assert
         Assert.True(bitBoard.GetBit(BoardSquare.e4));
