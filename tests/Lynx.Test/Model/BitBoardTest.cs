@@ -133,7 +133,7 @@ public class BitBoardTest
         BitBoard bitBoard = BitBoardExtensions.Initialize(new[] { BoardSquare.d5, BoardSquare.e4 });
 
         // Act
-        var result = bitBoard.ResetLS1BNonSideEffect();
+        var result = bitBoard.WithoutLS1B();
 
         // Assert
         Assert.True(bitBoard.GetBit(BoardSquare.e4));

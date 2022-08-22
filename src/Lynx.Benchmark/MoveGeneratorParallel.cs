@@ -205,7 +205,7 @@ public class MoveGeneratorParallel : BaseBenchmark
             while (bitboard != default)
             {
                 sourceSquare = bitboard.GetLS1BIndex();
-                bitboard = bitboard.ResetLS1B();
+                bitboard.ResetLS1B();
 
                 var sourceRank = (sourceSquare / 8) + 1;
                 if (sourceRank == 1 || sourceRank == 8)
@@ -259,7 +259,7 @@ public class MoveGeneratorParallel : BaseBenchmark
                 while (attackedSquares != default)
                 {
                     targetSquare = attackedSquares.GetLS1BIndex();
-                    attackedSquares = attackedSquares.ResetLS1B();
+                    attackedSquares.ResetLS1B();
 
                     var targetRank = (targetSquare / 8) + 1;
                     if (targetRank == 1 || targetRank == 8)  // Capture with promotion
@@ -346,7 +346,7 @@ public class MoveGeneratorParallel : BaseBenchmark
             while (bitboard != default)
             {
                 sourceSquare = bitboard.GetLS1BIndex();
-                bitboard = bitboard.ResetLS1B();
+                bitboard.ResetLS1B();
 
                 ulong attacks = _pieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
                     & ~position.OccupancyBitBoards[(int)position.Side];
@@ -354,7 +354,7 @@ public class MoveGeneratorParallel : BaseBenchmark
                 while (attacks != default)
                 {
                     targetSquare = attacks.GetLS1BIndex();
-                    attacks = attacks.ResetLS1B();
+                    attacks.ResetLS1B();
 
                     if (position.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare))
                     {

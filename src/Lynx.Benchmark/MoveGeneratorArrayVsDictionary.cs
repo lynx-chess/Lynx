@@ -49,7 +49,7 @@ public class MoveGeneratorArrayVsDictionary : BaseBenchmark
             while (bitboard != default)
             {
                 var sourceSquare = bitboard.GetLS1BIndex();
-                bitboard = bitboard.ResetLS1B();
+                bitboard.ResetLS1B();
 
                 ulong attacks = _pieceAttacksDictionary[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both]);
 
@@ -74,7 +74,7 @@ public class MoveGeneratorArrayVsDictionary : BaseBenchmark
             while (bitboard != default)
             {
                 var sourceSquare = bitboard.GetLS1BIndex();
-                bitboard = bitboard.ResetLS1B();
+                bitboard.ResetLS1B();
 
                 ulong attacks = _pieceAttacksArray[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both]);
 

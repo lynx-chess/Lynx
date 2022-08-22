@@ -382,7 +382,7 @@ public sealed class Position
             while (bitboard != default)
             {
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
-                bitboard = bitboard.ResetLS1B();
+                bitboard.ResetLS1B();
 
                 ++pieceCount[pieceIndex];
 
@@ -402,7 +402,7 @@ public sealed class Position
             while (bitboard != default)
             {
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
-                bitboard = bitboard.ResetLS1B();
+                bitboard.ResetLS1B();
 
                 ++pieceCount[pieceIndex];
 
