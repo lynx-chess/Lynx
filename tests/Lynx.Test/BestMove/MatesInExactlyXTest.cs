@@ -53,6 +53,7 @@ public class MatesInExactlyXTest : BaseTest
         Assert.AreEqual(5, result.Mate);
     }
 
+    [Explicit]
     [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_6), Category = Categories.LongRunning)]
     public void Mate_in_Exactly_6(string fen, string[]? allowedUCIMoveString, string description)
     {
