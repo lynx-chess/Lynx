@@ -1,5 +1,5 @@
 ﻿/*
- * 
+ *
  *  |     Method |                  fen |     Mean |     Error |    StdDev | Ratio | RatioSD |  Gen 0 | Allocated |
  *  |----------- |--------------------- |---------:|----------:|----------:|------:|--------:|-------:|----------:|
  *  | Dictionary | r2q1r(...)- 0 9 [68] | 8.000 us | 0.1077 us | 0.1007 us |  1.00 |    0.00 | 1.6632 |      3 KB |
@@ -16,7 +16,7 @@
  *  |            |                      |          |           |           |       |         |        |           |
  *  | Dictionary | rnbqk(...)- 0 1 [56] | 6.523 us | 0.0918 us | 0.0859 us |  1.00 |    0.00 | 1.4725 |      3 KB |
  *  |      Array | rnbqk(...)- 0 1 [56] | 6.155 us | 0.0812 us | 0.0720 us |  0.94 |    0.01 | 1.4725 |      3 KB |
- * 
+ *
  */
 
 using BenchmarkDotNet.Attributes;
@@ -44,12 +44,12 @@ public class MoveGeneratorArrayVsDictionary : BaseBenchmark
 
         for (int piece = (int)Piece.P; piece <= (int)Piece.k; ++piece)
         {
-            var bitboard = position.PieceBitBoards[piece].Board;
+            var bitboard = position.PieceBitBoards[piece];
 
             while (bitboard != default)
             {
-                var sourceSquare = BitBoard.GetLS1BIndex(bitboard);
-                bitboard = BitBoard.ResetLS1B(bitboard);
+                var sourceSquare = bitboard.GetLS1BIndex();
+                bitboard.ResetLS1B();
 
                 ulong attacks = _pieceAttacksDictionary[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both]);
 
@@ -69,12 +69,12 @@ public class MoveGeneratorArrayVsDictionary : BaseBenchmark
 
         for (int piece = (int)Piece.P; piece <= (int)Piece.k; ++piece)
         {
-            var bitboard = position.PieceBitBoards[piece].Board;
+            var bitboard = position.PieceBitBoards[piece];
 
             while (bitboard != default)
             {
-                var sourceSquare = BitBoard.GetLS1BIndex(bitboard);
-                bitboard = BitBoard.ResetLS1B(bitboard);
+                var sourceSquare = bitboard.GetLS1BIndex();
+                bitboard.ResetLS1B();
 
                 ulong attacks = _pieceAttacksArray[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both]);
 
@@ -87,39 +87,39 @@ public class MoveGeneratorArrayVsDictionary : BaseBenchmark
 
     private static readonly Func<int, BitBoard, ulong>[] _pieceAttacksArray = new Func<int, BitBoard, ulong>[]
     {
-            (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White, origin].Board,
-            (int origin, BitBoard _) => Attacks.KnightAttacks[origin].Board,
-            (int origin, BitBoard occupancy) => Attacks.BishopAttacks(origin, occupancy).Board,
-            (int origin, BitBoard occupancy) => Attacks.RookAttacks(origin, occupancy).Board,
-            (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy).Board,
-            (int origin, BitBoard _) => Attacks.KingAttacks[origin].Board,
+            (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White, origin],
+            (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
+            (int origin, BitBoard occupancy) => Attacks.BishopAttacks(origin, occupancy),
+            (int origin, BitBoard occupancy) => Attacks.RookAttacks(origin, occupancy),
+            (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy),
+            (int origin, BitBoard _) => Attacks.KingAttacks[origin],
 
-            (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.Black, origin].Board,
-            (int origin, BitBoard _) => Attacks.KnightAttacks[origin].Board,
-            (int origin, BitBoard occupancy) => Attacks.BishopAttacks(origin, occupancy).Board,
-            (int origin, BitBoard occupancy) => Attacks.RookAttacks(origin, occupancy).Board,
-            (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy).Board,
-            (int origin, BitBoard _) => Attacks.KingAttacks[origin].Board,
+            (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.Black, origin],
+            (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
+            (int origin, BitBoard occupancy) => Attacks.BishopAttacks(origin, occupancy),
+            (int origin, BitBoard occupancy) => Attacks.RookAttacks(origin, occupancy),
+            (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy),
+            (int origin, BitBoard _) => Attacks.KingAttacks[origin],
     };
 
     private static readonly IReadOnlyDictionary<int, Func<int, BitBoard, ulong>> _pieceAttacksDictionary = new Dictionary<int, Func<int, BitBoard, ulong>>
     {
-        [(int)Piece.P] = (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White, origin].Board,
-        [(int)Piece.p] = (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.Black, origin].Board,
+        [(int)Piece.P] = (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White, origin],
+        [(int)Piece.p] = (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.Black, origin],
 
-        [(int)Piece.K] = (int origin, BitBoard _) => Attacks.KingAttacks[origin].Board,
-        [(int)Piece.k] = (int origin, BitBoard _) => Attacks.KingAttacks[origin].Board,
+        [(int)Piece.K] = (int origin, BitBoard _) => Attacks.KingAttacks[origin],
+        [(int)Piece.k] = (int origin, BitBoard _) => Attacks.KingAttacks[origin],
 
-        [(int)Piece.N] = (int origin, BitBoard _) => Attacks.KnightAttacks[origin].Board,
-        [(int)Piece.n] = (int origin, BitBoard _) => Attacks.KnightAttacks[origin].Board,
+        [(int)Piece.N] = (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
+        [(int)Piece.n] = (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
 
-        [(int)Piece.B] = (int origin, BitBoard occupancy) => Attacks.BishopAttacks(origin, occupancy).Board,
-        [(int)Piece.b] = (int origin, BitBoard occupancy) => Attacks.BishopAttacks(origin, occupancy).Board,
+        [(int)Piece.B] = (int origin, BitBoard occupancy) => Attacks.BishopAttacks(origin, occupancy),
+        [(int)Piece.b] = (int origin, BitBoard occupancy) => Attacks.BishopAttacks(origin, occupancy),
 
-        [(int)Piece.R] = (int origin, BitBoard occupancy) => Attacks.RookAttacks(origin, occupancy).Board,
-        [(int)Piece.r] = (int origin, BitBoard occupancy) => Attacks.RookAttacks(origin, occupancy).Board,
+        [(int)Piece.R] = (int origin, BitBoard occupancy) => Attacks.RookAttacks(origin, occupancy),
+        [(int)Piece.r] = (int origin, BitBoard occupancy) => Attacks.RookAttacks(origin, occupancy),
 
-        [(int)Piece.Q] = (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy).Board,
-        [(int)Piece.q] = (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy).Board,
+        [(int)Piece.Q] = (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy),
+        [(int)Piece.q] = (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy),
     };
 }

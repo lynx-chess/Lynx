@@ -26,7 +26,7 @@ public class BishopAttacksTest
     public void GenerateBishopAttacksOnTheFly(BS bishopSquare, BS[] occupiedSquares, BS[] attackedSquares)
     {
         // Arrange
-        var occupancy = new BitBoard(occupiedSquares);
+        var occupancy = BitBoardExtensions.Initialize(occupiedSquares);
 
         // Act
         var attacks = AttackGenerator.GenerateBishopAttacksOnTheFly((int)bishopSquare, occupancy);
@@ -72,7 +72,7 @@ public class BishopAttacksTest
     public void GetBishopAttacks(BS bishopSquare, BS[] occupiedSquares, BS[] attackedSquares)
     {
         // Arrange
-        var occupancy = new BitBoard(occupiedSquares);
+        var occupancy = BitBoardExtensions.Initialize(occupiedSquares);
 
         // Act
         var attacks = Attacks.BishopAttacks((int)bishopSquare, occupancy);

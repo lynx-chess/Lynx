@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <Using Include="System.Int32" Alias="Move" />
+    <Using Include="System.UInt64" Alias="BitBoard" />
   </ItemGroup >
 
   <PropertyGroup>

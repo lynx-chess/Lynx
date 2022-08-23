@@ -12,7 +12,7 @@ internal static class ConstantGenerator
         {
             for (int file = 0; file < 8; ++file)
             {
-                var squareIndex = BitBoard.SquareIndex(rank, file);
+                var squareIndex = BitBoardExtensions.SquareIndex(rank, file);
 
                 if (file > 0)
                 {
@@ -23,7 +23,7 @@ internal static class ConstantGenerator
 
         b.Print();
 
-        return b.Board;
+        return b;
     }
 
     public static ulong NotHFile()
@@ -34,7 +34,7 @@ internal static class ConstantGenerator
         {
             for (int file = 0; file < 8; ++file)
             {
-                var squareIndex = BitBoard.SquareIndex(rank, file);
+                var squareIndex = BitBoardExtensions.SquareIndex(rank, file);
 
                 if (file < 7)
                 {
@@ -45,7 +45,7 @@ internal static class ConstantGenerator
 
         b.Print();
 
-        return b.Board;
+        return b;
     }
 
     public static ulong NotABFiles()
@@ -56,7 +56,7 @@ internal static class ConstantGenerator
         {
             for (int file = 0; file < 8; ++file)
             {
-                var squareIndex = BitBoard.SquareIndex(rank, file);
+                var squareIndex = BitBoardExtensions.SquareIndex(rank, file);
 
                 if (file > 1)
                 {
@@ -67,7 +67,7 @@ internal static class ConstantGenerator
 
         b.Print();
 
-        return b.Board;
+        return b;
     }
 
     public static ulong NotHGFiles()
@@ -78,7 +78,7 @@ internal static class ConstantGenerator
         {
             for (int file = 0; file < 8; ++file)
             {
-                var squareIndex = BitBoard.SquareIndex(rank, file);
+                var squareIndex = BitBoardExtensions.SquareIndex(rank, file);
 
                 if (file < 6)
                 {
@@ -89,7 +89,7 @@ internal static class ConstantGenerator
 
         b.Print();
 
-        return b.Board;
+        return b;
     }
 
     public static void PrintSquares()
@@ -115,7 +115,7 @@ internal static class ConstantGenerator
         {
             for (var file = 0; file < 8; ++file)
             {
-                int square = BitBoard.SquareIndex(rank, file);
+                int square = BitBoardExtensions.SquareIndex(rank, file);
 
                 var bishopOccupancy = AttackGenerator.MaskBishopOccupancy(square);
                 Console.Write($"{bishopOccupancy.CountBits()}, ");
@@ -131,7 +131,7 @@ internal static class ConstantGenerator
         {
             for (var file = 0; file < 8; ++file)
             {
-                int square = BitBoard.SquareIndex(rank, file);
+                int square = BitBoardExtensions.SquareIndex(rank, file);
 
                 var bishopOccupancy = AttackGenerator.MaskRookOccupancy(square);
                 Console.Write($"{bishopOccupancy.CountBits()}, ");

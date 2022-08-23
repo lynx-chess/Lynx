@@ -43,12 +43,12 @@ public class CountBits : BaseBenchmark
 
         foreach (var bitboard in position.PieceBitBoards)
         {
-            counter += CountBits_Naive(bitboard.Board);
+            counter += CountBits_Naive(bitboard);
         }
 
         foreach (var bitboard in position.OccupancyBitBoards)
         {
-            counter += CountBits_Naive(bitboard.Board);
+            counter += CountBits_Naive(bitboard);
         }
 
         return counter;
@@ -62,12 +62,12 @@ public class CountBits : BaseBenchmark
 
         foreach (var bitboard in position.PieceBitBoards)
         {
-            counter += CountBits_PopCount(bitboard.Board);
+            counter += CountBits_PopCount(bitboard);
         }
 
         foreach (var bitboard in position.OccupancyBitBoards)
         {
-            counter += CountBits_PopCount(bitboard.Board);
+            counter += CountBits_PopCount(bitboard);
         }
 
         return counter;

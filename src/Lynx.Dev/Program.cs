@@ -52,7 +52,7 @@ const string CmkPosition = Constants.CmkTestPositionFEN;
 
 static void _2_GettingStarted()
 {
-    var board = new BitBoard(4UL);
+    var board = 4UL;
     board.SetBit(BoardSquare.e4);
     board.Print();
     board.PopBit(BoardSquare.e4);
@@ -133,7 +133,7 @@ static void _8_Slider_Pieces_Attacks()
     block.Print();
     bishopAttacks.Print();
 
-    block = new BitBoard(new[] { BoardSquare.d3, BoardSquare.b4, BoardSquare.d7, BoardSquare.h4 });
+    block = BitBoardExtensions.Initialize(new[] { BoardSquare.d3, BoardSquare.b4, BoardSquare.d7, BoardSquare.h4 });
 
     var rookAttacks = AttackGenerator.GenerateRookAttacksOnTheFly((int)BoardSquare.d4, block);
     block.Print();
@@ -142,12 +142,12 @@ static void _8_Slider_Pieces_Attacks()
 
 static void _9_BitCount()
 {
-    BitBoard bitBoard = new(new[] { BoardSquare.d5, BoardSquare.e4 });
+    BitBoard bitBoard = BitBoardExtensions.Initialize(new[] { BoardSquare.d5, BoardSquare.e4 });
 
     bitBoard.ResetLS1B();
     bitBoard.Print();
 
-    var bb = new BitBoard(BoardSquare.d5, BoardSquare.e4);
+    var bb = BitBoardExtensions.Initialize(BoardSquare.d5, BoardSquare.e4);
 
     Console.WriteLine(bb.GetLS1BIndex());
     Console.WriteLine(bb.GetLS1BIndex());
@@ -192,7 +192,7 @@ static void _11_OccupancyBitCountLookupTables()
     {
         for (var file = 0; file < 8; ++file)
         {
-            int square = BitBoard.SquareIndex(rank, file);
+            int square = BitBoardExtensions.SquareIndex(rank, file);
 
             var bishopOccupancy = AttackGenerator.MaskBishopOccupancy(square);
             Console.Write($"{bishopOccupancy.CountBits()}, ");
@@ -205,7 +205,7 @@ static void _11_OccupancyBitCountLookupTables()
     {
         for (var file = 0; file < 8; ++file)
         {
-            int square = BitBoard.SquareIndex(rank, file);
+            int square = BitBoardExtensions.SquareIndex(rank, file);
 
             var bishopOccupancy = AttackGenerator.MaskRookOccupancy(square);
             Console.Write($"{bishopOccupancy.CountBits()}, ");
@@ -226,12 +226,12 @@ static void _13_GeneratingMagicNumbersCandidates()
 
     // int(uint really), which is 32 bits -> ulong, 64 bits leaves the seconf half of the board empty
     // The slicing leaves the second quarter empty as well
-    var randomBoard = new BitBoard(randomNumber);
+    var randomBoard = randomNumber;
     randomBoard.Print();
 
     var candidate = MagicNumberGenerator.GenerateMagicNumber();
 
-    var board = new BitBoard(candidate);
+    var board = candidate;
     board.Print();
 }
 
@@ -318,9 +318,9 @@ static void _21_IsSquareAttacked()
 
     Attacks.PawnAttacks[(int)Side.White, (int)BoardSquare.e4].Print();
 
-    var and = new BitBoard(
-        position.PieceBitBoards[(int)Piece.p].Board & Attacks.PawnAttacks[(int)Side.White,
-        (int)BoardSquare.e4].Board);
+    var and =
+        position.PieceBitBoards[(int)Piece.p]
+        & Attacks.PawnAttacks[(int)Side.White, (int)BoardSquare.e4];
     and.Print();
 
     Console.WriteLine("=====================================");
@@ -368,7 +368,7 @@ static void _22_Generate_Moves()
     var position = new Position("r1P1k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1 ");
     position.Print();
 
-    //position.OccupancyBitBoards[2].Board |= 0b11100111UL << 8 * 4;
+    //position.OccupancyBitBoards[2] |= 0b11100111UL << 8 * 4;
     var moves = MoveGenerator.GenerateAllMoves(position);
 
     foreach (var move in moves)
@@ -794,12 +794,12 @@ static void CountBits()
 
         foreach (var bitboard in position.PieceBitBoards)
         {
-            counter += CountBits_Naive(bitboard.Board);
+            counter += CountBits_Naive(bitboard);
         }
 
         foreach (var bitboard in position.OccupancyBitBoards)
         {
-            counter += CountBits_Naive(bitboard.Board);
+            counter += CountBits_Naive(bitboard);
         }
 
         return counter;
@@ -811,12 +811,12 @@ static void CountBits()
 
         foreach (var bitboard in position.PieceBitBoards)
         {
-            counter += CountBits_PopCount(bitboard.Board);
+            counter += CountBits_PopCount(bitboard);
         }
 
         foreach (var bitboard in position.OccupancyBitBoards)
         {
-            counter += CountBits_PopCount(bitboard.Board);
+            counter += CountBits_PopCount(bitboard);
         }
 
         return counter;
@@ -873,12 +873,12 @@ static void GetLS1BIndex()
 
         foreach (var bitboard in position.PieceBitBoards)
         {
-            counter += Original_GetLS1BIndex_Impl(bitboard.Board);
+            counter += Original_GetLS1BIndex_Impl(bitboard);
         }
 
         foreach (var bitboard in position.OccupancyBitBoards)
         {
-            counter += Original_GetLS1BIndex_Impl(bitboard.Board);
+            counter += Original_GetLS1BIndex_Impl(bitboard);
         }
 
         return counter;
@@ -890,12 +890,12 @@ static void GetLS1BIndex()
 
         foreach (var bitboard in position.PieceBitBoards)
         {
-            counter += BitOperations_GetLS1BIndex_Impl(bitboard.Board);
+            counter += BitOperations_GetLS1BIndex_Impl(bitboard);
         }
 
         foreach (var bitboard in position.OccupancyBitBoards)
         {
-            counter += BitOperations_GetLS1BIndex_Impl(bitboard.Board);
+            counter += BitOperations_GetLS1BIndex_Impl(bitboard);
         }
 
         return counter;

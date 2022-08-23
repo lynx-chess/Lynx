@@ -15,12 +15,12 @@ public class SetBishopOrRookOccupancyTest
         // Act
         var occupancy = AttackGenerator.SetBishopOrRookOccupancy(0, occupancyMask);
         // Assert
-        Assert.True(occupancy.Empty);
+        Assert.True(occupancy.Empty());
 
         // Act
         occupancy = AttackGenerator.SetBishopOrRookOccupancy(maxIndex, occupancyMask);
         // Assert
-        Assert.AreEqual(occupancyMask.Board, occupancy.Board);
+        Assert.AreEqual(occupancyMask, occupancy);
     }
 
     [TestCase(BoardSquare.a8)]
@@ -34,17 +34,17 @@ public class SetBishopOrRookOccupancyTest
         // Act - empty board
         var occupancy = AttackGenerator.SetBishopOrRookOccupancy(0, occupancyMask);
         // Assert
-        Assert.True(occupancy.Empty);
+        Assert.True(occupancy.Empty());
 
         // Act - top rank occupied
         var index = (int)Math.Pow(2, 6) - 1;
         occupancy = AttackGenerator.SetBishopOrRookOccupancy(index, occupancyMask);
         // Assert
-        Assert.AreEqual(0b01111110UL << 8 * ((int)rookSquare / 8), occupancy.Board);
+        Assert.AreEqual(0b01111110UL << 8 * ((int)rookSquare / 8), occupancy);
 
         // Act - max occupancy
         occupancy = AttackGenerator.SetBishopOrRookOccupancy(maxIndex, occupancyMask);
         // Assert
-        Assert.AreEqual(occupancyMask.Board, occupancy.Board);
+        Assert.AreEqual(occupancyMask, occupancy);
     }
 }

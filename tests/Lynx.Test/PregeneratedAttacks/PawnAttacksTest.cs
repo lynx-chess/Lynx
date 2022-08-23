@@ -25,13 +25,13 @@ public class PawnAttacksTest
         var attacks = AttackGenerator.MaskPawnAttacks((int)square, isWhite);
 
         // Assert
-        Assert.AreEqual(expectedResult, attacks.Board);
+        Assert.AreEqual(expectedResult, attacks);
 
         // Act
         attacks = Attacks.PawnAttacks[isWhite ? 1 : 0, (int)square];
 
         // Assert
-        Assert.AreEqual(expectedResult, attacks.Board);
+        Assert.AreEqual(expectedResult, attacks);
     }
 
     [Test]
@@ -50,8 +50,8 @@ public class PawnAttacksTest
                 continue;
             }
 
-            bool aFile = !new BitBoard(Constants.NotAFile).GetBit(intSquare);
-            bool hFile = !new BitBoard(Constants.NotHFile).GetBit(intSquare);
+            bool aFile = !Constants.NotAFile.GetBit(intSquare);
+            bool hFile = !Constants.NotHFile.GetBit(intSquare);
 
             var attackDiagram = aFile || hFile
                 ? 1UL
@@ -62,20 +62,20 @@ public class PawnAttacksTest
                 : 9;    // c7 -> b8 (101)
 
             var expectedWhiteResult = attackDiagram << (intSquare - whiteOffset);
-            Assert.AreEqual(expectedWhiteResult, result[1, intSquare].Board);
+            Assert.AreEqual(expectedWhiteResult, result[1, intSquare]);
 
             var blackOffset = aFile
                 ? 9     // a7 -> b8 (1)
                 : 7;    // c7 -> b6 (101)
 
             var expectedBlackResult = attackDiagram << (intSquare + blackOffset);
-            Assert.AreEqual(expectedBlackResult, result[0, intSquare].Board);
+            Assert.AreEqual(expectedBlackResult, result[0, intSquare]);
         }
 
         for (int square = 0; square < 8; ++square)
         {
-            Assert.AreEqual(0UL, result[1, square].Board);
-            Assert.AreEqual(0UL, result[0, 63 - square].Board);
+            Assert.AreEqual(0UL, result[1, square]);
+            Assert.AreEqual(0UL, result[0, 63 - square]);
         }
     }
 }

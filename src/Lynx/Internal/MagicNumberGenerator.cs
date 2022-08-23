@@ -64,8 +64,8 @@ public static class MagicNumberGenerator
             var magicNumber = GenerateMagicNumber();
 
             // Skip inappropriate magic numbers
-            var n = (occupancyMask.Board * magicNumber) & 0xFF000_000_000_000_00;
-            if (BitBoard.CountBits(n) < 6)
+            var n = (occupancyMask * magicNumber) & 0xFF000_000_000_000_00;
+            if (n.CountBits() < 6)
             {
                 continue;
             }
@@ -80,15 +80,15 @@ public static class MagicNumberGenerator
             for (index = 0, fail = false; !fail && index < occupancyIndexes; ++index)
             {
                 // Initialize magic index
-                int magicIndex = (int)((occupancies[index].Board * magicNumber) >> (64 - relevantOccupancyBits));
+                int magicIndex = (int)((occupancies[index] * magicNumber) >> (64 - relevantOccupancyBits));
 
                 // If magic index works
                 if (usedAttacks[magicIndex] == default)
                 {
                     // Init used attacks
-                    usedAttacks[magicIndex] = attacks[index].Board;
+                    usedAttacks[magicIndex] = attacks[index];
                 }
-                else if (usedAttacks[magicIndex] != attacks[index].Board)
+                else if (usedAttacks[magicIndex] != attacks[index])
                 {
                     // Magic index doesn't work
                     fail = true;

@@ -98,7 +98,7 @@ public class InitializeBishopAndRookAttacks : BaseBenchmark
                     {
                         var occupancy = AttackGenerator.SetBishopOrRookOccupancy(index, attackMask);
 
-                        var magicIndex = (occupancy.Board * Constants.BishopMagicNumbers[square]) >> (64 - relevantBitsCount);
+                        var magicIndex = (occupancy * Constants.BishopMagicNumbers[square]) >> (64 - relevantBitsCount);
 
                         _bishopAttacks[square, magicIndex] = AttackGenerator.GenerateBishopAttacksOnTheFly(square, occupancy);
                     }
@@ -106,7 +106,7 @@ public class InitializeBishopAndRookAttacks : BaseBenchmark
                     {
                         var occupancy = AttackGenerator.SetBishopOrRookOccupancy(index, attackMask);
 
-                        var magicIndex = (occupancy.Board * Constants.RookMagicNumbers[square]) >> (64 - relevantBitsCount);
+                        var magicIndex = (occupancy * Constants.RookMagicNumbers[square]) >> (64 - relevantBitsCount);
 
                         _rookAttacks[square, magicIndex] = AttackGenerator.GenerateRookAttacksOnTheFly(square, occupancy);
                     }

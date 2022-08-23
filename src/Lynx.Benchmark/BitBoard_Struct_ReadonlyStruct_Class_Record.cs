@@ -346,7 +346,7 @@ public class BitBoard_Struct_ReadonlyStruct_Class_Record : BaseBenchmark
         {
             var square = (int)BoardSquare.e1;
 
-            var occupancyMask = new BitBoardOpsReadonly(AttackGenerator.MaskBishopOccupancy(square).Board);
+            var occupancyMask = new BitBoardOpsReadonly(AttackGenerator.MaskBishopOccupancy(square));
 
             var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
 
@@ -367,7 +367,7 @@ public class BitBoard_Struct_ReadonlyStruct_Class_Record : BaseBenchmark
         {
             var square = (int)BoardSquare.e1;
 
-            var occupancyMask = new BitBoardOps(AttackGenerator.MaskBishopOccupancy(square).Board);
+            var occupancyMask = new BitBoardOps(AttackGenerator.MaskBishopOccupancy(square));
 
             var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
 
@@ -388,7 +388,7 @@ public class BitBoard_Struct_ReadonlyStruct_Class_Record : BaseBenchmark
         {
             var square = (int)BoardSquare.e1;
 
-            var occupancyMask = new BitBoardOpsClass(AttackGenerator.MaskBishopOccupancy(square).Board);
+            var occupancyMask = new BitBoardOpsClass(AttackGenerator.MaskBishopOccupancy(square));
 
             var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
 
@@ -409,7 +409,7 @@ public class BitBoard_Struct_ReadonlyStruct_Class_Record : BaseBenchmark
         {
             var square = (int)BoardSquare.e1;
 
-            var occupancyMask = new BitBoardOpsRecord(AttackGenerator.MaskBishopOccupancy(square).Board);
+            var occupancyMask = new BitBoardOpsRecord(AttackGenerator.MaskBishopOccupancy(square));
 
             var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
 
@@ -430,7 +430,7 @@ public class BitBoard_Struct_ReadonlyStruct_Class_Record : BaseBenchmark
         {
             var square = (int)BoardSquare.e1;
 
-            var occupancyMask = AttackGenerator.MaskBishopOccupancy(square).Board;
+            var occupancyMask = AttackGenerator.MaskBishopOccupancy(square);
 
             var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
 
@@ -450,7 +450,7 @@ public class BitBoard_Struct_ReadonlyStruct_Class_Record : BaseBenchmark
         {
             var square = (int)BoardSquare.e1;
 
-            var occupancyMask = new BitBoardOpsProperRecord(AttackGenerator.MaskBishopOccupancy(square).Board);
+            var occupancyMask = new BitBoardOpsProperRecord(AttackGenerator.MaskBishopOccupancy(square));
 
             var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
 

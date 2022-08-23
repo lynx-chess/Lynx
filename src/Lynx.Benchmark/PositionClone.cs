@@ -84,13 +84,9 @@ public class PositionClone : BaseBenchmark
         public Position(Position position, int _)
         {
             FEN = position.FEN;
-            PieceBitBoards = position.PieceBitBoards
-                .Select(bb => new BitBoard(bb.Board))
-                .ToArray();
+            PieceBitBoards = position.PieceBitBoards;
 
-            OccupancyBitBoards = position.OccupancyBitBoards
-                .Select(bb => new BitBoard(bb.Board))
-                .ToArray();
+            OccupancyBitBoards = position.OccupancyBitBoards;
 
             Side = position.Side;
             Castle = position.Castle;

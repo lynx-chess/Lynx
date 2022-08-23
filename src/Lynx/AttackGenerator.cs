@@ -89,7 +89,7 @@ public static class AttackGenerator
             {
                 var occupancy = SetBishopOrRookOccupancy(index, occupancyMasks[square]);
 
-                var magicIndex = (occupancy.Board * Constants.BishopMagicNumbers[square]) >> (64 - relevantBitsCount);
+                var magicIndex = (occupancy * Constants.BishopMagicNumbers[square]) >> (64 - relevantBitsCount);
 
                 attacks[square, magicIndex] = GenerateBishopAttacksOnTheFly(square, occupancy);
             }
@@ -119,7 +119,7 @@ public static class AttackGenerator
             {
                 var occupancy = SetBishopOrRookOccupancy(index, occupancyMasks[square]);
 
-                var magicIndex = (occupancy.Board * Constants.RookMagicNumbers[square]) >> (64 - relevantBitsCount);
+                var magicIndex = (occupancy * Constants.RookMagicNumbers[square]) >> (64 - relevantBitsCount);
 
                 attacks[square, magicIndex] = GenerateRookAttacksOnTheFly(square, occupancy);
             }
@@ -134,7 +134,7 @@ public static class AttackGenerator
         ulong attacks = 0UL;
 
         // Piece bitboard
-        BitBoard bitBoard = new(0UL);
+        BitBoard bitBoard = 0UL;
 
         // Set piece on board
         bitBoard.SetBit(squareIndex);
@@ -146,7 +146,7 @@ public static class AttackGenerator
              * 0 0 1 0 0
              * 0 0 0 0 0
              */
-            var right = bitBoard.Board >> 7;
+            var right = bitBoard >> 7;
             if ((right & Constants.NotAFile) != default)
             {
                 attacks |= right;
@@ -157,7 +157,7 @@ public static class AttackGenerator
              * 0 0 1 0 0
              * 0 0 0 0 0
              */
-            var left = bitBoard.Board >> 9;
+            var left = bitBoard >> 9;
             if ((left & Constants.NotHFile) != default)
             {
                 attacks |= left;
@@ -170,7 +170,7 @@ public static class AttackGenerator
              * 0 0 1 0 0
              * 0 X 0 0 0
              */
-            var left = bitBoard.Board << 7;
+            var left = bitBoard << 7;
             if ((left & Constants.NotHFile) != default)
             {
                 attacks |= left;
@@ -181,14 +181,14 @@ public static class AttackGenerator
              * 0 0 1 0 0
              * 0 0 0 X 0
              */
-            var right = bitBoard.Board << 9;
+            var right = bitBoard << 9;
             if ((right & Constants.NotAFile) != default)
             {
                 attacks |= right;
             }
         }
 
-        return new BitBoard(attacks);
+        return attacks;
     }
 
     public static BitBoard MaskKnightAttacks(int squareIndex)
@@ -197,7 +197,7 @@ public static class AttackGenerator
         ulong attacks = 0UL;
 
         // Piece bitboard
-        BitBoard bitBoard = new(0UL);
+        BitBoard bitBoard = 0UL;
 
         // Set piece on board
         bitBoard.SetBit(squareIndex);
@@ -209,7 +209,7 @@ public static class AttackGenerator
          * 0 0 0 0 0
          * 0 0 0 0 0
          */
-        var attack = bitBoard.Board >> 17;
+        var attack = bitBoard >> 17;
         if ((attack & Constants.NotHFile) != default)
         {
             attacks |= attack;
@@ -222,7 +222,7 @@ public static class AttackGenerator
          * 0 0 0 0 0
          * 0 0 0 0 0
          */
-        attack = bitBoard.Board >> 15;
+        attack = bitBoard >> 15;
         if ((attack & Constants.NotAFile) != default)
         {
             attacks |= attack;
@@ -235,7 +235,7 @@ public static class AttackGenerator
          * 0 0 0 0 0
          * 0 X 0 0 0
          */
-        attack = bitBoard.Board << 15;
+        attack = bitBoard << 15;
         if ((attack & Constants.NotHFile) != default)
         {
             attacks |= attack;
@@ -248,7 +248,7 @@ public static class AttackGenerator
          * 0 0 0 0 0
          * 0 0 0 X 0
          */
-        attack = bitBoard.Board << 17;
+        attack = bitBoard << 17;
         if ((attack & Constants.NotAFile) != default)
         {
             attacks |= attack;
@@ -261,7 +261,7 @@ public static class AttackGenerator
          * 0 0 0 0 0
          * 0 0 0 0 0
          */
-        attack = bitBoard.Board >> 10;
+        attack = bitBoard >> 10;
         if ((attack & Constants.NotHGFiles) != default)
         {
             attacks |= attack;
@@ -274,7 +274,7 @@ public static class AttackGenerator
          * 0 0 0 0 0
          * 0 0 0 0 0
          */
-        attack = bitBoard.Board >> 6;
+        attack = bitBoard >> 6;
         if ((attack & Constants.NotABFiles) != default)
         {
             attacks |= attack;
@@ -287,7 +287,7 @@ public static class AttackGenerator
          * X 0 0 0 0
          * 0 0 0 0 0
          */
-        attack = bitBoard.Board << 6;
+        attack = bitBoard << 6;
         if ((attack & Constants.NotHGFiles) != default)
         {
             attacks |= attack;
@@ -300,13 +300,13 @@ public static class AttackGenerator
          * 0 0 0 0 X
          * 0 0 0 0 0
          */
-        attack = bitBoard.Board << 10;
+        attack = bitBoard << 10;
         if ((attack & Constants.NotABFiles) != default)
         {
             attacks |= attack;
         }
 
-        return new BitBoard(attacks);
+        return attacks;
     }
 
     public static BitBoard MaskKingAttacks(int squareIndex)
@@ -315,7 +315,7 @@ public static class AttackGenerator
         ulong attacks = 0UL;
 
         // Piece bitboard
-        BitBoard bitBoard = new(0UL);
+        BitBoard bitBoard = 0UL;
 
         // Set piece on board
         bitBoard.SetBit(squareIndex);
@@ -325,7 +325,7 @@ public static class AttackGenerator
          * 0 1 0
          * 0 0 0
          */
-        var attack = bitBoard.Board >> 9;
+        var attack = bitBoard >> 9;
         if ((attack & Constants.NotHFile) != default)
         {
             attacks |= attack;
@@ -336,14 +336,14 @@ public static class AttackGenerator
          * 0 1 0
          * 0 0 0
          */
-        attacks |= bitBoard.Board >> 8;
+        attacks |= bitBoard >> 8;
 
         /*
          * 0 0 X
          * 0 1 0
          * 0 0 0
          */
-        attack = bitBoard.Board >> 7;
+        attack = bitBoard >> 7;
         if ((attack & Constants.NotAFile) != default)
         {
             attacks |= attack;
@@ -354,7 +354,7 @@ public static class AttackGenerator
          * X 1 0
          * 0 0 0
          */
-        attack = bitBoard.Board >> 1;
+        attack = bitBoard >> 1;
         if ((attack & Constants.NotHFile) != default)
         {
             attacks |= attack;
@@ -365,7 +365,7 @@ public static class AttackGenerator
          * 0 1 X
          * 0 0 0
          */
-        attack = bitBoard.Board << 1;
+        attack = bitBoard << 1;
         if ((attack & Constants.NotAFile) != default)
         {
             attacks |= attack;
@@ -376,7 +376,7 @@ public static class AttackGenerator
          * 0 1 0
          * X 0 0
          */
-        attack = bitBoard.Board << 7;
+        attack = bitBoard << 7;
         if ((attack & Constants.NotHFile) != default)
         {
             attacks |= attack;
@@ -387,20 +387,20 @@ public static class AttackGenerator
          * 0 1 0
          * 0 X 0
          */
-        attacks |= bitBoard.Board << 8;
+        attacks |= bitBoard << 8;
 
         /*
          * 0 0 0
          * 0 1 0
          * X 0 0
          */
-        attack = bitBoard.Board << 9;
+        attack = bitBoard << 9;
         if ((attack & Constants.NotAFile) != default)
         {
             attacks |= attack;
         }
 
-        return new BitBoard(attacks);
+        return attacks;
     }
 
     /// <summary>
@@ -432,7 +432,7 @@ public static class AttackGenerator
          */
         for (rank = targetRank + 1, file = targetFile + 1; rank <= 6 && file <= 6; ++rank, ++file)
         {
-            attacks |= 1UL << BitBoard.SquareIndex(rank, file);
+            attacks |= 1UL << BitBoardExtensions.SquareIndex(rank, file);
         }
 
         /*
@@ -444,7 +444,7 @@ public static class AttackGenerator
          */
         for (rank = targetRank - 1, file = targetFile - 1; rank >= 1 && file >= 1; --rank, --file)
         {
-            attacks |= 1UL << BitBoard.SquareIndex(rank, file);
+            attacks |= 1UL << BitBoardExtensions.SquareIndex(rank, file);
         }
 
         /*
@@ -456,7 +456,7 @@ public static class AttackGenerator
          */
         for (rank = targetRank - 1, file = targetFile + 1; rank >= 1 && file <= 6; --rank, ++file)
         {
-            attacks |= 1UL << BitBoard.SquareIndex(rank, file);
+            attacks |= 1UL << BitBoardExtensions.SquareIndex(rank, file);
         }
 
         /*
@@ -468,10 +468,10 @@ public static class AttackGenerator
          */
         for (rank = targetRank + 1, file = targetFile - 1; rank <= 6 && file >= 1; ++rank, --file)
         {
-            attacks |= 1UL << BitBoard.SquareIndex(rank, file);
+            attacks |= 1UL << BitBoardExtensions.SquareIndex(rank, file);
         }
 
-        return new BitBoard(attacks);
+        return attacks;
     }
 
     /// <summary>
@@ -503,7 +503,7 @@ public static class AttackGenerator
          */
         for (file = targetFile + 1; file <= 6; ++file)
         {
-            attacks |= 1UL << BitBoard.SquareIndex(targetRank, file);
+            attacks |= 1UL << BitBoardExtensions.SquareIndex(targetRank, file);
         }
 
         /*
@@ -515,7 +515,7 @@ public static class AttackGenerator
          */
         for (file = targetFile - 1; file >= 1; --file)
         {
-            attacks |= 1UL << BitBoard.SquareIndex(targetRank, file);
+            attacks |= 1UL << BitBoardExtensions.SquareIndex(targetRank, file);
         }
 
         /*
@@ -527,7 +527,7 @@ public static class AttackGenerator
          */
         for (rank = targetRank + 1; rank <= 6; ++rank)
         {
-            attacks |= 1UL << BitBoard.SquareIndex(rank, targetFile);
+            attacks |= 1UL << BitBoardExtensions.SquareIndex(rank, targetFile);
         }
 
         /*
@@ -539,10 +539,10 @@ public static class AttackGenerator
          */
         for (rank = targetRank - 1; rank >= 1; --rank)
         {
-            attacks |= 1UL << BitBoard.SquareIndex(rank, targetFile);
+            attacks |= 1UL << BitBoardExtensions.SquareIndex(rank, targetFile);
         }
 
-        return new BitBoard(attacks);
+        return attacks;
     }
 
     /// <summary>
@@ -599,10 +599,10 @@ public static class AttackGenerator
          */
         for (rank = targetRank + 1, file = targetFile + 1; rank <= 7 && file <= 7; ++rank, ++file)
         {
-            ulong square = 1UL << BitBoard.SquareIndex(rank, file);
+            ulong square = 1UL << BitBoardExtensions.SquareIndex(rank, file);
             attacks |= square;
 
-            if ((square & occupiedSquares.Board) != default)
+            if ((square & occupiedSquares) != default)
             {
                 break;
             }
@@ -617,10 +617,10 @@ public static class AttackGenerator
          */
         for (rank = targetRank - 1, file = targetFile - 1; rank >= 0 && file >= 0; --rank, --file)
         {
-            ulong square = 1UL << BitBoard.SquareIndex(rank, file);
+            ulong square = 1UL << BitBoardExtensions.SquareIndex(rank, file);
             attacks |= square;
 
-            if ((square & occupiedSquares.Board) != default)
+            if ((square & occupiedSquares) != default)
             {
                 break;
             }
@@ -635,10 +635,10 @@ public static class AttackGenerator
          */
         for (rank = targetRank - 1, file = targetFile + 1; rank >= 0 && file <= 7; --rank, ++file)
         {
-            ulong square = 1UL << BitBoard.SquareIndex(rank, file);
+            ulong square = 1UL << BitBoardExtensions.SquareIndex(rank, file);
             attacks |= square;
 
-            if ((square & occupiedSquares.Board) != default)
+            if ((square & occupiedSquares) != default)
             {
                 break;
             }
@@ -653,16 +653,16 @@ public static class AttackGenerator
          */
         for (rank = targetRank + 1, file = targetFile - 1; rank <= 7 && file >= 0; ++rank, --file)
         {
-            ulong square = 1UL << BitBoard.SquareIndex(rank, file);
+            ulong square = 1UL << BitBoardExtensions.SquareIndex(rank, file);
             attacks |= square;
 
-            if ((square & occupiedSquares.Board) != default)
+            if ((square & occupiedSquares) != default)
             {
                 break;
             }
         }
 
-        return new BitBoard(attacks);
+        return attacks;
     }
 
     public static BitBoard GenerateRookAttacksOnTheFly(int squareIndex, BitBoard occupiedSquares)
@@ -687,10 +687,10 @@ public static class AttackGenerator
          */
         for (file = targetFile + 1; file <= 7; ++file)
         {
-            ulong square = 1UL << BitBoard.SquareIndex(targetRank, file);
+            ulong square = 1UL << BitBoardExtensions.SquareIndex(targetRank, file);
             attacks |= square;
 
-            if ((square & occupiedSquares.Board) != default)
+            if ((square & occupiedSquares) != default)
             {
                 break;
             }
@@ -705,10 +705,10 @@ public static class AttackGenerator
          */
         for (file = targetFile - 1; file >= 0; --file)
         {
-            ulong square = 1UL << BitBoard.SquareIndex(targetRank, file);
+            ulong square = 1UL << BitBoardExtensions.SquareIndex(targetRank, file);
             attacks |= square;
 
-            if ((square & occupiedSquares.Board) != default)
+            if ((square & occupiedSquares) != default)
             {
                 break;
             }
@@ -723,10 +723,10 @@ public static class AttackGenerator
          */
         for (rank = targetRank + 1; rank <= 7; ++rank)
         {
-            ulong square = 1UL << BitBoard.SquareIndex(rank, targetFile);
+            ulong square = 1UL << BitBoardExtensions.SquareIndex(rank, targetFile);
             attacks |= square;
 
-            if ((square & occupiedSquares.Board) != default)
+            if ((square & occupiedSquares) != default)
             {
                 break;
             }
@@ -741,15 +741,15 @@ public static class AttackGenerator
          */
         for (rank = targetRank - 1; rank >= 0; --rank)
         {
-            ulong square = 1UL << BitBoard.SquareIndex(rank, targetFile);
+            ulong square = 1UL << BitBoardExtensions.SquareIndex(rank, targetFile);
             attacks |= square;
 
-            if ((square & occupiedSquares.Board) != default)
+            if ((square & occupiedSquares) != default)
             {
                 break;
             }
         }
 
-        return new BitBoard(attacks);
+        return attacks;
     }
 }

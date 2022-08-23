@@ -27,34 +27,34 @@ public class FENParserTest
         Assert.True(success);
 
         var whitePawns = pieceBitBoards[(int)Piece.P];
-        Assert.AreEqual(0b1111_1111UL << (6 * 8), whitePawns.Board);
+        Assert.AreEqual(0b1111_1111UL << (6 * 8), whitePawns);
         var blackPawns = pieceBitBoards[(int)Piece.p];
-        Assert.AreEqual(0b1111_1111UL << (1 * 8), blackPawns.Board);
+        Assert.AreEqual(0b1111_1111UL << (1 * 8), blackPawns);
 
         var whiteRooks = pieceBitBoards[(int)Piece.R];
-        Assert.AreEqual(0b1000_0001UL << (7 * 8), whiteRooks.Board);
+        Assert.AreEqual(0b1000_0001UL << (7 * 8), whiteRooks);
         var blackRooks = pieceBitBoards[(int)Piece.r];
-        Assert.AreEqual(0b1000_0001UL << (0 * 8), blackRooks.Board);
+        Assert.AreEqual(0b1000_0001UL << (0 * 8), blackRooks);
 
         var whiteKnights = pieceBitBoards[(int)Piece.N];
-        Assert.AreEqual(0b0100_0010UL << (7 * 8), whiteKnights.Board);
+        Assert.AreEqual(0b0100_0010UL << (7 * 8), whiteKnights);
         var blackKnights = pieceBitBoards[(int)Piece.n];
-        Assert.AreEqual(0b0100_0010UL << (0 * 8), blackKnights.Board);
+        Assert.AreEqual(0b0100_0010UL << (0 * 8), blackKnights);
 
         var whiteBishops = pieceBitBoards[(int)Piece.B];
-        Assert.AreEqual(0b0010_0100UL << (7 * 8), whiteBishops.Board);
+        Assert.AreEqual(0b0010_0100UL << (7 * 8), whiteBishops);
         var blackBishops = pieceBitBoards[(int)Piece.b];
-        Assert.AreEqual(0b0010_0100UL << (0 * 8), blackBishops.Board);
+        Assert.AreEqual(0b0010_0100UL << (0 * 8), blackBishops);
 
         var whiteQueen = pieceBitBoards[(int)Piece.Q];
-        Assert.AreEqual(0b0000_1000UL << (int)BoardSquare.a1, whiteQueen.Board);
+        Assert.AreEqual(0b0000_1000UL << (int)BoardSquare.a1, whiteQueen);
         var blackQueen = pieceBitBoards[(int)Piece.q];
-        Assert.AreEqual(0b0000_1000UL << (0 * 8), blackQueen.Board);
+        Assert.AreEqual(0b0000_1000UL << (0 * 8), blackQueen);
 
         var whiteKing = pieceBitBoards[(int)Piece.K];
-        Assert.AreEqual(0b0001_0000UL << (7 * 8), whiteKing.Board);
+        Assert.AreEqual(0b0001_0000UL << (7 * 8), whiteKing);
         var blackKing = pieceBitBoards[(int)Piece.k];
-        Assert.AreEqual(0b0001_0000UL << (0 * 8), blackKing.Board);
+        Assert.AreEqual(0b0001_0000UL << (0 * 8), blackKing);
     }
 
     [Test]
@@ -137,28 +137,28 @@ public class FENParserTest
         Assert.True(success);
 
         var expectedWhiteOccupancy = 0UL;
-        expectedWhiteOccupancy |= pieceBitBoards[(int)Piece.P].Board;
-        expectedWhiteOccupancy |= pieceBitBoards[(int)Piece.N].Board;
-        expectedWhiteOccupancy |= pieceBitBoards[(int)Piece.B].Board;
-        expectedWhiteOccupancy |= pieceBitBoards[(int)Piece.R].Board;
-        expectedWhiteOccupancy |= pieceBitBoards[(int)Piece.Q].Board;
-        expectedWhiteOccupancy |= pieceBitBoards[(int)Piece.K].Board;
+        expectedWhiteOccupancy |= pieceBitBoards[(int)Piece.P];
+        expectedWhiteOccupancy |= pieceBitBoards[(int)Piece.N];
+        expectedWhiteOccupancy |= pieceBitBoards[(int)Piece.B];
+        expectedWhiteOccupancy |= pieceBitBoards[(int)Piece.R];
+        expectedWhiteOccupancy |= pieceBitBoards[(int)Piece.Q];
+        expectedWhiteOccupancy |= pieceBitBoards[(int)Piece.K];
 
-        Assert.AreEqual(expectedWhiteOccupancy, occupancyBitBoards[(int)Side.White].Board);
+        Assert.AreEqual(expectedWhiteOccupancy, occupancyBitBoards[(int)Side.White]);
 
         var expectedBlackOccupancy = 0UL;
-        expectedBlackOccupancy |= pieceBitBoards[(int)Piece.p].Board;
-        expectedBlackOccupancy |= pieceBitBoards[(int)Piece.n].Board;
-        expectedBlackOccupancy |= pieceBitBoards[(int)Piece.b].Board;
-        expectedBlackOccupancy |= pieceBitBoards[(int)Piece.r].Board;
-        expectedBlackOccupancy |= pieceBitBoards[(int)Piece.q].Board;
-        expectedBlackOccupancy |= pieceBitBoards[(int)Piece.k].Board;
+        expectedBlackOccupancy |= pieceBitBoards[(int)Piece.p];
+        expectedBlackOccupancy |= pieceBitBoards[(int)Piece.n];
+        expectedBlackOccupancy |= pieceBitBoards[(int)Piece.b];
+        expectedBlackOccupancy |= pieceBitBoards[(int)Piece.r];
+        expectedBlackOccupancy |= pieceBitBoards[(int)Piece.q];
+        expectedBlackOccupancy |= pieceBitBoards[(int)Piece.k];
 
-        Assert.AreEqual(expectedBlackOccupancy, occupancyBitBoards[(int)Side.Black].Board);
+        Assert.AreEqual(expectedBlackOccupancy, occupancyBitBoards[(int)Side.Black]);
 
         var expectedCombinedOccupancy = expectedWhiteOccupancy | expectedBlackOccupancy;
 
-        Assert.AreEqual(expectedCombinedOccupancy, occupancyBitBoards[(int)Side.Both].Board);
+        Assert.AreEqual(expectedCombinedOccupancy, occupancyBitBoards[(int)Side.Both]);
     }
 
     [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", Side.White)]

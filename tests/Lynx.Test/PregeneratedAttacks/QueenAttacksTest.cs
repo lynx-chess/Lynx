@@ -64,7 +64,7 @@ public class QueenAttacksTest
     public void GetQueenAttacks(BS bishopSquare, BS[] occupiedSquares, BS[] attackedSquares)
     {
         // Arrange
-        var occupancy = new BitBoard(occupiedSquares);
+        var occupancy = BitBoardExtensions.Initialize(occupiedSquares);
 
         // Act
         var attacks = Attacks.QueenAttacks((int)bishopSquare, occupancy);

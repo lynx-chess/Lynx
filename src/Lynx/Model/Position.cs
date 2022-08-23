@@ -207,7 +207,7 @@ public sealed class Position
         }
 
         Side = (Side)oppositeSide;
-        OccupancyBitBoards[(int)Side.Both] = new BitBoard(OccupancyBitBoards[(int)Side.White].Board | OccupancyBitBoards[(int)Side.Black].Board);
+        OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
 
         // Updating castling rights
         Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
@@ -224,10 +224,10 @@ public sealed class Position
     internal bool IsValid()
     {
         var kingBitBoard = PieceBitBoards[(int)Piece.K + Utils.PieceOffset(Side)];
-        var kingSquare = kingBitBoard.Board == default ? -1 : kingBitBoard.GetLS1BIndex();
+        var kingSquare = kingBitBoard == default ? -1 : kingBitBoard.GetLS1BIndex();
 
         var oppositeKingBitBoard = PieceBitBoards[(int)Piece.K + Utils.PieceOffset((Side)Utils.OppositeSide(Side))];
-        var oppositeKingSquare = oppositeKingBitBoard.Board == default ? -1 : oppositeKingBitBoard.GetLS1BIndex();
+        var oppositeKingSquare = oppositeKingBitBoard == default ? -1 : oppositeKingBitBoard.GetLS1BIndex();
 
         return kingSquare >= 0 && oppositeKingSquare >= 0
             && !Attacks.IsSquaredAttacked(oppositeKingSquare, Side, PieceBitBoards, OccupancyBitBoards);
@@ -243,7 +243,7 @@ public sealed class Position
     public bool WasProduceByAValidMove()
     {
         var oppositeKingBitBoard = PieceBitBoards[(int)Piece.K + Utils.PieceOffset((Side)Utils.OppositeSide(Side))];
-        var oppositeKingSquare = oppositeKingBitBoard.Board == default ? -1 : oppositeKingBitBoard.GetLS1BIndex();
+        var oppositeKingSquare = oppositeKingBitBoard == default ? -1 : oppositeKingBitBoard.GetLS1BIndex();
 
         return oppositeKingSquare >= 0 && !Attacks.IsSquaredAttacked(oppositeKingSquare, Side, PieceBitBoards, OccupancyBitBoards);
     }
@@ -377,12 +377,12 @@ public sealed class Position
         for (int pieceIndex = 0; pieceIndex < sideLimit; ++pieceIndex)
         {
             // Bitboard 'copy'. Use long directly to avoid the extra allocations
-            var bitboard = PieceBitBoards[pieceIndex].Board;
+            var bitboard = PieceBitBoards[pieceIndex];
 
             while (bitboard != default)
             {
-                var pieceSquareIndex = BitBoard.GetLS1BIndex(bitboard);
-                bitboard = BitBoard.ResetLS1B(bitboard);
+                var pieceSquareIndex = bitboard.GetLS1BIndex();
+                bitboard.ResetLS1B();
 
                 ++pieceCount[pieceIndex];
 
@@ -397,12 +397,12 @@ public sealed class Position
         for (int pieceIndex = sideLimit; pieceIndex < PieceBitBoards.Length; ++pieceIndex)
         {
             // Bitboard 'copy'. Use long directly to avoid the extra allocations
-            var bitboard = PieceBitBoards[pieceIndex].Board;
+            var bitboard = PieceBitBoards[pieceIndex];
 
             while (bitboard != default)
             {
-                var pieceSquareIndex = BitBoard.GetLS1BIndex(bitboard);
-                bitboard = BitBoard.ResetLS1B(bitboard);
+                var pieceSquareIndex = bitboard.GetLS1BIndex();
+                bitboard.ResetLS1B();
 
                 ++pieceCount[pieceIndex];
 
@@ -501,7 +501,7 @@ public sealed class Position
                     Console.Write($"{8 - rank}  ");
                 }
 
-                var squareIndex = BitBoard.SquareIndex(rank, file);
+                var squareIndex = BitBoardExtensions.SquareIndex(rank, file);
 
                 var piece = -1;
 
@@ -555,7 +555,7 @@ public sealed class Position
                     Console.Write($"{8 - rank}  ");
                 }
 
-                var squareIndex = BitBoard.SquareIndex(rank, file);
+                var squareIndex = BitBoardExtensions.SquareIndex(rank, file);
 
                 var pieceRepresentation = Attacks.IsSquaredAttacked(squareIndex, sideToMove, PieceBitBoards, OccupancyBitBoards)
                     ? '1'
