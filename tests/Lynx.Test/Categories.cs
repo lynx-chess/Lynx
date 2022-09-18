@@ -9,4 +9,6 @@ public static class Categories
     public const string TooLong = "TooLongToBeRun";
 
     public const string NoPruning = "RequireNoPruning";
+
+    public const string NotGoodEnough = "NotGoodEnough";
 }

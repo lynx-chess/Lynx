@@ -28,7 +28,8 @@ public class MatesTest : BaseTest
     }
 
     [Explicit]
-    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_4), Category = Categories.LongRunning)]
+    [Category(Categories.LongRunning)]
+    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_4))]
     public void Mate_in_4(string fen, string[]? allowedUCIMoveString, string description)
     {
         var result = SearchBestMove(fen);
@@ -41,7 +42,8 @@ public class MatesTest : BaseTest
     /// <param name="fen"></param>
     /// <param name="allowedUCIMoveString"></param>
     [Explicit]
-    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_4_Collection), Category = Categories.LongRunning)]
+    [Category(Categories.LongRunning)]
+    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_4_Collection))]
     public void Mate_in_4_Collection(string fen, string[]? allowedUCIMoveString, string description)
     {
         var result = SearchBestMove(fen);
@@ -49,7 +51,8 @@ public class MatesTest : BaseTest
     }
 
     [Explicit]
-    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_5), Category = Categories.LongRunning)]
+    [Category(Categories.LongRunning)]
+    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_5))]
     public void Mate_in_5(string fen, string[]? allowedUCIMoveString, string description)
     {
         var result = SearchBestMove(fen);
@@ -57,7 +60,8 @@ public class MatesTest : BaseTest
     }
 
     [Explicit]
-    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_6), Category = Categories.LongRunning)]
+    [Category(Categories.LongRunning)]
+    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_6))]
     public void Mate_in_6(string fen, string[]? allowedUCIMoveString, string description)
     {
         var result = SearchBestMove(fen);
@@ -65,7 +69,8 @@ public class MatesTest : BaseTest
     }
 
     [Explicit]
-    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_7), Category = Categories.LongRunning)]
+    [Category(Categories.LongRunning)]
+    [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_7))]
     public void Mate_in_7(string fen, string[]? allowedUCIMoveString, string description)
     {
         var result = SearchBestMove(fen, depth: 14);

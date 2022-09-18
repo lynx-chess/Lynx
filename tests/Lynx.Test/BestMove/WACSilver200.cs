@@ -9,7 +9,8 @@ namespace Lynx.Test.BestMove;
 public class WACSilver200 : BaseTest
 {
     [Explicit]
-    [TestCaseSource(typeof(WACData), nameof(WACData.Data), Category = nameof(WinningAtChess_10seconds))]
+    [Category(nameof(WinningAtChess_10seconds))]
+    [TestCaseSource(typeof(WACData), nameof(WACData.Data))]
     /// <summary>
     /// 10s, see first case of <see cref="TimeManagementTest"/>
     /// </summary>
@@ -21,7 +22,8 @@ public class WACSilver200 : BaseTest
     }
 
     [Explicit]
-    [TestCaseSource(typeof(WACData), nameof(WACData.Data), Category = nameof(WinningAtChess_DefaultSearchDepth))]
+    [Category(nameof(WinningAtChess_DefaultSearchDepth))]
+    [TestCaseSource(typeof(WACData), nameof(WACData.Data))]
     /// <summary>
     /// 10s, see first case of <see cref="TimeManagementTest"/>
     /// </summary>

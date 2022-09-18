@@ -36,8 +36,10 @@ public class ZobristHashGenerationTest
         TransversePosition(originalPosition, fenDictionary);
     }
 
-    [TestCase(Constants.TrickyTestPositionFEN, Category = Categories.LongRunning, Explicit = true)]
-    [TestCase(Constants.KillerTestPositionFEN, Category = Categories.LongRunning, Explicit = true)]
+    [Explicit]
+    [Category(Categories.LongRunning)]
+    [TestCase(Constants.TrickyTestPositionFEN)]
+    [TestCase(Constants.KillerTestPositionFEN)]
     public void EnPassant(string fen)
     {
         var originalPosition = new Position(fen);

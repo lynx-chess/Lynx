@@ -23,13 +23,13 @@ public class RegressionTest : BaseTest
 
     [TestCase("8/n2k4/bpr4p/1q1p4/4pp1b/P3P1Pr/R2K4/1r2n1Nr w - - 0 1", new[]
     {
-            "a3a4",
-            "a2a1", "a2b2", "a2c2",
-            "e3f4", "f3g4",
-            "g3f4", "g3g4", "g3h4",
-            "g3f4", "g3g4", "g3h4",
-            "g1h3", "g1f3", "g1e2"
-        }, Description = "Used to return an illegal move in the very first versions")]
+                "a3a4",
+                "a2a1", "a2b2", "a2c2",
+                "e3f4", "f3g4",
+                "g3f4", "g3g4", "g3h4",
+                "g3f4", "g3g4", "g3h4",
+                "g1h3", "g1f3", "g1e2"
+            }, Description = "Used to return an illegal move in the very first versions")]
 
     public void GeneralRegression(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
     {
@@ -43,9 +43,10 @@ public class RegressionTest : BaseTest
         TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 5);
     }
 
+    [Explicit]
+    [Category(Categories.NotGoodEnough)]
     [TestCase("6k1/1R6/5Kn1/3p1N2/1P6/8/8/3r4 b - - 10 37", new[] { "g6f8" }, new[] { "g6f4" },
-        Category = Categories.LongRunning, Explicit = true, Description = "Avoid mate in 4 https://lichess.org/XkZsoXLA#74",
-        Ignore = "Not good enough yet")]
+        Description = "Avoid mate in 4 https://lichess.org/XkZsoXLA#74")]
     public void AvoidMate(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
     {
         TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
@@ -102,15 +103,14 @@ public class RegressionTest : BaseTest
         Assert.DoesNotThrow(() => engine.BestMove(goCommand));
     }
 
+    [Explicit]
+    [Category(Categories.NotGoodEnough)]
     [TestCase("3rk2r/ppq1pp2/2p1n1pp/7n/4P3/2P1BQP1/P1P2PBP/R3R1K1 w k - 0 18", null, new[] { "e3a7" },
-        Category = Categories.LongRunning, Explicit = true, Description = "At depth 3 White takes the pawn",
-        Ignore = "Not good enough yet")]
+        Description = "At depth 3 White takes the pawn")]
     [TestCase("r1bqk2r/ppp2ppp/2n1p3/8/Q1pP4/2b2NP1/P3PPBP/1RB2RK1 b kq - 1 10", null, new[] { "c3d4" },
-        Category = Categories.LongRunning, Explicit = true, Description = "It failed at depth 6 in https://lichess.org/nZVw6G5D/black#19",
-        Ignore = "Not good enough yet")]
+        Description = "It failed at depth 6 in https://lichess.org/nZVw6G5D/black#19")]
     [TestCase("r1bqkb1r/ppp2ppp/2n1p3/3pP3/3Pn3/5P2/PPP1N1PP/R1BQKBNR b KQkq - 0 1", null, new[] { "f8b4" },
-        Category = Categories.LongRunning, Explicit = true, Description = "It failed at depth 5 in https://lichess.org/rtTsj9Sr/black",
-        Ignore = "Not good enough yet")]
+        Description = "It failed at depth 5 in https://lichess.org/rtTsj9Sr/black")]
     public void GeneralFailures(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
     {
         TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
@@ -228,6 +228,8 @@ public class RegressionTest : BaseTest
         Assert.NotZero(bestMove.Evaluation);
     }
 
+    [Explicit]
+    [Category(Categories.LongRunning)]
     [TestCase(Constants.KillerTestPositionFEN)]
     [TestCase(Constants.TrickyTestPositionFEN)]
     public void PVTableCrash(string fen)
@@ -235,10 +237,12 @@ public class RegressionTest : BaseTest
         const int depthWhenMaxDepthInQuiescenceIsReached = 7;
         var engine = GetEngine(fen);
 
-        var bestMove = engine.BestMove(new GoCommand($"go depth {depthWhenMaxDepthInQuiescenceIsReached }"));
+        var bestMove = engine.BestMove(new GoCommand($"go depth {depthWhenMaxDepthInQuiescenceIsReached}"));
         Assert.AreEqual(depthWhenMaxDepthInQuiescenceIsReached, bestMove.TargetDepth);
     }
 
+    [Explicit]
+    [Category(Categories.LongRunning)]
     [Test]
     public void PonderingCrash()
     {
