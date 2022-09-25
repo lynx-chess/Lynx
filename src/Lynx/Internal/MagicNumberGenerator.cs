@@ -38,7 +38,7 @@ public static class MagicNumberGenerator
 
         BitBoard[] attacks = new BitBoard[4096];
 
-        ulong[] usedAttacks = new ulong[4096];
+        var usedAttacks = new ulong[4096];
 
         var occupancyMask = isBishop
             ? AttackGenerator.MaskBishopOccupancy(squareIndex)

@@ -25,7 +25,7 @@ public sealed partial class Engine
     /// </summary>
     private int _halfMovesWithoutCaptureOrPawnMove;
 
-    private readonly Move _defaultMove = new();
+    private readonly Move _defaultMove = default;
 
     public SearchResult IDDFS(int minDepth, int? maxDepth, int? decisionTime)
     {
