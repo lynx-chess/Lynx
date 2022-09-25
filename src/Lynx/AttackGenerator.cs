@@ -131,10 +131,10 @@ public static class AttackGenerator
     public static BitBoard MaskPawnAttacks(int squareIndex, bool isWhite)
     {
         // Results attack bitboard
-        ulong attacks = 0UL;
+        BitBoard attacks = default;
 
         // Piece bitboard
-        BitBoard bitBoard = 0UL;
+        BitBoard bitBoard = default;
 
         // Set piece on board
         bitBoard.SetBit(squareIndex);
@@ -194,10 +194,10 @@ public static class AttackGenerator
     public static BitBoard MaskKnightAttacks(int squareIndex)
     {
         // Results attack bitboard
-        ulong attacks = 0UL;
+        BitBoard attacks = default;
 
         // Piece bitboard
-        BitBoard bitBoard = 0UL;
+        BitBoard bitBoard = default;
 
         // Set piece on board
         bitBoard.SetBit(squareIndex);
@@ -312,10 +312,10 @@ public static class AttackGenerator
     public static BitBoard MaskKingAttacks(int squareIndex)
     {
         // Results attack bitboard
-        ulong attacks = 0UL;
+        BitBoard attacks = default;
 
         // Piece bitboard
-        BitBoard bitBoard = 0UL;
+        BitBoard bitBoard = default;
 
         // Set piece on board
         bitBoard.SetBit(squareIndex);
@@ -413,7 +413,7 @@ public static class AttackGenerator
     public static BitBoard MaskBishopOccupancy(int squareIndex)
     {
         // Results attack bitboard
-        ulong attacks = 0UL;
+        BitBoard attacks = default;
 
         int rank, file;
 
@@ -484,7 +484,7 @@ public static class AttackGenerator
     public static BitBoard MaskRookOccupancy(int squareIndex)
     {
         // Results attack bitboard
-        ulong attacks = 0UL;
+        BitBoard attacks = default;
 
         int rank, file;
 
@@ -580,7 +580,7 @@ public static class AttackGenerator
     public static BitBoard GenerateBishopAttacksOnTheFly(int squareIndex, BitBoard occupiedSquares)
     {
         // Results attack bitboard
-        ulong attacks = 0UL;
+        BitBoard attacks = default;
 
         int rank, file;
 
@@ -668,7 +668,7 @@ public static class AttackGenerator
     public static BitBoard GenerateRookAttacksOnTheFly(int squareIndex, BitBoard occupiedSquares)
     {
         // Results attack bitboard
-        ulong attacks = 0UL;
+        BitBoard attacks = default;
 
         int rank, file;
 

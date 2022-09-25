@@ -15,12 +15,12 @@ public static class FENParser
     {
         fen = fen.Trim();
 
-        var pieceBitBoards = new ulong[12] {
+        var pieceBitBoards = new BitBoard[12] {
                 default, default, default, default,
                 default, default, default, default,
                 default, default, default, default};
 
-        var occupancyBitBoards = new ulong[3] { default, default, default };
+        var occupancyBitBoards = new BitBoard[3] { default, default, default };
 
         bool success = true;
         Side side = Side.Both;
@@ -67,7 +67,7 @@ public static class FENParser
         return (success, pieceBitBoards, occupancyBitBoards, side, castle, enPassant, halfMoveClock, fullMoveCounter);
     }
 
-    private static (MatchCollection Matches, bool Success) ParseBoard(string fen, ulong[] pieceBitBoards, ulong[] occupancyBitBoards)
+    private static (MatchCollection Matches, bool Success) ParseBoard(string fen, BitBoard[] pieceBitBoards, BitBoard[] occupancyBitBoards)
     {
         bool success = true;
 
@@ -108,7 +108,7 @@ public static class FENParser
 
         return (matches, success);
 
-        static void PopulateOccupancies(ulong[] pieceBitBoards, ulong[] occupancyBitBoards)
+        static void PopulateOccupancies(BitBoard[] pieceBitBoards, BitBoard[] occupancyBitBoards)
         {
             var limit = (int)Piece.K;
             for (int piece = (int)Piece.P; piece <= limit; ++piece)
@@ -157,7 +157,7 @@ public static class FENParser
         return castle;
     }
 
-    private static (BoardSquare EnPassant, bool Success) ParseEnPassant(string enPassantString, ulong[] PieceBitBoards, Side side)
+    private static (BoardSquare EnPassant, bool Success) ParseEnPassant(string enPassantString, BitBoard[] PieceBitBoards, Side side)
     {
         bool success = true;
         BoardSquare enPassant = BoardSquare.noSquare;

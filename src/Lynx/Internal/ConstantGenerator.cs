@@ -4,9 +4,9 @@ namespace Lynx.Internal;
 
 internal static class ConstantGenerator
 {
-    public static ulong NotAFile()
+    public static BitBoard NotAFile()
     {
-        BitBoard b = new();
+        BitBoard b = default;
 
         for (int rank = 0; rank < 8; ++rank)
         {
@@ -26,9 +26,9 @@ internal static class ConstantGenerator
         return b;
     }
 
-    public static ulong NotHFile()
+    public static BitBoard NotHFile()
     {
-        BitBoard b = new();
+        BitBoard b = default;
 
         for (int rank = 0; rank < 8; ++rank)
         {
@@ -48,9 +48,9 @@ internal static class ConstantGenerator
         return b;
     }
 
-    public static ulong NotABFiles()
+    public static BitBoard NotABFiles()
     {
-        BitBoard b = new();
+        BitBoard b = default;
 
         for (int rank = 0; rank < 8; ++rank)
         {
@@ -70,9 +70,9 @@ internal static class ConstantGenerator
         return b;
     }
 
-    public static ulong NotHGFiles()
+    public static BitBoard NotHGFiles()
     {
-        BitBoard b = new();
+        BitBoard b = default;
 
         for (int rank = 0; rank < 8; ++rank)
         {

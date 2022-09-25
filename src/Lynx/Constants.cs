@@ -16,7 +16,7 @@ public static class Constants
     /// 1   1 1 1 1 1 1 1 1
     ///     a b c d e f g h
     /// </summary>
-    public const ulong FullBoard = ulong.MaxValue;
+    public const BitBoard FullBoard = ulong.MaxValue;
 
     /// <summary>
     /// 8   0 1 1 1 1 1 1 1
@@ -29,7 +29,7 @@ public static class Constants
     /// 1   0 1 1 1 1 1 1 1
     ///     a b c d e f g h
     /// </summary>
-    public const ulong NotAFile = 0xFEFEFEFEFEFEFEFE;
+    public const BitBoard NotAFile = 0xFEFEFEFEFEFEFEFE;
 
     /// <summary>
     /// 8   1 1 1 1 1 1 1 0
@@ -42,7 +42,7 @@ public static class Constants
     /// 1   1 1 1 1 1 1 1 0
     ///     a b c d e f g h
     /// </summary>
-    public const ulong NotHFile = 0x7F7F7F7F7F7F7F7F;
+    public const BitBoard NotHFile = 0x7F7F7F7F7F7F7F7F;
 
     /// <summary>
     /// 8   1 1 1 1 1 1 0 0
@@ -55,7 +55,7 @@ public static class Constants
     /// 1   1 1 1 1 1 1 0 0
     ///     a b c d e f g h
     /// </summary>
-    public const ulong NotHGFiles = 0x3F3F3F3F3F3F3F3F;
+    public const BitBoard NotHGFiles = 0x3F3F3F3F3F3F3F3F;
 
     /// <summary>
     /// 8   0 0 1 1 1 1 1 1
@@ -68,7 +68,7 @@ public static class Constants
     /// 1   0 0 1 1 1 1 1 1
     ///     a b c d e f g h
     /// </summary>
-    public const ulong NotABFiles = 0xFCFCFCFCFCFCFCFC;
+    public const BitBoard NotABFiles = 0xFCFCFCFCFCFCFCFC;
 
     public static readonly string[] Coordinates = new string[64]
     {
@@ -150,7 +150,7 @@ public static class Constants
     /// <summary>
     /// https://github.com/maksimKorzh/chess_programming/blob/master/src/bbc/init_magics/bbc.c
     /// </summary>
-    public static readonly ulong[] RookMagicNumbers = new ulong[64]
+    public static readonly BitBoard[] RookMagicNumbers = new BitBoard[64]
     {
             0x8a80104000800020UL,
             0x140002000100040UL,
@@ -221,7 +221,7 @@ public static class Constants
     /// <summary>
     /// https://github.com/maksimKorzh/chess_programming/blob/master/src/bbc/init_magics/bbc.c
     /// </summary>
-    public static readonly ulong[] BishopMagicNumbers = new ulong[64]
+    public static readonly BitBoard[] BishopMagicNumbers = new BitBoard[64]
     {
             0x40040844404084UL,
             0x2004208a004208UL,

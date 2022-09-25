@@ -107,7 +107,7 @@ public static class BitBoardExtensions
     /// <param name="board"></param>
     /// <returns>Bitboard</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ulong WithoutLS1B(this BitBoard board)
+    public static BitBoard WithoutLS1B(this BitBoard board)
     {
         return board & (board - 1);
     }

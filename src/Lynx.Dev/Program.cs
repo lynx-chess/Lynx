@@ -121,7 +121,7 @@ static void _7_Rook_Occupancy()
 static void _8_Slider_Pieces_Attacks()
 {
     // Occupancy bitboard
-    BitBoard block = new();
+    BitBoard block = default;
 
     block.SetBit(BoardSquare.b6);
     block.SetBit(BoardSquare.g7);

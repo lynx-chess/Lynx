@@ -14,7 +14,7 @@ public static class MoveGenerator
     /// Indexed by <see cref="Piece"/>.
     /// Checks are not considered
     /// </summary>
-    private static readonly Func<int, BitBoard, ulong>[] _pieceAttacks = new Func<int, BitBoard, ulong>[]
+    private static readonly Func<int, BitBoard, BitBoard>[] _pieceAttacks = new Func<int, BitBoard, BitBoard>[]
     {
             (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White, origin],
             (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
@@ -131,7 +131,7 @@ public static class MoveGenerator
             }
 
             // Captures
-            ulong attackedSquares = attacks & position.OccupancyBitBoards[oppositeSide];
+            var attackedSquares = attacks & position.OccupancyBitBoards[oppositeSide];
             while (attackedSquares != default)
             {
                 targetSquare = attackedSquares.GetLS1BIndex();
@@ -240,7 +240,7 @@ public static class MoveGenerator
             sourceSquare = bitboard.GetLS1BIndex();
             bitboard.ResetLS1B();
 
-            ulong attacks = _pieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
+            var attacks = _pieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
                 & ~position.OccupancyBitBoards[(int)position.Side];
 
             while (attacks != default)
@@ -335,7 +335,7 @@ public static class MoveGenerator
             }
 
             // Captures
-            ulong attackedSquares = attacks & position.OccupancyBitBoards[oppositeSide];
+            var attackedSquares = attacks & position.OccupancyBitBoards[oppositeSide];
             while (attackedSquares != default)
             {
                 targetSquare = attackedSquares.GetLS1BIndex();
@@ -483,7 +483,7 @@ public static class MoveGenerator
             sourceSquare = bitboard.GetLS1BIndex();
             bitboard.ResetLS1B();
 
-            ulong attacks = _pieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
+            var attacks = _pieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
                 & ~position.OccupancyBitBoards[(int)position.Side];
 
             while (attacks != default)
