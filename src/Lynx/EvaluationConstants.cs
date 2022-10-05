@@ -40,65 +40,74 @@ public static class EvaluationConstants
 
     private static readonly int[] _knightPositionalScore = new int[64]
     {
-            -10,   0,   0,   0,   0,   0,   0,  -10,
-            -5,   0,   0,  10,  10,   0,   0,  -5,
-            -5,   5,  20,  20,  20,  20,   5,  -5,
-            -5,  10,  20,  30,  30,  20,  10,  -5,
-            -5,  10,  20,  30,  30,  20,  10,  -5,
-            -5,   5,  20,  10,  10,  20,   5,  -5,
-            -5,   0,   0,   0,   0,   0,   0,  -5,
-            -10, -10,   0,   0,   0,   0, -10,  -10
+            -60,    -20,    -10,    -3,     -3,     -10,    -20,    -60,
+            -15,    -5,      0,     10,     10,     0,      -5,     -15,
+            -5,     5,      20,     20,     20,     20,     5,      -5,
+            -5,     10,     20,     30,     30,     20,     10,     -5,
+            -5,     10,     20,     30,     30,     20,     10,     -5,
+            -5,     5,      20,     10,     10,     20,     5,      -5,
+            -15,    -5,      0,      5,      5,      0,     -5,     -15,
+            -30,    -20,    -10,    -5,     -5,     -10,    -20,    -30
      };
 
     private static readonly int[] _bishopPositionalScore = new int[64]
     {
-             0,   0,   0,   0,   0,   0,   0,   0,
-             0,   0,   0,   0,   0,   0,   0,   0,
-             0,   0,   0,  10,  10,   0,   0,   0,
-             0,   0,  10,  20,  20,  10,   0,   0,
-             0,   0,  10,  20,  20,  10,   0,   0,
-             0,  10,   0,   0,   0,   0,  10,   0,
-             0,  30,   0,   0,   0,   0,  30,   0,
-             0,   0, -10,   0,   0, -10,   0,   0
+             -0,   -10,    -10,     -10,    -10,    -10,    -10,    0,
+             -5,    10,      0,     0,      0,      0,      10,     -5,
+             -5,    0,      20,     10,     10,     20,     0,      -5,
+             0,     5,      10,     30,     30,     10,     5,      0,
+             0,     5,      10,     30,     30,     10,     5,      0,
+             -5,    0,      20,     10,     10,     20,     0,      -5,
+             -5,     10,     0,      0,      0,      0,     10,    -5,
+             0,     -10,    -20,    -10,    -10,    -20,    -10,    0
     };
 
     private static readonly int[] _rookPositionalScore = new int[64]
     {
             50,  50,  50,  50,  50,  50,  50,  50,
-            50,  50,  50,  50,  50,  50,  50,  50,
+            70,  70,  70,  70,  70,  70,  70,  70,
              0,   0,  10,  20,  20,  10,   0,   0,
              0,   0,  10,  20,  20,  10,   0,   0,
              0,   0,  10,  20,  20,  10,   0,   0,
              0,   0,  10,  20,  20,  10,   0,   0,
              0,   0,  10,  20,  20,  10,   0,   0,
-             0,   0,   0,  20,  20,   0,   0,   0
+             5,   5,   5,  20,  20,   5,   5,   5
     };
 
     private static readonly int[] _queenPositionalScore = new int[64]
     {
-             0,  0,  0,  0,  0,  0,  0,  0,
-             0,  0,  0,  0,  0,  0,  0,  0,
-             0,  0,  0,  0,  0,  0,  0,  0,
-             0,  0,  0,  0,  0,  0,  0,  0,
-             0,  0,  0,  0,  0,  0,  0,  0,
-             0,  0,  0,  0,  0,  0,  0,  0,
-             0,  0,  0,  0,  0,  0,  0,  0,
-             0,  0,  0,  0,  0,  0,  0,  0
+             -10,   -10,    5,      5,      5,      5,      -10,    -10,
+             -10,   5,      5,      5,      5,      5,      5,      -10,
+             5,     5,      10,     10,     10,     5,      5,      5,
+             5,     5,      10,     20,     20,     10,     5,      5,
+             5,     5,      10,     20,     20,     10,     5,      5,
+             5,     5,      5,      10,     10,     5,      5,      5,
+             -10,   5,      5,      5,      5,      5,      5,      -10,
+             -10,   -10,    -5,     0,      0,      -5,     -10,    -10
     };
 
-    /// <summary>
-    /// Could have two: one for opening/middle game, avoiding the center, and another one for endgames, seeking the center
-    /// </summary>
     private static readonly int[] _kingPositionalScore = new int[64]
     {
-             0,   0,   0,   0,   0,   0,   0,   0,
-             0,   0,   5,   5,   5,   5,   0,   0,
-             0,   5,   5,  10,  10,   5,   5,   0,
-             0,   5,  10,  20,  20,  10,   5,   0,
-             0,   5,  10,  20,  20,  10,   5,   0,
-             0,   0,   5,  10,  10,   5,   0,   0,
-             0,   5,   5,  -5,  -5,   0,   5,   0,
-             0,   0,   10,  0, -15,   0,  15,   0
+             -50,   -50,    -50,    -50,    -50,    -50,    -50,    -50,
+             -50,   -50,    -50,    -50,    -50,    -50,    -50,    -50,
+             -50,   -50,    -50,    -50,    -50,    -50,    -50,    -50,
+             -50,   -50,    -50,    -50,    -50,    -50,    -50,    -50,
+             -50,   -50,    -50,    -50,    -50,    -50,    -50,    -50,
+             -50,   -50,    -50,    -50,    -50,    -50,    -50,    -50,
+             +15,    +20,   -10,    -20,    -20,    -30,    +30,    +25,
+             +20,    +20,   +20,    -10,    +10,    -40,    +30,    +30
+    };
+
+    private static readonly int[] _kingEndgamePositionalScore = new int[64]
+    {
+             0,     5,      10,     12,     12,     10,     5,      0,
+             5,     10,     15,     20,     20,     15,     10,     5,
+             10,    15,     20,     30,     30,     20,     15,     10,
+             15,    20,     30,     50,     50,     30,     20,     15,
+             15,    20,     30,     50,     50,     30,     20,     15,
+             10,    15,     20,     30,     30,     20,     15,     10,
+             5,     10,     15,     20,     20,     15,     10,     5,
+             0,     5,      10,     12,     12,     10,     5,      0
     };
 
     private static readonly int[] _mirrorScore = new int[64]
@@ -118,6 +127,8 @@ public static class EvaluationConstants
     private static int BPS(BoardSquare square) => -_bishopPositionalScore[_mirrorScore[(int)square]];
     private static int RPS(BoardSquare square) => -_rookPositionalScore[_mirrorScore[(int)square]];
     private static int KPS(BoardSquare square) => -_kingPositionalScore[_mirrorScore[(int)square]];
+
+    private static int KEPS(BoardSquare square) => -_kingEndgamePositionalScore[_mirrorScore[(int)square]];
 
     private static readonly int[] _pawnPositionalScore_Black = new int[64]
     {
@@ -179,21 +190,50 @@ public static class EvaluationConstants
             KPS(a1), KPS(b1), KPS(c1), KPS(d1), KPS(e1), KPS(f1), KPS(g1), KPS(h1)
     };
 
+    private static readonly int[] _kingEndgamePositionalScore_Black = new int[64]
+    {
+            KEPS(a8), KEPS(b8), KEPS(c8), KEPS(d8), KEPS(e8), KEPS(f8), KEPS(g8), KEPS(h8),
+            KEPS(a7), KEPS(b7), KEPS(c7), KEPS(d7), KEPS(e7), KEPS(f7), KEPS(g7), KEPS(h7),
+            KEPS(a6), KEPS(b6), KEPS(c6), KEPS(d6), KEPS(e6), KEPS(f6), KEPS(g6), KEPS(h6),
+            KEPS(a5), KEPS(b5), KEPS(c5), KEPS(d5), KEPS(e5), KEPS(f5), KEPS(g5), KEPS(h5),
+            KEPS(a4), KEPS(b4), KEPS(c4), KEPS(d4), KEPS(e4), KEPS(f4), KEPS(g4), KEPS(h4),
+            KEPS(a3), KEPS(b3), KEPS(c3), KEPS(d3), KEPS(e3), KEPS(f3), KEPS(g3), KEPS(h3),
+            KEPS(a2), KEPS(b2), KEPS(c2), KEPS(d2), KEPS(e2), KEPS(f2), KEPS(g2), KEPS(h2),
+            KEPS(a1), KEPS(b1), KEPS(c1), KEPS(d1), KEPS(e1), KEPS(f1), KEPS(g1), KEPS(h1)
+    };
+
     public static readonly int[][] PositionalScore = new int[12][]
     {
-            _pawnPositionalScore,
-            _knightPositionalScore,
-            _bishopPositionalScore,
-            _rookPositionalScore,
-            _queenPositionalScore,
-            _kingPositionalScore,
+        _pawnPositionalScore,
+        _knightPositionalScore,
+        _bishopPositionalScore,
+        _rookPositionalScore,
+        _queenPositionalScore,
+        _kingPositionalScore,
 
-            _pawnPositionalScore_Black,
-            _knightPositionalScore_Black,
-            _bishopPositionalScore_Black,
-            _rookPositionalScore_Black,
-            _queenPositionalScore,
-            _kingPositionalScore_Black,
+        _pawnPositionalScore_Black,
+        _knightPositionalScore_Black,
+        _bishopPositionalScore_Black,
+        _rookPositionalScore_Black,
+        _queenPositionalScore,
+        _kingPositionalScore_Black,
+    };
+
+    public static readonly int[][] EndgamePositionalScore = new int[12][]
+    {
+        Array.Empty<int>(),
+        Array.Empty<int>(),
+        Array.Empty<int>(),
+        Array.Empty<int>(),
+        Array.Empty<int>(),
+        _kingEndgamePositionalScore,
+
+        Array.Empty<int>(),
+        Array.Empty<int>(),
+        Array.Empty<int>(),
+        Array.Empty<int>(),
+        Array.Empty<int>(),
+        _kingEndgamePositionalScore_Black
     };
 
     /// <summary>

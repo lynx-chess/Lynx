@@ -366,4 +366,5 @@ public static class Constants
     /// </summary>
     public const int MaxNumberOfPossibleMovesInAPosition = 250;
 
+    public static readonly int SideLimit = Enum.GetValues(typeof(Piece)).Length / 2;
 }

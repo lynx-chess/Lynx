@@ -372,11 +372,11 @@ public sealed class Position
         int whiteMaterialEval = 0, blackMaterialEval = 0;
         var pieceCount = new int[PieceBitBoards.Length];
 
-        var sideLimit = PieceBitBoards.Length / 2;
+        bool IsEndgameForWhite() => pieceCount[(int)Piece.q] == 0;
+        bool IsEndgameForBlack() => pieceCount[(int)Piece.Q] == 0;
 
-        for (int pieceIndex = 0; pieceIndex < sideLimit; ++pieceIndex)
+        for (int pieceIndex = 0; pieceIndex < Constants.SideLimit - 1; ++pieceIndex)
         {
-            // Bitboard 'copy'. Use long directly to avoid the extra allocations
             var bitboard = PieceBitBoards[pieceIndex];
 
             while (bitboard != default)
@@ -394,9 +394,8 @@ public sealed class Position
             }
         }
 
-        for (int pieceIndex = sideLimit; pieceIndex < PieceBitBoards.Length; ++pieceIndex)
+        for (int pieceIndex = Constants.SideLimit; pieceIndex < PieceBitBoards.Length - 1; ++pieceIndex)
         {
-            // Bitboard 'copy'. Use long directly to avoid the extra allocations
             var bitboard = PieceBitBoards[pieceIndex];
 
             while (bitboard != default)
@@ -414,13 +413,23 @@ public sealed class Position
             }
         }
 
+        //++pieceCount[Constants.WhiteKingIndex];
+        var whiteKing = PieceBitBoards[(int)Piece.K].GetLS1BIndex();
+        eval += IsEndgameForWhite()
+            ? EvaluationConstants.EndgamePositionalScore[(int)Piece.K][whiteKing]
+            : EvaluationConstants.PositionalScore[(int)Piece.K][whiteKing];
+
+        //++pieceCount[Constants.BlackKingIndex];
+        var blackKing = PieceBitBoards[(int)Piece.k].GetLS1BIndex();
+        eval += IsEndgameForBlack()
+            ? EvaluationConstants.EndgamePositionalScore[(int)Piece.k][blackKing]
+            : EvaluationConstants.PositionalScore[(int)Piece.k][blackKing];
+
         eval += whiteMaterialEval + blackMaterialEval;
 
         // Check if drawn position due to lack of material
         if (eval >= 0)
         {
-            whiteMaterialEval -= EvaluationConstants.MaterialScore[(int)Piece.K];
-
             bool whiteCannotWin = pieceCount[(int)Piece.P] == 0
                 && (whiteMaterialEval <= EvaluationConstants.MaterialScore[(int)Piece.B]            // B or N
                     || whiteMaterialEval == 2 * EvaluationConstants.MaterialScore[(int)Piece.N]);   // N+N
@@ -432,8 +441,6 @@ public sealed class Position
         }
         else
         {
-            blackMaterialEval -= EvaluationConstants.MaterialScore[(int)Piece.k];
-
             bool blackCannotWin = pieceCount[(int)Piece.p] == 0
                 && (blackMaterialEval >= EvaluationConstants.MaterialScore[(int)Piece.b]            // b or n
                     || blackMaterialEval == 2 * EvaluationConstants.MaterialScore[(int)Piece.n]);   // n+n
