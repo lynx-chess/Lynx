@@ -206,7 +206,7 @@ public static class MoveExtensions
         return score;
     }
 
-    public static string ToString(this Move move)
+    public static string ToMoveString(this Move move)
     {
 #pragma warning disable S3358 // Ternary operators should not be nested
         return move.IsCastle() == default
@@ -242,7 +242,7 @@ public static class MoveExtensions
 
     public static void Print(this Move move)
     {
-        Console.WriteLine(move.ToString());
+        Console.WriteLine(move.ToMoveString());
     }
 
     public static string UCIString(this Move move)
