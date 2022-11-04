@@ -43,7 +43,8 @@ using System.Runtime.InteropServices;
 //CountBits();
 //GetLS1BIndex();
 //FileAndRankMasks();
-EnhancedPawnEvaluation();
+//EnhancedPawnEvaluation();
+RookEvaluation();
 
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
 const string TrickyPosition = Constants.TrickyTestPositionFEN;
@@ -976,6 +977,24 @@ static void EnhancedPawnEvaluation()
     Console.WriteLine(eval);
 
     position = new Position("4k3/pp2pp1P/p7/8/8/P7/PP3P2/4K3 w - - 0 1");
+    position.Print();
+    eval = position.StaticEvaluation(new(), new());
+    Console.WriteLine(eval);
+}
+
+static void RookEvaluation()
+{
+    var position = new Position("r3k3/7p/8/8/8/8/7P/4K2R w - - 0 1");
+    position.Print();
+    var eval = position.StaticEvaluation(new(), new());
+    Console.WriteLine(eval);
+
+    position = new Position("r3k3/1p6/8/8/8/8/7P/4K2R w - - 0 1");
+    position.Print();
+    eval = position.StaticEvaluation(new(), new());
+    Console.WriteLine(eval);
+
+    position = new Position("r3k3/1P6/8/8/8/8/7p/4K2R w - - 0 1");
     position.Print();
     eval = position.StaticEvaluation(new(), new());
     Console.WriteLine(eval);

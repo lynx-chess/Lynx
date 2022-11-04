@@ -469,6 +469,7 @@ public sealed class Position
         return pieceIndex switch
         {
             (int)Piece.P or (int)Piece.p => PawnEvaluation(pieceSquareIndex, pieceIndex),
+            (int)Piece.R or (int)Piece.r => RookEvaluation(pieceSquareIndex, pieceIndex),
             _ => 0
         };
     }
@@ -497,11 +498,31 @@ public sealed class Position
             if (pieceIndex == (int)Piece.p)
             {
                 rank = 7 - rank;
-        }
+            }
             bonus += Configuration.EngineSettings.PassedPawnBonus[rank];
         }
 
         return bonus;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int RookEvaluation(int squareIndex, int pieceIndex)
+    {
+        const int pawnToRookOffset = (int)Piece.R - (int)Piece.P;
+        bool IsOpenFile() => ((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default;
+        bool IsSemiOpenFile() => (PieceBitBoards[pieceIndex - pawnToRookOffset] & Masks.FileMasks[squareIndex]) == default;
+
+        if (IsOpenFile())
+        {
+            return Configuration.EngineSettings.OpenFileRookBonus;
+        }
+
+        if (IsSemiOpenFile())
+        {
+            return Configuration.EngineSettings.SemiOpenFileRookBonus;
+        }
+
+        return 0;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
