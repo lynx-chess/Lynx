@@ -1,4 +1,5 @@
 using NLog;
+using System;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -377,6 +378,7 @@ public sealed class Position
 
         for (int pieceIndex = 0; pieceIndex < Constants.SideLimit - 1; ++pieceIndex)
         {
+            // Bitboard copy that we 'empty'
             var bitboard = PieceBitBoards[pieceIndex];
 
             while (bitboard != default)
@@ -391,11 +393,14 @@ public sealed class Position
 
                 // Positional evaluation
                 eval += EvaluationConstants.PositionalScore[pieceIndex][pieceSquareIndex];
+
+                eval += CustomPieceEvaluation(pieceIndex, pieceSquareIndex);
             }
         }
 
         for (int pieceIndex = Constants.SideLimit; pieceIndex < PieceBitBoards.Length - 1; ++pieceIndex)
         {
+            // Bitboard copy that we 'empty'
             var bitboard = PieceBitBoards[pieceIndex];
 
             while (bitboard != default)
@@ -410,6 +415,8 @@ public sealed class Position
 
                 // Positional evaluation
                 eval += EvaluationConstants.PositionalScore[pieceIndex][pieceSquareIndex];
+
+                eval -= CustomPieceEvaluation(pieceIndex, pieceSquareIndex);
             }
         }
 
@@ -455,6 +462,72 @@ public sealed class Position
             ? eval
             : -eval;
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int CustomPieceEvaluation(int pieceIndex, int pieceSquareIndex)
+    {
+        return pieceIndex switch
+        {
+            (int)Piece.P or (int)Piece.p => PawnEvaluation(pieceSquareIndex, pieceIndex),
+            //(int)Piece.N or (int)Piece.n => KnightEvaluation(),
+            //(int)Piece.B or (int)Piece.b => BishopEvaluation(),
+            //(int)Piece.R or (int)Piece.r => RookEvaluation(),
+            //(int)Piece.Q or (int)Piece.q => QueenEvaluation(),
+            //(int)Piece.K or (int)Piece.k => KingEvaluation(),
+            _ => 0
+        };
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int PawnEvaluation(int squareIndex, int pieceIndex)
+    {
+        var bonus = 0;
+
+        var doublePawns = (PieceBitBoards[pieceIndex] & Masks.FileMasks[squareIndex]).CountBits();
+        if (doublePawns > 1)
+        {
+            bonus -= doublePawns * 10;
+        }
+
+        bool IsIsolatedPawn() => (PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default;
+        if (IsIsolatedPawn())
+        {
+            bonus -= 10;
+        }
+
+        bool IsPassedPawn() => (PieceBitBoards[(int)Piece.p - pieceIndex] & Masks.PassedPawns[pieceIndex][squareIndex]) == default;
+        if(IsPassedPawn())
+        {
+            bonus += Constants.GetRank[squareIndex] + 10;
+        }
+
+        return bonus;
+    }
+
+    //int KnightEvaluation()
+    //{
+    //    return 0;
+    //}
+
+    //int BishopEvaluation()
+    //{
+    //    return 0;
+    //}
+
+    //int RookEvaluation()
+    //{
+    //    return 0;
+    //}
+
+    //int QueenEvaluation()
+    //{
+    //    return 0;
+    //}
+
+    //int KingEvaluation()
+    //{
+    //    return 0;
+    //}
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public IEnumerable<Move> AllPossibleMoves(Move[]? movePool = null) => MoveGenerator.GenerateAllMoves(this, movePool);

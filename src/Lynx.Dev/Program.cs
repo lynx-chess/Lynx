@@ -42,7 +42,8 @@ using System.Runtime.InteropServices;
 //PV_Table();
 //CountBits();
 //GetLS1BIndex();
-FileAndRankMasks();
+//FileAndRankMasks();
+EnhancedPawnEvaluation();
 
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
 const string TrickyPosition = Constants.TrickyTestPositionFEN;
@@ -940,4 +941,42 @@ static void FileAndRankMasks()
     Masks.IsolatedPawnMasks[square].Print();
     Masks.WhitePassedPawnMasks[square].Print();
     Masks.BlackPassedPawnMasks[square].Print();
+}
+
+static void EnhancedPawnEvaluation()
+{
+    var position = new Position("4k3/ppp5/8/8/8/P7/PP6/4K3 w - - 0 1");
+    var eval = position.StaticEvaluation(new(), new());
+    position.Print();
+    Console.WriteLine(eval);
+
+    position = new Position("4k3/pp4pp/p7/8/8/P7/PPP3P1/4K3 w - - 0 1");
+    position.Print();
+    eval = position.StaticEvaluation(new(), new());
+    Console.WriteLine(eval);
+    
+    position = new Position("4k3/pp3pp1/p7/8/8/P7/PPP4P/4K3 w - - 0 1");
+    position.Print();
+    eval = position.StaticEvaluation(new(), new());
+    Console.WriteLine(eval);
+
+    position = new Position("4k3/pp3pp1/p7/8/8/P7/PP3P1P/4K3 w - - 0 1");
+    position.Print();
+    eval = position.StaticEvaluation(new(), new());
+    Console.WriteLine(eval);
+
+    position = new Position("4k3/pp2pp2/p7/8/8/P7/PP3P1P/4K3 w - - 0 1");
+    position.Print();
+    eval = position.StaticEvaluation(new(), new());
+    Console.WriteLine(eval);
+
+    position = new Position("4k3/pp2pp2/p7/8/7P/P7/PP3P2/4K3 w - - 0 1");
+    position.Print();
+    eval = position.StaticEvaluation(new(), new());
+    Console.WriteLine(eval);
+
+    position = new Position("4k3/pp2pp1P/p7/8/8/P7/PP3P2/4K3 w - - 0 1");
+    position.Print();
+    eval = position.StaticEvaluation(new(), new());
+    Console.WriteLine(eval);
 }
