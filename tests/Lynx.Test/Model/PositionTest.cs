@@ -386,4 +386,170 @@ public class PositionTest
     {
         Assert.Greater(new Position(fen1).StaticEvaluation(new(), default), new Position(fen2).StaticEvaluation(new(), default));
     }
+
+    /// <summary>
+    /// 8   . . . . k . . .
+    /// 7   . p p p . . . .
+    /// 6   . . . . . . . .
+    /// 5   . . . . . . . .
+    /// 4   . . . . . . . .
+    /// 3   . . . . . . . .
+    /// 2   P P . P . . . .
+    /// 1   . . . . K . . .
+    ///     a b c d e f g h
+    /// </summary>
+    /// <param name="fen"></param>
+    [TestCase("4k3/1ppp4/8/8/8/8/PP1P4/4K3 w - - 0 1")]
+    public void StaticEvaluation_IsolatedPawnPenalty(string fen)
+    {
+        var position = new Position(fen);
+        var evaluation = position.StaticEvaluation(new(), default);
+
+        Assert.AreEqual(-Configuration.EngineSettings.IsolatedPawnPenalty, evaluation);
+    }
+
+    /// <summary>
+    /// 8   . . . . k . . .
+    /// 7   p p p . . . . .
+    /// 6   . . . . . . . .
+    /// 5   . . . . . . . .
+    /// 4   . . . . . . . .
+    /// 3   P . . . . . . .
+    /// 2   P P . . . . . .
+    /// 1   . . . . K . . .
+    ///     a b c d e f g h
+    /// </summary>
+    /// <param name="fen"></param>
+    [TestCase("4k3/ppp5/8/8/8/P7/PP6/4K3 w - - 0 1")]
+    public void StaticEvaluation_DoublePawnPenalty(string fen)
+    {
+        var position = new Position(fen);
+        var evaluation = position.StaticEvaluation(new(), default);
+
+        Assert.AreEqual(-4 * Configuration.EngineSettings.DoubledPawnPenalty, evaluation);
+    }
+
+    /// <summary>
+    /// Illegal position, but avoids any positional bonuses
+    /// 8   . . . . k . . .
+    /// 7   p p p . . p p p
+    /// 6   . . . . . . . .
+    /// 5   . . . . . . . .
+    /// 4   . . . . . . . .
+    /// 3   P . . . . . . .
+    /// 2   P P . . . . P P
+    /// 1   P . . . K . . .
+    ///     a b c d e f g h
+    /// </summary>
+    /// <param name="fen"></param>
+    [TestCase("4k3/ppp2ppp/8/8/8/P7/PP4PP/P3K3 w - - 0 1")]
+    public void StaticEvaluation_TriplePawnPenalty(string fen)
+    {
+        var position = new Position(fen);
+        var evaluation = position.StaticEvaluation(new(), default);
+
+        Assert.AreEqual(-9 * Configuration.EngineSettings.DoubledPawnPenalty, evaluation);
+    }
+
+    /// <summary>
+    /// 8   . . . . . . k .
+    /// 7   p p . . . . . .
+    /// 6   p . . . . . . .
+    /// 5   . . . . . . . .
+    /// 4   . . . . . . . .
+    /// 3   . . . . . . . .
+    /// 2   P P . P . . . .
+    /// 1   . . . . . . K .
+    ///     a b c d e f g h
+    /// </summary>
+    /// <param name="fen"></param>
+    /// <param name="square"></param>
+    [TestCase("6k1/pp6/p7/8/8/8/PP1P4/6K1 w - - 0 1", BoardSquare.d2)]
+
+    /// <summary>
+    /// 8   . . . . . . k .
+    /// 7   p p . . . . . .
+    /// 6   p . . . . . . .
+    /// 5   . . . . . . . .
+    /// 4   . . . . . . . .
+    /// 3   . . . P . . . .
+    /// 2   P P . . . . . .
+    /// 1   . . . . . . K .
+    ///     a b c d e f g h
+    /// </summary>
+    /// <param name="fen"></param>
+    /// <param name="square"></param>
+    [TestCase("6k1/pp6/p7/8/8/3P4/PP6/6K1 w - - 0 1", BoardSquare.d3)]
+
+    /// <summary>
+    /// 8   . . . . . . k .
+    /// 7   p p . . . . . .
+    /// 6   p . . . . . . .
+    /// 5   . . . . . . . .
+    /// 4   . . . P . . . .
+    /// 3   . . . . . . . .
+    /// 2   P P . . . . . .
+    /// 1   . . . . . . K .
+    ///     a b c d e f g h
+    /// </summary>
+    /// <param name="fen"></param>
+    /// <param name="square"></param>
+    [TestCase("6k1/pp6/p7/8/3P4/8/PP6/6K1 w - - 0 1", BoardSquare.d4)]
+
+    /// <summary>
+    /// 8   . . . . . . k .
+    /// 7   p p . . . . . .
+    /// 6   p . . . . . . .
+    /// 5   . . . P . . . .
+    /// 4   . . . . . . . .
+    /// 3   . . . . . . . .
+    /// 2   P P . . . . . .
+    /// 1   . . . . . . K .
+    ///     a b c d e f g h
+    /// </summary>
+    /// <param name="fen"></param>
+    /// <param name="square"></param>
+    [TestCase("6k1/pp6/p7/3P4/8/8/PP6/6K1 w - - 0 1", BoardSquare.d5)]
+
+    /// <summary>
+    /// 8   . . . . . . k .
+    /// 7   p p . . . . . .
+    /// 6   p . . P . . . .
+    /// 5   . . . . . . . .
+    /// 4   . . . . . . . .
+    /// 3   . . . . . . . .
+    /// 2   P P . . . . . .
+    /// 1   . . . . . . K .
+    ///     a b c d e f g h
+    /// </summary>
+    /// <param name="fen"></param>
+    /// <param name="square"></param>
+    [TestCase("6k1/pp6/p2P4/8/8/8/PP6/6K1 w - - 0 1", BoardSquare.d6)]
+
+    /// <summary>
+    /// 8   . . . . . . k .
+    /// 7   p p . P . . . .
+    /// 6   p . . . . . . .
+    /// 5   . . . . . . . .
+    /// 4   . . . . . . . .
+    /// 3   . . . . . . . .
+    /// 2   P P . . . . . .
+    /// 1   . . . . . . K .
+    ///     a b c d e f g h
+    /// </summary>
+    /// <param name="fen"></param>
+    /// <param name="square"></param>
+    [TestCase("6k1/pp1P4/p7/8/8/8/PP6/6K1 w - - 0 1", BoardSquare.d7)]
+    public void StaticEvaluation_PassedPawnBonus(string fen, BoardSquare square)
+    {
+        var rank = Constants.GetRank[(int)square];
+        var position = new Position(fen);
+        var evaluation = position.StaticEvaluation(new(), default);
+
+        Assert.AreEqual(
+            4 * Configuration.EngineSettings.DoubledPawnPenalty
+            - Configuration.EngineSettings.IsolatedPawnPenalty
+            + EvaluationConstants.PositionalScore[(int)Piece.P][(int)square]
+        + Configuration.EngineSettings.PassedPawnBonus[rank], evaluation);
+    }
 }

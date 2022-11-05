@@ -160,4 +160,20 @@ public sealed class EngineSettings
     public int AspirationWindowAlpha { get; set; } = 50;
 
     public int AspirationWindowBeta { get; set; } = 50;
+
+    public int IsolatedPawnPenalty { get; set; } = 10;
+
+    public int DoubledPawnPenalty { get; set; } = 10;
+
+    public int[] PassedPawnBonus { get; set; } = new[] { 0, 10, 30, 50, 75, 100, 150, 200 };
+
+    public int SemiOpenFileRookBonus { get; set; } = 10;
+
+    public int OpenFileRookBonus { get; set; } = 15;
+
+    public int SemiOpenFileKingPenalty { get; set; } = 10;
+
+    public int OpenFileKingPenalty { get; set; } = 15;
+
+    public int KingShieldBonus { get; set; } = 5;
 }

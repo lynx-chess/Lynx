@@ -954,7 +954,7 @@ static void EnhancedPawnEvaluation()
     position.Print();
     eval = position.StaticEvaluation(new(), new());
     Console.WriteLine(eval);
-    
+
     position = new Position("4k3/pp3pp1/p7/8/8/P7/PPP4P/4K3 w - - 0 1");
     position.Print();
     eval = position.StaticEvaluation(new(), new());

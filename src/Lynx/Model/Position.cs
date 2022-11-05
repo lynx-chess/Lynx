@@ -469,11 +469,6 @@ public sealed class Position
         return pieceIndex switch
         {
             (int)Piece.P or (int)Piece.p => PawnEvaluation(pieceSquareIndex, pieceIndex),
-            //(int)Piece.N or (int)Piece.n => KnightEvaluation(),
-            //(int)Piece.B or (int)Piece.b => BishopEvaluation(),
-            //(int)Piece.R or (int)Piece.r => RookEvaluation(),
-            //(int)Piece.Q or (int)Piece.q => QueenEvaluation(),
-            //(int)Piece.K or (int)Piece.k => KingEvaluation(),
             _ => 0
         };
     }
@@ -483,51 +478,26 @@ public sealed class Position
     {
         var bonus = 0;
 
-        var doublePawns = (PieceBitBoards[pieceIndex] & Masks.FileMasks[squareIndex]).CountBits();
-        if (doublePawns > 1)
+        var doublePawnsCount = (PieceBitBoards[pieceIndex] & Masks.FileMasks[squareIndex]).CountBits();
+        if (doublePawnsCount > 1)
         {
-            bonus -= doublePawns * 10;
+            bonus -= doublePawnsCount * Configuration.EngineSettings.DoubledPawnPenalty;
         }
 
         bool IsIsolatedPawn() => (PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default;
         if (IsIsolatedPawn())
         {
-            bonus -= 10;
+            bonus -= Configuration.EngineSettings.IsolatedPawnPenalty;
         }
 
         bool IsPassedPawn() => (PieceBitBoards[(int)Piece.p - pieceIndex] & Masks.PassedPawns[pieceIndex][squareIndex]) == default;
-        if(IsPassedPawn())
+        if (IsPassedPawn())
         {
-            bonus += Constants.GetRank[squareIndex] + 10;
+            bonus += Configuration.EngineSettings.PassedPawnBonus[Constants.GetRank[squareIndex]];
         }
 
         return bonus;
     }
-
-    //int KnightEvaluation()
-    //{
-    //    return 0;
-    //}
-
-    //int BishopEvaluation()
-    //{
-    //    return 0;
-    //}
-
-    //int RookEvaluation()
-    //{
-    //    return 0;
-    //}
-
-    //int QueenEvaluation()
-    //{
-    //    return 0;
-    //}
-
-    //int KingEvaluation()
-    //{
-    //    return 0;
-    //}
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public IEnumerable<Move> AllPossibleMoves(Move[]? movePool = null) => MoveGenerator.GenerateAllMoves(this, movePool);
