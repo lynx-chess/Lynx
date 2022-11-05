@@ -28,6 +28,7 @@ public sealed class LinxDriver
         _ = PVTable.Indexes[0];
         _ = Attacks.KingAttacks;
         _ = ZobristTable.SideHash();
+        _ = Masks.FileMasks;
     }
 
     public async Task Run(CancellationToken cancellationToken)

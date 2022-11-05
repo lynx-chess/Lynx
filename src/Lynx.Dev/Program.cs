@@ -40,8 +40,9 @@ using System.Runtime.InteropServices;
 //_54_ScoreMove();
 //ZobristTable();
 //PV_Table();
-CountBits();
-GetLS1BIndex();
+//CountBits();
+//GetLS1BIndex();
+FileAndRankMasks();
 
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
 const string TrickyPosition = Constants.TrickyTestPositionFEN;
@@ -930,3 +931,13 @@ static void GetLS1BIndex()
     }
 }
 
+static void FileAndRankMasks()
+{
+    const int square = (int)BoardSquare.e4;
+
+    Masks.RankMasks[square].Print();
+    Masks.FileMasks[square].Print();
+    Masks.IsolatedPawnMasks[square].Print();
+    Masks.WhitePassedPawnMasks[square].Print();
+    Masks.BlackPassedPawnMasks[square].Print();
+}
