@@ -695,4 +695,48 @@ public class PositionTest
 
         Assert.AreEqual(-2 * Configuration.EngineSettings.OpenFileRookBonus, evaluation);
     }
+
+    /// <summary>
+    /// 8   . . . . k . . .
+    /// 7   p . . . p p p .
+    /// 6   . . . . . . . .
+    /// 5   . . . . . . . .
+    /// 4   . . . . . . . .
+    /// 3   . . . . . . . .
+    /// 2   P . . . P P . P
+    /// 1   . . . . . . K .
+    ///     a b c d e f g h
+    /// </summary>
+    /// <param name="fen"></param>
+    [TestCase("4k3/p3ppp1/8/8/8/8/P3PP1P/6K1 w - - 0 1")]
+    public void StaticEvaluation_SemiOpenFileKingPenalty(string fen)
+    {
+        var position = new Position(fen);
+        var evaluation = position.StaticEvaluation(new(), default);
+
+        Assert.AreEqual(-Configuration.EngineSettings.SemiOpenFileKingPenalty, evaluation);
+    }
+
+    /// <summary>
+    /// 8   . . . k . . . .
+    /// 7   p . . p . p . p
+    /// 6   . . . . . . . .
+    /// 5   . . . . . . . .
+    /// 4   . . . . . . . .
+    /// 3   . . . . . . . .
+    /// 2   P . . P . P . P
+    /// 1   . . . . K . . .
+    /// </summary>
+    /// <param name="fen"></param>
+    [TestCase("3k4/p2p1p1p/8/8/8/8/P2P1P1P/4K3 w - - 0 1")]
+    public void StaticEvaluation_OpenFileKingPenalty(string fen)
+    {
+        var position = new Position(fen);
+        var evaluation = position.StaticEvaluation(new(), default);
+
+        Assert.AreEqual(-Configuration.EngineSettings.OpenFileKingPenalty, evaluation);
+    }
+
+    [Test]
+    public void KingShieldBonus() => Assert.Fail();
 }

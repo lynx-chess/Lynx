@@ -394,7 +394,7 @@ public sealed class Position
                 // Positional evaluation
                 eval += EvaluationConstants.PositionalScore[pieceIndex][pieceSquareIndex];
 
-                eval += CustomPieceEvaluation(pieceIndex, pieceSquareIndex);
+                eval += CustomPieceEvaluation(pieceSquareIndex, pieceIndex);
             }
         }
 
@@ -416,7 +416,7 @@ public sealed class Position
                 // Positional evaluation
                 eval += EvaluationConstants.PositionalScore[pieceIndex][pieceSquareIndex];
 
-                eval -= CustomPieceEvaluation(pieceIndex, pieceSquareIndex);
+                eval -= CustomPieceEvaluation(pieceSquareIndex, pieceIndex);
             }
         }
 
@@ -425,12 +425,14 @@ public sealed class Position
         eval += IsEndgameForWhite()
             ? EvaluationConstants.EndgamePositionalScore[(int)Piece.K][whiteKing]
             : EvaluationConstants.PositionalScore[(int)Piece.K][whiteKing];
+        eval += KingEvaluation(whiteKing, Side.White, pieceCount);
 
         //++pieceCount[Constants.BlackKingIndex];
         var blackKing = PieceBitBoards[(int)Piece.k].GetLS1BIndex();
         eval += IsEndgameForBlack()
             ? EvaluationConstants.EndgamePositionalScore[(int)Piece.k][blackKing]
             : EvaluationConstants.PositionalScore[(int)Piece.k][blackKing];
+        eval += KingEvaluation(blackKing, Side.Black, pieceCount);
 
         eval += whiteMaterialEval + blackMaterialEval;
 
@@ -464,7 +466,7 @@ public sealed class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int CustomPieceEvaluation(int pieceIndex, int pieceSquareIndex)
+    private int CustomPieceEvaluation(int pieceSquareIndex, int pieceIndex)
     {
         return pieceIndex switch
         {
@@ -523,6 +525,30 @@ public sealed class Position
         }
 
         return 0;
+    }
+
+    int KingEvaluation(int squareIndex, Side pieceSide, int[] pieceCount)
+    {
+        var bonus = 0;
+        var oppositeSide = Utils.OppositeSide(pieceSide);
+        var opposieSideOffset = Utils.PieceOffset(oppositeSide);
+
+        bool areThereOppositeSideRooksOrQueens() => pieceCount[(int)Piece.R + opposieSideOffset] + pieceCount[(int)Piece.Q + opposieSideOffset] != default;
+        if (areThereOppositeSideRooksOrQueens())
+        {
+            bool isOpenFile() => ((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default;
+            bool isSemiOpenFile() => (PieceBitBoards[(int)Piece.p - opposieSideOffset] & Masks.FileMasks[squareIndex]) == default;
+            if (isOpenFile())
+            {
+                bonus += Configuration.EngineSettings.OpenFileKingPenalty;
+            }
+            else if (isSemiOpenFile())
+            {
+                bonus += Configuration.EngineSettings.SemiOpenFileKingPenalty;
+            }
+        }
+
+        return bonus += ((Attacks.KingAttacks[squareIndex] & OccupancyBitBoards[(int)pieceSide]).CountBits() * Configuration.EngineSettings.KingShieldBonus);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
