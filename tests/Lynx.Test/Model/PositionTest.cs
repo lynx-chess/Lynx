@@ -578,7 +578,6 @@ public class PositionTest
     [TestCase("1k6/6pp/8/8/8/7P/4p1PP/1K6 b - - 0 1", BoardSquare.e2)]
     public void StaticEvaluation_PassedPawnBonus(string fen, BoardSquare square)
     {
-        var rank = Constants.GetRank[(int)square];
         var position = new Position(fen);
         var rank = Constants.Rank[(int)square];
         if (position.Side == Side.Black)
@@ -591,7 +590,7 @@ public class PositionTest
         Assert.AreEqual(
             4 * Configuration.EngineSettings.DoubledPawnPenalty
             - Configuration.EngineSettings.IsolatedPawnPenalty
-            + EvaluationConstants.PositionalScore[(int)Piece.P][(int)square]
+            + EvaluationConstants.PositionalScore[piece][(int)square] * (position.Side == Side.White ? 1 : -1)
         + Configuration.EngineSettings.PassedPawnBonus[rank], evaluation);
     }
 }
