@@ -493,7 +493,12 @@ public sealed class Position
         bool IsPassedPawn() => (PieceBitBoards[(int)Piece.p - pieceIndex] & Masks.PassedPawns[pieceIndex][squareIndex]) == default;
         if (IsPassedPawn())
         {
-            bonus += Configuration.EngineSettings.PassedPawnBonus[Constants.GetRank[squareIndex]];
+            var rank = Constants.Rank[squareIndex];
+            if (pieceIndex == (int)Piece.p)
+            {
+                rank = 7 - rank;
+        }
+            bonus += Configuration.EngineSettings.PassedPawnBonus[rank];
         }
 
         return bonus;

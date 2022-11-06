@@ -368,7 +368,7 @@ public static class Constants
 
     public static readonly int SideLimit = Enum.GetValues(typeof(Piece)).Length / 2;
 
-    public static readonly int[] GetRank = new[]
+    public static readonly int[] Rank = new[]
     {
         7, 7, 7, 7, 7, 7, 7, 7,
         6, 6, 6, 6, 6, 6, 6, 6,
