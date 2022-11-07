@@ -400,6 +400,11 @@ public class PositionTest
     /// </summary>
     /// <param name="fen"></param>
     [TestCase("4k3/1ppp4/8/8/8/8/PP1P4/4K3 w - - 0 1")]
+    /// <summary>
+    /// Previous one mirrored
+    /// </summary>
+    /// <param name="fen"></param>
+    [TestCase("3k4/4p1pp/8/8/8/8/4PPP1/3K4 b - - 0 1")]
     public void StaticEvaluation_IsolatedPawnPenalty(string fen)
     {
         var position = new Position(fen);
@@ -421,6 +426,11 @@ public class PositionTest
     /// </summary>
     /// <param name="fen"></param>
     [TestCase("4k3/ppp5/8/8/8/P7/PP6/4K3 w - - 0 1")]
+    /// <summary>
+    /// Previous one mirrored
+    /// </summary>
+    /// <param name="fen"></param>
+    [TestCase("3k4/6pp/7p/8/8/8/5PPP/3K4 b - - 0 1")]
     public void StaticEvaluation_DoublePawnPenalty(string fen)
     {
         var position = new Position(fen);
@@ -443,6 +453,11 @@ public class PositionTest
     /// </summary>
     /// <param name="fen"></param>
     [TestCase("4k3/ppp2ppp/8/8/8/P7/PP4PP/P3K3 w - - 0 1")]
+    /// <summary>
+    /// Previous one mirrored
+    /// </summary>
+    /// <param name="fen"></param>
+    [TestCase("3k3p/pp4pp/7p/8/8/8/PPP2PPP/3K4 b - - 0 1")]
     public void StaticEvaluation_TriplePawnPenalty(string fen)
     {
         var position = new Position(fen);
