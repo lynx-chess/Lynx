@@ -1,4 +1,5 @@
 using NLog;
+using System;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -377,6 +378,7 @@ public sealed class Position
 
         for (int pieceIndex = 0; pieceIndex < Constants.SideLimit - 1; ++pieceIndex)
         {
+            // Bitboard copy that we 'empty'
             var bitboard = PieceBitBoards[pieceIndex];
 
             while (bitboard != default)
@@ -391,11 +393,14 @@ public sealed class Position
 
                 // Positional evaluation
                 eval += EvaluationConstants.PositionalScore[pieceIndex][pieceSquareIndex];
+
+                eval += CustomPieceEvaluation(pieceIndex, pieceSquareIndex);
             }
         }
 
         for (int pieceIndex = Constants.SideLimit; pieceIndex < PieceBitBoards.Length - 1; ++pieceIndex)
         {
+            // Bitboard copy that we 'empty'
             var bitboard = PieceBitBoards[pieceIndex];
 
             while (bitboard != default)
@@ -410,6 +415,8 @@ public sealed class Position
 
                 // Positional evaluation
                 eval += EvaluationConstants.PositionalScore[pieceIndex][pieceSquareIndex];
+
+                eval -= CustomPieceEvaluation(pieceIndex, pieceSquareIndex);
             }
         }
 
@@ -454,6 +461,47 @@ public sealed class Position
         return Side == Side.White
             ? eval
             : -eval;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int CustomPieceEvaluation(int pieceIndex, int pieceSquareIndex)
+    {
+        return pieceIndex switch
+        {
+            (int)Piece.P or (int)Piece.p => PawnEvaluation(pieceSquareIndex, pieceIndex),
+            _ => 0
+        };
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int PawnEvaluation(int squareIndex, int pieceIndex)
+    {
+        var bonus = 0;
+
+        var doublePawnsCount = (PieceBitBoards[pieceIndex] & Masks.FileMasks[squareIndex]).CountBits();
+        if (doublePawnsCount > 1)
+        {
+            bonus -= doublePawnsCount * Configuration.EngineSettings.DoubledPawnPenalty;
+        }
+
+        bool IsIsolatedPawn() => (PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default;
+        if (IsIsolatedPawn())
+        {
+            bonus -= Configuration.EngineSettings.IsolatedPawnPenalty;
+        }
+
+        bool IsPassedPawn() => (PieceBitBoards[(int)Piece.p - pieceIndex] & Masks.PassedPawns[pieceIndex][squareIndex]) == default;
+        if (IsPassedPawn())
+        {
+            var rank = Constants.Rank[squareIndex];
+            if (pieceIndex == (int)Piece.p)
+            {
+                rank = 7 - rank;
+        }
+            bonus += Configuration.EngineSettings.PassedPawnBonus[rank];
+        }
+
+        return bonus;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
