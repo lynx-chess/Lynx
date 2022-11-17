@@ -432,7 +432,7 @@ public sealed class Position
         eval += IsEndgameForBlack()
             ? EvaluationConstants.EndgamePositionalScore[(int)Piece.k][blackKing]
             : EvaluationConstants.PositionalScore[(int)Piece.k][blackKing];
-        eval += KingEvaluation(blackKing, Side.Black, pieceCount);
+        eval -= KingEvaluation(blackKing, Side.Black, pieceCount);
 
         eval += whiteMaterialEval + blackMaterialEval;
 
@@ -540,11 +540,11 @@ public sealed class Position
             bool isSemiOpenFile() => (PieceBitBoards[(int)Piece.p - opposieSideOffset] & Masks.FileMasks[squareIndex]) == default;
             if (isOpenFile())
             {
-                bonus += Configuration.EngineSettings.OpenFileKingPenalty;
+                bonus -= Configuration.EngineSettings.OpenFileKingPenalty;
             }
             else if (isSemiOpenFile())
             {
-                bonus += Configuration.EngineSettings.SemiOpenFileKingPenalty;
+                bonus -= Configuration.EngineSettings.SemiOpenFileKingPenalty;
             }
         }
 
