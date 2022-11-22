@@ -548,7 +548,7 @@ public sealed class Position
             }
         }
 
-        return bonus += ((Attacks.KingAttacks[squareIndex] & OccupancyBitBoards[(int)pieceSide]).CountBits() * Configuration.EngineSettings.KingShieldBonus);
+        return bonus += (Attacks.KingAttacks[squareIndex] & OccupancyBitBoards[(int)pieceSide]).CountBits() * Configuration.EngineSettings.KingShieldBonus;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

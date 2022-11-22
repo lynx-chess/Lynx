@@ -6,7 +6,6 @@ public static class Masks
 {
     /// <summary>
     /// File mask for square f2 (same one as f3, f4, etc.)
-    ///
     ///  8  0 0 0 0 0 1 0 0
     ///  7  0 0 0 0 0 1 0 0
     ///  6  0 0 0 0 0 1 0 0
@@ -21,7 +20,6 @@ public static class Masks
 
     /// <summary>
     /// Rank mask for square a6 (same one for b6, c6, etc.)
-    /// 
     /// 8  0 0 0 0 0 0 0 0
     /// 7  0 0 0 0 0 0 0 0
     /// 6  1 1 1 1 1 1 1 1
@@ -36,7 +34,6 @@ public static class Masks
 
     /// <summary>
     /// Isolated mask for square g2 (same for g3, g4, etc.)
-    ///   
     /// 8  0 0 0 0 0 1 0 1
     /// 7  0 0 0 0 0 1 0 1
     /// 6  0 0 0 0 0 1 0 1
@@ -52,7 +49,6 @@ public static class Masks
 
     /// <summary>
     /// Passed pawn mask for square c4
-    ///         
     /// 8  0 1 1 1 0 0 0 0
     /// 7  0 1 1 1 0 0 0 0
     /// 6  0 1 1 1 0 0 0 0
@@ -67,7 +63,6 @@ public static class Masks
 
     /// <summary>
     /// Passed pawn mask for square c5
-    ///         
     /// 8  0 0 0 0 0 0 0 0
     /// 7  0 0 0 0 0 0 0 0
     /// 6  0 0 0 0 0 0 0 0
