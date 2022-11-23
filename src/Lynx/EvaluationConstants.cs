@@ -130,6 +130,8 @@ public static class EvaluationConstants
 
     private static int KEPS(BoardSquare square) => -_kingEndgamePositionalScore[_mirrorScore[(int)square]];
 
+    private static int QPS(BoardSquare square) => -_queenPositionalScore[_mirrorScore[(int)square]];
+
     private static readonly int[] _pawnPositionalScore_Black = new int[64]
     {
             PPS(a8), PPS(b8), PPS(c8), PPS(d8), PPS(e8), PPS(f8), PPS(g8), PPS(h8),
@@ -178,6 +180,18 @@ public static class EvaluationConstants
             RPS(a1), RPS(b1), RPS(c1), RPS(d1), RPS(e1), RPS(f1), RPS(g1), RPS(h1)
     };
 
+    private static readonly int[] _queenPositionalScore_Black = new int[64]
+    {
+            QPS(a8), QPS(b8), QPS(c8), QPS(d8), QPS(e8), QPS(f8), QPS(g8), QPS(h8),
+            QPS(a7), QPS(b7), QPS(c7), QPS(d7), QPS(e7), QPS(f7), QPS(g7), QPS(h7),
+            QPS(a6), QPS(b6), QPS(c6), QPS(d6), QPS(e6), QPS(f6), QPS(g6), QPS(h6),
+            QPS(a5), QPS(b5), QPS(c5), QPS(d5), QPS(e5), QPS(f5), QPS(g5), QPS(h5),
+            QPS(a4), QPS(b4), QPS(c4), QPS(d4), QPS(e4), QPS(f4), QPS(g4), QPS(h4),
+            QPS(a3), QPS(b3), QPS(c3), QPS(d3), QPS(e3), QPS(f3), QPS(g3), QPS(h3),
+            QPS(a2), QPS(b2), QPS(c2), QPS(d2), QPS(e2), QPS(f2), QPS(g2), QPS(h2),
+            QPS(a1), QPS(b1), QPS(c1), QPS(d1), QPS(e1), QPS(f1), QPS(g1), QPS(h1)
+    };
+
     private static readonly int[] _kingPositionalScore_Black = new int[64]
     {
             KPS(a8), KPS(b8), KPS(c8), KPS(d8), KPS(e8), KPS(f8), KPS(g8), KPS(h8),
@@ -215,7 +229,7 @@ public static class EvaluationConstants
         _knightPositionalScore_Black,
         _bishopPositionalScore_Black,
         _rookPositionalScore_Black,
-        _queenPositionalScore,
+        _queenPositionalScore_Black,
         _kingPositionalScore_Black,
     };
 
