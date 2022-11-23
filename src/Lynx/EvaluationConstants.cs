@@ -130,7 +130,6 @@ public static class EvaluationConstants
     private static int KPS(BoardSquare square) => -_kingPositionalScore[_mirrorScore[(int)square]];
     private static int KEPS(BoardSquare square) => -_kingEndgamePositionalScore[_mirrorScore[(int)square]];
 
-
     private static readonly int[] _pawnPositionalScore_Black = new int[64]
     {
             PPS(a8), PPS(b8), PPS(c8), PPS(d8), PPS(e8), PPS(f8), PPS(g8), PPS(h8),
