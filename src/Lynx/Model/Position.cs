@@ -527,6 +527,30 @@ public sealed class Position
         return 0;
     }
 
+    int KingEvaluation(int squareIndex, Side pieceSide, int[] pieceCount)
+    {
+        var bonus = 0;
+        var oppositeSide = Utils.OppositeSide(pieceSide);
+        var opposieSideOffset = Utils.PieceOffset(oppositeSide);
+
+        bool areThereOppositeSideRooksOrQueens() => pieceCount[(int)Piece.R + opposieSideOffset] + pieceCount[(int)Piece.Q + opposieSideOffset] != default;
+        if (areThereOppositeSideRooksOrQueens())
+        {
+            bool isOpenFile() => ((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default;
+            bool isSemiOpenFile() => (PieceBitBoards[(int)Piece.p - opposieSideOffset] & Masks.FileMasks[squareIndex]) == default;
+            if (isOpenFile())
+            {
+                bonus -= Configuration.EngineSettings.OpenFileKingPenalty;
+            }
+            else if (isSemiOpenFile())
+            {
+                bonus -= Configuration.EngineSettings.SemiOpenFileKingPenalty;
+            }
+        }
+
+        return bonus += (Attacks.KingAttacks[squareIndex] & OccupancyBitBoards[(int)pieceSide]).CountBits() * Configuration.EngineSettings.KingShieldBonus;
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int BishopEvaluation(int squareIndex)
     {
