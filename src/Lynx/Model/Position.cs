@@ -472,6 +472,7 @@ public sealed class Position
             (int)Piece.P or (int)Piece.p => PawnEvaluation(pieceSquareIndex, pieceIndex),
             (int)Piece.R or (int)Piece.r => RookEvaluation(pieceSquareIndex, pieceIndex),
             (int)Piece.B or (int)Piece.b => BishopEvaluation(pieceSquareIndex),
+            (int)Piece.Q or (int)Piece.q => QueenEvaluation(pieceSquareIndex),
             _ => 0
         };
     }
@@ -532,6 +533,13 @@ public sealed class Position
     {
         return Configuration.EngineSettings.BishopMobilityBonus
             * Attacks.BishopAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int QueenEvaluation(int squareIndex)
+    {
+        return Configuration.EngineSettings.QueenMobilityBonus
+            * Attacks.QueenAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
     }
 
     int KingEvaluation(int squareIndex, Side pieceSide, int[] pieceCount)

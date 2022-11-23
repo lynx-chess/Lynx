@@ -818,14 +818,14 @@ public class PositionTest
     }
 
     /// <summary>
-    /// 8   . k. . . . .n
+    /// 8   . k . . . . . n
     /// 7   . . . . . p p p
     /// 6   . . . . . . . .
     /// 5   . . . . . . . .
     /// 4   . . . . . . . .
     /// 3   . . . . . . . .
-    /// 2   P P P. . . . .
-    /// 1   . K. . . . .N
+    /// 2   P P P . . . . .
+    /// 1   . K . . . . . N
     ///     a b c d e f g h
     /// </summary>
     /// <param name="fen"></param>
@@ -844,8 +844,8 @@ public class PositionTest
     /// 5   . . . . . . . .
     /// 4   . . . . . . . .
     /// 3   . . . . . . . .
-    /// 2   N N N. . . . .
-    /// 1   B K B. . . . .
+    /// 2   N N N . . . . .
+    /// 1   B K B . . . . .
     ///     a b c d e f g h
     /// </summary>
     /// <param name="fen"></param>
@@ -883,17 +883,18 @@ public class PositionTest
     /// Previous one mirrored
     /// </summary>
     /// <param name="fen"></param>
-    /// <param name="surroundingPieces"></param>
+    /// <param name="mobilityDifference"></param>
     [TestCase("n2k4/1p6/8/4b3/4B3/8/6P1/3K3N b - - 0 1", 2)]
     /// <summary>
-    /// 8   . . . . k. . .
-    /// 7   . p. . . . . .
-    /// 6   . . p. . . . .
-    /// 5   . . . b. . . .
-    /// 4   . . . B. . . .
-    /// 3   . . . . . P. .
-    /// 2   . . . . . . P.
-    /// 1   . . . . K. . .
+    /// 8   . . . . k . . .
+    /// 7   . p . . . . . .
+    /// 6   . .  p. . . . .
+    /// 5   . . . b . . . .
+    /// 4   . . . B . . . .
+    /// 3   . . . . . P . .
+    /// 2   . . . . . . P .
+    /// 1   . . . . K . . .
+    ///     a b c d e f g h
     /// </summary>
     /// <param name="fen"></param>
     /// <param name="mobilityDifference"></param>
@@ -902,7 +903,7 @@ public class PositionTest
     /// Previous one mirrored
     /// </summary>
     /// <param name="fen"></param>
-    /// <param name="surroundingPieces"></param>
+    /// <param name="mobilityDifference"></param>
     [TestCase("3k4/1p6/2p5/4b3/4B3/5P2/6P1/3K4 b - - 0 1", 4)]
     public void StaticEvaluation_BishopMobility(string fen, int mobilityDifference)
     {
@@ -910,5 +911,112 @@ public class PositionTest
         var evaluation = position.StaticEvaluation(new(), default);
 
         Assert.AreEqual(mobilityDifference * Configuration.EngineSettings.BishopMobilityBonus, evaluation);
+    }
+
+    /// <summary>
+    /// 8   n . . . k . . .
+    /// 7   . p . . . . . .
+    /// 6   . . . . . . . .
+    /// 5   . . . q . . . .
+    /// 4   . . . Q . . . .
+    /// 3   . . . . . . . .
+    /// 2   . . . . . . P .
+    /// 1   . . . . K . . N
+    ///     a b c d e f g h
+    /// </summary>
+    /// <param name="fen"></param>
+    /// <param name="mobilityDifference"></param>
+    [TestCase("n3k3/1p6/8/3q4/3Q4/8/6P1/4K2N w - - 0 1", 2)]
+    /// <summary>
+    /// Previous one mirrored
+    /// </summary>
+    /// <param name="fen"></param>
+    /// <param name="mobilityDifference"></param>
+    [TestCase("n2k4/1p6/8/4q3/4Q3/8/6P1/3K3N b - - 0 1", 2)]
+    /// <summary>
+    /// 8   . . . . k . . .
+    /// 7   . p . . . . . .
+    /// 6   . . p . . . . .
+    /// 5   . . . q . . . .
+    /// 4   . . . Q . . . .
+    /// 3   . . . . . P . .
+    /// 2   . . . . . . P .
+    /// 1   . . . . K . . .
+    ///     a b c d e f g h
+    /// </summary>
+    /// <param name="fen"></param>
+    /// <param name="mobilityDifference"></param>
+    [TestCase("4k3/1p6/2p5/3q4/3Q4/5P2/6P1/4K3 w - - 0 1", 4)]
+    /// <summary>
+    /// Previous one mirrored
+    /// </summary>
+    /// <param name="fen"></param>
+    /// <param name="mobilityDifference"></param>
+    [TestCase("3k4/1p6/2p5/4q3/4Q3/5P2/6P1/3K4 b - - 0 1", 4)]    ///// <summary>
+    /// 8   n . . . k . . .
+    /// 7   . p . . . . . .
+    /// 6   . . . . . . . .
+    /// 5   . . . q . . . .
+    /// 4   . . . Q . . . .
+    /// 3   . . . . . . . .
+    /// 2   . . . . . . P .
+    /// 1   . . . . K . . N
+    ///     a b c d e f g h
+    /// </summary>
+    /// <param name="fen"></param>
+    /// <param name="mobilityDifference"></param>
+    [TestCase("n3k3/1p6/8/3q4/3Q4/8/6P1/4K2N w - - 0 1", 2)]
+    /// <summary>
+    /// Previous one mirrored
+    /// </summary>
+    /// <param name="fen"></param>
+    /// <param name="mobilityDifference"></param>
+    [TestCase("n2k4/1p6/8/4q3/4Q3/8/6P1/3K3N b - - 0 1", 2)]
+    /// <summary>
+    /// 8   . . . . k . . .
+    /// 7   . p . . . . . .
+    /// 6   . . p . . . . .
+    /// 5   . . . q . . . .
+    /// 4   . . . Q . . . .
+    /// 3   . . . . . P . .
+    /// 2   . . . . . . P .
+    /// 1   . . . . K . . .
+    ///     a b c d e f g h
+    /// </summary>
+    /// <param name="fen"></param>
+    /// <param name="mobilityDifference"></param>
+    [TestCase("4k3/1p6/2p5/3q4/3Q4/5P2/6P1/4K3 w - - 0 1", 4)]
+    /// <summary>
+    /// Previous one mirrored
+    /// </summary>
+    /// <param name="fen"></param>
+    /// <param name="mobilityDifference"></param>
+    [TestCase("3k4/1p6/2p5/4q3/4Q3/5P2/6P1/3K4 b - - 0 1", 4)]
+    /// <summary>
+    /// 8   n . . . k . . .
+    /// 7   . . . . . . . .
+    /// 6   . . p . . . . .
+    /// 5   . r . q . . . R
+    /// 4   . . . Q . . . .
+    /// 3   . . . . . P . .
+    /// 2   . . . . . . . .
+    /// 1   . . . . K . . N
+    ///     a b c d e f g h
+    /// </summary>
+    /// <param name="fen"></param>
+    /// <param name="mobilityDifference"></param>
+    [TestCase("n3k3/8/2p5/1r1q3R/3Q4/5P2/8/4K2N w - - 0 1", 5)]
+    /// <summary>
+    /// Previous one mirrored
+    /// </summary>
+    /// <param name="fen"></param>
+    /// <param name="mobilityDifference"></param>
+    [TestCase("n2k4/8/2p5/4q3/r3Q1R1/5P2/8/3K3N b - - 0 1", 5)]
+    public void StaticEvaluation_QueenMobility(string fen, int mobilityDifference)
+    {
+        var position = new Position(fen);
+        var evaluation = position.StaticEvaluation(new(), default);
+
+        Assert.AreEqual(mobilityDifference * Configuration.EngineSettings.QueenMobilityBonus, evaluation);
     }
 }
