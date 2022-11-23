@@ -452,12 +452,12 @@ public class PositionTest
     ///     a b c d e f g h
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("4k3/ppp2ppp/8/8/8/P7/PP4PP/P3K3 w - - 0 1")]
+    [TestCase("7k/ppp2ppp/8/8/8/P7/PP4PP/P6K w - - 0 1")]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("3k3p/pp4pp/7p/8/8/8/PPP2PPP/3K4 b - - 0 1")]
+    [TestCase("k6p/pp4pp/7p/8/8/8/PPP2PPP/K7 b - - 0 1")]
     public void StaticEvaluation_TriplePawnPenalty(string fen)
     {
         var position = new Position(fen);
@@ -709,5 +709,160 @@ public class PositionTest
         var evaluation = position.StaticEvaluation(new(), default);
 
         Assert.AreEqual(-2 * Configuration.EngineSettings.OpenFileRookBonus, evaluation);
+    }
+
+    /// <summary>
+    /// 8   . . . r . . k .
+    /// 7   p p . p . . p p
+    /// 6   . . . . . . . .
+    /// 5   . . . . . . . .
+    /// 4   . . . . . . . .
+    /// 3   . . . . . . . .
+    /// 2   P . P P . . P P
+    /// 1   . K . R . . . .
+    ///     a b c d e f g h
+    /// </summary>
+    /// <param name="fen"></param>
+    [TestCase("3r2k1/pp1p2pp/8/8/8/8/P1PP2PP/1K1R4 w - - 0 1")]
+    /// <summary>
+    /// Previous one mirrored
+    /// </summary>
+    /// <param name="fen"></param>
+    [TestCase("4r1k1/pp2pp1p/8/8/8/8/PP2P1PP/1K2R3 b - - 0 1")]
+    public void StaticEvaluation_SemiOpenFileKingPenalty(string fen)
+    {
+        var position = new Position(fen);
+        var evaluation = position.StaticEvaluation(new(), default);
+
+        Assert.AreEqual(-Configuration.EngineSettings.SemiOpenFileKingPenalty, evaluation);
+    }
+
+    /// <summary>
+    /// 8   . . . r . . k .
+    /// 7   p . p p . . p p
+    /// 6   . . . . . . . .
+    /// 5   . . . . . . . .
+    /// 4   . . . . . . . .
+    /// 3   . . . . . . . .
+    /// 2   P . P P . . P P
+    /// 1   . K . R . . . .
+    ///     a b c d e f g h
+    /// </summary>
+    /// <param name="fen"></param>
+    [TestCase("3r2k1/p1pp2pp/8/8/8/8/P1PP2PP/1K1R4 w - - 0 1")]
+    /// <summary>
+    /// Previous one mirrored
+    /// </summary>
+    /// <param name="fen"></param>
+    [TestCase("4r1k1/pp2pp1p/8/8/8/8/PP2PP1P/1K2R3 b - - 0 1")]
+    public void StaticEvaluation_OpenFileKingPenalty(string fen)
+    {
+        var position = new Position(fen);
+        var evaluation = position.StaticEvaluation(new(), default);
+
+        Assert.AreEqual(-Configuration.EngineSettings.OpenFileKingPenalty, evaluation);
+    }
+
+    /// <summary>
+    /// No rooks = no bonus or penalty
+    /// 8   . . . . . . k .
+    /// 7   p . p . . . p p
+    /// 6   . . . . . . . .
+    /// 5   . . . . . . . .
+    /// 4   . . . . . . . .
+    /// 3   . . . . . . . .
+    /// 2   P . P . . . P P
+    /// 1   . K . . . . . .
+    ///     a b c d e f g h
+    /// </summary>
+    /// <param name="fen"></param>
+    [TestCase("6k1/p1p3pp/8/8/8/8/P1P3PP/1K6 w - - 0 1")]
+    /// <summary>
+    /// Previous one mirrored
+    /// </summary>
+    /// <param name="fen"></param>
+    [TestCase("6k1/pp3p1p/8/8/8/8/PP3P1P/1K6 b - - 0 1")]
+    public void StaticEvaluation_NoOpenFileKingPenalty(string fen)
+    {
+        var position = new Position(fen);
+        var evaluation = position.StaticEvaluation(new(), default);
+
+        Assert.AreEqual(0, evaluation);
+    }
+
+    /// <summary>
+    /// No rooks = no bonus or penalty
+    /// 8   . . . . . . k .
+    /// 7   p . p . . . p p
+    /// 6   . . . . . . . .
+    /// 5   . . . . . . . .
+    /// 4   . . . . . . . .
+    /// 3   . . . . . . . .
+    /// 2   P . P . . . P P
+    /// 1   . K . . . . . .
+    ///     a b c d e f g h
+    /// </summary>
+    /// <param name="fen"></param>
+    [TestCase("6k1/pp1p2pp/8/8/8/8/P1PP2PP/1K6 w - - 0 1")]
+    /// <summary>
+    /// Previous one mirrored
+    /// </summary>
+    /// <param name="fen"></param>
+    [TestCase("6k1/pp2pp1p/8/8/8/8/PP2P1PP/1K6 b - - 0 1")]
+    public void StaticEvaluation_NoSemiOpenFileKingPenalty(string fen)
+    {
+        var position = new Position(fen);
+        var evaluation = position.StaticEvaluation(new(), default);
+
+        Assert.AreEqual(0, evaluation);
+    }
+
+    /// <summary>
+    /// 8   . k. . . . .n
+    /// 7   . . . . . p p p
+    /// 6   . . . . . . . .
+    /// 5   . . . . . . . .
+    /// 4   . . . . . . . .
+    /// 3   . . . . . . . .
+    /// 2   P P P. . . . .
+    /// 1   . K. . . . .N
+    ///     a b c d e f g h
+    /// </summary>
+    /// <param name="fen"></param>
+    /// <param name="surroundingPieces"></param>
+    [TestCase("1k5n/5ppp/8/8/8/8/PPP5/1K5N w - - 0 1", 3)]
+    /// <summary>
+    /// Previous one mirrored
+    /// </summary>
+    /// <param name="fen"></param>
+    /// <param name="surroundingPieces"></param>
+    [TestCase("n5k1/5ppp/8/8/8/8/PPP5/N5K1 b - - 0 1", 3)]
+    /// <summary>
+    /// 8   . k . . . b . b
+    /// 7   . . . . . n n n
+    /// 6   . . . . . . . .
+    /// 5   . . . . . . . .
+    /// 4   . . . . . . . .
+    /// 3   . . . . . . . .
+    /// 2   N N N. . . . .
+    /// 1   B K B. . . . .
+    ///     a b c d e f g h
+    /// </summary>
+    /// <param name="fen"></param>
+    /// <param name="surroundingPieces"></param>
+    [TestCase("1k3b1b/5nnn/8/8/8/8/NNN5/BKB5 w - - 0 1", 5)]
+    /// <summary>
+    /// Previous one mirrored
+    /// </summary>
+    /// <param name="fen"></param>
+    /// <param name="surroundingPieces"></param>
+    [TestCase("5bkb/5nnn/8/8/8/8/NNN5/B1B3K1 b - - 0 1", 5)]
+    public void KingShieldBonus(string fen, int surroundingPieces)
+    {
+        var position = new Position(fen);
+        position.Print();
+        var evaluation = position.StaticEvaluation(new(), default);
+
+        Assert.AreEqual(surroundingPieces * Configuration.EngineSettings.KingShieldBonus, evaluation);
     }
 }
