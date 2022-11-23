@@ -542,7 +542,8 @@ public sealed class Position
             * Attacks.QueenAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
     }
 
-    int KingEvaluation(int squareIndex, Side pieceSide, int[] pieceCount)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int KingEvaluation(int squareIndex, Side pieceSide, int[] pieceCount)
     {
         var bonus = 0;
         var oppositeSide = Utils.OppositeSide(pieceSide);
