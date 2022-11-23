@@ -126,11 +126,10 @@ public static class EvaluationConstants
     private static int NPS(BoardSquare square) => -_knightPositionalScore[_mirrorScore[(int)square]];
     private static int BPS(BoardSquare square) => -_bishopPositionalScore[_mirrorScore[(int)square]];
     private static int RPS(BoardSquare square) => -_rookPositionalScore[_mirrorScore[(int)square]];
+    private static int QPS(BoardSquare square) => -_queenPositionalScore[_mirrorScore[(int)square]];
     private static int KPS(BoardSquare square) => -_kingPositionalScore[_mirrorScore[(int)square]];
-
     private static int KEPS(BoardSquare square) => -_kingEndgamePositionalScore[_mirrorScore[(int)square]];
 
-    private static int QPS(BoardSquare square) => -_queenPositionalScore[_mirrorScore[(int)square]];
 
     private static readonly int[] _pawnPositionalScore_Black = new int[64]
     {
