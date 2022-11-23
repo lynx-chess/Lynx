@@ -81,8 +81,7 @@ public sealed class Position
     /// <param name="position"></param>
     /// <param name="nullMove"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-
-#pragma warning disable RCS1163 // Unused parameter.
+#pragma warning disable RCS1163, IDE0060 // Unused parameter.
     public Position(Position position, bool nullMove)
     {
         UniqueIdentifier = position.UniqueIdentifier;
@@ -472,6 +471,7 @@ public sealed class Position
         {
             (int)Piece.P or (int)Piece.p => PawnEvaluation(pieceSquareIndex, pieceIndex),
             (int)Piece.R or (int)Piece.r => RookEvaluation(pieceSquareIndex, pieceIndex),
+            (int)Piece.B or (int)Piece.b => BishopEvaluation(pieceSquareIndex),
             _ => 0
         };
     }
@@ -527,6 +527,13 @@ public sealed class Position
         return 0;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int BishopEvaluation(int squareIndex)
+    {
+        return Configuration.EngineSettings.BishopMobilityBonus
+            * Attacks.BishopAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
+    }
+
     int KingEvaluation(int squareIndex, Side pieceSide, int[] pieceCount)
     {
         var bonus = 0;
@@ -548,7 +555,8 @@ public sealed class Position
             }
         }
 
-        return bonus += (Attacks.KingAttacks[squareIndex] & OccupancyBitBoards[(int)pieceSide]).CountBits() * Configuration.EngineSettings.KingShieldBonus;
+        return bonus += Configuration.EngineSettings.KingShieldBonus *
+            (Attacks.KingAttacks[squareIndex] & OccupancyBitBoards[(int)pieceSide]).CountBits();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

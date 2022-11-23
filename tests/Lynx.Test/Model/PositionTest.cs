@@ -857,12 +857,58 @@ public class PositionTest
     /// <param name="fen"></param>
     /// <param name="surroundingPieces"></param>
     [TestCase("5bkb/5nnn/8/8/8/8/NNN5/B1B3K1 b - - 0 1", 5)]
-    public void KingShieldBonus(string fen, int surroundingPieces)
+    public void StaticEvaluation_KingShieldBonus(string fen, int surroundingPieces)
     {
         var position = new Position(fen);
-        position.Print();
         var evaluation = position.StaticEvaluation(new(), default);
 
         Assert.AreEqual(surroundingPieces * Configuration.EngineSettings.KingShieldBonus, evaluation);
+    }
+
+    /// <summary>
+    /// 8   n . . . k . . .
+    /// 7   . p . . . . . .
+    /// 6   . . . . . . . .
+    /// 5   . . . b . . . .
+    /// 4   . . . B . . . .
+    /// 3   . . . . . . . .
+    /// 2   . . . . . . P .
+    /// 1   . . . . K . . N
+    ///     a b c d e f g h
+    /// </summary>
+    /// <param name="fen"></param>
+    /// <param name="mobilityDifference"></param>
+    [TestCase("n3k3/1p6/8/3b4/3B4/8/6P1/4K2N w - - 0 1", 2)]
+    /// <summary>
+    /// Previous one mirrored
+    /// </summary>
+    /// <param name="fen"></param>
+    /// <param name="surroundingPieces"></param>
+    [TestCase("n2k4/1p6/8/4b3/4B3/8/6P1/3K3N b - - 0 1", 2)]
+    /// <summary>
+    /// 8   . . . . k. . .
+    /// 7   . p. . . . . .
+    /// 6   . . p. . . . .
+    /// 5   . . . b. . . .
+    /// 4   . . . B. . . .
+    /// 3   . . . . . P. .
+    /// 2   . . . . . . P.
+    /// 1   . . . . K. . .
+    /// </summary>
+    /// <param name="fen"></param>
+    /// <param name="mobilityDifference"></param>
+    [TestCase("4k3/1p6/2p5/3b4/3B4/5P2/6P1/4K3 w - - 0 1", 4)]
+    /// <summary>
+    /// Previous one mirrored
+    /// </summary>
+    /// <param name="fen"></param>
+    /// <param name="surroundingPieces"></param>
+    [TestCase("3k4/1p6/2p5/4b3/4B3/5P2/6P1/3K4 b - - 0 1", 4)]
+    public void StaticEvaluation_BishopMobility(string fen, int mobilityDifference)
+    {
+        var position = new Position(fen);
+        var evaluation = position.StaticEvaluation(new(), default);
+
+        Assert.AreEqual(mobilityDifference * Configuration.EngineSettings.BishopMobilityBonus, evaluation);
     }
 }
