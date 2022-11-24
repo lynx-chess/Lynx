@@ -176,4 +176,8 @@ public sealed class EngineSettings
     public int OpenFileKingPenalty { get; set; } = 15;
 
     public int KingShieldBonus { get; set; } = 5;
+
+    public int BishopMobilityBonus { get; set; } = 1;
+
+    public int QueenMobilityBonus { get; set; } = 1;
 }
