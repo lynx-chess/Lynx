@@ -5,19 +5,21 @@ using System.Text;
 
 namespace Lynx.Model;
 
-public sealed class Position
+public readonly struct Position
 {
     internal const int DepthFactor = 1_000_000;
 
     private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
 
-    private string? _fen;
+    //private string? _fen;
 
-    public string FEN
-    {
-        get => _fen ??= CalculateFEN();
-        init => _fen = value;
-    }
+    //public string FEN
+    //{
+    //    get => _fen ??= CalculateFEN();
+    //    init => _fen = value;
+    //}
+
+    public string FEN() => CalculateFEN();
 
     public long UniqueIdentifier { get; }
 
@@ -39,7 +41,7 @@ public sealed class Position
 
     public Position(string fen)
     {
-        _fen = null;    // Otherwise halfmove and fullmove numbers may interfere whenever FEN is being used as key of a dictionary
+        //_fen = null;    // Otherwise halfmove and fullmove numbers may interfere whenever FEN is being used as key of a dictionary
         var parsedFEN = FENParser.ParseFEN(fen);
 
         if (!parsedFEN.Success)
@@ -53,7 +55,8 @@ public sealed class Position
         Castle = parsedFEN.Castle;
         EnPassant = parsedFEN.EnPassant;
 
-        UniqueIdentifier = ZobristTable.PositionHash(this);
+        var localPosition = this;
+        UniqueIdentifier = ZobristTable.PositionHash(in localPosition); // TODO readonly struct
     }
 
     /// <summary>
@@ -61,7 +64,7 @@ public sealed class Position
     /// </summary>
     /// <param name="position"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public Position(Position position)
+    public Position(in Position position)
     {
         UniqueIdentifier = position.UniqueIdentifier;
         PieceBitBoards = new BitBoard[12];
@@ -82,7 +85,7 @@ public sealed class Position
     /// <param name="nullMove"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #pragma warning disable RCS1163, IDE0060 // Unused parameter.
-    public Position(Position position, bool nullMove)
+    public Position(in Position position, bool nullMove)
     {
         UniqueIdentifier = position.UniqueIdentifier;
         PieceBitBoards = new BitBoard[12];
@@ -102,7 +105,7 @@ public sealed class Position
 #pragma warning restore RCS1163 // Unused parameter.
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public Position(Position position, Move move) : this(position)
+    public Position(in Position position, Move move) : this(in position)
     {
         var oldSide = Side;
         var offset = Utils.PieceOffset(oldSide);
@@ -488,14 +491,14 @@ public sealed class Position
             bonus -= doublePawnsCount * Configuration.EngineSettings.DoubledPawnPenalty;
         }
 
-        bool IsIsolatedPawn() => (PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default;
-        if (IsIsolatedPawn())
+        //bool IsIsolatedPawn() => (PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default;
+        if ((PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default)
         {
             bonus -= Configuration.EngineSettings.IsolatedPawnPenalty;
         }
 
-        bool IsPassedPawn() => (PieceBitBoards[(int)Piece.p - pieceIndex] & Masks.PassedPawns[pieceIndex][squareIndex]) == default;
-        if (IsPassedPawn())
+        //bool IsPassedPawn() => (PieceBitBoards[(int)Piece.p - pieceIndex] & Masks.PassedPawns[pieceIndex][squareIndex]) == default;
+        if ((PieceBitBoards[(int)Piece.p - pieceIndex] & Masks.PassedPawns[pieceIndex][squareIndex]) == default)
         {
             var rank = Constants.Rank[squareIndex];
             if (pieceIndex == (int)Piece.p)
@@ -512,15 +515,15 @@ public sealed class Position
     private int RookEvaluation(int squareIndex, int pieceIndex)
     {
         const int pawnToRookOffset = (int)Piece.R - (int)Piece.P;
-        bool IsOpenFile() => ((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default;
-        bool IsSemiOpenFile() => (PieceBitBoards[pieceIndex - pawnToRookOffset] & Masks.FileMasks[squareIndex]) == default;
+        //bool IsOpenFile() => ((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default;
+        //bool IsSemiOpenFile() => (PieceBitBoards[pieceIndex - pawnToRookOffset] & Masks.FileMasks[squareIndex]) == default;
 
-        if (IsOpenFile())
+        if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default)
         {
             return Configuration.EngineSettings.OpenFileRookBonus;
         }
 
-        if (IsSemiOpenFile())
+        if ((PieceBitBoards[pieceIndex - pawnToRookOffset] & Masks.FileMasks[squareIndex]) == default)
         {
             return Configuration.EngineSettings.SemiOpenFileRookBonus;
         }
@@ -552,13 +555,13 @@ public sealed class Position
         bool areThereOppositeSideRooksOrQueens() => pieceCount[(int)Piece.R + opposieSideOffset] + pieceCount[(int)Piece.Q + opposieSideOffset] != default;
         if (areThereOppositeSideRooksOrQueens())
         {
-            bool isOpenFile() => ((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default;
-            bool isSemiOpenFile() => (PieceBitBoards[(int)Piece.p - opposieSideOffset] & Masks.FileMasks[squareIndex]) == default;
-            if (isOpenFile())
+            //bool isOpenFile() => ((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default;
+            //bool isSemiOpenFile() => (PieceBitBoards[(int)Piece.p - opposieSideOffset] & Masks.FileMasks[squareIndex]) == default;
+            if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default)
             {
                 bonus -= Configuration.EngineSettings.OpenFileKingPenalty;
             }
-            else if (isSemiOpenFile())
+            else if ((PieceBitBoards[(int)Piece.p - opposieSideOffset] & Masks.FileMasks[squareIndex]) == default)
             {
                 bonus -= Configuration.EngineSettings.SemiOpenFileKingPenalty;
             }

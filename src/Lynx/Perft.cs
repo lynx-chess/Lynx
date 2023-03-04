@@ -47,7 +47,7 @@ public static class Perft
         {
             foreach (var move in MoveGenerator.GenerateAllMoves(position))
             {
-                var newPosition = new Position(position, move);
+                var newPosition = new Position(in position, move);
 
                 if (newPosition.WasProduceByAValidMove())
                 {
@@ -67,7 +67,7 @@ public static class Perft
         {
             foreach (var move in MoveGenerator.GenerateAllMoves(position))
             {
-                var newPosition = new Position(position, move);
+                var newPosition = new Position(in position, move);
 
                 if (newPosition.WasProduceByAValidMove())
                 {

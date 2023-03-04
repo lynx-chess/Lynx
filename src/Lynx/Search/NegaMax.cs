@@ -22,7 +22,7 @@ public sealed partial class Engine
     /// <param name="isVerifyingNullMoveCutOff">Indicates if the search is verifying an ancestors null-move that failed high, or the root node</param>
     /// <param name="ancestorWasNullMove">Indicates whether the immediate ancestor node was a null move</param>
     /// <returns></returns>
-    private int NegaMax(Position position, int minDepth, int maxDepth, int depth, int alpha, int beta, bool isVerifyingNullMoveCutOff, bool ancestorWasNullMove = false)
+    private int NegaMax(in Position position, int minDepth, int maxDepth, int depth, int alpha, int beta, bool isVerifyingNullMoveCutOff, bool ancestorWasNullMove = false)
     {
         _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
         if (depth > minDepth)
@@ -42,9 +42,9 @@ public sealed partial class Engine
         {
             foreach (var candidateMove in position.AllPossibleMoves(Game.MovePool))
             {
-                if (new Position(position, candidateMove).WasProduceByAValidMove())
+                if (new Position(in position, candidateMove).WasProduceByAValidMove())
                 {
-                    return QuiescenceSearch(position, depth, alpha, beta);
+                    return QuiescenceSearch(in position, depth, alpha, beta);
                 }
             }
 
@@ -59,13 +59,13 @@ public sealed partial class Engine
             && (!isVerifyingNullMoveCutOff || depth < maxDepth - 1))    // verify == true and depth == maxDepth -1 -> No null pruning, since verification will not be possible)
                                                                         // following pv?
         {
-            var newPosition = new Position(position, nullMove: true);
+            var newPosition = new Position(in position, nullMove: true);
 
-            var repetitions = Utils.UpdatePositionHistory(newPosition, Game.PositionHashHistory);
+            var repetitions = Utils.UpdatePositionHistory(in newPosition, Game.PositionHashHistory);
 
-            var evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1 + Configuration.EngineSettings.NullMovePruning_R, -beta, -beta + 1, isVerifyingNullMoveCutOff, ancestorWasNullMove: true);
+            var evaluation = -NegaMax(in newPosition, minDepth, maxDepth, depth + 1 + Configuration.EngineSettings.NullMovePruning_R, -beta, -beta + 1, isVerifyingNullMoveCutOff, ancestorWasNullMove: true);
 
-            Utils.RevertPositionHistory(newPosition, Game.PositionHashHistory, repetitions);
+            Utils.RevertPositionHistory(in newPosition, Game.PositionHashHistory, repetitions);
 
             if (evaluation >= beta) // Fail high
             {
@@ -89,29 +89,29 @@ public sealed partial class Engine
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
-        var pseudoLegalMoves = SortMoves(position.AllPossibleMoves(Game.MovePool), position, depth);
+        var pseudoLegalMoves = SortMoves(position.AllPossibleMoves(Game.MovePool), in position, depth);
 
         foreach (var move in pseudoLegalMoves)
         {
-            var newPosition = new Position(position, move);
+            var newPosition = new Position(in position, move);
             if (!newPosition.WasProduceByAValidMove())
             {
                 continue;
             }
             isAnyMoveValid = true;
 
-            PrintPreMove(position, depth, move);
+            PrintPreMove(in position, depth, move);
 
             // Before making a move
             var oldValue = _halfMovesWithoutCaptureOrPawnMove;
             _halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, _halfMovesWithoutCaptureOrPawnMove);
-            var repetitions = Utils.UpdatePositionHistory(newPosition, Game.PositionHashHistory);
+            var repetitions = Utils.UpdatePositionHistory(in newPosition, Game.PositionHashHistory);
 
             int evaluation;
 
             if (movesSearched == 0)
             {
-                evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
+                evaluation = -NegaMax(in newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
             }
             else
             {
@@ -125,7 +125,7 @@ public sealed partial class Engine
                     && move.PromotedPiece() == default)
                 {
                     // Search with reduced depth
-                    evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1 + Configuration.EngineSettings.LMR_DepthReduction, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
+                    evaluation = -NegaMax(in newPosition, minDepth, maxDepth, depth + 1 + Configuration.EngineSettings.LMR_DepthReduction, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
                 }
                 else
                 {
@@ -143,24 +143,24 @@ public sealed partial class Engine
                         // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
 
                         // Search with full depth but narrowed score bandwidth
-                        evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
+                        evaluation = -NegaMax(in newPosition, minDepth, maxDepth, depth + 1, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
 
                         if (evaluation > alpha && evaluation < beta)
                         {
                             // Hipothesis invalidated -> search with full depth and full score bandwidth
-                            evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
+                            evaluation = -NegaMax(in newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
                         }
                     }
                     else
                     {
-                        evaluation = -NegaMax(newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
+                        evaluation = -NegaMax(in newPosition, minDepth, maxDepth, depth + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
                     }
                 }
             }
 
             // After making a move
             _halfMovesWithoutCaptureOrPawnMove = oldValue;
-            Utils.RevertPositionHistory(newPosition, Game.PositionHashHistory, repetitions);
+            Utils.RevertPositionHistory(in newPosition, Game.PositionHashHistory, repetitions);
 
             PrintMove(depth, move, evaluation);
 
@@ -230,7 +230,7 @@ public sealed partial class Engine
     /// Defaults to the works possible score for Black, Int.MaxValue
     /// </param>
     /// <returns></returns>
-    public int QuiescenceSearch(Position position, int depth, int alpha, int beta)
+    public int QuiescenceSearch(in Position position, int depth, int alpha, int beta)
     {
         _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
         //_cancellationToken.Token.ThrowIfCancellationRequested();
@@ -266,30 +266,30 @@ public sealed partial class Engine
             return staticEvaluation;  // TODO check if in check or drawn position
         }
 
-        var movesToEvaluate = SortCaptures(generatedMoves, position, depth);
+        var movesToEvaluate = SortCaptures(generatedMoves, in position, depth);
 
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
         foreach (var move in movesToEvaluate)
         {
-            var newPosition = new Position(position, move);
+            var newPosition = new Position(in position, move);
             if (!newPosition.WasProduceByAValidMove())
             {
                 continue;
             }
             isAnyMoveValid = true;
 
-            PrintPreMove(position, depth, move, isQuiescence: true);
+            PrintPreMove(in position, depth, move, isQuiescence: true);
 
             var oldValue = _halfMovesWithoutCaptureOrPawnMove;
             _halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, _halfMovesWithoutCaptureOrPawnMove);
-            var repetitions = Utils.UpdatePositionHistory(newPosition, Game.PositionHashHistory);
+            var repetitions = Utils.UpdatePositionHistory(in newPosition, Game.PositionHashHistory);
 
-            var evaluation = -QuiescenceSearch(newPosition, depth + 1, -beta, -alpha);
+            var evaluation = -QuiescenceSearch(in newPosition, depth + 1, -beta, -alpha);
 
             _halfMovesWithoutCaptureOrPawnMove = oldValue;
-            Utils.RevertPositionHistory(newPosition, Game.PositionHashHistory, repetitions);
+            Utils.RevertPositionHistory(in newPosition, Game.PositionHashHistory, repetitions);
 
             PrintMove(depth, move, evaluation);
 
@@ -312,9 +312,24 @@ public sealed partial class Engine
 
         if (bestMove is null)
         {
-            return isAnyMoveValid || position.AllPossibleMoves(Game.MovePool).Any(move => new Position(position, move).WasProduceByAValidMove())
-                ? alpha
-                : Position.EvaluateFinalPosition(depth, position.IsInCheck(), Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
+            //return isAnyMoveValid || position.AllPossibleMoves(Game.MovePool).Any(move => new Position(position, move).WasProduceByAValidMove())   // TODO readonly struct
+            //    ? alpha
+            //    : Position.EvaluateFinalPosition(depth, position.IsInCheck(), Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
+
+            if (isAnyMoveValid)
+            {
+                return alpha;
+            }
+
+            foreach (var move in position.AllPossibleMoves(Game.MovePool))
+            {
+                if (new Position(in position, move).WasProduceByAValidMove())
+                {
+                    return alpha;
+                }
+            }
+
+            return Position.EvaluateFinalPosition(depth, position.IsInCheck(), Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
         }
 
         // Node fails low

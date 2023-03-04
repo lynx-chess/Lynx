@@ -10,10 +10,10 @@ public class ZobristHashGenerationTest
     {
         var originalPosition = new Position(Constants.InitialPositionFEN);
 
-        var position = new Position(originalPosition, originalPosition.AllPossibleMoves().Single(m => m.UCIString() == "g1f3"));
-        position = new Position(position, position.AllPossibleMoves().Single(m => m.UCIString() == "g8f6"));
-        position = new Position(position, position.AllPossibleMoves().Single(m => m.UCIString() == "f3g1"));
-        position = new Position(position, position.AllPossibleMoves().Single(m => m.UCIString() == "f6g8"));
+        var position = new Position(in originalPosition, originalPosition.AllPossibleMoves().Single(m => m.UCIString() == "g1f3"));
+        position = new Position(in position, position.AllPossibleMoves().Single(m => m.UCIString() == "g8f6"));
+        position = new Position(in position, position.AllPossibleMoves().Single(m => m.UCIString() == "f3g1"));
+        position = new Position(in position, position.AllPossibleMoves().Single(m => m.UCIString() == "f6g8"));
 
         Assert.AreEqual(originalPosition.UniqueIdentifier, position.UniqueIdentifier);
     }
@@ -30,7 +30,7 @@ public class ZobristHashGenerationTest
 
         var fenDictionary = new Dictionary<string, (string Move, long Hash)>()
         {
-            [originalPosition.FEN] = ("", originalPosition.UniqueIdentifier)
+            [originalPosition.FEN()] = ("", originalPosition.UniqueIdentifier)
         };
 
         TransversePosition(originalPosition, fenDictionary);
@@ -46,7 +46,7 @@ public class ZobristHashGenerationTest
 
         var fenDictionary = new Dictionary<string, (string Move, long Hash)>()
         {
-            [originalPosition.FEN] = ("", originalPosition.UniqueIdentifier)
+            [originalPosition.FEN()] = ("", originalPosition.UniqueIdentifier)
         };
 
         TransversePosition(originalPosition, fenDictionary);
@@ -58,19 +58,19 @@ public class ZobristHashGenerationTest
     {
         foreach (var move in originalPosition.AllPossibleMoves())
         {
-            var newPosition = new Position(originalPosition, move);
+            var newPosition = new Position(in originalPosition, move);
             if (!newPosition.IsValid())
             {
                 continue;
             }
 
-            if (fenDictionary.TryGetValue(newPosition.FEN, out var pair))
+            if (fenDictionary.TryGetValue(newPosition.FEN(), out var pair))
             {
-                Assert.AreEqual(pair.Hash, newPosition.UniqueIdentifier, $"From {originalPosition.FEN} using {move}: {newPosition.FEN}");
+                Assert.AreEqual(pair.Hash, newPosition.UniqueIdentifier, $"From {originalPosition.FEN()} using {move}: {newPosition.FEN()}");
             }
             else
             {
-                fenDictionary.Add(newPosition.FEN, (move.ToString(), newPosition.UniqueIdentifier));
+                fenDictionary.Add(newPosition.FEN(), (move.ToString(), newPosition.UniqueIdentifier));
             }
 
             if (depth < maxDepth)

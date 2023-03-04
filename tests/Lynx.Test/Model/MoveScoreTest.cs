@@ -24,7 +24,7 @@ public class MoveScoreTest
     {
         var position = new Position(fen);
 
-        var allMoves = position.AllPossibleMoves().OrderByDescending(move => move.Score(position)).ToList();
+        var allMoves = position.AllPossibleMoves().OrderByDescending(move => move.Score(in position)).ToList();
 
         Assert.AreEqual("e2a6", allMoves[0].UCIString());     // BxB
         Assert.AreEqual("f3f6", allMoves[1].UCIString());     // QxN
@@ -37,7 +37,7 @@ public class MoveScoreTest
 
         foreach (var move in allMoves.Where(move => !move.IsCapture() && !move.IsCastle()))
         {
-            Assert.AreEqual(0, move.Score(position));
+            Assert.AreEqual(0, move.Score(in position));
         }
     }
 
@@ -61,9 +61,9 @@ public class MoveScoreTest
     {
         Position position = new(fen);
 
-        var allMoves = position.AllPossibleMoves().OrderByDescending(move => move.Score(position)).ToList();
+        var allMoves = position.AllPossibleMoves().OrderByDescending(move => move.Score(in position)).ToList();
 
         Assert.AreEqual(moveWithHighestScore, allMoves[0].UCIString());
-        Assert.AreEqual(MoveExtensions.CaptureBaseScore + EvaluationConstants.MostValueableVictimLeastValuableAttacker[0, 0], allMoves[0].Score(position));
+        Assert.AreEqual(MoveExtensions.CaptureBaseScore + EvaluationConstants.MostValueableVictimLeastValuableAttacker[0, 0], allMoves[0].Score(in position));
     }
 }

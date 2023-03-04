@@ -96,7 +96,7 @@ public static class Utils
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int UpdatePositionHistory(Position newPosition, Dictionary<long, int> positionHistory)
+    public static int UpdatePositionHistory(in Position newPosition, Dictionary<long, int> positionHistory)
     {
         var id = newPosition.UniqueIdentifier;
 
@@ -106,7 +106,7 @@ public static class Utils
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void RevertPositionHistory(Position newPosition, Dictionary<long, int> positionHistory, int repetitions)
+    public static void RevertPositionHistory(in Position newPosition, Dictionary<long, int> positionHistory, int repetitions)
     {
         var id = newPosition.UniqueIdentifier;
 

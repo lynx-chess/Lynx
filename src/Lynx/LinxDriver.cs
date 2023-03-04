@@ -244,7 +244,8 @@ public sealed class LinxDriver
 
         if (items.Length >= 2 && int.TryParse(items[1], out int depth) && depth >= 1)
         {
-            Perft.Results(_engine.Game.CurrentPosition, depth);
+            var localPosition = _engine.Game.CurrentPosition;
+            Perft.Results(localPosition, depth);   // TODO readonly struct
         }
     }
 
@@ -254,7 +255,8 @@ public sealed class LinxDriver
 
         if (items.Length >= 2 && int.TryParse(items[1], out int depth) && depth >= 1)
         {
-            Perft.Results(_engine.Game.CurrentPosition, depth);
+            var localPosition = _engine.Game.CurrentPosition;
+            Perft.Results(localPosition, depth);
         }
     }
 

@@ -20,7 +20,7 @@ public sealed class Game
     {
     }
 
-    public Game(string fen) : this(new Position(fen))
+    public Game(string fen) : this(new Position(fen)) // TODO readonly struct ref?
     {
     }
 
@@ -37,7 +37,8 @@ public sealed class Game
     {
         foreach (var moveString in movesUCIString)
         {
-            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, MovePool);
+            //var localPosition = CurrentPosition;
+            var moveList = MoveGenerator.GenerateAllMoves(/*ref localPosition*/ CurrentPosition, MovePool);   // TODO readonly struct
 
             if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
             {
@@ -52,7 +53,8 @@ public sealed class Game
     public bool MakeMove(Move moveToPlay)
     {
         PositionHistory.Add(CurrentPosition);
-        CurrentPosition = new Position(CurrentPosition, moveToPlay);
+        var localPosition = CurrentPosition;    // TODO readonly struct
+        CurrentPosition = new Position(in localPosition, moveToPlay);
         MoveHistory.Add(moveToPlay);
 
         if (!CurrentPosition.WasProduceByAValidMove())
@@ -61,7 +63,8 @@ public sealed class Game
             return false;
         }
 
-        Utils.UpdatePositionHistory(CurrentPosition, PositionHashHistory);
+        localPosition = CurrentPosition;
+        Utils.UpdatePositionHistory(in localPosition, PositionHashHistory);// TODO readonly struct
 
         HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveToPlay, HalfMovesWithoutCaptureOrPawnMove);
 

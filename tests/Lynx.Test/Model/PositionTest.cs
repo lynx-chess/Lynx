@@ -14,10 +14,10 @@ public class PositionTest
     public void FEN(string fen)
     {
         var position = new Position(fen);
-        Assert.AreEqual(fen, position.FEN);
+        Assert.AreEqual(fen, position.FEN());
 
-        var newPosition = new Position(position);
-        Assert.AreEqual(fen, newPosition.FEN);
+        var newPosition = new Position(in position);
+        Assert.AreEqual(fen, newPosition.FEN());
     }
 
     [TestCase(Constants.EmptyBoardFEN)]
@@ -32,10 +32,10 @@ public class PositionTest
         var position = new Position(fen);
 
         // Act
-        var clonedPosition = new Position(position);
+        var clonedPosition = new Position(in position);
 
         // Assert
-        Assert.AreEqual(position.FEN, clonedPosition.FEN);
+        Assert.AreEqual(position.FEN(), clonedPosition.FEN());
         Assert.AreEqual(position.UniqueIdentifier, clonedPosition.UniqueIdentifier);
         Assert.AreEqual(position.Side, clonedPosition.Side);
         Assert.AreEqual(position.Castle, clonedPosition.Castle);
@@ -98,7 +98,7 @@ public class PositionTest
         var origin = new Position("r2k4/1K6/8/8/8/8/8/8 b - - 0 1");
         var move = MoveExtensions.Encode((int)BoardSquare.b7, (int)BoardSquare.a8, (int)Piece.K, isCapture: 1);
 
-        Assert.NotNull(new Position(origin, move));
+        Assert.NotNull(new Position(in origin, move));
     }
 
     [TestCase(Constants.InitialPositionFEN, true)]
@@ -142,7 +142,7 @@ public class PositionTest
     {
         // Arrange
         var position = new Position(fen);
-        Assert.IsEmpty(position.AllPossibleMoves().Where(move => new Position(position, move).IsValid()));
+        Assert.IsEmpty(position.AllPossibleMoves().Where(move => new Position(in position, move).IsValid()));
         var isInCheck = position.IsInCheck();
 
         // Act

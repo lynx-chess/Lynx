@@ -663,7 +663,7 @@ static void _54_ScoreMove()
 
     foreach (var move in position.AllCapturesMoves())
     {
-        Console.WriteLine($"{move} {move.Score(position)}");
+        Console.WriteLine($"{move} {move.Score(in position)}");
     }
 
     position = new Position(TrickyPosition);
@@ -671,7 +671,7 @@ static void _54_ScoreMove()
 
     foreach (var move in position.AllCapturesMoves())
     {
-        Console.WriteLine($"{move} {move.Score(position)}");
+        Console.WriteLine($"{move} {move.Score(in position)}");
     }
 }
 
