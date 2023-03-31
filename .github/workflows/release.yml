@@ -1,4 +1,4 @@
-﻿name: Release
+name: Release
 
 on:
 
@@ -65,7 +65,7 @@ jobs:
       DOTNET_TC_QuickJitForLoops: 1
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Inject slug/short variables
       uses: rlespinasse/github-slug-action@v3.x
@@ -149,7 +149,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Configure git user
       run: |
