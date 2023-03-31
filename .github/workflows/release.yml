@@ -1,4 +1,4 @@
-﻿name: Release
+name: Release
 
 on:
 
@@ -76,7 +76,7 @@ jobs:
         dotnet-version: 7.0.x
 
     - name: Nuget cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path:
           ~/.nuget/packages
