@@ -1,4 +1,4 @@
-﻿name: Release
+name: Release
 
 on:
 
@@ -96,7 +96,7 @@ jobs:
 
     - name: Upload Lynx-${{ matrix.runtime-identifier }} artifact
       if: github.event.inputs.new_engine_version != ''
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: Lynx-${{ github.event.inputs.new_engine_version }}-${{ matrix.runtime-identifier }}
         path: |
@@ -106,7 +106,7 @@ jobs:
 
     - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-${{ matrix.runtime-identifier }} artifact
       if: github.event.inputs.new_engine_version == ''
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-${{ matrix.runtime-identifier }}
         path: |
