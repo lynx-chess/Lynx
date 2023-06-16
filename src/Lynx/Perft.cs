@@ -9,7 +9,7 @@ namespace Lynx;
 /// </summary>
 public static class Perft
 {
-    public static long Results(Position position, int depth)
+    public static long Results(in Position position, int depth)
     {
         var sw = new Stopwatch();
         sw.Start();
@@ -21,11 +21,11 @@ public static class Perft
         return nodes;
     }
 
-    public static long Divide(Position position, int depth)
+    public static long Divide(in Position position, int depth)
     {
         var sw = new Stopwatch();
         sw.Start();
-        var nodes = DivideImpl(position, depth, 0);
+        var nodes = DivideImpl(in position, depth, 0);
         sw.Stop();
 
         Console.WriteLine();
@@ -41,13 +41,13 @@ public static class Perft
     /// <param name="depth"></param>
     /// <param name="nodes"></param>
     /// <returns></returns>
-    internal static long ResultsImpl(Position position, int depth, long nodes)
+    internal static long ResultsImpl(in Position position, int depth, long nodes)
     {
         if (depth != 0)
         {
-            foreach (var move in MoveGenerator.GenerateAllMoves(position))
+            foreach (var move in MoveGenerator.GenerateAllMoves(in position))
             {
-                var newPosition = new Position(position, move);
+                var newPosition = new Position(in position, move);
 
                 if (newPosition.WasProduceByAValidMove())
                 {
@@ -61,13 +61,13 @@ public static class Perft
         return ++nodes;
     }
 
-    private static long DivideImpl(Position position, int depth, long nodes)
+    private static long DivideImpl(in Position position, int depth, long nodes)
     {
         if (depth != 0)
         {
-            foreach (var move in MoveGenerator.GenerateAllMoves(position))
+            foreach (var move in MoveGenerator.GenerateAllMoves(in position))
             {
-                var newPosition = new Position(position, move);
+                var newPosition = new Position(in position, move);
 
                 if (newPosition.WasProduceByAValidMove())
                 {

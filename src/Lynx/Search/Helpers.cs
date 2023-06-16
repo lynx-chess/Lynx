@@ -28,7 +28,7 @@ public sealed partial class Engine
     private const int MaxValue = +2 * EvaluationConstants.CheckMateEvaluation;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private List<Move> SortMoves(IEnumerable<Move> moves, Position currentPosition, int depth)
+    private List<Move> SortMoves(IEnumerable<Move> moves, in Position currentPosition, int depth)
     {
         if (_isFollowingPV)
         {
@@ -43,11 +43,12 @@ public sealed partial class Engine
             }
         }
 
-        return moves.OrderByDescending(move => Score(move, currentPosition, depth)).ToList();
+        var localPosition = currentPosition;
+        return moves.OrderByDescending(move => Score(move, in localPosition, depth)).ToList();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int Score(Move move, Position position, int depth)
+    private int Score(Move move, in Position position, int depth)
     {
         if (_isScoringPV && move == _pVTable[depth])
         {
@@ -56,11 +57,15 @@ public sealed partial class Engine
             return EvaluationConstants.PVMoveValue;
         }
 
-        return move.Score(position, _killerMoves, depth, _historyMoves);
+        return move.Score(in position, _killerMoves, depth, _historyMoves);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private IOrderedEnumerable<Move> SortCaptures(IEnumerable<Move> moves, Position currentPosition, int depth) => moves.OrderByDescending(move => Score(move, currentPosition, depth));
+    private IOrderedEnumerable<Move> SortCaptures(IEnumerable<Move> moves, in Position currentPosition, int depth)
+    {
+        var localPosition = currentPosition;
+        return moves.OrderByDescending(move => Score(move, in localPosition, depth));
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void CopyPVTableMoves(int target, int source, int moveCountToCopy)
@@ -99,23 +104,23 @@ public sealed partial class Engine
                position.AllPossibleMoves(Game.MovePool),
                out _))
             {
-                var message = $"Unexpected PV move {move.UCIString()} from position {position.FEN}";
+                var message = $"Unexpected PV move {move.UCIString()} from position {position.FEN()}";
                 _logger.Error(message);
                 throw new AssertException(message);
             }
 
-            var newPosition = new Position(position, move);
+            var newPosition = new Position(in position, move);
 
             if (!newPosition.WasProduceByAValidMove())
             {
-                throw new AssertException($"Invalid position after move {move.UCIString()} from position {position.FEN}");
+                throw new AssertException($"Invalid position after move {move.UCIString()} from position {position.FEN()}");
             }
             position = newPosition;
         }
     }
 
     [Conditional("DEBUG")]
-    private static void PrintPreMove(Position position, int plies, Move move, bool isQuiescence = false)
+    private static void PrintPreMove(in Position position, int plies, Move move, bool isQuiescence = false)
     {
         var sb = new StringBuilder();
         for (int i = 0; i <= plies; ++i)

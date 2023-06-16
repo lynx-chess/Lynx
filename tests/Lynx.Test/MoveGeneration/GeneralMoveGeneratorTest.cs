@@ -13,11 +13,11 @@ public class GeneralMoveGeneratorTest
     {
         var originalPosition = new Position("8/8/8/k1pP3R/8/8/8/n4K2 w - c6 0 1");
         var enPassantMove = originalPosition.AllPossibleMoves().Single(m => m.IsEnPassant());
-        var positionAferEnPassant = new Position(originalPosition, enPassantMove);
+        var positionAferEnPassant = new Position(in originalPosition, enPassantMove);
 
-        foreach (var move in MoveGenerator.GenerateAllMoves(positionAferEnPassant))
+        foreach (var move in MoveGenerator.GenerateAllMoves(in positionAferEnPassant))
         {
-            if (new Position(positionAferEnPassant, move).IsValid())
+            if (new Position(in positionAferEnPassant, move).IsValid())
             {
                 Assert.AreNotEqual(Piece.n, (Piece)move.Piece());
                 Assert.AreEqual(Piece.k, (Piece)move.Piece());

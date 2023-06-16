@@ -153,7 +153,7 @@ public static class MoveExtensions
     /// <param name="historyMoves"></param>
     /// <returns>The higher the score is, the more valuable is the captured piece and the less valuable is the piece that makes the such capture</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int Score(this Move move, Position position, int[,]? killerMoves = null, int? plies = null, int[,]? historyMoves = null)
+    public static int Score(this Move move, in Position position, int[,]? killerMoves = null, int? plies = null, int[,]? historyMoves = null)
     {
         int score = 0;
 
