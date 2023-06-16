@@ -312,10 +312,6 @@ public sealed partial class Engine
 
         if (bestMove is null)
         {
-            //return isAnyMoveValid || position.AllPossibleMoves(Game.MovePool).Any(move => new Position(position, move).WasProduceByAValidMove())   // TODO readonly struct
-            //    ? alpha
-            //    : Position.EvaluateFinalPosition(depth, position.IsInCheck(), Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
-
             if (isAnyMoveValid)
             {
                 return alpha;

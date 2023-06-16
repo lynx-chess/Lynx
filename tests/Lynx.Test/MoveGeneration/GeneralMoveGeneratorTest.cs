@@ -15,7 +15,7 @@ public class GeneralMoveGeneratorTest
         var enPassantMove = originalPosition.AllPossibleMoves().Single(m => m.IsEnPassant());
         var positionAferEnPassant = new Position(in originalPosition, enPassantMove);
 
-        foreach (var move in MoveGenerator.GenerateAllMoves(positionAferEnPassant))
+        foreach (var move in MoveGenerator.GenerateAllMoves(in positionAferEnPassant))
         {
             if (new Position(in positionAferEnPassant, move).IsValid())
             {

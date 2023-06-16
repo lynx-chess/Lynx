@@ -44,7 +44,7 @@ public sealed partial class Engine
         }
 
         var localPosition = currentPosition;
-        return moves.OrderByDescending(move => Score(move, in localPosition, depth)).ToList();   // TODO readonly struct
+        return moves.OrderByDescending(move => Score(move, in localPosition, depth)).ToList();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -64,7 +64,7 @@ public sealed partial class Engine
     private IOrderedEnumerable<Move> SortCaptures(IEnumerable<Move> moves, in Position currentPosition, int depth)
     {
         var localPosition = currentPosition;
-        return moves.OrderByDescending(move => Score(move, in localPosition, depth));   // TODO readonly struct
+        return moves.OrderByDescending(move => Score(move, in localPosition, depth));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

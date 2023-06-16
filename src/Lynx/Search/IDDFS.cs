@@ -93,8 +93,7 @@ public sealed partial class Engine
                 AspirationWindows_SearchAgain:
 
                 _isFollowingPV = true;
-                var localPosition = Game.CurrentPosition;
-                bestEvaluation = NegaMax(in localPosition, minDepth, maxDepth: depth, depth: 0, alpha, beta, isVerifyingNullMoveCutOff: true);   // TODO readonly struct
+                bestEvaluation = NegaMax(Game.CurrentPosition, minDepth, maxDepth: depth, depth: 0, alpha, beta, isVerifyingNullMoveCutOff: true);
 
                 var bestEvaluationAbs = Math.Abs(bestEvaluation);
                 isMateDetected = bestEvaluationAbs > 0.1 * EvaluationConstants.CheckMateEvaluation;

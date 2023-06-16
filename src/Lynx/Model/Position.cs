@@ -11,14 +11,6 @@ public readonly struct Position
 
     private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
 
-    //private string? _fen;
-
-    //public string FEN
-    //{
-    //    get => _fen ??= CalculateFEN();
-    //    init => _fen = value;
-    //}
-
     public string FEN() => CalculateFEN();
 
     public long UniqueIdentifier { get; }
@@ -55,8 +47,7 @@ public readonly struct Position
         Castle = parsedFEN.Castle;
         EnPassant = parsedFEN.EnPassant;
 
-        var localPosition = this;
-        UniqueIdentifier = ZobristTable.PositionHash(in localPosition); // TODO readonly struct
+        UniqueIdentifier = ZobristTable.PositionHash(this);
     }
 
     /// <summary>

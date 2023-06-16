@@ -40,7 +40,7 @@ public static class MoveGenerator
     /// <param name="capturesOnly">Filters out all moves but captures</param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IEnumerable<Move> GenerateAllMoves(/*ref*/ Position position, Move[]? movePool = null, bool capturesOnly = false)   // TODO readonly struct
+    public static IEnumerable<Move> GenerateAllMoves(in Position position, Move[]? movePool = null, bool capturesOnly = false)
     {
 #if DEBUG
         if (position.Side == Side.Both)
