@@ -12,6 +12,8 @@ public sealed class Game
     public List<Position> PositionHistory { get; }
     public Dictionary<long, int> PositionHashHistory { get; }
 
+    public TranspositionTable TranspositionTable { get; } = new TranspositionTableElement[Configuration.Hash];
+
     public int HalfMovesWithoutCaptureOrPawnMove { get; private set; }
 
     public Position CurrentPosition { get; private set; }

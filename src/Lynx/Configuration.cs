@@ -1,13 +1,19 @@
-﻿namespace Lynx;
+﻿using Lynx.Model;
+using System.Runtime.InteropServices;
+
+namespace Lynx;
 
 public static class Configuration
 {
+    public static EngineSettings EngineSettings { get; set; } = new EngineSettings();
+    public static GeneralSettings GeneralSettings { get; set; } = new GeneralSettings();
+
     private static int _isDebug = 0;
 #pragma warning disable IDE1006 // Naming Styles
     private static int _UCI_AnalyseMode = 0;
 #pragma warning restore IDE1006 // Naming Styles
     private static int _ponder = 0;
-    private static int _hash = 0;
+    private static int _hash = EngineSettings.DefaultTranspositionTableSize;
 
     public static bool IsDebug
     {
@@ -62,10 +68,6 @@ public static class Configuration
         get => _hash;
         set => Interlocked.Exchange(ref _hash, value);
     }
-
-    public static EngineSettings EngineSettings { get; set; } = new EngineSettings();
-
-    public static GeneralSettings GeneralSettings { get; set; } = new GeneralSettings();
 }
 
 public sealed class GeneralSettings
@@ -180,4 +182,9 @@ public sealed class EngineSettings
     public int BishopMobilityBonus { get; set; } = 1;
 
     public int QueenMobilityBonus { get; set; } = 1;
+
+    /// <summary>
+    /// 4MB
+    /// </summary>
+    public int DefaultTranspositionTableSize { get; set; } = 0x400_000 / Marshal.SizeOf(typeof(TranspositionTableElement));
 }
