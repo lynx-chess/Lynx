@@ -276,7 +276,25 @@ public static class EvaluationConstants
             { 100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600 }
     };
 
-    public const int CheckMateEvaluation = 1_000_000_000;
+    /// <summary>
+    /// Base absolute checkmate evaluation value. Actual absolute evaluations are lower than this one by <see cref="Position.DepthCheckmateFactor"/>
+    /// </summary>
+    public const int CheckMateBaseEvaluation = 1_000_000_000;
+
+    /// <summary>
+    /// This value combined with <see cref="PositiveCheckmateDetectionLimit"/> and <see cref="NegativeCheckmateDetectionLimit"/> allows up to mates in 500 moves. TODO decrase to 100k and validate that everything works
+    /// </summary>
+    public const int DepthCheckmateFactor = 1_000_000;
+
+    /// <summary>
+    /// Minimum evaluation for a position to be White checkmate
+    /// </summary>
+    public const int PositiveCheckmateDetectionLimit = (int)(0.1 * CheckMateBaseEvaluation);
+
+    /// <summary>
+    /// Minimum evaluation for a position to be Black checkmate
+    /// </summary>
+    public const int NegativeCheckmateDetectionLimit = (int)(-0.1 * CheckMateBaseEvaluation);
 
     public const int FirstKillerMoveValue = 9_000;
 

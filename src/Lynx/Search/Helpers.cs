@@ -24,8 +24,8 @@ public record SearchResult(Move BestMove, double Evaluation, int TargetDepth, in
 
 public sealed partial class Engine
 {
-    private const int MinValue = -2 * EvaluationConstants.CheckMateEvaluation;
-    private const int MaxValue = +2 * EvaluationConstants.CheckMateEvaluation;
+    private const int MinValue = -2 * EvaluationConstants.CheckMateBaseEvaluation;
+    private const int MaxValue = +2 * EvaluationConstants.CheckMateBaseEvaluation;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private List<Move> SortMoves(IEnumerable<Move> moves, in Position currentPosition, int depth)

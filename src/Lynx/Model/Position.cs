@@ -7,8 +7,6 @@ namespace Lynx.Model;
 
 public readonly struct Position
 {
-    internal const int DepthFactor = 1_000_000;
-
     private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
 
     public string FEN() => CalculateFEN();
@@ -588,7 +586,8 @@ public readonly struct Position
 
         if (isInCheck)
         {
-            return -EvaluationConstants.CheckMateEvaluation + (DepthFactor * depth);
+            // Checkmate evaluation, but not as bad/shallow as it looks like since we're already searching at a certain depth
+            return -EvaluationConstants.CheckMateBaseEvaluation + (EvaluationConstants.DepthCheckmateFactor * depth);
         }
         else
         {
@@ -648,7 +647,7 @@ public readonly struct Position
             $"{((Castle & (int)CastlingRights.BK) != default ? 'k' : '-')}" +
             $"{((Castle & (int)CastlingRights.BQ) != default ? 'q' : '-')}"
             );
-        Console.WriteLine($"    FEN:\t{FEN}");
+        Console.WriteLine($"    FEN:\t{FEN()}");
 #pragma warning restore RCS1214 // Unnecessary interpolated string.
 
         Console.WriteLine(separator);

@@ -96,7 +96,7 @@ public sealed partial class Engine
                 bestEvaluation = NegaMax(Game.CurrentPosition, minDepth, maxDepth: depth, depth: 0, alpha, beta, isVerifyingNullMoveCutOff: true);
 
                 var bestEvaluationAbs = Math.Abs(bestEvaluation);
-                isMateDetected = bestEvaluationAbs > 0.1 * EvaluationConstants.CheckMateEvaluation;
+                isMateDetected = bestEvaluationAbs > EvaluationConstants.PositiveCheckmateDetectionLimit;
 
                 // 🔍 Aspiration Windows
                 if (!isMateDetected && ((bestEvaluation <= alpha) || (bestEvaluation >= beta)))
@@ -120,8 +120,7 @@ public sealed partial class Engine
                 int mate = default;
                 if (isMateDetected)
                 {
-                    mate = (int)Math.Ceiling(0.5 * ((EvaluationConstants.CheckMateEvaluation - bestEvaluationAbs) / Position.DepthFactor));
-                    mate = (int)Math.CopySign(mate, bestEvaluation);
+                    mate = Utils.CalculateMateInX(bestEvaluation, bestEvaluationAbs);
                 }
 
                 var elapsedTime = _stopWatch.ElapsedMilliseconds;
