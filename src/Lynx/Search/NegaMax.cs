@@ -36,6 +36,17 @@ public sealed partial class Engine
         var pvIndex = PVTable.Indexes[depth];
         var nextPvIndex = PVTable.Indexes[depth + 1];
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
+
+        bool isPvNode = beta - alpha > 1;
+        if (!isPvNode && depth > 0)
+        {
+            var transpositionTableValue = Game.TranspositionTable.ProbeHash(position, maxDepth, depth, alpha, beta);
+            if (transpositionTableValue != EvaluationConstants.NoHashEntry)
+            {
+                return transpositionTableValue;
+            }
+        }
+
         bool isInCheck = position.IsInCheck();
 
         if (depth >= maxDepth)
@@ -69,6 +80,9 @@ public sealed partial class Engine
 
             if (evaluation >= beta) // Fail high
             {
+                // TODO null moves in tt?
+                //Game.TranspositionTable.RecordHash(newPosition, maxDepth, depth, move: null, beta, NodeType.Beta);
+
                 if (isVerifyingNullMoveCutOff)
                 {
                     ++depth;
@@ -84,6 +98,8 @@ public sealed partial class Engine
         }
 
         VerifiedNullMovePruning_SearchAgain:
+
+        var nodeType = NodeType.Alpha;
 
         int movesSearched = 0;
         Move? bestMove = null;
@@ -129,7 +145,7 @@ public sealed partial class Engine
                 }
                 else
                 {
-                    // Ensuring full depth search takes palce
+                    // Ensuring full depth search takes place
                     evaluation = alpha + 1;
                 }
 
@@ -175,6 +191,9 @@ public sealed partial class Engine
                     _killerMoves[1, depth] = _killerMoves[0, depth];
                     _killerMoves[0, depth] = move;
                 }
+
+                Game.TranspositionTable.RecordHash(position, maxDepth, depth, move, beta, NodeType.Beta);
+
                 return beta;    // TODO return evaluation?
             }
 
@@ -191,6 +210,8 @@ public sealed partial class Engine
 
                 _pVTable[pvIndex] = move;
                 CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - depth - 1);
+
+                nodeType = NodeType.Alpha;
             }
 
             ++movesSearched;
@@ -205,12 +226,16 @@ public sealed partial class Engine
             goto VerifiedNullMovePruning_SearchAgain;
         }
 
-        if (bestMove is null)
+        if (bestMove is null && !isAnyMoveValid)
         {
-            return isAnyMoveValid
-                ? alpha
-                : Position.EvaluateFinalPosition(depth, isInCheck, Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
+            var eval = Position.EvaluateFinalPosition(depth, isInCheck, Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
+
+            Game.TranspositionTable.RecordHash(position, maxDepth, depth, bestMove, eval, NodeType.Exact);
+
+            return eval;
         }
+
+        Game.TranspositionTable.RecordHash(position, maxDepth, depth, bestMove, alpha, nodeType);
 
         // Node fails low
         return alpha;

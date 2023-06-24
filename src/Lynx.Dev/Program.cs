@@ -1004,6 +1004,7 @@ static void RookEvaluation()
 
 static void TranspositionTable()
 {
+    var transpositionTable = new TranspositionTableElement[Configuration.Hash];
     var position = new Position(Constants.InitialPositionFEN);
     position.Print();
     Console.WriteLine($"Hash: {position.UniqueIdentifier}");
@@ -1011,10 +1012,9 @@ static void TranspositionTable()
     var hashKey = position.UniqueIdentifier % 0x400000;
     Console.WriteLine(hashKey);
 
-    var hashKey2 = TranspositionTableExtensions.TranspositionTableIndex(position);
+    var hashKey2 = TranspositionTableExtensions.TranspositionTableIndex(position, transpositionTable);
     Console.WriteLine(hashKey2);
 
-    var transpositionTable = new TranspositionTableElement[Configuration.Hash];
     transpositionTable.ClearTranspositionTable();
 
     //transpositionTable.RecordHash(position, depth: 3, maxDepth: 5, move: 1234, eval: +5, nodeType: NodeType.Alpha);

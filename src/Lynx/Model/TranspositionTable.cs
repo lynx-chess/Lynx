@@ -70,7 +70,7 @@ public static class TranspositionTableExtensions
     /// <returns></returns>
     public static int ProbeHash(this TranspositionTable transpositionTable, Position position, int maxDepth, int depth, int alpha, int beta)
     {
-        var entry = transpositionTable[TranspositionTableIndex(position)];
+        var entry = transpositionTable[TranspositionTableIndex(position, transpositionTable)];
 
         if (position.UniqueIdentifier != entry.Key)
         {
@@ -109,9 +109,9 @@ public static class TranspositionTableExtensions
     /// <param name="move"></param>
     /// <param name="eval"></param>
     /// <param name="nodeType"></param>
-    public static void RecordHash(this TranspositionTable transpositionTable, Position position, int maxDepth, int depth, int move, int eval, NodeType nodeType)
+    public static void RecordHash(this TranspositionTable transpositionTable, Position position, int maxDepth, int depth, Move? move, int eval, NodeType nodeType)
     {
-        ref var entry = ref transpositionTable[TranspositionTableIndex(position)];
+        ref var entry = ref transpositionTable[TranspositionTableIndex(position, transpositionTable)];
 
         // We want to store the distance to the checkmate position relative to the current node, independently from the root
         // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
@@ -124,8 +124,8 @@ public static class TranspositionTableExtensions
         entry.Type = nodeType;
     }
 
-    internal static int TranspositionTableIndex(Position position) =>
-        (int)position.UniqueIdentifier % Configuration.EngineSettings.DefaultTranspositionTableSize;
+    internal static int TranspositionTableIndex(Position position, TranspositionTable transpositionTable) =>
+        (int)(position.UniqueIdentifier % transpositionTable.Length);
 
     /// <summary>
     /// If playing side is giving checkmate, decrease checkmate score (increase n in checkmate in n moves) due to being searching at a given depth already when this position is found.
