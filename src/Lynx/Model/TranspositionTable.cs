@@ -79,6 +79,8 @@ public static class TranspositionTableExtensions
 
         if (entry.Depth >= maxDepth)
         {
+            // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
+            // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
             var score = RecalculateMateScores(entry.Score, depth);
 
             return entry.Type switch
@@ -102,8 +104,8 @@ public static class TranspositionTableExtensions
     /// </summary>
     /// <param name="transpositionTable"></param>
     /// <param name="position"></param>
-    /// <param name="depth">Ply</param>
     /// <param name="maxDepth"></param>
+    /// <param name="depth">Ply</param>
     /// <param name="move"></param>
     /// <param name="eval"></param>
     /// <param name="nodeType"></param>
@@ -111,7 +113,9 @@ public static class TranspositionTableExtensions
     {
         ref var entry = ref transpositionTable[TranspositionTableIndex(position)];
 
-        var score = RecalculateMateScores(eval, depth);
+        // We want to store the distance to the checkmate position relative to the current node, independently from the root
+        // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
+        var score = RecalculateMateScores(eval, -depth); // TODO check and add tests
 
         entry.Key = position.UniqueIdentifier;
         entry.Score = score;
@@ -124,7 +128,9 @@ public static class TranspositionTableExtensions
         (int)position.UniqueIdentifier % Configuration.EngineSettings.DefaultTranspositionTableSize;
 
     /// <summary>
-    /// If playing side is giving checkmate, decrease checkmate score (increase n in checkmate in n moves) due to being searching at a given depth already when this position is found. The opposite if the playing side is getting checkmated
+    /// If playing side is giving checkmate, decrease checkmate score (increase n in checkmate in n moves) due to being searching at a given depth already when this position is found.
+    /// The opposite if the playing side is getting checkmated.
+    /// Logic for when to pass +depth or -depth for the desired effect in https://www.talkchess.com/forum3/viewtopic.php?f=7&t=74411
     /// </summary>
     /// <param name="score"></param>
     /// <param name="depth"></param>
