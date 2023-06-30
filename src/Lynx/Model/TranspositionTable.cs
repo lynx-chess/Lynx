@@ -105,17 +105,17 @@ public static class TranspositionTableExtensions
     /// <param name="transpositionTable"></param>
     /// <param name="position"></param>
     /// <param name="maxDepth"></param>
-    /// <param name="depth">Ply</param>
+    /// <param name="ply">Ply</param>
     /// <param name="move"></param>
     /// <param name="eval"></param>
     /// <param name="nodeType"></param>
-    public static void RecordHash(this TranspositionTable transpositionTable, Position position, int maxDepth, int depth, Move? move, int eval, NodeType nodeType)
+    public static void RecordHash(this TranspositionTable transpositionTable, Position position, int maxDepth, int ply, Move? move, int eval, NodeType nodeType)
     {
         ref var entry = ref transpositionTable[TranspositionTableIndex(position, transpositionTable)];
 
         // We want to store the distance to the checkmate position relative to the current node, independently from the root
         // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
-        var score = RecalculateMateScores(eval, -depth); // TODO check and add tests
+        var score = RecalculateMateScores(eval, -ply);
 
         entry.Key = position.UniqueIdentifier;
         entry.Score = score;
@@ -130,7 +130,7 @@ public static class TranspositionTableExtensions
     /// <summary>
     /// If playing side is giving checkmate, decrease checkmate score (increase n in checkmate in n moves) due to being searching at a given depth already when this position is found.
     /// The opposite if the playing side is getting checkmated.
-    /// Logic for when to pass +depth or -depth for the desired effect in https://www.talkchess.com/forum3/viewtopic.php?f=7&t=74411
+    /// Logic for when to pass +depth or -depth for the desired effect in https://www.talkchess.com/forum3/viewtopic.php?f=7&t=74411 and https://talkchess.com/forum3/viewtopic.php?p=861852#p861852
     /// </summary>
     /// <param name="score"></param>
     /// <param name="depth"></param>
@@ -142,4 +142,17 @@ public static class TranspositionTableExtensions
             < EvaluationConstants.NegativeCheckmateDetectionLimit => EvaluationConstants.DepthCheckmateFactor * depth,
             _ => 0
         };
+
+    internal static void Print(this TranspositionTable transpositionTable)
+    {
+        Console.WriteLine("Transposition table:");
+        for (int i = 0; i < transpositionTable.Length; ++i)
+        {
+            if (transpositionTable[i].Key != default)
+            {
+                Console.WriteLine($"{i}: Key = {transpositionTable[i].Key}, Depth: {transpositionTable[i].Depth}, Score: {transpositionTable[i].Score}, Move: {transpositionTable[i].Move?.ToMoveString() ?? "-"} {transpositionTable[i].Type}");
+            }
+        }
+        Console.WriteLine("");
+    }
 }

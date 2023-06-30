@@ -93,7 +93,7 @@ public sealed partial class Engine
                 AspirationWindows_SearchAgain:
 
                 _isFollowingPV = true;
-                bestEvaluation = NegaMax(Game.CurrentPosition, minDepth, maxDepth: depth, depth: 0, alpha, beta, isVerifyingNullMoveCutOff: true);
+                bestEvaluation = NegaMax(Game.CurrentPosition, minDepth, targetDepth: depth, ply: 0, alpha, beta, isVerifyingNullMoveCutOff: true);
 
                 var bestEvaluationAbs = Math.Abs(bestEvaluation);
                 isMateDetected = bestEvaluationAbs > EvaluationConstants.PositiveCheckmateDetectionLimit;
@@ -146,7 +146,7 @@ public sealed partial class Engine
         }
         catch (Exception e) when (e is not AssertException)
         {
-            _logger.Error(e, $"Unexpected error ocurred during the search at depth {depth}, best move will be returned");
+            _logger.Error(e, $"Unexpected error ocurred during the search at depth {depth}, best move will be returned\n{e.StackTrace}");
         }
         finally
         {

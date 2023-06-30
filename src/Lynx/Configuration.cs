@@ -141,7 +141,9 @@ public sealed class EngineSettings
 
     public int MinDepth { get; set; } = 4;
 
-    public int MaxDepth { get; set; } = 32;
+    public int MaxDepth { get; set; } = 64;
+
+    public int MaxQuiescenceDepth { get; set; } = 128;
 
     public int MinMoveTime { get; set; } = 1_000;
 

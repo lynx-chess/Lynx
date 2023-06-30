@@ -1020,19 +1020,19 @@ static void TranspositionTable()
     //transpositionTable.RecordHash(position, depth: 3, maxDepth: 5, move: 1234, eval: +5, nodeType: NodeType.Alpha);
     //var entry = transpositionTable.ProbeHash(position, maxDepth: 5, depth: 3, alpha: 1, beta: 2);
 
-    transpositionTable.RecordHash(position, depth: 3, maxDepth: 5, move: 1234, eval: +19, nodeType: NodeType.Alpha);
+    transpositionTable.RecordHash(position, ply: 3, maxDepth: 5, move: 1234, eval: +19, nodeType: NodeType.Alpha);
     var entry = transpositionTable.ProbeHash(position, maxDepth: 5, depth: 3, alpha: 20, beta: 30);
     Console.WriteLine(entry); // Expected 20
 
-    transpositionTable.RecordHash(position, depth: 3, maxDepth: 5, move: 1234, eval: +21, nodeType: NodeType.Alpha);
+    transpositionTable.RecordHash(position, ply: 3, maxDepth: 5, move: 1234, eval: +21, nodeType: NodeType.Alpha);
     entry = transpositionTable.ProbeHash(position, maxDepth: 5, depth: 3, alpha: 20, beta: 30);
     Console.WriteLine(entry); // Expected 12_345_678
 
-    transpositionTable.RecordHash(position, depth: 3, maxDepth: 5, move: 1234, eval: +29, nodeType: NodeType.Beta);
+    transpositionTable.RecordHash(position, ply: 3, maxDepth: 5, move: 1234, eval: +29, nodeType: NodeType.Beta);
     entry = transpositionTable.ProbeHash(position, maxDepth: 5, depth: 3, alpha: 20, beta: 30);
     Console.WriteLine(entry); // Expected 12_345_678
 
-    transpositionTable.RecordHash(position, depth: 3, maxDepth: 5, move: 1234, eval: +31, nodeType: NodeType.Beta);
+    transpositionTable.RecordHash(position, ply: 3, maxDepth: 5, move: 1234, eval: +31, nodeType: NodeType.Beta);
     entry = transpositionTable.ProbeHash(position, maxDepth: 5, depth: 3, alpha: 20, beta: 30);
     Console.WriteLine(entry); // Expected 30
 }

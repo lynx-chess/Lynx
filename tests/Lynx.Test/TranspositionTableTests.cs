@@ -33,7 +33,7 @@ public class TranspositionTableTests
         var position = new Position(Constants.InitialPositionFEN);
         var transpositionTable = new TranspositionTableElement[Configuration.Hash];
 
-        transpositionTable.RecordHash(position, maxDepth: 5, depth: 3, move: 1234, eval: recordedEval, nodeType: recordNodeType);
+        transpositionTable.RecordHash(position, maxDepth: 5, ply: 3, move: 1234, eval: recordedEval, nodeType: recordNodeType);
 
         Assert.AreEqual(expectedProbeEval, transpositionTable.ProbeHash(position, maxDepth: 5, depth: 3, alpha: probeAlpha, beta: probeBeta));
     }
@@ -46,7 +46,7 @@ public class TranspositionTableTests
         var position = new Position(Constants.InitialPositionFEN);
         var transpositionTable = new TranspositionTableElement[Configuration.Hash];
 
-        transpositionTable.RecordHash(position, maxDepth: 10, depth: sharedDepth, move: 1234, eval: recordedEval, nodeType: NodeType.Exact);
+        transpositionTable.RecordHash(position, maxDepth: 10, ply: sharedDepth, move: 1234, eval: recordedEval, nodeType: NodeType.Exact);
 
         Assert.AreEqual(recordedEval, transpositionTable.ProbeHash(position, maxDepth: 7, depth: sharedDepth, alpha: 50, beta: 100));
     }
@@ -60,7 +60,7 @@ public class TranspositionTableTests
         var position = new Position(Constants.InitialPositionFEN);
         var transpositionTable = new TranspositionTableElement[Configuration.Hash];
 
-        transpositionTable.RecordHash(position, maxDepth: 10, depth: recordedDeph, move: 1234, eval: recordedEval, nodeType: NodeType.Exact);
+        transpositionTable.RecordHash(position, maxDepth: 10, ply: recordedDeph, move: 1234, eval: recordedEval, nodeType: NodeType.Exact);
 
         Assert.AreEqual(expectedProbeEval, transpositionTable.ProbeHash(position, maxDepth: 7, depth: probeDepth, alpha: 50, beta: 100));
     }
