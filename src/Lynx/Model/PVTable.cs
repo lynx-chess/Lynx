@@ -8,7 +8,7 @@ public static class PVTable
 
     private static ImmutableArray<int> Initialize()
     {
-        var indexes = new int [Configuration.EngineSettings.MaxDepth * (Configuration.EngineSettings.MaxDepth + 1) / 2];
+        var indexes = new int[Configuration.EngineSettings.MaxDepth + 1];
         int previousPVIndex = 0;
         indexes[0] = previousPVIndex;
 

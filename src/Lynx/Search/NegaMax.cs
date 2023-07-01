@@ -266,7 +266,7 @@ public sealed partial class Engine
 
         ++_nodes;
 
-        if (ply >= Configuration.EngineSettings.MaxQuiescenceDepth)
+        if (ply >= Configuration.EngineSettings.MaxDepth)
         {
             return position.StaticEvaluation(Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
         }
