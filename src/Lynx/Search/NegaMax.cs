@@ -73,10 +73,10 @@ public sealed partial class Engine
 
         // 🔍 Null-move pruning
         bool isFailHigh = false;    // In order to detect zugzwangs
-        if (targetDepth > Configuration.EngineSettings.NullMovePruning_R
+        if (ply > Configuration.EngineSettings.NullMovePruning_R
             && !isInCheck
             && !ancestorWasNullMove
-            && (!isVerifyingNullMoveCutOff || ply < targetDepth - 1))    // verify == true and depth == maxDepth -1 -> No null pruning, since verification will not be possible)
+            && (!isVerifyingNullMoveCutOff || ply < targetDepth - 1))    // verify == true and ply == targetDepth -1 -> No null pruning, since verification will not be possible)
                                                                          // following pv?
         {
             var newPosition = new Position(in position, nullMove: true);
@@ -138,7 +138,7 @@ public sealed partial class Engine
             {
                 // 🔍 Late Move Reduction (LMR)
                 if (movesSearched >= Configuration.EngineSettings.LMR_FullDepthMoves
-                    && targetDepth >= Configuration.EngineSettings.LMR_ReductionLimit
+                    && ply >= Configuration.EngineSettings.LMR_ReductionLimit
                     && !_isFollowingPV
                     && !isInCheck
                     //&& !newPosition.IsInCheck()
