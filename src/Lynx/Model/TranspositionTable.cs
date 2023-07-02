@@ -1,4 +1,6 @@
-﻿using System.Runtime.InteropServices;
+﻿using NLog;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace Lynx.Model;
 
@@ -52,6 +54,8 @@ public struct TranspositionTableElement
 
 public static class TranspositionTableExtensions
 {
+    private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+
     public static int TranspositionTableArrayLength => Configuration.EngineSettings.TranspositionTableSize / Marshal.SizeOf(typeof(TranspositionTableElement));
 
     public static void ClearTranspositionTable(this TranspositionTable transpositionTable)
@@ -116,6 +120,11 @@ public static class TranspositionTableExtensions
     public static void RecordHash(this TranspositionTable transpositionTable, Position position, int maxDepth, int ply, Move? move, int eval, NodeType nodeType)
     {
         ref var entry = ref transpositionTable[TranspositionTableIndex(position, transpositionTable)];
+
+        //if (entry.Key != default && entry.Key != position.UniqueIdentifier)
+        //{
+        //    _logger.Warn("TT collision");
+        //}
 
         // We want to store the distance to the checkmate position relative to the current node, independently from the root
         // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3

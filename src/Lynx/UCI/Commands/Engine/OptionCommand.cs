@@ -124,7 +124,7 @@ public sealed class OptionCommand : EngineBaseCommand
     public static readonly ImmutableArray<string> AvailableOptions = ImmutableArray.Create<string>(
         "option name UCI_Opponent type string",
         "option name UCI_EngineAbout type string default Lynx by Eduardo Cáceres, see https://github.com/lynx-chess/Lynx",
-        "option name Hash type spin default 64 min 1 max 131072");
+        $"option name Hash type spin default {Configuration.EngineSettings.TranspositionTableSize / 1024 / 1024} min 1 max 131072");
     //"option name UCI_AnalyseMode type check",
     //"option name NalimovPath type string default C:/...",
     //"option name NalimovCache type spin default 1 min 1 max 32

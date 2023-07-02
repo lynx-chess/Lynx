@@ -12,8 +12,6 @@ public sealed class Game
     public List<Position> PositionHistory { get; }
     public Dictionary<long, int> PositionHashHistory { get; }
 
-    public TranspositionTable TranspositionTable { get; }
-
     public int HalfMovesWithoutCaptureOrPawnMove { get; private set; }
 
     public Position CurrentPosition { get; private set; }
@@ -33,7 +31,6 @@ public sealed class Game
         MoveHistory = new(150);
         PositionHistory = new(150);
         PositionHashHistory = new() { [position.UniqueIdentifier] = 1 };
-        TranspositionTable = new TranspositionTableElement[TranspositionTableExtensions.TranspositionTableArrayLength];
     }
 
     public Game(string fen, List<string> movesUCIString) : this(fen)

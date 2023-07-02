@@ -12,6 +12,7 @@ public sealed partial class Engine
     private readonly int[,] _killerMoves = new int[2, Configuration.EngineSettings.MaxDepth];
     private readonly int[,] _historyMoves = new int[12, 64];
     private readonly int[] _maxDepthReached = new int[Configuration.EngineSettings.MaxDepth];
+    private TranspositionTable _transpositionTable = new TranspositionTableElement[TranspositionTableExtensions.TranspositionTableArrayLength];
 
     private int _nodes;
     private bool _isFollowingPV;
@@ -29,7 +30,7 @@ public sealed partial class Engine
 
     public SearchResult IDDFS(int minDepth, int? maxDepth, int? decisionTime)
     {
-        Game.TranspositionTable.Stats();
+        _transpositionTable.Stats();
 
         // Cleanup
         _nodes = 0;

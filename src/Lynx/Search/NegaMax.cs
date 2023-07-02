@@ -36,7 +36,7 @@ public sealed partial class Engine
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
             var staticEval = position.StaticEvaluation(Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
-            //Game.TranspositionTable.RecordHash(position, targetDepth, ply, null, staticEval, NodeType.Exact);         // This seems to create bugs for multiple people
+            //_transpositionTable.RecordHash(position, targetDepth, ply, null, staticEval, NodeType.Exact);         // This seems to create bugs for multiple people
             return staticEval;
         }
 
@@ -48,7 +48,7 @@ public sealed partial class Engine
         bool isPvNode = beta - alpha == 1;
         if (!isPvNode && ply > 0)
         {
-            var transpositionTableValue = Game.TranspositionTable.ProbeHash(position, targetDepth, ply, alpha, beta);
+            var transpositionTableValue = _transpositionTable.ProbeHash(position, targetDepth, ply, alpha, beta);
             if (transpositionTableValue != EvaluationConstants.NoHashEntry)
             {
                 return transpositionTableValue;
@@ -66,7 +66,7 @@ public sealed partial class Engine
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck, Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
-            Game.TranspositionTable.RecordHash(position, targetDepth, ply, null, finalPositionEvaluation, NodeType.Exact);
+            _transpositionTable.RecordHash(position, targetDepth, ply, null, finalPositionEvaluation, NodeType.Exact);
 
             return finalPositionEvaluation;
         }
@@ -197,7 +197,7 @@ public sealed partial class Engine
                     _killerMoves[0, ply] = move;
                 }
 
-                Game.TranspositionTable.RecordHash(position, targetDepth, ply, move, beta, NodeType.Beta);
+                _transpositionTable.RecordHash(position, targetDepth, ply, move, beta, NodeType.Beta);
 
                 return beta;    // TODO return evaluation?
             }
@@ -235,11 +235,11 @@ public sealed partial class Engine
         {
             var eval = Position.EvaluateFinalPosition(ply, isInCheck, Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
 
-            Game.TranspositionTable.RecordHash(position, targetDepth, ply, bestMove, eval, NodeType.Exact);
+            _transpositionTable.RecordHash(position, targetDepth, ply, bestMove, eval, NodeType.Exact);
             return eval;
         }
 
-        Game.TranspositionTable.RecordHash(position, targetDepth, ply, bestMove, alpha, nodeType);
+        _transpositionTable.RecordHash(position, targetDepth, ply, bestMove, alpha, nodeType);
 
         // Node fails low
         return alpha;

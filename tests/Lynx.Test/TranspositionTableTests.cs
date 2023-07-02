@@ -31,7 +31,7 @@ public class TranspositionTableTests
     public void RecordHash_ProbeHash(int recordedEval, NodeType recordNodeType, int probeAlpha, int probeBeta, int expectedProbeEval)
     {
         var position = new Position(Constants.InitialPositionFEN);
-        var transpositionTable = new TranspositionTableElement[Configuration.Hash];
+        var transpositionTable = new TranspositionTableElement[Configuration.EngineSettings.TranspositionTableSize];
 
         transpositionTable.RecordHash(position, maxDepth: 5, ply: 3, move: 1234, eval: recordedEval, nodeType: recordNodeType);
 
@@ -44,7 +44,7 @@ public class TranspositionTableTests
     {
         const int sharedDepth = 5;
         var position = new Position(Constants.InitialPositionFEN);
-        var transpositionTable = new TranspositionTableElement[Configuration.Hash];
+        var transpositionTable = new TranspositionTableElement[Configuration.EngineSettings.TranspositionTableSize];
 
         transpositionTable.RecordHash(position, maxDepth: 10, ply: sharedDepth, move: 1234, eval: recordedEval, nodeType: NodeType.Exact);
 
@@ -58,7 +58,7 @@ public class TranspositionTableTests
     public void RecordHash_ProbeHash_CheckmateDifferentDepth(int recordedEval, int recordedDeph, int probeDepth, int expectedProbeEval)
     {
         var position = new Position(Constants.InitialPositionFEN);
-        var transpositionTable = new TranspositionTableElement[Configuration.Hash];
+        var transpositionTable = new TranspositionTableElement[Configuration.EngineSettings.TranspositionTableSize];
 
         transpositionTable.RecordHash(position, maxDepth: 10, ply: recordedDeph, move: 1234, eval: recordedEval, nodeType: NodeType.Exact);
 

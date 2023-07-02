@@ -1004,7 +1004,7 @@ static void RookEvaluation()
 
 static void TranspositionTable()
 {
-    var transpositionTable = new TranspositionTableElement[Configuration.Hash];
+    var transpositionTable = new TranspositionTableElement[Configuration.EngineSettings.TranspositionTableSize];
     var position = new Position(Constants.InitialPositionFEN);
     position.Print();
     Console.WriteLine($"Hash: {position.UniqueIdentifier}");
