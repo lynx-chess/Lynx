@@ -13,7 +13,6 @@ public static class Configuration
     private static int _UCI_AnalyseMode = 0;
 #pragma warning restore IDE1006 // Naming Styles
     private static int _ponder = 0;
-    private static int _hash = EngineSettings.DefaultTranspositionTableSize;
 
     public static bool IsDebug
     {
@@ -65,8 +64,8 @@ public static class Configuration
 
     public static int Hash
     {
-        get => _hash;
-        set => Interlocked.Exchange(ref _hash, value);
+        get => EngineSettings.TranspositionTableSize;
+        set => EngineSettings.TranspositionTableSize = value;
     }
 }
 
@@ -184,7 +183,7 @@ public sealed class EngineSettings
     public int QueenMobilityBonus { get; set; } = 1;
 
     /// <summary>
-    /// 4MB
+    /// 128 MB
     /// </summary>
-    public int DefaultTranspositionTableSize { get; set; } = 0x400_000;
+    public int TranspositionTableSize { get; set; } = 128 * 1024 * 1024;
 }

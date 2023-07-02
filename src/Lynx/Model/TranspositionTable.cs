@@ -52,7 +52,7 @@ public struct TranspositionTableElement
 
 public static class TranspositionTableExtensions
 {
-    public static int TranspositionTableArrayLength => Configuration.Hash / Marshal.SizeOf(typeof(TranspositionTableElement));
+    public static int TranspositionTableArrayLength => Configuration.EngineSettings.TranspositionTableSize / Marshal.SizeOf(typeof(TranspositionTableElement));
 
     public static void ClearTranspositionTable(this TranspositionTable transpositionTable)
     {
@@ -147,9 +147,26 @@ public static class TranspositionTableExtensions
             _ => 0
         };
 
+    internal static void Stats(this TranspositionTable transpositionTable)
+    {
+        Console.WriteLine("Transposition table stats:");
+        int items = 0;
+        for (int i = 0; i < transpositionTable.Length; ++i)
+        {
+            if (transpositionTable[i].Key != default)
+            {
+                ++items;
+            }
+        }
+        Console.WriteLine($"Size:\t{transpositionTable.Length * Marshal.SizeOf(typeof(TranspositionTableElement)) / 1024 / 1024}MB ({transpositionTable.Length} items)");
+        Console.WriteLine($"Occupancy:\t{100 * items / transpositionTable.Length}%");
+        Console.WriteLine("");
+    }
+
+    [Conditional("DEBUG")]
     internal static void Print(this TranspositionTable transpositionTable)
     {
-        Console.WriteLine("Transposition table:");
+        Console.WriteLine("Transposition table content:");
         for (int i = 0; i < transpositionTable.Length; ++i)
         {
             if (transpositionTable[i].Key != default)

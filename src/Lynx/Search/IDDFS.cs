@@ -29,6 +29,8 @@ public sealed partial class Engine
 
     public SearchResult IDDFS(int minDepth, int? maxDepth, int? decisionTime)
     {
+        Game.TranspositionTable.Stats();
+
         // Cleanup
         _nodes = 0;
         _isFollowingPV = false;
