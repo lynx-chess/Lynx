@@ -25,19 +25,17 @@ public sealed partial class Engine
     private int NegaMax(in Position position, int minDepth, int targetDepth, int ply, int alpha, int beta, bool isVerifyingNullMoveCutOff, bool ancestorWasNullMove = false)
     {
         _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
-        if (ply > minDepth)
-        {
-            _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
-        }
 
-        ++_nodes;
+        if (Position.IsThreefoldRepetition(Game.PositionHashHistory) || Position.Is50MovesRepetition(_halfMovesWithoutCaptureOrPawnMove))
+        {
+            return 0;
+        }
 
         bool isInCheck = position.IsInCheck();
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
-            var staticEval = position.StaticEvaluation(Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
+            return position.StaticEvaluation();
             //_transpositionTable.RecordHash(position, targetDepth, ply, null, staticEval, NodeType.Exact);         // This seems to create bugs for multiple people
-            return staticEval;
         }
 
         _maxDepthReached[ply] = ply;
@@ -55,6 +53,12 @@ public sealed partial class Engine
             }
         }
 
+        // Before any time-consuming operations
+        if (ply > minDepth)
+        {
+            _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
+        }
+
         if (ply >= targetDepth)
         {
             foreach (var candidateMove in position.AllPossibleMoves(Game.MovePool))
@@ -65,11 +69,13 @@ public sealed partial class Engine
                 }
             }
 
-            var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck, Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
+            var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
             _transpositionTable.RecordHash(position, targetDepth, ply, finalPositionEvaluation, NodeType.Exact);
 
             return finalPositionEvaluation;
         }
+
+        ++_nodes;
 
         // 🔍 Null-move pruning
         bool isFailHigh = false;    // In order to detect zugzwangs
@@ -233,7 +239,7 @@ public sealed partial class Engine
 
         if (bestMove is null && !isAnyMoveValid)
         {
-            var eval = Position.EvaluateFinalPosition(ply, isInCheck, Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
+            var eval = Position.EvaluateFinalPosition(ply, isInCheck);
 
             _transpositionTable.RecordHash(position, targetDepth, ply, eval, NodeType.Exact);
             return eval;
@@ -264,19 +270,24 @@ public sealed partial class Engine
         _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
         //_cancellationToken.Token.ThrowIfCancellationRequested();
 
-        ++_nodes;
+        if (Position.IsThreefoldRepetition(Game.PositionHashHistory) || Position.Is50MovesRepetition(_halfMovesWithoutCaptureOrPawnMove))
+        {
+            return 0;
+        }
 
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
-            return position.StaticEvaluation(Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
+            return position.StaticEvaluation();
         }
+
+        ++_nodes;
 
         _maxDepthReached[ply] = ply;
         var pvIndex = PVTable.Indexes[ply];
         var nextPvIndex = PVTable.Indexes[ply + 1];
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
-        var staticEvaluation = position.StaticEvaluation(Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
+        var staticEvaluation = position.StaticEvaluation();
 
         // Fail-hard beta-cutoff (updating alpha after this check)
         if (staticEvaluation >= beta)
@@ -359,7 +370,7 @@ public sealed partial class Engine
                 }
             }
 
-            return Position.EvaluateFinalPosition(ply, position.IsInCheck(), Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
+            return Position.EvaluateFinalPosition(ply, position.IsInCheck());
         }
 
         // Node fails low

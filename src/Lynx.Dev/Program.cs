@@ -949,38 +949,38 @@ static void FileAndRankMasks()
 static void EnhancedPawnEvaluation()
 {
     var position = new Position("4k3/ppp5/8/8/8/P7/PP6/4K3 w - - 0 1");
-    var eval = position.StaticEvaluation(new(), new());
+    var eval = position.StaticEvaluation();
     position.Print();
     Console.WriteLine(eval);
 
     position = new Position("4k3/pp4pp/p7/8/8/P7/PPP3P1/4K3 w - - 0 1");
     position.Print();
-    eval = position.StaticEvaluation(new(), new());
+    eval = position.StaticEvaluation();
     Console.WriteLine(eval);
 
     position = new Position("4k3/pp3pp1/p7/8/8/P7/PPP4P/4K3 w - - 0 1");
     position.Print();
-    eval = position.StaticEvaluation(new(), new());
+    eval = position.StaticEvaluation();
     Console.WriteLine(eval);
 
     position = new Position("4k3/pp3pp1/p7/8/8/P7/PP3P1P/4K3 w - - 0 1");
     position.Print();
-    eval = position.StaticEvaluation(new(), new());
+    eval = position.StaticEvaluation();
     Console.WriteLine(eval);
 
     position = new Position("4k3/pp2pp2/p7/8/8/P7/PP3P1P/4K3 w - - 0 1");
     position.Print();
-    eval = position.StaticEvaluation(new(), new());
+    eval = position.StaticEvaluation();
     Console.WriteLine(eval);
 
     position = new Position("4k3/pp2pp2/p7/8/7P/P7/PP3P2/4K3 w - - 0 1");
     position.Print();
-    eval = position.StaticEvaluation(new(), new());
+    eval = position.StaticEvaluation();
     Console.WriteLine(eval);
 
     position = new Position("4k3/pp2pp1P/p7/8/8/P7/PP3P2/4K3 w - - 0 1");
     position.Print();
-    eval = position.StaticEvaluation(new(), new());
+    eval = position.StaticEvaluation();
     Console.WriteLine(eval);
 }
 
@@ -988,17 +988,17 @@ static void RookEvaluation()
 {
     var position = new Position("r3k3/7p/8/8/8/8/7P/4K2R w - - 0 1");
     position.Print();
-    var eval = position.StaticEvaluation(new(), new());
+    var eval = position.StaticEvaluation();
     Console.WriteLine(eval);
 
     position = new Position("r3k3/1p6/8/8/8/8/7P/4K2R w - - 0 1");
     position.Print();
-    eval = position.StaticEvaluation(new(), new());
+    eval = position.StaticEvaluation();
     Console.WriteLine(eval);
 
     position = new Position("r3k3/1P6/8/8/8/8/7p/4K2R w - - 0 1");
     position.Print();
-    eval = position.StaticEvaluation(new(), new());
+    eval = position.StaticEvaluation();
     Console.WriteLine(eval);
 }
 
@@ -1020,19 +1020,19 @@ static void TranspositionTable()
     //transpositionTable.RecordHash(position, depth: 3, maxDepth: 5, move: 1234, eval: +5, nodeType: NodeType.Alpha);
     //var entry = transpositionTable.ProbeHash(position, maxDepth: 5, depth: 3, alpha: 1, beta: 2);
 
-    transpositionTable.RecordHash(position, maxDepth: 5, ply: 3, eval: +19, nodeType: NodeType.Alpha, move: 1234);
-    var entry = transpositionTable.ProbeHash(position, maxDepth: 5, depth: 3, alpha: 20, beta: 30);
+    transpositionTable.RecordHash(position, targetDepth: 5, ply: 3, eval: +19, nodeType: NodeType.Alpha, move: 1234);
+    var entry = transpositionTable.ProbeHash(position, targetDepth: 5, ply: 3, alpha: 20, beta: 30);
     Console.WriteLine(entry); // Expected 20
 
-    transpositionTable.RecordHash(position, maxDepth: 5, ply: 3, eval: +21, nodeType: NodeType.Alpha, move: 1234);
-    entry = transpositionTable.ProbeHash(position, maxDepth: 5, depth: 3, alpha: 20, beta: 30);
+    transpositionTable.RecordHash(position, targetDepth: 5, ply: 3, eval: +21, nodeType: NodeType.Alpha, move: 1234);
+    entry = transpositionTable.ProbeHash(position, targetDepth: 5, ply: 3, alpha: 20, beta: 30);
     Console.WriteLine(entry); // Expected 12_345_678
 
-    transpositionTable.RecordHash(position, maxDepth: 5, ply: 3, eval: +29, nodeType: NodeType.Beta, move: 1234);
-    entry = transpositionTable.ProbeHash(position, maxDepth: 5, depth: 3, alpha: 20, beta: 30);
+    transpositionTable.RecordHash(position, targetDepth: 5, ply: 3, eval: +29, nodeType: NodeType.Beta, move: 1234);
+    entry = transpositionTable.ProbeHash(position, targetDepth: 5, ply: 3, alpha: 20, beta: 30);
     Console.WriteLine(entry); // Expected 12_345_678
 
-    transpositionTable.RecordHash(position, maxDepth: 5, ply: 3, eval: +31, nodeType: NodeType.Beta, move: 1234);
-    entry = transpositionTable.ProbeHash(position, maxDepth: 5, depth: 3, alpha: 20, beta: 30);
+    transpositionTable.RecordHash(position, targetDepth: 5, ply: 3, eval: +31, nodeType: NodeType.Beta, move: 1234);
+    entry = transpositionTable.ProbeHash(position, targetDepth: 5, ply: 3, alpha: 20, beta: 30);
     Console.WriteLine(entry); // Expected 30
 }
