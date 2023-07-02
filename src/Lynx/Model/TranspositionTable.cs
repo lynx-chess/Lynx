@@ -1,4 +1,6 @@
-﻿namespace Lynx.Model;
+﻿using System.Runtime.InteropServices;
+
+namespace Lynx.Model;
 
 public enum NodeType
 {
@@ -50,6 +52,8 @@ public struct TranspositionTableElement
 
 public static class TranspositionTableExtensions
 {
+    public static int TranspositionTableArrayLength => Configuration.Hash / Marshal.SizeOf(typeof(TranspositionTableElement));
+
     public static void ClearTranspositionTable(this TranspositionTable transpositionTable)
     {
         foreach (var element in transpositionTable)

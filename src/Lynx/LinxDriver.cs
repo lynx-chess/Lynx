@@ -195,9 +195,8 @@ public sealed class LinxDriver
                 {
                     if (commandItems.Length > 4 && int.TryParse(commandItems[4], out var value))
                     {
-                        Configuration.Hash = value;
+                        Configuration.Hash = value * 1024 * 1024;
                     }
-                    _logger.Warn("Hash size modification not supported yet");
                     break;
                 }
             case "uci_opponent":
@@ -224,7 +223,10 @@ public sealed class LinxDriver
 
     private void HandleNewGame()
     {
-        _logger.Info($"Average depth: {_engine.AverageDepth}");
+        if (_engine.AverageDepth > 0 && _engine.AverageDepth < int.MaxValue)
+        {
+            _logger.Info($"Average depth: {_engine.AverageDepth}");
+        }
         _engine.NewGame();
     }
 

@@ -186,5 +186,5 @@ public sealed class EngineSettings
     /// <summary>
     /// 4MB
     /// </summary>
-    public int DefaultTranspositionTableSize { get; set; } = 0x400_000 / Marshal.SizeOf(typeof(TranspositionTableElement));
+    public int DefaultTranspositionTableSize { get; set; } = 0x400_000;
 }
