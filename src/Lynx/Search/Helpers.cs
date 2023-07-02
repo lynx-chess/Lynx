@@ -5,9 +5,19 @@ using System.Text;
 
 namespace Lynx;
 
-public record SearchResult(Move BestMove, double Evaluation, int TargetDepth, int DepthReached, int Nodes, long Time, long NodesPerSecond, List<Move> Moves, int Alpha, int Beta, int Mate = default)
+public sealed record SearchResult(Move BestMove, double Evaluation, int TargetDepth, List<Move> Moves, int Alpha, int Beta, int Mate = default)
 {
+    public int DepthReached { get; set; }
+
+    public int Nodes { get; set; }
+
+    public long Time { get; set; }
+
+    public long NodesPerSecond { get; set; }
+
     public bool IsCancelled { get; set; }
+
+    public int HashfullPermill { get; set; }
 
     public SearchResult(SearchResult previousSearchResult)
     {

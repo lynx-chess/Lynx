@@ -30,8 +30,6 @@ public sealed partial class Engine
 
     public SearchResult IDDFS(int minDepth, int? maxDepth, int? decisionTime)
     {
-        _transpositionTable.Stats();
-
         // Cleanup
         _nodes = 0;
         _isFollowingPV = false;
@@ -59,7 +57,11 @@ public sealed partial class Engine
         {
             _logger.Debug("Ponder hit");
 
-            lastSearchResult = new SearchResult(_previousSearchResult);
+            lastSearchResult = new SearchResult(_previousSearchResult)
+            {
+                HashfullPermill = _transpositionTable.HashfullPermill()
+            };
+
             Array.Copy(_previousSearchResult.Moves.ToArray(), 2, _pVTable, 0, _previousSearchResult.Moves.Count - 2);
 
             Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult)));
@@ -129,7 +131,14 @@ public sealed partial class Engine
                 var elapsedTime = _stopWatch.ElapsedMilliseconds;
 
                 _previousSearchResult = lastSearchResult;
-                lastSearchResult = new SearchResult(pvMoves.FirstOrDefault(), bestEvaluation, depth, maxDepthReached, _nodes, elapsedTime, Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * elapsedTime) + 1), 0, Int64.MaxValue)), pvMoves, alpha, beta, mate);
+                lastSearchResult = new SearchResult(pvMoves.FirstOrDefault(), bestEvaluation, depth, pvMoves, alpha, beta, mate)
+                {
+                    DepthReached = maxDepthReached,
+                    Nodes = _nodes,
+                    Time = elapsedTime,
+                    NodesPerSecond = Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * elapsedTime) + 1), 0, long.MaxValue)),
+                    HashfullPermill = _transpositionTable.HashfullPermill()
+                };
 
                 Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult)));
 
@@ -159,11 +168,25 @@ public sealed partial class Engine
         if (lastSearchResult is not null)
         {
             lastSearchResult.IsCancelled = isCancelled;
+            lastSearchResult.DepthReached = Math.Max(lastSearchResult.DepthReached, _maxDepthReached.LastOrDefault(item => item != default));
+            lastSearchResult.Nodes = _nodes;
+            lastSearchResult.Time = _stopWatch.ElapsedMilliseconds;
+            lastSearchResult.NodesPerSecond = Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * _stopWatch.ElapsedMilliseconds) + 1), 0, Int64.MaxValue));
+            lastSearchResult.HashfullPermill = _transpositionTable.HashfullPermill();
+
             return lastSearchResult;
         }
         else
         {
-            return new(default, bestEvaluation, depth, depth, _nodes, _stopWatch.ElapsedMilliseconds, Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * _stopWatch.ElapsedMilliseconds) + 1), 0, Int64.MaxValue)), new List<Move>(), alpha, beta);
+            return new(default, bestEvaluation, depth, new List<Move>(), alpha, beta)
+            {
+                DepthReached = _maxDepthReached.LastOrDefault(item => item != default),
+                Nodes = _nodes,
+                Time = _stopWatch.ElapsedMilliseconds,
+                NodesPerSecond = Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * _stopWatch.ElapsedMilliseconds) + 1), 0, long.MaxValue)),
+                HashfullPermill = _transpositionTable.HashfullPermill(),
+                IsCancelled = isCancelled
+            };
         }
 
         static bool stopSearchCondition(int depth, int? maxDepth, bool isMateDetected, int nodes, int? decisionTime, Stopwatch stopWatch, ILogger logger)

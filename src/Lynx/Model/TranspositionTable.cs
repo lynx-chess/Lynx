@@ -1,5 +1,6 @@
 ﻿using NLog;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Lynx.Model;
@@ -64,6 +65,11 @@ public static class TranspositionTableExtensions
 
     public static int TranspositionTableArrayLength => Configuration.EngineSettings.TranspositionTableSize / Marshal.SizeOf(typeof(TranspositionTableElement));
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static int TranspositionTableIndex(Position position, TranspositionTable transpositionTable) =>
+        (int)(position.UniqueIdentifier % transpositionTable.Length);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void ClearTranspositionTable(this TranspositionTable transpositionTable)
     {
         foreach (var element in transpositionTable)
@@ -82,6 +88,7 @@ public static class TranspositionTableExtensions
     /// <param name="alpha"></param>
     /// <param name="beta"></param>
     /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int ProbeHash(this TranspositionTable transpositionTable, Position position, int targetDepth, int ply, int alpha, int beta)
     {
         var entry = transpositionTable[TranspositionTableIndex(position, transpositionTable)];
@@ -123,6 +130,7 @@ public static class TranspositionTableExtensions
     /// <param name="eval"></param>
     /// <param name="nodeType"></param>
     /// <param name="move"></param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void RecordHash(this TranspositionTable transpositionTable, Position position, int targetDepth, int ply, int eval, NodeType nodeType, Move? move = 0)
     {
         ref var entry = ref transpositionTable[TranspositionTableIndex(position, transpositionTable)];
@@ -143,9 +151,6 @@ public static class TranspositionTableExtensions
         entry.Type = nodeType;
     }
 
-    internal static int TranspositionTableIndex(Position position, TranspositionTable transpositionTable) =>
-        (int)(position.UniqueIdentifier % transpositionTable.Length);
-
     /// <summary>
     /// If playing side is giving checkmate, decrease checkmate score (increase n in checkmate in n moves) due to being searching at a given depth already when this position is found.
     /// The opposite if the playing side is getting checkmated.
@@ -154,14 +159,39 @@ public static class TranspositionTableExtensions
     /// <param name="score"></param>
     /// <param name="depth"></param>
     /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static int RecalculateMateScores(int score, int depth) => score +
-        score switch
-        {
-            > EvaluationConstants.PositiveCheckmateDetectionLimit => -EvaluationConstants.DepthCheckmateFactor * depth,
-            < EvaluationConstants.NegativeCheckmateDetectionLimit => EvaluationConstants.DepthCheckmateFactor * depth,
-            _ => 0
-        };
+            score switch
+            {
+                > EvaluationConstants.PositiveCheckmateDetectionLimit => -EvaluationConstants.DepthCheckmateFactor * depth,
+                < EvaluationConstants.NegativeCheckmateDetectionLimit => EvaluationConstants.DepthCheckmateFactor * depth,
+                _ => 0
+            };
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int PopulatedItemsCount(this TranspositionTable transpositionTable)
+    {
+        int items = 0;
+        for (int i = 0; i < transpositionTable.Length; ++i)
+        {
+            if (transpositionTable[i].Key != default)
+            {
+                ++items;
+            }
+        }
+
+        return items;
+    }
+
+    /// <summary>
+    /// TT occupancy per mill
+    /// </summary>
+    /// <param name="transpositionTable"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int HashfullPermill(this TranspositionTable transpositionTable) => 1000 * transpositionTable.PopulatedItemsCount() / transpositionTable.Length;
+
+    [Conditional("DEBUG")]
     internal static void Stats(this TranspositionTable transpositionTable)
     {
         int items = 0;
@@ -172,7 +202,7 @@ public static class TranspositionTableExtensions
                 ++items;
             }
         }
-        _logger.Info($"TT Occupancy:\t{100 * items / transpositionTable.Length}% ({transpositionTable.Length * Marshal.SizeOf(typeof(TranspositionTableElement)) / 1024 / 1024}MB)");
+        _logger.Info($"TT Occupancy:\t{100 * transpositionTable.PopulatedItemsCount() / transpositionTable.Length}% ({transpositionTable.Length * Marshal.SizeOf(typeof(TranspositionTableElement)) / 1024 / 1024}MB)");
     }
 
     [Conditional("DEBUG")]
