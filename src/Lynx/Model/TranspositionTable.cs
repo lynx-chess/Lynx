@@ -15,7 +15,7 @@ public enum NodeType : byte
 public struct TranspositionTableElement
 {
     private byte _depth;
-    private byte _age;
+    //private byte _age;
     private short _score;
 
     /// <summary>
@@ -37,21 +37,22 @@ public struct TranspositionTableElement
     public int Score { readonly get => _score; set => _score = (short)value; }
 
     /// <summary>
-    /// Best move found in a position. May not exist if the position failed low (score <= alpha)
+    /// Best move found in a position. 0 if the position failed low (score <= alpha)
     /// </summary>
     public Move Move { get; set; }
 
     /// <summary>
-    /// How deep the recorded search went
+    /// How deep the recorded search went. For us this numberis targetDepth - ply
     /// </summary>
     public int Depth { readonly get => _depth; set => _depth = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref value, 1))[0]; }
-    public int Age { readonly get => _age; set => _age = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref value, 1))[0]; }
+
+    //public int Age { readonly get => _age; set => _age = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref value, 1))[0]; }
 
     public void Clear()
     {
-        Key = default;
-        Score = default;
-        Depth = default;
+        Key = 0;
+        Score = 0;
+        Depth = 0;
         Move = 0;
         Type = NodeType.Unknown;
     }
@@ -76,12 +77,12 @@ public static class TranspositionTableExtensions
     /// </summary>
     /// <param name="transpositionTable"></param>
     /// <param name="position"></param>
-    /// <param name="maxDepth"></param>
-    /// <param name="depth">Ply</param>
+    /// <param name="targetDepth"></param>
+    /// <param name="ply">Ply</param>
     /// <param name="alpha"></param>
     /// <param name="beta"></param>
     /// <returns></returns>
-    public static int ProbeHash(this TranspositionTable transpositionTable, Position position, int maxDepth, int depth, int alpha, int beta)
+    public static int ProbeHash(this TranspositionTable transpositionTable, Position position, int targetDepth, int ply, int alpha, int beta)
     {
         var entry = transpositionTable[TranspositionTableIndex(position, transpositionTable)];
 
@@ -90,11 +91,11 @@ public static class TranspositionTableExtensions
             return EvaluationConstants.NoHashEntry;
         }
 
-        if (entry.Depth >= maxDepth)
+        if (entry.Depth >= (targetDepth - ply))    // TODO is this conditon correct? In BBC depth is passed, but BBC depth decreases when going deeper
         {
             // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
             // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
-            var score = RecalculateMateScores(entry.Score, depth);
+            var score = RecalculateMateScores(entry.Score, ply);
 
             return entry.Type switch
             {
@@ -117,12 +118,12 @@ public static class TranspositionTableExtensions
     /// </summary>
     /// <param name="transpositionTable"></param>
     /// <param name="position"></param>
-    /// <param name="maxDepth"></param>
+    /// <param name="targetDepth"></param>
     /// <param name="ply">Ply</param>
     /// <param name="eval"></param>
     /// <param name="nodeType"></param>
     /// <param name="move"></param>
-    public static void RecordHash(this TranspositionTable transpositionTable, Position position, int maxDepth, int ply, int eval, NodeType nodeType, Move? move = 0)
+    public static void RecordHash(this TranspositionTable transpositionTable, Position position, int targetDepth, int ply, int eval, NodeType nodeType, Move? move = 0)
     {
         ref var entry = ref transpositionTable[TranspositionTableIndex(position, transpositionTable)];
 
@@ -137,7 +138,7 @@ public static class TranspositionTableExtensions
 
         entry.Key = position.UniqueIdentifier;
         entry.Score = score;
-        entry.Depth = maxDepth;
+        entry.Depth = targetDepth - ply;
         entry.Move = move ?? 0;
         entry.Type = nodeType;
     }
