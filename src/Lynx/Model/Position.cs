@@ -556,7 +556,7 @@ public readonly struct Position
             }
         }
 
-        return bonus += Configuration.EngineSettings.KingShieldBonus *
+        return bonus + Configuration.EngineSettings.KingShieldBonus *
             (Attacks.KingAttacks[squareIndex] & OccupancyBitBoards[(int)pieceSide]).CountBits();
     }
 

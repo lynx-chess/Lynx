@@ -117,7 +117,8 @@ public static class TranspositionTableExtensions
     /// <param name="move"></param>
     /// <param name="eval"></param>
     /// <param name="nodeType"></param>
-    public static void RecordHash(this TranspositionTable transpositionTable, Position position, int maxDepth, int ply, Move? move, int eval, NodeType nodeType)
+    /// <param name="move"></param>
+    public static void RecordHash(this TranspositionTable transpositionTable, Position position, int maxDepth, int ply, int eval, NodeType nodeType, Move? move = 0)
     {
         ref var entry = ref transpositionTable[TranspositionTableIndex(position, transpositionTable)];
 
@@ -167,9 +168,7 @@ public static class TranspositionTableExtensions
                 ++items;
             }
         }
-        Console.WriteLine($"Size:\t{transpositionTable.Length * Marshal.SizeOf(typeof(TranspositionTableElement)) / 1024 / 1024}MB ({transpositionTable.Length} items)");
-        Console.WriteLine($"Occupancy:\t{100 * items / transpositionTable.Length}%");
-        Console.WriteLine("");
+        _logger.Info($"TT Occupancy:\t{100 * items / transpositionTable.Length}% ({transpositionTable.Length * Marshal.SizeOf(typeof(TranspositionTableElement)) / 1024 / 1024}MB)");
     }
 
     [Conditional("DEBUG")]

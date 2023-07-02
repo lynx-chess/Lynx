@@ -52,7 +52,7 @@ catch (AggregateException ae)
     {
         if (e is TaskCanceledException taskCanceledException)
         {
-            Console.WriteLine("Cancellation requested: {taskCanceledException.Message}");
+            Console.WriteLine($"Cancellation requested: {taskCanceledException.Message}");
         }
         else
         {
