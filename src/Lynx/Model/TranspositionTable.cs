@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace Lynx.Model;
 
-public enum NodeType
+public enum NodeType : byte
 {
     Unknown,    // Making it 0 instead of -1 because of default struct initialization
     Exact,
@@ -14,6 +14,10 @@ public enum NodeType
 
 public struct TranspositionTableElement
 {
+    private byte _depth;
+    private byte _age;
+    private short _score;
+
     /// <summary>
     /// Full Zobrist key
     /// </summary>
@@ -30,24 +34,25 @@ public struct TranspositionTableElement
     /// <summary>
     /// Position evaluation
     /// </summary>
-    public int Score { get; set; }
+    public int Score { readonly get => _score; set => _score = (short)value; }
 
     /// <summary>
     /// Best move found in a position. May not exist if the position failed low (score <= alpha)
     /// </summary>
-    public Move? Move { get; set; }
+    public Move Move { get; set; }
 
     /// <summary>
     /// How deep the recorded search went
     /// </summary>
-    public int Depth { get; set; }
+    public int Depth { readonly get => _depth; set => _depth = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref value, 1))[0]; }
+    public int Age { readonly get => _age; set => _age = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref value, 1))[0]; }
 
     public void Clear()
     {
         Key = default;
         Score = default;
         Depth = default;
-        Move = null;
+        Move = 0;
         Type = NodeType.Unknown;
     }
 }
@@ -114,7 +119,6 @@ public static class TranspositionTableExtensions
     /// <param name="position"></param>
     /// <param name="maxDepth"></param>
     /// <param name="ply">Ply</param>
-    /// <param name="move"></param>
     /// <param name="eval"></param>
     /// <param name="nodeType"></param>
     /// <param name="move"></param>
@@ -134,7 +138,7 @@ public static class TranspositionTableExtensions
         entry.Key = position.UniqueIdentifier;
         entry.Score = score;
         entry.Depth = maxDepth;
-        entry.Move = move;
+        entry.Move = move ?? 0;
         entry.Type = nodeType;
     }
 
@@ -159,7 +163,6 @@ public static class TranspositionTableExtensions
 
     internal static void Stats(this TranspositionTable transpositionTable)
     {
-        Console.WriteLine("Transposition table stats:");
         int items = 0;
         for (int i = 0; i < transpositionTable.Length; ++i)
         {
@@ -179,7 +182,7 @@ public static class TranspositionTableExtensions
         {
             if (transpositionTable[i].Key != default)
             {
-                Console.WriteLine($"{i}: Key = {transpositionTable[i].Key}, Depth: {transpositionTable[i].Depth}, Score: {transpositionTable[i].Score}, Move: {transpositionTable[i].Move?.ToMoveString() ?? "-"} {transpositionTable[i].Type}");
+                Console.WriteLine($"{i}: Key = {transpositionTable[i].Key}, Depth: {transpositionTable[i].Depth}, Score: {transpositionTable[i].Score}, Move: {(transpositionTable[i].Move != 0 ? transpositionTable[i].Move.ToMoveString() : "-")} {transpositionTable[i].Type}");
             }
         }
         Console.WriteLine("");

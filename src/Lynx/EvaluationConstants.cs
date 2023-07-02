@@ -277,24 +277,24 @@ public static class EvaluationConstants
     };
 
     /// <summary>
-    /// Base absolute checkmate evaluation value. Actual absolute evaluations are lower than this one by <see cref="Position.DepthCheckmateFactor"/>
+    /// Base absolute checkmate evaluation value. Actual absolute evaluations are lower than this one by a number of <see cref="Position.DepthCheckmateFactor"/>
     /// </summary>
-    public const int CheckMateBaseEvaluation = 1_000_000_000;
+    public const int CheckMateBaseEvaluation = 30_000;
 
     /// <summary>
-    /// This value combined with <see cref="PositiveCheckmateDetectionLimit"/> and <see cref="NegativeCheckmateDetectionLimit"/> allows up to mates in 500 moves. TODO decrase to 100k and validate that everything works
+    /// This value combined with <see cref="PositiveCheckmateDetectionLimit"/> and <see cref="NegativeCheckmateDetectionLimit"/> should allows mates up to in <see cref="Constants.AbsoluteMaxDepth"/> moves.
     /// </summary>
-    public const int DepthCheckmateFactor = 1_000_000;
+    public const int DepthCheckmateFactor = 10;
 
     /// <summary>
     /// Minimum evaluation for a position to be White checkmate
     /// </summary>
-    public const int PositiveCheckmateDetectionLimit = (int)(0.1 * CheckMateBaseEvaluation);
+    public const int PositiveCheckmateDetectionLimit = 27_000; // CheckMateBaseEvaluation - (Constants.AbsoluteMaxDepth + 45) * DepthCheckmateFactor;
 
     /// <summary>
     /// Minimum evaluation for a position to be Black checkmate
     /// </summary>
-    public const int NegativeCheckmateDetectionLimit = (int)(-0.1 * CheckMateBaseEvaluation);
+    public const int NegativeCheckmateDetectionLimit = -27_000; // -CheckMateBaseEvaluation + (Constants.AbsoluteMaxDepth + 45) * DepthCheckmateFactor;
 
     public const int FirstKillerMoveValue = 9_000;
 
@@ -305,5 +305,5 @@ public static class EvaluationConstants
     /// <summary>
     /// Outside of the evaluation ranges (higher than any sensible evaluation, lower than <see cref="PositiveCheckmateDetectionLimit"/>)
     /// </summary>
-    public const int NoHashEntry = 12_345_678;
+    public const int NoHashEntry = 25_000;
 }

@@ -66,7 +66,7 @@ public sealed partial class Engine
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck, Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
-            _transpositionTable.RecordHash(position, targetDepth, ply, null, finalPositionEvaluation, NodeType.Exact);
+            _transpositionTable.RecordHash(position, targetDepth, ply, finalPositionEvaluation, NodeType.Exact);
 
             return finalPositionEvaluation;
         }
@@ -197,7 +197,7 @@ public sealed partial class Engine
                     _killerMoves[0, ply] = move;
                 }
 
-                _transpositionTable.RecordHash(position, targetDepth, ply, move, beta, NodeType.Beta);
+                _transpositionTable.RecordHash(position, targetDepth, ply, beta, NodeType.Beta, move);
 
                 return beta;    // TODO return evaluation?
             }
@@ -235,11 +235,11 @@ public sealed partial class Engine
         {
             var eval = Position.EvaluateFinalPosition(ply, isInCheck, Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
 
-            _transpositionTable.RecordHash(position, targetDepth, ply, bestMove, eval, NodeType.Exact);
+            _transpositionTable.RecordHash(position, targetDepth, ply, eval, NodeType.Exact);
             return eval;
         }
 
-        _transpositionTable.RecordHash(position, targetDepth, ply, bestMove, alpha, nodeType);
+        _transpositionTable.RecordHash(position, targetDepth, ply, alpha, nodeType, bestMove);
 
         // Node fails low
         return alpha;

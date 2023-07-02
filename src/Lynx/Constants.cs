@@ -391,4 +391,6 @@ public static class Constants
         0, 1, 2, 3, 4, 5, 6, 7,
         0, 1, 2, 3, 4, 5, 6, 7
     };
+
+    public const int AbsoluteMaxDepth = 255;
 }

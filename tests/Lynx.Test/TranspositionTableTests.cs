@@ -5,13 +5,13 @@ using static Lynx.EvaluationConstants;
 namespace Lynx.Test;
 public class TranspositionTableTests
 {
-    [TestCase(100_000, 1, 100_000)]
-    [TestCase(100_000, 3, 100_000)]
-    [TestCase(100_000, 5, 100_000)]
+    [TestCase(10_000, 1, 10_000)]
+    [TestCase(10_000, 5, 10_000)]
+    [TestCase(10_000, 3, 10_000)]
     [TestCase(PositiveCheckmateDetectionLimit - 1, 5, PositiveCheckmateDetectionLimit - 1)]
-    [TestCase(-100_000, 1, -100_000)]
-    [TestCase(-100_000, 3, -100_000)]
-    [TestCase(-100_000, 5, -100_000)]
+    [TestCase(-10_000, 1, -10_000)]
+    [TestCase(-10_000, 3, -10_000)]
+    [TestCase(-10_000, 5, -10_000)]
     [TestCase(NegativeCheckmateDetectionLimit + 1, 5, NegativeCheckmateDetectionLimit + 1)]
 
     [TestCase(CheckMateBaseEvaluation - 5 * DepthCheckmateFactor, 2, CheckMateBaseEvaluation - 7 * DepthCheckmateFactor)]
