@@ -184,7 +184,7 @@ public sealed class EngineSettings
     public int QueenMobilityBonus { get; set; } = 1;
 
     /// <summary>
-    /// 128 MB
+    /// 64 MB
     /// </summary>
-    public int TranspositionTableSize { get; set; } = 128 * 1024 * 1024;
+    public int TranspositionTableSize { get; set; } = 64 * 1024 * 1024;
 }
