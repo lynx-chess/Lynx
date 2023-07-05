@@ -5,9 +5,19 @@ using System.Text;
 
 namespace Lynx;
 
-public record SearchResult(Move BestMove, double Evaluation, int TargetDepth, int DepthReached, int Nodes, long Time, long NodesPerSecond, List<Move> Moves, int Alpha, int Beta, int Mate = default)
+public sealed record SearchResult(Move BestMove, double Evaluation, int TargetDepth, List<Move> Moves, int Alpha, int Beta, int Mate = default)
 {
+    public int DepthReached { get; set; }
+
+    public int Nodes { get; set; }
+
+    public long Time { get; set; }
+
+    public long NodesPerSecond { get; set; }
+
     public bool IsCancelled { get; set; }
+
+    public int HashfullPermill { get; set; }
 
     public SearchResult(SearchResult previousSearchResult)
     {
@@ -24,8 +34,8 @@ public record SearchResult(Move BestMove, double Evaluation, int TargetDepth, in
 
 public sealed partial class Engine
 {
-    private const int MinValue = -2 * EvaluationConstants.CheckMateEvaluation;
-    private const int MaxValue = +2 * EvaluationConstants.CheckMateEvaluation;
+    private const int MinValue = short.MinValue;
+    private const int MaxValue = short.MaxValue;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private List<Move> SortMoves(IEnumerable<Move> moves, in Position currentPosition, int depth)

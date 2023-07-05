@@ -1,13 +1,18 @@
-﻿namespace Lynx;
+﻿using Lynx.Model;
+using System.Runtime.InteropServices;
+
+namespace Lynx;
 
 public static class Configuration
 {
+    public static EngineSettings EngineSettings { get; set; } = new EngineSettings();
+    public static GeneralSettings GeneralSettings { get; set; } = new GeneralSettings();
+
     private static int _isDebug = 0;
 #pragma warning disable IDE1006 // Naming Styles
     private static int _UCI_AnalyseMode = 0;
 #pragma warning restore IDE1006 // Naming Styles
     private static int _ponder = 0;
-    private static int _hash = 0;
 
     public static bool IsDebug
     {
@@ -59,13 +64,9 @@ public static class Configuration
 
     public static int Hash
     {
-        get => _hash;
-        set => Interlocked.Exchange(ref _hash, value);
+        get => EngineSettings.TranspositionTableSize;
+        set => EngineSettings.TranspositionTableSize = value;
     }
-
-    public static EngineSettings EngineSettings { get; set; } = new EngineSettings();
-
-    public static GeneralSettings GeneralSettings { get; set; } = new GeneralSettings();
 }
 
 public sealed class GeneralSettings
@@ -139,7 +140,8 @@ public sealed class EngineSettings
 
     public int MinDepth { get; set; } = 4;
 
-    public int MaxDepth { get; set; } = 32;
+    private int _maxDepth = 64;
+    public int MaxDepth { get => _maxDepth; set => _maxDepth = Math.Clamp(value, 1, Constants.AbsoluteMaxDepth); }
 
     public int MinMoveTime { get; set; } = 1_000;
 
@@ -180,4 +182,9 @@ public sealed class EngineSettings
     public int BishopMobilityBonus { get; set; } = 1;
 
     public int QueenMobilityBonus { get; set; } = 1;
+
+    /// <summary>
+    /// 128 MB
+    /// </summary>
+    public int TranspositionTableSize { get; set; } = 128 * 1024 * 1024;
 }

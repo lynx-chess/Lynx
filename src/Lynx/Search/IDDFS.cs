@@ -8,10 +8,11 @@ namespace Lynx;
 public sealed partial class Engine
 {
     private readonly Stopwatch _stopWatch = new();
-    private readonly Move[] _pVTable = new Move[((Configuration.EngineSettings.MaxDepth * Configuration.EngineSettings.MaxDepth) + Configuration.EngineSettings.MaxDepth) / 2];
+    private readonly Move[] _pVTable = new Move[Configuration.EngineSettings.MaxDepth * (Configuration.EngineSettings.MaxDepth + 1) / 2];
     private readonly int[,] _killerMoves = new int[2, Configuration.EngineSettings.MaxDepth];
     private readonly int[,] _historyMoves = new int[12, 64];
     private readonly int[] _maxDepthReached = new int[Configuration.EngineSettings.MaxDepth];
+    private TranspositionTable _transpositionTable = new TranspositionTableElement[TranspositionTableExtensions.TranspositionTableArrayLength];
 
     private int _nodes;
     private bool _isFollowingPV;
@@ -56,7 +57,10 @@ public sealed partial class Engine
         {
             _logger.Debug("Ponder hit");
 
-            lastSearchResult = new SearchResult(_previousSearchResult);
+            lastSearchResult = new SearchResult(_previousSearchResult)
+            {
+                HashfullPermill = _transpositionTable.HashfullPermill()
+            };
             Array.Copy(_previousSearchResult.Moves.ToArray(), 2, _pVTable, 0, _previousSearchResult.Moves.Count - 2);
 
             Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult)));
@@ -96,7 +100,7 @@ public sealed partial class Engine
                 bestEvaluation = NegaMax(Game.CurrentPosition, minDepth, maxDepth: depth, depth: 0, alpha, beta, isVerifyingNullMoveCutOff: true);
 
                 var bestEvaluationAbs = Math.Abs(bestEvaluation);
-                isMateDetected = bestEvaluationAbs > 0.1 * EvaluationConstants.CheckMateEvaluation;
+                isMateDetected = bestEvaluationAbs > EvaluationConstants.PositiveCheckmateDetectionLimit;
 
                 // 🔍 Aspiration Windows
                 if (!isMateDetected && ((bestEvaluation <= alpha) || (bestEvaluation >= beta)))
@@ -120,14 +124,20 @@ public sealed partial class Engine
                 int mate = default;
                 if (isMateDetected)
                 {
-                    mate = (int)Math.Ceiling(0.5 * ((EvaluationConstants.CheckMateEvaluation - bestEvaluationAbs) / Position.DepthFactor));
-                    mate = (int)Math.CopySign(mate, bestEvaluation);
+                    mate = Utils.CalculateMateInX(bestEvaluation, bestEvaluationAbs);
                 }
 
                 var elapsedTime = _stopWatch.ElapsedMilliseconds;
 
                 _previousSearchResult = lastSearchResult;
-                lastSearchResult = new SearchResult(pvMoves.FirstOrDefault(), bestEvaluation, depth, maxDepthReached, _nodes, elapsedTime, Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * elapsedTime) + 1), 0, Int64.MaxValue)), pvMoves, alpha, beta, mate);
+                lastSearchResult = new SearchResult(pvMoves.FirstOrDefault(), bestEvaluation, depth, pvMoves, alpha, beta, mate)
+                {
+                    DepthReached = maxDepthReached,
+                    Nodes = _nodes,
+                    Time = elapsedTime,
+                    NodesPerSecond = Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * elapsedTime) + 1), 0, long.MaxValue)),
+                    HashfullPermill = _transpositionTable.HashfullPermill()
+                };
 
                 Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult)));
 
@@ -147,7 +157,7 @@ public sealed partial class Engine
         }
         catch (Exception e) when (e is not AssertException)
         {
-            _logger.Error(e, $"Unexpected error ocurred during the search at depth {depth}, best move will be returned");
+            _logger.Error(e, $"Unexpected error ocurred during the search at depth {depth}, best move will be returned\n{e.StackTrace}");
         }
         finally
         {
@@ -161,7 +171,15 @@ public sealed partial class Engine
         }
         else
         {
-            return new(default, bestEvaluation, depth, depth, _nodes, _stopWatch.ElapsedMilliseconds, Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * _stopWatch.ElapsedMilliseconds) + 1), 0, Int64.MaxValue)), new List<Move>(), alpha, beta);
+            return new(default, bestEvaluation, depth, new List<Move>(), alpha, beta)
+            {
+                DepthReached = _maxDepthReached.LastOrDefault(item => item != default),
+                Nodes = _nodes,
+                Time = _stopWatch.ElapsedMilliseconds,
+                NodesPerSecond = Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * _stopWatch.ElapsedMilliseconds) + 1), 0, long.MaxValue)),
+                HashfullPermill = _transpositionTable.HashfullPermill(),
+                IsCancelled = isCancelled
+            };
         }
 
         static bool stopSearchCondition(int depth, int? maxDepth, bool isMateDetected, int nodes, int? decisionTime, Stopwatch stopWatch, ILogger logger)

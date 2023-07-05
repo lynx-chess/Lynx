@@ -4,11 +4,14 @@ using System.Text.RegularExpressions;
 
 namespace Lynx;
 
-public static class FENParser
+public static partial class FENParser
 {
+    [GeneratedRegex("(?<=^|\\/)[P|N|B|R|Q|K|p|n|b|r|q|k|\\d]{1,8}", RegexOptions.Compiled)]
+    private static partial Regex RankRegex();
+
     private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
 
-    private static readonly Regex _ranksRegex = new(@"(?<=^|\/)[P|N|B|R|Q|K|p|n|b|r|q|k|\d]{1,8}", RegexOptions.Compiled);
+    private static readonly Regex _ranksRegex = RankRegex();
 
     public static (bool Success, BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, int Castle, BoardSquare EnPassant,
         int HalfMoveClock, int FullMoveCounter) ParseFEN(string fen)

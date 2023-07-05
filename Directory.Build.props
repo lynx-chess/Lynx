@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
+    <LangVersion>preview</LangVersion>
     <Nullable>Enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
@@ -10,6 +11,7 @@
   <ItemGroup>
     <Using Include="System.Int32" Alias="Move" />
     <Using Include="System.UInt64" Alias="BitBoard" />
+    <Using Include="Lynx.Model.TranspositionTableElement[]" Alias="TranspositionTable" />
   </ItemGroup >
 
   <PropertyGroup>

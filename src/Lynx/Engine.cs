@@ -51,6 +51,7 @@ public sealed partial class Engine
         AverageDepth = 0;
         _isNewGameComing = true;
         _isNewGameCommandSupported = true;
+        _transpositionTable = new TranspositionTableElement[TranspositionTableExtensions.TranspositionTableArrayLength];
     }
 
     public void AdjustPosition(string rawPositionCommand)
@@ -135,6 +136,7 @@ public sealed partial class Engine
         }
 
         var result = IDDFS(minDepth, maxDepth, decisionTime);
+        Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(result)));
         _logger.Info($"Evaluation: {result.Evaluation} (depth: {result.TargetDepth}, refutation: {string.Join(", ", result.Moves.Select(m => m.ToMoveString()))})");
 
         if (!result.IsCancelled && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)

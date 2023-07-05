@@ -25,12 +25,33 @@ public sealed partial class Engine
     private int NegaMax(in Position position, int minDepth, int maxDepth, int depth, int alpha, int beta, bool isVerifyingNullMoveCutOff, bool ancestorWasNullMove = false)
     {
         _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
+
+        //if (Position.IsThreefoldRepetition(Game.PositionHashHistory) || Position.Is50MovesRepetition(_halfMovesWithoutCaptureOrPawnMove))
+        //{
+        //    return 0;
+        //}
+
+        if (depth >= Configuration.EngineSettings.MaxDepth)
+        {
+            return position.StaticEvaluation(Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
+            //_transpositionTable.RecordHash(position, targetDepth, ply, null, staticEval, NodeType.Exact);         // This seems to create bugs for multiple people
+        }
+
+        //bool isPvNode = beta - alpha == 1;
+        //if (!isPvNode && depth > 0)
+        //{
+        //    var transpositionTableValue = _transpositionTable.ProbeHash(position, maxDepth, depth, alpha, beta);
+        //    if (transpositionTableValue != EvaluationConstants.NoHashEntry)
+        //    {
+        //        return transpositionTableValue;
+        //    }
+        //}
+
         if (depth > minDepth)
         {
             _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
         }
 
-        ++_nodes;
         _maxDepthReached[depth] = depth;
 
         var pvIndex = PVTable.Indexes[depth];
@@ -48,8 +69,12 @@ public sealed partial class Engine
                 }
             }
 
-            return Position.EvaluateFinalPosition(depth, isInCheck, Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
+            var finalPositionEvaluation = Position.EvaluateFinalPosition(depth, isInCheck, Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
+            //_transpositionTable.RecordHash(position, maxDepth, depth, finalPositionEvaluation, NodeType.Exact);
+            return finalPositionEvaluation;
         }
+
+        ++_nodes;
 
         // 🔍 Null-move pruning
         bool isFailHigh = false;    // In order to detect zugzwangs
@@ -84,6 +109,8 @@ public sealed partial class Engine
         }
 
         VerifiedNullMovePruning_SearchAgain:
+
+        var nodeType = NodeType.Alpha;
 
         int movesSearched = 0;
         Move? bestMove = null;
@@ -175,6 +202,9 @@ public sealed partial class Engine
                     _killerMoves[1, depth] = _killerMoves[0, depth];
                     _killerMoves[0, depth] = move;
                 }
+
+                //_transpositionTable.RecordHash(position, maxDepth, depth, beta, NodeType.Beta, move);
+
                 return beta;    // TODO return evaluation?
             }
 
@@ -191,6 +221,7 @@ public sealed partial class Engine
 
                 _pVTable[pvIndex] = move;
                 CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - depth - 1);
+                nodeType = NodeType.Alpha;
             }
 
             ++movesSearched;
@@ -205,12 +236,15 @@ public sealed partial class Engine
             goto VerifiedNullMovePruning_SearchAgain;
         }
 
-        if (bestMove is null)
+        if (bestMove is null && !isAnyMoveValid)
         {
-            return isAnyMoveValid
-                ? alpha
-                : Position.EvaluateFinalPosition(depth, isInCheck, Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
+            var eval = Position.EvaluateFinalPosition(depth, isInCheck, Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
+
+            //_transpositionTable.RecordHash(position, maxDepth, depth, eval, NodeType.Exact);
+            return eval;
         }
+
+        //_transpositionTable.RecordHash(position, maxDepth, depth, alpha, nodeType, bestMove);
 
         // Node fails low
         return alpha;
@@ -234,6 +268,16 @@ public sealed partial class Engine
     {
         _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
         //_cancellationToken.Token.ThrowIfCancellationRequested();
+
+        //if (Position.IsThreefoldRepetition(Game.PositionHashHistory) || Position.Is50MovesRepetition(_halfMovesWithoutCaptureOrPawnMove))
+        //{
+        //    return 0;
+        //}
+
+        if (depth >= Configuration.EngineSettings.MaxDepth)
+        {
+            return position.StaticEvaluation(Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
+        }
 
         ++_nodes;
         _maxDepthReached[depth] = depth;
