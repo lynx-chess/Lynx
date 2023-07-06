@@ -6,6 +6,9 @@ public static class PVTable
 {
     public static readonly ImmutableArray<int> Indexes = Initialize();
 
+    // TODO verify it's using the updated values
+    public static int PVLength => Configuration.EngineSettings.MaxDepth * (Configuration.EngineSettings.MaxDepth + 1) / 2;
+
     private static ImmutableArray<int> Initialize()
     {
         var indexes = new int[Configuration.EngineSettings.MaxDepth + 1];

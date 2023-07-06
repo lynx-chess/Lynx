@@ -1,4 +1,5 @@
-﻿using Lynx.Model;
+﻿using CommunityToolkit.HighPerformance;
+using Lynx.Model;
 using Lynx.UCI.Commands.Engine;
 using NLog;
 using System.Diagnostics;
@@ -8,7 +9,7 @@ namespace Lynx;
 public sealed partial class Engine
 {
     private readonly Stopwatch _stopWatch = new();
-    private readonly Move[] _pVTable = new Move[Configuration.EngineSettings.MaxDepth * (Configuration.EngineSettings.MaxDepth + 1) / 2];
+    private readonly Move[,] _pVTable = new Move[Constants.MaxMultiPV, PVTable.PVLength];
     private readonly int[,] _killerMoves = new int[2, Configuration.EngineSettings.MaxDepth];
     private readonly int[,] _historyMoves = new int[12, 64];
     private readonly int[] _maxDepthReached = new int[Configuration.EngineSettings.MaxDepth];
@@ -18,7 +19,7 @@ public sealed partial class Engine
     private bool _isFollowingPV;
     private bool _isScoringPV;
 
-    private SearchResult? _previousSearchResult;
+    private List<SearchResult>? _previousSearchResult;
     private readonly int[,] _previousKillerMoves = new int[2, Configuration.EngineSettings.MaxDepth];
 
     /// <summary>
@@ -44,24 +45,28 @@ public sealed partial class Engine
         int bestEvaluation = 0;
         int alpha = MinValue;
         int beta = MaxValue;
-        SearchResult? lastSearchResult = null;
+        List<SearchResult>? lastSearchResult = null;
         int depth = 1;
         bool isCancelled = false;
         bool isMateDetected = false;
 
         if (Game.MoveHistory.Count >= 2
-            && _previousSearchResult?.Moves.Count >= 2
-            && _previousSearchResult.BestMove != default
-            && Game.MoveHistory[^2] == _previousSearchResult.Moves[0]
-            && Game.MoveHistory[^1] == _previousSearchResult.Moves[1])
+            && _previousSearchResult?[0]?.Moves.Count >= 2
+            && _previousSearchResult?[0].BestMove != default
+            && Game.MoveHistory[^2] == _previousSearchResult?[0].Moves[0]
+            && Game.MoveHistory[^1] == _previousSearchResult?[0].Moves[1])
         {
             _logger.Debug("Ponder hit");
 
-            lastSearchResult = new SearchResult(_previousSearchResult)
+            lastSearchResult = new List<SearchResult>();
+            foreach (var previousSearchResult in _previousSearchResult)
             {
-                HashfullPermill = _transpositionTable.HashfullPermill()
-            };
-            Array.Copy(_previousSearchResult.Moves.ToArray(), 2, _pVTable, 0, _previousSearchResult.Moves.Count - 2);
+                lastSearchResult.Add(new SearchResult(previousSearchResult)
+                {
+                    HashfullPermill = _transpositionTable.HashfullPermill()
+                });
+                Array.Copy(previousSearchResult.Moves.ToArray(), 2, _pVTable, 0, previousSearchResult.Moves.Count - 2);
+            }
 
             Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult)));
 
@@ -71,9 +76,9 @@ public sealed partial class Engine
                 _killerMoves[1, d] = _previousKillerMoves[1, d + 2];
             }
 
-            depth = lastSearchResult.TargetDepth + 1;
-            alpha = lastSearchResult.Alpha;
-            beta = lastSearchResult.Beta;
+            depth = lastSearchResult[0].TargetDepth + 1;
+            alpha = lastSearchResult[0].Alpha;
+            beta = lastSearchResult[0].Beta;
         }
         else
         {
@@ -94,7 +99,7 @@ public sealed partial class Engine
                 }
                 _nodes = 0;
 
-                AspirationWindows_SearchAgain:
+            AspirationWindows_SearchAgain:
 
                 _isFollowingPV = true;
                 bestEvaluation = NegaMax(Game.CurrentPosition, minDepth, maxDepth: depth, depth: 0, alpha, beta, isVerifyingNullMoveCutOff: true);
@@ -118,7 +123,13 @@ public sealed partial class Engine
                 //PrintPvTable();
                 ValidatePVTable();
 
-                var pvMoves = _pVTable.TakeWhile(m => m != default).ToList();
+                var pvSpan2D = new Span2D<int>(_pVTable);
+
+                var pvMoves = new List<List<Move>>();
+                for (int i = 0; i < PVTable.PVLength; ++i)
+                {
+                    pvMoves.Add(pvSpan2D.GetRowSpan(i).ToArray().TakeWhile(m => m != default).ToList());
+                }
                 var maxDepthReached = _maxDepthReached.LastOrDefault(item => item != default);
 
                 int mate = default;
@@ -130,7 +141,7 @@ public sealed partial class Engine
                 var elapsedTime = _stopWatch.ElapsedMilliseconds;
 
                 _previousSearchResult = lastSearchResult;
-                lastSearchResult = new SearchResult(pvMoves.FirstOrDefault(), bestEvaluation, depth, pvMoves, alpha, beta, mate)
+                lastSearchResult = new SearchResult(pvMoves[0].FirstOrDefault(), bestEvaluation, depth, pvMoves, alpha, beta, mate)
                 {
                     DepthReached = maxDepthReached,
                     Nodes = _nodes,
@@ -152,7 +163,8 @@ public sealed partial class Engine
 
             for (int i = 0; i < lastSearchResult?.Moves.Count; ++i)
             {
-                _pVTable[i] = lastSearchResult.Moves[i];
+                for (int j = 0; j < lastSearchResult.Moves[i].Count; ++j)
+                    _pVTable[i, j] = lastSearchResult.Moves[i][j];
             }
         }
         catch (Exception e) when (e is not AssertException)
@@ -171,7 +183,7 @@ public sealed partial class Engine
         }
         else
         {
-            return new(default, bestEvaluation, depth, new List<Move>(), alpha, beta)
+            return new(default, bestEvaluation, depth, new List<List<Move>>(), alpha, beta)
             {
                 DepthReached = _maxDepthReached.LastOrDefault(item => item != default),
                 Nodes = _nodes,

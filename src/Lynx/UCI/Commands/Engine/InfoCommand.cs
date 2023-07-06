@@ -1,4 +1,5 @@
-﻿using Lynx.Model;
+﻿using System.Text;
+using Lynx.Model;
 
 namespace Lynx.UCI.Commands.Engine;
 
@@ -75,19 +76,28 @@ public sealed class InfoCommand : EngineBaseCommand
 {
     public const string Id = "info";
 
-    public static string SearchResultInfo(SearchResult searchResult)
+    public static string SearchResultInfo(List<SearchResult> searchResultList)
     {
+        var result = new StringBuilder();
+
+        for (int searchResultIndex = 0; searchResultIndex < searchResultList.Count; ++searchResultIndex)
+        {
+            var searchResult = searchResultList[searchResultIndex];
+
+            result.AppendLine(Id +
 #pragma warning disable RCS1214 // Unnecessary interpolated string.
-        return Id +
-            $" depth {searchResult.TargetDepth}" +
-            $" seldepth {searchResult.DepthReached}" +
-            $" multipv 1" +
-            $" score {(searchResult.Mate == default ? $"cp {searchResult.Evaluation}" : $"mate {searchResult.Mate}")}" +
-            $" nodes {searchResult.Nodes}" +
-            $" nps {searchResult.NodesPerSecond}" +
-            $" time {searchResult.Time}" +
-            $" hashfull {searchResult.HashfullPermill}" +
-            $" pv {string.Join(" ", searchResult.Moves.Select(move => move.UCIString()))}";
+                $" depth {searchResult.TargetDepth}" +
+                $" seldepth {searchResult.DepthReached}" +
+                $" multipv {searchResultIndex}" +
+                $" score {(searchResult.Mate == default ? $"cp {searchResult.Evaluation}" : $"mate {searchResult.Mate}")}" +
+                $" nodes {searchResult.Nodes}" +
+                $" nps {searchResult.NodesPerSecond}" +
+                $" time {searchResult.Time}" +
+                $" hashfull {searchResult.HashfullPermill}" +
+                $" pv {string.Join(" ", searchResult.Moves.Select(move => move.UCIString()))}");
 #pragma warning restore RCS1214 // Unnecessary interpolated string.
+        }
+
+        return result.ToString();
     }
 }

@@ -393,4 +393,6 @@ public static class Constants
     };
 
     public const int AbsoluteMaxDepth = 255;
+
+    public const int MaxMultiPV = 10;
 }

@@ -124,7 +124,8 @@ public sealed class OptionCommand : EngineBaseCommand
     public static readonly ImmutableArray<string> AvailableOptions = ImmutableArray.Create<string>(
         "option name UCI_Opponent type string",
         "option name UCI_EngineAbout type string default Lynx by Eduardo Cáceres, see https://github.com/lynx-chess/Lynx",
-        $"option name Hash type spin default {Configuration.EngineSettings.TranspositionTableSize / 1024 / 1024} min 1 max 131072");
+        $"option name Hash type spin default {Configuration.EngineSettings.TranspositionTableSize / 1024 / 1024} min 1 max 131072",
+        $"option name MultiPV type spin default 1 min 1 max {Constants.MaxMultiPV}");
 
     //"option name Hash type spin default 1 min 1 max 128",
     //"option name UCI_AnalyseMode type check",
@@ -133,7 +134,6 @@ public sealed class OptionCommand : EngineBaseCommand
     //"option name Ponder type check",
     //$"option name Depth type spin default 3 min 1 max {int.MaxValue}"
     //"option name OwnBook type check",
-    //"option name MultiPV type spin default 1",
     //"option name UCI_ShowCurrLine type check default false",      // Interesting
     //"option name UCI_ShowRefutations type check default false",
     //"option name UCI_LimitStrength type check default false",

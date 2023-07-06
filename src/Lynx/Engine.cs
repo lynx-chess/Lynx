@@ -137,7 +137,7 @@ public sealed partial class Engine
 
         var result = IDDFS(minDepth, maxDepth, decisionTime);
         Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(result)));
-        _logger.Info($"Evaluation: {result.Evaluation} (depth: {result.TargetDepth}, refutation: {string.Join(", ", result.Moves.Select(m => m.ToMoveString()))})");
+        _logger.Info($"Evaluation: {result.Evaluation} (depth: {result.TargetDepth}, refutation: {string.Join(", ", result.Moves[0].Select(m => m.ToMoveString()))})");
 
         if (!result.IsCancelled && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
         {
@@ -216,7 +216,7 @@ public sealed partial class Engine
             try
             {
                 var searchResult = BestMove(goCommand);
-                _moveToPonder = searchResult.Moves.Count >= 2 ? searchResult.Moves[1] : null;
+                _moveToPonder = searchResult.Moves[0].Count >= 2 ? searchResult.Moves[0][1] : null;
                 await _engineWriter.WriteAsync(BestMoveCommand.BestMove(searchResult.BestMove, _moveToPonder));
             }
             catch (Exception e)

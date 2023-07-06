@@ -45,7 +45,7 @@ public sealed partial class Engine
             _isFollowingPV = false;
             foreach (var move in moves)
             {
-                if (move == _pVTable[depth])
+                if (move == _pVTable[0, depth])
                 {
                     _isFollowingPV = true;
                     _isScoringPV = true;
@@ -60,7 +60,7 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int Score(Move move, in Position position, int depth)
     {
-        if (_isScoringPV && move == _pVTable[depth])
+        if (_isScoringPV && move == _pVTable[0, depth])
         {
             _isScoringPV = false;
 
@@ -97,35 +97,38 @@ public sealed partial class Engine
     private void ValidatePVTable()
     {
         var position = Game.CurrentPosition;
-        for (int i = 0; i < PVTable.Indexes[1]; ++i)
+        for (int index = 0; index < _pVTable.Length; ++index)
         {
-            if (_pVTable[i] == default)
+            for (int i = 0; i < PVTable.Indexes[1]; ++i)
             {
-                for (int j = i + 1; j < PVTable.Indexes[1]; ++j)
+                if (_pVTable[index, i] == default)
                 {
-                    Utils.Assert(_pVTable[j] == default, $"Not expecting a move in _pvTable[{j}]");
+                    for (int j = i + 1; j < PVTable.Indexes[1]; ++j)
+                    {
+                        Utils.Assert(_pVTable[index, j] == default, $"Not expecting a move in _pvTable[{j}]");
+                    }
+                    break;
                 }
-                break;
-            }
-            var move = _pVTable[i];
+                var move = _pVTable[index, i];
 
-            if (!MoveExtensions.TryParseFromUCIString(
-               move.UCIString(),
-               position.AllPossibleMoves(Game.MovePool),
-               out _))
-            {
-                var message = $"Unexpected PV move {move.UCIString()} from position {position.FEN()}";
-                _logger.Error(message);
-                throw new AssertException(message);
-            }
+                if (!MoveExtensions.TryParseFromUCIString(
+                   move.UCIString(),
+                   position.AllPossibleMoves(Game.MovePool),
+                   out _))
+                {
+                    var message = $"Unexpected PV move {move.UCIString()} from position {position.FEN()}";
+                    _logger.Error(message);
+                    throw new AssertException(message);
+                }
 
-            var newPosition = new Position(in position, move);
+                var newPosition = new Position(in position, move);
 
-            if (!newPosition.WasProduceByAValidMove())
-            {
-                throw new AssertException($"Invalid position after move {move.UCIString()} from position {position.FEN()}");
+                if (!newPosition.WasProduceByAValidMove())
+                {
+                    throw new AssertException($"Invalid position after move {move.UCIString()} from position {position.FEN()}");
+                }
+                position = newPosition;
             }
-            position = newPosition;
         }
     }
 
@@ -194,15 +197,18 @@ public sealed partial class Engine
     [Conditional("DEBUG")]
     private void PrintPvTable(int target = -1, int source = -1)
     {
-        Console.WriteLine(
-(target != -1 ? $"src: {source}, tgt: {target}" + Environment.NewLine : "") +
-$" {0,-3} {_pVTable[0],-6} {_pVTable[1],-6} {_pVTable[2],-6} {_pVTable[3],-6} {_pVTable[4],-6} {_pVTable[5],-6} {_pVTable[6],-6} {_pVTable[7],-6}" + Environment.NewLine +
-$" {64,-3}        {_pVTable[64],-6} {_pVTable[65],-6} {_pVTable[66],-6} {_pVTable[67],-6} {_pVTable[68],-6} {_pVTable[69],-6} {_pVTable[70],-6}" + Environment.NewLine +
-$" {127,-3}               {_pVTable[127],-6} {_pVTable[128],-6} {_pVTable[129],-6} {_pVTable[130],-6} {_pVTable[131],-6} {_pVTable[132],-6}" + Environment.NewLine +
-$" {189,-3}                      {_pVTable[189],-6} {_pVTable[190],-6} {_pVTable[191],-6} {_pVTable[192],-6} {_pVTable[193],-6}" + Environment.NewLine +
-$" {250,-3}                             {_pVTable[250],-6} {_pVTable[251],-6} {_pVTable[252],-6} {_pVTable[253],-6}" + Environment.NewLine +
-$" {310,-3}                                    {_pVTable[310],-6} {_pVTable[311],-6} {_pVTable[312],-6}" + Environment.NewLine +
-(target == -1 ? "------------------------------------------------------------------------------------" + Environment.NewLine : ""));
+        for (int index = 0; index < PVTable.PVLength; ++index)
+        {
+            Console.WriteLine(
+    (target != -1 ? $"src: {source}, tgt: {target}" + Environment.NewLine : "") +
+    $" {0,-3} {_pVTable[index, 0],-6} {_pVTable[index, 1],-6} {_pVTable[index, 2],-6} {_pVTable[index, 3],-6} {_pVTable[index, 4],-6} {_pVTable[index, 5],-6} {_pVTable[index, 6],-6} {_pVTable[index, 7],-6}" + Environment.NewLine +
+    $" {64,-3}        {_pVTable[index, 64],-6} {_pVTable[index, 65],-6} {_pVTable[index, 66],-6} {_pVTable[index, 67],-6} {_pVTable[index, 68],-6} {_pVTable[index, 69],-6} {_pVTable[index, 70],-6}" + Environment.NewLine +
+    $" {127,-3}               {_pVTable[index, 127],-6} {_pVTable[index, 128],-6} {_pVTable[index, 129],-6} {_pVTable[index, 130],-6} {_pVTable[index, 131],-6} {_pVTable[index, 132],-6}" + Environment.NewLine +
+    $" {189,-3}                      {_pVTable[index, 189],-6} {_pVTable[index, 190],-6} {_pVTable[index, 191],-6} {_pVTable[index, 192],-6} {_pVTable[index, 193],-6}" + Environment.NewLine +
+    $" {250,-3}                             {_pVTable[index, 250],-6} {_pVTable[index, 251],-6} {_pVTable[index, 252],-6} {_pVTable[index, 253],-6}" + Environment.NewLine +
+    $" {310,-3}                                    {_pVTable[index, 310],-6} {_pVTable[index, 311],-6} {_pVTable[index, 312],-6}" + Environment.NewLine +
+    (target == -1 ? "------------------------------------------------------------------------------------" + Environment.NewLine : ""));
+        }
     }
 
     #endregion
