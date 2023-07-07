@@ -24,17 +24,12 @@ public sealed partial class Engine
     /// <returns></returns>
     private int NegaMax(in Position position, int minDepth, int maxDepth, int depth, int alpha, int beta, bool isVerifyingNullMoveCutOff, bool ancestorWasNullMove = false)
     {
+        _maxDepthReached[depth] = depth;
         _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
 
         if (Position.IsThreefoldRepetition(Game.PositionHashHistory) || Position.Is50MovesRepetition(_halfMovesWithoutCaptureOrPawnMove))
         {
            return 0;
-        }
-
-        if (depth >= Configuration.EngineSettings.MaxDepth)
-        {
-            return position.StaticEvaluation();
-            //_transpositionTable.RecordHash(position, targetDepth, ply, null, staticEval, NodeType.Exact);         // This seems to create bugs for multiple people
         }
 
         bool isPvNode = beta - alpha == 1;
@@ -52,11 +47,6 @@ public sealed partial class Engine
             _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
         }
 
-        _maxDepthReached[depth] = depth;
-
-        var pvIndex = PVTable.Indexes[depth];
-        var nextPvIndex = PVTable.Indexes[depth + 1];
-        _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
         bool isInCheck = position.IsInCheck();
 
         if (depth >= maxDepth)
@@ -74,9 +64,17 @@ public sealed partial class Engine
             return finalPositionEvaluation;
         }
 
-// TODO move here code to check overflow
+        // Prevents runtime failure, although it should be covered by the previous check
+        if (depth >= Configuration.EngineSettings.MaxDepth)
+        {
+            _logger.Warn("####################### prevents runtime failure ###########################3");
+            return position.StaticEvaluation();
+            //_transpositionTable.RecordHash(position, targetDepth, ply, null, staticEval, NodeType.Exact);         // This seems to create bugs for multiple people
+        }
 
-// TODO move here pvIndex initialization
+        var pvIndex = PVTable.Indexes[depth];
+        var nextPvIndex = PVTable.Indexes[depth + 1];
+        _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
         ++_nodes;
 
