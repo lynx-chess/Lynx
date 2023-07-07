@@ -222,7 +222,7 @@ public sealed partial class Engine
                 _pVTable[pvIndex] = move;
                 CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
 
-                nodeType = NodeType.Alpha;
+                nodeType = NodeType.Exact;
             }
 
             ++movesSearched;
