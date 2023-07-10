@@ -263,7 +263,6 @@ public sealed partial class Engine
         var generatedMoves = position.AllCapturesMoves(Game.MovePool);
         if (!generatedMoves.Any())
         {
-            _logger.Info("Quiescence - lack of moves: {0}, eval {1}", position.FEN(), staticEvaluation);
             return staticEvaluation;  // TODO check if in check or drawn position
         }
 

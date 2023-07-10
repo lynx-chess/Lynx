@@ -138,7 +138,7 @@ public sealed partial class Engine
         catch (OperationCanceledException)
         {
             isCancelled = true;
-            _logger.Info("Search cancellation requested after {_stopWatch.ElapsedMilliseconds}ms (depth {0}, nodes {1}), best move will be returned", depth, _nodes);
+            _logger.Info("Search cancellation requested after {0}ms (depth {1}, nodes {2}), best move will be returned", _stopWatch.ElapsedMilliseconds, depth, _nodes);
 
             for (int i = 0; i < lastSearchResult?.Moves.Count; ++i)
             {
