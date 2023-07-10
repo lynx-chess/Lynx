@@ -39,6 +39,7 @@ public sealed partial class Engine
                 {
                     _isFollowingPV = true;
                     _isScoringPV = true;
+                    break;
                 }
             }
         }
