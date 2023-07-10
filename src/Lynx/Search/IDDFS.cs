@@ -104,7 +104,7 @@ public sealed partial class Engine
                     alpha = MinValue;   // We fell outside the window, so try again with a
                     beta = MaxValue;    // full-width window (and the same depth).
 
-                    _logger.Debug($"Outside of aspiration window (depth {depth}, nodes {_nodes}): eval {bestEvaluation}, alpha {alpha}, beta {beta}");
+                    _logger.Debug("Outside of aspiration window (depth {0}, nodes {1}): eval {2}, alpha {3}, beta {4}", depth, _nodes, bestEvaluation, alpha, beta);
                     goto AspirationWindows_SearchAgain;
                 }
 
@@ -138,7 +138,7 @@ public sealed partial class Engine
         catch (OperationCanceledException)
         {
             isCancelled = true;
-            _logger.Info($"Search cancellation requested after {_stopWatch.ElapsedMilliseconds}ms (depth {depth}, nodes {_nodes}), best move will be returned");
+            _logger.Info("Search cancellation requested after {_stopWatch.ElapsedMilliseconds}ms (depth {0}, nodes {1}), best move will be returned", depth, _nodes);
 
             for (int i = 0; i < lastSearchResult?.Moves.Count; ++i)
             {
@@ -147,7 +147,7 @@ public sealed partial class Engine
         }
         catch (Exception e) when (e is not AssertException)
         {
-            _logger.Error(e, $"Unexpected error ocurred during the search at depth {depth}, best move will be returned");
+            _logger.Error(e, "Unexpected error ocurred during the search at depth {0}, best move will be returned\n{1}", depth, e.StackTrace);
         }
         finally
         {
@@ -177,7 +177,7 @@ public sealed partial class Engine
                 bool shouldContinue = depth <= maxDepth;
                 if (!shouldContinue)
                 {
-                    logger.Info($"Stopping at depth {depth - 1}: max. depth reached");
+                    logger.Info("Stopping at depth {0}: max. depth reached", depth - 1);
                 }
                 return shouldContinue;
             }
@@ -187,7 +187,8 @@ public sealed partial class Engine
             var decisionTimePercentageToStopSearching = Configuration.EngineSettings.DecisionTimePercentageToStopSearching;
             if (decisionTime is not null && elapsedMilliseconds > minTimeToConsiderStopSearching && elapsedMilliseconds > decisionTimePercentageToStopSearching * decisionTime)
             {
-                logger.Info($"Stopping at depth {depth - 1} (nodes {nodes}): {elapsedMilliseconds} > {Configuration.EngineSettings.DecisionTimePercentageToStopSearching * decisionTime} (elapsed time > [{minTimeToConsiderStopSearching}, {decisionTimePercentageToStopSearching} * decision time])");
+                logger.Info("Stopping at depth {0} (nodes {1}): {2} > {3} (elapsed time > [{4}, {5} * decision time])",
+                    depth - 1, nodes, elapsedMilliseconds, Configuration.EngineSettings.DecisionTimePercentageToStopSearching * decisionTime, minTimeToConsiderStopSearching, decisionTimePercentageToStopSearching);
                 return false;
             }
 

@@ -96,12 +96,12 @@ public sealed partial class Engine
 
                 if (decisionTime > Configuration.EngineSettings.MinMoveTime)
                 {
-                    _logger.Info($"Time to move: {0.001 * decisionTime}s, min. {minDepth} plies");
+                    _logger.Info("Time to move: {0}s, min. {1} plies", 0.001 * decisionTime, minDepth);
                     _searchCancellationTokenSource.CancelAfter(decisionTime.Value);
                 }
                 else // Ignore decisionTime and limit search to MinDepthWhenLessThanMinMoveTime plies
                 {
-                    _logger.Info($"Depth limited to {Configuration.EngineSettings.DepthWhenLessThanMinMoveTime} plies due to time trouble (decision time: {decisionTime})");
+                    _logger.Info("Depth limited to {0} plies due to time trouble (decision time: {1})", Configuration.EngineSettings.DepthWhenLessThanMinMoveTime, decisionTime);
                     maxDepth = Configuration.EngineSettings.DepthWhenLessThanMinMoveTime;
                 }
             }
@@ -109,7 +109,7 @@ public sealed partial class Engine
             {
                 minDepth = 0;
                 decisionTime = (int)(0.95 * goCommand.MoveTime);
-                _logger.Info($"Time to move: {0.001 * decisionTime}s, min. {minDepth} plies");
+                _logger.Info("Time to move: {0}s, min. {1} plies", 0.001 * decisionTime, minDepth);
                 _searchCancellationTokenSource.CancelAfter(decisionTime.Value);
             }
             else if (goCommand.Depth > 0)
@@ -121,7 +121,7 @@ public sealed partial class Engine
             {
                 minDepth = Configuration.EngineSettings.MaxDepth;
                 maxDepth = Configuration.EngineSettings.MaxDepth;
-                _logger.Info($"Infinite search (depth {minDepth})");
+                _logger.Info("Infinite search (depth {0})", minDepth);
             }
             else
             {
@@ -135,7 +135,8 @@ public sealed partial class Engine
         }
 
         var result = IDDFS(minDepth, maxDepth, decisionTime);
-        _logger.Info($"Evaluation: {result.Evaluation} (depth: {result.TargetDepth}, refutation: {string.Join(", ", result.Moves.Select(m => m.ToMoveString()))})");
+        Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(result)));
+        _logger.Info("Evaluation: {0} (depth: {1}, refutation: {2})", result.Evaluation, result.TargetDepth, string.Join(", ", result.Moves.Select(m => m.ToMoveString())));
 
         if (!result.IsCancelled && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
         {
@@ -219,7 +220,7 @@ public sealed partial class Engine
             }
             catch (Exception e)
             {
-                _logger.Fatal(e, $"Error in {nameof(StartSearching)} while calculating BestMove");
+                _logger.Fatal(e, "Error in {0} while calculating BestMove", nameof(StartSearching));
             }
         });
         // TODO: if ponder, continue with PonderAction, which is searching indefinitely for a move

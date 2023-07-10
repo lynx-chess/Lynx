@@ -41,7 +41,7 @@ public sealed class LinxDriver
                 {
                     if (_uciReader.TryRead(out var rawCommand) && !string.IsNullOrWhiteSpace(rawCommand))
                     {
-                        _logger.Debug($"[GUI]\t{rawCommand}");
+                        _logger.Debug("[GUI]\t{0}", rawCommand);
 
                         var commandItems = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
                         switch (commandItems[0].ToLowerInvariant())
@@ -87,7 +87,7 @@ public sealed class LinxDriver
                                 break;
 
                             default:
-                                _logger.Warn($"Unknown command received: {rawCommand}");
+                                _logger.Warn("Unknown command received: {0}", rawCommand);
                                 break;
                         }
                     }
@@ -204,7 +204,7 @@ public sealed class LinxDriver
                 {
                     if (commandItems.Length > 4)
                     {
-                        _logger.Info($"Game against {string.Join(' ', commandItems.Skip(4).Except(new[] { "none" }))}");
+                        _logger.Info("Game against {0}", string.Join(' ', commandItems.Skip(4).Except(new[] { "none" })));
                     }
                     break;
                 }
@@ -212,19 +212,19 @@ public sealed class LinxDriver
                 {
                     if (commandItems.Length > 4)
                     {
-                        _logger.Info($"UCI_EngineAbout: {string.Join(' ', commandItems.Skip(4))}");
+                        _logger.Info("UCI_EngineAbout: {0}", string.Join(' ', commandItems.Skip(4)));
                     }
                     break;
                 }
             default:
-                _logger.Warn($"Unsupported option: {command}");
+                _logger.Warn("Unsupported option: {0}", command);
                 break;
         }
     }
 
     private void HandleNewGame()
     {
-        _logger.Info($"Average depth: {_engine.AverageDepth}");
+        _logger.Info("Average depth: {0}", _engine.AverageDepth);
         _engine.NewGame();
     }
 
@@ -232,7 +232,10 @@ public sealed class LinxDriver
 
     private void HandleQuit()
     {
-        _logger.Info($"Average depth: {_engine.AverageDepth}");
+        if (_engine.AverageDepth > 0 && _engine.AverageDepth < int.MaxValue)
+        {
+            _logger.Info("Average depth: {0}", _engine.AverageDepth);
+        }
         _engineWriter.Writer.Complete();
     }
 

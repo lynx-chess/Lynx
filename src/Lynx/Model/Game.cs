@@ -41,7 +41,7 @@ public sealed class Game
 
             if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
             {
-                _logger.Error($"Error parsing game with fen {fen} and moves {string.Join(' ', movesUCIString)}: error detected in {moveString}");
+                _logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen, string.Join(' ', movesUCIString), moveString);
                 break;
             }
 

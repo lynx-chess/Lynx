@@ -43,7 +43,7 @@ public sealed class PositionCommand : GUIBaseCommand
 
             if (string.IsNullOrEmpty(initialPosition))
             {
-                _logger.Error($"Error parsing position command '{positionCommand}': no initial position found");
+                _logger.Error("Error parsing position command '{0}': no initial position found", positionCommand);
             }
 
             var moves = _movesRegex.Match(positionCommand).Value.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
@@ -52,7 +52,7 @@ public sealed class PositionCommand : GUIBaseCommand
         }
         catch (Exception e)
         {
-            _logger.Error(e, $"Error parsing position command '{positionCommand}'");
+            _logger.Error(e, "Error parsing position command '{0}'", positionCommand);
             return new Game();
         }
     }
@@ -68,7 +68,7 @@ public sealed class PositionCommand : GUIBaseCommand
             game.CurrentPosition.AllPossibleMoves(game.MovePool),
             out lastMove))
         {
-            _logger.Warn($"Error parsing last move {lastMove} from position command {positionCommand}");
+            _logger.Warn("Error parsing last move {0} from position command {1}", lastMove, positionCommand);
             return false;
         }
 

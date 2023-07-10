@@ -59,7 +59,7 @@ public static class FENParser
         }
         catch (Exception e)
         {
-            _logger.Error($"Error parsing FEN string {fen}");
+            _logger.Error("Error parsing FEN string {0}", fen);
             _logger.Error(e.Message);
             success = false;
         }
@@ -95,7 +95,7 @@ public static class FENParser
                 }
                 else
                 {
-                    _logger.Error($"Unrecognized character in FEN: {ch} (within {((Group)match).Value})");
+                    _logger.Error("Unrecognized character in FEN: {0} (within {1})", ch, ((Group)match).Value);
                     success = false;
                     break;
                 }
@@ -170,7 +170,7 @@ public static class FENParser
             if (rank != 3 && rank != 6)
             {
                 success = false;
-                _logger.Error($"Invalid en passant square: {enPassantString}");
+                _logger.Error("Invalid en passant square: {0}", enPassantString);
             }
 
             // Check that there's an actual pawn to be captured
@@ -187,13 +187,13 @@ public static class FENParser
             if (!pawnBitBoard.GetBit(pawnSquare))
             {
                 success = false;
-                _logger.Error($"Invalid board: en passant square {enPassantString}, but no {side} pawn located in {pawnSquare}");
+                _logger.Error("Invalid board: en passant square {0}, but no {1} pawn located in {2}", enPassantString, side, pawnSquare);
             }
         }
         else if (enPassantString != "-")
         {
             success = false;
-            _logger.Error($"Invalid en passant square: {enPassantString}");
+            _logger.Error("Invalid en passant square: {0}", enPassantString);
         }
 
         return (enPassant, success);
