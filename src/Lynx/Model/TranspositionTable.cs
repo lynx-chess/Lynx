@@ -89,14 +89,16 @@ public static class TranspositionTableExtensions
     /// <param name="beta"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int ProbeHash(this TranspositionTable transpositionTable, Position position, int targetDepth, int ply, int alpha, int beta)
+    public static (int Evaluation, Move BestMove) ProbeHash(this TranspositionTable transpositionTable, Position position, int targetDepth, int ply, int alpha, int beta)
     {
         var entry = transpositionTable[TranspositionTableIndex(position, transpositionTable)];
 
         if (position.UniqueIdentifier != entry.Key)
         {
-            return EvaluationConstants.NoHashEntry;
+            return (EvaluationConstants.NoHashEntry, default);
         }
+
+        var eval = EvaluationConstants.NoHashEntry;
 
         if (entry.Depth >= (targetDepth - ply))    // TODO is this conditon correct? In BBC depth is passed, but BBC depth decreases when going deeper
         {
@@ -104,7 +106,7 @@ public static class TranspositionTableExtensions
             // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
             var score = RecalculateMateScores(entry.Score, ply);
 
-            return entry.Type switch
+            eval = entry.Type switch
             {
                 NodeType.Exact => score,
                 NodeType.Alpha when score <= alpha => alpha,
@@ -112,12 +114,8 @@ public static class TranspositionTableExtensions
                 _ => EvaluationConstants.NoHashEntry
             };
         }
-        else
-        {
-            // TODO return only best move candidate?
-        }
 
-        return EvaluationConstants.NoHashEntry;
+        return (eval, entry.Move);
     }
 
     /// <summary>

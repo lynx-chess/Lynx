@@ -25,7 +25,7 @@ public class EvaluationConstantsTest
 
         Assert.Greater(checkmateDetectionLimit, _sensibleEvaluation);
 
-        Assert.Greater(checkmateDetectionLimit, PVMoveValue);
+        Assert.Greater(checkmateDetectionLimit, PVMoveScoreValue);
         Assert.Greater(checkmateDetectionLimit, FirstKillerMoveValue);
         Assert.Greater(checkmateDetectionLimit, SecondKillerMoveValue);
     }
@@ -37,7 +37,7 @@ public class EvaluationConstantsTest
         Assert.Greater(PositiveCheckmateDetectionLimit, NoHashEntry);
         Assert.Greater(-NegativeCheckmateDetectionLimit, NoHashEntry);
 
-        Assert.Greater(NoHashEntry, PVMoveValue);
+        Assert.Greater(NoHashEntry, PVMoveScoreValue);
         Assert.Greater(NoHashEntry, FirstKillerMoveValue);
         Assert.Greater(NoHashEntry, SecondKillerMoveValue);
     }

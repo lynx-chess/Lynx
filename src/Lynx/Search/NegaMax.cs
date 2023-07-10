@@ -29,17 +29,20 @@ public sealed partial class Engine
 
         if (Position.IsThreefoldRepetition(Game.PositionHashHistory) || Position.Is50MovesRepetition(_halfMovesWithoutCaptureOrPawnMove))
         {
-           return 0;
+            return 0;
         }
+
+        Move ttBestMove = default;
 
         bool isPvNode = beta - alpha == 1;
         if (!isPvNode && depth > 0)
         {
-           var transpositionTableValue = _transpositionTable.ProbeHash(position, maxDepth, depth, alpha, beta);
-           if (transpositionTableValue != EvaluationConstants.NoHashEntry)
-           {
-               return transpositionTableValue;
-           }
+            var ttProbeResult = _transpositionTable.ProbeHash(position, maxDepth, depth, alpha, beta);
+            if (ttProbeResult.Evaluation != EvaluationConstants.NoHashEntry)
+            {
+                return ttProbeResult.Evaluation;
+            }
+            ttBestMove = ttProbeResult.BestMove;
         }
 
         if (depth > minDepth)
@@ -118,7 +121,7 @@ public sealed partial class Engine
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
-        var pseudoLegalMoves = SortMoves(position.AllPossibleMoves(Game.MovePool), in position, depth);
+        var pseudoLegalMoves = SortMoves(position.AllPossibleMoves(Game.MovePool), in position, depth, ttBestMove);
 
         foreach (var move in pseudoLegalMoves)
         {
@@ -273,7 +276,7 @@ public sealed partial class Engine
 
         if (Position.IsThreefoldRepetition(Game.PositionHashHistory) || Position.Is50MovesRepetition(_halfMovesWithoutCaptureOrPawnMove))
         {
-           return 0;
+            return 0;
         }
 
         if (depth >= Configuration.EngineSettings.MaxDepth)
@@ -302,9 +305,6 @@ public sealed partial class Engine
         {
             alpha = staticEvaluation;
         }
-
-        // Quiescence search limitation
-        //if (depth >= Configuration.EngineSettings.QuiescenceSearchDepth) return alpha;
 
         var generatedMoves = position.AllCapturesMoves(Game.MovePool);
         if (!generatedMoves.Any())

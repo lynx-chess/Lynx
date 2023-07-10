@@ -38,7 +38,7 @@ public sealed partial class Engine
     private const int MaxValue = short.MaxValue;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private List<Move> SortMoves(IEnumerable<Move> moves, in Position currentPosition, int depth)
+    private List<Move> SortMoves(IEnumerable<Move> moves, in Position currentPosition, int depth, Move bestMoveTTCandidate)
     {
         if (_isFollowingPV)
         {
@@ -54,17 +54,22 @@ public sealed partial class Engine
         }
 
         var localPosition = currentPosition;
-        return moves.OrderByDescending(move => Score(move, in localPosition, depth)).ToList();
+        return moves.OrderByDescending(move => Score(move, in localPosition, depth, bestMoveTTCandidate)).ToList();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int Score(Move move, in Position position, int depth)
+    private int Score(Move move, in Position position, int depth, Move bestMoveTTCandidate = default)
     {
         if (_isScoringPV && move == _pVTable[depth])
         {
             _isScoringPV = false;
 
-            return EvaluationConstants.PVMoveValue;
+            return EvaluationConstants.PVMoveScoreValue;
+        }
+
+        if (move == bestMoveTTCandidate)
+        {
+            return EvaluationConstants.TTMoveScoreValue;
         }
 
         return move.Score(in position, _killerMoves, depth, _historyMoves);
@@ -132,63 +137,75 @@ public sealed partial class Engine
     [Conditional("DEBUG")]
     private static void PrintPreMove(in Position position, int plies, Move move, bool isQuiescence = false)
     {
-        var sb = new StringBuilder();
-        for (int i = 0; i <= plies; ++i)
+        if (_logger.IsTraceEnabled)
         {
-            sb.Append("\t\t");
-        }
-        string depthStr = sb.ToString();
+            var sb = new StringBuilder();
+            for (int i = 0; i <= plies; ++i)
+            {
+                sb.Append("\t\t");
+            }
+            string depthStr = sb.ToString();
 
-        //if (plies < Configuration.Parameters.Depth - 1)
-        {
-            //Console.WriteLine($"{Environment.NewLine}{depthStr}{move} ({position.Side}, {depth})");
-            _logger.Trace($"{Environment.NewLine}{depthStr}{(isQuiescence ? "[Qui] " : "")}{move} ({position.Side}, {plies})");
+            //if (plies < Configuration.Parameters.Depth - 1)
+            {
+                //Console.WriteLine($"{Environment.NewLine}{depthStr}{move} ({position.Side}, {depth})");
+                _logger.Trace($"{Environment.NewLine}{depthStr}{(isQuiescence ? "[Qui] " : "")}{move} ({position.Side}, {plies})");
+            }
         }
     }
 
     [Conditional("DEBUG")]
     private static void PrintMove(int plies, Move move, int evaluation, bool isQuiescence = false, bool prune = false)
     {
-        var sb = new StringBuilder();
-        for (int i = 0; i <= plies; ++i)
+        if (_logger.IsTraceEnabled)
         {
-            sb.Append("\t\t");
+            var sb = new StringBuilder();
+            for (int i = 0; i <= plies; ++i)
+            {
+                sb.Append("\t\t");
+            }
+            string depthStr = sb.ToString();
+
+            //Console.ForegroundColor = depth switch
+            //{
+            //    0 => ConsoleColor.Red,
+            //    1 => ConsoleColor.Blue,
+            //    2 => ConsoleColor.Green,
+            //    3 => ConsoleColor.White,
+            //    _ => ConsoleColor.White
+            //};
+            //Console.WriteLine($"{depthStr}{move} ({position.Side}, {depthLeft}) | {evaluation}");
+            //Console.WriteLine($"{depthStr}{move} | {evaluation}");
+
+            _logger.Trace($"{depthStr}{(isQuiescence ? "[Qui] " : "")}{move,-6} | {evaluation}{(prune ? " | prunning" : "")}");
+
+            //Console.ResetColor();
         }
-        string depthStr = sb.ToString();
-
-        //Console.ForegroundColor = depth switch
-        //{
-        //    0 => ConsoleColor.Red,
-        //    1 => ConsoleColor.Blue,
-        //    2 => ConsoleColor.Green,
-        //    3 => ConsoleColor.White,
-        //    _ => ConsoleColor.White
-        //};
-        //Console.WriteLine($"{depthStr}{move} ({position.Side}, {depthLeft}) | {evaluation}");
-        //Console.WriteLine($"{depthStr}{move} | {evaluation}");
-
-        _logger.Trace($"{depthStr}{(isQuiescence ? "[Qui] " : "")}{move,-6} | {evaluation}{(prune ? " | prunning" : "")}");
-
-        //Console.ResetColor();
     }
 
     [Conditional("DEBUG")]
     private static void PrintMessage(int plies, string message)
     {
-        var sb = new StringBuilder();
-        for (int i = 0; i <= plies; ++i)
+        if (_logger.IsTraceEnabled)
         {
-            sb.Append("\t\t");
-        }
-        string depthStr = sb.ToString();
+            var sb = new StringBuilder();
+            for (int i = 0; i <= plies; ++i)
+            {
+                sb.Append("\t\t");
+            }
+            string depthStr = sb.ToString();
 
-        _logger.Trace(depthStr + message);
+            _logger.Trace(depthStr + message);
+        }
     }
 
     [Conditional("DEBUG")]
     private static void PrintMessage(string message)
     {
-        _logger.Trace(message);
+        if (_logger.IsTraceEnabled)
+        {
+            _logger.Trace(message);
+        }
     }
 
     [Conditional("DEBUG")]
