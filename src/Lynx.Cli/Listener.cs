@@ -30,7 +30,7 @@ public sealed class Listener
         }
         finally
         {
-            _logger.Info($"Finishing {nameof(Listener)}");
+            _logger.Info("Finishing {0}", nameof(Listener));
         }
     }
 }
