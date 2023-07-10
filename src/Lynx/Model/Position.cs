@@ -648,7 +648,7 @@ public readonly struct Position
             $"{((Castle & (int)CastlingRights.BK) != default ? 'k' : '-')}" +
             $"{((Castle & (int)CastlingRights.BQ) != default ? 'q' : '-')}"
             );
-        Console.WriteLine($"    FEN:\t{FEN}");
+        Console.WriteLine($"    FEN:\t{FEN()}");
 #pragma warning restore RCS1214 // Unnecessary interpolated string.
 
         Console.WriteLine(separator);
