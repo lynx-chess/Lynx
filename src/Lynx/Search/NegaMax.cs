@@ -196,7 +196,7 @@ public sealed partial class Engine
 
             PrintMove(depth, move, evaluation);
 
-            // Fail-hard beta-cutoff
+            // Fail-hard beta-cutoff - refutation found, no need to keep searching this line
             if (evaluation >= beta)
             {
                 PrintMessage($"Pruning: {move} is enough");
@@ -208,7 +208,7 @@ public sealed partial class Engine
                     _killerMoves[0, depth] = move;
                 }
 
-                _transpositionTable.RecordHash(position, maxDepth, depth, beta, NodeType.Beta, move);
+                _transpositionTable.RecordHash(position, maxDepth, depth, beta, NodeType.Beta, bestMove);
 
                 return beta;    // TODO return evaluation?
             }
