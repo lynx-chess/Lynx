@@ -13,22 +13,23 @@ namespace Lynx.UCI.Commands.GUI;
 ///	Note: no "new" command is needed. However, if this position is from a different game than
 ///	the last position sent to the engine, the GUI should have sent a "ucinewgame" inbetween.
 /// </summary>
-public sealed class PositionCommand : GUIBaseCommand
+public sealed partial class PositionCommand : GUIBaseCommand
 {
     public const string Id = "position";
 
     public const string StartPositionString = "startpos";
     public const string MovesString = "moves";
 
+    [GeneratedRegex("(?<=fen).+?(?=moves|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+    private static partial Regex FenRegex();
+
+    [GeneratedRegex("(?<=moves).+?(?=$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+    private static partial Regex MovesRegex();
+
+    private static readonly Regex _fenRegex = FenRegex();
+    private static readonly Regex _movesRegex = MovesRegex();
+
     private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
-
-    private static readonly Regex _fenRegex = new(
-        "(?<=fen).+?(?=moves|$)",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-    private static readonly Regex _movesRegex = new(
-        "(?<=moves).+?(?=$)",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     public static Game ParseGame(string positionCommand)
     {
