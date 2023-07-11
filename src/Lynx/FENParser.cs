@@ -4,11 +4,14 @@ using System.Text.RegularExpressions;
 
 namespace Lynx;
 
-public static class FENParser
+public static partial class FENParser
 {
-    private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+    [GeneratedRegex("(?<=^|\\/)[P|N|B|R|Q|K|p|n|b|r|q|k|\\d]{1,8}", RegexOptions.Compiled)]
+    private static partial Regex RanksRegex();
 
-    private static readonly Regex _ranksRegex = new(@"(?<=^|\/)[P|N|B|R|Q|K|p|n|b|r|q|k|\d]{1,8}", RegexOptions.Compiled);
+    private static readonly Regex _ranksRegex = RanksRegex();
+
+    private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
 
     public static (bool Success, BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, int Castle, BoardSquare EnPassant,
         int HalfMoveClock, int FullMoveCounter) ParseFEN(string fen)
@@ -132,7 +135,7 @@ public static class FENParser
         bool isWhite = sideString.Equals("w", StringComparison.OrdinalIgnoreCase);
 
         return isWhite || sideString.Equals("b", StringComparison.OrdinalIgnoreCase)
-            ? (isWhite ? Side.White : Side.Black)
+            ? isWhite ? Side.White : Side.Black
             : throw new($"Unrecognized side: {sideString}");
 #pragma warning restore S3358 // Ternary operators should not be nested
     }
@@ -166,7 +169,7 @@ public static class FENParser
         {
             enPassant = result;
 
-            var rank = 1 + ((int)enPassant / 8);
+            var rank = 1 + (int)enPassant / 8;
             if (rank != 3 && rank != 6)
             {
                 success = false;
