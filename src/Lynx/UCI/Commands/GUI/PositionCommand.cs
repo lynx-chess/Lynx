@@ -61,8 +61,7 @@ public sealed partial class PositionCommand : GUIBaseCommand
     public static bool TryParseLastMove(string positionCommand, Game game, [NotNullWhen(true)] out Move? lastMove)
     {
         var moveString = positionCommand
-                .Split(' ', StringSplitOptions.RemoveEmptyEntries)
-                .Last();
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries)[^1];
 
         if (!MoveExtensions.TryParseFromUCIString(
             moveString,
