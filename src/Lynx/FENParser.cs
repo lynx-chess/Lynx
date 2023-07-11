@@ -36,7 +36,7 @@ public static partial class FENParser
             MatchCollection matches;
             (matches, success) = ParseBoard(fen, pieceBitBoards, occupancyBitBoards);
 
-            var unparsedString = fen[(matches.Last().Index + matches.Last().Length)..];
+            var unparsedString = fen[(matches[^1].Index + matches[^1].Length)..];
             var parts = unparsedString.Split(" ", StringSplitOptions.RemoveEmptyEntries);
 
             if (parts.Length < 3)
