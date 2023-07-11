@@ -35,7 +35,7 @@ public class TranspositionTableTests
 
         transpositionTable.RecordHash(position, targetDepth: 5, ply: 3, eval: recordedEval, nodeType: recordNodeType, move: 1234);
 
-        Assert.AreEqual(expectedProbeEval, transpositionTable.ProbeHash(position, targetDepth: 5, ply: 3, alpha: probeAlpha, beta: probeBeta));
+        Assert.AreEqual(expectedProbeEval, transpositionTable.ProbeHash(position, targetDepth: 5, ply: 3, alpha: probeAlpha, beta: probeBeta).Evaluation);
     }
 
     [TestCase(CheckMateBaseEvaluation - 8 * DepthCheckmateFactor)]
@@ -48,7 +48,7 @@ public class TranspositionTableTests
 
         transpositionTable.RecordHash(position, targetDepth: 10, ply: sharedDepth, eval: recordedEval, nodeType: NodeType.Exact, move: 1234);
 
-        Assert.AreEqual(recordedEval, transpositionTable.ProbeHash(position, targetDepth: 7, ply: sharedDepth, alpha: 50, beta: 100));
+        Assert.AreEqual(recordedEval, transpositionTable.ProbeHash(position, targetDepth: 7, ply: sharedDepth, alpha: 50, beta: 100).Evaluation);
     }
 
     [TestCase(CheckMateBaseEvaluation - 8 * DepthCheckmateFactor, 5, 4, CheckMateBaseEvaluation - 7 * DepthCheckmateFactor)]
@@ -62,6 +62,6 @@ public class TranspositionTableTests
 
         transpositionTable.RecordHash(position, targetDepth: 10, ply: recordedDeph, eval: recordedEval, nodeType: NodeType.Exact, move: 1234);
 
-        Assert.AreEqual(expectedProbeEval, transpositionTable.ProbeHash(position, targetDepth: 7, ply: probeDepth, alpha: 50, beta: 100));
+        Assert.AreEqual(expectedProbeEval, transpositionTable.ProbeHash(position, targetDepth: 7, ply: probeDepth, alpha: 50, beta: 100).Evaluation);
     }
 }
