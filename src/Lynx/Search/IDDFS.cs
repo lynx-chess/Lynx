@@ -164,23 +164,16 @@ public sealed partial class Engine
             _stopWatch.Stop();
         }
 
-        if (lastSearchResult is not null)
-        {
-            lastSearchResult.IsCancelled = isCancelled;
-            return lastSearchResult;
-        }
-        else
-        {
-            return new(default, bestEvaluation, depth, new List<Move>(), alpha, beta)
-            {
-                DepthReached = _maxDepthReached.LastOrDefault(item => item != default),
-                Nodes = _nodes,
-                Time = _stopWatch.ElapsedMilliseconds,
-                NodesPerSecond = Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * _stopWatch.ElapsedMilliseconds) + 1), 0, long.MaxValue)),
-                HashfullPermill = _transpositionTable.HashfullPermill(),
-                IsCancelled = isCancelled
-            };
-        }
+        var finalSearchResult = lastSearchResult ??= new(default, bestEvaluation, depth, new List<Move>(), alpha, beta);
+
+        finalSearchResult.IsCancelled = isCancelled;
+        finalSearchResult.DepthReached = Math.Max(finalSearchResult.DepthReached, _maxDepthReached.LastOrDefault(item => item != default));
+        finalSearchResult.Nodes = _nodes;
+        finalSearchResult.Time = _stopWatch.ElapsedMilliseconds;
+        finalSearchResult.NodesPerSecond = Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * _stopWatch.ElapsedMilliseconds) + 1), 0, long.MaxValue));
+        finalSearchResult.HashfullPermill = _transpositionTable.HashfullPermill();
+
+        return finalSearchResult;
 
         static bool stopSearchCondition(int depth, int? maxDepth, bool isMateDetected, int nodes, int? decisionTime, Stopwatch stopWatch, ILogger logger)
         {
