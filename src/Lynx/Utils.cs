@@ -151,6 +151,20 @@ public static class Utils
         }
     }
 
+    /// <summary>
+    /// Providing there's a checkmate detected in <paramref name="bestEvaluation"/>, returns in how many moves
+    /// </summary>
+    /// <param name="bestEvaluation"></param>
+    /// <param name="bestEvaluationAbs"></param>
+    /// <returns>Positive value if white is checkmating, negative value if black is</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int CalculateMateInX(int bestEvaluation, int bestEvaluationAbs)
+    {
+        int mate = (int)Math.Ceiling(0.5 * ((EvaluationConstants.CheckMateBaseEvaluation - bestEvaluationAbs) / EvaluationConstants.DepthCheckmateFactor));
+
+        return (int)Math.CopySign(mate, bestEvaluation);
+    }
+
     [Conditional("DEBUG")]
     private static void GuardAgainstSideBoth(int side)
     {

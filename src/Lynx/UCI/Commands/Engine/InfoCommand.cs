@@ -82,10 +82,11 @@ public sealed class InfoCommand : EngineBaseCommand
             $" depth {searchResult.TargetDepth}" +
             $" seldepth {searchResult.DepthReached}" +
             $" multipv 1" +
-            $" score cp {searchResult.Evaluation}" + (searchResult.Mate == default ? "" : $" mate {searchResult.Mate}") +
+            $" score {(searchResult.Mate == default ? $"cp {searchResult.Evaluation}" : $"mate {searchResult.Mate}")}" +
             $" nodes {searchResult.Nodes}" +
             $" nps {searchResult.NodesPerSecond}" +
             $" time {searchResult.Time}" +
+            $" hashfull {searchResult.HashfullPermill}" +
             $" pv {string.Join(" ", searchResult.Moves.Select(move => move.UCIString()))}";
 #pragma warning restore RCS1214 // Unnecessary interpolated string.
     }

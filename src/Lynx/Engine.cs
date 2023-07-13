@@ -51,6 +51,7 @@ public sealed partial class Engine
         AverageDepth = 0;
         _isNewGameComing = true;
         _isNewGameCommandSupported = true;
+        //_transpositionTable = new TranspositionTableElement[TranspositionTableExtensions.TranspositionTableArrayLength];
     }
 
     public void AdjustPosition(string rawPositionCommand)
