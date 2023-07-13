@@ -7,11 +7,11 @@ namespace Lynx;
 public static partial class FENParser
 {
     [GeneratedRegex("(?<=^|\\/)[P|N|B|R|Q|K|p|n|b|r|q|k|\\d]{1,8}", RegexOptions.Compiled)]
-    private static partial Regex RankRegex();
+    private static partial Regex RanksRegex();
+
+    private static readonly Regex _ranksRegex = RanksRegex();
 
     private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
-
-    private static readonly Regex _ranksRegex = RankRegex();
 
     public static (bool Success, BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, int Castle, BoardSquare EnPassant,
         int HalfMoveClock, int FullMoveCounter) ParseFEN(string fen)
@@ -36,7 +36,7 @@ public static partial class FENParser
             MatchCollection matches;
             (matches, success) = ParseBoard(fen, pieceBitBoards, occupancyBitBoards);
 
-            var unparsedString = fen[(matches.Last().Index + matches.Last().Length)..];
+            var unparsedString = fen[(matches[^1].Index + matches[^1].Length)..];
             var parts = unparsedString.Split(" ", StringSplitOptions.RemoveEmptyEntries);
 
             if (parts.Length < 3)
@@ -62,7 +62,7 @@ public static partial class FENParser
         }
         catch (Exception e)
         {
-            _logger.Error($"Error parsing FEN string {fen}");
+            _logger.Error("Error parsing FEN string {0}", fen);
             _logger.Error(e.Message);
             success = false;
         }
@@ -98,7 +98,7 @@ public static partial class FENParser
                 }
                 else
                 {
-                    _logger.Error($"Unrecognized character in FEN: {ch} (within {((Group)match).Value})");
+                    _logger.Error("Unrecognized character in FEN: {0} (within {1})", ch, ((Group)match).Value);
                     success = false;
                     break;
                 }
@@ -135,7 +135,7 @@ public static partial class FENParser
         bool isWhite = sideString.Equals("w", StringComparison.OrdinalIgnoreCase);
 
         return isWhite || sideString.Equals("b", StringComparison.OrdinalIgnoreCase)
-            ? (isWhite ? Side.White : Side.Black)
+            ? isWhite ? Side.White : Side.Black
             : throw new($"Unrecognized side: {sideString}");
 #pragma warning restore S3358 // Ternary operators should not be nested
     }
@@ -169,11 +169,11 @@ public static partial class FENParser
         {
             enPassant = result;
 
-            var rank = 1 + ((int)enPassant / 8);
+            var rank = 1 + (int)enPassant / 8;
             if (rank != 3 && rank != 6)
             {
                 success = false;
-                _logger.Error($"Invalid en passant square: {enPassantString}");
+                _logger.Error("Invalid en passant square: {0}", enPassantString);
             }
 
             // Check that there's an actual pawn to be captured
@@ -190,13 +190,13 @@ public static partial class FENParser
             if (!pawnBitBoard.GetBit(pawnSquare))
             {
                 success = false;
-                _logger.Error($"Invalid board: en passant square {enPassantString}, but no {side} pawn located in {pawnSquare}");
+                _logger.Error("Invalid board: en passant square {0}, but no {1} pawn located in {2}", enPassantString, side, pawnSquare);
             }
         }
         else if (enPassantString != "-")
         {
             success = false;
-            _logger.Error($"Invalid en passant square: {enPassantString}");
+            _logger.Error("Invalid en passant square: {0}", enPassantString);
         }
 
         return (enPassant, success);

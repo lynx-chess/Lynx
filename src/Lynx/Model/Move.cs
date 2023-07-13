@@ -79,7 +79,7 @@ public static class MoveExtensions
 
             if (move.Equals(default(Move)))
             {
-                _logger.Warn($"Unable to link last move string {UCIString} to a valid move in the current position. That move may have already been played");
+                _logger.Warn("Unable to link last move string {0} to a valid move in the current position. That move may have already been played", UCIString);
                 move = null;
                 return false;
             }
@@ -102,7 +102,7 @@ public static class MoveExtensions
             move = candidateMoves.FirstOrDefault(predicate);
             if (move.Equals(default(Move)))
             {
-                _logger.Warn($"Unable to link move {UCIString} to a valid move in the current position. That move may have already been played");
+                _logger.Warn("Unable to link move {0} to a valid move in the current position. That move may have already been played", UCIString);
                 move = null;
                 return false;
             }
