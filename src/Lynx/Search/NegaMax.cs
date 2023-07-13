@@ -34,16 +34,16 @@ public sealed partial class Engine
 
         Move ttBestMove = default;
 
-        //bool isPvNode = beta - alpha == 1;
-        //if (!isPvNode && depth > 0)
-        //{
-        //    var ttProbeResult = _transpositionTable.ProbeHash(position, maxDepth, depth, alpha, beta);
-        //    if (ttProbeResult.Evaluation != EvaluationConstants.NoHashEntry)
-        //    {
-        //        return ttProbeResult.Evaluation;
-        //    }
-        //    ttBestMove = ttProbeResult.BestMove;
-        //}
+        bool isPvNode = beta - alpha == 1;
+        if (!isPvNode && depth > 0)
+        {
+            var ttProbeResult = _transpositionTable.ProbeHash(position, maxDepth, depth, alpha, beta);
+            if (ttProbeResult.Evaluation != EvaluationConstants.NoHashEntry)
+            {
+                return ttProbeResult.Evaluation;
+            }
+            ttBestMove = ttProbeResult.BestMove;
+        }
 
         if (depth > minDepth)
         {
@@ -208,7 +208,7 @@ public sealed partial class Engine
                     _killerMoves[0, depth] = move;
                 }
 
-                //_transpositionTable.RecordHash(position, maxDepth, depth, beta, NodeType.Beta, bestMove);
+                _transpositionTable.RecordHash(position, maxDepth, depth, beta, NodeType.Beta, bestMove);
 
                 return beta;    // TODO return evaluation?
             }
@@ -245,11 +245,11 @@ public sealed partial class Engine
         {
             var eval = Position.EvaluateFinalPosition(depth, isInCheck);
 
-            //_transpositionTable.RecordHash(position, maxDepth, depth, eval, NodeType.Exact);
+            _transpositionTable.RecordHash(position, maxDepth, depth, eval, NodeType.Exact);
             return eval;
         }
 
-        //_transpositionTable.RecordHash(position, maxDepth, depth, alpha, nodeType, bestMove);
+        _transpositionTable.RecordHash(position, maxDepth, depth, alpha, nodeType, bestMove);
 
         // Node fails low
         return alpha;

@@ -12,7 +12,7 @@ public sealed partial class Engine
     private readonly int[,] _killerMoves = new int[2, Configuration.EngineSettings.MaxDepth];
     private readonly int[,] _historyMoves = new int[12, 64];
     private readonly int[] _maxDepthReached = new int[Constants.AbsoluteMaxDepth];
-    //private TranspositionTable _transpositionTable = new TranspositionTableElement[TranspositionTableExtensions.TranspositionTableArrayLength];
+    private TranspositionTable _transpositionTable = new TranspositionTableElement[TranspositionTableExtensions.TranspositionTableArrayLength];
 
     private int _nodes;
     private bool _isFollowingPV;
@@ -59,7 +59,7 @@ public sealed partial class Engine
 
             lastSearchResult = new SearchResult(_previousSearchResult)
             {
-                //HashfullPermill = _transpositionTable.HashfullPermill()
+                HashfullPermill = _transpositionTable.HashfullPermill()
             };
             Array.Copy(_previousSearchResult.Moves.ToArray(), 2, _pVTable, 0, _previousSearchResult.Moves.Count - 2);
 
@@ -136,7 +136,7 @@ public sealed partial class Engine
                     Nodes = _nodes,
                     Time = elapsedTime,
                     NodesPerSecond = Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * elapsedTime) + 1), 0, long.MaxValue)),
-                    //HashfullPermill = _transpositionTable.HashfullPermill()
+                    HashfullPermill = _transpositionTable.HashfullPermill()
                 };
 
                 Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult)));
@@ -171,7 +171,7 @@ public sealed partial class Engine
         finalSearchResult.Nodes = _nodes;
         finalSearchResult.Time = _stopWatch.ElapsedMilliseconds;
         finalSearchResult.NodesPerSecond = Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * _stopWatch.ElapsedMilliseconds) + 1), 0, long.MaxValue));
-        //finalSearchResult.HashfullPermill = _transpositionTable.HashfullPermill();
+        finalSearchResult.HashfullPermill = _transpositionTable.HashfullPermill();
 
         return finalSearchResult;
 
