@@ -134,6 +134,17 @@ public sealed partial class Engine
             maxDepth = Configuration.EngineSettings.DefaultMaxDepth;
         }
 
+        var tablebaseResult = OnlineTablebaseProber.RootSearch(Game.CurrentPosition, _halfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
+
+        if (tablebaseResult.BestMove != 0)
+        {
+            var searchResult = new SearchResult(tablebaseResult.BestMove, 0, 0, 0, _nodes, _stopWatch.ElapsedMilliseconds, Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * _stopWatch.ElapsedMilliseconds) + 1), 0, long.MaxValue)), new List<Move>(), MinValue, MaxValue, Mate: tablebaseResult.DistanceToMate);
+
+            Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(searchResult))).Wait();
+
+            return searchResult;
+        }
+
         var result = IDDFS(minDepth, maxDepth, decisionTime);
         Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(result)));
         _logger.Info("Evaluation: {0} (depth: {1}, refutation: {2})", result.Evaluation, result.TargetDepth, string.Join(", ", result.Moves.Select(m => m.ToMoveString())));

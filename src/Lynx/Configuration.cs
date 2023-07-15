@@ -180,4 +180,11 @@ public sealed class EngineSettings
     public int BishopMobilityBonus { get; set; } = 1;
 
     public int QueenMobilityBonus { get; set; } = 1;
+
+    public bool UseOnlineTablebase { get; set; } = false;
+
+    /// <summary>
+    /// This can also de used to reduce online probing
+    /// </summary>
+    public int OnlineTablebaseMaxSupportedPieces { get; set; } = 7;
 }

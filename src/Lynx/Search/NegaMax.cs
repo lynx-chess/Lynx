@@ -233,7 +233,7 @@ public sealed partial class Engine
     public int QuiescenceSearch(in Position position, int depth, int alpha, int beta)
     {
         _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
-        //_cancellationToken.Token.ThrowIfCancellationRequested();
+        //_searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
 
         ++_nodes;
         _maxDepthReached[depth] = depth;
@@ -242,7 +242,7 @@ public sealed partial class Engine
         var nextPvIndex = PVTable.Indexes[depth + 1];
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
-        var staticEvaluation = position.StaticEvaluation(Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove);
+        var staticEvaluation = position.StaticEvaluation(Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
 
         // Fail-hard beta-cutoff (updating alpha after this check)
         if (staticEvaluation >= beta)

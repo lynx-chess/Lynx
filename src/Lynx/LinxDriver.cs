@@ -216,6 +216,14 @@ public sealed class LinxDriver
                     }
                     break;
                 }
+            case "onlinetablebase":
+                {
+                    if (commandItems.Length > 4 && bool.TryParse(commandItems[4], out var value))
+                    {
+                        Configuration.EngineSettings.UseOnlineTablebase = value;
+                    }
+                    break;
+                }
             default:
                 _logger.Warn("Unsupported option: {0}", command);
                 break;

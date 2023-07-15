@@ -9,7 +9,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Macross.Json.Extensions" Version="3.0.0" />
     <PackageReference Include="NLog" Version="5.2.2" />
+    <PackageReference Include="Polly.Extensions.Http" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>

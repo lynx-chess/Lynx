@@ -1,7 +1,9 @@
 using NLog;
 using System;
+using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Json;
 
 namespace Lynx.Model;
 
@@ -252,7 +254,7 @@ public readonly struct Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal string CalculateFEN()
+    private string CalculateFEN()
     {
         var sb = new StringBuilder(100);
 
@@ -346,6 +348,8 @@ public readonly struct Position
         return sb.ToString();
     }
 
+    public int CountPieces() => PieceBitBoards.Sum(b => b.CountBits());
+
     /// <summary>
     /// Evaluates material and position in a NegaMax style.
     /// That is, positive scores always favour playing <see cref="Side"/>.
@@ -354,7 +358,7 @@ public readonly struct Position
     /// <param name="movesWithoutCaptureOrPawnMove"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int StaticEvaluation(Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove)
+    public int StaticEvaluation(Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove, CancellationToken cancellationToken = default)
     {
         var eval = 0;
 
@@ -410,6 +414,20 @@ public readonly struct Position
                 eval += EvaluationConstants.PositionalScore[pieceIndex][pieceSquareIndex];
 
                 eval -= CustomPieceEvaluation(pieceSquareIndex, pieceIndex);
+            }
+        }
+
+        // 7 piece tablebase available, 5 pieces not counting queens
+        if (Configuration.EngineSettings.UseOnlineTablebase && pieceCount.Sum() <= Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces - 2)
+        {
+            var result = OnlineTablebaseProber.GetEvaluation(FEN(), cancellationToken).Result;
+            if (result?.Category > TablebaseEvaluationCategory.Unknown)
+            {
+                return result.Category switch
+                {
+                    TablebaseEvaluationCategory.Draw => 0,
+                    _ => Math.Sign(result.DistanceToMate) * (EvaluationConstants.CheckMateEvaluation - (DepthFactor * (int)Math.Ceiling(0.5 * result.DistanceToMate))) * (Side == Side.White ? 1 : -1)
+                };
             }
         }
 
