@@ -1,4 +1,6 @@
-﻿#pragma warning disable S4144 // Methods should not have identical implementations
+﻿#pragma warning disable S4144 // Methods should not have identical implementations - Logical separations, even if the implementation is the same
+#pragma warning disable RCS1163 // Unused parameter -  RootSearch_ and EvaluationSearch_ methods have the same fen input, so they're just duplicated (too lazy to create data input collections)
+#pragma warning disable IDE0060 // Remove unused parameter -  RootSearch_ and EvaluationSearch_ methods have the same fen input, so they're just duplicated (too lazy to create data input collections)
 
 using Lynx.Model;
 using NUnit.Framework;
@@ -227,3 +229,5 @@ public class OnlineTablebaseProberTest
 }
 
 #pragma warning restore S4144 // Methods should not have identical implementations
+#pragma warning restore IDE0060 // Remove unused parameter
+#pragma warning restore RCS1163 // Unused parameter.

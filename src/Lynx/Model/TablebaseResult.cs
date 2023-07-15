@@ -12,7 +12,11 @@ public enum TablebaseEvaluationCategory : byte
     [EnumMember(Value = "cursed-win")]
     CursedWin,
     [EnumMember(Value = "blessed-loss")]
-    BlessedLoss
+    BlessedLoss,
+    [EnumMember(Value = "maybe-win")]
+    MaybeWin,
+    [EnumMember(Value = "maybe-loss")]
+    MaybeLoss
 }
 
 public record class TablebaseEvaluation()
