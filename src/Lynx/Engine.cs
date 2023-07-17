@@ -138,7 +138,7 @@ public sealed partial class Engine
 
         if (tablebaseResult.BestMove != 0)
         {
-            var searchResult = new SearchResult(tablebaseResult.BestMove, 0, 0, 0, _nodes, _stopWatch.ElapsedMilliseconds, Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * _stopWatch.ElapsedMilliseconds) + 1), 0, long.MaxValue)), new List<Move>(), MinValue, MaxValue, Mate: tablebaseResult.DistanceToMate);
+            var searchResult = new SearchResult(tablebaseResult.BestMove, 0, 0, 0, _nodes, _stopWatch.ElapsedMilliseconds, Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * _stopWatch.ElapsedMilliseconds) + 1), 0, long.MaxValue)), new List<Move>(), MinValue, MaxValue, Mate: tablebaseResult.MateScore);
 
             Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(searchResult))).Wait();
 

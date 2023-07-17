@@ -43,7 +43,7 @@ public static class OnlineTablebaseProber
         TypeInfoResolver = SourceGenerationContext.Default
     };
 
-    public static (int DistanceToMate, Move BestMove) RootSearch(Position position, Dictionary<long, int> positionHistory, int halfMovesWithoutCaptureOrPawnMove, CancellationToken cancellationToken)
+    public static (int MateScore, Move BestMove) RootSearch(Position position, Dictionary<long, int> positionHistory, int halfMovesWithoutCaptureOrPawnMove, CancellationToken cancellationToken)
     {
         if (!Configuration.EngineSettings.UseOnlineTablebaseInRootPositions || position.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
         {
@@ -87,8 +87,7 @@ public static class OnlineTablebaseProber
             case TablebaseEvaluationCategory.Win:
                 if (tablebaseEval.DistanceToMate.HasValue)
                 {
-                    mate = (int)Math.Ceiling(0.5 * Math.Abs(tablebaseEval.DistanceToMate.Value));
-                    Math.CopySign(mate, tablebaseEval.DistanceToMate.Value);
+                    mate = +(int)Math.Ceiling(0.5 * Math.Abs(tablebaseEval.DistanceToMate.Value));
                 }
                 else
                 {
@@ -181,8 +180,7 @@ public static class OnlineTablebaseProber
             case TablebaseEvaluationCategory.MaybeLoss:
                 if (tablebaseEval.DistanceToMate.HasValue)
                 {
-                    mate = (int)Math.Ceiling(0.5 * Math.Abs(tablebaseEval.DistanceToMate.Value));
-                    Math.CopySign(mate, tablebaseEval.DistanceToMate.Value);
+                    mate = -(int)Math.Ceiling(0.5 * Math.Abs(tablebaseEval.DistanceToMate.Value));
                 }
                 else
                 {

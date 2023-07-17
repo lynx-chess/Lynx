@@ -24,7 +24,7 @@ public static partial class FENParser
 
         var occupancyBitBoards = new BitBoard[3] { default, default, default };
 
-        bool success = true;
+        bool success;
         Side side = Side.Both;
         int castle = 0;
         int halfMoveClock = 0, fullMoveCounter = 1;
@@ -204,6 +204,15 @@ public static partial class FENParser
 
 public readonly ref struct ParseFENResult
 {
+    public bool Success { get; }
+    public ulong[] PieceBitBoards { get; }
+    public ulong[] OccupancyBitBoards { get; }
+    public Side Side { get; }
+    public int Castle { get; }
+    public BoardSquare EnPassant { get; }
+    public int HalfMoveClock { get; }
+    public int FullMoveCounter { get; }
+
     public ParseFENResult(bool success, ulong[] pieceBitBoards, ulong[] occupancyBitBoards, Side side, int castle, BoardSquare enPassant, int halfMoveClock, int fullMoveCounter)
     {
         Success = success;
@@ -214,24 +223,5 @@ public readonly ref struct ParseFENResult
         EnPassant = enPassant;
         HalfMoveClock = halfMoveClock;
         FullMoveCounter = fullMoveCounter;
-    }
-
-    public bool Success { get; }
-    public ulong[] PieceBitBoards { get; }
-    public ulong[] OccupancyBitBoards { get; }
-    public Side Side { get; }
-    public int Castle { get; }
-    public BoardSquare EnPassant { get; }
-    public int HalfMoveClock { get; }
-    public int FullMoveCounter { get; }
-
-    public static implicit operator (bool success, ulong[] pieceBitBoards, ulong[] occupancyBitBoards, Side side, int castle, BoardSquare enPassant, int halfMoveClock, int fullMoveCounter)(ParseFENResult value)
-    {
-        return (value.Success, value.PieceBitBoards, value.OccupancyBitBoards, value.Side, value.Castle, value.EnPassant, value.HalfMoveClock, value.FullMoveCounter);
-    }
-
-    public static implicit operator ParseFENResult((bool success, ulong[] pieceBitBoards, ulong[] occupancyBitBoards, Side side, int castle, BoardSquare enPassant, int halfMoveClock, int fullMoveCounter) value)
-    {
-        return new ParseFENResult(value.success, value.pieceBitBoards, value.occupancyBitBoards, value.side, value.castle, value.enPassant, value.halfMoveClock, value.fullMoveCounter);
     }
 }

@@ -12,8 +12,6 @@ public readonly struct Position
 {
     internal const int DepthFactor = 1_000_000;
 
-    private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
-
     public string FEN() => CalculateFEN();
 
     public string FEN(int halfMovesWithoutCaptureOrPawnMove) => CalculateFEN(halfMovesWithoutCaptureOrPawnMove);

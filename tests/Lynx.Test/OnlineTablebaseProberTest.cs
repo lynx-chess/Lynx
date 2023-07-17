@@ -22,7 +22,7 @@ public class OnlineTablebaseProberTest
     public void RootSearch_CursedWin(string fen, int distanceToMate, string bestMove)
     {
         var result = OnlineTablebaseProber.RootSearch(new Position(fen), new(), 0, default);
-        Assert.AreEqual(distanceToMate, result.DistanceToMate);
+        Assert.AreEqual(distanceToMate, result.MateScore);
         Assert.AreEqual(bestMove, result.BestMove.UCIString());
     }
 
@@ -40,7 +40,7 @@ public class OnlineTablebaseProberTest
     public void RootSearch_BlessedLoss(string fen, int distanceToMate, string bestMove)
     {
         var result = OnlineTablebaseProber.RootSearch(new Position(fen), new(), 0, default);
-        Assert.AreEqual(distanceToMate, result.DistanceToMate);
+        Assert.AreEqual(distanceToMate, result.MateScore);
         Assert.AreEqual(bestMove, result.BestMove.UCIString());
     }
 
@@ -57,7 +57,7 @@ public class OnlineTablebaseProberTest
     public void RootSearch_Stalemate(string fen)
     {
         var result = OnlineTablebaseProber.RootSearch(new Position(fen), new(), 0, default);
-        Assert.AreEqual(OnlineTablebaseProber.NoResult, result.DistanceToMate);
+        Assert.AreEqual(OnlineTablebaseProber.NoResult, result.MateScore);
         Assert.AreEqual(0, result.BestMove);
     }
 
@@ -86,7 +86,7 @@ public class OnlineTablebaseProberTest
     {
         var position = new Position(fen);
         var result = OnlineTablebaseProber.RootSearch(position, new(), 0, default);
-        Assert.AreEqual(distanceToMate, result.DistanceToMate);
+        Assert.AreEqual(distanceToMate, result.MateScore);
         Assert.Contains(result.BestMove, position.AllPossibleMoves().ToList());
     }
 
@@ -122,7 +122,7 @@ public class OnlineTablebaseProberTest
     {
         var position = new Position(fen);
         var result = OnlineTablebaseProber.RootSearch(position, new(), 0, default);
-        Assert.AreEqual(distanceToMate, result.DistanceToMate);
+        Assert.AreEqual(distanceToMate, result.MateScore);
         Assert.Contains(result.BestMove, position.AllPossibleMoves().ToList());
     }
 
@@ -146,7 +146,7 @@ public class OnlineTablebaseProberTest
     {
         var position = new Position(fen);
         var result = OnlineTablebaseProber.RootSearch(position, new(), 0, default);
-        Assert.AreEqual(distanceToMate, result.DistanceToMate);
+        Assert.AreEqual(distanceToMate, result.MateScore);
         Assert.AreEqual(bestMove, result.BestMove.UCIString());
     }
 
@@ -163,7 +163,7 @@ public class OnlineTablebaseProberTest
     {
         var position = new Position(fen);
         var result = OnlineTablebaseProber.RootSearch(position, new(), 0, default);
-        Assert.AreEqual(distanceToMate, result.DistanceToMate);
+        Assert.AreEqual(distanceToMate, result.MateScore);
         Assert.AreEqual(bestMove, result.BestMove.UCIString());
     }
 
@@ -181,7 +181,7 @@ public class OnlineTablebaseProberTest
     {
         var position = new Position(fen);
         var result = OnlineTablebaseProber.RootSearch(position, new(), 0, default);
-        Assert.AreEqual(distanceToMate, result.DistanceToMate);
+        Assert.AreEqual(distanceToMate, result.MateScore);
         Assert.AreEqual(bestMove, result.BestMove.UCIString());
     }
 
@@ -198,7 +198,7 @@ public class OnlineTablebaseProberTest
     {
         var position = new Position(fen);
         var result = OnlineTablebaseProber.RootSearch(position, new(), 0, default);
-        Assert.AreEqual(distanceToMate, result.DistanceToMate);
+        Assert.AreEqual(distanceToMate, result.MateScore);
         Assert.AreEqual(bestMove, result.BestMove.UCIString());
     }
 
@@ -226,7 +226,7 @@ public class OnlineTablebaseProberTest
     {
         var position = new Position(fen);
         var result = OnlineTablebaseProber.RootSearch(position, new(), halfMovesWithoutCaptureOrPawnMove, default);
-        Assert.AreEqual(distanceToMate, result.DistanceToMate);
+        Assert.AreEqual(distanceToMate, result.MateScore);
         Assert.AreEqual(bestMove, result.BestMove.UCIString());
     }
 
@@ -254,15 +254,15 @@ public class OnlineTablebaseProberTest
     /// <param name="distanceToMate"></param>
     /// <param name="bestMove"></param>
     /// <param name="halfMovesWithoutCaptureOrPawnMove"></param>
-    [TestCase("6kN/8/8/8/8/8/8/B3K3 b - - 0 1", 30, "g8f8", 0)]    // B+N, Mate in 27, DTZ?==DTM=58
-    [TestCase("6kN/8/8/8/8/8/8/B3K3 b - - 0 1", 30, "g8f8", 42)]   // B+N, Mate in 27, DTZ?==DTM=58
-    [TestCase("6kN/8/8/8/8/8/8/B3K3 b - - 0 1", 30, "g8f8", 0)]    // B+N, Mate in 27, DTZ?==DTM=58
-    [TestCase("6kN/8/8/8/8/8/8/B3K3 b - - 0 1", 30, "g8f8", 42)]   // B+N, Mate in 27, DTZ?==DTM=58
+    [TestCase("6kN/8/8/8/8/8/8/B3K3 b - - 0 1", -30, "g8f8", 0)]    // B+N, Mate in 30, DTZ?==DTM=60
+    [TestCase("6kN/8/8/8/8/8/8/B3K3 b - - 0 1", -30, "g8f8", 42)]   // B+N, Mate in 30, DTZ?==DTM=60
+    [TestCase("6Kn/8/8/8/8/8/8/b3k3 w - - 0 1", -30, "g8f8", 0)]    // B+N, Mate in 30, DTZ?==DTM=60
+    [TestCase("6Kn/8/8/8/8/8/8/b3k3 w - - 0 1", -30, "g8f8", 42)]   // B+N, Mate in 30, DTZ?==DTM=60
     public void RootSearch_DrawLosingPositionDueToExistingHalfMovesWithoutCaptureOrPawnMove(string fen, int distanceToMate, string bestMove, int halfMovesWithoutCaptureOrPawnMove)
     {
         var position = new Position(fen);
         var result = OnlineTablebaseProber.RootSearch(position, new(), halfMovesWithoutCaptureOrPawnMove, default);
-        Assert.AreEqual(distanceToMate, result.DistanceToMate);
+        Assert.AreEqual(distanceToMate, result.MateScore);
         Assert.AreEqual(bestMove, result.BestMove.UCIString());
     }
 
@@ -272,10 +272,10 @@ public class OnlineTablebaseProberTest
     /// <param name="fen"></param>
     /// <param name="halfMovesWithoutCaptureOrPawnMove"></param>
     /// <param name="expectedEvaluation"></param>
-    [TestCase("6kN/8/8/8/8/8/8/B3K3 b - - 0 1", 0, -EvaluationConstants.CheckMateEvaluation + 30 * Position.DepthFactor)]   // B+N, Mate in 27, DTZ==DTM=58
-    [TestCase("6kN/8/8/8/8/8/8/B3K3 b - - 0 1", 42, 0)]                                                                     // B+N, Mate in 27, DTM=58, DTZ >100
-    [TestCase("6kN/8/8/8/8/8/8/B3K3 b - - 0 1", 0, -EvaluationConstants.CheckMateEvaluation + 30 * Position.DepthFactor)]   // B+N, Mate in 27, DTZ?==DTM=58
-    [TestCase("6kN/8/8/8/8/8/8/B3K3 b - - 0 1", 42, 0)]                                                                     // B+N, Mate in 27, DTZ?==DTM=58, DTZ >100
+    [TestCase("6kN/8/8/8/8/8/8/B3K3 b - - 0 1", 0, -EvaluationConstants.CheckMateEvaluation + 30 * Position.DepthFactor)]   // B+N, Mate in 30, DTZ?==DTM=60
+    [TestCase("6kN/8/8/8/8/8/8/B3K3 b - - 0 1", 42, 0)]                                                                     // B+N, Mate in 30, DTZ?==DTM=60
+    [TestCase("6Kn/8/8/8/8/8/8/b3k3 w - - 0 1", 0, -EvaluationConstants.CheckMateEvaluation + 30 * Position.DepthFactor)]   // B+N, Mate in 30, DTZ?==DTM=60
+    [TestCase("6Kn/8/8/8/8/8/8/b3k3 w - - 0 1", 42, 0)]                                                                     // B+N, Mate in 30, DTZ?==DTM=60
     public void EvaluationSearch_DrawLosingPositionDueToExistingHalfMovesWithoutCaptureOrPawnMove(string fen, int halfMovesWithoutCaptureOrPawnMove, int expectedEvaluation)
     {
         var position = new Position(fen);
@@ -288,7 +288,7 @@ public class OnlineTablebaseProberTest
     {
         var position = new Position(fen);
         var result = OnlineTablebaseProber.RootSearch(position, new(), default, default);
-        Assert.AreEqual(distanceToMate, result.DistanceToMate);
+        Assert.AreEqual(distanceToMate, result.MateScore);
         Assert.Contains(result.BestMove.UCIString(), bestMoves);
     }
 
@@ -305,7 +305,7 @@ public class OnlineTablebaseProberTest
     {
         var position = new Position(fen);
         var result = OnlineTablebaseProber.RootSearch(position, new(), default, default);
-        Assert.AreEqual(distanceToMate, result.DistanceToMate);
+        Assert.AreEqual(distanceToMate, result.MateScore);
         Assert.NotZero(result.BestMove);
     }
 
@@ -322,7 +322,7 @@ public class OnlineTablebaseProberTest
     {
         var position = new Position(fen);
         var result = OnlineTablebaseProber.RootSearch(position, new(), default, default);
-        Assert.AreEqual(distanceToMate, result.DistanceToMate);
+        Assert.AreEqual(distanceToMate, result.MateScore);
         Assert.Contains(result.BestMove.UCIString(), bestMoves);
     }
 
@@ -339,7 +339,7 @@ public class OnlineTablebaseProberTest
     {
         var position = new Position(fen);
         var result = OnlineTablebaseProber.RootSearch(position, new(), default, default);
-        Assert.AreEqual(distanceToMate, result.DistanceToMate);
+        Assert.AreEqual(distanceToMate, result.MateScore);
         Assert.Contains(result.BestMove.UCIString(), bestMoves);
     }
 
@@ -357,17 +357,17 @@ public class OnlineTablebaseProberTest
     {
         var position = new Position(fen);
         var result = OnlineTablebaseProber.RootSearch(position, new(), default, default);
-        Assert.AreEqual(distanceToMate, result.DistanceToMate);
+        Assert.AreEqual(distanceToMate, result.MateScore);
         Assert.AreEqual(bestMove, result.BestMove.UCIString());
     }
 
-    [TestCase("8/2PK4/1k6/8/8/8/8/8 b - - 0 1", 8, "b6c5")]
-    [TestCase("8/8/8/8/8/6K1/4kp2/8 w - - 0 1", 8, "g3f4")]
+    [TestCase("8/2PK4/1k6/8/8/8/8/8 b - - 0 1", -8, "b6c5")]
+    [TestCase("8/8/8/8/8/6K1/4kp2/8 w - - 0 1", -8, "g3f4")]
     public void RootSearch_MoveOrderingWhenLosing(string fen, int distanceToMate, string bestMove)
     {
         var position = new Position(fen);
         var result = OnlineTablebaseProber.RootSearch(position, new(), default, default);
-        Assert.AreEqual(distanceToMate, result.DistanceToMate);
+        Assert.AreEqual(distanceToMate, result.MateScore);
         Assert.AreEqual(bestMove, result.BestMove.UCIString());
     }
 
@@ -382,7 +382,7 @@ public class OnlineTablebaseProberTest
         var result = OnlineTablebaseProber.RootSearch(position, game.PositionHashHistory, game.HalfMovesWithoutCaptureOrPawnMove, default);
 
         // Assert
-        Assert.AreEqual(0, result.DistanceToMate);
+        Assert.AreEqual(0, result.MateScore);
         Assert.AreEqual("h8g7", result.BestMove.UCIString());
 
         var lastPosition = new Position(position, result.BestMove);
@@ -401,7 +401,7 @@ public class OnlineTablebaseProberTest
         var result = OnlineTablebaseProber.RootSearch(position, game.PositionHashHistory, game.HalfMovesWithoutCaptureOrPawnMove, default);
 
         // Assert
-        Assert.AreEqual(0, result.DistanceToMate);
+        Assert.AreEqual(0, result.MateScore);
         Assert.AreEqual("h8g7", result.BestMove.UCIString());
 
         var lastPosition = new Position(position, result.BestMove);
