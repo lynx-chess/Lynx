@@ -99,7 +99,7 @@ public record class TablebaseEvaluation()
 
 public record class TablebaseEvalMove()
 {
-    public string? Uci
+    public string Uci
     {
         get;
 #if NET8_0_OR_GREATER
@@ -107,7 +107,7 @@ public record class TablebaseEvalMove()
 #else
         set;
 #endif
-    }
+    } = string.Empty;
 
     public TablebaseEvaluationCategory Category
     {

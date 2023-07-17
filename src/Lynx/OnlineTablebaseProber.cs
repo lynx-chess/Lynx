@@ -21,7 +21,7 @@ public static class OnlineTablebaseProber
         .HandleTransientHttpError()
         .OrTransientHttpError()
         .OrResult(response => response.StatusCode == HttpStatusCode.TooManyRequests)
-        .WaitAndRetryAsync(4, retryAttempt => TimeSpan.FromMilliseconds(Math.Pow(2, 6 + retryAttempt)));    // 128, 256, 512, 1024ms
+        .WaitAndRetryAsync(4, retryAttempt => TimeSpan.FromMilliseconds(Math.Pow(2, 10 + retryAttempt)));    // 128, 256, 512, 1024ms
 
     private readonly static HttpClient _client = new(
         new PolicyHttpMessageHandler(_retryPolicy)
@@ -39,7 +39,7 @@ public static class OnlineTablebaseProber
         TypeInfoResolver = SourceGenerationContext.Default
     };
 
-    public static (int DistanceToMate, Move BestMove) RootSearch(Position position, int halfMovesWithoutCaptureOrPawnMove, CancellationToken cancellationToken)
+    public static (int DistanceToMate, Move BestMove) RootSearch(Position position, Dictionary<long, int> positionHistory, int halfMovesWithoutCaptureOrPawnMove, CancellationToken cancellationToken)
     {
         if (!Configuration.EngineSettings.UseOnlineTablebaseInRootPositions || position.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
         {
@@ -57,8 +57,10 @@ public static class OnlineTablebaseProber
             return (NoResult, default);
         }
 
-        TablebaseEvalMove? bestMove;
+        TablebaseEvalMove? bestMove = null;
         int mate = 0;
+
+        IEnumerable<int>? allPossibleMoves = null;
 
         switch (tablebaseEval.Category)
         {
@@ -76,6 +78,7 @@ public static class OnlineTablebaseProber
                 bestMove = tablebaseEval.Moves?.Find(m => m.Category == TablebaseEvaluationCategory.Draw);
 
                 break;
+
             case TablebaseEvaluationCategory.MaybeWin:
             case TablebaseEvaluationCategory.Win:
                 if (tablebaseEval.DistanceToMate.HasValue)
@@ -94,13 +97,82 @@ public static class OnlineTablebaseProber
                     // We don't set mate to 0 since we don't really care about it due to being root node search: let it play the best moves anyway
                 }
 
-                bestMove = tablebaseEval.Moves
+                // for 3K4/2P5/1k6/8/8/8/8/8_w_-_-_1_1
+                // http://tablebase.lichess.ovh/standard?fen=3K4/2P5/1k6/8/8/8/8/8_w_-_-_1_1
+                // {"checkmate":false,"stalemate":false,"variant_win":false,"variant_loss":false,"insufficient_material":false,"dtz":1,"precise_dtz":1,"dtm":13,"category":"win", "moves":[
+                //      { "uci":"c7c8q","san":"c8=Q","zeroing":true,"checkmate":false,"stalemate":false,"variant_win":false,"variant_loss":false,"insufficient_material":false,"dtz":-12,"precise_dtz":-12,"dtm":-12,"category":"loss//     "},
+                //      { "uci":"d8d7","san":"Kd7","zeroing":false,"checkmate":false,"stalemate":false,"variant_win":false,"variant_loss":false,"insufficient_material":false,"dtz":-2,"precise_dtz":-2,"dtm":-16,"category":"loss//        "},
+                //      { "uci":"d8c8","san":"Kc8","zeroing":false,"checkmate":false,"stalemate":false,"variant_win":false,"variant_loss":false,"insufficient_material":false,"dtz":-4,"precise_dtz":-4,"dtm":-20,"category":"loss//        "},
+                //      { "uci":"c7c8r","san":"c8=R","zeroing":true,"checkmate":false,"stalemate":false,"variant_win":false,"variant_loss":false,"insufficient_material":false,"dtz":-22,"precise_dtz":-22,"dtm":-22,"category":"loss//     "},
+                //      { "uci":"c7c8b","san":"c8=B","zeroing":true,"checkmate":false,"stalemate":false,"variant_win":false,"variant_loss":false,"insufficient_material":true,"dtz":0,"precise_dtz":0,"dtm":0,"category":"draw"},
+                //      { "uci":"c7c8n","san":"c8=N+","zeroing":true,"checkmate":false,"stalemate":false,"variant_win":false,"variant_loss":false,"insufficient_material":true,"dtz":0,"precise_dtz":0,"dtm":0,"category":"draw"},
+                // If we follow dtz, we reach http://tablebase.lichess.ovh/standard?fen=3K4/2P5/1k6/8/8/8/8/8_w_-_-_1_1#2, which suggests to repeat
+                // (rep 1) 29. Kd8 Kc5 30. Kd7 Kb6 (rep 2) 31.Kd6 Kb7 32.Kd7 (unica) Kb6 (rep 3)
+
+                var bestMoveList = tablebaseEval.Moves
                     ?.Where(m => m.Category == TablebaseEvaluationCategory.Loss)
-                    .OrderBy(m => Math.Abs(m.DistanceToZero ?? 0))
-                    .ThenBy(m => Math.Abs(m.DistanceToMate ?? 0))
-                    .FirstOrDefault();
+                    .OrderByDescending(m => m.DistanceToMate ?? 0)      // When winning, moves have negative dtm and dtz
+                    .ThenByDescending(m => m.DistanceToZero ?? 0);
+
+                if (bestMoveList is not null)
+                {
+                    allPossibleMoves ??= position.AllPossibleMoves();
+                    var originalNumberOfTwoFoldRepetitionCount = Position.NumberOfTwoFoldRepetitions(positionHistory);
+
+                    foreach (var move in bestMoveList)
+                    {
+                        if (!MoveExtensions.TryParseFromUCIString(move!.Uci, allPossibleMoves, out var moveCandidate))
+                        {
+                            throw new AssertException($"{move!.Uci} should be parsable from position {fen}");
+                        }
+
+                        var newPosition = new Position(in position, moveCandidate.Value);
+
+                        var oldValue = halfMovesWithoutCaptureOrPawnMove;
+                        halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
+                        var repetitions = Utils.UpdatePositionHistory(in newPosition, positionHistory);
+
+                        // If a repetition already exists, we can't rely on two fold repetition detection,
+                        // so we check if it adds any extra repetitions and initially discard it if that's the case
+                        var numberOfTwoFoldRepetitionCount = Position.NumberOfTwoFoldRepetitions(positionHistory);
+                        if (numberOfTwoFoldRepetitionCount == originalNumberOfTwoFoldRepetitionCount && !Position.Is50MovesRepetition(halfMovesWithoutCaptureOrPawnMove))        // Attacking: any move that draws is discarded
+                        {
+                            bestMove = move;
+                            break;
+                        }
+
+                        halfMovesWithoutCaptureOrPawnMove = oldValue;
+                        Utils.RevertPositionHistory(in newPosition, positionHistory, repetitions);
+                    }
+
+                    if (bestMove is null)
+                    {
+                        // Since there are no moves that don't cause an extra 'two-fold' repetition, let's grab one that doesn't cause a three-fold one, hoping that the rival can't complete it
+                        foreach (var move in bestMoveList)
+                        {
+                            MoveExtensions.TryParseFromUCIString(move!.Uci, allPossibleMoves, out var moveCandidate);
+                            var newPosition = new Position(in position, moveCandidate!.Value);
+                            var repetitions = Utils.UpdatePositionHistory(in newPosition, positionHistory);
+
+                            if (!Position.IsThreefoldRepetition(positionHistory))
+                            {
+                                Utils.RevertPositionHistory(in newPosition, positionHistory, repetitions);
+                                bestMove = move;
+                                break;
+                            }
+                            Utils.RevertPositionHistory(in newPosition, positionHistory, repetitions);
+                        }
+                        if (bestMove is null)
+                        {
+                            _logger.Info("Can't find a path to win in position {fen} due to repetitions via all the possible candidate moves :O", fen);
+                            mate = 0;
+                            bestMove = bestMoveList.FirstOrDefault();
+                        }
+                    }
+                }
 
                 break;
+
             case TablebaseEvaluationCategory.Loss:
             case TablebaseEvaluationCategory.MaybeLoss:
                 if (tablebaseEval.DistanceToMate.HasValue)
@@ -119,13 +191,75 @@ public static class OnlineTablebaseProber
                     // We don't set mate to 0 since we don't really care about it due to being root node search: let it play the best moves anyway
                 }
 
-                bestMove = tablebaseEval.Moves
+                // When defending, we priorize the highest dtz over dtm
+                bestMoveList = tablebaseEval.Moves
                     ?.Where(m => m.Category == TablebaseEvaluationCategory.Win)
-                    .OrderByDescending(m => Math.Abs(m.DistanceToZero ?? 0))
-                    .ThenByDescending(m => Math.Abs(m.DistanceToMate ?? 0))
-                    .FirstOrDefault();
+                    .OrderByDescending(m => m.DistanceToZero ?? 0)    // When losing, moves have positive dtm and dtz, so we want the highest
+                    .ThenByDescending(m => m.DistanceToMate ?? 0);
+
+                if (bestMoveList is not null)
+                {
+                    allPossibleMoves ??= position.AllPossibleMoves();
+
+                    foreach (var move in bestMoveList)
+                    {
+                        if (!MoveExtensions.TryParseFromUCIString(move!.Uci, allPossibleMoves, out var moveCandidate))
+                        {
+                            throw new AssertException($"{move!.Uci} should be parsable from position {fen}");
+                        }
+
+                        var newPosition = new Position(in position, moveCandidate.Value);
+
+                        var oldValue = halfMovesWithoutCaptureOrPawnMove;
+                        halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
+                        var repetitions = Utils.UpdatePositionHistory(in newPosition, positionHistory);
+
+                        if (Position.IsThreefoldRepetition(positionHistory) || Position.Is50MovesRepetition(halfMovesWithoutCaptureOrPawnMove))     // Defending: any possible move that draws is good
+                        {
+                            bestMove = move;
+                            break;
+                        }
+
+                        halfMovesWithoutCaptureOrPawnMove = oldValue;
+                        Utils.RevertPositionHistory(in newPosition, positionHistory, repetitions);
+                    }
+
+                    if (bestMove is not null)
+                    {
+                        _logger.Info("There's a miraculous move ({0}) that saves {fen} due to repetition :O", bestMove, fen);
+                        mate = 0;
+                    }
+                    else
+                    {
+                        // Since there are no moves that cause a 'three-fold' repetition, let's grab one that causes an extra two-fold one, hoping that the rival completes it or allows us to do so next move
+                        var originalNumberOfTwoFoldRepetitionCount = Position.NumberOfTwoFoldRepetitions(positionHistory);
+
+                        foreach (var move in bestMoveList)
+                        {
+                            MoveExtensions.TryParseFromUCIString(move!.Uci, allPossibleMoves, out var moveCandidate);
+                            var newPosition = new Position(in position, moveCandidate!.Value);
+                            var repetitions = Utils.UpdatePositionHistory(in newPosition, positionHistory);
+
+                            // If a repetition already exists, we can't rely on two fold repetition detection,
+                            // so we check if it adds any extra repetitions
+                            var numberOfTwoFoldRepetitionCount = Position.NumberOfTwoFoldRepetitions(positionHistory);
+                            if (numberOfTwoFoldRepetitionCount > originalNumberOfTwoFoldRepetitionCount)
+                            {
+                                Utils.RevertPositionHistory(in newPosition, positionHistory, repetitions);
+                                bestMove = move;
+                                break;
+                            }
+                            Utils.RevertPositionHistory(in newPosition, positionHistory, repetitions);
+                        }
+                        if (bestMove is null)
+                        {
+                            bestMove = bestMoveList.FirstOrDefault();
+                        }
+                    }
+                }
 
                 break;
+
             case TablebaseEvaluationCategory.CursedWin:
                 // We don't set mate to 0 since we don't really care about it due to being root node search: let it play the best moves anyway
                 if (tablebaseEval.DistanceToMate.HasValue)
@@ -143,13 +277,70 @@ public static class OnlineTablebaseProber
 
                 _logger.Info("Cursed win {0}", fen);
 
-                bestMove = tablebaseEval.Moves
+                bestMoveList = tablebaseEval.Moves
                     ?.Where(m => m.Category == TablebaseEvaluationCategory.BlessedLoss)
-                    .OrderBy(m => Math.Abs(m.DistanceToZero ?? 0))
-                    .ThenBy(m => Math.Abs(m.DistanceToMate ?? 0))
-                    .FirstOrDefault();
+                    .OrderByDescending(m => m.DistanceToMate ?? 0)      // When winning, moves have negative dtm and dtz
+                    .ThenByDescending(m => m.DistanceToZero ?? 0);
+
+                if (bestMoveList is not null)
+                {
+                    allPossibleMoves ??= position.AllPossibleMoves();
+                    var originalNumberOfTwoFoldRepetitionCount = Position.NumberOfTwoFoldRepetitions(positionHistory);
+
+                    foreach (var move in bestMoveList)
+                    {
+                        if (!MoveExtensions.TryParseFromUCIString(move!.Uci, allPossibleMoves, out var moveCandidate))
+                        {
+                            throw new AssertException($"{move!.Uci} should be parsable from position {fen}");
+                        }
+
+                        var newPosition = new Position(in position, moveCandidate.Value);
+
+                        var oldValue = halfMovesWithoutCaptureOrPawnMove;
+                        halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
+                        var repetitions = Utils.UpdatePositionHistory(in newPosition, positionHistory);
+
+                        // If a repetition already exists, we can't rely on two fold repetition detection,
+                        // so we check if it adds any extra repetitions and initially discard it if that's the case
+                        var numberOfTwoFoldRepetitionCount = Position.NumberOfTwoFoldRepetitions(positionHistory);
+                        if (numberOfTwoFoldRepetitionCount == originalNumberOfTwoFoldRepetitionCount && !Position.Is50MovesRepetition(halfMovesWithoutCaptureOrPawnMove))    // Attacking: any move that draws is discarded
+                        {
+                            bestMove = move;
+                            break;
+                        }
+
+                        halfMovesWithoutCaptureOrPawnMove = oldValue;
+                        Utils.RevertPositionHistory(in newPosition, positionHistory, repetitions);
+                    }
+
+                    if (bestMove is null)
+                    {
+                        // Since there are no moves that don't cause an extra 'two-fold' repetition, let's grab one that doesn't cause a three-fold one, hoping that the rival can't complete it
+                        foreach (var move in bestMoveList)
+                        {
+                            MoveExtensions.TryParseFromUCIString(move!.Uci, allPossibleMoves, out var moveCandidate);
+                            var newPosition = new Position(in position, moveCandidate!.Value);
+                            var repetitions = Utils.UpdatePositionHistory(in newPosition, positionHistory);
+
+                            if (!Position.IsThreefoldRepetition(positionHistory))
+                            {
+                                Utils.RevertPositionHistory(in newPosition, positionHistory, repetitions);
+                                bestMove = move;
+                                break;
+                            }
+                            Utils.RevertPositionHistory(in newPosition, positionHistory, repetitions);
+                        }
+                        if (bestMove is null)
+                        {
+                            _logger.Info("All moves draw earlier than the expected cursed win due to repetitions :O");
+                            mate = 0;
+                            bestMove = bestMoveList.FirstOrDefault();
+                        }
+                    }
+                }
 
                 break;
+
             case TablebaseEvaluationCategory.BlessedLoss:
                 // We don't set mate to 0 since we don't really care about it due to being root node search, and we have to play the best moves anyway
                 if (tablebaseEval.DistanceToMate.HasValue)
@@ -167,13 +358,74 @@ public static class OnlineTablebaseProber
 
                 _logger.Info("Blessed loss {0}", fen);
 
-                bestMove = tablebaseEval.Moves
+                bestMoveList = tablebaseEval.Moves
                     ?.Where(m => m.Category == TablebaseEvaluationCategory.CursedWin)
-                    .OrderByDescending(m => Math.Abs(m.DistanceToZero ?? 0))
-                    .ThenByDescending(m => Math.Abs(m.DistanceToMate ?? 0))
-                    .FirstOrDefault();
+                    .OrderByDescending(m => m.DistanceToZero ?? 0)      // When winning, moves have positive dtm and dtz, so we want the highest
+                    .ThenByDescending(m => m.DistanceToMate ?? 0);
+
+                if (bestMoveList is not null)
+                {
+                    allPossibleMoves ??= position.AllPossibleMoves();
+                    foreach (var move in bestMoveList)
+                    {
+                        if (!MoveExtensions.TryParseFromUCIString(move!.Uci, allPossibleMoves, out var moveCandidate))
+                        {
+                            throw new AssertException($"{move!.Uci} should be parsable from position {fen}");
+                        }
+
+                        var newPosition = new Position(in position, moveCandidate.Value);
+
+                        var oldValue = halfMovesWithoutCaptureOrPawnMove;
+                        halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
+                        var repetitions = Utils.UpdatePositionHistory(in newPosition, positionHistory);
+
+                        if (Position.IsThreefoldRepetition(positionHistory) || Position.Is50MovesRepetition(halfMovesWithoutCaptureOrPawnMove)) // Defending: any possible move that draws is good
+                        {
+                            bestMove = move;
+                            break;
+                        }
+
+                        halfMovesWithoutCaptureOrPawnMove = oldValue;
+                        Utils.RevertPositionHistory(in newPosition, positionHistory, repetitions);
+                    }
+
+                    if (bestMove is not null)
+                    {
+                        _logger.Info("Move {0} draws the game due to repetition earlier than the expected blessed loss in {fen} position :O", bestMove, fen);
+                        mate = 0;
+                    }
+                    else
+                    {
+                        // Since there are no moves that cause a 'three-fold' repetition, let's grab one that causes a two-fold one, hoping that the rival completes it or allows us to do so next move
+                        var originalNumberOfTwoFoldRepetitionCount = Position.NumberOfTwoFoldRepetitions(positionHistory);
+
+                        foreach (var move in bestMoveList)
+                        {
+                            MoveExtensions.TryParseFromUCIString(move!.Uci, allPossibleMoves, out var moveCandidate);
+                            var newPosition = new Position(in position, moveCandidate!.Value);
+                            var repetitions = Utils.UpdatePositionHistory(in newPosition, positionHistory);
+
+                            // If a repetition already exists, we can't rely on two fold repetition detection,
+                            // so we check if it adds any extra repetitions
+                            var numberOfTwoFoldRepetitionCount = Position.NumberOfTwoFoldRepetitions(positionHistory);
+                            if (numberOfTwoFoldRepetitionCount > originalNumberOfTwoFoldRepetitionCount)
+                            {
+                                Utils.RevertPositionHistory(in newPosition, positionHistory, repetitions);
+                                bestMove = move;
+                                break;
+                            }
+                            Utils.RevertPositionHistory(in newPosition, positionHistory, repetitions);
+                        }
+                        if (bestMove is null)
+                        {
+                            bestMove = bestMoveList.FirstOrDefault();
+                        }
+                    }
+
+                }
 
                 break;
+
             default:
                 return (NoResult, default);
         }

@@ -349,6 +349,26 @@ public class OnlineTablebaseProberTest
         var result = OnlineTablebaseProber.EvaluationSearch(position, default, default);
         Assert.AreEqual(EvaluationConstants.CheckMateEvaluation - Position.DepthFactor * distanceToMate, result);
     }
+
+    [TestCase("8/2PK4/1k6/8/8/8/8/8 w - - 0 1", 6, "c7c8q")]
+    [TestCase("8/8/8/8/8/6K1/4kp2/8 b - - 0 1", 6, "f2f1q")]
+    public void RootSearch_MoveOrderingWhenWinning(string fen, int distanceToMate, string bestMove)
+    {
+        var position = new Position(fen);
+        var result = OnlineTablebaseProber.RootSearch(position, new(), default, default);
+        Assert.AreEqual(distanceToMate, result.DistanceToMate);
+        Assert.AreEqual(bestMove, result.BestMove.UCIString());
+    }
+
+    [TestCase("8/2PK4/1k6/8/8/8/8/8 b - - 0 1", 8, "b6c5")]
+    [TestCase("8/8/8/8/8/6K1/4kp2/8 w - - 0 1", 8, "g3f4")]
+    public void RootSearch_MoveOrderingWhenLosing(string fen, int distanceToMate, string bestMove)
+    {
+        var position = new Position(fen);
+        var result = OnlineTablebaseProber.RootSearch(position, new(), default, default);
+        Assert.AreEqual(distanceToMate, result.DistanceToMate);
+        Assert.AreEqual(bestMove, result.BestMove.UCIString());
+    }
 }
 
 #pragma warning restore S4144   // Methods should not have identical implementations

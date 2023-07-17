@@ -419,8 +419,8 @@ public readonly struct Position
         }
 
         var result = OnlineTablebaseProber.EvaluationSearch(this, movesWithoutCaptureOrPawnMove, cancellationToken);
-        Debug.Assert(result > EvaluationConstants.CheckMateEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
-        Debug.Assert(result < -EvaluationConstants.CheckMateEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
+        Debug.Assert(result < EvaluationConstants.CheckMateEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
+        Debug.Assert(result > -EvaluationConstants.CheckMateEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
 
         if (result != OnlineTablebaseProber.NoResult)
         {
@@ -471,6 +471,18 @@ public readonly struct Position
             ? eval
             : -eval;
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsTwoFoldRepetition(Dictionary<long, int> positionHistory) => positionHistory.Values.Any(val => val >= 2);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int NumberOfTwoFoldRepetitions(Dictionary<long, int> positionHistory) => positionHistory.Values.Count(val => val >= 2);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsThreefoldRepetition(Dictionary<long, int> positionHistory) => positionHistory.Values.Any(val => val >= 3);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool Is50MovesRepetition(int movesWithoutCaptureOrPawnMove) => movesWithoutCaptureOrPawnMove >= 100;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int CustomPieceEvaluation(int pieceSquareIndex, int pieceIndex)

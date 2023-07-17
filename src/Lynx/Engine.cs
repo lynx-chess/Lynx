@@ -134,7 +134,7 @@ public sealed partial class Engine
             maxDepth = Configuration.EngineSettings.DefaultMaxDepth;
         }
 
-        var tablebaseResult = OnlineTablebaseProber.RootSearch(Game.CurrentPosition, _halfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
+        var tablebaseResult = OnlineTablebaseProber.RootSearch(Game.CurrentPosition, Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
 
         if (tablebaseResult.BestMove != 0)
         {
