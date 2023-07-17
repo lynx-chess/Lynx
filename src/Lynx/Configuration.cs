@@ -181,7 +181,12 @@ public sealed class EngineSettings
 
     public int QueenMobilityBonus { get; set; } = 1;
 
-    public bool UseOnlineTablebase { get; set; } = false;
+    public bool UseOnlineTablebaseInRootPositions { get; set; } = false;
+
+    /// <summary>
+    /// Might mishehave due to tablebase API limits
+    /// </summary>
+    public bool UseOnlineTablebaseInSearch { get; set; } = false;
 
     /// <summary>
     /// This can also de used to reduce online probing

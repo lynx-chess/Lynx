@@ -1,4 +1,4 @@
-﻿#pragma warning disable S4144 // Methods should not have identical implementations - Logical separations, even if the implementation is the same
+﻿#pragma warning disable S4144   // Methods should not have identical implementations - Logical separations, even if the implementation is the same
 #pragma warning disable RCS1163 // Unused parameter -  RootSearch_ and EvaluationSearch_ methods have the same fen input, so they're just duplicated (too lazy to create data input collections)
 #pragma warning disable IDE0060 // Remove unused parameter -  RootSearch_ and EvaluationSearch_ methods have the same fen input, so they're just duplicated (too lazy to create data input collections)
 
@@ -12,14 +12,15 @@ public class OnlineTablebaseProberTest
 {
     public OnlineTablebaseProberTest()
     {
-        Configuration.EngineSettings.UseOnlineTablebase = true;
+        Configuration.EngineSettings.UseOnlineTablebaseInRootPositions = true;
+        Configuration.EngineSettings.UseOnlineTablebaseInSearch = true;
     }
 
     [TestCase("1N6/8/p7/8/4kN2/8/K7/8 w - - 0 1", 115, "f4e2")]     // 115 moves to mate
     [TestCase("8/3B4/8/1R6/5r2/8/3K4/5k2 w - - 1 1", 65, "d2e3")]   // 64 moves to mate, 58 moves to zero
     public void RootSearch_CursedWin(string fen, int distanceToMate, string bestMove)
     {
-        var result = OnlineTablebaseProber.RootSearch(new Position(fen), 0, default);
+        var result = OnlineTablebaseProber.RootSearch(new Position(fen), new(), 0, default);
         Assert.AreEqual(distanceToMate, result.DistanceToMate);
         Assert.AreEqual(bestMove, result.BestMove.UCIString());
     }
@@ -34,9 +35,10 @@ public class OnlineTablebaseProberTest
 
     [TestCase("1N6/8/p7/8/4k3/8/K3N3/8 b - - 1 1", -114, "e4d3")]   // 114 moves to mate
     [TestCase("8/3B4/8/1R6/5r2/4K3/8/5k2 b - - 2 1", -64, "f4c4")] // 63 moves to mate, 57 moves to zero
+    [TestCase("8/6B1/8/8/B7/8/K1pk4/8 b - - 0 1", -67, "c2c1n")] // 67 moves to mate if the underpromotion is played
     public void RootSearch_BlessedLoss(string fen, int distanceToMate, string bestMove)
     {
-        var result = OnlineTablebaseProber.RootSearch(new Position(fen), 0, default);
+        var result = OnlineTablebaseProber.RootSearch(new Position(fen), new(), 0, default);
         Assert.AreEqual(distanceToMate, result.DistanceToMate);
         Assert.AreEqual(bestMove, result.BestMove.UCIString());
     }
@@ -53,7 +55,7 @@ public class OnlineTablebaseProberTest
     [TestCase("7K/5q2/4k3/8/8/8/8/8 w - - 0 1")]
     public void RootSearch_Stalemate(string fen)
     {
-        var result = OnlineTablebaseProber.RootSearch(new Position(fen), 0, default);
+        var result = OnlineTablebaseProber.RootSearch(new Position(fen), new(), 0, default);
         Assert.AreEqual(OnlineTablebaseProber.NoResult, result.DistanceToMate);
         Assert.AreEqual(0, result.BestMove);
     }
@@ -82,7 +84,7 @@ public class OnlineTablebaseProberTest
     public void RootSearch_ImpossibleCheckmate(string fen, int distanceToMate)
     {
         var position = new Position(fen);
-        var result = OnlineTablebaseProber.RootSearch(position, 0, default);
+        var result = OnlineTablebaseProber.RootSearch(position, new(), 0, default);
         Assert.AreEqual(distanceToMate, result.DistanceToMate);
         Assert.Contains(result.BestMove, position.AllPossibleMoves().ToList());
     }
@@ -118,7 +120,7 @@ public class OnlineTablebaseProberTest
     public void RootSearch_NoMaterial(string fen, int distanceToMate)
     {
         var position = new Position(fen);
-        var result = OnlineTablebaseProber.RootSearch(position, 0, default);
+        var result = OnlineTablebaseProber.RootSearch(position, new(), 0, default);
         Assert.AreEqual(distanceToMate, result.DistanceToMate);
         Assert.Contains(result.BestMove, position.AllPossibleMoves().ToList());
     }
@@ -142,7 +144,7 @@ public class OnlineTablebaseProberTest
     public void RootSearch_DrawWithCorrectPlay(string fen, int distanceToMate, string bestMove)
     {
         var position = new Position(fen);
-        var result = OnlineTablebaseProber.RootSearch(position, 0, default);
+        var result = OnlineTablebaseProber.RootSearch(position, new(), 0, default);
         Assert.AreEqual(distanceToMate, result.DistanceToMate);
         Assert.AreEqual(bestMove, result.BestMove.UCIString());
     }
@@ -159,7 +161,7 @@ public class OnlineTablebaseProberTest
     public void RootSearch_WinWithCorrectPlay(string fen, int distanceToMate, string bestMove)
     {
         var position = new Position(fen);
-        var result = OnlineTablebaseProber.RootSearch(position, 0, default);
+        var result = OnlineTablebaseProber.RootSearch(position, new(), 0, default);
         Assert.AreEqual(distanceToMate, result.DistanceToMate);
         Assert.AreEqual(bestMove, result.BestMove.UCIString());
     }
@@ -169,15 +171,32 @@ public class OnlineTablebaseProberTest
     {
         var position = new Position(fen);
         var result = OnlineTablebaseProber.EvaluationSearch(position, 0, default);
-        Assert.Greater(result, -EvaluationConstants.CheckMateEvaluation); // TODO detection limit
-        Assert.Less(result, -0.1 * EvaluationConstants.CheckMateEvaluation); // TODO detection limit
+        Assert.Greater(result, 0.1 * EvaluationConstants.CheckMateEvaluation); // TODO detection limit
+        Assert.Less(result, EvaluationConstants.CheckMateEvaluation);
+    }
+
+    [TestCase("k7/2QR4/8/8/8/4N3/2r4Q/1K6 b - - 0 1", -49, "c2c1")]   // Loss but after 15 checks
+    public void RootSearch_LossButHoldingAsLongAsPossible(string fen, int distanceToMate, string bestMove)
+    {
+        var position = new Position(fen);
+        var result = OnlineTablebaseProber.RootSearch(position, new(), 0, default);
+        Assert.AreEqual(distanceToMate, result.DistanceToMate);
+        Assert.AreEqual(bestMove, result.BestMove.UCIString());
+    }
+
+    [TestCase("k7/2QR4/8/8/8/4N3/2r4Q/1K6 b - - 0 1", 49, "c2c1")]   // Loss but after 15 checks
+    public void EvaluationSearch_LossButHoldingAsLongAsPossible(string fen, int distanceToMate, string bestMove)
+    {
+        var position = new Position(fen);
+        var result = OnlineTablebaseProber.EvaluationSearch(position, 0, default);
+        Assert.AreEqual(-EvaluationConstants.CheckMateEvaluation + distanceToMate * Position.DepthFactor, result); // TODO detection limit
     }
 
     [TestCase("8/3P3K/3p1k2/8/8/8/3p4/8 w - - 1 1", 14, "d7d8q")]   // Win or lose
     public void RootSearch_WinWithCorrectPlay_2(string fen, int distanceToMate, string bestMove)
     {
         var position = new Position(fen);
-        var result = OnlineTablebaseProber.RootSearch(position, 0, default);
+        var result = OnlineTablebaseProber.RootSearch(position, new(), 0, default);
         Assert.AreEqual(distanceToMate, result.DistanceToMate);
         Assert.AreEqual(bestMove, result.BestMove.UCIString());
     }
@@ -205,7 +224,7 @@ public class OnlineTablebaseProberTest
     public void RootSearch_DrawWinningPositionDueToExistingHalfMovesWithoutCaptureOrPawnMove(string fen, int distanceToMate, string bestMove, int halfMovesWithoutCaptureOrPawnMove)
     {
         var position = new Position(fen);
-        var result = OnlineTablebaseProber.RootSearch(position, halfMovesWithoutCaptureOrPawnMove, default);
+        var result = OnlineTablebaseProber.RootSearch(position, new(), halfMovesWithoutCaptureOrPawnMove, default);
         Assert.AreEqual(distanceToMate, result.DistanceToMate);
         Assert.AreEqual(bestMove, result.BestMove.UCIString());
     }
@@ -218,7 +237,7 @@ public class OnlineTablebaseProberTest
     /// <param name="expectedEvaluation"></param>
     [TestCase("kN6/8/8/8/8/8/8/B3K3 w - - 0 1", 0, EvaluationConstants.CheckMateEvaluation - 27 * Position.DepthFactor)]    // B+N, Mate in 27, DTZ==DTM=58
     [TestCase("kN6/8/8/8/8/8/8/B3K3 w - - 0 1", 50, 0)]                                                                     // B+N, Mate in 27, DTM=58, DTZ >100
-    [TestCase("Kn6/8/8/8/8/8/8/b3k3 b - - 0 1", 0, -EvaluationConstants.CheckMateEvaluation + 27 * Position.DepthFactor)]   // B+N, Mate in 27, DTZ?==DTM=58
+    [TestCase("Kn6/8/8/8/8/8/8/b3k3 b - - 0 1", 0, +EvaluationConstants.CheckMateEvaluation - 27 * Position.DepthFactor)]   // B+N, Mate in 27, DTZ?==DTM=58
     [TestCase("Kn6/8/8/8/8/8/8/b3k3 b - - 0 1", 50, 0)]                                                                     // B+N, Mate in 27, DTZ?==DTM=58, DTZ >100
     public void EvaluationSearch_DrawWinningPositionDueToExistingHalfMovesWithoutCaptureOrPawnMove(string fen, int halfMovesWithoutCaptureOrPawnMove, int expectedEvaluation)
     {
@@ -226,8 +245,112 @@ public class OnlineTablebaseProberTest
         var result = OnlineTablebaseProber.EvaluationSearch(position, halfMovesWithoutCaptureOrPawnMove, default);
         Assert.AreEqual(expectedEvaluation, result);
     }
+
+    /// <summary>
+    /// In root search mate score will always be the detected one, even if over 50 moves with or without previous <paramref name="halfMovesWithoutCaptureOrPawnMove"/>
+    /// </summary>
+    /// <param name="fen"></param>
+    /// <param name="distanceToMate"></param>
+    /// <param name="bestMove"></param>
+    /// <param name="halfMovesWithoutCaptureOrPawnMove"></param>
+    [TestCase("6kN/8/8/8/8/8/8/B3K3 b - - 0 1", 30, "g8f8", 0)]    // B+N, Mate in 27, DTZ?==DTM=58
+    [TestCase("6kN/8/8/8/8/8/8/B3K3 b - - 0 1", 30, "g8f8", 42)]   // B+N, Mate in 27, DTZ?==DTM=58
+    [TestCase("6kN/8/8/8/8/8/8/B3K3 b - - 0 1", 30, "g8f8", 0)]    // B+N, Mate in 27, DTZ?==DTM=58
+    [TestCase("6kN/8/8/8/8/8/8/B3K3 b - - 0 1", 30, "g8f8", 42)]   // B+N, Mate in 27, DTZ?==DTM=58
+    public void RootSearch_DrawLosingPositionDueToExistingHalfMovesWithoutCaptureOrPawnMove(string fen, int distanceToMate, string bestMove, int halfMovesWithoutCaptureOrPawnMove)
+    {
+        var position = new Position(fen);
+        var result = OnlineTablebaseProber.RootSearch(position, new(), halfMovesWithoutCaptureOrPawnMove, default);
+        Assert.AreEqual(distanceToMate, result.DistanceToMate);
+        Assert.AreEqual(bestMove, result.BestMove.UCIString());
+    }
+
+    /// <summary>
+    /// In evaluation search we need to check <paramref name="halfMovesWithoutCaptureOrPawnMove"/> to make sure to apply the 50 moves rule correctly
+    /// </summary>
+    /// <param name="fen"></param>
+    /// <param name="halfMovesWithoutCaptureOrPawnMove"></param>
+    /// <param name="expectedEvaluation"></param>
+    [TestCase("6kN/8/8/8/8/8/8/B3K3 b - - 0 1", 0, -EvaluationConstants.CheckMateEvaluation + 30 * Position.DepthFactor)]   // B+N, Mate in 27, DTZ==DTM=58
+    [TestCase("6kN/8/8/8/8/8/8/B3K3 b - - 0 1", 42, 0)]                                                                     // B+N, Mate in 27, DTM=58, DTZ >100
+    [TestCase("6kN/8/8/8/8/8/8/B3K3 b - - 0 1", 0, -EvaluationConstants.CheckMateEvaluation + 30 * Position.DepthFactor)]   // B+N, Mate in 27, DTZ?==DTM=58
+    [TestCase("6kN/8/8/8/8/8/8/B3K3 b - - 0 1", 42, 0)]                                                                     // B+N, Mate in 27, DTZ?==DTM=58, DTZ >100
+    public void EvaluationSearch_DrawLosingPositionDueToExistingHalfMovesWithoutCaptureOrPawnMove(string fen, int halfMovesWithoutCaptureOrPawnMove, int expectedEvaluation)
+    {
+        var position = new Position(fen);
+        var result = OnlineTablebaseProber.EvaluationSearch(position, halfMovesWithoutCaptureOrPawnMove, default);
+        Assert.AreEqual(expectedEvaluation, result);
+    }
+
+    [TestCase("8/1k6/8/6B1/p1P5/2K1Pp2/8/8 w - - 0 1", +49, new[] { "g5h4", "c3d2", "c3d3" })]
+    public void RootSearch_NoDistanceToMateProvidedWhileWinning(string fen, int distanceToMate, string[] bestMoves)
+    {
+        var position = new Position(fen);
+        var result = OnlineTablebaseProber.RootSearch(position, new(), default, default);
+        Assert.AreEqual(distanceToMate, result.DistanceToMate);
+        Assert.Contains(result.BestMove.UCIString(), bestMoves);
+    }
+
+    [TestCase("8/1k6/8/6B1/p1P5/2K1Pp2/8/8 w - - 0 1", +49, new[] { "g5h4", "c3d2", "c3d3" })]
+    public void EvaluatioSearch_NoDistanceToMateProvidedWhileWinning(string fen, int distanceToMate, string[] bestMoves)
+    {
+        var position = new Position(fen);
+        var result = OnlineTablebaseProber.EvaluationSearch(position, default, default);
+        Assert.AreEqual(+EvaluationConstants.CheckMateEvaluation - Position.DepthFactor * distanceToMate, result);
+    }
+
+    [TestCase("8/1k6/8/8/p1P4B/2K1Pp2/8/8 b - - 1 1", -49)]
+    public void RootSearch_NoDistanceToMateProvidedWhileLosing(string fen, int distanceToMate)
+    {
+        var position = new Position(fen);
+        var result = OnlineTablebaseProber.RootSearch(position, new(), default, default);
+        Assert.AreEqual(distanceToMate, result.DistanceToMate);
+        Assert.NotZero(result.BestMove);
+    }
+
+    [TestCase("8/1k6/8/8/p1P4B/2K1Pp2/8/8 b - - 1 1", 49)]
+    public void EvaluationSearch_NoDistanceToMateProvidedWhileLosing(string fen, int distanceToMate)
+    {
+        var position = new Position(fen);
+        var result = OnlineTablebaseProber.EvaluationSearch(position, default, default);
+        Assert.AreEqual(-EvaluationConstants.CheckMateEvaluation + Position.DepthFactor * distanceToMate, result);
+    }
+
+    [TestCase("8/8/1p6/8/P1P3k1/P7/P6K/8 b - - 66 1", -49, new[] { "g4f4", "g4f5" })]
+    public void RootSearch_MaybeLosing(string fen, int distanceToMate, string[] bestMoves)
+    {
+        var position = new Position(fen);
+        var result = OnlineTablebaseProber.RootSearch(position, new(), default, default);
+        Assert.AreEqual(distanceToMate, result.DistanceToMate);
+        Assert.Contains(result.BestMove.UCIString(), bestMoves);
+    }
+
+    [TestCase("8/8/1p6/8/P1P3k1/P7/P6K/8 b - - 66 1", 49, new[] { "g4f4", "g4f5" })]
+    public void EvaluationSearch_MaybeLosing(string fen, int distanceToMate, string[] bestMoves)
+    {
+        var position = new Position(fen);
+        var result = OnlineTablebaseProber.EvaluationSearch(position, default, default);
+        Assert.AreEqual(-EvaluationConstants.CheckMateEvaluation + Position.DepthFactor * distanceToMate, result);
+    }
+
+    [TestCase("8/8/1p6/8/P1P2k2/P7/P6K/8 w - - 67 2", +49, new[] { "h2h3" })]
+    public void RootSearch_MaybeWinning(string fen, int distanceToMate, string[] bestMoves)
+    {
+        var position = new Position(fen);
+        var result = OnlineTablebaseProber.RootSearch(position, new(), default, default);
+        Assert.AreEqual(distanceToMate, result.DistanceToMate);
+        Assert.Contains(result.BestMove.UCIString(), bestMoves);
+    }
+
+    [TestCase("8/8/1p6/8/P1P2k2/P7/P6K/8 w - - 67 2", +49, new[] { "h2h3" })]
+    public void EvaluationSearch_MaybeWinning(string fen, int distanceToMate, string[] bestMoves)
+    {
+        var position = new Position(fen);
+        var result = OnlineTablebaseProber.EvaluationSearch(position, default, default);
+        Assert.AreEqual(EvaluationConstants.CheckMateEvaluation - Position.DepthFactor * distanceToMate, result);
+    }
 }
 
-#pragma warning restore S4144 // Methods should not have identical implementations
+#pragma warning restore S4144   // Methods should not have identical implementations
 #pragma warning restore IDE0060 // Remove unused parameter
 #pragma warning restore RCS1163 // Unused parameter.

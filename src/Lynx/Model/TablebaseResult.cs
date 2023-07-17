@@ -21,59 +21,130 @@ public enum TablebaseEvaluationCategory : byte
 
 public record class TablebaseEvaluation()
 {
-    public TablebaseEvaluationCategory Category { get; init; }
+    public TablebaseEvaluationCategory Category
+    {
+        get;
+#if NET8_0_OR_GREATER
+        init;
+#else
+        set;
+#endif
+    }
 
     [JsonPropertyName("dtm")]
-    public int DistanceToMate { get; init; }
+    public int? DistanceToMate
+    {
+        get;
+#if NET8_0_OR_GREATER
+        init;
+#else
+        set;
+#endif
+    }
 
     [JsonPropertyName("dtz")]
-    public int DistanceToZero { get; init; }
+    public int? DistanceToZero
+    {
+        get;
+#if NET8_0_OR_GREATER
+        init;
+#else
+        set;
+#endif
+    }
 
     [JsonPropertyName("insufficient_material")]
-    public bool IsInsufficientMaterial { get; init; }
+    public bool IsInsufficientMaterial
+    {
+        get;
+#if NET8_0_OR_GREATER
+        init;
+#else
+        set;
+#endif
+    }
 
     [JsonPropertyName("checkmate")]
-    public bool IsCheckmate { get; init; }
+    public bool IsCheckmate
+    {
+        get;
+#if NET8_0_OR_GREATER
+        init;
+#else
+        set;
+#endif
+    }
 
     [JsonPropertyName("stalemate")]
-    public bool IsStalemate { get; init; }
+    public bool IsStalemate
+    {
+        get;
+#if NET8_0_OR_GREATER
+        init;
+#else
+        set;
+#endif
+    }
 
-    public List<TablebaseEvalMove>? Moves { get; init; }
-}
-
-public enum TablebaseMainLineWinner
-{
-    W,
-    B
+    public List<TablebaseEvalMove>? Moves
+    {
+        get;
+#if NET8_0_OR_GREATER
+        init;
+#else
+        set;
+#endif
+    }
 }
 
 public record class TablebaseEvalMove()
 {
-    public string? Uci { get; init; }
+    public string? Uci
+    {
+        get;
+#if NET8_0_OR_GREATER
+        init;
+#else
+        set;
+#endif
+    }
 
-    public TablebaseEvaluationCategory Category { get; init; }
+    public TablebaseEvaluationCategory Category
+    {
+        get;
+#if NET8_0_OR_GREATER
+        init;
+#else
+        set;
+#endif
+    }
 
     [JsonPropertyName("dtm")]
-    public int DistanceToMate { get; set; }
+    public int? DistanceToMate
+    {
+        get;
+#if NET8_0_OR_GREATER
+        init;
+#else
+        set;
+#endif
+    }
 
     [JsonPropertyName("dtz")]
-    public int DistanceToZero { get; init; }
+    public int? DistanceToZero
+    {
+        get;
+#if NET8_0_OR_GREATER
+        init;
+#else
+        set;
+#endif
+    }
 }
 
-public record class TablebaseMainlineMove()
+[JsonSourceGenerationOptions(
+    GenerationMode = JsonSourceGenerationMode.Default)] // https://github.com/dotnet/runtime/issues/78602#issuecomment-1322004254
+[JsonSerializable(typeof(TablebaseEvaluation))]
+internal partial class SourceGenerationContext : JsonSerializerContext
 {
-    public string? Uci { get; init; }
-}
-
-public record class TablebaseMainLine
-{
-    /// <summary>
-    /// Null in case of draw or stalemate detected
-    /// </summary>
-    public TablebaseMainLineWinner? Winner { get; init; }
-
-    public List<TablebaseMainlineMove>? MainLine { get; init; }
-
-    [JsonPropertyName("dtz")]
-    public int DistanceToZero { get; set; }
 }

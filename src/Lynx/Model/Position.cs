@@ -1,5 +1,6 @@
 using NLog;
 using System;
+using System.Diagnostics;
 using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -417,18 +418,13 @@ public readonly struct Position
             }
         }
 
-        // 7 piece tablebase available, 5 pieces not counting queens
-        if (Configuration.EngineSettings.UseOnlineTablebase && pieceCount.Sum() <= Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces - 2)
+        var result = OnlineTablebaseProber.EvaluationSearch(this, movesWithoutCaptureOrPawnMove, cancellationToken);
+        Debug.Assert(result > EvaluationConstants.CheckMateEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
+        Debug.Assert(result < -EvaluationConstants.CheckMateEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
+
+        if (result != OnlineTablebaseProber.NoResult)
         {
-            var result = OnlineTablebaseProber.GetEvaluation(FEN(), cancellationToken).Result;
-            if (result?.Category > TablebaseEvaluationCategory.Unknown)
-            {
-                return result.Category switch
-                {
-                    TablebaseEvaluationCategory.Draw => 0,
-                    _ => Math.Sign(result.DistanceToMate) * (EvaluationConstants.CheckMateEvaluation - (DepthFactor * (int)Math.Ceiling(0.5 * result.DistanceToMate))) * (Side == Side.White ? 1 : -1)
-                };
-            }
+            return result;
         }
 
         //++pieceCount[Constants.WhiteKingIndex];

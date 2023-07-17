@@ -216,11 +216,19 @@ public sealed class LinxDriver
                     }
                     break;
                 }
-            case "onlinetablebase":
+            case "onlinetablebaseinrootpositions":
                 {
                     if (commandItems.Length > 4 && bool.TryParse(commandItems[4], out var value))
                     {
-                        Configuration.EngineSettings.UseOnlineTablebase = value;
+                        Configuration.EngineSettings.UseOnlineTablebaseInRootPositions = value;
+                    }
+                    break;
+                }
+            case "onlinetablebaseinsearch":
+                {
+                    if (commandItems.Length > 4 && bool.TryParse(commandItems[4], out var value))
+                    {
+                        Configuration.EngineSettings.UseOnlineTablebaseInSearch = value;
                     }
                     break;
                 }
