@@ -11,6 +11,10 @@ using System.Text.Json.Serialization;
 
 namespace Lynx;
 
+/// <summary>
+/// https://syzygy-tables.info/ -
+/// https://tablebase.lichess.ovh/
+/// </summary>
 public static class OnlineTablebaseProber
 {
     public const int NoResult = 6666;
@@ -226,7 +230,7 @@ public static class OnlineTablebaseProber
 
                     if (bestMove is not null)
                     {
-                        _logger.Info("There's a miraculous move ({0}) that saves {fen} due to repetition :O", bestMove, fen);
+                        _logger.Info("There's a miraculous move ({0}) that saves {fen} due to repetition :O", bestMove.Uci, fen);
                         mate = 0;
                     }
                     else
@@ -251,10 +255,8 @@ public static class OnlineTablebaseProber
                             }
                             Utils.RevertPositionHistory(in newPosition, positionHistory, repetitions);
                         }
-                        if (bestMove is null)
-                        {
-                            bestMove = bestMoveList.FirstOrDefault();
-                        }
+
+                        bestMove ??= bestMoveList.FirstOrDefault();
                     }
                 }
 
@@ -391,7 +393,7 @@ public static class OnlineTablebaseProber
 
                     if (bestMove is not null)
                     {
-                        _logger.Info("Move {0} draws the game due to repetition earlier than the expected blessed loss in {fen} position :O", bestMove, fen);
+                        _logger.Info("Move {0} draws the game due to repetition earlier than the expected blessed loss in {fen} position :O", bestMove.Uci, fen);
                         mate = 0;
                     }
                     else
@@ -416,12 +418,9 @@ public static class OnlineTablebaseProber
                             }
                             Utils.RevertPositionHistory(in newPosition, positionHistory, repetitions);
                         }
-                        if (bestMove is null)
-                        {
-                            bestMove = bestMoveList.FirstOrDefault();
-                        }
-                    }
 
+                        bestMove ??= bestMoveList.FirstOrDefault();
+                    }
                 }
 
                 break;
