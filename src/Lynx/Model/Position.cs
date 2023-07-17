@@ -16,6 +16,8 @@ public readonly struct Position
 
     public string FEN() => CalculateFEN();
 
+    public string FEN(int halfMovesWithoutCaptureOrPawnMove) => CalculateFEN(halfMovesWithoutCaptureOrPawnMove);
+
     public long UniqueIdentifier { get; }
 
     /// <summary>
@@ -34,16 +36,12 @@ public readonly struct Position
 
     public int Castle { get; }
 
-    public Position(string fen)
+    public Position(string fen) : this(FENParser.ParseFEN(fen))
     {
-        //_fen = null;    // Otherwise halfmove and fullmove numbers may interfere whenever FEN is being used as key of a dictionary
-        var parsedFEN = FENParser.ParseFEN(fen);
+    }
 
-        if (!parsedFEN.Success)
-        {
-            _logger.Error($"Error parsing FEN {fen}");
-        }
-
+    public Position(ParseFENResult parsedFEN)
+    {
         PieceBitBoards = parsedFEN.PieceBitBoards;
         OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
         Side = parsedFEN.Side;
@@ -347,6 +345,13 @@ public readonly struct Position
         sb.Append(" 0 1");
 
         return sb.ToString();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private string CalculateFEN(int halfMovesWithoutCaptureOrPawnMove)
+    {
+        var fen = CalculateFEN();
+        return fen.Replace(" 0 1", $" {halfMovesWithoutCaptureOrPawnMove} 1");
     }
 
     public int CountPieces() => PieceBitBoards.Sum(b => b.CountBits());

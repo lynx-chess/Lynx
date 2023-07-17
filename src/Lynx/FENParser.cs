@@ -13,8 +13,7 @@ public static partial class FENParser
 
     private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
 
-    public static (bool Success, BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, int Castle, BoardSquare EnPassant,
-        int HalfMoveClock, int FullMoveCounter) ParseFEN(string fen)
+    public static ParseFENResult ParseFEN(string fen)
     {
         fen = fen.Trim();
 
@@ -67,7 +66,7 @@ public static partial class FENParser
             success = false;
         }
 
-        return (success, pieceBitBoards, occupancyBitBoards, side, castle, enPassant, halfMoveClock, fullMoveCounter);
+        return new ParseFENResult(success, pieceBitBoards, occupancyBitBoards, side, castle, enPassant, halfMoveClock, fullMoveCounter);
     }
 
     private static (MatchCollection Matches, bool Success) ParseBoard(string fen, BitBoard[] pieceBitBoards, BitBoard[] occupancyBitBoards)
@@ -200,5 +199,39 @@ public static partial class FENParser
         }
 
         return (enPassant, success);
+    }
+}
+
+public readonly ref struct ParseFENResult
+{
+    public ParseFENResult(bool success, ulong[] pieceBitBoards, ulong[] occupancyBitBoards, Side side, int castle, BoardSquare enPassant, int halfMoveClock, int fullMoveCounter)
+    {
+        Success = success;
+        PieceBitBoards = pieceBitBoards;
+        OccupancyBitBoards = occupancyBitBoards;
+        Side = side;
+        Castle = castle;
+        EnPassant = enPassant;
+        HalfMoveClock = halfMoveClock;
+        FullMoveCounter = fullMoveCounter;
+    }
+
+    public bool Success { get; }
+    public ulong[] PieceBitBoards { get; }
+    public ulong[] OccupancyBitBoards { get; }
+    public Side Side { get; }
+    public int Castle { get; }
+    public BoardSquare EnPassant { get; }
+    public int HalfMoveClock { get; }
+    public int FullMoveCounter { get; }
+
+    public static implicit operator (bool success, ulong[] pieceBitBoards, ulong[] occupancyBitBoards, Side side, int castle, BoardSquare enPassant, int halfMoveClock, int fullMoveCounter)(ParseFENResult value)
+    {
+        return (value.Success, value.PieceBitBoards, value.OccupancyBitBoards, value.Side, value.Castle, value.EnPassant, value.HalfMoveClock, value.FullMoveCounter);
+    }
+
+    public static implicit operator ParseFENResult((bool success, ulong[] pieceBitBoards, ulong[] occupancyBitBoards, Side side, int castle, BoardSquare enPassant, int halfMoveClock, int fullMoveCounter) value)
+    {
+        return new ParseFENResult(value.success, value.pieceBitBoards, value.occupancyBitBoards, value.side, value.castle, value.enPassant, value.halfMoveClock, value.fullMoveCounter);
     }
 }

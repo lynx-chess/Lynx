@@ -50,7 +50,7 @@ public static class OnlineTablebaseProber
             return (NoResult, default);
         }
 
-        var fen = position.FEN();
+        var fen = position.FEN(halfMovesWithoutCaptureOrPawnMove);
         _logger.Debug("[{0}] Querying online tb for position {1}", nameof(RootSearch), fen);
 
         var tablebaseEval = GetEvaluation(fen, cancellationToken).Result;
@@ -445,10 +445,10 @@ public static class OnlineTablebaseProber
             return NoResult;
         }
 
-        var fen = position.FEN();
+        var fen = position.FEN(halfMovesWithoutCaptureOrPawnMove);
         _logger.Debug("[{0}] Querying online tb for position {1}", nameof(EvaluationSearch), fen);
 
-        var result = GetEvaluation(position.FEN(), cancellationToken).Result;
+        var result = GetEvaluation(fen, cancellationToken).Result;
 
 #pragma warning disable S3358 // Ternary operators should not be nested
         return result?.Category switch

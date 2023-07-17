@@ -20,11 +20,19 @@ public sealed class Game
     {
     }
 
-    public Game(string fen) : this(new Position(fen))
+    public Game(string fen)
     {
+        var parsedFen = FENParser.ParseFEN(fen);
+        CurrentPosition = new Position(parsedFen);
+
+        MoveHistory = new(150);
+        PositionHistory = new(150);
+        PositionHashHistory = new() { [CurrentPosition.UniqueIdentifier] = 1 };
+
+        HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
     }
 
-    public Game(Position position)
+    internal Game(Position position)
     {
         CurrentPosition = position;
 
