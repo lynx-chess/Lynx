@@ -299,6 +299,9 @@ public static class Constants
 
     public const string ComplexPositionFEN = "rq2k2r/ppp2pb1/2n1pnpp/1Q1p1b2/3P1B2/2N1PNP1/PPP2PBP/R3K2R w KQkq - 0 1";
 
+    // https://www.chessprogramming.org/Lasker-Reichhelm_Position
+    public const string TTPositionFEN = "8/k7/3p4/p2P1p2/P2P1P2/8/8/K7 w - - 0 1";
+
     public const string EmptyBoardFEN = "8/8/8/8/8/8/8/8 w - - 0 1";
 
     public const int WhiteShortCastleKingSquare = (int)BoardSquare.g1;
@@ -391,4 +394,6 @@ public static class Constants
         0, 1, 2, 3, 4, 5, 6, 7,
         0, 1, 2, 3, 4, 5, 6, 7
     };
+
+    public const int AbsoluteMaxDepth = 255;
 }

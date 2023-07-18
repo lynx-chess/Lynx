@@ -359,3 +359,10 @@ global.json
 
 # VS diagnostic sessions
 *.diagsession
+
+# VS Code settings
+.vscode/
+
+# Infersharp
+.infersharpconfig
+infer-out/
