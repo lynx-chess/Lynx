@@ -190,7 +190,7 @@ public class OnlineTablebaseProberTest
     {
         var position = new Position(fen);
         var result = OnlineTablebaseProber.EvaluationSearch(position, 0, default);
-        Assert.AreEqual(-EvaluationConstants.PositiveCheckmateDetectionLimit + distanceToMate * EvaluationConstants.DepthCheckmateFactor, result);
+        Assert.AreEqual(-EvaluationConstants.CheckMateBaseEvaluation + distanceToMate * EvaluationConstants.DepthCheckmateFactor, result);
     }
 
     [TestCase("8/3P3K/3p1k2/8/8/8/3p4/8 w - - 1 1", 14, "d7d8q")]   // Win or lose
