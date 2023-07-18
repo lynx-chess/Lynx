@@ -71,7 +71,7 @@ public sealed partial class Engine
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
             _logger.Warn("####################### prevents runtime failure ###########################3");
-            return position.StaticEvaluation();
+            return position.StaticEvaluation(_halfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
             //_transpositionTable.RecordHash(position, targetDepth, ply, null, staticEval, NodeType.Exact);         // This seems to create bugs for multiple people
         }
 
@@ -281,7 +281,7 @@ public sealed partial class Engine
 
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
-            return position.StaticEvaluation();
+            return position.StaticEvaluation(_halfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
         }
 
         ++_nodes;
@@ -291,7 +291,7 @@ public sealed partial class Engine
         var nextPvIndex = PVTable.Indexes[ply + 1];
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
-        var staticEvaluation = position.StaticEvaluation();
+        var staticEvaluation = position.StaticEvaluation(_halfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
 
         // Fail-hard beta-cutoff (updating alpha after this check)
         if (staticEvaluation >= beta)

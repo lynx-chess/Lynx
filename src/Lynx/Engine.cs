@@ -3,6 +3,7 @@ using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
 using System.Threading.Channels;
+using System.Timers;
 
 namespace Lynx;
 
@@ -139,7 +140,14 @@ public sealed partial class Engine
 
         if (tablebaseResult.BestMove != 0)
         {
-            var searchResult = new SearchResult(tablebaseResult.BestMove, 0, 0, 0, _nodes, _stopWatch.ElapsedMilliseconds, Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * _stopWatch.ElapsedMilliseconds) + 1), 0, long.MaxValue)), new List<Move>(), MinValue, MaxValue, Mate: tablebaseResult.MateScore);
+            var searchResult = new SearchResult(tablebaseResult.BestMove, Evaluation: 0, TargetDepth: 0, new List<Move>(), MinValue, MaxValue, Mate: tablebaseResult.MateScore)
+            {
+                DepthReached = 0,
+                Nodes = 0,
+                Time = _stopWatch.ElapsedMilliseconds,
+                NodesPerSecond = 0,
+                HashfullPermill = _transpositionTable.HashfullPermill()
+            };
 
             Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(searchResult))).Wait();
 

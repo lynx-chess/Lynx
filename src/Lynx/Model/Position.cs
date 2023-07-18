@@ -249,6 +249,13 @@ public readonly struct Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private string CalculateFEN(int halfMovesWithoutCaptureOrPawnMove)
+    {
+        var fen = CalculateFEN();
+        return fen.Replace(" 0 1", $" {halfMovesWithoutCaptureOrPawnMove} 1");
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private string CalculateFEN()
     {
         var sb = new StringBuilder(100);
@@ -349,13 +356,6 @@ public readonly struct Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public IEnumerable<Move> AllCapturesMoves(Move[]? movePool = null) => MoveGenerator.GenerateAllMoves(this, movePool, capturesOnly: true);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private string CalculateFEN(int halfMovesWithoutCaptureOrPawnMove)
-    {
-        var fen = CalculateFEN();
-        return fen.Replace(" 0 1", $" {halfMovesWithoutCaptureOrPawnMove} 1");
-    }
-
     public int CountPieces() => PieceBitBoards.Sum(b => b.CountBits());
 
     /// <summary>
@@ -373,7 +373,7 @@ public readonly struct Position
             return 0;
         }
 
-        return StaticEvaluation();
+        return StaticEvaluation(movesWithoutCaptureOrPawnMove, cancellationToken);
     }
 
     /// <summary>
@@ -382,7 +382,7 @@ public readonly struct Position
     /// </summary>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int StaticEvaluation()
+    public int StaticEvaluation(int movesWithoutCaptureOrPawnMove, CancellationToken cancellationToken = default)
     {
         var eval = 0;
 
@@ -437,8 +437,8 @@ public readonly struct Position
         }
 
         var result = OnlineTablebaseProber.EvaluationSearch(this, movesWithoutCaptureOrPawnMove, cancellationToken);
-        Debug.Assert(result < EvaluationConstants.CheckMateEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
-        Debug.Assert(result > -EvaluationConstants.CheckMateEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
+        Debug.Assert(result < EvaluationConstants.CheckMateBaseEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
+        Debug.Assert(result > -EvaluationConstants.CheckMateBaseEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
 
         if (result != OnlineTablebaseProber.NoResult)
         {
