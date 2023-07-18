@@ -63,7 +63,7 @@ public sealed partial class Engine
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(depth, isInCheck);
-            //_transpositionTable.RecordHash(position, maxDepth, depth, finalPositionEvaluation, NodeType.Exact);
+            _transpositionTable.RecordHash(position, maxDepth, depth, finalPositionEvaluation, NodeType.Exact);
             return finalPositionEvaluation;
         }
 
