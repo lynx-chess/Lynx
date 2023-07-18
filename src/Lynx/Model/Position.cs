@@ -508,49 +508,6 @@ public readonly struct Position
         }
     }
 
-    /// <summary>
-    /// Assuming a current position has no legal moves (<see cref="AllPossibleMoves"/> doesn't produce any <see cref="IsValid"/> position),
-    /// this method determines if a position is a result of either a loss by Checkmate or a draw by stalemate.
-    /// NegaMax style
-    /// </summary>
-    /// <param name="depth">Modulates the output, favouring positions with lower depth left (i.e. Checkmate in less moves)</param>
-    /// <param name="positionHistory"></param>
-    /// <param name="movesWithoutCaptureOrPawnMove"></param>
-    /// <returns>At least <see cref="CheckMateEvaluation"/> if Position.Side lost (more extreme values when <paramref name="depth"/> increases)
-    /// or 0 if Position.Side was stalemated</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int EvaluateFinalPosition(int depth, bool isInCheck, Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove)
-    {
-        if (IsThreefoldRepetition(positionHistory) || Is50MovesRepetition(movesWithoutCaptureOrPawnMove))
-        {
-            return 0;
-        }
-
-        return EvaluateFinalPosition(depth, isInCheck);
-    }
-
-    /// <summary>
-    /// Assuming a current position has no legal moves (<see cref="AllPossibleMoves"/> doesn't produce any <see cref="IsValid"/> position),
-    /// this method determines if a position is a result of either a loss by Checkmate or a draw by stalemate.
-    /// NegaMax style
-    /// </summary>
-    /// <param name="depth">Modulates the output, favouring positions with lower depth left (i.e. Checkmate in less moves)</param>
-    /// <returns>At least <see cref="CheckMateEvaluation"/> if Position.Side lost (more extreme values when <paramref name="depth"/> increases)
-    /// or 0 if Position.Side was stalemated</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int EvaluateFinalPosition(int depth, bool isInCheck)
-    {
-        if (isInCheck)
-        {
-            // Checkmate evaluation, but not as bad/shallow as it looks like since we're already searching at a certain depth
-            return -EvaluationConstants.CheckMateBaseEvaluation + (EvaluationConstants.DepthCheckmateFactor * depth);
-        }
-        else
-        {
-            return default;
-        }
-    }
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsThreefoldRepetition(Dictionary<long, int> positionHistory) => positionHistory.Values.Any(val => val >= 3);
 
