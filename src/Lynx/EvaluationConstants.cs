@@ -276,11 +276,36 @@ public static class EvaluationConstants
             { 100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600 }
     };
 
-    public const int CheckMateEvaluation = 1_000_000_000;
+    /// <summary>
+    /// Base absolute checkmate evaluation value. Actual absolute evaluations are lower than this one by a number of <see cref="Position.DepthCheckmateFactor"/>
+    /// </summary>
+    public const int CheckMateBaseEvaluation = 30_000;
+
+    /// <summary>
+    /// This value combined with <see cref="PositiveCheckmateDetectionLimit"/> and <see cref="NegativeCheckmateDetectionLimit"/> should allows mates up to in <see cref="Constants.AbsoluteMaxDepth"/> moves.
+    /// </summary>
+    public const int DepthCheckmateFactor = 10;
+
+    /// <summary>
+    /// Minimum evaluation for a position to be White checkmate
+    /// </summary>
+    public const int PositiveCheckmateDetectionLimit = 27_000; // CheckMateBaseEvaluation - (Constants.AbsoluteMaxDepth + 45) * DepthCheckmateFactor;
+
+    /// <summary>
+    /// Minimum evaluation for a position to be Black checkmate
+    /// </summary>
+    public const int NegativeCheckmateDetectionLimit = -27_000; // -CheckMateBaseEvaluation + (Constants.AbsoluteMaxDepth + 45) * DepthCheckmateFactor;
 
     public const int FirstKillerMoveValue = 9_000;
 
     public const int SecondKillerMoveValue = 8_000;
 
-    public const int PVMoveValue = 20_000;
+    public const int PVMoveScoreValue = 20_000;
+
+    public const int TTMoveScoreValue = 19_000;
+
+    /// <summary>
+    /// Outside of the evaluation ranges (higher than any sensible evaluation, lower than <see cref="PositiveCheckmateDetectionLimit"/>)
+    /// </summary>
+    public const int NoHashEntry = 25_000;
 }

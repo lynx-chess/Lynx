@@ -10,8 +10,6 @@ namespace Lynx.Model;
 
 public readonly struct Position
 {
-    internal const int DepthFactor = 1_000_000;
-
     public string FEN() => CalculateFEN();
 
     public string FEN(int halfMovesWithoutCaptureOrPawnMove) => CalculateFEN(halfMovesWithoutCaptureOrPawnMove);
@@ -346,6 +344,12 @@ public readonly struct Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public IEnumerable<Move> AllPossibleMoves(Move[]? movePool = null) => MoveGenerator.GenerateAllMoves(this, movePool);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public IEnumerable<Move> AllCapturesMoves(Move[]? movePool = null) => MoveGenerator.GenerateAllMoves(this, movePool, capturesOnly: true);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private string CalculateFEN(int halfMovesWithoutCaptureOrPawnMove)
     {
         var fen = CalculateFEN();
@@ -364,12 +368,23 @@ public readonly struct Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int StaticEvaluation(Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove, CancellationToken cancellationToken = default)
     {
-        var eval = 0;
-
-        if (positionHistory.Values.Any(val => val >= 3) || movesWithoutCaptureOrPawnMove >= 100)
+        if (IsThreefoldRepetition(positionHistory) || Is50MovesRepetition(movesWithoutCaptureOrPawnMove))
         {
-            return eval;
+            return 0;
         }
+
+        return StaticEvaluation();
+    }
+
+    /// <summary>
+    /// Evaluates material and position in a NegaMax style.
+    /// That is, positive scores always favour playing <see cref="Side"/>.
+    /// </summary>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public int StaticEvaluation()
+    {
+        var eval = 0;
 
         int whiteMaterialEval = 0, blackMaterialEval = 0;
         var pieceCount = new int[PieceBitBoards.Length];
@@ -475,10 +490,51 @@ public readonly struct Position
             : -eval;
     }
 
+    /// <summary>
+    /// Assuming a current position has no legal moves (<see cref="AllPossibleMoves"/> doesn't produce any <see cref="IsValid"/> position),
+    /// this method determines if a position is a result of either a loss by Checkmate or a draw by stalemate.
+    /// NegaMax style
+    /// </summary>
+    /// <param name="depth">Modulates the output, favouring positions with lower depth left (i.e. Checkmate in less moves)</param>
+    /// <param name="isInCheck"></param>
+    /// <param name="positionHistory"></param>
+    /// <param name="movesWithoutCaptureOrPawnMove"></param>
+    /// <returns>At least <see cref="CheckMateEvaluation"/> if Position.Side lost (more extreme values when <paramref name="depth"/> increases)
+    /// or 0 if Position.Side was stalemated</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsTwoFoldRepetition(Dictionary<long, int> positionHistory) => positionHistory.Values.Any(val => val >= 2);
+    public static int EvaluateFinalPosition(int depth, bool isInCheck, Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove)
+    {
+        if (IsThreefoldRepetition(positionHistory) || Is50MovesRepetition(movesWithoutCaptureOrPawnMove))
+        {
+            return 0;
+        }
 
+        return EvaluateFinalPosition(depth, isInCheck);
+    }
+
+    /// <summary>
+    /// Assuming a current position has no legal moves (<see cref="AllPossibleMoves"/> doesn't produce any <see cref="IsValid"/> position),
+    /// this method determines if a position is a result of either a loss by Checkmate or a draw by stalemate.
+    /// NegaMax style
+    /// </summary>
+    /// <param name="depth">Modulates the output, favouring positions with lower depth left (i.e. Checkmate in less moves)</param>
+    /// <param name="isInCheck"></param>
+    /// <returns>At least <see cref="CheckMateEvaluation"/> if Position.Side lost (more extreme values when <paramref name="depth"/> increases)
+    /// or 0 if Position.Side was stalemated</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int EvaluateFinalPosition(int depth, bool isInCheck)
+    {
+        if (isInCheck)
+        {
+            // Checkmate evaluation, but not as bad/shallow as it looks like since we're already searching at a certain depth
+            return -EvaluationConstants.CheckMateBaseEvaluation + (EvaluationConstants.DepthCheckmateFactor * depth);
+        }
+        else
+        {
+            return default;
+        }
+    }
+
     public static int NumberOfTwoFoldRepetitions(Dictionary<long, int> positionHistory) => positionHistory.Values.Count(val => val >= 2);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -587,42 +643,8 @@ public readonly struct Position
             }
         }
 
-        return bonus += Configuration.EngineSettings.KingShieldBonus *
+        return bonus + Configuration.EngineSettings.KingShieldBonus *
             (Attacks.KingAttacks[squareIndex] & OccupancyBitBoards[(int)pieceSide]).CountBits();
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public IEnumerable<Move> AllPossibleMoves(Move[]? movePool = null) => MoveGenerator.GenerateAllMoves(this, movePool);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public IEnumerable<Move> AllCapturesMoves(Move[]? movePool = null) => MoveGenerator.GenerateAllMoves(this, movePool, capturesOnly: true);
-
-    /// <summary>
-    /// Assuming a current position has no legal moves (<see cref="AllPossibleMoves"/> doesn't produce any <see cref="IsValid"/> position),
-    /// this method determines if a position is a result of either a loss by Checkmate or a draw by stalemate.
-    /// NegaMax style
-    /// </summary>
-    /// <param name="depth">Modulates the output, favouring positions with lower depth left (i.e. Checkmate in less moves)</param>
-    /// <param name="positionHistory"></param>
-    /// <param name="movesWithoutCaptureOrPawnMove"></param>
-    /// <returns>At least <see cref="CheckMateEvaluation"/> if Position.Side lost (more extreme values when <paramref name="depth"/> increases)
-    /// or 0 if Position.Side was stalemated</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int EvaluateFinalPosition(int depth, bool isInCheck, Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove)
-    {
-        if (positionHistory.Values.Any(val => val >= 3) || movesWithoutCaptureOrPawnMove >= 100)
-        {
-            return 0;
-        }
-
-        if (isInCheck)
-        {
-            return -EvaluationConstants.CheckMateEvaluation + (DepthFactor * depth);
-        }
-        else
-        {
-            return default;
-        }
     }
 
     /// <summary>
