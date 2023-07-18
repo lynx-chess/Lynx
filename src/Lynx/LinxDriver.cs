@@ -223,7 +223,10 @@ public sealed class LinxDriver
 
     private void HandleNewGame()
     {
-        _logger.Info("Average depth: {0}", _engine.AverageDepth);
+        if (_engine.AverageDepth > 0 && _engine.AverageDepth < int.MaxValue)
+        {
+            _logger.Info("Average depth: {0}", _engine.AverageDepth);
+        }
         _engine.NewGame();
     }
 

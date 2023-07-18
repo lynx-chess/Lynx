@@ -479,6 +479,7 @@ public readonly struct Position
     /// NegaMax style
     /// </summary>
     /// <param name="depth">Modulates the output, favouring positions with lower depth left (i.e. Checkmate in less moves)</param>
+    /// <param name="isInCheck"></param>
     /// <param name="positionHistory"></param>
     /// <param name="movesWithoutCaptureOrPawnMove"></param>
     /// <returns>At least <see cref="CheckMateEvaluation"/> if Position.Side lost (more extreme values when <paramref name="depth"/> increases)
@@ -500,6 +501,7 @@ public readonly struct Position
     /// NegaMax style
     /// </summary>
     /// <param name="depth">Modulates the output, favouring positions with lower depth left (i.e. Checkmate in less moves)</param>
+    /// <param name="isInCheck"></param>
     /// <returns>At least <see cref="CheckMateEvaluation"/> if Position.Side lost (more extreme values when <paramref name="depth"/> increases)
     /// or 0 if Position.Side was stalemated</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
