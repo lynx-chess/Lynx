@@ -13,22 +13,23 @@ namespace Lynx.UCI.Commands.GUI;
 ///	Note: no "new" command is needed. However, if this position is from a different game than
 ///	the last position sent to the engine, the GUI should have sent a "ucinewgame" inbetween.
 /// </summary>
-public sealed class PositionCommand : GUIBaseCommand
+public sealed partial class PositionCommand : GUIBaseCommand
 {
     public const string Id = "position";
 
     public const string StartPositionString = "startpos";
     public const string MovesString = "moves";
 
+    [GeneratedRegex("(?<=fen).+?(?=moves|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+    private static partial Regex FenRegex();
+
+    [GeneratedRegex("(?<=moves).+?(?=$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+    private static partial Regex MovesRegex();
+
+    private static readonly Regex _fenRegex = FenRegex();
+    private static readonly Regex _movesRegex = MovesRegex();
+
     private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
-
-    private static readonly Regex _fenRegex = new(
-        "(?<=fen).+?(?=moves|$)",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-    private static readonly Regex _movesRegex = new(
-        "(?<=moves).+?(?=$)",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     public static Game ParseGame(string positionCommand)
     {
@@ -43,7 +44,7 @@ public sealed class PositionCommand : GUIBaseCommand
 
             if (string.IsNullOrEmpty(initialPosition))
             {
-                _logger.Error($"Error parsing position command '{positionCommand}': no initial position found");
+                _logger.Error("Error parsing position command '{0}': no initial position found", positionCommand);
             }
 
             var moves = _movesRegex.Match(positionCommand).Value.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
@@ -52,7 +53,7 @@ public sealed class PositionCommand : GUIBaseCommand
         }
         catch (Exception e)
         {
-            _logger.Error(e, $"Error parsing position command '{positionCommand}'");
+            _logger.Error(e, "Error parsing position command '{0}'", positionCommand);
             return new Game();
         }
     }
@@ -60,15 +61,14 @@ public sealed class PositionCommand : GUIBaseCommand
     public static bool TryParseLastMove(string positionCommand, Game game, [NotNullWhen(true)] out Move? lastMove)
     {
         var moveString = positionCommand
-                .Split(' ', StringSplitOptions.RemoveEmptyEntries)
-                .Last();
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries)[^1];
 
         if (!MoveExtensions.TryParseFromUCIString(
             moveString,
             game.CurrentPosition.AllPossibleMoves(game.MovePool),
             out lastMove))
         {
-            _logger.Warn($"Error parsing last move {lastMove} from position command {positionCommand}");
+            _logger.Warn("Error parsing last move {0} from position command {1}", lastMove, positionCommand);
             return false;
         }
 

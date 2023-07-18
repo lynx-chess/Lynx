@@ -19,6 +19,8 @@
  *
  */
 
+#pragma warning disable SYSLIB1045 // Convert to 'GeneratedRegexAttribute' - tested in GoCommandParsing_GeneratedAttribute
+
 using BenchmarkDotNet.Attributes;
 using System.Text.RegularExpressions;
 
@@ -263,3 +265,5 @@ public class GoCommandParsing : BaseBenchmark
         await Task.WhenAll(taskList);
     }
 }
+
+#pragma warning restore SYSLIB1045 // Convert to 'GeneratedRegexAttribute'.

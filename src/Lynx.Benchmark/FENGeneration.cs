@@ -373,7 +373,7 @@ internal struct StructCustomPosition
 
         if (!parsedFEN.Success)
         {
-            _logger.Error($"Error parsing FEN {fen}");
+            _logger.Error("Error parsing FEN {0}", fen);
         }
 
         PieceBitBoards = parsedFEN.PieceBitBoards;
@@ -727,7 +727,7 @@ internal readonly struct ReadonlyStructCustomPosition
 
         if (!parsedFEN.Success)
         {
-            _logger.Error($"Error parsing FEN {fen}");
+            _logger.Error("Error parsing FEN {0}", fen);
         }
 
         PieceBitBoards = parsedFEN.PieceBitBoards;
@@ -1087,7 +1087,7 @@ internal class ClassCustomPosition
 
         if (!parsedFEN.Success)
         {
-            _logger.Error($"Error parsing FEN {fen}");
+            _logger.Error("Error parsing FEN {0}", fen);
         }
 
         PieceBitBoards = parsedFEN.PieceBitBoards;
@@ -1446,7 +1446,7 @@ internal record class RecordClassCustomPosition
 
         if (!parsedFEN.Success)
         {
-            _logger.Error($"Error parsing FEN {fen}");
+            _logger.Error("Error parsing FEN {0}", fen);
         }
 
         PieceBitBoards = parsedFEN.PieceBitBoards;
@@ -1805,7 +1805,7 @@ internal record struct RecordStructCustomPosition
 
         if (!parsedFEN.Success)
         {
-            _logger.Error($"Error parsing FEN {fen}");
+            _logger.Error("Error parsing FEN {0}", fen);
         }
 
         PieceBitBoards = parsedFEN.PieceBitBoards;

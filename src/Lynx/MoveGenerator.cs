@@ -85,7 +85,7 @@ public static class MoveGenerator
 #if DEBUG
             if (sourceRank == 1 || sourceRank == 8)
             {
-                _logger.Warn($"There's a non-promoted {position.Side} pawn in rank {sourceRank}");
+                _logger.Warn("There's a non-promoted {0} pawn in rank {1}", position.Side, sourceRank);
                 continue;
             }
 #endif
@@ -289,7 +289,7 @@ public static class MoveGenerator
 #if DEBUG
             if (sourceRank == 1 || sourceRank == 8)
             {
-                _logger.Warn($"There's a non-promoted {position.Side} pawn in rank {sourceRank}");
+                _logger.Warn("There's a non-promoted {0} pawn in rank {1}", position.Side, sourceRank);
                 continue;
             }
 #endif

@@ -24,6 +24,7 @@ public sealed partial class Engine
     /// <returns></returns>
     private int NegaMax(in Position position, int minDepth, int targetDepth, int ply, int alpha, int beta, bool isVerifyingNullMoveCutOff, bool ancestorWasNullMove = false)
     {
+        _maxDepthReached[depth] = depth;
         _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
 
         if (Position.IsThreefoldRepetition(Game.PositionHashHistory) || Position.Is50MovesRepetition(_halfMovesWithoutCaptureOrPawnMove))
@@ -31,17 +32,25 @@ public sealed partial class Engine
             return 0;
         }
 
-        bool isInCheck = position.IsInCheck();
-        if (ply >= Configuration.EngineSettings.MaxDepth)
+        Move ttBestMove = default;
+
+        bool isPvNode = beta - alpha == 1;
+        if (!isPvNode && depth > 0)
         {
-            return position.StaticEvaluation();
-            //_transpositionTable.RecordHash(position, targetDepth, ply, null, staticEval, NodeType.Exact);         // This seems to create bugs for multiple people
+            var ttProbeResult = _transpositionTable.ProbeHash(position, maxDepth, depth, alpha, beta);
+            if (ttProbeResult.Evaluation != EvaluationConstants.NoHashEntry)
+            {
+                return ttProbeResult.Evaluation;
+            }
+            ttBestMove = ttProbeResult.BestMove;
         }
 
-        _maxDepthReached[ply] = ply;
-        var pvIndex = PVTable.Indexes[ply];
-        var nextPvIndex = PVTable.Indexes[ply + 1];
-        _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
+        if (depth > minDepth)
+        {
+            return 0;
+        }
+
+        bool isInCheck = position.IsInCheck();
 
         bool isPvNode = beta - alpha == 1;
         if (!isPvNode && ply > 0)
@@ -69,11 +78,22 @@ public sealed partial class Engine
                 }
             }
 
-            var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
-            _transpositionTable.RecordHash(position, targetDepth, ply, finalPositionEvaluation, NodeType.Exact);
-
+            var finalPositionEvaluation = Position.EvaluateFinalPosition(depth, isInCheck);
+            _transpositionTable.RecordHash(position, maxDepth, depth, finalPositionEvaluation, NodeType.Exact);
             return finalPositionEvaluation;
         }
+
+        // Prevents runtime failure, although it should be covered by the previous check
+        if (depth >= Configuration.EngineSettings.MaxDepth)
+        {
+            _logger.Warn("####################### prevents runtime failure ###########################3");
+            return position.StaticEvaluation();
+            //_transpositionTable.RecordHash(position, targetDepth, ply, null, staticEval, NodeType.Exact);         // This seems to create bugs for multiple people
+        }
+
+        var pvIndex = PVTable.Indexes[depth];
+        var nextPvIndex = PVTable.Indexes[depth + 1];
+        _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
         ++_nodes;
 
@@ -117,7 +137,7 @@ public sealed partial class Engine
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
-        var pseudoLegalMoves = SortMoves(position.AllPossibleMoves(Game.MovePool), in position, ply);
+        var pseudoLegalMoves = SortMoves(position.AllPossibleMoves(Game.MovePool), in position, depth, ttBestMove);
 
         foreach (var move in pseudoLegalMoves)
         {
@@ -191,7 +211,7 @@ public sealed partial class Engine
 
             PrintMove(ply, move, evaluation);
 
-            // Fail-hard beta-cutoff
+            // Fail-hard beta-cutoff - refutation found, no need to keep searching this line
             if (evaluation >= beta)
             {
                 PrintMessage($"Pruning: {move} is enough");
@@ -203,7 +223,7 @@ public sealed partial class Engine
                     _killerMoves[0, ply] = move;
                 }
 
-                _transpositionTable.RecordHash(position, targetDepth, ply, beta, NodeType.Beta, move);
+                _transpositionTable.RecordHash(position, targetDepth, ply, beta, NodeType.Beta, bestMove);
 
                 return beta;    // TODO return evaluation?
             }
@@ -301,9 +321,6 @@ public sealed partial class Engine
         {
             alpha = staticEvaluation;
         }
-
-        // Quiescence search limitation
-        //if (depth >= Configuration.EngineSettings.QuiescenceSearchDepth) return alpha;
 
         var generatedMoves = position.AllCapturesMoves(Game.MovePool);
         if (!generatedMoves.Any())

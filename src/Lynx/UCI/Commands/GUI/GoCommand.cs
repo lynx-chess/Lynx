@@ -44,51 +44,52 @@ namespace Lynx.UCI.Commands.GUI;
 ///	* infinite
 ///		search until the "stop" command. Do not exit the search without being told so in this mode!
 /// </summary>
-public sealed class GoCommand : GUIBaseCommand
+public sealed partial class GoCommand : GUIBaseCommand
 {
     public const string Id = "go";
 
     private const string GoSubcommands = "searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite";
 
-    private static readonly Regex _searchMovesRegex = new(
-        $"(?<=searchmoves).+?(?={GoSubcommands}|$)",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    [GeneratedRegex(@$"(?<=searchmoves).+?(?={GoSubcommands}|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+    private static partial Regex SearchMoveRegex();
 
-    private static readonly Regex _whiteTimeRegex = new(
-        $"(?<=wtime).+?(?={GoSubcommands}|$)",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    [GeneratedRegex(@$"(?<=wtime).+?(?={GoSubcommands}|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+    private static partial Regex WhiteTimeRegex();
 
-    private static readonly Regex _blackTimeRegex = new(
-        $"(?<=btime).+?(?={GoSubcommands}|$)",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    [GeneratedRegex(@$"(?<=btime).+?(?={GoSubcommands}|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+    private static partial Regex BlackTimeRegex();
 
-    private static readonly Regex _whiteIncrementRegex = new(
-        $"(?<=winc).+?(?={GoSubcommands}|$)",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    [GeneratedRegex(@$"(?<=winc).+?(?={GoSubcommands}|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+    private static partial Regex WhiteIncrementRegex();
 
-    private static readonly Regex _blackIncrementRegex = new(
-        $"(?<=binc).+?(?={GoSubcommands}|$)",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    [GeneratedRegex(@$"(?<=binc).+?(?={GoSubcommands}|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+    private static partial Regex BlackIncrementRegex();
 
-    private static readonly Regex _movesToGoRegex = new(
-        $"(?<=movestogo).+?(?={GoSubcommands}|$)",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    [GeneratedRegex(@$"(?<=movestogo).+?(?={GoSubcommands}|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+    private static partial Regex MovesToGoRegex();
 
-    private static readonly Regex _depthRegex = new(
-        $"(?<=depth).+?(?={GoSubcommands}|$)",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    [GeneratedRegex(@$"(?<=depth).+?(?={GoSubcommands}|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+    private static partial Regex DepthRegex();
 
-    private static readonly Regex _nodesRegex = new(
-        $"(?<=nodes).+?(?={GoSubcommands}|$)",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    [GeneratedRegex(@$"(?<=nodes).+?(?={GoSubcommands}|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+    private static partial Regex NodesRegex();
 
-    private static readonly Regex _mateRegex = new(
-        $"(?<=mate).+?(?={GoSubcommands}|$)",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    [GeneratedRegex(@$"(?<=mate).+?(?={GoSubcommands}|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+    private static partial Regex MateRegex();
 
-    private static readonly Regex _moveTimeRegex = new(
-        $"(?<=movetime).+?(?={GoSubcommands}|$)",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+    [GeneratedRegex(@$"(?<=movetime).+?(?={GoSubcommands}|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+    private static partial Regex MoveTimeRegex();
+
+    private static readonly Regex _searchMovesRegex = SearchMoveRegex();
+    private static readonly Regex _whiteTimeRegex = WhiteTimeRegex();
+    private static readonly Regex _blackTimeRegex = BlackTimeRegex();
+    private static readonly Regex _whiteIncrementRegex = WhiteIncrementRegex();
+    private static readonly Regex _blackIncrementRegex = BlackIncrementRegex();
+    private static readonly Regex _movesToGoRegex = MovesToGoRegex();
+    private static readonly Regex _depthRegex = DepthRegex();
+    private static readonly Regex _nodesRegex = NodesRegex();
+    private static readonly Regex _mateRegex = MateRegex();
+    private static readonly Regex _moveTimeRegex = MoveTimeRegex();
 
     public List<string> SearchMoves { get; private set; } = default!;
     public int WhiteTime { get; private set; } = default!;

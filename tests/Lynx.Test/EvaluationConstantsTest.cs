@@ -3,7 +3,7 @@ using NUnit.Framework;
 using static Lynx.EvaluationConstants;
 
 namespace Lynx.Test;
-internal class EvaluationConstantsTest
+public class EvaluationConstantsTest
 {
     /// <summary>
     /// Shy from 14k
@@ -25,7 +25,7 @@ internal class EvaluationConstantsTest
 
         Assert.Greater(checkmateDetectionLimit, _sensibleEvaluation);
 
-        Assert.Greater(checkmateDetectionLimit, PVMoveValue);
+        Assert.Greater(checkmateDetectionLimit, PVMoveScoreValue);
         Assert.Greater(checkmateDetectionLimit, FirstKillerMoveValue);
         Assert.Greater(checkmateDetectionLimit, SecondKillerMoveValue);
     }
@@ -37,7 +37,7 @@ internal class EvaluationConstantsTest
         Assert.Greater(PositiveCheckmateDetectionLimit, NoHashEntry);
         Assert.Greater(-NegativeCheckmateDetectionLimit, NoHashEntry);
 
-        Assert.Greater(NoHashEntry, PVMoveValue);
+        Assert.Greater(NoHashEntry, PVMoveScoreValue);
         Assert.Greater(NoHashEntry, FirstKillerMoveValue);
         Assert.Greater(NoHashEntry, SecondKillerMoveValue);
     }
