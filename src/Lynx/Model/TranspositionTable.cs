@@ -114,10 +114,6 @@ public static class TranspositionTableExtensions
                 _ => EvaluationConstants.NoHashEntry
             };
         }
-        else
-        {
-            // TODO return only best move candidate?
-        }
 
         return (eval, entry.Move);
     }

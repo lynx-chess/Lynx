@@ -479,6 +479,7 @@ public readonly struct Position
     /// NegaMax style
     /// </summary>
     /// <param name="depth">Modulates the output, favouring positions with lower depth left (i.e. Checkmate in less moves)</param>
+    /// <param name="isInCheck"></param>
     /// <param name="positionHistory"></param>
     /// <param name="movesWithoutCaptureOrPawnMove"></param>
     /// <returns>At least <see cref="CheckMateEvaluation"/> if Position.Side lost (more extreme values when <paramref name="depth"/> increases)
@@ -494,6 +495,15 @@ public readonly struct Position
         return EvaluateFinalPosition(depth, isInCheck);
     }
 
+    /// <summary>
+    /// Assuming a current position has no legal moves (<see cref="AllPossibleMoves"/> doesn't produce any <see cref="IsValid"/> position),
+    /// this method determines if a position is a result of either a loss by Checkmate or a draw by stalemate.
+    /// NegaMax style
+    /// </summary>
+    /// <param name="depth">Modulates the output, favouring positions with lower depth left (i.e. Checkmate in less moves)</param>
+    /// <param name="isInCheck"></param>
+    /// <returns>At least <see cref="CheckMateEvaluation"/> if Position.Side lost (more extreme values when <paramref name="depth"/> increases)
+    /// or 0 if Position.Side was stalemated</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int EvaluateFinalPosition(int depth, bool isInCheck)
     {
