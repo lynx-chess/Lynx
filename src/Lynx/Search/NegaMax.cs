@@ -45,19 +45,13 @@ public sealed partial class Engine
             ttBestMove = ttProbeResult.BestMove;
         }
 
-        if (ply > minDepth)
-        {
-            return 0;
-        }
-
-        bool isInCheck = position.IsInCheck();
-
         // Before any time-consuming operations
         if (ply > minDepth)
         {
             _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
         }
 
+        bool isInCheck = position.IsInCheck();
         if (ply >= targetDepth)
         {
             foreach (var candidateMove in position.AllPossibleMoves(Game.MovePool))
