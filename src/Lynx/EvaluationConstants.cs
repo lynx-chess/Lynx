@@ -284,7 +284,7 @@ public static class EvaluationConstants
     /// <summary>
     /// This value combined with <see cref="PositiveCheckmateDetectionLimit"/> and <see cref="NegativeCheckmateDetectionLimit"/> should allows mates up to in <see cref="Constants.AbsoluteMaxDepth"/> moves.
     /// </summary>
-    public const int DepthCheckmateFactor = 10;
+    public const int CheckmateDepthFactor = 10;
 
     /// <summary>
     /// Minimum evaluation for a position to be White checkmate

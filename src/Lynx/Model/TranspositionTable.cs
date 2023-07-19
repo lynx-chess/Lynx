@@ -161,8 +161,8 @@ public static class TranspositionTableExtensions
     internal static int RecalculateMateScores(int score, int depth) => score +
             score switch
             {
-                > EvaluationConstants.PositiveCheckmateDetectionLimit => -EvaluationConstants.DepthCheckmateFactor * depth,
-                < EvaluationConstants.NegativeCheckmateDetectionLimit => EvaluationConstants.DepthCheckmateFactor * depth,
+                > EvaluationConstants.PositiveCheckmateDetectionLimit => -EvaluationConstants.CheckmateDepthFactor * depth,
+                < EvaluationConstants.NegativeCheckmateDetectionLimit => EvaluationConstants.CheckmateDepthFactor * depth,
                 _ => 0
             };
 

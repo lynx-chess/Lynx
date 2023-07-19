@@ -5,6 +5,7 @@
 using Lynx.Model;
 using Lynx.UCI.Commands.GUI;
 using NUnit.Framework;
+using static Lynx.EvaluationConstants;
 
 namespace Lynx.Test;
 
@@ -172,8 +173,8 @@ public class OnlineTablebaseProberTest
     {
         var position = new Position(fen);
         var result = OnlineTablebaseProber.EvaluationSearch(position, 0, default);
-        Assert.Greater(result, EvaluationConstants.PositiveCheckmateDetectionLimit);
-        Assert.Less(result, EvaluationConstants.CheckMateBaseEvaluation);
+        Assert.Greater(result, PositiveCheckmateDetectionLimit);
+        Assert.Less(result, CheckMateBaseEvaluation);
     }
 
     [TestCase("k7/2QR4/8/8/8/4N3/2r4Q/1K6 b - - 0 1", -49, "c2c1")]   // Loss but after 15 checks
@@ -190,7 +191,7 @@ public class OnlineTablebaseProberTest
     {
         var position = new Position(fen);
         var result = OnlineTablebaseProber.EvaluationSearch(position, 0, default);
-        Assert.AreEqual(-EvaluationConstants.CheckMateBaseEvaluation + distanceToMate * EvaluationConstants.DepthCheckmateFactor, result);
+        Assert.AreEqual(-CheckMateBaseEvaluation + distanceToMate * CheckmateDepthFactor, result);
     }
 
     [TestCase("8/3P3K/3p1k2/8/8/8/3p4/8 w - - 1 1", 14, "d7d8q")]   // Win or lose
@@ -207,8 +208,8 @@ public class OnlineTablebaseProberTest
     {
         var position = new Position(fen);
         var result = OnlineTablebaseProber.EvaluationSearch(position, 0, default);
-        Assert.Greater(result, EvaluationConstants.PositiveCheckmateDetectionLimit);
-        Assert.Less(result, EvaluationConstants.CheckMateBaseEvaluation);
+        Assert.Greater(result, PositiveCheckmateDetectionLimit);
+        Assert.Less(result, CheckMateBaseEvaluation);
     }
 
     /// <summary>
@@ -236,9 +237,9 @@ public class OnlineTablebaseProberTest
     /// <param name="fen"></param>
     /// <param name="halfMovesWithoutCaptureOrPawnMove"></param>
     /// <param name="expectedEvaluation"></param>
-    [TestCase("kN6/8/8/8/8/8/8/B3K3 w - - 0 1", 0, EvaluationConstants.CheckMateBaseEvaluation - 27 * EvaluationConstants.DepthCheckmateFactor)]    // B+N, Mate in 27, DTZ==DTM=58
+    [TestCase("kN6/8/8/8/8/8/8/B3K3 w - - 0 1", 0, CheckMateBaseEvaluation - 27 * CheckmateDepthFactor)]    // B+N, Mate in 27, DTZ==DTM=58
     [TestCase("kN6/8/8/8/8/8/8/B3K3 w - - 0 1", 50, 0)]                                                                     // B+N, Mate in 27, DTM=58, DTZ >100
-    [TestCase("Kn6/8/8/8/8/8/8/b3k3 b - - 0 1", 0, +EvaluationConstants.CheckMateBaseEvaluation - 27 * EvaluationConstants.DepthCheckmateFactor)]   // B+N, Mate in 27, DTZ?==DTM=58
+    [TestCase("Kn6/8/8/8/8/8/8/b3k3 b - - 0 1", 0, +CheckMateBaseEvaluation - 27 * CheckmateDepthFactor)]   // B+N, Mate in 27, DTZ?==DTM=58
     [TestCase("Kn6/8/8/8/8/8/8/b3k3 b - - 0 1", 50, 0)]                                                                     // B+N, Mate in 27, DTZ?==DTM=58, DTZ >100
     public void EvaluationSearch_DrawWinningPositionDueToExistingHalfMovesWithoutCaptureOrPawnMove(string fen, int halfMovesWithoutCaptureOrPawnMove, int expectedEvaluation)
     {
@@ -272,9 +273,9 @@ public class OnlineTablebaseProberTest
     /// <param name="fen"></param>
     /// <param name="halfMovesWithoutCaptureOrPawnMove"></param>
     /// <param name="expectedEvaluation"></param>
-    [TestCase("6kN/8/8/8/8/8/8/B3K3 b - - 0 1", 0, -EvaluationConstants.CheckMateBaseEvaluation + 30 * EvaluationConstants.DepthCheckmateFactor)]   // B+N, Mate in 30, DTZ?==DTM=60
+    [TestCase("6kN/8/8/8/8/8/8/B3K3 b - - 0 1", 0, -CheckMateBaseEvaluation + 30 * CheckmateDepthFactor)]   // B+N, Mate in 30, DTZ?==DTM=60
     [TestCase("6kN/8/8/8/8/8/8/B3K3 b - - 0 1", 42, 0)]                                                                     // B+N, Mate in 30, DTZ?==DTM=60
-    [TestCase("6Kn/8/8/8/8/8/8/b3k3 w - - 0 1", 0, -EvaluationConstants.CheckMateBaseEvaluation + 30 * EvaluationConstants.DepthCheckmateFactor)]   // B+N, Mate in 30, DTZ?==DTM=60
+    [TestCase("6Kn/8/8/8/8/8/8/b3k3 w - - 0 1", 0, -CheckMateBaseEvaluation + 30 * CheckmateDepthFactor)]   // B+N, Mate in 30, DTZ?==DTM=60
     [TestCase("6Kn/8/8/8/8/8/8/b3k3 w - - 0 1", 42, 0)]                                                                     // B+N, Mate in 30, DTZ?==DTM=60
     public void EvaluationSearch_DrawLosingPositionDueToExistingHalfMovesWithoutCaptureOrPawnMove(string fen, int halfMovesWithoutCaptureOrPawnMove, int expectedEvaluation)
     {
@@ -297,7 +298,7 @@ public class OnlineTablebaseProberTest
     {
         var position = new Position(fen);
         var result = OnlineTablebaseProber.EvaluationSearch(position, default, default);
-        Assert.AreEqual(+EvaluationConstants.CheckMateBaseEvaluation - EvaluationConstants.DepthCheckmateFactor * distanceToMate, result);
+        Assert.AreEqual(+CheckMateBaseEvaluation - CheckmateDepthFactor * distanceToMate, result);
     }
 
     [TestCase("8/1k6/8/8/p1P4B/2K1Pp2/8/8 b - - 1 1", -49)]
@@ -314,7 +315,7 @@ public class OnlineTablebaseProberTest
     {
         var position = new Position(fen);
         var result = OnlineTablebaseProber.EvaluationSearch(position, default, default);
-        Assert.AreEqual(-EvaluationConstants.CheckMateBaseEvaluation + EvaluationConstants.DepthCheckmateFactor * distanceToMate, result);
+        Assert.AreEqual(-CheckMateBaseEvaluation + CheckmateDepthFactor * distanceToMate, result);
     }
 
     [TestCase("8/8/1p6/8/P1P3k1/P7/P6K/8 b - - 66 1", -49, new[] { "g4f4", "g4f5" })]
@@ -331,7 +332,7 @@ public class OnlineTablebaseProberTest
     {
         var position = new Position(fen);
         var result = OnlineTablebaseProber.EvaluationSearch(position, default, default);
-        Assert.AreEqual(-EvaluationConstants.CheckMateBaseEvaluation + EvaluationConstants.DepthCheckmateFactor * distanceToMate, result);
+        Assert.AreEqual(-CheckMateBaseEvaluation + CheckmateDepthFactor * distanceToMate, result);
     }
 
     [TestCase("8/8/1p6/8/P1P2k2/P7/P6K/8 w - - 67 2", +49, new[] { "h2h3" })]
@@ -348,7 +349,7 @@ public class OnlineTablebaseProberTest
     {
         var position = new Position(fen);
         var result = OnlineTablebaseProber.EvaluationSearch(position, default, default);
-        Assert.AreEqual(EvaluationConstants.CheckMateBaseEvaluation - EvaluationConstants.DepthCheckmateFactor * distanceToMate, result);
+        Assert.AreEqual(CheckMateBaseEvaluation - CheckmateDepthFactor * distanceToMate, result);
     }
 
     [TestCase("8/2PK4/1k6/8/8/8/8/8 w - - 0 1", 6, "c7c8q")]

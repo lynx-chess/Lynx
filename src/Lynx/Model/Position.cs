@@ -527,7 +527,7 @@ public readonly struct Position
         if (isInCheck)
         {
             // Checkmate evaluation, but not as bad/shallow as it looks like since we're already searching at a certain depth
-            return -EvaluationConstants.CheckMateBaseEvaluation + (EvaluationConstants.DepthCheckmateFactor * depth);
+            return -EvaluationConstants.CheckMateBaseEvaluation + (EvaluationConstants.CheckmateDepthFactor * depth);
         }
         else
         {
