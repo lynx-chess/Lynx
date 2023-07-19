@@ -52,6 +52,11 @@ public sealed partial class Engine
         }
 
         bool isInCheck = position.IsInCheck();
+        if (isInCheck)
+        {
+            ++targetDepth;
+        }
+
         if (ply >= targetDepth)
         {
             foreach (var candidateMove in position.AllPossibleMoves(Game.MovePool))
@@ -67,12 +72,11 @@ public sealed partial class Engine
             return finalPositionEvaluation;
         }
 
-        // Prevents runtime failure, although it should be covered by the previous check
+        // Prevents runtime failure, in case targetDepth is increased due to check extension
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
-            _logger.Warn("####################### prevents runtime failure ###########################3");
+            _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
             return position.StaticEvaluation();
-            //_transpositionTable.RecordHash(position, targetDepth, ply, null, staticEval, NodeType.Exact);         // This seems to create bugs for multiple people
         }
 
         var pvIndex = PVTable.Indexes[ply];
