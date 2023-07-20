@@ -183,6 +183,8 @@ public sealed class EngineSettings
 
     public int QueenMobilityBonus { get; set; } = 1;
 
+    public bool TranspositionTableEnabled { get; set; } = true;
+
     /// <summary>
     /// 64 MB
     /// </summary>

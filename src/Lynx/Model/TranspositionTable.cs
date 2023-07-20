@@ -91,6 +91,11 @@ public static class TranspositionTableExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static (int Evaluation, Move BestMove) ProbeHash(this TranspositionTable transpositionTable, Position position, int targetDepth, int ply, int alpha, int beta)
     {
+        if (!Configuration.EngineSettings.TranspositionTableEnabled)
+        {
+            return (EvaluationConstants.NoHashEntry, default);
+        }
+
         var entry = transpositionTable[TranspositionTableIndex(position, transpositionTable)];
 
         if (position.UniqueIdentifier != entry.Key)
@@ -131,6 +136,11 @@ public static class TranspositionTableExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void RecordHash(this TranspositionTable transpositionTable, Position position, int targetDepth, int ply, int eval, NodeType nodeType, Move? move = 0)
     {
+        if (!Configuration.EngineSettings.TranspositionTableEnabled)
+        {
+            return;
+        }
+
         ref var entry = ref transpositionTable[TranspositionTableIndex(position, transpositionTable)];
 
         //if (entry.Key != default && entry.Key != position.UniqueIdentifier)
@@ -187,7 +197,10 @@ public static class TranspositionTableExtensions
     /// <param name="transpositionTable"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int HashfullPermill(this TranspositionTable transpositionTable) => 1000 * transpositionTable.PopulatedItemsCount() / transpositionTable.Length;
+    public static int HashfullPermill(this TranspositionTable transpositionTable) =>
+        transpositionTable.Length > 0
+        ? 1000 * transpositionTable.PopulatedItemsCount() / transpositionTable.Length
+        : 0;
 
     [Conditional("DEBUG")]
     internal static void Stats(this TranspositionTable transpositionTable)
