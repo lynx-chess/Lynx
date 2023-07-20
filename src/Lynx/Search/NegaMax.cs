@@ -52,27 +52,34 @@ public sealed partial class Engine
         }
 
         bool isInCheck = position.IsInCheck();
+
         if (ply >= targetDepth)
         {
-            foreach (var candidateMove in position.AllPossibleMoves(Game.MovePool))
+            if (isInCheck)
             {
-                if (new Position(in position, candidateMove).WasProduceByAValidMove())
-                {
-                    return QuiescenceSearch(in position, ply, alpha, beta);
-                }
+                ++targetDepth;
             }
+            else
+            {
+                foreach (var candidateMove in position.AllPossibleMoves(Game.MovePool))
+                {
+                    if (new Position(in position, candidateMove).WasProduceByAValidMove())
+                    {
+                        return QuiescenceSearch(in position, ply, alpha, beta);
+                    }
+                }
 
-            var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
-            _transpositionTable.RecordHash(position, targetDepth, ply, finalPositionEvaluation, NodeType.Exact);
-            return finalPositionEvaluation;
+                var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
+                _transpositionTable.RecordHash(position, targetDepth, ply, finalPositionEvaluation, NodeType.Exact);
+                return finalPositionEvaluation;
+            }
         }
 
-        // Prevents runtime failure, although it should be covered by the previous check
+        // Prevents runtime failure, in case targetDepth is increased due to check extension
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
-            _logger.Warn("####################### prevents runtime failure ###########################3");
+            _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
             return position.StaticEvaluation();
-            //_transpositionTable.RecordHash(position, targetDepth, ply, null, staticEval, NodeType.Exact);         // This seems to create bugs for multiple people
         }
 
         var pvIndex = PVTable.Indexes[ply];
