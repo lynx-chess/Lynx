@@ -167,7 +167,7 @@ public static class OnlineTablebaseProber
                         }
                         if (bestMove is null)
                         {
-                            _logger.Info("Can't find a path to win in position {fen} due to repetitions via all the possible candidate moves :O", fen);
+                            _logger.Info("Can't find a path to win in position {0} due to repetitions via all the possible candidate moves :O", fen);
                             mate = 0;
                             bestMove = bestMoveList.FirstOrDefault();
                         }
@@ -228,7 +228,7 @@ public static class OnlineTablebaseProber
 
                     if (bestMove is not null)
                     {
-                        _logger.Info("There's a miraculous move ({0}) that saves {fen} due to repetition :O", bestMove.Uci, fen);
+                        _logger.Info("There's a miraculous move ({0}) that saves {1} due to repetition :O", bestMove.Uci, fen);
                         mate = 0;
                     }
                     else
@@ -391,7 +391,7 @@ public static class OnlineTablebaseProber
 
                     if (bestMove is not null)
                     {
-                        _logger.Info("Move {0} draws the game due to repetition earlier than the expected blessed loss in {fen} position :O", bestMove.Uci, fen);
+                        _logger.Info("Move {0} draws the game due to repetition earlier than the expected blessed loss in {1} position :O", bestMove.Uci, fen);
                         mate = 0;
                     }
                     else
@@ -485,7 +485,7 @@ public static class OnlineTablebaseProber
         }
         catch (Exception e)
         {
-            _logger.Error(e, "Error querying tablebase for evaluation of position {fen}", fen);
+            _logger.Error(e, "Error querying tablebase for evaluation of position {0}", fen);
             return null;
         }
     }

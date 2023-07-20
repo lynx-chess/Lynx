@@ -104,7 +104,7 @@ public sealed class LinxDriver
         }
         finally
         {
-            _logger.Info($"Finishing {nameof(LinxDriver)}");
+            _logger.Info("Finishing {0}", nameof(LinxDriver));
         }
     }
 

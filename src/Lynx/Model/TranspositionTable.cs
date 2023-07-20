@@ -200,7 +200,9 @@ public static class TranspositionTableExtensions
                 ++items;
             }
         }
-        _logger.Info($"TT Occupancy:\t{100 * transpositionTable.PopulatedItemsCount() / transpositionTable.Length}% ({transpositionTable.Length * Marshal.SizeOf(typeof(TranspositionTableElement)) / 1024 / 1024}MB)");
+        _logger.Info("TT Occupancy:\t{0}% ({1}MB)",
+            100 * transpositionTable.PopulatedItemsCount() / transpositionTable.Length,
+            transpositionTable.Length * Marshal.SizeOf(typeof(TranspositionTableElement)) / 1024 / 1024);
     }
 
     [Conditional("DEBUG")]
