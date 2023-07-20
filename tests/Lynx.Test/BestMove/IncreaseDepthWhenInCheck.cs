@@ -6,7 +6,6 @@ namespace Lynx.Test.BestMove;
 public class IncreaseDepthWhenInCheck : BaseTest
 {
     /// <summary>
-    /// Position:
     /// 8   . r . . . . . .
     /// 7   . . . . . . . .
     /// 6   . . . . . . . .
@@ -15,7 +14,6 @@ public class IncreaseDepthWhenInCheck : BaseTest
     /// 3   . . . . . R . .
     /// 2   . q . . . . . .
     /// 1   R . . . . . q .
-    ///
     ///     a b c d e f g h
     /// </summary>
     [Test]
@@ -28,6 +26,8 @@ public class IncreaseDepthWhenInCheck : BaseTest
 
         var searchResult = engine.BestMove(new GoCommand("go depth 1"));
 
+        // In Quiescence search, which would be triggered after Rxg1+ without
+        // the depth increase, Black would capture the pawn and get checkmated
         Assert.AreEqual("g5h4", searchResult.Moves[1].UCIString());
     }
 }
