@@ -43,7 +43,7 @@ public static class OnlineTablebaseProber
         TypeInfoResolver = SourceGenerationContext.Default
     };
 
-    public static (int MateScore, Move BestMove) RootSearch(Position position, Dictionary<long, int> positionHistory, int halfMovesWithoutCaptureOrPawnMove, CancellationToken cancellationToken)
+    public static async Task<(int MateScore, Move BestMove)> RootSearch(Position position, Dictionary<long, int> positionHistory, int halfMovesWithoutCaptureOrPawnMove, CancellationToken cancellationToken)
     {
         if (!Configuration.EngineSettings.UseOnlineTablebaseInRootPositions || position.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
         {
@@ -53,7 +53,7 @@ public static class OnlineTablebaseProber
         var fen = position.FEN(halfMovesWithoutCaptureOrPawnMove);
         _logger.Debug("[{0}] Querying online tb for position {1}", nameof(RootSearch), fen);
 
-        var tablebaseEval = GetEvaluation(fen, cancellationToken).Result;
+        var tablebaseEval = await GetEvaluation(fen, cancellationToken);
 
         if (tablebaseEval is null || tablebaseEval.Category == TablebaseEvaluationCategory.Unknown)
         {

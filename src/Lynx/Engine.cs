@@ -136,36 +136,50 @@ public sealed partial class Engine
             maxDepth = Configuration.EngineSettings.DefaultMaxDepth;
         }
 
-        var tablebaseResult = OnlineTablebaseProber.RootSearch(Game.CurrentPosition, Game.PositionHashHistory, _halfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
+        SearchResult resultToReturn = SearchBestMove(minDepth, maxDepth, decisionTime);
 
-        if (tablebaseResult.BestMove != 0)
+        if (!resultToReturn.IsCancelled && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
         {
-            var searchResult = new SearchResult(tablebaseResult.BestMove, Evaluation: 0, TargetDepth: 0, new List<Move>(), MinValue, MaxValue, Mate: tablebaseResult.MateScore)
+            Game.MakeMove(resultToReturn.BestMove);
+        }
+
+        AverageDepth += (resultToReturn.TargetDepth - AverageDepth) / Math.Ceiling(0.5 * Game.MoveHistory.Count);
+
+        return resultToReturn;
+    }
+
+    private SearchResult SearchBestMove(int minDepth, int? maxDepth, int? decisionTime)
+    {
+        var searchResultTask = IDDFS(minDepth, maxDepth, decisionTime);
+        var tablebaseResultTask = ProbeOnlineTablebase(Game.CurrentPosition, new(Game.PositionHashHistory), _halfMovesWithoutCaptureOrPawnMove);
+
+        SearchResult resultToReturn;
+        var resultList = Task.WhenAll(tablebaseResultTask, searchResultTask).Result;
+
+        if (resultList[1] is not null)
+        {
+            _logger.Info("Search evaluation result - eval: {0}, mate: {1}, depth: {2}, refutation: {3}",
+                resultList[1]!.Evaluation, resultList[1]!.Mate, resultList[1]!.TargetDepth, string.Join(", ", resultList[1]!.Moves.Select(m => m.ToMoveString())));
+
+            Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(resultList[1]!)));
+        }
+
+        if (resultList[0] is not null)
+        {
+            if (resultList[1]?.Mate <= resultList[0]!.Mate && resultList[1]?.Mate + _halfMovesWithoutCaptureOrPawnMove < 96)
             {
-                DepthReached = 0,
-                Nodes = 0,
-                Time = _stopWatch.ElapsedMilliseconds,
-                NodesPerSecond = 0,
-                HashfullPermill = _transpositionTable.HashfullPermill()
-            };
+                _logger.Info("Relying on search result due to mate distance match");
 
-            Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(searchResult))).Wait();
+                resultList[1]!.Moves.Clear();
+                resultList[1]!.Moves.AddRange(resultList[0]!.Moves);
+            }
+            _logger.Info("Online tb probing result - mate: {0}, moves: {1}",
+                resultList[1]!.Mate, string.Join(", ", resultList[1]!.Moves.Select(m => m.ToMoveString())));
 
-            return searchResult;
+            Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(resultList[0]!)));
         }
 
-        var result = IDDFS(minDepth, maxDepth, decisionTime);
-        Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(result)));
-        _logger.Info("Evaluation: {0} (depth: {1}, refutation: {2})", result.Evaluation, result.TargetDepth, string.Join(", ", result.Moves.Select(m => m.ToMoveString())));
-
-        if (!result.IsCancelled && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
-        {
-            Game.MakeMove(result.BestMove);
-        }
-
-        AverageDepth += (result.TargetDepth - AverageDepth) / Math.Ceiling(0.5 * Game.MoveHistory.Count);
-
-        return result;
+        return resultList[0] ?? resultList[1] ?? throw new AssertException("Both search and online tb proving results are null. At least search one is always expected to have a value");
     }
 
     internal double CalculateDecisionTime(int movesToGo, int millisecondsLeft, int millisecondsIncrement)

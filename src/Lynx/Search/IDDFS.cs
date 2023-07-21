@@ -28,7 +28,7 @@ public sealed partial class Engine
 
     private readonly Move _defaultMove = default;
 
-    public SearchResult IDDFS(int minDepth, int? maxDepth, int? decisionTime)
+    public Task<SearchResult?> IDDFS(int minDepth, int? maxDepth, int? decisionTime)
     {
         // Cleanup
         _nodes = 0;
@@ -174,7 +174,7 @@ public sealed partial class Engine
         finalSearchResult.NodesPerSecond = Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * _stopWatch.ElapsedMilliseconds) + 1), 0, long.MaxValue));
         finalSearchResult.HashfullPermill = _transpositionTable.HashfullPermill();
 
-        return finalSearchResult;
+        return Task.FromResult<SearchResult?>(finalSearchResult);
 
         static bool stopSearchCondition(int depth, int? maxDepth, bool isMateDetected, int nodes, int? decisionTime, Stopwatch stopWatch, ILogger logger)
         {

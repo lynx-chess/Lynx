@@ -55,7 +55,14 @@ public sealed partial class Engine
         }
 
         var localPosition = currentPosition;
-        return moves.OrderByDescending(move => Score(move, in localPosition, depth, bestMoveTTCandidate)).ToList();
+
+        var orderedMoves = moves
+            .OrderByDescending(move => Score(move, in localPosition, depth, bestMoveTTCandidate))
+            .ToList();
+
+        _logger.Trace("For position {0}:\n{1})", currentPosition.FEN(), string.Join(", ", orderedMoves.Select(m => $"{m.ToEPDString()} ({Score(m, in localPosition, depth, bestMoveTTCandidate)})")));
+
+        return orderedMoves;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -150,7 +157,7 @@ public sealed partial class Engine
             //if (plies < Configuration.Parameters.Depth - 1)
             {
                 //Console.WriteLine($"{Environment.NewLine}{depthStr}{move} ({position.Side}, {depth})");
-                _logger.Trace($"{Environment.NewLine}{depthStr}{(isQuiescence ? "[Qui] " : "")}{move} ({position.Side}, {plies})");
+                _logger.Trace($"{Environment.NewLine}{depthStr}{(isQuiescence ? "[Qui] " : "")}{move.ToEPDString()} ({position.Side}, {plies})");
             }
         }
     }
@@ -178,7 +185,7 @@ public sealed partial class Engine
             //Console.WriteLine($"{depthStr}{move} ({position.Side}, {depthLeft}) | {evaluation}");
             //Console.WriteLine($"{depthStr}{move} | {evaluation}");
 
-            _logger.Trace($"{depthStr}{(isQuiescence ? "[Qui] " : "")}{move,-6} | {evaluation}{(prune ? " | prunning" : "")}");
+            _logger.Trace($"{depthStr}{(isQuiescence ? "[Qui] " : "")}{move.ToEPDString(),-6} | {evaluation}{(prune ? " | prunning" : "")}");
 
             //Console.ResetColor();
         }
