@@ -153,7 +153,6 @@ public sealed partial class Engine
         var searchResultTask = IDDFS(minDepth, maxDepth, decisionTime);
         var tablebaseResultTask = ProbeOnlineTablebase(Game.CurrentPosition, new(Game.PositionHashHistory), _halfMovesWithoutCaptureOrPawnMove);
 
-        SearchResult resultToReturn;
         var resultList = Task.WhenAll(tablebaseResultTask, searchResultTask).Result;
 
         if (resultList[1] is not null)
