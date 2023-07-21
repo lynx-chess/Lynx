@@ -178,7 +178,7 @@ public sealed partial class Engine
             Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(resultList[1]!)));
         }
 
-        return resultList[1] ?? resultList[0] ?? throw new AssertException("Both search and online tb proving results are null. At least search one is always expected to have a value");
+        return resultList[0] ?? resultList[1] ?? throw new AssertException("Both search and online tb proving results are null. At least search one is always expected to have a value");
     }
 
     internal double CalculateDecisionTime(int movesToGo, int millisecondsLeft, int millisecondsIncrement)
