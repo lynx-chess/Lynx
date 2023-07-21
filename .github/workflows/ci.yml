@@ -5,6 +5,14 @@ on:
   schedule:
     - cron:  '1 0 * * 1'    # Mondays at 00:01
 
+env:
+    DOTNET_VERSION: 7.0.x
+    PROJECT_NAME: Lynx
+    DOTNET_CLI_TELEMETRY_OPTOUT: 1
+    DOTNET_TieredPGO: 1
+    DOTNET_ReadyToRun: 0
+    DOTNET_TC_QuickJitForLoops: 1
+
 jobs:
 
   make-build:
@@ -15,9 +23,6 @@ jobs:
         os: [ubuntu-latest, macos-latest]
       fail-fast: false
 
-    env:
-      DOTNET_CLI_TELEMETRY_OPTOUT: 1
-
     steps:
     - uses: actions/checkout@v3
 
@@ -27,7 +32,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 7.0.x
+        dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
       uses: actions/cache@v3
@@ -41,7 +46,69 @@ jobs:
     - name: Build
       run: make
 
-  build:
+  build-and-publish:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+        include:
+          - os: ubuntu-latest
+            runtime-identifier: linux-x64
+          - os: windows-latest
+            runtime-identifier: win-x64
+          - os: macOS-latest
+            runtime-identifier: osx-x64
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Inject slug/short variables
+      uses: rlespinasse/github-slug-action@v3.x
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Nuget cache
+      uses: actions/cache@v3
+      with:
+        path:
+          ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Build
+      run: dotnet build -c Release src/Lynx.Cli/Lynx.Cli.csproj /p:DeterministicBuild=true
+
+    - name: Publish CLI
+      run: dotnet publish src/Lynx.Cli/Lynx.Cli.csproj -c Release --runtime ${{ matrix.runtime-identifier }} --self-contained /p:Optimized=true -o artifacts/${{ matrix.runtime-identifier }}
+
+    - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-${{ matrix.runtime-identifier }} artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-${{ matrix.runtime-identifier }}
+        path: |
+          artifacts/${{ matrix.runtime-identifier }}/
+          !artifacts/**/*.pdb
+        if-no-files-found: error
+
+    - name: Publish library
+      run: dotnet pack -c Release --no-build src/Lynx/Lynx.csproj --include-symbols -o artifacts/nuget
+
+    - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }} NuGet package
+      uses: actions/upload-artifact@v3
+      with:
+        name: Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}
+        path: |
+          artifacts/nuget/*.nupkg
+          artifacts/nuget/*.snupkg
+        if-no-files-found: error
+
+  fast-tests:
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -57,13 +124,6 @@ jobs:
             runtime-identifier: osx-x64
       fail-fast: false
 
-    env:
-      DOTNET_CLI_TELEMETRY_OPTOUT: 1
-      PROJECT_NAME: Lynx
-      DOTNET_TieredPGO: 1
-      DOTNET_ReadyToRun: 0
-      DOTNET_TC_QuickJitForLoops: 1
-
     steps:
     - uses: actions/checkout@v3
 
@@ -73,7 +133,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 7.0.x
+        dotnet-version:${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
       uses: actions/cache@v3
@@ -88,7 +148,7 @@ jobs:
       run: dotnet build -c ${{ matrix.configuration }} /p:DeterministicBuild=true
 
     - name: Run CI tests
-      run: dotnet test -c ${{ matrix.configuration }} --no-build --collect:"XPlat Code Coverage" --logger "console;verbosity=normal"
+      run: dotnet test -c ${{ matrix.configuration }} --no-build --collect:"XPlat Code Coverage" -v normal
 
     - name: '[Ubuntu] Generate test coverage report'
       if: matrix.os == 'ubuntu-latest' && matrix.configuration == 'Release'
@@ -113,34 +173,6 @@ jobs:
         path: coveragereport/
         if-no-files-found: error
 
-    - name: Publish CLI
-      if: matrix.configuration == 'Release'
-      run: dotnet publish src/Lynx.Cli/Lynx.Cli.csproj -c Release --runtime ${{ matrix.runtime-identifier }} --self-contained /p:Optimized=true -o artifacts/${{ matrix.runtime-identifier }}
-
-    - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-${{ matrix.runtime-identifier }} artifact
-      if: matrix.configuration == 'Release'
-      uses: actions/upload-artifact@v3
-      with:
-        name: Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-${{ matrix.runtime-identifier }}
-        path: |
-          artifacts/${{ matrix.runtime-identifier }}/
-          !artifacts/**/*.pdb
-        if-no-files-found: error
-
-    - name: Publish library
-      if: matrix.os == 'ubuntu-latest' && matrix.configuration == 'Release'
-      run: dotnet pack -c Release --no-build src/Lynx/Lynx.csproj --include-symbols -o artifacts/nuget
-
-    - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }} NuGet package
-      if: matrix.os == 'ubuntu-latest' && matrix.configuration == 'Release'
-      uses: actions/upload-artifact@v3
-      with:
-        name: Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}
-        path: |
-          artifacts/nuget/*.nupkg
-          artifacts/nuget/*.snupkg
-        if-no-files-found: error
-
   winning-at-chess:
     runs-on: ${{ matrix.os }}
 
@@ -150,17 +182,13 @@ jobs:
         category: [WinningAtChess_10seconds]
       fail-fast: false
 
-    env:
-      DOTNET_CLI_TELEMETRY_OPTOUT: 1
-      PROJECT_NAME: Lynx
-
     steps:
     - uses: actions/checkout@v3
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 7.0.x
+        dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
       uses: actions/cache@v3
@@ -175,9 +203,8 @@ jobs:
       run: dotnet build -c Release
 
     - name: Run ${{ matrix.category }} tests
-      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" --logger "console;verbosity=normal"
+      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal
       continue-on-error: true
-        # -v=normal https://github.com/dotnet/sdk/issues/16122, --logger "console;verbosity=normal" is a workaround
         # --collect:"XPlat Code Coverage" https://github.com/coverlet-coverage/coverlet/issues/1192
 
   long-running-tests:
@@ -189,17 +216,13 @@ jobs:
         category: [Perft, LongRunning]
       fail-fast: false
 
-    env:
-      DOTNET_CLI_TELEMETRY_OPTOUT: 1
-      PROJECT_NAME: Lynx
-
     steps:
     - uses: actions/checkout@v3
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 7.0.x
+        dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
       uses: actions/cache@v3
@@ -214,8 +237,7 @@ jobs:
       run: dotnet build -c Release
 
     - name: Run ${{ matrix.category }} tests
-      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" --logger "console;verbosity=normal"
-        # -v=normal https://github.com/dotnet/sdk/issues/16122, --logger "console;verbosity=normal" is a workaround
+      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal
         # --collect:"XPlat Code Coverage" https://github.com/coverlet-coverage/coverlet/issues/1192
 
   #unify-coverage-reports:
@@ -285,7 +307,7 @@ jobs:
   #  - name: Setup .NET
   #    uses: actions/setup-dotnet@v3
   #    with:
-  #      dotnet-version: 7.0.x
+  #      dotnet-version: ${{ env.DOTNET_VERSION }}
 
   #  - name: Nuget cache
   #    uses: actions/cache@v3
