@@ -165,7 +165,7 @@ public sealed partial class Engine
 
         if (resultList[1] is not null)
         {
-            if (resultList[0]?.Mate <= resultList[1]!.Mate && resultList[0]?.Mate + _halfMovesWithoutCaptureOrPawnMove < 96)
+            if (resultList[0]?.Mate is not null && resultList[0]!.Mate <= resultList[1]!.Mate && resultList[0]!.Mate + _halfMovesWithoutCaptureOrPawnMove < 96)
             {
                 _logger.Info("Relying on search result due to mate distance match");
 
@@ -178,7 +178,7 @@ public sealed partial class Engine
             Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(resultList[1]!)));
         }
 
-        return resultList[0] ?? resultList[1] ?? throw new AssertException("Both search and online tb proving results are null. At least search one is always expected to have a value");
+        return resultList[1] ?? resultList[0] ?? throw new AssertException("Both search and online tb proving results are null. At least search one is always expected to have a value");
     }
 
     internal double CalculateDecisionTime(int movesToGo, int millisecondsLeft, int millisecondsIncrement)
