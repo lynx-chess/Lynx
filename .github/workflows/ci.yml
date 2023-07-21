@@ -133,7 +133,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version:${{ env.DOTNET_VERSION }}
+        dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
       uses: actions/cache@v3
@@ -173,6 +173,39 @@ jobs:
         path: coveragereport/
         if-no-files-found: error
 
+  long-running-tests:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+        category: [Perft, LongRunning]
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Nuget cache
+      uses: actions/cache@v3
+      with:
+        path:
+          ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Build
+      run: dotnet build -c Release
+
+    - name: Run ${{ matrix.category }} tests
+      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal
+        # --collect:"XPlat Code Coverage" https://github.com/coverlet-coverage/coverlet/issues/1192
+
   winning-at-chess:
     runs-on: ${{ matrix.os }}
 
@@ -205,39 +238,6 @@ jobs:
     - name: Run ${{ matrix.category }} tests
       run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal
       continue-on-error: true
-        # --collect:"XPlat Code Coverage" https://github.com/coverlet-coverage/coverlet/issues/1192
-
-  long-running-tests:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
-        category: [Perft, LongRunning]
-      fail-fast: false
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
-
-    - name: Nuget cache
-      uses: actions/cache@v3
-      with:
-        path:
-          ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-nuget-
-
-    - name: Build
-      run: dotnet build -c Release
-
-    - name: Run ${{ matrix.category }} tests
-      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal
         # --collect:"XPlat Code Coverage" https://github.com/coverlet-coverage/coverlet/issues/1192
 
   #unify-coverage-reports:
