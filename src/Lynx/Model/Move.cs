@@ -231,7 +231,11 @@ public static class MoveExtensions
 #pragma warning disable S3358 // Ternary operators should not be nested
         return move.IsCastle() == default
             ?
-                ((piece == (int)Model.Piece.P || piece == (int)Model.Piece.p) && !move.IsCapture() ? "" : char.ToUpperInvariant(Constants.AsciiPieces[move.Piece()])) +
+                (piece == (int)Model.Piece.P || piece == (int)Model.Piece.p
+                    ? (move.IsCapture()
+                        ? Constants.Coordinates[move.SourceSquare()][..^1]  // exd5
+                        : "")    // d5
+                    : char.ToUpperInvariant(Constants.AsciiPieces[move.Piece()])) +
                 (move.IsCapture() == default ? "" : "x") +
                 Constants.Coordinates[move.TargetSquare()] +
                 (move.PromotedPiece() == default ? "" : $"={char.ToUpperInvariant(Constants.AsciiPieces[move.PromotedPiece()])}") +
