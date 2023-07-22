@@ -56,13 +56,9 @@ public sealed partial class Engine
 
         var localPosition = currentPosition;
 
-        var orderedMoves = moves
+        return moves
             .OrderByDescending(move => Score(move, in localPosition, depth, bestMoveTTCandidate))
             .ToList();
-
-        _logger.Trace("For position {0}:\n{1})", currentPosition.FEN(), string.Join(", ", orderedMoves.Select(m => $"{m.ToEPDString()} ({Score(m, in localPosition, depth, bestMoveTTCandidate)})")));
-
-        return orderedMoves;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

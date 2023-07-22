@@ -197,8 +197,7 @@ public static class TranspositionTableExtensions
     /// <param name="transpositionTable"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int HashfullPermill(this TranspositionTable transpositionTable) =>
-        transpositionTable.Length > 0
+    public static int HashfullPermill(this TranspositionTable transpositionTable) => transpositionTable.Length > 0
         ? 1000 * transpositionTable.PopulatedItemsCount() / transpositionTable.Length
         : 0;
 
