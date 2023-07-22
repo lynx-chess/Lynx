@@ -65,7 +65,14 @@ public static class Configuration
     public static int Hash
     {
         get => EngineSettings.TranspositionTableSize;
-        set => EngineSettings.TranspositionTableSize = value;
+        set
+        {
+            EngineSettings.TranspositionTableSize = value;
+            if (value == 0)
+            {
+                EngineSettings.TranspositionTableEnabled = false;
+            }
+        }
     }
 }
 
