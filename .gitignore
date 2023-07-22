@@ -366,3 +366,5 @@ global.json
 # Infersharp
 .infersharpconfig
 infer-out/
+
+tmp/
