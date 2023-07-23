@@ -51,7 +51,7 @@ public static class OnlineTablebaseProber
         }
 
         var fen = position.FEN(halfMovesWithoutCaptureOrPawnMove);
-        _logger.Debug("[{0}] Querying online tb for position {1}", nameof(RootSearch), fen);
+        _logger.Info("[{0}] Querying online tb for position {1}", nameof(RootSearch), fen);
 
         var tablebaseEval = await GetEvaluation(fen, cancellationToken);
 
@@ -482,6 +482,10 @@ public static class OnlineTablebaseProber
 #pragma warning disable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code - TypeInfoResolver included in _serializerOptions
             return await _client.GetFromJsonAsync<TablebaseEvaluation>($"standard?fen={fen}", _serializerOptions, cancellationToken);
 #pragma warning restore IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
+        }
+        catch (OperationCanceledException)  // Also catches TaskCanceledException
+        {
+            throw;
         }
         catch (Exception e)
         {

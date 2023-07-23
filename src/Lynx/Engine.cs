@@ -150,35 +150,41 @@ public sealed partial class Engine
 
     private SearchResult SearchBestMove(int minDepth, int? maxDepth, int? decisionTime)
     {
-        var searchResultTask = IDDFS(minDepth, maxDepth, decisionTime);
-        var tablebaseResultTask = ProbeOnlineTablebase(Game.CurrentPosition, new(Game.PositionHashHistory), _halfMovesWithoutCaptureOrPawnMove);
+        var tasks = new Task<SearchResult?>[] {
+            ProbeOnlineTablebase(Game.CurrentPosition, new(Game.PositionHashHistory), _halfMovesWithoutCaptureOrPawnMove),
+            IDDFS(minDepth, maxDepth, decisionTime),
+        };
 
-        var resultList = Task.WhenAll(searchResultTask, tablebaseResultTask).Result;
+        var resultList = Task.WhenAll(tasks).Result;
+        var searchResult = resultList[1];
+        var tbResult = resultList[0];
 
-        if (resultList[0] is not null)
+        if (searchResult is not null)
         {
             _logger.Info("Search evaluation result - eval: {0}, mate: {1}, depth: {2}, refutation: {3}",
-                resultList[0]!.Evaluation, resultList[0]!.Mate, resultList[0]!.TargetDepth, string.Join(", ", resultList[0]!.Moves.Select(m => m.ToMoveString())));
+                searchResult.Evaluation, searchResult.Mate, searchResult.TargetDepth, string.Join(", ", searchResult.Moves.Select(m => m.ToMoveString())));
 
-            Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(resultList[0]!)));
+            Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(searchResult)));
         }
 
-        if (resultList[1] is not null)
+        if (tbResult is not null)
         {
-            if (resultList[0]?.Mate is not null && resultList[0]!.Mate <= resultList[1]!.Mate && resultList[0]!.Mate + _halfMovesWithoutCaptureOrPawnMove < 96)
-            {
-                _logger.Info("Relying on search result due to mate distance match");
-
-                resultList[1]!.Moves.Clear();
-                resultList[1]!.Moves.AddRange(resultList[0]!.Moves);
-            }
             _logger.Info("Online tb probing result - mate: {0}, moves: {1}",
-                resultList[1]!.Mate, string.Join(", ", resultList[1]!.Moves.Select(m => m.ToMoveString())));
+                tbResult.Mate, string.Join(", ", tbResult.Moves.Select(m => m.ToMoveString())));
 
-            Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(resultList[1]!)));
+            if (searchResult?.Mate > 0 && searchResult.Mate <= tbResult.Mate && searchResult.Mate + _halfMovesWithoutCaptureOrPawnMove < 96)
+            {
+                _logger.Info("Relying on search result mate line due to dtm match and low enough dtz");
+                ++searchResult.TargetDepth;
+                tbResult = null;
+            }
         }
 
-        return resultList[1] ?? resultList[0] ?? throw new AssertException("Both search and online tb proving results are null. At least search one is always expected to have a value");
+        var result = tbResult ?? searchResult ?? throw new AssertException("Both search and online tb proving results are null. At least search one is always expected to have a value");
+
+        Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(result)));
+
+        return result;
     }
 
     internal double CalculateDecisionTime(int movesToGo, int millisecondsLeft, int millisecondsIncrement)
