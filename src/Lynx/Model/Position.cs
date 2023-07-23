@@ -36,7 +36,8 @@ public readonly struct Position
     {
     }
 
-    public Position(ParseFENResult parsedFEN)
+    public Position((bool Success, BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, int Castle, BoardSquare EnPassant,
+        int HalfMoveClock, int FullMoveCounter) parsedFEN)
     {
         PieceBitBoards = parsedFEN.PieceBitBoards;
         OccupancyBitBoards = parsedFEN.OccupancyBitBoards;

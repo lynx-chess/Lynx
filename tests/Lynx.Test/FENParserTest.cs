@@ -14,7 +14,7 @@ public class FENParserTest
 
         // Make sure a previous Fen doesn't change anything
         const string previuosFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-        ParseFENResult result = FENParser.ParseFEN(previuosFen);
+        var result = FENParser.ParseFEN(previuosFen);
         Assert.True(result.Success);
 
         const string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";

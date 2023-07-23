@@ -13,7 +13,8 @@ public static partial class FENParser
 
     private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
 
-    public static ParseFENResult ParseFEN(string fen)
+    public static (bool Success, BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, int Castle, BoardSquare EnPassant,
+        int HalfMoveClock, int FullMoveCounter) ParseFEN(string fen)
     {
         fen = fen.Trim();
 
@@ -66,7 +67,7 @@ public static partial class FENParser
             success = false;
         }
 
-        return new ParseFENResult(success, pieceBitBoards, occupancyBitBoards, side, castle, enPassant, halfMoveClock, fullMoveCounter);
+        return (success, pieceBitBoards, occupancyBitBoards, side, castle, enPassant, halfMoveClock, fullMoveCounter);
     }
 
     private static (MatchCollection Matches, bool Success) ParseBoard(string fen, BitBoard[] pieceBitBoards, BitBoard[] occupancyBitBoards)
