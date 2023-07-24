@@ -202,27 +202,3 @@ public static partial class FENParser
         return (enPassant, success);
     }
 }
-
-public readonly ref struct ParseFENResult
-{
-    public bool Success { get; }
-    public ulong[] PieceBitBoards { get; }
-    public ulong[] OccupancyBitBoards { get; }
-    public Side Side { get; }
-    public int Castle { get; }
-    public BoardSquare EnPassant { get; }
-    public int HalfMoveClock { get; }
-    public int FullMoveCounter { get; }
-
-    public ParseFENResult(bool success, ulong[] pieceBitBoards, ulong[] occupancyBitBoards, Side side, int castle, BoardSquare enPassant, int halfMoveClock, int fullMoveCounter)
-    {
-        Success = success;
-        PieceBitBoards = pieceBitBoards;
-        OccupancyBitBoards = occupancyBitBoards;
-        Side = side;
-        Castle = castle;
-        EnPassant = enPassant;
-        HalfMoveClock = halfMoveClock;
-        FullMoveCounter = fullMoveCounter;
-    }
-}
