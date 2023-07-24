@@ -304,6 +304,8 @@ public static class Constants
 
     public const string EmptyBoardFEN = "8/8/8/8/8/8/8/8 w - - 0 1";
 
+    public const string CaptureTrainPositionFEN = "r2q1rk1/bppb1pp1/p2p2np/2PPp3/1P2P1n1/P3BN2/2Q1BPPP/RN3RK1 w - - 2 15";
+
     public const int WhiteShortCastleKingSquare = (int)BoardSquare.g1;
     public const int BlackShortCastleKingSquare = (int)BoardSquare.g8;
     public const int WhiteLongCastleKingSquare = (int)BoardSquare.c1;

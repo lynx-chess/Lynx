@@ -3,6 +3,7 @@ using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
 using System.Threading.Channels;
+using System.Timers;
 
 namespace Lynx;
 
@@ -138,16 +139,53 @@ public sealed partial class Engine
             maxDepth = Configuration.EngineSettings.DefaultMaxDepth;
         }
 
-        var result = IDDFS(minDepth, maxDepth, decisionTime);
-        Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(result)));
-        _logger.Info("Evaluation: {0} (depth: {1}, refutation: {2})", result.Evaluation, result.TargetDepth, string.Join(", ", result.Moves.Select(m => m.ToMoveString())));
+        SearchResult resultToReturn = SearchBestMove(minDepth, maxDepth, decisionTime);
 
-        if (!result.IsCancelled && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
+        if (!resultToReturn.IsCancelled && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
         {
-            Game.MakeMove(result.BestMove);
+            Game.MakeMove(resultToReturn.BestMove);
         }
 
-        AverageDepth += (result.TargetDepth - AverageDepth) / Math.Ceiling(0.5 * Game.MoveHistory.Count);
+        AverageDepth += (resultToReturn.TargetDepth - AverageDepth) / Math.Ceiling(0.5 * Game.MoveHistory.Count);
+
+        return resultToReturn;
+    }
+
+    private SearchResult SearchBestMove(int minDepth, int? maxDepth, int? decisionTime)
+    {
+        var tasks = new Task<SearchResult?>[] {
+            ProbeOnlineTablebase(Game.CurrentPosition, new(Game.PositionHashHistory), _halfMovesWithoutCaptureOrPawnMove),
+            IDDFS(minDepth, maxDepth, decisionTime),
+        };
+
+        var resultList = Task.WhenAll(tasks).Result;
+        var searchResult = resultList[1];
+        var tbResult = resultList[0];
+
+        if (searchResult is not null)
+        {
+            _logger.Info("Search evaluation result - eval: {0}, mate: {1}, depth: {2}, refutation: {3}",
+                searchResult.Evaluation, searchResult.Mate, searchResult.TargetDepth, string.Join(", ", searchResult.Moves.Select(m => m.ToMoveString())));
+
+            Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(searchResult)));
+        }
+
+        if (tbResult is not null)
+        {
+            _logger.Info("Online tb probing result - mate: {0}, moves: {1}",
+                tbResult.Mate, string.Join(", ", tbResult.Moves.Select(m => m.ToMoveString())));
+
+            if (searchResult?.Mate > 0 && searchResult.Mate <= tbResult.Mate && searchResult.Mate + _halfMovesWithoutCaptureOrPawnMove < 96)
+            {
+                _logger.Info("Relying on search result mate line due to dtm match and low enough dtz");
+                ++searchResult.TargetDepth;
+                tbResult = null;
+            }
+        }
+
+        var result = tbResult ?? searchResult ?? throw new AssertException("Both search and online tb proving results are null. At least search one is always expected to have a value");
+
+        Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(result)));
 
         return result;
     }

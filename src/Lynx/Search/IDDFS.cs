@@ -30,7 +30,7 @@ public sealed partial class Engine
 
     private readonly Move _defaultMove = default;
 
-    public SearchResult IDDFS(int minDepth, int? maxDepth, int? decisionTime)
+    public async Task<SearchResult?> IDDFS(int minDepth, int? maxDepth, int? decisionTime)
     {
         // Cleanup
         _nodes = 0;
@@ -66,7 +66,7 @@ public sealed partial class Engine
 
             Array.Copy(_previousSearchResult.Moves.ToArray(), 2, _pVTable, 0, _previousSearchResult.Moves.Count - 2);
 
-            Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult)));
+            await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult));
 
             for (int d = 1; d < Configuration.EngineSettings.MaxDepth - 2; ++d)
             {
@@ -91,7 +91,8 @@ public sealed partial class Engine
             do
             {
                 _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
-                if (depth - 1 > minDepth)
+                if (minDepth == maxDepth    // go depth n commands
+                    ||  depth - 1 > minDepth)
                 {
                     _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
                 }
@@ -142,7 +143,7 @@ public sealed partial class Engine
                     HashfullPermill = _transpositionTable.HashfullPermill()
                 };
 
-                Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult)));
+                await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult));
 
                 Array.Copy(_killerMoves, _previousKillerMoves, _killerMoves.Length);
 
@@ -175,6 +176,14 @@ public sealed partial class Engine
         finalSearchResult.Time = _stopWatch.ElapsedMilliseconds;
         finalSearchResult.NodesPerSecond = Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * _stopWatch.ElapsedMilliseconds) + 1), 0, long.MaxValue));
         finalSearchResult.HashfullPermill = _transpositionTable.HashfullPermill();
+
+        if (isMateDetected && finalSearchResult.Mate + _halfMovesWithoutCaptureOrPawnMove < 96)
+        {
+            _logger.Info("Engine search found a short enough mate, cancelling online tb probing if still active");
+            _searchCancellationTokenSource.Cancel();
+        }
+
+        await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(finalSearchResult));
 
         return finalSearchResult;
 

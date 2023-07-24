@@ -104,7 +104,7 @@ public sealed class LinxDriver
         }
         finally
         {
-            _logger.Info($"Finishing {nameof(LinxDriver)}");
+            _logger.Info("Finishing {0}", nameof(LinxDriver));
         }
     }
 
@@ -212,6 +212,22 @@ public sealed class LinxDriver
                     if (commandItems.Length > 4)
                     {
                         _logger.Info("UCI_EngineAbout: {0}", string.Join(' ', commandItems.Skip(4)));
+                    }
+                    break;
+                }
+            case "onlinetablebaseinrootpositions":
+                {
+                    if (commandItems.Length > 4 && bool.TryParse(commandItems[4], out var value))
+                    {
+                        Configuration.EngineSettings.UseOnlineTablebaseInRootPositions = value;
+                    }
+                    break;
+                }
+            case "onlinetablebaseinsearch":
+                {
+                    if (commandItems.Length > 4 && bool.TryParse(commandItems[4], out var value))
+                    {
+                        Configuration.EngineSettings.UseOnlineTablebaseInSearch = value;
                     }
                     break;
                 }

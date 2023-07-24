@@ -367,4 +367,4 @@ global.json
 .infersharpconfig
 infer-out/
 
-/tmp
+tmp/

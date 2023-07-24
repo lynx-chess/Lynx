@@ -37,7 +37,7 @@ public class PositionIdGeneration : BaseBenchmark
     [ArgumentsSource(nameof(Data))]
     public string FEN(Position newPosition)
     {
-        return newPosition.CalculateFEN();
+        return newPosition.FEN();
     }
 
     /// <summary>

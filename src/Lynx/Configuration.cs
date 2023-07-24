@@ -196,4 +196,16 @@ public sealed class EngineSettings
     /// 32 MB
     /// </summary>
     public int TranspositionTableSize { get; set; } = 32 * 1024 * 1024;
+
+    public bool UseOnlineTablebaseInRootPositions { get; set; } = false;
+
+    /// <summary>
+    /// Experimental, might misbehave due to tablebase API limits
+    /// </summary>
+    public bool UseOnlineTablebaseInSearch { get; set; } = false;
+
+    /// <summary>
+    /// This can also de used to reduce online probing
+    /// </summary>
+    public int OnlineTablebaseMaxSupportedPieces { get; set; } = 7;
 }

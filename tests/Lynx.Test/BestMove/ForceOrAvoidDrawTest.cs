@@ -62,7 +62,7 @@ public class ForceOrAvoidDrawTest : BaseTest
 
         // Assert
         Assert.AreNotEqual(movesThatAllowsRepetition.UCIString(), bestMoveFound.UCIString(), "No threefold repetition avoided");
-        Assert.Less(searchResult.Evaluation, EvaluationConstants.CheckMateBaseEvaluation - (20 * EvaluationConstants.DepthCheckmateFactor), "Mate not detected");
+        Assert.Less(searchResult.Evaluation, EvaluationConstants.CheckMateBaseEvaluation - (20 * EvaluationConstants.CheckmateDepthFactor), "Mate not detected");
     }
 
     [Test]
@@ -158,7 +158,7 @@ public class ForceOrAvoidDrawTest : BaseTest
 
         // Assert
         Assert.AreNotEqual(movesThatAllowsRepetition.UCIString(), bestMoveFound.UCIString(), "No 50 moves rule avoided");
-        Assert.Less(searchResult.Evaluation, EvaluationConstants.CheckMateBaseEvaluation - (20 * EvaluationConstants.DepthCheckmateFactor), "Mate not detected");
+        Assert.Less(searchResult.Evaluation, EvaluationConstants.CheckMateBaseEvaluation - (20 * EvaluationConstants.CheckmateDepthFactor), "Mate not detected");
     }
 
     [Test]

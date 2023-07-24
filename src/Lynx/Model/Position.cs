@@ -1,15 +1,18 @@
 using NLog;
 using System;
+using System.Diagnostics;
+using System.Net.Http.Json;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Json;
 
 namespace Lynx.Model;
 
 public readonly struct Position
 {
-    private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
-
     public string FEN() => CalculateFEN();
+
+    public string FEN(int halfMovesWithoutCaptureOrPawnMove) => CalculateFEN(halfMovesWithoutCaptureOrPawnMove);
 
     public long UniqueIdentifier { get; }
 
@@ -29,16 +32,13 @@ public readonly struct Position
 
     public int Castle { get; }
 
-    public Position(string fen)
+    public Position(string fen) : this(FENParser.ParseFEN(fen))
     {
-        //_fen = null;    // Otherwise halfmove and fullmove numbers may interfere whenever FEN is being used as key of a dictionary
-        var parsedFEN = FENParser.ParseFEN(fen);
+    }
 
-        if (!parsedFEN.Success)
-        {
-            _logger.Error($"Error parsing FEN {fen}");
-        }
-
+    public Position((bool Success, BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, int Castle, BoardSquare EnPassant,
+        int HalfMoveClock, int FullMoveCounter) parsedFEN)
+    {
         PieceBitBoards = parsedFEN.PieceBitBoards;
         OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
         Side = parsedFEN.Side;
@@ -250,7 +250,14 @@ public readonly struct Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal string CalculateFEN()
+    private string CalculateFEN(int halfMovesWithoutCaptureOrPawnMove)
+    {
+        var fen = CalculateFEN();
+        return fen.Replace(" 0 1", $" {halfMovesWithoutCaptureOrPawnMove} 1");
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private string CalculateFEN()
     {
         var sb = new StringBuilder(100);
 
@@ -350,6 +357,8 @@ public readonly struct Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public IEnumerable<Move> AllCapturesMoves(Move[]? movePool = null) => MoveGenerator.GenerateAllMoves(this, movePool, capturesOnly: true);
 
+    public int CountPieces() => PieceBitBoards.Sum(b => b.CountBits());
+
     /// <summary>
     /// Evaluates material and position in a NegaMax style.
     /// That is, positive scores always favour playing <see cref="Side"/>.
@@ -358,14 +367,14 @@ public readonly struct Position
     /// <param name="movesWithoutCaptureOrPawnMove"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int StaticEvaluation(Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove)
+    public int StaticEvaluation(Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove, CancellationToken cancellationToken = default)
     {
         if (IsThreefoldRepetition(positionHistory) || Is50MovesRepetition(movesWithoutCaptureOrPawnMove))
         {
             return 0;
         }
 
-        return StaticEvaluation();
+        return StaticEvaluation(movesWithoutCaptureOrPawnMove, cancellationToken);
     }
 
     /// <summary>
@@ -374,7 +383,7 @@ public readonly struct Position
     /// </summary>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int StaticEvaluation()
+    public int StaticEvaluation(int movesWithoutCaptureOrPawnMove, CancellationToken cancellationToken = default)
     {
         var eval = 0;
 
@@ -426,6 +435,15 @@ public readonly struct Position
 
                 eval -= CustomPieceEvaluation(pieceSquareIndex, pieceIndex);
             }
+        }
+
+        var result = OnlineTablebaseProber.EvaluationSearch(this, movesWithoutCaptureOrPawnMove, cancellationToken);
+        Debug.Assert(result < EvaluationConstants.CheckMateBaseEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
+        Debug.Assert(result > -EvaluationConstants.CheckMateBaseEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
+
+        if (result != OnlineTablebaseProber.NoResult)
+        {
+            return result;
         }
 
         //++pieceCount[Constants.WhiteKingIndex];
@@ -510,13 +528,15 @@ public readonly struct Position
         if (isInCheck)
         {
             // Checkmate evaluation, but not as bad/shallow as it looks like since we're already searching at a certain depth
-            return -EvaluationConstants.CheckMateBaseEvaluation + (EvaluationConstants.DepthCheckmateFactor * depth);
+            return -EvaluationConstants.CheckMateBaseEvaluation + (EvaluationConstants.CheckmateDepthFactor * depth);
         }
         else
         {
             return default;
         }
     }
+
+    public static int NumberOfTwoFoldRepetitions(Dictionary<long, int> positionHistory) => positionHistory.Values.Count(val => val >= 2);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsThreefoldRepetition(Dictionary<long, int> positionHistory) => positionHistory.Values.Any(val => val >= 3);

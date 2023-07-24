@@ -376,7 +376,7 @@ public class PositionTest
     {
         var position = new Position(fen);
 
-        Assert.AreEqual(0, position.StaticEvaluation());
+        Assert.AreEqual(0, position.StaticEvaluation(default));
     }
 
     [TestCase("4k3/8/8/7Q/7q/8/8/4K3 w - - 0 1", "4k3/8/8/7Q/7q/8/4K3/8 w - - 0 1", Description = "King in 8th rank with queens > King in 7th rank with queens")]
@@ -384,7 +384,7 @@ public class PositionTest
     [TestCase("4k3/7p/8/8/4K3/8/7P/8 w - - 0 1", "4k3/7p/8/q7/4K3/Q7/7P/8 w - - 0 1", Description = "King in the center without queens > King in the center with queens")]
     public void StaticEvaluation_KingEndgame(string fen1, string fen2)
     {
-        Assert.Greater(new Position(fen1).StaticEvaluation(), new Position(fen2).StaticEvaluation());
+        Assert.Greater(new Position(fen1).StaticEvaluation(default), new Position(fen2).StaticEvaluation(default));
     }
 
     /// <summary>
@@ -408,7 +408,7 @@ public class PositionTest
     public void StaticEvaluation_IsolatedPawnPenalty(string fen)
     {
         var position = new Position(fen);
-        var evaluation = position.StaticEvaluation();
+        var evaluation = position.StaticEvaluation(default);
 
         Assert.AreEqual(-Configuration.EngineSettings.IsolatedPawnPenalty, evaluation);
     }
@@ -434,7 +434,7 @@ public class PositionTest
     public void StaticEvaluation_DoublePawnPenalty(string fen)
     {
         var position = new Position(fen);
-        var evaluation = position.StaticEvaluation();
+        var evaluation = position.StaticEvaluation(default);
 
         Assert.AreEqual(-4 * Configuration.EngineSettings.DoubledPawnPenalty, evaluation);
     }
@@ -461,7 +461,7 @@ public class PositionTest
     public void StaticEvaluation_TriplePawnPenalty(string fen)
     {
         var position = new Position(fen);
-        var evaluation = position.StaticEvaluation();
+        var evaluation = position.StaticEvaluation(default);
 
         Assert.AreEqual(-9 * Configuration.EngineSettings.DoubledPawnPenalty, evaluation);
     }
@@ -600,7 +600,7 @@ public class PositionTest
             rank = 7 - rank;
         }
         var piece = (int)(position.Side == Side.White ? Piece.P : Piece.p);
-        var evaluation = position.StaticEvaluation();
+        var evaluation = position.StaticEvaluation(default);
 
         Assert.AreEqual(
             4 * Configuration.EngineSettings.DoubledPawnPenalty
@@ -630,7 +630,7 @@ public class PositionTest
     public void StaticEvaluation_SemiOpenFileRookBonus(string fen)
     {
         var position = new Position(fen);
-        var evaluation = position.StaticEvaluation();
+        var evaluation = position.StaticEvaluation(default);
         Assert.AreEqual(Configuration.EngineSettings.SemiOpenFileRookBonus, evaluation);
     }
 
@@ -655,7 +655,7 @@ public class PositionTest
     public void StaticEvaluation_OpenFileRookBonus(string fen)
     {
         var position = new Position(fen);
-        var evaluation = position.StaticEvaluation();
+        var evaluation = position.StaticEvaluation(default);
         Assert.AreEqual(Configuration.EngineSettings.OpenFileRookBonus, evaluation);
     }
 
@@ -680,7 +680,7 @@ public class PositionTest
     public void StaticEvaluation_DoubleSemiOpenFileRookBonus(string fen)
     {
         var position = new Position(fen);
-        var evaluation = position.StaticEvaluation();
+        var evaluation = position.StaticEvaluation(default);
 
         Assert.AreEqual(2 * Configuration.EngineSettings.SemiOpenFileRookBonus, evaluation);
     }
@@ -706,7 +706,7 @@ public class PositionTest
     public void StaticEvaluation_DoubleOpenFileRookBonus(string fen)
     {
         var position = new Position(fen);
-        var evaluation = position.StaticEvaluation();
+        var evaluation = position.StaticEvaluation(default);
 
         Assert.AreEqual(-2 * Configuration.EngineSettings.OpenFileRookBonus, evaluation);
     }
@@ -732,7 +732,7 @@ public class PositionTest
     public void StaticEvaluation_SemiOpenFileKingPenalty(string fen)
     {
         var position = new Position(fen);
-        var evaluation = position.StaticEvaluation();
+        var evaluation = position.StaticEvaluation(default);
 
         Assert.AreEqual(-Configuration.EngineSettings.SemiOpenFileKingPenalty, evaluation);
     }
@@ -758,7 +758,7 @@ public class PositionTest
     public void StaticEvaluation_OpenFileKingPenalty(string fen)
     {
         var position = new Position(fen);
-        var evaluation = position.StaticEvaluation();
+        var evaluation = position.StaticEvaluation(default);
 
         Assert.AreEqual(-Configuration.EngineSettings.OpenFileKingPenalty, evaluation);
     }
@@ -785,7 +785,7 @@ public class PositionTest
     public void StaticEvaluation_NoOpenFileKingPenalty(string fen)
     {
         var position = new Position(fen);
-        var evaluation = position.StaticEvaluation();
+        var evaluation = position.StaticEvaluation(default);
 
         Assert.AreEqual(0, evaluation);
     }
@@ -812,7 +812,7 @@ public class PositionTest
     public void StaticEvaluation_NoSemiOpenFileKingPenalty(string fen)
     {
         var position = new Position(fen);
-        var evaluation = position.StaticEvaluation();
+        var evaluation = position.StaticEvaluation(default);
 
         Assert.AreEqual(0, evaluation);
     }
@@ -860,7 +860,7 @@ public class PositionTest
     public void StaticEvaluation_KingShieldBonus(string fen, int surroundingPieces)
     {
         var position = new Position(fen);
-        var evaluation = position.StaticEvaluation();
+        var evaluation = position.StaticEvaluation(default);
 
         Assert.AreEqual(surroundingPieces * Configuration.EngineSettings.KingShieldBonus, evaluation);
     }
@@ -908,7 +908,7 @@ public class PositionTest
     public void StaticEvaluation_BishopMobility(string fen, int mobilityDifference)
     {
         var position = new Position(fen);
-        var evaluation = position.StaticEvaluation();
+        var evaluation = position.StaticEvaluation(default);
 
         Assert.AreEqual(mobilityDifference * Configuration.EngineSettings.BishopMobilityBonus, evaluation);
     }
@@ -1015,7 +1015,7 @@ public class PositionTest
     public void StaticEvaluation_QueenMobility(string fen, int mobilityDifference)
     {
         var position = new Position(fen);
-        var evaluation = position.StaticEvaluation();
+        var evaluation = position.StaticEvaluation(default);
 
         Assert.AreEqual(mobilityDifference * Configuration.EngineSettings.QueenMobilityBonus, evaluation);
     }

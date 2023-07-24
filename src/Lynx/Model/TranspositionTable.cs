@@ -171,8 +171,8 @@ public static class TranspositionTableExtensions
     internal static int RecalculateMateScores(int score, int depth) => score +
             score switch
             {
-                > EvaluationConstants.PositiveCheckmateDetectionLimit => -EvaluationConstants.DepthCheckmateFactor * depth,
-                < EvaluationConstants.NegativeCheckmateDetectionLimit => EvaluationConstants.DepthCheckmateFactor * depth,
+                > EvaluationConstants.PositiveCheckmateDetectionLimit => -EvaluationConstants.CheckmateDepthFactor * depth,
+                < EvaluationConstants.NegativeCheckmateDetectionLimit => EvaluationConstants.CheckmateDepthFactor * depth,
                 _ => 0
             };
 
@@ -212,7 +212,9 @@ public static class TranspositionTableExtensions
                 ++items;
             }
         }
-        _logger.Info($"TT Occupancy:\t{100 * transpositionTable.PopulatedItemsCount() / transpositionTable.Length}% ({transpositionTable.Length * Marshal.SizeOf(typeof(TranspositionTableElement)) / 1024 / 1024}MB)");
+        _logger.Info("TT Occupancy:\t{0}% ({1}MB)",
+            100 * transpositionTable.PopulatedItemsCount() / transpositionTable.Length,
+            transpositionTable.Length * Marshal.SizeOf(typeof(TranspositionTableElement)) / 1024 / 1024);
     }
 
     [Conditional("DEBUG")]

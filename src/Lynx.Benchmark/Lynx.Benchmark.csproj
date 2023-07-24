@@ -15,6 +15,7 @@
 
   <PropertyGroup>
     <NoWarn>S125,CA1822,CA1806,RCS1090</NoWarn>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
 </Project>

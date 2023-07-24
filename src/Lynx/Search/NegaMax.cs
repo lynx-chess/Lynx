@@ -81,7 +81,7 @@ public sealed partial class Engine
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
             _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
-            return position.StaticEvaluation();
+            return position.StaticEvaluation(_halfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
         }
 
         var pvIndex = PVTable.Indexes[ply];
@@ -281,7 +281,7 @@ public sealed partial class Engine
     public int QuiescenceSearch(in Position position, int ply, int alpha, int beta)
     {
         _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
-        //_cancellationToken.Token.ThrowIfCancellationRequested();
+        //_searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
 
         if (Position.IsThreefoldRepetition(Game.PositionHashHistory) || Position.Is50MovesRepetition(_halfMovesWithoutCaptureOrPawnMove))
         {
@@ -290,7 +290,7 @@ public sealed partial class Engine
 
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
-            return position.StaticEvaluation();
+            return position.StaticEvaluation(_halfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
         }
 
         ++_nodes;
@@ -300,7 +300,7 @@ public sealed partial class Engine
         var nextPvIndex = PVTable.Indexes[ply + 1];
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
-        var staticEvaluation = position.StaticEvaluation();
+        var staticEvaluation = position.StaticEvaluation(_halfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
 
         // Fail-hard beta-cutoff (updating alpha after this check)
         if (staticEvaluation >= beta)

@@ -25,7 +25,7 @@ public static partial class FENParser
 
         var occupancyBitBoards = new BitBoard[3] { default, default, default };
 
-        bool success = true;
+        bool success;
         Side side = Side.Both;
         int castle = 0;
         int halfMoveClock = 0, fullMoveCounter = 1;

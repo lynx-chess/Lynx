@@ -5,8 +5,16 @@ using System.Text;
 
 namespace Lynx;
 
-public sealed record SearchResult(Move BestMove, double Evaluation, int TargetDepth, List<Move> Moves, int Alpha, int Beta, int Mate = default)
+public class SearchResult
 {
+    public Move BestMove { get; init; }
+    public double Evaluation { get; init; }
+    public int TargetDepth { get; set; }
+    public List<Move> Moves { get; init; }
+    public int Alpha { get; init; }
+    public int Beta { get; init; }
+    public int Mate { get; init; }
+
     public int DepthReached { get; set; }
 
     public int Nodes { get; set; }
@@ -18,6 +26,17 @@ public sealed record SearchResult(Move BestMove, double Evaluation, int TargetDe
     public bool IsCancelled { get; set; }
 
     public int HashfullPermill { get; set; }
+
+    public SearchResult(Move bestMove, double evaluation, int targetDepth, List<Move> moves, int alpha, int beta, int mate = default)
+    {
+        BestMove = bestMove;
+        Evaluation = evaluation;
+        TargetDepth = targetDepth;
+        Moves = moves;
+        Alpha = alpha;
+        Beta = beta;
+        Mate = mate;
+    }
 
     public SearchResult(SearchResult previousSearchResult)
     {
@@ -56,9 +75,13 @@ public sealed partial class Engine
 
         var localPosition = currentPosition;
 
-        return moves
+        var orderedMoves = moves
             .OrderByDescending(move => Score(move, in localPosition, depth, bestMoveTTCandidate))
             .ToList();
+
+        PrintMessage($"For position {currentPosition.FEN()}:\n{string.Join(", ", orderedMoves.Select(m => $"{m.ToEPDString()} ({Score(m, in localPosition, depth, bestMoveTTCandidate)})"))})");
+
+        return orderedMoves;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
