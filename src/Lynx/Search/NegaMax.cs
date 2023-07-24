@@ -40,6 +40,8 @@ public sealed partial class Engine
             var ttProbeResult = _transpositionTable.ProbeHash(position, targetDepth, ply, alpha, beta);
             if (ttProbeResult.Evaluation != EvaluationConstants.NoHashEntry)
             {
+                _logger.Trace("Taking move {0} from tt with eval {1}", ttProbeResult.BestMove, ttProbeResult.Evaluation);
+
                 return ttProbeResult.Evaluation;
             }
             ttBestMove = ttProbeResult.BestMove;

@@ -91,6 +91,11 @@ public static class TranspositionTableExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static (int Evaluation, Move BestMove) ProbeHash(this TranspositionTable transpositionTable, Position position, int targetDepth, int ply, int alpha, int beta)
     {
+        if (!Configuration.EngineSettings.TranspositionTableEnabled)
+        {
+            return (EvaluationConstants.NoHashEntry, default);
+        }
+
         var entry = transpositionTable[TranspositionTableIndex(position, transpositionTable)];
 
         if (position.UniqueIdentifier != entry.Key)
@@ -100,7 +105,7 @@ public static class TranspositionTableExtensions
 
         var eval = EvaluationConstants.NoHashEntry;
 
-        if (entry.Depth >= (targetDepth - ply))    // TODO is this conditon correct? In BBC depth is passed, but BBC depth decreases when going deeper
+        if (entry.Depth >= (targetDepth - ply))
         {
             // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
             // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
@@ -131,6 +136,11 @@ public static class TranspositionTableExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void RecordHash(this TranspositionTable transpositionTable, Position position, int targetDepth, int ply, int eval, NodeType nodeType, Move? move = 0)
     {
+        if (!Configuration.EngineSettings.TranspositionTableEnabled)
+        {
+            return;
+        }
+
         ref var entry = ref transpositionTable[TranspositionTableIndex(position, transpositionTable)];
 
         //if (entry.Key != default && entry.Key != position.UniqueIdentifier)
@@ -187,7 +197,9 @@ public static class TranspositionTableExtensions
     /// <param name="transpositionTable"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int HashfullPermill(this TranspositionTable transpositionTable) => 1000 * transpositionTable.PopulatedItemsCount() / transpositionTable.Length;
+    public static int HashfullPermill(this TranspositionTable transpositionTable) => transpositionTable.Length > 0
+        ? 1000 * transpositionTable.PopulatedItemsCount() / transpositionTable.Length
+        : 0;
 
     [Conditional("DEBUG")]
     internal static void Stats(this TranspositionTable transpositionTable)

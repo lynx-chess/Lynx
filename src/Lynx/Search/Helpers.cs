@@ -15,7 +15,6 @@ public class SearchResult
     public int Beta { get; init; }
     public int Mate { get; init; }
 
-
     public int DepthReached { get; set; }
 
     public int Nodes { get; set; }
