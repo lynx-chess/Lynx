@@ -190,6 +190,8 @@ public sealed class EngineSettings
 
     public int QueenMobilityBonus { get; set; } = 1;
 
+    public bool TranspositionTableEnabled { get; set; } = true;
+
     /// <summary>
     /// 32 MB
     /// </summary>
@@ -198,7 +200,7 @@ public sealed class EngineSettings
     public bool UseOnlineTablebaseInRootPositions { get; set; } = false;
 
     /// <summary>
-    /// Might mishehave due to tablebase API limits
+    /// Experimental, might misbehave due to tablebase API limits
     /// </summary>
     public bool UseOnlineTablebaseInSearch { get; set; } = false;
 
