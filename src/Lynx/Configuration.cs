@@ -65,7 +65,14 @@ public static class Configuration
     public static int Hash
     {
         get => EngineSettings.TranspositionTableSize;
-        set => EngineSettings.TranspositionTableSize = value;
+        set
+        {
+            EngineSettings.TranspositionTableSize = value;
+            if (value == 0)
+            {
+                EngineSettings.TranspositionTableEnabled = false;
+            }
+        }
     }
 }
 
@@ -183,8 +190,10 @@ public sealed class EngineSettings
 
     public int QueenMobilityBonus { get; set; } = 1;
 
+    public bool TranspositionTableEnabled { get; set; } = true;
+
     /// <summary>
-    /// 64 MB
+    /// 32 MB
     /// </summary>
-    public int TranspositionTableSize { get; set; } = 64 * 1024 * 1024;
+    public int TranspositionTableSize { get; set; } = 32 * 1024 * 1024;
 }

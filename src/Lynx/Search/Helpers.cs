@@ -55,7 +55,10 @@ public sealed partial class Engine
         }
 
         var localPosition = currentPosition;
-        return moves.OrderByDescending(move => Score(move, in localPosition, depth, bestMoveTTCandidate)).ToList();
+
+        return moves
+            .OrderByDescending(move => Score(move, in localPosition, depth, bestMoveTTCandidate))
+            .ToList();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
