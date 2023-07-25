@@ -952,7 +952,8 @@ public class PositionTest
     /// </summary>
     /// <param name="fen"></param>
     /// <param name="mobilityDifference"></param>
-    [TestCase("3k4/1p6/2p5/4q3/4Q3/5P2/6P1/3K4 b - - 0 1", 4)]    ///// <summary>
+    [TestCase("3k4/1p6/2p5/4q3/4Q3/5P2/6P1/3K4 b - - 0 1", 4)]
+    /// <summary>
     /// 8   n . . . k . . .
     /// 7   . p . . . . . .
     /// 6   . . . . . . . .
