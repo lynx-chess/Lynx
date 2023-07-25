@@ -197,7 +197,7 @@
  *
 */
 
-#pragma warning disable RCS1163 // Unused parameter.
+#pragma warning disable RCS1163, IDE0060 // Unused parameter.
 
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
@@ -2673,4 +2673,4 @@ internal static class FENHelpers
     }
 }
 
-#pragma warning restore RCS1163 // Unused parameter.
+#pragma warning restore RCS1163, IDE0060 // Unused parameter.

@@ -48,7 +48,7 @@ internal class MasksTest
 
         Assert.AreEqual(expectedBitBoard, actualBitBoard);
     }
-    
+
     [TestCase(BoardSquare.e4, "3ppp2/3ppp2/3ppp2/3ppp2/8/8/8/8 w - - 0 1")]
     [TestCase(BoardSquare.e5, "3ppp2/3ppp2/3ppp2/8/8/8/8/8 w - - 0 1")]
     [TestCase(BoardSquare.e7, "3ppp2/8/8/8/8/8/8/8 w - - 0 1")] // TODO makes sense?
@@ -66,7 +66,7 @@ internal class MasksTest
 
         Assert.AreEqual(expectedBitBoard, actualBitBoard);
     }
-    
+
     [TestCase(BoardSquare.e4, "8/8/8/8/8/3ppp2/3ppp2/3ppp2 w - - 0 1")]
     [TestCase(BoardSquare.e5, "8/8/8/8/3ppp2/3ppp2/3ppp2/3ppp2 w - - 0 1")]
     [TestCase(BoardSquare.e2, "8/8/8/8/8/8/8/3ppp2 w - - 0 1")] // TODO makes sense?

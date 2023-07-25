@@ -1,7 +1,4 @@
-﻿using Lynx.Model;
-using System.Runtime.InteropServices;
-
-namespace Lynx;
+﻿namespace Lynx;
 
 public static class Configuration
 {

@@ -19,9 +19,9 @@ public class QuiescenceTest : BaseTest
     [TestCase("2kr3q/pbppppp1/1p1P3r/4bB2/1n2n1Q1/8/PPPPNBPP/R4RK1 b Q - 0 1", 3, 12,
         new[] { "e5h2" },
         Description = "Mate in 6 with quiescence, https://gameknot.com/chess-puzzle.pl?pz=257112")]
-#pragma warning disable RCS1163 // Unused parameter.
+#pragma warning disable RCS1163, IDE0060 // Unused parameter.
     public void Quiescence(string fen, int depth, int minQuiescenceSearchDepth, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
-#pragma warning restore RCS1163 // Unused parameter.
+#pragma warning restore RCS1163, IDE0060 // Unused parameter.
     {
         TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth);
     }

@@ -3,7 +3,6 @@ using Lynx.Internal;
 using Lynx.Model;
 using System.Diagnostics;
 using System.Numerics;
-using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -138,7 +137,7 @@ static void _8_Slider_Pieces_Attacks()
     block.Print();
     bishopAttacks.Print();
 
-    block = BitBoardExtensions.Initialize(new[] { BoardSquare.d3, BoardSquare.b4, BoardSquare.d7, BoardSquare.h4 });
+    block = BitBoardExtensions.Initialize(BoardSquare.d3, BoardSquare.b4, BoardSquare.d7, BoardSquare.h4);
 
     var rookAttacks = AttackGenerator.GenerateRookAttacksOnTheFly((int)BoardSquare.d4, block);
     block.Print();
@@ -147,7 +146,7 @@ static void _8_Slider_Pieces_Attacks()
 
 static void _9_BitCount()
 {
-    BitBoard bitBoard = BitBoardExtensions.Initialize(new[] { BoardSquare.d5, BoardSquare.e4 });
+    BitBoard bitBoard = BitBoardExtensions.Initialize(BoardSquare.d5, BoardSquare.e4);
 
     bitBoard.ResetLS1B();
     bitBoard.Print();

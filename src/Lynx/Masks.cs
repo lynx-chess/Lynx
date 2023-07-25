@@ -46,7 +46,6 @@ public static class Masks
     /// </summary>
     public static BitBoard[] IsolatedPawnMasks { get; } = new BitBoard[64];
 
-
     /// <summary>
     /// Passed pawn mask for square c4
     /// 8  0 1 1 1 0 0 0 0
@@ -155,7 +154,6 @@ public static class Masks
                         mask.SetBit(squareIndex);
                     }
                 }
-
                 else if (rankIndex != -1)
                 {
                     if (rank == rankIndex)

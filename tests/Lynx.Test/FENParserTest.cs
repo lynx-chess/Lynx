@@ -1,6 +1,5 @@
 ﻿using Lynx.Model;
 using NUnit.Framework;
-using System.Drawing;
 using CR = Lynx.Model.CastlingRights;
 
 namespace Lynx.Test;

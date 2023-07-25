@@ -3,7 +3,6 @@ using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
 using System.Threading.Channels;
-using System.Timers;
 
 namespace Lynx;
 
