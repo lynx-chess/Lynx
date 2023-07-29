@@ -300,7 +300,7 @@ public static class EvaluationConstants
 
     public const int SecondKillerMoveValue = 8_000;
 
-    public const int PVMoveScoreValue = 20_000;
+    public const int PVMoveScoreValue = 200_000;
 
     public const int TTMoveScoreValue = 19_000;
 
