@@ -92,7 +92,7 @@ public sealed partial class Engine
             {
                 _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
                 if (minDepth == maxDepth    // go depth n commands
-                    ||  depth - 1 > minDepth)
+                    || depth - 1 > minDepth)
                 {
                     _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
                 }

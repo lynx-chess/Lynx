@@ -165,8 +165,6 @@ public sealed partial class Engine
         {
             _logger.Info("Search evaluation result - eval: {0}, mate: {1}, depth: {2}, refutation: {3}",
                 searchResult.Evaluation, searchResult.Mate, searchResult.TargetDepth, string.Join(", ", searchResult.Moves.Select(m => m.ToMoveString())));
-
-            Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(searchResult)));
         }
 
         if (tbResult is not null)
@@ -182,11 +180,9 @@ public sealed partial class Engine
             }
         }
 
-        var result = tbResult ?? searchResult ?? throw new AssertException("Both search and online tb proving results are null. At least search one is always expected to have a value");
-
-        Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(result)));
-
-        return result;
+        return tbResult
+            ?? searchResult
+                ?? throw new AssertException("Both search and online tb proving results are null. At least search one is always expected to have a value");
     }
 
     internal double CalculateDecisionTime(int movesToGo, int millisecondsLeft, int millisecondsIncrement)
