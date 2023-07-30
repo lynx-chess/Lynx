@@ -300,9 +300,14 @@ public static class EvaluationConstants
 
     public const int SecondKillerMoveValue = 8_000;
 
-    public const int PVMoveScoreValue = 20_000;
+    public const int PVMoveScoreValue = 200_000;
 
-    public const int TTMoveScoreValue = 19_000;
+    public const int TTMoveScoreValue = 190_000;
+
+    /// <summary>
+    /// For MVVLVA
+    /// </summary>
+    public const int CaptureMoveBaseScoreValue = 100_000;
 
     /// <summary>
     /// Outside of the evaluation ranges (higher than any sensible evaluation, lower than <see cref="PositiveCheckmateDetectionLimit"/>)

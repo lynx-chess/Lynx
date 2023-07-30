@@ -25,8 +25,6 @@ namespace Lynx.Model;
 /// </summary>
 public static class MoveExtensions
 {
-    public const int CaptureBaseScore = 100_000;
-
     private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
 
     /// <summary>
@@ -177,7 +175,7 @@ public static class MoveExtensions
                 }
             }
 
-            score += CaptureBaseScore + EvaluationConstants.MostValueableVictimLeastValuableAttacker[sourcePiece, targetPiece];
+            score += EvaluationConstants.CaptureMoveBaseScoreValue + EvaluationConstants.MostValueableVictimLeastValuableAttacker[sourcePiece, targetPiece];
         }
         else
         {
