@@ -64,6 +64,6 @@ public class MoveScoreTest
         var allMoves = position.AllPossibleMoves().OrderByDescending(move => move.Score(in position)).ToList();
 
         Assert.AreEqual(moveWithHighestScore, allMoves[0].UCIString());
-        Assert.AreEqual(MoveExtensions.CaptureBaseScore + EvaluationConstants.MostValueableVictimLeastValuableAttacker[0, 0], allMoves[0].Score(in position));
+        Assert.AreEqual(EvaluationConstants.CaptureMoveBaseScoreValue + EvaluationConstants.MostValueableVictimLeastValuableAttacker[0, 0], allMoves[0].Score(in position));
     }
 }

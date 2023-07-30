@@ -299,6 +299,7 @@ public static class Constants
 
     public const string ComplexPositionFEN = "rq2k2r/ppp2pb1/2n1pnpp/1Q1p1b2/3P1B2/2N1PNP1/PPP2PBP/R3K2R w KQkq - 0 1";
 
+    // 'Search explosion'
     // https://www.chessprogramming.org/Lasker-Reichhelm_Position
     public const string TTPositionFEN = "8/k7/3p4/p2P1p2/P2P1P2/8/8/K7 w - - 0 1";
 
