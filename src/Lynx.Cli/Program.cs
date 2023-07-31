@@ -17,10 +17,8 @@ var config = new ConfigurationBuilder()
     .AddEnvironmentVariables()
     .Build();
 
-#pragma warning disable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code - Application code isn't trimmed, see https://github.com/dotnet/runtime/discussions/59230
 config.GetRequiredSection(nameof(EngineSettings)).Bind(Configuration.EngineSettings);
 config.GetRequiredSection(nameof(GeneralSettings)).Bind(Configuration.GeneralSettings);
-#pragma warning restore IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
 
 if (!Configuration.GeneralSettings.DisableLogging)
 {
