@@ -7,7 +7,7 @@ namespace Lynx;
 
 public static class Utils
 {
-    private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     /// <summary>
     /// Side.White -> 0

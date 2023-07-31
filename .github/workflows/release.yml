@@ -30,7 +30,7 @@ on:
         required: false
 
 env:
-  DOTNET_VERSION: 7.0.x
+  DOTNET_VERSION: 8.0.x
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
   DOTNET_TieredPGO: 1
   DOTNET_ReadyToRun: 0
