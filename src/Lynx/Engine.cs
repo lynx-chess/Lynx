@@ -75,7 +75,7 @@ public sealed partial class Engine
     {
         _searchCancellationTokenSource = new CancellationTokenSource();
         _absoluteSearchCancellationTokenSource = new CancellationTokenSource();
-        int minDepth = Configuration.EngineSettings.MinDepth;
+        int minDepth = Configuration.EngineSettings.MinDepth + 1;
         int? maxDepth = null;
         int? decisionTime = null;
 
@@ -98,14 +98,14 @@ public sealed partial class Engine
             {
                 decisionTime = Convert.ToInt32(CalculateDecisionTime(goCommand.MovesToGo, millisecondsLeft, millisecondsIncrement));
 
-                _logger.Info("Time to move: {0}s, min. {1} plies", 0.001 * decisionTime, minDepth - 1);
+                _logger.Info("Time to move: {0}s, min. {1} plies", 0.001 * decisionTime, minDepth);
                 _searchCancellationTokenSource.CancelAfter(decisionTime!.Value);
             }
             else if (goCommand.MoveTime > 0)
             {
                 minDepth = 0;
                 decisionTime = (int)(0.95 * goCommand.MoveTime);
-                _logger.Info("Time to move: {0}s, min. {1} plies", 0.001 * decisionTime, minDepth - 1);
+                _logger.Info("Time to move: {0}s, min. {1} plies", 0.001 * decisionTime, minDepth);
                 _searchCancellationTokenSource.CancelAfter(decisionTime.Value);
             }
             else if (goCommand.Depth > 0)
