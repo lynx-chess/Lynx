@@ -75,45 +75,43 @@ public sealed partial class Engine
     {
         _searchCancellationTokenSource = new CancellationTokenSource();
         _absoluteSearchCancellationTokenSource = new CancellationTokenSource();
-        int? millisecondsLeft;
-        int? millisecondsIncrement;
-        int minDepth = Configuration.EngineSettings.MinDepth;
+        int minDepth = Configuration.EngineSettings.MinDepth + 1;
         int? maxDepth = null;
         int? decisionTime = null;
 
-        if (Game.CurrentPosition.Side == Side.White)
-        {
-            millisecondsLeft = goCommand?.WhiteTime;
-            millisecondsIncrement = goCommand?.WhiteIncrement;
-        }
-        else
-        {
-            millisecondsLeft = goCommand?.BlackTime;
-            millisecondsIncrement = goCommand?.BlackIncrement;
-        }
-
         if (goCommand is not null)
         {
-            if (millisecondsLeft != 0)
+            int millisecondsLeft;
+            int millisecondsIncrement;
+            if (Game.CurrentPosition.Side == Side.White)
             {
-                decisionTime = Convert.ToInt32(CalculateDecisionTime(goCommand.MovesToGo, millisecondsLeft ?? 0, millisecondsIncrement ?? 0));
+                millisecondsLeft = goCommand.WhiteTime;
+                millisecondsIncrement = goCommand.WhiteIncrement;
+            }
+            else
+            {
+                millisecondsLeft = goCommand.BlackTime;
+                millisecondsIncrement = goCommand.BlackIncrement;
+            }
 
-                if (decisionTime > Configuration.EngineSettings.MinMoveTime)
-                {
-                    _logger.Info("Time to move: {0}s, min. {1} plies", 0.001 * decisionTime, minDepth);
-                    _searchCancellationTokenSource.CancelAfter(decisionTime.Value);
-                }
-                else // Ignore decisionTime and limit search to MinDepthWhenLessThanMinMoveTime plies
-                {
-                    _logger.Info("Depth limited to {0} plies due to time trouble (decision time: {1})", Configuration.EngineSettings.DepthWhenLessThanMinMoveTime, decisionTime);
-                    maxDepth = Configuration.EngineSettings.DepthWhenLessThanMinMoveTime;
-                }
+            if (millisecondsLeft > 0)
+            {
+                // Inspired by Alexandria: time overhead to avoid timing out in the engine-gui communication process
+                millisecondsLeft -= 50;
+
+                Math.Clamp(millisecondsLeft, 50, int.MaxValue); // Avoiding 0/negative values
+
+                // Suggested by Serdra (EP discord)
+                decisionTime = Convert.ToInt32(Math.Min(0.5 * millisecondsLeft, millisecondsLeft * 0.03333 + millisecondsIncrement));
+
+                _logger.Info("Time to move: {0}s", 0.001 * decisionTime);
+                _searchCancellationTokenSource.CancelAfter(decisionTime!.Value);
             }
             else if (goCommand.MoveTime > 0)
             {
                 minDepth = 0;
                 decisionTime = (int)(0.95 * goCommand.MoveTime);
-                _logger.Info("Time to move: {0}s, min. {1} plies", 0.001 * decisionTime, minDepth);
+                _logger.Info("Time to move: {0}s", 0.001 * decisionTime, minDepth);
                 _searchCancellationTokenSource.CancelAfter(decisionTime.Value);
             }
             else if (goCommand.Depth > 0)
