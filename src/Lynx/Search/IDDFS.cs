@@ -147,16 +147,23 @@ public sealed partial class Engine
 
                 Array.Copy(_killerMoves, _previousKillerMoves, _killerMoves.Length);
 
-            } while (stopSearchCondition(++depth, maxDepth, isMateDetected, _nodes, decisionTime, _stopWatch, _logger));
+            } while (stopSearchCondition(++depth, maxDepth, minDepth, isMateDetected, _nodes, decisionTime, _stopWatch, _logger));
         }
         catch (OperationCanceledException)
         {
             isCancelled = true;
             _logger.Info("Search cancellation requested after {0}ms (depth {1}, nodes {2}), best move will be returned", _stopWatch.ElapsedMilliseconds, depth, _nodes);
 
+            _logger.Info($"Incomplete PVTable: {string.Join(' ', _pVTable.TakeWhile(x => x != default).Select(m => m.ToEPDString()))}");
+            var lclBestMove = _pVTable[0];
             for (int i = 0; i < lastSearchResult?.Moves.Count; ++i)
             {
                 _pVTable[i] = lastSearchResult.Moves[i];
+            }
+            _logger.Info($"  complete PVTable: {string.Join(' ', _pVTable.TakeWhile(x => x != default).Select(m => m.ToEPDString()))}");
+            if (_pVTable[0] != lclBestMove && lclBestMove != default)
+            {
+                _logger.Info("@@@@@@@@@@@@@@@@@");
             }
         }
         catch (Exception e) when (e is not AssertException)
@@ -187,7 +194,7 @@ public sealed partial class Engine
 
         return finalSearchResult;
 
-        static bool stopSearchCondition(int depth, int? maxDepth, bool isMateDetected, int nodes, int? decisionTime, Stopwatch stopWatch, ILogger logger)
+        static bool stopSearchCondition(int depth, int? maxDepth, int minDepth, bool isMateDetected, int nodes, int? decisionTime, Stopwatch stopWatch, ILogger logger)
         {
             if (isMateDetected)
             {
@@ -208,7 +215,7 @@ public sealed partial class Engine
             var elapsedMilliseconds = stopWatch.ElapsedMilliseconds;
             var minTimeToConsiderStopSearching = Configuration.EngineSettings.MinElapsedTimeToConsiderStopSearching;
             var decisionTimePercentageToStopSearching = Configuration.EngineSettings.DecisionTimePercentageToStopSearching;
-            if (decisionTime is not null && elapsedMilliseconds > minTimeToConsiderStopSearching && elapsedMilliseconds > decisionTimePercentageToStopSearching * decisionTime)
+            if (depth > minDepth && decisionTime is not null && elapsedMilliseconds > minTimeToConsiderStopSearching && elapsedMilliseconds > decisionTimePercentageToStopSearching * decisionTime)
             {
                 logger.Info("Stopping at depth {0} (nodes {1}): {2} > {3} (elapsed time > [{4}, {5} * decision time])",
                     depth - 1, nodes, elapsedMilliseconds, Configuration.EngineSettings.DecisionTimePercentageToStopSearching * decisionTime, minTimeToConsiderStopSearching, decisionTimePercentageToStopSearching);

@@ -101,39 +101,41 @@ public sealed class EngineSettings
     #region No MovesToGo provided
 
     /// <summary>
-    /// Number of total moves to calculate decision time against
-    /// </summary>
-    public int TotalMovesWhenNoMovesToGoProvided { get; set; } = 100;
-
-    /// <summary>
-    /// Number of extra moves to calculate decision time against, when the number of moves exceeds <see cref="TotalMovesWhenNoMovesToGoProvided"/>
-    /// </summary>
-    public int FixedMovesLeftWhenNoMovesToGoProvidedAndOverTotalMovesWhenNoMovesToGoProvided { get; set; } = 20;
-
-    /// <summary>
     /// Min time to apply <see cref="FirstCoefficientWhenNoMovesToGoProvided"/>
     /// </summary>
     public int FirstTimeLimitWhenNoMovesToGoProvided { get; set; } = 120_000;
 
     /// <summary>
-    /// Coefficient applied to ensure more time is allocated to moves when there's over <see cref="FirstTimeLimitWhenNoMovesToGoProvided"/> ms on the clock
+    /// Max number of moves to apply <see cref="FirstCoefficientWhenNoMovesToGoProvided"/>
     /// </summary>
-    public int FirstCoefficientWhenNoMovesToGoProvided { get; set; } = 3;
+    public int FirstMoveLimitWhenNoMovesToGoProvided { get; set; } = 15;
 
     /// <summary>
-    /// Min time to apply <see cref="SecondCoefficientWhenNoMovesToGoProvided"/>
+    /// Coefficient applied to ensure more time is allocated to moves when there's over <see cref="FirstTimeLimitWhenNoMovesToGoProvided"/> ms on the clock
     /// </summary>
-    public int SecondTimeLimitWhenNoMovesToGoProvided { get; set; } = 30_000;
+    public double FirstCoefficientWhenNoMovesToGoProvided { get; set; } = 0.033;
+
+    /// <summary>
+    /// Max number of moves to apply <see cref="FirstCoefficientWhenNoMovesToGoProvided"/>
+    /// </summary>
+    public double SecondMoveLimitWhenNoMovesToGoProvided { get; set; } = 25;
 
     /// <summary>
     /// Coefficient applied to ensure more time is allocated to moves when there's over <see cref="SecondTimeLimitWhenNoMovesToGoProvided"/> ms on the clock
     /// </summary>
-    public int SecondCoefficientWhenNoMovesToGoProvided { get; set; } = 2;
+    public double SecondCoefficientWhenNoMovesToGoProvided { get; set; } = 0.05;
+
+    /// <summary>
+    /// Coefficient applied to when moves over <see cref="SecondMoveLimitWhenNoMovesToGoProvided"/> ms on the clock
+    /// </summary>
+    public double ThirdCoefficientWhenNoMovesToGoProvided { get; set; } = 0.04;
+
+    public double IncrementCoefficientToSpendPerMove { get; set; } = 0.75;
 
     #endregion
 
     /// <summary>
-    /// Min. time left in the clock if all decision time is used befire <see cref="CoefficientSecurityTime"/> is used over that decision time
+    /// Min. time left in the clock if all decision time is used before <see cref="CoefficientSecurityTime"/> is used over that decision time
     /// </summary>
     public int MinSecurityTime { get; set; } = 1_000;
 
@@ -142,14 +144,10 @@ public sealed class EngineSettings
     /// </summary>
     public double CoefficientSecurityTime { get; set; } = 0.9;
 
-    public int MinDepth { get; set; } = 4;
+    public int MinDepth { get; set; } = 2;
 
     private int _maxDepth = 64;
     public int MaxDepth { get => _maxDepth; set => _maxDepth = Math.Clamp(value, 1, Constants.AbsoluteMaxDepth); }
-
-    public int MinMoveTime { get; set; } = 1_000;
-
-    public int DepthWhenLessThanMinMoveTime { get; set; } = 4;
 
     public int MinElapsedTimeToConsiderStopSearching { get; set; } = 1_000;
 

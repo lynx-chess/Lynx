@@ -75,45 +75,37 @@ public sealed partial class Engine
     {
         _searchCancellationTokenSource = new CancellationTokenSource();
         _absoluteSearchCancellationTokenSource = new CancellationTokenSource();
-        int? millisecondsLeft;
-        int? millisecondsIncrement;
         int minDepth = Configuration.EngineSettings.MinDepth;
         int? maxDepth = null;
         int? decisionTime = null;
 
-        if (Game.CurrentPosition.Side == Side.White)
-        {
-            millisecondsLeft = goCommand?.WhiteTime;
-            millisecondsIncrement = goCommand?.WhiteIncrement;
-        }
-        else
-        {
-            millisecondsLeft = goCommand?.BlackTime;
-            millisecondsIncrement = goCommand?.BlackIncrement;
-        }
-
         if (goCommand is not null)
         {
-            if (millisecondsLeft != 0)
+            int millisecondsLeft;
+            int millisecondsIncrement;
+            if (Game.CurrentPosition.Side == Side.White)
             {
-                decisionTime = Convert.ToInt32(CalculateDecisionTime(goCommand.MovesToGo, millisecondsLeft ?? 0, millisecondsIncrement ?? 0));
+                millisecondsLeft = goCommand.WhiteTime;
+                millisecondsIncrement = goCommand.WhiteIncrement;
+            }
+            else
+            {
+                millisecondsLeft = goCommand.BlackTime;
+                millisecondsIncrement = goCommand.BlackIncrement;
+            }
 
-                if (decisionTime > Configuration.EngineSettings.MinMoveTime)
-                {
-                    _logger.Info("Time to move: {0}s, min. {1} plies", 0.001 * decisionTime, minDepth);
-                    _searchCancellationTokenSource.CancelAfter(decisionTime.Value);
-                }
-                else // Ignore decisionTime and limit search to MinDepthWhenLessThanMinMoveTime plies
-                {
-                    _logger.Info("Depth limited to {0} plies due to time trouble (decision time: {1})", Configuration.EngineSettings.DepthWhenLessThanMinMoveTime, decisionTime);
-                    maxDepth = Configuration.EngineSettings.DepthWhenLessThanMinMoveTime;
-                }
+            if (millisecondsLeft > 0)
+            {
+                decisionTime = Convert.ToInt32(CalculateDecisionTime(goCommand.MovesToGo, millisecondsLeft, millisecondsIncrement));
+
+                _logger.Info("Time to move: {0}s, min. {1} plies", 0.001 * decisionTime, minDepth - 1);
+                _searchCancellationTokenSource.CancelAfter(decisionTime!.Value);
             }
             else if (goCommand.MoveTime > 0)
             {
                 minDepth = 0;
                 decisionTime = (int)(0.95 * goCommand.MoveTime);
-                _logger.Info("Time to move: {0}s, min. {1} plies", 0.001 * decisionTime, minDepth);
+                _logger.Info("Time to move: {0}s, min. {1} plies", 0.001 * decisionTime, minDepth - 1);
                 _searchCancellationTokenSource.CancelAfter(decisionTime.Value);
             }
             else if (goCommand.Depth > 0)
@@ -187,33 +179,24 @@ public sealed partial class Engine
 
     internal double CalculateDecisionTime(int movesToGo, int millisecondsLeft, int millisecondsIncrement)
     {
-        double decisionTime;
-        millisecondsLeft -= millisecondsIncrement; // Since we're going to spend them, shouldn't take into account for our calculations
-        millisecondsLeft = Math.Clamp(millisecondsLeft, 0, int.MaxValue);
+        double decisionTime = millisecondsLeft;
+        //millisecondsLeft -= millisecondsIncrement; // Since we're going to spend them, shouldn't take into account for our calculations
+        //millisecondsLeft = Math.Clamp(millisecondsLeft, 0, int.MaxValue);
 
         if (movesToGo == default)
         {
-            int movesLeft = Configuration.EngineSettings.TotalMovesWhenNoMovesToGoProvided - (Game.MoveHistory.Count >> 1);
-
-            if (movesLeft <= 0)
+            if (Game.MoveHistory.Count < Configuration.EngineSettings.FirstMoveLimitWhenNoMovesToGoProvided)
             {
-                movesLeft = Configuration.EngineSettings.FixedMovesLeftWhenNoMovesToGoProvidedAndOverTotalMovesWhenNoMovesToGoProvided;
+                decisionTime *= Configuration.EngineSettings.FirstMoveLimitWhenNoMovesToGoProvided;
             }
-
-#pragma warning disable S2184 // Results of integer division should not be assigned to floating point variables
-            if (millisecondsLeft >= Configuration.EngineSettings.FirstTimeLimitWhenNoMovesToGoProvided)
+            else if (Game.MoveHistory.Count < Configuration.EngineSettings.SecondMoveLimitWhenNoMovesToGoProvided)
             {
-                decisionTime = Configuration.EngineSettings.FirstCoefficientWhenNoMovesToGoProvided * millisecondsLeft / movesLeft;
-            }
-            else if (millisecondsLeft >= Configuration.EngineSettings.SecondTimeLimitWhenNoMovesToGoProvided)
-            {
-                decisionTime = Configuration.EngineSettings.SecondCoefficientWhenNoMovesToGoProvided * millisecondsLeft / movesLeft;
+                decisionTime *= Configuration.EngineSettings.SecondCoefficientWhenNoMovesToGoProvided;
             }
             else
             {
-                decisionTime = millisecondsLeft / movesLeft;
+                decisionTime *= Configuration.EngineSettings.ThirdCoefficientWhenNoMovesToGoProvided;
             }
-#pragma warning restore S2184 // Results of integer division should not be assigned to floating point variables
         }
         else
         {
@@ -227,7 +210,9 @@ public sealed partial class Engine
             }
         }
 
-        decisionTime += millisecondsIncrement;
+        decisionTime += millisecondsIncrement * Configuration.EngineSettings.IncrementCoefficientToSpendPerMove;
+
+        decisionTime = Math.Min(millisecondsLeft >> 1, decisionTime);
 
         //if (millisecondsLeft > Configuration.Parameters.MinTimeToClamp)
         //{

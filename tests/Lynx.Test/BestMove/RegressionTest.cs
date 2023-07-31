@@ -201,10 +201,6 @@ public class RegressionTest : BaseTest
 
         var bestMove = engine.BestMove(new GoCommand($"go depth {Configuration.EngineSettings.MinDepth}"));
         Assert.NotZero(bestMove.Evaluation);
-
-        engine.AdjustPosition(positionCommand);
-        bestMove = engine.BestMove(new GoCommand($"go depth {Configuration.EngineSettings.DepthWhenLessThanMinMoveTime}"));
-        Assert.NotZero(bestMove.Evaluation);
     }
 
     [TestCase("position startpos moves" +

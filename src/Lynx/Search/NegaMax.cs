@@ -48,7 +48,7 @@ public sealed partial class Engine
         }
 
         // Before any time-consuming operations
-        if (ply > minDepth)
+        if (targetDepth > minDepth)
         {
             _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
         }
