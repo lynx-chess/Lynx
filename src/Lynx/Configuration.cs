@@ -149,9 +149,13 @@ public sealed class EngineSettings
     private int _maxDepth = 64;
     public int MaxDepth { get => _maxDepth; set => _maxDepth = Math.Clamp(value, 1, Constants.AbsoluteMaxDepth); }
 
-    public int MinElapsedTimeToConsiderStopSearching { get; set; } = 1_000;
+    //public int MinMoveTime { get; set; } = 1_000;
 
-    public double DecisionTimePercentageToStopSearching { get; set; } = 0.5;
+    //public int DepthWhenLessThanMinMoveTime { get; set; } = 4;
+
+    public int MinElapsedTimeToConsiderStopSearching { get; set; } = 0;
+
+    public double DecisionTimePercentageToStopSearching { get; set; } = 0.4;
 
     public int LMR_FullDepthMoves { get; set; } = 4;
 

@@ -96,10 +96,12 @@ public sealed partial class Engine
 
             if (millisecondsLeft > 0)
             {
+                // Inspired by Alexandria: time overhead to avoid timing out in the engine-gui communication process
                 millisecondsLeft -= 50;
-                Math.Clamp(millisecondsLeft, 50, int.MaxValue);
-                decisionTime = Convert.ToInt32(Math.Min(0.5 * millisecondsLeft, millisecondsLeft * 0.03333 + millisecondsIncrement));
-                //decisionTime = Convert.ToInt32(CalculateDecisionTime(goCommand.MovesToGo, millisecondsLeft, millisecondsIncrement));
+
+                Math.Clamp(millisecondsLeft, 50, int.MaxValue); // Avoiding 0/negative values
+
+                decisionTime = Convert.ToInt32(CalculateDecisionTime(goCommand.MovesToGo, millisecondsLeft, millisecondsIncrement));
 
                 _logger.Info("Time to move: {0}s", 0.001 * decisionTime);
                 _searchCancellationTokenSource.CancelAfter(decisionTime!.Value);
@@ -108,7 +110,7 @@ public sealed partial class Engine
             {
                 minDepth = 0;
                 decisionTime = (int)(0.95 * goCommand.MoveTime);
-                _logger.Info("Time to move: {0}s, min. {1} plies", 0.001 * decisionTime, minDepth);
+                _logger.Info("Time to move: {0}s", 0.001 * decisionTime, minDepth);
                 _searchCancellationTokenSource.CancelAfter(decisionTime.Value);
             }
             else if (goCommand.Depth > 0)

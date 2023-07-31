@@ -218,7 +218,7 @@ public sealed partial class Engine
             if (/*depth > minDepth &&*/ decisionTime is not null /*&& elapsedMilliseconds > minTimeToConsiderStopSearching */&& elapsedMilliseconds > decisionTimePercentageToStopSearching * decisionTime)
             {
                 logger.Info("Stopping at depth {0} (nodes {1}): {2} > {3} (elapsed time > [{4}, {5} * decision time])",
-                    depth - 1, nodes, elapsedMilliseconds, Configuration.EngineSettings.DecisionTimePercentageToStopSearching * decisionTime, minTimeToConsiderStopSearching, decisionTimePercentageToStopSearching);
+                    depth - 1, nodes, elapsedMilliseconds, decisionTimePercentageToStopSearching * decisionTime, minTimeToConsiderStopSearching, decisionTimePercentageToStopSearching);
                 return false;
             }
 
