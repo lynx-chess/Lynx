@@ -153,7 +153,7 @@ public sealed class EngineSettings
 
     public int MinElapsedTimeToConsiderStopSearching { get; set; } = 0;
 
-    public double DecisionTimePercentageToStopSearching { get; set; } = 0.4;
+    public double DecisionTimePercentageToStopSearching { get; set; } = 0.5;
 
     public int LMR_FullDepthMoves { get; set; } = 4;
 
