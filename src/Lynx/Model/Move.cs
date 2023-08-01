@@ -27,7 +27,7 @@ public static class MoveExtensions
 {
     public const int CaptureBaseScore = 100_000;
 
-    private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     /// <summary>
     /// 'Encode' constractor

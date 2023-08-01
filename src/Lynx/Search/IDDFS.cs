@@ -187,7 +187,7 @@ public sealed partial class Engine
 
         return finalSearchResult;
 
-        static bool stopSearchCondition(int depth, int? maxDepth, bool isMateDetected, int nodes, int? decisionTime, Stopwatch stopWatch, ILogger logger)
+        static bool stopSearchCondition(int depth, int? maxDepth, bool isMateDetected, int nodes, int? decisionTime, Stopwatch stopWatch, Logger logger)
         {
             if (isMateDetected)
             {

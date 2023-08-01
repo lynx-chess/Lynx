@@ -6,7 +6,7 @@ namespace Lynx.Cli;
 public sealed class Listener
 {
     private readonly Channel<string> _guiInputReader;
-    private readonly ILogger _logger;
+    private readonly Logger _logger;
 
     public Listener(Channel<string> guiInputReader)
     {

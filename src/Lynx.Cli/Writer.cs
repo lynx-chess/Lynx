@@ -6,7 +6,7 @@ namespace Lynx.Cli;
 public sealed class Writer
 {
     private readonly ChannelReader<string> _engineOutputReader;
-    private readonly ILogger _logger;
+    private readonly Logger _logger;
 
     public Writer(ChannelReader<string> engineOutputReader)
     {
