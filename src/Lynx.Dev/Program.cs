@@ -375,7 +375,7 @@ static void _22_Generate_Moves()
     position.Print();
 
     //position.OccupancyBitBoards[2] |= 0b11100111UL << 8 * 4;
-    var moves = MoveGenerator.GenerateAllMoves(in position);
+    var moves = MoveGenerator.GenerateAllMoves(position);
 
     foreach (var move in moves)
     {
@@ -386,7 +386,7 @@ static void _22_Generate_Moves()
     position.PieceBitBoards[0].Print();
     position.PieceBitBoards[6].Print();
     position.Print();
-    moves = MoveGenerator.GenerateAllMoves(in position);
+    moves = MoveGenerator.GenerateAllMoves(position);
 
     foreach (var move in moves)
     {
@@ -415,7 +415,7 @@ static void _26_Piece_Moves()
     var moves = MoveGenerator.GenerateKnightMoves(position).ToList();
     moves.ForEach(m => Console.WriteLine(m));
 
-    moves = MoveGenerator.GenerateAllMoves(in position).ToList();
+    moves = MoveGenerator.GenerateAllMoves(position).ToList();
     Console.WriteLine($"Expected 48, found: {moves.Count}");
     foreach (var move in moves)
     {
@@ -444,16 +444,16 @@ static void _28_Move_Encoding()
 static void _29_Move_List()
 {
     var position = new Position(TrickyPosition);
-    var moves = MoveGenerator.GenerateAllMoves(in position);
+    var moves = MoveGenerator.GenerateAllMoves(position);
     moves.PrintMoveList();
 
     position = new Position(TrickyPositionReversed);
-    moves = MoveGenerator.GenerateAllMoves(in position);
+    moves = MoveGenerator.GenerateAllMoves(position);
     moves.PrintMoveList();
 
     position = new Position(KillerPosition);
     position.Print();
-    moves = MoveGenerator.GenerateAllMoves(in position);
+    moves = MoveGenerator.GenerateAllMoves(position);
     moves.PrintMoveList();
 }
 
@@ -526,7 +526,7 @@ static void _42_Perft()
     {
         var sw = new Stopwatch();
         sw.Start();
-        var nodes = Perft.Results(in pos, depth);
+        var nodes = Perft.Results(pos, depth);
         sw.Stop();
 
         Console.WriteLine($"Depth {depth}\tNodes: {nodes}\tTime: {sw.ElapsedMilliseconds}ms");
@@ -549,7 +549,7 @@ static void _49_Rudimetary_Evaluation()
 {
     //var position = new Position(Constants.InitialPositionFEN);
 
-    //foreach (var move in MoveGenerator.GenerateAllMoves(in position))
+    //foreach (var move in MoveGenerator.GenerateAllMoves(position))
     //{
     //    var newBlackPosition = new Position(position, move);
     //    if (newBlackPosition.IsValid())
@@ -667,7 +667,7 @@ static void _54_ScoreMove()
     var engine = new Engine(Channel.CreateBounded<string>(new BoundedChannelOptions(100) { SingleReader = true, SingleWriter = false }));
     foreach (var move in position.AllCapturesMoves())
     {
-        Console.WriteLine($"{move} {engine.ScoreMove(move, in position, default, default)}");
+        Console.WriteLine($"{move} {engine.ScoreMove(move, position, default, default)}");
     }
 
     position = new Position(TrickyPosition);
@@ -675,7 +675,7 @@ static void _54_ScoreMove()
 
     foreach (var move in position.AllCapturesMoves())
     {
-        Console.WriteLine($"{move} {engine.ScoreMove(move, in position, default, default)}");
+        Console.WriteLine($"{move} {engine.ScoreMove(move, position, default, default)}");
     }
 }
 

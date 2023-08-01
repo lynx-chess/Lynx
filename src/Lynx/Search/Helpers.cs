@@ -57,7 +57,7 @@ public sealed partial class Engine
     private const int MaxValue = short.MaxValue;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private List<Move> SortMoves(IEnumerable<Move> moves, in Position currentPosition, int depth, Move bestMoveTTCandidate)
+    private List<Move> SortMoves(IEnumerable<Move> moves, Position currentPosition, int depth, Move bestMoveTTCandidate)
     {
         if (_isFollowingPV)
         {
@@ -76,10 +76,10 @@ public sealed partial class Engine
         var localPosition = currentPosition;
 
         var orderedMoves = moves
-            .OrderByDescending(move => ScoreMove(move, in localPosition, depth, true, bestMoveTTCandidate))
+            .OrderByDescending(move => ScoreMove(move, localPosition, depth, true, bestMoveTTCandidate))
             .ToList();
 
-        PrintMessage($"For position {currentPosition.FEN()}:\n{string.Join(", ", orderedMoves.Select(m => $"{m.ToEPDString()} ({ScoreMove(m, in localPosition, depth, true, bestMoveTTCandidate)})"))})");
+        PrintMessage($"For position {currentPosition.FEN()}:\n{string.Join(", ", orderedMoves.Select(m => $"{m.ToEPDString()} ({ScoreMove(m, localPosition, depth, true, bestMoveTTCandidate)})"))})");
 
         return orderedMoves;
     }
@@ -94,7 +94,7 @@ public sealed partial class Engine
     /// <param name="bestMoveTTCandidate"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMove(Move move, in Position position, int depth, bool useKillerAndPositionMoves, Move bestMoveTTCandidate = default)
+    internal int ScoreMove(Move move, Position position, int depth, bool useKillerAndPositionMoves, Move bestMoveTTCandidate = default)
     {
         if (_isScoringPV && move == _pVTable[depth])
         {
@@ -110,7 +110,7 @@ public sealed partial class Engine
 
         var promotedPiece = move.PromotedPiece();
 
-        //// Queen promotion
+        // Queen promotion
         if ((promotedPiece + 2) % 6 == 0)
         {
             return EvaluationConstants.CaptureMoveBaseScoreValue + EvaluationConstants.PromotionMoveScoreValue;
@@ -152,7 +152,6 @@ public sealed partial class Engine
                 return EvaluationConstants.FirstKillerMoveValue;
             }
 
-            // 2nd killer move
             if (_killerMoves[1, depth] == move)
             {
                 return EvaluationConstants.SecondKillerMoveValue;
@@ -225,7 +224,7 @@ public sealed partial class Engine
                 throw new AssertException(message);
             }
 
-            var newPosition = new Position(in position, move);
+            var newPosition = new Position(position, move);
 
             if (!newPosition.WasProduceByAValidMove())
             {
@@ -236,7 +235,7 @@ public sealed partial class Engine
     }
 
     [Conditional("DEBUG")]
-    private static void PrintPreMove(in Position position, int plies, Move move, bool isQuiescence = false)
+    private static void PrintPreMove(Position position, int plies, Move move, bool isQuiescence = false)
     {
         if (_logger.IsTraceEnabled)
         {

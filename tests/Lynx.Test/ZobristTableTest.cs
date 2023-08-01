@@ -89,10 +89,10 @@ public class ZobristTableTest
     public void CastleHash(string fen)
     {
         var positionWithoutCastlingRights = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b - - 0 1");
-        var positionWithoutCastlingRightsHash = ZobristTable.PositionHash(in positionWithoutCastlingRights);
+        var positionWithoutCastlingRightsHash = ZobristTable.PositionHash(positionWithoutCastlingRights);
 
         var position = new Position(fen);
-        var positionHash = ZobristTable.PositionHash(in position);
+        var positionHash = ZobristTable.PositionHash(position);
 
         var castleHash = ZobristTable.CastleHash(position.Castle);
 

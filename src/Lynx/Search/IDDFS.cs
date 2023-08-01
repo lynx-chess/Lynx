@@ -201,6 +201,7 @@ public sealed partial class Engine
             var elapsedMilliseconds = stopWatch.ElapsedMilliseconds;
             var minTimeToConsiderStopSearching = Configuration.EngineSettings.MinElapsedTimeToConsiderStopSearching;
             var decisionTimePercentageToStopSearching = Configuration.EngineSettings.DecisionTimePercentageToStopSearching;
+            Console.WriteLine($"%: {decisionTimePercentageToStopSearching}");
             if (decisionTime is not null && elapsedMilliseconds > minTimeToConsiderStopSearching && elapsedMilliseconds > decisionTimePercentageToStopSearching * decisionTime)
             {
                 logger.Info("Stopping at depth {0} (nodes {1}): {2} > {3} (elapsed time > [{4}, {5} * decision time])",

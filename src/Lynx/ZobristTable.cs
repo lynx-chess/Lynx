@@ -90,7 +90,7 @@ public static class ZobristTable
     /// <param name="position"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static long PositionHash(in Position position)
+    public static long PositionHash(Position position)
     {
         long positionHash = 0;
 
