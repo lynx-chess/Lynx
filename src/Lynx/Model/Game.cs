@@ -4,7 +4,7 @@ namespace Lynx.Model;
 
 public sealed class Game
 {
-    private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public Move[] MovePool { get; } = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
 
@@ -80,7 +80,7 @@ public sealed class Game
     {
         if (PositionHistory.Count != 0)
         {
-            CurrentPosition = PositionHistory.Last();
+            CurrentPosition = PositionHistory[^1];
             PositionHistory.Remove(CurrentPosition);
         }
 

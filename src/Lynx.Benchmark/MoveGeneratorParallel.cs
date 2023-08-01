@@ -102,7 +102,7 @@ public class MoveGeneratorParallel : BaseBenchmark
 
     public static class CustomMoveGenerator
     {
-        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         private const int TRUE = 1;
 

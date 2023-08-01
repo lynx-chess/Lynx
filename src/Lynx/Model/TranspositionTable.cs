@@ -61,7 +61,7 @@ public struct TranspositionTableElement
 
 public static class TranspositionTableExtensions
 {
-    private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public static int TranspositionTableArrayLength => Configuration.EngineSettings.TranspositionTableSize / Marshal.SizeOf(typeof(TranspositionTableElement));
 

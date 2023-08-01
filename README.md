@@ -9,7 +9,7 @@
 
 Lynx is a chess engine developed by [@eduherminio](https://github.com/eduherminio).
 
-It's written in C# (.NET 7).
+It's written in C# (.NET 8).
 
 You can find Lynx:
 
@@ -23,12 +23,13 @@ Lichess bot can be played directly, but a chess GUI that supports UCI protocol i
 
 | Lynx version                                                    | CCRL Blitz elo                                                                                                                         |
 |-----------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
-| [0.13.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.13.0) | [1736](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.13.0%2064-bit#Lynx_0_13_0_64-bit) |
-| [0.11.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.11.0) | [1603](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.11.0%2064-bit#Lynx_0_11_0_64-bit) |
-| [0.10.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.10.0) | [1558](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.10.0%2064-bit#Lynx_0_10_0_64-bit) |
-| [0.9.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.9.0) | [1575](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.9.0%2064-bit#Lynx_0_9_0_64-bit) |
-| [0.6.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.6.0) | [1407](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.6.0%2064-bit#Lynx_0_6_0_64-bit) |
-| [0.4.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.4.0) | [1361](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.4.0%2064-bit#Lynx_0_4_0_64-bit) |
+| [0.14.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.14.0) | [1804](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.14.0%2064-bit#Lynx_0_14_0_64-bit) |
+| [0.13.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.13.0) | [1762](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.13.0%2064-bit#Lynx_0_13_0_64-bit) |
+| [0.11.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.11.0) | [1618](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.11.0%2064-bit#Lynx_0_11_0_64-bit) |
+| [0.10.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.10.0) | [1573](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.10.0%2064-bit#Lynx_0_10_0_64-bit) |
+| [0.9.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.9.0) | [1591](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.9.0%2064-bit#Lynx_0_9_0_64-bit) |
+| [0.6.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.6.0) | [1419](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.6.0%2064-bit#Lynx_0_6_0_64-bit) |
+| [0.4.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.4.0) | [1367](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.4.0%2064-bit#Lynx_0_4_0_64-bit) |
 
 ## Building Lynx
 
@@ -38,7 +39,7 @@ However, you can also choose to build Lynx yourself.
 
 ### Requirements
 
-- [.NET 7 SDK](https://dotnet.microsoft.com/download/dotnet/7.0). You can find instructions about how to install it in your preferred OS/Distro either [here](https://docs.microsoft.com/en-us/dotnet/core/install/) or [here](https://github.com/dotnet/core/tree/main/release-notes/7.0).
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0). You can find instructions about how to install it in your preferred OS/Distro either [here](https://docs.microsoft.com/en-us/dotnet/core/install/) or [here](https://github.com/dotnet/core/tree/main/release-notes/8.0).
 
 If you're a Linux user and are new to .NET ecosystem, the conversation in [this issue](https://github.com/lynx-chess/Lynx/issues/33) may help.
 
