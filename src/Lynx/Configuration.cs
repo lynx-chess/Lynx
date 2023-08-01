@@ -144,7 +144,7 @@ public sealed class EngineSettings
 
     public int MinDepth { get; set; } = 4;
 
-    private int _maxDepth = 64;
+    private int _maxDepth = 128;
     public int MaxDepth { get => _maxDepth; set => _maxDepth = Math.Clamp(value, 1, Constants.AbsoluteMaxDepth); }
 
     //public int MinMoveTime { get; set; } = 1_000;
