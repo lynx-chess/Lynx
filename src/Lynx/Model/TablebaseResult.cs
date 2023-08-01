@@ -22,125 +22,36 @@ public enum TablebaseEvaluationCategory : byte
 
 public record class TablebaseEvaluation()
 {
-    public TablebaseEvaluationCategory Category
-    {
-        get;
-#if NET8_0_OR_GREATER
-        init;
-#else
-        set;
-#endif
-    }
+    public TablebaseEvaluationCategory Category { get; init; }
 
     [JsonPropertyName("dtm")]
-    public int? DistanceToMate
-    {
-        get;
-#if NET8_0_OR_GREATER
-        init;
-#else
-        set;
-#endif
-    }
+    public int? DistanceToMate { get; init; }
 
     [JsonPropertyName("dtz")]
-    public int? DistanceToZero
-    {
-        get;
-#if NET8_0_OR_GREATER
-        init;
-#else
-        set;
-#endif
-    }
-
+    public int? DistanceToZero { get; init; }
     [JsonPropertyName("insufficient_material")]
-    public bool IsInsufficientMaterial
-    {
-        get;
-#if NET8_0_OR_GREATER
-        init;
-#else
-        set;
-#endif
-    }
+    public bool IsInsufficientMaterial { get; init; }
 
     [JsonPropertyName("checkmate")]
-    public bool IsCheckmate
-    {
-        get;
-#if NET8_0_OR_GREATER
-        init;
-#else
-        set;
-#endif
-    }
+    public bool IsCheckmate { get; init; }
 
     [JsonPropertyName("stalemate")]
-    public bool IsStalemate
-    {
-        get;
-#if NET8_0_OR_GREATER
-        init;
-#else
-        set;
-#endif
-    }
+    public bool IsStalemate { get; init; }
 
-    public List<TablebaseEvalMove>? Moves
-    {
-        get;
-#if NET8_0_OR_GREATER
-        init;
-#else
-        set;
-#endif
-    }
+    public List<TablebaseEvalMove>? Moves { get; init; }
 }
 
 public record class TablebaseEvalMove()
 {
-    public string Uci
-    {
-        get;
-#if NET8_0_OR_GREATER
-        init;
-#else
-        set;
-#endif
-    } = string.Empty;
+    public string Uci { get; init; } = string.Empty;
 
-    public TablebaseEvaluationCategory Category
-    {
-        get;
-#if NET8_0_OR_GREATER
-        init;
-#else
-        set;
-#endif
-    }
+    public TablebaseEvaluationCategory Category { get; init; }
 
     [JsonPropertyName("dtm")]
-    public int? DistanceToMate
-    {
-        get;
-#if NET8_0_OR_GREATER
-        init;
-#else
-        set;
-#endif
-    }
+    public int? DistanceToMate { get; init; }
 
     [JsonPropertyName("dtz")]
-    public int? DistanceToZero
-    {
-        get;
-#if NET8_0_OR_GREATER
-        init;
-#else
-        set;
-#endif
-    }
+    public int? DistanceToZero { get; init; }
 }
 
 [JsonSourceGenerationOptions(

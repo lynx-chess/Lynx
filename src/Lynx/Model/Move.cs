@@ -25,7 +25,7 @@ namespace Lynx.Model;
 /// </summary>
 public static class MoveExtensions
 {
-    private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     /// <summary>
     /// 'Encode' constractor

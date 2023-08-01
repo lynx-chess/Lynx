@@ -6,7 +6,7 @@ namespace Lynx;
 
 public static class MoveGenerator
 {
-    private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     private const int TRUE = 1;
 

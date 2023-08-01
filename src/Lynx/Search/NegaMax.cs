@@ -48,10 +48,7 @@ public sealed partial class Engine
         }
 
         // Before any time-consuming operations
-        if (ply > minDepth)
-        {
-            _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
-        }
+        _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
 
         bool isInCheck = position.IsInCheck();
 

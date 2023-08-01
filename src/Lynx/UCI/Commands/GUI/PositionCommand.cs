@@ -29,7 +29,7 @@ public sealed partial class PositionCommand : GUIBaseCommand
     private static readonly Regex _fenRegex = FenRegex();
     private static readonly Regex _movesRegex = MovesRegex();
 
-    private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public static Game ParseGame(string positionCommand)
     {
