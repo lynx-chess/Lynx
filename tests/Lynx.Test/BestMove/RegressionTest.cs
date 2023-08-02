@@ -193,7 +193,8 @@ public class RegressionTest : BaseTest
         " f8g8 g4h3 g1f1 d5e3 f2e3 e6e3 g8g5 e3c3 f1e2 g3g2 e2f2 b5b4 g5g2 c3c2 f2e3 c2g2 e3d4 b4b3 d4d5 b3b2" +
         " d5e5 b2b1q e5f4 b1d3 f4e5 g2g6 e5f4 d3e2 f4f5 e2e6 f5f4 g6g4 f4f3 e6e8 f3f2 g4f4 f2g1 f4f6 g1h1 e8e6" +
         " h1g1 e6e5 g1h1 e5d5 h1g1 d5d4 g1h1 d4e4 h1g1 f6g6 g1f1 e4d3 f1e1 g6g1 e1f2 g1g2 f2e1 g2g6 e1f2 d3d2" +
-        " f2f3 d2e1 f3f4 e1e2 f4f5 e2e6 f5f4 g6g4 f4f3 e6e8 f3f2 g4f4 f2g1 f4f6 g1h1 e8e6 h1g1 e6e5 g1h1 e5d5")]
+        " f2f3 d2e1 f3f4 e1e2 f4f5 e2e6 f5f4 g6g4 f4f3 e6e8 f3f2 g4f4 f2g1 f4f6 g1h1 e8e6 h1g1 e6e5 g1h1 e5d5",
+        Ignore = "Now that we detect 2 move repetitions, this should fail")]
     public void FalseDrawnPositions(string positionCommand)
     {
         var engine = GetEngine();

@@ -43,7 +43,7 @@ public static class OnlineTablebaseProber
         TypeInfoResolver = SourceGenerationContext.Default
     };
 
-    public static async Task<(int MateScore, Move BestMove)> RootSearch(Position position, Dictionary<long, int> positionHistory, int halfMovesWithoutCaptureOrPawnMove, CancellationToken cancellationToken)
+    public static async Task<(int MateScore, Move BestMove)> RootSearch(Position position, HashSet<long> positionHistory, int halfMovesWithoutCaptureOrPawnMove, CancellationToken cancellationToken)
     {
         if (!Configuration.EngineSettings.UseOnlineTablebaseInRootPositions || position.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
         {
@@ -120,7 +120,6 @@ public static class OnlineTablebaseProber
                 if (bestMoveList is not null)
                 {
                     allPossibleMoves ??= position.AllPossibleMoves();
-                    var originalNumberOfTwoFoldRepetitionCount = Position.NumberOfTwoFoldRepetitions(positionHistory);
 
                     foreach (var move in bestMoveList)
                     {
@@ -133,44 +132,21 @@ public static class OnlineTablebaseProber
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
-                        var repetitions = Utils.UpdatePositionHistory(in newPosition, positionHistory);
+                        bool isFiftyMovesRepetition = Game.Is50MovesRepetition(halfMovesWithoutCaptureOrPawnMove);
+                        halfMovesWithoutCaptureOrPawnMove = oldValue;
 
-                        // If a repetition already exists, we can't rely on two fold repetition detection,
-                        // so we check if it adds any extra repetitions and initially discard it if that's the case
-                        var numberOfTwoFoldRepetitionCount = Position.NumberOfTwoFoldRepetitions(positionHistory);
-                        if (numberOfTwoFoldRepetitionCount == originalNumberOfTwoFoldRepetitionCount && !Position.Is50MovesRepetition(halfMovesWithoutCaptureOrPawnMove))        // Attacking: any move that draws is discarded
+                        if (!Game.IsThreefoldRepetition(positionHistory, newPosition) && !isFiftyMovesRepetition) // Attacking: any move that draws is discarded
                         {
                             bestMove = move;
                             break;
                         }
-
-                        halfMovesWithoutCaptureOrPawnMove = oldValue;
-                        Utils.RevertPositionHistory(in newPosition, positionHistory, repetitions);
                     }
 
                     if (bestMove is null)
                     {
-                        // Since there are no moves that don't cause an extra 'two-fold' repetition, let's grab one that doesn't cause a three-fold one, hoping that the rival can't complete it
-                        foreach (var move in bestMoveList)
-                        {
-                            MoveExtensions.TryParseFromUCIString(move!.Uci, allPossibleMoves, out var moveCandidate);
-                            var newPosition = new Position(in position, moveCandidate!.Value);
-                            var repetitions = Utils.UpdatePositionHistory(in newPosition, positionHistory);
-
-                            if (!Position.IsThreefoldRepetition(positionHistory))
-                            {
-                                Utils.RevertPositionHistory(in newPosition, positionHistory, repetitions);
-                                bestMove = move;
-                                break;
-                            }
-                            Utils.RevertPositionHistory(in newPosition, positionHistory, repetitions);
-                        }
-                        if (bestMove is null)
-                        {
-                            _logger.Info("Can't find a path to win in position {0} due to repetitions via all the possible candidate moves :O", fen);
-                            mate = 0;
-                            bestMove = bestMoveList.FirstOrDefault();
-                        }
+                        _logger.Info("Can't find a safe path to win in position {0} due to potential repetitions via all the possible candidate moves :O", fen);
+                        mate = 0;
+                        bestMove = bestMoveList.FirstOrDefault();
                     }
                 }
 
@@ -214,47 +190,24 @@ public static class OnlineTablebaseProber
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
-                        var repetitions = Utils.UpdatePositionHistory(in newPosition, positionHistory);
+                        bool isFiftyMovesRepetition = Game.Is50MovesRepetition(halfMovesWithoutCaptureOrPawnMove);
+                        halfMovesWithoutCaptureOrPawnMove = oldValue;
 
-                        if (Position.IsThreefoldRepetition(positionHistory) || Position.Is50MovesRepetition(halfMovesWithoutCaptureOrPawnMove))     // Defending: any possible move that draws is good
+                        if (Game.IsThreefoldRepetition(positionHistory, newPosition) || isFiftyMovesRepetition)     // Defending: any possible move that draws is good
                         {
                             bestMove = move;
                             break;
                         }
-
-                        halfMovesWithoutCaptureOrPawnMove = oldValue;
-                        Utils.RevertPositionHistory(in newPosition, positionHistory, repetitions);
                     }
 
-                    if (bestMove is not null)
+                    if (bestMove is null)
                     {
-                        _logger.Info("There's a miraculous move ({0}) that saves {1} due to repetition :O", bestMove.Uci, fen);
-                        mate = 0;
+                        bestMove = bestMoveList.FirstOrDefault();
                     }
                     else
                     {
-                        // Since there are no moves that cause a 'three-fold' repetition, let's grab one that causes an extra two-fold one, hoping that the rival completes it or allows us to do so next move
-                        var originalNumberOfTwoFoldRepetitionCount = Position.NumberOfTwoFoldRepetitions(positionHistory);
-
-                        foreach (var move in bestMoveList)
-                        {
-                            MoveExtensions.TryParseFromUCIString(move!.Uci, allPossibleMoves, out var moveCandidate);
-                            var newPosition = new Position(in position, moveCandidate!.Value);
-                            var repetitions = Utils.UpdatePositionHistory(in newPosition, positionHistory);
-
-                            // If a repetition already exists, we can't rely on two fold repetition detection,
-                            // so we check if it adds any extra repetitions
-                            var numberOfTwoFoldRepetitionCount = Position.NumberOfTwoFoldRepetitions(positionHistory);
-                            if (numberOfTwoFoldRepetitionCount > originalNumberOfTwoFoldRepetitionCount)
-                            {
-                                Utils.RevertPositionHistory(in newPosition, positionHistory, repetitions);
-                                bestMove = move;
-                                break;
-                            }
-                            Utils.RevertPositionHistory(in newPosition, positionHistory, repetitions);
-                        }
-
-                        bestMove ??= bestMoveList.FirstOrDefault();
+                        _logger.Info("There's a potentially miraculous move ({0}) that saves {1} due to repetition :O", bestMove.Uci, fen);
+                        mate = 0;
                     }
                 }
 
@@ -285,7 +238,6 @@ public static class OnlineTablebaseProber
                 if (bestMoveList is not null)
                 {
                     allPossibleMoves ??= position.AllPossibleMoves();
-                    var originalNumberOfTwoFoldRepetitionCount = Position.NumberOfTwoFoldRepetitions(positionHistory);
 
                     foreach (var move in bestMoveList)
                     {
@@ -298,44 +250,21 @@ public static class OnlineTablebaseProber
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
-                        var repetitions = Utils.UpdatePositionHistory(in newPosition, positionHistory);
+                        bool isFiftyMovesRepetition = Game.Is50MovesRepetition(halfMovesWithoutCaptureOrPawnMove);
+                        halfMovesWithoutCaptureOrPawnMove = oldValue;
 
-                        // If a repetition already exists, we can't rely on two fold repetition detection,
-                        // so we check if it adds any extra repetitions and initially discard it if that's the case
-                        var numberOfTwoFoldRepetitionCount = Position.NumberOfTwoFoldRepetitions(positionHistory);
-                        if (numberOfTwoFoldRepetitionCount == originalNumberOfTwoFoldRepetitionCount && !Position.Is50MovesRepetition(halfMovesWithoutCaptureOrPawnMove))    // Attacking: any move that draws is discarded
+                        if (!Game.IsThreefoldRepetition(positionHistory, newPosition) && !isFiftyMovesRepetition) // Attacking: any move that draws is discarded
                         {
                             bestMove = move;
                             break;
                         }
-
-                        halfMovesWithoutCaptureOrPawnMove = oldValue;
-                        Utils.RevertPositionHistory(in newPosition, positionHistory, repetitions);
                     }
 
                     if (bestMove is null)
                     {
-                        // Since there are no moves that don't cause an extra 'two-fold' repetition, let's grab one that doesn't cause a three-fold one, hoping that the rival can't complete it
-                        foreach (var move in bestMoveList)
-                        {
-                            MoveExtensions.TryParseFromUCIString(move!.Uci, allPossibleMoves, out var moveCandidate);
-                            var newPosition = new Position(in position, moveCandidate!.Value);
-                            var repetitions = Utils.UpdatePositionHistory(in newPosition, positionHistory);
-
-                            if (!Position.IsThreefoldRepetition(positionHistory))
-                            {
-                                Utils.RevertPositionHistory(in newPosition, positionHistory, repetitions);
-                                bestMove = move;
-                                break;
-                            }
-                            Utils.RevertPositionHistory(in newPosition, positionHistory, repetitions);
-                        }
-                        if (bestMove is null)
-                        {
-                            _logger.Info("All moves draw earlier than the expected cursed win due to repetitions :O");
-                            mate = 0;
-                            bestMove = bestMoveList.FirstOrDefault();
-                        }
+                        _logger.Info("All moves potentially draw earlier than the expected cursed win due to repetitions :O");
+                        mate = 0;
+                        bestMove = bestMoveList.FirstOrDefault();
                     }
                 }
 
@@ -377,47 +306,24 @@ public static class OnlineTablebaseProber
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
-                        var repetitions = Utils.UpdatePositionHistory(in newPosition, positionHistory);
+                        bool isFiftyMovesRepetition = Game.Is50MovesRepetition(halfMovesWithoutCaptureOrPawnMove);
+                        halfMovesWithoutCaptureOrPawnMove = oldValue;
 
-                        if (Position.IsThreefoldRepetition(positionHistory) || Position.Is50MovesRepetition(halfMovesWithoutCaptureOrPawnMove)) // Defending: any possible move that draws is good
+                        if (Game.IsThreefoldRepetition(positionHistory, newPosition) || isFiftyMovesRepetition)     // Defending: any possible move that draws is good
                         {
                             bestMove = move;
                             break;
                         }
-
-                        halfMovesWithoutCaptureOrPawnMove = oldValue;
-                        Utils.RevertPositionHistory(in newPosition, positionHistory, repetitions);
                     }
 
-                    if (bestMove is not null)
+                    if (bestMove is null)
                     {
-                        _logger.Info("Move {0} draws the game due to repetition earlier than the expected blessed loss in {1} position :O", bestMove.Uci, fen);
-                        mate = 0;
+                        bestMove = bestMoveList.FirstOrDefault();
                     }
                     else
                     {
-                        // Since there are no moves that cause a 'three-fold' repetition, let's grab one that causes a two-fold one, hoping that the rival completes it or allows us to do so next move
-                        var originalNumberOfTwoFoldRepetitionCount = Position.NumberOfTwoFoldRepetitions(positionHistory);
-
-                        foreach (var move in bestMoveList)
-                        {
-                            MoveExtensions.TryParseFromUCIString(move!.Uci, allPossibleMoves, out var moveCandidate);
-                            var newPosition = new Position(in position, moveCandidate!.Value);
-                            var repetitions = Utils.UpdatePositionHistory(in newPosition, positionHistory);
-
-                            // If a repetition already exists, we can't rely on two fold repetition detection,
-                            // so we check if it adds any extra repetitions
-                            var numberOfTwoFoldRepetitionCount = Position.NumberOfTwoFoldRepetitions(positionHistory);
-                            if (numberOfTwoFoldRepetitionCount > originalNumberOfTwoFoldRepetitionCount)
-                            {
-                                Utils.RevertPositionHistory(in newPosition, positionHistory, repetitions);
-                                bestMove = move;
-                                break;
-                            }
-                            Utils.RevertPositionHistory(in newPosition, positionHistory, repetitions);
-                        }
-
-                        bestMove ??= bestMoveList.FirstOrDefault();
+                        _logger.Info("Move {0} potentially draws the game due to repetition earlier than the expected blessed loss in {1} position :O", bestMove.Uci, fen);
+                        mate = 0;
                     }
                 }
 

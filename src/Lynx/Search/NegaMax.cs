@@ -27,11 +27,6 @@ public sealed partial class Engine
         _maxDepthReached[ply] = ply;
         _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
 
-        if (Position.IsThreefoldRepetition(Game.PositionHashHistory) || Position.Is50MovesRepetition(_halfMovesWithoutCaptureOrPawnMove))
-        {
-            return 0;
-        }
-
         Move ttBestMove = default;
 
         bool isPvNode = beta - alpha == 1;
@@ -78,7 +73,7 @@ public sealed partial class Engine
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
             _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
-            return position.StaticEvaluation(_halfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
+            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
         }
 
         var pvIndex = PVTable.Indexes[ply];
@@ -97,11 +92,7 @@ public sealed partial class Engine
         {
             var newPosition = new Position(in position, nullMove: true);
 
-            var repetitions = Utils.UpdatePositionHistory(in newPosition, Game.PositionHashHistory);
-
             var evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1 + Configuration.EngineSettings.NullMovePruning_R, -beta, -beta + 1, isVerifyingNullMoveCutOff, ancestorWasNullMove: true);
-
-            Utils.RevertPositionHistory(in newPosition, Game.PositionHashHistory, repetitions);
 
             if (evaluation >= beta) // Fail high
             {
@@ -141,12 +132,16 @@ public sealed partial class Engine
             PrintPreMove(in position, ply, move);
 
             // Before making a move
-            var oldValue = _halfMovesWithoutCaptureOrPawnMove;
-            _halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, _halfMovesWithoutCaptureOrPawnMove);
-            var repetitions = Utils.UpdatePositionHistory(in newPosition, Game.PositionHashHistory);
+            var oldValue = Game.HalfMovesWithoutCaptureOrPawnMove;
+            Game.HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, Game.HalfMovesWithoutCaptureOrPawnMove);
+            var isThreFoldRepetition = !Game.PositionHashHistory.Add(newPosition.UniqueIdentifier);
 
             int evaluation;
-            if (movesSearched == 0)
+            if (isThreFoldRepetition || Game.Is50MovesRepetition())
+            {
+                evaluation = 0;
+            }
+            else if (movesSearched == 0)
             {
                 evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
             }
@@ -196,8 +191,11 @@ public sealed partial class Engine
             }
 
             // After making a move
-            _halfMovesWithoutCaptureOrPawnMove = oldValue;
-            Utils.RevertPositionHistory(in newPosition, Game.PositionHashHistory, repetitions);
+            Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
+            if (!isThreFoldRepetition)
+            {
+                Game.PositionHashHistory.Remove(newPosition.UniqueIdentifier);
+            }
 
             PrintMove(ply, move, evaluation);
 
@@ -280,14 +278,9 @@ public sealed partial class Engine
         _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
         //_searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
 
-        if (Position.IsThreefoldRepetition(Game.PositionHashHistory) || Position.Is50MovesRepetition(_halfMovesWithoutCaptureOrPawnMove))
-        {
-            return 0;
-        }
-
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
-            return position.StaticEvaluation(_halfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
+            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
         }
 
         ++_nodes;
@@ -297,7 +290,7 @@ public sealed partial class Engine
         var nextPvIndex = PVTable.Indexes[ply + 1];
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
-        var staticEvaluation = position.StaticEvaluation(_halfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
+        var staticEvaluation = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
 
         // Fail-hard beta-cutoff (updating alpha after this check)
         if (staticEvaluation >= beta)
@@ -334,14 +327,23 @@ public sealed partial class Engine
 
             PrintPreMove(in position, ply, move, isQuiescence: true);
 
-            var oldValue = _halfMovesWithoutCaptureOrPawnMove;
-            _halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, _halfMovesWithoutCaptureOrPawnMove);
-            var repetitions = Utils.UpdatePositionHistory(in newPosition, Game.PositionHashHistory);
+            // Before making a move
+            var oldValue = Game.HalfMovesWithoutCaptureOrPawnMove;
+            Game.HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, Game.HalfMovesWithoutCaptureOrPawnMove);
+            var isNotThreFoldRepetition = Game.PositionHashHistory.Add(newPosition.UniqueIdentifier);
 
-            var evaluation = -QuiescenceSearch(in newPosition, ply + 1, -beta, -alpha);
+            int evaluation = 0;
+            if (isNotThreFoldRepetition && !Game.Is50MovesRepetition())
+            {
+                evaluation = -QuiescenceSearch(in newPosition, ply + 1, -beta, -alpha);
+            }
 
-            _halfMovesWithoutCaptureOrPawnMove = oldValue;
-            Utils.RevertPositionHistory(in newPosition, Game.PositionHashHistory, repetitions);
+            // After making a move
+            Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
+            if (isNotThreFoldRepetition)
+            {
+                Game.PositionHashHistory.Remove(newPosition.UniqueIdentifier);
+            }
 
             PrintMove(ply, move, evaluation);
 

@@ -1,4 +1,5 @@
 ﻿using NLog;
+using System.Runtime.CompilerServices;
 
 namespace Lynx.Model;
 
@@ -10,9 +11,9 @@ public sealed class Game
 
     public List<Move> MoveHistory { get; }
     public List<Position> PositionHistory { get; }
-    public Dictionary<long, int> PositionHashHistory { get; }
+    public HashSet<long> PositionHashHistory { get; }
 
-    public int HalfMovesWithoutCaptureOrPawnMove { get; private set; }
+    public int HalfMovesWithoutCaptureOrPawnMove { get; set; }
 
     public Position CurrentPosition { get; private set; }
 
@@ -27,7 +28,7 @@ public sealed class Game
 
         MoveHistory = new(150);
         PositionHistory = new(150);
-        PositionHashHistory = new() { [CurrentPosition.UniqueIdentifier] = 1 };
+        PositionHashHistory = new(150) { CurrentPosition.UniqueIdentifier };
 
         HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
     }
@@ -38,7 +39,7 @@ public sealed class Game
 
         MoveHistory = new(150);
         PositionHistory = new(150);
-        PositionHashHistory = new() { [position.UniqueIdentifier] = 1 };
+        PositionHashHistory = new(150) { position.UniqueIdentifier };
     }
 
     public Game(string fen, List<string> movesUCIString) : this(fen)
@@ -57,6 +58,29 @@ public sealed class Game
         }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsThreefoldRepetition(Position position) => PositionHashHistory.Contains(position.UniqueIdentifier);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool Is50MovesRepetition() => HalfMovesWithoutCaptureOrPawnMove >= 100;
+
+    /// <summary>
+    /// To be used in online tb proving only, with a copy of <see cref="PositionHashHistory"/>
+    /// </summary>
+    /// <param name="positionHashHistory"></param>
+    /// <param name="position"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsThreefoldRepetition(HashSet<long> positionHashHistory, Position position) => positionHashHistory.Contains(position.UniqueIdentifier);
+
+    /// <summary>
+    /// To be used in online tb proving only, with a copy of <see cref="HalfMovesWithoutCaptureOrPawnMove"/>
+    /// </summary>
+    /// <param name="halfMovesWithoutCaptureOrPawnMove"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool Is50MovesRepetition(int halfMovesWithoutCaptureOrPawnMove) => halfMovesWithoutCaptureOrPawnMove >= 100;
+
     public bool MakeMove(Move moveToPlay)
     {
         PositionHistory.Add(CurrentPosition);
@@ -69,7 +93,7 @@ public sealed class Game
             return false;
         }
 
-        Utils.UpdatePositionHistory(CurrentPosition, PositionHashHistory);
+        PositionHashHistory.Add(CurrentPosition.UniqueIdentifier);
 
         HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveToPlay, HalfMovesWithoutCaptureOrPawnMove);
 
