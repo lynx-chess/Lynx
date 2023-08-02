@@ -27,6 +27,10 @@ public sealed partial class Engine
         _maxDepthReached[ply] = ply;
         _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
 
+        var pvIndex = PVTable.Indexes[ply];
+        var nextPvIndex = PVTable.Indexes[ply + 1];
+        _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
+
         if (Position.IsThreefoldRepetition(Game.PositionHashHistory) || Position.Is50MovesRepetition(_halfMovesWithoutCaptureOrPawnMove))
         {
             return 0;
@@ -80,10 +84,6 @@ public sealed partial class Engine
             _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
             return position.StaticEvaluation(_halfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
         }
-
-        var pvIndex = PVTable.Indexes[ply];
-        var nextPvIndex = PVTable.Indexes[ply + 1];
-        _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
         ++_nodes;
 
