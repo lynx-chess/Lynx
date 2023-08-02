@@ -23,11 +23,6 @@ public sealed partial class Engine
     private SearchResult? _previousSearchResult;
     private readonly int[,] _previousKillerMoves = new int[2, Configuration.EngineSettings.MaxDepth];
 
-    /// <summary>
-    /// Copy of <see cref="Game.HalfMovesWithoutCaptureOrPawnMove"/>
-    /// </summary>
-    private int _halfMovesWithoutCaptureOrPawnMove;
-
     private readonly Move _defaultMove = default;
 
     public async Task<SearchResult?> IDDFS(int minDepth, int? maxDepth, int? decisionTime)
@@ -40,8 +35,6 @@ public sealed partial class Engine
 
         Array.Clear(_pVTable);
         Array.Clear(_maxDepthReached);
-
-        _halfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
 
         int bestEvaluation = 0;
         int alpha = MinValue;
@@ -177,7 +170,7 @@ public sealed partial class Engine
         finalSearchResult.NodesPerSecond = Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * _stopWatch.ElapsedMilliseconds) + 1), 0, long.MaxValue));
         finalSearchResult.HashfullPermill = _transpositionTable.HashfullPermill();
 
-        if (isMateDetected && finalSearchResult.Mate + _halfMovesWithoutCaptureOrPawnMove < 96)
+        if (isMateDetected && finalSearchResult.Mate + Game.HalfMovesWithoutCaptureOrPawnMove < 96)
         {
             _logger.Info("Engine search found a short enough mate, cancelling online tb probing if still active");
             _searchCancellationTokenSource.Cancel();

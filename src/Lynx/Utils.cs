@@ -95,31 +95,6 @@ public static class Utils
         return (int)BoardSquare.a8 + (7 * 8 * side);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int UpdatePositionHistory(in Position newPosition, Dictionary<long, int> positionHistory)
-    {
-        var id = newPosition.UniqueIdentifier;
-
-        return positionHistory.TryAdd(id, 1)
-            ? 1
-            : ++positionHistory[id];
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void RevertPositionHistory(in Position newPosition, Dictionary<long, int> positionHistory, int repetitions)
-    {
-        var id = newPosition.UniqueIdentifier;
-
-        if (repetitions == 1)
-        {
-            positionHistory.Remove(id);
-        }
-        else
-        {
-            --positionHistory[id];
-        }
-    }
-
     /// <summary>
     /// Updates <paramref name="halfMovesWithoutCaptureOrPawnMove"/>
     /// </summary>

@@ -117,7 +117,7 @@ public sealed partial class Engine
             else if (goCommand.Depth > 0)
             {
                 minDepth = goCommand.Depth;
-                maxDepth = goCommand.Depth;
+                maxDepth = goCommand.Depth > Constants.AbsoluteMaxDepth ? Constants.AbsoluteMaxDepth : goCommand.Depth;
             }
             else if (goCommand.Infinite)
             {
@@ -150,8 +150,12 @@ public sealed partial class Engine
 
     private SearchResult SearchBestMove(int minDepth, int? maxDepth, int? decisionTime)
     {
+        // Local copy of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove so that it doesn't interfere with regular search
+        var currentHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
+
+
         var tasks = new Task<SearchResult?>[] {
-            ProbeOnlineTablebase(Game.CurrentPosition, new(Game.PositionHashHistory), _halfMovesWithoutCaptureOrPawnMove),
+            ProbeOnlineTablebase(Game.CurrentPosition, new(Game.PositionHashHistory), currentHalfMovesWithoutCaptureOrPawnMove),  // Other copies of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove (same reason)
             IDDFS(minDepth, maxDepth, decisionTime),
         };
 
@@ -170,7 +174,7 @@ public sealed partial class Engine
             _logger.Info("Online tb probing result - mate: {0}, moves: {1}",
                 tbResult.Mate, string.Join(", ", tbResult.Moves.Select(m => m.ToMoveString())));
 
-            if (searchResult?.Mate > 0 && searchResult.Mate <= tbResult.Mate && searchResult.Mate + _halfMovesWithoutCaptureOrPawnMove < 96)
+            if (searchResult?.Mate > 0 && searchResult.Mate <= tbResult.Mate && searchResult.Mate + currentHalfMovesWithoutCaptureOrPawnMove < 96)
             {
                 _logger.Info("Relying on search result mate line due to dtm match and low enough dtz");
                 ++searchResult.TargetDepth;
