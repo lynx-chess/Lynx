@@ -52,7 +52,7 @@ public sealed partial class Engine
         bool isMateDetected = false;
 
         if (Game.MoveHistory.Count >= 2
-            && _previousSearchResult?.Moves.Count >= 2
+            && _previousSearchResult?.Moves.Count > 2
             && _previousSearchResult.BestMove != default
             && Game.MoveHistory[^2] == _previousSearchResult.Moves[0]
             && Game.MoveHistory[^1] == _previousSearchResult.Moves[1])
