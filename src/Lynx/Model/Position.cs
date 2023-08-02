@@ -532,10 +532,10 @@ public readonly struct Position
         }
     }
 
-    public static int NumberOfTwoFoldRepetitions(Dictionary<long, int> positionHistory) => positionHistory.Values.Count(val => val >= 2);
+    public static int NumberOfTwoFoldRepetitions(Dictionary<long, int> positionHistory) => positionHistory.Count(pair => pair.Value >= 2);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsThreefoldRepetition(Dictionary<long, int> positionHistory) => positionHistory.Values.Any(val => val >= 3);
+    public static bool IsThreefoldRepetition(Dictionary<long, int> positionHistory) => positionHistory.Any(pair => pair.Value >= 3);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool Is50MovesRepetition(int movesWithoutCaptureOrPawnMove) => movesWithoutCaptureOrPawnMove >= 100;
