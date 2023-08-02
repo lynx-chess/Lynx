@@ -280,6 +280,10 @@ public sealed partial class Engine
         _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
         //_searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
 
+        var pvIndex = PVTable.Indexes[ply];
+        _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
+        var nextPvIndex = PVTable.Indexes[ply + 1];
+
         if (Position.IsThreefoldRepetition(Game.PositionHashHistory) || Position.Is50MovesRepetition(_halfMovesWithoutCaptureOrPawnMove))
         {
             return 0;
@@ -291,11 +295,7 @@ public sealed partial class Engine
         }
 
         ++_nodes;
-
         _maxDepthReached[ply] = ply;
-        var pvIndex = PVTable.Indexes[ply];
-        var nextPvIndex = PVTable.Indexes[ply + 1];
-        _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
         var staticEvaluation = position.StaticEvaluation(_halfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
 
