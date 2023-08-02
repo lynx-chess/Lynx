@@ -27,6 +27,10 @@ public sealed partial class Engine
         _maxDepthReached[ply] = ply;
         _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
 
+        var pvIndex = PVTable.Indexes[ply];
+        var nextPvIndex = PVTable.Indexes[ply + 1];
+        _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
+
         Move ttBestMove = default;
 
         bool isPvNode = beta - alpha == 1;
@@ -75,10 +79,6 @@ public sealed partial class Engine
             _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
             return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
         }
-
-        var pvIndex = PVTable.Indexes[ply];
-        var nextPvIndex = PVTable.Indexes[ply + 1];
-        _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
         ++_nodes;
 
@@ -278,17 +278,12 @@ public sealed partial class Engine
         _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
         //_searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
 
-        if (ply >= Configuration.EngineSettings.MaxDepth)
-        {
-            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
-        }
+        var pvIndex = PVTable.Indexes[ply];
+        _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
+        var nextPvIndex = PVTable.Indexes[ply + 1];
 
         ++_nodes;
-
         _maxDepthReached[ply] = ply;
-        var pvIndex = PVTable.Indexes[ply];
-        var nextPvIndex = PVTable.Indexes[ply + 1];
-        _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
         var staticEvaluation = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
 
