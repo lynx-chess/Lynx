@@ -112,7 +112,7 @@ public sealed partial class Engine
                 alpha = bestEvaluation - Configuration.EngineSettings.AspirationWindowAlpha;
                 beta = bestEvaluation + Configuration.EngineSettings.AspirationWindowBeta;
 
-                //PrintPvTable();
+                //PrintPvTable(depth: depth);
                 ValidatePVTable();
 
                 var pvMoves = _pVTable.TakeWhile(m => m != default).ToList();

@@ -140,6 +140,11 @@ public sealed partial class Engine
             if (isThreFoldRepetition || Game.Is50MovesRepetition())
             {
                 evaluation = 0;
+
+                // We don't need to evaluate further down to know it's a draw.
+                // Since we won't be evaluating further down, we need to clear the PV table because those moves there
+                // don't belong to this line and if this move were to beat alpha, they'd incorrectly copied to pv line.
+                Array.Clear(_pVTable, nextPvIndex, _pVTable.Length - nextPvIndex);
             }
             else if (movesSearched == 0)
             {
@@ -279,8 +284,8 @@ public sealed partial class Engine
         //_searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
 
         var pvIndex = PVTable.Indexes[ply];
-        _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
         var nextPvIndex = PVTable.Indexes[ply + 1];
+        _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
         ++_nodes;
         _maxDepthReached[ply] = ply;

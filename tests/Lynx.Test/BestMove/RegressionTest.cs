@@ -229,6 +229,47 @@ public class RegressionTest : BaseTest
         Assert.NotZero(bestMove.Evaluation);
     }
 
+    // 8/2Q4p/4pppk/4P3/8/7P/q4PK1/1q6 w - - 0 1 - || PV Qc7 Kh6 e5 b1=Q Qxb1 Qxb1 exf6, with b1=Q as the first invalid move there
+    [TestCase("position startpos moves d2d4 g8f6 c2c4 e7e6 g1f3 d7d5 b1c3 f8e7 c1f4 e8g8" +
+        " e2e3 c7c5 d4c5 e7c5 a2a3 a7a6 d1d2 d5c4 f1c4 b7b5 c4d3 c8b7 b2b4 b7f3 b4c5 f3g2" +
+        " h1g1 g2f3 g1g3 f3c6 f4h6 g7g6 h6f8 d8f8 a3a4 b5b4 c3a2 b4b3 a2c1 f8c5 c1b3 c5d5" +
+        " b3a5 d5h1 d3f1 c6d5 d2c3 b8d7 c3c7 h1e4 f1c4 e4c2 a1a2 c2c1 e1e2 d7e5 c7e5 d5c4" +
+        " a5c4 c1c4 e2f3 c4a2 e5f6 a2a4 f3g2 a8c8 g3f3 a4d7 f6e5 d7b5 e5d6 a6a5 d6e7 c8f8" +
+        " e7d6 a5a4 e3e4 b5c4 f3e3 f8c8 h2h3 c4b5 e3f3 b5g5 f3g3 g5a5 g3d3 a5g5 d3g3 g5b5" +
+        " g3f3 b5a5 f3d3 a5a8 d6b4 c8b8 b4c4 a4a3 d3d2 b8b2 d2b2 a3b2 c4b4 a8a2 b4b8 g8g7" +
+        " b8e5 g7g8 e5b8 g8g7 b8e5 f7f6 e5c7 g7g8 c7b8 g8f7 b8c7 f7g8 c7b8 g8g7")]
+    public void InvalidPV(string positionCommand)
+    {
+        var engine = GetEngine();
+        engine.AdjustPosition(positionCommand);
+
+        var bestMove = engine.BestMove(new GoCommand($"go depth {5}"));
+        Assert.Zero(bestMove.Evaluation);
+        Assert.AreEqual(1, bestMove.Moves.Count);
+        Assert.AreEqual("b8c7", bestMove.BestMove.UCIString());
+    }
+
+    // pv h2h1q a5a6 d5c4 a6a7 c4b4 c5c6 h1g1 b6a6, playing h2h1q again
+    [TestCase("position startpos moves e2e4 c7c6 d2d4 d7d5 e4e5 c8f5 g1f3 e7e6 f1e2 c6c5 c1e3" +
+        " c5d4 f3d4 g8e7 b1c3 f5g6 h2h4 h7h5 e2b5 b8d7 e3f4 a7a6 b5d3 g6d3 d1d3 e7g6 d4e6 g6f4" +
+        " e6f4 d7e5 d3e2 d8d6 c3d5 g7g6 e1c1 f8h6 h1e1 f7f6 d5f6 d6f6 e2e5 f6e5 e1e5 e8f8 g2g3" +
+        " a8e8 e5e3 h6f4 g3f4 h8h7 d1d6 h7f7 e3e8 f8e8 d6g6 f7f4 g6g8 e8f7 g8b8 b7b5 b8b6 f4a4" +
+        " f2f3 a4h4 b6a6 h4h1 c1d2 h1h2 d2c3 h2f2 b2b3 h5h4 a6h6 f2f3 c3b4 f3f4 b4b5 f7g7 h6h5" +
+        " g7f6 c2c4 f4f5 h5f5 f6f5 c4c5 f5e6 a2a4 h4h3 b5b6 h3h2 b3b4 h2h1q a4a5")]
+
+    public void InvalidPV2(string positionCommand)
+    {
+        var engine = GetEngine();
+        engine.AdjustPosition(positionCommand[..^10]);
+
+        var bestMove = engine.BestMove(new GoCommand($"go depth {7}"));
+        Assert.AreEqual("h2h1q", bestMove.BestMove.UCIString());
+
+        engine.AdjustPosition(positionCommand);
+        bestMove = engine.BestMove(new GoCommand($"go depth {7}"));
+        Assert.AreNotEqual("h2h1q", bestMove.BestMove.UCIString());
+    }
+
     [Explicit]
     [Category(Categories.LongRunning)]
     [TestCase(Constants.KillerTestPositionFEN)]
