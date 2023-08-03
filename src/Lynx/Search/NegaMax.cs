@@ -134,12 +134,17 @@ public sealed partial class Engine
             // Before making a move
             var oldValue = Game.HalfMovesWithoutCaptureOrPawnMove;
             Game.HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, Game.HalfMovesWithoutCaptureOrPawnMove);
-            var isThreFoldRepetition = !Game.PositionHashHistory.Add(newPosition.UniqueIdentifier);
+            var isThreeFoldRepetition = !Game.PositionHashHistory.Add(newPosition.UniqueIdentifier);
 
             int evaluation;
-            if (isThreFoldRepetition || Game.Is50MovesRepetition())
+            if (isThreeFoldRepetition || Game.Is50MovesRepetition())
             {
                 evaluation = 0;
+
+                // We don't need to evaluate further down to know it's a draw.
+                // Since we won't be evaluating further down, we need to clear the PV table because those moves there
+                // don't belong to this line and if this move were to beat alpha, they'd incorrectly copied to pv line.
+                Array.Clear(_pVTable, nextPvIndex, _pVTable.Length - nextPvIndex);
             }
             else if (movesSearched == 0)
             {
@@ -192,7 +197,7 @@ public sealed partial class Engine
 
             // After making a move
             Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
-            if (!isThreFoldRepetition)
+            if (!isThreeFoldRepetition)
             {
                 Game.PositionHashHistory.Remove(newPosition.UniqueIdentifier);
             }
@@ -279,8 +284,8 @@ public sealed partial class Engine
         //_searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
 
         var pvIndex = PVTable.Indexes[ply];
-        _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
         var nextPvIndex = PVTable.Indexes[ply + 1];
+        _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
         ++_nodes;
         _maxDepthReached[ply] = ply;
@@ -325,17 +330,26 @@ public sealed partial class Engine
             // Before making a move
             var oldValue = Game.HalfMovesWithoutCaptureOrPawnMove;
             Game.HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, Game.HalfMovesWithoutCaptureOrPawnMove);
-            var isNotThreFoldRepetition = Game.PositionHashHistory.Add(newPosition.UniqueIdentifier);
+            var isThreeFoldRepetition = !Game.PositionHashHistory.Add(newPosition.UniqueIdentifier);
 
-            int evaluation = 0;
-            if (isNotThreFoldRepetition && !Game.Is50MovesRepetition())
+            int evaluation;
+            if (isThreeFoldRepetition || Game.Is50MovesRepetition())
+            {
+                evaluation = 0;
+
+                // We don't need to evaluate further down to know it's a draw.
+                // Since we won't be evaluating further down, we need to clear the PV table because those moves there
+                // don't belong to this line and if this move were to beat alpha, they'd incorrectly copied to pv line.
+                Array.Clear(_pVTable, nextPvIndex, _pVTable.Length - nextPvIndex);
+            }
+            else
             {
                 evaluation = -QuiescenceSearch(in newPosition, ply + 1, -beta, -alpha);
             }
 
             // After making a move
             Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
-            if (isNotThreFoldRepetition)
+            if (!isThreeFoldRepetition)
             {
                 Game.PositionHashHistory.Remove(newPosition.UniqueIdentifier);
             }
