@@ -33,14 +33,11 @@ public sealed partial class Engine
 
         Move ttBestMove = default;
 
-        bool isPvNode = beta - alpha == 1;
-        if (!isPvNode && ply > 0)
+        if (ply > 0)
         {
             var ttProbeResult = _transpositionTable.ProbeHash(position, targetDepth, ply, alpha, beta);
-            if (ttProbeResult.Evaluation != EvaluationConstants.NoHashEntry)
+            if (ttProbeResult.Evaluation != EvaluationConstants.NoHashEntry) // TODO here we can try alpha == beta - 1 as requirement
             {
-                _logger.Trace("Taking move {0} from tt with eval {1}", ttProbeResult.BestMove, ttProbeResult.Evaluation);
-
                 return ttProbeResult.Evaluation;
             }
             ttBestMove = ttProbeResult.BestMove;
