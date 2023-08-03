@@ -67,7 +67,7 @@ public static class TranspositionTableExtensions
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static int TranspositionTableIndex(Position position, TranspositionTable transpositionTable) =>
-        (int)((position.UniqueIdentifier * transpositionTable.Length) >> 32);
+        (int)((position.UniqueIdentifier * transpositionTable.LongLength) >> 32);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void ClearTranspositionTable(this TranspositionTable transpositionTable)
