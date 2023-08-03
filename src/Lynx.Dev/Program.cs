@@ -45,7 +45,8 @@ using System.Runtime.InteropServices;
 //FileAndRankMasks();
 //EnhancedPawnEvaluation();
 //RookEvaluation();
-TranspositionTable();
+_42_Perft();
+//TranspositionTable();
 
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
 const string TrickyPosition = Constants.TrickyTestPositionFEN;
@@ -520,14 +521,20 @@ static void _42_Perft()
 
     var pos = new Position(TrickyPosition);
 
-    for (int depth = 0; depth < 7; ++depth)
+    for (int depth = 0; depth < 6; ++depth)
     {
         var sw = new Stopwatch();
         sw.Start();
-        var nodes = Perft.Results(in pos, depth);
+        var nodes = Perft.Results(in pos, depth, false);
         sw.Stop();
+    }
 
-        Console.WriteLine($"Depth {depth}\tNodes: {nodes}\tTime: {sw.ElapsedMilliseconds}ms");
+    for (int depth = 0; depth < 6; ++depth)
+    {
+        var sw = new Stopwatch();
+        sw.Start();
+        var nodes = Perft.Results(in pos, depth, true);
+        sw.Stop();
     }
 }
 

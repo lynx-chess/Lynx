@@ -56,7 +56,9 @@ public sealed partial class Engine
             }
             else
             {
-                foreach (var candidateMove in position.AllPossibleMoves(Game.MovePool))
+                Span<Move> moveList = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+                MoveGenerator.GenerateAllMoves(in position, ref moveList);
+                foreach (var candidateMove in moveList)
                 {
                     if (new Position(in position, candidateMove).WasProduceByAValidMove())
                     {
@@ -115,7 +117,31 @@ public sealed partial class Engine
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
-        var pseudoLegalMoves = SortMoves(position.AllPossibleMoves(Game.MovePool), in position, ply, ttBestMove);
+        Span<Move> pseudoLegalMoves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        MoveGenerator.GenerateAllMoves(in position, ref pseudoLegalMoves);
+
+        bool detectPVMove = _isFollowingPV;
+        bool pvMoveDetected = false;
+        _isFollowingPV = false;
+        var localPosition = position;
+
+        pseudoLegalMoves.Sort((moveA, moveB) =>
+        {
+            if (detectPVMove && (moveA == _pVTable[ply] || moveB == _pVTable[ply]))
+            {
+                pvMoveDetected = true;
+                detectPVMove = false;
+            }
+
+            var scoreA = Score(moveA, in localPosition, ply, ttBestMove);
+            var scoreB = Score(moveB, in localPosition, ply, ttBestMove);
+            return scoreA == scoreB ? 0 : (scoreA > scoreB ? -1 : 1);
+        });
+        if (pvMoveDetected)
+        {
+            _isFollowingPV = _isScoringPV = true;
+        }
+        //var pseudoLegalMoves = SortMoves(position.AllPossibleMoves(Game.MovePool), in position, ply, ttBestMove);
 
         foreach (var move in pseudoLegalMoves)
         {
@@ -302,18 +328,29 @@ public sealed partial class Engine
             alpha = staticEvaluation;
         }
 
-        var generatedMoves = position.AllCapturesMoves(Game.MovePool);
-        if (!generatedMoves.Any())
+        Span<Move> generatedMoves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        MoveGenerator.GenerateAllMoves(in position, ref generatedMoves, true);
+
+        //var generatedMoves = position.AllCapturesMoves(Game.MovePool);
+        if (generatedMoves.Length == 0)
+        //if (!generatedMoves.Any())
         {
             return staticEvaluation;  // TODO check if in check or drawn position
         }
 
-        var movesToEvaluate = SortCaptures(generatedMoves, in position, ply);
+        var localPosition = position;
+        generatedMoves.Sort((moveA, moveB) =>
+        {
+            var scoreA = Score(moveA, in localPosition, ply);
+            var scoreB = Score(moveB, in localPosition, ply);
+            return scoreA == scoreB ? 0 : (scoreA > scoreB ? -1 : 1);
+        });
+        //var movesToEvaluate = SortCaptures(generatedMoves, in position, ply);
 
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
-        foreach (var move in movesToEvaluate)
+        foreach (var move in generatedMoves)
         {
             var newPosition = new Position(in position, move);
             if (!newPosition.WasProduceByAValidMove())
@@ -377,7 +414,9 @@ public sealed partial class Engine
                 return alpha;
             }
 
-            foreach (var move in position.AllPossibleMoves(Game.MovePool))
+            Span<Move> moveList = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+            MoveGenerator.GenerateAllMoves(in position, ref moveList);
+            foreach (var move in moveList)
             {
                 if (new Position(in position, move).WasProduceByAValidMove())
                 {

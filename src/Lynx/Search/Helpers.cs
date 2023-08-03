@@ -159,9 +159,11 @@ public sealed partial class Engine
             }
             var move = _pVTable[i];
 
+            Span<Move> moveList = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+            MoveGenerator.GenerateAllMoves(in position, ref moveList);
             if (!MoveExtensions.TryParseFromUCIString(
                move.UCIString(),
-               position.AllPossibleMoves(Game.MovePool),
+               ref moveList,
                out _))
             {
                 var message = $"Unexpected PV move {move.UCIString()} from position {position.FEN()}";

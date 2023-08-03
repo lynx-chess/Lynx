@@ -9,11 +9,11 @@ namespace Lynx;
 /// </summary>
 public static class Perft
 {
-    public static long Results(in Position position, int depth)
+    public static long Results(in Position position, int depth, bool useSpan = false)
     {
         var sw = new Stopwatch();
         sw.Start();
-        var nodes = ResultsImpl(position, depth, 0);
+        var nodes = ResultsImpl(position, depth, 0, useSpan);
         sw.Stop();
 
         PrintPerftResult(depth, nodes, sw);
@@ -41,11 +41,23 @@ public static class Perft
     /// <param name="depth"></param>
     /// <param name="nodes"></param>
     /// <returns></returns>
-    internal static long ResultsImpl(in Position position, int depth, long nodes)
+    internal static long ResultsImpl(in Position position, int depth, long nodes, bool useSpan = false)
     {
         if (depth != 0)
         {
-            foreach (var move in MoveGenerator.GenerateAllMoves(in position))
+            Span<Move> moveList = useSpan
+                ? stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition]
+                : default;
+
+            if (useSpan)
+            {
+                MoveGenerator.GenerateAllMoves(in position, ref moveList);
+            }
+            else
+            {
+                moveList = new(MoveGenerator.GenerateAllMoves(in position).ToArray());
+            }
+            foreach (var move in moveList)
             {
                 var newPosition = new Position(in position, move);
 
@@ -65,7 +77,9 @@ public static class Perft
     {
         if (depth != 0)
         {
-            foreach (var move in MoveGenerator.GenerateAllMoves(in position))
+            Span<Move> moveList = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+            MoveGenerator.GenerateAllMoves(in position, ref moveList);
+            foreach (var move in moveList)
             {
                 var newPosition = new Position(in position, move);
 

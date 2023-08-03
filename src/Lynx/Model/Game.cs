@@ -7,8 +7,6 @@ public sealed class Game
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    public Move[] MovePool { get; } = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-
     public List<Move> MoveHistory { get; }
     public List<Position> PositionHistory { get; }
     public HashSet<long> PositionHashHistory { get; }
@@ -46,9 +44,10 @@ public sealed class Game
     {
         foreach (var moveString in movesUCIString)
         {
-            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, MovePool);
+            Span<Move> moveList = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+            MoveGenerator.GenerateAllMoves(CurrentPosition, ref moveList);
 
-            if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
+            if (!MoveExtensions.TryParseFromUCIString(moveString, ref moveList, out var parsedMove))
             {
                 _logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen, string.Join(' ', movesUCIString), moveString);
                 break;

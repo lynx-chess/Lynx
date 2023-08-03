@@ -249,7 +249,7 @@ public class RegressionTest : BaseTest
         Assert.AreEqual("b8c7", bestMove.BestMove.UCIString());
     }
 
-    // pv h2h1q a5a6 d5c4 a6a7 c4b4 c5c6 h1g1 b6a6, playing h2h1q again
+    // 1Q6/6kp/4ppp1/8/4P3/7P/qp3PK1/8 w - - 0 1 || pv h2h1q a5a6 d5c4 a6a7 c4b4 c5c6 h1g1 b6a6, playing h2h1q again
     [TestCase("position startpos moves e2e4 c7c6 d2d4 d7d5 e4e5 c8f5 g1f3 e7e6 f1e2 c6c5 c1e3" +
         " c5d4 f3d4 g8e7 b1c3 f5g6 h2h4 h7h5 e2b5 b8d7 e3f4 a7a6 b5d3 g6d3 d1d3 e7g6 d4e6 g6f4" +
         " e6f4 d7e5 d3e2 d8d6 c3d5 g7g6 e1c1 f8h6 h1e1 f7f6 d5f6 d6f6 e2e5 f6e5 e1e5 e8f8 g2g3" +
