@@ -96,7 +96,7 @@ public static class TranspositionTableExtensions
             return (EvaluationConstants.NoHashEntry, default);
         }
 
-        var entry = transpositionTable[TranspositionTableIndex(position, transpositionTable)];
+        ref var entry = ref transpositionTable[TranspositionTableIndex(position, transpositionTable)];
 
         if (position.UniqueIdentifier != entry.Key)
         {
