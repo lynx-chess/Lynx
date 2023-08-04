@@ -103,13 +103,6 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private IOrderedEnumerable<Move> SortCaptures(IEnumerable<Move> moves, in Position currentPosition, int depth)
-    {
-        var localPosition = currentPosition;
-        return moves.OrderByDescending(move => Score(move, in localPosition, depth));
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void CopyPVTableMoves(int target, int source, int moveCountToCopy)
     {
         // When asked to copy an incomplete PV one level ahead, clears the rest of the PV Table+

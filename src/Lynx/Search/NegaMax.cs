@@ -36,7 +36,7 @@ public sealed partial class Engine
         if (ply > 0)
         {
             var ttProbeResult = _transpositionTable.ProbeHash(position, targetDepth, ply, alpha, beta);
-            if (ttProbeResult.Evaluation != EvaluationConstants.NoHashEntry) // TODO here we can try alpha == beta - 1 as requirement
+            if (ttProbeResult.Evaluation != EvaluationConstants.NoHashEntry)
             {
                 return ttProbeResult.Evaluation;
             }
@@ -60,7 +60,7 @@ public sealed partial class Engine
                 {
                     if (new Position(in position, candidateMove).WasProduceByAValidMove())
                     {
-                        return QuiescenceSearch(in position, ply, alpha, beta);
+                        return QuiescenceSearch(in position, targetDepth, ply, alpha, beta);
                     }
                 }
 
@@ -110,7 +110,6 @@ public sealed partial class Engine
         VerifiedNullMovePruning_SearchAgain:
 
         var nodeType = NodeType.Alpha;
-
         int movesSearched = 0;
         Move? bestMove = null;
         bool isAnyMoveValid = false;
@@ -275,7 +274,7 @@ public sealed partial class Engine
     /// Defaults to the works possible score for Black, Int.MaxValue
     /// </param>
     /// <returns></returns>
-    public int QuiescenceSearch(in Position position, int ply, int alpha, int beta)
+    public int QuiescenceSearch(in Position position, int targetDepth, int ply, int alpha, int beta)
     {
         _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
         //_searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
@@ -283,6 +282,15 @@ public sealed partial class Engine
         var pvIndex = PVTable.Indexes[ply];
         var nextPvIndex = PVTable.Indexes[ply + 1];
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
+
+        Move ttBestMove = default;
+
+        var ttProbeResult = _transpositionTable.ProbeHash(position, targetDepth, ply, alpha, beta); // We need to make sure that
+        if (ttProbeResult.Evaluation != EvaluationConstants.NoHashEntry)
+        {
+            return ttProbeResult.Evaluation;
+        }
+        ttBestMove = ttProbeResult.BestMove;
 
         ++_nodes;
         _maxDepthReached[ply] = ply;
@@ -308,12 +316,14 @@ public sealed partial class Engine
             return staticEvaluation;  // TODO check if in check or drawn position
         }
 
-        var movesToEvaluate = SortCaptures(generatedMoves, in position, ply);
-
+        var nodeType = NodeType.Alpha;
         Move? bestMove = null;
         bool isAnyMoveValid = false;
+        var localPosition = position;
 
-        foreach (var move in movesToEvaluate)
+        var pseudoLegalMoves = generatedMoves.OrderByDescending(move => Score(move, in localPosition, ply, ttBestMove));
+
+        foreach (var move in pseudoLegalMoves)
         {
             var newPosition = new Position(in position, move);
             if (!newPosition.WasProduceByAValidMove())
@@ -341,7 +351,7 @@ public sealed partial class Engine
             }
             else
             {
-                evaluation = -QuiescenceSearch(in newPosition, ply + 1, -beta, -alpha);
+                evaluation = -QuiescenceSearch(in newPosition, targetDepth, ply + 1, -beta, -alpha);
             }
 
             // After making a move
@@ -357,6 +367,9 @@ public sealed partial class Engine
             if (evaluation >= beta)
             {
                 PrintMessage($"Pruning: {move} is enough to discard this line");
+
+                _transpositionTable.RecordHash(position, targetDepth, ply, beta, NodeType.Beta, bestMove);
+
                 return evaluation; // The refutation doesn't matter, since it'll be pruned
             }
 
@@ -367,6 +380,8 @@ public sealed partial class Engine
 
                 _pVTable[pvIndex] = move;
                 CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
+
+                nodeType = NodeType.Exact;
             }
         }
 
@@ -374,19 +389,23 @@ public sealed partial class Engine
         {
             if (isAnyMoveValid)
             {
-                return alpha;
+                goto ReturnAlpha;
             }
 
             foreach (var move in position.AllPossibleMoves(Game.MovePool))
             {
                 if (new Position(in position, move).WasProduceByAValidMove())
                 {
-                    return alpha;
+                    goto ReturnAlpha;
                 }
             }
 
-            return Position.EvaluateFinalPosition(ply, position.IsInCheck());
+            var finalEval = Position.EvaluateFinalPosition(ply, position.IsInCheck());
+            _transpositionTable.RecordHash(position, targetDepth, ply, finalEval, NodeType.Exact);
         }
+
+        ReturnAlpha:
+        _transpositionTable.RecordHash(position, targetDepth, ply, alpha, nodeType, bestMove);
 
         // Node fails low
         return alpha;
