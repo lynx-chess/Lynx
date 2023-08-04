@@ -205,8 +205,12 @@ public struct Position
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void MakeMove(Move move)
+    public GameState MakeMove(Move move)
     {
+        int capturedPiece = -1;
+        int castleCopy = Castle;
+        BoardSquare enpassantCopy = EnPassant;
+
         var oldSide = Side;
         var offset = Utils.PieceOffset(oldSide);
         var oppositeSide = Utils.OppositeSide(oldSide);
@@ -232,8 +236,8 @@ public struct Position
             ZobristTable.SideHash()
             ^ ZobristTable.PieceHash(sourceSquare, piece)
             ^ ZobristTable.PieceHash(targetSquare, newPiece)
-            ^ ZobristTable.EnPassantHash((int)EnPassant)
-            ^ ZobristTable.CastleHash(Castle);
+            ^ ZobristTable.EnPassantHash((int)EnPassant)            // We clear the existing enpassant square, if any
+            ^ ZobristTable.CastleHash(Castle);                      // We clear the existing castle rights
 
         EnPassant = BoardSquare.noSquare;
         if (move.IsCapture())
@@ -249,6 +253,7 @@ public struct Position
                 PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
                 OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
                 UniqueIdentifier ^= ZobristTable.PieceHash(capturedPawnSquare, oppositePawnIndex);
+                capturedPiece = oppositePawnIndex;
             }
             else
             {
@@ -259,6 +264,7 @@ public struct Position
                     {
                         PieceBitBoards[pieceIndex].PopBit(targetSquare);
                         UniqueIdentifier ^= ZobristTable.PieceHash(targetSquare, pieceIndex);
+                        capturedPiece = pieceIndex;
                         break;
                     }
                 }
@@ -316,10 +322,12 @@ public struct Position
         Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
 
         UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
+
+        return new GameState(capturedPiece, castleCopy, enpassantCopy);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void UnmakeMove(Move move)
+    public void UnmakeMove(Move move, GameState gameState)
     {
         var oppositeSide = (int)Side;
         Side = (Side)Utils.OppositeSide(Side);
@@ -346,8 +354,8 @@ public struct Position
             ZobristTable.SideHash()
             ^ ZobristTable.PieceHash(sourceSquare, piece)
             ^ ZobristTable.PieceHash(targetSquare, newPiece)
-            ^ ZobristTable.EnPassantHash((int)EnPassant)
-            ^ ZobristTable.CastleHash(Castle);
+            ^ ZobristTable.EnPassantHash((int)EnPassant)        // We clear the existing enpassant square, if any
+            ^ ZobristTable.CastleHash(Castle);                  // We clear the existing castling rights
 
         EnPassant = BoardSquare.noSquare;
         if (move.IsCapture())
@@ -366,16 +374,16 @@ public struct Position
             }
             else
             {
-                PieceBitBoards[capturedPiece].SetBit(targetSquare);
-                UniqueIdentifier ^= ZobristTable.PieceHash(targetSquare, capturedPiece);
+                PieceBitBoards[gameState.CapturedPiece].SetBit(targetSquare);
+                UniqueIdentifier ^= ZobristTable.PieceHash(targetSquare, gameState.CapturedPiece);
 
                 OccupancyBitBoards[oppositeSide].SetBit(targetSquare);
             }
         }
         else if (move.IsDoublePawnPush())
         {
-            EnPassant = oldEnpassantSquare;
-            UniqueIdentifier ^= ZobristTable.EnPassantHash(enPassantSquare);
+            EnPassant = gameState.EnPassant;
+            UniqueIdentifier ^= ZobristTable.EnPassantHash((int)EnPassant);
         }
         else if (move.IsShortCastle())
         {
@@ -413,7 +421,7 @@ public struct Position
         OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
 
         // Updating castling rights
-        Castle = oldCastle;
+        Castle = gameState.Castle;
 
         UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
     }
@@ -431,10 +439,10 @@ public struct Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void UnMakeNullMove()
+    public void UnMakeNullMove(GameState gameState)
     {
         Side = (Side)Utils.OppositeSide(Side);
-        EnPassant = oldEnPassant;
+        EnPassant = gameState.EnPassant;
 
         UniqueIdentifier ^=
             ZobristTable.SideHash()
