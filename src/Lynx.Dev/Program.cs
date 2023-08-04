@@ -2,9 +2,11 @@
 using Lynx.Internal;
 using Lynx.Model;
 using System.Diagnostics;
+using System.Net.Http.Headers;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading.Channels;
 
 //_2_GettingStarted();
 //_3_PawnAttacks();
@@ -662,9 +664,10 @@ static void _54_ScoreMove()
     var position = new Position(KillerPosition);
     position.Print();
 
+    var engine = new Engine(Channel.CreateBounded<string>(new BoundedChannelOptions(100) { SingleReader = true, SingleWriter = false }));
     foreach (var move in position.AllCapturesMoves())
     {
-        Console.WriteLine($"{move} {move.Score(in position)}");
+        Console.WriteLine($"{move} {engine.ScoreMove(move, in position, default, default)}");
     }
 
     position = new Position(TrickyPosition);
@@ -672,7 +675,7 @@ static void _54_ScoreMove()
 
     foreach (var move in position.AllCapturesMoves())
     {
-        Console.WriteLine($"{move} {move.Score(in position)}");
+        Console.WriteLine($"{move} {engine.ScoreMove(move, in position, default, default)}");
     }
 }
 
