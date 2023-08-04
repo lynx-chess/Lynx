@@ -304,6 +304,8 @@ public static class EvaluationConstants
 
     public const int TTMoveScoreValue = 190_000;
 
+    public const int PromotionMoveScoreValue = 10_000;
+
     /// <summary>
     /// For MVVLVA
     /// </summary>

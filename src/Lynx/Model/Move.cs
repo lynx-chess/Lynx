@@ -177,27 +177,28 @@ public static class MoveExtensions
 
             score += EvaluationConstants.CaptureMoveBaseScoreValue + EvaluationConstants.MostValueableVictimLeastValuableAttacker[sourcePiece, targetPiece];
         }
-        else
+        else if (move.PromotedPiece() != default)
         {
-            if (killerMoves is not null && plies is not null)
+            return EvaluationConstants.PromotionMoveScoreValue;
+        }
+        else if (killerMoves is not null && plies is not null)
+        {
+            // 1st killer move
+            if (killerMoves[0, plies.Value] == move)
             {
-                // 1st killer move
-                if (killerMoves[0, plies.Value] == move)
-                {
-                    return EvaluationConstants.FirstKillerMoveValue;
-                }
+                return EvaluationConstants.FirstKillerMoveValue;
+            }
 
-                // 2nd killer move
-                else if (killerMoves[1, plies.Value] == move)
-                {
-                    return EvaluationConstants.SecondKillerMoveValue;
-                }
+            // 2nd killer move
+            else if (killerMoves[1, plies.Value] == move)
+            {
+                return EvaluationConstants.SecondKillerMoveValue;
+            }
 
-                // History move
-                else if (historyMoves is not null)
-                {
-                    return historyMoves[move.Piece(), move.TargetSquare()];
-                }
+            // History move
+            else if (historyMoves is not null)
+            {
+                return historyMoves[move.Piece(), move.TargetSquare()];
             }
         }
 
