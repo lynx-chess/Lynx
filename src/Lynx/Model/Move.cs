@@ -153,9 +153,11 @@ public static class MoveExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int Score(this Move move, in Position position, int[,]? killerMoves = null, int? plies = null, int[,]? historyMoves = null)
     {
-        int score = 0;
-
-        if (move.IsCapture())
+        if (move.PromotedPiece() != default)
+        {
+            return EvaluationConstants.PromotionMoveScoreValue;
+        }
+        else if (move.IsCapture())
         {
             var sourcePiece = move.Piece();
             int targetPiece = (int)Model.Piece.P;    // Important to initialize to P or p, due to en-passant captures
@@ -175,11 +177,7 @@ public static class MoveExtensions
                 }
             }
 
-            score += EvaluationConstants.CaptureMoveBaseScoreValue + EvaluationConstants.MostValueableVictimLeastValuableAttacker[sourcePiece, targetPiece];
-        }
-        else if (move.PromotedPiece() != default)
-        {
-            return EvaluationConstants.PromotionMoveScoreValue;
+            return EvaluationConstants.CaptureMoveBaseScoreValue + EvaluationConstants.MostValueableVictimLeastValuableAttacker[sourcePiece, targetPiece];
         }
         else if (killerMoves is not null && plies is not null)
         {
@@ -202,7 +200,7 @@ public static class MoveExtensions
             }
         }
 
-        return score;
+        return default;
     }
 
     public static string ToMoveString(this Move move)
