@@ -111,10 +111,10 @@ public sealed partial class Engine
         var promotedPiece = move.PromotedPiece();
 
         //// Queen promotion
-        //if ((promotedPiece + 2) % 6 == 0)
-        //{
-        //    return EvaluationConstants.CaptureMoveBaseScoreValue + EvaluationConstants.PromotionMoveScoreValue;
-        //}
+        if ((promotedPiece + 2) % 6 == 0)
+        {
+            return EvaluationConstants.CaptureMoveBaseScoreValue + EvaluationConstants.PromotionMoveScoreValue;
+        }
 
         if (move.IsCapture())
         {

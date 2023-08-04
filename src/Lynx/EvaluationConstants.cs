@@ -305,11 +305,11 @@ public static class EvaluationConstants
     /// </summary>
     public const int CaptureMoveBaseScoreValue = 100_000;
 
-    public const int PromotionMoveScoreValue = 10_000;
-
     public const int FirstKillerMoveValue = 9_000;
 
     public const int SecondKillerMoveValue = 8_000;
+
+    public const int PromotionMoveScoreValue = 7_000;
 
     /// <summary>
     /// Outside of the evaluation ranges (higher than any sensible evaluation, lower than <see cref="PositiveCheckmateDetectionLimit"/>)
