@@ -33,7 +33,9 @@ public sealed partial class Engine
 
         Move ttBestMove = default;
 
-        bool pvNode = alpha != beta - 1;
+        //bool pvNode = alpha != beta - 1;
+        bool pvNode = beta - alpha > 1;
+
         if (ply > 0)
         {
             var ttProbeResult = _transpositionTable.ProbeHash(position, targetDepth, ply, alpha, beta);
