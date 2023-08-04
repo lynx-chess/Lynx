@@ -33,10 +33,11 @@ public sealed partial class Engine
 
         Move ttBestMove = default;
 
+        bool pvNode = alpha != beta - 1;
         if (ply > 0)
         {
             var ttProbeResult = _transpositionTable.ProbeHash(position, targetDepth, ply, alpha, beta);
-            if (ttProbeResult.Evaluation != EvaluationConstants.NoHashEntry) // TODO here we can try alpha == beta - 1 as requirement
+            if (ttProbeResult.Evaluation != EvaluationConstants.NoHashEntry && !pvNode)
             {
                 return ttProbeResult.Evaluation;
             }
