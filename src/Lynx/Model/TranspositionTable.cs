@@ -198,7 +198,7 @@ public static class TranspositionTableExtensions
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int HashfullPermill(this TranspositionTable transpositionTable) => transpositionTable.Length > 0
-        ? 1000 * transpositionTable.PopulatedItemsCount() / transpositionTable.Length
+        ? (int)(1000L * transpositionTable.PopulatedItemsCount() / transpositionTable.LongLength)
         : 0;
 
     [Conditional("DEBUG")]
