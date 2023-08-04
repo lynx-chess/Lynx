@@ -207,7 +207,7 @@ public sealed partial class Engine
                 PrintMessage($"Pruning: {move} is enough");
 
                 // 🔍 Killer moves
-                if (!move.IsCapture())
+                if (!move.IsCapture() && move.PromotedPiece() == default)
                 {
                     _killerMoves[1, ply] = _killerMoves[0, ply];
                     _killerMoves[0, ply] = move;
