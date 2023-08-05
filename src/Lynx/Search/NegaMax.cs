@@ -22,7 +22,7 @@ public sealed partial class Engine
     /// <param name="isVerifyingNullMoveCutOff">Indicates if the search is verifying an ancestors null-move that failed high, or the root node</param>
     /// <param name="ancestorWasNullMove">Indicates whether the immediate ancestor node was a null move</param>
     /// <returns></returns>
-    private int NegaMax(in Position position, int minDepth, int targetDepth, int ply, int alpha, int beta, bool isVerifyingNullMoveCutOff, bool ancestorWasNullMove = false)
+    private int NegaMax(in Position position, int minDepth, int targetDepth, int ply, int alpha, int beta/*, bool isVerifyingNullMoveCutOff, bool ancestorWasNullMove = false*/)
     {
         _maxDepthReached[ply] = ply;
         _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
@@ -79,35 +79,35 @@ public sealed partial class Engine
 
         ++_nodes;
 
-        // 🔍 Null-move pruning
-        bool isFailHigh = false;    // In order to detect zugzwangs
-        if (ply > Configuration.EngineSettings.NullMovePruning_R
-            && !isInCheck
-            && !ancestorWasNullMove
-            && (!isVerifyingNullMoveCutOff || ply < targetDepth - 1))    // verify == true and ply == targetDepth -1 -> No null pruning, since verification will not be possible)
-                                                                         // following pv?
-        {
-            var newPosition = new Position(in position, nullMove: true);
+        //// 🔍 Null-move pruning
+        //bool isFailHigh = false;    // In order to detect zugzwangs
+        //if (ply > Configuration.EngineSettings.NullMovePruning_R
+        //    && !isInCheck
+        //    && !ancestorWasNullMove
+        //    && (!isVerifyingNullMoveCutOff || ply < targetDepth - 1))    // verify == true and ply == targetDepth -1 -> No null pruning, since verification will not be possible)
+        //                                                                 // following pv?
+        //{
+        //    var newPosition = new Position(in position, nullMove: true);
 
-            var evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1 + Configuration.EngineSettings.NullMovePruning_R, -beta, -beta + 1, isVerifyingNullMoveCutOff, ancestorWasNullMove: true);
+        //    var evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1 + Configuration.EngineSettings.NullMovePruning_R, -beta, -beta + 1, isVerifyingNullMoveCutOff, ancestorWasNullMove: true);
 
-            if (evaluation >= beta) // Fail high
-            {
-                if (isVerifyingNullMoveCutOff)
-                {
-                    ++ply;
-                    isVerifyingNullMoveCutOff = false;
-                    isFailHigh = true;
-                }
-                else
-                {
-                    // cutoff in a sub-tree with fail-high report
-                    return evaluation;
-                }
-            }
-        }
+        //    if (evaluation >= beta) // Fail high
+        //    {
+        //        if (isVerifyingNullMoveCutOff)
+        //        {
+        //            ++ply;
+        //            isVerifyingNullMoveCutOff = false;
+        //            isFailHigh = true;
+        //        }
+        //        else
+        //        {
+        //            // cutoff in a sub-tree with fail-high report
+        //            return evaluation;
+        //        }
+        //    }
+        //}
 
-        VerifiedNullMovePruning_SearchAgain:
+        //VerifiedNullMovePruning_SearchAgain:
 
         var nodeType = NodeType.Alpha;
 
@@ -145,7 +145,7 @@ public sealed partial class Engine
             }
             else if (movesSearched == 0)
             {
-                evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
+                evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1, -beta, -alpha/*a, isVerifyingNullMoveCutOff*/);
             }
             else
             {
@@ -177,17 +177,17 @@ public sealed partial class Engine
                         // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
 
                         // Search with full depth but narrowed score bandwidth
-                        evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
+                    evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1, -alpha - 1, -alpha/*, isVerifyingNullMoveCutOff*/);
 
                         if (evaluation > alpha && evaluation < beta)
                         {
                             // Hipothesis invalidated -> search with full depth and full score bandwidth
-                            evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
+                        evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1, -beta, -alpha/*, isVerifyingNullMoveCutOff*/);
                         }
                     }
                     else
                     {
-                        evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
+                    evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1, -beta, -alpha/*, isVerifyingNullMoveCutOff*/);
                     }
                 }
             }
@@ -239,13 +239,13 @@ public sealed partial class Engine
         }
 
         // [Null-move pruning] If there is a fail-high report, but no cutoff was found, the position is a zugzwang and has to be re-searched with the original depth
-        if (isFailHigh && alpha < beta)
-        {
-            --ply;
-            isFailHigh = false;
-            isVerifyingNullMoveCutOff = true;
-            goto VerifiedNullMovePruning_SearchAgain;
-        }
+        //if (isFailHigh && alpha < beta)
+        //{
+        //    --ply;
+        //    isFailHigh = false;
+        //    isVerifyingNullMoveCutOff = true;
+        //    goto VerifiedNullMovePruning_SearchAgain;
+        //}
 
         if (bestMove is null && !isAnyMoveValid)
         {
