@@ -142,68 +142,6 @@ public static class MoveExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsCastle(this Move move) => (move & 0x180_0000) >> 23 != default;
 
-    /// <summary>
-    /// Returns the score evaluation of a move taking into account <see cref="EvaluationConstants.MostValueableVictimLeastValuableAttacker"/>
-    /// </summary>
-    /// <param name="position">The position that precedes a move</param>
-    /// <param name="killerMoves"></param>
-    /// <param name="plies"></param>
-    /// <param name="historyMoves"></param>
-    /// <returns>The higher the score is, the more valuable is the captured piece and the less valuable is the piece that makes the such capture</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int Score(this Move move, in Position position, int[,]? killerMoves = null, int? plies = null, int[,]? historyMoves = null)
-    {
-        int score = 0;
-
-        if (move.IsCapture())
-        {
-            var sourcePiece = move.Piece();
-            int targetPiece = (int)Model.Piece.P;    // Important to initialize to P or p, due to en-passant captures
-
-            var targetSquare = move.TargetSquare();
-            var oppositeSide = Utils.OppositeSide(position.Side);
-            var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
-            var oppositePawnIndex = (int)Model.Piece.P + oppositeSideOffset;
-
-            var limit = (int)Model.Piece.K + oppositeSideOffset;
-            for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
-            {
-                if (position.PieceBitBoards[pieceIndex].GetBit(targetSquare))
-                {
-                    targetPiece = pieceIndex;
-                    break;
-                }
-            }
-
-            score += EvaluationConstants.CaptureMoveBaseScoreValue + EvaluationConstants.MostValueableVictimLeastValuableAttacker[sourcePiece, targetPiece];
-        }
-        else
-        {
-            if (killerMoves is not null && plies is not null)
-            {
-                // 1st killer move
-                if (killerMoves[0, plies.Value] == move)
-                {
-                    return EvaluationConstants.FirstKillerMoveValue;
-                }
-
-                // 2nd killer move
-                else if (killerMoves[1, plies.Value] == move)
-                {
-                    return EvaluationConstants.SecondKillerMoveValue;
-                }
-
-                // History move
-                else if (historyMoves is not null)
-                {
-                    return historyMoves[move.Piece(), move.TargetSquare()];
-                }
-            }
-        }
-
-        return score;
-    }
-
     public static string ToMoveString(this Move move)
     {
 #pragma warning disable S3358 // Ternary operators should not be nested

@@ -76,16 +76,25 @@ public sealed partial class Engine
         var localPosition = currentPosition;
 
         var orderedMoves = moves
-            .OrderByDescending(move => Score(move, in localPosition, depth, bestMoveTTCandidate))
+            .OrderByDescending(move => ScoreMove(move, in localPosition, depth, true, bestMoveTTCandidate))
             .ToList();
 
-        PrintMessage($"For position {currentPosition.FEN()}:\n{string.Join(", ", orderedMoves.Select(m => $"{m.ToEPDString()} ({Score(m, in localPosition, depth, bestMoveTTCandidate)})"))})");
+        PrintMessage($"For position {currentPosition.FEN()}:\n{string.Join(", ", orderedMoves.Select(m => $"{m.ToEPDString()} ({ScoreMove(m, in localPosition, depth, true, bestMoveTTCandidate)})"))})");
 
         return orderedMoves;
     }
 
+    /// <summary>
+    /// Returns the score evaluation of a move taking into account <see cref="_isScoringPV"/>, <paramref name="bestMoveTTCandidate"/>, <see cref="EvaluationConstants.MostValueableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_historyMoves"/>
+    /// </summary>
+    /// <param name="move"></param>
+    /// <param name="position"></param>
+    /// <param name="depth"></param>
+    /// <param name="useKillerAndPositionMoves"></param>
+    /// <param name="bestMoveTTCandidate"></param>
+    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int Score(Move move, in Position position, int depth, Move bestMoveTTCandidate = default)
+    internal int ScoreMove(Move move, in Position position, int depth, bool useKillerAndPositionMoves, Move bestMoveTTCandidate = default)
     {
         if (_isScoringPV && move == _pVTable[depth])
         {
@@ -99,14 +108,61 @@ public sealed partial class Engine
             return EvaluationConstants.TTMoveScoreValue;
         }
 
-        return move.Score(in position, _killerMoves, depth, _historyMoves);
-    }
+        var promotedPiece = move.PromotedPiece();
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private IOrderedEnumerable<Move> SortCaptures(IEnumerable<Move> moves, in Position currentPosition, int depth)
-    {
-        var localPosition = currentPosition;
-        return moves.OrderByDescending(move => Score(move, in localPosition, depth));
+        //// Queen promotion
+        if ((promotedPiece + 2) % 6 == 0)
+        {
+            return EvaluationConstants.CaptureMoveBaseScoreValue + EvaluationConstants.PromotionMoveScoreValue;
+        }
+
+        if (move.IsCapture())
+        {
+            var sourcePiece = move.Piece();
+            int targetPiece = (int)Piece.P;    // Important to initialize to P or p, due to en-passant captures
+
+            var targetSquare = move.TargetSquare();
+            var oppositeSide = Utils.OppositeSide(position.Side);
+            var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
+            var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
+
+            var limit = (int)Piece.K + oppositeSideOffset;
+            for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
+            {
+                if (position.PieceBitBoards[pieceIndex].GetBit(targetSquare))
+                {
+                    targetPiece = pieceIndex;
+                    break;
+                }
+            }
+
+            return EvaluationConstants.CaptureMoveBaseScoreValue + EvaluationConstants.MostValueableVictimLeastValuableAttacker[sourcePiece, targetPiece];
+        }
+
+        if (promotedPiece != default)
+        {
+            return EvaluationConstants.PromotionMoveScoreValue;
+        }
+
+        if (useKillerAndPositionMoves)
+        {
+            // 1st killer move
+            if (_killerMoves[0, depth] == move)
+            {
+                return EvaluationConstants.FirstKillerMoveValue;
+            }
+
+            // 2nd killer move
+            if (_killerMoves[1, depth] == move)
+            {
+                return EvaluationConstants.SecondKillerMoveValue;
+            }
+
+            // History move or 0 if not found
+            return _historyMoves[move.Piece(), move.TargetSquare()];
+        }
+
+        return default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

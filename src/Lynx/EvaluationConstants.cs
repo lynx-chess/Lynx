@@ -296,10 +296,6 @@ public static class EvaluationConstants
     /// </summary>
     public const int NegativeCheckmateDetectionLimit = -27_000; // -CheckMateBaseEvaluation + (Constants.AbsoluteMaxDepth + 45) * DepthCheckmateFactor;
 
-    public const int FirstKillerMoveValue = 9_000;
-
-    public const int SecondKillerMoveValue = 8_000;
-
     public const int PVMoveScoreValue = 200_000;
 
     public const int TTMoveScoreValue = 190_000;
@@ -308,6 +304,12 @@ public static class EvaluationConstants
     /// For MVVLVA
     /// </summary>
     public const int CaptureMoveBaseScoreValue = 100_000;
+
+    public const int FirstKillerMoveValue = 9_000;
+
+    public const int SecondKillerMoveValue = 8_000;
+
+    public const int PromotionMoveScoreValue = 7_000;
 
     /// <summary>
     /// Outside of the evaluation ranges (higher than any sensible evaluation, lower than <see cref="PositiveCheckmateDetectionLimit"/>)

@@ -207,7 +207,7 @@ public sealed partial class Engine
                 PrintMessage($"Pruning: {move} is enough");
 
                 // 🔍 Killer moves
-                if (!move.IsCapture())
+                if (!move.IsCapture() && move.PromotedPiece() == default)
                 {
                     _killerMoves[1, ply] = _killerMoves[0, ply];
                     _killerMoves[0, ply] = move;
@@ -308,7 +308,8 @@ public sealed partial class Engine
             return staticEvaluation;  // TODO check if in check or drawn position
         }
 
-        var movesToEvaluate = SortCaptures(generatedMoves, in position, ply);
+        var localPosition = position;
+        var movesToEvaluate = generatedMoves.OrderByDescending(move => ScoreMove(move, in localPosition, ply, false));
 
         Move? bestMove = null;
         bool isAnyMoveValid = false;
