@@ -120,7 +120,7 @@ public class MoveGeneratorParallel : BaseBenchmark
             moves.AddRange(GeneratePieceMoves((int)Piece.R + offset, position, capturesOnly));
             moves.AddRange(GeneratePieceMoves((int)Piece.Q + offset, position, capturesOnly));
 
-            return moves.OrderByDescending(move => move.Score(in position, killerMoves, plies));
+            return moves.OrderByDescending(move => move.OldScore(in position, killerMoves, plies));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -141,7 +141,7 @@ public class MoveGeneratorParallel : BaseBenchmark
 
             var result = await Task.WhenAll(taskList);
 
-            return result.SelectMany(i => i).OrderByDescending(move => move.Score(in position, killerMoves, plies));
+            return result.SelectMany(i => i).OrderByDescending(move => move.OldScore(in position, killerMoves, plies));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -170,7 +170,7 @@ public class MoveGeneratorParallel : BaseBenchmark
                 }
             });
 
-            return concurrentBag.OrderByDescending(move => move.Score(in position, killerMoves, plies));
+            return concurrentBag.OrderByDescending(move => move.OldScore(in position, killerMoves, plies));
         }
 
         #region Other stuff
