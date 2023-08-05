@@ -159,7 +159,7 @@ public sealed partial class Engine
                     && move.PromotedPiece() == default)
                 {
                     // Search with reduced depth
-                    evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1 + Configuration.EngineSettings.LMR_DepthReduction, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
+                    evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1 + Configuration.EngineSettings.LMR_DepthReduction, -alpha - 1, -alpha/*, isVerifyingNullMoveCutOff*/);
                 }
                 else
                 {
@@ -177,17 +177,17 @@ public sealed partial class Engine
                         // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
 
                         // Search with full depth but narrowed score bandwidth
-                    evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1, -alpha - 1, -alpha/*, isVerifyingNullMoveCutOff*/);
+                        evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1, -alpha - 1, -alpha/*, isVerifyingNullMoveCutOff*/);
 
                         if (evaluation > alpha && evaluation < beta)
                         {
                             // Hipothesis invalidated -> search with full depth and full score bandwidth
-                        evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1, -beta, -alpha/*, isVerifyingNullMoveCutOff*/);
+                            evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1, -beta, -alpha/*, isVerifyingNullMoveCutOff*/);
                         }
                     }
                     else
                     {
-                    evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1, -beta, -alpha/*, isVerifyingNullMoveCutOff*/);
+                        evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1, -beta, -alpha/*, isVerifyingNullMoveCutOff*/);
                     }
                 }
             }
