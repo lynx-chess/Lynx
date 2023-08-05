@@ -286,10 +286,10 @@ public sealed partial class Engine
         Move ttBestMove = default;
 
         var ttProbeResult = _transpositionTable.ProbeHash(position, targetDepth, ply, alpha, beta); // We need to make sure that
-        //if (ttProbeResult.Evaluation != EvaluationConstants.NoHashEntry)
-        //{
-        //    return ttProbeResult.Evaluation;
-        //}
+        if (ttProbeResult.Evaluation != EvaluationConstants.NoHashEntry)
+        {
+            return ttProbeResult.Evaluation;
+        }
         ttBestMove = ttProbeResult.BestMove;
 
         ++_nodes;
@@ -321,7 +321,7 @@ public sealed partial class Engine
         bool isAnyMoveValid = false;
         var localPosition = position;
 
-        var pseudoLegalMoves = generatedMoves.OrderByDescending(move => Score(move, in localPosition, ply/*, ttBestMove*/));
+        var pseudoLegalMoves = generatedMoves.OrderByDescending(move => ScoreMove(move, in localPosition, ply, false, ttBestMove));
 
         foreach (var move in pseudoLegalMoves)
         {
