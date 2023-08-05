@@ -149,47 +149,47 @@ public sealed partial class Engine
             }
             else
             {
-                //// 🔍 Late Move Reduction (LMR)
-                //if (movesSearched >= Configuration.EngineSettings.LMR_FullDepthMoves
-                //    && ply >= Configuration.EngineSettings.LMR_ReductionLimit
-                //    && !_isFollowingPV
-                //    && !isInCheck
-                //    //&& !newPosition.IsInCheck()
-                //    && !move.IsCapture()
-                //    && move.PromotedPiece() == default)
-                //{
-                //    // Search with reduced depth
-                //    evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1 + Configuration.EngineSettings.LMR_DepthReduction, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
-                //}
-                //else
-                //{
-                //    // Ensuring full depth search takes place
-                //    evaluation = alpha + 1;
-                //}
-
-                //if (evaluation > alpha)
-                //{
-                // 🔍 Principal Variation Search (PVS)
-                if (bestMove is not null)
+                // 🔍 Late Move Reduction (LMR)
+                if (movesSearched >= Configuration.EngineSettings.LMR_FullDepthMoves
+                    && ply >= Configuration.EngineSettings.LMR_ReductionLimit
+                    && !_isFollowingPV
+                    && !isInCheck
+                    //&& !newPosition.IsInCheck()
+                    && !move.IsCapture()
+                    && move.PromotedPiece() == default)
                 {
-                    // Optimistic search, validating that the rest of the moves are worse than bestmove.
-                    // It should produce more cutoffs and therefore be faster.
-                    // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
-
-                    // Search with full depth but narrowed score bandwidth
-                    evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1, -alpha - 1, -alpha);
-
-                    if (evaluation > alpha && evaluation < beta)
-                    {
-                        // Hipothesis invalidated -> search with full depth and full score bandwidth
-                        evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1, -beta, -alpha);
-                    }
+                    // Search with reduced depth
+                    evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1 + Configuration.EngineSettings.LMR_DepthReduction, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
                 }
                 else
                 {
-                    evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1, -beta, -alpha);
+                    // Ensuring full depth search takes place
+                    evaluation = alpha + 1;
                 }
-                //}
+
+                if (evaluation > alpha)
+                {
+                    // 🔍 Principal Variation Search (PVS)
+                    if (bestMove is not null)
+                    {
+                        // Optimistic search, validating that the rest of the moves are worse than bestmove.
+                        // It should produce more cutoffs and therefore be faster.
+                        // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
+
+                        // Search with full depth but narrowed score bandwidth
+                    evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1, -alpha - 1, -alpha/*, isVerifyingNullMoveCutOff*/);
+
+                        if (evaluation > alpha && evaluation < beta)
+                        {
+                            // Hipothesis invalidated -> search with full depth and full score bandwidth
+                        evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1, -beta, -alpha/*, isVerifyingNullMoveCutOff*/);
+                        }
+                    }
+                    else
+                    {
+                    evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1, -beta, -alpha/*, isVerifyingNullMoveCutOff*/);
+                    }
+                }
             }
 
             // After making a move
