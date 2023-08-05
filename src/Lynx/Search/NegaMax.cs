@@ -321,7 +321,7 @@ public sealed partial class Engine
         bool isAnyMoveValid = false;
         var localPosition = position;
 
-        var pseudoLegalMoves = generatedMoves.OrderByDescending(move => Score(move, in localPosition, ply, ttBestMove));
+        var pseudoLegalMoves = generatedMoves.OrderByDescending(move => Score(move, in localPosition, ply, /*ttBestMove*/));
 
         foreach (var move in pseudoLegalMoves)
         {
