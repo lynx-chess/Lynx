@@ -402,6 +402,8 @@ public sealed partial class Engine
 
             var finalEval = Position.EvaluateFinalPosition(ply, position.IsInCheck());
             _transpositionTable.RecordHash(position, targetDepth, ply, finalEval, NodeType.Exact);
+
+            return finalEval;
         }
 
         ReturnAlpha:
