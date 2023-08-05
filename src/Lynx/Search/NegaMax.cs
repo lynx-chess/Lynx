@@ -153,11 +153,12 @@ public sealed partial class Engine
                 // 🔍 Late Move Reduction (LMR)
                 if (movesSearched >= Configuration.EngineSettings.LMR_FullDepthMoves
                     && ply >= Configuration.EngineSettings.LMR_ReductionLimit
-                    && !pvNode
+                    && !_isFollowingPV
                     && !isInCheck
                     //&& !newPosition.IsInCheck()
-                    && !move.IsCapture()
-                    && move.PromotedPiece() == default)
+                    //&& !move.IsCapture()
+                    //&& move.PromotedPiece() == default
+                    )
                 {
                     // Search with reduced depth
                     evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1 + Configuration.EngineSettings.LMR_DepthReduction, -alpha - 1, -alpha/*, isVerifyingNullMoveCutOff*/);
