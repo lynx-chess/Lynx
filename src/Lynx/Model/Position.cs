@@ -523,15 +523,15 @@ public readonly struct Position
         }
 
         //bool IsPassedPawn() => (PieceBitBoards[(int)Piece.p - pieceIndex] & Masks.PassedPawns[pieceIndex][squareIndex]) == default;
-        if ((PieceBitBoards[(int)Piece.p - pieceIndex] & Masks.PassedPawns[pieceIndex][squareIndex]) == default)
-        {
-            var rank = Constants.Rank[squareIndex];
-            if (pieceIndex == (int)Piece.p)
-            {
-                rank = 7 - rank;
-            }
-            bonus += Configuration.EngineSettings.PassedPawnBonus[rank];
-        }
+        //if ((PieceBitBoards[(int)Piece.p - pieceIndex] & Masks.PassedPawns[pieceIndex][squareIndex]) == default)
+        //{
+        //    var rank = Constants.Rank[squareIndex];
+        //    if (pieceIndex == (int)Piece.p)
+        //    {
+        //        rank = 7 - rank;
+        //    }
+        //    bonus += Configuration.EngineSettings.PassedPawnBonus[rank];
+        //}
 
         return bonus;
     }
