@@ -285,12 +285,12 @@ public sealed partial class Engine
 
         Move ttBestMove = default;
 
-        //var ttProbeResult = _transpositionTable.ProbeHash(position, targetDepth, ply, alpha, beta); // We need to make sure that
-        //if (ttProbeResult.Evaluation != EvaluationConstants.NoHashEntry)
-        //{
-        //    return ttProbeResult.Evaluation;
-        //}
-        //ttBestMove = ttProbeResult.BestMove;
+        var ttProbeResult = _transpositionTable.ProbeHash(position, targetDepth, ply, alpha, beta);
+        if (ttProbeResult.Evaluation != EvaluationConstants.NoHashEntry)
+        {
+            return ttProbeResult.Evaluation;
+        }
+        ttBestMove = ttProbeResult.BestMove;
 
         ++_nodes;
         _maxDepthReached[ply] = ply;
@@ -316,7 +316,7 @@ public sealed partial class Engine
             return staticEvaluation;  // TODO check if in check or drawn position
         }
 
-        //var nodeType = NodeType.Alpha;
+        var nodeType = NodeType.Alpha;
         Move? bestMove = null;
         bool isAnyMoveValid = false;
         var localPosition = position;
@@ -368,7 +368,7 @@ public sealed partial class Engine
             {
                 PrintMessage($"Pruning: {move} is enough to discard this line");
 
-                //_transpositionTable.RecordHash(position, targetDepth, ply, beta, NodeType.Beta, bestMove);
+                _transpositionTable.RecordHash(position, targetDepth, ply, beta, NodeType.Beta, bestMove);
 
                 return evaluation; // The refutation doesn't matter, since it'll be pruned
             }
@@ -381,7 +381,7 @@ public sealed partial class Engine
                 _pVTable[pvIndex] = move;
                 CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
 
-                //nodeType = NodeType.Exact;
+                nodeType = NodeType.Exact;
             }
         }
 
@@ -401,13 +401,13 @@ public sealed partial class Engine
             }
 
             var finalEval = Position.EvaluateFinalPosition(ply, position.IsInCheck());
-            //_transpositionTable.RecordHash(position, targetDepth, ply, finalEval, NodeType.Exact);
+            _transpositionTable.RecordHash(position, targetDepth, ply, finalEval, NodeType.Exact);
 
             return finalEval;
         }
 
         ReturnAlpha:
-        //_transpositionTable.RecordHash(position, targetDepth, ply, alpha, nodeType, bestMove);
+        _transpositionTable.RecordHash(position, targetDepth, ply, alpha, nodeType, bestMove);
 
         // Node fails low
         return alpha;
