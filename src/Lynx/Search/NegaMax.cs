@@ -31,6 +31,7 @@ public sealed partial class Engine
         var nextPvIndex = PVTable.Indexes[ply + 1];
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
+        bool pvNode = beta - alpha > 1;
         Move ttBestMove = default;
 
         if (ply > 0)
@@ -115,7 +116,7 @@ public sealed partial class Engine
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
-        var pseudoLegalMoves = SortMoves(position.AllPossibleMoves(Game.MovePool), in position, ply, ttBestMove);
+        var pseudoLegalMoves = SortMoves(position.AllPossibleMoves(Game.MovePool), in position, ply, pvNode, ttBestMove);
 
         foreach (var move in pseudoLegalMoves)
         {
@@ -152,7 +153,7 @@ public sealed partial class Engine
                 // 🔍 Late Move Reduction (LMR)
                 if (movesSearched >= Configuration.EngineSettings.LMR_FullDepthMoves
                     && ply >= Configuration.EngineSettings.LMR_ReductionLimit
-                    && !_isFollowingPV
+                    && !pvNode
                     && !isInCheck
                     //&& !newPosition.IsInCheck()
                     && !move.IsCapture()
@@ -280,6 +281,7 @@ public sealed partial class Engine
         _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
         //_searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
 
+        bool pvNode = beta - alpha > 1;
         var pvIndex = PVTable.Indexes[ply];
         var nextPvIndex = PVTable.Indexes[ply + 1];
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
@@ -309,7 +311,7 @@ public sealed partial class Engine
         }
 
         var localPosition = position;
-        var movesToEvaluate = generatedMoves.OrderByDescending(move => ScoreMove(move, in localPosition, ply, false));
+        var movesToEvaluate = generatedMoves.OrderByDescending(move => ScoreMove(move, in localPosition, ply, pvNode, false));
 
         Move? bestMove = null;
         bool isAnyMoveValid = false;

@@ -17,8 +17,6 @@ public sealed partial class Engine
         : Array.Empty<TranspositionTableElement>();
 
     private int _nodes;
-    private bool _isFollowingPV;
-    private bool _isScoringPV;
 
     private SearchResult? _previousSearchResult;
     private readonly int[,] _previousKillerMoves = new int[2, Configuration.EngineSettings.MaxDepth];
@@ -29,8 +27,6 @@ public sealed partial class Engine
     {
         // Cleanup
         _nodes = 0;
-        _isFollowingPV = false;
-        _isScoringPV = false;
         _stopWatch.Reset();
 
         Array.Clear(_pVTable);
@@ -93,7 +89,6 @@ public sealed partial class Engine
 
                 AspirationWindows_SearchAgain:
 
-                _isFollowingPV = true;
                 bestEvaluation = NegaMax(Game.CurrentPosition, minDepth, targetDepth: depth, ply: 0, alpha, beta, isVerifyingNullMoveCutOff: true);
 
                 var bestEvaluationAbs = Math.Abs(bestEvaluation);

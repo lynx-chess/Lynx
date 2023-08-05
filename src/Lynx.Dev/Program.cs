@@ -667,7 +667,7 @@ static void _54_ScoreMove()
     var engine = new Engine(Channel.CreateBounded<string>(new BoundedChannelOptions(100) { SingleReader = true, SingleWriter = false }));
     foreach (var move in position.AllCapturesMoves())
     {
-        Console.WriteLine($"{move} {engine.ScoreMove(move, in position, default, default)}");
+        Console.WriteLine($"{move} {engine.ScoreMove(move, in position, default, default, default)}");
     }
 
     position = new Position(TrickyPosition);
@@ -675,7 +675,7 @@ static void _54_ScoreMove()
 
     foreach (var move in position.AllCapturesMoves())
     {
-        Console.WriteLine($"{move} {engine.ScoreMove(move, in position, default, default)}");
+        Console.WriteLine($"{move} {engine.ScoreMove(move, in position, default, default, default)}");
     }
 }
 

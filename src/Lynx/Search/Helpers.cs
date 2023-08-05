@@ -57,29 +57,15 @@ public sealed partial class Engine
     private const int MaxValue = short.MaxValue;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private List<Move> SortMoves(IEnumerable<Move> moves, in Position currentPosition, int depth, Move bestMoveTTCandidate)
+    private List<Move> SortMoves(IEnumerable<Move> moves, in Position currentPosition, int depth, bool pvNode, Move bestMoveTTCandidate)
     {
-        if (_isFollowingPV)
-        {
-            _isFollowingPV = false;
-            foreach (var move in moves)
-            {
-                if (move == _pVTable[depth])
-                {
-                    _isFollowingPV = true;
-                    _isScoringPV = true;
-                    break;
-                }
-            }
-        }
-
         var localPosition = currentPosition;
 
         var orderedMoves = moves
-            .OrderByDescending(move => ScoreMove(move, in localPosition, depth, true, bestMoveTTCandidate))
+            .OrderByDescending(move => ScoreMove(move, in localPosition, depth, pvNode, true, bestMoveTTCandidate))
             .ToList();
 
-        PrintMessage($"For position {currentPosition.FEN()}:\n{string.Join(", ", orderedMoves.Select(m => $"{m.ToEPDString()} ({ScoreMove(m, in localPosition, depth, true, bestMoveTTCandidate)})"))})");
+        PrintMessage($"For position {currentPosition.FEN()}:\n{string.Join(", ", orderedMoves.Select(m => $"{m.ToEPDString()} ({ScoreMove(m, in localPosition, depth, pvNode, true, bestMoveTTCandidate)})"))})");
 
         return orderedMoves;
     }
@@ -94,12 +80,10 @@ public sealed partial class Engine
     /// <param name="bestMoveTTCandidate"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMove(Move move, in Position position, int depth, bool useKillerAndPositionMoves, Move bestMoveTTCandidate = default)
+    internal int ScoreMove(Move move, in Position position, int depth, bool pvNode, bool useKillerAndPositionMoves, Move bestMoveTTCandidate = default)
     {
-        if (_isScoringPV && move == _pVTable[depth])
+        if (pvNode && move == _pVTable[depth])
         {
-            _isScoringPV = false;
-
             return EvaluationConstants.PVMoveScoreValue;
         }
 
