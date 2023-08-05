@@ -286,10 +286,10 @@ public sealed partial class Engine
         Move ttBestMove = default;
 
         var ttProbeResult = _transpositionTable.ProbeHash(position, targetDepth, ply, alpha, beta); // We need to make sure that
-        if (ttProbeResult.Evaluation != EvaluationConstants.NoHashEntry)
-        {
-            return ttProbeResult.Evaluation;
-        }
+        //if (ttProbeResult.Evaluation != EvaluationConstants.NoHashEntry)
+        //{
+        //    return ttProbeResult.Evaluation;
+        //}
         ttBestMove = ttProbeResult.BestMove;
 
         ++_nodes;
