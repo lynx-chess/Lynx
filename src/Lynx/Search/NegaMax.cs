@@ -31,6 +31,7 @@ public sealed partial class Engine
         var nextPvIndex = PVTable.Indexes[ply + 1];
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
+        bool pvNode = beta - alpha > 1;
         Move ttBestMove = default;
 
         if (ply > 0)
@@ -152,7 +153,7 @@ public sealed partial class Engine
                 // 🔍 Late Move Reduction (LMR)
                 if (movesSearched >= Configuration.EngineSettings.LMR_FullDepthMoves
                     && ply >= Configuration.EngineSettings.LMR_ReductionLimit
-                    && !_isFollowingPV
+                    && !pvNode
                     && !isInCheck
                     //&& !newPosition.IsInCheck()
                     && !move.IsCapture()
