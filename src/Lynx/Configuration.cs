@@ -157,7 +157,7 @@ public sealed class EngineSettings
 
     public int LMR_FullDepthMoves { get; set; } = 4;
 
-    public int LMR_ReductionLimit { get; set; } = 4;
+    public int LMR_ReductionLimit { get; set; } = 2;
 
     public int LMR_DepthReduction { get; set; } = 1;
 
