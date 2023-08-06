@@ -156,8 +156,8 @@ public sealed partial class Engine
                     && !_isFollowingPV
                     && !isInCheck
                     //&& !newPosition.IsInCheck()
-                    //&& !move.IsCapture()
-                    //&& move.PromotedPiece() == default
+                    && !move.IsCapture()
+                    && move.PromotedPiece() == default
                     )
                 {
                     // Search with reduced depth
