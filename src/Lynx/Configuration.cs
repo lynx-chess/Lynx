@@ -155,7 +155,7 @@ public sealed class EngineSettings
 
     public double DecisionTimePercentageToStopSearching { get; set; } = 0.4;
 
-    public int LMR_FullDepthMoves { get; set; } = 5;
+    public int LMR_FullDepthMoves { get; set; } = 3;
 
     public int LMR_ReductionLimit { get; set; } = 3;
 
