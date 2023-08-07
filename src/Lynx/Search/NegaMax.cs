@@ -49,6 +49,10 @@ public sealed partial class Engine
 
         bool isInCheck = position.IsInCheck();
 
+        if (isInCheck)
+        {
+            ++targetDepth;
+        }
         if (ply >= targetDepth)
         {
             foreach (var candidateMove in position.AllPossibleMoves(Game.MovePool))
@@ -121,10 +125,6 @@ public sealed partial class Engine
             isAnyMoveValid = true;
 
             PrintPreMove(in position, ply, move);
-            if (newPosition.IsInCheck())
-            {
-                ++targetDepth;
-            }
 
             // Before making a move
             var oldValue = Game.HalfMovesWithoutCaptureOrPawnMove;
