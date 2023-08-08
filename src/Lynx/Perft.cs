@@ -79,7 +79,7 @@ public static class Perft
 
                 if (position.WasProduceByAValidMove())
                 {
-                    nodes = ResultsImpl(position, depth - 1, nodes);
+                    nodes = ResultsImplUnmakeMove(position, depth - 1, nodes);
                 }
                 //position.UnmakeMove(move, _gameStates.Pop());
                 position.UnmakeMove(move, state);

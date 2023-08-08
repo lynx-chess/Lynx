@@ -203,7 +203,6 @@ public struct Position
         UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
     }
 
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public GameState MakeMove(Move move)
     {
