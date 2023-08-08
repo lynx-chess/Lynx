@@ -155,7 +155,7 @@ public struct Position
         {
             var pawnPush = +8 - ((int)oldSide * 16);
             var enPassantSquare = sourceSquare + pawnPush;
-            Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
+            Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {(BoardSquare)enPassantSquare}");
 
             EnPassant = (BoardSquare)enPassantSquare;
             UniqueIdentifier ^= ZobristTable.EnPassantHash(enPassantSquare);
@@ -275,7 +275,7 @@ public struct Position
         {
             var pawnPush = +8 - ((int)oldSide * 16);
             var enPassantSquare = sourceSquare + pawnPush;
-            Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
+            Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {(BoardSquare)enPassantSquare}");
 
             EnPassant = (BoardSquare)enPassantSquare;
             UniqueIdentifier ^= ZobristTable.EnPassantHash(enPassantSquare);
@@ -380,11 +380,11 @@ public struct Position
                 OccupancyBitBoards[oppositeSide].SetBit(targetSquare);
             }
         }
-        else if (move.IsDoublePawnPush())
-        {
-            EnPassant = gameState.EnPassant;
-            UniqueIdentifier ^= ZobristTable.EnPassantHash((int)EnPassant);
-        }
+        //else if (move.IsDoublePawnPush())
+        //{
+        //    EnPassant = gameState.EnPassant;
+        //    UniqueIdentifier ^= ZobristTable.EnPassantHash((int)EnPassant);
+        //}
         else if (move.IsShortCastle())
         {
             var rookSourceSquare = Utils.ShortCastleRookSourceSquare(Side);
@@ -420,10 +420,13 @@ public struct Position
 
         OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
 
-        // Updating castling rights
+        // Updating castling and enpassant rights
         Castle = gameState.Castle;
+        EnPassant = gameState.EnPassant;
 
-        UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
+        UniqueIdentifier ^=
+            ZobristTable.CastleHash(Castle)
+            ^ ZobristTable.EnPassantHash((int)EnPassant);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -469,7 +472,7 @@ public struct Position
     /// <summary>
     /// Lightweight version of <see cref="IsValid"/>
     /// False if the opponent king is in check.
-    /// This method is meant to be invoked only after <see cref="Position(Position, Move)"/>
+    /// This method is meant to be invoked only after <see cref="Position(Position, Move)"/> or <see cref="MakeMove(int)"/>
     /// </summary>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

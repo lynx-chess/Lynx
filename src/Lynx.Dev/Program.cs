@@ -1043,7 +1043,7 @@ static void TranspositionTable()
 static void UnmakeMove()
 {
     var pos = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq");
-    var a = Perft.ResultsImplUnmakeMove(pos, 1, default);
+    var a = Perft.ResultsImplMakeUnmakeMove(pos, 1, default);
 
     TestMoveGen(Constants.InitialPositionFEN);
     TestMoveGen(Constants.TTPositionFEN);
@@ -1072,7 +1072,7 @@ static void UnmakeMove()
 
             Console.WriteLine($"Unmaking {move.ToEPDString()} in\t{position.FEN()}");
 
-            position.UnmakeMove(move, savedState);
+            //position.UnmakeMove(move, savedState);
 
             Console.WriteLine($"Position\t{position.FEN()}, Zobrist key {position.UniqueIdentifier}");
 

@@ -59,7 +59,11 @@ public sealed partial class Engine
             {
                 foreach (var candidateMove in position.AllPossibleMoves(Game.MovePool))
                 {
-                    if (new Position(position, candidateMove).WasProduceByAValidMove())
+                    var gameState = position.MakeMove(candidateMove);
+                    bool isValid = position.WasProduceByAValidMove();
+                    position.UnmakeMove(candidateMove, gameState);
+
+                    if (isValid)
                     {
                         return QuiescenceSearch(position, ply, alpha, beta);
                     }
@@ -120,9 +124,11 @@ public sealed partial class Engine
 
         foreach (var move in pseudoLegalMoves)
         {
-            var newPosition = new Position(position, move);
-            if (!newPosition.WasProduceByAValidMove())
+            var gameState = position.MakeMove(move);
+
+            if (!position.WasProduceByAValidMove())
             {
+                position.UnmakeMove(move, gameState);
                 continue;
             }
             isAnyMoveValid = true;
@@ -132,7 +138,7 @@ public sealed partial class Engine
             // Before making a move
             var oldValue = Game.HalfMovesWithoutCaptureOrPawnMove;
             Game.HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, Game.HalfMovesWithoutCaptureOrPawnMove);
-            var isThreeFoldRepetition = !Game.PositionHashHistory.Add(newPosition.UniqueIdentifier);
+            var isThreeFoldRepetition = !Game.PositionHashHistory.Add(position.UniqueIdentifier);
 
             int evaluation;
             if (isThreeFoldRepetition || Game.Is50MovesRepetition())
@@ -146,7 +152,7 @@ public sealed partial class Engine
             }
             else if (movesSearched == 0)
             {
-                evaluation = -NegaMax(newPosition, minDepth, targetDepth, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
+                evaluation = -NegaMax(position, minDepth, targetDepth, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
             }
             else
             {
@@ -160,7 +166,7 @@ public sealed partial class Engine
                     && move.PromotedPiece() == default)
                 {
                     // Search with reduced depth
-                    evaluation = -NegaMax(newPosition, minDepth, targetDepth, ply + 1 + Configuration.EngineSettings.LMR_DepthReduction, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
+                    evaluation = -NegaMax(position, minDepth, targetDepth, ply + 1 + Configuration.EngineSettings.LMR_DepthReduction, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
                 }
                 else
                 {
@@ -178,17 +184,17 @@ public sealed partial class Engine
                         // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
 
                         // Search with full depth but narrowed score bandwidth
-                        evaluation = -NegaMax(newPosition, minDepth, targetDepth, ply + 1, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
+                        evaluation = -NegaMax(position, minDepth, targetDepth, ply + 1, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
 
                         if (evaluation > alpha && evaluation < beta)
                         {
                             // Hipothesis invalidated -> search with full depth and full score bandwidth
-                            evaluation = -NegaMax(newPosition, minDepth, targetDepth, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
+                            evaluation = -NegaMax(position, minDepth, targetDepth, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
                         }
                     }
                     else
                     {
-                        evaluation = -NegaMax(newPosition, minDepth, targetDepth, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
+                        evaluation = -NegaMax(position, minDepth, targetDepth, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
                     }
                 }
             }
@@ -197,8 +203,9 @@ public sealed partial class Engine
             Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
             if (!isThreeFoldRepetition)
             {
-                Game.PositionHashHistory.Remove(newPosition.UniqueIdentifier);
+                Game.PositionHashHistory.Remove(position.UniqueIdentifier);
             }
+            position.UnmakeMove(move, gameState);
 
             PrintMove(ply, move, evaluation);
 
@@ -317,9 +324,10 @@ public sealed partial class Engine
 
         foreach (var move in movesToEvaluate)
         {
-            var newPosition = new Position(position, move);
-            if (!newPosition.WasProduceByAValidMove())
+            var gameState = position.MakeMove(move);
+            if (!position.WasProduceByAValidMove())
             {
+                position.UnmakeMove(move, gameState);
                 continue;
             }
             isAnyMoveValid = true;
@@ -329,7 +337,7 @@ public sealed partial class Engine
             // Before making a move
             var oldValue = Game.HalfMovesWithoutCaptureOrPawnMove;
             Game.HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, Game.HalfMovesWithoutCaptureOrPawnMove);
-            var isThreeFoldRepetition = !Game.PositionHashHistory.Add(newPosition.UniqueIdentifier);
+            var isThreeFoldRepetition = !Game.PositionHashHistory.Add(position.UniqueIdentifier);
 
             int evaluation;
             if (isThreeFoldRepetition || Game.Is50MovesRepetition())
@@ -343,15 +351,16 @@ public sealed partial class Engine
             }
             else
             {
-                evaluation = -QuiescenceSearch(newPosition, ply + 1, -beta, -alpha);
+                evaluation = -QuiescenceSearch(position, ply + 1, -beta, -alpha);
             }
 
             // After making a move
             Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
             if (!isThreeFoldRepetition)
             {
-                Game.PositionHashHistory.Remove(newPosition.UniqueIdentifier);
+                Game.PositionHashHistory.Remove(position.UniqueIdentifier);
             }
+            position.UnmakeMove(move, gameState);
 
             PrintMove(ply, move, evaluation);
 
@@ -381,7 +390,11 @@ public sealed partial class Engine
 
             foreach (var move in position.AllPossibleMoves(Game.MovePool))
             {
-                if (new Position(position, move).WasProduceByAValidMove())
+                var gameState = position.MakeMove(move);
+                bool isValid = position.WasProduceByAValidMove();
+                position.UnmakeMove(move, gameState);
+
+                if (isValid)
                 {
                     return alpha;
                 }
