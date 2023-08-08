@@ -430,7 +430,7 @@ public struct Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void MakeNullMove()
+    public GameState MakeNullMove()
     {
         Side = (Side)Utils.OppositeSide(Side);
         var oldEnPassant = EnPassant;
@@ -439,6 +439,8 @@ public struct Position
         UniqueIdentifier ^=
             ZobristTable.SideHash()
             ^ ZobristTable.EnPassantHash((int)oldEnPassant);
+
+        return new GameState(-1, -1, oldEnPassant);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

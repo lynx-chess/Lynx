@@ -92,9 +92,11 @@ public sealed partial class Engine
             && (!isVerifyingNullMoveCutOff || ply < targetDepth - 1))    // verify == true and ply == targetDepth -1 -> No null pruning, since verification will not be possible)
                                                                          // following pv?
         {
-            var newPosition = new Position(position, nullMove: true);
+            var gameState = position.MakeNullMove();
 
-            var evaluation = -NegaMax(newPosition, minDepth, targetDepth, ply + 1 + Configuration.EngineSettings.NullMovePruning_R, -beta, -beta + 1, isVerifyingNullMoveCutOff, ancestorWasNullMove: true);
+            var evaluation = -NegaMax(position, minDepth, targetDepth, ply + 1 + Configuration.EngineSettings.NullMovePruning_R, -beta, -beta + 1, isVerifyingNullMoveCutOff, ancestorWasNullMove: true);
+
+            position.UnMakeNullMove(gameState);
 
             if (evaluation >= beta) // Fail high
             {

@@ -485,7 +485,7 @@ static void _32_Make_Move()
             game.CurrentPosition.Print();
 
             move.Print();
-            game.MakeMove(move);
+            var gameState = game.MakeMove(move);
             game.CurrentPosition.Print();
 
             Console.WriteLine("White occupancy:");
@@ -494,7 +494,7 @@ static void _32_Make_Move()
             Console.WriteLine("Black occupancy:");
             game.CurrentPosition.OccupancyBitBoards[(int)Side.Black].Print();
 
-            game.RevertLastMove();
+            game.RevertLastMove(move, gameState);
         }
     }
 
@@ -508,10 +508,10 @@ static void _32_Make_Move()
                 game.CurrentPosition.Print();
 
                 move.Print();
-                game.MakeMove(move);
+                var gameState = game.MakeMove(move);
                 game.CurrentPosition.Print();
 
-                game.RevertLastMove();
+                game.RevertLastMove(move, gameState);
             }
         }
     }

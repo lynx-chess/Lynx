@@ -10,7 +10,6 @@ public sealed class Game
     public Move[] MovePool { get; } = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
 
     public List<Move> MoveHistory { get; }
-    public List<Position> PositionHistory { get; }
     public HashSet<long> PositionHashHistory { get; }
 
     public int HalfMovesWithoutCaptureOrPawnMove { get; set; }
@@ -27,7 +26,6 @@ public sealed class Game
         CurrentPosition = new Position(parsedFen);
 
         MoveHistory = new(150);
-        PositionHistory = new(150);
         PositionHashHistory = new(150) { CurrentPosition.UniqueIdentifier };
 
         HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
@@ -38,7 +36,6 @@ public sealed class Game
         CurrentPosition = position;
 
         MoveHistory = new(150);
-        PositionHistory = new(150);
         PositionHashHistory = new(150) { position.UniqueIdentifier };
     }
 
@@ -81,32 +78,26 @@ public sealed class Game
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool Is50MovesRepetition(int halfMovesWithoutCaptureOrPawnMove) => halfMovesWithoutCaptureOrPawnMove >= 100;
 
-    public bool MakeMove(Move moveToPlay)
+    public GameState MakeMove(Move moveToPlay)
     {
-        PositionHistory.Add(CurrentPosition);
-        CurrentPosition = new Position(CurrentPosition, moveToPlay);
+        var gameState = CurrentPosition.MakeMove(moveToPlay);
         MoveHistory.Add(moveToPlay);
 
         if (!CurrentPosition.WasProduceByAValidMove())
         {
-            RevertLastMove();
-            return false;
+            RevertLastMove(moveToPlay, gameState);
         }
 
         PositionHashHistory.Add(CurrentPosition.UniqueIdentifier);
 
         HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveToPlay, HalfMovesWithoutCaptureOrPawnMove);
 
-        return true;
+        return gameState;
     }
 
-    internal void RevertLastMove()
+    internal void RevertLastMove(Move playedMove, GameState gameState)
     {
-        if (PositionHistory.Count != 0)
-        {
-            CurrentPosition = PositionHistory[^1];
-            PositionHistory.Remove(CurrentPosition);
-        }
+        CurrentPosition.UnmakeMove(playedMove, gameState);
 
         if (MoveHistory.Count != 0)
         {
