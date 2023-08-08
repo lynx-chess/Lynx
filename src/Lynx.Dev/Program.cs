@@ -47,7 +47,8 @@ using System.Threading.Channels;
 //FileAndRankMasks();
 //EnhancedPawnEvaluation();
 //RookEvaluation();
-TranspositionTable();
+//TranspositionTable();
+UnmakeMove();
 
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
 const string TrickyPosition = Constants.TrickyTestPositionFEN;
@@ -1037,4 +1038,51 @@ static void TranspositionTable()
     transpositionTable.RecordHash(position, targetDepth: 5, ply: 3, eval: +31, nodeType: NodeType.Beta, move: 1234);
     entry = transpositionTable.ProbeHash(position, targetDepth: 5, ply: 3, alpha: 20, beta: 30);
     Console.WriteLine(entry); // Expected 30
+}
+
+static void UnmakeMove()
+{
+    TestMoveGen(Constants.InitialPositionFEN);
+    TestMoveGen(Constants.TTPositionFEN);
+    TestMoveGen(Constants.CmkTestPositionFEN);
+    TestMoveGen(Constants.ComplexPositionFEN);
+    TestMoveGen(Constants.TrickyTestPositionFEN);
+
+    static void TestMoveGen(string fen)
+    {
+        var position = new Position(fen);
+        Console.WriteLine($"**Position\t{position.FEN()}, Zobrist key {position.UniqueIdentifier}**");
+
+        var allMoves = position.AllPossibleMoves();
+
+        var oldZobristKey = position.UniqueIdentifier;
+        foreach (var move in allMoves)
+        {
+            Console.WriteLine($"Trying {move.ToEPDString()} in\t{position.FEN()}");
+
+            var newPosition = new Position(position, move);
+            var savedState = position.MakeMove(move);
+
+            Console.WriteLine($"Position\t{newPosition.FEN()}, Zobrist key {newPosition.UniqueIdentifier}");
+            Console.WriteLine($"Position\t{position.FEN()}, Zobrist key {position.UniqueIdentifier}");
+
+
+            Console.WriteLine($"Unmaking {move.ToEPDString()} in\t{position.FEN()}");
+
+            position.UnmakeMove(move, savedState);
+
+            Console.WriteLine($"Position\t{position.FEN()}, Zobrist key {position.UniqueIdentifier}");
+
+            if (oldZobristKey != position.UniqueIdentifier)
+            {
+                Console.WriteLine($"{oldZobristKey} != {position.UniqueIdentifier}");
+                throw new();
+            }
+
+            Console.WriteLine("----------------------------------------------------------------------------");
+        }
+        Console.WriteLine();
+        Console.WriteLine();
+    }
+
 }

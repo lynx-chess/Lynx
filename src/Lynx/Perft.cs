@@ -13,7 +13,7 @@ public static class Perft
     {
         var sw = new Stopwatch();
         sw.Start();
-        var nodes = ResultsImpl(position, depth, 0);
+        var nodes = ResultsImplUnmakeMove(position, depth, 0);
         sw.Stop();
 
         PrintPerftResult(depth, nodes, sw);
@@ -53,6 +53,36 @@ public static class Perft
                 {
                     nodes = ResultsImpl(newPosition, depth - 1, nodes);
                 }
+            }
+
+            return nodes;
+        }
+
+        return ++nodes;
+    }
+
+    /// <summary>
+    /// Proper implementation, used by <see cref="DivideImpl(Position, int, long)"/> as well
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="depth"></param>
+    /// <param name="nodes"></param>
+    /// <returns></returns>
+    internal static long ResultsImplUnmakeMove(Position position, int depth, long nodes)
+    {
+        if (depth != 0)
+        {
+            foreach (var move in MoveGenerator.GenerateAllMoves(position))
+            {
+                //_gameStates.Push(position.MakeMove(move));
+                var state = position.MakeMove(move);
+
+                if (position.WasProduceByAValidMove())
+                {
+                    nodes = ResultsImpl(position, depth - 1, nodes);
+                }
+                //position.UnmakeMove(move, _gameStates.Pop());
+                position.UnmakeMove(move, state);
             }
 
             return nodes;

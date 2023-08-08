@@ -366,7 +366,8 @@ public struct Position
             if (move.IsEnPassant())
             {
                 var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
+                Utils.Assert(OccupancyBitBoards[(int)Side.Both].GetBit(capturedPawnSquare) == default,
+                    $"Expected empty {capturedPawnSquare}");
 
                 PieceBitBoards[oppositePawnIndex].SetBit(capturedPawnSquare);
                 OccupancyBitBoards[oppositeSide].SetBit(capturedPawnSquare);
