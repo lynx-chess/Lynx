@@ -26,13 +26,16 @@ public class Position
 
     public BoardSquare EnPassant { get; private set; }
 
-    public int Castle { get; private set; }
+    /// <summary>
+    /// See <see cref="<CastlingRights"/>
+    /// </summary>
+    public byte Castle { get; private set; }
 
     public Position(string fen) : this(FENParser.ParseFEN(fen))
     {
     }
 
-    public Position((bool Success, BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, int Castle, BoardSquare EnPassant,
+    public Position((bool Success, BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, byte Castle, BoardSquare EnPassant,
         int HalfMoveClock, int FullMoveCounter) parsedFEN)
     {
         PieceBitBoards = parsedFEN.PieceBitBoards;
@@ -207,7 +210,7 @@ public class Position
     public GameState MakeMove(Move move)
     {
         int capturedPiece = -1;
-        int castleCopy = Castle;
+        byte castleCopy = Castle;
         BoardSquare enpassantCopy = EnPassant;
         long uniqueIdentifierCopy = UniqueIdentifier;
 
@@ -420,7 +423,7 @@ public class Position
             ZobristTable.SideHash()
             ^ ZobristTable.EnPassantHash((int)oldEnPassant);
 
-        return new GameState(-1, -1, oldEnPassant, oldUniqueIdentifier);
+        return new GameState(-1, byte.MaxValue, oldEnPassant, oldUniqueIdentifier);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

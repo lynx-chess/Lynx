@@ -13,7 +13,7 @@ public static partial class FENParser
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    public static (bool Success, BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, int Castle, BoardSquare EnPassant,
+    public static (bool Success, BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, byte Castle, BoardSquare EnPassant,
         int HalfMoveClock, int FullMoveCounter) ParseFEN(string fen)
     {
         fen = fen.Trim();
@@ -27,7 +27,7 @@ public static partial class FENParser
 
         bool success;
         Side side = Side.Both;
-        int castle = 0;
+        byte castle = 0;
         int halfMoveClock = 0, fullMoveCounter = 1;
         BoardSquare enPassant = BoardSquare.noSquare;
 
@@ -140,18 +140,18 @@ public static partial class FENParser
 #pragma warning restore S3358 // Ternary operators should not be nested
     }
 
-    private static int ParseCastlingRights(string castleString)
+    private static byte ParseCastlingRights(string castleString)
     {
-        int castle = 0;
+        byte castle = 0;
 
         foreach (var ch in castleString)
         {
             castle |= ch switch
             {
-                'K' => (int)CastlingRights.WK,
-                'Q' => (int)CastlingRights.WQ,
-                'k' => (int)CastlingRights.BK,
-                'q' => (int)CastlingRights.BQ,
+                'K' => (byte)CastlingRights.WK,
+                'Q' => (byte)CastlingRights.WQ,
+                'k' => (byte)CastlingRights.BK,
+                'q' => (byte)CastlingRights.BQ,
                 '-' => castle,
                 _ => throw new($"Unrecognized castling char: {ch}")
             };
