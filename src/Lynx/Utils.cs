@@ -48,11 +48,20 @@ public static class Utils
     /// <param name="side"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int OppositeSide(Side side)
-    {
-        GuardAgainstSideBoth((int)side);
+    public static int OppositeSide(Side side) => OppositeSide((int)side);
 
-        return (int)side ^ 1;     // or  (int)Side.White - (int)side
+    /// <summary>
+    /// Side.Black -> Side.White
+    /// Side.White -> Side.Black
+    /// </summary>
+    /// <param name="side"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int OppositeSide(int side)
+    {
+        GuardAgainstSideBoth(side);
+
+        return side ^ 1;     // or  (int)Side.White - side
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -93,6 +102,26 @@ public static class Utils
         GuardAgainstSideBoth(side);
 
         return (int)BoardSquare.a8 + (7 * 8 * side);
+    }
+
+    public static (int Source, int Target) ShortCastleRookSourceAndTargetSquare(Side side) => ShortCastleRookSourceAndTargetSquare((int)side);
+    public static (int Source, int Target) ShortCastleRookSourceAndTargetSquare(int side)
+    {
+        GuardAgainstSideBoth(side);
+
+        return (
+            (int)BoardSquare.h8 + (7 * 8 * side),
+            Constants.BlackShortCastleRookSquare + (7 * 8 * side));
+    }
+
+    public static (int Source, int Target) LongCastleRookSourceAndTargetSquare(Side side) => LongCastleRookSourceAndTargetSquare((int)side);
+    public static (int Source, int Target) LongCastleRookSourceAndTargetSquare(int side)
+    {
+        GuardAgainstSideBoth(side);
+
+        return (
+            (int)BoardSquare.a8 + (7 * 8 * side),
+            Constants.BlackLongCastleRookSquare + (7 * 8 * side));
     }
 
     /// <summary>
