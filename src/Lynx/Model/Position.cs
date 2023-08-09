@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Lynx.Model;
 
-public struct Position
+public class Position
 {
     public string FEN() => CalculateFEN();
 
