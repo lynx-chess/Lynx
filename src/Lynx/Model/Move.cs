@@ -20,6 +20,7 @@ namespace Lynx.Model;
 /// 0001 0000 0000 0000 0000 0000 0000      0x100_0000  Long castling flag
 /// Total: 24 bits -> fits an int
 /// Could be reduced to 16 bits -> see https://www.chessprogramming.org/Encoding_Moves
+/// source + target + reg/en passant/castling/promotion + promotion piece
 /// </para>
 /// </summary>
 /// </summary>

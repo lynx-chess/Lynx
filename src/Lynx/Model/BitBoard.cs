@@ -78,6 +78,29 @@ public static class BitBoardExtensions
         return board != default && WithoutLS1B(board) == default;
     }
 
+    /// <summary>
+    /// https://github.com/SebLague/Chess-Challenge/blob/4ef9025ebf5f3386e416ce8244bbdf3fc488f95b/Chess-Challenge/src/Framework/Chess/Move%20Generation/Bitboards/BitBoardUtility.cs#L32
+    /// </summary>
+    /// <param name="bitboard"></param>
+    /// <param name="squareIndex"></param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void ToggleBit(this ref BitBoard bitboard, int squareIndex)
+    {
+        bitboard ^= 1ul << squareIndex;
+    }
+
+    /// <summary>
+    /// https://github.com/SebLague/Chess-Challenge/blob/4ef9025ebf5f3386e416ce8244bbdf3fc488f95b/Chess-Challenge/src/Framework/Chess/Move%20Generation/Bitboards/BitBoardUtility.cs#L37
+    /// </summary>
+    /// <param name="bitboard"></param>
+    /// <param name="squareA"></param>
+    /// <param name="squareB"></param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void ToggleBits(this ref BitBoard bitboard, int squareA, int squareB)
+    {
+        bitboard ^= (1ul << squareA | 1ul << squareB);
+    }
+
     #region Static methods
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
