@@ -15,7 +15,7 @@ public enum NodeType : byte
 
 public struct TranspositionTableElement
 {
-    private sbyte _depth;
+    private byte _depth;
     //private byte _age;
     private short _score;
 
@@ -45,7 +45,7 @@ public struct TranspositionTableElement
     /// <summary>
     /// How deep the recorded search went. For us this numberis targetDepth - ply
     /// </summary>
-    public int Depth { readonly get => _depth; set => _depth = Convert.ToSByte(value); }
+    public int Depth { readonly get => _depth; set => _depth = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref value, 1))[0]; }
 
     //public int Age { readonly get => _age; set => _age = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref value, 1))[0]; }
 
@@ -152,11 +152,15 @@ public static class TranspositionTableExtensions
         // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
         var score = RecalculateMateScores(eval, -ply);
 
+        var theoreticalDepth = targetDepth - ply;
+
         entry.Key = position.UniqueIdentifier;
         entry.Score = score;
-        entry.Depth = targetDepth - ply;
         entry.Move = move ?? 0;
         entry.Type = nodeType;
+
+        // When in QSearch, depth doesn't really matter, since all positions will get 'resolved'
+        entry.Depth = theoreticalDepth <= 0 ? 0 : theoreticalDepth;
     }
 
     /// <summary>
