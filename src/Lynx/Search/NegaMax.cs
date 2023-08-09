@@ -7,7 +7,6 @@ public sealed partial class Engine
     /// <summary>
     /// NegaMax algorithm implementation using alpha-beta pruning, quiescence search and Iterative Deepeting Depth-First Search (IDDFS)
     /// </summary>
-    /// <param name="position"></param>
     /// <param name="minDepth">Minimum number of depth (plies), regardless of time constrains</param>
     /// <param name="targetDepth"></param>
     /// <param name="ply">Current depth or number of half moves</param>
@@ -22,8 +21,10 @@ public sealed partial class Engine
     /// <param name="isVerifyingNullMoveCutOff">Indicates if the search is verifying an ancestors null-move that failed high, or the root node</param>
     /// <param name="ancestorWasNullMove">Indicates whether the immediate ancestor node was a null move</param>
     /// <returns></returns>
-    private int NegaMax(Position position, int minDepth, int targetDepth, int ply, int alpha, int beta, bool isVerifyingNullMoveCutOff, bool ancestorWasNullMove = false)
+    private int NegaMax(int minDepth, int targetDepth, int ply, int alpha, int beta, bool isVerifyingNullMoveCutOff, bool ancestorWasNullMove = false)
     {
+        var position = Game.CurrentPosition;
+
         _maxDepthReached[ply] = ply;
         _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
 
@@ -63,7 +64,7 @@ public sealed partial class Engine
 
                 if (isValid)
                 {
-                    return QuiescenceSearch(position, ply, alpha, beta);
+                    return QuiescenceSearch(ply, alpha, beta);
                 }
             }
 
@@ -91,7 +92,7 @@ public sealed partial class Engine
         {
             var gameState = position.MakeNullMove();
 
-            var evaluation = -NegaMax(position, minDepth, targetDepth, ply + 1 + Configuration.EngineSettings.NullMovePruning_R, -beta, -beta + 1, isVerifyingNullMoveCutOff, ancestorWasNullMove: true);
+            var evaluation = -NegaMax(minDepth, targetDepth, ply + 1 + Configuration.EngineSettings.NullMovePruning_R, -beta, -beta + 1, isVerifyingNullMoveCutOff, ancestorWasNullMove: true);
 
             position.UnMakeNullMove(gameState);
 
@@ -119,7 +120,7 @@ public sealed partial class Engine
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
-        var pseudoLegalMoves = SortMoves(position.AllPossibleMoves(Game.MovePool), position, ply, ttBestMove);
+        var pseudoLegalMoves = SortMoves(position.AllPossibleMoves(Game.MovePool), ply, ttBestMove);
 
         foreach (var move in pseudoLegalMoves)
         {
@@ -151,7 +152,7 @@ public sealed partial class Engine
             }
             else if (movesSearched == 0)
             {
-                evaluation = -NegaMax(position, minDepth, targetDepth, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
+                evaluation = -NegaMax(minDepth, targetDepth, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
             }
             else
             {
@@ -165,7 +166,7 @@ public sealed partial class Engine
                     && move.PromotedPiece() == default)
                 {
                     // Search with reduced depth
-                    evaluation = -NegaMax(position, minDepth, targetDepth, ply + 1 + Configuration.EngineSettings.LMR_DepthReduction, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
+                    evaluation = -NegaMax(minDepth, targetDepth, ply + 1 + Configuration.EngineSettings.LMR_DepthReduction, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
                 }
                 else
                 {
@@ -183,17 +184,17 @@ public sealed partial class Engine
                         // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
 
                         // Search with full depth but narrowed score bandwidth
-                        evaluation = -NegaMax(position, minDepth, targetDepth, ply + 1, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
+                        evaluation = -NegaMax(minDepth, targetDepth, ply + 1, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
 
                         if (evaluation > alpha && evaluation < beta)
                         {
                             // Hipothesis invalidated -> search with full depth and full score bandwidth
-                            evaluation = -NegaMax(position, minDepth, targetDepth, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
+                            evaluation = -NegaMax(minDepth, targetDepth, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
                         }
                     }
                     else
                     {
-                        evaluation = -NegaMax(position, minDepth, targetDepth, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
+                        evaluation = -NegaMax(minDepth, targetDepth, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
                     }
                 }
             }
@@ -271,7 +272,6 @@ public sealed partial class Engine
     /// <summary>
     /// Quiescence search implementation, NegaMax alpha-beta style, fail-hard
     /// </summary>
-    /// <param name="position"></param>
     /// <param name="ply"></param>
     /// <param name="alpha">
     /// Best score White can achieve, assuming best play by Black.
@@ -282,8 +282,10 @@ public sealed partial class Engine
     /// Defaults to the works possible score for Black, Int.MaxValue
     /// </param>
     /// <returns></returns>
-    public int QuiescenceSearch(Position position, int ply, int alpha, int beta)
+    public int QuiescenceSearch(int ply, int alpha, int beta)
     {
+        var position = Game.CurrentPosition;
+
         _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
         //_searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
 
@@ -315,8 +317,7 @@ public sealed partial class Engine
             return staticEvaluation;  // TODO check if in check or drawn position
         }
 
-        var localPosition = position;
-        var movesToEvaluate = generatedMoves.OrderByDescending(move => ScoreMove(move, localPosition, ply, false));
+        var movesToEvaluate = generatedMoves.OrderByDescending(move => ScoreMove(move, ply, false));
 
         Move? bestMove = null;
         bool isAnyMoveValid = false;
@@ -350,7 +351,7 @@ public sealed partial class Engine
             }
             else
             {
-                evaluation = -QuiescenceSearch(position, ply + 1, -beta, -alpha);
+                evaluation = -QuiescenceSearch(ply + 1, -beta, -alpha);
             }
 
             // After making a move
