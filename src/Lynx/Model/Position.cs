@@ -223,14 +223,17 @@ public class Position
         var newPiece = piece;
         if (promotedPiece != default)
         {
+            PieceBitBoards[piece].PopBit(sourceSquare);
+            PieceBitBoards[promotedPiece].SetBit(targetSquare);
+
             newPiece = promotedPiece;
         }
+        else
+        {
+            PieceBitBoards[piece].ToggleBits(sourceSquare, targetSquare);
+        }
 
-        PieceBitBoards[piece].PopBit(sourceSquare);
-        OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
-
-        PieceBitBoards[newPiece].SetBit(targetSquare);
-        OccupancyBitBoards[(int)Side].SetBit(targetSquare);
+        OccupancyBitBoards[(int)Side].ToggleBits(sourceSquare, targetSquare);
 
         UniqueIdentifier ^=
             ZobristTable.SideHash()
@@ -287,11 +290,8 @@ public class Position
             var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
             var rookIndex = (int)Piece.R + offset;
 
-            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
-
-            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+            PieceBitBoards[rookIndex].ToggleBits(rookSourceSquare, rookTargetSquare);
+            OccupancyBitBoards[(int)Side].ToggleBits(rookSourceSquare, rookTargetSquare);
 
             UniqueIdentifier ^=
                 ZobristTable.PieceHash(rookSourceSquare, rookIndex)
@@ -303,11 +303,8 @@ public class Position
             var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
             var rookIndex = (int)Piece.R + offset;
 
-            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
-
-            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+            PieceBitBoards[rookIndex].ToggleBits(rookSourceSquare, rookTargetSquare);
+            OccupancyBitBoards[(int)Side].ToggleBits(rookSourceSquare, rookTargetSquare);
 
             UniqueIdentifier ^=
                 ZobristTable.PieceHash(rookSourceSquare, rookIndex)
@@ -344,17 +341,17 @@ public class Position
         int piece = move.Piece();
         int promotedPiece = move.PromotedPiece();
 
-        var newPiece = piece;
         if (promotedPiece != default)
         {
-            newPiece = promotedPiece;
+            PieceBitBoards[promotedPiece].PopBit(targetSquare);
+            PieceBitBoards[piece].SetBit(sourceSquare);
+        }
+        else
+        {
+            PieceBitBoards[piece].ToggleBits(sourceSquare, targetSquare);
         }
 
-        PieceBitBoards[newPiece].PopBit(targetSquare);
-        OccupancyBitBoards[(int)Side].PopBit(targetSquare);
-
-        PieceBitBoards[piece].SetBit(sourceSquare);
-        OccupancyBitBoards[(int)Side].SetBit(sourceSquare);
+        OccupancyBitBoards[(int)Side].ToggleBits(sourceSquare, targetSquare);
 
         if (move.IsCapture())
         {
@@ -382,11 +379,8 @@ public class Position
             var rookTargetSquare = Utils.ShortCastleRookTargetSquare(Side);
             var rookIndex = (int)Piece.R + offset;
 
-            PieceBitBoards[rookIndex].SetBit(rookSourceSquare);
-            OccupancyBitBoards[(int)Side].SetBit(rookSourceSquare);
-
-            PieceBitBoards[rookIndex].PopBit(rookTargetSquare);
-            OccupancyBitBoards[(int)Side].PopBit(rookTargetSquare);
+            PieceBitBoards[rookIndex].ToggleBits(rookSourceSquare, rookTargetSquare);
+            OccupancyBitBoards[(int)Side].ToggleBits(rookSourceSquare, rookTargetSquare);
         }
         else if (move.IsLongCastle())
         {
@@ -394,11 +388,8 @@ public class Position
             var rookTargetSquare = Utils.LongCastleRookTargetSquare(Side);
             var rookIndex = (int)Piece.R + offset;
 
-            PieceBitBoards[rookIndex].SetBit(rookSourceSquare);
-            OccupancyBitBoards[(int)Side].SetBit(rookSourceSquare);
-
-            PieceBitBoards[rookIndex].PopBit(rookTargetSquare);
-            OccupancyBitBoards[(int)Side].PopBit(rookTargetSquare);
+            PieceBitBoards[rookIndex].ToggleBits(rookSourceSquare, rookTargetSquare);
+            OccupancyBitBoards[(int)Side].ToggleBits(rookSourceSquare, rookTargetSquare);
         }
 
         OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
