@@ -138,7 +138,8 @@ public sealed partial class Engine
 
         SearchResult resultToReturn = SearchBestMove(minDepth, maxDepth, decisionTime);
 
-        if (!resultToReturn.IsCancelled && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
+        Game.ResetCurrentPositionToBeforeSearchState();
+        if (resultToReturn.BestMove != default && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
         {
             Game.MakeMove(resultToReturn.BestMove);
         }

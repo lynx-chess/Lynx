@@ -97,7 +97,7 @@ public static class Attacks
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsSquaredAttackedBySide(int squaredIndex, in Position position, Side sideToMove) =>
+    public static bool IsSquaredAttackedBySide(int squaredIndex, Position position, Side sideToMove) =>
         IsSquaredAttacked(squaredIndex, sideToMove, position.PieceBitBoards, position.OccupancyBitBoards);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

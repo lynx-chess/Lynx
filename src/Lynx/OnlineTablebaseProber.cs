@@ -43,7 +43,7 @@ public static class OnlineTablebaseProber
         TypeInfoResolver = SourceGenerationContext.Default
     };
 
-    public static async Task<(int MateScore, Move BestMove)> RootSearch(Position position, HashSet<long> positionHistory, int halfMovesWithoutCaptureOrPawnMove, CancellationToken cancellationToken)
+    public static async Task<(int MateScore, Move BestMove)> RootSearch(Position position, HashSet<long> positionHashHistory, int halfMovesWithoutCaptureOrPawnMove, CancellationToken cancellationToken)
     {
         if (!Configuration.EngineSettings.UseOnlineTablebaseInRootPositions || position.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
         {
@@ -128,14 +128,14 @@ public static class OnlineTablebaseProber
                             throw new AssertException($"{move!.Uci} should be parsable from position {fen}");
                         }
 
-                        var newPosition = new Position(in position, moveCandidate.Value);
+                        var newPosition = new Position(position, moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
                         bool isFiftyMovesRepetition = Game.Is50MovesRepetition(halfMovesWithoutCaptureOrPawnMove);
                         halfMovesWithoutCaptureOrPawnMove = oldValue;
 
-                        if (!Game.IsThreefoldRepetition(positionHistory, newPosition) && !isFiftyMovesRepetition) // Attacking: any move that draws is discarded
+                        if (!Game.IsThreefoldRepetition(positionHashHistory, newPosition) && !isFiftyMovesRepetition) // Attacking: any move that draws is discarded
                         {
                             bestMove = move;
                             break;
@@ -186,14 +186,14 @@ public static class OnlineTablebaseProber
                             throw new AssertException($"{move!.Uci} should be parsable from position {fen}");
                         }
 
-                        var newPosition = new Position(in position, moveCandidate.Value);
+                        var newPosition = new Position(position, moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
                         bool isFiftyMovesRepetition = Game.Is50MovesRepetition(halfMovesWithoutCaptureOrPawnMove);
                         halfMovesWithoutCaptureOrPawnMove = oldValue;
 
-                        if (Game.IsThreefoldRepetition(positionHistory, newPosition) || isFiftyMovesRepetition)     // Defending: any possible move that draws is good
+                        if (Game.IsThreefoldRepetition(positionHashHistory, newPosition) || isFiftyMovesRepetition)     // Defending: any possible move that draws is good
                         {
                             bestMove = move;
                             break;
@@ -246,14 +246,14 @@ public static class OnlineTablebaseProber
                             throw new AssertException($"{move!.Uci} should be parsable from position {fen}");
                         }
 
-                        var newPosition = new Position(in position, moveCandidate.Value);
+                        var newPosition = new Position(position, moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
                         bool isFiftyMovesRepetition = Game.Is50MovesRepetition(halfMovesWithoutCaptureOrPawnMove);
                         halfMovesWithoutCaptureOrPawnMove = oldValue;
 
-                        if (!Game.IsThreefoldRepetition(positionHistory, newPosition) && !isFiftyMovesRepetition) // Attacking: any move that draws is discarded
+                        if (!Game.IsThreefoldRepetition(positionHashHistory, newPosition) && !isFiftyMovesRepetition) // Attacking: any move that draws is discarded
                         {
                             bestMove = move;
                             break;
@@ -302,14 +302,14 @@ public static class OnlineTablebaseProber
                             throw new AssertException($"{move!.Uci} should be parsable from position {fen}");
                         }
 
-                        var newPosition = new Position(in position, moveCandidate.Value);
+                        var newPosition = new Position(position, moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
                         bool isFiftyMovesRepetition = Game.Is50MovesRepetition(halfMovesWithoutCaptureOrPawnMove);
                         halfMovesWithoutCaptureOrPawnMove = oldValue;
 
-                        if (Game.IsThreefoldRepetition(positionHistory, newPosition) || isFiftyMovesRepetition)     // Defending: any possible move that draws is good
+                        if (Game.IsThreefoldRepetition(positionHashHistory, newPosition) || isFiftyMovesRepetition)     // Defending: any possible move that draws is good
                         {
                             bestMove = move;
                             break;
