@@ -1045,7 +1045,7 @@ static void TranspositionTable()
 static void UnmakeMove()
 {
     var pos = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq");
-    var a = Perft.ResultsImplMakeUnmakeMove(pos, 1, default);
+    var a = Perft.ResultsImpl(pos, 1, default);
 
     TestMoveGen(Constants.InitialPositionFEN);
     TestMoveGen(Constants.TTPositionFEN);
