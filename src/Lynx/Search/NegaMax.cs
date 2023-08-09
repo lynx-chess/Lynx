@@ -64,7 +64,7 @@ public sealed partial class Engine
 
                 if (isValid)
                 {
-                    return QuiescenceSearch(ply, alpha, beta);
+                    return QuiescenceSearch(targetDepth, ply, alpha, beta);
                 }
             }
 
