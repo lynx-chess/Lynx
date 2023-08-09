@@ -209,7 +209,7 @@ public class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public GameState MakeMove(Move move)
     {
-        int capturedPiece = -1;
+        sbyte capturedPiece = -1;
         byte castleCopy = Castle;
         BoardSquare enpassantCopy = EnPassant;
         long uniqueIdentifierCopy = UniqueIdentifier;
@@ -255,7 +255,7 @@ public class Position
                 PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
                 OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
                 UniqueIdentifier ^= ZobristTable.PieceHash(capturedPawnSquare, oppositePawnIndex);
-                capturedPiece = oppositePawnIndex;
+                capturedPiece = (sbyte)oppositePawnIndex;
             }
             else
             {
@@ -266,7 +266,7 @@ public class Position
                     {
                         PieceBitBoards[pieceIndex].PopBit(targetSquare);
                         UniqueIdentifier ^= ZobristTable.PieceHash(targetSquare, pieceIndex);
-                        capturedPiece = pieceIndex;
+                        capturedPiece = (sbyte)pieceIndex;
                         break;
                     }
                 }
