@@ -57,7 +57,7 @@ public sealed partial class Engine
     private const int MaxValue = short.MaxValue;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private List<Move> SortMoves(IEnumerable<Move> moves, Position currentPosition, int depth, Move bestMoveTTCandidate)
+    private List<Move> SortMoves(IEnumerable<Move> moves, int depth, Move bestMoveTTCandidate)
     {
         if (_isFollowingPV)
         {
@@ -73,13 +73,11 @@ public sealed partial class Engine
             }
         }
 
-        var localPosition = currentPosition;
-
         var orderedMoves = moves
-            .OrderByDescending(move => ScoreMove(move, localPosition, depth, true, bestMoveTTCandidate))
+            .OrderByDescending(move => ScoreMove(move, depth, true, bestMoveTTCandidate))
             .ToList();
 
-        PrintMessage($"For position {currentPosition.FEN()}:\n{string.Join(", ", orderedMoves.Select(m => $"{m.ToEPDString()} ({ScoreMove(m, localPosition, depth, true, bestMoveTTCandidate)})"))})");
+        PrintMessage($"For position {Game.CurrentPosition.FEN()}:\n{string.Join(", ", orderedMoves.Select(m => $"{m.ToEPDString()} ({ScoreMove(m, depth, true, bestMoveTTCandidate)})"))})");
 
         return orderedMoves;
     }
@@ -88,13 +86,12 @@ public sealed partial class Engine
     /// Returns the score evaluation of a move taking into account <see cref="_isScoringPV"/>, <paramref name="bestMoveTTCandidate"/>, <see cref="EvaluationConstants.MostValueableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_historyMoves"/>
     /// </summary>
     /// <param name="move"></param>
-    /// <param name="position"></param>
     /// <param name="depth"></param>
     /// <param name="useKillerAndPositionMoves"></param>
     /// <param name="bestMoveTTCandidate"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMove(Move move, Position position, int depth, bool useKillerAndPositionMoves, Move bestMoveTTCandidate = default)
+    internal int ScoreMove(Move move, int depth, bool useKillerAndPositionMoves, Move bestMoveTTCandidate = default)
     {
         if (_isScoringPV && move == _pVTable[depth])
         {
@@ -122,14 +119,14 @@ public sealed partial class Engine
             int targetPiece = (int)Piece.P;    // Important to initialize to P or p, due to en-passant captures
 
             var targetSquare = move.TargetSquare();
-            var oppositeSide = Utils.OppositeSide(position.Side);
+            var oppositeSide = Utils.OppositeSide(Game.CurrentPosition.Side);
             var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
             var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
 
             var limit = (int)Piece.K + oppositeSideOffset;
             for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
             {
-                if (position.PieceBitBoards[pieceIndex].GetBit(targetSquare))
+                if (Game.CurrentPosition.PieceBitBoards[pieceIndex].GetBit(targetSquare))
                 {
                     targetPiece = pieceIndex;
                     break;
