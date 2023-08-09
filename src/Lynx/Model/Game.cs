@@ -15,6 +15,7 @@ public sealed class Game
     public int HalfMovesWithoutCaptureOrPawnMove { get; set; }
 
     public Position CurrentPosition { get; private set; }
+    private readonly Position _gameInitialPosition;
 
     public Game() : this(Constants.InitialPositionFEN)
     {
@@ -24,6 +25,7 @@ public sealed class Game
     {
         var parsedFen = FENParser.ParseFEN(fen);
         CurrentPosition = new Position(parsedFen);
+        _gameInitialPosition = new Position(CurrentPosition);
 
         MoveHistory = new(150);
         PositionHashHistory = new(150) { CurrentPosition.UniqueIdentifier };
@@ -34,6 +36,7 @@ public sealed class Game
     internal Game(Position position)
     {
         CurrentPosition = position;
+        _gameInitialPosition = new Position(CurrentPosition);
 
         MoveHistory = new(150);
         PositionHashHistory = new(150) { position.UniqueIdentifier };
@@ -53,6 +56,8 @@ public sealed class Game
 
             MakeMove(parsedMove.Value);
         }
+
+        _gameInitialPosition = new Position(CurrentPosition);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -104,4 +109,11 @@ public sealed class Game
             MoveHistory.RemoveAt(MoveHistory.Count - 1);
         }
     }
+
+    /// <summary>
+    /// Cleans <see cref="CurrentPosition"/> value, since in case of search cancellation
+    /// (either by the engine time management logic or by external stop command)
+    /// currentPosition won't be the initial one
+    /// </summary>
+    public void ResetCurrentPositionToBeforeSearchState() => CurrentPosition = _gameInitialPosition;
 }
