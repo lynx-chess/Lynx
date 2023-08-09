@@ -328,7 +328,6 @@ public sealed partial class Engine
         var nodeType = NodeType.Alpha;
         Move? bestMove = null;
         bool isAnyMoveValid = false;
-        var localPosition = position;
 
         var pseudoLegalMoves = generatedMoves.OrderByDescending(move => ScoreMove(move, ply, false, ttBestMove));
 
