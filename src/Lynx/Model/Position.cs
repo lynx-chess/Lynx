@@ -209,6 +209,7 @@ public class Position
         int capturedPiece = -1;
         int castleCopy = Castle;
         BoardSquare enpassantCopy = EnPassant;
+        long uniqueIdentifierCopy = UniqueIdentifier;
 
         var oldSide = Side;
         var offset = Utils.PieceOffset(oldSide);
@@ -322,7 +323,13 @@ public class Position
 
         UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
 
-        return new GameState(capturedPiece, castleCopy, enpassantCopy);
+        return new GameState(capturedPiece, castleCopy, enpassantCopy, uniqueIdentifierCopy);
+        //var clone = new Position(this);
+        //clone.UnmakeMove(move, gameState);
+        //if (uniqueIdentifierCopy != clone.UniqueIdentifier)
+        //{
+        //    throw new($"{FEN()}: {uniqueIdentifierCopy} expected, got {clone.UniqueIdentifier} got after Make/Unmake move {move.ToEPDString()}");
+        //}
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -349,14 +356,6 @@ public class Position
         PieceBitBoards[piece].SetBit(sourceSquare);
         OccupancyBitBoards[(int)Side].SetBit(sourceSquare);
 
-        UniqueIdentifier ^=
-            ZobristTable.SideHash()
-            ^ ZobristTable.PieceHash(sourceSquare, piece)
-            ^ ZobristTable.PieceHash(targetSquare, newPiece)
-            ^ ZobristTable.EnPassantHash((int)EnPassant)        // We clear the existing enpassant square, if any
-            ^ ZobristTable.CastleHash(Castle);                  // We clear the existing castling rights
-
-        EnPassant = BoardSquare.noSquare;
         if (move.IsCapture())
         {
             var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
@@ -370,21 +369,13 @@ public class Position
 
                 PieceBitBoards[oppositePawnIndex].SetBit(capturedPawnSquare);
                 OccupancyBitBoards[oppositeSide].SetBit(capturedPawnSquare);
-                UniqueIdentifier ^= ZobristTable.PieceHash(capturedPawnSquare, oppositePawnIndex);
             }
             else
             {
                 PieceBitBoards[gameState.CapturedPiece].SetBit(targetSquare);
-                UniqueIdentifier ^= ZobristTable.PieceHash(targetSquare, gameState.CapturedPiece);
-
                 OccupancyBitBoards[oppositeSide].SetBit(targetSquare);
             }
         }
-        //else if (move.IsDoublePawnPush())
-        //{
-        //    EnPassant = gameState.EnPassant;
-        //    UniqueIdentifier ^= ZobristTable.EnPassantHash((int)EnPassant);
-        //}
         else if (move.IsShortCastle())
         {
             var rookSourceSquare = Utils.ShortCastleRookSourceSquare(Side);
@@ -396,10 +387,6 @@ public class Position
 
             PieceBitBoards[rookIndex].PopBit(rookTargetSquare);
             OccupancyBitBoards[(int)Side].PopBit(rookTargetSquare);
-
-            UniqueIdentifier ^=
-                ZobristTable.PieceHash(rookSourceSquare, rookIndex)
-                ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
         }
         else if (move.IsLongCastle())
         {
@@ -412,35 +399,134 @@ public class Position
 
             PieceBitBoards[rookIndex].PopBit(rookTargetSquare);
             OccupancyBitBoards[(int)Side].PopBit(rookTargetSquare);
-
-            UniqueIdentifier ^=
-                ZobristTable.PieceHash(rookSourceSquare, rookIndex)
-                ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
         }
 
         OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
 
-        // Updating castling and enpassant rights
+        // Updating saved values
         Castle = gameState.Castle;
         EnPassant = gameState.EnPassant;
-
-        UniqueIdentifier ^=
-            ZobristTable.CastleHash(Castle)
-            ^ ZobristTable.EnPassantHash((int)EnPassant);
+        UniqueIdentifier = gameState.ZobristKey;
     }
+
+    //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+    //public void UnmakeMoveWithoutZobrist(Move move, GameState gameState)
+    //{
+    //    var oppositeSide = (int)Side;
+    //    Side = (Side)Utils.OppositeSide(Side);
+    //    var offset = Utils.PieceOffset(Side);
+
+    //    int sourceSquare = move.SourceSquare();
+    //    int targetSquare = move.TargetSquare();
+    //    int piece = move.Piece();
+    //    int promotedPiece = move.PromotedPiece();
+
+    //    var newPiece = piece;
+    //    if (promotedPiece != default)
+    //    {
+    //        newPiece = promotedPiece;
+    //    }
+
+    //    PieceBitBoards[newPiece].PopBit(targetSquare);
+    //    OccupancyBitBoards[(int)Side].PopBit(targetSquare);
+
+    //    PieceBitBoards[piece].SetBit(sourceSquare);
+    //    OccupancyBitBoards[(int)Side].SetBit(sourceSquare);
+
+    //    UniqueIdentifier ^=
+    //        ZobristTable.SideHash()
+    //        ^ ZobristTable.PieceHash(sourceSquare, piece)
+    //        ^ ZobristTable.PieceHash(targetSquare, newPiece)
+    //        ^ ZobristTable.EnPassantHash((int)EnPassant)        // We clear the existing enpassant square, if any
+    //        ^ ZobristTable.CastleHash(Castle);                  // We clear the existing castling rights
+
+    //    EnPassant = BoardSquare.noSquare;
+    //    if (move.IsCapture())
+    //    {
+    //        var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
+    //        var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
+
+    //        if (move.IsEnPassant())
+    //        {
+    //            var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
+    //            Utils.Assert(OccupancyBitBoards[(int)Side.Both].GetBit(capturedPawnSquare) == default,
+    //                $"Expected empty {capturedPawnSquare}");
+
+    //            PieceBitBoards[oppositePawnIndex].SetBit(capturedPawnSquare);
+    //            OccupancyBitBoards[oppositeSide].SetBit(capturedPawnSquare);
+    //            UniqueIdentifier ^= ZobristTable.PieceHash(capturedPawnSquare, oppositePawnIndex);
+    //        }
+    //        else
+    //        {
+    //            PieceBitBoards[gameState.CapturedPiece].SetBit(targetSquare);
+    //            UniqueIdentifier ^= ZobristTable.PieceHash(targetSquare, gameState.CapturedPiece);
+
+    //            OccupancyBitBoards[oppositeSide].SetBit(targetSquare);
+    //        }
+    //    }
+    //    //else if (move.IsDoublePawnPush())
+    //    //{
+    //    //    EnPassant = gameState.EnPassant;
+    //    //    UniqueIdentifier ^= ZobristTable.EnPassantHash((int)EnPassant);
+    //    //}
+    //    else if (move.IsShortCastle())
+    //    {
+    //        var rookSourceSquare = Utils.ShortCastleRookSourceSquare(Side);
+    //        var rookTargetSquare = Utils.ShortCastleRookTargetSquare(Side);
+    //        var rookIndex = (int)Piece.R + offset;
+
+    //        PieceBitBoards[rookIndex].SetBit(rookSourceSquare);
+    //        OccupancyBitBoards[(int)Side].SetBit(rookSourceSquare);
+
+    //        PieceBitBoards[rookIndex].PopBit(rookTargetSquare);
+    //        OccupancyBitBoards[(int)Side].PopBit(rookTargetSquare);
+
+    //        UniqueIdentifier ^=
+    //            ZobristTable.PieceHash(rookSourceSquare, rookIndex)
+    //            ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
+    //    }
+    //    else if (move.IsLongCastle())
+    //    {
+    //        var rookSourceSquare = Utils.LongCastleRookSourceSquare(Side);
+    //        var rookTargetSquare = Utils.LongCastleRookTargetSquare(Side);
+    //        var rookIndex = (int)Piece.R + offset;
+
+    //        PieceBitBoards[rookIndex].SetBit(rookSourceSquare);
+    //        OccupancyBitBoards[(int)Side].SetBit(rookSourceSquare);
+
+    //        PieceBitBoards[rookIndex].PopBit(rookTargetSquare);
+    //        OccupancyBitBoards[(int)Side].PopBit(rookTargetSquare);
+
+    //        UniqueIdentifier ^=
+    //            ZobristTable.PieceHash(rookSourceSquare, rookIndex)
+    //            ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
+    //    }
+
+    //    OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
+
+    //    // Updating castling and enpassant rights
+    //    Castle = gameState.Castle;
+    //    EnPassant = gameState.EnPassant;
+
+    //    UniqueIdentifier ^=
+    //        ZobristTable.CastleHash(Castle)
+    //        ^ ZobristTable.EnPassantHash((int)EnPassant);
+    //}
+
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public GameState MakeNullMove()
     {
         Side = (Side)Utils.OppositeSide(Side);
         var oldEnPassant = EnPassant;
+        var oldUniqueIdentifier = UniqueIdentifier;
         EnPassant = BoardSquare.noSquare;
 
         UniqueIdentifier ^=
             ZobristTable.SideHash()
             ^ ZobristTable.EnPassantHash((int)oldEnPassant);
 
-        return new GameState(-1, -1, oldEnPassant);
+        return new GameState(-1, -1, oldEnPassant, oldUniqueIdentifier);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -449,9 +535,7 @@ public class Position
         Side = (Side)Utils.OppositeSide(Side);
         EnPassant = gameState.EnPassant;
 
-        UniqueIdentifier ^=
-            ZobristTable.SideHash()
-            ^ ZobristTable.EnPassantHash((int)EnPassant);
+        UniqueIdentifier = gameState.ZobristKey;
     }
 
     /// <summary>

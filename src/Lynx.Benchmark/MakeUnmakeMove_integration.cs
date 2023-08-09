@@ -148,7 +148,7 @@ using NLog;
 using System.Runtime.CompilerServices;
 
 namespace Lynx.Benchmark;
-public class MakeMove : BaseBenchmark
+public class MakeUnmakeMove_integration : BaseBenchmark
 {
     public static IEnumerable<(string, int)> Data => new[] {
             (Constants.InitialPositionFEN, 4),
