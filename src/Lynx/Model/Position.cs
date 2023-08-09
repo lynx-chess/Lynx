@@ -211,7 +211,7 @@ public class Position
         BoardSquare enpassantCopy = EnPassant;
         long uniqueIdentifierCopy = UniqueIdentifier;
 
-        var oldSide = Side;
+        var oldSide = (int)Side;
         var offset = Utils.PieceOffset(oldSide);
         var oppositeSide = Utils.OppositeSide(oldSide);
 
@@ -227,10 +227,10 @@ public class Position
         }
 
         PieceBitBoards[piece].PopBit(sourceSquare);
-        OccupancyBitBoards[(int)Side].PopBit(sourceSquare);
+        OccupancyBitBoards[oldSide].PopBit(sourceSquare);
 
         PieceBitBoards[newPiece].SetBit(targetSquare);
-        OccupancyBitBoards[(int)Side].SetBit(targetSquare);
+        OccupancyBitBoards[oldSide].SetBit(targetSquare);
 
         UniqueIdentifier ^=
             ZobristTable.SideHash()
@@ -242,8 +242,7 @@ public class Position
         EnPassant = BoardSquare.noSquare;
         if (move.IsCapture())
         {
-            var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
-            var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
+            var oppositePawnIndex = /*(int)Piece.P + */Utils.PieceOffset(oppositeSide);
 
             if (move.IsEnPassant())
             {
@@ -257,7 +256,7 @@ public class Position
             }
             else
             {
-                var limit = (int)Piece.K + oppositeSideOffset;
+                var limit = (int)Piece.K + oppositePawnIndex;
                 for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
                 {
                     if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
@@ -274,7 +273,7 @@ public class Position
         }
         else if (move.IsDoublePawnPush())
         {
-            var pawnPush = +8 - ((int)oldSide * 16);
+            var pawnPush = +8 - (oldSide * 16);
             var enPassantSquare = sourceSquare + pawnPush;
             Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {(BoardSquare)enPassantSquare}");
 
@@ -288,10 +287,10 @@ public class Position
             var rookIndex = (int)Piece.R + offset;
 
             PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+            OccupancyBitBoards[oldSide].PopBit(rookSourceSquare);
 
             PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+            OccupancyBitBoards[oldSide].SetBit(rookTargetSquare);
 
             UniqueIdentifier ^=
                 ZobristTable.PieceHash(rookSourceSquare, rookIndex)
@@ -304,10 +303,10 @@ public class Position
             var rookIndex = (int)Piece.R + offset;
 
             PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-            OccupancyBitBoards[(int)Side].PopBit(rookSourceSquare);
+            OccupancyBitBoards[oldSide].PopBit(rookSourceSquare);
 
             PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-            OccupancyBitBoards[(int)Side].SetBit(rookTargetSquare);
+            OccupancyBitBoards[oldSide].SetBit(rookTargetSquare);
 
             UniqueIdentifier ^=
                 ZobristTable.PieceHash(rookSourceSquare, rookIndex)
@@ -315,11 +314,11 @@ public class Position
         }
 
         Side = (Side)oppositeSide;
-        OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
+        OccupancyBitBoards[2] = OccupancyBitBoards[1] | OccupancyBitBoards[0];
 
         // Updating castling rights
-        Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
-        Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
+        Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare]
+            & Constants.CastlingRightsUpdateConstants[targetSquare];
 
         UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
 
@@ -336,8 +335,9 @@ public class Position
     public void UnmakeMove(Move move, GameState gameState)
     {
         var oppositeSide = (int)Side;
-        Side = (Side)Utils.OppositeSide(Side);
-        var offset = Utils.PieceOffset(Side);
+        var side = Utils.OppositeSide(oppositeSide);
+        Side = (Side)side;
+        var offset = Utils.PieceOffset(side);
 
         int sourceSquare = move.SourceSquare();
         int targetSquare = move.TargetSquare();
@@ -351,15 +351,14 @@ public class Position
         }
 
         PieceBitBoards[newPiece].PopBit(targetSquare);
-        OccupancyBitBoards[(int)Side].PopBit(targetSquare);
+        OccupancyBitBoards[side].PopBit(targetSquare);
 
         PieceBitBoards[piece].SetBit(sourceSquare);
-        OccupancyBitBoards[(int)Side].SetBit(sourceSquare);
+        OccupancyBitBoards[side].SetBit(sourceSquare);
 
         if (move.IsCapture())
         {
-            var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
-            var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
+            var oppositePawnIndex =/*(int)Piece.P +*/ Utils.PieceOffset(oppositeSide);
 
             if (move.IsEnPassant())
             {
@@ -378,30 +377,30 @@ public class Position
         }
         else if (move.IsShortCastle())
         {
-            var rookSourceSquare = Utils.ShortCastleRookSourceSquare(Side);
-            var rookTargetSquare = Utils.ShortCastleRookTargetSquare(Side);
+            var rookSourceSquare = Utils.ShortCastleRookSourceSquare(side);
+            var rookTargetSquare = Utils.ShortCastleRookTargetSquare(side);
             var rookIndex = (int)Piece.R + offset;
 
             PieceBitBoards[rookIndex].SetBit(rookSourceSquare);
-            OccupancyBitBoards[(int)Side].SetBit(rookSourceSquare);
+            OccupancyBitBoards[side].SetBit(rookSourceSquare);
 
             PieceBitBoards[rookIndex].PopBit(rookTargetSquare);
-            OccupancyBitBoards[(int)Side].PopBit(rookTargetSquare);
+            OccupancyBitBoards[side].PopBit(rookTargetSquare);
         }
         else if (move.IsLongCastle())
         {
-            var rookSourceSquare = Utils.LongCastleRookSourceSquare(Side);
-            var rookTargetSquare = Utils.LongCastleRookTargetSquare(Side);
+            var rookSourceSquare = Utils.LongCastleRookSourceSquare(side);
+            var rookTargetSquare = Utils.LongCastleRookTargetSquare(side);
             var rookIndex = (int)Piece.R + offset;
 
             PieceBitBoards[rookIndex].SetBit(rookSourceSquare);
-            OccupancyBitBoards[(int)Side].SetBit(rookSourceSquare);
+            OccupancyBitBoards[side].SetBit(rookSourceSquare);
 
             PieceBitBoards[rookIndex].PopBit(rookTargetSquare);
-            OccupancyBitBoards[(int)Side].PopBit(rookTargetSquare);
+            OccupancyBitBoards[side].PopBit(rookTargetSquare);
         }
 
-        OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
+        OccupancyBitBoards[2] = OccupancyBitBoards[1] | OccupancyBitBoards[0];
 
         // Updating saved values
         Castle = gameState.Castle;
