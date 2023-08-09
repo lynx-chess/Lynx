@@ -22,10 +22,9 @@ public class MoveScoreTest : BaseTest
     [TestCase(Constants.TrickyTestPositionFEN)]
     public void MoveScore(string fen)
     {
-        var engine = GetEngine();
-        var position = new Position(fen);
+        var engine = GetEngine(fen);
 
-        var allMoves = position.AllPossibleMoves().OrderByDescending(move => engine.ScoreMove(move, position, default, default)).ToList();
+        var allMoves = engine.Game.CurrentPosition.AllPossibleMoves().OrderByDescending(move => engine.ScoreMove(move, default, default)).ToList();
 
         Assert.AreEqual("e2a6", allMoves[0].UCIString());     // BxB
         Assert.AreEqual("f3f6", allMoves[1].UCIString());     // QxN
@@ -38,7 +37,7 @@ public class MoveScoreTest : BaseTest
 
         foreach (var move in allMoves.Where(move => !move.IsCapture() && !move.IsCastle()))
         {
-            Assert.AreEqual(0, engine.ScoreMove(move, position, default, default));
+            Assert.AreEqual(0, engine.ScoreMove(move, default, default));
         }
     }
 
@@ -60,12 +59,11 @@ public class MoveScoreTest : BaseTest
     [TestCase("rnbqkbnr/ppp1pppp/8/8/3pP3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1", "d4e3")]
     public void MoveScoreEnPassant(string fen, string moveWithHighestScore)
     {
-        var engine = GetEngine();
-        var position = new Position(fen);
+        var engine = GetEngine(fen);
 
-        var allMoves = position.AllPossibleMoves().OrderByDescending(move => engine.ScoreMove(move, position, default, default)).ToList();
+        var allMoves = engine.Game.CurrentPosition.AllPossibleMoves().OrderByDescending(move => engine.ScoreMove(move, default, default)).ToList();
 
         Assert.AreEqual(moveWithHighestScore, allMoves[0].UCIString());
-        Assert.AreEqual(EvaluationConstants.CaptureMoveBaseScoreValue + EvaluationConstants.MostValueableVictimLeastValuableAttacker[0, 0], engine.ScoreMove(allMoves[0], position, default, default));
+        Assert.AreEqual(EvaluationConstants.CaptureMoveBaseScoreValue + EvaluationConstants.MostValueableVictimLeastValuableAttacker[0, 0], engine.ScoreMove(allMoves[0], default, default));
     }
 }
