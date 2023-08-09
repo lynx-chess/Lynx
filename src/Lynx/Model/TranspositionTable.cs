@@ -15,7 +15,7 @@ public enum NodeType : byte
 
 public struct TranspositionTableElement
 {
-    private byte _depth;
+    private sbyte _depth;
     //private byte _age;
     private short _score;
 
@@ -45,7 +45,7 @@ public struct TranspositionTableElement
     /// <summary>
     /// How deep the recorded search went. For us this numberis targetDepth - ply
     /// </summary>
-    public int Depth { readonly get => _depth; set => _depth = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref value, 1))[0]; }
+    public int Depth { readonly get => _depth; set => _depth = Convert.ToSByte(value); }
 
     //public int Age { readonly get => _age; set => _age = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref value, 1))[0]; }
 
