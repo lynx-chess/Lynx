@@ -142,6 +142,7 @@ public static class MoveExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsCastle(this Move move) => (move & 0x180_0000) >> 23 != default;
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string ToMoveString(this Move move)
     {
 #pragma warning disable S3358 // Ternary operators should not be nested
@@ -149,10 +150,10 @@ public static class MoveExtensions
             ?
                 Constants.AsciiPieces[move.Piece()] +
                 Constants.Coordinates[move.SourceSquare()] +
-                (move.IsCapture() == default ? "" : "x") +
+                (move.IsCapture() ? "x" : "") +
                 Constants.Coordinates[move.TargetSquare()] +
                 (move.PromotedPiece() == default ? "" : $"={Constants.AsciiPieces[move.PromotedPiece()]}") +
-                (move.IsEnPassant() == default ? "" : "e.p.")
+                (move.IsEnPassant() ? "e.p." : "")
             : (move.IsShortCastle() ? "O-O" : "O-O-O");
 #pragma warning restore S3358 // Ternary operators should not be nested
     }
