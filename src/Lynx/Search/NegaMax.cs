@@ -49,30 +49,27 @@ public sealed partial class Engine
 
         bool isInCheck = position.IsInCheck();
 
+        if (isInCheck)
+        {
+            ++targetDepth;
+        }
         if (ply >= targetDepth)
         {
-            if (isInCheck)
+            foreach (var candidateMove in position.AllPossibleMoves(Game.MovePool))
             {
-                ++targetDepth;
-            }
-            else
-            {
-                foreach (var candidateMove in position.AllPossibleMoves(Game.MovePool))
+                var gameState = position.MakeMove(candidateMove);
+                bool isValid = position.WasProduceByAValidMove();
+                position.UnmakeMove(candidateMove, gameState);
+
+                if (isValid)
                 {
-                    var gameState = position.MakeMove(candidateMove);
-                    bool isValid = position.WasProduceByAValidMove();
-                    position.UnmakeMove(candidateMove, gameState);
-
-                    if (isValid)
-                    {
-                        return QuiescenceSearch(position, ply, alpha, beta);
-                    }
+                    return QuiescenceSearch(position, ply, alpha, beta);
                 }
-
-                var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
-                _transpositionTable.RecordHash(position, targetDepth, ply, finalPositionEvaluation, NodeType.Exact);
-                return finalPositionEvaluation;
             }
+
+            var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
+            _transpositionTable.RecordHash(position, targetDepth, ply, finalPositionEvaluation, NodeType.Exact);
+            return finalPositionEvaluation;
         }
 
         // Prevents runtime failure, in case targetDepth is increased due to check extension
