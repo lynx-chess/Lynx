@@ -62,10 +62,10 @@ public class PositionIdGeneration : BaseBenchmark
 
     public static IEnumerable<Position> Data => new[] {
             //Constants.EmptyBoardFEN,
-            new Position(in Positions[0], Positions[0].AllPossibleMoves().First()),
-            new Position(in Positions[1], Positions[1].AllPossibleMoves().First()),
-            new Position(in Positions[2], Positions[2].AllPossibleMoves().First()),
-            new Position(in Positions[3], Positions[3].AllPossibleMoves().First())
+            new Position( Positions[0], Positions[0].AllPossibleMoves().First()),
+            new Position( Positions[1], Positions[1].AllPossibleMoves().First()),
+            new Position( Positions[2], Positions[2].AllPossibleMoves().First()),
+            new Position( Positions[3], Positions[3].AllPossibleMoves().First())
         };
 }
 

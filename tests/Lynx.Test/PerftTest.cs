@@ -23,6 +23,12 @@ public class PerftTest
         Validate(fen, depth, expectedNumberOfNodes);
     }
 
+    /// <summary>
+    /// aka <see cref="Constants.TrickyTestPositionFEN"/>
+    /// </summary>
+    /// <param name="fen"></param>
+    /// <param name="depth"></param>
+    /// <param name="expectedNumberOfNodes"></param>
     [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 1, 48)]
     [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 2, 2_039)]
     [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 3, 97_862)]
@@ -155,6 +161,6 @@ public class PerftTest
 
     private static void Validate(string fen, int depth, long expectedNumberOfNodes)
     {
-        Assert.AreEqual(expectedNumberOfNodes, Perft.ResultsImpl(new Position(fen), depth, default));
+        Assert.AreEqual(expectedNumberOfNodes, Perft.ResultsImplMakeUnmakeMove(new Position(fen), depth, default));
     }
 }

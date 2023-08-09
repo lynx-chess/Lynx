@@ -22,7 +22,7 @@ public sealed partial class Engine
     /// <param name="isVerifyingNullMoveCutOff">Indicates if the search is verifying an ancestors null-move that failed high, or the root node</param>
     /// <param name="ancestorWasNullMove">Indicates whether the immediate ancestor node was a null move</param>
     /// <returns></returns>
-    private int NegaMax(in Position position, int minDepth, int targetDepth, int ply, int alpha, int beta, bool isVerifyingNullMoveCutOff, bool ancestorWasNullMove = false)
+    private int NegaMax(Position position, int minDepth, int targetDepth, int ply, int alpha, int beta, bool isVerifyingNullMoveCutOff, bool ancestorWasNullMove = false)
     {
         _maxDepthReached[ply] = ply;
         _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
@@ -57,9 +57,13 @@ public sealed partial class Engine
         {
             foreach (var candidateMove in position.AllPossibleMoves(Game.MovePool))
             {
-                if (new Position(in position, candidateMove).WasProduceByAValidMove())
+                var gameState = position.MakeMove(candidateMove);
+                bool isValid = position.WasProduceByAValidMove();
+                position.UnmakeMove(candidateMove, gameState);
+
+                if (isValid)
                 {
-                    return QuiescenceSearch(in position, ply, alpha, beta);
+                    return QuiescenceSearch(position, ply, alpha, beta);
                 }
             }
 
@@ -85,9 +89,11 @@ public sealed partial class Engine
             && (!isVerifyingNullMoveCutOff || ply < targetDepth - 1))    // verify == true and ply == targetDepth -1 -> No null pruning, since verification will not be possible)
                                                                          // following pv?
         {
-            var newPosition = new Position(in position, nullMove: true);
+            var gameState = position.MakeNullMove();
 
-            var evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1 + Configuration.EngineSettings.NullMovePruning_R, -beta, -beta + 1, isVerifyingNullMoveCutOff, ancestorWasNullMove: true);
+            var evaluation = -NegaMax(position, minDepth, targetDepth, ply + 1 + Configuration.EngineSettings.NullMovePruning_R, -beta, -beta + 1, isVerifyingNullMoveCutOff, ancestorWasNullMove: true);
+
+            position.UnMakeNullMove(gameState);
 
             if (evaluation >= beta) // Fail high
             {
@@ -113,23 +119,25 @@ public sealed partial class Engine
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
-        var pseudoLegalMoves = SortMoves(position.AllPossibleMoves(Game.MovePool), in position, ply, ttBestMove);
+        var pseudoLegalMoves = SortMoves(position.AllPossibleMoves(Game.MovePool), position, ply, ttBestMove);
 
         foreach (var move in pseudoLegalMoves)
         {
-            var newPosition = new Position(in position, move);
-            if (!newPosition.WasProduceByAValidMove())
+            var gameState = position.MakeMove(move);
+
+            if (!position.WasProduceByAValidMove())
             {
+                position.UnmakeMove(move, gameState);
                 continue;
             }
             isAnyMoveValid = true;
 
-            PrintPreMove(in position, ply, move);
+            PrintPreMove(position, ply, move);
 
             // Before making a move
             var oldValue = Game.HalfMovesWithoutCaptureOrPawnMove;
             Game.HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, Game.HalfMovesWithoutCaptureOrPawnMove);
-            var isThreeFoldRepetition = !Game.PositionHashHistory.Add(newPosition.UniqueIdentifier);
+            var isThreeFoldRepetition = !Game.PositionHashHistory.Add(position.UniqueIdentifier);
 
             int evaluation;
             if (isThreeFoldRepetition || Game.Is50MovesRepetition())
@@ -143,7 +151,7 @@ public sealed partial class Engine
             }
             else if (movesSearched == 0)
             {
-                evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
+                evaluation = -NegaMax(position, minDepth, targetDepth, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
             }
             else
             {
@@ -157,7 +165,7 @@ public sealed partial class Engine
                     && move.PromotedPiece() == default)
                 {
                     // Search with reduced depth
-                    evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1 + Configuration.EngineSettings.LMR_DepthReduction, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
+                    evaluation = -NegaMax(position, minDepth, targetDepth, ply + 1 + Configuration.EngineSettings.LMR_DepthReduction, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
                 }
                 else
                 {
@@ -175,17 +183,17 @@ public sealed partial class Engine
                         // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
 
                         // Search with full depth but narrowed score bandwidth
-                        evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
+                        evaluation = -NegaMax(position, minDepth, targetDepth, ply + 1, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
 
                         if (evaluation > alpha && evaluation < beta)
                         {
                             // Hipothesis invalidated -> search with full depth and full score bandwidth
-                            evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
+                            evaluation = -NegaMax(position, minDepth, targetDepth, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
                         }
                     }
                     else
                     {
-                        evaluation = -NegaMax(in newPosition, minDepth, targetDepth, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
+                        evaluation = -NegaMax(position, minDepth, targetDepth, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
                     }
                 }
             }
@@ -194,8 +202,9 @@ public sealed partial class Engine
             Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
             if (!isThreeFoldRepetition)
             {
-                Game.PositionHashHistory.Remove(newPosition.UniqueIdentifier);
+                Game.PositionHashHistory.Remove(position.UniqueIdentifier);
             }
+            position.UnmakeMove(move, gameState);
 
             PrintMove(ply, move, evaluation);
 
@@ -273,7 +282,7 @@ public sealed partial class Engine
     /// Defaults to the works possible score for Black, Int.MaxValue
     /// </param>
     /// <returns></returns>
-    public int QuiescenceSearch(in Position position, int ply, int alpha, int beta)
+    public int QuiescenceSearch(Position position, int ply, int alpha, int beta)
     {
         _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
         //_searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
@@ -307,26 +316,27 @@ public sealed partial class Engine
         }
 
         var localPosition = position;
-        var movesToEvaluate = generatedMoves.OrderByDescending(move => ScoreMove(move, in localPosition, ply, false));
+        var movesToEvaluate = generatedMoves.OrderByDescending(move => ScoreMove(move, localPosition, ply, false));
 
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
         foreach (var move in movesToEvaluate)
         {
-            var newPosition = new Position(in position, move);
-            if (!newPosition.WasProduceByAValidMove())
+            var gameState = position.MakeMove(move);
+            if (!position.WasProduceByAValidMove())
             {
+                position.UnmakeMove(move, gameState);
                 continue;
             }
             isAnyMoveValid = true;
 
-            PrintPreMove(in position, ply, move, isQuiescence: true);
+            PrintPreMove(position, ply, move, isQuiescence: true);
 
             // Before making a move
             var oldValue = Game.HalfMovesWithoutCaptureOrPawnMove;
             Game.HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, Game.HalfMovesWithoutCaptureOrPawnMove);
-            var isThreeFoldRepetition = !Game.PositionHashHistory.Add(newPosition.UniqueIdentifier);
+            var isThreeFoldRepetition = !Game.PositionHashHistory.Add(position.UniqueIdentifier);
 
             int evaluation;
             if (isThreeFoldRepetition || Game.Is50MovesRepetition())
@@ -340,15 +350,16 @@ public sealed partial class Engine
             }
             else
             {
-                evaluation = -QuiescenceSearch(in newPosition, ply + 1, -beta, -alpha);
+                evaluation = -QuiescenceSearch(position, ply + 1, -beta, -alpha);
             }
 
             // After making a move
             Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
             if (!isThreeFoldRepetition)
             {
-                Game.PositionHashHistory.Remove(newPosition.UniqueIdentifier);
+                Game.PositionHashHistory.Remove(position.UniqueIdentifier);
             }
+            position.UnmakeMove(move, gameState);
 
             PrintMove(ply, move, evaluation);
 
@@ -378,7 +389,11 @@ public sealed partial class Engine
 
             foreach (var move in position.AllPossibleMoves(Game.MovePool))
             {
-                if (new Position(in position, move).WasProduceByAValidMove())
+                var gameState = position.MakeMove(move);
+                bool isValid = position.WasProduceByAValidMove();
+                position.UnmakeMove(move, gameState);
+
+                if (isValid)
                 {
                     return alpha;
                 }
