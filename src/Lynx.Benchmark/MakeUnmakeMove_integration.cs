@@ -142,6 +142,7 @@
  *  |   MakeUnmakeMove_PassRef | (rnbq(...)1, 4) [61] |  27.016 ms |  0.5351 ms |  0.8940 ms |  26.693 ms |  0.97 |    0.05 |   375.0000 |       - |    9.54 MB |        0.22 |
  */
 
+#pragma warning disable S101, S1854 // Types should be named in PascalCase
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
 using NLog;
@@ -1178,7 +1179,7 @@ public class MakeUnmakeMove_integration : BaseBenchmark
         /// </summary>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal bool IsValid()
+        internal readonly bool IsValid()
         {
             var kingBitBoard = PieceBitBoards[(int)Piece.K + Utils.PieceOffset(Side)];
             var kingSquare = kingBitBoard == default ? -1 : kingBitBoard.GetLS1BIndex();
@@ -1197,7 +1198,7 @@ public class MakeUnmakeMove_integration : BaseBenchmark
         /// </summary>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool WasProduceByAValidMove()
+        public readonly bool WasProduceByAValidMove()
         {
             var oppositeKingBitBoard = PieceBitBoards[(int)Piece.K + Utils.PieceOffset((Side)Utils.OppositeSide(Side))];
             var oppositeKingSquare = oppositeKingBitBoard == default ? -1 : oppositeKingBitBoard.GetLS1BIndex();
@@ -1206,7 +1207,7 @@ public class MakeUnmakeMove_integration : BaseBenchmark
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<Move> AllPossibleMoves(Move[]? movePool = null) => MakeMoveMoveGenerator.GenerateAllMoves(this, movePool);
+        public readonly IEnumerable<Move> AllPossibleMoves(Move[]? movePool = null) => MakeMoveMoveGenerator.GenerateAllMoves(this, movePool);
     }
 
     public readonly struct MakeMoveGameState
@@ -1245,18 +1246,16 @@ public class MakeUnmakeMove_integration : BaseBenchmark
         }
     }
 
-
     public struct MakeMoveGameState_PassRef
     {
+#pragma warning disable S1104 // Fields should not have public accessibility
         public int CapturedPiece;
 
         public int Castle;
 
         public BoardSquare EnPassant;
-
-        // TODO: save full Zobrist key?
+#pragma warning restore S1104 // Fields should not have public accessibility
     }
-
 
     #region ;(
 
@@ -1403,7 +1402,6 @@ public class MakeUnmakeMove_integration : BaseBenchmark
             (int origin, BitBoard _) => MakeMoveAttacks.KnightAttacks[origin],
             (int origin, BitBoard occupancy) => MakeMoveAttacks.BishopAttacks(origin, occupancy),
             (int origin, BitBoard occupancy) => MakeMoveAttacks.RookAttacks(origin, occupancy),
-            // TODO try to improve performance by re-using bishop and rook attacks
             (int origin, BitBoard occupancy) => MakeMoveAttacks.QueenAttacks(origin, occupancy),
             (int origin, BitBoard _) => MakeMoveAttacks.KingAttacks[origin],
 
@@ -1411,7 +1409,6 @@ public class MakeUnmakeMove_integration : BaseBenchmark
             (int origin, BitBoard _) => MakeMoveAttacks.KnightAttacks[origin],
             (int origin, BitBoard occupancy) => MakeMoveAttacks.BishopAttacks(origin, occupancy),
             (int origin, BitBoard occupancy) => MakeMoveAttacks.RookAttacks(origin, occupancy),
-            // TODO try to improve performance by re-using bishop and rook attacks
             (int origin, BitBoard occupancy) => MakeMoveAttacks.QueenAttacks(origin, occupancy),
             (int origin, BitBoard _) => MakeMoveAttacks.KingAttacks[origin],
         };
@@ -1818,3 +1815,5 @@ public class MakeUnmakeMove_integration : BaseBenchmark
 
     #endregion
 }
+
+#pragma warning restore S101, S1854 // Types should be named in PascalCase

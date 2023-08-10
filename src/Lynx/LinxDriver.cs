@@ -276,7 +276,7 @@ public sealed class LinxDriver
 
         if (items.Length >= 2 && int.TryParse(items[1], out int depth) && depth >= 1)
         {
-            Perft.Results(_engine.Game.CurrentPosition, depth);
+            Perft.Divide(_engine.Game.CurrentPosition, depth);
         }
     }
 
