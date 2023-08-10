@@ -160,7 +160,7 @@ public static class TranspositionTableExtensions
         entry.Type = nodeType;
 
         // When in QSearch, depth doesn't really matter, since all positions will get 'resolved'
-        if (theoreticalDepth < 0)
+        if (theoreticalDepth <= 0)
         {
             theoreticalDepth = 0;
             entry.Move = 0;
