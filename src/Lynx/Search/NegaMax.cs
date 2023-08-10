@@ -120,7 +120,8 @@ public sealed partial class Engine
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
-        var pseudoLegalMoves = SortMoves(position.AllPossibleMoves(Game.MovePool), ply, ttBestMove);
+        var pseudoLegalMoves = position.AllPossibleMoves(Game.MovePool);
+        SortMoves(pseudoLegalMoves, ply, ttBestMove);
 
         foreach (var move in pseudoLegalMoves)
         {
@@ -311,13 +312,13 @@ public sealed partial class Engine
             alpha = staticEvaluation;
         }
 
-        var generatedMoves = position.AllCapturesMoves(Game.MovePool);
-        if (!generatedMoves.Any())
+        var movesToEvaluate = position.AllCapturesMoves(Game.MovePool);
+        if (movesToEvaluate.Length == 0)
         {
             return staticEvaluation;  // TODO check if in check or drawn position
         }
 
-        var movesToEvaluate = generatedMoves.OrderByDescending(move => ScoreMove(move, ply, false));
+        Array.Sort(movesToEvaluate, (a, b) => ScoreMove(a, ply, false) > ScoreMove(b, ply, false) ? 1 : 0);
 
         Move? bestMove = null;
         bool isAnyMoveValid = false;

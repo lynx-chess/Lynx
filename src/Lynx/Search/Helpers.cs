@@ -57,7 +57,7 @@ public sealed partial class Engine
     private const int MaxValue = short.MaxValue;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private List<Move> SortMoves(IEnumerable<Move> moves, int depth, Move bestMoveTTCandidate)
+    private void SortMoves(Move[] moves, int depth, Move bestMoveTTCandidate)
     {
         if (_isFollowingPV)
         {
@@ -73,13 +73,7 @@ public sealed partial class Engine
             }
         }
 
-        var orderedMoves = moves
-            .OrderByDescending(move => ScoreMove(move, depth, true, bestMoveTTCandidate))
-            .ToList();
-
-        PrintMessage($"For position {Game.CurrentPosition.FEN()}:\n{string.Join(", ", orderedMoves.Select(m => $"{m.ToEPDString()} ({ScoreMove(m, depth, true, bestMoveTTCandidate)})"))})");
-
-        return orderedMoves;
+        Array.Sort(moves, (a, b) => ScoreMove(a, depth, true, bestMoveTTCandidate) > ScoreMove(b, depth, true, bestMoveTTCandidate) ? 1 : 0);
     }
 
     /// <summary>

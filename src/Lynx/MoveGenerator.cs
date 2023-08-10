@@ -40,7 +40,7 @@ public static class MoveGenerator
     /// <param name="capturesOnly">Filters out all moves but captures</param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IEnumerable<Move> GenerateAllMoves(Position position, Move[]? movePool = null, bool capturesOnly = false)
+    public static Move[] GenerateAllMoves(Position position, Move[]? movePool = null, bool capturesOnly = false)
     {
 #if DEBUG
         if (position.Side == Side.Both)
@@ -62,7 +62,7 @@ public static class MoveGenerator
         GeneratePieceMoves(ref localIndex, movePool, (int)Piece.R + offset, position, capturesOnly);
         GeneratePieceMoves(ref localIndex, movePool, (int)Piece.Q + offset, position, capturesOnly);
 
-        return movePool.Take(localIndex);
+        return movePool[..localIndex];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
