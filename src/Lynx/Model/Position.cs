@@ -26,13 +26,16 @@ public class Position
 
     public BoardSquare EnPassant { get; private set; }
 
-    public int Castle { get; private set; }
+    /// <summary>
+    /// See <see cref="<CastlingRights"/>
+    /// </summary>
+    public byte Castle { get; private set; }
 
     public Position(string fen) : this(FENParser.ParseFEN(fen))
     {
     }
 
-    public Position((bool Success, BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, int Castle, BoardSquare EnPassant,
+    public Position((bool Success, BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, byte Castle, BoardSquare EnPassant,
         int HalfMoveClock, int FullMoveCounter) parsedFEN)
     {
         PieceBitBoards = parsedFEN.PieceBitBoards;
@@ -206,8 +209,8 @@ public class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public GameState MakeMove(Move move)
     {
-        int capturedPiece = -1;
-        int castleCopy = Castle;
+        sbyte capturedPiece = -1;
+        byte castleCopy = Castle;
         BoardSquare enpassantCopy = EnPassant;
         long uniqueIdentifierCopy = UniqueIdentifier;
 
@@ -252,7 +255,7 @@ public class Position
                 PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
                 OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
                 UniqueIdentifier ^= ZobristTable.PieceHash(capturedPawnSquare, oppositePawnIndex);
-                capturedPiece = oppositePawnIndex;
+                capturedPiece = (sbyte)oppositePawnIndex;
             }
             else
             {
@@ -263,7 +266,7 @@ public class Position
                     {
                         PieceBitBoards[pieceIndex].PopBit(targetSquare);
                         UniqueIdentifier ^= ZobristTable.PieceHash(targetSquare, pieceIndex);
-                        capturedPiece = pieceIndex;
+                        capturedPiece = (sbyte)pieceIndex;
                         break;
                     }
                 }
@@ -317,8 +320,8 @@ public class Position
         OccupancyBitBoards[2] = OccupancyBitBoards[1] | OccupancyBitBoards[0];
 
         // Updating castling rights
-        Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare]
-            & Constants.CastlingRightsUpdateConstants[targetSquare];
+        Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
+        Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
 
         UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
 
@@ -420,7 +423,7 @@ public class Position
             ZobristTable.SideHash()
             ^ ZobristTable.EnPassantHash((int)oldEnPassant);
 
-        return new GameState(-1, -1, oldEnPassant, oldUniqueIdentifier);
+        return new GameState(-1, byte.MaxValue, oldEnPassant, oldUniqueIdentifier);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

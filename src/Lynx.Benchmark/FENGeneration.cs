@@ -2033,7 +2033,7 @@ internal record struct RecordStructCustomPosition
         _fen = FENHelpers.UpdateSecondPartOfFEN(fenSb, Side, Castle, EnPassant);
     }
 
-    private string CalculateFEN()
+    private readonly string CalculateFEN()
     {
         var sb = new StringBuilder(100);
 
