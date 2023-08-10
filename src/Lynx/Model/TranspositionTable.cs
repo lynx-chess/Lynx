@@ -144,7 +144,7 @@ public static class TranspositionTableExtensions
         ref var entry = ref transpositionTable[TranspositionTableIndex(position, transpositionTable)];
 
         // Avoid replacing Negamax entries with QSearch ones
-        if (entry.Depth > 0 && targetDepth - ply < 0)
+        if (targetDepth - ply < 0 && nodeType != NodeType.Exact)
         {
             return;
         }
@@ -161,11 +161,11 @@ public static class TranspositionTableExtensions
         entry.Type = nodeType;
 
         // When in QSearch, depth doesn't really matter, since all positions will get 'resolved'
-        if (theoreticalDepth <= 0)
-        {
-            theoreticalDepth = 0;
-            //entry.Move = 0;         // No TT moves on QSearch
-        }
+        //if (theoreticalDepth <= 0)
+        //{
+        //    theoreticalDepth = 0;
+        //    //entry.Move = 0;         // No TT moves on QSearch
+        //}
         entry.Depth = theoreticalDepth;
     }
 
