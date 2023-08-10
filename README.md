@@ -90,13 +90,28 @@ If you're a Linux user and are new to .NET ecosystem, the conversation in [this 
 
 - Aspiration Windows [[1](https://web.archive.org/web/20071031095918/http://www.brucemo.com/compchess/programming/aspiration.htm)] [[2](https://www.chessprogramming.org/Aspiration_Windows)]
 
+- Transposition Table [[1](https://web.archive.org/web/20071031100051/http://www.brucemo.com/compchess/programming/hashing.htm)]
+
+- Check extensions [[1](https://www.chessprogramming.org/Check_Extensions)]
+
 ## Credits
 
 Lynx development wouldn't have been possible without:
 
+-  [`BitBoard Chess Engine in C` YouTube playlist](https://www.youtube.com/playlist?list=PLmN0neTso3Jxh8ZIylk74JpwfiWNI76Cs), where [@maksimKorzh](https://github.com/maksimKorzh) explains how he developed his [BBC](https://github.com/maksimKorzh/bbc) engine
+
 - [Chess Programming Wiki](https://www.chessprogramming.org/)
 
--  [`BitBoard Chess Engine in C` YouTube playlist](https://www.youtube.com/playlist?list=PLmN0neTso3Jxh8ZIylk74JpwfiWNI76Cs), where [@maksimKorzh](https://github.com/maksimKorzh) explains how he developed his [BBC](https://github.com/maksimKorzh/bbc) engine
+- Engine Programming discord group, especially Jamie Whiting
+([Akimbo](https://github.com/JacquesRW/akimbo)), Antares ([Altair](https://github.com/Alex2262/AltairChessEngine)), Ciekce ([Stormphrax](https://github.com/Ciekce/Stormphrax/)), Rak ([Mess](https://github.com/raklaptudirm/mess)), etc.
+
+- The community Discord around [SebLague/Chess-Challenge](https://github.com/SebLague/Chess-Challenge/), which allowed me to discover EP discord and to revisit the basics, this time explained by very knowledgeable developers (such as the ones above) to people without any previous chess engine programming knowledge
+
+- [Marcel Vanthoor's blog](https://rustic-chess.org/) about creating his engine Rustic
+
+- Countless other developers and online resources, who/which I should probably remember, but don't come to my mind right now
+
+Thanks also to all the testers that invest their time in computer chess, especially those ones that test lower rated engines (as opposed to only top ones).
 
 [buildlink]: https://github.com/lynx-chess/Lynx/actions/workflows/ci.yml
 [buildlogo]: https://github.com/lynx-chess/Lynx/actions/workflows/ci.yml/badge.svg
