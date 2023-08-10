@@ -320,8 +320,8 @@ public class Position
         OccupancyBitBoards[2] = OccupancyBitBoards[1] | OccupancyBitBoards[0];
 
         // Updating castling rights
-        Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare]
-            & Constants.CastlingRightsUpdateConstants[targetSquare];
+        Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
+        Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
 
         UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
 
