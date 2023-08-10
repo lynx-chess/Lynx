@@ -105,7 +105,7 @@ public static class TranspositionTableExtensions
 
         var eval = EvaluationConstants.NoHashEntry;
 
-        if (entry.Depth >= (targetDepth - ply))
+        if (entry.Depth >= (targetDepth - ply) /*&& entry.Depth > 0*/)  // No TT cuoffs on QSearch
         {
             // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
             // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
@@ -163,7 +163,7 @@ public static class TranspositionTableExtensions
         if (theoreticalDepth <= 0)
         {
             theoreticalDepth = 0;
-            entry.Move = 0;
+            //entry.Move = 0;         // No TT moves on QSearch
         }
         entry.Depth = theoreticalDepth;
     }
