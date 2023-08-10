@@ -45,7 +45,7 @@ public static class MoveGenerator
 #if DEBUG
         if (position.Side == Side.Both)
         {
-            return new List<Move>();
+            return Array.Empty<Move>();
         }
 #endif
 
