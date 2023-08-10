@@ -1,21 +1,11 @@
 ﻿namespace Lynx.Model;
-public readonly struct GameState
+public readonly struct GameState(sbyte capturedPiece, byte castle, BoardSquare enpassant, long zobristKey)
 {
-    public readonly sbyte CapturedPiece;
+    public readonly sbyte CapturedPiece = capturedPiece;
 
-    public readonly byte Castle;
+    public readonly byte Castle = castle;
 
-    public readonly BoardSquare EnPassant;
+    public readonly BoardSquare EnPassant = enpassant;
 
-    public readonly long ZobristKey;
-
-    // TODO: save full Zobrist key?
-
-    public GameState(sbyte capturedPiece, byte castle, BoardSquare enpassant, long zobristKey)
-    {
-        CapturedPiece = capturedPiece;
-        Castle = castle;
-        EnPassant = enpassant;
-        ZobristKey = zobristKey;
-    }
+    public readonly long ZobristKey = zobristKey;
 }
