@@ -30,16 +30,26 @@ namespace Lynx.Benchmark;
 
 public class MutableReadonlyBitBoard : BaseBenchmark
 {
-    private struct Mutable(ulong n)
+    private struct Mutable
     {
-        public ulong Board { get; set; } = n;
+        public ulong Board { get; set; }
+
+        public Mutable(ulong n)
+        {
+            Board = n;
+        }
     }
 
-    private struct MutableReadonly(ulong n)
+    private struct MutableReadonly
     {
 #pragma warning disable RCS1170 // Use read-only auto-implemented property.
-        public ulong Board { readonly get; private set; } = n;
+        public ulong Board { readonly get; private set; }
 #pragma warning restore RCS1170 // Use read-only auto-implemented property.
+
+        public MutableReadonly(ulong n)
+        {
+            Board = n;
+        }
     }
 
     private Mutable _mutableBoard = new(1234);

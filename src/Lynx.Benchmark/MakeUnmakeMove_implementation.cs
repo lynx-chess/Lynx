@@ -810,24 +810,41 @@ public class MakeUnmakeMove_implementation : BaseBenchmark
         public readonly IEnumerable<Move> AllPossibleMoves(Move[]? movePool = null) => MakeMoveMoveGenerator.GenerateAllMoves(this, movePool);
     }
 
-    public readonly struct MakeMoveGameState(int capturedPiece, int castle, BoardSquare enpassant)
+    public readonly struct MakeMoveGameState
     {
-        public readonly int CapturedPiece = capturedPiece;
+        public readonly int CapturedPiece;
 
-        public readonly int Castle = castle;
+        public readonly int Castle;
 
-        public readonly BoardSquare EnPassant = enpassant;
+        public readonly BoardSquare EnPassant;
+
+        // TODO: save full Zobrist key?
+
+        public MakeMoveGameState(int capturedPiece, int castle, BoardSquare enpassant)
+        {
+            CapturedPiece = capturedPiece;
+            Castle = castle;
+            EnPassant = enpassant;
+        }
     }
 
-    public readonly struct MakeMoveGameStateWithZobristKey(int capturedPiece, int castle, BoardSquare enpassant, long zobristKey)
+    public readonly struct MakeMoveGameStateWithZobristKey
     {
-        public readonly int CapturedPiece = capturedPiece;
+        public readonly int CapturedPiece;
 
-        public readonly int Castle = castle;
+        public readonly int Castle;
 
-        public readonly BoardSquare EnPassant = enpassant;
+        public readonly BoardSquare EnPassant;
 
-        public readonly long ZobristKey = zobristKey;
+        public readonly long ZobristKey;
+
+        public MakeMoveGameStateWithZobristKey(int capturedPiece, int castle, BoardSquare enpassant, long zobristKey)
+        {
+            CapturedPiece = capturedPiece;
+            Castle = castle;
+            EnPassant = enpassant;
+            ZobristKey = zobristKey;
+        }
     }
 
     #region ;(

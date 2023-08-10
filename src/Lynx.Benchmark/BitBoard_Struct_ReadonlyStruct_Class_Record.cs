@@ -88,9 +88,14 @@ public class BitBoard_Struct_ReadonlyStruct_Class_Record : BaseBenchmark
         #endregion
     }
 
-    private readonly struct BitBoardOpsReadonly(ulong b)
+    private readonly struct BitBoardOpsReadonly
     {
-        public ulong Board { get; } = b;
+        public ulong Board { get; }
+
+        public BitBoardOpsReadonly(ulong b)
+        {
+            Board = b;
+        }
 
         public static ulong SetBit(ulong bb, int square)
         {
