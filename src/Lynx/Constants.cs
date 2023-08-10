@@ -354,7 +354,7 @@ public static class Constants
     ///  Black kingside Rook moved      1111 & 1011  =  1011    11
     ///  Black queenside Rook moved     1111 & 0111  =  0111    7
     /// </summary>
-    public static readonly int[] CastlingRightsUpdateConstants = new int[64]
+    public static readonly byte[] CastlingRightsUpdateConstants = new byte[64]
     {
             7, 15, 15, 15,  3, 15, 15, 11,
             15, 15, 15, 15, 15, 15, 15, 15,
