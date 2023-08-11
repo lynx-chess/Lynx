@@ -318,7 +318,13 @@ public sealed partial class Engine
             return staticEvaluation;  // TODO check if in check or drawn position
         }
 
-        Array.Sort(movesToEvaluate, (a, b) => ScoreMove(a, ply, false) > ScoreMove(b, ply, false) ? 1 : 0);
+        Array.Sort(movesToEvaluate, (moveA, moveB) =>
+        {
+            var scoreA = ScoreMove(moveA, ply, false);
+            var scoreB = ScoreMove(moveB, ply, false);
+
+            return scoreA == scoreB ? 0 : (scoreA > scoreB ? -1 : 1);
+        });
 
         Move? bestMove = null;
         bool isAnyMoveValid = false;

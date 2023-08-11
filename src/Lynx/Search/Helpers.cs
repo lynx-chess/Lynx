@@ -57,14 +57,14 @@ public sealed partial class Engine
     private const int MaxValue = short.MaxValue;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void SortMoves(Move[] moves, int depth, Move bestMoveTTCandidate)
+    private void SortMoves(Move[] moves, int ply, Move bestMoveTTCandidate)
     {
         if (_isFollowingPV)
         {
             _isFollowingPV = false;
             foreach (var move in moves)
             {
-                if (move == _pVTable[depth])
+                if (move == _pVTable[ply])
                 {
                     _isFollowingPV = true;
                     _isScoringPV = true;
@@ -73,7 +73,13 @@ public sealed partial class Engine
             }
         }
 
-        Array.Sort(moves, (a, b) => ScoreMove(a, depth, true, bestMoveTTCandidate) > ScoreMove(b, depth, true, bestMoveTTCandidate) ? 1 : 0);
+        Array.Sort(moves, (moveA, moveB) =>
+        {
+            var scoreA = ScoreMove(moveA, ply, true, bestMoveTTCandidate);
+            var scoreB = ScoreMove(moveB, ply, true, bestMoveTTCandidate);
+
+            return scoreA == scoreB ? 0 : (scoreA > scoreB ? -1 : 1);
+        });
     }
 
     /// <summary>
