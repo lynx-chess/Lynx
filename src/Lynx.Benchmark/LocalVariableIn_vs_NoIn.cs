@@ -41,10 +41,10 @@ public class LocalVariableIn_vs_NoIn : BaseBenchmark
         return Sort_NoIn(moves, position)[0];
     }
 
-    private List<Move> Sort_LocalVariableAndIn(IEnumerable<Move> moves, in Position currentPosition)
+    private List<Move> Sort_LocalVariableAndIn(IEnumerable<Move> moves, Position currentPosition)
     {
         var localPosition = currentPosition;
-        return moves.OrderByDescending(move => Score(move, in localPosition)).ToList();
+        return moves.OrderByDescending(move => Score(move, localPosition)).ToList();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -54,5 +54,65 @@ public class LocalVariableIn_vs_NoIn : BaseBenchmark
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int Score(Move move, in Position position) => move.Score(in position);
+    private int Score(Move move, in Position position) => move.OldScore(in position);
+}
+
+public static class BenchmarkLegacyMoveExtensions
+{
+    /// <summary>
+    /// Returns the score evaluation of a move taking into account <see cref="EvaluationConstants.MostValueableVictimLeastValuableAttacker"/>
+    /// </summary>
+    /// <param name="position">The position that precedes a move</param>
+    /// <param name="killerMoves"></param>
+    /// <param name="plies"></param>
+    /// <param name="historyMoves"></param>
+    /// <returns>The higher the score is, the more valuable is the captured piece and the less valuable is the piece that makes the such capture</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int OldScore(this Move move, in Position position, int[,]? killerMoves = null, int? plies = null, int[,]? historyMoves = null)
+    {
+        if (move.IsCapture())
+        {
+            var sourcePiece = move.Piece();
+            int targetPiece = (int)Model.Piece.P;    // Important to initialize to P or p, due to en-passant captures
+
+            var targetSquare = move.TargetSquare();
+            var oppositeSide = Utils.OppositeSide(position.Side);
+            var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
+            var oppositePawnIndex = (int)Model.Piece.P + oppositeSideOffset;
+
+            var limit = (int)Model.Piece.K + oppositeSideOffset;
+            for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
+            {
+                if (position.PieceBitBoards[pieceIndex].GetBit(targetSquare))
+                {
+                    targetPiece = pieceIndex;
+                    break;
+                }
+            }
+
+            return EvaluationConstants.CaptureMoveBaseScoreValue + EvaluationConstants.MostValueableVictimLeastValuableAttacker[sourcePiece, targetPiece];
+        }
+        else if (killerMoves is not null && plies is not null)
+        {
+            // 1st killer move
+            if (killerMoves[0, plies.Value] == move)
+            {
+                return EvaluationConstants.FirstKillerMoveValue;
+            }
+
+            // 2nd killer move
+            else if (killerMoves[1, plies.Value] == move)
+            {
+                return EvaluationConstants.SecondKillerMoveValue;
+            }
+
+            // History move
+            else if (historyMoves is not null)
+            {
+                return historyMoves[move.Piece(), move.TargetSquare()];
+            }
+        }
+
+        return default;
+    }
 }

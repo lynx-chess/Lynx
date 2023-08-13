@@ -7,7 +7,7 @@ namespace Lynx;
 
 public static class Utils
 {
-    private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     /// <summary>
     /// Side.White -> 0
@@ -48,11 +48,20 @@ public static class Utils
     /// <param name="side"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int OppositeSide(Side side)
-    {
-        GuardAgainstSideBoth((int)side);
+    public static int OppositeSide(Side side) => OppositeSide((int)side);
 
-        return (int)side ^ 1;     // or  (int)Side.White - (int)side
+    /// <summary>
+    /// Side.Black -> Side.White
+    /// Side.White -> Side.Black
+    /// </summary>
+    /// <param name="side"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int OppositeSide(int side)
+    {
+        GuardAgainstSideBoth(side);
+
+        return side ^ 1;     // or  (int)Side.White - side
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -95,29 +104,24 @@ public static class Utils
         return (int)BoardSquare.a8 + (7 * 8 * side);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int UpdatePositionHistory(in Position newPosition, Dictionary<long, int> positionHistory)
+    public static (int Source, int Target) ShortCastleRookSourceAndTargetSquare(Side side) => ShortCastleRookSourceAndTargetSquare((int)side);
+    public static (int Source, int Target) ShortCastleRookSourceAndTargetSquare(int side)
     {
-        var id = newPosition.UniqueIdentifier;
+        GuardAgainstSideBoth(side);
 
-        return positionHistory.TryAdd(id, 1)
-            ? 1
-            : ++positionHistory[id];
+        return (
+            (int)BoardSquare.h8 + (7 * 8 * side),
+            Constants.BlackShortCastleRookSquare + (7 * 8 * side));
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void RevertPositionHistory(in Position newPosition, Dictionary<long, int> positionHistory, int repetitions)
+    public static (int Source, int Target) LongCastleRookSourceAndTargetSquare(Side side) => LongCastleRookSourceAndTargetSquare((int)side);
+    public static (int Source, int Target) LongCastleRookSourceAndTargetSquare(int side)
     {
-        var id = newPosition.UniqueIdentifier;
+        GuardAgainstSideBoth(side);
 
-        if (repetitions == 1)
-        {
-            positionHistory.Remove(id);
-        }
-        else
-        {
-            --positionHistory[id];
-        }
+        return (
+            (int)BoardSquare.a8 + (7 * 8 * side),
+            Constants.BlackLongCastleRookSquare + (7 * 8 * side));
     }
 
     /// <summary>

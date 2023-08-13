@@ -387,8 +387,7 @@ public class OnlineTablebaseProberTest
         Assert.AreEqual("h8g7", result.BestMove.UCIString());
 
         var lastPosition = new Position(position, result.BestMove);
-        Utils.UpdatePositionHistory(in lastPosition, game.PositionHashHistory);
-        Assert.True(Position.IsThreefoldRepetition(game.PositionHashHistory));
+        Assert.True(game.IsThreefoldRepetition(lastPosition));
     }
 
     [Test]
@@ -406,8 +405,7 @@ public class OnlineTablebaseProberTest
         Assert.AreEqual("h8g7", result.BestMove.UCIString());
 
         var lastPosition = new Position(position, result.BestMove);
-        Utils.UpdatePositionHistory(in lastPosition, game.PositionHashHistory);
-        Assert.True(Position.IsThreefoldRepetition(game.PositionHashHistory));
+        Assert.True(game.IsThreefoldRepetition(lastPosition));
     }
 }
 

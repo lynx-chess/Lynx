@@ -75,51 +75,49 @@ public sealed partial class Engine
     {
         _searchCancellationTokenSource = new CancellationTokenSource();
         _absoluteSearchCancellationTokenSource = new CancellationTokenSource();
-        int? millisecondsLeft;
-        int? millisecondsIncrement;
-        int minDepth = Configuration.EngineSettings.MinDepth;
+        int minDepth = Configuration.EngineSettings.MinDepth + 1;
         int? maxDepth = null;
         int? decisionTime = null;
 
-        if (Game.CurrentPosition.Side == Side.White)
-        {
-            millisecondsLeft = goCommand?.WhiteTime;
-            millisecondsIncrement = goCommand?.WhiteIncrement;
-        }
-        else
-        {
-            millisecondsLeft = goCommand?.BlackTime;
-            millisecondsIncrement = goCommand?.BlackIncrement;
-        }
-
         if (goCommand is not null)
         {
-            if (millisecondsLeft != 0)
+            int millisecondsLeft;
+            int millisecondsIncrement;
+            if (Game.CurrentPosition.Side == Side.White)
             {
-                decisionTime = Convert.ToInt32(CalculateDecisionTime(goCommand.MovesToGo, millisecondsLeft ?? 0, millisecondsIncrement ?? 0));
+                millisecondsLeft = goCommand.WhiteTime;
+                millisecondsIncrement = goCommand.WhiteIncrement;
+            }
+            else
+            {
+                millisecondsLeft = goCommand.BlackTime;
+                millisecondsIncrement = goCommand.BlackIncrement;
+            }
 
-                if (decisionTime > Configuration.EngineSettings.MinMoveTime)
-                {
-                    _logger.Info("Time to move: {0}s, min. {1} plies", 0.001 * decisionTime, minDepth);
-                    _searchCancellationTokenSource.CancelAfter(decisionTime.Value);
-                }
-                else // Ignore decisionTime and limit search to MinDepthWhenLessThanMinMoveTime plies
-                {
-                    _logger.Info("Depth limited to {0} plies due to time trouble (decision time: {1})", Configuration.EngineSettings.DepthWhenLessThanMinMoveTime, decisionTime);
-                    maxDepth = Configuration.EngineSettings.DepthWhenLessThanMinMoveTime;
-                }
+            if (millisecondsLeft > 0)
+            {
+                // Inspired by Alexandria: time overhead to avoid timing out in the engine-gui communication process
+                millisecondsLeft -= 50;
+
+                Math.Clamp(millisecondsLeft, 50, int.MaxValue); // Avoiding 0/negative values
+
+                // Suggested by Serdra (EP discord)
+                decisionTime = Convert.ToInt32(Math.Min(0.5 * millisecondsLeft, millisecondsLeft * 0.03333 + millisecondsIncrement));
+
+                _logger.Info("Time to move: {0}s", 0.001 * decisionTime);
+                _searchCancellationTokenSource.CancelAfter(decisionTime!.Value);
             }
             else if (goCommand.MoveTime > 0)
             {
                 minDepth = 0;
                 decisionTime = (int)(0.95 * goCommand.MoveTime);
-                _logger.Info("Time to move: {0}s, min. {1} plies", 0.001 * decisionTime, minDepth);
+                _logger.Info("Time to move: {0}s", 0.001 * decisionTime, minDepth);
                 _searchCancellationTokenSource.CancelAfter(decisionTime.Value);
             }
             else if (goCommand.Depth > 0)
             {
                 minDepth = goCommand.Depth;
-                maxDepth = goCommand.Depth;
+                maxDepth = goCommand.Depth > Constants.AbsoluteMaxDepth ? Constants.AbsoluteMaxDepth : goCommand.Depth;
             }
             else if (goCommand.Infinite)
             {
@@ -140,7 +138,8 @@ public sealed partial class Engine
 
         SearchResult resultToReturn = SearchBestMove(minDepth, maxDepth, decisionTime);
 
-        if (!resultToReturn.IsCancelled && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
+        Game.ResetCurrentPositionToBeforeSearchState();
+        if (resultToReturn.BestMove != default && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
         {
             Game.MakeMove(resultToReturn.BestMove);
         }
@@ -152,8 +151,11 @@ public sealed partial class Engine
 
     private SearchResult SearchBestMove(int minDepth, int? maxDepth, int? decisionTime)
     {
+        // Local copy of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove so that it doesn't interfere with regular search
+        var currentHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
+
         var tasks = new Task<SearchResult?>[] {
-            ProbeOnlineTablebase(Game.CurrentPosition, new(Game.PositionHashHistory), _halfMovesWithoutCaptureOrPawnMove),
+            ProbeOnlineTablebase(Game.CurrentPosition, new(Game.PositionHashHistory), currentHalfMovesWithoutCaptureOrPawnMove),  // Other copies of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove (same reason)
             IDDFS(minDepth, maxDepth, decisionTime),
         };
 
@@ -165,8 +167,6 @@ public sealed partial class Engine
         {
             _logger.Info("Search evaluation result - eval: {0}, mate: {1}, depth: {2}, refutation: {3}",
                 searchResult.Evaluation, searchResult.Mate, searchResult.TargetDepth, string.Join(", ", searchResult.Moves.Select(m => m.ToMoveString())));
-
-            Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(searchResult)));
         }
 
         if (tbResult is not null)
@@ -174,7 +174,7 @@ public sealed partial class Engine
             _logger.Info("Online tb probing result - mate: {0}, moves: {1}",
                 tbResult.Mate, string.Join(", ", tbResult.Moves.Select(m => m.ToMoveString())));
 
-            if (searchResult?.Mate > 0 && searchResult.Mate <= tbResult.Mate && searchResult.Mate + _halfMovesWithoutCaptureOrPawnMove < 96)
+            if (searchResult?.Mate > 0 && searchResult.Mate <= tbResult.Mate && searchResult.Mate + currentHalfMovesWithoutCaptureOrPawnMove < 96)
             {
                 _logger.Info("Relying on search result mate line due to dtm match and low enough dtz");
                 ++searchResult.TargetDepth;
@@ -182,11 +182,9 @@ public sealed partial class Engine
             }
         }
 
-        var result = tbResult ?? searchResult ?? throw new AssertException("Both search and online tb proving results are null. At least search one is always expected to have a value");
-
-        Task.Run(async () => await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(result)));
-
-        return result;
+        return tbResult
+            ?? searchResult
+                ?? throw new AssertException("Both search and online tb proving results are null. At least search one is always expected to have a value");
     }
 
     internal double CalculateDecisionTime(int movesToGo, int millisecondsLeft, int millisecondsIncrement)

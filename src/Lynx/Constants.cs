@@ -299,6 +299,7 @@ public static class Constants
 
     public const string ComplexPositionFEN = "rq2k2r/ppp2pb1/2n1pnpp/1Q1p1b2/3P1B2/2N1PNP1/PPP2PBP/R3K2R w KQkq - 0 1";
 
+    // 'Search explosion'
     // https://www.chessprogramming.org/Lasker-Reichhelm_Position
     public const string TTPositionFEN = "8/k7/3p4/p2P1p2/P2P1P2/8/8/K7 w - - 0 1";
 
@@ -353,7 +354,7 @@ public static class Constants
     ///  Black kingside Rook moved      1111 & 1011  =  1011    11
     ///  Black queenside Rook moved     1111 & 0111  =  0111    7
     /// </summary>
-    public static readonly int[] CastlingRightsUpdateConstants = new int[64]
+    public static readonly byte[] CastlingRightsUpdateConstants = new byte[64]
     {
             7, 15, 15, 15,  3, 15, 15, 11,
             15, 15, 15, 15, 15, 15, 15, 15,

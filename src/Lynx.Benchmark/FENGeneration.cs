@@ -339,7 +339,7 @@ public class FENGeneration : BaseBenchmark
 
 internal struct StructCustomPosition
 {
-    private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     private string? _fen;
 
@@ -699,7 +699,7 @@ internal struct StructCustomPosition
 
 internal readonly struct ReadonlyStructCustomPosition
 {
-    private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public string FEN { get; private init; }
 
@@ -1053,7 +1053,7 @@ internal readonly struct ReadonlyStructCustomPosition
 
 internal class ClassCustomPosition
 {
-    private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     private string? _fen;
 
@@ -1412,7 +1412,7 @@ internal class ClassCustomPosition
 
 internal record class RecordClassCustomPosition
 {
-    private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     private string? _fen;
 
@@ -1771,7 +1771,7 @@ internal record class RecordClassCustomPosition
 
 internal record struct RecordStructCustomPosition
 {
-    private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     private string? _fen;
 
@@ -2033,7 +2033,7 @@ internal record struct RecordStructCustomPosition
         _fen = FENHelpers.UpdateSecondPartOfFEN(fenSb, Side, Castle, EnPassant);
     }
 
-    private string CalculateFEN()
+    private readonly string CalculateFEN()
     {
         var sb = new StringBuilder(100);
 

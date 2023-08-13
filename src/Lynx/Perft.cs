@@ -9,7 +9,7 @@ namespace Lynx;
 /// </summary>
 public static class Perft
 {
-    public static long Results(in Position position, int depth)
+    public static long Results(Position position, int depth)
     {
         var sw = new Stopwatch();
         sw.Start();
@@ -21,11 +21,11 @@ public static class Perft
         return nodes;
     }
 
-    public static long Divide(in Position position, int depth)
+    public static long Divide(Position position, int depth)
     {
         var sw = new Stopwatch();
         sw.Start();
-        var nodes = DivideImpl(in position, depth, 0);
+        var nodes = DivideImpl(position, depth, 0);
         sw.Stop();
 
         Console.WriteLine();
@@ -41,17 +41,74 @@ public static class Perft
     /// <param name="depth"></param>
     /// <param name="nodes"></param>
     /// <returns></returns>
-    internal static long ResultsImpl(in Position position, int depth, long nodes)
+    internal static long ResultsImpl(Position position, int depth, long nodes)
     {
         if (depth != 0)
         {
-            foreach (var move in MoveGenerator.GenerateAllMoves(in position))
+            foreach (var move in MoveGenerator.GenerateAllMoves(position))
             {
-                var newPosition = new Position(in position, move);
+                var state = position.MakeMove(move);
+
+                if (position.WasProduceByAValidMove())
+                {
+                    nodes = ResultsImpl(position, depth - 1, nodes);
+                }
+                position.UnmakeMove(move, state);
+            }
+
+            return nodes;
+        }
+
+        return ++nodes;
+    }
+
+    private static long DivideImpl(Position position, int depth, long nodes)
+    {
+        if (depth != 0)
+        {
+            foreach (var move in MoveGenerator.GenerateAllMoves(position))
+            {
+                var state = position.MakeMove(move);
+
+                if (position.WasProduceByAValidMove())
+                {
+                    var cummulativeNodes = nodes;
+
+                    nodes = ResultsImpl(position, depth - 1, nodes);
+
+                    var oldNodes = nodes - cummulativeNodes;
+                    Console.WriteLine($"{move.UCIString()}\t\t{oldNodes:N0}");
+                }
+
+                position.UnmakeMove(move, state);
+            }
+
+            return nodes;
+        }
+
+        return ++nodes;
+    }
+
+    #region Legacy
+
+    /// <summary>
+    /// Proper implementation, used by <see cref="DivideImplUsingPositionConstructor(Position, int, long)"/> as well
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="depth"></param>
+    /// <param name="nodes"></param>
+    /// <returns></returns>
+    private static long ResultsImplUsingPositionConstructor(Position position, int depth, long nodes)
+    {
+        if (depth != 0)
+        {
+            foreach (var move in MoveGenerator.GenerateAllMoves(position))
+            {
+                var newPosition = new Position(position, move);
 
                 if (newPosition.WasProduceByAValidMove())
                 {
-                    nodes = ResultsImpl(newPosition, depth - 1, nodes);
+                    nodes = ResultsImplUsingPositionConstructor(newPosition, depth - 1, nodes);
                 }
             }
 
@@ -61,19 +118,19 @@ public static class Perft
         return ++nodes;
     }
 
-    private static long DivideImpl(in Position position, int depth, long nodes)
+    private static long DivideImplUsingPositionConstructor(Position position, int depth, long nodes)
     {
         if (depth != 0)
         {
-            foreach (var move in MoveGenerator.GenerateAllMoves(in position))
+            foreach (var move in MoveGenerator.GenerateAllMoves(position))
             {
-                var newPosition = new Position(in position, move);
+                var newPosition = new Position(position, move);
 
                 if (newPosition.WasProduceByAValidMove())
                 {
                     var cummulativeNodes = nodes;
 
-                    nodes = ResultsImpl(newPosition, depth - 1, nodes);
+                    nodes = ResultsImplUsingPositionConstructor(newPosition, depth - 1, nodes);
 
                     var oldNodes = nodes - cummulativeNodes;
                     Console.WriteLine($"{move.UCIString()}\t\t{oldNodes:N0}");
@@ -85,6 +142,8 @@ public static class Perft
 
         return ++nodes;
     }
+
+    #endregion
 
     private static void PrintPerftResult(int depth, long nodes, Stopwatch sw)
     {

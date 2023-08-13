@@ -9,7 +9,7 @@
 
 Lynx is a chess engine developed by [@eduherminio](https://github.com/eduherminio).
 
-It's written in C# (.NET 7).
+It's written in C# (.NET 8).
 
 You can find Lynx:
 
@@ -23,12 +23,13 @@ Lichess bot can be played directly, but a chess GUI that supports UCI protocol i
 
 | Lynx version                                                    | CCRL Blitz elo                                                                                                                         |
 |-----------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
-| [0.13.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.13.0) | [1736](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.13.0%2064-bit#Lynx_0_13_0_64-bit) |
-| [0.11.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.11.0) | [1603](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.11.0%2064-bit#Lynx_0_11_0_64-bit) |
-| [0.10.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.10.0) | [1558](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.10.0%2064-bit#Lynx_0_10_0_64-bit) |
-| [0.9.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.9.0) | [1575](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.9.0%2064-bit#Lynx_0_9_0_64-bit) |
-| [0.6.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.6.0) | [1407](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.6.0%2064-bit#Lynx_0_6_0_64-bit) |
-| [0.4.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.4.0) | [1361](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.4.0%2064-bit#Lynx_0_4_0_64-bit) |
+| [0.14.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.14.0) | [1804](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.14.0%2064-bit#Lynx_0_14_0_64-bit) |
+| [0.13.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.13.0) | [1762](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.13.0%2064-bit#Lynx_0_13_0_64-bit) |
+| [0.11.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.11.0) | [1618](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.11.0%2064-bit#Lynx_0_11_0_64-bit) |
+| [0.10.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.10.0) | [1573](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.10.0%2064-bit#Lynx_0_10_0_64-bit) |
+| [0.9.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.9.0) | [1591](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.9.0%2064-bit#Lynx_0_9_0_64-bit) |
+| [0.6.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.6.0) | [1419](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.6.0%2064-bit#Lynx_0_6_0_64-bit) |
+| [0.4.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.4.0) | [1367](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.4.0%2064-bit#Lynx_0_4_0_64-bit) |
 
 ## Building Lynx
 
@@ -38,7 +39,7 @@ However, you can also choose to build Lynx yourself.
 
 ### Requirements
 
-- [.NET 7 SDK](https://dotnet.microsoft.com/download/dotnet/7.0). You can find instructions about how to install it in your preferred OS/Distro either [here](https://docs.microsoft.com/en-us/dotnet/core/install/) or [here](https://github.com/dotnet/core/tree/main/release-notes/7.0).
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0). You can find instructions about how to install it in your preferred OS/Distro either [here](https://docs.microsoft.com/en-us/dotnet/core/install/) or [here](https://github.com/dotnet/core/tree/main/release-notes/8.0).
 
 If you're a Linux user and are new to .NET ecosystem, the conversation in [this issue](https://github.com/lynx-chess/Lynx/issues/33) may help.
 
@@ -89,13 +90,28 @@ If you're a Linux user and are new to .NET ecosystem, the conversation in [this 
 
 - Aspiration Windows [[1](https://web.archive.org/web/20071031095918/http://www.brucemo.com/compchess/programming/aspiration.htm)] [[2](https://www.chessprogramming.org/Aspiration_Windows)]
 
+- Transposition Table [[1](https://web.archive.org/web/20071031100051/http://www.brucemo.com/compchess/programming/hashing.htm)]
+
+- Check extensions [[1](https://www.chessprogramming.org/Check_Extensions)]
+
 ## Credits
 
 Lynx development wouldn't have been possible without:
 
+-  [`BitBoard Chess Engine in C` YouTube playlist](https://www.youtube.com/playlist?list=PLmN0neTso3Jxh8ZIylk74JpwfiWNI76Cs), where [@maksimKorzh](https://github.com/maksimKorzh) explains how he developed his [BBC](https://github.com/maksimKorzh/bbc) engine
+
 - [Chess Programming Wiki](https://www.chessprogramming.org/)
 
--  [`BitBoard Chess Engine in C` YouTube playlist](https://www.youtube.com/playlist?list=PLmN0neTso3Jxh8ZIylk74JpwfiWNI76Cs), where [@maksimKorzh](https://github.com/maksimKorzh) explains how he developed his [BBC](https://github.com/maksimKorzh/bbc) engine
+- Engine Programming discord group, especially Jamie Whiting
+([Akimbo](https://github.com/JacquesRW/akimbo)), Antares ([Altair](https://github.com/Alex2262/AltairChessEngine)), Ciekce ([Stormphrax](https://github.com/Ciekce/Stormphrax/)), Rak ([Mess](https://github.com/raklaptudirm/mess)), etc.
+
+- The community Discord around [SebLague/Chess-Challenge](https://github.com/SebLague/Chess-Challenge/), which allowed me to discover EP discord and to revisit the basics, this time explained by very knowledgeable developers (such as the ones above) to people without any previous chess engine programming knowledge
+
+- [Marcel Vanthoor's blog](https://rustic-chess.org/) about creating his engine Rustic
+
+- Countless other developers and online resources, who/which I should probably remember, but don't come to my mind right now
+
+Thanks also to all the testers that invest their time in computer chess, especially those ones that test lower rated engines (as opposed to only top ones).
 
 [buildlink]: https://github.com/lynx-chess/Lynx/actions/workflows/ci.yml
 [buildlogo]: https://github.com/lynx-chess/Lynx/actions/workflows/ci.yml/badge.svg

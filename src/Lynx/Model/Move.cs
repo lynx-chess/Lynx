@@ -20,14 +20,13 @@ namespace Lynx.Model;
 /// 0001 0000 0000 0000 0000 0000 0000      0x100_0000  Long castling flag
 /// Total: 24 bits -> fits an int
 /// Could be reduced to 16 bits -> see https://www.chessprogramming.org/Encoding_Moves
+/// source + target + reg/en passant/castling/promotion + promotion piece
 /// </para>
 /// </summary>
 /// </summary>
 public static class MoveExtensions
 {
-    public const int CaptureBaseScore = 100_000;
-
-    private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     /// <summary>
     /// 'Encode' constractor
@@ -144,68 +143,7 @@ public static class MoveExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsCastle(this Move move) => (move & 0x180_0000) >> 23 != default;
 
-    /// <summary>
-    /// Returns the score evaluation of a move taking into account <see cref="EvaluationConstants.MostValueableVictimLeastValuableAttacker"/>
-    /// </summary>
-    /// <param name="position">The position that precedes a move</param>
-    /// <param name="killerMoves"></param>
-    /// <param name="plies"></param>
-    /// <param name="historyMoves"></param>
-    /// <returns>The higher the score is, the more valuable is the captured piece and the less valuable is the piece that makes the such capture</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int Score(this Move move, in Position position, int[,]? killerMoves = null, int? plies = null, int[,]? historyMoves = null)
-    {
-        int score = 0;
-
-        if (move.IsCapture())
-        {
-            var sourcePiece = move.Piece();
-            int targetPiece = (int)Model.Piece.P;    // Important to initialize to P or p, due to en-passant captures
-
-            var targetSquare = move.TargetSquare();
-            var oppositeSide = Utils.OppositeSide(position.Side);
-            var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
-            var oppositePawnIndex = (int)Model.Piece.P + oppositeSideOffset;
-
-            var limit = (int)Model.Piece.K + oppositeSideOffset;
-            for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
-            {
-                if (position.PieceBitBoards[pieceIndex].GetBit(targetSquare))
-                {
-                    targetPiece = pieceIndex;
-                    break;
-                }
-            }
-
-            score += CaptureBaseScore + EvaluationConstants.MostValueableVictimLeastValuableAttacker[sourcePiece, targetPiece];
-        }
-        else
-        {
-            if (killerMoves is not null && plies is not null)
-            {
-                // 1st killer move
-                if (killerMoves[0, plies.Value] == move)
-                {
-                    return EvaluationConstants.FirstKillerMoveValue;
-                }
-
-                // 2nd killer move
-                else if (killerMoves[1, plies.Value] == move)
-                {
-                    return EvaluationConstants.SecondKillerMoveValue;
-                }
-
-                // History move
-                else if (historyMoves is not null)
-                {
-                    return historyMoves[move.Piece(), move.TargetSquare()];
-                }
-            }
-        }
-
-        return score;
-    }
-
     public static string ToMoveString(this Move move)
     {
 #pragma warning disable S3358 // Ternary operators should not be nested
@@ -213,10 +151,10 @@ public static class MoveExtensions
             ?
                 Constants.AsciiPieces[move.Piece()] +
                 Constants.Coordinates[move.SourceSquare()] +
-                (move.IsCapture() == default ? "" : "x") +
+                (move.IsCapture() ? "x" : "") +
                 Constants.Coordinates[move.TargetSquare()] +
                 (move.PromotedPiece() == default ? "" : $"={Constants.AsciiPieces[move.PromotedPiece()]}") +
-                (move.IsEnPassant() == default ? "" : "e.p.")
+                (move.IsEnPassant() ? "e.p." : "")
             : (move.IsShortCastle() ? "O-O" : "O-O-O");
 #pragma warning restore S3358 // Ternary operators should not be nested
     }

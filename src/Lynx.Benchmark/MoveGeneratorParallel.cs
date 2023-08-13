@@ -102,7 +102,7 @@ public class MoveGeneratorParallel : BaseBenchmark
 
     public static class CustomMoveGenerator
     {
-        private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         private const int TRUE = 1;
 
@@ -120,7 +120,7 @@ public class MoveGeneratorParallel : BaseBenchmark
             moves.AddRange(GeneratePieceMoves((int)Piece.R + offset, position, capturesOnly));
             moves.AddRange(GeneratePieceMoves((int)Piece.Q + offset, position, capturesOnly));
 
-            return moves.OrderByDescending(move => move.Score(in position, killerMoves, plies));
+            return moves.OrderByDescending(move => move.OldScore(position, killerMoves, plies));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -141,7 +141,7 @@ public class MoveGeneratorParallel : BaseBenchmark
 
             var result = await Task.WhenAll(taskList);
 
-            return result.SelectMany(i => i).OrderByDescending(move => move.Score(in position, killerMoves, plies));
+            return result.SelectMany(i => i).OrderByDescending(move => move.OldScore(in position, killerMoves, plies));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -170,7 +170,7 @@ public class MoveGeneratorParallel : BaseBenchmark
                 }
             });
 
-            return concurrentBag.OrderByDescending(move => move.Score(in position, killerMoves, plies));
+            return concurrentBag.OrderByDescending(move => move.OldScore(in position, killerMoves, plies));
         }
 
         #region Other stuff
@@ -293,9 +293,9 @@ public class MoveGeneratorParallel : BaseBenchmark
                     if (((position.Castle & (int)CastlingRights.WK) != default)
                         && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.f1)
                         && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.g1)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.e1, in position, oppositeSide)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.f1, in position, oppositeSide)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.g1, in position, oppositeSide))
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.e1, position, oppositeSide)
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.f1, position, oppositeSide)
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.g1, position, oppositeSide))
                     {
                         yield return MoveExtensions.Encode(sourceSquare, Constants.WhiteShortCastleKingSquare, piece, isShortCastle: TRUE);
                     }
@@ -304,9 +304,9 @@ public class MoveGeneratorParallel : BaseBenchmark
                         && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.d1)
                         && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c1)
                         && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b1)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.e1, in position, oppositeSide)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.d1, in position, oppositeSide)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.c1, in position, oppositeSide))
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.e1, position, oppositeSide)
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.d1, position, oppositeSide)
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.c1, position, oppositeSide))
                     {
                         yield return MoveExtensions.Encode(sourceSquare, Constants.WhiteLongCastleKingSquare, piece, isLongCastle: TRUE);
                     }
@@ -316,9 +316,9 @@ public class MoveGeneratorParallel : BaseBenchmark
                     if (((position.Castle & (int)CastlingRights.BK) != default)
                         && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.f8)
                         && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.g8)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.e8, in position, oppositeSide)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.f8, in position, oppositeSide)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.g8, in position, oppositeSide))
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.e8, position, oppositeSide)
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.f8, position, oppositeSide)
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.g8, position, oppositeSide))
                     {
                         yield return MoveExtensions.Encode(sourceSquare, Constants.BlackShortCastleKingSquare, piece, isShortCastle: TRUE);
                     }
@@ -327,9 +327,9 @@ public class MoveGeneratorParallel : BaseBenchmark
                         && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.d8)
                         && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c8)
                         && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b8)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.e8, in position, oppositeSide)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.d8, in position, oppositeSide)
-                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.c8, in position, oppositeSide))
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.e8, position, oppositeSide)
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.d8, position, oppositeSide)
+                        && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.c8, position, oppositeSide))
                     {
                         yield return MoveExtensions.Encode(sourceSquare, Constants.BlackLongCastleKingSquare, piece, isLongCastle: TRUE);
                     }

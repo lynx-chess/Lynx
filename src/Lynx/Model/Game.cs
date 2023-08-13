@@ -1,20 +1,21 @@
 ﻿using NLog;
+using System.Runtime.CompilerServices;
 
 namespace Lynx.Model;
 
 public sealed class Game
 {
-    private static readonly ILogger _logger = LogManager.GetCurrentClassLogger();
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public Move[] MovePool { get; } = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
 
     public List<Move> MoveHistory { get; }
-    public List<Position> PositionHistory { get; }
-    public Dictionary<long, int> PositionHashHistory { get; }
+    public HashSet<long> PositionHashHistory { get; }
 
-    public int HalfMovesWithoutCaptureOrPawnMove { get; private set; }
+    public int HalfMovesWithoutCaptureOrPawnMove { get; set; }
 
     public Position CurrentPosition { get; private set; }
+    private readonly Position _gameInitialPosition;
 
     public Game() : this(Constants.InitialPositionFEN)
     {
@@ -24,10 +25,10 @@ public sealed class Game
     {
         var parsedFen = FENParser.ParseFEN(fen);
         CurrentPosition = new Position(parsedFen);
+        _gameInitialPosition = new Position(CurrentPosition);
 
         MoveHistory = new(150);
-        PositionHistory = new(150);
-        PositionHashHistory = new() { [CurrentPosition.UniqueIdentifier] = 1 };
+        PositionHashHistory = new(150) { CurrentPosition.UniqueIdentifier };
 
         HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
     }
@@ -35,10 +36,10 @@ public sealed class Game
     internal Game(Position position)
     {
         CurrentPosition = position;
+        _gameInitialPosition = new Position(CurrentPosition);
 
         MoveHistory = new(150);
-        PositionHistory = new(150);
-        PositionHashHistory = new() { [position.UniqueIdentifier] = 1 };
+        PositionHashHistory = new(150) { position.UniqueIdentifier };
     }
 
     public Game(string fen, List<string> movesUCIString) : this(fen)
@@ -55,38 +56,64 @@ public sealed class Game
 
             MakeMove(parsedMove.Value);
         }
+
+        _gameInitialPosition = new Position(CurrentPosition);
     }
 
-    public bool MakeMove(Move moveToPlay)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsThreefoldRepetition(Position position) => PositionHashHistory.Contains(position.UniqueIdentifier);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool Is50MovesRepetition() => HalfMovesWithoutCaptureOrPawnMove >= 100;
+
+    /// <summary>
+    /// To be used in online tb proving only, with a copy of <see cref="PositionHashHistory"/>
+    /// </summary>
+    /// <param name="positionHashHistory"></param>
+    /// <param name="position"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsThreefoldRepetition(HashSet<long> positionHashHistory, Position position) => positionHashHistory.Contains(position.UniqueIdentifier);
+
+    /// <summary>
+    /// To be used in online tb proving only, with a copy of <see cref="HalfMovesWithoutCaptureOrPawnMove"/>
+    /// </summary>
+    /// <param name="halfMovesWithoutCaptureOrPawnMove"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool Is50MovesRepetition(int halfMovesWithoutCaptureOrPawnMove) => halfMovesWithoutCaptureOrPawnMove >= 100;
+
+    public GameState MakeMove(Move moveToPlay)
     {
-        PositionHistory.Add(CurrentPosition);
-        CurrentPosition = new Position(CurrentPosition, moveToPlay);
+        var gameState = CurrentPosition.MakeMove(moveToPlay);
         MoveHistory.Add(moveToPlay);
 
         if (!CurrentPosition.WasProduceByAValidMove())
         {
-            RevertLastMove();
-            return false;
+            RevertLastMove(moveToPlay, gameState);
         }
 
-        Utils.UpdatePositionHistory(CurrentPosition, PositionHashHistory);
+        PositionHashHistory.Add(CurrentPosition.UniqueIdentifier);
 
         HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveToPlay, HalfMovesWithoutCaptureOrPawnMove);
 
-        return true;
+        return gameState;
     }
 
-    internal void RevertLastMove()
+    internal void RevertLastMove(Move playedMove, GameState gameState)
     {
-        if (PositionHistory.Count != 0)
-        {
-            CurrentPosition = PositionHistory.Last();
-            PositionHistory.Remove(CurrentPosition);
-        }
+        CurrentPosition.UnmakeMove(playedMove, gameState);
 
         if (MoveHistory.Count != 0)
         {
             MoveHistory.RemoveAt(MoveHistory.Count - 1);
         }
     }
+
+    /// <summary>
+    /// Cleans <see cref="CurrentPosition"/> value, since in case of search cancellation
+    /// (either by the engine time management logic or by external stop command)
+    /// currentPosition won't be the initial one
+    /// </summary>
+    public void ResetCurrentPositionToBeforeSearchState() => CurrentPosition = _gameInitialPosition;
 }

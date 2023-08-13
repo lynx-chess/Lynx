@@ -23,11 +23,6 @@ public sealed partial class Engine
     private SearchResult? _previousSearchResult;
     private readonly int[,] _previousKillerMoves = new int[2, Configuration.EngineSettings.MaxDepth];
 
-    /// <summary>
-    /// Copy of <see cref="Game.HalfMovesWithoutCaptureOrPawnMove"/>
-    /// </summary>
-    private int _halfMovesWithoutCaptureOrPawnMove;
-
     private readonly Move _defaultMove = default;
 
     public async Task<SearchResult?> IDDFS(int minDepth, int? maxDepth, int? decisionTime)
@@ -41,8 +36,6 @@ public sealed partial class Engine
         Array.Clear(_pVTable);
         Array.Clear(_maxDepthReached);
 
-        _halfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
-
         int bestEvaluation = 0;
         int alpha = MinValue;
         int beta = MaxValue;
@@ -52,7 +45,7 @@ public sealed partial class Engine
         bool isMateDetected = false;
 
         if (Game.MoveHistory.Count >= 2
-            && _previousSearchResult?.Moves.Count >= 2
+            && _previousSearchResult?.Moves.Count > 2
             && _previousSearchResult.BestMove != default
             && Game.MoveHistory[^2] == _previousSearchResult.Moves[0]
             && Game.MoveHistory[^1] == _previousSearchResult.Moves[1])
@@ -92,7 +85,7 @@ public sealed partial class Engine
             {
                 _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
                 if (minDepth == maxDepth    // go depth n commands
-                    ||  depth - 1 > minDepth)
+                    || depth - 1 > minDepth)
                 {
                     _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
                 }
@@ -101,7 +94,7 @@ public sealed partial class Engine
                 AspirationWindows_SearchAgain:
 
                 _isFollowingPV = true;
-                bestEvaluation = NegaMax(Game.CurrentPosition, minDepth, targetDepth: depth, ply: 0, alpha, beta, isVerifyingNullMoveCutOff: true);
+                bestEvaluation = NegaMax(minDepth, targetDepth: depth, ply: 0, alpha, beta, isVerifyingNullMoveCutOff: true);
 
                 var bestEvaluationAbs = Math.Abs(bestEvaluation);
                 isMateDetected = bestEvaluationAbs > EvaluationConstants.PositiveCheckmateDetectionLimit;
@@ -119,7 +112,7 @@ public sealed partial class Engine
                 alpha = bestEvaluation - Configuration.EngineSettings.AspirationWindowAlpha;
                 beta = bestEvaluation + Configuration.EngineSettings.AspirationWindowBeta;
 
-                //PrintPvTable();
+                //PrintPvTable(depth: depth);
                 ValidatePVTable();
 
                 var pvMoves = _pVTable.TakeWhile(m => m != default).ToList();
@@ -177,7 +170,7 @@ public sealed partial class Engine
         finalSearchResult.NodesPerSecond = Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * _stopWatch.ElapsedMilliseconds) + 1), 0, long.MaxValue));
         finalSearchResult.HashfullPermill = _transpositionTable.HashfullPermill();
 
-        if (isMateDetected && finalSearchResult.Mate + _halfMovesWithoutCaptureOrPawnMove < 96)
+        if (isMateDetected && finalSearchResult.Mate + Game.HalfMovesWithoutCaptureOrPawnMove < 96)
         {
             _logger.Info("Engine search found a short enough mate, cancelling online tb probing if still active");
             _searchCancellationTokenSource.Cancel();
@@ -187,7 +180,7 @@ public sealed partial class Engine
 
         return finalSearchResult;
 
-        static bool stopSearchCondition(int depth, int? maxDepth, bool isMateDetected, int nodes, int? decisionTime, Stopwatch stopWatch, ILogger logger)
+        static bool stopSearchCondition(int depth, int? maxDepth, bool isMateDetected, int nodes, int? decisionTime, Stopwatch stopWatch, Logger logger)
         {
             if (isMateDetected)
             {
@@ -211,7 +204,7 @@ public sealed partial class Engine
             if (decisionTime is not null && elapsedMilliseconds > minTimeToConsiderStopSearching && elapsedMilliseconds > decisionTimePercentageToStopSearching * decisionTime)
             {
                 logger.Info("Stopping at depth {0} (nodes {1}): {2} > {3} (elapsed time > [{4}, {5} * decision time])",
-                    depth - 1, nodes, elapsedMilliseconds, Configuration.EngineSettings.DecisionTimePercentageToStopSearching * decisionTime, minTimeToConsiderStopSearching, decisionTimePercentageToStopSearching);
+                    depth - 1, nodes, elapsedMilliseconds, decisionTimePercentageToStopSearching * decisionTime, minTimeToConsiderStopSearching, decisionTimePercentageToStopSearching);
                 return false;
             }
 

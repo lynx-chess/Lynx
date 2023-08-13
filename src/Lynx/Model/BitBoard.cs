@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Runtime.Intrinsics.X86;
 
 #pragma warning disable S4136
 
@@ -78,6 +79,29 @@ public static class BitBoardExtensions
         return board != default && WithoutLS1B(board) == default;
     }
 
+    /// <summary>
+    /// https://github.com/SebLague/Chess-Challenge/blob/4ef9025ebf5f3386e416ce8244bbdf3fc488f95b/Chess-Challenge/src/Framework/Chess/Move%20Generation/Bitboards/BitBoardUtility.cs#L32
+    /// </summary>
+    /// <param name="bitboard"></param>
+    /// <param name="squareIndex"></param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void ToggleBit(this ref BitBoard bitboard, int squareIndex)
+    {
+        bitboard ^= 1ul << squareIndex;
+    }
+
+    /// <summary>
+    /// https://github.com/SebLague/Chess-Challenge/blob/4ef9025ebf5f3386e416ce8244bbdf3fc488f95b/Chess-Challenge/src/Framework/Chess/Move%20Generation/Bitboards/BitBoardUtility.cs#L37
+    /// </summary>
+    /// <param name="bitboard"></param>
+    /// <param name="squareA"></param>
+    /// <param name="squareB"></param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void ToggleBits(this ref BitBoard bitboard, int squareA, int squareB)
+    {
+        bitboard ^= (1ul << squareA | 1ul << squareB);
+    }
+
     #region Static methods
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -97,6 +121,11 @@ public static class BitBoardExtensions
     public static int GetLS1BIndex(this BitBoard board)
     {
         Utils.Assert(board != default);
+
+        if (Bmi1.X64.IsSupported)
+        {
+            return (int)Bmi1.X64.TrailingZeroCount(board);
+        }
 
         return BitOperations.TrailingZeroCount(board);
     }
@@ -126,6 +155,11 @@ public static class BitBoardExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int CountBits(this BitBoard board)
     {
+        if (Popcnt.X64.IsSupported)
+        {
+            return (int)Popcnt.X64.PopCount(board);
+        }
+
         return BitOperations.PopCount(board);
     }
 

@@ -12,15 +12,13 @@ Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
 var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
 
 var config = new ConfigurationBuilder()
-    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-    .AddJsonFile($"appsettings.{environmentName}.json", optional: true, reloadOnChange: true)
+    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
+    .AddJsonFile($"appsettings.{environmentName}.json", optional: true, reloadOnChange: false)
     .AddEnvironmentVariables()
     .Build();
 
-#pragma warning disable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code - Application code isn't trimmed, see https://github.com/dotnet/runtime/discussions/59230
 config.GetRequiredSection(nameof(EngineSettings)).Bind(Configuration.EngineSettings);
 config.GetRequiredSection(nameof(GeneralSettings)).Bind(Configuration.GeneralSettings);
-#pragma warning restore IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
 
 if (!Configuration.GeneralSettings.DisableLogging)
 {
@@ -70,6 +68,7 @@ finally
     engineChannel.Writer.TryComplete();
     uciChannel.Writer.TryComplete();
     //source.Cancel();
+    NLog.LogManager.Shutdown(); // Flush and close down internal threads and timers
 }
 
 Thread.Sleep(2_000);

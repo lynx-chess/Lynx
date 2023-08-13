@@ -24,10 +24,6 @@ public class EvaluationConstantsTest
             checkmateDetectionLimit);
 
         Assert.Greater(checkmateDetectionLimit, _sensibleEvaluation);
-
-        Assert.Greater(checkmateDetectionLimit, PVMoveScoreValue);
-        Assert.Greater(checkmateDetectionLimit, FirstKillerMoveValue);
-        Assert.Greater(checkmateDetectionLimit, SecondKillerMoveValue);
     }
 
     [Test]
@@ -36,10 +32,6 @@ public class EvaluationConstantsTest
         Assert.Greater(NoHashEntry, _sensibleEvaluation);
         Assert.Greater(PositiveCheckmateDetectionLimit, NoHashEntry);
         Assert.Greater(-NegativeCheckmateDetectionLimit, NoHashEntry);
-
-        Assert.Greater(NoHashEntry, PVMoveScoreValue);
-        Assert.Greater(NoHashEntry, FirstKillerMoveValue);
-        Assert.Greater(NoHashEntry, SecondKillerMoveValue);
     }
 
     [Test]
@@ -48,5 +40,85 @@ public class EvaluationConstantsTest
         Assert.Greater(short.MaxValue, PositiveCheckmateDetectionLimit);
         Assert.Greater(short.MaxValue, NoHashEntry);
         Assert.Greater(short.MaxValue, _sensibleEvaluation);
+    }
+
+    [Test]
+    public void TTMoveScoreValueConstant()
+    {
+        var maxMVVLVAMoveValue = int.MinValue;
+
+        for (int s = (int)Piece.P; s <= (int)Piece.r; ++s)
+        {
+            for (int t = (int)Piece.P; t <= (int)Piece.r; ++t)
+            {
+                if (MostValueableVictimLeastValuableAttacker[s, t] > maxMVVLVAMoveValue)
+                {
+                    maxMVVLVAMoveValue = MostValueableVictimLeastValuableAttacker[s, t];
+                }
+            }
+        }
+        Assert.Greater(TTMoveScoreValue, maxMVVLVAMoveValue + CaptureMoveBaseScoreValue);
+    }
+
+    [Test]
+    public void PVMoveScoreValueConstant()
+    {
+        Assert.Greater(PVMoveScoreValue, TTMoveScoreValue);
+    }
+
+    [Test]
+    public void FirstKillerMoveValueConstant()
+    {
+        var minMVVLVAMoveValue = int.MaxValue;
+
+        for (int s = (int)Piece.P; s <= (int)Piece.r; ++s)
+        {
+            for (int t = (int)Piece.P; t <= (int)Piece.r; ++t)
+            {
+                if (MostValueableVictimLeastValuableAttacker[s, t] < minMVVLVAMoveValue)
+                {
+                    minMVVLVAMoveValue = MostValueableVictimLeastValuableAttacker[s, t];
+                }
+            }
+        }
+
+        checked
+        {
+#pragma warning disable S3949 // Calculations should not overflow - well, we're adding checked just in case
+            Assert.Less(FirstKillerMoveValue, minMVVLVAMoveValue + CaptureMoveBaseScoreValue);
+#pragma warning restore S3949 // Calculations should not overflow
+        }
+
+        Assert.Less(FirstKillerMoveValue, TTMoveScoreValue);
+
+        Assert.Greater(FirstKillerMoveValue, SecondKillerMoveValue);
+    }
+
+    [Test]
+    public void SecondKillerMoveValueConstant()
+    {
+        var minMVVLVAMoveValue = int.MaxValue;
+
+        for (int s = (int)Piece.P; s <= (int)Piece.r; ++s)
+        {
+            for (int t = (int)Piece.P; t <= (int)Piece.r; ++t)
+            {
+                if (MostValueableVictimLeastValuableAttacker[s, t] < minMVVLVAMoveValue)
+                {
+                    minMVVLVAMoveValue = MostValueableVictimLeastValuableAttacker[s, t];
+                }
+            }
+        }
+
+        checked
+        {
+#pragma warning disable S3949 // Calculations should not overflow - well, we're adding checked just in case
+            Assert.Less(SecondKillerMoveValue, minMVVLVAMoveValue + CaptureMoveBaseScoreValue);
+#pragma warning restore S3949 // Calculations should not overflow
+        }
+
+        Assert.Less(SecondKillerMoveValue, FirstKillerMoveValue);
+
+        Assert.Greater(SecondKillerMoveValue, default);
     }
 }

@@ -57,7 +57,7 @@ public sealed partial class Engine
     private const int MaxValue = short.MaxValue;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private List<Move> SortMoves(IEnumerable<Move> moves, in Position currentPosition, int depth, Move bestMoveTTCandidate)
+    private List<Move> SortMoves(IEnumerable<Move> moves, int depth, Move bestMoveTTCandidate)
     {
         if (_isFollowingPV)
         {
@@ -73,19 +73,25 @@ public sealed partial class Engine
             }
         }
 
-        var localPosition = currentPosition;
-
         var orderedMoves = moves
-            .OrderByDescending(move => Score(move, in localPosition, depth, bestMoveTTCandidate))
+            .OrderByDescending(move => ScoreMove(move, depth, true, bestMoveTTCandidate))
             .ToList();
 
-        PrintMessage($"For position {currentPosition.FEN()}:\n{string.Join(", ", orderedMoves.Select(m => $"{m.ToEPDString()} ({Score(m, in localPosition, depth, bestMoveTTCandidate)})"))})");
+        PrintMessage($"For position {Game.CurrentPosition.FEN()}:\n{string.Join(", ", orderedMoves.Select(m => $"{m.ToEPDString()} ({ScoreMove(m, depth, true, bestMoveTTCandidate)})"))})");
 
         return orderedMoves;
     }
 
+    /// <summary>
+    /// Returns the score evaluation of a move taking into account <see cref="_isScoringPV"/>, <paramref name="bestMoveTTCandidate"/>, <see cref="EvaluationConstants.MostValueableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_historyMoves"/>
+    /// </summary>
+    /// <param name="move"></param>
+    /// <param name="depth"></param>
+    /// <param name="useKillerAndPositionMoves"></param>
+    /// <param name="bestMoveTTCandidate"></param>
+    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int Score(Move move, in Position position, int depth, Move bestMoveTTCandidate = default)
+    internal int ScoreMove(Move move, int depth, bool useKillerAndPositionMoves, Move bestMoveTTCandidate = default)
     {
         if (_isScoringPV && move == _pVTable[depth])
         {
@@ -99,26 +105,90 @@ public sealed partial class Engine
             return EvaluationConstants.TTMoveScoreValue;
         }
 
-        return move.Score(in position, _killerMoves, depth, _historyMoves);
-    }
+        var promotedPiece = move.PromotedPiece();
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private IOrderedEnumerable<Move> SortCaptures(IEnumerable<Move> moves, in Position currentPosition, int depth)
-    {
-        var localPosition = currentPosition;
-        return moves.OrderByDescending(move => Score(move, in localPosition, depth));
+        // Queen promotion
+        if ((promotedPiece + 2) % 6 == 0)
+        {
+            return EvaluationConstants.CaptureMoveBaseScoreValue + EvaluationConstants.PromotionMoveScoreValue;
+        }
+
+        if (move.IsCapture())
+        {
+            var sourcePiece = move.Piece();
+            int targetPiece = (int)Piece.P;    // Important to initialize to P or p, due to en-passant captures
+
+            var targetSquare = move.TargetSquare();
+            var oppositeSide = Utils.OppositeSide(Game.CurrentPosition.Side);
+            var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
+            var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
+
+            var limit = (int)Piece.K + oppositeSideOffset;
+            for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
+            {
+                if (Game.CurrentPosition.PieceBitBoards[pieceIndex].GetBit(targetSquare))
+                {
+                    targetPiece = pieceIndex;
+                    break;
+                }
+            }
+
+            return EvaluationConstants.CaptureMoveBaseScoreValue + EvaluationConstants.MostValueableVictimLeastValuableAttacker[sourcePiece, targetPiece];
+        }
+
+        if (promotedPiece != default)
+        {
+            return EvaluationConstants.PromotionMoveScoreValue;
+        }
+
+        if (useKillerAndPositionMoves)
+        {
+            // 1st killer move
+            if (_killerMoves[0, depth] == move)
+            {
+                return EvaluationConstants.FirstKillerMoveValue;
+            }
+
+            if (_killerMoves[1, depth] == move)
+            {
+                return EvaluationConstants.SecondKillerMoveValue;
+            }
+
+            // History move or 0 if not found
+            return _historyMoves[move.Piece(), move.TargetSquare()];
+        }
+
+        return default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void CopyPVTableMoves(int target, int source, int moveCountToCopy)
     {
+        // When asked to copy an incomplete PV one level ahead, clears the rest of the PV Table+
+        // PV Table at depth 3
+        // Copying 60 moves
+        // src: 250, tgt: 190
+        //  0   Qxb2   Qxb2   h4     a8     a8     a8     a8     a8
+        //  64         b1=Q   exf6   Kxf6   a8     a8     a8     a8
+        //  127               a8     b1=Q   Qxb1   Qxb1   a8     a8
+        //  189                      Qxb1   Qxb1   Qxb1   a8     a8
+        //  250                             a8     Qxb1   a8     a8
+        //  310                                    a8     a8     a8
+        //
+        // PV Table at depth 3
+        //  0   Qxb2   Qxb2   h4     a8     a8     a8     a8     a8
+        //  64         b1=Q   exf6   Kxf6   a8     a8     a8     a8
+        //  127               a8     b1=Q   Qxb1   Qxb1   a8     a8
+        //  189                      Qxb1   a8     a8     a8     a8
+        //  250                             a8     a8     a8     a8
+        //  310                                    a8     a8     a8
         if (_pVTable[source] == default)
         {
             Array.Clear(_pVTable, target, _pVTable.Length - target);
             return;
         }
 
-        //PrintPvTable(target, source);
+        //PrintPvTable(target: target, source: source, movesToCopy: moveCountToCopy);
         Array.Copy(_pVTable, source, _pVTable, target, moveCountToCopy);
         //PrintPvTable();
     }
@@ -151,7 +221,7 @@ public sealed partial class Engine
                 throw new AssertException(message);
             }
 
-            var newPosition = new Position(in position, move);
+            var newPosition = new Position(position, move);
 
             if (!newPosition.WasProduceByAValidMove())
             {
@@ -162,7 +232,7 @@ public sealed partial class Engine
     }
 
     [Conditional("DEBUG")]
-    private static void PrintPreMove(in Position position, int plies, Move move, bool isQuiescence = false)
+    private static void PrintPreMove(Position position, int plies, Move move, bool isQuiescence = false)
     {
         if (_logger.IsTraceEnabled)
         {
@@ -235,17 +305,36 @@ public sealed partial class Engine
         }
     }
 
+    /// <summary>
+    /// Assumes Configuration.EngineSettings.MaxDepth = 64
+    /// </summary>
+    /// <param name="target"></param>
+    /// <param name="source"></param>
+    /// <param name="movesToCopy"></param>
+    /// <param name="depth"></param>
     [Conditional("DEBUG")]
-    private void PrintPvTable(int target = -1, int source = -1)
+    private void PrintPvTable(int target = -1, int source = -1, int movesToCopy = 0, int depth = 0)
     {
+        if (depth != default)
+        {
+            Console.WriteLine($"PV Table at depth {depth}");
+        }
+        if (movesToCopy != default)
+        {
+            Console.WriteLine($"Copying {movesToCopy} moves");
+        }
+
         Console.WriteLine(
 (target != -1 ? $"src: {source}, tgt: {target}" + Environment.NewLine : "") +
-$" {0,-3} {_pVTable[0],-6} {_pVTable[1],-6} {_pVTable[2],-6} {_pVTable[3],-6} {_pVTable[4],-6} {_pVTable[5],-6} {_pVTable[6],-6} {_pVTable[7],-6}" + Environment.NewLine +
-$" {64,-3}        {_pVTable[64],-6} {_pVTable[65],-6} {_pVTable[66],-6} {_pVTable[67],-6} {_pVTable[68],-6} {_pVTable[69],-6} {_pVTable[70],-6}" + Environment.NewLine +
-$" {127,-3}               {_pVTable[127],-6} {_pVTable[128],-6} {_pVTable[129],-6} {_pVTable[130],-6} {_pVTable[131],-6} {_pVTable[132],-6}" + Environment.NewLine +
-$" {189,-3}                      {_pVTable[189],-6} {_pVTable[190],-6} {_pVTable[191],-6} {_pVTable[192],-6} {_pVTable[193],-6}" + Environment.NewLine +
-$" {250,-3}                             {_pVTable[250],-6} {_pVTable[251],-6} {_pVTable[252],-6} {_pVTable[253],-6}" + Environment.NewLine +
-$" {310,-3}                                    {_pVTable[310],-6} {_pVTable[311],-6} {_pVTable[312],-6}" + Environment.NewLine +
+$" {0,-3} {_pVTable[0].ToEPDString(),-6} {_pVTable[1].ToEPDString(),-6} {_pVTable[2].ToEPDString(),-6} {_pVTable[3].ToEPDString(),-6} {_pVTable[4].ToEPDString(),-6} {_pVTable[5].ToEPDString(),-6} {_pVTable[6].ToEPDString(),-6} {_pVTable[7].ToEPDString(),-6} {_pVTable[8].ToEPDString(),-6} {_pVTable[9].ToEPDString(),-6} {_pVTable[10].ToEPDString(),-6}" + Environment.NewLine +
+$" {64,-3}        {_pVTable[64].ToEPDString(),-6} {_pVTable[65].ToEPDString(),-6} {_pVTable[66].ToEPDString(),-6} {_pVTable[67].ToEPDString(),-6} {_pVTable[68].ToEPDString(),-6} {_pVTable[69].ToEPDString(),-6} {_pVTable[70].ToEPDString(),-6} {_pVTable[71].ToEPDString(),-6} {_pVTable[72].ToEPDString(),-6} {_pVTable[73].ToEPDString(),-6}" + Environment.NewLine +
+$" {127,-3}               {_pVTable[127].ToEPDString(),-6} {_pVTable[128].ToEPDString(),-6} {_pVTable[129].ToEPDString(),-6} {_pVTable[130].ToEPDString(),-6} {_pVTable[131].ToEPDString(),-6} {_pVTable[132].ToEPDString(),-6} {_pVTable[133].ToEPDString(),-6} {_pVTable[134].ToEPDString(),-6} {_pVTable[135].ToEPDString(),-6}" + Environment.NewLine +
+$" {189,-3}                      {_pVTable[189].ToEPDString(),-6} {_pVTable[190].ToEPDString(),-6} {_pVTable[191].ToEPDString(),-6} {_pVTable[192].ToEPDString(),-6} {_pVTable[193].ToEPDString(),-6} {_pVTable[194].ToEPDString(),-6} {_pVTable[195].ToEPDString(),-6} {_pVTable[196].ToEPDString(),-6}" + Environment.NewLine +
+$" {250,-3}                             {_pVTable[250].ToEPDString(),-6} {_pVTable[251].ToEPDString(),-6} {_pVTable[252].ToEPDString(),-6} {_pVTable[253].ToEPDString(),-6} {_pVTable[254].ToEPDString(),-6} {_pVTable[255].ToEPDString(),-6} {_pVTable[256].ToEPDString(),-6}" + Environment.NewLine +
+$" {310,-3}                                    {_pVTable[310].ToEPDString(),-6} {_pVTable[311].ToEPDString(),-6} {_pVTable[312].ToEPDString(),-6} {_pVTable[313].ToEPDString(),-6} {_pVTable[314].ToEPDString(),-6} {_pVTable[315].ToEPDString(),-6}" + Environment.NewLine +
+$" {369,-3}                                           {_pVTable[369].ToEPDString(),-6} {_pVTable[370].ToEPDString(),-6} {_pVTable[371].ToEPDString(),-6} {_pVTable[372].ToEPDString(),-6} {_pVTable[373].ToEPDString(),-6}" + Environment.NewLine +
+$" {427,-3}                                                  {_pVTable[427].ToEPDString(),-6} {_pVTable[428].ToEPDString(),-6} {_pVTable[429].ToEPDString(),-6} {_pVTable[430].ToEPDString(),-6}" + Environment.NewLine +
+$" {484,-3}                                                         {_pVTable[484].ToEPDString(),-6} {_pVTable[485].ToEPDString(),-6} {_pVTable[486].ToEPDString(),-6}" + Environment.NewLine +
 (target == -1 ? "------------------------------------------------------------------------------------" + Environment.NewLine : ""));
     }
 

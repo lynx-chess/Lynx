@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <LangVersion>preview</LangVersion>
     <Nullable>Enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -15,7 +15,7 @@
   </ItemGroup >
 
   <PropertyGroup>
-    <Version>0.14.0</Version>
+    <Version>0.14.1</Version>
     <Authors>Eduardo Cáceres</Authors>
     <ApplicationIcon>$(MSBuildThisFileDirectory)resources\icon.ico</ApplicationIcon>
     <RepositoryUrl>https://github.com/lynx-chess/Lynx</RepositoryUrl>

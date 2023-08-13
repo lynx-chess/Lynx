@@ -4,13 +4,13 @@ using System.Text;
 
 namespace Lynx.Model;
 
-public readonly struct Position
+public class Position
 {
     public string FEN() => CalculateFEN();
 
     public string FEN(int halfMovesWithoutCaptureOrPawnMove) => CalculateFEN(halfMovesWithoutCaptureOrPawnMove);
 
-    public long UniqueIdentifier { get; }
+    public long UniqueIdentifier { get; private set; }
 
     /// <summary>
     /// Use <see cref="Piece"/> as index
@@ -22,17 +22,20 @@ public readonly struct Position
     /// </summary>
     public BitBoard[] OccupancyBitBoards { get; }
 
-    public Side Side { get; }
+    public Side Side { get; private set; }
 
-    public BoardSquare EnPassant { get; }
+    public BoardSquare EnPassant { get; private set; }
 
-    public int Castle { get; }
+    /// <summary>
+    /// See <see cref="<CastlingRights"/>
+    /// </summary>
+    public byte Castle { get; private set; }
 
     public Position(string fen) : this(FENParser.ParseFEN(fen))
     {
     }
 
-    public Position((bool Success, BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, int Castle, BoardSquare EnPassant,
+    public Position((bool Success, BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, byte Castle, BoardSquare EnPassant,
         int HalfMoveClock, int FullMoveCounter) parsedFEN)
     {
         PieceBitBoards = parsedFEN.PieceBitBoards;
@@ -49,7 +52,7 @@ public readonly struct Position
     /// </summary>
     /// <param name="position"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public Position(in Position position)
+    public Position(Position position)
     {
         UniqueIdentifier = position.UniqueIdentifier;
         PieceBitBoards = new BitBoard[12];
@@ -70,7 +73,7 @@ public readonly struct Position
     /// <param name="nullMove"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #pragma warning disable RCS1163, IDE0060 // Unused parameter.
-    public Position(in Position position, bool nullMove)
+    public Position(Position position, bool nullMove)
     {
         UniqueIdentifier = position.UniqueIdentifier;
         PieceBitBoards = new BitBoard[12];
@@ -87,10 +90,9 @@ public readonly struct Position
             ZobristTable.SideHash()
             ^ ZobristTable.EnPassantHash((int)position.EnPassant);
     }
-#pragma warning restore RCS1163 // Unused parameter.
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public Position(in Position position, Move move) : this(in position)
+    public Position(Position position, Move move) : this(position)
     {
         var oldSide = Side;
         var offset = Utils.PieceOffset(oldSide);
@@ -156,7 +158,7 @@ public readonly struct Position
         {
             var pawnPush = +8 - ((int)oldSide * 16);
             var enPassantSquare = sourceSquare + pawnPush;
-            Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
+            Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {(BoardSquare)enPassantSquare}");
 
             EnPassant = (BoardSquare)enPassantSquare;
             UniqueIdentifier ^= ZobristTable.EnPassantHash(enPassantSquare);
@@ -204,6 +206,235 @@ public readonly struct Position
         UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public GameState MakeMove(Move move)
+    {
+        sbyte capturedPiece = -1;
+        byte castleCopy = Castle;
+        BoardSquare enpassantCopy = EnPassant;
+        long uniqueIdentifierCopy = UniqueIdentifier;
+
+        var oldSide = (int)Side;
+        var offset = Utils.PieceOffset(oldSide);
+        var oppositeSide = Utils.OppositeSide(oldSide);
+
+        int sourceSquare = move.SourceSquare();
+        int targetSquare = move.TargetSquare();
+        int piece = move.Piece();
+        int promotedPiece = move.PromotedPiece();
+
+        var newPiece = piece;
+        if (promotedPiece != default)
+        {
+            newPiece = promotedPiece;
+        }
+
+        PieceBitBoards[piece].PopBit(sourceSquare);
+        OccupancyBitBoards[oldSide].PopBit(sourceSquare);
+
+        PieceBitBoards[newPiece].SetBit(targetSquare);
+        OccupancyBitBoards[oldSide].SetBit(targetSquare);
+
+        UniqueIdentifier ^=
+            ZobristTable.SideHash()
+            ^ ZobristTable.PieceHash(sourceSquare, piece)
+            ^ ZobristTable.PieceHash(targetSquare, newPiece)
+            ^ ZobristTable.EnPassantHash((int)EnPassant)            // We clear the existing enpassant square, if any
+            ^ ZobristTable.CastleHash(Castle);                      // We clear the existing castle rights
+
+        EnPassant = BoardSquare.noSquare;
+        if (move.IsCapture())
+        {
+            var oppositePawnIndex = /*(int)Piece.P + */Utils.PieceOffset(oppositeSide);
+
+            if (move.IsEnPassant())
+            {
+                var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
+                Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
+
+                PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
+                OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
+                UniqueIdentifier ^= ZobristTable.PieceHash(capturedPawnSquare, oppositePawnIndex);
+                capturedPiece = (sbyte)oppositePawnIndex;
+            }
+            else
+            {
+                var limit = (int)Piece.K + oppositePawnIndex;
+                for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
+                {
+                    if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
+                    {
+                        PieceBitBoards[pieceIndex].PopBit(targetSquare);
+                        UniqueIdentifier ^= ZobristTable.PieceHash(targetSquare, pieceIndex);
+                        capturedPiece = (sbyte)pieceIndex;
+                        break;
+                    }
+                }
+
+                OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
+            }
+        }
+        else if (move.IsDoublePawnPush())
+        {
+            var pawnPush = +8 - (oldSide * 16);
+            var enPassantSquare = sourceSquare + pawnPush;
+            Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {(BoardSquare)enPassantSquare}");
+
+            EnPassant = (BoardSquare)enPassantSquare;
+            UniqueIdentifier ^= ZobristTable.EnPassantHash(enPassantSquare);
+        }
+        else if (move.IsShortCastle())
+        {
+            var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
+            var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
+            var rookIndex = (int)Piece.R + offset;
+
+            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitBoards[oldSide].PopBit(rookSourceSquare);
+
+            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitBoards[oldSide].SetBit(rookTargetSquare);
+
+            UniqueIdentifier ^=
+                ZobristTable.PieceHash(rookSourceSquare, rookIndex)
+                ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
+        }
+        else if (move.IsLongCastle())
+        {
+            var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
+            var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
+            var rookIndex = (int)Piece.R + offset;
+
+            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitBoards[oldSide].PopBit(rookSourceSquare);
+
+            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitBoards[oldSide].SetBit(rookTargetSquare);
+
+            UniqueIdentifier ^=
+                ZobristTable.PieceHash(rookSourceSquare, rookIndex)
+                ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
+        }
+
+        Side = (Side)oppositeSide;
+        OccupancyBitBoards[2] = OccupancyBitBoards[1] | OccupancyBitBoards[0];
+
+        // Updating castling rights
+        Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
+        Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
+
+        UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
+
+        return new GameState(capturedPiece, castleCopy, enpassantCopy, uniqueIdentifierCopy);
+        //var clone = new Position(this);
+        //clone.UnmakeMove(move, gameState);
+        //if (uniqueIdentifierCopy != clone.UniqueIdentifier)
+        //{
+        //    throw new($"{FEN()}: {uniqueIdentifierCopy} expected, got {clone.UniqueIdentifier} got after Make/Unmake move {move.ToEPDString()}");
+        //}
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void UnmakeMove(Move move, GameState gameState)
+    {
+        var oppositeSide = (int)Side;
+        var side = Utils.OppositeSide(oppositeSide);
+        Side = (Side)side;
+        var offset = Utils.PieceOffset(side);
+
+        int sourceSquare = move.SourceSquare();
+        int targetSquare = move.TargetSquare();
+        int piece = move.Piece();
+        int promotedPiece = move.PromotedPiece();
+
+        var newPiece = piece;
+        if (promotedPiece != default)
+        {
+            newPiece = promotedPiece;
+        }
+
+        PieceBitBoards[newPiece].PopBit(targetSquare);
+        OccupancyBitBoards[side].PopBit(targetSquare);
+
+        PieceBitBoards[piece].SetBit(sourceSquare);
+        OccupancyBitBoards[side].SetBit(sourceSquare);
+
+        if (move.IsCapture())
+        {
+            var oppositePawnIndex =/*(int)Piece.P +*/ Utils.PieceOffset(oppositeSide);
+
+            if (move.IsEnPassant())
+            {
+                var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
+                Utils.Assert(OccupancyBitBoards[(int)Side.Both].GetBit(capturedPawnSquare) == default,
+                    $"Expected empty {capturedPawnSquare}");
+
+                PieceBitBoards[oppositePawnIndex].SetBit(capturedPawnSquare);
+                OccupancyBitBoards[oppositeSide].SetBit(capturedPawnSquare);
+            }
+            else
+            {
+                PieceBitBoards[gameState.CapturedPiece].SetBit(targetSquare);
+                OccupancyBitBoards[oppositeSide].SetBit(targetSquare);
+            }
+        }
+        else if (move.IsShortCastle())
+        {
+            var rookSourceSquare = Utils.ShortCastleRookSourceSquare(side);
+            var rookTargetSquare = Utils.ShortCastleRookTargetSquare(side);
+            var rookIndex = (int)Piece.R + offset;
+
+            PieceBitBoards[rookIndex].SetBit(rookSourceSquare);
+            OccupancyBitBoards[side].SetBit(rookSourceSquare);
+
+            PieceBitBoards[rookIndex].PopBit(rookTargetSquare);
+            OccupancyBitBoards[side].PopBit(rookTargetSquare);
+        }
+        else if (move.IsLongCastle())
+        {
+            var rookSourceSquare = Utils.LongCastleRookSourceSquare(side);
+            var rookTargetSquare = Utils.LongCastleRookTargetSquare(side);
+            var rookIndex = (int)Piece.R + offset;
+
+            PieceBitBoards[rookIndex].SetBit(rookSourceSquare);
+            OccupancyBitBoards[side].SetBit(rookSourceSquare);
+
+            PieceBitBoards[rookIndex].PopBit(rookTargetSquare);
+            OccupancyBitBoards[side].PopBit(rookTargetSquare);
+        }
+
+        OccupancyBitBoards[2] = OccupancyBitBoards[1] | OccupancyBitBoards[0];
+
+        // Updating saved values
+        Castle = gameState.Castle;
+        EnPassant = gameState.EnPassant;
+        UniqueIdentifier = gameState.ZobristKey;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public GameState MakeNullMove()
+    {
+        Side = (Side)Utils.OppositeSide(Side);
+        var oldEnPassant = EnPassant;
+        var oldUniqueIdentifier = UniqueIdentifier;
+        EnPassant = BoardSquare.noSquare;
+
+        UniqueIdentifier ^=
+            ZobristTable.SideHash()
+            ^ ZobristTable.EnPassantHash((int)oldEnPassant);
+
+        return new GameState(-1, byte.MaxValue, oldEnPassant, oldUniqueIdentifier);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void UnMakeNullMove(GameState gameState)
+    {
+        Side = (Side)Utils.OppositeSide(Side);
+        EnPassant = gameState.EnPassant;
+
+        UniqueIdentifier = gameState.ZobristKey;
+    }
+
     /// <summary>
     /// False if any of the kings has been captured, or if the opponent king is in check.
     /// </summary>
@@ -224,7 +455,7 @@ public readonly struct Position
     /// <summary>
     /// Lightweight version of <see cref="IsValid"/>
     /// False if the opponent king is in check.
-    /// This method is meant to be invoked only after <see cref="Position(Position, Move)"/>
+    /// This method is meant to be invoked only after <see cref="Position(Position, Move)"/> or <see cref="MakeMove(int)"/>
     /// </summary>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -359,24 +590,6 @@ public readonly struct Position
     /// Evaluates material and position in a NegaMax style.
     /// That is, positive scores always favour playing <see cref="Side"/>.
     /// </summary>
-    /// <param name="positionHistory"></param>
-    /// <param name="movesWithoutCaptureOrPawnMove"></param>
-    /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int StaticEvaluation(Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove, CancellationToken cancellationToken = default)
-    {
-        if (IsThreefoldRepetition(positionHistory) || Is50MovesRepetition(movesWithoutCaptureOrPawnMove))
-        {
-            return 0;
-        }
-
-        return StaticEvaluation(movesWithoutCaptureOrPawnMove, cancellationToken);
-    }
-
-    /// <summary>
-    /// Evaluates material and position in a NegaMax style.
-    /// That is, positive scores always favour playing <see cref="Side"/>.
-    /// </summary>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int StaticEvaluation(int movesWithoutCaptureOrPawnMove, CancellationToken cancellationToken = default)
@@ -494,28 +707,6 @@ public readonly struct Position
     /// </summary>
     /// <param name="depth">Modulates the output, favouring positions with lower depth left (i.e. Checkmate in less moves)</param>
     /// <param name="isInCheck"></param>
-    /// <param name="positionHistory"></param>
-    /// <param name="movesWithoutCaptureOrPawnMove"></param>
-    /// <returns>At least <see cref="CheckMateEvaluation"/> if Position.Side lost (more extreme values when <paramref name="depth"/> increases)
-    /// or 0 if Position.Side was stalemated</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int EvaluateFinalPosition(int depth, bool isInCheck, Dictionary<long, int> positionHistory, int movesWithoutCaptureOrPawnMove)
-    {
-        if (IsThreefoldRepetition(positionHistory) || Is50MovesRepetition(movesWithoutCaptureOrPawnMove))
-        {
-            return 0;
-        }
-
-        return EvaluateFinalPosition(depth, isInCheck);
-    }
-
-    /// <summary>
-    /// Assuming a current position has no legal moves (<see cref="AllPossibleMoves"/> doesn't produce any <see cref="IsValid"/> position),
-    /// this method determines if a position is a result of either a loss by Checkmate or a draw by stalemate.
-    /// NegaMax style
-    /// </summary>
-    /// <param name="depth">Modulates the output, favouring positions with lower depth left (i.e. Checkmate in less moves)</param>
-    /// <param name="isInCheck"></param>
     /// <returns>At least <see cref="CheckMateEvaluation"/> if Position.Side lost (more extreme values when <paramref name="depth"/> increases)
     /// or 0 if Position.Side was stalemated</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -531,14 +722,6 @@ public readonly struct Position
             return default;
         }
     }
-
-    public static int NumberOfTwoFoldRepetitions(Dictionary<long, int> positionHistory) => positionHistory.Values.Count(val => val >= 2);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsThreefoldRepetition(Dictionary<long, int> positionHistory) => positionHistory.Values.Any(val => val >= 3);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool Is50MovesRepetition(int movesWithoutCaptureOrPawnMove) => movesWithoutCaptureOrPawnMove >= 100;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int CustomPieceEvaluation(int pieceSquareIndex, int pieceIndex)

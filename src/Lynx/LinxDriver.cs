@@ -11,7 +11,8 @@ public sealed class LinxDriver
     private readonly ChannelReader<string> _uciReader;
     private readonly Channel<string> _engineWriter;
     private readonly Engine _engine;
-    private readonly ILogger _logger;
+    private readonly Logger _logger;
+    private static readonly string[] _none = new[] { "none" };
 
     public LinxDriver(ChannelReader<string> uciReader, Channel<string> engineWriter, Engine engine)
     {
@@ -203,7 +204,7 @@ public sealed class LinxDriver
                 {
                     if (commandItems.Length > 4)
                     {
-                        _logger.Info("Game against {0}", string.Join(' ', commandItems.Skip(4).Except(new[] { "none" })));
+                        _logger.Info("Game against {0}", string.Join(' ', commandItems.Skip(4).Except(_none)));
                     }
                     break;
                 }
@@ -275,7 +276,7 @@ public sealed class LinxDriver
 
         if (items.Length >= 2 && int.TryParse(items[1], out int depth) && depth >= 1)
         {
-            Perft.Results(_engine.Game.CurrentPosition, depth);
+            Perft.Divide(_engine.Game.CurrentPosition, depth);
         }
     }
 

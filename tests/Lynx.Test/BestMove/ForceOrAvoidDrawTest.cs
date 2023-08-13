@@ -19,7 +19,12 @@ public class ForceOrAvoidDrawTest : BaseTest
     }
 
     [Test]
-    public void AvoidThreefoldRepetitionWhenWinningPosition()
+    [TestCase(1)]
+    [TestCase(2)]
+    [TestCase(3)]
+    [TestCase(4)]
+    [TestCase(5)]
+    public void AvoidThreefoldRepetitionWhenWinningPosition(int depth)
     {
         // Arrange
 
@@ -57,7 +62,7 @@ public class ForceOrAvoidDrawTest : BaseTest
         Assert.AreEqual(repeatedMoves.Count, engine.Game.MoveHistory.Count);
 
         // Act
-        var searchResult = engine.BestMove();
+        var searchResult = engine.BestMove(new($"go depth {depth}"));
         var bestMoveFound = searchResult.BestMove;
 
         // Assert
