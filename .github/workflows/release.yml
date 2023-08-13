@@ -151,6 +151,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        token: ${{ secrets.GH_RELEASE }}
 
     - name: Configure git user
       run: |
@@ -171,7 +173,7 @@ jobs:
       if: github.event.inputs.should_commit_new_version == 'true'
       continue-on-error: true
       run: |
-        git switch ${{ env.GITHUB_REF_SLUG }}
+        git switch ${{ env.GITHUB_REF_NAME }}
         git status
         git commit -am "🚀 Release v${{ github.event.inputs.new_engine_version }}"
         git push
@@ -179,7 +181,7 @@ jobs:
     - name: Create git tag
       if: github.event.inputs.should_tag_new_version == 'true'
       run: |
-        git switch ${{ env.GITHUB_REF_SLUG }}
+        git switch ${{ env.GITHUB_REF_NAME }}
         git status
         git tag -a v${{ github.event.inputs.new_engine_version }} -m "v${{ github.event.inputs.new_engine_version }}"
         git push --tags
