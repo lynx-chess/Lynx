@@ -73,7 +73,7 @@ public sealed partial class Engine
 
     public async Task<SearchResult> BestMove(GoCommand? goCommand)
     {
-        _searchCancellationTokenSource = new CancellationTokenSource();
+        _searchCancellationTokenSource.TryReset();
         _absoluteSearchCancellationTokenSource.TryReset();
         int minDepth = Configuration.EngineSettings.MinDepth + 1;
         int? maxDepth = null;
@@ -256,21 +256,24 @@ public sealed partial class Engine
         return decisionTime;
     }
 
-    public async Task StartSearching(GoCommand goCommand)
+    public void StartSearching(GoCommand goCommand)
     {
         _isPondering = goCommand.Ponder;
         IsSearching = true;
 
-        try
+        Task.Run(async () =>
         {
-            var searchResult = await BestMove(goCommand);
-            _moveToPonder = searchResult.Moves.Count >= 2 ? searchResult.Moves[1] : null;
-            await _engineWriter.WriteAsync(BestMoveCommand.BestMove(searchResult.BestMove, _moveToPonder));
-        }
-        catch (Exception e)
-        {
-            _logger.Fatal(e, "Error in {0} while calculating BestMove", nameof(StartSearching));
-        }
+            try
+            {
+                var searchResult = await BestMove(goCommand);
+                _moveToPonder = searchResult.Moves.Count >= 2 ? searchResult.Moves[1] : null;
+                await _engineWriter.WriteAsync(BestMoveCommand.BestMove(searchResult.BestMove, _moveToPonder));
+            }
+            catch (Exception e)
+            {
+                _logger.Fatal(e, "Error in {0} while calculating BestMove", nameof(StartSearching));
+            }
+        });
         // TODO: if ponder, continue with PonderAction, which is searching indefinitely for a move
     }
 
