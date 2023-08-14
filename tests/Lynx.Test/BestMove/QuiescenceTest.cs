@@ -20,9 +20,9 @@ public class QuiescenceTest : BaseTest
         new[] { "e5h2" },
         Description = "Mate in 6 with quiescence, https://gameknot.com/chess-puzzle.pl?pz=257112")]
 #pragma warning disable RCS1163, IDE0060 // Unused parameter.
-    public void Quiescence(string fen, int depth, int minQuiescenceSearchDepth, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
+    public async Task Quiescence(string fen, int depth, int minQuiescenceSearchDepth, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
 #pragma warning restore RCS1163, IDE0060 // Unused parameter.
     {
-        TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth);
+        await TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth);
     }
 }

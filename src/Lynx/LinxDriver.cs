@@ -36,68 +36,137 @@ public sealed class LinxDriver
     {
         try
         {
-            while (await _uciReader.WaitToReadAsync(cancellationToken) && !cancellationToken.IsCancellationRequested)
+            var parallelOptions = new ParallelOptions()
             {
-                try
-                {
-                    if (_uciReader.TryRead(out var rawCommand) && !string.IsNullOrWhiteSpace(rawCommand))
+                MaxDegreeOfParallelism = 2,
+                CancellationToken = cancellationToken
+            };
+
+            await Parallel.ForEachAsync(
+                    _uciReader.ReadAllAsync(cancellationToken),
+                    parallelOptions,
+                    async (rawCommand, _) =>
                     {
-                        _logger.Debug("[GUI]\t{0}", rawCommand);
-
-                        var commandItems = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                        switch (commandItems[0].ToLowerInvariant())
+                        try
                         {
-                            case DebugCommand.Id:
-                                HandleDebug(rawCommand);
-                                break;
-                            case GoCommand.Id:
-                                await HandleGo(rawCommand);
-                                break;
-                            case IsReadyCommand.Id:
-                                await HandleIsReady(cancellationToken);
-                                break;
-                            case PonderHitCommand.Id:
-                                HandlePonderHit();
-                                break;
-                            case PositionCommand.Id:
-                                HandlePosition(rawCommand);
-                                break;
-                            case QuitCommand.Id:
-                                HandleQuit();
-                                return;
-                            case RegisterCommand.Id:
-                                HandleRegister(rawCommand);
-                                break;
-                            case SetOptionCommand.Id:
-                                HandleSetOption(rawCommand, commandItems);
-                                break;
-                            case StopCommand.Id:
-                                HandleStop();
-                                break;
-                            case UCICommand.Id:
-                                await HandleUCI(cancellationToken);
-                                break;
-                            case UCINewGameCommand.Id:
-                                HandleNewGame();
-                                break;
-                            case "perft":
-                                HandlePerft(rawCommand);
-                                break;
-                            case "divide":
-                                HandleDivide(rawCommand);
-                                break;
+                            _logger.Debug("[GUI]\t{0}", rawCommand);
 
-                            default:
-                                _logger.Warn("Unknown command received: {0}", rawCommand);
-                                break;
+                            var commandItems = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                            switch (commandItems[0].ToLowerInvariant())
+                            {
+                                case DebugCommand.Id:
+                                    HandleDebug(rawCommand);
+                                    break;
+                                case GoCommand.Id:
+                                    await HandleGo(rawCommand);
+                                    break;
+                                case IsReadyCommand.Id:
+                                    await HandleIsReady(cancellationToken);
+                                    break;
+                                case PonderHitCommand.Id:
+                                    HandlePonderHit();
+                                    break;
+                                case PositionCommand.Id:
+                                    HandlePosition(rawCommand);
+                                    break;
+                                case QuitCommand.Id:
+                                    HandleQuit();
+                                    return;
+                                case RegisterCommand.Id:
+                                    HandleRegister(rawCommand);
+                                    break;
+                                case SetOptionCommand.Id:
+                                    HandleSetOption(rawCommand, commandItems);
+                                    break;
+                                case StopCommand.Id:
+                                    HandleStop();
+                                    break;
+                                case UCICommand.Id:
+                                    await HandleUCI(cancellationToken);
+                                    break;
+                                case UCINewGameCommand.Id:
+                                    HandleNewGame();
+                                    break;
+                                case "perft":
+                                    HandlePerft(rawCommand);
+                                    break;
+                                case "divide":
+                                    HandleDivide(rawCommand);
+                                    break;
+
+                                default:
+                                    _logger.Warn("Unknown command received: {0}", rawCommand);
+                                    break;
+                            }
                         }
-                    }
-                }
-                catch (Exception e)
-                {
-                    _logger.Error(e, "Error trying to read/parse UCI command");
-                }
-            }
+                        catch (Exception e)
+                        {
+                            _logger.Error(e, "Error trying to read/parse UCI command");
+                        }
+                    });
+            //.ContinueWith(t => _uciReader.TryComplete(t.Exception));
+
+            //            while (await _uciReader.WaitToReadAsync(cancellationToken) && !cancellationToken.IsCancellationRequested)
+            //            {
+            //                try
+            //                {
+            //                    if (_uciReader.TryRead(out var rawCommand) && !string.IsNullOrWhiteSpace(rawCommand))
+            //                    {
+            //                        _logger.Debug("[GUI]\t{0}", rawCommand);
+
+            //                        var commandItems = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            //                        switch (commandItems[0].ToLowerInvariant())
+            //                        {
+            //                            case DebugCommand.Id:
+            //                                HandleDebug(rawCommand);
+            //                                break;
+            //                            case GoCommand.Id:
+            //                                await HandleGo(rawCommand);
+            //                                break;
+            //                            case IsReadyCommand.Id:
+            //                                await HandleIsReady(cancellationToken);
+            //                                break;
+            //                            case PonderHitCommand.Id:
+            //                                HandlePonderHit();
+            //                                break;
+            //                            case PositionCommand.Id:
+            //                                HandlePosition(rawCommand);
+            //                                break;
+            //                            case QuitCommand.Id:
+            //                                HandleQuit();
+            //                                return;
+            //                            case RegisterCommand.Id:
+            //                                HandleRegister(rawCommand);
+            //                                break;
+            //                            case SetOptionCommand.Id:
+            //                                HandleSetOption(rawCommand, commandItems);
+            //                                break;
+            //                            case StopCommand.Id:
+            //                                HandleStop();
+            //                                break;
+            //                            case UCICommand.Id:
+            //                                await HandleUCI(cancellationToken);
+            //                                break;
+            //                            case UCINewGameCommand.Id:
+            //                                HandleNewGame();
+            //                                break;
+            //                            case "perft":
+            //                                HandlePerft(rawCommand);
+            //                                break;
+            //                            case "divide":
+            //                                HandleDivide(rawCommand);
+            //                                break;
+
+            //                            default:
+            //                                _logger.Warn("Unknown command received: {0}", rawCommand);
+            //                                break;
+            //                        }
+            //                    }
+            //                }
+            //                catch (Exception e)
+            //                {
+            //    _logger.Error(e, "Error trying to read/parse UCI command");
+            //}
         }
         catch (Exception e)
         {
@@ -127,7 +196,7 @@ public sealed class LinxDriver
     {
         var goCommand = new GoCommand();
         await goCommand.Parse(command);
-        _engine.StartSearching(goCommand);
+        await _engine.StartSearching(goCommand);
     }
 
     private void HandleStop() => _engine.StopSearching();

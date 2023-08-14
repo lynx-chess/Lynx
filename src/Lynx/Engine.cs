@@ -69,12 +69,12 @@ public sealed partial class Engine
         _isPondering = false;
     }
 
-    public SearchResult BestMove() => BestMove(null);
+    public async Task<SearchResult> BestMove() => await BestMove(null);
 
-    public SearchResult BestMove(GoCommand? goCommand)
+    public async Task<SearchResult> BestMove(GoCommand? goCommand)
     {
         _searchCancellationTokenSource = new CancellationTokenSource();
-        _absoluteSearchCancellationTokenSource = new CancellationTokenSource();
+        _absoluteSearchCancellationTokenSource.TryReset();
         int minDepth = Configuration.EngineSettings.MinDepth + 1;
         int? maxDepth = null;
         int? decisionTime = null;
@@ -136,7 +136,7 @@ public sealed partial class Engine
             maxDepth = Configuration.EngineSettings.DefaultMaxDepth;
         }
 
-        SearchResult resultToReturn = SearchBestMove(minDepth, maxDepth, decisionTime);
+        SearchResult resultToReturn = await SearchBestMove(minDepth, maxDepth, decisionTime);
 
         Game.ResetCurrentPositionToBeforeSearchState();
         if (resultToReturn.BestMove != default && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
@@ -149,7 +149,7 @@ public sealed partial class Engine
         return resultToReturn;
     }
 
-    private SearchResult SearchBestMove(int minDepth, int? maxDepth, int? decisionTime)
+    private async Task<SearchResult> SearchBestMove(int minDepth, int? maxDepth, int? decisionTime)
     {
         // Local copy of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove so that it doesn't interfere with regular search
         var currentHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
@@ -159,7 +159,7 @@ public sealed partial class Engine
 
         if (!Configuration.EngineSettings.UseOnlineTablebaseInRootPositions || Game.CurrentPosition.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
         {
-            searchResult = IDDFS(minDepth, maxDepth, decisionTime).Result;
+            searchResult = await IDDFS(minDepth, maxDepth, decisionTime);
             tbResult = null;
         }
         else
@@ -169,7 +169,7 @@ public sealed partial class Engine
                 IDDFS(minDepth, maxDepth, decisionTime)
             };
 
-            var resultList = Task.WhenAll(tasks).Result;
+            var resultList = await Task.WhenAll(tasks);
             searchResult = resultList[1];
             tbResult = resultList[0];
         }
@@ -256,23 +256,21 @@ public sealed partial class Engine
         return decisionTime;
     }
 
-    public void StartSearching(GoCommand goCommand)
+    public async Task StartSearching(GoCommand goCommand)
     {
         _isPondering = goCommand.Ponder;
         IsSearching = true;
-        Task.Run(async () =>
+
+        try
         {
-            try
-            {
-                var searchResult = BestMove(goCommand);
-                _moveToPonder = searchResult.Moves.Count >= 2 ? searchResult.Moves[1] : null;
-                await _engineWriter.WriteAsync(BestMoveCommand.BestMove(searchResult.BestMove, _moveToPonder));
-            }
-            catch (Exception e)
-            {
-                _logger.Fatal(e, "Error in {0} while calculating BestMove", nameof(StartSearching));
-            }
-        });
+            var searchResult = await BestMove(goCommand);
+            _moveToPonder = searchResult.Moves.Count >= 2 ? searchResult.Moves[1] : null;
+            await _engineWriter.WriteAsync(BestMoveCommand.BestMove(searchResult.BestMove, _moveToPonder));
+        }
+        catch (Exception e)
+        {
+            _logger.Fatal(e, "Error in {0} while calculating BestMove", nameof(StartSearching));
+        }
         // TODO: if ponder, continue with PonderAction, which is searching indefinitely for a move
     }
 
