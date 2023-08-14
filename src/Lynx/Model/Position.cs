@@ -45,6 +45,8 @@ public class Position
         EnPassant = parsedFEN.EnPassant;
 
         UniqueIdentifier = ZobristTable.PositionHash(this);
+
+        // TODO: half move and full move counters
     }
 
     /// <summary>

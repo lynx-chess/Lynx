@@ -126,7 +126,8 @@ public sealed class OptionCommand : EngineBaseCommand
         "option name UCI_EngineAbout type string default Lynx by Eduardo Cáceres, see https://github.com/lynx-chess/Lynx",
         $"option name Hash type spin default {Configuration.EngineSettings.TranspositionTableSize / 1024 / 1024} min 0 max 131072",
         "option name OnlineTablebaseInRootPositions type check default false",
-        "option name OnlineTablebaseInSearch type check default false"
+        "option name OnlineTablebaseInSearch type check default false",
+        "option name Threads type spin default 1 min 1 max 1"
     );
 
     //"option name UCI_AnalyseMode type check",

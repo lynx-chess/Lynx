@@ -165,7 +165,7 @@ public sealed partial class Engine
 
         if (searchResult is not null)
         {
-            _logger.Info("Search evaluation result - eval: {0}, mate: {1}, depth: {2}, refutation: {3}",
+            _logger.Info("Search evaluation result - eval: {0}, mate: {1}, depth: {2}, pv: {3}",
                 searchResult.Evaluation, searchResult.Mate, searchResult.TargetDepth, string.Join(", ", searchResult.Moves.Select(m => m.ToMoveString())));
         }
 

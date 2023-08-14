@@ -1,9 +1,12 @@
 ﻿using Lynx;
 using Lynx.Cli;
+using Lynx.UCI.Commands.Engine;
 using Microsoft.Extensions.Configuration;
 using NLog;
 using NLog.Extensions.Logging;
 using System.Threading.Channels;
+
+Console.WriteLine($"{IdCommand.EngineName} {IdCommand.GetVersion()} by {IdCommand.EngineAuthor}");
 
 #if DEBUG
 Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
@@ -34,7 +37,7 @@ CancellationToken cancellationToken = source.Token;
 var tasks = new List<Task>
 {
     Task.Run(() => new Writer(engineChannel).Run(cancellationToken)),
-    Task.Run(() => new LinxDriver(uciChannel, engineChannel, new Engine(engineChannel)).Run(cancellationToken)),
+    Task.Run(() => new LynxDriver(uciChannel, engineChannel, new Engine(engineChannel)).Run(cancellationToken)),
     Task.Run(() => new Listener(uciChannel).Run(cancellationToken)),
     uciChannel.Reader.Completion,
     engineChannel.Reader.Completion
@@ -42,6 +45,10 @@ var tasks = new List<Task>
 
 try
 {
+    if (args[0] == "bench")
+    {
+        await uciChannel.Writer.WriteAsync("bench");
+    }
     await Task.WhenAny(tasks);
 }
 catch (AggregateException ae)

@@ -80,8 +80,6 @@ public sealed partial class Engine
             return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
         }
 
-        ++_nodes;
-
         // 🔍 Null-move pruning
         bool isFailHigh = false;    // In order to detect zugzwangs
         if (ply > Configuration.EngineSettings.NullMovePruning_R
@@ -131,6 +129,8 @@ public sealed partial class Engine
                 position.UnmakeMove(move, gameState);
                 continue;
             }
+
+            ++_nodes;
             isAnyMoveValid = true;
 
             PrintPreMove(position, ply, move);
@@ -293,7 +293,6 @@ public sealed partial class Engine
         var nextPvIndex = PVTable.Indexes[ply + 1];
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
-        ++_nodes;
         _maxDepthReached[ply] = ply;
 
         var staticEvaluation = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
@@ -330,6 +329,8 @@ public sealed partial class Engine
                 position.UnmakeMove(move, gameState);
                 continue;
             }
+
+            ++_nodes;
             isAnyMoveValid = true;
 
             PrintPreMove(position, ply, move, isQuiescence: true);

@@ -527,17 +527,19 @@ static void _42_Perft()
     {
         var sw = new Stopwatch();
         sw.Start();
-        var nodes = Perft.Results(pos, depth);
+        var result = Perft.Results(pos, depth);
         sw.Stop();
 
-        Console.WriteLine($"Depth {depth}\tNodes: {nodes}\tTime: {sw.ElapsedMilliseconds}ms");
+        Perft.PrintPerftResult(depth, result, Console.WriteLine);
     }
 }
 
 static void _43_Perft()
 {
-    Perft.Divide(new Position(Constants.InitialPositionFEN), 5);
-    Perft.Divide(new Position(TrickyPosition), 5);
+    var result = Perft.Divide(new Position(Constants.InitialPositionFEN), 5);
+    Perft.PrintPerftResult(5, result, Console.WriteLine);
+    result = Perft.Divide(new Position(TrickyPosition), 5);
+    Perft.PrintPerftResult(5, result, Console.WriteLine);
 }
 
 static void _44_ParseUCI()
