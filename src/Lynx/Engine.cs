@@ -154,14 +154,25 @@ public sealed partial class Engine
         // Local copy of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove so that it doesn't interfere with regular search
         var currentHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
 
-        var tasks = new Task<SearchResult?>[] {
-            ProbeOnlineTablebase(Game.CurrentPosition, new(Game.PositionHashHistory), currentHalfMovesWithoutCaptureOrPawnMove),  // Other copies of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove (same reason)
-            IDDFS(minDepth, maxDepth, decisionTime),
-        };
+        SearchResult? searchResult = null;
+        SearchResult? tbResult = null;
 
-        var resultList = Task.WhenAll(tasks).Result;
-        var searchResult = resultList[1];
-        var tbResult = resultList[0];
+        if (!Configuration.EngineSettings.UseOnlineTablebaseInRootPositions || Game.CurrentPosition.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
+        {
+            searchResult = IDDFS(minDepth, maxDepth, decisionTime).Result;
+            tbResult = null;
+        }
+        else
+        {
+            var tasks = new Task<SearchResult?>[] {
+                ProbeOnlineTablebase(Game.CurrentPosition, new(Game.PositionHashHistory), currentHalfMovesWithoutCaptureOrPawnMove),  // Other copies of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove (same reason)
+                IDDFS(minDepth, maxDepth, decisionTime)
+            };
+
+            var resultList = Task.WhenAll(tasks).Result;
+            searchResult = resultList[1];
+            tbResult = resultList[0];
+        }
 
         if (searchResult is not null)
         {
