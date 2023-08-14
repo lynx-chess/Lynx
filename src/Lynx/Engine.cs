@@ -73,8 +73,8 @@ public sealed partial class Engine
 
     public async Task<SearchResult> BestMove(GoCommand? goCommand)
     {
-        _searchCancellationTokenSource.TryReset();
-        _absoluteSearchCancellationTokenSource.TryReset();
+        _searchCancellationTokenSource = new();
+        _absoluteSearchCancellationTokenSource = new();
         int minDepth = Configuration.EngineSettings.MinDepth + 1;
         int? maxDepth = null;
         int? decisionTime = null;
