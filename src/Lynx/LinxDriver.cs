@@ -232,6 +232,17 @@ public sealed class LinxDriver
                     }
                     break;
                 }
+            case "threads":
+                {
+                    if (commandItems.Length > 4 && int.TryParse(commandItems[4], out var value))
+                    {
+                        if (value != 1)
+                        {
+                            _logger.Warn("Unsopported threads value: {0}", value);
+                        }
+                    }
+                    break;
+                }
             default:
                 _logger.Warn("Unsupported option: {0}", command);
                 break;
