@@ -205,4 +205,9 @@ public sealed class EngineSettings
     /// This can also de used to reduce online probing
     /// </summary>
     public int OnlineTablebaseMaxSupportedPieces { get; set; } = 7;
+
+    /// <summary>
+    /// Depth for bench command
+    /// </summary>
+    public int BenchDepth { get; set; } = 3;
 }

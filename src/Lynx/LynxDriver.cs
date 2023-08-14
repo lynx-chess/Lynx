@@ -6,7 +6,7 @@ using System.Threading.Channels;
 
 namespace Lynx;
 
-public sealed class LinxDriver
+public sealed class LynxDriver
 {
     private readonly ChannelReader<string> _uciReader;
     private readonly Channel<string> _engineWriter;
@@ -14,7 +14,7 @@ public sealed class LinxDriver
     private readonly Logger _logger;
     private static readonly string[] _none = new[] { "none" };
 
-    public LinxDriver(ChannelReader<string> uciReader, Channel<string> engineWriter, Engine engine)
+    public LynxDriver(ChannelReader<string> uciReader, Channel<string> engineWriter, Engine engine)
     {
         _uciReader = uciReader;
         _engineWriter = engineWriter;
@@ -81,12 +81,14 @@ public sealed class LinxDriver
                                 HandleNewGame();
                                 break;
                             case "perft":
-                                HandlePerft(rawCommand);
+                                await HandlePerft(rawCommand);
                                 break;
                             case "divide":
-                                HandleDivide(rawCommand);
+                                await HandleDivide(rawCommand);
                                 break;
-
+                            case "bench":
+                                await HandleBench(rawCommand);
+                                break;
                             default:
                                 _logger.Warn("Unknown command received: {0}", rawCommand);
                                 break;
@@ -105,7 +107,7 @@ public sealed class LinxDriver
         }
         finally
         {
-            _logger.Info("Finishing {0}", nameof(LinxDriver));
+            _logger.Info("Finishing {0}", nameof(LynxDriver));
         }
     }
 
@@ -271,24 +273,32 @@ public sealed class LinxDriver
 
     private void HandleRegister(string rawCommand) => _engine.Registration = new RegisterCommand(rawCommand);
 
-    private void HandlePerft(string rawCommand)
+    private async Task HandlePerft(string rawCommand)
     {
         var items = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
         if (items.Length >= 2 && int.TryParse(items[1], out int depth) && depth >= 1)
         {
-            Perft.Results(_engine.Game.CurrentPosition, depth);
+            var results = Perft.Results(_engine.Game.CurrentPosition, depth);
+            await Perft.PrintPerftResult(depth, results, str => _engineWriter.Writer.WriteAsync(str));
         }
     }
 
-    private void HandleDivide(string rawCommand)
+    private async ValueTask HandleDivide(string rawCommand)
     {
         var items = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
         if (items.Length >= 2 && int.TryParse(items[1], out int depth) && depth >= 1)
         {
-            Perft.Divide(_engine.Game.CurrentPosition, depth);
+            var results = Perft.Divide(_engine.Game.CurrentPosition, depth);
+            await Perft.PrintPerftResult(depth, results, str => _engineWriter.Writer.WriteAsync(str));
         }
+    }
+
+    private async ValueTask HandleBench(string rawCommand)
+    {
+        var results = OpenBench.Bench();
+        await OpenBench.PrintBenchResults(results, str => _engineWriter.Writer.WriteAsync(str));
     }
 
     #endregion

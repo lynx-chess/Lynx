@@ -169,6 +169,12 @@ public static class Utils
         return (int)Math.CopySign(mate, bestEvaluation);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static long CalculateNps(int nodes, long elapsedMilliseconds)
+    {
+        return Convert.ToInt64(Math.Clamp(nodes / ((0.001 * elapsedMilliseconds) + 1), 0, long.MaxValue));
+    }
+
     [Conditional("DEBUG")]
     private static void GuardAgainstSideBoth(int side)
     {
