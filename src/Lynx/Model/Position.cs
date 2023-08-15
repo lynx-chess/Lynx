@@ -463,7 +463,7 @@ public class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool WasProduceByAValidMove()
     {
-        var oppositeKingBitBoard = PieceBitBoards[(int)Piece.K + Utils.PieceOffset(Utils.OppositeSide(Side))];
+        var oppositeKingBitBoard = PieceBitBoards[(int)Piece.k - Utils.PieceOffset(Side)];
 
         return oppositeKingBitBoard != default && !Attacks.IsSquaredAttacked(oppositeKingBitBoard.GetLS1BIndex(), Side, PieceBitBoards, OccupancyBitBoards);
     }
