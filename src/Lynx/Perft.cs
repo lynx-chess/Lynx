@@ -1,5 +1,6 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
+using System.Threading.Channels;
 
 namespace Lynx;
 
@@ -9,29 +10,24 @@ namespace Lynx;
 /// </summary>
 public static class Perft
 {
-    public static long Results(Position position, int depth)
+    public static (long Nodes, double ElapsedMilliseconds) Results(Position position, int depth)
     {
         var sw = new Stopwatch();
         sw.Start();
         var nodes = ResultsImpl(position, depth, 0);
         sw.Stop();
 
-        PrintPerftResult(depth, nodes, sw);
-
-        return nodes;
+        return (nodes, CalculateElapsedMilliseconds(sw));
     }
 
-    public static long Divide(Position position, int depth)
+    public static (long Nodes, double ElapsedMilliseconds) Divide(Position position, int depth)
     {
         var sw = new Stopwatch();
         sw.Start();
         var nodes = DivideImpl(position, depth, 0);
         sw.Stop();
 
-        Console.WriteLine();
-        PrintPerftResult(depth, nodes, sw);
-
-        return nodes;
+        return (nodes, CalculateElapsedMilliseconds(sw));
     }
 
     /// <summary>
@@ -145,26 +141,38 @@ public static class Perft
 
     #endregion
 
-    private static void PrintPerftResult(int depth, long nodes, Stopwatch sw)
+    public static void PrintPerftResult(int depth, (long Nodes, double ElapsedMilliseconds) peftResult, Action<string> write)
     {
-        var timeStr = TimeToString(sw);
+        var timeStr = TimeToString(peftResult.ElapsedMilliseconds);
 
-        Console.WriteLine(
+        write(
             $"Depth:\t{depth}" + Environment.NewLine +
-            $"Nodes:\t{nodes:N0}" + Environment.NewLine +
+            $"Nodes:\t{peftResult.Nodes:N0}" + Environment.NewLine +
             $"Time:\t{timeStr}" + Environment.NewLine);
     }
 
-    private static string TimeToString(Stopwatch stopwatch)
+    public static async ValueTask PrintPerftResult(int depth, (long Nodes, double ElapsedMilliseconds) peftResult, Func<string, ValueTask> write)
     {
-        // http://geekswithblogs.net/BlackRabbitCoder/archive/2012/01/12/c.net-little-pitfalls-stopwatch-ticks-are-not-timespan-ticks.aspx
-        static double CalculateElapsedMilliseconds(Stopwatch stopwatch)
-        {
-            return 1000 * stopwatch.ElapsedTicks / (double)Stopwatch.Frequency;
-        }
+        var timeStr = TimeToString(peftResult.ElapsedMilliseconds);
 
-        var milliseconds = CalculateElapsedMilliseconds(stopwatch);
+        await write(
+            $"Depth:\t{depth}" + Environment.NewLine +
+            $"Nodes:\t{peftResult.Nodes:N0}" + Environment.NewLine +
+            $"Time:\t{timeStr}" + Environment.NewLine);
+    }
 
+    /// <summary>
+    /// http://geekswithblogs.net/BlackRabbitCoder/archive/2012/01/12/c.net-little-pitfalls-stopwatch-ticks-are-not-timespan-ticks.aspx
+    /// </summary>
+    /// <param name="stopwatch"></param>
+    /// <returns></returns>
+    private static double CalculateElapsedMilliseconds(Stopwatch stopwatch)
+    {
+        return 1000 * stopwatch.ElapsedTicks / (double)Stopwatch.Frequency;
+    }
+
+    private static string TimeToString(double milliseconds)
+    {
         return milliseconds switch
         {
             < 1 => $"{milliseconds:F} ms",

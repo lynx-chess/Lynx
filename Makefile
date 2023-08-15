@@ -1,5 +1,8 @@
 .DEFAULT_GOAL := publish
 
+EXE = Lynx.Cli
+CC = dotnet
+
 RUNTIME=
 OUTPUT_DIR:=artifacts/Lynx/
 
@@ -39,7 +42,7 @@ test:
 	dotnet test -c Release & dotnet test -c Release --filter "TestCategory=LongRunning" & dotnet test -c Release --filter "TestCategory=Perft"
 
 publish:
-	dotnet publish src/Lynx.Cli/Lynx.Cli.csproj -c Release --runtime ${RUNTIME} --self-contained /p:Optimized=true -o ${OUTPUT_DIR}
+	dotnet publish src/Lynx.Cli/Lynx.Cli.csproj -c Release --runtime ${RUNTIME} --self-contained /p:Optimized=true /p:DeterministicBuild=true -o ${OUTPUT_DIR}
 
 run:
 	dotnet run --project src/Lynx.Cli/Lynx.Cli.csproj -c Release --runtime ${RUNTIME}

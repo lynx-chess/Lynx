@@ -132,7 +132,7 @@ public sealed partial class Engine
                     DepthReached = maxDepthReached,
                     Nodes = _nodes,
                     Time = elapsedTime,
-                    NodesPerSecond = Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * elapsedTime) + 1), 0, long.MaxValue)),
+                    NodesPerSecond = Utils.CalculateNps(_nodes, elapsedTime),
                     HashfullPermill = _transpositionTable.HashfullPermill()
                 };
 
@@ -167,7 +167,7 @@ public sealed partial class Engine
         finalSearchResult.DepthReached = Math.Max(finalSearchResult.DepthReached, _maxDepthReached.LastOrDefault(item => item != default));
         finalSearchResult.Nodes = _nodes;
         finalSearchResult.Time = _stopWatch.ElapsedMilliseconds;
-        finalSearchResult.NodesPerSecond = Convert.ToInt64(Math.Clamp(_nodes / ((0.001 * _stopWatch.ElapsedMilliseconds) + 1), 0, long.MaxValue));
+        finalSearchResult.NodesPerSecond = Utils.CalculateNps(_nodes, _stopWatch.ElapsedMilliseconds);
         finalSearchResult.HashfullPermill = _transpositionTable.HashfullPermill();
 
         if (isMateDetected && finalSearchResult.Mate + Game.HalfMovesWithoutCaptureOrPawnMove < 96)
