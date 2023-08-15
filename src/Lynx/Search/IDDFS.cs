@@ -52,10 +52,7 @@ public sealed partial class Engine
         {
             _logger.Debug("Ponder hit");
 
-            lastSearchResult = new SearchResult(_previousSearchResult)
-            {
-                HashfullPermill = _transpositionTable.HashfullPermill()
-            };
+            lastSearchResult = new SearchResult(_previousSearchResult);
 
             Array.Copy(_previousSearchResult.Moves.ToArray(), 2, _pVTable, 0, _previousSearchResult.Moves.Count - 2);
 
@@ -132,8 +129,7 @@ public sealed partial class Engine
                     DepthReached = maxDepthReached,
                     Nodes = _nodes,
                     Time = elapsedTime,
-                    NodesPerSecond = Utils.CalculateNps(_nodes, elapsedTime),
-                    HashfullPermill = _transpositionTable.HashfullPermill()
+                    NodesPerSecond = Utils.CalculateNps(_nodes, elapsedTime)
                 };
 
                 await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult));
@@ -168,7 +164,6 @@ public sealed partial class Engine
         finalSearchResult.Nodes = _nodes;
         finalSearchResult.Time = _stopWatch.ElapsedMilliseconds;
         finalSearchResult.NodesPerSecond = Utils.CalculateNps(_nodes, _stopWatch.ElapsedMilliseconds);
-        finalSearchResult.HashfullPermill = _transpositionTable.HashfullPermill();
 
         if (isMateDetected && finalSearchResult.Mate + Game.HalfMovesWithoutCaptureOrPawnMove < 96)
         {
