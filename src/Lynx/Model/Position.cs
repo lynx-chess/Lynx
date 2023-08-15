@@ -93,6 +93,11 @@ public class Position
             ^ ZobristTable.EnPassantHash((int)position.EnPassant);
     }
 
+    /// <summary>
+    /// Slower than make-unmake move method
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="move"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Position(Position position, Move move) : this(position)
     {
@@ -247,7 +252,7 @@ public class Position
         EnPassant = BoardSquare.noSquare;
         if (move.IsCapture())
         {
-            var oppositePawnIndex = /*(int)Piece.P + */Utils.PieceOffset(oppositeSide);
+            var oppositePawnIndex = (int)Piece.p - offset;
 
             if (move.IsEnPassant())
             {
@@ -363,7 +368,7 @@ public class Position
 
         if (move.IsCapture())
         {
-            var oppositePawnIndex =/*(int)Piece.P +*/ Utils.PieceOffset(oppositeSide);
+            var oppositePawnIndex = (int)Piece.p - offset;
 
             if (move.IsEnPassant())
             {
@@ -446,11 +451,11 @@ public class Position
     {
         var offset = Utils.PieceOffset(Side);
 
-        var kingBitboard = PieceBitBoards[(int)Piece.K + offset];
-        var kingSquare = kingBitboard == default ? -1 : kingBitboard.GetLS1BIndex();
+        var kingBitBoard = PieceBitBoards[(int)Piece.K + offset];
+        var kingSquare = kingBitBoard == default ? -1 : kingBitBoard.GetLS1BIndex();
 
-        var oppositeKingBitboard = PieceBitBoards[(int)Piece.k - offset];
-        var oppositeKingSquare = oppositeKingBitboard == default ? -1 : oppositeKingBitboard.GetLS1BIndex();
+        var oppositeKingBitBoard = PieceBitBoards[(int)Piece.k - offset];
+        var oppositeKingSquare = oppositeKingBitBoard == default ? -1 : oppositeKingBitBoard.GetLS1BIndex();
 
         return kingSquare >= 0 && oppositeKingSquare >= 0
             && !Attacks.IsSquaredAttacked(oppositeKingSquare, Side, PieceBitBoards, OccupancyBitBoards);
@@ -459,7 +464,8 @@ public class Position
     /// <summary>
     /// Lightweight version of <see cref="IsValid"/>
     /// False if the opponent king is in check.
-    /// This method is meant to be invoked only after <see cref="Position(Position, Move)"/> or <see cref="MakeMove(int)"/>
+    /// This method is meant to be invoked only after a pseudolegal <see cref="Position(Position, Move)"/> or <see cref="MakeMove(int)"/>.
+    /// i.e. it doesn't ensure that both kings are on the board
     /// </summary>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
