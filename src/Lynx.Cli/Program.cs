@@ -45,7 +45,7 @@ var tasks = new List<Task>
 
 try
 {
-    if (args[0] == "bench")
+    if (args.Length > 0 && args[0] == "bench")
     {
         await uciChannel.Writer.WriteAsync("bench");
     }
