@@ -446,8 +446,11 @@ public class Position
     {
         var offset = Utils.PieceOffset(Side);
 
-        var kingSquare = PieceBitBoards[(int)Piece.K + offset].GetLS1BIndex();
-        var oppositeKingSquare = PieceBitBoards[(int)Piece.k - offset].GetLS1BIndex();
+        var kingBitboard = PieceBitBoards[(int)Piece.K + offset];
+        var kingSquare = kingBitboard == default ? -1 : kingBitboard.GetLS1BIndex();
+
+        var oppositeKingBitboard = PieceBitBoards[(int)Piece.k - offset];
+        var oppositeKingSquare = oppositeKingBitboard == default ? -1 : oppositeKingBitboard.GetLS1BIndex();
 
         return kingSquare >= 0 && oppositeKingSquare >= 0
             && !Attacks.IsSquaredAttacked(oppositeKingSquare, Side, PieceBitBoards, OccupancyBitBoards);
