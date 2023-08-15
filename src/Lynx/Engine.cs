@@ -151,28 +151,23 @@ public sealed partial class Engine
 
     private async Task<SearchResult> SearchBestMove(int minDepth, int? maxDepth, int? decisionTime)
     {
+        if (!Configuration.EngineSettings.UseOnlineTablebaseInRootPositions || Game.CurrentPosition.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
+        {
+            return (await IDDFS(minDepth, maxDepth, decisionTime))!;
+        }
+
         // Local copy of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove so that it doesn't interfere with regular search
         var currentHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
 
-        SearchResult? searchResult = null;
-        SearchResult? tbResult = null;
-
-        if (!Configuration.EngineSettings.UseOnlineTablebaseInRootPositions || Game.CurrentPosition.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
-        {
-            searchResult = await IDDFS(minDepth, maxDepth, decisionTime);
-            tbResult = null;
-        }
-        else
-        {
-            var tasks = new Task<SearchResult?>[] {
-                ProbeOnlineTablebase(Game.CurrentPosition, new(Game.PositionHashHistory), currentHalfMovesWithoutCaptureOrPawnMove),  // Other copies of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove (same reason)
+        var tasks = new Task<SearchResult?>[] {
+                // Other copies of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove (same reason)
+                ProbeOnlineTablebase(Game.CurrentPosition, new(Game.PositionHashHistory),  Game.HalfMovesWithoutCaptureOrPawnMove),
                 IDDFS(minDepth, maxDepth, decisionTime)
             };
 
-            var resultList = await Task.WhenAll(tasks);
-            searchResult = resultList[1];
-            tbResult = resultList[0];
-        }
+        var resultList = await Task.WhenAll(tasks);
+        var searchResult = resultList[1];
+        var tbResult = resultList[0];
 
         if (searchResult is not null)
         {
@@ -193,9 +188,7 @@ public sealed partial class Engine
             }
         }
 
-        return tbResult
-            ?? searchResult
-                ?? throw new AssertException("Both search and online tb proving results are null. At least search one is always expected to have a value");
+        return tbResult ?? searchResult!;
     }
 
     internal double CalculateDecisionTime(int movesToGo, int millisecondsLeft, int millisecondsIncrement)

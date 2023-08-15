@@ -25,6 +25,13 @@ public sealed partial class Engine
 
     private readonly Move _defaultMove = default;
 
+    /// <summary>
+    /// IDDFs search
+    /// </summary>
+    /// <param name="minDepth"></param>
+    /// <param name="maxDepth"></param>
+    /// <param name="decisionTime"></param>
+    /// <returns>Not null <see cref="SearchResult"/>, although made nullable in order to match online tb probing signature</returns>
     public async Task<SearchResult?> IDDFS(int minDepth, int? maxDepth, int? decisionTime)
     {
         // Cleanup
@@ -161,7 +168,7 @@ public sealed partial class Engine
             _stopWatch.Stop();
         }
 
-        var finalSearchResult = lastSearchResult ??= new(default, bestEvaluation, depth, new List<Move>(), alpha, beta);
+        SearchResult finalSearchResult = lastSearchResult ??= new(default, bestEvaluation, depth, new List<Move>(), alpha, beta);
 
         finalSearchResult.IsCancelled = isCancelled;
         finalSearchResult.DepthReached = Math.Max(finalSearchResult.DepthReached, _maxDepthReached.LastOrDefault(item => item != default));
