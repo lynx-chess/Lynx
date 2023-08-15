@@ -101,7 +101,7 @@ public class PositionTest
         Assert.NotNull(new Position(origin, move));
     }
 
-    [TestCase(Constants.EmptyBoardFEN, Ignore = "WasProduceByAValidMove doesn't check the presence of both kings on the board")]
+    [TestCase(Constants.EmptyBoardFEN, false, Ignore = "WasProduceByAValidMove doesn't check the presence of both kings on the board")]
     [TestCase("K/8/8/8/8/8/8/8 w - - 0 1", false, Ignore = "WasProduceByAValidMove doesn't check the presence of both kings on the board")]
     [TestCase("K/8/8/8/8/8/8/8 b - - 0 1", false, Ignore = "WasProduceByAValidMove doesn't check the presence of both kings on the board")]
     [TestCase("k/8/8/8/8/8/8/8 w - - 0 1", false, Ignore = "WasProduceByAValidMove doesn't check the presence of both kings on the board")]
