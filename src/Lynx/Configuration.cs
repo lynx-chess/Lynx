@@ -209,5 +209,5 @@ public sealed class EngineSettings
     /// <summary>
     /// Depth for bench command
     /// </summary>
-    public int BenchDepth { get; set; } = 3;
+    public int BenchDepth { get; set; } = 5;
 }

@@ -69,12 +69,12 @@ public sealed partial class Engine
         _isPondering = false;
     }
 
-    public SearchResult BestMove() => BestMove(null);
+    public async Task<SearchResult> BestMove() => await BestMove(null);
 
-    public SearchResult BestMove(GoCommand? goCommand)
+    public async Task<SearchResult> BestMove(GoCommand? goCommand)
     {
-        _searchCancellationTokenSource = new CancellationTokenSource();
-        _absoluteSearchCancellationTokenSource = new CancellationTokenSource();
+        _searchCancellationTokenSource = new();
+        _absoluteSearchCancellationTokenSource = new();
         int minDepth = Configuration.EngineSettings.MinDepth + 1;
         int? maxDepth = null;
         int? decisionTime = null;
@@ -136,7 +136,7 @@ public sealed partial class Engine
             maxDepth = Configuration.EngineSettings.DefaultMaxDepth;
         }
 
-        SearchResult resultToReturn = SearchBestMove(minDepth, maxDepth, decisionTime);
+        SearchResult resultToReturn = await SearchBestMove(minDepth, maxDepth, decisionTime);
 
         Game.ResetCurrentPositionToBeforeSearchState();
         if (resultToReturn.BestMove != default && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
@@ -149,17 +149,23 @@ public sealed partial class Engine
         return resultToReturn;
     }
 
-    private SearchResult SearchBestMove(int minDepth, int? maxDepth, int? decisionTime)
+    private async Task<SearchResult> SearchBestMove(int minDepth, int? maxDepth, int? decisionTime)
     {
+        if (!Configuration.EngineSettings.UseOnlineTablebaseInRootPositions || Game.CurrentPosition.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
+        {
+            return (await IDDFS(minDepth, maxDepth, decisionTime))!;
+        }
+
         // Local copy of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove so that it doesn't interfere with regular search
         var currentHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
 
         var tasks = new Task<SearchResult?>[] {
-            ProbeOnlineTablebase(Game.CurrentPosition, new(Game.PositionHashHistory), currentHalfMovesWithoutCaptureOrPawnMove),  // Other copies of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove (same reason)
-            IDDFS(minDepth, maxDepth, decisionTime),
-        };
+                // Other copies of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove (same reason)
+                ProbeOnlineTablebase(Game.CurrentPosition, new(Game.PositionHashHistory),  Game.HalfMovesWithoutCaptureOrPawnMove),
+                IDDFS(minDepth, maxDepth, decisionTime)
+            };
 
-        var resultList = Task.WhenAll(tasks).Result;
+        var resultList = await Task.WhenAll(tasks);
         var searchResult = resultList[1];
         var tbResult = resultList[0];
 
@@ -182,9 +188,7 @@ public sealed partial class Engine
             }
         }
 
-        return tbResult
-            ?? searchResult
-                ?? throw new AssertException("Both search and online tb proving results are null. At least search one is always expected to have a value");
+        return tbResult ?? searchResult!;
     }
 
     internal double CalculateDecisionTime(int movesToGo, int millisecondsLeft, int millisecondsIncrement)
@@ -249,11 +253,12 @@ public sealed partial class Engine
     {
         _isPondering = goCommand.Ponder;
         IsSearching = true;
+
         Task.Run(async () =>
         {
             try
             {
-                var searchResult = BestMove(goCommand);
+                var searchResult = await BestMove(goCommand);
                 _moveToPonder = searchResult.Moves.Count >= 2 ? searchResult.Moves[1] : null;
                 await _engineWriter.WriteAsync(BestMoveCommand.BestMove(searchResult.BestMove, _moveToPonder));
             }

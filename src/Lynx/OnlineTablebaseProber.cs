@@ -45,11 +45,6 @@ public static class OnlineTablebaseProber
 
     public static async Task<(int MateScore, Move BestMove)> RootSearch(Position position, HashSet<long> positionHashHistory, int halfMovesWithoutCaptureOrPawnMove, CancellationToken cancellationToken)
     {
-        if (!Configuration.EngineSettings.UseOnlineTablebaseInRootPositions || position.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
-        {
-            return (NoResult, default);
-        }
-
         var fen = position.FEN(halfMovesWithoutCaptureOrPawnMove);
         _logger.Info("[{0}] Querying online tb for position {1}", nameof(RootSearch), fen);
 

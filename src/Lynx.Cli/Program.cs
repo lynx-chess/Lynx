@@ -36,9 +36,9 @@ CancellationToken cancellationToken = source.Token;
 
 var tasks = new List<Task>
 {
-    Task.Run(() => new Writer(engineChannel).Run(cancellationToken)),
-    Task.Run(() => new LynxDriver(uciChannel, engineChannel, new Engine(engineChannel)).Run(cancellationToken)),
-    Task.Run(() => new Listener(uciChannel).Run(cancellationToken)),
+    new Writer(engineChannel).Run(cancellationToken),
+    new LynxDriver(uciChannel, engineChannel, new Engine(engineChannel)).Run(cancellationToken),
+    new Listener(uciChannel).Run(cancellationToken),
     uciChannel.Reader.Completion,
     engineChannel.Reader.Completion
 };

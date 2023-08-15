@@ -36,7 +36,7 @@
   </ItemGroup>
 
   <!--<ItemGroup Condition="!$(AssemblyName.EndsWith('Test')) AND !$(AssemblyName.EndsWith('Benchmark')) AND !$(AssemblyName.EndsWith('Dev'))">
-     <PackageReference Include="ClrHeapAllocationAnalyzer" Version="3.0.0">
+    <PackageReference Include="ClrHeapAllocationAnalyzer" Version="3.0.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
