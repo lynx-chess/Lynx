@@ -1,6 +1,5 @@
 ﻿using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Runtime.Intrinsics.X86;
 
 #pragma warning disable S4136
 
@@ -122,11 +121,6 @@ public static class BitBoardExtensions
     {
         Utils.Assert(board != default);
 
-        if (Bmi1.X64.IsSupported)
-        {
-            return (int)Bmi1.X64.TrailingZeroCount(board);
-        }
-
         return BitOperations.TrailingZeroCount(board);
     }
 
@@ -155,11 +149,6 @@ public static class BitBoardExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int CountBits(this BitBoard board)
     {
-        if (Popcnt.X64.IsSupported)
-        {
-            return (int)Popcnt.X64.PopCount(board);
-        }
-
         return BitOperations.PopCount(board);
     }
 
