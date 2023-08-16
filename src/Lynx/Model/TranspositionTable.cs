@@ -83,10 +83,6 @@ public static class TranspositionTableExtensions
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static int TranspositionTableIndex(Position position, TranspositionTable transpositionTable) =>
-        (int)(position.UniqueIdentifier & (transpositionTable.Length - 1));
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void ClearTranspositionTable(this TranspositionTable transpositionTable)
     {
         foreach (var element in transpositionTable)

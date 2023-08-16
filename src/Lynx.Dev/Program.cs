@@ -2,7 +2,6 @@
 using Lynx.Internal;
 using Lynx.Model;
 using System.Diagnostics;
-using System.Net.Http.Headers;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -1044,7 +1043,7 @@ static void TranspositionTable()
     var hashKey = position.UniqueIdentifier % 0x400000;
     Console.WriteLine(hashKey);
 
-    var hashKey2 = TranspositionTableExtensions.TranspositionTableIndex(position, transpositionTable);
+    var hashKey2 = position.UniqueIdentifier & mask;
     Console.WriteLine(hashKey2);
 
     transpositionTable.ClearTranspositionTable();

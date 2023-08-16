@@ -9,6 +9,11 @@ public abstract class BaseTest
 {
     protected const int DefaultSearchDepth = 10;
 
+    protected BaseTest()
+    {
+        Configuration.EngineSettings.TranspositionTableSize = 32;
+    }
+
     protected static async Task<SearchResult> TestBestMove(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString, int depth = DefaultSearchDepth)
     {
         var seachResult = await SearchBestMove(fen, depth);
