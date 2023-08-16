@@ -44,7 +44,7 @@ public sealed partial class Engine
 
         if (ply > 0)
         {
-            var ttProbeResult = _transpositionTable.ProbeHash(position, targetDepth, ply, alpha, beta);
+            var ttProbeResult = _tt.ProbeHash(_ttMask, position, targetDepth, ply, alpha, beta);
             if (ttProbeResult.Evaluation != EvaluationConstants.NoHashEntry)
             {
                 return ttProbeResult.Evaluation;
@@ -76,7 +76,7 @@ public sealed partial class Engine
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
-            _transpositionTable.RecordHash(position, targetDepth, ply, finalPositionEvaluation, NodeType.Exact);
+            _tt.RecordHash(_ttMask, position, targetDepth, ply, finalPositionEvaluation, NodeType.Exact);
             return finalPositionEvaluation;
         }
 
@@ -221,7 +221,7 @@ public sealed partial class Engine
                     _killerMoves[0, ply] = move;
                 }
 
-                _transpositionTable.RecordHash(position, targetDepth, ply, beta, NodeType.Beta, bestMove);
+                _tt.RecordHash(_ttMask, position, targetDepth, ply, beta, NodeType.Beta, bestMove);
 
                 return beta;    // TODO return evaluation?
             }
@@ -259,11 +259,11 @@ public sealed partial class Engine
         {
             var eval = Position.EvaluateFinalPosition(ply, isInCheck);
 
-            _transpositionTable.RecordHash(position, targetDepth, ply, eval, NodeType.Exact);
+            _tt.RecordHash(_ttMask, position, targetDepth, ply, eval, NodeType.Exact);
             return eval;
         }
 
-        _transpositionTable.RecordHash(position, targetDepth, ply, alpha, nodeType, bestMove);
+        _tt.RecordHash(_ttMask, position, targetDepth, ply, alpha, nodeType, bestMove);
 
         // Node fails low
         return alpha;
