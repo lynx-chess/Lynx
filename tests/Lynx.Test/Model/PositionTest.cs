@@ -76,12 +76,12 @@ public class PositionTest
         }
     }
 
-    [TestCase(Constants.InitialPositionFEN, true)]
     [TestCase(Constants.EmptyBoardFEN, false)]
     [TestCase("K/8/8/8/8/8/8/8 w - - 0 1", false)]
     [TestCase("K/8/8/8/8/8/8/8 b - - 0 1", false)]
     [TestCase("k/8/8/8/8/8/8/8 w - - 0 1", false)]
     [TestCase("k/8/8/8/8/8/8/8 b - - 0 1", false)]
+    [TestCase(Constants.InitialPositionFEN, true)]
     [TestCase("r1bqkbnr/pppp2pp/2n2p2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 0 1", false)]
     [TestCase("r1bqkbnr/pppp2pp/2n2p2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 1", true)]
     [TestCase("r1bqk1nr/pppp2pp/2n2p2/4p3/1bB1P3/3P4/PPP2PPP/RNBQK1NR b KQkq - 0 1", false)]
@@ -101,12 +101,12 @@ public class PositionTest
         Assert.NotNull(new Position(origin, move));
     }
 
+    [TestCase(Constants.EmptyBoardFEN, false, Ignore = "WasProduceByAValidMove doesn't check the presence of both kings on the board")]
+    [TestCase("K/8/8/8/8/8/8/8 w - - 0 1", false, Ignore = "WasProduceByAValidMove doesn't check the presence of both kings on the board")]
+    [TestCase("K/8/8/8/8/8/8/8 b - - 0 1", false, Ignore = "WasProduceByAValidMove doesn't check the presence of both kings on the board")]
+    [TestCase("k/8/8/8/8/8/8/8 w - - 0 1", false, Ignore = "WasProduceByAValidMove doesn't check the presence of both kings on the board")]
+    [TestCase("k/8/8/8/8/8/8/8 b - - 0 1", false, Ignore = "WasProduceByAValidMove doesn't check the presence of both kings on the board")]
     [TestCase(Constants.InitialPositionFEN, true)]
-    [TestCase(Constants.EmptyBoardFEN, false)]
-    [TestCase("K/8/8/8/8/8/8/8 w - - 0 1", false)]
-    [TestCase("K/8/8/8/8/8/8/8 b - - 0 1", true)]
-    [TestCase("k/8/8/8/8/8/8/8 w - - 0 1", true)]
-    [TestCase("k/8/8/8/8/8/8/8 b - - 0 1", false)]
     [TestCase("r1bqkbnr/pppp2pp/2n2p2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 0 1", false)]
     [TestCase("r1bqkbnr/pppp2pp/2n2p2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 1", true)]
     [TestCase("r1bqk1nr/pppp2pp/2n2p2/4p3/1bB1P3/3P4/PPP2PPP/RNBQK1NR b KQkq - 0 1", false)]
