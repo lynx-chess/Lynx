@@ -25,6 +25,13 @@ public sealed partial class Engine
     {
         var position = Game.CurrentPosition;
 
+        // Prevents runtime failure, in case targetDepth is increased due to check extension
+        if (ply >= Configuration.EngineSettings.MaxDepth)
+        {
+            _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
+            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
+        }
+
         _maxDepthReached[ply] = ply;
         _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
 
@@ -71,13 +78,6 @@ public sealed partial class Engine
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
             _transpositionTable.RecordHash(position, targetDepth, ply, finalPositionEvaluation, NodeType.Exact);
             return finalPositionEvaluation;
-        }
-
-        // Prevents runtime failure, in case targetDepth is increased due to check extension
-        if (ply >= Configuration.EngineSettings.MaxDepth)
-        {
-            _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
-            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
         }
 
         // 🔍 Null-move pruning
@@ -288,6 +288,12 @@ public sealed partial class Engine
 
         _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
         //_searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
+
+        if (ply >= Configuration.EngineSettings.MaxDepth)
+        {
+            _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
+            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
+        }
 
         var pvIndex = PVTable.Indexes[ply];
         var nextPvIndex = PVTable.Indexes[ply + 1];
