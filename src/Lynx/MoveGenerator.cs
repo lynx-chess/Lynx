@@ -80,7 +80,7 @@ public static class MoveGenerator
             sourceSquare = bitboard.GetLS1BIndex();
             bitboard.ResetLS1B();
 
-            var sourceRank = (sourceSquare / 8) + 1;
+            var sourceRank = (sourceSquare >> 3) + 1;
 
 #if DEBUG
             if (sourceRank == 1 || sourceRank == 8)
@@ -95,7 +95,7 @@ public static class MoveGenerator
             if (!position.OccupancyBitBoards[2].GetBit(singlePushSquare))
             {
                 // Single pawn push
-                var targetRank = (singlePushSquare / 8) + 1;
+                var targetRank = (singlePushSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)  // Promotion
                 {
                     movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.Q + offset);
@@ -137,7 +137,7 @@ public static class MoveGenerator
                 targetSquare = attackedSquares.GetLS1BIndex();
                 attackedSquares.ResetLS1B();
 
-                var targetRank = (targetSquare / 8) + 1;
+                var targetRank = (targetSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)  // Capture with promotion
                 {
                     movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.Q + offset, isCapture: TRUE);
@@ -284,7 +284,7 @@ public static class MoveGenerator
             sourceSquare = bitboard.GetLS1BIndex();
             bitboard.ResetLS1B();
 
-            var sourceRank = (sourceSquare / 8) + 1;
+            var sourceRank = (sourceSquare >> 3) + 1;
 
 #if DEBUG
             if (sourceRank == 1 || sourceRank == 8)
@@ -299,7 +299,7 @@ public static class MoveGenerator
             if (!position.OccupancyBitBoards[2].GetBit(singlePushSquare))
             {
                 // Single pawn push
-                var targetRank = (singlePushSquare / 8) + 1;
+                var targetRank = (singlePushSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)  // Promotion
                 {
                     yield return MoveExtensions.Encode(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.Q + offset);
@@ -341,7 +341,7 @@ public static class MoveGenerator
                 targetSquare = attackedSquares.GetLS1BIndex();
                 attackedSquares.ResetLS1B();
 
-                var targetRank = (targetSquare / 8) + 1;
+                var targetRank = (targetSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)  // Capture with promotion
                 {
                     yield return MoveExtensions.Encode(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.Q + offset, isCapture: TRUE);

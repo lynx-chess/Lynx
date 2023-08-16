@@ -169,7 +169,7 @@ public static partial class FENParser
         {
             enPassant = result;
 
-            var rank = 1 + (int)enPassant / 8;
+            var rank = 1 + (int)enPassant >> 3;
             if (rank != 3 && rank != 6)
             {
                 success = false;
