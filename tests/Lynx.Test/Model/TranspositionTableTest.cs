@@ -20,7 +20,6 @@ public class TranspositionTableTests
     [TestCase(1024)]
     public void TranspositionTableLength(int sizeMb)
     {
-        var size = sizeMb * 1024 * 1024;
         var (length, mask) = TranspositionTableExtensions.CalculateLength(size);
         Assert.AreEqual(length - 1, mask);
         Assert.AreEqual(0, length % 2);
