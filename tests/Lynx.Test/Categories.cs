@@ -4,8 +4,6 @@ public static class Categories
 {
     public const string Perft = "Perft";
 
-    public const string PerftTestSuite = "PerftTestSuite";
-
     public const string LongRunning = "LongRunning";
 
     public const string TooLong = "TooLongToBeRun";

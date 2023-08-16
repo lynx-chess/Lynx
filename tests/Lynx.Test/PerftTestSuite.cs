@@ -6,7 +6,7 @@ namespace Lynx.Test;
 /// <summary>
 /// http://www.rocechess.ch/perftsuite.zip, from http://www.rocechess.ch/perft.html
 /// </summary>
-[TestFixture(Category = Categories.PerftTestSuite, Explicit = true)]
+[TestFixture(Category = Categories.Perft, Explicit = true)]
 public class PerftTestSuite
 {
     [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", 1, 20)]
