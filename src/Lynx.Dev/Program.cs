@@ -2,7 +2,6 @@
 using Lynx.Internal;
 using Lynx.Model;
 using System.Diagnostics;
-using System.Net.Http.Headers;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -1013,18 +1012,17 @@ static void TranspositionTable()
 {
     static void TesSize(int size)
     {
-        Console.WriteLine("Hash={0}MB", size);
-        size *= 1024 * 1024;
+        Console.WriteLine("Hash: {0} MB", size);
         var (length, mask) = TranspositionTableExtensions.CalculateLength(size);
 
         var lengthMb = length / 1024 / 1024;
 
-        Console.WriteLine("TT memory: {0}MB", lengthMb * Marshal.SizeOf(typeof(TranspositionTableElement)));
+        Console.WriteLine("TT memory: {0} MB", lengthMb * Marshal.SizeOf(typeof(TranspositionTableElement)));
         Console.WriteLine("TT array length: {0}MB, (0x{1}, {2} items)", lengthMb, length.ToString("X"), length);
         Console.WriteLine("TT mask: 0x{0} ({1})\n", mask.ToString("X"), Convert.ToString(mask, 2));
     }
 
-    Console.WriteLine($"{nameof(TranspositionTableElement)} size: {Marshal.SizeOf(typeof(TranspositionTableElement))}bytes\n");
+    Console.WriteLine($"{nameof(TranspositionTableElement)} size: {Marshal.SizeOf(typeof(TranspositionTableElement))} bytes\n");
 
     TesSize(2);
     TesSize(4);
@@ -1045,7 +1043,7 @@ static void TranspositionTable()
     var hashKey = position.UniqueIdentifier % 0x400000;
     Console.WriteLine(hashKey);
 
-    var hashKey2 = TranspositionTableExtensions.TranspositionTableIndex(position, transpositionTable);
+    var hashKey2 = position.UniqueIdentifier & mask;
     Console.WriteLine(hashKey2);
 
     transpositionTable.ClearTranspositionTable();

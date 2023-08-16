@@ -119,11 +119,10 @@ public sealed partial class Engine
             int targetPiece = (int)Piece.P;    // Important to initialize to P or p, due to en-passant captures
 
             var targetSquare = move.TargetSquare();
-            var oppositeSide = Utils.OppositeSide(Game.CurrentPosition.Side);
-            var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
-            var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
+            var offset = Utils.PieceOffset(Game.CurrentPosition.Side);
+            var oppositePawnIndex = (int)Piece.p - offset;
 
-            var limit = (int)Piece.K + oppositeSideOffset;
+            var limit = (int)Piece.k - offset;
             for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
             {
                 if (Game.CurrentPosition.PieceBitBoards[pieceIndex].GetBit(targetSquare))

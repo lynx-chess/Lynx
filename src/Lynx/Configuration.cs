@@ -190,9 +190,9 @@ public sealed class EngineSettings
     public bool TranspositionTableEnabled { get; set; } = true;
 
     /// <summary>
-    /// 32 MB
+    /// MB
     /// </summary>
-    public int TranspositionTableSize { get; set; } = 32 * 1024 * 1024;
+    public int TranspositionTableSize { get; set; } = 256;
 
     public bool UseOnlineTablebaseInRootPositions { get; set; } = false;
 

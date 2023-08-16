@@ -198,7 +198,7 @@ public sealed class LynxDriver
                 {
                     if (commandItems.Length > 4 && int.TryParse(commandItems[4], out var value))
                     {
-                        Configuration.Hash = value * 1024 * 1024;
+                        Configuration.Hash = Math.Clamp(value, 0, 1024);
                     }
                     break;
                 }

@@ -65,21 +65,24 @@ public struct TranspositionTableElement
 public static class TranspositionTableExtensions
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+    private static int _ttElementSize = Marshal.SizeOf(typeof(TranspositionTableElement));
 
     public static (int Length, int Mask) CalculateLength(int size)
     {
-        var ttSize = (int)BitOperations.RoundUpToPowerOf2((uint)(size / Marshal.SizeOf(typeof(TranspositionTableElement))));
+        var sizeBytes = size * 1024 * 1024;
+        var ttLength = (int)BitOperations.RoundUpToPowerOf2((uint)(sizeBytes / _ttElementSize));
+        var ttLengthMb = ttLength / 1024 / 1024;
 
-        _logger.Info("Choosing TT size of {0}MB for user selected {1}MB", ttSize / 1024 / 1024, size);
-        _logger.Debug("TT size: ({0})MB, {1}", ttSize / 1024 / 1024, ttSize.ToString("X"));
-        _logger.Debug("TT mask: {0}", (ttSize - 1).ToString("X"));
+        var mask = ttLength - 1;
 
-        return (ttSize, ttSize - 1);
+        _logger.Info("Hash value:\t{0} MB", size);
+        _logger.Info("TT memory:\t{0} MB", ttLengthMb * _ttElementSize);
+        _logger.Info("TT length:\t{0} items", ttLength);
+        _logger.Info("TT entry:\t{0} bytes", _ttElementSize);
+        _logger.Info("TT mask:\t{0}", mask.ToString("X"));
+
+        return (ttLength, mask);
     }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static int TranspositionTableIndex(Position position, TranspositionTable transpositionTable) =>
-        (int)(position.UniqueIdentifier & (transpositionTable.Length - 1));
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void ClearTranspositionTable(this TranspositionTable transpositionTable)
