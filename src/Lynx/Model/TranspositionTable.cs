@@ -16,14 +16,21 @@ public enum NodeType : byte
 
 public struct TranspositionTableElement
 {
-    private byte _depth;
-    //private byte _age;
-    private short _score;
-
     /// <summary>
     /// Full Zobrist key
     /// </summary>
     public long Key { get; set; }
+
+    /// <summary>
+    /// Best move found in a position. 0 if the position failed low (score <= alpha)
+    /// </summary>
+    public Move Move { get; set; }
+
+    private short _score;
+
+    private byte _depth;
+
+    //private byte _age;
 
     /// <summary>
     /// Node (position) type:
@@ -34,19 +41,14 @@ public struct TranspositionTableElement
     public NodeType Type { get; set; }
 
     /// <summary>
-    /// Position evaluation
-    /// </summary>
-    public int Score { readonly get => _score; set => _score = (short)value; }
-
-    /// <summary>
-    /// Best move found in a position. 0 if the position failed low (score <= alpha)
-    /// </summary>
-    public Move Move { get; set; }
-
-    /// <summary>
     /// How deep the recorded search went. For us this numberis targetDepth - ply
     /// </summary>
     public int Depth { readonly get => _depth; set => _depth = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref value, 1))[0]; }
+
+    /// <summary>
+    /// Position evaluation
+    /// </summary>
+    public int Score { readonly get => _score; set => _score = (short)value; }
 
     //public int Age { readonly get => _age; set => _age = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref value, 1))[0]; }
 
