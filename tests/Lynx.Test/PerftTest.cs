@@ -9,12 +9,12 @@ namespace Lynx.Test;
 [TestFixture(Category = Categories.Perft, Explicit = true)]
 public class PerftTest
 {
-    [TestCase(Constants.InitialPositionFEN, 1, 20)]
-    [TestCase(Constants.InitialPositionFEN, 2, 400)]
-    [TestCase(Constants.InitialPositionFEN, 3, 8_902)]
-    [TestCase(Constants.InitialPositionFEN, 4, 197_281)]
-    [TestCase(Constants.InitialPositionFEN, 5, 4_865_609)]
-    [TestCase(Constants.InitialPositionFEN, 6, 119_060_324)]
+    [TestCase(Constants.InitialPositionFEN, 1, 20, Ignore = "Included in PerftTestSuite")]
+    [TestCase(Constants.InitialPositionFEN, 2, 400, Ignore = "Included in PerftTestSuite")]
+    [TestCase(Constants.InitialPositionFEN, 3, 8_902, Ignore = "Included in PerftTestSuite")]
+    [TestCase(Constants.InitialPositionFEN, 4, 197_281, Ignore = "Included in PerftTestSuite")]
+    [TestCase(Constants.InitialPositionFEN, 5, 4_865_609, Ignore = "Included in PerftTestSuite")]
+    [TestCase(Constants.InitialPositionFEN, 6, 119_060_324, Ignore = "Included in PerftTestSuite")]
     [TestCase(Constants.InitialPositionFEN, 7, 3_195_901_860, Category = Categories.TooLong, Explicit = true)]
     [TestCase(Constants.InitialPositionFEN, 8, 84_998_978_956, Category = Categories.TooLong, Explicit = true)]
     [TestCase(Constants.InitialPositionFEN, 9, 2_439_530_234_167, Category = Categories.TooLong, Explicit = true)]
@@ -29,11 +29,11 @@ public class PerftTest
     /// <param name="fen"></param>
     /// <param name="depth"></param>
     /// <param name="expectedNumberOfNodes"></param>
-    [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 1, 48)]
-    [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 2, 2_039)]
-    [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 3, 97_862)]
-    [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 4, 4_085_603)]
-    [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 5, 193_690_690)]                                                      // 2m 30s
+    [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 1, 48, Ignore = "Included in PerftTestSuite")]
+    [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 2, 2_039, Ignore = "Included in PerftTestSuite")]
+    [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 3, 97_862, Ignore = "Included in PerftTestSuite")]
+    [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 4, 4_085_603, Ignore = "Included in PerftTestSuite")]
+    [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 5, 193_690_690, Ignore = "Included in PerftTestSuite")]                                                      // 2m 30s
     [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 6, 8_031_647_685, Category = Categories.TooLong, Explicit = true)]    // 24 min
     public void Position2(string fen, int depth, long expectedNumberOfNodes)
     {
