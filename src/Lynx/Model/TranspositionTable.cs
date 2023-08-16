@@ -76,8 +76,8 @@ public static class TranspositionTableExtensions
         _logger.Info("Hash value:\t{0} MB", size);
         _logger.Info("TT memory:\t{0} MB", ttLengthMb * _ttElementSize);
         _logger.Info("TT length:\t{0} items", ttLength);
-        _logger.Info("TT entry:\t{0} bytes", size);
-        _logger.Info("TT mask:\t0x{0}", mask.ToString("X"));
+        _logger.Info("TT entry:\t{0} bytes", _ttElementSize);
+        _logger.Info("TT mask:\t{0}", mask.ToString("X"));
 
         return (ttLength, mask);
     }
