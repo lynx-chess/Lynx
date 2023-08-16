@@ -1,6 +1,5 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
-using System.Threading.Channels;
 
 namespace Lynx;
 
@@ -20,11 +19,21 @@ public static class Perft
         return (nodes, CalculateElapsedMilliseconds(sw));
     }
 
-    public static (long Nodes, double ElapsedMilliseconds) Divide(Position position, int depth)
+    public static async Task<(long Nodes, double ElapsedMilliseconds)> Divide(Position position, int depth, Func<string, ValueTask> write)
     {
         var sw = new Stopwatch();
         sw.Start();
-        var nodes = DivideImpl(position, depth, 0);
+        var nodes = await DivideImpl(position, depth, 0, write);
+        sw.Stop();
+
+        return (nodes, CalculateElapsedMilliseconds(sw));
+    }
+
+    public static (long Nodes, double ElapsedMilliseconds) Divide(Position position, int depth, Action<string> write)
+    {
+        var sw = new Stopwatch();
+        sw.Start();
+        var nodes = DivideImpl(position, depth, 0, write);
         sw.Stop();
 
         return (nodes, CalculateElapsedMilliseconds(sw));
@@ -55,10 +64,10 @@ public static class Perft
             return nodes;
         }
 
-        return ++nodes;
+        return nodes + 1;
     }
 
-    private static long DivideImpl(Position position, int depth, long nodes)
+    private static async Task<long> DivideImpl(Position position, int depth, long nodes, Func<string, ValueTask> write)
     {
         if (depth != 0)
         {
@@ -68,21 +77,48 @@ public static class Perft
 
                 if (position.WasProduceByAValidMove())
                 {
-                    var cummulativeNodes = nodes;
-
+                    var accumulatedNodes = nodes;
                     nodes = ResultsImpl(position, depth - 1, nodes);
 
-                    var oldNodes = nodes - cummulativeNodes;
-                    Console.WriteLine($"{move.UCIString()}\t\t{oldNodes:N0}");
+                    await write($"{move.UCIString()}\t\t{nodes - accumulatedNodes}");
                 }
 
                 position.UnmakeMove(move, state);
             }
 
+            await write(string.Empty);
+
             return nodes;
         }
 
-        return ++nodes;
+        return nodes + 1;
+    }
+
+    private static long DivideImpl(Position position, int depth, long nodes, Action<string> write)
+    {
+        if (depth != 0)
+        {
+            foreach (var move in MoveGenerator.GenerateAllMoves(position))
+            {
+                var state = position.MakeMove(move);
+
+                if (position.WasProduceByAValidMove())
+                {
+                    var accumulatedNodes = nodes;
+                    nodes = ResultsImpl(position, depth - 1, nodes);
+
+                    write($"{move.UCIString()}\t\t{nodes - accumulatedNodes}");
+                }
+
+                position.UnmakeMove(move, state);
+            }
+
+            write(string.Empty);
+
+            return nodes;
+        }
+
+        return nodes + 1;
     }
 
     #region Legacy
@@ -111,7 +147,7 @@ public static class Perft
             return nodes;
         }
 
-        return ++nodes;
+        return nodes + 1;
     }
 
     private static long DivideImplUsingPositionConstructor(Position position, int depth, long nodes)
@@ -124,19 +160,17 @@ public static class Perft
 
                 if (newPosition.WasProduceByAValidMove())
                 {
-                    var cummulativeNodes = nodes;
-
+                    var accumulatedNodes = nodes;
                     nodes = ResultsImplUsingPositionConstructor(newPosition, depth - 1, nodes);
 
-                    var oldNodes = nodes - cummulativeNodes;
-                    Console.WriteLine($"{move.UCIString()}\t\t{oldNodes:N0}");
+                    Console.WriteLine($"{move.UCIString()}\t\t{nodes - accumulatedNodes}");
                 }
             }
 
             return nodes;
         }
 
-        return ++nodes;
+        return nodes + 1;
     }
 
     #endregion
@@ -147,8 +181,9 @@ public static class Perft
 
         write(
             $"Depth:\t{depth}" + Environment.NewLine +
-            $"Nodes:\t{peftResult.Nodes:N0}" + Environment.NewLine +
-            $"Time:\t{timeStr}" + Environment.NewLine);
+            $"Nodes:\t{peftResult.Nodes}" + Environment.NewLine +
+            $"Time:\t{timeStr}" + Environment.NewLine +
+            $"nps:\t{(Math.Round(peftResult.Nodes / peftResult.ElapsedMilliseconds)) / 1000} Mnps" + Environment.NewLine);
     }
 
     public static async ValueTask PrintPerftResult(int depth, (long Nodes, double ElapsedMilliseconds) peftResult, Func<string, ValueTask> write)
@@ -157,8 +192,9 @@ public static class Perft
 
         await write(
             $"Depth:\t{depth}" + Environment.NewLine +
-            $"Nodes:\t{peftResult.Nodes:N0}" + Environment.NewLine +
-            $"Time:\t{timeStr}" + Environment.NewLine);
+            $"Nodes:\t{peftResult.Nodes}" + Environment.NewLine +
+            $"Time:\t{timeStr}" + Environment.NewLine +
+            $"nps:\t{(Math.Round(peftResult.Nodes / peftResult.ElapsedMilliseconds)) / 1000} Mnps" + Environment.NewLine);
     }
 
     /// <summary>

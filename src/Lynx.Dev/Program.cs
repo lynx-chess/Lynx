@@ -33,7 +33,7 @@ using System.Threading.Channels;
 //_29_Move_List();
 //_32_Make_Move();
 //_42_Perft();
-//_43_Perft();
+//_43_Divide();
 //_44_ParseUCI();
 //_49_Rudimetary_Evaluation();
 //_50_MiniMax_AlphaBeta();
@@ -534,11 +534,11 @@ static void _42_Perft()
     }
 }
 
-static void _43_Perft()
+static void _43_Divide()
 {
-    var result = Perft.Divide(new Position(Constants.InitialPositionFEN), 5);
+    var result = Perft.Divide(new Position(Constants.InitialPositionFEN), 5, Console.WriteLine);
     Perft.PrintPerftResult(5, result, Console.WriteLine);
-    result = Perft.Divide(new Position(TrickyPosition), 5);
+    result = Perft.Divide(new Position(TrickyPosition), 5, Console.WriteLine);
     Perft.PrintPerftResult(5, result, Console.WriteLine);
 }
 
