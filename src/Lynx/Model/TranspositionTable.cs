@@ -63,11 +63,20 @@ public static class TranspositionTableExtensions
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    public static int TranspositionTableArrayLength => Configuration.EngineSettings.TranspositionTableSize / Marshal.SizeOf(typeof(TranspositionTableElement));
+    public static (int Length, int Mask) CalculateLength(int size)
+    {
+        var ttSize = (int)BitOperations.RoundUpToPowerOf2((uint)(size / Marshal.SizeOf(typeof(TranspositionTableElement))));
+
+        _logger.Info("Choosing TT size of {0}MB for user selected {1}MB", ttSize / 1024 / 1024, size);
+        _logger.Debug("TT size: ({0})MB, {1}", ttSize / 1024 / 1024, ttSize.ToString("X"));
+        _logger.Debug("TT mask: {0}", (ttSize - 1).ToString("X"));
+
+        return (ttSize, ttSize - 1);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static int TranspositionTableIndex(Position position, TranspositionTable transpositionTable) =>
-        (int)(position.UniqueIdentifier % transpositionTable.Length);
+        (int)(position.UniqueIdentifier & (transpositionTable.Length - 1));
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void ClearTranspositionTable(this TranspositionTable transpositionTable)
@@ -81,7 +90,7 @@ public static class TranspositionTableExtensions
     /// <summary>
     /// Checks the transposition table and, if there's a eval value that can be deducted from it of there's a previously recorded <paramref name="position"/>, it's returned. <see cref="EvaluationConstants.NoHashEntry"/> is returned otherwise
     /// </summary>
-    /// <param name="transpositionTable"></param>
+    /// <param name="tt"></param>
     /// <param name="position"></param>
     /// <param name="targetDepth"></param>
     /// <param name="ply">Ply</param>
@@ -89,14 +98,14 @@ public static class TranspositionTableExtensions
     /// <param name="beta"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static (int Evaluation, Move BestMove) ProbeHash(this TranspositionTable transpositionTable, Position position, int targetDepth, int ply, int alpha, int beta)
+    public static (int Evaluation, Move BestMove) ProbeHash(this TranspositionTable tt, int ttMask, Position position, int targetDepth, int ply, int alpha, int beta)
     {
         if (!Configuration.EngineSettings.TranspositionTableEnabled)
         {
             return (EvaluationConstants.NoHashEntry, default);
         }
 
-        var entry = transpositionTable[TranspositionTableIndex(position, transpositionTable)];
+        ref var entry = ref tt[position.UniqueIdentifier & ttMask];
 
         if (position.UniqueIdentifier != entry.Key)
         {
@@ -126,7 +135,7 @@ public static class TranspositionTableExtensions
     /// <summary>
     /// Adds a <see cref="TranspositionTableElement"/> to the transposition tabke
     /// </summary>
-    /// <param name="transpositionTable"></param>
+    /// <param name="tt"></param>
     /// <param name="position"></param>
     /// <param name="targetDepth"></param>
     /// <param name="ply">Ply</param>
@@ -134,14 +143,14 @@ public static class TranspositionTableExtensions
     /// <param name="nodeType"></param>
     /// <param name="move"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void RecordHash(this TranspositionTable transpositionTable, Position position, int targetDepth, int ply, int eval, NodeType nodeType, Move? move = 0)
+    public static void RecordHash(this TranspositionTable tt, int ttMask, Position position, int targetDepth, int ply, int eval, NodeType nodeType, Move? move = 0)
     {
         if (!Configuration.EngineSettings.TranspositionTableEnabled)
         {
             return;
         }
 
-        ref var entry = ref transpositionTable[TranspositionTableIndex(position, transpositionTable)];
+        ref var entry = ref tt[position.UniqueIdentifier & ttMask];
 
         //if (entry.Key != default && entry.Key != position.UniqueIdentifier)
         //{
