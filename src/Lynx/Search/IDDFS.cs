@@ -12,9 +12,8 @@ public sealed partial class Engine
     private readonly int[,] _killerMoves = new int[2, Configuration.EngineSettings.MaxDepth];
     private readonly int[,] _historyMoves = new int[12, 64];
     private readonly int[] _maxDepthReached = new int[Constants.AbsoluteMaxDepth];
-    private TranspositionTable _transpositionTable = Configuration.EngineSettings.TranspositionTableEnabled
-        ? new TranspositionTableElement[TranspositionTableExtensions.TranspositionTableArrayLength]
-        : Array.Empty<TranspositionTableElement>();
+    private TranspositionTable _tt = Array.Empty<TranspositionTableElement>();
+    private int _ttMask;
 
     private int _nodes;
     private bool _isFollowingPV;

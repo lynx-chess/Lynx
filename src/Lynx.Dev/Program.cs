@@ -2,7 +2,6 @@
 using Lynx.Internal;
 using Lynx.Model;
 using System.Diagnostics;
-using System.Net.Http.Headers;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -47,8 +46,8 @@ using System.Threading.Channels;
 //FileAndRankMasks();
 //EnhancedPawnEvaluation();
 //RookEvaluation();
-//TranspositionTable();
-UnmakeMove();
+TranspositionTable();
+//UnmakeMove();
 
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
 const string TrickyPosition = Constants.TrickyTestPositionFEN;
@@ -1011,7 +1010,32 @@ static void RookEvaluation()
 
 static void TranspositionTable()
 {
-    var transpositionTable = new TranspositionTableElement[Configuration.EngineSettings.TranspositionTableSize];
+    static void TesSize(int size)
+    {
+        Console.WriteLine("Hash: {0} MB", size);
+        var (length, mask) = TranspositionTableExtensions.CalculateLength(size);
+
+        var lengthMb = length / 1024 / 1024;
+
+        Console.WriteLine("TT memory: {0} MB", lengthMb * Marshal.SizeOf(typeof(TranspositionTableElement)));
+        Console.WriteLine("TT array length: {0}MB, (0x{1}, {2} items)", lengthMb, length.ToString("X"), length);
+        Console.WriteLine("TT mask: 0x{0} ({1})\n", mask.ToString("X"), Convert.ToString(mask, 2));
+    }
+
+    Console.WriteLine($"{nameof(TranspositionTableElement)} size: {Marshal.SizeOf(typeof(TranspositionTableElement))} bytes\n");
+
+    TesSize(2);
+    TesSize(4);
+    TesSize(16);
+    TesSize(32);
+    TesSize(64);
+    TesSize(128);
+    TesSize(256);
+    TesSize(512);
+    TesSize(1024);
+
+    var (mask, length) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
+    var transpositionTable = new TranspositionTableElement[length];
     var position = new Position(Constants.InitialPositionFEN);
     position.Print();
     Console.WriteLine($"Hash: {position.UniqueIdentifier}");
@@ -1019,7 +1043,7 @@ static void TranspositionTable()
     var hashKey = position.UniqueIdentifier % 0x400000;
     Console.WriteLine(hashKey);
 
-    var hashKey2 = TranspositionTableExtensions.TranspositionTableIndex(position, transpositionTable);
+    var hashKey2 = position.UniqueIdentifier & mask;
     Console.WriteLine(hashKey2);
 
     transpositionTable.ClearTranspositionTable();
@@ -1027,20 +1051,20 @@ static void TranspositionTable()
     //transpositionTable.RecordHash(position, depth: 3, maxDepth: 5, move: 1234, eval: +5, nodeType: NodeType.Alpha);
     //var entry = transpositionTable.ProbeHash(position, maxDepth: 5, depth: 3, alpha: 1, beta: 2);
 
-    transpositionTable.RecordHash(position, targetDepth: 5, ply: 3, eval: +19, nodeType: NodeType.Alpha, move: 1234);
-    var entry = transpositionTable.ProbeHash(position, targetDepth: 5, ply: 3, alpha: 20, beta: 30);
+    transpositionTable.RecordHash(mask, position, targetDepth: 5, ply: 3, eval: +19, nodeType: NodeType.Alpha, move: 1234);
+    var entry = transpositionTable.ProbeHash(mask, position, targetDepth: 5, ply: 3, alpha: 20, beta: 30);
     Console.WriteLine(entry); // Expected 20
 
-    transpositionTable.RecordHash(position, targetDepth: 5, ply: 3, eval: +21, nodeType: NodeType.Alpha, move: 1234);
-    entry = transpositionTable.ProbeHash(position, targetDepth: 5, ply: 3, alpha: 20, beta: 30);
+    transpositionTable.RecordHash(mask, position, targetDepth: 5, ply: 3, eval: +21, nodeType: NodeType.Alpha, move: 1234);
+    entry = transpositionTable.ProbeHash(mask, position, targetDepth: 5, ply: 3, alpha: 20, beta: 30);
     Console.WriteLine(entry); // Expected 12_345_678
 
-    transpositionTable.RecordHash(position, targetDepth: 5, ply: 3, eval: +29, nodeType: NodeType.Beta, move: 1234);
-    entry = transpositionTable.ProbeHash(position, targetDepth: 5, ply: 3, alpha: 20, beta: 30);
+    transpositionTable.RecordHash(mask, position, targetDepth: 5, ply: 3, eval: +29, nodeType: NodeType.Beta, move: 1234);
+    entry = transpositionTable.ProbeHash(mask, position, targetDepth: 5, ply: 3, alpha: 20, beta: 30);
     Console.WriteLine(entry); // Expected 12_345_678
 
-    transpositionTable.RecordHash(position, targetDepth: 5, ply: 3, eval: +31, nodeType: NodeType.Beta, move: 1234);
-    entry = transpositionTable.ProbeHash(position, targetDepth: 5, ply: 3, alpha: 20, beta: 30);
+    transpositionTable.RecordHash(mask, position, targetDepth: 5, ply: 3, eval: +31, nodeType: NodeType.Beta, move: 1234);
+    entry = transpositionTable.ProbeHash(mask, position, targetDepth: 5, ply: 3, alpha: 20, beta: 30);
     Console.WriteLine(entry); // Expected 30
 }
 

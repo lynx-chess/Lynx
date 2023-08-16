@@ -39,6 +39,8 @@ public sealed partial class Engine
         _searchCancellationTokenSource = new();
         _absoluteSearchCancellationTokenSource = new();
         _engineWriter = engineWriter;
+
+        InitializeTT();
     }
 
     internal void SetGame(Game game)
@@ -51,10 +53,7 @@ public sealed partial class Engine
         AverageDepth = 0;
         _isNewGameComing = true;
         _isNewGameCommandSupported = true;
-        if (Configuration.EngineSettings.TranspositionTableEnabled)
-        {
-            _transpositionTable = new TranspositionTableElement[TranspositionTableExtensions.TranspositionTableArrayLength];
-        }
+        InitializeTT();
     }
 
     public void AdjustPosition(string rawPositionCommand)
@@ -274,5 +273,14 @@ public sealed partial class Engine
     {
         _absoluteSearchCancellationTokenSource.Cancel();
         IsSearching = false;
+    }
+
+    private void InitializeTT()
+    {
+        if (Configuration.EngineSettings.TranspositionTableEnabled)
+        {
+            (int ttLength, _ttMask) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
+            _tt = new TranspositionTableElement[ttLength];
+        }
     }
 }
