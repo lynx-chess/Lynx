@@ -183,7 +183,7 @@ public static class Perft
             $"Depth:\t{depth}" + Environment.NewLine +
             $"Nodes:\t{peftResult.Nodes}" + Environment.NewLine +
             $"Time:\t{timeStr}" + Environment.NewLine +
-            $"NPS:\t{peftResult.Nodes / peftResult.ElapsedMilliseconds}" + Environment.NewLine);
+            $"nps:\t{(Math.Round(peftResult.Nodes / peftResult.ElapsedMilliseconds)) / 1000} Mnps" + Environment.NewLine);
     }
 
     public static async ValueTask PrintPerftResult(int depth, (long Nodes, double ElapsedMilliseconds) peftResult, Func<string, ValueTask> write)
