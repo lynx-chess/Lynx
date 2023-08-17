@@ -593,6 +593,13 @@ public class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public IEnumerable<Move> AllCapturesMoves(Move[]? movePool = null) => MoveGenerator.GenerateAllMoves(this, movePool, capturesOnly: true);
 
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void AllPossibleMoves(ref Span<Move> movePool) => MoveGenerator.GenerateAllMoves(this, ref movePool);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void AllCapturesMoves(ref Span<Move> movePool) => MoveGenerator.GenerateAllMoves(this, ref movePool, capturesOnly: true);
+
     public int CountPieces() => PieceBitBoards.Sum(b => b.CountBits());
 
     /// <summary>

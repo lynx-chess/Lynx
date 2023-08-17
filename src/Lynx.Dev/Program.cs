@@ -31,7 +31,7 @@ using System.Threading.Channels;
 //_27_Move_Encoding();
 //_29_Move_List();
 //_32_Make_Move();
-//_42_Perft();
+_42_Perft();
 //_43_Divide();
 //_44_ParseUCI();
 //_49_Rudimetary_Evaluation();
@@ -46,7 +46,7 @@ using System.Threading.Channels;
 //FileAndRankMasks();
 //EnhancedPawnEvaluation();
 //RookEvaluation();
-TranspositionTable();
+//TranspositionTable();
 //UnmakeMove();
 
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
@@ -522,13 +522,21 @@ static void _42_Perft()
 
     var pos = new Position(TrickyPosition);
 
-    for (int depth = 0; depth < 7; ++depth)
+    for (int depth = 0; depth < 6; ++depth)
     {
         var sw = new Stopwatch();
         sw.Start();
         var result = Perft.Results(pos, depth);
         sw.Stop();
+        Perft.PrintPerftResult(depth, result, Console.WriteLine);
+    }
 
+    for (int depth = 0; depth < 6; ++depth)
+    {
+        var sw = new Stopwatch();
+        sw.Start();
+        var result = Perft.Results(pos, depth, true);
+        sw.Stop();
         Perft.PrintPerftResult(depth, result, Console.WriteLine);
     }
 }

@@ -63,7 +63,9 @@ public sealed partial class Engine
         }
         if (ply >= targetDepth)
         {
-            foreach (var candidateMove in position.AllPossibleMoves(Game.MovePool))
+            Span<Move> moveList = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+            MoveGenerator.GenerateAllMoves(position, ref moveList);
+            foreach (var candidateMove in moveList)
             {
                 var gameState = position.MakeMove(candidateMove);
                 bool isValid = position.WasProduceByAValidMove();
@@ -79,7 +81,6 @@ public sealed partial class Engine
             _tt.RecordHash(_ttMask, position, targetDepth, ply, finalPositionEvaluation, NodeType.Exact);
             return finalPositionEvaluation;
         }
-
         // 🔍 Null-move pruning
         bool isFailHigh = false;    // In order to detect zugzwangs
         if (ply > Configuration.EngineSettings.NullMovePruning_R
@@ -118,7 +119,28 @@ public sealed partial class Engine
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
-        var pseudoLegalMoves = SortMoves(position.AllPossibleMoves(Game.MovePool), ply, ttBestMove);
+        Span<Move> pseudoLegalMoves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        MoveGenerator.GenerateAllMoves(position, ref pseudoLegalMoves);
+
+        bool detectPVMove = _isFollowingPV;
+        bool pvMoveDetected = false;
+        _isFollowingPV = false;
+
+        pseudoLegalMoves.Sort((moveA, moveB) =>
+        {
+            if (detectPVMove && (moveA == _pVTable[ply] || moveB == _pVTable[ply]))
+            {
+                pvMoveDetected = true;
+                detectPVMove = false;
+            }
+            var scoreA = ScoreMove(moveA, ply, true, ttBestMove);
+            var scoreB = ScoreMove(moveB, ply, true, ttBestMove);
+            return scoreA == scoreB ? 0 : (scoreA > scoreB ? -1 : 1);
+        });
+        if (pvMoveDetected)
+        {
+            _isFollowingPV = _isScoringPV = true;
+        }
 
         foreach (var move in pseudoLegalMoves)
         {
@@ -316,18 +338,25 @@ public sealed partial class Engine
             alpha = staticEvaluation;
         }
 
-        var generatedMoves = position.AllCapturesMoves(Game.MovePool);
-        if (!generatedMoves.Any())
+        Span<Move> generatedMoves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        MoveGenerator.GenerateAllMoves(position, ref generatedMoves, true);
+
+        if (generatedMoves.Length == 0)
         {
             return staticEvaluation;  // TODO check if in check or drawn position
         }
 
-        var movesToEvaluate = generatedMoves.OrderByDescending(move => ScoreMove(move, ply, false));
+        generatedMoves.Sort((moveA, moveB) =>
+        {
+            var scoreA = ScoreMove(moveA, ply, false);
+            var scoreB = ScoreMove(moveB, ply, false);
+            return scoreA == scoreB ? 0 : (scoreA > scoreB ? -1 : 1);
+        });
 
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
-        foreach (var move in movesToEvaluate)
+        foreach (var move in generatedMoves)
         {
             var gameState = position.MakeMove(move);
             if (!position.WasProduceByAValidMove())
@@ -395,7 +424,9 @@ public sealed partial class Engine
                 return alpha;
             }
 
-            foreach (var move in position.AllPossibleMoves(Game.MovePool))
+            Span<Move> moveList = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+            MoveGenerator.GenerateAllMoves(position, ref moveList);
+            foreach (var move in moveList)
             {
                 var gameState = position.MakeMove(move);
                 bool isValid = position.WasProduceByAValidMove();

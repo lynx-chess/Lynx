@@ -9,11 +9,13 @@ namespace Lynx;
 /// </summary>
 public static class Perft
 {
-    public static (long Nodes, double ElapsedMilliseconds) Results(Position position, int depth)
+    public static (long Nodes, double ElapsedMilliseconds) Results(Position position, int depth, bool useSpan = false)
     {
         var sw = new Stopwatch();
         sw.Start();
-        var nodes = ResultsImpl(position, depth, 0);
+        var nodes = useSpan
+            ? ResultsImplSpan(position, depth, 0)
+            : ResultsImpl(position, depth, 0);
         sw.Stop();
 
         return (nodes, CalculateElapsedMilliseconds(sw));
@@ -29,11 +31,13 @@ public static class Perft
         return (nodes, CalculateElapsedMilliseconds(sw));
     }
 
-    public static (long Nodes, double ElapsedMilliseconds) Divide(Position position, int depth, Action<string> write)
+    public static (long Nodes, double ElapsedMilliseconds) Divide(Position position, int depth, Action<string> write, bool useSpan = false)
     {
         var sw = new Stopwatch();
         sw.Start();
-        var nodes = DivideImpl(position, depth, 0, write);
+        var nodes = useSpan
+            ? DivideImplSpan(position, depth, 0, write)
+            : DivideImpl(position, depth, 0, write);
         sw.Stop();
 
         return (nodes, CalculateElapsedMilliseconds(sw));
@@ -57,6 +61,37 @@ public static class Perft
                 if (position.WasProduceByAValidMove())
                 {
                     nodes = ResultsImpl(position, depth - 1, nodes);
+                }
+                position.UnmakeMove(move, state);
+            }
+
+            return nodes;
+        }
+
+        return nodes + 1;
+    }
+
+    /// <summary>
+    /// Proper implementation, used by <see cref="DivideImpl(Position, int, long)"/> as well
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="depth"></param>
+    /// <param name="nodes"></param>
+    /// <returns></returns>
+    internal static long ResultsImplSpan(Position position, int depth, long nodes)
+    {
+        if (depth != 0)
+        {
+            Span<Move> moveList = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+            MoveGenerator.GenerateAllMoves(position, ref moveList);
+
+            foreach (var move in moveList)
+            {
+                var state = position.MakeMove(move);
+
+                if (position.WasProduceByAValidMove())
+                {
+                    nodes = ResultsImplSpan(position, depth - 1, nodes);
                 }
                 position.UnmakeMove(move, state);
             }
@@ -99,6 +134,36 @@ public static class Perft
         if (depth != 0)
         {
             foreach (var move in MoveGenerator.GenerateAllMoves(position))
+            {
+                var state = position.MakeMove(move);
+
+                if (position.WasProduceByAValidMove())
+                {
+                    var accumulatedNodes = nodes;
+                    nodes = ResultsImpl(position, depth - 1, nodes);
+
+                    write($"{move.UCIString()}\t\t{nodes - accumulatedNodes}");
+                }
+
+                position.UnmakeMove(move, state);
+            }
+
+            write(string.Empty);
+
+            return nodes;
+        }
+
+        return nodes + 1;
+    }
+
+    private static long DivideImplSpan(Position position, int depth, long nodes, Action<string> write)
+    {
+        if (depth != 0)
+        {
+            Span<Move> moveList = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+            MoveGenerator.GenerateAllMoves(position, ref moveList);
+
+            foreach (var move in moveList)
             {
                 var state = position.MakeMove(move);
 
