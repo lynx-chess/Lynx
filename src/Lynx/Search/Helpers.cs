@@ -198,6 +198,8 @@ public sealed partial class Engine
     private void ValidatePVTable()
     {
         var position = Game.CurrentPosition;
+        Span<Move> moveList = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+
         for (int i = 0; i < PVTable.Indexes[1]; ++i)
         {
             if (_pVTable[i] == default)
@@ -210,9 +212,12 @@ public sealed partial class Engine
             }
             var move = _pVTable[i];
 
+            var (start, end) = MoveGenerator.GenerateAllMoves(position, ref moveList, 0);
+            var slicedMoveList = moveList.Slice(start, end);
+
             if (!MoveExtensions.TryParseFromUCIString(
                move.UCIString(),
-               position.AllPossibleMoves(Game.MovePool),
+               ref slicedMoveList,
                out _))
             {
                 var message = $"Unexpected PV move {move.UCIString()} from position {position.FEN()}";

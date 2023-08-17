@@ -3,6 +3,7 @@ using Lynx.Internal;
 using Lynx.Model;
 using System.Diagnostics;
 using System.Numerics;
+using System.Reflection.PortableExecutable;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Channels;
@@ -46,8 +47,9 @@ using System.Threading.Channels;
 //FileAndRankMasks();
 //EnhancedPawnEvaluation();
 //RookEvaluation();
-TranspositionTable();
+//TranspositionTable();
 //UnmakeMove();
+ComparePerft();
 
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
 const string TrickyPosition = Constants.TrickyTestPositionFEN;
@@ -522,13 +524,26 @@ static void _42_Perft()
 
     var pos = new Position(TrickyPosition);
 
-    for (int depth = 0; depth < 7; ++depth)
+    //for (int depth = 0; depth < 6; ++depth)
+    //{
+    //    var sw = new Stopwatch();
+    //    sw.Start();
+    //    var result = Perft.Results(pos, depth);
+    //    sw.Stop();
+    //    Perft.PrintPerftResult(depth, result, Console.WriteLine);
+    //}
+
+    Console.WriteLine("**********************************************");
+    Console.WriteLine("Span");
+
+    Span<Move> moveList = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition * Configuration.EngineSettings.MaxDepth];
+
+    for (int depth = 0; depth < 6; ++depth)
     {
         var sw = new Stopwatch();
         sw.Start();
-        var result = Perft.Results(pos, depth);
+        var result = Perft.Results(pos, depth, ref moveList);
         sw.Stop();
-
         Perft.PrintPerftResult(depth, result, Console.WriteLine);
     }
 }
@@ -1116,4 +1131,42 @@ static void UnmakeMove()
         Console.WriteLine();
     }
 
+}
+
+static void ComparePerft()
+{
+    var positions = new (string, int)[] {
+        (Constants.InitialPositionFEN, 6),
+        (Constants.TrickyTestPositionFEN, 5),
+        ("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10", 5),
+        ("2K2r2/4P3/8/8/8/8/8/3k4 w - - 0 1", 8),
+        ("8/p7/8/1P6/K1k3p1/6P1/7P/8 w - -", 10)
+    };
+
+    Span<Move> moveList = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition * Configuration.EngineSettings.MaxDepth];
+
+    foreach (var (fen, depth) in positions)
+    {
+        var startingDepth = Math.Clamp(0, depth, depth);
+        Console.WriteLine(fen);
+
+        for (int d = startingDepth; d <= depth; ++d)
+        {
+            var position = new Position(fen);
+            var result1 = Perft.Results(position, d);
+            Perft.PrintPerftResult(d, result1, Console.WriteLine);
+
+            position = new Position(fen);
+            var result2 = Perft.Results(position, d, ref moveList);
+            Perft.PrintPerftResult(d, result2, Console.WriteLine);
+
+            var percentage = 100 * (result1.ElapsedMilliseconds - result2.ElapsedMilliseconds) / result1.ElapsedMilliseconds;
+
+            Console.ForegroundColor = percentage > 0 ? ConsoleColor.Green : ConsoleColor.Red;
+            Console.WriteLine($"2 was {percentage:0.00}% faster than 1 at depth {d}");
+            Console.ResetColor();
+        }
+
+        Console.WriteLine("-------------------------------------------------------");
+    }
 }
