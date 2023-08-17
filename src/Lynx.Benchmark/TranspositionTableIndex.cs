@@ -122,9 +122,6 @@
  */
 
 using BenchmarkDotNet.Attributes;
-using Lynx.Model;
-using System.Numerics;
-using System.Runtime.CompilerServices;
 
 namespace Lynx.Benchmark;
 

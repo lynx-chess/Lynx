@@ -267,16 +267,17 @@ public static class MoveGenerator
     /// <param name="capturesOnly">Filters out all moves but captures</param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void GenerateAllMoves(Position position, ref Span<Move> movePool, bool capturesOnly = false)
+    public static (int Start, int End) GenerateAllMoves(Position position, ref Span<Move> movePool, int ply, bool capturesOnly = false)
     {
 #if DEBUG
         if (position.Side == Side.Both)
         {
-            return;
+            return (-1, -1);
         }
 #endif
 
-        int localIndex = 0;
+        int initialLocalIndex = Constants.MaxNumberOfPossibleMovesInAPosition * ply;
+        int localIndex = initialLocalIndex;
 
         var offset = Utils.PieceOffset(position.Side);
 
@@ -288,7 +289,7 @@ public static class MoveGenerator
         GeneratePieceMoves(ref localIndex, ref movePool, (int)Piece.R + offset, position, capturesOnly);
         GeneratePieceMoves(ref localIndex, ref movePool, (int)Piece.Q + offset, position, capturesOnly);
 
-        movePool = movePool[..localIndex];
+        return (initialLocalIndex, localIndex);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
