@@ -319,7 +319,10 @@ public sealed partial class Engine
         var generatedMoves = position.AllCapturesMoves(Game.MovePool);
         if (!generatedMoves.Any())
         {
-            return staticEvaluation;  // TODO check if in check or drawn position
+            // Since draws are detected in static evaluation and checks are extended,
+            // it's actually complex to probe that this works
+            // The closer I got is 7k/1Q4r1/2q1B3/1P2QNN1/8/R7/nN6/K1R5 b - - 0 1, where it saves time
+            return ValueIfAnyValidMoveOrFinalPositionEval(staticEvaluation);
         }
 
         var movesToEvaluate = generatedMoves.OrderByDescending(move => ScoreMove(move, ply, false));
@@ -395,6 +398,14 @@ public sealed partial class Engine
                 return alpha;
             }
 
+            return ValueIfAnyValidMoveOrFinalPositionEval(alpha);
+        }
+
+        // Node fails low
+        return alpha;
+
+        int ValueIfAnyValidMoveOrFinalPositionEval(int returnValue)
+        {
             foreach (var move in position.AllPossibleMoves(Game.MovePool))
             {
                 var gameState = position.MakeMove(move);
@@ -403,14 +414,11 @@ public sealed partial class Engine
 
                 if (isValid)
                 {
-                    return alpha;
+                    return returnValue;
                 }
             }
 
             return Position.EvaluateFinalPosition(ply, position.IsInCheck());
         }
-
-        // Node fails low
-        return alpha;
     }
 }
