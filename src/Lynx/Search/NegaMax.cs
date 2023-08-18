@@ -74,7 +74,7 @@ public sealed partial class Engine
 
                 if (isValid)
                 {
-                    return QuiescenceSearch(ref movePool, realPly , ply, alpha, beta);
+                    return QuiescenceSearch(ref movePool, realPly, ply, alpha, beta);
                 }
             }
 
@@ -92,7 +92,7 @@ public sealed partial class Engine
         {
             var gameState = position.MakeNullMove();
 
-            var evaluation = -NegaMax(ref movePool, realPly +1, minDepth, targetDepth, ply + 1 + Configuration.EngineSettings.NullMovePruning_R, -beta, -beta + 1, isVerifyingNullMoveCutOff, ancestorWasNullMove: true);
+            var evaluation = -NegaMax(ref movePool, realPly + 1, minDepth, targetDepth, ply + 1 + Configuration.EngineSettings.NullMovePruning_R, -beta, -beta + 1, isVerifyingNullMoveCutOff, ancestorWasNullMove: true);
 
             position.UnMakeNullMove(gameState);
 
@@ -123,40 +123,27 @@ public sealed partial class Engine
         var (moveStart, moveEnd) = MoveGenerator.GenerateAllMoves(position, ref movePool, realPly);
         var pseudoLegalMoves = movePool[moveStart..moveEnd];
 
-        bool detectPVMove = _isFollowingPV;
-        bool pvMoveDetected = false;
         _isFollowingPV = false;
 
-        pseudoLegalMoves.Sort((moveA, moveB) =>
+        Span<int> scores = stackalloc int[pseudoLegalMoves.Length];
+        for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            if (detectPVMove && (moveA == _pVTable[ply] || moveB == _pVTable[ply]))
+            scores[i] = -ScoreMove(pseudoLegalMoves[i], ply, true);
+
+            if (pseudoLegalMoves[i] == _pVTable[ply])
             {
-                pvMoveDetected = true;
-                detectPVMove = false;
+                _isFollowingPV = true;
+                _isScoringPV = true;
             }
-            var scoreA = ScoreMove(moveA, ply, true, ttBestMove);
-            var scoreB = ScoreMove(moveB, ply, true, ttBestMove);
-            return scoreA == scoreB ? 0 : (scoreA > scoreB ? -1 : 1);
-        });
-        if (pvMoveDetected)
-        {
-            _isFollowingPV = _isScoringPV = true;
         }
+        scores.Sort(pseudoLegalMoves);
 
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
             ref var move = ref pseudoLegalMoves[i];
 
-            GameState gameState = default;
-            //var gameState = position.MakeMove(move);
-            try
-            {
-                gameState = position.MakeMove(move);
-            }
-            catch (Exception e)
-            {
-                ;
-            }
+            var gameState = position.MakeMove(move);
+
             if (!position.WasProduceByAValidMove())
             {
                 position.UnmakeMove(move, gameState);
@@ -238,14 +225,8 @@ public sealed partial class Engine
             {
                 Game.PositionHashHistory.Remove(position.UniqueIdentifier);
             }
-            try
-            {
-                position.UnmakeMove(move, gameState);
-            }
-            catch (Exception e)
-            {
-                ;
-            }
+
+            position.UnmakeMove(move, gameState);
 
             PrintMove(ply, move, evaluation);
 
@@ -362,13 +343,12 @@ public sealed partial class Engine
         }
 
         var generatedMoves = movePool[moveStart..moveEnd];
-
-        generatedMoves.Sort((moveA, moveB) =>
+        Span<int> scores = stackalloc int[generatedMoves.Length];
+        for (int i = 0; i < generatedMoves.Length; ++i)
         {
-            var scoreA = ScoreMove(moveA, ply, false);
-            var scoreB = ScoreMove(moveB, ply, false);
-            return scoreA == scoreB ? 0 : (scoreA > scoreB ? -1 : 1);
-        });
+            scores[i] = -ScoreMove(generatedMoves[i], ply, false);
+        }
+        scores.Sort(generatedMoves);
 
         Move? bestMove = null;
         bool isAnyMoveValid = false;
