@@ -27,6 +27,11 @@ public sealed class Game
         CurrentPosition = new Position(parsedFen);
         _gameInitialPosition = new Position(CurrentPosition);
 
+        if (!CurrentPosition.IsValid())
+        {
+            _logger.Warn($"Invalid position detected: {fen}");
+        }
+
         MoveHistory = new(150);
         PositionHashHistory = new(150) { CurrentPosition.UniqueIdentifier };
 

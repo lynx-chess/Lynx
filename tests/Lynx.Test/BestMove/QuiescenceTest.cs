@@ -25,4 +25,11 @@ public class QuiescenceTest : BaseTest
     {
         await TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth);
     }
+
+    [TestCase("7k/8/5NQ1/8/8/KN6/8/1r6 b - - 0 1", 1, new[] { "b1b3" })]
+    [TestCase("5Rbk/8/5N2/6Q1/8/1r6/8/KN6 b - - 0 1", 1, new[] { "b3b1" })]
+    public async Task DetectDrawWhenNoCaptures(string fen, int depth, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
+    {
+        await TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth);
+    }
 }
