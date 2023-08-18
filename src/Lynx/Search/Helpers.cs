@@ -56,32 +56,6 @@ public sealed partial class Engine
     private const int MinValue = short.MinValue;
     private const int MaxValue = short.MaxValue;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private List<Move> SortMoves(IEnumerable<Move> moves, int depth, Move bestMoveTTCandidate)
-    {
-        if (_isFollowingPV)
-        {
-            _isFollowingPV = false;
-            foreach (var move in moves)
-            {
-                if (move == _pVTable[depth])
-                {
-                    _isFollowingPV = true;
-                    _isScoringPV = true;
-                    break;
-                }
-            }
-        }
-
-        var orderedMoves = moves
-            .OrderByDescending(move => ScoreMove(move, depth, true, bestMoveTTCandidate))
-            .ToList();
-
-        PrintMessage($"For position {Game.CurrentPosition.FEN()}:\n{string.Join(", ", orderedMoves.Select(m => $"{m.ToEPDString()} ({ScoreMove(m, depth, true, bestMoveTTCandidate)})"))})");
-
-        return orderedMoves;
-    }
-
     /// <summary>
     /// Returns the score evaluation of a move taking into account <see cref="_isScoringPV"/>, <paramref name="bestMoveTTCandidate"/>, <see cref="EvaluationConstants.MostValueableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_historyMoves"/>
     /// </summary>

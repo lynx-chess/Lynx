@@ -110,7 +110,7 @@ public sealed partial class Engine
             }
         }
 
-        VerifiedNullMovePruning_SearchAgain:
+    VerifiedNullMovePruning_SearchAgain:
 
         var nodeType = NodeType.Alpha;
 
@@ -118,7 +118,24 @@ public sealed partial class Engine
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
-        var pseudoLegalMoves = SortMoves(position.AllPossibleMoves(Game.MovePool), ply, ttBestMove);
+        var pseudoLegalMoves = position.AllPossibleMoves(Game.MovePool);
+
+        _isFollowingPV = false;
+
+        var scores = new int[pseudoLegalMoves.Length];
+        for (int i = 0; i < pseudoLegalMoves.Length; ++i)
+        {
+            scores[i] = -ScoreMove(pseudoLegalMoves[i], ply, true);
+
+            if (pseudoLegalMoves[i] == _pVTable[ply])
+            {
+                _isFollowingPV = true;
+                _isScoringPV = true;
+            }
+        }
+        Array.Sort(scores, pseudoLegalMoves);
+
+        PrintMessage($"For position {Game.CurrentPosition.FEN()}:\n{string.Join(", ", pseudoLegalMoves.Select(m => $"{m.ToEPDString()} ({ScoreMove(m, ply, true, ttBestMove)})"))})");
 
         foreach (var move in pseudoLegalMoves)
         {
@@ -322,12 +339,17 @@ public sealed partial class Engine
             return staticEvaluation;  // TODO check if in check or drawn position
         }
 
-        var movesToEvaluate = generatedMoves.OrderByDescending(move => ScoreMove(move, ply, false));
+        var scores = new int[generatedMoves.Length];
+        for (int i = 0; i < generatedMoves.Length; ++i)
+        {
+            scores[i] = -ScoreMove(generatedMoves[i], ply, false);
+        }
+        Array.Sort(scores, generatedMoves);
 
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
-        foreach (var move in movesToEvaluate)
+        foreach (var move in generatedMoves)
         {
             var gameState = position.MakeMove(move);
             if (!position.WasProduceByAValidMove())
