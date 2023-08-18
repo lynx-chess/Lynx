@@ -31,6 +31,9 @@ public class RegressionTest : BaseTest
                 "g1h3", "g1f3", "g1e2"
             }, Description = "Used to return an illegal move in the very first versions")]
 
+    [TestCase("7k/1Q4r1/2q1B3/1P2QNN1/8/R7/nN6/K1R5 b - - 0 1", new[] { "c6c1" },
+        Description = "Get stalemated vs winning a queen")]
+
     public async Task GeneralRegression(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
     {
         await TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 5);
@@ -342,5 +345,12 @@ public class RegressionTest : BaseTest
 
         var result = await engine.BestMove(new("go wtime 3600000 btime 3600000"));
         Assert.Less(result.DepthReached, Configuration.EngineSettings.MaxDepth);
+    }
+
+    [TestCase("4r3/5P1k/5K2/5N2/8/8/8/8 w - - 0 1", new[] { "f7e8b" },
+        Description = "Position by Alex Brunetti, https://www.talkchess.com/forum3/viewtopic.php?f=2&t=31150&start=28")]
+    public async Task BishopUnderpromotion(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
+    {
+        await TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
     }
 }
