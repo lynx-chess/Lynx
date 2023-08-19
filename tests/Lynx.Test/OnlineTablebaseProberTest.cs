@@ -88,7 +88,7 @@ public class OnlineTablebaseProberTest
         var position = new Position(fen);
         var result = await OnlineTablebaseProber.RootSearch(position, new(), 0, default);
         Assert.AreEqual(distanceToMate, result.MateScore);
-        Assert.Contains(result.BestMove, position.AllPossibleMoves().ToList());
+        Assert.Contains(result.BestMove, MoveGenerator.GenerateAllMoves(position).ToList());
     }
 
     /// <summary>
@@ -124,7 +124,7 @@ public class OnlineTablebaseProberTest
         var position = new Position(fen);
         var result = await OnlineTablebaseProber.RootSearch(position, new(), 0, default);
         Assert.AreEqual(distanceToMate, result.MateScore);
-        Assert.Contains(result.BestMove, position.AllPossibleMoves().ToList());
+        Assert.Contains(result.BestMove, MoveGenerator.GenerateAllMoves(position).ToList());
     }
 
     [TestCase("8/8/8/8/8/2B3K1/8/6k1 b - - 1 1", 0)]   // B

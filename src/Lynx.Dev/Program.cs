@@ -668,7 +668,7 @@ static void _54_ScoreMove()
 
     var engine = new Engine(Channel.CreateBounded<string>(new BoundedChannelOptions(100) { SingleReader = true, SingleWriter = false }));
     engine.SetGame(new(position));
-    foreach (var move in position.AllCapturesMoves())
+    foreach (var move in MoveGenerator.GenerateAllMoves(position, capturesOnly: true))
     {
         Console.WriteLine($"{move} {engine.ScoreMove(move, default, default)}");
     }
@@ -677,7 +677,7 @@ static void _54_ScoreMove()
     position.Print();
 
     engine.SetGame(new(position));
-    foreach (var move in position.AllCapturesMoves())
+    foreach (var move in MoveGenerator.GenerateAllMoves(position, capturesOnly: true))
     {
         Console.WriteLine($"{move} {engine.ScoreMove(move, default, default)}");
     }
@@ -688,7 +688,7 @@ static void ZobristTable()
     var pos = new Position(KillerPosition);
     var zobristTable = InitializeZobristTable();
     var hash = CalculatePositionHash(zobristTable, pos);
-    var updatedHash = UpdatePositionHash(zobristTable, hash, pos.AllPossibleMoves().First());
+    var updatedHash = UpdatePositionHash(zobristTable, hash, MoveGenerator.GenerateAllMoves(pos).First());
 
     Console.WriteLine(updatedHash);
 }
@@ -1084,7 +1084,7 @@ static void UnmakeMove()
         var position = new Position(fen);
         Console.WriteLine($"**Position\t{position.FEN()}, Zobrist key {position.UniqueIdentifier}**");
 
-        var allMoves = position.AllPossibleMoves();
+        var allMoves = MoveGenerator.GenerateAllMoves(position);
 
         var oldZobristKey = position.UniqueIdentifier;
         foreach (var move in allMoves)

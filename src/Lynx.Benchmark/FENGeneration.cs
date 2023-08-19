@@ -212,7 +212,7 @@ public class FENGeneration : BaseBenchmark
     [ArgumentsSource(nameof(Data))]
     public string Struct_FENCalculatedOnTheFly(string fen)
     {
-        var moves = new Position(fen).AllPossibleMoves();
+        var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         var position = new StructCustomPosition(fen);
         var newPosition = new StructCustomPosition(position, moves.First());
@@ -223,7 +223,7 @@ public class FENGeneration : BaseBenchmark
     [ArgumentsSource(nameof(Data))]
     public string Struct_FENCalculatedWithinTheMoveConstructor(string fen)
     {
-        var moves = new Position(fen).AllPossibleMoves();
+        var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         var position = new StructCustomPosition(fen);
         var newPosition = new StructCustomPosition(position, moves.First(), default);
@@ -235,7 +235,7 @@ public class FENGeneration : BaseBenchmark
     [ArgumentsSource(nameof(Data))]
     public string ReadonlyStruct_FENCalculatedOnTheFly(string fen)
     {
-        var moves = new Position(fen).AllPossibleMoves();
+        var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         var position = new ReadonlyStructCustomPosition(fen);
         var newPosition = new ReadonlyStructCustomPosition(position, moves.First());
@@ -247,7 +247,7 @@ public class FENGeneration : BaseBenchmark
     [ArgumentsSource(nameof(Data))]
     public string ReadonlyStruct_FENCalculatedWithinTheMoveConstructor(string fen)
     {
-        var moves = new Position(fen).AllPossibleMoves();
+        var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         var position = new ReadonlyStructCustomPosition(fen);
         var newPosition = new ReadonlyStructCustomPosition(position, moves.First(), default);
@@ -259,7 +259,7 @@ public class FENGeneration : BaseBenchmark
     [ArgumentsSource(nameof(Data))]
     public string Class_FENCalculatedOnTheFly(string fen)
     {
-        var moves = new Position(fen).AllPossibleMoves();
+        var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         var position = new ClassCustomPosition(fen);
         var newPosition = new ClassCustomPosition(position, moves.First());
@@ -271,7 +271,7 @@ public class FENGeneration : BaseBenchmark
     [ArgumentsSource(nameof(Data))]
     public string Class_FENCalculatedWithinTheMoveConstructor(string fen)
     {
-        var moves = new Position(fen).AllPossibleMoves();
+        var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         var position = new ClassCustomPosition(fen);
         var newPosition = new ClassCustomPosition(position, moves.First(), default);
@@ -283,7 +283,7 @@ public class FENGeneration : BaseBenchmark
     [ArgumentsSource(nameof(Data))]
     public string RecordClass_FENCalculatedOnTheFly(string fen)
     {
-        var moves = new Position(fen).AllPossibleMoves();
+        var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         var position = new RecordClassCustomPosition(fen);
         var newPosition = new RecordClassCustomPosition(position, moves.First());
@@ -295,7 +295,7 @@ public class FENGeneration : BaseBenchmark
     [ArgumentsSource(nameof(Data))]
     public string RecordClass_FENCalculatedWithinTheMoveConstructor(string fen)
     {
-        var moves = new Position(fen).AllPossibleMoves();
+        var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         var position = new RecordClassCustomPosition(fen);
         var newPosition = new RecordClassCustomPosition(position, moves.First(), default);
@@ -307,7 +307,7 @@ public class FENGeneration : BaseBenchmark
     [ArgumentsSource(nameof(Data))]
     public string RecordStruct_FENCalculatedOnTheFly(string fen)
     {
-        var moves = new Position(fen).AllPossibleMoves();
+        var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         var position = new RecordStructCustomPosition(fen);
         var newPosition = new RecordStructCustomPosition(position, moves.First());
@@ -319,7 +319,7 @@ public class FENGeneration : BaseBenchmark
     [ArgumentsSource(nameof(Data))]
     public string RecordStruct_FENCalculatedWithinTheMoveConstructor(string fen)
     {
-        var moves = new Position(fen).AllPossibleMoves();
+        var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         var position = new RecordStructCustomPosition(fen);
         var newPosition = new RecordStructCustomPosition(position, moves.First(), default);
