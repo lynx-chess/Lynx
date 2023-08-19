@@ -5,6 +5,8 @@ using System.Text.Json.Nodes;
 
 namespace Lynx.Test;
 
+[Explicit]
+[Category(Categories.Configuration)]
 [NonParallelizable]
 public class ConfigurationTest
 {
