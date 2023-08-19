@@ -63,16 +63,9 @@ public sealed partial class Engine
         }
         if (ply >= targetDepth)
         {
-            foreach (var candidateMove in position.AllPossibleMoves(Game.MovePool))
+            if (position.HasValidMoves())
             {
-                var gameState = position.MakeMove(candidateMove);
-                bool isValid = position.WasProduceByAValidMove();
-                position.UnmakeMove(candidateMove, gameState);
-
-                if (isValid)
-                {
-                    return QuiescenceSearch(ply, alpha, beta);
-                }
+                return QuiescenceSearch(ply, alpha, beta);
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
@@ -319,7 +312,8 @@ public sealed partial class Engine
         var generatedMoves = position.AllCapturesMoves(Game.MovePool);
         if (!generatedMoves.Any())
         {
-            return staticEvaluation;  // TODO check if in check or drawn position
+            // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358
+            return staticEvaluation;
         }
 
         var movesToEvaluate = generatedMoves.OrderByDescending(move => ScoreMove(move, ply, false));
@@ -390,24 +384,9 @@ public sealed partial class Engine
 
         if (bestMove is null)
         {
-            if (isAnyMoveValid)
-            {
-                return alpha;
-            }
-
-            foreach (var move in position.AllPossibleMoves(Game.MovePool))
-            {
-                var gameState = position.MakeMove(move);
-                bool isValid = position.WasProduceByAValidMove();
-                position.UnmakeMove(move, gameState);
-
-                if (isValid)
-                {
-                    return alpha;
-                }
-            }
-
-            return Position.EvaluateFinalPosition(ply, position.IsInCheck());
+            return isAnyMoveValid || position.HasValidMoves()
+                ? alpha
+                : Position.EvaluateFinalPosition(ply, position.IsInCheck());
         }
 
         // Node fails low
