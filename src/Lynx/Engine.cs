@@ -93,6 +93,8 @@ public sealed partial class Engine
                 millisecondsIncrement = goCommand.BlackIncrement;
             }
 
+            maxDepth = Configuration.EngineSettings.MaxDepth;
+
             if (millisecondsLeft > 0)
             {
                 // Inspired by Alexandria: time overhead to avoid timing out in the engine-gui communication process

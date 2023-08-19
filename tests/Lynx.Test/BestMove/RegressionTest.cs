@@ -326,22 +326,35 @@ public class RegressionTest : BaseTest
         Assert.NotZero(searchResult.BestMove);
     }
 
-    [Test]
-    public async Task DepthOverflow()
+    [TestCase("position fen r1bq1rk1/pp1nppbp/2p2np1/8/2QPP3/2N2N2/PP2BPPP/R1B1K2R w KQ - 0 1" +
+        " moves c1f4 d7b6 c4b4 c8e6 e1g1 a7a5 b4c5 b6d7 c5a3 d8b6 e4e5 f6d5 c3d5 e6d5 f1d1 a8d8 f4d2 d8a8" +
+        " a3e7 f8d8 d2c3 a5a4 d1d2 g7h6 d2c2 h6g7 c2c1 c6c5 c1d1 a8c8 e7d6 d5c6 d4c5 d7c5 d6e7 d8e8 e7h4" +
+        " c6f3 e2f3 g7e5 c3e5 e8e5 h4d4 b6f6 d4b4 g8g7 d1d2 c8e8 a1f1 b7b6 d2d1 h7h6 b4c4 e5e7 b2b4 a4b3" +
+        " a2b3 c5e4 b3b4 e4c3 d1d3 c3e4 b4b5 f6b2 c4d4 b2d4 d3d4 e7e5 f3e4 e5e4 d4e4 e8e4 f1b1 g7f6 f2f3" +
+        " e4e5 g1f2 h6h5 b1b4 f6f5 h2h4 e5d5 f2e3 d5e5 e3f2 f7f6 g2g4 f5e6 f3f4 e5c5 f4f5 e6f7 f5g6 f7g6" +
+        " g4h5 g6h5 f2e3 f6f5 e3d3 c5d5 d3e3 h5g6 b4b2 g6f6 b2b4 f6e5 e3e2 f5f4 h4h5 e5f5 h5h6 d5d6 b4c4" +
+        " d6h6 c4c6 h6c6 b5c6 f5e6 e2d3 b6b5 d3e4 b5b4 c6c7 e6d7 c7c8q d7c8 e4f4 b4b3 f4e4 b3b2 e4f3" +
+        " b2b1q f3f2 c8c7 f2e2 b1a2 e2d1 a2f2 d1c1 f2e2 c1b1 e2d3 b1a2 d3d2 a2b3 c7c6 b3c4 d2e3 c4b4 e3d3" +
+        " b4a4 d3e3", Description = "FEN 8/8/2k5/8/K7/4q3/8/8 w - - 0 1")]
+
+    [TestCase("position fen r2qk1nr/1ppb2bp/p1np1pp1/4p3/B2PP3/2P2N2/PP3PPP/RNBQR1K1 w kq - 0 1 moves c1e3" +
+        " b7b5 a4c2 g8h6 h2h3 e8g8 b1d2 h6f7 d1e2 e5d4 c3d4 d8e7 a1c1 a8e8 c2b3 e7d8 e2d3 c6e7 c1c2 d6d5" +
+        " c2c5 d7c6 e4d5 c6d5 a2a4 d5b3 d3b3 c7c6 b3d3 f7e5 d3c2 e5d7 c2b3 f8f7 c5c2 d7b6 a4b5 a6b5 e3f4" +
+        " e7d5 e1e8 d8e8 f4d6 e8d7 b3a3 b6c8 d6c5 d7b7 d2e4 f7d7 a3b3 g8h8 c2e2 d7d8 e4c3 c8b6 h3h4 f6f5" +
+        " f3e5 d5c3 b2c3 b6d5 c3c4 d5f4 e2a2 g7e5 d4e5 f4d3 a2d2 b7a6 c4b5 a6a1 b3d1 a1d1 d2d1 d8d5 e5e6" +
+        " h8g7 b5c6 d5c5 d1d3 g7f6 e6e7 f6e7 d3d7 e7e6 d7h7 c5c6 h7a7 e6e5 a7e7 e5f6 e7b7 c6c2 g2g3 c2a2" +
+        " g1g2 a2c2 g2f3 c2c4 f3e3 c4c3 e3f4 c3c4 f4f3 c4c3 f3e2 c3c2 e2e1 f6e6 e1f1 e6f6 f1g2 f6e6 b7a7" +
+        " e6f6 g2f3 c2b2 a7c7 b2a2 f3e3 a2a3 e3d4 a3a2 c7c6 f6g7 d4e3 a2a3 e3f4 a3a4 f4f3 g7f7 h4h5 g6h5" +
+        " c6h6 a4a2 h6h5 f7f6 f3e3 a2b2 h5h7 f6e6 e3f3 e6d5 h7e7 d5d6 e7e8 b2a2 f3e3 a2b2 f2f4 b2c2 e8e5" +
+        " c2c5 e5c5 d6c5 e3f3 c5d6 g3g4 f5g4 f3g4 d6c6 f4f5 c6d7 g4g5 d7e7 g5g6 e7f8 g6f6 f8e8 f6g7 e8d7" +
+        " f5f6 d7e6 f6f7 e6f5 f7f8q f5g5 f8c5 g5g4 g7f7 g4f4 c5b4 f4e3 b4c3 e3e4 c3b4 e4e3 f7f6 e3f3 b4d2" +
+        " f3g4 f6f7 g4f3 d2d3 f3f2 f7f8 f2g1 d3e3 g1g2 e3e2 g2g3 f8e7 g3h3 e7d7 h3h4 e2g2 h4h5 d7e6 h5h6 e6d7",
+        Description = "FEN 8/3K4/7k/8/8/8/6Q1/8 b - - 0 1")]
+    public async Task DepthOverflow(string positionCommand)
     {
         var engine = GetEngine();
 
-        // 8/8/2k5/8/K7/4q3/8/8 w - - 0 1 but
-        engine.AdjustPosition("position fen r1bq1rk1/pp1nppbp/2p2np1/8/2QPP3/2N2N2/PP2BPPP/R1B1K2R w KQ - 0 1" +
-            " moves c1f4 d7b6 c4b4 c8e6 e1g1 a7a5 b4c5 b6d7 c5a3 d8b6 e4e5 f6d5 c3d5 e6d5 f1d1 a8d8 f4d2 d8a8" +
-            " a3e7 f8d8 d2c3 a5a4 d1d2 g7h6 d2c2 h6g7 c2c1 c6c5 c1d1 a8c8 e7d6 d5c6 d4c5 d7c5 d6e7 d8e8 e7h4" +
-            " c6f3 e2f3 g7e5 c3e5 e8e5 h4d4 b6f6 d4b4 g8g7 d1d2 c8e8 a1f1 b7b6 d2d1 h7h6 b4c4 e5e7 b2b4 a4b3" +
-            " a2b3 c5e4 b3b4 e4c3 d1d3 c3e4 b4b5 f6b2 c4d4 b2d4 d3d4 e7e5 f3e4 e5e4 d4e4 e8e4 f1b1 g7f6 f2f3" +
-            " e4e5 g1f2 h6h5 b1b4 f6f5 h2h4 e5d5 f2e3 d5e5 e3f2 f7f6 g2g4 f5e6 f3f4 e5c5 f4f5 e6f7 f5g6 f7g6" +
-            " g4h5 g6h5 f2e3 f6f5 e3d3 c5d5 d3e3 h5g6 b4b2 g6f6 b2b4 f6e5 e3e2 f5f4 h4h5 e5f5 h5h6 d5d6 b4c4" +
-            " d6h6 c4c6 h6c6 b5c6 f5e6 e2d3 b6b5 d3e4 b5b4 c6c7 e6d7 c7c8q d7c8 e4f4 b4b3 f4e4 b3b2 e4f3" +
-            " b2b1q f3f2 c8c7 f2e2 b1a2 e2d1 a2f2 d1c1 f2e2 c1b1 e2d3 b1a2 d3d2 a2b3 c7c6 b3c4 d2e3 c4b4 e3d3" +
-            " b4a4 d3e3");
+        engine.AdjustPosition(positionCommand);
 
         var result = await engine.BestMove(new("go wtime 3600000 btime 3600000"));
         Assert.Less(result.DepthReached, Configuration.EngineSettings.MaxDepth);
