@@ -227,7 +227,7 @@ public sealed partial class Engine
                 // 🔍 History moves
                 if (!move.IsCapture())
                 {
-                    _historyMoves[move.Piece(), move.TargetSquare()] += ply * ply;
+                    _historyMoves[move.Piece(), move.TargetSquare()] += (1 << ply);
                 }
 
                 _pVTable[pvIndex] = move;
