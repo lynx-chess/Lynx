@@ -269,7 +269,7 @@ jobs:
       run: dotnet build -c Release
 
     - name: Run ${{ matrix.category }} tests
-      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal --collect:"XPlat Code Coverage" https://github.com/coverlet-coverage/coverlet/issues/1192
+      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal --collect:"XPlat Code Coverage"
 
   winning-at-chess:
     runs-on: ${{ matrix.os }}
