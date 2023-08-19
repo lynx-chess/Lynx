@@ -133,7 +133,7 @@ public sealed class EngineSettings
     #endregion
 
     /// <summary>
-    /// Min. time left in the clock if all decision time is used befire <see cref="CoefficientSecurityTime"/> is used over that decision time
+    /// Min. time left in the clock if all decision time is used before <see cref="CoefficientSecurityTime"/> is used over that decision time
     /// </summary>
     public int MinSecurityTime { get; set; } = 1_000;
 

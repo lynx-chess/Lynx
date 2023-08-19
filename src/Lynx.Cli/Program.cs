@@ -20,9 +20,10 @@ var config = new ConfigurationBuilder()
     .AddEnvironmentVariables()
     .Build();
 
-config.GetRequiredSection(nameof(EngineSettings)).Bind(Configuration.EngineSettings);
+config.GetSection(nameof(EngineSettings)).Bind(Configuration.EngineSettings);
+config.GetSection(nameof(GeneralSettings)).Bind(Configuration.GeneralSettings);
 
-var generalConfig = config.GetRequiredSection(nameof(GeneralSettings));
+var generalConfig = config.GetSection(nameof(GeneralSettings));
 if (bool.TryParse(generalConfig[nameof(Configuration.GeneralSettings.EnableLogging)], out var enableLogging))
 {
     Configuration.GeneralSettings.EnableLogging = enableLogging;
