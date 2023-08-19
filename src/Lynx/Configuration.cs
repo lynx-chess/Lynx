@@ -75,7 +75,7 @@ public static class Configuration
 
 public sealed class GeneralSettings
 {
-    public bool DisableLogging { get; set; } = false;
+    public bool EnableLogging { get; set; } = false;
 }
 
 public sealed class EngineSettings
