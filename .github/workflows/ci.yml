@@ -147,7 +147,7 @@ jobs:
     - name: Build
       run: dotnet build -c ${{ matrix.configuration }} /p:DeterministicBuild=true
 
-    - name: Run CI tests
+    - name: Run ${{ matrix.category }} tests
       run: dotnet test -c ${{ matrix.configuration }} --no-build --collect:"XPlat Code Coverage" -v normal
 
     - name: '[Ubuntu] Generate test coverage report'
@@ -238,6 +238,38 @@ jobs:
     - name: Run ${{ matrix.category }} tests
       run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal
         # --collect:"XPlat Code Coverage" https://github.com/coverlet-coverage/coverlet/issues/1192
+
+  other-tests:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+        category: [Configuration]
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Nuget cache
+      uses: actions/cache@v3
+      with:
+        path:
+          ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Build
+      run: dotnet build -c Release
+
+    - name: Run ${{ matrix.category }} tests
+      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal --collect:"XPlat Code Coverage"
 
   winning-at-chess:
     runs-on: ${{ matrix.os }}
