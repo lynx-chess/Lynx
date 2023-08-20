@@ -159,7 +159,7 @@ public static class Attacks
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsSquareAttackedByPawns(int squareIndex, Side sideToMove, int offset, BitBoard[] pieces)
     {
-        var oppositeColorIndex = ((int)sideToMove + 1) % 2;
+        var oppositeColorIndex = (int)sideToMove ^ 1;
 
         return (PawnAttacks[oppositeColorIndex, squareIndex] & pieces[offset]) != default;
     }
@@ -167,7 +167,7 @@ public static class Attacks
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool AreAnySquaresAttackedByPawns(int squareIndex1, int squareIndex2, Side sideToMove, int offset, BitBoard[] pieces)
     {
-        var oppositeColorIndex = ((int)sideToMove + 1) % 2;
+        var oppositeColorIndex = (int)sideToMove ^ 1;
 
         return ((PawnAttacks[oppositeColorIndex, squareIndex1] & pieces[offset]) != default)
             || ((PawnAttacks[oppositeColorIndex, squareIndex2] & pieces[offset]) != default);
