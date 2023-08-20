@@ -225,7 +225,7 @@ public sealed partial class Engine
                 bestMove = move;
 
                 // 🔍 History moves
-                if (!move.IsCapture())
+                if (!move.IsCapture() && move.PromotedPiece() == default)
                 {
                     _historyMoves[move.Piece(), move.TargetSquare()] += ply << 2;
                 }
