@@ -58,20 +58,20 @@ public sealed partial class PositionCommand : GUIBaseCommand
         }
     }
 
-    //public static bool TryParseLastMove(string positionCommand, Game game, [NotNullWhen(true)] out Move? lastMove)
-    //{
-    //    var moveString = positionCommand
-    //            .Split(' ', StringSplitOptions.RemoveEmptyEntries)[^1];
+    public static bool TryParseLastMove(string positionCommand, Game game, [NotNullWhen(true)] out Move? lastMove)
+    {
+        var moveString = positionCommand
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries)[^1];
 
-    //    if (!MoveExtensions.TryParseFromUCIString(
-    //        moveString,
-    //        game.CurrentPosition.AllPossibleMoves(game.MovePool),
-    //        out lastMove))
-    //    {
-    //        _logger.Warn("Error parsing last move {0} from position command {1}", lastMove, positionCommand);
-    //        return false;
-    //    }
+        if (!MoveExtensions.TryParseFromUCIString(
+            moveString,
+            MoveGenerator.GenerateAllMoves(game.CurrentPosition, game.MovePool),
+            out lastMove))
+        {
+            _logger.Warn("Error parsing last move {0} from position command {1}", lastMove, positionCommand);
+            return false;
+        }
 
-    //    return true;
-    //}
+        return true;
+    }
 }
