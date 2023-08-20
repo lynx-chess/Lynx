@@ -587,15 +587,6 @@ public class Position
         return sb.ToString();
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public IEnumerable<Move> AllPossibleMoves(Move[]? movePool = null) => MoveGenerator.GenerateAllMoves(this, movePool);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public IEnumerable<Move> AllCapturesMoves(Move[]? movePool = null) => MoveGenerator.GenerateAllMoves(this, movePool, capturesOnly: true);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool HasValidMoves() => MoveGenerator.CanGenerateAtLeastAValidMove(this);
-
     public int CountPieces() => PieceBitBoards.Sum(b => b.CountBits());
 
     /// <summary>
