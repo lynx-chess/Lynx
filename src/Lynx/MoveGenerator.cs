@@ -163,6 +163,11 @@ public static class MoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static void GenerateCastlingMoves(ref int localIndex, Move[] movePool, Position position, int offset)
     {
+        if (position.IsInCheck())
+        {
+            return;
+        }
+
         var piece = (int)Piece.K + offset;
         var oppositeSide = (Side)Utils.OppositeSide(position.Side);
 
@@ -391,6 +396,11 @@ public static class MoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsAnyCastlingMoveValid(Position position, int offset)
     {
+        if (position.IsInCheck())
+        {
+            return false;
+        }
+
         var piece = (int)Piece.K + offset;
         var oppositeSide = (Side)Utils.OppositeSide(position.Side);
 
