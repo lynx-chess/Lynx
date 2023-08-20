@@ -128,9 +128,8 @@ public sealed partial class Engine
 
     /// <summary>
     /// Obvious moves that put the king in check have been discarded, but the rest still need to be discarded
-    /// see FEN Game.CurrentPosition "8/8/8/2bbb3/2bKb3/2bbb3/8/8 w - - 0 1", where 4 legal moves (corners) are found
+    /// see FEN pos "8/8/8/2bbb3/2bKb3/2bbb3/8/8 w - - 0 1", where 4 legal moves (corners) are found
     /// </summary>
-    /// <param name="Game.CurrentPosition"></param>
     /// <param name="offset"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -199,7 +198,6 @@ public sealed partial class Engine
     /// Generate Knight, Bishop, Rook and Queen moves
     /// </summary>
     /// <param name="piece"><see cref="Piece"/></param>
-    /// <param name="Game.CurrentPosition"></param>
     /// <param name="capturesOnly"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -236,7 +234,6 @@ public sealed partial class Engine
     /// <summary>
     /// Generates all psuedo-legal moves from <paramref name="Game.CurrentPosition"/>, ordered by <see cref="Move.Score(Game.CurrentPosition)"/>
     /// </summary>
-    /// <param name="Game.CurrentPosition"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsThereAnyValidMove()
@@ -356,9 +353,8 @@ public sealed partial class Engine
 
     /// <summary>
     /// Obvious moves that put the king in check have been discarded, but the rest still need to be discarded
-    /// see FEN Game.CurrentPosition "8/8/8/2bbb3/2bKb3/2bbb3/8/8 w - - 0 1", where 4 legal moves (corners) are found
+    /// see FEN pos "8/8/8/2bbb3/2bKb3/2bbb3/8/8 w - - 0 1", where 4 legal moves (corners) are found
     /// </summary>
-    /// <param name="Game.CurrentPosition"></param>
     /// <param name="offset"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -433,7 +429,6 @@ public sealed partial class Engine
     /// Generate Knight, Bishop, Rook and Queen moves
     /// </summary>
     /// <param name="piece"><see cref="Piece"/></param>
-    /// <param name="Game.CurrentPosition"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool IsAnyPieceMoveValid(int piece)
