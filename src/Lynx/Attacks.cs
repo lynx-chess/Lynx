@@ -101,6 +101,10 @@ public static class Attacks
         IsSquaredAttacked(squaredIndex, sideToMove, position.PieceBitBoards, position.OccupancyBitBoards);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool AreSquaresAttackedBySide(int squaredIndex1, int squaredIndex2, Position position, Side sideToMove) =>
+        AreSquaresAttacked(squaredIndex1, squaredIndex2, sideToMove, position.PieceBitBoards, position.OccupancyBitBoards);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsSquaredAttacked(int squareIndex, Side sideToMove, BitBoard[] piecePosition, BitBoard[] occupancy)
     {
         Utils.Assert(sideToMove != Side.Both);
@@ -115,6 +119,32 @@ public static class Attacks
             || IsSquareAttackedByRooks(squareIndex, offset, piecePosition, occupancy, out var rookAttacks)
             || IsSquareAttackedByQueens(offset, bishopAttacks, rookAttacks, piecePosition)
             || IsSquareAttackedByKing(squareIndex, offset, piecePosition);
+    }
+
+    /// <summary>
+    /// (A & B) || (C & B) -> (A | C) & B
+    /// </summary>
+    /// <param name="squareIndex1"></param>
+    /// <param name="squareIndex2"></param>
+    /// <param name="sideToMove"></param>
+    /// <param name="piecePosition"></param>
+    /// <param name="occupancy"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool AreSquaresAttacked(int squareIndex1, int squareIndex2, Side sideToMove, BitBoard[] piecePosition, BitBoard[] occupancy)
+    {
+        Utils.Assert(sideToMove != Side.Both);
+
+        var offset = Utils.PieceOffset(sideToMove);
+
+        // I tried to order them from most to least likely
+        return
+            AreSquaresAttackedByPawns(squareIndex1, squareIndex2, sideToMove, offset, piecePosition)
+            || AreSquaresAttackedByKnights(squareIndex1, squareIndex2, offset, piecePosition)
+            || AreSquaresAttackedByBishops(squareIndex1, squareIndex2, offset, piecePosition, occupancy, out var bishopAttacks1, out var bishopAttacks2)
+            || AreSquaresAttackedByRooks(squareIndex1, squareIndex2, offset, piecePosition, occupancy, out var rookAttacks1, out var rookAttacks2)
+            || AreSquaresAttackedByQueens(offset, bishopAttacks1, rookAttacks1, bishopAttacks2, rookAttacks2, piecePosition)
+            || AreSquaresAttackedByKing(squareIndex1, squareIndex2, offset, piecePosition);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -142,15 +172,35 @@ public static class Attacks
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool AreSquaresAttackedByPawns(int squareIndex1, int squareIndex2, Side sideToMove, int offset, BitBoard[] pieces)
+    {
+        var oppositeColorIndex = ((int)sideToMove + 1) % 2;
+
+        return ((PawnAttacks[oppositeColorIndex, squareIndex1] | PawnAttacks[oppositeColorIndex, squareIndex2]) & pieces[offset]) != default;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsSquareAttackedByKnights(int squareIndex, int offset, BitBoard[] piecePosition)
     {
         return (KnightAttacks[squareIndex] & piecePosition[(int)Piece.N + offset]) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool AreSquaresAttackedByKnights(int squareIndex1, int squareIndex2, int offset, BitBoard[] piecePosition)
+    {
+        return ((KnightAttacks[squareIndex1] | KnightAttacks[squareIndex2]) & piecePosition[(int)Piece.N + offset]) != default;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsSquareAttackedByKing(int squareIndex, int offset, BitBoard[] piecePosition)
     {
         return (KingAttacks[squareIndex] & piecePosition[(int)Piece.K + offset]) != default;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool AreSquaresAttackedByKing(int squareIndex1, int squareIndex2, int offset, BitBoard[] piecePosition)
+    {
+        return ((KingAttacks[squareIndex1] | KingAttacks[squareIndex2]) & piecePosition[(int)Piece.K + offset]) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -161,6 +211,14 @@ public static class Attacks
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool AreSquaresAttackedByBishops(int squareIndex1, int squareIndex2, int offset, BitBoard[] piecePosition, BitBoard[] occupancy, out BitBoard bishopAttacks1, out BitBoard bishopAttacks2)
+    {
+        bishopAttacks1 = BishopAttacks(squareIndex1, occupancy[(int)Side.Both]);
+        bishopAttacks2 = BishopAttacks(squareIndex2, occupancy[(int)Side.Both]);
+        return ((bishopAttacks1 | bishopAttacks2) & piecePosition[(int)Piece.B + offset]) != default;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsSquareAttackedByRooks(int squareIndex, int offset, BitBoard[] piecePosition, BitBoard[] occupancy, out BitBoard rookAttacks)
     {
         rookAttacks = RookAttacks(squareIndex, occupancy[(int)Side.Both]);
@@ -168,9 +226,25 @@ public static class Attacks
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool AreSquaresAttackedByRooks(int squareIndex1, int squareIndex2, int offset, BitBoard[] piecePosition, BitBoard[] occupancy, out BitBoard rookAttacks1, out BitBoard rookAttacks2)
+    {
+        rookAttacks1 = RookAttacks(squareIndex1, occupancy[(int)Side.Both]);
+        rookAttacks2 = RookAttacks(squareIndex2, occupancy[(int)Side.Both]);
+        return ((rookAttacks1 | rookAttacks2) & piecePosition[(int)Piece.R + offset]) != default;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsSquareAttackedByQueens(int offset, BitBoard bishopAttacks, BitBoard rookAttacks, BitBoard[] piecePosition)
     {
         var queenAttacks = QueenAttacks(rookAttacks, bishopAttacks);
         return (queenAttacks & piecePosition[(int)Piece.Q + offset]) != default;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool AreSquaresAttackedByQueens(int offset, BitBoard bishopAttacks1, BitBoard rookAttacks1, BitBoard bishopAttacks2, BitBoard rookAttacks2, BitBoard[] piecePosition)
+    {
+        var queenAttacks1 = QueenAttacks(rookAttacks1, bishopAttacks1);
+        var queenAttacks2 = QueenAttacks(rookAttacks2, bishopAttacks2);
+        return ((queenAttacks1 | queenAttacks2) & piecePosition[(int)Piece.Q + offset]) != default;
     }
 }
