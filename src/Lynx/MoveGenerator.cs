@@ -8,13 +8,13 @@ public static class MoveGenerator
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    public const int TRUE = 1;
+    private const int TRUE = 1;
 
     /// <summary>
     /// Indexed by <see cref="Piece"/>.
     /// Checks are not considered
     /// </summary>
-    public static readonly Func<int, BitBoard, BitBoard>[] PieceAttacks = new Func<int, BitBoard, BitBoard>[]
+    private static readonly Func<int, BitBoard, BitBoard>[] _pieceAttacks = new Func<int, BitBoard, BitBoard>[]
     {
             (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White, origin],
             (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
@@ -240,7 +240,7 @@ public static class MoveGenerator
             sourceSquare = bitboard.GetLS1BIndex();
             bitboard.ResetLS1B();
 
-            var attacks = PieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
+            var attacks = _pieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
                 & ~position.OccupancyBitBoards[(int)position.Side];
 
             while (attacks != default)
@@ -473,7 +473,7 @@ public static class MoveGenerator
             sourceSquare = bitboard.GetLS1BIndex();
             bitboard.ResetLS1B();
 
-            var attacks = PieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
+            var attacks = _pieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
                 & ~position.OccupancyBitBoards[(int)position.Side];
 
             while (attacks != default)
@@ -729,7 +729,7 @@ public static class MoveGenerator
             sourceSquare = bitboard.GetLS1BIndex();
             bitboard.ResetLS1B();
 
-            var attacks = PieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
+            var attacks = _pieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
                 & ~position.OccupancyBitBoards[(int)position.Side];
 
             while (attacks != default)
