@@ -105,14 +105,15 @@ public static class Attacks
     {
         Utils.Assert(sideToMove != Side.Both);
 
-        var offset = Utils.PieceOffset(sideToMove);
+        var sideToMoveInt = (int)sideToMove;
+        var offset = Utils.PieceOffset(sideToMoveInt);
 
         // I tried to order them from most to least likely
         return
-            IsSquareAttackedByPawns(squareIndex, sideToMove, offset, piecePosition)
+            IsSquareAttackedByPawns(squareIndex, sideToMoveInt, offset, piecePosition)
             || IsSquareAttackedByKing(squareIndex, offset, piecePosition)
             || IsSquareAttackedByKnights(squareIndex, offset, piecePosition)
-            || IsSquareAttackedByBishops(squareIndex, offset, piecePosition, occupancy, out var bishopAttacks) 
+            || IsSquareAttackedByBishops(squareIndex, offset, piecePosition, occupancy, out var bishopAttacks)
             || IsSquareAttackedByRooks(squareIndex, offset, piecePosition, occupancy, out var rookAttacks)
             || IsSquareAttackedByQueens(offset, bishopAttacks, rookAttacks, piecePosition);
     }
@@ -122,7 +123,8 @@ public static class Attacks
     {
         Utils.Assert(sideToMove != Side.Both);
 
-        var offset = Utils.PieceOffset(sideToMove);
+        var sideToMoveInt = (int)sideToMove;
+        var offset = Utils.PieceOffset(sideToMoveInt);
 
         // I tried to order them from most to least likely
         return
@@ -130,13 +132,13 @@ public static class Attacks
             || IsSquareAttackedByBishops(squareIndex, offset, piecePosition, occupancy, out var bishopAttacks)
             || IsSquareAttackedByQueens(offset, bishopAttacks, rookAttacks, piecePosition)
             || IsSquareAttackedByKnights(squareIndex, offset, piecePosition)
-            || IsSquareAttackedByPawns(squareIndex, sideToMove, offset, piecePosition);
+            || IsSquareAttackedByPawns(squareIndex, sideToMoveInt, offset, piecePosition);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsSquareAttackedByPawns(int squareIndex, Side sideToMove, int offset, BitBoard[] pieces)
+    private static bool IsSquareAttackedByPawns(int squareIndex, int sideToMove, int offset, BitBoard[] pieces)
     {
-        var oppositeColorIndex = ((int)sideToMove + 1) % 2;
+        var oppositeColorIndex = sideToMove ^ 1;
 
         return (PawnAttacks[oppositeColorIndex, squareIndex] & pieces[offset]) != default;
     }
