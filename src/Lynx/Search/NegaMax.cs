@@ -63,7 +63,7 @@ public sealed partial class Engine
         }
         if (ply >= targetDepth)
         {
-            if (IsThereAnyValidMove())
+            if (MoveGenerator.CanGenerateAtLeastAValidMove(position))
             {
                 return QuiescenceSearch(ply, alpha, beta);
             }
@@ -111,7 +111,7 @@ public sealed partial class Engine
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
-        var pseudoLegalMoves = SortMoves(GenerateAllMoves(), ply, ttBestMove);
+        var pseudoLegalMoves = SortMoves(MoveGenerator.GenerateAllMoves(position), ply, ttBestMove);
 
         foreach (var move in pseudoLegalMoves)
         {
@@ -309,7 +309,7 @@ public sealed partial class Engine
             alpha = staticEvaluation;
         }
 
-        var generatedMoves = GenerateAllMoves(capturesOnly: true);
+        var generatedMoves = MoveGenerator.GenerateAllMoves(position, capturesOnly: true);
         if (!generatedMoves.Any())
         {
             // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358
@@ -384,7 +384,7 @@ public sealed partial class Engine
 
         if (bestMove is null)
         {
-            return isThereAnyValidCapture || IsThereAnyValidMove()
+            return isThereAnyValidCapture || MoveGenerator.CanGenerateAtLeastAValidMove(position)
                 ? alpha
                 : Position.EvaluateFinalPosition(ply, position.IsInCheck());
         }
