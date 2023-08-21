@@ -45,17 +45,13 @@ var tasks = new List<Task>
 {
     new Writer(engineChannel).Run(cancellationToken),
     new LynxDriver(uciChannel, engineChannel, new Engine(engineChannel)).Run(cancellationToken),
-    new Listener(uciChannel).Run(cancellationToken),
+    new Listener(uciChannel).Run(cancellationToken, args),
     uciChannel.Reader.Completion,
     engineChannel.Reader.Completion
 };
 
 try
 {
-    if (args.Length > 0 && args[0] == "bench")
-    {
-        await uciChannel.Writer.WriteAsync("bench");
-    }
     await Task.WhenAny(tasks);
 }
 catch (AggregateException ae)
