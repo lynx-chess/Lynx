@@ -14,10 +14,15 @@ public sealed class Listener
         _logger = LogManager.GetCurrentClassLogger();
     }
 
-    public async Task Run(CancellationToken cancellationToken)
+    public async Task Run(CancellationToken cancellationToken, params string[] args)
     {
         try
         {
+            foreach (var arg in args)
+            {
+                await _guiInputReader.Writer.WriteAsync(arg, cancellationToken);
+            }
+
             while (!cancellationToken.IsCancellationRequested)
             {
                 var input = Console.ReadLine();
