@@ -298,7 +298,7 @@ public sealed class LynxDriver
     private async ValueTask HandleBench()
     {
         var results = await OpenBench.Bench(_engineWriter);
-        await OpenBench.PrintBenchResults(results, str => _engineWriter.Writer.WriteAsync(str));
+        OpenBench.PrintBenchResults(results, Console.WriteLine);
     }
 
     #endregion
