@@ -1,5 +1,6 @@
 ﻿using Lynx.Model;
 using NLog;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 namespace Lynx;
 
@@ -473,4 +474,268 @@ public sealed partial class Engine
 
         return result;
     }
+
+    class MoveComparer : IComparer<Move>
+    {
+        public int Compare(int scoreA, int scoreB)
+        {
+            return scoreB.CompareTo(scoreA);
+        }
+    }
+
+    private static MoveComparer _moveComparer = new();
+
+
+
+    /// <summary>
+    /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="capturesOnly">Filters out all moves but captures</param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public SortedList<int, Move> GenerateAndScoreAllMoves(int depth, bool useKillerAndPositionMoves, Move bestMoveTTCandidate = default, bool capturesOnly = false)
+    {
+#if DEBUG
+        if (Game.CurrentPosition.Side == Side.Both)
+        {
+            return new(0);
+        }
+#endif
+
+        var sortedList = new SortedList<int, Move>(Constants.MaxNumberOfPossibleMovesInAPosition, _moveComparer);
+        var offset = Utils.PieceOffset(Game.CurrentPosition.Side);
+
+        GenerateAndScorePawnMoves(offset, sortedList, depth, useKillerAndPositionMoves, bestMoveTTCandidate, capturesOnly);
+        GenerateAndScoreCastlingMoves(offset, sortedList, depth, useKillerAndPositionMoves, bestMoveTTCandidate);
+        GenerateAndScorePieceMoves((int)Piece.K + offset,sortedList, depth, useKillerAndPositionMoves, bestMoveTTCandidate, capturesOnly);
+        GenerateAndScorePieceMoves((int)Piece.N + offset,sortedList, depth, useKillerAndPositionMoves, bestMoveTTCandidate, capturesOnly);
+        GenerateAndScorePieceMoves((int)Piece.B + offset,sortedList, depth, useKillerAndPositionMoves, bestMoveTTCandidate, capturesOnly);
+        GenerateAndScorePieceMoves((int)Piece.R + offset,sortedList, depth, useKillerAndPositionMoves, bestMoveTTCandidate, capturesOnly);
+        GenerateAndScorePieceMoves((int)Piece.Q + offset, sortedList, depth, useKillerAndPositionMoves, bestMoveTTCandidate, capturesOnly);
+
+        return sortedList;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal void GenerateAndScorePawnMoves(int offset, SortedList<int, Move> sortedList, int depth, bool useKillerAndPositionMoves, Move bestMoveTTCandidate = default, bool capturesOnly = false)
+    {
+        int sourceSquare, targetSquare;
+
+        var piece = (int)Piece.P + offset;
+        var pawnPush = +8 - ((int)Game.CurrentPosition.Side * 16);          // Game.CurrentPosition.Side == Side.White ? -8 : +8
+        int oppositeSide = Utils.OppositeSide(Game.CurrentPosition.Side);   // Game.CurrentPosition.Side == Side.White ? (int)Side.Black : (int)Side.White
+        var bitboard = Game.CurrentPosition.PieceBitBoards[piece];
+        Move move;
+
+        while (bitboard != default)
+        {
+            sourceSquare = bitboard.GetLS1BIndex();
+            bitboard.ResetLS1B();
+
+            var sourceRank = (sourceSquare >> 3) + 1;
+
+#if DEBUG
+            if (sourceRank == 1 || sourceRank == 8)
+            {
+                _logger.Warn("There's a non-promoted {0} pawn in rank {1}", Game.CurrentPosition.Side, sourceRank);
+                continue;
+            }
+#endif
+
+            // Pawn pushes
+            var singlePushSquare = sourceSquare + pawnPush;
+            if (!Game.CurrentPosition.OccupancyBitBoards[2].GetBit(singlePushSquare))
+            {
+                // Single pawn push
+                var targetRank = (singlePushSquare >> 3) + 1;
+                if (targetRank == 1 || targetRank == 8)  // Promotion
+                {
+                    move = MoveExtensions.Encode(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.Q + offset);
+                    sortedList.Add(ScoreMove(move, depth, useKillerAndPositionMoves, bestMoveTTCandidate), move);
+
+                    move = MoveExtensions.Encode(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.R + offset);
+                    sortedList.Add(ScoreMove(move, depth, useKillerAndPositionMoves, bestMoveTTCandidate), move);
+
+                    move = MoveExtensions.Encode(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.N + offset);
+                    sortedList.Add(ScoreMove(move, depth, useKillerAndPositionMoves, bestMoveTTCandidate), move);
+
+                    move = MoveExtensions.Encode(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.B + offset);
+                    sortedList.Add(ScoreMove(move, depth, useKillerAndPositionMoves, bestMoveTTCandidate), move);
+                }
+                else if (!capturesOnly)
+                {
+                    move = MoveExtensions.Encode(sourceSquare, singlePushSquare, piece);
+                    sortedList.Add(ScoreMove(move, depth, useKillerAndPositionMoves, bestMoveTTCandidate), move);
+                }
+
+                // Double pawn push
+                // Inside of the if because singlePush square cannot be occupied either
+                if (!capturesOnly)
+                {
+                    var doublePushSquare = sourceSquare + (2 * pawnPush);
+                    if (!Game.CurrentPosition.OccupancyBitBoards[2].GetBit(doublePushSquare)
+                        && ((sourceRank == 2 && Game.CurrentPosition.Side == Side.Black) || (sourceRank == 7 && Game.CurrentPosition.Side == Side.White)))
+                    {
+                        move = MoveExtensions.Encode(sourceSquare, doublePushSquare, piece, isDoublePawnPush: TRUE);
+                        sortedList.Add(ScoreMove(move, depth, useKillerAndPositionMoves, bestMoveTTCandidate), move);
+                    }
+                }
+            }
+
+            var attacks = Attacks.PawnAttacks[(int)Game.CurrentPosition.Side, sourceSquare];
+
+            // En passant
+            if (Game.CurrentPosition.EnPassant != BoardSquare.noSquare && attacks.GetBit(Game.CurrentPosition.EnPassant))
+            // We assume that Game.CurrentPosition.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
+            {
+                move = MoveExtensions.Encode(sourceSquare, (int)Game.CurrentPosition.EnPassant, piece, isCapture: TRUE, isEnPassant: TRUE);
+                sortedList.Add(ScoreMove(move, depth, useKillerAndPositionMoves, bestMoveTTCandidate), move);
+            }
+
+            // Captures
+            var attackedSquares = attacks & Game.CurrentPosition.OccupancyBitBoards[oppositeSide];
+            while (attackedSquares != default)
+            {
+                targetSquare = attackedSquares.GetLS1BIndex();
+                attackedSquares.ResetLS1B();
+
+                var targetRank = (targetSquare >> 3) + 1;
+                if (targetRank == 1 || targetRank == 8)  // Capture with promotion
+                {
+                    move = MoveExtensions.Encode(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.Q + offset, isCapture: TRUE);
+                    sortedList.Add(ScoreMove(move, depth, useKillerAndPositionMoves, bestMoveTTCandidate), move);
+
+                    move = MoveExtensions.Encode(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.R + offset, isCapture: TRUE);
+                    sortedList.Add(ScoreMove(move, depth, useKillerAndPositionMoves, bestMoveTTCandidate), move);
+
+                    move = MoveExtensions.Encode(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.N + offset, isCapture: TRUE);
+                    sortedList.Add(ScoreMove(move, depth, useKillerAndPositionMoves, bestMoveTTCandidate), move);
+
+                    move = MoveExtensions.Encode(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.B + offset, isCapture: TRUE);
+                    sortedList.Add(ScoreMove(move, depth, useKillerAndPositionMoves, bestMoveTTCandidate), move);
+                }
+                else
+                {
+                    move = MoveExtensions.Encode(sourceSquare, targetSquare, piece, isCapture: TRUE);
+                    sortedList.Add(ScoreMove(move, depth, useKillerAndPositionMoves, bestMoveTTCandidate), move);
+
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Obvious moves that put the king in check have been discarded, but the rest still need to be discarded
+    /// see FEN pos "8/8/8/2bbb3/2bKb3/2bbb3/8/8 w - - 0 1", where 4 legal moves (corners) are found
+    /// </summary>
+    /// <param name="offset"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal void GenerateAndScoreCastlingMoves(int offset, SortedList<int, Move> sortedList, int depth, bool useKillerAndPositionMoves, Move bestMoveTTCandidate = default)
+    {
+        if (Game.CurrentPosition.Castle != default)
+        {
+            var piece = (int)Piece.K + offset;
+            var oppositeSide = (Side)Utils.OppositeSide(Game.CurrentPosition.Side);
+
+            int sourceSquare = Game.CurrentPosition.PieceBitBoards[piece].GetLS1BIndex(); // There's for sure only one
+
+            Move move;
+
+            if (Game.CurrentPosition.Side == Side.White)
+            {
+                bool ise1Attacked = Attacks.IsSquaredAttackedBySide((int)BoardSquare.e1, Game.CurrentPosition, oppositeSide);
+                if (((Game.CurrentPosition.Castle & (int)CastlingRights.WK) != default)
+                    && !Game.CurrentPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.f1)
+                    && !Game.CurrentPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.g1)
+                    && !ise1Attacked
+                    && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.f1, Game.CurrentPosition, oppositeSide)
+                    && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.g1, Game.CurrentPosition, oppositeSide))
+                {
+                    move = MoveExtensions.Encode(sourceSquare, Constants.WhiteShortCastleKingSquare, piece, isShortCastle: TRUE);
+                    sortedList.Add(ScoreMove(move, depth, useKillerAndPositionMoves, bestMoveTTCandidate), move);
+                }
+
+                if (((Game.CurrentPosition.Castle & (int)CastlingRights.WQ) != default)
+                    && !Game.CurrentPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.d1)
+                    && !Game.CurrentPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c1)
+                    && !Game.CurrentPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b1)
+                    && !ise1Attacked
+                    && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.d1, Game.CurrentPosition, oppositeSide)
+                    && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.c1, Game.CurrentPosition, oppositeSide))
+                {
+                    move = MoveExtensions.Encode(sourceSquare, Constants.WhiteLongCastleKingSquare, piece, isLongCastle: TRUE);
+                    sortedList.Add(ScoreMove(move, depth, useKillerAndPositionMoves, bestMoveTTCandidate), move);
+                }
+            }
+            else
+            {
+                bool ise8Attacked = Attacks.IsSquaredAttackedBySide((int)BoardSquare.e8, Game.CurrentPosition, oppositeSide);
+                if (((Game.CurrentPosition.Castle & (int)CastlingRights.BK) != default)
+                    && !Game.CurrentPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.f8)
+                    && !Game.CurrentPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.g8)
+                    && !ise8Attacked
+                    && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.f8, Game.CurrentPosition, oppositeSide)
+                    && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.g8, Game.CurrentPosition, oppositeSide))
+                {
+                   move = MoveExtensions.Encode(sourceSquare, Constants.BlackShortCastleKingSquare, piece, isShortCastle: TRUE);
+                    sortedList.Add(ScoreMove(move, depth, useKillerAndPositionMoves, bestMoveTTCandidate), move);
+                }
+
+                if (((Game.CurrentPosition.Castle & (int)CastlingRights.BQ) != default)
+                    && !Game.CurrentPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.d8)
+                    && !Game.CurrentPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c8)
+                    && !Game.CurrentPosition.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b8)
+                    && !ise8Attacked
+                    && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.d8, Game.CurrentPosition, oppositeSide)
+                    && !Attacks.IsSquaredAttackedBySide((int)BoardSquare.c8, Game.CurrentPosition, oppositeSide))
+                {
+                    move = MoveExtensions.Encode(sourceSquare, Constants.BlackLongCastleKingSquare, piece, isLongCastle: TRUE);
+                    sortedList.Add(ScoreMove(move, depth, useKillerAndPositionMoves, bestMoveTTCandidate), move);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Generate Knight, Bishop, Rook and Queen moves
+    /// </summary>
+    /// <param name="piece"><see cref="Piece"/></param>
+    /// <param name="capturesOnly"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal void GenerateAndScorePieceMoves(int piece, SortedList<int, Move> sortedList, int depth, bool useKillerAndPositionMoves, Move bestMoveTTCandidate = default, bool capturesOnly = false)
+    {
+        var bitboard = Game.CurrentPosition.PieceBitBoards[piece];
+        int sourceSquare, targetSquare;
+        Move move;
+
+        while (bitboard != default)
+        {
+            sourceSquare = bitboard.GetLS1BIndex();
+            bitboard.ResetLS1B();
+
+            var attacks = PieceAttacks[piece](sourceSquare, Game.CurrentPosition.OccupancyBitBoards[(int)Side.Both])
+                & ~Game.CurrentPosition.OccupancyBitBoards[(int)Game.CurrentPosition.Side];
+
+            while (attacks != default)
+            {
+                targetSquare = attacks.GetLS1BIndex();
+                attacks.ResetLS1B();
+
+                if (Game.CurrentPosition.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare))
+                {
+                    move = MoveExtensions.Encode(sourceSquare, targetSquare, piece, isCapture: TRUE);
+                    sortedList.Add(ScoreMove(move, depth, useKillerAndPositionMoves, bestMoveTTCandidate), move);
+                }
+                else if (!capturesOnly)
+                {
+                    move = MoveExtensions.Encode(sourceSquare, targetSquare, piece);
+                    sortedList.Add(ScoreMove(move, depth, useKillerAndPositionMoves, bestMoveTTCandidate), move);
+                }
+            }
+        }
+    }
+
 }

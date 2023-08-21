@@ -111,7 +111,16 @@ public sealed partial class Engine
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
-        var pseudoLegalMoves = SortMoves(GenerateAllMoves(), ply, ttBestMove);
+        var pseudoLegalMoves = GenerateAndScoreAllMoves(ply, true, ttBestMove).Values;
+        if (_isFollowingPV)
+        {
+            _isFollowingPV = false;
+            if (pseudoLegalMoves.Any(m => m == _pVTable[ply]))
+            {
+                _isFollowingPV = true;
+                _isScoringPV = true;
+            }
+        }
 
         foreach (var move in pseudoLegalMoves)
         {
@@ -309,14 +318,12 @@ public sealed partial class Engine
             alpha = staticEvaluation;
         }
 
-        var generatedMoves = GenerateAllMoves(capturesOnly: true);
-        if (!generatedMoves.Any())
+        var movesToEvaluate = GenerateAndScoreAllMoves(ply, false, capturesOnly: true).Values;
+        if (movesToEvaluate.Count == 0)
         {
             // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358
             return staticEvaluation;
         }
-
-        var movesToEvaluate = generatedMoves.OrderByDescending(move => ScoreMove(move, ply, false));
 
         Move? bestMove = null;
         bool isThereAnyValidCapture = false;
