@@ -17,7 +17,7 @@ public sealed class IdCommand : EngineBaseCommand
 
     public const string EngineName = "Lynx";
 
-    public const string EngineAuthor = "Eduardo Cáceres";
+    public const string EngineAuthor = "Eduardo Caceres";
 
     public static string GetVersion()
     {
