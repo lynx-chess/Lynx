@@ -23,7 +23,7 @@ public class LocalVariableIn_vs_NoIn : BaseBenchmark
         var moves = new List<Move>(50_000);
 
         for (int i = 0; i < 1000; ++i)
-            moves.AddRange(Sort_LocalVariableAndIn(position.AllPossibleMoves(), position));
+            moves.AddRange(Sort_LocalVariableAndIn(MoveGenerator.GenerateAllMoves(position), position));
 
         return Sort_LocalVariableAndIn(moves, position)[0];
     }
@@ -36,7 +36,7 @@ public class LocalVariableIn_vs_NoIn : BaseBenchmark
         var position = new Position(fen);
 
         for (int i = 0; i < 1000; ++i)
-            moves.AddRange(Sort_NoIn(position.AllPossibleMoves(), position));
+            moves.AddRange(Sort_NoIn(MoveGenerator.GenerateAllMoves(position), position));
 
         return Sort_NoIn(moves, position)[0];
     }

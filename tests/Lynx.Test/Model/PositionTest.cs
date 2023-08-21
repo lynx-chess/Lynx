@@ -142,7 +142,7 @@ public class PositionTest
     {
         // Arrange
         var position = new Position(fen);
-        Assert.IsEmpty(position.AllPossibleMoves().Where(move => new Position(position, move).IsValid()));
+        Assert.IsEmpty(MoveGenerator.GenerateAllMoves(position).Where(move => new Position(position, move).IsValid()));
         var isInCheck = position.IsInCheck();
 
         // Act

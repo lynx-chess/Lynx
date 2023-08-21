@@ -63,7 +63,7 @@ public sealed partial class Engine
         }
         if (ply >= targetDepth)
         {
-            if (position.HasValidMoves())
+            if (MoveGenerator.CanGenerateAtLeastAValidMove(position))
             {
                 return QuiescenceSearch(ply, alpha, beta);
             }
@@ -111,7 +111,7 @@ public sealed partial class Engine
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
-        var pseudoLegalMoves = SortMoves(position.AllPossibleMoves(Game.MovePool), ply, ttBestMove);
+        var pseudoLegalMoves = SortMoves(MoveGenerator.GenerateAllMoves(position, Game.MovePool), ply, ttBestMove);
 
         foreach (var move in pseudoLegalMoves)
         {
@@ -309,7 +309,7 @@ public sealed partial class Engine
             alpha = staticEvaluation;
         }
 
-        var generatedMoves = position.AllCapturesMoves(Game.MovePool);
+        var generatedMoves = MoveGenerator.GenerateAllMoves(position, Game.MovePool, capturesOnly: true);
         if (!generatedMoves.Any())
         {
             // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358
@@ -319,7 +319,7 @@ public sealed partial class Engine
         var movesToEvaluate = generatedMoves.OrderByDescending(move => ScoreMove(move, ply, false));
 
         Move? bestMove = null;
-        bool isAnyMoveValid = false;
+        bool isThereAnyValidCapture = false;
 
         foreach (var move in movesToEvaluate)
         {
@@ -331,7 +331,7 @@ public sealed partial class Engine
             }
 
             ++_nodes;
-            isAnyMoveValid = true;
+            isThereAnyValidCapture = true;
 
             PrintPreMove(position, ply, move, isQuiescence: true);
 
@@ -384,7 +384,7 @@ public sealed partial class Engine
 
         if (bestMove is null)
         {
-            return isAnyMoveValid || position.HasValidMoves()
+            return isThereAnyValidCapture || MoveGenerator.CanGenerateAtLeastAValidMove(position)
                 ? alpha
                 : Position.EvaluateFinalPosition(ply, position.IsInCheck());
         }

@@ -12,7 +12,7 @@ public class GeneralMoveGeneratorTest
     public void DiscoveredCheckAfterEnPassantCapture()
     {
         var originalPosition = new Position("8/8/8/k1pP3R/8/8/8/n4K2 w - c6 0 1");
-        var enPassantMove = originalPosition.AllPossibleMoves().Single(m => m.IsEnPassant());
+        var enPassantMove = MoveGenerator.GenerateAllMoves(originalPosition).Single(m => m.IsEnPassant());
         var positionAferEnPassant = new Position(originalPosition, enPassantMove);
 
         foreach (var move in MoveGenerator.GenerateAllMoves(positionAferEnPassant))
