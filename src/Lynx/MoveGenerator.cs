@@ -391,14 +391,13 @@ public static class MoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsAnyCastlingMoveValid(Position position, int offset)
     {
-        var piece = (int)Piece.K + offset;
-        var oppositeSide = (Side)Utils.OppositeSide(position.Side);
-
-        int sourceSquare = position.PieceBitBoards[piece].GetLS1BIndex(); // There's for sure only one
-
-        // Castles
         if (position.Castle != default)
         {
+            var piece = (int)Piece.K + offset;
+            var oppositeSide = (Side)Utils.OppositeSide(position.Side);
+
+            int sourceSquare = position.PieceBitBoards[piece].GetLS1BIndex(); // There's for sure only one
+
             if (position.Side == Side.White)
             {
                 bool ise1Attacked = Attacks.IsSquaredAttackedBySide((int)BoardSquare.e1, position, oppositeSide);
