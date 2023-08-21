@@ -88,6 +88,7 @@ public sealed class LynxDriver
                                 break;
                             case "bench":
                                 await HandleBench();
+                                HandleQuit();
                                 break;
                             default:
                                 _logger.Warn("Unknown command received: {0}", rawCommand);
