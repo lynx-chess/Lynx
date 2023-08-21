@@ -48,7 +48,7 @@ jobs:
       run: dotnet build -c Release
 
     - name: Run perft ${{ github.event.inputs.depth }} on ${{ github.event.inputs.fen }}
-      run: dotnet run -c Release --no-build "position fen ${{ github.event.inputs.fen }}" "perft ${{ github.event.inputs.depth }}"'
+      run: dotnet run -c Release --no-build "position fen ${{ github.event.inputs.fen }}" "perft ${{ github.event.inputs.depth }}" "quit"'
       working-directory: ./src/Lynx.Cli
 
   divide:
@@ -83,5 +83,5 @@ jobs:
       run: dotnet build -c Release
 
     - name: Run divide ${{ github.event.inputs.depth }} on ${{ github.event.inputs.fen }}
-      run: dotnet run -c Release --no-build "position fen ${{ github.event.inputs.fen }}" "divide ${{ github.event.inputs.depth }}"'
+      run: dotnet run -c Release --no-build "position fen ${{ github.event.inputs.fen }}" "divide ${{ github.event.inputs.depth }}" "quit"'
       working-directory: ./src/Lynx.Cli
