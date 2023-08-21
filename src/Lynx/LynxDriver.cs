@@ -88,6 +88,7 @@ public sealed class LynxDriver
                                 break;
                             case "bench":
                                 await HandleBench();
+                                HandleQuit();
                                 break;
                             default:
                                 _logger.Warn("Unknown command received: {0}", rawCommand);
@@ -298,7 +299,7 @@ public sealed class LynxDriver
     private async ValueTask HandleBench()
     {
         var results = await OpenBench.Bench(_engineWriter);
-        OpenBench.PrintBenchResults(results, Console.WriteLine);
+        await OpenBench.PrintBenchResults(results, str => _engineWriter.Writer.WriteAsync(str));
     }
 
     #endregion
