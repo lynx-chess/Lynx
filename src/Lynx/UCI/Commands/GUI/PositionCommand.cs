@@ -63,6 +63,7 @@ public sealed partial class PositionCommand : GUIBaseCommand
     //    var moveString = positionCommand
     //            .Split(' ', StringSplitOptions.RemoveEmptyEntries)[^1];
 
+
     //    if (!MoveExtensions.TryParseFromUCIString(
     //        moveString,
     //        game.CurrentPosition.AllPossibleMoves(game.MovePool),
@@ -71,6 +72,7 @@ public sealed partial class PositionCommand : GUIBaseCommand
     //        _logger.Warn("Error parsing last move {0} from position command {1}", lastMove, positionCommand);
     //        return false;
     //    }
+
 
     //    return true;
     //}

@@ -391,7 +391,9 @@ public sealed partial class Engine
 
         if (bestMove is null)
         {
+
             return isThereAnyValidCapture || IsThereAnyValidMove()
+
                 ? alpha
                 : Position.EvaluateFinalPosition(ply, position.IsInCheck());
         }
