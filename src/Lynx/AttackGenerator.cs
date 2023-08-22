@@ -72,7 +72,7 @@ public static class AttackGenerator
     /// Returns bishop occupancy masks and attacks
     /// </summary>
     /// <returns>(BitBoard[64], BitBoard[64, 512])</returns>
-    public static (BitBoard[] BishopOccupancyMasks, BitBoard[,] BishopAttacks) InitializeBishopAttacks()
+    public static (BitBoard[] BishopOccupancyMasks, BitBoard[,] BishopAttacks) InitializeBishopAttacksAndOccupancy()
     {
         BitBoard[] occupancyMasks = new BitBoard[64];
         BitBoard[,] attacks = new BitBoard[64, 512];
@@ -99,10 +99,37 @@ public static class AttackGenerator
     }
 
     /// <summary>
+    /// Returns bishop attacks
+    /// </summary>
+    /// <returns>BitBoard[64]</returns>
+    public static BitBoard[,] InitializeBishopAttacks()
+    {
+        BitBoard[,] attacks = new BitBoard[64, 512];
+
+        for (int square = 0; square < 64; ++square)
+        {
+            var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
+
+            int occupancyIndexes = (1 << relevantBitsCount);
+
+            for (int index = 0; index < occupancyIndexes; ++index)
+            {
+                var occupancy = SetBishopOrRookOccupancy(index, Attacks._bishopOccupancyMasks[square]);
+
+                var magicIndex = (occupancy * Constants.BishopMagicNumbers[square]) >> (64 - relevantBitsCount);
+
+                attacks[square, magicIndex] = GenerateBishopAttacksOnTheFly(square, occupancy);
+            }
+        }
+
+        return attacks;
+    }
+
+    /// <summary>
     /// Returns rook occupancy masks and attacks
     /// </summary>
     /// <returns>(BitBoard[64], BitBoard[64, 512])</returns>
-    public static (BitBoard[] RookOccupancyMasks, BitBoard[,] RookAttacks) InitializeRookAttacks()
+    public static (BitBoard[] RookOccupancyMasks, BitBoard[,] RookAttacks) InitializeRookAttacksAndOccupancy()
     {
         BitBoard[] occupancyMasks = new BitBoard[64];
         BitBoard[,] attacks = new BitBoard[64, 4096];
@@ -126,6 +153,33 @@ public static class AttackGenerator
         }
 
         return (occupancyMasks, attacks);
+    }
+
+    /// <summary>
+    /// Returns rook attacks
+    /// </summary>
+    /// <returns>BitBoard[64]</returns>
+    public static BitBoard[,] InitializeRookAttacks()
+    {
+        BitBoard[,] attacks = new BitBoard[64, 4096];
+
+        for (int square = 0; square < 64; ++square)
+        {
+            var relevantBitsCount = Constants.RookRelevantOccupancyBits[square];
+
+            int occupancyIndexes = (1 << relevantBitsCount);
+
+            for (int index = 0; index < occupancyIndexes; ++index)
+            {
+                var occupancy = SetBishopOrRookOccupancy(index, Attacks._rookOccupancyMasks[square]);
+
+                var magicIndex = (occupancy * Constants.RookMagicNumbers[square]) >> (64 - relevantBitsCount);
+
+                attacks[square, magicIndex] = GenerateRookAttacksOnTheFly(square, occupancy);
+            }
+        }
+
+        return attacks;
     }
 
     public static BitBoard MaskPawnAttacks(int squareIndex, bool isWhite)
@@ -747,5 +801,36 @@ public static class AttackGenerator
         }
 
         return attacks;
+    }
+
+    public static void PrintAttacks(BitBoard[] attacks)
+    {
+        //Console.WriteLine($"{{{string.Join(", ", attacks)}}}");
+
+        Console.WriteLine("{");
+        for (var j = 0; j < 64; ++j)
+        {
+            Console.Write(attacks[j]);
+            Console.Write(",");
+            if ((j + 1) % 8 == 0)
+                Console.WriteLine();
+        }
+        Console.WriteLine("}");
+    }
+
+    public static void PrintAttacks(BitBoard[,] pawnAttacks)
+    {
+        for (int i = 0; i < pawnAttacks.Length / 64; ++i)
+        {
+            Console.WriteLine("{");
+            for (var j = 0; j < 64; ++j)
+            {
+                Console.Write(pawnAttacks[i, j]);
+                Console.Write(",");
+                if ((j + 1) % 8 == 0)
+                    Console.WriteLine();
+            }
+            Console.WriteLine("},");
+        }
     }
 }

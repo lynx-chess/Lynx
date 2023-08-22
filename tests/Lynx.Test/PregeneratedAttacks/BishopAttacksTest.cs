@@ -47,7 +47,7 @@ public class BishopAttacksTest
     }
 
     /// <summary>
-    /// Implicitly tests <see cref="AttackGenerator.InitializeBishopAttacks"/> and <see cref="Constants.BishopMagicNumbers"/>
+    /// Implicitly tests <see cref="AttackGenerator.InitializeBishopAttacksAndOccupancy"/> and <see cref="Constants.BishopMagicNumbers"/>
     /// </summary>
     /// <param name="bishopSquare"></param>
     /// <param name="occupiedSquares"></param>

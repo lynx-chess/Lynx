@@ -42,7 +42,7 @@ public class RookAttacksTest
     }
 
     /// <summary>
-    /// Implicitly tests <see cref="AttackGenerator.InitializeRookAttacks"/> and <see cref="Constants.RookMagicNumbers"/>
+    /// Implicitly tests <see cref="AttackGenerator.InitializeRookAttacksAndOccupancy"/> and <see cref="Constants.RookMagicNumbers"/>
     /// </summary>
     /// <param name="rookSquare"></param>
     /// <param name="occupiedSquares"></param>
