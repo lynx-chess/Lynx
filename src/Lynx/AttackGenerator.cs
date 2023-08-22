@@ -808,27 +808,39 @@ public static class AttackGenerator
         //Console.WriteLine($"{{{string.Join(", ", attacks)}}}");
 
         Console.WriteLine("{");
+        Console.Write('\t');
         for (var j = 0; j < 64; ++j)
         {
             Console.Write(attacks[j]);
-            Console.Write(",");
+            if (j != 64 - 1)
+                Console.Write(",");
             if ((j + 1) % 8 == 0)
+            {
                 Console.WriteLine();
+                if (j != 64 - 1)
+                    Console.Write('\t');
+            }
         }
         Console.WriteLine("}");
     }
 
-    public static void PrintAttacks(BitBoard[,] pawnAttacks)
+    public static void PrintAttacks(BitBoard[,] pawnAttacks, int secondDimension)
     {
-        for (int i = 0; i < pawnAttacks.Length / 64; ++i)
+        for (int i = 0; i < pawnAttacks.Length / secondDimension; ++i)
         {
             Console.WriteLine("{");
-            for (var j = 0; j < 64; ++j)
+            Console.Write('\t');
+            for (var j = 0; j < secondDimension; ++j)
             {
                 Console.Write(pawnAttacks[i, j]);
-                Console.Write(",");
+                if (j != secondDimension - 1)
+                    Console.Write(",");
                 if ((j + 1) % 8 == 0)
+                {
                     Console.WriteLine();
+                    if (j != secondDimension - 1)
+                        Console.Write('\t');
+                }
             }
             Console.WriteLine("},");
         }

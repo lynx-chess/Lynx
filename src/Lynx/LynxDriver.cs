@@ -291,7 +291,7 @@ public sealed class LynxDriver
 
         if (items.Length >= 2 && int.TryParse(items[1], out int depth) && depth >= 1)
         {
-            var results = await Perft.Divide(_engine.Game.CurrentPosition, depth, str =>_engineWriter.Writer.WriteAsync(str));
+            var results = await Perft.Divide(_engine.Game.CurrentPosition, depth, str => _engineWriter.Writer.WriteAsync(str));
             await Perft.PrintPerftResult(depth, results, str => _engineWriter.Writer.WriteAsync(str));
         }
     }

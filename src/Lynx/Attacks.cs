@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace Lynx;
 
-public static class Attacks
+public static partial class Attacks
 {
     internal static readonly BitBoard[] _bishopOccupancyMasks =
     {
@@ -28,18 +28,6 @@ public static class Attacks
         35466950888980736,      34905104758997504,      34344362452452352,      33222877839362048,      30979908613181440,      26493970160820224,      17522093256097792,      35607136465616896,
         9079539427579068672,    8935706818303361536,    8792156787827803136,    8505056726876686336,    7930856604974452736,    6782456361169985536,    4485655873561051136,    9115426935197958144,
     };
-
-    /// <summary>
-    /// [64 (Squares), 512 (Occupancies)]
-    /// Use <see cref="BishopAttacks(int, BitBoard)"/>
-    /// </summary>
-    internal static readonly BitBoard[,] _bishopAttacks = AttackGenerator.InitializeBishopAttacks();
-
-    /// <summary>
-    /// [64 (Squares), 4096 (Occupancies)]
-    /// Use <see cref="RookAttacks(int, BitBoard)"/>
-    /// </summary>
-    internal static readonly BitBoard[,] _rookAttacks = AttackGenerator.InitializeRookAttacks();
 
     /// <summary>
     /// [2 (B|W), 64 (Squares)]
