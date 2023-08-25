@@ -9,7 +9,7 @@ public class SearchResult
 {
     public Move BestMove { get; init; }
     public double Evaluation { get; init; }
-    public int TargetDepth { get; set; }
+    public int Depth { get; set; }
     public List<Move> Moves { get; init; }
     public int Alpha { get; init; }
     public int Beta { get; init; }
@@ -31,7 +31,7 @@ public class SearchResult
     {
         BestMove = bestMove;
         Evaluation = evaluation;
-        TargetDepth = targetDepth;
+        Depth = targetDepth;
         Moves = moves;
         Alpha = alpha;
         Beta = beta;
@@ -42,7 +42,7 @@ public class SearchResult
     {
         BestMove = previousSearchResult.Moves.ElementAtOrDefault(2);
         Evaluation = previousSearchResult.Evaluation;
-        TargetDepth = previousSearchResult.TargetDepth - 2;
+        Depth = previousSearchResult.Depth - 2;
         DepthReached = previousSearchResult.DepthReached - 2;
         Moves = previousSearchResult.Moves.Skip(2).ToList();
         Alpha = previousSearchResult.Alpha;

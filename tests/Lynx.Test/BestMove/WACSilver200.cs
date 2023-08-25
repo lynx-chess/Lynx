@@ -44,7 +44,7 @@ public class WACSilver200 : BaseTest
         if (bestMoveArray.Length == 1)
         {
             var expectedMove = bestMoveArray[0].TrimEnd('+');
-            Assert.AreEqual(expectedMove, bestResult.BestMove.ToEPDString(), $"id {id} depth {bestResult.TargetDepth} seldepth {bestResult.TargetDepth} nodes {bestResult.Nodes}");
+            Assert.AreEqual(expectedMove, bestResult.BestMove.ToEPDString(), $"id {id} depth {bestResult.Depth} seldepth {bestResult.Depth} nodes {bestResult.Nodes}");
         }
         else if (bestMoveArray.Length == 2)
         {
@@ -53,7 +53,7 @@ public class WACSilver200 : BaseTest
                 bestMoveArray[0].TrimEnd('+') == bestResultGot
                 || bestMoveArray[1].TrimEnd('+') == bestResultGot
                 , $"id {id} Expected {bestMove} but got {bestResultGot} " +
-                $"depth {bestResult.TargetDepth} seldepth {bestResult.TargetDepth} nodes {bestResult.Nodes}");
+                $"depth {bestResult.Depth} seldepth {bestResult.Depth} nodes {bestResult.Nodes}");
         }
         else
         {

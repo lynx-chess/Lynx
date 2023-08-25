@@ -79,7 +79,7 @@ public sealed class InfoCommand : EngineBaseCommand
     {
 #pragma warning disable RCS1214 // Unnecessary interpolated string.
         return Id +
-            $" depth {searchResult.TargetDepth}" +
+            $" depth {searchResult.Depth}" +
             $" seldepth {searchResult.DepthReached}" +
             $" multipv 1" +
             $" score {(searchResult.Mate == default ? $"cp {searchResult.Evaluation}" : $"mate {searchResult.Mate}")}" +

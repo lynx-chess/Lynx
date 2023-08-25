@@ -145,7 +145,7 @@ public sealed partial class Engine
             Game.MakeMove(resultToReturn.BestMove);
         }
 
-        AverageDepth += (resultToReturn.TargetDepth - AverageDepth) / Math.Ceiling(0.5 * Game.MoveHistory.Count);
+        AverageDepth += (resultToReturn.Depth - AverageDepth) / Math.Ceiling(0.5 * Game.MoveHistory.Count);
 
         return resultToReturn;
     }
@@ -173,7 +173,7 @@ public sealed partial class Engine
         if (searchResult is not null)
         {
             _logger.Info("Search evaluation result - eval: {0}, mate: {1}, depth: {2}, pv: {3}",
-                searchResult.Evaluation, searchResult.Mate, searchResult.TargetDepth, string.Join(", ", searchResult.Moves.Select(m => m.ToMoveString())));
+                searchResult.Evaluation, searchResult.Mate, searchResult.Depth, string.Join(", ", searchResult.Moves.Select(m => m.ToMoveString())));
         }
 
         if (tbResult is not null)
@@ -184,7 +184,7 @@ public sealed partial class Engine
             if (searchResult?.Mate > 0 && searchResult.Mate <= tbResult.Mate && searchResult.Mate + currentHalfMovesWithoutCaptureOrPawnMove < 96)
             {
                 _logger.Info("Relying on search result mate line due to dtm match and low enough dtz");
-                ++searchResult.TargetDepth;
+                ++searchResult.Depth;
                 tbResult = null;
             }
         }

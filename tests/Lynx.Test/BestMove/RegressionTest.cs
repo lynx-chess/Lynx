@@ -283,7 +283,7 @@ public class RegressionTest : BaseTest
         var engine = GetEngine(fen);
 
         var bestMove = await engine.BestMove(new GoCommand($"go depth {depthWhenMaxDepthInQuiescenceIsReached}"));
-        Assert.AreEqual(depthWhenMaxDepthInQuiescenceIsReached, bestMove.TargetDepth);
+        Assert.AreEqual(depthWhenMaxDepthInQuiescenceIsReached, bestMove.Depth);
     }
 
     [Explicit]
