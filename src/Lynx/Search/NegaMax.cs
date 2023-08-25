@@ -65,7 +65,7 @@ public sealed partial class Engine
         {
             if (MoveGenerator.CanGenerateAtLeastAValidMove(position))
             {
-                return QuiescenceSearch(ply, alpha, beta);  // realPly + 1?
+                return QuiescenceSearch(ply, alpha, beta);
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
@@ -73,7 +73,7 @@ public sealed partial class Engine
             return finalPositionEvaluation;
         }
 
-        // 🔍 Null-move pruning
+        // 🔍 Verified Null-move pruning (NMP) - https://www.researchgate.net/publication/297377298_Verified_Null-Move_Pruning
         bool isFailHigh = false;    // In order to detect zugzwangs
         if (ply > Configuration.EngineSettings.NullMovePruning_R    // TODO Use depth
             && !isInCheck
