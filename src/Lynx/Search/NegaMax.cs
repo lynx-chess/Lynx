@@ -151,7 +151,7 @@ public sealed partial class Engine
             {
                 // 🔍 Late Move Reduction (LMR)
                 if (movesSearched >= Configuration.EngineSettings.LMR_FullDepthMoves
-                    && ply >= Configuration.EngineSettings.LMR_ReductionLimit       // TODO depth? - https://www.chessprogramming.org/Late_Move_Reductions
+                    && depth >= Configuration.EngineSettings.LMR_ReductionLimit
                     && !pvNode
                     && !isInCheck
                     //&& !newPosition.IsInCheck()
