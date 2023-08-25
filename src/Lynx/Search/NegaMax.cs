@@ -75,11 +75,11 @@ public sealed partial class Engine
 
         // 🔍 Verified Null-move pruning (NMP) - https://www.researchgate.net/publication/297377298_Verified_Null-Move_Pruning
         bool isFailHigh = false;    // In order to detect zugzwangs
-        if (ply > Configuration.EngineSettings.NullMovePruning_R    // TODO Use depth
+        if (depth > Configuration.EngineSettings.NullMovePruning_R
             && !isInCheck
             && !ancestorWasNullMove
-            && (!isVerifyingNullMoveCutOff || depth > 1))    // verify == true and ply == targetDepth -1 -> No null pruning, since verification will not be possible)
-                                                                         // following pv?
+            /*&& (!isVerifyingNullMoveCutOff || depth > 1)*/)    // verify == true and ply == targetDepth -1 -> No null pruning, since verification will not be possible)
+                                                             // following pv?
         {
             var gameState = position.MakeNullMove();
 
