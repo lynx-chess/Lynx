@@ -104,7 +104,7 @@ public static class TranspositionTableExtensions
     /// <param name="beta"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static (int Evaluation, Move BestMove) ProbeHash(this TranspositionTable tt, int ttMask, Position position, int targetDepth, int ply, int alpha, int beta)
+    public static (int Evaluation, Move BestMove) ProbeHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int alpha, int beta)
     {
         if (!Configuration.EngineSettings.TranspositionTableEnabled)
         {
@@ -120,7 +120,7 @@ public static class TranspositionTableExtensions
 
         var eval = EvaluationConstants.NoHashEntry;
 
-        if (entry.Depth >= (targetDepth - ply))
+        if (entry.Depth >= depth)
         {
             // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
             // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
@@ -149,7 +149,7 @@ public static class TranspositionTableExtensions
     /// <param name="nodeType"></param>
     /// <param name="move"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void RecordHash(this TranspositionTable tt, int ttMask, Position position, int targetDepth, int ply, int eval, NodeType nodeType, Move? move = 0)
+    public static void RecordHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int eval, NodeType nodeType, Move? move = 0)
     {
         if (!Configuration.EngineSettings.TranspositionTableEnabled)
         {
@@ -169,7 +169,7 @@ public static class TranspositionTableExtensions
 
         entry.Key = position.UniqueIdentifier;
         entry.Score = score;
-        entry.Depth = targetDepth - ply;
+        entry.Depth = depth;
         entry.Move = move ?? 0;
         entry.Type = nodeType;
     }
@@ -180,14 +180,14 @@ public static class TranspositionTableExtensions
     /// Logic for when to pass +depth or -depth for the desired effect in https://www.talkchess.com/forum3/viewtopic.php?f=7&t=74411 and https://talkchess.com/forum3/viewtopic.php?p=861852#p861852
     /// </summary>
     /// <param name="score"></param>
-    /// <param name="depth"></param>
+    /// <param name="ply"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static int RecalculateMateScores(int score, int depth) => score +
+    internal static int RecalculateMateScores(int score, int ply) => score +
             score switch
             {
-                > EvaluationConstants.PositiveCheckmateDetectionLimit => -EvaluationConstants.CheckmateDepthFactor * depth,
-                < EvaluationConstants.NegativeCheckmateDetectionLimit => EvaluationConstants.CheckmateDepthFactor * depth,
+                > EvaluationConstants.PositiveCheckmateDetectionLimit => -EvaluationConstants.CheckmateDepthFactor * ply,
+                < EvaluationConstants.NegativeCheckmateDetectionLimit => EvaluationConstants.CheckmateDepthFactor * ply,
                 _ => 0
             };
 

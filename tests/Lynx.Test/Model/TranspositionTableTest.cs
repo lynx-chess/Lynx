@@ -86,9 +86,9 @@ public class TranspositionTableTests
         var (mask, length) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
         var transpositionTable = new TranspositionTableElement[length];
 
-        transpositionTable.RecordHash(mask, position, targetDepth: 5, ply: 3, eval: recordedEval, nodeType: recordNodeType, move: 1234);
+        transpositionTable.RecordHash(mask, position, depth: 5, ply: 3, eval: recordedEval, nodeType: recordNodeType, move: 1234);
 
-        Assert.AreEqual(expectedProbeEval, transpositionTable.ProbeHash(mask, position, targetDepth: 5, ply: 3, alpha: probeAlpha, beta: probeBeta).Evaluation);
+        Assert.AreEqual(expectedProbeEval, transpositionTable.ProbeHash(mask, position, depth: 5, ply: 3, alpha: probeAlpha, beta: probeBeta).Evaluation);
     }
 
     [TestCase(CheckMateBaseEvaluation - 8 * CheckmateDepthFactor)]
@@ -100,9 +100,9 @@ public class TranspositionTableTests
         var (mask, length) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
         var transpositionTable = new TranspositionTableElement[length];
 
-        transpositionTable.RecordHash(mask, position, targetDepth: 10, ply: sharedDepth, eval: recordedEval, nodeType: NodeType.Exact, move: 1234);
+        transpositionTable.RecordHash(mask, position, depth: 10, ply: sharedDepth, eval: recordedEval, nodeType: NodeType.Exact, move: 1234);
 
-        Assert.AreEqual(recordedEval, transpositionTable.ProbeHash(mask, position, targetDepth: 7, ply: sharedDepth, alpha: 50, beta: 100).Evaluation);
+        Assert.AreEqual(recordedEval, transpositionTable.ProbeHash(mask, position, depth: 7, ply: sharedDepth, alpha: 50, beta: 100).Evaluation);
     }
 
     [TestCase(CheckMateBaseEvaluation - 8 * CheckmateDepthFactor, 5, 4, CheckMateBaseEvaluation - 7 * CheckmateDepthFactor)]
@@ -115,8 +115,8 @@ public class TranspositionTableTests
         var (mask, length) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
         var transpositionTable = new TranspositionTableElement[length];
 
-        transpositionTable.RecordHash(mask, position, targetDepth: 10, ply: recordedDeph, eval: recordedEval, nodeType: NodeType.Exact, move: 1234);
+        transpositionTable.RecordHash(mask, position, depth: 10, ply: recordedDeph, eval: recordedEval, nodeType: NodeType.Exact, move: 1234);
 
-        Assert.AreEqual(expectedProbeEval, transpositionTable.ProbeHash(mask, position, targetDepth: 7, ply: probeDepth, alpha: 50, beta: 100).Evaluation);
+        Assert.AreEqual(expectedProbeEval, transpositionTable.ProbeHash(mask, position, depth: 7, ply: probeDepth, alpha: 50, beta: 100).Evaluation);
     }
 }

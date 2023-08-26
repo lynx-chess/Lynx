@@ -70,7 +70,7 @@ public sealed partial class Engine
                 _killerMoves[1, d] = _previousKillerMoves[1, d + 2];
             }
 
-            depth = lastSearchResult.TargetDepth + 1;
+            depth = lastSearchResult.Depth - 1;
             alpha = lastSearchResult.Alpha;
             beta = lastSearchResult.Beta;
         }
@@ -97,7 +97,7 @@ public sealed partial class Engine
                 AspirationWindows_SearchAgain:
 
                 _isFollowingPV = true;
-                bestEvaluation = NegaMax(minDepth, targetDepth: depth, ply: 0, alpha, beta, isVerifyingNullMoveCutOff: true);
+                bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta, isVerifyingNullMoveCutOff: true); ;
 
                 var bestEvaluationAbs = Math.Abs(bestEvaluation);
                 isMateDetected = bestEvaluationAbs > EvaluationConstants.PositiveCheckmateDetectionLimit;
