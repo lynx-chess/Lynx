@@ -1,3 +1,4 @@
+using NLog;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -6,6 +7,8 @@ namespace Lynx.Model;
 
 public class Position
 {
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
     public string FEN() => CalculateFEN();
 
     public string FEN(int halfMovesWithoutCaptureOrPawnMove) => CalculateFEN(halfMovesWithoutCaptureOrPawnMove);
@@ -597,58 +600,6 @@ public class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int StaticEvaluation(int movesWithoutCaptureOrPawnMove, CancellationToken cancellationToken = default)
     {
-        var eval = 0;
-
-        int whiteMaterialEval = 0, blackMaterialEval = 0;
-        var pieceCount = new int[PieceBitBoards.Length];
-
-        bool IsEndgameForWhite() => pieceCount[(int)Piece.q] == 0;
-        bool IsEndgameForBlack() => pieceCount[(int)Piece.Q] == 0;
-
-        for (int pieceIndex = 0; pieceIndex < Constants.SideLimit - 1; ++pieceIndex)
-        {
-            // Bitboard copy that we 'empty'
-            var bitboard = PieceBitBoards[pieceIndex];
-
-            while (bitboard != default)
-            {
-                var pieceSquareIndex = bitboard.GetLS1BIndex();
-                bitboard.ResetLS1B();
-
-                ++pieceCount[pieceIndex];
-
-                // Material evaluation
-                whiteMaterialEval += EvaluationConstants.MaterialScore[pieceIndex];
-
-                // Positional evaluation
-                eval += EvaluationConstants.PositionalScore[pieceIndex][pieceSquareIndex];
-
-                eval += CustomPieceEvaluation(pieceSquareIndex, pieceIndex);
-            }
-        }
-
-        for (int pieceIndex = Constants.SideLimit; pieceIndex < PieceBitBoards.Length - 1; ++pieceIndex)
-        {
-            // Bitboard copy that we 'empty'
-            var bitboard = PieceBitBoards[pieceIndex];
-
-            while (bitboard != default)
-            {
-                var pieceSquareIndex = bitboard.GetLS1BIndex();
-                bitboard.ResetLS1B();
-
-                ++pieceCount[pieceIndex];
-
-                // Material evaluation
-                blackMaterialEval += EvaluationConstants.MaterialScore[pieceIndex];
-
-                // Positional evaluation
-                eval += EvaluationConstants.PositionalScore[pieceIndex][pieceSquareIndex];
-
-                eval -= CustomPieceEvaluation(pieceSquareIndex, pieceIndex);
-            }
-        }
-
         var result = OnlineTablebaseProber.EvaluationSearch(this, movesWithoutCaptureOrPawnMove, cancellationToken);
         Debug.Assert(result < EvaluationConstants.CheckMateBaseEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
         Debug.Assert(result > -EvaluationConstants.CheckMateBaseEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
@@ -658,45 +609,72 @@ public class Position
             return result;
         }
 
-        //++pieceCount[Constants.WhiteKingIndex];
-        var whiteKing = PieceBitBoards[(int)Piece.K].GetLS1BIndex();
-        eval += IsEndgameForWhite()
-            ? EvaluationConstants.EndgamePositionalScore[(int)Piece.K][whiteKing]
-            : EvaluationConstants.PositionalScore[(int)Piece.K][whiteKing];
-        eval += KingEvaluation(whiteKing, Side.White, pieceCount);
+        var pieceCount = new int[PieceBitBoards.Length];
 
-        //++pieceCount[Constants.BlackKingIndex];
-        var blackKing = PieceBitBoards[(int)Piece.k].GetLS1BIndex();
-        eval += IsEndgameForBlack()
-            ? EvaluationConstants.EndgamePositionalScore[(int)Piece.k][blackKing]
-            : EvaluationConstants.PositionalScore[(int)Piece.k][blackKing];
-        eval -= KingEvaluation(blackKing, Side.Black, pieceCount);
+        int middleGameScore = 0;
+        int endGameScore = 0;
+        int gamePhase = 0;
 
-        eval += whiteMaterialEval + blackMaterialEval;
+        for (int pieceIndex = (int)Piece.P; pieceIndex < (int)Piece.k; ++pieceIndex)
+        {
+            // Bitboard copy that we 'empty'
+            var bitboard = PieceBitBoards[pieceIndex];
+
+            while (bitboard != default)
+            {
+                var pieceSquareIndex = bitboard.GetLS1BIndex();
+                bitboard.ResetLS1B();
+
+                middleGameScore += EvaluationConstants.MiddleGameTable[pieceIndex, pieceSquareIndex];
+                endGameScore += EvaluationConstants.EndGameTable[pieceIndex, pieceSquareIndex];
+                gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
+
+                ++pieceCount[pieceIndex];
+
+                //eval += CustomPieceEvaluation(pieceSquareIndex, pieceIndex);
+
+                //If black
+                //eval -= CustomPieceEvaluation(pieceSquareIndex, pieceIndex);
+            }
+        }
 
         // Check if drawn position due to lack of material
-        if (eval >= 0)
+        if (endGameScore >= 0)
         {
-            bool whiteCannotWin = pieceCount[(int)Piece.P] == 0
-                && (whiteMaterialEval <= EvaluationConstants.MaterialScore[(int)Piece.B]            // B or N
-                    || whiteMaterialEval == 2 * EvaluationConstants.MaterialScore[(int)Piece.N]);   // N+N
+            bool whiteCannotWin =
+                pieceCount[(int)Piece.P] == 0 && pieceCount[(int)Piece.Q] == 0 && pieceCount[(int)Piece.R] == 0
+                && (pieceCount[(int)Piece.B] + pieceCount[(int)Piece.N] == 1                // B or N
+                    || (pieceCount[(int)Piece.B] == 0 && pieceCount[(int)Piece.N] == 2));   // N+N
 
             if (whiteCannotWin)
             {
-                eval = 0;
+                return 0;
             }
         }
         else
         {
-            bool blackCannotWin = pieceCount[(int)Piece.p] == 0
-                && (blackMaterialEval >= EvaluationConstants.MaterialScore[(int)Piece.b]            // b or n
-                    || blackMaterialEval == 2 * EvaluationConstants.MaterialScore[(int)Piece.n]);   // n+n
+            bool blackCannotWin =
+                pieceCount[(int)Piece.p] == 0 && pieceCount[(int)Piece.q] == 0 && pieceCount[(int)Piece.r] == 0
+                && (pieceCount[(int)Piece.b] + pieceCount[(int)Piece.n] == 1                // B or N
+                    || (pieceCount[(int)Piece.n] == 0 && pieceCount[(int)Piece.n] == 2));   // N+N
 
             if (blackCannotWin)
             {
-                eval = 0;
+                return 0;
             }
         }
+
+        const int maxPhase = 24;
+
+        if (gamePhase > maxPhase)    // Early promotion
+        {
+            gamePhase = maxPhase;
+        }
+
+        int endGamePhase = maxPhase - gamePhase;
+        //_logger.Trace("Phase: {0}/24", gamePhase);
+
+        var eval = ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / 24;
 
         return Side == Side.White
             ? eval
