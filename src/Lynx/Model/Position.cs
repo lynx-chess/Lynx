@@ -613,6 +613,7 @@ public class Position
         int middleGameScore = 0;
         int endGameScore = 0;
         int gamePhase = 0;
+        int eval = 0;
 
         for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.K; ++pieceIndex)
         {
@@ -690,7 +691,7 @@ public class Position
         int endGamePhase = maxPhase - gamePhase;
         //_logger.Trace("Phase: {0}/24", gamePhase);
 
-        var eval = ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / 24;
+        eval += ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / 24;
 
         return Side == Side.White
             ? eval
