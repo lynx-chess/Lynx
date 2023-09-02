@@ -1,13 +1,8 @@
-using NLog;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Text;
-
 namespace Lynx.Model;
 
 public class Position
 {
-    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+    //private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public string FEN() => CalculateFEN();
 
@@ -615,7 +610,7 @@ public class Position
         int endGameScore = 0;
         int gamePhase = 0;
 
-        for (int pieceIndex = (int)Piece.P; pieceIndex < (int)Piece.k; ++pieceIndex)
+        for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.K; ++pieceIndex)
         {
             // Bitboard copy that we 'empty'
             var bitboard = PieceBitBoards[pieceIndex];
@@ -631,10 +626,27 @@ public class Position
 
                 ++pieceCount[pieceIndex];
 
-                //eval += CustomPieceEvaluation(pieceSquareIndex, pieceIndex);
+                eval += CustomPieceEvaluation(pieceSquareIndex, pieceIndex);
+            }
+        }
 
-                //If black
-                //eval -= CustomPieceEvaluation(pieceSquareIndex, pieceIndex);
+        for (int pieceIndex = (int)Piece.p; pieceIndex <= (int)Piece.k; ++pieceIndex)
+        {
+            // Bitboard copy that we 'empty'
+            var bitboard = PieceBitBoards[pieceIndex];
+
+            while (bitboard != default)
+            {
+                var pieceSquareIndex = bitboard.GetLS1BIndex();
+                bitboard.ResetLS1B();
+
+                middleGameScore += EvaluationConstants.MiddleGameTable[pieceIndex, pieceSquareIndex];
+                endGameScore += EvaluationConstants.EndGameTable[pieceIndex, pieceSquareIndex];
+                gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
+
+                ++pieceCount[pieceIndex];
+
+                eval -= CustomPieceEvaluation(pieceSquareIndex, pieceIndex);
             }
         }
 
