@@ -368,3 +368,9 @@ global.json
 infer-out/
 
 tmp/
+
+# Backup files
+*.bak
+
+# Zip files
+*.zip
