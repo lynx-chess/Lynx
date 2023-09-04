@@ -24,7 +24,7 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Inject slug/short variables
       uses: rlespinasse/github-slug-action@v3.x
@@ -62,7 +62,7 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Inject slug/short variables
       uses: rlespinasse/github-slug-action@v3.x
@@ -125,7 +125,7 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Inject slug/short variables
       uses: rlespinasse/github-slug-action@v3.x
@@ -183,7 +183,7 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
@@ -216,7 +216,7 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
@@ -249,7 +249,7 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
@@ -281,7 +281,7 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
@@ -367,7 +367,7 @@ jobs:
   #    PROJECT_NAME: Lynx
 
   #  steps:
-  #  - uses: actions/checkout@v3
+  #  - uses: actions/checkout@v4
 
   #  - name: Setup .NET
   #    uses: actions/setup-dotnet@v3
