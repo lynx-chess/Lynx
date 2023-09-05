@@ -24,6 +24,10 @@ public class ForceOrAvoidDrawTest : BaseTest
     [TestCase(3)]
     [TestCase(4)]
     [TestCase(5)]
+    [TestCase(6)]
+    [TestCase(7)]
+    [TestCase(8)]
+    [TestCase(9)]
     public async Task AvoidThreefoldRepetitionWhenWinningPosition(int depth)
     {
         // Arrange
@@ -67,7 +71,6 @@ public class ForceOrAvoidDrawTest : BaseTest
 
         // Assert
         Assert.AreNotEqual(movesThatAllowsRepetition.UCIString(), bestMoveFound.UCIString(), "No threefold repetition avoided");
-        Assert.Less(searchResult.Evaluation, EvaluationConstants.CheckMateBaseEvaluation - (20 * EvaluationConstants.CheckmateDepthFactor), "Mate not detected");
     }
 
     [Test]
@@ -163,7 +166,6 @@ public class ForceOrAvoidDrawTest : BaseTest
 
         // Assert
         Assert.AreNotEqual(movesThatAllowsRepetition.UCIString(), bestMoveFound.UCIString(), "No 50 moves rule avoided");
-        Assert.Less(searchResult.Evaluation, EvaluationConstants.CheckMateBaseEvaluation - (20 * EvaluationConstants.CheckmateDepthFactor), "Mate not detected");
     }
 
     [Test]

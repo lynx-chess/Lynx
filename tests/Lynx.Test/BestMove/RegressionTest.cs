@@ -227,9 +227,11 @@ public class RegressionTest : BaseTest
     {
         var engine = GetEngine();
         engine.AdjustPosition(positionCommand);
-
+        Assert.False(engine.Game.Is50MovesRepetition());
         var bestMove = await engine.BestMove(new GoCommand("go depth 1"));
-        Assert.NotZero(bestMove.Evaluation);
+
+        engine.AdjustPosition(positionCommand + " " + bestMove.BestMove.ToEPDString());
+        Assert.IsFalse(engine.Game.Is50MovesRepetition());
     }
 
     // 8/2Q4p/4pppk/4P3/8/7P/q4PK1/1q6 w - - 0 1 - || PV Qc7 Kh6 e5 b1=Q Qxb1 Qxb1 exf6, with b1=Q as the first invalid move there
