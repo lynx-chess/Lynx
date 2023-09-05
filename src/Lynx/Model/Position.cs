@@ -673,7 +673,7 @@ public class Position
             bool blackCannotWin =
                 pieceCount[(int)Piece.p] == 0 && pieceCount[(int)Piece.q] == 0 && pieceCount[(int)Piece.r] == 0
                 && (pieceCount[(int)Piece.b] + pieceCount[(int)Piece.n] == 1                // B or N
-                    || (pieceCount[(int)Piece.n] == 0 && pieceCount[(int)Piece.n] == 2));   // N+N
+                    || (pieceCount[(int)Piece.b] == 0 && pieceCount[(int)Piece.n] == 2));   // N+N
 
             if (blackCannotWin)
             {
