@@ -404,7 +404,7 @@ public class PositionTest
         Assert.AreEqual(
             4 * Configuration.EngineSettings.DoubledPawnPenalty
             - Configuration.EngineSettings.IsolatedPawnPenalty
-            + EvaluationConstants.PositionalScore[piece][(int)square] * (position.Side == Side.White ? 1 : -1)
+            + EvaluationConstants.EndGamePositionalTables[piece][(int)square] * (position.Side == Side.White ? 1 : -1)
         + Configuration.EngineSettings.PassedPawnBonus[rank], evaluation);
     }
 

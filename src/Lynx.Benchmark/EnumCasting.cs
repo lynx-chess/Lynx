@@ -35,12 +35,12 @@ public class EnumCasting : BaseBenchmark
         var sum = 0;
         for (int i = 0; i < iterations; ++i)
         {
-            sum += EvaluationConstants.MaterialScore[Pawn];
-            sum += EvaluationConstants.MaterialScore[Pawn];
-            sum += EvaluationConstants.MaterialScore[Pawn];
-            sum += EvaluationConstants.MaterialScore[Pawn];
-            sum += EvaluationConstants.MaterialScore[Pawn];
-            sum += EvaluationConstants.MaterialScore[Pawn];
+            sum += EvaluationConstants.MiddleGamePieceValues[Pawn];
+            sum += EvaluationConstants.MiddleGamePieceValues[Pawn];
+            sum += EvaluationConstants.MiddleGamePieceValues[Pawn];
+            sum += EvaluationConstants.MiddleGamePieceValues[Pawn];
+            sum += EvaluationConstants.MiddleGamePieceValues[Pawn];
+            sum += EvaluationConstants.MiddleGamePieceValues[Pawn];
         }
 
         return sum;
@@ -53,12 +53,12 @@ public class EnumCasting : BaseBenchmark
         var sum = 0;
         for (int i = 0; i < iterations; ++i)
         {
-            sum += EvaluationConstants.MaterialScore[(int)Piece.P];
-            sum += EvaluationConstants.MaterialScore[(int)Piece.P];
-            sum += EvaluationConstants.MaterialScore[(int)Piece.P];
-            sum += EvaluationConstants.MaterialScore[(int)Piece.P];
-            sum += EvaluationConstants.MaterialScore[(int)Piece.P];
-            sum += EvaluationConstants.MaterialScore[(int)Piece.P];
+            sum += EvaluationConstants.MiddleGamePieceValues[(int)Piece.P];
+            sum += EvaluationConstants.MiddleGamePieceValues[(int)Piece.P];
+            sum += EvaluationConstants.MiddleGamePieceValues[(int)Piece.P];
+            sum += EvaluationConstants.MiddleGamePieceValues[(int)Piece.P];
+            sum += EvaluationConstants.MiddleGamePieceValues[(int)Piece.P];
+            sum += EvaluationConstants.MiddleGamePieceValues[(int)Piece.P];
         }
 
         return sum;

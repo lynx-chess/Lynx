@@ -9,12 +9,12 @@ public class EvaluationConstantsTest
     /// Shy from 14k
     /// </summary>
     private readonly int _sensibleEvaluation =
-        2 * (MaterialScore[(int)Piece.B] + PositionalScore[(int)Piece.B].Max() + Configuration.EngineSettings.BishopMobilityBonus * 64) +
-        2 * (MaterialScore[(int)Piece.N] + PositionalScore[(int)Piece.N].Max()) +
-        2 * (MaterialScore[(int)Piece.R] + PositionalScore[(int)Piece.R].Max() + Configuration.EngineSettings.OpenFileRookBonus + Configuration.EngineSettings.SemiOpenFileRookBonus) +
-        9 * (MaterialScore[(int)Piece.Q] + PositionalScore[(int)Piece.Q].Max() + Configuration.EngineSettings.QueenMobilityBonus * 64) +
-        Configuration.EngineSettings.KingShieldBonus * 8 +
-        MaterialScore[(int)Piece.Q]; // just in case
+        2 * (Math.Max(MiddleGamePositionalTables[(int)Piece.B].Max(), EndGamePositionalTables[(int)Piece.B].Max()) + Configuration.EngineSettings.BishopMobilityBonus * 64) +
+        2 * (Math.Max(MiddleGamePositionalTables[(int)Piece.N].Max(), EndGamePositionalTables[(int)Piece.N].Max())) +
+        2 * (Math.Max(MiddleGamePositionalTables[(int)Piece.R].Max(), EndGamePositionalTables[(int)Piece.R].Max()) + Configuration.EngineSettings.OpenFileRookBonus + Configuration.EngineSettings.SemiOpenFileRookBonus) +
+        9 * (Math.Max(MiddleGamePositionalTables[(int)Piece.Q].Max(), EndGamePositionalTables[(int)Piece.Q].Max()) + Configuration.EngineSettings.QueenMobilityBonus * 64) +
+        1 * (Math.Max(MiddleGamePositionalTables[(int)Piece.K].Max(), EndGamePositionalTables[(int)Piece.K].Max()) + Configuration.EngineSettings.KingShieldBonus * 8) +
+        MiddleGamePositionalTables[(int)Piece.Q].Max(); // just in case
 
     [TestCase(PositiveCheckmateDetectionLimit)]
     [TestCase(-NegativeCheckmateDetectionLimit)]
