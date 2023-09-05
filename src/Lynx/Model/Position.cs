@@ -591,6 +591,14 @@ public class Position
 
     public int CountPieces() => PieceBitBoards.Sum(b => b.CountBits());
 
+    private static readonly int _maxPhase =
+          (16 * EvaluationConstants.GamePhaseByPiece[(int)Piece.P])
+        + (4 * EvaluationConstants.GamePhaseByPiece[(int)Piece.N])
+        + (4 * EvaluationConstants.GamePhaseByPiece[(int)Piece.B])
+        + (4 * EvaluationConstants.GamePhaseByPiece[(int)Piece.R])
+        + (2 * EvaluationConstants.GamePhaseByPiece[(int)Piece.Q])
+        + (2 * EvaluationConstants.GamePhaseByPiece[(int)Piece.K]);
+
     /// <summary>
     /// Evaluates material and position in a NegaMax style.
     /// That is, positive scores always favour playing <see cref="Side"/>.
@@ -612,7 +620,7 @@ public class Position
 
         int middleGameScore = 0;
         int endGameScore = 0;
-        int gamePhase = 0;
+        int gamePhase = _maxPhase;
         int eval = 0;
 
         for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.K; ++pieceIndex)
@@ -627,7 +635,7 @@ public class Position
 
                 middleGameScore += EvaluationConstants.MiddleGameTable[pieceIndex, pieceSquareIndex];
                 endGameScore += EvaluationConstants.EndGameTable[pieceIndex, pieceSquareIndex];
-                gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
+                gamePhase -= EvaluationConstants.GamePhaseByPiece[pieceIndex];
 
                 ++pieceCount[pieceIndex];
 
@@ -647,7 +655,7 @@ public class Position
 
                 middleGameScore += EvaluationConstants.MiddleGameTable[pieceIndex, pieceSquareIndex];
                 endGameScore += EvaluationConstants.EndGameTable[pieceIndex, pieceSquareIndex];
-                gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
+                gamePhase -= EvaluationConstants.GamePhaseByPiece[pieceIndex];
 
                 ++pieceCount[pieceIndex];
 
@@ -681,17 +689,14 @@ public class Position
             }
         }
 
-        const int maxPhase = 24;
-
-        if (gamePhase > maxPhase)    // Early promotion
+        if (gamePhase < 0)    // Early promotion
         {
-            gamePhase = maxPhase;
+            gamePhase = 0;
         }
 
-        int endGamePhase = maxPhase - gamePhase;
-        //_logger.Trace("Phase: {0}/24", gamePhase);
-
-        eval += ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / 24;
+        // https://www.chessprogramming.org/Tapered_Eval
+        gamePhase = (gamePhase * 256 + (_maxPhase / 2)) / _maxPhase;
+        eval += ((middleGameScore * (256 - gamePhase)) + (endGameScore * gamePhase)) / 256;
 
         return Side == Side.White
             ? eval
