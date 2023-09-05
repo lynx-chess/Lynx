@@ -810,29 +810,25 @@ public class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int KingEvaluation(int squareIndex, Side pieceSide, int[] pieceCount)
+    internal int KingEvaluation(int squareIndex, Side kingSide, int[] pieceCount)
     {
         var bonus = 0;
-        var oppositeSide = Utils.OppositeSide(pieceSide);
-        var opposieSideOffset = Utils.PieceOffset(oppositeSide);
+        var kingSideOffset = Utils.PieceOffset(kingSide);
 
-        bool areThereOppositeSideRooksOrQueens() => pieceCount[(int)Piece.R + opposieSideOffset] + pieceCount[(int)Piece.Q + opposieSideOffset] != default;
-        if (areThereOppositeSideRooksOrQueens())
+        if (pieceCount[(int)Piece.r - kingSideOffset] + pieceCount[(int)Piece.q - kingSideOffset] != default) // areThereOppositeSideRooksOrQueens
         {
-            //bool isOpenFile() => ((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default;
-            //bool isSemiOpenFile() => (PieceBitBoards[(int)Piece.p - opposieSideOffset] & Masks.FileMasks[squareIndex]) == default;
-            if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default)
+            if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default)  // isOpenFile
             {
                 bonus -= Configuration.EngineSettings.OpenFileKingPenalty;
             }
-            else if ((PieceBitBoards[(int)Piece.p - opposieSideOffset] & Masks.FileMasks[squareIndex]) == default)
+            else if ((PieceBitBoards[(int)Piece.P + kingSideOffset] & Masks.FileMasks[squareIndex]) == default) // isSemiOpenFile
             {
                 bonus -= Configuration.EngineSettings.SemiOpenFileKingPenalty;
             }
         }
 
         return bonus + Configuration.EngineSettings.KingShieldBonus *
-            (Attacks.KingAttacks[squareIndex] & OccupancyBitBoards[(int)pieceSide]).CountBits();
+            (Attacks.KingAttacks[squareIndex] & OccupancyBitBoards[(int)kingSide]).CountBits();
     }
 
     /// <summary>
