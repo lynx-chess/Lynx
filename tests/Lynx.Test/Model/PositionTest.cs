@@ -578,8 +578,8 @@ public class PositionTest
     public void StaticEvaluation_SemiOpenFileKingPenalty(string fen)
     {
         Position position = new Position(fen);
-        int evaluation = CustomPieceEvaluation(position, Piece.K)
-            - CustomPieceEvaluation(position, Piece.k);
+        int evaluation = KingPieceEvaluation(position, Piece.K)
+            - KingPieceEvaluation(position, Piece.k);
 
         if (position.Side == Side.Black)
         {
@@ -610,8 +610,8 @@ public class PositionTest
     public void StaticEvaluation_OpenFileKingPenalty(string fen)
     {
         Position position = new Position(fen);
-        int evaluation = CustomPieceEvaluation(position, Piece.K)
-            - CustomPieceEvaluation(position, Piece.k);
+        int evaluation = KingPieceEvaluation(position, Piece.K)
+            - KingPieceEvaluation(position, Piece.k);
 
         if (position.Side == Side.Black)
         {
@@ -643,8 +643,8 @@ public class PositionTest
     public void StaticEvaluation_NoOpenFileKingPenalty(string fen)
     {
         Position position = new Position(fen);
-        int evaluation = CustomPieceEvaluation(position, Piece.K)
-            - CustomPieceEvaluation(position, Piece.k);
+        int evaluation = KingPieceEvaluation(position, Piece.K)
+            - KingPieceEvaluation(position, Piece.k);
 
         if (position.Side == Side.Black)
         {
@@ -676,8 +676,8 @@ public class PositionTest
     public void StaticEvaluation_NoSemiOpenFileKingPenalty(string fen)
     {
         Position position = new Position(fen);
-        int evaluation = CustomPieceEvaluation(position, Piece.K)
-            - CustomPieceEvaluation(position, Piece.k);
+        int evaluation = KingPieceEvaluation(position, Piece.K)
+            - KingPieceEvaluation(position, Piece.k);
 
         if (position.Side == Side.Black)
         {
@@ -730,8 +730,8 @@ public class PositionTest
     public void StaticEvaluation_KingShieldBonus(string fen, int surroundingPieces)
     {
         Position position = new Position(fen);
-        int evaluation = CustomPieceEvaluation(position, Piece.K)
-            - CustomPieceEvaluation(position, Piece.k);
+        int evaluation = KingPieceEvaluation(position, Piece.K)
+            - KingPieceEvaluation(position, Piece.k);
 
         if (position.Side == Side.Black)
         {
@@ -911,20 +911,6 @@ public class PositionTest
 
     private static int CustomPieceEvaluation(Position position, Piece piece)
     {
-        var pieceCount = new int[position.PieceBitBoards.Length];
-        for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.k; ++pieceIndex)
-        {
-            var bitboard = position.PieceBitBoards[pieceIndex];
-
-            while (bitboard != default)
-            {
-                var pieceSquareIndex = bitboard.GetLS1BIndex();
-                bitboard.ResetLS1B();
-
-                ++pieceCount[pieceIndex];
-            }
-        }
-
         var bitBoard = position.PieceBitBoards[(int)piece];
         int eval = 0;
 
@@ -932,9 +918,31 @@ public class PositionTest
         {
             var pieceSquareIndex = bitBoard.GetLS1BIndex();
             bitBoard.ResetLS1B();
-            eval += position.CustomPieceEvaluation(pieceSquareIndex, (int)piece, pieceCount);
+            eval += position.CustomPieceEvaluation(pieceSquareIndex, (int)piece);
         }
 
         return eval;
+    }
+
+    private static int KingPieceEvaluation(Position position, Piece piece)
+    {
+        var pieceCount = new int[position.PieceBitBoards.Length];
+        for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.k; ++pieceIndex)
+        {
+            var bitboard = position.PieceBitBoards[pieceIndex];
+
+            while (bitboard != default)
+            {
+                bitboard.ResetLS1B();
+
+                ++pieceCount[pieceIndex];
+            }
+        }
+
+        var bitBoard = position.PieceBitBoards[(int)piece].GetLS1BIndex();
+
+        return piece == Piece.K
+            ? position.KingEvaluation(bitBoard, Side.White, pieceCount)
+            : position.KingEvaluation(bitBoard, Side.Black, pieceCount);
     }
 }

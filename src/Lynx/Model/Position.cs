@@ -615,7 +615,7 @@ public class Position
         int gamePhase = 0;
         int eval = 0;
 
-        for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.K; ++pieceIndex)
+        for (int pieceIndex = (int)Piece.P; pieceIndex < (int)Piece.K; ++pieceIndex)
         {
             // Bitboard copy that we 'empty'
             var bitboard = PieceBitBoards[pieceIndex];
@@ -635,7 +635,7 @@ public class Position
             }
         }
 
-        for (int pieceIndex = (int)Piece.p; pieceIndex <= (int)Piece.k; ++pieceIndex)
+        for (int pieceIndex = (int)Piece.p; pieceIndex < (int)Piece.k; ++pieceIndex)
         {
             // Bitboard copy that we 'empty'
             var bitboard = PieceBitBoards[pieceIndex];
@@ -654,6 +654,16 @@ public class Position
                 eval -= CustomPieceEvaluation(pieceSquareIndex, pieceIndex);
             }
         }
+
+        var whiteKing = PieceBitBoards[(int)Piece.K].GetLS1BIndex();
+        middleGameScore += EvaluationConstants.MiddleGameTable[(int)Piece.K, whiteKing];
+        endGameScore += EvaluationConstants.EndGameTable[(int)Piece.K, whiteKing];
+        eval += KingEvaluation(whiteKing, Side.White, pieceCount);
+
+        var blackKing = PieceBitBoards[(int)Piece.k].GetLS1BIndex();
+        middleGameScore += EvaluationConstants.MiddleGameTable[(int)Piece.k, blackKing];
+        endGameScore += EvaluationConstants.EndGameTable[(int)Piece.k, blackKing];
+        eval -= KingEvaluation(blackKing, Side.Black, pieceCount);
 
         // Check if drawn position due to lack of material
         if (endGameScore >= 0)
@@ -722,7 +732,7 @@ public class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int CustomPieceEvaluation(int pieceSquareIndex, int pieceIndex)
+    internal int CustomPieceEvaluation(int pieceSquareIndex, int pieceIndex)
     {
         return pieceIndex switch
         {
@@ -800,7 +810,7 @@ public class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int KingEvaluation(int squareIndex, Side pieceSide, int[] pieceCount)
+    internal int KingEvaluation(int squareIndex, Side pieceSide, int[] pieceCount)
     {
         var bonus = 0;
         var oppositeSide = Utils.OppositeSide(pieceSide);
