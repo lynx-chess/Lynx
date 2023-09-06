@@ -1,6 +1,5 @@
 ﻿using Lynx.Model;
 using NUnit.Framework;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Lynx.Test.Model;
 
@@ -208,8 +207,8 @@ public class PositionTest
     public void StaticEvaluation_IsolatedPawnPenalty(string fen)
     {
         Position position = new Position(fen);
-        int evaluation = CustomPieceEvaluation(position, Piece.P)
-            - CustomPieceEvaluation(position, Piece.p);
+        int evaluation = AdditionalPieceEvaluation(position, Piece.P)
+            - AdditionalPieceEvaluation(position, Piece.p);
 
         if (position.Side == Side.Black)
         {
@@ -240,8 +239,8 @@ public class PositionTest
     public void StaticEvaluation_DoublePawnPenalty(string fen)
     {
         Position position = new Position(fen);
-        int evaluation = CustomPieceEvaluation(position, Piece.P)
-            - CustomPieceEvaluation(position, Piece.p);
+        int evaluation = AdditionalPieceEvaluation(position, Piece.P)
+            - AdditionalPieceEvaluation(position, Piece.p);
 
         if (position.Side == Side.Black)
         {
@@ -273,8 +272,8 @@ public class PositionTest
     public void StaticEvaluation_TriplePawnPenalty(string fen)
     {
         Position position = new Position(fen);
-        int evaluation = CustomPieceEvaluation(position, Piece.P)
-            - CustomPieceEvaluation(position, Piece.p);
+        int evaluation = AdditionalPieceEvaluation(position, Piece.P)
+            - AdditionalPieceEvaluation(position, Piece.p);
 
         if (position.Side == Side.Black)
         {
@@ -412,8 +411,8 @@ public class PositionTest
     public void StaticEvaluation_PassedPawnBonus(string fen, BoardSquare square)
     {
         var position = new Position(fen);
-        int evaluation = CustomPieceEvaluation(position, Piece.P)
-            - CustomPieceEvaluation(position, Piece.p);
+        int evaluation = AdditionalPieceEvaluation(position, Piece.P)
+            - AdditionalPieceEvaluation(position, Piece.p);
 
         var rank = Constants.Rank[(int)square];
         if (position.Side == Side.Black)
@@ -451,8 +450,8 @@ public class PositionTest
     public void StaticEvaluation_SemiOpenFileRookBonus(string fen)
     {
         Position position = new Position(fen);
-        int evaluation = CustomPieceEvaluation(position, Piece.R)
-            - CustomPieceEvaluation(position, Piece.r);
+        int evaluation = AdditionalPieceEvaluation(position, Piece.R)
+            - AdditionalPieceEvaluation(position, Piece.r);
 
         if (position.Side == Side.Black)
         {
@@ -483,8 +482,8 @@ public class PositionTest
     public void StaticEvaluation_OpenFileRookBonus(string fen)
     {
         Position position = new Position(fen);
-        int evaluation = CustomPieceEvaluation(position, Piece.R)
-            - CustomPieceEvaluation(position, Piece.r);
+        int evaluation = AdditionalPieceEvaluation(position, Piece.R)
+            - AdditionalPieceEvaluation(position, Piece.r);
 
         if (position.Side == Side.Black)
         {
@@ -514,8 +513,8 @@ public class PositionTest
     public void StaticEvaluation_DoubleSemiOpenFileRookBonus(string fen)
     {
         Position position = new Position(fen);
-        int evaluation = CustomPieceEvaluation(position, Piece.R)
-            - CustomPieceEvaluation(position, Piece.r);
+        int evaluation = AdditionalPieceEvaluation(position, Piece.R)
+            - AdditionalPieceEvaluation(position, Piece.r);
 
         if (position.Side == Side.Black)
         {
@@ -546,8 +545,8 @@ public class PositionTest
     public void StaticEvaluation_DoubleOpenFileRookBonus(string fen)
     {
         Position position = new Position(fen);
-        int evaluation = CustomPieceEvaluation(position, Piece.R)
-            - CustomPieceEvaluation(position, Piece.r);
+        int evaluation = AdditionalPieceEvaluation(position, Piece.R)
+            - AdditionalPieceEvaluation(position, Piece.r);
 
         if (position.Side == Side.Black)
         {
@@ -578,8 +577,8 @@ public class PositionTest
     public void StaticEvaluation_SemiOpenFileKingPenalty(string fen)
     {
         Position position = new Position(fen);
-        int evaluation = KingPieceEvaluation(position, Piece.K)
-            - KingPieceEvaluation(position, Piece.k);
+        int evaluation = AdditionalKingEvaluation(position, Piece.K)
+            - AdditionalKingEvaluation(position, Piece.k);
 
         if (position.Side == Side.Black)
         {
@@ -610,8 +609,8 @@ public class PositionTest
     public void StaticEvaluation_OpenFileKingPenalty(string fen)
     {
         Position position = new Position(fen);
-        int evaluation = KingPieceEvaluation(position, Piece.K)
-            - KingPieceEvaluation(position, Piece.k);
+        int evaluation = AdditionalKingEvaluation(position, Piece.K)
+            - AdditionalKingEvaluation(position, Piece.k);
 
         if (position.Side == Side.Black)
         {
@@ -643,8 +642,8 @@ public class PositionTest
     public void StaticEvaluation_NoOpenFileKingPenalty(string fen)
     {
         Position position = new Position(fen);
-        int evaluation = KingPieceEvaluation(position, Piece.K)
-            - KingPieceEvaluation(position, Piece.k);
+        int evaluation = AdditionalKingEvaluation(position, Piece.K)
+            - AdditionalKingEvaluation(position, Piece.k);
 
         if (position.Side == Side.Black)
         {
@@ -676,8 +675,8 @@ public class PositionTest
     public void StaticEvaluation_NoSemiOpenFileKingPenalty(string fen)
     {
         Position position = new Position(fen);
-        int evaluation = KingPieceEvaluation(position, Piece.K)
-            - KingPieceEvaluation(position, Piece.k);
+        int evaluation = AdditionalKingEvaluation(position, Piece.K)
+            - AdditionalKingEvaluation(position, Piece.k);
 
         if (position.Side == Side.Black)
         {
@@ -730,8 +729,8 @@ public class PositionTest
     public void StaticEvaluation_KingShieldBonus(string fen, int surroundingPieces)
     {
         Position position = new Position(fen);
-        int evaluation = KingPieceEvaluation(position, Piece.K)
-            - KingPieceEvaluation(position, Piece.k);
+        int evaluation = AdditionalKingEvaluation(position, Piece.K)
+            - AdditionalKingEvaluation(position, Piece.k);
 
         if (position.Side == Side.Black)
         {
@@ -784,8 +783,8 @@ public class PositionTest
     public void StaticEvaluation_BishopMobility(string fen, int mobilityDifference)
     {
         Position position = new Position(fen);
-        int evaluation = CustomPieceEvaluation(position, Piece.B)
-            - CustomPieceEvaluation(position, Piece.b);
+        int evaluation = AdditionalPieceEvaluation(position, Piece.B)
+            - AdditionalPieceEvaluation(position, Piece.b);
 
         if (position.Side == Side.Black)
         {
@@ -898,8 +897,8 @@ public class PositionTest
     public void StaticEvaluation_QueenMobility(string fen, int mobilityDifference)
     {
         Position position = new Position(fen);
-        int evaluation = CustomPieceEvaluation(position, Piece.Q)
-            - CustomPieceEvaluation(position, Piece.q);
+        int evaluation = AdditionalPieceEvaluation(position, Piece.Q)
+            - AdditionalPieceEvaluation(position, Piece.q);
 
         if (position.Side == Side.Black)
         {
@@ -909,7 +908,7 @@ public class PositionTest
         Assert.AreEqual(mobilityDifference * Configuration.EngineSettings.QueenMobilityBonus, evaluation);
     }
 
-    private static int CustomPieceEvaluation(Position position, Piece piece)
+    private static int AdditionalPieceEvaluation(Position position, Piece piece)
     {
         var bitBoard = position.PieceBitBoards[(int)piece];
         int eval = 0;
@@ -918,13 +917,13 @@ public class PositionTest
         {
             var pieceSquareIndex = bitBoard.GetLS1BIndex();
             bitBoard.ResetLS1B();
-            eval += position.CustomPieceEvaluation(pieceSquareIndex, (int)piece);
+            eval += position.AdditionalPieceEvaluation(pieceSquareIndex, (int)piece);
         }
 
         return eval;
     }
 
-    private static int KingPieceEvaluation(Position position, Piece piece)
+    private static int AdditionalKingEvaluation(Position position, Piece piece)
     {
         var pieceCount = new int[position.PieceBitBoards.Length];
         for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.k; ++pieceIndex)
@@ -942,7 +941,7 @@ public class PositionTest
         var bitBoard = position.PieceBitBoards[(int)piece].GetLS1BIndex();
 
         return piece == Piece.K
-            ? position.KingEvaluation(bitBoard, Side.White, pieceCount)
-            : position.KingEvaluation(bitBoard, Side.Black, pieceCount);
+            ? position.KingAdditionalEvaluation(bitBoard, Side.White, pieceCount)
+            : position.KingAdditionalEvaluation(bitBoard, Side.Black, pieceCount);
     }
 }
