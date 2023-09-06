@@ -203,7 +203,7 @@ public sealed partial class Engine
             PrintMove(ply, move, evaluation);
 
             // 🔍 Reverse FutilityPrunning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
-            if (!pvNode && !isInCheck && depth <= Configuration.EngineSettings.ReverseFPMinDepth && evaluation - Configuration.EngineSettings.ReverseFPDepthScalingFactor * depth >= beta)
+            if (!pvNode && !isInCheck && depth <= Configuration.EngineSettings.ReverseFPMaxDepth && evaluation - (Configuration.EngineSettings.ReverseFPDepthScalingFactor * depth) >= beta)
             {
                 return evaluation;
             }
