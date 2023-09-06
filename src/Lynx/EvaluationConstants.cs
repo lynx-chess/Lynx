@@ -3,7 +3,6 @@
 */
 
 using Lynx.Model;
-using static Lynx.Model.BoardSquare;
 
 namespace Lynx;
 
@@ -171,174 +170,23 @@ public static class EvaluationConstants
         -53, -34, -21, -11, -28, -14, -24, -43
     };
 
-    private static readonly int[] _mirrorScore = new int[64]
-    {
-        (int)a1, (int)b1, (int)c1, (int)d1, (int)e1, (int)f1, (int)g1, (int)h1,
-        (int)a2, (int)b2, (int)c2, (int)d2, (int)e2, (int)f2, (int)g2, (int)h2,
-        (int)a3, (int)b3, (int)c3, (int)d3, (int)e3, (int)f3, (int)g3, (int)h3,
-        (int)a4, (int)b4, (int)c4, (int)d4, (int)e4, (int)f4, (int)g4, (int)h4,
-        (int)a5, (int)b5, (int)c5, (int)d5, (int)e5, (int)f5, (int)g5, (int)h5,
-        (int)a6, (int)b6, (int)c6, (int)d6, (int)e6, (int)f6, (int)g6, (int)h6,
-        (int)a7, (int)b7, (int)c7, (int)d7, (int)e7, (int)f7, (int)g7, (int)h7,
-        (int)a8, (int)b8, (int)c8, (int)d8, (int)e8, (int)f8, (int)g8, (int)h8
-    };
+    public static readonly int[] MiddleGamePawnTableBlack = MiddleGamePawnTable.Select((_, index) => -MiddleGamePawnTable[index ^ 56]).ToArray();
+    public static readonly int[] EndGamePawnTableBlack = EndGamePawnTable.Select((_, index) => -EndGamePawnTable[index ^ 56]).ToArray();
 
-    private static int MPS(BoardSquare square) => -MiddleGamePawnTable[_mirrorScore[(int)square]];
-    private static int EPS(BoardSquare square) => -EndGamePawnTable[_mirrorScore[(int)square]];
-    private static int MNS(BoardSquare square) => -MiddleGameKnightTable[_mirrorScore[(int)square]];
-    private static int ENS(BoardSquare square) => -EndGameKnightTable[_mirrorScore[(int)square]];
-    private static int MBS(BoardSquare square) => -MiddleGameBishopTable[_mirrorScore[(int)square]];
-    private static int EBS(BoardSquare square) => -EndGameBishopTable[_mirrorScore[(int)square]];
-    private static int MRS(BoardSquare square) => -MiddleGameRookTable[_mirrorScore[(int)square]];
-    private static int ERS(BoardSquare square) => -EndGameRookTable[_mirrorScore[(int)square]];
-    private static int MQS(BoardSquare square) => -MiddleGameQueenTable[_mirrorScore[(int)square]];
-    private static int EQS(BoardSquare square) => -EndGameQueenTable[_mirrorScore[(int)square]];
-    private static int MKS(BoardSquare square) => -MiddleGameKingTable[_mirrorScore[(int)square]];
-    private static int EKS(BoardSquare square) => -EndGameKingTable[_mirrorScore[(int)square]];
+    public static readonly int[] MiddleGameKnightTableBlack = MiddleGameKnightTable.Select((_, index) => -MiddleGameKnightTable[index ^ 56]).ToArray();
+    public static readonly int[] EndGameKnightTableBlack = EndGameKnightTable.Select((_, index) => -EndGameKnightTable[index ^ 56]).ToArray();
 
-    private static readonly int[] MiddleGamePawnTableBlack = new int[64]
-    {
-        MPS(a8), MPS(b8), MPS(c8), MPS(d8), MPS(e8), MPS(f8), MPS(g8), MPS(h8),
-        MPS(a7), MPS(b7), MPS(c7), MPS(d7), MPS(e7), MPS(f7), MPS(g7), MPS(h7),
-        MPS(a6), MPS(b6), MPS(c6), MPS(d6), MPS(e6), MPS(f6), MPS(g6), MPS(h6),
-        MPS(a5), MPS(b5), MPS(c5), MPS(d5), MPS(e5), MPS(f5), MPS(g5), MPS(h5),
-        MPS(a4), MPS(b4), MPS(c4), MPS(d4), MPS(e4), MPS(f4), MPS(g4), MPS(h4),
-        MPS(a3), MPS(b3), MPS(c3), MPS(d3), MPS(e3), MPS(f3), MPS(g3), MPS(h3),
-        MPS(a2), MPS(b2), MPS(c2), MPS(d2), MPS(e2), MPS(f2), MPS(g2), MPS(h2),
-        MPS(a1), MPS(b1), MPS(c1), MPS(d1), MPS(e1), MPS(f1), MPS(g1), MPS(h1)
-    };
+    public static readonly int[] MiddleGameBishopTableBlack = MiddleGameBishopTable.Select((_, index) => -MiddleGameBishopTable[index ^ 56]).ToArray();
+    public static readonly int[] EndGameBishopTableBlack = EndGameBishopTable.Select((_, index) => -EndGameBishopTable[index ^ 56]).ToArray();
 
-    private static readonly int[] EndGamePawnTableBlack = new int[64]
-    {
-        EPS(a8), EPS(b8), EPS(c8), EPS(d8), EPS(e8), EPS(f8), EPS(g8), EPS(h8),
-        EPS(a7), EPS(b7), EPS(c7), EPS(d7), EPS(e7), EPS(f7), EPS(g7), EPS(h7),
-        EPS(a6), EPS(b6), EPS(c6), EPS(d6), EPS(e6), EPS(f6), EPS(g6), EPS(h6),
-        EPS(a5), EPS(b5), EPS(c5), EPS(d5), EPS(e5), EPS(f5), EPS(g5), EPS(h5),
-        EPS(a4), EPS(b4), EPS(c4), EPS(d4), EPS(e4), EPS(f4), EPS(g4), EPS(h4),
-        EPS(a3), EPS(b3), EPS(c3), EPS(d3), EPS(e3), EPS(f3), EPS(g3), EPS(h3),
-        EPS(a2), EPS(b2), EPS(c2), EPS(d2), EPS(e2), EPS(f2), EPS(g2), EPS(h2),
-        EPS(a1), EPS(b1), EPS(c1), EPS(d1), EPS(e1), EPS(f1), EPS(g1), EPS(h1)
-    };
+    public static readonly int[] MiddleGameRookTableBlack = MiddleGameRookTable.Select((_, index) => -MiddleGameRookTable[index ^ 56]).ToArray();
+    public static readonly int[] EndGameRookTableBlack = EndGameRookTable.Select((_, index) => -EndGameRookTable[index ^ 56]).ToArray();
 
-    private static readonly int[] MiddleGameKnightTableBlack = new int[64]
-    {
-        MNS(a8), MNS(b8), MNS(c8), MNS(d8), MNS(e8), MNS(f8), MNS(g8), MNS(h8),
-        MNS(a7), MNS(b7), MNS(c7), MNS(d7), MNS(e7), MNS(f7), MNS(g7), MNS(h7),
-        MNS(a6), MNS(b6), MNS(c6), MNS(d6), MNS(e6), MNS(f6), MNS(g6), MNS(h6),
-        MNS(a5), MNS(b5), MNS(c5), MNS(d5), MNS(e5), MNS(f5), MNS(g5), MNS(h5),
-        MNS(a4), MNS(b4), MNS(c4), MNS(d4), MNS(e4), MNS(f4), MNS(g4), MNS(h4),
-        MNS(a3), MNS(b3), MNS(c3), MNS(d3), MNS(e3), MNS(f3), MNS(g3), MNS(h3),
-        MNS(a2), MNS(b2), MNS(c2), MNS(d2), MNS(e2), MNS(f2), MNS(g2), MNS(h2),
-        MNS(a1), MNS(b1), MNS(c1), MNS(d1), MNS(e1), MNS(f1), MNS(g1), MNS(h1)
-    };
+    public static readonly int[] MiddleGameQueenTableBlack = MiddleGameQueenTable.Select((_, index) => -MiddleGameQueenTable[index ^ 56]).ToArray();
+    public static readonly int[] EndGameQueenTableBlack = EndGameQueenTable.Select((_, index) => -EndGameQueenTable[index ^ 56]).ToArray();
 
-    private static readonly int[] EndGameKnightTableBlack = new int[64]
-    {
-        ENS(a8), ENS(b8), ENS(c8), ENS(d8), ENS(e8), ENS(f8), ENS(g8), ENS(h8),
-        ENS(a7), ENS(b7), ENS(c7), ENS(d7), ENS(e7), ENS(f7), ENS(g7), ENS(h7),
-        ENS(a6), ENS(b6), ENS(c6), ENS(d6), ENS(e6), ENS(f6), ENS(g6), ENS(h6),
-        ENS(a5), ENS(b5), ENS(c5), ENS(d5), ENS(e5), ENS(f5), ENS(g5), ENS(h5),
-        ENS(a4), ENS(b4), ENS(c4), ENS(d4), ENS(e4), ENS(f4), ENS(g4), ENS(h4),
-        ENS(a3), ENS(b3), ENS(c3), ENS(d3), ENS(e3), ENS(f3), ENS(g3), ENS(h3),
-        ENS(a2), ENS(b2), ENS(c2), ENS(d2), ENS(e2), ENS(f2), ENS(g2), ENS(h2),
-        ENS(a1), ENS(b1), ENS(c1), ENS(d1), ENS(e1), ENS(f1), ENS(g1), ENS(h1)
-    };
-
-    private static readonly int[] MiddleGameBishopTableBlack = new int[64]
-    {
-        MBS(a8), MBS(b8), MBS(c8), MBS(d8), MBS(e8), MBS(f8), MBS(g8), MBS(h8),
-        MBS(a7), MBS(b7), MBS(c7), MBS(d7), MBS(e7), MBS(f7), MBS(g7), MBS(h7),
-        MBS(a6), MBS(b6), MBS(c6), MBS(d6), MBS(e6), MBS(f6), MBS(g6), MBS(h6),
-        MBS(a5), MBS(b5), MBS(c5), MBS(d5), MBS(e5), MBS(f5), MBS(g5), MBS(h5),
-        MBS(a4), MBS(b4), MBS(c4), MBS(d4), MBS(e4), MBS(f4), MBS(g4), MBS(h4),
-        MBS(a3), MBS(b3), MBS(c3), MBS(d3), MBS(e3), MBS(f3), MBS(g3), MBS(h3),
-        MBS(a2), MBS(b2), MBS(c2), MBS(d2), MBS(e2), MBS(f2), MBS(g2), MBS(h2),
-        MBS(a1), MBS(b1), MBS(c1), MBS(d1), MBS(e1), MBS(f1), MBS(g1), MBS(h1)
-    };
-
-    private static readonly int[] EndGameBishopTableBlack = new int[64]
-    {
-        EBS(a8), EBS(b8), EBS(c8), EBS(d8), EBS(e8), EBS(f8), EBS(g8), EBS(h8),
-        EBS(a7), EBS(b7), EBS(c7), EBS(d7), EBS(e7), EBS(f7), EBS(g7), EBS(h7),
-        EBS(a6), EBS(b6), EBS(c6), EBS(d6), EBS(e6), EBS(f6), EBS(g6), EBS(h6),
-        EBS(a5), EBS(b5), EBS(c5), EBS(d5), EBS(e5), EBS(f5), EBS(g5), EBS(h5),
-        EBS(a4), EBS(b4), EBS(c4), EBS(d4), EBS(e4), EBS(f4), EBS(g4), EBS(h4),
-        EBS(a3), EBS(b3), EBS(c3), EBS(d3), EBS(e3), EBS(f3), EBS(g3), EBS(h3),
-        EBS(a2), EBS(b2), EBS(c2), EBS(d2), EBS(e2), EBS(f2), EBS(g2), EBS(h2),
-        EBS(a1), EBS(b1), EBS(c1), EBS(d1), EBS(e1), EBS(f1), EBS(g1), EBS(h1)
-    };
-
-    private static readonly int[] MiddleGameRookTableBlack = new int[64]
-    {
-        MRS(a8), MRS(b8), MRS(c8), MRS(d8), MRS(e8), MRS(f8), MRS(g8), MRS(h8),
-        MRS(a7), MRS(b7), MRS(c7), MRS(d7), MRS(e7), MRS(f7), MRS(g7), MRS(h7),
-        MRS(a6), MRS(b6), MRS(c6), MRS(d6), MRS(e6), MRS(f6), MRS(g6), MRS(h6),
-        MRS(a5), MRS(b5), MRS(c5), MRS(d5), MRS(e5), MRS(f5), MRS(g5), MRS(h5),
-        MRS(a4), MRS(b4), MRS(c4), MRS(d4), MRS(e4), MRS(f4), MRS(g4), MRS(h4),
-        MRS(a3), MRS(b3), MRS(c3), MRS(d3), MRS(e3), MRS(f3), MRS(g3), MRS(h3),
-        MRS(a2), MRS(b2), MRS(c2), MRS(d2), MRS(e2), MRS(f2), MRS(g2), MRS(h2),
-        MRS(a1), MRS(b1), MRS(c1), MRS(d1), MRS(e1), MRS(f1), MRS(g1), MRS(h1)
-    };
-
-    private static readonly int[] EndGameRookTableBlack = new int[64]
-    {
-        ERS(a8), ERS(b8), ERS(c8), ERS(d8), ERS(e8), ERS(f8), ERS(g8), ERS(h8),
-        ERS(a7), ERS(b7), ERS(c7), ERS(d7), ERS(e7), ERS(f7), ERS(g7), ERS(h7),
-        ERS(a6), ERS(b6), ERS(c6), ERS(d6), ERS(e6), ERS(f6), ERS(g6), ERS(h6),
-        ERS(a5), ERS(b5), ERS(c5), ERS(d5), ERS(e5), ERS(f5), ERS(g5), ERS(h5),
-        ERS(a4), ERS(b4), ERS(c4), ERS(d4), ERS(e4), ERS(f4), ERS(g4), ERS(h4),
-        ERS(a3), ERS(b3), ERS(c3), ERS(d3), ERS(e3), ERS(f3), ERS(g3), ERS(h3),
-        ERS(a2), ERS(b2), ERS(c2), ERS(d2), ERS(e2), ERS(f2), ERS(g2), ERS(h2),
-        ERS(a1), ERS(b1), ERS(c1), ERS(d1), ERS(e1), ERS(f1), ERS(g1), ERS(h1)
-    };
-
-    private static readonly int[] MiddleGameQueenTableBlack = new int[64]
-    {
-        MQS(a8), MQS(b8), MQS(c8), MQS(d8), MQS(e8), MQS(f8), MQS(g8), MQS(h8),
-        MQS(a7), MQS(b7), MQS(c7), MQS(d7), MQS(e7), MQS(f7), MQS(g7), MQS(h7),
-        MQS(a6), MQS(b6), MQS(c6), MQS(d6), MQS(e6), MQS(f6), MQS(g6), MQS(h6),
-        MQS(a5), MQS(b5), MQS(c5), MQS(d5), MQS(e5), MQS(f5), MQS(g5), MQS(h5),
-        MQS(a4), MQS(b4), MQS(c4), MQS(d4), MQS(e4), MQS(f4), MQS(g4), MQS(h4),
-        MQS(a3), MQS(b3), MQS(c3), MQS(d3), MQS(e3), MQS(f3), MQS(g3), MQS(h3),
-        MQS(a2), MQS(b2), MQS(c2), MQS(d2), MQS(e2), MQS(f2), MQS(g2), MQS(h2),
-        MQS(a1), MQS(b1), MQS(c1), MQS(d1), MQS(e1), MQS(f1), MQS(g1), MQS(h1)
-    };
-
-    private static readonly int[] EndGameQueenTableBlack = new int[64]
-    {
-        EQS(a8), EQS(b8), EQS(c8), EQS(d8), EQS(e8), EQS(f8), EQS(g8), EQS(h8),
-        EQS(a7), EQS(b7), EQS(c7), EQS(d7), EQS(e7), EQS(f7), EQS(g7), EQS(h7),
-        EQS(a6), EQS(b6), EQS(c6), EQS(d6), EQS(e6), EQS(f6), EQS(g6), EQS(h6),
-        EQS(a5), EQS(b5), EQS(c5), EQS(d5), EQS(e5), EQS(f5), EQS(g5), EQS(h5),
-        EQS(a4), EQS(b4), EQS(c4), EQS(d4), EQS(e4), EQS(f4), EQS(g4), EQS(h4),
-        EQS(a3), EQS(b3), EQS(c3), EQS(d3), EQS(e3), EQS(f3), EQS(g3), EQS(h3),
-        EQS(a2), EQS(b2), EQS(c2), EQS(d2), EQS(e2), EQS(f2), EQS(g2), EQS(h2),
-        EQS(a1), EQS(b1), EQS(c1), EQS(d1), EQS(e1), EQS(f1), EQS(g1), EQS(h1)
-    };
-
-    private static readonly int[] MiddleGameKingTableBlack = new int[64]
-    {
-        MKS(a8), MKS(b8), MKS(c8), MKS(d8), MKS(e8), MKS(f8), MKS(g8), MKS(h8),
-        MKS(a7), MKS(b7), MKS(c7), MKS(d7), MKS(e7), MKS(f7), MKS(g7), MKS(h7),
-        MKS(a6), MKS(b6), MKS(c6), MKS(d6), MKS(e6), MKS(f6), MKS(g6), MKS(h6),
-        MKS(a5), MKS(b5), MKS(c5), MKS(d5), MKS(e5), MKS(f5), MKS(g5), MKS(h5),
-        MKS(a4), MKS(b4), MKS(c4), MKS(d4), MKS(e4), MKS(f4), MKS(g4), MKS(h4),
-        MKS(a3), MKS(b3), MKS(c3), MKS(d3), MKS(e3), MKS(f3), MKS(g3), MKS(h3),
-        MKS(a2), MKS(b2), MKS(c2), MKS(d2), MKS(e2), MKS(f2), MKS(g2), MKS(h2),
-        MKS(a1), MKS(b1), MKS(c1), MKS(d1), MKS(e1), MKS(f1), MKS(g1), MKS(h1)
-    };
-
-    private static readonly int[] EndGameKingTableBlack = new int[64]
-    {
-        EKS(a8), EKS(b8), EKS(c8), EKS(d8), EKS(e8), EKS(f8), EKS(g8), EKS(h8),
-        EKS(a7), EKS(b7), EKS(c7), EKS(d7), EKS(e7), EKS(f7), EKS(g7), EKS(h7),
-        EKS(a6), EKS(b6), EKS(c6), EKS(d6), EKS(e6), EKS(f6), EKS(g6), EKS(h6),
-        EKS(a5), EKS(b5), EKS(c5), EKS(d5), EKS(e5), EKS(f5), EKS(g5), EKS(h5),
-        EKS(a4), EKS(b4), EKS(c4), EKS(d4), EKS(e4), EKS(f4), EKS(g4), EKS(h4),
-        EKS(a3), EKS(b3), EKS(c3), EKS(d3), EKS(e3), EKS(f3), EKS(g3), EKS(h3),
-        EKS(a2), EKS(b2), EKS(c2), EKS(d2), EKS(e2), EKS(f2), EKS(g2), EKS(h2),
-        EKS(a1), EKS(b1), EKS(c1), EKS(d1), EKS(e1), EKS(f1), EKS(g1), EKS(h1)
-    };
+    public static readonly int[] MiddleGameKingTableBlack = MiddleGameKingTable.Select((_, index) => -MiddleGameKingTable[index ^ 56]).ToArray();
+    public static readonly int[] EndGameKingTableBlack = EndGameKingTable.Select((_, index) => -EndGameKingTable[index ^ 56]).ToArray();
 
     public static readonly int[][] MiddleGamePositionalTables =
     {
@@ -348,6 +196,7 @@ public static class EvaluationConstants
         MiddleGameRookTable,
         MiddleGameQueenTable,
         MiddleGameKingTable,
+
         MiddleGamePawnTableBlack,
         MiddleGameKnightTableBlack,
         MiddleGameBishopTableBlack,
@@ -364,6 +213,7 @@ public static class EvaluationConstants
         EndGameRookTable,
         EndGameQueenTable,
         EndGameKingTable,
+
         EndGamePawnTableBlack,
         EndGameKnightTableBlack,
         EndGameBishopTableBlack,
