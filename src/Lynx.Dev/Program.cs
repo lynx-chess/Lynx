@@ -1,7 +1,6 @@
 ﻿using Lynx;
 using Lynx.Internal;
 using Lynx.Model;
-using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -1127,7 +1126,7 @@ static void PieceSquareTables()
     PrintBitBoard(EvaluationConstants.EndGamePawnTable);
     PrintBitBoard(EvaluationConstants.EndGamePawnTableBlack);
 
-    static void PrintBitBoard(ImmutableArray<int> bitboard)
+    static void PrintBitBoard(int[] bitboard)
     {
         for (var rank = 0; rank < 8; ++rank)
         {
