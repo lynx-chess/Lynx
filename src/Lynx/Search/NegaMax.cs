@@ -79,7 +79,7 @@ public sealed partial class Engine
             && !isInCheck
             && !ancestorWasNullMove
             /*&& (!isVerifyingNullMoveCutOff || depth > 1)*/)    // verify == true and ply == targetDepth -1 -> No null pruning, since verification will not be possible)
-                                                             // following pv?
+                                                                 // following pv?
         {
             var gameState = position.MakeNullMove();
 
@@ -201,6 +201,12 @@ public sealed partial class Engine
             position.UnmakeMove(move, gameState);
 
             PrintMove(ply, move, evaluation);
+
+            // 🔍 Reverse FutilityPrunning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
+            if (!pvNode && !isInCheck && depth <= Configuration.EngineSettings.ReverseFPMinDepth && evaluation - Configuration.EngineSettings.ReverseFPDepthScalingFactor * depth >= beta)
+            {
+                return evaluation;
+            }
 
             // Fail-hard beta-cutoff - refutation found, no need to keep searching this line
             if (evaluation >= beta)

@@ -210,4 +210,8 @@ public sealed class EngineSettings
     /// Depth for bench command
     /// </summary>
     public int BenchDepth { get; set; } = 5;
+
+    public int ReverseFPMinDepth { get; set; } = 4;
+
+    public int ReverseFPDepthScalingFactor { get; set; } = 150;
 }
