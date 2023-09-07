@@ -46,8 +46,9 @@ using System.Threading.Channels;
 //FileAndRankMasks();
 //EnhancedPawnEvaluation();
 //RookEvaluation();
-TranspositionTable();
+//TranspositionTable();
 //UnmakeMove();
+PieceSquareTables();
 
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
 const string TrickyPosition = Constants.TrickyTestPositionFEN;
@@ -1115,5 +1116,34 @@ static void UnmakeMove()
         Console.WriteLine();
         Console.WriteLine();
     }
+}
 
+static void PieceSquareTables()
+{
+    PrintBitBoard(EvaluationConstants.MiddleGamePawnTable);
+    PrintBitBoard(EvaluationConstants.MiddleGamePawnTableBlack);
+
+    PrintBitBoard(EvaluationConstants.EndGamePawnTable);
+    PrintBitBoard(EvaluationConstants.EndGamePawnTableBlack);
+
+    static void PrintBitBoard(int[] bitboard)
+    {
+        for (var rank = 0; rank < 8; ++rank)
+        {
+            for (var file = 0; file < 8; ++file)
+            {
+                if (file == 0)
+                {
+                    Console.Write($"{8 - rank}  ");
+                }
+
+                var squareIndex = BitBoardExtensions.SquareIndex(rank, file);
+
+                Console.Write($" {bitboard[squareIndex]}\t");
+            }
+
+            Console.WriteLine();
+        }
+        Console.Write("\n    a\tb\tc\td\te\tf\tg\th\n\n\n");
+    }
 }

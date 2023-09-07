@@ -1,8 +1,6 @@
 ﻿using Lynx.Model;
 using NUnit.Framework;
-using System.Drawing;
 using System.Numerics;
-using System.Threading.Tasks;
 using static Lynx.EvaluationConstants;
 
 namespace Lynx.Test;
