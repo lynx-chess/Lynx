@@ -6,6 +6,8 @@ namespace Lynx.Model;
 
 public class Position
 {
+    //private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
     public string FEN() => CalculateFEN();
 
     public string FEN(int halfMovesWithoutCaptureOrPawnMove) => CalculateFEN(halfMovesWithoutCaptureOrPawnMove);
@@ -597,58 +599,6 @@ public class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int StaticEvaluation(int movesWithoutCaptureOrPawnMove, CancellationToken cancellationToken = default)
     {
-        var eval = 0;
-
-        int whiteMaterialEval = 0, blackMaterialEval = 0;
-        var pieceCount = new int[PieceBitBoards.Length];
-
-        bool IsEndgameForWhite() => pieceCount[(int)Piece.q] == 0;
-        bool IsEndgameForBlack() => pieceCount[(int)Piece.Q] == 0;
-
-        for (int pieceIndex = 0; pieceIndex < Constants.SideLimit - 1; ++pieceIndex)
-        {
-            // Bitboard copy that we 'empty'
-            var bitboard = PieceBitBoards[pieceIndex];
-
-            while (bitboard != default)
-            {
-                var pieceSquareIndex = bitboard.GetLS1BIndex();
-                bitboard.ResetLS1B();
-
-                ++pieceCount[pieceIndex];
-
-                // Material evaluation
-                whiteMaterialEval += EvaluationConstants.MaterialScore[pieceIndex];
-
-                // Positional evaluation
-                eval += EvaluationConstants.PositionalScore[pieceIndex][pieceSquareIndex];
-
-                eval += CustomPieceEvaluation(pieceSquareIndex, pieceIndex);
-            }
-        }
-
-        for (int pieceIndex = Constants.SideLimit; pieceIndex < PieceBitBoards.Length - 1; ++pieceIndex)
-        {
-            // Bitboard copy that we 'empty'
-            var bitboard = PieceBitBoards[pieceIndex];
-
-            while (bitboard != default)
-            {
-                var pieceSquareIndex = bitboard.GetLS1BIndex();
-                bitboard.ResetLS1B();
-
-                ++pieceCount[pieceIndex];
-
-                // Material evaluation
-                blackMaterialEval += EvaluationConstants.MaterialScore[pieceIndex];
-
-                // Positional evaluation
-                eval += EvaluationConstants.PositionalScore[pieceIndex][pieceSquareIndex];
-
-                eval -= CustomPieceEvaluation(pieceSquareIndex, pieceIndex);
-            }
-        }
-
         var result = OnlineTablebaseProber.EvaluationSearch(this, movesWithoutCaptureOrPawnMove, cancellationToken);
         Debug.Assert(result < EvaluationConstants.CheckMateBaseEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
         Debug.Assert(result > -EvaluationConstants.CheckMateBaseEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
@@ -658,45 +608,98 @@ public class Position
             return result;
         }
 
-        //++pieceCount[Constants.WhiteKingIndex];
+        var pieceCount = new int[PieceBitBoards.Length];
+
+        int middleGameScore = 0;
+        int endGameScore = 0;
+        int gamePhase = 0;
+        int eval = 0;
+
+        for (int pieceIndex = (int)Piece.P; pieceIndex < (int)Piece.K; ++pieceIndex)
+        {
+            // Bitboard copy that we 'empty'
+            var bitboard = PieceBitBoards[pieceIndex];
+
+            while (bitboard != default)
+            {
+                var pieceSquareIndex = bitboard.GetLS1BIndex();
+                bitboard.ResetLS1B();
+
+                middleGameScore += EvaluationConstants.MiddleGameTable[pieceIndex, pieceSquareIndex];
+                endGameScore += EvaluationConstants.EndGameTable[pieceIndex, pieceSquareIndex];
+                gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
+
+                ++pieceCount[pieceIndex];
+
+                eval += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
+            }
+        }
+
+        for (int pieceIndex = (int)Piece.p; pieceIndex < (int)Piece.k; ++pieceIndex)
+        {
+            // Bitboard copy that we 'empty'
+            var bitboard = PieceBitBoards[pieceIndex];
+
+            while (bitboard != default)
+            {
+                var pieceSquareIndex = bitboard.GetLS1BIndex();
+                bitboard.ResetLS1B();
+
+                middleGameScore += EvaluationConstants.MiddleGameTable[pieceIndex, pieceSquareIndex];
+                endGameScore += EvaluationConstants.EndGameTable[pieceIndex, pieceSquareIndex];
+                gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
+
+                ++pieceCount[pieceIndex];
+
+                eval -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
+            }
+        }
+
         var whiteKing = PieceBitBoards[(int)Piece.K].GetLS1BIndex();
-        eval += IsEndgameForWhite()
-            ? EvaluationConstants.EndgamePositionalScore[(int)Piece.K][whiteKing]
-            : EvaluationConstants.PositionalScore[(int)Piece.K][whiteKing];
-        eval += KingEvaluation(whiteKing, Side.White, pieceCount);
+        middleGameScore += EvaluationConstants.MiddleGameTable[(int)Piece.K, whiteKing];
+        endGameScore += EvaluationConstants.EndGameTable[(int)Piece.K, whiteKing];
+        eval += KingAdditionalEvaluation(whiteKing, Side.White, pieceCount);
 
-        //++pieceCount[Constants.BlackKingIndex];
         var blackKing = PieceBitBoards[(int)Piece.k].GetLS1BIndex();
-        eval += IsEndgameForBlack()
-            ? EvaluationConstants.EndgamePositionalScore[(int)Piece.k][blackKing]
-            : EvaluationConstants.PositionalScore[(int)Piece.k][blackKing];
-        eval -= KingEvaluation(blackKing, Side.Black, pieceCount);
-
-        eval += whiteMaterialEval + blackMaterialEval;
+        middleGameScore += EvaluationConstants.MiddleGameTable[(int)Piece.k, blackKing];
+        endGameScore += EvaluationConstants.EndGameTable[(int)Piece.k, blackKing];
+        eval -= KingAdditionalEvaluation(blackKing, Side.Black, pieceCount);
 
         // Check if drawn position due to lack of material
-        if (eval >= 0)
+        if (endGameScore >= 0)
         {
-            bool whiteCannotWin = pieceCount[(int)Piece.P] == 0
-                && (whiteMaterialEval <= EvaluationConstants.MaterialScore[(int)Piece.B]            // B or N
-                    || whiteMaterialEval == 2 * EvaluationConstants.MaterialScore[(int)Piece.N]);   // N+N
+            bool whiteCannotWin = pieceCount[(int)Piece.P] == 0 && pieceCount[(int)Piece.Q] == 0 && pieceCount[(int)Piece.R] == 0
+                && (pieceCount[(int)Piece.B] + pieceCount[(int)Piece.N] == 1                // B or N
+                    || (pieceCount[(int)Piece.B] == 0 && pieceCount[(int)Piece.N] == 2));   // N+N
 
             if (whiteCannotWin)
             {
-                eval = 0;
+                return 0;
             }
         }
         else
         {
-            bool blackCannotWin = pieceCount[(int)Piece.p] == 0
-                && (blackMaterialEval >= EvaluationConstants.MaterialScore[(int)Piece.b]            // b or n
-                    || blackMaterialEval == 2 * EvaluationConstants.MaterialScore[(int)Piece.n]);   // n+n
+            bool blackCannotWin = pieceCount[(int)Piece.p] == 0 && pieceCount[(int)Piece.q] == 0 && pieceCount[(int)Piece.r] == 0
+                && (pieceCount[(int)Piece.b] + pieceCount[(int)Piece.n] == 1                // B or N
+                    || (pieceCount[(int)Piece.b] == 0 && pieceCount[(int)Piece.n] == 2));   // N+N
 
             if (blackCannotWin)
             {
-                eval = 0;
+                return 0;
             }
         }
+
+        const int maxPhase = 24;
+
+        if (gamePhase > maxPhase)    // Early promotions
+        {
+            gamePhase = maxPhase;
+        }
+
+        int endGamePhase = maxPhase - gamePhase;
+        //_logger.Trace("Phase: {0}/24", gamePhase);
+
+        eval += ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / 24;
 
         return Side == Side.White
             ? eval
@@ -726,21 +729,35 @@ public class Position
         }
     }
 
+    /// <summary>
+    /// Doesn't include <see cref="Piece.K"/> and <see cref="Piece.k"/> evaluation since this method is called
+    /// on the fly while going through the existing pieces and <see cref="KingAdditionalEvaluation(int, Side, int[])"/>
+    /// requires oppposite piece count, which in case of white king it's not available when this method is invoked
+    /// </summary>
+    /// <param name="pieceSquareIndex"></param>
+    /// <param name="pieceIndex"></param>
+    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int CustomPieceEvaluation(int pieceSquareIndex, int pieceIndex)
+    internal int AdditionalPieceEvaluation(int pieceSquareIndex, int pieceIndex)
     {
         return pieceIndex switch
         {
-            (int)Piece.P or (int)Piece.p => PawnEvaluation(pieceSquareIndex, pieceIndex),
-            (int)Piece.R or (int)Piece.r => RookEvaluation(pieceSquareIndex, pieceIndex),
-            (int)Piece.B or (int)Piece.b => BishopEvaluation(pieceSquareIndex),
-            (int)Piece.Q or (int)Piece.q => QueenEvaluation(pieceSquareIndex),
+            (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(pieceSquareIndex, pieceIndex),
+            (int)Piece.R or (int)Piece.r => RookAdditonalEvaluation(pieceSquareIndex, pieceIndex),
+            (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex),
+            (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex),
             _ => 0
         };
     }
 
+    /// <summary>
+    /// Doubled pawns penalty, isolated pawns penalty, passed pawns bonus
+    /// </summary>
+    /// <param name="squareIndex"></param>
+    /// <param name="pieceIndex"></param>
+    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int PawnEvaluation(int squareIndex, int pieceIndex)
+    private int PawnAdditionalEvaluation(int squareIndex, int pieceIndex)
     {
         var bonus = 0;
 
@@ -750,14 +767,12 @@ public class Position
             bonus -= doublePawnsCount * Configuration.EngineSettings.DoubledPawnPenalty;
         }
 
-        //bool IsIsolatedPawn() => (PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default;
-        if ((PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default)
+        if ((PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default) // isIsolatedPawn
         {
             bonus -= Configuration.EngineSettings.IsolatedPawnPenalty;
         }
 
-        //bool IsPassedPawn() => (PieceBitBoards[(int)Piece.p - pieceIndex] & Masks.PassedPawns[pieceIndex][squareIndex]) == default;
-        if ((PieceBitBoards[(int)Piece.p - pieceIndex] & Masks.PassedPawns[pieceIndex][squareIndex]) == default)
+        if ((PieceBitBoards[(int)Piece.p - pieceIndex] & Masks.PassedPawns[pieceIndex][squareIndex]) == default)    // isPassedPawn
         {
             var rank = Constants.Rank[squareIndex];
             if (pieceIndex == (int)Piece.p)
@@ -770,19 +785,23 @@ public class Position
         return bonus;
     }
 
+    /// <summary>
+    /// Open and semiopen file bonus
+    /// </summary>
+    /// <param name="squareIndex"></param>
+    /// <param name="pieceIndex"></param>
+    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int RookEvaluation(int squareIndex, int pieceIndex)
+    private int RookAdditonalEvaluation(int squareIndex, int pieceIndex)
     {
         const int pawnToRookOffset = (int)Piece.R - (int)Piece.P;
-        //bool IsOpenFile() => ((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default;
-        //bool IsSemiOpenFile() => (PieceBitBoards[pieceIndex - pawnToRookOffset] & Masks.FileMasks[squareIndex]) == default;
 
-        if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default)
+        if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default)  // isOpenFile
         {
             return Configuration.EngineSettings.OpenFileRookBonus;
         }
 
-        if ((PieceBitBoards[pieceIndex - pawnToRookOffset] & Masks.FileMasks[squareIndex]) == default)
+        if ((PieceBitBoards[pieceIndex - pawnToRookOffset] & Masks.FileMasks[squareIndex]) == default)  // isSemiOpenFile
         {
             return Configuration.EngineSettings.SemiOpenFileRookBonus;
         }
@@ -790,44 +809,57 @@ public class Position
         return 0;
     }
 
+    /// <summary>
+    /// Mobility bonus
+    /// </summary>
+    /// <param name="squareIndex"></param>
+    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int BishopEvaluation(int squareIndex)
+    private int BishopAdditionalEvaluation(int squareIndex)
     {
         return Configuration.EngineSettings.BishopMobilityBonus
             * Attacks.BishopAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
     }
 
+    /// <summary>
+    /// Mobility bonus
+    /// </summary>
+    /// <param name="squareIndex"></param>
+    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int QueenEvaluation(int squareIndex)
+    private int QueenAdditionalEvaluation(int squareIndex)
     {
         return Configuration.EngineSettings.QueenMobilityBonus
             * Attacks.QueenAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
     }
 
+    /// <summary>
+    /// Open and semiopenfile penalties, shield bonus
+    /// </summary>
+    /// <param name="squareIndex"></param>
+    /// <param name="kingSide"></param>
+    /// <param name="pieceCount"></param>
+    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int KingEvaluation(int squareIndex, Side pieceSide, int[] pieceCount)
+    internal int KingAdditionalEvaluation(int squareIndex, Side kingSide, int[] pieceCount)
     {
         var bonus = 0;
-        var oppositeSide = Utils.OppositeSide(pieceSide);
-        var opposieSideOffset = Utils.PieceOffset(oppositeSide);
+        var kingSideOffset = Utils.PieceOffset(kingSide);
 
-        bool areThereOppositeSideRooksOrQueens() => pieceCount[(int)Piece.R + opposieSideOffset] + pieceCount[(int)Piece.Q + opposieSideOffset] != default;
-        if (areThereOppositeSideRooksOrQueens())
+        if (pieceCount[(int)Piece.r - kingSideOffset] + pieceCount[(int)Piece.q - kingSideOffset] != default) // areThereOppositeSideRooksOrQueens
         {
-            //bool isOpenFile() => ((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default;
-            //bool isSemiOpenFile() => (PieceBitBoards[(int)Piece.p - opposieSideOffset] & Masks.FileMasks[squareIndex]) == default;
-            if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default)
+            if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default)  // isOpenFile
             {
                 bonus -= Configuration.EngineSettings.OpenFileKingPenalty;
             }
-            else if ((PieceBitBoards[(int)Piece.p - opposieSideOffset] & Masks.FileMasks[squareIndex]) == default)
+            else if ((PieceBitBoards[(int)Piece.P + kingSideOffset] & Masks.FileMasks[squareIndex]) == default) // isSemiOpenFile
             {
                 bonus -= Configuration.EngineSettings.SemiOpenFileKingPenalty;
             }
         }
 
         return bonus + Configuration.EngineSettings.KingShieldBonus *
-            (Attacks.KingAttacks[squareIndex] & OccupancyBitBoards[(int)pieceSide]).CountBits();
+            (Attacks.KingAttacks[squareIndex] & OccupancyBitBoards[(int)kingSide]).CountBits();
     }
 
     /// <summary>
