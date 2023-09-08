@@ -1,4 +1,4 @@
-name: OnDemandTests
+name: On demand tests
 
 on:
   workflow_dispatch:
