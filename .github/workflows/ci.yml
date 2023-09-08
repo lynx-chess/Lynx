@@ -148,7 +148,7 @@ jobs:
       run: dotnet build -c ${{ matrix.configuration }} /p:DeterministicBuild=true
 
     - name: Run ${{ matrix.category }} tests
-      run: dotnet test -c ${{ matrix.configuration }} --no-build --collect:"XPlat Code Coverage" -v normal --logger GitHubActions
+      run: dotnet test -c ${{ matrix.configuration }} --no-build --collect:"XPlat Code Coverage" -v normal --logger "GitHubActions;summary.includePassedTests;summary.includeSkippedTests" -- RunConfiguration.CollectSourceInformation=true
 
     - name: '[Ubuntu] Generate test coverage report'
       if: matrix.os == 'ubuntu-latest' && matrix.configuration == 'Release'
@@ -203,7 +203,7 @@ jobs:
       run: dotnet build -c Release
 
     - name: Run ${{ matrix.category }} tests
-      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal  --logger GitHubActions
+      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal --logger "GitHubActions;summary.includePassedTests;summary.includeSkippedTests" -- RunConfiguration.CollectSourceInformation=true
         # --collect:"XPlat Code Coverage" https://github.com/coverlet-coverage/coverlet/issues/1192
 
   perft-tests:
@@ -236,7 +236,7 @@ jobs:
       run: dotnet build -c Release
 
     - name: Run ${{ matrix.category }} tests
-      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal  --logger GitHubActions
+      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal --logger "GitHubActions;summary.includePassedTests;summary.includeSkippedTests" -- RunConfiguration.CollectSourceInformation=true
         # --collect:"XPlat Code Coverage" https://github.com/coverlet-coverage/coverlet/issues/1192
 
   other-tests:
@@ -269,7 +269,7 @@ jobs:
       run: dotnet build -c Release
 
     - name: Run ${{ matrix.category }} tests
-      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal --collect:"XPlat Code Coverage"  --logger GitHubActions
+      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal --collect:"XPlat Code Coverage" --logger "GitHubActions;summary.includePassedTests;summary.includeSkippedTests" -- RunConfiguration.CollectSourceInformation=true
 
   winning-at-chess:
     runs-on: ${{ matrix.os }}
@@ -301,7 +301,7 @@ jobs:
       run: dotnet build -c Release
 
     - name: Run ${{ matrix.category }} tests
-      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal  --logger GitHubActions
+      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal --logger "GitHubActions;summary.includePassedTests;summary.includeSkippedTests" -- RunConfiguration.CollectSourceInformation=true
       continue-on-error: true
         # --collect:"XPlat Code Coverage" https://github.com/coverlet-coverage/coverlet/issues/1192
 
@@ -387,7 +387,7 @@ jobs:
   #    run: dotnet build -c Release
 
   #  - name: Run non-parallelizable tests
-  #    run: dotnet test -c Release --no-build -v=normal --filter "TestCategory=NonParallelizable" --collect:"XPlat Code Coverage"  --logger GitHubActions
+  #    run: dotnet test -c Release --no-build -v=normal --filter "TestCategory=NonParallelizable" --collect:"XPlat Code Coverage" --logger "GitHubActions;summary.includePassedTests;summary.includeSkippedTests" -- RunConfiguration.CollectSourceInformation=true
 
   #  - name: '[Ubuntu] Generate test coverage report'
   #    if: matrix.os == 'ubuntu-latest'
