@@ -213,5 +213,5 @@ public sealed class EngineSettings
 
     public int ReverseFPMaxDepth { get; set; } = 2;
 
-    public int ReverseFPDepthScalingFactor { get; set; } = 150;
+    public int ReverseFPDepthScalingFactor { get; set; } = 200;
 }
