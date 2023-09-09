@@ -105,6 +105,21 @@ public sealed partial class Engine
 
         VerifiedNullMovePruning_SearchAgain:
 
+        // 🔍 Reverse FutilityPrunning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
+        // Beta check from: https://github.com/JacquesRW/akimbo/blob/c6e42e010e5c4db1d3b5e84b2637f6d97c746a13/akimbo/src/search.rs#L307C47-L307C47
+        if (!pvNode && !isInCheck
+            //&& beta < EvaluationConstants.PositiveCheckmateDetectionLimit
+            //&& beta > EvaluationConstants.NegativeCheckmateDetectionLimit
+            && depth <= Configuration.EngineSettings.ReverseFPMaxDepth)
+        {
+            var staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
+
+            if (staticEval - (Configuration.EngineSettings.ReverseFPDepthScalingFactor * depth) >= beta)
+            {
+                return staticEval;
+            }
+        }
+
         var nodeType = NodeType.Alpha;
 
         int movesSearched = 0;
@@ -201,17 +216,6 @@ public sealed partial class Engine
             position.UnmakeMove(move, gameState);
 
             PrintMove(ply, move, evaluation);
-
-            // 🔍 Reverse FutilityPrunning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
-            // Beta check from: https://github.com/JacquesRW/akimbo/blob/c6e42e010e5c4db1d3b5e84b2637f6d97c746a13/akimbo/src/search.rs#L307C47-L307C47
-            if (!pvNode && !isInCheck
-                && beta < EvaluationConstants.PositiveCheckmateDetectionLimit
-                && beta > EvaluationConstants.NegativeCheckmateDetectionLimit
-                && depth <= Configuration.EngineSettings.ReverseFPMaxDepth
-                && evaluation - (Configuration.EngineSettings.ReverseFPDepthScalingFactor * depth) >= beta)
-            {
-                return evaluation;
-            }
 
             // Fail-hard beta-cutoff - refutation found, no need to keep searching this line
             if (evaluation >= beta)
