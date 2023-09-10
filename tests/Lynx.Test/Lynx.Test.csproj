@@ -3,6 +3,8 @@
   <PropertyGroup>
     <IsPackable>false</IsPackable>
     <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
+    <!--TODO remove after RC-2, according to https://github.com/dotnet/core/issues/8439-->
+    <Features>$(Features);InterceptorsPreview</Features>
   </PropertyGroup>
 
   <ItemGroup>
