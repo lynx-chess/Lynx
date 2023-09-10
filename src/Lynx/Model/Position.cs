@@ -701,6 +701,15 @@ public class Position
 
         eval += ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / 24;
 
+        if (pieceCount[(int)Piece.B] >= 2)
+        {
+            eval += Configuration.EngineSettings.BishopPairMaxBonus * endGamePhase / 24;
+        }
+        if (pieceCount[(int)Piece.b] >= 2)
+        {
+            eval -= Configuration.EngineSettings.BishopPairMaxBonus * endGamePhase / 24;
+        }
+
         return Side == Side.White
             ? eval
             : -eval;

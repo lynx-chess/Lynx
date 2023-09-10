@@ -212,6 +212,11 @@ public sealed class EngineSettings
     /// Depth for bench command
     /// </summary>
     public int BenchDepth { get; set; } = 5;
+
+    /// <summary>
+    /// It'll be scaled with phase
+    /// </summary>
+    public int BishopPairMaxBonus { get; set; } = 100;
 }
 
 [JsonSourceGenerationOptions(
