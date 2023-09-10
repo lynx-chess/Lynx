@@ -23,13 +23,14 @@ Lichess bot can be played directly, but a chess GUI that supports UCI protocol i
 
 | Lynx version                                                    | CCRL Blitz elo                                                                                                                         |
 |-----------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
-| [0.14.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.14.0) | [1804](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.14.0%2064-bit#Lynx_0_14_0_64-bit) |
-| [0.13.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.13.0) | [1762](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.13.0%2064-bit#Lynx_0_13_0_64-bit) |
-| [0.11.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.11.0) | [1618](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.11.0%2064-bit#Lynx_0_11_0_64-bit) |
+| [0.16.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.16.0) | [2087](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.16.0%2064-bit#Lynx_0_16_0_64-bit) |
+| [0.14.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.14.0) | [1794](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.14.0%2064-bit#Lynx_0_14_0_64-bit) |
+| [0.13.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.13.0) | [1763](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.13.0%2064-bit#Lynx_0_13_0_64-bit) |
+| [0.11.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.11.0) | [1619](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.11.0%2064-bit#Lynx_0_11_0_64-bit) |
 | [0.10.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.10.0) | [1573](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.10.0%2064-bit#Lynx_0_10_0_64-bit) |
-| [0.9.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.9.0) | [1591](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.9.0%2064-bit#Lynx_0_9_0_64-bit) |
-| [0.6.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.6.0) | [1419](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.6.0%2064-bit#Lynx_0_6_0_64-bit) |
-| [0.4.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.4.0) | [1367](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.4.0%2064-bit#Lynx_0_4_0_64-bit) |
+| [0.9.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.9.0) | [1593](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.9.0%2064-bit#Lynx_0_9_0_64-bit) |
+| [0.6.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.6.0) | [1421](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.6.0%2064-bit#Lynx_0_6_0_64-bit) |
+| [0.4.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.4.0) | [1371](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.4.0%2064-bit#Lynx_0_4_0_64-bit) |
 
 ## Building Lynx
 
