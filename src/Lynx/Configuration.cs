@@ -1,4 +1,6 @@
-﻿namespace Lynx;
+﻿using System.Text.Json.Serialization;
+
+namespace Lynx;
 
 public static class Configuration
 {
@@ -211,7 +213,19 @@ public sealed class EngineSettings
     /// </summary>
     public int BenchDepth { get; set; } = 5;
 
+    /// <summary>
+    /// It'll be scaled with phase
+    /// </summary>
+    public int BishopPairMaxBonus { get; set; } = 100;
+
     public int ReverseFPMaxDepth { get; set; } = 8;
 
     public int ReverseFPDepthScalingFactor { get; set; } = 100;
+}
+
+[JsonSourceGenerationOptions(
+    GenerationMode = JsonSourceGenerationMode.Serialization, WriteIndented = true)] // https://github.com/dotnet/runtime/issues/78602#issuecomment-1322004254
+[JsonSerializable(typeof(EngineSettings))]
+internal partial class EngineSettingsJsonSerializerContext : JsonSerializerContext
+{
 }
