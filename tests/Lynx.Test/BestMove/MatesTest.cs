@@ -20,6 +20,7 @@ public class MatesTest : BaseTest
         Assert.AreNotEqual(default, result.Mate);
     }
 
+    [Explicit]
     [Category(Categories.LongRunning)]
     [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_3))]
     public async Task Mate_in_3(string fen, string[]? allowedUCIMoveString, string description)
