@@ -218,9 +218,9 @@ public sealed class EngineSettings
     /// </summary>
     public int BishopPairMaxBonus { get; set; } = 100;
 
-    public int ReverseFPMaxDepth { get; set; } = 8;
+    public int ReverseFPMaxDepth { get; set; } = 4;
 
-    public int ReverseFPDepthScalingFactor { get; set; } = 100;
+    public int ReverseFPDepthScalingFactor { get; set; } = 150;
 }
 
 [JsonSourceGenerationOptions(
