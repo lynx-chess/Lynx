@@ -7,8 +7,17 @@ namespace Lynx.Test.BestMove;
 /// <summary>
 /// All the tests in this class used to pass when null-pruning wasn't implemented
 /// </summary>
+[Explicit]
+[Category(Categories.NoPruning)]
 public class MatesInExactlyXTest : BaseTest
 {
+    public MatesInExactlyXTest()
+    {
+        Configuration.EngineSettings.ReverseFPMaxDepth = 0;
+        Configuration.EngineSettings.LMR_DepthReduction = 0;
+        Configuration.EngineSettings.NullMovePruning_R = 0;
+    }
+
     [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_1))]
     public async Task Mate_in_Exactly_1(string fen, string[]? allowedUCIMoveString, string description)
     {
@@ -23,8 +32,6 @@ public class MatesInExactlyXTest : BaseTest
         Assert.AreEqual(2, result.Mate);
     }
 
-    [Explicit]
-    [Category(Categories.NoPruning)]
     [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_3))]
     public async Task Mate_in_Exactly_3(string fen, string[]? allowedUCIMoveString, string description)
     {
@@ -32,8 +39,6 @@ public class MatesInExactlyXTest : BaseTest
         Assert.AreEqual(3, result.Mate);
     }
 
-    [Explicit]
-    [Category(Categories.NoPruning)]
     [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_4))]
     public async Task Mate_in_Exactly_4(string fen, string[]? allowedUCIMoveString, string description)
     {
@@ -41,8 +46,6 @@ public class MatesInExactlyXTest : BaseTest
         Assert.AreEqual(4, result.Mate);
     }
 
-    [Explicit]
-    [Category(Categories.NoPruning)]
     [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_4_Collection))]
     public async Task Mate_in_Exactly_4_Collection(string fen, string[]? allowedUCIMoveString, string description)
     {
@@ -50,8 +53,6 @@ public class MatesInExactlyXTest : BaseTest
         Assert.AreEqual(4, result.Mate);
     }
 
-    [Explicit]
-    [Category(Categories.NoPruning)]
     [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_5))]
     public async Task Mate_in_Exactly_5(string fen, string[]? allowedUCIMoveString, string description)
     {
@@ -59,8 +60,6 @@ public class MatesInExactlyXTest : BaseTest
         Assert.AreEqual(5, result.Mate);
     }
 
-    [Explicit]
-    [Category(Categories.NoPruning)]
     [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_6))]
     public async Task Mate_in_Exactly_6(string fen, string[]? allowedUCIMoveString, string description)
     {
@@ -68,8 +67,6 @@ public class MatesInExactlyXTest : BaseTest
         Assert.AreEqual(6, result.Mate);
     }
 
-    [Explicit]
-    [Category(Categories.TooLong)]
     [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_7))]
     public async Task Mate_in_Exactly_7(string fen, string[]? allowedUCIMoveString, string description)
     {

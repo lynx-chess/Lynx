@@ -20,8 +20,8 @@ public class ConfigurationTest
         var engineSettingsSection = config.GetRequiredSection(nameof(EngineSettings));
         Assert.IsNotNull(engineSettingsSection);
 
+        var serializedEngineSettingsConfig = JsonSerializer.Serialize(Configuration.EngineSettings, EngineSettingsJsonSerializerContext.Default.EngineSettings);
 #pragma warning disable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
-        var serializedEngineSettingsConfig = JsonSerializer.Serialize(Configuration.EngineSettings);
         var jsonNode = JsonSerializer.Deserialize<JsonNode>(serializedEngineSettingsConfig);
 #pragma warning restore IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
         Assert.IsNotNull(jsonNode);

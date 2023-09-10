@@ -224,7 +224,7 @@ public sealed class EngineSettings
 }
 
 [JsonSourceGenerationOptions(
-    GenerationMode = JsonSourceGenerationMode.Serialization, WriteIndented = true)] // https://github.com/dotnet/runtime/issues/78602#issuecomment-1322004254
+    GenerationMode = JsonSourceGenerationMode.Default, WriteIndented = true)] // https://github.com/dotnet/runtime/issues/78602#issuecomment-1322004254
 [JsonSerializable(typeof(EngineSettings))]
 internal partial class EngineSettingsJsonSerializerContext : JsonSerializerContext
 {
