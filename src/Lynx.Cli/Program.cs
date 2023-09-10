@@ -78,7 +78,7 @@ finally
     engineChannel.Writer.TryComplete();
     uciChannel.Writer.TryComplete();
     //source.Cancel();
-    NLog.LogManager.Shutdown(); // Flush and close down internal threads and timers
+    LogManager.Shutdown(); // Flush and close down internal threads and timers
 }
 
 Thread.Sleep(2_000);

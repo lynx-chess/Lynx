@@ -1,4 +1,6 @@
-﻿namespace Lynx;
+﻿using System.Text.Json.Serialization;
+
+namespace Lynx;
 
 public static class Configuration
 {
@@ -210,4 +212,11 @@ public sealed class EngineSettings
     /// Depth for bench command
     /// </summary>
     public int BenchDepth { get; set; } = 5;
+}
+
+[JsonSourceGenerationOptions(
+    GenerationMode = JsonSourceGenerationMode.Serialization, WriteIndented = true)] // https://github.com/dotnet/runtime/issues/78602#issuecomment-1322004254
+[JsonSerializable(typeof(EngineSettings))]
+internal partial class EngineSettingsJsonSerializerContext : JsonSerializerContext
+{
 }
