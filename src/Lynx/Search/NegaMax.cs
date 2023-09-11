@@ -103,6 +103,8 @@ public sealed partial class Engine
             }
         }
 
+        VerifiedNullMovePruning_SearchAgain:
+
         // 🔍 Reverse FutilityPrunning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
         if (!pvNode && !isInCheck
             && depth <= Configuration.EngineSettings.ReverseFPMaxDepth)
@@ -114,8 +116,6 @@ public sealed partial class Engine
                 return staticEval;
             }
         }
-
-        VerifiedNullMovePruning_SearchAgain:
 
         var nodeType = NodeType.Alpha;
 
