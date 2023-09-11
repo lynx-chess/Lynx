@@ -73,6 +73,18 @@ public sealed partial class Engine
             return finalPositionEvaluation;
         }
 
+        // 🔍 Reverse FutilityPrunning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
+        if (!pvNode && !isInCheck
+            && depth <= Configuration.EngineSettings.ReverseFPMaxDepth)
+        {
+            var staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
+
+            if (staticEval - (Configuration.EngineSettings.ReverseFPDepthScalingFactor * depth) >= beta)
+            {
+                return staticEval;
+            }
+        }
+
         // 🔍 Verified Null-move pruning (NMP) - https://www.researchgate.net/publication/297377298_Verified_Null-Move_Pruning
         bool isFailHigh = false;    // In order to detect zugzwangs
         if (depth > Configuration.EngineSettings.NullMovePruning_R
@@ -104,21 +116,6 @@ public sealed partial class Engine
         }
 
         VerifiedNullMovePruning_SearchAgain:
-
-        // 🔍 Reverse FutilityPrunning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
-        // Beta check from: https://github.com/JacquesRW/akimbo/blob/c6e42e010e5c4db1d3b5e84b2637f6d97c746a13/akimbo/src/search.rs#L307C47-L307C47
-        if (!pvNode && !isInCheck
-            && beta < EvaluationConstants.PositiveCheckmateDetectionLimit
-            && beta > EvaluationConstants.NegativeCheckmateDetectionLimit
-            && depth <= Configuration.EngineSettings.ReverseFPMaxDepth)
-        {
-            var staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
-
-            if (staticEval - (Configuration.EngineSettings.ReverseFPDepthScalingFactor * depth) >= beta)
-            {
-                return staticEval;
-            }
-        }
 
         var nodeType = NodeType.Alpha;
 
