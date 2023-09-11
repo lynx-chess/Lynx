@@ -73,18 +73,6 @@ public sealed partial class Engine
             return finalPositionEvaluation;
         }
 
-        // 🔍 Reverse FutilityPrunning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
-        if (!pvNode && !isInCheck
-            && depth <= Configuration.EngineSettings.ReverseFPMaxDepth)
-        {
-            var staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
-
-            if (staticEval - (Configuration.EngineSettings.ReverseFPDepthScalingFactor * depth) >= beta)
-            {
-                return staticEval;
-            }
-        }
-
         // 🔍 Verified Null-move pruning (NMP) - https://www.researchgate.net/publication/297377298_Verified_Null-Move_Pruning
         bool isFailHigh = false;    // In order to detect zugzwangs
         if (depth > Configuration.EngineSettings.NullMovePruning_R
@@ -112,6 +100,18 @@ public sealed partial class Engine
                     // cutoff in a sub-tree with fail-high report
                     return evaluation;
                 }
+            }
+        }
+
+        // 🔍 Reverse FutilityPrunning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
+        if (!pvNode && !isInCheck
+            && depth <= Configuration.EngineSettings.ReverseFPMaxDepth)
+        {
+            var staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
+
+            if (staticEval - (Configuration.EngineSettings.ReverseFPDepthScalingFactor * depth) >= beta)
+            {
+                return staticEval;
             }
         }
 
