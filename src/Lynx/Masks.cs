@@ -74,8 +74,11 @@ public static class Masks
     /// </summary>
     public static BitBoard[] BlackPassedPawnMasks { get; } = new BitBoard[64];
 
-    public static readonly BitBoard[][] PassedPawns = new BitBoard[12][]
-    {
+    /// <summary>
+    /// [12][64]
+    /// </summary>
+    public static readonly BitBoard[][] PassedPawns =
+    [
         WhitePassedPawnMasks,
         Array.Empty<BitBoard>(),
         Array.Empty<BitBoard>(),
@@ -88,7 +91,7 @@ public static class Masks
         Array.Empty<BitBoard>(),
         Array.Empty<BitBoard>(),
         Array.Empty<BitBoard>(),
-    };
+    ];
 
     static Masks()
     {
