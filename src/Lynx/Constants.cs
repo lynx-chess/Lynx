@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using System.Collections.Immutable;
 
 namespace Lynx;
 
@@ -70,7 +71,7 @@ public static class Constants
     /// </summary>
     public const BitBoard NotABFiles = 0xFCFCFCFCFCFCFCFC;
 
-    public static readonly string[] Coordinates =
+    public static readonly ImmutableArray<string> Coordinates =
     [
         "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
         "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
@@ -91,7 +92,7 @@ public static class Constants
     /// Following <see cref="Piece"/> order.
     /// Don't work stright away in Windows
     /// </summary>
-    public static readonly string[] UnicodePieces =
+    public static readonly ImmutableArray<string> UnicodePieces =
     [
         "♙", "♘", "♗", "♖", "♕", "♔",   // White
         "♟︎", "♞", "♝", "♜", "♛", "♚"    // Black
@@ -120,7 +121,7 @@ public static class Constants
     /// <summary>
     /// Relevant bishop occupancy bit count per square
     /// </summary>
-    public static readonly int[] BishopRelevantOccupancyBits =
+    public static readonly ImmutableArray<int> BishopRelevantOccupancyBits =
     [
         6, 5, 5, 5, 5, 5, 5, 6,
         5, 5, 5, 5, 5, 5, 5, 5,
@@ -135,7 +136,7 @@ public static class Constants
     /// <summary>
     /// Relevant rook occupancy bit count per square
     /// </summary>
-    public static readonly int[] RookRelevantOccupancyBits =
+    public static readonly ImmutableArray<int> RookRelevantOccupancyBits =
     [
         12, 11, 11, 11, 11, 11, 11, 12,
         11, 10, 10, 10, 10, 10, 10, 11,
@@ -150,7 +151,7 @@ public static class Constants
     /// <summary>
     /// https://github.com/maksimKorzh/chess_programming/blob/master/src/bbc/init_magics/bbc.c
     /// </summary>
-    public static readonly BitBoard[] RookMagicNumbers =
+    public static readonly ImmutableArray<BitBoard> RookMagicNumbers =
     [
         0x8a80104000800020UL,
         0x140002000100040UL,
@@ -221,7 +222,7 @@ public static class Constants
     /// <summary>
     /// https://github.com/maksimKorzh/chess_programming/blob/master/src/bbc/init_magics/bbc.c
     /// </summary>
-    public static readonly BitBoard[] BishopMagicNumbers =
+    public static readonly ImmutableArray<BitBoard> BishopMagicNumbers =
     [
         0x40040844404084UL,
         0x2004208a004208UL,
@@ -354,7 +355,7 @@ public static class Constants
     ///  Black kingside Rook moved      1111 & 1011  =  1011    11
     ///  Black queenside Rook moved     1111 & 0111  =  0111    7
     /// </summary>
-    public static readonly byte[] CastlingRightsUpdateConstants =
+    public static readonly ImmutableArray<byte> CastlingRightsUpdateConstants =
     [
         7, 15, 15, 15, 3, 15, 15, 11,
         15, 15, 15, 15, 15, 15, 15, 15,
@@ -374,7 +375,7 @@ public static class Constants
 
     public static readonly int SideLimit = Enum.GetValues(typeof(Piece)).Length / 2;
 
-    public static readonly int[] Rank =
+    public static readonly ImmutableArray<int> Rank =
     [
         7, 7, 7, 7, 7, 7, 7, 7,
         6, 6, 6, 6, 6, 6, 6, 6,
@@ -386,7 +387,7 @@ public static class Constants
         0, 0, 0, 0, 0, 0, 0, 0
     ];
 
-    public static readonly int[] File =
+    public static readonly ImmutableArray<int> File =
     [
         0, 1, 2, 3, 4, 5, 6, 7,
         0, 1, 2, 3, 4, 5, 6, 7,
