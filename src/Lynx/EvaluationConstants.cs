@@ -189,6 +189,9 @@ public static class EvaluationConstants
     public static readonly ImmutableArray<int> MiddleGameKingTableBlack = MiddleGameKingTable.Select((_, index) => -MiddleGameKingTable[index ^ 56]).ToImmutableArray();
     public static readonly ImmutableArray<int> EndGameKingTableBlack = EndGameKingTable.Select((_, index) => -EndGameKingTable[index ^ 56]).ToImmutableArray();
 
+    /// <summary>
+    /// [12][64]
+    /// </summary>
     public static readonly ImmutableArray<ImmutableArray<int>> MiddleGamePositionalTables =
     [
         MiddleGamePawnTable,
@@ -206,6 +209,9 @@ public static class EvaluationConstants
         MiddleGameKingTableBlack
     ];
 
+    /// <summary>
+    /// [12][64]
+    /// </summary>
     public static readonly ImmutableArray<ImmutableArray<int>> EndGamePositionalTables =
     [
         EndGamePawnTable,
@@ -239,7 +245,7 @@ public static class EvaluationConstants
     }
 
     /// <summary>
-    /// MVV LVA [attacker,victim]
+    /// MVV LVA [attacker,victim] [12,64]
     /// https://github.com/maksimKorzh/chess_programming/blob/master/src/bbc/move_ordering_intro/bbc.c#L2406
     ///             (Victims)   Pawn Knight Bishop  Rook   Queen  King
     /// (Attackers)
@@ -250,7 +256,7 @@ public static class EvaluationConstants
     ///      Queen              101    201    301    401    501    601
     ///       King              100    200    300    400    500    600
     /// </summary>
-    public static readonly int[,] MostValueableVictimLeastValuableAttacker = new int[12, 12]
+    public static readonly int[,] MostValueableVictimLeastValuableAttacker =
     {
         { 105, 205, 305, 405, 505, 605, 105, 205, 305, 405, 505, 605 },
         { 104, 204, 304, 404, 504, 604, 104, 204, 304, 404, 504, 604 },
