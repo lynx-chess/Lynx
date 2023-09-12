@@ -75,7 +75,7 @@ public sealed partial class Engine
 
         // 🔍 Verified Null-move pruning (NMP) - https://www.researchgate.net/publication/297377298_Verified_Null-Move_Pruning
         bool isFailHigh = false;    // In order to detect zugzwangs
-        if (depth > Configuration.EngineSettings.NullMovePruning_R
+        if (depth > Configuration.EngineSettings.NMP_DepthReduction
             && !isInCheck
             && !ancestorWasNullMove
             /*&& (!isVerifyingNullMoveCutOff || depth > 1)*/)    // verify == true and ply == targetDepth -1 -> No null pruning, since verification will not be possible)
@@ -83,7 +83,7 @@ public sealed partial class Engine
         {
             var gameState = position.MakeNullMove();
 
-            var evaluation = -NegaMax(depth - 1 - Configuration.EngineSettings.NullMovePruning_R, ply + 1, -beta, -beta + 1, isVerifyingNullMoveCutOff, ancestorWasNullMove: true);
+            var evaluation = -NegaMax(depth - 1 - Configuration.EngineSettings.NMP_DepthReduction, ply + 1, -beta, -beta + 1, isVerifyingNullMoveCutOff, ancestorWasNullMove: true);
 
             position.UnMakeNullMove(gameState);
 
@@ -107,11 +107,11 @@ public sealed partial class Engine
 
         // 🔍 Reverse FutilityPrunning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
         if (!pvNode && !isInCheck
-            && depth <= Configuration.EngineSettings.ReverseFPMaxDepth)
+            && depth <= Configuration.EngineSettings.RFP_MaxDepth)
         {
             var staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
 
-            if (staticEval - (Configuration.EngineSettings.ReverseFPDepthScalingFactor * depth) >= beta)
+            if (staticEval - (Configuration.EngineSettings.RFP_DepthScalingFactor * depth) >= beta)
             {
                 return staticEval;
             }
@@ -162,8 +162,8 @@ public sealed partial class Engine
             else
             {
                 // 🔍 Late Move Reduction (LMR)
-                if (movesSearched >= Configuration.EngineSettings.LMR_FullDepthMoves
-                    && depth >= Configuration.EngineSettings.LMR_ReductionLimit
+                if (movesSearched >= Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves
+                    && depth >= Configuration.EngineSettings.LMR_MaxDepth
                     && !pvNode
                     && !isInCheck
                     //&& !newPosition.IsInCheck()

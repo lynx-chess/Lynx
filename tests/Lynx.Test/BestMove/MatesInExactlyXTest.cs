@@ -11,13 +11,6 @@ namespace Lynx.Test.BestMove;
 [Category(Categories.NoPruning)]
 public class MatesInExactlyXTest : BaseTest
 {
-    public MatesInExactlyXTest()
-    {
-        Configuration.EngineSettings.ReverseFPMaxDepth = 0;
-        Configuration.EngineSettings.LMR_DepthReduction = 0;
-        Configuration.EngineSettings.NullMovePruning_R = 0;
-    }
-
     [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_1))]
     public async Task Mate_in_Exactly_1(string fen, string[]? allowedUCIMoveString, string description)
     {
