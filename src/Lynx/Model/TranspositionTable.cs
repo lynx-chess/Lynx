@@ -207,7 +207,7 @@ public static class TranspositionTableExtensions
     }
 
     /// <summary>
-    /// TT occupancy per mill
+    /// Exact TT occupancy per mill
     /// </summary>
     /// <param name="transpositionTable"></param>
     /// <returns></returns>
@@ -215,6 +215,27 @@ public static class TranspositionTableExtensions
     public static int HashfullPermill(this TranspositionTable transpositionTable) => transpositionTable.Length > 0
         ? (int)(1000L * transpositionTable.PopulatedItemsCount() / transpositionTable.LongLength)
         : 0;
+
+    /// <summary>
+    /// Orders of magnitude faster than <see cref="HashfullPermill(TranspositionTableElement[])"/>
+    /// </summary>
+    /// <param name="transpositionTable"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int HashfullPermillApprox(this TranspositionTable transpositionTable)
+    {
+        int items = 0;
+        for (int i = 0; i < 1000; ++i)
+        {
+            if (transpositionTable[i].Key != default)
+            {
+                ++items;
+            }
+        }
+
+        //Console.WriteLine($"Real: {HashfullPermill(transpositionTable)}, estimated: {items}");
+        return items;
+    }
 
     [Conditional("DEBUG")]
     internal static void Stats(this TranspositionTable transpositionTable)
