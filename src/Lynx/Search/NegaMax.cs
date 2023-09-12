@@ -119,6 +119,8 @@ public sealed partial class Engine
 
         var nodeType = NodeType.Alpha;
 
+        bool hasValidateExtraLegalMoves = false;
+        int firstLegalMovePosition = 0;
         int movesSearched = 0;
         Move? bestMove = null;
         bool isAnyMoveValid = false;
@@ -134,6 +136,25 @@ public sealed partial class Engine
             if (!position.WasProduceByAValidMove())
             {
                 position.UnmakeMove(move, gameState);
+                continue;
+            }
+
+            if (isRoot && !hasValidateExtraLegalMoves)
+            {
+                position.UnmakeMove(move, gameState);
+                if (firstLegalMovePosition == 0)
+                {
+                    // We save the position (+1) of the first legal move and check if there's at least another one
+                    firstLegalMovePosition = moveIndex + 1;
+                }
+                else
+                {
+                    // We go back to the first legal move to continue the regular search
+                    moveIndex = firstLegalMovePosition - 2;
+
+                    // And prevent this behavior from happenning again
+                    hasValidateExtraLegalMoves = true;
+                }
                 continue;
             }
 
@@ -251,6 +272,21 @@ public sealed partial class Engine
             }
 
             ++movesSearched;
+        }
+
+        // Detect if there was only one legal move
+        if (firstLegalMovePosition > 0 && !hasValidateExtraLegalMoves)
+        {
+            _pVTable[pvIndex] = pseudoLegalMoves[firstLegalMovePosition - 1];
+            CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
+
+            // We don't have or need any eval, and we don't want to return 0 or a negative eval that
+            // could make the GUI resign or take a draw from this position.
+            // Since this only happens in root, we don't really care about being more precise for raising
+            // alphas or betas of parent moves, so let's just return +-2 pawns depending on the side to move
+            return Game.CurrentPosition.Side == Side.White
+                ? +EvaluationConstants.SingleMoveEvaluation
+                : -EvaluationConstants.SingleMoveEvaluation;
         }
 
         // [Null-move pruning] If there is a fail-high report, but no cutoff was found, the position is a zugzwang and has to be re-searched with the original depth

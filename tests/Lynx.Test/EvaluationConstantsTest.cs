@@ -121,4 +121,16 @@ public class EvaluationConstantsTest
 
         Assert.Greater(SecondKillerMoveValue, default);
     }
+
+    /// <summary>
+    /// Avoids drawish evals that can lead the GUI to declare a draw
+    /// or negative ones that can lead it to resign
+    /// </summary>
+    [Test]
+    public void SingleMoveEvaluation()
+    {
+        Assert.NotZero(EvaluationConstants.SingleMoveEvaluation);
+        Assert.Greater(EvaluationConstants.SingleMoveEvaluation, 100);
+        Assert.Less(EvaluationConstants.SingleMoveEvaluation, 400);
+    }
 }
