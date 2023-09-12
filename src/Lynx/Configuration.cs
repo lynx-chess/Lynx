@@ -157,13 +157,13 @@ public sealed class EngineSettings
 
     public double DecisionTimePercentageToStopSearching { get; set; } = 0.4;
 
-    public int LMR_FullDepthMoves { get; set; } = 4;
+    public int LMR_MinFullDepthSearchedMoves { get; set; } = 4;
 
-    public int LMR_ReductionLimit { get; set; } = 3;
+    public int LMR_MaxDepth { get; set; } = 3;
 
     public int LMR_DepthReduction { get; set; } = 1;
 
-    public int NullMovePruning_R { get; set; } = 3;
+    public int NMP_DepthReduction { get; set; } = 3;
 
     public int AspirationWindowAlpha { get; set; } = 50;
 
@@ -218,9 +218,9 @@ public sealed class EngineSettings
     /// </summary>
     public int BishopPairMaxBonus { get; set; } = 100;
 
-    public int ReverseFPMaxDepth { get; set; } = 6;
+    public int RFP_MaxDepth { get; set; } = 6;
 
-    public int ReverseFPDepthScalingFactor { get; set; } = 75;
+    public int RFP_DepthScalingFactor { get; set; } = 75;
 }
 
 [JsonSourceGenerationOptions(
