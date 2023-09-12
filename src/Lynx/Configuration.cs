@@ -217,10 +217,14 @@ public sealed class EngineSettings
     /// It'll be scaled with phase
     /// </summary>
     public int BishopPairMaxBonus { get; set; } = 100;
+
+    public int ReverseFPMaxDepth { get; set; } = 6;
+
+    public int ReverseFPDepthScalingFactor { get; set; } = 75;
 }
 
 [JsonSourceGenerationOptions(
-    GenerationMode = JsonSourceGenerationMode.Serialization, WriteIndented = true)] // https://github.com/dotnet/runtime/issues/78602#issuecomment-1322004254
+    GenerationMode = JsonSourceGenerationMode.Default, WriteIndented = true)] // https://github.com/dotnet/runtime/issues/78602#issuecomment-1322004254
 [JsonSerializable(typeof(EngineSettings))]
 internal partial class EngineSettingsJsonSerializerContext : JsonSerializerContext
 {
