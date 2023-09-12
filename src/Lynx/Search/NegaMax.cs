@@ -125,8 +125,10 @@ public sealed partial class Engine
 
         var pseudoLegalMoves = SortMoves(MoveGenerator.GenerateAllMoves(position, Game.MovePool), ply, ttBestMove);
 
-        foreach (var move in pseudoLegalMoves)
+        for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count; ++moveIndex)
         {
+            var move = pseudoLegalMoves[moveIndex];
+
             var gameState = position.MakeMove(move);
 
             if (!position.WasProduceByAValidMove())
