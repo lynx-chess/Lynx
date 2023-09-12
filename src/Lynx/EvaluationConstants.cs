@@ -192,7 +192,7 @@ public static class EvaluationConstants
     /// [12][64]
     /// </summary>
     public static readonly int[][] MiddleGamePositionalTables =
-    {
+    [
         MiddleGamePawnTable,
         MiddleGameKnightTable,
         MiddleGameBishopTable,
@@ -206,10 +206,13 @@ public static class EvaluationConstants
         MiddleGameRookTableBlack,
         MiddleGameQueenTableBlack,
         MiddleGameKingTableBlack
-    };
+    ];
 
+    /// <summary>
+    /// [12][64]
+    /// </summary>
     public static readonly int[][] EndGamePositionalTables =
-    {
+    [
         EndGamePawnTable,
         EndGameKnightTable,
         EndGameBishopTable,
@@ -223,7 +226,7 @@ public static class EvaluationConstants
         EndGameRookTableBlack,
         EndGameQueenTableBlack,
         EndGameKingTableBlack
-    };
+    ];
 
     public static readonly int[,] MiddleGameTable = new int[12, 64];
     public static readonly int[,] EndGameTable = new int[12, 64];
