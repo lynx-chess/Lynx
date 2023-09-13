@@ -50,39 +50,91 @@ public sealed partial class Engine
         bool isCancelled = false;
         bool isMateDetected = false;
 
-        if (Game.MoveHistory.Count >= 2
-            && _previousSearchResult?.Moves.Count > 2
-            && _previousSearchResult.BestMove != default
-            && Game.MoveHistory[^2] == _previousSearchResult.Moves[0]
-            && Game.MoveHistory[^1] == _previousSearchResult.Moves[1])
-        {
-            _logger.Debug("Ponder hit");
-
-            lastSearchResult = new SearchResult(_previousSearchResult);
-
-            Array.Copy(_previousSearchResult.Moves.ToArray(), 2, _pVTable, 0, _previousSearchResult.Moves.Count - 2);
-
-            await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult));
-
-            for (int d = 1; d < Configuration.EngineSettings.MaxDepth - 2; ++d)
-            {
-                _killerMoves[0, d] = _previousKillerMoves[0, d + 2];
-                _killerMoves[1, d] = _previousKillerMoves[1, d + 2];
-            }
-
-            depth = lastSearchResult.Depth - 1;
-            alpha = lastSearchResult.Alpha;
-            beta = lastSearchResult.Beta;
-        }
-        else
-        {
-            Array.Clear(_killerMoves);
-            Array.Clear(_historyMoves);
-        }
-
         try
         {
             _stopWatch.Start();
+
+            bool onlyOneLegalMove = false;
+            Move firstLegalMove = default;
+            foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition))
+            {
+                var gameState = Game.CurrentPosition.MakeMove(move);
+                bool isPositionValid = Game.CurrentPosition.IsValid();
+                Game.CurrentPosition.UnmakeMove(move, gameState);
+
+                if (isPositionValid)
+                {
+                    // We save the first legal move and check if there's at least another one
+                    if (firstLegalMove == default)
+                    {
+                        firstLegalMove = move;
+                        onlyOneLegalMove = true;
+                    }
+                    // If there's a second legal move, we exit and let the search continue
+                    else
+                    {
+                        onlyOneLegalMove = false;
+                        break;
+                    }
+                }
+            }
+
+            // Detect if there was only one legal move
+            if (onlyOneLegalMove)
+            {
+                _logger.Debug("One single move found");
+                var elapsedTime = _stopWatch.ElapsedMilliseconds;
+
+                // We don't have or need any eval, and we don't want to return 0 or a negative eval that
+                // could make the GUI resign or take a draw from this position.
+                // Since this only happens in root, we don't really care about being more precise for raising
+                // alphas or betas of parent moves, so let's just return +-2 pawns depending on the side to move
+                var eval = Game.CurrentPosition.Side == Side.White
+                    ? +EvaluationConstants.SingleMoveEvaluation
+                    : -EvaluationConstants.SingleMoveEvaluation;
+
+                var result = new SearchResult(firstLegalMove, eval, 0, [firstLegalMove], alpha, beta)
+                {
+                    DepthReached = 0,
+                    Nodes = 0,
+                    Time = elapsedTime,
+                    NodesPerSecond = 0
+                };
+
+                await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(result));
+
+                return result;
+            }
+
+            if (Game.MoveHistory.Count >= 2
+                && _previousSearchResult?.Moves.Count > 2
+                && _previousSearchResult.BestMove != default
+                && Game.MoveHistory[^2] == _previousSearchResult.Moves[0]
+                && Game.MoveHistory[^1] == _previousSearchResult.Moves[1])
+            {
+                _logger.Debug("Ponder hit");
+
+                lastSearchResult = new SearchResult(_previousSearchResult);
+
+                Array.Copy(_previousSearchResult.Moves.ToArray(), 2, _pVTable, 0, _previousSearchResult.Moves.Count - 2);
+
+                await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult));
+
+                for (int d = 1; d < Configuration.EngineSettings.MaxDepth - 2; ++d)
+                {
+                    _killerMoves[0, d] = _previousKillerMoves[0, d + 2];
+                    _killerMoves[1, d] = _previousKillerMoves[1, d + 2];
+                }
+
+                depth = lastSearchResult.Depth - 1;
+                alpha = lastSearchResult.Alpha;
+                beta = lastSearchResult.Beta;
+            }
+            else
+            {
+                Array.Clear(_killerMoves);
+                Array.Clear(_historyMoves);
+            }
 
             do
             {

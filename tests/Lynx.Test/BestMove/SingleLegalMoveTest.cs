@@ -62,6 +62,8 @@ public class SingleLegalMoveTest : BaseTest
             Assert.AreEqual(-EvaluationConstants.SingleMoveEvaluation, result.Evaluation);
         }
 
-        Assert.AreEqual(depth, result.Depth);
+        Assert.AreEqual(0, result.Depth);
+        Assert.AreEqual(0, result.DepthReached);
+        Assert.AreEqual(0, result.NodesPerSecond);
     }
 }
