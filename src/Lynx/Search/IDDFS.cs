@@ -222,6 +222,7 @@ public sealed partial class Engine
         finalSearchResult.Nodes = _nodes;
         finalSearchResult.Time = _stopWatch.ElapsedMilliseconds;
         finalSearchResult.NodesPerSecond = Utils.CalculateNps(_nodes, _stopWatch.ElapsedMilliseconds);
+        finalSearchResult.HashfullPermill = _tt.HashfullPermillApprox();
 
         if (isMateDetected && finalSearchResult.Mate + Game.HalfMovesWithoutCaptureOrPawnMove < 96)
         {

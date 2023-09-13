@@ -25,7 +25,7 @@ public class SearchResult
 
     public bool IsCancelled { get; set; }
 
-    public int HashfullPermill { get; set; }
+    public int HashfullPermill { get; set; } = -1;
 
     public SearchResult(Move bestMove, double evaluation, int targetDepth, List<Move> moves, int alpha, int beta, int mate = default)
     {

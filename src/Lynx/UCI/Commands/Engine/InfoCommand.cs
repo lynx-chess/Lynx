@@ -86,6 +86,7 @@ public sealed class InfoCommand : EngineBaseCommand
             $" nodes {searchResult.Nodes}" +
             $" nps {searchResult.NodesPerSecond}" +
             $" time {searchResult.Time}" +
+            (searchResult.HashfullPermill != -1 ? $" hashfull {searchResult.HashfullPermill}" : string.Empty) +
             $" pv {string.Join(" ", searchResult.Moves.Select(move => move.UCIString()))}";
 #pragma warning restore RCS1214 // Unnecessary interpolated string.
     }

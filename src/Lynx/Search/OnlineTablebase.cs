@@ -20,7 +20,8 @@ public sealed partial class Engine
                     DepthReached = 0,
                     Nodes = 666,                // In case some guis proritize the info command with biggest depth
                     Time = stopWatch.ElapsedMilliseconds,
-                    NodesPerSecond = 0
+                    NodesPerSecond = 0,
+                    HashfullPermill = _tt.HashfullPermillApprox()
                 };
 
                 await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(searchResult));
