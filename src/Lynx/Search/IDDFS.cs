@@ -138,11 +138,12 @@ public sealed partial class Engine
                     NodesPerSecond = Utils.CalculateNps(_nodes, elapsedTime)
                 };
 
+                _logger.Warn($"Delta between current and previous: {lastSearchResult.Time - _previousSearchResult?.Time ?? 0}");
                 await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult));
 
                 Array.Copy(_killerMoves, _previousKillerMoves, _killerMoves.Length);
 
-            } while (stopSearchCondition(++depth, maxDepth, isMateDetected, _nodes, decisionTime, _stopWatch, _logger));
+            } while (stopSearchCondition(++depth, maxDepth, isMateDetected, _nodes, decisionTime, lastSearchResult.Time - _previousSearchResult?.Time ?? 0, _stopWatch, _logger));
         }
         catch (OperationCanceledException)
         {
@@ -182,7 +183,7 @@ public sealed partial class Engine
 
         return finalSearchResult;
 
-        static bool stopSearchCondition(int depth, int? maxDepth, bool isMateDetected, int nodes, int? decisionTime, Stopwatch stopWatch, Logger logger)
+        static bool stopSearchCondition(int depth, int? maxDepth, bool isMateDetected, int nodes, int? decisionTime, long lastSearchTime, Stopwatch stopWatch, Logger logger)
         {
             if (isMateDetected)
             {
@@ -200,14 +201,34 @@ public sealed partial class Engine
                 return shouldContinue;
             }
 
-            var elapsedMilliseconds = stopWatch.ElapsedMilliseconds;
-            var minTimeToConsiderStopSearching = Configuration.EngineSettings.MinElapsedTimeToConsiderStopSearching;
-            var decisionTimePercentageToStopSearching = Configuration.EngineSettings.DecisionTimePercentageToStopSearching;
-            if (decisionTime is not null && elapsedMilliseconds > minTimeToConsiderStopSearching && elapsedMilliseconds > decisionTimePercentageToStopSearching * decisionTime)
+            if (decisionTime is not null)
             {
-                logger.Info("Stopping at depth {0} (nodes {1}): {2} > {3} (elapsed time > [{4}, {5} * decision time])",
-                    depth - 1, nodes, elapsedMilliseconds, decisionTimePercentageToStopSearching * decisionTime, minTimeToConsiderStopSearching, decisionTimePercentageToStopSearching);
-                return false;
+                var elapsedMilliseconds = stopWatch.ElapsedMilliseconds;
+                var minTimeToStop = Configuration.EngineSettings.MinElapsedTimeToConsiderStopSearching;
+                var decisionTimePercentageToStop = Configuration.EngineSettings.DecisionTimeFactorToStopSearching;
+                var maxExpectedElapsedTimeToStop = decisionTimePercentageToStop * decisionTime;
+
+                if (elapsedMilliseconds > minTimeToStop
+                    && elapsedMilliseconds > maxExpectedElapsedTimeToStop)
+                {
+                    logger.Info("Stopping at depth {0} (nodes {1}): {2} > {3} (elapsed time > [{4}, {5} * decision time])",
+                        depth - 1, nodes, elapsedMilliseconds, maxExpectedElapsedTimeToStop, minTimeToStop, decisionTimePercentageToStop);
+                    return false;
+                }
+
+                var remainingTime = decisionTime - elapsedMilliseconds;
+                var minLastSearchTimeToStop = Configuration.EngineSettings.MinLastSearchTimeToConsiderStopSearching;
+                var lastTimeSearchFactorToStop = Configuration.EngineSettings.LastSearchTimeFactorToStopSearching;
+                var minExpectedRemainingTimeToStop = lastSearchTime * lastTimeSearchFactorToStop;
+
+                if (lastSearchTime > minLastSearchTimeToStop
+                    && remainingTime < minExpectedRemainingTimeToStop)
+                {
+                    logger.Info("Stopping at depth {0} (nodes {1}): {2} < {3} (remaining time < [{4} * {5}])",
+                        depth - 1, nodes, remainingTime, minExpectedRemainingTimeToStop, lastSearchTime, lastTimeSearchFactorToStop);
+
+                    return false;
+                }
             }
 
             return true;

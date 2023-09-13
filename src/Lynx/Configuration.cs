@@ -155,7 +155,22 @@ public sealed class EngineSettings
 
     public int MinElapsedTimeToConsiderStopSearching { get; set; } = 0;
 
-    public double DecisionTimePercentageToStopSearching { get; set; } = 0.4;
+    /// <summary>
+    /// Elapsed time must be greater than <see cref="DecisionTimeFactorToStopSearching"/> * decision time
+    /// to continue the search, providing elaped time is greater than <see cref="MinElapsedTimeToConsiderStopSearching"/>
+    /// </summary>
+    public double DecisionTimeFactorToStopSearching { get; set; } = 0.4;
+
+    /// <summary>
+    /// Time increment between last 2 searches
+    /// </summary>
+    public int MinLastSearchTimeToConsiderStopSearching { get; set; } = 1_000;
+
+    /// <summary>
+    /// Remaining time must be greater than <see cref="LastSearchTimeFactorToStopSearching"/> * last search time
+    /// to continue the search, providing last search time is greater than <see cref="MinLastSearchTimeToConsiderStopSearching"/>
+    /// </summary>
+    public double LastSearchTimeFactorToStopSearching { get; set; } = 1.0;
 
     public int LMR_MinFullDepthSearchedMoves { get; set; } = 4;
 
