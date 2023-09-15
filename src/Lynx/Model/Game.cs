@@ -65,6 +65,29 @@ public sealed class Game
         _gameInitialPosition = new Position(CurrentPosition);
     }
 
+    public Game(string fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan) : this(fen)
+    {
+        foreach (var range in rangeSpan)
+        {
+            if (range.Start.Equals(range.End))
+            {
+                break;
+            }
+            var moveString = rawMoves[range].ToString();
+            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, MovePool);
+
+            if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
+            {
+                _logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen, string.Join(' ', rawMoves.ToString()), moveString);
+                break;
+            }
+
+            MakeMove(parsedMove.Value);
+        }
+
+        _gameInitialPosition = new Position(CurrentPosition);
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsThreefoldRepetition(Position position) => PositionHashHistory.Contains(position.UniqueIdentifier);
 
