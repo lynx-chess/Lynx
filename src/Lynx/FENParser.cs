@@ -38,7 +38,7 @@ public static partial class FENParser
 
             var unparsedString = fen[(matches[^1].Index + matches[^1].Length)..].AsSpan();
             Span<Range> parts = stackalloc Range[5];
-            var partsLength = unparsedString.Split(parts, " ", StringSplitOptions.RemoveEmptyEntries);
+            var partsLength = unparsedString.Split(parts, ' ', StringSplitOptions.RemoveEmptyEntries);
 
             if (partsLength < 3)
             {
