@@ -1,5 +1,6 @@
 ﻿using Lynx.Model;
 using NLog;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
 namespace Lynx;
@@ -45,11 +46,11 @@ public static partial class FENParser
                 throw new($"Error parsing second half (after board) of fen {fen}");
             }
 
-            side = ParseSide(unparsedStringAsSpan, parts[0]);
+            side = ParseSide(unparsedStringAsSpan[parts[0]]);
 
-            castle = ParseCastlingRights(unparsedStringAsSpan, parts[1]);
+            castle = ParseCastlingRights(unparsedStringAsSpan[parts[1]]);
 
-            (enPassant, success) = ParseEnPassant(unparsedStringAsSpan, parts[2], pieceBitBoards, side);
+            (enPassant, success) = ParseEnPassant(unparsedStringAsSpan[parts[2]], pieceBitBoards, side);
 
             if (partsLength < 4 || !int.TryParse(unparsedStringAsSpan[parts[3]], out halfMoveClock))
             {
@@ -71,6 +72,7 @@ public static partial class FENParser
         return (success, pieceBitBoards, occupancyBitBoards, side, castle, enPassant, halfMoveClock, fullMoveCounter);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static (MatchCollection Matches, bool Success) ParseBoard(string fen, BitBoard[] pieceBitBoards, BitBoard[] occupancyBitBoards)
     {
         bool success = true;
@@ -130,45 +132,45 @@ public static partial class FENParser
         }
     }
 
-    private static Side ParseSide(ReadOnlySpan<char> unparsedString, Range sideRange)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static Side ParseSide(ReadOnlySpan<char> side)
     {
-        var sidePart = unparsedString[sideRange];
-#pragma warning disable S3358 // Ternary operators should not be nested
-        bool isWhite = sidePart[0].Equals('w');
-
-        return isWhite || sidePart[0].Equals('b')
-            ? isWhite ? Side.White : Side.Black
-            : throw new($"Unrecognized side: {sidePart}");
-#pragma warning restore S3358 // Ternary operators should not be nested
+        return side[0] switch
+        {
+            'w' or 'W' => Side.White,
+            'b' or 'B' => Side.Black,
+            _ => throw new($"Unrecognized side: {side}")
+        };
     }
 
-    private static byte ParseCastlingRights(ReadOnlySpan<char> unparsedString, Range castleRange)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static byte ParseCastlingRights(ReadOnlySpan<char> castling)
     {
         byte castle = 0;
 
-        foreach (var ch in unparsedString[castleRange])
+        for (int i = 0; i < castling.Length; ++i)
         {
-            castle |= ch switch
+            castle |= castling[i] switch
             {
                 'K' => (byte)CastlingRights.WK,
                 'Q' => (byte)CastlingRights.WQ,
                 'k' => (byte)CastlingRights.BK,
                 'q' => (byte)CastlingRights.BQ,
                 '-' => castle,
-                _ => throw new($"Unrecognized castling char: {ch}")
+                _ => throw new($"Unrecognized castling char: {castling[i]}")
             };
         }
 
         return castle;
     }
 
-    private static (BoardSquare EnPassant, bool Success) ParseEnPassant(ReadOnlySpan<char> unparsedString, Range enPassantRange, BitBoard[] PieceBitBoards, Side side)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static (BoardSquare EnPassant, bool Success) ParseEnPassant(ReadOnlySpan<char> enPassantSpan,BitBoard[] PieceBitBoards, Side side)
     {
-        var enPassantPart = unparsedString[enPassantRange];
         bool success = true;
         BoardSquare enPassant = BoardSquare.noSquare;
 
-        if (Enum.TryParse(enPassantPart, ignoreCase: true, out BoardSquare result))
+        if (Enum.TryParse(enPassantSpan, ignoreCase: true, out BoardSquare result))
         {
             enPassant = result;
 
@@ -176,7 +178,7 @@ public static partial class FENParser
             if (rank != 3 && rank != 6)
             {
                 success = false;
-                _logger.Error("Invalid en passant square: {0}", enPassantPart.ToString());
+                _logger.Error("Invalid en passant square: {0}", enPassantSpan.ToString());
             }
 
             // Check that there's an actual pawn to be captured
@@ -193,13 +195,13 @@ public static partial class FENParser
             if (!pawnBitBoard.GetBit(pawnSquare))
             {
                 success = false;
-                _logger.Error("Invalid board: en passant square {0}, but no {1} pawn located in {2}", enPassantPart.ToString(), side, pawnSquare);
+                _logger.Error("Invalid board: en passant square {0}, but no {1} pawn located in {2}", enPassantSpan.ToString(), side, pawnSquare);
             }
         }
-        else if (enPassantPart[0] != '-')
+        else if (enPassantSpan[0] != '-')
         {
             success = false;
-            _logger.Error("Invalid en passant square: {0}", enPassantPart.ToString());
+            _logger.Error("Invalid en passant square: {0}", enPassantSpan.ToString());
         }
 
         return (enPassant, success);
