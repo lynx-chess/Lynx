@@ -49,11 +49,9 @@ public sealed partial class PositionCommand : GUIBaseCommand
                 _logger.Error("Error parsing position command '{0}': no initial position found", positionCommand);
             }
 
-            Span<Range> moves = stackalloc Range[250];
-            var movesRegexResultAsSpan = _movesRegex.Match(positionCommand).ValueSpan;
-            movesRegexResultAsSpan.Split(moves, ' ', StringSplitOptions.RemoveEmptyEntries);
+            var moves = _movesRegex.Match(positionCommand).Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-            return new Game(initialPosition, movesRegexResultAsSpan, moves);
+            return new Game(initialPosition, moves);
         }
         catch (Exception e)
         {

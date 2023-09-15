@@ -47,10 +47,7 @@ public sealed class Game
         PositionHashHistory = new(150) { position.UniqueIdentifier };
     }
 
-#pragma warning disable S1133 // Deprecated code should be removed - used internally for benchmarks
-    [Obsolete("Use ReadOnlySpan<char>,Span<Range> overload instead")]
-#pragma warning restore S1133 // Deprecated code should be removed
-    internal Game(string fen, List<string> movesUCIString) : this(fen)
+    internal Game(string fen, string[] movesUCIString) : this(fen)
     {
         foreach (var moveString in movesUCIString)
         {
