@@ -47,7 +47,7 @@ public sealed class Game
         PositionHashHistory = new(150) { position.UniqueIdentifier };
     }
 
-    internal Game(string fen, string[] movesUCIString) : this(fen)
+    public Game(string fen, string[] movesUCIString) : this(fen)
     {
         foreach (var moveString in movesUCIString)
         {
@@ -65,7 +65,7 @@ public sealed class Game
         _gameInitialPosition = new Position(CurrentPosition);
     }
 
-    public Game(string fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan) : this(fen)
+    internal Game(string fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan) : this(fen)
     {
         for (int i = 0; i < rangeSpan.Length; ++i)
         {
