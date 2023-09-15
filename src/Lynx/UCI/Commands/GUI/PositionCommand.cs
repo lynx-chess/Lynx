@@ -50,10 +50,10 @@ public sealed partial class PositionCommand : GUIBaseCommand
             }
 
             Span<Range> moves = stackalloc Range[250];
-            var movesRegexResult = _movesRegex.Match(positionCommand).ValueSpan;
-            movesRegexResult.Split(moves, ' ', StringSplitOptions.RemoveEmptyEntries);
+            var movesRegexResultAsSpan = _movesRegex.Match(positionCommand).ValueSpan;
+            movesRegexResultAsSpan.Split(moves, ' ', StringSplitOptions.RemoveEmptyEntries);
 
-            return new Game(initialPosition, movesRegexResult, moves);
+            return new Game(initialPosition, movesRegexResultAsSpan, moves);
         }
         catch (Exception e)
         {

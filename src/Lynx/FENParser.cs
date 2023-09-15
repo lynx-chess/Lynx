@@ -36,27 +36,27 @@ public static partial class FENParser
             MatchCollection matches;
             (matches, success) = ParseBoard(fen, pieceBitBoards, occupancyBitBoards);
 
-            var unparsedString = fen[(matches[^1].Index + matches[^1].Length)..].AsSpan();
+            var unparsedStringAsSpan = fen[(matches[^1].Index + matches[^1].Length)..].AsSpan();
             Span<Range> parts = stackalloc Range[5];
-            var partsLength = unparsedString.Split(parts, ' ', StringSplitOptions.RemoveEmptyEntries);
+            var partsLength = unparsedStringAsSpan.Split(parts, ' ', StringSplitOptions.RemoveEmptyEntries);
 
             if (partsLength < 3)
             {
                 throw new($"Error parsing second half (after board) of fen {fen}");
             }
 
-            side = ParseSide(unparsedString, parts[0]);
+            side = ParseSide(unparsedStringAsSpan, parts[0]);
 
-            castle = ParseCastlingRights(unparsedString, parts[1]);
+            castle = ParseCastlingRights(unparsedStringAsSpan, parts[1]);
 
-            (enPassant, success) = ParseEnPassant(unparsedString, parts[2], pieceBitBoards, side);
+            (enPassant, success) = ParseEnPassant(unparsedStringAsSpan, parts[2], pieceBitBoards, side);
 
-            if (partsLength < 4 || !int.TryParse(unparsedString[parts[3]], out halfMoveClock))
+            if (partsLength < 4 || !int.TryParse(unparsedStringAsSpan[parts[3]], out halfMoveClock))
             {
                 _logger.Debug("No half move clock detected");
             }
 
-            if (partsLength < 5 || !int.TryParse(unparsedString[parts[4]], out fullMoveCounter))
+            if (partsLength < 5 || !int.TryParse(unparsedStringAsSpan[parts[4]], out fullMoveCounter))
             {
                 _logger.Debug("No full move counter detected");
             }
