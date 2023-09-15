@@ -134,7 +134,9 @@ public partial class ParseGameBenchmark : BaseBenchmark
 
                 var moves = _movesRegex.Match(positionCommand).Value.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
 
+#pragma warning disable CS0618 // Type or member is obsolete
                 return new Game(initialPosition, moves);
+#pragma warning restore CS0618 // Type or member is obsolete
             }
             catch (Exception e)
             {
@@ -161,7 +163,7 @@ public partial class ParseGameBenchmark : BaseBenchmark
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         public static Game ParseGame(string positionCommand)
-            {
+        {
                 try
                 {
                     var positionCommandSpan = positionCommand.AsSpan();

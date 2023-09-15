@@ -47,7 +47,10 @@ public sealed class Game
         PositionHashHistory = new(150) { position.UniqueIdentifier };
     }
 
-    public Game(string fen, List<string> movesUCIString) : this(fen)
+#pragma warning disable S1133 // Deprecated code should be removed - used internally for benchmarks
+    [Obsolete("Use ReadOnlySpan<char>,Span<Range> overload instead")]
+#pragma warning restore S1133 // Deprecated code should be removed
+    internal Game(string fen, List<string> movesUCIString) : this(fen)
     {
         foreach (var moveString in movesUCIString)
         {
@@ -67,18 +70,19 @@ public sealed class Game
 
     public Game(string fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan) : this(fen)
     {
-        foreach (var range in rangeSpan)
+        for (int i = 0; i < rangeSpan.Length; ++i)
         {
+            var range = rangeSpan[i];
             if (range.Start.Equals(range.End))
             {
                 break;
             }
-            var moveString = rawMoves[range].ToString();
+            var moveString = rawMoves[range];
             var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, MovePool);
 
             if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
             {
-                _logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen, string.Join(' ', rawMoves.ToString()), moveString);
+                _logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen, string.Join(' ', rawMoves.ToString()), moveString.ToString());
                 break;
             }
 
