@@ -159,6 +159,10 @@ public partial class ParseGameBenchmark : BaseBenchmark
     [ArgumentsSource(nameof(Data))]
     public Game ParseGame_Improved4(string positionCommand) => ParseGame_ImprovedClass4.ParseGame(positionCommand);
 
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public Game ParseGame_Improved5(string positionCommand) => ParseGame_ImprovedClass5.ParseGame(positionCommand);
+
     public static partial class ParseGame_OriginalClass
     {
         public const string StartPositionString = "startpos";
@@ -286,7 +290,7 @@ public partial class ParseGameBenchmark : BaseBenchmark
                 }
 
                 var movesRegexResultAsSpan = _movesRegex.Match(positionCommand).ValueSpan;
-                Span<Range> moves = stackalloc Range[(movesRegexResultAsSpan.Length + 1) / 5];
+                Span<Range> moves = stackalloc Range[(movesRegexResultAsSpan.Length / 5) + 1];
                 movesRegexResultAsSpan.Split(moves, ' ', StringSplitOptions.RemoveEmptyEntries);
 
                 return new Game(initialPosition, movesRegexResultAsSpan, moves);
@@ -332,7 +336,7 @@ public partial class ParseGameBenchmark : BaseBenchmark
                 }
 
                 var movesRegexResultAsSpan = _movesRegex.Match(positionCommand).ValueSpan;
-                Span<Range> moves = stackalloc Range[(movesRegexResultAsSpan.Length + 1) / 5];
+                Span<Range> moves = stackalloc Range[(movesRegexResultAsSpan.Length / 5) + 1];
                 movesRegexResultAsSpan.Split(moves, ' ', StringSplitOptions.RemoveEmptyEntries);
 
                 return new Game(initialPosition, movesRegexResultAsSpan, moves);
@@ -381,6 +385,54 @@ public partial class ParseGameBenchmark : BaseBenchmark
                 var movesSection = positionCommand[items[1]];
 
                 Span<Range> moves = stackalloc Range[2048]; // Number of potential half-moves provided in the string
+                movesSection.Split(moves, ' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+                return new Game(fen, movesSection, moves);
+            }
+            catch (Exception e)
+            {
+                _logger.Error(e, "Error parsing position command '{0}'", positionCommand.ToString());
+                return new Game();
+            }
+        }
+    }
+
+    public static class ParseGame_ImprovedClass5
+    {
+        public const string Id = "position";
+
+        public const string StartPositionString = "startpos";
+        public const string MovesString = "moves";
+
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
+        public static Game ParseGame(ReadOnlySpan<char> positionCommand)
+        {
+            try
+            {
+                // We divide the position command in these two sections:
+                // "position startpos                       ||"
+                // "position startpos                       || moves e2e4 e7e5"
+                // "position fen 8/8/8/8/8/8/8/8 w - - 0 1  ||"
+                // "position fen 8/8/8/8/8/8/8/8 w - - 0 1  || moves e2e4 e7e5"
+                Span<Range> items = stackalloc Range[2];
+                positionCommand.Split(items, "moves", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+                var initialPositionSection = positionCommand[items[0]];
+
+                // We divide in these two parts
+                // "position startpos ||"       <-- If "fen" doesn't exist in the section
+                // "position || (fen) 8/8/8/8/8/8/8/8 w - - 0 1"  <-- If "fen" does exist
+                Span<Range> initialPositionParts = stackalloc Range[2];
+                initialPositionSection.Split(initialPositionParts, "fen", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+                ReadOnlySpan<char> fen = initialPositionSection[initialPositionParts[0]].Length == Id.Length   // "position" o "position startpos"
+                    ? initialPositionSection[initialPositionParts[1]]
+                    : Constants.InitialPositionFEN.AsSpan();
+
+                var movesSection = positionCommand[items[1]];
+
+                Span<Range> moves = stackalloc Range[(movesSection.Length / 5) + 1]; // Number of potential half-moves provided in the string
                 movesSection.Split(moves, ' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
                 return new Game(fen, movesSection, moves);
