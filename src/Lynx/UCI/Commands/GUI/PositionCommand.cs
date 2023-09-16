@@ -35,10 +35,8 @@ public sealed partial class PositionCommand : GUIBaseCommand
     {
         try
         {
-            var positionCommandSpan = positionCommand.AsSpan();
-            Span<Range> items = stackalloc Range[3];    // Leaving 'everything else' in the third one
-            positionCommandSpan.Split(items, ' ', StringSplitOptions.RemoveEmptyEntries);
-            bool isInitialPosition = positionCommandSpan[items[1]].Equals(StartPositionString, StringComparison.OrdinalIgnoreCase);
+            var items = positionCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            bool isInitialPosition = string.Equals(items.ElementAtOrDefault(1), StartPositionString, StringComparison.OrdinalIgnoreCase);
 
             var initialPosition = isInitialPosition
                     ? Constants.InitialPositionFEN
@@ -49,9 +47,11 @@ public sealed partial class PositionCommand : GUIBaseCommand
                 _logger.Error("Error parsing position command '{0}': no initial position found", positionCommand);
             }
 
-            var moves = _movesRegex.Match(positionCommand).Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            var movesRegexResultAsSpan = _movesRegex.Match(positionCommand).ValueSpan;
+            Span<Range> moves = stackalloc Range[(movesRegexResultAsSpan.Length + 1) / 5];
+            movesRegexResultAsSpan.Split(moves, ' ', StringSplitOptions.RemoveEmptyEntries);
 
-            return new Game(initialPosition, moves);
+            return new Game(initialPosition, movesRegexResultAsSpan, moves);
         }
         catch (Exception e)
         {
