@@ -266,7 +266,7 @@ public sealed partial class Engine
         {
             var eval = Position.EvaluateFinalPosition(ply, isInCheck);
 
-            _tt.RecordHash(_ttMask, position, depth, ply, eval, NodeType.Exact);
+            _tt.RecordHash(_ttMask, position, depth, ply, eval, NodeType.Exact, ttBestMove);
             return eval;
         }
 
