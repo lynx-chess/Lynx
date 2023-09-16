@@ -32,8 +32,8 @@ public sealed class Game
             _logger.Warn($"Invalid position detected: {fen}");
         }
 
-        MoveHistory = new(150);
-        PositionHashHistory = new(150) { CurrentPosition.UniqueIdentifier };
+        MoveHistory = new(1024);
+        PositionHashHistory = new(1024) { CurrentPosition.UniqueIdentifier };
 
         HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
     }
@@ -43,8 +43,8 @@ public sealed class Game
         CurrentPosition = position;
         _gameInitialPosition = new Position(CurrentPosition);
 
-        MoveHistory = new(150);
-        PositionHashHistory = new(150) { position.UniqueIdentifier };
+        MoveHistory = new(1024);
+        PositionHashHistory = new(1024) { position.UniqueIdentifier };
     }
 
     public Game(string fen, string[] movesUCIString) : this(fen)
