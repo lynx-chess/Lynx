@@ -98,7 +98,15 @@ public partial class ParseGameBenchmark : BaseBenchmark
 
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
-    public Game ParseGame_Current(string positionCommand) => ParseGame_ImprovedClass.ParseGame(positionCommand);
+    public Game ParseGame_Improved1(string positionCommand) => ParseGame_ImprovedClass1.ParseGame(positionCommand);
+
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public Game ParseGame_Improved2(string positionCommand) => ParseGame_ImprovedClass2.ParseGame(positionCommand);
+
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public Game ParseGame_Improved3(string positionCommand) => ParseGame_ImprovedClass2.ParseGame(positionCommand);
 
     public static partial class ParseGame_OriginalClass
     {
@@ -146,8 +154,8 @@ public partial class ParseGameBenchmark : BaseBenchmark
         }
     }
 
-        public static partial class ParseGame_ImprovedClass
-        {
+    public static partial class ParseGame_ImprovedClass1
+    {
         public const string StartPositionString = "startpos";
         public const string MovesString = "moves";
 
@@ -164,33 +172,125 @@ public partial class ParseGameBenchmark : BaseBenchmark
 
         public static Game ParseGame(string positionCommand)
         {
-                try
+            try
+            {
+                var positionCommandSpan = positionCommand.AsSpan();
+                Span<Range> items = stackalloc Range[3];    // Leaving 'everything else' in the third one
+                positionCommandSpan.Split(items, ' ', StringSplitOptions.RemoveEmptyEntries);
+                bool isInitialPosition = positionCommandSpan[items[1]].Equals(StartPositionString, StringComparison.OrdinalIgnoreCase);
+
+                var initialPosition = isInitialPosition
+                        ? Constants.InitialPositionFEN
+                        : _fenRegex.Match(positionCommand).Value.Trim();
+
+                if (string.IsNullOrEmpty(initialPosition))
                 {
-                    var positionCommandSpan = positionCommand.AsSpan();
-                    Span<Range> items = stackalloc Range[3];    // Leaving 'everything else' in the third one
-                    positionCommandSpan.Split(items, ' ', StringSplitOptions.RemoveEmptyEntries);
-                    bool isInitialPosition = positionCommandSpan[items[1]].Equals(StartPositionString, StringComparison.OrdinalIgnoreCase);
-
-                    var initialPosition = isInitialPosition
-                            ? Constants.InitialPositionFEN
-                            : _fenRegex.Match(positionCommand).Value.Trim();
-
-                    if (string.IsNullOrEmpty(initialPosition))
-                    {
-                        _logger.Error("Error parsing position command '{0}': no initial position found", positionCommand);
-                    }
-
-                    Span<Range> moves = stackalloc Range[250];
-                    var movesRegexResult = _movesRegex.Match(positionCommand).ValueSpan;
-                    movesRegexResult.Split(moves, ' ', StringSplitOptions.RemoveEmptyEntries);
-
-                    return new Game(initialPosition, movesRegexResult, moves);
+                    _logger.Error("Error parsing position command '{0}': no initial position found", positionCommand);
                 }
-                catch (Exception e)
-                {
-                    _logger.Error(e, "Error parsing position command '{0}'", positionCommand);
-                    return new Game();
-                }
+
+                var moves = _movesRegex.Match(positionCommand).Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                return new Game(initialPosition, moves);
+            }
+            catch (Exception e)
+            {
+                _logger.Error(e, "Error parsing position command '{0}'", positionCommand);
+                return new Game();
             }
         }
     }
+
+    public static partial class ParseGame_ImprovedClass2
+    {
+        public const string StartPositionString = "startpos";
+        public const string MovesString = "moves";
+
+        [GeneratedRegex("(?<=fen).+?(?=moves|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+        private static partial Regex FenRegex();
+
+        [GeneratedRegex("(?<=moves).+?(?=$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+        private static partial Regex MovesRegex();
+
+        private static readonly Regex _fenRegex = FenRegex();
+        private static readonly Regex _movesRegex = MovesRegex();
+
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
+        public static Game ParseGame(string positionCommand)
+        {
+            try
+            {
+                var positionCommandSpan = positionCommand.AsSpan();
+                Span<Range> items = stackalloc Range[3];    // Leaving 'everything else' in the third one
+                positionCommandSpan.Split(items, ' ', StringSplitOptions.RemoveEmptyEntries);
+                bool isInitialPosition = positionCommandSpan[items[1]].Equals(StartPositionString, StringComparison.OrdinalIgnoreCase);
+
+                var initialPosition = isInitialPosition
+                        ? Constants.InitialPositionFEN
+                        : _fenRegex.Match(positionCommand).Value.Trim();
+
+                if (string.IsNullOrEmpty(initialPosition))
+                {
+                    _logger.Error("Error parsing position command '{0}': no initial position found", positionCommand);
+                }
+
+                var movesRegexResultAsSpan = _movesRegex.Match(positionCommand).ValueSpan;
+                Span<Range> moves = stackalloc Range[(movesRegexResultAsSpan.Length + 1) / 5];
+                movesRegexResultAsSpan.Split(moves, ' ', StringSplitOptions.RemoveEmptyEntries);
+
+                return new Game(initialPosition, movesRegexResultAsSpan, moves);
+            }
+            catch (Exception e)
+            {
+                _logger.Error(e, "Error parsing position command '{0}'", positionCommand);
+                return new Game();
+            }
+        }
+    }
+
+    public static partial class ParseGame_ImprovedClass3
+    {
+        public const string StartPositionString = "startpos";
+        public const string MovesString = "moves";
+
+        [GeneratedRegex("(?<=fen).+?(?=moves|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+        private static partial Regex FenRegex();
+
+        [GeneratedRegex("(?<=moves).+?(?=$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+        private static partial Regex MovesRegex();
+
+        private static readonly Regex _fenRegex = FenRegex();
+        private static readonly Regex _movesRegex = MovesRegex();
+
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
+        public static Game ParseGame(string positionCommand)
+        {
+            try
+            {
+                var items = positionCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                bool isInitialPosition = string.Equals(items.ElementAtOrDefault(1), StartPositionString, StringComparison.OrdinalIgnoreCase);
+
+                var initialPosition = isInitialPosition
+                        ? Constants.InitialPositionFEN
+                        : _fenRegex.Match(positionCommand).Value.Trim();
+
+                if (string.IsNullOrEmpty(initialPosition))
+                {
+                    _logger.Error("Error parsing position command '{0}': no initial position found", positionCommand);
+                }
+
+                var movesRegexResultAsSpan = _movesRegex.Match(positionCommand).ValueSpan;
+                Span<Range> moves = stackalloc Range[(movesRegexResultAsSpan.Length + 1) / 5];
+                movesRegexResultAsSpan.Split(moves, ' ', StringSplitOptions.RemoveEmptyEntries);
+
+                return new Game(initialPosition, movesRegexResultAsSpan, moves);
+            }
+            catch (Exception e)
+            {
+                _logger.Error(e, "Error parsing position command '{0}'", positionCommand);
+                return new Game();
+            }
+        }
+    }
+}
