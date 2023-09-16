@@ -161,15 +161,13 @@ public class FENParserTest
     [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR a KQkq - 0 1", Side.Both)]
     public void SideToMove(string fen, Side expectedSide)
     {
-        var result = FENParser.ParseFEN(fen);
-
         if (expectedSide != Side.Both)
         {
-            Assert.AreEqual(expectedSide, result.Side);
+            Assert.AreEqual(expectedSide, FENParser.ParseFEN(fen).Side);
         }
         else
         {
-            Assert.AreEqual(Side.Both, result.Side);
+            Assert.Throws<Exception>(() => FENParser.ParseFEN(fen));
         }
     }
 
@@ -189,16 +187,21 @@ public class FENParserTest
     {
         // Arrange
         // Make sure a previous Fen doesn't change anything
-        const string previuosFen = "8/8/8/8/8/8/8/8 w KQkq 1234 0 1";
-        var result = FENParser.ParseFEN(previuosFen);
+        const string previuosFen = "8/8/8/8/8/8/8/8 w KQkq - 0 1";
+        Assert.DoesNotThrow(() => FENParser.ParseFEN(previuosFen));
 
-        // Act
-        result = FENParser.ParseFEN(fen);
-
-        // Assert
         if (expectedCastleResult >= 0)
         {
+            // Act
+            var result = FENParser.ParseFEN(fen);
+
+            //Assert
             Assert.AreEqual(expectedCastleResult, result.Castle);
+        }
+        else
+        {
+            // Act and Assert
+            Assert.Throws<Exception>(() => FENParser.ParseFEN(fen));
         }
     }
 
@@ -220,9 +223,11 @@ public class FENParserTest
     [TestCase("rnbqkbnr/ppppp1pp/8/8/4pP2/8/PPPPP1PP/RNBQKBNR b Qq b3 0 1")]  // f3 could be
     [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq i1 0 1")]
     [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq i3 0 1")]
+    [TestCase("8/8/Q7/P7/1p6/8/8/8 w - b3 0 1", Description = "Wrong EnPassant square")]
+    [TestCase("8/8/8/1P6/p7/q7/8/8 b - b6 0 1", Description = "Wrong EnPassant square")]
     public void EnPassant_Error(string fen)
     {
-        var result = FENParser.ParseFEN(fen);
+        Assert.Throws<AssertException>(() => FENParser.ParseFEN(fen));
     }
 
     [TestCase("8/8/8/8/8/8/8/8 w KQkq - 0 1", 0)]

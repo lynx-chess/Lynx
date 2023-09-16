@@ -22,7 +22,7 @@ public static class FENParser
         bool success;
         Side side = Side.Both;
         byte castle = 0;
-        int halfMoveClock = 0, fullMoveCounter = 1;
+        int halfMoveClock = 0/*, fullMoveCounter = 1*/;
         BoardSquare enPassant = BoardSquare.noSquare;
 
         try
@@ -56,17 +56,15 @@ public static class FENParser
         }
         catch (Exception e)
         {
-            _logger.Error("Error parsing FEN string {0}", fen.ToString());
             _logger.Error(e.Message);
             success = false;
+            throw;
         }
 
-#if DEBUG
         if (!success)
         {
-            throw new();
+            throw new AssertException($"Error parsing {fen.ToString()}");
         }
-#endif
 
         return (pieceBitBoards, occupancyBitBoards, side, castle, enPassant, halfMoveClock/*, fullMoveCounter*/);
     }
