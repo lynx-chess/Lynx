@@ -46,7 +46,7 @@ public sealed class Game
 
         if (!CurrentPosition.IsValid())
         {
-            _logger.Warn($"Invalid position detected: {fen}");
+            _logger.Warn($"Invalid position detected: {fen.ToString()}");
         }
 
         MoveHistory = new(1024);
@@ -55,6 +55,10 @@ public sealed class Game
         HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
     }
 
+    /// <summary>
+    /// Intended to be used from tests only
+    /// </summary>
+    /// <param name="position"></param>
     internal Game(Position position)
     {
         CurrentPosition = position;
@@ -100,7 +104,7 @@ public sealed class Game
         _gameInitialPosition = new Position(CurrentPosition);
     }
 
-    internal Game(string fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan) : this(fen)
+    public Game(string fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan) : this(fen)
     {
         for (int i = 0; i < rangeSpan.Length; ++i)
         {
@@ -124,7 +128,7 @@ public sealed class Game
         _gameInitialPosition = new Position(CurrentPosition);
     }
 
-    internal Game(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan) : this(fen)
+    public Game(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan) : this(fen)
     {
         for (int i = 0; i < rangeSpan.Length; ++i)
         {

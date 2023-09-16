@@ -8,10 +8,6 @@ public class Position
 {
     //private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    public string FEN() => CalculateFEN();
-
-    public string FEN(int halfMovesWithoutCaptureOrPawnMove) => CalculateFEN(halfMovesWithoutCaptureOrPawnMove);
-
     public long UniqueIdentifier { get; private set; }
 
     /// <summary>
@@ -488,14 +484,7 @@ public class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private string CalculateFEN(int halfMovesWithoutCaptureOrPawnMove)
-    {
-        var fen = CalculateFEN();
-        return fen.Replace(" 0 1", $" {halfMovesWithoutCaptureOrPawnMove} 1");
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private string CalculateFEN()
+    private string FEN(int halfMovesWithoutCaptureOrPawnMove = 0, int fullMoveClock = 1)
     {
         var sb = new StringBuilder(100);
 
@@ -584,7 +573,7 @@ public class Position
 
         sb.Append(EnPassant == BoardSquare.noSquare ? "-" : Constants.Coordinates[(int)EnPassant]);
 
-        sb.Append(" 0 1");
+        sb.Append(' ').Append(halfMovesWithoutCaptureOrPawnMove).Append(' ').Append(fullMoveClock);
 
         return sb.ToString();
     }
