@@ -49,10 +49,10 @@ public static class FENParser
                 _logger.Debug("No half move clock detected");
             }
 
-            if (partsLength < 5 || !int.TryParse(unparsedStringAsSpan[parts[4]], out fullMoveCounter))
-            {
-                _logger.Debug("No full move counter detected");
-            }
+            //if (partsLength < 5 || !int.TryParse(unparsedStringAsSpan[parts[4]], out fullMoveCounter))
+            //{
+            //    _logger.Debug("No full move counter detected");
+            //}
         }
         catch (Exception e)
         {
@@ -60,6 +60,13 @@ public static class FENParser
             _logger.Error(e.Message);
             success = false;
         }
+
+#if DEBUG
+        if (!success)
+        {
+            throw new();
+        }
+#endif
 
         return (pieceBitBoards, occupancyBitBoards, side, castle, enPassant, halfMoveClock/*, fullMoveCounter*/);
     }
