@@ -15,74 +15,12 @@ public static partial class FENParser
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public static (bool Success, BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, byte Castle, BoardSquare EnPassant,
-        int HalfMoveClock, int FullMoveCounter) ParseFEN(string fen)
-    {
-        fen = fen.Trim();
-
-        var pieceBitBoards = new BitBoard[12] {
-                default, default, default, default,
-                default, default, default, default,
-                default, default, default, default};
-
-        var occupancyBitBoards = new BitBoard[3] { default, default, default };
-
-        bool success;
-        Side side = Side.Both;
-        byte castle = 0;
-        int halfMoveClock = 0, fullMoveCounter = 1;
-        BoardSquare enPassant = BoardSquare.noSquare;
-
-        try
-        {
-            MatchCollection matches;
-            (matches, success) = ParseBoard(fen, pieceBitBoards, occupancyBitBoards);
-
-            var unparsedStringAsSpan = fen[(matches[^1].Index + matches[^1].Length)..].AsSpan();
-            Span<Range> parts = stackalloc Range[5];
-            var partsLength = unparsedStringAsSpan.Split(parts, ' ', StringSplitOptions.RemoveEmptyEntries);
-
-            if (partsLength < 3)
-            {
-                throw new($"Error parsing second half (after board) of fen {fen}");
-            }
-
-            side = ParseSide(unparsedStringAsSpan[parts[0]]);
-
-            castle = ParseCastlingRights(unparsedStringAsSpan[parts[1]]);
-
-            (enPassant, success) = ParseEnPassant(unparsedStringAsSpan[parts[2]], pieceBitBoards, side);
-
-            if (partsLength < 4 || !int.TryParse(unparsedStringAsSpan[parts[3]], out halfMoveClock))
-            {
-                _logger.Debug("No half move clock detected");
-            }
-
-            if (partsLength < 5 || !int.TryParse(unparsedStringAsSpan[parts[4]], out fullMoveCounter))
-            {
-                _logger.Debug("No full move counter detected");
-            }
-        }
-        catch (Exception e)
-        {
-            _logger.Error("Error parsing FEN string {0}", fen);
-            _logger.Error(e.Message);
-            success = false;
-        }
-
-        return (success, pieceBitBoards, occupancyBitBoards, side, castle, enPassant, halfMoveClock, fullMoveCounter);
-    }
-
-    public static (bool Success, BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, byte Castle, BoardSquare EnPassant,
         int HalfMoveClock, int FullMoveCounter) ParseFEN(ReadOnlySpan<char> fen)
     {
         fen = fen.Trim();
 
-        var pieceBitBoards = new BitBoard[12] {
-                default, default, default, default,
-                default, default, default, default,
-                default, default, default, default};
-
-        var occupancyBitBoards = new BitBoard[3] { default, default, default };
+        var pieceBitBoards = new BitBoard[12];
+        var occupancyBitBoards = new BitBoard[3];
 
         bool success;
         Side side = Side.Both;

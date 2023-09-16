@@ -259,7 +259,9 @@ public partial class ParseGameBenchmark : BaseBenchmark
 
                 var moves = _movesRegex.Match(positionCommand).Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
+#pragma warning disable CS0618 // Type or member is obsolete
                 return new Game(initialPosition, moves);
+#pragma warning restore CS0618 // Type or member is obsolete
             }
             catch (Exception e)
             {
@@ -307,7 +309,9 @@ public partial class ParseGameBenchmark : BaseBenchmark
                 Span<Range> moves = stackalloc Range[(movesRegexResultAsSpan.Length / 5) + 1];
                 movesRegexResultAsSpan.Split(moves, ' ', StringSplitOptions.RemoveEmptyEntries);
 
+#pragma warning disable CS0618 // Type or member is obsolete
                 return new Game(initialPosition, movesRegexResultAsSpan, moves);
+#pragma warning restore CS0618 // Type or member is obsolete
             }
             catch (Exception e)
             {
@@ -353,7 +357,9 @@ public partial class ParseGameBenchmark : BaseBenchmark
                 Span<Range> moves = stackalloc Range[(movesRegexResultAsSpan.Length / 5) + 1];
                 movesRegexResultAsSpan.Split(moves, ' ', StringSplitOptions.RemoveEmptyEntries);
 
+#pragma warning disable CS0618 // Type or member is obsolete
                 return new Game(initialPosition, movesRegexResultAsSpan, moves);
+#pragma warning restore CS0618 // Type or member is obsolete
             }
             catch (Exception e)
             {
