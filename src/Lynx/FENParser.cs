@@ -1,21 +1,17 @@
 ﻿using Lynx.Model;
 using NLog;
 using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
+
+using ParseResult = (bool Success, ulong[] PieceBitBoards, ulong[] OccupancyBitBoards, Lynx.Model.Side Side, byte Castle, Lynx.Model.BoardSquare EnPassant,
+            int HalfMoveClock, int FullMoveCounter);
 
 namespace Lynx;
 
-public static partial class FENParser
+public static class FENParser
 {
-    [GeneratedRegex("(?<=^|\\/)[P|N|B|R|Q|K|p|n|b|r|q|k|\\d]{1,8}", RegexOptions.Compiled)]
-    private static partial Regex RanksRegex();
-
-    private static readonly Regex _ranksRegex = RanksRegex();
-
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    public static (bool Success, BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, byte Castle, BoardSquare EnPassant,
-        int HalfMoveClock, int FullMoveCounter) ParseFEN(ReadOnlySpan<char> fen)
+    public static ParseResult ParseFEN(ReadOnlySpan<char> fen)
     {
         fen = fen.Trim();
 
@@ -30,10 +26,9 @@ public static partial class FENParser
 
         try
         {
-            MatchCollection matches;
-            (matches, success) = ParseBoard(fen.ToString(), pieceBitBoards, occupancyBitBoards);
+            success = ParseBoard(fen, pieceBitBoards, occupancyBitBoards);
 
-            var unparsedStringAsSpan = fen[(matches[^1].Index + matches[^1].Length)..];
+            var unparsedStringAsSpan = fen[fen.IndexOf(' ')..];
             Span<Range> parts = stackalloc Range[5];
             var partsLength = unparsedStringAsSpan.Split(parts, ' ', StringSplitOptions.RemoveEmptyEntries);
 
@@ -69,22 +64,34 @@ public static partial class FENParser
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static (MatchCollection Matches, bool Success) ParseBoard(string fen, BitBoard[] pieceBitBoards, BitBoard[] occupancyBitBoards)
+    private static bool ParseBoard(ReadOnlySpan<char> fen, BitBoard[] pieceBitBoards, BitBoard[] occupancyBitBoards)
     {
         bool success = true;
-
         var rankIndex = 0;
-        var matches = _ranksRegex.Matches(fen);
+        var end = fen.IndexOf('/');
 
-        if (matches.Count != 8)
+        while (success && end != -1)
         {
-            return (matches, false);
+            var match = fen[..end];
+
+            ParseBoardSection(pieceBitBoards, ref success, rankIndex, match);
+            PopulateOccupancies(pieceBitBoards, occupancyBitBoards);
+
+            fen = fen[(end + 1)..];
+            end = fen.IndexOf('/');
+            ++rankIndex;
         }
 
-        foreach (var match in matches)
+        ParseBoardSection(pieceBitBoards, ref success, rankIndex, fen[..fen.IndexOf(' ')]);
+        PopulateOccupancies(pieceBitBoards, occupancyBitBoards);
+
+        return success;
+
+        static void ParseBoardSection(ulong[] pieceBitBoards, ref bool success, int rankIndex, ReadOnlySpan<char> boardfenSection)
         {
-            var fileIndex = 0;
-            foreach (var ch in ((Group)match).Value)
+            int fileIndex = 0;
+
+            foreach (var ch in boardfenSection)
             {
                 if (Constants.PiecesByChar.TryGetValue(ch, out Piece piece))
                 {
@@ -97,18 +104,12 @@ public static partial class FENParser
                 }
                 else
                 {
-                    _logger.Error("Unrecognized character in FEN: {0} (within {1})", ch, ((Group)match).Value);
+                    _logger.Error("Unrecognized character in FEN: {0} (within {1})", ch, boardfenSection.ToString());
                     success = false;
                     break;
                 }
             }
-
-            PopulateOccupancies(pieceBitBoards, occupancyBitBoards);
-
-            ++rankIndex;
         }
-
-        return (matches, success);
 
         static void PopulateOccupancies(BitBoard[] pieceBitBoards, BitBoard[] occupancyBitBoards)
         {
@@ -161,7 +162,7 @@ public static partial class FENParser
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static (BoardSquare EnPassant, bool Success) ParseEnPassant(ReadOnlySpan<char> enPassantSpan,BitBoard[] PieceBitBoards, Side side)
+    private static (BoardSquare EnPassant, bool Success) ParseEnPassant(ReadOnlySpan<char> enPassantSpan, BitBoard[] PieceBitBoards, Side side)
     {
         bool success = true;
         BoardSquare enPassant = BoardSquare.noSquare;
