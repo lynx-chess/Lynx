@@ -99,17 +99,16 @@ public sealed class Game
     {
         for (int i = 0; i < rangeSpan.Length; ++i)
         {
-            var range = rangeSpan[i];
-            if (range.Start.Equals(range.End))
+            if (rangeSpan[i].Start.Equals(rangeSpan[i].End))
             {
                 break;
             }
-            var moveString = rawMoves[range];
+            var moveString = rawMoves[rangeSpan[i]];
             var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, MovePool);
 
             if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
             {
-                _logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen.ToString(), string.Join(' ', rawMoves.ToString()), moveString.ToString());
+                _logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen.ToString(), rawMoves.ToString(), moveString.ToString());
                 break;
             }
 

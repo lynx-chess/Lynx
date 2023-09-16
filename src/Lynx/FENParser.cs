@@ -2,8 +2,8 @@
 using NLog;
 using System.Runtime.CompilerServices;
 
-using ParseResult = (bool Success, ulong[] PieceBitBoards, ulong[] OccupancyBitBoards, Lynx.Model.Side Side, byte Castle, Lynx.Model.BoardSquare EnPassant,
-            int HalfMoveClock, int FullMoveCounter);
+using ParseResult = (ulong[] PieceBitBoards, ulong[] OccupancyBitBoards, Lynx.Model.Side Side, byte Castle, Lynx.Model.BoardSquare EnPassant,
+            int HalfMoveClock/*, int FullMoveCounter*/);
 
 namespace Lynx;
 
@@ -11,6 +11,7 @@ public static class FENParser
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ParseResult ParseFEN(ReadOnlySpan<char> fen)
     {
         fen = fen.Trim();
@@ -60,7 +61,7 @@ public static class FENParser
             success = false;
         }
 
-        return (success, pieceBitBoards, occupancyBitBoards, side, castle, enPassant, halfMoveClock, fullMoveCounter);
+        return (pieceBitBoards, occupancyBitBoards, side, castle, enPassant, halfMoveClock/*, fullMoveCounter*/);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
