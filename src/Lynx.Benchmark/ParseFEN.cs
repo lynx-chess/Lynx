@@ -1,66 +1,95 @@
 ﻿/*
  * Span Split()
  *
- *  BenchmarkDotNet v0.13.8, Ubuntu 22.04.3 LTS (Jammy Jellyfish)
- *  Intel Xeon Platinum 8272CL CPU 2.60GHz, 1 CPU, 2 logical and 2 physical cores
- *  .NET SDK 8.0.100-rc.1.23455.8
- *    [Host]     : .NET 8.0.0 (8.0.23.41904), X64 RyuJIT AVX2
- *    DefaultJob : .NET 8.0.0 (8.0.23.41904), X64 RyuJIT AVX2
- *
- *
- *  | Method            | fen                  | Mean     | Error     | StdDev    | Ratio | Gen0   | Allocated | Alloc Ratio |
- *  |------------------ |--------------------- |---------:|----------:|----------:|------:|-------:|----------:|------------:|
- *  | ParseFEN_Original | 8/k7/(...)- 0 1 [39] | 3.213 us | 0.0239 us | 0.0212 us |  1.00 | 0.1564 |   2.89 KB |        1.00 |
- *  | ParseFEN_Current  | 8/k7/(...)- 0 1 [39] | 2.954 us | 0.0121 us | 0.0113 us |  0.92 | 0.1411 |   2.64 KB |        0.91 |
- *  |                   |                      |          |           |           |       |        |           |             |
- *  | ParseFEN_Original | r2q1r(...)- 0 9 [68] | 3.958 us | 0.0159 us | 0.0141 us |  1.00 | 0.1678 |   3.09 KB |        1.00 |
- *  | ParseFEN_Current  | r2q1r(...)- 0 9 [68] | 3.768 us | 0.0168 us | 0.0149 us |  0.95 | 0.1526 |   2.84 KB |        0.92 |
- *  |                   |                      |          |           |           |       |        |           |             |
- *  | ParseFEN_Original | r3k2r(...)- 0 1 [68] | 3.725 us | 0.0107 us | 0.0100 us |  1.00 | 0.1640 |   3.01 KB |        1.00 |
- *  | ParseFEN_Current  | r3k2r(...)- 0 1 [68] | 3.681 us | 0.0186 us | 0.0165 us |  0.99 | 0.1488 |   2.75 KB |        0.91 |
- *  |                   |                      |          |           |           |       |        |           |             |
- *  | ParseFEN_Original | r3k2r(...)- 0 1 [68] | 3.722 us | 0.0224 us | 0.0210 us |  1.00 | 0.1640 |   3.01 KB |        1.00 |
- *  | ParseFEN_Current  | r3k2r(...)- 0 1 [68] | 3.586 us | 0.0226 us | 0.0212 us |  0.96 | 0.1488 |   2.75 KB |        0.91 |
- *  |                   |                      |          |           |           |       |        |           |             |
- *  | ParseFEN_Original | rnbqk(...)6 0 1 [67] | 3.722 us | 0.0205 us | 0.0192 us |  1.00 | 0.1640 |      3 KB |        1.00 |
- *  | ParseFEN_Current  | rnbqk(...)6 0 1 [67] | 3.529 us | 0.0126 us | 0.0118 us |  0.95 | 0.1488 |   2.73 KB |        0.91 |
- *  |                   |                      |          |           |           |       |        |           |             |
- *  | ParseFEN_Original | rnbqk(...)- 0 1 [56] | 2.771 us | 0.0131 us | 0.0116 us |  1.00 | 0.1450 |    2.7 KB |        1.00 |
- *  | ParseFEN_Current  | rnbqk(...)- 0 1 [56] | 2.506 us | 0.0268 us | 0.0251 us |  0.90 | 0.1335 |   2.44 KB |        0.90 |
- *  |                   |                      |          |           |           |       |        |           |             |
- *  | ParseFEN_Original | rq2k2(...)- 0 1 [71] | 4.214 us | 0.0269 us | 0.0252 us |  1.00 | 0.1678 |   3.09 KB |        1.00 |
- *  | ParseFEN_Current  | rq2k2(...)- 0 1 [71] | 3.852 us | 0.0158 us | 0.0140 us |  0.91 | 0.1526 |   2.84 KB |        0.92 |
+ *  | enchmarkDotNet v0.13.8, Ubuntu 22.04.3 LTS (Jammy Jellyfish)
+ *  | tel Xeon Platinum 8370C CPU 2.80GHz, 1 CPU, 2 logical and 2 physical cores
+ *  | ET SDK 8.0.100-rc.1.23455.8
+ *  | [Host]     : .NET 8.0.0 (8.0.23.41904), X64 RyuJIT AVX2
+ *  | DefaultJob : .NET 8.0.0 (8.0.23.41904), X64 RyuJIT AVX2
+ *  |
+ *  |
+ *  | Method             | fen                  | Mean     | Error     | StdDev    | Ratio | Gen0   | Allocated | Alloc Ratio |
+ *  | ------------------ |--------------------- |---------:|----------:|----------:|------:|-------:|----------:|------------:|
+ *  | ParseFEN_Original  | 8/k7/(...)- 0 1 [39] | 3.211 us | 0.0078 us | 0.0066 us |  1.00 | 0.1144 |    2960 B |        1.00 |
+ *  | ParseFEN_Improved1 | 8/k7/(...)- 0 1 [39] | 2.860 us | 0.0076 us | 0.0071 us |  0.89 | 0.1068 |    2704 B |        0.91 |
+ *  | ParseFEN_Base2     | 8/k7/(...)- 0 1 [39] | 2.934 us | 0.0074 us | 0.0062 us |  0.91 | 0.1068 |    2760 B |        0.93 |
+ *  | ParseFEN_NoRegex   | 8/k7/(...)- 0 1 [39] | 1.358 us | 0.0004 us | 0.0003 us |  0.42 | 0.0191 |     480 B |        0.16 |
+ *  |                    |                      |          |           |           |       |        |           |             |
+ *  | ParseFEN_Original  | r2q1r(...)- 0 9 [68] | 3.810 us | 0.0103 us | 0.0091 us |  1.00 | 0.1221 |    3160 B |        1.00 |
+ *  | ParseFEN_Improved1 | r2q1r(...)- 0 9 [68] | 3.681 us | 0.0112 us | 0.0105 us |  0.97 | 0.1144 |    2904 B |        0.92 |
+ *  | ParseFEN_Base2     | r2q1r(...)- 0 9 [68] | 3.682 us | 0.0173 us | 0.0162 us |  0.97 | 0.1183 |    3016 B |        0.95 |
+ *  | ParseFEN_NoRegex   | r2q1r(...)- 0 9 [68] | 2.031 us | 0.0017 us | 0.0013 us |  0.53 | 0.0229 |     624 B |        0.20 |
+ *  |                    |                      |          |           |           |       |        |           |             |
+ *  | ParseFEN_Original  | r3k2r(...)- 0 1 [68] | 3.591 us | 0.0091 us | 0.0081 us |  1.00 | 0.1221 |    3080 B |        1.00 |
+ *  | ParseFEN_Improved1 | r3k2r(...)- 0 1 [68] | 3.416 us | 0.0030 us | 0.0025 us |  0.95 | 0.1106 |    2816 B |        0.91 |
+ *  | ParseFEN_Base2     | r3k2r(...)- 0 1 [68] | 3.746 us | 0.0053 us | 0.0044 us |  1.04 | 0.1144 |    2928 B |        0.95 |
+ *  | ParseFEN_NoRegex   | r3k2r(...)- 0 1 [68] | 1.942 us | 0.0014 us | 0.0012 us |  0.54 | 0.0210 |     552 B |        0.18 |
+ *  |                    |                      |          |           |           |       |        |           |             |
+ *  | ParseFEN_Original  | r3k2r(...)- 0 1 [68] | 3.701 us | 0.0054 us | 0.0048 us |  1.00 | 0.1221 |    3080 B |        1.00 |
+ *  | ParseFEN_Improved1 | r3k2r(...)- 0 1 [68] | 3.575 us | 0.0026 us | 0.0023 us |  0.97 | 0.1106 |    2816 B |        0.91 |
+ *  | ParseFEN_Base2     | r3k2r(...)- 0 1 [68] | 3.728 us | 0.0100 us | 0.0093 us |  1.01 | 0.1144 |    2928 B |        0.95 |
+ *  | ParseFEN_NoRegex   | r3k2r(...)- 0 1 [68] | 1.835 us | 0.0025 us | 0.0022 us |  0.50 | 0.0210 |     552 B |        0.18 |
+ *  |                    |                      |          |           |           |       |        |           |             |
+ *  | ParseFEN_Original  | rnbqk(...)6 0 1 [67] | 3.747 us | 0.0036 us | 0.0032 us |  1.00 | 0.1221 |    3072 B |        1.00 |
+ *  | ParseFEN_Improved1 | rnbqk(...)6 0 1 [67] | 3.341 us | 0.0078 us | 0.0069 us |  0.89 | 0.1106 |    2800 B |        0.91 |
+ *  | ParseFEN_Base2     | rnbqk(...)6 0 1 [67] | 3.360 us | 0.0070 us | 0.0062 us |  0.90 | 0.1144 |    2904 B |        0.95 |
+ *  | ParseFEN_NoRegex   | rnbqk(...)6 0 1 [67] | 1.622 us | 0.0005 us | 0.0004 us |  0.43 | 0.0210 |     528 B |        0.17 |
+ *  |                    |                      |          |           |           |       |        |           |             |
+ *  | ParseFEN_Original  | rnbqk(...)- 0 1 [56] | 2.786 us | 0.0098 us | 0.0087 us |  1.00 | 0.1068 |    2760 B |        1.00 |
+ *  | ParseFEN_Improved1 | rnbqk(...)- 0 1 [56] | 2.618 us | 0.0057 us | 0.0053 us |  0.94 | 0.0992 |    2496 B |        0.90 |
+ *  | ParseFEN_Base2     | rnbqk(...)- 0 1 [56] | 2.671 us | 0.0071 us | 0.0059 us |  0.96 | 0.0992 |    2584 B |        0.94 |
+ *  | ParseFEN_NoRegex   | rnbqk(...)- 0 1 [56] | 1.016 us | 0.0004 us | 0.0003 us |  0.36 | 0.0095 |     264 B |        0.10 |
+ *  |                    |                      |          |           |           |       |        |           |             |
+ *  | ParseFEN_Original  | rq2k2(...)- 0 1 [71] | 3.944 us | 0.0123 us | 0.0103 us |  1.00 | 0.1221 |    3168 B |        1.00 |
+ *  | ParseFEN_Improved1 | rq2k2(...)- 0 1 [71] | 3.767 us | 0.0156 us | 0.0146 us |  0.96 | 0.1144 |    2904 B |        0.92 |
+ *  | ParseFEN_Base2     | rq2k2(...)- 0 1 [71] | 3.756 us | 0.0077 us | 0.0060 us |  0.95 | 0.1183 |    3024 B |        0.95 |
+ *  | ParseFEN_NoRegex   | rq2k2(...)- 0 1 [71] | 2.074 us | 0.0010 us | 0.0008 us |  0.53 | 0.0229 |     624 B |        0.20 |
  *
  *
  *  BenchmarkDotNet v0.13.8, Windows 10 (10.0.20348.1906) (Hyper-V)
- *  Intel Xeon Platinum 8272CL CPU 2.60GHz, 1 CPU, 2 logical and 2 physical cores
+ *  Intel Xeon Platinum 8171M CPU 2.60GHz, 1 CPU, 2 logical and 2 physical cores
  *  .NET SDK 8.0.100-rc.1.23455.8
  *    [Host]     : .NET 8.0.0 (8.0.23.41904), X64 RyuJIT AVX2
  *    DefaultJob : .NET 8.0.0 (8.0.23.41904), X64 RyuJIT AVX2
  *
  *
- *  | Method            | fen                  | Mean     | Error     | StdDev    | Ratio | Gen0   | Allocated | Alloc Ratio |
- *  |------------------ |--------------------- |---------:|----------:|----------:|------:|-------:|----------:|------------:|
- *  | ParseFEN_Original | 8/k7/(...)- 0 1 [39] | 2.973 us | 0.0133 us | 0.0118 us |  1.00 | 0.1564 |   2.89 KB |        1.00 |
- *  | ParseFEN_Current  | 8/k7/(...)- 0 1 [39] | 2.793 us | 0.0095 us | 0.0088 us |  0.94 | 0.1411 |   2.64 KB |        0.91 |
- *  |                   |                      |          |           |           |       |        |           |             |
- *  | ParseFEN_Original | r2q1r(...)- 0 9 [68] | 3.772 us | 0.0103 us | 0.0086 us |  1.00 | 0.1678 |   3.09 KB |        1.00 |
- *  | ParseFEN_Current  | r2q1r(...)- 0 9 [68] | 3.597 us | 0.0079 us | 0.0070 us |  0.95 | 0.1526 |   2.84 KB |        0.92 |
- *  |                   |                      |          |           |           |       |        |           |             |
- *  | ParseFEN_Original | r3k2r(...)- 0 1 [68] | 3.502 us | 0.0114 us | 0.0101 us |  1.00 | 0.1640 |   3.01 KB |        1.00 |
- *  | ParseFEN_Current  | r3k2r(...)- 0 1 [68] | 3.468 us | 0.0127 us | 0.0118 us |  0.99 | 0.1488 |   2.75 KB |        0.91 |
- *  |                   |                      |          |           |           |       |        |           |             |
- *  | ParseFEN_Original | r3k2r(...)- 0 1 [68] | 3.449 us | 0.0090 us | 0.0084 us |  1.00 | 0.1640 |   3.01 KB |        1.00 |
- *  | ParseFEN_Current  | r3k2r(...)- 0 1 [68] | 3.349 us | 0.0135 us | 0.0126 us |  0.97 | 0.1488 |   2.75 KB |        0.91 |
- *  |                   |                      |          |           |           |       |        |           |             |
- *  | ParseFEN_Original | rnbqk(...)6 0 1 [67] | 3.460 us | 0.0135 us | 0.0126 us |  1.00 | 0.1640 |      3 KB |        1.00 |
- *  | ParseFEN_Current  | rnbqk(...)6 0 1 [67] | 3.244 us | 0.0120 us | 0.0112 us |  0.94 | 0.1488 |   2.73 KB |        0.91 |
- *  |                   |                      |          |           |           |       |        |           |             |
- *  | ParseFEN_Original | rnbqk(...)- 0 1 [56] | 2.666 us | 0.0093 us | 0.0087 us |  1.00 | 0.1450 |    2.7 KB |        1.00 |
- *  | ParseFEN_Current  | rnbqk(...)- 0 1 [56] | 2.415 us | 0.0066 us | 0.0062 us |  0.91 | 0.1335 |   2.44 KB |        0.90 |
- *  |                   |                      |          |           |           |       |        |           |             |
- *  | ParseFEN_Original | rq2k2(...)- 0 1 [71] | 3.705 us | 0.0107 us | 0.0100 us |  1.00 | 0.1678 |   3.09 KB |        1.00 |
- *  | ParseFEN_Current  | rq2k2(...)- 0 1 [71] | 3.629 us | 0.0099 us | 0.0093 us |  0.98 | 0.1526 |   2.84 KB |        0.92 |
+ *  | Method             | fen                  | Mean     | Error     | StdDev    | Ratio | RatioSD | Gen0   | Allocated | Alloc Ratio |
+ *  |------------------- |--------------------- |---------:|----------:|----------:|------:|--------:|-------:|----------:|------------:|
+ *  | ParseFEN_Original  | 8/k7/(...)- 0 1 [39] | 3.588 us | 0.0695 us | 0.0714 us |  1.00 |    0.00 | 0.1564 |    2960 B |        1.00 |
+ *  | ParseFEN_Improved1 | 8/k7/(...)- 0 1 [39] | 3.323 us | 0.0506 us | 0.0473 us |  0.92 |    0.02 | 0.1411 |    2704 B |        0.91 |
+ *  | ParseFEN_Base2     | 8/k7/(...)- 0 1 [39] | 3.324 us | 0.0602 us | 0.0563 us |  0.92 |    0.02 | 0.1450 |    2760 B |        0.93 |
+ *  | ParseFEN_NoRegex   | 8/k7/(...)- 0 1 [39] | 1.549 us | 0.0247 us | 0.0219 us |  0.43 |    0.01 | 0.0248 |     480 B |        0.16 |
+ *  |                    |                      |          |           |           |       |         |        |           |             |
+ *  | ParseFEN_Original  | r2q1r(...)- 0 9 [68] | 4.393 us | 0.0727 us | 0.0680 us |  1.00 |    0.00 | 0.1678 |    3161 B |        1.00 |
+ *  | ParseFEN_Improved1 | r2q1r(...)- 0 9 [68] | 4.103 us | 0.0803 us | 0.0860 us |  0.93 |    0.03 | 0.1526 |    2904 B |        0.92 |
+ *  | ParseFEN_Base2     | r2q1r(...)- 0 9 [68] | 4.201 us | 0.0735 us | 0.0687 us |  0.96 |    0.02 | 0.1602 |    3016 B |        0.95 |
+ *  | ParseFEN_NoRegex   | r2q1r(...)- 0 9 [68] | 2.193 us | 0.0149 us | 0.0125 us |  0.50 |    0.01 | 0.0305 |     624 B |        0.20 |
+ *  |                    |                      |          |           |           |       |         |        |           |             |
+ *  | ParseFEN_Original  | r3k2r(...)- 0 1 [68] | 4.145 us | 0.0803 us | 0.1125 us |  1.00 |    0.00 | 0.1602 |    3080 B |        1.00 |
+ *  | ParseFEN_Improved1 | r3k2r(...)- 0 1 [68] | 3.893 us | 0.0685 us | 0.0608 us |  0.92 |    0.03 | 0.1450 |    2816 B |        0.91 |
+ *  | ParseFEN_Base2     | r3k2r(...)- 0 1 [68] | 3.889 us | 0.0434 us | 0.0384 us |  0.92 |    0.02 | 0.1526 |    2928 B |        0.95 |
+ *  | ParseFEN_NoRegex   | r3k2r(...)- 0 1 [68] | 1.980 us | 0.0261 us | 0.0231 us |  0.47 |    0.01 | 0.0267 |     552 B |        0.18 |
+ *  |                    |                      |          |           |           |       |         |        |           |             |
+ *  | ParseFEN_Original  | r3k2r(...)- 0 1 [68] | 3.912 us | 0.0437 us | 0.0341 us |  1.00 |    0.00 | 0.1602 |    3080 B |        1.00 |
+ *  | ParseFEN_Improved1 | r3k2r(...)- 0 1 [68] | 3.879 us | 0.0289 us | 0.0256 us |  0.99 |    0.01 | 0.1450 |    2816 B |        0.91 |
+ *  | ParseFEN_Base2     | r3k2r(...)- 0 1 [68] | 4.080 us | 0.0815 us | 0.1116 us |  1.03 |    0.03 | 0.1526 |    2928 B |        0.95 |
+ *  | ParseFEN_NoRegex   | r3k2r(...)- 0 1 [68] | 1.962 us | 0.0328 us | 0.0307 us |  0.50 |    0.01 | 0.0267 |     552 B |        0.18 |
+ *  |                    |                      |          |           |           |       |         |        |           |             |
+ *  | ParseFEN_Original  | rnbqk(...)6 0 1 [67] | 4.118 us | 0.0814 us | 0.0762 us |  1.00 |    0.00 | 0.1602 |    3072 B |        1.00 |
+ *  | ParseFEN_Improved1 | rnbqk(...)6 0 1 [67] | 4.115 us | 0.0822 us | 0.0913 us |  1.01 |    0.03 | 0.1450 |    2800 B |        0.91 |
+ *  | ParseFEN_Base2     | rnbqk(...)6 0 1 [67] | 4.021 us | 0.0675 us | 0.0527 us |  0.98 |    0.02 | 0.1526 |    2904 B |        0.95 |
+ *  | ParseFEN_NoRegex   | rnbqk(...)6 0 1 [67] | 2.008 us | 0.0388 us | 0.0363 us |  0.49 |    0.01 | 0.0267 |     528 B |        0.17 |
+ *  |                    |                      |          |           |           |       |         |        |           |             |
+ *  | ParseFEN_Original  | rnbqk(...)- 0 1 [56] | 3.108 us | 0.0505 us | 0.0447 us |  1.00 |    0.00 | 0.1450 |    2760 B |        1.00 |
+ *  | ParseFEN_Improved1 | rnbqk(...)- 0 1 [56] | 2.828 us | 0.0540 us | 0.0530 us |  0.91 |    0.03 | 0.1335 |    2496 B |        0.90 |
+ *  | ParseFEN_Base2     | rnbqk(...)- 0 1 [56] | 2.842 us | 0.0482 us | 0.0451 us |  0.91 |    0.02 | 0.1373 |    2584 B |        0.94 |
+ *  | ParseFEN_NoRegex   | rnbqk(...)- 0 1 [56] | 1.137 us | 0.0180 us | 0.0168 us |  0.37 |    0.01 | 0.0134 |     264 B |        0.10 |
+ *  |                    |                      |          |           |           |       |         |        |           |             |
+ *  | ParseFEN_Original  | rq2k2(...)- 0 1 [71] | 4.488 us | 0.0874 us | 0.1041 us |  1.00 |    0.00 | 0.1678 |    3169 B |        1.00 |
+ *  | ParseFEN_Improved1 | rq2k2(...)- 0 1 [71] | 4.145 us | 0.0524 us | 0.0438 us |  0.92 |    0.02 | 0.1526 |    2904 B |        0.92 |
+ *  | ParseFEN_Base2     | rq2k2(...)- 0 1 [71] | 4.264 us | 0.0804 us | 0.0826 us |  0.95 |    0.03 | 0.1602 |    3024 B |        0.95 |
+ *  | ParseFEN_NoRegex   | rq2k2(...)- 0 1 [71] | 2.253 us | 0.0343 us | 0.0321 us |  0.50 |    0.02 | 0.0305 |     624 B |        0.20 |
+ *
  *
  *  BenchmarkDotNet v0.13.8, macOS Monterey 12.6.8 (21G725) [Darwin 21.6.0]
  *  Intel Xeon CPU E5-1650 v2 3.50GHz (Max: 3.34GHz), 1 CPU, 3 logical and 3 physical cores
@@ -69,28 +98,42 @@
  *    DefaultJob : .NET 8.0.0 (8.0.23.41904), X64 RyuJIT AVX
  *
  *
- *  | Method            | fen                  | Mean     | Error     | StdDev    | Median   | Ratio | RatioSD | Gen0   | Gen1   | Allocated | Alloc Ratio |
- *  |------------------ |--------------------- |---------:|----------:|----------:|---------:|------:|--------:|-------:|-------:|----------:|------------:|
- *  | ParseFEN_Original | 8/k7/(...)- 0 1 [39] | 2.961 us | 0.0187 us | 0.0146 us | 2.960 us |  1.00 |    0.00 | 0.4692 |      - |   2.89 KB |        1.00 |
- *  | ParseFEN_Current  | 8/k7/(...)- 0 1 [39] | 2.835 us | 0.0082 us | 0.0069 us | 2.836 us |  0.96 |    0.00 | 0.4311 |      - |   2.64 KB |        0.91 |
- *  |                   |                      |          |           |           |          |       |         |        |        |           |             |
- *  | ParseFEN_Original | r2q1r(...)- 0 9 [68] | 3.664 us | 0.0093 us | 0.0082 us | 3.665 us |  1.00 |    0.00 | 0.5035 | 0.0038 |   3.09 KB |        1.00 |
- *  | ParseFEN_Current  | r2q1r(...)- 0 9 [68] | 4.565 us | 0.2938 us | 0.8476 us | 4.247 us |  1.05 |    0.06 | 0.4616 |      - |   2.84 KB |        0.92 |
- *  |                   |                      |          |           |           |          |       |         |        |        |           |             |
- *  | ParseFEN_Original | r3k2r(...)- 0 1 [68] | 3.787 us | 0.0612 us | 0.0543 us | 3.788 us |  1.00 |    0.00 | 0.4883 |      - |   3.01 KB |        1.00 |
- *  | ParseFEN_Current  | r3k2r(...)- 0 1 [68] | 3.408 us | 0.0664 us | 0.0952 us | 3.398 us |  0.89 |    0.03 | 0.4463 |      - |   2.75 KB |        0.91 |
- *  |                   |                      |          |           |           |          |       |         |        |        |           |             |
- *  | ParseFEN_Original | r3k2r(...)- 0 1 [68] | 3.531 us | 0.0662 us | 0.0517 us | 3.529 us |  1.00 |    0.00 | 0.4883 |      - |   3.01 KB |        1.00 |
- *  | ParseFEN_Current  | r3k2r(...)- 0 1 [68] | 3.695 us | 0.0705 us | 0.0839 us | 3.697 us |  1.05 |    0.04 | 0.4463 |      - |   2.75 KB |        0.91 |
- *  |                   |                      |          |           |           |          |       |         |        |        |           |             |
- *  | ParseFEN_Original | rnbqk(...)6 0 1 [67] | 3.696 us | 0.0711 us | 0.0630 us | 3.680 us |  1.00 |    0.00 | 0.4883 |      - |      3 KB |        1.00 |
- *  | ParseFEN_Current  | rnbqk(...)6 0 1 [67] | 4.701 us | 0.0833 us | 0.0780 us | 4.725 us |  1.27 |    0.03 | 0.4463 |      - |   2.74 KB |        0.91 |
- *  |                   |                      |          |           |           |          |       |         |        |        |           |             |
- *  | ParseFEN_Original | rnbqk(...)- 0 1 [56] | 2.664 us | 0.0237 us | 0.0221 us | 2.661 us |  1.00 |    0.00 | 0.4387 |      - |    2.7 KB |        1.00 |
- *  | ParseFEN_Current  | rnbqk(...)- 0 1 [56] | 2.664 us | 0.0372 us | 0.0311 us | 2.661 us |  1.00 |    0.01 | 0.3967 |      - |   2.44 KB |        0.90 |
- *  |                   |                      |          |           |           |          |       |         |        |        |           |             |
- *  | ParseFEN_Original | rq2k2(...)- 0 1 [71] | 3.847 us | 0.0350 us | 0.0292 us | 3.838 us |  1.00 |    0.00 | 0.5035 |      - |   3.09 KB |        1.00 |
- *  | ParseFEN_Current  | rq2k2(...)- 0 1 [71] | 3.399 us | 0.0445 us | 0.0394 us | 3.378 us |  0.88 |    0.01 | 0.4616 | 0.0038 |   2.84 KB |        0.92 |
+ *  | Method             | fen                  | Mean     | Error     | StdDev    | Ratio | RatioSD | Gen0   | Gen1   | Allocated | Alloc Ratio |
+ *  |------------------- |--------------------- |---------:|----------:|----------:|------:|--------:|-------:|-------:|----------:|------------:|
+ *  | ParseFEN_Original  | 8/k7/(...)- 0 1 [39] | 3.105 us | 0.0258 us | 0.0229 us |  1.00 |    0.00 | 0.4692 |      - |    2961 B |        1.00 |
+ *  | ParseFEN_Improved1 | 8/k7/(...)- 0 1 [39] | 2.756 us | 0.0196 us | 0.0183 us |  0.89 |    0.01 | 0.4311 |      - |    2705 B |        0.91 |
+ *  | ParseFEN_Base2     | 8/k7/(...)- 0 1 [39] | 2.857 us | 0.0564 us | 0.1306 us |  0.88 |    0.04 | 0.4387 |      - |    2761 B |        0.93 |
+ *  | ParseFEN_NoRegex   | 8/k7/(...)- 0 1 [39] | 1.330 us | 0.0225 us | 0.0363 us |  0.43 |    0.01 | 0.0763 |      - |     480 B |        0.16 |
+ *  |                    |                      |          |           |           |       |         |        |        |           |             |
+ *  | ParseFEN_Original  | r2q1r(...)- 0 9 [68] | 3.793 us | 0.0753 us | 0.1128 us |  1.00 |    0.00 | 0.5035 | 0.0038 |    3161 B |        1.00 |
+ *  | ParseFEN_Improved1 | r2q1r(...)- 0 9 [68] | 3.712 us | 0.0944 us | 0.2783 us |  0.92 |    0.05 | 0.4616 |      - |    2905 B |        0.92 |
+ *  | ParseFEN_Base2     | r2q1r(...)- 0 9 [68] | 3.938 us | 0.0761 us | 0.1067 us |  1.04 |    0.04 | 0.4807 |      - |    3017 B |        0.95 |
+ *  | ParseFEN_NoRegex   | r2q1r(...)- 0 9 [68] | 1.983 us | 0.0310 us | 0.0454 us |  0.52 |    0.02 | 0.0992 |      - |     624 B |        0.20 |
+ *  |                    |                      |          |           |           |       |         |        |        |           |             |
+ *  | ParseFEN_Original  | r3k2r(...)- 0 1 [68] | 3.529 us | 0.0676 us | 0.0664 us |  1.00 |    0.00 | 0.4883 |      - |    3081 B |        1.00 |
+ *  | ParseFEN_Improved1 | r3k2r(...)- 0 1 [68] | 3.398 us | 0.0434 us | 0.0406 us |  0.96 |    0.02 | 0.4463 |      - |    2817 B |        0.91 |
+ *  | ParseFEN_Base2     | r3k2r(...)- 0 1 [68] | 3.330 us | 0.0262 us | 0.0245 us |  0.94 |    0.02 | 0.4654 |      - |    2929 B |        0.95 |
+ *  | ParseFEN_NoRegex   | r3k2r(...)- 0 1 [68] | 1.836 us | 0.0181 us | 0.0170 us |  0.52 |    0.01 | 0.0877 |      - |     552 B |        0.18 |
+ *  |                    |                      |          |           |           |       |         |        |        |           |             |
+ *  | ParseFEN_Original  | r3k2r(...)- 0 1 [68] | 3.521 us | 0.0477 us | 0.0399 us |  1.00 |    0.00 | 0.4883 |      - |    3081 B |        1.00 |
+ *  | ParseFEN_Improved1 | r3k2r(...)- 0 1 [68] | 3.606 us | 0.0701 us | 0.0936 us |  1.03 |    0.02 | 0.4463 |      - |    2817 B |        0.91 |
+ *  | ParseFEN_Base2     | r3k2r(...)- 0 1 [68] | 3.382 us | 0.0496 us | 0.0414 us |  0.96 |    0.02 | 0.4654 |      - |    2929 B |        0.95 |
+ *  | ParseFEN_NoRegex   | r3k2r(...)- 0 1 [68] | 1.815 us | 0.0354 us | 0.0331 us |  0.51 |    0.01 | 0.0877 |      - |     552 B |        0.18 |
+ *  |                    |                      |          |           |           |       |         |        |        |           |             |
+ *  | ParseFEN_Original  | rnbqk(...)6 0 1 [67] | 3.626 us | 0.0618 us | 0.0607 us |  1.00 |    0.00 | 0.4883 |      - |    3073 B |        1.00 |
+ *  | ParseFEN_Improved1 | rnbqk(...)6 0 1 [67] | 3.392 us | 0.0436 us | 0.0408 us |  0.94 |    0.02 | 0.4463 |      - |    2801 B |        0.91 |
+ *  | ParseFEN_Base2     | rnbqk(...)6 0 1 [67] | 3.415 us | 0.0236 us | 0.0197 us |  0.94 |    0.02 | 0.4616 | 0.0038 |    2905 B |        0.95 |
+ *  | ParseFEN_NoRegex   | rnbqk(...)6 0 1 [67] | 1.645 us | 0.0288 us | 0.0241 us |  0.45 |    0.01 | 0.0839 |      - |     528 B |        0.17 |
+ *  |                    |                      |          |           |           |       |         |        |        |           |             |
+ *  | ParseFEN_Original  | rnbqk(...)- 0 1 [56] | 2.626 us | 0.0165 us | 0.0146 us |  1.00 |    0.00 | 0.4387 |      - |    2761 B |        1.00 |
+ *  | ParseFEN_Improved1 | rnbqk(...)- 0 1 [56] | 2.401 us | 0.0231 us | 0.0216 us |  0.91 |    0.01 | 0.3967 |      - |    2497 B |        0.90 |
+ *  | ParseFEN_Base2     | rnbqk(...)- 0 1 [56] | 2.492 us | 0.0319 us | 0.0298 us |  0.95 |    0.01 | 0.4120 |      - |    2585 B |        0.94 |
+ *  | ParseFEN_NoRegex   | rnbqk(...)- 0 1 [56] | 1.037 us | 0.0208 us | 0.0184 us |  0.39 |    0.01 | 0.0420 |      - |     264 B |        0.10 |
+ *  |                    |                      |          |           |           |       |         |        |        |           |             |
+ *  | ParseFEN_Original  | rq2k2(...)- 0 1 [71] | 3.952 us | 0.0759 us | 0.0960 us |  1.00 |    0.00 | 0.5035 |      - |    3169 B |        1.00 |
+ *  | ParseFEN_Improved1 | rq2k2(...)- 0 1 [71] | 3.647 us | 0.0652 us | 0.0578 us |  0.92 |    0.04 | 0.4616 |      - |    2905 B |        0.92 |
+ *  | ParseFEN_Base2     | rq2k2(...)- 0 1 [71] | 3.739 us | 0.0718 us | 0.0636 us |  0.94 |    0.03 | 0.4807 |      - |    3025 B |        0.95 |
+ *  | ParseFEN_NoRegex   | rq2k2(...)- 0 1 [71] | 2.111 us | 0.0420 us | 0.0746 us |  0.52 |    0.02 | 0.0992 |      - |     624 B |        0.20 |
  */
 
 using BenchmarkDotNet.Attributes;
@@ -338,8 +381,7 @@ public partial class ParseFENBenchmark : BaseBenchmark
 
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-        public static (bool Success, BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, byte Castle, BoardSquare EnPassant,
-            int HalfMoveClock, int FullMoveCounter) ParseFEN(string fen)
+        public static ParseResult ParseFEN(string fen)
         {
             fen = fen.Trim();
 
@@ -540,8 +582,7 @@ public partial class ParseFENBenchmark : BaseBenchmark
 
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-        public static (bool Success, BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, byte Castle, BoardSquare EnPassant,
-            int HalfMoveClock, int FullMoveCounter) ParseFEN(ReadOnlySpan<char> fen)
+        public static ParseResult ParseFEN(ReadOnlySpan<char> fen)
         {
             fen = fen.Trim();
 
@@ -734,8 +775,7 @@ public partial class ParseFENBenchmark : BaseBenchmark
     {
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-        public static (bool Success, BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, byte Castle, BoardSquare EnPassant,
-            int HalfMoveClock, int FullMoveCounter) ParseFEN(ReadOnlySpan<char> fen)
+        public static ParseResult ParseFEN(ReadOnlySpan<char> fen)
         {
             fen = fen.Trim();
 
