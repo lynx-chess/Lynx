@@ -204,7 +204,7 @@ public partial class ParseGameBenchmark : BaseBenchmark
             catch (Exception e)
             {
                 _logger.Error(e, "Error parsing position command '{0}'", positionCommand);
-                return new Game();
+                throw;
             }
         }
     }
@@ -250,7 +250,7 @@ public partial class ParseGameBenchmark : BaseBenchmark
             catch (Exception e)
             {
                 _logger.Error(e, "Error parsing position command '{0}'", positionCommand);
-                return new Game();
+                throw;
             }
         }
     }
@@ -298,7 +298,7 @@ public partial class ParseGameBenchmark : BaseBenchmark
             catch (Exception e)
             {
                 _logger.Error(e, "Error parsing position command '{0}'", positionCommand);
-                return new Game();
+                throw;
             }
         }
     }
@@ -344,7 +344,7 @@ public partial class ParseGameBenchmark : BaseBenchmark
             catch (Exception e)
             {
                 _logger.Error(e, "Error parsing position command '{0}'", positionCommand);
-                return new Game();
+                throw;
             }
         }
     }
@@ -358,19 +358,21 @@ public partial class ParseGameBenchmark : BaseBenchmark
 
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-        public static Game ParseGame(ReadOnlySpan<char> positionCommand)
+        public static Game ParseGame(string positionCommand)
         {
             try
             {
+                var positionCommandSpan = positionCommand.AsSpan();
+
                 // We divide the position command in these two sections:
                 // "position startpos                       ||"
                 // "position startpos                       || moves e2e4 e7e5"
                 // "position fen 8/8/8/8/8/8/8/8 w - - 0 1  ||"
                 // "position fen 8/8/8/8/8/8/8/8 w - - 0 1  || moves e2e4 e7e5"
                 Span<Range> items = stackalloc Range[2];
-                positionCommand.Split(items, "moves", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                positionCommandSpan.Split(items, "moves", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-                var initialPositionSection = positionCommand[items[0]];
+                var initialPositionSection = positionCommandSpan[items[0]];
 
                 // We divide in these two parts
                 // "position startpos ||"       <-- If "fen" doesn't exist in the section
@@ -382,7 +384,7 @@ public partial class ParseGameBenchmark : BaseBenchmark
                     ? initialPositionSection[initialPositionParts[1]]
                     : Constants.InitialPositionFEN.AsSpan();
 
-                var movesSection = positionCommand[items[1]];
+                var movesSection = positionCommandSpan[items[1]];
 
                 Span<Range> moves = stackalloc Range[2048]; // Number of potential half-moves provided in the string
                 movesSection.Split(moves, ' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
@@ -391,8 +393,8 @@ public partial class ParseGameBenchmark : BaseBenchmark
             }
             catch (Exception e)
             {
-                _logger.Error(e, "Error parsing position command '{0}'", positionCommand.ToString());
-                return new Game();
+                _logger.Error(e, "Error parsing position command '{0}'", positionCommand);
+                throw;
             }
         }
     }
@@ -406,19 +408,21 @@ public partial class ParseGameBenchmark : BaseBenchmark
 
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-        public static Game ParseGame(ReadOnlySpan<char> positionCommand)
+        public static Game ParseGame(string positionCommand)
         {
             try
             {
+                var positionCommandSpan = positionCommand.AsSpan();
+
                 // We divide the position command in these two sections:
                 // "position startpos                       ||"
                 // "position startpos                       || moves e2e4 e7e5"
                 // "position fen 8/8/8/8/8/8/8/8 w - - 0 1  ||"
                 // "position fen 8/8/8/8/8/8/8/8 w - - 0 1  || moves e2e4 e7e5"
                 Span<Range> items = stackalloc Range[2];
-                positionCommand.Split(items, "moves", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                positionCommandSpan.Split(items, "moves", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-                var initialPositionSection = positionCommand[items[0]];
+                var initialPositionSection = positionCommandSpan[items[0]];
 
                 // We divide in these two parts
                 // "position startpos ||"       <-- If "fen" doesn't exist in the section
@@ -430,7 +434,7 @@ public partial class ParseGameBenchmark : BaseBenchmark
                     ? initialPositionSection[initialPositionParts[1]]
                     : Constants.InitialPositionFEN.AsSpan();
 
-                var movesSection = positionCommand[items[1]];
+                var movesSection = positionCommandSpan[items[1]];
 
                 Span<Range> moves = stackalloc Range[(movesSection.Length / 5) + 1]; // Number of potential half-moves provided in the string
                 movesSection.Split(moves, ' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
@@ -439,8 +443,8 @@ public partial class ParseGameBenchmark : BaseBenchmark
             }
             catch (Exception e)
             {
-                _logger.Error(e, "Error parsing position command '{0}'", positionCommand.ToString());
-                return new Game();
+                _logger.Error(e, "Error parsing position command '{0}'", positionCommand);
+                throw;
             }
         }
     }
