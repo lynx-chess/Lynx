@@ -35,8 +35,10 @@ public sealed partial class PositionCommand : GUIBaseCommand
     {
         try
         {
-            var items = positionCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            bool isInitialPosition = string.Equals(items.ElementAtOrDefault(1), StartPositionString, StringComparison.OrdinalIgnoreCase);
+            var positionCommandSpan = positionCommand.AsSpan();
+            Span<Range> items = stackalloc Range[3];    // Leaving 'everything else' in the third one
+            positionCommandSpan.Split(items, ' ', StringSplitOptions.RemoveEmptyEntries);
+            bool isInitialPosition = positionCommandSpan[items[1]].Equals(StartPositionString, StringComparison.OrdinalIgnoreCase);
 
             var initialPosition = isInitialPosition
                     ? Constants.InitialPositionFEN

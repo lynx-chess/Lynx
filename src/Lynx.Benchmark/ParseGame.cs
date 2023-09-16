@@ -1,39 +1,45 @@
 ﻿/*
  * Using Span.Split()
  *
-BenchmarkDotNet v0.13.8, Ubuntu 22.04.3 LTS (Jammy Jellyfish)
-Intel Xeon Platinum 8370C CPU 2.80GHz, 1 CPU, 2 logical and 2 physical cores
-.NET SDK 8.0.100-rc.1.23455.8
-  [Host]     : .NET 8.0.0 (8.0.23.41904), X64 RyuJIT AVX2
-  DefaultJob : .NET 8.0.0 (8.0.23.41904), X64 RyuJIT AVX2
-
-
-| Method              | positionCommand      | Mean       | Error     | StdDev    | Ratio | RatioSD | Gen0   | Gen1   | Allocated | Alloc Ratio |
-|-------------------- |--------------------- |-----------:|----------:|----------:|------:|--------:|-------:|-------:|----------:|------------:|
-| ParseGame_Original  | position startpos    |   6.036 us | 0.1164 us | 0.1340 us |  1.00 |    0.00 | 1.2131 | 0.1144 |   29.8 KB |        1.00 |
-| ParseGame_Improved1 | position startpos    |   5.915 us | 0.1144 us | 0.1070 us |  0.98 |    0.02 | 1.2054 | 0.1068 |  29.68 KB |        1.00 |
-| ParseGame_Improved2 | position startpos    |   5.927 us | 0.1148 us | 0.1179 us |  0.98 |    0.03 | 1.2054 | 0.1068 |  29.68 KB |        1.00 |
-| ParseGame_Improved3 | position startpos    |   5.974 us | 0.1085 us | 0.0962 us |  0.99 |    0.03 | 1.2054 | 0.1068 |  29.68 KB |        1.00 |
-|                     |                      |            |           |           |       |         |        |        |           |             |
-| ParseGame_Original  | posi(...)b7b6 [193]  |  27.356 us | 0.0920 us | 0.0860 us |  1.00 |    0.00 | 1.6479 | 0.1526 |  40.55 KB |        1.00 |
-| ParseGame_Improved1 | posi(...)b7b6 [193]  |  27.230 us | 0.0538 us | 0.0503 us |  1.00 |    0.00 | 1.5869 | 0.1526 |  39.07 KB |        0.96 |
-| ParseGame_Improved2 | posi(...)b7b6 [193]  |  26.537 us | 0.0530 us | 0.0496 us |  0.97 |    0.00 | 1.4954 | 0.1221 |  37.06 KB |        0.91 |
-| ParseGame_Improved3 | posi(...)b7b6 [193]  |  26.018 us | 0.0869 us | 0.0813 us |  0.95 |    0.00 | 1.4954 | 0.1221 |  37.06 KB |        0.91 |
-|                     |                      |            |           |           |       |         |        |        |           |             |
-| ParseGame_Original  | posi(...)f3g3 [353]  |  44.450 us | 0.1406 us | 0.1315 us |  1.00 |    0.00 | 2.0142 | 0.1831 |  50.37 KB |        1.00 |
-| ParseGame_Improved1 | posi(...)f3g3 [353]  |  42.145 us | 0.0483 us | 0.0452 us |  0.95 |    0.00 | 1.8921 | 0.1831 |  47.63 KB |        0.95 |
-| ParseGame_Improved2 | posi(...)f3g3 [353]  |  40.681 us | 0.0724 us | 0.0641 us |  0.91 |    0.00 | 1.7700 | 0.1221 |  43.81 KB |        0.87 |
-| ParseGame_Improved3 | posi(...)f3g3 [353]  |  41.602 us | 0.1074 us | 0.0952 us |  0.94 |    0.00 | 1.7700 | 0.1221 |  43.81 KB |        0.87 |
-|                     |                      |            |           |           |       |         |        |        |           |             |
-| ParseGame_Original  | posi(...)g4g8 [979]  |  98.247 us | 0.2507 us | 0.2222 us |  1.00 |    0.00 | 3.5400 | 0.3662 |  88.81 KB |        1.00 |
-| ParseGame_Improved1 | posi(...)g4g8 [979]  |  92.339 us | 0.1596 us | 0.1492 us |  0.94 |    0.00 | 3.2959 | 0.3662 |  81.19 KB |        0.91 |
-| ParseGame_Improved2 | posi(...)g4g8 [979]  |  94.117 us | 0.1661 us | 0.1553 us |  0.96 |    0.00 | 2.8076 | 0.2441 |  70.29 KB |        0.79 |
-| ParseGame_Improved3 | posi(...)g4g8 [979]  |  96.559 us | 0.1148 us | 0.1017 us |  0.98 |    0.00 | 2.8076 | 0.2441 |  70.29 KB |        0.79 |
-|                     |                      |            |           |           |       |         |        |        |           |             |
-| ParseGame_Original  | posi(...)h3f1 [2984] | 272.407 us | 0.4811 us | 0.4017 us |  1.00 |    0.00 | 8.3008 | 0.9766 | 211.79 KB |        1.00 |
-| ParseGame_Improved1 | posi(...)h3f1 [2984] | 246.348 us | 0.3769 us | 0.3148 us |  0.90 |    0.00 | 7.3242 | 0.9766 |  188.5 KB |        0.89 |
-| ParseGame_Improved2 | posi(...)h3f1 [2984] | 256.520 us | 0.2312 us | 0.1805 us |  0.94 |    0.00 | 5.8594 | 0.4883 | 154.89 KB |        0.73 |
-| ParseGame_Improved3 | posi(...)h3f1 [2984] | 247.423 us | 0.3236 us | 0.2702 us |  0.91 |    0.00 | 5.8594 | 0.4883 | 154.89 KB |        0.73 |
+ *  BenchmarkDotNet v0.13.8, Ubuntu 22.04.3 LTS (Jammy Jellyfish)
+ *  Intel Xeon Platinum 8171M CPU 2.60GHz, 1 CPU, 2 logical and 2 physical cores
+ *  .NET SDK 8.0.100-rc.1.23455.8
+ *    [Host]     : .NET 8.0.0 (8.0.23.41904), X64 RyuJIT AVX2
+ *    DefaultJob : .NET 8.0.0 (8.0.23.41904), X64 RyuJIT AVX2
+ *
+ *
+ *  | Method              | positionCommand      | Mean       | Error     | StdDev    | Ratio | RatioSD | Gen0    | Gen1   | Allocated | Alloc Ratio |
+ *  |-------------------- |--------------------- |-----------:|----------:|----------:|------:|--------:|--------:|-------:|----------:|------------:|
+ *  | ParseGame_Original  | position startpos    |   6.871 us | 0.1247 us | 0.1167 us |  1.00 |    0.00 |  1.6251 | 0.1450 |   29.8 KB |        1.00 |
+ *  | ParseGame_Improved1 | position startpos    |   7.054 us | 0.1380 us | 0.1534 us |  1.03 |    0.03 |  1.6251 | 0.1602 |  29.68 KB |        1.00 |
+ *  | ParseGame_Improved2 | position startpos    |   7.146 us | 0.1382 us | 0.1845 us |  1.03 |    0.03 |  1.6251 | 0.1602 |  29.68 KB |        1.00 |
+ *  | ParseGame_Improved3 | position startpos    |   6.894 us | 0.1260 us | 0.2305 us |  1.04 |    0.04 |  1.6251 | 0.1450 |   29.8 KB |        1.00 |
+ *  | ParseGame_Improved4 | position startpos    |   7.564 us | 0.1501 us | 0.1668 us |  1.10 |    0.03 |  1.6174 | 0.1526 |  29.77 KB |        1.00 |
+ *  |                     |                      |            |           |           |       |         |         |        |           |             |
+ *  | ParseGame_Original  | posi(...)b7b6 [193]  |  34.873 us | 0.5100 us | 0.4770 us |  1.00 |    0.00 |  2.1973 | 0.1831 |  40.55 KB |        1.00 |
+ *  | ParseGame_Improved1 | posi(...)b7b6 [193]  |  34.928 us | 0.4407 us | 0.4122 us |  1.00 |    0.02 |  2.1362 | 0.1831 |  39.07 KB |        0.96 |
+ *  | ParseGame_Improved2 | posi(...)b7b6 [193]  |  33.461 us | 0.5829 us | 0.5453 us |  0.96 |    0.02 |  2.0142 | 0.1831 |  37.06 KB |        0.91 |
+ *  | ParseGame_Improved3 | posi(...)b7b6 [193]  |  34.852 us | 0.4138 us | 0.3668 us |  1.00 |    0.02 |  2.0752 | 0.1831 |  38.54 KB |        0.95 |
+ *  | ParseGame_Improved4 | posi(...)b7b6 [193]  |  35.040 us | 0.5429 us | 0.5078 us |  1.00 |    0.02 |  2.0142 | 0.1831 |  36.94 KB |        0.91 |
+ *  |                     |                      |            |           |           |       |         |         |        |           |             |
+ *  | ParseGame_Original  | posi(...)f3g3 [353]  |  55.621 us | 0.7694 us | 0.7197 us |  1.00 |    0.00 |  2.7466 | 0.2441 |  50.37 KB |        1.00 |
+ *  | ParseGame_Improved1 | posi(...)f3g3 [353]  |  53.732 us | 0.4313 us | 0.4035 us |  0.97 |    0.02 |  2.5635 | 0.2441 |  47.63 KB |        0.95 |
+ *  | ParseGame_Improved2 | posi(...)f3g3 [353]  |  55.343 us | 0.6590 us | 0.5842 us |  0.99 |    0.02 |  2.3804 | 0.1831 |  43.81 KB |        0.87 |
+ *  | ParseGame_Improved3 | posi(...)f3g3 [353]  |  55.508 us | 0.5819 us | 0.5443 us |  1.00 |    0.01 |  2.5024 | 0.2441 |  46.55 KB |        0.92 |
+ *  | ParseGame_Improved4 | posi(...)f3g3 [353]  |  54.922 us | 0.5243 us | 0.4905 us |  0.99 |    0.01 |  2.3804 | 0.1831 |  43.69 KB |        0.87 |
+ *  |                     |                      |            |           |           |       |         |         |        |           |             |
+ *  | ParseGame_Original  | posi(...)g4g8 [979]  | 131.549 us | 2.3017 us | 2.1530 us |  1.00 |    0.00 |  4.6387 | 0.2441 |  88.81 KB |        1.00 |
+ *  | ParseGame_Improved1 | posi(...)g4g8 [979]  | 127.214 us | 1.5846 us | 1.4822 us |  0.97 |    0.02 |  4.3945 | 0.4883 |   81.2 KB |        0.91 |
+ *  | ParseGame_Improved2 | posi(...)g4g8 [979]  | 125.834 us | 1.0297 us | 0.9128 us |  0.96 |    0.02 |  3.6621 | 0.2441 |  70.29 KB |        0.79 |
+ *  | ParseGame_Improved3 | posi(...)g4g8 [979]  | 129.836 us | 1.3107 us | 1.2260 us |  0.99 |    0.02 |  4.1504 | 0.2441 |  77.91 KB |        0.88 |
+ *  | ParseGame_Improved4 | posi(...)g4g8 [979]  | 124.132 us | 0.4781 us | 0.4238 us |  0.94 |    0.01 |  3.6621 | 0.2441 |  70.18 KB |        0.79 |
+ *  |                     |                      |            |           |           |       |         |         |        |           |             |
+ *  | ParseGame_Original  | posi(...)h3f1 [2984] | 359.558 us | 5.2840 us | 4.9426 us |  1.00 |    0.00 | 11.2305 | 1.4648 |  211.8 KB |        1.00 |
+ *  | ParseGame_Improved1 | posi(...)h3f1 [2984] | 347.574 us | 3.6558 us | 3.4196 us |  0.97 |    0.02 | 10.2539 | 1.4648 | 188.51 KB |        0.89 |
+ *  | ParseGame_Improved2 | posi(...)h3f1 [2984] | 331.351 us | 3.1412 us | 2.9382 us |  0.92 |    0.02 |  8.3008 | 0.4883 |  154.9 KB |        0.73 |
+ *  | ParseGame_Improved3 | posi(...)h3f1 [2984] | 345.972 us | 2.1860 us | 1.8254 us |  0.96 |    0.01 |  9.2773 | 0.4883 | 178.18 KB |        0.84 |
+ *  | ParseGame_Improved4 | posi(...)h3f1 [2984] | 316.134 us | 1.9524 us | 1.7308 us |  0.88 |    0.01 |  8.3008 | 0.4883 | 154.78 KB |        0.73 |
+ *
  *
  *  BenchmarkDotNet v0.13.8, Windows 10 (10.0.20348.1906) (Hyper-V)
  *  Intel Xeon CPU E5-2673 v4 2.30GHz, 1 CPU, 2 logical and 2 physical cores
@@ -42,57 +48,77 @@ Intel Xeon Platinum 8370C CPU 2.80GHz, 1 CPU, 2 logical and 2 physical cores
  *    DefaultJob : .NET 8.0.0 (8.0.23.41904), X64 RyuJIT AVX2
  *
  *
- *  | Method             | positionCommand      | Mean       | Error     | StdDev     | Ratio | RatioSD | Gen0   | Gen1   | Allocated | Alloc Ratio |
- *  |------------------- |--------------------- |-----------:|----------:|-----------:|------:|--------:|-------:|-------:|----------:|------------:|
- *  | ParseGame_Original | position startpos    |   5.102 us | 0.1013 us |  0.1126 us |  1.00 |    0.00 | 0.3128 | 0.0076 |   8.02 KB |        1.00 |
- *  | ParseGame_Current  | position startpos    |   5.308 us | 0.1022 us |  0.1293 us |  1.05 |    0.04 | 0.3052 |      - |   7.91 KB |        0.99 |
- *  |                    |                      |            |           |            |       |         |        |        |           |             |
- *  | ParseGame_Original | posi(...)b7b6 [193]  |  30.325 us | 0.5971 us |  0.9471 us |  1.00 |    0.00 | 0.7324 |      - |  18.78 KB |        1.00 |
- *  | ParseGame_Current  | posi(...)b7b6 [193]  |  28.005 us | 0.4262 us |  0.3987 us |  0.90 |    0.02 | 0.5798 |      - |  15.28 KB |        0.81 |
- *  |                    |                      |            |           |            |       |         |        |        |           |             |
- *  | ParseGame_Original | posi(...)f3g3 [353]  |  47.914 us | 0.9522 us |  2.2258 us |  1.00 |    0.00 | 1.0986 |      - |  28.59 KB |        1.00 |
- *  | ParseGame_Current  | posi(...)f3g3 [353]  |  43.501 us | 0.8600 us |  1.8511 us |  0.91 |    0.05 | 0.8545 |      - |  22.03 KB |        0.77 |
- *  |                    |                      |            |           |            |       |         |        |        |           |             |
- *  | ParseGame_Original | posi(...)g4g8 [979]  | 115.204 us | 2.0057 us |  3.5651 us |  1.00 |    0.00 | 2.9297 | 0.1221 |  75.17 KB |        1.00 |
- *  | ParseGame_Current  | posi(...)g4g8 [979]  | 107.921 us | 1.9167 us |  1.7929 us |  0.93 |    0.04 | 2.1973 |      - |  56.66 KB |        0.75 |
- *  |                    |                      |            |           |            |       |         |        |        |           |             |
- *  | ParseGame_Original | posi(...)h3f1 [2984] | 312.412 us | 6.0765 us | 15.0196 us |  1.00 |    0.00 | 8.3008 | 0.9766 | 215.44 KB |        1.00 |
- *  | ParseGame_Current  | posi(...)h3f1 [2984] | 166.560 us | 3.1087 us |  3.4553 us |  0.54 |    0.02 | 2.9297 |      - |  77.49 KB |        0.36 |
+ *  | Method              | positionCommand      | Mean       | Error     | StdDev    | Median     | Ratio | RatioSD | Gen0   | Gen1   | Allocated | Alloc Ratio |
+ *  |-------------------- |--------------------- |-----------:|----------:|----------:|-----------:|------:|--------:|-------:|-------:|----------:|------------:|
+ *  | ParseGame_Original  | position startpos    |   7.307 us | 0.1456 us | 0.4224 us |   7.187 us |  1.00 |    0.00 | 1.1597 | 0.0992 |   29.8 KB |        1.00 |
+ *  | ParseGame_Improved1 | position startpos    |   8.015 us | 0.1632 us | 0.4812 us |   8.101 us |  1.10 |    0.09 | 1.1597 | 0.0992 |  29.68 KB |        1.00 |
+ *  | ParseGame_Improved2 | position startpos    |   7.846 us | 0.1505 us | 0.1546 us |   7.855 us |  1.10 |    0.06 | 1.1597 | 0.0992 |  29.68 KB |        1.00 |
+ *  | ParseGame_Improved3 | position startpos    |   7.621 us | 0.1422 us | 0.1397 us |   7.603 us |  1.07 |    0.04 | 1.1597 | 0.0992 |   29.8 KB |        1.00 |
+ *  | ParseGame_Improved4 | position startpos    |   8.560 us | 0.1703 us | 0.3947 us |   8.543 us |  1.16 |    0.10 | 1.1597 | 0.1068 |  29.77 KB |        1.00 |
+ *  |                     |                      |            |           |           |            |       |         |        |        |           |             |
+ *  | ParseGame_Original  | posi(...)b7b6 [193]  |  38.037 us | 0.7471 us | 1.2275 us |  38.141 us |  1.00 |    0.00 | 1.5869 | 0.1221 |  40.55 KB |        1.00 |
+ *  | ParseGame_Improved1 | posi(...)b7b6 [193]  |  37.127 us | 0.6398 us | 0.5985 us |  37.047 us |  1.00 |    0.03 | 1.5259 | 0.1221 |  39.07 KB |        0.96 |
+ *  | ParseGame_Improved2 | posi(...)b7b6 [193]  |  35.052 us | 0.6982 us | 1.0014 us |  34.867 us |  0.93 |    0.05 | 1.4038 | 0.1221 |  37.06 KB |        0.91 |
+ *  | ParseGame_Improved3 | posi(...)b7b6 [193]  |  34.950 us | 0.6290 us | 0.6459 us |  34.797 us |  0.94 |    0.03 | 1.4648 | 0.1221 |  38.54 KB |        0.95 |
+ *  | ParseGame_Improved4 | posi(...)b7b6 [193]  |  35.013 us | 0.6706 us | 1.0637 us |  35.186 us |  0.92 |    0.05 | 1.4038 | 0.1221 |  36.94 KB |        0.91 |
+ *  |                     |                      |            |           |           |            |       |         |        |        |           |             |
+ *  | ParseGame_Original  | posi(...)f3g3 [353]  |  57.933 us | 1.1546 us | 2.0222 us |  58.354 us |  1.00 |    0.00 | 1.9531 | 0.1831 |  50.37 KB |        1.00 |
+ *  | ParseGame_Improved1 | posi(...)f3g3 [353]  |  54.611 us | 0.9854 us | 0.8736 us |  54.500 us |  0.97 |    0.03 | 1.8311 | 0.1831 |  47.63 KB |        0.95 |
+ *  | ParseGame_Improved2 | posi(...)f3g3 [353]  |  53.850 us | 1.0766 us | 1.6441 us |  54.208 us |  0.93 |    0.04 | 1.7090 | 0.1221 |  43.81 KB |        0.87 |
+ *  | ParseGame_Improved3 | posi(...)f3g3 [353]  |  54.731 us | 1.0093 us | 1.2015 us |  54.825 us |  0.95 |    0.05 | 1.7700 | 0.1221 |  46.54 KB |        0.92 |
+ *  | ParseGame_Improved4 | posi(...)f3g3 [353]  |  57.566 us | 1.1010 us | 1.1780 us |  57.754 us |  1.01 |    0.03 | 1.7090 | 0.1221 |  43.69 KB |        0.87 |
+ *  |                     |                      |            |           |           |            |       |         |        |        |           |             |
+ *  | ParseGame_Original  | posi(...)g4g8 [979]  | 128.079 us | 2.4266 us | 2.1511 us | 128.147 us |  1.00 |    0.00 | 3.4180 | 0.2441 |  88.81 KB |        1.00 |
+ *  | ParseGame_Improved1 | posi(...)g4g8 [979]  | 123.052 us | 2.4402 us | 3.3402 us | 122.040 us |  0.95 |    0.02 | 3.1738 | 0.3662 |  81.19 KB |        0.91 |
+ *  | ParseGame_Improved2 | posi(...)g4g8 [979]  | 118.292 us | 2.3150 us | 3.8036 us | 118.165 us |  0.93 |    0.04 | 2.6855 | 0.2441 |  70.29 KB |        0.79 |
+ *  | ParseGame_Improved3 | posi(...)g4g8 [979]  | 123.003 us | 1.9221 us | 1.7039 us | 123.349 us |  0.96 |    0.02 | 2.9297 | 0.2441 |  77.91 KB |        0.88 |
+ *  | ParseGame_Improved4 | posi(...)g4g8 [979]  | 119.522 us | 1.2756 us | 1.1307 us | 119.621 us |  0.93 |    0.02 | 2.6855 | 0.2441 |  70.17 KB |        0.79 |
+ *  |                     |                      |            |           |           |            |       |         |        |        |           |             |
+ *  | ParseGame_Original  | posi(...)h3f1 [2984] | 371.790 us | 7.1718 us | 8.2591 us | 372.192 us |  1.00 |    0.00 | 7.8125 | 0.9766 | 211.79 KB |        1.00 |
+ *  | ParseGame_Improved1 | posi(...)h3f1 [2984] | 352.763 us | 6.8505 us | 7.3300 us | 352.608 us |  0.95 |    0.03 | 7.3242 | 0.9766 |  188.5 KB |        0.89 |
+ *  | ParseGame_Improved2 | posi(...)h3f1 [2984] | 319.417 us | 4.5244 us | 3.7781 us | 318.915 us |  0.86 |    0.02 | 5.8594 | 0.4883 | 154.89 KB |        0.73 |
+ *  | ParseGame_Improved3 | posi(...)h3f1 [2984] | 333.104 us | 5.6645 us | 8.6503 us | 331.891 us |  0.90 |    0.03 | 6.8359 | 0.4883 | 178.17 KB |        0.84 |
+ *  | ParseGame_Improved4 | posi(...)h3f1 [2984] | 324.352 us | 6.1629 us | 5.1463 us | 325.998 us |  0.87 |    0.03 | 5.8594 | 0.4883 | 154.77 KB |        0.73 |
  *
  *
-BenchmarkDotNet v0.13.8, macOS Monterey 12.6.8 (21G725) [Darwin 21.6.0]
-Intel Xeon CPU E5-1650 v2 3.50GHz (Max: 3.34GHz), 1 CPU, 3 logical and 3 physical cores
-.NET SDK 8.0.100-rc.1.23455.8
-  [Host]     : .NET 8.0.0 (8.0.23.41904), X64 RyuJIT AVX
-  DefaultJob : .NET 8.0.0 (8.0.23.41904), X64 RyuJIT AVX
-
-
-| Method              | positionCommand      | Mean       | Error     | StdDev    | Ratio | RatioSD | Gen0    | Gen1   | Allocated | Alloc Ratio |
-|-------------------- |--------------------- |-----------:|----------:|----------:|------:|--------:|--------:|-------:|----------:|------------:|
-| ParseGame_Original  | position startpos    |   5.691 us | 0.0466 us | 0.0389 us |  1.00 |    0.00 |  4.8523 | 0.1755 |  29.81 KB |        1.00 |
-| ParseGame_Improved1 | position startpos    |   5.569 us | 0.0682 us | 0.0638 us |  0.98 |    0.01 |  4.8370 | 0.2823 |  29.69 KB |        1.00 |
-| ParseGame_Improved2 | position startpos    |   5.561 us | 0.0382 us | 0.0339 us |  0.98 |    0.01 |  4.8370 | 0.2823 |  29.69 KB |        1.00 |
-| ParseGame_Improved3 | position startpos    |   5.534 us | 0.0581 us | 0.0543 us |  0.97 |    0.01 |  4.8370 | 0.2823 |  29.69 KB |        1.00 |
-|                     |                      |            |           |           |       |         |         |        |           |             |
-| ParseGame_Original  | posi(...)b7b6 [193]  |  28.256 us | 0.2944 us | 0.2754 us |  1.00 |    0.00 |  6.5918 | 0.3357 |  40.57 KB |        1.00 |
-| ParseGame_Improved1 | posi(...)b7b6 [193]  |  26.808 us | 0.2834 us | 0.2512 us |  0.95 |    0.01 |  6.3477 | 0.5188 |  39.08 KB |        0.96 |
-| ParseGame_Improved2 | posi(...)b7b6 [193]  |  26.136 us | 0.1953 us | 0.1731 us |  0.93 |    0.01 |  6.0120 | 0.3662 |  37.07 KB |        0.91 |
-| ParseGame_Improved3 | posi(...)b7b6 [193]  |  26.227 us | 0.2095 us | 0.1959 us |  0.93 |    0.01 |  6.0120 | 0.3662 |  37.07 KB |        0.91 |
-|                     |                      |            |           |           |       |         |         |        |           |             |
-| ParseGame_Original  | posi(...)f3g3 [353]  |  45.404 us | 0.3587 us | 0.3355 us |  1.00 |    0.00 |  8.1787 | 0.6714 |  50.38 KB |        1.00 |
-| ParseGame_Improved1 | posi(...)f3g3 [353]  |  43.858 us | 0.3918 us | 0.3665 us |  0.97 |    0.01 |  7.7515 | 0.6714 |  47.65 KB |        0.95 |
-| ParseGame_Improved2 | posi(...)f3g3 [353]  |  42.124 us | 0.4165 us | 0.3692 us |  0.93 |    0.01 |  7.1411 | 0.6104 |  43.83 KB |        0.87 |
-| ParseGame_Improved3 | posi(...)f3g3 [353]  |  42.512 us | 0.4810 us | 0.4264 us |  0.94 |    0.01 |  7.1411 | 0.6104 |  43.83 KB |        0.87 |
-|                     |                      |            |           |           |       |         |         |        |           |             |
-| ParseGame_Original  | posi(...)g4g8 [979]  | 105.806 us | 0.7700 us | 0.7202 us |  1.00 |    0.00 | 14.4043 | 1.5869 |  88.85 KB |        1.00 |
-| ParseGame_Improved1 | posi(...)g4g8 [979]  |  98.810 us | 0.8729 us | 0.8165 us |  0.93 |    0.01 | 13.1836 | 1.0986 |  81.23 KB |        0.91 |
-| ParseGame_Improved2 | posi(...)g4g8 [979]  |  95.290 us | 0.8584 us | 0.8030 us |  0.90 |    0.01 | 11.3525 | 0.8545 |  70.32 KB |        0.79 |
-| ParseGame_Improved3 | posi(...)g4g8 [979]  |  94.879 us | 0.7351 us | 0.6876 us |  0.90 |    0.01 | 11.3525 | 0.8545 |  70.32 KB |        0.79 |
-|                     |                      |            |           |           |       |         |         |        |           |             |
-| ParseGame_Original  | posi(...)h3f1 [2984] | 275.948 us | 3.3637 us | 3.1464 us |  1.00 |    0.00 | 34.1797 | 3.9063 | 211.88 KB |        1.00 |
-| ParseGame_Improved1 | posi(...)h3f1 [2984] | 261.578 us | 2.4591 us | 2.3003 us |  0.95 |    0.01 | 30.7617 | 4.3945 | 188.59 KB |        0.89 |
-| ParseGame_Improved2 | posi(...)h3f1 [2984] | 253.990 us | 3.2201 us | 3.0121 us |  0.92 |    0.02 | 24.9023 | 1.9531 | 154.96 KB |        0.73 |
-| ParseGame_Improved3 | posi(...)h3f1 [2984] | 248.209 us | 1.3742 us | 1.2854 us |  0.90 |    0.01 | 24.9023 | 1.9531 | 154.96 KB |        0.73 |
+ *  BenchmarkDotNet v0.13.8, macOS Monterey 12.6.8 (21G725) [Darwin 21.6.0]
+ *  Intel Xeon CPU E5-1650 v2 3.50GHz (Max: 3.34GHz), 1 CPU, 3 logical and 3 physical cores
+ *  .NET SDK 8.0.100-rc.1.23455.8
+ *    [Host]     : .NET 8.0.0 (8.0.23.41904), X64 RyuJIT AVX
+ *    DefaultJob : .NET 8.0.0 (8.0.23.41904), X64 RyuJIT AVX
+ *
+ *
+ *  | Method              | positionCommand      | Mean       | Error     | StdDev    | Ratio | RatioSD | Gen0    | Gen1   | Allocated | Alloc Ratio |
+ *  |-------------------- |--------------------- |-----------:|----------:|----------:|------:|--------:|--------:|-------:|----------:|------------:|
+ *  | ParseGame_Original  | position startpos    |   5.854 us | 0.1140 us | 0.1170 us |  1.00 |    0.00 |  4.8523 | 0.1755 |  29.81 KB |        1.00 |
+ *  | ParseGame_Improved1 | position startpos    |   6.305 us | 0.1791 us | 0.5253 us |  1.15 |    0.07 |  4.8370 | 0.2823 |  29.69 KB |        1.00 |
+ *  | ParseGame_Improved2 | position startpos    |   5.935 us | 0.1101 us | 0.1543 us |  1.01 |    0.04 |  4.8370 | 0.2823 |  29.69 KB |        1.00 |
+ *  | ParseGame_Improved3 | position startpos    |   6.076 us | 0.1208 us | 0.1240 us |  1.04 |    0.03 |  4.8523 | 0.1755 |  29.81 KB |        1.00 |
+ *  | ParseGame_Improved4 | position startpos    |   6.337 us | 0.0460 us | 0.0384 us |  1.08 |    0.02 |  4.8523 | 0.3662 |  29.78 KB |        1.00 |
+ *  |                     |                      |            |           |           |       |         |         |        |           |             |
+ *  | ParseGame_Original  | posi(...)b7b6 [193]  |  32.301 us | 0.6213 us | 0.7630 us |  1.00 |    0.00 |  6.5918 | 0.3357 |  40.57 KB |        1.00 |
+ *  | ParseGame_Improved1 | posi(...)b7b6 [193]  |  31.763 us | 0.4178 us | 0.3908 us |  0.98 |    0.02 |  6.3477 | 0.4883 |  39.08 KB |        0.96 |
+ *  | ParseGame_Improved2 | posi(...)b7b6 [193]  |  30.856 us | 0.6057 us | 0.7211 us |  0.96 |    0.03 |  5.9814 | 0.3052 |  37.07 KB |        0.91 |
+ *  | ParseGame_Improved3 | posi(...)b7b6 [193]  |  30.243 us | 0.2401 us | 0.2128 us |  0.94 |    0.02 |  6.2866 | 0.3052 |  38.56 KB |        0.95 |
+ *  | ParseGame_Improved4 | posi(...)b7b6 [193]  |  28.548 us | 0.2012 us | 0.1784 us |  0.88 |    0.02 |  6.0120 | 0.2747 |  36.96 KB |        0.91 |
+ *  |                     |                      |            |           |           |       |         |         |        |           |             |
+ *  | ParseGame_Original  | posi(...)f3g3 [353]  |  48.956 us | 0.3678 us | 0.3261 us |  1.00 |    0.00 |  8.1787 | 0.6714 |  50.38 KB |        1.00 |
+ *  | ParseGame_Improved1 | posi(...)f3g3 [353]  |  46.983 us | 0.3641 us | 0.3040 us |  0.96 |    0.01 |  7.7515 | 0.6714 |  47.65 KB |        0.95 |
+ *  | ParseGame_Improved2 | posi(...)f3g3 [353]  |  45.676 us | 0.3849 us | 0.3412 us |  0.93 |    0.01 |  7.1411 | 0.6104 |  43.83 KB |        0.87 |
+ *  | ParseGame_Improved3 | posi(...)f3g3 [353]  |  48.842 us | 0.9442 us | 1.0874 us |  0.99 |    0.03 |  7.5684 | 0.5493 |  46.56 KB |        0.92 |
+ *  | ParseGame_Improved4 | posi(...)f3g3 [353]  |  49.210 us | 0.8985 us | 0.9986 us |  1.00 |    0.02 |  7.0801 | 0.4272 |  43.71 KB |        0.87 |
+ *  |                     |                      |            |           |           |       |         |         |        |           |             |
+ *  | ParseGame_Original  | posi(...)g4g8 [979]  | 120.794 us | 1.0616 us | 0.9930 us |  1.00 |    0.00 | 14.4043 | 1.4648 |  88.85 KB |        1.00 |
+ *  | ParseGame_Improved1 | posi(...)g4g8 [979]  | 119.473 us | 2.2270 us | 2.1872 us |  0.99 |    0.02 | 13.1836 | 1.0986 |  81.23 KB |        0.91 |
+ *  | ParseGame_Improved2 | posi(...)g4g8 [979]  | 107.950 us | 1.0335 us | 0.9667 us |  0.89 |    0.01 | 11.3525 | 0.8545 |  70.32 KB |        0.79 |
+ *  | ParseGame_Improved3 | posi(...)g4g8 [979]  | 117.105 us | 1.4753 us | 1.2320 us |  0.97 |    0.02 | 12.6953 | 0.9766 |  77.94 KB |        0.88 |
+ *  | ParseGame_Improved4 | posi(...)g4g8 [979]  | 107.548 us | 1.3435 us | 1.1910 us |  0.89 |    0.01 | 11.3525 | 0.8545 |  70.21 KB |        0.79 |
+ *  |                     |                      |            |           |           |       |         |         |        |           |             |
+ *  | ParseGame_Original  | posi(...)h3f1 [2984] | 308.550 us | 5.7367 us | 5.3661 us |  1.00 |    0.00 | 34.1797 | 3.9063 | 211.88 KB |        1.00 |
+ *  | ParseGame_Improved1 | posi(...)h3f1 [2984] | 294.975 us | 4.6836 us | 4.3811 us |  0.96 |    0.02 | 30.7617 | 4.3945 | 188.59 KB |        0.89 |
+ *  | ParseGame_Improved2 | posi(...)h3f1 [2984] | 290.182 us | 3.2207 us | 3.0126 us |  0.94 |    0.02 | 24.9023 | 1.9531 | 154.96 KB |        0.73 |
+ *  | ParseGame_Improved3 | posi(...)h3f1 [2984] | 303.700 us | 5.9219 us | 4.6234 us |  0.98 |    0.03 | 28.8086 | 1.9531 | 178.25 KB |        0.84 |
+ *  | ParseGame_Improved4 | posi(...)h3f1 [2984] | 275.244 us | 2.4260 us | 2.2693 us |  0.89 |    0.02 | 24.9023 | 1.9531 | 154.84 KB |        0.73 |
  *
  *
  */
