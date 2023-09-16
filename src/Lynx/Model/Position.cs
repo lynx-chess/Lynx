@@ -484,7 +484,7 @@ public class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private string FEN(int halfMovesWithoutCaptureOrPawnMove = 0, int fullMoveClock = 1)
+    public string FEN(int halfMovesWithoutCaptureOrPawnMove = 0, int fullMoveClock = 1)
     {
         var sb = new StringBuilder(100);
 
