@@ -265,7 +265,7 @@ public class RegressionTest : BaseTest
     public async Task InvalidPV2(string positionCommand)
     {
         var engine = GetEngine();
-        engine.AdjustPosition(positionCommand[..^10]);
+        engine.AdjustPosition(positionCommand[..^10]);  // 8/8/1K2k3/2P5/PP6/8/7p/8 b - - 0 46, ready to promote
 
         var bestMove = await engine.BestMove(new GoCommand($"go depth {7}"));
         Assert.AreEqual("h2h1q", bestMove.BestMove.UCIString());

@@ -63,7 +63,7 @@ public static class MoveExtensions
     /// <exception cref="InvalidOperationException"></exception>
     /// <exception cref="IndexOutOfRangeException"></exception>
     /// <returns></returns>
-    public static bool TryParseFromUCIString(string UCIString, IEnumerable<Move> moveList, [NotNullWhen(true)] out Move? move)
+    public static bool TryParseFromUCIString(ReadOnlySpan<char> UCIString, IEnumerable<Move> moveList, [NotNullWhen(true)] out Move? move)
     {
         Utils.Assert(UCIString.Length == 4 || UCIString.Length == 5);
 
@@ -78,7 +78,7 @@ public static class MoveExtensions
 
             if (move.Equals(default(Move)))
             {
-                _logger.Warn("Unable to link last move string {0} to a valid move in the current position. That move may have already been played", UCIString);
+                _logger.Warn("Unable to link last move string {0} to a valid move in the current position. That move may have already been played", UCIString.ToString());
                 move = null;
                 return false;
             }
@@ -101,7 +101,7 @@ public static class MoveExtensions
             move = candidateMoves.FirstOrDefault(predicate);
             if (move.Equals(default(Move)))
             {
-                _logger.Warn("Unable to link move {0} to a valid move in the current position. That move may have already been played", UCIString);
+                _logger.Warn("Unable to link move {0} to a valid move in the current position. That move may have already been played", UCIString.ToString());
                 move = null;
                 return false;
             }

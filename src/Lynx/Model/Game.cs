@@ -21,7 +21,7 @@ public sealed class Game
     {
     }
 
-    public Game(string fen)
+    public Game(ReadOnlySpan<char> fen)
     {
         var parsedFen = FENParser.ParseFEN(fen);
         CurrentPosition = new Position(parsedFen);
@@ -29,7 +29,7 @@ public sealed class Game
 
         if (!CurrentPosition.IsValid())
         {
-            _logger.Warn($"Invalid position detected: {fen}");
+            _logger.Warn($"Invalid position detected: {fen.ToString()}");
         }
 
         MoveHistory = new(1024);
@@ -38,6 +38,10 @@ public sealed class Game
         HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
     }
 
+    /// <summary>
+    /// Intended to be used from tests only
+    /// </summary>
+    /// <param name="position"></param>
     internal Game(Position position)
     {
         CurrentPosition = position;
@@ -47,7 +51,8 @@ public sealed class Game
         PositionHashHistory = new(1024) { position.UniqueIdentifier };
     }
 
-    public Game(string fen, List<string> movesUCIString) : this(fen)
+    [Obsolete("Just intended for testing purposes")]
+    internal Game(string fen, string[] movesUCIString) : this(fen)
     {
         foreach (var moveString in movesUCIString)
         {
@@ -56,6 +61,55 @@ public sealed class Game
             if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
             {
                 _logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen, string.Join(' ', movesUCIString), moveString);
+                break;
+            }
+
+            MakeMove(parsedMove.Value);
+        }
+
+        _gameInitialPosition = new Position(CurrentPosition);
+    }
+
+    [Obsolete("Just intended for testing purposes")]
+    internal Game(string fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan) : this(fen)
+    {
+        for (int i = 0; i < rangeSpan.Length; ++i)
+        {
+            var range = rangeSpan[i];
+            if (range.Start.Equals(range.End))
+            {
+                break;
+            }
+            var moveString = rawMoves[range];
+            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, MovePool);
+
+            if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
+            {
+                _logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen, string.Join(' ', rawMoves.ToString()), moveString.ToString());
+                break;
+            }
+
+            MakeMove(parsedMove.Value);
+        }
+
+        _gameInitialPosition = new Position(CurrentPosition);
+    }
+
+    public Game(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan) : this(fen)
+    {
+        for (int i = 0; i < rangeSpan.Length; ++i)
+        {
+            var range = rangeSpan[i];
+            if (range.Start.Equals(range.End))
+            {
+                break;
+            }
+            var moveString = rawMoves[range];
+            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, MovePool);
+
+            if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
+            {
+                _logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen.ToString(), string.Join(' ', rawMoves.ToString()), moveString.ToString());
                 break;
             }
 
