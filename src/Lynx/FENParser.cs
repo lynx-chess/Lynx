@@ -61,12 +61,9 @@ public static class FENParser
             throw;
         }
 
-        if (!success)
-        {
-            throw new AssertException($"Error parsing {fen.ToString()}");
-        }
-
-        return (pieceBitBoards, occupancyBitBoards, side, castle, enPassant, halfMoveClock/*, fullMoveCounter*/);
+        return success
+            ? (pieceBitBoards, occupancyBitBoards, side, castle, enPassant, halfMoveClock/*, fullMoveCounter*/)
+            : throw new AssertException($"Error parsing {fen.ToString()}");
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
