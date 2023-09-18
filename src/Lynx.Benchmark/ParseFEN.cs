@@ -236,6 +236,11 @@ public partial class ParseFENBenchmark : BaseBenchmark
                 success = false;
             }
 
+            if (!success)
+            {
+                throw new();
+            }
+
             return (success, pieceBitBoards, occupancyBitBoards, side, castle, enPassant, halfMoveClock, fullMoveCounter);
         }
 
@@ -435,6 +440,11 @@ public partial class ParseFENBenchmark : BaseBenchmark
                 success = false;
             }
 
+            if (!success)
+            {
+                throw new();
+            }
+
             return (success, pieceBitBoards, occupancyBitBoards, side, castle, enPassant, halfMoveClock, fullMoveCounter);
         }
 
@@ -632,6 +642,11 @@ public partial class ParseFENBenchmark : BaseBenchmark
                 success = false;
             }
 
+            if (!success)
+            {
+                throw new();
+            }
+
             return (success, pieceBitBoards, occupancyBitBoards, side, castle, enPassant, halfMoveClock, fullMoveCounter);
         }
 
@@ -822,6 +837,11 @@ public partial class ParseFENBenchmark : BaseBenchmark
                 _logger.Error("Error parsing FEN string {0}", fen.ToString());
                 _logger.Error(e.Message);
                 success = false;
+            }
+
+            if (!success)
+            {
+                throw new();
             }
 
             return (success, pieceBitBoards, occupancyBitBoards, side, castle, enPassant, halfMoveClock, fullMoveCounter);

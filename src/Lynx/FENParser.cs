@@ -2,8 +2,8 @@
 using NLog;
 using System.Runtime.CompilerServices;
 
-using ParseResult = (bool Success, ulong[] PieceBitBoards, ulong[] OccupancyBitBoards, Lynx.Model.Side Side, byte Castle, Lynx.Model.BoardSquare EnPassant,
-            int HalfMoveClock, int FullMoveCounter);
+using ParseResult = (ulong[] PieceBitBoards, ulong[] OccupancyBitBoards, Lynx.Model.Side Side, byte Castle, Lynx.Model.BoardSquare EnPassant,
+            int HalfMoveClock/*, int FullMoveCounter*/);
 
 namespace Lynx;
 
@@ -11,6 +11,7 @@ public static class FENParser
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ParseResult ParseFEN(ReadOnlySpan<char> fen)
     {
         fen = fen.Trim();
@@ -21,7 +22,7 @@ public static class FENParser
         bool success;
         Side side = Side.Both;
         byte castle = 0;
-        int halfMoveClock = 0, fullMoveCounter = 1;
+        int halfMoveClock = 0/*, fullMoveCounter = 1*/;
         BoardSquare enPassant = BoardSquare.noSquare;
 
         try
@@ -48,19 +49,21 @@ public static class FENParser
                 _logger.Debug("No half move clock detected");
             }
 
-            if (partsLength < 5 || !int.TryParse(unparsedStringAsSpan[parts[4]], out fullMoveCounter))
-            {
-                _logger.Debug("No full move counter detected");
-            }
+            //if (partsLength < 5 || !int.TryParse(unparsedStringAsSpan[parts[4]], out fullMoveCounter))
+            //{
+            //    _logger.Debug("No full move counter detected");
+            //}
         }
         catch (Exception e)
         {
-            _logger.Error("Error parsing FEN string {0}", fen.ToString());
             _logger.Error(e.Message);
             success = false;
+            throw;
         }
 
-        return (success, pieceBitBoards, occupancyBitBoards, side, castle, enPassant, halfMoveClock, fullMoveCounter);
+        return success
+            ? (pieceBitBoards, occupancyBitBoards, side, castle, enPassant, halfMoveClock/*, fullMoveCounter*/)
+            : throw new AssertException($"Error parsing {fen.ToString()}");
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

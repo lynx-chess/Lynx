@@ -14,7 +14,6 @@ public class FENParserTest
         // Make sure a previous Fen doesn't change anything
         const string previuosFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
         var result = FENParser.ParseFEN(previuosFen);
-        Assert.True(result.Success);
 
         const string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
@@ -23,7 +22,6 @@ public class FENParserTest
         BitBoard[] pieceBitBoards = result.PieceBitBoards;
 
         // Assert
-        Assert.True(result.Success);
 
         var whitePawns = pieceBitBoards[(int)Piece.P];
         Assert.AreEqual(0b1111_1111UL << (6 * 8), whitePawns);
@@ -67,7 +65,6 @@ public class FENParserTest
         BitBoard[] pieceBitBoards = result.PieceBitBoards;
 
         // Assert
-        Assert.True(result.Success);
 
         Assert.True(pieceBitBoards[(int)Piece.p].GetBit(BoardSquare.a7));
         Assert.True(pieceBitBoards[(int)Piece.p].GetBit(BoardSquare.b4));
@@ -123,7 +120,6 @@ public class FENParserTest
         // Make sure a previous Fen doesn't change anything
         const string previuosFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
         var result = FENParser.ParseFEN(previuosFen);
-        Assert.True(result.Success);
 
         // Act
         result = FENParser.ParseFEN(fen);
@@ -131,7 +127,6 @@ public class FENParserTest
         BitBoard[] occupancyBitBoards = result.OccupancyBitBoards;
 
         // Assert
-        Assert.True(result.Success);
 
         var expectedWhiteOccupancy = 0UL;
         expectedWhiteOccupancy |= pieceBitBoards[(int)Piece.P];
@@ -166,17 +161,13 @@ public class FENParserTest
     [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR a KQkq - 0 1", Side.Both)]
     public void SideToMove(string fen, Side expectedSide)
     {
-        var result = FENParser.ParseFEN(fen);
-
         if (expectedSide != Side.Both)
         {
-            Assert.True(result.Success);
-            Assert.AreEqual(expectedSide, result.Side);
+            Assert.AreEqual(expectedSide, FENParser.ParseFEN(fen).Side);
         }
         else
         {
-            Assert.False(result.Success);
-            Assert.AreEqual(Side.Both, result.Side);
+            Assert.Throws<Exception>(() => FENParser.ParseFEN(fen));
         }
     }
 
@@ -196,22 +187,21 @@ public class FENParserTest
     {
         // Arrange
         // Make sure a previous Fen doesn't change anything
-        const string previuosFen = "8/8/8/8/8/8/8/8 w KQkq 1234 0 1";
-        var result = FENParser.ParseFEN(previuosFen);
-        Assert.False(result.Success);
+        const string previuosFen = "8/8/8/8/8/8/8/8 w KQkq - 0 1";
+        Assert.DoesNotThrow(() => FENParser.ParseFEN(previuosFen));
 
-        // Act
-        result = FENParser.ParseFEN(fen);
-
-        // Assert
         if (expectedCastleResult >= 0)
         {
-            Assert.True(result.Success);
+            // Act
+            var result = FENParser.ParseFEN(fen);
+
+            //Assert
             Assert.AreEqual(expectedCastleResult, result.Castle);
         }
         else
         {
-            Assert.False(result.Success);
+            // Act and Assert
+            Assert.Throws<Exception>(() => FENParser.ParseFEN(fen));
         }
     }
 
@@ -224,7 +214,6 @@ public class FENParserTest
     {
         var result = FENParser.ParseFEN(fen);
 
-        Assert.True(result.Success);
         Assert.AreEqual(expectedEnPassantSquare, result.EnPassant);
     }
 
@@ -234,11 +223,11 @@ public class FENParserTest
     [TestCase("rnbqkbnr/ppppp1pp/8/8/4pP2/8/PPPPP1PP/RNBQKBNR b Qq b3 0 1")]  // f3 could be
     [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq i1 0 1")]
     [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq i3 0 1")]
+    [TestCase("8/8/Q7/P7/1p6/8/8/8 w - b3 0 1", Description = "Wrong EnPassant square")]
+    [TestCase("8/8/8/1P6/p7/q7/8/8 b - b6 0 1", Description = "Wrong EnPassant square")]
     public void EnPassant_Error(string fen)
     {
-        var result = FENParser.ParseFEN(fen);
-
-        Assert.False(result.Success);
+        Assert.Throws<AssertException>(() => FENParser.ParseFEN(fen));
     }
 
     [TestCase("8/8/8/8/8/8/8/8 w KQkq - 0 1", 0)]
@@ -248,18 +237,16 @@ public class FENParserTest
     {
         var result = FENParser.ParseFEN(fen);
 
-        Assert.True(result.Success);
         Assert.AreEqual(expectedHalfMoves, result.HalfMoveClock);
     }
 
-    [TestCase("8/8/8/8/8/8/8/8 w KQkq - 0 1", 1)]
-    [TestCase("8/8/8/8/8/8/8/8 w KQkq - 0 50", 50)]
-    [TestCase("8/8/8/8/8/8/8/8 w KQkq - 0 100", 100)]
-    public void FullMoveCounter(string fen, int expectedFullMoveCounter)
-    {
-        var result = FENParser.ParseFEN(fen);
+    //[TestCase("8/8/8/8/8/8/8/8 w KQkq - 0 1", 1)]
+    //[TestCase("8/8/8/8/8/8/8/8 w KQkq - 0 50", 50)]
+    //[TestCase("8/8/8/8/8/8/8/8 w KQkq - 0 100", 100)]
+    //public void FullMoveCounter(string fen, int expectedFullMoveCounter)
+    //{
+    //    var result = FENParser.ParseFEN(fen);
 
-        Assert.True(result.Success);
-        Assert.AreEqual(expectedFullMoveCounter, result.FullMoveCounter);
-    }
+    //    Assert.AreEqual(expectedFullMoveCounter, result.FullMoveCounter);
+    //}
 }
