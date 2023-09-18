@@ -13,7 +13,6 @@ public sealed class LynxDriver
     private readonly Channel<string> _engineWriter;
     private readonly Engine _engine;
     private readonly Logger _logger;
-    private static readonly string[] _none = new[] { "none" };
 
     public LynxDriver(ChannelReader<string> uciReader, Channel<string> engineWriter, Engine engine)
     {
@@ -35,6 +34,14 @@ public sealed class LynxDriver
 
     public async Task Run(CancellationToken cancellationToken)
     {
+        static ReadOnlySpan<char> ExtractCommandItems(string rawCommand)
+        {
+            var span = rawCommand.AsSpan();
+            Span<Range> items = stackalloc Range[2];
+            span.Split(items, ' ', StringSplitOptions.RemoveEmptyEntries);
+
+            return span[items[0]];
+        }
         try
         {
             while (await _uciReader.WaitToReadAsync(cancellationToken) && !cancellationToken.IsCancellationRequested)
@@ -45,8 +52,7 @@ public sealed class LynxDriver
                     {
                         _logger.Debug("[GUI]\t{0}", rawCommand);
 
-                        var commandItems = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                        switch (commandItems[0].ToLowerInvariant())
+                        switch (ExtractCommandItems(rawCommand))
                         {
                             case DebugCommand.Id:
                                 HandleDebug(rawCommand);
@@ -70,7 +76,7 @@ public sealed class LynxDriver
                                 HandleRegister(rawCommand);
                                 break;
                             case SetOptionCommand.Id:
-                                HandleSetOption(rawCommand, commandItems);
+                                HandleSetOption(rawCommand);
                                 break;
                             case StopCommand.Id:
                                 HandleStop();
@@ -118,7 +124,7 @@ public sealed class LynxDriver
 
     #region Command handlers
 
-    private void HandlePosition(string command)
+    private void HandlePosition(ReadOnlySpan<char> command)
     {
 #if DEBUG
         _engine.Game.CurrentPosition.Print();
@@ -165,18 +171,24 @@ public sealed class LynxDriver
         }
     }
 
-    private void HandleSetOption(string command, string[] commandItems)
+    private void HandleSetOption(ReadOnlySpan<char> command)
     {
-        if (commandItems.Length < 3 || !string.Equals(commandItems[1], "name", StringComparison.OrdinalIgnoreCase))
+        Span<Range> commandItems = stackalloc Range[5];
+        var length = command.Split(commandItems, ' ', StringSplitOptions.RemoveEmptyEntries);
+
+        if (commandItems[2].Start.Equals(commandItems[2].End) || !command[commandItems[1]].Equals("name", StringComparison.OrdinalIgnoreCase))
         {
             return;
         }
 
-        switch (commandItems[2].ToLowerInvariant())
+        Span<char> lowerCaseFirstWord = stackalloc char[command[commandItems[2]].Length];
+        command[commandItems[2]].ToLowerInvariant(lowerCaseFirstWord);
+
+        switch (lowerCaseFirstWord)
         {
             case "ponder":
                 {
-                    if (commandItems.Length > 4 && bool.TryParse(commandItems[4], out var value))
+                    if (length > 4 && bool.TryParse(command[commandItems[4]], out var value))
                     {
                         Configuration.IsPonder = value;
                     }
@@ -185,7 +197,7 @@ public sealed class LynxDriver
                 }
             case "uci_analysemode":
                 {
-                    if (commandItems.Length > 4 && bool.TryParse(commandItems[4], out var value))
+                    if (length > 4 && bool.TryParse(command[commandItems[4]], out var value))
                     {
                         Configuration.UCI_AnalyseMode = value;
                     }
@@ -193,7 +205,7 @@ public sealed class LynxDriver
                 }
             case "depth":
                 {
-                    if (commandItems.Length > 4 && int.TryParse(commandItems[4], out var value))
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
                         Configuration.EngineSettings.DefaultMaxDepth = value;
                     }
@@ -201,7 +213,7 @@ public sealed class LynxDriver
                 }
             case "hash":
                 {
-                    if (commandItems.Length > 4 && int.TryParse(commandItems[4], out var value))
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
                         Configuration.Hash = Math.Clamp(value, 0, 1024);
                     }
@@ -209,23 +221,26 @@ public sealed class LynxDriver
                 }
             case "uci_opponent":
                 {
-                    if (commandItems.Length > 4)
+                    const string none = "none ";
+                    if (length > 4)
                     {
-                        _logger.Info("Game against {0}", string.Join(' ', commandItems.Skip(4).Except(_none)));
+                        var opponent = command[commandItems[4].Start.Value..].ToString();
+
+                        _logger.Info("Game against {0}", opponent.Replace(none, string.Empty));
                     }
                     break;
                 }
             case "uci_engineabout":
                 {
-                    if (commandItems.Length > 4)
+                    if (length > 4)
                     {
-                        _logger.Info("UCI_EngineAbout: {0}", string.Join(' ', commandItems.Skip(4)));
+                        _logger.Info("UCI_EngineAbout: {0}", command[commandItems[4].Start.Value..].ToString());
                     }
                     break;
                 }
             case "onlinetablebaseinrootpositions":
                 {
-                    if (commandItems.Length > 4 && bool.TryParse(commandItems[4], out var value))
+                    if (length > 4 && bool.TryParse(command[commandItems[4]], out var value))
                     {
                         Configuration.EngineSettings.UseOnlineTablebaseInRootPositions = value;
                     }
@@ -233,7 +248,7 @@ public sealed class LynxDriver
                 }
             case "onlinetablebaseinsearch":
                 {
-                    if (commandItems.Length > 4 && bool.TryParse(commandItems[4], out var value))
+                    if (length > 4 && bool.TryParse(command[commandItems[4]], out var value))
                     {
                         Configuration.EngineSettings.UseOnlineTablebaseInSearch = value;
                     }
@@ -241,7 +256,7 @@ public sealed class LynxDriver
                 }
             case "threads":
                 {
-                    if (commandItems.Length > 4 && int.TryParse(commandItems[4], out var value))
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
                         if (value != 1)
                         {
@@ -251,7 +266,7 @@ public sealed class LynxDriver
                     break;
                 }
             default:
-                _logger.Warn("Unsupported option: {0}", command);
+                _logger.Warn("Unsupported option: {0}", command.ToString());
                 break;
         }
     }
@@ -265,7 +280,7 @@ public sealed class LynxDriver
         _engine.NewGame();
     }
 
-    private static void HandleDebug(string command) => Configuration.IsDebug = DebugCommand.Parse(command);
+    private static void HandleDebug(ReadOnlySpan<char> command) => Configuration.IsDebug = DebugCommand.Parse(command);
 
     private void HandleQuit()
     {
@@ -276,7 +291,7 @@ public sealed class LynxDriver
         _engineWriter.Writer.Complete();
     }
 
-    private void HandleRegister(string rawCommand) => _engine.Registration = new RegisterCommand(rawCommand);
+    private void HandleRegister(ReadOnlySpan<char> rawCommand) => _engine.Registration = new RegisterCommand(rawCommand);
 
     private async Task HandlePerft(string rawCommand)
     {

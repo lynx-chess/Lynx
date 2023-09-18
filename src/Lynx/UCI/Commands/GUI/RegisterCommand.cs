@@ -28,11 +28,16 @@ public sealed class RegisterCommand : GUIBaseCommand
 
     public string Code { get; } = string.Empty;
 
-    public RegisterCommand(string command)
+    public RegisterCommand(ReadOnlySpan<char> command)
     {
-        var items = command.Split(' ', System.StringSplitOptions.RemoveEmptyEntries);
+        const string later = "later";
+        const string name = "name";
+        const string code = "code";
 
-        if (string.Equals("later", items[1], System.StringComparison.OrdinalIgnoreCase))
+        Span<Range> items = stackalloc Range[6];
+        var itemsLength = command.Split(items, ' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+        if (command[items[1]].Equals(later, StringComparison.OrdinalIgnoreCase))
         {
             Later = true;
             return;
@@ -40,16 +45,17 @@ public sealed class RegisterCommand : GUIBaseCommand
 
         var sb = new StringBuilder();
 
-        foreach (var item in items[1..])
+        for (int i = 1; i < itemsLength; ++i)
         {
-            if (string.Equals("name", item, System.StringComparison.OrdinalIgnoreCase))
+            var item = command[items[i]];
+            if (item.Equals(name, StringComparison.OrdinalIgnoreCase))
             {
-                Code = sb.ToString().TrimEnd();
+                Code = sb.ToString();
                 sb.Clear();
             }
-            else if (string.Equals("code", item, System.StringComparison.OrdinalIgnoreCase))
+            else if (item.Equals(code, StringComparison.OrdinalIgnoreCase))
             {
-                Name = sb.ToString().TrimEnd();
+                Name = sb.ToString();
                 sb.Clear();
             }
             else
@@ -61,11 +67,11 @@ public sealed class RegisterCommand : GUIBaseCommand
 
         if (string.IsNullOrEmpty(Name))
         {
-            Name = sb.ToString().TrimEnd();
+            Name = sb.ToString();
         }
         else
         {
-            Code = sb.ToString().TrimEnd();
+            Code = sb.ToString();
         }
     }
 }
