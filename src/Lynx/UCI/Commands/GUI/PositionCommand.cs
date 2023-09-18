@@ -1,7 +1,6 @@
 ﻿using Lynx.Model;
 using NLog;
 using System.Diagnostics.CodeAnalysis;
-using System.Text.RegularExpressions;
 
 namespace Lynx.UCI.Commands.GUI;
 
@@ -22,12 +21,10 @@ public sealed class PositionCommand : GUIBaseCommand
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    public static Game ParseGame(string positionCommand)
+    public static Game ParseGame(ReadOnlySpan<char> positionCommandSpan)
     {
         try
         {
-            var positionCommandSpan = positionCommand.AsSpan();
-
             // We divide the position command in these two sections:
             // "position startpos                       ||"
             // "position startpos                       || moves e2e4 e7e5"
@@ -57,7 +54,7 @@ public sealed class PositionCommand : GUIBaseCommand
         }
         catch (Exception e)
         {
-            _logger.Error(e, "Error parsing position command '{0}'", positionCommand);
+            _logger.Error(e, "Error parsing position command '{0}'", positionCommandSpan.ToString());
             return new Game();
         }
     }

@@ -56,7 +56,7 @@ public sealed partial class Engine
         InitializeTT();
     }
 
-    public void AdjustPosition(string rawPositionCommand)
+    public void AdjustPosition(ReadOnlySpan<char> rawPositionCommand)
     {
         Game = PositionCommand.ParseGame(rawPositionCommand);
         _isNewGameComing = false;
