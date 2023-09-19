@@ -43,9 +43,11 @@ jobs:
 
     strategy:
       matrix:
-        runtime-identifier: [win-x64, win-arm64, linux-x64, linux-arm64, linux-arm, osx-x64, osx.11.0-arm64, osx.12-arm64, osx.13-arm64]
+        runtime-identifier: [win-x64, win-x86, win-arm64, linux-x64, linux-arm64, linux-arm, linux-musl-x64, linux-bionic-arm64, osx-x64, osx-arm64]
         include:
           - runtime-identifier: win-x64
+            os: windows-latest
+          - runtime-identifier: win-x86
             os: windows-latest
           - runtime-identifier: win-arm64
             os: windows-latest
@@ -55,14 +57,14 @@ jobs:
             os: ubuntu-latest
           - runtime-identifier: linux-arm
             os: ubuntu-latest
+          - runtime-identifier: linux-musl-x64
+            os: ubuntu-latest
+          - runtime-identifier: linux-bionic-arm64
+            os: ubuntu-latest
           - runtime-identifier: osx-x64
-            os: ubuntu-latest
-          - runtime-identifier: osx.11.0-arm64
-            os: ubuntu-latest
-          - runtime-identifier: osx.12-arm64
-            os: ubuntu-latest
-          - runtime-identifier: osx.13-arm64
-            os: ubuntu-latest
+            os: macos-latest
+          - runtime-identifier: osx-arm64
+            os: macos-latest
       fail-fast: false
 
     steps:
