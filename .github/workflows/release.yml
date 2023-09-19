@@ -43,7 +43,7 @@ jobs:
 
     strategy:
       matrix:
-        runtime-identifier: [win-x64, win-arm64, linux-x64, linux-arm64, linux-arm, linux-musl-x64, linux-bionic-arm64, osx-x64, osx-arm64]
+        runtime-identifier: [win-x64, win-arm64, linux-x64, linux-arm64, linux-arm, linux-musl-x64, osx-x64, osx-arm64]
         include:
           - runtime-identifier: win-x64
             os: windows-latest
@@ -56,8 +56,6 @@ jobs:
           - runtime-identifier: linux-arm
             os: ubuntu-latest
           - runtime-identifier: linux-musl-x64
-            os: ubuntu-latest
-          - runtime-identifier: linux-bionic-arm64
             os: ubuntu-latest
           - runtime-identifier: osx-x64
             os: macos-latest
