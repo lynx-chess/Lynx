@@ -48,7 +48,8 @@ using System.Threading.Channels;
 //RookEvaluation();
 //TranspositionTable();
 //UnmakeMove();
-PieceSquareTables();
+//PieceSquareTables();
+TexelTuner();
 
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
 const string TrickyPosition = Constants.TrickyTestPositionFEN;
@@ -1134,16 +1135,73 @@ static void PieceSquareTables()
             {
                 if (file == 0)
                 {
-                    Console.Write($"{8 - rank}  ");
+                    //Console.Write($"{8 - rank}  ");
                 }
 
                 var squareIndex = BitBoardExtensions.SquareIndex(rank, file);
 
-                Console.Write($" {bitboard[squareIndex]}\t");
+                Console.Write($" {bitboard[squareIndex]},\t");
             }
 
             Console.WriteLine();
         }
-        Console.Write("\n    a\tb\tc\td\te\tf\tg\th\n\n\n");
+        Console.WriteLine();
+        //Console.Write("\n    a\tb\tc\td\te\tf\tg\th\n\n\n");
     }
+
+    static void PrintBitBoard2(ulong[] bitboard)
+    {
+        for (var rank = 0; rank < 8; ++rank)
+        {
+            for (var file = 0; file < 8; ++file)
+            {
+                if (file == 0)
+                {
+                    //Console.Write($"{8 - rank}  ");
+                }
+
+                var squareIndex = BitBoardExtensions.SquareIndex(rank, file);
+
+                Console.Write($" {bitboard[squareIndex]},\t");
+            }
+
+            Console.WriteLine();
+        }
+        Console.WriteLine();
+        //Console.Write("\n    a\tb\tc\td\te\tf\tg\th\n\n\n");
+    }
+}
+
+static void TexelTuner()
+{
+    //PrintBitBoard2(Masks.WhitePassedPawnMasks);
+    //PrintBitBoard2(Masks.BlackPassedPawnMasks);
+
+    var p = new Position("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    //p.StaticEvaluation(0);
+    //p = new Position("1nbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    //p.StaticEvaluation(0);
+    //p = new Position("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBN1 w KQkq - 0 1\"");
+    //p.StaticEvaluation(0);
+
+    //p = new Position("K7/5P1P/2B5/5P1P/5p1p/6b1/5p1p/k7 w - - 0 1");
+    //p.StaticEvaluation(0);  // eval 7  - bishop mobility
+
+    //p = new Position("K7/5P1P/2B5/5P1P/5p1p/2Q3bq/5p1p/k7 w - - 0 1");
+    //p.StaticEvaluation(0);  // eval 22 - queen mobility
+
+    //p = new Position("3k3r/7p/8/8/8/8/P7/3K3R w - - 0 1");
+    //p.StaticEvaluation(0);  // eval 10 - semi open rook
+
+    //p = new Position("3k3r/7p/8/8/8/8/P7/3K2R1 w - - 0 1");
+    //p.StaticEvaluation(0);  // eval 15 - open rook
+
+    //p = new Position("1k6/8/8/P7/7p/8/8/K7 w - - 0 1");
+    //p.StaticEvaluation(0);  // eval 0 - open king penalty but without rooks
+
+    //p = new Position("1k4r1/8/8/P7/7p/8/8/K4R2 w - - 0 1");
+    //p.StaticEvaluation(0);  // eval 15 - open king penalty with rooks
+
+    p = new Position("1k2r3/8/8/P7/7p/8/8/3R3K w - - 0 1");
+    p.StaticEvaluation(0);  // eval 15 - open king penalty for black and semi open fo white with rooks
 }
