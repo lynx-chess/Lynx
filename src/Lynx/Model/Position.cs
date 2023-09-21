@@ -692,11 +692,11 @@ public class Position
 
         if (pieceCount[(int)Piece.B] >= 2)
         {
-            eval += Configuration.EngineSettings.BishopPairMaxBonus * endGamePhase / 24;
+            eval += ((Configuration.EngineSettings.BishopPairMinBonus * gamePhase) + (Configuration.EngineSettings.BishopPairMaxBonus * endGamePhase)) / 24;
         }
         if (pieceCount[(int)Piece.b] >= 2)
         {
-            eval -= Configuration.EngineSettings.BishopPairMaxBonus * endGamePhase / 24;
+            eval -= ((Configuration.EngineSettings.BishopPairMinBonus * gamePhase) + (Configuration.EngineSettings.BishopPairMaxBonus * endGamePhase)) / 24;
         }
 
         return Side == Side.White

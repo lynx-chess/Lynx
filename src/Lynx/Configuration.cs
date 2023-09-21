@@ -217,6 +217,7 @@ public sealed class EngineSettings
     /// It'll be scaled with phase
     /// </summary>
     public int BishopPairMaxBonus { get; set; } = 100;
+    public int BishopPairMinBonus { get; set; } = 23;
 
     public int RFP_MaxDepth { get; set; } = 6;
 
