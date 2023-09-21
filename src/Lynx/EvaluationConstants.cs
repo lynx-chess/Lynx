@@ -16,7 +16,7 @@ public static class EvaluationConstants
 
     public static readonly int[] EndGamePieceValues =
     [
-        165, 352, 367, 647, 1218, 00
+        165, 352, 367, 647, 1218, 00,
         -165, -352, -367, -647, -1218, 00
     ];
 
