@@ -3,7 +3,7 @@ using NUnit.Framework;
 using static Lynx.EvaluationConstants;
 
 namespace Lynx.Test;
-public class EvaluationConstantsTest
+public class EvaluationConstantsTestº
 {
     /// <summary>
     /// Shy from 14k
@@ -132,5 +132,25 @@ public class EvaluationConstantsTest
         Assert.NotZero(EvaluationConstants.SingleMoveEvaluation);
         Assert.Greater(EvaluationConstants.SingleMoveEvaluation, 100);
         Assert.Less(EvaluationConstants.SingleMoveEvaluation, 400);
+    }
+
+    [Test]
+    public void PSQTSize()
+    {
+        Assert.AreEqual(12, MiddleGamePositionalTables.Length);
+        foreach (var table in MiddleGamePositionalTables)
+        {
+            Assert.AreEqual(64, table.Length);
+        }
+
+        Assert.AreEqual(12, EndGamePositionalTables.Length);
+        foreach (var table in EndGamePositionalTables)
+        {
+            Assert.AreEqual(64, table.Length);
+        }
+
+        Assert.AreEqual(5, GamePhaseByPiece.Length);
+        Assert.AreEqual(12, MiddleGamePieceValues.Length);
+        Assert.AreEqual(12, EndGamePieceValues.Length);
     }
 }

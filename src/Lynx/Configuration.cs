@@ -173,7 +173,17 @@ public sealed class EngineSettings
 
     public int DoubledPawnPenalty { get; set; } = 10;
 
-    public int[] PassedPawnBonus { get; set; } = new[] { 0, 10, 30, 50, 75, 100, 150, 200 };
+    public int[] PassedPawnBonus { get; set; } = new[]
+    {
+        0,
+        4,
+        -2,
+        19,
+        44,
+        82,
+        136,
+        200
+    };
 
     public int SemiOpenFileRookBonus { get; set; } = 10;
 
