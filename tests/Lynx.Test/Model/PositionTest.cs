@@ -924,11 +924,13 @@ public class PositionTest
         var bitBoard = position.PieceBitBoards[(int)piece];
         int eval = 0;
 
+        var pieceCount = new int[12];
         while (!bitBoard.Empty())
         {
             var pieceSquareIndex = bitBoard.GetLS1BIndex();
             bitBoard.ResetLS1B();
-            eval += position.AdditionalPieceEvaluation(pieceSquareIndex, (int)piece, 0);
+            pieceCount[(int)piece]++;
+            eval += position.AdditionalPieceEvaluation(pieceSquareIndex, (int)piece, pieceCount).MiddleGameScore;
         }
 
         return eval;
@@ -952,7 +954,7 @@ public class PositionTest
         var bitBoard = position.PieceBitBoards[(int)piece].GetLS1BIndex();
 
         return piece == Piece.K
-            ? position.KingAdditionalEvaluation(bitBoard, Side.White, pieceCount, 0)
-            : position.KingAdditionalEvaluation(bitBoard, Side.Black, pieceCount, 0);
+            ? position.KingAdditionalEvaluation(bitBoard, Side.White, pieceCount).EndGameScore
+            : position.KingAdditionalEvaluation(bitBoard, Side.Black, pieceCount).EndGameScore;
     }
 }
