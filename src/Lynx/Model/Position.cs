@@ -599,27 +599,30 @@ public class Position
             return result;
         }
 
-        var pieceSquares = new int?[PieceBitBoards.Length, 10]; // Max 10 pieces of same type
+        var pieceCount = new int[PieceBitBoards.Length];
 
         int middleGameScore = 0;
         int endGameScore = 0;
-        int phase = 0;
+        int gamePhase = 0;
 
         for (int pieceIndex = (int)Piece.P; pieceIndex < (int)Piece.K; ++pieceIndex)
         {
             // Bitboard copy that we 'empty'
             var bitboard = PieceBitBoards[pieceIndex];
 
-            for (int pieceNumberN = 0; bitboard != default; ++pieceNumberN)
+            while (bitboard != default)
             {
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
 
                 middleGameScore += EvaluationConstants.MiddleGameTable[pieceIndex, pieceSquareIndex];
                 endGameScore += EvaluationConstants.EndGameTable[pieceIndex, pieceSquareIndex];
-                phase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
+                gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
 
-                pieceSquares[pieceIndex, pieceNumberN] = pieceSquareIndex;
+                (int mgAdditionalScore, int egAdditionalScore) = AdditionalPieceEvaluation(pieceIndex, pieceIndex, pieceCount);
+
+                middleGameScore -= mgAdditionalScore;
+                endGameScore -= egAdditionalScore;
             }
         }
 
@@ -628,76 +631,35 @@ public class Position
             // Bitboard copy that we 'empty'
             var bitboard = PieceBitBoards[pieceIndex];
 
-            for (int pieceNumberN = 0; bitboard != default; ++pieceNumberN)
+            while (bitboard != default)
             {
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
 
                 middleGameScore += EvaluationConstants.MiddleGameTable[pieceIndex, pieceSquareIndex];
                 endGameScore += EvaluationConstants.EndGameTable[pieceIndex, pieceSquareIndex];
-                phase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
+                gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
 
-                pieceSquares[pieceIndex, pieceNumberN] = pieceSquareIndex;
-            }
-        }
+                ++pieceCount[pieceIndex];
 
-        var pieceCount = new int[PieceBitBoards.Length];
+                (int mgAdditionalScore, int egAdditionalScore) = AdditionalPieceEvaluation(pieceIndex, pieceIndex, pieceCount);
 
-        for (int pieceIndex = 0; pieceIndex < 5; ++pieceIndex)
-        {
-            for (int pieceSquareIndexIndex = 0; pieceSquareIndexIndex < 10; ++pieceSquareIndexIndex)
-            {
-                var pieceSquareIndex = pieceSquares[pieceIndex, pieceSquareIndexIndex];
-                if (pieceSquareIndex is null)
-                {
-                    break;
-                }
-
-                pieceCount[pieceIndex]++;
-
-                (int middleGameAdditionalScore, int endGameAdditionalScore) =
-                    AdditionalPieceEvaluation(pieceSquareIndex.Value, pieceIndex, pieceCount);
-
-                middleGameScore += middleGameAdditionalScore;
-                endGameScore += endGameAdditionalScore;
-            }
-        }
-
-        for (int pieceIndex = 6; pieceIndex < 11; ++pieceIndex)
-        {
-            for (int pieceSquareIndexIndex = 0; pieceSquareIndexIndex < 10; ++pieceSquareIndexIndex)
-            {
-                var pieceSquareIndex = pieceSquares[pieceIndex, pieceSquareIndexIndex];
-                if (pieceSquareIndex is null)
-                {
-                    break;
-                }
-
-                pieceCount[pieceIndex]++;
-
-                (int middleGameAdditionalScore, int endGameAdditionalScore) =
-                    AdditionalPieceEvaluation(pieceSquareIndex.Value, pieceIndex, pieceCount);
-
-                middleGameScore -= middleGameAdditionalScore;
-                endGameScore -= endGameAdditionalScore;
+                middleGameScore -= mgAdditionalScore;
+                endGameScore -= egAdditionalScore;
             }
         }
 
         var whiteKing = PieceBitBoards[(int)Piece.K].GetLS1BIndex();
-        middleGameScore += EvaluationConstants.MiddleGameTable[(int)Piece.K, whiteKing];
-        endGameScore += EvaluationConstants.EndGameTable[(int)Piece.K, whiteKing];
+        (int mgKingScore, int egKingScore) = KingAdditionalEvaluation(whiteKing, Side.White, pieceCount);
 
-        (int mgAdditional, int egAdditionalScore) = KingAdditionalEvaluation(whiteKing, Side.White, pieceCount);
-        middleGameScore += mgAdditional;
-        endGameScore += egAdditionalScore;
+        middleGameScore += EvaluationConstants.MiddleGameTable[(int)Piece.K, whiteKing] + mgKingScore;
+        endGameScore += EvaluationConstants.EndGameTable[(int)Piece.K, whiteKing] + egKingScore;
 
         var blackKing = PieceBitBoards[(int)Piece.k].GetLS1BIndex();
-        middleGameScore += EvaluationConstants.MiddleGameTable[(int)Piece.k, blackKing];
-        endGameScore += EvaluationConstants.EndGameTable[(int)Piece.k, blackKing];
+        (mgKingScore, egKingScore) = KingAdditionalEvaluation(blackKing, Side.Black, pieceCount);
 
-        (mgAdditional, egAdditionalScore) = KingAdditionalEvaluation(blackKing, Side.Black, pieceCount);
-        middleGameScore -= mgAdditional;
-        endGameScore -= egAdditionalScore;
+        middleGameScore += EvaluationConstants.MiddleGameTable[(int)Piece.k, blackKing] - mgKingScore;
+        endGameScore += EvaluationConstants.EndGameTable[(int)Piece.k, blackKing] - egKingScore;
 
         // Check if drawn position due to lack of material
         if (endGameScore >= 0)
@@ -725,15 +687,15 @@ public class Position
 
         const int maxPhase = 24;
 
-        if (phase > maxPhase)    // Early promotions
+        if (gamePhase > maxPhase)    // Early promotions
         {
-            phase = maxPhase;
+            gamePhase = maxPhase;
         }
 
-        int endGamePhase = maxPhase - phase;
+        int endGamePhase = maxPhase - gamePhase;
         //_logger.Trace("Phase: {0}/24", gamePhase);
 
-        var eval = ((middleGameScore * phase) + (endGameScore * endGamePhase)) / maxPhase;
+        var eval = ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / maxPhase;
 
         return Side == Side.White
             ? eval
