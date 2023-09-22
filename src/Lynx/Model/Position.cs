@@ -621,7 +621,7 @@ public class Position
 
                 ++pieceCount[pieceIndex];
 
-                (int mgAdditionalScore, int egAdditionalScore) = AdditionalPieceEvaluation(pieceIndex, pieceIndex, pieceCount);
+                (int mgAdditionalScore, int egAdditionalScore) = AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, pieceCount);
 
                 middleGameScore += mgAdditionalScore;
                 endGameScore += egAdditionalScore;
@@ -644,7 +644,7 @@ public class Position
 
                 ++pieceCount[pieceIndex];
 
-                (int mgAdditionalScore, int egAdditionalScore) = AdditionalPieceEvaluation(pieceIndex, pieceIndex, pieceCount);
+                (int mgAdditionalScore, int egAdditionalScore) = AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, pieceCount);
 
                 middleGameScore -= mgAdditionalScore;
                 endGameScore -= egAdditionalScore;
