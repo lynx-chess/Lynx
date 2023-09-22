@@ -619,6 +619,8 @@ public class Position
                 endGameScore += EvaluationConstants.EndGameTable[pieceIndex, pieceSquareIndex];
                 gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
 
+                ++pieceCount[pieceIndex];
+
                 (int mgAdditionalScore, int egAdditionalScore) = AdditionalPieceEvaluation(pieceIndex, pieceIndex, pieceCount);
 
                 middleGameScore += mgAdditionalScore;
