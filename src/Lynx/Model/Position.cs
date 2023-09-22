@@ -621,8 +621,8 @@ public class Position
 
                 (int mgAdditionalScore, int egAdditionalScore) = AdditionalPieceEvaluation(pieceIndex, pieceIndex, pieceCount);
 
-                middleGameScore -= mgAdditionalScore;
-                endGameScore -= egAdditionalScore;
+                middleGameScore += mgAdditionalScore;
+                endGameScore += egAdditionalScore;
             }
         }
 
