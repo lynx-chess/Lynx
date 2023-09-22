@@ -598,26 +598,19 @@ public class Position
             return result;
         }
 
-        var pieceCount = new int[PieceBitBoards.Length];
+        var pieceSquares = new int?[PieceBitBoards.Length, 10]; // Max 10 pieces of same type
 
         int middleGameScore = 0;
         int endGameScore = 0;
         int phase = 0;
         int eval = 0;
 
-        for (int pieceIndex = (int)Piece.P; pieceIndex < (int)Piece.k; ++pieceIndex)
-        {
-            var count = BitOperations.PopCount(PieceBitBoards[pieceIndex]);
-            pieceCount[pieceIndex] = count;
-            phase += count * EvaluationConstants.GamePhaseByPiece[pieceIndex];
-        }
-
         for (int pieceIndex = (int)Piece.P; pieceIndex < (int)Piece.K; ++pieceIndex)
         {
             // Bitboard copy that we 'empty'
             var bitboard = PieceBitBoards[pieceIndex];
 
-            while (bitboard != default)
+            for (int pieceNumberN = 0; bitboard != default; ++pieceNumberN)
             {
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
@@ -625,7 +618,7 @@ public class Position
                 middleGameScore += EvaluationConstants.MiddleGameTable[pieceIndex, pieceSquareIndex];
                 endGameScore += EvaluationConstants.EndGameTable[pieceIndex, pieceSquareIndex];
 
-                eval += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, phase);
+                pieceSquares[pieceIndex, pieceNumberN] = pieceSquareIndex;
             }
         }
 
@@ -634,7 +627,7 @@ public class Position
             // Bitboard copy that we 'empty'
             var bitboard = PieceBitBoards[pieceIndex];
 
-            while (bitboard != default)
+            for (int pieceNumberN = 0; bitboard != default; ++pieceNumberN)
             {
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
@@ -642,7 +635,41 @@ public class Position
                 middleGameScore += EvaluationConstants.MiddleGameTable[pieceIndex, pieceSquareIndex];
                 endGameScore += EvaluationConstants.EndGameTable[pieceIndex, pieceSquareIndex];
 
-                eval -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, phase);
+                pieceSquares[pieceIndex, pieceNumberN] = pieceSquareIndex;
+            }
+        }
+
+        var pieceCount = new int[PieceBitBoards.Length];
+
+        for (int pieceIndex = 0; pieceIndex < 5; ++pieceIndex)
+        {
+            for (int pieceSquareIndexIndex = 0; pieceSquareIndexIndex < 10; ++pieceSquareIndexIndex)
+            {
+                var pieceSquareIndex = pieceSquares[pieceIndex, pieceSquareIndexIndex];
+                if (pieceSquareIndex is null)
+                {
+                    break;
+                }
+
+                pieceCount[pieceIndex]++;
+
+                eval += AdditionalPieceEvaluation(pieceSquareIndex.Value, pieceIndex, phase);
+            }
+        }
+
+        for (int pieceIndex = 6; pieceIndex < 11; ++pieceIndex)
+        {
+            for (int pieceSquareIndexIndex = 0; pieceSquareIndexIndex < 10; ++pieceSquareIndexIndex)
+            {
+                var pieceSquareIndex = pieceSquares[pieceIndex, pieceSquareIndexIndex];
+                if (pieceSquareIndex is null)
+                {
+                    break;
+                }
+
+                pieceCount[pieceIndex]++;
+
+                eval -= AdditionalPieceEvaluation(pieceSquareIndex.Value, pieceIndex, phase);
             }
         }
 
