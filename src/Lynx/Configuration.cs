@@ -95,10 +95,17 @@ public class TaperedEvaluationTerm
         MG = mg;
         EG = eg;
     }
+
+    public override string ToString()
+    {
+        return $"{{\"MG\":{MG},\"EG\":{EG}}}";
+    }
 }
 
 public class TaperedEvaluationTermByRank
 {
+    private readonly List<TaperedEvaluationTerm> _evaluationTermsIndexedByPiece;
+
     public TaperedEvaluationTerm Rank0 { get; set; }
     public TaperedEvaluationTerm Rank1 { get; set; }
     public TaperedEvaluationTerm Rank2 { get; set; }
@@ -107,9 +114,6 @@ public class TaperedEvaluationTermByRank
     public TaperedEvaluationTerm Rank5 { get; set; }
     public TaperedEvaluationTerm Rank6 { get; set; }
     public TaperedEvaluationTerm Rank7 { get; set; }
-
-    public List<TaperedEvaluationTerm> EvaluationTermsIndexedByPiece { get; set; }
-    //private List<TaperedEvaluationTerm> _evaluationTermsIndexedByPiece;
 
     public TaperedEvaluationTermByRank(
         TaperedEvaluationTerm rank0, TaperedEvaluationTerm rank1, TaperedEvaluationTerm rank2,
@@ -125,12 +129,26 @@ public class TaperedEvaluationTermByRank
         Rank6 = rank6;
         Rank7 = rank7;
 
-        EvaluationTermsIndexedByPiece = [rank0, rank1, rank2, rank3, rank4, rank5, rank6, rank7];
+        _evaluationTermsIndexedByPiece = [rank0, rank1, rank2, rank3, rank4, rank5, rank6, rank7];
     }
 
     public TaperedEvaluationTerm this[int i]
     {
-        get { return EvaluationTermsIndexedByPiece[i]; }
+        get { return _evaluationTermsIndexedByPiece[i]; }
+    }
+
+    public override string ToString()
+    {
+        return "{" +
+            $"\"{nameof(Rank0)}\":{Rank0}," +
+            $"\"{nameof(Rank1)}\":{Rank1}," +
+            $"\"{nameof(Rank2)}\":{Rank2}," +
+            $"\"{nameof(Rank3)}\":{Rank3}," +
+            $"\"{nameof(Rank4)}\":{Rank4}," +
+            $"\"{nameof(Rank5)}\":{Rank5}," +
+            $"\"{nameof(Rank6)}\":{Rank6}," +
+            $"\"{nameof(Rank7)}\":{Rank7}" +
+            "}";
     }
 }
 
