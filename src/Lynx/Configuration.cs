@@ -82,9 +82,9 @@ public sealed class GeneralSettings
 
 public class TaperedEvaluationTerm
 {
-    public int MG { get; set; }
+    public int MG { get; }
 
-    public int EG { get; set; }
+    public int EG { get; }
 
     internal TaperedEvaluationTerm(int singleValue) : this(singleValue, singleValue)
     {
@@ -106,14 +106,14 @@ public class TaperedEvaluationTermByRank
 {
     private readonly List<TaperedEvaluationTerm> _evaluationTermsIndexedByPiece;
 
-    public TaperedEvaluationTerm Rank0 { get; set; }
-    public TaperedEvaluationTerm Rank1 { get; set; }
-    public TaperedEvaluationTerm Rank2 { get; set; }
-    public TaperedEvaluationTerm Rank3 { get; set; }
-    public TaperedEvaluationTerm Rank4 { get; set; }
-    public TaperedEvaluationTerm Rank5 { get; set; }
-    public TaperedEvaluationTerm Rank6 { get; set; }
-    public TaperedEvaluationTerm Rank7 { get; set; }
+    public TaperedEvaluationTerm Rank0 { get; }
+    public TaperedEvaluationTerm Rank1 { get; }
+    public TaperedEvaluationTerm Rank2 { get; }
+    public TaperedEvaluationTerm Rank3 { get; }
+    public TaperedEvaluationTerm Rank4 { get; }
+    public TaperedEvaluationTerm Rank5 { get; }
+    public TaperedEvaluationTerm Rank6 { get; }
+    public TaperedEvaluationTerm Rank7 { get; }
 
     public TaperedEvaluationTermByRank(
         TaperedEvaluationTerm rank0, TaperedEvaluationTerm rank1, TaperedEvaluationTerm rank2,
