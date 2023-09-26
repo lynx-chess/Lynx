@@ -586,7 +586,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(Configuration.EngineSettings.SemiOpenFileKingPenalty.MG, evaluation);
+        Assert.AreEqual(Configuration.EngineSettings.SemiOpenFileKingPenalty.EG, evaluation);
     }
 
     /// <summary>
@@ -618,7 +618,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(Configuration.EngineSettings.OpenFileKingPenalty.MG, evaluation);
+        Assert.AreEqual(Configuration.EngineSettings.OpenFileKingPenalty.EG, evaluation);
     }
 
     /// <summary>
