@@ -750,7 +750,7 @@ public class Position
             (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(pieceSquareIndex, pieceIndex),
             (int)Piece.R or (int)Piece.r => RookAdditonalEvaluation(pieceSquareIndex, pieceIndex),
             (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceCount),
-            (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex),
+            //(int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex),
             _ => (0, 0)
         };
     }
@@ -829,10 +829,10 @@ public class Position
     {
         int middleGameBonus = 0, endGameBonus = 0;
 
-        var attacksCount = Attacks.BishopAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
+        //var attacksCount = Attacks.BishopAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
 
-        middleGameBonus += attacksCount * Configuration.EngineSettings.BishopMobilityBonus.MG;
-        endGameBonus += attacksCount * Configuration.EngineSettings.BishopMobilityBonus.EG;
+        //middleGameBonus += attacksCount * Configuration.EngineSettings.BishopMobilityBonus.MG;
+        //endGameBonus += attacksCount * Configuration.EngineSettings.BishopMobilityBonus.EG;
 
         if (pieceCount[pieceIndex] == 2)
         {
@@ -883,6 +883,8 @@ public class Position
                 endGameBonus += Configuration.EngineSettings.SemiOpenFileKingPenalty.EG;
             }
         }
+
+        return (middleGameBonus, endGameBonus);
 
         var ownPiecesAroundCount = (Attacks.KingAttacks[squareIndex] & OccupancyBitBoards[(int)kingSide]).CountBits();
 
