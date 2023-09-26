@@ -216,7 +216,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(-Configuration.EngineSettings.IsolatedPawnPenalty.MG, evaluation);
+        Assert.AreEqual(Configuration.EngineSettings.IsolatedPawnPenalty.MG, evaluation);
     }
 
     /// <summary>
@@ -248,7 +248,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(-4 * Configuration.EngineSettings.DoubledPawnPenalty.MG, evaluation);
+        Assert.AreEqual(4 * Configuration.EngineSettings.DoubledPawnPenalty.MG, evaluation);
     }
 
     /// <summary>
@@ -281,7 +281,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(-9 * Configuration.EngineSettings.DoubledPawnPenalty.MG, evaluation);
+        Assert.AreEqual(9 * Configuration.EngineSettings.DoubledPawnPenalty.MG, evaluation);
     }
 
     /// <summary>
@@ -423,8 +423,8 @@ public class PositionTest
         }
 
         Assert.AreEqual(
-            4 * Configuration.EngineSettings.DoubledPawnPenalty.MG
-            - Configuration.EngineSettings.IsolatedPawnPenalty.MG
+            -4 * Configuration.EngineSettings.DoubledPawnPenalty.MG
+            + Configuration.EngineSettings.IsolatedPawnPenalty.MG
             + Configuration.EngineSettings.PassedPawnBonus[rank].MG,
 
             evaluation);
@@ -586,7 +586,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(-Configuration.EngineSettings.SemiOpenFileKingPenalty.MG, evaluation);
+        Assert.AreEqual(Configuration.EngineSettings.SemiOpenFileKingPenalty.MG, evaluation);
     }
 
     /// <summary>
@@ -618,7 +618,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(-Configuration.EngineSettings.OpenFileKingPenalty.MG, evaluation);
+        Assert.AreEqual(Configuration.EngineSettings.OpenFileKingPenalty.MG, evaluation);
     }
 
     /// <summary>
