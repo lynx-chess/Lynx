@@ -82,9 +82,9 @@ public sealed class GeneralSettings
 
 public class TaperedEvaluationTerm
 {
-    public int MG { get; }
+    public int MG { get; set; }
 
-    public int EG { get; }
+    public int EG { get; set; }
 
     internal TaperedEvaluationTerm(int singleValue) : this(singleValue, singleValue)
     {
@@ -106,14 +106,14 @@ public class TaperedEvaluationTermByRank
 {
     private readonly List<TaperedEvaluationTerm> _evaluationTermsIndexedByPiece;
 
-    public TaperedEvaluationTerm Rank0 { get; }
-    public TaperedEvaluationTerm Rank1 { get; }
-    public TaperedEvaluationTerm Rank2 { get; }
-    public TaperedEvaluationTerm Rank3 { get; }
-    public TaperedEvaluationTerm Rank4 { get; }
-    public TaperedEvaluationTerm Rank5 { get; }
-    public TaperedEvaluationTerm Rank6 { get; }
-    public TaperedEvaluationTerm Rank7 { get; }
+    public TaperedEvaluationTerm Rank0 { get; set; }
+    public TaperedEvaluationTerm Rank1 { get; set; }
+    public TaperedEvaluationTerm Rank2 { get; set; }
+    public TaperedEvaluationTerm Rank3 { get; set; }
+    public TaperedEvaluationTerm Rank4 { get; set; }
+    public TaperedEvaluationTerm Rank5 { get; set; }
+    public TaperedEvaluationTerm Rank6 { get; set; }
+    public TaperedEvaluationTerm Rank7 { get; set; }
 
     public TaperedEvaluationTermByRank(
         TaperedEvaluationTerm rank0, TaperedEvaluationTerm rank1, TaperedEvaluationTerm rank2,
@@ -243,9 +243,9 @@ public sealed class EngineSettings
 
     #region Evaluation
 
-    public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(10, 10);
+    public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-10, -10);
 
-    public TaperedEvaluationTerm DoubledPawnPenalty { get; set; } = new(10, 10);
+    public TaperedEvaluationTerm DoubledPawnPenalty { get; set; } = new(-10, -10);
 
     public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(new(0), new(10), new(30), new(50), new(75), new(100), new(150), new TaperedEvaluationTerm(200));
 
@@ -253,9 +253,9 @@ public sealed class EngineSettings
 
     public TaperedEvaluationTerm OpenFileRookBonus { get; set; } = new(15, 15);
 
-    public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(10, 10);
+    public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-10, -10);
 
-    public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(15, 15);
+    public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-15, -15);
 
     public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(5, 5);
 
@@ -299,6 +299,8 @@ public sealed class EngineSettings
 [JsonSourceGenerationOptions(
     GenerationMode = JsonSourceGenerationMode.Default, WriteIndented = true)] // https://github.com/dotnet/runtime/issues/78602#issuecomment-1322004254
 [JsonSerializable(typeof(EngineSettings))]
+[JsonSerializable(typeof(TaperedEvaluationTerm))]
+[JsonSerializable(typeof(TaperedEvaluationTermByRank))]
 internal partial class EngineSettingsJsonSerializerContext : JsonSerializerContext
 {
 }
