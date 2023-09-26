@@ -243,27 +243,35 @@ public sealed class EngineSettings
 
     #region Evaluation
 
-    public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-10, -10);
+    public TaperedEvaluationTerm DoubledPawnPenalty { get; set; } = new(-3, -10);
 
-    public TaperedEvaluationTerm DoubledPawnPenalty { get; set; } = new(-10, -10);
+    public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-14, -9);
 
-    public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(new(0), new(10), new(30), new(50), new(75), new(100), new(150), new TaperedEvaluationTerm(200));
+    public TaperedEvaluationTerm OpenFileRookBonus { get; set; } = new(45, 19);
 
-    public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(10, 10);
-
-    public TaperedEvaluationTerm OpenFileRookBonus { get; set; } = new(15, 15);
-
-    public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-10, -10);
-
-    public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-15, -15);
-
-    public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(5, 5);
+    public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(20, 16);
 
     public TaperedEvaluationTerm BishopMobilityBonus { get; set; } = new(1, 1);
 
     public TaperedEvaluationTerm QueenMobilityBonus { get; set; } = new(1, 1);
 
-    public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(0, 100);
+    public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-31, 20);
+
+    public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-82, 5);
+
+    public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(5, 5);
+
+    public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(26, 63);
+
+    public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(
+        new(0),
+        new(0, 5),
+        new(-10, 9),
+        new(-12, 30),
+        new(16, 58),
+        new(44, 127),
+        new(50, 190),
+        new(200));
 
     #endregion
 
