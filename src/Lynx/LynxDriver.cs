@@ -100,6 +100,10 @@ public sealed class LynxDriver
                             case "printsettings":
                                 await HandleSettings();
                                 break;
+                            case "staticeval":
+                                await HandleStaticEval(rawCommand, cancellationToken);
+                                HandleQuit();
+                                break;
                             default:
                                 _logger.Warn("Unknown command received: {0}", rawCommand);
                                 break;
@@ -328,6 +332,51 @@ public sealed class LynxDriver
         var message = $"{nameof(Configuration)}.{nameof(Configuration.EngineSettings)}:{Environment.NewLine}{engineSettings}";
 
         await _engineWriter.Writer.WriteAsync(message);
+    }
+
+    private async ValueTask HandleStaticEval(string rawCommand, CancellationToken cancellationToken)
+    {
+        try
+        {
+
+            var fullPath = Path.GetFullPath(rawCommand[(rawCommand.IndexOf(' ') + 1)..]);
+            if (!File.Exists(fullPath))
+            {
+                _logger.Warn("File {0} not found in (1), ignoring command", rawCommand, fullPath);
+                return;
+            }
+
+            foreach (var line in await File.ReadAllLinesAsync(fullPath, cancellationToken))
+            {
+                var fen = line[..line.IndexOfAny([';', '[', '"'])];
+
+                var position = new Position(fen);
+                if (!position.IsValid())
+                {
+                    _logger.Warn("Position {0}, parsed as {1} and then {2} not valid, skipping it", line, fen, position.FEN());
+                    continue;
+                }
+
+                var ourFen = position.FEN();
+                if (ourFen != fen)
+                {
+                    _logger.Debug("Raw fen: {0}, parsed fen: {1}", fen, ourFen);
+                }
+
+                var eval = position.StaticEvaluation(0);
+                if (position.Side == Side.Black)
+                {
+                    eval = -eval;   // White perspective
+                }
+
+                await _engineWriter.Writer.WriteAsync($"{line}: {eval}", cancellationToken);
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message + e.StackTrace);
+            await _engineWriter.Writer.WriteAsync(e.Message + e.StackTrace, cancellationToken);
+        }
     }
 
     #endregion
