@@ -157,7 +157,10 @@ public sealed partial class Engine
             return _historyMoves[move.Piece(), move.TargetSquare()];
         }
 
-        return default;
+        var piece = move.Piece();
+
+        return EvaluationConstants.MiddleGameTable[piece, move.TargetSquare()] -
+            EvaluationConstants.MiddleGameTable[piece, move.SourceSquare()];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
