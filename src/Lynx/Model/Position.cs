@@ -769,14 +769,14 @@ public class Position
         var doublePawnsCount = (PieceBitBoards[pieceIndex] & Masks.FileMasks[squareIndex]).CountBits();
         if (doublePawnsCount > 1)
         {
-            middleGameBonus -= doublePawnsCount * Configuration.EngineSettings.DoubledPawnPenalty.MG;
-            endGameBonus -= doublePawnsCount * Configuration.EngineSettings.DoubledPawnPenalty.EG;
+            middleGameBonus += doublePawnsCount * Configuration.EngineSettings.DoubledPawnPenalty.MG;
+            endGameBonus += doublePawnsCount * Configuration.EngineSettings.DoubledPawnPenalty.EG;
         }
 
         if ((PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default) // isIsolatedPawn
         {
-            middleGameBonus -= Configuration.EngineSettings.IsolatedPawnPenalty.MG;
-            endGameBonus -= Configuration.EngineSettings.IsolatedPawnPenalty.EG;
+            middleGameBonus += Configuration.EngineSettings.IsolatedPawnPenalty.MG;
+            endGameBonus += Configuration.EngineSettings.IsolatedPawnPenalty.EG;
         }
 
         if ((PieceBitBoards[(int)Piece.p - pieceIndex] & Masks.PassedPawns[pieceIndex][squareIndex]) == default)    // isPassedPawn
@@ -874,13 +874,13 @@ public class Position
         {
             if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default)  // isOpenFile
             {
-                middleGameBonus -= Configuration.EngineSettings.OpenFileKingPenalty.MG;
-                endGameBonus -= Configuration.EngineSettings.OpenFileKingPenalty.EG;
+                middleGameBonus += Configuration.EngineSettings.OpenFileKingPenalty.MG;
+                endGameBonus += Configuration.EngineSettings.OpenFileKingPenalty.EG;
             }
             else if ((PieceBitBoards[(int)Piece.P + kingSideOffset] & Masks.FileMasks[squareIndex]) == default) // isSemiOpenFile
             {
-                middleGameBonus -= Configuration.EngineSettings.SemiOpenFileKingPenalty.MG;
-                endGameBonus -= Configuration.EngineSettings.SemiOpenFileKingPenalty.EG;
+                middleGameBonus += Configuration.EngineSettings.SemiOpenFileKingPenalty.MG;
+                endGameBonus += Configuration.EngineSettings.SemiOpenFileKingPenalty.EG;
             }
         }
 
