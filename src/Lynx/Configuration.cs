@@ -80,6 +80,78 @@ public sealed class GeneralSettings
     public bool EnableLogging { get; set; } = false;
 }
 
+public class TaperedEvaluationTerm
+{
+    public int MG { get; set; }
+
+    public int EG { get; set; }
+
+    internal TaperedEvaluationTerm(int singleValue) : this(singleValue, singleValue)
+    {
+    }
+
+    public TaperedEvaluationTerm(int mg, int eg)
+    {
+        MG = mg;
+        EG = eg;
+    }
+
+    public override string ToString()
+    {
+        return $"{{\"MG\":{MG},\"EG\":{EG}}}";
+    }
+}
+
+public class TaperedEvaluationTermByRank
+{
+    private readonly List<TaperedEvaluationTerm> _evaluationTermsIndexedByPiece;
+
+    public TaperedEvaluationTerm Rank0 { get; set; }
+    public TaperedEvaluationTerm Rank1 { get; set; }
+    public TaperedEvaluationTerm Rank2 { get; set; }
+    public TaperedEvaluationTerm Rank3 { get; set; }
+    public TaperedEvaluationTerm Rank4 { get; set; }
+    public TaperedEvaluationTerm Rank5 { get; set; }
+    public TaperedEvaluationTerm Rank6 { get; set; }
+    public TaperedEvaluationTerm Rank7 { get; set; }
+
+    public TaperedEvaluationTermByRank(
+        TaperedEvaluationTerm rank0, TaperedEvaluationTerm rank1, TaperedEvaluationTerm rank2,
+        TaperedEvaluationTerm rank3, TaperedEvaluationTerm rank4, TaperedEvaluationTerm rank5,
+        TaperedEvaluationTerm rank6, TaperedEvaluationTerm rank7)
+    {
+        Rank0 = rank0;
+        Rank1 = rank1;
+        Rank2 = rank2;
+        Rank3 = rank3;
+        Rank4 = rank4;
+        Rank5 = rank5;
+        Rank6 = rank6;
+        Rank7 = rank7;
+
+        _evaluationTermsIndexedByPiece = [rank0, rank1, rank2, rank3, rank4, rank5, rank6, rank7];
+    }
+
+    public TaperedEvaluationTerm this[int i]
+    {
+        get { return _evaluationTermsIndexedByPiece[i]; }
+    }
+
+    public override string ToString()
+    {
+        return "{" +
+            $"\"{nameof(Rank0)}\":{Rank0}," +
+            $"\"{nameof(Rank1)}\":{Rank1}," +
+            $"\"{nameof(Rank2)}\":{Rank2}," +
+            $"\"{nameof(Rank3)}\":{Rank3}," +
+            $"\"{nameof(Rank4)}\":{Rank4}," +
+            $"\"{nameof(Rank5)}\":{Rank5}," +
+            $"\"{nameof(Rank6)}\":{Rank6}," +
+            $"\"{nameof(Rank7)}\":{Rank7}" +
+            "}";
+    }
+}
+
 public sealed class EngineSettings
 {
     public int DefaultMaxDepth { get; set; } = 5;
@@ -169,25 +241,39 @@ public sealed class EngineSettings
 
     public int AspirationWindowBeta { get; set; } = 50;
 
-    public int IsolatedPawnPenalty { get; set; } = 10;
+    #region Evaluation
 
-    public int DoubledPawnPenalty { get; set; } = 10;
+    public TaperedEvaluationTerm DoubledPawnPenalty { get; set; } = new(-3, -10);
 
-    public int[] PassedPawnBonus { get; set; } = new[] { 0, 10, 30, 50, 75, 100, 150, 200 };
+    public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-14, -9);
 
-    public int SemiOpenFileRookBonus { get; set; } = 10;
+    public TaperedEvaluationTerm OpenFileRookBonus { get; set; } = new(45, 19);
 
-    public int OpenFileRookBonus { get; set; } = 15;
+    public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(20, 16);
 
-    public int SemiOpenFileKingPenalty { get; set; } = 10;
+    public TaperedEvaluationTerm BishopMobilityBonus { get; set; } = new(1, 1);
 
-    public int OpenFileKingPenalty { get; set; } = 15;
+    public TaperedEvaluationTerm QueenMobilityBonus { get; set; } = new(1, 1);
 
-    public int KingShieldBonus { get; set; } = 5;
+    public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-31, 20);
 
-    public int BishopMobilityBonus { get; set; } = 1;
+    public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-82, 5);
 
-    public int QueenMobilityBonus { get; set; } = 1;
+    public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(5, 5);
+
+    public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(26, 63);
+
+    public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(
+        new(0),
+        new(0, 5),
+        new(-10, 9),
+        new(-12, 30),
+        new(16, 58),
+        new(44, 127),
+        new(50, 190),
+        new(200));
+
+    #endregion
 
     public bool TranspositionTableEnabled { get; set; } = true;
 
@@ -213,11 +299,6 @@ public sealed class EngineSettings
     /// </summary>
     public int BenchDepth { get; set; } = 5;
 
-    /// <summary>
-    /// It'll be scaled with phase
-    /// </summary>
-    public int BishopPairMaxBonus { get; set; } = 100;
-
     public int RFP_MaxDepth { get; set; } = 6;
 
     public int RFP_DepthScalingFactor { get; set; } = 75;
@@ -226,6 +307,8 @@ public sealed class EngineSettings
 [JsonSourceGenerationOptions(
     GenerationMode = JsonSourceGenerationMode.Default, WriteIndented = true)] // https://github.com/dotnet/runtime/issues/78602#issuecomment-1322004254
 [JsonSerializable(typeof(EngineSettings))]
+[JsonSerializable(typeof(TaperedEvaluationTerm))]
+[JsonSerializable(typeof(TaperedEvaluationTermByRank))]
 internal partial class EngineSettingsJsonSerializerContext : JsonSerializerContext
 {
 }

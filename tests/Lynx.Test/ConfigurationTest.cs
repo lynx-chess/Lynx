@@ -46,8 +46,17 @@ public class ConfigurationTest
                     continue;
                 }
 
-                var sourceSetting = jsonNode![property.Name]!.ToString().ToLowerInvariant();
-                var configSetting = property.GetValue(Configuration.EngineSettings)!.ToString()!.ToLowerInvariant();
+                var sourceSetting = jsonNode![property.Name]!.ToString()
+                    .Replace("\r", "")
+                    .Replace("\n", "")
+                    .Replace(" ", "")
+                    .ToLowerInvariant();
+
+                var configSetting = property.GetValue(Configuration.EngineSettings)!.ToString()!
+                    .Replace("\r", "")
+                    .Replace("\n", "")
+                    .Replace(" ", "")
+                    .ToLowerInvariant();
 
                 Assert.AreEqual(sourceSetting, configSetting, $"Error in {property.Name} ({property.PropertyType}): (Configuration.cs) {sourceSetting} != {configSetting} (appSettings.json)");
             }

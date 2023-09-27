@@ -23,13 +23,6 @@ var config = new ConfigurationBuilder()
 config.GetSection(nameof(EngineSettings)).Bind(Configuration.EngineSettings);
 config.GetSection(nameof(GeneralSettings)).Bind(Configuration.GeneralSettings);
 
-// TODO remove when .NET sdk includes https://github.com/dotnet/runtime/issues/89732
-var generalConfig = config.GetSection(nameof(GeneralSettings));
-if (bool.TryParse(generalConfig[nameof(Configuration.GeneralSettings.EnableLogging)], out var enableLogging))
-{
-    Configuration.GeneralSettings.EnableLogging = enableLogging;
-}
-
 if (Configuration.GeneralSettings.EnableLogging)
 {
     LogManager.Configuration = new NLogLoggingConfiguration(config.GetSection("NLog"));
