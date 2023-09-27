@@ -159,7 +159,9 @@ public sealed partial class Engine
 
         var piece = move.Piece();
 
-        return EvaluationConstants.MiddleGameTable[piece, move.TargetSquare()];
+        // Ensuring none fo this moves goes above history moves.
+        // Values can as high as MiddleGamePieceValues[Q].Max() + let's say up to 100 with PSQT tuning
+        return EvaluationConstants.MiddleGameTable[piece, move.TargetSquare()] - 2_000;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
