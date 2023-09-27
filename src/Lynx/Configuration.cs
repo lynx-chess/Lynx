@@ -243,34 +243,34 @@ public sealed class EngineSettings
 
     #region Evaluation
 
-    public TaperedEvaluationTerm DoubledPawnPenalty { get; set; } = new(-3, -10);
+    public TaperedEvaluationTerm DoubledPawnPenalty { get; set; } = new(-3, -11);
 
-    public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-14, -9);
+    public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-13, -10);
 
-    public TaperedEvaluationTerm OpenFileRookBonus { get; set; } = new(45, 19);
+    public TaperedEvaluationTerm OpenFileRookBonus { get; set; } = new(43, 22);
 
-    public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(20, 16);
+    public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(18, 16);
 
-    public TaperedEvaluationTerm BishopMobilityBonus { get; set; } = new(1, 1);
+    public TaperedEvaluationTerm BishopMobilityBonus { get; set; } = new(8, 7);
 
-    public TaperedEvaluationTerm QueenMobilityBonus { get; set; } = new(1, 1);
+    public TaperedEvaluationTerm QueenMobilityBonus { get; set; } = new(2, 7);
 
-    public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-31, 20);
+    public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-29, 19);
 
-    public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-82, 5);
+    public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-81, 3);
 
-    public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(5, 5);
+    public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(15, -5);
 
-    public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(26, 63);
+    public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(22, 65);
 
     public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(
         new(0),
-        new(0, 5),
-        new(-10, 9),
-        new(-12, 30),
-        new(16, 58),
-        new(44, 127),
-        new(50, 190),
+        new(-2, 5),
+        new(-13, 10),
+        new(-12, 32),
+        new(13, 62),
+        new(38, 132),
+        new(53, 191),
         new(200));
 
     #endregion
