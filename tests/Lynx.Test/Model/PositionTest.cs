@@ -738,7 +738,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(surroundingPieces * Configuration.EngineSettings.KingShieldBonus.MG, evaluation);
+        Assert.AreEqual(surroundingPieces * Configuration.EngineSettings.KingShieldBonus.EG, evaluation);
     }
 
     /// <summary>
