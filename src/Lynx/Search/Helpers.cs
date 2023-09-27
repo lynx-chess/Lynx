@@ -159,8 +159,7 @@ public sealed partial class Engine
 
         var piece = move.Piece();
 
-        return EvaluationConstants.MiddleGameTable[piece, move.TargetSquare()] -
-            EvaluationConstants.MiddleGameTable[piece, move.SourceSquare()];
+        return EvaluationConstants.MiddleGameTable[piece, move.TargetSquare()];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
