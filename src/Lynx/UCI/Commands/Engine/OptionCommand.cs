@@ -123,7 +123,7 @@ public sealed class OptionCommand : EngineBaseCommand
 
     public static readonly ImmutableArray<string> AvailableOptions = ImmutableArray.Create<string>(
         "option name UCI_Opponent type string",
-        $"option name UCI_EngineAbout type string default {IdCommand.EngineName} by {IdCommand.Name}, see https://github.com/lynx-chess/Lynx",
+        $"option name UCI_EngineAbout type string default {IdCommand.EngineName} by {IdCommand.EngineAuthor}, see https://github.com/lynx-chess/Lynx",
         $"option name Hash type spin default {Configuration.EngineSettings.TranspositionTableSize} min 0 max 1024",
         "option name OnlineTablebaseInRootPositions type check default false",
         "option name OnlineTablebaseInSearch type check default false",

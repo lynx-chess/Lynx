@@ -1,7 +1,6 @@
 ﻿using Lynx.Model;
 using NLog;
 using System.Diagnostics.CodeAnalysis;
-using System.Text.RegularExpressions;
 
 namespace Lynx.UCI.Commands.GUI;
 
@@ -13,47 +12,49 @@ namespace Lynx.UCI.Commands.GUI;
 ///	Note: no "new" command is needed. However, if this position is from a different game than
 ///	the last position sent to the engine, the GUI should have sent a "ucinewgame" inbetween.
 /// </summary>
-public sealed partial class PositionCommand : GUIBaseCommand
+public sealed class PositionCommand : GUIBaseCommand
 {
     public const string Id = "position";
 
     public const string StartPositionString = "startpos";
     public const string MovesString = "moves";
 
-    [GeneratedRegex("(?<=fen).+?(?=moves|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
-    private static partial Regex FenRegex();
-
-    [GeneratedRegex("(?<=moves).+?(?=$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
-    private static partial Regex MovesRegex();
-
-    private static readonly Regex _fenRegex = FenRegex();
-    private static readonly Regex _movesRegex = MovesRegex();
-
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    public static Game ParseGame(string positionCommand)
+    public static Game ParseGame(ReadOnlySpan<char> positionCommandSpan)
     {
         try
         {
-            var items = positionCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            bool isInitialPosition = string.Equals(items.ElementAtOrDefault(1), StartPositionString, StringComparison.OrdinalIgnoreCase);
+            // We divide the position command in these two sections:
+            // "position startpos                       ||"
+            // "position startpos                       || moves e2e4 e7e5"
+            // "position fen 8/8/8/8/8/8/8/8 w - - 0 1  ||"
+            // "position fen 8/8/8/8/8/8/8/8 w - - 0 1  || moves e2e4 e7e5"
+            Span<Range> items = stackalloc Range[2];
+            positionCommandSpan.Split(items, "moves", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-            var initialPosition = isInitialPosition
-                    ? Constants.InitialPositionFEN
-                    : _fenRegex.Match(positionCommand).Value.Trim();
+            var initialPositionSection = positionCommandSpan[items[0]];
 
-            if (string.IsNullOrEmpty(initialPosition))
-            {
-                _logger.Error("Error parsing position command '{0}': no initial position found", positionCommand);
-            }
+            // We divide in these two parts
+            // "position startpos ||"       <-- If "fen" doesn't exist in the section
+            // "position || (fen) 8/8/8/8/8/8/8/8 w - - 0 1"  <-- If "fen" does exist
+            Span<Range> initialPositionParts = stackalloc Range[2];
+            initialPositionSection.Split(initialPositionParts, "fen", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-            var moves = _movesRegex.Match(positionCommand).Value.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
+            ReadOnlySpan<char> fen = initialPositionSection[initialPositionParts[0]].Length == Id.Length   // "position" o "position startpos"
+                ? initialPositionSection[initialPositionParts[1]]
+                : Constants.InitialPositionFEN.AsSpan();
 
-            return new Game(initialPosition, moves);
+            var movesSection = positionCommandSpan[items[1]];
+
+            Span<Range> moves = stackalloc Range[(movesSection.Length / 5) + 1]; // Number of potential half-moves provided in the string
+            movesSection.Split(moves, ' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            return new Game(fen, movesSection, moves);
         }
         catch (Exception e)
         {
-            _logger.Error(e, "Error parsing position command '{0}'", positionCommand);
+            _logger.Error(e, "Error parsing position command '{0}'", positionCommandSpan.ToString());
             return new Game();
         }
     }
