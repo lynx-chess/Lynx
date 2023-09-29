@@ -65,6 +65,38 @@ public static class MoveGenerator
         return movePool.Take(localIndex);
     }
 
+    /// <summary>
+    /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="capturesOnly">Filters out all moves but captures</param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Span<Move> GenerateAllMovesAsSpan(Position position, Move[]? movePool = null, bool capturesOnly = false)
+    {
+#if DEBUG
+        if (position.Side == Side.Both)
+        {
+            return Span<Move>.Empty;
+        }
+#endif
+
+        movePool ??= new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        int localIndex = 0;
+
+        var offset = Utils.PieceOffset(position.Side);
+
+        GeneratePawnMoves(ref localIndex, movePool, position, offset, capturesOnly);
+        GenerateCastlingMoves(ref localIndex, movePool, position, offset);
+        GeneratePieceMoves(ref localIndex, movePool, (int)Piece.K + offset, position, capturesOnly);
+        GeneratePieceMoves(ref localIndex, movePool, (int)Piece.N + offset, position, capturesOnly);
+        GeneratePieceMoves(ref localIndex, movePool, (int)Piece.B + offset, position, capturesOnly);
+        GeneratePieceMoves(ref localIndex, movePool, (int)Piece.R + offset, position, capturesOnly);
+        GeneratePieceMoves(ref localIndex, movePool, (int)Piece.Q + offset, position, capturesOnly);
+
+        return movePool.AsSpan()[..localIndex];
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static void GeneratePawnMoves(ref int localIndex, Move[] movePool, Position position, int offset, bool capturesOnly = false)
     {
