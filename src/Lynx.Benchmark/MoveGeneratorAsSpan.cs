@@ -54,7 +54,7 @@ public class MoveGeneratorAsSpan : BaseBenchmark
         var position = new Position(fen);
         var sp = MovePool.AsSpan();
         ref var movePool = ref sp;
-        var (moveStart, moveEnd) = MoveGenerator.GenerateAllMovesAsSpan(position, ref movePool, 1, capturesOnly: false);
+        var (moveStart, moveEnd) = MoveGenerator.GenerateAllMovesAsSpan(position, ref movePool, 0, capturesOnly: false);
 
         if (movePool[moveStart] == 0)
         {
