@@ -31,7 +31,7 @@ public sealed partial class Engine
     /// <param name="maxDepth"></param>
     /// <param name="decisionTime"></param>
     /// <returns>Not null <see cref="SearchResult"/>, although made nullable in order to match online tb probing signature</returns>
-    public async Task<SearchResult?> IDDFS(int minDepth, int? maxDepth, int? decisionTime)
+    public SearchResult? IDDFS(int minDepth, int? maxDepth, int? decisionTime)
     {
         // Cleanup
         _nodes = 0;
@@ -49,6 +49,8 @@ public sealed partial class Engine
         int depth = 1;
         bool isCancelled = false;
         bool isMateDetected = false;
+
+        Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition * Configuration.EngineSettings.MaxDepth];
 
         try
         {
@@ -101,7 +103,7 @@ public sealed partial class Engine
                     NodesPerSecond = 0
                 };
 
-                await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(result));
+                _engineWriter.TryWrite(InfoCommand.SearchResultInfo(result));
 
                 return result;
             }
@@ -118,7 +120,7 @@ public sealed partial class Engine
 
                 Array.Copy(_previousSearchResult.Moves.ToArray(), 2, _pVTable, 0, _previousSearchResult.Moves.Count - 2);
 
-                await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult));
+                _engineWriter.TryWrite(InfoCommand.SearchResultInfo(lastSearchResult));
 
                 for (int d = 1; d < Configuration.EngineSettings.MaxDepth - 2; ++d)
                 {
@@ -149,7 +151,7 @@ public sealed partial class Engine
                 AspirationWindows_SearchAgain:
 
                 _isFollowingPV = true;
-                bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta, isVerifyingNullMoveCutOff: true); ;
+                bestEvaluation = NegaMax(ref movePool, depth: depth, ply: 0, alpha, beta, isVerifyingNullMoveCutOff: true); ;
 
                 var bestEvaluationAbs = Math.Abs(bestEvaluation);
                 isMateDetected = bestEvaluationAbs > EvaluationConstants.PositiveCheckmateDetectionLimit;
@@ -190,7 +192,7 @@ public sealed partial class Engine
                     NodesPerSecond = Utils.CalculateNps(_nodes, elapsedTime)
                 };
 
-                await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult));
+                _engineWriter.TryWrite(InfoCommand.SearchResultInfo(lastSearchResult));
 
                 Array.Copy(_killerMoves, _previousKillerMoves, _killerMoves.Length);
 
@@ -230,7 +232,7 @@ public sealed partial class Engine
             _searchCancellationTokenSource.Cancel();
         }
 
-        await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(finalSearchResult));
+        _engineWriter.TryWrite(InfoCommand.SearchResultInfo(finalSearchResult));
 
         return finalSearchResult;
 

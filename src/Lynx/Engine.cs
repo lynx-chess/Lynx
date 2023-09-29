@@ -163,7 +163,7 @@ public sealed partial class Engine
     {
         if (!Configuration.EngineSettings.UseOnlineTablebaseInRootPositions || Game.CurrentPosition.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
         {
-            return (await IDDFS(minDepth, maxDepth, decisionTime))!;
+            return IDDFS(minDepth, maxDepth, decisionTime)!;
         }
 
         // Local copy of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove so that it doesn't interfere with regular search
@@ -172,7 +172,7 @@ public sealed partial class Engine
         var tasks = new Task<SearchResult?>[] {
                 // Other copies of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove (same reason)
                 ProbeOnlineTablebase(Game.CurrentPosition, new(Game.PositionHashHistory),  Game.HalfMovesWithoutCaptureOrPawnMove),
-                IDDFS(minDepth, maxDepth, decisionTime)
+                Task.Run(()=>IDDFS(minDepth, maxDepth, decisionTime))
             };
 
         var resultList = await Task.WhenAll(tasks);
