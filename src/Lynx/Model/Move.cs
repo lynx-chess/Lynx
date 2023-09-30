@@ -1,4 +1,5 @@
 ﻿using NLog;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -71,6 +72,65 @@ public static class MoveExtensions
         var targetSquare = (UCIString[2] - 'a') + ((8 - (UCIString[3] - '0')) * 8);
 
         var candidateMoves = moveList.Where(move => move.SourceSquare() == sourceSquare && move.TargetSquare() == targetSquare);
+
+        if (UCIString.Length == 4)
+        {
+            move = candidateMoves.FirstOrDefault();
+
+            if (move.Equals(default(Move)))
+            {
+                _logger.Warn("Unable to link last move string {0} to a valid move in the current position. That move may have already been played", UCIString.ToString());
+                move = null;
+                return false;
+            }
+
+            Utils.Assert(move.Value.PromotedPiece() == default);
+            return true;
+        }
+        else
+        {
+            var promotedPiece = (int)Enum.Parse<Piece>(UCIString[4].ToString());
+
+            bool predicate(Move m)
+            {
+                var actualPromotedPiece = m.PromotedPiece();
+
+                return actualPromotedPiece == promotedPiece
+                || actualPromotedPiece == promotedPiece - 6;
+            }
+
+            move = candidateMoves.FirstOrDefault(predicate);
+            if (move.Equals(default(Move)))
+            {
+                _logger.Warn("Unable to link move {0} to a valid move in the current position. That move may have already been played", UCIString.ToString());
+                move = null;
+                return false;
+            }
+
+            Utils.Assert(candidateMoves.Count() == 4);
+            Utils.Assert(candidateMoves.Count(predicate) == 1);
+
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// Returns the move from <paramref name="moveList"/> indicated by <paramref name="UCIString"/>
+    /// </summary>
+    /// <param name="UCIString"></param>
+    /// <param name="moveList"></param>
+    /// <param name="move"></param>
+    /// <exception cref="InvalidOperationException"></exception>
+    /// <exception cref="IndexOutOfRangeException"></exception>
+    /// <returns></returns>
+    public static bool TryParseFromUCIString(ReadOnlySpan<char> UCIString, ref Span<Move> moveList, [NotNullWhen(true)] out Move? move)
+    {
+        Utils.Assert(UCIString.Length == 4 || UCIString.Length == 5);
+
+        var sourceSquare = (UCIString[0] - 'a') + ((8 - (UCIString[1] - '0')) * 8);
+        var targetSquare = (UCIString[2] - 'a') + ((8 - (UCIString[3] - '0')) * 8);
+
+        var candidateMoves = moveList.ToImmutableArray().Where(move => move.SourceSquare() == sourceSquare && move.TargetSquare() == targetSquare);
 
         if (UCIString.Length == 4)
         {

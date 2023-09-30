@@ -7,8 +7,6 @@ public sealed class Game
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    public Move[] MovePool { get; } = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-
     public List<Move> MoveHistory { get; }
     public HashSet<long> PositionHashHistory { get; }
 
@@ -54,11 +52,14 @@ public sealed class Game
     [Obsolete("Just intended for testing purposes")]
     internal Game(string fen, string[] movesUCIString) : this(fen)
     {
+        Span<Move> moveList = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+
         foreach (var moveString in movesUCIString)
         {
-            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, MovePool);
+            var (start, end) = MoveGenerator.GenerateAllMovesAsSpan(CurrentPosition, ref moveList, 0);
+            var slicedMoveList = moveList[start..end];
 
-            if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
+            if (!MoveExtensions.TryParseFromUCIString(moveString, ref slicedMoveList, out var parsedMove))
             {
                 _logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen, string.Join(' ', movesUCIString), moveString);
                 break;
@@ -73,6 +74,8 @@ public sealed class Game
     [Obsolete("Just intended for testing purposes")]
     internal Game(string fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan) : this(fen)
     {
+        Span<Move> moveList = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+
         for (int i = 0; i < rangeSpan.Length; ++i)
         {
             var range = rangeSpan[i];
@@ -81,9 +84,10 @@ public sealed class Game
                 break;
             }
             var moveString = rawMoves[range];
-            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, MovePool);
+            var (start, end) = MoveGenerator.GenerateAllMovesAsSpan(CurrentPosition, ref moveList, 0);
+            var slicedMoveList = moveList[start..end];
 
-            if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
+            if (!MoveExtensions.TryParseFromUCIString(moveString, ref slicedMoveList, out var parsedMove))
             {
                 _logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen, string.Join(' ', rawMoves.ToString()), moveString.ToString());
                 break;
@@ -97,6 +101,7 @@ public sealed class Game
 
     public Game(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan) : this(fen)
     {
+        Span<Move> moveList = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
         for (int i = 0; i < rangeSpan.Length; ++i)
         {
             if (rangeSpan[i].Start.Equals(rangeSpan[i].End))
@@ -104,9 +109,11 @@ public sealed class Game
                 break;
             }
             var moveString = rawMoves[rangeSpan[i]];
-            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, MovePool);
 
-            if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
+            var (start, end) = MoveGenerator.GenerateAllMovesAsSpan(CurrentPosition, ref moveList, 0);
+            var slicedMoveList = moveList[start..end];
+
+            if (!MoveExtensions.TryParseFromUCIString(moveString, ref slicedMoveList, out var parsedMove))
             {
                 _logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen.ToString(), rawMoves.ToString(), moveString.ToString());
                 break;

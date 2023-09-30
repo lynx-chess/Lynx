@@ -771,6 +771,8 @@ public class PerftTestSuite
 
     private static void Validate(string fen, int depth, long expectedNumberOfNodes)
     {
-        Assert.AreEqual(expectedNumberOfNodes, Perft.ResultsImpl(new Position(fen), depth, default));
+        Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+
+        Assert.AreEqual(expectedNumberOfNodes, Perft.ResultsImpl(new Position(fen), depth, default, ref movePool));
     }
 }

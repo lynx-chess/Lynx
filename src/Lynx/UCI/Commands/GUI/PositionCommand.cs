@@ -64,9 +64,13 @@ public sealed class PositionCommand : GUIBaseCommand
         var moveString = positionCommand
                 .Split(' ', StringSplitOptions.RemoveEmptyEntries)[^1];
 
+        Span<Move> moveList = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        var (moveStart, moveEnd) = MoveGenerator.GenerateAllMovesAsSpan(game.CurrentPosition, ref moveList, 0);
+        var pseudoLegalMoves = moveList[moveStart..moveEnd];
+
         if (!MoveExtensions.TryParseFromUCIString(
             moveString,
-            MoveGenerator.GenerateAllMoves(game.CurrentPosition, game.MovePool),
+            ref pseudoLegalMoves,
             out lastMove))
         {
             _logger.Warn("Error parsing last move {0} from position command {1}", lastMove, positionCommand);

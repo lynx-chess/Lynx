@@ -11,19 +11,23 @@ public static class Perft
 {
     public static (long Nodes, double ElapsedMilliseconds) Results(Position position, int depth)
     {
+        Span<Move> moveList = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition * Configuration.EngineSettings.MaxDepth];
+
         var sw = new Stopwatch();
         sw.Start();
-        var nodes = ResultsImpl(position, depth, 0);
+        var nodes = ResultsImpl(position, depth, 0, ref moveList);
         sw.Stop();
 
         return (nodes, CalculateElapsedMilliseconds(sw));
     }
 
-    public static async Task<(long Nodes, double ElapsedMilliseconds)> Divide(Position position, int depth, Func<string, ValueTask> write)
+    public static (long Nodes, double ElapsedMilliseconds) Divide(Position position, int depth, Func<string, bool> write)
     {
+        Span<Move> moveList = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition * Configuration.EngineSettings.MaxDepth];
+
         var sw = new Stopwatch();
         sw.Start();
-        var nodes = await DivideImpl(position, depth, 0, write);
+        var nodes = DivideImpl(position, depth, 0, write, ref moveList);
         sw.Stop();
 
         return (nodes, CalculateElapsedMilliseconds(sw));
@@ -31,9 +35,11 @@ public static class Perft
 
     public static (long Nodes, double ElapsedMilliseconds) Divide(Position position, int depth, Action<string> write)
     {
+        Span<Move> moveList = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition * Configuration.EngineSettings.MaxDepth];
+
         var sw = new Stopwatch();
         sw.Start();
-        var nodes = DivideImpl(position, depth, 0, write);
+        var nodes = DivideImpl(position, depth, 0, write, ref moveList);
         sw.Stop();
 
         return (nodes, CalculateElapsedMilliseconds(sw));
@@ -46,17 +52,21 @@ public static class Perft
     /// <param name="depth"></param>
     /// <param name="nodes"></param>
     /// <returns></returns>
-    internal static long ResultsImpl(Position position, int depth, long nodes)
+    internal static long ResultsImpl(Position position, int depth, long nodes, ref Span<Move> moveList, int ply = 0)
     {
         if (depth != 0)
         {
-            foreach (var move in MoveGenerator.GenerateAllMoves(position))
+            var (start, end) = MoveGenerator.GenerateAllMovesAsSpan(position, ref moveList, ply);
+
+            for (int i = start; i < end; ++i)
             {
+                ref var move = ref moveList[i];
+
                 var state = position.MakeMove(move);
 
                 if (position.WasProduceByAValidMove())
                 {
-                    nodes = ResultsImpl(position, depth - 1, nodes);
+                    nodes = ResultsImpl(position, depth - 1, nodes, ref moveList, ply + 1);
                 }
                 position.UnmakeMove(move, state);
             }
@@ -67,26 +77,30 @@ public static class Perft
         return nodes + 1;
     }
 
-    private static async Task<long> DivideImpl(Position position, int depth, long nodes, Func<string, ValueTask> write)
+    private static long DivideImpl(Position position, int depth, long nodes, Func<string, bool> write, ref Span<Move> moveList, int ply = 0)
     {
         if (depth != 0)
         {
-            foreach (var move in MoveGenerator.GenerateAllMoves(position))
+            var (start, end) = MoveGenerator.GenerateAllMovesAsSpan(position, ref moveList, ply);
+
+            for (int i = start; i < end; ++i)
             {
+                ref var move = ref moveList[i];
+
                 var state = position.MakeMove(move);
 
                 if (position.WasProduceByAValidMove())
                 {
                     var accumulatedNodes = nodes;
-                    nodes = ResultsImpl(position, depth - 1, nodes);
+                    nodes = ResultsImpl(position, depth - 1, nodes, ref moveList, ply + 1);
 
-                    await write($"{move.UCIString()}\t\t{nodes - accumulatedNodes}");
+                    write($"{move.UCIString()}\t\t{nodes - accumulatedNodes}");
                 }
 
                 position.UnmakeMove(move, state);
             }
 
-            await write(string.Empty);
+            write(string.Empty);
 
             return nodes;
         }
@@ -94,18 +108,22 @@ public static class Perft
         return nodes + 1;
     }
 
-    private static long DivideImpl(Position position, int depth, long nodes, Action<string> write)
+    private static long DivideImpl(Position position, int depth, long nodes, Action<string> write, ref Span<Move> moveList, int ply = 0)
     {
         if (depth != 0)
         {
-            foreach (var move in MoveGenerator.GenerateAllMoves(position))
+            var (start, end) = MoveGenerator.GenerateAllMovesAsSpan(position, ref moveList, ply);
+
+            for (int i = start; i < end; ++i)
             {
+                ref var move = ref moveList[i];
+
                 var state = position.MakeMove(move);
 
                 if (position.WasProduceByAValidMove())
                 {
                     var accumulatedNodes = nodes;
-                    nodes = ResultsImpl(position, depth - 1, nodes);
+                    nodes = ResultsImpl(position, depth - 1, nodes, ref moveList, ply + 1);
 
                     write($"{move.UCIString()}\t\t{nodes - accumulatedNodes}");
                 }
