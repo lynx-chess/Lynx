@@ -161,7 +161,7 @@ public class PerftTest
 
     private static void Validate(string fen, int depth, long expectedNumberOfNodes)
     {
-        Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition * Configuration.EngineSettings.MaxDepth];
 
         Assert.AreEqual(expectedNumberOfNodes, Perft.ResultsImpl(new Position(fen), depth, default, ref movePool));
     }
