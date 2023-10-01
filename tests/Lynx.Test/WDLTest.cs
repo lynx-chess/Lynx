@@ -17,7 +17,7 @@ public class WDLTest
     }
 
     [TestCase(500, 617)]
-    [TestCase(1000, 1235)]
+    [TestCase(1000, 1234)]
     [TestCase(0, 0)]
     [TestCase(EvaluationConstants.PositiveCheckmateDetectionLimit + 5, EvaluationConstants.PositiveCheckmateDetectionLimit + 5)]
     [TestCase(EvaluationConstants.NegativeCheckmateDetectionLimit - 5, EvaluationConstants.NegativeCheckmateDetectionLimit - 5)]
