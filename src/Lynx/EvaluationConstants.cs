@@ -8,6 +8,12 @@ namespace Lynx;
 
 public static class EvaluationConstants
 {
+    public const int EvalNormalizationCoefficient = 81;
+
+    public static readonly double[] As = [-32.78983036, 235.37133071, -249.05082702, 128.26358603];
+
+    public static readonly double[] Bs = [-17.47035102, 113.21912714, -143.31733309, 123.25432020];
+
     public static readonly int[] MiddleGamePieceValues =
     [
             +49, +270, +255, +347, +790, 0,

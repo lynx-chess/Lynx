@@ -8,7 +8,7 @@ namespace Lynx;
 public class SearchResult
 {
     public Move BestMove { get; init; }
-    public double Evaluation { get; init; }
+    public int Evaluation { get; init; }
     public int Depth { get; set; }
     public List<Move> Moves { get; init; }
     public int Alpha { get; init; }
@@ -27,7 +27,9 @@ public class SearchResult
 
     public int HashfullPermill { get; set; } = -1;
 
-    public SearchResult(Move bestMove, double evaluation, int targetDepth, List<Move> moves, int alpha, int beta, int mate = default)
+    public (int WDLWin, int WDLDraw, int WDLLoss)? WDL { get; set; } = null;
+
+    public SearchResult(Move bestMove, int evaluation, int targetDepth, List<Move> moves, int alpha, int beta, int mate = default)
     {
         BestMove = bestMove;
         Evaluation = evaluation;
