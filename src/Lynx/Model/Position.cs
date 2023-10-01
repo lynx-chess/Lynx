@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace Lynx.Model;
 
@@ -699,10 +700,23 @@ public class Position
 
         var eval = ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / maxPhase;
 
+        eval = ScaleEvalWith50MovesDrawDistance(eval, movesWithoutCaptureOrPawnMove);
+
         return Side == Side.White
             ? eval
             : -eval;
     }
+
+    /// <summary>
+    /// Scales <paramref name="eval"/> with <paramref name="movesWithoutCaptureOrPawnMove"/>, so that
+    /// an eval with 100 halfmove counter is half of the value of one with 0 halfmove counter
+    /// </summary>
+    /// <param name="eval"></param>
+    /// <param name="movesWithoutCaptureOrPawnMove"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static int ScaleEvalWith50MovesDrawDistance(int eval, int movesWithoutCaptureOrPawnMove) =>
+        eval * (200 - movesWithoutCaptureOrPawnMove) / 200;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static int TaperedEvaluation(TaperedEvaluationTerm taperedEvaluationTerm, int phase)

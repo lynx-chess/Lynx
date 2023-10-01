@@ -957,4 +957,16 @@ public class PositionTest
             ? position.KingAdditionalEvaluation(bitBoard, Side.White, pieceCount).EndGameScore
             : position.KingAdditionalEvaluation(bitBoard, Side.Black, pieceCount).EndGameScore;
     }
+
+    [Test]
+    public void ScaleEvalWith50MovesDrawDistance()
+    {
+        const string queenVsRookPosition = "8/4k3/4r3/3Q4/3K4/8/8/8 w - - 0 1";
+
+        var position = new Position(queenVsRookPosition);
+
+        Assert.Greater(position.StaticEvaluation(0), 10);
+        Assert.AreEqual(0.5 * position.StaticEvaluation(0), position.StaticEvaluation(100));
+        Assert.AreEqual(0.75 * position.StaticEvaluation(0), position.StaticEvaluation(50));
+    }
 }
