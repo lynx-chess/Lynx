@@ -82,7 +82,7 @@ public sealed class InfoCommand : EngineBaseCommand
             $" depth {searchResult.Depth}" +
             $" seldepth {searchResult.DepthReached}" +
             $" multipv 1" +
-            $" score {(searchResult.Mate == default ? $"cp {searchResult.Evaluation}" : $"mate {searchResult.Mate}")}" +
+            $" score {(searchResult.Mate == default ? $"cp {WDL.NormalizeScore(searchResult.Evaluation)}" : $"mate {searchResult.Mate}")}" +
             $" nodes {searchResult.Nodes}" +
             $" nps {searchResult.NodesPerSecond}" +
             $" time {searchResult.Time}" +

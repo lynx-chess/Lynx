@@ -5,6 +5,7 @@ using static EvaluationConstants;
 public static class WDL
 {
     /// <summary>
+    /// Adjust score so that 100cp == 50% win probability
     /// Based on https://github.com/Ciekce/Stormphrax/blob/main/src/wdl.h
     /// </summary>
     /// <returns></returns>

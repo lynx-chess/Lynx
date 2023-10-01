@@ -346,7 +346,6 @@ public sealed class LynxDriver
     {
         try
         {
-
             var fullPath = Path.GetFullPath(rawCommand[(rawCommand.IndexOf(' ') + 1)..]);
             if (!File.Exists(fullPath))
             {
@@ -371,7 +370,7 @@ public sealed class LynxDriver
                     _logger.Debug("Raw fen: {0}, parsed fen: {1}", fen, ourFen);
                 }
 
-                var eval = position.StaticEvaluation(0);
+                var eval = WDL.NormalizeScore(position.StaticEvaluation(0));
                 if (position.Side == Side.Black)
                 {
                     eval = -eval;   // White perspective
