@@ -588,7 +588,7 @@ public class Position
     /// </summary>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int StaticEvaluation(int movesWithoutCaptureOrPawnMove, CancellationToken cancellationToken = default)
+    public int StaticEvaluation(int movesWithoutCaptureOrPawnMove, Side sideToMove = Side.Both, CancellationToken cancellationToken = default)
     {
         var result = OnlineTablebaseProber.EvaluationSearch(this, movesWithoutCaptureOrPawnMove, cancellationToken);
         Debug.Assert(result < EvaluationConstants.CheckMateBaseEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
@@ -662,6 +662,12 @@ public class Position
 
         middleGameScore += EvaluationConstants.MiddleGameTable[(int)Piece.k, blackKing] - mgKingScore;
         endGameScore += EvaluationConstants.EndGameTable[(int)Piece.k, blackKing] - egKingScore;
+
+        if (Side == sideToMove)
+        {
+            middleGameScore += Configuration.EngineSettings.TempoBonus.MG;
+            endGameScore += Configuration.EngineSettings.TempoBonus.EG;
+        }
 
         // Check if drawn position due to lack of material
         if (endGameScore >= 0)

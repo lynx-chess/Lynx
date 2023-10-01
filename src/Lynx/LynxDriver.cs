@@ -370,7 +370,7 @@ public sealed class LynxDriver
                     _logger.Debug("Raw fen: {0}, parsed fen: {1}", fen, ourFen);
                 }
 
-                var eval = WDL.NormalizeScore(position.StaticEvaluation(0));
+                var eval = WDL.NormalizeScore(position.StaticEvaluation(0, position.Side));
                 if (position.Side == Side.Black)
                 {
                     eval = -eval;   // White perspective

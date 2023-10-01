@@ -17,6 +17,8 @@ public sealed class Game
     public Position CurrentPosition { get; private set; }
     private readonly Position _gameInitialPosition;
 
+    public Side SideToMove() => _gameInitialPosition.Side;
+
     public Game() : this(Constants.InitialPositionFEN)
     {
     }

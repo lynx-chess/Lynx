@@ -28,7 +28,7 @@ public sealed partial class Engine
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
             _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
-            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
+            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, Game.SideToMove(), _searchCancellationTokenSource.Token);
         }
 
         _maxDepthReached[ply] = ply;
@@ -109,7 +109,7 @@ public sealed partial class Engine
         if (!pvNode && !isInCheck
             && depth <= Configuration.EngineSettings.RFP_MaxDepth)
         {
-            var staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
+            var staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, Game.SideToMove());
 
             if (staticEval - (Configuration.EngineSettings.RFP_DepthScalingFactor * depth) >= beta)
             {
@@ -299,7 +299,7 @@ public sealed partial class Engine
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
             _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
-            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
+            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, Game.SideToMove(), _searchCancellationTokenSource.Token);
         }
 
         var pvIndex = PVTable.Indexes[ply];
@@ -308,7 +308,7 @@ public sealed partial class Engine
 
         _maxDepthReached[ply] = ply;
 
-        var staticEvaluation = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
+        var staticEvaluation = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, Game.SideToMove(), _searchCancellationTokenSource.Token);
 
         // Fail-hard beta-cutoff (updating alpha after this check)
         if (staticEvaluation >= beta)
