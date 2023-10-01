@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 
 namespace Lynx.UCI.Commands.Engine;
+
 #pragma warning disable RCS1243 // Duplicate word in a comment.
 /// <summary>
 /// option
@@ -116,17 +117,19 @@ namespace Lynx.UCI.Commands.Engine;
 ///	    "option name NalimovPath type string default c:\\n"
 ///	    "option name Clear Hash type button\n"
 /// </summary>
-public sealed class OptionCommand : EngineBaseCommand
 #pragma warning restore RCS1243 // Duplicate word in a comment.
+
+public sealed class OptionCommand : EngineBaseCommand
 {
     public const string Id = "option";
 
-    public static readonly ImmutableArray<string> AvailableOptions = ImmutableArray.Create<string>(
+    public static readonly ImmutableArray<string> AvailableOptions = ImmutableArray.Create(
         "option name UCI_Opponent type string",
         $"option name UCI_EngineAbout type string default {IdCommand.EngineName} by {IdCommand.EngineAuthor}, see https://github.com/lynx-chess/Lynx",
+        $"option name UCI_ShowWDL type check default {Configuration.EngineSettings.ShowWDL}",
         $"option name Hash type spin default {Configuration.EngineSettings.TranspositionTableSize} min 0 max 1024",
-        "option name OnlineTablebaseInRootPositions type check default false",
-        "option name OnlineTablebaseInSearch type check default false",
+        $"option name OnlineTablebaseInRootPositions type check default {Configuration.EngineSettings.UseOnlineTablebaseInRootPositions}",
+        $"option name OnlineTablebaseInSearch type check default {Configuration.EngineSettings.UseOnlineTablebaseInSearch}",
         "option name Threads type spin default 1 min 1 max 1"
     );
 

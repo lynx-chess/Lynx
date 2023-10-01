@@ -269,6 +269,14 @@ public sealed class LynxDriver
                     }
                     break;
                 }
+            case "uci_showwdl":
+                {
+                    if (length > 4 && bool.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.ShowWDL = value;
+                    }
+                }
+                break;
             default:
                 _logger.Warn("Unsupported option: {0}", command.ToString());
                 break;

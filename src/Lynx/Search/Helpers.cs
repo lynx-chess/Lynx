@@ -27,6 +27,8 @@ public class SearchResult
 
     public int HashfullPermill { get; set; } = -1;
 
+    public (int WDLWin, int WDLDraw, int WDLLoss)? WDL { get; set; } = null;
+
     public SearchResult(Move bestMove, double evaluation, int targetDepth, List<Move> moves, int alpha, int beta, int mate = default)
     {
         BestMove = bestMove;

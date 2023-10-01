@@ -101,4 +101,9 @@ public static class MatePositions
 
         new object[]{ "1k2r3/ppN3pp/5n2/8/6P1/P1p1pK1P/1PPr4/1R2RN2 b - -               ", new[] { "d2f2" }, "https://gameknot.com/chess-puzzle.pl?pz=117353" }     // info depth 12 seldepth 26 multipv 1 score cp 160 nodes 102915997 nps 439966 time 232918 pv d2f2 f3g3 f6e4 g3h4 f2f6 c7a6 b7a6 b2c3 b8c8 g4g5 f6f4 h4h5 e4c3, not reachable any more after adding RFP
     };
+
+    public static readonly object[] Mates_in_11 = new object[]
+    {
+        new object[]{ "6r1/p1pq1p1p/1p1p1Qnk/3PrR2/2n1P1PP/P1P5/4R3/6K1 w - -           ", new[] { "f5h5" }, "https://talkchess.com/forum3/viewtopic.php?f=7&t=82648" },
+    };
 }
