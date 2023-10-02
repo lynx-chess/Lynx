@@ -965,7 +965,7 @@ public class PositionTest
 
         var position = new Position(queenVsRookPosition);
 
-        Assert.Greater(position.StaticEvaluation(0), 10);
+        Assert.Greater(position.StaticEvaluation(0), position.StaticEvaluation(10));
         Assert.AreEqual(0.5 * position.StaticEvaluation(0), position.StaticEvaluation(100));
         Assert.AreEqual(0.75 * position.StaticEvaluation(0), position.StaticEvaluation(50));
     }
