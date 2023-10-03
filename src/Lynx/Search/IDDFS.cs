@@ -260,17 +260,18 @@ public sealed partial class Engine
             if (decisionTime is not null)
             {
                 var elapsedMilliseconds = stopWatch.ElapsedMilliseconds;
-                var minTimeToStop = Configuration.EngineSettings.MinElapsedTimeToConsiderStopSearching;
-                var decisionTimePercentageToStop = Configuration.EngineSettings.DecisionTimeFactorToStopSearching;
-                var maxExpectedElapsedTimeToStop = decisionTimePercentageToStop * decisionTime;
 
-                if (elapsedMilliseconds > minTimeToStop
-                    && elapsedMilliseconds > maxExpectedElapsedTimeToStop)
-                {
-                    logger.Info("Stopping at depth {0} (nodes {1}): {2} > {3} (elapsed time > [{4}, {5} * decision time])",
-                        depth - 1, nodes, elapsedMilliseconds, maxExpectedElapsedTimeToStop, minTimeToStop, decisionTimePercentageToStop);
-                    return false;
-                }
+                //var minTimeToStop = Configuration.EngineSettings.MinElapsedTimeToConsiderStopSearching;
+                //var decisionTimePercentageToStop = Configuration.EngineSettings.DecisionTimeFactorToStopSearching;
+                //var maxExpectedElapsedTimeToStop = decisionTimePercentageToStop * decisionTime;
+
+                //if (elapsedMilliseconds > minTimeToStop
+                //    && elapsedMilliseconds > maxExpectedElapsedTimeToStop)
+                //{
+                //    logger.Info("Stopping at depth {0} (nodes {1}): {2} > {3} (elapsed time > [{4}, {5} * decision time])",
+                //        depth - 1, nodes, elapsedMilliseconds, maxExpectedElapsedTimeToStop, minTimeToStop, decisionTimePercentageToStop);
+                //    return false;
+                //}
 
                 var remainingTime = decisionTime - elapsedMilliseconds;
                 var minLastSearchTimeToStop = Configuration.EngineSettings.MinLastSearchTimeToConsiderStopSearching;
