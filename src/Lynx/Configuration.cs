@@ -317,6 +317,8 @@ public sealed class EngineSettings
     public int RFP_MaxDepth { get; set; } = 6;
 
     public int RFP_DepthScalingFactor { get; set; } = 75;
+
+    public bool ShowWDL { get; set; } = false;
 }
 
 [JsonSourceGenerationOptions(

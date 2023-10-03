@@ -8,6 +8,16 @@ namespace Lynx;
 
 public static class EvaluationConstants
 {
+    /// <summary>
+    /// 30k games, 16+0.16, UHO_XXL_+0.90_+1.19.epd
+    /// Retained (W,D,L) = (791773, 1127929, 793778) positions.
+    /// </summary>
+    public const int EvalNormalizationCoefficient = 78;
+
+    public static readonly double[] As = [-44.54789428, 284.90322556, -305.65458204, 143.86777995];
+
+    public static readonly double[] Bs = [-21.08101051, 127.81742295, -160.22340655, 128.53122955];
+
     public static readonly int[] MiddleGamePieceValues =
     [
             +49, +270, +255, +347, +790, 0,

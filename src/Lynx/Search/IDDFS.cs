@@ -224,6 +224,10 @@ public sealed partial class Engine
         finalSearchResult.Time = _stopWatch.ElapsedMilliseconds;
         finalSearchResult.NodesPerSecond = Utils.CalculateNps(_nodes, _stopWatch.ElapsedMilliseconds);
         finalSearchResult.HashfullPermill = _tt.HashfullPermillApprox();
+        if (Configuration.EngineSettings.ShowWDL)
+        {
+            finalSearchResult.WDL = WDL.WDLModel(bestEvaluation, depth);
+        }
 
         if (isMateDetected && finalSearchResult.Mate + Game.HalfMovesWithoutCaptureOrPawnMove < 96)
         {
