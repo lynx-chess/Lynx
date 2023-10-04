@@ -1,12 +1,13 @@
 ﻿using Lynx.Model;
-using NLog;
 using System.Runtime.CompilerServices;
 
 namespace Lynx;
 
 public static class MoveGenerator
 {
-    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+#if DEBUG
+    private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
+#endif
 
     private const int TRUE = 1;
 
@@ -39,7 +40,6 @@ public static class MoveGenerator
     /// <param name="position"></param>
     /// <param name="capturesOnly">Filters out all moves but captures</param>
     /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IEnumerable<Move> GenerateAllMoves(Position position, Move[]? movePool = null, bool capturesOnly = false)
     {
 #if DEBUG

@@ -11,7 +11,6 @@ public static class FENParser
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ParseResult ParseFEN(ReadOnlySpan<char> fen)
     {
         fen = fen.Trim();

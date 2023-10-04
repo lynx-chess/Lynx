@@ -212,7 +212,6 @@ public class Position
         UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public GameState MakeMove(Move move)
     {
         sbyte capturedPiece = -1;
@@ -340,7 +339,6 @@ public class Position
         //}
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void UnmakeMove(Move move, GameState gameState)
     {
         var oppositeSide = (int)Side;
@@ -484,7 +482,6 @@ public class Position
         return Attacks.IsSquareInCheck(kingSquare, oppositeSide, PieceBitBoards, OccupancyBitBoards);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public string FEN(int halfMovesWithoutCaptureOrPawnMove = 0, int fullMoveClock = 1)
     {
         var sb = new StringBuilder(100);
@@ -587,7 +584,6 @@ public class Position
     /// That is, positive scores always favour playing <see cref="Side"/>.
     /// </summary>
     /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int StaticEvaluation(int movesWithoutCaptureOrPawnMove, CancellationToken cancellationToken = default)
     {
         var result = OnlineTablebaseProber.EvaluationSearch(this, movesWithoutCaptureOrPawnMove, cancellationToken);
@@ -742,7 +738,6 @@ public class Position
     /// <param name="pieceIndex"></param>
     /// <param name="pieceCount">Incomplete count</param>
     /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal (int MiddleGameScore, int EndGameScore) AdditionalPieceEvaluation(int pieceSquareIndex, int pieceIndex, int[] pieceCount)
     {
         return pieceIndex switch
