@@ -97,8 +97,9 @@ public static class TranspositionTableExtensions
     /// Checks the transposition table and, if there's a eval value that can be deducted from it of there's a previously recorded <paramref name="position"/>, it's returned. <see cref="EvaluationConstants.NoHashEntry"/> is returned otherwise
     /// </summary>
     /// <param name="tt"></param>
+    /// <param name="ttMask"></param>
     /// <param name="position"></param>
-    /// <param name="targetDepth"></param>
+    /// <param name="depth"></param>
     /// <param name="ply">Ply</param>
     /// <param name="alpha"></param>
     /// <param name="beta"></param>
@@ -143,7 +144,7 @@ public static class TranspositionTableExtensions
     /// </summary>
     /// <param name="tt"></param>
     /// <param name="position"></param>
-    /// <param name="targetDepth"></param>
+    /// <param name="depth"></param>
     /// <param name="ply">Ply</param>
     /// <param name="eval"></param>
     /// <param name="nodeType"></param>
