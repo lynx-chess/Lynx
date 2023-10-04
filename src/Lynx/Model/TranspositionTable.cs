@@ -143,6 +143,7 @@ public static class TranspositionTableExtensions
     /// Adds a <see cref="TranspositionTableElement"/> to the transposition tabke
     /// </summary>
     /// <param name="tt"></param>
+    /// <param name="ttMask"></param>
     /// <param name="position"></param>
     /// <param name="depth"></param>
     /// <param name="ply">Ply</param>
