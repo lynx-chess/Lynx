@@ -105,15 +105,43 @@ public sealed partial class Engine
 
         VerifiedNullMovePruning_SearchAgain:
 
-        // 🔍 Reverse FutilityPrunning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
-        if (!pvNode && !isInCheck
-            && depth <= Configuration.EngineSettings.RFP_MaxDepth)
+        if (!pvNode && !isInCheck && depth <= Configuration.EngineSettings.RFP_MaxDepth)
         {
-            var staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
+            int staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
 
+            // 🔍 Reverse FutilityPrunning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
             if (staticEval - (Configuration.EngineSettings.RFP_DepthScalingFactor * depth) >= beta)
             {
                 return staticEval;
+            }
+
+            // 🔍 Razoring - Strelka impl (CPW) - https://www.chessprogramming.org/Razoring#Strelka
+            if (depth < Configuration.EngineSettings.Razoring_MaxDepth)
+            {
+                var score = staticEval + Configuration.EngineSettings.Razoring_Depth1Bonus;
+
+                // if (score < beta)               // Static evaluation indicates fail-low node - TODO sprt
+                if (depth == 1)
+                {
+                    var qSearchScore = QuiescenceSearch(ply, alpha, beta);
+
+                    return qSearchScore > score
+                        ? qSearchScore
+                        : score;
+                }
+
+                score += Configuration.EngineSettings.Razoring_NotDepth1Bonus;
+
+                if (score < beta)               // Static evaluation indicates fail-low node
+                {
+                    var qSearchScore = QuiescenceSearch(ply, alpha, beta);
+                    if (qSearchScore < beta)    // Quiescence score also indicates fail-low node
+                    {
+                        return qSearchScore > score
+                            ? qSearchScore
+                            : score;
+                    }
+                }
             }
         }
 
