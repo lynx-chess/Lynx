@@ -166,8 +166,15 @@ public sealed partial class Engine
                     _logger.Debug("Eval ({0}) outside of aspiration window [{1}, {2}] (depth {3}, nodes {4})", bestEvaluation, alpha, beta, depth, _nodes);
 
                     window *= 2;
-                    alpha = bestEvaluation - window;   // We fell outside the window, so try again with a
-                    beta = bestEvaluation + window;    // bigger window (and the same depth).
+
+                    if (alpha >= bestEvaluation)     // Fail low
+                    {
+                        alpha = bestEvaluation - window;
+                    }
+                    if (beta <= bestEvaluation)     // Fail high
+                    {
+                        beta = bestEvaluation + window;
+                    }
                 }
 
                 alpha = bestEvaluation - Configuration.EngineSettings.AspirationWindowAlpha;
