@@ -146,22 +146,26 @@ public sealed partial class Engine
                 }
                 _nodes = 0;
 
-                AspirationWindows_SearchAgain:
-
-                _isFollowingPV = true;
-                bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta, isVerifyingNullMoveCutOff: true); ;
-
-                var bestEvaluationAbs = Math.Abs(bestEvaluation);
-                isMateDetected = bestEvaluationAbs > EvaluationConstants.PositiveCheckmateDetectionLimit;
-
                 // 🔍 Aspiration Windows
-                if (!isMateDetected && ((bestEvaluation <= alpha) || (bestEvaluation >= beta)))
+                var window = Configuration.EngineSettings.AspirationWindowAlpha;
+                while (true)
                 {
-                    alpha = MinValue;   // We fell outside the window, so try again with a
-                    beta = MaxValue;    // full-width window (and the same depth).
+                    _isFollowingPV = true;
+                    bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta, isVerifyingNullMoveCutOff: true);
 
-                    _logger.Debug("Outside of aspiration window (depth {0}, nodes {1}): eval {2}, alpha {3}, beta {4}", depth, _nodes, bestEvaluation, alpha, beta);
-                    goto AspirationWindows_SearchAgain;
+                    var bestEvaluationAbs = Math.Abs(bestEvaluation);
+                    isMateDetected = bestEvaluationAbs > EvaluationConstants.PositiveCheckmateDetectionLimit;
+
+                    if (isMateDetected || (alpha < bestEvaluation && beta > bestEvaluation))
+                    {
+                        break;
+                    }
+
+                    _logger.Debug("Eval ({0}) outside of aspiration window [{1}, {2}] (depth {3}, nodes {4})", bestEvaluation, alpha, beta, depth, _nodes);
+
+                    window *= 2;
+                    alpha = bestEvaluation - window;   // We fell outside the window, so try again with a
+                    beta = bestEvaluation + window;    // bigger window (and the same depth).
                 }
 
                 alpha = bestEvaluation - Configuration.EngineSettings.AspirationWindowAlpha;
