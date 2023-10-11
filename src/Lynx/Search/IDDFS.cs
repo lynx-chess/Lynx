@@ -146,6 +146,8 @@ public sealed partial class Engine
                 }
                 _nodes = 0;
 
+                int bestEvaluationAbs;
+
                 // 🔍 Aspiration Windows
                 var window = Configuration.EngineSettings.AspirationWindowAlpha;
                 while (true)
@@ -153,7 +155,7 @@ public sealed partial class Engine
                     _isFollowingPV = true;
                     bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta, isVerifyingNullMoveCutOff: true);
 
-                    var bestEvaluationAbs = Math.Abs(bestEvaluation);
+                    bestEvaluationAbs = Math.Abs(bestEvaluation);
                     isMateDetected = bestEvaluationAbs > EvaluationConstants.PositiveCheckmateDetectionLimit;
 
                     if (isMateDetected || (alpha < bestEvaluation && beta > bestEvaluation))
