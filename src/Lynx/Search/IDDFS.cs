@@ -146,39 +146,46 @@ public sealed partial class Engine
                 }
                 _nodes = 0;
 
-                int bestEvaluationAbs;
-
-                // 🔍 Aspiration Windows
-                var window = Configuration.EngineSettings.AspirationWindowAlpha;
-                while (true)
+                if (depth < Configuration.EngineSettings.AspirationWindowMinDepth || lastSearchResult?.Evaluation is null)
                 {
-                    _isFollowingPV = true;
                     bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta, isVerifyingNullMoveCutOff: true);
+                }
+                else
+                {
+                    // 🔍 Aspiration Windows
+                    var window = Configuration.EngineSettings.AspirationWindowDelta;
 
-                    bestEvaluationAbs = Math.Abs(bestEvaluation);
-                    isMateDetected = bestEvaluationAbs > EvaluationConstants.PositiveCheckmateDetectionLimit;
+                    alpha = Math.Max(MinValue, lastSearchResult.Evaluation - window);
+                    beta = Math.Min(MaxValue, lastSearchResult.Evaluation + window);
 
-                    if (isMateDetected || (alpha < bestEvaluation && beta > bestEvaluation))
+                    while (true)
                     {
-                        break;
-                    }
+                        _isFollowingPV = true;
+                        bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta, isVerifyingNullMoveCutOff: true);
 
-                    _logger.Debug("Eval ({0}) outside of aspiration window [{1}, {2}] (depth {3}, nodes {4})", bestEvaluation, alpha, beta, depth, _nodes);
+                        isMateDetected = Math.Abs(bestEvaluation) > EvaluationConstants.PositiveCheckmateDetectionLimit;
 
-                    window *= 2;
+                        if (isMateDetected || (alpha < bestEvaluation && beta > bestEvaluation))
+                        {
+                            break;
+                        }
 
-                    if (alpha >= bestEvaluation)     // Fail low
-                    {
+                        _logger.Debug("Eval ({0}) outside of aspiration window [{1}, {2}] (depth {3}, nodes {4})", bestEvaluation, alpha, beta, depth, _nodes);
+
+                        window += window / 2;
+
                         alpha = bestEvaluation - window;
-                    }
-                    if (beta <= bestEvaluation)     // Fail high
-                    {
                         beta = bestEvaluation + window;
+                        //if (alpha >= bestEvaluation)     // Fail low
+                        //{
+                        //    alpha = bestEvaluation - window;
+                        //}
+                        //if (beta <= bestEvaluation)     // Fail high
+                        //{
+                        //    beta = bestEvaluation + window;
+                        //}
                     }
                 }
-
-                alpha = bestEvaluation - Configuration.EngineSettings.AspirationWindowAlpha;
-                beta = bestEvaluation + Configuration.EngineSettings.AspirationWindowBeta;
 
                 //PrintPvTable(depth: depth);
                 ValidatePVTable();
@@ -187,6 +194,8 @@ public sealed partial class Engine
                 var maxDepthReached = _maxDepthReached.LastOrDefault(item => item != default);
 
                 int mate = default;
+                var bestEvaluationAbs = Math.Abs(bestEvaluation);
+                isMateDetected = bestEvaluationAbs > EvaluationConstants.PositiveCheckmateDetectionLimit;
                 if (isMateDetected)
                 {
                     mate = Utils.CalculateMateInX(bestEvaluation, bestEvaluationAbs);
