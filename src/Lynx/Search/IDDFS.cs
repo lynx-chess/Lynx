@@ -163,9 +163,7 @@ public sealed partial class Engine
                         _isFollowingPV = true;
                         bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta, isVerifyingNullMoveCutOff: true);
 
-                        isMateDetected = Math.Abs(bestEvaluation) > EvaluationConstants.PositiveCheckmateDetectionLimit;
-
-                        if (isMateDetected || (alpha < bestEvaluation && beta > bestEvaluation))
+                        if (alpha < bestEvaluation && beta > bestEvaluation)
                         {
                             break;
                         }
@@ -174,8 +172,9 @@ public sealed partial class Engine
 
                         window += window / 2;
 
-                        alpha = bestEvaluation - window;
-                        beta = bestEvaluation + window;
+                        alpha = Math.Max(bestEvaluation - window, MinValue);
+                        beta = Math.Min(bestEvaluation + window, MaxValue);
+
                         //if (alpha >= bestEvaluation)     // Fail low
                         //{
                         //    alpha = bestEvaluation - window;
