@@ -126,7 +126,7 @@ public sealed partial class Engine
                     _killerMoves[1, d] = _previousKillerMoves[1, d + 2];
                 }
 
-                depth = lastSearchResult.Depth - 1;
+                depth = lastSearchResult.Depth + 1;
                 alpha = lastSearchResult.Alpha;
                 beta = lastSearchResult.Beta;
             }
