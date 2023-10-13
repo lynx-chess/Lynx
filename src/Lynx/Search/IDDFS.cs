@@ -120,7 +120,7 @@ public sealed partial class Engine
 
                 await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult));
 
-                for (int d = 1; d < Configuration.EngineSettings.MaxDepth - 2; ++d)
+                for (int d = 0; d < Configuration.EngineSettings.MaxDepth - 2; ++d)
                 {
                     _killerMoves[0, d] = _previousKillerMoves[0, d + 2];
                     _killerMoves[1, d] = _previousKillerMoves[1, d + 2];
