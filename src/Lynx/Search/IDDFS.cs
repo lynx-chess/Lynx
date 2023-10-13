@@ -106,31 +106,33 @@ public sealed partial class Engine
                 return result;
             }
 
-            if (Game.MoveHistory.Count >= 2
-                && _previousSearchResult?.Moves.Count > 2
-                && _previousSearchResult.BestMove != default
-                && Game.MoveHistory[^2] == _previousSearchResult.Moves[0]
-                && Game.MoveHistory[^1] == _previousSearchResult.Moves[1])
-            {
-                _logger.Debug("Ponder hit");
+            //if (Game.MoveHistory.Count >= 2
+            //    && _previousSearchResult?.Moves.Count > 2
+            //    && _previousSearchResult.BestMove != default
+            //    && Game.MoveHistory[^2] == _previousSearchResult.Moves[0]
+            //    && Game.MoveHistory[^1] == _previousSearchResult.Moves[1])
+            //{
+            //    _logger.Debug("Ponder hit");
 
-                lastSearchResult = new SearchResult(_previousSearchResult);
+            //    lastSearchResult = new SearchResult(_previousSearchResult);
 
-                Array.Copy(_previousSearchResult.Moves.ToArray(), 2, _pVTable, 0, _previousSearchResult.Moves.Count - 2);
+            //    Array.Copy(_previousSearchResult.Moves.ToArray(), 2, _pVTable, 0, _previousSearchResult.Moves.Count - 2);
 
-                await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult));
+            //    await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult));
 
-                for (int d = 0; d < Configuration.EngineSettings.MaxDepth - 2; ++d)
-                {
-                    _killerMoves[0, d] = _previousKillerMoves[0, d + 2];
-                    _killerMoves[1, d] = _previousKillerMoves[1, d + 2];
-                }
+            //    for (int d = 0; d < Configuration.EngineSettings.MaxDepth - 2; ++d)
+            //    {
+            //        _killerMoves[0, d] = _previousKillerMoves[0, d + 2];
+            //        _killerMoves[1, d] = _previousKillerMoves[1, d + 2];
+            //    }
+            //    //Array.Clear(_killerMoves);
+            //    //Array.Clear(_historyMoves);
 
-                depth = lastSearchResult.Depth + 1;
-                alpha = lastSearchResult.Alpha;
-                beta = lastSearchResult.Beta;
-            }
-            else
+            //    depth = lastSearchResult.Depth + 1;
+            //    alpha = lastSearchResult.Alpha;
+            //    beta = lastSearchResult.Beta;
+            //}
+            //else
             {
                 Array.Clear(_killerMoves);
                 Array.Clear(_historyMoves);
