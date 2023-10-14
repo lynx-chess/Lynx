@@ -239,7 +239,7 @@ public sealed partial class Engine
         SearchResult finalSearchResult;
         if (lastSearchResult is null)
         {
-            finalSearchResult = new(default, bestEvaluation, depth, new List<Move>(), alpha, beta)
+            finalSearchResult = new(default, bestEvaluation, depth, new List<Move>(), alpha, beta);
         }
         else
         {
