@@ -127,8 +127,6 @@ public sealed partial class Engine
                 }
 
                 depth = lastSearchResult.Depth + 1; // Already reduced by 2
-                alpha = lastSearchResult.Alpha;
-                beta = lastSearchResult.Beta;
             }
             else
             {
@@ -155,8 +153,8 @@ public sealed partial class Engine
                     // 🔍 Aspiration Windows
                     var window = Configuration.EngineSettings.AspirationWindowDelta;
 
-                    alpha = Math.Max(MinValue, lastSearchResult.Evaluation - window);
-                    beta = Math.Min(MaxValue, lastSearchResult.Evaluation + window);
+                    alpha = Math.Max(MinValue, lastSearchResult.Evaluation - window);   // lastSearchResult.Alpha?
+                    beta = Math.Min(MaxValue, lastSearchResult.Evaluation + window);    // lastSearchResult.Beta?
 
                     while (true)
                     {
