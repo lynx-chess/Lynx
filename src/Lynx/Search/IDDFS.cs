@@ -150,6 +150,8 @@ public sealed partial class Engine
                 }
                 else
                 {
+                    var aspirationDepth = depth;
+
                     // 🔍 Aspiration Windows
                     var window = Configuration.EngineSettings.AspirationWindowDelta;
 
@@ -159,7 +161,7 @@ public sealed partial class Engine
                     while (true)
                     {
                         _isFollowingPV = true;
-                        bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta, isVerifyingNullMoveCutOff: true);
+                        bestEvaluation = NegaMax(depth: aspirationDepth, ply: 0, alpha, beta, isVerifyingNullMoveCutOff: true);
 
                         if (alpha < bestEvaluation && beta > bestEvaluation)
                         {
@@ -174,12 +176,12 @@ public sealed partial class Engine
                         {
                             alpha = Math.Max(bestEvaluation - window, MinValue);
                             beta = (alpha + beta) / 2;
-                            // TODO reset depth if it's reduced in the other case
+                            aspirationDepth = depth;
                         }
                         else if (beta <= bestEvaluation)     // Fail high
                         {
                             beta = Math.Min(bestEvaluation + window, MaxValue);
-                            // TODO reduce depth
+                            --aspirationDepth;  // TODO try updating only if outside of mate scores
                         }
                     }
                 }
