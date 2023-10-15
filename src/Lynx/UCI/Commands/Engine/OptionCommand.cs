@@ -129,7 +129,7 @@ public sealed class OptionCommand : EngineBaseCommand
         $"option name UCI_ShowWDL type check default {Configuration.EngineSettings.ShowWDL}",
         $"option name Hash type spin default {Configuration.EngineSettings.TranspositionTableSize} min 0 max 1024",
         $"option name OnlineTablebaseInRootPositions type check default {Configuration.EngineSettings.UseOnlineTablebaseInRootPositions}",
-        $"option name OnlineTablebaseInSearch type check default {Configuration.EngineSettings.UseOnlineTablebaseInSearch}",
+        //$"option name OnlineTablebaseInSearch type check default {Configuration.EngineSettings.UseOnlineTablebaseInSearch}",
         "option name Threads type spin default 1 min 1 max 1"
     );
 
