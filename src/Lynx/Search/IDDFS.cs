@@ -182,6 +182,10 @@ public sealed partial class Engine
                             beta = Math.Min(bestEvaluation + window, MaxValue);
                             --aspirationDepth;  // TODO try updating only if outside of mate scores
                         }
+                        else
+                        {
+                            aspirationDepth = depth;
+                        }
                     }
                 }
 
