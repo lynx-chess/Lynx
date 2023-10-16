@@ -237,9 +237,9 @@ public sealed class EngineSettings
 
     public int NMP_DepthReduction { get; set; } = 3;
 
-    public int AspirationWindowAlpha { get; set; } = 50;
+    public int AspirationWindowDelta { get; set; } = 50;
 
-    public int AspirationWindowBeta { get; set; } = 50;
+    public int AspirationWindowMinDepth { get; set; } = 6;
 
     #region Evaluation
 
