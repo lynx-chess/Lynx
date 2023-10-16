@@ -150,9 +150,8 @@ public sealed partial class Engine
                 }
                 else
                 {
-                    var aspirationDepth = depth;
-
                     // 🔍 Aspiration Windows
+                    var aspirationDepth = depth;
                     var window = Configuration.EngineSettings.AspirationWindowDelta;
 
                     alpha = Math.Max(MinValue, lastSearchResult.Evaluation - window);
@@ -168,7 +167,7 @@ public sealed partial class Engine
                             break;
                         }
 
-                        _logger.Debug("Eval ({0}) outside of aspiration window [{1}, {2}] (depth {3}, nodes {4})", bestEvaluation, alpha, beta, depth, _nodes);
+                        _logger.Debug("Eval ({0}) outside of aspiration window [{1}, {2}] (depth {3}, nodes {4})", bestEvaluation, alpha, beta, aspirationDepth, _nodes);
 
                         window += window / 2;
 
