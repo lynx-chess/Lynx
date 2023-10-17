@@ -156,10 +156,10 @@ public sealed partial class Engine
             }
 
             // History move or 0 if not found
-            return EvaluationConstants.HistoryMoveBaseScore + _historyMoves[move.Piece(), move.TargetSquare()];
+            return EvaluationConstants.MoveBaseScore + _historyMoves[move.Piece(), move.TargetSquare()];
         }
 
-        return default;
+        return EvaluationConstants.MoveBaseScore;
     }
 
     /// <summary>
