@@ -156,7 +156,7 @@ public sealed partial class Engine
             }
 
             // History move or 0 if not found
-            return _historyMoves[move.Piece(), move.TargetSquare()];
+            return EvaluationConstants.HistoryMoveBaseScore + _historyMoves[move.Piece(), move.TargetSquare()];
         }
 
         return default;
@@ -172,7 +172,7 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int ScoreHistoryMove(int score, int rawHistoryBonus)
     {
-        return EvaluationConstants.HistoryMoveOffset + score + rawHistoryBonus;
+        return score + rawHistoryBonus;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
