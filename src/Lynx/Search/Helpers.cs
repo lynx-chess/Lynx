@@ -8,8 +8,8 @@ namespace Lynx;
 public class SearchResult
 {
     public Move BestMove { get; init; }
-    public double Evaluation { get; init; }
-    public int TargetDepth { get; set; }
+    public int Evaluation { get; init; }
+    public int Depth { get; set; }
     public List<Move> Moves { get; init; }
     public int Alpha { get; init; }
     public int Beta { get; init; }
@@ -25,13 +25,15 @@ public class SearchResult
 
     public bool IsCancelled { get; set; }
 
-    public int HashfullPermill { get; set; }
+    public int HashfullPermill { get; set; } = -1;
 
-    public SearchResult(Move bestMove, double evaluation, int targetDepth, List<Move> moves, int alpha, int beta, int mate = default)
+    public (int WDLWin, int WDLDraw, int WDLLoss)? WDL { get; set; } = null;
+
+    public SearchResult(Move bestMove, int evaluation, int targetDepth, List<Move> moves, int alpha, int beta, int mate = default)
     {
         BestMove = bestMove;
         Evaluation = evaluation;
-        TargetDepth = targetDepth;
+        Depth = targetDepth;
         Moves = moves;
         Alpha = alpha;
         Beta = beta;
@@ -42,7 +44,7 @@ public class SearchResult
     {
         BestMove = previousSearchResult.Moves.ElementAtOrDefault(2);
         Evaluation = previousSearchResult.Evaluation;
-        TargetDepth = previousSearchResult.TargetDepth - 2;
+        Depth = previousSearchResult.Depth - 2;
         DepthReached = previousSearchResult.DepthReached - 2;
         Moves = previousSearchResult.Moves.Skip(2).ToList();
         Alpha = previousSearchResult.Alpha;
@@ -119,11 +121,10 @@ public sealed partial class Engine
             int targetPiece = (int)Piece.P;    // Important to initialize to P or p, due to en-passant captures
 
             var targetSquare = move.TargetSquare();
-            var oppositeSide = Utils.OppositeSide(Game.CurrentPosition.Side);
-            var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
-            var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
+            var offset = Utils.PieceOffset(Game.CurrentPosition.Side);
+            var oppositePawnIndex = (int)Piece.p - offset;
 
-            var limit = (int)Piece.K + oppositeSideOffset;
+            var limit = (int)Piece.k - offset;
             for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
             {
                 if (Game.CurrentPosition.PieceBitBoards[pieceIndex].GetBit(targetSquare))
@@ -159,6 +160,19 @@ public sealed partial class Engine
         }
 
         return default;
+    }
+
+    /// <summary>
+    /// Soft caps history score
+    /// Formula taken from EP discord, https://discord.com/channels/1132289356011405342/1132289356447625298/1141102105847922839
+    /// </summary>
+    /// <param name="score"></param>
+    /// <param name="rawHistoryBonus"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int ScoreHistoryMove(int score, int rawHistoryBonus)
+    {
+        return score + rawHistoryBonus - (score * Math.Abs(rawHistoryBonus) / EvaluationConstants.MaxHistoryMoveValue);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -213,10 +227,10 @@ public sealed partial class Engine
 
             if (!MoveExtensions.TryParseFromUCIString(
                move.UCIString(),
-               position.AllPossibleMoves(Game.MovePool),
+               MoveGenerator.GenerateAllMoves(position, Game.MovePool),
                out _))
             {
-                var message = $"Unexpected PV move {move.UCIString()} from position {position.FEN()}";
+                var message = $"Unexpected PV move {i}: {move.UCIString()} from position {position.FEN()}";
                 _logger.Error(message);
                 throw new AssertException(message);
             }
@@ -336,6 +350,21 @@ $" {369,-3}                                           {_pVTable[369].ToEPDString
 $" {427,-3}                                                  {_pVTable[427].ToEPDString(),-6} {_pVTable[428].ToEPDString(),-6} {_pVTable[429].ToEPDString(),-6} {_pVTable[430].ToEPDString(),-6}" + Environment.NewLine +
 $" {484,-3}                                                         {_pVTable[484].ToEPDString(),-6} {_pVTable[485].ToEPDString(),-6} {_pVTable[486].ToEPDString(),-6}" + Environment.NewLine +
 (target == -1 ? "------------------------------------------------------------------------------------" + Environment.NewLine : ""));
+    }
+
+    internal void PrintHistoryMoves()
+    {
+        int max = int.MinValue;
+
+        foreach (var item in _historyMoves)
+        {
+            if (item > max)
+            {
+                max = item;
+            }
+        }
+
+        _logger.Debug($"Max history: {max}");
     }
 
     #endregion

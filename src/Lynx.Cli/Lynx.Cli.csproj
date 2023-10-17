@@ -4,6 +4,8 @@
     <OutputType>Exe</OutputType>
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
+    <!--<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>-->
+    <InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);Microsoft.Extensions.Configuration.Binder.SourceGeneration</InterceptorsPreviewNamespaces>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Optimized.ToLower())'=='true'">
@@ -18,10 +20,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.0-preview.7.23375.6" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0-preview.7.23375.6" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0-preview.7.23375.6" />
-    <PackageReference Include="NLog.Extensions.Logging" Version="5.3.3" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.0-rc.2.23479.6" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0-rc.2.23479.6" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0-rc.2.23479.6" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="5.3.5" />
   </ItemGroup>
 
   <ItemGroup>
@@ -36,5 +38,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <Target Name="Rename" AfterTargets="Publish" Condition="'$(ExecutableName)'!='' and '$(ExecutableName)'!='$(AssemblyName)'">
+    <Message Text="Attempting to rename executable file from $(PublishDir)/$(AssemblyName) to $(PublishDir)/$(ExecutableName)" Importance="high" />
+    <Move SourceFiles="$(PublishDir)/$(AssemblyName)" DestinationFiles="$(PublishDir)/$(ExecutableName)" ContinueOnError="true" />
+    <Message Text="Attempting to rename executable file from $(PublishDir)\$(AssemblyName).exe to $(PublishDir)/$(ExecutableName).exe" Importance="high" />
+    <Move SourceFiles="$(PublishDir)/$(AssemblyName).exe" DestinationFiles="$(PublishDir)/$(ExecutableName).exe" ContinueOnError="true" />
+  </Target>
 
 </Project>

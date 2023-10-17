@@ -17,14 +17,14 @@ public class IncreaseDepthWhenInCheck : BaseTest
     ///     a b c d e f g h
     /// </summary>
     [Test]
-    public void DepthLimit()
+    public async Task DepthLimit()
     {
         Configuration.EngineSettings.MinDepth = 0;
 
         var engine = GetEngine("1r6/8/8/6kP/K7/5R1p/1q6/R5q1 w - - 0 2");
         Assert.AreEqual(Side.White, engine.Game.CurrentPosition.Side);
 
-        var searchResult = engine.BestMove(new GoCommand("go depth 1"));
+        var searchResult = await engine.BestMove(new GoCommand("go depth 1"));
 
         // In Quiescence search, which would be triggered after Rxg1+ without
         // the depth increase, Black would capture the pawn and get checkmated

@@ -43,7 +43,7 @@ jobs:
 
     strategy:
       matrix:
-        runtime-identifier: [win-x64, win-arm64, linux-x64, linux-arm64, linux-arm, osx-x64, osx.11.0-arm64, osx.12-arm64, osx.13-arm64]
+        runtime-identifier: [win-x64, win-arm64, linux-x64, linux-arm64, linux-arm, linux-musl-x64, osx-x64, osx-arm64]
         include:
           - runtime-identifier: win-x64
             os: windows-latest
@@ -55,18 +55,16 @@ jobs:
             os: ubuntu-latest
           - runtime-identifier: linux-arm
             os: ubuntu-latest
+          - runtime-identifier: linux-musl-x64
+            os: ubuntu-latest
           - runtime-identifier: osx-x64
-            os: ubuntu-latest
-          - runtime-identifier: osx.11.0-arm64
-            os: ubuntu-latest
-          - runtime-identifier: osx.12-arm64
-            os: ubuntu-latest
-          - runtime-identifier: osx.13-arm64
-            os: ubuntu-latest
+            os: macos-latest
+          - runtime-identifier: osx-arm64
+            os: macos-latest
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Inject slug/short variables
       uses: rlespinasse/github-slug-action@v3.x
@@ -150,7 +148,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GH_RELEASE }}
 
     - name: Configure git user
       run: |
@@ -171,7 +171,7 @@ jobs:
       if: github.event.inputs.should_commit_new_version == 'true'
       continue-on-error: true
       run: |
-        git switch ${{ env.GITHUB_REF_SLUG }}
+        git switch ${{ env.GITHUB_REF_NAME }}
         git status
         git commit -am "🚀 Release v${{ github.event.inputs.new_engine_version }}"
         git push
@@ -179,7 +179,7 @@ jobs:
     - name: Create git tag
       if: github.event.inputs.should_tag_new_version == 'true'
       run: |
-        git switch ${{ env.GITHUB_REF_SLUG }}
+        git switch ${{ env.GITHUB_REF_NAME }}
         git status
         git tag -a v${{ github.event.inputs.new_engine_version }} -m "v${{ github.event.inputs.new_engine_version }}"
         git push --tags

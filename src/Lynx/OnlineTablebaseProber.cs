@@ -45,11 +45,6 @@ public static class OnlineTablebaseProber
 
     public static async Task<(int MateScore, Move BestMove)> RootSearch(Position position, HashSet<long> positionHashHistory, int halfMovesWithoutCaptureOrPawnMove, CancellationToken cancellationToken)
     {
-        if (!Configuration.EngineSettings.UseOnlineTablebaseInRootPositions || position.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
-        {
-            return (NoResult, default);
-        }
-
         var fen = position.FEN(halfMovesWithoutCaptureOrPawnMove);
         _logger.Info("[{0}] Querying online tb for position {1}", nameof(RootSearch), fen);
 
@@ -119,7 +114,7 @@ public static class OnlineTablebaseProber
 
                 if (bestMoveList is not null)
                 {
-                    allPossibleMoves ??= position.AllPossibleMoves();
+                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position);
 
                     foreach (var move in bestMoveList)
                     {
@@ -177,7 +172,7 @@ public static class OnlineTablebaseProber
 
                 if (bestMoveList is not null)
                 {
-                    allPossibleMoves ??= position.AllPossibleMoves();
+                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position);
 
                     foreach (var move in bestMoveList)
                     {
@@ -237,7 +232,7 @@ public static class OnlineTablebaseProber
 
                 if (bestMoveList is not null)
                 {
-                    allPossibleMoves ??= position.AllPossibleMoves();
+                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position);
 
                     foreach (var move in bestMoveList)
                     {
@@ -294,7 +289,7 @@ public static class OnlineTablebaseProber
 
                 if (bestMoveList is not null)
                 {
-                    allPossibleMoves ??= position.AllPossibleMoves();
+                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position);
                     foreach (var move in bestMoveList)
                     {
                         if (!MoveExtensions.TryParseFromUCIString(move!.Uci, allPossibleMoves, out var moveCandidate))
@@ -334,7 +329,7 @@ public static class OnlineTablebaseProber
         }
 
         Move? parsedMove = 0;
-        if (bestMove?.Uci is not null && !MoveExtensions.TryParseFromUCIString(bestMove.Uci, position.AllPossibleMoves(), out parsedMove))
+        if (bestMove?.Uci is not null && !MoveExtensions.TryParseFromUCIString(bestMove.Uci, MoveGenerator.GenerateAllMoves(position), out parsedMove))
         {
             throw new AssertException($"{bestMove.Uci} should be parsable from position {fen}");
         }

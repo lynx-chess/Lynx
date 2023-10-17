@@ -1,5 +1,6 @@
 ﻿using NLog;
 using System.Diagnostics;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -15,14 +16,21 @@ public enum NodeType : byte
 
 public struct TranspositionTableElement
 {
-    private byte _depth;
-    //private byte _age;
-    private short _score;
-
     /// <summary>
     /// Full Zobrist key
     /// </summary>
     public long Key { get; set; }
+
+    /// <summary>
+    /// Best move found in a position. 0 if the position failed low (score <= alpha)
+    /// </summary>
+    public Move Move { get; set; }
+
+    private short _score;
+
+    private byte _depth;
+
+    //private byte _age;
 
     /// <summary>
     /// Node (position) type:
@@ -33,19 +41,14 @@ public struct TranspositionTableElement
     public NodeType Type { get; set; }
 
     /// <summary>
-    /// Position evaluation
-    /// </summary>
-    public int Score { readonly get => _score; set => _score = (short)value; }
-
-    /// <summary>
-    /// Best move found in a position. 0 if the position failed low (score <= alpha)
-    /// </summary>
-    public Move Move { get; set; }
-
-    /// <summary>
     /// How deep the recorded search went. For us this numberis targetDepth - ply
     /// </summary>
     public int Depth { readonly get => _depth; set => _depth = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref value, 1))[0]; }
+
+    /// <summary>
+    /// Position evaluation
+    /// </summary>
+    public int Score { readonly get => _score; set => _score = (short)value; }
 
     //public int Age { readonly get => _age; set => _age = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref value, 1))[0]; }
 
@@ -62,12 +65,24 @@ public struct TranspositionTableElement
 public static class TranspositionTableExtensions
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+    private static int _ttElementSize = Marshal.SizeOf(typeof(TranspositionTableElement));
 
-    public static int TranspositionTableArrayLength => Configuration.EngineSettings.TranspositionTableSize / Marshal.SizeOf(typeof(TranspositionTableElement));
+    public static (int Length, int Mask) CalculateLength(int size)
+    {
+        var sizeBytes = size * 1024 * 1024;
+        var ttLength = (int)BitOperations.RoundUpToPowerOf2((uint)(sizeBytes / _ttElementSize));
+        var ttLengthMb = ttLength / 1024 / 1024;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static int TranspositionTableIndex(Position position, TranspositionTable transpositionTable) =>
-        (int)(position.UniqueIdentifier % transpositionTable.Length);
+        var mask = ttLength - 1;
+
+        _logger.Info("Hash value:\t{0} MB", size);
+        _logger.Info("TT memory:\t{0} MB", ttLengthMb * _ttElementSize);
+        _logger.Info("TT length:\t{0} items", ttLength);
+        _logger.Info("TT entry:\t{0} bytes", _ttElementSize);
+        _logger.Info("TT mask:\t{0}", mask.ToString("X"));
+
+        return (ttLength, mask);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void ClearTranspositionTable(this TranspositionTable transpositionTable)
@@ -81,22 +96,23 @@ public static class TranspositionTableExtensions
     /// <summary>
     /// Checks the transposition table and, if there's a eval value that can be deducted from it of there's a previously recorded <paramref name="position"/>, it's returned. <see cref="EvaluationConstants.NoHashEntry"/> is returned otherwise
     /// </summary>
-    /// <param name="transpositionTable"></param>
+    /// <param name="tt"></param>
+    /// <param name="ttMask"></param>
     /// <param name="position"></param>
-    /// <param name="targetDepth"></param>
+    /// <param name="depth"></param>
     /// <param name="ply">Ply</param>
     /// <param name="alpha"></param>
     /// <param name="beta"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static (int Evaluation, Move BestMove) ProbeHash(this TranspositionTable transpositionTable, Position position, int targetDepth, int ply, int alpha, int beta)
+    public static (int Evaluation, Move BestMove) ProbeHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int alpha, int beta)
     {
         if (!Configuration.EngineSettings.TranspositionTableEnabled)
         {
             return (EvaluationConstants.NoHashEntry, default);
         }
 
-        var entry = transpositionTable[TranspositionTableIndex(position, transpositionTable)];
+        ref var entry = ref tt[position.UniqueIdentifier & ttMask];
 
         if (position.UniqueIdentifier != entry.Key)
         {
@@ -105,7 +121,7 @@ public static class TranspositionTableExtensions
 
         var eval = EvaluationConstants.NoHashEntry;
 
-        if (entry.Depth >= (targetDepth - ply) /*&& entry.Depth > 0*/)  // No TT cuoffs on QSearch
+        if (entry.Depth >= depth)
         {
             // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
             // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
@@ -126,22 +142,23 @@ public static class TranspositionTableExtensions
     /// <summary>
     /// Adds a <see cref="TranspositionTableElement"/> to the transposition tabke
     /// </summary>
-    /// <param name="transpositionTable"></param>
+    /// <param name="tt"></param>
+    /// <param name="ttMask"></param>
     /// <param name="position"></param>
-    /// <param name="targetDepth"></param>
+    /// <param name="depth"></param>
     /// <param name="ply">Ply</param>
     /// <param name="eval"></param>
     /// <param name="nodeType"></param>
     /// <param name="move"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void RecordHash(this TranspositionTable transpositionTable, Position position, int targetDepth, int ply, int eval, NodeType nodeType, Move? move = 0)
+    public static void RecordHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int eval, NodeType nodeType, Move? move = 0)
     {
         if (!Configuration.EngineSettings.TranspositionTableEnabled)
         {
             return;
         }
 
-        ref var entry = ref transpositionTable[TranspositionTableIndex(position, transpositionTable)];
+        ref var entry = ref tt[position.UniqueIdentifier & ttMask];
 
         // Avoid replacing Negamax entries with QSearch ones
         if (targetDepth - ply < 0 && nodeType != NodeType.Exact)
@@ -153,7 +170,7 @@ public static class TranspositionTableExtensions
         // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
         var score = RecalculateMateScores(eval, -ply);
 
-        var theoreticalDepth = targetDepth - ply;
+        var theoreticalDepth = depth;
 
         entry.Key = position.UniqueIdentifier;
         entry.Score = score;
@@ -175,14 +192,14 @@ public static class TranspositionTableExtensions
     /// Logic for when to pass +depth or -depth for the desired effect in https://www.talkchess.com/forum3/viewtopic.php?f=7&t=74411 and https://talkchess.com/forum3/viewtopic.php?p=861852#p861852
     /// </summary>
     /// <param name="score"></param>
-    /// <param name="depth"></param>
+    /// <param name="ply"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static int RecalculateMateScores(int score, int depth) => score +
+    internal static int RecalculateMateScores(int score, int ply) => score +
             score switch
             {
-                > EvaluationConstants.PositiveCheckmateDetectionLimit => -EvaluationConstants.CheckmateDepthFactor * depth,
-                < EvaluationConstants.NegativeCheckmateDetectionLimit => EvaluationConstants.CheckmateDepthFactor * depth,
+                > EvaluationConstants.PositiveCheckmateDetectionLimit => -EvaluationConstants.CheckmateDepthFactor * ply,
+                < EvaluationConstants.NegativeCheckmateDetectionLimit => EvaluationConstants.CheckmateDepthFactor * ply,
                 _ => 0
             };
 
@@ -202,7 +219,7 @@ public static class TranspositionTableExtensions
     }
 
     /// <summary>
-    /// TT occupancy per mill
+    /// Exact TT occupancy per mill
     /// </summary>
     /// <param name="transpositionTable"></param>
     /// <returns></returns>
@@ -210,6 +227,27 @@ public static class TranspositionTableExtensions
     public static int HashfullPermill(this TranspositionTable transpositionTable) => transpositionTable.Length > 0
         ? (int)(1000L * transpositionTable.PopulatedItemsCount() / transpositionTable.LongLength)
         : 0;
+
+    /// <summary>
+    /// Orders of magnitude faster than <see cref="HashfullPermill(TranspositionTableElement[])"/>
+    /// </summary>
+    /// <param name="transpositionTable"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int HashfullPermillApprox(this TranspositionTable transpositionTable)
+    {
+        int items = 0;
+        for (int i = 0; i < 1000; ++i)
+        {
+            if (transpositionTable[i].Key != default)
+            {
+                ++items;
+            }
+        }
+
+        //Console.WriteLine($"Real: {HashfullPermill(transpositionTable)}, estimated: {items}");
+        return items;
+    }
 
     [Conditional("DEBUG")]
     internal static void Stats(this TranspositionTable transpositionTable)

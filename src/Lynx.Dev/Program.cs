@@ -2,7 +2,6 @@
 using Lynx.Internal;
 using Lynx.Model;
 using System.Diagnostics;
-using System.Net.Http.Headers;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -33,7 +32,7 @@ using System.Threading.Channels;
 //_29_Move_List();
 //_32_Make_Move();
 //_42_Perft();
-//_43_Perft();
+//_43_Divide();
 //_44_ParseUCI();
 //_49_Rudimetary_Evaluation();
 //_50_MiniMax_AlphaBeta();
@@ -48,7 +47,8 @@ using System.Threading.Channels;
 //EnhancedPawnEvaluation();
 //RookEvaluation();
 //TranspositionTable();
-UnmakeMove();
+//UnmakeMove();
+PieceSquareTables();
 
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
 const string TrickyPosition = Constants.TrickyTestPositionFEN;
@@ -527,17 +527,19 @@ static void _42_Perft()
     {
         var sw = new Stopwatch();
         sw.Start();
-        var nodes = Perft.Results(pos, depth);
+        var result = Perft.Results(pos, depth);
         sw.Stop();
 
-        Console.WriteLine($"Depth {depth}\tNodes: {nodes}\tTime: {sw.ElapsedMilliseconds}ms");
+        Perft.PrintPerftResult(depth, result, Console.WriteLine);
     }
 }
 
-static void _43_Perft()
+static void _43_Divide()
 {
-    Perft.Divide(new Position(Constants.InitialPositionFEN), 5);
-    Perft.Divide(new Position(TrickyPosition), 5);
+    var result = Perft.Divide(new Position(Constants.InitialPositionFEN), 5, Console.WriteLine);
+    Perft.PrintPerftResult(5, result, Console.WriteLine);
+    result = Perft.Divide(new Position(TrickyPosition), 5, Console.WriteLine);
+    Perft.PrintPerftResult(5, result, Console.WriteLine);
 }
 
 static void _44_ParseUCI()
@@ -667,7 +669,7 @@ static void _54_ScoreMove()
 
     var engine = new Engine(Channel.CreateBounded<string>(new BoundedChannelOptions(100) { SingleReader = true, SingleWriter = false }));
     engine.SetGame(new(position));
-    foreach (var move in position.AllCapturesMoves())
+    foreach (var move in MoveGenerator.GenerateAllMoves(position, capturesOnly: true))
     {
         Console.WriteLine($"{move} {engine.ScoreMove(move, default, default)}");
     }
@@ -676,7 +678,7 @@ static void _54_ScoreMove()
     position.Print();
 
     engine.SetGame(new(position));
-    foreach (var move in position.AllCapturesMoves())
+    foreach (var move in MoveGenerator.GenerateAllMoves(position, capturesOnly: true))
     {
         Console.WriteLine($"{move} {engine.ScoreMove(move, default, default)}");
     }
@@ -687,7 +689,7 @@ static void ZobristTable()
     var pos = new Position(KillerPosition);
     var zobristTable = InitializeZobristTable();
     var hash = CalculatePositionHash(zobristTable, pos);
-    var updatedHash = UpdatePositionHash(zobristTable, hash, pos.AllPossibleMoves().First());
+    var updatedHash = UpdatePositionHash(zobristTable, hash, MoveGenerator.GenerateAllMoves(pos).First());
 
     Console.WriteLine(updatedHash);
 }
@@ -1009,7 +1011,32 @@ static void RookEvaluation()
 
 static void TranspositionTable()
 {
-    var transpositionTable = new TranspositionTableElement[Configuration.EngineSettings.TranspositionTableSize];
+    static void TesSize(int size)
+    {
+        Console.WriteLine("Hash: {0} MB", size);
+        var (length, mask) = TranspositionTableExtensions.CalculateLength(size);
+
+        var lengthMb = length / 1024 / 1024;
+
+        Console.WriteLine("TT memory: {0} MB", lengthMb * Marshal.SizeOf(typeof(TranspositionTableElement)));
+        Console.WriteLine("TT array length: {0}MB, (0x{1}, {2} items)", lengthMb, length.ToString("X"), length);
+        Console.WriteLine("TT mask: 0x{0} ({1})\n", mask.ToString("X"), Convert.ToString(mask, 2));
+    }
+
+    Console.WriteLine($"{nameof(TranspositionTableElement)} size: {Marshal.SizeOf(typeof(TranspositionTableElement))} bytes\n");
+
+    TesSize(2);
+    TesSize(4);
+    TesSize(16);
+    TesSize(32);
+    TesSize(64);
+    TesSize(128);
+    TesSize(256);
+    TesSize(512);
+    TesSize(1024);
+
+    var (mask, length) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
+    var transpositionTable = new TranspositionTableElement[length];
     var position = new Position(Constants.InitialPositionFEN);
     position.Print();
     Console.WriteLine($"Hash: {position.UniqueIdentifier}");
@@ -1017,7 +1044,7 @@ static void TranspositionTable()
     var hashKey = position.UniqueIdentifier % 0x400000;
     Console.WriteLine(hashKey);
 
-    var hashKey2 = TranspositionTableExtensions.TranspositionTableIndex(position, transpositionTable);
+    var hashKey2 = position.UniqueIdentifier & mask;
     Console.WriteLine(hashKey2);
 
     transpositionTable.ClearTranspositionTable();
@@ -1025,20 +1052,20 @@ static void TranspositionTable()
     //transpositionTable.RecordHash(position, depth: 3, maxDepth: 5, move: 1234, eval: +5, nodeType: NodeType.Alpha);
     //var entry = transpositionTable.ProbeHash(position, maxDepth: 5, depth: 3, alpha: 1, beta: 2);
 
-    transpositionTable.RecordHash(position, targetDepth: 5, ply: 3, eval: +19, nodeType: NodeType.Alpha, move: 1234);
-    var entry = transpositionTable.ProbeHash(position, targetDepth: 5, ply: 3, alpha: 20, beta: 30);
+    transpositionTable.RecordHash(mask, position, depth: 5, ply: 3, eval: +19, nodeType: NodeType.Alpha, move: 1234);
+    var entry = transpositionTable.ProbeHash(mask, position, depth: 5, ply: 3, alpha: 20, beta: 30);
     Console.WriteLine(entry); // Expected 20
 
-    transpositionTable.RecordHash(position, targetDepth: 5, ply: 3, eval: +21, nodeType: NodeType.Alpha, move: 1234);
-    entry = transpositionTable.ProbeHash(position, targetDepth: 5, ply: 3, alpha: 20, beta: 30);
+    transpositionTable.RecordHash(mask, position, depth: 5, ply: 3, eval: +21, nodeType: NodeType.Alpha, move: 1234);
+    entry = transpositionTable.ProbeHash(mask, position, depth: 5, ply: 3, alpha: 20, beta: 30);
     Console.WriteLine(entry); // Expected 12_345_678
 
-    transpositionTable.RecordHash(position, targetDepth: 5, ply: 3, eval: +29, nodeType: NodeType.Beta, move: 1234);
-    entry = transpositionTable.ProbeHash(position, targetDepth: 5, ply: 3, alpha: 20, beta: 30);
+    transpositionTable.RecordHash(mask, position, depth: 5, ply: 3, eval: +29, nodeType: NodeType.Beta, move: 1234);
+    entry = transpositionTable.ProbeHash(mask, position, depth: 5, ply: 3, alpha: 20, beta: 30);
     Console.WriteLine(entry); // Expected 12_345_678
 
-    transpositionTable.RecordHash(position, targetDepth: 5, ply: 3, eval: +31, nodeType: NodeType.Beta, move: 1234);
-    entry = transpositionTable.ProbeHash(position, targetDepth: 5, ply: 3, alpha: 20, beta: 30);
+    transpositionTable.RecordHash(mask, position, depth: 5, ply: 3, eval: +31, nodeType: NodeType.Beta, move: 1234);
+    entry = transpositionTable.ProbeHash(mask, position, depth: 5, ply: 3, alpha: 20, beta: 30);
     Console.WriteLine(entry); // Expected 30
 }
 
@@ -1058,7 +1085,7 @@ static void UnmakeMove()
         var position = new Position(fen);
         Console.WriteLine($"**Position\t{position.FEN()}, Zobrist key {position.UniqueIdentifier}**");
 
-        var allMoves = position.AllPossibleMoves();
+        var allMoves = MoveGenerator.GenerateAllMoves(position);
 
         var oldZobristKey = position.UniqueIdentifier;
         foreach (var move in allMoves)
@@ -1089,5 +1116,34 @@ static void UnmakeMove()
         Console.WriteLine();
         Console.WriteLine();
     }
+}
 
+static void PieceSquareTables()
+{
+    PrintBitBoard(EvaluationConstants.MiddleGamePawnTable);
+    PrintBitBoard(EvaluationConstants.MiddleGamePawnTableBlack);
+
+    PrintBitBoard(EvaluationConstants.EndGamePawnTable);
+    PrintBitBoard(EvaluationConstants.EndGamePawnTableBlack);
+
+    static void PrintBitBoard(int[] bitboard)
+    {
+        for (var rank = 0; rank < 8; ++rank)
+        {
+            for (var file = 0; file < 8; ++file)
+            {
+                if (file == 0)
+                {
+                    Console.Write($"{8 - rank}  ");
+                }
+
+                var squareIndex = BitBoardExtensions.SquareIndex(rank, file);
+
+                Console.Write($" {bitboard[squareIndex]}\t");
+            }
+
+            Console.WriteLine();
+        }
+        Console.Write("\n    a\tb\tc\td\te\tf\tg\th\n\n\n");
+    }
 }

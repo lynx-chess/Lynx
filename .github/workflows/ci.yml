@@ -24,7 +24,7 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Inject slug/short variables
       uses: rlespinasse/github-slug-action@v3.x
@@ -62,7 +62,7 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Inject slug/short variables
       uses: rlespinasse/github-slug-action@v3.x
@@ -125,7 +125,7 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Inject slug/short variables
       uses: rlespinasse/github-slug-action@v3.x
@@ -147,8 +147,8 @@ jobs:
     - name: Build
       run: dotnet build -c ${{ matrix.configuration }} /p:DeterministicBuild=true
 
-    - name: Run CI tests
-      run: dotnet test -c ${{ matrix.configuration }} --no-build --collect:"XPlat Code Coverage" -v normal
+    - name: Run ${{ matrix.category }} tests
+      run: dotnet test -c ${{ matrix.configuration }} --no-build --collect:"XPlat Code Coverage" -v normal --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true" -- RunConfiguration.CollectSourceInformation=true
 
     - name: '[Ubuntu] Generate test coverage report'
       if: matrix.os == 'ubuntu-latest' && matrix.configuration == 'Release'
@@ -179,11 +179,11 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macOS-latest]
-        category: [Perft, LongRunning]
+        category: [LongRunning]
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
@@ -203,8 +203,73 @@ jobs:
       run: dotnet build -c Release
 
     - name: Run ${{ matrix.category }} tests
-      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal
+      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true" -- RunConfiguration.CollectSourceInformation=true
         # --collect:"XPlat Code Coverage" https://github.com/coverlet-coverage/coverlet/issues/1192
+
+  perft-tests:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+        category: [Perft]
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Nuget cache
+      uses: actions/cache@v3
+      with:
+        path:
+          ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Build
+      run: dotnet build -c Release
+
+    - name: Run ${{ matrix.category }} tests
+      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true" -- RunConfiguration.CollectSourceInformation=true
+        # --collect:"XPlat Code Coverage" https://github.com/coverlet-coverage/coverlet/issues/1192
+
+  other-tests:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+        category: [Configuration]
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Nuget cache
+      uses: actions/cache@v3
+      with:
+        path:
+          ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Build
+      run: dotnet build -c Release
+
+    - name: Run ${{ matrix.category }} tests
+      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal --collect:"XPlat Code Coverage" --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true" -- RunConfiguration.CollectSourceInformation=true
 
   winning-at-chess:
     runs-on: ${{ matrix.os }}
@@ -212,11 +277,11 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        category: [WinningAtChess_10seconds]
+        category: [WinningAtChess_FixedTime]
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
@@ -236,7 +301,7 @@ jobs:
       run: dotnet build -c Release
 
     - name: Run ${{ matrix.category }} tests
-      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal
+      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true" -- RunConfiguration.CollectSourceInformation=true
       continue-on-error: true
         # --collect:"XPlat Code Coverage" https://github.com/coverlet-coverage/coverlet/issues/1192
 
@@ -302,7 +367,7 @@ jobs:
   #    PROJECT_NAME: Lynx
 
   #  steps:
-  #  - uses: actions/checkout@v3
+  #  - uses: actions/checkout@v4
 
   #  - name: Setup .NET
   #    uses: actions/setup-dotnet@v3
@@ -322,7 +387,7 @@ jobs:
   #    run: dotnet build -c Release
 
   #  - name: Run non-parallelizable tests
-  #    run: dotnet test -c Release --no-build -v=normal --filter "TestCategory=NonParallelizable" --collect:"XPlat Code Coverage"
+  #    run: dotnet test -c Release --no-build -v=normal --filter "TestCategory=NonParallelizable" --collect:"XPlat Code Coverage" --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true" -- RunConfiguration.CollectSourceInformation=true
 
   #  - name: '[Ubuntu] Generate test coverage report'
   #    if: matrix.os == 'ubuntu-latest'

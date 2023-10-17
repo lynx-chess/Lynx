@@ -148,20 +148,18 @@ public class GeneratePawnMovesTest
         Assert.AreEqual(4, blackMoves.Count(m => m.TargetSquare() == (int)BoardSquare.g1));
     }
 
-    [TestCase("8/8/Q7/P7/8/8/8/8 w - b6 0 1")]    // We don't really check if there's a pawn there
-    [TestCase("8/8/Q7/P7/1p6/8/8/8 w - b6 0 1")]
-    [TestCase("8/8/8/8/p7/q7/8/8 b - b3 0 1")]    // We don't really check if there's a pawn there
-    [TestCase("8/8/8/1P6/p7/q7/8/8 b - b3 0 1")]
+    [TestCase("7k/8/p7/Pp6/8/Q7/8/7K w - b6 0 1")]
+    [TestCase("7k/8/q7/8/pP6/P7/8/7K b - b3 0 1")]
     public void EnPassant(string fen)
     {
         var position = new Position(fen);
         var moves = MoveGenerator.GeneratePawnMovesForReference(position, offset: Utils.PieceOffset(position.Side));
-        Assert.True(1 == moves.Count());
-        Assert.True(1 == moves.Count(m => m.IsEnPassant() && m.IsCapture()));
+        Assert.AreEqual(1,moves.Count());
+        Assert.AreEqual(1, moves.Count(m => m.IsEnPassant() && m.IsCapture()));
     }
 
-    [TestCase("8/8/8/P1P6/8/8/8/8 w - b6 0 1")]
-    [TestCase("8/8/8/8/p1p6/8/8/8 b - b3 0 1")]
+    [TestCase("7k/8/8/PpP5/8/Q7/8/7K w - b6 0 1")]
+    [TestCase("7k/8/q7/8/pPp5/8/8/7K b - b3 0 1")]
     public void DoubleEnPassant(string fen)
     {
         var position = new Position(fen);
@@ -175,8 +173,6 @@ public class GeneratePawnMovesTest
 #endif
     [TestCase("8/8/8/p1p1p1p1/PpPpPpPp/1P1P1P1P/8/8 w - - 0 1", Description = "Blocked position")]
     [TestCase("8/8/8/p1p1p1p1/PpPpPpPp/1P1P1P1P/8/8 b - - 0 1", Description = "Blocked position")]
-    [TestCase("8/8/Q7/P7/1p6/8/8/8 w - b3 0 1", Description = "Wrong EnPassant square")]
-    [TestCase("8/8/8/1P6/p7/q7/8/8 b - b6 0 1", Description = "Wrong EnPassant square")]
     [TestCase("8/8/8/N7/P7/1p6/8/8 w - - 0 1", Description = "Backwards/inverse capture")]
     [TestCase("8/8/8/1P6/p7/n7/8/8 b - - 0 1", Description = "Backwards/inverse capture")]
     public void ShouldNotGenerateMoves(string fen)

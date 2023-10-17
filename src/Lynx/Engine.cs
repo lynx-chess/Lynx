@@ -39,6 +39,8 @@ public sealed partial class Engine
         _searchCancellationTokenSource = new();
         _absoluteSearchCancellationTokenSource = new();
         _engineWriter = engineWriter;
+
+        InitializeTT();
     }
 
     internal void SetGame(Game game)
@@ -51,13 +53,10 @@ public sealed partial class Engine
         AverageDepth = 0;
         _isNewGameComing = true;
         _isNewGameCommandSupported = true;
-        if (Configuration.EngineSettings.TranspositionTableEnabled)
-        {
-            _transpositionTable = new TranspositionTableElement[TranspositionTableExtensions.TranspositionTableArrayLength];
-        }
+        InitializeTT();
     }
 
-    public void AdjustPosition(string rawPositionCommand)
+    public void AdjustPosition(ReadOnlySpan<char> rawPositionCommand)
     {
         Game = PositionCommand.ParseGame(rawPositionCommand);
         _isNewGameComing = false;
@@ -69,12 +68,12 @@ public sealed partial class Engine
         _isPondering = false;
     }
 
-    public SearchResult BestMove() => BestMove(null);
+    public async Task<SearchResult> BestMove() => await BestMove(null);
 
-    public SearchResult BestMove(GoCommand? goCommand)
+    public async Task<SearchResult> BestMove(GoCommand? goCommand)
     {
-        _searchCancellationTokenSource = new CancellationTokenSource();
-        _absoluteSearchCancellationTokenSource = new CancellationTokenSource();
+        _searchCancellationTokenSource = new();
+        _absoluteSearchCancellationTokenSource = new();
         int minDepth = Configuration.EngineSettings.MinDepth + 1;
         int? maxDepth = null;
         int? decisionTime = null;
@@ -94,15 +93,26 @@ public sealed partial class Engine
                 millisecondsIncrement = goCommand.BlackIncrement;
             }
 
+            maxDepth = Configuration.EngineSettings.MaxDepth;
+
             if (millisecondsLeft > 0)
             {
-                // Inspired by Alexandria: time overhead to avoid timing out in the engine-gui communication process
-                millisecondsLeft -= 50;
+                if (goCommand.MovesToGo == default)
+                {
+                    // Inspired by Alexandria: time overhead to avoid timing out in the engine-gui communication process
+                    millisecondsLeft -= 50;
+                    Math.Clamp(millisecondsLeft, 50, int.MaxValue); // Avoiding 0/negative values
 
-                Math.Clamp(millisecondsLeft, 50, int.MaxValue); // Avoiding 0/negative values
+                    // 1/30, suggested by Serdra (EP discord)
+                    decisionTime = Convert.ToInt32(Math.Min(0.5 * millisecondsLeft, (millisecondsLeft * 0.03333) + millisecondsIncrement));
+                }
+                else
+                {
+                    millisecondsLeft -= 500;
+                    Math.Clamp(millisecondsLeft, 50, int.MaxValue); // Avoiding 0/negative values
 
-                // Suggested by Serdra (EP discord)
-                decisionTime = Convert.ToInt32(Math.Min(0.5 * millisecondsLeft, millisecondsLeft * 0.03333 + millisecondsIncrement));
+                    decisionTime = Convert.ToInt32((millisecondsLeft / goCommand.MovesToGo) + millisecondsIncrement);
+                }
 
                 _logger.Info("Time to move: {0}s", 0.001 * decisionTime);
                 _searchCancellationTokenSource.CancelAfter(decisionTime!.Value);
@@ -136,7 +146,7 @@ public sealed partial class Engine
             maxDepth = Configuration.EngineSettings.DefaultMaxDepth;
         }
 
-        SearchResult resultToReturn = SearchBestMove(minDepth, maxDepth, decisionTime);
+        SearchResult resultToReturn = await SearchBestMove(minDepth, maxDepth, decisionTime);
 
         Game.ResetCurrentPositionToBeforeSearchState();
         if (resultToReturn.BestMove != default && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
@@ -144,30 +154,35 @@ public sealed partial class Engine
             Game.MakeMove(resultToReturn.BestMove);
         }
 
-        AverageDepth += (resultToReturn.TargetDepth - AverageDepth) / Math.Ceiling(0.5 * Game.MoveHistory.Count);
+        AverageDepth += (resultToReturn.Depth - AverageDepth) / Math.Ceiling(0.5 * Game.MoveHistory.Count);
 
         return resultToReturn;
     }
 
-    private SearchResult SearchBestMove(int minDepth, int? maxDepth, int? decisionTime)
+    private async Task<SearchResult> SearchBestMove(int minDepth, int? maxDepth, int? decisionTime)
     {
+        if (!Configuration.EngineSettings.UseOnlineTablebaseInRootPositions || Game.CurrentPosition.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
+        {
+            return (await IDDFS(minDepth, maxDepth, decisionTime))!;
+        }
+
         // Local copy of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove so that it doesn't interfere with regular search
         var currentHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
 
-
         var tasks = new Task<SearchResult?>[] {
-            ProbeOnlineTablebase(Game.CurrentPosition, new(Game.PositionHashHistory), currentHalfMovesWithoutCaptureOrPawnMove),  // Other copies of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove (same reason)
-            IDDFS(minDepth, maxDepth, decisionTime),
-        };
+                // Other copies of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove (same reason)
+                ProbeOnlineTablebase(Game.CurrentPosition, new(Game.PositionHashHistory),  Game.HalfMovesWithoutCaptureOrPawnMove),
+                IDDFS(minDepth, maxDepth, decisionTime)
+            };
 
-        var resultList = Task.WhenAll(tasks).Result;
+        var resultList = await Task.WhenAll(tasks);
         var searchResult = resultList[1];
         var tbResult = resultList[0];
 
         if (searchResult is not null)
         {
-            _logger.Info("Search evaluation result - eval: {0}, mate: {1}, depth: {2}, refutation: {3}",
-                searchResult.Evaluation, searchResult.Mate, searchResult.TargetDepth, string.Join(", ", searchResult.Moves.Select(m => m.ToMoveString())));
+            _logger.Info("Search evaluation result - eval: {0}, mate: {1}, depth: {2}, pv: {3}",
+                searchResult.Evaluation, searchResult.Mate, searchResult.Depth, string.Join(", ", searchResult.Moves.Select(m => m.ToMoveString())));
         }
 
         if (tbResult is not null)
@@ -178,14 +193,12 @@ public sealed partial class Engine
             if (searchResult?.Mate > 0 && searchResult.Mate <= tbResult.Mate && searchResult.Mate + currentHalfMovesWithoutCaptureOrPawnMove < 96)
             {
                 _logger.Info("Relying on search result mate line due to dtm match and low enough dtz");
-                ++searchResult.TargetDepth;
+                ++searchResult.Depth;
                 tbResult = null;
             }
         }
 
-        return tbResult
-            ?? searchResult
-                ?? throw new AssertException("Both search and online tb proving results are null. At least search one is always expected to have a value");
+        return tbResult ?? searchResult!;
     }
 
     internal double CalculateDecisionTime(int movesToGo, int millisecondsLeft, int millisecondsIncrement)
@@ -250,11 +263,12 @@ public sealed partial class Engine
     {
         _isPondering = goCommand.Ponder;
         IsSearching = true;
+
         Task.Run(async () =>
         {
             try
             {
-                var searchResult = BestMove(goCommand);
+                var searchResult = await BestMove(goCommand);
                 _moveToPonder = searchResult.Moves.Count >= 2 ? searchResult.Moves[1] : null;
                 await _engineWriter.WriteAsync(BestMoveCommand.BestMove(searchResult.BestMove, _moveToPonder));
             }
@@ -270,5 +284,14 @@ public sealed partial class Engine
     {
         _absoluteSearchCancellationTokenSource.Cancel();
         IsSearching = false;
+    }
+
+    private void InitializeTT()
+    {
+        if (Configuration.EngineSettings.TranspositionTableEnabled)
+        {
+            (int ttLength, _ttMask) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
+            _tt = new TranspositionTableElement[ttLength];
+        }
     }
 }

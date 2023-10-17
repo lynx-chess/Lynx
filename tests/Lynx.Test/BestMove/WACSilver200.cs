@@ -9,16 +9,16 @@ namespace Lynx.Test.BestMove;
 public class WACSilver200 : BaseTest
 {
     [Explicit]
-    [Category(nameof(WinningAtChess_10seconds))]
+    [Category(nameof(WinningAtChess_FixedTime))]
     [TestCaseSource(typeof(WACData), nameof(WACData.Data))]
     /// <summary>
-    /// 10s, see first case of <see cref="TimeManagementTest"/>
+    /// 5s
     /// </summary>
     /// <param name="fen"></param>
     /// <param name="bestMove"></param>
-    public void WinningAtChess_10seconds(string fen, string bestMove, string id)
+    public async Task WinningAtChess_FixedTime(string fen, string bestMove, string id)
     {
-        VerifyBestMove(fen, bestMove, id, new GoCommand($"go btime {2_000} wtime {2_000} winc {11_111} binc {11_111} movestogo {1}"));
+        await VerifyBestMove(fen, bestMove, id, new GoCommand("go wtime 5500 btime 5500 winc 0 binc 0 movestogo 1"));
     }
 
     [Explicit]
@@ -29,22 +29,22 @@ public class WACSilver200 : BaseTest
     /// </summary>
     /// <param name="fen"></param>
     /// <param name="bestMove"></param>
-    public void WinningAtChess_DefaultSearchDepth(string fen, string bestMove, string id)
+    public async Task WinningAtChess_DefaultSearchDepth(string fen, string bestMove, string id)
     {
-        VerifyBestMove(fen, bestMove, id, new GoCommand($"go depth {DefaultSearchDepth}"));
+        await VerifyBestMove(fen, bestMove, id, new GoCommand($"go depth {DefaultSearchDepth}"));
     }
 
-    private static void VerifyBestMove(string fen, string bestMove, string id, GoCommand goCommand)
+    private static async Task VerifyBestMove(string fen, string bestMove, string id, GoCommand goCommand)
     {
         var engine = GetEngine(fen);
 
-        var bestResult = engine.BestMove(goCommand);
+        var bestResult = await engine.BestMove(goCommand);
 
         var bestMoveArray = bestMove.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         if (bestMoveArray.Length == 1)
         {
             var expectedMove = bestMoveArray[0].TrimEnd('+');
-            Assert.AreEqual(expectedMove, bestResult.BestMove.ToEPDString(), $"id {id} depth {bestResult.TargetDepth} seldepth {bestResult.TargetDepth} nodes {bestResult.Nodes}");
+            Assert.AreEqual(expectedMove, bestResult.BestMove.ToEPDString(), $"id {id} depth {bestResult.Depth} seldepth {bestResult.Depth} nodes {bestResult.Nodes}");
         }
         else if (bestMoveArray.Length == 2)
         {
@@ -53,7 +53,7 @@ public class WACSilver200 : BaseTest
                 bestMoveArray[0].TrimEnd('+') == bestResultGot
                 || bestMoveArray[1].TrimEnd('+') == bestResultGot
                 , $"id {id} Expected {bestMove} but got {bestResultGot} " +
-                $"depth {bestResult.TargetDepth} seldepth {bestResult.TargetDepth} nodes {bestResult.Nodes}");
+                $"depth {bestResult.Depth} seldepth {bestResult.Depth} nodes {bestResult.Nodes}");
         }
         else
         {

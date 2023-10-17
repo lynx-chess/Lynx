@@ -1,9 +1,12 @@
 ﻿using Lynx;
 using Lynx.Cli;
+using Lynx.UCI.Commands.Engine;
 using Microsoft.Extensions.Configuration;
 using NLog;
 using NLog.Extensions.Logging;
 using System.Threading.Channels;
+
+Console.WriteLine($"{IdCommand.EngineName} {IdCommand.GetVersion()} by {IdCommand.EngineAuthor}");
 
 #if DEBUG
 Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
@@ -17,10 +20,10 @@ var config = new ConfigurationBuilder()
     .AddEnvironmentVariables()
     .Build();
 
-config.GetRequiredSection(nameof(EngineSettings)).Bind(Configuration.EngineSettings);
-config.GetRequiredSection(nameof(GeneralSettings)).Bind(Configuration.GeneralSettings);
+config.GetSection(nameof(EngineSettings)).Bind(Configuration.EngineSettings);
+config.GetSection(nameof(GeneralSettings)).Bind(Configuration.GeneralSettings);
 
-if (!Configuration.GeneralSettings.DisableLogging)
+if (Configuration.GeneralSettings.EnableLogging)
 {
     LogManager.Configuration = new NLogLoggingConfiguration(config.GetSection("NLog"));
 }
@@ -34,8 +37,8 @@ CancellationToken cancellationToken = source.Token;
 var tasks = new List<Task>
 {
     Task.Run(() => new Writer(engineChannel).Run(cancellationToken)),
-    Task.Run(() => new LinxDriver(uciChannel, engineChannel, new Engine(engineChannel)).Run(cancellationToken)),
-    Task.Run(() => new Listener(uciChannel).Run(cancellationToken)),
+    Task.Run(() => new LynxDriver(uciChannel, engineChannel, new Engine(engineChannel)).Run(cancellationToken)),
+    Task.Run(() => new Listener(uciChannel).Run(cancellationToken, args)),
     uciChannel.Reader.Completion,
     engineChannel.Reader.Completion
 };
@@ -68,6 +71,7 @@ finally
     engineChannel.Writer.TryComplete();
     uciChannel.Writer.TryComplete();
     //source.Cancel();
+    LogManager.Shutdown(); // Flush and close down internal threads and timers
 }
 
 Thread.Sleep(2_000);

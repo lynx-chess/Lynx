@@ -418,8 +418,7 @@ public static class AttackGenerator
         int rank, file;
 
         // Next target square within the attack ray of a sliding piece
-        int targetRank = squareIndex / 8;
-        int targetFile = squareIndex % 8;
+        int targetRank = Math.DivRem(squareIndex, 8, out int targetFile);
 
         // Mask relevant bishop occupancy bits (squares)
 
@@ -489,8 +488,7 @@ public static class AttackGenerator
         int rank, file;
 
         // Next target square within the attack ray of a sliding piece
-        int targetRank = squareIndex / 8;
-        int targetFile = squareIndex % 8;
+        int targetRank = Math.DivRem(squareIndex, 8, out int targetFile);
 
         // Mask relevant rook occupancy bits (squares)
 
@@ -585,8 +583,7 @@ public static class AttackGenerator
         int rank, file;
 
         // Next target square within the attack ray of a sliding piece
-        int targetRank = squareIndex / 8;
-        int targetFile = squareIndex % 8;
+        int targetRank = Math.DivRem(squareIndex, 8, out int targetFile);
 
         // Generate bishop attacks
 
@@ -673,8 +670,7 @@ public static class AttackGenerator
         int rank, file;
 
         // Next target square within the attack ray of a sliding piece
-        int targetRank = squareIndex / 8;
-        int targetFile = squareIndex % 8;
+        int targetRank = Math.DivRem(squareIndex, 8, out int targetFile);
 
         // Generate rook attacks
 

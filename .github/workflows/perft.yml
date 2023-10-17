@@ -1,0 +1,87 @@
+name: Perft
+
+on:
+  workflow_dispatch:
+    inputs:
+      fen:
+        description: 'fen'
+        required: true
+        default: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+      depth:
+        description: 'depth'
+        required: true
+      divide:
+        description: 'Run also divide'
+        required: false
+        type: boolean
+
+jobs:
+
+  perft:
+    runs-on: ubuntu-latest
+
+    env:
+      DOTNET_VERSION: 8.0.x
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_TieredPGO: 1
+      DOTNET_ReadyToRun: 0
+      DOTNET_TC_QuickJitForLoops: 1
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Nuget cache
+      uses: actions/cache@v3
+      with:
+        path:
+          ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Build
+      run: dotnet build -c Release
+
+    - name: Run perft ${{ github.event.inputs.depth }} on ${{ github.event.inputs.fen }}
+      run: dotnet run -c Release --no-build "position fen ${{ github.event.inputs.fen }}" "perft ${{ github.event.inputs.depth }}" "quit"
+      working-directory: ./src/Lynx.Cli
+
+  divide:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.divide
+
+    env:
+      DOTNET_VERSION: 8.0.x
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_TieredPGO: 1
+      DOTNET_ReadyToRun: 0
+      DOTNET_TC_QuickJitForLoops: 1
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Nuget cache
+      uses: actions/cache@v3
+      with:
+        path:
+          ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Build
+      run: dotnet build -c Release
+
+    - name: Run divide ${{ github.event.inputs.depth }} on ${{ github.event.inputs.fen }}
+      run: dotnet run -c Release --no-build "position fen ${{ github.event.inputs.fen }}" "divide ${{ github.event.inputs.depth }}" "quit"
+      working-directory: ./src/Lynx.Cli

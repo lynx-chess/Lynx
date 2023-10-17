@@ -10,7 +10,7 @@
 /// * 1111      Both sides can castle both directions
 /// * 1001      Black king => only O-O-O; White king => only O-O
 /// </summary>
-public enum CastlingRights
+public enum CastlingRights : byte
 {
     WK = 1, WQ = 2, BK = 4, BQ = 8
 }

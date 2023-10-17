@@ -26,7 +26,7 @@ jobs:
       DOTNET_TC_QuickJitForLoops: 1
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
@@ -46,7 +46,13 @@ jobs:
       run: dotnet build -c Release
 
     - name: Run ${{ github.event.inputs.benchmark_name }} benchmark
+      if: matrix.os == 'windows-latest'
       run: dotnet run -c Release --no-build --filter '${{ github.event.inputs.benchmark_name }}'
+      working-directory: ./src/Lynx.Benchmark
+
+    - name: Run ${{ github.event.inputs.benchmark_name }} benchmark with sudo
+      if: matrix.os != 'windows-latest'
+      run: sudo dotnet run -c Release --no-build --filter '${{ github.event.inputs.benchmark_name }}'
       working-directory: ./src/Lynx.Benchmark
 
     - name: 'Upload ${{ matrix.os }} artifacts'

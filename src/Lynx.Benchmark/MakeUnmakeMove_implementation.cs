@@ -33,6 +33,8 @@
  *  | MakeUnmakeMove_WithZobristKey | (rnbq(...)1, 4) [61] |  29.83 ms |  0.586 ms |  0.651 ms |  0.78 |    0.03 |   4781.2500 |    9.54 MB |        0.22 |
  */
 
+#pragma warning disable S101, S1854 // Types should be named in PascalCase
+
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
 using NLog;
@@ -149,8 +151,8 @@ public class MakeUnmakeMove_implementation : BaseBenchmark
         {
         }
 
-        public MakeMovePosition((bool Success, BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, int Castle, BoardSquare EnPassant,
-            int HalfMoveClock, int FullMoveCounter) parsedFEN)
+        public MakeMovePosition((BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, int Castle, BoardSquare EnPassant,
+            int HalfMoveClock/*, int FullMoveCounter*/) parsedFEN)
         {
             PieceBitBoards = parsedFEN.PieceBitBoards;
             OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
@@ -777,7 +779,7 @@ public class MakeUnmakeMove_implementation : BaseBenchmark
         /// </summary>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal bool IsValid()
+        internal readonly bool IsValid()
         {
             var kingBitBoard = PieceBitBoards[(int)Piece.K + Utils.PieceOffset(Side)];
             var kingSquare = kingBitBoard == default ? -1 : kingBitBoard.GetLS1BIndex();
@@ -796,7 +798,7 @@ public class MakeUnmakeMove_implementation : BaseBenchmark
         /// </summary>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool WasProduceByAValidMove()
+        public readonly bool WasProduceByAValidMove()
         {
             var oppositeKingBitBoard = PieceBitBoards[(int)Piece.K + Utils.PieceOffset((Side)Utils.OppositeSide(Side))];
             var oppositeKingSquare = oppositeKingBitBoard == default ? -1 : oppositeKingBitBoard.GetLS1BIndex();
@@ -805,7 +807,7 @@ public class MakeUnmakeMove_implementation : BaseBenchmark
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IEnumerable<Move> AllPossibleMoves(Move[]? movePool = null) => MakeMoveMoveGenerator.GenerateAllMoves(this, movePool);
+        public readonly IEnumerable<Move> AllPossibleMoves(Move[]? movePool = null) => MakeMoveMoveGenerator.GenerateAllMoves(this, movePool);
     }
 
     public readonly struct MakeMoveGameState
@@ -990,7 +992,6 @@ public class MakeUnmakeMove_implementation : BaseBenchmark
             (int origin, BitBoard _) => MakeMoveAttacks.KnightAttacks[origin],
             (int origin, BitBoard occupancy) => MakeMoveAttacks.BishopAttacks(origin, occupancy),
             (int origin, BitBoard occupancy) => MakeMoveAttacks.RookAttacks(origin, occupancy),
-            // TODO try to improve performance by re-using bishop and rook attacks
             (int origin, BitBoard occupancy) => MakeMoveAttacks.QueenAttacks(origin, occupancy),
             (int origin, BitBoard _) => MakeMoveAttacks.KingAttacks[origin],
 
@@ -998,7 +999,6 @@ public class MakeUnmakeMove_implementation : BaseBenchmark
             (int origin, BitBoard _) => MakeMoveAttacks.KnightAttacks[origin],
             (int origin, BitBoard occupancy) => MakeMoveAttacks.BishopAttacks(origin, occupancy),
             (int origin, BitBoard occupancy) => MakeMoveAttacks.RookAttacks(origin, occupancy),
-            // TODO try to improve performance by re-using bishop and rook attacks
             (int origin, BitBoard occupancy) => MakeMoveAttacks.QueenAttacks(origin, occupancy),
             (int origin, BitBoard _) => MakeMoveAttacks.KingAttacks[origin],
         };
@@ -1405,3 +1405,5 @@ public class MakeUnmakeMove_implementation : BaseBenchmark
 
     #endregion
 }
+
+#pragma warning restore S101, S1854 // Types should be named in PascalCase

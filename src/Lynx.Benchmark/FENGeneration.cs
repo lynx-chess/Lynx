@@ -212,7 +212,7 @@ public class FENGeneration : BaseBenchmark
     [ArgumentsSource(nameof(Data))]
     public string Struct_FENCalculatedOnTheFly(string fen)
     {
-        var moves = new Position(fen).AllPossibleMoves();
+        var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         var position = new StructCustomPosition(fen);
         var newPosition = new StructCustomPosition(position, moves.First());
@@ -223,7 +223,7 @@ public class FENGeneration : BaseBenchmark
     [ArgumentsSource(nameof(Data))]
     public string Struct_FENCalculatedWithinTheMoveConstructor(string fen)
     {
-        var moves = new Position(fen).AllPossibleMoves();
+        var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         var position = new StructCustomPosition(fen);
         var newPosition = new StructCustomPosition(position, moves.First(), default);
@@ -235,7 +235,7 @@ public class FENGeneration : BaseBenchmark
     [ArgumentsSource(nameof(Data))]
     public string ReadonlyStruct_FENCalculatedOnTheFly(string fen)
     {
-        var moves = new Position(fen).AllPossibleMoves();
+        var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         var position = new ReadonlyStructCustomPosition(fen);
         var newPosition = new ReadonlyStructCustomPosition(position, moves.First());
@@ -247,7 +247,7 @@ public class FENGeneration : BaseBenchmark
     [ArgumentsSource(nameof(Data))]
     public string ReadonlyStruct_FENCalculatedWithinTheMoveConstructor(string fen)
     {
-        var moves = new Position(fen).AllPossibleMoves();
+        var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         var position = new ReadonlyStructCustomPosition(fen);
         var newPosition = new ReadonlyStructCustomPosition(position, moves.First(), default);
@@ -259,7 +259,7 @@ public class FENGeneration : BaseBenchmark
     [ArgumentsSource(nameof(Data))]
     public string Class_FENCalculatedOnTheFly(string fen)
     {
-        var moves = new Position(fen).AllPossibleMoves();
+        var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         var position = new ClassCustomPosition(fen);
         var newPosition = new ClassCustomPosition(position, moves.First());
@@ -271,7 +271,7 @@ public class FENGeneration : BaseBenchmark
     [ArgumentsSource(nameof(Data))]
     public string Class_FENCalculatedWithinTheMoveConstructor(string fen)
     {
-        var moves = new Position(fen).AllPossibleMoves();
+        var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         var position = new ClassCustomPosition(fen);
         var newPosition = new ClassCustomPosition(position, moves.First(), default);
@@ -283,7 +283,7 @@ public class FENGeneration : BaseBenchmark
     [ArgumentsSource(nameof(Data))]
     public string RecordClass_FENCalculatedOnTheFly(string fen)
     {
-        var moves = new Position(fen).AllPossibleMoves();
+        var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         var position = new RecordClassCustomPosition(fen);
         var newPosition = new RecordClassCustomPosition(position, moves.First());
@@ -295,7 +295,7 @@ public class FENGeneration : BaseBenchmark
     [ArgumentsSource(nameof(Data))]
     public string RecordClass_FENCalculatedWithinTheMoveConstructor(string fen)
     {
-        var moves = new Position(fen).AllPossibleMoves();
+        var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         var position = new RecordClassCustomPosition(fen);
         var newPosition = new RecordClassCustomPosition(position, moves.First(), default);
@@ -307,7 +307,7 @@ public class FENGeneration : BaseBenchmark
     [ArgumentsSource(nameof(Data))]
     public string RecordStruct_FENCalculatedOnTheFly(string fen)
     {
-        var moves = new Position(fen).AllPossibleMoves();
+        var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         var position = new RecordStructCustomPosition(fen);
         var newPosition = new RecordStructCustomPosition(position, moves.First());
@@ -319,7 +319,7 @@ public class FENGeneration : BaseBenchmark
     [ArgumentsSource(nameof(Data))]
     public string RecordStruct_FENCalculatedWithinTheMoveConstructor(string fen)
     {
-        var moves = new Position(fen).AllPossibleMoves();
+        var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         var position = new RecordStructCustomPosition(fen);
         var newPosition = new RecordStructCustomPosition(position, moves.First(), default);
@@ -370,11 +370,6 @@ internal struct StructCustomPosition
         _fen = fen;
 
         var parsedFEN = FENParser.ParseFEN(fen);
-
-        if (!parsedFEN.Success)
-        {
-            _logger.Error("Error parsing FEN {0}", fen);
-        }
 
         PieceBitBoards = parsedFEN.PieceBitBoards;
         OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
@@ -724,11 +719,6 @@ internal readonly struct ReadonlyStructCustomPosition
         FEN = fen;
 
         var parsedFEN = FENParser.ParseFEN(fen);
-
-        if (!parsedFEN.Success)
-        {
-            _logger.Error("Error parsing FEN {0}", fen);
-        }
 
         PieceBitBoards = parsedFEN.PieceBitBoards;
         OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
@@ -1085,11 +1075,6 @@ internal class ClassCustomPosition
 
         var parsedFEN = FENParser.ParseFEN(fen);
 
-        if (!parsedFEN.Success)
-        {
-            _logger.Error("Error parsing FEN {0}", fen);
-        }
-
         PieceBitBoards = parsedFEN.PieceBitBoards;
         OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
         Side = parsedFEN.Side;
@@ -1443,11 +1428,6 @@ internal record class RecordClassCustomPosition
         _fen = fen;
 
         var parsedFEN = FENParser.ParseFEN(fen);
-
-        if (!parsedFEN.Success)
-        {
-            _logger.Error("Error parsing FEN {0}", fen);
-        }
 
         PieceBitBoards = parsedFEN.PieceBitBoards;
         OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
@@ -1803,11 +1783,6 @@ internal record struct RecordStructCustomPosition
 
         var parsedFEN = FENParser.ParseFEN(fen);
 
-        if (!parsedFEN.Success)
-        {
-            _logger.Error("Error parsing FEN {0}", fen);
-        }
-
         PieceBitBoards = parsedFEN.PieceBitBoards;
         OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
         Side = parsedFEN.Side;
@@ -2033,7 +2008,7 @@ internal record struct RecordStructCustomPosition
         _fen = FENHelpers.UpdateSecondPartOfFEN(fenSb, Side, Castle, EnPassant);
     }
 
-    private string CalculateFEN()
+    private readonly string CalculateFEN()
     {
         var sb = new StringBuilder(100);
 

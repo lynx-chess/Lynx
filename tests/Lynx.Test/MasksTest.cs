@@ -51,12 +51,12 @@ internal class MasksTest
 
     [TestCase(BoardSquare.e4, "3ppp2/3ppp2/3ppp2/3ppp2/8/8/8/8 w - - 0 1")]
     [TestCase(BoardSquare.e5, "3ppp2/3ppp2/3ppp2/8/8/8/8/8 w - - 0 1")]
-    [TestCase(BoardSquare.e7, "3ppp2/8/8/8/8/8/8/8 w - - 0 1")] // TODO makes sense?
-    [TestCase(BoardSquare.a7, "pp6/8/8/8/8/8/8/8 w - - 0 1")] // TODO makes sense?
+    [TestCase(BoardSquare.e7, "3ppp2/8/8/8/8/8/8/8 w - - 0 1")]
+    [TestCase(BoardSquare.a7, "pp6/8/8/8/8/8/8/8 w - - 0 1")]
     [TestCase(BoardSquare.a2, "pp6/pp6/pp6/pp6/pp6/pp6/8/8 w - - 0 1")]
     [TestCase(BoardSquare.h3, "6pp/6pp/6pp/6pp/6pp/8/8/8 w - - 0 1")]
-    [TestCase(BoardSquare.h1, "6pp/6pp/6pp/6pp/6pp/6pp/6pp/8 w - - 0 1")] // TODO makes senes
-    [TestCase(BoardSquare.h8, "8/8/8/8/8/8/8/8 w - - 0 1")] // TODO makes senes
+    [TestCase(BoardSquare.h1, "6pp/6pp/6pp/6pp/6pp/6pp/6pp/8 w - - 0 1")]
+    [TestCase(BoardSquare.h8, "8/8/8/8/8/8/8/8 w - - 0 1")]
     public void WhitePassedPawnMasks(BoardSquare square, string fen)
     {
         var position = new Position(fen);
@@ -69,12 +69,12 @@ internal class MasksTest
 
     [TestCase(BoardSquare.e4, "8/8/8/8/8/3ppp2/3ppp2/3ppp2 w - - 0 1")]
     [TestCase(BoardSquare.e5, "8/8/8/8/3ppp2/3ppp2/3ppp2/3ppp2 w - - 0 1")]
-    [TestCase(BoardSquare.e2, "8/8/8/8/8/8/8/3ppp2 w - - 0 1")] // TODO makes sense?
+    [TestCase(BoardSquare.e2, "8/8/8/8/8/8/8/3ppp2 w - - 0 1")]
     [TestCase(BoardSquare.a7, "8/8/pp6/pp6/pp6/pp6/pp6/pp6 w - - 0 1")]
-    [TestCase(BoardSquare.a2, "8/8/8/8/8/8/8/pp6 w - - 0 1")] // TODO makes sense?
+    [TestCase(BoardSquare.a2, "8/8/8/8/8/8/8/pp6 w - - 0 1")]
     [TestCase(BoardSquare.h3, "8/8/8/8/8/8/6pp/6pp w - - 0 1")]
-    [TestCase(BoardSquare.h8, "8/6pp/6pp/6pp/6pp/6pp/6pp/6pp w - - 0 1")] // TODO makes senes
-    [TestCase(BoardSquare.h1, "8/8/8/8/8/8/8/8 w - - 0 1")] // TODO makes senes
+    [TestCase(BoardSquare.h8, "8/6pp/6pp/6pp/6pp/6pp/6pp/6pp w - - 0 1")]
+    [TestCase(BoardSquare.h1, "8/8/8/8/8/8/8/8 w - - 0 1")]
     public void BlackPassedPawnMasks(BoardSquare square, string fen)
     {
         var position = new Position(fen);
