@@ -172,6 +172,7 @@ public static class TranspositionTableExtensions
 
         entry.Key = position.UniqueIdentifier;
         entry.Score = score;
+        entry.Depth = depth;
         entry.Move = move ?? 0;
         entry.Type = nodeType;
 

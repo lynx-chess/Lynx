@@ -454,6 +454,7 @@ public sealed partial class Engine
         }
 
         _tt.RecordHash(_ttMask, position, 0, ply, alpha, nodeType, bestMove);
+
         return alpha;
     }
 }

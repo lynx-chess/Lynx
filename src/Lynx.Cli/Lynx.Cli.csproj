@@ -6,7 +6,6 @@
     <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
     <!--<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>-->
     <InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);Microsoft.Extensions.Configuration.Binder.SourceGeneration</InterceptorsPreviewNamespaces>
-    <Features>InterceptorsPreview</Features>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Optimized.ToLower())'=='true'">
