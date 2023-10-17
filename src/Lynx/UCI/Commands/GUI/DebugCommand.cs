@@ -12,11 +12,28 @@ public sealed class DebugCommand : GUIBaseCommand
 {
     public const string Id = "debug";
 
-    public static bool Parse(string command)
+    /// <summary>
+    /// Parse debug command
+    /// </summary>
+    /// <param name="command"></param>
+    /// <returns>
+    /// true if debug command sent 'on'
+    /// false if debug command sent 'off'
+    /// <see cref="Configuration.IsDebug"/> if something else was sent
+    ///
+    /// </returns>
+    public static bool Parse(ReadOnlySpan<char> command)
     {
-        return string.Equals(
-            "on",
-            command.Split(' ', System.StringSplitOptions.RemoveEmptyEntries)[1],
-            System.StringComparison.OrdinalIgnoreCase);
+        const string on = "on";
+        const string off= "off";
+
+        Span<Range> items = stackalloc Range[2];
+        command.Split(items, ' ', StringSplitOptions.RemoveEmptyEntries);
+
+        var debugValue = command[items[1]];
+
+        return debugValue.Equals(on, StringComparison.OrdinalIgnoreCase)
+            || (!debugValue.Equals(off, StringComparison.OrdinalIgnoreCase)
+                && Configuration.IsDebug);
     }
 }

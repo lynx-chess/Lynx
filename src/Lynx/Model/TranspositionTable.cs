@@ -97,8 +97,9 @@ public static class TranspositionTableExtensions
     /// Checks the transposition table and, if there's a eval value that can be deducted from it of there's a previously recorded <paramref name="position"/>, it's returned. <see cref="EvaluationConstants.NoHashEntry"/> is returned otherwise
     /// </summary>
     /// <param name="tt"></param>
+    /// <param name="ttMask"></param>
     /// <param name="position"></param>
-    /// <param name="targetDepth"></param>
+    /// <param name="depth"></param>
     /// <param name="ply">Ply</param>
     /// <param name="alpha"></param>
     /// <param name="beta"></param>
@@ -142,8 +143,9 @@ public static class TranspositionTableExtensions
     /// Adds a <see cref="TranspositionTableElement"/> to the transposition tabke
     /// </summary>
     /// <param name="tt"></param>
+    /// <param name="ttMask"></param>
     /// <param name="position"></param>
-    /// <param name="targetDepth"></param>
+    /// <param name="depth"></param>
     /// <param name="ply">Ply</param>
     /// <param name="eval"></param>
     /// <param name="nodeType"></param>
@@ -207,7 +209,7 @@ public static class TranspositionTableExtensions
     }
 
     /// <summary>
-    /// TT occupancy per mill
+    /// Exact TT occupancy per mill
     /// </summary>
     /// <param name="transpositionTable"></param>
     /// <returns></returns>
@@ -215,6 +217,27 @@ public static class TranspositionTableExtensions
     public static int HashfullPermill(this TranspositionTable transpositionTable) => transpositionTable.Length > 0
         ? (int)(1000L * transpositionTable.PopulatedItemsCount() / transpositionTable.LongLength)
         : 0;
+
+    /// <summary>
+    /// Orders of magnitude faster than <see cref="HashfullPermill(TranspositionTableElement[])"/>
+    /// </summary>
+    /// <param name="transpositionTable"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int HashfullPermillApprox(this TranspositionTable transpositionTable)
+    {
+        int items = 0;
+        for (int i = 0; i < 1000; ++i)
+        {
+            if (transpositionTable[i].Key != default)
+            {
+                ++items;
+            }
+        }
+
+        //Console.WriteLine($"Real: {HashfullPermill(transpositionTable)}, estimated: {items}");
+        return items;
+    }
 
     [Conditional("DEBUG")]
     internal static void Stats(this TranspositionTable transpositionTable)

@@ -28,7 +28,7 @@ public sealed partial class Engine
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
             _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
-            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
+            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
         }
 
         _maxDepthReached[ply] = ply;
@@ -241,7 +241,10 @@ public sealed partial class Engine
                 // 🔍 History moves
                 if (!move.IsCapture())
                 {
-                    _historyMoves[move.Piece(), move.TargetSquare()] += ply << 2;
+                    var piece = move.Piece();
+                    var targetSquare = move.TargetSquare();
+
+                    _historyMoves[piece, targetSquare] = ScoreHistoryMove(_historyMoves[piece, targetSquare], ply << 2);
                 }
 
                 _pVTable[pvIndex] = move;
@@ -299,7 +302,7 @@ public sealed partial class Engine
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
             _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
-            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
+            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
         }
 
         var pvIndex = PVTable.Indexes[ply];
@@ -308,7 +311,7 @@ public sealed partial class Engine
 
         _maxDepthReached[ply] = ply;
 
-        var staticEvaluation = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
+        var staticEvaluation = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
 
         // Fail-hard beta-cutoff (updating alpha after this check)
         if (staticEvaluation >= beta)

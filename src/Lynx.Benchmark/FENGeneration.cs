@@ -371,11 +371,6 @@ internal struct StructCustomPosition
 
         var parsedFEN = FENParser.ParseFEN(fen);
 
-        if (!parsedFEN.Success)
-        {
-            _logger.Error("Error parsing FEN {0}", fen);
-        }
-
         PieceBitBoards = parsedFEN.PieceBitBoards;
         OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
         Side = parsedFEN.Side;
@@ -724,11 +719,6 @@ internal readonly struct ReadonlyStructCustomPosition
         FEN = fen;
 
         var parsedFEN = FENParser.ParseFEN(fen);
-
-        if (!parsedFEN.Success)
-        {
-            _logger.Error("Error parsing FEN {0}", fen);
-        }
 
         PieceBitBoards = parsedFEN.PieceBitBoards;
         OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
@@ -1085,11 +1075,6 @@ internal class ClassCustomPosition
 
         var parsedFEN = FENParser.ParseFEN(fen);
 
-        if (!parsedFEN.Success)
-        {
-            _logger.Error("Error parsing FEN {0}", fen);
-        }
-
         PieceBitBoards = parsedFEN.PieceBitBoards;
         OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
         Side = parsedFEN.Side;
@@ -1444,11 +1429,6 @@ internal record class RecordClassCustomPosition
 
         var parsedFEN = FENParser.ParseFEN(fen);
 
-        if (!parsedFEN.Success)
-        {
-            _logger.Error("Error parsing FEN {0}", fen);
-        }
-
         PieceBitBoards = parsedFEN.PieceBitBoards;
         OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
         Side = parsedFEN.Side;
@@ -1802,11 +1782,6 @@ internal record struct RecordStructCustomPosition
         _fen = fen;
 
         var parsedFEN = FENParser.ParseFEN(fen);
-
-        if (!parsedFEN.Success)
-        {
-            _logger.Error("Error parsing FEN {0}", fen);
-        }
 
         PieceBitBoards = parsedFEN.PieceBitBoards;
         OccupancyBitBoards = parsedFEN.OccupancyBitBoards;

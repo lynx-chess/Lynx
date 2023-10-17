@@ -1,5 +1,6 @@
 ﻿using Lynx.Model;
 using System.Collections.Immutable;
+using System.Collections.Frozen;
 
 namespace Lynx;
 
@@ -101,7 +102,7 @@ public static class Constants
     /// <summary>
     /// Covert ASCII character pieces to encoded constants
     /// </summary>
-    public static readonly IReadOnlyDictionary<char, Piece> PiecesByChar = new Dictionary<char, Piece>(12)
+    public static readonly FrozenDictionary<char, Piece> PiecesByChar = new Dictionary<char, Piece>(12)
     {
         ['P'] = Piece.P,
         ['N'] = Piece.N,
@@ -116,7 +117,7 @@ public static class Constants
         ['r'] = Piece.r,
         ['q'] = Piece.q,
         ['k'] = Piece.k,
-    };
+    }.ToFrozenDictionary();
 
     /// <summary>
     /// Relevant bishop occupancy bit count per square
@@ -323,7 +324,7 @@ public static class Constants
     public const string WhiteLongCastle = "e1c1";
     public const string BlackLongCastle = "e8c8";
 
-    public static readonly IReadOnlyDictionary<int, int> EnPassantCaptureSquares = new Dictionary<int, int>(16)
+    public static readonly FrozenDictionary<int, int> EnPassantCaptureSquares = new Dictionary<int, int>(16)
     {
         [(int)BoardSquare.a6] = (int)BoardSquare.a6 + 8,
         [(int)BoardSquare.b6] = (int)BoardSquare.b6 + 8,
@@ -342,7 +343,7 @@ public static class Constants
         [(int)BoardSquare.f3] = (int)BoardSquare.f3 - 8,
         [(int)BoardSquare.g3] = (int)BoardSquare.g3 - 8,
         [(int)BoardSquare.h3] = (int)BoardSquare.h3 - 8,
-    };
+    }.ToFrozenDictionary();
 
     /// <summary>
     /// https://github.com/maksimKorzh/chess_programming/blob/master/src/bbc/make_move_castling_rights/bbc.c#L1474

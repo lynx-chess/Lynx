@@ -1,91 +1,100 @@
 ﻿using Lynx.Model;
 using NLog;
-using System.Text.RegularExpressions;
+using System.Runtime.CompilerServices;
+
+using ParseResult = (ulong[] PieceBitBoards, ulong[] OccupancyBitBoards, Lynx.Model.Side Side, byte Castle, Lynx.Model.BoardSquare EnPassant,
+            int HalfMoveClock/*, int FullMoveCounter*/);
 
 namespace Lynx;
 
-public static partial class FENParser
+public static class FENParser
 {
-    [GeneratedRegex("(?<=^|\\/)[P|N|B|R|Q|K|p|n|b|r|q|k|\\d]{1,8}", RegexOptions.Compiled)]
-    private static partial Regex RanksRegex();
-
-    private static readonly Regex _ranksRegex = RanksRegex();
-
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    public static (bool Success, BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, byte Castle, BoardSquare EnPassant,
-        int HalfMoveClock, int FullMoveCounter) ParseFEN(string fen)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ParseResult ParseFEN(ReadOnlySpan<char> fen)
     {
         fen = fen.Trim();
 
-        var pieceBitBoards = new BitBoard[12] {
-                default, default, default, default,
-                default, default, default, default,
-                default, default, default, default};
-
-        var occupancyBitBoards = new BitBoard[3] { default, default, default };
+        var pieceBitBoards = new BitBoard[12];
+        var occupancyBitBoards = new BitBoard[3];
 
         bool success;
         Side side = Side.Both;
         byte castle = 0;
-        int halfMoveClock = 0, fullMoveCounter = 1;
+        int halfMoveClock = 0/*, fullMoveCounter = 1*/;
         BoardSquare enPassant = BoardSquare.noSquare;
 
         try
         {
-            MatchCollection matches;
-            (matches, success) = ParseBoard(fen, pieceBitBoards, occupancyBitBoards);
+            success = ParseBoard(fen, pieceBitBoards, occupancyBitBoards);
 
-            var unparsedString = fen[(matches[^1].Index + matches[^1].Length)..];
-            var parts = unparsedString.Split(" ", StringSplitOptions.RemoveEmptyEntries);
+            var unparsedStringAsSpan = fen[fen.IndexOf(' ')..];
+            Span<Range> parts = stackalloc Range[5];
+            var partsLength = unparsedStringAsSpan.Split(parts, ' ', StringSplitOptions.RemoveEmptyEntries);
 
-            if (parts.Length < 3)
+            if (partsLength < 3)
             {
                 throw new($"Error parsing second half (after board) of fen {fen}");
             }
 
-            side = ParseSide(parts[0]);
+            side = ParseSide(unparsedStringAsSpan[parts[0]]);
 
-            castle = ParseCastlingRights(parts[1]);
+            castle = ParseCastlingRights(unparsedStringAsSpan[parts[1]]);
 
-            (enPassant, success) = ParseEnPassant(parts[2], pieceBitBoards, side);
+            (enPassant, success) = ParseEnPassant(unparsedStringAsSpan[parts[2]], pieceBitBoards, side);
 
-            if (parts.Length < 4 || !int.TryParse(parts[3], out halfMoveClock))
+            if (partsLength < 4 || !int.TryParse(unparsedStringAsSpan[parts[3]], out halfMoveClock))
             {
                 _logger.Debug("No half move clock detected");
             }
 
-            if (parts.Length < 5 || !int.TryParse(parts[4], out fullMoveCounter))
-            {
-                _logger.Debug("No full move counter detected");
-            }
+            //if (partsLength < 5 || !int.TryParse(unparsedStringAsSpan[parts[4]], out fullMoveCounter))
+            //{
+            //    _logger.Debug("No full move counter detected");
+            //}
         }
         catch (Exception e)
         {
-            _logger.Error("Error parsing FEN string {0}", fen);
             _logger.Error(e.Message);
             success = false;
+            throw;
         }
 
-        return (success, pieceBitBoards, occupancyBitBoards, side, castle, enPassant, halfMoveClock, fullMoveCounter);
+        return success
+            ? (pieceBitBoards, occupancyBitBoards, side, castle, enPassant, halfMoveClock/*, fullMoveCounter*/)
+            : throw new AssertException($"Error parsing {fen.ToString()}");
     }
 
-    private static (MatchCollection Matches, bool Success) ParseBoard(string fen, BitBoard[] pieceBitBoards, BitBoard[] occupancyBitBoards)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool ParseBoard(ReadOnlySpan<char> fen, BitBoard[] pieceBitBoards, BitBoard[] occupancyBitBoards)
     {
         bool success = true;
-
         var rankIndex = 0;
-        var matches = _ranksRegex.Matches(fen);
+        var end = fen.IndexOf('/');
 
-        if (matches.Count != 8)
+        while (success && end != -1)
         {
-            return (matches, false);
+            var match = fen[..end];
+
+            ParseBoardSection(pieceBitBoards, ref success, rankIndex, match);
+            PopulateOccupancies(pieceBitBoards, occupancyBitBoards);
+
+            fen = fen[(end + 1)..];
+            end = fen.IndexOf('/');
+            ++rankIndex;
         }
 
-        foreach (var match in matches)
+        ParseBoardSection(pieceBitBoards, ref success, rankIndex, fen[..fen.IndexOf(' ')]);
+        PopulateOccupancies(pieceBitBoards, occupancyBitBoards);
+
+        return success;
+
+        static void ParseBoardSection(ulong[] pieceBitBoards, ref bool success, int rankIndex, ReadOnlySpan<char> boardfenSection)
         {
-            var fileIndex = 0;
-            foreach (var ch in ((Group)match).Value)
+            int fileIndex = 0;
+
+            foreach (var ch in boardfenSection)
             {
                 if (Constants.PiecesByChar.TryGetValue(ch, out Piece piece))
                 {
@@ -98,18 +107,12 @@ public static partial class FENParser
                 }
                 else
                 {
-                    _logger.Error("Unrecognized character in FEN: {0} (within {1})", ch, ((Group)match).Value);
+                    _logger.Error("Unrecognized character in FEN: {0} (within {1})", ch, boardfenSection.ToString());
                     success = false;
                     break;
                 }
             }
-
-            PopulateOccupancies(pieceBitBoards, occupancyBitBoards);
-
-            ++rankIndex;
         }
-
-        return (matches, success);
 
         static void PopulateOccupancies(BitBoard[] pieceBitBoards, BitBoard[] occupancyBitBoards)
         {
@@ -129,43 +132,45 @@ public static partial class FENParser
         }
     }
 
-    private static Side ParseSide(string sideString)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static Side ParseSide(ReadOnlySpan<char> side)
     {
-#pragma warning disable S3358 // Ternary operators should not be nested
-        bool isWhite = sideString.Equals("w", StringComparison.OrdinalIgnoreCase);
-
-        return isWhite || sideString.Equals("b", StringComparison.OrdinalIgnoreCase)
-            ? isWhite ? Side.White : Side.Black
-            : throw new($"Unrecognized side: {sideString}");
-#pragma warning restore S3358 // Ternary operators should not be nested
+        return side[0] switch
+        {
+            'w' or 'W' => Side.White,
+            'b' or 'B' => Side.Black,
+            _ => throw new($"Unrecognized side: {side}")
+        };
     }
 
-    private static byte ParseCastlingRights(string castleString)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static byte ParseCastlingRights(ReadOnlySpan<char> castling)
     {
         byte castle = 0;
 
-        foreach (var ch in castleString)
+        for (int i = 0; i < castling.Length; ++i)
         {
-            castle |= ch switch
+            castle |= castling[i] switch
             {
                 'K' => (byte)CastlingRights.WK,
                 'Q' => (byte)CastlingRights.WQ,
                 'k' => (byte)CastlingRights.BK,
                 'q' => (byte)CastlingRights.BQ,
                 '-' => castle,
-                _ => throw new($"Unrecognized castling char: {ch}")
+                _ => throw new($"Unrecognized castling char: {castling[i]}")
             };
         }
 
         return castle;
     }
 
-    private static (BoardSquare EnPassant, bool Success) ParseEnPassant(string enPassantString, BitBoard[] PieceBitBoards, Side side)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static (BoardSquare EnPassant, bool Success) ParseEnPassant(ReadOnlySpan<char> enPassantSpan, BitBoard[] PieceBitBoards, Side side)
     {
         bool success = true;
         BoardSquare enPassant = BoardSquare.noSquare;
 
-        if (Enum.TryParse(enPassantString, ignoreCase: true, out BoardSquare result))
+        if (Enum.TryParse(enPassantSpan, ignoreCase: true, out BoardSquare result))
         {
             enPassant = result;
 
@@ -173,7 +178,7 @@ public static partial class FENParser
             if (rank != 3 && rank != 6)
             {
                 success = false;
-                _logger.Error("Invalid en passant square: {0}", enPassantString);
+                _logger.Error("Invalid en passant square: {0}", enPassantSpan.ToString());
             }
 
             // Check that there's an actual pawn to be captured
@@ -190,13 +195,13 @@ public static partial class FENParser
             if (!pawnBitBoard.GetBit(pawnSquare))
             {
                 success = false;
-                _logger.Error("Invalid board: en passant square {0}, but no {1} pawn located in {2}", enPassantString, side, pawnSquare);
+                _logger.Error("Invalid board: en passant square {0}, but no {1} pawn located in {2}", enPassantSpan.ToString(), side, pawnSquare);
             }
         }
-        else if (enPassantString != "-")
+        else if (enPassantSpan[0] != '-')
         {
             success = false;
-            _logger.Error("Invalid en passant square: {0}", enPassantString);
+            _logger.Error("Invalid en passant square: {0}", enPassantSpan.ToString());
         }
 
         return (enPassant, success);
