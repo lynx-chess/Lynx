@@ -172,7 +172,7 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int ScoreHistoryMove(int score, int rawHistoryBonus)
     {
-        return EvaluationConstants.BaseHistoryMove + score + rawHistoryBonus;
+        return EvaluationConstants.HistoryMoveOffset + score + rawHistoryBonus;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
