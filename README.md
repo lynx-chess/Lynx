@@ -97,6 +97,8 @@ If you're a Linux user and are new to .NET ecosystem, the conversation in [this 
 
 - Check extensions [[1](https://www.chessprogramming.org/Check_Extensions)]
 
+- Razoring [[1](https://www.chessprogramming.org/Razoring)]
+
 ## Credits
 
 Lynx development wouldn't have been possible without:
