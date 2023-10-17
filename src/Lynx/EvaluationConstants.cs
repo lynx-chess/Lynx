@@ -319,7 +319,7 @@ public static class EvaluationConstants
     /// <summary>
     /// Negative offset to ensure history move scores don't reach other move ordering values
     /// </summary>
-    public const int MoveBaseScore = int.MinValue / 2;
+    public const int BaseMoveScore = int.MinValue / 2;
 
     /// <summary>
     /// Outside of the evaluation ranges (higher than any sensible evaluation, lower than <see cref="PositiveCheckmateDetectionLimit"/>)
