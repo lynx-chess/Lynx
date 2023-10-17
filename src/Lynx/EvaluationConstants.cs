@@ -308,15 +308,13 @@ public static class EvaluationConstants
     /// <summary>
     /// For MVVLVA
     /// </summary>
-    public const int CaptureMoveBaseScoreValue = 1_048_576;
+    public const int CaptureMoveBaseScoreValue = 100_000;
 
-    public const int FirstKillerMoveValue = 524_288;
+    public const int FirstKillerMoveValue = 9_000;
 
-    public const int SecondKillerMoveValue = 262_144;
+    public const int SecondKillerMoveValue = 8_000;
 
-    public const int PromotionMoveScoreValue = 131_072;
-
-    public const int MaxHistoryMoveValue = 8_192;
+    public const int PromotionMoveScoreValue = 7_000;
 
     /// <summary>
     /// Outside of the evaluation ranges (higher than any sensible evaluation, lower than <see cref="PositiveCheckmateDetectionLimit"/>)
