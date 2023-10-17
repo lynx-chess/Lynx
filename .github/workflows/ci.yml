@@ -277,7 +277,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        category: [WinningAtChess_10seconds]
+        category: [WinningAtChess_FixedTime]
       fail-fast: false
 
     steps:
