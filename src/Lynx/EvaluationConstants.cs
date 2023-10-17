@@ -301,9 +301,9 @@ public static class EvaluationConstants
     /// </summary>
     public const int NegativeCheckmateDetectionLimit = -27_000; // -CheckMateBaseEvaluation + (Constants.AbsoluteMaxDepth + 45) * DepthCheckmateFactor;
 
-    public const int PVMoveScoreValue = 4_194_304;
+    public const int PVMoveScoreValue = 200_000;
 
-    public const int TTMoveScoreValue = 2_097_152;
+    public const int TTMoveScoreValue = 190_000;
 
     /// <summary>
     /// For MVVLVA
@@ -319,7 +319,7 @@ public static class EvaluationConstants
     /// <summary>
     /// Negative offset to ensure history move scores don't reach other move ordering values
     /// </summary>
-    public const int BaseMoveScore = int.MinValue / 2;
+    public const int BaseMoveScore = 0;
 
     /// <summary>
     /// Outside of the evaluation ranges (higher than any sensible evaluation, lower than <see cref="PositiveCheckmateDetectionLimit"/>)
