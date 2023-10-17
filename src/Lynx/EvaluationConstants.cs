@@ -316,6 +316,8 @@ public static class EvaluationConstants
 
     public const int PromotionMoveScoreValue = 7_000;
 
+    public const int BaseHistoryMove = int.MinValue / 2;
+
     /// <summary>
     /// Outside of the evaluation ranges (higher than any sensible evaluation, lower than <see cref="PositiveCheckmateDetectionLimit"/>)
     /// </summary>
