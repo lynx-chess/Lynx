@@ -161,7 +161,7 @@ public static class TranspositionTableExtensions
         ref var entry = ref tt[position.UniqueIdentifier & ttMask];
 
         // Avoid replacing Negamax entries with QSearch ones
-        if (targetDepth - ply < 0 && nodeType != NodeType.Exact)
+        if (depth == 0 && entry.Depth > 0)
         {
             return;
         }
@@ -170,20 +170,16 @@ public static class TranspositionTableExtensions
         // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
         var score = RecalculateMateScores(eval, -ply);
 
-        var theoreticalDepth = depth;
-
         entry.Key = position.UniqueIdentifier;
         entry.Score = score;
         entry.Move = move ?? 0;
         entry.Type = nodeType;
 
-        // When in QSearch, depth doesn't really matter, since all positions will get 'resolved'
-        //if (theoreticalDepth <= 0)
+        // TODO
+        //if (depth <= 0)
         //{
-        //    theoreticalDepth = 0;
-        //    //entry.Move = 0;         // No TT moves on QSearch
+        //    entry.Move = 0;         // No TT moves on QSearch
         //}
-        entry.Depth = theoreticalDepth;
     }
 
     /// <summary>
