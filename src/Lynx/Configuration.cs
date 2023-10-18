@@ -225,9 +225,19 @@ public sealed class EngineSettings
 
     //public int DepthWhenLessThanMinMoveTime { get; set; } = 4;
 
-    public int MinElapsedTimeToConsiderStopSearching { get; set; } = 0;
+    //public int MinElapsedTimeToConsiderStopSearching { get; set; } = 0;
 
-    public double DecisionTimePercentageToStopSearching { get; set; } = 0.4;
+    //public double DecisionTimePercentageToStopSearching { get; set; } = 0.4;
+
+    /// <summary>
+    /// 1/30, suggested by Serdra (EP discord)
+    /// </summary>
+    public double SoftTimeBound { get; set; } = 0.03333;
+
+    /// <summary>
+    /// 1/4, suggested by MinusKelvin (EP discord)
+    /// </summary>
+    public double HardTimeBound { get; set; } = 0.25;
 
     public int LMR_MinFullDepthSearchedMoves { get; set; } = 4;
 
@@ -309,7 +319,7 @@ public sealed class EngineSettings
 
     public int Razoring_Depth1Bonus { get; set; } = 125;
 
-    public int Razoring_NotDepth1Bonus{ get; set; } = 175;
+    public int Razoring_NotDepth1Bonus { get; set; } = 175;
 }
 
 [JsonSourceGenerationOptions(

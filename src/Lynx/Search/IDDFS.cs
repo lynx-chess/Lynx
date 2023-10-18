@@ -284,12 +284,10 @@ public sealed partial class Engine
             }
 
             var elapsedMilliseconds = stopWatch.ElapsedMilliseconds;
-            var minTimeToConsiderStopSearching = Configuration.EngineSettings.MinElapsedTimeToConsiderStopSearching;
-            var decisionTimePercentageToStopSearching = Configuration.EngineSettings.DecisionTimePercentageToStopSearching;
-            if (decisionTime is not null && elapsedMilliseconds > minTimeToConsiderStopSearching && elapsedMilliseconds > decisionTimePercentageToStopSearching * decisionTime)
+            if (decisionTime is not null && elapsedMilliseconds > decisionTime)
             {
-                logger.Info("Stopping at depth {0} (nodes {1}): {2} > {3} (elapsed time > [{4}, {5} * decision time])",
-                    depth - 1, nodes, elapsedMilliseconds, decisionTimePercentageToStopSearching * decisionTime, minTimeToConsiderStopSearching, decisionTimePercentageToStopSearching);
+                logger.Info("Stopping at depth {0} (nodes {1}): {2} ms > {3} ms",
+                    depth - 1, nodes, elapsedMilliseconds, decisionTime);
                 return false;
             }
 

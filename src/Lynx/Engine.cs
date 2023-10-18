@@ -103,8 +103,7 @@ public sealed partial class Engine
                     millisecondsLeft -= 50;
                     Math.Clamp(millisecondsLeft, 50, int.MaxValue); // Avoiding 0/negative values
 
-                    // 1/30, suggested by Serdra (EP discord)
-                    decisionTime = Convert.ToInt32(Math.Min(0.5 * millisecondsLeft, (millisecondsLeft * 0.03333) + millisecondsIncrement));
+                    decisionTime = Convert.ToInt32(Math.Min(0.5 * millisecondsLeft, (millisecondsLeft * Configuration.EngineSettings.SoftTimeBound) + millisecondsIncrement));
                 }
                 else
                 {
@@ -114,8 +113,9 @@ public sealed partial class Engine
                     decisionTime = Convert.ToInt32((millisecondsLeft / goCommand.MovesToGo) + millisecondsIncrement);
                 }
 
-                _logger.Info("Time to move: {0}s", 0.001 * decisionTime);
-                _searchCancellationTokenSource.CancelAfter(decisionTime!.Value);
+                var hardTimeBound = Convert.ToInt32(millisecondsLeft * Configuration.EngineSettings.HardTimeBound);
+                _logger.Info("Time to move: {0}s, {1}s max", 0.001 * decisionTime, 0.001 * hardTimeBound);
+                _searchCancellationTokenSource.CancelAfter(hardTimeBound);
             }
             else if (goCommand.MoveTime > 0)
             {
