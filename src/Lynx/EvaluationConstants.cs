@@ -316,6 +316,8 @@ public static class EvaluationConstants
 
     public const int PromotionMoveScoreValue = 131_072;
 
+    public const int MaxHistoryMoveValue = 8_192;
+
     /// <summary>
     /// Negative offset to ensure history move scores don't reach other move ordering values
     /// </summary>
