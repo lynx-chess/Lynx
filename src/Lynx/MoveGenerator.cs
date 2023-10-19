@@ -6,7 +6,9 @@ namespace Lynx;
 
 public static class MoveGenerator
 {
+#if DEBUG
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+#endif
 
     private const int TRUE = 1;
 
@@ -294,13 +296,6 @@ public static class MoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int LegalMovesCount(Position position, Move[] movePool)
     {
-#if DEBUG
-        if (position.Side == Side.Both)
-        {
-            return false;
-        }
-#endif
-
         int legalMoveCounter = 0;
 
         foreach (var move in GenerateAllMoves(position, movePool))
