@@ -286,6 +286,38 @@ public static class MoveGenerator
             || IsAnyCastlingMoveValid(position, offset);
     }
 
+    /// <summary>
+    /// Counts legal moves from <paramref name="position"/>
+    /// </summary>
+    /// <param name="position"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int LegalMovesCount(Position position, Move[] movePool)
+    {
+#if DEBUG
+        if (position.Side == Side.Both)
+        {
+            return false;
+        }
+#endif
+
+        int legalMoveCounter = 0;
+
+        foreach (var move in GenerateAllMoves(position, movePool))
+        {
+            var gameState = position.MakeMove(move);
+
+            if (position.WasProduceByAValidMove())
+            {
+                ++legalMoveCounter;
+            }
+
+            position.UnmakeMove(move, gameState);
+        }
+
+        return legalMoveCounter;
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsAnyPawnMoveValid(Position position, int offset)
     {

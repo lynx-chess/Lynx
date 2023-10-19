@@ -586,9 +586,10 @@ public class Position
     /// Evaluates material and position in a NegaMax style.
     /// That is, positive scores always favour playing <see cref="Side"/>.
     /// </summary>
+    /// <param name="movePool"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int StaticEvaluation(int movesWithoutCaptureOrPawnMove)
+    public int StaticEvaluation(Move[]? movePool = null)
     {
         //var result = OnlineTablebaseProber.EvaluationSearch(this, movesWithoutCaptureOrPawnMove, cancellationToken);
         //Debug.Assert(result < EvaluationConstants.CheckMateBaseEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
@@ -599,6 +600,24 @@ public class Position
         //    return result;
         //}
 
+        var whitePerspectiveEval = TaperedStaticEvaluationFromWhitePerspective();
+
+        movePool ??= new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        whitePerspectiveEval += MoveGenerator.LegalMovesCount(this, movePool);
+
+        return Side == Side.White
+            ? whitePerspectiveEval
+            : -whitePerspectiveEval;
+    }
+
+    /// <summary>
+    /// Evaluates material and position based on game phase
+    /// and from <see cref="Side.White"/>'s perspective
+    /// </summary>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal int TaperedStaticEvaluationFromWhitePerspective()
+    {
         var pieceCount = new int[PieceBitBoards.Length];
 
         int middleGameScore = 0;
@@ -697,11 +716,7 @@ public class Position
         int endGamePhase = maxPhase - gamePhase;
         //_logger.Trace("Phase: {0}/24", gamePhase);
 
-        var eval = ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / maxPhase;
-
-        return Side == Side.White
-            ? eval
-            : -eval;
+        return ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / maxPhase;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

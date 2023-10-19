@@ -154,11 +154,11 @@ public class GameTest : BaseTest
         }
 
         newPosition = new Position(game.CurrentPosition, repeatedMoves[^1]);
-        Assert.False(game.IsThreefoldRepetition(newPosition));                      // Same position, but white not can't castle
+        Assert.False(game.IsThreefoldRepetition(newPosition));                      // Same position, but white can't castle
         Assert.DoesNotThrow(() => game.MakeMove(repeatedMoves[^1]));
         Assert.AreEqual(repeatedMoves.Count, game.MoveHistory.Count);
 
-        var eval = winningPosition.StaticEvaluation(default);
+        var eval = winningPosition.TaperedStaticEvaluationFromWhitePerspective();
         Assert.AreNotEqual(0, eval);
 
         Assert.DoesNotThrow(() => game.MakeMove(repeatedMoves[5]));
