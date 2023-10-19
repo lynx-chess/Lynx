@@ -316,7 +316,12 @@ public static class EvaluationConstants
 
     public const int PromotionMoveScoreValue = 131_072;
 
-    public const int MaxHistoryMoveValue = 8_192;
+    public const int MaxHistoryMoveValue = 8_192; // TODO move to Configuration.EngineSettings, since it's tunable
+
+    /// <summary>
+    /// Negative offset to ensure history move scores don't reach other move ordering values
+    /// </summary>
+    public const int BaseMoveScore = int.MinValue / 2;
 
     /// <summary>
     /// Outside of the evaluation ranges (higher than any sensible evaluation, lower than <see cref="PositiveCheckmateDetectionLimit"/>)
