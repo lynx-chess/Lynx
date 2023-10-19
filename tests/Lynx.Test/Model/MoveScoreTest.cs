@@ -37,7 +37,7 @@ public class MoveScoreTest : BaseTest
 
         foreach (var move in allMoves.Where(move => !move.IsCapture() && !move.IsCastle()))
         {
-            Assert.AreEqual(0, engine.ScoreMove(move, default, default));
+            Assert.AreEqual(EvaluationConstants.BaseMoveScore, engine.ScoreMove(move, default, default));
         }
     }
 

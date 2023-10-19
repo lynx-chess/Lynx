@@ -301,20 +301,27 @@ public static class EvaluationConstants
     /// </summary>
     public const int NegativeCheckmateDetectionLimit = -27_000; // -CheckMateBaseEvaluation + (Constants.AbsoluteMaxDepth + 45) * DepthCheckmateFactor;
 
-    public const int PVMoveScoreValue = 200_000;
+    public const int PVMoveScoreValue = 4_194_304;
 
-    public const int TTMoveScoreValue = 190_000;
+    public const int TTMoveScoreValue = 2_097_152;
 
     /// <summary>
     /// For MVVLVA
     /// </summary>
-    public const int CaptureMoveBaseScoreValue = 100_000;
+    public const int CaptureMoveBaseScoreValue = 1_048_576;
 
-    public const int FirstKillerMoveValue = 9_000;
+    public const int FirstKillerMoveValue = 524_288;
 
-    public const int SecondKillerMoveValue = 8_000;
+    public const int SecondKillerMoveValue = 262_144;
 
-    public const int PromotionMoveScoreValue = 7_000;
+    public const int PromotionMoveScoreValue = 131_072;
+
+    //public const int MaxHistoryMoveValue => Configuration.EngineSettings.MaxHistoryMoveValue;
+
+    /// <summary>
+    /// Negative offset to ensure history move scores don't reach other move ordering values
+    /// </summary>
+    public const int BaseMoveScore = int.MinValue / 2;
 
     /// <summary>
     /// Outside of the evaluation ranges (higher than any sensible evaluation, lower than <see cref="PositiveCheckmateDetectionLimit"/>)
