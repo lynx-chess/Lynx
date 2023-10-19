@@ -316,7 +316,7 @@ public static class EvaluationConstants
 
     public const int PromotionMoveScoreValue = 131_072;
 
-    public const int MaxHistoryMoveValue = 8_192; // TODO move to Configuration.EngineSettings, since it's tunable
+    //public const int MaxHistoryMoveValue => Configuration.EngineSettings.MaxHistoryMoveValue;
 
     /// <summary>
     /// Negative offset to ensure history move scores don't reach other move ordering values
