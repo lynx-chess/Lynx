@@ -294,8 +294,10 @@ public static class MoveGenerator
     /// <param name="position"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int LegalMovesCount(Position position, Move[] movePool)
+    public static int LegalMovesCount(Position position, Move[]? movePool = null)
     {
+        movePool ??= new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+
         int legalMoveCounter = 0;
 
         foreach (var move in GenerateAllMoves(position, movePool))

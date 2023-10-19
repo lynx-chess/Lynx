@@ -602,7 +602,6 @@ public class Position
 
         var whitePerspectiveEval = TaperedStaticEvaluationFromWhitePerspective();
 
-        movePool ??= new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
         whitePerspectiveEval += MoveGenerator.LegalMovesCount(this, movePool);
 
         return Side == Side.White

@@ -11,10 +11,10 @@ public class ForceOrAvoidDrawTest : BaseTest
     [TestCase("8/8/4NQ2/7k/2P4p/1q2P2P/5P2/6K1 b - - 5 52", new[] { "b3b1", "b3d1" },
         Description = "Force stalemate - https://lichess.org/sM5ekwnW/black#103, Having issues with null pruning implemeneted")]
     [TestCase("8/8/4NQ2/7k/2P4p/4P2P/5PK1/3q4 b - - 7 53", new[] { "d1h1", "d1g1", "d1f1" },
-        Description = "Force stalemate - https://lichess.org/sM5ekwnW/black#105")]
+    Description = "Force stalemate - https://lichess.org/sM5ekwnW/black#105")]
     public async Task ForceStaleMate(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
     {
-        var result = await TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 5);
+        var result = await TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 8);
         Assert.AreEqual(0, result.Evaluation, "No drawn position detected");
     }
 
