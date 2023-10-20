@@ -193,7 +193,7 @@ public sealed partial class Engine
             }
             else
             {
-                // 🔍 Late Move Reduction (LMR) - based on Ciekce advice (Stormphrax)
+                // 🔍 Late Move Reduction (LMR) - based on Ciekce advice (Stormphrax) and Stormphrax & Akimbo implementations
                 if (movesSearched >= (pvNode ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves - 1)
                     && depth >= Configuration.EngineSettings.LMR_MinDepth
                     && !isInCheck
