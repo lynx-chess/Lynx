@@ -99,6 +99,8 @@ If you're a Linux user and are new to .NET ecosystem, the conversation in [this 
 
 - Razoring [[1](https://www.chessprogramming.org/Razoring)]
 
+- PEXT Bitboards [[1](https://www.chessprogramming.org/BMI2#PEXTBitboards)]  [[2](https://analog-hors.github.io/site/magic-bitboards/)]
+
 ## Credits
 
 Lynx development wouldn't have been possible without:
