@@ -229,6 +229,8 @@ public sealed class EngineSettings
 
     public double DecisionTimePercentageToStopSearching { get; set; } = 0.4;
 
+    public int LMR_MinDepth { get; set; } = 3;
+
     public int LMR_MinFullDepthSearchedMoves { get; set; } = 4;
 
     /// <summary>
@@ -240,10 +242,6 @@ public sealed class EngineSettings
     /// Value original from Stormphrax 1.0.0, who took it from Viridithas
     /// </summary>
     public double LMR_Divisor { get; set; } = 2.67;
-
-    public int LMR_MaxDepth { get; set; } = 3;
-
-    public int LMR_DepthReduction { get; set; } = 1;
 
     public int NMP_DepthReduction { get; set; } = 3;
 

@@ -195,12 +195,12 @@ public sealed partial class Engine
             {
                 // 🔍 Late Move Reduction (LMR) - based on Ciekce advice (Stormphrax)
                 if (movesSearched >= (pvNode ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves - 1)
-                    && depth >= Configuration.EngineSettings.LMR_MaxDepth
+                    && depth >= Configuration.EngineSettings.LMR_MinDepth
                     && !isInCheck
                     && !move.IsCapture())
                 {
                     var reduction = Convert.ToInt32(Math.Round(
-                        Configuration.EngineSettings.LMR_Base + (Math.Log(movesSearched) * Math.Log(depth) / Configuration.EngineSettings.LMR_Divisor)));
+                        Configuration.EngineSettings.LMR_Base + (Math.Log(movesSearched + 1) * Math.Log(depth) / Configuration.EngineSettings.LMR_Divisor)));
 
                     if (pvNode)
                     {
