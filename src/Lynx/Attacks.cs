@@ -1,5 +1,7 @@
 ﻿using Lynx.Model;
+using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Runtime.Intrinsics.X86;
 
 namespace Lynx;
 
@@ -20,6 +22,10 @@ public static class Attacks
     /// </summary>
     private static readonly BitBoard[,] _rookAttacks;
 
+    private static readonly ulong[] _pextAttacks = new ulong[5248 + 102400];
+    private static readonly ulong[] _pextBishopOffset = new ulong[64];
+    private static readonly ulong[] _pextRookOffset = new ulong[64];
+
     /// <summary>
     /// [2 (B|W), 64 (Squares)]
     /// </summary>
@@ -33,8 +39,21 @@ public static class Attacks
         PawnAttacks = AttackGenerator.InitializePawnAttacks();
         KnightAttacks = AttackGenerator.InitializeKnightAttacks();
 
-        (_bishopOccupancyMasks, _bishopAttacks) = AttackGenerator.InitializeBishopAttacks();
-        (_rookOccupancyMasks, _rookAttacks) = AttackGenerator.InitializeRookAttacks();
+        (_bishopOccupancyMasks, _bishopAttacks) = AttackGenerator.InitializeBishopMagicAttacks();
+        (_rookOccupancyMasks, _rookAttacks) = AttackGenerator.InitializeRookMagicAttacks();
+
+        if (Bmi2.X64.IsSupported)
+        {
+            InitializeBishopAndRookPextAttacks();
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static BitBoard BishopAttacks(int squareIndex, BitBoard occupancy)
+    {
+        return Bmi2.X64.IsSupported
+            ? _pextAttacks[_pextBishopOffset[squareIndex] + Bmi2.X64.ParallelBitExtract(occupancy, _bishopOccupancyMasks[squareIndex])]
+            : MagicNumbersBishopAttacks(squareIndex, occupancy);
     }
 
     /// <summary>
@@ -44,7 +63,7 @@ public static class Attacks
     /// <param name="occupancy">Occupancy of <see cref="Side.Both"/></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard BishopAttacks(int squareIndex, BitBoard occupancy)
+    public static BitBoard MagicNumbersBishopAttacks(int squareIndex, BitBoard occupancy)
     {
         var occ = occupancy & _bishopOccupancyMasks[squareIndex];
         occ *= Constants.BishopMagicNumbers[squareIndex];
@@ -61,6 +80,13 @@ public static class Attacks
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static BitBoard RookAttacks(int squareIndex, BitBoard occupancy)
+    {
+        return Bmi2.IsSupported
+            ? _pextAttacks[_pextRookOffset[squareIndex] + Bmi2.X64.ParallelBitExtract(occupancy, _rookOccupancyMasks[squareIndex])]
+            : MagicNumbersRookAttacks(squareIndex, occupancy);
+    }
+
+    public static BitBoard MagicNumbersRookAttacks(int squareIndex, BitBoard occupancy)
     {
         var occ = occupancy & _rookOccupancyMasks[squareIndex];
         occ *= Constants.RookMagicNumbers[squareIndex];
@@ -174,5 +200,43 @@ public static class Attacks
     {
         var queenAttacks = QueenAttacks(rookAttacks, bishopAttacks);
         return (queenAttacks & piecePosition[(int)Piece.Q + offset]) != default;
+    }
+
+    /// <summary>
+    /// Taken from Leorik (https://github.com/lithander/Leorik/blob/master/Leorik.Core/Slider/Pext.cs)
+    /// Based on https://www.chessprogramming.org/BMI2#PEXT_Bitboards
+    /// </summary>
+    private static void InitializeBishopAndRookPextAttacks()
+    {
+        ulong index = 0;
+
+        // Bishop-Attacks
+        for (int square = 0; square < 64; square++)
+        {
+            _pextBishopOffset[square] = index;
+            ulong bishopMask = _bishopOccupancyMasks[square];
+
+            ulong patterns = 1UL << BitOperations.PopCount(bishopMask);
+
+            for (ulong i = 0; i < patterns; i++)
+            {
+                ulong occupation = Bmi2.X64.ParallelBitDeposit(i, bishopMask);
+                _pextAttacks[index++] = MagicNumbersBishopAttacks(square, occupation);
+            }
+        }
+
+        // Rook-Attacks
+        for (int square = 0; square < 64; square++)
+        {
+            _pextRookOffset[square] = index;
+            ulong rookMask = _rookOccupancyMasks[square];
+            ulong patterns = 1UL << BitOperations.PopCount(rookMask);
+
+            for (ulong i = 0; i < patterns; i++)
+            {
+                ulong occupation = Bmi2.X64.ParallelBitDeposit(i, rookMask);
+                _pextAttacks[index++] = MagicNumbersRookAttacks(square, occupation);
+            }
+        }
     }
 }
