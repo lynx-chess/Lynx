@@ -199,8 +199,7 @@ public sealed partial class Engine
                     && !isInCheck
                     && !move.IsCapture())
                 {
-                    var reduction = Convert.ToInt32(Math.Round(
-                        Configuration.EngineSettings.LMR_Base + (Math.Log(movesSearched + 1) * Math.Log(depth) / Configuration.EngineSettings.LMR_Divisor)));
+                    var reduction = EvaluationConstants.LMRReductions[depth, movesSearched];
 
                     if (pvNode)
                     {
