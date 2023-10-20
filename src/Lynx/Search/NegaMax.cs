@@ -193,17 +193,29 @@ public sealed partial class Engine
             }
             else
             {
-                // 🔍 Late Move Reduction (LMR)
-                if (movesSearched >= Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves
+                // 🔍 Late Move Reduction (LMR) - inspired by Stormphrax
+                if (movesSearched >= (pvNode ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves - 1)
                     && depth >= Configuration.EngineSettings.LMR_MaxDepth
-                    && !pvNode
-                    && !isInCheck
-                    //&& !newPosition.IsInCheck()
-                    && !move.IsCapture()
-                    && move.PromotedPiece() == default)
+                    && !move.IsCapture())
                 {
+                    var reduction = Convert.ToInt32(Math.Round(0.77 + (Math.Log(depth) * Math.Log(movesSearched + 1) / 2.36)));
+
+                    if (pvNode)
+                    {
+                        ++reduction;
+                    }
+                    if (position.IsInCheck() /*|| move.PromotedPiece() != default */)   // i.e. move gives check
+                    {
+                        --reduction;
+                    }
+
+                    var nextDepth = depth - 1 - reduction;
+
+                    // Don't allow LMR to drop into qsearch or increase the depth
+                    nextDepth = Math.Clamp(nextDepth, 1, depth - 1);
+
                     // Search with reduced depth
-                    evaluation = -NegaMax(depth - 1 - Configuration.EngineSettings.LMR_DepthReduction, ply + 1, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
+                    evaluation = -NegaMax(nextDepth, ply + 1, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
                 }
                 else
                 {
