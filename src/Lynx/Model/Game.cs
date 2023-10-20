@@ -122,8 +122,15 @@ public sealed class Game
     public bool IsThreefoldRepetition(Position position) => PositionHashHistory.Contains(position.UniqueIdentifier);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool Is50MovesRepetition() => HalfMovesWithoutCaptureOrPawnMove >= 100
-            && (!CurrentPosition.IsInCheck() || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition));
+    public bool Is50MovesRepetition()
+    {
+        if (HalfMovesWithoutCaptureOrPawnMove < 100)
+        {
+            return false;
+        }
+
+        return !CurrentPosition.IsInCheck() || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition);
+    }
 
     /// <summary>
     /// To be used in online tb proving only, with a copy of <see cref="PositionHashHistory"/>
