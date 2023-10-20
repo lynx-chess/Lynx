@@ -14,7 +14,7 @@ public class ForceOrAvoidDrawTest : BaseTest
         Description = "Force stalemate - https://lichess.org/sM5ekwnW/black#105")]
     public async Task ForceStaleMate(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
     {
-        var result = await TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 5);
+        var result = await TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 12);
         Assert.AreEqual(0, result.Evaluation, "No drawn position detected");
     }
 
