@@ -239,7 +239,7 @@ public sealed class EngineSettings
     /// <summary>
     /// Value original from Stormphrax 1.0.0, who took it from Viridithas
     /// </summary>
-    public double LMR_Divisor { get; set; } = 2.36;
+    public double LMR_Divisor { get; set; } = 2.67;
 
     public int LMR_MaxDepth { get; set; } = 3;
 
