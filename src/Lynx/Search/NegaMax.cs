@@ -203,7 +203,7 @@ public sealed partial class Engine
 
                     if (pvNode)
                     {
-                        ++reduction;
+                        --reduction;
                     }
                     if (position.IsInCheck() /*|| move.PromotedPiece() != default */)   // i.e. move gives check
                     {
