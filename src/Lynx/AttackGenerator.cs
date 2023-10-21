@@ -72,7 +72,7 @@ public static class AttackGenerator
     /// Returns bishop occupancy masks and attacks
     /// </summary>
     /// <returns>(BitBoard[64], BitBoard[64, 512])</returns>
-    public static (BitBoard[] BishopOccupancyMasks, BitBoard[,] BishopAttacks) InitializeBishopAttacks()
+    public static (BitBoard[] BishopOccupancyMasks, BitBoard[,] BishopAttacks) InitializeBishopMagicAttacks()
     {
         BitBoard[] occupancyMasks = new BitBoard[64];
         BitBoard[,] attacks = new BitBoard[64, 512];
@@ -102,7 +102,7 @@ public static class AttackGenerator
     /// Returns rook occupancy masks and attacks
     /// </summary>
     /// <returns>(BitBoard[64], BitBoard[64, 512])</returns>
-    public static (BitBoard[] RookOccupancyMasks, BitBoard[,] RookAttacks) InitializeRookAttacks()
+    public static (BitBoard[] RookOccupancyMasks, BitBoard[,] RookAttacks) InitializeRookMagicAttacks()
     {
         BitBoard[] occupancyMasks = new BitBoard[64];
         BitBoard[,] attacks = new BitBoard[64, 4096];

@@ -42,7 +42,7 @@ public class RookAttacksTest
     }
 
     /// <summary>
-    /// Implicitly tests <see cref="AttackGenerator.InitializeRookAttacks"/> and <see cref="Constants.RookMagicNumbers"/>
+    /// Implicitly tests <see cref="AttackGenerator.InitializeRookMagicAttacks"/> and <see cref="Constants.RookMagicNumbers"/>
     /// </summary>
     /// <param name="rookSquare"></param>
     /// <param name="occupiedSquares"></param>
@@ -71,6 +71,7 @@ public class RookAttacksTest
 
         // Act
         var attacks = Attacks.RookAttacks((int)rookSquare, occupancy);
+        Assert.AreEqual(Attacks.MagicNumbersRookAttacks((int)rookSquare, occupancy), attacks);
 
         // Assert
         ValidateAttacks(attackedSquares, attacks);

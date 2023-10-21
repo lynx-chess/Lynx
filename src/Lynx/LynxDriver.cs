@@ -2,6 +2,7 @@
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
+using System.Runtime.Intrinsics.X86;
 using System.Text.Json;
 using System.Threading.Channels;
 
@@ -99,6 +100,9 @@ public sealed class LynxDriver
                                 break;
                             case "printsettings":
                                 await HandleSettings();
+                                break;
+                            case "printsysteminfo":
+                                await HandleSystemInfo();
                                 break;
                             case "staticeval":
                                 await HandleStaticEval(rawCommand, cancellationToken);
@@ -340,6 +344,22 @@ public sealed class LynxDriver
         var message = $"{nameof(Configuration)}.{nameof(Configuration.EngineSettings)}:{Environment.NewLine}{engineSettings}";
 
         await _engineWriter.Writer.WriteAsync(message);
+    }
+
+    private async ValueTask HandleSystemInfo()
+    {
+        try
+        {
+            var simd = Bmi2.X64.IsSupported
+                ? "Bmi2.X64 supported, PEXT BitBoards will be used"
+                : "Bmi2.X64 not supported";
+
+            await _engineWriter.Writer.WriteAsync(simd);
+        }
+        catch (Exception e)
+        {
+            _logger.Error(e);
+        }
     }
 
     private async ValueTask HandleStaticEval(string rawCommand, CancellationToken cancellationToken)
