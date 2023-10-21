@@ -64,6 +64,12 @@ jobs:
       fail-fast: false
 
     steps:
+
+    - name: Install hub
+      if: github.event.inputs.should_create_github_release == 'true'
+      run: |
+        sudo apt-get update && sudo apt-get install -y hub
+
     - uses: actions/checkout@v4
 
     - name: Inject slug/short variables
