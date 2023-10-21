@@ -258,7 +258,7 @@ public static class EvaluationConstants
         {
             for (int movesSearchedCount = 1; movesSearchedCount < Constants.MaxNumberOfPossibleMovesInAPosition; ++movesSearchedCount) // movesSearchedCount > 0 or we wouldn't be applying LMR
             {
-                LMRReductions[searchDepth, movesSearchedCount] = Convert.ToInt32(Math.Round(
+                LMRReductions[searchDepth, movesSearchedCount] = Convert.ToInt32(Math.Truncate(
                     Configuration.EngineSettings.LMR_Base + (Math.Log(movesSearchedCount) * Math.Log(searchDepth) / Configuration.EngineSettings.LMR_Divisor)));
             }
         }
