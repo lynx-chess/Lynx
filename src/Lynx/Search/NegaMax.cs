@@ -210,16 +210,6 @@ public sealed partial class Engine
                         --reduction;
                     }
 
-                    var piece = move.Piece();
-                    var targetSquare = move.TargetSquare();
-                    var oppositePawns = position.PieceBitBoards[(int)Piece.p - piece];
-
-                    if (move.Piece() % 6 == 0                                                       // Is pawn move
-                        && (oppositePawns & Masks.PassedPawns[piece][targetSquare]) == default)     // Is passed pawn
-                    {
-                        --reduction;
-                    }
-
                     var nextDepth = depth - 1 - reduction;
 
                     // Don't allow LMR to drop into qsearch or increase the depth
