@@ -197,7 +197,8 @@ public sealed partial class Engine
                 if (movesSearched >= (pvNode ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves - 1)
                     && depth >= Configuration.EngineSettings.LMR_MinDepth
                     && !isInCheck
-                    && !move.IsCapture())
+                    && !move.IsCapture()
+                    && move.PromotedPiece() == default)
                 {
                     var reduction = EvaluationConstants.LMRReductions[depth, movesSearched];
 
