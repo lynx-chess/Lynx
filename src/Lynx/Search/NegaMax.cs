@@ -210,6 +210,9 @@ public sealed partial class Engine
                         --reduction;
                     }
 
+                    // Reduce more in moves with bad history, idea taken from Ethereal
+                    reduction -= _historyMoves[move.Piece(), move.TargetSquare()] / Configuration.EngineSettings.MaxHistoryMoveValue;
+
                     var nextDepth = depth - 1 - reduction;
 
                     // Don't allow LMR to drop into qsearch or increase the depth
