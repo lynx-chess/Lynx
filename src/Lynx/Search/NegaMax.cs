@@ -205,7 +205,13 @@ public sealed partial class Engine
                     {
                         --reduction;
                     }
-                    if (position.IsInCheck() /*|| move.PromotedPiece() != default */)   // i.e. move gives check
+
+                    if (position.IsInCheck())   // i.e. move gives check
+                    {
+                        --reduction;
+                    }
+
+                    if (move.PromotedPiece() != default)
                     {
                         --reduction;
                     }
