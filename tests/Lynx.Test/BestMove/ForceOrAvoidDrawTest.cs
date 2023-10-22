@@ -216,4 +216,18 @@ public class ForceOrAvoidDrawTest : BaseTest
         Assert.AreEqual(movesThatAllowsRepetition.UCIString(), bestMoveFound.UCIString(), "No 50 moves rule forced");
         Assert.AreEqual(0, searchResult.Evaluation, "No drawn position detected");
     }
+
+    /// <summary>
+    /// If a checkmate is delivered in move 50 (ply 100), the result of the game is checkmate
+    /// </summary>
+    /// <returns></returns>
+    [Test]
+    public async Task CheckmateHasPrecedenceOver50MovesRule()
+    {
+        // Source: https://github.com/PGG106/Alexandria/issues/213
+        const string mateIn1Fen = "4Q3/8/1p4pk/1PbB1p1p/7P/p3P1PK/P3qP2/8 w - - 99 88";
+
+        var result = await TestBestMove(mateIn1Fen, new[] { "e8h8" }, Array.Empty<string>(), depth: 1);
+        Assert.AreEqual(1, result.Mate);
+    }
 }
