@@ -312,6 +312,8 @@ public sealed class EngineSettings
     public int Razoring_NotDepth1Bonus { get; set; } = 175;
 
     public int MaxHistoryMoveValue { get; set; } = 8_192;
+
+    public int CheckTime { get; set; } = 2048;
 }
 
 [JsonSourceGenerationOptions(

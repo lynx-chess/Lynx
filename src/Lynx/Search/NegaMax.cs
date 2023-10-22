@@ -32,7 +32,12 @@ public sealed partial class Engine
         }
 
         _maxDepthReached[ply] = ply;
-        _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
+        var checkTime = _nodes % Configuration.EngineSettings.CheckTime == 0;
+
+        if (checkTime)
+        {
+            _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
+        }
 
         var pvIndex = PVTable.Indexes[ply];
         var nextPvIndex = PVTable.Indexes[ply + 1];
@@ -53,7 +58,10 @@ public sealed partial class Engine
         }
 
         // Before any time-consuming operations
-        _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
+        if (checkTime)
+        {
+            _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
+        }
 
         bool isInCheck = position.IsInCheck();
 
@@ -326,8 +334,11 @@ public sealed partial class Engine
     {
         var position = Game.CurrentPosition;
 
-        _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
-        _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
+        if (_nodes % 2048 == 0)
+        {
+            _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
+            _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
+        }
 
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
