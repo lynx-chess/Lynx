@@ -197,7 +197,7 @@ public sealed partial class Engine
                 if (movesSearched >= (pvNode ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves - 1)
                     && depth >= Configuration.EngineSettings.LMR_MinDepth
                     && !isInCheck
-                    && ScoreMove(move, depth, true) < EvaluationConstants.PromotionMoveScoreValue)
+                    && !move.IsCapture())
                 {
                     var reduction = EvaluationConstants.LMRReductions[depth, movesSearched];
 
@@ -205,8 +205,7 @@ public sealed partial class Engine
                     {
                         --reduction;
                     }
-
-                    if (position.IsInCheck())   // i.e. move gives check
+                    if (position.IsInCheck() /*|| move.PromotedPiece() != default */)   // i.e. move gives check
                     {
                         --reduction;
                     }
