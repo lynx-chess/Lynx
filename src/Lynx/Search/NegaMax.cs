@@ -193,13 +193,16 @@ public sealed partial class Engine
             }
             else
             {
-                // 🔍 Late Move Reduction (LMR) - based on Ciekce advice (Stormphrax) and Stormphrax & Akimbo implementations
+                int reduction = int.MaxValue;
+
+                // 🔍 Late Move Reduction (LMR) - search with reduced depth
+                // Impl. based on Ciekce advice (Stormphrax) and Stormphrax & Akimbo implementations
                 if (movesSearched >= (pvNode ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves - 1)
                     && depth >= Configuration.EngineSettings.LMR_MinDepth
                     && !isInCheck
                     && !move.IsCapture())
                 {
-                    var reduction = EvaluationConstants.LMRReductions[depth, movesSearched];
+                    reduction = EvaluationConstants.LMRReductions[depth, movesSearched];
 
                     if (pvNode)
                     {
@@ -210,42 +213,31 @@ public sealed partial class Engine
                         --reduction;
                     }
 
-                    var nextDepth = depth - 1 - reduction;
-
                     // Don't allow LMR to drop into qsearch or increase the depth
-                    nextDepth = Math.Clamp(nextDepth, 1, depth - 1);
-
-                    // Search with reduced depth
-                    evaluation = -NegaMax(nextDepth, ply + 1, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
-                }
-                else
-                {
-                    // Ensuring full depth search takes place
-                    evaluation = alpha + 1;
+                    // depth - 1 - depth +2 = 1, min depth we want
+                    reduction = Math.Clamp(reduction, 0, depth - 2);
                 }
 
-                if (evaluation > alpha)
+                // Search with reduced depth
+                evaluation = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
+
+                // 🔍 Principal Variation Search (PVS)
+                if (evaluation > alpha
+                    && reduction > 0            // LMR failed
+                    && bestMove is not null)
                 {
-                    // 🔍 Principal Variation Search (PVS)
-                    if (bestMove is not null)
-                    {
-                        // Optimistic search, validating that the rest of the moves are worse than bestmove.
-                        // It should produce more cutoffs and therefore be faster.
-                        // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
+                    // Optimistic search, validating that the rest of the moves are worse than bestmove.
+                    // It should produce more cutoffs and therefore be faster.
+                    // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
 
-                        // Search with full depth but narrowed score bandwidth
-                        evaluation = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
+                    // Search with full depth but narrowed score bandwidth
+                    evaluation = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
+                }
 
-                        if (evaluation > alpha && evaluation < beta)
-                        {
-                            // Hipothesis invalidated -> search with full depth and full score bandwidth
-                            evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
-                        }
-                    }
-                    else
-                    {
-                        evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
-                    }
+                if (evaluation > alpha && evaluation < beta)
+                {
+                    // PVS Hipothesis invalidated -> search with full depth and full score bandwidth
+                    evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
                 }
             }
 
