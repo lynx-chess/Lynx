@@ -229,11 +229,19 @@ public sealed class EngineSettings
 
     public double DecisionTimePercentageToStopSearching { get; set; } = 0.4;
 
+    public int LMR_MinDepth { get; set; } = 3;
+
     public int LMR_MinFullDepthSearchedMoves { get; set; } = 4;
 
-    public int LMR_MaxDepth { get; set; } = 3;
+    /// <summary>
+    /// Value originally from Stormphrax, who apparently took it from Viridithas
+    /// </summary>
+    public double LMR_Base { get; set; } = 0.77;
 
-    public int LMR_DepthReduction { get; set; } = 1;
+    /// <summary>
+    /// Value originally from Akimbo
+    /// </summary>
+    public double LMR_Divisor { get; set; } = 2.67;
 
     public int NMP_DepthReduction { get; set; } = 3;
 
