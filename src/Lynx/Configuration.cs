@@ -234,12 +234,12 @@ public sealed class EngineSettings
     public int LMR_MinFullDepthSearchedMoves { get; set; } = 4;
 
     /// <summary>
-    /// Value original from Stormphrax 1.0.0, who took it from Viridithas
+    /// Value originally from Stormphrax, who apparently took it from Viridithas
     /// </summary>
     public double LMR_Base { get; set; } = 0.77;
 
     /// <summary>
-    /// Value original from Stormphrax 1.0.0, who took it from Viridithas
+    /// Value originally from Akimbo
     /// </summary>
     public double LMR_Divisor { get; set; } = 2.67;
 
