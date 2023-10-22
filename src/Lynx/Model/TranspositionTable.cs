@@ -161,10 +161,10 @@ public static class TranspositionTableExtensions
         ref var entry = ref tt[position.UniqueIdentifier & ttMask];
 
         // Avoid replacing Negamax entries with QSearch ones
-        if (depth == 0 && entry.Depth > 0)
-        {
-            return;
-        }
+        //if (depth == 0 && entry.Depth > 0)
+        //{
+        //    return;
+        //}
 
         // We want to store the distance to the checkmate position relative to the current node, independently from the root
         // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
