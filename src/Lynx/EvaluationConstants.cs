@@ -241,6 +241,8 @@ public static class EvaluationConstants
     public static readonly int[,] MiddleGameTable = new int[12, 64];
     public static readonly int[,] EndGameTable = new int[12, 64];
 
+    public static readonly int[,] LMRReductions = new int[Constants.AbsoluteMaxDepth, Constants.MaxNumberOfPossibleMovesInAPosition];
+
     static EvaluationConstants()
     {
         for (int piece = (int)Piece.P; piece <= (int)Piece.k; ++piece)
@@ -249,6 +251,15 @@ public static class EvaluationConstants
             {
                 MiddleGameTable[piece, sq] = MiddleGamePieceValues[piece] + MiddleGamePositionalTables[piece][sq];
                 EndGameTable[piece, sq] = EndGamePieceValues[piece] + EndGamePositionalTables[piece][sq];
+            }
+        }
+
+        for (int searchDepth = 1; searchDepth < Constants.AbsoluteMaxDepth; ++searchDepth)    // Depth > 0 or we'd be in QSearch
+        {
+            for (int movesSearchedCount = 1; movesSearchedCount < Constants.MaxNumberOfPossibleMovesInAPosition; ++movesSearchedCount) // movesSearchedCount > 0 or we wouldn't be applying LMR
+            {
+                LMRReductions[searchDepth, movesSearchedCount] = Convert.ToInt32(Math.Round(
+                    Configuration.EngineSettings.LMR_Base + (Math.Log(movesSearchedCount) * Math.Log(searchDepth) / Configuration.EngineSettings.LMR_Divisor)));
             }
         }
     }
