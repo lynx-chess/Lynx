@@ -148,7 +148,6 @@ public sealed partial class Engine
         }
 
         var nodeType = NodeType.Alpha;
-
         int movesSearched = 0;
         Move? bestMove = null;
         bool isAnyMoveValid = false;
@@ -343,6 +342,15 @@ public sealed partial class Engine
         var nextPvIndex = PVTable.Indexes[ply + 1];
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
+        Move ttBestMove = default;
+
+        var ttProbeResult = _tt.ProbeHash(_ttMask, position, 0, ply, alpha, beta);
+        if (ttProbeResult.Evaluation != EvaluationConstants.NoHashEntry)
+        {
+            return ttProbeResult.Evaluation;
+        }
+        ttBestMove = ttProbeResult.BestMove;
+
         _maxDepthReached[ply] = ply;
 
         var staticEvaluation = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
@@ -367,12 +375,13 @@ public sealed partial class Engine
             return staticEvaluation;
         }
 
-        var movesToEvaluate = generatedMoves.OrderByDescending(move => ScoreMove(move, ply, false));
-
+        var nodeType = NodeType.Alpha;
         Move? bestMove = null;
         bool isThereAnyValidCapture = false;
 
-        foreach (var move in movesToEvaluate)
+        var pseudoLegalMoves = generatedMoves.OrderByDescending(move => ScoreMove(move, ply, false, ttBestMove));
+
+        foreach (var move in pseudoLegalMoves)
         {
             var gameState = position.MakeMove(move);
             if (!position.WasProduceByAValidMove())
@@ -420,6 +429,9 @@ public sealed partial class Engine
             if (evaluation >= beta)
             {
                 PrintMessage($"Pruning: {move} is enough to discard this line");
+
+                _tt.RecordHash(_ttMask, position, 0, ply, beta, NodeType.Beta, bestMove);
+
                 return evaluation; // The refutation doesn't matter, since it'll be pruned
             }
 
@@ -430,17 +442,23 @@ public sealed partial class Engine
 
                 _pVTable[pvIndex] = move;
                 CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
+
+                nodeType = NodeType.Exact;
             }
         }
 
-        if (bestMove is null)
+        if (bestMove is null
+            && !isThereAnyValidCapture
+            && !MoveGenerator.CanGenerateAtLeastAValidMove(position))
         {
-            return isThereAnyValidCapture || MoveGenerator.CanGenerateAtLeastAValidMove(position)
-                ? alpha
-                : Position.EvaluateFinalPosition(ply, position.IsInCheck());
+            var finalEval = Position.EvaluateFinalPosition(ply, position.IsInCheck());
+            _tt.RecordHash(_ttMask, position, 0, ply, finalEval, NodeType.Exact);
+
+            return finalEval;
         }
 
-        // Node fails low
+        _tt.RecordHash(_ttMask, position, 0, ply, alpha, nodeType, bestMove);
+
         return alpha;
     }
 }
