@@ -131,7 +131,14 @@ public sealed partial class Engine
             else
             {
                 Array.Clear(_killerMoves);
-                Array.Clear(_historyMoves);
+
+                for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
+                {
+                    for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
+                    {
+                        _historyMoves[pieceIndex, squareIndex] /= 2;
+                    }
+                }
             }
 
             do
