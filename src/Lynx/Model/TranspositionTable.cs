@@ -143,7 +143,7 @@ public static class TranspositionTableExtensions
     /// Adds a <see cref="TranspositionTableElement"/> to the transposition tabke
     /// </summary>
     /// <param name="tt"></param>
-    /// <param name="ttMask"></param>
+    /// <param name="ttMask"></param>c
     /// <param name="position"></param>
     /// <param name="depth"></param>
     /// <param name="ply">Ply</param>
@@ -160,10 +160,9 @@ public static class TranspositionTableExtensions
 
         ref var entry = ref tt[position.UniqueIdentifier & ttMask];
 
-        // Avoid replacing Negamax entries with QSearch ones
-        //if (depth == 0 && entry.Depth > 0)
+        //if (entry.Key != default && entry.Key != position.UniqueIdentifier)
         //{
-        //    return;
+        //    _logger.Warn("TT collision");
         //}
 
         // We want to store the distance to the checkmate position relative to the current node, independently from the root
@@ -175,12 +174,6 @@ public static class TranspositionTableExtensions
         entry.Depth = depth;
         entry.Move = move ?? 0;
         entry.Type = nodeType;
-
-        // TODO
-        //if (depth <= 0)
-        //{
-        //    entry.Move = 0;         // No TT moves on QSearch
-        //}
     }
 
     /// <summary>
