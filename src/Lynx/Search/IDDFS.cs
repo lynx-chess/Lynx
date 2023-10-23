@@ -106,23 +106,6 @@ public sealed partial class Engine
                 return result;
             }
 
-            if (Game.MoveHistory.Count >= 2
-                && _previousSearchResult?.Moves.Count > 2
-                && _previousSearchResult.BestMove != default
-                && Game.MoveHistory[^2] == _previousSearchResult.Moves[0]
-                && Game.MoveHistory[^1] == _previousSearchResult.Moves[1])
-            {
-                _logger.Debug("Ponder hit");
-
-                lastSearchResult = new SearchResult(_previousSearchResult);
-
-                Array.Copy(_previousSearchResult.Moves.ToArray(), 2, _pVTable, 0, _previousSearchResult.Moves.Count - 2);
-
-                await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult));
-
-                depth = lastSearchResult.Depth + 1; // Already reduced by 2
-            }
-
             Array.Clear(_killerMoves);
             Array.Clear(_historyMoves);
 
