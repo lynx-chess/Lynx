@@ -120,26 +120,11 @@ public sealed partial class Engine
 
                 await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult));
 
-                for (int d = 0; d < Configuration.EngineSettings.MaxDepth - 2; ++d)
-                {
-                    _killerMoves[0, d] = _previousKillerMoves[0, d + 2];
-                    _killerMoves[1, d] = _previousKillerMoves[1, d + 2];
-                }
-
                 depth = lastSearchResult.Depth + 1; // Already reduced by 2
             }
-            else
-            {
-                Array.Clear(_killerMoves);
 
-                for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
-                {
-                    for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
-                    {
-                        _historyMoves[pieceIndex, squareIndex] /= 10;
-                    }
-                }
-            }
+            Array.Clear(_killerMoves);
+            Array.Clear(_historyMoves);
 
             do
             {
