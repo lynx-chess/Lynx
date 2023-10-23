@@ -223,7 +223,8 @@ public sealed partial class Engine
 
                 // 🔍 Principal Variation Search (PVS)
                 if (evaluation > alpha
-                    && reduction > 0)            // LMR failed)
+                    && reduction > 0            // LMR failed
+                    && bestMove is not null)
                 {
                     // Optimistic search, validating that the rest of the moves are worse than bestmove.
                     // It should produce more cutoffs and therefore be faster.
