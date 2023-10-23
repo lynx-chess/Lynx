@@ -187,13 +187,13 @@ public sealed partial class Engine
                 // don't belong to this line and if this move were to beat alpha, they'd incorrectly copied to pv line.
                 Array.Clear(_pVTable, nextPvIndex, _pVTable.Length - nextPvIndex);
             }
-            else if (movesSearched == 0)
+            else if (pvNode && movesSearched == 0)
             {
                 evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
             }
             else
             {
-                int reduction = int.MaxValue;
+                int reduction = 0;
 
                 // 🔍 Late Move Reduction (LMR) - search with reduced depth
                 // Impl. based on Ciekce advice (Stormphrax) and Stormphrax & Akimbo implementations
