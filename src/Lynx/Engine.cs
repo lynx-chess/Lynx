@@ -51,6 +51,7 @@ public sealed partial class Engine
     public void NewGame()
     {
         AverageDepth = 0;
+        Game = new Game();
         _isNewGameComing = true;
         _isNewGameCommandSupported = true;
         InitializeTT();

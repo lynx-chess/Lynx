@@ -34,8 +34,8 @@ public class InitializeBishopAndRookAttacks : BaseBenchmark
             _pawnAttacks = AttackGenerator.InitializePawnAttacks();
             _knightAttacks = AttackGenerator.InitializeKnightAttacks();
 
-            (_bishopOccupancyMasks, _bishopAttacks) = AttackGenerator.InitializeBishopAttacks();
-            (_rookOccupancyMasks, _rookAttacks) = AttackGenerator.InitializeRookAttacks();
+            (_bishopOccupancyMasks, _bishopAttacks) = AttackGenerator.InitializeBishopMagicAttacks();
+            (_rookOccupancyMasks, _rookAttacks) = AttackGenerator.InitializeRookMagicAttacks();
         }
 
         /// <summary>
@@ -46,8 +46,8 @@ public class InitializeBishopAndRookAttacks : BaseBenchmark
         {
             InitializePawnKnightAndKingAttacks();
 
-            (_bishopOccupancyMasks, _bishopAttacks) = AttackGenerator.InitializeBishopAttacks();
-            (_rookOccupancyMasks, _rookAttacks) = AttackGenerator.InitializeRookAttacks();
+            (_bishopOccupancyMasks, _bishopAttacks) = AttackGenerator.InitializeBishopMagicAttacks();
+            (_rookOccupancyMasks, _rookAttacks) = AttackGenerator.InitializeRookMagicAttacks();
         }
 
         /// <summary>

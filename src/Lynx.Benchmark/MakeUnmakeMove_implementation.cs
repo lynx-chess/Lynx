@@ -1261,8 +1261,8 @@ public class MakeUnmakeMove_implementation : BaseBenchmark
             PawnAttacks = AttackGenerator.InitializePawnAttacks();
             KnightAttacks = AttackGenerator.InitializeKnightAttacks();
 
-            (_bishopOccupancyMasks, _bishopAttacks) = AttackGenerator.InitializeBishopAttacks();
-            (_rookOccupancyMasks, _rookAttacks) = AttackGenerator.InitializeRookAttacks();
+            (_bishopOccupancyMasks, _bishopAttacks) = AttackGenerator.InitializeBishopMagicAttacks();
+            (_rookOccupancyMasks, _rookAttacks) = AttackGenerator.InitializeRookMagicAttacks();
         }
 
         /// <summary>

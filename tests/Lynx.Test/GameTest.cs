@@ -192,7 +192,8 @@ public class GameTest : BaseTest
 
         Assert.AreEqual(101, game.MoveHistory.Count);
 
-        Assert.True(game.Is50MovesRepetition());
+        // If the checkmate is in the move when it's claimed, checkmate remains
+        Assert.False(game.Is50MovesRepetition());
     }
 
     [Test]
