@@ -339,7 +339,7 @@ public sealed partial class Engine
         var position = Game.CurrentPosition;
 
         _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
-        //_searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
+        _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
 
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
