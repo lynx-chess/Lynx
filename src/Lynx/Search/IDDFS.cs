@@ -136,7 +136,7 @@ public sealed partial class Engine
                 {
                     for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
                     {
-                        _historyMoves[pieceIndex, squareIndex] /= 2;
+                        _historyMoves[pieceIndex, squareIndex] /= 10;
                     }
                 }
             }
