@@ -109,6 +109,7 @@ public sealed partial class Engine
             if (Game.MoveHistory.Count >= 2
                 && _previousSearchResult?.Moves.Count > 2
                 && _previousSearchResult.BestMove != default
+                && _previousSearchResult?.Depth > 2 // i.e. depth 1 seldepth 3 that finds a mate would cause a bug here
                 && Game.MoveHistory[^2] == _previousSearchResult.Moves[0]
                 && Game.MoveHistory[^1] == _previousSearchResult.Moves[1])
             {
@@ -126,7 +127,9 @@ public sealed partial class Engine
                     _killerMoves[1, d] = _previousKillerMoves[1, d + 2];
                 }
 
-                depth = lastSearchResult.Depth + 1; // Already reduced by 2
+                // depth Already reduced by 2 in SearchResult constructor
+                depth = lastSearchResult.Depth + 1;
+                depth = Math.Clamp(depth, 1, Configuration.EngineSettings.MaxDepth - 1);
             }
             else
             {
@@ -189,7 +192,7 @@ public sealed partial class Engine
                 var pvMoves = _pVTable.TakeWhile(m => m != default).ToList();
                 var maxDepthReached = _maxDepthReached.LastOrDefault(item => item != default);
 
-                int mate = default;
+                int mate = default; f
                 var bestEvaluationAbs = Math.Abs(bestEvaluation);
                 isMateDetected = bestEvaluationAbs > EvaluationConstants.PositiveCheckmateDetectionLimit;
                 if (isMateDetected)
