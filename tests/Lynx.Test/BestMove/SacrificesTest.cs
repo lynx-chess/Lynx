@@ -10,6 +10,6 @@ public class SacrificesTest : BaseTest
         Description = "Actual Bishop sacrifice - https://lichess.org/VaY6zfHI/white#84")]
     public async Task Sacrifices(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
     {
-        await TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 12);
+        await TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 20);
     }
 }
