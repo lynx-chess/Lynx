@@ -148,7 +148,6 @@ public sealed partial class Engine
         }
 
         var nodeType = NodeType.Alpha;
-
         int movesSearched = 0;
         Move? bestMove = null;
         bool isAnyMoveValid = false;
@@ -187,19 +186,22 @@ public sealed partial class Engine
                 // don't belong to this line and if this move were to beat alpha, they'd incorrectly copied to pv line.
                 Array.Clear(_pVTable, nextPvIndex, _pVTable.Length - nextPvIndex);
             }
-            else if (movesSearched == 0)
+            else if (pvNode && movesSearched == 0)
             {
                 evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
             }
             else
             {
-                // 🔍 Late Move Reduction (LMR) - based on Ciekce advice (Stormphrax) and Stormphrax & Akimbo implementations
+                int reduction = 0;
+
+                // 🔍 Late Move Reduction (LMR) - search with reduced depth
+                // Impl. based on Ciekce advice (Stormphrax) and Stormphrax & Akimbo implementations
                 if (movesSearched >= (pvNode ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves - 1)
                     && depth >= Configuration.EngineSettings.LMR_MinDepth
                     && !isInCheck
                     && !move.IsCapture())
                 {
-                    var reduction = EvaluationConstants.LMRReductions[depth, movesSearched];
+                    reduction = EvaluationConstants.LMRReductions[depth, movesSearched];
 
                     if (pvNode)
                     {
@@ -210,42 +212,29 @@ public sealed partial class Engine
                         --reduction;
                     }
 
-                    var nextDepth = depth - 1 - reduction;
-
                     // Don't allow LMR to drop into qsearch or increase the depth
-                    nextDepth = Math.Clamp(nextDepth, 1, depth - 1);
-
-                    // Search with reduced depth
-                    evaluation = -NegaMax(nextDepth, ply + 1, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
-                }
-                else
-                {
-                    // Ensuring full depth search takes place
-                    evaluation = alpha + 1;
+                    // depth - 1 - depth +2 = 1, min depth we want
+                    reduction = Math.Clamp(reduction, 0, depth - 2);
                 }
 
-                if (evaluation > alpha)
+                // Search with reduced depth
+                evaluation = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
+
+                // 🔍 Principal Variation Search (PVS)
+                if (evaluation > alpha && reduction > 0)
                 {
-                    // 🔍 Principal Variation Search (PVS)
-                    if (bestMove is not null)
-                    {
-                        // Optimistic search, validating that the rest of the moves are worse than bestmove.
-                        // It should produce more cutoffs and therefore be faster.
-                        // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
+                    // Optimistic search, validating that the rest of the moves are worse than bestmove.
+                    // It should produce more cutoffs and therefore be faster.
+                    // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
 
-                        // Search with full depth but narrowed score bandwidth
-                        evaluation = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
+                    // Search with full depth but narrowed score bandwidth
+                    evaluation = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
+                }
 
-                        if (evaluation > alpha && evaluation < beta)
-                        {
-                            // Hipothesis invalidated -> search with full depth and full score bandwidth
-                            evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
-                        }
-                    }
-                    else
-                    {
-                        evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
-                    }
+                if (evaluation > alpha && evaluation < beta)
+                {
+                    // PVS Hipothesis invalidated -> search with full depth and full score bandwidth
+                    evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
                 }
             }
 
@@ -352,6 +341,15 @@ public sealed partial class Engine
         var nextPvIndex = PVTable.Indexes[ply + 1];
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
+        Move ttBestMove = default;
+
+        var ttProbeResult = _tt.ProbeHash(_ttMask, position, 0, ply, alpha, beta);
+        if (ttProbeResult.Evaluation != EvaluationConstants.NoHashEntry)
+        {
+            return ttProbeResult.Evaluation;
+        }
+        ttBestMove = ttProbeResult.BestMove;
+
         _maxDepthReached[ply] = ply;
 
         var staticEvaluation = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
@@ -376,12 +374,13 @@ public sealed partial class Engine
             return staticEvaluation;
         }
 
-        var movesToEvaluate = generatedMoves.OrderByDescending(move => ScoreMove(move, ply, false));
-
+        var nodeType = NodeType.Alpha;
         Move? bestMove = null;
         bool isThereAnyValidCapture = false;
 
-        foreach (var move in movesToEvaluate)
+        var pseudoLegalMoves = generatedMoves.OrderByDescending(move => ScoreMove(move, ply, false, ttBestMove));
+
+        foreach (var move in pseudoLegalMoves)
         {
             var gameState = position.MakeMove(move);
             if (!position.WasProduceByAValidMove())
@@ -429,6 +428,9 @@ public sealed partial class Engine
             if (evaluation >= beta)
             {
                 PrintMessage($"Pruning: {move} is enough to discard this line");
+
+                _tt.RecordHash(_ttMask, position, 0, ply, beta, NodeType.Beta, bestMove);
+
                 return evaluation; // The refutation doesn't matter, since it'll be pruned
             }
 
@@ -439,17 +441,23 @@ public sealed partial class Engine
 
                 _pVTable[pvIndex] = move;
                 CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
+
+                nodeType = NodeType.Exact;
             }
         }
 
-        if (bestMove is null)
+        if (bestMove is null
+            && !isThereAnyValidCapture
+            && !MoveGenerator.CanGenerateAtLeastAValidMove(position))
         {
-            return isThereAnyValidCapture || MoveGenerator.CanGenerateAtLeastAValidMove(position)
-                ? alpha
-                : Position.EvaluateFinalPosition(ply, position.IsInCheck());
+            var finalEval = Position.EvaluateFinalPosition(ply, position.IsInCheck());
+            _tt.RecordHash(_ttMask, position, 0, ply, finalEval, NodeType.Exact);
+
+            return finalEval;
         }
 
-        // Node fails low
+        _tt.RecordHash(_ttMask, position, 0, ply, alpha, nodeType, bestMove);
+
         return alpha;
     }
 }
