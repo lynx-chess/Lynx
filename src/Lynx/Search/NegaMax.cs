@@ -221,8 +221,7 @@ public sealed partial class Engine
                 evaluation = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
 
                 // 🔍 Principal Variation Search (PVS)
-                if (evaluation > alpha
-                    && reduction > 0)            // LMR failed)
+                if (evaluation > alpha && reduction > 0)
                 {
                     // Optimistic search, validating that the rest of the moves are worse than bestmove.
                     // It should produce more cutoffs and therefore be faster.
