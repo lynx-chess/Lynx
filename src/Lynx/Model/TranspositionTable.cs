@@ -172,7 +172,7 @@ public static class TranspositionTableExtensions
         entry.Key = position.UniqueIdentifier;
         entry.Score = score;
         entry.Depth = depth;
-        entry.Move = move ?? entry.Move;
+        entry.Move = move ?? entry.Move;    // Suggested by cj5716 instead of 0. https://github.com/lynx-chess/Lynx/pull/462
         entry.Type = nodeType;
     }
 
