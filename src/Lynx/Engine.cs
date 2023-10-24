@@ -65,7 +65,7 @@ public sealed partial class Engine
 
     public void PonderHit()
     {
-        Game.MakeMove(_moveToPonder!.Value);   // TODO: do we also receive the position command? If so, remove this line
+        Game.MakeMove(_moveToPonder!.Value);   // TODO ponder: do we also receive the position command? If so, remove this line
         _isPondering = false;
     }
 
@@ -278,7 +278,7 @@ public sealed partial class Engine
                 _logger.Fatal(e, "Error in {0} while calculating BestMove", nameof(StartSearching));
             }
         });
-        // TODO: if ponder, continue with PonderAction, which is searching indefinitely for a move
+        // TODO ponder: if ponder, continue with PonderAction, which is searching indefinitely for a move
     }
 
     public void StopSearching()
