@@ -818,8 +818,6 @@ public class MakeUnmakeMove_implementation : BaseBenchmark
 
         public readonly BoardSquare EnPassant;
 
-        // TODO: save full Zobrist key?
-
         public MakeMoveGameState(int capturedPiece, int castle, BoardSquare enpassant)
         {
             CapturedPiece = capturedPiece;
