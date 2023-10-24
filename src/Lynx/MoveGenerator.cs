@@ -18,18 +18,16 @@ public static class MoveGenerator
     {
             (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White, origin],
             (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
-            (int origin, BitBoard occupancy) => Attacks.BishopAttacks(origin, occupancy),
-            (int origin, BitBoard occupancy) => Attacks.RookAttacks(origin, occupancy),
-            // TODO try to improve performance by re-using bishop and rook attacks
-            (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy),
+            Attacks.BishopAttacks,
+            Attacks.RookAttacks,
+            Attacks.QueenAttacks,
             (int origin, BitBoard _) => Attacks.KingAttacks[origin],
 
             (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.Black, origin],
             (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
-            (int origin, BitBoard occupancy) => Attacks.BishopAttacks(origin, occupancy),
-            (int origin, BitBoard occupancy) => Attacks.RookAttacks(origin, occupancy),
-            // TODO try to improve performance by re-using bishop and rook attacks
-            (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy),
+            Attacks.BishopAttacks,
+            Attacks.RookAttacks,
+            Attacks.QueenAttacks,
             (int origin, BitBoard _) => Attacks.KingAttacks[origin],
     };
 
