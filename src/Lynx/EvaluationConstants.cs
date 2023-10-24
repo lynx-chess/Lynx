@@ -258,8 +258,12 @@ public static class EvaluationConstants
         {
             for (int movesSearchedCount = 1; movesSearchedCount < Constants.MaxNumberOfPossibleMovesInAPosition; ++movesSearchedCount) // movesSearchedCount > 0 or we wouldn't be applying LMR
             {
+#pragma warning disable S2583 // Conditionally executed code should be reachable - https://github.com/SonarSource/sonar-dotnet/issues/8248
+                var depthFactor = searchDepth < 10 ? Math.Log(searchDepth) : Math.Log10(searchDepth);
+#pragma warning restore S2583 // Conditionally executed code should be reachable
+
                 LMRReductions[searchDepth, movesSearchedCount] = Convert.ToInt32(Math.Round(
-                    Configuration.EngineSettings.LMR_Base + (Math.Log10(movesSearchedCount) * Math.Log10(searchDepth) / Configuration.EngineSettings.LMR_Divisor)));
+                    Configuration.EngineSettings.LMR_Base + (Math.Log(movesSearchedCount) * depthFactor / Configuration.EngineSettings.LMR_Divisor)));
             }
         }
     }
