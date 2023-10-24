@@ -127,8 +127,7 @@ public sealed partial class Engine
                 }
 
                 // depth Already reduced by 2 in SearchResult constructor
-                depth = lastSearchResult.Depth + 1;
-                depth = Math.Clamp(depth, 1, Configuration.EngineSettings.MaxDepth - 1);
+                depth = Math.Clamp(lastSearchResult.Depth, 1, Configuration.EngineSettings.MaxDepth - 1);
             }
             else
             {
