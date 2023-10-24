@@ -126,7 +126,9 @@ public sealed partial class Engine
                     _killerMoves[1, d] = _previousKillerMoves[1, d + 2];
                 }
 
-                depth = lastSearchResult.Depth + 1; // Already reduced by 2
+                // depth Already reduced by 2 in SearchResult constructor
+                depth = lastSearchResult.Depth + 1;
+                depth = Math.Clamp(depth, 1, Configuration.EngineSettings.MaxDepth - 1);
             }
             else
             {
