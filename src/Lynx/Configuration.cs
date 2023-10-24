@@ -281,6 +281,8 @@ public sealed class EngineSettings
         new(53, 191),
         new(200));
 
+    public TaperedEvaluationTerm TempoBonus { get; set; } = new(5, 5);
+
     #endregion
 
     public bool TranspositionTableEnabled { get; set; } = true;

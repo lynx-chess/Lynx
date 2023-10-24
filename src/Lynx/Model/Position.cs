@@ -687,6 +687,9 @@ public class Position
             }
         }
 
+        middleGameScore += Configuration.EngineSettings.TempoBonus.MG;
+        endGameScore += Configuration.EngineSettings.TempoBonus.EG;
+
         const int maxPhase = 24;
 
         if (gamePhase > maxPhase)    // Early promotions
@@ -697,11 +700,11 @@ public class Position
         int endGamePhase = maxPhase - gamePhase;
         //_logger.Trace("Phase: {0}/24", gamePhase);
 
-        var eval = ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / maxPhase;
+        var score = ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / maxPhase;
 
         return Side == Side.White
-            ? eval
-            : -eval;
+            ? score
+            : -score;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
