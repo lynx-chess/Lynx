@@ -170,16 +170,15 @@ public sealed partial class Engine
 
                         window += window / 2;
 
+                        // Depth change: https://github.com/lynx-chess/Lynx/pull/440
                         if (alpha >= bestEvaluation)     // Fail low
                         {
                             alpha = Math.Max(bestEvaluation - window, MinValue);
                             beta = (alpha + beta) / 2;
-                            // TODO reset depth if it's reduced in the other case
                         }
                         else if (beta <= bestEvaluation)     // Fail high
                         {
                             beta = Math.Min(bestEvaluation + window, MaxValue);
-                            // TODO reduce depth
                         }
                     }
                 }
