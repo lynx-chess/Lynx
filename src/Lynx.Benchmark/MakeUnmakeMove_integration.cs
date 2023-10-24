@@ -1218,8 +1218,6 @@ public class MakeUnmakeMove_integration : BaseBenchmark
 
         public readonly BoardSquare EnPassant;
 
-        // TODO: save full Zobrist key?
-
         public MakeMoveGameState(int capturedPiece, int castle, BoardSquare enpassant)
         {
             CapturedPiece = capturedPiece;
@@ -1235,8 +1233,6 @@ public class MakeUnmakeMove_integration : BaseBenchmark
         public int Castle;
 
         public BoardSquare EnPassant;
-
-        // TODO: save full Zobrist key?
 
         public MakeMoveGameState_PassOut(int capturedPiece, int castle, BoardSquare enpassant)
         {

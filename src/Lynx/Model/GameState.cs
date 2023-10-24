@@ -9,8 +9,6 @@ public readonly struct GameState
 
     public readonly long ZobristKey;
 
-    // TODO: save full Zobrist key?
-
     public GameState(sbyte capturedPiece, byte castle, BoardSquare enpassant, long zobristKey)
     {
         CapturedPiece = capturedPiece;
