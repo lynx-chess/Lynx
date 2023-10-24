@@ -229,6 +229,8 @@ public sealed class EngineSettings
 
     public double DecisionTimePercentageToStopSearching { get; set; } = 0.4;
 
+    public int HardTimeBoundDivisor { get; set; } = 2;
+
     public int LMR_MinDepth { get; set; } = 3;
 
     public int LMR_MinFullDepthSearchedMoves { get; set; } = 4;

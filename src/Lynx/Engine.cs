@@ -116,7 +116,7 @@ public sealed partial class Engine
                 }
 
                 _logger.Info("Time to move: {0}s", 0.001 * decisionTime);
-                _searchCancellationTokenSource.CancelAfter(decisionTime!.Value);
+                _searchCancellationTokenSource.CancelAfter(decisionTime!.Value / Configuration.EngineSettings.HardTimeBoundDivisor);
             }
             else if (goCommand.MoveTime > 0)
             {
