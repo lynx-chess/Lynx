@@ -130,8 +130,9 @@ public sealed partial class Engine
             else
             {
                 Array.Clear(_killerMoves);
-                Array.Clear(_historyMoves);
             }
+
+            Array.Clear(_historyMoves);
 
             do
             {
