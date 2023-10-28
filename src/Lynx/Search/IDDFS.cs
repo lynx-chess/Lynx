@@ -257,8 +257,9 @@ public sealed partial class Engine
         {
             _logger.Debug("Ponder hit");
 
-            await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(new SearchResult(_previousSearchResult)));
-
+            lastSearchResult = new SearchResult(_previousSearchResult);
+            await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult));
+            
             Array.Copy(_previousSearchResult.Moves.ToArray(), 2, _pVTable, 0, _previousSearchResult.Moves.Count - 2);
 
             for (int d = 0; d < Configuration.EngineSettings.MaxDepth - 2; ++d)
@@ -267,8 +268,8 @@ public sealed partial class Engine
                 _killerMoves[1, d] = _previousKillerMoves[1, d + 2];
             }
 
-            // Re-search from depth 1
-            depth = 1;
+            // depth Already reduced by 2 in SearchResult constructor
+            depth = Math.Clamp(lastSearchResult.Depth, 1, Configuration.EngineSettings.MaxDepth - 1);
         }
         else
         {
