@@ -273,7 +273,7 @@ public sealed class EngineSettings
 
     public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(
         new(0),
-        new(-2, -5),
+        new(-2, 5),
         new(-13, 10),
         new(-12, 32),
         new(13, 62),
