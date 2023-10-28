@@ -62,7 +62,7 @@ public sealed partial class Engine
                 return onlyOneLegalMoveSearchResult;
             }
 
-            depth = await CheckPonderHit(depth);
+            depth = await CheckPonderHit(lastSearchResult, depth);
 
             do
             {
@@ -247,7 +247,7 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private async Task<int> CheckPonderHit(int depth)
+    private async Task<int> CheckPonderHit(SearchResult? lastSearchResult, int depth)
     {
         if (Game.MoveHistory.Count >= 2
             && _previousSearchResult?.Moves.Count > 2
@@ -257,7 +257,7 @@ public sealed partial class Engine
         {
             _logger.Debug("Ponder hit");
 
-            var lastSearchResult = new SearchResult(_previousSearchResult);
+            lastSearchResult = new SearchResult(_previousSearchResult);
             await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult));
 
             Array.Copy(_previousSearchResult.Moves.ToArray(), 2, _pVTable, 0, _previousSearchResult.Moves.Count - 2);
