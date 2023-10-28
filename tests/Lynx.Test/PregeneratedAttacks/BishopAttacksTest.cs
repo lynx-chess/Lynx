@@ -47,7 +47,7 @@ public class BishopAttacksTest
     }
 
     /// <summary>
-    /// Implicitly tests <see cref="AttackGenerator.InitializeBishopAttacks"/> and <see cref="Constants.BishopMagicNumbers"/>
+    /// Implicitly tests <see cref="AttackGenerator.InitializeBishopMagicAttacks"/> and <see cref="Constants.BishopMagicNumbers"/>
     /// </summary>
     /// <param name="bishopSquare"></param>
     /// <param name="occupiedSquares"></param>
@@ -76,6 +76,7 @@ public class BishopAttacksTest
 
         // Act
         var attacks = Attacks.BishopAttacks((int)bishopSquare, occupancy);
+        Assert.AreEqual(Attacks.MagicNumbersBishopAttacks((int)bishopSquare, occupancy), attacks);
 
         // Assert
         foreach (var attackedSquare in attackedSquares)

@@ -9,16 +9,16 @@ namespace Lynx.Test.BestMove;
 public class WACSilver200 : BaseTest
 {
     [Explicit]
-    [Category(nameof(WinningAtChess_10seconds))]
+    [Category(nameof(WinningAtChess_FixedTime))]
     [TestCaseSource(typeof(WACData), nameof(WACData.Data))]
     /// <summary>
-    /// 10s, see first case of <see cref="TimeManagementTest"/>
+    /// 5s
     /// </summary>
     /// <param name="fen"></param>
     /// <param name="bestMove"></param>
-    public async Task WinningAtChess_10seconds(string fen, string bestMove, string id)
+    public async Task WinningAtChess_FixedTime(string fen, string bestMove, string id)
     {
-        await VerifyBestMove(fen, bestMove, id, new GoCommand($"go btime {2_000} wtime {2_000} winc {11_111} binc {11_111} movestogo {1}"));
+        await VerifyBestMove(fen, bestMove, id, new GoCommand("go wtime 5500 btime 5500 winc 0 binc 0 movestogo 1"));
     }
 
     [Explicit]

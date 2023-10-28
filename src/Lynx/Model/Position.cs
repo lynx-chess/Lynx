@@ -30,12 +30,17 @@ public class Position
     /// </summary>
     public byte Castle { get; private set; }
 
+    /// <summary>
+    /// Beware, half move coutner isn't take into account
+    /// Use alternative cosntructor instead and set it externally if relevant
+    /// </summary>
+    /// <param name="fen"></param>
     public Position(string fen) : this(FENParser.ParseFEN(fen))
     {
     }
 
     public Position((BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, byte Castle, BoardSquare EnPassant,
-        int HalfMoveClock/*, int FullMoveCounter*/) parsedFEN)
+        int _/*, int FullMoveCounter*/) parsedFEN)
     {
         PieceBitBoards = parsedFEN.PieceBitBoards;
         OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
@@ -44,8 +49,6 @@ public class Position
         EnPassant = parsedFEN.EnPassant;
 
         UniqueIdentifier = ZobristTable.PositionHash(this);
-
-        // TODO: half move and full move counters
     }
 
     /// <summary>
@@ -588,16 +591,16 @@ public class Position
     /// </summary>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int StaticEvaluation(int movesWithoutCaptureOrPawnMove, CancellationToken cancellationToken = default)
+    public int StaticEvaluation(int movesWithoutCaptureOrPawnMove)
     {
-        var result = OnlineTablebaseProber.EvaluationSearch(this, movesWithoutCaptureOrPawnMove, cancellationToken);
-        Debug.Assert(result < EvaluationConstants.CheckMateBaseEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
-        Debug.Assert(result > -EvaluationConstants.CheckMateBaseEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
+        //var result = OnlineTablebaseProber.EvaluationSearch(this, movesWithoutCaptureOrPawnMove, cancellationToken);
+        //Debug.Assert(result < EvaluationConstants.CheckMateBaseEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
+        //Debug.Assert(result > -EvaluationConstants.CheckMateBaseEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
 
-        if (result != OnlineTablebaseProber.NoResult)
-        {
-            return result;
-        }
+        //if (result != OnlineTablebaseProber.NoResult)
+        //{
+        //    return result;
+        //}
 
         var pieceCount = new int[PieceBitBoards.Length];
 

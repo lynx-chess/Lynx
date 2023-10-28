@@ -120,15 +120,14 @@ public sealed partial class Engine
 
                 await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult));
 
-                for (int d = 1; d < Configuration.EngineSettings.MaxDepth - 2; ++d)
+                for (int d = 0; d < Configuration.EngineSettings.MaxDepth - 2; ++d)
                 {
                     _killerMoves[0, d] = _previousKillerMoves[0, d + 2];
                     _killerMoves[1, d] = _previousKillerMoves[1, d + 2];
                 }
 
-                depth = lastSearchResult.Depth - 1;
-                alpha = lastSearchResult.Alpha;
-                beta = lastSearchResult.Beta;
+                // depth Already reduced by 2 in SearchResult constructor
+                depth = Math.Clamp(lastSearchResult.Depth, 1, Configuration.EngineSettings.MaxDepth - 1);
             }
             else
             {
@@ -146,26 +145,44 @@ public sealed partial class Engine
                 }
                 _nodes = 0;
 
-                AspirationWindows_SearchAgain:
-
-                _isFollowingPV = true;
-                bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta, isVerifyingNullMoveCutOff: true); ;
-
-                var bestEvaluationAbs = Math.Abs(bestEvaluation);
-                isMateDetected = bestEvaluationAbs > EvaluationConstants.PositiveCheckmateDetectionLimit;
-
-                // 🔍 Aspiration Windows
-                if (!isMateDetected && ((bestEvaluation <= alpha) || (bestEvaluation >= beta)))
+                if (depth < Configuration.EngineSettings.AspirationWindowMinDepth || lastSearchResult?.Evaluation is null)
                 {
-                    alpha = MinValue;   // We fell outside the window, so try again with a
-                    beta = MaxValue;    // full-width window (and the same depth).
-
-                    _logger.Debug("Outside of aspiration window (depth {0}, nodes {1}): eval {2}, alpha {3}, beta {4}", depth, _nodes, bestEvaluation, alpha, beta);
-                    goto AspirationWindows_SearchAgain;
+                    bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta, isVerifyingNullMoveCutOff: true);
                 }
+                else
+                {
+                    // 🔍 Aspiration Windows
+                    var window = Configuration.EngineSettings.AspirationWindowDelta;
 
-                alpha = bestEvaluation - Configuration.EngineSettings.AspirationWindowAlpha;
-                beta = bestEvaluation + Configuration.EngineSettings.AspirationWindowBeta;
+                    alpha = Math.Max(MinValue, lastSearchResult.Evaluation - window);
+                    beta = Math.Min(MaxValue, lastSearchResult.Evaluation + window);
+
+                    while (true)
+                    {
+                        _isFollowingPV = true;
+                        bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta, isVerifyingNullMoveCutOff: true);
+
+                        if (alpha < bestEvaluation && beta > bestEvaluation)
+                        {
+                            break;
+                        }
+
+                        _logger.Debug("Eval ({0}) outside of aspiration window [{1}, {2}] (depth {3}, nodes {4})", bestEvaluation, alpha, beta, depth, _nodes);
+
+                        window += window / 2;
+
+                        // Depth change: https://github.com/lynx-chess/Lynx/pull/440
+                        if (alpha >= bestEvaluation)     // Fail low
+                        {
+                            alpha = Math.Max(bestEvaluation - window, MinValue);
+                            beta = (alpha + beta) / 2;
+                        }
+                        else if (beta <= bestEvaluation)     // Fail high
+                        {
+                            beta = Math.Min(bestEvaluation + window, MaxValue);
+                        }
+                    }
+                }
 
                 //PrintPvTable(depth: depth);
                 ValidatePVTable();
@@ -174,6 +191,8 @@ public sealed partial class Engine
                 var maxDepthReached = _maxDepthReached.LastOrDefault(item => item != default);
 
                 int mate = default;
+                var bestEvaluationAbs = Math.Abs(bestEvaluation);
+                isMateDetected = bestEvaluationAbs > EvaluationConstants.PositiveCheckmateDetectionLimit;
                 if (isMateDetected)
                 {
                     mate = Utils.CalculateMateInX(bestEvaluation, bestEvaluationAbs);
@@ -215,7 +234,15 @@ public sealed partial class Engine
             _stopWatch.Stop();
         }
 
-        SearchResult finalSearchResult = lastSearchResult ??= new(default, bestEvaluation, depth, new List<Move>(), alpha, beta);
+        SearchResult finalSearchResult;
+        if (lastSearchResult is null)
+        {
+            finalSearchResult = new(default, bestEvaluation, depth, new List<Move>(), alpha, beta);
+        }
+        else
+        {
+            finalSearchResult = _previousSearchResult = lastSearchResult;
+        }
 
         finalSearchResult.IsCancelled = isCancelled;
         finalSearchResult.DepthReached = Math.Max(finalSearchResult.DepthReached, _maxDepthReached.LastOrDefault(item => item != default));

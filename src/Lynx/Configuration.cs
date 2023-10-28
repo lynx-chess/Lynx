@@ -229,17 +229,25 @@ public sealed class EngineSettings
 
     public double DecisionTimePercentageToStopSearching { get; set; } = 0.4;
 
+    public int LMR_MinDepth { get; set; } = 3;
+
     public int LMR_MinFullDepthSearchedMoves { get; set; } = 4;
 
-    public int LMR_MaxDepth { get; set; } = 3;
+    /// <summary>
+    /// Value originally from Stormphrax, who apparently took it from Viridithas
+    /// </summary>
+    public double LMR_Base { get; set; } = 0.77;
 
-    public int LMR_DepthReduction { get; set; } = 1;
+    /// <summary>
+    /// Value originally from Akimbo
+    /// </summary>
+    public double LMR_Divisor { get; set; } = 2.67;
 
     public int NMP_DepthReduction { get; set; } = 3;
 
-    public int AspirationWindowAlpha { get; set; } = 50;
+    public int AspirationWindowDelta { get; set; } = 50;
 
-    public int AspirationWindowBeta { get; set; } = 50;
+    public int AspirationWindowMinDepth { get; set; } = 6;
 
     #region Evaluation
 
@@ -304,6 +312,14 @@ public sealed class EngineSettings
     public int RFP_DepthScalingFactor { get; set; } = 75;
 
     public bool ShowWDL { get; set; } = false;
+
+    public int Razoring_MaxDepth { get; set; } = 2;
+
+    public int Razoring_Depth1Bonus { get; set; } = 125;
+
+    public int Razoring_NotDepth1Bonus { get; set; } = 175;
+
+    public int MaxHistoryMoveValue { get; set; } = 8_192;
 }
 
 [JsonSourceGenerationOptions(

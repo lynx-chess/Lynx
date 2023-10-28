@@ -97,9 +97,11 @@ jobs:
         if-no-files-found: error
 
     - name: Publish library
+      if: matrix.os == 'ubuntu-latest'
       run: dotnet pack -c Release --no-build src/Lynx/Lynx.csproj --include-symbols -o artifacts/nuget
 
     - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }} NuGet package
+      if: matrix.os == 'ubuntu-latest'
       uses: actions/upload-artifact@v3
       with:
         name: Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}
@@ -277,7 +279,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        category: [WinningAtChess_10seconds]
+        category: [WinningAtChess_FixedTime]
       fail-fast: false
 
     steps:

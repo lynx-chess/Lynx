@@ -1218,8 +1218,6 @@ public class MakeUnmakeMove_integration : BaseBenchmark
 
         public readonly BoardSquare EnPassant;
 
-        // TODO: save full Zobrist key?
-
         public MakeMoveGameState(int capturedPiece, int castle, BoardSquare enpassant)
         {
             CapturedPiece = capturedPiece;
@@ -1235,8 +1233,6 @@ public class MakeUnmakeMove_integration : BaseBenchmark
         public int Castle;
 
         public BoardSquare EnPassant;
-
-        // TODO: save full Zobrist key?
 
         public MakeMoveGameState_PassOut(int capturedPiece, int castle, BoardSquare enpassant)
         {
@@ -1671,8 +1667,8 @@ public class MakeUnmakeMove_integration : BaseBenchmark
             PawnAttacks = AttackGenerator.InitializePawnAttacks();
             KnightAttacks = AttackGenerator.InitializeKnightAttacks();
 
-            (_bishopOccupancyMasks, _bishopAttacks) = AttackGenerator.InitializeBishopAttacks();
-            (_rookOccupancyMasks, _rookAttacks) = AttackGenerator.InitializeRookAttacks();
+            (_bishopOccupancyMasks, _bishopAttacks) = AttackGenerator.InitializeBishopMagicAttacks();
+            (_rookOccupancyMasks, _rookAttacks) = AttackGenerator.InitializeRookMagicAttacks();
         }
 
         /// <summary>
