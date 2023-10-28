@@ -168,6 +168,18 @@ public static class EvaluationConstants
             -45, 33, 6, -71, -8, -65, 20, 20,
     ];
 
+    public static readonly int[] EndGameKingTable =
+    [
+            -68, -43, -22, 4, -23, 4, -26, -65,
+            -35, 1, 26, 34, 36, 28, 11, -12,
+            8, 19, 36, 45, 50, 48, 34, 18,
+            9, 29, 47, 63, 60, 56, 43, 20,
+            3, 21, 53, 65, 68, 65, 60, 38,
+            9, 29, 50, 59, 65, 66, 53, 25,
+            4, 23, 38, 55, 55, 51, 27, 0,
+            -34, -32, -4, 23, -7, 21, -12, -43,
+    ];
+
     public static readonly int[] MiddleGamePawnTableBlack = MiddleGamePawnTable.Select((_, index) => -MiddleGamePawnTable[index ^ 56]).ToArray();
     public static readonly int[] EndGamePawnTableBlack = EndGamePawnTable.Select((_, index) => -EndGamePawnTable[index ^ 56]).ToArray();
 
