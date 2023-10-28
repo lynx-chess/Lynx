@@ -1,5 +1,6 @@
 ﻿using Lynx.Model;
 using Lynx.UCI.Commands.Engine;
+using NLog.Targets;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -62,7 +63,11 @@ public sealed partial class Engine
                 return onlyOneLegalMoveSearchResult;
             }
 
-            depth = await CheckPonderHit(lastSearchResult, depth);
+            depth = CheckPonderHit(ref lastSearchResult, depth);
+            if (lastSearchResult is not null)
+            {
+                await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult));
+            }
 
             do
             {
@@ -247,7 +252,7 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private async Task<int> CheckPonderHit(SearchResult? lastSearchResult, int depth)
+    private int CheckPonderHit(ref SearchResult? lastSearchResult, int depth)
     {
         if (Game.MoveHistory.Count >= 2
             && _previousSearchResult?.Moves.Count > 2
@@ -258,7 +263,6 @@ public sealed partial class Engine
             _logger.Debug("Ponder hit");
 
             lastSearchResult = new SearchResult(_previousSearchResult);
-            await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult));
 
             Array.Copy(_previousSearchResult.Moves.ToArray(), 2, _pVTable, 0, _previousSearchResult.Moves.Count - 2);
 
