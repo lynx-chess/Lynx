@@ -257,9 +257,9 @@ public sealed partial class Engine
         {
             _logger.Debug("Ponder hit");
 
-            lastSearchResult = new SearchResult(_previousSearchResult);
+            var lastSearchResult = new SearchResult(_previousSearchResult);
             await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult));
-            
+
             Array.Copy(_previousSearchResult.Moves.ToArray(), 2, _pVTable, 0, _previousSearchResult.Moves.Count - 2);
 
             for (int d = 0; d < Configuration.EngineSettings.MaxDepth - 2; ++d)
