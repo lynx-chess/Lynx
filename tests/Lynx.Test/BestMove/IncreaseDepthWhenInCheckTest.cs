@@ -3,7 +3,7 @@ using Lynx.UCI.Commands.GUI;
 using NUnit.Framework;
 
 namespace Lynx.Test.BestMove;
-public class IncreaseDepthWhenInCheck : BaseTest
+public class IncreaseDepthWhenInCheckTest : BaseTest
 {
     /// <summary>
     /// 8   . r . . . . . .
