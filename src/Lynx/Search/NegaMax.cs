@@ -17,10 +17,8 @@ public sealed partial class Engine
     /// Best score Side's to move's opponent can achieve, assuming best play by Side to move.
     /// Defaults to the worse possible score for Side to move's opponent, Int.MaxValue
     /// </param>
-    /// <param name="isVerifyingNullMoveCutOff">Indicates if the search is verifying an ancestors null-move that failed high, or the root node</param>
-    /// <param name="ancestorWasNullMove">Indicates whether the immediate ancestor node was a null move</param>
     /// <returns></returns>
-    private int NegaMax(int depth, int ply, int alpha, int beta, bool isVerifyingNullMoveCutOff, bool ancestorWasNullMove = false)
+    private int NegaMax(int depth, int ply, int alpha, int beta)
     {
         var position = Game.CurrentPosition;
 
@@ -72,38 +70,6 @@ public sealed partial class Engine
             _tt.RecordHash(_ttMask, position, depth, ply, finalPositionEvaluation, NodeType.Exact);
             return finalPositionEvaluation;
         }
-
-        // 🔍 Verified Null-move pruning (NMP) - https://www.researchgate.net/publication/297377298_Verified_Null-Move_Pruning
-        bool isFailHigh = false;    // In order to detect zugzwangs
-        if (depth > Configuration.EngineSettings.NMP_DepthReduction
-            && !isInCheck
-            && !ancestorWasNullMove
-            /*&& (!isVerifyingNullMoveCutOff || depth > 1)*/)    // verify == true and ply == targetDepth -1 -> No null pruning, since verification will not be possible)
-                                                                 // following pv?
-        {
-            var gameState = position.MakeNullMove();
-
-            var evaluation = -NegaMax(depth - 1 - Configuration.EngineSettings.NMP_DepthReduction, ply + 1, -beta, -beta + 1, isVerifyingNullMoveCutOff, ancestorWasNullMove: true);
-
-            position.UnMakeNullMove(gameState);
-
-            if (evaluation >= beta) // Fail high
-            {
-                if (isVerifyingNullMoveCutOff)
-                {
-                    --depth;
-                    isVerifyingNullMoveCutOff = false;
-                    isFailHigh = true;
-                }
-                else
-                {
-                    // cutoff in a sub-tree with fail-high report
-                    return evaluation;
-                }
-            }
-        }
-
-        VerifiedNullMovePruning_SearchAgain:
 
         if (!pvNode && !isInCheck && depth <= Configuration.EngineSettings.RFP_MaxDepth)
         {
@@ -188,7 +154,7 @@ public sealed partial class Engine
             }
             else if (pvNode && movesSearched == 0)
             {
-                evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
+                evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
             }
             else
             {
@@ -218,7 +184,7 @@ public sealed partial class Engine
                 }
 
                 // Search with reduced depth
-                evaluation = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
+                evaluation = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha);
 
                 // 🔍 Principal Variation Search (PVS)
                 if (evaluation > alpha && reduction > 0)
@@ -228,13 +194,13 @@ public sealed partial class Engine
                     // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
 
                     // Search with full depth but narrowed score bandwidth
-                    evaluation = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
+                    evaluation = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha);
                 }
 
                 if (evaluation > alpha && evaluation < beta)
                 {
                     // PVS Hipothesis invalidated -> search with full depth and full score bandwidth
-                    evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
+                    evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
                 }
             }
 
@@ -286,15 +252,6 @@ public sealed partial class Engine
             }
 
             ++movesSearched;
-        }
-
-        // [Null-move pruning] If there is a fail-high report, but no cutoff was found, the position is a zugzwang and has to be re-searched with the original depth
-        if (isFailHigh && alpha < beta)
-        {
-            ++depth;
-            isFailHigh = false;
-            isVerifyingNullMoveCutOff = true;
-            goto VerifiedNullMovePruning_SearchAgain;
         }
 
         if (bestMove is null && !isAnyMoveValid)
