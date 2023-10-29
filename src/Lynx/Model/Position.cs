@@ -675,7 +675,7 @@ public class Position
 
             if (whiteCannotWin)
             {
-                return 0;
+                return new EvaluationResult(0, gamePhase);
             }
         }
         else
@@ -686,7 +686,7 @@ public class Position
 
             if (blackCannotWin)
             {
-                return 0;
+                return new EvaluationResult(0, gamePhase);
             }
         }
 
@@ -702,9 +702,11 @@ public class Position
 
         var eval = ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / maxPhase;
 
-        return Side == Side.White
+        var evalToReturn = Side == Side.White
             ? eval
             : -eval;
+
+        return new EvaluationResult(eval, gamePhase);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
