@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using Polly.Caching;
 
 namespace Lynx;
 
@@ -18,7 +19,7 @@ public sealed partial class Engine
     /// Defaults to the worse possible score for Side to move's opponent, Int.MaxValue
     /// </param>
     /// <returns></returns>
-    private int NegaMax(int depth, int ply, int alpha, int beta, bool ancestorWasNullMove = false)
+    private int NegaMax(int depth, int ply, int alpha, int beta, bool parentWasNullMove = false)
     {
         var position = Game.CurrentPosition;
 
@@ -38,16 +39,22 @@ public sealed partial class Engine
 
         bool isRoot = ply == 0;
         bool pvNode = beta - alpha > 1;
+
         Move ttBestMove = default;
+        NodeType ttElementType = default;
+        int ttEval = EvaluationConstants.NoHashEntry;
 
         if (!isRoot)
         {
-            var ttProbeResult = _tt.ProbeHash(_ttMask, position, depth, ply, alpha, beta);
-            if (ttProbeResult.Evaluation != EvaluationConstants.NoHashEntry)
+            var ttEntry = _tt.ProbeHash(_ttMask, position, depth, ply, alpha, beta);
+            if (ttEntry.Evaluation != EvaluationConstants.NoHashEntry)
             {
-                return ttProbeResult.Evaluation;
+                return ttEntry.Evaluation;
             }
-            ttBestMove = ttProbeResult.BestMove;
+
+            ttEval = ttEntry.Evaluation;
+            ttBestMove = ttEntry.BestMove;
+            ttElementType = ttEntry.Type;
         }
 
         // Before any time-consuming operations
@@ -79,9 +86,11 @@ public sealed partial class Engine
             // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving ouropponent a double move and still remain ahead of beta
             if (depth >= Configuration.EngineSettings.NMP_MinDepth
                 && staticEval >= beta
-                && !ancestorWasNullMove
-            //(!ttHit || !(ttBound & BOUND_UPPER) || ttValue >= beta)
-                && staticEvalResult.Phase > 2)   // Zugzwang risk reduction: pieces other than pawn presents
+                && !parentWasNullMove                           // We'd get to the same position
+                && (ttEval == EvaluationConstants.NoHashEntry
+                    || ttElementType != NodeType.Alpha          // Not a fail low entry
+                    || ttEval >= beta))                         // If it is, its score should be over beta
+            //&& staticEvalResult.Phase > 2)   // Zugzwang risk reduction: pieces other than pawn presents
             {
                 var nmpReduction =
                     Configuration.EngineSettings.NMP_BaseDepthReduction;
@@ -92,7 +101,7 @@ public sealed partial class Engine
                 // TODO adaptative reduction
 
                 var gameState = position.MakeNullMove();
-                var evaluation = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, ancestorWasNullMove: true);
+                var evaluation = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, parentWasNullMove: true);
                 position.UnMakeNullMove(gameState);
 
                 if (evaluation >= beta)
