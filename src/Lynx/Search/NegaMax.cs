@@ -87,15 +87,15 @@ public sealed partial class Engine
             if (depth >= Configuration.EngineSettings.NMP_MinDepth
                 && staticEval >= beta
                 && !parentWasNullMove                           // We'd get to the same position
+                && staticEvalResult.Phase > 2   // Zugzwang risk reduction: pieces other than pawn presents
                 && (ttEval == EvaluationConstants.NoHashEntry
                     || ttElementType != NodeType.Alpha          // Not a fail low entry
                     || ttEval >= beta))                         // If it is, its score should be over beta
-            //&& staticEvalResult.Phase > 2)   // Zugzwang risk reduction: pieces other than pawn presents
             {
                 var nmpReduction =
-                    Configuration.EngineSettings.NMP_BaseDepthReduction;
-                //+ (depth / Configuration.EngineSettings.NMP_DepthIncrementDivisor);
-                //+ (staticEval - beta) / Configuration.EngineSettings.NMP_StaticEvalBetaDeltaIncrementDivisor;
+                    Configuration.EngineSettings.NMP_BaseDepthReduction
+                + (depth / Configuration.EngineSettings.NMP_DepthIncrementDivisor)
+                + ((staticEval - beta) / Configuration.EngineSettings.NMP_StaticEvalBetaDeltaIncrementDivisor);
                 //+ Math.Min((staticEval - beta) / Configuration.EngineSettings.NMP_StaticEvalBetaDeltaIncrementDivisor, 3);
 
                 // TODO adaptative reduction
