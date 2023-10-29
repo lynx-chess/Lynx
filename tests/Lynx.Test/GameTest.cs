@@ -158,7 +158,7 @@ public class GameTest : BaseTest
         Assert.DoesNotThrow(() => game.MakeMove(repeatedMoves[^1]));
         Assert.AreEqual(repeatedMoves.Count, game.MoveHistory.Count);
 
-        var eval = winningPosition.StaticEvaluation(default);
+        var eval = winningPosition.StaticEvaluation().Evaluation;
         Assert.AreNotEqual(0, eval);
 
         Assert.DoesNotThrow(() => game.MakeMove(repeatedMoves[5]));

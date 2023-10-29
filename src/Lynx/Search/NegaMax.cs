@@ -26,7 +26,7 @@ public sealed partial class Engine
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
             _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
-            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
+            return position.StaticEvaluation().Evaluation;
         }
 
         _maxDepthReached[ply] = ply;
@@ -73,19 +73,20 @@ public sealed partial class Engine
 
         if (!pvNode && !isInCheck)
         {
-            var staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
+            var staticEvalResult = position.StaticEvaluation();
+            var staticEval = staticEvalResult.Evaluation;
 
             // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving ouropponent a double move and still remain ahead of beta
             if (depth >= Configuration.EngineSettings.NMP_MinDepth
                 && staticEval >= beta
-                && !ancestorWasNullMove)
+                && !ancestorWasNullMove
             //(!ttHit || !(ttBound & BOUND_UPPER) || ttValue >= beta)
-            //&& staticEvalResult.Phase > 1)   // Zugzwang risk reduction: pieces other than pawn presents
+                && staticEvalResult.Phase > 2)   // Zugzwang risk reduction: pieces other than pawn presents
             {
                 var nmpReduction =
-                    Configuration.EngineSettings.NMP_BaseDepthReduction
-                    //+ (depth / Configuration.EngineSettings.NMP_DepthIncrementDivisor);
-                    + (staticEval - beta) / Configuration.EngineSettings.NMP_StaticEvalBetaDeltaIncrementDivisor;
+                    Configuration.EngineSettings.NMP_BaseDepthReduction;
+                //+ (depth / Configuration.EngineSettings.NMP_DepthIncrementDivisor);
+                //+ (staticEval - beta) / Configuration.EngineSettings.NMP_StaticEvalBetaDeltaIncrementDivisor;
                 //+ Math.Min((staticEval - beta) / Configuration.EngineSettings.NMP_StaticEvalBetaDeltaIncrementDivisor, 3);
 
                 // TODO adaptative reduction
@@ -337,7 +338,7 @@ public sealed partial class Engine
 
         _maxDepthReached[ply] = ply;
 
-        var staticEvaluation = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
+        var staticEvaluation = position.StaticEvaluation().Evaluation;
 
         // Fail-hard beta-cutoff (updating alpha after this check)
         if (staticEvaluation >= beta)

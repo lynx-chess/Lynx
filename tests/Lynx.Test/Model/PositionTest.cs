@@ -176,7 +176,7 @@ public class PositionTest
     {
         var position = new Position(fen);
 
-        Assert.AreEqual(0, position.StaticEvaluation(default));
+        Assert.AreEqual(0, position.StaticEvaluation().Evaluation);
     }
 
     [TestCase("4k3/8/8/7Q/7q/8/4K3/8 w - - 0 1", "4k3/8/8/7Q/7q/8/8/4K3 w - - 0 1", Description = "King in 7th rank with queens > King in 8th rank with queens")]
@@ -184,7 +184,7 @@ public class PositionTest
     [TestCase("4k3/7p/8/8/4K3/8/7P/8 w - - 0 1", "4k3/7p/8/q7/4K3/Q7/7P/8 w - - 0 1", Description = "King in the center without queens > King in the center with queens")]
     public void StaticEvaluation_KingEndgame(string fen1, string fen2)
     {
-        Assert.Greater(new Position(fen1).StaticEvaluation(default), new Position(fen2).StaticEvaluation(default));
+        Assert.Greater(new Position(fen1).StaticEvaluation().Evaluation, new Position(fen2).StaticEvaluation().Evaluation);
     }
 
     /// <summary>
