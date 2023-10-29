@@ -86,7 +86,6 @@ public sealed partial class Engine
                     Configuration.EngineSettings.NMP_BaseDepthReduction
                     + (depth / Configuration.EngineSettings.NMP_DepthIncrementDivisor);
 
-                Math.Clamp(nmpReduction, 0, depth - 2);
                 // TODO adaptative reduction
                 //    + Math.Min((staticEval - beta) / 200, 3));
 
