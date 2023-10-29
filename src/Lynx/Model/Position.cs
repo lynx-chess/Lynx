@@ -591,7 +591,7 @@ public class Position
     /// </summary>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public EvaluationResult StaticEvaluation()
+    public (int Evaluation, int Phase) StaticEvaluation()
     {
         //var result = OnlineTablebaseProber.EvaluationSearch(this, movesWithoutCaptureOrPawnMove, cancellationToken);
         //Debug.Assert(result < EvaluationConstants.CheckMateBaseEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
@@ -675,7 +675,7 @@ public class Position
 
             if (whiteCannotWin)
             {
-                return new EvaluationResult(0, gamePhase);
+                return (0, gamePhase);
             }
         }
         else
@@ -686,7 +686,7 @@ public class Position
 
             if (blackCannotWin)
             {
-                return new EvaluationResult(0, gamePhase);
+                return (0, gamePhase);
             }
         }
 
@@ -706,7 +706,7 @@ public class Position
             ? eval
             : -eval;
 
-        return new EvaluationResult(eval, gamePhase);
+        return (evalToReturn, gamePhase);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
