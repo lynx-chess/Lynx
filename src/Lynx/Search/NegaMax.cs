@@ -71,42 +71,68 @@ public sealed partial class Engine
             return finalPositionEvaluation;
         }
 
-        if (!pvNode && !isInCheck && depth <= Configuration.EngineSettings.RFP_MaxDepth)
+        if (!pvNode && !isInCheck)
         {
-            int staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
+            var staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
 
-            // 🔍 Reverse FutilityPrunning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
-            if (staticEval - (Configuration.EngineSettings.RFP_DepthScalingFactor * depth) >= beta)
+            // 🔍 Null Move Pruning (NMP)
+            if (depth >= Configuration.EngineSettings.NMP_MinDepth
+                && staticEval >= beta   // Our position is so good that we can't potentially afford giving our opponent a null move
+                )
+            //&& !ancestorWasNullMove
+            //&& staticEvalResult.Phase > 1)   // Zugzwang risk reduction: pieces other than pawn presents
             {
-                return staticEval;
+                var nmpReduction = Configuration.EngineSettings.NMP_DepthReduction;
+                // TODO adaptative reduction
+                //var nmpReduction = Math.Min(
+                //    depth,
+                //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
+
+                var gameState = position.MakeNullMove();
+                var evaluation = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1);
+                position.UnMakeNullMove(gameState);
+
+                if (evaluation >= beta)
+                {
+                    return evaluation;
+                }
             }
 
-            // 🔍 Razoring - Strelka impl (CPW) - https://www.chessprogramming.org/Razoring#Strelka
-            if (depth <= Configuration.EngineSettings.Razoring_MaxDepth)
+            if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
             {
-                var score = staticEval + Configuration.EngineSettings.Razoring_Depth1Bonus;
-
-                if (score < beta)               // Static evaluation + bonus indicates fail-low node
+                // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
+                if (staticEval - (Configuration.EngineSettings.RFP_DepthScalingFactor * depth) >= beta)
                 {
-                    if (depth == 1)
+                    return staticEval;
+                }
+
+                // 🔍 Razoring - Strelka impl (CPW) - https://www.chessprogramming.org/Razoring#Strelka
+                if (depth <= Configuration.EngineSettings.Razoring_MaxDepth)
+                {
+                    var score = staticEval + Configuration.EngineSettings.Razoring_Depth1Bonus;
+
+                    if (score < beta)               // Static evaluation + bonus indicates fail-low node
                     {
-                        var qSearchScore = QuiescenceSearch(ply, alpha, beta);
-
-                        return qSearchScore > score
-                            ? qSearchScore
-                            : score;
-                    }
-
-                    score += Configuration.EngineSettings.Razoring_NotDepth1Bonus;
-
-                    if (score < beta)               // Static evaluation indicates fail-low node
-                    {
-                        var qSearchScore = QuiescenceSearch(ply, alpha, beta);
-                        if (qSearchScore < beta)    // Quiescence score also indicates fail-low node
+                        if (depth == 1)
                         {
+                            var qSearchScore = QuiescenceSearch(ply, alpha, beta);
+
                             return qSearchScore > score
                                 ? qSearchScore
                                 : score;
+                        }
+
+                        score += Configuration.EngineSettings.Razoring_NotDepth1Bonus;
+
+                        if (score < beta)               // Static evaluation indicates fail-low node
+                        {
+                            var qSearchScore = QuiescenceSearch(ply, alpha, beta);
+                            if (qSearchScore < beta)    // Quiescence score also indicates fail-low node
+                            {
+                                return qSearchScore > score
+                                    ? qSearchScore
+                                    : score;
+                            }
                         }
                     }
                 }
