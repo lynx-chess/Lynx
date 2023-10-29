@@ -84,10 +84,11 @@ public sealed partial class Engine
             {
                 var nmpReduction =
                     Configuration.EngineSettings.NMP_BaseDepthReduction
-                    + (depth / Configuration.EngineSettings.NMP_DepthIncrementDivisor);
+                    //+ (depth / Configuration.EngineSettings.NMP_DepthIncrementDivisor);
+                    + (staticEval - beta) / Configuration.EngineSettings.NMP_StaticEvalBetaDeltaIncrementDivisor;
+                //+ Math.Min((staticEval - beta) / Configuration.EngineSettings.NMP_StaticEvalBetaDeltaIncrementDivisor, 3);
 
                 // TODO adaptative reduction
-                //    + Math.Min((staticEval - beta) / 200, 3));
 
                 var gameState = position.MakeNullMove();
                 var evaluation = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, ancestorWasNullMove: true);
