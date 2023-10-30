@@ -144,11 +144,45 @@ public sealed partial class Engine
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
-        var pseudoLegalMoves = SortMoves(MoveGenerator.GenerateAllMoves(position, Game.MovePool), ply, ttBestMove);
+        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, Game.MovePool);
 
-        for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count; ++moveIndex)
+        var scores = new int[pseudoLegalMoves.Length];
+        if (_isFollowingPV)
         {
-            var move = pseudoLegalMoves[moveIndex];
+            _isFollowingPV = false;
+            for (int i = 0; i < pseudoLegalMoves.Length; ++i)
+            {
+                scores[i] = ScoreMove(pseudoLegalMoves[i], ply, true, ttBestMove);
+
+                if (pseudoLegalMoves[i] == _pVTable[depth])
+                {
+                    _isFollowingPV = true;
+                    _isScoringPV = true;
+                }
+            }
+        }
+        else
+        {
+            for (int i = 0; i < pseudoLegalMoves.Length; ++i)
+            {
+                scores[i] = ScoreMove(pseudoLegalMoves[i], ply, true, ttBestMove);
+            }
+        }
+
+        for (int i = 0; i < pseudoLegalMoves.Length; ++i)
+        {
+            // Incremental move sorting, inspired by https://github.com/jw1912/Chess-Challenge and suggested by toanth
+            // There's no need to sort all the moves since most of them don't get checked anyway
+            // So just find the first unsearched one with the best score and try it
+            for (int j = i + 1; j < pseudoLegalMoves.Length; j++)
+            {
+                if (scores[j] > scores[i])
+                {
+                    (scores[i], scores[j], pseudoLegalMoves[i], pseudoLegalMoves[j]) = (scores[j], scores[i], pseudoLegalMoves[j], pseudoLegalMoves[i]);
+                }
+            }
+
+            var move = pseudoLegalMoves[i];
 
             var gameState = position.MakeMove(move);
 
@@ -350,8 +384,8 @@ public sealed partial class Engine
             alpha = staticEvaluation;
         }
 
-        var generatedMoves = MoveGenerator.GenerateAllMoves(position, Game.MovePool, capturesOnly: true);
-        if (!generatedMoves.Any())
+        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, Game.MovePool, capturesOnly: true);
+        if (pseudoLegalMoves.Length == 0)
         {
             // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358
             return staticEvaluation;
@@ -361,10 +395,27 @@ public sealed partial class Engine
         Move? bestMove = null;
         bool isThereAnyValidCapture = false;
 
-        var pseudoLegalMoves = generatedMoves.OrderByDescending(move => ScoreMove(move, ply, false, ttBestMove));
-
-        foreach (var move in pseudoLegalMoves)
+        var scores = new int[pseudoLegalMoves.Length];
+        for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
+            scores[i] = ScoreMove(pseudoLegalMoves[i], ply, false, ttBestMove);
+        }
+
+        for (int i = 0; i < pseudoLegalMoves.Length; ++i)
+        {
+            // Incremental move sorting, inspired by https://github.com/jw1912/Chess-Challenge and suggested by toanth
+            // There's no need to sort all the moves since most of them don't get checked anyway
+            // So just find the first unsearched one with the best score and try it
+            for (int j = i + 1; j < pseudoLegalMoves.Length; j++)
+            {
+                if (scores[j] > scores[i])
+                {
+                    (scores[i], scores[j], pseudoLegalMoves[i], pseudoLegalMoves[j]) = (scores[j], scores[i], pseudoLegalMoves[j], pseudoLegalMoves[i]);
+                }
+            }
+
+            var move = pseudoLegalMoves[i];
+
             var gameState = position.MakeMove(move);
             if (!position.WasProduceByAValidMove())
             {
