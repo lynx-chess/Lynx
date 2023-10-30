@@ -28,7 +28,7 @@ public sealed partial class Engine
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
             _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
-            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
+            return position.StaticEvaluation();
         }
 
         _maxDepthReached[ply] = ply;
@@ -107,7 +107,7 @@ public sealed partial class Engine
 
         if (!pvNode && !isInCheck && depth <= Configuration.EngineSettings.RFP_MaxDepth)
         {
-            int staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
+            int staticEval = position.StaticEvaluation();
 
             // 🔍 Reverse FutilityPrunning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
             if (staticEval - (Configuration.EngineSettings.RFP_DepthScalingFactor * depth) >= beta)
@@ -368,7 +368,7 @@ public sealed partial class Engine
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
             _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
-            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
+            return position.StaticEvaluation();
         }
 
         var pvIndex = PVTable.Indexes[ply];
@@ -386,7 +386,7 @@ public sealed partial class Engine
 
         _maxDepthReached[ply] = ply;
 
-        var staticEvaluation = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
+        var staticEvaluation = position.StaticEvaluation();
 
         // Fail-hard beta-cutoff (updating alpha after this check)
         if (staticEvaluation >= beta)
