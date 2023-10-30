@@ -26,7 +26,7 @@ public sealed partial class Engine
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
             _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
-            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
+            return position.StaticEvaluation();
         }
 
         _maxDepthReached[ply] = ply;
@@ -73,7 +73,7 @@ public sealed partial class Engine
 
         if (!pvNode && !isInCheck)
         {
-            var staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
+            var staticEval = position.StaticEvaluation();
 
             // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving ouropponent a double move and still remain ahead of beta
             if (depth >= Configuration.EngineSettings.NMP_MinDepth
@@ -351,7 +351,7 @@ public sealed partial class Engine
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
             _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
-            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
+            return position.StaticEvaluation();
         }
 
         var pvIndex = PVTable.Indexes[ply];
@@ -369,7 +369,7 @@ public sealed partial class Engine
 
         _maxDepthReached[ply] = ply;
 
-        var staticEvaluation = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
+        var staticEvaluation = position.StaticEvaluation();
 
         // Fail-hard beta-cutoff (updating alpha after this check)
         if (staticEvaluation >= beta)
