@@ -151,7 +151,7 @@ public static class TranspositionTableExtensions
     /// <param name="nodeType"></param>
     /// <param name="move"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void RecordHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int eval, NodeType nodeType, Move? move = 0)
+    public static void RecordHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int eval, NodeType nodeType, Move? move = null)
     {
         if (!Configuration.EngineSettings.TranspositionTableEnabled)
         {
@@ -172,8 +172,8 @@ public static class TranspositionTableExtensions
         entry.Key = position.UniqueIdentifier;
         entry.Score = score;
         entry.Depth = depth;
-        entry.Move = move ?? entry.Move;    // Suggested by cj5716 instead of 0. https://github.com/lynx-chess/Lynx/pull/462
         entry.Type = nodeType;
+        entry.Move = move ?? entry.Move;    // Suggested by cj5716 instead of 0. https://github.com/lynx-chess/Lynx/pull/462
     }
 
     /// <summary>
