@@ -59,7 +59,7 @@ public sealed partial class Engine
 
         if (isInCheck)
         {
-            ++depth;
+            depth += 2;
         }
         if (depth <= 0)
         {
