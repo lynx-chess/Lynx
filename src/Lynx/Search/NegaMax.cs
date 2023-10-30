@@ -179,6 +179,9 @@ public sealed partial class Engine
 
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
+            // Incremental move sorting, inspired by https://github.com/jw1912/Chess-Challenge and suggested by toanth
+            // There's no need to sort all the moves since most of them don't get checked anyway
+            // So just find the first unsearched one with the best score and try it
             for (int j = i + 1; j < pseudoLegalMoves.Length; j++)
             {
                 if (scores[j] > scores[i])
@@ -417,6 +420,9 @@ public sealed partial class Engine
 
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
+            // Incremental move sorting, inspired by https://github.com/jw1912/Chess-Challenge and suggested by toanth
+            // There's no need to sort all the moves since most of them don't get checked anyway
+            // So just find the first unsearched one with the best score and try it
             for (int j = i + 1; j < pseudoLegalMoves.Length; j++)
             {
                 if (scores[j] > scores[i])
