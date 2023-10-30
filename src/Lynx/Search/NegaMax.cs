@@ -154,24 +154,27 @@ public sealed partial class Engine
 
         var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, Game.MovePool);
 
+        var scores = new int[pseudoLegalMoves.Length];
         if (_isFollowingPV)
         {
             _isFollowingPV = false;
-            foreach (var move in pseudoLegalMoves)
+            for (int i = 0; i < pseudoLegalMoves.Length; ++i)
             {
-                if (move == _pVTable[depth])
+                scores[i] = ScoreMove(pseudoLegalMoves[i], ply, true, ttBestMove);
+
+                if (pseudoLegalMoves[i] == _pVTable[depth])
                 {
                     _isFollowingPV = true;
                     _isScoringPV = true;
-                    break;
                 }
             }
         }
-
-        var scores = new int[pseudoLegalMoves.Length];
-        for (int i = 0; i < pseudoLegalMoves.Length; ++i)
+        else
         {
-            scores[i] = ScoreMove(pseudoLegalMoves[i], ply, true);
+            for (int i = 0; i < pseudoLegalMoves.Length; ++i)
+            {
+                scores[i] = ScoreMove(pseudoLegalMoves[i], ply, true, ttBestMove);
+            }
         }
 
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
