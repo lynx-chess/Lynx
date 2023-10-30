@@ -176,6 +176,12 @@ public sealed partial class Engine
             Game.HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, Game.HalfMovesWithoutCaptureOrPawnMove);
             var isThreeFoldRepetition = !Game.PositionHashHistory.Add(position.UniqueIdentifier);
 
+            var isPromotion = move.PromotedPiece() != default;
+            if (isPromotion)
+            {
+                ++depth;
+            }
+
             int evaluation;
             if (isThreeFoldRepetition || Game.Is50MovesRepetition())
             {
@@ -283,6 +289,11 @@ public sealed partial class Engine
                 CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
 
                 nodeType = NodeType.Exact;
+            }
+
+            if (isPromotion)
+            {
+                --depth;
             }
 
             ++movesSearched;
