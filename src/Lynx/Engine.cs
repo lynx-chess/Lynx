@@ -14,17 +14,21 @@ public sealed partial class Engine
 #pragma warning disable IDE0052, CS0414, S4487 // Remove unread private members
     private bool _isNewGameCommandSupported;
     private bool _isNewGameComing;
-    private bool _isPondering;
 #pragma warning restore IDE0052, CS0414 // Remove unread private members
 
-    private Move? _moveToPonder;
+    private bool _isPondering;
+    private bool _isPonderHit;
+
+    private GoCommand? _lastGoCommand;
+    private SemaphoreSlim _isSearchingSemaphoreSlim = new(1, 1);
+
     public double AverageDepth { get; private set; }
 
     public RegisterCommand? Registration { get; set; }
 
     public Game Game { get; private set; }
 
-    public bool IsSearching { get; private set; }
+    public bool IsSearching => _isSearchingSemaphoreSlim.CurrentCount == 0;
 
     public bool PendingConfirmation { get; set; }
 
@@ -65,8 +69,16 @@ public sealed partial class Engine
 
     public void PonderHit()
     {
-        Game.MakeMove(_moveToPonder!.Value);   // TODO ponder: do we also receive the position command? If so, remove this line
-        _isPondering = false;
+        _absoluteSearchCancellationTokenSource.Cancel();
+
+        if (_lastGoCommand is null)
+        {
+            _logger.Error("No previous go command saved");
+            return;
+        }
+
+        _lastGoCommand.DisablePonder();
+        StartSearching(_lastGoCommand, isPonderHit: true);
     }
 
     public async Task<SearchResult> BestMove() => await BestMove(null);
@@ -116,14 +128,22 @@ public sealed partial class Engine
                 }
 
                 _logger.Info("Time to move: {0}s", 0.001 * decisionTime);
-                _searchCancellationTokenSource.CancelAfter(decisionTime!.Value);
+
+                if (!_isPondering)
+                {
+                    _searchCancellationTokenSource.CancelAfter(decisionTime!.Value);
+                }
             }
             else if (goCommand.MoveTime > 0)
             {
                 minDepth = 0;
                 decisionTime = (int)(0.95 * goCommand.MoveTime);
                 _logger.Info("Time to move: {0}s", 0.001 * decisionTime, minDepth);
-                _searchCancellationTokenSource.CancelAfter(decisionTime.Value);
+
+                if (!_isPondering)
+                {
+                    _searchCancellationTokenSource.CancelAfter(decisionTime.Value);
+                }
             }
             else if (goCommand.Depth > 0)
             {
@@ -150,7 +170,10 @@ public sealed partial class Engine
         SearchResult resultToReturn = await SearchBestMove(minDepth, maxDepth, decisionTime);
 
         Game.ResetCurrentPositionToBeforeSearchState();
-        if (resultToReturn.BestMove != default && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
+
+        if (!_isPondering
+            && resultToReturn.BestMove != default
+            && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
         {
             Game.MakeMove(resultToReturn.BestMove);
         }
@@ -260,31 +283,47 @@ public sealed partial class Engine
         return decisionTime;
     }
 
-    public void StartSearching(GoCommand goCommand)
+    public void StartSearching(GoCommand goCommand, bool isPonderHit = false)
     {
-        _isPondering = goCommand.Ponder;
-        IsSearching = true;
+        _lastGoCommand = goCommand;
 
         Task.Run(async () =>
         {
             try
             {
+                await _isSearchingSemaphoreSlim.WaitAsync();
+                // Important to do this after the semaphore, or the wrong values will be used at the end of the try and in IDDFS
+                _isPondering = goCommand.Ponder;
+                _isPonderHit = isPonderHit;
+
                 var searchResult = await BestMove(goCommand);
-                _moveToPonder = searchResult.Moves.Count >= 2 ? searchResult.Moves[1] : null;
-                await _engineWriter.WriteAsync(BestMoveCommand.BestMove(searchResult.BestMove, _moveToPonder));
+
+                // In case of pondering, we don't give a best move result.
+                // This search will be cancelled by a 'stop' or 'ponderhit' command
+                // and proper time will be allocated for a non-ponder, regular search
+                if (!_isPondering)
+                {
+                    Move? moveToPonder = searchResult.Moves.Count >= 2 ? searchResult.Moves[1] : null;
+                    await _engineWriter.WriteAsync(BestMoveCommand.BestMove(searchResult.BestMove, moveToPonder));
+                }
             }
             catch (Exception e)
             {
                 _logger.Fatal(e, "Error in {0} while calculating BestMove", nameof(StartSearching));
             }
+            finally
+            {
+                _isPonderHit = false;
+                _isPondering = false;
+                _isSearchingSemaphoreSlim.Release();
+            }
         });
-        // TODO ponder: if ponder, continue with PonderAction, which is searching indefinitely for a move
     }
 
     public void StopSearching()
     {
+        _isPondering = false;   // Always allowing a best move to be sent, even if it's discarded in case we're pondering
         _absoluteSearchCancellationTokenSource.Cancel();
-        IsSearching = false;
     }
 
     private void InitializeTT()

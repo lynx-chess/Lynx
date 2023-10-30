@@ -215,4 +215,6 @@ public sealed partial class GoCommand : GUIBaseCommand
 
         await Task.WhenAll(taskList);
     }
+
+    public void DisablePonder() => Ponder = false;
 }

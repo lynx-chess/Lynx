@@ -173,9 +173,13 @@ public sealed class LynxDriver
 
     private void HandlePonderHit()
     {
-        if (Configuration.IsPonder)
+        if (Configuration.EngineSettings.IsPonder)
         {
             _engine.PonderHit();
+        }
+        else
+        {
+            _logger.Warn("Unexpected ponderhit command, ponder is disabled");
         }
     }
 
@@ -198,9 +202,8 @@ public sealed class LynxDriver
                 {
                     if (length > 4 && bool.TryParse(command[commandItems[4]], out var value))
                     {
-                        Configuration.IsPonder = value;
+                        Configuration.EngineSettings.IsPonder = value;
                     }
-                    _logger.Warn("Ponder not supported yet");
                     break;
                 }
             case "uci_analysemode":

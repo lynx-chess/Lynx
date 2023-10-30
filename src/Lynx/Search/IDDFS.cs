@@ -56,7 +56,7 @@ public sealed partial class Engine
         {
             _stopWatch.Start();
 
-            if (OnlyOneLegalMove(out var onlyOneLegalMoveSearchResult))
+            if (!_isPondering && OnlyOneLegalMove(out var onlyOneLegalMoveSearchResult))
             {
                 await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(onlyOneLegalMoveSearchResult));
 
@@ -165,6 +165,11 @@ public sealed partial class Engine
 
     private bool StopSearchCondition(int depth, int? maxDepth, bool isMateDetected, int? decisionTime)
     {
+        if (_isPondering)
+        {
+            return true;
+        }
+
         if (isMateDetected)
         {
             _logger.Info($"Stopping at depth {depth - 1}: mate detected");
@@ -254,7 +259,17 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int CheckPonderHit(ref SearchResult? lastSearchResult, int depth)
     {
-        if (Game.MoveHistory.Count >= 2
+        // Real ponderhit while in pondering mode: previous search result moves are valid and they come after last two moves of the move history
+        if (_isPonderHit && _previousSearchResult is not null)
+        {
+            lastSearchResult = _previousSearchResult;
+            Array.Copy(_previousSearchResult.Moves.ToArray(), 0, _pVTable, 0, _previousSearchResult.Moves.Count);
+
+            depth = lastSearchResult.Depth;
+        }
+
+        // 'Made up' ponder hit: first two moves of the previous search match with the last two moves of the move history
+        else if (Game.MoveHistory.Count >= 2
             && _previousSearchResult?.Moves.Count > 2
             && _previousSearchResult.BestMove != default
             && Game.MoveHistory[^2] == _previousSearchResult.Moves[0]
