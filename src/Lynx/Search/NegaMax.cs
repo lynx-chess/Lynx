@@ -18,7 +18,7 @@ public sealed partial class Engine
     /// Defaults to the worse possible score for Side to move's opponent, Int.MaxValue
     /// </param>
     /// <returns></returns>
-    private int NegaMax(int depth, int ply, int alpha, int beta, bool ancestorWasNullMove = false)
+    private int NegaMax(int depth, int ply, int alpha, int beta, bool parentWasNullMove = false)
     {
         var position = Game.CurrentPosition;
 
@@ -78,9 +78,9 @@ public sealed partial class Engine
             // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving ouropponent a double move and still remain ahead of beta
             if (depth >= Configuration.EngineSettings.NMP_MinDepth
                 && staticEval >= beta
-                && !ancestorWasNullMove)
-            //(!ttHit || !(ttBound & BOUND_UPPER) || ttValue >= beta)
-            //&& staticEvalResult.Phase > 1)   // Zugzwang risk reduction: pieces other than pawn presents
+                && !parentWasNullMove)
+            // && (!ttHit || !(ttBound & BOUND_UPPER) || ttValue >= beta)
+            // && staticEvalResult.Phase > 2)   // Zugzwang risk reduction: pieces other than pawn presents
             {
                 var nmpReduction = Configuration.EngineSettings.NMP_DepthReduction;
                 // TODO adaptative reduction
@@ -89,7 +89,7 @@ public sealed partial class Engine
                 //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
 
                 var gameState = position.MakeNullMove();
-                var evaluation = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, ancestorWasNullMove: true);
+                var evaluation = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, parentWasNullMove: true);
                 position.UnMakeNullMove(gameState);
 
                 if (evaluation >= beta)
