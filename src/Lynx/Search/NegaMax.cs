@@ -17,10 +17,8 @@ public sealed partial class Engine
     /// Best score Side's to move's opponent can achieve, assuming best play by Side to move.
     /// Defaults to the worse possible score for Side to move's opponent, Int.MaxValue
     /// </param>
-    /// <param name="isVerifyingNullMoveCutOff">Indicates if the search is verifying an ancestors null-move that failed high, or the root node</param>
-    /// <param name="ancestorWasNullMove">Indicates whether the immediate ancestor node was a null move</param>
     /// <returns></returns>
-    private int NegaMax(int depth, int ply, int alpha, int beta, bool isVerifyingNullMoveCutOff, bool ancestorWasNullMove = false)
+    private int NegaMax(int depth, int ply, int alpha, int beta, bool parentWasNullMove = false)
     {
         var position = Game.CurrentPosition;
 
@@ -73,74 +71,68 @@ public sealed partial class Engine
             return finalPositionEvaluation;
         }
 
-        // 🔍 Verified Null-move pruning (NMP) - https://www.researchgate.net/publication/297377298_Verified_Null-Move_Pruning
-        bool isFailHigh = false;    // In order to detect zugzwangs
-        if (depth > Configuration.EngineSettings.NMP_DepthReduction
-            && !isInCheck
-            && !ancestorWasNullMove
-            /*&& (!isVerifyingNullMoveCutOff || depth > 1)*/)    // verify == true and ply == targetDepth -1 -> No null pruning, since verification will not be possible)
-                                                                 // following pv?
+        if (!pvNode && !isInCheck)
         {
-            var gameState = position.MakeNullMove();
+            var staticEval = position.StaticEvaluation();
 
-            var evaluation = -NegaMax(depth - 1 - Configuration.EngineSettings.NMP_DepthReduction, ply + 1, -beta, -beta + 1, isVerifyingNullMoveCutOff, ancestorWasNullMove: true);
-
-            position.UnMakeNullMove(gameState);
-
-            if (evaluation >= beta) // Fail high
+            // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving ouropponent a double move and still remain ahead of beta
+            if (depth >= Configuration.EngineSettings.NMP_MinDepth
+                && staticEval >= beta
+                && !parentWasNullMove)
+            // && (!ttHit || !(ttBound & BOUND_UPPER) || ttValue >= beta)
+            // && staticEvalResult.Phase > 2)   // Zugzwang risk reduction: pieces other than pawn presents
             {
-                if (isVerifyingNullMoveCutOff)
+                var nmpReduction = Configuration.EngineSettings.NMP_DepthReduction;
+                // TODO adaptative reduction
+                //var nmpReduction = Math.Min(
+                //    depth,
+                //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
+
+                var gameState = position.MakeNullMove();
+                var evaluation = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, parentWasNullMove: true);
+                position.UnMakeNullMove(gameState);
+
+                if (evaluation >= beta)
                 {
-                    --depth;
-                    isVerifyingNullMoveCutOff = false;
-                    isFailHigh = true;
-                }
-                else
-                {
-                    // cutoff in a sub-tree with fail-high report
                     return evaluation;
                 }
             }
-        }
 
-        VerifiedNullMovePruning_SearchAgain:
-
-        if (!pvNode && !isInCheck && depth <= Configuration.EngineSettings.RFP_MaxDepth)
-        {
-            int staticEval = position.StaticEvaluation();
-
-            // 🔍 Reverse FutilityPrunning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
-            if (staticEval - (Configuration.EngineSettings.RFP_DepthScalingFactor * depth) >= beta)
+            if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
             {
-                return staticEval;
-            }
-
-            // 🔍 Razoring - Strelka impl (CPW) - https://www.chessprogramming.org/Razoring#Strelka
-            if (depth <= Configuration.EngineSettings.Razoring_MaxDepth)
-            {
-                var score = staticEval + Configuration.EngineSettings.Razoring_Depth1Bonus;
-
-                if (score < beta)               // Static evaluation + bonus indicates fail-low node
+                // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
+                if (staticEval - (Configuration.EngineSettings.RFP_DepthScalingFactor * depth) >= beta)
                 {
-                    if (depth == 1)
+                    return staticEval;
+                }
+
+                // 🔍 Razoring - Strelka impl (CPW) - https://www.chessprogramming.org/Razoring#Strelka
+                if (depth <= Configuration.EngineSettings.Razoring_MaxDepth)
+                {
+                    var score = staticEval + Configuration.EngineSettings.Razoring_Depth1Bonus;
+
+                    if (score < beta)               // Static evaluation + bonus indicates fail-low node
                     {
-                        var qSearchScore = QuiescenceSearch(ply, alpha, beta);
-
-                        return qSearchScore > score
-                            ? qSearchScore
-                            : score;
-                    }
-
-                    score += Configuration.EngineSettings.Razoring_NotDepth1Bonus;
-
-                    if (score < beta)               // Static evaluation indicates fail-low node
-                    {
-                        var qSearchScore = QuiescenceSearch(ply, alpha, beta);
-                        if (qSearchScore < beta)    // Quiescence score also indicates fail-low node
+                        if (depth == 1)
                         {
+                            var qSearchScore = QuiescenceSearch(ply, alpha, beta);
+
                             return qSearchScore > score
                                 ? qSearchScore
                                 : score;
+                        }
+
+                        score += Configuration.EngineSettings.Razoring_NotDepth1Bonus;
+
+                        if (score < beta)               // Static evaluation indicates fail-low node
+                        {
+                            var qSearchScore = QuiescenceSearch(ply, alpha, beta);
+                            if (qSearchScore < beta)    // Quiescence score also indicates fail-low node
+                            {
+                                return qSearchScore > score
+                                    ? qSearchScore
+                                    : score;
+                            }
                         }
                     }
                 }
@@ -222,7 +214,7 @@ public sealed partial class Engine
             }
             else if (pvNode && movesSearched == 0)
             {
-                evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
+                evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
             }
             else
             {
@@ -252,7 +244,7 @@ public sealed partial class Engine
                 }
 
                 // Search with reduced depth
-                evaluation = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
+                evaluation = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha);
 
                 // 🔍 Principal Variation Search (PVS)
                 if (evaluation > alpha && reduction > 0)
@@ -262,13 +254,13 @@ public sealed partial class Engine
                     // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
 
                     // Search with full depth but narrowed score bandwidth
-                    evaluation = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
+                    evaluation = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha);
                 }
 
                 if (evaluation > alpha && evaluation < beta)
                 {
                     // PVS Hipothesis invalidated -> search with full depth and full score bandwidth
-                    evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
+                    evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
                 }
             }
 
@@ -320,15 +312,6 @@ public sealed partial class Engine
             }
 
             ++movesSearched;
-        }
-
-        // [Null-move pruning] If there is a fail-high report, but no cutoff was found, the position is a zugzwang and has to be re-searched with the original depth
-        if (isFailHigh && alpha < beta)
-        {
-            ++depth;
-            isFailHigh = false;
-            isVerifyingNullMoveCutOff = true;
-            goto VerifiedNullMovePruning_SearchAgain;
         }
 
         if (bestMove is null && !isAnyMoveValid)
