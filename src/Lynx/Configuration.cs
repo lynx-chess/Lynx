@@ -226,6 +226,8 @@ public sealed class EngineSettings
     /// </summary>
     public double LMR_Divisor { get; set; } = 2.67;
 
+    public int NMP_MinDepth { get; set; } = 3;
+
     public int NMP_DepthReduction { get; set; } = 3;
 
     public int AspirationWindowDelta { get; set; } = 50;
