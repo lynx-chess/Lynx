@@ -255,7 +255,7 @@ public sealed class EngineSettings
 
     public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-13, -10);
 
-    public TaperedEvaluationTerm OpenFileRookBonus { get; set; } = new(43, 22);
+    public TaperedEvaluationTerm OpenFileRookBonus { get; set; } = new(42, 22);
 
     public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(18, 16);
 
@@ -265,7 +265,7 @@ public sealed class EngineSettings
 
     public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-29, 19);
 
-    public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-81, 3);
+    public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-80, 3);
 
     public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(15, -5);
 
@@ -279,7 +279,7 @@ public sealed class EngineSettings
         new(13, 62),
         new(38, 132),
         new(53, 191),
-        new(200));
+        new(0));
 
     #endregion
 
