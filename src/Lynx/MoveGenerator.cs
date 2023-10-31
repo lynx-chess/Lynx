@@ -99,7 +99,7 @@ public static class MoveGenerator
             {
                 // Single pawn push
                 var targetRank = (singlePushSquare >> 3) + 1;
-                if (targetRank == 1 || targetRank == 8)  // Promotion
+                if (!capturesOnly && (targetRank == 1 || targetRank == 8)  // Promotion
                 {
                     movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.Q + offset);
                     movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.R + offset);
