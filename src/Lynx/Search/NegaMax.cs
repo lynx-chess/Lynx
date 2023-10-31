@@ -82,7 +82,7 @@ public sealed partial class Engine
             // && (!ttHit || !(ttBound & BOUND_UPPER) || ttValue >= beta)
             // && staticEvalResult.Phase > 2)   // Zugzwang risk reduction: pieces other than pawn presents
             {
-                var nmpReduction = Configuration.EngineSettings.NMP_DepthReduction + Math.Min((staticEval - beta) / 200, 3);
+                var nmpReduction = Configuration.EngineSettings.NMP_DepthReduction + Math.Min((staticEval - beta) / 500, 3);
                 // TODO adaptative reduction
                 //var nmpReduction = Math.Min(
                 //    depth,
