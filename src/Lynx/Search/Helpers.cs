@@ -70,7 +70,7 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal int ScoreMove(Move move, int depth, bool isPvNode, bool useKillerAndPositionMoves, Move bestMoveTTCandidate = default)
     {
-        if (isPvNode)
+        if (isPvNode && move == _pVTable[depth])
         {
             return EvaluationConstants.PVMoveScoreValue;
         }
