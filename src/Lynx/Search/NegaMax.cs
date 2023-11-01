@@ -372,6 +372,8 @@ public sealed partial class Engine
             return staticEvaluation;
         }
 
+        bool pvNode = beta - alpha > 1;
+
         var nodeType = NodeType.Alpha;
         Move? bestMove = null;
         bool isThereAnyValidCapture = false;
@@ -379,7 +381,7 @@ public sealed partial class Engine
         var scores = new int[pseudoLegalMoves.Length];
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            scores[i] = ScoreMove(pseudoLegalMoves[i], ply, false, false, ttBestMove);
+            scores[i] = ScoreMove(pseudoLegalMoves[i], ply, false, pvNode, ttBestMove);
         }
 
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
