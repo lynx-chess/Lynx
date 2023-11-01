@@ -59,20 +59,19 @@ public sealed partial class Engine
     private const int MaxValue = short.MaxValue;
 
     /// <summary>
-    /// Returns the score evaluation of a move taking into account <see cref="_isScoringPV"/>, <paramref name="bestMoveTTCandidate"/>, <see cref="EvaluationConstants.MostValueableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_historyMoves"/>
+    /// Returns the score evaluation of a move taking into account <paramref name="isPvNode"/>, <paramref name="bestMoveTTCandidate"/>, <see cref="EvaluationConstants.MostValueableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_historyMoves"/>
     /// </summary>
     /// <param name="move"></param>
     /// <param name="depth"></param>
+    /// <param name="isPvNode"></param>
     /// <param name="useKillerAndPositionMoves"></param>
     /// <param name="bestMoveTTCandidate"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMove(Move move, int depth, bool useKillerAndPositionMoves, Move bestMoveTTCandidate = default)
+    internal int ScoreMove(Move move, int depth, bool isPvNode, bool useKillerAndPositionMoves, Move bestMoveTTCandidate = default)
     {
-        if (_isScoringPV && move == _pVTable[depth])
+        if (isPvNode)
         {
-            _isScoringPV = false;
-
             return EvaluationConstants.PVMoveScoreValue;
         }
 

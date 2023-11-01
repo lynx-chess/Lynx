@@ -147,26 +147,9 @@ public sealed partial class Engine
         var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, Game.MovePool);
 
         var scores = new int[pseudoLegalMoves.Length];
-        if (_isFollowingPV)
+        for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            _isFollowingPV = false;
-            for (int i = 0; i < pseudoLegalMoves.Length; ++i)
-            {
-                scores[i] = ScoreMove(pseudoLegalMoves[i], ply, true, ttBestMove);
-
-                if (pseudoLegalMoves[i] == _pVTable[depth])
-                {
-                    _isFollowingPV = true;
-                    _isScoringPV = true;
-                }
-            }
-        }
-        else
-        {
-            for (int i = 0; i < pseudoLegalMoves.Length; ++i)
-            {
-                scores[i] = ScoreMove(pseudoLegalMoves[i], ply, true, ttBestMove);
-            }
+            scores[i] = ScoreMove(pseudoLegalMoves[i], ply, true, pvNode, ttBestMove);
         }
 
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
@@ -358,14 +341,12 @@ public sealed partial class Engine
         var nextPvIndex = PVTable.Indexes[ply + 1];
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
-        Move ttBestMove = default;
-
         var ttProbeResult = _tt.ProbeHash(_ttMask, position, 0, ply, alpha, beta);
         if (ttProbeResult.Evaluation != EvaluationConstants.NoHashEntry)
         {
             return ttProbeResult.Evaluation;
         }
-        ttBestMove = ttProbeResult.BestMove;
+        Move ttBestMove = ttProbeResult.BestMove;
 
         _maxDepthReached[ply] = ply;
 
@@ -398,7 +379,7 @@ public sealed partial class Engine
         var scores = new int[pseudoLegalMoves.Length];
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            scores[i] = ScoreMove(pseudoLegalMoves[i], ply, false, ttBestMove);
+            scores[i] = ScoreMove(pseudoLegalMoves[i], ply, false, false, ttBestMove);
         }
 
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
