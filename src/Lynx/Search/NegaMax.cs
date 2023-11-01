@@ -149,7 +149,7 @@ public sealed partial class Engine
         var scores = new int[pseudoLegalMoves.Length];
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            scores[i] = ScoreMove(pseudoLegalMoves[i], ply, true, pvNode, ttBestMove);
+            scores[i] = ScoreMove(pseudoLegalMoves[i], ply, pvNode, useKillerAndPositionMoves: true, ttBestMove);
         }
 
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
@@ -381,7 +381,7 @@ public sealed partial class Engine
         var scores = new int[pseudoLegalMoves.Length];
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            scores[i] = ScoreMove(pseudoLegalMoves[i], ply, false, pvNode, ttBestMove);
+            scores[i] = ScoreMove(pseudoLegalMoves[i], ply, pvNode, useKillerAndPositionMoves: false, ttBestMove);
         }
 
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
