@@ -15,6 +15,13 @@ public sealed class Game
     public int HalfMovesWithoutCaptureOrPawnMove { get; set; }
 
     public Position CurrentPosition { get; private set; }
+
+    public int MiddleGamePSQTEval { get; set; }
+
+    public int EndGamePSQTEval { get; set; }
+
+    public int GamePhase { get; set; }
+
     private readonly Position _gameInitialPosition;
 
     public Game() : this(Constants.InitialPositionFEN)
@@ -36,12 +43,15 @@ public sealed class Game
         PositionHashHistory = new(1024) { CurrentPosition.UniqueIdentifier };
 
         HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
+
+        (MiddleGamePSQTEval, EndGamePSQTEval, GamePhase) = CurrentPosition.PSQTEvaluation();
     }
 
     /// <summary>
     /// Intended to be used from tests only
     /// </summary>
     /// <param name="position"></param>
+    [Obsolete("Just intended for testing purposes")]
     internal Game(Position position)
     {
         CurrentPosition = position;
@@ -49,6 +59,7 @@ public sealed class Game
 
         MoveHistory = new(1024);
         PositionHashHistory = new(1024) { position.UniqueIdentifier };
+        (MiddleGamePSQTEval, EndGamePSQTEval, GamePhase) = CurrentPosition.PSQTEvaluation();
     }
 
     [Obsolete("Just intended for testing purposes")]
@@ -68,6 +79,7 @@ public sealed class Game
         }
 
         _gameInitialPosition = new Position(CurrentPosition);
+        (MiddleGamePSQTEval, EndGamePSQTEval, GamePhase) = CurrentPosition.PSQTEvaluation();
     }
 
     [Obsolete("Just intended for testing purposes")]
@@ -93,6 +105,7 @@ public sealed class Game
         }
 
         _gameInitialPosition = new Position(CurrentPosition);
+        (MiddleGamePSQTEval, EndGamePSQTEval, GamePhase) = CurrentPosition.PSQTEvaluation();
     }
 
     public Game(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan) : this(fen)
@@ -116,6 +129,7 @@ public sealed class Game
         }
 
         _gameInitialPosition = new Position(CurrentPosition);
+        (MiddleGamePSQTEval, EndGamePSQTEval, GamePhase) = CurrentPosition.PSQTEvaluation();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
