@@ -669,7 +669,7 @@ public class Position
         // Check if drawn position due to lack of material
         if (gamePhase <= 4)
         {
-            var offset = Utils.PieceOffset(Side == Side.White);
+            var offset = Utils.PieceOffset(endGameScore >= 0);
 
             bool sideCannotWin = pieceCount[(int)Piece.P + offset] == 0 && pieceCount[(int)Piece.Q + offset] == 0 && pieceCount[(int)Piece.R + offset] == 0
                 && (pieceCount[(int)Piece.B + offset] + pieceCount[(int)Piece.N + offset] == 1                                                          // B or N
