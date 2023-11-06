@@ -591,7 +591,7 @@ public class Position
     /// </summary>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int StaticEvaluation()
+    public (int Score, int Phase) StaticEvaluation()
     {
         //var result = OnlineTablebaseProber.EvaluationSearch(this, movesWithoutCaptureOrPawnMove, cancellationToken);
         //Debug.Assert(result < EvaluationConstants.CheckMateBaseEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
@@ -666,6 +666,13 @@ public class Position
         middleGameScore += EvaluationConstants.MiddleGameTable[(int)Piece.k, blackKing] - mgKingScore;
         endGameScore += EvaluationConstants.EndGameTable[(int)Piece.k, blackKing] - egKingScore;
 
+        const int maxPhase = 24;
+
+        if (gamePhase > maxPhase)    // Early promotions
+        {
+            gamePhase = maxPhase;
+        }
+
         // Check if drawn position due to lack of material
         if (endGameScore >= 0)
         {
@@ -675,7 +682,7 @@ public class Position
 
             if (whiteCannotWin)
             {
-                return 0;
+                return (0, gamePhase);
             }
         }
         else
@@ -686,15 +693,8 @@ public class Position
 
             if (blackCannotWin)
             {
-                return 0;
+                return (0, gamePhase);
             }
-        }
-
-        const int maxPhase = 24;
-
-        if (gamePhase > maxPhase)    // Early promotions
-        {
-            gamePhase = maxPhase;
         }
 
         int endGamePhase = maxPhase - gamePhase;
@@ -702,9 +702,11 @@ public class Position
 
         var eval = ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / maxPhase;
 
-        return Side == Side.White
+        var sideEval = Side == Side.White
             ? eval
             : -eval;
+
+        return (sideEval, gamePhase);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -26,7 +26,7 @@ public sealed partial class Engine
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
             _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
-            return position.StaticEvaluation();
+            return position.StaticEvaluation().Score;
         }
 
         _maxDepthReached[ply] = ply;
@@ -73,14 +73,15 @@ public sealed partial class Engine
 
         if (!pvNode && !isInCheck)
         {
-            var staticEval = position.StaticEvaluation();
+            var staticEvalResult = position.StaticEvaluation();
+            var staticEval = staticEvalResult.Score;
 
             // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
             if (depth >= Configuration.EngineSettings.NMP_MinDepth
                 && staticEval >= beta
-                && !parentWasNullMove)
+                && !parentWasNullMove
+                && staticEvalResult.Phase > 2)   // Zugzwang risk reduction: pieces other than pawn presents
             // && (!ttHit || !(ttBound & BOUND_UPPER) || ttValue >= beta)   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta (From Stormphrax)
-            // && staticEvalResult.Phase > 2)   // Zugzwang risk reduction: pieces other than pawn presents
             {
                 var nmpReduction = ((depth + 1) / 3) + 1;   // Clarity
 
@@ -352,7 +353,7 @@ public sealed partial class Engine
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
             _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
-            return position.StaticEvaluation();
+            return position.StaticEvaluation().Score;
         }
 
         var pvIndex = PVTable.Indexes[ply];
@@ -370,7 +371,7 @@ public sealed partial class Engine
 
         _maxDepthReached[ply] = ply;
 
-        var staticEvaluation = position.StaticEvaluation();
+        var staticEvaluation = position.StaticEvaluation().Score;
 
         // Fail-hard beta-cutoff (updating alpha after this check)
         if (staticEvaluation >= beta)
