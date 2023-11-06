@@ -83,7 +83,9 @@ public sealed partial class Engine
             // && staticEvalResult.Phase > 2)   // Zugzwang risk reduction: pieces other than pawn presents
             {
                 var nmpReduction = ((depth + 1) / 3) + 1   // Clarity
-                    + Math.Min((staticEval - beta) / 200, 3);   // Increase more when staticEval - beta is bigger
+                    + Math.Min(
+                        Configuration.EngineSettings.NMP_StaticEvalBetaDeltaMaxReduction,   // Increase more when staticEval - beta is bigger
+                        (staticEval - beta) / Configuration.EngineSettings.NMP_StaticEvalBetaDeltaIncrementDivisor);
 
                 // TODO more advanced adaptative reduction, similar to what Akimbo and Stormphrax are doing
                 //var nmpReduction = Math.Min(
