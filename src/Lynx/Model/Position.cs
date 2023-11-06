@@ -667,24 +667,15 @@ public class Position
         endGameScore += EvaluationConstants.EndGameTable[(int)Piece.k, blackKing] - egKingScore;
 
         // Check if drawn position due to lack of material
-        if (endGameScore >= 0)
+        if (gamePhase <= 4)
         {
-            bool whiteCannotWin = pieceCount[(int)Piece.P] == 0 && pieceCount[(int)Piece.Q] == 0 && pieceCount[(int)Piece.R] == 0
-                && (pieceCount[(int)Piece.B] + pieceCount[(int)Piece.N] == 1                // B or N
-                    || (pieceCount[(int)Piece.B] == 0 && pieceCount[(int)Piece.N] == 2));   // N+N
+            var offset = Utils.PieceOffset(endGameScore >= 0);
 
-            if (whiteCannotWin)
-            {
-                return 0;
-            }
-        }
-        else
-        {
-            bool blackCannotWin = pieceCount[(int)Piece.p] == 0 && pieceCount[(int)Piece.q] == 0 && pieceCount[(int)Piece.r] == 0
-                && (pieceCount[(int)Piece.b] + pieceCount[(int)Piece.n] == 1                // B or N
-                    || (pieceCount[(int)Piece.b] == 0 && pieceCount[(int)Piece.n] == 2));   // N+N
+            bool sideCannotWin = pieceCount[(int)Piece.P + offset] == 0 && pieceCount[(int)Piece.Q + offset] == 0 && pieceCount[(int)Piece.R + offset] == 0
+                && (pieceCount[(int)Piece.B + offset] + pieceCount[(int)Piece.N + offset] == 1                                                          // B or N
+                    || (pieceCount[(int)Piece.B + offset] == 0 && pieceCount[(int)Piece.N + offset] == 2));    // N+N
 
-            if (blackCannotWin)
+            if (sideCannotWin)
             {
                 return 0;
             }
