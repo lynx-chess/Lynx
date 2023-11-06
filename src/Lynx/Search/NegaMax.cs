@@ -75,15 +75,16 @@ public sealed partial class Engine
         {
             var staticEval = position.StaticEvaluation();
 
-            // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving ouropponent a double move and still remain ahead of beta
+            // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
             if (depth >= Configuration.EngineSettings.NMP_MinDepth
                 && staticEval >= beta
                 && !parentWasNullMove)
-            // && (!ttHit || !(ttBound & BOUND_UPPER) || ttValue >= beta)
+            // && (!ttHit || !(ttBound & BOUND_UPPER) || ttValue >= beta)   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta (From Stormphrax)
             // && staticEvalResult.Phase > 2)   // Zugzwang risk reduction: pieces other than pawn presents
             {
-                var nmpReduction = Configuration.EngineSettings.NMP_DepthReduction;
-                // TODO adaptative reduction
+                var nmpReduction = ((depth + 1) / 3) + 1;   // Clarity
+
+                // TODO more advanced adaptative reduction, similar to what Akimbo and Stormphrax are doing
                 //var nmpReduction = Math.Min(
                 //    depth,
                 //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
