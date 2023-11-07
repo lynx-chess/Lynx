@@ -39,15 +39,16 @@ public sealed partial class Engine
         bool isRoot = ply == 0;
         bool pvNode = beta - alpha > 1;
         Move ttBestMove = default;
+        NodeType ttElementType = default;
+        int ttEvaluation = default;
 
         if (!isRoot)
         {
-            var ttProbeResult = _tt.ProbeHash(_ttMask, position, depth, ply, alpha, beta);
-            if (ttProbeResult.Evaluation != EvaluationConstants.NoHashEntry)
+            (ttEvaluation, ttBestMove, ttElementType) = _tt.ProbeHash(_ttMask, position, depth, ply, alpha, beta);
+            if (ttEvaluation != EvaluationConstants.NoHashEntry)
             {
-                return ttProbeResult.Evaluation;
+                return ttEvaluation;
             }
-            ttBestMove = ttProbeResult.BestMove;
         }
 
         // Before any time-consuming operations
@@ -80,12 +81,12 @@ public sealed partial class Engine
             if (depth >= Configuration.EngineSettings.NMP_MinDepth
                 && staticEval >= beta
                 && !parentWasNullMove
-                && staticEvalResult.Phase > 2)   // Zugzwang risk reduction: pieces other than pawn presents
-            // && (!ttHit || !(ttBound & BOUND_UPPER) || ttValue >= beta)   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta (From Stormphrax)
+                && staticEvalResult.Phase > 2   // Zugzwang risk reduction: pieces other than pawn presents
+                && (ttElementType != NodeType.Alpha || ttEvaluation >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
             {
                 var nmpReduction = ((depth + 1) / 3) + 1;   // Clarity
 
-                // TODO more advanced adaptative reduction, similar to what Akimbo and Stormphrax are doing
+                // TODO more advanced adaptative reduction, similar to what Ethereal and Stormphrax are doing
                 //var nmpReduction = Math.Min(
                 //    depth,
                 //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
