@@ -377,7 +377,7 @@ public sealed partial class Engine
         if (staticEvaluation >= beta)
         {
             PrintMessage(ply - 1, "Pruning before starting quiescence search");
-            return staticEvaluation;
+            return beta;
         }
 
         // Better move
@@ -467,7 +467,7 @@ public sealed partial class Engine
 
                 _tt.RecordHash(_ttMask, position, 0, ply, beta, NodeType.Beta, bestMove);
 
-                return evaluation; // The refutation doesn't matter, since it'll be pruned
+                return beta; // The refutation doesn't matter, since it'll be pruned
             }
 
             if (evaluation > alpha)
