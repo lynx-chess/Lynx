@@ -956,38 +956,38 @@ static void FileAndRankMasks()
 static void EnhancedPawnEvaluation()
 {
     var position = new Position("4k3/ppp5/8/8/8/P7/PP6/4K3 w - - 0 1");
-    var eval = position.StaticEvaluation();
+    var eval = position.StaticEvaluation().Score;
     position.Print();
     Console.WriteLine(eval);
 
     position = new Position("4k3/pp4pp/p7/8/8/P7/PPP3P1/4K3 w - - 0 1");
     position.Print();
-    eval = position.StaticEvaluation();
+    eval = position.StaticEvaluation().Score;
     Console.WriteLine(eval);
 
     position = new Position("4k3/pp3pp1/p7/8/8/P7/PPP4P/4K3 w - - 0 1");
     position.Print();
-    eval = position.StaticEvaluation();
+    eval = position.StaticEvaluation().Score;
     Console.WriteLine(eval);
 
     position = new Position("4k3/pp3pp1/p7/8/8/P7/PP3P1P/4K3 w - - 0 1");
     position.Print();
-    eval = position.StaticEvaluation();
+    eval = position.StaticEvaluation().Score;
     Console.WriteLine(eval);
 
     position = new Position("4k3/pp2pp2/p7/8/8/P7/PP3P1P/4K3 w - - 0 1");
     position.Print();
-    eval = position.StaticEvaluation();
+    eval = position.StaticEvaluation().Score;
     Console.WriteLine(eval);
 
     position = new Position("4k3/pp2pp2/p7/8/7P/P7/PP3P2/4K3 w - - 0 1");
     position.Print();
-    eval = position.StaticEvaluation();
+    eval = position.StaticEvaluation().Score;
     Console.WriteLine(eval);
 
     position = new Position("4k3/pp2pp1P/p7/8/8/P7/PP3P2/4K3 w - - 0 1");
     position.Print();
-    eval = position.StaticEvaluation();
+    eval = position.StaticEvaluation().Score;
     Console.WriteLine(eval);
 }
 
@@ -995,17 +995,17 @@ static void RookEvaluation()
 {
     var position = new Position("r3k3/7p/8/8/8/8/7P/4K2R w - - 0 1");
     position.Print();
-    var eval = position.StaticEvaluation();
+    var eval = position.StaticEvaluation().Score;
     Console.WriteLine(eval);
 
     position = new Position("r3k3/1p6/8/8/8/8/7P/4K2R w - - 0 1");
     position.Print();
-    eval = position.StaticEvaluation();
+    eval = position.StaticEvaluation().Score;
     Console.WriteLine(eval);
 
     position = new Position("r3k3/1P6/8/8/8/8/7p/4K2R w - - 0 1");
     position.Print();
-    eval = position.StaticEvaluation();
+    eval = position.StaticEvaluation().Score;
     Console.WriteLine(eval);
 }
 

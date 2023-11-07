@@ -28,7 +28,7 @@ Here are the ones 'properly' rated over at least a few hundred of games:
 
 | Lynx version | Release date | Estimated elo | [CCRL Blitz](https://ccrl.chessdom.com/ccrl/404/) | [CCRL](https://ccrl.chessdom.com/ccrl/4040/) | [MCERL](https://www.chessengeria.eu/mcerl) | [CEDR](https://chessengines.blogspot.com/p/rating-jcer.html) |
 |---|---|---|---|---|---|---|
-| [0.19.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.19.0) | 2023-10-27  | [2434](https://github.com/lynx-chess/Lynx/commit/b42d235a2815ddb989c5d83218750167c43be7bb#commitcomment-131057706) |  |  |  |  |
+| [0.19.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.19.0) | 2023-10-27  | [2434](https://github.com/lynx-chess/Lynx/commit/b42d235a2815ddb989c5d83218750167c43be7bb#commitcomment-131057706) | [2412](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.19.0%2064-bit#Lynx_0_19_0_64-bit) |  |  |  |
 | [0.18.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.18.0) | 2023-10-21  | [2283](https://github.com/lynx-chess/Lynx/commit/3397c86c27bccb521f08306564325ff3cd64335d#commitcomment-130585961) |  |  | 2381  |  |
 | [0.17.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.17.0) | 2023-09-19  | [2178](https://github.com/lynx-chess/Lynx/commit/ecd462bf48923deb7fe7449ff74da3bcc8afe75c#commitcomment-127755063) |  |  | 2352 | 2252 |
 | [0.16.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.16.0) | 2023-08-26 | [2053](https://github.com/lynx-chess/Lynx/commit/8743436f4e0cca508dc9fd419a5498c46f15866c#commitcomment-125145952) | [2083](http://ccrl.chessdom.com/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.16.0%2064-bit#Lynx_0_16_0_64-bit) |  |  | 2152 |

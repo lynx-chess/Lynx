@@ -26,7 +26,7 @@ public sealed partial class Engine
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
             _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
-            return position.StaticEvaluation();
+            return position.StaticEvaluation().Score;
         }
 
         _maxDepthReached[ply] = ply;
@@ -73,17 +73,19 @@ public sealed partial class Engine
 
         if (!pvNode && !isInCheck)
         {
-            var staticEval = position.StaticEvaluation();
+            var staticEvalResult = position.StaticEvaluation();
+            var staticEval = staticEvalResult.Score;
 
-            // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving ouropponent a double move and still remain ahead of beta
+            // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
             if (depth >= Configuration.EngineSettings.NMP_MinDepth
                 && staticEval >= beta
-                && !parentWasNullMove)
-            // && (!ttHit || !(ttBound & BOUND_UPPER) || ttValue >= beta)
-            // && staticEvalResult.Phase > 2)   // Zugzwang risk reduction: pieces other than pawn presents
+                && !parentWasNullMove
+                && staticEvalResult.Phase > 2)   // Zugzwang risk reduction: pieces other than pawn presents
+            // && (!ttHit || !(ttBound & BOUND_UPPER) || ttValue >= beta)   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta (From Stormphrax)
             {
-                var nmpReduction = Configuration.EngineSettings.NMP_DepthReduction;
-                // TODO adaptative reduction
+                var nmpReduction = ((depth + 1) / 3) + 1;   // Clarity
+
+                // TODO more advanced adaptative reduction, similar to what Akimbo and Stormphrax are doing
                 //var nmpReduction = Math.Min(
                 //    depth,
                 //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
@@ -351,7 +353,7 @@ public sealed partial class Engine
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
             _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
-            return position.StaticEvaluation();
+            return position.StaticEvaluation().Score;
         }
 
         var pvIndex = PVTable.Indexes[ply];
@@ -369,7 +371,7 @@ public sealed partial class Engine
 
         _maxDepthReached[ply] = ply;
 
-        var staticEvaluation = position.StaticEvaluation();
+        var staticEvaluation = position.StaticEvaluation().Score;
 
         // Fail-hard beta-cutoff (updating alpha after this check)
         if (staticEvaluation >= beta)
