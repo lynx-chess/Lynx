@@ -290,7 +290,7 @@ public sealed partial class Engine
 
                 _tt.RecordHash(_ttMask, position, depth, ply, beta, NodeType.Beta, bestMove);
 
-                return beta;    // TODO return evaluation?
+                return evaluation;
             }
 
             if (evaluation > alpha)
