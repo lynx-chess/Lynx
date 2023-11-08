@@ -81,15 +81,14 @@ public sealed partial class Engine
             if (depth >= Configuration.EngineSettings.NMP_MinDepth
                 && staticEval >= beta
                 && !parentWasNullMove
-                && staticEvalResult.Phase > 2   // Zugzwang risk reduction: pieces other than pawn presents
+                && staticEvalResult.Phase > 2                                   // Zugzwang risk reduction: only try NMP if there are a number pieces other than pawn on the board
                 && (ttElementType != NodeType.Alpha || ttEvaluation >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
             {
-                var nmpReduction = Configuration.EngineSettings.NMP_BaseDepthReduction + ((depth + 1) / 3);   // Clarity
-
-                // TODO more advanced adaptative reduction, similar to what Ethereal and Stormphrax are doing
-                //var nmpReduction = Math.Min(
-                //    depth,
-                //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
+                var nmpReduction = Configuration.EngineSettings.NMP_BaseDepthReduction
+                    + ((depth + 1) / 3)                             // Depth formula used by Clarity
+                    + Math.Min(
+                        Configuration.EngineSettings.NMP_StaticEvalBetaDeltaMaxReduction,
+                        (staticEval - beta) / Configuration.EngineSettings.NMP_StaticEvalBetaDeltaDivisor);      // Idea taken from Stormphrax and Ethereal
 
                 var gameState = position.MakeNullMove();
                 var evaluation = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, parentWasNullMove: true);

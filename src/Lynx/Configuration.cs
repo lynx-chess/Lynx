@@ -247,6 +247,10 @@ public sealed class EngineSettings
 
     public int NMP_BaseDepthReduction { get; set; } = 1;
 
+    public int NMP_StaticEvalBetaDeltaMaxReduction { get; set; } = 2;
+
+    public int NMP_StaticEvalBetaDeltaDivisor { get; set; } = 1000;
+
     public int AspirationWindowDelta { get; set; } = 50;
 
     public int AspirationWindowMinDepth { get; set; } = 6;
