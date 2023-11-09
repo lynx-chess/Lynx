@@ -84,7 +84,7 @@ public sealed partial class Engine
                 && staticEvalResult.Phase > 2   // Zugzwang risk reduction: pieces other than pawn presents
                 && (ttElementType != NodeType.Alpha || ttEvaluation >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
             {
-                var nmpReduction = Configuration.EngineSettings.NMP_BaseDepthReduction + (depth / 3);   // Clarity
+                var nmpReduction = Configuration.EngineSettings.NMP_BaseReduction + (depth / Configuration.EngineSettings.NMP_DepthReductionDivisor);   // Clarity
 
                 // TODO more advanced adaptative reduction, similar to what Ethereal and Stormphrax are doing
                 //var nmpReduction = Math.Min(
