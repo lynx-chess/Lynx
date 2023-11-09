@@ -247,7 +247,7 @@ public sealed class EngineSettings
 
     public int NMP_BaseReduction { get; set; } = 1;
 
-    public int NMP_DepthReductionDivisor { get; set; } = 4;
+    public int NMP_DepthReductionDivisor { get; set; } = 3;
 
     public int AspirationWindowDelta { get; set; } = 50;
 
