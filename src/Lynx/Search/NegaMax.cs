@@ -17,10 +17,8 @@ public sealed partial class Engine
     /// Best score Side's to move's opponent can achieve, assuming best play by Side to move.
     /// Defaults to the worse possible score for Side to move's opponent, Int.MaxValue
     /// </param>
-    /// <param name="isVerifyingNullMoveCutOff">Indicates if the search is verifying an ancestors null-move that failed high, or the root node</param>
-    /// <param name="ancestorWasNullMove">Indicates whether the immediate ancestor node was a null move</param>
     /// <returns></returns>
-    private int NegaMax(int depth, int ply, int alpha, int beta, bool isVerifyingNullMoveCutOff, bool ancestorWasNullMove = false)
+    private int NegaMax(int depth, int ply, int alpha, int beta, bool parentWasNullMove = false)
     {
         var position = Game.CurrentPosition;
 
@@ -28,7 +26,7 @@ public sealed partial class Engine
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
             _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
-            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
+            return position.StaticEvaluation().Score;
         }
 
         _maxDepthReached[ply] = ply;
@@ -41,15 +39,16 @@ public sealed partial class Engine
         bool isRoot = ply == 0;
         bool pvNode = beta - alpha > 1;
         Move ttBestMove = default;
+        NodeType ttElementType = default;
+        int ttEvaluation = default;
 
         if (!isRoot)
         {
-            var ttProbeResult = _tt.ProbeHash(_ttMask, position, depth, ply, alpha, beta);
-            if (ttProbeResult.Evaluation != EvaluationConstants.NoHashEntry)
+            (ttEvaluation, ttBestMove, ttElementType) = _tt.ProbeHash(_ttMask, position, depth, ply, alpha, beta);
+            if (ttEvaluation != EvaluationConstants.NoHashEntry)
             {
-                return ttProbeResult.Evaluation;
+                return ttEvaluation;
             }
-            ttBestMove = ttProbeResult.BestMove;
         }
 
         // Before any time-consuming operations
@@ -73,74 +72,70 @@ public sealed partial class Engine
             return finalPositionEvaluation;
         }
 
-        // 🔍 Verified Null-move pruning (NMP) - https://www.researchgate.net/publication/297377298_Verified_Null-Move_Pruning
-        bool isFailHigh = false;    // In order to detect zugzwangs
-        if (depth > Configuration.EngineSettings.NMP_DepthReduction
-            && !isInCheck
-            && !ancestorWasNullMove
-            /*&& (!isVerifyingNullMoveCutOff || depth > 1)*/)    // verify == true and ply == targetDepth -1 -> No null pruning, since verification will not be possible)
-                                                                 // following pv?
+        if (!pvNode && !isInCheck)
         {
-            var gameState = position.MakeNullMove();
+            var staticEvalResult = position.StaticEvaluation();
+            var staticEval = staticEvalResult.Score;
 
-            var evaluation = -NegaMax(depth - 1 - Configuration.EngineSettings.NMP_DepthReduction, ply + 1, -beta, -beta + 1, isVerifyingNullMoveCutOff, ancestorWasNullMove: true);
-
-            position.UnMakeNullMove(gameState);
-
-            if (evaluation >= beta) // Fail high
+            // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
+            if (depth >= Configuration.EngineSettings.NMP_MinDepth
+                && staticEval >= beta
+                && !parentWasNullMove
+                && staticEvalResult.Phase > 2   // Zugzwang risk reduction: pieces other than pawn presents
+                && (ttElementType != NodeType.Alpha || ttEvaluation >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
             {
-                if (isVerifyingNullMoveCutOff)
+                var nmpReduction = Configuration.EngineSettings.NMP_BaseDepthReduction + ((depth + 1) / 3);   // Clarity
+
+                // TODO more advanced adaptative reduction, similar to what Ethereal and Stormphrax are doing
+                //var nmpReduction = Math.Min(
+                //    depth,
+                //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
+
+                var gameState = position.MakeNullMove();
+                var evaluation = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, parentWasNullMove: true);
+                position.UnMakeNullMove(gameState);
+
+                if (evaluation >= beta)
                 {
-                    --depth;
-                    isVerifyingNullMoveCutOff = false;
-                    isFailHigh = true;
-                }
-                else
-                {
-                    // cutoff in a sub-tree with fail-high report
                     return evaluation;
                 }
             }
-        }
 
-        VerifiedNullMovePruning_SearchAgain:
-
-        if (!pvNode && !isInCheck && depth <= Configuration.EngineSettings.RFP_MaxDepth)
-        {
-            int staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
-
-            // 🔍 Reverse FutilityPrunning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
-            if (staticEval - (Configuration.EngineSettings.RFP_DepthScalingFactor * depth) >= beta)
+            if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
             {
-                return staticEval;
-            }
-
-            // 🔍 Razoring - Strelka impl (CPW) - https://www.chessprogramming.org/Razoring#Strelka
-            if (depth <= Configuration.EngineSettings.Razoring_MaxDepth)
-            {
-                var score = staticEval + Configuration.EngineSettings.Razoring_Depth1Bonus;
-
-                if (score < beta)               // Static evaluation + bonus indicates fail-low node
+                // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
+                if (staticEval - (Configuration.EngineSettings.RFP_DepthScalingFactor * depth) >= beta)
                 {
-                    if (depth == 1)
+                    return staticEval;
+                }
+
+                // 🔍 Razoring - Strelka impl (CPW) - https://www.chessprogramming.org/Razoring#Strelka
+                if (depth <= Configuration.EngineSettings.Razoring_MaxDepth)
+                {
+                    var score = staticEval + Configuration.EngineSettings.Razoring_Depth1Bonus;
+
+                    if (score < beta)               // Static evaluation + bonus indicates fail-low node
                     {
-                        var qSearchScore = QuiescenceSearch(ply, alpha, beta);
-
-                        return qSearchScore > score
-                            ? qSearchScore
-                            : score;
-                    }
-
-                    score += Configuration.EngineSettings.Razoring_NotDepth1Bonus;
-
-                    if (score < beta)               // Static evaluation indicates fail-low node
-                    {
-                        var qSearchScore = QuiescenceSearch(ply, alpha, beta);
-                        if (qSearchScore < beta)    // Quiescence score also indicates fail-low node
+                        if (depth == 1)
                         {
+                            var qSearchScore = QuiescenceSearch(ply, alpha, beta);
+
                             return qSearchScore > score
                                 ? qSearchScore
                                 : score;
+                        }
+
+                        score += Configuration.EngineSettings.Razoring_NotDepth1Bonus;
+
+                        if (score < beta)               // Static evaluation indicates fail-low node
+                        {
+                            var qSearchScore = QuiescenceSearch(ply, alpha, beta);
+                            if (qSearchScore < beta)    // Quiescence score also indicates fail-low node
+                            {
+                                return qSearchScore > score
+                                    ? qSearchScore
+                                    : score;
+                            }
                         }
                     }
                 }
@@ -152,11 +147,45 @@ public sealed partial class Engine
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
-        var pseudoLegalMoves = SortMoves(MoveGenerator.GenerateAllMoves(position, Game.MovePool), ply, ttBestMove);
+        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, Game.MovePool);
 
-        for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Count; ++moveIndex)
+        var scores = new int[pseudoLegalMoves.Length];
+        if (_isFollowingPV)
         {
-            var move = pseudoLegalMoves[moveIndex];
+            _isFollowingPV = false;
+            for (int i = 0; i < pseudoLegalMoves.Length; ++i)
+            {
+                scores[i] = ScoreMove(pseudoLegalMoves[i], ply, true, ttBestMove);
+
+                if (pseudoLegalMoves[i] == _pVTable[depth])
+                {
+                    _isFollowingPV = true;
+                    _isScoringPV = true;
+                }
+            }
+        }
+        else
+        {
+            for (int i = 0; i < pseudoLegalMoves.Length; ++i)
+            {
+                scores[i] = ScoreMove(pseudoLegalMoves[i], ply, true, ttBestMove);
+            }
+        }
+
+        for (int i = 0; i < pseudoLegalMoves.Length; ++i)
+        {
+            // Incremental move sorting, inspired by https://github.com/jw1912/Chess-Challenge and suggested by toanth
+            // There's no need to sort all the moves since most of them don't get checked anyway
+            // So just find the first unsearched one with the best score and try it
+            for (int j = i + 1; j < pseudoLegalMoves.Length; j++)
+            {
+                if (scores[j] > scores[i])
+                {
+                    (scores[i], scores[j], pseudoLegalMoves[i], pseudoLegalMoves[j]) = (scores[j], scores[i], pseudoLegalMoves[j], pseudoLegalMoves[i]);
+                }
+            }
+
+            var move = pseudoLegalMoves[i];
 
             var gameState = position.MakeMove(move);
 
@@ -188,7 +217,7 @@ public sealed partial class Engine
             }
             else if (pvNode && movesSearched == 0)
             {
-                evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
+                evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
             }
             else
             {
@@ -218,7 +247,7 @@ public sealed partial class Engine
                 }
 
                 // Search with reduced depth
-                evaluation = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
+                evaluation = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha);
 
                 // 🔍 Principal Variation Search (PVS)
                 if (evaluation > alpha && reduction > 0)
@@ -228,13 +257,13 @@ public sealed partial class Engine
                     // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
 
                     // Search with full depth but narrowed score bandwidth
-                    evaluation = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha, isVerifyingNullMoveCutOff);
+                    evaluation = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha);
                 }
 
                 if (evaluation > alpha && evaluation < beta)
                 {
                     // PVS Hipothesis invalidated -> search with full depth and full score bandwidth
-                    evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha, isVerifyingNullMoveCutOff);
+                    evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
                 }
             }
 
@@ -288,15 +317,6 @@ public sealed partial class Engine
             ++movesSearched;
         }
 
-        // [Null-move pruning] If there is a fail-high report, but no cutoff was found, the position is a zugzwang and has to be re-searched with the original depth
-        if (isFailHigh && alpha < beta)
-        {
-            ++depth;
-            isFailHigh = false;
-            isVerifyingNullMoveCutOff = true;
-            goto VerifiedNullMovePruning_SearchAgain;
-        }
-
         if (bestMove is null && !isAnyMoveValid)
         {
             var eval = Position.EvaluateFinalPosition(ply, isInCheck);
@@ -334,7 +354,7 @@ public sealed partial class Engine
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
             _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
-            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
+            return position.StaticEvaluation().Score;
         }
 
         var pvIndex = PVTable.Indexes[ply];
@@ -352,7 +372,7 @@ public sealed partial class Engine
 
         _maxDepthReached[ply] = ply;
 
-        var staticEvaluation = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
+        var staticEvaluation = position.StaticEvaluation().Score;
 
         // Fail-hard beta-cutoff (updating alpha after this check)
         if (staticEvaluation >= beta)
@@ -367,8 +387,8 @@ public sealed partial class Engine
             alpha = staticEvaluation;
         }
 
-        var generatedMoves = MoveGenerator.GenerateAllMoves(position, Game.MovePool, capturesOnly: true);
-        if (!generatedMoves.Any())
+        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, Game.MovePool, capturesOnly: true);
+        if (pseudoLegalMoves.Length == 0)
         {
             // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358
             return staticEvaluation;
@@ -378,10 +398,27 @@ public sealed partial class Engine
         Move? bestMove = null;
         bool isThereAnyValidCapture = false;
 
-        var pseudoLegalMoves = generatedMoves.OrderByDescending(move => ScoreMove(move, ply, false, ttBestMove));
-
-        foreach (var move in pseudoLegalMoves)
+        var scores = new int[pseudoLegalMoves.Length];
+        for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
+            scores[i] = ScoreMove(pseudoLegalMoves[i], ply, false, ttBestMove);
+        }
+
+        for (int i = 0; i < pseudoLegalMoves.Length; ++i)
+        {
+            // Incremental move sorting, inspired by https://github.com/jw1912/Chess-Challenge and suggested by toanth
+            // There's no need to sort all the moves since most of them don't get checked anyway
+            // So just find the first unsearched one with the best score and try it
+            for (int j = i + 1; j < pseudoLegalMoves.Length; j++)
+            {
+                if (scores[j] > scores[i])
+                {
+                    (scores[i], scores[j], pseudoLegalMoves[i], pseudoLegalMoves[j]) = (scores[j], scores[i], pseudoLegalMoves[j], pseudoLegalMoves[i]);
+                }
+            }
+
+            var move = pseudoLegalMoves[i];
+
             var gameState = position.MakeMove(move);
             if (!position.WasProduceByAValidMove())
             {

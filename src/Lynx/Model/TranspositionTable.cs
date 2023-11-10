@@ -65,7 +65,7 @@ public struct TranspositionTableElement
 public static class TranspositionTableExtensions
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-    private static int _ttElementSize = Marshal.SizeOf(typeof(TranspositionTableElement));
+    private static readonly int _ttElementSize = Marshal.SizeOf(typeof(TranspositionTableElement));
 
     public static (int Length, int Mask) CalculateLength(int size)
     {
@@ -105,18 +105,18 @@ public static class TranspositionTableExtensions
     /// <param name="beta"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static (int Evaluation, Move BestMove) ProbeHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int alpha, int beta)
+    public static (int Evaluation, Move BestMove, NodeType NodeType) ProbeHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int alpha, int beta)
     {
         if (!Configuration.EngineSettings.TranspositionTableEnabled)
         {
-            return (EvaluationConstants.NoHashEntry, default);
+            return (EvaluationConstants.NoHashEntry, default, default);
         }
 
         ref var entry = ref tt[position.UniqueIdentifier & ttMask];
 
         if (position.UniqueIdentifier != entry.Key)
         {
-            return (EvaluationConstants.NoHashEntry, default);
+            return (EvaluationConstants.NoHashEntry, default, default);
         }
 
         var eval = EvaluationConstants.NoHashEntry;
@@ -136,7 +136,7 @@ public static class TranspositionTableExtensions
             };
         }
 
-        return (eval, entry.Move);
+        return (eval, entry.Move, entry.Type);
     }
 
     /// <summary>
@@ -151,7 +151,7 @@ public static class TranspositionTableExtensions
     /// <param name="nodeType"></param>
     /// <param name="move"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void RecordHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int eval, NodeType nodeType, Move? move = 0)
+    public static void RecordHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int eval, NodeType nodeType, Move? move = null)
     {
         if (!Configuration.EngineSettings.TranspositionTableEnabled)
         {
@@ -172,8 +172,8 @@ public static class TranspositionTableExtensions
         entry.Key = position.UniqueIdentifier;
         entry.Score = score;
         entry.Depth = depth;
-        entry.Move = move ?? entry.Move;    // Suggested by cj5716 instead of 0. https://github.com/lynx-chess/Lynx/pull/462
         entry.Type = nodeType;
+        entry.Move = move ?? entry.Move;    // Suggested by cj5716 instead of 0. https://github.com/lynx-chess/Lynx/pull/462
     }
 
     /// <summary>
