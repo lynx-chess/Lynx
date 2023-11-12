@@ -243,7 +243,7 @@ public sealed class EngineSettings
     /// </summary>
     public double LMR_Divisor { get; set; } = 2.67;
 
-    public int NMP_MinDepth { get; set; } = 3;
+    public int NMP_MinDepth { get; set; } = 2;
 
     public int NMP_BaseDepthReduction { get; set; } = 1;
 
