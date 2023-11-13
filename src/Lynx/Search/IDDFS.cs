@@ -255,17 +255,8 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int CheckPonderHit(ref SearchResult? lastSearchResult, int depth)
     {
-        // Real ponderhit while in pondering mode: previous search result moves are valid and they come after last two moves of the move history
-        if (_isPonderHit && _previousSearchResult is not null)
-        {
-            lastSearchResult = _previousSearchResult;
-            Array.Copy(_previousSearchResult.Moves.ToArray(), 0, _pVTable, 0, _previousSearchResult.Moves.Count);
-
-            depth = lastSearchResult.Depth;
-        }
-
         // 'Made up' ponder hit: first two moves of the previous search match with the last two moves of the move history
-        else if (Game.MoveHistory.Count >= 2
+        if (Game.MoveHistory.Count >= 2
             && _previousSearchResult?.Moves.Count > 2
             && _previousSearchResult.BestMove != default
             && Game.MoveHistory[^2] == _previousSearchResult.Moves[0]
