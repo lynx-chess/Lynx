@@ -33,7 +33,7 @@ public sealed partial class Engine
     /// <param name="maxDepth"></param>
     /// <param name="decisionTime"></param>
     /// <returns>Not null <see cref="SearchResult"/>, although made nullable in order to match online tb probing signature</returns>
-    public async Task<SearchResult?> IDDFS(int minDepth, int? maxDepth, int? decisionTime)
+    public async Task<SearchResult?> IDDFS(int? maxDepth, int? decisionTime)
     {
         // Cleanup
         _nodes = 0;
@@ -72,21 +72,17 @@ public sealed partial class Engine
             do
             {
                 _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
-                if (minDepth == maxDepth    // go depth n commands
-                    || depth - 1 > minDepth)
-                {
-                    _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
-                }
+                _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
                 _nodes = 0;
 
-                if (depth < Configuration.EngineSettings.AspirationWindowMinDepth || lastSearchResult?.Evaluation is null)
+                if (depth < Configuration.EngineSettings.AspirationWindow_MinDepth || lastSearchResult?.Evaluation is null)
                 {
                     bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta);
                 }
                 else
                 {
                     // 🔍 Aspiration Windows
-                    var window = Configuration.EngineSettings.AspirationWindowDelta;
+                    var window = Configuration.EngineSettings.AspirationWindow_Delta;
 
                     alpha = Math.Max(MinValue, lastSearchResult.Evaluation - window);
                     beta = Math.Min(MaxValue, lastSearchResult.Evaluation + window);

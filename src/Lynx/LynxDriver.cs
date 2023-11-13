@@ -214,14 +214,6 @@ public sealed class LynxDriver
                     }
                     break;
                 }
-            case "depth":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.DefaultMaxDepth = value;
-                    }
-                    break;
-                }
             case "hash":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
