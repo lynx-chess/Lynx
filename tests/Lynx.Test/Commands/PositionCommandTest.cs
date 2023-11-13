@@ -23,7 +23,7 @@ public class PositionCommandTest
         var goCommand = new GoCommand();
         await goCommand.Parse("go wtime 1 btime 1 winc 5000 binc 5000");
 
-        var resultTask = Task.Run(() => engine.BestMove());
+        var resultTask = Task.Run(() => engine.BestMove(new($"go depth {Engine.DefaultMaxDepth}")));
 
         engine.StopSearching();
         await resultTask;

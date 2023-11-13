@@ -203,7 +203,7 @@ public class RegressionTest : BaseTest
         var engine = GetEngine();
         engine.AdjustPosition(positionCommand);
 
-        var bestMove = await engine.BestMove(new GoCommand($"go depth {Configuration.EngineSettings.MinDepth}"));
+        var bestMove = await engine.BestMove(new GoCommand($"go depth {Engine.DefaultMaxDepth}"));
         Assert.NotZero(bestMove.Evaluation);
 
         //engine.AdjustPosition(positionCommand);
@@ -307,7 +307,7 @@ public class RegressionTest : BaseTest
             " d5d4 h5h6 f7a7 h6h5 d4d5 h5h6 d5d6 h6h5 a7f7 h5h6 d6d5 h6h5 f7a7 h5h6 d5d4 h6h5 g7g8 h5h6 d4d5 e2b2" +
             " d5d6 b2f2 a7a8 h6h7 d6d5 h7h6 d5e5 h6h7 e5d5 h7h6 d5e6 h6h5 g8g1 f2e2 e6f7 e2f2 f7g7 f2f8");
 
-        var searchResult = await engine.BestMove();
+        var searchResult = await engine.BestMove(new($"go depth {Engine.DefaultMaxDepth}"));
 
         engine.AdjustPosition("position startpos moves" +
             " e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 a7a6 f2f3 e7e5 d4b3 c8e6 c1e3 h7h5 c3d5 e6d5 e4d5 b8d7" +
@@ -323,7 +323,7 @@ public class RegressionTest : BaseTest
             " d5d6 b2f2 a7a8 h6h7 d6d5 h7h6 d5e5 h6h7 e5d5 h7h6 d5e6 h6h5 g8g1 f2e2 e6f7 e2f2 f7g7 f2f8" +
             $" {searchResult.BestMove.UCIString()} {searchResult.Moves[1].UCIString()}");
 
-        searchResult = await engine.BestMove();
+        searchResult = await engine.BestMove(new($"go depth {Engine.DefaultMaxDepth}"));
 
         Assert.NotZero(searchResult.BestMove);
     }
