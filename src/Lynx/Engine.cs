@@ -22,6 +22,7 @@ public sealed partial class Engine
     private bool _isPonderHit;
 
     private GoCommand? _lastGoCommand;
+    private string? _lastPositionCommand;
     private SemaphoreSlim _isSearchingSemaphoreSlim = new(1, 1);
 
     public double AverageDepth { get; private set; }
@@ -65,6 +66,11 @@ public sealed partial class Engine
 
     public void AdjustPosition(ReadOnlySpan<char> rawPositionCommand)
     {
+        if (Configuration.EngineSettings.IsPonder)
+        {
+            _lastPositionCommand = rawPositionCommand.ToString();
+        }
+
         Game = PositionCommand.ParseGame(rawPositionCommand);
         _isNewGameComing = false;
     }
@@ -223,8 +229,16 @@ public sealed partial class Engine
             try
             {
                 await _isSearchingSemaphoreSlim.WaitAsync();
+
                 // Important to do this after the semaphore, or the wrong values will be used at the end of the try and in IDDFS
-                _isPondering = Configuration.EngineSettings.IsPonder && goCommand.Ponder;
+
+                if (Configuration.EngineSettings.IsPonder)
+                {
+                    // Game is polluted with previous, incomplete search information.
+                    // More specifically PositionHashHistory, which will detect draws everywhere in the new search
+                    AdjustPosition(_lastPositionCommand);
+                    _isPondering = goCommand.Ponder;
+                }
                 _isPonderHit = isPonderHit;
 
                 var searchResult = await BestMove(goCommand);
