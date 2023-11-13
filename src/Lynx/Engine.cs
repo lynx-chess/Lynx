@@ -57,6 +57,8 @@ public sealed partial class Engine
 
     public void NewGame()
     {
+        _absoluteSearchCancellationTokenSource.Cancel();
+
         AverageDepth = 0;
         Game = new Game();
         _isNewGameComing = true;

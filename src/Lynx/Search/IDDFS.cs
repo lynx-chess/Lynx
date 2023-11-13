@@ -256,13 +256,15 @@ public sealed partial class Engine
     private int CheckPonderHit(ref SearchResult? lastSearchResult, int depth)
     {
         // 'Made up' ponder hit: first two moves of the previous search match with the last two moves of the move history
-        if (Game.MoveHistory.Count >= 2
+        if (
+            !_isPonderHit
+            && Game.MoveHistory.Count >= 2
             && _previousSearchResult?.Moves.Count > 2
             && _previousSearchResult.BestMove != default
             && Game.MoveHistory[^2] == _previousSearchResult.Moves[0]
             && Game.MoveHistory[^1] == _previousSearchResult.Moves[1])
         {
-            _logger.Debug("Ponder hit");
+            _logger.Debug("Artificial ponder hit");
 
             lastSearchResult = new SearchResult(_previousSearchResult);
 
