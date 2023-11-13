@@ -224,7 +224,7 @@ public sealed partial class Engine
             {
                 await _isSearchingSemaphoreSlim.WaitAsync();
                 // Important to do this after the semaphore, or the wrong values will be used at the end of the try and in IDDFS
-                _isPondering = goCommand.Ponder;
+                _isPondering = Configuration.EngineSettings.IsPonder && goCommand.Ponder;
                 _isPonderHit = isPonderHit;
 
                 var searchResult = await BestMove(goCommand);
