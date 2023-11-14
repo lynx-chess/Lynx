@@ -135,7 +135,7 @@ public sealed class EngineSettings
 
     public int AspirationWindow_Delta { get; set; } = 50;
 
-    public int AspirationWindow_MinDepth { get; set; } = 6;
+    public int AspirationWindow_MinDepth { get; set; } = 4;
 
     public int RFP_MaxDepth { get; set; } = 6;
 
