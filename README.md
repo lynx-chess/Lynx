@@ -113,7 +113,7 @@ If you're a Linux user and are new to .NET ecosystem, the conversation in [this 
 
 Lynx development wouldn't have been possible without:
 
--  [`BitBoard Chess Engine in C` YouTube playlist](https://www.youtube.com/playlist?list=PLmN0neTso3Jxh8ZIylk74JpwfiWNI76Cs), where [@maksimKorzh](https://github.com/maksimKorzh) explains how he developed his [BBC](https://github.com/maksimKorzh/bbc) engine
+-  On top of everything else, [`BitBoard Chess Engine in C` YouTube playlist](https://www.youtube.com/playlist?list=PLmN0neTso3Jxh8ZIylk74JpwfiWNI76Cs), where [@maksimKorzh](https://github.com/maksimKorzh) explains how he developed his [BBC](https://github.com/maksimKorzh/bbc) engine
 
 - [Chess Programming Wiki](https://www.chessprogramming.org/)
 
