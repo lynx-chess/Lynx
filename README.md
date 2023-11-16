@@ -28,6 +28,7 @@ Here are the ones 'properly' rated over at least a few hundred of games:
 
 | Lynx version | Release date | Estimated elo | [CCRL Blitz](https://www.computerchess.org.uk/ccrl/404/) | [CCRL](https://www.computerchess.org.uk/ccrl/4040/) | [MCERL](https://www.chessengeria.eu/mcerl) | [CEDR](https://chessengines.blogspot.com/p/rating-jcer.html) |
 |---|---|---|---|---|---|---|
+| [1.0.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.0.0) | 2023-11-16  | [2511](https://github.com/lynx-chess/Lynx/commit/66d340232298768bba57d6876f59831645a6dffb#commitcomment-132727293) |  |  |  |  |
 | [0.19.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.19.0) | 2023-10-27  | [2434](https://github.com/lynx-chess/Lynx/commit/b42d235a2815ddb989c5d83218750167c43be7bb#commitcomment-131057706) | [2421](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.19.0%2064-bit#Lynx_0_19_0_64-bit) |  |  |  |
 | [0.18.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.18.0) | 2023-10-21  | [2283](https://github.com/lynx-chess/Lynx/commit/3397c86c27bccb521f08306564325ff3cd64335d#commitcomment-130585961) |  |  | 2381  |  |
 | [0.17.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.17.0) | 2023-09-19  | [2178](https://github.com/lynx-chess/Lynx/commit/ecd462bf48923deb7fe7449ff74da3bcc8afe75c#commitcomment-127755063) |  |  | 2352 | 2252 |
@@ -111,18 +112,30 @@ If you're a Linux user and are new to .NET ecosystem, the conversation in [this 
 
 ## Credits
 
-Lynx development wouldn't have been possible without:
+Lynx development would simply not have been possible without:
 
--  On top of everything else, [`BitBoard Chess Engine in C` YouTube playlist](https://www.youtube.com/playlist?list=PLmN0neTso3Jxh8ZIylk74JpwfiWNI76Cs), where [@maksimKorzh](https://github.com/maksimKorzh) explains how he developed his [BBC](https://github.com/maksimKorzh/bbc) engine
+- [`BitBoard Chess Engine in C` YouTube playlist](https://www.youtube.com/playlist?list=PLmN0neTso3Jxh8ZIylk74JpwfiWNI76Cs), where [@maksimKorzh](https://github.com/maksimKorzh) explains how he developed his [BBC](https://github.com/maksimKorzh/bbc) engine
 
 - [Chess Programming Wiki](https://www.chessprogramming.org/)
+
+I would also like to extend my gratitude to:
 
 - Engine Programming discord group, especially Jamie Whiting
 ([Akimbo](https://github.com/JacquesRW/akimbo)), Antares ([Altair](https://github.com/Alex2262/AltairChessEngine)), Ciekce ([Stormphrax](https://github.com/Ciekce/Stormphrax/)), Rak ([Mess](https://github.com/raklaptudirm/mess)), etc.
 
 - The community Discord around [SebLague/Chess-Challenge](https://github.com/SebLague/Chess-Challenge/), which allowed me to discover EP discord and to revisit the basics, this time explained by very knowledgeable developers (such as the ones above) to people without any previous chess engine programming knowledge
 
-- [Marcel Vanthoor's blog](https://rustic-chess.org/) about creating his engine Rustic
+- Marcel Vanthoor and [his blog about how he created his engine, Rustic](https://rustic-chess.org/)
+
+- Gedas for his [texel-tuner](https://github.com/GediminasMasaitis/texel-tuner) tool
+
+- SF developers for their [WDL_model](https://github.com/official-stockfish/WDL_model) tool
+
+- Andrew Grant for [OpenBench](https://github.com/AndyGrant/OpenBench)
+
+- lichess developers for [lichess-bot](https://github.com/lichess-bot-devs/lichess-bot)
+
+- Open source chess engines with permissive licenses. Their existence encourages knowledge sharing and really helps pushing the Chess Engine Developer community forward. Some engines are credited inside the codebase itself, where relevant 
 
 - Countless other developers and online resources, who/which I should probably remember, but don't come to my mind right now
 
