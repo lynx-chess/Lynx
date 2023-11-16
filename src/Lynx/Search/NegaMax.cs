@@ -42,8 +42,6 @@ public sealed partial class Engine
         NodeType ttElementType = default;
         int ttEvaluation = default;
 
-        bool isInCheck = position.IsInCheck();
-
         if (!isRoot)
         {
             (ttEvaluation, ttBestMove, ttElementType) = _tt.ProbeHash(_ttMask, position, depth, ply, alpha, beta);
@@ -52,14 +50,12 @@ public sealed partial class Engine
                 return ttEvaluation;
             }
 
-            // Internal Iterative Reduction (IIR)
+            // Internal iterative reduction (IIR)
             // If this position isn't found in TT, it has never been searched before,
             // so the search will be potentially expensive.
             // Therefore, we search with reduced depth for now, expecting to record a TT move
             // which we'll be able to use later for the full depth search
-            if (ttElementType == default
-                && depth >= Configuration.EngineSettings.IIR_MinDepth
-                && !isInCheck)
+            if (ttElementType == default && depth >= Configuration.EngineSettings.IIR_MinDepth)
             {
                 --depth;
             }
@@ -67,6 +63,8 @@ public sealed partial class Engine
 
         // Before any time-consuming operations
         _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
+
+        bool isInCheck = position.IsInCheck();
 
         if (isInCheck)
         {
