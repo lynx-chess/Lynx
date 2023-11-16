@@ -460,7 +460,7 @@ public class Position
         var oppositeKingSquare = oppositeKingBitBoard == default ? -1 : oppositeKingBitBoard.GetLS1BIndex();
 
         return kingSquare >= 0 && oppositeKingSquare >= 0
-            && !Attacks.IsSquaredAttacked(oppositeKingSquare, Side, PieceBitBoards, OccupancyBitBoards);
+            && !Attacks.IsSquareAttacked(oppositeKingSquare, Side, PieceBitBoards, OccupancyBitBoards);
     }
 
     /// <summary>
@@ -475,7 +475,7 @@ public class Position
     {
         var oppositeKingSquare = PieceBitBoards[(int)Piece.k - Utils.PieceOffset(Side)].GetLS1BIndex();
 
-        return !Attacks.IsSquaredAttacked(oppositeKingSquare, Side, PieceBitBoards, OccupancyBitBoards);
+        return !Attacks.IsSquareAttacked(oppositeKingSquare, Side, PieceBitBoards, OccupancyBitBoards);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -960,7 +960,7 @@ public class Position
 
                 var squareIndex = BitBoardExtensions.SquareIndex(rank, file);
 
-                var pieceRepresentation = Attacks.IsSquaredAttacked(squareIndex, sideToMove, PieceBitBoards, OccupancyBitBoards)
+                var pieceRepresentation = Attacks.IsSquareAttacked(squareIndex, sideToMove, PieceBitBoards, OccupancyBitBoards)
                     ? '1'
                     : '.';
 
