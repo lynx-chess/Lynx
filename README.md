@@ -110,6 +110,8 @@ If you're a Linux user and are new to .NET ecosystem, the conversation in [this 
 
 - PEXT Bitboards [[1](https://www.chessprogramming.org/BMI2#PEXTBitboards)]  [[2](https://analog-hors.github.io/site/magic-bitboards/)]
 
+- Internal Iterative Deepening [[1](https://www.chessprogramming.org/Internal_Iterative_Deepening)]
+
 ## Credits
 
 Lynx development would simply not have been possible without:
