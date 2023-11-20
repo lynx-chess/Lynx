@@ -693,7 +693,7 @@ public class Position
 
         var eval = ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / maxPhase;
 
-        eval = Math.Clamp(eval, EvaluationConstants.NegativeCheckmateDetectionLimit, EvaluationConstants.PositiveCheckmateDetectionLimit);
+        eval = Math.Clamp(eval, EvaluationConstants.MinEval, EvaluationConstants.MaxEval);
 
         var sideEval = Side == Side.White
             ? eval
