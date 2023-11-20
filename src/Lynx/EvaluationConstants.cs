@@ -312,6 +312,10 @@ public static class EvaluationConstants
     /// </summary>
     public const int NegativeCheckmateDetectionLimit = -27_000; // -CheckMateBaseEvaluation + (Constants.AbsoluteMaxDepth + 45) * DepthCheckmateFactor;
 
+    public const int MinEval = NegativeCheckmateDetectionLimit + 1;
+
+    public const int MaxEval = PositiveCheckmateDetectionLimit - 1;
+
     public const int PVMoveScoreValue = 4_194_304;
 
     public const int TTMoveScoreValue = 2_097_152;
