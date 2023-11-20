@@ -231,6 +231,26 @@ public sealed partial class Engine
             }
             else
             {
+                // Late Move Pruning (LMP) - all quiet moves can be pruned
+                // after searching the first few given by the move ordering algorithm
+                if (!pvNode
+                    && !isInCheck
+                    && depth <= Configuration.EngineSettings.LMP_MaxDepth
+                    && scores[i] < EvaluationConstants.PromotionMoveScoreValue  // Quiet moves
+                    && i >= depth * 10) // Suggested by Antares
+                                        //&& i >= base + depth * depth) // SP, base 2 or 3
+                {
+                    // After making a move
+                    Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
+                    if (!isThreeFoldRepetition)
+                    {
+                        Game.PositionHashHistory.Remove(position.UniqueIdentifier);
+                    }
+                    position.UnmakeMove(move, gameState);
+
+                    break;
+                }
+
                 int reduction = 0;
 
                 // 🔍 Late Move Reduction (LMR) - search with reduced depth
