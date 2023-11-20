@@ -55,7 +55,7 @@ public sealed partial class Engine
             // so the search will be potentially expensive.
             // Therefore, we search with reduced depth for now, expecting to record a TT move
             // which we'll be able to use later for the full depth search
-            if (ttBestMove == default && depth >= Configuration.EngineSettings.IIR_MinDepth)
+            if (ttElementType == default && depth >= Configuration.EngineSettings.IIR_MinDepth)
             {
                 --depth;
             }
