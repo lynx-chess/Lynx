@@ -151,6 +151,8 @@ public sealed class EngineSettings
 
     public int LMP_MaxDepth { get; set; } = 3;
 
+    public int LMP_BaseMovesToTry { get; set; } = 3;
+
     public int History_MaxMoveValue { get; set; } = 8_192;
 
     #region Evaluation

@@ -237,8 +237,7 @@ public sealed partial class Engine
                     && !isInCheck
                     && depth <= Configuration.EngineSettings.LMP_MaxDepth
                     && scores[i] < EvaluationConstants.PromotionMoveScoreValue  // Quiet moves
-                    && i >= depth * 10) // Suggested by Antares
-                                        //&& i >= base + depth * depth) // SP, base 2 or 3
+                    && i >= Configuration.EngineSettings.LMP_BaseMovesToTry + depth * depth) // Based on SP
                 {
                     // After making a move
                     Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
