@@ -182,20 +182,20 @@ public sealed partial class Engine
             }
         }
 
-        for (int i = 0; i < pseudoLegalMoves.Length; ++i)
+        for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
         {
             // Incremental move sorting, inspired by https://github.com/jw1912/Chess-Challenge and suggested by toanth
             // There's no need to sort all the moves since most of them don't get checked anyway
             // So just find the first unsearched one with the best score and try it
-            for (int j = i + 1; j < pseudoLegalMoves.Length; j++)
+            for (int j = moveIndex + 1; j < pseudoLegalMoves.Length; j++)
             {
-                if (scores[j] > scores[i])
+                if (scores[j] > scores[moveIndex])
                 {
-                    (scores[i], scores[j], pseudoLegalMoves[i], pseudoLegalMoves[j]) = (scores[j], scores[i], pseudoLegalMoves[j], pseudoLegalMoves[i]);
+                    (scores[moveIndex], scores[j], pseudoLegalMoves[moveIndex], pseudoLegalMoves[j]) = (scores[j], scores[moveIndex], pseudoLegalMoves[j], pseudoLegalMoves[moveIndex]);
                 }
             }
 
-            var move = pseudoLegalMoves[i];
+            var move = pseudoLegalMoves[moveIndex];
 
             var gameState = position.MakeMove(move);
 
@@ -236,8 +236,8 @@ public sealed partial class Engine
                 if (!pvNode
                     && !isInCheck
                     && depth <= Configuration.EngineSettings.LMP_MaxDepth
-                    && scores[i] < EvaluationConstants.PromotionMoveScoreValue  // Quiet moves
-                    && i >= Configuration.EngineSettings.LMP_BaseMovesToTry + 10 * depth) // Based on SP and Altair
+                    && scores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue  // Quiet moves
+                    && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth)) // Based on SP and Altair
                 {
                     // After making a move
                     Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
