@@ -183,6 +183,8 @@ public sealed class EngineSettings
         new(53, 191),
         new(0));
 
+    public TaperedEvaluationTerm TempoBonus { get; set; } = new(5, 5);
+
     #endregion
 }
 

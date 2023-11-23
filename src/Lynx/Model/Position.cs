@@ -666,6 +666,17 @@ public class Position
         middleGameScore += EvaluationConstants.MiddleGameTable[(int)Piece.k, blackKing] - mgKingScore;
         endGameScore += EvaluationConstants.EndGameTable[(int)Piece.k, blackKing] - egKingScore;
 
+        if (Side == Side.White)
+        {
+            middleGameScore += Configuration.EngineSettings.TempoBonus.MG;
+            endGameScore += Configuration.EngineSettings.TempoBonus.EG;
+        }
+        else
+        {
+            middleGameScore -= Configuration.EngineSettings.TempoBonus.MG;
+            endGameScore -= Configuration.EngineSettings.TempoBonus.EG;
+        }
+
         const int maxPhase = 24;
 
         if (gamePhase > maxPhase)    // Early promotions
