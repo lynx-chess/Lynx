@@ -236,7 +236,6 @@ public sealed partial class Engine
                 if (!pvNode
                     && !isInCheck
                     && depth <= Configuration.EngineSettings.LMP_MaxDepth
-                    && scores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue  // Quiet moves
                     && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth)) // Based on formula suggested by Antares
                 {
                     // After making a move
