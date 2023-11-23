@@ -237,7 +237,7 @@ public sealed partial class Engine
                     && !isInCheck
                     && depth <= Configuration.EngineSettings.LMP_MaxDepth
                     && scores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue  // Quiet moves
-                    && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + Configuration.EngineSettings.LMP_MovesDepthMultiplier) // Based on SP and Altair
+                    && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth)) // Based on SP and Altair
                 {
                     // After making a move
                     Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
