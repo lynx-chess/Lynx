@@ -113,7 +113,7 @@ public class ForceOrAvoidDrawTest : BaseTest
         Assert.AreEqual(repeatedMoves.Count, engine.Game.MoveHistory.Count);
 
         // Act
-        var searchResult = await engine.BestMove();
+        var searchResult = await engine.BestMove(new($"go depth {Engine.DefaultMaxDepth}"));
         var bestMoveFound = searchResult.BestMove;
 
         // Assert
@@ -161,7 +161,7 @@ public class ForceOrAvoidDrawTest : BaseTest
         engine.Game.PositionHashHistory.Clear(); // Make sure we don't take account threefold repetition
 
         // Act
-        var searchResult = await engine.BestMove();
+        var searchResult = await engine.BestMove(new($"go depth {Engine.DefaultMaxDepth}"));
         var bestMoveFound = searchResult.BestMove;
 
         // Assert
@@ -209,7 +209,7 @@ public class ForceOrAvoidDrawTest : BaseTest
         engine.Game.PositionHashHistory.Clear(); // Make sure we don't take account threefold repetition
 
         // Act
-        var searchResult = await engine.BestMove();
+        var searchResult = await engine.BestMove(new($"go depth {Engine.DefaultMaxDepth}"));
         var bestMoveFound = searchResult.BestMove;
 
         // Assert
