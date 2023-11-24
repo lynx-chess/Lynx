@@ -1,6 +1,5 @@
 ﻿using Lynx.Model;
 using Lynx.UCI.Commands.Engine;
-using NLog.Targets;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -268,8 +267,8 @@ public sealed partial class Engine
                 _killerMoves[1, d] = _previousKillerMoves[1, d + 2];
             }
 
-            // depth Already reduced by 2 in SearchResult constructor
-            depth = Math.Clamp(lastSearchResult.Depth, 1, Configuration.EngineSettings.MaxDepth - 1);
+            // Re-search from depth 1
+            depth = 1;
         }
         else
         {
