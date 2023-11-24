@@ -123,11 +123,11 @@ public static class Attacks
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsSquaredAttackedBySide(int squaredIndex, Position position, Side sideToMove) =>
-        IsSquaredAttacked(squaredIndex, sideToMove, position.PieceBitBoards, position.OccupancyBitBoards);
+    public static bool IsSquareAttackedBySide(int squaredIndex, Position position, Side sideToMove) =>
+        IsSquareAttacked(squaredIndex, sideToMove, position.PieceBitBoards, position.OccupancyBitBoards);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsSquaredAttacked(int squareIndex, Side sideToMove, BitBoard[] piecePosition, BitBoard[] occupancy)
+    public static bool IsSquareAttacked(int squareIndex, Side sideToMove, BitBoard[] piecePosition, BitBoard[] occupancy)
     {
         Utils.Assert(sideToMove != Side.Both);
 

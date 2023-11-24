@@ -909,6 +909,20 @@ public class PositionTest
         Assert.AreEqual(mobilityDifference * Configuration.EngineSettings.QueenMobilityBonus.MG, evaluation);
     }
 
+    /// <summary>
+    /// https://github.com/lynx-chess/Lynx/pull/510
+    /// </summary>
+    /// <param name="fen"></param>
+    /// <param name="expectedStaticEvaluation"></param>
+    [TestCase("QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QPPPPPPP/K6k b - - 0 1", EvaluationConstants.MinEval)]
+    [TestCase("QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QPPPPPPP/K5k1 w - - 0 1", EvaluationConstants.MaxEval)]
+    public void StaticEvaluation_Clamp(string fen, int expectedStaticEvaluation)
+    {
+        var position = new Position(fen);
+
+        Assert.AreEqual(expectedStaticEvaluation, position.StaticEvaluation().Score);
+    }
+
     [TestCase(0, 0)]
     [TestCase(0, 100)]
     [TestCase(100, 100)]

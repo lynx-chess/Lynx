@@ -49,6 +49,16 @@ public sealed partial class Engine
             {
                 return ttEvaluation;
             }
+
+            // Internal iterative reduction (IIR)
+            // If this position isn't found in TT, it has never been searched before,
+            // so the search will be potentially expensive.
+            // Therefore, we search with reduced depth for now, expecting to record a TT move
+            // which we'll be able to use later for the full depth search
+            if (ttElementType == default && depth >= Configuration.EngineSettings.IIR_MinDepth)
+            {
+                --depth;
+            }
         }
 
         // Before any time-consuming operations
@@ -172,20 +182,20 @@ public sealed partial class Engine
             }
         }
 
-        for (int i = 0; i < pseudoLegalMoves.Length; ++i)
+        for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
         {
             // Incremental move sorting, inspired by https://github.com/jw1912/Chess-Challenge and suggested by toanth
             // There's no need to sort all the moves since most of them don't get checked anyway
             // So just find the first unsearched one with the best score and try it
-            for (int j = i + 1; j < pseudoLegalMoves.Length; j++)
+            for (int j = moveIndex + 1; j < pseudoLegalMoves.Length; j++)
             {
-                if (scores[j] > scores[i])
+                if (scores[j] > scores[moveIndex])
                 {
-                    (scores[i], scores[j], pseudoLegalMoves[i], pseudoLegalMoves[j]) = (scores[j], scores[i], pseudoLegalMoves[j], pseudoLegalMoves[i]);
+                    (scores[moveIndex], scores[j], pseudoLegalMoves[moveIndex], pseudoLegalMoves[j]) = (scores[j], scores[moveIndex], pseudoLegalMoves[j], pseudoLegalMoves[moveIndex]);
                 }
             }
 
-            var move = pseudoLegalMoves[i];
+            var move = pseudoLegalMoves[moveIndex];
 
             var gameState = position.MakeMove(move);
 
@@ -221,6 +231,25 @@ public sealed partial class Engine
             }
             else
             {
+                // Late Move Pruning (LMP) - all quiet moves can be pruned
+                // after searching the first few given by the move ordering algorithm
+                if (!pvNode
+                    && !isInCheck
+                    && depth <= Configuration.EngineSettings.LMP_MaxDepth
+                    && scores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue  // Quiet moves
+                    && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth)) // Based on formula suggested by Antares
+                {
+                    // After making a move
+                    Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
+                    if (!isThreeFoldRepetition)
+                    {
+                        Game.PositionHashHistory.Remove(position.UniqueIdentifier);
+                    }
+                    position.UnmakeMove(move, gameState);
+
+                    break;
+                }
+
                 int reduction = 0;
 
                 // 🔍 Late Move Reduction (LMR) - search with reduced depth

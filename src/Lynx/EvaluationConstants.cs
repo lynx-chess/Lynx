@@ -9,14 +9,20 @@ namespace Lynx;
 public static class EvaluationConstants
 {
     /// <summary>
-    /// 30k games, 16+0.16, UHO_XXL_+0.90_+1.19.epd
-    /// Retained (W,D,L) = (791773, 1127929, 793778) positions.
+    /// 21454 games, 16+0.16, UHO_XXL_+0.90_+1.19.epd
+    /// Retained (W,D,L) = (486074, 1108791, 487345) positions.
     /// </summary>
-    public const int EvalNormalizationCoefficient = 78;
+    public const int EvalNormalizationCoefficient = 138;
 
-    public static readonly double[] As = [-44.54789428, 284.90322556, -305.65458204, 143.86777995];
+    public static readonly double[] As = [-25.59900221, 175.23377472, -145.09355540, 133.49051930];
 
-    public static readonly double[] Bs = [-21.08101051, 127.81742295, -160.22340655, 128.53122955];
+    public static readonly double[] Bs = [-14.14613328, 84.98205725, -101.16332276, 120.88906952];
+
+    public static readonly int[] GamePhaseByPiece =
+    [
+        0, 1, 1, 2, 4, 0,
+        0, 1, 1, 2, 4, 0
+    ];
 
     public static readonly int[] MiddleGamePieceValues =
     [
@@ -29,12 +35,6 @@ public static class EvaluationConstants
             +109, +356, +324, +653, +1123, 0,
             -109, -356, -324, -653, -1123, 0
     ];
-
-    public static readonly int[] GamePhaseByPiece =
-[
-    0, 1, 1, 2, 4, 0,
-    0, 1, 1, 2, 4, 0
-];
 
     public static readonly int[] MiddleGamePawnTable =
     [
@@ -311,6 +311,10 @@ public static class EvaluationConstants
     /// Minimum evaluation for a position to be Black checkmate
     /// </summary>
     public const int NegativeCheckmateDetectionLimit = -27_000; // -CheckMateBaseEvaluation + (Constants.AbsoluteMaxDepth + 45) * DepthCheckmateFactor;
+
+    public const int MinEval = NegativeCheckmateDetectionLimit + 1;
+
+    public const int MaxEval = PositiveCheckmateDetectionLimit - 1;
 
     public const int PVMoveScoreValue = 4_194_304;
 
