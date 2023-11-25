@@ -24,7 +24,6 @@ public static class EvaluationConstants
         0, 1, 1, 2, 4, 0
     ];
 
-[4503s] Epoch 50000 (11.1368 eps), error 0.0884277, LR 1
 public static readonly int[] MiddleGamePieceValues =
 [
         +103, +380, +357, +502, +1126, 0,
