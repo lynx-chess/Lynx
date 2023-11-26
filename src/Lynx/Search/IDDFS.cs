@@ -254,10 +254,25 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int CheckPonderHit(ref SearchResult? lastSearchResult, int depth)
     {
+        if (_isPonderHit && _previousSearchResult is not null)
+        {
+            _logger.Debug("Ponder hit");
+
+            lastSearchResult = new SearchResult(_previousSearchResult);
+
+            Array.Copy(_previousSearchResult.Moves.ToArray(), 0, _pVTable, 0, _previousSearchResult.Moves.Count);
+
+            for (int d = 0; d < Configuration.EngineSettings.MaxDepth; ++d)
+            {
+                _killerMoves[0, d] = _previousKillerMoves[0, d];
+                _killerMoves[1, d] = _previousKillerMoves[1, d];
+            }
+
+            // Re-search from depth 1
+            depth = 1;
+        }
         // 'Made up' ponder hit: first two moves of the previous search match with the last two moves of the move history
-        if (
-            !_isPonderHit
-            && Game.MoveHistory.Count >= 2
+        else if (Game.MoveHistory.Count >= 2
             && _previousSearchResult?.Moves.Count > 2
             && _previousSearchResult.BestMove != default
             && Game.MoveHistory[^2] == _previousSearchResult.Moves[0]
