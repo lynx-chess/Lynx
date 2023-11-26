@@ -1,5 +1,4 @@
 ﻿using Lynx.Model;
-using System.Runtime.CompilerServices;
 
 namespace Lynx;
 
@@ -8,7 +7,6 @@ public static class AttackGenerator
     /// <summary>
     /// BitBoard[isWhite, square]
     /// </summary>
-    [SkipLocalsInit]
     public static BitBoard[,] InitializePawnAttacks()
     {
         BitBoard[,] pawnAttacks = new BitBoard[2, 64];
@@ -22,7 +20,6 @@ public static class AttackGenerator
         return pawnAttacks;
     }
 
-    [SkipLocalsInit]
     public static BitBoard[] InitializeKnightAttacks()
     {
         BitBoard[] knightAttacks = new BitBoard[64];
@@ -35,7 +32,6 @@ public static class AttackGenerator
         return knightAttacks;
     }
 
-    [SkipLocalsInit]
     public static BitBoard[] InitializeKingAttacks()
     {
         BitBoard[] kingAttacks = new BitBoard[64];
@@ -48,7 +44,6 @@ public static class AttackGenerator
         return kingAttacks;
     }
 
-    [SkipLocalsInit]
     public static BitBoard[] InitializeBishopOccupancy()
     {
         BitBoard[] bishopAttacks = new BitBoard[64];
@@ -61,7 +56,6 @@ public static class AttackGenerator
         return bishopAttacks;
     }
 
-    [SkipLocalsInit]
     public static BitBoard[] InitializeRookOccupancy()
     {
         BitBoard[] rookAttacks = new BitBoard[64];
@@ -78,7 +72,6 @@ public static class AttackGenerator
     /// Returns bishop occupancy masks and attacks
     /// </summary>
     /// <returns>(BitBoard[64], BitBoard[64, 512])</returns>
-    [SkipLocalsInit]
     public static (BitBoard[] BishopOccupancyMasks, BitBoard[,] BishopAttacks) InitializeBishopMagicAttacks()
     {
         BitBoard[] occupancyMasks = new BitBoard[64];
@@ -109,7 +102,6 @@ public static class AttackGenerator
     /// Returns rook occupancy masks and attacks
     /// </summary>
     /// <returns>(BitBoard[64], BitBoard[64, 512])</returns>
-    [SkipLocalsInit]
     public static (BitBoard[] RookOccupancyMasks, BitBoard[,] RookAttacks) InitializeRookMagicAttacks()
     {
         BitBoard[] occupancyMasks = new BitBoard[64];

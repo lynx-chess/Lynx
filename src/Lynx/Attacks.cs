@@ -5,7 +5,6 @@ using System.Runtime.Intrinsics.X86;
 
 namespace Lynx;
 
-[SkipLocalsInit]
 public static class Attacks
 {
     private static readonly BitBoard[] _bishopOccupancyMasks;
@@ -23,9 +22,9 @@ public static class Attacks
     /// </summary>
     private static readonly BitBoard[,] _rookAttacks;
 
-    private static readonly ulong[] _pextAttacks = new ulong[5248 + 102400];
-    private static readonly ulong[] _pextBishopOffset = new ulong[64];
-    private static readonly ulong[] _pextRookOffset = new ulong[64];
+    private static readonly ulong[] _pextAttacks;
+    private static readonly ulong[] _pextBishopOffset;
+    private static readonly ulong[] _pextRookOffset;
 
     /// <summary>
     /// [2 (B|W), 64 (Squares)]
@@ -45,7 +44,17 @@ public static class Attacks
 
         if (Bmi2.X64.IsSupported)
         {
+            _pextAttacks = new ulong[5248 + 102400];
+            _pextBishopOffset = new ulong[64];
+            _pextRookOffset = new ulong[64];
+
             InitializeBishopAndRookPextAttacks();
+        }
+        else
+        {
+            _pextAttacks = [];
+            _pextBishopOffset = [];
+            _pextRookOffset = [];
         }
     }
 
