@@ -20,7 +20,7 @@ public class SkipLocalsInit : BaseBenchmark
         (var _bishopOccupancyMasks, var _bishopAttacks) = SkipLocalsInit_AttackGenerator_Original.InitializeBishopMagicAttacks();
         (var _rookOccupancyMasks, var _rookAttacks) = SkipLocalsInit_AttackGenerator_Original.InitializeRookMagicAttacks();
 
-        return KingAttacks[0] ^ PawnAttacks[0, 0] ^ KnightAttacks[0] ^ _bishopOccupancyMasks[0] ^ _rookOccupancyMasks[0] ^ _bishopAttacks[0] ^ _rookAttacks[0];
+        return KingAttacks[0] ^ PawnAttacks[0, 0] ^ KnightAttacks[0] ^ _bishopOccupancyMasks[0] ^ _rookOccupancyMasks[0] ^ _bishopAttacks[0, 0] ^ _rookAttacks[0, 0];
     }
 
     [Benchmark]
