@@ -1,4 +1,15 @@
 ﻿/*
+ *  BenchmarkDotNet v0.13.10, Ubuntu 22.04.3 LTS (Jammy Jellyfish)
+ *  AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
+ *  .NET SDK 8.0.100
+ *    [Host]     : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
+ *    DefaultJob : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
+ *
+ *  | Method                         | Mean     | Error     | StdDev    | Ratio | Gen0     | Gen1     | Gen2     | Allocated | Alloc Ratio |
+ *  |------------------------------- |---------:|----------:|----------:|------:|---------:|---------:|---------:|----------:|------------:|
+ *  | AttackGenerator_Original       | 5.575 ms | 0.0278 ms | 0.0260 ms |  1.00 | 484.3750 | 484.3750 | 484.3750 |   2.25 MB |        1.00 |
+ *  | AttackGenerator_SkipLocalsInit | 5.574 ms | 0.0250 ms | 0.0222 ms |  1.00 | 468.7500 | 468.7500 | 468.7500 |   2.25 MB |        1.00 |
+ *  | AttackGenerator_Other          | 5.573 ms | 0.0333 ms | 0.0312 ms |  1.00 | 468.7500 | 468.7500 | 468.7500 |   2.25 MB |        1.00 |
  */
 
 using BenchmarkDotNet.Attributes;
