@@ -132,6 +132,14 @@ public sealed class EngineSettings
 
     public int Razoring_NotDepth1Bonus { get; set; } = 175;
 
+    public int IIR_MinDepth { get; set; } = 4;
+
+    public int LMP_MaxDepth { get; set; } = 2;
+
+    public int LMP_BaseMovesToTry { get; set; } = 0;
+
+    public int LMP_MovesDepthMultiplier { get; set; } = 10;
+
     public int History_MaxMoveValue { get; set; } = 8_192;
 
     #region Evaluation
