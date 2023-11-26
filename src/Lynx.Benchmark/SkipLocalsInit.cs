@@ -17,10 +17,15 @@ public class SkipLocalsInit : BaseBenchmark
         var PawnAttacks = SkipLocalsInit_AttackGenerator_Original.InitializePawnAttacks();
         var KnightAttacks = SkipLocalsInit_AttackGenerator_Original.InitializeKnightAttacks();
 
+        var bishopOcuppancy = SkipLocalsInit_AttackGenerator_Original.InitializeBishopOccupancy();
+        var rookOcuppancy = SkipLocalsInit_AttackGenerator_Original.InitializeRookOccupancy();
+
         (var _bishopOccupancyMasks, var _bishopAttacks) = SkipLocalsInit_AttackGenerator_Original.InitializeBishopMagicAttacks();
         (var _rookOccupancyMasks, var _rookAttacks) = SkipLocalsInit_AttackGenerator_Original.InitializeRookMagicAttacks();
 
-        return KingAttacks[0] ^ PawnAttacks[0, 0] ^ KnightAttacks[0] ^ _bishopOccupancyMasks[0] ^ _rookOccupancyMasks[0] ^ _bishopAttacks[0, 0] ^ _rookAttacks[0, 0];
+        return KingAttacks[0] ^ PawnAttacks[0, 0] ^ KnightAttacks[0] ^ _bishopOccupancyMasks[0]
+            ^ _rookOccupancyMasks[0] ^ _bishopAttacks[0, 0] ^ _rookAttacks[0, 0]
+            ^ bishopOcuppancy[0] ^ rookOcuppancy[0];
     }
 
     [Benchmark]
@@ -30,10 +35,15 @@ public class SkipLocalsInit : BaseBenchmark
         var PawnAttacks = SkipLocalsInit_AttackGenerator_SkipLocalsInit.InitializePawnAttacks();
         var KnightAttacks = SkipLocalsInit_AttackGenerator_SkipLocalsInit.InitializeKnightAttacks();
 
+        var bishopOcuppancy = SkipLocalsInit_AttackGenerator_SkipLocalsInit.InitializeBishopOccupancy();
+        var rookOcuppancy = SkipLocalsInit_AttackGenerator_SkipLocalsInit.InitializeRookOccupancy();
+
         (var _bishopOccupancyMasks, var _bishopAttacks) = SkipLocalsInit_AttackGenerator_SkipLocalsInit.InitializeBishopMagicAttacks();
         (var _rookOccupancyMasks, var _rookAttacks) = SkipLocalsInit_AttackGenerator_SkipLocalsInit.InitializeRookMagicAttacks();
 
-        return KingAttacks[0] ^ PawnAttacks[0, 0] ^ KnightAttacks[0] ^ _bishopOccupancyMasks[0] ^ _rookOccupancyMasks[0] ^ _bishopAttacks[0, 0] ^ _rookAttacks[0, 0];
+        return KingAttacks[0] ^ PawnAttacks[0, 0] ^ KnightAttacks[0] ^ _bishopOccupancyMasks[0]
+            ^ _rookOccupancyMasks[0] ^ _bishopAttacks[0, 0] ^ _rookAttacks[0, 0]
+            ^ bishopOcuppancy[0] ^ rookOcuppancy[0];
     }
 
     private static class SkipLocalsInit_AttackGenerator_Original
@@ -789,7 +799,6 @@ public class SkipLocalsInit : BaseBenchmark
         /// <summary>
         /// BitBoard[isWhite, square]
         /// </summary>
-        [SkipLocalsInit]
         public static BitBoard[,] InitializePawnAttacks()
         {
             BitBoard[,] pawnAttacks = new BitBoard[2, 64];
@@ -803,63 +812,38 @@ public class SkipLocalsInit : BaseBenchmark
             return pawnAttacks;
         }
 
-        [SkipLocalsInit]
         public static BitBoard[] InitializeKnightAttacks()
         {
-            BitBoard[] knightAttacks = new BitBoard[64];
-
-            for (int square = 0; square < 64; ++square)
-            {
-                knightAttacks[square] = MaskKnightAttacks(square);
-            }
-
-            return knightAttacks;
+            return Enumerable.Range(0, 64)
+                .Select(MaskKnightAttacks)
+                .ToArray();
         }
 
-        [SkipLocalsInit]
         public static BitBoard[] InitializeKingAttacks()
         {
-            BitBoard[] kingAttacks = new BitBoard[64];
-
-            for (int square = 0; square < 64; ++square)
-            {
-                kingAttacks[square] = MaskKingAttacks(square);
-            }
-
-            return kingAttacks;
+            return Enumerable.Range(0, 64)
+                .Select(MaskKingAttacks)
+                .ToArray();
         }
 
-        [SkipLocalsInit]
-        public static BitBoard[] InitializeBishopOccupancy()
+¡        public static BitBoard[] InitializeBishopOccupancy()
         {
-            BitBoard[] bishopAttacks = new BitBoard[64];
-
-            for (int square = 0; square < 64; ++square)
-            {
-                bishopAttacks[square] = MaskBishopOccupancy(square);
-            }
-
-            return bishopAttacks;
+            return Enumerable.Range(0, 64)
+                .Select(MaskBishopOccupancy)
+                .ToArray();
         }
 
-        [SkipLocalsInit]
         public static BitBoard[] InitializeRookOccupancy()
         {
-            BitBoard[] rookAttacks = new BitBoard[64];
-
-            for (int square = 0; square < 64; ++square)
-            {
-                rookAttacks[square] = MaskRookOccupancy(square);
-            }
-
-            return rookAttacks;
+            return Enumerable.Range(0, 64)
+                .Select(MaskRookOccupancy)
+                .ToArray();
         }
 
         /// <summary>
         /// Returns bishop occupancy masks and attacks
         /// </summary>
         /// <returns>(BitBoard[64], BitBoard[64, 512])</returns>
-        [SkipLocalsInit]
         public static (BitBoard[] BishopOccupancyMasks, BitBoard[,] BishopAttacks) InitializeBishopMagicAttacks()
         {
             BitBoard[] occupancyMasks = new BitBoard[64];
@@ -890,7 +874,6 @@ public class SkipLocalsInit : BaseBenchmark
         /// Returns rook occupancy masks and attacks
         /// </summary>
         /// <returns>(BitBoard[64], BitBoard[64, 512])</returns>
-        [SkipLocalsInit]
         public static (BitBoard[] RookOccupancyMasks, BitBoard[,] RookAttacks) InitializeRookMagicAttacks()
         {
             BitBoard[] occupancyMasks = new BitBoard[64];
