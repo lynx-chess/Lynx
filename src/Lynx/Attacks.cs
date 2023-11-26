@@ -5,6 +5,7 @@ using System.Runtime.Intrinsics.X86;
 
 namespace Lynx;
 
+[SkipLocalsInit]
 public static class Attacks
 {
     private static readonly BitBoard[] _bishopOccupancyMasks;
