@@ -826,7 +826,7 @@ public class SkipLocalsInit : BaseBenchmark
                 .ToArray();
         }
 
-¡        public static BitBoard[] InitializeBishopOccupancy()
+        public static BitBoard[] InitializeBishopOccupancy()
         {
             return Enumerable.Range(0, 64)
                 .Select(MaskBishopOccupancy)
