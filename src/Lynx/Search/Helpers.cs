@@ -69,16 +69,16 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal int ScoreMove(Move move, int depth, bool useKillerAndPositionMoves, Move bestMoveTTCandidate = default)
     {
+        if (move == bestMoveTTCandidate)
+        {
+            return EvaluationConstants.TTMoveScoreValue;
+        }
+
         if (_isScoringPV && move == _pVTable[depth])
         {
             _isScoringPV = false;
 
             return EvaluationConstants.PVMoveScoreValue;
-        }
-
-        if (move == bestMoveTTCandidate)
-        {
-            return EvaluationConstants.TTMoveScoreValue;
         }
 
         var promotedPiece = move.PromotedPiece();
