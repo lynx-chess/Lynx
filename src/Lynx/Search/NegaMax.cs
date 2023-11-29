@@ -196,6 +196,7 @@ public sealed partial class Engine
             }
 
             var move = pseudoLegalMoves[moveIndex];
+            int depthExtensions = 0;
 
             var gameState = position.MakeMove(move);
 
@@ -209,6 +210,11 @@ public sealed partial class Engine
             isAnyMoveValid = true;
 
             PrintPreMove(position, ply, move);
+
+            if (move.PromotedPiece() != default)
+            {
+                ++depthExtensions;
+            }
 
             // Before making a move
             var oldValue = Game.HalfMovesWithoutCaptureOrPawnMove;
@@ -227,7 +233,7 @@ public sealed partial class Engine
             }
             else if (pvNode && movesSearched == 0)
             {
-                evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
+                evaluation = -NegaMax(depth - 1 + depthExtensions, ply + 1, -beta, -alpha);
             }
             else
             {
@@ -276,7 +282,7 @@ public sealed partial class Engine
                 }
 
                 // Search with reduced depth
-                evaluation = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha);
+                evaluation = -NegaMax(depth - 1 - reduction + depthExtensions, ply + 1, -alpha - 1, -alpha);
 
                 // 🔍 Principal Variation Search (PVS)
                 if (evaluation > alpha && reduction > 0)
@@ -286,13 +292,13 @@ public sealed partial class Engine
                     // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
 
                     // Search with full depth but narrowed score bandwidth
-                    evaluation = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha);
+                    evaluation = -NegaMax(depth - 1 + depthExtensions, ply + 1, -alpha - 1, -alpha);
                 }
 
                 if (evaluation > alpha && evaluation < beta)
                 {
                     // PVS Hipothesis invalidated -> search with full depth and full score bandwidth
-                    evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
+                    evaluation = -NegaMax(depth - 1 + depthExtensions, ply + 1, -beta, -alpha);
                 }
             }
 
