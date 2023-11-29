@@ -325,13 +325,13 @@ public static readonly int[] EndGameKingTable =
     /// </summary>
     public const int CaptureMoveBaseScoreValue = 1_048_576;
 
-    public const int FirstKillerMoveValue = 524_288;
+    public const int PromotionMoveScoreValue = 524_288;
 
-    public const int SecondKillerMoveValue = 262_144;
+    public const int FirstKillerMoveValue = 262_144;
 
-    public const int ThirdKillerMoveValue = 131_072;
+    public const int SecondKillerMoveValue = 131_072;
 
-    public const int PromotionMoveScoreValue = 65_536;
+    public const int ThirdKillerMoveValue = 65_536;
 
     //public const int MaxHistoryMoveValue => Configuration.EngineSettings.MaxHistoryMoveValue;
 
