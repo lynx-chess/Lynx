@@ -1,5 +1,6 @@
 ﻿using Lynx.Model;
 using System.Numerics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics.X86;
 
@@ -39,8 +40,31 @@ public static class Attacks
         PawnAttacks = AttackGenerator.InitializePawnAttacks();
         KnightAttacks = AttackGenerator.InitializeKnightAttacks();
 
-        (_bishopOccupancyMasks, _bishopAttacks) = AttackGenerator.InitializeBishopMagicAttacks();
-        (_rookOccupancyMasks, _rookAttacks) = AttackGenerator.InitializeRookMagicAttacks();
+        const string dll = "Attacks.dll";
+        const string bin = "Attacks.bin";
+        const string @namespace = "AttacksNamespace";
+
+        (_bishopOccupancyMasks, var bishopAttacks) = AttackGenerator.InitializeBishopMagicAttacks();
+        {
+            const string type = "BishopAttacks";
+            const string method = "DeserializeBishopAttacks";
+
+            Microsoft.FrozenObjects.Serializer.SerializeObject(bishopAttacks, bin, dll, @namespace, type, method, new Version(1, 0, 0, 0));
+
+            _bishopAttacks = (BitBoard[,])
+                Assembly.Load(File.ReadAllBytes(dll)).GetTypes().Single(t => t.FullName == $"{@namespace}.{type}").GetMethod(method)!.Invoke(null, new object[] { bin })!;
+        }
+
+        (_rookOccupancyMasks, var rookAttacks) = AttackGenerator.InitializeRookMagicAttacks();
+        {
+            const string type = "RookAttacks";
+            const string method = "DeserializeRookAttacks";
+
+            Microsoft.FrozenObjects.Serializer.SerializeObject(rookAttacks, bin, dll, @namespace, type, method, new Version(1, 0, 0, 0));
+
+            _rookAttacks = (BitBoard[,])
+                Assembly.Load(File.ReadAllBytes(dll)).GetTypes().Single(t => t.FullName == $"{@namespace}.{type}").GetMethod(method)!.Invoke(null, new object[] { bin })!;
+        }
 
         if (Bmi2.X64.IsSupported)
         {

@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Using Include="Lynx.Model.TranspositionTableElement[]" Alias="TranspositionTable" />
+  </ItemGroup >
+
+  <ItemGroup>
     <PackageReference Include="Macross.Json.Extensions" Version="3.0.0" />
     <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.0" />
     <PackageReference Include="NLog" Version="5.2.6" />
@@ -31,6 +35,10 @@
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
       <_Parameter1>$(AssemblyName).Test</_Parameter1>
     </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FrozenObjects\src\Microsoft.FrozenObjects.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
