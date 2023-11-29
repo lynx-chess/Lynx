@@ -10,7 +10,7 @@ public sealed partial class Engine
 {
     private readonly Stopwatch _stopWatch = new();
     private readonly Move[] _pVTable = new Move[Configuration.EngineSettings.MaxDepth * (Configuration.EngineSettings.MaxDepth + 1) / 2];
-    private readonly int[,] _killerMoves = new int[2, Configuration.EngineSettings.MaxDepth];
+    private readonly int[,] _killerMoves = new int[3, Configuration.EngineSettings.MaxDepth];
     private readonly int[,] _historyMoves = new int[12, 64];
     private readonly int[] _maxDepthReached = new int[Constants.AbsoluteMaxDepth];
     private TranspositionTable _tt = Array.Empty<TranspositionTableElement>();
@@ -265,6 +265,7 @@ public sealed partial class Engine
             {
                 _killerMoves[0, d] = _previousKillerMoves[0, d + 2];
                 _killerMoves[1, d] = _previousKillerMoves[1, d + 2];
+                _killerMoves[2, d] = _previousKillerMoves[2, d + 2];
             }
 
             // Re-search from depth 1
