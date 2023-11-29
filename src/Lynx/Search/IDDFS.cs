@@ -21,7 +21,7 @@ public sealed partial class Engine
     private bool _isScoringPV;
 
     private SearchResult? _previousSearchResult;
-    private readonly int[,] _previousKillerMoves = new int[2, Configuration.EngineSettings.MaxDepth];
+    private readonly int[,] _previousKillerMoves = new int[3, Configuration.EngineSettings.MaxDepth];
 
     private readonly Move _defaultMove = default;
 
