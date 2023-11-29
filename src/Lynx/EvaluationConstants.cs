@@ -316,9 +316,9 @@ public static readonly int[] EndGameKingTable =
 
     public const int MaxEval = PositiveCheckmateDetectionLimit - 1;
 
-    public const int PVMoveScoreValue = 4_194_304;
+    public const int PVMoveScoreValue = 2_097_152;
 
-    public const int TTMoveScoreValue = 2_097_152;
+    public const int TTMoveScoreValue = 4_194_304;
 
     /// <summary>
     /// For MVVLVA

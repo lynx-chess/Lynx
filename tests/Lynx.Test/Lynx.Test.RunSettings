@@ -1,0 +1,5 @@
+<RunSettings>
+   <NUnit>
+       <DebugExecution>True</DebugExecution>
+   </NUnit>
+</RunSettings>
