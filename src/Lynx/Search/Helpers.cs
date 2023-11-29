@@ -124,16 +124,6 @@ public sealed partial class Engine
                 return EvaluationConstants.FirstKillerMoveValue;
             }
 
-            if (_killerMoves[1, depth] == move)
-            {
-                return EvaluationConstants.SecondKillerMoveValue;
-            }
-
-            if (_killerMoves[2, depth] == move)
-            {
-                return EvaluationConstants.ThirdKillerMoveValue;
-            }
-
             // History move or 0 if not found
             return EvaluationConstants.BaseMoveScore + _historyMoves[move.Piece(), move.TargetSquare()];
         }
