@@ -8,6 +8,8 @@ namespace Lynx;
 
 public sealed partial class Engine
 {
+    internal const int DefaultMaxDepth = 5;
+
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
     private readonly ChannelWriter<string> _engineWriter;
 
@@ -69,85 +71,72 @@ public sealed partial class Engine
         _isPondering = false;
     }
 
-    public async Task<SearchResult> BestMove() => await BestMove(null);
-
-    public async Task<SearchResult> BestMove(GoCommand? goCommand)
+    public async Task<SearchResult> BestMove(GoCommand goCommand)
     {
         _searchCancellationTokenSource = new();
         _absoluteSearchCancellationTokenSource = new();
-        int minDepth = Configuration.EngineSettings.MinDepth + 1;
         int? maxDepth = null;
         int? decisionTime = null;
 
-        if (goCommand is not null)
+        int millisecondsLeft;
+        int millisecondsIncrement;
+        if (Game.CurrentPosition.Side == Side.White)
         {
-            int millisecondsLeft;
-            int millisecondsIncrement;
-            if (Game.CurrentPosition.Side == Side.White)
+            millisecondsLeft = goCommand.WhiteTime;
+            millisecondsIncrement = goCommand.WhiteIncrement;
+        }
+        else
+        {
+            millisecondsLeft = goCommand.BlackTime;
+            millisecondsIncrement = goCommand.BlackIncrement;
+        }
+
+        maxDepth = Configuration.EngineSettings.MaxDepth;
+
+        if (millisecondsLeft > 0)
+        {
+            if (goCommand.MovesToGo == default)
             {
-                millisecondsLeft = goCommand.WhiteTime;
-                millisecondsIncrement = goCommand.WhiteIncrement;
+                // Inspired by Alexandria: time overhead to avoid timing out in the engine-gui communication process
+                millisecondsLeft -= 50;
+                Math.Clamp(millisecondsLeft, 50, int.MaxValue); // Avoiding 0/negative values
+
+                // 1/30, suggested by Serdra (EP discord)
+                decisionTime = Convert.ToInt32(Math.Min(0.5 * millisecondsLeft, (millisecondsLeft * 0.03333) + millisecondsIncrement));
             }
             else
             {
-                millisecondsLeft = goCommand.BlackTime;
-                millisecondsIncrement = goCommand.BlackIncrement;
+                millisecondsLeft -= 500;
+                Math.Clamp(millisecondsLeft, 50, int.MaxValue); // Avoiding 0/negative values
+
+                decisionTime = Convert.ToInt32((millisecondsLeft / goCommand.MovesToGo) + millisecondsIncrement);
             }
 
+            _logger.Info("Time to move: {0}s", 0.001 * decisionTime);
+            _searchCancellationTokenSource.CancelAfter(decisionTime!.Value);
+        }
+        else if (goCommand.MoveTime > 0)
+        {
+            decisionTime = (int)(0.95 * goCommand.MoveTime);
+            _logger.Info("Time to move: {0}s", 0.001 * decisionTime);
+            _searchCancellationTokenSource.CancelAfter(decisionTime.Value);
+        }
+        else if (goCommand.Depth > 0)
+        {
+            maxDepth = goCommand.Depth > Constants.AbsoluteMaxDepth ? Constants.AbsoluteMaxDepth : goCommand.Depth;
+        }
+        else if (goCommand.Infinite)
+        {
             maxDepth = Configuration.EngineSettings.MaxDepth;
-
-            if (millisecondsLeft > 0)
-            {
-                if (goCommand.MovesToGo == default)
-                {
-                    // Inspired by Alexandria: time overhead to avoid timing out in the engine-gui communication process
-                    millisecondsLeft -= 50;
-                    Math.Clamp(millisecondsLeft, 50, int.MaxValue); // Avoiding 0/negative values
-
-                    // 1/30, suggested by Serdra (EP discord)
-                    decisionTime = Convert.ToInt32(Math.Min(0.5 * millisecondsLeft, (millisecondsLeft * 0.03333) + millisecondsIncrement));
-                }
-                else
-                {
-                    millisecondsLeft -= 500;
-                    Math.Clamp(millisecondsLeft, 50, int.MaxValue); // Avoiding 0/negative values
-
-                    decisionTime = Convert.ToInt32((millisecondsLeft / goCommand.MovesToGo) + millisecondsIncrement);
-                }
-
-                _logger.Info("Time to move: {0}s", 0.001 * decisionTime);
-                _searchCancellationTokenSource.CancelAfter(decisionTime!.Value);
-            }
-            else if (goCommand.MoveTime > 0)
-            {
-                minDepth = 0;
-                decisionTime = (int)(0.95 * goCommand.MoveTime);
-                _logger.Info("Time to move: {0}s", 0.001 * decisionTime, minDepth);
-                _searchCancellationTokenSource.CancelAfter(decisionTime.Value);
-            }
-            else if (goCommand.Depth > 0)
-            {
-                minDepth = goCommand.Depth;
-                maxDepth = goCommand.Depth > Constants.AbsoluteMaxDepth ? Constants.AbsoluteMaxDepth : goCommand.Depth;
-            }
-            else if (goCommand.Infinite)
-            {
-                minDepth = Configuration.EngineSettings.MaxDepth;
-                maxDepth = Configuration.EngineSettings.MaxDepth;
-                _logger.Info("Infinite search (depth {0})", minDepth);
-            }
-            else
-            {
-                _logger.Warn("Unexpected or unsupported go command");
-                maxDepth = Configuration.EngineSettings.DefaultMaxDepth;
-            }
+            _logger.Info("Infinite search (depth {0})", maxDepth);
         }
-        else // EngineTest
+        else
         {
-            maxDepth = Configuration.EngineSettings.DefaultMaxDepth;
+            _logger.Warn("Unexpected or unsupported go command");
+            maxDepth = DefaultMaxDepth;
         }
 
-        SearchResult resultToReturn = await SearchBestMove(minDepth, maxDepth, decisionTime);
+        SearchResult resultToReturn = await SearchBestMove(maxDepth, decisionTime);
 
         Game.ResetCurrentPositionToBeforeSearchState();
         if (resultToReturn.BestMove != default && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
@@ -160,11 +149,11 @@ public sealed partial class Engine
         return resultToReturn;
     }
 
-    private async Task<SearchResult> SearchBestMove(int minDepth, int? maxDepth, int? decisionTime)
+    private async Task<SearchResult> SearchBestMove(int? maxDepth, int? decisionTime)
     {
         if (!Configuration.EngineSettings.UseOnlineTablebaseInRootPositions || Game.CurrentPosition.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
         {
-            return (await IDDFS(minDepth, maxDepth, decisionTime))!;
+            return (await IDDFS(maxDepth, decisionTime))!;
         }
 
         // Local copy of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove so that it doesn't interfere with regular search
@@ -173,7 +162,7 @@ public sealed partial class Engine
         var tasks = new Task<SearchResult?>[] {
                 // Other copies of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove (same reason)
                 ProbeOnlineTablebase(Game.CurrentPosition, new(Game.PositionHashHistory),  Game.HalfMovesWithoutCaptureOrPawnMove),
-                IDDFS(minDepth, maxDepth, decisionTime)
+                IDDFS(maxDepth, decisionTime)
             };
 
         var resultList = await Task.WhenAll(tasks);
@@ -200,64 +189,6 @@ public sealed partial class Engine
         }
 
         return tbResult ?? searchResult!;
-    }
-
-    internal double CalculateDecisionTime(int movesToGo, int millisecondsLeft, int millisecondsIncrement)
-    {
-        double decisionTime;
-        millisecondsLeft -= millisecondsIncrement; // Since we're going to spend them, shouldn't take into account for our calculations
-        millisecondsLeft = Math.Clamp(millisecondsLeft, 0, int.MaxValue);
-
-        if (movesToGo == default)
-        {
-            int movesLeft = Configuration.EngineSettings.TotalMovesWhenNoMovesToGoProvided - (Game.MoveHistory.Count >> 1);
-
-            if (movesLeft <= 0)
-            {
-                movesLeft = Configuration.EngineSettings.FixedMovesLeftWhenNoMovesToGoProvidedAndOverTotalMovesWhenNoMovesToGoProvided;
-            }
-
-#pragma warning disable S2184 // Results of integer division should not be assigned to floating point variables
-            if (millisecondsLeft >= Configuration.EngineSettings.FirstTimeLimitWhenNoMovesToGoProvided)
-            {
-                decisionTime = Configuration.EngineSettings.FirstCoefficientWhenNoMovesToGoProvided * millisecondsLeft / movesLeft;
-            }
-            else if (millisecondsLeft >= Configuration.EngineSettings.SecondTimeLimitWhenNoMovesToGoProvided)
-            {
-                decisionTime = Configuration.EngineSettings.SecondCoefficientWhenNoMovesToGoProvided * millisecondsLeft / movesLeft;
-            }
-            else
-            {
-                decisionTime = millisecondsLeft / movesLeft;
-            }
-#pragma warning restore S2184 // Results of integer division should not be assigned to floating point variables
-        }
-        else
-        {
-            if (movesToGo > Configuration.EngineSettings.KeyMovesBeforeMovesToGo)
-            {
-                decisionTime = Configuration.EngineSettings.CoefficientBeforeKeyMovesBeforeMovesToGo * millisecondsLeft / movesToGo;
-            }
-            else
-            {
-                decisionTime = Configuration.EngineSettings.CoefficientAfterKeyMovesBeforeMovesToGo * millisecondsLeft / movesToGo;
-            }
-        }
-
-        decisionTime += millisecondsIncrement;
-
-        //if (millisecondsLeft > Configuration.Parameters.MinTimeToClamp)
-        //{
-        //    decisionTime = Math.Clamp(decisionTime, Configuration.Parameters.MinMoveTime, Configuration.Parameters.MaxMoveTime);
-        //}
-
-        // If time left after taking all decision time < 1s
-        if (millisecondsLeft + millisecondsIncrement - decisionTime < Configuration.EngineSettings.MinSecurityTime)    // i.e. x + 10s, 10s left in the clock
-        {
-            decisionTime *= Configuration.EngineSettings.CoefficientSecurityTime;
-        }
-
-        return decisionTime;
     }
 
     public void StartSearching(GoCommand goCommand)

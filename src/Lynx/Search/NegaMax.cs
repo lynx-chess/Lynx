@@ -39,15 +39,26 @@ public sealed partial class Engine
         bool isRoot = ply == 0;
         bool pvNode = beta - alpha > 1;
         Move ttBestMove = default;
+        NodeType ttElementType = default;
+        int ttEvaluation = default;
 
         if (!isRoot)
         {
-            var ttProbeResult = _tt.ProbeHash(_ttMask, position, depth, ply, alpha, beta);
-            if (ttProbeResult.Evaluation != EvaluationConstants.NoHashEntry)
+            (ttEvaluation, ttBestMove, ttElementType) = _tt.ProbeHash(_ttMask, position, depth, ply, alpha, beta);
+            if (ttEvaluation != EvaluationConstants.NoHashEntry)
             {
-                return ttProbeResult.Evaluation;
+                return ttEvaluation;
             }
-            ttBestMove = ttProbeResult.BestMove;
+
+            // Internal iterative reduction (IIR)
+            // If this position isn't found in TT, it has never been searched before,
+            // so the search will be potentially expensive.
+            // Therefore, we search with reduced depth for now, expecting to record a TT move
+            // which we'll be able to use later for the full depth search
+            if (ttElementType == default && depth >= Configuration.EngineSettings.IIR_MinDepth)
+            {
+                --depth;
+            }
         }
 
         // Before any time-consuming operations
@@ -75,15 +86,16 @@ public sealed partial class Engine
         {
             var staticEval = position.StaticEvaluation(Game.MiddleGamePSQTEval, Game.EndGamePSQTEval, Game.GamePhase);
 
-            // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving ouropponent a double move and still remain ahead of beta
+            // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
             if (depth >= Configuration.EngineSettings.NMP_MinDepth
                 && staticEval >= beta
-                && !parentWasNullMove)
-            // && (!ttHit || !(ttBound & BOUND_UPPER) || ttValue >= beta)
-            // && staticEvalResult.Phase > 2)   // Zugzwang risk reduction: pieces other than pawn presents
+                && !parentWasNullMove
+                && Game.GamePhase > 2   // Zugzwang risk reduction: pieces other than pawn presents
+                && (ttElementType != NodeType.Alpha || ttEvaluation >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
             {
-                var nmpReduction = Configuration.EngineSettings.NMP_DepthReduction;
-                // TODO adaptative reduction
+                var nmpReduction = Configuration.EngineSettings.NMP_BaseDepthReduction + ((depth + 1) / 3);   // Clarity
+
+                // TODO more advanced adaptative reduction, similar to what Ethereal and Stormphrax are doing
                 //var nmpReduction = Math.Min(
                 //    depth,
                 //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
@@ -169,20 +181,20 @@ public sealed partial class Engine
             }
         }
 
-        for (int i = 0; i < pseudoLegalMoves.Length; ++i)
+        for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
         {
             // Incremental move sorting, inspired by https://github.com/jw1912/Chess-Challenge and suggested by toanth
             // There's no need to sort all the moves since most of them don't get checked anyway
             // So just find the first unsearched one with the best score and try it
-            for (int j = i + 1; j < pseudoLegalMoves.Length; j++)
+            for (int j = moveIndex + 1; j < pseudoLegalMoves.Length; j++)
             {
-                if (scores[j] > scores[i])
+                if (scores[j] > scores[moveIndex])
                 {
-                    (scores[i], scores[j], pseudoLegalMoves[i], pseudoLegalMoves[j]) = (scores[j], scores[i], pseudoLegalMoves[j], pseudoLegalMoves[i]);
+                    (scores[moveIndex], scores[j], pseudoLegalMoves[moveIndex], pseudoLegalMoves[j]) = (scores[j], scores[moveIndex], pseudoLegalMoves[j], pseudoLegalMoves[moveIndex]);
                 }
             }
 
-            var move = pseudoLegalMoves[i];
+            var move = pseudoLegalMoves[moveIndex];
 
             (GameState gameState, Game.MiddleGamePSQTEval, Game.EndGamePSQTEval, Game.GamePhase) = position.MakeMoveAndUpdatePSQTEval(move, Game.MiddleGamePSQTEval, Game.EndGamePSQTEval, Game.GamePhase);
 
@@ -218,6 +230,25 @@ public sealed partial class Engine
             }
             else
             {
+                // Late Move Pruning (LMP) - all quiet moves can be pruned
+                // after searching the first few given by the move ordering algorithm
+                if (!pvNode
+                    && !isInCheck
+                    && depth <= Configuration.EngineSettings.LMP_MaxDepth
+                    && scores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue  // Quiet moves
+                    && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth)) // Based on formula suggested by Antares
+                {
+                    // After making a move
+                    Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
+                    if (!isThreeFoldRepetition)
+                    {
+                        Game.PositionHashHistory.Remove(position.UniqueIdentifier);
+                    }
+                    position.UnmakeMove(move, gameState);
+
+                    break;
+                }
+
                 int reduction = 0;
 
                 // 🔍 Late Move Reduction (LMR) - search with reduced depth
@@ -282,6 +313,7 @@ public sealed partial class Engine
                 // 🔍 Killer moves
                 if (!move.IsCapture() && move.PromotedPiece() == default && move != _killerMoves[0, ply])
                 {
+                    _killerMoves[2, ply] = _killerMoves[1, ply];
                     _killerMoves[1, ply] = _killerMoves[0, ply];
                     _killerMoves[0, ply] = move;
                 }

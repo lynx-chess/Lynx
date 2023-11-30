@@ -19,8 +19,6 @@ public class IncreaseDepthWhenInCheckTest : BaseTest
     [Test]
     public async Task DepthLimit()
     {
-        Configuration.EngineSettings.MinDepth = 0;
-
         var engine = GetEngine("1r6/8/8/6kP/K7/5R1p/1q6/R5q1 w - - 0 2");
         Assert.AreEqual(Side.White, engine.Game.CurrentPosition.Side);
 

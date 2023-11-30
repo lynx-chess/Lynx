@@ -685,7 +685,7 @@ public class Position
         var oppositeKingSquare = oppositeKingBitBoard == default ? -1 : oppositeKingBitBoard.GetLS1BIndex();
 
         return kingSquare >= 0 && oppositeKingSquare >= 0
-            && !Attacks.IsSquaredAttacked(oppositeKingSquare, Side, PieceBitBoards, OccupancyBitBoards);
+            && !Attacks.IsSquareAttacked(oppositeKingSquare, Side, PieceBitBoards, OccupancyBitBoards);
     }
 
     /// <summary>
@@ -700,7 +700,7 @@ public class Position
     {
         var oppositeKingSquare = PieceBitBoards[(int)Piece.k - Utils.PieceOffset(Side)].GetLS1BIndex();
 
-        return !Attacks.IsSquaredAttacked(oppositeKingSquare, Side, PieceBitBoards, OccupancyBitBoards);
+        return !Attacks.IsSquareAttacked(oppositeKingSquare, Side, PieceBitBoards, OccupancyBitBoards);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -816,7 +816,7 @@ public class Position
     /// </summary>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int StaticEvaluation()
+    public (int Score, int Phase) StaticEvaluation()
     {
         //var result = OnlineTablebaseProber.EvaluationSearch(this, movesWithoutCaptureOrPawnMove, cancellationToken);
         //Debug.Assert(result < EvaluationConstants.CheckMateBaseEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
@@ -891,30 +891,6 @@ public class Position
         middleGameScore += EvaluationConstants.MiddleGameTable[(int)Piece.k, blackKing] - mgKingScore;
         endGameScore += EvaluationConstants.EndGameTable[(int)Piece.k, blackKing] - egKingScore;
 
-        // Check if drawn position due to lack of material
-        if (endGameScore >= 0)
-        {
-            bool whiteCannotWin = pieceCount[(int)Piece.P] == 0 && pieceCount[(int)Piece.Q] == 0 && pieceCount[(int)Piece.R] == 0
-                && (pieceCount[(int)Piece.B] + pieceCount[(int)Piece.N] == 1                // B or N
-                    || (pieceCount[(int)Piece.B] == 0 && pieceCount[(int)Piece.N] == 2));   // N+N
-
-            if (whiteCannotWin)
-            {
-                return 0;
-            }
-        }
-        else
-        {
-            bool blackCannotWin = pieceCount[(int)Piece.p] == 0 && pieceCount[(int)Piece.q] == 0 && pieceCount[(int)Piece.r] == 0
-                && (pieceCount[(int)Piece.b] + pieceCount[(int)Piece.n] == 1                // B or N
-                    || (pieceCount[(int)Piece.b] == 0 && pieceCount[(int)Piece.n] == 2));   // N+N
-
-            if (blackCannotWin)
-            {
-                return 0;
-            }
-        }
-
         const int maxPhase = 24;
 
         if (gamePhase > maxPhase)    // Early promotions
@@ -922,14 +898,33 @@ public class Position
             gamePhase = maxPhase;
         }
 
+        // Check if drawn position due to lack of material
+        if (gamePhase <= 4)
+        {
+            var offset = Utils.PieceOffset(endGameScore >= 0);
+
+            bool sideCannotWin = pieceCount[(int)Piece.P + offset] == 0 && pieceCount[(int)Piece.Q + offset] == 0 && pieceCount[(int)Piece.R + offset] == 0
+                && (pieceCount[(int)Piece.B + offset] + pieceCount[(int)Piece.N + offset] == 1                  // B or N
+                    || (pieceCount[(int)Piece.B + offset] == 0 && pieceCount[(int)Piece.N + offset] == 2));     // N+N
+
+            if (sideCannotWin)
+            {
+                return (0, gamePhase);
+            }
+        }
+
         int endGamePhase = maxPhase - gamePhase;
         //_logger.Trace("Phase: {0}/24", gamePhase);
 
         var eval = ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / maxPhase;
 
-        return Side == Side.White
+        eval = Math.Clamp(eval, EvaluationConstants.MinEval, EvaluationConstants.MaxEval);
+
+        var sideEval = Side == Side.White
             ? eval
             : -eval;
+
+        return (sideEval, gamePhase);
     }
 
     /// <summary>
@@ -1336,7 +1331,7 @@ public class Position
 
                 var squareIndex = BitBoardExtensions.SquareIndex(rank, file);
 
-                var pieceRepresentation = Attacks.IsSquaredAttacked(squareIndex, sideToMove, PieceBitBoards, OccupancyBitBoards)
+                var pieceRepresentation = Attacks.IsSquareAttacked(squareIndex, sideToMove, PieceBitBoards, OccupancyBitBoards)
                     ? '1'
                     : '.';
 

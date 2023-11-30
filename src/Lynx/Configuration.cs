@@ -80,7 +80,119 @@ public sealed class GeneralSettings
     public bool EnableLogging { get; set; } = false;
 }
 
-public class TaperedEvaluationTerm
+public sealed class EngineSettings
+{
+    private int _maxDepth = 128;
+    public int MaxDepth { get => _maxDepth; set => _maxDepth = Math.Clamp(value, 1, Constants.AbsoluteMaxDepth); }
+
+    /// <summary>
+    /// Depth for bench command
+    /// </summary>
+    public int BenchDepth { get; set; } = 5;
+
+    /// <summary>
+    /// MB
+    /// </summary>
+    public int TranspositionTableSize { get; set; } = 256;
+
+    public bool TranspositionTableEnabled { get; set; } = true;
+
+    public bool UseOnlineTablebaseInRootPositions { get; set; } = false;
+
+    /// <summary>
+    /// Experimental, might misbehave due to tablebase API limits
+    /// </summary>
+    public bool UseOnlineTablebaseInSearch { get; set; } = false;
+
+    /// <summary>
+    /// This can also de used to reduce online probing
+    /// </summary>
+    public int OnlineTablebaseMaxSupportedPieces { get; set; } = 7;
+
+    public bool ShowWDL { get; set; } = false;
+
+    public int MinElapsedTimeToConsiderStopSearching { get; set; } = 0;
+
+    public double DecisionTimePercentageToStopSearching { get; set; } = 0.4;
+
+    public int LMR_MinDepth { get; set; } = 3;
+
+    public int LMR_MinFullDepthSearchedMoves { get; set; } = 4;
+
+    /// <summary>
+    /// Value originally from Stormphrax, who apparently took it from Viridithas
+    /// </summary>
+    public double LMR_Base { get; set; } = 0.77;
+
+    /// <summary>
+    /// Value originally from Akimbo
+    /// </summary>
+    public double LMR_Divisor { get; set; } = 2.67;
+
+    public int NMP_MinDepth { get; set; } = 3;
+
+    public int NMP_BaseDepthReduction { get; set; } = 1;
+
+    public int AspirationWindow_Delta { get; set; } = 50;
+
+    public int AspirationWindow_MinDepth { get; set; } = 6;
+
+    public int RFP_MaxDepth { get; set; } = 6;
+
+    public int RFP_DepthScalingFactor { get; set; } = 75;
+
+    public int Razoring_MaxDepth { get; set; } = 2;
+
+    public int Razoring_Depth1Bonus { get; set; } = 125;
+
+    public int Razoring_NotDepth1Bonus { get; set; } = 175;
+
+    public int IIR_MinDepth { get; set; } = 4;
+
+    public int LMP_MaxDepth { get; set; } = 2;
+
+    public int LMP_BaseMovesToTry { get; set; } = 0;
+
+    public int LMP_MovesDepthMultiplier { get; set; } = 10;
+
+    public int History_MaxMoveValue { get; set; } = 8_192;
+
+    #region Evaluation
+
+    public TaperedEvaluationTerm DoubledPawnPenalty { get; set; } = new(-5, -14);
+
+    public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-17, -14);
+
+    public TaperedEvaluationTerm OpenFileRookBonus { get; set; } = new(60, 28);
+
+    public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(25, 23);
+
+    public TaperedEvaluationTerm BishopMobilityBonus { get; set; } = new(10, 10);
+
+    public TaperedEvaluationTerm QueenMobilityBonus { get; set; } = new(3, 9);
+
+    public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-38, 25);
+
+    public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-107, 4);
+
+    public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(19, -6);
+
+    public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(30, 88);
+
+    public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(
+        new(0),
+        new(-2, 7),
+        new(-16, 13),
+        new(-16, 44),
+        new(20, 83),
+        new(61, 175),
+        new(92, 257),
+        new(0));
+
+    #endregion
+}
+
+public sealed class TaperedEvaluationTerm
 {
     public int MG { get; set; }
 
@@ -102,7 +214,7 @@ public class TaperedEvaluationTerm
     }
 }
 
-public class TaperedEvaluationTermByRank
+public sealed class TaperedEvaluationTermByRank
 {
     private readonly List<TaperedEvaluationTerm> _evaluationTermsIndexedByPiece;
 
@@ -150,178 +262,6 @@ public class TaperedEvaluationTermByRank
             $"\"{nameof(Rank7)}\":{Rank7}" +
             "}";
     }
-}
-
-public sealed class EngineSettings
-{
-    public int DefaultMaxDepth { get; set; } = 5;
-
-    #region MovesToGo provided
-
-    /// <summary>
-    /// Coefficient applied to ensure more time is allocated to moves when there are over <see cref="KeyMovesBeforeMovesToGo"/> moves left
-    /// </summary>
-    public double CoefficientBeforeKeyMovesBeforeMovesToGo { get; set; } = 1.5;
-
-    public int KeyMovesBeforeMovesToGo { get; set; } = 10;
-
-    /// <summary>
-    /// Security coefficient applied to ensure there are no timeouts when there are less than <see cref="KeyMovesBeforeMovesToGo"/>  movesleft
-    /// </summary>
-    public double CoefficientAfterKeyMovesBeforeMovesToGo { get; set; } = 0.95;
-
-    #endregion
-
-    #region No MovesToGo provided
-
-    /// <summary>
-    /// Number of total moves to calculate decision time against
-    /// </summary>
-    public int TotalMovesWhenNoMovesToGoProvided { get; set; } = 100;
-
-    /// <summary>
-    /// Number of extra moves to calculate decision time against, when the number of moves exceeds <see cref="TotalMovesWhenNoMovesToGoProvided"/>
-    /// </summary>
-    public int FixedMovesLeftWhenNoMovesToGoProvidedAndOverTotalMovesWhenNoMovesToGoProvided { get; set; } = 20;
-
-    /// <summary>
-    /// Min time to apply <see cref="FirstCoefficientWhenNoMovesToGoProvided"/>
-    /// </summary>
-    public int FirstTimeLimitWhenNoMovesToGoProvided { get; set; } = 120_000;
-
-    /// <summary>
-    /// Coefficient applied to ensure more time is allocated to moves when there's over <see cref="FirstTimeLimitWhenNoMovesToGoProvided"/> ms on the clock
-    /// </summary>
-    public int FirstCoefficientWhenNoMovesToGoProvided { get; set; } = 3;
-
-    /// <summary>
-    /// Min time to apply <see cref="SecondCoefficientWhenNoMovesToGoProvided"/>
-    /// </summary>
-    public int SecondTimeLimitWhenNoMovesToGoProvided { get; set; } = 30_000;
-
-    /// <summary>
-    /// Coefficient applied to ensure more time is allocated to moves when there's over <see cref="SecondTimeLimitWhenNoMovesToGoProvided"/> ms on the clock
-    /// </summary>
-    public int SecondCoefficientWhenNoMovesToGoProvided { get; set; } = 2;
-
-    #endregion
-
-    /// <summary>
-    /// Min. time left in the clock if all decision time is used before <see cref="CoefficientSecurityTime"/> is used over that decision time
-    /// </summary>
-    public int MinSecurityTime { get; set; } = 1_000;
-
-    /// <summary>
-    /// Coefficient applied to devision tim if the time left in the clock after spending it is less than <see cref="MinSecurityTime"/>
-    /// </summary>
-    public double CoefficientSecurityTime { get; set; } = 0.9;
-
-    public int MinDepth { get; set; } = 4;
-
-    private int _maxDepth = 128;
-    public int MaxDepth { get => _maxDepth; set => _maxDepth = Math.Clamp(value, 1, Constants.AbsoluteMaxDepth); }
-
-    //public int MinMoveTime { get; set; } = 1_000;
-
-    //public int DepthWhenLessThanMinMoveTime { get; set; } = 4;
-
-    public int MinElapsedTimeToConsiderStopSearching { get; set; } = 0;
-
-    public double DecisionTimePercentageToStopSearching { get; set; } = 0.4;
-
-    public int LMR_MinDepth { get; set; } = 3;
-
-    public int LMR_MinFullDepthSearchedMoves { get; set; } = 4;
-
-    /// <summary>
-    /// Value originally from Stormphrax, who apparently took it from Viridithas
-    /// </summary>
-    public double LMR_Base { get; set; } = 0.77;
-
-    /// <summary>
-    /// Value originally from Akimbo
-    /// </summary>
-    public double LMR_Divisor { get; set; } = 2.67;
-
-    public int NMP_MinDepth { get; set; } = 3;
-
-    public int NMP_DepthReduction { get; set; } = 3;
-
-    public int AspirationWindowDelta { get; set; } = 50;
-
-    public int AspirationWindowMinDepth { get; set; } = 6;
-
-    #region Evaluation
-
-    public TaperedEvaluationTerm DoubledPawnPenalty { get; set; } = new(-3, -11);
-
-    public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-13, -10);
-
-    public TaperedEvaluationTerm OpenFileRookBonus { get; set; } = new(42, 22);
-
-    public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(18, 16);
-
-    public TaperedEvaluationTerm BishopMobilityBonus { get; set; } = new(8, 7);
-
-    public TaperedEvaluationTerm QueenMobilityBonus { get; set; } = new(2, 7);
-
-    public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-29, 19);
-
-    public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-80, 3);
-
-    public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(15, -5);
-
-    public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(22, 65);
-
-    public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(
-        new(0),
-        new(-2, 5),
-        new(-13, 10),
-        new(-12, 32),
-        new(13, 62),
-        new(38, 132),
-        new(53, 191),
-        new(0));
-
-    #endregion
-
-    public bool TranspositionTableEnabled { get; set; } = true;
-
-    /// <summary>
-    /// MB
-    /// </summary>
-    public int TranspositionTableSize { get; set; } = 256;
-
-    public bool UseOnlineTablebaseInRootPositions { get; set; } = false;
-
-    /// <summary>
-    /// Experimental, might misbehave due to tablebase API limits
-    /// </summary>
-    public bool UseOnlineTablebaseInSearch { get; set; } = false;
-
-    /// <summary>
-    /// This can also de used to reduce online probing
-    /// </summary>
-    public int OnlineTablebaseMaxSupportedPieces { get; set; } = 7;
-
-    /// <summary>
-    /// Depth for bench command
-    /// </summary>
-    public int BenchDepth { get; set; } = 5;
-
-    public int RFP_MaxDepth { get; set; } = 6;
-
-    public int RFP_DepthScalingFactor { get; set; } = 75;
-
-    public bool ShowWDL { get; set; } = false;
-
-    public int Razoring_MaxDepth { get; set; } = 2;
-
-    public int Razoring_Depth1Bonus { get; set; } = 125;
-
-    public int Razoring_NotDepth1Bonus { get; set; } = 175;
-
-    public int MaxHistoryMoveValue { get; set; } = 8_192;
 }
 
 [JsonSourceGenerationOptions(
