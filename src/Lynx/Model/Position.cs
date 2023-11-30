@@ -1,3 +1,4 @@
+using NLog;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -216,8 +217,12 @@ public class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public (GameState GameState, int MgEval, int EgEval, int GamePhase) MakeMoveAndUpdatePSQTEval(Move move, int mgEval, int egEval, int gamePhase)
+    public GameState MakeMoveAndUpdatePSQTEval(Move move, Game game)
     {
+        var originalMg = game.MiddleGamePSQTEval;
+        var originalEg = game.EndGamePSQTEval;
+        var originalPhase = game.GamePhase;
+
         sbyte capturedPiece = -1;
         byte castleCopy = Castle;
         BoardSquare enpassantCopy = EnPassant;
@@ -236,8 +241,8 @@ public class Position
         if (promotedPiece != default)
         {
             newPiece = promotedPiece;
-            gamePhase -= EvaluationConstants.GamePhaseByPiece[piece];
-            gamePhase += EvaluationConstants.GamePhaseByPiece[promotedPiece];
+            game.GamePhase -= EvaluationConstants.GamePhaseByPiece[piece];
+            game.GamePhase += EvaluationConstants.GamePhaseByPiece[promotedPiece];
         }
 
         PieceBitBoards[piece].PopBit(sourceSquare);
@@ -246,8 +251,8 @@ public class Position
         PieceBitBoards[newPiece].SetBit(targetSquare);
         OccupancyBitBoards[oldSide].SetBit(targetSquare);
 
-        mgEval += EvaluationConstants.MiddleGameTable[newPiece, targetSquare] - EvaluationConstants.MiddleGameTable[piece, sourceSquare];
-        egEval += EvaluationConstants.EndGameTable[newPiece, targetSquare] - EvaluationConstants.EndGameTable[piece, sourceSquare];
+        game.MiddleGamePSQTEval += EvaluationConstants.MiddleGameTable[newPiece, targetSquare] - EvaluationConstants.MiddleGameTable[piece, sourceSquare];
+        game.EndGamePSQTEval += EvaluationConstants.EndGameTable[newPiece, targetSquare] - EvaluationConstants.EndGameTable[piece, sourceSquare];
 
         UniqueIdentifier ^=
             ZobristTable.SideHash()
@@ -288,9 +293,9 @@ public class Position
                 OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
             }
 
-            mgEval -= EvaluationConstants.MiddleGameTable[capturedPiece, targetSquare];
-            egEval -= EvaluationConstants.EndGameTable[capturedPiece, targetSquare];
-            gamePhase -= EvaluationConstants.GamePhaseByPiece[capturedPiece];
+            game.MiddleGamePSQTEval -= EvaluationConstants.MiddleGameTable[capturedPiece, targetSquare];
+            game.EndGamePSQTEval -= EvaluationConstants.EndGameTable[capturedPiece, targetSquare];
+            game.GamePhase -= EvaluationConstants.GamePhaseByPiece[capturedPiece];
         }
         else if (move.IsDoublePawnPush())
         {
@@ -343,13 +348,24 @@ public class Position
 
         UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
 
-        return (new GameState(capturedPiece, castleCopy, enpassantCopy, uniqueIdentifierCopy), mgEval, egEval, gamePhase);
+        var gameState = new GameState(capturedPiece, castleCopy, enpassantCopy, uniqueIdentifierCopy);
         //var clone = new Position(this);
         //clone.UnmakeMove(move, gameState);
         //if (uniqueIdentifierCopy != clone.UniqueIdentifier)
         //{
         //    throw new($"{FEN()}: {uniqueIdentifierCopy} expected, got {clone.UniqueIdentifier} got after Make/Unmake move {move.ToEPDString()}");
         //}
+
+        UnmakeMoveAndUpdatePSQTEval(move, gameState, game);
+
+        if(originalMg != game.MiddleGamePSQTEval
+            || originalEg != game.EndGamePSQTEval
+            || originalPhase != game.GamePhase)
+        {
+            ;
+        }
+
+        return gameState;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -481,7 +497,7 @@ public class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public (int MgEval, int EgEval, int GamePhase) UnmakeMoveAndUpdatePSQTEval(Move move, GameState gameState, int mgEval, int egEval, int gamePhase)
+    public void UnmakeMoveAndUpdatePSQTEval(Move move, GameState gameState, Game game)
     {
         var oppositeSide = (int)Side;
         var side = Utils.OppositeSide(oppositeSide);
@@ -497,8 +513,8 @@ public class Position
         if (promotedPiece != default)
         {
             newPiece = promotedPiece;
-            gamePhase -= EvaluationConstants.GamePhaseByPiece[promotedPiece];
-            gamePhase += EvaluationConstants.GamePhaseByPiece[piece];
+            game.GamePhase -= EvaluationConstants.GamePhaseByPiece[promotedPiece];
+            game.GamePhase += EvaluationConstants.GamePhaseByPiece[piece];
         }
 
         PieceBitBoards[newPiece].PopBit(targetSquare);
@@ -507,8 +523,8 @@ public class Position
         PieceBitBoards[piece].SetBit(sourceSquare);
         OccupancyBitBoards[side].SetBit(sourceSquare);
 
-        mgEval += EvaluationConstants.MiddleGameTable[piece, sourceSquare] - EvaluationConstants.MiddleGameTable[newPiece, targetSquare];
-        egEval += EvaluationConstants.EndGameTable[piece, sourceSquare] - EvaluationConstants.EndGameTable[newPiece, targetSquare];
+        game.MiddleGamePSQTEval += EvaluationConstants.MiddleGameTable[piece, sourceSquare] - EvaluationConstants.MiddleGameTable[newPiece, targetSquare];
+        game.EndGamePSQTEval += EvaluationConstants.EndGameTable[piece, sourceSquare] - EvaluationConstants.EndGameTable[newPiece, targetSquare];
 
         if (move.IsCapture())
         {
@@ -529,9 +545,9 @@ public class Position
                 OccupancyBitBoards[oppositeSide].SetBit(targetSquare);
             }
 
-            mgEval += EvaluationConstants.MiddleGameTable[gameState.CapturedPiece, targetSquare];
-            egEval += EvaluationConstants.EndGameTable[gameState.CapturedPiece, targetSquare];
-            gamePhase += EvaluationConstants.GamePhaseByPiece[gameState.CapturedPiece];
+            game.MiddleGamePSQTEval += EvaluationConstants.MiddleGameTable[gameState.CapturedPiece, targetSquare];
+            game.EndGamePSQTEval += EvaluationConstants.EndGameTable[gameState.CapturedPiece, targetSquare];
+            game.GamePhase += EvaluationConstants.GamePhaseByPiece[gameState.CapturedPiece];
         }
         else if (move.IsShortCastle())
         {
@@ -564,8 +580,6 @@ public class Position
         Castle = gameState.Castle;
         EnPassant = gameState.EnPassant;
         UniqueIdentifier = gameState.ZobristKey;
-
-        return (mgEval, egEval, gamePhase);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -933,7 +947,7 @@ public class Position
     /// </summary>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int StaticEvaluation(int middleGameScore, int endGameScore, int gamePhase)
+    public int StaticEvaluation(Game game)
     {
         //var result = OnlineTablebaseProber.EvaluationSearch(this, movesWithoutCaptureOrPawnMove, cancellationToken);
         //Debug.Assert(result < EvaluationConstants.CheckMateBaseEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
@@ -945,7 +959,7 @@ public class Position
         //}
 
         // Check if drawn position due to lack of material
-        if (endGameScore >= 0)
+        if (game.EndGamePSQTEval >= 0)
         {
             bool whiteCannotWinWithMajorPieces = PieceBitBoards[(int)Piece.P].CountBits() == 0 && PieceBitBoards[(int)Piece.Q].CountBits() == 0 && PieceBitBoards[(int)Piece.R].CountBits() == 0;
 
@@ -980,10 +994,10 @@ public class Position
 
         const int maxPhase = 24;
 
-        int endGamePhase = maxPhase - gamePhase;
+        int endGamePhase = maxPhase - game.GamePhase;
         //_logger.Trace("Phase: {0}/24", gamePhase);
 
-        var eval = ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / maxPhase;
+        var eval = ((game.MiddleGamePSQTEval * game.GamePhase) + (game.EndGamePSQTEval * endGamePhase)) / maxPhase;
 
         return Side == Side.White
             ? eval

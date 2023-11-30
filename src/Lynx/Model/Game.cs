@@ -165,7 +165,7 @@ public sealed class Game
 
     public GameState MakeMove(Move moveToPlay)
     {
-        var gameState = CurrentPosition.MakeMove(moveToPlay);
+        var gameState = CurrentPosition.MakeMoveAndUpdatePSQTEval(moveToPlay, this);
         MoveHistory.Add(moveToPlay);
 
         if (!CurrentPosition.WasProduceByAValidMove())
@@ -182,7 +182,7 @@ public sealed class Game
 
     internal void RevertLastMove(Move playedMove, GameState gameState)
     {
-        CurrentPosition.UnmakeMove(playedMove, gameState);
+        CurrentPosition.UnmakeMoveAndUpdatePSQTEval(playedMove, gameState, this);
 
         if (MoveHistory.Count != 0)
         {

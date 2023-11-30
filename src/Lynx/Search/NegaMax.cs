@@ -26,7 +26,7 @@ public sealed partial class Engine
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
             _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
-            return position.StaticEvaluation(Game.MiddleGamePSQTEval, Game.EndGamePSQTEval, Game.GamePhase);
+            return position.StaticEvaluation(Game);
         }
 
         _maxDepthReached[ply] = ply;
@@ -84,7 +84,7 @@ public sealed partial class Engine
 
         if (!pvNode && !isInCheck)
         {
-            var staticEval = position.StaticEvaluation(Game.MiddleGamePSQTEval, Game.EndGamePSQTEval, Game.GamePhase);
+            var staticEval = position.StaticEvaluation(Game);
 
             // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
             if (depth >= Configuration.EngineSettings.NMP_MinDepth
@@ -196,11 +196,11 @@ public sealed partial class Engine
 
             var move = pseudoLegalMoves[moveIndex];
 
-            (GameState gameState, Game.MiddleGamePSQTEval, Game.EndGamePSQTEval, Game.GamePhase) = position.MakeMoveAndUpdatePSQTEval(move, Game.MiddleGamePSQTEval, Game.EndGamePSQTEval, Game.GamePhase);
+            var gameState = position.MakeMoveAndUpdatePSQTEval(move, Game);
 
             if (!position.WasProduceByAValidMove())
             {
-                position.UnmakeMoveAndUpdatePSQTEval(move, gameState, Game.MiddleGamePSQTEval, Game.EndGamePSQTEval, Game.GamePhase);
+                position.UnmakeMoveAndUpdatePSQTEval(move, gameState, Game);
                 continue;
             }
 
@@ -301,7 +301,8 @@ public sealed partial class Engine
             {
                 Game.PositionHashHistory.Remove(position.UniqueIdentifier);
             }
-            position.UnmakeMoveAndUpdatePSQTEval(move, gameState, Game.MiddleGamePSQTEval, Game.EndGamePSQTEval, Game.GamePhase);
+
+            position.UnmakeMoveAndUpdatePSQTEval(move, gameState, Game);
 
             PrintMove(ply, move, evaluation);
 
@@ -383,7 +384,7 @@ public sealed partial class Engine
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
             _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
-            return position.StaticEvaluation(Game.MiddleGamePSQTEval, Game.EndGamePSQTEval, Game.GamePhase);
+            return position.StaticEvaluation(Game);
         }
 
         var pvIndex = PVTable.Indexes[ply];
@@ -401,7 +402,7 @@ public sealed partial class Engine
 
         _maxDepthReached[ply] = ply;
 
-        var staticEvaluation = position.StaticEvaluation(Game.MiddleGamePSQTEval, Game.EndGamePSQTEval, Game.GamePhase);
+        var staticEvaluation = position.StaticEvaluation(Game);
 
         // Fail-hard beta-cutoff (updating alpha after this check)
         if (staticEvaluation >= beta)
@@ -448,10 +449,10 @@ public sealed partial class Engine
 
             var move = pseudoLegalMoves[i];
 
-            (GameState gameState, Game.MiddleGamePSQTEval, Game.EndGamePSQTEval, Game.GamePhase) = position.MakeMoveAndUpdatePSQTEval(move, Game.MiddleGamePSQTEval, Game.EndGamePSQTEval, Game.GamePhase);
+            var gameState = position.MakeMoveAndUpdatePSQTEval(move, Game);
             if (!position.WasProduceByAValidMove())
             {
-                position.UnmakeMoveAndUpdatePSQTEval(move, gameState, Game.MiddleGamePSQTEval, Game.EndGamePSQTEval, Game.GamePhase);
+                position.UnmakeMoveAndUpdatePSQTEval(move, gameState, Game);
                 continue;
             }
 
@@ -486,7 +487,7 @@ public sealed partial class Engine
             {
                 Game.PositionHashHistory.Remove(position.UniqueIdentifier);
             }
-            position.UnmakeMoveAndUpdatePSQTEval(move, gameState, Game.MiddleGamePSQTEval, Game.EndGamePSQTEval, Game.GamePhase);
+            position.UnmakeMoveAndUpdatePSQTEval(move, gameState, Game);
 
             PrintMove(ply, move, evaluation);
 
