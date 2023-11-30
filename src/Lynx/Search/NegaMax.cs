@@ -45,7 +45,7 @@ public sealed partial class Engine
         if (!isRoot)
         {
             (ttEvaluation, ttBestMove, ttElementType) = _tt.ProbeHash(_ttMask, position, depth, ply, alpha, beta);
-            if (ttEvaluation != EvaluationConstants.NoHashEntry)
+            if (ttEvaluation != EvaluationConstants.NoHashEntry && !pvNode)
             {
                 return ttEvaluation;
             }
