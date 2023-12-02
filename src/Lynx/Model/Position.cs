@@ -219,6 +219,7 @@ public class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public GameState MakeMoveAndUpdatePSQTEval(Move move, Game game)
     {
+        //return MakeMove(move);
         var originalMg = game.MiddleGamePSQTEval;
         var originalEg = game.EndGamePSQTEval;
         var originalPhase = game.GamePhase;
@@ -275,6 +276,10 @@ public class Position
                 OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
                 UniqueIdentifier ^= ZobristTable.PieceHash(capturedPawnSquare, oppositePawnIndex);
                 capturedPiece = (sbyte)oppositePawnIndex;
+
+                game.MiddleGamePSQTEval -= EvaluationConstants.MiddleGameTable[capturedPiece, capturedPawnSquare];
+                game.EndGamePSQTEval -= EvaluationConstants.EndGameTable[capturedPiece, capturedPawnSquare];
+                game.GamePhase -= EvaluationConstants.GamePhaseByPiece[capturedPiece];
             }
             else
             {
@@ -291,11 +296,11 @@ public class Position
                 }
 
                 OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
-            }
 
-            game.MiddleGamePSQTEval -= EvaluationConstants.MiddleGameTable[capturedPiece, targetSquare];
-            game.EndGamePSQTEval -= EvaluationConstants.EndGameTable[capturedPiece, targetSquare];
-            game.GamePhase -= EvaluationConstants.GamePhaseByPiece[capturedPiece];
+                game.MiddleGamePSQTEval -= EvaluationConstants.MiddleGameTable[capturedPiece, targetSquare];
+                game.EndGamePSQTEval -= EvaluationConstants.EndGameTable[capturedPiece, targetSquare];
+                game.GamePhase -= EvaluationConstants.GamePhaseByPiece[capturedPiece];
+            }
         }
         else if (move.IsDoublePawnPush())
         {
@@ -358,14 +363,20 @@ public class Position
 
         UnmakeMoveAndUpdatePSQTEval(move, gameState, game);
 
-        if(originalMg != game.MiddleGamePSQTEval
+        return gameState;
+        if (originalMg != game.MiddleGamePSQTEval
             || originalEg != game.EndGamePSQTEval
             || originalPhase != game.GamePhase)
         {
+            Console.WriteLine("**********************************");
+            Console.WriteLine(FEN());
+            Console.WriteLine(move);
+            Console.WriteLine("**********************************");
             ;
         }
 
-        return gameState;
+        return MakeMove(move);
+
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -538,16 +549,21 @@ public class Position
 
                 PieceBitBoards[oppositePawnIndex].SetBit(capturedPawnSquare);
                 OccupancyBitBoards[oppositeSide].SetBit(capturedPawnSquare);
+
+                game.MiddleGamePSQTEval += EvaluationConstants.MiddleGameTable[gameState.CapturedPiece, capturedPawnSquare];
+                game.EndGamePSQTEval += EvaluationConstants.EndGameTable[gameState.CapturedPiece, capturedPawnSquare];
+                game.GamePhase += EvaluationConstants.GamePhaseByPiece[oppositePawnIndex];
             }
             else
             {
                 PieceBitBoards[gameState.CapturedPiece].SetBit(targetSquare);
                 OccupancyBitBoards[oppositeSide].SetBit(targetSquare);
+
+                game.MiddleGamePSQTEval += EvaluationConstants.MiddleGameTable[gameState.CapturedPiece, targetSquare];
+                game.EndGamePSQTEval += EvaluationConstants.EndGameTable[gameState.CapturedPiece, targetSquare];
+                game.GamePhase += EvaluationConstants.GamePhaseByPiece[gameState.CapturedPiece];
             }
 
-            game.MiddleGamePSQTEval += EvaluationConstants.MiddleGameTable[gameState.CapturedPiece, targetSquare];
-            game.EndGamePSQTEval += EvaluationConstants.EndGameTable[gameState.CapturedPiece, targetSquare];
-            game.GamePhase += EvaluationConstants.GamePhaseByPiece[gameState.CapturedPiece];
         }
         else if (move.IsShortCastle())
         {
