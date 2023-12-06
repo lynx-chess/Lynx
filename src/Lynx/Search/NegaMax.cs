@@ -314,7 +314,11 @@ public sealed partial class Engine
                 // 🔍 Killer moves
                 if (!move.IsCapture() && move.PromotedPiece() == default && move != _killerMoves[0, ply])
                 {
-                    _killerMoves[2, ply] = _killerMoves[1, ply];
+                    if (move != _killerMoves[1, ply])
+                    {
+                        _killerMoves[2, ply] = _killerMoves[1, ply];
+                    }
+
                     _killerMoves[1, ply] = _killerMoves[0, ply];
                     _killerMoves[0, ply] = move;
                 }
