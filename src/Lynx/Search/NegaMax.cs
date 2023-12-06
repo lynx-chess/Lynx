@@ -312,18 +312,15 @@ public sealed partial class Engine
                 PrintMessage($"Pruning: {move} is enough");
 
                 // 🔍 Killer moves
-                if (!move.IsCapture() && move.PromotedPiece() == default)
+                if (!move.IsCapture() && move.PromotedPiece() == default && move != _killerMoves[0, ply])
                 {
                     if (move != _killerMoves[1, ply])
                     {
                         _killerMoves[2, ply] = _killerMoves[1, ply];
                     }
 
-                    if (move != _killerMoves[0, ply])
-                    {
-                        _killerMoves[1, ply] = _killerMoves[0, ply];
-                        _killerMoves[0, ply] = move;
-                    }
+                    _killerMoves[1, ply] = _killerMoves[0, ply];
+                    _killerMoves[0, ply] = move;
                 }
 
                 _tt.RecordHash(_ttMask, position, depth, ply, beta, NodeType.Beta, bestMove);
