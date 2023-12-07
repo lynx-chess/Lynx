@@ -34,6 +34,7 @@ public sealed partial class Engine
     public async Task<SearchResult?> IDDFS(int? maxDepth, int? decisionTime)
     {
         // Cleanup
+        _age = Math.Clamp(++_age, byte.MinValue, byte.MaxValue);
         _nodes = 0;
         _isFollowingPV = false;
         _isScoringPV = false;
