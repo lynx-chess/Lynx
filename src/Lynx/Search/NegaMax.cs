@@ -339,7 +339,9 @@ public sealed partial class Engine
                     var piece = move.Piece();
                     var targetSquare = move.TargetSquare();
 
-                    _historyMoves[piece, targetSquare] = ScoreHistoryMove(_historyMoves[piece, targetSquare], ply << 2);
+                    _historyMoves[piece, targetSquare] = ScoreHistoryMove(
+                        _historyMoves[piece, targetSquare],
+                        Math.Min(1896, 4 * depth * depth + 120 * depth - 120));     // Sirius, originally from Berserk,
                 }
 
                 _pVTable[pvIndex] = move;
