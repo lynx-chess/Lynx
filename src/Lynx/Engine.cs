@@ -19,6 +19,8 @@ public sealed partial class Engine
     private bool _isPondering;
 #pragma warning restore IDE0052, CS0414 // Remove unread private members
 
+    private byte _age;
+
     private Move? _moveToPonder;
     public double AverageDepth { get; private set; }
 
@@ -35,6 +37,7 @@ public sealed partial class Engine
 
     public Engine(ChannelWriter<string> engineWriter)
     {
+        _age = 0;
         AverageDepth = 0;
         Game = new Game();
         _isNewGameComing = true;
@@ -56,6 +59,7 @@ public sealed partial class Engine
         Game = new Game();
         _isNewGameComing = true;
         _isNewGameCommandSupported = true;
+        _age = 0;
         InitializeTT();
     }
 
@@ -75,7 +79,7 @@ public sealed partial class Engine
     {
         _searchCancellationTokenSource = new();
         _absoluteSearchCancellationTokenSource = new();
-        int? maxDepth = null;
+        int? maxDepth = Configuration.EngineSettings.MaxDepth;
         int? decisionTime = null;
 
         int millisecondsLeft;
@@ -90,8 +94,6 @@ public sealed partial class Engine
             millisecondsLeft = goCommand.BlackTime;
             millisecondsIncrement = goCommand.BlackIncrement;
         }
-
-        maxDepth = Configuration.EngineSettings.MaxDepth;
 
         if (millisecondsLeft > 0)
         {

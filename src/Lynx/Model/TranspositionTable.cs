@@ -30,6 +30,8 @@ public struct TranspositionTableElement
 
     private byte _depth;
 
+    public byte Age { get; set; }
+
     //private byte _age;
 
     /// <summary>
@@ -151,7 +153,7 @@ public static class TranspositionTableExtensions
     /// <param name="nodeType"></param>
     /// <param name="move"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void RecordHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int eval, NodeType nodeType, Move? move = null)
+    public static void RecordHash(this TranspositionTable tt, byte age, int ttMask, Position position, int depth, int ply, int eval, NodeType nodeType, Move? move = null)
     {
         if (!Configuration.EngineSettings.TranspositionTableEnabled)
         {
@@ -165,15 +167,19 @@ public static class TranspositionTableExtensions
         //    _logger.Warn("TT collision");
         //}
 
-        // We want to store the distance to the checkmate position relative to the current node, independently from the root
-        // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
-        var score = RecalculateMateScores(eval, -ply);
+        if (age != entry.Age)
+        {
+            // We want to store the distance to the checkmate position relative to the current node, independently from the root
+            // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
+            var score = RecalculateMateScores(eval, -ply);
 
-        entry.Key = position.UniqueIdentifier;
-        entry.Score = score;
-        entry.Depth = depth;
-        entry.Type = nodeType;
-        entry.Move = move ?? entry.Move;    // Suggested by cj5716 instead of 0. https://github.com/lynx-chess/Lynx/pull/462
+            entry.Key = position.UniqueIdentifier;
+            entry.Score = score;
+            entry.Depth = depth;
+            entry.Type = nodeType;
+            entry.Age = age;
+            entry.Move = move ?? entry.Move;    // Suggested by cj5716 instead of 0. https://github.com/lynx-chess/Lynx/pull/462
+        }
     }
 
     /// <summary>
