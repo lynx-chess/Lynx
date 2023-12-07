@@ -114,7 +114,7 @@ public static class TranspositionTableExtensions
 
         ref var entry = ref tt[position.UniqueIdentifier & ttMask];
 
-        if (position.UniqueIdentifier != entry.Key)
+        if ((position.UniqueIdentifier >> 32) != entry.Key)
         {
             return (EvaluationConstants.NoHashEntry, default, default);
         }
@@ -166,7 +166,7 @@ public static class TranspositionTableExtensions
         //}
 
         bool shouldReplace =
-            position.UniqueIdentifier != entry.Key  // Different key: collision
+            (position.UniqueIdentifier >> 32) != entry.Key  // Different key: collision
             || nodeType == NodeType.Exact           // PV entries
             || depth >= entry.Depth                 // Higher depth
             || age != entry.Age;                    // Previous searches
