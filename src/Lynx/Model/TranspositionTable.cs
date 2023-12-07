@@ -166,10 +166,11 @@ public static class TranspositionTableExtensions
         //}
 
         bool shouldReplace =
-            (position.UniqueIdentifier >> 32) != entry.Key  // Different key: collision
-            || nodeType == NodeType.Exact           // PV entries
-            || depth >= entry.Depth                 // Higher depth
-            || age != entry.Age;                    // Previous searches
+            entry.Key == 0                                      // No actual entry
+            || (position.UniqueIdentifier >> 32) != entry.Key   // Different key: collision
+            || nodeType == NodeType.Exact                       // Entering PV data
+            || depth >= entry.Depth                             // Higher depth
+            || age != entry.Age;                                // Previous searches
 
         if (!shouldReplace)
         {
