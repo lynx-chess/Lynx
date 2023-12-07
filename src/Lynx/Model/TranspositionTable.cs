@@ -30,9 +30,7 @@ public struct TranspositionTableElement
 
     private byte _depth;
 
-    public byte Age { get; set; }
-
-    //private byte _age;
+    //public byte Age { get; set; }
 
     /// <summary>
     /// Node (position) type:
@@ -51,8 +49,6 @@ public struct TranspositionTableElement
     /// Position evaluation
     /// </summary>
     public int Score { readonly get => _score; set => _score = (short)value; }
-
-    //public int Age { readonly get => _age; set => _age = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref value, 1))[0]; }
 
     public void Clear()
     {
@@ -186,7 +182,7 @@ public static class TranspositionTableExtensions
         entry.Score = score;
         entry.Depth = depth;
         entry.Type = nodeType;
-        entry.Age = age;
+        //entry.Age = age;
         entry.Move = move ?? entry.Move;    // Suggested by cj5716 instead of 0. https://github.com/lynx-chess/Lynx/pull/462
     }
 
