@@ -167,19 +167,27 @@ public static class TranspositionTableExtensions
         //    _logger.Warn("TT collision");
         //}
 
-        if (age != entry.Age)
-        {
-            // We want to store the distance to the checkmate position relative to the current node, independently from the root
-            // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
-            var score = RecalculateMateScores(eval, -ply);
+        bool shouldReplace =
+            position.UniqueIdentifier != entry.Key  // Different key: collision
+            || nodeType == NodeType.Exact           // PV entries
+            || depth >= entry.Depth;                // Higher depth
+        //|| age != entry.Age;                      // Previous searches
 
-            entry.Key = position.UniqueIdentifier;
-            entry.Score = score;
-            entry.Depth = depth;
-            entry.Type = nodeType;
-            entry.Age = age;
-            entry.Move = move ?? entry.Move;    // Suggested by cj5716 instead of 0. https://github.com/lynx-chess/Lynx/pull/462
+        if (!shouldReplace)
+        {
+            return;
         }
+
+        // We want to store the distance to the checkmate position relative to the current node, independently from the root
+        // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
+        var score = RecalculateMateScores(eval, -ply);
+
+        entry.Key = position.UniqueIdentifier;
+        entry.Score = score;
+        entry.Depth = depth;
+        entry.Type = nodeType;
+        entry.Age = age;
+        entry.Move = move ?? entry.Move;    // Suggested by cj5716 instead of 0. https://github.com/lynx-chess/Lynx/pull/462
     }
 
     /// <summary>
