@@ -19,7 +19,7 @@ public struct TranspositionTableElement
     /// <summary>
     /// Full Zobrist key
     /// </summary>
-    public long Key { get; set; }
+    private int _key;
 
     /// <summary>
     /// Best move found in a position. 0 if the position failed low (score <= alpha)
@@ -30,7 +30,7 @@ public struct TranspositionTableElement
 
     private byte _depth;
 
-    //public byte Age { get; set; }
+    public byte Age { get; set; }
 
     /// <summary>
     /// Node (position) type:
@@ -49,6 +49,8 @@ public struct TranspositionTableElement
     /// Position evaluation
     /// </summary>
     public int Score { readonly get => _score; set => _score = (short)value; }
+
+    public long Key { readonly get => _key; set => _key = (int)(value >> 32); }
 
     public void Clear()
     {
@@ -166,8 +168,8 @@ public static class TranspositionTableExtensions
         bool shouldReplace =
             position.UniqueIdentifier != entry.Key  // Different key: collision
             || nodeType == NodeType.Exact           // PV entries
-            || depth >= entry.Depth;                // Higher depth
-        //|| age != entry.Age;                      // Previous searches
+            || depth >= entry.Depth                 // Higher depth
+            || age != entry.Age;                    // Previous searches
 
         if (!shouldReplace)
         {
@@ -182,7 +184,7 @@ public static class TranspositionTableExtensions
         entry.Score = score;
         entry.Depth = depth;
         entry.Type = nodeType;
-        //entry.Age = age;
+        entry.Age = age;
         entry.Move = move ?? entry.Move;    // Suggested by cj5716 instead of 0. https://github.com/lynx-chess/Lynx/pull/462
     }
 
