@@ -75,7 +75,7 @@ public sealed partial class Engine
     {
         _searchCancellationTokenSource = new();
         _absoluteSearchCancellationTokenSource = new();
-        int? maxDepth = null;
+        int? maxDepth = Configuration.EngineSettings.MaxDepth;
         int? decisionTime = null;
 
         int millisecondsLeft;
@@ -90,8 +90,6 @@ public sealed partial class Engine
             millisecondsLeft = goCommand.BlackTime;
             millisecondsIncrement = goCommand.BlackIncrement;
         }
-
-        maxDepth = Configuration.EngineSettings.MaxDepth;
 
         if (millisecondsLeft > 0)
         {
