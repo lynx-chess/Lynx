@@ -157,8 +157,6 @@ public sealed class EngineSettings
 
     public int History_MaxMoveValue { get; set; } = 8_192;
 
-    public int TTMinDepthDifferenceToAlwaysReplaceWhenSameKey { get; set; } = 3;
-
     #region Evaluation
 
     public TaperedEvaluationTerm DoubledPawnPenalty { get; set; } = new(-5, -14);

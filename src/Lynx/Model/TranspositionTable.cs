@@ -171,7 +171,7 @@ public static class TranspositionTableExtensions
             entry.Key == 0                                      // No actual entry
             || (position.UniqueIdentifier >> 32) != entry.Key   // Different key: collision
             || nodeType == NodeType.Exact                       // Entering PV data
-            || depth >= entry.Depth + Configuration.EngineSettings.TTMinDepthDifferenceToAlwaysReplaceWhenSameKey;  // Significativelt higher depth (if the keys match)
+            || depth >= entry.Depth;                            // Higher depth
 
         if (!shouldReplace)
         {
