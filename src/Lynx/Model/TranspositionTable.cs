@@ -169,8 +169,8 @@ public static class TranspositionTableExtensions
             entry.Key == 0                                      // No actual entry
             || (position.UniqueIdentifier >> 32) != entry.Key   // Different key: collision
             || nodeType == NodeType.Exact                       // Entering PV data
-            || depth >= entry.Depth                             // Higher depth
-            || age != entry.Age;                                // Previous searches
+            || depth >= entry.Depth;                            // Higher depth
+                                                                //|| age != entry.Age;                                // Previous searches
 
         if (!shouldReplace)
         {
@@ -185,7 +185,7 @@ public static class TranspositionTableExtensions
         entry.Score = score;
         entry.Depth = depth;
         entry.Type = nodeType;
-        entry.Age = age;
+        //entry.Age = age;
         entry.Move = move ?? entry.Move;    // Suggested by cj5716 instead of 0. https://github.com/lynx-chess/Lynx/pull/462
     }
 
