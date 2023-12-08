@@ -31,6 +31,7 @@ public sealed class LynxDriver
         _ = Attacks.KingAttacks;
         _ = ZobristTable.SideHash();
         _ = Masks.FileMasks;
+        _ = EvaluationConstants.HistoryBonus[1];
     }
 
     public async Task Run(CancellationToken cancellationToken)

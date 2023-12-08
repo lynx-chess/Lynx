@@ -341,7 +341,7 @@ public sealed partial class Engine
 
                     _historyMoves[piece, targetSquare] = ScoreHistoryMove(
                         _historyMoves[piece, targetSquare],
-                        Math.Min(1896, 4 * depth * depth + 120 * depth - 120));     // Sirius, originally from Berserk,
+                        EvaluationConstants.HistoryBonus[depth]);
                 }
 
                 _pVTable[pvIndex] = move;
