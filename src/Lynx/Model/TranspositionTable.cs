@@ -30,8 +30,6 @@ public struct TranspositionTableElement
 
     private byte _depth;
 
-    public byte Age { get; set; }
-
     /// <summary>
     /// Node (position) type:
     /// <see cref="NodeType.Exact"/>: == <see cref="Score"/>,
@@ -70,7 +68,11 @@ public static class TranspositionTableExtensions
     public static (int Length, int Mask) CalculateLength(int size)
     {
         var sizeBytes = size * 1024 * 1024;
-        var ttLength = (int)BitOperations.RoundUpToPowerOf2((uint)(sizeBytes / _ttElementSize));
+        var ttLength = sizeBytes / _ttElementSize;
+        if (!BitOperations.IsPow2(ttLength))
+        {
+            ttLength = (int)BitOperations.RoundUpToPowerOf2((uint)ttLength) / 2;
+        }
         var ttLengthMb = ttLength / 1024 / 1024;
 
         var mask = ttLength - 1;
