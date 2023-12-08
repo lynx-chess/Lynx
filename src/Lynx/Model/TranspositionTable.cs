@@ -19,7 +19,7 @@ public struct TranspositionTableElement
     /// <summary>
     /// Full Zobrist key
     /// </summary>
-    private int _key;
+    public long Key { get; set; }
 
     /// <summary>
     /// Best move found in a position. 0 if the position failed low (score <= alpha)
@@ -50,8 +50,6 @@ public struct TranspositionTableElement
     /// </summary>
     public int Score { readonly get => _score; set => _score = (short)value; }
 
-    public long Key { readonly get => _key; set => _key = (int)(value >> 32); }
-
     public void Clear()
     {
         Key = 0;
@@ -70,7 +68,11 @@ public static class TranspositionTableExtensions
     public static (int Length, int Mask) CalculateLength(int size)
     {
         var sizeBytes = size * 1024 * 1024;
-        var ttLength = (int)BitOperations.RoundUpToPowerOf2((uint)(sizeBytes / _ttElementSize));
+        var ttLength = sizeBytes / _ttElementSize;
+        if (!BitOperations.IsPow2(ttLength))
+        {
+            ttLength = (int)BitOperations.RoundUpToPowerOf2((uint)ttLength);// / 2;
+        }
         var ttLengthMb = ttLength / 1024 / 1024;
 
         var mask = ttLength - 1;
@@ -114,7 +116,7 @@ public static class TranspositionTableExtensions
 
         ref var entry = ref tt[position.UniqueIdentifier & ttMask];
 
-        if ((position.UniqueIdentifier >> 32) != entry.Key)
+        if (position.UniqueIdentifier != entry.Key)
         {
             return (EvaluationConstants.NoHashEntry, default, default);
         }
@@ -167,10 +169,10 @@ public static class TranspositionTableExtensions
 
         bool shouldReplace =
             entry.Key == 0                                      // No actual entry
-            || (position.UniqueIdentifier >> 32) != entry.Key   // Different key: collision
+            || position.UniqueIdentifier != entry.Key   // Different key: collision
             || nodeType == NodeType.Exact                       // Entering PV data
-            || depth >= entry.Depth;                            // Higher depth
-                                                                //|| age != entry.Age;                                // Previous searches
+            || depth >= entry.Depth                             // Higher depth
+            || age != entry.Age;                                // Previous searches
 
         if (!shouldReplace)
         {
@@ -185,7 +187,7 @@ public static class TranspositionTableExtensions
         entry.Score = score;
         entry.Depth = depth;
         entry.Type = nodeType;
-        //entry.Age = age;
+        entry.Age = age;
         entry.Move = move ?? entry.Move;    // Suggested by cj5716 instead of 0. https://github.com/lynx-chess/Lynx/pull/462
     }
 
