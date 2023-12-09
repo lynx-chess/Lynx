@@ -19,7 +19,7 @@ public struct TranspositionTableElement
     /// <summary>
     /// Full Zobrist key
     /// </summary>
-    public long Key { get; set; }
+    private int _key;
 
     /// <summary>
     /// Best move found in a position. 0 if the position failed low (score <= alpha)
@@ -29,8 +29,6 @@ public struct TranspositionTableElement
     private short _score;
 
     private byte _depth;
-
-    //private byte _age;
 
     /// <summary>
     /// Node (position) type:
@@ -50,7 +48,7 @@ public struct TranspositionTableElement
     /// </summary>
     public int Score { readonly get => _score; set => _score = (short)value; }
 
-    //public int Age { readonly get => _age; set => _age = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref value, 1))[0]; }
+    public long Key { readonly get => _key; set => _key = (int)(value >> 32); }
 
     public void Clear()
     {
@@ -70,7 +68,11 @@ public static class TranspositionTableExtensions
     public static (int Length, int Mask) CalculateLength(int size)
     {
         var sizeBytes = size * 1024 * 1024;
-        var ttLength = (int)BitOperations.RoundUpToPowerOf2((uint)(sizeBytes / _ttElementSize));
+        var ttLength = sizeBytes / _ttElementSize;
+        if (!BitOperations.IsPow2(ttLength))
+        {
+            ttLength = (int)BitOperations.RoundUpToPowerOf2((uint)ttLength) / 2;
+        }
         var ttLengthMb = ttLength / 1024 / 1024;
 
         var mask = ttLength - 1;
@@ -114,7 +116,7 @@ public static class TranspositionTableExtensions
 
         ref var entry = ref tt[position.UniqueIdentifier & ttMask];
 
-        if (position.UniqueIdentifier != entry.Key)
+        if ((position.UniqueIdentifier >> 32) != entry.Key)
         {
             return (EvaluationConstants.NoHashEntry, default, default);
         }
@@ -164,6 +166,17 @@ public static class TranspositionTableExtensions
         //{
         //    _logger.Warn("TT collision");
         //}
+
+        bool shouldReplace =
+            entry.Key == 0                                      // No actual entry
+            || (position.UniqueIdentifier >> 32) != entry.Key   // Different key: collision
+            || nodeType == NodeType.Exact                       // Entering PV data
+            || depth >= entry.Depth;                            // Higher depth
+
+        if (!shouldReplace)
+        {
+            return;
+        }
 
         // We want to store the distance to the checkmate position relative to the current node, independently from the root
         // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
