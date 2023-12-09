@@ -967,8 +967,8 @@ public static class EvaluationConstants
             }
 
             HistoryBonus[searchDepth] = Math.Min(
-                Configuration.EngineSettings.History_MaxMoveRawBonus + (5 * searchDepth),   // Making sure it still increases after reaching the threshold
-                (4 * searchDepth * searchDepth) + (120 * searchDepth) - 120);               // Formula suggested by Sirius author, originally from Berserk
+                Configuration.EngineSettings.History_MaxMoveRawBonus,
+                (4 * searchDepth * searchDepth) + (120 * searchDepth) - 120);   // Sirius, originally from Berserk
         }
     }
 
