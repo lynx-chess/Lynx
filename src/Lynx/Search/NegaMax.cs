@@ -314,7 +314,11 @@ public sealed partial class Engine
                 // 🔍 Killer moves
                 if (!move.IsCapture() && move.PromotedPiece() == default && move != _killerMoves[0, ply])
                 {
-                    _killerMoves[2, ply] = _killerMoves[1, ply];
+                    if (move != _killerMoves[1, ply])
+                    {
+                        _killerMoves[2, ply] = _killerMoves[1, ply];
+                    }
+
                     _killerMoves[1, ply] = _killerMoves[0, ply];
                     _killerMoves[0, ply] = move;
                 }
@@ -391,14 +395,12 @@ public sealed partial class Engine
         var nextPvIndex = PVTable.Indexes[ply + 1];
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
-        Move ttBestMove = default;
-
         var ttProbeResult = _tt.ProbeHash(_ttMask, position, 0, ply, alpha, beta);
         if (ttProbeResult.Evaluation != EvaluationConstants.NoHashEntry)
         {
             return ttProbeResult.Evaluation;
         }
-        ttBestMove = ttProbeResult.BestMove;
+        Move ttBestMove = ttProbeResult.BestMove;
 
         _maxDepthReached[ply] = ply;
 

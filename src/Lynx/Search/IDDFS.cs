@@ -28,7 +28,6 @@ public sealed partial class Engine
     /// <summary>
     /// IDDFs search
     /// </summary>
-    /// <param name="minDepth"></param>
     /// <param name="maxDepth"></param>
     /// <param name="decisionTime"></param>
     /// <returns>Not null <see cref="SearchResult"/>, although made nullable in order to match online tb probing signature</returns>
