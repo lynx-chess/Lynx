@@ -339,7 +339,9 @@ public sealed partial class Engine
                     var piece = move.Piece();
                     var targetSquare = move.TargetSquare();
 
-                    _historyMoves[piece, targetSquare] = ScoreHistoryMove(_historyMoves[piece, targetSquare], ply << 2);
+                    _historyMoves[piece, targetSquare] = ScoreHistoryMove(
+                        _historyMoves[piece, targetSquare],
+                        EvaluationConstants.HistoryBonus[depth]);
                 }
 
                 _pVTable[pvIndex] = move;

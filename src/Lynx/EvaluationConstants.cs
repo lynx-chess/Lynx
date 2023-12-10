@@ -243,6 +243,8 @@ public static readonly int[] EndGameKingTable =
 
     public static readonly int[,] LMRReductions = new int[Constants.AbsoluteMaxDepth, Constants.MaxNumberOfPossibleMovesInAPosition];
 
+    public static readonly int[] HistoryBonus = new int[Constants.AbsoluteMaxDepth];
+
     static EvaluationConstants()
     {
         for (int piece = (int)Piece.P; piece <= (int)Piece.k; ++piece)
@@ -261,6 +263,10 @@ public static readonly int[] EndGameKingTable =
                 LMRReductions[searchDepth, movesSearchedCount] = Convert.ToInt32(Math.Round(
                     Configuration.EngineSettings.LMR_Base + (Math.Log(movesSearchedCount) * Math.Log(searchDepth) / Configuration.EngineSettings.LMR_Divisor)));
             }
+
+            HistoryBonus[searchDepth] = Math.Min(
+                Configuration.EngineSettings.History_MaxMoveRawBonus,
+                (4 * searchDepth * searchDepth) + (120 * searchDepth) - 120);   // Sirius, originally from Berserk
         }
     }
 

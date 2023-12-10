@@ -157,6 +157,11 @@ public sealed class EngineSettings
 
     public int History_MaxMoveValue { get; set; } = 8_192;
 
+    /// <summary>
+    /// 1896: constant from depth 12
+    /// </summary>
+    public int History_MaxMoveRawBonus { get; set; } = 1_896;
+
     #region Evaluation
 
     public TaperedEvaluationTerm DoubledPawnPenalty { get; set; } = new(-5, -14);
