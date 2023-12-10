@@ -217,9 +217,24 @@ public class Position
     public GameState MakeMoveAndUpdatePSQTEval(Move move, Game game)
     {
         //return MakeMove(move);
-        var originalMg = game.MiddleGamePSQTEval;
-        var originalEg = game.EndGamePSQTEval;
-        var originalPhase = game.GamePhase;
+        {
+            var originalMg = game.MiddleGamePSQTEval;
+            var originalEg = game.EndGamePSQTEval;
+            var originalPhase = game.GamePhase;
+
+
+            (var mg, var eg, var phase) = PSQTEvaluation();
+            if (
+                phase != originalPhase
+                || mg != originalMg
+                || eg != originalEg)
+            {
+                Console.WriteLine($"{move.UCIString()} is off in {FEN()}");
+                Console.WriteLine($"Phase {phase}, MG {mg}, EG {eg}");
+                Console.WriteLine($"Phase {originalPhase}, MG {originalMg}, EG {originalEg}");
+                Console.WriteLine();
+            }
+        }
 
         sbyte capturedPiece = -1;
         byte castleCopy = Castle;
@@ -249,9 +264,6 @@ public class Position
         PieceBitBoards[newPiece].SetBit(targetSquare);
         OccupancyBitBoards[oldSide].SetBit(targetSquare);
 
-        game.MiddleGamePSQTEval += EvaluationConstants.MiddleGameTable[newPiece, targetSquare] - EvaluationConstants.MiddleGameTable[piece, sourceSquare];
-        game.EndGamePSQTEval += EvaluationConstants.EndGameTable[newPiece, targetSquare] - EvaluationConstants.EndGameTable[piece, sourceSquare];
-
         UniqueIdentifier ^=
             ZobristTable.SideHash()
             ^ ZobristTable.PieceHash(sourceSquare, piece)
@@ -274,8 +286,10 @@ public class Position
                 UniqueIdentifier ^= ZobristTable.PieceHash(capturedPawnSquare, oppositePawnIndex);
                 capturedPiece = (sbyte)oppositePawnIndex;
 
-                game.MiddleGamePSQTEval -= EvaluationConstants.MiddleGameTable[capturedPiece, capturedPawnSquare];
-                game.EndGamePSQTEval -= EvaluationConstants.EndGameTable[capturedPiece, capturedPawnSquare];
+                var (capturedPawnMGScore, capturedPawnEGScore) = CompletePieceEvaluation(capturedPiece, capturedPawnSquare);
+
+                game.MiddleGamePSQTEval -= capturedPawnMGScore;
+                game.EndGamePSQTEval -= capturedPawnEGScore;
                 game.GamePhase -= EvaluationConstants.GamePhaseByPiece[capturedPiece];
             }
             else
@@ -294,8 +308,10 @@ public class Position
 
                 OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
 
-                game.MiddleGamePSQTEval -= EvaluationConstants.MiddleGameTable[capturedPiece, targetSquare];
-                game.EndGamePSQTEval -= EvaluationConstants.EndGameTable[capturedPiece, targetSquare];
+                var (capturedPieceMGScore, capturedPieceEGScore) = CompletePieceEvaluation(capturedPiece, targetSquare);
+
+                game.MiddleGamePSQTEval -= capturedPieceMGScore;
+                game.EndGamePSQTEval -= capturedPieceEGScore;
                 game.GamePhase -= EvaluationConstants.GamePhaseByPiece[capturedPiece];
             }
         }
@@ -350,6 +366,27 @@ public class Position
 
         UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
 
+        // At the end, so that rooks are in the right positions in case of castling moves
+        var (targetPieceMGScore, targetPieceEGScore) = CompletePieceEvaluation(newPiece, targetSquare);
+        var (sourcePieceMGScore, sourcePieceEGScore) = CompletePieceEvaluation(piece, sourceSquare);
+
+        game.MiddleGamePSQTEval += targetPieceMGScore - sourcePieceMGScore;
+        game.EndGamePSQTEval += targetPieceEGScore - sourcePieceEGScore;
+
+        {
+            (var mg, var eg, var phase) = PSQTEvaluation();
+            if (
+                phase != game.GamePhase
+                || mg != game.MiddleGamePSQTEval
+                || eg != game.EndGamePSQTEval)
+            {
+                Console.WriteLine($"{move.UCIString()} is off in {FEN()}");
+                Console.WriteLine($"Phase {phase}, MG {mg}, EG {eg}");
+                Console.WriteLine($"Phase {game.GamePhase}, MG {game.MiddleGamePSQTEval}, EG {game.EndGamePSQTEval}");
+                Console.WriteLine();
+            }
+        }
+
         var gameState = new GameState(capturedPiece, castleCopy, enpassantCopy, uniqueIdentifierCopy);
         //var clone = new Position(this);
         //clone.UnmakeMove(move, gameState);
@@ -358,19 +395,21 @@ public class Position
         //    throw new($"{FEN()}: {uniqueIdentifierCopy} expected, got {clone.UniqueIdentifier} got after Make/Unmake move {move.ToEPDString()}");
         //}
 
-        UnmakeMoveAndUpdatePSQTEval(move, gameState, game);
+        //UnmakeMoveAndUpdatePSQTEval(move, gameState, game);
+
+        //(var mg, var eg, var phase) = PSQTEvaluation();
+        //if (
+        //    phase != game.GamePhase
+        //    || mg != game.MiddleGamePSQTEval
+        //    || eg != game.EndGamePSQTEval)
+        //{
+        //    Console.WriteLine($"{move} is off in {FEN()}");
+        //    Console.WriteLine($"Phase {phase}, MG {mg}, EG {eg}");
+        //    Console.WriteLine($"Phase {originalPhase}, MG {originalMg}, EG {originalEg}");
+        //    Console.WriteLine();
+        //}
 
         return gameState;
-        if (originalMg != game.MiddleGamePSQTEval
-            || originalEg != game.EndGamePSQTEval
-            || originalPhase != game.GamePhase)
-        {
-            Console.WriteLine("**********************************");
-            Console.WriteLine(FEN());
-            Console.WriteLine(move);
-            Console.WriteLine("**********************************");
-            ;
-        }
 
         return MakeMove(move);
 
@@ -531,9 +570,6 @@ public class Position
         PieceBitBoards[piece].SetBit(sourceSquare);
         OccupancyBitBoards[side].SetBit(sourceSquare);
 
-        game.MiddleGamePSQTEval += EvaluationConstants.MiddleGameTable[piece, sourceSquare] - EvaluationConstants.MiddleGameTable[newPiece, targetSquare];
-        game.EndGamePSQTEval += EvaluationConstants.EndGameTable[piece, sourceSquare] - EvaluationConstants.EndGameTable[newPiece, targetSquare];
-
         if (move.IsCapture())
         {
             var oppositePawnIndex = (int)Piece.p - offset;
@@ -547,8 +583,10 @@ public class Position
                 PieceBitBoards[oppositePawnIndex].SetBit(capturedPawnSquare);
                 OccupancyBitBoards[oppositeSide].SetBit(capturedPawnSquare);
 
-                game.MiddleGamePSQTEval += EvaluationConstants.MiddleGameTable[gameState.CapturedPiece, capturedPawnSquare];
-                game.EndGamePSQTEval += EvaluationConstants.EndGameTable[gameState.CapturedPiece, capturedPawnSquare];
+                var (capturedPawnMGScore, capturedPawnEGScore) = CompletePieceEvaluation(gameState.CapturedPiece, capturedPawnSquare);
+
+                game.MiddleGamePSQTEval += capturedPawnMGScore;
+                game.EndGamePSQTEval += capturedPawnEGScore;
                 game.GamePhase += EvaluationConstants.GamePhaseByPiece[oppositePawnIndex];
             }
             else
@@ -556,11 +594,12 @@ public class Position
                 PieceBitBoards[gameState.CapturedPiece].SetBit(targetSquare);
                 OccupancyBitBoards[oppositeSide].SetBit(targetSquare);
 
-                game.MiddleGamePSQTEval += EvaluationConstants.MiddleGameTable[gameState.CapturedPiece, targetSquare];
-                game.EndGamePSQTEval += EvaluationConstants.EndGameTable[gameState.CapturedPiece, targetSquare];
+                var (capturedPieceMGScore, capturedPieceEGScore) = CompletePieceEvaluation(gameState.CapturedPiece, targetSquare);
+
+                game.MiddleGamePSQTEval += capturedPieceMGScore;
+                game.EndGamePSQTEval += capturedPieceEGScore;
                 game.GamePhase += EvaluationConstants.GamePhaseByPiece[gameState.CapturedPiece];
             }
-
         }
         else if (move.IsShortCastle())
         {
@@ -593,6 +632,13 @@ public class Position
         Castle = gameState.Castle;
         EnPassant = gameState.EnPassant;
         UniqueIdentifier = gameState.ZobristKey;
+
+        // At the end, so that rooks are in the right positions in case of castling moves
+        var (targetPieceMGScore, targetPieceEGScore) = CompletePieceEvaluation(newPiece, targetSquare);
+        var (sourcePieceMGScore, sourcePieceEGScore) = CompletePieceEvaluation(piece, sourceSquare);
+
+        game.MiddleGamePSQTEval += sourcePieceMGScore - targetPieceMGScore;
+        game.EndGamePSQTEval += sourcePieceEGScore - targetPieceEGScore;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -854,91 +900,43 @@ public class Position
         //    return result;
         //}
 
-        var pieceCount = new int[PieceBitBoards.Length];
-
-        int middleGameScore = 0;
-        int endGameScore = 0;
-        int gamePhase = 0;
-
-        for (int pieceIndex = (int)Piece.P; pieceIndex < (int)Piece.K; ++pieceIndex)
-        {
-            // Bitboard copy that we 'empty'
-            var bitboard = PieceBitBoards[pieceIndex];
-
-            while (bitboard != default)
-            {
-                var pieceSquareIndex = bitboard.GetLS1BIndex();
-                bitboard.ResetLS1B();
-
-                middleGameScore += EvaluationConstants.MiddleGameTable[pieceIndex, pieceSquareIndex];
-                endGameScore += EvaluationConstants.EndGameTable[pieceIndex, pieceSquareIndex];
-                gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
-
-                ++pieceCount[pieceIndex];
-
-                (int mgAdditionalScore, int egAdditionalScore) = AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, pieceCount);
-
-                middleGameScore += mgAdditionalScore;
-                endGameScore += egAdditionalScore;
-            }
-        }
-
-        for (int pieceIndex = (int)Piece.p; pieceIndex < (int)Piece.k; ++pieceIndex)
-        {
-            // Bitboard copy that we 'empty'
-            var bitboard = PieceBitBoards[pieceIndex];
-
-            while (bitboard != default)
-            {
-                var pieceSquareIndex = bitboard.GetLS1BIndex();
-                bitboard.ResetLS1B();
-
-                middleGameScore += EvaluationConstants.MiddleGameTable[pieceIndex, pieceSquareIndex];
-                endGameScore += EvaluationConstants.EndGameTable[pieceIndex, pieceSquareIndex];
-                gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
-
-                ++pieceCount[pieceIndex];
-
-                (int mgAdditionalScore, int egAdditionalScore) = AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, pieceCount);
-
-                middleGameScore -= mgAdditionalScore;
-                endGameScore -= egAdditionalScore;
-            }
-        }
-
-        var whiteKing = PieceBitBoards[(int)Piece.K].GetLS1BIndex();
-        (int mgKingScore, int egKingScore) = KingAdditionalEvaluation(whiteKing, Side.White, pieceCount);
-
-        middleGameScore += EvaluationConstants.MiddleGameTable[(int)Piece.K, whiteKing] + mgKingScore;
-        endGameScore += EvaluationConstants.EndGameTable[(int)Piece.K, whiteKing] + egKingScore;
-
-        var blackKing = PieceBitBoards[(int)Piece.k].GetLS1BIndex();
-        (mgKingScore, egKingScore) = KingAdditionalEvaluation(blackKing, Side.Black, pieceCount);
-
-        middleGameScore += EvaluationConstants.MiddleGameTable[(int)Piece.k, blackKing] - mgKingScore;
-        endGameScore += EvaluationConstants.EndGameTable[(int)Piece.k, blackKing] - egKingScore;
-
-        const int maxPhase = 24;
-
-        if (gamePhase > maxPhase)    // Early promotions
-        {
-            gamePhase = maxPhase;
-        }
+        (var middleGameScore, var endGameScore, var gamePhase) = PSQTEvaluation();
 
         // Check if drawn position due to lack of material
-        if (gamePhase <= 4)
+        if (endGameScore >= 0)
         {
-            var offset = Utils.PieceOffset(endGameScore >= 0);
+            bool whiteCannotWinWithMajorPieces = PieceBitBoards[(int)Piece.P].CountBits() == 0 && PieceBitBoards[(int)Piece.Q].CountBits() == 0 && PieceBitBoards[(int)Piece.R].CountBits() == 0;
 
-            bool sideCannotWin = pieceCount[(int)Piece.P + offset] == 0 && pieceCount[(int)Piece.Q + offset] == 0 && pieceCount[(int)Piece.R + offset] == 0
-                && (pieceCount[(int)Piece.B + offset] + pieceCount[(int)Piece.N + offset] == 1                  // B or N
-                    || (pieceCount[(int)Piece.B + offset] == 0 && pieceCount[(int)Piece.N + offset] == 2));     // N+N
-
-            if (sideCannotWin)
+            if (whiteCannotWinWithMajorPieces)
             {
-                return (0, gamePhase);
+                var bishopCount = PieceBitBoards[(int)Piece.B].CountBits();
+                var knightCount = PieceBitBoards[(int)Piece.N].CountBits();
+
+                if (bishopCount + knightCount == 1                  // B or N
+                    || (bishopCount == 0 && knightCount == 2))      // NN
+                {
+                    return (0, gamePhase);
+                }
             }
         }
+        else
+        {
+            bool blackCannotWinWithMajorPieces = PieceBitBoards[(int)Piece.p].CountBits() == 0 && PieceBitBoards[(int)Piece.q].CountBits() == 0 && PieceBitBoards[(int)Piece.r].CountBits() == 0;
+
+            if (blackCannotWinWithMajorPieces)
+            {
+                var bishopCount = PieceBitBoards[(int)Piece.b].CountBits();
+                var knightCount = PieceBitBoards[(int)Piece.n].CountBits();
+
+                if (bishopCount + knightCount == 1                  // B or N
+                    || (bishopCount == 0 && knightCount == 2))      // NN
+                {
+                    return (0, gamePhase);
+                }
+            }
+        }
+
+        const int maxPhase = 24;
 
         int endGamePhase = maxPhase - gamePhase;
         //_logger.Trace("Phase: {0}/24", gamePhase);
@@ -960,7 +958,7 @@ public class Position
     /// </summary>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int StaticEvaluation(Game game)
+    public int IncrementalStaticEvaluation(Game game)
     {
         //var result = OnlineTablebaseProber.EvaluationSearch(this, movesWithoutCaptureOrPawnMove, cancellationToken);
         //Debug.Assert(result < EvaluationConstants.CheckMateBaseEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
@@ -1046,7 +1044,7 @@ public class Position
 
                 ++pieceCount[pieceIndex];
 
-                (int mgAdditionalScore, int egAdditionalScore) = AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, pieceCount);
+                (int mgAdditionalScore, int egAdditionalScore) = AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
 
                 middleGameScore += mgAdditionalScore;
                 endGameScore += egAdditionalScore;
@@ -1069,21 +1067,21 @@ public class Position
 
                 ++pieceCount[pieceIndex];
 
-                (int mgAdditionalScore, int egAdditionalScore) = AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, pieceCount);
+                (int mgAdditionalScore, int egAdditionalScore) = AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
 
-                middleGameScore -= mgAdditionalScore;
-                endGameScore -= egAdditionalScore;
+                middleGameScore += mgAdditionalScore;
+                endGameScore += egAdditionalScore;
             }
         }
 
         var whiteKing = PieceBitBoards[(int)Piece.K].GetLS1BIndex();
-        (int mgKingScore, int egKingScore) = KingAdditionalEvaluation(whiteKing, Side.White, pieceCount);
+        (int mgKingScore, int egKingScore) = KingAdditionalEvaluation(whiteKing, (int)Piece.K);
 
         middleGameScore += EvaluationConstants.MiddleGameTable[(int)Piece.K, whiteKing] + mgKingScore;
         endGameScore += EvaluationConstants.EndGameTable[(int)Piece.K, whiteKing] + egKingScore;
 
         var blackKing = PieceBitBoards[(int)Piece.k].GetLS1BIndex();
-        (mgKingScore, egKingScore) = KingAdditionalEvaluation(blackKing, Side.Black, pieceCount);
+        (mgKingScore, egKingScore) = KingAdditionalEvaluation(blackKing, (int)Piece.k);
 
         middleGameScore += EvaluationConstants.MiddleGameTable[(int)Piece.k, blackKing] - mgKingScore;
         endGameScore += EvaluationConstants.EndGameTable[(int)Piece.k, blackKing] - egKingScore;
@@ -1127,6 +1125,15 @@ public class Position
         }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public (int MiddleGameScore, int EndGameScore) CompletePieceEvaluation(int pieceIndex, int pieceSquareIndex)
+    {
+        var (middleGameAdditionalScore, endGameAdditionalScore) = AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
+
+        return (EvaluationConstants.MiddleGameTable[pieceIndex, pieceSquareIndex] + middleGameAdditionalScore,
+                EvaluationConstants.EndGameTable[pieceIndex, pieceSquareIndex] + endGameAdditionalScore);
+    }
+
     /// <summary>
     /// Doesn't include <see cref="Piece.K"/> and <see cref="Piece.k"/> evaluation since this method is called
     /// on the fly while going through the existing pieces and <see cref="KingAdditionalEvaluation(int, Side, int[])"/>
@@ -1134,19 +1141,23 @@ public class Position
     /// </summary>
     /// <param name="pieceSquareIndex"></param>
     /// <param name="pieceIndex"></param>
-    /// <param name="pieceCount">Incomplete count</param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal (int MiddleGameScore, int EndGameScore) AdditionalPieceEvaluation(int pieceSquareIndex, int pieceIndex, int[] pieceCount)
+    internal (int MiddleGameScore, int EndGameScore) AdditionalPieceEvaluation(int pieceSquareIndex, int pieceIndex)
     {
-        return pieceIndex switch
+        var result = pieceIndex switch
         {
             (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(pieceSquareIndex, pieceIndex),
             (int)Piece.R or (int)Piece.r => RookAdditonalEvaluation(pieceSquareIndex, pieceIndex),
-            (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceCount),
+            (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex),
             (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex),
+            (int)Piece.K or (int)Piece.k => KingAdditionalEvaluation(pieceSquareIndex, pieceIndex),
             _ => (0, 0)
         };
+
+        return pieceIndex < 6
+            ? result
+            : (-result.Item1, -result.Item2);
     }
 
     /// <summary>
@@ -1184,7 +1195,7 @@ public class Position
             endGameBonus += Configuration.EngineSettings.PassedPawnBonus[rank].EG;
         }
 
-        return (middleGameBonus, endGameBonus); ;
+        return (middleGameBonus, endGameBonus);
     }
 
     /// <summary>
@@ -1219,7 +1230,7 @@ public class Position
     /// <param name="pieceCount">Incomplete (on the fly) count, but can be used to detect the pair of bishops</param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private (int MiddleGameScore, int EndGameScore) BishopAdditionalEvaluation(int squareIndex, int pieceIndex, int[] pieceCount)
+    private (int MiddleGameScore, int EndGameScore) BishopAdditionalEvaluation(int squareIndex, int pieceIndex)
     {
         int middleGameBonus = 0, endGameBonus = 0;
 
@@ -1228,7 +1239,7 @@ public class Position
         middleGameBonus += attacksCount * Configuration.EngineSettings.BishopMobilityBonus.MG;
         endGameBonus += attacksCount * Configuration.EngineSettings.BishopMobilityBonus.EG;
 
-        if (pieceCount[pieceIndex] == 2)
+        if (PieceBitBoards[pieceIndex].CountBits() >= 2)
         {
             middleGameBonus += Configuration.EngineSettings.BishopPairBonus.MG;
             endGameBonus += Configuration.EngineSettings.BishopPairBonus.EG;
@@ -1279,6 +1290,40 @@ public class Position
         }
 
         var ownPiecesAroundCount = (Attacks.KingAttacks[squareIndex] & OccupancyBitBoards[(int)kingSide]).CountBits();
+
+        return (middleGameBonus + ownPiecesAroundCount * Configuration.EngineSettings.KingShieldBonus.MG,
+            endGameBonus + ownPiecesAroundCount * Configuration.EngineSettings.KingShieldBonus.EG);
+    }
+
+    /// <summary>
+    /// Open and semiopenfile penalties, shield bonus
+    /// </summary>
+    /// <param name="pieceIndex"></param>
+    /// <param name="squareIndex"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal (int MiddleGameScore, int EndGameScore) KingAdditionalEvaluation(int squareIndex, int pieceIndex)
+    {
+        int middleGameBonus = 0, endGameBonus = 0;
+        var kingSideOffset = pieceIndex - (int)Piece.K;
+
+        if (PieceBitBoards[(int)Piece.r - kingSideOffset].CountBits() + PieceBitBoards[(int)Piece.q - kingSideOffset].CountBits() != default) // areThereOppositeSideRooksOrQueens
+        {
+            if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default)  // isOpenFile
+            {
+                middleGameBonus += Configuration.EngineSettings.OpenFileKingPenalty.MG;
+                endGameBonus += Configuration.EngineSettings.OpenFileKingPenalty.EG;
+            }
+            else if ((PieceBitBoards[(int)Piece.P + kingSideOffset] & Masks.FileMasks[squareIndex]) == default) // isSemiOpenFile
+            {
+                middleGameBonus += Configuration.EngineSettings.SemiOpenFileKingPenalty.MG;
+                endGameBonus += Configuration.EngineSettings.SemiOpenFileKingPenalty.EG;
+            }
+        }
+
+        //  5 -> (0101 & 111) >> 2 = 1
+        // 11 -> (1011 & 111) >> 2 = 0
+        var ownPiecesAroundCount = (Attacks.KingAttacks[squareIndex] & OccupancyBitBoards[(pieceIndex & 0b111) >> 2]).CountBits();
 
         return (middleGameBonus + ownPiecesAroundCount * Configuration.EngineSettings.KingShieldBonus.MG,
             endGameBonus + ownPiecesAroundCount * Configuration.EngineSettings.KingShieldBonus.EG);

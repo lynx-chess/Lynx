@@ -1,4 +1,5 @@
 ﻿using NLog;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Lynx.Model;
@@ -79,7 +80,8 @@ public sealed class Game
         }
 
         _gameInitialPosition = new Position(CurrentPosition);
-        (MiddleGamePSQTEval, EndGamePSQTEval, GamePhase) = CurrentPosition.PSQTEvaluation();
+
+        ValidateStaticEvaluationAndPhase();
     }
 
     [Obsolete("Just intended for testing purposes")]
@@ -105,7 +107,8 @@ public sealed class Game
         }
 
         _gameInitialPosition = new Position(CurrentPosition);
-        (MiddleGamePSQTEval, EndGamePSQTEval, GamePhase) = CurrentPosition.PSQTEvaluation();
+
+        ValidateStaticEvaluationAndPhase();
     }
 
     public Game(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan) : this(fen)
@@ -129,7 +132,29 @@ public sealed class Game
         }
 
         _gameInitialPosition = new Position(CurrentPosition);
-        (MiddleGamePSQTEval, EndGamePSQTEval, GamePhase) = CurrentPosition.PSQTEvaluation();
+
+        ValidateStaticEvaluationAndPhase();
+    }
+
+    /// <summary>
+    /// Ensures that values calculated move a move after the initial position calculation
+    /// are the same as the values calculated from scratch from the current position
+    /// </summary>
+    [Conditional("DEBUG")]
+    private void ValidateStaticEvaluationAndPhase()
+    {
+        (var middleGamePSQTEval, var endGamePSQTEval, var gamePhase) = CurrentPosition.PSQTEvaluation();
+
+        if (middleGamePSQTEval != MiddleGamePSQTEval || endGamePSQTEval != EndGamePSQTEval || gamePhase != GamePhase)
+        {
+            var message = "Mismatch between position evaluation or phase calculated from scratch vs the one move by move\n" +
+                $"From scratch values: MG = {middleGamePSQTEval}, EG = {endGamePSQTEval}, phase = {gamePhase}\n" +
+                $"Move-by-move values: MG = {MiddleGamePSQTEval}, EG = {EndGamePSQTEval}, phase = {GamePhase}";
+
+            _logger.Error(message);
+
+            //Debug.Fail(message);
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -48,7 +48,90 @@ using System.Threading.Channels;
 //RookEvaluation();
 //TranspositionTable();
 //UnmakeMove();
-PieceSquareTables();
+
+var engineChannel = Channel.CreateBounded<string>(new BoundedChannelOptions(100) { SingleReader = true, SingleWriter = false });
+
+const string fen = "rnbqkbnr/pppppppp/8/8/P7/8/1PPPPPPP/RNBQKBNR b KQkq a3 0 1";
+
+var position = new Position(fen);
+
+foreach (var move in MoveGenerator.GenerateAllMoves(position).Skip(2))
+{
+    position = new Position(fen);
+    (var initialMg, var initialEg, var initialPhase) = position.PSQTEvaluation();
+
+    var state = position.MakeMove(move);
+
+    (var mg, var eg, var phase) = position.PSQTEvaluation();
+
+    var engine = new Engine(engineChannel);
+    engine.AdjustPosition($"position fen {fen} moves {move.UCIString()}");
+
+    if (
+        phase != engine.Game.GamePhase
+        || mg != engine.Game.MiddleGamePSQTEval
+        || eg != engine.Game.EndGamePSQTEval)
+    {
+        Console.WriteLine($"{move.UCIString()} is off in {fen}");
+        Console.WriteLine($"Phase {phase}, MG {mg}, EG {eg}");
+        Console.WriteLine($"Phase {engine.Game.GamePhase}, MG {engine.Game.MiddleGamePSQTEval}, EG {engine.Game.EndGamePSQTEval}");
+        Console.WriteLine();
+    }
+
+    position.UnmakeMoveAndUpdatePSQTEval(move, state, engine.Game);
+
+    if (
+    initialPhase != engine.Game.GamePhase
+    || initialMg != engine.Game.MiddleGamePSQTEval
+    || initialEg != engine.Game.EndGamePSQTEval)
+    {
+        Console.WriteLine($"Unmaking {move.UCIString()} is off in {fen}");
+        Console.WriteLine($"Phase {phase}, MG {mg}, EG {eg}");
+        Console.WriteLine($"Phase {engine.Game.GamePhase}, MG {engine.Game.MiddleGamePSQTEval}, EG {engine.Game.EndGamePSQTEval}");
+        Console.WriteLine();
+    }
+    //position.UnmakeMove(move, state);
+}
+
+//foreach (var move in MoveGenerator.GenerateAllMoves(position))
+//{
+//    position = new Position(fen);
+//    (var initialEval, var initialPhase, var initialMg, var initialEg) = position.StaticEvaluationCopy();
+
+//    var engine = new Engine(engineChannel);
+//    engine.AdjustPosition($"position fen {fen}");
+
+//    var state = position.MakeMoveAndUpdatePSQTEval(move, engine.Game);
+
+//    engine.AdjustPosition($"position fen {fen} moves {move.UCIString()}");
+//    (var eval, var phase, var mg, var eg) = position.StaticEvaluationCopy();
+
+
+//    if (
+//        phase != engine.Game.GamePhase
+//        || mg != engine.Game.MiddleGamePSQTEval
+//        || eg != engine.Game.EndGamePSQTEval)
+//    {
+//        Console.WriteLine($"{move} is off in {fen}");
+//        Console.WriteLine($"Phase {phase}, MG {mg}, EG {eg}");
+//        Console.WriteLine($"Phase {engine.Game.GamePhase}, MG {engine.Game.MiddleGamePSQTEval}, EG {engine.Game.EndGamePSQTEval}");
+//        Console.WriteLine();
+//    }
+
+//    position.UnmakeMoveAndUpdatePSQTEval(move, state, engine.Game);
+
+//    if (
+//    initialPhase != engine.Game.GamePhase
+//    || initialMg != engine.Game.MiddleGamePSQTEval
+//    || initialEg != engine.Game.EndGamePSQTEval)
+//    {
+//        Console.WriteLine($"{move} is off in {fen}");
+//        Console.WriteLine($"Phase {phase}, MG {mg}, EG {eg}");
+//        Console.WriteLine($"Phase {engine.Game.GamePhase}, MG {engine.Game.MiddleGamePSQTEval}, EG {engine.Game.EndGamePSQTEval}");
+//        Console.WriteLine();
+//    }
+//    //position.UnmakeMove(move, state);
+//}
 
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
 const string TrickyPosition = Constants.TrickyTestPositionFEN;

@@ -177,7 +177,7 @@ public sealed class EngineSettings
 
     public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(19, -6);
 
-    public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(30, 88);
+    public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(15, 44);
 
     public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(
         new(0),
