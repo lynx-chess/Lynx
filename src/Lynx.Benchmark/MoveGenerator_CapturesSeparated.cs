@@ -1,4 +1,39 @@
 ﻿/*
+ * Pretty much inconclusive, there seems to be no improvement
+ *
+ *  BenchmarkDotNet v0.13.11, Ubuntu 22.04.3 LTS (Jammy Jellyfish)
+ *  AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
+ *  .NET SDK 8.0.100
+ *    [Host]     : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
+ *    DefaultJob : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
+ *
+ *
+ *  | Method                            | data   | Mean            | Error         | StdDev        | Ratio | Gen0      | Allocated  | Alloc Ratio |
+ *  |---------------------------------- |------- |----------------:|--------------:|--------------:|------:|----------:|-----------:|------------:|
+ *  | OldMoveGenerator_GenerateAll      | 1      |        790.8 ns |       7.60 ns |       6.35 ns |  1.00 |    0.0105 |      912 B |        1.00 |
+ *  | OldMoveGenerator_GenerateCaptures | 1      |        603.1 ns |       4.38 ns |       3.88 ns |  0.76 |    0.0029 |      256 B |        0.28 |
+ *  | NewMoveGenerator_GenerateAll      | 1      |        868.9 ns |       2.86 ns |       2.68 ns |  1.10 |    0.0105 |      912 B |        1.00 |
+ *  | NewMoveGenerator_GenerateCaptures | 1      |        614.9 ns |       3.98 ns |       3.53 ns |  0.78 |    0.0029 |      256 B |        0.28 |
+ *  |                                   |        |                 |               |               |       |           |            |             |
+ *  | OldMoveGenerator_GenerateAll      | 10     |      7,715.2 ns |      17.51 ns |      14.62 ns |  1.00 |    0.1068 |     9120 B |        1.00 |
+ *  | OldMoveGenerator_GenerateCaptures | 10     |      5,975.2 ns |      24.84 ns |      22.02 ns |  0.77 |    0.0305 |     2560 B |        0.28 |
+ *  | NewMoveGenerator_GenerateAll      | 10     |      7,526.9 ns |      17.00 ns |      15.07 ns |  0.98 |    0.1068 |     9120 B |        1.00 |
+ *  | NewMoveGenerator_GenerateCaptures | 10     |      6,149.6 ns |      16.54 ns |      13.81 ns |  0.80 |    0.0305 |     2560 B |        0.28 |
+ *  |                                   |        |                 |               |               |       |           |            |             |
+ *  | OldMoveGenerator_GenerateAll      | 1000   |    772,329.2 ns |   4,374.03 ns |   3,877.47 ns |  1.00 |   10.7422 |   912001 B |        1.00 |
+ *  | OldMoveGenerator_GenerateCaptures | 1000   |    584,375.5 ns |     798.98 ns |     623.79 ns |  0.76 |    2.9297 |   256001 B |        0.28 |
+ *  | NewMoveGenerator_GenerateAll      | 1000   |    758,327.8 ns |   4,868.83 ns |   4,316.09 ns |  0.98 |   10.7422 |   912001 B |        1.00 |
+ *  | NewMoveGenerator_GenerateCaptures | 1000   |    590,605.7 ns |   1,740.66 ns |   1,453.53 ns |  0.77 |    2.9297 |   256001 B |        0.28 |
+ *  |                                   |        |                 |               |               |       |           |            |             |
+ *  | OldMoveGenerator_GenerateAll      | 10000  |  7,646,512.6 ns |  43,082.84 ns |  38,191.82 ns |  1.00 |  101.5625 |  9120008 B |        1.00 |
+ *  | OldMoveGenerator_GenerateCaptures | 10000  |  5,807,032.4 ns |  31,200.92 ns |  27,658.80 ns |  0.76 |   23.4375 |  2560008 B |        0.28 |
+ *  | NewMoveGenerator_GenerateAll      | 10000  |  7,624,232.2 ns |  28,030.21 ns |  26,219.48 ns |  1.00 |  101.5625 |  9120008 B |        1.00 |
+ *  | NewMoveGenerator_GenerateCaptures | 10000  |  6,101,343.2 ns |  18,170.07 ns |  16,996.29 ns |  0.80 |   23.4375 |  2560008 B |        0.28 |
+ *  |                                   |        |                 |               |               |       |           |            |             |
+ *  | OldMoveGenerator_GenerateAll      | 100000 | 77,027,912.9 ns | 626,302.21 ns | 555,200.60 ns |  1.00 | 1000.0000 | 91200179 B |        1.00 |
+ *  | OldMoveGenerator_GenerateCaptures | 100000 | 60,132,915.4 ns | 508,151.56 ns | 475,325.28 ns |  0.78 |  250.0000 | 25600134 B |        0.28 |
+ *  | NewMoveGenerator_GenerateAll      | 100000 | 76,396,534.0 ns | 166,527.46 ns | 155,769.89 ns |  0.99 | 1000.0000 | 91200179 B |        1.00 |
+ *  | NewMoveGenerator_GenerateCaptures | 100000 | 58,641,448.1 ns | 460,447.43 ns | 384,494.46 ns |  0.76 |  250.0000 | 25600134 B |        0.28 |
  *
 */
 
