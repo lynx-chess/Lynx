@@ -669,19 +669,23 @@ static void _54_ScoreMove()
 
     var engine = new Engine(Channel.CreateBounded<string>(new BoundedChannelOptions(100) { SingleReader = true, SingleWriter = false }));
     engine.SetGame(new(position));
-    foreach (var move in MoveGenerator.GenerateAllMoves(position, capturesOnly: true))
+#pragma warning disable CS0618 // Type or member is obsolete
+    foreach (var move in MoveGenerator.GenerateAllCaptures(position))
     {
         Console.WriteLine($"{move} {engine.ScoreMove(move, default, default)}");
     }
+#pragma warning restore CS0618 // Type or member is obsolete
 
     position = new Position(TrickyPosition);
     position.Print();
 
     engine.SetGame(new(position));
-    foreach (var move in MoveGenerator.GenerateAllMoves(position, capturesOnly: true))
+#pragma warning disable CS0618 // Type or member is obsolete
+    foreach (var move in MoveGenerator.GenerateAllCaptures(position))
     {
         Console.WriteLine($"{move} {engine.ScoreMove(move, default, default)}");
     }
+#pragma warning restore CS0618 // Type or member is obsolete
 }
 
 static void ZobristTable()
