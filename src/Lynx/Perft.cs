@@ -50,6 +50,7 @@ public static class Perft
     {
         if (depth != 0)
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             foreach (var move in MoveGenerator.GenerateAllMoves(position))
             {
                 var state = position.MakeMove(move);
@@ -60,6 +61,7 @@ public static class Perft
                 }
                 position.UnmakeMove(move, state);
             }
+#pragma warning restore CS0618 // Type or member is obsolete
 
             return nodes;
         }
@@ -71,6 +73,7 @@ public static class Perft
     {
         if (depth != 0)
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             foreach (var move in MoveGenerator.GenerateAllMoves(position))
             {
                 var state = position.MakeMove(move);
@@ -85,6 +88,7 @@ public static class Perft
 
                 position.UnmakeMove(move, state);
             }
+#pragma warning restore CS0618 // Type or member is obsolete
 
             await write(string.Empty);
 
@@ -98,6 +102,7 @@ public static class Perft
     {
         if (depth != 0)
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             foreach (var move in MoveGenerator.GenerateAllMoves(position))
             {
                 var state = position.MakeMove(move);
@@ -112,6 +117,7 @@ public static class Perft
 
                 position.UnmakeMove(move, state);
             }
+#pragma warning restore CS0618 // Type or member is obsolete
 
             write(string.Empty);
 
@@ -134,6 +140,7 @@ public static class Perft
     {
         if (depth != 0)
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             foreach (var move in MoveGenerator.GenerateAllMoves(position))
             {
                 var newPosition = new Position(position, move);
@@ -143,6 +150,7 @@ public static class Perft
                     nodes = ResultsImplUsingPositionConstructor(newPosition, depth - 1, nodes);
                 }
             }
+#pragma warning restore CS0618 // Type or member is obsolete
 
             return nodes;
         }
@@ -154,6 +162,7 @@ public static class Perft
     {
         if (depth != 0)
         {
+#pragma warning disable CS0618 // Type or member is obsolete
             foreach (var move in MoveGenerator.GenerateAllMoves(position))
             {
                 var newPosition = new Position(position, move);
@@ -166,6 +175,7 @@ public static class Perft
                     Console.WriteLine($"{move.UCIString()}\t\t{nodes - accumulatedNodes}");
                 }
             }
+#pragma warning restore CS0618 // Type or member is obsolete
 
             return nodes;
         }

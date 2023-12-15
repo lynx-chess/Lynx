@@ -421,7 +421,7 @@ public sealed partial class Engine
             alpha = staticEvaluation;
         }
 
-        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, Game.MovePool, capturesOnly: true);
+        var pseudoLegalMoves = MoveGenerator.GenerateAllCaptures(position, Game.MovePool);
         if (pseudoLegalMoves.Length == 0)
         {
             // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358
