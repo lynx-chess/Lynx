@@ -5,50 +5,75 @@
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
 using NLog;
-using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 
 namespace Lynx.Benchmark;
 
 public class MoveGenerator_CapturesSeparated : BaseBenchmark
 {
-    private static Move[] _movePool = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+    private static readonly Move[] _movePool = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
 
-    public static IEnumerable<string> Data => new[]
-    {
-            Constants.InitialPositionFEN,
-            Constants.TrickyTestPositionFEN,
-            Constants.TrickyTestPositionReversedFEN,
-            Constants.CmkTestPositionFEN,
-            Constants.KillerTestPositionFEN
-        };
+    public static IEnumerable<int> Data => new[] { 1, 10, 1_000, 10_000, 100_000 };
+
+    private static readonly Position[] _positions =
+    [
+        new(Constants.InitialPositionFEN),
+        new(Constants.TrickyTestPositionFEN),
+        new(Constants.TrickyTestPositionReversedFEN),
+        new(Constants.CmkTestPositionFEN),
+        new(Constants.KillerTestPositionFEN)
+    ];
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]
-    public Move[] OldMoveGenerator_GenerateAll(string fen)
+    public void OldMoveGenerator_GenerateAll(int data)
     {
-        return OldMoveGenerator.GenerateAllMoves(new Position(fen), _movePool);
+        for (int i = 0; i < data; ++i)
+        {
+            foreach (var position in _positions)
+            {
+                OldMoveGenerator.GenerateAllMoves(position, _movePool);
+            }
+        }
     }
 
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
-    public Move[] OldMoveGenerator_GenerateCaptures(string fen)
+    public void OldMoveGenerator_GenerateCaptures(int data)
     {
-        return OldMoveGenerator.GenerateAllMoves(new Position(fen), _movePool, capturesOnly: true);
+        for (int i = 0; i < data; ++i)
+        {
+            foreach (var position in _positions)
+            {
+                OldMoveGenerator.GenerateAllMoves(position, _movePool, capturesOnly: true);
+            }
+        }
     }
 
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
-    public Move[] NewMoveGenerator_GenerateAll(string fen)
+    public void NewMoveGenerator_GenerateAll(int data)
     {
-        return NewMoveGenerator.GenerateAllMoves(new Position(fen), _movePool);
+        for (int i = 0; i < data; ++i)
+        {
+            foreach (var position in _positions)
+            {
+                NewMoveGenerator.GenerateAllMoves(position, _movePool);
+            }
+        }
     }
 
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
-    public Move[] NewMoveGenerator_GenerateCaptures(string fen)
+    public void NewMoveGenerator_GenerateCaptures(int data)
     {
-        return NewMoveGenerator.GenerateAllCaptures(new Position(fen), _movePool);
+        for (int i = 0; i < data; ++i)
+        {
+            foreach (var position in _positions)
+            {
+                NewMoveGenerator.GenerateAllCaptures(position, _movePool);
+            }
+        }
     }
 }
 
@@ -340,7 +365,6 @@ file static class NewMoveGenerator
     /// <param name="position"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    [Obsolete("Use override that accepts Move[] when possible")]
     public static Move[] GenerateAllMoves(Position position) =>
         GenerateAllMoves(position, new Move[Constants.MaxNumberOfPossibleMovesInAPosition]);
 
@@ -381,7 +405,6 @@ file static class NewMoveGenerator
     /// <param name="position"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    [Obsolete("Use override that accepts Move[] when possible")]
     public static Move[] GenerateAllCaptures(Position position) =>
         GenerateAllCaptures(position, new Move[Constants.MaxNumberOfPossibleMovesInAPosition]);
 
