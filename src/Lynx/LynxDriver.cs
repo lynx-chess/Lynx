@@ -96,7 +96,7 @@ public sealed class LynxDriver
                                 await HandleDivide(rawCommand);
                                 break;
                             case "bench":
-                                await HandleBench();
+                                await HandleBench(rawCommand);
                                 HandleQuit();
                                 break;
                             case "printsettings":
@@ -324,9 +324,15 @@ public sealed class LynxDriver
         }
     }
 
-    private async ValueTask HandleBench()
+    private async ValueTask HandleBench(string rawCommand)
     {
-        var results = await OpenBench.Bench(_engineWriter);
+        var items = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+        if (items.Length < 2 || !int.TryParse(items[1], out int depth))
+        {
+            depth = Configuration.EngineSettings.BenchDepth;
+        }
+        var results = await OpenBench.Bench(depth, _engineWriter);
         await OpenBench.PrintBenchResults(results, str => _engineWriter.Writer.WriteAsync(str));
     }
 

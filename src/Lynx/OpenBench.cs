@@ -75,9 +75,9 @@ public static class OpenBench
     /// Positions taken from Akimbo
     /// https://github.com/JacquesRW/akimbo/blob/main/resources/fens.txt
     /// </summary>
-    public static async Task<(int TotalNodes, long Nps)> Bench(Channel<string> _engineWriter)
+    public static async Task<(int TotalNodes, long Nps)> Bench(int depth, Channel<string> engineWriter)
     {
-        var engine = new Engine(_engineWriter);
+        var engine = new Engine(engineWriter);
         var stopwatch = new Stopwatch();
 
         int totalNodes = 0;
@@ -85,17 +85,17 @@ public static class OpenBench
 
         foreach (var fen in _benchmarkFens)
         {
-            await _engineWriter.Writer.WriteAsync($"Benchmarking {fen} at depth {Configuration.EngineSettings.BenchDepth}");
+            await engineWriter.Writer.WriteAsync($"Benchmarking {fen} at depth {depth}");
 
             engine.AdjustPosition($"position fen {fen}");
             stopwatch.Restart();
 
-            var result = await engine.BestMove(new($"go depth {Configuration.EngineSettings.BenchDepth}"));
+            var result = await engine.BestMove(new($"go depth {depth}"));
             totalTime += stopwatch.ElapsedMilliseconds;
             totalNodes += result.Nodes;
         }
 
-        await _engineWriter.Writer.WriteAsync($"Total time: {totalTime}");
+        await engineWriter.Writer.WriteAsync($"Total time: {totalTime}");
 
         return (totalNodes, Utils.CalculateNps(totalNodes, totalTime));
     }
