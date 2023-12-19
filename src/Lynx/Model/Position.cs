@@ -863,9 +863,12 @@ public class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal (int MiddleGameScore, int EndGameScore) KingAdditionalEvaluation(int squareIndex, Side kingSide, int[] pieceCount)
     {
-        int middleGameBonus = 0, endGameBonus = 0;
-        var kingSideOffset = Utils.PieceOffset(kingSide);
+        var attacksCount = Attacks.KingAttacks[squareIndex].CountBits();
 
+        var middleGameBonus = attacksCount * Configuration.EngineSettings.KingMobilityBonus.MG;
+        var endGameBonus = attacksCount * Configuration.EngineSettings.KingMobilityBonus.EG;
+
+        var kingSideOffset = Utils.PieceOffset(kingSide);
         if (pieceCount[(int)Piece.r - kingSideOffset] + pieceCount[(int)Piece.q - kingSideOffset] != default) // areThereOppositeSideRooksOrQueens
         {
             if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default)  // isOpenFile
@@ -881,9 +884,10 @@ public class Position
         }
 
         var ownPiecesAroundCount = (Attacks.KingAttacks[squareIndex] & OccupancyBitBoards[(int)kingSide]).CountBits();
+        middleGameBonus += ownPiecesAroundCount * Configuration.EngineSettings.KingShieldBonus.MG;
+        endGameBonus += ownPiecesAroundCount * Configuration.EngineSettings.KingShieldBonus.EG;
 
-        return (middleGameBonus + ownPiecesAroundCount * Configuration.EngineSettings.KingShieldBonus.MG,
-            endGameBonus + ownPiecesAroundCount * Configuration.EngineSettings.KingShieldBonus.EG);
+        return (middleGameBonus, endGameBonus);
     }
 
     /// <summary>
