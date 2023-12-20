@@ -178,7 +178,7 @@ public sealed class EngineSettings
 
     public TaperedEvaluationTerm QueenMobilityBonus { get; set; } = new(4, 8);
 
-    public TaperedEvaluationTerm KingMobilityBonus { get; set; } = new(-5, 5);
+    public TaperedEvaluationTerm KingMobilityBonus { get; set; } = new(-29, 26);
 
     public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-38, 25);
 
