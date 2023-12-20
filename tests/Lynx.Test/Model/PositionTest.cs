@@ -459,7 +459,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(Configuration.EngineSettings.SemiOpenFileRookBonus.MG, evaluation);
+        Assert.AreEqual(Configuration.EngineSettings.SemiOpenFileRookBonus.MG + 6 * Configuration.EngineSettings.RookMobilityBonus.MG, evaluation);
     }
 
     /// <summary>
@@ -490,7 +490,7 @@ public class PositionTest
         {
             evaluation = -evaluation;
         }
-        Assert.AreEqual(Configuration.EngineSettings.OpenFileRookBonus.MG, evaluation);
+        Assert.AreEqual(Configuration.EngineSettings.OpenFileRookBonus.MG + 7 * Configuration.EngineSettings.RookMobilityBonus.MG, evaluation);
     }
 
     /// <summary>
@@ -554,7 +554,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(-2 * Configuration.EngineSettings.OpenFileRookBonus.MG, evaluation);
+        Assert.AreEqual(-2 * Configuration.EngineSettings.OpenFileRookBonus.MG - 5 * Configuration.EngineSettings.RookMobilityBonus.MG, evaluation);
     }
 
     /// <summary>
