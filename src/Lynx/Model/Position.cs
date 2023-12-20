@@ -798,19 +798,25 @@ public class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private (int MiddleGameScore, int EndGameScore) RookAdditonalEvaluation(int squareIndex, int pieceIndex)
     {
+        var attacksCount = Attacks.RookAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
+
+        var middleGameBonus = attacksCount * Configuration.EngineSettings.RookMobilityBonus.MG;
+        var endGameBonus = attacksCount * Configuration.EngineSettings.RookMobilityBonus.EG;
+
         const int pawnToRookOffset = (int)Piece.R - (int)Piece.P;
 
         if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default)  // isOpenFile
         {
-            return (Configuration.EngineSettings.OpenFileRookBonus.MG, Configuration.EngineSettings.OpenFileRookBonus.EG);
+            middleGameBonus += Configuration.EngineSettings.OpenFileRookBonus.MG;
+            endGameBonus += Configuration.EngineSettings.OpenFileRookBonus.EG;
         }
-
-        if ((PieceBitBoards[pieceIndex - pawnToRookOffset] & Masks.FileMasks[squareIndex]) == default)  // isSemiOpenFile
+        else if ((PieceBitBoards[pieceIndex - pawnToRookOffset] & Masks.FileMasks[squareIndex]) == default)  // isSemiOpenFile
         {
-            return (Configuration.EngineSettings.SemiOpenFileRookBonus.MG, Configuration.EngineSettings.SemiOpenFileRookBonus.EG);
+            middleGameBonus += Configuration.EngineSettings.SemiOpenFileRookBonus.MG;
+            endGameBonus += Configuration.EngineSettings.SemiOpenFileRookBonus.EG;
         }
 
-        return (0, 0);
+        return (middleGameBonus, endGameBonus);
     }
 
     /// <summary>
@@ -823,12 +829,10 @@ public class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private (int MiddleGameScore, int EndGameScore) BishopAdditionalEvaluation(int squareIndex, int pieceIndex, int[] pieceCount)
     {
-        int middleGameBonus = 0, endGameBonus = 0;
-
         var attacksCount = Attacks.BishopAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
 
-        middleGameBonus += attacksCount * Configuration.EngineSettings.BishopMobilityBonus.MG;
-        endGameBonus += attacksCount * Configuration.EngineSettings.BishopMobilityBonus.EG;
+        var middleGameBonus = attacksCount * Configuration.EngineSettings.BishopMobilityBonus.MG;
+        var endGameBonus = attacksCount * Configuration.EngineSettings.BishopMobilityBonus.EG;
 
         if (pieceCount[pieceIndex] == 2)
         {
