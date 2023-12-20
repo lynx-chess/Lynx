@@ -799,7 +799,6 @@ public class Position
     private (int MiddleGameScore, int EndGameScore) RookAdditonalEvaluation(int squareIndex, int pieceIndex)
     {
         var attacksCount = Attacks.RookAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
-
         var middleGameBonus = attacksCount * Configuration.EngineSettings.RookMobilityBonus.MG;
         var endGameBonus = attacksCount * Configuration.EngineSettings.RookMobilityBonus.EG;
 
@@ -830,7 +829,6 @@ public class Position
     private (int MiddleGameScore, int EndGameScore) BishopAdditionalEvaluation(int squareIndex, int pieceIndex, int[] pieceCount)
     {
         var attacksCount = Attacks.BishopAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
-
         var middleGameBonus = attacksCount * Configuration.EngineSettings.BishopMobilityBonus.MG;
         var endGameBonus = attacksCount * Configuration.EngineSettings.BishopMobilityBonus.EG;
 
@@ -868,7 +866,6 @@ public class Position
     internal (int MiddleGameScore, int EndGameScore) KingAdditionalEvaluation(int squareIndex, Side kingSide, int[] pieceCount)
     {
         var attacksCount = Attacks.KingAttacks[squareIndex].CountBits();
-
         var middleGameBonus = attacksCount * Configuration.EngineSettings.KingMobilityBonus.MG;
         var endGameBonus = attacksCount * Configuration.EngineSettings.KingMobilityBonus.EG;
 
