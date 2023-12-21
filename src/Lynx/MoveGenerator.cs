@@ -174,6 +174,7 @@ public static class MoveGenerator
             if (position.Side == Side.White)
             {
                 bool ise1Attacked = Attacks.IsSquareAttackedBySide(Constants.WhiteKingSourceSquare, position, Side.Black);
+
                 if (((position.Castle & (int)CastlingRights.WK) != default)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.f1)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.g1)
@@ -204,6 +205,7 @@ public static class MoveGenerator
             else
             {
                 bool ise8Attacked = Attacks.IsSquareAttackedBySide(Constants.BlackKingSourceSquare, position, Side.White);
+
                 if (((position.Castle & (int)CastlingRights.BK) != default)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.f8)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.g8)
