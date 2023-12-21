@@ -400,9 +400,12 @@ static void _23_Castling_Moves()
     var position = new Position("rn2k2r/pppppppp/8/8/8/8/PPPPPPPP/RN2K2R w KQkq - 0 1");
     position.Print();
 
-    var moves = MoveGenerator.GenerateCastlingMovesForReference(position, Utils.PieceOffset(position.Side)).ToList();
+    int index = 0;
+    var moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
 
-    foreach (var move in moves)
+    MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
+
+    foreach (var move in moves[..index])
     {
         Console.WriteLine(move);
     }
@@ -689,7 +692,7 @@ static void ZobristTable()
     var pos = new Position(KillerPosition);
     var zobristTable = InitializeZobristTable();
     var hash = CalculatePositionHash(zobristTable, pos);
-    var updatedHash = UpdatePositionHash(zobristTable, hash, MoveGenerator.GenerateAllMoves(pos).First());
+    var updatedHash = UpdatePositionHash(zobristTable, hash, MoveGenerator.GenerateAllMoves(pos)[0]);
 
     Console.WriteLine(updatedHash);
 }
@@ -1097,7 +1100,6 @@ static void UnmakeMove()
 
             Console.WriteLine($"Position\t{newPosition.FEN()}, Zobrist key {newPosition.UniqueIdentifier}");
             Console.WriteLine($"Position\t{position.FEN()}, Zobrist key {position.UniqueIdentifier}");
-
 
             Console.WriteLine($"Unmaking {move.ToEPDString()} in\t{position.FEN()}");
 
