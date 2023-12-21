@@ -1,5 +1,6 @@
 ﻿using Lynx.Model;
 using NLog;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Lynx;
@@ -10,31 +11,37 @@ public static class MoveGenerator
 
     private const int TRUE = 1;
 
+    public const int WhiteShortCastle = 8413116;
+    public const int WhiteLongCastle = 16801468;
+    public const int BlackShortCastle = 8434052;
+    public const int BlackLongCastle = 16822404;
+
     /// <summary>
     /// Indexed by <see cref="Piece"/>.
     /// Checks are not considered
     /// </summary>
-    private static readonly Func<int, BitBoard, BitBoard>[] _pieceAttacks = new Func<int, BitBoard, BitBoard>[]
-    {
-            (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White, origin],
-            (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
-            Attacks.BishopAttacks,
-            Attacks.RookAttacks,
-            Attacks.QueenAttacks,
-            (int origin, BitBoard _) => Attacks.KingAttacks[origin],
+    private static readonly Func<int, BitBoard, BitBoard>[] _pieceAttacks =
+    [
+        (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White, origin],
+        (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
+        Attacks.BishopAttacks,
+        Attacks.RookAttacks,
+        Attacks.QueenAttacks,
+        (int origin, BitBoard _) => Attacks.KingAttacks[origin],
 
-            (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.Black, origin],
-            (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
-            Attacks.BishopAttacks,
-            Attacks.RookAttacks,
-            Attacks.QueenAttacks,
-            (int origin, BitBoard _) => Attacks.KingAttacks[origin],
-    };
+        (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.Black, origin],
+        (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
+        Attacks.BishopAttacks,
+        Attacks.RookAttacks,
+        Attacks.QueenAttacks,
+        (int origin, BitBoard _) => Attacks.KingAttacks[origin],
+    ];
 
     /// <summary>
     /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
     /// </summary>
     /// <param name="position"></param>
+    /// <param name="movePool"></param>
     /// <param name="capturesOnly">Filters out all moves but captures</param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -43,7 +50,7 @@ public static class MoveGenerator
 #if DEBUG
         if (position.Side == Side.Both)
         {
-            return Array.Empty<Move>();
+            return [];
         }
 #endif
 
@@ -53,7 +60,7 @@ public static class MoveGenerator
         var offset = Utils.PieceOffset(position.Side);
 
         GeneratePawnMoves(ref localIndex, movePool, position, offset, capturesOnly);
-        GenerateCastlingMoves(ref localIndex, movePool, position, offset);
+        GenerateCastlingMoves(ref localIndex, movePool, position);
         GeneratePieceMoves(ref localIndex, movePool, (int)Piece.K + offset, position, capturesOnly);
         GeneratePieceMoves(ref localIndex, movePool, (int)Piece.N + offset, position, capturesOnly);
         GeneratePieceMoves(ref localIndex, movePool, (int)Piece.B + offset, position, capturesOnly);
@@ -155,31 +162,29 @@ public static class MoveGenerator
     /// Obvious moves that put the king in check have been discarded, but the rest still need to be discarded
     /// see FEN position "8/8/8/2bbb3/2bKb3/2bbb3/8/8 w - - 0 1", where 4 legal moves (corners) are found
     /// </summary>
+    /// <param name="movePool"></param>
     /// <param name="position"></param>
-    /// <param name="offset"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void GenerateCastlingMoves(ref int localIndex, Move[] movePool, Position position, int offset)
+    internal static void GenerateCastlingMoves(ref int localIndex, Move[] movePool, Position position)
     {
-        var piece = (int)Piece.K + offset;
-        var oppositeSide = (Side)Utils.OppositeSide(position.Side);
-
-        int sourceSquare = position.PieceBitBoards[piece].GetLS1BIndex(); // There's for sure only one
-
-        // Castles
         if (position.Castle != default)
         {
             if (position.Side == Side.White)
             {
-                bool ise1Attacked = Attacks.IsSquareAttackedBySide((int)BoardSquare.e1, position, oppositeSide);
+                bool ise1Attacked = Attacks.IsSquareAttackedBySide(Constants.WhiteKingSourceSquare, position, Side.Black);
+
                 if (((position.Castle & (int)CastlingRights.WK) != default)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.f1)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.g1)
                     && !ise1Attacked
-                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.f1, position, oppositeSide)
-                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.g1, position, oppositeSide))
+                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.f1, position, Side.Black)
+                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.g1, position, Side.Black))
                 {
-                    movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, Constants.WhiteShortCastleKingSquare, piece, isShortCastle: TRUE);
+                    movePool[localIndex++] = WhiteShortCastle;
+
+                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.Encode(Constants.WhiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K + Utils.PieceOffset(position.Side), isShortCastle: TRUE),
+                        "Wrong hardcoded white short castle move");
                 }
 
                 if (((position.Castle & (int)CastlingRights.WQ) != default)
@@ -187,23 +192,30 @@ public static class MoveGenerator
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c1)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b1)
                     && !ise1Attacked
-                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.d1, position, oppositeSide)
-                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.c1, position, oppositeSide))
+                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.d1, position, Side.Black)
+                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.c1, position, Side.Black))
                 {
-                    movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, Constants.WhiteLongCastleKingSquare, piece, isLongCastle: TRUE);
+                    movePool[localIndex++] = WhiteLongCastle;
+
+                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.Encode(Constants.WhiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K + Utils.PieceOffset(position.Side), isLongCastle: TRUE),
+                        "Wrong hardcoded white long castle move");
                 }
             }
             else
             {
-                bool ise8Attacked = Attacks.IsSquareAttackedBySide((int)BoardSquare.e8, position, oppositeSide);
+                bool ise8Attacked = Attacks.IsSquareAttackedBySide(Constants.BlackKingSourceSquare, position, Side.White);
+
                 if (((position.Castle & (int)CastlingRights.BK) != default)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.f8)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.g8)
                     && !ise8Attacked
-                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.f8, position, oppositeSide)
-                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.g8, position, oppositeSide))
+                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.f8, position, Side.White)
+                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.g8, position, Side.White))
                 {
-                    movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, Constants.BlackShortCastleKingSquare, piece, isShortCastle: TRUE);
+                    movePool[localIndex++] = BlackShortCastle;
+
+                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.Encode(Constants.BlackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.K + Utils.PieceOffset(position.Side), isShortCastle: TRUE),
+                        "Wrong hardcoded black short castle move");
                 }
 
                 if (((position.Castle & (int)CastlingRights.BQ) != default)
@@ -211,10 +223,13 @@ public static class MoveGenerator
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c8)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b8)
                     && !ise8Attacked
-                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.d8, position, oppositeSide)
-                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.c8, position, oppositeSide))
+                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.d8, position, Side.White)
+                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.c8, position, Side.White))
                 {
-                    movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, Constants.BlackLongCastleKingSquare, piece, isLongCastle: TRUE);
+                    movePool[localIndex++] = BlackLongCastle;
+
+                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.Encode(Constants.BlackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.K + Utils.PieceOffset(position.Side), isLongCastle: TRUE),
+                        "Wrong hardcoded black long castle move");
                 }
             }
         }
@@ -223,6 +238,7 @@ public static class MoveGenerator
     /// <summary>
     /// Generate Knight, Bishop, Rook and Queen moves
     /// </summary>
+    /// <param name="movePool"></param>
     /// <param name="piece"><see cref="Piece"/></param>
     /// <param name="position"></param>
     /// <param name="capturesOnly"></param>
@@ -281,7 +297,7 @@ public static class MoveGenerator
             || IsAnyPieceMoveValid((int)Piece.B + offset, position)
             || IsAnyPieceMoveValid((int)Piece.N + offset, position)
             || IsAnyPieceMoveValid((int)Piece.R + offset, position)
-            || IsAnyCastlingMoveValid(position, offset);
+            || IsAnyCastlingMoveValid(position);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -384,28 +400,23 @@ public static class MoveGenerator
     /// see FEN position "8/8/8/2bbb3/2bKb3/2bbb3/8/8 w - - 0 1", where 4 legal moves (corners) are found
     /// </summary>
     /// <param name="position"></param>
-    /// <param name="offset"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsAnyCastlingMoveValid(Position position, int offset)
+    private static bool IsAnyCastlingMoveValid(Position position)
     {
         if (position.Castle != default)
         {
-            var piece = (int)Piece.K + offset;
-            var oppositeSide = (Side)Utils.OppositeSide(position.Side);
-
-            int sourceSquare = position.PieceBitBoards[piece].GetLS1BIndex(); // There's for sure only one
-
             if (position.Side == Side.White)
             {
-                bool ise1Attacked = Attacks.IsSquareAttackedBySide((int)BoardSquare.e1, position, oppositeSide);
+                bool ise1Attacked = Attacks.IsSquareAttackedBySide(Constants.WhiteKingSourceSquare, position, Side.Black);
+
                 if (((position.Castle & (int)CastlingRights.WK) != default)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.f1)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.g1)
                     && !ise1Attacked
-                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.f1, position, oppositeSide)
-                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.g1, position, oppositeSide)
-                    && IsValidMove(position, MoveExtensions.Encode(sourceSquare, Constants.WhiteShortCastleKingSquare, piece, isShortCastle: TRUE)))
+                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.f1, position, Side.Black)
+                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.g1, position, Side.Black)
+                    && IsValidMove(position, WhiteShortCastle))
                 {
                     return true;
                 }
@@ -415,23 +426,24 @@ public static class MoveGenerator
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c1)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b1)
                     && !ise1Attacked
-                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.d1, position, oppositeSide)
-                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.c1, position, oppositeSide)
-                    && IsValidMove(position, MoveExtensions.Encode(sourceSquare, Constants.WhiteLongCastleKingSquare, piece, isLongCastle: TRUE)))
+                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.d1, position, Side.Black)
+                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.c1, position, Side.Black)
+                    && IsValidMove(position, WhiteLongCastle))
                 {
                     return true;
                 }
             }
             else
             {
-                bool ise8Attacked = Attacks.IsSquareAttackedBySide((int)BoardSquare.e8, position, oppositeSide);
+                bool ise8Attacked = Attacks.IsSquareAttackedBySide(Constants.BlackKingSourceSquare, position, Side.White);
+
                 if (((position.Castle & (int)CastlingRights.BK) != default)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.f8)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.g8)
                     && !ise8Attacked
-                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.f8, position, oppositeSide)
-                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.g8, position, oppositeSide)
-                    && IsValidMove(position, MoveExtensions.Encode(sourceSquare, Constants.BlackShortCastleKingSquare, piece, isShortCastle: TRUE)))
+                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.f8, position, Side.White)
+                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.g8, position, Side.White)
+                    && IsValidMove(position, BlackShortCastle))
                 {
                     return true;
                 }
@@ -441,9 +453,9 @@ public static class MoveGenerator
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c8)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b8)
                     && !ise8Attacked
-                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.d8, position, oppositeSide)
-                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.c8, position, oppositeSide)
-                    && IsValidMove(position, MoveExtensions.Encode(sourceSquare, Constants.BlackLongCastleKingSquare, piece, isLongCastle: TRUE)))
+                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.d8, position, Side.White)
+                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.c8, position, Side.White)
+                    && IsValidMove(position, BlackLongCastle))
                 {
                     return true;
                 }
@@ -595,74 +607,6 @@ public static class MoveGenerator
                 else
                 {
                     yield return MoveExtensions.Encode(sourceSquare, targetSquare, piece, isCapture: TRUE);
-                }
-            }
-        }
-    }
-
-    /// <summary>
-    /// Same as <see cref="GenerateCastlingMoves(Position, int)"/> but returning them
-    /// </summary>
-    /// <param name="position"></param>
-    /// <param name="offset"></param>
-    /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static IEnumerable<Move> GenerateCastlingMovesForReference(Position position, int offset)
-    {
-        var piece = (int)Piece.K + offset;
-        var oppositeSide = (Side)Utils.OppositeSide(position.Side);
-
-        int sourceSquare = position.PieceBitBoards[piece].GetLS1BIndex(); // There's for sure only one
-
-        // Castles
-        if (position.Castle != default)
-        {
-            if (position.Side == Side.White)
-            {
-                bool ise1Attacked = Attacks.IsSquareAttackedBySide((int)BoardSquare.e1, position, oppositeSide);
-                if (((position.Castle & (int)CastlingRights.WK) != default)
-                    && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.f1)
-                    && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.g1)
-                    && !ise1Attacked
-                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.f1, position, oppositeSide)
-                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.g1, position, oppositeSide))
-                {
-                    yield return MoveExtensions.Encode(sourceSquare, Constants.WhiteShortCastleKingSquare, piece, isShortCastle: TRUE);
-                }
-
-                if (((position.Castle & (int)CastlingRights.WQ) != default)
-                    && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.d1)
-                    && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c1)
-                    && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b1)
-                    && !ise1Attacked
-                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.d1, position, oppositeSide)
-                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.c1, position, oppositeSide))
-                {
-                    yield return MoveExtensions.Encode(sourceSquare, Constants.WhiteLongCastleKingSquare, piece, isLongCastle: TRUE);
-                }
-            }
-            else
-            {
-                bool ise8Attacked = Attacks.IsSquareAttackedBySide((int)BoardSquare.e8, position, oppositeSide);
-                if (((position.Castle & (int)CastlingRights.BK) != default)
-                    && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.f8)
-                    && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.g8)
-                    && !ise8Attacked
-                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.f8, position, oppositeSide)
-                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.g8, position, oppositeSide))
-                {
-                    yield return MoveExtensions.Encode(sourceSquare, Constants.BlackShortCastleKingSquare, piece, isShortCastle: TRUE);
-                }
-
-                if (((position.Castle & (int)CastlingRights.BQ) != default)
-                    && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.d8)
-                    && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c8)
-                    && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b8)
-                    && !ise8Attacked
-                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.d8, position, oppositeSide)
-                    && !Attacks.IsSquareAttackedBySide((int)BoardSquare.c8, position, oppositeSide))
-                {
-                    yield return MoveExtensions.Encode(sourceSquare, Constants.BlackLongCastleKingSquare, piece, isLongCastle: TRUE);
                 }
             }
         }
