@@ -1,5 +1,4 @@
-﻿using Lynx.Internal;
-using Lynx.Model;
+﻿using Lynx.Model;
 using NLog;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -184,7 +183,7 @@ public static class MoveGenerator
                 {
                     movePool[localIndex++] = WhiteShortCastle;
 
-                    Debug.Assert(movePool[localIndex] == MoveExtensions.Encode(Constants.WhiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K + Utils.PieceOffset(position.Side), isShortCastle: TRUE),
+                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.Encode(Constants.WhiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K + Utils.PieceOffset(position.Side), isShortCastle: TRUE),
                         "Wrong hardcoded white short castle move");
                 }
 
@@ -198,7 +197,7 @@ public static class MoveGenerator
                 {
                     movePool[localIndex++] = WhiteLongCastle;
 
-                    Debug.Assert(movePool[localIndex] == MoveExtensions.Encode(Constants.WhiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K + Utils.PieceOffset(position.Side), isLongCastle: TRUE),
+                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.Encode(Constants.WhiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K + Utils.PieceOffset(position.Side), isLongCastle: TRUE),
                         "Wrong hardcoded white long castle move");
                 }
             }
@@ -215,7 +214,7 @@ public static class MoveGenerator
                 {
                     movePool[localIndex++] = BlackShortCastle;
 
-                    Debug.Assert(movePool[localIndex] == MoveExtensions.Encode(Constants.BlackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.K + Utils.PieceOffset(position.Side), isShortCastle: TRUE),
+                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.Encode(Constants.BlackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.K + Utils.PieceOffset(position.Side), isShortCastle: TRUE),
                         "Wrong hardcoded black short castle move");
                 }
 
@@ -229,7 +228,7 @@ public static class MoveGenerator
                 {
                     movePool[localIndex++] = BlackLongCastle;
 
-                    Debug.Assert(movePool[localIndex] == MoveExtensions.Encode(Constants.BlackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.K + Utils.PieceOffset(position.Side), isLongCastle: TRUE),
+                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.Encode(Constants.BlackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.K + Utils.PieceOffset(position.Side), isLongCastle: TRUE),
                         "Wrong hardcoded black long castle move");
                 }
             }
