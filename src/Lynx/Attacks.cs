@@ -59,6 +59,22 @@ public static class Attacks
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static BitBoard WhitePawnAttacks(this Position position)
+    {
+        var whitePawns = position.PieceBitBoards[(int)Piece.P];
+
+        return whitePawns.SE() | whitePawns.SW();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static BitBoard BlackPawnAttacks(this Position position)
+    {
+        var whitePawns = position.PieceBitBoards[(int)Piece.p];
+
+        return whitePawns.NE() | whitePawns.NW();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static BitBoard BishopAttacks(int squareIndex, BitBoard occupancy)
     {
         return Bmi2.X64.IsSupported

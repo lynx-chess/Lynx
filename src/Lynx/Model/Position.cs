@@ -622,7 +622,7 @@ public class Position
 
                 ++pieceCount[pieceIndex];
 
-                (int mgAdditionalScore, int egAdditionalScore) = AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, pieceCount);
+                (int mgAdditionalScore, int egAdditionalScore) = AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, pieceCount, opponentPawnAttacks: this.BlackPawnAttacks());
 
                 middleGameScore += mgAdditionalScore;
                 endGameScore += egAdditionalScore;
@@ -645,7 +645,7 @@ public class Position
 
                 ++pieceCount[pieceIndex];
 
-                (int mgAdditionalScore, int egAdditionalScore) = AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, pieceCount);
+                (int mgAdditionalScore, int egAdditionalScore) = AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, pieceCount, opponentPawnAttacks: this.WhitePawnAttacks());
 
                 middleGameScore -= mgAdditionalScore;
                 endGameScore -= egAdditionalScore;
@@ -739,20 +739,20 @@ public class Position
     /// <param name="pieceCount">Incomplete count</param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal (int MiddleGameScore, int EndGameScore) AdditionalPieceEvaluation(int pieceSquareIndex, int pieceIndex, int[] pieceCount)
+    internal (int MiddleGameScore, int EndGameScore) AdditionalPieceEvaluation(int pieceSquareIndex, int pieceIndex, int[] pieceCount, BitBoard opponentPawnAttacks)
     {
         return pieceIndex switch
         {
             (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(pieceSquareIndex, pieceIndex),
 
-            (int)Piece.R => RookAdditonalEvaluation(pieceSquareIndex, pieceIndex, side: (int)Side.White),
-            (int)Piece.r => RookAdditonalEvaluation(pieceSquareIndex, pieceIndex, side: (int)Side.Black),
+            (int)Piece.R => RookAdditonalEvaluation(pieceSquareIndex, pieceIndex, side: (int)Side.White, opponentPawnAttacks),
+            (int)Piece.r => RookAdditonalEvaluation(pieceSquareIndex, pieceIndex, side: (int)Side.Black, opponentPawnAttacks),
 
-            (int)Piece.B => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceCount, side: (int)Side.White),
-            (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceCount, side: (int)Side.Black),
+            (int)Piece.B => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceCount, side: (int)Side.White, opponentPawnAttacks),
+            (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceCount, side: (int)Side.Black, opponentPawnAttacks),
 
-            (int)Piece.Q => QueenAdditionalEvaluation(pieceSquareIndex, side: (int)Side.White),
-            (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex, side: (int)Side.Black),
+            (int)Piece.Q => QueenAdditionalEvaluation(pieceSquareIndex, side: (int)Side.White, opponentPawnAttacks),
+            (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex, side: (int)Side.Black, opponentPawnAttacks),
 
             _ => (0, 0)
         };
@@ -803,9 +803,9 @@ public class Position
     /// <param name="pieceIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private (int MiddleGameScore, int EndGameScore) RookAdditonalEvaluation(int squareIndex, int pieceIndex, int side)
+    private (int MiddleGameScore, int EndGameScore) RookAdditonalEvaluation(int squareIndex, int pieceIndex, int side, BitBoard opponentPawnAttacks)
     {
-        var attacksCount = (Attacks.RookAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]) & ~OccupancyBitBoards[side]).CountBits();
+        var attacksCount = (Attacks.RookAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]) & ~OccupancyBitBoards[side] & ~opponentPawnAttacks).CountBits();
 
         var middleGameBonus = attacksCount * Configuration.EngineSettings.RookMobilityBonus.MG;
         var endGameBonus = attacksCount * Configuration.EngineSettings.RookMobilityBonus.EG;
@@ -834,9 +834,9 @@ public class Position
     /// <param name="pieceCount">Incomplete (on the fly) count, but can be used to detect the pair of bishops</param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private (int MiddleGameScore, int EndGameScore) BishopAdditionalEvaluation(int squareIndex, int pieceIndex, int[] pieceCount, int side)
+    private (int MiddleGameScore, int EndGameScore) BishopAdditionalEvaluation(int squareIndex, int pieceIndex, int[] pieceCount, int side, BitBoard opponentPawnAttacks)
     {
-        var attacksCount = (Attacks.BishopAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]) & ~OccupancyBitBoards[side]).CountBits();
+        var attacksCount = (Attacks.BishopAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]) & ~OccupancyBitBoards[side] & ~opponentPawnAttacks).CountBits();
 
         var middleGameBonus = attacksCount * Configuration.EngineSettings.BishopMobilityBonus.MG;
         var endGameBonus = attacksCount * Configuration.EngineSettings.BishopMobilityBonus.EG;
@@ -856,9 +856,9 @@ public class Position
     /// <param name="squareIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private (int MiddleGameScore, int EndGameScore) QueenAdditionalEvaluation(int squareIndex, int side)
+    private (int MiddleGameScore, int EndGameScore) QueenAdditionalEvaluation(int squareIndex, int side, BitBoard opponentPawnAttacks)
     {
-        var attacksCount = (Attacks.QueenAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]) & ~OccupancyBitBoards[side]).CountBits();
+        var attacksCount = (Attacks.QueenAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]) & ~OccupancyBitBoards[side] & ~opponentPawnAttacks).CountBits();
 
         return (attacksCount * Configuration.EngineSettings.QueenMobilityBonus.MG,
             attacksCount * Configuration.EngineSettings.QueenMobilityBonus.EG);

@@ -48,7 +48,9 @@ using System.Threading.Channels;
 //RookEvaluation();
 //TranspositionTable();
 //UnmakeMove();
-PieceSquareTables();
+//PieceSquareTables();
+//BitBoardDirections();
+PawnAttacks();
 
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
 const string TrickyPosition = Constants.TrickyTestPositionFEN;
@@ -1150,4 +1152,59 @@ static void PieceSquareTables()
         }
         Console.Write("\n    a\tb\tc\td\te\tf\tg\th\n\n\n");
     }
+}
+
+static void BitBoardDirections()
+{
+    var position = new Position("8/P3P3/8/1P3P2/8/2P3P1/8/3P3P w - - 0 1");
+    var pawns = position.PieceBitBoards[(int)Piece.P];
+
+    Console.WriteLine("N");
+    pawns.Print();
+    pawns.North().Print();
+
+    Console.WriteLine("S");
+    pawns.Print();
+    pawns.South().Print();
+
+    Console.WriteLine("E");
+    pawns.Print();
+    pawns.East().Print();
+
+    Console.WriteLine("W");
+    pawns.Print();
+    pawns.West().Print();
+
+    Console.WriteLine("NE");
+    pawns.Print();
+    pawns.NE().Print();
+
+    Console.WriteLine("NW");
+    pawns.Print();
+    pawns.NW().Print();
+
+    Console.WriteLine("SE");
+    pawns.Print();
+    pawns.SE().Print();
+
+    Console.WriteLine("SW");
+    pawns.Print();
+    pawns.SW().Print();
+}
+
+static void PawnAttacks()
+{
+    var position = new Position("8/p2p3p/8/8/8/8/P2P3P/8 w - - 0 1");
+    position.Print();
+
+    var whitePawns =  position.PieceBitBoards[(int)Piece.P];
+    var blackPawns =  position.PieceBitBoards[(int)Piece.p];
+
+    var whiteAttacks = position.WhitePawnAttacks();
+    whitePawns.Print();
+    whiteAttacks.Print();
+
+    var blackAttacks = position.BlackPawnAttacks();
+    blackPawns.Print();
+    blackAttacks.Print();
 }

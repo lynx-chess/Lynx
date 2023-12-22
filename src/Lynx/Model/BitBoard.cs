@@ -101,8 +101,6 @@ public static class BitBoardExtensions
         bitboard ^= (1ul << squareA | 1ul << squareB);
     }
 
-    #region Static methods
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int SquareIndex(int rank, int file)
     {
@@ -151,6 +149,32 @@ public static class BitBoardExtensions
     {
         return BitOperations.PopCount(board);
     }
+
+    #region Directions - yoinked from 4ku
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static BitBoard East(this BitBoard bitboard) => bitboard << 1 & ~0x101010101010101UL;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static BitBoard West(this BitBoard bitboard) => bitboard >> 1 & ~0x8080808080808080UL;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static BitBoard North(this BitBoard bitboard) => bitboard << 8;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static BitBoard South(this BitBoard bitboard) => bitboard >> 8;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static BitBoard NW(this BitBoard bitboard) => North(West(bitboard));
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static BitBoard NE(this BitBoard bitboard) => North(East(bitboard));
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static BitBoard SW(this BitBoard bitboard) => South(West(bitboard));
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static BitBoard SE(this BitBoard bitboard) => South(East(bitboard));
 
     #endregion
 
