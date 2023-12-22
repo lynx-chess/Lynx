@@ -315,6 +315,8 @@ static void _20_QueenAttacks()
 {
     var position = new Position(Constants.InitialPositionFEN);
     Attacks.QueenAttacks((int)BoardSquare.e4, position.OccupancyBitBoards[(int)Side.Both]).Print();
+    (Attacks.QueenAttacks((int)BoardSquare.e4, position.OccupancyBitBoards[(int)Side.Both]) & ~position.OccupancyBitBoards[(int)Side.White]).Print();
+    (Attacks.QueenAttacks((int)BoardSquare.e4, position.OccupancyBitBoards[(int)Side.Both]) & ~position.OccupancyBitBoards[(int)Side.Black]).Print();
 }
 
 static void _21_IsSquareAttacked()
