@@ -944,7 +944,7 @@ public class PositionTest
             var pieceSquareIndex = bitBoard.GetLS1BIndex();
             bitBoard.ResetLS1B();
             pieceCount[(int)piece]++;
-            eval += position.AdditionalPieceEvaluation(pieceSquareIndex, (int)piece, pieceCount).MiddleGameScore;
+            eval += position.AdditionalPieceEvaluation(pieceSquareIndex, (int)piece, pieceCount, 0).MiddleGameScore;
         }
 
         return eval;
