@@ -93,7 +93,7 @@ public sealed class EngineSettings
     /// <summary>
     /// MB
     /// </summary>
-    public int TranspositionTableSize { get; set; } = 256;
+    public int TranspositionTableSize { get; set; } = 32;
 
     public bool TranspositionTableEnabled { get; set; } = true;
 
@@ -117,33 +117,33 @@ public sealed class EngineSettings
 
     public int LMR_MinDepth { get; set; } = 3;
 
-    public int LMR_MinFullDepthSearchedMoves { get; set; } = 5;
+    public int LMR_MinFullDepthSearchedMoves { get; set; } = 4;
 
     /// <summary>
     /// Value originally from Stormphrax, who apparently took it from Viridithas
     /// </summary>
-    public double LMR_Base { get; set; } = 0.73;
+    public double LMR_Base { get; set; } = 0.74;
 
     /// <summary>
     /// Value originally from Akimbo
     /// </summary>
-    public double LMR_Divisor { get; set; } = 2.92;
+    public double LMR_Divisor { get; set; } = 2.94;
 
     public int NMP_MinDepth { get; set; } = 3;
 
     public int NMP_BaseDepthReduction { get; set; } = 1;
 
-    public int AspirationWindow_Delta { get; set; } = 19;
+    public int AspirationWindow_Delta { get; set; } = 16;
 
-    public int AspirationWindow_MinDepth { get; set; } = 8;
+    public int AspirationWindow_MinDepth { get; set; } = 7;
 
     public int RFP_MaxDepth { get; set; } = 4;
 
-    public int RFP_DepthScalingFactor { get; set; } = 79;
+    public int RFP_DepthScalingFactor { get; set; } = 85;
 
     public int Razoring_MaxDepth { get; set; } = 3;
 
-    public int Razoring_Depth1Bonus { get; set; } = 109;
+    public int Razoring_Depth1Bonus { get; set; } = 106;
 
     public int Razoring_NotDepth1Bonus { get; set; } = 156;
 
@@ -151,7 +151,7 @@ public sealed class EngineSettings
 
     public int LMP_MaxDepth { get; set; } = 1;
 
-    public int LMP_BaseMovesToTry { get; set; } = 2;
+    public int LMP_BaseMovesToTry { get; set; } = 1;
 
     public int LMP_MovesDepthMultiplier { get; set; } = 11;
 
