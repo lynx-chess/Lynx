@@ -17,9 +17,9 @@ public enum NodeType : byte
 public struct TranspositionTableElement
 {
     /// <summary>
-    /// Full Zobrist key
+    /// 16 MSB of Zobrist key
     /// </summary>
-    private int _key;
+    private short _key;
 
     /// <summary>
     /// Best move found in a position. 0 if the position failed low (score <= alpha)
@@ -48,7 +48,7 @@ public struct TranspositionTableElement
     /// </summary>
     public int Score { readonly get => _score; set => _score = (short)value; }
 
-    public long Key { readonly get => _key; set => _key = (int)(value >> 32); }
+    public long Key { readonly get => _key; set => _key = (ShortMove)(value >> 48); }
 
     public void Clear()
     {
@@ -116,7 +116,7 @@ public static class TranspositionTableExtensions
 
         ref var entry = ref tt[position.UniqueIdentifier & ttMask];
 
-        if ((position.UniqueIdentifier >> 32) != entry.Key)
+        if ((position.UniqueIdentifier >> 48) != entry.Key)
         {
             return (EvaluationConstants.NoHashEntry, default, default);
         }
@@ -169,7 +169,7 @@ public static class TranspositionTableExtensions
 
         bool shouldReplace =
             entry.Key == 0                                      // No actual entry
-            || (position.UniqueIdentifier >> 32) != entry.Key   // Different key: collision
+            || (position.UniqueIdentifier >> 48) != entry.Key   // Different key: collision
             || nodeType == NodeType.Exact                       // Entering PV data
             || depth >= entry.Depth;                            // Higher depth
 
