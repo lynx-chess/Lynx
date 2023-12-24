@@ -24,7 +24,7 @@ public struct TranspositionTableElement
     /// <summary>
     /// Best move found in a position. 0 if the position failed low (score <= alpha)
     /// </summary>
-    public Move Move { get; set; }
+    public ShortMove Move { get; set; }
 
     private short _score;
 
@@ -107,7 +107,7 @@ public static class TranspositionTableExtensions
     /// <param name="beta"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static (int Evaluation, Move BestMove, NodeType NodeType) ProbeHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int alpha, int beta)
+    public static (int Evaluation, ShortMove BestMove, NodeType NodeType) ProbeHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int alpha, int beta)
     {
         if (!Configuration.EngineSettings.TranspositionTableEnabled)
         {
@@ -186,7 +186,7 @@ public static class TranspositionTableExtensions
         entry.Score = score;
         entry.Depth = depth;
         entry.Type = nodeType;
-        entry.Move = move ?? entry.Move;    // Suggested by cj5716 instead of 0. https://github.com/lynx-chess/Lynx/pull/462
+        entry.Move = move != null ? (ShortMove)move : entry.Move;    // Suggested by cj5716 instead of 0. https://github.com/lynx-chess/Lynx/pull/462
     }
 
     /// <summary>
@@ -276,7 +276,7 @@ public static class TranspositionTableExtensions
         {
             if (transpositionTable[i].Key != default)
             {
-                Console.WriteLine($"{i}: Key = {transpositionTable[i].Key}, Depth: {transpositionTable[i].Depth}, Score: {transpositionTable[i].Score}, Move: {(transpositionTable[i].Move != 0 ? transpositionTable[i].Move.ToMoveString() : "-")} {transpositionTable[i].Type}");
+                Console.WriteLine($"{i}: Key = {transpositionTable[i].Key}, Depth: {transpositionTable[i].Depth}, Score: {transpositionTable[i].Score}, Move: {(transpositionTable[i].Move != 0 ? ((Move)transpositionTable[i].Move).ToMoveString() : "-")} {transpositionTable[i].Type}");
             }
         }
         Console.WriteLine("");

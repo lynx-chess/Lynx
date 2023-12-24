@@ -67,7 +67,7 @@ public sealed partial class Engine
     /// <param name="bestMoveTTCandidate"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMove(Move move, int depth, bool useKillerAndPositionMoves, Move bestMoveTTCandidate = default)
+    internal int ScoreMove(Move move, int depth, bool useKillerAndPositionMoves, ShortMove bestMoveTTCandidate = default)
     {
         if (_isScoringPV && move == _pVTable[depth])
         {
@@ -76,7 +76,7 @@ public sealed partial class Engine
             return EvaluationConstants.PVMoveScoreValue;
         }
 
-        if (move == bestMoveTTCandidate)
+        if ((ShortMove)move == bestMoveTTCandidate)
         {
             return EvaluationConstants.TTMoveScoreValue;
         }

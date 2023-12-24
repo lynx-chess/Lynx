@@ -9,10 +9,10 @@ namespace Lynx.Model;
 /// <para>int Value:</para>
 /// <para>
 ///     Binary move bits            Hexadecimal
-/// 0000 0000 0000 0000 0000 0011 1111      0x3F        Source square (63 bits)
-/// 0000 0000 0000 0000 1111 1100 0000      0xFC0       Target Square (63 bits)
-/// 0000 0000 0000 1111 0000 0000 0000      0xF000      Piece (11 bits)
-/// 0000 0000 1111 0000 0000 0000 0000      0xF0000     Promoted piece (~11 bits)
+/// 0000 0000 0000 0000 0000 0000 1111      0xF        Promoted piece (~11 bits)
+/// 0000 0000 0000 0000 0011 1111 0000      0x3F0       Source square (63 bits)
+/// 0000 0000 0000 1111 1100 0000 0000      0xFC00      Target Square (63 bits)
+/// 0000 0000 1111 0000 0000 0000 0000      0xF0000     Piece (11 bits)
 /// 0000 0001 0000 0000 0000 0000 0000      0x10_0000   Capture flag
 /// 0000 0010 0000 0000 0000 0000 0000      0x20_0000   Double pawn push flag
 /// 0000 0100 0000 0000 0000 0000 0000      0x40_0000   Enpassant flag
@@ -46,7 +46,7 @@ public static class MoveExtensions
         int isCapture = default, int isDoublePawnPush = default, int isEnPassant = default,
         int isShortCastle = default, int isLongCastle = default)
     {
-        return sourceSquare | (targetSquare << 6) | (piece << 12) | (promotedPiece << 16)
+        return promotedPiece | (sourceSquare << 4) | (targetSquare << 10) | (piece << 16)
             | (isCapture << 20)
             | (isDoublePawnPush << 21)
             | (isEnPassant << 22)
@@ -114,16 +114,16 @@ public static class MoveExtensions
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int SourceSquare(this Move move) => move & 0x3F;
+    public static int PromotedPiece(this Move move) => move & 0xF;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int TargetSquare(this Move move) => (move & 0xFC0) >> 6;
+    public static int SourceSquare(this Move move) => (move & 0x3F0) >> 4;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int Piece(this Move move) => (move & 0xF000) >> 12;
+    public static int TargetSquare(this Move move) => (move & 0xFC00) >> 10;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int PromotedPiece(this Move move) => (move & 0xF0000) >> 16;
+    public static int Piece(this Move move) => (move & 0xF0000) >> 16;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsCapture(this Move move) => (move & 0x10_0000) >> 20 != default;

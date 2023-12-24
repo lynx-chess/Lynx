@@ -38,7 +38,7 @@ public sealed partial class Engine
 
         bool isRoot = ply == 0;
         bool pvNode = beta - alpha > 1;
-        Move ttBestMove = default;
+        ShortMove ttBestMove = default;
         NodeType ttElementType = default;
         int ttEvaluation = default;
 
@@ -402,7 +402,7 @@ public sealed partial class Engine
         {
             return ttProbeResult.Evaluation;
         }
-        Move ttBestMove = ttProbeResult.BestMove;
+        ShortMove ttBestMove = ttProbeResult.BestMove;
 
         _maxDepthReached[ply] = ply;
 
