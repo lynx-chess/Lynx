@@ -93,7 +93,7 @@ public sealed class EngineSettings
     /// <summary>
     /// MB
     /// </summary>
-    public int TranspositionTableSize { get; set; } = 32;
+    public int TranspositionTableSize { get; set; } = 256;
 
     public bool TranspositionTableEnabled { get; set; } = true;
 
