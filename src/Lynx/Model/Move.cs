@@ -6,8 +6,6 @@ using System.Text;
 namespace Lynx.Model;
 
 /// <summary>
-/// <para>int Value:</para>
-/// <para>
 ///     Binary move bits            Hexadecimal
 /// 0000 0000 0000 0000 0000 0000 1111      0xF        Promoted piece (~11 bits)
 /// 0000 0000 0000 0000 0011 1111 0000      0x3F0       Source square (63 bits)
@@ -19,10 +17,8 @@ namespace Lynx.Model;
 /// 0000 1000 0000 0000 0000 0000 0000      0x80_0000   Short castling flag
 /// 0001 0000 0000 0000 0000 0000 0000      0x100_0000  Long castling flag
 /// Total: 24 bits -> fits an int
-/// Could be reduced to 16 bits -> see https://www.chessprogramming.org/Encoding_Moves
-/// source + target + reg/en passant/castling/promotion + promotion piece
-/// </para>
-/// </summary>
+/// By casting it to ShortMove, a unique int16 (short) move is achieved, since
+/// source and target square and promoted piece can only represent a move in a given position
 /// </summary>
 public static class MoveExtensions
 {
