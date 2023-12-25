@@ -6,8 +6,8 @@ using System.Text;
 namespace Lynx.Model;
 
 /// <summary>
-///     Binary move bits            Hexadecimal
-/// 0000 0000 0000 0000 0000 0000 1111      0xF        Promoted piece (~11 bits)
+///     Binary move bits                  Hexadecimal
+/// 0000 0000 0000 0000 0000 0000 1111      0xF         Promoted piece (~11 bits)
 /// 0000 0000 0000 0000 0011 1111 0000      0x3F0       Source square (63 bits)
 /// 0000 0000 0000 1111 1100 0000 0000      0xFC00      Target Square (63 bits)
 /// 0000 0000 1111 0000 0000 0000 0000      0xF0000     Piece (11 bits)
