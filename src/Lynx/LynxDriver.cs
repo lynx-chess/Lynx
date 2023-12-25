@@ -60,7 +60,7 @@ public sealed class LynxDriver
                                 HandleDebug(rawCommand);
                                 break;
                             case GoCommand.Id:
-                                await HandleGo(rawCommand);
+                                HandleGo(rawCommand);
                                 break;
                             case IsReadyCommand.Id:
                                 await HandleIsReady(cancellationToken);
@@ -145,10 +145,9 @@ public sealed class LynxDriver
 #endif
     }
 
-    private async Task HandleGo(string command)
+    private void HandleGo(string command)
     {
-        var goCommand = new GoCommand();
-        await goCommand.Parse(command);
+        var goCommand = new GoCommand(command);
         _engine.StartSearching(goCommand);
     }
 
