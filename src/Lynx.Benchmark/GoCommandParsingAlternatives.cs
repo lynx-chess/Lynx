@@ -24,7 +24,7 @@ using System.Text.RegularExpressions;
 
 namespace Lynx.Benchmark;
 
-public partial class GoCommandParsing : BaseBenchmark
+public partial class GoCommandParsingAlternatives : BaseBenchmark
 {
     public static IEnumerable<string> Data => new[] {
             "go infinite",
