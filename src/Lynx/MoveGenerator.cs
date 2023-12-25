@@ -7,7 +7,9 @@ namespace Lynx;
 
 public static class MoveGenerator
 {
+#if DEBUG
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+#endif
 
     private const int TRUE = 1;
 
@@ -41,11 +43,22 @@ public static class MoveGenerator
     /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
     /// </summary>
     /// <param name="position"></param>
+    /// <param name="capturesOnly">Filters out all moves but captures</param>
+    /// <returns></returns>
+    [Obsolete("dev and test only")]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Move[] GenerateAllMoves(Position position, bool capturesOnly = false) =>
+        GenerateAllMoves(position, new Move[Constants.MaxNumberOfPossibleMovesInAPosition], capturesOnly);
+
+    /// <summary>
+    /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
+    /// </summary>
+    /// <param name="position"></param>
     /// <param name="movePool"></param>
     /// <param name="capturesOnly">Filters out all moves but captures</param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Move[] GenerateAllMoves(Position position, Move[]? movePool = null, bool capturesOnly = false)
+    public static Move[] GenerateAllMoves(Position position, Move[] movePool, bool capturesOnly = false)
     {
 #if DEBUG
         if (position.Side == Side.Both)
@@ -54,7 +67,6 @@ public static class MoveGenerator
         }
 #endif
 
-        movePool ??= new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
         int localIndex = 0;
 
         var offset = Utils.PieceOffset(position.Side);

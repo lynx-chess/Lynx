@@ -9,6 +9,8 @@ namespace Lynx;
 /// </summary>
 public static class Perft
 {
+    private static Move[] MovePool { get; } = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+
     public static (long Nodes, double ElapsedMilliseconds) Results(Position position, int depth)
     {
         var sw = new Stopwatch();
@@ -50,7 +52,7 @@ public static class Perft
     {
         if (depth != 0)
         {
-            foreach (var move in MoveGenerator.GenerateAllMoves(position))
+            foreach (var move in MoveGenerator.GenerateAllMoves(position, MovePool))
             {
                 var state = position.MakeMove(move);
 
@@ -71,7 +73,7 @@ public static class Perft
     {
         if (depth != 0)
         {
-            foreach (var move in MoveGenerator.GenerateAllMoves(position))
+            foreach (var move in MoveGenerator.GenerateAllMoves(position, MovePool))
             {
                 var state = position.MakeMove(move);
 
@@ -98,7 +100,7 @@ public static class Perft
     {
         if (depth != 0)
         {
-            foreach (var move in MoveGenerator.GenerateAllMoves(position))
+            foreach (var move in MoveGenerator.GenerateAllMoves(position, MovePool))
             {
                 var state = position.MakeMove(move);
 
@@ -130,6 +132,7 @@ public static class Perft
     /// <param name="depth"></param>
     /// <param name="nodes"></param>
     /// <returns></returns>
+    [Obsolete("Legacy")]
     private static long ResultsImplUsingPositionConstructor(Position position, int depth, long nodes)
     {
         if (depth != 0)
@@ -150,6 +153,8 @@ public static class Perft
         return nodes + 1;
     }
 
+    [Obsolete("Legacy")]
+#pragma warning disable IDE0052 // Remove unread private members
     private static long DivideImplUsingPositionConstructor(Position position, int depth, long nodes)
     {
         if (depth != 0)
@@ -172,6 +177,7 @@ public static class Perft
 
         return nodes + 1;
     }
+#pragma warning restore IDE0052 // Remove unread private members
 
     #endregion
 
