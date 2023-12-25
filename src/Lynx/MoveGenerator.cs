@@ -11,10 +11,10 @@ public static class MoveGenerator
 
     private const int TRUE = 1;
 
-    public const int WhiteShortCastle = 8413116;
-    public const int WhiteLongCastle = 16801468;
-    public const int BlackShortCastle = 8434052;
-    public const int BlackLongCastle = 16822404;
+    public const int WhiteShortCastle = 8780736;
+    public const int WhiteLongCastle = 17165248;
+    public const int BlackShortCastle = 9115712;
+    public const int BlackLongCastle = 17500224;
 
     /// <summary>
     /// Indexed by <see cref="Piece"/>.
