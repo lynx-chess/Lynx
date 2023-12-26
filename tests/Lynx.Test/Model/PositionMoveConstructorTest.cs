@@ -3,6 +3,8 @@ using NUnit.Framework;
 
 namespace Lynx.Test.Model;
 
+#pragma warning disable CS0618 // Type or member is obsolete
+
 public class PositionMoveConstructorTest
 {
     #region Captures
@@ -1022,3 +1024,5 @@ public class PositionMoveConstructorTest
 
     #endregion
 }
+
+#pragma warning restore CS0618 // Type or member is obsolete
