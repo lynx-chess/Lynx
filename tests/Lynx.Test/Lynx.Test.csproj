@@ -29,4 +29,8 @@
     <ProjectReference Include="..\..\src\Lynx.Cli\Lynx.Cli.csproj" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <NoWarn>$(NoWarn),CS0618</NoWarn>
+  </PropertyGroup>
+
 </Project>

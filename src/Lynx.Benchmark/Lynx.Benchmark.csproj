@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <NoWarn>S125,CA1822,CA1806,RCS1090</NoWarn>
+    <NoWarn>S125,CA1822,CA1806,RCS1090,CS0618</NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
