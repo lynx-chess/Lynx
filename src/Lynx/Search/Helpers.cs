@@ -188,6 +188,9 @@ public sealed partial class Engine
 
     #region Debugging
 
+#pragma warning disable S125 // Sections of code should not be commented out
+#pragma warning disable S1199 // Nested code blocks should not be used
+
     [Conditional("DEBUG")]
     private void ValidatePVTable()
     {
@@ -345,6 +348,9 @@ $" {484,-3}                                                         {_pVTable[48
 
         _logger.Debug($"Max history: {max}");
     }
+
+#pragma warning restore S125 // Sections of code should not be commented out
+#pragma warning restore S1199 // Nested code blocks should not be used
 
     #endregion
 }

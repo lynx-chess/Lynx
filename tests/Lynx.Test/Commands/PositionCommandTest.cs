@@ -52,7 +52,7 @@ public class PositionCommandTest
         Assert.AreEqual("c7c5", parsedGame.MoveHistory[7].UCIString());
         Assert.AreEqual("e2e3", parsedGame.MoveHistory[8].UCIString());
 
-        Assert.AreEqual("rnbqkb1r/pp3ppp/4pn2/2pp4/3P4/2N1PNP1/PPP2P1P/R1BQKB1R b KQkq - 0 5", parsedGame.CurrentPosition.FEN(parsedGame.HalfMovesWithoutCaptureOrPawnMove, parsedGame.MoveHistory.Count / 2 + parsedGame.MoveHistory.Count % 2));
+        Assert.AreEqual("rnbqkb1r/pp3ppp/4pn2/2pp4/3P4/2N1PNP1/PPP2P1P/R1BQKB1R b KQkq - 0 5", parsedGame.CurrentPosition.FEN(parsedGame.HalfMovesWithoutCaptureOrPawnMove, (parsedGame.MoveHistory.Count / 2) + (parsedGame.MoveHistory.Count % 2)));
     }
 
     /// <summary>

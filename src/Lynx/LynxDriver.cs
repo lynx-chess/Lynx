@@ -256,6 +256,7 @@ public sealed class LynxDriver
                 }
             case "threads":
                 {
+#pragma warning disable S1066 // Collapsible "if" statements should be merged
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
                         if (value != 1)
@@ -264,6 +265,7 @@ public sealed class LynxDriver
                         }
                     }
                     break;
+#pragma warning restore S1066 // Collapsible "if" statements should be merged
                 }
             case "uci_showwdl":
                 {

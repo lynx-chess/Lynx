@@ -156,7 +156,7 @@ public partial class GoCommandParsing_GeneratedAttribute : BaseBenchmark
                 {
                     var match = _searchMovesRegex.Match(command);
 
-                    SearchMoves = match.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
+                    SearchMoves = [.. match.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries)];
                 }),
                 Task.Run(() =>
                 {
@@ -254,7 +254,7 @@ public partial class GoCommandParsing_GeneratedAttribute : BaseBenchmark
                 {
                     var match = _searchMovesRegexAttribute.Match(command);
 
-                    SearchMoves = match.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
+                    SearchMoves = [.. match.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries)];
                 }),
                 Task.Run(() =>
                 {

@@ -423,7 +423,7 @@ public class PositionTest
         }
 
         Assert.AreEqual(
-            -4 * Configuration.EngineSettings.DoubledPawnPenalty.MG
+            (-4 * Configuration.EngineSettings.DoubledPawnPenalty.MG)
             + Configuration.EngineSettings.IsolatedPawnPenalty.MG
             + Configuration.EngineSettings.PassedPawnBonus[rank].MG,
 
@@ -459,7 +459,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(Configuration.EngineSettings.SemiOpenFileRookBonus.MG + 6 * Configuration.EngineSettings.RookMobilityBonus.MG, evaluation);
+        Assert.AreEqual(Configuration.EngineSettings.SemiOpenFileRookBonus.MG + (6 * Configuration.EngineSettings.RookMobilityBonus.MG), evaluation);
     }
 
     /// <summary>
@@ -490,7 +490,7 @@ public class PositionTest
         {
             evaluation = -evaluation;
         }
-        Assert.AreEqual(Configuration.EngineSettings.OpenFileRookBonus.MG + 7 * Configuration.EngineSettings.RookMobilityBonus.MG, evaluation);
+        Assert.AreEqual(Configuration.EngineSettings.OpenFileRookBonus.MG + (7 * Configuration.EngineSettings.RookMobilityBonus.MG), evaluation);
     }
 
     /// <summary>
@@ -554,7 +554,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(-2 * Configuration.EngineSettings.OpenFileRookBonus.MG - 5 * Configuration.EngineSettings.RookMobilityBonus.MG, evaluation);
+        Assert.AreEqual((-2 * Configuration.EngineSettings.OpenFileRookBonus.MG) - (5 * Configuration.EngineSettings.RookMobilityBonus.MG), evaluation);
     }
 
     /// <summary>
@@ -654,6 +654,7 @@ public class PositionTest
         Assert.AreEqual(0, evaluation);
     }
 
+#pragma warning disable S4144 // Methods should not have identical implementations
     /// <summary>
     /// No rooks = no bonus or penalty
     /// 8   . . . . . . k .
@@ -686,6 +687,7 @@ public class PositionTest
 
         Assert.AreEqual(0, evaluation);
     }
+#pragma warning restore S4144 // Methods should not have identical implementations
 
     /// <summary>
     /// 8   . k . . . . . n

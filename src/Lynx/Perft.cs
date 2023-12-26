@@ -121,64 +121,6 @@ public static class Perft
         return nodes + 1;
     }
 
-    #region Legacy
-
-    /// <summary>
-    /// Proper implementation, used by <see cref="DivideImplUsingPositionConstructor(Position, int, long)"/> as well
-    /// </summary>
-    /// <param name="position"></param>
-    /// <param name="depth"></param>
-    /// <param name="nodes"></param>
-    /// <returns></returns>
-    [Obsolete("Legacy")]
-    private static long ResultsImplUsingPositionConstructor(Position position, int depth, long nodes)
-    {
-        if (depth != 0)
-        {
-            foreach (var move in MoveGenerator.GenerateAllMoves(position))
-            {
-                var newPosition = new Position(position, move);
-
-                if (newPosition.WasProduceByAValidMove())
-                {
-                    nodes = ResultsImplUsingPositionConstructor(newPosition, depth - 1, nodes);
-                }
-            }
-
-            return nodes;
-        }
-
-        return nodes + 1;
-    }
-
-    [Obsolete("Legacy")]
-#pragma warning disable IDE0052 // Remove unread private members
-    private static long DivideImplUsingPositionConstructor(Position position, int depth, long nodes)
-    {
-        if (depth != 0)
-        {
-            foreach (var move in MoveGenerator.GenerateAllMoves(position))
-            {
-                var newPosition = new Position(position, move);
-
-                if (newPosition.WasProduceByAValidMove())
-                {
-                    var accumulatedNodes = nodes;
-                    nodes = ResultsImplUsingPositionConstructor(newPosition, depth - 1, nodes);
-
-                    Console.WriteLine($"{move.UCIString()}\t\t{nodes - accumulatedNodes}");
-                }
-            }
-
-            return nodes;
-        }
-
-        return nodes + 1;
-    }
-#pragma warning restore IDE0052 // Remove unread private members
-
-    #endregion
-
     public static void PrintPerftResult(int depth, (long Nodes, double ElapsedMilliseconds) peftResult, Action<string> write)
     {
         var timeStr = TimeToString(peftResult.ElapsedMilliseconds);

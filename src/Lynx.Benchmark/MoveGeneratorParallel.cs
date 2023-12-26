@@ -83,21 +83,21 @@ public class MoveGeneratorParallel : BaseBenchmark
     [ArgumentsSource(nameof(Data))]
     public Move[] SingleThreadArray(string fen)
     {
-        return CustomMoveGenerator.GenerateAllMoves_SingleThread(new Position(fen)).ToArray();
+        return [.. CustomMoveGenerator.GenerateAllMoves_SingleThread(new Position(fen))];
     }
 
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
     public Move[] ParallelForEachArray(string fen)
     {
-        return CustomMoveGenerator.GenerateAllMoves_ParallelForEach(new Position(fen)).ToArray();
+        return [.. CustomMoveGenerator.GenerateAllMoves_ParallelForEach(new Position(fen))];
     }
 
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
     public Move[] WhenAllArray(string fen)
     {
-        return CustomMoveGenerator.GenerateAllMoves_WhenAll(new Position(fen)).Result.ToArray();
+        return [.. CustomMoveGenerator.GenerateAllMoves_WhenAll(new Position(fen)).Result];
     }
 
     public static class CustomMoveGenerator
@@ -175,22 +175,22 @@ public class MoveGeneratorParallel : BaseBenchmark
 
         #region Other stuff
 
-        private static readonly Func<int, BitBoard, ulong>[] _pieceAttacks = new Func<int, BitBoard, ulong>[]
-        {
+        private static readonly Func<int, BitBoard, ulong>[] _pieceAttacks =
+        [
             (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White, origin],
             (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
-            (int origin, BitBoard occupancy) => Attacks.BishopAttacks(origin, occupancy),
-            (int origin, BitBoard occupancy) => Attacks.RookAttacks(origin, occupancy),
-            (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy),
+            Attacks.BishopAttacks,
+            Attacks.RookAttacks,
+            Attacks.QueenAttacks,
             (int origin, BitBoard _) => Attacks.KingAttacks[origin],
 
             (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.Black, origin],
             (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
-            (int origin, BitBoard occupancy) => Attacks.BishopAttacks(origin, occupancy),
-            (int origin, BitBoard occupancy) => Attacks.RookAttacks(origin, occupancy),
-            (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy),
+            Attacks.BishopAttacks,
+            Attacks.RookAttacks,
+            Attacks.QueenAttacks,
             (int origin, BitBoard _) => Attacks.KingAttacks[origin],
-        };
+        ];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static IEnumerable<Move> GeneratePawnMoves(Position position, int offset, bool capturesOnly = false)
