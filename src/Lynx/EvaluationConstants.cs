@@ -14,7 +14,7 @@ public static class EvaluationConstants
 
     public static readonly double[] Bs = [-14.14613328, 84.98205725, -101.16332276, 120.88906952];
 
-    #pragma warning disable IDE0055 // Discard formatting in this region
+#pragma warning disable IDE0055 // Discard formatting in this region
 
     public static readonly int[] GamePhaseByPiece =
     [
