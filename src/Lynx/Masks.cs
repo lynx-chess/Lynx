@@ -80,17 +80,17 @@ public static class Masks
     public static readonly BitBoard[][] PassedPawns =
     [
         WhitePassedPawnMasks,
-        Array.Empty<BitBoard>(),
-        Array.Empty<BitBoard>(),
-        Array.Empty<BitBoard>(),
-        Array.Empty<BitBoard>(),
-        Array.Empty<BitBoard>(),
+        [],
+        [],
+        [],
+        [],
+        [],
         BlackPassedPawnMasks,
-        Array.Empty<BitBoard>(),
-        Array.Empty<BitBoard>(),
-        Array.Empty<BitBoard>(),
-        Array.Empty<BitBoard>(),
-        Array.Empty<BitBoard>(),
+        [],
+        [],
+        [],
+        [],
+        [],
     ];
 
     static Masks()
@@ -140,6 +140,8 @@ public static class Masks
         }
     }
 
+#pragma warning disable S1066 // Collapsible "if" statements should be merged - init only code, clarity over speed here
+
     private static BitBoard SetFileRankMask(int fileIndex, int rankIndex)
     {
         BitBoard mask = 0;
@@ -169,4 +171,6 @@ public static class Masks
 
         return mask;
     }
+
+#pragma warning restore S1066 // Collapsible "if" statements should be merged
 }

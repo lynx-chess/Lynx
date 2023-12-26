@@ -13,7 +13,7 @@ public sealed partial class Engine
     private readonly int[,] _killerMoves = new int[3, Configuration.EngineSettings.MaxDepth];
     private readonly int[,] _historyMoves = new int[12, 64];
     private readonly int[] _maxDepthReached = new int[Constants.AbsoluteMaxDepth];
-    private TranspositionTable _tt = Array.Empty<TranspositionTableElement>();
+    private TranspositionTable _tt = [];
     private int _ttMask;
 
     private int _nodes;
@@ -311,7 +311,7 @@ public sealed partial class Engine
         SearchResult finalSearchResult;
         if (lastSearchResult is null)
         {
-            finalSearchResult = new(default, bestEvaluation, depth, new List<Move>(), alpha, beta);
+            finalSearchResult = new(default, bestEvaluation, depth, [], alpha, beta);
         }
         else
         {
