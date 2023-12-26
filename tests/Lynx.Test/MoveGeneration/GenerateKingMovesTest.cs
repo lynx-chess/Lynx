@@ -210,28 +210,4 @@ public class GenerateKingMovesTest
             m.SourceSquare() == (int)BoardSquare.g6
             && m.TargetSquare() == (int)BoardSquare.f5));
     }
-
-    //[TestCase(Constants.InitialPositionFEN, 0)]
-    //[TestCase("8/8/8/2ppp3/2pKp3/2p1p3/8/8 w - - 0 1", 5)]
-    //[TestCase("8/8/8/2ppp3/2pKp3/3pp3/8/8 w - - 0 1", 4)]
-    //[TestCase("8/8/8/2ppp3/2pKp3/2pp4/8/8 w - - 0 1", 4)]
-    //[TestCase("8/8/8/2ppp3/2pKp3/3p4/8/8 w - - 0 1", 3)]
-    //[TestCase("8/8/8/2ppp3/2pKp3/8/8/8 w - - 0 1", 3)]
-    //[TestCase("8/8/8/2ppp3/2pK4/8/8/8 w - - 0 1", 3)]
-    //[TestCase("8/8/8/2ppp3/3K4/8/8/8 w - - 0 1", 3)]
-    //[TestCase("8/8/8/2p1p3/3K4/8/8/8 w - - 0 1", 2)]
-    //[TestCase("8/8/8/4p3/3K4/8/8/8 w - - 0 1", 1)]
-    //[TestCase("8/8/8/8/3K4/8/8/8 w - - 0 1", 0)]
-    //[TestCase("8/8/8/2nnn3/2nKn3/2nnn3/8/8 w - - 0 1", 0)]
-    //[TestCase("8/8/8/2qqq3/2qKq3/2qqq3/8/8 w - - 0 1", 0)]
-    //[TestCase("8/8/8/2bbb3/2bKb3/2bbb3/8/8 w - - 0 1", 0)]
-    //public void LegalMoves(string fen, int expectedMoves)
-    //{
-    //    var position = new Position(fen);
-    //    var offset = Utils.PieceOffset(position.Side);
-    //    var piece = (int)Piece.K + offset;
-    //    var moves = MovesGenerator.GeneratePieceMovesForReference(piece, position);
-
-    //    Assert.AreEqual(expectedMoves, moves.Count(m => m.Piece() == piece));
-    //}
 }

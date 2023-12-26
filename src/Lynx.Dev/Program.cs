@@ -419,7 +419,7 @@ static void _26_Piece_Moves()
     var moves = MoveGenerator.GenerateKnightMoves(position).ToList();
     moves.ForEach(m => Console.WriteLine(m));
 
-    moves = MoveGenerator.GenerateAllMoves(position).ToList();
+    moves = [.. MoveGenerator.GenerateAllMoves(position)];
     Console.WriteLine($"Expected 48, found: {moves.Count}");
     foreach (var move in moves)
     {

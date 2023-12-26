@@ -60,7 +60,7 @@ public sealed class LynxDriver
                                 HandleDebug(rawCommand);
                                 break;
                             case GoCommand.Id:
-                                await HandleGo(rawCommand);
+                                HandleGo(rawCommand);
                                 break;
                             case IsReadyCommand.Id:
                                 await HandleIsReady(cancellationToken);
@@ -145,10 +145,9 @@ public sealed class LynxDriver
 #endif
     }
 
-    private async Task HandleGo(string command)
+    private void HandleGo(string command)
     {
-        var goCommand = new GoCommand();
-        await goCommand.Parse(command);
+        var goCommand = new GoCommand(command);
         _engine.StartSearching(goCommand);
     }
 
@@ -257,6 +256,7 @@ public sealed class LynxDriver
                 }
             case "threads":
                 {
+#pragma warning disable S1066 // Collapsible "if" statements should be merged
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
                         if (value != 1)
@@ -265,6 +265,7 @@ public sealed class LynxDriver
                         }
                     }
                     break;
+#pragma warning restore S1066 // Collapsible "if" statements should be merged
                 }
             case "uci_showwdl":
                 {

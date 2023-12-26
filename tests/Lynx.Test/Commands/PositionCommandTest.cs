@@ -20,8 +20,7 @@ public class PositionCommandTest
         engine.AdjustPosition($"position fen {Constants.InitialPositionFEN} moves e2e4");
 
         // A command that guarantees ~5s thinking time
-        var goCommand = new GoCommand();
-        await goCommand.Parse("go wtime 1 btime 1 winc 5000 binc 5000");
+        var goCommand = new GoCommand("go wtime 1 btime 1 winc 5000 binc 5000");
 
         var resultTask = Task.Run(() => engine.BestMove(new($"go depth {Engine.DefaultMaxDepth}")));
 
@@ -53,7 +52,7 @@ public class PositionCommandTest
         Assert.AreEqual("c7c5", parsedGame.MoveHistory[7].UCIString());
         Assert.AreEqual("e2e3", parsedGame.MoveHistory[8].UCIString());
 
-        Assert.AreEqual("rnbqkb1r/pp3ppp/4pn2/2pp4/3P4/2N1PNP1/PPP2P1P/R1BQKB1R b KQkq - 0 5", parsedGame.CurrentPosition.FEN(parsedGame.HalfMovesWithoutCaptureOrPawnMove, parsedGame.MoveHistory.Count / 2 + parsedGame.MoveHistory.Count % 2));
+        Assert.AreEqual("rnbqkb1r/pp3ppp/4pn2/2pp4/3P4/2N1PNP1/PPP2P1P/R1BQKB1R b KQkq - 0 5", parsedGame.CurrentPosition.FEN(parsedGame.HalfMovesWithoutCaptureOrPawnMove, (parsedGame.MoveHistory.Count / 2) + (parsedGame.MoveHistory.Count % 2)));
     }
 
     /// <summary>

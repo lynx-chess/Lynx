@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <Using Include="System.Int32" Alias="Move" />
+    <Using Include="System.Int16" Alias="ShortMove" />
     <Using Include="System.UInt64" Alias="BitBoard" />
     <Using Include="Lynx.Model.TranspositionTableElement[]" Alias="TranspositionTable" />
   </ItemGroup >

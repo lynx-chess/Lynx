@@ -67,7 +67,7 @@ public sealed partial class Engine
     /// <param name="bestMoveTTCandidate"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMove(Move move, int depth, bool useKillerAndPositionMoves, Move bestMoveTTCandidate = default)
+    internal int ScoreMove(Move move, int depth, bool useKillerAndPositionMoves, ShortMove bestMoveTTCandidate = default)
     {
         if (_isScoringPV && move == _pVTable[depth])
         {
@@ -76,7 +76,7 @@ public sealed partial class Engine
             return EvaluationConstants.PVMoveScoreValue;
         }
 
-        if (move == bestMoveTTCandidate)
+        if ((ShortMove)move == bestMoveTTCandidate)
         {
             return EvaluationConstants.TTMoveScoreValue;
         }
@@ -187,6 +187,9 @@ public sealed partial class Engine
     }
 
     #region Debugging
+
+#pragma warning disable S125 // Sections of code should not be commented out
+#pragma warning disable S1199 // Nested code blocks should not be used
 
     [Conditional("DEBUG")]
     private void ValidatePVTable()
@@ -345,6 +348,9 @@ $" {484,-3}                                                         {_pVTable[48
 
         _logger.Debug($"Max history: {max}");
     }
+
+#pragma warning restore S125 // Sections of code should not be commented out
+#pragma warning restore S1199 // Nested code blocks should not be used
 
     #endregion
 }

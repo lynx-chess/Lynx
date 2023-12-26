@@ -1,8 +1,4 @@
-﻿/*
- * PSQT based on https://www.chessprogramming.org/PeSTO%27s_Evaluation_Function
-*/
-
-using Lynx.Model;
+﻿using Lynx.Model;
 
 namespace Lynx;
 
@@ -17,6 +13,8 @@ public static class EvaluationConstants
     public static readonly double[] As = [-25.59900221, 175.23377472, -145.09355540, 133.49051930];
 
     public static readonly double[] Bs = [-14.14613328, 84.98205725, -101.16332276, 120.88906952];
+
+#pragma warning disable IDE0055 // Discard formatting in this region
 
     public static readonly int[] GamePhaseByPiece =
     [
@@ -179,6 +177,8 @@ public static readonly int[] EndGameKingTable =
         -45,    11,     31,     41,     44,     33,     9,      -27,
         -97,    -61,    -29,    -3,     -31,    -7,     -45,    -101,
 ];
+
+#pragma warning restore IDE0055
 
     public static readonly int[] MiddleGamePawnTableBlack = MiddleGamePawnTable.Select((_, index) => -MiddleGamePawnTable[index ^ 56]).ToArray();
     public static readonly int[] EndGamePawnTableBlack = EndGamePawnTable.Select((_, index) => -EndGamePawnTable[index ^ 56]).ToArray();
