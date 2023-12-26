@@ -9,8 +9,6 @@ namespace Lynx;
 /// </summary>
 public static class Perft
 {
-    private static Move[] MovePool { get; } = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-
     public static (long Nodes, double ElapsedMilliseconds) Results(Position position, int depth)
     {
         var sw = new Stopwatch();
@@ -100,7 +98,7 @@ public static class Perft
     {
         if (depth != 0)
         {
-            foreach (var move in MoveGenerator.GenerateAllMoves(position, MovePool))
+            foreach (var move in MoveGenerator.GenerateAllMoves(position, movePool))
             {
                 var state = position.MakeMove(move);
 
