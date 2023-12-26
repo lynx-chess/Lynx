@@ -20,8 +20,7 @@ public class PositionCommandTest
         engine.AdjustPosition($"position fen {Constants.InitialPositionFEN} moves e2e4");
 
         // A command that guarantees ~5s thinking time
-        var goCommand = new GoCommand();
-        await goCommand.Parse("go wtime 1 btime 1 winc 5000 binc 5000");
+        var goCommand = new GoCommand("go wtime 1 btime 1 winc 5000 binc 5000");
 
         var resultTask = Task.Run(() => engine.BestMove(new($"go depth {Engine.DefaultMaxDepth}")));
 
