@@ -1,5 +1,4 @@
 ﻿using Lynx.Model;
-using NLog;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
@@ -8,7 +7,7 @@ namespace Lynx;
 public static class MoveGenerator
 {
 #if DEBUG
-    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+    private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 #endif
 
     private const int TRUE = 1;
