@@ -44,13 +44,13 @@ public class LocalVariableIn_vs_NoIn : BaseBenchmark
     private List<Move> Sort_LocalVariableAndIn(IEnumerable<Move> moves, Position currentPosition)
     {
         var localPosition = currentPosition;
-        return moves.OrderByDescending(move => Score(move, localPosition)).ToList();
+        return [.. moves.OrderByDescending(move => Score(move, localPosition))];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private List<Move> Sort_NoIn(IEnumerable<Move> moves, Position currentPosition)
     {
-        return moves.OrderByDescending(move => Score(move, currentPosition)).ToList();
+        return [.. moves.OrderByDescending(move => Score(move, currentPosition))];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

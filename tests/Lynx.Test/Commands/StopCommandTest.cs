@@ -23,7 +23,7 @@ public class StopCommandTest
 
         var resultTask = Task.Run(() => engine.BestMove(goCommand));
         // Wait 2s so that there's some best move available
-        Thread.Sleep(2000);
+        await Task.Delay(2000);
 
         // Act
         engine.StopSearching();

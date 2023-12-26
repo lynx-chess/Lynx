@@ -361,13 +361,13 @@ public static class OnlineTablebaseProber
                     ? 0
                     : result.DistanceToMate.HasValue
                         ? EvaluationConstants.CheckMateBaseEvaluation - (EvaluationConstants.CheckmateDepthFactor * (int)Math.Ceiling(0.5 * Math.Abs(result.DistanceToMate.Value)))
-                    : EvaluationConstants.CheckMateBaseEvaluation - 49 * EvaluationConstants.CheckmateDepthFactor,
+                    : EvaluationConstants.CheckMateBaseEvaluation - (49 * EvaluationConstants.CheckmateDepthFactor),
             TablebaseEvaluationCategory.Loss or TablebaseEvaluationCategory.MaybeLoss =>
                 Math.Abs(result.DistanceToZero ?? 0) + halfMovesWithoutCaptureOrPawnMove > 100
                     ? 0
                     : result.DistanceToMate.HasValue
                         ? -EvaluationConstants.CheckMateBaseEvaluation + (EvaluationConstants.CheckmateDepthFactor * (int)Math.Ceiling(0.5 * Math.Abs(result.DistanceToMate.Value)))
-                        : -EvaluationConstants.CheckMateBaseEvaluation + 49 * EvaluationConstants.CheckmateDepthFactor,
+                        : -EvaluationConstants.CheckMateBaseEvaluation + (49 * EvaluationConstants.CheckmateDepthFactor),
             _ => NoResult
         };
 #pragma warning restore S3358 // Ternary operators should not be nested
