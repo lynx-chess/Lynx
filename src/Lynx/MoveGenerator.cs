@@ -45,10 +45,14 @@ public static class MoveGenerator
     /// <param name="capturesOnly">Filters out all moves but captures</param>
     /// <returns></returns>
     [Obsolete("dev and test only")]
-    internal static Move[] GenerateAllMoves(Position position, bool capturesOnly = false) =>
-        capturesOnly
-            ? GenerateAllCaptures(position, new Move[Constants.MaxNumberOfPossibleMovesInAPosition])
-            : GenerateAllMoves(position, new Move[Constants.MaxNumberOfPossibleMovesInAPosition]);
+    internal static Move[] GenerateAllMoves(Position position, bool capturesOnly = false)
+    {
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+
+        return (capturesOnly
+            ? GenerateAllCaptures(position, moves)
+            : GenerateAllMoves(position, moves)).ToArray();
+    }
 
     /// <summary>
     /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
