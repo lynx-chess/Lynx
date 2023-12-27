@@ -45,8 +45,7 @@ public static class MoveGenerator
     /// <param name="capturesOnly">Filters out all moves but captures</param>
     /// <returns></returns>
     [Obsolete("dev and test only")]
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Move[] GenerateAllMoves(Position position, bool capturesOnly = false) =>
+    internal static Move[] GenerateAllMoves(Position position, bool capturesOnly = false) =>
         capturesOnly
             ? GenerateAllCaptures(position, new Move[Constants.MaxNumberOfPossibleMovesInAPosition])
             : GenerateAllMoves(position, new Move[Constants.MaxNumberOfPossibleMovesInAPosition]);
@@ -669,7 +668,7 @@ public static class MoveGenerator
     /// <param name="offset"></param>
     /// <param name="capturesOnly"></param>
     /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [Obsolete("Mostly for reference")]
     internal static IEnumerable<Move> GeneratePawnMovesForReference(Position position, int offset, bool capturesOnly = false)
     {
         int sourceSquare, targetSquare;
@@ -757,7 +756,7 @@ public static class MoveGenerator
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [Obsolete("Mostly for reference")]
     internal static IEnumerable<Move> GenerateKingMoves(Position position, bool capturesOnly = false)
     {
         var offset = Utils.PieceOffset(position.Side);
@@ -765,7 +764,7 @@ public static class MoveGenerator
         return GeneratePieceMovesForReference((int)Piece.K + offset, position, capturesOnly);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [Obsolete("Mostly for reference")]
     internal static IEnumerable<Move> GenerateKnightMoves(Position position, bool capturesOnly = false)
     {
         var offset = Utils.PieceOffset(position.Side);
@@ -773,7 +772,7 @@ public static class MoveGenerator
         return GeneratePieceMovesForReference((int)Piece.N + offset, position, capturesOnly);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [Obsolete("Mostly for reference")]
     internal static IEnumerable<Move> GenerateBishopMoves(Position position, bool capturesOnly = false)
     {
         var offset = Utils.PieceOffset(position.Side);
@@ -781,7 +780,7 @@ public static class MoveGenerator
         return GeneratePieceMovesForReference((int)Piece.B + offset, position, capturesOnly);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [Obsolete("Mostly for reference")]
     internal static IEnumerable<Move> GenerateRookMoves(Position position, bool capturesOnly = false)
     {
         var offset = Utils.PieceOffset(position.Side);
@@ -789,7 +788,7 @@ public static class MoveGenerator
         return GeneratePieceMovesForReference((int)Piece.R + offset, position, capturesOnly);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [Obsolete("Mostly for reference")]
     internal static IEnumerable<Move> GenerateQueenMoves(Position position, bool capturesOnly = false)
     {
         var offset = Utils.PieceOffset(position.Side);
@@ -804,8 +803,8 @@ public static class MoveGenerator
     /// <param name="position"></param>
     /// <param name="capturesOnly"></param>
     /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static IEnumerable<Move> GeneratePieceMovesForReference(int piece, Position position, bool capturesOnly = false)
+    [Obsolete("Mostly for reference")]
+    private static IEnumerable<Move> GeneratePieceMovesForReference(int piece, Position position, bool capturesOnly = false)
     {
         var bitboard = position.PieceBitBoards[piece];
         int sourceSquare, targetSquare;

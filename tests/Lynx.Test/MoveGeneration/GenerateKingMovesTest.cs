@@ -5,6 +5,12 @@ namespace Lynx.Test.MoveGeneration;
 
 public class GenerateKingMovesTest
 {
+    private static IEnumerable<Move> GenerateKingMoves(Position position) =>
+        MoveGenerator.GenerateAllMoves(position, new Move[Constants.MaxNumberOfPossibleMovesInAPosition]).Where(m => m.Piece() == (int)Piece.K || m.Piece() == (int)Piece.k);
+
+    private static IEnumerable<Move> GenerateKingCaptures(Position position) =>
+        MoveGenerator.GenerateAllCaptures(position, new Move[Constants.MaxNumberOfPossibleMovesInAPosition]).Where(m => m.Piece() == (int)Piece.K || m.Piece() == (int)Piece.k);
+
     [TestCase(Constants.InitialPositionFEN, 0)]
     [TestCase("8/8/8/2PPP3/2PKP3/2P1P3/8/8 w - - 0 1", 1)]
     [TestCase("8/8/8/2PPP3/2PKP3/3PP3/8/8 w - - 0 1", 1)]
@@ -19,12 +25,10 @@ public class GenerateKingMovesTest
     public void KingMoves_Count(string fen, int expectedMoves)
     {
         var position = new Position(fen);
-        var offset = Utils.PieceOffset(position.Side);
-        var moves = MoveGenerator.GeneratePieceMovesForReference((int)Piece.K + offset, position);
-
-        Assert.AreEqual(expectedMoves, moves.Count());
+        var moves = GenerateKingMoves(position);
 
         Assert.AreEqual(moves, MoveGenerator.GenerateKingMoves(position));
+        Assert.AreEqual(expectedMoves, moves.Count());
     }
 
     /// <summary>
@@ -47,7 +51,7 @@ public class GenerateKingMovesTest
         var position = new Position("8/6nQ/6k1/5PB1/8/2N5/nKr5/bp6 w - - 0 1");
         var offset = Utils.PieceOffset(position.Side);
         var piece = (int)Piece.K + offset;
-        var moves = MoveGenerator.GeneratePieceMovesForReference(piece, position);
+        var moves = GenerateKingMoves(position);
 
         Assert.AreEqual(7, moves.Count(m => m.Piece() == piece));
 
@@ -100,7 +104,7 @@ public class GenerateKingMovesTest
         var position = new Position("8/6nQ/6k1/5PB1/8/2N5/nKr5/bp6 b - - 0 1");
         var offset = Utils.PieceOffset(position.Side);
         var piece = (int)Piece.K + offset;
-        var moves = MoveGenerator.GeneratePieceMovesForReference(piece, position);
+        var moves = GenerateKingMoves(position);
 
         Assert.AreEqual(7, moves.Count(m => m.Piece() == piece));
 
@@ -153,7 +157,7 @@ public class GenerateKingMovesTest
         var position = new Position("8/6nQ/6k1/5PB1/8/2N5/nKr5/bp6 w - - 0 1");
         var offset = Utils.PieceOffset(position.Side);
         var piece = (int)Piece.K + offset;
-        var moves = MoveGenerator.GeneratePieceMovesForReference(piece, position, capturesOnly: true);
+        var moves = GenerateKingCaptures(position);
 
         Assert.AreEqual(4, moves.Count(m => m.Piece() == piece));
 
@@ -194,7 +198,7 @@ public class GenerateKingMovesTest
         var position = new Position("8/6nQ/6k1/5PB1/8/2N5/nKr5/bp6 b - - 0 1");
         var offset = Utils.PieceOffset(position.Side);
         var piece = (int)Piece.K + offset;
-        var moves = MoveGenerator.GeneratePieceMovesForReference(piece, position, capturesOnly: true);
+        var moves = GenerateKingCaptures(position);
 
         Assert.AreEqual(3, moves.Count(m => m.Piece() == piece));
 

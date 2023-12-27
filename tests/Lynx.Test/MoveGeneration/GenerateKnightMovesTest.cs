@@ -5,6 +5,12 @@ namespace Lynx.Test.MoveGeneration;
 
 public class GenerateKnightMovesTest
 {
+    private static IEnumerable<Move> GenerateKnightMoves(Position position) =>
+        MoveGenerator.GenerateAllMoves(position, new Move[Constants.MaxNumberOfPossibleMovesInAPosition]).Where(m => m.Piece() == (int)Piece.N || m.Piece() == (int)Piece.n);
+
+    private static IEnumerable<Move> GenerateKnightCaptures(Position position) =>
+        MoveGenerator.GenerateAllCaptures(position, new Move[Constants.MaxNumberOfPossibleMovesInAPosition]).Where(m => m.Piece() == (int)Piece.N || m.Piece() == (int)Piece.n);
+
     [TestCase(Constants.EmptyBoardFEN, 0)]
     [TestCase(Constants.InitialPositionFEN, 4)]
     [TestCase("8/8/8/8/8/P1P2P1P/PPPPPPPP/RNBQKBNR w KQkq - 0 1", 0)]
@@ -16,8 +22,7 @@ public class GenerateKnightMovesTest
     public void KnightMoves_Count(string fen, int expectedMoves)
     {
         var position = new Position(fen);
-        var offset = Utils.PieceOffset(position.Side);
-        var moves = MoveGenerator.GeneratePieceMovesForReference((int)Piece.N + offset, position);
+        var moves = GenerateKnightMoves(position);
 
         Assert.AreEqual(expectedMoves, moves.Count());
 
@@ -44,7 +49,7 @@ public class GenerateKnightMovesTest
         var position = new Position(Constants.TrickyTestPositionFEN);
         var offset = Utils.PieceOffset(position.Side);
         var piece = (int)Piece.N + offset;
-        var moves = MoveGenerator.GeneratePieceMovesForReference(piece, position);
+        var moves = GenerateKnightMoves(position);
 
         Assert.AreEqual(11, moves.Count(m => m.Piece() == piece));
 
@@ -113,7 +118,7 @@ public class GenerateKnightMovesTest
         var position = new Position(Constants.TrickyTestPositionReversedFEN);
         var offset = Utils.PieceOffset(position.Side);
         var piece = (int)Piece.N + offset;
-        var moves = MoveGenerator.GeneratePieceMovesForReference(piece, position);
+        var moves = GenerateKnightMoves(position);
 
         Assert.AreEqual(10, moves.Count(m => m.Piece() == piece));
 
@@ -178,7 +183,7 @@ public class GenerateKnightMovesTest
         var position = new Position(Constants.TrickyTestPositionFEN);
         var offset = Utils.PieceOffset(position.Side);
         var piece = (int)Piece.N + offset;
-        var moves = MoveGenerator.GeneratePieceMovesForReference(piece, position, capturesOnly: true);
+        var moves = GenerateKnightCaptures(position);
 
         Assert.AreEqual(3, moves.Count(m => m.Piece() == piece && m.IsCapture()));
 
@@ -215,7 +220,7 @@ public class GenerateKnightMovesTest
         var position = new Position(Constants.TrickyTestPositionReversedFEN);
         var offset = Utils.PieceOffset(position.Side);
         var piece = (int)Piece.N + offset;
-        var moves = MoveGenerator.GeneratePieceMovesForReference(piece, position, capturesOnly: true);
+        var moves = GenerateKnightCaptures(position);
 
         Assert.AreEqual(3, moves.Count(m => m.Piece() == piece && m.IsCapture()));
 
