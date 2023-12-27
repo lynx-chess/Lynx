@@ -21,7 +21,7 @@ public sealed class PositionCommand : GUIBaseCommand
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    public static Game ParseGame(ReadOnlySpan<char> positionCommandSpan)
+    public static Game ParseGame(ReadOnlySpan<char> positionCommandSpan, Move[] movePool)
     {
         try
         {
@@ -50,7 +50,7 @@ public sealed class PositionCommand : GUIBaseCommand
             Span<Range> moves = stackalloc Range[(movesSection.Length / 5) + 1]; // Number of potential half-moves provided in the string
             movesSection.Split(moves, ' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-            return new Game(fen, movesSection, moves);
+            return new Game(fen, movesSection, moves, movePool);
         }
         catch (Exception e)
         {
@@ -59,14 +59,14 @@ public sealed class PositionCommand : GUIBaseCommand
         }
     }
 
-    public static bool TryParseLastMove(string positionCommand, Game game, [NotNullWhen(true)] out Move? lastMove)
+    public static bool TryParseLastMove(string positionCommand, Game game, Move[] movePool, [NotNullWhen(true)] out Move? lastMove)
     {
         var moveString = positionCommand
                 .Split(' ', StringSplitOptions.RemoveEmptyEntries)[^1];
 
         if (!MoveExtensions.TryParseFromUCIString(
             moveString,
-            MoveGenerator.GenerateAllMoves(game.CurrentPosition, game.MovePool),
+            MoveGenerator.GenerateAllMoves(game.CurrentPosition, movePool),
             out lastMove))
         {
             _logger.Warn("Error parsing last move {0} from position command {1}", lastMove, positionCommand);

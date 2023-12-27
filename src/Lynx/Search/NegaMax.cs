@@ -156,7 +156,7 @@ public sealed partial class Engine
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
-        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, Game.MovePool);
+        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, MovePool);
 
         var scores = new int[pseudoLegalMoves.Length];
         if (_isFollowingPV)
@@ -420,7 +420,7 @@ public sealed partial class Engine
             alpha = staticEvaluation;
         }
 
-        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, Game.MovePool, capturesOnly: true);
+        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, MovePool, capturesOnly: true);
         if (pseudoLegalMoves.Length == 0)
         {
             // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358

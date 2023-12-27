@@ -371,6 +371,8 @@ public partial class ParseGameBenchmark : BaseBenchmark
 
     public static class ParseGame_ImprovedClass4
     {
+        private static Move[] MovePool = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+
         public const string Id = "position";
 
         public const string StartPositionString = "startpos";
@@ -409,7 +411,7 @@ public partial class ParseGameBenchmark : BaseBenchmark
                 Span<Range> moves = stackalloc Range[2048]; // Number of potential half-moves provided in the string
                 movesSection.Split(moves, ' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-                return new Game(fen, movesSection, moves);
+                return new Game(fen, movesSection, moves, MovePool);
             }
             catch (Exception e)
             {
@@ -421,6 +423,8 @@ public partial class ParseGameBenchmark : BaseBenchmark
 
     public static class ParseGame_ImprovedClass5
     {
+        private static Move[] MovePool = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+
         public const string Id = "position";
 
         public const string StartPositionString = "startpos";
@@ -459,7 +463,7 @@ public partial class ParseGameBenchmark : BaseBenchmark
                 Span<Range> moves = stackalloc Range[(movesSection.Length / 5) + 1]; // Number of potential half-moves provided in the string
                 movesSection.Split(moves, ' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-                return new Game(fen, movesSection, moves);
+                return new Game(fen, movesSection, moves, MovePool);
             }
             catch (Exception e)
             {
