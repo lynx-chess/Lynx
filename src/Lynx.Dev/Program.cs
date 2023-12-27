@@ -400,9 +400,12 @@ static void _23_Castling_Moves()
     var position = new Position("rn2k2r/pppppppp/8/8/8/8/PPPPPPPP/RN2K2R w KQkq - 0 1");
     position.Print();
 
-    var moves = MoveGenerator.GenerateCastlingMovesForReference(position, Utils.PieceOffset(position.Side)).ToList();
+    int index = 0;
+    var moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
 
-    foreach (var move in moves)
+    MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
+
+    foreach (var move in moves[..index])
     {
         Console.WriteLine(move);
     }
@@ -416,7 +419,7 @@ static void _26_Piece_Moves()
     var moves = MoveGenerator.GenerateKnightMoves(position).ToList();
     moves.ForEach(m => Console.WriteLine(m));
 
-    moves = MoveGenerator.GenerateAllMoves(position).ToList();
+    moves = [.. MoveGenerator.GenerateAllMoves(position)];
     Console.WriteLine($"Expected 48, found: {moves.Count}");
     foreach (var move in moves)
     {
@@ -689,7 +692,7 @@ static void ZobristTable()
     var pos = new Position(KillerPosition);
     var zobristTable = InitializeZobristTable();
     var hash = CalculatePositionHash(zobristTable, pos);
-    var updatedHash = UpdatePositionHash(zobristTable, hash, MoveGenerator.GenerateAllMoves(pos).First());
+    var updatedHash = UpdatePositionHash(zobristTable, hash, MoveGenerator.GenerateAllMoves(pos)[0]);
 
     Console.WriteLine(updatedHash);
 }
@@ -1072,7 +1075,7 @@ static void TranspositionTable()
 static void UnmakeMove()
 {
     var pos = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq");
-    var a = Perft.ResultsImpl(pos, 1, default);
+    var a = Perft.ResultsImpl(pos, 1, default, new Move[Constants.MaxNumberOfPossibleMovesInAPosition]);
 
     TestMoveGen(Constants.InitialPositionFEN);
     TestMoveGen(Constants.TTPositionFEN);
@@ -1097,7 +1100,6 @@ static void UnmakeMove()
 
             Console.WriteLine($"Position\t{newPosition.FEN()}, Zobrist key {newPosition.UniqueIdentifier}");
             Console.WriteLine($"Position\t{position.FEN()}, Zobrist key {position.UniqueIdentifier}");
-
 
             Console.WriteLine($"Unmaking {move.ToEPDString()} in\t{position.FEN()}");
 

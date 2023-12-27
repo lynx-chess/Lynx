@@ -786,7 +786,7 @@ public class Position
             endGameBonus += Configuration.EngineSettings.PassedPawnBonus[rank].EG;
         }
 
-        return (middleGameBonus, endGameBonus); ;
+        return (middleGameBonus, endGameBonus);
     }
 
     /// <summary>
