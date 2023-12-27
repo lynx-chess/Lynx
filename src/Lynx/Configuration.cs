@@ -122,18 +122,18 @@ public sealed class EngineSettings
     /// <summary>
     /// Value originally from Stormphrax, who apparently took it from Viridithas
     /// </summary>
-    public double LMR_Base { get; set; } = 0.74;
+    public double LMR_Base { get; set; } = 0.79;
 
     /// <summary>
     /// Value originally from Akimbo
     /// </summary>
-    public double LMR_Divisor { get; set; } = 2.94;
+    public double LMR_Divisor { get; set; } = 2.89;
 
     public int NMP_MinDepth { get; set; } = 3;
 
     public int NMP_BaseDepthReduction { get; set; } = 1;
 
-    public int AspirationWindow_Delta { get; set; } = 16;
+    public int AspirationWindow_Delta { get; set; } = 15;
 
     public int AspirationWindow_MinDepth { get; set; } = 7;
 
@@ -143,9 +143,9 @@ public sealed class EngineSettings
 
     public int Razoring_MaxDepth { get; set; } = 3;
 
-    public int Razoring_Depth1Bonus { get; set; } = 106;
+    public int Razoring_Depth1Bonus { get; set; } = 102;
 
-    public int Razoring_NotDepth1Bonus { get; set; } = 156;
+    public int Razoring_NotDepth1Bonus { get; set; } = 161;
 
     public int IIR_MinDepth { get; set; } = 2;
 
