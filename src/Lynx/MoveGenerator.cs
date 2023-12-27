@@ -82,6 +82,37 @@ public static class MoveGenerator
     }
 
     /// <summary>
+    /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="movePool"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Span<Move> GenerateAllMoves(Position position, Span<Move> movePool)
+    {
+#if DEBUG
+        if (position.Side == Side.Both)
+        {
+            return [];
+        }
+#endif
+
+        int localIndex = 0;
+
+        var offset = Utils.PieceOffset(position.Side);
+
+        GenerateAllPawnMoves(ref localIndex, movePool, position, offset);
+        GenerateCastlingMoves(ref localIndex, movePool, position);
+        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.K + offset, position);
+        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.N + offset, position);
+        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.B + offset, position);
+        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.R + offset, position);
+        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.Q + offset, position);
+
+        return movePool[..localIndex];
+    }
+
+    /// <summary>
     /// Generates all psuedo-legal captures from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
     /// </summary>
     /// <param name="position"></param>
@@ -112,8 +143,39 @@ public static class MoveGenerator
         return movePool[..localIndex];
     }
 
+    /// <summary>
+    /// Generates all psuedo-legal captures from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="movePool"></param>
+    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void GenerateAllPawnMoves(ref int localIndex, Move[] movePool, Position position, int offset)
+    public static Span<Move> GenerateAllCaptures(Position position, Span<Move> movePool)
+    {
+#if DEBUG
+        if (position.Side == Side.Both)
+        {
+            return [];
+        }
+#endif
+
+        int localIndex = 0;
+
+        var offset = Utils.PieceOffset(position.Side);
+
+        GeneratePawnCapturesAndPromotions(ref localIndex, movePool, position, offset);
+        GenerateCastlingMoves(ref localIndex, movePool, position);
+        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.K + offset, position);
+        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.N + offset, position);
+        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.B + offset, position);
+        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.R + offset, position);
+        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.Q + offset, position);
+
+        return movePool[..localIndex];
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void GenerateAllPawnMoves(ref int localIndex, Span<Move> movePool, Position position, int offset)
     {
         int sourceSquare, targetSquare;
 
@@ -198,7 +260,7 @@ public static class MoveGenerator
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void GeneratePawnCapturesAndPromotions(ref int localIndex, Move[] movePool, Position position, int offset)
+    internal static void GeneratePawnCapturesAndPromotions(ref int localIndex, Span<Move> movePool, Position position, int offset)
     {
         int sourceSquare, targetSquare;
 
@@ -277,7 +339,7 @@ public static class MoveGenerator
     /// <param name="position"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void GenerateCastlingMoves(ref int localIndex, Move[] movePool, Position position)
+    internal static void GenerateCastlingMoves(ref int localIndex, Span<Move> movePool, Position position)
     {
         if (position.Castle != default)
         {
@@ -354,7 +416,7 @@ public static class MoveGenerator
     /// <param name="position"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void GenerateAllPieceMoves(ref int localIndex, Move[] movePool, int piece, Position position)
+    internal static void GenerateAllPieceMoves(ref int localIndex, Span<Move> movePool, int piece, Position position)
     {
         var bitboard = position.PieceBitBoards[piece];
         int sourceSquare, targetSquare;
@@ -392,7 +454,7 @@ public static class MoveGenerator
     /// <param name="position"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void GeneratePieceCaptures(ref int localIndex, Move[] movePool, int piece, Position position)
+    internal static void GeneratePieceCaptures(ref int localIndex, Span<Move> movePool, int piece, Position position)
     {
         var bitboard = position.PieceBitBoards[piece];
         int sourceSquare, targetSquare;
