@@ -5,6 +5,12 @@ namespace Lynx.Test.MoveGeneration;
 
 public class GenerateBishopMovesTest
 {
+    private static IEnumerable<Move> GenerateBishopMoves(Position position) =>
+        MoveGenerator.GenerateAllMoves(position, new Move[Constants.MaxNumberOfPossibleMovesInAPosition]).Where(m => m.Piece() == (int)Piece.B || m.Piece() == (int)Piece.b);
+
+    private static IEnumerable<Move> GenerateBishopCaptures(Position position) =>
+        MoveGenerator.GenerateAllCaptures(position, new Move[Constants.MaxNumberOfPossibleMovesInAPosition]).Where(m => m.Piece() == (int)Piece.B || m.Piece() == (int)Piece.b);
+
     [TestCase(Constants.EmptyBoardFEN, 0)]
     [TestCase(Constants.InitialPositionFEN, 0)]
     [TestCase("8/8/8/8/8/8/P1P2P1P/RNBQKBNR w KQkq - 0 1", 14)]
@@ -16,8 +22,7 @@ public class GenerateBishopMovesTest
     public void BishopMoves_Count(string fen, int expectedMoves)
     {
         var position = new Position(fen);
-        var offset = Utils.PieceOffset(position.Side);
-        var moves = MoveGenerator.GeneratePieceMovesForReference((int)Piece.B + offset, position);
+        var moves = GenerateBishopMoves(position);
 
         Assert.AreEqual(expectedMoves, moves.Count());
 
@@ -44,7 +49,7 @@ public class GenerateBishopMovesTest
         var position = new Position(Constants.TrickyTestPositionFEN);
         var offset = Utils.PieceOffset(position.Side);
         var piece = (int)Piece.B + offset;
-        var moves = MoveGenerator.GeneratePieceMovesForReference(piece, position);
+        var moves = GenerateBishopMoves(position);
 
         Assert.AreEqual(11, moves.Count(m => m.Piece() == piece));
 
@@ -113,7 +118,7 @@ public class GenerateBishopMovesTest
         var position = new Position(Constants.TrickyTestPositionReversedFEN);
         var offset = Utils.PieceOffset(position.Side);
         var piece = (int)Piece.B + offset;
-        var moves = MoveGenerator.GeneratePieceMovesForReference(piece, position);
+        var moves = GenerateBishopMoves(position);
 
         Assert.AreEqual(8, moves.Count(m => m.Piece() == piece));
 
@@ -170,7 +175,7 @@ public class GenerateBishopMovesTest
         var position = new Position(Constants.TrickyTestPositionFEN);
         var offset = Utils.PieceOffset(position.Side);
         var piece = (int)Piece.B + offset;
-        var moves = MoveGenerator.GeneratePieceMovesForReference(piece, position, capturesOnly: true);
+        var moves = GenerateBishopCaptures(position);
 
         Assert.AreEqual(1, moves.Count(m => m.Piece() == piece && m.IsCapture()));
 
@@ -199,7 +204,7 @@ public class GenerateBishopMovesTest
         var position = new Position(Constants.TrickyTestPositionReversedFEN);
         var offset = Utils.PieceOffset(position.Side);
         var piece = (int)Piece.B + offset;
-        var moves = MoveGenerator.GeneratePieceMovesForReference(piece, position, capturesOnly: true);
+        var moves = GenerateBishopCaptures(position);
 
         Assert.AreEqual(1, moves.Count(m => m.Piece() == piece && m.IsCapture()));
 

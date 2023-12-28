@@ -198,6 +198,8 @@ public sealed partial class Engine
 
         Task.Run(async () =>
         {
+            Thread.CurrentThread.Priority = ThreadPriority.Highest;
+
             try
             {
                 var searchResult = await BestMove(goCommand);

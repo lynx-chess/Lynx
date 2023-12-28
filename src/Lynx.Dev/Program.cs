@@ -416,7 +416,7 @@ static void _26_Piece_Moves()
     var position = new Position(TrickyPosition);
     position.Print();
 
-    var moves = MoveGenerator.GenerateKnightMoves(position).ToList();
+    var moves = MoveGenerator.GenerateAllMoves(position).Where(m => m.Piece() == (int)Piece.N || m.Piece() == (int)Piece.n).ToList();
     moves.ForEach(m => Console.WriteLine(m));
 
     moves = [.. MoveGenerator.GenerateAllMoves(position)];
