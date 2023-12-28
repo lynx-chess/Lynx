@@ -127,13 +127,13 @@ public sealed class EngineSettings
     /// <summary>
     /// Value originally from Akimbo
     /// </summary>
-    public double LMR_Divisor { get; set; } = 2.89;
+    public double LMR_Divisor { get; set; } = 2.85;
 
     public int NMP_MinDepth { get; set; } = 3;
 
-    public int NMP_BaseDepthReduction { get; set; } = 1;
+    public int NMP_BaseDepthReduction { get; set; } = 2;
 
-    public int AspirationWindow_Delta { get; set; } = 15;
+    public int AspirationWindow_Delta { get; set; } = 17;
 
     public int AspirationWindow_MinDepth { get; set; } = 7;
 
@@ -143,17 +143,17 @@ public sealed class EngineSettings
 
     public int Razoring_MaxDepth { get; set; } = 3;
 
-    public int Razoring_Depth1Bonus { get; set; } = 102;
+    public int Razoring_Depth1Bonus { get; set; } = 105;
 
-    public int Razoring_NotDepth1Bonus { get; set; } = 161;
+    public int Razoring_NotDepth1Bonus { get; set; } = 162;
 
     public int IIR_MinDepth { get; set; } = 2;
 
-    public int LMP_MaxDepth { get; set; } = 1;
+    public int LMP_MaxDepth { get; set; } = 2;
 
     public int LMP_BaseMovesToTry { get; set; } = 1;
 
-    public int LMP_MovesDepthMultiplier { get; set; } = 11;
+    public int LMP_MovesDepthMultiplier { get; set; } = 10;
 
     public int History_MaxMoveValue { get; set; } = 8_192;
 
