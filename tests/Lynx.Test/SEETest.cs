@@ -86,7 +86,7 @@ public class SEETest
         {
             if (expectedScore >= 0)
             {
-                Assert.True(SEE.SEE(position, move));
+                Assert.True(SEE.IsGoodCapture(position, move));
             }
             else
             {
