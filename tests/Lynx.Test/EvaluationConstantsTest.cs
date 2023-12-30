@@ -57,7 +57,7 @@ public class EvaluationConstantsTest
                 }
             }
         }
-        Assert.Greater(TTMoveScoreValue, maxMVVLVAMoveValue + CaptureMoveBaseScoreValue);
+        Assert.Greater(TTMoveScoreValue, maxMVVLVAMoveValue + BadCaptureMoveBaseScoreValue);
     }
 
     [Test]
@@ -85,7 +85,7 @@ public class EvaluationConstantsTest
         checked
         {
 #pragma warning disable S3949 // Calculations should not overflow - well, we're adding checked just in case
-            Assert.Less(FirstKillerMoveValue, minMVVLVAMoveValue + CaptureMoveBaseScoreValue);
+            Assert.Less(FirstKillerMoveValue, minMVVLVAMoveValue + BadCaptureMoveBaseScoreValue);
 #pragma warning restore S3949 // Calculations should not overflow
         }
 
@@ -113,7 +113,7 @@ public class EvaluationConstantsTest
         checked
         {
 #pragma warning disable S3949 // Calculations should not overflow - well, we're adding checked just in case
-            Assert.Less(SecondKillerMoveValue, minMVVLVAMoveValue + CaptureMoveBaseScoreValue);
+            Assert.Less(SecondKillerMoveValue, minMVVLVAMoveValue + BadCaptureMoveBaseScoreValue);
 #pragma warning restore S3949 // Calculations should not overflow
         }
 

@@ -64,6 +64,6 @@ public class MoveScoreTest : BaseTest
         var allMoves = MoveGenerator.GenerateAllMoves(engine.Game.CurrentPosition).OrderByDescending(move => engine.ScoreMove(move, default, default)).ToList();
 
         Assert.AreEqual(moveWithHighestScore, allMoves[0].UCIString());
-        Assert.AreEqual(EvaluationConstants.CaptureMoveBaseScoreValue + EvaluationConstants.MostValueableVictimLeastValuableAttacker[0, 0], engine.ScoreMove(allMoves[0], default, default));
+        Assert.AreEqual(EvaluationConstants.BadCaptureMoveBaseScoreValue + EvaluationConstants.MostValueableVictimLeastValuableAttacker[0, 0], engine.ScoreMove(allMoves[0], default, default));
     }
 }
