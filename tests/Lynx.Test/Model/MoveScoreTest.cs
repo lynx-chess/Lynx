@@ -23,17 +23,54 @@ public class MoveScoreTest : BaseTest
     public void MoveScore(string fen)
     {
         var engine = GetEngine(fen);
-
-        var allMoves = MoveGenerator.GenerateAllMoves(engine.Game.CurrentPosition).OrderByDescending(move => engine.ScoreMove(move, default, default)).ToList();
+        var movePool = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        var allMoves = MoveGenerator.GenerateAllMoves(engine.Game.CurrentPosition, movePool).OrderByDescending(move => engine.ScoreMove(move, default, default)).ToList();
 
         Assert.AreEqual("e2a6", allMoves[0].UCIString());     // BxB
         Assert.AreEqual("d5e6", allMoves[1].UCIString());     // PxP
         Assert.AreEqual("g2h3", allMoves[2].UCIString());     // PxP
-        Assert.AreEqual("f3f6", allMoves[3].UCIString());     // QxN
-        Assert.AreEqual("e5d7", allMoves[4].UCIString());     // NxP
-        Assert.AreEqual("e5f7", allMoves[5].UCIString());     // NxP
-        Assert.AreEqual("e5g6", allMoves[6].UCIString());     // NxP
-        Assert.AreEqual("f3h3", allMoves[7].UCIString());     // QxP
+        Assert.AreEqual("f3f6", allMoves[^5].UCIString());     // QxN
+        Assert.AreEqual("e5d7", allMoves[^4].UCIString());     // NxP
+        Assert.AreEqual("e5f7", allMoves[^3].UCIString());     // NxP
+        Assert.AreEqual("e5g6", allMoves[^2].UCIString());     // NxP
+        Assert.AreEqual("f3h3", allMoves[^1].UCIString());     // QxP
+
+        foreach (var move in allMoves.Where(move => !move.IsCapture() && !move.IsCastle()))
+        {
+            Assert.AreEqual(EvaluationConstants.BaseMoveScore, engine.ScoreMove(move, default, default));
+        }
+    }
+
+    /// <summary>
+    /// 'Tricky position'
+    /// 8   r . . . k . . r
+    /// 7   p . p p q p b .
+    /// 6   b n . . p n p .
+    /// 5   . . . P N . . .
+    /// 4   . p . . P . . .
+    /// 3   . . N . . Q . p
+    /// 2   P P P B B P P P
+    /// 1   R . . . K . . R
+    ///     a b c d e f g h
+    /// This tests indirectly <see cref="EvaluationConstants.MostValueableVictimLeastValuableAttacker"/>
+    /// </summary>
+    /// <param name="fen"></param>
+    [TestCase(Constants.TrickyTestPositionFEN)]
+    public void CaptureScore(string fen)
+    {
+        var engine = GetEngine(fen);
+        var movePool = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        var allMoves = MoveGenerator.GenerateAllCaptures(engine.Game.CurrentPosition, movePool).OrderByDescending(move => engine.ScoreMove(move, default, default)).ToList();
+
+        Assert.AreEqual("e2a6", allMoves[0].UCIString());     // BxB
+        Assert.AreEqual("d5e6", allMoves[1].UCIString());     // PxP
+        Assert.AreEqual("g2h3", allMoves[2].UCIString());     // PxP
+        // Castling moves in the middle
+        Assert.AreEqual("f3f6", allMoves[5].UCIString());     // QxN
+        Assert.AreEqual("e5d7", allMoves[6].UCIString());     // NxP
+        Assert.AreEqual("e5f7", allMoves[7].UCIString());     // NxP
+        Assert.AreEqual("e5g6", allMoves[8].UCIString());     // NxP
+        Assert.AreEqual("f3h3", allMoves[9].UCIString());     // QxP
 
         foreach (var move in allMoves.Where(move => !move.IsCapture() && !move.IsCastle()))
         {

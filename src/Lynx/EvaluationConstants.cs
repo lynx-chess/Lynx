@@ -338,14 +338,14 @@ public static readonly int[] EndGameKingTable =
 
     public const int PromotionMoveScoreValue = 65_536;
 
-    public const int BadCaptureMoveBaseScoreValue = 32_768;
+    public const int BadCaptureMoveBaseScoreValue = int.MinValue / 4 * 3;
 
     //public const int MaxHistoryMoveValue => Configuration.EngineSettings.MaxHistoryMoveValue;
 
     /// <summary>
     /// Negative offset to ensure history move scores don't reach other move ordering values
     /// </summary>
-    public const int BaseMoveScore = int.MinValue / 2;
+    public const int BaseMoveScore = int.MinValue / 4;
 
     #endregion
 
