@@ -454,7 +454,7 @@ public sealed partial class Engine
             var move = pseudoLegalMoves[i];
 
             // Prune bad captures
-            if (!SEE.IsGoodCapture(Game.CurrentPosition, move))
+            if (move.IsCapture() && move.PromotedPiece() == default && !move.IsEnPassant() && !SEE.IsGoodCapture(Game.CurrentPosition, move))
             {
                 continue;
             }
