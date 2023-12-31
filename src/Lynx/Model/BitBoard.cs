@@ -7,7 +7,11 @@ namespace Lynx.Model;
 
 public static class BitBoardExtensions
 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool Empty(this BitBoard board) => board == default;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool NotEmpty(this BitBoard board) => board != default;
 
     public static BitBoard Initialize(params BoardSquare[] occupiedSquares)
     {
@@ -101,6 +105,17 @@ public static class BitBoardExtensions
         bitboard ^= (1ul << squareA | 1ul << squareB);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ulong LSB(this BitBoard board)
+    {
+        if (System.Runtime.Intrinsics.X86.Bmi1.IsSupported)
+        {
+            return System.Runtime.Intrinsics.X86.Bmi1.X64.ExtractLowestSetBit(board);
+        }
+
+        return board & (~board + 1);
+    }
+
     #region Static methods
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -150,6 +165,30 @@ public static class BitBoardExtensions
     public static int CountBits(this BitBoard board)
     {
         return BitOperations.PopCount(board);
+    }
+
+    /// <summary>
+    /// Extracts the bit that represents each square on a bitboard
+    /// </summary>
+    /// <param name="boardSquare"></param>
+    /// <returns></returns>
+    public static ulong SquareBit(int boardSquare)
+    {
+        return 1UL << boardSquare;
+    }
+
+    public static bool Contains(this BitBoard board, int boardSquare)
+    {
+        var bit = SquareBit(boardSquare);
+
+        return (board & bit) != default;
+    }
+
+    public static bool DoesNotContain(this BitBoard board, int boardSquare)
+    {
+        var bit = SquareBit(boardSquare);
+
+        return (board & bit) == default;
     }
 
     #endregion

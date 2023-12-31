@@ -93,13 +93,13 @@ public sealed partial class Engine
             millisecondsIncrement = goCommand.BlackIncrement;
         }
 
-        if (millisecondsLeft > 0)
+        if (millisecondsLeft != 0)  // Cutechess sometimes sends negative wtime/btime
         {
             if (goCommand.MovesToGo == default)
             {
                 // Inspired by Alexandria: time overhead to avoid timing out in the engine-gui communication process
                 millisecondsLeft -= 50;
-                Math.Clamp(millisecondsLeft, 50, int.MaxValue); // Avoiding 0/negative values
+                millisecondsLeft = Math.Clamp(millisecondsLeft, 50, int.MaxValue); // Avoiding 0/negative values
 
                 // 1/30, suggested by Serdra (EP discord)
                 decisionTime = Convert.ToInt32(Math.Min(0.5 * millisecondsLeft, (millisecondsLeft * 0.03333) + millisecondsIncrement));
@@ -107,7 +107,7 @@ public sealed partial class Engine
             else
             {
                 millisecondsLeft -= 500;
-                Math.Clamp(millisecondsLeft, 50, int.MaxValue); // Avoiding 0/negative values
+                millisecondsLeft = Math.Clamp(millisecondsLeft, 50, int.MaxValue); // Avoiding 0/negative values
 
                 decisionTime = Convert.ToInt32((millisecondsLeft / goCommand.MovesToGo) + millisecondsIncrement);
             }
