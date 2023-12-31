@@ -122,38 +122,38 @@ public sealed class EngineSettings
     /// <summary>
     /// Value originally from Stormphrax, who apparently took it from Viridithas
     /// </summary>
-    public double LMR_Base { get; set; } = 0.74;
+    public double LMR_Base { get; set; } = 0.76;
 
     /// <summary>
     /// Value originally from Akimbo
     /// </summary>
-    public double LMR_Divisor { get; set; } = 2.94;
+    public double LMR_Divisor { get; set; } = 2.54;
 
     public int NMP_MinDepth { get; set; } = 3;
 
     public int NMP_BaseDepthReduction { get; set; } = 1;
 
-    public int AspirationWindow_Delta { get; set; } = 16;
+    public int AspirationWindow_Delta { get; set; } = 22;
 
-    public int AspirationWindow_MinDepth { get; set; } = 7;
+    public int AspirationWindow_MinDepth { get; set; } = 8;
 
-    public int RFP_MaxDepth { get; set; } = 4;
+    public int RFP_MaxDepth { get; set; } = 3;
 
-    public int RFP_DepthScalingFactor { get; set; } = 85;
+    public int RFP_DepthScalingFactor { get; set; } = 74;
 
-    public int Razoring_MaxDepth { get; set; } = 3;
+    public int Razoring_MaxDepth { get; set; } = 4;
 
-    public int Razoring_Depth1Bonus { get; set; } = 106;
+    public int Razoring_Depth1Bonus { get; set; } = 116;
 
-    public int Razoring_NotDepth1Bonus { get; set; } = 156;
+    public int Razoring_NotDepth1Bonus { get; set; } = 177;
 
-    public int IIR_MinDepth { get; set; } = 2;
+    public int IIR_MinDepth { get; set; } = 3;
 
-    public int LMP_MaxDepth { get; set; } = 1;
+    public int LMP_MaxDepth { get; set; } = 2;
 
     public int LMP_BaseMovesToTry { get; set; } = 1;
 
-    public int LMP_MovesDepthMultiplier { get; set; } = 11;
+    public int LMP_MovesDepthMultiplier { get; set; } = 9;
 
     public int History_MaxMoveValue { get; set; } = 8_192;
 
