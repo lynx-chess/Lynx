@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using System.Transactions;
 
 namespace Lynx;
 
@@ -451,6 +452,12 @@ public sealed partial class Engine
             }
 
             var move = pseudoLegalMoves[i];
+
+            // Prune bad captures
+            if (scores[i] < EvaluationConstants.PromotionMoveScoreValue && scores[i] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
+            {
+                continue;
+            }
 
             var gameState = position.MakeMove(move);
             if (!position.WasProduceByAValidMove())
