@@ -82,7 +82,7 @@ public class SEETest
         var allMoves = MoveGenerator.GenerateAllMoves(position);
         var move = allMoves.Single(m => m.UCIString() == moveUCIString);
 
-        if (move.IsCapture() && move.PromotedPiece() == default)
+        if (move.IsCapture() && move.PromotedPiece() == default && !move.IsEnPassant())
         {
             if (expectedScore >= 0)
             {

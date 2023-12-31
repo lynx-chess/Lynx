@@ -18,9 +18,20 @@ public static class SEE
 
     #pragma warning restore IDE0055
 
+    /// <summary>
+    /// Doesn't handle non-captures, promotions and en-passants
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="move"></param>
+    /// <param name="threshold"></param>
+    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsGoodCapture(Position position, Move move, short threshold = 0)
     {
+        System.Diagnostics.Debug.Assert(move.IsCapture(), $"{nameof(IsGoodCapture)} doesn't handle non-capture moves");
+        System.Diagnostics.Debug.Assert(move.PromotedPiece() == default, $"{nameof(IsGoodCapture)} doesn't handle promotion moves");
+        System.Diagnostics.Debug.Assert(!move.IsEnPassant(), $"{nameof(IsGoodCapture)} potentially doesn't handle en-passant moves");
+
         var sideToMove = position.Side;
 
         var score = Gain(position, move) - threshold;
@@ -31,10 +42,7 @@ public static class SEE
             return false;
         }
 
-        var next = move.PromotedPiece() != default
-            ? move.PromotedPiece()
-            : move.Piece();
-
+        var next = move.Piece();
         score -= _pieceValues[next];
 
         // If risking our piece being fully lost and the exchange value is still >= 0
@@ -104,94 +112,23 @@ public static class SEE
         return (int)sideToMove != us;
     }
 
+    /// <summary>
+    /// Doesn't handle non-captures, promotions and en-passants
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="move"></param>
+    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int SEEScore(Position position, Move move, short threshold = 0)
-    {
-        var sideToMove = position.Side;
+    private static int Gain(Position position, Move move) => _pieceValues[position.PieceAt(move.TargetSquare())];
 
-        var score = Gain(position, move) - threshold;
-
-        if (score < 0)
-        {
-            return score;
-        }
-
-        var next = move.PromotedPiece() != default
-            ? move.PromotedPiece()
-            : move.Piece();
-
-        score -= _pieceValues[next];
-
-        if (score >= 0)
-        {
-            return score;
-        }
-
-        var targetSquare = move.TargetSquare();
-
-        var occupancy = position.OccupancyBitBoards[(int)Side.Both]
-            ^ BitBoardExtensions.SquareBit(move.SourceSquare())
-            ^ BitBoardExtensions.SquareBit(targetSquare);
-
-        var queens = position.Queens;
-        var bishops = queens | position.Bishops;
-        var rooks = queens | position.Rooks;
-
-        var attackers = position.AllAttackersTo(targetSquare, occupancy);
-
-        var us = Utils.OppositeSide(sideToMove);
-
-        while (true)
-        {
-            var ourAttackers = attackers & position.OccupancyBitBoards[us];
-
-            if (ourAttackers.Empty())
-            {
-                break;
-            }
-
-            var nextPiece = PopLeastValuableAttacker(position, ref occupancy, ourAttackers, us);
-
-            if (nextPiece == Piece.P || nextPiece == Piece.p
-                || nextPiece == Piece.B || nextPiece == Piece.b
-                || nextPiece == Piece.Q || nextPiece == Piece.q)
-            {
-                attackers |= Attacks.BishopAttacks(targetSquare, occupancy) & bishops;
-            }
-
-            if (nextPiece == Piece.R || nextPiece == Piece.r
-                || nextPiece == Piece.Q || nextPiece == Piece.q)
-            {
-                attackers |= Attacks.RookAttacks(targetSquare, occupancy) & rooks;
-            }
-
-            attackers &= occupancy;
-
-            score = -score - 1 - _pieceValues[(int)nextPiece];
-            us = Utils.OppositeSide(us);
-
-            if (score >= 0)
-            {
-                // our only attacker is our king, but the opponent still has defenders
-
-                if ((nextPiece == Piece.K || nextPiece == Piece.k)
-                    && !(attackers & position.OccupancyBitBoards[us]).Empty())
-                {
-                    us = Utils.OppositeSide(us);
-                }
-
-                break;
-            }
-        }
-
-        return (int)sideToMove == us
-            ? -score
-            : score;
-        //return (int)sideToMove != us;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int Gain(Position position, Move move)
+    /// <summary>
+    /// Doesn't handle non-captures, promotions and en-passants
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="move"></param>
+    /// <returns></returns>
+    [Obsolete("Since we're not handling non-captures, promotiosn and en-passants, we don't really need this")]
+    private static int CompleteGain(Position position, Move move)
     {
         if (move.IsCastle())
         {
