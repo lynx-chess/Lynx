@@ -93,7 +93,7 @@ public sealed partial class Engine
             millisecondsIncrement = goCommand.BlackIncrement;
         }
 
-        if (millisecondsLeft > 0)
+        if (millisecondsLeft != 0)  // Cutechess sometimes sends negative wtime/btime
         {
             if (goCommand.MovesToGo == default)
             {
