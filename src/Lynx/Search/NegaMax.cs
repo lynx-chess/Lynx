@@ -88,12 +88,11 @@ public sealed partial class Engine
         {
             var (staticEval, phase) = position.StaticEvaluation();
 
-            if (ttElementType != default &&
-                (ttElementType == NodeType.Exact
+            // Use TT score as a better positional eval - cj5716 and Sirius
+            if (ttElementType == NodeType.Exact
                     || (ttElementType == NodeType.Beta && ttEvaluation >= staticEval)
-                    || (ttElementType == NodeType.Alpha && ttEvaluation <= staticEval)))
+                    || (ttElementType == NodeType.Alpha && ttEvaluation <= staticEval))
             {
-                // preferrably in a separate variable
                 staticEval = ttEvaluation;
             }
 
