@@ -159,6 +159,8 @@ public sealed partial class Engine
         return score + rawHistoryBonus - (score * Math.Abs(rawHistoryBonus) / Configuration.EngineSettings.History_MaxMoveValue);
     }
 
+#pragma warning disable RCS1226 // Add paragraph to documentation comment
+#pragma warning disable RCS1243 // Duplicate word in a comment
     /// <summary>
     /// When asked to copy an incomplete PV one level ahead, clears the rest of the PV Table+
     /// PV Table at depth 3
@@ -182,6 +184,8 @@ public sealed partial class Engine
     /// <param name="target"></param>
     /// <param name="source"></param>
     /// <param name="moveCountToCopy"></param>
+#pragma warning restore RCS1243 // Duplicate word in a comment
+#pragma warning restore RCS1226 // Add paragraph to documentation comment
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void CopyPVTableMoves(int target, int source, int moveCountToCopy)
     {
