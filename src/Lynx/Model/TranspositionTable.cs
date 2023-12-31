@@ -101,44 +101,38 @@ public static class TranspositionTableExtensions
     /// <param name="tt"></param>
     /// <param name="ttMask"></param>
     /// <param name="position"></param>
-    /// <param name="depth"></param>
     /// <param name="ply">Ply</param>
     /// <param name="alpha"></param>
     /// <param name="beta"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static (int Evaluation, ShortMove BestMove, NodeType NodeType) ProbeHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int alpha, int beta)
+    public static (int Evaluation, ShortMove BestMove, NodeType NodeType, int Depth) ProbeHash(this TranspositionTable tt, int ttMask, Position position, int ply, int alpha, int beta)
     {
         if (!Configuration.EngineSettings.TranspositionTableEnabled)
         {
-            return (EvaluationConstants.NoHashEntry, default, default);
+            return (EvaluationConstants.NoHashEntry, default, default, -1);
         }
 
         ref var entry = ref tt[position.UniqueIdentifier & ttMask];
 
         if ((position.UniqueIdentifier >> 48) != entry.Key)
         {
-            return (EvaluationConstants.NoHashEntry, default, default);
+            return (EvaluationConstants.NoHashEntry, default, default, -1);
         }
 
-        var eval = EvaluationConstants.NoHashEntry;
+        // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
+        // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
+        var score = RecalculateMateScores(entry.Score, ply);
 
-        if (entry.Depth >= depth)
+        var eval = entry.Type switch
         {
-            // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
-            // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
-            var score = RecalculateMateScores(entry.Score, ply);
+            NodeType.Exact => score,
+            NodeType.Alpha when score <= alpha => alpha,
+            NodeType.Beta when score >= beta => beta,
+            _ => EvaluationConstants.NoHashEntry
+        };
 
-            eval = entry.Type switch
-            {
-                NodeType.Exact => score,
-                NodeType.Alpha when score <= alpha => alpha,
-                NodeType.Beta when score >= beta => beta,
-                _ => EvaluationConstants.NoHashEntry
-            };
-        }
-
-        return (eval, entry.Move, entry.Type);
+        return (eval, entry.Move, entry.Type, entry.Depth);
     }
 
     /// <summary>
@@ -198,7 +192,8 @@ public static class TranspositionTableExtensions
     /// <param name="ply"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static int RecalculateMateScores(int score, int ply) => score +
+    internal static int RecalculateMateScores(int score, int ply) =>
+        score +
             score switch
             {
                 > EvaluationConstants.PositiveCheckmateDetectionLimit => -EvaluationConstants.CheckmateDepthFactor * ply,

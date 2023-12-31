@@ -41,11 +41,13 @@ public sealed partial class Engine
         ShortMove ttBestMove = default;
         NodeType ttElementType = default;
         int ttEvaluation = default;
+        bool ttHit = false;
 
         if (!isRoot)
         {
-            (ttEvaluation, ttBestMove, ttElementType) = _tt.ProbeHash(_ttMask, position, depth, ply, alpha, beta);
-            if (ttEvaluation != EvaluationConstants.NoHashEntry)
+            (ttEvaluation, ttBestMove, ttElementType, int entryDepth) = _tt.ProbeHash(_ttMask, position, ply, alpha, beta);
+            ttHit = ttEvaluation != EvaluationConstants.NoHashEntry;
+            if (ttHit && entryDepth >= depth)
             {
                 return ttEvaluation;
             }
@@ -100,7 +102,7 @@ public sealed partial class Engine
                 && staticEval >= beta
                 && !parentWasNullMove
                 && phase > 2   // Zugzwang risk reduction: pieces other than pawn presents
-                && (ttElementType != NodeType.Alpha || ttEvaluation >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
+                && (!ttHit || ttElementType != NodeType.Alpha || ttEvaluation >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
             {
                 var nmpReduction = Configuration.EngineSettings.NMP_BaseDepthReduction + ((depth + 1) / 3);   // Clarity
 
@@ -405,8 +407,8 @@ public sealed partial class Engine
         var nextPvIndex = PVTable.Indexes[ply + 1];
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
-        var ttProbeResult = _tt.ProbeHash(_ttMask, position, 0, ply, alpha, beta);
-        if (ttProbeResult.Evaluation != EvaluationConstants.NoHashEntry)
+        var ttProbeResult = _tt.ProbeHash(_ttMask, position, ply, alpha, beta);
+        if (ttProbeResult.Evaluation != EvaluationConstants.NoHashEntry && ttProbeResult.Depth >= 0)
         {
             return ttProbeResult.Evaluation;
         }
