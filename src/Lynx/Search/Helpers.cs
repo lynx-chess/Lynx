@@ -154,27 +154,36 @@ public sealed partial class Engine
         return score + rawHistoryBonus - (score * Math.Abs(rawHistoryBonus) / Configuration.EngineSettings.History_MaxMoveValue);
     }
 
+#pragma warning disable RCS1226 // Add paragraph to documentation comment
+#pragma warning disable RCS1243 // Duplicate word in a comment
+    /// <summary>
+    /// When asked to copy an incomplete PV one level ahead, clears the rest of the PV Table+
+    /// PV Table at depth 3
+    /// Copying 60 moves
+    /// src: 250, tgt: 190
+    ///  0   Qxb2   Qxb2   h4     a8     a8     a8     a8     a8
+    ///  64         b1=Q   exf6   Kxf6   a8     a8     a8     a8
+    ///  127               a8     b1=Q   Qxb1   Qxb1   a8     a8
+    ///  189                      Qxb1   Qxb1   Qxb1   a8     a8
+    ///  250                             a8     Qxb1   a8     a8
+    ///  310                                    a8     a8     a8
+    ///
+    /// PV Table at depth 3
+    ///  0   Qxb2   Qxb2   h4     a8     a8     a8     a8     a8
+    ///  64         b1=Q   exf6   Kxf6   a8     a8     a8     a8
+    ///  127               a8     b1=Q   Qxb1   Qxb1   a8     a8
+    ///  189                      Qxb1   a8     a8     a8     a8
+    ///  250                             a8     a8     a8     a8
+    ///  310                                    a8     a8     a8
+    /// </summary>
+    /// <param name="target"></param>
+    /// <param name="source"></param>
+    /// <param name="moveCountToCopy"></param>
+#pragma warning restore RCS1243 // Duplicate word in a comment
+#pragma warning restore RCS1226 // Add paragraph to documentation comment
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void CopyPVTableMoves(int target, int source, int moveCountToCopy)
     {
-        // When asked to copy an incomplete PV one level ahead, clears the rest of the PV Table+
-        // PV Table at depth 3
-        // Copying 60 moves
-        // src: 250, tgt: 190
-        //  0   Qxb2   Qxb2   h4     a8     a8     a8     a8     a8
-        //  64         b1=Q   exf6   Kxf6   a8     a8     a8     a8
-        //  127               a8     b1=Q   Qxb1   Qxb1   a8     a8
-        //  189                      Qxb1   Qxb1   Qxb1   a8     a8
-        //  250                             a8     Qxb1   a8     a8
-        //  310                                    a8     a8     a8
-        //
-        // PV Table at depth 3
-        //  0   Qxb2   Qxb2   h4     a8     a8     a8     a8     a8
-        //  64         b1=Q   exf6   Kxf6   a8     a8     a8     a8
-        //  127               a8     b1=Q   Qxb1   Qxb1   a8     a8
-        //  189                      Qxb1   a8     a8     a8     a8
-        //  250                             a8     a8     a8     a8
-        //  310                                    a8     a8     a8
         if (_pVTable[source] == default)
         {
             Array.Clear(_pVTable, target, _pVTable.Length - target);
