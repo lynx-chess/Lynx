@@ -49,7 +49,11 @@ public sealed partial class GoCommand : GUIBaseCommand
 {
     public const string Id = "go";
 
-    [GeneratedRegex(@"(?<wtime>(?<=wtime\s+)\d+)|(?<btime>(?<=btime\s+)\d+)|(?<winc>(?<=winc\s+)\d+)|(?<binc>(?<=binc\s+)\d+)|(?<movestogo>(?<=movestogo\s+)\d+)|(?<depth>(?<=depth\s+)\d+)|(?<movetime>(?<=movetime\s+)\d+)|(?<infinite>infinite)|(?<ponder>ponder)")]
+    /// <summary>
+    /// Note that wtime and btime need to support negative numbers because of cutechess
+    /// </summary>
+    /// <returns></returns>
+    [GeneratedRegex(@"(?<wtime>(?<=wtime\s+)-?\d+)|(?<btime>(?<=btime\s+)-?\d+)|(?<winc>(?<=winc\s+)\d+)|(?<binc>(?<=binc\s+)\d+)|(?<movestogo>(?<=movestogo\s+)\d+)|(?<depth>(?<=depth\s+)\d+)|(?<movetime>(?<=movetime\s+)\d+)|(?<infinite>infinite)|(?<ponder>ponder)")]
     private static partial Regex Regex();
 
     public int WhiteTime { get; }
