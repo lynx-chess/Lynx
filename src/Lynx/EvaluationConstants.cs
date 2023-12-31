@@ -336,6 +336,7 @@ public static readonly int[] EndGameKingTable =
 
     public const int ThirdKillerMoveValue = 131_072;
 
+    // Revisit bad capture pruning in NegaMax.cs if order changes and promos aren't the lowest before bad captures
     public const int PromotionMoveScoreValue = 65_536;
 
     public const int BadCaptureMoveBaseScoreValue = 32_768;
