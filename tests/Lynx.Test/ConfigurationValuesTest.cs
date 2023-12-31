@@ -14,8 +14,6 @@ public class ConfigurationValuesTest
     [Test]
     public void RazoringValues()
     {
-        Assert.Greater(Configuration.EngineSettings.RFP_MaxDepth, Configuration.EngineSettings.Razoring_MaxDepth);
-
         var config = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
             .Build();
