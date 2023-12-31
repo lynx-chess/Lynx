@@ -275,7 +275,7 @@ public sealed partial class Engine
                     reduction = Math.Clamp(reduction, 0, depth - 2);
                 }
 
-                // 🔍 Static Exchange Evaluation (SEE)
+                // 🔍 Static Exchange Evaluation (SEE) reduction
                 // Bad captures are reduced more
                 if (!isInCheck
                     && scores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue
