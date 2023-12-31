@@ -63,11 +63,11 @@ public sealed partial class Engine
     /// </summary>
     /// <param name="move"></param>
     /// <param name="depth"></param>
-    /// <param name="useKillerAndPositionMoves"></param>
+    /// <param name="isNotQSearch"></param>
     /// <param name="bestMoveTTCandidate"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMove(Move move, int depth, bool useKillerAndPositionMoves, ShortMove bestMoveTTCandidate = default)
+    internal int ScoreMove(Move move, int depth, bool isNotQSearch, ShortMove bestMoveTTCandidate = default)
     {
         if (_isScoringPV && move == _pVTable[depth])
         {
@@ -82,11 +82,12 @@ public sealed partial class Engine
         }
 
         var promotedPiece = move.PromotedPiece();
+        var isPromotion = promotedPiece != default;
 
         // Queen promotion
         if ((promotedPiece + 2) % 6 == 0)
         {
-            return EvaluationConstants.CaptureMoveBaseScoreValue + EvaluationConstants.PromotionMoveScoreValue;
+            return EvaluationConstants.BadCaptureMoveBaseScoreValue + EvaluationConstants.PromotionMoveScoreValue;
         }
 
         if (move.IsCapture())
@@ -108,15 +109,19 @@ public sealed partial class Engine
                 }
             }
 
-            return EvaluationConstants.CaptureMoveBaseScoreValue + EvaluationConstants.MostValueableVictimLeastValuableAttacker[sourcePiece, targetPiece];
+            var baseCaptureScore = (isPromotion || move.IsEnPassant() || SEE.IsGoodCapture(Game.CurrentPosition, move))
+                ? EvaluationConstants.GoodCaptureMoveBaseScoreValue
+                : EvaluationConstants.BadCaptureMoveBaseScoreValue;
+
+            return baseCaptureScore + EvaluationConstants.MostValueableVictimLeastValuableAttacker[sourcePiece, targetPiece];
         }
 
-        if (promotedPiece != default)
+        if (isPromotion)
         {
             return EvaluationConstants.PromotionMoveScoreValue;
         }
 
-        if (useKillerAndPositionMoves)
+        if (isNotQSearch)
         {
             // 1st killer move
             if (_killerMoves[0, depth] == move)
