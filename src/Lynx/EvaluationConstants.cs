@@ -326,10 +326,9 @@ public static readonly int[] EndGameKingTable =
 
     public const int TTMoveScoreValue = 2_097_152;
 
-    /// <summary>
-    /// For MVVLVA
-    /// </summary>
-    public const int CaptureMoveBaseScoreValue = 1_048_576;
+    #region Move ordering
+
+    public const int GoodCaptureMoveBaseScoreValue = 1_048_576;
 
     public const int FirstKillerMoveValue = 524_288;
 
@@ -339,12 +338,16 @@ public static readonly int[] EndGameKingTable =
 
     public const int PromotionMoveScoreValue = 65_536;
 
+    public const int BadCaptureMoveBaseScoreValue = 32_768;
+
     //public const int MaxHistoryMoveValue => Configuration.EngineSettings.MaxHistoryMoveValue;
 
     /// <summary>
     /// Negative offset to ensure history move scores don't reach other move ordering values
     /// </summary>
     public const int BaseMoveScore = int.MinValue / 2;
+
+    #endregion
 
     /// <summary>
     /// Outside of the evaluation ranges (higher than any sensible evaluation, lower than <see cref="PositiveCheckmateDetectionLimit"/>)
