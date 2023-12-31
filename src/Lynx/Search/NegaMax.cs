@@ -454,7 +454,7 @@ public sealed partial class Engine
             var move = pseudoLegalMoves[i];
 
             // Prune bad captures
-            if (scores[i] < EvaluationConstants.PromotionMoveScoreValue && scores[i] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
+            if (scores[i] < EvaluationConstants.GoodCaptureMoveBaseScoreValue && scores[i] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
             {
                 continue;
             }

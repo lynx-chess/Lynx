@@ -92,8 +92,6 @@ public class EvaluationConstantsTest
         {
 #pragma warning disable S3949 // Calculations should not overflow - well, we're adding checked just in case
             Assert.Less(FirstKillerMoveValue, minMVVLVAMoveValue + GoodCaptureMoveBaseScoreValue);
-            Assert.Less(maxMVVLVAMoveValue + BadCaptureMoveBaseScoreValue, FirstKillerMoveValue);
-            Assert.Less(minMVVLVAMoveValue + BadCaptureMoveBaseScoreValue, ThirdKillerMoveValue);
 #pragma warning restore S3949 // Calculations should not overflow
         }
 
@@ -128,7 +126,6 @@ public class EvaluationConstantsTest
         {
 #pragma warning disable S3949 // Calculations should not overflow - well, we're adding checked just in case
             Assert.Less(SecondKillerMoveValue, minMVVLVAMoveValue + GoodCaptureMoveBaseScoreValue);
-            Assert.Less(maxMVVLVAMoveValue + BadCaptureMoveBaseScoreValue, SecondKillerMoveValue);
 #pragma warning restore S3949 // Calculations should not overflow
         }
 
@@ -163,7 +160,6 @@ public class EvaluationConstantsTest
         {
 #pragma warning disable S3949 // Calculations should not overflow - well, we're adding checked just in case
             Assert.Less(ThirdKillerMoveValue, minMVVLVAMoveValue + GoodCaptureMoveBaseScoreValue);
-            Assert.Less(maxMVVLVAMoveValue + BadCaptureMoveBaseScoreValue, ThirdKillerMoveValue);
 #pragma warning restore S3949 // Calculations should not overflow
         }
 
@@ -188,7 +184,26 @@ public class EvaluationConstantsTest
             }
         }
 
-        Assert.Less(BadCaptureMoveBaseScoreValue + maxMVVLVAMoveValue, PromotionMoveScoreValue);
+        Assert.Less(PromotionMoveScoreValue, ThirdKillerMoveValue);
+    }
+
+    [Test]
+    public void BadCaptureMoveValueConstant()
+    {
+        var maxMVVLVAMoveValue = int.MinValue;
+
+        for (int s = (int)Piece.P; s <= (int)Piece.r; ++s)
+        {
+            for (int t = (int)Piece.P; t <= (int)Piece.r; ++t)
+            {
+                if (MostValueableVictimLeastValuableAttacker[s, t] > maxMVVLVAMoveValue)
+                {
+                    maxMVVLVAMoveValue = MostValueableVictimLeastValuableAttacker[s, t];
+                }
+            }
+        }
+
+        Assert.Less(BadCaptureMoveBaseScoreValue + maxMVVLVAMoveValue, GoodCaptureMoveBaseScoreValue);
     }
 
     /// <summary>
