@@ -110,7 +110,7 @@ public sealed partial class Engine
                 }
             }
 
-            if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
+            if (depth <= Configuration.EngineSettings.Razoring_MaxDepth)
             {
                 // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
                 if (staticEval - (Configuration.EngineSettings.RFP_DepthScalingFactor * depth) >= beta)
@@ -119,7 +119,7 @@ public sealed partial class Engine
                 }
 
                 // 🔍 Razoring - Strelka impl (CPW) - https://www.chessprogramming.org/Razoring#Strelka
-                if (depth <= Configuration.EngineSettings.Razoring_MaxDepth)
+                if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
                 {
                     var score = staticEval + Configuration.EngineSettings.Razoring_Depth1Bonus;
 

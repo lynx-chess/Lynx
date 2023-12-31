@@ -24,6 +24,6 @@ public class ConfigurationValuesTest
         Assert.IsNotNull(engineSettingsSection);
         engineSettingsSection.Bind(Configuration.EngineSettings);
 
-        Assert.Greater(Configuration.EngineSettings.RFP_MaxDepth, Configuration.EngineSettings.Razoring_MaxDepth);
+        Assert.Greater(Configuration.EngineSettings.Razoring_MaxDepth, Configuration.EngineSettings.RFP_MaxDepth);
     }
 }
