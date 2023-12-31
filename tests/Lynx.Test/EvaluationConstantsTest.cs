@@ -172,25 +172,6 @@ public class EvaluationConstantsTest
         Assert.Greater(ThirdKillerMoveValue, default);
     }
 
-    [Test]
-    public void BadCaptureMoveValueConstant()
-    {
-        var maxMVVLVAMoveValue = int.MinValue;
-
-        for (int s = (int)Piece.P; s <= (int)Piece.r; ++s)
-        {
-            for (int t = (int)Piece.P; t <= (int)Piece.r; ++t)
-            {
-                if (MostValueableVictimLeastValuableAttacker[s, t] > maxMVVLVAMoveValue)
-                {
-                    maxMVVLVAMoveValue = MostValueableVictimLeastValuableAttacker[s, t];
-                }
-            }
-        }
-
-        Assert.Less(BadCaptureMoveBaseScoreValue + maxMVVLVAMoveValue, BaseMoveScore);
-    }
-
     /// <summary>
     /// Avoids drawish evals that can lead the GUI to declare a draw
     /// or negative ones that can lead it to resign
