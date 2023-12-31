@@ -86,6 +86,15 @@ public sealed partial class Engine
         {
             var (staticEval, phase) = position.StaticEvaluation();
 
+            if (ttElementType != default &&
+                (ttElementType == NodeType.Exact
+                    || (ttElementType == NodeType.Beta && ttEvaluation >= staticEval)
+                    || (ttElementType == NodeType.Alpha && ttEvaluation <= staticEval)))
+            {
+                // preferrably in a separate variable
+                staticEval = ttEvaluation;
+            }
+
             // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
             if (depth >= Configuration.EngineSettings.NMP_MinDepth
                 && staticEval >= beta

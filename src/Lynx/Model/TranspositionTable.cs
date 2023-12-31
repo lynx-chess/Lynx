@@ -10,8 +10,8 @@ public enum NodeType : byte
 {
     Unknown,    // Making it 0 instead of -1 because of default struct initialization
     Exact,
-    Alpha,
-    Beta
+    Alpha,      // Upper bound
+    Beta        // Lower bound
 }
 
 public struct TranspositionTableElement
