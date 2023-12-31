@@ -428,6 +428,7 @@ public sealed partial class Engine
             return staticEvaluation;
         }
 
+        var isInCheck = position.IsInCheck();
         var nodeType = NodeType.Alpha;
         Move? bestMove = null;
         bool isThereAnyValidCapture = false;
@@ -454,7 +455,9 @@ public sealed partial class Engine
             var move = pseudoLegalMoves[i];
 
             // Prune bad captures
-            if (scores[i] < EvaluationConstants.PromotionMoveScoreValue && scores[i] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
+            if (!isInCheck
+                && scores[i] < EvaluationConstants.PromotionMoveScoreValue
+                && scores[i] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
             {
                 continue;
             }
@@ -527,7 +530,7 @@ public sealed partial class Engine
             && !isThereAnyValidCapture
             && !MoveGenerator.CanGenerateAtLeastAValidMove(position))
         {
-            var finalEval = Position.EvaluateFinalPosition(ply, position.IsInCheck());
+            var finalEval = Position.EvaluateFinalPosition(ply, isInCheck);
             _tt.RecordHash(_ttMask, position, 0, ply, finalEval, NodeType.Exact);
 
             return finalEval;
