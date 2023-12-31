@@ -26,7 +26,7 @@ public static class SEE
     /// <param name="threshold"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsGoodCapture(Position position, Move move, short threshold = 0)
+    public static bool IsGoodCapture(Position position, Move move, int threshold = 0)
     {
         System.Diagnostics.Debug.Assert(move.IsCapture(), $"{nameof(IsGoodCapture)} doesn't handle non-capture moves");
         System.Diagnostics.Debug.Assert(move.PromotedPiece() == default, $"{nameof(IsGoodCapture)} doesn't handle promotion moves");
