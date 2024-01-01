@@ -151,6 +151,11 @@ public sealed class OptionCommand : EngineBaseCommand
         //$"option name {nameof(Configuration.EngineSettings.LMP_MaxDepth)} type spin default {Configuration.EngineSettings.LMP_MaxDepth} min 0 max 1024",
         //$"option name {nameof(Configuration.EngineSettings.LMP_BaseMovesToTry)} type spin default {Configuration.EngineSettings.LMP_BaseMovesToTry} min 0 max 1024",
         //$"option name {nameof(Configuration.EngineSettings.LMP_MovesDepthMultiplier)} type spin default {Configuration.EngineSettings.LMP_MovesDepthMultiplier} min 0 max 1024",
+        //$"option name {nameof(Configuration.EngineSettings.LMP_MovesDepthMultiplier)} type spin default {Configuration.EngineSettings.LMP_MovesDepthMultiplier} min 0 max 1024",
+        //$"option name {nameof(Configuration.EngineSettings.LMP_MovesDepthMultiplier)} type spin default {Configuration.EngineSettings.LMP_MovesDepthMultiplier} min 0 max 1024",
+        //$"option name {nameof(Configuration.EngineSettings.SEE_BadCaptureBaseReduction)} type spin default {Configuration.EngineSettings.SEE_BadCaptureBaseReduction} min 0 max 1024",
+        //$"option name {nameof(Configuration.EngineSettings.SEE_BadCaptureEnableDepthScalingFactor)} type spin default {Configuration.EngineSettings.SEE_BadCaptureEnableDepthScalingFactor} min 0 max 1024",
+        //$"option name {nameof(Configuration.EngineSettings.SEE_BadCaptureDepthDivisor)} type spin default {Configuration.EngineSettings.SEE_BadCaptureDepthDivisor} min 0 max 1024",
 
         #endregion
     ];
