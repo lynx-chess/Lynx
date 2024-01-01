@@ -250,6 +250,23 @@ public sealed partial class Engine
                     break;
                 }
 
+                // 🔍 Static Exchange Evaluation (SEE) pruning
+                // Non captures with bad SEE are pruned
+                if (!isInCheck
+                    && !move.IsCapture()
+                    && !SEE.HasPositiveScore(Game.CurrentPosition, move))
+                {
+                    // After making a move
+                    Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
+                    if (!isThreeFoldRepetition)
+                    {
+                        Game.PositionHashHistory.Remove(position.UniqueIdentifier);
+                    }
+                    position.UnmakeMove(move, gameState);
+
+                    continue;
+                }
+
                 int reduction = 0;
 
                 // 🔍 Late Move Reduction (LMR) - search with reduced depth
