@@ -1,18 +1,46 @@
 ﻿/*
- * Locgical results
+ * Pretty much the same
  *
-* BenchmarkDotNet v0.13.11, Windows 10 (10.0.19045.3803/22H2/2022Update)
-* Intel Core i7-5500U CPU 2.40GHz (Broadwell), 1 CPU, 4 logical and 2 physical cores
-* .NET SDK 8.0.100
-*   [Host]     : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
-*   DefaultJob : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
-*
-*
-* | Method          | Mean     | Error     | StdDev    | Ratio | RatioSD | Gen0   | Allocated | Alloc Ratio |
-* |---------------- |---------:|----------:|----------:|------:|--------:|-------:|----------:|------------:|
-* | KnowingColor    | 5.033 us | 0.1004 us | 0.2611 us |  1.00 |    0.00 | 0.2823 |     601 B |        1.00 |
-* | KnowingColor_2  | 4.837 us | 0.0966 us | 0.2613 us |  0.96 |    0.08 | 0.2823 |     601 B |        1.00 |
-* | NotKnowingColor | 4.814 us | 0.0952 us | 0.2685 us |  0.96 |    0.08 | 0.2823 |     601 B |        1.00 |
+ *  BenchmarkDotNet v0.13.11, Ubuntu 22.04.3 LTS (Jammy Jellyfish)
+ *  AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
+ *  .NET SDK 8.0.100
+ *    [Host]     : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
+ *    DefaultJob : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
+ *
+ *  | Method                   | Mean     | Error     | StdDev    | Ratio | Gen0   | Allocated | Alloc Ratio |
+ *  |------------------------- |---------:|----------:|----------:|------:|-------:|----------:|------------:|
+ *  | KnowingColor             | 1.975 us | 0.0057 us | 0.0051 us |  1.00 | 0.0038 |     600 B |        1.00 |
+ *  | KnowingColor_Unrolled    | 1.983 us | 0.0044 us | 0.0036 us |  1.00 | 0.0038 |     600 B |        1.00 |
+ *  | NotKnowingColor          | 2.017 us | 0.0141 us | 0.0125 us |  1.02 | 0.0038 |     600 B |        1.00 |
+ *  | NotKnowingColor_Unrolled | 2.021 us | 0.0201 us | 0.0188 us |  1.02 | 0.0038 |     600 B |        1.00 |
+ *
+ *
+ *  BenchmarkDotNet v0.13.11, Windows 10 (10.0.20348.2159) (Hyper-V)
+ *  AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
+ *  .NET SDK 8.0.100
+ *    [Host]     : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
+ *    DefaultJob : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
+ *
+ *  | Method                   | Mean     | Error     | StdDev    | Ratio | Gen0   | Allocated | Alloc Ratio |
+ *  |------------------------- |---------:|----------:|----------:|------:|-------:|----------:|------------:|
+ *  | KnowingColor             | 1.871 us | 0.0044 us | 0.0037 us |  1.00 | 0.0343 |     600 B |        1.00 |
+ *  | KnowingColor_Unrolled    | 1.819 us | 0.0038 us | 0.0032 us |  0.97 | 0.0343 |     600 B |        1.00 |
+ *  | NotKnowingColor          | 1.819 us | 0.0033 us | 0.0026 us |  0.97 | 0.0343 |     600 B |        1.00 |
+ *  | NotKnowingColor_Unrolled | 1.810 us | 0.0026 us | 0.0022 us |  0.97 | 0.0343 |     600 B |        1.00 |
+ *
+ *
+ *  BenchmarkDotNet v0.13.11, macOS Monterey 12.7.2 (21G1974) [Darwin 21.6.0]
+ *  Intel Core i7-8700B CPU 3.20GHz (Max: 3.19GHz) (Coffee Lake), 1 CPU, 4 logical and 4 physical cores
+ *  .NET SDK 8.0.100
+ *    [Host]     : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
+ *    DefaultJob : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
+ *
+ *  | Method                   | Mean     | Error     | StdDev    | Ratio | RatioSD | Gen0   | Allocated | Alloc Ratio |
+ *  |------------------------- |---------:|----------:|----------:|------:|--------:|-------:|----------:|------------:|
+ *  | KnowingColor             | 2.178 us | 0.0194 us | 0.0181 us |  1.00 |    0.00 | 0.0954 |     600 B |        1.00 |
+ *  | KnowingColor_Unrolled    | 2.225 us | 0.0220 us | 0.0184 us |  1.02 |    0.01 | 0.0954 |     600 B |        1.00 |
+ *  | NotKnowingColor          | 2.224 us | 0.0296 us | 0.0277 us |  1.02 |    0.02 | 0.0954 |     600 B |        1.00 |
+ *  | NotKnowingColor_Unrolled | 2.210 us | 0.0398 us | 0.0372 us |  1.01 |    0.02 | 0.0954 |     600 B |        1.00 |
  *
 */
 
@@ -20,6 +48,9 @@ using BenchmarkDotNet.Attributes;
 using Lynx.Model;
 
 namespace Lynx.Benchmark;
+
+#pragma warning disable RCS1058, IDE0054 // Use compound assignment
+
 public class PieceAtSquare : BaseBenchmark
 {
     [Benchmark(Baseline = true)]
@@ -228,3 +259,5 @@ public class PieceAtSquare : BaseBenchmark
         return (int)Piece.None;
     }
 }
+
+#pragma warning restore RCS1058, IDE0054 // Use compound assignment
