@@ -161,7 +161,8 @@ public static class Constants
         "♝",
         "♜",
         "♛",
-        "♚"    // Black
+        "♚",   // Black
+        "-"
     ];
 
     /// <summary>

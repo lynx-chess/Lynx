@@ -32,7 +32,7 @@ public class ConstantsTest
     {
         foreach (var value in Enum.GetValues<Piece>())
         {
-            if (value > 0)
+            if (value > 0 && value != Piece.None)
             {
                 Assert.AreEqual(value.ToString(), Constants.AsciiPieces[(int)value].ToString());
             }
@@ -40,11 +40,11 @@ public class ConstantsTest
     }
 
     [Test]
-    public void PiecesByChar()
+    public void PiecesByString()
     {
         foreach (var value in Enum.GetValues<Piece>())
         {
-            if (value > 0)
+            if (value > 0 && value != Piece.None)
             {
                 Assert.AreEqual(value, Constants.PiecesByChar[value.ToString()[0]]);
             }

@@ -611,7 +611,7 @@ public class Position
         }
         else
         {
-            return (int)Piece.Unknown;
+            return (int)Piece.None;
         }
 
         var offset = Utils.PieceOffset(color);
@@ -626,7 +626,7 @@ public class Position
 
         System.Diagnostics.Debug.Fail($"Bit set in {Side} occupancy bitboard, but not piece found");
 
-        return (int)Piece.Unknown;
+        return (int)Piece.None;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
