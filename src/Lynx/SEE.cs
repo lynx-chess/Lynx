@@ -61,7 +61,7 @@ public static class SEE
         var bishops = queens | position.Bishops;
         var rooks = queens | position.Rooks;
 
-        var attackers = position.AllAttackersTo(targetSquare, occupancy);
+        var attackers = position.AllAttackersTo(targetSquare, occupancy, rooks, bishops);
 
         var us = Utils.OppositeSide(sideToMove);
 
@@ -77,9 +77,7 @@ public static class SEE
             var nextPiece = PopLeastValuableAttacker(position, ref occupancy, ourAttackers, us);
 
             // After removing an attacker, there could be a sliding piece attack
-            if (nextPiece == Piece.P || nextPiece == Piece.p
-                || nextPiece == Piece.B || nextPiece == Piece.b
-                || nextPiece == Piece.Q || nextPiece == Piece.q)
+            if (((int)nextPiece & 0x01) == 0)    // Equivalent to (int)nextPiece % 2 == 0): true for P, B, Q, p, b, q
             {
                 attackers |= Attacks.BishopAttacks(targetSquare, occupancy) & bishops;
             }

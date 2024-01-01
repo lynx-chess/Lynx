@@ -647,6 +647,27 @@ public class Position
     }
 
     /// <summary>
+    /// Overload that has rooks and bishops precalculated for the position
+    /// </summary>
+    /// <param name="square"></param>
+    /// <param name="occupancy"></param>
+    /// <param name="rooks">Includes Queen bitboard</param>
+    /// <param name="bishops">Includes Queen bitboard</param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ulong AllAttackersTo(int square, BitBoard occupancy, BitBoard rooks, BitBoard bishops)
+    {
+        System.Diagnostics.Debug.Assert(square != (int)BoardSquare.noSquare);
+
+        return (rooks & Attacks.RookAttacks(square, occupancy))
+            | (bishops & Attacks.BishopAttacks(square, occupancy))
+            | (PieceBitBoards[(int)Piece.p] & Attacks.PawnAttacks[(int)Side.White, square])
+            | (PieceBitBoards[(int)Piece.P] & Attacks.PawnAttacks[(int)Side.Black, square])
+            | (Knights & Attacks.KnightAttacks[square])
+            | (Kings & Attacks.KingAttacks[square]);
+    }
+
+    /// <summary>
     /// Evaluates material and position in a NegaMax style.
     /// That is, positive scores always favour playing <see cref="Side"/>.
     /// </summary>
