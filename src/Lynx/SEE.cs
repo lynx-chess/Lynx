@@ -34,7 +34,7 @@ public static class SEE
 
         var sideToMove = position.Side;
 
-        var score = _pieceValues[position.PieceAt(move.TargetSquare())] - threshold;
+        var score = _pieceValues[position.PieceAt(move.TargetSquare())] - threshold;    // Gain() - threshold
 
         // If taking the opponent's piece without any risk is still negative
         if (score < 0)
@@ -151,7 +151,7 @@ public static class SEE
         {
             var board = attackers & position.PieceBitBoards[i + offset];
 
-            if (!board.Empty())
+            if (board.NotEmpty())
             {
                 occupancy ^= board.LSB();
 
