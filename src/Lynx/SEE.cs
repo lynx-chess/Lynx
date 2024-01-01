@@ -26,7 +26,7 @@ public static class SEE
     /// <param name="threshold"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsGoodCapture(Position position, Move move, short threshold = 0)
+    public static bool IsGoodCapture(Position position, Move move, int threshold = 0)
     {
         System.Diagnostics.Debug.Assert(move.IsCapture(), $"{nameof(IsGoodCapture)} doesn't handle non-capture moves");
         System.Diagnostics.Debug.Assert(move.PromotedPiece() == default, $"{nameof(IsGoodCapture)} doesn't handle promotion moves");
@@ -34,7 +34,7 @@ public static class SEE
 
         var sideToMove = position.Side;
 
-        var score = Gain(position, move) - threshold;
+        var score = _pieceValues[position.PieceAt(move.TargetSquare())] - threshold;
 
         // If taking the opponent's piece without any risk is still negative
         if (score < 0)
@@ -115,17 +115,8 @@ public static class SEE
     /// <param name="position"></param>
     /// <param name="move"></param>
     /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int Gain(Position position, Move move) => _pieceValues[position.PieceAt(move.TargetSquare())];
-
-    /// <summary>
-    /// Doesn't handle non-captures, promotions and en-passants
-    /// </summary>
-    /// <param name="position"></param>
-    /// <param name="move"></param>
-    /// <returns></returns>
     [Obsolete("Since we're not handling non-captures, promotiosn and en-passants, we don't really need this")]
-    private static int CompleteGain(Position position, Move move)
+    private static int Gain(Position position, Move move)
     {
         if (move.IsCastle())
         {
