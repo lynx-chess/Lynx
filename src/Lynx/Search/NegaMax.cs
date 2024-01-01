@@ -275,6 +275,24 @@ public sealed partial class Engine
                     reduction = Math.Clamp(reduction, 0, depth - 2);
                 }
 
+                // 🔍 Static Exchange Evaluation (SEE) pruning
+                // Bad captures are pruned up until a certain depth
+                if (!isInCheck
+                    && depth <= Configuration.EngineSettings.SEE_Pruning_MaxDepth
+                    && scores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue
+                    && scores[moveIndex] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
+                {
+                    // After making a move
+                    Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
+                    if (!isThreeFoldRepetition)
+                    {
+                        Game.PositionHashHistory.Remove(position.UniqueIdentifier);
+                    }
+                    position.UnmakeMove(move, gameState);
+
+                    continue;
+                }
+
                 // Search with reduced depth
                 evaluation = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha);
 
