@@ -28,6 +28,7 @@ public class Piece_IsPawnBishopOrQueen : BaseBenchmark
     };
 
     [Benchmark(Baseline = true)]
+    [ArgumentsSource(nameof(Data))]
     public bool Naive(Piece nextPiece)
     {
         return nextPiece == Piece.P || nextPiece == Piece.p
@@ -36,6 +37,7 @@ public class Piece_IsPawnBishopOrQueen : BaseBenchmark
     }
 
     [Benchmark]
+    [ArgumentsSource(nameof(Data))]
     public bool Smart(Piece nextPiece)
     {
         return (int)nextPiece % 2 == 0;
