@@ -162,7 +162,11 @@ public sealed class EngineSettings
     /// </summary>
     public int History_MaxMoveRawBonus { get; set; } = 1_896;
 
-    public int SEE_BadCaptureReduction { get; set; } = 1;
+    public int SEE_BadCaptureBaseReduction { get; set; } = 1;
+
+    public int SEE_BadCaptureEnableDepthScalingFactor { get; set; } = 0;
+
+    public int SEE_BadCaptureDepthDivisor { get; set; } = 8;
 
     #region Evaluation
 

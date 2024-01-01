@@ -281,7 +281,8 @@ public sealed partial class Engine
                     && scores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue
                     && scores[moveIndex] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
                 {
-                    reduction += Configuration.EngineSettings.SEE_BadCaptureReduction;
+                    reduction += Configuration.EngineSettings.SEE_BadCaptureBaseReduction +
+                        (Configuration.EngineSettings.SEE_BadCaptureEnableDepthScalingFactor * (depth % Configuration.EngineSettings.SEE_BadCaptureDepthDivisor));
                 }
 
                 // Search with reduced depth
