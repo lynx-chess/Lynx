@@ -77,12 +77,12 @@ public static class SEE
             var nextPiece = PopLeastValuableAttacker(position, ref occupancy, ourAttackers, us);
 
             // After removing an attacker, there could be a sliding piece attack
-            if ((nextPiece & 0x01) == 0)    // Equivalent to nextPiece % 2 == 0): true for P, B, Q (and p, b, q)
+            if ((nextPiece & 0x01) == 0)    // Equivalent to nextPiece % 2 == 0): true for P, B, Q (and p, b, q, should PopLeastValuableAttacker also return black pieces ever gain)
             {
                 attackers |= Attacks.BishopAttacks(targetSquare, occupancy) & bishops;
             }
 
-            if (nextPiece == (int)Piece.R || nextPiece == (int)Piece.Q)   // Piece.R or Piece.Q
+            if (nextPiece == (int)Piece.R || nextPiece == (int)Piece.Q)
             {
                 attackers |= Attacks.RookAttacks(targetSquare, occupancy) & rooks;
             }
@@ -96,7 +96,7 @@ public static class SEE
             if (score >= 0)
             {
                 // Our only attacker is our king, but the opponent still has defenders
-                if ((nextPiece == (int)Piece.K)    // Piece.K
+                if ((nextPiece == (int)Piece.K)
                     && (attackers & position.OccupancyBitBoards[us]).NotEmpty())
                 {
                     us = Utils.OppositeSide(us);
