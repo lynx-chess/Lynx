@@ -26,7 +26,7 @@ public static class SEE
     /// <param name="threshold"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsGoodCapture(Position position, Move move, short threshold = 0)
+    public static bool IsGoodCapture(Position position, Move move, int threshold = 0)
     {
         System.Diagnostics.Debug.Assert(move.IsCapture(), $"{nameof(IsGoodCapture)} doesn't handle non-capture moves");
         System.Diagnostics.Debug.Assert(move.PromotedPiece() == default, $"{nameof(IsGoodCapture)} doesn't handle promotion moves");
@@ -34,7 +34,7 @@ public static class SEE
 
         var sideToMove = position.Side;
 
-        var score = Gain(position, move) - threshold;
+        var score = _pieceValues[position.PieceAt(move.TargetSquare())] - threshold;    // Gain() - threshold
 
         // If taking the opponent's piece without any risk is still negative
         if (score < 0)
@@ -61,7 +61,7 @@ public static class SEE
         var bishops = queens | position.Bishops;
         var rooks = queens | position.Rooks;
 
-        var attackers = position.AllAttackersTo(targetSquare, occupancy);
+        var attackers = position.AllAttackersTo(targetSquare, occupancy, rooks, bishops);
 
         var us = Utils.OppositeSide(sideToMove);
 
@@ -77,15 +77,12 @@ public static class SEE
             var nextPiece = PopLeastValuableAttacker(position, ref occupancy, ourAttackers, us);
 
             // After removing an attacker, there could be a sliding piece attack
-            if (nextPiece == Piece.P || nextPiece == Piece.p
-                || nextPiece == Piece.B || nextPiece == Piece.b
-                || nextPiece == Piece.Q || nextPiece == Piece.q)
+            if ((nextPiece & 0x01) == 0)    // Equivalent to nextPiece % 2 == 0): true for P, B, Q (and p, b, q, should PopLeastValuableAttacker also return black pieces ever gain)
             {
                 attackers |= Attacks.BishopAttacks(targetSquare, occupancy) & bishops;
             }
 
-            if (nextPiece == Piece.R || nextPiece == Piece.r
-                || nextPiece == Piece.Q || nextPiece == Piece.q)
+            if (nextPiece == (int)Piece.R || nextPiece == (int)Piece.Q)
             {
                 attackers |= Attacks.RookAttacks(targetSquare, occupancy) & rooks;
             }
@@ -93,13 +90,13 @@ public static class SEE
             // Removing used pieces from attackers
             attackers &= occupancy;
 
-            score = -score - 1 - _pieceValues[(int)nextPiece];
+            score = -score - 1 - _pieceValues[nextPiece];
             us = Utils.OppositeSide(us);
 
             if (score >= 0)
             {
                 // Our only attacker is our king, but the opponent still has defenders
-                if ((nextPiece == Piece.K || nextPiece == Piece.k)
+                if ((nextPiece == (int)Piece.K)
                     && (attackers & position.OccupancyBitBoards[us]).NotEmpty())
                 {
                     us = Utils.OppositeSide(us);
@@ -118,17 +115,8 @@ public static class SEE
     /// <param name="position"></param>
     /// <param name="move"></param>
     /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int Gain(Position position, Move move) => _pieceValues[position.PieceAt(move.TargetSquare())];
-
-    /// <summary>
-    /// Doesn't handle non-captures, promotions and en-passants
-    /// </summary>
-    /// <param name="position"></param>
-    /// <param name="move"></param>
-    /// <returns></returns>
     [Obsolete("Since we're not handling non-captures, promotiosn and en-passants, we don't really need this")]
-    private static int CompleteGain(Position position, Move move)
+    private static int Gain(Position position, Move move)
     {
         if (move.IsCastle())
         {
@@ -146,24 +134,33 @@ public static class SEE
             : _pieceValues[promotedPiece] - _pieceValues[(int)Piece.P];
     }
 
+    /// <summary>
+    /// Returns only <see cref="Side.White"/> pieces
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="occupancy"></param>
+    /// <param name="attackers"></param>
+    /// <param name="color"></param>
+    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static Piece PopLeastValuableAttacker(Position position, ref BitBoard occupancy, BitBoard attackers, int color)
+    private static int PopLeastValuableAttacker(Position position, ref BitBoard occupancy, BitBoard attackers, int color)
     {
-        var start = Utils.PieceOffset(color);
+        var offset = Utils.PieceOffset(color);
 
-        for (int i = start; i < start + 6; ++i)
+        for (int i = 0; i < 6; ++i)
         {
-            var piece = (Piece)i;
-            var board = attackers & position.PieceBitBoards[i];
+            var board = attackers & position.PieceBitBoards[i + offset];
 
-            if (!board.Empty())
+            if (board.NotEmpty())
             {
                 occupancy ^= board.LSB();
 
-                return piece;
+                return i;
             }
         }
 
-        return Piece.Unknown;
+        System.Diagnostics.Debug.Fail($"Unexpected outcome of {PopLeastValuableAttacker}: no attacker returned");
+
+        return (int)Piece.Unknown;
     }
 }
