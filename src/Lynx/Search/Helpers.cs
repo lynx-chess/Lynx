@@ -109,7 +109,7 @@ public sealed partial class Engine
                 }
             }
 
-            var baseCaptureScore = (isPromotion || move.IsEnPassant() || SEE.IsGoodCapture(Game.CurrentPosition, move))
+            var baseCaptureScore = (isPromotion || move.IsEnPassant() || isNotQSearch || SEE.IsGoodCapture(Game.CurrentPosition, move))
                 ? EvaluationConstants.GoodCaptureMoveBaseScoreValue
                 : EvaluationConstants.BadCaptureMoveBaseScoreValue;
 
