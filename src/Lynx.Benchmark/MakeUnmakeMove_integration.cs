@@ -303,13 +303,13 @@ public class MakeUnmakeMove_integration : BaseBenchmark
 
         public BoardSquare EnPassant { get; private set; }
 
-        public int Castle { get; private set; }
+        public byte Castle { get; private set; }
 
         public MakeMovePosition(string fen) : this(FENParser.ParseFEN(fen))
         {
         }
 
-        public MakeMovePosition((BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, int Castle, BoardSquare EnPassant,
+        public MakeMovePosition((BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, byte Castle, BoardSquare EnPassant,
             int HalfMoveClock/*, int FullMoveCounter*/) parsedFEN)
         {
             PieceBitBoards = parsedFEN.PieceBitBoards;
@@ -484,7 +484,7 @@ public class MakeUnmakeMove_integration : BaseBenchmark
         public MakeMoveGameState MakeMove_Original(Move move)
         {
             int capturedPiece = -1;
-            int castleCopy = Castle;
+            var castleCopy = Castle;
             BoardSquare enpassantCopy = EnPassant;
 
             var oldSide = Side;
@@ -606,7 +606,7 @@ public class MakeUnmakeMove_integration : BaseBenchmark
         public void MakeMove_PassOut(Move move, out MakeMoveGameState_PassOut gameState)
         {
             int capturedPiece = -1;
-            int castleCopy = Castle;
+            var castleCopy = Castle;
             BoardSquare enpassantCopy = EnPassant;
 
             var oldSide = Side;
@@ -728,7 +728,7 @@ public class MakeUnmakeMove_integration : BaseBenchmark
         public void MakeMove_PassRef(Move move, ref MakeMoveGameState_PassRef gameState)
         {
             int capturedPiece = -1;
-            int castleCopy = Castle;
+            var castleCopy = Castle;
             BoardSquare enpassantCopy = EnPassant;
 
             var oldSide = Side;
@@ -1212,13 +1212,13 @@ public class MakeUnmakeMove_integration : BaseBenchmark
 
     public readonly struct MakeMoveGameState
     {
-        public readonly int CapturedPiece;
+        public readonly byte Castle;
 
-        public readonly int Castle;
+        public readonly int CapturedPiece;
 
         public readonly BoardSquare EnPassant;
 
-        public MakeMoveGameState(int capturedPiece, int castle, BoardSquare enpassant)
+        public MakeMoveGameState(int capturedPiece, byte castle, BoardSquare enpassant)
         {
             CapturedPiece = capturedPiece;
             Castle = castle;
@@ -1230,11 +1230,11 @@ public class MakeUnmakeMove_integration : BaseBenchmark
     {
         public int CapturedPiece;
 
-        public int Castle;
+        public byte Castle;
 
         public BoardSquare EnPassant;
 
-        public MakeMoveGameState_PassOut(int capturedPiece, int castle, BoardSquare enpassant)
+        public MakeMoveGameState_PassOut(int capturedPiece, byte castle, BoardSquare enpassant)
         {
             CapturedPiece = capturedPiece;
             Castle = castle;
@@ -1247,13 +1247,13 @@ public class MakeUnmakeMove_integration : BaseBenchmark
 #pragma warning disable S1104 // Fields should not have public accessibility
         public int CapturedPiece;
 
-        public int Castle;
+        public byte Castle;
 
         public BoardSquare EnPassant;
 #pragma warning restore S1104 // Fields should not have public accessibility
     }
 
-    #region ;(
+    #region
 
     public static class MakeMoveZobristTable
     {
@@ -1384,8 +1384,6 @@ public class MakeUnmakeMove_integration : BaseBenchmark
 
     public static class MakeMoveMoveGenerator
     {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
         private const int TRUE = 1;
 
         /// <summary>
@@ -1396,16 +1394,16 @@ public class MakeUnmakeMove_integration : BaseBenchmark
         {
             (int origin, BitBoard _) => MakeMoveAttacks.PawnAttacks[(int)Side.White, origin],
             (int origin, BitBoard _) => MakeMoveAttacks.KnightAttacks[origin],
-            (int origin, BitBoard occupancy) => MakeMoveAttacks.BishopAttacks(origin, occupancy),
-            (int origin, BitBoard occupancy) => MakeMoveAttacks.RookAttacks(origin, occupancy),
-            (int origin, BitBoard occupancy) => MakeMoveAttacks.QueenAttacks(origin, occupancy),
+            MakeMoveAttacks.BishopAttacks,
+            MakeMoveAttacks.RookAttacks,
+            MakeMoveAttacks.QueenAttacks,
             (int origin, BitBoard _) => MakeMoveAttacks.KingAttacks[origin],
 
             (int origin, BitBoard _) => MakeMoveAttacks.PawnAttacks[(int)Side.Black, origin],
             (int origin, BitBoard _) => MakeMoveAttacks.KnightAttacks[origin],
-            (int origin, BitBoard occupancy) => MakeMoveAttacks.BishopAttacks(origin, occupancy),
-            (int origin, BitBoard occupancy) => MakeMoveAttacks.RookAttacks(origin, occupancy),
-            (int origin, BitBoard occupancy) => MakeMoveAttacks.QueenAttacks(origin, occupancy),
+            MakeMoveAttacks.BishopAttacks,
+            MakeMoveAttacks.RookAttacks,
+            MakeMoveAttacks.QueenAttacks,
             (int origin, BitBoard _) => MakeMoveAttacks.KingAttacks[origin],
         };
 

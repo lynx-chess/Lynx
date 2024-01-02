@@ -326,7 +326,7 @@ public class MakeUnmakeMove_implementation : BaseBenchmark
         public MakeMoveGameState MakeMove_Original(Move move)
         {
             int capturedPiece = -1;
-            int castleCopy = Castle;
+            var castleCopy = Castle;
             BoardSquare enpassantCopy = EnPassant;
 
             var oldSide = Side;
