@@ -119,4 +119,6 @@ public sealed partial class GoCommand : GUIBaseCommand
             }
         }
     }
+
+    public static string Init() => Id;
 }

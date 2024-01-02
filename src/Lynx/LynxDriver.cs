@@ -32,6 +32,8 @@ public sealed class LynxDriver
         _ = ZobristTable.SideHash();
         _ = Masks.FileMasks;
         _ = EvaluationConstants.HistoryBonus[1];
+        _ = MoveGenerator.Init();
+        _ = GoCommand.Init();
     }
 
     public async Task Run(CancellationToken cancellationToken)
