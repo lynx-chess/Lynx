@@ -976,6 +976,9 @@ public class MakeUnmakeMove_implementation : BaseBenchmark
 
     public static class MakeMoveMoveGenerator
     {
+#if DEBUG
+        private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
+#endif
         private const int TRUE = 1;
 
         /// <summary>

@@ -73,7 +73,7 @@ public class PieceHash : BaseBenchmark
             return default;
         }
 
-        var file = enPassantSquare & 0x03;
+        var file = enPassantSquare & 0x07;
 
         return _table[file, (int)Piece.P];
     }
