@@ -42,7 +42,7 @@ using Lynx.Model;
 using System.Runtime.CompilerServices;
 
 namespace Lynx.Benchmark;
-public class PieceHash : BaseBenchmark
+public class ZobristHash_EnPassant : BaseBenchmark
 {
     private static readonly long[,] _table = Initialize();
 
