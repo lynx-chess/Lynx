@@ -96,12 +96,12 @@ public class ZobristTableTest
 
         var castleHash = ZobristTable.CastleHash(position.Castle);
 
-        Assert.AreEqual(CalculateCastleHash(position.Castle)castleHash);
+        Assert.AreEqual(CalculateCastleHash(position.Castle), castleHash);
 
         Assert.AreEqual(positionWithoutCastlingRightsHash, positionHash ^ castleHash);
     }
 
-    private static long CalculateCastleHash(byte castle)
+    private long CalculateCastleHash(byte castle)
     {
         long combinedHash = 0;
 
