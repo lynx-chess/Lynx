@@ -14,6 +14,12 @@ public class Position
     /// </summary>
     public BitBoard[] PieceBitBoards { get; }
 
+    public BitBoard Queens => PieceBitBoards[(int)Piece.Q] | PieceBitBoards[(int)Piece.q];
+    public BitBoard Rooks => PieceBitBoards[(int)Piece.R] | PieceBitBoards[(int)Piece.r];
+    public BitBoard Bishops => PieceBitBoards[(int)Piece.B] | PieceBitBoards[(int)Piece.b];
+    public BitBoard Knights => PieceBitBoards[(int)Piece.N] | PieceBitBoards[(int)Piece.n];
+    public BitBoard Kings => PieceBitBoards[(int)Piece.K] | PieceBitBoards[(int)Piece.k];
+
     /// <summary>
     /// Black, White, Both
     /// </summary>
@@ -582,6 +588,84 @@ public class Position
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int CountPieces() => PieceBitBoards.Sum(b => b.CountBits());
+
+    /// <summary>
+    /// Based on Stormphrax
+    /// </summary>
+    /// <param name="square"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public int PieceAt(int square)
+    {
+        var bit = BitBoardExtensions.SquareBit(square);
+
+        Side color;
+
+        if ((OccupancyBitBoards[(int)Side.Black] & bit) != default)
+        {
+            color = Side.Black;
+        }
+        else if ((OccupancyBitBoards[(int)Side.White] & bit) != default)
+        {
+            color = Side.White;
+        }
+        else
+        {
+            return (int)Piece.None;
+        }
+
+        var offset = Utils.PieceOffset(color);
+
+        for (int pieceIndex = offset; pieceIndex < 6 + offset; ++pieceIndex)
+        {
+            if (!(PieceBitBoards[pieceIndex] & bit).Empty())
+            {
+                return pieceIndex;
+            }
+        }
+
+        System.Diagnostics.Debug.Fail($"Bit set in {Side} occupancy bitboard, but not piece found");
+
+        return (int)Piece.None;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ulong AllAttackersTo(int square, BitBoard occupancy)
+    {
+        System.Diagnostics.Debug.Assert(square != (int)BoardSquare.noSquare);
+
+        var queens = Queens;
+        var rooks = queens | Rooks;
+        var bishops = queens | Bishops;
+
+        return (rooks & Attacks.RookAttacks(square, occupancy))
+            | (bishops & Attacks.BishopAttacks(square, occupancy))
+            | (PieceBitBoards[(int)Piece.p] & Attacks.PawnAttacks[(int)Side.White, square])
+            | (PieceBitBoards[(int)Piece.P] & Attacks.PawnAttacks[(int)Side.Black, square])
+            | (Knights & Attacks.KnightAttacks[square])
+            | (Kings & Attacks.KingAttacks[square]);
+    }
+
+    /// <summary>
+    /// Overload that has rooks and bishops precalculated for the position
+    /// </summary>
+    /// <param name="square"></param>
+    /// <param name="occupancy"></param>
+    /// <param name="rooks">Includes Queen bitboard</param>
+    /// <param name="bishops">Includes Queen bitboard</param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ulong AllAttackersTo(int square, BitBoard occupancy, BitBoard rooks, BitBoard bishops)
+    {
+        System.Diagnostics.Debug.Assert(square != (int)BoardSquare.noSquare);
+
+        return (rooks & Attacks.RookAttacks(square, occupancy))
+            | (bishops & Attacks.BishopAttacks(square, occupancy))
+            | (PieceBitBoards[(int)Piece.p] & Attacks.PawnAttacks[(int)Side.White, square])
+            | (PieceBitBoards[(int)Piece.P] & Attacks.PawnAttacks[(int)Side.Black, square])
+            | (Knights & Attacks.KnightAttacks[square])
+            | (Kings & Attacks.KingAttacks[square]);
+    }
 
     /// <summary>
     /// Evaluates material and position in a NegaMax style.

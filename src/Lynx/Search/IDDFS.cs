@@ -97,13 +97,13 @@ public sealed partial class Engine
 
                         _logger.Debug("Eval ({0}) outside of aspiration window [{1}, {2}] (depth {3}, nodes {4})", bestEvaluation, alpha, beta, depth, _nodes);
 
-                        window += window / 2;
+                        window += window >> 1;   // window / 2
 
                         // Depth change: https://github.com/lynx-chess/Lynx/pull/440
                         if (alpha >= bestEvaluation)     // Fail low
                         {
                             alpha = Math.Max(bestEvaluation - window, MinValue);
-                            beta = (alpha + beta) / 2;
+                            beta = (alpha + beta) >> 1;  // (alpha + beta) / 2
                         }
                         else if (beta <= bestEvaluation)     // Fail high
                         {

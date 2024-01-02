@@ -71,7 +71,7 @@ public static class TranspositionTableExtensions
         var ttLength = sizeBytes / _ttElementSize;
         if (!BitOperations.IsPow2(ttLength))
         {
-            ttLength = (int)BitOperations.RoundUpToPowerOf2((uint)ttLength) / 2;
+            ttLength = (int)BitOperations.RoundUpToPowerOf2((uint)ttLength) >> 1;    // / 2
         }
         var ttLengthMb = ttLength / 1024 / 1024;
 

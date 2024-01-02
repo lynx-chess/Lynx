@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using System.Transactions;
 
 namespace Lynx;
 
@@ -165,7 +166,7 @@ public sealed partial class Engine
             _isFollowingPV = false;
             for (int i = 0; i < pseudoLegalMoves.Length; ++i)
             {
-                scores[i] = ScoreMove(pseudoLegalMoves[i], ply, true, ttBestMove);
+                scores[i] = ScoreMove(pseudoLegalMoves[i], ply, isNotQSearch: true, ttBestMove);
 
                 if (pseudoLegalMoves[i] == _pVTable[depth])
                 {
@@ -178,7 +179,7 @@ public sealed partial class Engine
         {
             for (int i = 0; i < pseudoLegalMoves.Length; ++i)
             {
-                scores[i] = ScoreMove(pseudoLegalMoves[i], ply, true, ttBestMove);
+                scores[i] = ScoreMove(pseudoLegalMoves[i], ply, isNotQSearch: true, ttBestMove);
             }
         }
 
@@ -436,7 +437,7 @@ public sealed partial class Engine
         var scores = new int[pseudoLegalMoves.Length];
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            scores[i] = ScoreMove(pseudoLegalMoves[i], ply, false, ttBestMove);
+            scores[i] = ScoreMove(pseudoLegalMoves[i], ply, isNotQSearch: false, ttBestMove);
         }
 
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
@@ -453,6 +454,12 @@ public sealed partial class Engine
             }
 
             var move = pseudoLegalMoves[i];
+
+            // Prune bad captures
+            if (scores[i] < EvaluationConstants.PromotionMoveScoreValue && scores[i] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
+            {
+                continue;
+            }
 
             var gameState = position.MakeMove(move);
             if (!position.WasProduceByAValidMove())
