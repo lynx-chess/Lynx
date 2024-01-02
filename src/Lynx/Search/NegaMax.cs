@@ -160,7 +160,7 @@ public sealed partial class Engine
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
         var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves);
 
-        var scores = new int[pseudoLegalMoves.Length];
+        Span<int> scores = stackalloc int[pseudoLegalMoves.Length];
         if (_isFollowingPV)
         {
             _isFollowingPV = false;
@@ -434,7 +434,7 @@ public sealed partial class Engine
         Move? bestMove = null;
         bool isThereAnyValidCapture = false;
 
-        var scores = new int[pseudoLegalMoves.Length];
+        Span<int> scores = stackalloc int[pseudoLegalMoves.Length];
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
             scores[i] = ScoreMove(pseudoLegalMoves[i], ply, isNotQSearch: false, ttBestMove);
