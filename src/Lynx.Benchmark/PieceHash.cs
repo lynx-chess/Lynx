@@ -8,10 +8,10 @@ public class PieceHash : BaseBenchmark
     private static readonly long[,] _table = Initialize();
 
     [Benchmark(Baseline = true)]
-    private long Module() => Module((int)BoardSquare.c6);
+    public long Module() => Module((int)BoardSquare.c6);
 
     [Benchmark]
-    private long AndTrick() => AndTrick((int)BoardSquare.c6);
+    public long AndTrick() => AndTrick((int)BoardSquare.c6);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static long Module(int enPassantSquare)
