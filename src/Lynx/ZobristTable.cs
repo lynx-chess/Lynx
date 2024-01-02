@@ -34,7 +34,7 @@ public static class ZobristTable
         }
 #endif
 
-        var file = enPassantSquare % 8;
+        var file = enPassantSquare & 0x03;  // enPassantSquare % 8
 
         return _table[file, (int)Piece.P];
     }
