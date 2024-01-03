@@ -164,8 +164,6 @@ public sealed class EngineSettings
 
     public int SEE_BadCaptureBaseReduction { get; set; } = 1;
 
-    public int SEE_BadCaptureEnableDepthScalingFactor { get; set; } = 0;
-
     public int SEE_BadCaptureDepthDivisor { get; set; } = 8;
 
     #region Evaluation

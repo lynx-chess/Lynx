@@ -38,6 +38,8 @@ public static class MoveGenerator
         (int origin, BitBoard _) => Attacks.KingAttacks[origin],
     ];
 
+    internal static int Init() => TRUE;
+
     /// <summary>
     /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
     /// </summary>
