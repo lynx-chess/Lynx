@@ -174,6 +174,10 @@ public partial class ParseFENBenchmark : BaseBenchmark
     [ArgumentsSource(nameof(Data))]
     public ParseResult ParseFEN_NoRegex(string fen) => ParseFEN_FENParser_NoRegex.ParseFEN(fen);
 
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public ParseResult ParseFEN_OptimizedParseBoard(string fen) => ParseFEN_FENParser_OptimizedParseBoard.ParseFEN(fen);
+
     public static partial class ParseFEN_FENParser_Original
     {
         [GeneratedRegex("(?<=^|\\/)[P|N|B|R|Q|K|p|n|b|r|q|k|\\d]{1,8}", RegexOptions.Compiled)]

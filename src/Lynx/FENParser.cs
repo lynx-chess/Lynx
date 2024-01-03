@@ -124,7 +124,7 @@ public static class FENParser
                 {
                     fileIndex += ch - '0';
 
-                    System.Diagnostics.Debug.Assert(fileIndex >= 0 && fileIndex < 8, $"Error parsing char {ch} in fen {boardfenSection.ToString()}");
+                    System.Diagnostics.Debug.Assert(fileIndex >= 1 && fileIndex <= 8, $"Error parsing char {ch} in fen {boardfenSection.ToString()}");
                 }
             }
         }
