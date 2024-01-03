@@ -430,14 +430,6 @@ public sealed class LynxDriver
                     }
                     break;
                 }
-            case "see_badcaptureenabledepthscalingfactor":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.SEE_BadCaptureEnableDepthScalingFactor = value;
-                    }
-                    break;
-                }
             case "see_badcapturedepthdivisor":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
