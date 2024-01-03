@@ -505,26 +505,37 @@ public static class Constants
     public const string WhiteLongCastle = "e1c1";
     public const string BlackLongCastle = "e8c8";
 
-    public static readonly FrozenDictionary<int, int> EnPassantCaptureSquares = new Dictionary<int, int>(16)
-    {
-        [(int)BoardSquare.a6] = (int)BoardSquare.a6 + 8,
-        [(int)BoardSquare.b6] = (int)BoardSquare.b6 + 8,
-        [(int)BoardSquare.c6] = (int)BoardSquare.c6 + 8,
-        [(int)BoardSquare.d6] = (int)BoardSquare.d6 + 8,
-        [(int)BoardSquare.e6] = (int)BoardSquare.e6 + 8,
-        [(int)BoardSquare.f6] = (int)BoardSquare.f6 + 8,
-        [(int)BoardSquare.g6] = (int)BoardSquare.g6 + 8,
-        [(int)BoardSquare.h6] = (int)BoardSquare.h6 + 8,
+    #pragma warning disable IDE0055 // Discard formatting in this region
 
-        [(int)BoardSquare.a3] = (int)BoardSquare.a3 - 8,
-        [(int)BoardSquare.b3] = (int)BoardSquare.b3 - 8,
-        [(int)BoardSquare.c3] = (int)BoardSquare.c3 - 8,
-        [(int)BoardSquare.d3] = (int)BoardSquare.d3 - 8,
-        [(int)BoardSquare.e3] = (int)BoardSquare.e3 - 8,
-        [(int)BoardSquare.f3] = (int)BoardSquare.f3 - 8,
-        [(int)BoardSquare.g3] = (int)BoardSquare.g3 - 8,
-        [(int)BoardSquare.h3] = (int)BoardSquare.h3 - 8,
-    }.ToFrozenDictionary();
+    public static readonly int[] EnPassantCaptureSquares =
+    [
+        0, 0, 0, 0, 0, 0, 0, 0,     //  0-7
+        0, 0, 0, 0, 0, 0, 0, 0,     //  8-15
+
+        (int)BoardSquare.a6 + 8,    // 16 = a6
+        (int)BoardSquare.a6 + 8,
+        (int)BoardSquare.b6 + 8,
+        (int)BoardSquare.c6 + 8,
+        (int)BoardSquare.d6 + 8,
+        (int)BoardSquare.e6 + 8,
+        (int)BoardSquare.f6 + 8,
+        (int)BoardSquare.g6 + 8,
+        (int)BoardSquare.h6 + 8,    // 23 = h6
+
+        0, 0, 0, 0, 0, 0, 0, 0,     // 24-31
+        0, 0, 0, 0, 0, 0, 0, 0,     // 32-39
+
+        (int)BoardSquare.a3 - 8,    // 40 = a3
+        (int)BoardSquare.b3 - 8,
+        (int)BoardSquare.c3 - 8,
+        (int)BoardSquare.d3 - 8,
+        (int)BoardSquare.e3 - 8,
+        (int)BoardSquare.f3 - 8,
+        (int)BoardSquare.g3 - 8,
+        (int)BoardSquare.h3 - 8     //47 = h3
+    ];
+
+    #pragma warning restore IDE0055
 
     /// <summary>
     /// https://github.com/maksimKorzh/chess_programming/blob/master/src/bbc/make_move_castling_rights/bbc.c#L1474

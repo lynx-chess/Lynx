@@ -51,11 +51,15 @@ public class ZobristTableTest
     [Test]
     public void EnPassantHash()
     {
-        foreach (var enPassantSquare in Constants.EnPassantCaptureSquares.Keys)
+        var squares = Constants.EnPassantCaptureSquares.Where(content => content != 0).Select((_, index) => index);
+
+        foreach (var enPassantSquare in squares)
         {
             var file = enPassantSquare % 8;
             Assert.AreEqual(_zobristTable[file, (int)Piece.P], ZobristTable.EnPassantHash(enPassantSquare));
         }
+
+        Assert.AreEqual(16, squares.Count());
 
 #if DEBUG
         for (int square = 0; square < 64; ++square)

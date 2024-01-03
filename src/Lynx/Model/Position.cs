@@ -171,7 +171,7 @@ public class Position
         {
             var pawnPush = +8 - ((int)oldSide * 16);
             var enPassantSquare = sourceSquare + pawnPush;
-            Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {(BoardSquare)enPassantSquare}");
+            Utils.Assert(Constants.EnPassantCaptureSquares.Length > enPassantSquare && Constants.EnPassantCaptureSquares[enPassantSquare] != 0, $"Unexpected en passant square : {(BoardSquare)enPassantSquare}");
 
             EnPassant = (BoardSquare)enPassantSquare;
             UniqueIdentifier ^= ZobristTable.EnPassantHash(enPassantSquare);
@@ -291,7 +291,7 @@ public class Position
         {
             var pawnPush = +8 - (oldSide * 16);
             var enPassantSquare = sourceSquare + pawnPush;
-            Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {(BoardSquare)enPassantSquare}");
+            Utils.Assert(Constants.EnPassantCaptureSquares.Length > enPassantSquare && Constants.EnPassantCaptureSquares[enPassantSquare] != 0, $"Unexpected en passant square : {(BoardSquare)enPassantSquare}");
 
             EnPassant = (BoardSquare)enPassantSquare;
             UniqueIdentifier ^= ZobristTable.EnPassantHash(enPassantSquare);
