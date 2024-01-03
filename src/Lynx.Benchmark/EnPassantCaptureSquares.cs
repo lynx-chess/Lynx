@@ -14,7 +14,7 @@ public class EnPassantCaptureSquares : BaseBenchmark
     [ArgumentsSource(nameof(Data))]
     public int Dictionary(BoardSquare square) => EnPassantCaptureSquaresDictionary[(int)square];
 
-    [Benchmark(Baseline = true)]
+    [Benchmark]
     [ArgumentsSource(nameof(Data))]
     public int Array(BoardSquare square) => Constants.EnPassantCaptureSquares[(int)square];
 
