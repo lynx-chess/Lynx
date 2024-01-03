@@ -455,7 +455,6 @@ internal struct StructCustomPosition
         {
             var pawnPush = +8 - ((int)oldSide * 16);
             var enPassantSquare = sourceSquare + pawnPush;
-            Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
 
             EnPassant = (BoardSquare)enPassantSquare;
         }
@@ -558,7 +557,6 @@ internal struct StructCustomPosition
         {
             var pawnPush = +8 - ((int)oldSide * 16);
             var enPassantSquare = sourceSquare + pawnPush;
-            Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
 
             EnPassant = (BoardSquare)enPassantSquare;
         }
@@ -803,7 +801,6 @@ internal readonly struct ReadonlyStructCustomPosition
         {
             var pawnPush = +8 - ((int)oldSide * 16);
             var enPassantSquare = sourceSquare + pawnPush;
-            Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
 
             EnPassant = (BoardSquare)enPassantSquare;
         }
@@ -907,7 +904,6 @@ internal readonly struct ReadonlyStructCustomPosition
         {
             var pawnPush = +8 - ((int)oldSide * 16);
             var enPassantSquare = sourceSquare + pawnPush;
-            Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
 
             EnPassant = (BoardSquare)enPassantSquare;
         }
@@ -1159,7 +1155,6 @@ internal class ClassCustomPosition
         {
             var pawnPush = +8 - ((int)oldSide * 16);
             var enPassantSquare = sourceSquare + pawnPush;
-            Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
 
             EnPassant = (BoardSquare)enPassantSquare;
         }
@@ -1261,7 +1256,6 @@ internal class ClassCustomPosition
         {
             var pawnPush = +8 - ((int)oldSide * 16);
             var enPassantSquare = sourceSquare + pawnPush;
-            Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
 
             EnPassant = (BoardSquare)enPassantSquare;
         }
@@ -1513,7 +1507,6 @@ internal record class RecordClassCustomPosition
         {
             var pawnPush = +8 - ((int)oldSide * 16);
             var enPassantSquare = sourceSquare + pawnPush;
-            Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
 
             EnPassant = (BoardSquare)enPassantSquare;
         }
@@ -1615,7 +1608,6 @@ internal record class RecordClassCustomPosition
         {
             var pawnPush = +8 - ((int)oldSide * 16);
             var enPassantSquare = sourceSquare + pawnPush;
-            Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
 
             EnPassant = (BoardSquare)enPassantSquare;
         }
@@ -1867,7 +1859,6 @@ internal record struct RecordStructCustomPosition
         {
             var pawnPush = +8 - ((int)oldSide * 16);
             var enPassantSquare = sourceSquare + pawnPush;
-            Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
 
             EnPassant = (BoardSquare)enPassantSquare;
         }
@@ -1969,7 +1960,6 @@ internal record struct RecordStructCustomPosition
         {
             var pawnPush = +8 - ((int)oldSide * 16);
             var enPassantSquare = sourceSquare + pawnPush;
-            Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
 
             EnPassant = (BoardSquare)enPassantSquare;
         }

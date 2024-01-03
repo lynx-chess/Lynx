@@ -513,7 +513,6 @@ public static class Constants
         0, 0, 0, 0, 0, 0, 0, 0,     //  8-15
 
         (int)BoardSquare.a6 + 8,    // 16 = a6
-        (int)BoardSquare.a6 + 8,
         (int)BoardSquare.b6 + 8,
         (int)BoardSquare.c6 + 8,
         (int)BoardSquare.d6 + 8,
