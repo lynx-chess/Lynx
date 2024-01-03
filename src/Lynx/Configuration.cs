@@ -162,6 +162,8 @@ public sealed class EngineSettings
     /// </summary>
     public int History_MaxMoveRawBonus { get; set; } = 1_896;
 
+    public int SEE_BadCaptureReduction { get; set; } = 1;
+
     #region Evaluation
 
     public TaperedEvaluationTerm DoubledPawnPenalty { get; set; } = new(-5, -14);
