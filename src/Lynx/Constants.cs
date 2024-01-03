@@ -168,7 +168,7 @@ public static class Constants
     /// <summary>
     /// Covert ASCII character pieces to encoded constants
     /// </summary>
-    public static readonly FrozenDictionary<char, Piece> PiecesByChar = new Dictionary<char, Piece>(12)
+    public static readonly FrozenDictionary<char, Piece> PiecesByChar = new Dictionary<char, Piece>(12) // TODO array
     {
         ['P'] = Piece.P,
         ['N'] = Piece.N,
