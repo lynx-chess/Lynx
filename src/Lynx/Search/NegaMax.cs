@@ -275,6 +275,15 @@ public sealed partial class Engine
                     reduction = Math.Clamp(reduction, 0, depth - 2);
                 }
 
+                // 🔍 Static Exchange Evaluation (SEE) reduction
+                // Bad captures are reduced more
+                if (!isInCheck
+                    && scores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue
+                    && scores[moveIndex] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
+                {
+                    reduction += Configuration.EngineSettings.SEE_BadCaptureReduction;
+                }
+
                 // Search with reduced depth
                 evaluation = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha);
 
