@@ -96,20 +96,35 @@ public static class FENParser
 
             foreach (var ch in boardfenSection)
             {
-                if (Constants.PiecesByChar.TryGetValue(ch, out Piece piece))
+                var piece = ch switch
+                {
+                    'P' => Piece.P,
+                    'N' => Piece.N,
+                    'B' => Piece.B,
+                    'R' => Piece.R,
+                    'Q' => Piece.Q,
+                    'K' => Piece.K,
+
+                    'p' => Piece.p,
+                    'n' => Piece.n,
+                    'b' => Piece.b,
+                    'r' => Piece.r,
+                    'q' => Piece.q,
+                    'k' => Piece.k,
+
+                    _ => Piece.None
+                };
+
+                if (piece != Piece.None)
                 {
                     pieceBitBoards[(int)piece] = pieceBitBoards[(int)piece].SetBit(BitBoardExtensions.SquareIndex(rankIndex, fileIndex));
                     ++fileIndex;
                 }
-                else if (int.TryParse($"{ch}", out int emptySquares))
-                {
-                    fileIndex += emptySquares;
-                }
                 else
                 {
-                    _logger.Error("Unrecognized character in FEN: {0} (within {1})", ch, boardfenSection.ToString());
-                    success = false;
-                    break;
+                    fileIndex += ch - '0';
+
+                    System.Diagnostics.Debug.Assert(fileIndex >= 0 && fileIndex < 8, $"Error parsing char {ch} in fen {boardfenSection.ToString()}");
                 }
             }
         }
