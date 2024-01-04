@@ -145,13 +145,13 @@ public class MakeUnmakeMove_implementation : BaseBenchmark
 
         public BoardSquare EnPassant { get; private set; }
 
-        public int Castle { get; private set; }
+        public byte Castle { get; private set; }
 
         public MakeMovePosition(string fen) : this(FENParser.ParseFEN(fen))
         {
         }
 
-        public MakeMovePosition((BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, int Castle, BoardSquare EnPassant,
+        public MakeMovePosition((BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, byte Castle, BoardSquare EnPassant,
             int HalfMoveClock/*, int FullMoveCounter*/) parsedFEN)
         {
             PieceBitBoards = parsedFEN.PieceBitBoards;
@@ -326,7 +326,7 @@ public class MakeUnmakeMove_implementation : BaseBenchmark
         public MakeMoveGameState MakeMove_Original(Move move)
         {
             int capturedPiece = -1;
-            int castleCopy = Castle;
+            var castleCopy = Castle;
             BoardSquare enpassantCopy = EnPassant;
 
             var oldSide = Side;
@@ -549,7 +549,7 @@ public class MakeUnmakeMove_implementation : BaseBenchmark
         public MakeMoveGameStateWithZobristKey MakeMove_WithZobristKey(Move move)
         {
             int capturedPiece = -1;
-            int castleCopy = Castle;
+            var castleCopy = Castle;
             BoardSquare enpassantCopy = EnPassant;
             long uniqueIdentifierCopy = UniqueIdentifier;
 
@@ -814,11 +814,11 @@ public class MakeUnmakeMove_implementation : BaseBenchmark
     {
         public readonly int CapturedPiece;
 
-        public readonly int Castle;
+        public readonly byte Castle;
 
         public readonly BoardSquare EnPassant;
 
-        public MakeMoveGameState(int capturedPiece, int castle, BoardSquare enpassant)
+        public MakeMoveGameState(int capturedPiece, byte castle, BoardSquare enpassant)
         {
             CapturedPiece = capturedPiece;
             Castle = castle;
@@ -828,15 +828,15 @@ public class MakeUnmakeMove_implementation : BaseBenchmark
 
     public readonly struct MakeMoveGameStateWithZobristKey
     {
-        public readonly int CapturedPiece;
+        public readonly long ZobristKey;
 
-        public readonly int Castle;
+        public readonly int CapturedPiece;
 
         public readonly BoardSquare EnPassant;
 
-        public readonly long ZobristKey;
+        public readonly byte Castle;
 
-        public MakeMoveGameStateWithZobristKey(int capturedPiece, int castle, BoardSquare enpassant, long zobristKey)
+        public MakeMoveGameStateWithZobristKey(int capturedPiece, byte castle, BoardSquare enpassant, long zobristKey)
         {
             CapturedPiece = capturedPiece;
             Castle = castle;
@@ -845,7 +845,7 @@ public class MakeUnmakeMove_implementation : BaseBenchmark
         }
     }
 
-    #region ;(
+    #region
 
     public static class MakeMoveZobristTable
     {
@@ -897,7 +897,7 @@ public class MakeUnmakeMove_implementation : BaseBenchmark
         /// <param name="castle"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long CastleHash(int castle)
+        public static long CastleHash(byte castle)
         {
             long combinedHash = 0;
 
@@ -976,8 +976,9 @@ public class MakeUnmakeMove_implementation : BaseBenchmark
 
     public static class MakeMoveMoveGenerator
     {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
+#if DEBUG
+        private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
+#endif
         private const int TRUE = 1;
 
         /// <summary>
@@ -988,16 +989,16 @@ public class MakeUnmakeMove_implementation : BaseBenchmark
         {
             (int origin, BitBoard _) => MakeMoveAttacks.PawnAttacks[(int)Side.White, origin],
             (int origin, BitBoard _) => MakeMoveAttacks.KnightAttacks[origin],
-            (int origin, BitBoard occupancy) => MakeMoveAttacks.BishopAttacks(origin, occupancy),
-            (int origin, BitBoard occupancy) => MakeMoveAttacks.RookAttacks(origin, occupancy),
-            (int origin, BitBoard occupancy) => MakeMoveAttacks.QueenAttacks(origin, occupancy),
+            MakeMoveAttacks.BishopAttacks,
+            MakeMoveAttacks.RookAttacks,
+            MakeMoveAttacks.QueenAttacks,
             (int origin, BitBoard _) => MakeMoveAttacks.KingAttacks[origin],
 
             (int origin, BitBoard _) => MakeMoveAttacks.PawnAttacks[(int)Side.Black, origin],
             (int origin, BitBoard _) => MakeMoveAttacks.KnightAttacks[origin],
-            (int origin, BitBoard occupancy) => MakeMoveAttacks.BishopAttacks(origin, occupancy),
-            (int origin, BitBoard occupancy) => MakeMoveAttacks.RookAttacks(origin, occupancy),
-            (int origin, BitBoard occupancy) => MakeMoveAttacks.QueenAttacks(origin, occupancy),
+            MakeMoveAttacks.BishopAttacks,
+            MakeMoveAttacks.RookAttacks,
+            MakeMoveAttacks.QueenAttacks,
             (int origin, BitBoard _) => MakeMoveAttacks.KingAttacks[origin],
         };
 
