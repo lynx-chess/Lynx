@@ -33,7 +33,7 @@ public static class ZobristTable
         }
 
 #if DEBUG
-        if (!Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare))
+        if (Constants.EnPassantCaptureSquares.Length <= enPassantSquare || Constants.EnPassantCaptureSquares[enPassantSquare] == 0)
         {
             throw new ArgumentException($"{Constants.Coordinates[enPassantSquare]} is not a valid en-passant square");
         }

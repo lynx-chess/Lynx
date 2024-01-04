@@ -432,7 +432,6 @@ public class MakeUnmakeMove_integration : BaseBenchmark
             {
                 var pawnPush = +8 - ((int)oldSide * 16);
                 var enPassantSquare = sourceSquare + pawnPush;
-                Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
 
                 EnPassant = (BoardSquare)enPassantSquare;
                 UniqueIdentifier ^= ZobristTable.EnPassantHash(enPassantSquare);
@@ -552,7 +551,6 @@ public class MakeUnmakeMove_integration : BaseBenchmark
             {
                 var pawnPush = +8 - ((int)oldSide * 16);
                 var enPassantSquare = sourceSquare + pawnPush;
-                Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
 
                 EnPassant = (BoardSquare)enPassantSquare;
                 UniqueIdentifier ^= ZobristTable.EnPassantHash(enPassantSquare);
@@ -674,7 +672,6 @@ public class MakeUnmakeMove_integration : BaseBenchmark
             {
                 var pawnPush = +8 - ((int)oldSide * 16);
                 var enPassantSquare = sourceSquare + pawnPush;
-                Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
 
                 EnPassant = (BoardSquare)enPassantSquare;
                 UniqueIdentifier ^= ZobristTable.EnPassantHash(enPassantSquare);
@@ -796,7 +793,6 @@ public class MakeUnmakeMove_integration : BaseBenchmark
             {
                 var pawnPush = +8 - ((int)oldSide * 16);
                 var enPassantSquare = sourceSquare + pawnPush;
-                Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {enPassantSquare}");
 
                 EnPassant = (BoardSquare)enPassantSquare;
                 UniqueIdentifier ^= ZobristTable.EnPassantHash(enPassantSquare);
@@ -1274,13 +1270,6 @@ public class MakeUnmakeMove_integration : BaseBenchmark
             {
                 return default;
             }
-
-#if DEBUG
-            if (!Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare))
-            {
-                throw new ArgumentException($"{Constants.Coordinates[enPassantSquare]} is not a valid en-passant square");
-            }
-#endif
 
             var file = enPassantSquare % 8;
 
