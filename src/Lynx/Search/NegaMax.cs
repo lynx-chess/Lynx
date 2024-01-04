@@ -157,9 +157,10 @@ public sealed partial class Engine
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
-        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, MovePool);
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves);
 
-        var scores = new int[pseudoLegalMoves.Length];
+        Span<int> scores = stackalloc int[pseudoLegalMoves.Length];
         if (_isFollowingPV)
         {
             _isFollowingPV = false;
@@ -430,7 +431,8 @@ public sealed partial class Engine
             alpha = staticEvaluation;
         }
 
-        var pseudoLegalMoves = MoveGenerator.GenerateAllCaptures(position, MovePool);
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        var pseudoLegalMoves = MoveGenerator.GenerateAllCaptures(position, moves);
         if (pseudoLegalMoves.Length == 0)
         {
             // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358
@@ -441,7 +443,7 @@ public sealed partial class Engine
         Move? bestMove = null;
         bool isThereAnyValidCapture = false;
 
-        var scores = new int[pseudoLegalMoves.Length];
+        Span<int> scores = stackalloc int[pseudoLegalMoves.Length];
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
             scores[i] = ScoreMove(pseudoLegalMoves[i], ply, isNotQSearch: false, ttBestMove);

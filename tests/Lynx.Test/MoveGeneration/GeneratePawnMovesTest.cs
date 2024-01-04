@@ -7,11 +7,17 @@ public class GeneratePawnMovesTest
 {
 #pragma warning disable RCS1098 // Constant values should be placed on right side of comparisons.
 
-    private static IEnumerable<Move> GeneratePawnMoves(Position position) =>
-        MoveGenerator.GenerateAllMoves(position, new Move[Constants.MaxNumberOfPossibleMovesInAPosition]).Where(m => m.Piece() % (int)Piece.p == 0);
+    private static IEnumerable<Move> GeneratePawnMoves(Position position)
+    {
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        return MoveGenerator.GenerateAllMoves(position, moves).ToArray().Where(m => m.Piece() % (int)Piece.p == 0);
+    }
 
-    private static IEnumerable<Move> GeneratePawnCaptures(Position position) =>
-        MoveGenerator.GenerateAllCaptures(position, new Move[Constants.MaxNumberOfPossibleMovesInAPosition]).Where(m => m.Piece() % (int)Piece.p == 0);
+    private static IEnumerable<Move> GeneratePawnCaptures(Position position)
+    {
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        return MoveGenerator.GenerateAllCaptures(position, moves).ToArray().Where(m => m.Piece() % (int)Piece.p == 0);
+    }
 
     [Test]
     public void QuietMoves()

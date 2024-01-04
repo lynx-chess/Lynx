@@ -5,11 +5,17 @@ namespace Lynx.Test.MoveGeneration;
 
 public class GenerateKingMovesTest
 {
-    private static IEnumerable<Move> GenerateKingMoves(Position position) =>
-        MoveGenerator.GenerateAllMoves(position, new Move[Constants.MaxNumberOfPossibleMovesInAPosition]).Where(m => m.Piece() == (int)Piece.K || m.Piece() == (int)Piece.k);
+    private static IEnumerable<Move> GenerateKingMoves(Position position)
+    {
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        return MoveGenerator.GenerateAllMoves(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.K || m.Piece() == (int)Piece.k);
+    }
 
-    private static IEnumerable<Move> GenerateKingCaptures(Position position) =>
-        MoveGenerator.GenerateAllCaptures(position, new Move[Constants.MaxNumberOfPossibleMovesInAPosition]).Where(m => m.Piece() == (int)Piece.K || m.Piece() == (int)Piece.k);
+    private static IEnumerable<Move> GenerateKingCaptures(Position position)
+    {
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        return MoveGenerator.GenerateAllCaptures(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.K || m.Piece() == (int)Piece.k);
+    }
 
     [TestCase(Constants.InitialPositionFEN, 0)]
     [TestCase("8/8/8/2PPP3/2PKP3/2P1P3/8/8 w - - 0 1", 1)]

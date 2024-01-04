@@ -161,6 +161,6 @@ public class PerftTest
 
     private static void Validate(string fen, int depth, long expectedNumberOfNodes)
     {
-        Assert.AreEqual(expectedNumberOfNodes, Perft.ResultsImpl(new Position(fen), depth, default, new Move[Constants.MaxNumberOfPossibleMovesInAPosition]));
+        Assert.AreEqual(expectedNumberOfNodes, Perft.ResultsImpl(new Position(fen), depth, default));
     }
 }
