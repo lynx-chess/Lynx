@@ -73,11 +73,20 @@ public static class FENParser
         var rankIndex = 0;
         var end = fen.IndexOf('/');
 
-        while (success && end != -1)
+        while (
+            end != -1
+#if DEBUG
+            && success
+#endif
+            )
         {
             var match = fen[..end];
 
-            ParseBoardSection(pieceBitBoards, ref success, rankIndex, match);
+            ParseBoardSection(pieceBitBoards, rankIndex, match
+#if DEBUG
+            , ref success
+#endif
+                );
             PopulateOccupancies(pieceBitBoards, occupancyBitBoards);
 
             fen = fen[(end + 1)..];
@@ -85,12 +94,20 @@ public static class FENParser
             ++rankIndex;
         }
 
-        ParseBoardSection(pieceBitBoards, ref success, rankIndex, fen[..fen.IndexOf(' ')]);
+        ParseBoardSection(pieceBitBoards, rankIndex, fen[..fen.IndexOf(' ')]
+#if DEBUG
+            , ref success
+#endif
+            );
         PopulateOccupancies(pieceBitBoards, occupancyBitBoards);
 
         return success;
 
-        static void ParseBoardSection(ulong[] pieceBitBoards, ref bool success, int rankIndex, ReadOnlySpan<char> boardfenSection)
+        static void ParseBoardSection(ulong[] pieceBitBoards, int rankIndex, ReadOnlySpan<char> boardfenSection
+#if DEBUG
+            , ref bool success
+#endif
+            )
         {
             int fileIndex = 0;
 
@@ -123,24 +140,20 @@ public static class FENParser
                 else
                 {
                     fileIndex += ch - '0';
-
+#if DEBUG
                     System.Diagnostics.Debug.Assert(fileIndex >= 1 && fileIndex <= 8, $"Error parsing char {ch} in fen {boardfenSection.ToString()}");
+                    success = false;
+#endif
                 }
             }
         }
 
         static void PopulateOccupancies(BitBoard[] pieceBitBoards, BitBoard[] occupancyBitBoards)
         {
-            var limit = (int)Piece.K;
-            for (int piece = (int)Piece.P; piece <= limit; ++piece)
+            for (int piece = (int)Piece.P; piece <= (int)Piece.K; ++piece)
             {
                 occupancyBitBoards[(int)Side.White] |= pieceBitBoards[piece];
-            }
-
-            limit = (int)Piece.k;
-            for (int piece = (int)Piece.p; piece <= limit; ++piece)
-            {
-                occupancyBitBoards[(int)Side.Black] |= pieceBitBoards[piece];
+                occupancyBitBoards[(int)Side.Black] |= pieceBitBoards[piece + 6];
             }
 
             occupancyBitBoards[(int)Side.Both] = occupancyBitBoards[(int)Side.White] | occupancyBitBoards[(int)Side.Black];
