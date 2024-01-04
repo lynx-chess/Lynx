@@ -98,4 +98,26 @@ public class ZobristTableTest
 
         Assert.AreEqual(positionWithoutCastlingRightsHash, positionHash ^ castleHash);
     }
+
+    private static long OriginalPositionHash(Position position)
+    {
+        long positionHash = 0;
+
+        for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
+        {
+            for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
+            {
+                if (position.PieceBitBoards[pieceIndex].GetBit(squareIndex))
+                {
+                    positionHash ^= ZobristTable.PieceHash(squareIndex, pieceIndex);
+                }
+            }
+        }
+
+        positionHash ^= ZobristTable.EnPassantHash((int)position.EnPassant)
+            ^ ZobristTable.SideHash()
+            ^ ZobristTable.CastleHash(position.Castle);
+
+        return positionHash;
+    }
 }
