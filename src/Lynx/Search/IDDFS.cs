@@ -193,7 +193,9 @@ public sealed partial class Engine
     {
         bool onlyOneLegalMove = false;
         Move firstLegalMove = default;
-        foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, MovePool))
+
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, moves))
         {
             var gameState = Game.CurrentPosition.MakeMove(move);
             bool isPositionValid = Game.CurrentPosition.IsValid();
