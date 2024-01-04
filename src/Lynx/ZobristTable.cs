@@ -94,14 +94,16 @@ public static class ZobristTable
     {
         long positionHash = 0;
 
-        for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
+        for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
         {
-            for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
+            var bitboard = position.PieceBitBoards[pieceIndex];
+
+            while (bitboard != default)
             {
-                if (position.PieceBitBoards[pieceIndex].GetBit(squareIndex))
-                {
-                    positionHash ^= PieceHash(squareIndex, pieceIndex);
-                }
+                var pieceSquareIndex = bitboard.GetLS1BIndex();
+                bitboard.ResetLS1B();
+
+                positionHash ^= ZobristTable.PieceHash(pieceSquareIndex, pieceIndex);
             }
         }
 
