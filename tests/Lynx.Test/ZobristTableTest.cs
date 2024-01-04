@@ -99,6 +99,23 @@ public class ZobristTableTest
         Assert.AreEqual(positionWithoutCastlingRightsHash, positionHash ^ castleHash);
     }
 
+    [TestCase(Constants.InitialPositionFEN)]
+    [TestCase(Constants.TrickyTestPositionFEN)]
+    [TestCase(Constants.TrickyTestPositionReversedFEN)]
+    [TestCase(Constants.CmkTestPositionFEN)]
+    [TestCase(Constants.ComplexPositionFEN)]
+    [TestCase(Constants.KillerTestPositionFEN)]
+    [TestCase(Constants.TTPositionFEN)]
+    public void PositionHash(string fen)
+    {
+        var position = new Position(fen);
+
+        var originalHash = OriginalPositionHash(position);
+        var currentHash = ZobristTable.PositionHash(position);
+
+        Assert.AreEqual(originalHash, currentHash);
+    }
+
     private static long OriginalPositionHash(Position position)
     {
         long positionHash = 0;
