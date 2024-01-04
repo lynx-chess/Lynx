@@ -5,11 +5,17 @@ namespace Lynx.Test.MoveGeneration;
 
 public class GenerateQueenMovesTest
 {
-    private static IEnumerable<Move> GenerateQueenMoves(Position position) =>
-        MoveGenerator.GenerateAllMoves(position, new Move[Constants.MaxNumberOfPossibleMovesInAPosition]).Where(m => m.Piece() == (int)Piece.Q || m.Piece() == (int)Piece.q);
+    private static IEnumerable<Move> GenerateQueenMoves(Position position)
+    {
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        return MoveGenerator.GenerateAllMoves(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.Q || m.Piece() == (int)Piece.q);
+    }
 
-    private static IEnumerable<Move> GenerateQueenCaptures(Position position) =>
-        MoveGenerator.GenerateAllCaptures(position, new Move[Constants.MaxNumberOfPossibleMovesInAPosition]).Where(m => m.Piece() == (int)Piece.Q || m.Piece() == (int)Piece.q);
+    private static IEnumerable<Move> GenerateQueenCaptures(Position position)
+    {
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        return MoveGenerator.GenerateAllCaptures(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.Q || m.Piece() == (int)Piece.q);
+    }
 
     [TestCase(Constants.EmptyBoardFEN, 0)]
     [TestCase(Constants.InitialPositionFEN, 0)]
