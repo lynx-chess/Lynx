@@ -141,8 +141,11 @@ public static class FENParser
                 {
                     fileIndex += ch - '0';
 #if DEBUG
-                    System.Diagnostics.Debug.Assert(fileIndex >= 1 && fileIndex <= 8, $"Error parsing char {ch} in fen {boardfenSection.ToString()}");
-                    success = false;
+                    if (fileIndex < 1 || fileIndex > 8)
+                    {
+                        System.Diagnostics.Debug.Fail($"Error parsing char {ch} in fen {boardfenSection.ToString()}");
+                        success = false;
+                    }
 #endif
                 }
             }
