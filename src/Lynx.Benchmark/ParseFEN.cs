@@ -6,49 +6,56 @@
  *    [Host]     : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
  *    DefaultJob : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
  *
- *  | Method                       | fen                  | Mean       | Error    | StdDev   | Ratio | Gen0   | Allocated | Alloc Ratio |
- *  |----------------------------- |--------------------- |-----------:|---------:|---------:|------:|-------:|----------:|------------:|
- *  | ParseFEN_Original            | 8/k7/(...)- 0 1 [39] | 2,441.4 ns |  7.51 ns |  6.27 ns |  1.00 | 0.0343 |    2960 B |        1.00 |
- *  | ParseFEN_Improved1           | 8/k7/(...)- 0 1 [39] | 2,509.8 ns | 12.38 ns | 11.58 ns |  1.03 | 0.0305 |    2704 B |        0.91 |
- *  | ParseFEN_Base2               | 8/k7/(...)- 0 1 [39] | 2,332.2 ns | 13.59 ns | 12.72 ns |  0.95 | 0.0305 |    2760 B |        0.93 |
- *  | ParseFEN_NoRegex             | 8/k7/(...)- 0 1 [39] | 1,074.7 ns |  4.83 ns |  4.03 ns |  0.44 | 0.0057 |     480 B |        0.16 |
- *  | ParseFEN_OptimizedParseBoard | 8/k7/(...)- 0 1 [39] |   332.4 ns |  2.58 ns |  2.41 ns |  0.14 | 0.0019 |     168 B |        0.06 |
- *  |                              |                      |            |          |          |       |        |           |             |
- *  | ParseFEN_Original            | r2q1r(...)- 0 9 [68] | 3,254.5 ns |  7.77 ns |  7.27 ns |  1.00 | 0.0343 |    3160 B |        1.00 |
- *  | ParseFEN_Improved1           | r2q1r(...)- 0 9 [68] | 2,981.4 ns | 16.73 ns | 15.65 ns |  0.92 | 0.0343 |    2904 B |        0.92 |
- *  | ParseFEN_Base2               | r2q1r(...)- 0 9 [68] | 2,958.6 ns |  8.61 ns |  8.05 ns |  0.91 | 0.0343 |    3016 B |        0.95 |
- *  | ParseFEN_NoRegex             | r2q1r(...)- 0 9 [68] | 1,524.1 ns |  6.46 ns |  6.04 ns |  0.47 | 0.0057 |     624 B |        0.20 |
- *  | ParseFEN_OptimizedParseBoard | r2q1r(...)- 0 9 [68] |   380.5 ns |  2.13 ns |  1.88 ns |  0.12 | 0.0019 |     168 B |        0.05 |
- *  |                              |                      |            |          |          |       |        |           |             |
- *  | ParseFEN_Original            | r3k2r(...)- 0 1 [68] | 2,959.7 ns | 12.97 ns | 12.13 ns |  1.00 | 0.0343 |    3080 B |        1.00 |
- *  | ParseFEN_Improved1           | r3k2r(...)- 0 1 [68] | 2,884.5 ns |  8.71 ns |  8.14 ns |  0.97 | 0.0305 |    2816 B |        0.91 |
- *  | ParseFEN_Base2               | r3k2r(...)- 0 1 [68] | 2,846.0 ns |  5.74 ns |  5.09 ns |  0.96 | 0.0343 |    2928 B |        0.95 |
- *  | ParseFEN_NoRegex             | r3k2r(...)- 0 1 [68] | 1,405.5 ns |  4.79 ns |  4.48 ns |  0.47 | 0.0057 |     552 B |        0.18 |
- *  | ParseFEN_OptimizedParseBoard | r3k2r(...)- 0 1 [68] |   380.0 ns |  2.50 ns |  2.34 ns |  0.13 | 0.0019 |     168 B |        0.05 |
- *  |                              |                      |            |          |          |       |        |           |             |
- *  | ParseFEN_Original            | r3k2r(...)- 0 1 [68] | 2,930.6 ns |  8.95 ns |  7.93 ns |  1.00 | 0.0343 |    3080 B |        1.00 |
- *  | ParseFEN_Improved1           | r3k2r(...)- 0 1 [68] | 2,850.1 ns |  8.67 ns |  8.11 ns |  0.97 | 0.0305 |    2816 B |        0.91 |
- *  | ParseFEN_Base2               | r3k2r(...)- 0 1 [68] | 2,787.1 ns |  2.02 ns |  1.58 ns |  0.95 | 0.0343 |    2928 B |        0.95 |
- *  | ParseFEN_NoRegex             | r3k2r(...)- 0 1 [68] | 1,411.7 ns |  4.99 ns |  4.42 ns |  0.48 | 0.0057 |     552 B |        0.18 |
- *  | ParseFEN_OptimizedParseBoard | r3k2r(...)- 0 1 [68] |   383.2 ns |  3.05 ns |  2.85 ns |  0.13 | 0.0019 |     168 B |        0.05 |
- *  |                              |                      |            |          |          |       |        |           |             |
- *  | ParseFEN_Original            | rnbqk(...)6 0 1 [67] | 2,839.4 ns |  7.78 ns |  6.49 ns |  1.00 | 0.0343 |    3072 B |        1.00 |
- *  | ParseFEN_Improved1           | rnbqk(...)6 0 1 [67] | 2,673.7 ns | 13.69 ns | 12.13 ns |  0.94 | 0.0305 |    2800 B |        0.91 |
- *  | ParseFEN_Base2               | rnbqk(...)6 0 1 [67] | 2,707.6 ns |  9.94 ns |  9.29 ns |  0.95 | 0.0343 |    2904 B |        0.95 |
- *  | ParseFEN_NoRegex             | rnbqk(...)6 0 1 [67] | 1,341.3 ns |  4.73 ns |  4.42 ns |  0.47 | 0.0057 |     528 B |        0.17 |
- *  | ParseFEN_OptimizedParseBoard | rnbqk(...)6 0 1 [67] |   385.4 ns |  0.55 ns |  0.43 ns |  0.14 | 0.0019 |     168 B |        0.05 |
- *  |                              |                      |            |          |          |       |        |           |             |
- *  | ParseFEN_Original            | rnbqk(...)- 0 1 [56] | 2,022.2 ns |  3.98 ns |  3.53 ns |  1.00 | 0.0305 |    2760 B |        1.00 |
- *  | ParseFEN_Improved1           | rnbqk(...)- 0 1 [56] | 1,989.9 ns |  4.35 ns |  3.40 ns |  0.98 | 0.0267 |    2496 B |        0.90 |
- *  | ParseFEN_Base2               | rnbqk(...)- 0 1 [56] | 1,941.0 ns |  7.01 ns |  6.22 ns |  0.96 | 0.0305 |    2584 B |        0.94 |
- *  | ParseFEN_NoRegex             | rnbqk(...)- 0 1 [56] |   754.1 ns |  3.40 ns |  3.18 ns |  0.37 | 0.0029 |     264 B |        0.10 |
- *  | ParseFEN_OptimizedParseBoard | rnbqk(...)- 0 1 [56] |   385.8 ns |  0.84 ns |  0.74 ns |  0.19 | 0.0019 |     168 B |        0.06 |
- *  |                              |                      |            |          |          |       |        |           |             |
- *  | ParseFEN_Original            | rq2k2(...)- 0 1 [71] | 3,171.1 ns |  6.61 ns |  5.86 ns |  1.00 | 0.0343 |    3168 B |        1.00 |
- *  | ParseFEN_Improved1           | rq2k2(...)- 0 1 [71] | 3,102.0 ns |  6.98 ns |  6.18 ns |  0.98 | 0.0343 |    2904 B |        0.92 |
- *  | ParseFEN_Base2               | rq2k2(...)- 0 1 [71] | 3,082.6 ns | 10.31 ns |  9.14 ns |  0.97 | 0.0343 |    3024 B |        0.95 |
- *  | ParseFEN_NoRegex             | rq2k2(...)- 0 1 [71] | 1,583.2 ns |  5.20 ns |  4.86 ns |  0.50 | 0.0057 |     624 B |        0.20 |
- *  | ParseFEN_OptimizedParseBoard | rq2k2(...)- 0 1 [71] |   408.8 ns |  0.56 ns |  0.47 ns |  0.13 | 0.0019 |     168 B |        0.05 |
+ *  | Method                                | fen                  | Mean       | Error    | StdDev   | Ratio | Gen0   | Allocated | Alloc Ratio |
+ *  |-------------------------------------- |--------------------- |-----------:|---------:|---------:|------:|-------:|----------:|------------:|
+ *  | ParseFEN_Original                     | 8/k7/(...)- 0 1 [39] | 2,524.7 ns | 12.02 ns | 10.66 ns |  1.00 | 0.0343 |    2960 B |        1.00 |
+ *  | ParseFEN_Improved1                    | 8/k7/(...)- 0 1 [39] | 2,288.4 ns | 18.94 ns | 17.72 ns |  0.91 | 0.0305 |    2704 B |        0.91 |
+ *  | ParseFEN_Base2                        | 8/k7/(...)- 0 1 [39] | 2,367.6 ns |  7.51 ns |  6.27 ns |  0.94 | 0.0305 |    2760 B |        0.93 |
+ *  | ParseFEN_NoRegex                      | 8/k7/(...)- 0 1 [39] | 1,079.5 ns |  4.92 ns |  4.36 ns |  0.43 | 0.0057 |     480 B |        0.16 |
+ *  | ParseFEN_OptimizedParseBoard          | 8/k7/(...)- 0 1 [39] |   332.3 ns |  0.76 ns |  0.59 ns |  0.13 | 0.0019 |     168 B |        0.06 |
+ *  | ParseFEN_OptimizedPopulateOccupancies | 8/k7/(...)- 0 1 [39] |   317.7 ns |  2.06 ns |  1.92 ns |  0.13 | 0.0019 |     168 B |        0.06 |
+ *  |                                       |                      |            |          |          |       |        |           |             |
+ *  | ParseFEN_Original                     | r2q1r(...)- 0 9 [68] | 3,169.5 ns | 11.35 ns | 10.62 ns |  1.00 | 0.0343 |    3160 B |        1.00 |
+ *  | ParseFEN_Improved1                    | r2q1r(...)- 0 9 [68] | 3,135.9 ns |  4.78 ns |  4.24 ns |  0.99 | 0.0343 |    2904 B |        0.92 |
+ *  | ParseFEN_Base2                        | r2q1r(...)- 0 9 [68] | 3,170.2 ns | 13.62 ns | 12.74 ns |  1.00 | 0.0343 |    3016 B |        0.95 |
+ *  | ParseFEN_NoRegex                      | r2q1r(...)- 0 9 [68] | 1,565.7 ns |  1.15 ns |  0.96 ns |  0.49 | 0.0057 |     624 B |        0.20 |
+ *  | ParseFEN_OptimizedParseBoard          | r2q1r(...)- 0 9 [68] |   380.9 ns |  2.34 ns |  2.08 ns |  0.12 | 0.0019 |     168 B |        0.05 |
+ *  | ParseFEN_OptimizedPopulateOccupancies | r2q1r(...)- 0 9 [68] |   390.8 ns |  1.56 ns |  1.39 ns |  0.12 | 0.0019 |     168 B |        0.05 |
+ *  |                                       |                      |            |          |          |       |        |           |             |
+ *  | ParseFEN_Original                     | r3k2r(...)- 0 1 [68] | 3,030.9 ns |  4.14 ns |  3.46 ns |  1.00 | 0.0343 |    3080 B |        1.00 |
+ *  | ParseFEN_Improved1                    | r3k2r(...)- 0 1 [68] | 2,855.1 ns |  8.86 ns |  8.29 ns |  0.94 | 0.0305 |    2816 B |        0.91 |
+ *  | ParseFEN_Base2                        | r3k2r(...)- 0 1 [68] | 2,723.6 ns | 15.72 ns | 14.70 ns |  0.90 | 0.0343 |    2928 B |        0.95 |
+ *  | ParseFEN_NoRegex                      | r3k2r(...)- 0 1 [68] | 1,441.1 ns |  1.23 ns |  1.03 ns |  0.48 | 0.0057 |     552 B |        0.18 |
+ *  | ParseFEN_OptimizedParseBoard          | r3k2r(...)- 0 1 [68] |   400.5 ns |  2.11 ns |  1.87 ns |  0.13 | 0.0019 |     168 B |        0.05 |
+ *  | ParseFEN_OptimizedPopulateOccupancies | r3k2r(...)- 0 1 [68] |   371.0 ns |  1.56 ns |  1.46 ns |  0.12 | 0.0019 |     168 B |        0.05 |
+ *  |                                       |                      |            |          |          |       |        |           |             |
+ *  | ParseFEN_Original                     | r3k2r(...)- 0 1 [68] | 2,884.8 ns | 12.03 ns | 10.67 ns |  1.00 | 0.0343 |    3080 B |        1.00 |
+ *  | ParseFEN_Improved1                    | r3k2r(...)- 0 1 [68] | 2,834.7 ns | 10.18 ns |  9.52 ns |  0.98 | 0.0305 |    2816 B |        0.91 |
+ *  | ParseFEN_Base2                        | r3k2r(...)- 0 1 [68] | 2,782.7 ns |  6.39 ns |  5.33 ns |  0.96 | 0.0343 |    2928 B |        0.95 |
+ *  | ParseFEN_NoRegex                      | r3k2r(...)- 0 1 [68] | 1,396.6 ns |  2.03 ns |  1.80 ns |  0.48 | 0.0057 |     552 B |        0.18 |
+ *  | ParseFEN_OptimizedParseBoard          | r3k2r(...)- 0 1 [68] |   409.4 ns |  1.83 ns |  1.71 ns |  0.14 | 0.0019 |     168 B |        0.05 |
+ *  | ParseFEN_OptimizedPopulateOccupancies | r3k2r(...)- 0 1 [68] |   374.5 ns |  3.72 ns |  3.30 ns |  0.13 | 0.0019 |     168 B |        0.05 |
+ *  |                                       |                      |            |          |          |       |        |           |             |
+ *  | ParseFEN_Original                     | rnbqk(...)6 0 1 [67] | 3,089.3 ns | 12.13 ns | 10.75 ns |  1.00 | 0.0343 |    3072 B |        1.00 |
+ *  | ParseFEN_Improved1                    | rnbqk(...)6 0 1 [67] | 2,699.1 ns | 10.40 ns |  9.73 ns |  0.87 | 0.0305 |    2800 B |        0.91 |
+ *  | ParseFEN_Base2                        | rnbqk(...)6 0 1 [67] | 2,795.3 ns |  8.82 ns |  7.82 ns |  0.90 | 0.0343 |    2904 B |        0.95 |
+ *  | ParseFEN_NoRegex                      | rnbqk(...)6 0 1 [67] | 1,328.5 ns |  1.40 ns |  1.17 ns |  0.43 | 0.0057 |     528 B |        0.17 |
+ *  | ParseFEN_OptimizedParseBoard          | rnbqk(...)6 0 1 [67] |   400.5 ns |  0.84 ns |  0.74 ns |  0.13 | 0.0019 |     168 B |        0.05 |
+ *  | ParseFEN_OptimizedPopulateOccupancies | rnbqk(...)6 0 1 [67] |   394.7 ns |  1.76 ns |  1.65 ns |  0.13 | 0.0019 |     168 B |        0.05 |
+ *  |                                       |                      |            |          |          |       |        |           |             |
+ *  | ParseFEN_Original                     | rnbqk(...)- 0 1 [56] | 2,059.5 ns |  4.90 ns |  4.59 ns |  1.00 | 0.0305 |    2760 B |        1.00 |
+ *  | ParseFEN_Improved1                    | rnbqk(...)- 0 1 [56] | 2,007.0 ns |  5.08 ns |  4.75 ns |  0.97 | 0.0267 |    2496 B |        0.90 |
+ *  | ParseFEN_Base2                        | rnbqk(...)- 0 1 [56] | 1,916.2 ns |  6.67 ns |  5.57 ns |  0.93 | 0.0305 |    2584 B |        0.94 |
+ *  | ParseFEN_NoRegex                      | rnbqk(...)- 0 1 [56] |   776.1 ns |  0.99 ns |  0.83 ns |  0.38 | 0.0029 |     264 B |        0.10 |
+ *  | ParseFEN_OptimizedParseBoard          | rnbqk(...)- 0 1 [56] |   374.3 ns |  0.60 ns |  0.50 ns |  0.18 | 0.0019 |     168 B |        0.06 |
+ *  | ParseFEN_OptimizedPopulateOccupancies | rnbqk(...)- 0 1 [56] |   356.9 ns |  1.50 ns |  1.26 ns |  0.17 | 0.0019 |     168 B |        0.06 |
+ *  |                                       |                      |            |          |          |       |        |           |             |
+ *  | ParseFEN_Original                     | rq2k2(...)- 0 1 [71] | 3,124.3 ns | 10.80 ns | 10.10 ns |  1.00 | 0.0343 |    3168 B |        1.00 |
+ *  | ParseFEN_Improved1                    | rq2k2(...)- 0 1 [71] | 3,033.7 ns |  6.11 ns |  5.72 ns |  0.97 | 0.0343 |    2904 B |        0.92 |
+ *  | ParseFEN_Base2                        | rq2k2(...)- 0 1 [71] | 3,127.4 ns |  5.19 ns |  4.33 ns |  1.00 | 0.0343 |    3024 B |        0.95 |
+ *  | ParseFEN_NoRegex                      | rq2k2(...)- 0 1 [71] | 1,590.6 ns |  8.02 ns |  7.50 ns |  0.51 | 0.0057 |     624 B |        0.20 |
+ *  | ParseFEN_OptimizedParseBoard          | rq2k2(...)- 0 1 [71] |   380.7 ns |  1.12 ns |  1.05 ns |  0.12 | 0.0019 |     168 B |        0.05 |
+ *  | ParseFEN_OptimizedPopulateOccupancies | rq2k2(...)- 0 1 [71] |   371.5 ns |  0.64 ns |  0.53 ns |  0.12 | 0.0019 |     168 B |        0.05 |
  *
  *
  *  BenchmarkDotNet v0.13.11, Windows 10 (10.0.20348.2159) (Hyper-V)
@@ -57,99 +64,114 @@
  *    [Host]     : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
  *    DefaultJob : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
  *
- *  | Method                       | fen                  | Mean       | Error    | StdDev   | Ratio | Gen0   | Allocated | Alloc Ratio |
- *  |----------------------------- |--------------------- |-----------:|---------:|---------:|------:|-------:|----------:|------------:|
- *  | ParseFEN_Original            | 8/k7/(...)- 0 1 [39] | 2,118.2 ns | 28.81 ns | 25.54 ns |  1.00 | 0.1755 |    2961 B |        1.00 |
- *  | ParseFEN_Improved1           | 8/k7/(...)- 0 1 [39] | 2,093.2 ns |  5.88 ns |  5.21 ns |  0.99 | 0.1602 |    2704 B |        0.91 |
- *  | ParseFEN_Base2               | 8/k7/(...)- 0 1 [39] | 2,024.0 ns | 10.40 ns |  9.73 ns |  0.96 | 0.1640 |    2760 B |        0.93 |
- *  | ParseFEN_NoRegex             | 8/k7/(...)- 0 1 [39] |   957.6 ns |  3.09 ns |  2.74 ns |  0.45 | 0.0286 |     480 B |        0.16 |
- *  | ParseFEN_OptimizedParseBoard | 8/k7/(...)- 0 1 [39] |   307.3 ns |  1.03 ns |  0.97 ns |  0.15 | 0.0100 |     168 B |        0.06 |
- *  |                              |                      |            |          |          |       |        |           |             |
- *  | ParseFEN_Original            | r2q1r(...)- 0 9 [68] | 2,676.8 ns | 10.22 ns |  9.06 ns |  1.00 | 0.1869 |    3161 B |        1.00 |
- *  | ParseFEN_Improved1           | r2q1r(...)- 0 9 [68] | 2,655.8 ns |  8.83 ns |  7.83 ns |  0.99 | 0.1717 |    2905 B |        0.92 |
- *  | ParseFEN_Base2               | r2q1r(...)- 0 9 [68] | 2,570.6 ns | 11.12 ns | 10.40 ns |  0.96 | 0.1793 |    3017 B |        0.95 |
- *  | ParseFEN_NoRegex             | r2q1r(...)- 0 9 [68] | 1,421.3 ns |  7.09 ns |  6.63 ns |  0.53 | 0.0362 |     624 B |        0.20 |
- *  | ParseFEN_OptimizedParseBoard | r2q1r(...)- 0 9 [68] |   378.9 ns |  0.76 ns |  0.67 ns |  0.14 | 0.0100 |     168 B |        0.05 |
- *  |                              |                      |            |          |          |       |        |           |             |
- *  | ParseFEN_Original            | r3k2r(...)- 0 1 [68] | 2,346.9 ns | 15.15 ns | 13.43 ns |  1.00 | 0.1831 |    3081 B |        1.00 |
- *  | ParseFEN_Improved1           | r3k2r(...)- 0 1 [68] | 2,458.3 ns |  7.03 ns |  6.23 ns |  1.05 | 0.1678 |    2817 B |        0.91 |
- *  | ParseFEN_Base2               | r3k2r(...)- 0 1 [68] | 2,514.6 ns | 13.30 ns | 11.11 ns |  1.07 | 0.1717 |    2929 B |        0.95 |
- *  | ParseFEN_NoRegex             | r3k2r(...)- 0 1 [68] | 1,286.1 ns |  3.21 ns |  2.68 ns |  0.55 | 0.0324 |     552 B |        0.18 |
- *  | ParseFEN_OptimizedParseBoard | r3k2r(...)- 0 1 [68] |   391.6 ns |  3.84 ns |  3.59 ns |  0.17 | 0.0100 |     168 B |        0.05 |
- *  |                              |                      |            |          |          |       |        |           |             |
- *  | ParseFEN_Original            | r3k2r(...)- 0 1 [68] | 2,594.7 ns |  8.83 ns |  7.83 ns |  1.00 | 0.1831 |    3081 B |        1.00 |
- *  | ParseFEN_Improved1           | r3k2r(...)- 0 1 [68] | 2,502.9 ns |  9.25 ns |  7.72 ns |  0.96 | 0.1678 |    2817 B |        0.91 |
- *  | ParseFEN_Base2               | r3k2r(...)- 0 1 [68] | 2,444.2 ns |  9.58 ns |  8.96 ns |  0.94 | 0.1717 |    2929 B |        0.95 |
- *  | ParseFEN_NoRegex             | r3k2r(...)- 0 1 [68] | 1,283.2 ns |  4.44 ns |  4.15 ns |  0.49 | 0.0324 |     552 B |        0.18 |
- *  | ParseFEN_OptimizedParseBoard | r3k2r(...)- 0 1 [68] |   385.2 ns |  0.83 ns |  0.73 ns |  0.15 | 0.0100 |     168 B |        0.05 |
- *  |                              |                      |            |          |          |       |        |           |             |
- *  | ParseFEN_Original            | rnbqk(...)6 0 1 [67] | 2,475.0 ns | 13.47 ns | 12.60 ns |  1.00 | 0.1831 |    3073 B |        1.00 |
- *  | ParseFEN_Improved1           | rnbqk(...)6 0 1 [67] | 2,393.5 ns | 10.55 ns |  9.35 ns |  0.97 | 0.1640 |    2800 B |        0.91 |
- *  | ParseFEN_Base2               | rnbqk(...)6 0 1 [67] | 2,405.1 ns |  7.30 ns |  6.10 ns |  0.97 | 0.1717 |    2905 B |        0.95 |
- *  | ParseFEN_NoRegex             | rnbqk(...)6 0 1 [67] | 1,158.9 ns |  2.26 ns |  2.11 ns |  0.47 | 0.0305 |     528 B |        0.17 |
- *  | ParseFEN_OptimizedParseBoard | rnbqk(...)6 0 1 [67] |   357.7 ns |  1.13 ns |  1.00 ns |  0.14 | 0.0100 |     168 B |        0.05 |
- *  |                              |                      |            |          |          |       |        |           |             |
- *  | ParseFEN_Original            | rnbqk(...)- 0 1 [56] | 1,729.6 ns |  6.36 ns |  5.64 ns |  1.00 | 0.1640 |    2760 B |        1.00 |
- *  | ParseFEN_Improved1           | rnbqk(...)- 0 1 [56] | 1,667.3 ns | 10.49 ns |  9.30 ns |  0.96 | 0.1488 |    2496 B |        0.90 |
- *  | ParseFEN_Base2               | rnbqk(...)- 0 1 [56] | 1,678.4 ns |  5.03 ns |  4.46 ns |  0.97 | 0.1545 |    2584 B |        0.94 |
- *  | ParseFEN_NoRegex             | rnbqk(...)- 0 1 [56] |   755.3 ns |  2.44 ns |  2.16 ns |  0.44 | 0.0153 |     264 B |        0.10 |
- *  | ParseFEN_OptimizedParseBoard | rnbqk(...)- 0 1 [56] |   357.6 ns |  2.64 ns |  2.47 ns |  0.21 | 0.0100 |     168 B |        0.06 |
- *  |                              |                      |            |          |          |       |        |           |             |
- *  | ParseFEN_Original            | rq2k2(...)- 0 1 [71] | 2,756.1 ns | 12.76 ns | 11.93 ns |  1.00 | 0.1869 |    3169 B |        1.00 |
- *  | ParseFEN_Improved1           | rq2k2(...)- 0 1 [71] | 2,754.7 ns | 12.91 ns | 12.07 ns |  1.00 | 0.1717 |    2905 B |        0.92 |
- *  | ParseFEN_Base2               | rq2k2(...)- 0 1 [71] | 2,662.5 ns |  8.62 ns |  8.06 ns |  0.97 | 0.1793 |    3025 B |        0.95 |
- *  | ParseFEN_NoRegex             | rq2k2(...)- 0 1 [71] | 1,427.8 ns |  4.57 ns |  4.27 ns |  0.52 | 0.0362 |     624 B |        0.20 |
- *  | ParseFEN_OptimizedParseBoard | rq2k2(...)- 0 1 [71] |   378.3 ns |  1.33 ns |  1.18 ns |  0.14 | 0.0100 |     168 B |        0.05 |
+ *  | Method                                | fen                  | Mean       | Error    | StdDev   | Ratio | Gen0   | Allocated | Alloc Ratio |
+ *  |-------------------------------------- |--------------------- |-----------:|---------:|---------:|------:|-------:|----------:|------------:|
+ *  | ParseFEN_Original                     | 8/k7/(...)- 0 1 [39] | 2,125.6 ns | 15.09 ns | 12.60 ns |  1.00 | 0.1755 |    2961 B |        1.00 |
+ *  | ParseFEN_Improved1                    | 8/k7/(...)- 0 1 [39] | 2,116.1 ns | 15.77 ns | 13.17 ns |  1.00 | 0.1602 |    2704 B |        0.91 |
+ *  | ParseFEN_Base2                        | 8/k7/(...)- 0 1 [39] | 2,047.4 ns | 26.62 ns | 24.90 ns |  0.96 | 0.1640 |    2760 B |        0.93 |
+ *  | ParseFEN_NoRegex                      | 8/k7/(...)- 0 1 [39] |   972.4 ns |  3.72 ns |  3.30 ns |  0.46 | 0.0286 |     480 B |        0.16 |
+ *  | ParseFEN_OptimizedParseBoard          | 8/k7/(...)- 0 1 [39] |   308.4 ns |  0.93 ns |  0.78 ns |  0.15 | 0.0100 |     168 B |        0.06 |
+ *  | ParseFEN_OptimizedPopulateOccupancies | 8/k7/(...)- 0 1 [39] |   315.1 ns |  1.44 ns |  1.28 ns |  0.15 | 0.0100 |     168 B |        0.06 |
+ *  |                                       |                      |            |          |          |       |        |           |             |
+ *  | ParseFEN_Original                     | r2q1r(...)- 0 9 [68] | 2,686.8 ns | 11.73 ns | 10.97 ns |  1.00 | 0.1869 |    3161 B |        1.00 |
+ *  | ParseFEN_Improved1                    | r2q1r(...)- 0 9 [68] | 2,686.6 ns | 15.47 ns | 14.47 ns |  1.00 | 0.1717 |    2905 B |        0.92 |
+ *  | ParseFEN_Base2                        | r2q1r(...)- 0 9 [68] | 2,590.5 ns |  5.99 ns |  5.60 ns |  0.96 | 0.1793 |    3017 B |        0.95 |
+ *  | ParseFEN_NoRegex                      | r2q1r(...)- 0 9 [68] | 1,393.3 ns |  3.90 ns |  3.46 ns |  0.52 | 0.0362 |     624 B |        0.20 |
+ *  | ParseFEN_OptimizedParseBoard          | r2q1r(...)- 0 9 [68] |   377.1 ns |  1.54 ns |  1.44 ns |  0.14 | 0.0100 |     168 B |        0.05 |
+ *  | ParseFEN_OptimizedPopulateOccupancies | r2q1r(...)- 0 9 [68] |   375.4 ns |  0.91 ns |  0.80 ns |  0.14 | 0.0100 |     168 B |        0.05 |
+ *  |                                       |                      |            |          |          |       |        |           |             |
+ *  | ParseFEN_Original                     | r3k2r(...)- 0 1 [68] | 2,554.5 ns | 19.55 ns | 17.33 ns |  1.00 | 0.1831 |    3081 B |        1.00 |
+ *  | ParseFEN_Improved1                    | r3k2r(...)- 0 1 [68] | 2,541.3 ns | 14.49 ns | 11.31 ns |  1.00 | 0.1678 |    2817 B |        0.91 |
+ *  | ParseFEN_Base2                        | r3k2r(...)- 0 1 [68] | 2,491.1 ns | 27.74 ns | 25.95 ns |  0.98 | 0.1717 |    2929 B |        0.95 |
+ *  | ParseFEN_NoRegex                      | r3k2r(...)- 0 1 [68] | 1,297.3 ns |  7.77 ns |  7.27 ns |  0.51 | 0.0324 |     552 B |        0.18 |
+ *  | ParseFEN_OptimizedParseBoard          | r3k2r(...)- 0 1 [68] |   386.0 ns |  0.66 ns |  0.59 ns |  0.15 | 0.0100 |     168 B |        0.05 |
+ *  | ParseFEN_OptimizedPopulateOccupancies | r3k2r(...)- 0 1 [68] |   383.5 ns |  1.15 ns |  1.02 ns |  0.15 | 0.0100 |     168 B |        0.05 |
+ *  |                                       |                      |            |          |          |       |        |           |             |
+ *  | ParseFEN_Original                     | r3k2r(...)- 0 1 [68] | 2,543.6 ns | 16.06 ns | 14.24 ns |  1.00 | 0.1831 |    3081 B |        1.00 |
+ *  | ParseFEN_Improved1                    | r3k2r(...)- 0 1 [68] | 2,465.2 ns | 12.26 ns | 10.87 ns |  0.97 | 0.1678 |    2817 B |        0.91 |
+ *  | ParseFEN_Base2                        | r3k2r(...)- 0 1 [68] | 2,479.2 ns | 20.19 ns | 18.89 ns |  0.97 | 0.1717 |    2929 B |        0.95 |
+ *  | ParseFEN_NoRegex                      | r3k2r(...)- 0 1 [68] | 1,275.2 ns |  1.49 ns |  1.24 ns |  0.50 | 0.0324 |     552 B |        0.18 |
+ *  | ParseFEN_OptimizedParseBoard          | r3k2r(...)- 0 1 [68] |   374.7 ns |  1.66 ns |  1.56 ns |  0.15 | 0.0100 |     168 B |        0.05 |
+ *  | ParseFEN_OptimizedPopulateOccupancies | r3k2r(...)- 0 1 [68] |   358.2 ns |  1.76 ns |  1.47 ns |  0.14 | 0.0100 |     168 B |        0.05 |
+ *  |                                       |                      |            |          |          |       |        |           |             |
+ *  | ParseFEN_Original                     | rnbqk(...)6 0 1 [67] | 2,528.8 ns |  7.25 ns |  6.78 ns |  1.00 | 0.1831 |    3073 B |        1.00 |
+ *  | ParseFEN_Improved1                    | rnbqk(...)6 0 1 [67] | 2,431.1 ns | 12.50 ns | 11.08 ns |  0.96 | 0.1640 |    2800 B |        0.91 |
+ *  | ParseFEN_Base2                        | rnbqk(...)6 0 1 [67] | 2,418.0 ns |  6.77 ns |  5.29 ns |  0.96 | 0.1717 |    2905 B |        0.95 |
+ *  | ParseFEN_NoRegex                      | rnbqk(...)6 0 1 [67] | 1,205.9 ns |  4.79 ns |  4.48 ns |  0.48 | 0.0305 |     528 B |        0.17 |
+ *  | ParseFEN_OptimizedParseBoard          | rnbqk(...)6 0 1 [67] |   350.5 ns |  0.98 ns |  0.82 ns |  0.14 | 0.0100 |     168 B |        0.05 |
+ *  | ParseFEN_OptimizedPopulateOccupancies | rnbqk(...)6 0 1 [67] |   336.5 ns |  0.53 ns |  0.50 ns |  0.13 | 0.0100 |     168 B |        0.05 |
+ *  |                                       |                      |            |          |          |       |        |           |             |
+ *  | ParseFEN_Original                     | rnbqk(...)- 0 1 [56] | 1,790.1 ns | 14.62 ns | 12.96 ns |  1.00 | 0.1640 |    2760 B |        1.00 |
+ *  | ParseFEN_Improved1                    | rnbqk(...)- 0 1 [56] | 1,628.0 ns |  6.50 ns |  6.08 ns |  0.91 | 0.1488 |    2496 B |        0.90 |
+ *  | ParseFEN_Base2                        | rnbqk(...)- 0 1 [56] | 1,645.9 ns |  5.81 ns |  4.85 ns |  0.92 | 0.1545 |    2584 B |        0.94 |
+ *  | ParseFEN_NoRegex                      | rnbqk(...)- 0 1 [56] |   743.8 ns |  1.82 ns |  1.70 ns |  0.42 | 0.0153 |     264 B |        0.10 |
+ *  | ParseFEN_OptimizedParseBoard          | rnbqk(...)- 0 1 [56] |   366.6 ns |  1.36 ns |  1.27 ns |  0.20 | 0.0100 |     168 B |        0.06 |
+ *  | ParseFEN_OptimizedPopulateOccupancies | rnbqk(...)- 0 1 [56] |   361.1 ns |  0.99 ns |  0.88 ns |  0.20 | 0.0100 |     168 B |        0.06 |
+ *  |                                       |                      |            |          |          |       |        |           |             |
+ *  | ParseFEN_Original                     | rq2k2(...)- 0 1 [71] | 2,756.2 ns |  6.30 ns |  5.58 ns |  1.00 | 0.1869 |    3169 B |        1.00 |
+ *  | ParseFEN_Improved1                    | rq2k2(...)- 0 1 [71] | 2,686.1 ns |  9.56 ns |  8.94 ns |  0.97 | 0.1717 |    2905 B |        0.92 |
+ *  | ParseFEN_Base2                        | rq2k2(...)- 0 1 [71] | 2,689.8 ns |  9.50 ns |  8.42 ns |  0.98 | 0.1793 |    3025 B |        0.95 |
+ *  | ParseFEN_NoRegex                      | rq2k2(...)- 0 1 [71] | 1,418.5 ns |  7.53 ns |  7.04 ns |  0.51 | 0.0362 |     624 B |        0.20 |
+ *  | ParseFEN_OptimizedParseBoard          | rq2k2(...)- 0 1 [71] |   401.6 ns |  0.53 ns |  0.41 ns |  0.15 | 0.0100 |     168 B |        0.05 |
+ *  | ParseFEN_OptimizedPopulateOccupancies | rq2k2(...)- 0 1 [71] |   383.2 ns |  1.64 ns |  1.45 ns |  0.14 | 0.0100 |     168 B |        0.05 |
+ *
  *
  *  BenchmarkDotNet v0.13.11, macOS Monterey 12.7.2 (21G1974) [Darwin 21.6.0]
- *  Intel Core i7-8700B CPU 3.20GHz (Max: 3.19GHz) (Coffee Lake), 1 CPU, 4 logical and 4 physical cores
+ *  Intel Xeon CPU E5-1650 v2 3.50GHz (Max: 3.34GHz), 1 CPU, 3 logical and 3 physical cores
  *  .NET SDK 8.0.100
- *    [Host]     : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
- *    DefaultJob : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
+ *    [Host]     : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX
+ *    DefaultJob : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX
  *
- *  | Method                       | fen                  | Mean       | Error     | StdDev    | Median     | Ratio | RatioSD | Gen0   | Gen1   | Allocated | Alloc Ratio |
- *  |----------------------------- |--------------------- |-----------:|----------:|----------:|-----------:|------:|--------:|-------:|-------:|----------:|------------:|
- *  | ParseFEN_Original            | 8/k7/(...)- 0 1 [39] | 3,794.2 ns | 100.96 ns | 288.04 ns | 3,783.3 ns |  1.00 |    0.00 | 0.4692 |      - |    2961 B |        1.00 |
- *  | ParseFEN_Improved1           | 8/k7/(...)- 0 1 [39] | 3,443.8 ns |  90.46 ns | 263.88 ns | 3,439.0 ns |  0.91 |    0.09 | 0.4311 |      - |    2705 B |        0.91 |
- *  | ParseFEN_Base2               | 8/k7/(...)- 0 1 [39] | 3,703.3 ns | 194.13 ns | 553.86 ns | 3,607.0 ns |  0.98 |    0.15 | 0.4387 |      - |    2761 B |        0.93 |
- *  | ParseFEN_NoRegex             | 8/k7/(...)- 0 1 [39] | 1,773.6 ns |  34.80 ns |  83.37 ns | 1,759.6 ns |  0.47 |    0.04 | 0.0763 |      - |     480 B |        0.16 |
- *  | ParseFEN_OptimizedParseBoard | 8/k7/(...)- 0 1 [39] |   554.2 ns |  12.98 ns |  37.03 ns |   557.1 ns |  0.15 |    0.02 | 0.0267 |      - |     168 B |        0.06 |
- *  |                              |                      |            |           |           |            |       |         |        |        |           |             |
- *  | ParseFEN_Original            | r2q1r(...)- 0 9 [68] | 3,915.4 ns |  76.41 ns |  78.47 ns | 3,912.0 ns |  1.00 |    0.00 | 0.5035 |      - |    3162 B |        1.00 |
- *  | ParseFEN_Improved1           | r2q1r(...)- 0 9 [68] | 3,695.3 ns |  68.21 ns |  63.80 ns | 3,704.8 ns |  0.94 |    0.02 | 0.4616 |      - |    2905 B |        0.92 |
- *  | ParseFEN_Base2               | r2q1r(...)- 0 9 [68] | 3,646.7 ns |  62.66 ns |  52.32 ns | 3,653.7 ns |  0.93 |    0.02 | 0.4807 |      - |    3017 B |        0.95 |
- *  | ParseFEN_NoRegex             | r2q1r(...)- 0 9 [68] | 1,993.2 ns |  37.52 ns |  38.53 ns | 1,976.9 ns |  0.51 |    0.02 | 0.0992 |      - |     624 B |        0.20 |
- *  | ParseFEN_OptimizedParseBoard | r2q1r(...)- 0 9 [68] |   561.4 ns |   6.67 ns |   5.57 ns |   559.7 ns |  0.14 |    0.00 | 0.0267 |      - |     168 B |        0.05 |
- *  |                              |                      |            |           |           |            |       |         |        |        |           |             |
- *  | ParseFEN_Original            | r3k2r(...)- 0 1 [68] | 3,604.1 ns |  62.98 ns | 148.44 ns | 3,549.7 ns |  1.00 |    0.00 | 0.4883 |      - |    3081 B |        1.00 |
- *  | ParseFEN_Improved1           | r3k2r(...)- 0 1 [68] | 3,339.2 ns |  40.44 ns |  31.58 ns | 3,337.8 ns |  0.91 |    0.05 | 0.4463 |      - |    2817 B |        0.91 |
- *  | ParseFEN_Base2               | r3k2r(...)- 0 1 [68] | 3,446.9 ns |  67.95 ns |  66.74 ns | 3,421.1 ns |  0.94 |    0.04 | 0.4654 |      - |    2929 B |        0.95 |
- *  | ParseFEN_NoRegex             | r3k2r(...)- 0 1 [68] | 1,733.0 ns |  15.48 ns |  13.72 ns | 1,732.0 ns |  0.47 |    0.03 | 0.0877 |      - |     552 B |        0.18 |
- *  | ParseFEN_OptimizedParseBoard | r3k2r(...)- 0 1 [68] |   591.4 ns |  10.09 ns |  11.62 ns |   588.7 ns |  0.16 |    0.01 | 0.0267 |      - |     168 B |        0.05 |
- *  |                              |                      |            |           |           |            |       |         |        |        |           |             |
- *  | ParseFEN_Original            | r3k2r(...)- 0 1 [68] | 3,515.3 ns |  60.58 ns |  50.59 ns | 3,528.7 ns |  1.00 |    0.00 | 0.4883 |      - |    3081 B |        1.00 |
- *  | ParseFEN_Improved1           | r3k2r(...)- 0 1 [68] | 3,295.8 ns |  27.15 ns |  22.67 ns | 3,288.3 ns |  0.94 |    0.02 | 0.4463 |      - |    2817 B |        0.91 |
- *  | ParseFEN_Base2               | r3k2r(...)- 0 1 [68] | 3,397.7 ns |  38.98 ns |  32.55 ns | 3,391.7 ns |  0.97 |    0.01 | 0.4654 |      - |    2929 B |        0.95 |
- *  | ParseFEN_NoRegex             | r3k2r(...)- 0 1 [68] | 1,773.9 ns |  16.04 ns |  15.01 ns | 1,766.1 ns |  0.50 |    0.01 | 0.0877 |      - |     552 B |        0.18 |
- *  | ParseFEN_OptimizedParseBoard | r3k2r(...)- 0 1 [68] |   585.8 ns |   3.94 ns |   3.07 ns |   585.4 ns |  0.17 |    0.00 | 0.0267 |      - |     168 B |        0.05 |
- *  |                              |                      |            |           |           |            |       |         |        |        |           |             |
- *  | ParseFEN_Original            | rnbqk(...)6 0 1 [67] | 3,537.1 ns |  68.15 ns |  72.92 ns | 3,528.8 ns |  1.00 |    0.00 | 0.4883 |      - |    3073 B |        1.00 |
- *  | ParseFEN_Improved1           | rnbqk(...)6 0 1 [67] | 3,225.5 ns |  38.78 ns |  32.38 ns | 3,220.2 ns |  0.91 |    0.02 | 0.4463 |      - |    2801 B |        0.91 |
- *  | ParseFEN_Base2               | rnbqk(...)6 0 1 [67] | 3,319.0 ns |  31.29 ns |  29.27 ns | 3,311.9 ns |  0.94 |    0.02 | 0.4616 | 0.0038 |    2905 B |        0.95 |
- *  | ParseFEN_NoRegex             | rnbqk(...)6 0 1 [67] | 1,677.7 ns |  18.83 ns |  14.70 ns | 1,670.1 ns |  0.47 |    0.01 | 0.0839 |      - |     528 B |        0.17 |
- *  | ParseFEN_OptimizedParseBoard | rnbqk(...)6 0 1 [67] |   536.6 ns |   7.37 ns |   6.90 ns |   534.2 ns |  0.15 |    0.00 | 0.0267 |      - |     168 B |        0.05 |
- *  |                              |                      |            |           |           |            |       |         |        |        |           |             |
- *  | ParseFEN_Original            | rnbqk(...)- 0 1 [56] | 2,506.3 ns |  42.48 ns |  35.47 ns | 2,497.0 ns |  1.00 |    0.00 | 0.4387 |      - |    2761 B |        1.00 |
- *  | ParseFEN_Improved1           | rnbqk(...)- 0 1 [56] | 2,329.3 ns |  44.57 ns |  41.69 ns | 2,319.3 ns |  0.93 |    0.02 | 0.3967 |      - |    2497 B |        0.90 |
- *  | ParseFEN_Base2               | rnbqk(...)- 0 1 [56] | 2,319.6 ns |  45.21 ns |  69.04 ns | 2,291.5 ns |  0.95 |    0.01 | 0.4120 |      - |    2585 B |        0.94 |
- *  | ParseFEN_NoRegex             | rnbqk(...)- 0 1 [56] |   867.6 ns |  13.83 ns |  20.70 ns |   863.9 ns |  0.35 |    0.01 | 0.0420 |      - |     264 B |        0.10 |
- *  | ParseFEN_OptimizedParseBoard | rnbqk(...)- 0 1 [56] |   564.1 ns |   7.06 ns |   5.90 ns |   561.6 ns |  0.23 |    0.00 | 0.0267 |      - |     168 B |        0.06 |
- *  |                              |                      |            |           |           |            |       |         |        |        |           |             |
- *  | ParseFEN_Original            | rq2k2(...)- 0 1 [71] | 3,832.2 ns |  74.22 ns |  82.50 ns | 3,817.5 ns |  1.00 |    0.00 | 0.5035 |      - |    3169 B |        1.00 |
- *  | ParseFEN_Improved1           | rq2k2(...)- 0 1 [71] | 3,589.3 ns |  27.62 ns |  23.07 ns | 3,589.4 ns |  0.94 |    0.02 | 0.4616 |      - |    2905 B |        0.92 |
- *  | ParseFEN_Base2               | rq2k2(...)- 0 1 [71] | 3,687.5 ns |  39.47 ns |  34.99 ns | 3,685.2 ns |  0.96 |    0.02 | 0.4807 | 0.0038 |    3025 B |        0.95 |
- *  | ParseFEN_NoRegex             | rq2k2(...)- 0 1 [71] | 2,004.8 ns |  39.24 ns |  36.70 ns | 1,984.7 ns |  0.52 |    0.02 | 0.0992 |      - |     624 B |        0.20 |
- *  | ParseFEN_OptimizedParseBoard | rq2k2(...)- 0 1 [71] |   577.0 ns |   7.93 ns |   7.41 ns |   576.4 ns |  0.15 |    0.00 | 0.0267 |      - |     168 B |        0.05 |
+ *  | Method                                | fen                  | Mean       | Error    | StdDev    | Median     | Ratio | RatioSD | Gen0   | Gen1   | Allocated | Alloc Ratio |
+ *  |-------------------------------------- |--------------------- |-----------:|---------:|----------:|-----------:|------:|--------:|-------:|-------:|----------:|------------:|
+ *  | ParseFEN_Original                     | 8/k7/(...)- 0 1 [39] | 3,027.5 ns | 60.25 ns | 154.45 ns | 2,978.2 ns |  1.00 |    0.00 | 0.4692 |      - |    2961 B |        1.00 |
+ *  | ParseFEN_Improved1                    | 8/k7/(...)- 0 1 [39] | 2,646.7 ns | 49.90 ns |  57.47 ns | 2,655.1 ns |  0.88 |    0.06 | 0.4311 |      - |    2705 B |        0.91 |
+ *  | ParseFEN_Base2                        | 8/k7/(...)- 0 1 [39] | 2,757.1 ns | 18.09 ns |  16.92 ns | 2,753.3 ns |  0.92 |    0.05 | 0.4387 |      - |    2761 B |        0.93 |
+ *  | ParseFEN_NoRegex                      | 8/k7/(...)- 0 1 [39] | 1,283.2 ns |  6.19 ns |   5.48 ns | 1,282.6 ns |  0.43 |    0.02 | 0.0763 |      - |     480 B |        0.16 |
+ *  | ParseFEN_OptimizedParseBoard          | 8/k7/(...)- 0 1 [39] |   439.4 ns |  8.51 ns |   7.10 ns |   439.8 ns |  0.15 |    0.01 | 0.0267 |      - |     168 B |        0.06 |
+ *  | ParseFEN_OptimizedPopulateOccupancies | 8/k7/(...)- 0 1 [39] |   410.6 ns |  3.45 ns |   3.23 ns |   409.8 ns |  0.14 |    0.01 | 0.0267 |      - |     168 B |        0.06 |
+ *  |                                       |                      |            |          |           |            |       |         |        |        |           |             |
+ *  | ParseFEN_Original                     | r2q1r(...)- 0 9 [68] | 3,698.7 ns | 60.75 ns |  50.73 ns | 3,710.6 ns |  1.00 |    0.00 | 0.5035 |      - |    3161 B |        1.00 |
+ *  | ParseFEN_Improved1                    | r2q1r(...)- 0 9 [68] | 3,528.1 ns | 51.56 ns |  45.71 ns | 3,538.6 ns |  0.96 |    0.02 | 0.4616 |      - |    2905 B |        0.92 |
+ *  | ParseFEN_Base2                        | r2q1r(...)- 0 9 [68] | 3,747.1 ns | 74.17 ns |  88.29 ns | 3,755.4 ns |  1.01 |    0.03 | 0.4807 |      - |    3017 B |        0.95 |
+ *  | ParseFEN_NoRegex                      | r2q1r(...)- 0 9 [68] | 1,942.1 ns | 29.20 ns |  25.89 ns | 1,940.5 ns |  0.53 |    0.01 | 0.0992 |      - |     624 B |        0.20 |
+ *  | ParseFEN_OptimizedParseBoard          | r2q1r(...)- 0 9 [68] |   579.5 ns |  8.81 ns |   8.24 ns |   578.0 ns |  0.16 |    0.00 | 0.0267 |      - |     168 B |        0.05 |
+ *  | ParseFEN_OptimizedPopulateOccupancies | r2q1r(...)- 0 9 [68] |   565.6 ns | 11.17 ns |  10.44 ns |   564.4 ns |  0.15 |    0.00 | 0.0267 |      - |     168 B |        0.05 |
+ *  |                                       |                      |            |          |           |            |       |         |        |        |           |             |
+ *  | ParseFEN_Original                     | r3k2r(...)- 0 1 [68] | 3,870.9 ns | 76.82 ns | 140.47 ns | 3,821.1 ns |  1.00 |    0.00 | 0.4883 |      - |    3081 B |        1.00 |
+ *  | ParseFEN_Improved1                    | r3k2r(...)- 0 1 [68] | 3,421.6 ns | 64.83 ns |  77.18 ns | 3,406.2 ns |  0.87 |    0.05 | 0.4463 |      - |    2817 B |        0.91 |
+ *  | ParseFEN_Base2                        | r3k2r(...)- 0 1 [68] | 3,741.3 ns | 71.90 ns |  90.93 ns | 3,730.3 ns |  0.96 |    0.04 | 0.4654 |      - |    2929 B |        0.95 |
+ *  | ParseFEN_NoRegex                      | r3k2r(...)- 0 1 [68] | 1,687.8 ns | 33.75 ns |  38.87 ns | 1,669.9 ns |  0.43 |    0.02 | 0.0877 |      - |     552 B |        0.18 |
+ *  | ParseFEN_OptimizedParseBoard          | r3k2r(...)- 0 1 [68] |   609.5 ns |  3.78 ns |   3.35 ns |   607.8 ns |  0.15 |    0.01 | 0.0267 |      - |     168 B |        0.05 |
+ *  | ParseFEN_OptimizedPopulateOccupancies | r3k2r(...)- 0 1 [68] |   591.3 ns |  5.60 ns |   5.23 ns |   590.6 ns |  0.15 |    0.01 | 0.0267 |      - |     168 B |        0.05 |
+ *  |                                       |                      |            |          |           |            |       |         |        |        |           |             |
+ *  | ParseFEN_Original                     | r3k2r(...)- 0 1 [68] | 3,608.2 ns | 30.71 ns |  27.22 ns | 3,611.8 ns |  1.00 |    0.00 | 0.4883 |      - |    3081 B |        1.00 |
+ *  | ParseFEN_Improved1                    | r3k2r(...)- 0 1 [68] | 3,377.4 ns | 60.42 ns |  56.52 ns | 3,374.1 ns |  0.93 |    0.02 | 0.4463 |      - |    2817 B |        0.91 |
+ *  | ParseFEN_Base2                        | r3k2r(...)- 0 1 [68] | 3,791.0 ns | 37.73 ns |  35.29 ns | 3,800.8 ns |  1.05 |    0.01 | 0.4654 |      - |    2929 B |        0.95 |
+ *  | ParseFEN_NoRegex                      | r3k2r(...)- 0 1 [68] | 1,793.3 ns | 30.26 ns |  28.30 ns | 1,784.9 ns |  0.50 |    0.01 | 0.0877 |      - |     552 B |        0.18 |
+ *  | ParseFEN_OptimizedParseBoard          | r3k2r(...)- 0 1 [68] |   635.5 ns | 12.54 ns |  23.87 ns |   642.7 ns |  0.17 |    0.01 | 0.0267 |      - |     168 B |        0.05 |
+ *  | ParseFEN_OptimizedPopulateOccupancies | r3k2r(...)- 0 1 [68] |   601.3 ns |  8.07 ns |   7.16 ns |   603.7 ns |  0.17 |    0.00 | 0.0267 |      - |     168 B |        0.05 |
+ *  |                                       |                      |            |          |           |            |       |         |        |        |           |             |
+ *  | ParseFEN_Original                     | rnbqk(...)6 0 1 [67] | 3,908.1 ns | 58.65 ns |  54.86 ns | 3,890.9 ns |  1.00 |    0.00 | 0.4883 |      - |    3073 B |        1.00 |
+ *  | ParseFEN_Improved1                    | rnbqk(...)6 0 1 [67] | 3,512.7 ns | 35.79 ns |  29.88 ns | 3,510.1 ns |  0.90 |    0.01 | 0.4463 |      - |    2801 B |        0.91 |
+ *  | ParseFEN_Base2                        | rnbqk(...)6 0 1 [67] | 3,573.5 ns | 70.68 ns | 121.92 ns | 3,578.9 ns |  0.93 |    0.04 | 0.4616 | 0.0038 |    2905 B |        0.95 |
+ *  | ParseFEN_NoRegex                      | rnbqk(...)6 0 1 [67] | 1,808.6 ns | 27.75 ns |  25.96 ns | 1,804.9 ns |  0.46 |    0.01 | 0.0839 |      - |     528 B |        0.17 |
+ *  | ParseFEN_OptimizedParseBoard          | rnbqk(...)6 0 1 [67] |   573.3 ns |  3.23 ns |   2.86 ns |   573.4 ns |  0.15 |    0.00 | 0.0267 |      - |     168 B |        0.05 |
+ *  | ParseFEN_OptimizedPopulateOccupancies | rnbqk(...)6 0 1 [67] |   566.5 ns |  5.64 ns |   5.28 ns |   564.6 ns |  0.14 |    0.00 | 0.0267 |      - |     168 B |        0.05 |
+ *  |                                       |                      |            |          |           |            |       |         |        |        |           |             |
+ *  | ParseFEN_Original                     | rnbqk(...)- 0 1 [56] | 2,689.6 ns | 35.42 ns |  29.57 ns | 2,679.4 ns |  1.00 |    0.00 | 0.4387 |      - |    2761 B |        1.00 |
+ *  | ParseFEN_Improved1                    | rnbqk(...)- 0 1 [56] | 2,500.6 ns | 16.87 ns |  15.78 ns | 2,497.4 ns |  0.93 |    0.01 | 0.3967 |      - |    2497 B |        0.90 |
+ *  | ParseFEN_Base2                        | rnbqk(...)- 0 1 [56] | 2,546.0 ns | 23.64 ns |  20.96 ns | 2,552.9 ns |  0.95 |    0.02 | 0.4120 |      - |    2585 B |        0.94 |
+ *  | ParseFEN_NoRegex                      | rnbqk(...)- 0 1 [56] | 1,008.9 ns | 14.43 ns |  13.50 ns | 1,011.0 ns |  0.38 |    0.00 | 0.0420 |      - |     264 B |        0.10 |
+ *  | ParseFEN_OptimizedParseBoard          | rnbqk(...)- 0 1 [56] |   542.9 ns |  8.88 ns |   8.31 ns |   538.9 ns |  0.20 |    0.00 | 0.0267 |      - |     168 B |        0.06 |
+ *  | ParseFEN_OptimizedPopulateOccupancies | rnbqk(...)- 0 1 [56] |   562.2 ns |  6.47 ns |   6.05 ns |   560.8 ns |  0.21 |    0.00 | 0.0267 |      - |     168 B |        0.06 |
+ *  |                                       |                      |            |          |           |            |       |         |        |        |           |             |
+ *  | ParseFEN_Original                     | rq2k2(...)- 0 1 [71] | 3,823.7 ns | 75.62 ns |  84.05 ns | 3,846.4 ns |  1.00 |    0.00 | 0.5035 |      - |    3170 B |        1.00 |
+ *  | ParseFEN_Improved1                    | rq2k2(...)- 0 1 [71] | 3,661.7 ns | 57.23 ns |  50.73 ns | 3,655.0 ns |  0.96 |    0.03 | 0.4616 |      - |    2905 B |        0.92 |
+ *  | ParseFEN_Base2                        | rq2k2(...)- 0 1 [71] | 3,800.6 ns | 72.78 ns |  83.81 ns | 3,793.9 ns |  0.99 |    0.03 | 0.4807 |      - |    3025 B |        0.95 |
+ *  | ParseFEN_NoRegex                      | rq2k2(...)- 0 1 [71] | 2,023.4 ns | 24.08 ns |  22.52 ns | 2,019.7 ns |  0.53 |    0.01 | 0.0992 |      - |     624 B |        0.20 |
+ *  | ParseFEN_OptimizedParseBoard          | rq2k2(...)- 0 1 [71] |   631.5 ns |  6.95 ns |   6.50 ns |   629.9 ns |  0.16 |    0.00 | 0.0267 |      - |     168 B |        0.05 |
+ *  | ParseFEN_OptimizedPopulateOccupancies | rq2k2(...)- 0 1 [71] |   600.8 ns |  5.86 ns |   4.57 ns |   601.4 ns |  0.16 |    0.00 | 0.0267 |      - |     168 B |        0.05 |
  *
  */
 
