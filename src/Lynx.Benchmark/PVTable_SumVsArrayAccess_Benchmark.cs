@@ -60,7 +60,7 @@ public class PVTable_SumVsArrayAccess_Benchmark : BaseBenchmark
 {
     private const int MaxDepth = 64;
 
-    public PVTable_SumVsArrayAccess()
+    public PVTable_SumVsArrayAccess_Benchmark()
     {
         _ = PVTable.Indexes[0];
     }
