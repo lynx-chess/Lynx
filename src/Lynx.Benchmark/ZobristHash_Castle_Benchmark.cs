@@ -114,6 +114,10 @@ public class ZobristHash_Castle_Benchmark : BaseBenchmark
     [ArgumentsSource(nameof(Data))]
     public long Switch(Position position) => SwitchMethod(position.Castle);
 
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public long Switch_Precalculated(Position position) => ZobristTable.EnPassantHash(position.Castle);
+
     private static readonly long[,] _table = Initialize();
 
     private static readonly long WK_Hash = _table[(int)BoardSquare.a8, (int)Piece.p];
