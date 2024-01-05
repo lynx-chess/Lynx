@@ -7,82 +7,39 @@
  *    DefaultJob : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
  *
  *
- *  | Method     | position            | Mean      | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
- *  |----------- |-------------------- |----------:|----------:|----------:|------:|----------:|------------:|
- *  | Naive      | Lynx.Model.Position | 3.6573 ns | 0.0236 ns | 0.0221 ns |  1.00 |         - |          NA |
- *  | Naive      | Lynx.Model.Position | 3.6536 ns | 0.0270 ns | 0.0253 ns |  1.00 |         - |          NA |
- *  | Naive      | Lynx.Model.Position | 3.6658 ns | 0.0390 ns | 0.0345 ns |  1.00 |         - |          NA |
- *  | Naive      | Lynx.Model.Position | 0.5306 ns | 0.0131 ns | 0.0116 ns |  0.15 |         - |          NA |
- *  | Naive      | Lynx.Model.Position | 3.6498 ns | 0.0266 ns | 0.0236 ns |  1.00 |         - |          NA |
- *  | Naive      | Lynx.Model.Position | 3.6450 ns | 0.0182 ns | 0.0152 ns |  1.00 |         - |          NA |
- *  | Dictionary | Lynx.Model.Position | 4.2155 ns | 0.0417 ns | 0.0348 ns |  1.15 |         - |          NA |
- *  | Dictionary | Lynx.Model.Position | 4.2197 ns | 0.0365 ns | 0.0342 ns |  1.15 |         - |          NA |
- *  | Dictionary | Lynx.Model.Position | 4.2167 ns | 0.0281 ns | 0.0263 ns |  1.15 |         - |          NA |
- *  | Dictionary | Lynx.Model.Position | 4.2664 ns | 0.0254 ns | 0.0238 ns |  1.17 |         - |          NA |
- *  | Dictionary | Lynx.Model.Position | 4.2085 ns | 0.0254 ns | 0.0237 ns |  1.15 |         - |          NA |
- *  | Dictionary | Lynx.Model.Position | 4.2174 ns | 0.0287 ns | 0.0254 ns |  1.15 |         - |          NA |
- *  | Switch     | Lynx.Model.Position | 0.6271 ns | 0.0158 ns | 0.0147 ns |  0.17 |         - |          NA |
- *  | Switch     | Lynx.Model.Position | 0.6266 ns | 0.0135 ns | 0.0127 ns |  0.17 |         - |          NA |
- *  | Switch     | Lynx.Model.Position | 0.6262 ns | 0.0151 ns | 0.0141 ns |  0.17 |         - |          NA |
- *  | Switch     | Lynx.Model.Position | 0.4921 ns | 0.0133 ns | 0.0124 ns |  0.13 |         - |          NA |
- *  | Switch     | Lynx.Model.Position | 0.6203 ns | 0.0014 ns | 0.0013 ns |  0.17 |         - |          NA |
- *  | Switch     | Lynx.Model.Position | 0.6133 ns | 0.0126 ns | 0.0118 ns |  0.17 |         - |          NA |
- *
- *
- *  BenchmarkDotNet v0.13.11, Windows 10 (10.0.20348.2159) (Hyper-V)
- *  AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
- *  .NET SDK 8.0.100
- *    [Host]     : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
- *    DefaultJob : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
- *
- *  | Method     | position            | Mean      | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
- *  |----------- |-------------------- |----------:|----------:|----------:|------:|----------:|------------:|
- *  | Naive      | Lynx.Model.Position | 3.6573 ns | 0.0171 ns | 0.0133 ns |  1.00 |         - |          NA |
- *  | Naive      | Lynx.Model.Position | 3.6489 ns | 0.0170 ns | 0.0150 ns |  1.00 |         - |          NA |
- *  | Naive      | Lynx.Model.Position | 3.6426 ns | 0.0147 ns | 0.0138 ns |  1.00 |         - |          NA |
- *  | Naive      | Lynx.Model.Position | 0.5414 ns | 0.0018 ns | 0.0017 ns |  0.15 |         - |          NA |
- *  | Naive      | Lynx.Model.Position | 3.6448 ns | 0.0237 ns | 0.0210 ns |  1.00 |         - |          NA |
- *  | Naive      | Lynx.Model.Position | 3.6530 ns | 0.0153 ns | 0.0127 ns |  1.00 |         - |          NA |
- *  | Dictionary | Lynx.Model.Position | 3.9936 ns | 0.0076 ns | 0.0068 ns |  1.09 |         - |          NA |
- *  | Dictionary | Lynx.Model.Position | 3.9949 ns | 0.0064 ns | 0.0053 ns |  1.09 |         - |          NA |
- *  | Dictionary | Lynx.Model.Position | 3.9996 ns | 0.0084 ns | 0.0079 ns |  1.09 |         - |          NA |
- *  | Dictionary | Lynx.Model.Position | 3.9819 ns | 0.0039 ns | 0.0036 ns |  1.09 |         - |          NA |
- *  | Dictionary | Lynx.Model.Position | 3.9955 ns | 0.0061 ns | 0.0051 ns |  1.09 |         - |          NA |
- *  | Dictionary | Lynx.Model.Position | 3.9970 ns | 0.0041 ns | 0.0036 ns |  1.09 |         - |          NA |
- *  | Switch     | Lynx.Model.Position | 0.3095 ns | 0.0015 ns | 0.0012 ns |  0.08 |         - |          NA |
- *  | Switch     | Lynx.Model.Position | 0.3101 ns | 0.0021 ns | 0.0018 ns |  0.08 |         - |          NA |
- *  | Switch     | Lynx.Model.Position | 0.3082 ns | 0.0010 ns | 0.0009 ns |  0.08 |         - |          NA |
- *  | Switch     | Lynx.Model.Position | 0.3116 ns | 0.0027 ns | 0.0025 ns |  0.09 |         - |          NA |
- *  | Switch     | Lynx.Model.Position | 0.3088 ns | 0.0016 ns | 0.0014 ns |  0.08 |         - |          NA |
- *  | Switch     | Lynx.Model.Position | 0.3107 ns | 0.0017 ns | 0.0015 ns |  0.08 |         - |          NA |
- *
- *
- *  BenchmarkDotNet v0.13.11, macOS Monterey 12.7.2 (21G1974) [Darwin 21.6.0]
- *  Intel Xeon CPU E5-1650 v2 3.50GHz (Max: 3.34GHz), 1 CPU, 3 logical and 3 physical cores
- *  .NET SDK 8.0.100
- *    [Host]     : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX
- *    DefaultJob : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX
- *
- *  | Method     | position            | Mean      | Error     | StdDev    | Median    | Ratio | RatioSD | Allocated | Alloc Ratio |
- *  |----------- |-------------------- |----------:|----------:|----------:|----------:|------:|--------:|----------:|------------:|
- *  | Naive      | Lynx.Model.Position | 5.4659 ns | 0.1821 ns | 0.4924 ns | 5.2647 ns |  1.00 |    0.00 |         - |          NA |
- *  | Naive      | Lynx.Model.Position | 5.1548 ns | 0.1188 ns | 0.1271 ns | 5.1218 ns |  0.94 |    0.10 |         - |          NA |
- *  | Naive      | Lynx.Model.Position | 5.0598 ns | 0.0379 ns | 0.0354 ns | 5.0433 ns |  0.92 |    0.09 |         - |          NA |
- *  | Naive      | Lynx.Model.Position | 0.6435 ns | 0.0152 ns | 0.0127 ns | 0.6474 ns |  0.12 |    0.01 |         - |          NA |
- *  | Naive      | Lynx.Model.Position | 5.0734 ns | 0.0417 ns | 0.0370 ns | 5.0662 ns |  0.93 |    0.09 |         - |          NA |
- *  | Naive      | Lynx.Model.Position | 5.0377 ns | 0.0530 ns | 0.0414 ns | 5.0147 ns |  0.92 |    0.10 |         - |          NA |
- *  | Dictionary | Lynx.Model.Position | 5.5652 ns | 0.0642 ns | 0.0569 ns | 5.5691 ns |  1.02 |    0.10 |         - |          NA |
- *  | Dictionary | Lynx.Model.Position | 5.5223 ns | 0.1023 ns | 0.0957 ns | 5.5145 ns |  1.01 |    0.10 |         - |          NA |
- *  | Dictionary | Lynx.Model.Position | 6.5139 ns | 0.0813 ns | 0.0721 ns | 6.4870 ns |  1.20 |    0.12 |         - |          NA |
- *  | Dictionary | Lynx.Model.Position | 6.7231 ns | 0.1553 ns | 0.1453 ns | 6.7304 ns |  1.23 |    0.10 |         - |          NA |
- *  | Dictionary | Lynx.Model.Position | 5.7433 ns | 0.1528 ns | 0.1429 ns | 5.7473 ns |  1.05 |    0.11 |         - |          NA |
- *  | Dictionary | Lynx.Model.Position | 5.5860 ns | 0.0609 ns | 0.0508 ns | 5.5894 ns |  1.02 |    0.10 |         - |          NA |
- *  | Switch     | Lynx.Model.Position | 1.2280 ns | 0.0627 ns | 0.0587 ns | 1.2163 ns |  0.22 |    0.02 |         - |          NA |
- *  | Switch     | Lynx.Model.Position | 1.1605 ns | 0.0602 ns | 0.0564 ns | 1.1582 ns |  0.21 |    0.02 |         - |          NA |
- *  | Switch     | Lynx.Model.Position | 1.1891 ns | 0.0371 ns | 0.0347 ns | 1.1862 ns |  0.22 |    0.02 |         - |          NA |
- *  | Switch     | Lynx.Model.Position | 0.8324 ns | 0.0356 ns | 0.0333 ns | 0.8413 ns |  0.15 |    0.02 |         - |          NA |
- *  | Switch     | Lynx.Model.Position | 1.1439 ns | 0.0257 ns | 0.0228 ns | 1.1468 ns |  0.21 |    0.02 |         - |          NA |
- *  | Switch     | Lynx.Model.Position | 1.1235 ns | 0.0397 ns | 0.0332 ns | 1.1063 ns |  0.21 |    0.02 |         - |          NA |
+BenchmarkDotNet v0.13.11, Ubuntu 22.04.3 LTS (Jammy Jellyfish)
+AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
+.NET SDK 8.0.100
+  [Host]     : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
+  DefaultJob : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
+
+
+| Method               | position            | Mean      | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
+|--------------------- |-------------------- |----------:|----------:|----------:|------:|----------:|------------:|
+| Naive                | Lynx.Model.Position | 3.6647 ns | 0.0090 ns | 0.0070 ns |  1.00 |         - |          NA |
+| Naive                | Lynx.Model.Position | 3.6659 ns | 0.0061 ns | 0.0047 ns |  1.00 |         - |          NA |
+| Naive                | Lynx.Model.Position | 3.6757 ns | 0.0245 ns | 0.0229 ns |  1.00 |         - |          NA |
+| Naive                | Lynx.Model.Position | 0.5081 ns | 0.0159 ns | 0.0148 ns |  0.14 |         - |          NA |
+| Naive                | Lynx.Model.Position | 3.6627 ns | 0.0065 ns | 0.0051 ns |  1.00 |         - |          NA |
+| Naive                | Lynx.Model.Position | 3.6720 ns | 0.0089 ns | 0.0074 ns |  1.00 |         - |          NA |
+| Dictionary           | Lynx.Model.Position | 4.2204 ns | 0.0277 ns | 0.0259 ns |  1.15 |         - |          NA |
+| Dictionary           | Lynx.Model.Position | 4.3162 ns | 0.0289 ns | 0.0241 ns |  1.18 |         - |          NA |
+| Dictionary           | Lynx.Model.Position | 4.2144 ns | 0.0260 ns | 0.0243 ns |  1.15 |         - |          NA |
+| Dictionary           | Lynx.Model.Position | 4.3022 ns | 0.0205 ns | 0.0171 ns |  1.17 |         - |          NA |
+| Dictionary           | Lynx.Model.Position | 4.3205 ns | 0.0279 ns | 0.0261 ns |  1.18 |         - |          NA |
+| Dictionary           | Lynx.Model.Position | 4.3908 ns | 0.0279 ns | 0.0261 ns |  1.20 |         - |          NA |
+| Switch               | Lynx.Model.Position | 0.6192 ns | 0.0015 ns | 0.0012 ns |  0.17 |         - |          NA |
+| Switch               | Lynx.Model.Position | 0.6174 ns | 0.0025 ns | 0.0021 ns |  0.17 |         - |          NA |
+| Switch               | Lynx.Model.Position | 0.6277 ns | 0.0132 ns | 0.0124 ns |  0.17 |         - |          NA |
+| Switch               | Lynx.Model.Position | 0.4964 ns | 0.0159 ns | 0.0141 ns |  0.14 |         - |          NA |
+| Switch               | Lynx.Model.Position | 0.6192 ns | 0.0025 ns | 0.0020 ns |  0.17 |         - |          NA |
+| Switch               | Lynx.Model.Position | 0.6189 ns | 0.0017 ns | 0.0014 ns |  0.17 |         - |          NA |
+| Switch_Precalculated | Lynx.Model.Position | 0.5519 ns | 0.0102 ns | 0.0096 ns |  0.15 |         - |          NA |
+| Switch_Precalculated | Lynx.Model.Position | 0.5597 ns | 0.0119 ns | 0.0112 ns |  0.15 |         - |          NA |
+| Switch_Precalculated | Lynx.Model.Position | 0.5493 ns | 0.0049 ns | 0.0043 ns |  0.15 |         - |          NA |
+| Switch_Precalculated | Lynx.Model.Position | 0.5647 ns | 0.0108 ns | 0.0101 ns |  0.15 |         - |          NA |
+| Switch_Precalculated | Lynx.Model.Position | 0.5602 ns | 0.0121 ns | 0.0107 ns |  0.15 |         - |          NA |
+| Switch_Precalculated | Lynx.Model.Position | 0.5573 ns | 0.0055 ns | 0.0049 ns |  0.15 |         - |          NA |
  *
  */
 
@@ -93,30 +50,82 @@ using System.Runtime.CompilerServices;
 namespace Lynx.Benchmark;
 public class ZobristHash_Castle_Benchmark : BaseBenchmark
 {
-    public static IEnumerable<Position> Data => new[] {
+    [Params(1, 10, 100, 1_000, 10_000)]
+    public int Size { get; set; }
+
+    private static readonly Position[] _positions =
+    [
         new Position(Constants.InitialPositionFEN),
         new Position(Constants.TrickyTestPositionFEN),
         new Position(Constants.TrickyTestPositionReversedFEN),
         new Position(Constants.CmkTestPositionFEN),
         new Position(Constants.ComplexPositionFEN),
         new Position(Constants.KillerTestPositionFEN),
-    };
+    ];
 
     [Benchmark(Baseline = true)]
-    [ArgumentsSource(nameof(Data))]
-    public long Naive(Position position) => CalculateMethod(position.Castle);
+    public long Naive()
+    {
+        long count = 0;
+
+        for (int i = 0; i < Size; ++i)
+        {
+            foreach (var position in _positions)
+            {
+                count += CalculateMethod(position.Castle);
+            }
+        }
+
+        return count;
+    }
 
     [Benchmark]
-    [ArgumentsSource(nameof(Data))]
-    public long Dictionary(Position position) => DictionaryMethod(position.Castle);
+    public long Dictionary()
+    {
+        long count = 0;
+
+        for (int i = 0; i < Size; ++i)
+        {
+            foreach (var position in _positions)
+            {
+                count += DictionaryMethod(position.Castle);
+            }
+        }
+
+        return count;
+    }
 
     [Benchmark]
-    [ArgumentsSource(nameof(Data))]
-    public long Switch(Position position) => SwitchMethod(position.Castle);
+    public long Switch()
+    {
+        long count = 0;
+
+        for (int i = 0; i < Size; ++i)
+        {
+            foreach (var position in _positions)
+            {
+                count += SwitchMethod(position.Castle);
+            }
+        }
+
+        return count;
+    }
 
     [Benchmark]
-    [ArgumentsSource(nameof(Data))]
-    public long Switch_Precalculated(Position position) => ZobristTable.EnPassantHash(position.Castle);
+    public long Switch_Precalculated()
+    {
+        long count = 0;
+
+        for (int i = 0; i < Size; ++i)
+        {
+            foreach (var position in _positions)
+            {
+                count += ZobristTable.EnPassantHash(position.Castle);
+            }
+        }
+
+        return count;
+    }
 
     private static readonly long[,] _table = Initialize();
 
