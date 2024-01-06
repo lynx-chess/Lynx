@@ -338,7 +338,7 @@ public class Position
 
         UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
 
-        return new GameState(capturedPiece, castleCopy, enpassantCopy, uniqueIdentifierCopy);
+        return new GameState(uniqueIdentifierCopy, capturedPiece, castleCopy, enpassantCopy);
         //var clone = new Position(this);
         //clone.UnmakeMove(move, gameState);
         //if (uniqueIdentifierCopy != clone.UniqueIdentifier)
@@ -436,7 +436,7 @@ public class Position
             ZobristTable.SideHash()
             ^ ZobristTable.EnPassantHash((int)oldEnPassant);
 
-        return new GameState(-1, byte.MaxValue, oldEnPassant, oldUniqueIdentifier);
+        return new GameState(oldUniqueIdentifier, -1, byte.MaxValue, oldEnPassant);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
