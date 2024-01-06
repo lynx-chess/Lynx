@@ -9,7 +9,7 @@ public readonly struct GameState
 
     public readonly BoardSquare EnPassant;
 
-    public GameState(sbyte capturedPiece, byte castle, BoardSquare enpassant, long zobristKey)
+    public GameState(long zobristKey, sbyte capturedPiece, byte castle, BoardSquare enpassant)
     {
         CapturedPiece = capturedPiece;
         Castle = castle;
