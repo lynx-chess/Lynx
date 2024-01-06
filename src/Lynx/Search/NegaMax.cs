@@ -157,9 +157,10 @@ public sealed partial class Engine
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
-        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, MovePool);
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves);
 
-        var scores = new int[pseudoLegalMoves.Length];
+        Span<int> scores = stackalloc int[pseudoLegalMoves.Length];
         if (_isFollowingPV)
         {
             _isFollowingPV = false;
@@ -273,6 +274,15 @@ public sealed partial class Engine
                     // Don't allow LMR to drop into qsearch or increase the depth
                     // depth - 1 - depth +2 = 1, min depth we want
                     reduction = Math.Clamp(reduction, 0, depth - 2);
+                }
+
+                // 🔍 Static Exchange Evaluation (SEE) reduction
+                // Bad captures are reduced more
+                if (!isInCheck
+                    && scores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue
+                    && scores[moveIndex] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
+                {
+                    reduction += Configuration.EngineSettings.SEE_BadCaptureReduction;
                 }
 
                 // Search with reduced depth
@@ -421,7 +431,8 @@ public sealed partial class Engine
             alpha = staticEvaluation;
         }
 
-        var pseudoLegalMoves = MoveGenerator.GenerateAllCaptures(position, MovePool);
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        var pseudoLegalMoves = MoveGenerator.GenerateAllCaptures(position, moves);
         if (pseudoLegalMoves.Length == 0)
         {
             // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358
@@ -432,7 +443,7 @@ public sealed partial class Engine
         Move? bestMove = null;
         bool isThereAnyValidCapture = false;
 
-        var scores = new int[pseudoLegalMoves.Length];
+        Span<int> scores = stackalloc int[pseudoLegalMoves.Length];
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
             scores[i] = ScoreMove(pseudoLegalMoves[i], ply, isNotQSearch: false, ttBestMove);

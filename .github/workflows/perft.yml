@@ -13,6 +13,7 @@ on:
       divide:
         description: 'Run also divide'
         required: false
+        default: false
         type: boolean
 
 jobs:

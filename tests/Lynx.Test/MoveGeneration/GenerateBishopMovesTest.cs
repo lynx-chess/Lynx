@@ -5,11 +5,17 @@ namespace Lynx.Test.MoveGeneration;
 
 public class GenerateBishopMovesTest
 {
-    private static IEnumerable<Move> GenerateBishopMoves(Position position) =>
-        MoveGenerator.GenerateAllMoves(position, new Move[Constants.MaxNumberOfPossibleMovesInAPosition]).Where(m => m.Piece() == (int)Piece.B || m.Piece() == (int)Piece.b);
+    private static IEnumerable<Move> GenerateBishopMoves(Position position)
+    {
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        return MoveGenerator.GenerateAllMoves(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.B || m.Piece() == (int)Piece.b);
+    }
 
-    private static IEnumerable<Move> GenerateBishopCaptures(Position position) =>
-        MoveGenerator.GenerateAllCaptures(position, new Move[Constants.MaxNumberOfPossibleMovesInAPosition]).Where(m => m.Piece() == (int)Piece.B || m.Piece() == (int)Piece.b);
+    private static IEnumerable<Move> GenerateBishopCaptures(Position position)
+    {
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        return MoveGenerator.GenerateAllCaptures(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.B || m.Piece() == (int)Piece.b);
+    }
 
     [TestCase(Constants.EmptyBoardFEN, 0)]
     [TestCase(Constants.InitialPositionFEN, 0)]

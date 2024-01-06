@@ -51,6 +51,7 @@ public static class MoveExtensions
     }
 
     /// <summary>
+    /// TODO: try to make span-compatible
     /// Returns the move from <paramref name="moveList"/> indicated by <paramref name="UCIString"/>
     /// </summary>
     /// <param name="UCIString"></param>

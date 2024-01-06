@@ -32,6 +32,8 @@ public sealed class LynxDriver
         _ = ZobristTable.SideHash();
         _ = Masks.FileMasks;
         _ = EvaluationConstants.HistoryBonus[1];
+        _ = MoveGenerator.Init();
+        _ = GoCommand.Init();
     }
 
     public async Task Run(CancellationToken cancellationToken)
@@ -468,7 +470,7 @@ public sealed class LynxDriver
 
         if (items.Length >= 2 && int.TryParse(items[1], out int depth) && depth >= 1)
         {
-            var results = await Perft.Divide(_engine.Game.CurrentPosition, depth, str => _engineWriter.Writer.WriteAsync(str));
+            var results = Perft.Divide(_engine.Game.CurrentPosition, depth, str => _engineWriter.Writer.TryWrite(str));
             await Perft.PrintPerftResult(depth, results, str => _engineWriter.Writer.WriteAsync(str));
         }
     }
