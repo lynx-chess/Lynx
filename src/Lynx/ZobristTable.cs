@@ -11,11 +11,6 @@ public static class ZobristTable
 {
     private static readonly long[,] _table = Initialize();
 
-    private static readonly long WK_Hash = _table[(int)BoardSquare.a8, (int)Piece.p];
-    private static readonly long WQ_Hash = _table[(int)BoardSquare.b8, (int)Piece.p];
-    private static readonly long BK_Hash = _table[(int)BoardSquare.c8, (int)Piece.p];
-    private static readonly long BQ_Hash = _table[(int)BoardSquare.d8, (int)Piece.p];
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static long PieceHash(int boardSquare, int piece) => _table[boardSquare, piece];
 
@@ -64,6 +59,11 @@ public static class ZobristTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static long CastleHash(byte castle)
     {
+        var WK_Hash = _table[(int)BoardSquare.a8, (int)Piece.p];
+        var WQ_Hash = _table[(int)BoardSquare.b8, (int)Piece.p];
+        var BK_Hash = _table[(int)BoardSquare.c8, (int)Piece.p];
+        var BQ_Hash = _table[(int)BoardSquare.d8, (int)Piece.p];
+
         return castle switch
         {
             0 => 0,                                // -    | -
