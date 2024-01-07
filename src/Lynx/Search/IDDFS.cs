@@ -195,7 +195,7 @@ public sealed partial class Engine
         Move firstLegalMove = default;
 
         var moves = new MoveArray();
-        foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, moves))
+        foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, ref moves))
         {
             var gameState = Game.CurrentPosition.MakeMove(move);
             bool isPositionValid = Game.CurrentPosition.IsValid();
