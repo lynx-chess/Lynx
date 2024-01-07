@@ -116,9 +116,14 @@ public sealed partial class Engine
                 }
             }
 
-            var baseCaptureScore = (isPromotion || move.IsEnPassant() || SEE.IsGoodCapture(Game.CurrentPosition, move))
-                ? EvaluationConstants.GoodCaptureMoveBaseScoreValue
-                : EvaluationConstants.BadCaptureMoveBaseScoreValue;
+            var baseCaptureScore = (
+                isPromotion
+                || move.IsEnPassant()
+                || (sourcePiece - offset) == (int)Piece.P           // All captures with pawns are worth considering
+                || (targetPiece - offset) == (int)Piece.Q           // All queen captures are worth considering
+                || SEE.IsGoodCapture(Game.CurrentPosition, move))
+                    ? EvaluationConstants.GoodCaptureMoveBaseScoreValue
+                    : EvaluationConstants.BadCaptureMoveBaseScoreValue;
 
             return baseCaptureScore + EvaluationConstants.MostValueableVictimLeastValuableAttacker[sourcePiece, targetPiece];
         }
