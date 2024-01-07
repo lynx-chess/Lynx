@@ -83,14 +83,21 @@ public sealed partial class Engine
 
         var promotedPiece = move.PromotedPiece();
         var isPromotion = promotedPiece != default;
+        var isCapture = move.IsCapture();
 
         // Queen promotion
         if ((promotedPiece + 2) % 6 == 0)
         {
-            return EvaluationConstants.BadCaptureMoveBaseScoreValue + EvaluationConstants.PromotionMoveScoreValue;
+            var baseScore = SEE.HasPositiveScore(Game.CurrentPosition, move)
+                ? EvaluationConstants.GoodCaptureMoveBaseScoreValue
+                : EvaluationConstants.BadCaptureMoveBaseScoreValue;
+
+            var captureBonus = isCapture ? 1 : 0;
+
+            return baseScore + EvaluationConstants.PromotionMoveScoreValue + captureBonus;
         }
 
-        if (move.IsCapture())
+        if (isCapture)
         {
             var sourcePiece = move.Piece();
             int targetPiece = (int)Piece.P;    // Important to initialize to P or p, due to en-passant captures
