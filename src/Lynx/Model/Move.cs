@@ -5,6 +5,22 @@ using System.Text;
 
 namespace Lynx.Model;
 
+#pragma warning disable S1144 // Unused private types or members should be removed
+#pragma warning disable RCS1169 // Make field read-only
+#pragma warning disable IDE0044 // Add readonly modifier
+#pragma warning disable IDE0051 // Remove unused private members
+#pragma warning disable RCS1213 // Remove unused member declaration
+[InlineArray(Constants.MaxNumberOfPossibleMovesInAPosition)]
+public struct MoveArray
+{
+    private Move _move;
+}
+#pragma warning restore RCS1213 // Remove unused member declaration
+#pragma warning restore IDE0051 // Remove unused private members
+#pragma warning restore IDE0044 // Add readonly modifier
+#pragma warning restore RCS1169 // Make field read-only
+#pragma warning restore S1144 // Unused private types or members should be removed
+
 /// <summary>
 ///     Binary move bits                  Hexadecimal
 /// 0000 0000 0000 0000 0000 0000 1111      0xF         Promoted piece (~11 bits)
