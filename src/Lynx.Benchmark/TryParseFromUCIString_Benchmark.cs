@@ -1,4 +1,79 @@
-﻿using BenchmarkDotNet.Attributes;
+﻿/*
+ *
+ *  BenchmarkDotNet v0.13.12, Ubuntu 22.04.3 LTS (Jammy Jellyfish)
+ *  AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
+ *  .NET SDK 8.0.100
+ *    [Host]     : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
+ *    DefaultJob : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
+ *
+ *  | Method | positionCommand      | Mean       | Error     | StdDev    | Ratio | RatioSD |
+ *  |------- |--------------------- |-----------:|----------:|----------:|------:|--------:|
+ *  | Array  | position startpos    |   2.355 us | 0.0394 us | 0.0405 us |  1.00 |    0.00 |
+ *  | Span   | position startpos    |   2.500 us | 0.0245 us | 0.0229 us |  1.06 |    0.02 |
+ *  |        |                      |            |           |           |       |         |
+ *  | Array  | posi(...)b7b6 [193]  |  13.705 us | 0.1297 us | 0.1213 us |  1.00 |    0.00 |
+ *  | Span   | posi(...)b7b6 [193]  |   9.752 us | 0.0431 us | 0.0382 us |  0.71 |    0.01 |
+ *  |        |                      |            |           |           |       |         |
+ *  | Array  | posi(...)f3g3 [353]  |  21.567 us | 0.0971 us | 0.0861 us |  1.00 |    0.00 |
+ *  | Span   | posi(...)f3g3 [353]  |  15.369 us | 0.0461 us | 0.0360 us |  0.71 |    0.00 |
+ *  |        |                      |            |           |           |       |         |
+ *  | Array  | posi(...)h3f1 [2984] | 136.327 us | 0.4031 us | 0.3573 us |  1.00 |    0.00 |
+ *  | Span   | posi(...)h3f1 [2984] |  86.599 us | 0.7724 us | 0.6847 us |  0.64 |    0.01 |
+ *  |        |                      |            |           |           |       |         |
+ *  | Array  | posi(...)g4g8 [979]  |  53.044 us | 0.3062 us | 0.2864 us |  1.00 |    0.00 |
+ *  | Span   | posi(...)g4g8 [979]  |  34.743 us | 0.0633 us | 0.0529 us |  0.65 |    0.00 |
+ *
+ *
+ *  BenchmarkDotNet v0.13.12, Windows 10 (10.0.20348.2159) (Hyper-V)
+ *  AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
+ *  .NET SDK 8.0.100
+ *    [Host]     : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
+ *    DefaultJob : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
+ *
+ *  | Method | positionCommand      | Mean       | Error     | StdDev    | Ratio | RatioSD |
+ *  |------- |--------------------- |-----------:|----------:|----------:|------:|--------:|
+ *  | Array  | position startpos    |   1.579 us | 0.0328 us | 0.0962 us |  1.00 |    0.00 |
+ *  | Span   | position startpos    |   1.667 us | 0.0330 us | 0.0696 us |  1.04 |    0.06 |
+ *  |        |                      |            |           |           |       |         |
+ *  | Array  | posi(...)b7b6 [193]  |  12.017 us | 0.2292 us | 0.2548 us |  1.00 |    0.00 |
+ *  | Span   | posi(...)b7b6 [193]  |   9.297 us | 0.1096 us | 0.1025 us |  0.78 |    0.02 |
+ *  |        |                      |            |           |           |       |         |
+ *  | Array  | posi(...)f3g3 [353]  |  19.820 us | 0.1753 us | 0.1464 us |  1.00 |    0.00 |
+ *  | Span   | posi(...)f3g3 [353]  |  14.153 us | 0.1537 us | 0.1284 us |  0.71 |    0.01 |
+ *  |        |                      |            |           |           |       |         |
+ *  | Array  | posi(...)h3f1 [2984] | 131.354 us | 1.2493 us | 1.1686 us |  1.00 |    0.00 |
+ *  | Span   | posi(...)h3f1 [2984] |  76.583 us | 0.2956 us | 0.2765 us |  0.58 |    0.01 |
+ *  |        |                      |            |           |           |       |         |
+ *  | Array  | posi(...)g4g8 [979]  |  45.122 us | 0.5464 us | 0.5111 us |  1.00 |    0.00 |
+ *  | Span   | posi(...)g4g8 [979]  |  29.862 us | 0.1963 us | 0.1837 us |  0.66 |    0.01 |
+ *
+ *
+ *  BenchmarkDotNet v0.13.12, macOS Monterey 12.7.2 (21G1974) [Darwin 21.6.0]
+ *  Intel Xeon CPU E5-1650 v2 3.50GHz (Max: 3.34GHz), 1 CPU, 3 logical and 3 physical cores
+ *  .NET SDK 8.0.100
+ *    [Host]     : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX
+ *    DefaultJob : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX
+ *
+ *  | Method | positionCommand      | Mean       | Error     | StdDev    | Ratio | RatioSD |
+ *  |------- |--------------------- |-----------:|----------:|----------:|------:|--------:|
+ *  | Array  | position startpos    |   3.950 us | 0.1722 us | 0.4858 us |  1.00 |    0.00 |
+ *  | Span   | position startpos    |   3.894 us | 0.1201 us | 0.3521 us |  1.00 |    0.17 |
+ *  |        |                      |            |           |           |       |         |
+ *  | Array  | posi(...)b7b6 [193]  |  23.443 us | 0.4611 us | 0.6465 us |  1.00 |    0.00 |
+ *  | Span   | posi(...)b7b6 [193]  |  20.842 us | 0.4002 us | 0.3930 us |  0.90 |    0.03 |
+ *  |        |                      |            |           |           |       |         |
+ *  | Array  | posi(...)f3g3 [353]  |  37.742 us | 0.7509 us | 0.8346 us |  1.00 |    0.00 |
+ *  | Span   | posi(...)f3g3 [353]  |  26.693 us | 0.5087 us | 0.4759 us |  0.71 |    0.02 |
+ *  |        |                      |            |           |           |       |         |
+ *  | Array  | posi(...)h3f1 [2984] | 230.965 us | 2.6163 us | 2.4473 us |  1.00 |    0.00 |
+ *  | Span   | posi(...)h3f1 [2984] | 152.074 us | 3.0190 us | 2.6763 us |  0.66 |    0.01 |
+ *  |        |                      |            |           |           |       |         |
+ *  | Array  | posi(...)g4g8 [979]  |  87.359 us | 1.7323 us | 2.6969 us |  1.00 |    0.00 |
+ *  | Span   | posi(...)g4g8 [979]  |  54.649 us | 0.4869 us | 0.4554 us |  0.61 |    0.02 |
+ *
+*/
+
+using BenchmarkDotNet.Attributes;
 using Lynx.Model;
 using Lynx.UCI.Commands.GUI;
 
