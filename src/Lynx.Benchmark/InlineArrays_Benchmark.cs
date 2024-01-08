@@ -11,42 +11,88 @@ public class InlineArrays_Benchmark : BaseBenchmark
 {
     private readonly Move[] _arrayMovePool = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
 
-    public static IEnumerable<string> Data => new[] {
-        Constants.InitialPositionFEN,
-        Constants.TrickyTestPositionFEN,
-        Constants.TrickyTestPositionReversedFEN,
-        Constants.CmkTestPositionFEN,
-        Constants.ComplexPositionFEN,
-        Constants.KillerTestPositionFEN,
-        Constants.TTPositionFEN
-    };
+    [Params(1, 10, 100, 1_000, 10_000)]
+    public int Size { get; set; }
+
+    private static readonly Position[] Positions =
+    [
+        new Position(Constants.InitialPositionFEN),
+        new Position(Constants.TrickyTestPositionFEN),
+        new Position(Constants.TrickyTestPositionReversedFEN),
+        new Position(Constants.CmkTestPositionFEN),
+        new Position(Constants.ComplexPositionFEN),
+        new Position(Constants.KillerTestPositionFEN),
+        new Position(Constants.TTPositionFEN)
+    ];
 
     [Benchmark(Baseline = true)]
-    [ArgumentsSource(nameof(Data))]
-    public int Span(string fen)
+    public long Span()
     {
-        Span<Move> moveSpan = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        var allMoves = MoveGenerator.GenerateAllMoves(new Position(fen), moveSpan);
+        long result = 0;
 
-        return allMoves.Length;
+        for (int i = 0; i < Size; ++i)
+        {
+            foreach (var position in Positions)
+            {
+                result += Span(position);
+            }
+        }
+
+        return result;
+
+        static int Span(Position position)
+        {
+            Span<Move> moveSpan = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+            var allMoves = MoveGenerator.GenerateAllMoves(position, moveSpan);
+
+            return allMoves.Length;
+        }
     }
 
     [Benchmark]
-    [ArgumentsSource(nameof(Data))]
-    public int Array(string fen)
+    public long Array()
     {
-        var allMoves = MoveGenerator.GenerateAllMoves(new Position(fen), _arrayMovePool);
+        long result = 0;
 
-        return allMoves.Length;
+        for (int i = 0; i < Size; ++i)
+        {
+            foreach (var position in Positions)
+            {
+                result += Array(position);
+            }
+        }
+
+        return result;
+
+        int Array(Position position)
+        {
+            var allMoves = MoveGenerator.GenerateAllMoves(position, _arrayMovePool);
+
+            return allMoves.Length;
+        }
     }
 
     [Benchmark]
-    [ArgumentsSource(nameof(Data))]
-    public int InlineArray(string fen)
+    public long InlineArray()
     {
-        var moveArray = new MoveArray();
-        var allMoves = MoveGenerator.GenerateAllMoves(new Position(fen), ref moveArray);
+        long result = 0;
 
-        return allMoves.Length;
+        for (int i = 0; i < Size; ++i)
+        {
+            foreach (var position in Positions)
+            {
+                result += InlineArray(position);
+            }
+        }
+
+        return result;
+
+        static int InlineArray(Position position)
+        {
+            var moveArray = new MoveArray();
+            var allMoves = MoveGenerator.GenerateAllMoves(position, ref moveArray);
+
+            return allMoves.Length;
+        }
     }
 }
