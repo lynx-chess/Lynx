@@ -35,85 +35,85 @@ using Lynx.Model;
 
 namespace Lynx.Benchmark;
 
-public class PositionClone_Benchmark : BaseBenchmark
+file readonly struct Position
 {
-    public readonly struct Position
+    public string FEN { get; }
+
+    /// <summary>
+    /// Use <see cref="Piece"/> as index
+    /// </summary>
+    public BitBoard[] PieceBitBoards { get; }
+
+    /// <summary>
+    /// Black, White, Both
+    /// </summary>
+    public BitBoard[] OccupancyBitBoards { get; }
+
+    public Side Side { get; }
+
+    public BoardSquare EnPassant { get; }
+
+    public int Castle { get; }
+
+    public Position(string fen)
     {
-        public string FEN { get; }
+        FEN = fen;
+        var parsedFEN = FENParser.ParseFEN(fen);
 
-        /// <summary>
-        /// Use <see cref="Piece"/> as index
-        /// </summary>
-        public BitBoard[] PieceBitBoards { get; }
-
-        /// <summary>
-        /// Black, White, Both
-        /// </summary>
-        public BitBoard[] OccupancyBitBoards { get; }
-
-        public Side Side { get; }
-
-        public BoardSquare EnPassant { get; }
-
-        public int Castle { get; }
-
-        public Position(string fen)
-        {
-            FEN = fen;
-            var parsedFEN = FENParser.ParseFEN(fen);
-
-            PieceBitBoards = parsedFEN.PieceBitBoards;
-            OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
-            Side = parsedFEN.Side;
-            Castle = parsedFEN.Castle;
-            EnPassant = parsedFEN.EnPassant;
-        }
-
-        /// <summary>
-        /// 'Pasing FEN' Clone constructor
-        /// </summary>
-        /// <param name="position"></param>
-        public Position(Position position) : this(position.FEN)
-        { }
-
-        /// <summary>
-        /// 'Manual' Clone constructor
-        /// </summary>
-        /// <param name="position"></param>
-        /// <param name="_"></param>
-        public Position(Position position, int _)
-        {
-            FEN = position.FEN;
-            PieceBitBoards = position.PieceBitBoards;
-
-            OccupancyBitBoards = position.OccupancyBitBoards;
-
-            Side = position.Side;
-            Castle = position.Castle;
-            EnPassant = position.EnPassant;
-        }
-
-        /// <summary>
-        /// 'Manual' Clone constructor using Array.Copy
-        /// </summary>
-        /// <param name="position"></param>
-        /// <param name="_"></param>
-        public Position(Position position, string _)
-        {
-            FEN = position.FEN;
-
-            PieceBitBoards = new BitBoard[12];
-            Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
-
-            OccupancyBitBoards = new BitBoard[3];
-            Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
-
-            Side = position.Side;
-            Castle = position.Castle;
-            EnPassant = position.EnPassant;
-        }
+        PieceBitBoards = parsedFEN.PieceBitBoards;
+        OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
+        Side = parsedFEN.Side;
+        Castle = parsedFEN.Castle;
+        EnPassant = parsedFEN.EnPassant;
     }
 
+    /// <summary>
+    /// 'Pasing FEN' Clone constructor
+    /// </summary>
+    /// <param name="position"></param>
+    public Position(Position position) : this(position.FEN)
+    { }
+
+    /// <summary>
+    /// 'Manual' Clone constructor
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="_"></param>
+    public Position(Position position, int _)
+    {
+        FEN = position.FEN;
+        PieceBitBoards = position.PieceBitBoards;
+
+        OccupancyBitBoards = position.OccupancyBitBoards;
+
+        Side = position.Side;
+        Castle = position.Castle;
+        EnPassant = position.EnPassant;
+    }
+
+    /// <summary>
+    /// 'Manual' Clone constructor using Array.Copy
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="_"></param>
+    public Position(Position position, string _)
+    {
+        FEN = position.FEN;
+
+        PieceBitBoards = new BitBoard[12];
+        Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
+
+        OccupancyBitBoards = new BitBoard[3];
+        Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
+
+        Side = position.Side;
+        Castle = position.Castle;
+        EnPassant = position.EnPassant;
+    }
+}
+
+public class PositionClone_Benchmark : BaseBenchmark
+{
     public static IEnumerable<string> Data => new[] {
             Constants.EmptyBoardFEN,
             Constants.InitialPositionFEN,

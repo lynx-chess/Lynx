@@ -26,8 +26,6 @@ public sealed partial class Engine
 
     public Game Game { get; private set; }
 
-    private Move[] MovePool { get; } = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-
     public bool IsSearching { get; private set; }
 
     public bool PendingConfirmation { get; set; }
@@ -63,7 +61,9 @@ public sealed partial class Engine
 
     public void AdjustPosition(ReadOnlySpan<char> rawPositionCommand)
     {
-        Game = PositionCommand.ParseGame(rawPositionCommand, MovePool);
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+
+        Game = PositionCommand.ParseGame(rawPositionCommand, moves);
         _isNewGameComing = false;
     }
 

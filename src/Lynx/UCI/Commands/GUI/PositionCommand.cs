@@ -21,6 +21,7 @@ public sealed class PositionCommand : GUIBaseCommand
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
+    [Obsolete("Just intended for testing purposes")]
     public static Game ParseGame(ReadOnlySpan<char> positionCommandSpan, Move[] movePool)
     {
         try
@@ -59,10 +60,50 @@ public sealed class PositionCommand : GUIBaseCommand
         }
     }
 
-    public static bool TryParseLastMove(string positionCommand, Game game, Move[] movePool, [NotNullWhen(true)] out Move? lastMove)
+    public static Game ParseGame(ReadOnlySpan<char> positionCommandSpan, Span<Move> movePool)
+    {
+        try
+        {
+            // We divide the position command in these two sections:
+            // "position startpos                       ||"
+            // "position startpos                       || moves e2e4 e7e5"
+            // "position fen 8/8/8/8/8/8/8/8 w - - 0 1  ||"
+            // "position fen 8/8/8/8/8/8/8/8 w - - 0 1  || moves e2e4 e7e5"
+            Span<Range> items = stackalloc Range[2];
+            positionCommandSpan.Split(items, "moves", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            var initialPositionSection = positionCommandSpan[items[0]];
+
+            // We divide in these two parts
+            // "position startpos ||"       <-- If "fen" doesn't exist in the section
+            // "position || (fen) 8/8/8/8/8/8/8/8 w - - 0 1"  <-- If "fen" does exist
+            Span<Range> initialPositionParts = stackalloc Range[2];
+            initialPositionSection.Split(initialPositionParts, "fen", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            ReadOnlySpan<char> fen = initialPositionSection[initialPositionParts[0]].Length == Id.Length   // "position" o "position startpos"
+                ? initialPositionSection[initialPositionParts[1]]
+                : Constants.InitialPositionFEN.AsSpan();
+
+            var movesSection = positionCommandSpan[items[1]];
+
+            Span<Range> moves = stackalloc Range[(movesSection.Length / 5) + 1]; // Number of potential half-moves provided in the string
+            movesSection.Split(moves, ' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            return new Game(fen, movesSection, moves, movePool);
+        }
+        catch (Exception e)
+        {
+            _logger.Error(e, "Error parsing position command '{0}'", positionCommandSpan.ToString());
+            return new Game();
+        }
+    }
+
+    public static bool TryParseLastMove(string positionCommand, Game game, [NotNullWhen(true)] out Move? lastMove)
     {
         var moveString = positionCommand
                 .Split(' ', StringSplitOptions.RemoveEmptyEntries)[^1];
+
+        Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
 
         if (!MoveExtensions.TryParseFromUCIString(
             moveString,
