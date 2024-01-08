@@ -121,7 +121,7 @@ public static class MoveExtensions
     /// <exception cref="InvalidOperationException"></exception>
     /// <exception cref="IndexOutOfRangeException"></exception>
     /// <returns></returns>
-    public static bool TryParseFromUCIString(ReadOnlySpan<char> UCIString, Span<Move> moveList, [NotNullWhen(true)] out Move? move)
+    public static bool TryParseFromUCIString(ReadOnlySpan<char> UCIString, ReadOnlySpan<Move> moveList, [NotNullWhen(true)] out Move? move)
     {
         Utils.Assert(UCIString.Length == 4 || UCIString.Length == 5);
 
