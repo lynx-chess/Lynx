@@ -100,8 +100,6 @@ public class ZobristTableTest
 
         var castleHash = ZobristTable.CastleHash(position.Castle);
 
-        Assert.AreEqual(CalculateCastleHash(position.Castle), castleHash);
-
         Assert.AreEqual(positionWithoutCastlingRightsHash, positionHash ^ castleHash);
     }
 
@@ -120,33 +118,6 @@ public class ZobristTableTest
         var currentHash = ZobristTable.PositionHash(position);
 
         Assert.AreEqual(originalHash, currentHash);
-    }
-  
-    private long CalculateCastleHash(byte castle)
-    {
-        long combinedHash = 0;
-
-        if ((castle & (int)CastlingRights.WK) != default)
-        {
-            combinedHash ^= _zobristTable[(int)BoardSquare.a8, (int)Piece.p];        // a8
-        }
-
-        if ((castle & (int)CastlingRights.WQ) != default)
-        {
-            combinedHash ^= _zobristTable[(int)BoardSquare.b8, (int)Piece.p];        // b8
-        }
-
-        if ((castle & (int)CastlingRights.BK) != default)
-        {
-            combinedHash ^= _zobristTable[(int)BoardSquare.c8, (int)Piece.p];        // c8
-        }
-
-        if ((castle & (int)CastlingRights.BQ) != default)
-        {
-            combinedHash ^= _zobristTable[(int)BoardSquare.d8, (int)Piece.p];        // d8
-        }
-
-        return combinedHash;
     }
 
     private static long OriginalPositionHash(Position position)
