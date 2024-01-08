@@ -6,22 +6,22 @@
  *    [Host]     : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
  *    DefaultJob : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
  *
- *  | Method | positionCommand      | Mean       | Error     | StdDev    | Ratio | RatioSD |
- *  |------- |--------------------- |-----------:|----------:|----------:|------:|--------:|
- *  | Array  | position startpos    |   2.355 us | 0.0394 us | 0.0405 us |  1.00 |    0.00 |
- *  | Span   | position startpos    |   2.500 us | 0.0245 us | 0.0229 us |  1.06 |    0.02 |
- *  |        |                      |            |           |           |       |         |
- *  | Array  | posi(...)b7b6 [193]  |  13.705 us | 0.1297 us | 0.1213 us |  1.00 |    0.00 |
- *  | Span   | posi(...)b7b6 [193]  |   9.752 us | 0.0431 us | 0.0382 us |  0.71 |    0.01 |
- *  |        |                      |            |           |           |       |         |
- *  | Array  | posi(...)f3g3 [353]  |  21.567 us | 0.0971 us | 0.0861 us |  1.00 |    0.00 |
- *  | Span   | posi(...)f3g3 [353]  |  15.369 us | 0.0461 us | 0.0360 us |  0.71 |    0.00 |
- *  |        |                      |            |           |           |       |         |
- *  | Array  | posi(...)h3f1 [2984] | 136.327 us | 0.4031 us | 0.3573 us |  1.00 |    0.00 |
- *  | Span   | posi(...)h3f1 [2984] |  86.599 us | 0.7724 us | 0.6847 us |  0.64 |    0.01 |
- *  |        |                      |            |           |           |       |         |
- *  | Array  | posi(...)g4g8 [979]  |  53.044 us | 0.3062 us | 0.2864 us |  1.00 |    0.00 |
- *  | Span   | posi(...)g4g8 [979]  |  34.743 us | 0.0633 us | 0.0529 us |  0.65 |    0.00 |
+ *  | Method | positionCommand      | Mean       | Error     | StdDev    | Ratio |
+ *  |------- |--------------------- |-----------:|----------:|----------:|------:|
+ *  | Array  | position startpos    |   2.319 us | 0.0152 us | 0.0135 us |  1.00 |
+ *  | Span   | position startpos    |   2.263 us | 0.0112 us | 0.0094 us |  0.98 |
+ *  |        |                      |            |           |           |       |
+ *  | Array  | posi(...)b7b6 [193]  |  13.390 us | 0.0607 us | 0.0538 us |  1.00 |
+ *  | Span   | posi(...)b7b6 [193]  |  10.359 us | 0.0813 us | 0.0761 us |  0.77 |
+ *  |        |                      |            |           |           |       |
+ *  | Array  | posi(...)f3g3 [353]  |  22.144 us | 0.1809 us | 0.1692 us |  1.00 |
+ *  | Span   | posi(...)f3g3 [353]  |  16.378 us | 0.0323 us | 0.0252 us |  0.74 |
+ *  |        |                      |            |           |           |       |
+ *  | Array  | posi(...)h3f1 [2984] | 134.685 us | 0.8669 us | 0.8109 us |  1.00 |
+ *  | Span   | posi(...)h3f1 [2984] |  87.676 us | 0.3720 us | 0.3298 us |  0.65 |
+ *  |        |                      |            |           |           |       |
+ *  | Array  | posi(...)g4g8 [979]  |  50.230 us | 0.3931 us | 0.3677 us |  1.00 |
+ *  | Span   | posi(...)g4g8 [979]  |  33.977 us | 0.2039 us | 0.1702 us |  0.68 |
  *
  *
  *  BenchmarkDotNet v0.13.12, Windows 10 (10.0.20348.2159) (Hyper-V)
@@ -32,44 +32,44 @@
  *
  *  | Method | positionCommand      | Mean       | Error     | StdDev    | Ratio | RatioSD |
  *  |------- |--------------------- |-----------:|----------:|----------:|------:|--------:|
- *  | Array  | position startpos    |   1.579 us | 0.0328 us | 0.0962 us |  1.00 |    0.00 |
- *  | Span   | position startpos    |   1.667 us | 0.0330 us | 0.0696 us |  1.04 |    0.06 |
+ *  | Array  | position startpos    |   1.453 us | 0.0283 us | 0.0441 us |  1.00 |    0.00 |
+ *  | Span   | position startpos    |   1.387 us | 0.0202 us | 0.0189 us |  0.96 |    0.02 |
  *  |        |                      |            |           |           |       |         |
- *  | Array  | posi(...)b7b6 [193]  |  12.017 us | 0.2292 us | 0.2548 us |  1.00 |    0.00 |
- *  | Span   | posi(...)b7b6 [193]  |   9.297 us | 0.1096 us | 0.1025 us |  0.78 |    0.02 |
+ *  | Array  | posi(...)b7b6 [193]  |  11.410 us | 0.0500 us | 0.0468 us |  1.00 |    0.00 |
+ *  | Span   | posi(...)b7b6 [193]  |   9.423 us | 0.0429 us | 0.0401 us |  0.83 |    0.00 |
  *  |        |                      |            |           |           |       |         |
- *  | Array  | posi(...)f3g3 [353]  |  19.820 us | 0.1753 us | 0.1464 us |  1.00 |    0.00 |
- *  | Span   | posi(...)f3g3 [353]  |  14.153 us | 0.1537 us | 0.1284 us |  0.71 |    0.01 |
+ *  | Array  | posi(...)f3g3 [353]  |  18.247 us | 0.1635 us | 0.1530 us |  1.00 |    0.00 |
+ *  | Span   | posi(...)f3g3 [353]  |  14.975 us | 0.0424 us | 0.0396 us |  0.82 |    0.01 |
  *  |        |                      |            |           |           |       |         |
- *  | Array  | posi(...)h3f1 [2984] | 131.354 us | 1.2493 us | 1.1686 us |  1.00 |    0.00 |
- *  | Span   | posi(...)h3f1 [2984] |  76.583 us | 0.2956 us | 0.2765 us |  0.58 |    0.01 |
+ *  | Array  | posi(...)h3f1 [2984] | 127.327 us | 1.0539 us | 0.8228 us |  1.00 |    0.00 |
+ *  | Span   | posi(...)h3f1 [2984] |  79.683 us | 0.3485 us | 0.2910 us |  0.63 |    0.00 |
  *  |        |                      |            |           |           |       |         |
- *  | Array  | posi(...)g4g8 [979]  |  45.122 us | 0.5464 us | 0.5111 us |  1.00 |    0.00 |
- *  | Span   | posi(...)g4g8 [979]  |  29.862 us | 0.1963 us | 0.1837 us |  0.66 |    0.01 |
+ *  | Array  | posi(...)g4g8 [979]  |  43.613 us | 0.2034 us | 0.1902 us |  1.00 |    0.00 |
+ *  | Span   | posi(...)g4g8 [979]  |  31.224 us | 0.0788 us | 0.0737 us |  0.72 |    0.00 |
  *
  *
  *  BenchmarkDotNet v0.13.12, macOS Monterey 12.7.2 (21G1974) [Darwin 21.6.0]
- *  Intel Xeon CPU E5-1650 v2 3.50GHz (Max: 3.34GHz), 1 CPU, 3 logical and 3 physical cores
+ *  Intel Core i7-8700B CPU 3.20GHz (Max: 3.19GHz) (Coffee Lake), 1 CPU, 4 logical and 4 physical cores
  *  .NET SDK 8.0.100
- *    [Host]     : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX
- *    DefaultJob : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX
+ *    [Host]     : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
+ *    DefaultJob : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
  *
- *  | Method | positionCommand      | Mean       | Error     | StdDev    | Ratio | RatioSD |
- *  |------- |--------------------- |-----------:|----------:|----------:|------:|--------:|
- *  | Array  | position startpos    |   3.950 us | 0.1722 us | 0.4858 us |  1.00 |    0.00 |
- *  | Span   | position startpos    |   3.894 us | 0.1201 us | 0.3521 us |  1.00 |    0.17 |
- *  |        |                      |            |           |           |       |         |
- *  | Array  | posi(...)b7b6 [193]  |  23.443 us | 0.4611 us | 0.6465 us |  1.00 |    0.00 |
- *  | Span   | posi(...)b7b6 [193]  |  20.842 us | 0.4002 us | 0.3930 us |  0.90 |    0.03 |
- *  |        |                      |            |           |           |       |         |
- *  | Array  | posi(...)f3g3 [353]  |  37.742 us | 0.7509 us | 0.8346 us |  1.00 |    0.00 |
- *  | Span   | posi(...)f3g3 [353]  |  26.693 us | 0.5087 us | 0.4759 us |  0.71 |    0.02 |
- *  |        |                      |            |           |           |       |         |
- *  | Array  | posi(...)h3f1 [2984] | 230.965 us | 2.6163 us | 2.4473 us |  1.00 |    0.00 |
- *  | Span   | posi(...)h3f1 [2984] | 152.074 us | 3.0190 us | 2.6763 us |  0.66 |    0.01 |
- *  |        |                      |            |           |           |       |         |
- *  | Array  | posi(...)g4g8 [979]  |  87.359 us | 1.7323 us | 2.6969 us |  1.00 |    0.00 |
- *  | Span   | posi(...)g4g8 [979]  |  54.649 us | 0.4869 us | 0.4554 us |  0.61 |    0.02 |
+ *  | Method | positionCommand      | Mean       | Error     | StdDev    | Median     | Ratio | RatioSD |
+ *  |------- |--------------------- |-----------:|----------:|----------:|-----------:|------:|--------:|
+ *  | Array  | position startpos    |   3.046 us | 0.0605 us | 0.1461 us |   3.014 us |  1.00 |    0.00 |
+ *  | Span   | position startpos    |   2.435 us | 0.0504 us | 0.1415 us |   2.389 us |  0.81 |    0.07 |
+ *  |        |                      |            |           |           |            |       |         |
+ *  | Array  | posi(...)b7b6 [193]  |  20.178 us | 0.8471 us | 2.4977 us |  20.122 us |  1.00 |    0.00 |
+ *  | Span   | posi(...)b7b6 [193]  |  12.911 us | 0.2695 us | 0.7860 us |  12.717 us |  0.65 |    0.09 |
+ *  |        |                      |            |           |           |            |       |         |
+ *  | Array  | posi(...)f3g3 [353]  |  30.972 us | 0.6170 us | 0.9785 us |  30.953 us |  1.00 |    0.00 |
+ *  | Span   | posi(...)f3g3 [353]  |  19.636 us | 0.3911 us | 0.8907 us |  19.504 us |  0.65 |    0.04 |
+ *  |        |                      |            |           |           |            |       |         |
+ *  | Array  | posi(...)h3f1 [2984] | 199.897 us | 3.9347 us | 6.1258 us | 199.718 us |  1.00 |    0.00 |
+ *  | Span   | posi(...)h3f1 [2984] | 129.359 us | 2.5684 us | 7.3278 us | 130.342 us |  0.62 |    0.03 |
+ *  |        |                      |            |           |           |            |       |         |
+ *  | Array  | posi(...)g4g8 [979]  |  88.155 us | 1.7529 us | 3.3773 us |  87.987 us |  1.00 |    0.00 |
+ *  | Span   | posi(...)g4g8 [979]  |  49.409 us | 1.4983 us | 4.2988 us |  49.710 us |  0.56 |    0.06 |
  *
 */
 
