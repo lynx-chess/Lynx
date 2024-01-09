@@ -82,7 +82,7 @@ namespace Lynx.Benchmark;
 /// <summary>
 /// Extension of <see cref="ParseFENBenchmark_Benchmark"/>, but other (previous) stuff is tested there
 /// </summary>
-public class TryParseFromUCIString_Benchmark
+public class TryParseFromUCIString_Benchmark : BaseBenchmark
 {
     private static readonly Move[] _movePool = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
 
