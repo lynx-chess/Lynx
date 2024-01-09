@@ -227,24 +227,29 @@ public sealed partial class Engine
                 break;
             }
             var move = _pVTable[i];
+            TryParseMove(position, i, move);
+
+            var newPosition = new Position(position, move);
+            if (!newPosition.WasProduceByAValidMove())
+            {
+                throw new AssertException($"Invalid position after move {move.UCIString()} from position {position.FEN()}");
+            }
+            position = newPosition;
+        }
+
+        static void TryParseMove(Position position, int i, int move)
+        {
+            Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
 
             if (!MoveExtensions.TryParseFromUCIString(
                move.UCIString(),
-               MoveGenerator.GenerateAllMoves(position, MovePool),
+               MoveGenerator.GenerateAllMoves(position, movePool),
                out _))
             {
                 var message = $"Unexpected PV move {i}: {move.UCIString()} from position {position.FEN()}";
                 _logger.Error(message);
                 throw new AssertException(message);
             }
-
-            var newPosition = new Position(position, move);
-
-            if (!newPosition.WasProduceByAValidMove())
-            {
-                throw new AssertException($"Invalid position after move {move.UCIString()} from position {position.FEN()}");
-            }
-            position = newPosition;
         }
     }
 

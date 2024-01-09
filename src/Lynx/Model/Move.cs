@@ -1,4 +1,5 @@
 ﻿using NLog;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -51,7 +52,6 @@ public static class MoveExtensions
     }
 
     /// <summary>
-    /// TODO: try to make span-compatible
     /// Returns the move from <paramref name="moveList"/> indicated by <paramref name="UCIString"/>
     /// </summary>
     /// <param name="UCIString"></param>
@@ -60,7 +60,8 @@ public static class MoveExtensions
     /// <exception cref="InvalidOperationException"></exception>
     /// <exception cref="IndexOutOfRangeException"></exception>
     /// <returns></returns>
-    public static bool TryParseFromUCIString(ReadOnlySpan<char> UCIString, IEnumerable<Move> moveList, [NotNullWhen(true)] out Move? move)
+    [Obsolete("Just intended for testing purposes")]
+    public static bool TryParseFromUCIString(ReadOnlySpan<char> UCIString, Move[] moveList, [NotNullWhen(true)] out Move? move)
     {
         Utils.Assert(UCIString.Length == 4 || UCIString.Length == 5);
 
@@ -108,6 +109,60 @@ public static class MoveExtensions
 
             return true;
         }
+    }
+
+    /// <summary>
+    /// Returns the move from <paramref name="moveList"/> indicated by <paramref name="UCIString"/>
+    /// </summary>
+    /// <param name="UCIString"></param>
+    /// <param name="moveList"></param>
+    /// <param name="move"></param>
+    /// <exception cref="InvalidOperationException"></exception>
+    /// <exception cref="IndexOutOfRangeException"></exception>
+    /// <returns></returns>
+    public static bool TryParseFromUCIString(ReadOnlySpan<char> UCIString, ReadOnlySpan<Move> moveList, [NotNullWhen(true)] out Move? move)
+    {
+        Utils.Assert(UCIString.Length == 4 || UCIString.Length == 5);
+
+        var sourceSquare = (UCIString[0] - 'a') + ((8 - (UCIString[1] - '0')) * 8);
+        var targetSquare = (UCIString[2] - 'a') + ((8 - (UCIString[3] - '0')) * 8);
+
+        for (int i = 0; i < moveList.Length; ++i)
+        {
+            Move candidateMove = moveList[i];
+
+            if (candidateMove.SourceSquare() == sourceSquare && candidateMove.TargetSquare() == targetSquare)
+            {
+                if (UCIString.Length == 4)
+                {
+                    Debug.Assert(candidateMove.PromotedPiece() == default);
+
+                    move = candidateMove;
+                    return true;
+                }
+                else
+                {
+                    var promotedPiece = (int)Enum.Parse<Piece>(UCIString[4].ToString());
+                    var candidatePromotedPiece = candidateMove.PromotedPiece();
+
+                    if (candidatePromotedPiece == promotedPiece
+                        || candidatePromotedPiece == promotedPiece - 6)
+                    {
+                        move = candidateMove;
+                        return true;
+                    }
+
+                    Debug.Assert(moveList.Length >= 4, "There will be at least 4 moves that match sourceSquare and targetSquare when there is a promotion");
+                    Debug.Assert(moveList.ToArray().Count(m => m.PromotedPiece() != default) == 4 || moveList.ToArray().Count(m => m.PromotedPiece() != default) == 8, "There will be either 4 or 8 moves that are a promotion");
+                    Debug.Assert(moveList.ToArray().Count(m => m.SourceSquare() == sourceSquare && m.TargetSquare() == targetSquare && m.PromotedPiece() != default) == 4, "There will be 4 (and always 4) moves that match sourceSquare and targetSquare when there is a promotion");
+                }
+            }
+        }
+
+        _logger.Warn("Unable to link last move string {0} to a valid move in the current position. That move may have already been played", UCIString.ToString());
+        move = null;
+
+        return false;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

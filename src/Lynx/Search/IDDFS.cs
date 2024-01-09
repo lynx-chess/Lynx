@@ -1,5 +1,6 @@
 ﻿using Lynx.Model;
 using Lynx.UCI.Commands.Engine;
+using System.Buffers;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -194,26 +195,28 @@ public sealed partial class Engine
         bool onlyOneLegalMove = false;
         Move firstLegalMove = default;
 
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, moves))
+        using (var owner = MemoryPool<Move>.Shared.Rent(Constants.MaxNumberOfPossibleMovesInAPosition))
         {
-            var gameState = Game.CurrentPosition.MakeMove(move);
-            bool isPositionValid = Game.CurrentPosition.IsValid();
-            Game.CurrentPosition.UnmakeMove(move, gameState);
-
-            if (isPositionValid)
+            foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, owner.Memory.Span))
             {
-                // We save the first legal move and check if there's at least another one
-                if (firstLegalMove == default)
+                var gameState = Game.CurrentPosition.MakeMove(move);
+                bool isPositionValid = Game.CurrentPosition.IsValid();
+                Game.CurrentPosition.UnmakeMove(move, gameState);
+
+                if (isPositionValid)
                 {
-                    firstLegalMove = move;
-                    onlyOneLegalMove = true;
-                }
-                // If there's a second legal move, we exit and let the search continue
-                else
-                {
-                    onlyOneLegalMove = false;
-                    break;
+                    // We save the first legal move and check if there's at least another one
+                    if (firstLegalMove == default)
+                    {
+                        firstLegalMove = move;
+                        onlyOneLegalMove = true;
+                    }
+                    // If there's a second legal move, we exit and let the search continue
+                    else
+                    {
+                        onlyOneLegalMove = false;
+                        break;
+                    }
                 }
             }
         }

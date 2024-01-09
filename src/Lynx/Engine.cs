@@ -2,6 +2,7 @@
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
+using System.Buffers;
 using System.Threading.Channels;
 
 namespace Lynx;
@@ -25,8 +26,6 @@ public sealed partial class Engine
     public RegisterCommand? Registration { get; set; }
 
     public Game Game { get; private set; }
-
-    private Move[] MovePool { get; } = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
 
     public bool IsSearching { get; private set; }
 
@@ -63,7 +62,8 @@ public sealed partial class Engine
 
     public void AdjustPosition(ReadOnlySpan<char> rawPositionCommand)
     {
-        Game = PositionCommand.ParseGame(rawPositionCommand, MovePool);
+        using var owner = MemoryPool<Move>.Shared.Rent(Constants.MaxNumberOfPossibleMovesInAPosition);
+        Game = PositionCommand.ParseGame(rawPositionCommand, owner.Memory.Span);
         _isNewGameComing = false;
     }
 

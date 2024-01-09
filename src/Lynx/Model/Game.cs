@@ -93,7 +93,31 @@ public sealed class Game
         _gameInitialPosition = new Position(CurrentPosition);
     }
 
+    [Obsolete("Just intended for testing purposes")]
     public Game(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan, Move[] movePool) : this(fen)
+    {
+        for (int i = 0; i < rangeSpan.Length; ++i)
+        {
+            if (rangeSpan[i].Start.Equals(rangeSpan[i].End))
+            {
+                break;
+            }
+            var moveString = rawMoves[rangeSpan[i]];
+            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, movePool);
+
+            if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
+            {
+                _logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen.ToString(), rawMoves.ToString(), moveString.ToString());
+                break;
+            }
+
+            MakeMove(parsedMove.Value);
+        }
+
+        _gameInitialPosition = new Position(CurrentPosition);
+    }
+
+    public Game(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan, Span<Move> movePool) : this(fen)
     {
         for (int i = 0; i < rangeSpan.Length; ++i)
         {

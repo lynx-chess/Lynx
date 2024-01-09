@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using System.Buffers;
 using System.Transactions;
 
 namespace Lynx;
@@ -157,8 +158,8 @@ public sealed partial class Engine
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves);
+        using var owner = MemoryPool<Move>.Shared.Rent(Constants.MaxNumberOfPossibleMovesInAPosition);
+        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, owner.Memory.Span);
 
         Span<int> scores = stackalloc int[pseudoLegalMoves.Length];
         if (_isFollowingPV)
@@ -431,8 +432,8 @@ public sealed partial class Engine
             alpha = staticEvaluation;
         }
 
-        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        var pseudoLegalMoves = MoveGenerator.GenerateAllCaptures(position, moves);
+        using var owner = MemoryPool<Move>.Shared.Rent(Constants.MaxNumberOfPossibleMovesInAPosition);
+        var pseudoLegalMoves = MoveGenerator.GenerateAllCaptures(position, owner.Memory.Span);
         if (pseudoLegalMoves.Length == 0)
         {
             // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358
