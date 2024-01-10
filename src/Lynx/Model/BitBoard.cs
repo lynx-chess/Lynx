@@ -167,26 +167,16 @@ public static class BitBoardExtensions
         return BitOperations.PopCount(board);
     }
 
-    /// <summary>
-    /// Extracts the bit that represents each square on a bitboard
-    /// </summary>
-    /// <param name="boardSquare"></param>
-    /// <returns></returns>
-    public static ulong SquareBit(int boardSquare)
-    {
-        return 1UL << boardSquare;
-    }
-
     public static bool Contains(this BitBoard board, int boardSquare)
     {
-        var bit = SquareBit(boardSquare);
+        var bit = Constants.SquareBits[boardSquare];
 
         return (board & bit) != default;
     }
 
     public static bool DoesNotContain(this BitBoard board, int boardSquare)
     {
-        var bit = SquareBit(boardSquare);
+        var bit = Constants.SquareBits[boardSquare];
 
         return (board & bit) == default;
     }

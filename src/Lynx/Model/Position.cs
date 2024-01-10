@@ -597,7 +597,7 @@ public class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int PieceAt(int square)
     {
-        var bit = BitBoardExtensions.SquareBit(square);
+        var bit = Constants.SquareBits[square];
 
         Side color;
 

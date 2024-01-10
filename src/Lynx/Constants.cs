@@ -217,7 +217,6 @@ public static class Constants
     public const string WhiteLongCastle = "e1c1";
     public const string BlackLongCastle = "e8c8";
 
-
     public static readonly int[] EnPassantCaptureSquares =
     [
         0, 0, 0, 0, 0, 0, 0, 0,     //  0-7
@@ -301,6 +300,14 @@ public static class Constants
     ];
 
     public const int AbsoluteMaxDepth = 255;
+
+    /// <summary>
+    /// Bits that represents each square on a bitboard
+    /// </summary>
+    public static readonly ulong[] SquareBits = Enum.GetValuesAsUnderlyingType<BoardSquare>()
+        .OfType<int>()
+        .Select(square => 1UL << square)
+        .ToArray();
 }
 
 #pragma warning restore IDE0055
