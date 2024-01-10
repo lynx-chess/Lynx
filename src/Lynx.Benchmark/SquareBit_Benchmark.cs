@@ -32,8 +32,8 @@ public class SquareBit_Benchmark : BaseBenchmark
     [GlobalSetup]
     public void Setup()
     {
-        _squares = Enumerable.Range((int)BoardSquare.a1, (int)BoardSquare.h8).
-            Select(_ => (BoardSquare)Random.Shared.Next((int)BoardSquare.a1, (int)BoardSquare.h8))
+        _squares = Enumerable.Range((int)BoardSquare.a8, (int)BoardSquare.h1).
+            Select(_ => (BoardSquare)Random.Shared.Next((int)BoardSquare.a8, (int)BoardSquare.h1))
             .ToArray();
     }
 
