@@ -59,7 +59,7 @@ public static class OnlineTablebaseProber
         TablebaseEvalMove? bestMove = null;
         int mate = 0;
 
-        IEnumerable<int>? allPossibleMoves = null;
+        int[]? allPossibleMoves = null;
 
         switch (tablebaseEval.Category)
         {
@@ -116,11 +116,11 @@ public static class OnlineTablebaseProber
                 {
 #pragma warning disable CS0618 // Type or member is obsolete
                     allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position);
-#pragma warning restore CS0618 // Type or member is obsolete
 
                     foreach (var move in bestMoveList)
                     {
                         if (!MoveExtensions.TryParseFromUCIString(move!.Uci, allPossibleMoves, out var moveCandidate))
+#pragma warning restore CS0618 // Type or member is obsolete
                         {
                             throw new AssertException($"{move!.Uci} should be parsable from position {fen}");
                         }
@@ -176,11 +176,11 @@ public static class OnlineTablebaseProber
                 {
 #pragma warning disable CS0618 // Type or member is obsolete
                     allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position);
-#pragma warning restore CS0618 // Type or member is obsolete
 
                     foreach (var move in bestMoveList)
                     {
                         if (!MoveExtensions.TryParseFromUCIString(move!.Uci, allPossibleMoves, out var moveCandidate))
+#pragma warning restore CS0618 // Type or member is obsolete
                         {
                             throw new AssertException($"{move!.Uci} should be parsable from position {fen}");
                         }
@@ -238,11 +238,11 @@ public static class OnlineTablebaseProber
                 {
 #pragma warning disable CS0618 // Type or member is obsolete
                     allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position);
-#pragma warning restore CS0618 // Type or member is obsolete
 
                     foreach (var move in bestMoveList)
                     {
                         if (!MoveExtensions.TryParseFromUCIString(move!.Uci, allPossibleMoves, out var moveCandidate))
+#pragma warning restore CS0618 // Type or member is obsolete
                         {
                             throw new AssertException($"{move!.Uci} should be parsable from position {fen}");
                         }
@@ -297,11 +297,11 @@ public static class OnlineTablebaseProber
                 {
 #pragma warning disable CS0618 // Type or member is obsolete
                     allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position);
-#pragma warning restore CS0618 // Type or member is obsolete
 
                     foreach (var move in bestMoveList)
                     {
                         if (!MoveExtensions.TryParseFromUCIString(move!.Uci, allPossibleMoves, out var moveCandidate))
+#pragma warning restore CS0618 // Type or member is obsolete
                         {
                             throw new AssertException($"{move!.Uci} should be parsable from position {fen}");
                         }
