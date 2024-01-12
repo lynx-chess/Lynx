@@ -3,17 +3,17 @@ public readonly struct GameState
 {
     public readonly long ZobristKey;
 
-    public readonly byte Castle;
-
     public readonly int CapturedPiece;
 
     public readonly BoardSquare EnPassant;
 
-    public GameState(long zobristKey, int capturedPiece, byte castle, BoardSquare enpassant)
+    public readonly byte Castle;
+
+    public GameState(long zobristKey, int capturedPiece, BoardSquare enpassant, byte castle)
     {
-        CapturedPiece = capturedPiece;
-        Castle = castle;
-        EnPassant = enpassant;
         ZobristKey = zobristKey;
+        CapturedPiece = capturedPiece;
+        EnPassant = enpassant;
+        Castle = castle;
     }
 }
