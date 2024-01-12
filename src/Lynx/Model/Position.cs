@@ -222,7 +222,7 @@ public class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public GameState MakeMove(Move move)
     {
-        sbyte capturedPiece = -1;
+        int capturedPiece = -1;
         byte castleCopy = Castle;
         BoardSquare enpassantCopy = EnPassant;
         long uniqueIdentifierCopy = UniqueIdentifier;
@@ -268,7 +268,7 @@ public class Position
                 PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
                 OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
                 UniqueIdentifier ^= ZobristTable.PieceHash(capturedPawnSquare, oppositePawnIndex);
-                capturedPiece = (sbyte)oppositePawnIndex;
+                capturedPiece = oppositePawnIndex;
             }
             else
             {
@@ -279,7 +279,7 @@ public class Position
                     {
                         PieceBitBoards[pieceIndex].PopBit(targetSquare);
                         UniqueIdentifier ^= ZobristTable.PieceHash(targetSquare, pieceIndex);
-                        capturedPiece = (sbyte)pieceIndex;
+                        capturedPiece = pieceIndex;
                         break;
                     }
                 }
@@ -338,7 +338,7 @@ public class Position
 
         UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
 
-        return new GameState(uniqueIdentifierCopy, capturedPiece, castleCopy, enpassantCopy);
+        return new GameState(uniqueIdentifierCopy, capturedPiece, enpassantCopy, castleCopy);
         //var clone = new Position(this);
         //clone.UnmakeMove(move, gameState);
         //if (uniqueIdentifierCopy != clone.UniqueIdentifier)
@@ -436,7 +436,7 @@ public class Position
             ZobristTable.SideHash()
             ^ ZobristTable.EnPassantHash((int)oldEnPassant);
 
-        return new GameState(oldUniqueIdentifier, -1, byte.MaxValue, oldEnPassant);
+        return new GameState(oldUniqueIdentifier, -1, oldEnPassant, byte.MaxValue);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
