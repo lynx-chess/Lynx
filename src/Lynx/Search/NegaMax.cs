@@ -322,15 +322,15 @@ public sealed partial class Engine
                 PrintMessage($"Pruning: {move} is enough");
 
                 // 🔍 Killer moves
-                if (!move.IsCapture() && move.PromotedPiece() == default && move != _killerMoves[0, ply])
+                if (!move.IsCapture() && move.PromotedPiece() == default && move != _killerMoves[0][ply])
                 {
-                    if (move != _killerMoves[1, ply])
+                    if (move != _killerMoves[1][ply])
                     {
-                        _killerMoves[2, ply] = _killerMoves[1, ply];
+                        _killerMoves[2][ply] = _killerMoves[1][ply];
                     }
 
-                    _killerMoves[1, ply] = _killerMoves[0, ply];
-                    _killerMoves[0, ply] = move;
+                    _killerMoves[1][ply] = _killerMoves[0][ply];
+                    _killerMoves[0][ply] = move;
                 }
 
                 _tt.RecordHash(_ttMask, position, depth, ply, beta, NodeType.Beta, bestMove);
@@ -349,8 +349,8 @@ public sealed partial class Engine
                     var piece = move.Piece();
                     var targetSquare = move.TargetSquare();
 
-                    _historyMoves[piece, targetSquare] = ScoreHistoryMove(
-                        _historyMoves[piece, targetSquare],
+                    _historyMoves[piece][targetSquare] = ScoreHistoryMove(
+                        _historyMoves[piece][targetSquare],
                         EvaluationConstants.HistoryBonus[depth]);
                 }
 
