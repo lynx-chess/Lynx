@@ -5,15 +5,12 @@ public readonly struct GameState
 
     public readonly byte Castle;
 
-    public readonly sbyte CapturedPiece;
-
     public readonly BoardSquare EnPassant;
 
-    public GameState(long zobristKey, sbyte capturedPiece, byte castle, BoardSquare enpassant)
+    public GameState(long zobristKey, byte castle, BoardSquare enpassant)
     {
-        CapturedPiece = capturedPiece;
+        ZobristKey = zobristKey;
         Castle = castle;
         EnPassant = enpassant;
-        ZobristKey = zobristKey;
     }
 }

@@ -99,28 +99,12 @@ public sealed partial class Engine
 
         if (isCapture)
         {
-            var sourcePiece = move.Piece();
-            int targetPiece = (int)Piece.P;    // Important to initialize to P or p, due to en-passant captures
-
-            var targetSquare = move.TargetSquare();
-            var offset = Utils.PieceOffset(Game.CurrentPosition.Side);
-            var oppositePawnIndex = (int)Piece.p - offset;
-
-            var limit = (int)Piece.k - offset;
-            for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
-            {
-                if (Game.CurrentPosition.PieceBitBoards[pieceIndex].GetBit(targetSquare))
-                {
-                    targetPiece = pieceIndex;
-                    break;
-                }
-            }
 
             var baseCaptureScore = (isPromotion || move.IsEnPassant() || SEE.IsGoodCapture(Game.CurrentPosition, move))
                 ? EvaluationConstants.GoodCaptureMoveBaseScoreValue
                 : EvaluationConstants.BadCaptureMoveBaseScoreValue;
 
-            return baseCaptureScore + EvaluationConstants.MostValueableVictimLeastValuableAttacker[sourcePiece, targetPiece];
+            return baseCaptureScore + EvaluationConstants.MostValueableVictimLeastValuableAttacker[move.Piece(), move.CapturedPiece()];
         }
 
         if (isPromotion)

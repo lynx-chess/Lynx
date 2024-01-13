@@ -43,13 +43,50 @@ public static class MoveExtensions
     public static Move Encode(
         int sourceSquare, int targetSquare, int piece, int promotedPiece = default,
         int isCapture = default, int isDoublePawnPush = default, int isEnPassant = default,
+        int isShortCastle = default, int isLongCastle = default, int capturedPiece = (int)Model.Piece.None)
+    {
+#if DEBUG
+        Debug.Assert(isCapture == default || capturedPiece != (int)Model.Piece.None);
+#endif
+
+        return promotedPiece
+            | (sourceSquare << 4)
+            | (targetSquare << 10)
+            | (piece << 16)
+            | (capturedPiece << 20)
+            | (isCapture << 24)
+            | (isDoublePawnPush << 25)
+            | (isEnPassant << 26)
+            | (isShortCastle << 27)
+            | (isLongCastle << 28);
+    }
+
+    /// <summary>
+    /// 'Encode' constractor
+    /// </summary>
+    /// <param name="noCaptureProvided">To indicate that there is capture but the captured piece isn't encoded</param>
+    /// <param name="sourceSquare"></param>
+    /// <param name="targetSquare"></param>
+    /// <param name="piece"></param>
+    /// <param name="promotedPiece"></param>
+    /// <param name="isCapture"></param>
+    /// <param name="isDoublePawnPush"></param>
+    /// <param name="isEnPassant"></param>
+    /// <param name="isShortCastle"></param>
+    /// <param name="isLongCastle"></param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Move Encode(
+#pragma warning disable RCS1163, IDE0060 // Unused parameter
+        bool noCaptureProvided,
+#pragma warning restore IDE0060, RCS1163 // Remove unused parameter
+        int sourceSquare, int targetSquare, int piece, int promotedPiece = default,
+        int isCapture = default, int isDoublePawnPush = default, int isEnPassant = default,
         int isShortCastle = default, int isLongCastle = default)
     {
         return promotedPiece
             | (sourceSquare << 4)
             | (targetSquare << 10)
             | (piece << 16)
-            // | (capturedPiece << 20)
             | (isCapture << 24)
             | (isDoublePawnPush << 25)
             | (isEnPassant << 26)

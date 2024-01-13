@@ -19,7 +19,7 @@ public class MoveToEPDStringTest
         int isCapture = default, int isDoublePawnPush = default, int isEnPassant = default,
         int isShortCastle = default, int isLongCastle = default)
     {
-        var move = MoveExtensions.Encode(sourceSquare, targetSquare, piece, promotedPiece, isCapture, isDoublePawnPush, isEnPassant, isShortCastle, isLongCastle);
+        var move = MoveExtensions.Encode(sourceSquare, targetSquare, piece, promotedPiece, isCapture, isDoublePawnPush, isEnPassant, isShortCastle, isLongCastle, capturedPiece: isCapture != default ? 1 : (int)Piece.None);
 
         Assert.AreEqual(expectedString, move.ToEPDString());
     }
