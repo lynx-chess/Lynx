@@ -322,7 +322,7 @@ public sealed partial class Engine
 
                 if (!move.IsCapture())
                 {
-                    // 🔍 History moves
+                    // 🔍 Quiet history moves
                     // Doing this only in beta cutoffs (instead of when eval > alpha) was suggested by Sirius author
                     var piece = move.Piece();
                     var targetSquare = move.TargetSquare();
@@ -341,6 +341,22 @@ public sealed partial class Engine
 
                         _killerMoves[1][ply] = _killerMoves[0][ply];
                         _killerMoves[0][ply] = move;
+                    }
+                }
+
+                // 🔍 History penalty/malus
+                // When a move fails high, penalize previous visited ones
+                for (int i = 0; i < moveIndex; ++i)
+                {
+                    var visitedMove = pseudoLegalMoves[moveIndex];
+                    // if (!visitedMove.IsCapture())                           // TODO: Penalize only quiets?
+                    {
+                        var visitedMovePiece = visitedMove.Piece();
+                        var visitedMoveTargetSquare = visitedMove.TargetSquare();
+
+                        _historyMoves[visitedMovePiece][visitedMoveTargetSquare] = ScoreHistoryMove(
+                            _historyMoves[visitedMovePiece][visitedMoveTargetSquare],
+                            -EvaluationConstants.HistoryBonus[depth]);
                     }
                 }
 
