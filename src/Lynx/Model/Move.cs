@@ -2,23 +2,24 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using System.Runtime.ExceptionServices;
 using System.Text;
 
 namespace Lynx.Model;
 
 /// <summary>
 ///     Binary move bits                  Hexadecimal
-/// 0000 0000 0000 0000 0000 0000 1111      0xF         Promoted piece (~11 bits)
-/// 0000 0000 0000 0000 0011 1111 0000      0x3F0       Source square (63 bits)
-/// 0000 0000 0000 1111 1100 0000 0000      0xFC00      Target Square (63 bits)
-/// 0000 0000 1111 0000 0000 0000 0000      0xF0000     Piece (11 bits)
-/// 0000 0001 0000 0000 0000 0000 0000      0x10_0000   Capture flag
-/// 0000 0010 0000 0000 0000 0000 0000      0x20_0000   Double pawn push flag
-/// 0000 0100 0000 0000 0000 0000 0000      0x40_0000   Enpassant flag
-/// 0000 1000 0000 0000 0000 0000 0000      0x80_0000   Short castling flag
-/// 0001 0000 0000 0000 0000 0000 0000      0x100_0000  Long castling flag
-/// Total: 24 bits -> fits an int
+/// 0000 0000 0000 0000 0000 0000 0000 1111     0xF             Promoted piece (~11 bits)
+/// 0000 0000 0000 0000 0000 0011 1111 0000     0x3F0           Source square (63 bits)
+/// 0000 0000 0000 0000 1111 1100 0000 0000     0xFC00          Target Square (63 bits)
+/// --------------------------------------------------------------------------------------------
+/// 0000 0000 0000 1111 0000 0000 0000 0000     0xF_0000        Piece (11 bits)
+/// 0000 0000 1111 0000 0000 0000 0000 0000     0xF0_0000       Captured piece (11 bits)
+/// 0000 0001 0000 0000 0000 0000 0000 0000     0x100_0000      Capture flag
+/// 0000 0010 0000 0000 0000 0000 0000 0000     0x200_0000      Double pawn push flag
+/// 0000 0100 0000 0000 0000 0000 0000 0000     0x400_0000      Enpassant flag
+/// 0000 1000 0000 0000 0000 0000 0000 0000     0x800_0000      Short castling flag
+/// 0001 0000 0000 0000 0000 0000 0000 0000     0x1000_0000     Long castling flag
+/// Total: 29 bits -> fits an int
 /// By casting it to ShortMove, a unique int16 (short) move is achieved, since
 /// source and target square and promoted piece can only represent a move in a given position
 /// </summary>
@@ -42,15 +43,59 @@ public static class MoveExtensions
     public static Move Encode(
         int sourceSquare, int targetSquare, int piece, int promotedPiece = default,
         int isCapture = default, int isDoublePawnPush = default, int isEnPassant = default,
+        int isShortCastle = default, int isLongCastle = default, int capturedPiece = (int)Model.Piece.None)
+    {
+#if DEBUG
+        Debug.Assert(isCapture == default || capturedPiece != (int)Model.Piece.None);
+#endif
+
+        return promotedPiece
+            | (sourceSquare << 4)
+            | (targetSquare << 10)
+            | (piece << 16)
+            | (capturedPiece << 20)
+            | (isCapture << 24)
+            | (isDoublePawnPush << 25)
+            | (isEnPassant << 26)
+            | (isShortCastle << 27)
+            | (isLongCastle << 28);
+    }
+
+    /// <summary>
+    /// 'Encode' constractor
+    /// </summary>
+    /// <param name="noCaptureProvided">To indicate that there is capture but the captured piece isn't encoded</param>
+    /// <param name="sourceSquare"></param>
+    /// <param name="targetSquare"></param>
+    /// <param name="piece"></param>
+    /// <param name="promotedPiece"></param>
+    /// <param name="isCapture"></param>
+    /// <param name="isDoublePawnPush"></param>
+    /// <param name="isEnPassant"></param>
+    /// <param name="isShortCastle"></param>
+    /// <param name="isLongCastle"></param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Move Encode(
+#pragma warning disable RCS1163, IDE0060 // Unused parameter
+        bool noCaptureProvided,
+#pragma warning restore IDE0060, RCS1163 // Remove unused parameter
+        int sourceSquare, int targetSquare, int piece, int promotedPiece = default,
+        int isCapture = default, int isDoublePawnPush = default, int isEnPassant = default,
         int isShortCastle = default, int isLongCastle = default)
     {
-        return promotedPiece | (sourceSquare << 4) | (targetSquare << 10) | (piece << 16)
-            | (isCapture << 20)
-            | (isDoublePawnPush << 21)
-            | (isEnPassant << 22)
-            | (isShortCastle << 23)
-            | (isLongCastle << 24);
+        return promotedPiece
+            | (sourceSquare << 4)
+            | (targetSquare << 10)
+            | (piece << 16)
+            | (isCapture << 24)
+            | (isDoublePawnPush << 25)
+            | (isEnPassant << 26)
+            | (isShortCastle << 27)
+            | (isLongCastle << 28);
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Move EncodeCapturedPiece(int move, int capturedPiece) => move | (capturedPiece << 20);
 
     /// <summary>
     /// Returns the move from <paramref name="moveList"/> indicated by <paramref name="UCIString"/>
@@ -176,25 +221,28 @@ public static class MoveExtensions
     public static int TargetSquare(this Move move) => (move & 0xFC00) >> 10;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int Piece(this Move move) => (move & 0xF0000) >> 16;
+    public static int Piece(this Move move) => (move & 0xF_0000) >> 16;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsCapture(this Move move) => (move & 0x10_0000) >> 20 != default;
+    public static int CapturedPiece(this Move move) => (move & 0xF0_0000) >> 20;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsDoublePawnPush(this Move move) => (move & 0x20_0000) >> 21 != default;
+    public static bool IsCapture(this Move move) => (move & 0x100_0000) >> 24 != default;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsEnPassant(this Move move) => (move & 0x40_0000) >> 22 != default;
+    public static bool IsDoublePawnPush(this Move move) => (move & 0x200_0000) >> 25 != default;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsShortCastle(this Move move) => (move & 0x80_0000) >> 23 != default;
+    public static bool IsEnPassant(this Move move) => (move & 0x400_0000) >> 26 != default;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsLongCastle(this Move move) => (move & 0x100_0000) >> 24 != default;
+    public static bool IsShortCastle(this Move move) => (move & 0x800_0000) >> 27 != default;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsCastle(this Move move) => (move & 0x180_0000) >> 23 != default;
+    public static bool IsLongCastle(this Move move) => (move & 0x1000_0000) >> 28 != default;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsCastle(this Move move) => (move & 0x1800_0000) >> 27 != default;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string ToMoveString(this Move move)
