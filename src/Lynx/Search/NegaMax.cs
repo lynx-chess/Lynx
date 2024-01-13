@@ -323,6 +323,7 @@ public sealed partial class Engine
                 if (!move.IsCapture())
                 {
                     // 🔍 History moves
+                    // Doing this only in beta cutoffs (instead of when eval > alpha) was suggested by Sirius author
                     var piece = move.Piece();
                     var targetSquare = move.TargetSquare();
 
