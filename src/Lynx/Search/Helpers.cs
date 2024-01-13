@@ -131,23 +131,23 @@ public sealed partial class Engine
         if (isNotQSearch)
         {
             // 1st killer move
-            if (_killerMoves[0, depth] == move)
+            if (_killerMoves[0][depth] == move)
             {
                 return EvaluationConstants.FirstKillerMoveValue;
             }
 
-            if (_killerMoves[1, depth] == move)
+            if (_killerMoves[1][depth] == move)
             {
                 return EvaluationConstants.SecondKillerMoveValue;
             }
 
-            if (_killerMoves[2, depth] == move)
+            if (_killerMoves[2][depth] == move)
             {
                 return EvaluationConstants.ThirdKillerMoveValue;
             }
 
             // History move or 0 if not found
-            return EvaluationConstants.BaseMoveScore + _historyMoves[move.Piece(), move.TargetSquare()];
+            return EvaluationConstants.BaseMoveScore + _historyMoves[move.Piece()][move.TargetSquare()];
         }
 
         return EvaluationConstants.BaseMoveScore;
@@ -365,11 +365,17 @@ $" {484,-3}                                                         {_pVTable[48
     {
         int max = int.MinValue;
 
-        foreach (var item in _historyMoves)
+        for (int i = 0; i < 12; ++i)
         {
-            if (item > max)
+            var tmp = _historyMoves[i];
+            for (int j = 0; j < 64; ++i)
             {
-                max = item;
+                var item = tmp[j];
+
+                if (item > max)
+                {
+                    max = item;
+                }
             }
         }
 

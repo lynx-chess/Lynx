@@ -42,6 +42,12 @@ public sealed partial class Engine
         _absoluteSearchCancellationTokenSource = new();
         _engineWriter = engineWriter;
 
+        _historyMoves = new int[12][];
+        for (int i = 0; i < _historyMoves.Length; ++i)
+        {
+            _historyMoves[i] = new int[64];
+        }
+
         InitializeTT();
     }
 
