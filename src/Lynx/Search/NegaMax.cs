@@ -332,17 +332,15 @@ public sealed partial class Engine
                         EvaluationConstants.HistoryBonus[depth]);
 
                     // 🔍 Killer moves
-                    var firstKillerMove = _killerMoves[0];
-                    if (move.PromotedPiece() == default && move != firstKillerMove[ply])
+                    if (move.PromotedPiece() == default && move != _killerMoves[0][ply])
                     {
-                        var secondKillerMove = _killerMoves[1];
-                        if (move != secondKillerMove[ply])
+                        if (move != _killerMoves[1][ply])
                         {
-                            _killerMoves[2][ply] = secondKillerMove[ply];
+                            _killerMoves[2][ply] = _killerMoves[1][ply];
                         }
 
-                        secondKillerMove[ply] = firstKillerMove[ply];
-                        firstKillerMove[ply] = move;
+                        _killerMoves[1][ply] = _killerMoves[0][ply];
+                        _killerMoves[0][ply] = move;
                     }
                 }
 
