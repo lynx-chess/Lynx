@@ -85,27 +85,27 @@ public class MoveGeneratorArrayVsDictionary_Benchmark : BaseBenchmark
         return sum;
     }
 
-    private static readonly Func<int, BitBoard, ulong>[] _pieceAttacksArray = new Func<int, BitBoard, ulong>[]
-    {
-            (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White, origin],
-            (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
-            (int origin, BitBoard occupancy) => Attacks.BishopAttacks(origin, occupancy),
-            (int origin, BitBoard occupancy) => Attacks.RookAttacks(origin, occupancy),
-            (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy),
-            (int origin, BitBoard _) => Attacks.KingAttacks[origin],
+    private static readonly Func<int, BitBoard, ulong>[] _pieceAttacksArray =
+    [
+        (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White][origin],
+        (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
+        Attacks.BishopAttacks,
+        Attacks.RookAttacks,
+        Attacks.QueenAttacks,
+        (int origin, BitBoard _) => Attacks.KingAttacks[origin],
 
-            (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.Black, origin],
-            (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
-            (int origin, BitBoard occupancy) => Attacks.BishopAttacks(origin, occupancy),
-            (int origin, BitBoard occupancy) => Attacks.RookAttacks(origin, occupancy),
-            (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy),
-            (int origin, BitBoard _) => Attacks.KingAttacks[origin],
-    };
+        (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.Black][origin],
+        (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
+        Attacks.BishopAttacks,
+        Attacks.RookAttacks,
+        Attacks.QueenAttacks,
+        (int origin, BitBoard _) => Attacks.KingAttacks[origin],
+    ];
 
     private static readonly IReadOnlyDictionary<int, Func<int, BitBoard, ulong>> _pieceAttacksDictionary = new Dictionary<int, Func<int, BitBoard, ulong>>
     {
-        [(int)Piece.P] = (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White, origin],
-        [(int)Piece.p] = (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.Black, origin],
+        [(int)Piece.P] = (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White][origin],
+        [(int)Piece.p] = (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.Black][origin],
 
         [(int)Piece.K] = (int origin, BitBoard _) => Attacks.KingAttacks[origin],
         [(int)Piece.k] = (int origin, BitBoard _) => Attacks.KingAttacks[origin],
@@ -113,13 +113,13 @@ public class MoveGeneratorArrayVsDictionary_Benchmark : BaseBenchmark
         [(int)Piece.N] = (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
         [(int)Piece.n] = (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
 
-        [(int)Piece.B] = (int origin, BitBoard occupancy) => Attacks.BishopAttacks(origin, occupancy),
-        [(int)Piece.b] = (int origin, BitBoard occupancy) => Attacks.BishopAttacks(origin, occupancy),
+        [(int)Piece.B] = Attacks.BishopAttacks,
+        [(int)Piece.b] = Attacks.BishopAttacks,
 
-        [(int)Piece.R] = (int origin, BitBoard occupancy) => Attacks.RookAttacks(origin, occupancy),
-        [(int)Piece.r] = (int origin, BitBoard occupancy) => Attacks.RookAttacks(origin, occupancy),
+        [(int)Piece.R] = Attacks.RookAttacks,
+        [(int)Piece.r] = Attacks.RookAttacks,
 
-        [(int)Piece.Q] = (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy),
-        [(int)Piece.q] = (int origin, BitBoard occupancy) => Attacks.QueenAttacks(origin, occupancy),
+        [(int)Piece.Q] = Attacks.QueenAttacks,
+        [(int)Piece.q] = Attacks.QueenAttacks,
     };
 }

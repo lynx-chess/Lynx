@@ -248,7 +248,10 @@ public static readonly int[] EndGameKingTable =
     /// </summary>
     public static readonly int[][] EndGameTable = new int[12][];
 
-    public static readonly int[,] LMRReductions = new int[Constants.AbsoluteMaxDepth, Constants.MaxNumberOfPossibleMovesInAPosition];
+    /// <summary>
+    /// <see cref="Constants.AbsoluteMaxDepth"/> x <see cref="Constants.MaxNumberOfPossibleMovesInAPosition"/>
+    /// </summary>
+    public static readonly int[][] LMRReductions = new int[Constants.AbsoluteMaxDepth][];
 
     public static readonly int[] HistoryBonus = new int[Constants.AbsoluteMaxDepth];
 
@@ -267,9 +270,11 @@ public static readonly int[] EndGameKingTable =
 
         for (int searchDepth = 1; searchDepth < Constants.AbsoluteMaxDepth; ++searchDepth)    // Depth > 0 or we'd be in QSearch
         {
+            LMRReductions[searchDepth] = new int[Constants.MaxNumberOfPossibleMovesInAPosition];
+
             for (int movesSearchedCount = 1; movesSearchedCount < Constants.MaxNumberOfPossibleMovesInAPosition; ++movesSearchedCount) // movesSearchedCount > 0 or we wouldn't be applying LMR
             {
-                LMRReductions[searchDepth, movesSearchedCount] = Convert.ToInt32(Math.Round(
+                LMRReductions[searchDepth][movesSearchedCount] = Convert.ToInt32(Math.Round(
                     Configuration.EngineSettings.LMR_Base + (Math.Log(movesSearchedCount) * Math.Log(searchDepth) / Configuration.EngineSettings.LMR_Divisor)));
             }
 
@@ -291,21 +296,21 @@ public static readonly int[] EndGameKingTable =
     ///      Queen              101    201    301    401    501    601
     ///       King              100    200    300    400    500    600
     /// </summary>
-    public static readonly int[,] MostValueableVictimLeastValuableAttacker =
-    {
-        { 105, 205, 305, 405, 505, 605, 105, 205, 305, 405, 505, 605 },
-        { 104, 204, 304, 404, 504, 604, 104, 204, 304, 404, 504, 604 },
-        { 103, 203, 303, 403, 503, 603, 103, 203, 303, 403, 503, 603 },
-        { 102, 202, 302, 402, 502, 602, 102, 202, 302, 402, 502, 602 },
-        { 101, 201, 301, 401, 501, 601, 101, 201, 301, 401, 501, 601 },
-        { 100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600 },
-        { 105, 205, 305, 405, 505, 605, 105, 205, 305, 405, 505, 605 },
-        { 104, 204, 304, 404, 504, 604, 104, 204, 304, 404, 504, 604 },
-        { 103, 203, 303, 403, 503, 603, 103, 203, 303, 403, 503, 603 },
-        { 102, 202, 302, 402, 502, 602, 102, 202, 302, 402, 502, 602 },
-        { 101, 201, 301, 401, 501, 601, 101, 201, 301, 401, 501, 601 },
-        { 100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600 }
-    };
+    public static readonly int[][] MostValueableVictimLeastValuableAttacker =
+    [
+        [105, 205, 305, 405, 505, 605, 105, 205, 305, 405, 505, 605],
+        [104, 204, 304, 404, 504, 604, 104, 204, 304, 404, 504, 604],
+        [103, 203, 303, 403, 503, 603, 103, 203, 303, 403, 503, 603],
+        [102, 202, 302, 402, 502, 602, 102, 202, 302, 402, 502, 602],
+        [101, 201, 301, 401, 501, 601, 101, 201, 301, 401, 501, 601],
+        [100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600],
+        [105, 205, 305, 405, 505, 605, 105, 205, 305, 405, 505, 605],
+        [104, 204, 304, 404, 504, 604, 104, 204, 304, 404, 504, 604],
+        [103, 203, 303, 403, 503, 603, 103, 203, 303, 403, 503, 603],
+        [102, 202, 302, 402, 502, 602, 102, 202, 302, 402, 502, 602],
+        [101, 201, 301, 401, 501, 601, 101, 201, 301, 401, 501, 601],
+        [100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600]
+    ];
 
     /// <summary>
     /// Base absolute checkmate evaluation value. Actual absolute evaluations are lower than this one by a number of <see cref="Position.DepthCheckmateFactor"/>

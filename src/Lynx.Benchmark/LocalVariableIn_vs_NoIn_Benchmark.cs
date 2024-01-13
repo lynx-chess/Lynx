@@ -90,7 +90,7 @@ public static class BenchmarkLegacyMoveExtensions
                 }
             }
 
-            return EvaluationConstants.BadCaptureMoveBaseScoreValue + EvaluationConstants.MostValueableVictimLeastValuableAttacker[sourcePiece, targetPiece];
+            return EvaluationConstants.BadCaptureMoveBaseScoreValue + EvaluationConstants.MostValueableVictimLeastValuableAttacker[sourcePiece][targetPiece];
         }
         else if (killerMoves is not null && plies is not null)
         {

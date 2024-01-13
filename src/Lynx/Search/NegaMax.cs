@@ -260,7 +260,7 @@ public sealed partial class Engine
                     && !isInCheck
                     && !move.IsCapture())
                 {
-                    reduction = EvaluationConstants.LMRReductions[depth, movesSearched];
+                    reduction = EvaluationConstants.LMRReductions[depth][movesSearched];
 
                     if (pvNode)
                     {

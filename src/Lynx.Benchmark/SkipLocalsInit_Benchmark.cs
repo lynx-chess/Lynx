@@ -33,7 +33,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
         (var _bishopOccupancyMasks, var _bishopAttacks) = SkipLocalsInit_AttackGenerator_Original.InitializeBishopMagicAttacks();
         (var _rookOccupancyMasks, var _rookAttacks) = SkipLocalsInit_AttackGenerator_Original.InitializeRookMagicAttacks();
 
-        return KingAttacks[0] ^ PawnAttacks[0, 0] ^ KnightAttacks[0] ^ _bishopOccupancyMasks[0]
+        return KingAttacks[0] ^ PawnAttacks[0][0] ^ KnightAttacks[0] ^ _bishopOccupancyMasks[0]
             ^ _rookOccupancyMasks[0] ^ _bishopAttacks[0, 0] ^ _rookAttacks[0, 0]
             ^ bishopOcuppancy[0] ^ rookOcuppancy[0];
     }
@@ -69,7 +69,7 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
         (var _bishopOccupancyMasks, var _bishopAttacks) = SkipLocalsInit_AttackGenerator_Other.InitializeBishopMagicAttacks();
         (var _rookOccupancyMasks, var _rookAttacks) = SkipLocalsInit_AttackGenerator_Other.InitializeRookMagicAttacks();
 
-        return KingAttacks[0] ^ PawnAttacks[0, 0] ^ KnightAttacks[0] ^ _bishopOccupancyMasks[0]
+        return KingAttacks[0] ^ PawnAttacks[0][0] ^ KnightAttacks[0] ^ _bishopOccupancyMasks[0]
             ^ _rookOccupancyMasks[0] ^ _bishopAttacks[0, 0] ^ _rookAttacks[0, 0]
             ^ bishopOcuppancy[0] ^ rookOcuppancy[0];
     }
@@ -79,14 +79,14 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
         /// <summary>
         /// BitBoard[isWhite, square]
         /// </summary>
-        public static BitBoard[,] InitializePawnAttacks()
+        public static BitBoard[][] InitializePawnAttacks()
         {
-            BitBoard[,] pawnAttacks = new BitBoard[2, 64];
+            BitBoard[][] pawnAttacks = [new BitBoard[64], new BitBoard[64]];
 
             for (int square = 0; square < 64; ++square)
             {
-                pawnAttacks[0, square] = MaskPawnAttacks(square, isWhite: false);
-                pawnAttacks[1, square] = MaskPawnAttacks(square, isWhite: true);
+                pawnAttacks[0][square] = MaskPawnAttacks(square, isWhite: false);
+                pawnAttacks[1][square] = MaskPawnAttacks(square, isWhite: true);
             }
 
             return pawnAttacks;
@@ -1582,14 +1582,14 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
         /// <summary>
         /// BitBoard[isWhite, square]
         /// </summary>
-        public static BitBoard[,] InitializePawnAttacks()
+        public static BitBoard[][] InitializePawnAttacks()
         {
-            BitBoard[,] pawnAttacks = new BitBoard[2, 64];
+            BitBoard[][] pawnAttacks = [new BitBoard[64], new BitBoard[64]];
 
             for (int square = 0; square < 64; ++square)
             {
-                pawnAttacks[0, square] = MaskPawnAttacks(square, isWhite: false);
-                pawnAttacks[1, square] = MaskPawnAttacks(square, isWhite: true);
+                pawnAttacks[0][square] = MaskPawnAttacks(square, isWhite: false);
+                pawnAttacks[1][square] = MaskPawnAttacks(square, isWhite: true);
             }
 
             return pawnAttacks;
