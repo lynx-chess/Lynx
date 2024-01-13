@@ -238,8 +238,15 @@ public static readonly int[] EndGameKingTable =
         EndGameKingTableBlack
     ];
 
-    public static readonly int[,] MiddleGameTable = new int[12, 64];
-    public static readonly int[,] EndGameTable = new int[12, 64];
+    /// <summary>
+    /// 12x64
+    /// </summary>
+    public static readonly int[][] MiddleGameTable = new int[12][];
+
+    /// <summary>
+    /// 12x64
+    /// </summary>
+    public static readonly int[][] EndGameTable = new int[12][];
 
     public static readonly int[,] LMRReductions = new int[Constants.AbsoluteMaxDepth, Constants.MaxNumberOfPossibleMovesInAPosition];
 
@@ -249,10 +256,12 @@ public static readonly int[] EndGameKingTable =
     {
         for (int piece = (int)Piece.P; piece <= (int)Piece.k; ++piece)
         {
+            MiddleGameTable[piece] = new int[64];
+            EndGameTable[piece] = new int[64];
             for (int sq = 0; sq < 64; ++sq)
             {
-                MiddleGameTable[piece, sq] = MiddleGamePieceValues[piece] + MiddleGamePositionalTables[piece][sq];
-                EndGameTable[piece, sq] = EndGamePieceValues[piece] + EndGamePositionalTables[piece][sq];
+                MiddleGameTable[piece][sq] = MiddleGamePieceValues[piece] + MiddleGamePositionalTables[piece][sq];
+                EndGameTable[piece][sq] = EndGamePieceValues[piece] + EndGamePositionalTables[piece][sq];
             }
         }
 
