@@ -349,7 +349,7 @@ public sealed partial class Engine
                 for (int i = 0; i < moveIndex; ++i)
                 {
                     var visitedMove = pseudoLegalMoves[moveIndex];
-                    // if (!visitedMove.IsCapture())                           // TODO: Penalize only quiets?
+                    if (!visitedMove.IsCapture())                           // TODO: Penalize only quiets?
                     {
                         var visitedMovePiece = visitedMove.Piece();
                         var visitedMoveTargetSquare = visitedMove.TargetSquare();
