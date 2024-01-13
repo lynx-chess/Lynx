@@ -10,15 +10,16 @@ public static class AttackGenerator
     /// </summary>
     public static BitBoard[][] InitializePawnAttacks()
     {
-        BitBoard[][] pawnAttacks = [new BitBoard[64], new BitBoard[64]];
+        var blackPawns = new BitBoard[64];
+        var whitePawns = new BitBoard[64];
 
         for (int square = 0; square < 64; ++square)
         {
-            pawnAttacks[0][square] = MaskPawnAttacks(square, isWhite: false);
-            pawnAttacks[1][square] = MaskPawnAttacks(square, isWhite: true);
+            blackPawns[square] = MaskPawnAttacks(square, isWhite: false);
+            whitePawns[square] = MaskPawnAttacks(square, isWhite: true);
         }
 
-        return pawnAttacks;
+        return [blackPawns, whitePawns];
     }
 
     public static BitBoard[] InitializeKnightAttacks()
@@ -80,7 +81,7 @@ public static class AttackGenerator
 
         for (int square = 0; square < 64; ++square)
         {
-            attacks[square] = new BitBoard[512];
+            var squareAttacks = new BitBoard[512];
 
             occupancyMasks[square] = MaskBishopOccupancy(square);
 
@@ -94,8 +95,10 @@ public static class AttackGenerator
 
                 var magicIndex = (occupancy * Constants.BishopMagicNumbers[square]) >> (64 - relevantBitsCount);
 
-                attacks[square][magicIndex] = GenerateBishopAttacksOnTheFly(square, occupancy);
+                squareAttacks[magicIndex] = GenerateBishopAttacksOnTheFly(square, occupancy);
             }
+
+            attacks[square] = squareAttacks;
         }
 
         return (occupancyMasks, attacks);
@@ -112,7 +115,7 @@ public static class AttackGenerator
 
         for (int square = 0; square < 64; ++square)
         {
-            attacks[square] = new BitBoard[4096];
+            var squareAttacks = new BitBoard[4096];
 
             occupancyMasks[square] = MaskRookOccupancy(square);
 
@@ -126,8 +129,10 @@ public static class AttackGenerator
 
                 var magicIndex = (occupancy * Constants.RookMagicNumbers[square]) >> (64 - relevantBitsCount);
 
-                attacks[square][magicIndex] = GenerateRookAttacksOnTheFly(square, occupancy);
+                squareAttacks[magicIndex] = GenerateRookAttacksOnTheFly(square, occupancy);
             }
+
+            attacks[square] = squareAttacks;
         }
 
         return (occupancyMasks, attacks);

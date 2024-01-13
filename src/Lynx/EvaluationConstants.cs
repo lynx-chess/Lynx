@@ -259,12 +259,15 @@ public static readonly int[] EndGameKingTable =
     {
         for (int piece = (int)Piece.P; piece <= (int)Piece.k; ++piece)
         {
+            var mgPositional = MiddleGamePositionalTables[piece];
+            var egPositional = EndGamePositionalTables[piece];
+
             MiddleGameTable[piece] = new int[64];
             EndGameTable[piece] = new int[64];
             for (int sq = 0; sq < 64; ++sq)
             {
-                MiddleGameTable[piece][sq] = MiddleGamePieceValues[piece] + MiddleGamePositionalTables[piece][sq];
-                EndGameTable[piece][sq] = EndGamePieceValues[piece] + EndGamePositionalTables[piece][sq];
+                MiddleGameTable[piece][sq] = MiddleGamePieceValues[piece] + mgPositional[sq];
+                EndGameTable[piece][sq] = EndGamePieceValues[piece] + egPositional[sq];
             }
         }
 

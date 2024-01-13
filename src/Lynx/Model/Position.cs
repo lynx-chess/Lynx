@@ -799,6 +799,9 @@ public class Position
 
         for (int pieceIndex = (int)Piece.P; pieceIndex < (int)Piece.K; ++pieceIndex)
         {
+            var mg = EvaluationConstants.MiddleGameTable[pieceIndex];
+            var eg = EvaluationConstants.EndGameTable[pieceIndex];
+
             // Bitboard copy that we 'empty'
             var bitboard = PieceBitBoards[pieceIndex];
 
@@ -807,8 +810,8 @@ public class Position
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
 
-                middleGameScore += EvaluationConstants.MiddleGameTable[pieceIndex][pieceSquareIndex];
-                endGameScore += EvaluationConstants.EndGameTable[pieceIndex][pieceSquareIndex];
+                middleGameScore += mg[pieceSquareIndex];
+                endGameScore += eg[pieceSquareIndex];
                 gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
 
                 ++pieceCount[pieceIndex];
@@ -822,6 +825,9 @@ public class Position
 
         for (int pieceIndex = (int)Piece.p; pieceIndex < (int)Piece.k; ++pieceIndex)
         {
+            var mg = EvaluationConstants.MiddleGameTable[pieceIndex];
+            var eg = EvaluationConstants.EndGameTable[pieceIndex];
+
             // Bitboard copy that we 'empty'
             var bitboard = PieceBitBoards[pieceIndex];
 
@@ -830,8 +836,8 @@ public class Position
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
 
-                middleGameScore += EvaluationConstants.MiddleGameTable[pieceIndex][pieceSquareIndex];
-                endGameScore += EvaluationConstants.EndGameTable[pieceIndex][pieceSquareIndex];
+                middleGameScore += mg[pieceSquareIndex];
+                endGameScore += eg[pieceSquareIndex];
                 gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
 
                 ++pieceCount[pieceIndex];
