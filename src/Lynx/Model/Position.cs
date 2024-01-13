@@ -700,8 +700,8 @@ public class Position
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
 
-                middleGameScore += EvaluationConstants.MiddleGameTable[pieceIndex, pieceSquareIndex];
-                endGameScore += EvaluationConstants.EndGameTable[pieceIndex, pieceSquareIndex];
+                middleGameScore += EvaluationConstants.MiddleGameTable[pieceIndex][pieceSquareIndex];
+                endGameScore += EvaluationConstants.EndGameTable[pieceIndex][pieceSquareIndex];
                 gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
 
                 ++pieceCount[pieceIndex];
@@ -723,8 +723,8 @@ public class Position
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
 
-                middleGameScore += EvaluationConstants.MiddleGameTable[pieceIndex, pieceSquareIndex];
-                endGameScore += EvaluationConstants.EndGameTable[pieceIndex, pieceSquareIndex];
+                middleGameScore += EvaluationConstants.MiddleGameTable[pieceIndex][pieceSquareIndex];
+                endGameScore += EvaluationConstants.EndGameTable[pieceIndex][pieceSquareIndex];
                 gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
 
                 ++pieceCount[pieceIndex];
@@ -739,14 +739,14 @@ public class Position
         var whiteKing = PieceBitBoards[(int)Piece.K].GetLS1BIndex();
         (int mgKingScore, int egKingScore) = KingAdditionalEvaluation(whiteKing, Side.White, pieceCount);
 
-        middleGameScore += EvaluationConstants.MiddleGameTable[(int)Piece.K, whiteKing] + mgKingScore;
-        endGameScore += EvaluationConstants.EndGameTable[(int)Piece.K, whiteKing] + egKingScore;
+        middleGameScore += EvaluationConstants.MiddleGameTable[(int)Piece.K][whiteKing] + mgKingScore;
+        endGameScore += EvaluationConstants.EndGameTable[(int)Piece.K][whiteKing] + egKingScore;
 
         var blackKing = PieceBitBoards[(int)Piece.k].GetLS1BIndex();
         (mgKingScore, egKingScore) = KingAdditionalEvaluation(blackKing, Side.Black, pieceCount);
 
-        middleGameScore += EvaluationConstants.MiddleGameTable[(int)Piece.k, blackKing] - mgKingScore;
-        endGameScore += EvaluationConstants.EndGameTable[(int)Piece.k, blackKing] - egKingScore;
+        middleGameScore += EvaluationConstants.MiddleGameTable[(int)Piece.k][blackKing] - mgKingScore;
+        endGameScore += EvaluationConstants.EndGameTable[(int)Piece.k][blackKing] - egKingScore;
 
         const int maxPhase = 24;
 
