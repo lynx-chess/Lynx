@@ -1,5 +1,4 @@
 ﻿using Lynx.Model;
-using System.Transactions;
 
 namespace Lynx;
 
@@ -321,16 +320,28 @@ public sealed partial class Engine
             {
                 PrintMessage($"Pruning: {move} is enough");
 
-                // 🔍 Killer moves
-                if (!move.IsCapture() && move.PromotedPiece() == default && move != _killerMoves[0][ply])
+                if (!move.IsCapture())
                 {
-                    if (move != _killerMoves[1][ply])
-                    {
-                        _killerMoves[2][ply] = _killerMoves[1][ply];
-                    }
+                    // 🔍 History moves
+                    // Doing this only in beta cutoffs (instead of when eval > alpha) was suggested by Sirius author
+                    var piece = move.Piece();
+                    var targetSquare = move.TargetSquare();
 
-                    _killerMoves[1][ply] = _killerMoves[0][ply];
-                    _killerMoves[0][ply] = move;
+                    _historyMoves[piece][targetSquare] = ScoreHistoryMove(
+                        _historyMoves[piece][targetSquare],
+                        EvaluationConstants.HistoryBonus[depth]);
+
+                    // 🔍 Killer moves
+                    if (move.PromotedPiece() == default && move != _killerMoves[0][ply])
+                    {
+                        if (move != _killerMoves[1][ply])
+                        {
+                            _killerMoves[2][ply] = _killerMoves[1][ply];
+                        }
+
+                        _killerMoves[1][ply] = _killerMoves[0][ply];
+                        _killerMoves[0][ply] = move;
+                    }
                 }
 
                 _tt.RecordHash(_ttMask, position, depth, ply, beta, NodeType.Beta, bestMove);
@@ -342,17 +353,6 @@ public sealed partial class Engine
             {
                 alpha = evaluation;
                 bestMove = move;
-
-                // 🔍 History moves
-                if (!move.IsCapture())
-                {
-                    var piece = move.Piece();
-                    var targetSquare = move.TargetSquare();
-
-                    _historyMoves[piece][targetSquare] = ScoreHistoryMove(
-                        _historyMoves[piece][targetSquare],
-                        EvaluationConstants.HistoryBonus[depth]);
-                }
 
                 _pVTable[pvIndex] = move;
                 CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
