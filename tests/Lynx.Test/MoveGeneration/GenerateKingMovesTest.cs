@@ -39,9 +39,9 @@ public class GenerateKingMovesTest
 
     /// <summary>
     /// 8   . . . . . . . .
-    /// 7   . . . . . . n Q
+    /// 7   . . . . . . . .
     /// 6   . . . . . . k .
-    /// 5   . . . . . P B .
+    /// 5   . . . . . . . .
     /// 4   . . . . . . . .
     /// 3   . . N . . . . .
     /// 2   n K r . . . . .
@@ -50,11 +50,12 @@ public class GenerateKingMovesTest
     ///     Side:       White
     ///     Enpassant:  no
     ///     Castling:   -- | --
+    ///     FEN:        8/8/6k1/8/8/2N5/nKr5/bp6 w - - 0 1
     /// </summary>
     [Test]
     public void KingMoves_White()
     {
-        var position = new Position("8/6nQ/6k1/5PB1/8/2N5/nKr5/bp6 w - - 0 1");
+        var position = new Position("8/8/6k1/8/8/2N5/nKr5/bp6 w - - 0 1");
         var offset = Utils.PieceOffset(position.Side);
         var piece = (int)Piece.K + offset;
         var moves = GenerateKingMoves(position);
@@ -96,18 +97,19 @@ public class GenerateKingMovesTest
     /// 6   . . . . . . k .
     /// 5   . . . . . P B .
     /// 4   . . . . . . . .
-    /// 3   . . N . . . . .
-    /// 2   n K r . . . . .
-    /// 1   b p . . . . . .
+    /// 3   . . . . . . . .
+    /// 2   . . . . . . . .
+    /// 1   K . . . . . . .
     ///     a b c d e f g h
     ///     Side:       Black
     ///     Enpassant:  no
     ///     Castling:   -- | --
+    ///     FEN:        8/6nQ/6k1/5PB1/8/8/8/K7 b - - 0 1
     /// </summary>
     [Test]
     public void KingMoves_Black()
     {
-        var position = new Position("8/6nQ/6k1/5PB1/8/2N5/nKr5/bp6 b - - 0 1");
+        var position = new Position("8/6nQ/6k1/5PB1/8/8/8/K7 b - - 0 1");
         var offset = Utils.PieceOffset(position.Side);
         var piece = (int)Piece.K + offset;
         var moves = GenerateKingMoves(position);
@@ -145,9 +147,9 @@ public class GenerateKingMovesTest
 
     /// <summary>
     /// 8   . . . . . . . .
-    /// 7   . . . . . . n Q
+    /// 7   . . . . . . . .
     /// 6   . . . . . . k .
-    /// 5   . . . . . P B .
+    /// 5   . . . . . . . .
     /// 4   . . . . . . . .
     /// 3   . . N . . . . .
     /// 2   n K r . . . . .
@@ -156,11 +158,12 @@ public class GenerateKingMovesTest
     ///     Side:       White
     ///     Enpassant:  no
     ///     Castling:   -- | --
+    ///     FEN:        8/8/6k1/8/8/2N5/nKr5/bp6 w - - 0 1
     /// </summary>
     [Test]
     public void KingMoves_CapturesOnly_White()
     {
-        var position = new Position("8/6nQ/6k1/5PB1/8/2N5/nKr5/bp6 w - - 0 1");
+        var position = new Position("8/8/6k1/8/8/2N5/nKr5/bp6 w - - 0 1");
         var offset = Utils.PieceOffset(position.Side);
         var piece = (int)Piece.K + offset;
         var moves = GenerateKingCaptures(position);
@@ -190,18 +193,19 @@ public class GenerateKingMovesTest
     /// 6   . . . . . . k .
     /// 5   . . . . . P B .
     /// 4   . . . . . . . .
-    /// 3   . . N . . . . .
-    /// 2   n K r . . . . .
-    /// 1   b p . . . . . .
+    /// 3   . . . . . . . .
+    /// 2   . . . . . . . .
+    /// 1   K . . . . . . .
     ///     a b c d e f g h
     ///     Side:       Black
     ///     Enpassant:  no
     ///     Castling:   -- | --
+    ///     FEN:        8/6nQ/6k1/5PB1/8/8/8/K7 b - - 0 1
     /// </summary>
     [Test]
     public void KingMoves_CapturesOnly_Black()
     {
-        var position = new Position("8/6nQ/6k1/5PB1/8/2N5/nKr5/bp6 b - - 0 1");
+        var position = new Position("8/6nQ/6k1/5PB1/8/8/8/K7 b - - 0 1");
         var offset = Utils.PieceOffset(position.Side);
         var piece = (int)Piece.K + offset;
         var moves = GenerateKingCaptures(position);

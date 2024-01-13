@@ -97,7 +97,7 @@ public class PositionTest
     public void CustomIsValid()
     {
         var origin = new Position("r2k4/1K6/8/8/8/8/8/8 b - - 0 1");
-        var move = MoveExtensions.Encode((int)BoardSquare.b7, (int)BoardSquare.a8, (int)Piece.K, isCapture: 1);
+        var move = MoveExtensions.Encode((int)BoardSquare.b7, (int)BoardSquare.a8, (int)Piece.K, isCapture: 1, capturedPiece: 1);
 
         Assert.NotNull(new Position(origin, move));
     }
