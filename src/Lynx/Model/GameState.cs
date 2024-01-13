@@ -3,14 +3,14 @@ public readonly struct GameState
 {
     public readonly long ZobristKey;
 
-    public readonly byte Castle;
-
     public readonly BoardSquare EnPassant;
 
-    public GameState(long zobristKey, byte castle, BoardSquare enpassant)
+    public readonly byte Castle;
+
+    public GameState(long zobristKey, BoardSquare enpassant, byte castle)
     {
         ZobristKey = zobristKey;
-        Castle = castle;
         EnPassant = enpassant;
+        Castle = castle;
     }
 }
