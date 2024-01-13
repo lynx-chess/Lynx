@@ -34,6 +34,7 @@ public sealed class LynxDriver
         _ = EvaluationConstants.HistoryBonus[1];
         _ = MoveGenerator.Init();
         _ = GoCommand.Init();
+        _ = Constants.PiecesByChar['P'];
     }
 
     public async Task Run(CancellationToken cancellationToken)
