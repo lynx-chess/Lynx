@@ -8,14 +8,14 @@ public static class AttackGenerator
     /// 2x64
     /// BitBoard[isWhite, square]
     /// </summary>
-    public static BitBoard[,] InitializePawnAttacks()
+    public static BitBoard[][] InitializePawnAttacks()
     {
-        BitBoard[,] pawnAttacks = new BitBoard[2, 64];
+        BitBoard[][] pawnAttacks = [new BitBoard[64], new BitBoard[64]];
 
         for (int square = 0; square < 64; ++square)
         {
-            pawnAttacks[0, square] = MaskPawnAttacks(square, isWhite: false);
-            pawnAttacks[1, square] = MaskPawnAttacks(square, isWhite: true);
+            pawnAttacks[0][square] = MaskPawnAttacks(square, isWhite: false);
+            pawnAttacks[1][square] = MaskPawnAttacks(square, isWhite: true);
         }
 
         return pawnAttacks;

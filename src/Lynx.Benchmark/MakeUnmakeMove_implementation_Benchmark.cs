@@ -975,22 +975,22 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         /// Indexed by <see cref="Piece"/>.
         /// Checks are not considered
         /// </summary>
-        private static readonly Func<int, BitBoard, BitBoard>[] _pieceAttacks = new Func<int, BitBoard, BitBoard>[]
-        {
-            (int origin, BitBoard _) => MakeMoveAttacks.PawnAttacks[(int)Side.White, origin],
+        private static readonly Func<int, BitBoard, BitBoard>[] _pieceAttacks =
+        [
+            (int origin, BitBoard _) => MakeMoveAttacks.PawnAttacks[(int)Side.White][origin],
             (int origin, BitBoard _) => MakeMoveAttacks.KnightAttacks[origin],
             MakeMoveAttacks.BishopAttacks,
             MakeMoveAttacks.RookAttacks,
             MakeMoveAttacks.QueenAttacks,
             (int origin, BitBoard _) => MakeMoveAttacks.KingAttacks[origin],
 
-            (int origin, BitBoard _) => MakeMoveAttacks.PawnAttacks[(int)Side.Black, origin],
+            (int origin, BitBoard _) => MakeMoveAttacks.PawnAttacks[(int)Side.Black][origin],
             (int origin, BitBoard _) => MakeMoveAttacks.KnightAttacks[origin],
             MakeMoveAttacks.BishopAttacks,
             MakeMoveAttacks.RookAttacks,
             MakeMoveAttacks.QueenAttacks,
             (int origin, BitBoard _) => MakeMoveAttacks.KingAttacks[origin],
-        };
+        ];
 
         /// <summary>
         /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
@@ -1080,7 +1080,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
                     }
                 }
 
-                var attacks = MakeMoveAttacks.PawnAttacks[(int)position.Side, sourceSquare];
+                var attacks = MakeMoveAttacks.PawnAttacks[(int)position.Side][sourceSquare];
 
                 // En passant
                 if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
@@ -1240,7 +1240,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         /// <summary>
         /// [2 (B|W), 64 (Squares)]
         /// </summary>
-        public static BitBoard[,] PawnAttacks { get; }
+        public static BitBoard[][] PawnAttacks { get; }
         public static BitBoard[] KnightAttacks { get; }
         public static BitBoard[] KingAttacks { get; }
 
@@ -1355,7 +1355,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         {
             var oppositeColorIndex = ((int)sideToMove + 1) % 2;
 
-            return (PawnAttacks[oppositeColorIndex, squareIndex] & pieces[offset]) != default;
+            return (PawnAttacks[oppositeColorIndex][squareIndex] & pieces[offset]) != default;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

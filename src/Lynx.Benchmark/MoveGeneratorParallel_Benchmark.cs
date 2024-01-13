@@ -177,14 +177,14 @@ public class MoveGeneratorParallel_Benchmark : BaseBenchmark
 
         private static readonly Func<int, BitBoard, ulong>[] _pieceAttacks =
         [
-            (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White, origin],
+            (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White][origin],
             (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
             Attacks.BishopAttacks,
             Attacks.RookAttacks,
             Attacks.QueenAttacks,
             (int origin, BitBoard _) => Attacks.KingAttacks[origin],
 
-            (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.Black, origin],
+            (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.Black][origin],
             (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
             Attacks.BishopAttacks,
             Attacks.RookAttacks,
@@ -245,7 +245,7 @@ public class MoveGeneratorParallel_Benchmark : BaseBenchmark
                     }
                 }
 
-                var attacks = Attacks.PawnAttacks[(int)position.Side, sourceSquare];
+                var attacks = Attacks.PawnAttacks[(int)position.Side][sourceSquare];
 
                 // En passant
                 if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))

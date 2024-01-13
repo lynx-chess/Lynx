@@ -23,14 +23,14 @@ public static class MoveGenerator
     /// </summary>
     private static readonly Func<int, BitBoard, BitBoard>[] _pieceAttacks =
     [
-        (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White, origin],
+        (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White][origin],
         (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
         Attacks.BishopAttacks,
         Attacks.RookAttacks,
         Attacks.QueenAttacks,
         (int origin, BitBoard _) => Attacks.KingAttacks[origin],
 
-        (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.Black, origin],
+        (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.Black][origin],
         (int origin, BitBoard _) => Attacks.KnightAttacks[origin],
         Attacks.BishopAttacks,
         Attacks.RookAttacks,
@@ -233,7 +233,7 @@ public static class MoveGenerator
                 }
             }
 
-            var attacks = Attacks.PawnAttacks[(int)position.Side, sourceSquare];
+            var attacks = Attacks.PawnAttacks[(int)position.Side][sourceSquare];
 
             // En passant
             if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
@@ -305,7 +305,7 @@ public static class MoveGenerator
                 }
             }
 
-            var attacks = Attacks.PawnAttacks[(int)position.Side, sourceSquare];
+            var attacks = Attacks.PawnAttacks[(int)position.Side][sourceSquare];
 
             // En passant
             if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
@@ -569,7 +569,7 @@ public static class MoveGenerator
                 }
             }
 
-            var attacks = Attacks.PawnAttacks[(int)position.Side, sourceSquare];
+            var attacks = Attacks.PawnAttacks[(int)position.Side][sourceSquare];
 
             // En passant
             if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant)
@@ -792,7 +792,7 @@ public static class MoveGenerator
                 }
             }
 
-            var attacks = Attacks.PawnAttacks[(int)position.Side, sourceSquare];
+            var attacks = Attacks.PawnAttacks[(int)position.Side][sourceSquare];
 
             // En passant
             if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))

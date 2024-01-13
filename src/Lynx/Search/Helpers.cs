@@ -120,7 +120,7 @@ public sealed partial class Engine
                 ? EvaluationConstants.GoodCaptureMoveBaseScoreValue
                 : EvaluationConstants.BadCaptureMoveBaseScoreValue;
 
-            return baseCaptureScore + EvaluationConstants.MostValueableVictimLeastValuableAttacker[sourcePiece, targetPiece];
+            return baseCaptureScore + EvaluationConstants.MostValueableVictimLeastValuableAttacker[sourcePiece][targetPiece];
         }
 
         if (isPromotion)

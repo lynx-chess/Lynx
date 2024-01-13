@@ -323,11 +323,11 @@ static void _21_IsSquareAttacked()
 
     position.PieceBitBoards[(int)Piece.p].Print();
 
-    Attacks.PawnAttacks[(int)Side.White, (int)BoardSquare.e4].Print();
+    Attacks.PawnAttacks[(int)Side.White][(int)BoardSquare.e4].Print();
 
     var and =
         position.PieceBitBoards[(int)Piece.p]
-        & Attacks.PawnAttacks[(int)Side.White, (int)BoardSquare.e4];
+        & Attacks.PawnAttacks[(int)Side.White][(int)BoardSquare.e4];
     and.Print();
 
     Console.WriteLine("=====================================");

@@ -640,8 +640,8 @@ public class Position
 
         return (rooks & Attacks.RookAttacks(square, occupancy))
             | (bishops & Attacks.BishopAttacks(square, occupancy))
-            | (PieceBitBoards[(int)Piece.p] & Attacks.PawnAttacks[(int)Side.White, square])
-            | (PieceBitBoards[(int)Piece.P] & Attacks.PawnAttacks[(int)Side.Black, square])
+            | (PieceBitBoards[(int)Piece.p] & Attacks.PawnAttacks[(int)Side.White][square])
+            | (PieceBitBoards[(int)Piece.P] & Attacks.PawnAttacks[(int)Side.Black][square])
             | (Knights & Attacks.KnightAttacks[square])
             | (Kings & Attacks.KingAttacks[square]);
     }
@@ -661,8 +661,8 @@ public class Position
 
         return (rooks & Attacks.RookAttacks(square, occupancy))
             | (bishops & Attacks.BishopAttacks(square, occupancy))
-            | (PieceBitBoards[(int)Piece.p] & Attacks.PawnAttacks[(int)Side.White, square])
-            | (PieceBitBoards[(int)Piece.P] & Attacks.PawnAttacks[(int)Side.Black, square])
+            | (PieceBitBoards[(int)Piece.p] & Attacks.PawnAttacks[(int)Side.White][square])
+            | (PieceBitBoards[(int)Piece.P] & Attacks.PawnAttacks[(int)Side.Black][square])
             | (Knights & Attacks.KnightAttacks[square])
             | (Kings & Attacks.KingAttacks[square]);
     }

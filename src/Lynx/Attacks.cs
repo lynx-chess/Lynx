@@ -29,7 +29,7 @@ public static class Attacks
     /// <summary>
     /// [2 (B|W), 64 (Squares)]
     /// </summary>
-    public static BitBoard[,] PawnAttacks { get; }
+    public static BitBoard[][] PawnAttacks { get; }
     public static BitBoard[] KnightAttacks { get; }
     public static BitBoard[] KingAttacks { get; }
 
@@ -176,7 +176,7 @@ public static class Attacks
     {
         var oppositeColorIndex = sideToMove ^ 1;
 
-        return (PawnAttacks[oppositeColorIndex, squareIndex] & pieces[offset]) != default;
+        return (PawnAttacks[oppositeColorIndex][squareIndex] & pieces[offset]) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
