@@ -9,15 +9,18 @@ namespace Lynx;
 /// </summary>
 public static class ZobristTable
 {
-    private static readonly long[,] _table = Initialize();
+    /// <summary>
+    /// 64x12
+    /// </summary>
+    private static readonly long[][] _table = Initialize();
 
-    private static readonly long WK_Hash = _table[(int)BoardSquare.a8, (int)Piece.p];
-    private static readonly long WQ_Hash = _table[(int)BoardSquare.b8, (int)Piece.p];
-    private static readonly long BK_Hash = _table[(int)BoardSquare.c8, (int)Piece.p];
-    private static readonly long BQ_Hash = _table[(int)BoardSquare.d8, (int)Piece.p];
+    private static readonly long WK_Hash = _table[(int)BoardSquare.a8][(int)Piece.p];
+    private static readonly long WQ_Hash = _table[(int)BoardSquare.b8][(int)Piece.p];
+    private static readonly long BK_Hash = _table[(int)BoardSquare.c8][(int)Piece.p];
+    private static readonly long BQ_Hash = _table[(int)BoardSquare.d8][(int)Piece.p];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static long PieceHash(int boardSquare, int piece) => _table[boardSquare, piece];
+    public static long PieceHash(int boardSquare, int piece) => _table[boardSquare][piece];
 
     /// <summary>
     /// Uses <see cref="Piece.P"/> and squares <see cref="BoardSquare.a1"/>-<see cref="BoardSquare.h1"/>
@@ -41,7 +44,7 @@ public static class ZobristTable
 
         var file = enPassantSquare & 0x07;  // enPassantSquare % 8
 
-        return _table[file, (int)Piece.P];
+        return _table[file][(int)Piece.P];
     }
 
     /// <summary>
@@ -51,7 +54,7 @@ public static class ZobristTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static long SideHash()
     {
-        return _table[(int)BoardSquare.h8, (int)Piece.p];
+        return _table[(int)BoardSquare.h8][(int)Piece.p];
     }
 
     /// <summary>
@@ -111,7 +114,7 @@ public static class ZobristTable
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
 
-                positionHash ^= ZobristTable.PieceHash(pieceSquareIndex, pieceIndex);
+                positionHash ^= PieceHash(pieceSquareIndex, pieceIndex);
             }
         }
 
@@ -123,20 +126,21 @@ public static class ZobristTable
     }
 
     /// <summary>
-    /// Initializes Zobrist table (long[64, 12])
+    /// Initializes Zobrist table (long[64][12])
     /// </summary>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static long[,] Initialize()
+    internal static long[][] Initialize()
     {
-        var zobristTable = new long[64, 12];
+        var zobristTable = new long[64][];
         var randomInstance = new Random(int.MaxValue);
 
         for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
         {
+            zobristTable[squareIndex] = new long[12];
             for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
             {
-                zobristTable[squareIndex, pieceIndex] = randomInstance.NextInt64();
+                zobristTable[squareIndex][pieceIndex] = randomInstance.NextInt64();
             }
         }
 

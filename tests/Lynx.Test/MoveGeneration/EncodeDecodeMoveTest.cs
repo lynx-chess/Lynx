@@ -27,7 +27,7 @@ public class EncodeDecodeMoveTest
     [TestCase(BoardSquare.b8, BoardSquare.c6, Piece.n, false)]
     public void SourceSquare_TargetSquare_Piece_Capture(BoardSquare sourceSquare, BoardSquare targetSquare, Piece piece, bool isCapture)
     {
-        var move = MoveExtensions.Encode((int)sourceSquare, (int)targetSquare, (int)piece, isCapture: isCapture ? 1 : 0);
+        var move = MoveExtensions.Encode((int)sourceSquare, (int)targetSquare, (int)piece, isCapture: isCapture ? 1 : 0, capturedPiece: isCapture ? 1 : (int)Piece.None);
 
         Assert.AreEqual((int)sourceSquare, move.SourceSquare());
         Assert.AreEqual((int)targetSquare, move.TargetSquare());
@@ -64,7 +64,7 @@ public class EncodeDecodeMoveTest
     [TestCase(BoardSquare.e4, BoardSquare.d3, true)]
     public void EnPassant(BoardSquare sourceSquare, BoardSquare targetSquare, bool enPassant)
     {
-        var move = MoveExtensions.Encode((int)sourceSquare, (int)targetSquare, (int)Piece.P, isEnPassant: enPassant ? 1 : 0);
+        var move = MoveExtensions.Encode((int)sourceSquare, (int)targetSquare, (int)Piece.P, isEnPassant: enPassant ? 1 : 0, capturedPiece: enPassant ? 1 : (int)Piece.None);
 
         Assert.AreEqual((int)sourceSquare, move.SourceSquare());
         Assert.AreEqual((int)targetSquare, move.TargetSquare());

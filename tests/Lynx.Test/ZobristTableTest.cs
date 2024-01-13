@@ -5,20 +5,25 @@ namespace Lynx.Test;
 
 public class ZobristTableTest
 {
-    private readonly long[,] _zobristTable = ZobristTable.Initialize();
+    private readonly long[][] _zobristTable = ZobristTable.Initialize();
 
     [Test]
     public void XorBehavior()
     {
-        foreach (var hash in _zobristTable)
+        for (int i = 0; i < 64; ++i)
         {
-            var n = Random.Shared.NextInt64();
+            for (int j = 0; j < 1; ++j)
+            {
+                var hash = _zobristTable[i][j];
 
-            var xored = n ^ hash;
+                var n = Random.Shared.NextInt64();
 
-            var original = xored ^ hash;
+                var xored = n ^ hash;
 
-            Assert.AreEqual(n, original);
+                var original = xored ^ hash;
+
+                Assert.AreEqual(n, original);
+            }
         }
     }
 
@@ -31,7 +36,7 @@ public class ZobristTableTest
         {
             for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
             {
-                Assert.AreEqual(_zobristTable[squareIndex, pieceIndex], anotherZobristTable[squareIndex, pieceIndex]);
+                Assert.AreEqual(_zobristTable[squareIndex][pieceIndex], anotherZobristTable[squareIndex][pieceIndex]);
             }
         }
     }
@@ -43,7 +48,7 @@ public class ZobristTableTest
         {
             for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
             {
-                Assert.AreEqual(_zobristTable[squareIndex, pieceIndex], ZobristTable.PieceHash(squareIndex, pieceIndex));
+                Assert.AreEqual(_zobristTable[squareIndex][pieceIndex], ZobristTable.PieceHash(squareIndex, pieceIndex));
             }
         }
     }
@@ -56,7 +61,7 @@ public class ZobristTableTest
         foreach (var enPassantSquare in enPassantSquares)
         {
             var file = enPassantSquare % 8;
-            Assert.AreEqual(_zobristTable[file, (int)Piece.P], ZobristTable.EnPassantHash(enPassantSquare));
+            Assert.AreEqual(_zobristTable[file][(int)Piece.P], ZobristTable.EnPassantHash(enPassantSquare));
         }
 
         Assert.AreEqual(16, enPassantSquares.Count());
@@ -76,7 +81,7 @@ public class ZobristTableTest
     [Test]
     public void SideHash()
     {
-        Assert.AreEqual(_zobristTable[(int)BoardSquare.h8, (int)Piece.p], ZobristTable.SideHash());
+        Assert.AreEqual(_zobristTable[(int)BoardSquare.h8][(int)Piece.p], ZobristTable.SideHash());
     }
 
     [TestCase(Constants.TrickyTestPositionReversedFEN)]
@@ -121,29 +126,29 @@ public class ZobristTableTest
 
         Assert.AreEqual(originalHash, currentHash);
     }
-  
+
     private long CalculateCastleHash(byte castle)
     {
         long combinedHash = 0;
 
         if ((castle & (int)CastlingRights.WK) != default)
         {
-            combinedHash ^= _zobristTable[(int)BoardSquare.a8, (int)Piece.p];        // a8
+            combinedHash ^= _zobristTable[(int)BoardSquare.a8][(int)Piece.p];        // a8
         }
 
         if ((castle & (int)CastlingRights.WQ) != default)
         {
-            combinedHash ^= _zobristTable[(int)BoardSquare.b8, (int)Piece.p];        // b8
+            combinedHash ^= _zobristTable[(int)BoardSquare.b8][(int)Piece.p];        // b8
         }
 
         if ((castle & (int)CastlingRights.BK) != default)
         {
-            combinedHash ^= _zobristTable[(int)BoardSquare.c8, (int)Piece.p];        // c8
+            combinedHash ^= _zobristTable[(int)BoardSquare.c8][(int)Piece.p];        // c8
         }
 
         if ((castle & (int)CastlingRights.BQ) != default)
         {
-            combinedHash ^= _zobristTable[(int)BoardSquare.d8, (int)Piece.p];        // d8
+            combinedHash ^= _zobristTable[(int)BoardSquare.d8][(int)Piece.p];        // d8
         }
 
         return combinedHash;

@@ -28,7 +28,7 @@ Here are the ones 'properly' rated over at least a few hundred of games:
 
 | Lynx version | Release date | Estimated elo | [CCRL Blitz](https://www.computerchess.org.uk/ccrl/404/) | [CCRL](https://www.computerchess.org.uk/ccrl/4040/) | [MCERL](https://www.chessengeria.eu/mcerl) | [CEDR](https://chessengines.blogspot.com/p/rating-jcer.html) |
 |---|---|---|---|---|---|---|
-| [1.2.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.2.0) | 2024-01-11  | [2611](https://github.com/lynx-chess/Lynx/commit/38f0d147fe049c89e56e6ea66ce28f9fa29907c2) |  |  |  |  |
+| [1.2.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.2.0) | 2024-01-11  | [2611](https://github.com/lynx-chess/Lynx/commit/38f0d147fe049c89e56e6ea66ce28f9fa29907c2) / [2551](https://github.com/lynx-chess/Lynx/commit/38f0d147fe049c89e56e6ea66ce28f9fa29907c2#commitcomment-137001006)<sup>1</sup> |  |  |  |  |
 | [1.1.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.1.0) | 2023-12-14  | [2533](https://github.com/lynx-chess/Lynx/commit/b7d0131909977fe7c398f70e29daf3dc02f9fdcb#commitcomment-134947966) | [2436](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%201.1.0%2064-bit#Lynx_1_1_0_64-bit) | [2506](https://www.computerchess.org.uk/ccrl/4040/cgi/engine_details.cgi?print=Details&each_game=0&eng=Lynx%201.1.0%2064-bit#Lynx_1_1_0_64-bit) | 2621 |  |
 | [1.0.1](https://github.com/lynx-chess/Lynx/releases/tag/v1.0.1) | 2023-11-20  | [2511](https://github.com/lynx-chess/Lynx/commit/66d340232298768bba57d6876f59831645a6dffb#commitcomment-132727293) | [2432](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%201.0.1%2064-bit#Lynx_1_0_1_64-bit) | [2434](https://www.computerchess.org.uk/ccrl/4040/cgi/engine_details.cgi?print=Details&each_game=0&eng=Lynx%201.0.1%2064-bit#Lynx_1_0_1_64-bit) | 2567 | 2648  |
 | [0.19.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.19.0) | 2023-10-27  | [2434](https://github.com/lynx-chess/Lynx/commit/b42d235a2815ddb989c5d83218750167c43be7bb#commitcomment-131057706) | [2348](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.19.0%2064-bit#Lynx_0_19_0_64-bit) |  | 2518 | 2469  |
@@ -44,6 +44,9 @@ Here are the ones 'properly' rated over at least a few hundred of games:
 | [0.9.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.9.0) | 2021-11-29 |  | [1460](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.9.0%2064-bit#Lynx_0_9_0_64-bit) |  |  |  |
 | [0.6.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.6.0) | 2021-10-19 |  | [1275](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.6.0%2064-bit#Lynx_0_6_0_64-bit) |  |  |  |
 | [0.4.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.4.0) | 2021-09-20  |  | [1220](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.4.0%2064-bit#Lynx_0_4_0_64-bit) |  |  |  |
+
+
+<sup>1</sup> After 2024-01-13 CCRL blitz elo recalculation, where Lynx 1.0.1 went from 2497 to 2432
 
 ## Building Lynx
 

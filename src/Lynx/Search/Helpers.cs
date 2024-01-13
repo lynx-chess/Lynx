@@ -99,28 +99,12 @@ public sealed partial class Engine
 
         if (isCapture)
         {
-            var sourcePiece = move.Piece();
-            int targetPiece = (int)Piece.P;    // Important to initialize to P or p, due to en-passant captures
-
-            var targetSquare = move.TargetSquare();
-            var offset = Utils.PieceOffset(Game.CurrentPosition.Side);
-            var oppositePawnIndex = (int)Piece.p - offset;
-
-            var limit = (int)Piece.k - offset;
-            for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
-            {
-                if (Game.CurrentPosition.PieceBitBoards[pieceIndex].GetBit(targetSquare))
-                {
-                    targetPiece = pieceIndex;
-                    break;
-                }
-            }
 
             var baseCaptureScore = (isPromotion || move.IsEnPassant() || SEE.IsGoodCapture(Game.CurrentPosition, move))
                 ? EvaluationConstants.GoodCaptureMoveBaseScoreValue
                 : EvaluationConstants.BadCaptureMoveBaseScoreValue;
 
-            return baseCaptureScore + EvaluationConstants.MostValueableVictimLeastValuableAttacker[sourcePiece, targetPiece];
+            return baseCaptureScore + EvaluationConstants.MostValueableVictimLeastValuableAttacker[move.Piece()][move.CapturedPiece()];
         }
 
         if (isPromotion)
@@ -131,23 +115,23 @@ public sealed partial class Engine
         if (isNotQSearch)
         {
             // 1st killer move
-            if (_killerMoves[0, depth] == move)
+            if (_killerMoves[0][depth] == move)
             {
                 return EvaluationConstants.FirstKillerMoveValue;
             }
 
-            if (_killerMoves[1, depth] == move)
+            if (_killerMoves[1][depth] == move)
             {
                 return EvaluationConstants.SecondKillerMoveValue;
             }
 
-            if (_killerMoves[2, depth] == move)
+            if (_killerMoves[2][depth] == move)
             {
                 return EvaluationConstants.ThirdKillerMoveValue;
             }
 
             // History move or 0 if not found
-            return EvaluationConstants.BaseMoveScore + _historyMoves[move.Piece(), move.TargetSquare()];
+            return EvaluationConstants.BaseMoveScore + _historyMoves[move.Piece()][move.TargetSquare()];
         }
 
         return EvaluationConstants.BaseMoveScore;
@@ -365,11 +349,17 @@ $" {484,-3}                                                         {_pVTable[48
     {
         int max = int.MinValue;
 
-        foreach (var item in _historyMoves)
+        for (int i = 0; i < 12; ++i)
         {
-            if (item > max)
+            var tmp = _historyMoves[i];
+            for (int j = 0; j < 64; ++i)
             {
-                max = item;
+                var item = tmp[j];
+
+                if (item > max)
+                {
+                    max = item;
+                }
             }
         }
 

@@ -323,11 +323,11 @@ static void _21_IsSquareAttacked()
 
     position.PieceBitBoards[(int)Piece.p].Print();
 
-    Attacks.PawnAttacks[(int)Side.White, (int)BoardSquare.e4].Print();
+    Attacks.PawnAttacks[(int)Side.White][(int)BoardSquare.e4].Print();
 
     var and =
         position.PieceBitBoards[(int)Piece.p]
-        & Attacks.PawnAttacks[(int)Side.White, (int)BoardSquare.e4];
+        & Attacks.PawnAttacks[(int)Side.White][(int)BoardSquare.e4];
     and.Print();
 
     Console.WriteLine("=====================================");
@@ -648,7 +648,7 @@ static void _53_MVVLVA()
     {
         for (int victim = (int)Piece.p; victim <= (int)Piece.k; ++victim)
         {
-            var score = EvaluationConstants.MostValueableVictimLeastValuableAttacker[attacker, victim];
+            var score = EvaluationConstants.MostValueableVictimLeastValuableAttacker[attacker][victim];
             Console.WriteLine($"Score {(Piece)attacker}x{(Piece)victim}: {score}");
         }
         Console.WriteLine();
@@ -658,7 +658,7 @@ static void _53_MVVLVA()
     {
         for (int victim = (int)Piece.P; victim <= (int)Piece.K; ++victim)
         {
-            var score = EvaluationConstants.MostValueableVictimLeastValuableAttacker[attacker, victim];
+            var score = EvaluationConstants.MostValueableVictimLeastValuableAttacker[attacker][victim];
             Console.WriteLine($"Score {(Piece)attacker}x{(Piece)victim}: {score}");
         }
         Console.WriteLine();

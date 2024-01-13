@@ -238,10 +238,20 @@ public static readonly int[] EndGameKingTable =
         EndGameKingTableBlack
     ];
 
-    public static readonly int[,] MiddleGameTable = new int[12, 64];
-    public static readonly int[,] EndGameTable = new int[12, 64];
+    /// <summary>
+    /// 12x64
+    /// </summary>
+    public static readonly int[][] MiddleGameTable = new int[12][];
 
-    public static readonly int[,] LMRReductions = new int[Constants.AbsoluteMaxDepth, Constants.MaxNumberOfPossibleMovesInAPosition];
+    /// <summary>
+    /// 12x64
+    /// </summary>
+    public static readonly int[][] EndGameTable = new int[12][];
+
+    /// <summary>
+    /// <see cref="Constants.AbsoluteMaxDepth"/> x <see cref="Constants.MaxNumberOfPossibleMovesInAPosition"/>
+    /// </summary>
+    public static readonly int[][] LMRReductions = new int[Constants.AbsoluteMaxDepth][];
 
     public static readonly int[] HistoryBonus = new int[Constants.AbsoluteMaxDepth];
 
@@ -249,18 +259,22 @@ public static readonly int[] EndGameKingTable =
     {
         for (int piece = (int)Piece.P; piece <= (int)Piece.k; ++piece)
         {
+            MiddleGameTable[piece] = new int[64];
+            EndGameTable[piece] = new int[64];
             for (int sq = 0; sq < 64; ++sq)
             {
-                MiddleGameTable[piece, sq] = MiddleGamePieceValues[piece] + MiddleGamePositionalTables[piece][sq];
-                EndGameTable[piece, sq] = EndGamePieceValues[piece] + EndGamePositionalTables[piece][sq];
+                MiddleGameTable[piece][sq] = MiddleGamePieceValues[piece] + MiddleGamePositionalTables[piece][sq];
+                EndGameTable[piece][sq] = EndGamePieceValues[piece] + EndGamePositionalTables[piece][sq];
             }
         }
 
         for (int searchDepth = 1; searchDepth < Constants.AbsoluteMaxDepth; ++searchDepth)    // Depth > 0 or we'd be in QSearch
         {
+            LMRReductions[searchDepth] = new int[Constants.MaxNumberOfPossibleMovesInAPosition];
+
             for (int movesSearchedCount = 1; movesSearchedCount < Constants.MaxNumberOfPossibleMovesInAPosition; ++movesSearchedCount) // movesSearchedCount > 0 or we wouldn't be applying LMR
             {
-                LMRReductions[searchDepth, movesSearchedCount] = Convert.ToInt32(Math.Round(
+                LMRReductions[searchDepth][movesSearchedCount] = Convert.ToInt32(Math.Round(
                     Configuration.EngineSettings.LMR_Base + (Math.Log(movesSearchedCount) * Math.Log(searchDepth) / Configuration.EngineSettings.LMR_Divisor)));
             }
 
@@ -282,21 +296,21 @@ public static readonly int[] EndGameKingTable =
     ///      Queen              101    201    301    401    501    601
     ///       King              100    200    300    400    500    600
     /// </summary>
-    public static readonly int[,] MostValueableVictimLeastValuableAttacker =
-    {
-        { 105, 205, 305, 405, 505, 605, 105, 205, 305, 405, 505, 605 },
-        { 104, 204, 304, 404, 504, 604, 104, 204, 304, 404, 504, 604 },
-        { 103, 203, 303, 403, 503, 603, 103, 203, 303, 403, 503, 603 },
-        { 102, 202, 302, 402, 502, 602, 102, 202, 302, 402, 502, 602 },
-        { 101, 201, 301, 401, 501, 601, 101, 201, 301, 401, 501, 601 },
-        { 100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600 },
-        { 105, 205, 305, 405, 505, 605, 105, 205, 305, 405, 505, 605 },
-        { 104, 204, 304, 404, 504, 604, 104, 204, 304, 404, 504, 604 },
-        { 103, 203, 303, 403, 503, 603, 103, 203, 303, 403, 503, 603 },
-        { 102, 202, 302, 402, 502, 602, 102, 202, 302, 402, 502, 602 },
-        { 101, 201, 301, 401, 501, 601, 101, 201, 301, 401, 501, 601 },
-        { 100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600 }
-    };
+    public static readonly int[][] MostValueableVictimLeastValuableAttacker =
+    [
+        [105, 205, 305, 405, 505, 605, 105, 205, 305, 405, 505, 605],
+        [104, 204, 304, 404, 504, 604, 104, 204, 304, 404, 504, 604],
+        [103, 203, 303, 403, 503, 603, 103, 203, 303, 403, 503, 603],
+        [102, 202, 302, 402, 502, 602, 102, 202, 302, 402, 502, 602],
+        [101, 201, 301, 401, 501, 601, 101, 201, 301, 401, 501, 601],
+        [100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600],
+        [105, 205, 305, 405, 505, 605, 105, 205, 305, 405, 505, 605],
+        [104, 204, 304, 404, 504, 604, 104, 204, 304, 404, 504, 604],
+        [103, 203, 303, 403, 503, 603, 103, 203, 303, 403, 503, 603],
+        [102, 202, 302, 402, 502, 602, 102, 202, 302, 402, 502, 602],
+        [101, 201, 301, 401, 501, 601, 101, 201, 301, 401, 501, 601],
+        [100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600]
+    ];
 
     /// <summary>
     /// Base absolute checkmate evaluation value. Actual absolute evaluations are lower than this one by a number of <see cref="Position.DepthCheckmateFactor"/>

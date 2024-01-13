@@ -259,7 +259,7 @@ public sealed partial class Engine
                     && !isInCheck
                     && !move.IsCapture())
                 {
-                    reduction = EvaluationConstants.LMRReductions[depth, movesSearched];
+                    reduction = EvaluationConstants.LMRReductions[depth][movesSearched];
 
                     if (pvNode)
                     {
@@ -327,20 +327,20 @@ public sealed partial class Engine
                     var piece = move.Piece();
                     var targetSquare = move.TargetSquare();
 
-                    _historyMoves[piece, targetSquare] = ScoreHistoryMove(
-                        _historyMoves[piece, targetSquare],
+                    _historyMoves[piece][targetSquare] = ScoreHistoryMove(
+                        _historyMoves[piece][targetSquare],
                         EvaluationConstants.HistoryBonus[depth]);
 
                     // 🔍 Killer moves
-                    if (move.PromotedPiece() == default && move != _killerMoves[0, ply])
+                    if (move.PromotedPiece() == default && move != _killerMoves[0][ply])
                     {
-                        if (move != _killerMoves[1, ply])
+                        if (move != _killerMoves[1][ply])
                         {
-                            _killerMoves[2, ply] = _killerMoves[1, ply];
+                            _killerMoves[2][ply] = _killerMoves[1][ply];
                         }
 
-                        _killerMoves[1, ply] = _killerMoves[0, ply];
-                        _killerMoves[0, ply] = move;
+                        _killerMoves[1][ply] = _killerMoves[0][ply];
+                        _killerMoves[0][ply] = move;
                     }
                 }
 

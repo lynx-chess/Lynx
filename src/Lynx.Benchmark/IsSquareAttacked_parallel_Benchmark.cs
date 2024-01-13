@@ -105,7 +105,7 @@ public class IsSquareAttacked_parallel_Benchmark : BaseBenchmark
         {
             var oppositeColorIndex = ((int)sideToMove + 1) % 2;
 
-            return (Attacks.PawnAttacks[oppositeColorIndex, squareIndex] & pieces[offset]) != default;
+            return (Attacks.PawnAttacks[oppositeColorIndex][squareIndex] & pieces[offset]) != default;
         }
 
         private static bool IsSquareAttackedByKnights(int squareIndex, int offset, BitBoard[] piecePosition)
@@ -160,7 +160,7 @@ public class IsSquareAttacked_parallel_Benchmark : BaseBenchmark
         {
             var oppositeColorIndex = ((int)sideToMove + 1) % 2;
 
-            return (Attacks.PawnAttacks[oppositeColorIndex, squareIndex] & pieces[offset]) != default;
+            return (Attacks.PawnAttacks[oppositeColorIndex][squareIndex] & pieces[offset]) != default;
         }
 
         private static bool IsSquareAttackedByKnights(int squareIndex, int offset, BitBoard[] piecePosition)
@@ -231,7 +231,7 @@ public class IsSquareAttacked_parallel_Benchmark : BaseBenchmark
         {
             var oppositeColorIndex = ((int)sideToMove + 1) % 2;
 
-            return (Attacks.PawnAttacks[oppositeColorIndex, squareIndex] & pieces[offset]) != default;
+            return (Attacks.PawnAttacks[oppositeColorIndex][squareIndex] & pieces[offset]) != default;
         }
 
         private static bool IsSquareAttackedByKnights(int squareIndex, int offset, BitBoard[] piecePosition)
