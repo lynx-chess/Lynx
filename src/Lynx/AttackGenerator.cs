@@ -5,6 +5,7 @@ namespace Lynx;
 public static class AttackGenerator
 {
     /// <summary>
+    /// 2x64
     /// BitBoard[isWhite, square]
     /// </summary>
     public static BitBoard[,] InitializePawnAttacks()
