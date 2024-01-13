@@ -14,13 +14,13 @@ public static class Attacks
     /// [64 (Squares), 512 (Occupancies)]
     /// Use <see cref="BishopAttacks(int, BitBoard)"/>
     /// </summary>
-    private static readonly BitBoard[,] _bishopAttacks;
+    private static readonly BitBoard[][] _bishopAttacks;
 
     /// <summary>
     /// [64 (Squares), 4096 (Occupancies)]
     /// Use <see cref="RookAttacks(int, BitBoard)"/>
     /// </summary>
-    private static readonly BitBoard[,] _rookAttacks;
+    private static readonly BitBoard[][] _rookAttacks;
 
     private static readonly ulong[] _pextAttacks;
     private static readonly ulong[] _pextBishopOffset;
@@ -79,7 +79,7 @@ public static class Attacks
         occ *= Constants.BishopMagicNumbers[squareIndex];
         occ >>= (64 - Constants.BishopRelevantOccupancyBits[squareIndex]);
 
-        return _bishopAttacks[squareIndex, occ];
+        return _bishopAttacks[squareIndex][occ];
     }
 
     /// <summary>
@@ -102,7 +102,7 @@ public static class Attacks
         occ *= Constants.RookMagicNumbers[squareIndex];
         occ >>= (64 - Constants.RookRelevantOccupancyBits[squareIndex]);
 
-        return _rookAttacks[squareIndex, occ];
+        return _rookAttacks[squareIndex][occ];
     }
 
     /// <summary>

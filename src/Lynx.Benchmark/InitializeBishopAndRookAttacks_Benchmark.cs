@@ -25,8 +25,8 @@ public class InitializeBishopAndRookAttacks_Benchmark : BaseBenchmark
         private readonly BitBoard[] _bishopOccupancyMasks = new BitBoard[64];
         private readonly BitBoard[] _rookOccupancyMasks = new BitBoard[64];
 
-        private readonly BitBoard[,] _bishopAttacks = new BitBoard[64, 512];
-        private readonly BitBoard[,] _rookAttacks = new BitBoard[64, 4096];
+        private readonly BitBoard[][] _bishopAttacks = new BitBoard[64][];
+        private readonly BitBoard[][] _rookAttacks = new BitBoard[64][];
 
         public CustomPosition()
         {
@@ -99,7 +99,7 @@ public class InitializeBishopAndRookAttacks_Benchmark : BaseBenchmark
 
                         var magicIndex = (occupancy * Constants.BishopMagicNumbers[square]) >> (64 - relevantBitsCount);
 
-                        _bishopAttacks[square, magicIndex] = AttackGenerator.GenerateBishopAttacksOnTheFly(square, occupancy);
+                        _bishopAttacks[square][magicIndex] = AttackGenerator.GenerateBishopAttacksOnTheFly(square, occupancy);
                     }
                     else
                     {
@@ -107,7 +107,7 @@ public class InitializeBishopAndRookAttacks_Benchmark : BaseBenchmark
 
                         var magicIndex = (occupancy * Constants.RookMagicNumbers[square]) >> (64 - relevantBitsCount);
 
-                        _rookAttacks[square, magicIndex] = AttackGenerator.GenerateRookAttacksOnTheFly(square, occupancy);
+                        _rookAttacks[square][magicIndex] = AttackGenerator.GenerateRookAttacksOnTheFly(square, occupancy);
                     }
                 }
             }
