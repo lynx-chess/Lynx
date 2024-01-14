@@ -325,7 +325,25 @@ public sealed partial class Engine
             {
                 PrintMessage($"Pruning: {move} is enough");
 
-                if (!move.IsCapture())
+                if (move.IsCapture())
+                {
+                    // 🔍 History penalty/malus
+                    // Penalize previous captures that didn't failed high
+                    for (int i = 0; i < visitedMovesCounter - 1; ++i)
+                    {
+                        var visitedMove = visitedMoves[i];
+                        if (visitedMove.IsCapture())
+                        {
+                            var visitedMovePiece = visitedMove.Piece();
+                            var visitedMoveTargetSquare = visitedMove.TargetSquare();
+
+                            _historyMoves[visitedMovePiece][visitedMoveTargetSquare] = ScoreHistoryMove(
+                                _historyMoves[visitedMovePiece][visitedMoveTargetSquare],
+                                -EvaluationConstants.HistoryBonus[depth]);
+                        }
+                    }
+                }
+                else
                 {
                     // 🔍 Quiet history moves
                     // Doing this only in beta cutoffs (instead of when eval > alpha) was suggested by Sirius author
@@ -341,7 +359,7 @@ public sealed partial class Engine
                     for (int i = 0; i < visitedMovesCounter - 1; ++i)
                     {
                         var visitedMove = visitedMoves[i];
-                        if (!visitedMove.IsCapture())                           // TODO: Penalize only quiets?
+                        //if (!visitedMove.IsCapture())                           // TODO: Penalize only quiets?
                         {
                             var visitedMovePiece = visitedMove.Piece();
                             var visitedMoveTargetSquare = visitedMove.TargetSquare();
