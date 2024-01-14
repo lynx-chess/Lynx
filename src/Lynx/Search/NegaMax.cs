@@ -182,8 +182,11 @@ public sealed partial class Engine
             }
         }
 
-        Span<Move> visitedMoves = stackalloc Move[pseudoLegalMoves.Length];
-        int visitedMovesCounter = 0;
+        Span<Move> visitedQuietMoves = stackalloc Move[pseudoLegalMoves.Length];
+        Span<Move> visitedCaptureMoves = stackalloc Move[pseudoLegalMoves.Length];
+
+        int visitedQuietMovesCounter = 0;
+        int visitedCaptureMovesCounter = 0;
 
         for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
         {
@@ -208,7 +211,15 @@ public sealed partial class Engine
                 continue;
             }
 
-            visitedMoves[visitedMovesCounter++] = move;
+            bool isCapture = move.IsCapture();
+            if (isCapture)
+            {
+                visitedCaptureMoves[visitedCaptureMovesCounter++] = move;
+            }
+            else
+            {
+                visitedQuietMoves[visitedQuietMovesCounter++] = move;
+            }
 
             ++_nodes;
             isAnyMoveValid = true;
@@ -262,7 +273,7 @@ public sealed partial class Engine
                 if (movesSearched >= (pvNode ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves - 1)
                     && depth >= Configuration.EngineSettings.LMR_MinDepth
                     && !isInCheck
-                    && !move.IsCapture())
+                    && !isCapture)
                 {
                     reduction = EvaluationConstants.LMRReductions[depth][movesSearched];
 
@@ -325,7 +336,22 @@ public sealed partial class Engine
             {
                 PrintMessage($"Pruning: {move} is enough");
 
-                if (!move.IsCapture())
+                if (isCapture)
+                {
+                    // 🔍 History penalty/malus
+                    // Penalize previous captures that didn't failed high
+                    for (int i = 0; i < visitedCaptureMovesCounter - 1; ++i)
+                    {
+                        var visitedMove = visitedCaptureMoves[i];
+                        var visitedMovePiece = visitedMove.Piece();
+                        var visitedMoveTargetSquare = visitedMove.TargetSquare();
+
+                        _historyMoves[visitedMovePiece][visitedMoveTargetSquare] = ScoreHistoryMove(
+                            _historyMoves[visitedMovePiece][visitedMoveTargetSquare],
+                            -EvaluationConstants.HistoryBonus[depth]);
+                    }
+                }
+                else
                 {
                     // 🔍 Quiet history moves
                     // Doing this only in beta cutoffs (instead of when eval > alpha) was suggested by Sirius author
@@ -338,18 +364,15 @@ public sealed partial class Engine
 
                     // 🔍 History penalty/malus
                     // When a quiet move fails high, penalize previous visited quiet moves
-                    for (int i = 0; i < visitedMovesCounter - 1; ++i)
+                    for (int i = 0; i < visitedQuietMovesCounter - 1; ++i)
                     {
-                        var visitedMove = visitedMoves[i];
-                        if (!visitedMove.IsCapture())
-                        {
-                            var visitedMovePiece = visitedMove.Piece();
-                            var visitedMoveTargetSquare = visitedMove.TargetSquare();
+                        var visitedMove = visitedQuietMoves[i];
+                        var visitedMovePiece = visitedMove.Piece();
+                        var visitedMoveTargetSquare = visitedMove.TargetSquare();
 
-                            _historyMoves[visitedMovePiece][visitedMoveTargetSquare] = ScoreHistoryMove(
-                                _historyMoves[visitedMovePiece][visitedMoveTargetSquare],
-                                -EvaluationConstants.HistoryBonus[depth]);
-                        }
+                        _historyMoves[visitedMovePiece][visitedMoveTargetSquare] = ScoreHistoryMove(
+                            _historyMoves[visitedMovePiece][visitedMoveTargetSquare],
+                            -EvaluationConstants.HistoryBonus[depth]);
                     }
 
                     // 🔍 Killer moves
