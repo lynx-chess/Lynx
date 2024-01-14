@@ -337,11 +337,11 @@ public sealed partial class Engine
                         EvaluationConstants.HistoryBonus[depth]);
 
                     // 🔍 History penalty/malus
-                    // When a quiet move fails high, penalize previous visited ones
+                    // When a quiet move fails high, penalize previous visited quiet moves
                     for (int i = 0; i < visitedMovesCounter - 1; ++i)
                     {
                         var visitedMove = visitedMoves[i];
-                        if (!visitedMove.IsCapture())                           // TODO: Penalize only quiets?
+                        if (!visitedMove.IsCapture())
                         {
                             var visitedMovePiece = visitedMove.Piece();
                             var visitedMoveTargetSquare = visitedMove.TargetSquare();
