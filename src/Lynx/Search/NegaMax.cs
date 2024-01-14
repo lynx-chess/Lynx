@@ -341,7 +341,7 @@ public sealed partial class Engine
                     for (int i = 0; i < visitedMovesCounter - 1; ++i)
                     {
                         var visitedMove = visitedMoves[i];
-                        //if (!visitedMove.IsCapture())                           // TODO: Penalize only quiets?
+                        if (!visitedMove.IsCapture())                           // TODO: Penalize only quiets?
                         {
                             var visitedMovePiece = visitedMove.Piece();
                             var visitedMoveTargetSquare = visitedMove.TargetSquare();
