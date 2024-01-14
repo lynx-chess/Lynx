@@ -335,7 +335,7 @@ public sealed partial class Engine
                     // When a quiet move fails high, penalize previous visited ones
                     for (int i = 0; i < moveIndex; ++i)
                     {
-                        var visitedMove = pseudoLegalMoves[moveIndex];
+                        var visitedMove = pseudoLegalMoves[i];
                         //if (!visitedMove.IsCapture())                           // TODO: Penalize only quiets?
                         {
                             var visitedMovePiece = visitedMove.Piece();
