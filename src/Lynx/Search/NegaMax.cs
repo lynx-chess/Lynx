@@ -182,6 +182,9 @@ public sealed partial class Engine
             }
         }
 
+        Span<Move> visitedMoves = stackalloc Move[pseudoLegalMoves.Length];
+        int visitedMovesCounter = 0;
+
         for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
         {
             // Incremental move sorting, inspired by https://github.com/jw1912/Chess-Challenge and suggested by toanth
@@ -204,6 +207,8 @@ public sealed partial class Engine
                 position.UnmakeMove(move, gameState);
                 continue;
             }
+
+            visitedMoves[visitedMovesCounter++] = move;
 
             ++_nodes;
             isAnyMoveValid = true;
@@ -333,9 +338,9 @@ public sealed partial class Engine
 
                     // 🔍 History penalty/malus
                     // When a quiet move fails high, penalize previous visited ones
-                    for (int i = 0; i < moveIndex; ++i)
+                    for (int i = 0; i < visitedMovesCounter - 1; ++i)
                     {
-                        var visitedMove = pseudoLegalMoves[i];
+                        var visitedMove = visitedMoves[i];
                         //if (!visitedMove.IsCapture())                           // TODO: Penalize only quiets?
                         {
                             var visitedMovePiece = visitedMove.Piece();
