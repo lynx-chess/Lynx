@@ -168,7 +168,7 @@ public sealed class EngineSettings
 
     public TaperedEvaluationTerm DoubledPawnPenalty { get; set; } = new(-5, -14);
 
-    public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-18, -14);
+    public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-17, -14);
 
     public TaperedEvaluationTerm OpenFileRookBonus { get; set; } = new(46, 13);
 
@@ -186,18 +186,18 @@ public sealed class EngineSettings
 
     public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(17, -5);
 
-    public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(30, 88);
+    public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(29, 88);
 
-    public TaperedEvaluationTerm KnightOutpostBonus { get; set; } = new(5, 5);
+    public TaperedEvaluationTerm KnightOutpostBonus { get; set; } = new(28, 24);
 
     public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(
         new(0),
-        new(-1, 5),
-        new(-15, 12),
-        new(-15, 43),
-        new(19, 84),
-        new(53, 176),
-        new(74, 260),
+        new(-3, 6),
+        new(-16, 13),
+        new(-16, 44),
+        new(19, 83),
+        new(54, 176),
+        new(76, 260),
         new(0));
 
     #endregion
