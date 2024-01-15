@@ -1166,6 +1166,11 @@ static void SidePassedPawnMasks()
     Masks.LightSquaresMask.Print();
     Masks.DarkSquaresMask.Print();
     (Masks.DarkSquaresMask ^ Masks.LightSquaresMask).Print();
+
+    Console.WriteLine(((Masks.LightSquaresMask >> (int)BoardSquare.h1) & 1) != 0);
+    Console.WriteLine((((9 * (int)BoardSquare.h1) + 8) & 8) != 0);
+    Console.WriteLine(((Masks.LightSquaresMask >> (int)BoardSquare.a1) & 1) != 0);
+    Console.WriteLine((((9 * (int)BoardSquare.a1) + 8) & 8) != 0);
 }
 
 static void PrintBitBoardArray(ulong[] bb)
