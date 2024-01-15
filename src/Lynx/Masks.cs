@@ -75,6 +75,26 @@ public static class Masks
     public static BitBoard[] BlackPassedPawnMasks { get; } = new BitBoard[64];
 
     /// <summary>
+    /// [12][64]
+    /// </summary>
+    public static readonly BitBoard[][] PassedPawns =
+    [
+        WhitePassedPawnMasks,
+        [],
+        [],
+        [],
+        [],
+        [],
+        BlackPassedPawnMasks,
+        [],
+        [],
+        [],
+        [],
+        [],
+    ];
+
+
+    /// <summary>
     /// Passed 'side' pawn mask for square c4
     /// 8  0 1 0 1 0 0 0 0
     /// 7  0 1 0 1 0 0 0 0
@@ -131,23 +151,14 @@ public static class Masks
     public static BitBoard[] BlackSidePassedPawnMasks { get; } = new BitBoard[64];
 
     /// <summary>
-    /// [12][64]
+    /// __builtin_bswap64(<see cref="LightSquaresMask"/>)
     /// </summary>
-    public static readonly BitBoard[][] PassedPawns =
-    [
-        WhitePassedPawnMasks,
-        [],
-        [],
-        [],
-        [],
-        [],
-        BlackPassedPawnMasks,
-        [],
-        [],
-        [],
-        [],
-        [],
-    ];
+    public const BitBoard DarkSquaresMask = 0x55AA_55AA_55AA_55AA;
+
+    /// <summary>
+    /// https://www.chessprogramming.org/Color_of_a_Square
+    /// </summary>
+    public const BitBoard LightSquaresMask = 0xAA55_AA55_AA55_AA55;
 
     static Masks()
     {

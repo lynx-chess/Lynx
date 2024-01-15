@@ -1162,6 +1162,10 @@ static void SidePassedPawnMasks()
 
     Masks.WhiteKnightOutpostMask.Print();
     Masks.BlackKnightOutpostMask.Print();
+
+    Masks.LightSquaresMask.Print();
+    Masks.DarkSquaresMask.Print();
+    (Masks.DarkSquaresMask ^ Masks.LightSquaresMask).Print();
 }
 
 static void PrintBitBoardArray(ulong[] bb)
