@@ -993,7 +993,8 @@ public class Position
     {
         int middleGameBonus = 0, endGameBonus = 0;
 
-        if ((PieceBitBoards[(int)Piece.p] & Masks.WhiteSidePassedPawnMasks[squareIndex]) == default)  // Knight has no potential opponent pawn attackers
+        if (Masks.WhiteKnightOutpostMask.GetBit(squareIndex) != default     // Knight is centered and in the opponent's side of the board
+            && (PieceBitBoards[(int)Piece.p] & Masks.WhiteSidePassedPawnMasks[squareIndex]) == default)  // Knight has no potential opponent pawn attackers
         {
             var ownPawnProtectersCount = (PieceBitBoards[(int)Piece.P] & Attacks.PawnAttacks[(int)Side.Black][squareIndex]).CountBits();
 
@@ -1015,7 +1016,8 @@ public class Position
     {
         int middleGameBonus = 0, endGameBonus = 0;
 
-        if ((PieceBitBoards[(int)Piece.P] & Masks.BlackSidePassedPawnMasks[squareIndex]) == default)  // Knight has no potential opponent pawn attackers
+        if (Masks.BlackKnightOutpostMask.GetBit(squareIndex) != default     // Knight is centered and in the opponent's side of the board
+            && (PieceBitBoards[(int)Piece.P] & Masks.BlackSidePassedPawnMasks[squareIndex]) == default)  // Knight has no potential opponent pawn attackers
         {
             var ownPawnProtectersCount = (PieceBitBoards[(int)Piece.p] & Attacks.PawnAttacks[(int)Side.White][squareIndex]).CountBits();
 
