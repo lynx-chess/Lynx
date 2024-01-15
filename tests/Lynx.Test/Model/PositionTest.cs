@@ -916,38 +916,38 @@ public class PositionTest
     /// 7   . . . . . . . .
     /// 6   . . . . . . . .
     /// 5   . . . p N . . .
-    /// 4   . . . P . n . .
-    /// 3   . . . . . . . .
+    /// 4   . . . P . . . .
+    /// 3   . . . . . b . .
     /// 2   . . . . . . . .
     /// 1   k . . . . . . .
     ///     a b c d e f g h
     /// </summary>
-    [TestCase("K7/8/8/3pN3/3P1n2/8/8/k7 w - - 0 1", 1)]
+    [TestCase("K7/8/8/3pN3/3P4/5b2/8/k7 w - - 0 1", 1)]
     // Previous one mirrored
-    [TestCase("K7/8/8/3pN3/4n3/8/8/k7 w - - 0 1", -1)]
+    [TestCase("K7/8/8/3pB3/4n3/8/8/k7 w - - 0 1", -1)]
 
     /// <summary>
     /// 8   K . . . . . . .
     /// 7   . . . . . . . .
     /// 6   . . . . . . . .
     /// 5   . . . p N . . .
-    /// 4   . n . P . P . .
+    /// 4   b . . P . P . .
     /// 3   . . . . . . . .
     /// 2   . . . . . . . .
     /// 1   k . . . . . . .
     ///     a b c d e f g h
     /// </summary>
-    [TestCase("K7/8/8/3pN3/1n1P1P2/8/8/k7 w - - 0 1", 2)]
+    [TestCase("K7/8/8/3pN3/b2P1P2/8/8/k7 w - - 0 1", 2)]
 
     // Previous one mirrored
-    [TestCase("K7/8/8/3pNp2/4n3/8/8/k7 w - - 0 1", -2)]
+    [TestCase("K7/8/8/3pBp2/4n3/8/8/k7 w - - 0 1", -2)]
 
     /// <summary>
     /// 8   K . . . . . . .
     /// 7   . . . . . . . .
     /// 6   . . . . . . . .
     /// 5   . . . p N . . .
-    /// 4   . n . P . P . .
+    /// 4   b . . P . P . .
     /// 3   . . . . . . . .
     /// 2   . . . . . . . .
     /// 1   k . . . . . . .
@@ -963,14 +963,14 @@ public class PositionTest
     /// 6   . . . . . . . .
     /// 5   . . . p N . . .
     /// 4   p . p P . . . .
-    /// 3   . n . . . . . .
+    /// 3   . b . . . . . .
     /// 2   . . . . . . . .
     /// 1   k . . . . . . .
     ///     a b c d e f g h
     /// </summary>
-    [TestCase("K7/8/8/3pN3/p1pP4/1n6/8/k7 w - - 0 1", -1)]
+    [TestCase("K7/8/8/3pN3/p1pP1P2/1b6/8/k7 w - - 0 1", 2)]
     // Previous one mirrored
-    [TestCase("K7/8/8/3pN3/p2P1P2/1n6/8/k7 b - - 0 1", -1)]
+    [TestCase("K7/8/8/3pN3/p2P1P2/1b6/8/k7 b - - 0 1", -2)]
 
     /// <summary>
     /// 8   K . . . . . . .
@@ -1040,17 +1040,48 @@ public class PositionTest
     /// <summary>
     /// 8   K . . . . . . .
     /// 7   . . . . p . . .
+    /// 6   . . . . . . . .
+    /// 5   . . . . N . . .
+    /// 4   . . . p . p . .
+    /// 3   . . . . . . . .
+    /// 2   . . . . . . . .
+    /// 1   k . . . b . . .
+    ///     a b c d e f g h
+    /// </summary>
+    [TestCase("K7/4p3/8/4N3/3P1P2/8/8/k3b3 w - - 0 1", 0)]
+
+    // Previous one mirrored
+    [TestCase("K3B3/8/8/3p1p2/4n3/8/4P3/k7 w - - 0 1", 0)]
+
+    /// <summary>
+    /// 8   K . . . . . . .
+    /// 7   . . . . p . . .
     /// 6   . . . . N . . .
     /// 5   . . . P . P . .
     /// 4   . . . p . . . .
-    /// 3   . . . . n . . .
+    /// 3   . . . . b . . .
     /// 2   . . . . P . . .
     /// 1   k . . . . . . .
     ///     a b c d e f g h
     /// </summary>
-    [TestCase("K7/4p3/4N3/3P1P2/3p4/4n3/4P3/k7 w - - 0 1", 1)]
+    [TestCase("K7/4p3/4N3/3P1P2/3p4/4b3/4P3/k7 w - - 0 1", 2)]
     // Previous one mirrored
-    [TestCase("K7/4p3/4N3/3P4/3p1p2/4n3/4P3/k7 w - - 0 1", -1)]
+    [TestCase("K7/4p3/4B3/3P4/3p1p2/4n3/4P3/k7 w - - 0 1", -2)]
+
+    /// <summary>
+    /// 8   k . . . . . . .
+    /// 7   . . . . . . . .
+    /// 6   . . . . . . . N
+    /// 5   . . . . . . P .
+    /// 4   . . . . . . . .
+    /// 3   . . . . . . . .
+    /// 2   . . . . . . . .
+    /// 1   K . . . . . . .
+    ///     a b c d e f g h
+    /// </summary>
+    [TestCase("k7/8/7N/6P1/8/8/8/K7 w - - 0 1", 0)]
+    // Previous one mirrored
+    [TestCase("k7/8/8/8/6p1/7n/8/K7 w - - 0 1", 0)]
 
     /// <summary>
     /// 8   k . . . . . . .
