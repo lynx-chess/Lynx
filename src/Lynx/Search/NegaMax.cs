@@ -182,6 +182,9 @@ public sealed partial class Engine
             }
         }
 
+        Span<Move> visitedMoves = stackalloc Move[pseudoLegalMoves.Length];
+        int visitedMovesCounter = 0;
+
         for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
         {
             // Incremental move sorting, inspired by https://github.com/jw1912/Chess-Challenge and suggested by toanth
@@ -204,6 +207,8 @@ public sealed partial class Engine
                 position.UnmakeMove(move, gameState);
                 continue;
             }
+
+            visitedMoves[visitedMovesCounter++] = move;
 
             ++_nodes;
             isAnyMoveValid = true;
@@ -322,7 +327,7 @@ public sealed partial class Engine
 
                 if (!move.IsCapture())
                 {
-                    // 🔍 History moves
+                    // 🔍 Quiet history moves
                     // Doing this only in beta cutoffs (instead of when eval > alpha) was suggested by Sirius author
                     var piece = move.Piece();
                     var targetSquare = move.TargetSquare();
@@ -330,6 +335,22 @@ public sealed partial class Engine
                     _historyMoves[piece][targetSquare] = ScoreHistoryMove(
                         _historyMoves[piece][targetSquare],
                         EvaluationConstants.HistoryBonus[depth]);
+
+                    // 🔍 History penalty/malus
+                    // When a quiet move fails high, penalize previous visited quiet moves
+                    for (int i = 0; i < visitedMovesCounter - 1; ++i)
+                    {
+                        var visitedMove = visitedMoves[i];
+                        if (!visitedMove.IsCapture())
+                        {
+                            var visitedMovePiece = visitedMove.Piece();
+                            var visitedMoveTargetSquare = visitedMove.TargetSquare();
+
+                            _historyMoves[visitedMovePiece][visitedMoveTargetSquare] = ScoreHistoryMove(
+                                _historyMoves[visitedMovePiece][visitedMoveTargetSquare],
+                                -EvaluationConstants.HistoryBonus[depth]);
+                        }
+                    }
 
                     // 🔍 Killer moves
                     var firstKillerMove = _killerMoves[0];
