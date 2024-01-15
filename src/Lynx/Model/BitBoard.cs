@@ -58,7 +58,8 @@ public static class BitBoardExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool GetBit(this BitBoard board, int squareIndex)
     {
-        return (board & (1UL << squareIndex)) != default;
+        // Faster than (board & (1UL << squareIndex)) != default;
+        return ((board >> squareIndex) & 1) != 0;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
