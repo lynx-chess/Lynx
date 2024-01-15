@@ -49,7 +49,7 @@ using System.Threading.Channels;
 //TranspositionTable();
 //UnmakeMove();
 //PieceSquareTables();
-SidePassedPawnMasks();
+NewMasks();
 
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
 const string TrickyPosition = Constants.TrickyTestPositionFEN;
@@ -1151,7 +1151,7 @@ static void PieceSquareTables()
     }
 }
 
-static void SidePassedPawnMasks()
+static void NewMasks()
 {
     Masks.WhiteSidePassedPawnMasks[(int)BoardSquare.c4].Print();
     Masks.BlackSidePassedPawnMasks[(int)BoardSquare.c5].Print();
