@@ -48,7 +48,8 @@ using System.Threading.Channels;
 //RookEvaluation();
 //TranspositionTable();
 //UnmakeMove();
-PieceSquareTables();
+//PieceSquareTables();
+SidePassedPawnMasks();
 
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
 const string TrickyPosition = Constants.TrickyTestPositionFEN;
@@ -1148,4 +1149,29 @@ static void PieceSquareTables()
         }
         Console.Write("\n    a\tb\tc\td\te\tf\tg\th\n\n\n");
     }
+}
+
+static void SidePassedPawnMasks()
+{
+    Masks.WhiteSidePassedPawnMasks[(int)BoardSquare.c4].Print();
+    Masks.BlackSidePassedPawnMasks[(int)BoardSquare.c5].Print();
+
+    PrintBitBoardArray(Masks.WhitePassedPawnMasks);
+    PrintBitBoardArray(Masks.WhiteSidePassedPawnMasks);
+    PrintBitBoardArray(Masks.BlackSidePassedPawnMasks);
+}
+
+static void PrintBitBoardArray(ulong[] bb)
+{
+    for (int i = 0; i < 64; ++i)
+    {
+        Console.Write($"{bb[i]}UL, ");
+
+        if ((i + 1) % 8 == 0)
+        {
+            Console.WriteLine();
+        }
+    }
+
+    Console.WriteLine();
 }

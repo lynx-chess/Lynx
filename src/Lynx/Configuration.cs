@@ -188,6 +188,8 @@ public sealed class EngineSettings
 
     public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(30, 88);
 
+    public TaperedEvaluationTerm KnightOutpostBonus { get; set; } = new(5, 5);
+
     public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(
         new(0),
         new(-1, 5),

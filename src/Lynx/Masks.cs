@@ -52,7 +52,7 @@ public static class Masks
     /// 7  0 1 1 1 0 0 0 0
     /// 6  0 1 1 1 0 0 0 0
     /// 5  0 1 1 1 0 0 0 0
-    /// 4  0 0 0 0 0 0 0 0
+    /// 4  0 0 x 0 0 0 0 0
     /// 3  0 0 0 0 0 0 0 0
     /// 2  0 0 0 0 0 0 0 0
     /// 1  0 0 0 0 0 0 0 0
@@ -65,7 +65,7 @@ public static class Masks
     /// 8  0 0 0 0 0 0 0 0
     /// 7  0 0 0 0 0 0 0 0
     /// 6  0 0 0 0 0 0 0 0
-    /// 5  0 0 0 0 0 0 0 0
+    /// 5  0 0 x 0 0 0 0 0
     /// 4  0 1 1 1 0 0 0 0
     /// 3  0 1 1 1 0 0 0 0
     /// 2  0 1 1 1 0 0 0 0
@@ -73,6 +73,34 @@ public static class Masks
     ///    a b c d e f g h
     /// </summary>
     public static BitBoard[] BlackPassedPawnMasks { get; } = new BitBoard[64];
+
+    /// <summary>
+    /// Passed 'side' pawn mask for square c4
+    /// 8  0 1 0 1 0 0 0 0
+    /// 7  0 1 0 1 0 0 0 0
+    /// 6  0 1 0 1 0 0 0 0
+    /// 5  0 1 0 1 0 0 0 0
+    /// 4  0 0 x 0 0 0 0 0
+    /// 3  0 0 0 0 0 0 0 0
+    /// 2  0 0 0 0 0 0 0 0
+    /// 1  0 0 0 0 0 0 0 0
+    ///    a b c d e f g h
+    /// </summary>
+    public static BitBoard[] WhiteSidePassedPawnMasks { get; } = new BitBoard[64];
+
+    /// <summary>
+    /// Passed 'side' pawn mask for square c5
+    /// 8  0 0 0 0 0 0 0 0
+    /// 7  0 0 0 0 0 0 0 0
+    /// 6  0 0 0 0 0 0 0 0
+    /// 5  0 0 x 0 0 0 0 0
+    /// 4  0 1 1 1 0 0 0 0
+    /// 3  0 1 1 1 0 0 0 0
+    /// 2  0 1 1 1 0 0 0 0
+    /// 1  0 1 1 1 0 0 0 0
+    ///    a b c d e f g h
+    /// </summary>
+    public static BitBoard[] BlackSidePassedPawnMasks { get; } = new BitBoard[64];
 
     /// <summary>
     /// [12][64]
@@ -115,12 +143,16 @@ public static class Masks
                 WhitePassedPawnMasks[squareIndex] |= SetFileRankMask(file, -1);
                 WhitePassedPawnMasks[squareIndex] |= SetFileRankMask(file + 1, -1);
 
+                WhiteSidePassedPawnMasks[squareIndex] |= SetFileRankMask(file - 1, -1);
+                WhiteSidePassedPawnMasks[squareIndex] |= SetFileRankMask(file + 1, -1);
+
                 // Reset bits behind the pawn
                 for (int i = 7; i >= rank; --i)
                 {
                     for (int j = 0; j < 8; ++j)
                     {
                         WhitePassedPawnMasks[squareIndex].PopBit(BitBoardExtensions.SquareIndex(i, j));
+                        WhiteSidePassedPawnMasks[squareIndex].PopBit(BitBoardExtensions.SquareIndex(i, j));
                     }
                 }
 
@@ -128,12 +160,16 @@ public static class Masks
                 BlackPassedPawnMasks[squareIndex] |= SetFileRankMask(file, -1);
                 BlackPassedPawnMasks[squareIndex] |= SetFileRankMask(file + 1, -1);
 
+                BlackSidePassedPawnMasks[squareIndex] |= SetFileRankMask(file - 1, -1);
+                BlackSidePassedPawnMasks[squareIndex] |= SetFileRankMask(file + 1, -1);
+
                 // Reset bits behind the pawn
                 for (int i = 0; i < rank + 1; ++i)
                 {
                     for (int j = 0; j < 8; ++j)
                     {
                         BlackPassedPawnMasks[squareIndex].PopBit(BitBoardExtensions.SquareIndex(i, j));
+                        BlackSidePassedPawnMasks[squareIndex].PopBit(BitBoardExtensions.SquareIndex(i, j));
                     }
                 }
             }

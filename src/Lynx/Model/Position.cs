@@ -935,8 +935,10 @@ public class Position
         return pieceIndex switch
         {
             (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(pieceSquareIndex, pieceIndex),
-            (int)Piece.R or (int)Piece.r => RookAdditonalEvaluation(pieceSquareIndex, pieceIndex),
+            (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex),
             (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceCount),
+            (int)Piece.N => WhiteKnightAdditionalEvaluation(pieceSquareIndex, pieceIndex),
+            (int)Piece.n => BlackKnightAdditionalEvaluation(pieceSquareIndex, pieceIndex),
             (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex),
             _ => (0, 0)
         };
@@ -981,13 +983,57 @@ public class Position
     }
 
     /// <summary>
+    /// Knight outposts
+    /// </summary>
+    /// <param name="squareIndex"></param>
+    /// <param name="pieceIndex"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private (int MiddleGameScore, int EndGameScore) WhiteKnightAdditionalEvaluation(int squareIndex, int pieceIndex)
+    {
+        int middleGameBonus = 0, endGameBonus = 0;
+
+        if ((PieceBitBoards[(int)Piece.p] & Masks.WhiteSidePassedPawnMasks[squareIndex]) == default)  // Knight has no potential opponent pawn attackers
+        {
+            var ownPawnProtectersCount = (PieceBitBoards[(int)Piece.P] & Attacks.PawnAttacks[(int)Side.Black][squareIndex]).CountBits();
+
+            middleGameBonus = Configuration.EngineSettings.KnightOutpostBonus.MG * ownPawnProtectersCount;
+            endGameBonus = Configuration.EngineSettings.KnightOutpostBonus.EG * ownPawnProtectersCount;
+        }
+
+        return (middleGameBonus, endGameBonus);
+    }
+
+    /// <summary>
+    /// Knight outposts
+    /// </summary>
+    /// <param name="squareIndex"></param>
+    /// <param name="pieceIndex"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private (int MiddleGameScore, int EndGameScore) BlackKnightAdditionalEvaluation(int squareIndex, int pieceIndex)
+    {
+        int middleGameBonus = 0, endGameBonus = 0;
+
+        if ((PieceBitBoards[(int)Piece.P] & Masks.BlackSidePassedPawnMasks[squareIndex]) == default)  // Knight has no potential opponent pawn attackers
+        {
+            var ownPawnProtectersCount = (PieceBitBoards[(int)Piece.p] & Attacks.PawnAttacks[(int)Side.White][squareIndex]).CountBits();
+
+            middleGameBonus = Configuration.EngineSettings.KnightOutpostBonus.MG * ownPawnProtectersCount;
+            endGameBonus = Configuration.EngineSettings.KnightOutpostBonus.EG * ownPawnProtectersCount;
+        }
+
+        return (middleGameBonus, endGameBonus);
+    }
+
+    /// <summary>
     /// Open and semiopen file bonus
     /// </summary>
     /// <param name="squareIndex"></param>
     /// <param name="pieceIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private (int MiddleGameScore, int EndGameScore) RookAdditonalEvaluation(int squareIndex, int pieceIndex)
+    private (int MiddleGameScore, int EndGameScore) RookAdditionalEvaluation(int squareIndex, int pieceIndex)
     {
         var attacksCount = Attacks.RookAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
 

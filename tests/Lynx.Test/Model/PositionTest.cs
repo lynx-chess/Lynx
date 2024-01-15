@@ -912,6 +912,145 @@ public class PositionTest
     }
 
     /// <summary>
+    /// 8   K . . . . . . .
+    /// 7   . . . . . . . .
+    /// 6   . . . . . . . .
+    /// 5   . . . p N . . .
+    /// 4   . . . P . n . .
+    /// 3   . . . . . . . .
+    /// 2   . . . . . . . .
+    /// 1   k . . . . . . .
+    ///     a b c d e f g h
+    /// </summary>
+    [TestCase("K7/8/8/3pN3/3P1n2/8/8/k7 w - - 0 1", 1)]
+    // Previous one mirrored
+    [TestCase("K7/8/8/3pN3/4n3/8/8/k7 w - - 0 1", -1)]
+
+    /// <summary>
+    /// 8   K . . . . . . .
+    /// 7   . . . . . . . .
+    /// 6   . . . . . . . .
+    /// 5   . . . p N . . .
+    /// 4   . n . P . P . .
+    /// 3   . . . . . . . .
+    /// 2   . . . . . . . .
+    /// 1   k . . . . . . .
+    ///     a b c d e f g h
+    /// </summary>
+    [TestCase("K7/8/8/3pN3/1n1P1P2/8/8/k7 w - - 0 1", 2)]
+
+    // Previous one mirrored
+    [TestCase("K7/8/8/3pNp2/4n3/8/8/k7 w - - 0 1", -2)]
+
+    /// <summary>
+    /// 8   K . . . . . . .
+    /// 7   . . . . . . . .
+    /// 6   . . . . . . . .
+    /// 5   . . . p N . . .
+    /// 4   . n . P . P . .
+    /// 3   . . . . . . . .
+    /// 2   . . . . . . . .
+    /// 1   k . . . . . . .
+    ///     a b c d e f g h
+    /// </summary>
+    [TestCase("K7/8/8/3pN3/p1pP1P2/1n6/8/k7 w - - 0 1", 0)]
+    // Previous one mirrored
+    [TestCase("K7/8/8/3pN3/p1pP1P2/1n6/8/k7 w - - 0 1", 0)]
+
+    /// <summary>
+    /// 8   K . . . . . . .
+    /// 7   . . . . . . . .
+    /// 6   . . . . . . . .
+    /// 5   . . . p N . . .
+    /// 4   p . p P . . . .
+    /// 3   . n . . . . . .
+    /// 2   . . . . . . . .
+    /// 1   k . . . . . . .
+    ///     a b c d e f g h
+    /// </summary>
+    [TestCase("K7/8/8/3pN3/p1pP4/1n6/8/k7 w - - 0 1", -1)]
+    // Previous one mirrored
+    [TestCase("K7/8/8/3pN3/p2P1P2/1n6/8/k7 b - - 0 1", -1)]
+
+    /// <summary>
+    /// 8   K . . . . . . .
+    /// 7   . . . p . . . .
+    /// 6   . . . . . . . .
+    /// 5   . . . . . . . .
+    /// 4   . . . . . . . .
+    /// 3   . . . . N . . .
+    /// 2   . . . P . P . .
+    /// 1   k . . . . . . .
+    ///     a b c d e f g h
+    /// </summary>
+    [TestCase("K7/3p4/8/8/8/4N3/3P1P2/k7 w - - 0 1", 0)]
+
+    // Previous one mirrored
+    [TestCase("K7/3p1p2/8/4n3/8/8/3P4/k7 b - - 0 1", 0)]
+
+    /// <summary>
+    /// 8   K . . . . . . .
+    /// 7   . . . . . p . .
+    /// 6   . . . . . . . .
+    /// 5   . . . . . . . .
+    /// 4   . . . . . . . .
+    /// 3   . . . . N . . .
+    /// 2   . . . P . P . .
+    /// 1   k . . . . . . .
+    ///     a b c d e f g h
+    /// </summary>
+    [TestCase("K7/5p2/8/8/8/4N3/3P1P2/k7 w - - 0 1", 0)]
+    // Previous one mirrored
+    [TestCase("K7/3p1p2/8/4n3/8/8/5P2/k7 b - - 0 1", 0)]
+
+    /// <summary>
+    /// 8   K . . . . . . .
+    /// 7   . . . . p . . .
+    /// 6   . . . . . . . .
+    /// 5   . . . . . . . .
+    /// 4   . . . . . . . .
+    /// 3   . . . . N . . .
+    /// 2   . . . P . P . .
+    /// 1   k . . . . . . .
+    ///     a b c d e f g h
+    /// </summary>
+    [TestCase("K7/4p3/8/8/8/4N3/3P1P2/k7 w - - 0 1", 2)]
+
+    // Previous one mirrored
+    [TestCase("K7/3p1p2/4n3/8/8/8/4P3/k7 w - - 0 1", -2)]
+    [TestCase("K7/3p1p2/4n3/8/8/8/4P3/k7 b - - 0 1", 2)]
+
+
+    /// <summary>
+    /// 8   K . . . . . . .
+    /// 7   . . . . p . . .
+    /// 6   . . . . N . . .
+    /// 5   . . . P . P . .
+    /// 4   . . . p . . . .
+    /// 3   . . . . n . . .
+    /// 2   . . . . P . . .
+    /// 1   k . . . . . . .
+    ///     a b c d e f g h
+    /// </summary>
+    [TestCase("K7/4p3/4N3/3P1P2/3p4/4n3/4P3/k7 w - - 0 1", 1)]
+    // Previous one mirrored
+    [TestCase("K7/4p3/4N3/3P4/3p1p2/4n3/4P3/k7 w - - 0 1", -1)]
+
+    public void StaticEvaluation_KnightOutpostBonus(string fen, int bonusCount)
+    {
+        Position position = new Position(fen);
+        int evaluation = AdditionalPieceEvaluation(position, Piece.N)
+            - AdditionalPieceEvaluation(position, Piece.n);
+
+        if (position.Side == Side.Black)
+        {
+            evaluation = -evaluation;
+        }
+
+        Assert.AreEqual(Configuration.EngineSettings.KnightOutpostBonus.MG * bonusCount, evaluation);
+    }
+
+    /// <summary>
     /// https://github.com/lynx-chess/Lynx/pull/510
     /// </summary>
     /// <param name="fen"></param>
