@@ -25,3 +25,28 @@ public enum BoardSquare
     a1, b1, c1, d1, e1, f1, g1, h1,
     noSquare = -1
 }
+
+public static class BoardSquareExtensions
+{
+    /// <summary>
+    /// https://www.chessprogramming.org/Color_of_a_Square
+    /// </summary>
+    /// <param name="squareIndex1"></param>
+    /// <param name="squareIndex2"></param>
+    /// <returns></returns>
+    public static bool DifferentColor(int squareIndex1, int squareIndex2)
+    {
+        return ((9 * (squareIndex1 ^ squareIndex2)) & 8) != 0;
+    }
+
+    /// <summary>
+    /// https://www.chessprogramming.org/Color_of_a_Square
+    /// </summary>
+    /// <param name="squareIndex1"></param>
+    /// <param name="squareIndex2"></param>
+    /// <returns></returns>
+    public static bool SameColor(int squareIndex1, int squareIndex2)
+    {
+        return ((9 * (squareIndex1 ^ squareIndex2)) & 8) == 0;
+    }
+}
