@@ -995,19 +995,18 @@ public class Position
 
         if (Masks.WhiteKnightOutpostMask.GetBit(squareIndex)                // Knight is centered and in the opponent's side of the board
             && PieceBitBoards[(int)Piece.n] == 0                            // No oponnent knights
-            && (PieceBitBoards[(int)Piece.p] & Masks.WhiteSidePassedPawnMasks[squareIndex]) == default)  // Knight has no potential opponent pawn attackers
+            && (PieceBitBoards[(int)Piece.p] & Masks.WhiteSidePassedPawnMasks[squareIndex]) == default  // Knight has no potential opponent pawn attackers
+            && (PieceBitBoards[(int)Piece.P] & Attacks.PawnAttacks[(int)Side.Black][squareIndex]) > 0)  // Knight has defenders
         {
             var oppositeBishops = PieceBitBoards[(int)Piece.b];
             var oppositeBishopCount = oppositeBishops.CountBits();
 
-            if (oppositeBishopCount == 0
-                || (oppositeBishopCount == 1
+            if (oppositeBishopCount == 0                                    // No opponent bishop
+                || (oppositeBishopCount == 1                                // Opposite color oponent bishop
                     && BoardSquareExtensions.DifferentColor(oppositeBishops.GetLS1BIndex(), squareIndex)))
             {
-                var ownPawnProtectersCount = (PieceBitBoards[(int)Piece.P] & Attacks.PawnAttacks[(int)Side.Black][squareIndex]).CountBits();
-
-                middleGameBonus = Configuration.EngineSettings.KnightOutpostBonus.MG * ownPawnProtectersCount;
-                endGameBonus = Configuration.EngineSettings.KnightOutpostBonus.EG * ownPawnProtectersCount;
+                middleGameBonus = Configuration.EngineSettings.KnightOutpostBonus.MG;
+                endGameBonus = Configuration.EngineSettings.KnightOutpostBonus.EG;
             }
         }
 
@@ -1027,19 +1026,18 @@ public class Position
 
         if (Masks.BlackKnightOutpostMask.GetBit(squareIndex)                // Knight is centered and in the opponent's side of the board
             && PieceBitBoards[(int)Piece.N] == 0                            // No oponnent knights
-            && (PieceBitBoards[(int)Piece.P] & Masks.BlackSidePassedPawnMasks[squareIndex]) == default)  // Knight has no potential opponent pawn attackers
+            && (PieceBitBoards[(int)Piece.P] & Masks.BlackSidePassedPawnMasks[squareIndex]) == default  // Knight has no potential opponent pawn attackers
+            && (PieceBitBoards[(int)Piece.p] & Attacks.PawnAttacks[(int)Side.White][squareIndex]) > 0)  // Knight has defenders
         {
             var oppositeBishops = PieceBitBoards[(int)Piece.B];
             var oppositeBishopCount = oppositeBishops.CountBits();
 
             if (oppositeBishopCount == 0                                    // No opponent bishop
-                || (oppositeBishopCount == 1                                // Opposite color bishop
+                || (oppositeBishopCount == 1                                // Opposite color oponent bishop
                     && BoardSquareExtensions.DifferentColor(oppositeBishops.GetLS1BIndex(), squareIndex)))
             {
-                var ownPawnProtectersCount = (PieceBitBoards[(int)Piece.p] & Attacks.PawnAttacks[(int)Side.White][squareIndex]).CountBits();
-
-                middleGameBonus = Configuration.EngineSettings.KnightOutpostBonus.MG * ownPawnProtectersCount;
-                endGameBonus = Configuration.EngineSettings.KnightOutpostBonus.EG * ownPawnProtectersCount;
+                middleGameBonus = Configuration.EngineSettings.KnightOutpostBonus.MG;
+                endGameBonus = Configuration.EngineSettings.KnightOutpostBonus.EG;
             }
         }
 
