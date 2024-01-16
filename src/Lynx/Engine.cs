@@ -47,6 +47,12 @@ public sealed partial class Engine
         _absoluteSearchCancellationTokenSource = new();
         _engineWriter = engineWriter;
 
+        _historyMoves = new int[12][];
+        for (int i = 0; i < _historyMoves.Length; ++i)
+        {
+            _historyMoves[i] = new int[64];
+        }
+
         InitializeTT();
     }
 
@@ -73,7 +79,9 @@ public sealed partial class Engine
             _lastPositionCommand = rawPositionCommand.ToString();
         }
 
-        Game = PositionCommand.ParseGame(rawPositionCommand);
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+
+        Game = PositionCommand.ParseGame(rawPositionCommand, moves);
         _isNewGameComing = false;
     }
 
@@ -95,7 +103,7 @@ public sealed partial class Engine
     {
         _searchCancellationTokenSource = new();
         _absoluteSearchCancellationTokenSource = new();
-        int? maxDepth = null;
+        int? maxDepth = Configuration.EngineSettings.MaxDepth;
         int? decisionTime = null;
 
         int millisecondsLeft;
@@ -111,15 +119,13 @@ public sealed partial class Engine
             millisecondsIncrement = goCommand.BlackIncrement;
         }
 
-        maxDepth = Configuration.EngineSettings.MaxDepth;
-
-        if (millisecondsLeft > 0)
+        if (millisecondsLeft != 0)  // Cutechess sometimes sends negative wtime/btime
         {
             if (goCommand.MovesToGo == default)
             {
                 // Inspired by Alexandria: time overhead to avoid timing out in the engine-gui communication process
                 millisecondsLeft -= 50;
-                Math.Clamp(millisecondsLeft, 50, int.MaxValue); // Avoiding 0/negative values
+                millisecondsLeft = Math.Clamp(millisecondsLeft, 50, int.MaxValue); // Avoiding 0/negative values
 
                 // 1/30, suggested by Serdra (EP discord)
                 decisionTime = Convert.ToInt32(Math.Min(0.5 * millisecondsLeft, (millisecondsLeft * 0.03333) + millisecondsIncrement));
@@ -127,7 +133,7 @@ public sealed partial class Engine
             else
             {
                 millisecondsLeft -= 500;
-                Math.Clamp(millisecondsLeft, 50, int.MaxValue); // Avoiding 0/negative values
+                millisecondsLeft = Math.Clamp(millisecondsLeft, 50, int.MaxValue); // Avoiding 0/negative values
 
                 decisionTime = Convert.ToInt32((millisecondsLeft / goCommand.MovesToGo) + millisecondsIncrement);
             }
@@ -228,6 +234,8 @@ public sealed partial class Engine
 
         Task.Run(async () =>
         {
+            Thread.CurrentThread.Priority = ThreadPriority.Highest;
+
             try
             {
                 await _isSearchingSemaphoreSlim.WaitAsync();

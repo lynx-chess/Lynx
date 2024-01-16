@@ -10,10 +10,24 @@ public sealed partial class Engine
 {
     private readonly Stopwatch _stopWatch = new();
     private readonly Move[] _pVTable = new Move[Configuration.EngineSettings.MaxDepth * (Configuration.EngineSettings.MaxDepth + 1) / 2];
-    private readonly int[,] _killerMoves = new int[2, Configuration.EngineSettings.MaxDepth];
-    private readonly int[,] _historyMoves = new int[12, 64];
+
+    /// <summary>
+    /// 3x<see cref="Configuration.EngineSettings.MaxDepth"/>
+    /// </summary>
+    private readonly int[][] _killerMoves =
+    [
+        new int[Configuration.EngineSettings.MaxDepth],
+        new int[Configuration.EngineSettings.MaxDepth],
+        new int[Configuration.EngineSettings.MaxDepth]
+    ];
+
+    /// <summary>
+    /// 12x64
+    /// </summary>
+    private readonly int[][] _historyMoves;
+
     private readonly int[] _maxDepthReached = new int[Constants.AbsoluteMaxDepth];
-    private TranspositionTable _tt = Array.Empty<TranspositionTableElement>();
+    private TranspositionTable _tt = [];
     private int _ttMask;
 
     private int _nodes;
@@ -21,14 +35,18 @@ public sealed partial class Engine
     private bool _isScoringPV;
 
     private SearchResult? _previousSearchResult;
-    private readonly int[,] _previousKillerMoves = new int[2, Configuration.EngineSettings.MaxDepth];
+    private readonly int[][] _previousKillerMoves =
+    [
+        new int[Configuration.EngineSettings.MaxDepth],
+        new int[Configuration.EngineSettings.MaxDepth],
+        new int[Configuration.EngineSettings.MaxDepth]
+    ];
 
     private readonly Move _defaultMove = default;
 
     /// <summary>
     /// IDDFs search
     /// </summary>
-    /// <param name="minDepth"></param>
     /// <param name="maxDepth"></param>
     /// <param name="decisionTime"></param>
     /// <returns>Not null <see cref="SearchResult"/>, although made nullable in order to match online tb probing signature</returns>
@@ -98,13 +116,13 @@ public sealed partial class Engine
 
                         _logger.Debug("Eval ({0}) outside of aspiration window [{1}, {2}] (depth {3}, nodes {4})", bestEvaluation, alpha, beta, depth, _nodes);
 
-                        window += window / 2;
+                        window += window >> 1;   // window / 2
 
                         // Depth change: https://github.com/lynx-chess/Lynx/pull/440
                         if (alpha >= bestEvaluation)     // Fail low
                         {
                             alpha = Math.Max(bestEvaluation - window, MinValue);
-                            beta = (alpha + beta) / 2;
+                            beta = (alpha + beta) >> 1;  // (alpha + beta) / 2
                         }
                         else if (beta <= bestEvaluation)     // Fail high
                         {
@@ -199,7 +217,9 @@ public sealed partial class Engine
     {
         bool onlyOneLegalMove = false;
         Move firstLegalMove = default;
-        foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition))
+
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, moves))
         {
             var gameState = Game.CurrentPosition.MakeMove(move);
             bool isPositionValid = Game.CurrentPosition.IsValid();
@@ -264,8 +284,8 @@ public sealed partial class Engine
 
             for (int d = 0; d < Configuration.EngineSettings.MaxDepth; ++d)
             {
-                _killerMoves[0, d] = _previousKillerMoves[0, d];
-                _killerMoves[1, d] = _previousKillerMoves[1, d];
+                _killerMoves[0][d] = _previousKillerMoves[0][d];
+                _killerMoves[1][d] = _previousKillerMoves[1][d];
             }
 
             // Re-search from depth 1
@@ -286,8 +306,9 @@ public sealed partial class Engine
 
             for (int d = 0; d < Configuration.EngineSettings.MaxDepth - 2; ++d)
             {
-                _killerMoves[0, d] = _previousKillerMoves[0, d + 2];
-                _killerMoves[1, d] = _previousKillerMoves[1, d + 2];
+                _killerMoves[0][d] = _previousKillerMoves[0][d + 2];
+                _killerMoves[1][d] = _previousKillerMoves[1][d + 2];
+                _killerMoves[2][d] = _previousKillerMoves[2][d + 2];
             }
 
             // Re-search from depth 1
@@ -295,8 +316,15 @@ public sealed partial class Engine
         }
         else
         {
-            Array.Clear(_killerMoves);
-            Array.Clear(_historyMoves);
+            Array.Clear(_killerMoves[0]);
+            Array.Clear(_killerMoves[1]);
+            Array.Clear(_killerMoves[2]);
+            Debug.Assert(_killerMoves.Length == 3);
+
+            for (int i = 0; i < _historyMoves.Length; i++)
+            {
+                Array.Clear(_historyMoves[i]);
+            }
         }
 
         return depth;
@@ -334,7 +362,7 @@ public sealed partial class Engine
         SearchResult finalSearchResult;
         if (lastSearchResult is null)
         {
-            finalSearchResult = new(default, bestEvaluation, depth, new List<Move>(), alpha, beta);
+            finalSearchResult = new(default, bestEvaluation, depth, [], alpha, beta);
         }
         else
         {

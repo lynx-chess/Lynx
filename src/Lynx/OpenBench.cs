@@ -68,16 +68,23 @@ public static class OpenBench
         "4r2k/1p3rbp/2p1N1p1/p3n3/P2NB1nq/1P6/4R1P1/B1Q2RK1 b - - 4 32",
         "4r1k1/1q1r3p/2bPNb2/1p1R3Q/pB3p2/n5P1/6B1/4R1K1 w - - 2 36",
         "3qr2k/1p3rbp/2p3p1/p7/P2pBNn1/1P3n2/6P1/B1Q1RR1K b - - 1 30",
-        "3qk1b1/1p4r1/1n4r1/2P1b2B/p3N2p/P2Q3P/8/1R3R1K w - - 2 39"
+        "3qk1b1/1p4r1/1n4r1/2P1b2B/p3N2p/P2Q3P/8/1R3R1K w - - 2 39",
+
+        "6RR/4bP2/8/8/5r2/3K4/5p2/4k3 w - -",                           // SEE test suite - regular promotion
+        "1n2kb1r/p1P4p/2qb4/5pP1/4n2Q/8/PP1PPP1P/RNB1KBNR w KQk - 0 1", // SEE test suite - promotion with capture
+        "6Q1/8/1kp4P/2q1p3/2PpP3/2nP2P1/p7/5BK1 b - - 1 35",            // Fischer vs Petrosian - double promotion
+        "5R2/2k3PK/8/5N2/7P/5q2/8/q7 w - - 0 69",                       // McShane - Aronian 2012 - knight promotion
+        "rnbqk1nr/ppp2ppp/8/4P3/1BP5/8/PP2KpPP/RN1Q1BNR b kq - 1 7"     // Albin Countergambit, Lasker Trap - knight promotion
     ];
 
     /// <summary>
     /// Positions taken from Akimbo
-    /// https://github.com/JacquesRW/akimbo/blob/main/resources/fens.txt
+    /// (https://github.com/JacquesRW/akimbo/blob/main/resources/fens.txt)
+    /// plus random some endgame positions to ensure promotions with/without captures are well covered
     /// </summary>
-    public static async Task<(int TotalNodes, long Nps)> Bench(Channel<string> _engineWriter)
+    public static async Task<(int TotalNodes, long Nps)> Bench(int depth, Channel<string> engineWriter)
     {
-        var engine = new Engine(_engineWriter);
+        var engine = new Engine(engineWriter);
         var stopwatch = new Stopwatch();
 
         int totalNodes = 0;
@@ -85,17 +92,17 @@ public static class OpenBench
 
         foreach (var fen in _benchmarkFens)
         {
-            await _engineWriter.Writer.WriteAsync($"Benchmarking {fen} at depth {Configuration.EngineSettings.BenchDepth}");
+            await engineWriter.Writer.WriteAsync($"Benchmarking {fen} at depth {depth}");
 
             engine.AdjustPosition($"position fen {fen}");
             stopwatch.Restart();
 
-            var result = await engine.BestMove(new($"go depth {Configuration.EngineSettings.BenchDepth}"));
+            var result = await engine.BestMove(new($"go depth {depth}"));
             totalTime += stopwatch.ElapsedMilliseconds;
             totalNodes += result.Nodes;
         }
 
-        await _engineWriter.Writer.WriteAsync($"Total time: {totalTime}");
+        await engineWriter.Writer.WriteAsync($"Total time: {totalTime}");
 
         return (totalNodes, Utils.CalculateNps(totalNodes, totalTime));
     }

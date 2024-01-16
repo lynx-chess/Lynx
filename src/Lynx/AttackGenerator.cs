@@ -5,16 +5,17 @@ namespace Lynx;
 public static class AttackGenerator
 {
     /// <summary>
+    /// 2x64
     /// BitBoard[isWhite, square]
     /// </summary>
-    public static BitBoard[,] InitializePawnAttacks()
+    public static BitBoard[][] InitializePawnAttacks()
     {
-        BitBoard[,] pawnAttacks = new BitBoard[2, 64];
+        BitBoard[][] pawnAttacks = [new BitBoard[64], new BitBoard[64]];
 
         for (int square = 0; square < 64; ++square)
         {
-            pawnAttacks[0, square] = MaskPawnAttacks(square, isWhite: false);
-            pawnAttacks[1, square] = MaskPawnAttacks(square, isWhite: true);
+            pawnAttacks[0][square] = MaskPawnAttacks(square, isWhite: false);
+            pawnAttacks[1][square] = MaskPawnAttacks(square, isWhite: true);
         }
 
         return pawnAttacks;
@@ -72,13 +73,15 @@ public static class AttackGenerator
     /// Returns bishop occupancy masks and attacks
     /// </summary>
     /// <returns>(BitBoard[64], BitBoard[64, 512])</returns>
-    public static (BitBoard[] BishopOccupancyMasks, BitBoard[,] BishopAttacks) InitializeBishopMagicAttacks()
+    public static (BitBoard[] BishopOccupancyMasks, BitBoard[][] BishopAttacks) InitializeBishopMagicAttacks()
     {
         BitBoard[] occupancyMasks = new BitBoard[64];
-        BitBoard[,] attacks = new BitBoard[64, 512];
+        BitBoard[][] attacks = new BitBoard[64][];  // 64x512
 
         for (int square = 0; square < 64; ++square)
         {
+            attacks[square] = new BitBoard[512];
+
             occupancyMasks[square] = MaskBishopOccupancy(square);
 
             var relevantBitsCount = Constants.BishopRelevantOccupancyBits[square];
@@ -91,7 +94,7 @@ public static class AttackGenerator
 
                 var magicIndex = (occupancy * Constants.BishopMagicNumbers[square]) >> (64 - relevantBitsCount);
 
-                attacks[square, magicIndex] = GenerateBishopAttacksOnTheFly(square, occupancy);
+                attacks[square][magicIndex] = GenerateBishopAttacksOnTheFly(square, occupancy);
             }
         }
 
@@ -102,13 +105,15 @@ public static class AttackGenerator
     /// Returns rook occupancy masks and attacks
     /// </summary>
     /// <returns>(BitBoard[64], BitBoard[64, 512])</returns>
-    public static (BitBoard[] RookOccupancyMasks, BitBoard[,] RookAttacks) InitializeRookMagicAttacks()
+    public static (BitBoard[] RookOccupancyMasks, BitBoard[][] RookAttacks) InitializeRookMagicAttacks()
     {
         BitBoard[] occupancyMasks = new BitBoard[64];
-        BitBoard[,] attacks = new BitBoard[64, 4096];
+        BitBoard[][] attacks = new BitBoard[64][];   // 64x4096
 
         for (int square = 0; square < 64; ++square)
         {
+            attacks[square] = new BitBoard[4096];
+
             occupancyMasks[square] = MaskRookOccupancy(square);
 
             var relevantBitsCount = Constants.RookRelevantOccupancyBits[square];
@@ -121,7 +126,7 @@ public static class AttackGenerator
 
                 var magicIndex = (occupancy * Constants.RookMagicNumbers[square]) >> (64 - relevantBitsCount);
 
-                attacks[square, magicIndex] = GenerateRookAttacksOnTheFly(square, occupancy);
+                attacks[square][magicIndex] = GenerateRookAttacksOnTheFly(square, occupancy);
             }
         }
 

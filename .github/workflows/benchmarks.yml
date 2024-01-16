@@ -29,7 +29,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
@@ -57,7 +57,7 @@ jobs:
 
     - name: 'Upload ${{ matrix.os }} artifacts'
       continue-on-error: true
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: artifacts-${{ matrix.os }}-${{ github.run_number }}
         # Can't include 'github.event.inputs.benchmark_name' in the name, since * is an invalid character

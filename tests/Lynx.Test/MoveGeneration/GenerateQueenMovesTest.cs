@@ -5,6 +5,18 @@ namespace Lynx.Test.MoveGeneration;
 
 public class GenerateQueenMovesTest
 {
+    private static IEnumerable<Move> GenerateQueenMoves(Position position)
+    {
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        return MoveGenerator.GenerateAllMoves(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.Q || m.Piece() == (int)Piece.q);
+    }
+
+    private static IEnumerable<Move> GenerateQueenCaptures(Position position)
+    {
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        return MoveGenerator.GenerateAllCaptures(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.Q || m.Piece() == (int)Piece.q);
+    }
+
     [TestCase(Constants.EmptyBoardFEN, 0)]
     [TestCase(Constants.InitialPositionFEN, 0)]
     [TestCase("8/8/8/8/8/8/PP3PPP/RNBQKBNR w KQkq - 0 1", 14)]
@@ -20,8 +32,7 @@ public class GenerateQueenMovesTest
     public void QueenMoves_Count(string fen, int expectedMoves)
     {
         var position = new Position(fen);
-        var offset = Utils.PieceOffset(position.Side);
-        var moves = MoveGenerator.GeneratePieceMovesForReference((int)Piece.Q + offset, position);
+        var moves = GenerateQueenMoves(position);
 
         Assert.AreEqual(expectedMoves, moves.Count());
 
@@ -48,7 +59,7 @@ public class GenerateQueenMovesTest
         var position = new Position(Constants.TrickyTestPositionFEN);
         var offset = Utils.PieceOffset(position.Side);
         var piece = (int)Piece.Q + offset;
-        var moves = MoveGenerator.GeneratePieceMovesForReference(piece, position);
+        var moves = GenerateQueenMoves(position);
 
         Assert.AreEqual(9, moves.Count(m => m.Piece() == piece));
 
@@ -109,7 +120,7 @@ public class GenerateQueenMovesTest
         var position = new Position("r3kR1r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1");
         var offset = Utils.PieceOffset(position.Side);
         var piece = (int)Piece.Q + offset;
-        var moves = MoveGenerator.GeneratePieceMovesForReference(piece, position);
+        var moves = GenerateQueenMoves(position);
 
         Assert.AreEqual(4, moves.Count(m => m.Piece() == piece));
 
@@ -139,7 +150,7 @@ public class GenerateQueenMovesTest
         var position = new Position(fen);
         var offset = Utils.PieceOffset(position.Side);
         var piece = (int)Piece.Q + offset;
-        var moves = MoveGenerator.GeneratePieceMovesForReference(piece, position, capturesOnly: true);
+        var moves = GenerateQueenCaptures(position);
 
         Assert.AreEqual(expectedCaptures, moves.Count(m => m.Piece() == piece && m.IsCapture()));
     }

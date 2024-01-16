@@ -1,22 +1,20 @@
-﻿/*
- * PSQT based on https://www.chessprogramming.org/PeSTO%27s_Evaluation_Function
-*/
-
-using Lynx.Model;
+﻿using Lynx.Model;
 
 namespace Lynx;
 
 public static class EvaluationConstants
 {
     /// <summary>
-    /// 21454 games, 16+0.16, UHO_XXL_+0.90_+1.19.epd
-    /// Retained (W,D,L) = (486074, 1108791, 487345) positions.
+    /// 26799 games, 20+0.2, UHO_XXL_+0.90_+1.19.epd
+    /// Retained (W,D,L) = (695493, 1473130, 695796) positions.
     /// </summary>
-    public const int EvalNormalizationCoefficient = 138;
+    public const int EvalNormalizationCoefficient = 90;
 
-    public static readonly double[] As = [-25.59900221, 175.23377472, -145.09355540, 133.49051930];
+    public static readonly double[] As = [-22.42003433, 164.85211203, -163.90358958, 112.35539471];
 
-    public static readonly double[] Bs = [-14.14613328, 84.98205725, -101.16332276, 120.88906952];
+    public static readonly double[] Bs = [-11.46115172, 75.58863284, -86.52557504, 85.45272407];
+
+#pragma warning disable IDE0055 // Discard formatting in this region
 
     public static readonly int[] GamePhaseByPiece =
     [
@@ -24,161 +22,163 @@ public static class EvaluationConstants
         0, 1, 1, 2, 4, 0
     ];
 
-    public static readonly int[] MiddleGamePieceValues =
-    [
-            +73, +275, +249, +359, +788, 0,
-            -73, -275, -249, -359, -788, 0
-    ];
+public static readonly int[] MiddleGamePieceValues =
+[
+        +103, +386, +357, +475, +1084, 0,
+        -103, -386, -357, -475, -1084, 0
+];
 
-    public static readonly int[] EndGamePieceValues =
-    [
-            +109, +356, +324, +653, +1123, 0,
-            -109, -356, -324, -653, -1123, 0
-    ];
+public static readonly int[] EndGamePieceValues =
+[
+        +149, +485, +434, +843, +1560, 0,
+        -149, -485, -434, -843, -1560, 0
+];
 
-    public static readonly int[] MiddleGamePawnTable =
-    [
-            0, 0, 0, 0, 0, 0, 0, 0,
-            -24, -17, -9, -10, 0, 18, 22, -14,
-            -22, -19, -2, 10, 15, 20, 17, 4,
-            -19, -12, 3, 15, 21, 24, 1, -2,
-            -17, -9, 2, 18, 23, 22, 0, -3,
-            -21, -13, -2, 5, 12, 15, 12, 0,
-            -24, -14, -13, -9, 2, 13, 13, -20,
-            0, 0, 0, 0, 0, 0, 0, 0,
-    ];
+public static readonly int[] MiddleGamePawnTable =
+[
+        0,      0,      0,      0,      0,      0,      0,      0,
+        -26,    -23,    -15,    -9,     -3,     29,     31,     -15,
+        -27,    -25,    -5,     11,     18,     27,     24,     7,
+        -27,    -15,    3,      18,     27,     30,     3,      -6,
+        -26,    -11,    1,      19,     27,     27,     2,      -7,
+        -24,    -19,    -3,     4,      14,     23,     17,     1,
+        -27,    -21,    -20,    -14,    -5,     22,     20,     -22,
+        0,      0,      0,      0,      0,      0,      0,      0,
+];
 
-    public static readonly int[] EndGamePawnTable =
-    [
-            0, 0, 0, 0, 0, 0, 0, 0,
-            10, 9, 3, -11, 3, 1, -3, -7,
-            8, 9, -1, -11, -6, -6, -1, -7,
-            20, 14, 1, -16, -14, -10, 6, 0,
-            18, 14, -2, -13, -12, -7, 4, -2,
-            10, 8, -3, -9, -2, -3, -1, -8,
-            12, 9, 7, -13, 6, 4, -1, -4,
-            0, 0, 0, 0, 0, 0, 0, 0,
-    ];
+public static readonly int[] EndGamePawnTable =
+[
+        0,      0,      0,      0,      0,      0,      0,      0,
+        12,     12,     6,      -15,    6,      2,      -4,     -12,
+        11,     13,     0,      -14,    -7,     -5,     -2,     -11,
+        28,     20,     0,      -22,    -18,    -12,    8,      -1,
+        25,     19,     -2,     -17,    -16,    -9,     6,      -3,
+        12,     10,     -4,     -13,    -2,     -3,     -1,     -11,
+        15,     12,     9,      -14,    16,     6,      -1,     -9,
+        0,      0,      0,      0,      0,      0,      0,      0,
+];
 
-    public static readonly int[] MiddleGameKnightTable =
-    [
-            -111, -27, -42, -31, -16, -19, -20, -71,
-            -36, -19, -2, 13, 14, 17, -9, -14,
-            -24, 2, 18, 42, 47, 33, 29, -1,
-            -6, 22, 33, 47, 47, 47, 34, 15,
-            -3, 17, 36, 37, 45, 46, 34, 13,
-            -22, 4, 17, 36, 45, 27, 22, -1,
-            -33, -9, 4, 11, 12, 12, -6, -15,
-            -123, -30, -41, -22, -14, -13, -26, -69,
-    ];
+public static readonly int[] MiddleGameKnightTable =
+[
+        -153,   -23,    -52,    -32,    -12,    -21,    -9,     -98,
+        -46,    -27,    -3,     15,     18,     25,     -14,    -17,
+        -28,    1,      20,     57,     61,     42,     35,     -3,
+        -11,    25,     43,     60,     60,     61,     46,     18,
+        -8,     24,     45,     48,     57,     59,     47,     17,
+        -26,    3,      20,     49,     60,     35,     28,     -4,
+        -48,    -19,    0,      15,     17,     19,     -11,    -18,
+        -168,   -24,    -49,    -21,    -9,     -12,    -17,    -91,
+];
 
-    public static readonly int[] EndGameKnightTable =
-    [
-            -57, -41, -10, -8, -7, -21, -35, -69,
-            -15, -2, 13, 7, 7, 6, -10, -15,
-            -6, 11, 25, 27, 27, 13, 5, -12,
-            6, 15, 37, 37, 39, 34, 16, -4,
-            6, 21, 35, 38, 39, 29, 21, -1,
-            -9, 15, 19, 33, 24, 14, 4, -9,
-            -24, -1, 4, 9, 4, 3, -12, -16,
-            -61, -40, -7, -10, -7, -17, -33, -63,
-    ];
+public static readonly int[] EndGameKnightTable =
+[
+        -72,    -61,    -13,    -13,    -10,    -28,    -55,    -93,
+        -22,    -2,     15,     9,      10,     7,      -13,    -21,
+        -14,    16,     38,     38,     37,     18,     10,     -15,
+        7,      20,     52,     53,     56,     50,     25,     -6,
+        4,      27,     51,     55,     58,     47,     31,     0,
+        -18,    19,     27,     45,     35,     20,     7,      -11,
+        -28,    2,      5,      13,     5,      0,      -15,    -25,
+        -78,    -60,    -9,     -17,    -11,    -26,    -53,    -93,
+];
 
-    public static readonly int[] MiddleGameBishopTable =
-    [
-            -14, 10, -7, -19, -12, -16, -14, 5,
-            5, 4, 5, -13, 2, -2, 23, -5,
-            -4, 5, -2, 1, -5, 10, 7, 23,
-            -2, -6, -6, 14, 12, -13, 3, 1,
-            -9, 0, -10, 12, 3, -8, -3, 7,
-            4, 4, 5, -5, 3, 4, 8, 20,
-            6, 13, 9, -4, -3, -1, 17, 1,
-            11, 10, 3, -27, -13, -18, -4, -9,
-    ];
+public static readonly int[] MiddleGameBishopTable =
+[
+        -15,    16,     -2,     -15,    -10,    -16,    -23,    2,
+        8,      3,      7,      -18,    1,      -1,     29,     -12,
+        -6,     5,      -4,     3,      -8,     14,     5,      28,
+        -7,     -7,     -6,     23,     19,     -18,    2,      -2,
+        -16,    -2,     -15,    17,     6,      -13,    -6,     5,
+        5,      5,      7,      -5,     6,      7,      8,      24,
+        10,     15,     12,     -6,     -3,     4,      21,     -2,
+        10,     20,     12,     -29,    -13,    -21,    1,      -12,
+];
 
-    public static readonly int[] EndGameBishopTable =
-    [
-            -8, 14, -16, 4, -4, 3, -3, -28,
-            -3, -4, -3, 4, 1, -8, -2, -11,
-            11, 12, 6, 4, 10, 5, 2, 4,
-            10, 8, 7, 0, -1, 7, 3, 1,
-            7, 7, 5, 4, -7, 2, 3, 2,
-            10, 3, 0, 2, 5, 0, 1, 4,
-            -12, -9, -14, 2, 1, 0, 0, -10,
-            -8, -10, -13, 4, 6, 4, -1, -16,
-    ];
+public static readonly int[] EndGameBishopTable =
+[
+        -14,    18,     -13,    3,      -3,     6,      1,      -31,
+        -5,     -8,     -4,     5,      4,      -10,    -2,     -16,
+        14,     16,     8,      3,      12,     4,      7,      10,
+        13,     8,      7,      -2,     -6,     6,      4,      5,
+        9,      10,     6,      4,      -10,    5,      4,      5,
+        12,     4,      0,      1,      5,      -1,     4,      7,
+        -15,    -11,    -17,    3,      1,      -3,     -2,     -11,
+        -7,     -12,    -7,     7,      8,      9,      -2,     -22,
+];
 
-    public static readonly int[] MiddleGameRookTable =
-    [
-            -5, -11, -11, -7, 5, -4, 2, -5,
-            -22, -9, -10, -10, -1, 0, 14, -3,
-            -22, -12, -13, -7, 5, 11, 42, 22,
-            -20, -13, -9, -6, 0, 5, 31, 20,
-            -14, -10, -5, 1, 0, 9, 23, 18,
-            -19, -10, -7, 0, 6, 17, 41, 26,
-            -21, -19, -6, -6, -1, 0, 18, -1,
-            -4, -6, -5, 2, 11, -1, 7, 6,
-    ];
+public static readonly int[] MiddleGameRookTable =
+[
+        -4,     -10,    -5,     2,      14,     3,      10,     0,
+        -27,    -17,    -14,    -14,    -2,     3,      21,     0,
+        -29,    -19,    -23,    -13,    4,      9,      55,     31,
+        -26,    -21,    -18,    -12,    -7,     8,      44,     21,
+        -20,    -17,    -12,    -5,     -10,    7,      33,     16,
+        -24,    -16,    -19,    -5,     1,      19,     50,     30,
+        -25,    -28,    -9,     -7,     -1,     1,      27,     4,
+        -2,     -3,     1,      12,     23,     8,      17,     12,
+];
 
-    public static readonly int[] EndGameRookTable =
-    [
-            5, 7, 12, 3, -4, 4, 5, -1,
-            10, 15, 15, 8, -1, 2, -2, 2,
-            6, 4, 6, 2, -7, -8, -18, -19,
-            8, 4, 8, 5, -4, -1, -11, -17,
-            7, 5, 9, 1, -2, -7, -12, -14,
-            7, 10, 1, -5, -9, -11, -17, -13,
-            14, 17, 12, 4, -3, 0, -4, 4,
-            0, 0, 7, -1, -9, -1, -3, -9,
-    ];
+public static readonly int[] EndGameRookTable =
+[
+        6,      3,      7,      -2,     -11,    4,      0,      -5,
+        15,     20,     21,     11,     0,      -2,     -6,     2,
+        11,     8,      12,     5,      -9,     -11,    -23,    -20,
+        15,     10,     12,     6,      -2,     -2,     -16,    -15,
+        14,     9,      12,     2,      -1,     -9,     -13,    -11,
+        12,     13,     3,      -4,     -11,    -16,    -22,    -14,
+        20,     23,     16,     5,      -3,     -2,     -8,     2,
+        1,      -3,     2,      -8,     -18,    -4,     -9,     -15,
+];
 
-    public static readonly int[] MiddleGameQueenTable =
-    [
-            -13, -15, -16, -2, -9, -27, 1, -2,
-            4, -5, 6, 0, 3, 5, 15, 38,
-            -2, -2, -3, -3, -6, 8, 28, 42,
-            -4, -12, -9, -4, -5, 0, 13, 22,
-            -6, -8, -11, -11, -5, 1, 7, 17,
-            -1, -1, -8, -6, -1, 4, 18, 28,
-            -7, -15, 3, 8, 5, 0, 9, 29,
-            -10, -20, -10, 1, -6, -35, -14, 11,
-    ];
+public static readonly int[] MiddleGameQueenTable =
+[
+        -15,    -10,    -5,     9,      3,      -32,    14,     1,
+        0,      -10,    7,      -2,     2,      6,      22,     51,
+        -8,     -5,     -10,    -9,     -14,    6,      35,     59,
+        -12,    -20,    -19,    -9,     -11,    -5,     11,     25,
+        -12,    -15,    -20,    -20,    -10,    -6,     9,      22,
+        -5,     -3,     -16,    -13,    -8,     4,      20,     39,
+        -15,    -21,    3,      9,      7,      3,      6,      37,
+        -11,    -11,    5,      11,     6,      -39,    -12,    28,
+];
 
-    public static readonly int[] EndGameQueenTable =
-    [
-            -18, -10, 0, -8, -4, -3, -28, 1,
-            -19, -14, -19, -2, -1, -13, -32, -4,
-            -13, -4, -1, -2, 14, 14, -10, 6,
-            -11, 5, -5, 7, 17, 24, 29, 22,
-            0, 0, 6, 16, 14, 18, 18, 33,
-            -12, -8, 8, 6, 10, 17, 12, 15,
-            -11, -6, -15, -14, -5, -3, -27, 3,
-            -7, -4, -1, -8, 3, 21, 13, -6,
-    ];
+public static readonly int[] EndGameQueenTable =
+[
+        -27,    -24,    -10,    -9,     -19,    -11,    -46,    6,
+        -22,    -13,    -28,    0,      -2,     -17,    -48,    -5,
+        -17,    -7,     4,      -1,     23,     23,     -8,     3,
+        -11,    8,      5,      12,     28,     40,     49,     35,
+        -2,     2,      14,     26,     26,     34,     27,     48,
+        -20,    -14,    15,     13,     19,     22,     23,     18,
+        -15,    -6,     -23,    -18,    -12,    -10,    -32,    6,
+        -15,    -18,    -17,    -2,     -9,     21,     13,     -9,
+];
 
-    public static readonly int[] MiddleGameKingTable =
-    [
-            19, 27, 4, -74, -15, -64, 14, 32,
-            -16, -22, -39, -70, -79, -59, -21, 2,
-            -80, -74, -107, -110, -114, -123, -86, -91,
-            -116, -115, -135, -165, -160, -149, -150, -173,
-            -81, -97, -126, -154, -158, -128, -150, -157,
-            -71, -45, -101, -110, -94, -103, -77, -81,
-            56, -17, -37, -62, -63, -49, -8, 10,
-            28, 45, 11, -64, -4, -54, 27, 43,
-    ];
+public static readonly int[] MiddleGameKingTable =
+[
+        34,     55,     30,     -72,    12,     -58,    44,     57,
+        -3,     -12,    -33,    -74,    -88,    -58,    -7,     23,
+        -83,    -71,    -116,   -119,   -133,   -137,   -88,    -100,
+        -120,   -119,   -138,   -181,   -172,   -160,   -157,   -190,
+        -85,    -87,    -128,   -159,   -174,   -144,   -161,   -182,
+        -77,    -42,    -108,   -119,   -103,   -116,   -78,    -92,
+        83,     -2,     -34,    -64,    -69,    -46,    9,      32,
+        49,     82,     43,     -55,    25,     -47,    58,     70,
+];
 
-    public static readonly int[] EndGameKingTable =
-    [
-            -58, -32, -11, 10, -20, 5, -22, -63,
-            -8, 19, 29, 40, 46, 34, 17, -8,
-            10, 40, 56, 65, 67, 61, 43, 25,
-            19, 52, 72, 87, 83, 75, 64, 44,
-            9, 45, 69, 83, 86, 73, 66, 41,
-            8, 35, 55, 65, 62, 56, 43, 22,
-            -29, 13, 28, 37, 39, 31, 13, -13,
-            -66, -39, -14, 5, -17, 2, -26, -67,
-    ];
+public static readonly int[] EndGameKingTable =
+[
+        -85,    -49,    -22,    4,      -36,    -3,     -41,    -96,
+        -21,    16,     30,     43,     51,     36,     14,     -24,
+        7,      44,     65,     77,     81,     71,     47,     25,
+        17,     60,     85,     102,    98,     90,     75,     47,
+        5,      50,     82,     98,     103,    88,     78,     46,
+        6,      40,     64,     77,     74,     66,     47,     20,
+        -45,    11,     31,     41,     44,     33,     9,      -27,
+        -97,    -61,    -29,    -3,     -31,    -7,     -45,    -101,
+];
+
+#pragma warning restore IDE0055
 
     public static readonly int[] MiddleGamePawnTableBlack = MiddleGamePawnTable.Select((_, index) => -MiddleGamePawnTable[index ^ 56]).ToArray();
     public static readonly int[] EndGamePawnTableBlack = EndGamePawnTable.Select((_, index) => -EndGamePawnTable[index ^ 56]).ToArray();
@@ -238,29 +238,49 @@ public static class EvaluationConstants
         EndGameKingTableBlack
     ];
 
-    public static readonly int[,] MiddleGameTable = new int[12, 64];
-    public static readonly int[,] EndGameTable = new int[12, 64];
+    /// <summary>
+    /// 12x64
+    /// </summary>
+    public static readonly int[][] MiddleGameTable = new int[12][];
 
-    public static readonly int[,] LMRReductions = new int[Constants.AbsoluteMaxDepth, Constants.MaxNumberOfPossibleMovesInAPosition];
+    /// <summary>
+    /// 12x64
+    /// </summary>
+    public static readonly int[][] EndGameTable = new int[12][];
+
+    /// <summary>
+    /// <see cref="Constants.AbsoluteMaxDepth"/> x <see cref="Constants.MaxNumberOfPossibleMovesInAPosition"/>
+    /// </summary>
+    public static readonly int[][] LMRReductions = new int[Constants.AbsoluteMaxDepth][];
+
+    public static readonly int[] HistoryBonus = new int[Constants.AbsoluteMaxDepth];
 
     static EvaluationConstants()
     {
         for (int piece = (int)Piece.P; piece <= (int)Piece.k; ++piece)
         {
+            MiddleGameTable[piece] = new int[64];
+            EndGameTable[piece] = new int[64];
             for (int sq = 0; sq < 64; ++sq)
             {
-                MiddleGameTable[piece, sq] = MiddleGamePieceValues[piece] + MiddleGamePositionalTables[piece][sq];
-                EndGameTable[piece, sq] = EndGamePieceValues[piece] + EndGamePositionalTables[piece][sq];
+                MiddleGameTable[piece][sq] = MiddleGamePieceValues[piece] + MiddleGamePositionalTables[piece][sq];
+                EndGameTable[piece][sq] = EndGamePieceValues[piece] + EndGamePositionalTables[piece][sq];
             }
         }
 
         for (int searchDepth = 1; searchDepth < Constants.AbsoluteMaxDepth; ++searchDepth)    // Depth > 0 or we'd be in QSearch
         {
+            LMRReductions[searchDepth] = new int[Constants.MaxNumberOfPossibleMovesInAPosition];
+
             for (int movesSearchedCount = 1; movesSearchedCount < Constants.MaxNumberOfPossibleMovesInAPosition; ++movesSearchedCount) // movesSearchedCount > 0 or we wouldn't be applying LMR
             {
-                LMRReductions[searchDepth, movesSearchedCount] = Convert.ToInt32(Math.Round(
+                LMRReductions[searchDepth][movesSearchedCount] = Convert.ToInt32(Math.Round(
                     Configuration.EngineSettings.LMR_Base + (Math.Log(movesSearchedCount) * Math.Log(searchDepth) / Configuration.EngineSettings.LMR_Divisor)));
             }
+
+            HistoryBonus[searchDepth] = Math.Min(
+                Configuration.EngineSettings.History_MaxMoveRawBonus,
+                (4 * searchDepth * searchDepth) + (120 * searchDepth) - 120);   // Sirius, originally from Berserk
         }
     }
 
@@ -276,21 +296,21 @@ public static class EvaluationConstants
     ///      Queen              101    201    301    401    501    601
     ///       King              100    200    300    400    500    600
     /// </summary>
-    public static readonly int[,] MostValueableVictimLeastValuableAttacker =
-    {
-        { 105, 205, 305, 405, 505, 605, 105, 205, 305, 405, 505, 605 },
-        { 104, 204, 304, 404, 504, 604, 104, 204, 304, 404, 504, 604 },
-        { 103, 203, 303, 403, 503, 603, 103, 203, 303, 403, 503, 603 },
-        { 102, 202, 302, 402, 502, 602, 102, 202, 302, 402, 502, 602 },
-        { 101, 201, 301, 401, 501, 601, 101, 201, 301, 401, 501, 601 },
-        { 100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600 },
-        { 105, 205, 305, 405, 505, 605, 105, 205, 305, 405, 505, 605 },
-        { 104, 204, 304, 404, 504, 604, 104, 204, 304, 404, 504, 604 },
-        { 103, 203, 303, 403, 503, 603, 103, 203, 303, 403, 503, 603 },
-        { 102, 202, 302, 402, 502, 602, 102, 202, 302, 402, 502, 602 },
-        { 101, 201, 301, 401, 501, 601, 101, 201, 301, 401, 501, 601 },
-        { 100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600 }
-    };
+    public static readonly int[][] MostValueableVictimLeastValuableAttacker =
+    [
+        [105, 205, 305, 405, 505, 605, 105, 205, 305, 405, 505, 605],
+        [104, 204, 304, 404, 504, 604, 104, 204, 304, 404, 504, 604],
+        [103, 203, 303, 403, 503, 603, 103, 203, 303, 403, 503, 603],
+        [102, 202, 302, 402, 502, 602, 102, 202, 302, 402, 502, 602],
+        [101, 201, 301, 401, 501, 601, 101, 201, 301, 401, 501, 601],
+        [100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600],
+        [105, 205, 305, 405, 505, 605, 105, 205, 305, 405, 505, 605],
+        [104, 204, 304, 404, 504, 604, 104, 204, 304, 404, 504, 604],
+        [103, 203, 303, 403, 503, 603, 103, 203, 303, 403, 503, 603],
+        [102, 202, 302, 402, 502, 602, 102, 202, 302, 402, 502, 602],
+        [101, 201, 301, 401, 501, 601, 101, 201, 301, 401, 501, 601],
+        [100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600]
+    ];
 
     /// <summary>
     /// Base absolute checkmate evaluation value. Actual absolute evaluations are lower than this one by a number of <see cref="Position.DepthCheckmateFactor"/>
@@ -320,16 +340,20 @@ public static class EvaluationConstants
 
     public const int TTMoveScoreValue = 2_097_152;
 
-    /// <summary>
-    /// For MVVLVA
-    /// </summary>
-    public const int CaptureMoveBaseScoreValue = 1_048_576;
+    #region Move ordering
+
+    public const int GoodCaptureMoveBaseScoreValue = 1_048_576;
 
     public const int FirstKillerMoveValue = 524_288;
 
     public const int SecondKillerMoveValue = 262_144;
 
-    public const int PromotionMoveScoreValue = 131_072;
+    public const int ThirdKillerMoveValue = 131_072;
+
+    // Revisit bad capture pruning in NegaMax.cs if order changes and promos aren't the lowest before bad captures
+    public const int PromotionMoveScoreValue = 65_536;
+
+    public const int BadCaptureMoveBaseScoreValue = 32_768;
 
     //public const int MaxHistoryMoveValue => Configuration.EngineSettings.MaxHistoryMoveValue;
 
@@ -337,6 +361,8 @@ public static class EvaluationConstants
     /// Negative offset to ensure history move scores don't reach other move ordering values
     /// </summary>
     public const int BaseMoveScore = int.MinValue / 2;
+
+    #endregion
 
     /// <summary>
     /// Outside of the evaluation ranges (higher than any sensible evaluation, lower than <see cref="PositiveCheckmateDetectionLimit"/>)

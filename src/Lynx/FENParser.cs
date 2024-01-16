@@ -73,11 +73,20 @@ public static class FENParser
         var rankIndex = 0;
         var end = fen.IndexOf('/');
 
-        while (success && end != -1)
+        while (
+            end != -1
+#if DEBUG
+            && success
+#endif
+            )
         {
             var match = fen[..end];
 
-            ParseBoardSection(pieceBitBoards, ref success, rankIndex, match);
+            ParseBoardSection(pieceBitBoards, rankIndex, match
+#if DEBUG
+            , ref success
+#endif
+                );
             PopulateOccupancies(pieceBitBoards, occupancyBitBoards);
 
             fen = fen[(end + 1)..];
@@ -85,47 +94,69 @@ public static class FENParser
             ++rankIndex;
         }
 
-        ParseBoardSection(pieceBitBoards, ref success, rankIndex, fen[..fen.IndexOf(' ')]);
+        ParseBoardSection(pieceBitBoards, rankIndex, fen[..fen.IndexOf(' ')]
+#if DEBUG
+            , ref success
+#endif
+            );
         PopulateOccupancies(pieceBitBoards, occupancyBitBoards);
 
         return success;
 
-        static void ParseBoardSection(ulong[] pieceBitBoards, ref bool success, int rankIndex, ReadOnlySpan<char> boardfenSection)
+        static void ParseBoardSection(ulong[] pieceBitBoards, int rankIndex, ReadOnlySpan<char> boardfenSection
+#if DEBUG
+            , ref bool success
+#endif
+            )
         {
             int fileIndex = 0;
 
             foreach (var ch in boardfenSection)
             {
-                if (Constants.PiecesByChar.TryGetValue(ch, out Piece piece))
+                var piece = ch switch
+                {
+                    'P' => Piece.P,
+                    'N' => Piece.N,
+                    'B' => Piece.B,
+                    'R' => Piece.R,
+                    'Q' => Piece.Q,
+                    'K' => Piece.K,
+
+                    'p' => Piece.p,
+                    'n' => Piece.n,
+                    'b' => Piece.b,
+                    'r' => Piece.r,
+                    'q' => Piece.q,
+                    'k' => Piece.k,
+
+                    _ => Piece.None
+                };
+
+                if (piece != Piece.None)
                 {
                     pieceBitBoards[(int)piece] = pieceBitBoards[(int)piece].SetBit(BitBoardExtensions.SquareIndex(rankIndex, fileIndex));
                     ++fileIndex;
                 }
-                else if (int.TryParse($"{ch}", out int emptySquares))
-                {
-                    fileIndex += emptySquares;
-                }
                 else
                 {
-                    _logger.Error("Unrecognized character in FEN: {0} (within {1})", ch, boardfenSection.ToString());
-                    success = false;
-                    break;
+                    fileIndex += ch - '0';
+#if DEBUG
+                    if (fileIndex < 1 || fileIndex > 8)
+                    {
+                        System.Diagnostics.Debug.Fail($"Error parsing char {ch} in fen {boardfenSection.ToString()}");
+                        success = false;
+                    }
+#endif
                 }
             }
         }
 
         static void PopulateOccupancies(BitBoard[] pieceBitBoards, BitBoard[] occupancyBitBoards)
         {
-            var limit = (int)Piece.K;
-            for (int piece = (int)Piece.P; piece <= limit; ++piece)
+            for (int piece = (int)Piece.P; piece <= (int)Piece.K; ++piece)
             {
                 occupancyBitBoards[(int)Side.White] |= pieceBitBoards[piece];
-            }
-
-            limit = (int)Piece.k;
-            for (int piece = (int)Piece.p; piece <= limit; ++piece)
-            {
-                occupancyBitBoards[(int)Side.Black] |= pieceBitBoards[piece];
+                occupancyBitBoards[(int)Side.Black] |= pieceBitBoards[piece + 6];
             }
 
             occupancyBitBoards[(int)Side.Both] = occupancyBitBoards[(int)Side.White] | occupancyBitBoards[(int)Side.Black];

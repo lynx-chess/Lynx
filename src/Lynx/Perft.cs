@@ -19,16 +19,6 @@ public static class Perft
         return (nodes, CalculateElapsedMilliseconds(sw));
     }
 
-    public static async Task<(long Nodes, double ElapsedMilliseconds)> Divide(Position position, int depth, Func<string, ValueTask> write)
-    {
-        var sw = new Stopwatch();
-        sw.Start();
-        var nodes = await DivideImpl(position, depth, 0, write);
-        sw.Stop();
-
-        return (nodes, CalculateElapsedMilliseconds(sw));
-    }
-
     public static (long Nodes, double ElapsedMilliseconds) Divide(Position position, int depth, Action<string> write)
     {
         var sw = new Stopwatch();
@@ -50,7 +40,8 @@ public static class Perft
     {
         if (depth != 0)
         {
-            foreach (var move in MoveGenerator.GenerateAllMoves(position))
+            Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+            foreach (var move in MoveGenerator.GenerateAllMoves(position, moves))
             {
                 var state = position.MakeMove(move);
 
@@ -60,33 +51,6 @@ public static class Perft
                 }
                 position.UnmakeMove(move, state);
             }
-
-            return nodes;
-        }
-
-        return nodes + 1;
-    }
-
-    private static async Task<long> DivideImpl(Position position, int depth, long nodes, Func<string, ValueTask> write)
-    {
-        if (depth != 0)
-        {
-            foreach (var move in MoveGenerator.GenerateAllMoves(position))
-            {
-                var state = position.MakeMove(move);
-
-                if (position.WasProduceByAValidMove())
-                {
-                    var accumulatedNodes = nodes;
-                    nodes = ResultsImpl(position, depth - 1, nodes);
-
-                    await write($"{move.UCIString()}\t\t{nodes - accumulatedNodes}");
-                }
-
-                position.UnmakeMove(move, state);
-            }
-
-            await write(string.Empty);
 
             return nodes;
         }
@@ -98,7 +62,8 @@ public static class Perft
     {
         if (depth != 0)
         {
-            foreach (var move in MoveGenerator.GenerateAllMoves(position))
+            Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+            foreach (var move in MoveGenerator.GenerateAllMoves(position, moves))
             {
                 var state = position.MakeMove(move);
 
@@ -120,60 +85,6 @@ public static class Perft
 
         return nodes + 1;
     }
-
-    #region Legacy
-
-    /// <summary>
-    /// Proper implementation, used by <see cref="DivideImplUsingPositionConstructor(Position, int, long)"/> as well
-    /// </summary>
-    /// <param name="position"></param>
-    /// <param name="depth"></param>
-    /// <param name="nodes"></param>
-    /// <returns></returns>
-    private static long ResultsImplUsingPositionConstructor(Position position, int depth, long nodes)
-    {
-        if (depth != 0)
-        {
-            foreach (var move in MoveGenerator.GenerateAllMoves(position))
-            {
-                var newPosition = new Position(position, move);
-
-                if (newPosition.WasProduceByAValidMove())
-                {
-                    nodes = ResultsImplUsingPositionConstructor(newPosition, depth - 1, nodes);
-                }
-            }
-
-            return nodes;
-        }
-
-        return nodes + 1;
-    }
-
-    private static long DivideImplUsingPositionConstructor(Position position, int depth, long nodes)
-    {
-        if (depth != 0)
-        {
-            foreach (var move in MoveGenerator.GenerateAllMoves(position))
-            {
-                var newPosition = new Position(position, move);
-
-                if (newPosition.WasProduceByAValidMove())
-                {
-                    var accumulatedNodes = nodes;
-                    nodes = ResultsImplUsingPositionConstructor(newPosition, depth - 1, nodes);
-
-                    Console.WriteLine($"{move.UCIString()}\t\t{nodes - accumulatedNodes}");
-                }
-            }
-
-            return nodes;
-        }
-
-        return nodes + 1;
-    }
-
-    #endregion
 
     public static void PrintPerftResult(int depth, (long Nodes, double ElapsedMilliseconds) peftResult, Action<string> write)
     {

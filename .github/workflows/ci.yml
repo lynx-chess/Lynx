@@ -31,7 +31,7 @@ jobs:
       uses: rlespinasse/github-slug-action@v3.x
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
@@ -69,7 +69,7 @@ jobs:
       uses: rlespinasse/github-slug-action@v3.x
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
@@ -89,7 +89,7 @@ jobs:
       run: dotnet publish src/Lynx.Cli/Lynx.Cli.csproj -c Release --runtime ${{ matrix.runtime-identifier }} --self-contained /p:Optimized=true -o artifacts/${{ matrix.runtime-identifier }}
 
     - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-${{ matrix.runtime-identifier }} artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-${{ matrix.runtime-identifier }}
         path: |
@@ -103,7 +103,7 @@ jobs:
 
     - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }} NuGet package
       if: matrix.os == 'ubuntu-latest'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}
         path: |
@@ -134,7 +134,7 @@ jobs:
       uses: rlespinasse/github-slug-action@v3.x
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
@@ -170,7 +170,7 @@ jobs:
 
     - name: '[Ubuntu] Upload test coverage report'
       if: matrix.os == 'ubuntu-latest' && matrix.configuration == 'Release'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ env.PROJECT_NAME }}-build-coverage-ci-${{ github.run_number }}
         path: coveragereport/
@@ -189,7 +189,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
@@ -222,7 +222,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
@@ -255,7 +255,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
@@ -287,7 +287,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
@@ -350,7 +350,7 @@ jobs:
   #      customSettings: 'numberOfReportsParsedInParallel=3;numberOfReportsMergedInParallel=3'
 
   #  - name: '[Ubuntu] Upload unified test coverage report'
-  #    uses: actions/upload-artifact@v3
+  #    uses: actions/upload-artifact@v4
   #    with:
   #      name: ${{ env.PROJECT_NAME }}-coverage-ci-${{ github.run_number }}
   #      path: coveragereport/
@@ -373,7 +373,7 @@ jobs:
   #  - uses: actions/checkout@v4
 
   #  - name: Setup .NET
-  #    uses: actions/setup-dotnet@v3
+  #    uses: actions/setup-dotnet@v4
   #    with:
   #      dotnet-version: ${{ env.DOTNET_VERSION }}
 
@@ -409,7 +409,7 @@ jobs:
 
   #  - name: '[Ubuntu] Upload test coverage report'
   #    if: matrix.os == 'ubuntu-latest'
-  #    uses: actions/upload-artifact@v3
+  #    uses: actions/upload-artifact@v4
   #    with:
   #      name: ${{ env.PROJECT_NAME }}-non-parallelizable-coverage-ci-${{ github.run_number }}
   #      path: coveragereport/

@@ -107,32 +107,32 @@ public sealed class EngineSettings
     /// <summary>
     /// Value originally from Stormphrax, who apparently took it from Viridithas
     /// </summary>
-    public double LMR_Base { get; set; } = 0.77;
+    public double LMR_Base { get; set; } = 0.85;
 
     /// <summary>
     /// Value originally from Akimbo
     /// </summary>
-    public double LMR_Divisor { get; set; } = 2.67;
+    public double LMR_Divisor { get; set; } = 2.84;
 
     public int NMP_MinDepth { get; set; } = 3;
 
     public int NMP_BaseDepthReduction { get; set; } = 1;
 
-    public int AspirationWindow_Delta { get; set; } = 50;
+    public int AspirationWindow_Delta { get; set; } = 20;
 
-    public int AspirationWindow_MinDepth { get; set; } = 6;
+    public int AspirationWindow_MinDepth { get; set; } = 7;
 
-    public int RFP_MaxDepth { get; set; } = 6;
+    public int RFP_MaxDepth { get; set; } = 4;
 
-    public int RFP_DepthScalingFactor { get; set; } = 75;
+    public int RFP_DepthScalingFactor { get; set; } = 87;
 
-    public int Razoring_MaxDepth { get; set; } = 2;
+    public int Razoring_MaxDepth { get; set; } = 3;
 
-    public int Razoring_Depth1Bonus { get; set; } = 125;
+    public int Razoring_Depth1Bonus { get; set; } = 105;
 
-    public int Razoring_NotDepth1Bonus { get; set; } = 175;
+    public int Razoring_NotDepth1Bonus { get; set; } = 161;
 
-    public int IIR_MinDepth { get; set; } = 4;
+    public int IIR_MinDepth { get; set; } = 2;
 
     public int LMP_MaxDepth { get; set; } = 2;
 
@@ -142,36 +142,45 @@ public sealed class EngineSettings
 
     public int History_MaxMoveValue { get; set; } = 8_192;
 
+    /// <summary>
+    /// 1896: constant from depth 12
+    /// </summary>
+    public int History_MaxMoveRawBonus { get; set; } = 1_896;
+
+    public int SEE_BadCaptureReduction { get; set; } = 1;
+
     #region Evaluation
 
-    public TaperedEvaluationTerm DoubledPawnPenalty { get; set; } = new(-3, -11);
+    public TaperedEvaluationTerm DoubledPawnPenalty { get; set; } = new(-5, -14);
 
-    public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-13, -10);
+    public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-18, -14);
 
-    public TaperedEvaluationTerm OpenFileRookBonus { get; set; } = new(42, 22);
+    public TaperedEvaluationTerm OpenFileRookBonus { get; set; } = new(46, 13);
 
-    public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(18, 16);
+    public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(17, 19);
 
-    public TaperedEvaluationTerm BishopMobilityBonus { get; set; } = new(8, 7);
+    public TaperedEvaluationTerm BishopMobilityBonus { get; set; } = new(10, 10);
 
-    public TaperedEvaluationTerm QueenMobilityBonus { get; set; } = new(2, 7);
+    public TaperedEvaluationTerm RookMobilityBonus { get; set; } = new(5, 5);
 
-    public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-29, 19);
+    public TaperedEvaluationTerm QueenMobilityBonus { get; set; } = new(4, 8);
 
-    public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-80, 3);
+    public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-38, 25);
 
-    public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(15, -5);
+    public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-109, 6);
 
-    public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(22, 65);
+    public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(17, -5);
+
+    public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(30, 88);
 
     public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(
         new(0),
-        new(-2, 5),
-        new(-13, 10),
-        new(-12, 32),
-        new(13, 62),
-        new(38, 132),
-        new(53, 191),
+        new(-1, 5),
+        new(-15, 12),
+        new(-15, 43),
+        new(19, 84),
+        new(53, 176),
+        new(74, 260),
         new(0));
 
     #endregion

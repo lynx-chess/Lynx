@@ -31,6 +31,9 @@ public sealed class LynxDriver
         _ = Attacks.KingAttacks;
         _ = ZobristTable.SideHash();
         _ = Masks.FileMasks;
+        _ = EvaluationConstants.HistoryBonus[1];
+        _ = MoveGenerator.Init();
+        _ = GoCommand.Init();
     }
 
     public async Task Run(CancellationToken cancellationToken)
@@ -59,7 +62,7 @@ public sealed class LynxDriver
                                 HandleDebug(rawCommand);
                                 break;
                             case GoCommand.Id:
-                                await HandleGo(rawCommand);
+                                HandleGo(rawCommand);
                                 break;
                             case IsReadyCommand.Id:
                                 await HandleIsReady(cancellationToken);
@@ -95,7 +98,7 @@ public sealed class LynxDriver
                                 await HandleDivide(rawCommand);
                                 break;
                             case "bench":
-                                await HandleBench();
+                                await HandleBench(rawCommand);
                                 HandleQuit();
                                 break;
                             case "printsettings":
@@ -144,10 +147,9 @@ public sealed class LynxDriver
 #endif
     }
 
-    private async Task HandleGo(string command)
+    private void HandleGo(string command)
     {
-        var goCommand = new GoCommand();
-        await goCommand.Parse(command);
+        var goCommand = new GoCommand(command);
         _engine.StartSearching(goCommand);
     }
 
@@ -259,6 +261,7 @@ public sealed class LynxDriver
                 }
             case "threads":
                 {
+#pragma warning disable S1066 // Collapsible "if" statements should be merged
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
                         if (value != 1)
@@ -267,6 +270,7 @@ public sealed class LynxDriver
                         }
                     }
                     break;
+#pragma warning restore S1066 // Collapsible "if" statements should be merged
                 }
             case "uci_showwdl":
                 {
@@ -274,8 +278,156 @@ public sealed class LynxDriver
                     {
                         Configuration.EngineSettings.ShowWDL = value;
                     }
+                    break;
                 }
-                break;
+
+            #region Search tuning
+
+            case "lmr_mindepth":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_MinDepth = value;
+                    }
+                    break;
+                }
+            case "lmr_minfulldepthsearchedmoves":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves = value;
+                    }
+                    break;
+                }
+            case "lmr_base":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_Base = (value * 0.01);
+                    }
+                    break;
+                }
+            case "lmr_divisor":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_Divisor = (value * 0.01);
+                    }
+                    break;
+                }
+
+            case "nmp_mindepth":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.NMP_MinDepth = value;
+                    }
+                    break;
+                }
+            case "nmp_basedepthreduction":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.NMP_BaseDepthReduction = value;
+                    }
+                    break;
+                }
+
+            case "aspirationwindow_delta":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.AspirationWindow_Delta = value;
+                    }
+                    break;
+                }
+            case "aspirationwindow_mindepth":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.AspirationWindow_MinDepth = value;
+                    }
+                    break;
+                }
+
+            case "rfp_maxdepth":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.RFP_MaxDepth = value;
+                    }
+                    break;
+                }
+            case "rfp_depthscalingfactor":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.RFP_DepthScalingFactor = value;
+                    }
+                    break;
+                }
+
+            case "razoring_maxdepth":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.Razoring_MaxDepth = value;
+                    }
+                    break;
+                }
+            case "razoring_depth1bonus":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.Razoring_Depth1Bonus = value;
+                    }
+                    break;
+                }
+            case "razoring_notdepth1bonus":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.Razoring_NotDepth1Bonus = value;
+                    }
+                    break;
+                }
+
+            case "iir_mindepth":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.IIR_MinDepth = value;
+                    }
+                    break;
+                }
+
+            case "lmp_maxdepth":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMP_MaxDepth = value;
+                    }
+                    break;
+                }
+            case "lmp_basemovestotry":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMP_BaseMovesToTry = value;
+                    }
+                    break;
+                }
+            case "lmp_movesdepthmultiplier":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMP_MovesDepthMultiplier = value;
+                    }
+                    break;
+                }
+
+            #endregion
+
             default:
                 _logger.Warn("Unsupported option: {0}", command.ToString());
                 break;
@@ -321,14 +473,20 @@ public sealed class LynxDriver
 
         if (items.Length >= 2 && int.TryParse(items[1], out int depth) && depth >= 1)
         {
-            var results = await Perft.Divide(_engine.Game.CurrentPosition, depth, str => _engineWriter.Writer.WriteAsync(str));
+            var results = Perft.Divide(_engine.Game.CurrentPosition, depth, str => _engineWriter.Writer.TryWrite(str));
             await Perft.PrintPerftResult(depth, results, str => _engineWriter.Writer.WriteAsync(str));
         }
     }
 
-    private async ValueTask HandleBench()
+    private async ValueTask HandleBench(string rawCommand)
     {
-        var results = await OpenBench.Bench(_engineWriter);
+        var items = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+        if (items.Length < 2 || !int.TryParse(items[1], out int depth))
+        {
+            depth = Configuration.EngineSettings.BenchDepth;
+        }
+        var results = await OpenBench.Bench(depth, _engineWriter);
         await OpenBench.PrintBenchResults(results, str => _engineWriter.Writer.WriteAsync(str));
     }
 

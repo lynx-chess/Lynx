@@ -63,11 +63,11 @@ public sealed partial class Engine
     /// </summary>
     /// <param name="move"></param>
     /// <param name="depth"></param>
-    /// <param name="useKillerAndPositionMoves"></param>
+    /// <param name="isNotQSearch"></param>
     /// <param name="bestMoveTTCandidate"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMove(Move move, int depth, bool useKillerAndPositionMoves, Move bestMoveTTCandidate = default)
+    internal int ScoreMove(Move move, int depth, bool isNotQSearch, ShortMove bestMoveTTCandidate = default)
     {
         if (_isScoringPV && move == _pVTable[depth])
         {
@@ -76,61 +76,62 @@ public sealed partial class Engine
             return EvaluationConstants.PVMoveScoreValue;
         }
 
-        if (move == bestMoveTTCandidate)
+        if ((ShortMove)move == bestMoveTTCandidate)
         {
             return EvaluationConstants.TTMoveScoreValue;
         }
 
         var promotedPiece = move.PromotedPiece();
+        var isPromotion = promotedPiece != default;
+        var isCapture = move.IsCapture();
 
         // Queen promotion
         if ((promotedPiece + 2) % 6 == 0)
         {
-            return EvaluationConstants.CaptureMoveBaseScoreValue + EvaluationConstants.PromotionMoveScoreValue;
+            var baseScore = SEE.HasPositiveScore(Game.CurrentPosition, move)
+                ? EvaluationConstants.GoodCaptureMoveBaseScoreValue
+                : EvaluationConstants.BadCaptureMoveBaseScoreValue;
+
+            var captureBonus = isCapture ? 1 : 0;
+
+            return baseScore + EvaluationConstants.PromotionMoveScoreValue + captureBonus;
         }
 
-        if (move.IsCapture())
+        if (isCapture)
         {
-            var sourcePiece = move.Piece();
-            int targetPiece = (int)Piece.P;    // Important to initialize to P or p, due to en-passant captures
 
-            var targetSquare = move.TargetSquare();
-            var offset = Utils.PieceOffset(Game.CurrentPosition.Side);
-            var oppositePawnIndex = (int)Piece.p - offset;
+            var baseCaptureScore = (isPromotion || move.IsEnPassant() || SEE.IsGoodCapture(Game.CurrentPosition, move))
+                ? EvaluationConstants.GoodCaptureMoveBaseScoreValue
+                : EvaluationConstants.BadCaptureMoveBaseScoreValue;
 
-            var limit = (int)Piece.k - offset;
-            for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
-            {
-                if (Game.CurrentPosition.PieceBitBoards[pieceIndex].GetBit(targetSquare))
-                {
-                    targetPiece = pieceIndex;
-                    break;
-                }
-            }
-
-            return EvaluationConstants.CaptureMoveBaseScoreValue + EvaluationConstants.MostValueableVictimLeastValuableAttacker[sourcePiece, targetPiece];
+            return baseCaptureScore + EvaluationConstants.MostValueableVictimLeastValuableAttacker[move.Piece()][move.CapturedPiece()];
         }
 
-        if (promotedPiece != default)
+        if (isPromotion)
         {
             return EvaluationConstants.PromotionMoveScoreValue;
         }
 
-        if (useKillerAndPositionMoves)
+        if (isNotQSearch)
         {
             // 1st killer move
-            if (_killerMoves[0, depth] == move)
+            if (_killerMoves[0][depth] == move)
             {
                 return EvaluationConstants.FirstKillerMoveValue;
             }
 
-            if (_killerMoves[1, depth] == move)
+            if (_killerMoves[1][depth] == move)
             {
                 return EvaluationConstants.SecondKillerMoveValue;
             }
 
+            if (_killerMoves[2][depth] == move)
+            {
+                return EvaluationConstants.ThirdKillerMoveValue;
+            }
+
             // History move or 0 if not found
-            return EvaluationConstants.BaseMoveScore + _historyMoves[move.Piece(), move.TargetSquare()];
+            return EvaluationConstants.BaseMoveScore + _historyMoves[move.Piece()][move.TargetSquare()];
         }
 
         return EvaluationConstants.BaseMoveScore;
@@ -149,27 +150,36 @@ public sealed partial class Engine
         return score + rawHistoryBonus - (score * Math.Abs(rawHistoryBonus) / Configuration.EngineSettings.History_MaxMoveValue);
     }
 
+#pragma warning disable RCS1226 // Add paragraph to documentation comment
+#pragma warning disable RCS1243 // Duplicate word in a comment
+    /// <summary>
+    /// When asked to copy an incomplete PV one level ahead, clears the rest of the PV Table+
+    /// PV Table at depth 3
+    /// Copying 60 moves
+    /// src: 250, tgt: 190
+    ///  0   Qxb2   Qxb2   h4     a8     a8     a8     a8     a8
+    ///  64         b1=Q   exf6   Kxf6   a8     a8     a8     a8
+    ///  127               a8     b1=Q   Qxb1   Qxb1   a8     a8
+    ///  189                      Qxb1   Qxb1   Qxb1   a8     a8
+    ///  250                             a8     Qxb1   a8     a8
+    ///  310                                    a8     a8     a8
+    ///
+    /// PV Table at depth 3
+    ///  0   Qxb2   Qxb2   h4     a8     a8     a8     a8     a8
+    ///  64         b1=Q   exf6   Kxf6   a8     a8     a8     a8
+    ///  127               a8     b1=Q   Qxb1   Qxb1   a8     a8
+    ///  189                      Qxb1   a8     a8     a8     a8
+    ///  250                             a8     a8     a8     a8
+    ///  310                                    a8     a8     a8
+    /// </summary>
+    /// <param name="target"></param>
+    /// <param name="source"></param>
+    /// <param name="moveCountToCopy"></param>
+#pragma warning restore RCS1243 // Duplicate word in a comment
+#pragma warning restore RCS1226 // Add paragraph to documentation comment
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void CopyPVTableMoves(int target, int source, int moveCountToCopy)
     {
-        // When asked to copy an incomplete PV one level ahead, clears the rest of the PV Table+
-        // PV Table at depth 3
-        // Copying 60 moves
-        // src: 250, tgt: 190
-        //  0   Qxb2   Qxb2   h4     a8     a8     a8     a8     a8
-        //  64         b1=Q   exf6   Kxf6   a8     a8     a8     a8
-        //  127               a8     b1=Q   Qxb1   Qxb1   a8     a8
-        //  189                      Qxb1   Qxb1   Qxb1   a8     a8
-        //  250                             a8     Qxb1   a8     a8
-        //  310                                    a8     a8     a8
-        //
-        // PV Table at depth 3
-        //  0   Qxb2   Qxb2   h4     a8     a8     a8     a8     a8
-        //  64         b1=Q   exf6   Kxf6   a8     a8     a8     a8
-        //  127               a8     b1=Q   Qxb1   Qxb1   a8     a8
-        //  189                      Qxb1   a8     a8     a8     a8
-        //  250                             a8     a8     a8     a8
-        //  310                                    a8     a8     a8
         if (_pVTable[source] == default)
         {
             Array.Clear(_pVTable, target, _pVTable.Length - target);
@@ -182,6 +192,9 @@ public sealed partial class Engine
     }
 
     #region Debugging
+
+#pragma warning disable S125 // Sections of code should not be commented out
+#pragma warning disable S1199 // Nested code blocks should not be used
 
     [Conditional("DEBUG")]
     private void ValidatePVTable()
@@ -197,25 +210,31 @@ public sealed partial class Engine
                 }
                 break;
             }
+
             var move = _pVTable[i];
+            TryParseMove(position, i, move);
+
+            var newPosition = new Position(position, move);
+            if (!newPosition.WasProduceByAValidMove())
+            {
+                throw new AssertException($"Invalid position after move {move.UCIString()} from position {position.FEN()}");
+            }
+            position = newPosition;
+        }
+
+        static void TryParseMove(Position position, int i, int move)
+        {
+            Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
 
             if (!MoveExtensions.TryParseFromUCIString(
                move.UCIString(),
-               MoveGenerator.GenerateAllMoves(position, Game.MovePool),
+               MoveGenerator.GenerateAllMoves(position, movePool),
                out _))
             {
                 var message = $"Unexpected PV move {i}: {move.UCIString()} from position {position.FEN()}";
                 _logger.Error(message);
                 throw new AssertException(message);
             }
-
-            var newPosition = new Position(position, move);
-
-            if (!newPosition.WasProduceByAValidMove())
-            {
-                throw new AssertException($"Invalid position after move {move.UCIString()} from position {position.FEN()}");
-            }
-            position = newPosition;
         }
     }
 
@@ -330,16 +349,25 @@ $" {484,-3}                                                         {_pVTable[48
     {
         int max = int.MinValue;
 
-        foreach (var item in _historyMoves)
+        for (int i = 0; i < 12; ++i)
         {
-            if (item > max)
+            var tmp = _historyMoves[i];
+            for (int j = 0; j < 64; ++i)
             {
-                max = item;
+                var item = tmp[j];
+
+                if (item > max)
+                {
+                    max = item;
+                }
             }
         }
 
         _logger.Debug($"Max history: {max}");
     }
+
+#pragma warning restore S125 // Sections of code should not be commented out
+#pragma warning restore S1199 // Nested code blocks should not be used
 
     #endregion
 }

@@ -27,9 +27,9 @@ public class MoveScoreTest : BaseTest
         var allMoves = MoveGenerator.GenerateAllMoves(engine.Game.CurrentPosition).OrderByDescending(move => engine.ScoreMove(move, default, default)).ToList();
 
         Assert.AreEqual("e2a6", allMoves[0].UCIString());     // BxB
-        Assert.AreEqual("f3f6", allMoves[1].UCIString());     // QxN
-        Assert.AreEqual("d5e6", allMoves[2].UCIString());     // PxP
-        Assert.AreEqual("g2h3", allMoves[3].UCIString());     // PxP
+        Assert.AreEqual("d5e6", allMoves[1].UCIString());     // PxP
+        Assert.AreEqual("g2h3", allMoves[2].UCIString());     // PxP
+        Assert.AreEqual("f3f6", allMoves[3].UCIString());     // QxN
         Assert.AreEqual("e5d7", allMoves[4].UCIString());     // NxP
         Assert.AreEqual("e5f7", allMoves[5].UCIString());     // NxP
         Assert.AreEqual("e5g6", allMoves[6].UCIString());     // NxP
@@ -64,6 +64,6 @@ public class MoveScoreTest : BaseTest
         var allMoves = MoveGenerator.GenerateAllMoves(engine.Game.CurrentPosition).OrderByDescending(move => engine.ScoreMove(move, default, default)).ToList();
 
         Assert.AreEqual(moveWithHighestScore, allMoves[0].UCIString());
-        Assert.AreEqual(EvaluationConstants.CaptureMoveBaseScoreValue + EvaluationConstants.MostValueableVictimLeastValuableAttacker[0, 0], engine.ScoreMove(allMoves[0], default, default));
+        Assert.AreEqual(EvaluationConstants.GoodCaptureMoveBaseScoreValue + EvaluationConstants.MostValueableVictimLeastValuableAttacker[0][0], engine.ScoreMove(allMoves[0], default, default));
     }
 }

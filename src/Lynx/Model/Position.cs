@@ -1,5 +1,3 @@
-using System.Diagnostics;
-using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -15,6 +13,12 @@ public class Position
     /// Use <see cref="Piece"/> as index
     /// </summary>
     public BitBoard[] PieceBitBoards { get; }
+
+    public BitBoard Queens => PieceBitBoards[(int)Piece.Q] | PieceBitBoards[(int)Piece.q];
+    public BitBoard Rooks => PieceBitBoards[(int)Piece.R] | PieceBitBoards[(int)Piece.r];
+    public BitBoard Bishops => PieceBitBoards[(int)Piece.B] | PieceBitBoards[(int)Piece.b];
+    public BitBoard Knights => PieceBitBoards[(int)Piece.N] | PieceBitBoards[(int)Piece.n];
+    public BitBoard Kings => PieceBitBoards[(int)Piece.K] | PieceBitBoards[(int)Piece.k];
 
     /// <summary>
     /// Black, White, Both
@@ -138,36 +142,28 @@ public class Position
             var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
             var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
 
+            var capturedSquare = targetSquare;
+            var capturedPiece = oppositePawnIndex;
+
             if (move.IsEnPassant())
             {
-                var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
-
-                PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
-                OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
-                UniqueIdentifier ^= ZobristTable.PieceHash(capturedPawnSquare, oppositePawnIndex);
+                capturedSquare = Constants.EnPassantCaptureSquares[targetSquare];
+                Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedSquare), $"Expected {(Side)oppositeSide} pawn in {capturedSquare}");
             }
             else
             {
-                var limit = (int)Piece.K + oppositeSideOffset;
-                for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
-                {
-                    if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
-                    {
-                        PieceBitBoards[pieceIndex].PopBit(targetSquare);
-                        UniqueIdentifier ^= ZobristTable.PieceHash(targetSquare, pieceIndex);
-                        break;
-                    }
-                }
-
-                OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
+                capturedPiece = move.CapturedPiece();
             }
+
+            PieceBitBoards[capturedPiece].PopBit(capturedSquare);
+            OccupancyBitBoards[oppositeSide].PopBit(capturedSquare);
+            UniqueIdentifier ^= ZobristTable.PieceHash(capturedSquare, capturedPiece);
         }
         else if (move.IsDoublePawnPush())
         {
             var pawnPush = +8 - ((int)oldSide * 16);
             var enPassantSquare = sourceSquare + pawnPush;
-            Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {(BoardSquare)enPassantSquare}");
+            Utils.Assert(Constants.EnPassantCaptureSquares.Length > enPassantSquare && Constants.EnPassantCaptureSquares[enPassantSquare] != 0, $"Unexpected en passant square : {(BoardSquare)enPassantSquare}");
 
             EnPassant = (BoardSquare)enPassantSquare;
             UniqueIdentifier ^= ZobristTable.EnPassantHash(enPassantSquare);
@@ -218,7 +214,6 @@ public class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public GameState MakeMove(Move move)
     {
-        sbyte capturedPiece = -1;
         byte castleCopy = Castle;
         BoardSquare enpassantCopy = EnPassant;
         long uniqueIdentifierCopy = UniqueIdentifier;
@@ -256,38 +251,27 @@ public class Position
         {
             var oppositePawnIndex = (int)Piece.p - offset;
 
+            var capturedSquare = targetSquare;
+            var capturedPiece = oppositePawnIndex;
             if (move.IsEnPassant())
             {
-                var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
-
-                PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
-                OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
-                UniqueIdentifier ^= ZobristTable.PieceHash(capturedPawnSquare, oppositePawnIndex);
-                capturedPiece = (sbyte)oppositePawnIndex;
+                capturedSquare = Constants.EnPassantCaptureSquares[targetSquare];
+                Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedSquare), $"Expected {(Side)oppositeSide} pawn in {capturedSquare}");
             }
             else
             {
-                var limit = (int)Piece.K + oppositePawnIndex;
-                for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
-                {
-                    if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
-                    {
-                        PieceBitBoards[pieceIndex].PopBit(targetSquare);
-                        UniqueIdentifier ^= ZobristTable.PieceHash(targetSquare, pieceIndex);
-                        capturedPiece = (sbyte)pieceIndex;
-                        break;
-                    }
-                }
-
-                OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
+                capturedPiece = move.CapturedPiece();
             }
+
+            PieceBitBoards[capturedPiece].PopBit(capturedSquare);
+            OccupancyBitBoards[oppositeSide].PopBit(capturedSquare);
+            UniqueIdentifier ^= ZobristTable.PieceHash(capturedSquare, capturedPiece);
         }
         else if (move.IsDoublePawnPush())
         {
             var pawnPush = +8 - (oldSide * 16);
             var enPassantSquare = sourceSquare + pawnPush;
-            Utils.Assert(Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare), $"Unexpected en passant square : {(BoardSquare)enPassantSquare}");
+            Utils.Assert(Constants.EnPassantCaptureSquares.Length > enPassantSquare && Constants.EnPassantCaptureSquares[enPassantSquare] != 0, $"Unexpected en passant square : {(BoardSquare)enPassantSquare}");
 
             EnPassant = (BoardSquare)enPassantSquare;
             UniqueIdentifier ^= ZobristTable.EnPassantHash(enPassantSquare);
@@ -334,7 +318,134 @@ public class Position
 
         UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
 
-        return new GameState(capturedPiece, castleCopy, enpassantCopy, uniqueIdentifierCopy);
+        return new GameState(uniqueIdentifierCopy, enpassantCopy, castleCopy);
+        //var clone = new Position(this);
+        //clone.UnmakeMove(move, gameState);
+        //if (uniqueIdentifierCopy != clone.UniqueIdentifier)
+        //{
+        //    throw new($"{FEN()}: {uniqueIdentifierCopy} expected, got {clone.UniqueIdentifier} got after Make/Unmake move {move.ToEPDString()}");
+        //}
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public GameState MakeMoveCalculatingCapturedPiece(ref Move move)
+    {
+        byte castleCopy = Castle;
+        BoardSquare enpassantCopy = EnPassant;
+        long uniqueIdentifierCopy = UniqueIdentifier;
+
+        var oldSide = (int)Side;
+        var offset = Utils.PieceOffset(oldSide);
+        var oppositeSide = Utils.OppositeSide(oldSide);
+
+        int sourceSquare = move.SourceSquare();
+        int targetSquare = move.TargetSquare();
+        int piece = move.Piece();
+        int promotedPiece = move.PromotedPiece();
+
+        var newPiece = piece;
+        if (promotedPiece != default)
+        {
+            newPiece = promotedPiece;
+        }
+
+        PieceBitBoards[piece].PopBit(sourceSquare);
+        OccupancyBitBoards[oldSide].PopBit(sourceSquare);
+
+        PieceBitBoards[newPiece].SetBit(targetSquare);
+        OccupancyBitBoards[oldSide].SetBit(targetSquare);
+
+        UniqueIdentifier ^=
+            ZobristTable.SideHash()
+            ^ ZobristTable.PieceHash(sourceSquare, piece)
+            ^ ZobristTable.PieceHash(targetSquare, newPiece)
+            ^ ZobristTable.EnPassantHash((int)EnPassant)            // We clear the existing enpassant square, if any
+            ^ ZobristTable.CastleHash(Castle);                      // We clear the existing castle rights
+
+        EnPassant = BoardSquare.noSquare;
+        if (move.IsCapture())
+        {
+            var oppositePawnIndex = (int)Piece.p - offset;
+
+            if (move.IsEnPassant())
+            {
+                var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
+                Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
+
+                PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
+                OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
+                UniqueIdentifier ^= ZobristTable.PieceHash(capturedPawnSquare, oppositePawnIndex);
+                move = MoveExtensions.EncodeCapturedPiece(move, oppositePawnIndex);
+            }
+            else
+            {
+                var limit = (int)Piece.K + oppositePawnIndex;
+                for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
+                {
+                    if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
+                    {
+                        PieceBitBoards[pieceIndex].PopBit(targetSquare);
+                        UniqueIdentifier ^= ZobristTable.PieceHash(targetSquare, pieceIndex);
+                        move = MoveExtensions.EncodeCapturedPiece(move, pieceIndex);
+                        break;
+                    }
+                }
+
+                OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
+            }
+        }
+        else if (move.IsDoublePawnPush())
+        {
+            var pawnPush = +8 - (oldSide * 16);
+            var enPassantSquare = sourceSquare + pawnPush;
+            Utils.Assert(Constants.EnPassantCaptureSquares.Length > enPassantSquare && Constants.EnPassantCaptureSquares[enPassantSquare] != 0, $"Unexpected en passant square : {(BoardSquare)enPassantSquare}");
+
+            EnPassant = (BoardSquare)enPassantSquare;
+            UniqueIdentifier ^= ZobristTable.EnPassantHash(enPassantSquare);
+        }
+        else if (move.IsShortCastle())
+        {
+            var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
+            var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
+            var rookIndex = (int)Piece.R + offset;
+
+            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitBoards[oldSide].PopBit(rookSourceSquare);
+
+            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitBoards[oldSide].SetBit(rookTargetSquare);
+
+            UniqueIdentifier ^=
+                ZobristTable.PieceHash(rookSourceSquare, rookIndex)
+                ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
+        }
+        else if (move.IsLongCastle())
+        {
+            var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
+            var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
+            var rookIndex = (int)Piece.R + offset;
+
+            PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
+            OccupancyBitBoards[oldSide].PopBit(rookSourceSquare);
+
+            PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
+            OccupancyBitBoards[oldSide].SetBit(rookTargetSquare);
+
+            UniqueIdentifier ^=
+                ZobristTable.PieceHash(rookSourceSquare, rookIndex)
+                ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
+        }
+
+        Side = (Side)oppositeSide;
+        OccupancyBitBoards[2] = OccupancyBitBoards[1] | OccupancyBitBoards[0];
+
+        // Updating castling rights
+        Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
+        Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
+
+        UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
+
+        return new GameState(uniqueIdentifierCopy, enpassantCopy, castleCopy);
         //var clone = new Position(this);
         //clone.UnmakeMove(move, gameState);
         //if (uniqueIdentifierCopy != clone.UniqueIdentifier)
@@ -383,7 +494,7 @@ public class Position
             }
             else
             {
-                PieceBitBoards[gameState.CapturedPiece].SetBit(targetSquare);
+                PieceBitBoards[move.CapturedPiece()].SetBit(targetSquare);
                 OccupancyBitBoards[oppositeSide].SetBit(targetSquare);
             }
         }
@@ -432,7 +543,7 @@ public class Position
             ZobristTable.SideHash()
             ^ ZobristTable.EnPassantHash((int)oldEnPassant);
 
-        return new GameState(-1, byte.MaxValue, oldEnPassant, oldUniqueIdentifier);
+        return new GameState(oldUniqueIdentifier, oldEnPassant, byte.MaxValue);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -586,6 +697,84 @@ public class Position
     public int CountPieces() => PieceBitBoards.Sum(b => b.CountBits());
 
     /// <summary>
+    /// Based on Stormphrax
+    /// </summary>
+    /// <param name="square"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public int PieceAt(int square)
+    {
+        var bit = BitBoardExtensions.SquareBit(square);
+
+        Side color;
+
+        if ((OccupancyBitBoards[(int)Side.Black] & bit) != default)
+        {
+            color = Side.Black;
+        }
+        else if ((OccupancyBitBoards[(int)Side.White] & bit) != default)
+        {
+            color = Side.White;
+        }
+        else
+        {
+            return (int)Piece.None;
+        }
+
+        var offset = Utils.PieceOffset(color);
+
+        for (int pieceIndex = offset; pieceIndex < 6 + offset; ++pieceIndex)
+        {
+            if (!(PieceBitBoards[pieceIndex] & bit).Empty())
+            {
+                return pieceIndex;
+            }
+        }
+
+        System.Diagnostics.Debug.Fail($"Bit set in {Side} occupancy bitboard, but not piece found");
+
+        return (int)Piece.None;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ulong AllAttackersTo(int square, BitBoard occupancy)
+    {
+        System.Diagnostics.Debug.Assert(square != (int)BoardSquare.noSquare);
+
+        var queens = Queens;
+        var rooks = queens | Rooks;
+        var bishops = queens | Bishops;
+
+        return (rooks & Attacks.RookAttacks(square, occupancy))
+            | (bishops & Attacks.BishopAttacks(square, occupancy))
+            | (PieceBitBoards[(int)Piece.p] & Attacks.PawnAttacks[(int)Side.White][square])
+            | (PieceBitBoards[(int)Piece.P] & Attacks.PawnAttacks[(int)Side.Black][square])
+            | (Knights & Attacks.KnightAttacks[square])
+            | (Kings & Attacks.KingAttacks[square]);
+    }
+
+    /// <summary>
+    /// Overload that has rooks and bishops precalculated for the position
+    /// </summary>
+    /// <param name="square"></param>
+    /// <param name="occupancy"></param>
+    /// <param name="rooks">Includes Queen bitboard</param>
+    /// <param name="bishops">Includes Queen bitboard</param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ulong AllAttackersTo(int square, BitBoard occupancy, BitBoard rooks, BitBoard bishops)
+    {
+        System.Diagnostics.Debug.Assert(square != (int)BoardSquare.noSquare);
+
+        return (rooks & Attacks.RookAttacks(square, occupancy))
+            | (bishops & Attacks.BishopAttacks(square, occupancy))
+            | (PieceBitBoards[(int)Piece.p] & Attacks.PawnAttacks[(int)Side.White][square])
+            | (PieceBitBoards[(int)Piece.P] & Attacks.PawnAttacks[(int)Side.Black][square])
+            | (Knights & Attacks.KnightAttacks[square])
+            | (Kings & Attacks.KingAttacks[square]);
+    }
+
+    /// <summary>
     /// Evaluates material and position in a NegaMax style.
     /// That is, positive scores always favour playing <see cref="Side"/>.
     /// </summary>
@@ -618,8 +807,8 @@ public class Position
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
 
-                middleGameScore += EvaluationConstants.MiddleGameTable[pieceIndex, pieceSquareIndex];
-                endGameScore += EvaluationConstants.EndGameTable[pieceIndex, pieceSquareIndex];
+                middleGameScore += EvaluationConstants.MiddleGameTable[pieceIndex][pieceSquareIndex];
+                endGameScore += EvaluationConstants.EndGameTable[pieceIndex][pieceSquareIndex];
                 gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
 
                 ++pieceCount[pieceIndex];
@@ -641,8 +830,8 @@ public class Position
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
 
-                middleGameScore += EvaluationConstants.MiddleGameTable[pieceIndex, pieceSquareIndex];
-                endGameScore += EvaluationConstants.EndGameTable[pieceIndex, pieceSquareIndex];
+                middleGameScore += EvaluationConstants.MiddleGameTable[pieceIndex][pieceSquareIndex];
+                endGameScore += EvaluationConstants.EndGameTable[pieceIndex][pieceSquareIndex];
                 gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
 
                 ++pieceCount[pieceIndex];
@@ -657,14 +846,14 @@ public class Position
         var whiteKing = PieceBitBoards[(int)Piece.K].GetLS1BIndex();
         (int mgKingScore, int egKingScore) = KingAdditionalEvaluation(whiteKing, Side.White, pieceCount);
 
-        middleGameScore += EvaluationConstants.MiddleGameTable[(int)Piece.K, whiteKing] + mgKingScore;
-        endGameScore += EvaluationConstants.EndGameTable[(int)Piece.K, whiteKing] + egKingScore;
+        middleGameScore += EvaluationConstants.MiddleGameTable[(int)Piece.K][whiteKing] + mgKingScore;
+        endGameScore += EvaluationConstants.EndGameTable[(int)Piece.K][whiteKing] + egKingScore;
 
         var blackKing = PieceBitBoards[(int)Piece.k].GetLS1BIndex();
         (mgKingScore, egKingScore) = KingAdditionalEvaluation(blackKing, Side.Black, pieceCount);
 
-        middleGameScore += EvaluationConstants.MiddleGameTable[(int)Piece.k, blackKing] - mgKingScore;
-        endGameScore += EvaluationConstants.EndGameTable[(int)Piece.k, blackKing] - egKingScore;
+        middleGameScore += EvaluationConstants.MiddleGameTable[(int)Piece.k][blackKing] - mgKingScore;
+        endGameScore += EvaluationConstants.EndGameTable[(int)Piece.k][blackKing] - egKingScore;
 
         const int maxPhase = 24;
 
@@ -788,7 +977,7 @@ public class Position
             endGameBonus += Configuration.EngineSettings.PassedPawnBonus[rank].EG;
         }
 
-        return (middleGameBonus, endGameBonus); ;
+        return (middleGameBonus, endGameBonus);
     }
 
     /// <summary>
@@ -800,19 +989,25 @@ public class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private (int MiddleGameScore, int EndGameScore) RookAdditonalEvaluation(int squareIndex, int pieceIndex)
     {
+        var attacksCount = Attacks.RookAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
+
+        var middleGameBonus = attacksCount * Configuration.EngineSettings.RookMobilityBonus.MG;
+        var endGameBonus = attacksCount * Configuration.EngineSettings.RookMobilityBonus.EG;
+
         const int pawnToRookOffset = (int)Piece.R - (int)Piece.P;
 
         if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default)  // isOpenFile
         {
-            return (Configuration.EngineSettings.OpenFileRookBonus.MG, Configuration.EngineSettings.OpenFileRookBonus.EG);
+            middleGameBonus += Configuration.EngineSettings.OpenFileRookBonus.MG;
+            endGameBonus += Configuration.EngineSettings.OpenFileRookBonus.EG;
         }
-
-        if ((PieceBitBoards[pieceIndex - pawnToRookOffset] & Masks.FileMasks[squareIndex]) == default)  // isSemiOpenFile
+        else if ((PieceBitBoards[pieceIndex - pawnToRookOffset] & Masks.FileMasks[squareIndex]) == default)  // isSemiOpenFile
         {
-            return (Configuration.EngineSettings.SemiOpenFileRookBonus.MG, Configuration.EngineSettings.SemiOpenFileRookBonus.EG);
+            middleGameBonus += Configuration.EngineSettings.SemiOpenFileRookBonus.MG;
+            endGameBonus += Configuration.EngineSettings.SemiOpenFileRookBonus.EG;
         }
 
-        return (0, 0);
+        return (middleGameBonus, endGameBonus);
     }
 
     /// <summary>
@@ -825,12 +1020,10 @@ public class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private (int MiddleGameScore, int EndGameScore) BishopAdditionalEvaluation(int squareIndex, int pieceIndex, int[] pieceCount)
     {
-        int middleGameBonus = 0, endGameBonus = 0;
-
         var attacksCount = Attacks.BishopAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
 
-        middleGameBonus += attacksCount * Configuration.EngineSettings.BishopMobilityBonus.MG;
-        endGameBonus += attacksCount * Configuration.EngineSettings.BishopMobilityBonus.EG;
+        var middleGameBonus = attacksCount * Configuration.EngineSettings.BishopMobilityBonus.MG;
+        var endGameBonus = attacksCount * Configuration.EngineSettings.BishopMobilityBonus.EG;
 
         if (pieceCount[pieceIndex] == 2)
         {

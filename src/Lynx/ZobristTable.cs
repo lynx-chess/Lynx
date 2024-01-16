@@ -9,10 +9,18 @@ namespace Lynx;
 /// </summary>
 public static class ZobristTable
 {
-    private static readonly long[,] _table = Initialize();
+    /// <summary>
+    /// 64x12
+    /// </summary>
+    private static readonly long[][] _table = Initialize();
+
+    private static readonly long WK_Hash = _table[(int)BoardSquare.a8][(int)Piece.p];
+    private static readonly long WQ_Hash = _table[(int)BoardSquare.b8][(int)Piece.p];
+    private static readonly long BK_Hash = _table[(int)BoardSquare.c8][(int)Piece.p];
+    private static readonly long BQ_Hash = _table[(int)BoardSquare.d8][(int)Piece.p];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static long PieceHash(int boardSquare, int piece) => _table[boardSquare, piece];
+    public static long PieceHash(int boardSquare, int piece) => _table[boardSquare][piece];
 
     /// <summary>
     /// Uses <see cref="Piece.P"/> and squares <see cref="BoardSquare.a1"/>-<see cref="BoardSquare.h1"/>
@@ -28,15 +36,15 @@ public static class ZobristTable
         }
 
 #if DEBUG
-        if (!Constants.EnPassantCaptureSquares.ContainsKey(enPassantSquare))
+        if (Constants.EnPassantCaptureSquares.Length <= enPassantSquare || Constants.EnPassantCaptureSquares[enPassantSquare] == 0)
         {
             throw new ArgumentException($"{Constants.Coordinates[enPassantSquare]} is not a valid en-passant square");
         }
 #endif
 
-        var file = enPassantSquare % 8;
+        var file = enPassantSquare & 0x07;  // enPassantSquare % 8
 
-        return _table[file, (int)Piece.P];
+        return _table[file][(int)Piece.P];
     }
 
     /// <summary>
@@ -46,7 +54,7 @@ public static class ZobristTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static long SideHash()
     {
-        return _table[(int)BoardSquare.h8, (int)Piece.p];
+        return _table[(int)BoardSquare.h8][(int)Piece.p];
     }
 
     /// <summary>
@@ -57,31 +65,34 @@ public static class ZobristTable
     /// <param name="castle"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static long CastleHash(int castle)
+    public static long CastleHash(byte castle)
     {
-        long combinedHash = 0;
-
-        if ((castle & (int)CastlingRights.WK) != default)
+        return castle switch
         {
-            combinedHash ^= _table[(int)BoardSquare.a8, (int)Piece.p];        // a8
-        }
+            0 => 0,                                // -    | -
 
-        if ((castle & (int)CastlingRights.WQ) != default)
-        {
-            combinedHash ^= _table[(int)BoardSquare.b8, (int)Piece.p];        // b8
-        }
+            (byte)CastlingRights.WK => WK_Hash,    // K    | -
+            (byte)CastlingRights.WQ => WQ_Hash,    // Q    | -
+            (byte)CastlingRights.BK => BK_Hash,    // -    | k
+            (byte)CastlingRights.BQ => BQ_Hash,    // -    | q
 
-        if ((castle & (int)CastlingRights.BK) != default)
-        {
-            combinedHash ^= _table[(int)BoardSquare.c8, (int)Piece.p];        // c8
-        }
+            (byte)CastlingRights.WK | (byte)CastlingRights.WQ => WK_Hash ^ WQ_Hash,    // KQ   | -
+            (byte)CastlingRights.WK | (byte)CastlingRights.BK => WK_Hash ^ BK_Hash,    // K    | k
+            (byte)CastlingRights.WK | (byte)CastlingRights.BQ => WK_Hash ^ BQ_Hash,    // K    | q
+            (byte)CastlingRights.WQ | (byte)CastlingRights.BK => WQ_Hash ^ BK_Hash,    // Q    | k
+            (byte)CastlingRights.WQ | (byte)CastlingRights.BQ => WQ_Hash ^ BQ_Hash,    // Q    | q
+            (byte)CastlingRights.BK | (byte)CastlingRights.BQ => BK_Hash ^ BQ_Hash,    // -    | kq
 
-        if ((castle & (int)CastlingRights.BQ) != default)
-        {
-            combinedHash ^= _table[(int)BoardSquare.d8, (int)Piece.p];        // d8
-        }
+            (byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BK => WK_Hash ^ WQ_Hash ^ BK_Hash,    // KQ   | k
+            (byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BQ => WK_Hash ^ WQ_Hash ^ BQ_Hash,    // KQ   | q
+            (byte)CastlingRights.WK | (byte)CastlingRights.BK | (byte)CastlingRights.BQ => WK_Hash ^ BK_Hash ^ BQ_Hash,    // K    | kq
+            (byte)CastlingRights.WQ | (byte)CastlingRights.BK | (byte)CastlingRights.BQ => WQ_Hash ^ BK_Hash ^ BQ_Hash,    // Q    | kq
 
-        return combinedHash;
+            (byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BK | (byte)CastlingRights.BQ =>       // KQ   | kq
+                WK_Hash ^ WQ_Hash ^ BK_Hash ^ BQ_Hash,
+
+            _ => throw new($"Unexpected castle encoded number: {castle}")
+        };
     }
 
     /// <summary>
@@ -94,14 +105,16 @@ public static class ZobristTable
     {
         long positionHash = 0;
 
-        for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
+        for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
         {
-            for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
+            var bitboard = position.PieceBitBoards[pieceIndex];
+
+            while (bitboard != default)
             {
-                if (position.PieceBitBoards[pieceIndex].GetBit(squareIndex))
-                {
-                    positionHash ^= PieceHash(squareIndex, pieceIndex);
-                }
+                var pieceSquareIndex = bitboard.GetLS1BIndex();
+                bitboard.ResetLS1B();
+
+                positionHash ^= PieceHash(pieceSquareIndex, pieceIndex);
             }
         }
 
@@ -113,20 +126,21 @@ public static class ZobristTable
     }
 
     /// <summary>
-    /// Initializes Zobrist table (long[64, 12])
+    /// Initializes Zobrist table (long[64][12])
     /// </summary>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static long[,] Initialize()
+    internal static long[][] Initialize()
     {
-        var zobristTable = new long[64, 12];
+        var zobristTable = new long[64][];
         var randomInstance = new Random(int.MaxValue);
 
         for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
         {
+            zobristTable[squareIndex] = new long[12];
             for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
             {
-                zobristTable[squareIndex, pieceIndex] = randomInstance.NextInt64();
+                zobristTable[squareIndex][pieceIndex] = randomInstance.NextInt64();
             }
         }
 

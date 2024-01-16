@@ -48,7 +48,8 @@ using System.Threading.Channels;
 //RookEvaluation();
 //TranspositionTable();
 //UnmakeMove();
-PieceSquareTables();
+//PieceSquareTables();
+NewMasks();
 
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
 const string TrickyPosition = Constants.TrickyTestPositionFEN;
@@ -323,11 +324,11 @@ static void _21_IsSquareAttacked()
 
     position.PieceBitBoards[(int)Piece.p].Print();
 
-    Attacks.PawnAttacks[(int)Side.White, (int)BoardSquare.e4].Print();
+    Attacks.PawnAttacks[(int)Side.White][(int)BoardSquare.e4].Print();
 
     var and =
         position.PieceBitBoards[(int)Piece.p]
-        & Attacks.PawnAttacks[(int)Side.White, (int)BoardSquare.e4];
+        & Attacks.PawnAttacks[(int)Side.White][(int)BoardSquare.e4];
     and.Print();
 
     Console.WriteLine("=====================================");
@@ -400,9 +401,12 @@ static void _23_Castling_Moves()
     var position = new Position("rn2k2r/pppppppp/8/8/8/8/PPPPPPPP/RN2K2R w KQkq - 0 1");
     position.Print();
 
-    var moves = MoveGenerator.GenerateCastlingMovesForReference(position, Utils.PieceOffset(position.Side)).ToList();
+    int index = 0;
+    var moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
 
-    foreach (var move in moves)
+    MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
+
+    foreach (var move in moves[..index])
     {
         Console.WriteLine(move);
     }
@@ -413,10 +417,10 @@ static void _26_Piece_Moves()
     var position = new Position(TrickyPosition);
     position.Print();
 
-    var moves = MoveGenerator.GenerateKnightMoves(position).ToList();
+    var moves = MoveGenerator.GenerateAllMoves(position).Where(m => m.Piece() == (int)Piece.N || m.Piece() == (int)Piece.n).ToList();
     moves.ForEach(m => Console.WriteLine(m));
 
-    moves = MoveGenerator.GenerateAllMoves(position).ToList();
+    moves = [.. MoveGenerator.GenerateAllMoves(position)];
     Console.WriteLine($"Expected 48, found: {moves.Count}");
     foreach (var move in moves)
     {
@@ -645,7 +649,7 @@ static void _53_MVVLVA()
     {
         for (int victim = (int)Piece.p; victim <= (int)Piece.k; ++victim)
         {
-            var score = EvaluationConstants.MostValueableVictimLeastValuableAttacker[attacker, victim];
+            var score = EvaluationConstants.MostValueableVictimLeastValuableAttacker[attacker][victim];
             Console.WriteLine($"Score {(Piece)attacker}x{(Piece)victim}: {score}");
         }
         Console.WriteLine();
@@ -655,7 +659,7 @@ static void _53_MVVLVA()
     {
         for (int victim = (int)Piece.P; victim <= (int)Piece.K; ++victim)
         {
-            var score = EvaluationConstants.MostValueableVictimLeastValuableAttacker[attacker, victim];
+            var score = EvaluationConstants.MostValueableVictimLeastValuableAttacker[attacker][victim];
             Console.WriteLine($"Score {(Piece)attacker}x{(Piece)victim}: {score}");
         }
         Console.WriteLine();
@@ -689,7 +693,7 @@ static void ZobristTable()
     var pos = new Position(KillerPosition);
     var zobristTable = InitializeZobristTable();
     var hash = CalculatePositionHash(zobristTable, pos);
-    var updatedHash = UpdatePositionHash(zobristTable, hash, MoveGenerator.GenerateAllMoves(pos).First());
+    var updatedHash = UpdatePositionHash(zobristTable, hash, MoveGenerator.GenerateAllMoves(pos)[0]);
 
     Console.WriteLine(updatedHash);
 }
@@ -1098,7 +1102,6 @@ static void UnmakeMove()
             Console.WriteLine($"Position\t{newPosition.FEN()}, Zobrist key {newPosition.UniqueIdentifier}");
             Console.WriteLine($"Position\t{position.FEN()}, Zobrist key {position.UniqueIdentifier}");
 
-
             Console.WriteLine($"Unmaking {move.ToEPDString()} in\t{position.FEN()}");
 
             //position.UnmakeMove(move, savedState);
@@ -1146,4 +1149,41 @@ static void PieceSquareTables()
         }
         Console.Write("\n    a\tb\tc\td\te\tf\tg\th\n\n\n");
     }
+}
+
+static void NewMasks()
+{
+    Masks.WhiteSidePassedPawnMasks[(int)BoardSquare.c4].Print();
+    Masks.BlackSidePassedPawnMasks[(int)BoardSquare.c5].Print();
+
+    PrintBitBoardArray(Masks.WhitePassedPawnMasks);
+    PrintBitBoardArray(Masks.WhiteSidePassedPawnMasks);
+    PrintBitBoardArray(Masks.BlackSidePassedPawnMasks);
+
+    Masks.WhiteKnightOutpostMask.Print();
+    Masks.BlackKnightOutpostMask.Print();
+
+    Masks.LightSquaresMask.Print();
+    Masks.DarkSquaresMask.Print();
+    (Masks.DarkSquaresMask ^ Masks.LightSquaresMask).Print();
+
+    Console.WriteLine(((Masks.LightSquaresMask >> (int)BoardSquare.h1) & 1) != 0);
+    Console.WriteLine((((9 * (int)BoardSquare.h1) + 8) & 8) != 0);
+    Console.WriteLine(((Masks.LightSquaresMask >> (int)BoardSquare.a1) & 1) != 0);
+    Console.WriteLine((((9 * (int)BoardSquare.a1) + 8) & 8) != 0);
+}
+
+static void PrintBitBoardArray(ulong[] bb)
+{
+    for (int i = 0; i < 64; ++i)
+    {
+        Console.Write($"{bb[i]}UL, ");
+
+        if ((i + 1) % 8 == 0)
+        {
+            Console.WriteLine();
+        }
+    }
+
+    Console.WriteLine();
 }

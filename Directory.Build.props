@@ -5,17 +5,19 @@
     <LangVersion>preview</LangVersion>
     <Nullable>Enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <InvariantGlobalization>true</InvariantGlobalization>
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
   </PropertyGroup>
 
   <ItemGroup>
     <Using Include="System.Int32" Alias="Move" />
+    <Using Include="System.Int16" Alias="ShortMove" />
     <Using Include="System.UInt64" Alias="BitBoard" />
     <Using Include="Lynx.Model.TranspositionTableElement[]" Alias="TranspositionTable" />
   </ItemGroup >
 
   <PropertyGroup>
-    <Version>1.0.1</Version>
+    <Version>1.2.0</Version>
     <Authors>Eduardo Cáceres</Authors>
     <ApplicationIcon>$(MSBuildThisFileDirectory)resources\icon.ico</ApplicationIcon>
     <RepositoryUrl>https://github.com/lynx-chess/Lynx</RepositoryUrl>
@@ -28,7 +30,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <NoWarn>$(NoWarn),1591,S101,RCS1090,S3903</NoWarn>
+    <NoWarn>$(NoWarn),1591,S101,RCS1090,S3903,S1133</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

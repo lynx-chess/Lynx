@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using NLog.LayoutRenderers.Wrappers;
+using System.Text.RegularExpressions;
 
 namespace Lynx.UCI.Commands.GUI;
 
@@ -48,173 +49,78 @@ public sealed partial class GoCommand : GUIBaseCommand
 {
     public const string Id = "go";
 
-    private const string GoSubcommands = "searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite";
-
-    [GeneratedRegex(@$"(?<=searchmoves).+?(?={GoSubcommands}|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
-    private static partial Regex SearchMoveRegex();
-
-    [GeneratedRegex(@$"(?<=wtime).+?(?={GoSubcommands}|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
-    private static partial Regex WhiteTimeRegex();
-
-    [GeneratedRegex(@$"(?<=btime).+?(?={GoSubcommands}|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
-    private static partial Regex BlackTimeRegex();
-
-    [GeneratedRegex(@$"(?<=winc).+?(?={GoSubcommands}|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
-    private static partial Regex WhiteIncrementRegex();
-
-    [GeneratedRegex(@$"(?<=binc).+?(?={GoSubcommands}|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
-    private static partial Regex BlackIncrementRegex();
-
-    [GeneratedRegex(@$"(?<=movestogo).+?(?={GoSubcommands}|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
-    private static partial Regex MovesToGoRegex();
-
-    [GeneratedRegex(@$"(?<=depth).+?(?={GoSubcommands}|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
-    private static partial Regex DepthRegex();
-
-    [GeneratedRegex(@$"(?<=nodes).+?(?={GoSubcommands}|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
-    private static partial Regex NodesRegex();
-
-    [GeneratedRegex(@$"(?<=mate).+?(?={GoSubcommands}|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
-    private static partial Regex MateRegex();
-
-    [GeneratedRegex(@$"(?<=movetime).+?(?={GoSubcommands}|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
-    private static partial Regex MoveTimeRegex();
-
-    private static readonly Regex _searchMovesRegex = SearchMoveRegex();
-    private static readonly Regex _whiteTimeRegex = WhiteTimeRegex();
-    private static readonly Regex _blackTimeRegex = BlackTimeRegex();
-    private static readonly Regex _whiteIncrementRegex = WhiteIncrementRegex();
-    private static readonly Regex _blackIncrementRegex = BlackIncrementRegex();
-    private static readonly Regex _movesToGoRegex = MovesToGoRegex();
-    private static readonly Regex _depthRegex = DepthRegex();
-    private static readonly Regex _nodesRegex = NodesRegex();
-    private static readonly Regex _mateRegex = MateRegex();
-    private static readonly Regex _moveTimeRegex = MoveTimeRegex();
-
-    public List<string> SearchMoves { get; private set; } = default!;
-    public int WhiteTime { get; private set; } = default!;
-    public int BlackTime { get; private set; } = default!;
-    public int WhiteIncrement { get; private set; } = default!;
-    public int BlackIncrement { get; private set; } = default!;
-    public int MovesToGo { get; private set; } = default!;
-    public int Depth { get; private set; } = default!;
-    public int Nodes { get; private set; } = default!;  // Not implemented
-    public int Mate { get; private set; } = default!;   // Not implemented
-    public int MoveTime { get; private set; } = default!;
-    public bool Infinite { get; private set; } = default!;
-    public bool Ponder { get; private set; } = default!;
-
     /// <summary>
-    /// Requires invoking <see cref="Parse(string)", allowing the user to make it asynchronously/>
+    /// Note that wtime and btime need to support negative numbers because of cutechess
     /// </summary>
-    public GoCommand() { }
+    /// <returns></returns>
+    [GeneratedRegex(@"(?<wtime>(?<=wtime\s+)-?\d+)|(?<btime>(?<=btime\s+)-?\d+)|(?<winc>(?<=winc\s+)\d+)|(?<binc>(?<=binc\s+)\d+)|(?<movestogo>(?<=movestogo\s+)\d+)|(?<depth>(?<=depth\s+)\d+)|(?<movetime>(?<=movetime\s+)\d+)|(?<infinite>infinite)|(?<ponder>ponder)")]
+    private static partial Regex Regex();
+
+    public int WhiteTime { get; }
+    public int BlackTime { get; }
+    public int WhiteIncrement { get; }
+    public int BlackIncrement { get; }
+    public int MovesToGo { get; }
+    public int Depth { get; }
+    public int MoveTime { get; }
+    public bool Infinite { get; }
+    public bool Ponder { get; private set; }
+
+    public int Nodes => throw new NotImplementedException();
+    public int Mate => throw new NotImplementedException();
+    public List<string> SearchMoves => throw new NotImplementedException();
 
     /// <summary>
     /// Invokes <see cref="Parse(string)" synchronously/>
     /// </summary>
     /// <param name="command"></param>
-    internal GoCommand(string command)
+    public GoCommand(string command)
     {
-        Parse(command).Wait();
-    }
-
-    public async Task Parse(string command)
-    {
-        var taskList = new List<Task>
+        foreach (var match in Regex().Matches(command).Cast<Match>())
+        {
+            for (int i = 1; i < match.Groups.Count; ++i)
             {
-                Task.Run(() =>
+                var group = match.Groups[i];
+                if (group.Success)
                 {
-                    var match = _searchMovesRegex.Match(command);
-
-                    SearchMoves = match.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
-                }),
-                Task.Run(() =>
-                {
-                    var match = _whiteTimeRegex.Match(command);
-
-                    if(int.TryParse(match.Value, out var value))
+                    switch (group.Name)
                     {
-                        WhiteTime = value;
+                        case "wtime":
+                            WhiteTime = int.Parse(group.Value);
+                            break;
+                        case "btime":
+                            BlackTime = int.Parse(group.Value);
+                            break;
+                        case "winc":
+                            WhiteIncrement = int.Parse(group.Value);
+                            break;
+                        case "binc":
+                            BlackIncrement = int.Parse(group.Value);
+                            break;
+                        case "movestogo":
+                            MovesToGo = int.Parse(group.Value);
+                            break;
+                        case "infinite":
+                            Infinite = true;
+                            break;
+                        case "ponder":
+                            Ponder = true;
+                            break;
+                        case "depth":
+                            Depth = int.Parse(group.Value);
+                            break;
+                        case "movetime":
+                            MoveTime = int.Parse(group.Value);
+                            break;
                     }
-                }),
-                Task.Run(() =>
-                {
-                    var match = _blackTimeRegex.Match(command);
 
-                    if(int.TryParse(match.Value, out var value))
-                    {
-                        BlackTime = value;
-                    }
-                }),
-                Task.Run(() =>
-                {
-                    var match = _whiteIncrementRegex.Match(command);
-
-                    if(int.TryParse(match.Value, out var value))
-                    {
-                        WhiteIncrement = value;
-                    }
-                }),
-                Task.Run(() =>
-                {
-                    var match = _blackIncrementRegex.Match(command);
-
-                    if(int.TryParse(match.Value, out var value))
-                    {
-                        BlackIncrement = value;
-                    }
-                }),
-                Task.Run(() =>
-                {
-                    var match = _movesToGoRegex.Match(command);
-
-                    if(int.TryParse(match.Value, out var value))
-                    {
-                        MovesToGo = value;
-                    }
-                }),
-                Task.Run(() =>
-                {
-                    var match = _depthRegex.Match(command);
-
-                    if(int.TryParse(match.Value, out var value))
-                    {
-                        Depth = value;
-                    }
-                }),
-                Task.Run(() =>
-                {
-                    var match = _nodesRegex.Match(command);
-
-                    if(int.TryParse(match.Value, out var value))
-                    {
-                        Nodes = value;
-                    }
-                }),
-                Task.Run(() =>
-                {
-                    var match = _mateRegex.Match(command);
-
-                    if(int.TryParse(match.Value, out var value))
-                    {
-                        Mate = value;
-                    }
-                }),
-                Task.Run(() =>
-                {
-                    var match = _moveTimeRegex.Match(command);
-
-                    if(int.TryParse(match.Value, out var value))
-                    {
-                        MoveTime = value;
-                    }
-                }),
-                Task.Run(() => Infinite = command.Contains("infinite", StringComparison.OrdinalIgnoreCase)),
-                Task.Run(() => Ponder = command.Contains("ponder", StringComparison.OrdinalIgnoreCase))
-            };
-
-        await Task.WhenAll(taskList);
+                    break;
+                }
+            }
+        }
     }
+
+    public static string Init() => Id;
 
     public void DisablePonder() => Ponder = false;
 }
