@@ -291,7 +291,7 @@ public static class MoveExtensions
         span[0] = source[0];
         span[1] = source[1];
 
-        var target = Constants.CoordinatesCharArray[move.SourceSquare()];
+        var target = Constants.CoordinatesCharArray[move.TargetSquare()];
         span[2] = target[0];
         span[3] = target[1];
 
