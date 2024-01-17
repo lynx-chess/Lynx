@@ -283,17 +283,32 @@ public static class MoveExtensions
 #pragma warning restore S3358 // Ternary operators should not be nested
     }
 
+    public static string UCIString(this Move move)
+    {
+        Span<char> span = stackalloc char[5];
+
+        var source = Constants.CoordinatesCharArray[move.SourceSquare()];
+        span[0] = source[0];
+        span[1] = source[1];
+
+        var target = Constants.CoordinatesCharArray[move.SourceSquare()];
+        span[2] = target[0];
+        span[3] = target[1];
+
+        var promotedPiece = move.PromotedPiece();
+        if (promotedPiece != default)
+    {
+            span[4] = Constants.AsciiPiecesLowercase[promotedPiece];
+
+            return span.ToString();
+        }
+
+        return span[..^1].ToString();
+    }
+
     public static void Print(this Move move)
     {
         Console.WriteLine(move.ToMoveString());
-    }
-
-    public static string UCIString(this Move move)
-    {
-        return
-            Constants.Coordinates[move.SourceSquare()] +
-            Constants.Coordinates[move.TargetSquare()] +
-            (move.PromotedPiece() == default ? "" : $"{Constants.AsciiPieces[move.PromotedPiece()].ToString().ToLowerInvariant()}");
     }
 
     public static void PrintMoveList(this IEnumerable<Move> moves)
