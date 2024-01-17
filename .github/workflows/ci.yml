@@ -36,7 +36,7 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path:
           ~/.nuget/packages
@@ -74,7 +74,7 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path:
           ~/.nuget/packages
@@ -139,7 +139,7 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path:
           ~/.nuget/packages
@@ -194,7 +194,7 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path:
           ~/.nuget/packages
@@ -227,7 +227,7 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path:
           ~/.nuget/packages
@@ -260,7 +260,7 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path:
           ~/.nuget/packages
@@ -292,7 +292,7 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path:
           ~/.nuget/packages
@@ -378,7 +378,7 @@ jobs:
   #      dotnet-version: ${{ env.DOTNET_VERSION }}
 
   #  - name: Nuget cache
-  #    uses: actions/cache@v3
+  #    uses: actions/cache@v4
   #    with:
   #      path:
   #        ~/.nuget/packages
