@@ -151,6 +151,10 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
 
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
+    public long MakeUnmakeMove_WithZobristKey_PreSwitchSpecialMove((string Fen, int Depth) data) => MakeMovePerft.ResultsImpl_MakeUnmakeMove_WithZobritsKey_PreSwitchSpecialMove(new(data.Fen), data.Depth, default);
+
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
     public long MakeUnmakeMove_WithZobristKey_SwitchSpecialMove((string Fen, int Depth) data) => MakeMovePerft.ResultsImpl_MakeUnmakeMove_WithZobritsKey_SwitchSpecialMove(new(data.Fen), data.Depth, default);
 
     public static class MakeMovePerft
@@ -213,6 +217,29 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
                     }
                     //position.UnmakeMove(move, _gameStates.Pop());
                     position.UnmakeMove_WithZobristKey(move, state);
+                }
+
+                return nodes;
+            }
+
+            return ++nodes;
+        }
+
+        public static long ResultsImpl_MakeUnmakeMove_WithZobritsKey_PreSwitchSpecialMove(MakeMovePosition position, int depth, long nodes)
+        {
+            if (depth != 0)
+            {
+                foreach (var move in MakeMoveMoveGenerator.GenerateAllMoves(position))
+                {
+                    //_gameStates.Push(position.MakeMove(move));
+                    var state = position.MakeMove_WithZobristKey_PreSwitchSpecialMove(move);
+
+                    if (position.WasProduceByAValidMove())
+                    {
+                        nodes = ResultsImpl_MakeUnmakeMove_WithZobritsKey_PreSwitchSpecialMove(position, depth - 1, nodes);
+                    }
+                    //position.UnmakeMove(move, _gameStates.Pop());
+                    position.UnmakeMove_WithZobristKey_PreSwitchSpecialMove(move, state);
                 }
 
                 return nodes;
@@ -778,6 +805,117 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public MakeMoveGameStateWithZobristKey MakeMove_WithZobristKey_PreSwitchSpecialMove(Move move)
+        {
+            int capturedPiece = -1;
+            byte castleCopy = Castle;
+            BoardSquare enpassantCopy = EnPassant;
+            long uniqueIdentifierCopy = UniqueIdentifier;
+
+            var oldSide = (int)Side;
+            var offset = Utils.PieceOffset(oldSide);
+            var oppositeSide = Utils.OppositeSide(oldSide);
+
+            int sourceSquare = move.SourceSquare();
+            int targetSquare = move.TargetSquare();
+            int piece = move.Piece();
+            int promotedPiece = move.PromotedPiece();
+
+            var newPiece = piece;
+            if (promotedPiece != default)
+            {
+                newPiece = promotedPiece;
+            }
+
+            PieceBitBoards[piece].PopBit(sourceSquare);
+            OccupancyBitBoards[oldSide].PopBit(sourceSquare);
+
+            PieceBitBoards[newPiece].SetBit(targetSquare);
+            OccupancyBitBoards[oldSide].SetBit(targetSquare);
+
+            UniqueIdentifier ^=
+                ZobristTable.SideHash()
+                ^ ZobristTable.PieceHash(sourceSquare, piece)
+                ^ ZobristTable.PieceHash(targetSquare, newPiece)
+                ^ ZobristTable.EnPassantHash((int)EnPassant)            // We clear the existing enpassant square, if any
+                ^ ZobristTable.CastleHash(Castle);                      // We clear the existing castle rights
+
+            EnPassant = BoardSquare.noSquare;
+            if (move.IsCapture())
+            {
+                var oppositePawnIndex = (int)Piece.p - offset;
+
+                var capturedSquare = targetSquare;
+                capturedPiece = oppositePawnIndex;
+                if (move.IsEnPassant())
+                {
+                    capturedSquare = Constants.EnPassantCaptureSquares[targetSquare];
+                    Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedSquare), $"Expected {(Side)oppositeSide} pawn in {capturedSquare}");
+                }
+                else
+                {
+                    capturedPiece = move.CapturedPiece();
+                }
+
+                PieceBitBoards[capturedPiece].PopBit(capturedSquare);
+                OccupancyBitBoards[oppositeSide].PopBit(capturedSquare);
+                UniqueIdentifier ^= ZobristTable.PieceHash(capturedSquare, capturedPiece);
+            }
+            else if (move.IsDoublePawnPush())
+            {
+                var pawnPush = +8 - (oldSide * 16);
+                var enPassantSquare = sourceSquare + pawnPush;
+                Utils.Assert(Constants.EnPassantCaptureSquares.Length > enPassantSquare && Constants.EnPassantCaptureSquares[enPassantSquare] != 0, $"Unexpected en passant square : {(BoardSquare)enPassantSquare}");
+
+                EnPassant = (BoardSquare)enPassantSquare;
+                UniqueIdentifier ^= ZobristTable.EnPassantHash(enPassantSquare);
+            }
+            else if (move.IsShortCastle())
+            {
+                var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
+                var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
+                var rookIndex = (int)Piece.R + offset;
+
+                PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
+                OccupancyBitBoards[oldSide].PopBit(rookSourceSquare);
+
+                PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
+                OccupancyBitBoards[oldSide].SetBit(rookTargetSquare);
+
+                UniqueIdentifier ^=
+                    ZobristTable.PieceHash(rookSourceSquare, rookIndex)
+                    ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
+            }
+            else if (move.IsLongCastle())
+            {
+                var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
+                var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
+                var rookIndex = (int)Piece.R + offset;
+
+                PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
+                OccupancyBitBoards[oldSide].PopBit(rookSourceSquare);
+
+                PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
+                OccupancyBitBoards[oldSide].SetBit(rookTargetSquare);
+
+                UniqueIdentifier ^=
+                    ZobristTable.PieceHash(rookSourceSquare, rookIndex)
+                    ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
+            }
+
+            Side = (Side)oppositeSide;
+            OccupancyBitBoards[2] = OccupancyBitBoards[1] | OccupancyBitBoards[0];
+
+            // Updating castling rights
+            Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
+            Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
+
+            UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
+
+            return new MakeMoveGameStateWithZobristKey(capturedPiece, castleCopy, enpassantCopy, uniqueIdentifierCopy);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public MakeMoveGameStateWithZobristKey MakeMove_WithZobristKey_SwitchSpecialMove(Move move)
         {
             int capturedPiece = -1;
@@ -895,7 +1033,6 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
                     }
             }
 
-
             Side = (Side)oppositeSide;
             OccupancyBitBoards[2] = OccupancyBitBoards[1] | OccupancyBitBoards[0];
 
@@ -978,6 +1115,83 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
             }
 
             OccupancyBitBoards[(int)Side.Both] = OccupancyBitBoards[(int)Side.White] | OccupancyBitBoards[(int)Side.Black];
+
+            // Updating saved values
+            Castle = gameState.Castle;
+            EnPassant = gameState.EnPassant;
+            UniqueIdentifier = gameState.ZobristKey;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void UnmakeMove_WithZobristKey_PreSwitchSpecialMove(Move move, MakeMoveGameStateWithZobristKey gameState)
+        {
+            var oppositeSide = (int)Side;
+            var side = Utils.OppositeSide(oppositeSide);
+            Side = (Side)side;
+            var offset = Utils.PieceOffset(side);
+
+            int sourceSquare = move.SourceSquare();
+            int targetSquare = move.TargetSquare();
+            int piece = move.Piece();
+            int promotedPiece = move.PromotedPiece();
+
+            var newPiece = piece;
+            if (promotedPiece != default)
+            {
+                newPiece = promotedPiece;
+            }
+
+            PieceBitBoards[newPiece].PopBit(targetSquare);
+            OccupancyBitBoards[side].PopBit(targetSquare);
+
+            PieceBitBoards[piece].SetBit(sourceSquare);
+            OccupancyBitBoards[side].SetBit(sourceSquare);
+
+            if (move.IsCapture())
+            {
+                var oppositePawnIndex = (int)Piece.p - offset;
+
+                if (move.IsEnPassant())
+                {
+                    var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
+                    Utils.Assert(OccupancyBitBoards[(int)Side.Both].GetBit(capturedPawnSquare) == default,
+                        $"Expected empty {capturedPawnSquare}");
+
+                    PieceBitBoards[oppositePawnIndex].SetBit(capturedPawnSquare);
+                    OccupancyBitBoards[oppositeSide].SetBit(capturedPawnSquare);
+                }
+                else
+                {
+                    PieceBitBoards[move.CapturedPiece()].SetBit(targetSquare);
+                    OccupancyBitBoards[oppositeSide].SetBit(targetSquare);
+                }
+            }
+            else if (move.IsShortCastle())
+            {
+                var rookSourceSquare = Utils.ShortCastleRookSourceSquare(side);
+                var rookTargetSquare = Utils.ShortCastleRookTargetSquare(side);
+                var rookIndex = (int)Piece.R + offset;
+
+                PieceBitBoards[rookIndex].SetBit(rookSourceSquare);
+                OccupancyBitBoards[side].SetBit(rookSourceSquare);
+
+                PieceBitBoards[rookIndex].PopBit(rookTargetSquare);
+                OccupancyBitBoards[side].PopBit(rookTargetSquare);
+            }
+            else if (move.IsLongCastle())
+            {
+                var rookSourceSquare = Utils.LongCastleRookSourceSquare(side);
+                var rookTargetSquare = Utils.LongCastleRookTargetSquare(side);
+                var rookIndex = (int)Piece.R + offset;
+
+                PieceBitBoards[rookIndex].SetBit(rookSourceSquare);
+                OccupancyBitBoards[side].SetBit(rookSourceSquare);
+
+                PieceBitBoards[rookIndex].PopBit(rookTargetSquare);
+                OccupancyBitBoards[side].PopBit(rookTargetSquare);
+            }
+
+            OccupancyBitBoards[2] = OccupancyBitBoards[1] | OccupancyBitBoards[0];
 
             // Updating saved values
             Castle = gameState.Castle;
