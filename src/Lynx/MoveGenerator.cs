@@ -12,10 +12,10 @@ public static class MoveGenerator
 
     private const int TRUE = 1;
 
-    public const int WhiteShortCastle = 147192768;
-    public const int WhiteLongCastle = 281406400;
-    public const int BlackShortCastle = 147527744;
-    public const int BlackLongCastle = 281741376;
+    public static int WhiteShortCastle = MoveExtensions.EncodeShortCastle(Constants.WhiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K);
+    public static int WhiteLongCastle = MoveExtensions.EncodeLongCastle(Constants.WhiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K);
+    public static int BlackShortCastle = MoveExtensions.EncodeShortCastle(Constants.BlackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.k);
+    public static int BlackLongCastle = MoveExtensions.EncodeLongCastle(Constants.BlackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.k);
 
     /// <summary>
     /// Indexed by <see cref="Piece"/>.
@@ -213,10 +213,10 @@ public static class MoveGenerator
                 var targetRank = (singlePushSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)  // Promotion
                 {
-                    movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.Q + offset);
-                    movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.R + offset);
-                    movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.N + offset);
-                    movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.B + offset);
+                    movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.Q + offset);
+                    movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.R + offset);
+                    movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.N + offset);
+                    movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.B + offset);
                 }
                 else
                 {
@@ -229,7 +229,7 @@ public static class MoveGenerator
                 if (!position.OccupancyBitBoards[2].GetBit(doublePushSquare)
                     && ((sourceRank == 2 && position.Side == Side.Black) || (sourceRank == 7 && position.Side == Side.White)))
                 {
-                    movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, doublePushSquare, piece, isDoublePawnPush: TRUE);
+                    movePool[localIndex++] = MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece);
                 }
             }
 
@@ -239,7 +239,7 @@ public static class MoveGenerator
             if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
             // We assume that position.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
             {
-                movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, (int)position.EnPassant, piece, isCapture: TRUE, isEnPassant: TRUE, capturedPiece: (int)Piece.p - offset);
+                movePool[localIndex++] = MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece, capturedPiece: (int)Piece.p - offset);
             }
 
             // Captures
@@ -253,14 +253,14 @@ public static class MoveGenerator
                 var targetRank = (targetSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)  // Capture with promotion
                 {
-                    movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.Q + offset, isCapture: TRUE, capturedPiece: capturedPiece);
-                    movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.R + offset, isCapture: TRUE, capturedPiece: capturedPiece);
-                    movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.N + offset, isCapture: TRUE, capturedPiece: capturedPiece);
-                    movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.B + offset, isCapture: TRUE, capturedPiece: capturedPiece);
+                    movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.Q + offset, capturedPiece: capturedPiece);
+                    movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.R + offset, capturedPiece: capturedPiece);
+                    movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.N + offset, capturedPiece: capturedPiece);
+                    movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.B + offset, capturedPiece: capturedPiece);
                 }
                 else
                 {
-                    movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece, isCapture: TRUE, capturedPiece: capturedPiece);
+                    movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece: capturedPiece);
                 }
             }
         }
@@ -299,10 +299,10 @@ public static class MoveGenerator
                 var targetRank = (singlePushSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)  // Promotion
                 {
-                    movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.Q + offset);
-                    movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.R + offset);
-                    movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.N + offset);
-                    movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.B + offset);
+                    movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.Q + offset);
+                    movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.R + offset);
+                    movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.N + offset);
+                    movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.B + offset);
                 }
             }
 
@@ -312,7 +312,7 @@ public static class MoveGenerator
             if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
             // We assume that position.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
             {
-                movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, (int)position.EnPassant, piece, isCapture: TRUE, isEnPassant: TRUE, capturedPiece: (int)Piece.p - offset);
+                movePool[localIndex++] = MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece, capturedPiece: (int)Piece.p - offset);
             }
 
             // Captures
@@ -326,14 +326,14 @@ public static class MoveGenerator
                 var targetRank = (targetSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)  // Capture with promotion
                 {
-                    movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.Q + offset, isCapture: TRUE, capturedPiece: capturedPiece);
-                    movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.R + offset, isCapture: TRUE, capturedPiece: capturedPiece);
-                    movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.N + offset, isCapture: TRUE, capturedPiece: capturedPiece);
-                    movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.B + offset, isCapture: TRUE, capturedPiece: capturedPiece);
+                    movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.Q + offset, capturedPiece: capturedPiece);
+                    movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.R + offset, capturedPiece: capturedPiece);
+                    movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.N + offset, capturedPiece: capturedPiece);
+                    movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.B + offset, capturedPiece: capturedPiece);
                 }
                 else
                 {
-                    movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece, isCapture: TRUE, capturedPiece: capturedPiece);
+                    movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece: capturedPiece);
                 }
             }
         }
@@ -364,8 +364,8 @@ public static class MoveGenerator
                 {
                     movePool[localIndex++] = WhiteShortCastle;
 
-                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.Encode(Constants.WhiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K + Utils.PieceOffset(position.Side), isShortCastle: TRUE),
-                        $"Wrong hardcoded white short castle move, expected {WhiteShortCastle}, got {MoveExtensions.Encode(Constants.WhiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K + Utils.PieceOffset(position.Side), isShortCastle: TRUE)}");
+                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeShortCastle(Constants.WhiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K),
+                        $"Wrong hardcoded white short castle move, expected {WhiteShortCastle}, got {MoveExtensions.EncodeShortCastle(Constants.WhiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K)}");
                 }
 
                 if (((position.Castle & (int)CastlingRights.WQ) != default)
@@ -378,8 +378,8 @@ public static class MoveGenerator
                 {
                     movePool[localIndex++] = WhiteLongCastle;
 
-                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.Encode(Constants.WhiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K + Utils.PieceOffset(position.Side), isLongCastle: TRUE),
-                        $"Wrong hardcoded white long castle move, expected {WhiteLongCastle}, got {MoveExtensions.Encode(Constants.WhiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K + Utils.PieceOffset(position.Side), isLongCastle: TRUE)}");
+                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeLongCastle(Constants.WhiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K),
+                        $"Wrong hardcoded white long castle move, expected {WhiteLongCastle}, got {MoveExtensions.EncodeLongCastle(Constants.WhiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K)}");
                 }
             }
             else
@@ -395,8 +395,8 @@ public static class MoveGenerator
                 {
                     movePool[localIndex++] = BlackShortCastle;
 
-                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.Encode(Constants.BlackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.K + Utils.PieceOffset(position.Side), isShortCastle: TRUE),
-                        $"Wrong hardcoded black short castle move, expected {BlackShortCastle}, got {MoveExtensions.Encode(Constants.BlackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.K + Utils.PieceOffset(position.Side), isShortCastle: TRUE)}");
+                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeShortCastle(Constants.BlackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.k),
+                        $"Wrong hardcoded black short castle move, expected {BlackShortCastle}, got {MoveExtensions.EncodeShortCastle(Constants.BlackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.k)}");
                 }
 
                 if (((position.Castle & (int)CastlingRights.BQ) != default)
@@ -409,8 +409,8 @@ public static class MoveGenerator
                 {
                     movePool[localIndex++] = BlackLongCastle;
 
-                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.Encode(Constants.BlackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.K + Utils.PieceOffset(position.Side), isLongCastle: TRUE),
-                        $"Wrong hardcoded black long castle move, expected {BlackLongCastle}, got {MoveExtensions.Encode(Constants.BlackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.K + Utils.PieceOffset(position.Side), isLongCastle: TRUE)}");
+                    Debug.Assert(movePool[localIndex - 1] == MoveExtensions.EncodeLongCastle(Constants.BlackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.k),
+                        $"Wrong hardcoded black long castle move, expected {BlackLongCastle}, got {MoveExtensions.EncodeLongCastle(Constants.BlackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.k)}");
                 }
             }
         }
@@ -445,7 +445,7 @@ public static class MoveGenerator
                 if (position.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare))
                 {
                     var capturedPiece = FindCapturedPiece(position, offset, targetSquare);
-                    movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece, isCapture: TRUE, capturedPiece: capturedPiece);
+                    movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece: capturedPiece);
                 }
                 else
                 {
@@ -484,7 +484,7 @@ public static class MoveGenerator
                 if (position.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare))
                 {
                     var capturedPiece = FindCapturedPiece(position, offset, targetSquare);
-                    movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece, isCapture: TRUE, capturedPiece: capturedPiece);
+                    movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece: capturedPiece);
                 }
             }
         }
@@ -560,10 +560,10 @@ public static class MoveGenerator
                 var targetRank = (singlePushSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)  // Promotion
                 {
-                    if (IsValidMove(position, MoveExtensions.Encode(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.Q + offset))
-                        || IsValidMove(position, MoveExtensions.Encode(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.R + offset))
-                        || IsValidMove(position, MoveExtensions.Encode(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.N + offset))
-                        || IsValidMove(position, MoveExtensions.Encode(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.B + offset)))
+                    if (IsValidMove(position, MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.Q + offset))
+                        || IsValidMove(position, MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.R + offset))
+                        || IsValidMove(position, MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.N + offset))
+                        || IsValidMove(position, MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.B + offset)))
                     {
                         return true;
                     }
@@ -579,7 +579,7 @@ public static class MoveGenerator
                 var doublePushSquare = sourceSquare + (2 * pawnPush);
                 if (!position.OccupancyBitBoards[2].GetBit(doublePushSquare)
                     && ((sourceRank == 2 && position.Side == Side.Black) || (sourceRank == 7 && position.Side == Side.White))
-                    && IsValidMove(position, MoveExtensions.Encode(sourceSquare, doublePushSquare, piece, isDoublePawnPush: TRUE)))
+                    && IsValidMove(position, MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece)))
                 {
                     return true;
                 }
@@ -590,7 +590,7 @@ public static class MoveGenerator
             // En passant
             if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant)
                 // We assume that position.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
-                && IsValidMove(position, MoveExtensions.Encode(true, sourceSquare, (int)position.EnPassant, piece, isCapture: TRUE, isEnPassant: TRUE)))
+                && IsValidMove(position, MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece)))
             {
                 return true;
             }
@@ -605,15 +605,15 @@ public static class MoveGenerator
                 var targetRank = (targetSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)  // Capture with promotion
                 {
-                    if (IsValidMove(position, MoveExtensions.Encode(true, sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.Q + offset, isCapture: TRUE))
-                        || IsValidMove(position, MoveExtensions.Encode(true, sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.R + offset, isCapture: TRUE))
-                        || IsValidMove(position, MoveExtensions.Encode(true, sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.N + offset, isCapture: TRUE))
-                        || IsValidMove(position, MoveExtensions.Encode(true, sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.B + offset, isCapture: TRUE)))
+                    if (IsValidMove(position, MoveExtensions.EncodePromotionWithCapture(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.Q + offset))
+                        || IsValidMove(position, MoveExtensions.EncodePromotionWithCapture(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.R + offset))
+                        || IsValidMove(position, MoveExtensions.EncodePromotionWithCapture(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.N + offset))
+                        || IsValidMove(position, MoveExtensions.EncodePromotionWithCapture(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.B + offset)))
                     {
                         return true;
                     }
                 }
-                else if (IsValidMove(position, MoveExtensions.Encode(true, sourceSquare, targetSquare, piece, isCapture: TRUE)))
+                else if (IsValidMove(position, MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece)))
                 {
                     return true;
                 }
@@ -719,7 +719,7 @@ public static class MoveGenerator
                 attacks.ResetLS1B();
 
                 if (position.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare)
-                    && IsValidMove(position, MoveExtensions.Encode(true, sourceSquare, targetSquare, piece, isCapture: TRUE)))
+                    && IsValidMove(position, MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece)))
                 {
                     return true;
                 }
@@ -815,10 +815,10 @@ public static class MoveGenerator
                 var targetRank = (singlePushSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)  // Promotion
                 {
-                    yield return MoveExtensions.Encode(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.Q + offset);
-                    yield return MoveExtensions.Encode(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.R + offset);
-                    yield return MoveExtensions.Encode(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.N + offset);
-                    yield return MoveExtensions.Encode(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.B + offset);
+                    yield return MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.Q + offset);
+                    yield return MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.R + offset);
+                    yield return MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.N + offset);
+                    yield return MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.B + offset);
                 }
                 else if (!capturesOnly)
                 {
@@ -833,7 +833,7 @@ public static class MoveGenerator
                     if (!position.OccupancyBitBoards[2].GetBit(doublePushSquare)
                         && ((sourceRank == 2 && position.Side == Side.Black) || (sourceRank == 7 && position.Side == Side.White)))
                     {
-                        yield return MoveExtensions.Encode(sourceSquare, doublePushSquare, piece, isDoublePawnPush: TRUE);
+                        yield return MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece);
                     }
                 }
             }
@@ -844,7 +844,7 @@ public static class MoveGenerator
             if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
             // We assume that position.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
             {
-                yield return MoveExtensions.Encode(sourceSquare, (int)position.EnPassant, piece, isCapture: TRUE, isEnPassant: TRUE, capturedPiece: (int)Piece.p - offset);
+                yield return MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece, capturedPiece: (int)Piece.p - offset);
             }
 
             // Captures
@@ -858,14 +858,14 @@ public static class MoveGenerator
                 var targetRank = (targetSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)  // Capture with promotion
                 {
-                    yield return MoveExtensions.Encode(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.Q + offset, isCapture: TRUE, capturedPiece: capturedPiece);
-                    yield return MoveExtensions.Encode(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.R + offset, isCapture: TRUE, capturedPiece: capturedPiece);
-                    yield return MoveExtensions.Encode(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.N + offset, isCapture: TRUE, capturedPiece: capturedPiece);
-                    yield return MoveExtensions.Encode(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.B + offset, isCapture: TRUE, capturedPiece: capturedPiece);
+                    yield return MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.Q + offset, capturedPiece: capturedPiece);
+                    yield return MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.R + offset, capturedPiece: capturedPiece);
+                    yield return MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.N + offset, capturedPiece: capturedPiece);
+                    yield return MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.B + offset, capturedPiece: capturedPiece);
                 }
                 else
                 {
-                    yield return MoveExtensions.Encode(sourceSquare, targetSquare, piece, isCapture: TRUE, capturedPiece: capturedPiece);
+                    yield return MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece: capturedPiece);
                 }
             }
         }
@@ -940,7 +940,7 @@ public static class MoveGenerator
                 if (position.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare))
                 {
                     var capturedPiece = FindCapturedPiece(position, offset, targetSquare);
-                    yield return MoveExtensions.Encode(sourceSquare, targetSquare, piece, isCapture: TRUE, capturedPiece: capturedPiece);
+                    yield return MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece: capturedPiece);
                 }
                 else if (!capturesOnly)
                 {

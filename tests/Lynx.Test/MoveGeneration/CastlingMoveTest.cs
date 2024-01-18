@@ -8,27 +8,39 @@ public class CastlingMoveTest
     public void WhiteShortCastling()
     {
         Assert.AreEqual(MoveGenerator.WhiteShortCastle,
-            MoveExtensions.Encode(Constants.WhiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K + Utils.PieceOffset(Side.White), isShortCastle: 1));
+            MoveExtensions.EncodeShortCastle(Constants.WhiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K));
+
+        Assert.AreEqual(MoveGenerator.WhiteShortCastle,
+            MoveExtensions.EncodeShortCastle(Constants.WhiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K + Utils.PieceOffset(Side.White)));
     }
 
     [Test]
     public void WhiteLongCastling()
     {
         Assert.AreEqual(MoveGenerator.WhiteLongCastle,
-            MoveExtensions.Encode(Constants.WhiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K + Utils.PieceOffset(Side.White), isLongCastle: 1));
+            MoveExtensions.EncodeLongCastle(Constants.WhiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K));
+
+        Assert.AreEqual(MoveGenerator.WhiteLongCastle,
+            MoveExtensions.EncodeLongCastle(Constants.WhiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K + Utils.PieceOffset(Side.White)));
     }
 
     [Test]
     public void BlackShortCastling()
     {
         Assert.AreEqual(MoveGenerator.BlackShortCastle,
-            MoveExtensions.Encode(Constants.BlackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.K + Utils.PieceOffset(Side.Black), isShortCastle: 1));
+            MoveExtensions.EncodeShortCastle(Constants.BlackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.k));
+
+        Assert.AreEqual(MoveGenerator.BlackShortCastle,
+            MoveExtensions.EncodeShortCastle(Constants.BlackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.K + Utils.PieceOffset(Side.Black)));
     }
 
     [Test]
     public void BlackLongCastling()
     {
         Assert.AreEqual(MoveGenerator.BlackLongCastle,
-            MoveExtensions.Encode(Constants.BlackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.K + Utils.PieceOffset(Side.Black), isLongCastle: 1));
+            MoveExtensions.EncodeLongCastle(Constants.BlackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.k));
+
+        Assert.AreEqual(MoveGenerator.BlackLongCastle,
+            MoveExtensions.EncodeLongCastle(Constants.BlackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.K + Utils.PieceOffset(Side.Black)));
     }
 }

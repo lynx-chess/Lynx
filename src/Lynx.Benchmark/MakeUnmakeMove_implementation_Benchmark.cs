@@ -966,11 +966,6 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
 
     public static class MakeMoveMoveGenerator
     {
-#if DEBUG
-        private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
-#endif
-        private const int TRUE = 1;
-
         /// <summary>
         /// Indexed by <see cref="Piece"/>.
         /// Checks are not considered
@@ -1001,13 +996,6 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IEnumerable<Move> GenerateAllMoves(MakeMovePosition position, Move[]? movePool = null, bool capturesOnly = false)
         {
-#if DEBUG
-            if (position.Side == Side.Both)
-            {
-                return new List<Move>();
-            }
-#endif
-
             movePool ??= new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
             int localIndex = 0;
 
@@ -1041,14 +1029,6 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
 
                 var sourceRank = (sourceSquare / 8) + 1;
 
-#if DEBUG
-                if (sourceRank == 1 || sourceRank == 8)
-                {
-                    _logger.Warn("There's a non-promoted {0} pawn in rank {1}", position.Side, sourceRank);
-                    continue;
-                }
-#endif
-
                 // Pawn pushes
                 var singlePushSquare = sourceSquare + pawnPush;
                 if (!position.OccupancyBitBoards[2].GetBit(singlePushSquare))
@@ -1057,10 +1037,10 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
                     var targetRank = (singlePushSquare / 8) + 1;
                     if (targetRank == 1 || targetRank == 8)  // Promotion
                     {
-                        movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.Q + offset);
-                        movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.R + offset);
-                        movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.N + offset);
-                        movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.B + offset);
+                        movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.Q + offset);
+                        movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.R + offset);
+                        movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.N + offset);
+                        movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.B + offset);
                     }
                     else if (!capturesOnly)
                     {
@@ -1075,7 +1055,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
                         if (!position.OccupancyBitBoards[2].GetBit(doublePushSquare)
                             && ((sourceRank == 2 && position.Side == Side.Black) || (sourceRank == 7 && position.Side == Side.White)))
                         {
-                            movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, doublePushSquare, piece, isDoublePawnPush: TRUE);
+                            movePool[localIndex++] = MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece);
                         }
                     }
                 }
@@ -1086,7 +1066,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
                 if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
                 // We assume that position.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
                 {
-                    movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, (int)position.EnPassant, piece, isCapture: TRUE, isEnPassant: TRUE);
+                    movePool[localIndex++] = MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece);
                 }
 
                 // Captures
@@ -1099,14 +1079,14 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
                     var targetRank = (targetSquare / 8) + 1;
                     if (targetRank == 1 || targetRank == 8)  // Capture with promotion
                     {
-                        movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.Q + offset, isCapture: TRUE);
-                        movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.R + offset, isCapture: TRUE);
-                        movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.N + offset, isCapture: TRUE);
-                        movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.B + offset, isCapture: TRUE);
+                        movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.Q + offset);
+                        movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.R + offset);
+                        movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.N + offset);
+                        movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.B + offset);
                     }
                     else
                     {
-                        movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece, isCapture: TRUE);
+                        movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece);
                     }
                 }
             }
@@ -1140,7 +1120,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
                         && !MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.f1, position, oppositeSide)
                         && !MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.g1, position, oppositeSide))
                     {
-                        movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, Constants.WhiteShortCastleKingSquare, piece, isShortCastle: TRUE);
+                        movePool[localIndex++] = MoveExtensions.EncodeShortCastle(sourceSquare, Constants.WhiteShortCastleKingSquare, piece);
                     }
 
                     if (((position.Castle & (int)CastlingRights.WQ) != default)
@@ -1151,7 +1131,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
                         && !MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.d1, position, oppositeSide)
                         && !MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.c1, position, oppositeSide))
                     {
-                        movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, Constants.WhiteLongCastleKingSquare, piece, isLongCastle: TRUE);
+                        movePool[localIndex++] = MoveExtensions.EncodeLongCastle(sourceSquare, Constants.WhiteLongCastleKingSquare, piece);
                     }
                 }
                 else
@@ -1164,7 +1144,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
                         && !MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.f8, position, oppositeSide)
                         && !MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.g8, position, oppositeSide))
                     {
-                        movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, Constants.BlackShortCastleKingSquare, piece, isShortCastle: TRUE);
+                        movePool[localIndex++] = MoveExtensions.EncodeShortCastle(sourceSquare, Constants.BlackShortCastleKingSquare, piece);
                     }
 
                     if (((position.Castle & (int)CastlingRights.BQ) != default)
@@ -1175,7 +1155,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
                         && !MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.d8, position, oppositeSide)
                         && !MakeMoveAttacks.IsSquaredAttackedBySide((int)BoardSquare.c8, position, oppositeSide))
                     {
-                        movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, Constants.BlackLongCastleKingSquare, piece, isLongCastle: TRUE);
+                        movePool[localIndex++] = MoveExtensions.EncodeLongCastle(sourceSquare, Constants.BlackLongCastleKingSquare, piece);
                     }
                 }
             }
@@ -1209,7 +1189,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
 
                     if (position.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare))
                     {
-                        movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, targetSquare, piece, isCapture: TRUE);
+                        movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece: 1);
                     }
                     else if (!capturesOnly)
                     {
