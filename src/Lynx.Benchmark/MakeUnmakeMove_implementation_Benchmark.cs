@@ -7,37 +7,44 @@
  *    [Host]     : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2
  *    DefaultJob : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2
  *
- *  | Method                                          | data                 | Mean         | Error       | StdDev      | Ratio | RatioSD | Gen0       | Allocated     | Alloc Ratio |
- *  |------------------------------------------------ |--------------------- |-------------:|------------:|------------:|------:|--------:|-----------:|--------------:|------------:|
- *  | NewPosition                                     | (2K2r(...)1, 6) [38] | 397,594.7 us | 4,212.70 us | 3,734.45 us |  1.00 |    0.00 | 13000.0000 | 1069286.11 KB |        1.00 |
- *  | MakeUnmakeMove_Original                         | (2K2r(...)1, 6) [38] | 434,075.4 us | 1,349.84 us | 1,127.17 us |  1.09 |    0.01 |  3000.0000 |  278498.13 KB |        0.26 |
- *  | MakeUnmakeMove_WithZobristKey                   | (2K2r(...)1, 6) [38] | 275,547.0 us | 2,201.86 us | 2,059.62 us |  0.69 |    0.01 |  3000.0000 |  278497.61 KB |        0.26 |
- *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove | (2K2r(...)1, 6) [38] |  21,979.3 us |   169.82 us |   158.85 us |  0.06 |    0.00 |   406.2500 |   35056.14 KB |        0.03 |
- *  |                                                 |                      |              |             |             |       |         |            |               |             |
- *  | NewPosition                                     | (3K4/(...)1, 6) [38] | 394,190.6 us | 2,760.12 us | 2,446.77 us |  1.00 |    0.00 | 13000.0000 | 1069286.11 KB |       1.000 |
- *  | MakeUnmakeMove_Original                         | (3K4/(...)1, 6) [38] | 451,305.4 us | 1,804.21 us | 1,599.39 us |  1.14 |    0.01 |  3000.0000 |  278498.13 KB |       0.260 |
- *  | MakeUnmakeMove_WithZobristKey                   | (3K4/(...)1, 6) [38] | 275,680.2 us | 2,376.10 us | 2,222.60 us |  0.70 |    0.01 |  3000.0000 |  278497.61 KB |       0.260 |
- *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove | (3K4/(...)1, 6) [38] |  21,480.1 us |    51.64 us |    45.78 us |  0.05 |    0.00 |    62.5000 |    5446.33 KB |       0.005 |
- *  |                                                 |                      |              |             |             |       |         |            |               |             |
- *  | NewPosition                                     | (8/p7(...)-, 6) [37] |  14,014.0 us |    74.89 us |    70.05 us |  1.00 |    0.00 |   515.6250 |    42915.8 KB |        1.00 |
- *  | MakeUnmakeMove_Original                         | (8/p7(...)-, 6) [37] |  15,909.3 us |    47.47 us |    42.08 us |  1.13 |    0.01 |   187.5000 |   17113.08 KB |        0.40 |
- *  | MakeUnmakeMove_WithZobristKey                   | (8/p7(...)-, 6) [37] |  10,438.8 us |    93.73 us |    83.09 us |  0.74 |    0.01 |   203.1250 |   17113.07 KB |        0.40 |
- *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove | (8/p7(...)-, 6) [37] |   4,719.8 us |    36.61 us |    32.45 us |  0.34 |    0.00 |   101.5625 |    8398.54 KB |        0.20 |
- *  |                                                 |                      |              |             |             |       |         |            |               |             |
- *  | NewPosition                                     | (r3k2(...)1, 4) [73] | 360,128.3 us | 4,954.12 us | 4,391.70 us | 1.000 |    0.00 |  9000.0000 |  801233.53 KB |       1.000 |
- *  | MakeUnmakeMove_Original                         | (r3k2(...)1, 4) [73] | 347,125.5 us | 1,845.83 us | 1,441.10 us | 0.963 |    0.01 |  1000.0000 |  104639.41 KB |       0.131 |
- *  | MakeUnmakeMove_WithZobristKey                   | (r3k2(...)1, 4) [73] | 240,126.7 us | 1,455.36 us | 1,361.34 us | 0.666 |    0.01 |  1000.0000 |  104638.72 KB |       0.131 |
- *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove | (r3k2(...)1, 4) [73] |     165.8 us |     1.48 us |     1.39 us | 0.000 |    0.00 |     1.2207 |     102.76 KB |       0.000 |
- *  |                                                 |                      |              |             |             |       |         |            |               |             |
- *  | NewPosition                                     | (r4rk(...)0, 4) [77] | 312,452.4 us | 2,062.78 us | 1,929.52 us | 1.000 |    0.00 |  9000.0000 |  765557.21 KB |       1.000 |
- *  | MakeUnmakeMove_Original                         | (r4rk(...)0, 4) [77] | 367,667.9 us |   725.59 us |   605.90 us | 1.176 |    0.01 |  1000.0000 |   96333.51 KB |       0.126 |
- *  | MakeUnmakeMove_WithZobristKey                   | (r4rk(...)0, 4) [77] | 214,976.8 us | 1,413.40 us | 1,322.10 us | 0.688 |    0.01 |  1000.0000 |   96332.81 KB |       0.126 |
- *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove | (r4rk(...)0, 4) [77] |     351.6 us |     1.32 us |     1.17 us | 0.001 |    0.00 |     2.4414 |      208.5 KB |       0.000 |
- *  |                                                 |                      |              |             |             |       |         |            |               |             |
- *  | NewPosition                                     | (rnbq(...)1, 4) [61] |  17,522.2 us |   312.79 us |   292.58 us |  1.00 |    0.00 |   531.2500 |   43733.27 KB |       1.000 |
- *  | MakeUnmakeMove_Original                         | (rnbq(...)1, 4) [61] |  15,792.3 us |    34.00 us |    28.39 us |  0.90 |    0.02 |    93.7500 |    9760.59 KB |       0.223 |
- *  | MakeUnmakeMove_WithZobristKey                   | (rnbq(...)1, 4) [61] |  11,878.4 us |    85.36 us |    79.85 us |  0.68 |    0.01 |   109.3750 |    9760.58 KB |       0.223 |
- *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove | (rnbq(...)1, 4) [61] |     251.4 us |     0.63 us |     0.49 us |  0.01 |    0.00 |     2.4414 |     220.02 KB |       0.005 |
+ *
+ *  | Method                                             | data                 | Mean         | Error       | StdDev      | Ratio | RatioSD | Gen0       | Allocated     | Alloc Ratio |
+ *  |--------------------------------------------------- |--------------------- |-------------:|------------:|------------:|------:|--------:|-----------:|--------------:|------------:|
+ *  | NewPosition                                        | (2K2r(...)1, 6) [38] | 371,916.2 us | 3,357.88 us | 2,976.67 us |  1.00 |    0.00 | 13000.0000 | 1069286.11 KB |        1.00 |
+ *  | MakeUnmakeMove_Original                            | (2K2r(...)1, 6) [38] | 438,803.6 us | 3,102.83 us | 2,902.39 us |  1.18 |    0.01 |  3000.0000 |  278498.13 KB |        0.26 |
+ *  | MakeUnmakeMove_WithZobristKey                      | (2K2r(...)1, 6) [38] | 276,965.8 us | 2,425.10 us | 2,268.44 us |  0.75 |    0.01 |  3000.0000 |  278497.61 KB |        0.26 |
+ *  | MakeUnmakeMove_WithZobristKey_PreSwitchSpecialMove | (2K2r(...)1, 6) [38] |  21,992.5 us |   181.89 us |   161.24 us |  0.06 |    0.00 |   406.2500 |   35056.14 KB |        0.03 |
+ *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove    | (2K2r(...)1, 6) [38] |  22,462.7 us |   394.02 us |   349.29 us |  0.06 |    0.00 |   406.2500 |   35056.14 KB |        0.03 |
+ *  |                                                    |                      |              |             |             |       |         |            |               |             |
+ *  | NewPosition                                        | (3K4/(...)1, 6) [38] | 388,579.9 us | 3,590.55 us | 3,358.60 us |  1.00 |    0.00 | 13000.0000 | 1069286.11 KB |       1.000 |
+ *  | MakeUnmakeMove_Original                            | (3K4/(...)1, 6) [38] | 441,682.8 us | 3,460.67 us | 3,067.79 us |  1.14 |    0.02 |  3000.0000 |  278498.13 KB |       0.260 |
+ *  | MakeUnmakeMove_WithZobristKey                      | (3K4/(...)1, 6) [38] | 260,931.1 us | 2,110.65 us | 1,974.30 us |  0.67 |    0.01 |  3000.0000 |  278497.61 KB |       0.260 |
+ *  | MakeUnmakeMove_WithZobristKey_PreSwitchSpecialMove | (3K4/(...)1, 6) [38] |  21,348.5 us |   129.00 us |   120.66 us |  0.05 |    0.00 |    62.5000 |    5446.33 KB |       0.005 |
+ *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove    | (3K4/(...)1, 6) [38] |  21,358.5 us |   151.00 us |   141.25 us |  0.05 |    0.00 |    62.5000 |    5446.33 KB |       0.005 |
+ *  |                                                    |                      |              |             |             |       |         |            |               |             |
+ *  | NewPosition                                        | (8/p7(...)-, 6) [37] |  13,754.5 us |    54.57 us |    51.05 us |  1.00 |    0.00 |   515.6250 |    42915.8 KB |        1.00 |
+ *  | MakeUnmakeMove_Original                            | (8/p7(...)-, 6) [37] |  15,711.2 us |    26.07 us |    24.39 us |  1.14 |    0.00 |   187.5000 |   17113.08 KB |        0.40 |
+ *  | MakeUnmakeMove_WithZobristKey                      | (8/p7(...)-, 6) [37] |  10,406.1 us |    55.41 us |    49.12 us |  0.76 |    0.01 |   203.1250 |   17113.07 KB |        0.40 |
+ *  | MakeUnmakeMove_WithZobristKey_PreSwitchSpecialMove | (8/p7(...)-, 6) [37] |   4,618.6 us |    25.61 us |    23.96 us |  0.34 |    0.00 |   101.5625 |    8398.54 KB |        0.20 |
+ *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove    | (8/p7(...)-, 6) [37] |   4,712.0 us |    52.73 us |    49.32 us |  0.34 |    0.00 |   101.5625 |    8398.54 KB |        0.20 |
+ *  |                                                    |                      |              |             |             |       |         |            |               |             |
+ *  | NewPosition                                        | (r3k2(...)1, 4) [73] | 319,595.5 us | 1,843.29 us | 1,724.21 us | 1.000 |    0.00 |  9500.0000 |  801233.01 KB |       1.000 |
+ *  | MakeUnmakeMove_Original                            | (r3k2(...)1, 4) [73] | 347,561.9 us | 1,235.28 us |   964.43 us | 1.087 |    0.01 |  1000.0000 |  104639.41 KB |       0.131 |
+ *  | MakeUnmakeMove_WithZobristKey                      | (r3k2(...)1, 4) [73] | 244,314.2 us |   924.89 us |   819.89 us | 0.764 |    0.00 |  1000.0000 |  104638.72 KB |       0.131 |
+ *  | MakeUnmakeMove_WithZobristKey_PreSwitchSpecialMove | (r3k2(...)1, 4) [73] |     161.3 us |     0.43 us |     0.33 us | 0.001 |    0.00 |     1.2207 |     102.76 KB |       0.000 |
+ *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove    | (r3k2(...)1, 4) [73] |     168.9 us |     0.87 us |     0.77 us | 0.001 |    0.00 |     1.2207 |     102.76 KB |       0.000 |
+ *  |                                                    |                      |              |             |             |       |         |            |               |             |
+ *  | NewPosition                                        | (r4rk(...)0, 4) [77] | 307,631.2 us | 2,571.62 us | 2,405.49 us | 1.000 |    0.00 |  9000.0000 |  765557.21 KB |       1.000 |
+ *  | MakeUnmakeMove_Original                            | (r4rk(...)0, 4) [77] | 279,892.9 us | 1,750.95 us | 1,637.84 us | 0.910 |    0.01 |  1000.0000 |   96332.98 KB |       0.126 |
+ *  | MakeUnmakeMove_WithZobristKey                      | (r4rk(...)0, 4) [77] | 215,268.1 us | 1,380.54 us | 1,291.35 us | 0.700 |    0.01 |  1000.0000 |   96332.81 KB |       0.126 |
+ *  | MakeUnmakeMove_WithZobristKey_PreSwitchSpecialMove | (r4rk(...)0, 4) [77] |     347.8 us |     1.24 us |     1.10 us | 0.001 |    0.00 |     2.4414 |      208.5 KB |       0.000 |
+ *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove    | (r4rk(...)0, 4) [77] |     358.4 us |     1.61 us |     1.26 us | 0.001 |    0.00 |     2.4414 |      208.5 KB |       0.000 |
+ *  |                                                    |                      |              |             |             |       |         |            |               |             |
+ *  | NewPosition                                        | (rnbq(...)1, 4) [61] |  16,786.2 us |    34.14 us |    28.51 us |  1.00 |    0.00 |   531.2500 |   43733.27 KB |       1.000 |
+ *  | MakeUnmakeMove_Original                            | (rnbq(...)1, 4) [61] |  15,329.7 us |    24.72 us |    20.64 us |  0.91 |    0.00 |   109.3750 |    9760.58 KB |       0.223 |
+ *  | MakeUnmakeMove_WithZobristKey                      | (rnbq(...)1, 4) [61] |  12,382.0 us |    41.57 us |    36.85 us |  0.74 |    0.00 |   109.3750 |    9760.58 KB |       0.223 |
+ *  | MakeUnmakeMove_WithZobristKey_PreSwitchSpecialMove | (rnbq(...)1, 4) [61] |     250.9 us |     1.71 us |     1.51 us |  0.01 |    0.00 |     2.4414 |     220.02 KB |       0.005 |
+ *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove    | (rnbq(...)1, 4) [61] |     249.2 us |     1.73 us |     1.62 us |  0.01 |    0.00 |     2.4414 |     220.02 KB |       0.005 |
  *
  *
  *  BenchmarkDotNet v0.13.12, Windows 10 (10.0.20348.2159) (Hyper-V)
@@ -46,76 +53,88 @@
  *    [Host]     : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2
  *    DefaultJob : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2
  *
- *  | Method                                          | data                 | Mean         | Error       | StdDev      | Ratio | Gen0       | Gen1      | Allocated     | Alloc Ratio |
- *  |------------------------------------------------ |--------------------- |-------------:|------------:|------------:|------:|-----------:|----------:|--------------:|------------:|
- *  | NewPosition                                     | (2K2r(...)1, 6) [38] | 366,053.0 us | 2,768.52 us | 2,589.68 us |  1.00 | 65000.0000 | 1000.0000 | 1069285.78 KB |        1.00 |
- *  | MakeUnmakeMove_Original                         | (2K2r(...)1, 6) [38] | 447,409.1 us | 4,180.66 us | 3,706.04 us |  1.22 | 17000.0000 |         - |   278497.8 KB |        0.26 |
- *  | MakeUnmakeMove_WithZobristKey                   | (2K2r(...)1, 6) [38] | 274,326.0 us |   704.09 us |   624.15 us |  0.75 | 17000.0000 |         - |  278497.45 KB |        0.26 |
- *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove | (2K2r(...)1, 6) [38] |  22,248.0 us |   115.31 us |    96.29 us |  0.06 |  2125.0000 |   31.2500 |   35057.84 KB |        0.03 |
- *  |                                                 |                      |              |             |             |       |            |           |               |             |
- *  | NewPosition                                     | (3K4/(...)1, 6) [38] | 348,384.8 us | 2,910.09 us | 2,579.72 us |  1.00 | 65000.0000 | 1000.0000 | 1069285.78 KB |       1.000 |
- *  | MakeUnmakeMove_Original                         | (3K4/(...)1, 6) [38] | 445,346.5 us |   824.01 us |   688.08 us |  1.28 | 17000.0000 |         - |   278497.8 KB |       0.260 |
- *  | MakeUnmakeMove_WithZobristKey                   | (3K4/(...)1, 6) [38] | 270,130.7 us |   599.63 us |   500.72 us |  0.77 | 17000.0000 |         - |  278497.45 KB |       0.260 |
- *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove | (3K4/(...)1, 6) [38] |  21,160.2 us |   136.92 us |   128.07 us |  0.06 |   312.5000 |         - |    5447.08 KB |       0.005 |
- *  |                                                 |                      |              |             |             |       |            |           |               |             |
- *  | NewPosition                                     | (8/p7(...)-, 6) [37] |  12,731.9 us |   118.51 us |   110.86 us |  1.00 |  2625.0000 |   62.5000 |   42917.22 KB |        1.00 |
- *  | MakeUnmakeMove_Original                         | (8/p7(...)-, 6) [37] |  16,804.4 us |   112.51 us |   105.24 us |  1.32 |  1031.2500 |         - |   17115.45 KB |        0.40 |
- *  | MakeUnmakeMove_WithZobristKey                   | (8/p7(...)-, 6) [37] |  10,124.0 us |    60.33 us |    53.48 us |  0.80 |  1046.8750 |   15.6250 |   17115.44 KB |        0.40 |
- *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove | (8/p7(...)-, 6) [37] |   4,634.1 us |    22.34 us |    20.90 us |  0.36 |   507.8125 |    7.8125 |    8399.77 KB |        0.20 |
- *  |                                                 |                      |              |             |             |       |            |           |               |             |
- *  | NewPosition                                     | (r3k2(...)1, 4) [73] | 290,074.0 us | 2,156.13 us | 1,911.36 us | 1.000 | 49000.0000 |  500.0000 |  801232.84 KB |       1.000 |
- *  | MakeUnmakeMove_Original                         | (r3k2(...)1, 4) [73] | 335,338.4 us |   709.24 us |   628.72 us | 1.156 |  6000.0000 |         - |  104639.09 KB |       0.131 |
- *  | MakeUnmakeMove_WithZobristKey                   | (r3k2(...)1, 4) [73] | 263,131.3 us |   472.10 us |   394.22 us | 0.907 |  6000.0000 |         - |  104638.73 KB |       0.131 |
- *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove | (r3k2(...)1, 4) [73] |     166.1 us |     0.32 us |     0.30 us | 0.001 |     6.1035 |         - |     102.78 KB |       0.000 |
- *  |                                                 |                      |              |             |             |       |            |           |               |             |
- *  | NewPosition                                     | (r4rk(...)0, 4) [77] | 255,742.8 us | 2,229.76 us | 2,085.72 us | 1.000 | 46500.0000 |  500.0000 |  765557.05 KB |       1.000 |
- *  | MakeUnmakeMove_Original                         | (r4rk(...)0, 4) [77] | 279,471.5 us |   511.51 us |   453.44 us | 1.092 |  5500.0000 |         - |   96332.82 KB |       0.126 |
- *  | MakeUnmakeMove_WithZobristKey                   | (r4rk(...)0, 4) [77] | 208,362.8 us |   869.15 us |   813.01 us | 0.815 |  5666.6667 |         - |    96332.7 KB |       0.126 |
- *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove | (r4rk(...)0, 4) [77] |     357.0 us |     0.96 us |     0.90 us | 0.001 |    12.6953 |         - |     208.53 KB |       0.000 |
- *  |                                                 |                      |              |             |             |       |            |           |               |             |
- *  | NewPosition                                     | (rnbq(...)1, 4) [61] |  14,302.6 us |   142.12 us |   125.99 us |  1.00 |  2671.8750 |   31.2500 |   43734.68 KB |       1.000 |
- *  | MakeUnmakeMove_Original                         | (rnbq(...)1, 4) [61] |  20,109.9 us |    44.69 us |    39.61 us |  1.41 |   593.7500 |         - |    9762.01 KB |       0.223 |
- *  | MakeUnmakeMove_WithZobristKey                   | (rnbq(...)1, 4) [61] |  11,840.0 us |    44.82 us |    41.93 us |  0.83 |   593.7500 |         - |       9762 KB |       0.223 |
- *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove | (rnbq(...)1, 4) [61] |     250.3 us |     1.11 us |     1.04 us |  0.02 |    13.1836 |         - |     220.05 KB |       0.005 |
+ *  | Method                                             | data                 | Mean         | Error       | StdDev      | Ratio | RatioSD | Gen0       | Gen1      | Allocated     | Alloc Ratio |
+ *  |--------------------------------------------------- |--------------------- |-------------:|------------:|------------:|------:|--------:|-----------:|----------:|--------------:|------------:|
+ *  | NewPosition                                        | (2K2r(...)1, 6) [38] | 340,274.7 us | 5,376.88 us | 5,029.54 us |  1.00 |    0.00 | 65000.0000 | 1000.0000 | 1069285.78 KB |        1.00 |
+ *  | MakeUnmakeMove_Original                            | (2K2r(...)1, 6) [38] | 442,876.5 us | 4,237.68 us | 3,538.65 us |  1.30 |    0.01 | 17000.0000 |         - |   278497.8 KB |        0.26 |
+ *  | MakeUnmakeMove_WithZobristKey                      | (2K2r(...)1, 6) [38] | 269,098.4 us |   554.73 us |   491.76 us |  0.79 |    0.01 | 17000.0000 |         - |  278497.45 KB |        0.26 |
+ *  | MakeUnmakeMove_WithZobristKey_PreSwitchSpecialMove | (2K2r(...)1, 6) [38] |  21,627.3 us |   416.92 us |   480.13 us |  0.06 |    0.00 |  2125.0000 |   31.2500 |   35057.84 KB |        0.03 |
+ *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove    | (2K2r(...)1, 6) [38] |  22,258.5 us |   383.98 us |   359.18 us |  0.07 |    0.00 |  2125.0000 |   31.2500 |   35057.84 KB |        0.03 |
+ *  |                                                    |                      |              |             |             |       |         |            |           |               |             |
+ *  | NewPosition                                        | (3K4/(...)1, 6) [38] | 345,690.7 us | 6,394.45 us | 5,981.37 us |  1.00 |    0.00 | 65000.0000 | 1000.0000 | 1069285.78 KB |       1.000 |
+ *  | MakeUnmakeMove_Original                            | (3K4/(...)1, 6) [38] | 437,070.3 us | 2,823.89 us | 2,358.08 us |  1.26 |    0.02 | 17000.0000 |         - |   278497.8 KB |       0.260 |
+ *  | MakeUnmakeMove_WithZobristKey                      | (3K4/(...)1, 6) [38] | 270,378.5 us | 2,361.96 us | 2,209.38 us |  0.78 |    0.01 | 17000.0000 |         - |  278497.45 KB |       0.260 |
+ *  | MakeUnmakeMove_WithZobristKey_PreSwitchSpecialMove | (3K4/(...)1, 6) [38] |  21,175.1 us |    76.07 us |    71.15 us |  0.06 |    0.00 |   312.5000 |         - |    5447.08 KB |       0.005 |
+ *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove    | (3K4/(...)1, 6) [38] |  21,442.6 us |    72.25 us |    64.05 us |  0.06 |    0.00 |   312.5000 |         - |    5447.08 KB |       0.005 |
+ *  |                                                    |                      |              |             |             |       |         |            |           |               |             |
+ *  | NewPosition                                        | (8/p7(...)-, 6) [37] |  12,793.4 us |   232.93 us |   217.88 us |  1.00 |    0.00 |  2625.0000 |   62.5000 |   42917.22 KB |        1.00 |
+ *  | MakeUnmakeMove_Original                            | (8/p7(...)-, 6) [37] |  16,194.7 us |    88.10 us |    78.10 us |  1.27 |    0.02 |  1031.2500 |         - |   17115.45 KB |        0.40 |
+ *  | MakeUnmakeMove_WithZobristKey                      | (8/p7(...)-, 6) [37] |  10,225.7 us |    72.37 us |    64.15 us |  0.80 |    0.01 |  1046.8750 |   15.6250 |   17115.44 KB |        0.40 |
+ *  | MakeUnmakeMove_WithZobristKey_PreSwitchSpecialMove | (8/p7(...)-, 6) [37] |   4,561.7 us |    30.06 us |    28.12 us |  0.36 |    0.01 |   507.8125 |    7.8125 |    8399.77 KB |        0.20 |
+ *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove    | (8/p7(...)-, 6) [37] |   4,648.8 us |    48.80 us |    45.65 us |  0.36 |    0.01 |   507.8125 |    7.8125 |    8399.77 KB |        0.20 |
+ *  |                                                    |                      |              |             |             |       |         |            |           |               |             |
+ *  | NewPosition                                        | (r3k2(...)1, 4) [73] | 289,780.8 us | 3,074.26 us | 2,725.25 us | 1.000 |    0.00 | 49000.0000 |  500.0000 |  801232.84 KB |       1.000 |
+ *  | MakeUnmakeMove_Original                            | (r3k2(...)1, 4) [73] | 355,328.7 us | 1,518.35 us | 1,420.27 us | 1.227 |    0.01 |  6000.0000 |         - |  104639.09 KB |       0.131 |
+ *  | MakeUnmakeMove_WithZobristKey                      | (r3k2(...)1, 4) [73] | 242,989.5 us | 1,527.59 us | 1,428.91 us | 0.839 |    0.01 |  6333.3333 |         - |  104638.61 KB |       0.131 |
+ *  | MakeUnmakeMove_WithZobristKey_PreSwitchSpecialMove | (r3k2(...)1, 4) [73] |     160.4 us |     0.72 us |     0.67 us | 0.001 |    0.00 |     6.1035 |         - |     102.78 KB |       0.000 |
+ *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove    | (r3k2(...)1, 4) [73] |     168.7 us |     0.98 us |     0.87 us | 0.001 |    0.00 |     6.1035 |         - |     102.78 KB |       0.000 |
+ *  |                                                    |                      |              |             |             |       |         |            |           |               |             |
+ *  | NewPosition                                        | (r4rk(...)0, 4) [77] | 257,510.9 us | 5,042.96 us | 4,717.19 us | 1.000 |    0.00 | 46500.0000 |  500.0000 |  765557.05 KB |       1.000 |
+ *  | MakeUnmakeMove_Original                            | (r4rk(...)0, 4) [77] | 278,350.4 us |   753.56 us |   704.88 us | 1.081 |    0.02 |  5500.0000 |         - |   96332.82 KB |       0.126 |
+ *  | MakeUnmakeMove_WithZobristKey                      | (r4rk(...)0, 4) [77] | 208,272.9 us |   985.54 us |   822.97 us | 0.810 |    0.01 |  5666.6667 |         - |    96332.7 KB |       0.126 |
+ *  | MakeUnmakeMove_WithZobristKey_PreSwitchSpecialMove | (r4rk(...)0, 4) [77] |     309.7 us |     2.04 us |     1.90 us | 0.001 |    0.00 |    12.6953 |         - |     208.53 KB |       0.000 |
+ *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove    | (r4rk(...)0, 4) [77] |     357.8 us |     3.60 us |     3.37 us | 0.001 |    0.00 |    12.6953 |         - |     208.53 KB |       0.000 |
+ *  |                                                    |                      |              |             |             |       |         |            |           |               |             |
+ *  | NewPosition                                        | (rnbq(...)1, 4) [61] |  14,612.6 us |   221.92 us |   196.73 us |  1.00 |    0.00 |  2671.8750 |   31.2500 |   43734.68 KB |       1.000 |
+ *  | MakeUnmakeMove_Original                            | (rnbq(...)1, 4) [61] |  15,658.0 us |    27.86 us |    24.70 us |  1.07 |    0.02 |   593.7500 |         - |    9762.01 KB |       0.223 |
+ *  | MakeUnmakeMove_WithZobristKey                      | (rnbq(...)1, 4) [61] |  11,908.9 us |    38.41 us |    34.05 us |  0.82 |    0.01 |   593.7500 |         - |       9762 KB |       0.223 |
+ *  | MakeUnmakeMove_WithZobristKey_PreSwitchSpecialMove | (rnbq(...)1, 4) [61] |     225.9 us |     0.83 us |     0.70 us |  0.02 |    0.00 |    13.4277 |         - |     220.05 KB |       0.005 |
+ *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove    | (rnbq(...)1, 4) [61] |     256.0 us |     0.86 us |     0.81 us |  0.02 |    0.00 |    13.1836 |         - |     220.05 KB |       0.005 |
  *
  *
  *  BenchmarkDotNet v0.13.12, macOS Monterey 12.7.2 (21G1974) [Darwin 21.6.0]
- *  Intel Core i7-8700B CPU 3.20GHz (Max: 3.19GHz) (Coffee Lake), 1 CPU, 4 logical and 4 physical cores
+ *  Intel Xeon CPU E5-1650 v2 3.50GHz (Max: 3.34GHz), 1 CPU, 3 logical and 3 physical cores
  *  .NET SDK 8.0.101
- *    [Host]     : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2
- *    DefaultJob : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2
+ *    [Host]     : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX
+ *    DefaultJob : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX
  *
- *  | Method                                          | data                 | Mean         | Error       | StdDev       | Ratio | RatioSD | Gen0        | Gen1      | Allocated     | Alloc Ratio |
- *  |------------------------------------------------ |--------------------- |-------------:|------------:|-------------:|------:|--------:|------------:|----------:|--------------:|------------:|
- *  | NewPosition                                     | (2K2r(...)1, 6) [38] | 497,953.8 us | 9,759.34 us | 12,689.90 us |  1.00 |    0.00 | 174000.0000 | 2000.0000 | 1069286.11 KB |        1.00 |
- *  | MakeUnmakeMove_Original                         | (2K2r(...)1, 6) [38] | 468,175.4 us | 9,099.16 us | 11,507.53 us |  0.94 |    0.03 |  45000.0000 |         - |  278498.13 KB |        0.26 |
- *  | MakeUnmakeMove_WithZobristKey                   | (2K2r(...)1, 6) [38] | 308,002.9 us | 6,088.07 us |  5,083.82 us |  0.61 |    0.01 |  45000.0000 |  500.0000 |  278497.61 KB |        0.26 |
- *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove | (2K2r(...)1, 6) [38] |  25,735.8 us |   430.37 us |    719.06 us |  0.05 |    0.00 |   5718.7500 |   62.5000 |   35057.85 KB |        0.03 |
- *  |                                                 |                      |              |             |              |       |         |             |           |               |             |
- *  | NewPosition                                     | (3K4/(...)1, 6) [38] | 485,879.0 us | 9,441.38 us | 11,940.33 us |  1.00 |    0.00 | 174000.0000 | 2000.0000 | 1069286.11 KB |       1.000 |
- *  | MakeUnmakeMove_Original                         | (3K4/(...)1, 6) [38] | 461,012.4 us | 8,901.81 us | 11,574.87 us |  0.95 |    0.03 |  45000.0000 |         - |  278498.13 KB |       0.260 |
- *  | MakeUnmakeMove_WithZobristKey                   | (3K4/(...)1, 6) [38] | 311,701.0 us | 5,907.80 us |  6,566.51 us |  0.64 |    0.02 |  45000.0000 |  500.0000 |  278497.61 KB |       0.260 |
- *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove | (3K4/(...)1, 6) [38] |  23,776.9 us |   438.04 us |    789.88 us |  0.05 |    0.00 |    857.1429 |         - |    5448.69 KB |       0.005 |
- *  |                                                 |                      |              |             |              |       |         |             |           |               |             |
- *  | NewPosition                                     | (8/p7(...)-, 6) [37] |  20,686.2 us |   765.70 us |  2,108.97 us |  1.00 |    0.00 |   7000.0000 |  125.0000 |   42917.24 KB |        1.00 |
- *  | MakeUnmakeMove_Original                         | (8/p7(...)-, 6) [37] |  18,236.6 us |   432.24 us |  1,247.10 us |  0.89 |    0.11 |   2733.3333 |         - |    17115.5 KB |        0.40 |
- *  | MakeUnmakeMove_WithZobristKey                   | (8/p7(...)-, 6) [37] |  11,901.3 us |   168.57 us |    140.76 us |  0.63 |    0.06 |   2781.2500 |   31.2500 |   17115.45 KB |        0.40 |
- *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove | (8/p7(...)-, 6) [37] |   5,332.6 us |   104.37 us |    257.97 us |  0.26 |    0.03 |   1367.1875 |   23.4375 |    8401.25 KB |        0.20 |
- *  |                                                 |                      |              |             |              |       |         |             |           |               |             |
- *  | NewPosition                                     | (r3k2(...)1, 4) [73] | 437,978.9 us | 9,011.62 us | 26,570.98 us | 1.000 |    0.00 | 130000.0000 | 1000.0000 |  801233.53 KB |       1.000 |
- *  | MakeUnmakeMove_Original                         | (r3k2(...)1, 4) [73] | 363,920.4 us | 4,364.21 us |  3,407.29 us | 0.804 |    0.03 |  17000.0000 |         - |  104639.41 KB |       0.131 |
- *  | MakeUnmakeMove_WithZobristKey                   | (r3k2(...)1, 4) [73] | 278,624.2 us | 4,591.36 us |  4,294.76 us | 0.610 |    0.03 |  17000.0000 |         - |  104638.89 KB |       0.131 |
- *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove | (r3k2(...)1, 4) [73] |     163.9 us |     2.42 us |      2.26 us | 0.000 |    0.00 |     16.6016 |         - |     102.81 KB |       0.000 |
- *  |                                                 |                      |              |             |              |       |         |             |           |               |             |
- *  | NewPosition                                     | (r4rk(...)0, 4) [77] | 383,821.2 us | 7,672.70 us | 10,242.84 us | 1.000 |    0.00 | 124000.0000 | 1000.0000 |  765557.73 KB |       1.000 |
- *  | MakeUnmakeMove_Original                         | (r4rk(...)0, 4) [77] | 373,585.2 us | 5,621.68 us |  4,983.47 us | 0.963 |    0.02 |  15000.0000 |         - |   96333.51 KB |       0.126 |
- *  | MakeUnmakeMove_WithZobristKey                   | (r4rk(...)0, 4) [77] | 238,751.5 us | 1,165.60 us |    973.33 us | 0.616 |    0.02 |  15000.0000 |         - |   96333.51 KB |       0.126 |
- *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove | (r4rk(...)0, 4) [77] |     382.2 us |     5.68 us |      5.03 us | 0.001 |    0.00 |     33.6914 |         - |      208.6 KB |       0.000 |
- *  |                                                 |                      |              |             |              |       |         |             |           |               |             |
- *  | NewPosition                                     | (rnbq(...)1, 4) [61] |  21,280.7 us |   348.64 us |    326.12 us |  1.00 |    0.00 |   7125.0000 |   93.7500 |    43734.7 KB |       1.000 |
- *  | MakeUnmakeMove_Original                         | (rnbq(...)1, 4) [61] |  18,844.6 us |   418.23 us |  1,233.15 us |  0.85 |    0.04 |   1593.7500 |         - |    9763.26 KB |       0.223 |
- *  | MakeUnmakeMove_WithZobristKey                   | (rnbq(...)1, 4) [61] |  14,520.0 us |   286.52 us |    552.03 us |  0.68 |    0.03 |   1593.7500 |   15.6250 |    9763.24 KB |       0.223 |
- *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove | (rnbq(...)1, 4) [61] |     306.5 us |     5.95 us |     15.58 us |  0.01 |    0.00 |     35.6445 |         - |     220.12 KB |       0.005 |
+ *  | Method                                             | data                 | Mean         | Error        | StdDev       | Median       | Ratio | RatioSD | Gen0        | Gen1      | Allocated     | Alloc Ratio |
+ *  |--------------------------------------------------- |--------------------- |-------------:|-------------:|-------------:|-------------:|------:|--------:|------------:|----------:|--------------:|------------:|
+ *  | NewPosition                                        | (2K2r(...)1, 6) [38] | 540,876.0 us | 10,642.51 us | 13,459.37 us | 538,884.9 us |  1.00 |    0.00 | 174000.0000 | 2000.0000 | 1069286.11 KB |        1.00 |
+ *  | MakeUnmakeMove_Original                            | (2K2r(...)1, 6) [38] | 564,020.4 us |  4,597.97 us |  3,839.51 us | 562,780.9 us |  1.04 |    0.02 |  45000.0000 |         - |  278498.13 KB |        0.26 |
+ *  | MakeUnmakeMove_WithZobristKey                      | (2K2r(...)1, 6) [38] | 466,090.7 us |  3,744.35 us |  3,502.46 us | 466,143.4 us |  0.86 |    0.02 |  45000.0000 |         - |  278498.13 KB |        0.26 |
+ *  | MakeUnmakeMove_WithZobristKey_PreSwitchSpecialMove | (2K2r(...)1, 6) [38] |  32,505.8 us |    618.37 us |    736.12 us |  32,372.7 us |  0.06 |    0.00 |   5687.5000 |   62.5000 |   35057.89 KB |        0.03 |
+ *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove    | (2K2r(...)1, 6) [38] |  33,390.2 us |    659.56 us |  1,317.21 us |  32,919.5 us |  0.06 |    0.00 |   5687.5000 |   62.5000 |   35057.89 KB |        0.03 |
+ *  |                                                    |                      |              |              |              |              |       |         |             |           |               |             |
+ *  | NewPosition                                        | (3K4/(...)1, 6) [38] | 548,045.1 us | 10,821.74 us | 15,862.37 us | 549,152.9 us |  1.00 |    0.00 | 174000.0000 | 2000.0000 | 1069286.11 KB |       1.000 |
+ *  | MakeUnmakeMove_Original                            | (3K4/(...)1, 6) [38] | 556,688.0 us |  5,922.58 us |  4,945.62 us | 555,281.0 us |  1.02 |    0.02 |  45000.0000 |         - |  278498.13 KB |       0.260 |
+ *  | MakeUnmakeMove_WithZobristKey                      | (3K4/(...)1, 6) [38] | 463,567.3 us |  2,885.32 us |  2,698.93 us | 463,340.7 us |  0.86 |    0.02 |  45000.0000 |         - |  278498.13 KB |       0.260 |
+ *  | MakeUnmakeMove_WithZobristKey_PreSwitchSpecialMove | (3K4/(...)1, 6) [38] |  31,099.1 us |    603.40 us |    991.40 us |  30,695.8 us |  0.06 |    0.00 |    875.0000 |         - |    5448.71 KB |       0.005 |
+ *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove    | (3K4/(...)1, 6) [38] |  30,692.5 us |    575.28 us |  1,411.18 us |  30,427.9 us |  0.06 |    0.00 |    833.3333 |         - |    5448.63 KB |       0.005 |
+ *  |                                                    |                      |              |              |              |              |       |         |             |           |               |             |
+ *  | NewPosition                                        | (8/p7(...)-, 6) [37] |  20,937.3 us |    387.25 us |    362.23 us |  20,862.1 us |  1.00 |    0.00 |   7000.0000 |  125.0000 |   42917.24 KB |        1.00 |
+ *  | MakeUnmakeMove_Original                            | (8/p7(...)-, 6) [37] |  21,898.1 us |    419.94 us |    372.27 us |  21,922.7 us |  1.05 |    0.03 |   2781.2500 |   31.2500 |   17115.46 KB |        0.40 |
+ *  | MakeUnmakeMove_WithZobristKey                      | (8/p7(...)-, 6) [37] |  18,003.7 us |    334.82 us |    313.19 us |  18,006.5 us |  0.86 |    0.02 |   2781.2500 |   31.2500 |   17115.46 KB |        0.40 |
+ *  | MakeUnmakeMove_WithZobristKey_PreSwitchSpecialMove | (8/p7(...)-, 6) [37] |   6,907.5 us |    137.10 us |    192.20 us |   6,890.6 us |  0.33 |    0.01 |   1367.1875 |   23.4375 |    8401.25 KB |        0.20 |
+ *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove    | (8/p7(...)-, 6) [37] |   9,188.5 us |    495.81 us |  1,461.91 us |   9,247.5 us |  0.41 |    0.07 |   1367.1875 |   23.4375 |    8401.25 KB |        0.20 |
+ *  |                                                    |                      |              |              |              |              |       |         |             |           |               |             |
+ *  | NewPosition                                        | (r3k2(...)1, 4) [73] | 572,501.0 us | 28,498.69 us | 84,029.03 us | 573,923.6 us | 1.000 |    0.00 | 130000.0000 | 1000.0000 |  801233.53 KB |       1.000 |
+ *  | MakeUnmakeMove_Original                            | (r3k2(...)1, 4) [73] | 663,197.3 us | 33,037.67 us | 97,412.33 us | 645,325.6 us | 1.188 |    0.27 |  17000.0000 |         - |  104639.41 KB |       0.131 |
+ *  | MakeUnmakeMove_WithZobristKey                      | (r3k2(...)1, 4) [73] | 419,634.7 us | 23,843.13 us | 68,792.89 us | 393,369.1 us | 0.749 |    0.17 |  17000.0000 |         - |  104639.41 KB |       0.131 |
+ *  | MakeUnmakeMove_WithZobristKey_PreSwitchSpecialMove | (r3k2(...)1, 4) [73] |     267.1 us |     13.87 us |     40.25 us |     256.7 us | 0.000 |    0.00 |     16.6016 |         - |     102.81 KB |       0.000 |
+ *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove    | (r3k2(...)1, 4) [73] |     232.9 us |      4.65 us |     10.58 us |     231.6 us | 0.000 |    0.00 |     16.6016 |         - |     102.81 KB |       0.000 |
+ *  |                                                    |                      |              |              |              |              |       |         |             |           |               |             |
+ *  | NewPosition                                        | (r4rk(...)0, 4) [77] | 485,734.5 us |  9,694.63 us | 25,708.79 us | 482,125.0 us | 1.000 |    0.00 | 124000.0000 | 1000.0000 |  765557.73 KB |       1.000 |
+ *  | MakeUnmakeMove_Original                            | (r4rk(...)0, 4) [77] | 511,174.7 us | 10,162.18 us | 24,347.94 us | 515,608.8 us | 1.059 |    0.07 |  15000.0000 |         - |   96333.51 KB |       0.126 |
+ *  | MakeUnmakeMove_WithZobristKey                      | (r4rk(...)0, 4) [77] | 324,566.1 us |  6,379.08 us | 11,981.46 us | 321,145.3 us | 0.675 |    0.05 |  15500.0000 |         - |   96332.98 KB |       0.126 |
+ *  | MakeUnmakeMove_WithZobristKey_PreSwitchSpecialMove | (r4rk(...)0, 4) [77] |     535.0 us |     10.60 us |      9.92 us |     535.7 us | 0.001 |    0.00 |     33.2031 |         - |      208.6 KB |       0.000 |
+ *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove    | (r4rk(...)0, 4) [77] |     531.5 us |      8.47 us |      7.92 us |     530.2 us | 0.001 |    0.00 |     33.2031 |         - |      208.6 KB |       0.000 |
+ *  |                                                    |                      |              |              |              |              |       |         |             |           |               |             |
+ *  | NewPosition                                        | (rnbq(...)1, 4) [61] |  25,527.8 us |    353.02 us |    312.94 us |  25,563.4 us |  1.00 |    0.00 |   7125.0000 |   93.7500 |    43734.7 KB |       1.000 |
+ *  | MakeUnmakeMove_Original                            | (rnbq(...)1, 4) [61] |  26,917.2 us |    524.57 us |    515.20 us |  26,961.6 us |  1.05 |    0.03 |   1593.7500 |         - |    9763.26 KB |       0.223 |
+ *  | MakeUnmakeMove_WithZobristKey                      | (rnbq(...)1, 4) [61] |  17,795.6 us |    305.66 us |    386.56 us |  17,654.9 us |  0.70 |    0.01 |   1593.7500 |         - |    9763.26 KB |       0.223 |
+ *  | MakeUnmakeMove_WithZobristKey_PreSwitchSpecialMove | (rnbq(...)1, 4) [61] |     363.8 us |      5.50 us |      5.14 us |     363.5 us |  0.01 |    0.00 |     35.6445 |         - |     220.12 KB |       0.005 |
+ *  | MakeUnmakeMove_WithZobristKey_SwitchSpecialMove    | (rnbq(...)1, 4) [61] |     371.4 us |      7.35 us |      8.17 us |     370.2 us |  0.01 |    0.00 |     35.6445 |         - |     220.12 KB |       0.005 |
  */
 
 #pragma warning disable S101, S1854 // Types should be named in PascalCase
@@ -956,6 +975,20 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
 
             switch (move.SpecialMoveFlag())
             {
+                case SpecialMoveType.None:
+                    {
+                        if (move.IsCapture())
+                        {
+                            var capturedSquare = targetSquare;
+                            capturedPiece = move.CapturedPiece();
+
+                            PieceBitBoards[capturedPiece].PopBit(capturedSquare);
+                            OccupancyBitBoards[oppositeSide].PopBit(capturedSquare);
+                            UniqueIdentifier ^= ZobristTable.PieceHash(capturedSquare, capturedPiece);
+                        }
+
+                        break;
+                    }
                 case SpecialMoveType.DoublePawnPush:
                     {
                         var pawnPush = +8 - (oldSide * 16);
@@ -1014,20 +1047,6 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
                         PieceBitBoards[capturedPiece].PopBit(capturedSquare);
                         OccupancyBitBoards[oppositeSide].PopBit(capturedSquare);
                         UniqueIdentifier ^= ZobristTable.PieceHash(capturedSquare, capturedPiece);
-
-                        break;
-                    }
-                default:
-                    {
-                        if (move.IsCapture())
-                        {
-                            var capturedSquare = targetSquare;
-                            capturedPiece = move.CapturedPiece();
-
-                            PieceBitBoards[capturedPiece].PopBit(capturedSquare);
-                            OccupancyBitBoards[oppositeSide].PopBit(capturedSquare);
-                            UniqueIdentifier ^= ZobristTable.PieceHash(capturedSquare, capturedPiece);
-                        }
 
                         break;
                     }
@@ -1226,6 +1245,16 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
 
             switch (move.SpecialMoveFlag())
             {
+                case SpecialMoveType.None:
+                    {
+                        if (move.IsCapture())
+                        {
+                            PieceBitBoards[move.CapturedPiece()].SetBit(targetSquare);
+                            OccupancyBitBoards[oppositeSide].SetBit(targetSquare);
+                        }
+
+                        break;
+                    }
                 case SpecialMoveType.ShortCastle:
                     {
                         var rookSourceSquare = Utils.ShortCastleRookSourceSquare(side);
@@ -1266,16 +1295,6 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
 
                             PieceBitBoards[oppositePawnIndex].SetBit(capturedPawnSquare);
                             OccupancyBitBoards[oppositeSide].SetBit(capturedPawnSquare);
-                        }
-
-                        break;
-                    }
-                default:
-                    {
-                        if (move.IsCapture())
-                        {
-                            PieceBitBoards[move.CapturedPiece()].SetBit(targetSquare);
-                            OccupancyBitBoards[oppositeSide].SetBit(targetSquare);
                         }
 
                         break;

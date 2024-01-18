@@ -250,6 +250,20 @@ public class Position
 
         switch (move.SpecialMoveFlag())
         {
+            case SpecialMoveType.None:
+                {
+                    if (move.IsCapture())
+                    {
+                        var capturedSquare = targetSquare;
+                        var capturedPiece = move.CapturedPiece();
+
+                        PieceBitBoards[capturedPiece].PopBit(capturedSquare);
+                        OccupancyBitBoards[oppositeSide].PopBit(capturedSquare);
+                        UniqueIdentifier ^= ZobristTable.PieceHash(capturedSquare, capturedPiece);
+                    }
+
+                    break;
+                }
             case SpecialMoveType.DoublePawnPush:
                 {
                     var pawnPush = +8 - (oldSide * 16);
@@ -308,20 +322,6 @@ public class Position
                     PieceBitBoards[capturedPiece].PopBit(capturedSquare);
                     OccupancyBitBoards[oppositeSide].PopBit(capturedSquare);
                     UniqueIdentifier ^= ZobristTable.PieceHash(capturedSquare, capturedPiece);
-
-                    break;
-                }
-            default:
-                {
-                    if (move.IsCapture())
-                    {
-                        var capturedSquare = targetSquare;
-                        var capturedPiece = move.CapturedPiece();
-
-                        PieceBitBoards[capturedPiece].PopBit(capturedSquare);
-                        OccupancyBitBoards[oppositeSide].PopBit(capturedSquare);
-                        UniqueIdentifier ^= ZobristTable.PieceHash(capturedSquare, capturedPiece);
-                    }
 
                     break;
                 }
@@ -516,6 +516,16 @@ public class Position
 
         switch (move.SpecialMoveFlag())
         {
+            case SpecialMoveType.None:
+                {
+                    if (move.IsCapture())
+                    {
+                        PieceBitBoards[move.CapturedPiece()].SetBit(targetSquare);
+                        OccupancyBitBoards[oppositeSide].SetBit(targetSquare);
+                    }
+
+                    break;
+                }
             case SpecialMoveType.ShortCastle:
                 {
                     var rookSourceSquare = Utils.ShortCastleRookSourceSquare(side);
@@ -556,16 +566,6 @@ public class Position
 
                         PieceBitBoards[oppositePawnIndex].SetBit(capturedPawnSquare);
                         OccupancyBitBoards[oppositeSide].SetBit(capturedPawnSquare);
-                    }
-
-                    break;
-                }
-            default:
-                {
-                    if (move.IsCapture())
-                    {
-                        PieceBitBoards[move.CapturedPiece()].SetBit(targetSquare);
-                        OccupancyBitBoards[oppositeSide].SetBit(targetSquare);
                     }
 
                     break;
