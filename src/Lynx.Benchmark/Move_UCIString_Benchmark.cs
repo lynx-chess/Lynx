@@ -3,7 +3,7 @@ using Lynx.Model;
 using System.Text;
 
 namespace Lynx.Benchmark;
-public class UCIString_Benchmark : BaseBenchmark
+public class Move_UCIString_Benchmark : BaseBenchmark
 {
     private static readonly Move[] _moves =
     [
