@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace Lynx.Model;
 
@@ -369,6 +368,7 @@ public static class MoveExtensions
 #pragma warning restore S3358 // Ternary operators should not be nested
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string UCIString(this Move move)
     {
         Span<char> span = stackalloc char[5];
@@ -390,37 +390,5 @@ public static class MoveExtensions
         }
 
         return span[..^1].ToString();
-    }
-
-    public static void Print(this Move move)
-    {
-        Console.WriteLine(move.ToMoveString());
-    }
-
-    public static void PrintMoveList(this IEnumerable<Move> moves)
-    {
-        Console.WriteLine($"{"#",-3}{"Pc",-3}{"src",-4}{"x",-2}{"tgt",-4}{"DPP",-4}{"ep",-3}{"O-O",-4}{"O-O-O",-7}\n");
-
-        static string bts(bool b) => b ? "1" : "0";
-        static string isCapture(bool c) => c ? "x" : "";
-
-        var sb = new StringBuilder();
-        for (int i = 0; i < moves.Count(); ++i)
-        {
-            var move = moves.ElementAt(i);
-
-            sb.AppendFormat("{0,-3}", i + 1)
-              .AppendFormat("{0,-3}", Constants.AsciiPieces[move.Piece()])
-              .AppendFormat("{0,-4}", Constants.Coordinates[move.SourceSquare()])
-              .AppendFormat("{0,-2}", isCapture(move.IsCapture()))
-              .AppendFormat("{0,-4}", Constants.Coordinates[move.TargetSquare()])
-              .AppendFormat("{0,-4}", bts(move.IsDoublePawnPush()))
-              .AppendFormat("{0,-3}", bts(move.IsEnPassant()))
-              .AppendFormat("{0,-4}", bts(move.IsShortCastle()))
-              .AppendFormat("{0,-4}", bts(move.IsLongCastle()))
-              .Append(Environment.NewLine);
-        }
-
-        Console.WriteLine(sb.ToString());
     }
 }
