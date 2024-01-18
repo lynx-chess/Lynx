@@ -371,10 +371,25 @@ public static class MoveExtensions
 
     public static string UCIString(this Move move)
     {
-        return
-            Constants.Coordinates[move.SourceSquare()] +
-            Constants.Coordinates[move.TargetSquare()] +
-            (move.PromotedPiece() == default ? "" : $"{Constants.AsciiPieces[move.PromotedPiece()].ToString().ToLowerInvariant()}");
+        Span<char> span = stackalloc char[5];
+
+        var source = Constants.CoordinatesCharArray[move.SourceSquare()];
+        var target = Constants.CoordinatesCharArray[move.TargetSquare()];
+
+        span[0] = source[0];
+        span[1] = source[1];
+        span[2] = target[0];
+        span[3] = target[1];
+
+        var promotedPiece = move.PromotedPiece();
+        if (promotedPiece != default)
+        {
+            span[4] = Constants.AsciiPiecesLowercase[promotedPiece];
+
+            return span.ToString();
+        }
+
+        return span[..^1].ToString();
     }
 
     public static void Print(this Move move)
