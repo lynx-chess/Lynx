@@ -123,7 +123,7 @@ public sealed partial class Engine
                 await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult));
 
                 Array.Copy(_killerMoves, _previousKillerMoves, _killerMoves.Length);
-            } while (StopSearchCondition(++depth, maxDepth, isMateDetected, decisionTime));
+            } while (StopSearchCondition(++depth, maxDepth, isMateDetected, lastSearchResult.Mate, decisionTime));
         }
         catch (OperationCanceledException)
         {
@@ -157,11 +157,11 @@ public sealed partial class Engine
         return finalSearchResult;
     }
 
-    private bool StopSearchCondition(int depth, int? maxDepth, bool isMateDetected, int? decisionTime)
+    private bool StopSearchCondition(int depth, int? maxDepth, bool isMateDetected, int mateDistance, int? decisionTime)
     {
-        if (isMateDetected)
+        if (isMateDetected && depth > 2 * mateDistance)
         {
-            _logger.Info($"Stopping at depth {depth - 1}: mate detected");
+            _logger.Info($"Stopping at depth {depth - 1}: mate in {mateDistance} detected");
             return false;
         }
 
