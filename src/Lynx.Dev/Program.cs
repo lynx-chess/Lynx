@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Channels;
 
 //_2_GettingStarted();
@@ -446,20 +447,47 @@ static void _28_Move_Encoding()
     Console.WriteLine(Constants.Coordinates[square]);
 }
 
+static void PrintMoveList(IEnumerable<Move> moves)
+{
+    Console.WriteLine($"{"#",-3}{"Pc",-3}{"src",-4}{"x",-2}{"tgt",-4}{"DPP",-4}{"ep",-3}{"O-O",-4}{"O-O-O",-7}\n");
+
+    static string bts(bool b) => b ? "1" : "0";
+    static string isCapture(bool c) => c ? "x" : "";
+
+    var sb = new StringBuilder();
+    for (int i = 0; i < moves.Count(); ++i)
+    {
+        var move = moves.ElementAt(i);
+
+        sb.AppendFormat("{0,-3}", i + 1)
+          .AppendFormat("{0,-3}", Constants.AsciiPieces[move.Piece()])
+          .AppendFormat("{0,-4}", Constants.Coordinates[move.SourceSquare()])
+          .AppendFormat("{0,-2}", isCapture(move.IsCapture()))
+          .AppendFormat("{0,-4}", Constants.Coordinates[move.TargetSquare()])
+          .AppendFormat("{0,-4}", bts(move.IsDoublePawnPush()))
+          .AppendFormat("{0,-3}", bts(move.IsEnPassant()))
+          .AppendFormat("{0,-4}", bts(move.IsShortCastle()))
+          .AppendFormat("{0,-4}", bts(move.IsLongCastle()))
+          .Append(Environment.NewLine);
+    }
+
+    Console.WriteLine(sb.ToString());
+}
+
 static void _29_Move_List()
 {
     var position = new Position(TrickyPosition);
     var moves = MoveGenerator.GenerateAllMoves(position);
-    moves.PrintMoveList();
+    PrintMoveList(moves);
 
     position = new Position(TrickyPositionReversed);
     moves = MoveGenerator.GenerateAllMoves(position);
-    moves.PrintMoveList();
+    PrintMoveList(moves);
 
     position = new Position(KillerPosition);
     position.Print();
     moves = MoveGenerator.GenerateAllMoves(position);
-    moves.PrintMoveList();
+    PrintMoveList(moves);
 }
 
 static void _32_Make_Move()
@@ -478,7 +506,7 @@ static void _32_Make_Move()
     //CastlingRightsTest(game);
     //CastlingRightsTest(reversedGame);
 
-    MoveGenerator.GenerateAllMoves(gameWithPromotion.CurrentPosition).PrintMoveList();
+    PrintMoveList(MoveGenerator.GenerateAllMoves(gameWithPromotion.CurrentPosition));
 
     GeneralMoveTest(gameWithPromotion);
 
@@ -488,7 +516,7 @@ static void _32_Make_Move()
         {
             game.CurrentPosition.Print();
 
-            move.Print();
+            Console.WriteLine(move.ToMoveString());
             var gameState = game.MakeMove(move);
             game.CurrentPosition.Print();
 
@@ -511,7 +539,7 @@ static void _32_Make_Move()
             {
                 game.CurrentPosition.Print();
 
-                move.Print();
+                Console.WriteLine(move.ToMoveString());
                 var gameState = game.MakeMove(move);
                 game.CurrentPosition.Print();
 
