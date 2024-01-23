@@ -137,7 +137,7 @@ public sealed partial class Engine
             var eval = EvaluationConstants.BaseMoveScore + _historyMoves[piece][targetSquare];
             if (Attacks.IsSquareAttackedByPawns(targetSquare, sideToMove, Utils.PieceOffset(sideToMove), Game.CurrentPosition.PieceBitBoards))
             {
-                eval -= _historyMoves[piece][targetSquare] / 2 - (2 * Configuration.EngineSettings.History_MaxMoveRawBonus) + EvaluationConstants.HistoryBonus[depth];
+                eval -= 256;
             }
 
             return eval;
