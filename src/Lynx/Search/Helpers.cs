@@ -67,7 +67,7 @@ public sealed partial class Engine
     /// <param name="bestMoveTTCandidate"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMove(Position position, Move move, int depth, bool isNotQSearch, ShortMove bestMoveTTCandidate = default)
+    internal int ScoreMove(Move move, int depth, bool isNotQSearch, ShortMove bestMoveTTCandidate = default)
     {
         if (_isScoringPV && move == _pVTable[depth])
         {
@@ -132,10 +132,10 @@ public sealed partial class Engine
             // History move or base score if not found
             var piece = move.Piece();
             var targetSquare = move.TargetSquare();
-            var sideToMove = (int)position.Side;
+            var sideToMove = (int)Game.CurrentPosition.Side;
 
             var eval = EvaluationConstants.BaseMoveScore + _historyMoves[piece][targetSquare];
-            if (Attacks.IsSquareAttackedByPawns(targetSquare, sideToMove, Utils.PieceOffset(sideToMove), position.PieceBitBoards))
+            if (Attacks.IsSquareAttackedByPawns(targetSquare, sideToMove, Utils.PieceOffset(sideToMove), Game.CurrentPosition.PieceBitBoards))
             {
                 eval /= 2;
             }
