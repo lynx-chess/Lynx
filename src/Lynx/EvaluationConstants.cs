@@ -253,6 +253,9 @@ public static readonly int[] EndGameKingTable =
     /// </summary>
     public static readonly int[][] LMRReductions = new int[Constants.AbsoluteMaxDepth][];
 
+    /// <summary>
+    /// [0, 4, 136, 276, 424, 580, 744, 916, 1096, 1284, 1480, 1684, 1896, 1896, 1896, 1896, ...]
+    /// </summary>
     public static readonly int[] HistoryBonus = new int[Constants.AbsoluteMaxDepth];
 
     static EvaluationConstants()
