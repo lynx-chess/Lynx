@@ -105,4 +105,10 @@ public static class MatePositions
     [
         new object[] { "6r1/p1pq1p1p/1p1p1Qnk/3PrR2/2n1P1PP/P1P5/4R3/6K1 w - -           ", new[] { "f5h5" }, "https://talkchess.com/forum3/viewtopic.php?f=7&t=82648" },
     ];
+
+    public static readonly object[] Mates_in_74 =
+    [
+        new object[] { "k7/B3p1p1/PPp1P3/4P2b/p4p1P/P1p2p1K/2P2P2/7B w - -", new[] { "" }, "https://talkchess.com/forum3/viewtopic.php?f=2&t=83218" },
+        new object[] { "qn6/b1Kp3p/p1pB3p/p6p/P1NkP3/2pP4/2B5/8 w - - 0 1", new[] { "d6f4" }, "https://talkchess.com/forum3/viewtopic.php?f=2&t=83218" }
+    ];
 }

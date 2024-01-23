@@ -67,7 +67,7 @@ public sealed partial class Engine
     /// <param name="bestMoveTTCandidate"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMove(Move move, int depth, bool isNotQSearch, ShortMove bestMoveTTCandidate = default)
+    internal int ScoreMove(Position position, Move move, int depth, bool isNotQSearch, ShortMove bestMoveTTCandidate = default)
     {
         if (_isScoringPV && move == _pVTable[depth])
         {
@@ -99,7 +99,6 @@ public sealed partial class Engine
 
         if (isCapture)
         {
-
             var baseCaptureScore = (isPromotion || move.IsEnPassant() || SEE.IsGoodCapture(Game.CurrentPosition, move))
                 ? EvaluationConstants.GoodCaptureMoveBaseScoreValue
                 : EvaluationConstants.BadCaptureMoveBaseScoreValue;
@@ -130,8 +129,18 @@ public sealed partial class Engine
                 return EvaluationConstants.ThirdKillerMoveValue;
             }
 
-            // History move or 0 if not found
-            return EvaluationConstants.BaseMoveScore + _historyMoves[move.Piece()][move.TargetSquare()];
+            // History move or base score if not found
+            var piece = move.Piece();
+            var targetSquare = move.TargetSquare();
+            var sideToMove = (int)position.Side;
+
+            var eval = EvaluationConstants.BaseMoveScore + _historyMoves[piece][targetSquare];
+            if (Attacks.IsSquareAttackedByPawns(targetSquare, sideToMove, Utils.PieceOffset(sideToMove), position.PieceBitBoards))
+            {
+                eval /= 2;
+            }
+
+            return eval;
         }
 
         return EvaluationConstants.BaseMoveScore;
