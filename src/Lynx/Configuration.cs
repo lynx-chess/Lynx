@@ -164,7 +164,7 @@ public sealed class EngineSettings
 
     public int SEE_BadCaptureReduction { get; set; } = 1;
 
-    public int MoveOrdering_PawnAttackedSquarePenalty { get; set; } = 64;
+    public int MoveOrdering_PawnAttackedSquarePenalty { get; set; } = 2;
 
     #region Evaluation
 
