@@ -62,7 +62,7 @@ public class IsSquareAttacked_PassBitBoard_Benchmark : BaseBenchmark
         return b;
     }
 
-    [Benchmark(Baseline = true)]
+    [Benchmark]
     public bool IsSquareInCheck_PassBitBoards()
     {
         var b = false;
