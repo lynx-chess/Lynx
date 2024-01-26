@@ -146,7 +146,7 @@ public static class Attacks
 
         // I tried to order them from most to least likely
         return
-            IsSquareAttackedByPawns(squareIndex, sideToMoveInt, offset, piecePosition)
+            IsSquareAttackedByPawns(squareIndex, sideToMoveInt, piecePosition[offset])
             || IsSquareAttackedByKing(squareIndex, offset, piecePosition)
             || IsSquareAttackedByKnights(squareIndex, offset, piecePosition)
             || IsSquareAttackedByBishops(squareIndex, offset, piecePosition, occupancy, out var bishopAttacks)
@@ -168,15 +168,15 @@ public static class Attacks
             || IsSquareAttackedByBishops(squareIndex, offset, piecePosition, occupancy, out var bishopAttacks)
             || IsSquareAttackedByQueens(offset, bishopAttacks, rookAttacks, piecePosition)
             || IsSquareAttackedByKnights(squareIndex, offset, piecePosition)
-            || IsSquareAttackedByPawns(squareIndex, sideToMoveInt, offset, piecePosition);
+            || IsSquareAttackedByPawns(squareIndex, sideToMoveInt, piecePosition[offset]);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsSquareAttackedByPawns(int squareIndex, int sideToMove, int offset, BitBoard[] pieces)
+    private static bool IsSquareAttackedByPawns(int squareIndex, int sideToMove, BitBoard pawnBitBoard)
     {
         var oppositeColorIndex = sideToMove ^ 1;
 
-        return (PawnAttacks[oppositeColorIndex][squareIndex] & pieces[offset]) != default;
+        return (PawnAttacks[oppositeColorIndex][squareIndex] & pawnBitBoard) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
