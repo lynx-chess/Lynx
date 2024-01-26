@@ -6,12 +6,13 @@
  *    [Host]     : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2
  *    DefaultJob : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2
  *
- *  | Method                             | Mean     | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
- *  |----------------------------------- |---------:|----------:|----------:|------:|----------:|------------:|
- *  | IsSquareAttacked_PassBitBoards     | 1.411 us | 0.0073 us | 0.0065 us |  1.00 |         - |          NA |
- *  | IsSquareAttacked_PassPieceBitBoard | 1.447 us | 0.0070 us | 0.0062 us |  1.03 |         - |          NA |
- *  | IsSquareInCheck_PassBitBoards      | 1.572 us | 0.0077 us | 0.0068 us |  1.11 |         - |          NA |
- *  | IsSquareInCheck_PassPieceBitBoard  | 1.669 us | 0.0069 us | 0.0057 us |  1.18 |         - |          NA |
+ *
+ *  | Method                             | Mean     | Error     | StdDev    | Ratio | RatioSD | Allocated | Alloc Ratio |
+ *  |----------------------------------- |---------:|----------:|----------:|------:|--------:|----------:|------------:|
+ *  | IsSquaredAttacked_PassBitBoards    | 1.387 us | 0.0151 us | 0.0142 us |  1.00 |    0.00 |         - |          NA |
+ *  | IsSquareAttacked_PassPieceBitBoard | 1.464 us | 0.0116 us | 0.0109 us |  1.06 |    0.02 |         - |          NA |
+ *  | IsSquareInCheck_PassBitBoards      | 1.571 us | 0.0183 us | 0.0171 us |  1.13 |    0.02 |         - |          NA |
+ *  | IsSquareInCheck_PassPieceBitBoard  | 1.646 us | 0.0175 us | 0.0163 us |  1.19 |    0.02 |         - |          NA |
  *
  *
  *  BenchmarkDotNet v0.13.12, Windows 10 (10.0.20348.2227) (Hyper-V)
@@ -20,12 +21,13 @@
  *    [Host]     : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2
  *    DefaultJob : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2
  *
- *  | Method                             | Mean     | Error     | StdDev    | Ratio | RatioSD | Allocated | Alloc Ratio |
- *  |----------------------------------- |---------:|----------:|----------:|------:|--------:|----------:|------------:|
- *  | IsSquareAttacked_PassBitBoards     | 1.522 us | 0.0294 us | 0.0245 us |  1.00 |    0.00 |         - |          NA |
- *  | IsSquareAttacked_PassPieceBitBoard | 1.536 us | 0.0037 us | 0.0035 us |  1.01 |    0.02 |         - |          NA |
- *  | IsSquareInCheck_PassBitBoards      | 1.668 us | 0.0019 us | 0.0017 us |  1.10 |    0.02 |         - |          NA |
- *  | IsSquareInCheck_PassPieceBitBoard  | 1.769 us | 0.0065 us | 0.0061 us |  1.16 |    0.02 |         - |          NA |
+ *
+ *  | Method                             | Mean     | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
+ *  |----------------------------------- |---------:|----------:|----------:|------:|----------:|------------:|
+ *  | IsSquaredAttacked_PassBitBoards    | 1.388 us | 0.0117 us | 0.0104 us |  1.00 |         - |          NA |
+ *  | IsSquareAttacked_PassPieceBitBoard | 1.548 us | 0.0067 us | 0.0056 us |  1.12 |         - |          NA |
+ *  | IsSquareInCheck_PassBitBoards      | 1.577 us | 0.0033 us | 0.0029 us |  1.14 |         - |          NA |
+ *  | IsSquareInCheck_PassPieceBitBoard  | 1.766 us | 0.0067 us | 0.0052 us |  1.27 |         - |          NA |
  *
  *
  *  BenchmarkDotNet v0.13.12, macOS Monterey 12.7.2 (21G1974) [Darwin 21.6.0]
@@ -69,9 +71,6 @@ public class IsSquareAttacked_PassBitBoard_Benchmark : BaseBenchmark
         {
             for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
             {
-                var sideToMoveInt = (int)position.Side;
-                var offset = Utils.PieceOffset(sideToMoveInt);
-
                 if (Attacks_PassingArray.IsSquareAttacked(squareIndex, position.Side, position.PieceBitBoards, position.OccupancyBitBoards))
                 {
                     b = true;
@@ -90,9 +89,6 @@ public class IsSquareAttacked_PassBitBoard_Benchmark : BaseBenchmark
         {
             for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
             {
-                var sideToMoveInt = (int)position.Side;
-                var offset = Utils.PieceOffset(sideToMoveInt);
-
                 if (Attacks_PassBitBoard.IsSquareAttacked(squareIndex, position.Side, position.PieceBitBoards, position.OccupancyBitBoards))
                 {
                     b = true;
@@ -104,6 +100,37 @@ public class IsSquareAttacked_PassBitBoard_Benchmark : BaseBenchmark
     }
 
     [Benchmark]
+    public bool IsSquareAttacked_Position()
+    {
+        var b = false;
+        foreach (var position in _positions)
+        {
+            for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
+            {
+                if (position.IsSquareAttacked(squareIndex, position.Side))
+                {
+                    b = true;
+                }
+            }
+        }
+
+        return b;
+    }
+}
+
+public class IsSquareInCheck_PassBitBoard_Benchmark : BaseBenchmark
+{
+    private readonly Position[] _positions =
+    [
+        new Position(Constants.InitialPositionFEN),
+        new Position(Constants.TrickyTestPositionFEN),
+        new Position(Constants.TrickyTestPositionReversedFEN),
+        new Position(Constants.CmkTestPositionFEN),
+        new Position(Constants.ComplexPositionFEN),
+        new Position(Constants.KillerTestPositionFEN),
+    ];
+
+    [Benchmark(Baseline = true)]
     public bool IsSquareInCheck_PassBitBoards()
     {
         var b = false;
@@ -132,10 +159,26 @@ public class IsSquareAttacked_PassBitBoard_Benchmark : BaseBenchmark
         {
             for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
             {
-                var sideToMoveInt = (int)position.Side;
-                var offset = Utils.PieceOffset(sideToMoveInt);
-
                 if (Attacks_PassBitBoard.IsSquareInCheck(squareIndex, position.Side, position.PieceBitBoards, position.OccupancyBitBoards))
+                {
+                    b = true;
+                }
+            }
+        }
+
+        return b;
+    }
+
+    [Benchmark]
+    public bool IsSquareInCheck_Position()
+    {
+        var b = false;
+        foreach (var position in _positions)
+        {
+            for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
+            {
+                var sideToMoveInt = (int)position.Side;
+                if (position.IsSquareInCheck(squareIndex, sideToMoveInt))
                 {
                     b = true;
                 }
