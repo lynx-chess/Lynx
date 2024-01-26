@@ -1,6 +1,38 @@
 ﻿/*
-
- *  | ExternalMethods | 6.900 us | 0.0547 us | 0.0512 us |  1.00 |     - |     - |     - |         - |
+ *  BenchmarkDotNet v0.13.12, Ubuntu 22.04.3 LTS (Jammy Jellyfish)
+ *  AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
+ *  .NET SDK 8.0.101
+ *    [Host]     : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2
+ *    DefaultJob : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2
+ *
+ *  | Method                                    | Mean     | Error   | StdDev  | Ratio | Allocated | Alloc Ratio |
+ *  |------------------------------------------ |---------:|--------:|--------:|------:|----------:|------------:|
+ *  | IsSquaredAttackedByPawns_PassBitBoards    | 538.3 ns | 5.07 ns | 4.74 ns |  1.00 |         - |          NA |
+ *  | IsSquaredAttackedByPawns_PassPawnBitBoard | 501.8 ns | 0.79 ns | 0.62 ns |  0.93 |         - |          NA |
+ *
+ *
+ *  BenchmarkDotNet v0.13.12, Windows 10 (10.0.20348.2227) (Hyper-V)
+ *  AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
+ *  .NET SDK 8.0.101
+ *    [Host]     : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2
+ *    DefaultJob : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2
+ *
+ *  | Method                                    | Mean     | Error   | StdDev  | Ratio | Allocated | Alloc Ratio |
+ *  |------------------------------------------ |---------:|--------:|--------:|------:|----------:|------------:|
+ *  | IsSquaredAttackedByPawns_PassBitBoards    | 503.7 ns | 1.63 ns | 1.45 ns |  1.00 |         - |          NA |
+ *  | IsSquaredAttackedByPawns_PassPawnBitBoard | 501.9 ns | 0.56 ns | 0.53 ns |  1.00 |         - |          NA |
+ *
+ *
+ *  BenchmarkDotNet v0.13.12, macOS Monterey 12.7.2 (21G1974) [Darwin 21.6.0]
+ *  Intel Xeon CPU E5-1650 v2 3.50GHz (Max: 3.34GHz), 1 CPU, 3 logical and 3 physical cores
+ *  .NET SDK 8.0.101
+ *    [Host]     : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX
+ *    DefaultJob : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX
+ *
+ *  | Method                                    | Mean     | Error   | StdDev  | Ratio | Allocated | Alloc Ratio |
+ *  |------------------------------------------ |---------:|--------:|--------:|------:|----------:|------------:|
+ *  | IsSquaredAttackedByPawns_PassBitBoards    | 802.2 ns | 5.70 ns | 4.45 ns |  1.00 |         - |          NA |
+ *  | IsSquaredAttackedByPawns_PassPawnBitBoard | 729.2 ns | 9.26 ns | 8.21 ns |  0.91 |         - |          NA |
  */
 
 using BenchmarkDotNet.Attributes;
@@ -9,7 +41,7 @@ using System.Runtime.CompilerServices;
 
 namespace Lynx.Benchmark;
 
-public class IsSquareAttackedByPawns_Benchmark : BaseBenchmark
+public class IsSquareAttackedByPawns_PassBitBoard_Benchmark : BaseBenchmark
 {
     private readonly Position[] _positions =
     [
