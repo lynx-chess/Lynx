@@ -1,5 +1,46 @@
 ﻿/*
-
+ *
+ *  BenchmarkDotNet v0.13.12, Ubuntu 22.04.3 LTS (Jammy Jellyfish)
+ *  AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
+ *  .NET SDK 8.0.101
+ *    [Host]     : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2
+ *    DefaultJob : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2
+ *
+ *  | Method                             | Mean     | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
+ *  |----------------------------------- |---------:|----------:|----------:|------:|----------:|------------:|
+ *  | IsSquareAttacked_PassBitBoards     | 1.411 us | 0.0073 us | 0.0065 us |  1.00 |         - |          NA |
+ *  | IsSquareAttacked_PassPieceBitBoard | 1.447 us | 0.0070 us | 0.0062 us |  1.03 |         - |          NA |
+ *  | IsSquareInCheck_PassBitBoards      | 1.572 us | 0.0077 us | 0.0068 us |  1.11 |         - |          NA |
+ *  | IsSquareInCheck_PassPieceBitBoard  | 1.669 us | 0.0069 us | 0.0057 us |  1.18 |         - |          NA |
+ *
+ *
+ *  BenchmarkDotNet v0.13.12, Windows 10 (10.0.20348.2227) (Hyper-V)
+ *  AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
+ *  .NET SDK 8.0.101
+ *    [Host]     : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2
+ *    DefaultJob : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2
+ *
+ *  | Method                             | Mean     | Error     | StdDev    | Ratio | RatioSD | Allocated | Alloc Ratio |
+ *  |----------------------------------- |---------:|----------:|----------:|------:|--------:|----------:|------------:|
+ *  | IsSquareAttacked_PassBitBoards     | 1.522 us | 0.0294 us | 0.0245 us |  1.00 |    0.00 |         - |          NA |
+ *  | IsSquareAttacked_PassPieceBitBoard | 1.536 us | 0.0037 us | 0.0035 us |  1.01 |    0.02 |         - |          NA |
+ *  | IsSquareInCheck_PassBitBoards      | 1.668 us | 0.0019 us | 0.0017 us |  1.10 |    0.02 |         - |          NA |
+ *  | IsSquareInCheck_PassPieceBitBoard  | 1.769 us | 0.0065 us | 0.0061 us |  1.16 |    0.02 |         - |          NA |
+ *
+ *
+ *  BenchmarkDotNet v0.13.12, macOS Monterey 12.7.2 (21G1974) [Darwin 21.6.0]
+ *  Intel Core i7-8700B CPU 3.20GHz (Max: 3.19GHz) (Coffee Lake), 1 CPU, 4 logical and 4 physical cores
+ *  .NET SDK 8.0.101
+ *    [Host]     : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2
+ *    DefaultJob : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2
+ *
+ *  | Method                             | Mean     | Error     | StdDev    | Median   | Ratio | RatioSD | Allocated | Alloc Ratio |
+ *  |----------------------------------- |---------:|----------:|----------:|---------:|------:|--------:|----------:|------------:|
+ *  | IsSquareAttacked_PassBitBoards     | 2.506 us | 0.0802 us | 0.2262 us | 2.512 us |  1.00 |    0.00 |         - |          NA |
+ *  | IsSquareAttacked_PassPieceBitBoard | 2.858 us | 0.1562 us | 0.4507 us | 2.721 us |  1.14 |    0.19 |         - |          NA |
+ *  | IsSquareInCheck_PassBitBoards      | 3.329 us | 0.1635 us | 0.4666 us | 3.217 us |  1.34 |    0.23 |         - |          NA |
+ *  | IsSquareInCheck_PassPieceBitBoard  | 3.714 us | 0.1368 us | 0.4011 us | 3.684 us |  1.48 |    0.20 |         - |          NA |
+ *
  */
 
 using BenchmarkDotNet.Attributes;
@@ -42,7 +83,7 @@ public class IsSquareAttacked_PassBitBoard_Benchmark : BaseBenchmark
     }
 
     [Benchmark]
-    public bool IsSquaredAttacked_PassPawnBitBoard()
+    public bool IsSquareAttacked_PassPieceBitBoard()
     {
         var b = false;
         foreach (var position in _positions)
@@ -84,7 +125,7 @@ public class IsSquareAttacked_PassBitBoard_Benchmark : BaseBenchmark
     }
 
     [Benchmark]
-    public bool IsSquaredInCheck_PassPawnBitBoard()
+    public bool IsSquareInCheck_PassPieceBitBoard()
     {
         var b = false;
         foreach (var position in _positions)
@@ -102,22 +143,6 @@ public class IsSquareAttacked_PassBitBoard_Benchmark : BaseBenchmark
         }
 
         return b;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsSquaredAttackedByPawns_PassBitBoards(int squareIndex, int sideToMove, int offset, BitBoard[] pieces)
-    {
-        var oppositeColorIndex = sideToMove ^ 1;
-
-        return (Attacks.PawnAttacks[oppositeColorIndex][squareIndex] & pieces[offset]) != default;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsSquaredAttackedByPawns_PassPawnBitBoard(int squareIndex, int sideToMove, BitBoard pawnBitBoard)
-    {
-        var oppositeColorIndex = sideToMove ^ 1;
-
-        return (Attacks.PawnAttacks[oppositeColorIndex][squareIndex] & pawnBitBoard) != default;
     }
 }
 
@@ -202,6 +227,7 @@ file static class Attacks_PassingArray
 
 file static class Attacks_PassBitBoard
 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsSquareAttacked(int squareIndex, Side sideToMove, BitBoard[] piecePosition, BitBoard[] occupancy)
     {
         Utils.Assert(sideToMove != Side.Both);
