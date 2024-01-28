@@ -6,13 +6,11 @@
  *    [Host]     : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2
  *    DefaultJob : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2
  *
- *
- *  | Method                             | Mean     | Error     | StdDev    | Ratio | RatioSD | Allocated | Alloc Ratio |
- *  |----------------------------------- |---------:|----------:|----------:|------:|--------:|----------:|------------:|
- *  | IsSquaredAttacked_PassBitBoards    | 1.387 us | 0.0151 us | 0.0142 us |  1.00 |    0.00 |         - |          NA |
- *  | IsSquareAttacked_PassPieceBitBoard | 1.464 us | 0.0116 us | 0.0109 us |  1.06 |    0.02 |         - |          NA |
- *  | IsSquareInCheck_PassBitBoards      | 1.571 us | 0.0183 us | 0.0171 us |  1.13 |    0.02 |         - |          NA |
- *  | IsSquareInCheck_PassPieceBitBoard  | 1.646 us | 0.0175 us | 0.0163 us |  1.19 |    0.02 |         - |          NA |
+ *  | Method                             | Mean     | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
+ *  |----------------------------------- |---------:|----------:|----------:|------:|----------:|------------:|
+ *  | IsSquaredAttacked_PassBitBoards    | 1.420 us | 0.0077 us | 0.0072 us |  1.00 |         - |          NA |
+ *  | IsSquareAttacked_PassPieceBitBoard | 1.453 us | 0.0089 us | 0.0083 us |  1.02 |         - |          NA |
+ *  | IsSquareAttacked_Position          | 1.530 us | 0.0120 us | 0.0112 us |  1.08 |         - |          NA |
  *
  *
  *  BenchmarkDotNet v0.13.12, Windows 10 (10.0.20348.2227) (Hyper-V)
@@ -21,13 +19,11 @@
  *    [Host]     : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2
  *    DefaultJob : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2
  *
- *
  *  | Method                             | Mean     | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
  *  |----------------------------------- |---------:|----------:|----------:|------:|----------:|------------:|
- *  | IsSquaredAttacked_PassBitBoards    | 1.388 us | 0.0117 us | 0.0104 us |  1.00 |         - |          NA |
- *  | IsSquareAttacked_PassPieceBitBoard | 1.548 us | 0.0067 us | 0.0056 us |  1.12 |         - |          NA |
- *  | IsSquareInCheck_PassBitBoards      | 1.577 us | 0.0033 us | 0.0029 us |  1.14 |         - |          NA |
- *  | IsSquareInCheck_PassPieceBitBoard  | 1.766 us | 0.0067 us | 0.0052 us |  1.27 |         - |          NA |
+ *  | IsSquaredAttacked_PassBitBoards    | 1.457 us | 0.0053 us | 0.0044 us |  1.00 |         - |          NA |
+ *  | IsSquareAttacked_PassPieceBitBoard | 1.447 us | 0.0097 us | 0.0086 us |  0.99 |         - |          NA |
+ *  | IsSquareAttacked_Position          | 1.464 us | 0.0038 us | 0.0036 us |  1.01 |         - |          NA |
  *
  *
  *  BenchmarkDotNet v0.13.12, macOS Monterey 12.7.2 (21G1974) [Darwin 21.6.0]
@@ -38,10 +34,49 @@
  *
  *  | Method                             | Mean     | Error     | StdDev    | Median   | Ratio | RatioSD | Allocated | Alloc Ratio |
  *  |----------------------------------- |---------:|----------:|----------:|---------:|------:|--------:|----------:|------------:|
- *  | IsSquareAttacked_PassBitBoards     | 2.506 us | 0.0802 us | 0.2262 us | 2.512 us |  1.00 |    0.00 |         - |          NA |
- *  | IsSquareAttacked_PassPieceBitBoard | 2.858 us | 0.1562 us | 0.4507 us | 2.721 us |  1.14 |    0.19 |         - |          NA |
- *  | IsSquareInCheck_PassBitBoards      | 3.329 us | 0.1635 us | 0.4666 us | 3.217 us |  1.34 |    0.23 |         - |          NA |
- *  | IsSquareInCheck_PassPieceBitBoard  | 3.714 us | 0.1368 us | 0.4011 us | 3.684 us |  1.48 |    0.20 |         - |          NA |
+ *  | IsSquaredAttacked_PassBitBoards    | 2.120 us | 0.0408 us | 0.1110 us | 2.087 us |  1.00 |    0.00 |         - |          NA |
+ *  | IsSquareAttacked_PassPieceBitBoard | 2.126 us | 0.0346 us | 0.0425 us | 2.120 us |  0.99 |    0.05 |         - |          NA |
+ *  | IsSquareAttacked_Position          | 1.989 us | 0.0394 us | 0.0498 us | 1.984 us |  0.93 |    0.06 |         - |          NA |
+ *
+ *  --------------------------------------------------------------------------------------------------------------------------------
+ *
+ *  BenchmarkDotNet v0.13.12, Ubuntu 22.04.3 LTS (Jammy Jellyfish)
+ *  AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
+ *  .NET SDK 8.0.101
+ *    [Host]     : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2
+ *    DefaultJob : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2
+ *
+ *  | Method                            | Mean     | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
+ *  |---------------------------------- |---------:|----------:|----------:|------:|----------:|------------:|
+ *  | IsSquareInCheck_PassBitBoards     | 1.573 us | 0.0059 us | 0.0053 us |  1.00 |         - |          NA |
+ *  | IsSquareInCheck_PassPieceBitBoard | 1.670 us | 0.0070 us | 0.0065 us |  1.06 |         - |          NA |
+ *  | IsSquareInCheck_Position          | 1.553 us | 0.0088 us | 0.0082 us |  0.99 |         - |          NA |
+ *
+ *
+ *  BenchmarkDotNet v0.13.12, Windows 10 (10.0.20348.2227) (Hyper-V)
+ *  AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
+ *  .NET SDK 8.0.101
+ *    [Host]     : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2
+ *    DefaultJob : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2
+ *
+ *  | Method                            | Mean     | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
+ *  |---------------------------------- |---------:|----------:|----------:|------:|----------:|------------:|
+ *  | IsSquareInCheck_PassBitBoards     | 1.555 us | 0.0089 us | 0.0079 us |  1.00 |         - |          NA |
+ *  | IsSquareInCheck_PassPieceBitBoard | 1.644 us | 0.0028 us | 0.0025 us |  1.06 |         - |          NA |
+ *  | IsSquareInCheck_Position          | 1.550 us | 0.0017 us | 0.0016 us |  1.00 |         - |          NA |
+ *
+ *
+ *  BenchmarkDotNet v0.13.12, macOS Monterey 12.7.2 (21G1974) [Darwin 21.6.0]
+ *  Intel Core i7-8700B CPU 3.20GHz (Max: 3.19GHz) (Coffee Lake), 1 CPU, 4 logical and 4 physical cores
+ *  .NET SDK 8.0.101
+ *    [Host]     : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2
+ *    DefaultJob : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX2
+ *
+ *  | Method                            | Mean     | Error     | StdDev    | Median   | Ratio | RatioSD | Allocated | Alloc Ratio |
+ *  |---------------------------------- |---------:|----------:|----------:|---------:|------:|--------:|----------:|------------:|
+ *  | IsSquareInCheck_PassBitBoards     | 2.459 us | 0.1088 us | 0.3067 us | 2.321 us |  1.00 |    0.00 |         - |          NA |
+ *  | IsSquareInCheck_PassPieceBitBoard | 2.965 us | 0.1559 us | 0.4596 us | 2.891 us |  1.23 |    0.24 |         - |          NA |
+ *  | IsSquareInCheck_Position          | 2.378 us | 0.0473 us | 0.1220 us | 2.349 us |  0.98 |    0.13 |         - |          NA |
  *
  */
 
