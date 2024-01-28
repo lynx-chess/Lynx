@@ -164,11 +164,11 @@ public static class Attacks
 
         // I tried to order them from most to least likely
         return
-            IsSquareAttackedByRooks(squareIndex, offset, piecePosition, occupancy, out var rookAttacks)
-            || IsSquareAttackedByBishops(squareIndex, offset, piecePosition, occupancy, out var bishopAttacks)
-            || IsSquareAttackedByQueens(offset, bishopAttacks, rookAttacks, piecePosition)
+            IsSquareAttackedByPawns(squareIndex, sideToMoveInt, offset, piecePosition)
             || IsSquareAttackedByKnights(squareIndex, offset, piecePosition)
-            || IsSquareAttackedByPawns(squareIndex, sideToMoveInt, offset, piecePosition);
+            || IsSquareAttackedByRooks(squareIndex, offset, piecePosition, occupancy, out var rookAttacks)
+            || IsSquareAttackedByBishops(squareIndex, offset, piecePosition, occupancy, out var bishopAttacks)
+            || IsSquareAttackedByQueens(offset, bishopAttacks, rookAttacks, piecePosition);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
