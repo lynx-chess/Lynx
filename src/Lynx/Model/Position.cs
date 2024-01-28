@@ -74,6 +74,8 @@ public class Position
         EnPassant = position.EnPassant;
     }
 
+    #region Move making
+
     /// <summary>
     /// Null moves constructor
     /// </summary>
@@ -657,152 +659,7 @@ public class Position
         return !IsSquareAttacked(oppositeKingSquare, Side);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsInCheck()
-    {
-        var kingSquare = PieceBitBoards[(int)Piece.K + Utils.PieceOffset(Side)].GetLS1BIndex();
-        var oppositeSideInt = Utils.OppositeSide(Side);
-
-        return IsSquareInCheck(kingSquare, oppositeSideInt);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public string FEN(int halfMovesWithoutCaptureOrPawnMove = 0, int fullMoveClock = 1)
-    {
-        var sb = new StringBuilder(100);
-
-        var squaresPerFile = 0;
-
-        int squaresWithoutPiece = 0;
-        int lengthBeforeSlash = sb.Length;
-        for (int square = 0; square < 64; ++square)
-        {
-            int foundPiece = -1;
-            for (var pieceBoardIndex = 0; pieceBoardIndex < 12; ++pieceBoardIndex)
-            {
-                if (PieceBitBoards[pieceBoardIndex].GetBit(square))
-                {
-                    foundPiece = pieceBoardIndex;
-                    break;
-                }
-            }
-
-            if (foundPiece != -1)
-            {
-                if (squaresWithoutPiece != 0)
-                {
-                    sb.Append(squaresWithoutPiece);
-                    squaresWithoutPiece = 0;
-                }
-
-                sb.Append(Constants.AsciiPieces[foundPiece]);
-            }
-            else
-            {
-                ++squaresWithoutPiece;
-            }
-
-            squaresPerFile = (squaresPerFile + 1) % 8;
-            if (squaresPerFile == 0)
-            {
-                if (squaresWithoutPiece != 0)
-                {
-                    sb.Append(squaresWithoutPiece);
-                    squaresWithoutPiece = 0;
-                }
-
-                if (square != 63)
-                {
-                    if (sb.Length == lengthBeforeSlash)
-                    {
-                        sb.Append('8');
-                    }
-                    sb.Append('/');
-                    lengthBeforeSlash = sb.Length;
-                    squaresWithoutPiece = 0;
-                }
-            }
-        }
-
-        sb.Append(' ');
-        sb.Append(Side == Side.White ? 'w' : 'b');
-
-        sb.Append(' ');
-        var length = sb.Length;
-
-        if ((Castle & (int)CastlingRights.WK) != default)
-        {
-            sb.Append('K');
-        }
-        if ((Castle & (int)CastlingRights.WQ) != default)
-        {
-            sb.Append('Q');
-        }
-        if ((Castle & (int)CastlingRights.BK) != default)
-        {
-            sb.Append('k');
-        }
-        if ((Castle & (int)CastlingRights.BQ) != default)
-        {
-            sb.Append('q');
-        }
-
-        if (sb.Length == length)
-        {
-            sb.Append('-');
-        }
-
-        sb.Append(' ');
-
-        sb.Append(EnPassant == BoardSquare.noSquare ? "-" : Constants.Coordinates[(int)EnPassant]);
-
-        sb.Append(' ').Append(halfMovesWithoutCaptureOrPawnMove).Append(' ').Append(fullMoveClock);
-
-        return sb.ToString();
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int CountPieces() => PieceBitBoards.Sum(b => b.CountBits());
-
-    /// <summary>
-    /// Based on Stormphrax
-    /// </summary>
-    /// <param name="square"></param>
-    /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int PieceAt(int square)
-    {
-        var bit = BitBoardExtensions.SquareBit(square);
-
-        Side color;
-
-        if ((OccupancyBitBoards[(int)Side.Black] & bit) != default)
-        {
-            color = Side.Black;
-        }
-        else if ((OccupancyBitBoards[(int)Side.White] & bit) != default)
-        {
-            color = Side.White;
-        }
-        else
-        {
-            return (int)Piece.None;
-        }
-
-        var offset = Utils.PieceOffset(color);
-
-        for (int pieceIndex = offset; pieceIndex < 6 + offset; ++pieceIndex)
-        {
-            if (!(PieceBitBoards[pieceIndex] & bit).Empty())
-            {
-                return pieceIndex;
-            }
-        }
-
-        System.Diagnostics.Debug.Fail($"Bit set in {Side} occupancy bitboard, but not piece found");
-
-        return (int)Piece.None;
-    }
+    #endregion
 
     #region Evaluation
 
@@ -1178,20 +1035,22 @@ public class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsSquareInCheck(int squareIndex, int sideToMoveInt)
+    public bool IsInCheck()
     {
-        Utils.Assert(sideToMoveInt != (int)Side.Both);
+        var oppositeSideInt = Utils.OppositeSide(Side);
+        var oppositeSideOffset = Utils.PieceOffset(oppositeSideInt);
 
-        var offset = Utils.PieceOffset(sideToMoveInt);
+        var kingSquare = PieceBitBoards[(int)Piece.k - oppositeSideOffset].GetLS1BIndex();
+
         var bothSidesOccupancy = OccupancyBitBoards[(int)Side.Both];
 
-        // I tried to order them from most to least likely- not tested
+        // I tried to order them from most to least likely - not tested
         return
-            IsSquareAttackedByRooks(squareIndex, offset, bothSidesOccupancy, out var rookAttacks)
-            || IsSquareAttackedByBishops(squareIndex, offset, bothSidesOccupancy, out var bishopAttacks)
-            || IsSquareAttackedByQueens(offset, bishopAttacks, rookAttacks)
-            || IsSquareAttackedByKnights(squareIndex, offset)
-            || IsSquareAttackedByPawns(squareIndex, sideToMoveInt, offset);
+            IsSquareAttackedByRooks(kingSquare, oppositeSideOffset, bothSidesOccupancy, out var rookAttacks)
+            || IsSquareAttackedByBishops(kingSquare, oppositeSideOffset, bothSidesOccupancy, out var bishopAttacks)
+            || IsSquareAttackedByQueens(oppositeSideOffset, bishopAttacks, rookAttacks)
+            || IsSquareAttackedByKnights(kingSquare, oppositeSideOffset)
+            || IsSquareAttackedByPawns(kingSquare, oppositeSideInt, oppositeSideOffset);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1236,6 +1095,144 @@ public class Position
     }
 
     #endregion
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public int CountPieces() => PieceBitBoards.Sum(b => b.CountBits());
+
+    /// <summary>
+    /// Based on Stormphrax
+    /// </summary>
+    /// <param name="square"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public int PieceAt(int square)
+    {
+        var bit = BitBoardExtensions.SquareBit(square);
+
+        Side color;
+
+        if ((OccupancyBitBoards[(int)Side.Black] & bit) != default)
+        {
+            color = Side.Black;
+        }
+        else if ((OccupancyBitBoards[(int)Side.White] & bit) != default)
+        {
+            color = Side.White;
+        }
+        else
+        {
+            return (int)Piece.None;
+        }
+
+        var offset = Utils.PieceOffset(color);
+
+        for (int pieceIndex = offset; pieceIndex < 6 + offset; ++pieceIndex)
+        {
+            if (!(PieceBitBoards[pieceIndex] & bit).Empty())
+            {
+                return pieceIndex;
+            }
+        }
+
+        System.Diagnostics.Debug.Fail($"Bit set in {Side} occupancy bitboard, but not piece found");
+
+        return (int)Piece.None;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public string FEN(int halfMovesWithoutCaptureOrPawnMove = 0, int fullMoveClock = 1)
+    {
+        var sb = new StringBuilder(100);
+
+        var squaresPerFile = 0;
+
+        int squaresWithoutPiece = 0;
+        int lengthBeforeSlash = sb.Length;
+        for (int square = 0; square < 64; ++square)
+        {
+            int foundPiece = -1;
+            for (var pieceBoardIndex = 0; pieceBoardIndex < 12; ++pieceBoardIndex)
+            {
+                if (PieceBitBoards[pieceBoardIndex].GetBit(square))
+                {
+                    foundPiece = pieceBoardIndex;
+                    break;
+                }
+            }
+
+            if (foundPiece != -1)
+            {
+                if (squaresWithoutPiece != 0)
+                {
+                    sb.Append(squaresWithoutPiece);
+                    squaresWithoutPiece = 0;
+                }
+
+                sb.Append(Constants.AsciiPieces[foundPiece]);
+            }
+            else
+            {
+                ++squaresWithoutPiece;
+            }
+
+            squaresPerFile = (squaresPerFile + 1) % 8;
+            if (squaresPerFile == 0)
+            {
+                if (squaresWithoutPiece != 0)
+                {
+                    sb.Append(squaresWithoutPiece);
+                    squaresWithoutPiece = 0;
+                }
+
+                if (square != 63)
+                {
+                    if (sb.Length == lengthBeforeSlash)
+                    {
+                        sb.Append('8');
+                    }
+                    sb.Append('/');
+                    lengthBeforeSlash = sb.Length;
+                    squaresWithoutPiece = 0;
+                }
+            }
+        }
+
+        sb.Append(' ');
+        sb.Append(Side == Side.White ? 'w' : 'b');
+
+        sb.Append(' ');
+        var length = sb.Length;
+
+        if ((Castle & (int)CastlingRights.WK) != default)
+        {
+            sb.Append('K');
+        }
+        if ((Castle & (int)CastlingRights.WQ) != default)
+        {
+            sb.Append('Q');
+        }
+        if ((Castle & (int)CastlingRights.BK) != default)
+        {
+            sb.Append('k');
+        }
+        if ((Castle & (int)CastlingRights.BQ) != default)
+        {
+            sb.Append('q');
+        }
+
+        if (sb.Length == length)
+        {
+            sb.Append('-');
+        }
+
+        sb.Append(' ');
+
+        sb.Append(EnPassant == BoardSquare.noSquare ? "-" : Constants.Coordinates[(int)EnPassant]);
+
+        sb.Append(' ').Append(halfMovesWithoutCaptureOrPawnMove).Append(' ').Append(fullMoveClock);
+
+        return sb.ToString();
+    }
 
     /// <summary>
     /// Combines <see cref="PieceBitBoards"/>, <see cref="Side"/>, <see cref="Castle"/> and <see cref="EnPassant"/>

@@ -212,8 +212,7 @@ public class IsSquareInCheck_PassBitBoard_Benchmark : BaseBenchmark
         {
             for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
             {
-                var sideToMoveInt = (int)position.Side;
-                if (position.IsSquareInCheck(squareIndex, sideToMoveInt))
+                if (position.IsInCheck())
                 {
                     b = true;
                 }
