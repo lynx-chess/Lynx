@@ -24,9 +24,6 @@ jobs:
     env:
       DOTNET_VERSION: 8.0.x
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
-      DOTNET_TieredPGO: 1
-      DOTNET_ReadyToRun: 0
-      DOTNET_TC_QuickJitForLoops: 1
 
     steps:
     - uses: actions/checkout@v4
