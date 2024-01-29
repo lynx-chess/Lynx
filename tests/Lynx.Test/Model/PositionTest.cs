@@ -925,6 +925,13 @@ public class PositionTest
         Assert.AreEqual(expectedStaticEvaluation, position.StaticEvaluation().Score);
     }
 
+    [TestCase("k7/8/8/3K4/8/8/8/8 w - - 0 1", true, "K vs k")]
+    [TestCase("8/8/8/8/3k4/8/8/K7 w - - 0 1", true, "K vs k")]
+    public void StaticEvaluation_PawnlessEndgames_KingVsKing(string fen, bool isDrawExpected, string _)
+    {
+        EvaluateDrawOrNotDraw(fen, isDrawExpected, 0);
+    }
+
     [TestCase("1k6/8/8/8/8/8/1B6/1K6 w - - 0 1", true, 1, "B")]
     [TestCase("1k6/1b6/8/8/8/8/8/1K6 w - - 0 1", true, 1, "b")]
     [TestCase("1k6/8/8/8/8/8/1N6/1K6 w - - 0 1", true, 1, "N")]
@@ -959,14 +966,7 @@ public class PositionTest
     [TestCase("1k6/r7/8/8/8/8/N7/1K6 w - - 0 1", true, "N vs r")]
     public void StaticEvaluation_PawnlessEndgames_RookVsMinorPiece(string fen, bool isDrawExpected, string _)
     {
-        EvaluateDrawOrNotDraw(fen, isDrawExpected, 3);
-    }
-
-    [TestCase("k7/8/8/3K4/8/8/8/8 w - - 0 1", true, "K vs k")]
-    [TestCase("8/8/8/8/3k4/8/8/K7 w - - 0 1", true, "K vs k")]
-    public void StaticEvaluation_PawnlessEndgames_KingVsKing(string fen, bool isDrawExpected, string _)
-    {
-        EvaluateDrawOrNotDraw(fen, isDrawExpected, 0);
+        EvaluateDrawishOrNotDrawish(fen, isDrawExpected, 3);
     }
 
     [TestCase("1k6/1n6/8/8/2BB4/3K4/8/8 w - - 0 1", false, "BB vs n")]
@@ -981,7 +981,7 @@ public class PositionTest
     [TestCase("8/8/3knn2/8/8/3N4/3K4/8 w - - 0 1", true, "N vs nn")]
     public void StaticEvaluation_PawnlessEndgames_TwoMinorPiecesVsOne(string fen, bool isDrawExpected, string _)
     {
-        EvaluateDrawOrNotDraw(fen, isDrawExpected, 3);
+        EvaluateDrawishOrNotDrawish(fen, isDrawExpected, 3);
     }
 
     [TestCase("8/8/3kr3/8/8/2RB4/3K4/8 w - - 0 1", true, "RB vs r")]
@@ -990,21 +990,21 @@ public class PositionTest
     [TestCase("8/8/2nkr3/8/8/2R5/3K4/8 w - - 0 1", true, "R vs rn")]
     public void StaticEvaluation_PawnlessEndgames_RookAndMinorPieceVsRook(string fen, bool isDrawExpected, string _)
     {
-        EvaluateDrawOrNotDraw(fen, isDrawExpected, 5);
+        EvaluateDrawishOrNotDrawish(fen, isDrawExpected, 5);
     }
 
     [TestCase("8/8/3kr3/8/8/2R1R3/3K4/8 w - - 0 1", false, "RR vs r")]
     [TestCase("8/8/3kr3/8/8/2R1R3/3K4/8 w - - 0 1", false, "R vs rr")]
     public void StaticEvaluation_PawnlessEndgames_TwoRooksVsRook(string fen, bool isDrawExpected, string _)
     {
-        EvaluateDrawOrNotDraw(fen, isDrawExpected, 6);
+        EvaluateDrawishOrNotDrawish(fen, isDrawExpected, 6);
     }
 
     [TestCase("8/8/3kr3/8/8/2Q5/3K4/8 w - - 0 1", false, "Q vs r")]
     [TestCase("8/8/3kq3/8/8/2R5/3K4/8 w - - 0 1", false, "R vs q")]
     public void StaticEvaluation_PawnlessEndgames_QueenVsRook(string fen, bool isDrawExpected, string _)
     {
-        EvaluateDrawOrNotDraw(fen, isDrawExpected, 6);
+        EvaluateDrawishOrNotDrawish(fen, isDrawExpected, 6);
     }
 
     [TestCase("8/8/3kq3/8/8/2Q1B3/3K4/8 w - - 0 1", true, "QB vs q")]
@@ -1013,14 +1013,14 @@ public class PositionTest
     [TestCase("8/8/2nkq3/8/8/2Q5/3K4/8 w - - 0 1", true, "Q vs qn")]
     public void StaticEvaluation_PawnlessEndgames_QueenAndMinorPieceVsQueen(string fen, bool isDrawExpected, string _)
     {
-        EvaluateDrawOrNotDraw(fen, isDrawExpected, 9);
+        EvaluateDrawishOrNotDrawish(fen, isDrawExpected, 9);
     }
 
     [TestCase("8/4q3/3k4/8/8/3K4/2QR4/8 w - - 0 1", false, "QR vs q")]
     [TestCase("8/3rq3/3k4/8/8/2QK4/8/8 w - - 1 1", false, "Q vs qr")]
     public void StaticEvaluation_PawnlessEndgames_QueenAndRookVsQueen(string fen, bool isDrawExpected, string _)
     {
-        EvaluateDrawOrNotDraw(fen, isDrawExpected, 10);
+        EvaluateDrawishOrNotDrawish(fen, isDrawExpected, 10);
     }
 
     [TestCase(0, 0)]
@@ -1072,20 +1072,38 @@ public class PositionTest
             : position.KingAdditionalEvaluation(bitBoard, Side.Black, pieceCount).EndGameScore;
     }
 
-    private static void EvaluateDrawOrNotDraw(string fen, bool isDrawExpected, int phase)
+    private static void EvaluateDrawOrNotDraw(string fen, bool isDrawExpected, int expectedPhase)
     {
         var position = new Position(fen);
-        var eval = position.StaticEvaluation();
+        var (score, phase) = position.StaticEvaluation();
 
-        Assert.AreEqual(phase, eval.Phase);
+        Assert.AreEqual(expectedPhase, phase);
 
         if (isDrawExpected)
         {
-            Assert.AreEqual(0, eval.Score);
+            Assert.AreEqual(0, score);
         }
         else
         {
-            Assert.AreNotEqual(0, eval.Score);
+            Assert.AreNotEqual(0, score);
+            Assert.AreNotEqual(EvaluationConstants.PawnlessDrawishEndgame, Math.Abs(score));
+        }
+    }
+
+    private static void EvaluateDrawishOrNotDrawish(string fen, bool isDrawExpected, int expectedPhase)
+    {
+        var position = new Position(fen);
+        var (score, phase) = position.StaticEvaluation();
+
+        Assert.AreEqual(expectedPhase, phase);
+
+        if (isDrawExpected)
+        {
+            Assert.AreEqual(EvaluationConstants.PawnlessDrawishEndgame, Math.Abs(score));
+        }
+        else
+        {
+            Assert.AreNotEqual(EvaluationConstants.PawnlessDrawishEndgame, Math.Abs(score));
         }
     }
 }

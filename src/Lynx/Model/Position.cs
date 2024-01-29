@@ -943,7 +943,9 @@ public class Position
                         if (pieceCount[(int)Piece.Q] == 1
                             && pieceCount[(int)Piece.q] == 1)
                         {
-                            return (0, gamePhase);
+                            return (
+                                EvaluationConstants.PawnlessDrawishEndgame - (22 * winningSideOffset),  // +-66
+                                gamePhase);
                         }
 
                         break;
@@ -954,7 +956,9 @@ public class Position
                         if (pieceCount[(int)Piece.R] == 1
                             && pieceCount[(int)Piece.r] == 1)
                         {
-                            return (0, gamePhase);
+                            return (
+                                EvaluationConstants.PawnlessDrawishEndgame - (22 * winningSideOffset),  // +-66
+                                gamePhase);
                         }
 
                         break;
@@ -966,7 +970,9 @@ public class Position
                             || pieceCount[(int)Piece.b - winningSideOffset] == 1    // BN vs B, NN vs B, BB vs B
                             || pieceCount[(int)Piece.B + winningSideOffset] <= 1)   // BN vs N, NN vs N
                         {                                                           // Only BB vs N is a win, (BN vs N can have some chances)
-                            return (0, gamePhase);
+                            return (
+                                EvaluationConstants.PawnlessDrawishEndgame - (22 * winningSideOffset),  // +-66
+                                gamePhase);
                         }
 
                         break;
