@@ -930,18 +930,64 @@ public class Position
             gamePhase = maxPhase;
         }
 
-        // Check if drawn position due to lack of material
-        if (gamePhase <= 4)
+        // Pawnless endgames with few pieces
+        if (pieceCount[(int)Piece.P] == 0 && pieceCount[(int)Piece.p] == 0)
         {
-            var offset = Utils.PieceOffset(endGameScore >= 0);
+            var winningSideOffset = Utils.PieceOffset(endGameScore >= 0);
 
-            bool sideCannotWin = pieceCount[(int)Piece.P + offset] == 0 && pieceCount[(int)Piece.Q + offset] == 0 && pieceCount[(int)Piece.R + offset] == 0
-                && (pieceCount[(int)Piece.B + offset] + pieceCount[(int)Piece.N + offset] == 1                  // B or N
-                    || (pieceCount[(int)Piece.B + offset] == 0 && pieceCount[(int)Piece.N + offset] == 2));     // N+N
-
-            if (sideCannotWin)
+            switch (gamePhase)
             {
-                return (0, gamePhase);
+                case 9:
+                    {
+                        // QB vs Q, QN vs Q
+                        if (pieceCount[(int)Piece.Q] == 1
+                            && pieceCount[(int)Piece.q] == 1)
+                        {
+                            return (0, gamePhase);
+                        }
+
+                        break;
+                    }
+                case 5:
+                    {
+                        // RB vs R, RN vs R
+                        if (pieceCount[(int)Piece.R] == 1
+                            && pieceCount[(int)Piece.r] == 1)
+                        {
+                            return (0, gamePhase);
+                        }
+
+                        break;
+                    }
+                case 3:
+                    {
+                        if (pieceCount[(int)Piece.R] == 1                           // R vs B, R vs N
+                            || pieceCount[(int)Piece.r] == 1
+                            || pieceCount[(int)Piece.b - winningSideOffset] == 1    // BN vs B, NN vs B, BB vs B
+                            || pieceCount[(int)Piece.B + winningSideOffset] <= 1)   // BN vs N, NN vs N
+                        {                                                           // Only BB vs N is a win, (BN vs N can have some chances)
+                            return (0, gamePhase);
+                        }
+
+                        break;
+                    }
+                case 2:
+                    {
+                        if (pieceCount[(int)Piece.R] == 0
+                            && pieceCount[(int)Piece.r] == 0
+                            && (pieceCount[(int)Piece.N] + pieceCount[(int)Piece.n] == 2        // NN, N vs N
+                                || pieceCount[(int)Piece.N] + pieceCount[(int)Piece.B] == 1))   // B vs N, B vs B
+                        {                                                                       // Only BB and BN are a win
+                            return (0, gamePhase);
+                        }
+
+                        break;
+                    }
+                case 1:
+                case 0:
+                    {
+                        return (0, gamePhase);
+                    }
             }
         }
 
