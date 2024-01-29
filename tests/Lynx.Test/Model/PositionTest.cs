@@ -995,9 +995,9 @@ public class PositionTest
 
     [TestCase("8/8/3kr3/8/8/2R1R3/3K4/8 w - - 0 1", false, "RR vs r")]
     [TestCase("8/8/3kr3/8/8/2R1R3/3K4/8 w - - 0 1", false, "R vs rr")]
-    public void StaticEvaluation_PawnlessEndgames_RooksVsRook(string fen, bool isDrawExpected, string _)
+    public void StaticEvaluation_PawnlessEndgames_TwoRooksVsRook(string fen, bool isDrawExpected, string _)
     {
-        EvaluateDrawOrNotDraw(fen, isDrawExpected, 5);
+        EvaluateDrawOrNotDraw(fen, isDrawExpected, 6);
     }
 
     [TestCase("8/8/3kr3/8/8/2Q5/3K4/8 w - - 0 1", false, "Q vs r")]
