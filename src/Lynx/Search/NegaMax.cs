@@ -44,7 +44,7 @@ public sealed partial class Engine
         if (!isRoot)
         {
             ttEvaluation = _tt.Read(_ttMask, position, depth, ply, alpha, beta, ref ttEntry);
-            if (ttEvaluation != EvaluationConstants.NoHashEntry)
+            if (ttEntry.Depth > 0 && ttEvaluation != EvaluationConstants.NoHashEntry)
             {
                 return ttEvaluation;
             }
