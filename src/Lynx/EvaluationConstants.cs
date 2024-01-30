@@ -374,5 +374,7 @@ public static readonly int[] EndGameKingTable =
     /// </summary>
     public const int SingleMoveEvaluation = 200;
 
-    public const int PawnlessDrawishEndgame = 66;
+    public const int PawnlessDrawishEndgameBonus = 66;
+
+    public const int PawnlessDrawishEndgameCoefficient = 2 * PawnlessDrawishEndgameBonus / 6;
 }
