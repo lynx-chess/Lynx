@@ -312,6 +312,13 @@ public static readonly int[] EndGameKingTable =
         [100, 200, 300, 400, 500, 600, 100, 200, 300, 400, 500, 600]
     ];
 
+    public static readonly int[] MVV_PieceValues =
+    [
+        100, 450, 450, 650, 1250, 0,
+        100, 450, 450, 650, 1250, 0,
+        0
+    ];
+
     /// <summary>
     /// Base absolute checkmate evaluation value. Actual absolute evaluations are lower than this one by a number of <see cref="Position.DepthCheckmateFactor"/>
     /// </summary>
