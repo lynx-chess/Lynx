@@ -347,6 +347,24 @@ public sealed partial class Engine
                     _captureHistory[piece][targetSquare][capturedPiece] = ScoreHistoryMove(
                         _captureHistory[piece][targetSquare][capturedPiece],
                         EvaluationConstants.HistoryBonus[depth]);
+
+                    // 🔍 Capture history penalty/malus
+                    // When a capture fails high, penalize previous visited captures
+                    for (int i = 0; i < visitedMovesCounter - 1; ++i)
+                    {
+                        var visitedMove = visitedMoves[i];
+
+                        if (visitedMove.IsCapture())
+                        {
+                            var visitedMovePiece = visitedMove.Piece();
+                            var visitedMoveTargetSquare = visitedMove.TargetSquare();
+                            var visitedMoveCapturedPiece = visitedMove.CapturedPiece();
+
+                            _captureHistory[visitedMovePiece][visitedMoveTargetSquare][visitedMoveCapturedPiece] = ScoreHistoryMove(
+                                _captureHistory[visitedMovePiece][visitedMoveTargetSquare][visitedMoveCapturedPiece],
+                                -EvaluationConstants.HistoryBonus[depth]);
+                        }
+                    }
                 }
                 else
                 {
@@ -359,22 +377,13 @@ public sealed partial class Engine
                         _quietHistory[piece][targetSquare],
                         EvaluationConstants.HistoryBonus[depth]);
 
-                    // 🔍 History penalty/malus
+                    // 🔍 Quiet history penalty/malus
                     // When a quiet move fails high, penalize previous visited quiet moves
                     for (int i = 0; i < visitedMovesCounter - 1; ++i)
                     {
                         var visitedMove = visitedMoves[i];
-                        if (visitedMove.IsCapture())
-                        {
-                            var visitedMovePiece = visitedMove.Piece();
-                            var visitedMoveTargetSquare = visitedMove.TargetSquare();
-                            var visitedMoveCapturedPiece = visitedMove.CapturedPiece();
 
-                            _captureHistory[visitedMovePiece][visitedMoveTargetSquare][visitedMoveCapturedPiece] = ScoreHistoryMove(
-                                _captureHistory[visitedMovePiece][visitedMoveTargetSquare][visitedMoveCapturedPiece],
-                                -EvaluationConstants.HistoryBonus[depth]);
-                        }
-                        else
+                        if (!visitedMove.IsCapture())
                         {
                             var visitedMovePiece = visitedMove.Piece();
                             var visitedMoveTargetSquare = visitedMove.TargetSquare();
