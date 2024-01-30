@@ -105,31 +105,32 @@ public static class TranspositionTableExtensions
     /// <param name="ply">Ply</param>
     /// <param name="alpha"></param>
     /// <param name="beta"></param>
+    /// <param name="entry"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static (int Evaluation, ShortMove BestMove, NodeType NodeType) ProbeHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int alpha, int beta)
+    public static int Read(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int alpha, int beta, ref TranspositionTableElement entry)
     {
         if (!Configuration.EngineSettings.TranspositionTableEnabled)
         {
-            return (EvaluationConstants.NoHashEntry, default, default);
+            return EvaluationConstants.NoHashEntry;
         }
 
-        ref var entry = ref tt[position.UniqueIdentifier & ttMask];
+        ref TranspositionTableElement localEntry = ref tt[position.UniqueIdentifier & ttMask];
 
-        if ((position.UniqueIdentifier >> 48) != entry.Key)
+        if ((position.UniqueIdentifier >> 48) != localEntry.Key)
         {
-            return (EvaluationConstants.NoHashEntry, default, default);
+            return EvaluationConstants.NoHashEntry;
         }
 
         var eval = EvaluationConstants.NoHashEntry;
 
-        if (entry.Depth >= depth)
+        if (localEntry.Depth >= depth)
         {
             // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
             // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
-            var score = RecalculateMateScores(entry.Score, ply);
+            var score = RecalculateMateScores(localEntry.Score, ply);
 
-            eval = entry.Type switch
+            eval = localEntry.Type switch
             {
                 NodeType.Exact => score,
                 NodeType.Alpha when score <= alpha => alpha,
@@ -138,7 +139,9 @@ public static class TranspositionTableExtensions
             };
         }
 
-        return (eval, entry.Move, entry.Type);
+        entry = localEntry;
+
+        return eval;
     }
 
     /// <summary>
@@ -153,7 +156,7 @@ public static class TranspositionTableExtensions
     /// <param name="nodeType"></param>
     /// <param name="move"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void RecordHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int eval, NodeType nodeType, Move? move = null)
+    public static void Save(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int eval, NodeType nodeType, Move? move = null)
     {
         if (!Configuration.EngineSettings.TranspositionTableEnabled)
         {
