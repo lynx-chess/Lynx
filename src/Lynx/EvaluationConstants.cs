@@ -317,8 +317,8 @@ public static readonly int[] EndGameKingTable =
 
     public static readonly int[] MVV_PieceValues =
     [
-        100, 350, 400, 500, 1100, 0,
-        100, 350, 400, 500, 1100, 0,
+        10, 35, 40, 50, 110, 0,
+        10, 35, 40, 50, 110, 0,
         0
     ];
 
