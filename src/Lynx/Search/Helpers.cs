@@ -59,7 +59,7 @@ public sealed partial class Engine
     private const int MaxValue = short.MaxValue;
 
     /// <summary>
-    /// Returns the score evaluation of a move taking into account <see cref="_isScoringPV"/>, <paramref name="bestMoveTTCandidate"/>, <see cref="EvaluationConstants.MostValueableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_historyMoves"/>
+    /// Returns the score evaluation of a move taking into account <see cref="_isScoringPV"/>, <paramref name="bestMoveTTCandidate"/>, <see cref="EvaluationConstants.MostValueableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_quietHistory"/>
     /// </summary>
     /// <param name="move"></param>
     /// <param name="depth"></param>
@@ -99,12 +99,16 @@ public sealed partial class Engine
 
         if (isCapture)
         {
-
             var baseCaptureScore = (isPromotion || move.IsEnPassant() || SEE.IsGoodCapture(Game.CurrentPosition, move))
                 ? EvaluationConstants.GoodCaptureMoveBaseScoreValue
                 : EvaluationConstants.BadCaptureMoveBaseScoreValue;
 
-            return baseCaptureScore + EvaluationConstants.MostValueableVictimLeastValuableAttacker[move.Piece()][move.CapturedPiece()];
+            var piece = move.Piece();
+
+            return baseCaptureScore
+                + EvaluationConstants.MostValueableVictimLeastValuableAttacker[piece][move.CapturedPiece()]
+                //+ EvaluationConstants.MVV_PieceValues[move.CapturedPiece()]
+                + _captureHistory[piece][move.TargetSquare()][move.CapturedPiece()];
         }
 
         if (isPromotion)
@@ -131,7 +135,7 @@ public sealed partial class Engine
             }
 
             // History move or 0 if not found
-            return EvaluationConstants.BaseMoveScore + _historyMoves[move.Piece()][move.TargetSquare()];
+            return EvaluationConstants.BaseMoveScore + _quietHistory[move.Piece()][move.TargetSquare()];
         }
 
         return EvaluationConstants.BaseMoveScore;
@@ -351,7 +355,7 @@ $" {484,-3}                                                         {_pVTable[48
 
         for (int i = 0; i < 12; ++i)
         {
-            var tmp = _historyMoves[i];
+            var tmp = _quietHistory[i];
             for (int j = 0; j < 64; ++i)
             {
                 var item = tmp[j];

@@ -287,7 +287,7 @@ public sealed partial class Engine
                     }
 
                     // -= history/(maxHistory/2)
-                    reduction -= 2 * _historyMoves[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.History_MaxMoveValue;
+                    reduction -= 2 * _quietHistory[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.History_MaxMoveValue;
 
                     // Don't allow LMR to drop into qsearch or increase the depth
                     // depth - 1 - depth +2 = 1, min depth we want
@@ -338,15 +338,25 @@ public sealed partial class Engine
             {
                 PrintMessage($"Pruning: {move} is enough");
 
-                if (!move.IsCapture())
+                if (move.IsCapture())
+                {
+                    var piece = move.Piece();
+                    var targetSquare = move.TargetSquare();
+                    var capturedPiece = move.CapturedPiece();
+
+                    _captureHistory[piece][targetSquare][capturedPiece] = ScoreHistoryMove(
+                        _captureHistory[piece][targetSquare][capturedPiece],
+                        EvaluationConstants.HistoryBonus[depth]);
+                }
+                else
                 {
                     // 🔍 Quiet history moves
                     // Doing this only in beta cutoffs (instead of when eval > alpha) was suggested by Sirius author
                     var piece = move.Piece();
                     var targetSquare = move.TargetSquare();
 
-                    _historyMoves[piece][targetSquare] = ScoreHistoryMove(
-                        _historyMoves[piece][targetSquare],
+                    _quietHistory[piece][targetSquare] = ScoreHistoryMove(
+                        _quietHistory[piece][targetSquare],
                         EvaluationConstants.HistoryBonus[depth]);
 
                     // 🔍 History penalty/malus
@@ -359,8 +369,8 @@ public sealed partial class Engine
                             var visitedMovePiece = visitedMove.Piece();
                             var visitedMoveTargetSquare = visitedMove.TargetSquare();
 
-                            _historyMoves[visitedMovePiece][visitedMoveTargetSquare] = ScoreHistoryMove(
-                                _historyMoves[visitedMovePiece][visitedMoveTargetSquare],
+                            _quietHistory[visitedMovePiece][visitedMoveTargetSquare] = ScoreHistoryMove(
+                                _quietHistory[visitedMovePiece][visitedMoveTargetSquare],
                                 -EvaluationConstants.HistoryBonus[depth]);
                         }
                     }
