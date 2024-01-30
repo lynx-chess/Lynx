@@ -364,7 +364,17 @@ public sealed partial class Engine
                     for (int i = 0; i < visitedMovesCounter - 1; ++i)
                     {
                         var visitedMove = visitedMoves[i];
-                        if (!visitedMove.IsCapture())
+                        if (visitedMove.IsCapture())
+                        {
+                            var visitedMovePiece = visitedMove.Piece();
+                            var visitedMoveTargetSquare = visitedMove.TargetSquare();
+                            var visitedMoveCapturedPiece = visitedMove.CapturedPiece();
+
+                            _captureHistory[visitedMovePiece][visitedMoveTargetSquare][visitedMoveCapturedPiece] = ScoreHistoryMove(
+                                _captureHistory[visitedMovePiece][visitedMoveTargetSquare][visitedMoveCapturedPiece],
+                                -EvaluationConstants.HistoryBonus[depth]);
+                        }
+                        else
                         {
                             var visitedMovePiece = visitedMove.Piece();
                             var visitedMoveTargetSquare = visitedMove.TargetSquare();
