@@ -106,8 +106,8 @@ public sealed partial class Engine
             var piece = move.Piece();
 
             return baseCaptureScore
-                //+ EvaluationConstants.MostValueableVictimLeastValuableAttacker[piece][move.CapturedPiece()]
-                + EvaluationConstants.MVV_PieceValues[move.CapturedPiece()]
+                + EvaluationConstants.MostValueableVictimLeastValuableAttacker[piece][move.CapturedPiece()]
+                //+ EvaluationConstants.MVV_PieceValues[move.CapturedPiece()]
                 + _captureHistory[piece][move.TargetSquare()][move.CapturedPiece()];
         }
 
