@@ -165,7 +165,7 @@ public sealed partial class Engine
             _isFollowingPV = false;
             for (int i = 0; i < pseudoLegalMoves.Length; ++i)
             {
-                scores[i] = ScoreMove(pseudoLegalMoves[i], ply, isNotQSearch: true, ttBestMove);
+                scores[i] = ScoreMove(pseudoLegalMoves[i], ply, ttBestMove);
 
                 if (pseudoLegalMoves[i] == _pVTable[depth])
                 {
@@ -178,7 +178,7 @@ public sealed partial class Engine
         {
             for (int i = 0; i < pseudoLegalMoves.Length; ++i)
             {
-                scores[i] = ScoreMove(pseudoLegalMoves[i], ply, isNotQSearch: true, ttBestMove);
+                scores[i] = ScoreMove(pseudoLegalMoves[i], ply, ttBestMove);
             }
         }
 
@@ -480,7 +480,7 @@ public sealed partial class Engine
         Span<int> scores = stackalloc int[pseudoLegalMoves.Length];
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            scores[i] = ScoreMove(pseudoLegalMoves[i], ply, isNotQSearch: false, ttBestMove);
+            scores[i] = ScoreMoveQuiescence(pseudoLegalMoves[i], ply, ttBestMove);
         }
 
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
