@@ -106,6 +106,8 @@ public sealed partial class Engine
             var piece = move.Piece();
             var capturedPiece = move.CapturedPiece();
 
+            Debug.Assert(capturedPiece != (int)Piece.K && capturedPiece != (int)Piece.k, $"{move.UCIString()} capturing king is generated in position {Game.CurrentPosition.FEN()}");
+
             return baseCaptureScore
                 + EvaluationConstants.MostValueableVictimLeastValuableAttacker[piece][capturedPiece]
                 //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
