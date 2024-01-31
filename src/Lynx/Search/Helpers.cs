@@ -104,11 +104,12 @@ public sealed partial class Engine
                 : EvaluationConstants.BadCaptureMoveBaseScoreValue;
 
             var piece = move.Piece();
+            var capturedPiece = move.CapturedPiece();
 
             return baseCaptureScore
-                + EvaluationConstants.MostValueableVictimLeastValuableAttacker[piece][move.CapturedPiece()]
-                //+ EvaluationConstants.MVV_PieceValues[move.CapturedPiece()]
-                + _captureHistory[piece][move.TargetSquare()][move.CapturedPiece()];
+                + EvaluationConstants.MostValueableVictimLeastValuableAttacker[piece][capturedPiece]
+                //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
+                + _captureHistory[piece][move.TargetSquare()][capturedPiece];
         }
 
         if (isPromotion)
