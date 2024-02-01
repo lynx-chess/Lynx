@@ -12,12 +12,12 @@ public class IsAttackedSquareTest
         const int square = (int)BoardSquare.e4;
 
         position.PieceBitBoards[(int)Piece.p].SetBit(BoardSquare.d3);
-        Assert.False(Attacks.IsSquareAttacked(square, Side.Black, position.PieceBitBoards, position.OccupancyBitBoards));
-        Assert.False(Attacks.IsSquareAttacked(square, Side.White, position.PieceBitBoards, position.OccupancyBitBoards));
+        Assert.False(position.IsSquareAttacked(square, Side.Black));
+        Assert.False(position.IsSquareAttacked(square, Side.White));
 
         position.PieceBitBoards[(int)Piece.p].SetBit(BoardSquare.d5);
-        Assert.True(Attacks.IsSquareAttacked(square, Side.Black, position.PieceBitBoards, position.OccupancyBitBoards));
-        Assert.False(Attacks.IsSquareAttacked(square, Side.White, position.PieceBitBoards, position.OccupancyBitBoards));
+        Assert.True(position.IsSquareAttacked(square, Side.Black));
+        Assert.False(position.IsSquareAttacked(square, Side.White));
 
         position.PieceBitBoards[(int)Piece.p].Clear();
     }
@@ -29,12 +29,12 @@ public class IsAttackedSquareTest
         const int square = (int)BoardSquare.e4;
 
         position.PieceBitBoards[(int)Piece.P].SetBit(BoardSquare.d5);
-        Assert.False(Attacks.IsSquareAttacked(square, Side.Black, position.PieceBitBoards, position.OccupancyBitBoards));
-        Assert.False(Attacks.IsSquareAttacked(square, Side.White, position.PieceBitBoards, position.OccupancyBitBoards));
+        Assert.False(position.IsSquareAttacked(square, Side.Black));
+        Assert.False(position.IsSquareAttacked(square, Side.White));
 
         position.PieceBitBoards[(int)Piece.P].SetBit(BoardSquare.d3);
-        Assert.False(Attacks.IsSquareAttacked(square, Side.Black, position.PieceBitBoards, position.OccupancyBitBoards));
-        Assert.True(Attacks.IsSquareAttacked(square, Side.White, position.PieceBitBoards, position.OccupancyBitBoards));
+        Assert.False(position.IsSquareAttacked(square, Side.Black));
+        Assert.True(position.IsSquareAttacked(square, Side.White));
 
         position.PieceBitBoards[(int)Piece.P].Clear();
     }
@@ -46,12 +46,12 @@ public class IsAttackedSquareTest
         const int square = (int)BoardSquare.e4;
 
         position.PieceBitBoards[(int)Piece.n].SetBit(BoardSquare.e7);
-        Assert.False(Attacks.IsSquareAttacked(square, Side.Black, position.PieceBitBoards, position.OccupancyBitBoards));
-        Assert.False(Attacks.IsSquareAttacked(square, Side.White, position.PieceBitBoards, position.OccupancyBitBoards));
+        Assert.False(position.IsSquareAttacked(square, Side.Black));
+        Assert.False(position.IsSquareAttacked(square, Side.White));
 
         position.PieceBitBoards[(int)Piece.n].SetBit(BoardSquare.f6);
-        Assert.True(Attacks.IsSquareAttacked(square, Side.Black, position.PieceBitBoards, position.OccupancyBitBoards));
-        Assert.False(Attacks.IsSquareAttacked(square, Side.White, position.PieceBitBoards, position.OccupancyBitBoards));
+        Assert.True(position.IsSquareAttacked(square, Side.Black));
+        Assert.False(position.IsSquareAttacked(square, Side.White));
 
         position.PieceBitBoards[(int)Piece.n].Clear();
     }
@@ -63,12 +63,12 @@ public class IsAttackedSquareTest
         const int square = (int)BoardSquare.e4;
 
         position.PieceBitBoards[(int)Piece.N].SetBit(BoardSquare.d3);
-        Assert.False(Attacks.IsSquareAttacked(square, Side.Black, position.PieceBitBoards, position.OccupancyBitBoards));
-        Assert.False(Attacks.IsSquareAttacked(square, Side.White, position.PieceBitBoards, position.OccupancyBitBoards));
+        Assert.False(position.IsSquareAttacked(square, Side.Black));
+        Assert.False(position.IsSquareAttacked(square, Side.White));
 
         position.PieceBitBoards[(int)Piece.N].SetBit(BoardSquare.d2);
-        Assert.False(Attacks.IsSquareAttacked(square, Side.Black, position.PieceBitBoards, position.OccupancyBitBoards));
-        Assert.True(Attacks.IsSquareAttacked(square, Side.White, position.PieceBitBoards, position.OccupancyBitBoards));
+        Assert.False(position.IsSquareAttacked(square, Side.Black));
+        Assert.True(position.IsSquareAttacked(square, Side.White));
 
         position.PieceBitBoards[(int)Piece.N].Clear();
     }
@@ -80,12 +80,12 @@ public class IsAttackedSquareTest
         const int square = (int)BoardSquare.e5;
 
         position.PieceBitBoards[(int)Piece.b].SetBit(BoardSquare.b7);
-        Assert.False(Attacks.IsSquareAttacked(square, Side.Black, position.PieceBitBoards, position.OccupancyBitBoards));
-        Assert.False(Attacks.IsSquareAttacked(square, Side.White, position.PieceBitBoards, position.OccupancyBitBoards));
+        Assert.False(position.IsSquareAttacked(square, Side.Black));
+        Assert.False(position.IsSquareAttacked(square, Side.White));
 
         position.PieceBitBoards[(int)Piece.b].SetBit(BoardSquare.b8);
-        Assert.True(Attacks.IsSquareAttacked(square, Side.Black, position.PieceBitBoards, position.OccupancyBitBoards));
-        Assert.False(Attacks.IsSquareAttacked(square, Side.White, position.PieceBitBoards, position.OccupancyBitBoards));
+        Assert.True(position.IsSquareAttacked(square, Side.Black));
+        Assert.False(position.IsSquareAttacked(square, Side.White));
 
         position.PieceBitBoards[(int)Piece.b].Clear();
     }
@@ -97,12 +97,12 @@ public class IsAttackedSquareTest
         const int square = (int)BoardSquare.e5;
 
         position.PieceBitBoards[(int)Piece.B].SetBit(BoardSquare.a2);
-        Assert.False(Attacks.IsSquareAttacked(square, Side.Black, position.PieceBitBoards, position.OccupancyBitBoards));
-        Assert.False(Attacks.IsSquareAttacked(square, Side.White, position.PieceBitBoards, position.OccupancyBitBoards));
+        Assert.False(position.IsSquareAttacked(square, Side.Black));
+        Assert.False(position.IsSquareAttacked(square, Side.White));
 
         position.PieceBitBoards[(int)Piece.B].SetBit(BoardSquare.a1);
-        Assert.False(Attacks.IsSquareAttacked(square, Side.Black, position.PieceBitBoards, position.OccupancyBitBoards));
-        Assert.True(Attacks.IsSquareAttacked(square, Side.White, position.PieceBitBoards, position.OccupancyBitBoards));
+        Assert.False(position.IsSquareAttacked(square, Side.Black));
+        Assert.True(position.IsSquareAttacked(square, Side.White));
 
         position.PieceBitBoards[(int)Piece.B].Clear();
     }
@@ -114,12 +114,12 @@ public class IsAttackedSquareTest
         const int square = (int)BoardSquare.e5;
 
         position.PieceBitBoards[(int)Piece.r].SetBit(BoardSquare.d7);
-        Assert.False(Attacks.IsSquareAttacked(square, Side.Black, position.PieceBitBoards, position.OccupancyBitBoards));
-        Assert.False(Attacks.IsSquareAttacked(square, Side.White, position.PieceBitBoards, position.OccupancyBitBoards));
+        Assert.False(position.IsSquareAttacked(square, Side.Black));
+        Assert.False(position.IsSquareAttacked(square, Side.White));
 
         position.PieceBitBoards[(int)Piece.r].SetBit(BoardSquare.e8);
-        Assert.True(Attacks.IsSquareAttacked(square, Side.Black, position.PieceBitBoards, position.OccupancyBitBoards));
-        Assert.False(Attacks.IsSquareAttacked(square, Side.White, position.PieceBitBoards, position.OccupancyBitBoards));
+        Assert.True(position.IsSquareAttacked(square, Side.Black));
+        Assert.False(position.IsSquareAttacked(square, Side.White));
 
         position.PieceBitBoards[(int)Piece.r].Clear();
     }
@@ -131,12 +131,12 @@ public class IsAttackedSquareTest
         const int square = (int)BoardSquare.e5;
 
         position.PieceBitBoards[(int)Piece.R].SetBit(BoardSquare.d1);
-        Assert.False(Attacks.IsSquareAttacked(square, Side.Black, position.PieceBitBoards, position.OccupancyBitBoards));
-        Assert.False(Attacks.IsSquareAttacked(square, Side.White, position.PieceBitBoards, position.OccupancyBitBoards));
+        Assert.False(position.IsSquareAttacked(square, Side.Black));
+        Assert.False(position.IsSquareAttacked(square, Side.White));
 
         position.PieceBitBoards[(int)Piece.R].SetBit(BoardSquare.e1);
-        Assert.False(Attacks.IsSquareAttacked(square, Side.Black, position.PieceBitBoards, position.OccupancyBitBoards));
-        Assert.True(Attacks.IsSquareAttacked(square, Side.White, position.PieceBitBoards, position.OccupancyBitBoards));
+        Assert.False(position.IsSquareAttacked(square, Side.Black));
+        Assert.True(position.IsSquareAttacked(square, Side.White));
 
         position.PieceBitBoards[(int)Piece.R].Clear();
     }
@@ -159,16 +159,16 @@ public class IsAttackedSquareTest
         position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquare.d1);
         position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquare.c4);
         position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquare.g4);
-        Assert.False(Attacks.IsSquareAttacked(square1, Side.Black, position.PieceBitBoards, position.OccupancyBitBoards));
-        Assert.False(Attacks.IsSquareAttacked(square1, Side.White, position.PieceBitBoards, position.OccupancyBitBoards));
-        Assert.False(Attacks.IsSquareAttacked(square2, Side.Black, position.PieceBitBoards, position.OccupancyBitBoards));
-        Assert.False(Attacks.IsSquareAttacked(square2, Side.White, position.PieceBitBoards, position.OccupancyBitBoards));
+        Assert.False(position.IsSquareAttacked(square1, Side.Black));
+        Assert.False(position.IsSquareAttacked(square1, Side.White));
+        Assert.False(position.IsSquareAttacked(square2, Side.Black));
+        Assert.False(position.IsSquareAttacked(square2, Side.White));
 
         position.PieceBitBoards[(int)Piece.q].SetBit(BoardSquare.e1);
-        Assert.True(Attacks.IsSquareAttacked(square1, Side.Black, position.PieceBitBoards, position.OccupancyBitBoards));
-        Assert.False(Attacks.IsSquareAttacked(square1, Side.White, position.PieceBitBoards, position.OccupancyBitBoards));
-        Assert.True(Attacks.IsSquareAttacked(square2, Side.Black, position.PieceBitBoards, position.OccupancyBitBoards));
-        Assert.False(Attacks.IsSquareAttacked(square2, Side.White, position.PieceBitBoards, position.OccupancyBitBoards));
+        Assert.True(position.IsSquareAttacked(square1, Side.Black));
+        Assert.False(position.IsSquareAttacked(square1, Side.White));
+        Assert.True(position.IsSquareAttacked(square2, Side.Black));
+        Assert.False(position.IsSquareAttacked(square2, Side.White));
 
         position.PieceBitBoards[(int)Piece.q].Clear();
     }
@@ -191,16 +191,16 @@ public class IsAttackedSquareTest
         position.PieceBitBoards[(int)Piece.Q].SetBit(BoardSquare.d1);
         position.PieceBitBoards[(int)Piece.Q].SetBit(BoardSquare.c4);
         position.PieceBitBoards[(int)Piece.Q].SetBit(BoardSquare.g4);
-        Assert.False(Attacks.IsSquareAttacked(square1, Side.Black, position.PieceBitBoards, position.OccupancyBitBoards));
-        Assert.False(Attacks.IsSquareAttacked(square1, Side.White, position.PieceBitBoards, position.OccupancyBitBoards));
-        Assert.False(Attacks.IsSquareAttacked(square2, Side.Black, position.PieceBitBoards, position.OccupancyBitBoards));
-        Assert.False(Attacks.IsSquareAttacked(square2, Side.White, position.PieceBitBoards, position.OccupancyBitBoards));
+        Assert.False(position.IsSquareAttacked(square1, Side.Black));
+        Assert.False(position.IsSquareAttacked(square1, Side.White));
+        Assert.False(position.IsSquareAttacked(square2, Side.Black));
+        Assert.False(position.IsSquareAttacked(square2, Side.White));
 
         position.PieceBitBoards[(int)Piece.Q].SetBit(BoardSquare.e1);
-        Assert.True(Attacks.IsSquareAttacked(square1, Side.White, position.PieceBitBoards, position.OccupancyBitBoards));
-        Assert.False(Attacks.IsSquareAttacked(square1, Side.Black, position.PieceBitBoards, position.OccupancyBitBoards));
-        Assert.True(Attacks.IsSquareAttacked(square2, Side.White, position.PieceBitBoards, position.OccupancyBitBoards));
-        Assert.False(Attacks.IsSquareAttacked(square2, Side.Black, position.PieceBitBoards, position.OccupancyBitBoards));
+        Assert.True(position.IsSquareAttacked(square1, Side.White));
+        Assert.False(position.IsSquareAttacked(square1, Side.Black));
+        Assert.True(position.IsSquareAttacked(square2, Side.White));
+        Assert.False(position.IsSquareAttacked(square2, Side.Black));
 
         position.PieceBitBoards[(int)Piece.Q].Clear();
     }
@@ -212,12 +212,12 @@ public class IsAttackedSquareTest
         const int square = (int)BoardSquare.e5;
 
         position.PieceBitBoards[(int)Piece.k].SetBit(BoardSquare.e3);
-        Assert.False(Attacks.IsSquareAttacked(square, Side.Black, position.PieceBitBoards, position.OccupancyBitBoards));
-        Assert.False(Attacks.IsSquareAttacked(square, Side.White, position.PieceBitBoards, position.OccupancyBitBoards));
+        Assert.False(position.IsSquareAttacked(square, Side.Black));
+        Assert.False(position.IsSquareAttacked(square, Side.White));
 
         position.PieceBitBoards[(int)Piece.k].SetBit(BoardSquare.e4);
-        Assert.True(Attacks.IsSquareAttacked(square, Side.Black, position.PieceBitBoards, position.OccupancyBitBoards));
-        Assert.False(Attacks.IsSquareAttacked(square, Side.White, position.PieceBitBoards, position.OccupancyBitBoards));
+        Assert.True(position.IsSquareAttacked(square, Side.Black));
+        Assert.False(position.IsSquareAttacked(square, Side.White));
 
         position.PieceBitBoards[(int)Piece.k].Clear();
     }
@@ -229,12 +229,12 @@ public class IsAttackedSquareTest
         const int square = (int)BoardSquare.e5;
 
         position.PieceBitBoards[(int)Piece.K].SetBit(BoardSquare.e3);
-        Assert.False(Attacks.IsSquareAttacked(square, Side.Black, position.PieceBitBoards, position.OccupancyBitBoards));
-        Assert.False(Attacks.IsSquareAttacked(square, Side.White, position.PieceBitBoards, position.OccupancyBitBoards));
+        Assert.False(position.IsSquareAttacked(square, Side.Black));
+        Assert.False(position.IsSquareAttacked(square, Side.White));
 
         position.PieceBitBoards[(int)Piece.K].SetBit(BoardSquare.e4);
-        Assert.False(Attacks.IsSquareAttacked(square, Side.Black, position.PieceBitBoards, position.OccupancyBitBoards));
-        Assert.True(Attacks.IsSquareAttacked(square, Side.White, position.PieceBitBoards, position.OccupancyBitBoards));
+        Assert.False(position.IsSquareAttacked(square, Side.Black));
+        Assert.True(position.IsSquareAttacked(square, Side.White));
 
         position.PieceBitBoards[(int)Piece.K].Clear();
     }
