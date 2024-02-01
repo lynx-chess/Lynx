@@ -140,13 +140,6 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal int ScoreMoveQuiescence(Move move, int ply, ShortMove bestMoveTTCandidate)
     {
-        if (_isScoringPV && move == _pVTable[ply])
-        {
-            _isScoringPV = false;
-
-            return EvaluationConstants.PVMoveScoreValue;
-        }
-
         if ((ShortMove)move == bestMoveTTCandidate)
         {
             return EvaluationConstants.TTMoveScoreValue;
