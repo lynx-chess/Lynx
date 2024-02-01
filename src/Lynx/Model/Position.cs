@@ -206,10 +206,9 @@ public class Position
                     var oppositeSideOffset = Utils.PieceOffset(oppositeSide);
                     var oppositePawnIndex = (int)Piece.P + oppositeSideOffset;
 
-                    var capturedSquare = targetSquare;
                     var capturedPiece = oppositePawnIndex;
 
-                    capturedSquare = Constants.EnPassantCaptureSquares[targetSquare];
+                    var capturedSquare = Constants.EnPassantCaptureSquares[targetSquare];
                     Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedSquare), $"Expected {(Side)oppositeSide} pawn in {capturedSquare}");
 
                     PieceBitBoards[capturedPiece].PopBit(capturedSquare);
