@@ -308,7 +308,16 @@ public sealed partial class Engine
                 Array.Clear(_quietHistory[i]);
             }
 
-            // Not clearing _captureHistory on purpose
+            for (int i = 0; i < _captureHistory.Length; i++)
+            {
+                for (int j = 0; j < _captureHistory[i].Length; j++)
+                {
+                    for (int k = 0; k < _captureHistory[i][j].Length; ++k)
+                    {
+                        _captureHistory[i][j][k] = a * 3 / 4;
+                    }
+                }
+            }
         }
 
         return depth;
