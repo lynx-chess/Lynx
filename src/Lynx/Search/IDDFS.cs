@@ -305,7 +305,10 @@ public sealed partial class Engine
 
             for (int i = 0; i < _quietHistory.Length; i++)
             {
-                Array.Clear(_quietHistory[i]);
+                for (int j = 0; j < _quietHistory[i].Length; j++)
+                {
+                    _quietHistory[i][j] = _quietHistory[i][j] * 8 / 10;
+                }
             }
 
             // Not clearing _captureHistory on purpose
