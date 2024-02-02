@@ -314,7 +314,7 @@ public sealed partial class Engine
                 {
                     for (int k = 0; k < _captureHistory[i][j].Length; ++k)
                     {
-                        _captureHistory[i][j][k] = a * 3 / 4;
+                        _captureHistory[i][j][k] = _captureHistory[i][j][k] * 9 / 10;
                     }
                 }
             }
