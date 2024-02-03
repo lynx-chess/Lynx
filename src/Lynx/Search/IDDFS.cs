@@ -303,10 +303,7 @@ public sealed partial class Engine
             Array.Clear(_killerMoves[2]);
             Debug.Assert(_killerMoves.Length == 3);
 
-            for (int i = 0; i < _quietHistory.Length; i++)
-            {
-                Array.Clear(_quietHistory[i]);
-            }
+            // Not clearing _quietHistory on purpose
 
             for (int i = 0; i < _captureHistory.Length; i++)
             {
