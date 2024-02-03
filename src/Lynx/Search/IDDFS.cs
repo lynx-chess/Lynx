@@ -24,7 +24,12 @@ public sealed partial class Engine
     /// <summary>
     /// 12x64
     /// </summary>
-    private readonly int[][] _historyMoves;
+    private readonly int[][] _quietHistory;
+
+    /// <summary>
+    /// 12x64x12
+    /// </summary>
+    private readonly int[][][] _captureHistory;
 
     private readonly int[] _maxDepthReached = new int[Constants.AbsoluteMaxDepth];
     private TranspositionTable _tt = [];
@@ -298,10 +303,9 @@ public sealed partial class Engine
             Array.Clear(_killerMoves[2]);
             Debug.Assert(_killerMoves.Length == 3);
 
-            for (int i = 0; i < _historyMoves.Length; i++)
-            {
-                Array.Clear(_historyMoves[i]);
-            }
+            // Not clearing _quietHistory on purpose
+
+            // Not clearing _captureHistory on purpose
         }
 
         return depth;
