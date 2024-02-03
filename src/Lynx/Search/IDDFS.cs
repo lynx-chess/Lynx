@@ -307,7 +307,7 @@ public sealed partial class Engine
             {
                 for (int j = 0; j < _quietHistory[i].Length; j++)
                 {
-                    _quietHistory[i][j] = _quietHistory[i][j] * 1 / 10;
+                    _quietHistory[i][j] = _quietHistory[i][j] * 8 / 10;
                 }
             }
 
