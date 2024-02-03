@@ -8,7 +8,10 @@ public sealed class Game
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public List<Move> MoveHistory { get; }
+
     public HashSet<long> PositionHashHistory { get; }
+
+    public Move[] MoveStack { get; }
 
     public int HalfMovesWithoutCaptureOrPawnMove { get; set; }
 
@@ -34,6 +37,7 @@ public sealed class Game
         PositionHashHistory = new(1024) { CurrentPosition.UniqueIdentifier };
 
         HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
+        MoveStack = new Move[1024];
     }
 
     /// <summary>
@@ -47,6 +51,7 @@ public sealed class Game
 
         MoveHistory = new(1024);
         PositionHashHistory = new(1024) { position.UniqueIdentifier };
+        MoveStack = new Move[1024];
     }
 
     [Obsolete("Just intended for testing purposes")]

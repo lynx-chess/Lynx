@@ -62,14 +62,14 @@ public sealed partial class Engine
     /// Returns the score evaluation of a move taking into account <see cref="_isScoringPV"/>, <paramref name="bestMoveTTCandidate"/>, <see cref="EvaluationConstants.MostValueableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_quietHistory"/>
     /// </summary>
     /// <param name="move"></param>
-    /// <param name="depth"></param>
+    /// <param name="ply"></param>
     /// <param name="isNotQSearch"></param>
     /// <param name="bestMoveTTCandidate"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMove(Move move, int depth, bool isNotQSearch, ShortMove bestMoveTTCandidate = default)
+    internal int ScoreMove(Move move, int ply, bool isNotQSearch, ShortMove bestMoveTTCandidate = default)
     {
-        if (_isScoringPV && move == _pVTable[depth])
+        if (_isScoringPV && move == _pVTable[ply])
         {
             _isScoringPV = false;
 
@@ -122,23 +122,47 @@ public sealed partial class Engine
         if (isNotQSearch)
         {
             // 1st killer move
-            if (_killerMoves[0][depth] == move)
+            if (_killerMoves[0][ply] == move)
             {
                 return EvaluationConstants.FirstKillerMoveValue;
             }
 
-            if (_killerMoves[1][depth] == move)
+            // 2nd killer move
+            if (_killerMoves[1][ply] == move)
             {
                 return EvaluationConstants.SecondKillerMoveValue;
             }
 
-            if (_killerMoves[2][depth] == move)
+            // 3rd killer move
+            if (_killerMoves[2][ply] == move)
             {
                 return EvaluationConstants.ThirdKillerMoveValue;
             }
 
+            // Counter move history
+            if (ply >= 1)
+            {
+                var previousMove = Game.MoveStack[ply - 1];
+
+                // Counter move and follow up history
+                if (ply >= 2)
+                {
+                    var previousPreviousMove = Game.MoveStack[ply - 2];
+
+                    return EvaluationConstants.BaseMoveScore
+                        + _quietHistory[move.Piece()][move.TargetSquare()]
+                        + _continuationHistory[move.Piece()][move.TargetSquare()][0][previousMove.Piece()][previousMove.TargetSquare()]
+                        + _continuationHistory[move.Piece()][move.TargetSquare()][1][previousPreviousMove.Piece()][previousPreviousMove.TargetSquare()];
+                }
+
+                return EvaluationConstants.CounterMoveValue
+                    + _quietHistory[move.Piece()][move.TargetSquare()]
+                    + _continuationHistory[move.Piece()][move.TargetSquare()][0][previousMove.Piece()][previousMove.TargetSquare()];
+            }
+
             // History move or 0 if not found
-            return EvaluationConstants.BaseMoveScore + _quietHistory[move.Piece()][move.TargetSquare()];
+            return EvaluationConstants.BaseMoveScore
+                + _quietHistory[move.Piece()][move.TargetSquare()];
         }
 
         return EvaluationConstants.BaseMoveScore;

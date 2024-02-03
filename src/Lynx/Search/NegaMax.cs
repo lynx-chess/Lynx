@@ -219,6 +219,7 @@ public sealed partial class Engine
             var oldValue = Game.HalfMovesWithoutCaptureOrPawnMove;
             Game.HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, Game.HalfMovesWithoutCaptureOrPawnMove);
             var isThreeFoldRepetition = !Game.PositionHashHistory.Add(position.UniqueIdentifier);
+            Game.MoveStack[ply] = move;
 
             int evaluation;
             if (isThreeFoldRepetition)
@@ -262,6 +263,7 @@ public sealed partial class Engine
                     Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
                     Game.PositionHashHistory.Remove(position.UniqueIdentifier); // We know that there's no triple repetition here
                     position.UnmakeMove(move, gameState);
+                    Game.MoveStack[ply] = 0;
 
                     break;
                 }
@@ -330,6 +332,7 @@ public sealed partial class Engine
             // Game.PositionHashHistory is update above
             Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
             position.UnmakeMove(move, gameState);
+            Game.MoveStack[ply] = 0;
 
             PrintMove(ply, move, evaluation);
 
@@ -391,6 +394,31 @@ public sealed partial class Engine
                             _quietHistory[visitedMovePiece][visitedMoveTargetSquare] = ScoreHistoryMove(
                                 _quietHistory[visitedMovePiece][visitedMoveTargetSquare],
                                 -EvaluationConstants.HistoryBonus[depth]);
+                        }
+                    }
+
+                    // 🔍 Continuation history
+                    // - Counter move history (continuation history, ply - 1)
+                    if (ply >= 1)
+                    {
+                        var previousMove = Game.MoveStack[ply - 1];
+                        var previousMovePiece = previousMove.Piece();
+                        var previousTargetSquare = previousMove.TargetSquare();
+
+                        _continuationHistory[piece][targetSquare][0][previousMovePiece][previousTargetSquare] = ScoreHistoryMove(
+                            _continuationHistory[piece][targetSquare][0][previousMovePiece][previousTargetSquare],
+                            EvaluationConstants.HistoryBonus[depth]);
+
+                        // - Followup move history (continuation history, ply - 2)
+                        if (ply >= 2)
+                        {
+                            var previousPreviousMove = Game.MoveStack[ply - 2];
+                            var previousPreviousMovePiece = previousPreviousMove.Piece();
+                            var previousPreviousMoveTargetSquare = previousPreviousMove.TargetSquare();
+
+                            _continuationHistory[piece][targetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare] = ScoreHistoryMove(
+                                _continuationHistory[piece][targetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare],
+                                EvaluationConstants.HistoryBonus[depth]);
                         }
                     }
 
@@ -549,6 +577,7 @@ public sealed partial class Engine
             var oldValue = Game.HalfMovesWithoutCaptureOrPawnMove;
             Game.HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, Game.HalfMovesWithoutCaptureOrPawnMove);
             var isThreeFoldRepetition = !Game.PositionHashHistory.Add(position.UniqueIdentifier);
+            Game.MoveStack[ply] = move;
 
             int evaluation;
             if (isThreeFoldRepetition || Game.Is50MovesRepetition())
@@ -572,6 +601,7 @@ public sealed partial class Engine
                 Game.PositionHashHistory.Remove(position.UniqueIdentifier);
             }
             position.UnmakeMove(move, gameState);
+            Game.MoveStack[ply] = 0;
 
             PrintMove(ply, move, evaluation);
 
