@@ -405,21 +405,21 @@ public sealed partial class Engine
                         var previousMovePiece = previousMove.Piece();
                         var previousTargetSquare = previousMove.TargetSquare();
 
-                        _continuationHistory[piece][targetSquare][0][previousMovePiece][previousTargetSquare] = ScoreHistoryMove(
-                            _continuationHistory[piece][targetSquare][0][previousMovePiece][previousTargetSquare],
+                        _continuationHistory[piece][targetSquare]/*[0]*/[previousMovePiece][previousTargetSquare] = ScoreHistoryMove(
+                            _continuationHistory[piece][targetSquare]/*[0]*/[previousMovePiece][previousTargetSquare],
                             EvaluationConstants.HistoryBonus[depth]);
 
-                        // - Followup move history (continuation history, ply - 2)
-                        if (ply >= 2)
-                        {
-                            var previousPreviousMove = Game.MoveStack[ply - 2];
-                            var previousPreviousMovePiece = previousPreviousMove.Piece();
-                            var previousPreviousMoveTargetSquare = previousPreviousMove.TargetSquare();
+                        //// - Followup move history (continuation history, ply - 2)
+                        //if (ply >= 2)
+                        //{
+                        //    var previousPreviousMove = Game.MoveStack[ply - 2];
+                        //    var previousPreviousMovePiece = previousPreviousMove.Piece();
+                        //    var previousPreviousMoveTargetSquare = previousPreviousMove.TargetSquare();
 
-                            _continuationHistory[piece][targetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare] = ScoreHistoryMove(
-                                _continuationHistory[piece][targetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare],
-                                EvaluationConstants.HistoryBonus[depth]);
-                        }
+                        //    _continuationHistory[piece][targetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare] = ScoreHistoryMove(
+                        //        _continuationHistory[piece][targetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare],
+                        //        EvaluationConstants.HistoryBonus[depth]);
+                        //}
                     }
 
                     // 🔍 Killer moves
