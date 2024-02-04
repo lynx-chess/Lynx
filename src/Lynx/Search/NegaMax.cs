@@ -380,23 +380,6 @@ public sealed partial class Engine
                         _quietHistory[piece][targetSquare],
                         EvaluationConstants.HistoryBonus[depth]);
 
-                    // 🔍 Quiet history penalty/malus
-                    // When a quiet move fails high, penalize previous visited quiet moves
-                    for (int i = 0; i < visitedMovesCounter - 1; ++i)
-                    {
-                        var visitedMove = visitedMoves[i];
-
-                        if (!visitedMove.IsCapture())
-                        {
-                            var visitedMovePiece = visitedMove.Piece();
-                            var visitedMoveTargetSquare = visitedMove.TargetSquare();
-
-                            _quietHistory[visitedMovePiece][visitedMoveTargetSquare] = ScoreHistoryMove(
-                                _quietHistory[visitedMovePiece][visitedMoveTargetSquare],
-                                -EvaluationConstants.HistoryBonus[depth]);
-                        }
-                    }
-
                     // 🔍 Continuation history
                     // - Counter move history (continuation history, ply - 1)
                     if (ply >= 1)
@@ -409,6 +392,26 @@ public sealed partial class Engine
                             _continuationHistory[piece][targetSquare]/*[0]*/[previousMovePiece][previousTargetSquare],
                             EvaluationConstants.HistoryBonus[depth]);
 
+                        // 🔍 Quiet + continuation history penalty/malus
+                        for (int i = 0; i < visitedMovesCounter - 1; ++i)
+                        {
+                            var visitedMove = visitedMoves[i];
+
+                            if (!visitedMove.IsCapture())
+                            {
+                                var visitedMovePiece = visitedMove.Piece();
+                                var visitedMoveTargetSquare = visitedMove.TargetSquare();
+
+                                _quietHistory[visitedMovePiece][visitedMoveTargetSquare] = ScoreHistoryMove(
+                                    _quietHistory[visitedMovePiece][visitedMoveTargetSquare],
+                                    -EvaluationConstants.HistoryBonus[depth]);
+
+                                _continuationHistory[visitedMovePiece][visitedMoveTargetSquare]/*[0]*/[previousMovePiece][previousTargetSquare] = ScoreHistoryMove(
+                                    _continuationHistory[visitedMovePiece][visitedMoveTargetSquare]/*[0]*/[previousMovePiece][previousTargetSquare],
+                                    -EvaluationConstants.HistoryBonus[depth]);
+                            }
+                        }
+
                         //// - Followup move history (continuation history, ply - 2)
                         //if (ply >= 2)
                         //{
@@ -420,6 +423,25 @@ public sealed partial class Engine
                         //        _continuationHistory[piece][targetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare],
                         //        EvaluationConstants.HistoryBonus[depth]);
                         //}
+                    }
+                    else
+                    {
+                        // 🔍 Quiet history penalty/malus
+                        // When a quiet move fails high, penalize previous visited quiet moves
+                        for (int i = 0; i < visitedMovesCounter - 1; ++i)
+                        {
+                            var visitedMove = visitedMoves[i];
+
+                            if (!visitedMove.IsCapture())
+                            {
+                                var visitedMovePiece = visitedMove.Piece();
+                                var visitedMoveTargetSquare = visitedMove.TargetSquare();
+
+                                _quietHistory[visitedMovePiece][visitedMoveTargetSquare] = ScoreHistoryMove(
+                                    _quietHistory[visitedMovePiece][visitedMoveTargetSquare],
+                                    -EvaluationConstants.HistoryBonus[depth]);
+                            }
+                        }
                     }
 
                     // 🔍 Killer moves
