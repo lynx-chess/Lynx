@@ -1081,24 +1081,25 @@ static void TranspositionTable()
 
     transpositionTable.ClearTranspositionTable();
 
-    //transpositionTable.RecordHash(position, depth: 3, maxDepth: 5, move: 1234, eval: +5, nodeType: NodeType.Alpha);
-    //var entry = transpositionTable.ProbeHash(position, maxDepth: 5, depth: 3, alpha: 1, beta: 2);
+    //transpositionTable.Save(position, depth: 3, maxDepth: 5, move: 1234, eval: +5, nodeType: NodeType.Alpha);
+    //var entry = transpositionTable.Read(position, maxDepth: 5, depth: 3, alpha: 1, beta: 2);
 
-    transpositionTable.RecordHash(mask, position, depth: 5, ply: 3, eval: +19, nodeType: NodeType.Alpha, move: 1234);
-    var entry = transpositionTable.ProbeHash(mask, position, depth: 5, ply: 3, alpha: 20, beta: 30);
-    Console.WriteLine(entry); // Expected 20
+    transpositionTable.Save(mask, position, depth: 5, ply: 3, eval: +19, nodeType: NodeType.Alpha, move: 1234);
+    TranspositionTableElement ttEntry = default;
+    var eval = transpositionTable.Read(mask, position, depth: 5, ply: 3, alpha: 20, beta: 30, ref ttEntry);
+    Console.WriteLine(eval); // Expected 20
 
-    transpositionTable.RecordHash(mask, position, depth: 5, ply: 3, eval: +21, nodeType: NodeType.Alpha, move: 1234);
-    entry = transpositionTable.ProbeHash(mask, position, depth: 5, ply: 3, alpha: 20, beta: 30);
-    Console.WriteLine(entry); // Expected 12_345_678
+    transpositionTable.Save(mask, position, depth: 5, ply: 3, eval: +21, nodeType: NodeType.Alpha, move: 1234);
+    eval = transpositionTable.Read(mask, position, depth: 5, ply: 3, alpha: 20, beta: 30, ref ttEntry);
+    Console.WriteLine(eval); // Expected 12_345_678
 
-    transpositionTable.RecordHash(mask, position, depth: 5, ply: 3, eval: +29, nodeType: NodeType.Beta, move: 1234);
-    entry = transpositionTable.ProbeHash(mask, position, depth: 5, ply: 3, alpha: 20, beta: 30);
-    Console.WriteLine(entry); // Expected 12_345_678
+    transpositionTable.Save(mask, position, depth: 5, ply: 3, eval: +29, nodeType: NodeType.Beta, move: 1234);
+    eval = transpositionTable.Read(mask, position, depth: 5, ply: 3, alpha: 20, beta: 30, ref ttEntry);
+    Console.WriteLine(eval); // Expected 12_345_678
 
-    transpositionTable.RecordHash(mask, position, depth: 5, ply: 3, eval: +31, nodeType: NodeType.Beta, move: 1234);
-    entry = transpositionTable.ProbeHash(mask, position, depth: 5, ply: 3, alpha: 20, beta: 30);
-    Console.WriteLine(entry); // Expected 30
+    transpositionTable.Save(mask, position, depth: 5, ply: 3, eval: +31, nodeType: NodeType.Beta, move: 1234);
+    eval = transpositionTable.Read(mask, position, depth: 5, ply: 3, alpha: 20, beta: 30, ref ttEntry);
+    Console.WriteLine(eval); // Expected 30
 }
 
 static void UnmakeMove()

@@ -38,13 +38,12 @@ public sealed partial class Engine
 
         bool isRoot = ply == 0;
         bool pvNode = beta - alpha > 1;
-        ShortMove ttBestMove = default;
-        NodeType ttElementType = default;
+        TranspositionTableElement ttEntry = default;
         int ttEvaluation = default;
 
         if (!isRoot)
         {
-            (ttEvaluation, ttBestMove, ttElementType) = _tt.ProbeHash(_ttMask, position, depth, ply, alpha, beta);
+            ttEvaluation = _tt.Read(_ttMask, position, depth, ply, alpha, beta, ref ttEntry);
             if (ttEvaluation != EvaluationConstants.NoHashEntry)
             {
                 return ttEvaluation;
@@ -55,7 +54,7 @@ public sealed partial class Engine
             // so the search will be potentially expensive.
             // Therefore, we search with reduced depth for now, expecting to record a TT move
             // which we'll be able to use later for the full depth search
-            if (ttElementType == default && depth >= Configuration.EngineSettings.IIR_MinDepth)
+            if (ttEntry.Type == default && depth >= Configuration.EngineSettings.IIR_MinDepth)
             {
                 --depth;
             }
@@ -78,7 +77,7 @@ public sealed partial class Engine
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
-            _tt.RecordHash(_ttMask, position, depth, ply, finalPositionEvaluation, NodeType.Exact);
+            _tt.Save(_ttMask, position, depth, ply, finalPositionEvaluation, NodeType.Exact);
             return finalPositionEvaluation;
         }
 
@@ -91,7 +90,7 @@ public sealed partial class Engine
                 && staticEval >= beta
                 && !parentWasNullMove
                 && phase > 2   // Zugzwang risk reduction: pieces other than pawn presents
-                && (ttElementType != NodeType.Alpha || ttEvaluation >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
+                && (ttEntry.Type != NodeType.Alpha || ttEvaluation >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
             {
                 var nmpReduction = Configuration.EngineSettings.NMP_BaseDepthReduction + ((depth + 1) / 3);   // Clarity
 
@@ -165,7 +164,7 @@ public sealed partial class Engine
             _isFollowingPV = false;
             for (int i = 0; i < pseudoLegalMoves.Length; ++i)
             {
-                scores[i] = ScoreMove(pseudoLegalMoves[i], ply, isNotQSearch: true, ttBestMove);
+                scores[i] = ScoreMove(pseudoLegalMoves[i], ply, isNotQSearch: true, ttEntry.Move);
 
                 if (pseudoLegalMoves[i] == _pVTable[depth])
                 {
@@ -178,7 +177,7 @@ public sealed partial class Engine
         {
             for (int i = 0; i < pseudoLegalMoves.Length; ++i)
             {
-                scores[i] = ScoreMove(pseudoLegalMoves[i], ply, isNotQSearch: true, ttBestMove);
+                scores[i] = ScoreMove(pseudoLegalMoves[i], ply, isNotQSearch: true, ttEntry.Move);
             }
         }
 
@@ -407,7 +406,7 @@ public sealed partial class Engine
                     }
                 }
 
-                _tt.RecordHash(_ttMask, position, depth, ply, beta, NodeType.Beta, bestMove);
+                _tt.Save(_ttMask, position, depth, ply, beta, NodeType.Beta, bestMove);
 
                 return beta;    // TODO return evaluation?
             }
@@ -430,11 +429,11 @@ public sealed partial class Engine
         {
             var eval = Position.EvaluateFinalPosition(ply, isInCheck);
 
-            _tt.RecordHash(_ttMask, position, depth, ply, eval, NodeType.Exact);
+            _tt.Save(_ttMask, position, depth, ply, eval, NodeType.Exact);
             return eval;
         }
 
-        _tt.RecordHash(_ttMask, position, depth, ply, alpha, nodeType, bestMove);
+        _tt.Save(_ttMask, position, depth, ply, alpha, nodeType, bestMove);
 
         // Node fails low
         return alpha;
@@ -470,12 +469,13 @@ public sealed partial class Engine
         var nextPvIndex = PVTable.Indexes[ply + 1];
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
-        var ttProbeResult = _tt.ProbeHash(_ttMask, position, 0, ply, alpha, beta);
-        if (ttProbeResult.Evaluation != EvaluationConstants.NoHashEntry)
+        TranspositionTableElement ttEntry = default;
+        var ttProbeEvaluation = _tt.Read(_ttMask, position, 0, ply, alpha, beta, ref ttEntry);
+        if (ttProbeEvaluation != EvaluationConstants.NoHashEntry)
         {
-            return ttProbeResult.Evaluation;
+            return ttProbeEvaluation;
         }
-        ShortMove ttBestMove = ttProbeResult.BestMove;
+        ShortMove ttBestMove = ttEntry.Move;
 
         _maxDepthReached[ply] = ply;
 
@@ -580,7 +580,7 @@ public sealed partial class Engine
             {
                 PrintMessage($"Pruning: {move} is enough to discard this line");
 
-                _tt.RecordHash(_ttMask, position, 0, ply, beta, NodeType.Beta, bestMove);
+                _tt.Save(_ttMask, position, 0, ply, beta, NodeType.Beta, bestMove);
 
                 return evaluation; // The refutation doesn't matter, since it'll be pruned
             }
@@ -602,12 +602,12 @@ public sealed partial class Engine
             && !MoveGenerator.CanGenerateAtLeastAValidMove(position))
         {
             var finalEval = Position.EvaluateFinalPosition(ply, position.IsInCheck());
-            _tt.RecordHash(_ttMask, position, 0, ply, finalEval, NodeType.Exact);
+            _tt.Save(_ttMask, position, 0, ply, finalEval, NodeType.Exact);
 
             return finalEval;
         }
 
-        _tt.RecordHash(_ttMask, position, 0, ply, alpha, nodeType, bestMove);
+        _tt.Save(_ttMask, position, 0, ply, alpha, nodeType, bestMove);
 
         return alpha;
     }
