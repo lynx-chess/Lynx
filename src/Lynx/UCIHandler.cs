@@ -63,7 +63,7 @@ public sealed class UCIHandler
                     HandleDebug(rawCommand);
                     break;
                 case IsReadyCommand.Id:
-                    await HandleIsReady();
+                    await HandleIsReady(cancellationToken);
                     break;
                 case PonderHitCommand.Id:
                     HandlePonderHit();
@@ -149,10 +149,7 @@ public sealed class UCIHandler
         await SendCommand(UciOKCommand.Id, cancellationToken);
     }
 
-    private async Task HandleIsReady()
-    {
-        await SendCommand(ReadyOKCommand.Id);
-    }
+    private async Task HandleIsReady(CancellationToken cancellationToken) => await SendCommand(ReadyOKCommand.Id, cancellationToken);
 
     private void HandlePonderHit()
     {
@@ -538,11 +535,6 @@ public sealed class UCIHandler
     }
 
     #endregion
-
-    private async Task SendCommand(string command)
-    {
-        await _engineToUci.Writer.WriteAsync(command);
-    }
 
     private async Task SendCommand(string command, CancellationToken cancellationToken)
     {
