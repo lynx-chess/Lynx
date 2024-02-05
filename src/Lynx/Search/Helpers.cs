@@ -143,6 +143,7 @@ public sealed partial class Engine
             if (ply >= 1)
             {
                 var previousMove = Game.MoveStack[ply - 1];
+                Debug.Assert(previousMove != 0);
 
                 // Counter move and follow up history
                 //if (ply >= 2)
