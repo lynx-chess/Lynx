@@ -28,7 +28,7 @@ public sealed class Listener
 
                 if (!string.IsNullOrEmpty(input))
                 {
-                    await _uciHandler.Handle(input!, cancellationToken);
+                    await _uciHandler.Handle(input, cancellationToken);
                 }
             }
         }
