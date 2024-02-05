@@ -26,7 +26,10 @@ public sealed class Listener
             {
                 var input = Console.ReadLine();
 
-                await _uciHandler.Handle(input!, cancellationToken);
+                if (!string.IsNullOrEmpty(input))
+                {
+                    await _uciHandler.Handle(input!, cancellationToken);
+                }
             }
         }
         catch (Exception e)
