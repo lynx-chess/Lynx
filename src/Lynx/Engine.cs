@@ -55,9 +55,9 @@ public sealed partial class Engine
             for (var j = 0; j < 64; ++j)                                        // 64
             {
                 _captureHistory[i][j] = new int[12];                            // 12
-                _continuationHistory[i][j] = new int[2][][];
+                _continuationHistory[i][j] = new int[EvaluationConstants.ContinuationHistoryPlyCount][][];
 
-                for (int contPly = 0; contPly < 2; ++contPly)                       // 2
+                for (int contPly = 0; contPly < EvaluationConstants.ContinuationHistoryPlyCount; ++contPly)                       // EvaluationConstants.ContinuationHistoryPlyCount
                 {
                     _continuationHistory[i][j][contPly] = new int[12][];
 
