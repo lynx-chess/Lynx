@@ -210,7 +210,8 @@ public sealed partial class Engine
                 continue;
             }
 
-            if (move.IsCapture())
+            var isCapture = move.IsCapture();
+            if (isCapture)
             {
                 visitedCaptures[visitedCapturesCounter++] = move;
             }
@@ -282,7 +283,7 @@ public sealed partial class Engine
                 if (movesSearched >= (pvNode ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves - 1)
                     && depth >= Configuration.EngineSettings.LMR_MinDepth
                     && !isInCheck
-                    && !move.IsCapture())
+                    && !isCapture)
                 {
                     reduction = EvaluationConstants.LMRReductions[depth][movesSearched];
 
@@ -347,7 +348,7 @@ public sealed partial class Engine
             {
                 PrintMessage($"Pruning: {move} is enough");
 
-                if (move.IsCapture())
+                if (isCapture)
                 {
                     var piece = move.Piece();
                     var targetSquare = move.TargetSquare();
