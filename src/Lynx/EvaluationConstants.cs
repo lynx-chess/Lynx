@@ -388,4 +388,6 @@ public static readonly int[] EndGameKingTable =
     /// Evaluation to be returned when there's one single legal move
     /// </summary>
     public const int SingleMoveEvaluation = 200;
+
+    public const int ContinuationHistoryPlyCount = 1;
 }

@@ -142,7 +142,7 @@ public sealed partial class Engine
             // Counter move history
             if (ply >= 1)
             {
-                var previousMove = Game.MoveStack[ply - 1];
+                var previousMove = Game.PopFromMoveStack(ply - 1);
                 Debug.Assert(previousMove != 0);
 
                 // Counter move and follow up history
@@ -155,7 +155,6 @@ public sealed partial class Engine
                 //        + _continuationHistory[move.Piece()][move.TargetSquare()][0][previousMove.Piece()][previousMove.TargetSquare()]
                 //        + _continuationHistory[move.Piece()][move.TargetSquare()][1][previousPreviousMove.Piece()][previousPreviousMove.TargetSquare()];
                 //}
-
                 return EvaluationConstants.BaseMoveScore
                     + _quietHistory[move.Piece()][move.TargetSquare()]
                     + _continuationHistory[move.Piece()][move.TargetSquare()]/*[0]*/[previousMove.Piece()][previousMove.TargetSquare()];
