@@ -16,9 +16,9 @@ public class WACSilver200 : BaseTest
     /// </summary>
     /// <param name="fen"></param>
     /// <param name="bestMove"></param>
-    public async Task WinningAtChess_FixedTime(string fen, string bestMove, string id)
+    public void WinningAtChess_FixedTime(string fen, string bestMove, string id)
     {
-        await VerifyBestMove(fen, bestMove, id, new GoCommand("go wtime 5500 btime 5500 winc 0 binc 0 movestogo 1"));
+        VerifyBestMove(fen, bestMove, id, new GoCommand("go wtime 5500 btime 5500 winc 0 binc 0 movestogo 1"));
     }
 
     [Explicit]
@@ -29,16 +29,16 @@ public class WACSilver200 : BaseTest
     /// </summary>
     /// <param name="fen"></param>
     /// <param name="bestMove"></param>
-    public async Task WinningAtChess_DefaultSearchDepth(string fen, string bestMove, string id)
+    public void WinningAtChess_DefaultSearchDepth(string fen, string bestMove, string id)
     {
-        await VerifyBestMove(fen, bestMove, id, new GoCommand($"go depth {DefaultSearchDepth}"));
+        VerifyBestMove(fen, bestMove, id, new GoCommand($"go depth {DefaultSearchDepth}"));
     }
 
-    private static async Task VerifyBestMove(string fen, string bestMove, string id, GoCommand goCommand)
+    private static void VerifyBestMove(string fen, string bestMove, string id, GoCommand goCommand)
     {
         var engine = GetEngine(fen);
 
-        var bestResult = await engine.BestMove(goCommand);
+        var bestResult = engine.BestMove(goCommand);
 
         var bestMoveArray = bestMove.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         if (bestMoveArray.Length == 1)

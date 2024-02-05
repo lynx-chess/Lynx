@@ -34,11 +34,13 @@ var engineChannel = Channel.CreateBounded<string>(new BoundedChannelOptions(100)
 using CancellationTokenSource source = new();
 CancellationToken cancellationToken = source.Token;
 
+var engine = new Engine(engineChannel);
+
 var tasks = new List<Task>
 {
     Task.Run(() => new Writer(engineChannel).Run(cancellationToken)),
-    Task.Run(() => new LynxDriver(uciChannel, engineChannel, new Engine(engineChannel)).Run(cancellationToken)),
-    Task.Run(() => new Listener(uciChannel).Run(cancellationToken, args)),
+    Task.Run(() => new Searcher(uciChannel, engine).Run(cancellationToken)),
+    Task.Run(() => new Listener(new UCIHandler(uciChannel, engineChannel, engine)).Run(cancellationToken, args)),
     uciChannel.Reader.Completion,
     engineChannel.Reader.Completion
 };

@@ -8,17 +8,19 @@ using System.Threading.Channels;
 
 namespace Lynx;
 
-public sealed class LynxDriver
+public sealed class UCIHandler
 {
-    private readonly ChannelReader<string> _uciReader;
-    private readonly Channel<string> _engineWriter;
+    private readonly Channel<string> _uciToEngine;
+    private readonly Channel<string> _engineToUci;
+
     private readonly Engine _engine;
     private readonly Logger _logger;
 
-    public LynxDriver(ChannelReader<string> uciReader, Channel<string> engineWriter, Engine engine)
+    public UCIHandler(Channel<string> uciToEngine, Channel<string> engineToUci, Engine engine)
     {
-        _uciReader = uciReader;
-        _engineWriter = engineWriter;
+        _uciToEngine = uciToEngine;
+        _engineToUci = engineToUci;
+
         _engine = engine;
         _logger = LogManager.GetCurrentClassLogger();
 
@@ -36,7 +38,7 @@ public sealed class LynxDriver
         _ = GoCommand.Init();
     }
 
-    public async Task Run(CancellationToken cancellationToken)
+    public async Task Handle(string rawCommand, CancellationToken cancellationToken)
     {
         static ReadOnlySpan<char> ExtractCommandItems(string rawCommand)
         {
@@ -46,90 +48,75 @@ public sealed class LynxDriver
 
             return span[items[0]];
         }
+
         try
         {
-            while (await _uciReader.WaitToReadAsync(cancellationToken) && !cancellationToken.IsCancellationRequested)
-            {
-                try
-                {
-                    if (_uciReader.TryRead(out var rawCommand) && !string.IsNullOrWhiteSpace(rawCommand))
-                    {
-                        _logger.Debug("[GUI]\t{0}", rawCommand);
+            _logger.Debug("[GUI]\t{0}", rawCommand);
 
-                        switch (ExtractCommandItems(rawCommand))
-                        {
-                            case DebugCommand.Id:
-                                HandleDebug(rawCommand);
-                                break;
-                            case GoCommand.Id:
-                                HandleGo(rawCommand);
-                                break;
-                            case IsReadyCommand.Id:
-                                await HandleIsReady(cancellationToken);
-                                break;
-                            case PonderHitCommand.Id:
-                                HandlePonderHit();
-                                break;
-                            case PositionCommand.Id:
-                                HandlePosition(rawCommand);
-                                break;
-                            case QuitCommand.Id:
-                                HandleQuit();
-                                return;
-                            case RegisterCommand.Id:
-                                HandleRegister(rawCommand);
-                                break;
-                            case SetOptionCommand.Id:
-                                HandleSetOption(rawCommand);
-                                break;
-                            case StopCommand.Id:
-                                HandleStop();
-                                break;
-                            case UCICommand.Id:
-                                await HandleUCI(cancellationToken);
-                                break;
-                            case UCINewGameCommand.Id:
-                                HandleNewGame();
-                                break;
-                            case "perft":
-                                await HandlePerft(rawCommand);
-                                break;
-                            case "divide":
-                                await HandleDivide(rawCommand);
-                                break;
-                            case "bench":
-                                await HandleBench(rawCommand);
-                                HandleQuit();
-                                break;
-                            case "printsettings":
-                                await HandleSettings();
-                                break;
-                            case "printsysteminfo":
-                                await HandleSystemInfo();
-                                break;
-                            case "staticeval":
-                                await HandleStaticEval(rawCommand, cancellationToken);
-                                HandleQuit();
-                                break;
-                            default:
-                                _logger.Warn("Unknown command received: {0}", rawCommand);
-                                break;
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    _logger.Error(e, "Error trying to read/parse UCI command");
-                }
+            switch (ExtractCommandItems(rawCommand))
+            {
+                case GoCommand.Id:
+                    await _uciToEngine.Writer.WriteAsync(rawCommand, cancellationToken);
+                    break;
+
+                case DebugCommand.Id:
+                    HandleDebug(rawCommand);
+                    break;
+                case IsReadyCommand.Id:
+                    await HandleIsReady();
+                    break;
+                case PonderHitCommand.Id:
+                    HandlePonderHit();
+                    break;
+                case PositionCommand.Id:
+                    HandlePosition(rawCommand);
+                    break;
+                case QuitCommand.Id:
+                    HandleQuit();
+                    return;
+                case RegisterCommand.Id:
+                    HandleRegister(rawCommand);
+                    break;
+                case SetOptionCommand.Id:
+                    HandleSetOption(rawCommand);
+                    break;
+                case StopCommand.Id:
+                    HandleStop();
+                    break;
+                case UCICommand.Id:
+                    await HandleUCI(cancellationToken);
+                    break;
+                case UCINewGameCommand.Id:
+                    HandleNewGame();
+                    break;
+                case "perft":
+                    await HandlePerft(rawCommand);
+                    break;
+                case "divide":
+                    await HandleDivide(rawCommand);
+                    break;
+                case "bench":
+                    await HandleBench(rawCommand);
+                    HandleQuit();
+                    break;
+                case "printsettings":
+                    await HandleSettings();
+                    break;
+                case "printsysteminfo":
+                    await HandleSystemInfo();
+                    break;
+                case "staticeval":
+                    await HandleStaticEval(rawCommand, cancellationToken);
+                    HandleQuit();
+                    break;
+                default:
+                    _logger.Warn("Unknown command received: {0}", rawCommand);
+                    break;
             }
         }
         catch (Exception e)
         {
-            _logger.Fatal(e);
-        }
-        finally
-        {
-            _logger.Info("Finishing {0}", nameof(LynxDriver));
+            _logger.Error(e, "Error trying to read/parse UCI command");
         }
     }
 
@@ -147,12 +134,6 @@ public sealed class LynxDriver
 #endif
     }
 
-    private void HandleGo(string command)
-    {
-        var goCommand = new GoCommand(command);
-        _engine.StartSearching(goCommand);
-    }
-
     private void HandleStop() => _engine.StopSearching();
 
     private async Task HandleUCI(CancellationToken cancellationToken)
@@ -168,9 +149,9 @@ public sealed class LynxDriver
         await SendCommand(UciOKCommand.Id, cancellationToken);
     }
 
-    private async Task HandleIsReady(CancellationToken cancellationToken)
+    private async Task HandleIsReady()
     {
-        await SendCommand(ReadyOKCommand.Id, cancellationToken);
+        await SendCommand(ReadyOKCommand.Id);
     }
 
     private void HandlePonderHit()
@@ -448,7 +429,7 @@ public sealed class LynxDriver
         {
             _logger.Info("Average depth: {0}", _engine.AverageDepth);
         }
-        _engineWriter.Writer.Complete();
+        _engineToUci.Writer.Complete();
     }
 
     private void HandleRegister(ReadOnlySpan<char> rawCommand) => _engine.Registration = new RegisterCommand(rawCommand);
@@ -460,7 +441,7 @@ public sealed class LynxDriver
         if (items.Length >= 2 && int.TryParse(items[1], out int depth) && depth >= 1)
         {
             var results = Perft.Results(_engine.Game.CurrentPosition, depth);
-            await Perft.PrintPerftResult(depth, results, str => _engineWriter.Writer.WriteAsync(str));
+            await Perft.PrintPerftResult(depth, results, str => _engineToUci.Writer.WriteAsync(str));
         }
     }
 
@@ -470,8 +451,8 @@ public sealed class LynxDriver
 
         if (items.Length >= 2 && int.TryParse(items[1], out int depth) && depth >= 1)
         {
-            var results = Perft.Divide(_engine.Game.CurrentPosition, depth, str => _engineWriter.Writer.TryWrite(str));
-            await Perft.PrintPerftResult(depth, results, str => _engineWriter.Writer.WriteAsync(str));
+            var results = Perft.Divide(_engine.Game.CurrentPosition, depth, str => _engineToUci.Writer.TryWrite(str));
+            await Perft.PrintPerftResult(depth, results, str => _engineToUci.Writer.WriteAsync(str));
         }
     }
 
@@ -483,8 +464,8 @@ public sealed class LynxDriver
         {
             depth = Configuration.EngineSettings.BenchDepth;
         }
-        var results = await OpenBench.Bench(depth, _engineWriter);
-        await OpenBench.PrintBenchResults(results, str => _engineWriter.Writer.WriteAsync(str));
+        var results = OpenBench.Bench(depth, _engineToUci);
+        await OpenBench.PrintBenchResults(results, str => _engineToUci.Writer.WriteAsync(str));
     }
 
     private async ValueTask HandleSettings()
@@ -493,7 +474,7 @@ public sealed class LynxDriver
 
         var message = $"{nameof(Configuration)}.{nameof(Configuration.EngineSettings)}:{Environment.NewLine}{engineSettings}";
 
-        await _engineWriter.Writer.WriteAsync(message);
+        await _engineToUci.Writer.WriteAsync(message);
     }
 
     private async ValueTask HandleSystemInfo()
@@ -504,7 +485,7 @@ public sealed class LynxDriver
                 ? "Bmi2.X64 supported, PEXT BitBoards will be used"
                 : "Bmi2.X64 not supported";
 
-            await _engineWriter.Writer.WriteAsync(simd);
+            await _engineToUci.Writer.WriteAsync(simd);
         }
         catch (Exception e)
         {
@@ -546,20 +527,25 @@ public sealed class LynxDriver
                     eval = -eval;   // White perspective
                 }
 
-                await _engineWriter.Writer.WriteAsync($"{line}: {eval}", cancellationToken);
+                await _engineToUci.Writer.WriteAsync($"{line}: {eval}", cancellationToken);
             }
         }
         catch (Exception e)
         {
             Console.WriteLine(e.Message + e.StackTrace);
-            await _engineWriter.Writer.WriteAsync(e.Message + e.StackTrace, cancellationToken);
+            await _engineToUci.Writer.WriteAsync(e.Message + e.StackTrace, cancellationToken);
         }
     }
 
     #endregion
 
+    private async Task SendCommand(string command)
+    {
+        await _engineToUci.Writer.WriteAsync(command);
+    }
+
     private async Task SendCommand(string command, CancellationToken cancellationToken)
     {
-        await _engineWriter.Writer.WriteAsync(command, cancellationToken);
+        await _engineToUci.Writer.WriteAsync(command, cancellationToken);
     }
 }

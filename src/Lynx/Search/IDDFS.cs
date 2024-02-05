@@ -55,7 +55,7 @@ public sealed partial class Engine
     /// <param name="maxDepth"></param>
     /// <param name="decisionTime"></param>
     /// <returns>Not null <see cref="SearchResult"/>, although made nullable in order to match online tb probing signature</returns>
-    public async Task<SearchResult?> IDDFS(int? maxDepth, int? decisionTime)
+    public SearchResult IDDFS(int? maxDepth, int? decisionTime)
     {
         // Cleanup
         _nodes = 0;
@@ -80,7 +80,7 @@ public sealed partial class Engine
 
             if (OnlyOneLegalMove(out var onlyOneLegalMoveSearchResult))
             {
-                await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(onlyOneLegalMoveSearchResult));
+                _engineWriter.TryWrite(InfoCommand.SearchResultInfo(onlyOneLegalMoveSearchResult));
 
                 return onlyOneLegalMoveSearchResult;
             }
@@ -88,7 +88,7 @@ public sealed partial class Engine
             depth = CheckPonderHit(ref lastSearchResult, depth);
             if (lastSearchResult is not null)
             {
-                await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult));
+                _engineWriter.TryWrite(InfoCommand.SearchResultInfo(lastSearchResult));
             }
 
             do
@@ -144,7 +144,7 @@ public sealed partial class Engine
 
                 lastSearchResult = UpdateLastSearchResult(lastSearchResult, bestEvaluation, alpha, beta, depth, isMateDetected, bestEvaluationAbs);
 
-                await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult));
+                _engineWriter.TryWrite(InfoCommand.SearchResultInfo(lastSearchResult));
 
                 Array.Copy(_killerMoves, _previousKillerMoves, _killerMoves.Length);
             } while (StopSearchCondition(++depth, maxDepth, isMateDetected, decisionTime));
@@ -176,7 +176,7 @@ public sealed partial class Engine
             _searchCancellationTokenSource.Cancel();
         }
 
-        await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(finalSearchResult));
+        _engineWriter.TryWrite(InfoCommand.SearchResultInfo(finalSearchResult));
 
         return finalSearchResult;
     }
