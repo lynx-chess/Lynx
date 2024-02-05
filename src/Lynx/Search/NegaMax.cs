@@ -381,15 +381,58 @@ public sealed partial class Engine
                         EvaluationConstants.HistoryBonus[depth]);
 
                     // 🔍 Continuation history
-                    // - Counter move history (continuation history, ply - 1)
-                    if (ply >= 1)
+                    if (ply >= 2)
+                    {
+                        // - Followup move history (continuation history, ply - 2)
+                        var previousPreviousMove = Game.MoveStack[ply - 2];
+                        var previousPreviousMovePiece = previousPreviousMove.Piece();
+                        var previousPreviousMoveTargetSquare = previousPreviousMove.TargetSquare();
+
+                        _continuationHistory[piece][targetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare] = ScoreHistoryMove(
+                            _continuationHistory[piece][targetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare],
+                            EvaluationConstants.HistoryBonus[depth]);
+
+                        // - Counter move history (continuation history, ply - 1)
+                        var previousMove = Game.MoveStack[ply - 1];
+                        var previousMovePiece = previousMove.Piece();
+                        var previousTargetSquare = previousMove.TargetSquare();
+
+                        _continuationHistory[piece][targetSquare][0][previousMovePiece][previousTargetSquare] = ScoreHistoryMove(
+                            _continuationHistory[piece][targetSquare][0][previousMovePiece][previousTargetSquare],
+                            EvaluationConstants.HistoryBonus[depth]);
+
+                        // 🔍 Quiet + continuation + followup history penalty/malus
+                        for (int i = 0; i < visitedMovesCounter - 1; ++i)
+                        {
+                            var visitedMove = visitedMoves[i];
+
+                            if (!visitedMove.IsCapture())
+                            {
+                                var visitedMovePiece = visitedMove.Piece();
+                                var visitedMoveTargetSquare = visitedMove.TargetSquare();
+
+                                _quietHistory[visitedMovePiece][visitedMoveTargetSquare] = ScoreHistoryMove(
+                                    _quietHistory[visitedMovePiece][visitedMoveTargetSquare],
+                                    -EvaluationConstants.HistoryBonus[depth]);
+
+                                _continuationHistory[visitedMovePiece][visitedMoveTargetSquare][0][previousMovePiece][previousTargetSquare] = ScoreHistoryMove(
+                                    _continuationHistory[visitedMovePiece][visitedMoveTargetSquare][0][previousMovePiece][previousTargetSquare],
+                                    -EvaluationConstants.HistoryBonus[depth]);
+
+                                _continuationHistory[visitedMovePiece][visitedMoveTargetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare] = ScoreHistoryMove(
+                                    _continuationHistory[visitedMovePiece][visitedMoveTargetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare],
+                                    -EvaluationConstants.HistoryBonus[depth]);
+                            }
+                        }
+                    }
+                    else if (ply >= 1)
                     {
                         var previousMove = Game.MoveStack[ply - 1];
                         var previousMovePiece = previousMove.Piece();
                         var previousTargetSquare = previousMove.TargetSquare();
 
-                        _continuationHistory[piece][targetSquare]/*[0]*/[previousMovePiece][previousTargetSquare] = ScoreHistoryMove(
-                            _continuationHistory[piece][targetSquare]/*[0]*/[previousMovePiece][previousTargetSquare],
+                        _continuationHistory[piece][targetSquare][0][previousMovePiece][previousTargetSquare] = ScoreHistoryMove(
+                            _continuationHistory[piece][targetSquare][0][previousMovePiece][previousTargetSquare],
                             EvaluationConstants.HistoryBonus[depth]);
 
                         // 🔍 Quiet + continuation history penalty/malus
@@ -406,23 +449,11 @@ public sealed partial class Engine
                                     _quietHistory[visitedMovePiece][visitedMoveTargetSquare],
                                     -EvaluationConstants.HistoryBonus[depth]);
 
-                                _continuationHistory[visitedMovePiece][visitedMoveTargetSquare]/*[0]*/[previousMovePiece][previousTargetSquare] = ScoreHistoryMove(
-                                    _continuationHistory[visitedMovePiece][visitedMoveTargetSquare]/*[0]*/[previousMovePiece][previousTargetSquare],
+                                _continuationHistory[visitedMovePiece][visitedMoveTargetSquare][0][previousMovePiece][previousTargetSquare] = ScoreHistoryMove(
+                                    _continuationHistory[visitedMovePiece][visitedMoveTargetSquare][0][previousMovePiece][previousTargetSquare],
                                     -EvaluationConstants.HistoryBonus[depth]);
                             }
                         }
-
-                        //// - Followup move history (continuation history, ply - 2)
-                        //if (ply >= 2)
-                        //{
-                        //    var previousPreviousMove = Game.MoveStack[ply - 2];
-                        //    var previousPreviousMovePiece = previousPreviousMove.Piece();
-                        //    var previousPreviousMoveTargetSquare = previousPreviousMove.TargetSquare();
-
-                        //    _continuationHistory[piece][targetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare] = ScoreHistoryMove(
-                        //        _continuationHistory[piece][targetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare],
-                        //        EvaluationConstants.HistoryBonus[depth]);
-                        //}
                     }
                     else
                     {

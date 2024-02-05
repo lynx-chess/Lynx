@@ -44,28 +44,28 @@ public sealed partial class Engine
 
         _quietHistory = new int[12][];
         _captureHistory = new int[12][][];
-        _continuationHistory = new int[12][]/*[]*/[][];
+        _continuationHistory = new int[12][][][][];
 
         for (int i = 0; i < 12; ++i)                                            // 12
         {
             _quietHistory[i] = new int[64];
             _captureHistory[i] = new int[64][];
-            _continuationHistory[i] = new int[64]/*[]*/[][];
+            _continuationHistory[i] = new int[64][][][];
 
             for (var j = 0; j < 64; ++j)                                        // 64
             {
                 _captureHistory[i][j] = new int[12];                            // 12
-                //_continuationHistory[i][j] = new int[2][][];
+                _continuationHistory[i][j] = new int[2][][];
 
-                //for (int contPly = 0; contPly < 2; ++contPly)                       // 2
-                //{
-                _continuationHistory[i][j]/*[contPly]*/ = new int[12][];
-
-                for (int k = 0; k < 12; ++k)                                    // 12
+                for (int contPly = 0; contPly < 2; ++contPly)                       // 2
                 {
-                    _continuationHistory[i][j]/*[contPly]*/[k] = new int[64];       // 64
+                    _continuationHistory[i][j][contPly] = new int[12][];
+
+                    for (int k = 0; k < 12; ++k)                                    // 12
+                    {
+                        _continuationHistory[i][j][contPly][k] = new int[64];       // 64
+                    }
                 }
-                //}
             }
         }
 
