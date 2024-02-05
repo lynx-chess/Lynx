@@ -146,6 +146,8 @@ public sealed partial class Engine
             {
                 var previousMove = Game.MoveStack[ply - 1];
                 var previousPreviousMove = Game.MoveStack[ply - 2];
+                Debug.Assert(previousMove != 0);
+                Debug.Assert(previousPreviousMove != 0);
 
                 evalWithHistory +=
                     _continuationHistory[move.Piece()][move.TargetSquare()][0][previousMove.Piece()][previousMove.TargetSquare()]
@@ -155,6 +157,7 @@ public sealed partial class Engine
             else if (ply == 1)
             {
                 var previousMove = Game.MoveStack[ply - 1];
+                Debug.Assert(previousMove != 0);
 
                 evalWithHistory += _continuationHistory[move.Piece()][move.TargetSquare()][0][previousMove.Piece()][previousMove.TargetSquare()];
             }

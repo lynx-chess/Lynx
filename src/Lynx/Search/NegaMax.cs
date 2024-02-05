@@ -101,8 +101,10 @@ public sealed partial class Engine
                 //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
 
                 var gameState = position.MakeNullMove();
+                Game.MoveStack[ply] = MoveExtensions.NullMove;
                 var evaluation = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, parentWasNullMove: true);
                 position.UnMakeNullMove(gameState);
+                Game.MoveStack[ply] = 0;
 
                 if (evaluation >= beta)
                 {
