@@ -104,7 +104,6 @@ public sealed partial class Engine
                 Game.PushToMoveStack(ply, MoveExtensions.NullMove);
                 var evaluation = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, parentWasNullMove: true);
                 position.UnMakeNullMove(gameState);
-                Game.PushToMoveStack(ply, 0);
 
                 if (evaluation >= beta)
                 {
@@ -265,7 +264,6 @@ public sealed partial class Engine
                     Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
                     Game.PositionHashHistory.Remove(position.UniqueIdentifier); // We know that there's no triple repetition here
                     position.UnmakeMove(move, gameState);
-                    Game.PushToMoveStack(ply, 0);
 
                     break;
                 }
@@ -334,7 +332,6 @@ public sealed partial class Engine
             // Game.PositionHashHistory is update above
             Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
             position.UnmakeMove(move, gameState);
-            Game.PushToMoveStack(ply, 0);
 
             PrintMove(ply, move, evaluation);
 
@@ -601,7 +598,6 @@ public sealed partial class Engine
                 Game.PositionHashHistory.Remove(position.UniqueIdentifier);
             }
             position.UnmakeMove(move, gameState);
-            Game.PushToMoveStack(ply, 0);
 
             PrintMove(ply, move, evaluation);
 
