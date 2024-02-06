@@ -63,7 +63,9 @@ public class ForceOrAvoidDrawTest : BaseTest
             engine.AdjustPosition(sb.ToString());
         }
 
+#if DEBUG
         Assert.AreEqual(repeatedMoves.Count, engine.Game.MoveHistory.Count);
+#endif
 
         // Act
         var searchResult = await engine.BestMove(new($"go depth {depth}"));
@@ -110,7 +112,9 @@ public class ForceOrAvoidDrawTest : BaseTest
             engine.AdjustPosition(sb.ToString());
         }
 
+#if DEBUG
         Assert.AreEqual(repeatedMoves.Count, engine.Game.MoveHistory.Count);
+#endif
 
         // Act
         var searchResult = await engine.BestMove(new($"go depth {Engine.DefaultMaxDepth}"));
@@ -156,7 +160,9 @@ public class ForceOrAvoidDrawTest : BaseTest
             engine.AdjustPosition(sb.ToString());
         }
 
+#if DEBUG
         Assert.AreEqual(98, engine.Game.MoveHistory.Count);
+#endif
 
         engine.Game.PositionHashHistory.Clear(); // Make sure we don't take account threefold repetition
 
@@ -205,7 +211,10 @@ public class ForceOrAvoidDrawTest : BaseTest
         sb.Append(' ').Append(nonCaptureOrPawnMoveMoves[2].UCIString());
         engine.AdjustPosition(sb.ToString());
 
+#if DEBUG
         Assert.AreEqual(99, engine.Game.MoveHistory.Count);
+#endif
+
         engine.Game.PositionHashHistory.Clear(); // Make sure we don't take account threefold repetition
 
         // Act
