@@ -101,8 +101,10 @@ public sealed partial class Engine
                 //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
 
                 var gameState = position.MakeNullMove();
+                Game.PushToMoveStack(ply, MoveExtensions.NullMove);
                 var evaluation = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, parentWasNullMove: true);
                 position.UnMakeNullMove(gameState);
+                Game.PushToMoveStack(ply, 0);
 
                 if (evaluation >= beta)
                 {
@@ -219,6 +221,7 @@ public sealed partial class Engine
             var oldValue = Game.HalfMovesWithoutCaptureOrPawnMove;
             Game.HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, Game.HalfMovesWithoutCaptureOrPawnMove);
             var isThreeFoldRepetition = !Game.PositionHashHistory.Add(position.UniqueIdentifier);
+            Game.PushToMoveStack(ply, move);
 
             int evaluation;
             if (isThreeFoldRepetition)
@@ -262,6 +265,7 @@ public sealed partial class Engine
                     Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
                     Game.PositionHashHistory.Remove(position.UniqueIdentifier); // We know that there's no triple repetition here
                     position.UnmakeMove(move, gameState);
+                    Game.PushToMoveStack(ply, 0);
 
                     break;
                 }
@@ -330,6 +334,7 @@ public sealed partial class Engine
             // Game.PositionHashHistory is update above
             Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
             position.UnmakeMove(move, gameState);
+            Game.PushToMoveStack(ply, 0);
 
             PrintMove(ply, move, evaluation);
 
@@ -377,8 +382,26 @@ public sealed partial class Engine
                         _quietHistory[piece][targetSquare],
                         EvaluationConstants.HistoryBonus[depth]);
 
-                    // 🔍 Quiet history penalty/malus
-                    // When a quiet move fails high, penalize previous visited quiet moves
+                    // 🔍 Continuation history
+                    // - Followup move history (continuation history, ply - 2)
+                    var previousPreviousMove = Game.PopFromMoveStack(ply - 2);
+                    var previousPreviousMovePiece = previousPreviousMove.Piece();
+                    var previousPreviousMoveTargetSquare = previousPreviousMove.TargetSquare();
+
+                    _continuationHistory[piece][targetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare] = ScoreHistoryMove(
+                        _continuationHistory[piece][targetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare],
+                        EvaluationConstants.HistoryBonus[depth]);
+
+                    // - Counter move history (continuation history, ply - 1)
+                    var previousMove = Game.PopFromMoveStack(ply - 1);
+                    var previousMovePiece = previousMove.Piece();
+                    var previousTargetSquare = previousMove.TargetSquare();
+
+                    _continuationHistory[piece][targetSquare][0][previousMovePiece][previousTargetSquare] = ScoreHistoryMove(
+                        _continuationHistory[piece][targetSquare][0][previousMovePiece][previousTargetSquare],
+                        EvaluationConstants.HistoryBonus[depth]);
+
+                    // 🔍 Quiet + continuation + followup history penalty/malus
                     for (int i = 0; i < visitedMovesCounter - 1; ++i)
                     {
                         var visitedMove = visitedMoves[i];
@@ -390,6 +413,14 @@ public sealed partial class Engine
 
                             _quietHistory[visitedMovePiece][visitedMoveTargetSquare] = ScoreHistoryMove(
                                 _quietHistory[visitedMovePiece][visitedMoveTargetSquare],
+                                -EvaluationConstants.HistoryBonus[depth]);
+
+                            _continuationHistory[visitedMovePiece][visitedMoveTargetSquare][0][previousMovePiece][previousTargetSquare] = ScoreHistoryMove(
+                                _continuationHistory[visitedMovePiece][visitedMoveTargetSquare][0][previousMovePiece][previousTargetSquare],
+                                -EvaluationConstants.HistoryBonus[depth]);
+
+                            _continuationHistory[visitedMovePiece][visitedMoveTargetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare] = ScoreHistoryMove(
+                                _continuationHistory[visitedMovePiece][visitedMoveTargetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare],
                                 -EvaluationConstants.HistoryBonus[depth]);
                         }
                     }
@@ -549,6 +580,7 @@ public sealed partial class Engine
             var oldValue = Game.HalfMovesWithoutCaptureOrPawnMove;
             Game.HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, Game.HalfMovesWithoutCaptureOrPawnMove);
             var isThreeFoldRepetition = !Game.PositionHashHistory.Add(position.UniqueIdentifier);
+            Game.PushToMoveStack(ply, move);
 
             int evaluation;
             if (isThreeFoldRepetition || Game.Is50MovesRepetition())
@@ -572,6 +604,7 @@ public sealed partial class Engine
                 Game.PositionHashHistory.Remove(position.UniqueIdentifier);
             }
             position.UnmakeMove(move, gameState);
+            Game.PushToMoveStack(ply, 0);
 
             PrintMove(ply, move, evaluation);
 

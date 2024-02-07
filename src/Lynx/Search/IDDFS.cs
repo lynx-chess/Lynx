@@ -23,13 +23,30 @@ public sealed partial class Engine
 
     /// <summary>
     /// 12x64
+    /// piece x target square
     /// </summary>
     private readonly int[][] _quietHistory;
 
     /// <summary>
-    /// 12x64x12
+    /// 12x64x12,
+    /// piece x target square x captured piece
     /// </summary>
     private readonly int[][][] _captureHistory;
+
+    /// <summary>
+    /// 12x64x2x12x64,
+    /// piece x target square x 2 ply x last piece x last target square
+    /// ply 0 -> Continuation move history
+    /// ply 1 -> Followup move history
+    /// </summary>
+    private readonly int[][][][][] _continuationHistory;
+
+    /// <summary>
+    /// <see cref="Configuration.EngineSettings.MaxDepth"/>x12x64,
+    /// depth x piece x target square
+    /// https://discord.com/channels/1132289356011405342/1134900681401176064/1152037164415205447
+    /// </summary>
+    //private readonly int[][][] _continuationHistory;
 
     private readonly int[] _maxDepthReached = new int[Constants.AbsoluteMaxDepth];
     private TranspositionTable _tt = [];

@@ -8,7 +8,13 @@ public sealed class Game
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public List<Move> MoveHistory { get; }
+
     public HashSet<long> PositionHashHistory { get; }
+
+    /// <summary>
+    /// Indexed by ply
+    /// </summary>
+    private readonly Move[] _moveStack;
 
     public int HalfMovesWithoutCaptureOrPawnMove { get; set; }
 
@@ -34,6 +40,7 @@ public sealed class Game
         PositionHashHistory = new(1024) { CurrentPosition.UniqueIdentifier };
 
         HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
+        _moveStack = new Move[1024];
     }
 
     /// <summary>
@@ -47,6 +54,7 @@ public sealed class Game
 
         MoveHistory = new(1024);
         PositionHashHistory = new(1024) { position.UniqueIdentifier };
+        _moveStack = new Move[1024];
     }
 
     [Obsolete("Just intended for testing purposes")]
@@ -205,4 +213,10 @@ public sealed class Game
     /// currentPosition won't be the initial one
     /// </summary>
     public void ResetCurrentPositionToBeforeSearchState() => CurrentPosition = _gameInitialPosition;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void PushToMoveStack(int n, Move move) => _moveStack[n + EvaluationConstants.ContinuationHistoryPlyCount] = move;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public Move PopFromMoveStack(int n) => _moveStack[n + EvaluationConstants.ContinuationHistoryPlyCount];
 }
