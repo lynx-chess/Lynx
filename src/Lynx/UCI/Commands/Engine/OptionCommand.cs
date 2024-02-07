@@ -130,7 +130,9 @@ public sealed class OptionCommand : EngineBaseCommand
         $"option name UCI_ShowWDL type check default {Configuration.EngineSettings.ShowWDL}",
         $"option name Hash type spin default {Configuration.EngineSettings.TranspositionTableSize} min 0 max 1024",
         $"option name OnlineTablebaseInRootPositions type check default {Configuration.EngineSettings.UseOnlineTablebaseInRootPositions}",
+        //$"option name OnlineTablebaseInSearch type check default {Configuration.EngineSettings.UseOnlineTablebaseInSearch}",
         "option name Threads type spin default 1 min 1 max 1",
+        $"option name Ponder type check default {Configuration.EngineSettings.IsPonder}",
 
         #region Search tuning
 
@@ -158,7 +160,6 @@ public sealed class OptionCommand : EngineBaseCommand
     //"option name UCI_AnalyseMode type check",
     //"option name NalimovPath type string default C:/...",
     //"option name NalimovCache type spin default 1 min 1 max 32
-    //"option name Ponder type check",
     //"option name OwnBook type check",
     //"option name MultiPV type spin default 1",
     //"option name UCI_ShowCurrLine type check default false",      // Interesting
