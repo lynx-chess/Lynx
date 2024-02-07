@@ -24,7 +24,7 @@ else
 			RUNTIME=linux-arm
 		endif
 	else ifneq ($(filter arm%,$(UNAME_P)),)
-		RUNTIME=osx.11.0-arm64
+		RUNTIME=osx-arm64
 	else
 		RUNTIME=osx-x64
 	endif
