@@ -138,12 +138,13 @@ public sealed class LynxDriver
     private void HandlePosition(ReadOnlySpan<char> command)
     {
 #if DEBUG
-        _engine.Game.CurrentPosition.Print();
+        _engine._game.CurrentPosition.Print();
 #endif
 
         _engine.AdjustPosition(command);
+
 #if DEBUG
-        _engine.Game.CurrentPosition.Print();
+        _engine._game.CurrentPosition.Print();
 #endif
     }
 
@@ -459,8 +460,8 @@ public sealed class LynxDriver
 
         if (items.Length >= 2 && int.TryParse(items[1], out int depth) && depth >= 1)
         {
-            var results = Perft.Results(_engine.Game.CurrentPosition, depth);
-            await Perft.PrintPerftResult(depth, results, str => _engineWriter.Writer.WriteAsync(str));
+            var results = _engine.Perft(depth);
+            await Engine.PrintPerftResult(depth, results, str => _engineWriter.Writer.WriteAsync(str));
         }
     }
 
@@ -470,8 +471,8 @@ public sealed class LynxDriver
 
         if (items.Length >= 2 && int.TryParse(items[1], out int depth) && depth >= 1)
         {
-            var results = Perft.Divide(_engine.Game.CurrentPosition, depth, str => _engineWriter.Writer.TryWrite(str));
-            await Perft.PrintPerftResult(depth, results, str => _engineWriter.Writer.WriteAsync(str));
+            var results = _engine.Divide(depth, str => _engineWriter.Writer.TryWrite(str));
+            await Engine.PrintPerftResult(depth, results, str => _engineWriter.Writer.WriteAsync(str));
         }
     }
 

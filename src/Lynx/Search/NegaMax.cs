@@ -20,7 +20,7 @@ public sealed partial class Engine
     /// <returns></returns>
     private int NegaMax(int depth, int ply, int alpha, int beta, bool parentWasNullMove = false)
     {
-        var position = Game.CurrentPosition;
+        var position = _game.CurrentPosition;
 
         // Prevents runtime failure in case depth is increased due to check extension, since we're using ply when calculating pvTable index,
         if (ply >= Configuration.EngineSettings.MaxDepth)
@@ -216,9 +216,9 @@ public sealed partial class Engine
             PrintPreMove(position, ply, move);
 
             // Before making a move
-            var oldValue = Game.HalfMovesWithoutCaptureOrPawnMove;
-            Game.HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, Game.HalfMovesWithoutCaptureOrPawnMove);
-            var isThreeFoldRepetition = !Game.PositionHashHistory.Add(position.UniqueIdentifier);
+            var oldValue = _game.HalfMovesWithoutCaptureOrPawnMove;
+            _game.HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, _game.HalfMovesWithoutCaptureOrPawnMove);
+            var isThreeFoldRepetition = !_game.PositionHashHistory.Add(position.UniqueIdentifier);
 
             int evaluation;
             if (isThreeFoldRepetition)
@@ -232,7 +232,7 @@ public sealed partial class Engine
 
                 // This is the only case were we don't clear position.UniqueIdentifier from Game.PositionHashHistory, because it was already there before making the move
             }
-            else if (Game.Is50MovesRepetition())
+            else if (_game.Is50MovesRepetition())
             {
                 evaluation = 0;
 
@@ -241,12 +241,12 @@ public sealed partial class Engine
                 // don't belong to this line and if this move were to beat alpha, they'd incorrectly copied to pv line.
                 Array.Clear(_pVTable, nextPvIndex, _pVTable.Length - nextPvIndex);
 
-                Game.PositionHashHistory.Remove(position.UniqueIdentifier);
+                _game.PositionHashHistory.Remove(position.UniqueIdentifier);
             }
             else if (pvNode && movesSearched == 0)
             {
                 evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
-                Game.PositionHashHistory.Remove(position.UniqueIdentifier);
+                _game.PositionHashHistory.Remove(position.UniqueIdentifier);
             }
             else
             {
@@ -259,8 +259,8 @@ public sealed partial class Engine
                     && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth)) // Based on formula suggested by Antares
                 {
                     // After making a move
-                    Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
-                    Game.PositionHashHistory.Remove(position.UniqueIdentifier); // We know that there's no triple repetition here
+                    _game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
+                    _game.PositionHashHistory.Remove(position.UniqueIdentifier); // We know that there's no triple repetition here
                     position.UnmakeMove(move, gameState);
 
                     break;
@@ -323,12 +323,12 @@ public sealed partial class Engine
                     evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
                 }
 
-                Game.PositionHashHistory.Remove(position.UniqueIdentifier);
+                _game.PositionHashHistory.Remove(position.UniqueIdentifier);
             }
 
             // After making a move
             // Game.PositionHashHistory is update above
-            Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
+            _game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
             position.UnmakeMove(move, gameState);
 
             PrintMove(ply, move, evaluation);
@@ -455,7 +455,7 @@ public sealed partial class Engine
     /// <returns></returns>
     public int QuiescenceSearch(int ply, int alpha, int beta)
     {
-        var position = Game.CurrentPosition;
+        var position = _game.CurrentPosition;
 
         _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
         _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
@@ -546,12 +546,12 @@ public sealed partial class Engine
             PrintPreMove(position, ply, move, isQuiescence: true);
 
             // Before making a move
-            var oldValue = Game.HalfMovesWithoutCaptureOrPawnMove;
-            Game.HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, Game.HalfMovesWithoutCaptureOrPawnMove);
-            var isThreeFoldRepetition = !Game.PositionHashHistory.Add(position.UniqueIdentifier);
+            var oldValue = _game.HalfMovesWithoutCaptureOrPawnMove;
+            _game.HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, _game.HalfMovesWithoutCaptureOrPawnMove);
+            var isThreeFoldRepetition = !_game.PositionHashHistory.Add(position.UniqueIdentifier);
 
             int evaluation;
-            if (isThreeFoldRepetition || Game.Is50MovesRepetition())
+            if (isThreeFoldRepetition || _game.Is50MovesRepetition())
             {
                 evaluation = 0;
 
@@ -566,10 +566,10 @@ public sealed partial class Engine
             }
 
             // After making a move
-            Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
+            _game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
             if (!isThreeFoldRepetition)
             {
-                Game.PositionHashHistory.Remove(position.UniqueIdentifier);
+                _game.PositionHashHistory.Remove(position.UniqueIdentifier);
             }
             position.UnmakeMove(move, gameState);
 

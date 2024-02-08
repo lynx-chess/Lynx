@@ -176,7 +176,7 @@ public sealed partial class Engine
 
         var finalSearchResult = GenerateFinalSearchResult(lastSearchResult, bestEvaluation, alpha, beta, depth, isCancelled);
 
-        if (isMateDetected && finalSearchResult.Mate + Game.HalfMovesWithoutCaptureOrPawnMove < 96)
+        if (isMateDetected && finalSearchResult.Mate + _game.HalfMovesWithoutCaptureOrPawnMove < 96)
         {
             _logger.Info("Engine search found a short enough mate, cancelling online tb probing if still active");
             _searchCancellationTokenSource.Cancel();
@@ -225,11 +225,11 @@ public sealed partial class Engine
         Move firstLegalMove = default;
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, moves))
+        foreach (var move in MoveGenerator.GenerateAllMoves(_game.CurrentPosition, moves))
         {
-            var gameState = Game.CurrentPosition.MakeMove(move);
-            bool isPositionValid = Game.CurrentPosition.IsValid();
-            Game.CurrentPosition.UnmakeMove(move, gameState);
+            var gameState = _game.CurrentPosition.MakeMove(move);
+            bool isPositionValid = _game.CurrentPosition.IsValid();
+            _game.CurrentPosition.UnmakeMove(move, gameState);
 
             if (isPositionValid)
             {
@@ -258,7 +258,7 @@ public sealed partial class Engine
             // could make the GUI resign or take a draw from this position.
             // Since this only happens in root, we don't really care about being more precise for raising
             // alphas or betas of parent moves, so let's just return +-2 pawns depending on the side to move
-            var eval = Game.CurrentPosition.Side == Side.White
+            var eval = _game.CurrentPosition.Side == Side.White
                 ? +EvaluationConstants.SingleMoveEvaluation
                 : -EvaluationConstants.SingleMoveEvaluation;
 

@@ -88,7 +88,7 @@ public sealed partial class Engine
         // Queen promotion
         if ((promotedPiece + 2) % 6 == 0)
         {
-            var baseScore = SEE.HasPositiveScore(Game.CurrentPosition, move)
+            var baseScore = SEE.HasPositiveScore(_game.CurrentPosition, move)
                 ? EvaluationConstants.GoodCaptureMoveBaseScoreValue
                 : EvaluationConstants.BadCaptureMoveBaseScoreValue;
 
@@ -99,14 +99,14 @@ public sealed partial class Engine
 
         if (isCapture)
         {
-            var baseCaptureScore = (isPromotion || move.IsEnPassant() || SEE.IsGoodCapture(Game.CurrentPosition, move))
+            var baseCaptureScore = (isPromotion || move.IsEnPassant() || SEE.IsGoodCapture(_game.CurrentPosition, move))
                 ? EvaluationConstants.GoodCaptureMoveBaseScoreValue
                 : EvaluationConstants.BadCaptureMoveBaseScoreValue;
 
             var piece = move.Piece();
             var capturedPiece = move.CapturedPiece();
 
-            Debug.Assert(capturedPiece != (int)Piece.K && capturedPiece != (int)Piece.k, $"{move.UCIString()} capturing king is generated in position {Game.CurrentPosition.FEN()}");
+            Debug.Assert(capturedPiece != (int)Piece.K && capturedPiece != (int)Piece.k, $"{move.UCIString()} capturing king is generated in position {_game.CurrentPosition.FEN()}");
 
             return baseCaptureScore
                 + EvaluationConstants.MostValueableVictimLeastValuableAttacker[piece][capturedPiece]
@@ -206,7 +206,7 @@ public sealed partial class Engine
     [Conditional("DEBUG")]
     private void ValidatePVTable()
     {
-        var position = Game.CurrentPosition;
+        var position = _game.CurrentPosition;
         for (int i = 0; i < PVTable.Indexes[1]; ++i)
         {
             if (_pVTable[i] == default)

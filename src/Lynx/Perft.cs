@@ -7,23 +7,23 @@ namespace Lynx;
 /// <see cref="https://www.chessprogramming.org/Perft"/>
 /// Calculates the leaf nodes (number of positions) reached during the test of the move generator at a given depth
 /// </summary>
-public static class Perft
+public partial class Engine
 {
-    public static (long Nodes, double ElapsedMilliseconds) Results(Position position, int depth)
+    public (long Nodes, double ElapsedMilliseconds) Perft(int depth)
     {
         var sw = new Stopwatch();
         sw.Start();
-        var nodes = ResultsImpl(position, depth, 0);
+        var nodes = ResultsImpl(depth, 0);
         sw.Stop();
 
         return (nodes, CalculateElapsedMilliseconds(sw));
     }
 
-    public static (long Nodes, double ElapsedMilliseconds) Divide(Position position, int depth, Action<string> write)
+    public (long Nodes, double ElapsedMilliseconds) Divide(int depth, Action<string> write)
     {
         var sw = new Stopwatch();
         sw.Start();
-        var nodes = DivideImpl(position, depth, 0, write);
+        var nodes = DivideImpl(depth, 0, write);
         sw.Stop();
 
         return (nodes, CalculateElapsedMilliseconds(sw));
@@ -36,10 +36,12 @@ public static class Perft
     /// <param name="depth"></param>
     /// <param name="nodes"></param>
     /// <returns></returns>
-    internal static long ResultsImpl(Position position, int depth, long nodes)
+    internal long ResultsImpl(int depth, long nodes)
     {
         if (depth != 0)
         {
+            var position = _game.CurrentPosition;
+
             Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
             foreach (var move in MoveGenerator.GenerateAllMoves(position, moves))
             {
@@ -47,7 +49,7 @@ public static class Perft
 
                 if (position.WasProduceByAValidMove())
                 {
-                    nodes = ResultsImpl(position, depth - 1, nodes);
+                    nodes = ResultsImpl(depth - 1, nodes);
                 }
                 position.UnmakeMove(move, state);
             }
@@ -58,10 +60,12 @@ public static class Perft
         return nodes + 1;
     }
 
-    private static long DivideImpl(Position position, int depth, long nodes, Action<string> write)
+    private long DivideImpl(int depth, long nodes, Action<string> write)
     {
         if (depth != 0)
         {
+            var position = _game.CurrentPosition;
+
             Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
             foreach (var move in MoveGenerator.GenerateAllMoves(position, moves))
             {
@@ -70,7 +74,7 @@ public static class Perft
                 if (position.WasProduceByAValidMove())
                 {
                     var accumulatedNodes = nodes;
-                    nodes = ResultsImpl(position, depth - 1, nodes);
+                    nodes = ResultsImpl(depth - 1, nodes);
 
                     write($"{move.UCIString()}\t\t{nodes - accumulatedNodes}");
                 }

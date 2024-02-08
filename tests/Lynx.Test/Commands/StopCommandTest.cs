@@ -34,7 +34,7 @@ public class StopCommandTest
         Assert.AreEqual(initialPositionFEN, engine.Game.CurrentPosition.FEN());
 
 #if DEBUG
-        Assert.IsEmpty(engine.Game.MoveHistory);
+        Assert.IsEmpty(engine._Game.MoveHistory);
 #endif
     }
 }

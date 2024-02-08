@@ -24,7 +24,11 @@ public sealed partial class Engine
 
     public RegisterCommand? Registration { get; set; }
 
-    public Game Game { get; private set; }
+#if DEBUG
+    public Game _game;
+#else
+    private Game _game;
+#endif
 
     public bool IsSearching { get; private set; }
 
@@ -36,7 +40,7 @@ public sealed partial class Engine
     public Engine(ChannelWriter<string> engineWriter)
     {
         AverageDepth = 0;
-        Game = new Game();
+        _game = new Game();
         _isNewGameComing = true;
         _searchCancellationTokenSource = new();
         _absoluteSearchCancellationTokenSource = new();
@@ -63,13 +67,13 @@ public sealed partial class Engine
 
     internal void SetGame(Game game)
     {
-        Game = game;
+        _game = game;
     }
 
     public void NewGame()
     {
         AverageDepth = 0;
-        Game = new Game();
+        _game = new Game();
         _isNewGameComing = true;
         _isNewGameCommandSupported = true;
         InitializeTT();
@@ -79,13 +83,13 @@ public sealed partial class Engine
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
 
-        Game = PositionCommand.ParseGame(rawPositionCommand, moves);
+        _game = PositionCommand.ParseGame(rawPositionCommand, moves);
         _isNewGameComing = false;
     }
 
     public void PonderHit()
     {
-        Game.MakeMove(_moveToPonder!.Value);   // TODO ponder: do we also receive the position command? If so, remove this line
+        _game.MakeMove(_moveToPonder!.Value);   // TODO ponder: do we also receive the position command? If so, remove this line
         _isPondering = false;
     }
 
@@ -98,7 +102,7 @@ public sealed partial class Engine
 
         int millisecondsLeft;
         int millisecondsIncrement;
-        if (Game.CurrentPosition.Side == Side.White)
+        if (_game.CurrentPosition.Side == Side.White)
         {
             millisecondsLeft = goCommand.WhiteTime;
             millisecondsIncrement = goCommand.WhiteIncrement;
@@ -154,30 +158,30 @@ public sealed partial class Engine
 
         SearchResult resultToReturn = await SearchBestMove(maxDepth, decisionTime);
 
-        Game.ResetCurrentPositionToBeforeSearchState();
+        _game.ResetCurrentPositionToBeforeSearchState();
         if (resultToReturn.BestMove != default && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
         {
-            Game.MakeMove(resultToReturn.BestMove);
+            _game.MakeMove(resultToReturn.BestMove);
         }
 
-        AverageDepth += (resultToReturn.Depth - AverageDepth) / Math.Ceiling(0.5 * Game.PositionHashHistory.Count);
+        AverageDepth += (resultToReturn.Depth - AverageDepth) / Math.Ceiling(0.5 * _game.PositionHashHistory.Count);
 
         return resultToReturn;
     }
 
     private async Task<SearchResult> SearchBestMove(int? maxDepth, int? decisionTime)
     {
-        if (!Configuration.EngineSettings.UseOnlineTablebaseInRootPositions || Game.CurrentPosition.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
+        if (!Configuration.EngineSettings.UseOnlineTablebaseInRootPositions || _game.CurrentPosition.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
         {
             return (await IDDFS(maxDepth, decisionTime))!;
         }
 
         // Local copy of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove so that it doesn't interfere with regular search
-        var currentHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
+        var currentHalfMovesWithoutCaptureOrPawnMove = _game.HalfMovesWithoutCaptureOrPawnMove;
 
         var tasks = new Task<SearchResult?>[] {
                 // Other copies of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove (same reason)
-                ProbeOnlineTablebase(Game.CurrentPosition, new(Game.PositionHashHistory),  Game.HalfMovesWithoutCaptureOrPawnMove),
+                ProbeOnlineTablebase(_game.CurrentPosition, new(_game.PositionHashHistory),  _game.HalfMovesWithoutCaptureOrPawnMove),
                 IDDFS(maxDepth, decisionTime)
             };
 

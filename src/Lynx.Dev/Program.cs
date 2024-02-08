@@ -552,25 +552,31 @@ static void _42_Perft()
 {
     // Leaf nodes (number of positions) reached dring the test if the move generator at a given depth
 
-    var pos = new Position(TrickyPosition);
+    var engine = new Engine(Channel.CreateBounded<string>(new BoundedChannelOptions(100) { SingleReader = true, SingleWriter = false }));
+    engine.AdjustPosition($"position fen {TrickyPosition}");
 
     for (int depth = 0; depth < 7; ++depth)
     {
         var sw = new Stopwatch();
         sw.Start();
-        var result = Perft.Results(pos, depth);
+        var result = engine.Perft(depth);
         sw.Stop();
 
-        Perft.PrintPerftResult(depth, result, Console.WriteLine);
+        Engine.PrintPerftResult(depth, result, Console.WriteLine);
     }
 }
 
 static void _43_Divide()
 {
-    var result = Perft.Divide(new Position(Constants.InitialPositionFEN), 5, Console.WriteLine);
-    Perft.PrintPerftResult(5, result, Console.WriteLine);
-    result = Perft.Divide(new Position(TrickyPosition), 5, Console.WriteLine);
-    Perft.PrintPerftResult(5, result, Console.WriteLine);
+    var engine = new Engine(Channel.CreateBounded<string>(new BoundedChannelOptions(100) { SingleReader = true, SingleWriter = false }));
+
+    var result = engine.Divide(5, Console.WriteLine);
+    Engine.PrintPerftResult(5, result, Console.WriteLine);
+
+    engine.AdjustPosition($"position fen {TrickyPosition}");
+
+    result = engine.Divide(5, Console.WriteLine);
+    Engine.PrintPerftResult(5, result, Console.WriteLine);
 }
 
 static void _44_ParseUCI()
@@ -1102,8 +1108,10 @@ static void TranspositionTable()
 
 static void UnmakeMove()
 {
-    var pos = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq");
-    var a = Perft.ResultsImpl(pos, 1, default);
+    var engine = new Engine(Channel.CreateBounded<string>(new BoundedChannelOptions(100) { SingleReader = true, SingleWriter = false }));
+    engine.AdjustPosition($"position fen {Constants.TrickyTestPositionFEN}");
+
+    var a = engine.ResultsImpl(1, default);
 
     TestMoveGen(Constants.InitialPositionFEN);
     TestMoveGen(Constants.TTPositionFEN);
