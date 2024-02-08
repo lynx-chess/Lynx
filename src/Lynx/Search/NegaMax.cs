@@ -115,7 +115,7 @@ public sealed partial class Engine
                 // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
                 if (staticEval - (Configuration.EngineSettings.RFP_DepthScalingFactor * depth) >= beta)
                 {
-                    return staticEval;
+                    return (staticEval + beta) / 2;
                 }
 
                 // 🔍 Razoring - Strelka impl (CPW) - https://www.chessprogramming.org/Razoring#Strelka
