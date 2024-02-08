@@ -85,7 +85,13 @@ public sealed partial class Engine
                 return onlyOneLegalMoveSearchResult;
             }
 
-            depth = CheckPonderHit(ref lastSearchResult, depth);
+            Debug.Assert(_killerMoves.Length == 3);
+            Array.Clear(_killerMoves[0]);
+            Array.Clear(_killerMoves[1]);
+            Array.Clear(_killerMoves[2]);
+            // Not clearing _quietHistory on purpose
+            // Not clearing _captureHistory on purpose
+
             if (lastSearchResult is not null)
             {
                 await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult));
@@ -269,46 +275,6 @@ public sealed partial class Engine
 
         result = null;
         return false;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int CheckPonderHit(ref SearchResult? lastSearchResult, int depth)
-    {
-        if (Game.MoveHistory.Count >= 2
-            && _previousSearchResult?.Moves.Count > 2
-            && _previousSearchResult.BestMove != default
-            && Game.MoveHistory[^2] == _previousSearchResult.Moves[0]
-            && Game.MoveHistory[^1] == _previousSearchResult.Moves[1])
-        {
-            _logger.Debug("Ponder hit");
-
-            lastSearchResult = new SearchResult(_previousSearchResult);
-
-            Array.Copy(_previousSearchResult.Moves.ToArray(), 2, _pVTable, 0, _previousSearchResult.Moves.Count - 2);
-
-            for (int d = 0; d < Configuration.EngineSettings.MaxDepth - 2; ++d)
-            {
-                _killerMoves[0][d] = _previousKillerMoves[0][d + 2];
-                _killerMoves[1][d] = _previousKillerMoves[1][d + 2];
-                _killerMoves[2][d] = _previousKillerMoves[2][d + 2];
-            }
-
-            // Re-search from depth 1
-            depth = 1;
-        }
-        else
-        {
-            Array.Clear(_killerMoves[0]);
-            Array.Clear(_killerMoves[1]);
-            Array.Clear(_killerMoves[2]);
-            Debug.Assert(_killerMoves.Length == 3);
-
-            // Not clearing _quietHistory on purpose
-
-            // Not clearing _captureHistory on purpose
-        }
-
-        return depth;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
