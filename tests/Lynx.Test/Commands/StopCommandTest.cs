@@ -32,6 +32,9 @@ public class StopCommandTest
         Assert.AreNotEqual(default, (await resultTask).BestMove);
 
         Assert.AreEqual(initialPositionFEN, engine.Game.CurrentPosition.FEN());
+
+#if DEBUG
         Assert.IsEmpty(engine.Game.MoveHistory);
+#endif
     }
 }

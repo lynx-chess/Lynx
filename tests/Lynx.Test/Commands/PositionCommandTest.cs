@@ -19,9 +19,6 @@ public class PositionCommandTest
         engine.NewGame();
         engine.AdjustPosition($"position fen {Constants.InitialPositionFEN} moves e2e4");
 
-        // A command that guarantees ~5s thinking time
-        var goCommand = new GoCommand("go wtime 1 btime 1 winc 5000 binc 5000");
-
         var resultTask = Task.Run(() => engine.BestMove(new($"go depth {Engine.DefaultMaxDepth}")));
 
         engine.StopSearching();
@@ -31,7 +28,11 @@ public class PositionCommandTest
         engine.AdjustPosition($"position fen {Constants.InitialPositionFEN} moves d2d4");
 
         // Assert
+#if DEBUG
         Assert.AreEqual(1, engine.Game.MoveHistory.Count);
+#endif
+
+        Assert.Pass();
     }
 
     [TestCase("position startpos moves d2d4 g8f6 g1f3 d7d5 b1c3 e7e6 g2g3 c7c5 e2e3")]
@@ -42,6 +43,7 @@ public class PositionCommandTest
     {
         var parsedGame = PositionCommand.ParseGame(positionCommand, new Move[Constants.MaxNumberOfPossibleMovesInAPosition]);
 
+#if DEBUG
         Assert.AreEqual("d2d4", parsedGame.MoveHistory[0].UCIString());
         Assert.AreEqual("g8f6", parsedGame.MoveHistory[1].UCIString());
         Assert.AreEqual("g1f3", parsedGame.MoveHistory[2].UCIString());
@@ -51,8 +53,11 @@ public class PositionCommandTest
         Assert.AreEqual("g2g3", parsedGame.MoveHistory[6].UCIString());
         Assert.AreEqual("c7c5", parsedGame.MoveHistory[7].UCIString());
         Assert.AreEqual("e2e3", parsedGame.MoveHistory[8].UCIString());
-
         Assert.AreEqual("rnbqkb1r/pp3ppp/4pn2/2pp4/3P4/2N1PNP1/PPP2P1P/R1BQKB1R b KQkq - 0 5", parsedGame.CurrentPosition.FEN(parsedGame.HalfMovesWithoutCaptureOrPawnMove, (parsedGame.MoveHistory.Count / 2) + (parsedGame.MoveHistory.Count % 2)));
+#endif
+        Assert.AreEqual("rnbqkb1r/pp3ppp/4pn2/2pp4/3P4/2N1PNP1/PPP2P1P/R1BQKB1R b KQkq - 0 5", parsedGame.CurrentPosition.FEN(parsedGame.HalfMovesWithoutCaptureOrPawnMove, (parsedGame.PositionHashHistory.Count / 2) + (parsedGame.PositionHashHistory.Count % 2)));
+
+        Assert.Pass();
     }
 
     /// <summary>
@@ -66,6 +71,9 @@ public class PositionCommandTest
 
         Assert.AreNotEqual(Constants.InitialPositionFEN, parsedGame.CurrentPosition);
         Assert.Greater(parsedGame.PositionHashHistory.Count, 500);
+
+#if DEBUG
         Assert.Greater(parsedGame.MoveHistory.Count, 590);
+#endif
     }
 }
