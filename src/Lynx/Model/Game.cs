@@ -7,7 +7,9 @@ public sealed class Game
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
+#if DEBUG
     public List<Move> MoveHistory { get; }
+#endif
 
     public HashSet<long> PositionHashHistory { get; }
 
@@ -36,11 +38,13 @@ public sealed class Game
             _logger.Warn($"Invalid position detected: {fen.ToString()}");
         }
 
-        MoveHistory = new(1024);
         PositionHashHistory = new(1024) { CurrentPosition.UniqueIdentifier };
-
         HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
         _moveStack = new Move[1024];
+
+#if DEBUG
+        MoveHistory = new(1024);
+#endif
     }
 
     /// <summary>
@@ -52,9 +56,12 @@ public sealed class Game
         CurrentPosition = position;
         _gameInitialPosition = new Position(CurrentPosition);
 
-        MoveHistory = new(1024);
         PositionHashHistory = new(1024) { position.UniqueIdentifier };
         _moveStack = new Move[1024];
+
+#if DEBUG
+        MoveHistory = new(1024);
+#endif
     }
 
     [Obsolete("Just intended for testing purposes")]
@@ -180,31 +187,27 @@ public sealed class Game
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool Is50MovesRepetition(int halfMovesWithoutCaptureOrPawnMove) => halfMovesWithoutCaptureOrPawnMove >= 100;
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public GameState MakeMove(Move moveToPlay)
     {
         var gameState = CurrentPosition.MakeMove(moveToPlay);
-        MoveHistory.Add(moveToPlay);
 
-        if (!CurrentPosition.WasProduceByAValidMove())
+        if (CurrentPosition.WasProduceByAValidMove())
         {
-            RevertLastMove(moveToPlay, gameState);
+#if DEBUG
+            MoveHistory.Add(moveToPlay);
+#endif
+        }
+        else
+        {
+            _logger.Warn("Error trying to play {0}", moveToPlay.UCIString());
+            CurrentPosition.UnmakeMove(moveToPlay, gameState);
         }
 
         PositionHashHistory.Add(CurrentPosition.UniqueIdentifier);
-
         HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveToPlay, HalfMovesWithoutCaptureOrPawnMove);
 
         return gameState;
-    }
-
-    internal void RevertLastMove(Move playedMove, GameState gameState)
-    {
-        CurrentPosition.UnmakeMove(playedMove, gameState);
-
-        if (MoveHistory.Count != 0)
-        {
-            MoveHistory.RemoveAt(MoveHistory.Count - 1);
-        }
     }
 
     /// <summary>

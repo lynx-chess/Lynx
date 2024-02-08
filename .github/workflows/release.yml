@@ -57,7 +57,7 @@ jobs:
           - runtime-identifier: osx-x64
             os: macos-latest
           - runtime-identifier: osx-arm64
-            os: macos-latest
+            os: macos-14
       fail-fast: false
 
     steps:

@@ -152,11 +152,6 @@ public sealed partial class Engine
             }
         }
 
-        var nodeType = NodeType.Alpha;
-        int movesSearched = 0;
-        Move? bestMove = null;
-        bool isAnyMoveValid = false;
-
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
         var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves);
 
@@ -182,6 +177,11 @@ public sealed partial class Engine
                 scores[i] = ScoreMove(pseudoLegalMoves[i], ply, isNotQSearch: true, ttBestMove);
             }
         }
+
+        var nodeType = NodeType.Alpha;
+        int movesSearched = 0;
+        Move? bestMove = null;
+        bool isAnyMoveValid = false;
 
         Span<Move> visitedMoves = stackalloc Move[pseudoLegalMoves.Length];
         int visitedMovesCounter = 0;

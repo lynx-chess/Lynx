@@ -186,7 +186,7 @@ public sealed partial class Engine
             Game.MakeMove(resultToReturn.BestMove);
         }
 
-        AverageDepth += (resultToReturn.Depth - AverageDepth) / Math.Ceiling(0.5 * Game.MoveHistory.Count);
+        AverageDepth += (resultToReturn.Depth - AverageDepth) / Math.Ceiling(0.5 * Game.PositionHashHistory.Count);
 
         return resultToReturn;
     }
