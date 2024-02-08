@@ -2,6 +2,8 @@
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
+using System.Diagnostics;
+using System.Security.Cryptography;
 using System.Threading.Channels;
 
 namespace Lynx;
@@ -72,7 +74,27 @@ public sealed partial class Engine
         Game = new Game();
         _isNewGameComing = true;
         _isNewGameCommandSupported = true;
-        InitializeTT();
+
+        InitializeTT(); // TODO SPRT clearing instead
+
+        // Clear histories
+        for (int i = 0; i < 12; ++i)
+        {
+            Array.Clear(_quietHistory[i]);
+            for (var j = 0; j < 64; ++j)
+            {
+                Array.Clear(_captureHistory[i][j]);
+            }
+        }
+
+        // Clear killer moves
+        Debug.Assert(_killerMoves.Length == 3);
+        Array.Clear(_killerMoves[0]);
+        Array.Clear(_killerMoves[1]);
+        Array.Clear(_killerMoves[2]);
+        // No need to clear _previousKillerMoves
+
+        // _pVTable will be cleared on IDDFS, since it needs to be cleaned for every search as well, no matter what
     }
 
     public void AdjustPosition(ReadOnlySpan<char> rawPositionCommand)
