@@ -84,6 +84,21 @@ public sealed partial class Engine
         _isNewGameComing = true;
         _isNewGameCommandSupported = true;
         InitializeTT();
+
+        for (int i = 0; i < 12; ++i)
+        {
+            for (var j = 0; j < 64; ++j)
+            {
+                //for (int contPly = 0; contPly < 2; ++contPly)
+                //{
+
+                for (int k = 0; k < 12; ++k)
+                {
+                    Array.Clear(_continuationHistory[i][j]/*[contPly]*/[k]);
+                }
+                //}
+            }
+        }
     }
 
     public void AdjustPosition(ReadOnlySpan<char> rawPositionCommand)
