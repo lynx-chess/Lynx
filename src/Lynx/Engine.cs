@@ -2,8 +2,6 @@
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
-using System.Diagnostics;
-using System.Security.Cryptography;
 using System.Threading.Channels;
 
 namespace Lynx;
@@ -87,14 +85,7 @@ public sealed partial class Engine
             }
         }
 
-        // Clear killer moves
-        Debug.Assert(_killerMoves.Length == 3);
-        Array.Clear(_killerMoves[0]);
-        Array.Clear(_killerMoves[1]);
-        Array.Clear(_killerMoves[2]);
-        // No need to clear _previousKillerMoves
-
-        // _pVTable will be cleared on IDDFS, since it needs to be cleaned for every search as well, no matter what
+        // No need to clear killer move or pv table because they're cleared on every search (IDDFS)
     }
 
     public void AdjustPosition(ReadOnlySpan<char> rawPositionCommand)

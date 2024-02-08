@@ -40,12 +40,6 @@ public sealed partial class Engine
     private bool _isScoringPV;
 
     private SearchResult? _previousSearchResult;
-    private readonly int[][] _previousKillerMoves =
-    [
-        new int[Configuration.EngineSettings.MaxDepth],
-        new int[Configuration.EngineSettings.MaxDepth],
-        new int[Configuration.EngineSettings.MaxDepth]
-    ];
 
     private readonly Move _defaultMove = default;
 
@@ -151,8 +145,6 @@ public sealed partial class Engine
                 lastSearchResult = UpdateLastSearchResult(lastSearchResult, bestEvaluation, alpha, beta, depth, isMateDetected, bestEvaluationAbs);
 
                 await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult));
-
-                Array.Copy(_killerMoves, _previousKillerMoves, _killerMoves.Length);
             } while (StopSearchCondition(++depth, maxDepth, isMateDetected, decisionTime));
         }
         catch (OperationCanceledException)
