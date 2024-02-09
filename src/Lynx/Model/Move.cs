@@ -15,15 +15,15 @@ public enum SpecialMoveType
 }
 
 /// <summary>
-///     Binary move bits                  Hexadecimal
-/// 0000 0000 0000 0000 0000 0000 0000 1111     0xF             Promoted piece (~11 bits)
-/// 0000 0000 0000 0000 0000 0011 1111 0000     0x3F0           Source square (63 bits)
-/// 0000 0000 0000 0000 1111 1100 0000 0000     0xFC00          Target Square (63 bits)
+///            Binary move bits               Hexadecimal
+/// 0000 0000 0000 0000 0000 0000 0000 1111     0xF             Promoted piece (0-11)
+/// 0000 0000 0000 0000 0000 0011 1111 0000     0x3F0           Source square (0-63)
+/// 0000 0000 0000 0000 1111 1100 0000 0000     0xFC00          Target Square (0-63)
 /// --------------------------------------------------------------------------------------------
-/// 0000 0000 0000 1111 0000 0000 0000 0000     0xF_0000        Piece (11 bits)
-/// 0000 0000 1111 0000 0000 0000 0000 0000     0xF0_0000       Captured piece (11 bits)
-/// 0000 0001 0000 0000 0000 0000 0000 0000     0x100_0000      Capture flag
-/// 0000 1110 0000 0000 0000 0000 0000 0000     0xE00_0000      SpecialMoveFlagOffset: Double pawn push, en-passant, short castle or long castle
+/// 0000 0000 0000 1111 0000 0000 0000 0000     0xF_0000        Piece (0-11)
+/// 0000 0000 1111 0000 0000 0000 0000 0000     0xF0_0000       Captured piece (0-11)
+/// 0000 0001 0000 0000 0000 0000 0000 0000     0x100_0000      Capture flag (1)
+/// 0000 1110 0000 0000 0000 0000 0000 0000     0xE00_0000      SpecialMoveFlagOffset: Double pawn push, en-passant, short castle or long castle (1-5)
 /// Total: 28 bits -> fits an int
 /// By casting it to ShortMove, a unique int16 (short) move is achieved, since
 /// source and target square and promoted piece can only represent a move in a given position
