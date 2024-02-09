@@ -72,7 +72,20 @@ public sealed partial class Engine
         Game = new Game();
         _isNewGameComing = true;
         _isNewGameCommandSupported = true;
-        InitializeTT();
+
+        InitializeTT(); // TODO SPRT clearing instead
+
+        // Clear histories
+        for (int i = 0; i < 12; ++i)
+        {
+            Array.Clear(_quietHistory[i]);
+            for (var j = 0; j < 64; ++j)
+            {
+                Array.Clear(_captureHistory[i][j]);
+            }
+        }
+
+        // No need to clear killer move or pv table because they're cleared on every search (IDDFS)
     }
 
     public void AdjustPosition(ReadOnlySpan<char> rawPositionCommand)
