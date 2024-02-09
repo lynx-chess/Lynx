@@ -23,19 +23,6 @@ public sealed class UCIHandler
 
         _engine = engine;
         _logger = LogManager.GetCurrentClassLogger();
-
-        InitializeStaticClasses();
-    }
-
-    private static void InitializeStaticClasses()
-    {
-        _ = PVTable.Indexes[0];
-        _ = Attacks.KingAttacks;
-        _ = ZobristTable.SideHash();
-        _ = Masks.FileMasks;
-        _ = EvaluationConstants.HistoryBonus[1];
-        _ = MoveGenerator.Init();
-        _ = GoCommand.Init();
     }
 
     public async Task Handle(string rawCommand, CancellationToken cancellationToken)

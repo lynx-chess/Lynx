@@ -6,8 +6,6 @@ using NLog;
 using NLog.Extensions.Logging;
 using System.Threading.Channels;
 
-Console.WriteLine($"{IdCommand.EngineName} {IdCommand.GetVersion()} by {IdCommand.EngineAuthor}");
-
 #if DEBUG
 Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
 #endif
@@ -35,18 +33,20 @@ using CancellationTokenSource source = new();
 CancellationToken cancellationToken = source.Token;
 
 var engine = new Engine(engineChannel);
+var uciHandler = new UCIHandler(uciChannel, engineChannel, engine);
 
 var tasks = new List<Task>
 {
     Task.Run(() => new Writer(engineChannel).Run(cancellationToken)),
     Task.Run(() => new Searcher(uciChannel, engine).Run(cancellationToken)),
-    Task.Run(() => new Listener(new UCIHandler(uciChannel, engineChannel, engine)).Run(cancellationToken, args)),
+    Task.Run(() => new Listener(uciHandler).Run(cancellationToken, args)),
     uciChannel.Reader.Completion,
     engineChannel.Reader.Completion
 };
 
 try
 {
+    Console.WriteLine($"{IdCommand.EngineName} {IdCommand.GetVersion()} by {IdCommand.EngineAuthor}");
     await Task.WhenAny(tasks);
 }
 catch (AggregateException ae)

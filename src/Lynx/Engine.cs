@@ -2,6 +2,7 @@
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
+using System.Diagnostics;
 using System.Threading.Channels;
 
 namespace Lynx;
@@ -42,6 +43,7 @@ public sealed partial class Engine
         _absoluteSearchCancellationTokenSource = new();
         _engineWriter = engineWriter;
 
+        // Update ResetEngine() after any changes here
         _quietHistory = new int[12][];
         for (int i = 0; i < _quietHistory.Length; ++i)
         {
@@ -59,6 +61,43 @@ public sealed partial class Engine
         }
 
         InitializeTT();
+
+        // Temporary channel so that no output is generated
+        _engineWriter = Channel.CreateUnbounded<string>(new UnboundedChannelOptions() { SingleReader = true, SingleWriter = false });
+        WarmupEngine();
+
+        _engineWriter = engineWriter;
+        ResetEngine();
+    }
+
+    private void WarmupEngine()
+    {
+        _logger.Info("Warming up engine");
+
+        InitializeStaticClasses();
+        const string goWarmupCommand = "go depth 10";   // ~300 ms
+
+        AdjustPosition(Constants.WarmupPosition);
+        BestMove(new(goWarmupCommand));
+
+        _logger.Info("Warm up finished");
+    }
+
+    private void ResetEngine()
+    {
+        InitializeTT(); // TODO SPRT clearing instead
+
+        // Clear histories
+        for (int i = 0; i < 12; ++i)
+        {
+            Array.Clear(_quietHistory[i]);
+            for (var j = 0; j < 64; ++j)
+            {
+                Array.Clear(_captureHistory[i][j]);
+            }
+        }
+
+        // No need to clear killer move or pv table because they're cleared on every search (IDDFS)
     }
 
     internal void SetGame(Game game)
@@ -73,19 +112,7 @@ public sealed partial class Engine
         _isNewGameComing = true;
         _isNewGameCommandSupported = true;
 
-        InitializeTT(); // TODO SPRT clearing instead
-
-        // Clear histories
-        for (int i = 0; i < 12; ++i)
-        {
-            Array.Clear(_quietHistory[i]);
-            for (var j = 0; j < 64; ++j)
-            {
-                Array.Clear(_captureHistory[i][j]);
-            }
-        }
-
-        // No need to clear killer move or pv table because they're cleared on every search (IDDFS)
+        ResetEngine();
     }
 
     public void AdjustPosition(ReadOnlySpan<char> rawPositionCommand)
@@ -263,5 +290,16 @@ public sealed partial class Engine
             (int ttLength, _ttMask) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
             _tt = new TranspositionTableElement[ttLength];
         }
+    }
+
+    private static void InitializeStaticClasses()
+    {
+        _ = PVTable.Indexes[0];
+        _ = Attacks.KingAttacks;
+        _ = ZobristTable.SideHash();
+        _ = Masks.FileMasks;
+        _ = EvaluationConstants.HistoryBonus[1];
+        _ = MoveGenerator.Init();
+        _ = GoCommand.Init();
     }
 }
