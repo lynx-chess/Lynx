@@ -2,6 +2,7 @@
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
+using System;
 using System.Threading.Channels;
 
 namespace Lynx;
@@ -83,12 +84,17 @@ public sealed partial class Engine
         Game = new Game();
         _isNewGameComing = true;
         _isNewGameCommandSupported = true;
-        InitializeTT();
 
+        InitializeTT(); // TODO SPRT clearing instead
+
+        // Clear histories
         for (int i = 0; i < 12; ++i)
         {
+            Array.Clear(_quietHistory[i]);
             for (var j = 0; j < 64; ++j)
             {
+                Array.Clear(_captureHistory[i][j]);
+
                 //for (int contPly = 0; contPly < 2; ++contPly)
                 //{
 
@@ -99,6 +105,8 @@ public sealed partial class Engine
                 //}
             }
         }
+
+        // No need to clear killer move or pv table because they're cleared on every search (IDDFS)
     }
 
     public void AdjustPosition(ReadOnlySpan<char> rawPositionCommand)
