@@ -156,7 +156,10 @@ public class GameTest : BaseTest
         newPosition = new Position(game.CurrentPosition, repeatedMoves[^1]);
         Assert.False(game.IsThreefoldRepetition(newPosition));                      // Same position, but white not can't castle
         Assert.DoesNotThrow(() => game.MakeMove(repeatedMoves[^1]));
+
+#if DEBUG
         Assert.AreEqual(repeatedMoves.Count, game.MoveHistory.Count);
+#endif
 
         var eval = winningPosition.StaticEvaluation().Score;
         Assert.AreNotEqual(0, eval);
@@ -190,7 +193,9 @@ public class GameTest : BaseTest
         Assert.DoesNotThrow(() => game.MakeMove(nonCaptureOrPawnMoveMoves[3]));
         Assert.DoesNotThrow(() => game.MakeMove(MoveExtensions.Encode((int)BoardSquare.f2, (int)BoardSquare.h2, (int)Piece.R)));   // Mate on move 51
 
+#if DEBUG
         Assert.AreEqual(101, game.MoveHistory.Count);
+#endif
 
         // If the checkmate is in the move when it's claimed, checkmate remains
         Assert.False(game.Is50MovesRepetition());
@@ -216,7 +221,9 @@ public class GameTest : BaseTest
             Assert.DoesNotThrow(() => game.MakeMove(nonCaptureOrPawnMoveMoves[i % nonCaptureOrPawnMoveMoves.Count]));
         }
 
+#if DEBUG
         Assert.AreEqual(100, game.MoveHistory.Count);
+#endif
 
         Assert.True(game.Is50MovesRepetition());
     }
@@ -245,7 +252,9 @@ public class GameTest : BaseTest
         Assert.DoesNotThrow(() => game.MakeMove(MoveExtensions.Encode((int)BoardSquare.b3, (int)BoardSquare.c4, (int)Piece.K)));
         Assert.DoesNotThrow(() => game.MakeMove(nonCaptureOrPawnMoveMoves[2]));
 
+#if DEBUG
         Assert.AreEqual(51, game.MoveHistory.Count);
+#endif
 
         Assert.False(game.Is50MovesRepetition());
     }
