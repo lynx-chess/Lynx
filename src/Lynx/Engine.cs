@@ -62,12 +62,14 @@ public sealed partial class Engine
 
         InitializeTT();
 
+#if !DEBUG
         // Temporary channel so that no output is generated
         _engineWriter = Channel.CreateUnbounded<string>(new UnboundedChannelOptions() { SingleReader = true, SingleWriter = false }).Writer;
         WarmupEngine();
 
         _engineWriter = engineWriter;
         ResetEngine();
+# endif
     }
 
     private void WarmupEngine()
@@ -78,7 +80,7 @@ public sealed partial class Engine
         InitializeStaticClasses();
         const string goWarmupCommand = "go depth 10";   // ~300 ms
 
-        AdjustPosition(Constants.WarmupPosition);
+        AdjustPosition(Constants.SuperLongPositionCommand);
         BestMove(new(goWarmupCommand));
 
         Bench(2);
