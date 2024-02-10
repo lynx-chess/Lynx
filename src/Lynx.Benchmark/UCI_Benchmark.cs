@@ -44,6 +44,7 @@ public class UCI_Benchmark : BaseBenchmark
     [Benchmark]
     public (int, long) Bench_DefaultDepth()
     {
-        return OpenBench.Bench(Configuration.EngineSettings.BenchDepth, _channel);
+        var engine = new Engine(_channel.Writer);
+        return engine.Bench(Configuration.EngineSettings.BenchDepth);
     }
 }
