@@ -2,6 +2,7 @@
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
+using System.Diagnostics;
 using System.Runtime.Intrinsics.X86;
 using System.Text.Json;
 using System.Threading.Channels;
@@ -111,6 +112,7 @@ public sealed class UCIHandler
 
     private void HandlePosition(ReadOnlySpan<char> command)
     {
+        var sw = Stopwatch.StartNew();
 #if DEBUG
         _engine.Game.CurrentPosition.Print();
 #endif
@@ -119,6 +121,8 @@ public sealed class UCIHandler
 #if DEBUG
         _engine.Game.CurrentPosition.Print();
 #endif
+
+        _logger.Info("Position parsing took {0}ms", sw.ElapsedMilliseconds);
     }
 
     private void HandleStop() => _engine.StopSearching();
