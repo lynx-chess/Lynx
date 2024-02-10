@@ -448,8 +448,8 @@ public sealed class UCIHandler
         {
             depth = Configuration.EngineSettings.BenchDepth;
         }
-        var results = OpenBench.Bench(depth, _engineToUci);
-        await OpenBench.PrintBenchResults(results, str => _engineToUci.Writer.WriteAsync(str));
+        var results = _engine.Bench(depth);
+        await _engine.PrintBenchResults(results);
     }
 
     private async ValueTask HandleSettings()

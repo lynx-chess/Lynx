@@ -63,7 +63,7 @@ public sealed partial class Engine
         InitializeTT();
 
         // Temporary channel so that no output is generated
-        _engineWriter = Channel.CreateUnbounded<string>(new UnboundedChannelOptions() { SingleReader = true, SingleWriter = false });
+        _engineWriter = Channel.CreateUnbounded<string>(new UnboundedChannelOptions() { SingleReader = true, SingleWriter = false }).Writer;
         WarmupEngine();
 
         _engineWriter = engineWriter;
@@ -73,6 +73,7 @@ public sealed partial class Engine
     private void WarmupEngine()
     {
         _logger.Info("Warming up engine");
+        var sw = Stopwatch.StartNew();
 
         InitializeStaticClasses();
         const string goWarmupCommand = "go depth 10";   // ~300 ms
@@ -80,7 +81,10 @@ public sealed partial class Engine
         AdjustPosition(Constants.WarmupPosition);
         BestMove(new(goWarmupCommand));
 
-        _logger.Info("Warm up finished");
+        Bench(2);
+
+        sw.Stop();
+        _logger.Info("Warm-up finished in {0}ms", sw.ElapsedMilliseconds);
     }
 
     private void ResetEngine()

@@ -3,7 +3,7 @@ using System.Threading.Channels;
 
 namespace Lynx;
 
-public static class OpenBench
+public partial class Engine
 {
     private static readonly string[] _benchmarkFens =
     [
@@ -86,9 +86,8 @@ public static class OpenBench
     /// (https://github.com/JacquesRW/akimbo/blob/main/resources/fens.txt)
     /// plus random some endgame positions to ensure promotions with/without captures are well covered
     /// </summary>
-    public static (int TotalNodes, long Nps) Bench(int depth, Channel<string> engineWriter)
+    public (int TotalNodes, long Nps) Bench(int depth)
     {
-        var engine = new Engine(engineWriter);
         var stopwatch = new Stopwatch();
 
         int totalNodes = 0;
@@ -96,21 +95,22 @@ public static class OpenBench
 
         foreach (var fen in _benchmarkFens)
         {
-            engineWriter.Writer.TryWrite($"Benchmarking {fen} at depth {depth}");
+            _engineWriter.TryWrite($"Benchmarking {fen} at depth {depth}");
 
-            engine.AdjustPosition($"position fen {fen}");
+            AdjustPosition($"position fen {fen}");
             stopwatch.Restart();
 
-            var result = engine.BestMove(new($"go depth {depth}"));
+            var result = BestMove(new($"go depth {depth}"));
             totalTime += stopwatch.ElapsedMilliseconds;
             totalNodes += result.Nodes;
         }
 
-        engineWriter.Writer.TryWrite($"Total time: {totalTime}");
+        _engineWriter.TryWrite($"Total time: {totalTime}");
 
         return (totalNodes, Utils.CalculateNps(totalNodes, totalTime));
     }
 
+    public async ValueTask PrintBenchResults((int TotalNodes, long Nps) benchResult) => await _engineWriter.WriteAsync($"{benchResult.TotalNodes} nodes {benchResult.Nps} nps");
     public static void PrintBenchResults((int TotalNodes, long Nps) benchResult, Action<string> write) => write($"{benchResult.TotalNodes} nodes {benchResult.Nps} nps");
     public static async ValueTask PrintBenchResults((int TotalNodes, long Nps) benchResult, Func<string, ValueTask> write) => await write($"{benchResult.TotalNodes} nodes {benchResult.Nps} nps");
 }
