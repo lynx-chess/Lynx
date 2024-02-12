@@ -212,6 +212,7 @@ public sealed partial class Engine
         if (resultToReturn.BestMove != default && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
         {
             Game.MakeMove(resultToReturn.BestMove);
+            Game.UpdateInitialPosition();
         }
 
         AverageDepth += (resultToReturn.Depth - AverageDepth) / Math.Ceiling(0.5 * Game.PositionHashHistory.Count);
