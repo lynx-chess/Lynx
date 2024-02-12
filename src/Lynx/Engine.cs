@@ -65,14 +65,14 @@ public sealed partial class Engine
 #if !DEBUG
         // Temporary channel so that no output is generated
         _engineWriter = Channel.CreateUnbounded<string>(new UnboundedChannelOptions() { SingleReader = true, SingleWriter = false }).Writer;
-        WarmupEngine();
+        WarmupEngine().Wait();
 
         _engineWriter = engineWriter;
         ResetEngine();
 # endif
     }
 
-    private void WarmupEngine()
+    private async Task WarmupEngine()
     {
         _logger.Info("Warming up engine");
         var sw = Stopwatch.StartNew();
@@ -81,9 +81,9 @@ public sealed partial class Engine
         const string goWarmupCommand = "go depth 10";   // ~300 ms
 
         AdjustPosition(Constants.SuperLongPositionCommand);
-        BestMove(new(goWarmupCommand));
+        await BestMove(new(goWarmupCommand));
 
-        Bench(2);
+        await Bench(2);
 
         sw.Stop();
         _logger.Info("Warm-up finished in {0}ms", sw.ElapsedMilliseconds);
@@ -135,7 +135,7 @@ public sealed partial class Engine
         _isPondering = false;
     }
 
-    public SearchResult BestMove(GoCommand goCommand)
+    public async Task<SearchResult> BestMove(GoCommand goCommand)
     {
         _searchCancellationTokenSource = new();
         _absoluteSearchCancellationTokenSource = new();
@@ -205,7 +205,7 @@ public sealed partial class Engine
             maxDepth = DefaultMaxDepth;
         }
 
-        SearchResult resultToReturn = IDDFS(maxDepth, decisionTime);
+        SearchResult resultToReturn = await IDDFS(maxDepth, decisionTime);
         //SearchResult resultToReturn = await SearchBestMove(maxDepth, decisionTime);
 
         Game.ResetCurrentPositionToBeforeSearchState();
@@ -224,7 +224,7 @@ public sealed partial class Engine
     {
         if (!Configuration.EngineSettings.UseOnlineTablebaseInRootPositions || Game.CurrentPosition.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
         {
-            return IDDFS(maxDepth, decisionTime)!;
+            return await IDDFS(maxDepth, decisionTime)!;
         }
 
         // Local copy of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove so that it doesn't interfere with regular search
@@ -233,7 +233,7 @@ public sealed partial class Engine
         var tasks = new Task<SearchResult?>[] {
                 // Other copies of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove (same reason)
                 ProbeOnlineTablebase(Game.CurrentPosition, new(Game.PositionHashHistory),  Game.HalfMovesWithoutCaptureOrPawnMove),
-                Task.Run(()=>(SearchResult?)IDDFS(maxDepth, decisionTime))
+                Task.FromResult((SearchResult?) await IDDFS(maxDepth, decisionTime))
             };
 
         var resultList = await Task.WhenAll(tasks);
@@ -262,7 +262,7 @@ public sealed partial class Engine
         return tbResult ?? searchResult!;
     }
 
-    public void Search(GoCommand goCommand)
+    public async Task Search(GoCommand goCommand)
     {
         if (IsSearching)
         {
@@ -276,9 +276,9 @@ public sealed partial class Engine
 
         try
         {
-            var searchResult = BestMove(goCommand);
+            var searchResult = await BestMove(goCommand);
             _moveToPonder = searchResult.Moves.Count >= 2 ? searchResult.Moves[1] : null;
-            _engineWriter.TryWrite(BestMoveCommand.BestMove(searchResult.BestMove, _moveToPonder));
+            await _engineWriter.WriteAsync(BestMoveCommand.BestMove(searchResult.BestMove, _moveToPonder));
         }
         catch (Exception e)
         {

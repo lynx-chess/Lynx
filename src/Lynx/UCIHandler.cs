@@ -452,7 +452,7 @@ public sealed class UCIHandler
         {
             depth = Configuration.EngineSettings.BenchDepth;
         }
-        var results = _engine.Bench(depth);
+        var results = await _engine.Bench(depth);
         await _engine.PrintBenchResults(results);
     }
 

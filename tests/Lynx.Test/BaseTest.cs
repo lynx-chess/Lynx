@@ -14,9 +14,9 @@ public abstract class BaseTest
         Configuration.EngineSettings.TranspositionTableSize = 32;
     }
 
-    protected static SearchResult TestBestMove(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString, int depth = DefaultSearchDepth)
+    protected static async Task<SearchResult> TestBestMove(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString, int depth = DefaultSearchDepth)
     {
-        var seachResult = SearchBestMove(fen, depth);
+        var seachResult = await SearchBestMove(fen, depth);
         var bestMoveFound = seachResult.BestMove;
 
         if (allowedUCIMoveString is not null)
@@ -32,10 +32,10 @@ public abstract class BaseTest
         return seachResult;
     }
 
-    protected static SearchResult SearchBestMove(string fen, int depth = DefaultSearchDepth)
+    protected static async Task<SearchResult> SearchBestMove(string fen, int depth = DefaultSearchDepth)
     {
         var engine = GetEngine(fen);
-        return engine.BestMove(new($"go depth {depth}"));
+        return await engine.BestMove(new($"go depth {depth}"));
     }
 
     protected static Engine GetEngine(string fen)

@@ -27,7 +27,7 @@ public sealed class Searcher
                 {
                     if (_uciReader.TryRead(out var rawCommand))
                     {
-                        _engine.Search(new GoCommand(rawCommand));
+                        await _engine.Search(new GoCommand(rawCommand));
                     }
                 }
                 catch (Exception e)

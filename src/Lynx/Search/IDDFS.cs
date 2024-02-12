@@ -49,7 +49,7 @@ public sealed partial class Engine
     /// <param name="maxDepth"></param>
     /// <param name="decisionTime"></param>
     /// <returns>Not null <see cref="SearchResult"/>, although made nullable in order to match online tb probing signature</returns>
-    public SearchResult IDDFS(int? maxDepth, int? decisionTime)
+    public async Task<SearchResult> IDDFS(int? maxDepth, int? decisionTime)
     {
         // Cleanup
         _nodes = 0;
@@ -74,7 +74,7 @@ public sealed partial class Engine
 
             if (OnlyOneLegalMove(out var onlyOneLegalMoveSearchResult))
             {
-                _engineWriter.TryWrite(InfoCommand.SearchResultInfo(onlyOneLegalMoveSearchResult));
+                await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(onlyOneLegalMoveSearchResult));
 
                 return onlyOneLegalMoveSearchResult;
             }
@@ -88,7 +88,7 @@ public sealed partial class Engine
 
             if (lastSearchResult is not null)
             {
-                _engineWriter.TryWrite(InfoCommand.SearchResultInfo(lastSearchResult));
+                await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult));
             }
 
             do
@@ -144,7 +144,7 @@ public sealed partial class Engine
 
                 lastSearchResult = UpdateLastSearchResult(lastSearchResult, bestEvaluation, alpha, beta, depth, isMateDetected, bestEvaluationAbs);
 
-                _engineWriter.TryWrite(InfoCommand.SearchResultInfo(lastSearchResult));
+                await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult));
             } while (StopSearchCondition(++depth, maxDepth, isMateDetected, decisionTime));
         }
         catch (OperationCanceledException)
@@ -174,7 +174,7 @@ public sealed partial class Engine
             _searchCancellationTokenSource.Cancel();
         }
 
-        _engineWriter.TryWrite(InfoCommand.SearchResultInfo(finalSearchResult));
+        await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(finalSearchResult));
 
         return finalSearchResult;
     }

@@ -27,7 +27,7 @@ public class SingleLegalMoveTest : BaseTest
     [TestCase("8/8/8/8/8/K7/2b5/k1Q5 b - - 0 1")]
     [TestCase("8/8/8/8/8/K1n5/8/k1Q5 b - - 0 1")]
     [TestCase("1q6/8/8/8/8/K7/8/k1Q5 b - - 0 1")]
-    public void SingleMove(string fen)
+    public async Task SingleMove(string fen)
     {
         // Arrange
         const int depth = 61;
@@ -48,7 +48,7 @@ public class SingleLegalMoveTest : BaseTest
         Assert.LessOrEqual(depth, Configuration.EngineSettings.MaxDepth);
 
         // Act
-        var result = SearchBestMove(fen, depth);
+        var result = await SearchBestMove(fen, depth);
 
         Assert.AreEqual(singleMove, result.BestMove);
         Assert.AreEqual(singleMove, result.Moves.Single());

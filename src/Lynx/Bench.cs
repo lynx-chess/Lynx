@@ -86,7 +86,7 @@ public partial class Engine
     /// (https://github.com/JacquesRW/akimbo/blob/main/resources/fens.txt)
     /// plus random some endgame positions to ensure promotions with/without captures are well covered
     /// </summary>
-    public (int TotalNodes, long Nps) Bench(int depth)
+    public async Task<(int TotalNodes, long Nps)> Bench(int depth)
     {
         var stopwatch = new Stopwatch();
 
@@ -95,17 +95,17 @@ public partial class Engine
 
         foreach (var fen in _benchmarkFens)
         {
-            _engineWriter.TryWrite($"Benchmarking {fen} at depth {depth}");
+            await _engineWriter.WriteAsync($"Benchmarking {fen} at depth {depth}");
 
             AdjustPosition($"position fen {fen}");
             stopwatch.Restart();
 
-            var result = BestMove(new($"go depth {depth}"));
+            var result = await BestMove(new($"go depth {depth}"));
             totalTime += stopwatch.ElapsedMilliseconds;
             totalNodes += result.Nodes;
         }
 
-        _engineWriter.TryWrite($"Total time: {totalTime}");
+        await _engineWriter.WriteAsync($"Total time: {totalTime}");
 
         return (totalNodes, Utils.CalculateNps(totalNodes, totalTime));
     }
