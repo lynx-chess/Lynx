@@ -78,7 +78,7 @@ public sealed partial class Engine
         var sw = Stopwatch.StartNew();
 
         InitializeStaticClasses();
-        const string goWarmupCommand = "go depth 10";   // ~300 ms
+        const string goWarmupCommand = "go depth 10";
 
         AdjustPosition(Constants.SuperLongPositionCommand);
         BestMove(new(goWarmupCommand));
@@ -91,7 +91,7 @@ public sealed partial class Engine
 
     private void ResetEngine()
     {
-        InitializeTT(); // TODO SPRT clearing instead
+        _tt.ClearTranspositionTable();
 
         // Clear histories
         for (int i = 0; i < 12; ++i)
