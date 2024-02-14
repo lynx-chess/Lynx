@@ -49,7 +49,7 @@ public sealed partial class Engine
     /// <param name="maxDepth"></param>
     /// <param name="decisionTime"></param>
     /// <returns>Not null <see cref="SearchResult"/>, although made nullable in order to match online tb probing signature</returns>
-    public async Task<SearchResult?> IDDFS(int? maxDepth, int? decisionTime)
+    public SearchResult IDDFS(int? maxDepth, int? decisionTime)
     {
         // Cleanup
         _nodes = 0;
@@ -67,14 +67,15 @@ public sealed partial class Engine
         int depth = 1;
         bool isCancelled = false;
         bool isMateDetected = false;
+        Move firstLegalMove = default;
 
         try
         {
             _stopWatch.Start();
 
-            if (OnlyOneLegalMove(out var onlyOneLegalMoveSearchResult))
+            if (OnlyOneLegalMove(ref firstLegalMove, out var onlyOneLegalMoveSearchResult))
             {
-                await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(onlyOneLegalMoveSearchResult));
+                _engineWriter.TryWrite(InfoCommand.SearchResultInfo(onlyOneLegalMoveSearchResult));
 
                 return onlyOneLegalMoveSearchResult;
             }
@@ -88,7 +89,7 @@ public sealed partial class Engine
 
             if (lastSearchResult is not null)
             {
-                await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult));
+                _engineWriter.TryWrite(InfoCommand.SearchResultInfo(lastSearchResult));
             }
 
             do
@@ -144,7 +145,7 @@ public sealed partial class Engine
 
                 lastSearchResult = UpdateLastSearchResult(lastSearchResult, bestEvaluation, alpha, beta, depth, isMateDetected, bestEvaluationAbs);
 
-                await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult));
+                _engineWriter.TryWrite(InfoCommand.SearchResultInfo(lastSearchResult));
             } while (StopSearchCondition(++depth, maxDepth, isMateDetected, decisionTime));
         }
         catch (OperationCanceledException)
@@ -166,7 +167,7 @@ public sealed partial class Engine
             _stopWatch.Stop();
         }
 
-        var finalSearchResult = GenerateFinalSearchResult(lastSearchResult, bestEvaluation, alpha, beta, depth, isCancelled);
+        var finalSearchResult = GenerateFinalSearchResult(lastSearchResult, bestEvaluation, alpha, beta, depth, firstLegalMove, isCancelled);
 
         if (isMateDetected && finalSearchResult.Mate + Game.HalfMovesWithoutCaptureOrPawnMove < 96)
         {
@@ -174,7 +175,7 @@ public sealed partial class Engine
             _searchCancellationTokenSource.Cancel();
         }
 
-        await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(finalSearchResult));
+        _engineWriter.TryWrite(InfoCommand.SearchResultInfo(finalSearchResult));
 
         return finalSearchResult;
     }
@@ -211,10 +212,9 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool OnlyOneLegalMove([NotNullWhen(true)] out SearchResult? result)
+    private bool OnlyOneLegalMove(ref Move firstLegalMove, [NotNullWhen(true)] out SearchResult? result)
     {
         bool onlyOneLegalMove = false;
-        Move firstLegalMove = default;
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
         foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, moves))
@@ -296,12 +296,13 @@ public sealed partial class Engine
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private SearchResult GenerateFinalSearchResult(SearchResult? lastSearchResult,
-        int bestEvaluation, int alpha, int beta, int depth, bool isCancelled)
+        int bestEvaluation, int alpha, int beta, int depth, Move firstLegalMove, bool isCancelled)
     {
         SearchResult finalSearchResult;
         if (lastSearchResult is null)
         {
-            finalSearchResult = new(default, bestEvaluation, depth, [], alpha, beta);
+            _logger.Warn("Search cancelled at depth 1, choosing first found legal move as best one");
+            finalSearchResult = new(firstLegalMove, 0, 0, [firstLegalMove], alpha, beta);
         }
         else
         {

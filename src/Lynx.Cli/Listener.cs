@@ -1,17 +1,16 @@
 ﻿using NLog;
 using System.Text;
-using System.Threading.Channels;
 
 namespace Lynx.Cli;
 
 public sealed class Listener
 {
-    private readonly Channel<string> _guiInputReader;
     private readonly Logger _logger;
+    private readonly UCIHandler _uciHandler;
 
-    public Listener(Channel<string> guiInputReader)
+    public Listener(UCIHandler uCIHandler)
     {
-        _guiInputReader = guiInputReader;
+        _uciHandler = uCIHandler;
         _logger = LogManager.GetCurrentClassLogger();
     }
 
@@ -21,7 +20,7 @@ public sealed class Listener
         {
             foreach (var arg in args)
             {
-                await _guiInputReader.Writer.WriteAsync(arg, cancellationToken);
+                await _uciHandler.Handle(arg, cancellationToken);
             }
 
             IncreaseInputBufferSize();
@@ -29,7 +28,11 @@ public sealed class Listener
             while (!cancellationToken.IsCancellationRequested)
             {
                 var input = Console.ReadLine();
-                await _guiInputReader.Writer.WriteAsync(input!, cancellationToken);
+
+                if (!string.IsNullOrEmpty(input))
+                {
+                    await _uciHandler.Handle(input, cancellationToken);
+                }
             }
         }
         catch (Exception e)
