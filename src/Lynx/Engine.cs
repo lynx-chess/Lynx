@@ -43,20 +43,19 @@ public sealed partial class Engine
         _absoluteSearchCancellationTokenSource = new();
         _engineWriter = engineWriter;
 
-        // Update ResetEngine() after any changes here
-        _quietHistory = new int[12][];
+        _quietHistory = PerformanceUtils.AllocatePinnedArray<int[]>(12);
         for (int i = 0; i < _quietHistory.Length; ++i)
         {
-            _quietHistory[i] = new int[64];
+            _quietHistory[i] = PerformanceUtils.AllocatePinnedArray<int>(64);
         }
 
-        _captureHistory = new int[12][][];
+        _captureHistory = PerformanceUtils.AllocatePinnedArray<int[][]>(12);
         for (int i = 0; i < 12; ++i)
         {
-            _captureHistory[i] = new int[64][];
+            _captureHistory[i] = PerformanceUtils.AllocatePinnedArray<int[]>(64);
             for (var j = 0; j < 64; ++j)
             {
-                _captureHistory[i][j] = new int[12];
+                _captureHistory[i][j] = PerformanceUtils.AllocatePinnedArray<int>(12);
             }
         }
 

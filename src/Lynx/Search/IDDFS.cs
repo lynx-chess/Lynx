@@ -9,16 +9,17 @@ namespace Lynx;
 public sealed partial class Engine
 {
     private readonly Stopwatch _stopWatch = new();
-    private readonly Move[] _pVTable = new Move[Configuration.EngineSettings.MaxDepth * (Configuration.EngineSettings.MaxDepth + 1) / 2];
+    private readonly Move[] _pVTable = PerformanceUtils.AllocatePinnedArray<int>(
+        Configuration.EngineSettings.MaxDepth * (Configuration.EngineSettings.MaxDepth + 1) / 2);
 
     /// <summary>
     /// 3x<see cref="Configuration.EngineSettings.MaxDepth"/>
     /// </summary>
     private readonly int[][] _killerMoves =
     [
-        new int[Configuration.EngineSettings.MaxDepth],
-        new int[Configuration.EngineSettings.MaxDepth],
-        new int[Configuration.EngineSettings.MaxDepth]
+        PerformanceUtils.AllocatePinnedArray<int>(Configuration.EngineSettings.MaxDepth),
+        PerformanceUtils.AllocatePinnedArray<int>(Configuration.EngineSettings.MaxDepth),
+        PerformanceUtils.AllocatePinnedArray<int>(Configuration.EngineSettings.MaxDepth)
     ];
 
     /// <summary>
@@ -31,7 +32,7 @@ public sealed partial class Engine
     /// </summary>
     private readonly int[][][] _captureHistory;
 
-    private readonly int[] _maxDepthReached = new int[Constants.AbsoluteMaxDepth];
+    private readonly int[] _maxDepthReached = PerformanceUtils.AllocatePinnedArray<int>(Constants.AbsoluteMaxDepth);
     private TranspositionTable _tt = [];
     private int _ttMask;
 
