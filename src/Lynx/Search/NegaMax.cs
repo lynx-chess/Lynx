@@ -113,6 +113,7 @@ public sealed partial class Engine
             if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
             {
                 // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
+                // Return formula by Ciekce, instead of just returning static eval
                 if (staticEval - (Configuration.EngineSettings.RFP_DepthScalingFactor * depth) >= beta)
                 {
                     return (staticEval + beta) / 2;
