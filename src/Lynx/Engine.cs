@@ -91,7 +91,7 @@ public sealed partial class Engine
 
     private void ResetEngine()
     {
-        _tt.ClearTranspositionTable();
+        Array.Clear(_tt);
 
         // Clear histories
         for (int i = 0; i < 12; ++i)

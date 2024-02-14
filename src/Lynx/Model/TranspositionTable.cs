@@ -49,15 +49,6 @@ public struct TranspositionTableElement
     public int Score { readonly get => _score; set => _score = (short)value; }
 
     public long Key { readonly get => _key; set => _key = (ShortMove)(value >> 48); }
-
-    public void Clear()
-    {
-        Key = 0;
-        Score = 0;
-        Depth = 0;
-        Move = 0;
-        Type = NodeType.Unknown;
-    }
 }
 
 public static class TranspositionTableExtensions
@@ -84,15 +75,6 @@ public static class TranspositionTableExtensions
         _logger.Info("TT mask:\t{0}", mask.ToString("X"));
 
         return (ttLength, mask);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void ClearTranspositionTable(this TranspositionTable transpositionTable)
-    {
-        foreach (var element in transpositionTable)
-        {
-            element.Clear();
-        }
     }
 
     /// <summary>
