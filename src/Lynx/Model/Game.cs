@@ -41,10 +41,7 @@ public sealed class Game
 #endif
     }
 
-    /// <summary>
-    /// Intended to be used from tests only
-    /// </summary>
-    /// <param name="position"></param>
+    [Obsolete("Just intended for testing purposes")]
     internal Game(Position position)
     {
         CurrentPosition = position;
@@ -208,7 +205,7 @@ public sealed class Game
     /// (either by the engine time management logic or by external stop command)
     /// currentPosition won't be the initial one
     /// </summary>
-    public void ResetCurrentPositionToBeforeSearchState() => CurrentPosition = new (_gameInitialPosition);
+    public void ResetCurrentPositionToBeforeSearchState() => CurrentPosition = new(_gameInitialPosition);
 
     public void UpdateInitialPosition() => _gameInitialPosition = new(CurrentPosition);
 }
