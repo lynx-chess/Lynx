@@ -5,6 +5,7 @@ namespace Lynx.Model;
 
 public class Position
 {
+    private const int _bitBoardSize = sizeof(BitBoard);
     //private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public long UniqueIdentifier { get; private set; }
@@ -64,10 +65,10 @@ public class Position
     {
         UniqueIdentifier = position.UniqueIdentifier;
         PieceBitBoards = new BitBoard[12];
-        Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
+        Buffer.BlockCopy(position.PieceBitBoards, 0, PieceBitBoards, 0, _bitBoardSize * position.PieceBitBoards.Length);
 
         OccupancyBitBoards = new BitBoard[3];
-        Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
+        Buffer.BlockCopy(position.OccupancyBitBoards, 0, OccupancyBitBoards, 0, _bitBoardSize * position.OccupancyBitBoards.Length);
 
         Side = position.Side;
         Castle = position.Castle;
@@ -87,10 +88,10 @@ public class Position
     {
         UniqueIdentifier = position.UniqueIdentifier;
         PieceBitBoards = new BitBoard[12];
-        Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
+        Buffer.BlockCopy(position.PieceBitBoards, 0, PieceBitBoards, 0, _bitBoardSize * position.PieceBitBoards.Length);
 
         OccupancyBitBoards = new BitBoard[3];
-        Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
+        Buffer.BlockCopy(position.OccupancyBitBoards, 0, OccupancyBitBoards, 0, _bitBoardSize * position.OccupancyBitBoards.Length);
 
         Side = (Side)Utils.OppositeSide(position.Side);
         Castle = position.Castle;

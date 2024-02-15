@@ -64,6 +64,13 @@ public class ArrayCopy_Benchmark : BaseBenchmark
         return UnrolledManualLoopImpl(array);
     }
 
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public ulong[] BlockCopy(ulong[] array)
+    {
+        return BlockCopyImpl(array);
+    }
+
     private static ulong[] ArrayDotCopyImpl(ulong[] array)
     {
         var result = new ulong[array.Length];
@@ -118,6 +125,15 @@ public class ArrayCopy_Benchmark : BaseBenchmark
                 ++i;
             }
         }
+
+        return result;
+    }
+
+    private static ulong[] BlockCopyImpl(ulong[] array)
+    {
+        const int ulongSize = sizeof(ulong);
+        var result = new ulong[array.Length];
+        Buffer.BlockCopy(array, 0, result, 0, ulongSize * array.Length);
 
         return result;
     }

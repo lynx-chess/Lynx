@@ -187,6 +187,8 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void CopyPVTableMoves(int target, int source, int moveCountToCopy)
     {
+        const int moveSize = sizeof(Move);
+
         if (_pVTable[source] == default)
         {
             Array.Clear(_pVTable, target, _pVTable.Length - target);
@@ -194,7 +196,8 @@ public sealed partial class Engine
         }
 
         //PrintPvTable(target: target, source: source, movesToCopy: moveCountToCopy);
-        Array.Copy(_pVTable, source, _pVTable, target, moveCountToCopy);
+        Buffer.BlockCopy(_pVTable, source, _pVTable, target, moveSize * moveCountToCopy);
+
         //PrintPvTable();
     }
 
