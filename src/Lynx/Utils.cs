@@ -104,7 +104,9 @@ public static class Utils
         return (int)BoardSquare.a8 + (7 * 8 * side);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static (int Source, int Target) ShortCastleRookSourceAndTargetSquare(Side side) => ShortCastleRookSourceAndTargetSquare((int)side);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static (int Source, int Target) ShortCastleRookSourceAndTargetSquare(int side)
     {
         GuardAgainstSideBoth(side);
@@ -114,7 +116,9 @@ public static class Utils
             Constants.BlackShortCastleRookSquare + (7 * 8 * side));
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static (int Source, int Target) LongCastleRookSourceAndTargetSquare(Side side) => LongCastleRookSourceAndTargetSquare((int)side);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static (int Source, int Target) LongCastleRookSourceAndTargetSquare(int side)
     {
         GuardAgainstSideBoth(side);
