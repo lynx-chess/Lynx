@@ -65,10 +65,10 @@ public class Position
     {
         UniqueIdentifier = position.UniqueIdentifier;
         PieceBitBoards = new BitBoard[12];
-        Buffer.BlockCopy(position.PieceBitBoards, 0, PieceBitBoards, 0, _bitBoardSize * position.PieceBitBoards.Length);
+        Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
 
         OccupancyBitBoards = new BitBoard[3];
-        Buffer.BlockCopy(position.OccupancyBitBoards, 0, OccupancyBitBoards, 0, _bitBoardSize * position.OccupancyBitBoards.Length);
+        Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
 
         Side = position.Side;
         Castle = position.Castle;
@@ -88,10 +88,10 @@ public class Position
     {
         UniqueIdentifier = position.UniqueIdentifier;
         PieceBitBoards = new BitBoard[12];
-        Buffer.BlockCopy(position.PieceBitBoards, 0, PieceBitBoards, 0, _bitBoardSize * position.PieceBitBoards.Length);
+        Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
 
         OccupancyBitBoards = new BitBoard[3];
-        Buffer.BlockCopy(position.OccupancyBitBoards, 0, OccupancyBitBoards, 0, _bitBoardSize * position.OccupancyBitBoards.Length);
+        Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
 
         Side = (Side)Utils.OppositeSide(position.Side);
         Castle = position.Castle;
