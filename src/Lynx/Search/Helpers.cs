@@ -352,6 +352,7 @@ $" {484,-3}                                                         {_pVTable[48
 (target == -1 ? "------------------------------------------------------------------------------------" + Environment.NewLine : ""));
     }
 
+    [Conditional("DEBUG")]
     internal void PrintHistoryMoves()
     {
         int max = int.MinValue;
