@@ -72,6 +72,7 @@ public sealed partial class Engine
 # endif
     }
 
+#pragma warning disable S1144 // Unused private types or members should be removed - used in Release mode
     private void WarmupEngine()
     {
         _logger.Info("Warming up engine");
@@ -88,6 +89,7 @@ public sealed partial class Engine
         sw.Stop();
         _logger.Info("Warm-up finished in {0}ms", sw.ElapsedMilliseconds);
     }
+#pragma warning restore S1144 // Unused private types or members should be removed
 
     private void ResetEngine()
     {

@@ -33,7 +33,7 @@ public class GenerateKingMovesTest
         var position = new Position(fen);
         var moves = GenerateKingMoves(position);
 
-        Assert.AreEqual(moves, MoveGenerator.GenerateKingMoves(position));
+        Assert.AreEqual(moves, ReferenceMoveGenerator.GenerateKingMoves(position));
         Assert.AreEqual(expectedMoves, moves.Count());
     }
 

@@ -7,7 +7,7 @@ public class GameTest : BaseTest
     [Test]
     public void IsThreefoldRepetition_1()
     {
-        var winningPosition = new Position("7k/8/5KR1/8/8/8/5R2/8 w - - 0 1");
+        const string winningPosition = "7k/8/5KR1/8/8/8/5R2/8 w - - 0 1";
 
         var game = new Game(winningPosition);
         var repeatedMoves = new List<Move>
@@ -51,7 +51,7 @@ public class GameTest : BaseTest
     public void IsThreefoldRepetition_2()
     {
         // https://lichess.org/MgWVifcK
-        var winningPosition = new Position("6k1/6b1/1p6/2p5/P7/1K4R1/8/r7 b - - 7 52");
+        const string winningPosition = "6k1/6b1/1p6/2p5/P7/1K4R1/8/r7 b - - 7 52";
 
         var game = new Game(winningPosition);
         var repeatedMoves = new List<Move>
@@ -99,7 +99,7 @@ public class GameTest : BaseTest
         // Position without castling rights
         var winningPosition = new Position("1n2k2r/8/8/8/8/8/4PPPP/1N2K2R w - - 0 1");
 
-        var game = new Game(winningPosition);
+        var game = new Game(winningPosition.FEN());
         var repeatedMoves = new List<Move>
             {
                 MoveExtensions.Encode((int)BoardSquare.b1, (int)BoardSquare.c3, (int)Piece.N),
@@ -134,7 +134,7 @@ public class GameTest : BaseTest
         // Position with castling rights, lost in move Ke1d1
         winningPosition = new Position("1n2k2r/8/8/8/8/8/4PPPP/1N2K2R w Kk - 0 1");
 
-        game = new Game(winningPosition);
+        game = new Game(winningPosition.FEN());
         repeatedMoves = new List<Move>
             {
                 MoveExtensions.Encode((int)BoardSquare.b1, (int)BoardSquare.c3, (int)Piece.N),
@@ -173,7 +173,7 @@ public class GameTest : BaseTest
     [Test]
     public void FiftyMovesRule_1()
     {
-        var winningPosition = new Position("7k/8/5KR1/8/8/8/5R2/8 w - - 0 1");
+        const string winningPosition = "7k/8/5KR1/8/8/8/5R2/8 w - - 0 1";
 
         var game = new Game(winningPosition);
         var nonCaptureOrPawnMoveMoves = new List<Move>
@@ -205,7 +205,7 @@ public class GameTest : BaseTest
     public void FiftyMovesRule_2()
     {
         // https://lichess.org/MgWVifcK
-        var winningPosition = new Position("6k1/6b1/1p6/2p5/P7/1K4R1/8/r7 b - - 7 52");
+        const string winningPosition = "6k1/6b1/1p6/2p5/P7/1K4R1/8/r7 b - - 7 52";
 
         var game = new Game(winningPosition);
         var nonCaptureOrPawnMoveMoves = new List<Move>
@@ -232,7 +232,7 @@ public class GameTest : BaseTest
     public void FiftyMovesRule_Promotion()
     {
         // https://lichess.org/MgWVifcK
-        var winningPosition = new Position("6k1/6b1/1p6/2p5/P7/1K4R1/7p/r7 b - - 7 52");
+        const string winningPosition = "6k1/6b1/1p6/2p5/P7/1K4R1/7p/r7 b - - 7 52";
 
         var game = new Game(winningPosition);
         var nonCaptureOrPawnMoveMoves = new List<Move>

@@ -91,6 +91,8 @@
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
 using Lynx.UCI.Commands.GUI;
+using NLog;
+using System.Runtime.CompilerServices;
 
 namespace Lynx.Benchmark;
 
@@ -111,9 +113,9 @@ public class TryParseFromUCIString_Benchmark : BaseBenchmark
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]
-    public Game Array(string positionCommand)
+    public TryParseFromUCIString_Benchmark_Game Array(string positionCommand)
     {
-        return PositionCommand.ParseGame(positionCommand, _movePool);
+        return ParseGame(positionCommand, _movePool);
     }
 
     [Benchmark]
@@ -123,5 +125,123 @@ public class TryParseFromUCIString_Benchmark : BaseBenchmark
         Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
 
         return PositionCommand.ParseGame(positionCommand, movePool);
+    }
+
+    private static TryParseFromUCIString_Benchmark_Game ParseGame(ReadOnlySpan<char> positionCommandSpan, Move[] movePool)
+    {
+        try
+        {
+            // We divide the position command in these two sections:
+            // "position startpos                       ||"
+            // "position startpos                       || moves e2e4 e7e5"
+            // "position fen 8/8/8/8/8/8/8/8 w - - 0 1  ||"
+            // "position fen 8/8/8/8/8/8/8/8 w - - 0 1  || moves e2e4 e7e5"
+            Span<Range> items = stackalloc Range[2];
+            positionCommandSpan.Split(items, "moves", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            var initialPositionSection = positionCommandSpan[items[0]];
+
+            // We divide in these two parts
+            // "position startpos ||"       <-- If "fen" doesn't exist in the section
+            // "position || (fen) 8/8/8/8/8/8/8/8 w - - 0 1"  <-- If "fen" does exist
+            Span<Range> initialPositionParts = stackalloc Range[2];
+            initialPositionSection.Split(initialPositionParts, "fen", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            ReadOnlySpan<char> fen = initialPositionSection[initialPositionParts[0]].Length == PositionCommand.Id.Length   // "position" o "position startpos"
+                ? initialPositionSection[initialPositionParts[1]]
+                : Constants.InitialPositionFEN.AsSpan();
+
+            var movesSection = positionCommandSpan[items[1]];
+
+            Span<Range> moves = stackalloc Range[(movesSection.Length / 5) + 1]; // Number of potential half-moves provided in the string
+            movesSection.Split(moves, ' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            return new TryParseFromUCIString_Benchmark_Game(fen, movesSection, moves, movePool);
+        }
+        catch (Exception)
+        {
+            throw new($"Error parsing position command '{positionCommandSpan.ToString()}'");
+        }
+    }
+
+    public sealed class TryParseFromUCIString_Benchmark_Game
+    {
+        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
+#if DEBUG
+        public List<Move> MoveHistory { get; }
+#endif
+
+        public HashSet<long> PositionHashHistory { get; }
+
+        public int HalfMovesWithoutCaptureOrPawnMove { get; set; }
+
+#pragma warning disable RCS1169, S2933, S4487, IDE0044, IDE0052, RCS1170 // Readonly, not used
+        public Position CurrentPosition { get; private set; }
+
+        private Position _gameInitialPosition;
+#pragma warning restore RCS1169, S2933, S4487, IDE0044, IDE0052, RCS1170 // Readonly, not used
+
+        public TryParseFromUCIString_Benchmark_Game(ReadOnlySpan<char> fen)
+        {
+            var parsedFen = FENParser.ParseFEN(fen);
+            CurrentPosition = new Position(parsedFen);
+            if (!CurrentPosition.IsValid())
+            {
+                _logger.Warn($"Invalid position detected: {fen.ToString()}");
+            }
+
+            PositionHashHistory = new(1024) { CurrentPosition.UniqueIdentifier };
+            HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
+            _gameInitialPosition = new Position(CurrentPosition);
+#if DEBUG
+            MoveHistory = new(1024);
+#endif
+        }
+
+        public TryParseFromUCIString_Benchmark_Game(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan, Move[] movePool) : this(fen)
+        {
+            for (int i = 0; i < rangeSpan.Length; ++i)
+            {
+                if (rangeSpan[i].Start.Equals(rangeSpan[i].End))
+                {
+                    break;
+                }
+                var moveString = rawMoves[rangeSpan[i]];
+                var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, movePool);
+
+                if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
+                {
+                    _logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen.ToString(), rawMoves.ToString(), moveString.ToString());
+                    break;
+                }
+
+                MakeMove(parsedMove.Value);
+            }
+
+            _gameInitialPosition = new Position(CurrentPosition);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public GameState MakeMove(Move moveToPlay)
+        {
+            var gameState = CurrentPosition.MakeMove(moveToPlay);
+
+            if (CurrentPosition.WasProduceByAValidMove())
+            {
+#if DEBUG
+                MoveHistory.Add(moveToPlay);
+#endif
+            }
+            else
+            {
+                _logger.Warn("Error trying to play {0}", moveToPlay.UCIString());
+                CurrentPosition.UnmakeMove(moveToPlay, gameState);
+            }
+
+            PositionHashHistory.Add(CurrentPosition.UniqueIdentifier);
+            HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveToPlay, HalfMovesWithoutCaptureOrPawnMove);
+
+            return gameState;
+        }
     }
 }
