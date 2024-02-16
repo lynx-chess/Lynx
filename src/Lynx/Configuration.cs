@@ -111,15 +111,9 @@ public sealed class EngineSettings
 
     public bool ShowWDL { get; set; } = false;
 
-    /// <summary>
-    /// 1/4, suggested by MinusKelvin (EP discord)
-    /// </summary>
-    public double HardTimeBound { get; set; } = 0.25;
+    public double HardTimeBound { get; set; } = 0.033333;
 
-    /// <summary>
-    /// 1/30, suggested by Serdra (EP discord)
-    /// </summary>
-    public double SoftTimeBound { get; set; } = 0.03333;
+    public double SoftTimeBound { get; set; } = 0.013333;
 
     public int LMR_MinDepth { get; set; } = 3;
 
