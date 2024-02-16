@@ -3,9 +3,9 @@ using NUnit.Framework;
 
 namespace Lynx.Test.MoveGeneration;
 
+#pragma warning disable RCS1098 // Constant values should be placed on right side of comparisons.
 public class GeneratePawnMovesTest
 {
-#pragma warning disable RCS1098 // Constant values should be placed on right side of comparisons.
 
     private static IEnumerable<Move> GeneratePawnMoves(Position position)
     {
@@ -39,7 +39,7 @@ public class GeneratePawnMovesTest
                 && !m.IsCapture()));
         }
 
-        Assert.AreEqual(whiteMoves.Count(), MoveGenerator.GeneratePawnMovesForReference(position, 0).Count());
+        Assert.AreEqual(whiteMoves.Count(), ReferenceMoveGenerator.GeneratePawnMovesForReference(position, 0).Count());
 
         position = new Position("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1");
         var blackMoves = GeneratePawnMoves(position);
@@ -57,7 +57,7 @@ public class GeneratePawnMovesTest
                 && !m.IsCapture()));
         }
 
-        Assert.AreEqual(blackMoves.Count(), MoveGenerator.GeneratePawnMovesForReference(position, 6).Count());
+        Assert.AreEqual(blackMoves.Count(), ReferenceMoveGenerator.GeneratePawnMovesForReference(position, 6).Count());
     }
 
     [TestCase("8/8/8/8/8/p1p1p1p1/P1P1P1P1/8 w - - 0 1", 0)]
