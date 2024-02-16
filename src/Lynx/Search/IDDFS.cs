@@ -188,10 +188,16 @@ public sealed partial class Engine
             return false;
         }
 
-        if (depth >= maxDepth)
+        if (maxDepth > 0)
         {
-            _logger.Info("Stopping at depth {0}: max. depth reached", depth - 1);
-            return false;
+            var shouldContinue = depth <= maxDepth;
+
+            if (!shouldContinue)
+            {
+                _logger.Info("Stopping at depth {0}: max. depth reached", depth - 1);
+            }
+
+            return shouldContinue;
         }
 
         var elapsedMilliseconds = _stopWatch.ElapsedMilliseconds;

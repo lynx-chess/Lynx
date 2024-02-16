@@ -142,7 +142,7 @@ public sealed partial class Engine
         _searchCancellationTokenSource = new();
         _absoluteSearchCancellationTokenSource = new();
 
-        int maxDepth = Configuration.EngineSettings.MaxDepth;
+        int maxDepth = -1;
         int hardLimitTimeBound;
         int softLimitTimeBound = int.MaxValue;
 
