@@ -1,6 +1,7 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using static Lynx.PregeneratedMoves;
 
 namespace Lynx;
 
@@ -11,11 +12,6 @@ public static class MoveGenerator
 #endif
 
     private const int TRUE = 1;
-
-    public static int WhiteShortCastle = MoveExtensions.EncodeShortCastle(Constants.WhiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K);
-    public static int WhiteLongCastle = MoveExtensions.EncodeLongCastle(Constants.WhiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K);
-    public static int BlackShortCastle = MoveExtensions.EncodeShortCastle(Constants.BlackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.k);
-    public static int BlackLongCastle = MoveExtensions.EncodeLongCastle(Constants.BlackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.k);
 
     /// <summary>
     /// Indexed by <see cref="Piece"/>.
@@ -63,6 +59,7 @@ public static class MoveGenerator
     /// <param name="movePool"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [Obsolete("Just intended for testing purposes")]
     public static Move[] GenerateAllMoves(Position position, Move[] movePool)
     {
 #if DEBUG
@@ -125,6 +122,7 @@ public static class MoveGenerator
     /// <param name="movePool"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [Obsolete("Just intended for testing purposes")]
     public static Move[] GenerateAllCaptures(Position position, Move[] movePool)
     {
 #if DEBUG
@@ -211,12 +209,23 @@ public static class MoveGenerator
             {
                 // Single pawn push
                 var targetRank = (singlePushSquare >> 3) + 1;
-                if (targetRank == 1 || targetRank == 8)  // Promotion
+                if (targetRank == 1)  // White promotion
                 {
-                    movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.Q + offset);
-                    movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.R + offset);
-                    movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.N + offset);
-                    movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.B + offset);
+                    var whitePromotions = WhitePromotions[singlePushSquare];
+
+                    movePool[localIndex++] = whitePromotions[0];
+                    movePool[localIndex++] = whitePromotions[1];
+                    movePool[localIndex++] = whitePromotions[2];
+                    movePool[localIndex++] = whitePromotions[3];
+                }
+                else if (targetRank == 8)    // Black promotion
+                {
+                    var blackPromotions = BlackPromotions[singlePushSquare - 56];
+
+                    movePool[localIndex++] = blackPromotions[0];
+                    movePool[localIndex++] = blackPromotions[1];
+                    movePool[localIndex++] = blackPromotions[2];
+                    movePool[localIndex++] = blackPromotions[3];
                 }
                 else
                 {
@@ -297,12 +306,23 @@ public static class MoveGenerator
             {
                 // Single pawn push
                 var targetRank = (singlePushSquare >> 3) + 1;
-                if (targetRank == 1 || targetRank == 8)  // Promotion
+                if (targetRank == 1)    // White promotion
                 {
-                    movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.Q + offset);
-                    movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.R + offset);
-                    movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.N + offset);
-                    movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.B + offset);
+                    var whitePromotions = WhitePromotions[singlePushSquare];
+
+                    movePool[localIndex++] = whitePromotions[0];
+                    movePool[localIndex++] = whitePromotions[1];
+                    movePool[localIndex++] = whitePromotions[2];
+                    movePool[localIndex++] = whitePromotions[3];
+                }
+                else if (targetRank == 8)    // Black promotion
+                {
+                    var blackPromotions = BlackPromotions[singlePushSquare - 56];
+
+                    movePool[localIndex++] = blackPromotions[0];
+                    movePool[localIndex++] = blackPromotions[1];
+                    movePool[localIndex++] = blackPromotions[2];
+                    movePool[localIndex++] = blackPromotions[3];
                 }
             }
 
