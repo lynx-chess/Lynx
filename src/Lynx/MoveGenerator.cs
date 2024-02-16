@@ -209,23 +209,27 @@ public static class MoveGenerator
             {
                 // Single pawn push
                 var targetRank = (singlePushSquare >> 3) + 1;
-                if (targetRank == 1)  // White promotion
+                if (targetRank == 1)    // White promotion
                 {
                     var whitePromotions = WhitePromotions[singlePushSquare];
 
-                    movePool[localIndex++] = whitePromotions[0];
-                    movePool[localIndex++] = whitePromotions[1];
-                    movePool[localIndex++] = whitePromotions[2];
-                    movePool[localIndex++] = whitePromotions[3];
+                    movePool[localIndex] = whitePromotions[0];
+                    movePool[localIndex + 1] = whitePromotions[1];
+                    movePool[localIndex + 2] = whitePromotions[2];
+                    movePool[localIndex + 3] = whitePromotions[3];
+
+                    localIndex += 4;
                 }
                 else if (targetRank == 8)    // Black promotion
                 {
                     var blackPromotions = BlackPromotions[singlePushSquare - 56];
 
-                    movePool[localIndex++] = blackPromotions[0];
-                    movePool[localIndex++] = blackPromotions[1];
-                    movePool[localIndex++] = blackPromotions[2];
-                    movePool[localIndex++] = blackPromotions[3];
+                    movePool[localIndex] = blackPromotions[0];
+                    movePool[localIndex + 1] = blackPromotions[1];
+                    movePool[localIndex + 2] = blackPromotions[2];
+                    movePool[localIndex + 3] = blackPromotions[3];
+
+                    localIndex += 4;
                 }
                 else
                 {
@@ -310,19 +314,23 @@ public static class MoveGenerator
                 {
                     var whitePromotions = WhitePromotions[singlePushSquare];
 
-                    movePool[localIndex++] = whitePromotions[0];
-                    movePool[localIndex++] = whitePromotions[1];
-                    movePool[localIndex++] = whitePromotions[2];
-                    movePool[localIndex++] = whitePromotions[3];
+                    movePool[localIndex] = whitePromotions[0];
+                    movePool[localIndex + 1] = whitePromotions[1];
+                    movePool[localIndex + 2] = whitePromotions[2];
+                    movePool[localIndex + 3] = whitePromotions[3];
+
+                    localIndex += 4;
                 }
                 else if (targetRank == 8)    // Black promotion
                 {
                     var blackPromotions = BlackPromotions[singlePushSquare - 56];
 
-                    movePool[localIndex++] = blackPromotions[0];
-                    movePool[localIndex++] = blackPromotions[1];
-                    movePool[localIndex++] = blackPromotions[2];
-                    movePool[localIndex++] = blackPromotions[3];
+                    movePool[localIndex] = blackPromotions[0];
+                    movePool[localIndex + 1] = blackPromotions[1];
+                    movePool[localIndex + 2] = blackPromotions[2];
+                    movePool[localIndex + 3] = blackPromotions[3];
+
+                    localIndex += 4;
                 }
             }
 
