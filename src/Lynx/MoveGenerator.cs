@@ -554,12 +554,26 @@ public static class MoveGenerator
             {
                 // Single pawn push
                 var targetRank = (singlePushSquare >> 3) + 1;
-                if (targetRank == 1 || targetRank == 8)  // Promotion
+                if (targetRank == 1)    // White promotion
                 {
-                    if (IsValidMove(position, MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.Q + offset))
-                        || IsValidMove(position, MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.R + offset))
-                        || IsValidMove(position, MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.N + offset))
-                        || IsValidMove(position, MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.B + offset)))
+                    var whitePromotions = WhitePromotions[singlePushSquare];
+
+                    if (IsValidMove(position, whitePromotions[0])
+                        || IsValidMove(position, whitePromotions[1])
+                        || IsValidMove(position, whitePromotions[2])
+                        || IsValidMove(position, whitePromotions[3]))
+                    {
+                        return true;
+                    }
+                }
+                else if (targetRank == 8)    // Black promotion
+                {
+                    var blackPromotions = BlackPromotions[singlePushSquare - 56];
+
+                    if (IsValidMove(position, blackPromotions[0])
+                        || IsValidMove(position, blackPromotions[1])
+                        || IsValidMove(position, blackPromotions[2])
+                        || IsValidMove(position, blackPromotions[3]))
                     {
                         return true;
                     }
