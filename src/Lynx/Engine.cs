@@ -172,11 +172,11 @@ public sealed partial class Engine
                 millisecondsLeft = Math.Clamp(millisecondsLeft, minSearchTime, int.MaxValue); // Avoiding 0/negative values
 
                 softLimitTimeBound = Convert.ToInt32(Math.Min(
-                    millisecondsLeft * Configuration.EngineSettings.SoftTimeBound + millisecondsIncrement,
+                    (millisecondsLeft * Configuration.EngineSettings.SoftTimeBound) + millisecondsIncrement,
                     millisecondsLeft * 0.5));
 
                 hardLimitTimeBound = Convert.ToInt32(Math.Min(
-                    millisecondsLeft * Configuration.EngineSettings.HardTimeBound + millisecondsIncrement,
+                    (millisecondsLeft * Configuration.EngineSettings.HardTimeBound) + millisecondsIncrement,
                     millisecondsLeft * 0.5));
             }
             else
