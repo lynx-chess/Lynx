@@ -1,10 +1,5 @@
 ﻿using Lynx.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Lynx.Test.MoveGeneration;
 public static class ReferenceMoveGenerator
@@ -37,7 +32,6 @@ public static class ReferenceMoveGenerator
     /// <param name="offset"></param>
     /// <param name="capturesOnly"></param>
     /// <returns></returns>
-    [Obsolete("Mostly for reference")]
     internal static IEnumerable<Move> GeneratePawnMovesForReference(Position position, int offset, bool capturesOnly = false)
     {
         int sourceSquare, targetSquare;
@@ -123,7 +117,6 @@ public static class ReferenceMoveGenerator
         }
     }
 
-    [Obsolete("Mostly for reference")]
     internal static IEnumerable<Move> GenerateKingMoves(Position position, bool capturesOnly = false)
     {
         var offset = Utils.PieceOffset(position.Side);
@@ -131,7 +124,6 @@ public static class ReferenceMoveGenerator
         return GeneratePieceMovesForReference((int)Piece.K + offset, position, offset, capturesOnly);
     }
 
-    [Obsolete("Mostly for reference")]
     internal static IEnumerable<Move> GenerateKnightMoves(Position position, bool capturesOnly = false)
     {
         var offset = Utils.PieceOffset(position.Side);
@@ -139,7 +131,6 @@ public static class ReferenceMoveGenerator
         return GeneratePieceMovesForReference((int)Piece.N + offset, position, offset, capturesOnly);
     }
 
-    [Obsolete("Mostly for reference")]
     internal static IEnumerable<Move> GenerateBishopMoves(Position position, bool capturesOnly = false)
     {
         var offset = Utils.PieceOffset(position.Side);
@@ -147,7 +138,6 @@ public static class ReferenceMoveGenerator
         return GeneratePieceMovesForReference((int)Piece.B + offset, position, offset, capturesOnly);
     }
 
-    [Obsolete("Mostly for reference")]
     internal static IEnumerable<Move> GenerateRookMoves(Position position, bool capturesOnly = false)
     {
         var offset = Utils.PieceOffset(position.Side);
@@ -155,7 +145,6 @@ public static class ReferenceMoveGenerator
         return GeneratePieceMovesForReference((int)Piece.R + offset, position, offset, capturesOnly);
     }
 
-    [Obsolete("Mostly for reference")]
     internal static IEnumerable<Move> GenerateQueenMoves(Position position, bool capturesOnly = false)
     {
         var offset = Utils.PieceOffset(position.Side);
@@ -170,7 +159,6 @@ public static class ReferenceMoveGenerator
     /// <param name="position"></param>
     /// <param name="capturesOnly"></param>
     /// <returns></returns>
-    [Obsolete("Mostly for reference")]
     private static IEnumerable<Move> GeneratePieceMovesForReference(int piece, Position position, int offset, bool capturesOnly = false)
     {
         var bitboard = position.PieceBitBoards[piece];
