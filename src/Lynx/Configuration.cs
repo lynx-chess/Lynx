@@ -111,9 +111,15 @@ public sealed class EngineSettings
 
     public bool ShowWDL { get; set; } = false;
 
-    public int MinElapsedTimeToConsiderStopSearching { get; set; } = 0;
+    /// <summary>
+    /// 1/4, suggested by MinusKelvin (EP discord)
+    /// </summary>
+    public double HardTimeBound { get; set; } = 0.25;
 
-    public double DecisionTimePercentageToStopSearching { get; set; } = 0.4;
+    /// <summary>
+    /// 1/30, suggested by Serdra (EP discord)
+    /// </summary>
+    public double SoftTimeBound { get; set; } = 0.03333;
 
     public int LMR_MinDepth { get; set; } = 3;
 

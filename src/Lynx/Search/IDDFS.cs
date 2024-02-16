@@ -47,9 +47,9 @@ public sealed partial class Engine
     /// IDDFs search
     /// </summary>
     /// <param name="maxDepth"></param>
-    /// <param name="decisionTime"></param>
+    /// <param name="softLimitTimeBound"></param>
     /// <returns>Not null <see cref="SearchResult"/>, although made nullable in order to match online tb probing signature</returns>
-    public SearchResult IDDFS(int? maxDepth, int? decisionTime)
+    public SearchResult IDDFS(int maxDepth, int softLimitTimeBound)
     {
         // Cleanup
         _nodes = 0;
@@ -146,7 +146,7 @@ public sealed partial class Engine
                 lastSearchResult = UpdateLastSearchResult(lastSearchResult, bestEvaluation, alpha, beta, depth, isMateDetected, bestEvaluationAbs);
 
                 _engineWriter.TryWrite(InfoCommand.SearchResultInfo(lastSearchResult));
-            } while (StopSearchCondition(++depth, maxDepth, isMateDetected, decisionTime));
+            } while (StopSearchCondition(++depth, maxDepth, isMateDetected, softLimitTimeBound));
         }
         catch (OperationCanceledException)
         {
@@ -180,31 +180,25 @@ public sealed partial class Engine
         return finalSearchResult;
     }
 
-    private bool StopSearchCondition(int depth, int? maxDepth, bool isMateDetected, int? decisionTime)
+    private bool StopSearchCondition(int depth, int maxDepth, bool isMateDetected, int softLimitTimeBound)
     {
         if (isMateDetected)
         {
-            _logger.Info($"Stopping at depth {depth - 1}: mate detected");
+            _logger.Info("Stopping at depth {0}: mate detected", depth - 1);
             return false;
         }
 
-        if (maxDepth is not null)
+        if (depth >= maxDepth)
         {
-            bool shouldContinue = depth <= maxDepth;
-            if (!shouldContinue)
-            {
-                _logger.Info("Stopping at depth {0}: max. depth reached", depth - 1);
-            }
-            return shouldContinue;
+            _logger.Info("Stopping at depth {0}: max. depth reached", depth - 1);
+            return false;
         }
 
         var elapsedMilliseconds = _stopWatch.ElapsedMilliseconds;
-        var minTimeToConsiderStopSearching = Configuration.EngineSettings.MinElapsedTimeToConsiderStopSearching;
-        var decisionTimePercentageToStopSearching = Configuration.EngineSettings.DecisionTimePercentageToStopSearching;
-        if (decisionTime is not null && elapsedMilliseconds > minTimeToConsiderStopSearching && elapsedMilliseconds > decisionTimePercentageToStopSearching * decisionTime)
+
+        if (elapsedMilliseconds > softLimitTimeBound)
         {
-            _logger.Info("Stopping at depth {0} (nodes {1}): {2} > {3} (elapsed time > [{4}, {5} * decision time])",
-                depth - 1, _nodes, elapsedMilliseconds, decisionTimePercentageToStopSearching * decisionTime, minTimeToConsiderStopSearching, decisionTimePercentageToStopSearching);
+            _logger.Info("Stopping at depth {0} (nodes {1}): {2}ms > {3}ms", depth - 1, _nodes, elapsedMilliseconds, softLimitTimeBound);
             return false;
         }
 

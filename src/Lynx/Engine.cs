@@ -141,8 +141,10 @@ public sealed partial class Engine
     {
         _searchCancellationTokenSource = new();
         _absoluteSearchCancellationTokenSource = new();
-        int? maxDepth = Configuration.EngineSettings.MaxDepth;
-        int? decisionTime = null;
+
+        int maxDepth = Configuration.EngineSettings.MaxDepth;
+        int hardLimitTimeBound;
+        int softLimitTimeBound = int.MaxValue;
 
         int millisecondsLeft;
         int millisecondsIncrement;
@@ -157,20 +159,25 @@ public sealed partial class Engine
             millisecondsIncrement = goCommand.BlackIncrement;
         }
 
+        // Inspired by Alexandria: time overhead to avoid timing out in the engine-gui communication process
+        const int engineGuiCommunicationTimeOverhead = 50;
+
         if (goCommand.WhiteTime != 0 || goCommand.BlackTime != 0)  // Cutechess sometimes sends negative wtime/btime
         {
             const int minSearchTime = 50;
 
             if (goCommand.MovesToGo == default)
             {
-                // Inspired by Alexandria: time overhead to avoid timing out in the engine-gui communication process
-                const int engineGuiCommunicationTimeOverhead = 50;
-
                 millisecondsLeft -= engineGuiCommunicationTimeOverhead;
                 millisecondsLeft = Math.Clamp(millisecondsLeft, minSearchTime, int.MaxValue); // Avoiding 0/negative values
 
-                // 1/30, suggested by Serdra (EP discord)
-                decisionTime = Convert.ToInt32(Math.Min(0.5 * millisecondsLeft, (millisecondsLeft * 0.03333) + millisecondsIncrement));
+                softLimitTimeBound = Convert.ToInt32(Math.Min(
+                    millisecondsLeft * Configuration.EngineSettings.SoftTimeBound + millisecondsIncrement,
+                    millisecondsLeft * 0.5));
+
+                hardLimitTimeBound = Convert.ToInt32(Math.Min(
+                    millisecondsLeft * Configuration.EngineSettings.HardTimeBound + millisecondsIncrement,
+                    millisecondsLeft * 0.5));
             }
             else
             {
@@ -180,17 +187,20 @@ public sealed partial class Engine
                 millisecondsLeft -= movesToGoTimeOverhead;
                 millisecondsLeft = Math.Clamp(millisecondsLeft, minSearchTime, int.MaxValue); // Avoiding 0/negative values
 
-                decisionTime = Convert.ToInt32((millisecondsLeft / goCommand.MovesToGo) + millisecondsIncrement);
+                softLimitTimeBound = hardLimitTimeBound = Convert.ToInt32((millisecondsLeft / goCommand.MovesToGo) + millisecondsIncrement);
             }
 
-            _logger.Info("Time to move: {0}s", 0.001 * decisionTime);
-            _searchCancellationTokenSource.CancelAfter(decisionTime!.Value);
+            _logger.Info("Soft time bound: {0}s", 0.001 * softLimitTimeBound);
+            _logger.Info("Hard time bound: {0}s", 0.001 * hardLimitTimeBound);
+
+            _searchCancellationTokenSource.CancelAfter(hardLimitTimeBound);
         }
         else if (goCommand.MoveTime > 0)
         {
-            decisionTime = (int)(0.95 * goCommand.MoveTime);
-            _logger.Info("Time to move: {0}s", 0.001 * decisionTime);
-            _searchCancellationTokenSource.CancelAfter(decisionTime.Value);
+            softLimitTimeBound = hardLimitTimeBound = goCommand.MoveTime - engineGuiCommunicationTimeOverhead;
+            _logger.Info("Time to move: {0}s", 0.001 * hardLimitTimeBound);
+
+            _searchCancellationTokenSource.CancelAfter(hardLimitTimeBound);
         }
         else if (goCommand.Depth > 0)
         {
@@ -203,11 +213,11 @@ public sealed partial class Engine
         }
         else
         {
-            _logger.Warn("Unexpected or unsupported go command");
             maxDepth = DefaultMaxDepth;
+            _logger.Warn("Unexpected or unsupported go command");
         }
 
-        SearchResult resultToReturn = IDDFS(maxDepth, decisionTime);
+        SearchResult resultToReturn = IDDFS(maxDepth, softLimitTimeBound);
         //SearchResult resultToReturn = await SearchBestMove(maxDepth, decisionTime);
 
         Game.ResetCurrentPositionToBeforeSearchState();
@@ -222,11 +232,11 @@ public sealed partial class Engine
         return resultToReturn;
     }
 
-    private async ValueTask<SearchResult> SearchBestMove(int? maxDepth, int? decisionTime)
+    private async ValueTask<SearchResult> SearchBestMove(int maxDepth, int softLimitTimeBound)
     {
         if (!Configuration.EngineSettings.UseOnlineTablebaseInRootPositions || Game.CurrentPosition.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
         {
-            return IDDFS(maxDepth, decisionTime)!;
+            return IDDFS(maxDepth, softLimitTimeBound)!;
         }
 
         // Local copy of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove so that it doesn't interfere with regular search
@@ -235,7 +245,7 @@ public sealed partial class Engine
         var tasks = new Task<SearchResult?>[] {
                 // Other copies of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove (same reason)
                 ProbeOnlineTablebase(Game.CurrentPosition, new(Game.PositionHashHistory),  Game.HalfMovesWithoutCaptureOrPawnMove),
-                Task.Run(()=>(SearchResult?)IDDFS(maxDepth, decisionTime))
+                Task.Run(()=>(SearchResult?)IDDFS(maxDepth, softLimitTimeBound))
             };
 
         var resultList = await Task.WhenAll(tasks);
