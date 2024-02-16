@@ -41,7 +41,8 @@ public class PositionCommandTest
     [TestCase(" position    fen         rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1   moves d2d4   g8f6     g1f3  d7d5 b1c3  e7e6 g2g3 c7c5  e2e3      ")]
     public void ParseGame_Spaces(string positionCommand)
     {
-        var parsedGame = PositionCommand.ParseGame(positionCommand, new Move[Constants.MaxNumberOfPossibleMovesInAPosition]);
+        Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        var parsedGame = PositionCommand.ParseGame(positionCommand, movePool);
 
 #if DEBUG
         Assert.AreEqual("d2d4", parsedGame.MoveHistory[0].UCIString());
@@ -66,7 +67,8 @@ public class PositionCommandTest
     [Test]
     public void ParseGame_Long()
     {
-        var parsedGame = PositionCommand.ParseGame(Constants.LongPositionCommand, new Move[Constants.MaxNumberOfPossibleMovesInAPosition]);
+        Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        var parsedGame = PositionCommand.ParseGame(Constants.LongPositionCommand, movePool);
 
         Assert.AreNotEqual(Constants.InitialPositionFEN, parsedGame.CurrentPosition);
         Assert.Greater(parsedGame.PositionHashHistory.Count, 500);

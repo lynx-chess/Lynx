@@ -1,6 +1,5 @@
 ﻿using Lynx.Model;
 using Moq;
-using NUnit.Framework;
 using System.Threading.Channels;
 
 namespace Lynx.Test;
