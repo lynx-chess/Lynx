@@ -117,4 +117,29 @@ public static class PregeneratedMoves
             MoveExtensions.EncodePromotion((int)BoardSquare.h2, (int)BoardSquare.h1, (int)Piece.p, promotedPiece: (int)Piece.b),
         ]
     ];
+
+    /// <summary>
+    /// 16, one per pawn.
+    /// Conveniently Indexed by target square - 24
+    /// </summary>
+    public static readonly Move[] DoublePawnPushes =
+    [
+        MoveExtensions.EncodeDoublePawnPush((int)BoardSquare.a7, (int)BoardSquare.a5, (int)Piece.p),
+        MoveExtensions.EncodeDoublePawnPush((int)BoardSquare.b7, (int)BoardSquare.b5, (int)Piece.p),
+        MoveExtensions.EncodeDoublePawnPush((int)BoardSquare.c7, (int)BoardSquare.c5, (int)Piece.p),
+        MoveExtensions.EncodeDoublePawnPush((int)BoardSquare.d7, (int)BoardSquare.d5, (int)Piece.p),
+        MoveExtensions.EncodeDoublePawnPush((int)BoardSquare.e7, (int)BoardSquare.e5, (int)Piece.p),
+        MoveExtensions.EncodeDoublePawnPush((int)BoardSquare.f7, (int)BoardSquare.f5, (int)Piece.p),
+        MoveExtensions.EncodeDoublePawnPush((int)BoardSquare.g7, (int)BoardSquare.g5, (int)Piece.p),
+        MoveExtensions.EncodeDoublePawnPush((int)BoardSquare.h7, (int)BoardSquare.h5, (int)Piece.p),
+
+        MoveExtensions.EncodeDoublePawnPush((int)BoardSquare.a2, (int)BoardSquare.a4, (int)Piece.P),
+        MoveExtensions.EncodeDoublePawnPush((int)BoardSquare.b2, (int)BoardSquare.b4, (int)Piece.P),
+        MoveExtensions.EncodeDoublePawnPush((int)BoardSquare.c2, (int)BoardSquare.c4, (int)Piece.P),
+        MoveExtensions.EncodeDoublePawnPush((int)BoardSquare.d2, (int)BoardSquare.d4, (int)Piece.P),
+        MoveExtensions.EncodeDoublePawnPush((int)BoardSquare.e2, (int)BoardSquare.e4, (int)Piece.P),
+        MoveExtensions.EncodeDoublePawnPush((int)BoardSquare.f2, (int)BoardSquare.f4, (int)Piece.P),
+        MoveExtensions.EncodeDoublePawnPush((int)BoardSquare.g2, (int)BoardSquare.g4, (int)Piece.P),
+        MoveExtensions.EncodeDoublePawnPush((int)BoardSquare.h2, (int)BoardSquare.h4, (int)Piece.P)
+    ];
 }

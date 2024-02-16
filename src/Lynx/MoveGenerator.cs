@@ -210,7 +210,7 @@ public static class MoveGenerator
                 if (!position.OccupancyBitBoards[2].GetBit(doublePushSquare)
                     && ((sourceRank == 2 && position.Side == Side.Black) || (sourceRank == 7 && position.Side == Side.White)))
                 {
-                    movePool[localIndex++] = MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece);
+                    movePool[localIndex++] = DoublePawnPushes[doublePushSquare - 24];
                 }
             }
 
@@ -575,7 +575,7 @@ public static class MoveGenerator
                 var doublePushSquare = sourceSquare + (2 * pawnPush);
                 if (!position.OccupancyBitBoards[2].GetBit(doublePushSquare)
                     && ((sourceRank == 2 && position.Side == Side.Black) || (sourceRank == 7 && position.Side == Side.White))
-                    && IsValidMove(position, MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece)))
+                    && IsValidMove(position, DoublePawnPushes[doublePushSquare - 24]))
                 {
                     return true;
                 }
