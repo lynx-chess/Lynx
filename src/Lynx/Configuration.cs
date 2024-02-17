@@ -118,7 +118,7 @@ public sealed class EngineSettings
     /// <summary>
     /// 1/4
     /// </summary>
-    public double HardTimeBoundMultiplier { get; set; } = 0.0333333;
+    public double HardTimeBoundMultiplier { get; set; } = 0.25;
 
     /// <summary>
     /// 1/30
