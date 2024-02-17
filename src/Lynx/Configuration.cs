@@ -118,12 +118,12 @@ public sealed class EngineSettings
     /// <summary>
     /// 1/4
     /// </summary>
-    public double HardTimeBoundMultiplier { get; set; } = 0.25;
+    public double HardTimeBoundMultiplier { get; set; } = 0.0333333;
 
     /// <summary>
     /// 1/30
     /// </summary>
-    public double SoftTimeBoundMultiplier { get; set; } = 0.033333;
+    public double SoftTimeBoundMultiplier { get; set; } = 0.4;
 
     public double SoftTimeBaseIncrementMultiplier { get; set; } = 0.75;
 
