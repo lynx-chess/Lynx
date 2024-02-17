@@ -115,14 +115,8 @@ public sealed class EngineSettings
 
     public int DefaultMovesToGo { get; set; } = 30;
 
-    /// <summary>
-    /// 1/4
-    /// </summary>
-    public double HardTimeBoundMultiplier { get; set; } = 0.0333333;
+    public double HardTimeBoundMultiplier { get; set; } = 0.25;
 
-    /// <summary>
-    /// 1/30
-    /// </summary>
     public double SoftTimeBoundMultiplier { get; set; } = 0.4;
 
     public double SoftTimeBaseIncrementMultiplier { get; set; } = 1;
