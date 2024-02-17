@@ -111,9 +111,23 @@ public sealed class EngineSettings
 
     public bool ShowWDL { get; set; } = false;
 
-    public double HardTimeBound { get; set; } = 0.033333;
+    #region Time management
 
-    public double SoftTimeBound { get; set; } = 0.013333;
+    public int DefaultMovesToGo { get; set; } = 30;
+
+    /// <summary>
+    /// 1/4
+    /// </summary>
+    public double HardTimeBoundMultiplier { get; set; } = 0.25;
+
+    /// <summary>
+    /// 1/30
+    /// </summary>
+    public double SoftTimeBoundMultiplier { get; set; } = 0.033333;
+
+    public double SoftTimeBaseIncrementMultiplier { get; set; } = 0.75;
+
+    #endregion
 
     public int LMR_MinDepth { get; set; } = 3;
 

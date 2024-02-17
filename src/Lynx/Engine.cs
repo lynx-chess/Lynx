@@ -146,7 +146,7 @@ public sealed partial class Engine
         int hardLimitTimeBound;
         int softLimitTimeBound = int.MaxValue;
 
-        int millisecondsLeft;
+        double millisecondsLeft;
         int millisecondsIncrement;
         if (Game.CurrentPosition.Side == Side.White)
         {
@@ -166,32 +166,22 @@ public sealed partial class Engine
         {
             const int minSearchTime = 50;
 
-            if (goCommand.MovesToGo == default)
-            {
-                millisecondsLeft -= engineGuiCommunicationTimeOverhead;
-                millisecondsLeft = Math.Clamp(millisecondsLeft, minSearchTime, int.MaxValue); // Avoiding 0/negative values
+            var movesDivisor = goCommand.MovesToGo == 0
+                ? Configuration.EngineSettings.DefaultMovesToGo
+                : goCommand.MovesToGo;
 
-                softLimitTimeBound = Convert.ToInt32(Math.Min(
-                    (millisecondsLeft * Configuration.EngineSettings.SoftTimeBound) + millisecondsIncrement,
-                    millisecondsLeft * 0.5));
+            millisecondsLeft -= engineGuiCommunicationTimeOverhead;
+            millisecondsLeft = Math.Clamp(millisecondsLeft, minSearchTime, int.MaxValue); // Avoiding 0/negative values
 
-                hardLimitTimeBound = Convert.ToInt32(Math.Min(
-                    (millisecondsLeft * Configuration.EngineSettings.HardTimeBound) + millisecondsIncrement,
-                    millisecondsLeft * 0.5));
-            }
-            else
-            {
-                // I prefer to leave some 'just in case' time apart to avoid losing in the last move before the control
-                const int movesToGoTimeOverhead = 500;
+            hardLimitTimeBound = (int)(millisecondsLeft * Configuration.EngineSettings.HardTimeBoundMultiplier);
 
-                millisecondsLeft -= movesToGoTimeOverhead;
-                millisecondsLeft = Math.Clamp(millisecondsLeft, minSearchTime, int.MaxValue); // Avoiding 0/negative values
-
-                softLimitTimeBound = hardLimitTimeBound = Convert.ToInt32((millisecondsLeft / goCommand.MovesToGo) + millisecondsIncrement);
-            }
+            var softLimitBase = (millisecondsLeft / movesDivisor) + (millisecondsIncrement * Configuration.EngineSettings.SoftTimeBaseIncrementMultiplier);
+            softLimitTimeBound = Math.Min(hardLimitTimeBound, (int)(softLimitBase * Configuration.EngineSettings.SoftTimeBoundMultiplier));
 
             _logger.Info("Soft time bound: {0}s", 0.001 * softLimitTimeBound);
             _logger.Info("Hard time bound: {0}s", 0.001 * hardLimitTimeBound);
+
+            //return default!;
 
             _searchCancellationTokenSource.CancelAfter(hardLimitTimeBound);
         }
