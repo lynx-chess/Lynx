@@ -125,7 +125,7 @@ public sealed class EngineSettings
     /// </summary>
     public double SoftTimeBoundMultiplier { get; set; } = 0.4;
 
-    public double SoftTimeBaseIncrementMultiplier { get; set; } = 0.75;
+    public double SoftTimeBaseIncrementMultiplier { get; set; } = 1;
 
     #endregion
 
