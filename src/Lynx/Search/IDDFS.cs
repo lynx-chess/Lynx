@@ -31,7 +31,7 @@ public sealed partial class Engine
     /// </summary>
     private readonly int[][][] _captureHistory;
 
-    private readonly int[] _maxDepthReached = new int[Constants.AbsoluteMaxDepth];
+    private readonly int[] _maxDepthReached = new int[Configuration.EngineSettings.MaxDepth];
     private TranspositionTable _tt = [];
     private int _ttMask;
 
@@ -185,6 +185,12 @@ public sealed partial class Engine
         if (isMateDetected)
         {
             _logger.Info("Stopping at depth {0}: mate detected", depth - 1);
+            return false;
+        }
+
+        if (depth >= Configuration.EngineSettings.MaxDepth)
+        {
+            _logger.Info("Max depth reached: {0}", Configuration.EngineSettings.MaxDepth);
             return false;
         }
 

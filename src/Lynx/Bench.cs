@@ -107,6 +107,11 @@ public partial class Engine
 
         _engineWriter.TryWrite($"Total time: {totalTime}");
 
+        // Cleanup game
+        NewGame();
+        _isNewGameComing = false;
+        _isNewGameCommandSupported = false;
+
         return (totalNodes, Utils.CalculateNps(totalNodes, totalTime));
     }
 
