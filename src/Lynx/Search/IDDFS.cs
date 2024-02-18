@@ -31,7 +31,7 @@ public sealed partial class Engine
     /// </summary>
     private readonly int[][][] _captureHistory;
 
-    private readonly int[] _maxDepthReached = new int[Constants.AbsoluteMaxDepth];
+    private readonly int[] _maxDepthReached = new int[Configuration.EngineSettings.MaxDepth];
     private TranspositionTable _tt = [];
     private int _ttMask;
 
