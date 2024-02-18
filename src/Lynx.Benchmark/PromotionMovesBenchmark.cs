@@ -6,11 +6,11 @@
  * .NET SDK 8.0.201
  *   [Host]     : .NET 8.0.2 (8.0.224.6711), X64 RyuJIT AVX2
  *   DefaultJob : .NET 8.0.2 (8.0.224.6711), X64 RyuJIT AVX2
- *
- * | Method               | Mean     | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
- * |--------------------- |---------:|----------:|----------:|------:|----------:|------------:|
- * | Naive                | 2.801 ns | 0.0084 ns | 0.0065 ns |  1.00 |         - |          NA |
- * | Increment_At_The_End | 2.761 ns | 0.0066 ns | 0.0051 ns |  0.99 |         - |          NA |
+ * | Method               | Mean     | Error     | StdDev    | Ratio | RatioSD | Allocated | Alloc Ratio |
+ * |--------------------- |---------:|----------:|----------:|------:|--------:|----------:|------------:|
+ * | Naive                | 2.784 ns | 0.0244 ns | 0.0228 ns |  1.00 |    0.00 |         - |          NA |
+ * | Increment_At_The_End | 2.796 ns | 0.0205 ns | 0.0192 ns |  1.00 |    0.01 |         - |          NA |
+ * | ArrayCopyToSpan      | 4.043 ns | 0.0271 ns | 0.0240 ns |  1.45 |    0.02 |         - |          NA |
  *
  *
  * BenchmarkDotNet v0.13.12, Windows 10 (10.0.20348.2227) (Hyper-V)
@@ -21,8 +21,9 @@
  *
  * | Method               | Mean     | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
  * |--------------------- |---------:|----------:|----------:|------:|----------:|------------:|
- * | Naive                | 2.744 ns | 0.0071 ns | 0.0066 ns |  1.00 |         - |          NA |
- * | Increment_At_The_End | 2.738 ns | 0.0064 ns | 0.0060 ns |  1.00 |         - |          NA |
+ * | Naive                | 2.760 ns | 0.0076 ns | 0.0068 ns |  1.00 |         - |          NA |
+ * | Increment_At_The_End | 2.755 ns | 0.0147 ns | 0.0138 ns |  1.00 |         - |          NA |
+ * | ArrayCopyToSpan      | 3.674 ns | 0.0086 ns | 0.0081 ns |  1.33 |         - |          NA |
  *
  *
  * BenchmarkDotNet v0.13.12, macOS Monterey 12.7.3 (21H1015) [Darwin 21.6.0]
@@ -33,8 +34,9 @@
  *
  * | Method               | Mean     | Error     | StdDev    | Ratio | RatioSD | Allocated | Alloc Ratio |
  * |--------------------- |---------:|----------:|----------:|------:|--------:|----------:|------------:|
- * | Naive                | 4.542 ns | 0.3233 ns | 0.9532 ns |  1.00 |    0.00 |         - |          NA |
- * | Increment_At_The_End | 3.830 ns | 0.0625 ns | 0.0554 ns |  0.73 |    0.08 |         - |          NA |
+ * | Naive                | 3.898 ns | 0.0582 ns | 0.0545 ns |  1.00 |    0.00 |         - |          NA |
+ * | Increment_At_The_End | 3.885 ns | 0.0490 ns | 0.0434 ns |  1.00 |    0.02 |         - |          NA |
+ * | ArrayCopyToSpan      | 4.465 ns | 0.0503 ns | 0.0471 ns |  1.15 |    0.02 |         - |          NA |
  *
  *
  * BenchmarkDotNet v0.13.12, macOS Sonoma 14.2.1 (23C71) [Darwin 23.2.0]
@@ -43,10 +45,11 @@
  *   [Host]     : .NET 8.0.2 (8.0.224.6711), Arm64 RyuJIT AdvSIMD
  *   DefaultJob : .NET 8.0.2 (8.0.224.6711), Arm64 RyuJIT AdvSIMD
  *
- * | Method               | Mean     | Error     | StdDev    | Ratio | RatioSD | Allocated | Alloc Ratio |
- * |--------------------- |---------:|----------:|----------:|------:|--------:|----------:|------------:|
- * | Naive                | 2.228 ns | 0.0558 ns | 0.0643 ns |  1.00 |    0.00 |         - |          NA |
- * | Increment_At_The_End | 2.380 ns | 0.0718 ns | 0.0768 ns |  1.07 |    0.04 |         - |          NA |
+ * | Method               | Mean     | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
+ * |--------------------- |---------:|----------:|----------:|------:|----------:|------------:|
+ * | Naive                | 2.107 ns | 0.0058 ns | 0.0045 ns |  1.00 |         - |          NA |
+ * | Increment_At_The_End | 2.042 ns | 0.0064 ns | 0.0057 ns |  0.97 |         - |          NA |
+ * | ArrayCopyToSpan      | 2.525 ns | 0.0035 ns | 0.0030 ns |  1.20 |         - |          NA |
  *
 */
 
