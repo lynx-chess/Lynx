@@ -111,9 +111,17 @@ public sealed class EngineSettings
 
     public bool ShowWDL { get; set; } = false;
 
-    public int MinElapsedTimeToConsiderStopSearching { get; set; } = 0;
+    #region Time management
 
-    public double DecisionTimePercentageToStopSearching { get; set; } = 0.4;
+    public int DefaultMovesToGo { get; set; } = 30;
+
+    public double HardTimeBoundMultiplier { get; set; } = 0.25;
+
+    public double SoftTimeBoundMultiplier { get; set; } = 0.4;
+
+    public double SoftTimeBaseIncrementMultiplier { get; set; } = 1;
+
+    #endregion
 
     public int LMR_MinDepth { get; set; } = 3;
 
