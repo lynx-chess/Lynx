@@ -186,7 +186,7 @@ public sealed class UCIHandler
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
-                        Configuration.Hash = Math.Clamp(value, 0, 1024);
+                        Configuration.Hash = Math.Clamp(value, 0, Constants.AbsoluteMaxTTSize);
                     }
                     break;
                 }
