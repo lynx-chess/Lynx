@@ -128,7 +128,7 @@ public sealed class OptionCommand : EngineBaseCommand
         "option name UCI_Opponent type string",
         $"option name UCI_EngineAbout type string default {IdCommand.EngineName} by {IdCommand.EngineAuthor}, see https://github.com/lynx-chess/Lynx",
         $"option name UCI_ShowWDL type check default {Configuration.EngineSettings.ShowWDL}",
-        $"option name Hash type spin default {Configuration.EngineSettings.TranspositionTableSize} min 0 max 1024",
+        $"option name Hash type spin default {Configuration.EngineSettings.TranspositionTableSize} min 0 max {Constants.AbsoluteMaxTTSize}",
         $"option name OnlineTablebaseInRootPositions type check default {Configuration.EngineSettings.UseOnlineTablebaseInRootPositions}",
         "option name Threads type spin default 1 min 1 max 1",
 
