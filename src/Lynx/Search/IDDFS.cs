@@ -188,6 +188,12 @@ public sealed partial class Engine
             return false;
         }
 
+        if (depth >= Configuration.EngineSettings.MaxDepth)
+        {
+            _logger.Info("Max depth reached: {0}", Configuration.EngineSettings.MaxDepth);
+            return false;
+        }
+
         if (maxDepth > 0)
         {
             var shouldContinue = depth <= maxDepth;
