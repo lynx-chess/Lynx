@@ -79,6 +79,13 @@ public class PromotionMovesBenchmark : BaseBenchmark
         return PregeneratedWhitePromotions_Increment_At_The_End(_movePool.Span, ref localIndex, (int)BoardSquare.e8);
     }
 
+    [Benchmark]
+    public int ArrayCopyToSpan()
+    {
+        int localIndex = 0;
+        return PregeneratedWhitePromotions_ArrayCopyToSpan(_movePool.Span, ref localIndex, (int)BoardSquare.e8);
+    }
+
     public int PregeneratedWhitePromotions_Naive(Span<Move> movePool, ref int localIndex, int singlePushSquare)
     {
         var whitePromotions = WhitePromotions[singlePushSquare];
@@ -102,6 +109,13 @@ public class PromotionMovesBenchmark : BaseBenchmark
 
         localIndex += 4;
 
+        return localIndex;
+    }
+
+    public int PregeneratedWhitePromotions_ArrayCopyToSpan(Span<Move> movePool, ref int localIndex, int singlePushSquare)
+    {
+        WhitePromotions[singlePushSquare].CopyTo(movePool[localIndex..]);
+        localIndex += 4;
         return localIndex;
     }
 }
