@@ -234,7 +234,7 @@ public sealed partial class Engine
 
                 // This is the only case were we don't clear position.UniqueIdentifier from Game.PositionHashHistory, because it was already there before making the move
             }
-            else if (!isCapture && (move.Piece() + 6) % 6 != 0 && move.Piece() != 6 && Game.Is50MovesRepetition())
+            else if (!isCapture && (move.Piece() + 6) % 6 != 0 && Game.Is50MovesRepetition())
             {
                 evaluation = 0;
 
