@@ -549,35 +549,6 @@ public sealed partial class Engine
             // No need to check for threefold or 50 moves repetitions, since we're only searching captures, promotions, and castles
             // Theoretically there could be a castling move that caused the 50 moves repetitions, but it's highly unlikely
 
-            /*
-             *  var oldValue = Game.HalfMovesWithoutCaptureOrPawnMove;
-             *  Game.HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, Game.HalfMovesWithoutCaptureOrPawnMove);
-             *  var isThreeFoldRepetition = !Game.PositionHashHistory.Add(position.UniqueIdentifier);
-             *
-             *  int evaluation;
-             *  if (isThreeFoldRepetition || Game.Is50MovesRepetition())
-             *  {
-             *      evaluation = 0;
-             *
-             *      // We don't need to evaluate further down to know it's a draw.
-             *      // Since we won't be evaluating further down, we need to clear the PV table because those moves there
-             *      // don't belong to this line and if this move were to beat alpha, they'd incorrectly copied to pv line.
-             *      Array.Clear(_pVTable, nextPvIndex, _pVTable.Length - nextPvIndex);
-             *  }
-             *  else
-             *  {
-             *      evaluation = -QuiescenceSearch(ply + 1, -beta, -alpha);
-             *  }
-             *
-             *  // After making a move
-             *  Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
-             *  if (!isThreeFoldRepetition)
-             *  {
-             *      Game.PositionHashHistory.Remove(position.UniqueIdentifier);
-             *  }
-             *  position.UnmakeMove(move, gameState);
-             */
-
             int evaluation = -QuiescenceSearch(ply + 1, -beta, -alpha);
             position.UnmakeMove(move, gameState);
 
