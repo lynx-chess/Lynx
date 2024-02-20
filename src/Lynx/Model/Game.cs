@@ -11,7 +11,7 @@ public sealed class Game
     public List<Move> MoveHistory { get; }
 #endif
 
-    public HashSet<long> PositionHashHistory { get; }
+    public List<long> PositionHashHistory { get; }
 
     public int HalfMovesWithoutCaptureOrPawnMove { get; set; }
 
@@ -33,11 +33,11 @@ public sealed class Game
             _logger.Warn($"Invalid position detected: {fen.ToString()}");
         }
 
-        PositionHashHistory = new(1024) { CurrentPosition.UniqueIdentifier };
+        PositionHashHistory = new(Constants.MaxNumberMovesInAGame) { CurrentPosition.UniqueIdentifier };
         HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
 
 #if DEBUG
-        MoveHistory = new(1024);
+        MoveHistory = new(Constants.MaxNumberMovesInAGame);
 #endif
     }
 
@@ -65,8 +65,27 @@ public sealed class Game
         _gameInitialPosition = new Position(CurrentPosition);
     }
 
+    /// <summary>
+    /// Basic algorithm described in https://web.archive.org/web/20201107002606/https://marcelk.net/2013-04-06/paper/upcoming-rep-v2.pdf
+    /// </summary>
+    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsThreefoldRepetition(Position position) => PositionHashHistory.Contains(position.UniqueIdentifier);
+    public bool IsThreefoldRepetition()
+    {
+        var currentHash = CurrentPosition.UniqueIdentifier;
+
+        // Count - 1 would be the last one, we want to start searching 2 ealier
+        for (int i = PositionHashHistory.Count - 3; i >= 0; i -= 2)
+        {
+            var diff = currentHash ^ PositionHashHistory[i];
+            if (diff == 0)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool Is50MovesRepetition()
@@ -80,13 +99,28 @@ public sealed class Game
     }
 
     /// <summary>
-    /// To be used in online tb proving only, with a copy of <see cref="PositionHashHistory"/>
+    /// To be used in online tb proving only, with a copy of <see cref="PositionHashHistory"/> that hasn't been updated with <paramref name="position"/>
     /// </summary>
     /// <param name="positionHashHistory"></param>
     /// <param name="position"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsThreefoldRepetition(HashSet<long> positionHashHistory, Position position) => positionHashHistory.Contains(position.UniqueIdentifier);
+    public static bool IsThreefoldRepetition(List<long> positionHashHistory, Position position)
+    {
+        var currentHash = position.UniqueIdentifier;
+
+        // Since positionHashHistory hasn't been updated with position, Count would be the last one, so we want to start searching 2 ealier
+        for (int i = positionHashHistory.Count - 2; i >= 0; i -= 2)
+        {
+            var diff = currentHash ^ positionHashHistory[i];
+            if (diff == 0)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /// <summary>
     /// To be used in online tb proving only, with a copy of <see cref="HalfMovesWithoutCaptureOrPawnMove"/>
