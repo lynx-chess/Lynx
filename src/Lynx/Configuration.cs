@@ -119,7 +119,7 @@ public sealed class EngineSettings
 
     public int DefaultMovesToGo { get; set; } = 40;
 
-    public double SoftTimeBaseIncrementMultiplier { get; set; } = 1;
+    public double SoftTimeBaseIncrementMultiplier { get; set; } = 0.75;
 
     #endregion
 
