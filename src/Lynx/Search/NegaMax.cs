@@ -350,7 +350,7 @@ public sealed partial class Engine
                         EvaluationConstants.HistoryBonus[depth]);
 
                     // 🔍 Capture history penalty/malus
-                    // When a capture fails high, penalize previous visited captures
+                    // When a capture fails high, penalize previously visited captures
                     for (int i = 0; i < visitedMovesCounter - 1; ++i)
                     {
                         var visitedMove = visitedMoves[i];
@@ -378,17 +378,24 @@ public sealed partial class Engine
                         _quietHistory[piece][targetSquare],
                         EvaluationConstants.HistoryBonus[depth]);
 
-                    // 🔍 Quiet history penalty/malus
-                    // When a quiet move fails high, penalize previous visited quiet moves
+                    // 🔍 Quiet and capture history penalty/malus
+                    // When a quiet move fails high, penalize both previously visited both captures and quiet moves
                     for (int i = 0; i < visitedMovesCounter - 1; ++i)
                     {
                         var visitedMove = visitedMoves[i];
+                        var visitedMovePiece = visitedMove.Piece();
+                        var visitedMoveTargetSquare = visitedMove.TargetSquare();
 
-                        if (!visitedMove.IsCapture())
+                        if (visitedMove.IsCapture())
                         {
-                            var visitedMovePiece = visitedMove.Piece();
-                            var visitedMoveTargetSquare = visitedMove.TargetSquare();
+                            var visitedMoveCapturedPiece = visitedMove.CapturedPiece();
 
+                            _captureHistory[visitedMovePiece][visitedMoveTargetSquare][visitedMoveCapturedPiece] = ScoreHistoryMove(
+                                _captureHistory[visitedMovePiece][visitedMoveTargetSquare][visitedMoveCapturedPiece],
+                                -EvaluationConstants.HistoryBonus[depth]);
+                        }
+                        else
+                        {
                             _quietHistory[visitedMovePiece][visitedMoveTargetSquare] = ScoreHistoryMove(
                                 _quietHistory[visitedMovePiece][visitedMoveTargetSquare],
                                 -EvaluationConstants.HistoryBonus[depth]);
