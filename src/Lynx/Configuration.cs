@@ -113,7 +113,7 @@ public sealed class EngineSettings
 
     #region Time management
 
-    public double HardTimeBoundMultiplier { get; set; } = 0.25;
+    public double HardTimeBoundMultiplier { get; set; } = 0.5;
 
     public double SoftTimeBoundMultiplier { get; set; } = 1;
 
