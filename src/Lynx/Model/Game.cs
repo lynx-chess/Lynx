@@ -160,7 +160,7 @@ public sealed class Game
         }
 
         PositionHashHistory.Add(CurrentPosition.UniqueIdentifier);
-        HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveToPlay, HalfMovesWithoutCaptureOrPawnMove);
+        Update50movesRule(moveToPlay, moveToPlay.IsCapture());
 
         return gameState;
     }
