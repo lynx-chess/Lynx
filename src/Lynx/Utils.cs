@@ -129,7 +129,8 @@ public static class Utils
     }
 
     /// <summary>
-    /// Updates <paramref name="halfMovesWithoutCaptureOrPawnMove"/>
+    /// Updates <paramref name="halfMovesWithoutCaptureOrPawnMove"/>.
+    /// See also <see cref="Game.Update50movesRule(int, bool)"/>
     /// </summary>
     /// <param name="moveToPlay"></param>
     /// <param name="halfMovesWithoutCaptureOrPawnMove"></param>
