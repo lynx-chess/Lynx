@@ -386,8 +386,8 @@ public class OnlineTablebaseProberTest
         Assert.AreEqual(0, result.MateScore);
         Assert.AreEqual("h8g7", result.BestMove.UCIString());
 
-        var lastPosition = new Position(position, result.BestMove);
-        Assert.True(game.IsThreefoldRepetition(lastPosition));
+        game.MakeMove(result.BestMove);
+        Assert.True(game.IsThreefoldRepetition());
 
         // Using local method due to async Span limitation
         static Game ParseGame()
@@ -412,8 +412,8 @@ public class OnlineTablebaseProberTest
         Assert.AreEqual(0, result.MateScore);
         Assert.AreEqual("h8g7", result.BestMove.UCIString());
 
-        var lastPosition = new Position(position, result.BestMove);
-        Assert.True(game.IsThreefoldRepetition(lastPosition));
+        game.MakeMove(result.BestMove);
+        Assert.True(game.IsThreefoldRepetition());
 
         // Using local method due to async Span limitation
         static Game ParseGame()

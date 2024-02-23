@@ -213,16 +213,17 @@ public sealed partial class Engine
 
             ++_nodes;
             isAnyMoveValid = true;
+            var isCapture = move.IsCapture();
 
             PrintPreMove(position, ply, move);
 
             // Before making a move
             var oldValue = Game.HalfMovesWithoutCaptureOrPawnMove;
             Game.HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, Game.HalfMovesWithoutCaptureOrPawnMove);
-            var isThreeFoldRepetition = !Game.PositionHashHistory.Add(position.UniqueIdentifier);
+            Game.PositionHashHistory.Add(position.UniqueIdentifier);
 
             int evaluation;
-            if (isThreeFoldRepetition)
+            if (Game.IsThreefoldRepetition() || Game.Is50MovesRepetition())
             {
                 evaluation = 0;
 
@@ -230,24 +231,10 @@ public sealed partial class Engine
                 // Since we won't be evaluating further down, we need to clear the PV table because those moves there
                 // don't belong to this line and if this move were to beat alpha, they'd incorrectly copied to pv line.
                 Array.Clear(_pVTable, nextPvIndex, _pVTable.Length - nextPvIndex);
-
-                // This is the only case were we don't clear position.UniqueIdentifier from Game.PositionHashHistory, because it was already there before making the move
-            }
-            else if (Game.Is50MovesRepetition())
-            {
-                evaluation = 0;
-
-                // We don't need to evaluate further down to know it's a draw.
-                // Since we won't be evaluating further down, we need to clear the PV table because those moves there
-                // don't belong to this line and if this move were to beat alpha, they'd incorrectly copied to pv line.
-                Array.Clear(_pVTable, nextPvIndex, _pVTable.Length - nextPvIndex);
-
-                Game.PositionHashHistory.Remove(position.UniqueIdentifier);
             }
             else if (pvNode && movesSearched == 0)
             {
                 evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
-                Game.PositionHashHistory.Remove(position.UniqueIdentifier);
             }
             else
             {
@@ -260,9 +247,9 @@ public sealed partial class Engine
                     && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth)) // Based on formula suggested by Antares
                 {
                     // After making a move
-                    Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
-                    Game.PositionHashHistory.Remove(position.UniqueIdentifier); // We know that there's no triple repetition here
                     position.UnmakeMove(move, gameState);
+                    Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
+                    Game.PositionHashHistory.RemoveAt(Game.PositionHashHistory.Count - 1);
 
                     break;
                 }
@@ -274,7 +261,7 @@ public sealed partial class Engine
                 if (movesSearched >= (pvNode ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves - 1)
                     && depth >= Configuration.EngineSettings.LMR_MinDepth
                     && !isInCheck
-                    && !move.IsCapture())
+                    && !isCapture)
                 {
                     reduction = EvaluationConstants.LMRReductions[depth][movesSearched];
 
@@ -323,14 +310,13 @@ public sealed partial class Engine
                     // PVS Hipothesis invalidated -> search with full depth and full score bandwidth
                     evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
                 }
-
-                Game.PositionHashHistory.Remove(position.UniqueIdentifier);
             }
 
             // After making a move
             // Game.PositionHashHistory is update above
-            Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
             position.UnmakeMove(move, gameState);
+            Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
+            Game.PositionHashHistory.RemoveAt(Game.PositionHashHistory.Count - 1);
 
             PrintMove(ply, move, evaluation);
 
@@ -339,7 +325,7 @@ public sealed partial class Engine
             {
                 PrintMessage($"Pruning: {move} is enough");
 
-                if (move.IsCapture())
+                if (isCapture)
                 {
                     var piece = move.Piece();
                     var targetSquare = move.TargetSquare();
