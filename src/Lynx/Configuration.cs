@@ -88,7 +88,7 @@ public sealed class EngineSettings
     /// <summary>
     /// Depth for bench command
     /// </summary>
-    public int BenchDepth { get; set; } = 5;
+    public int BenchDepth { get; set; } = 8;
 
     /// <summary>
     /// MB

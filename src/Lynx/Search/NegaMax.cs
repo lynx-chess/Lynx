@@ -213,12 +213,13 @@ public sealed partial class Engine
 
             ++_nodes;
             isAnyMoveValid = true;
+            var isCapture = move.IsCapture();
 
             PrintPreMove(position, ply, move);
 
             // Before making a move
-            var oldValue = Game.HalfMovesWithoutCaptureOrPawnMove;
-            Game.HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, Game.HalfMovesWithoutCaptureOrPawnMove);
+            var oldHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
+            Game.Update50movesRule(move, isCapture);
             var isThreeFoldRepetition = !Game.PositionHashHistory.Add(position.UniqueIdentifier);
 
             int evaluation;
@@ -260,7 +261,7 @@ public sealed partial class Engine
                     && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth)) // Based on formula suggested by Antares
                 {
                     // After making a move
-                    Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
+                    Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
                     Game.PositionHashHistory.Remove(position.UniqueIdentifier); // We know that there's no triple repetition here
                     position.UnmakeMove(move, gameState);
 
@@ -274,7 +275,7 @@ public sealed partial class Engine
                 if (movesSearched >= (pvNode ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves - 1)
                     && depth >= Configuration.EngineSettings.LMR_MinDepth
                     && !isInCheck
-                    && !move.IsCapture())
+                    && !isCapture)
                 {
                     reduction = EvaluationConstants.LMRReductions[depth][movesSearched];
 
@@ -329,7 +330,7 @@ public sealed partial class Engine
 
             // After making a move
             // Game.PositionHashHistory is update above
-            Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
+            Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
             position.UnmakeMove(move, gameState);
 
             PrintMove(ply, move, evaluation);
@@ -339,7 +340,7 @@ public sealed partial class Engine
             {
                 PrintMessage($"Pruning: {move} is enough");
 
-                if (move.IsCapture())
+                if (isCapture)
                 {
                     var piece = move.Piece();
                     var targetSquare = move.TargetSquare();
