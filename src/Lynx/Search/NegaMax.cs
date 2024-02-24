@@ -219,11 +219,11 @@ public sealed partial class Engine
 
             // Before making a move
             var oldHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
-            Game.Update50movesRule(move, isCapture);
+            var canBeRepetition = Game.Update50movesRule(move, isCapture);
             Game.PositionHashHistory.Add(position.UniqueIdentifier);
 
             int evaluation;
-            if (Game.IsThreefoldRepetition() || Game.Is50MovesRepetition())
+            if (canBeRepetition && (Game.IsThreefoldRepetition() || Game.Is50MovesRepetition()))
             {
                 evaluation = 0;
 

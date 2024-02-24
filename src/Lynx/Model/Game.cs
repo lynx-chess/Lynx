@@ -78,8 +78,9 @@ public sealed class Game
     ///     At depth 3, there's a capture, but the eval should still be 0
     ///     At depth 4 there's no capture, but the eval should still be 0
     /// </remarks>
+    /// <returns>true if threefol/50 moves repetition is possible (since both captures and pawn moves are irreversible)</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Update50movesRule(Move moveToPlay, bool isCapture)
+    public bool Update50movesRule(Move moveToPlay, bool isCapture)
     {
         if (isCapture)
         {
@@ -91,19 +92,26 @@ public sealed class Game
             {
                 ++HalfMovesWithoutCaptureOrPawnMove;
             }
+
+            return false;
         }
         else
         {
             var pieceToMove = moveToPlay.Piece();
 
-            if ((pieceToMove == (int)Piece.P || pieceToMove == (int)Piece.p) && HalfMovesWithoutCaptureOrPawnMove < 100)
+            if (pieceToMove == (int)Piece.P || pieceToMove == (int)Piece.p)
             {
-                HalfMovesWithoutCaptureOrPawnMove = 0;
+                if (HalfMovesWithoutCaptureOrPawnMove < 100)
+                {
+                    HalfMovesWithoutCaptureOrPawnMove = 0;
+                }
+
+                return false;
             }
-            else
-            {
-                ++HalfMovesWithoutCaptureOrPawnMove;
-            }
+
+            ++HalfMovesWithoutCaptureOrPawnMove;
+
+            return true;
         }
     }
 
