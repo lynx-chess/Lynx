@@ -218,8 +218,8 @@ public sealed partial class Engine
             PrintPreMove(position, ply, move);
 
             // Before making a move
-            var oldValue = Game.HalfMovesWithoutCaptureOrPawnMove;
-            Game.HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(move, Game.HalfMovesWithoutCaptureOrPawnMove);
+            var oldHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
+            Game.Update50movesRule(move, isCapture);
             Game.PositionHashHistory.Add(position.UniqueIdentifier);
 
             int evaluation;
@@ -247,9 +247,9 @@ public sealed partial class Engine
                     && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth)) // Based on formula suggested by Antares
                 {
                     // After making a move
-                    position.UnmakeMove(move, gameState);
-                    Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
+                    Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
                     Game.PositionHashHistory.RemoveAt(Game.PositionHashHistory.Count - 1);
+                    position.UnmakeMove(move, gameState);
 
                     break;
                 }
@@ -314,9 +314,9 @@ public sealed partial class Engine
 
             // After making a move
             // Game.PositionHashHistory is update above
-            position.UnmakeMove(move, gameState);
-            Game.HalfMovesWithoutCaptureOrPawnMove = oldValue;
+            Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
             Game.PositionHashHistory.RemoveAt(Game.PositionHashHistory.Count - 1);
+            position.UnmakeMove(move, gameState);
 
             PrintMove(ply, move, evaluation);
 

@@ -66,6 +66,48 @@ public sealed class Game
     }
 
     /// <summary>
+    /// Updates <paramref name="halfMovesWithoutCaptureOrPawnMove"/>.
+    /// See also <see cref="Utils.Update50movesRule(int, int)"/>
+    /// </summary>
+    /// <param name="moveToPlay"></param>
+    /// <param name="isCapture"></param>
+    /// <remarks>
+    /// Checking halfMovesWithoutCaptureOrPawnMove >= 100 since a capture/pawn move doesn't necessarily 'clear' the variable.
+    /// i.e. while the engine is searching:
+    ///     At depth 2, 50 rules move applied and eval is 0
+    ///     At depth 3, there's a capture, but the eval should still be 0
+    ///     At depth 4 there's no capture, but the eval should still be 0
+    /// </remarks>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Update50movesRule(Move moveToPlay, bool isCapture)
+    {
+        if (isCapture)
+        {
+            if (HalfMovesWithoutCaptureOrPawnMove < 100)
+            {
+                HalfMovesWithoutCaptureOrPawnMove = 0;
+            }
+            else
+            {
+                ++HalfMovesWithoutCaptureOrPawnMove;
+            }
+        }
+        else
+        {
+            var pieceToMove = moveToPlay.Piece();
+
+            if ((pieceToMove == (int)Piece.P || pieceToMove == (int)Piece.p) && HalfMovesWithoutCaptureOrPawnMove < 100)
+            {
+                HalfMovesWithoutCaptureOrPawnMove = 0;
+            }
+            else
+            {
+                ++HalfMovesWithoutCaptureOrPawnMove;
+            }
+        }
+    }
+
+    /// <summary>
     /// Basic algorithm described in https://web.archive.org/web/20201107002606/https://marcelk.net/2013-04-06/paper/upcoming-rep-v2.pdf
     /// </summary>
     /// <returns></returns>
@@ -148,7 +190,7 @@ public sealed class Game
         }
 
         PositionHashHistory.Add(CurrentPosition.UniqueIdentifier);
-        HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveToPlay, HalfMovesWithoutCaptureOrPawnMove);
+        Update50movesRule(moveToPlay, moveToPlay.IsCapture());
 
         return gameState;
     }
