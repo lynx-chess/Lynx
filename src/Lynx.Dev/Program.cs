@@ -699,7 +699,7 @@ static void _54_ScoreMove()
     position.Print();
 
     var engine = new Engine(Channel.CreateBounded<string>(new BoundedChannelOptions(100) { SingleReader = true, SingleWriter = false }));
-    engine.SetGame(new(position));
+    engine.SetGame(new(position.FEN()));
     foreach (var move in MoveGenerator.GenerateAllMoves(position, capturesOnly: true))
     {
         Console.WriteLine($"{move} {engine.ScoreMove(move, default, default)}");
@@ -708,7 +708,7 @@ static void _54_ScoreMove()
     position = new Position(TrickyPosition);
     position.Print();
 
-    engine.SetGame(new(position));
+    engine.SetGame(new(position.FEN()));
     foreach (var move in MoveGenerator.GenerateAllMoves(position, capturesOnly: true))
     {
         Console.WriteLine($"{move} {engine.ScoreMove(move, default, default)}");

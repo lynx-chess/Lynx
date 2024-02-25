@@ -32,7 +32,7 @@ public class GenerateRookMovesTest
 
         Assert.AreEqual(expectedMoves, moves.Count());
 
-        Assert.AreEqual(moves, MoveGenerator.GenerateRookMoves(position));
+        Assert.AreEqual(moves, ReferenceMoveGenerator.GenerateRookMoves(position));
     }
 
     /// <summary>

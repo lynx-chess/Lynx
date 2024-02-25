@@ -34,36 +34,36 @@ public class RegressionTest : BaseTest
     [TestCase("7k/1Q4r1/2q1B3/1P2QNN1/8/R7/nN6/K1R5 b - - 0 1", new[] { "c6c1" },
         Description = "Get stalemated vs winning a queen")]
 
-    public async Task GeneralRegression(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
+    public void GeneralRegression(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
     {
-        await TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 5);
+        TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 5);
     }
 
     [TestCase("r1bq2k1/1pp1n2p/2nppr1Q/p7/2PP2P1/5N2/PP3P1P/2KR1B1R w - - 0 15", new[] { "h6f6" },
         Description = "AlphaBeta/NegaMax depth 5 spends almost 3 minutes with a simple retake")]
-    public async Task SlowRecapture(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
+    public void SlowRecapture(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
     {
-        await TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 5);
+        TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 5);
     }
 
     [Explicit]
     [Category(Categories.NotGoodEnough)]
     [TestCase("6k1/1R6/5Kn1/3p1N2/1P6/8/8/3r4 b - - 10 37", new[] { "g6f8" }, new[] { "g6f4" },
         Description = "Avoid mate in 4 https://lichess.org/XkZsoXLA#74")]
-    public async Task AvoidMate(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
+    public void AvoidMate(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
     {
-        await TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
+        TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
     }
 
     [TestCase(5)]
     [TestCase(6)]
-    public async Task KeepNonGoodQuiescenceMoves(int depth)
+    public void KeepNonGoodQuiescenceMoves(int depth)
     {
         const string fen = Constants.InitialPositionFEN;
         var engine = GetEngine(fen);
         var goCommand = new GoCommand($"go depth {depth}");
 
-        var bestResult = await engine.BestMove(goCommand);
+        var bestResult = engine.BestMove(goCommand);
 
         switch (depth)
         {
@@ -81,12 +81,12 @@ public class RegressionTest : BaseTest
 
     [TestCase(5, Constants.InitialPositionFEN, "d8d5")]
     [TestCase(5, "rq2k2r/ppp2pb1/2n1pnpp/1Q1p1b2/3P1B2/2N1PNP1/PPP2PBP/R3K2R w KQkq - 0 1", "e5f4")]
-    public async Task TrashInPVTable(int depth, string fen, string notExpectedMove)
+    public void TrashInPVTable(int depth, string fen, string notExpectedMove)
     {
         var goCommand = new GoCommand($"go depth {depth}");
 
         var engine = GetEngine(fen);
-        var bestResult = await engine.BestMove(goCommand);
+        var bestResult = engine.BestMove(goCommand);
 
         if (bestResult.Moves.Count > depth)
         {
@@ -103,7 +103,7 @@ public class RegressionTest : BaseTest
         var engine = GetEngine();
 
         engine.AdjustPosition(positionCommand);
-        Assert.DoesNotThrowAsync(async () => await engine.BestMove(goCommand));
+        Assert.DoesNotThrow(() => engine.BestMove(goCommand));
     }
 
     [Explicit]
@@ -114,9 +114,9 @@ public class RegressionTest : BaseTest
         Description = "It failed at depth 6 in https://lichess.org/nZVw6G5D/black#19")]
     [TestCase("r1bqkb1r/ppp2ppp/2n1p3/3pP3/3Pn3/5P2/PPP1N1PP/R1BQKBNR b KQkq - 0 1", null, new[] { "f8b4" },
         Description = "It failed at depth 5 in https://lichess.org/rtTsj9Sr/black")]
-    public async Task GeneralFailures(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
+    public void GeneralFailures(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
     {
-        await TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
+        TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
     }
 
     /// <summary>
@@ -198,12 +198,12 @@ public class RegressionTest : BaseTest
         " h1g1 e6e5 g1h1 e5d5 h1g1 d5d4 g1h1 d4e4 h1g1 f6g6 g1f1 e4d3 f1e1 g6g1 e1f2 g1g2 f2e1 g2g6 e1f2 d3d2" +
         " f2f3 d2e1 f3f4 e1e2 f4f5 e2e6 f5f4 g6g4 f4f3 e6e8 f3f2 g4f4 f2g1 f4f6 g1h1 e8e6 h1g1 e6e5 g1h1 e5d5",
         Ignore = "Now that we detect 2 move repetitions, this should fail")]
-    public async Task FalseDrawnPositions(string positionCommand)
+    public void FalseDrawnPositions(string positionCommand)
     {
         var engine = GetEngine();
         engine.AdjustPosition(positionCommand);
 
-        var bestMove = await engine.BestMove(new GoCommand($"go depth {Engine.DefaultMaxDepth}"));
+        var bestMove = engine.BestMove(new GoCommand($"go depth {Engine.DefaultMaxDepth}"));
         Assert.NotZero(bestMove.Evaluation);
 
         //engine.AdjustPosition(positionCommand);
@@ -223,12 +223,12 @@ public class RegressionTest : BaseTest
         " f4e3 e6d5 e3f4 d5f3 f4f5 d6d5 f5f4 d5d6 f4f5 d6d5 f5f4 f3d1 f4f5 d1e2 f5f4" +
         " d5d6 f4e4 d6e6 e4f4 e6d5 f4f5 d5c5 f5f6 c5b6 f6e7 b6a7 e7d8 a7a8 d8e7 a8b8" +
         " e7f8 b8a8 f8e7 a8b8 e7f8 b8a8")]
-    public async Task FalseDrawnPositionBy50MovesRule(string positionCommand)
+    public void FalseDrawnPositionBy50MovesRule(string positionCommand)
     {
         var engine = GetEngine();
         engine.AdjustPosition(positionCommand);
         Assert.False(engine.Game.Is50MovesRepetition());
-        var bestMove = await engine.BestMove(new GoCommand("go depth 1"));
+        var bestMove = engine.BestMove(new GoCommand("go depth 1"));
 
         engine.AdjustPosition(positionCommand + " " + bestMove.BestMove.ToEPDString());
         Assert.IsFalse(engine.Game.Is50MovesRepetition());
@@ -243,12 +243,12 @@ public class RegressionTest : BaseTest
         " e7d6 a5a4 e3e4 b5c4 f3e3 f8c8 h2h3 c4b5 e3f3 b5g5 f3g3 g5a5 g3d3 a5g5 d3g3 g5b5" +
         " g3f3 b5a5 f3d3 a5a8 d6b4 c8b8 b4c4 a4a3 d3d2 b8b2 d2b2 a3b2 c4b4 a8a2 b4b8 g8g7" +
         " b8e5 g7g8 e5b8 g8g7 b8e5 f7f6 e5c7 g7g8 c7b8 g8f7 b8c7 f7g8 c7b8 g8g7")]
-    public async Task InvalidPV(string positionCommand)
+    public void InvalidPV(string positionCommand)
     {
         var engine = GetEngine();
         engine.AdjustPosition(positionCommand);
 
-        var bestMove = await engine.BestMove(new GoCommand($"go depth {5}"));
+        var bestMove = engine.BestMove(new GoCommand($"go depth {5}"));
         Assert.Zero(bestMove.Evaluation);
         Assert.AreEqual(1, bestMove.Moves.Count);
         Assert.AreEqual("b8c7", bestMove.BestMove.UCIString());
@@ -262,16 +262,16 @@ public class RegressionTest : BaseTest
         " f2f3 a4h4 b6a6 h4h1 c1d2 h1h2 d2c3 h2f2 b2b3 h5h4 a6h6 f2f3 c3b4 f3f4 b4b5 f7g7 h6h5" +
         " g7f6 c2c4 f4f5 h5f5 f6f5 c4c5 f5e6 a2a4 h4h3 b5b6 h3h2 b3b4 h2h1q a4a5")]
 
-    public async Task InvalidPV2(string positionCommand)
+    public void InvalidPV2(string positionCommand)
     {
         var engine = GetEngine();
         engine.AdjustPosition(positionCommand.AsSpan()[..^10]);  // 8/8/1K2k3/2P5/PP6/8/7p/8 b - - 0 46, ready to promote
 
-        var bestMove = await engine.BestMove(new GoCommand($"go depth {7}"));
+        var bestMove = engine.BestMove(new GoCommand($"go depth {7}"));
         Assert.AreEqual("h2h1q", bestMove.BestMove.UCIString());
 
         engine.AdjustPosition(positionCommand);
-        bestMove = await engine.BestMove(new GoCommand($"go depth {7}"));
+        bestMove = engine.BestMove(new GoCommand($"go depth {7}"));
         Assert.AreNotEqual("h2h1q", bestMove.BestMove.UCIString());
     }
 
@@ -279,19 +279,19 @@ public class RegressionTest : BaseTest
     [Category(Categories.LongRunning)]
     [TestCase(Constants.KillerTestPositionFEN)]
     [TestCase(Constants.TrickyTestPositionFEN)]
-    public async Task PVTableCrash(string fen)
+    public void PVTableCrash(string fen)
     {
         const int depthWhenMaxDepthInQuiescenceIsReached = 7;
         var engine = GetEngine(fen);
 
-        var bestMove = await engine.BestMove(new GoCommand($"go depth {depthWhenMaxDepthInQuiescenceIsReached}"));
+        var bestMove = engine.BestMove(new GoCommand($"go depth {depthWhenMaxDepthInQuiescenceIsReached}"));
         Assert.AreEqual(depthWhenMaxDepthInQuiescenceIsReached, bestMove.Depth);
     }
 
     [Explicit]
     [Category(Categories.LongRunning)]
     [Test]
-    public async Task PonderingCrash()
+    public void PonderingCrash()
     {
         var engine = GetEngine();
         engine.AdjustPosition("position startpos moves" +
@@ -307,7 +307,7 @@ public class RegressionTest : BaseTest
             " d5d4 h5h6 f7a7 h6h5 d4d5 h5h6 d5d6 h6h5 a7f7 h5h6 d6d5 h6h5 f7a7 h5h6 d5d4 h6h5 g7g8 h5h6 d4d5 e2b2" +
             " d5d6 b2f2 a7a8 h6h7 d6d5 h7h6 d5e5 h6h7 e5d5 h7h6 d5e6 h6h5 g8g1 f2e2 e6f7 e2f2 f7g7 f2f8");
 
-        var searchResult = await engine.BestMove(new($"go depth {Engine.DefaultMaxDepth}"));
+        var searchResult = engine.BestMove(new($"go depth {Engine.DefaultMaxDepth}"));
 
         engine.AdjustPosition("position startpos moves" +
             " e2e4 c7c5 g1f3 d7d6 d2d4 c5d4 f3d4 g8f6 b1c3 a7a6 f2f3 e7e5 d4b3 c8e6 c1e3 h7h5 c3d5 e6d5 e4d5 b8d7" +
@@ -323,7 +323,7 @@ public class RegressionTest : BaseTest
             " d5d6 b2f2 a7a8 h6h7 d6d5 h7h6 d5e5 h6h7 e5d5 h7h6 d5e6 h6h5 g8g1 f2e2 e6f7 e2f2 f7g7 f2f8" +
             $" {searchResult.BestMove.UCIString()} {searchResult.Moves[1].UCIString()}");
 
-        searchResult = await engine.BestMove(new($"go depth {Engine.DefaultMaxDepth}"));
+        searchResult = engine.BestMove(new($"go depth {Engine.DefaultMaxDepth}"));
 
         Assert.NotZero(searchResult.BestMove);
     }
@@ -352,20 +352,37 @@ public class RegressionTest : BaseTest
         " f5f6 d7e6 f6f7 e6f5 f7f8q f5g5 f8c5 g5g4 g7f7 g4f4 c5b4 f4e3 b4c3 e3e4 c3b4 e4e3 f7f6 e3f3 b4d2" +
         " f3g4 f6f7 g4f3 d2d3 f3f2 f7f8 f2g1 d3e3 g1g2 e3e2 g2g3 f8e7 g3h3 e7d7 h3h4 e2g2 h4h5 d7e6 h5h6 e6d7",
         Description = "FEN 8/3K4/7k/8/8/8/6Q1/8 b - - 0 1")]
-    public async Task DepthOverflow(string positionCommand)
+    public void DepthOverflow(string positionCommand)
     {
         var engine = GetEngine();
 
         engine.AdjustPosition(positionCommand);
 
-        var result = await engine.BestMove(new("go wtime 3600000 btime 3600000"));
+        var result = engine.BestMove(new("go wtime 3600000 btime 3600000"));
         Assert.Less(result.DepthReached, Configuration.EngineSettings.MaxDepth);
     }
 
     [TestCase("4r3/5P1k/5K2/5N2/8/8/8/8 w - - 0 1", new[] { "f7e8b" },
         Description = "Position by Alex Brunetti, https://www.talkchess.com/forum3/viewtopic.php?f=2&t=31150&start=28")]
-    public async Task BishopUnderpromotion(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
+    public void BishopUnderpromotion(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
     {
-        await TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
+        TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
+    }
+
+    /// <summary>
+    /// Unfortunately or not, it doesn't crash IDDFS, so the test is mostly useless, but let's have it in place just in case
+    /// </summary>
+    [Test]
+    public void MaxDepthCrash()
+    {
+        var engine = GetEngine();
+
+        engine.AdjustPosition("position startpos moves e2e4 c7c5 g1f3 g7g6 d2d4 f8g7 d4d5 d7d6 f1e2 c8g4 f3d2 g4e2 d1e2 g8f6 b1c3 f6d7 d2f3 d8b6 e1g1 b8a6 a2a4 a6c7 c3b5 c7b5 a4b5 h7h6 c2c4 e8g8 c1d2 a7a5 h2h3 g7b2 d2a5 a8a5 e2b2 f8a8 e4e5 a5a1 f1a1 a8a1 b2a1 d6e5 f3e5 d7e5 a1e5 b6d6 e5d6 e7d6 f2f4 f7f5 g1h2 g8f7 h2g3 f7f6 h3h4 g6g5 h4h5 f6g7 b5b6 g7f6 g3f3 g5g4 f3e3 f6f7 e3d2 f7e7 d2e2 e7f6 e2d3 f6g7 d3c2 g7f6 c2b3 f6f7 b3c3 f7f6 c3c2 f6e7 c2b2 e7f7 b2b1 f7f6 b1a1 f6e7 a1a2 e7f6 a2b1 f6e7 b1a1 e7f7 a1b2 f7f6 b2a2 f6e7 g2g3 e7f6 a2b2 f6e7 b2c3 e7f6 c3d3");
+
+        engine.BestMove(new("go wtime 10000 btime 10000 winc 80 binc 80"));
+
+        engine.AdjustPosition("position startpos moves e2e4 c7c5 g1f3 g7g6 d2d4 f8g7 d4d5 d7d6 f1e2 c8g4 f3d2 g4e2 d1e2 g8f6 b1c3 f6d7 d2f3 d8b6 e1g1 b8a6 a2a4 a6c7 c3b5 c7b5 a4b5 h7h6 c2c4 e8g8 c1d2 a7a5 h2h3 g7b2 d2a5 a8a5 e2b2 f8a8 e4e5 a5a1 f1a1 a8a1 b2a1 d6e5 f3e5 d7e5 a1e5 b6d6 e5d6 e7d6 f2f4 f7f5 g1h2 g8f7 h2g3 f7f6 h3h4 g6g5 h4h5 f6g7 b5b6 g7f6 g3f3 g5g4 f3e3 f6f7 e3d2 f7e7 d2e2 e7f6 e2d3 f6g7 d3c2 g7f6 c2b3 f6f7 b3c3 f7f6 c3c2 f6e7 c2b2 e7f7 b2b1 f7f6 b1a1 f6e7 a1a2 e7f6 a2b1 f6e7 b1a1 e7f7 a1b2 f7f6 b2a2 f6e7 g2g3 e7f6 a2b2 f6e7 b2c3 e7f6 c3d3 f6f7 d3c3");
+
+        Assert.DoesNotThrow(() => engine.BestMove(new("go wtime 100000 btime 100000 winc 80 binc 80")));
     }
 }

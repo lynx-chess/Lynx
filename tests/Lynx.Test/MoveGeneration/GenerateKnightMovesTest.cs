@@ -32,7 +32,7 @@ public class GenerateKnightMovesTest
 
         Assert.AreEqual(expectedMoves, moves.Count());
 
-        Assert.AreEqual(moves, MoveGenerator.GenerateKnightMoves(position));
+        Assert.AreEqual(moves, ReferenceMoveGenerator.GenerateKnightMoves(position));
     }
 
     /// <summary>

@@ -37,13 +37,14 @@ using System.Threading.Channels;
 
 namespace Lynx.Benchmark;
 
-public class UCI_Benchmark: BaseBenchmark
+public class UCI_Benchmark : BaseBenchmark
 {
     private readonly Channel<string> _channel = Channel.CreateBounded<string>(new BoundedChannelOptions(100_000) { SingleReader = true, SingleWriter = false });
 
     [Benchmark]
-    public async Task<(int, long)> Bench_DefaultDepth()
+    public (int, long) Bench_DefaultDepth()
     {
-        return await OpenBench.Bench(Configuration.EngineSettings.BenchDepth, _channel);
+        var engine = new Engine(_channel.Writer);
+        return engine.Bench(Configuration.EngineSettings.BenchDepth);
     }
 }
