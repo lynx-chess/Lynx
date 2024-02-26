@@ -230,23 +230,6 @@ public static class TranspositionTableExtensions
         return items;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void Prefetch(this TranspositionTable transpositionTable, int ttMask, long positionUniqueIdentifier)
-    {
-        if (Sse.IsSupported)
-        {
-            var index = positionUniqueIdentifier & ttMask;
-
-            unsafe
-            {
-                fixed (TranspositionTableElement* ttPtr = &transpositionTable[0])
-                {
-                    Sse.Prefetch0(ttPtr + index);
-                }
-            }
-        }
-    }
-
     /// <summary>
     /// Exact TT occupancy per mill
     /// </summary>

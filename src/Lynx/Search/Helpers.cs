@@ -1,6 +1,7 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 
 namespace Lynx;
@@ -107,6 +108,26 @@ public sealed partial class Engine
     private static int ScoreHistoryMove(int score, int rawHistoryBonus)
     {
         return score + rawHistoryBonus - (score * Math.Abs(rawHistoryBonus) / Configuration.EngineSettings.History_MaxMoveValue);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void PrefetchTTEntry()
+    {
+        if (Sse.IsSupported)
+        {
+            var index = Game.CurrentPosition.UniqueIdentifier & _ttMask;
+
+            unsafe
+            {
+                // Since _tt is a pinned array
+                // This is no-op pinning as it does not influence the GC compaction
+                // https://tooslowexception.com/pinned-object-heap-in-net-5/
+                fixed (TranspositionTableElement* ttPtr = _tt)
+                {
+                    Sse.Prefetch0(ttPtr + index);
+                }
+            }
+        }
     }
 
 #pragma warning disable RCS1226 // Add paragraph to documentation comment
