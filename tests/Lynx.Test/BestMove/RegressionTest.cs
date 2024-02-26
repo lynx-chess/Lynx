@@ -390,8 +390,8 @@ public class RegressionTest : BaseTest
         Description = "NN vs P, where knights can't take the pawn")]
     [TestCase("8/5R2/1n2RK2/8/8/7k/4r3/8 b - - 0 1", null, new[] { "e2e6" },
         Description = "RR vs RB, where if the side with the bishop exchanges the rooks, they lose")]
-    public async Task PawnlessEndgames(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
+    public void PawnlessEndgames(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
     {
-        await TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
+        TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
     }
 }

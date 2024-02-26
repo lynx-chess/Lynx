@@ -751,7 +751,7 @@ public class Position
         }
 
         // Pawnless endgames with few pieces
-        if (gamePhase <= 5 && pieceCount[(int)Piece.P] == 0 && pieceCount[(int)Piece.p] == 0)
+        if (gamePhase <= 3 && pieceCount[(int)Piece.P] == 0 && pieceCount[(int)Piece.p] == 0)
         {
             //var winningSideOffset = Utils.PieceOffset(endGameScore >= 0);
 
@@ -768,18 +768,18 @@ public class Position
 
                 //        break;
                 //    }
-                case 5:
-                    {
-                        // RB vs R, RN vs R
-                        if (pieceCount[(int)Piece.R] == 1
-                            && pieceCount[(int)Piece.r] == 1)
-                        {
-                            endGameScore >>= 1; // 2
-                            // -= EvaluationConstants.PawnlessDrawishEndgameBonus + (EvaluationConstants.PawnlessDrawishEndgameCoefficient * winningSideOffset);
-                        }
+                //case 5:
+                //    {
+                //        // RB vs R, RN vs R
+                //        if (pieceCount[(int)Piece.R] == 1
+                //            && pieceCount[(int)Piece.r] == 1)
+                //        {
+                //            //endGameScore >>= 1; // 2
+                //            // -= EvaluationConstants.PawnlessDrawishEndgameBonus + (EvaluationConstants.PawnlessDrawishEndgameCoefficient * winningSideOffset);
+                //        }
 
-                        break;
-                    }
+                //        break;
+                //    }
                 case 3:
                     {
                         var winningSideOffset = Utils.PieceOffset(endGameScore >= 0);
@@ -789,13 +789,15 @@ public class Position
                             return (0, gamePhase);
                         }
 
-                        //if (pieceCount[(int)Piece.R] == 1                           // R vs B, R vs N
-                        //    || pieceCount[(int)Piece.r] == 1
+                        if (pieceCount[(int)Piece.R] == 1                           // R vs B, R vs N
+                            || pieceCount[(int)Piece.r] == 1)
                         //    || pieceCount[(int)Piece.b - winningSideOffset] == 1    // BN vs B, NN vs B, BB vs B
                         //    || pieceCount[(int)Piece.B + winningSideOffset] <= 1)   // BN vs N, NN vs N
-                        //{                                                           // Only BB vs N is a win, (BN vs N can have some chances)
-                        //    endGameScore -= EvaluationConstants.PawnlessDrawishEndgameBonus + (EvaluationConstants.PawnlessDrawishEndgameCoefficient * winningSideOffset);
-                        //}
+                        {
+                            // Only BB vs N is a win, (BN vs N can have some chances)
+                            endGameScore >>= 1; // 2
+                            //endGameScore -= EvaluationConstants.PawnlessDrawishEndgameBonus + (EvaluationConstants.PawnlessDrawishEndgameCoefficient * winningSideOffset);
+                        }
 
                         break;
                     }
