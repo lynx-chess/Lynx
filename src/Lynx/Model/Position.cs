@@ -679,7 +679,7 @@ public class Position
         //    return result;
         //}
 
-        var pieceCount = new int[PieceBitBoards.Length];
+        Span<int> pieceCount = stackalloc int[PieceBitBoards.Length];
 
         int middleGameScore = 0;
         int endGameScore = 0;
@@ -818,7 +818,7 @@ public class Position
     /// <param name="pieceCount">Incomplete count</param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal (int MiddleGameScore, int EndGameScore) AdditionalPieceEvaluation(int pieceSquareIndex, int pieceIndex, int[] pieceCount)
+    internal (int MiddleGameScore, int EndGameScore) AdditionalPieceEvaluation(int pieceSquareIndex, int pieceIndex, ReadOnlySpan<int> pieceCount)
     {
         return pieceIndex switch
         {
@@ -906,7 +906,7 @@ public class Position
     /// <param name="pieceCount">Incomplete (on the fly) count, but can be used to detect the pair of bishops</param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private (int MiddleGameScore, int EndGameScore) BishopAdditionalEvaluation(int squareIndex, int pieceIndex, int[] pieceCount)
+    private (int MiddleGameScore, int EndGameScore) BishopAdditionalEvaluation(int squareIndex, int pieceIndex, ReadOnlySpan<int> pieceCount)
     {
         var attacksCount = Attacks.BishopAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
 
@@ -944,7 +944,7 @@ public class Position
     /// <param name="pieceCount"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal (int MiddleGameScore, int EndGameScore) KingAdditionalEvaluation(int squareIndex, Side kingSide, int[] pieceCount)
+    internal (int MiddleGameScore, int EndGameScore) KingAdditionalEvaluation(int squareIndex, Side kingSide, ReadOnlySpan<int> pieceCount)
     {
         int middleGameBonus = 0, endGameBonus = 0;
         var kingSideOffset = Utils.PieceOffset(kingSide);
