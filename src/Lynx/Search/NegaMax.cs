@@ -214,7 +214,8 @@ public sealed partial class Engine
             ++_nodes;
             isAnyMoveValid = true;
             var isCapture = move.IsCapture();
-            var isQuiet = !isCapture && move.PromotedPiece() == default && !position.IsInCheck();
+            var isNotPromotion = move.PromotedPiece() == default;
+            var isQuiet = !isCapture && isNotPromotion && !position.IsInCheck();
 
             PrintPreMove(position, ply, move);
 
@@ -326,7 +327,7 @@ public sealed partial class Engine
             {
                 PrintMessage($"Pruning: {move} is enough");
 
-                if (!isQuiet)
+                if (isCapture)
                 {
                     var piece = move.Piece();
                     var targetSquare = move.TargetSquare();
@@ -383,7 +384,7 @@ public sealed partial class Engine
                     }
 
                     // 🔍 Killer moves
-                    if (move != _killerMoves[0][ply])
+                    if (isNotPromotion && move != _killerMoves[0][ply])
                     {
                         if (move != _killerMoves[1][ply])
                         {
