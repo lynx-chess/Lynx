@@ -183,8 +183,10 @@ public sealed partial class Engine
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
-        Span<Move> visitedMoves = stackalloc Move[pseudoLegalMoves.Length];
-        int visitedMovesCounter = 0;
+        Span<Move> visitedNonCaptureMoves = stackalloc Move[pseudoLegalMoves.Length];
+        Span<Move> visitedCaptureMoves = stackalloc Move[pseudoLegalMoves.Length];
+        int visitedNonCaptureMovesCounter = 0;
+        int visitedCaptureMovesCounter = 0;
 
         for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
         {
@@ -209,12 +211,19 @@ public sealed partial class Engine
                 continue;
             }
 
-            visitedMoves[visitedMovesCounter++] = move;
-
             ++_nodes;
             isAnyMoveValid = true;
             var isCapture = move.IsCapture();
             var isQuiet = !isCapture && move.PromotedPiece() == default && !position.IsInCheck();
+
+            if (isCapture)
+            {
+                visitedCaptureMoves[visitedCaptureMovesCounter++] = move;
+            }
+            else
+            {
+                visitedNonCaptureMoves[visitedNonCaptureMovesCounter++] = move;
+            }
 
             PrintPreMove(position, ply, move);
 
@@ -326,7 +335,7 @@ public sealed partial class Engine
             {
                 PrintMessage($"Pruning: {move} is enough");
 
-                if (!isQuiet)
+                if (isCapture)
                 {
                     var piece = move.Piece();
                     var targetSquare = move.TargetSquare();
@@ -338,21 +347,19 @@ public sealed partial class Engine
 
                     // 🔍 Capture history penalty/malus
                     // When a capture fails high, penalize previous visited captures
-                    for (int i = 0; i < visitedMovesCounter - 1; ++i)
+                    for (int i = 0; i < visitedCaptureMovesCounter - 1; ++i)
                     {
-                        var visitedMove = visitedMoves[i];
+                        var visitedMove = visitedCaptureMoves[i];
 
-                        if (visitedMove.IsCapture())
-                        {
-                            var visitedMovePiece = visitedMove.Piece();
-                            var visitedMoveTargetSquare = visitedMove.TargetSquare();
-                            var visitedMoveCapturedPiece = visitedMove.CapturedPiece();
+                        var visitedMovePiece = visitedMove.Piece();
+                        var visitedMoveTargetSquare = visitedMove.TargetSquare();
+                        var visitedMoveCapturedPiece = visitedMove.CapturedPiece();
 
-                            _captureHistory[visitedMovePiece][visitedMoveTargetSquare][visitedMoveCapturedPiece] = ScoreHistoryMove(
-                                _captureHistory[visitedMovePiece][visitedMoveTargetSquare][visitedMoveCapturedPiece],
-                                -EvaluationConstants.HistoryBonus[depth]);
-                        }
+                        _captureHistory[visitedMovePiece][visitedMoveTargetSquare][visitedMoveCapturedPiece] = ScoreHistoryMove(
+                            _captureHistory[visitedMovePiece][visitedMoveTargetSquare][visitedMoveCapturedPiece],
+                            -EvaluationConstants.HistoryBonus[depth]);
                     }
+
                 }
                 else
                 {
@@ -367,19 +374,16 @@ public sealed partial class Engine
 
                     // 🔍 Quiet history penalty/malus
                     // When a quiet move fails high, penalize previous visited quiet moves
-                    for (int i = 0; i < visitedMovesCounter - 1; ++i)
+                    for (int i = 0; i < visitedNonCaptureMovesCounter - 1; ++i)
                     {
-                        var visitedMove = visitedMoves[i];
+                        var visitedMove = visitedNonCaptureMoves[i];
 
-                        if (!visitedMove.IsCapture())
-                        {
-                            var visitedMovePiece = visitedMove.Piece();
-                            var visitedMoveTargetSquare = visitedMove.TargetSquare();
+                        var visitedMovePiece = visitedMove.Piece();
+                        var visitedMoveTargetSquare = visitedMove.TargetSquare();
 
-                            _quietHistory[visitedMovePiece][visitedMoveTargetSquare] = ScoreHistoryMove(
-                                _quietHistory[visitedMovePiece][visitedMoveTargetSquare],
-                                -EvaluationConstants.HistoryBonus[depth]);
-                        }
+                        _quietHistory[visitedMovePiece][visitedMoveTargetSquare] = ScoreHistoryMove(
+                            _quietHistory[visitedMovePiece][visitedMoveTargetSquare],
+                            -EvaluationConstants.HistoryBonus[depth]);
                     }
 
                     // 🔍 Killer moves
