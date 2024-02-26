@@ -79,7 +79,7 @@ public sealed partial class Engine
         var sw = Stopwatch.StartNew();
 
         InitializeStaticClasses();
-        const string goWarmupCommand = "go depth 10";   // ~300 ms
+        const string goWarmupCommand = "go depth 10";
 
         AdjustPosition(Constants.SuperLongPositionCommand);
         BestMove(new(goWarmupCommand));
@@ -93,7 +93,7 @@ public sealed partial class Engine
 
     private void ResetEngine()
     {
-        InitializeTT(); // TODO SPRT clearing instead
+        Array.Clear(_tt);
 
         // Clear histories
         for (int i = 0; i < 12; ++i)
@@ -304,7 +304,7 @@ public sealed partial class Engine
         if (Configuration.EngineSettings.TranspositionTableEnabled)
         {
             (int ttLength, _ttMask) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
-            _tt = new TranspositionTableElement[ttLength];
+            _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
         }
     }
 
