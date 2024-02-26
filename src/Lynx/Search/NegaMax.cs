@@ -234,6 +234,7 @@ public sealed partial class Engine
             }
             else if (pvNode && movesSearched == 0)
             {
+                _tt.Prefetch(_ttMask, position.UniqueIdentifier);
                 evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
             }
             else
@@ -253,6 +254,8 @@ public sealed partial class Engine
 
                     break;
                 }
+
+                _tt.Prefetch(_ttMask, position.UniqueIdentifier);
 
                 int reduction = 0;
 
