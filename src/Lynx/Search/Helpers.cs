@@ -1,6 +1,7 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 
 namespace Lynx;
@@ -148,6 +149,26 @@ public sealed partial class Engine
         //PrintPvTable(target: target, source: source, movesToCopy: moveCountToCopy);
         Array.Copy(_pVTable, source, _pVTable, target, moveCountToCopy);
         //PrintPvTable();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void PrefetchTTEntry()
+    {
+        if (Sse.IsSupported)
+        {
+            var index = Game.CurrentPosition.UniqueIdentifier & _ttMask;
+
+            unsafe
+            {
+                // Since _tt is a pinned array
+                // This is no-op pinning as it does not influence the GC compaction
+                // https://tooslowexception.com/pinned-object-heap-in-net-5/
+                fixed (TranspositionTableElement* ttPtr = _tt)
+                {
+                    Sse.Prefetch0(ttPtr + index);
+                }
+            }
+        }
     }
 
     #region Debugging
