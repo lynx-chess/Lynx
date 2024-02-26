@@ -1,8 +1,11 @@
 ﻿using NLog;
+using NLog.Targets;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics.X86;
+using System.Threading.Tasks;
 
 namespace Lynx.Model;
 
@@ -225,6 +228,23 @@ public static class TranspositionTableExtensions
         }
 
         return items;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void Prefetch(this TranspositionTable transpositionTable, int ttMask, long positionUniqueIdentifier)
+    {
+        if (Sse.IsSupported)
+        {
+            var index = positionUniqueIdentifier & ttMask;
+
+            unsafe
+            {
+                fixed (TranspositionTableElement* ttPtr = &transpositionTable[0])
+                {
+                    Sse.Prefetch0(ttPtr + index);
+                }
+            }
+        }
     }
 
     /// <summary>
