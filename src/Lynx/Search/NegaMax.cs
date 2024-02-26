@@ -214,7 +214,8 @@ public sealed partial class Engine
             ++_nodes;
             isAnyMoveValid = true;
             var isCapture = move.IsCapture();
-            var isQuiet = !isCapture && move.PromotedPiece() == default && !position.IsInCheck();
+            var isNotPromotion = move.PromotedPiece() == default;
+            var isQuiet = !isCapture && isNotPromotion && !position.IsInCheck();
 
             if (isCapture)
             {
@@ -359,7 +360,6 @@ public sealed partial class Engine
                             _captureHistory[visitedMovePiece][visitedMoveTargetSquare][visitedMoveCapturedPiece],
                             -EvaluationConstants.HistoryBonus[depth]);
                     }
-
                 }
                 else
                 {
@@ -387,7 +387,7 @@ public sealed partial class Engine
                     }
 
                     // 🔍 Killer moves
-                    if (move != _killerMoves[0][ply])
+                    if (isNotPromotion && move != _killerMoves[0][ply])
                     {
                         if (move != _killerMoves[1][ply])
                         {
