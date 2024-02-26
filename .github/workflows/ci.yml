@@ -215,7 +215,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest, macos-14]
+        os: [ubuntu-latest, windows-latest, macos-14]   # disabled for macOS-latest since that's always the CI bottleneck due to runners availability
         category: [Perft]
       fail-fast: false
 
