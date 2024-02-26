@@ -214,6 +214,7 @@ public sealed partial class Engine
             ++_nodes;
             isAnyMoveValid = true;
             var isCapture = move.IsCapture();
+            var isQuiet = !isCapture && move.PromotedPiece() == default && !position.IsInCheck();
 
             PrintPreMove(position, ply, move);
 
@@ -261,7 +262,7 @@ public sealed partial class Engine
                 if (movesSearched >= (pvNode ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves - 1)
                     && depth >= Configuration.EngineSettings.LMR_MinDepth
                     && !isInCheck
-                    && !isCapture)
+                    && isQuiet)
                 {
                     reduction = EvaluationConstants.LMRReductions[depth][movesSearched];
 
@@ -325,7 +326,7 @@ public sealed partial class Engine
             {
                 PrintMessage($"Pruning: {move} is enough");
 
-                if (isCapture)
+                if (!isQuiet)
                 {
                     var piece = move.Piece();
                     var targetSquare = move.TargetSquare();
@@ -382,7 +383,7 @@ public sealed partial class Engine
                     }
 
                     // 🔍 Killer moves
-                    if (move.PromotedPiece() == default && move != _killerMoves[0][ply])
+                    if (move != _killerMoves[0][ply])
                     {
                         if (move != _killerMoves[1][ply])
                         {
