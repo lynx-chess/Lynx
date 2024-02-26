@@ -7,13 +7,16 @@ public sealed class Game
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
+#if DEBUG
     public List<Move> MoveHistory { get; }
-    public HashSet<long> PositionHashHistory { get; }
+#endif
+
+    public List<long> PositionHashHistory { get; }
 
     public int HalfMovesWithoutCaptureOrPawnMove { get; set; }
 
     public Position CurrentPosition { get; private set; }
-    private readonly Position _gameInitialPosition;
+    private Position _gameInitialPosition;
 
     public Game() : this(Constants.InitialPositionFEN)
     {
@@ -30,91 +33,12 @@ public sealed class Game
             _logger.Warn($"Invalid position detected: {fen.ToString()}");
         }
 
-        MoveHistory = new(1024);
-        PositionHashHistory = new(1024) { CurrentPosition.UniqueIdentifier };
-
+        PositionHashHistory = new(Constants.MaxNumberMovesInAGame) { CurrentPosition.UniqueIdentifier };
         HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
-    }
 
-    /// <summary>
-    /// Intended to be used from tests only
-    /// </summary>
-    /// <param name="position"></param>
-    internal Game(Position position)
-    {
-        CurrentPosition = position;
-        _gameInitialPosition = new Position(CurrentPosition);
-
-        MoveHistory = new(1024);
-        PositionHashHistory = new(1024) { position.UniqueIdentifier };
-    }
-
-    [Obsolete("Just intended for testing purposes")]
-    internal Game(string fen, string[] movesUCIString) : this(fen)
-    {
-        foreach (var moveString in movesUCIString)
-        {
-            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition);
-
-            if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
-            {
-                _logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen, string.Join(' ', movesUCIString), moveString);
-                break;
-            }
-
-            MakeMove(parsedMove.Value);
-        }
-
-        _gameInitialPosition = new Position(CurrentPosition);
-    }
-
-    [Obsolete("Just intended for testing purposes")]
-    internal Game(string fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan) : this(fen)
-    {
-        for (int i = 0; i < rangeSpan.Length; ++i)
-        {
-            var range = rangeSpan[i];
-            if (range.Start.Equals(range.End))
-            {
-                break;
-            }
-            var moveString = rawMoves[range];
-            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition);
-
-            if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
-            {
-                _logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen, string.Join(' ', rawMoves.ToString()), moveString.ToString());
-                break;
-            }
-
-            MakeMove(parsedMove.Value);
-        }
-
-        _gameInitialPosition = new Position(CurrentPosition);
-    }
-
-    [Obsolete("Just intended for testing purposes")]
-    public Game(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan, Move[] movePool) : this(fen)
-    {
-        for (int i = 0; i < rangeSpan.Length; ++i)
-        {
-            if (rangeSpan[i].Start.Equals(rangeSpan[i].End))
-            {
-                break;
-            }
-            var moveString = rawMoves[rangeSpan[i]];
-            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, movePool);
-
-            if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
-            {
-                _logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen.ToString(), rawMoves.ToString(), moveString.ToString());
-                break;
-            }
-
-            MakeMove(parsedMove.Value);
-        }
-
-        _gameInitialPosition = new Position(CurrentPosition);
+#if DEBUG
+        MoveHistory = new(Constants.MaxNumberMovesInAGame);
+#endif
     }
 
     public Game(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan, Span<Move> movePool) : this(fen)
@@ -141,8 +65,77 @@ public sealed class Game
         _gameInitialPosition = new Position(CurrentPosition);
     }
 
+    /// <summary>
+    /// Updates <paramref name="halfMovesWithoutCaptureOrPawnMove"/>.
+    /// See also <see cref="Utils.Update50movesRule(int, int)"/>
+    /// </summary>
+    /// <param name="moveToPlay"></param>
+    /// <param name="isCapture"></param>
+    /// <remarks>
+    /// Checking halfMovesWithoutCaptureOrPawnMove >= 100 since a capture/pawn move doesn't necessarily 'clear' the variable.
+    /// i.e. while the engine is searching:
+    ///     At depth 2, 50 rules move applied and eval is 0
+    ///     At depth 3, there's a capture, but the eval should still be 0
+    ///     At depth 4 there's no capture, but the eval should still be 0
+    /// </remarks>
+    /// <returns>true if threefol/50 moves repetition is possible (since both captures and pawn moves are irreversible)</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsThreefoldRepetition(Position position) => PositionHashHistory.Contains(position.UniqueIdentifier);
+    public bool Update50movesRule(Move moveToPlay, bool isCapture)
+    {
+        if (isCapture)
+        {
+            if (HalfMovesWithoutCaptureOrPawnMove < 100)
+            {
+                HalfMovesWithoutCaptureOrPawnMove = 0;
+            }
+            else
+            {
+                ++HalfMovesWithoutCaptureOrPawnMove;
+            }
+
+            return false;
+        }
+        else
+        {
+            var pieceToMove = moveToPlay.Piece();
+
+            if (pieceToMove == (int)Piece.P || pieceToMove == (int)Piece.p)
+            {
+                if (HalfMovesWithoutCaptureOrPawnMove < 100)
+                {
+                    HalfMovesWithoutCaptureOrPawnMove = 0;
+                }
+
+                return false;
+            }
+
+            ++HalfMovesWithoutCaptureOrPawnMove;
+
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// Basic algorithm described in https://web.archive.org/web/20201107002606/https://marcelk.net/2013-04-06/paper/upcoming-rep-v2.pdf
+    /// </summary>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsThreefoldRepetition()
+    {
+        var currentHash = CurrentPosition.UniqueIdentifier;
+
+        // [Count - 1] would be the last one, we want to start searching 2 ealier and finish HalfMovesWithoutCaptureOrPawnMove earlier
+        var limit = Math.Max(0, PositionHashHistory.Count - 1 - HalfMovesWithoutCaptureOrPawnMove);
+        for (int i = PositionHashHistory.Count - 3; i >= limit; i -= 2)
+        {
+            if (currentHash == PositionHashHistory[i])
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool Is50MovesRepetition()
@@ -156,13 +149,28 @@ public sealed class Game
     }
 
     /// <summary>
-    /// To be used in online tb proving only, with a copy of <see cref="PositionHashHistory"/>
+    /// To be used in online tb proving only, with a copy of <see cref="PositionHashHistory"/> that hasn't been updated with <paramref name="position"/>
     /// </summary>
     /// <param name="positionHashHistory"></param>
     /// <param name="position"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsThreefoldRepetition(HashSet<long> positionHashHistory, Position position) => positionHashHistory.Contains(position.UniqueIdentifier);
+    public static bool IsThreefoldRepetition(List<long> positionHashHistory, Position position, int halfMovesWithoutCaptureOrPawnMove = Constants.MaxNumberMovesInAGame)
+    {
+        var currentHash = position.UniqueIdentifier;
+
+        // Since positionHashHistory hasn't been updated with position, [Count] would be the last one, so we want to start searching 2 ealier
+        var limit = Math.Max(0, positionHashHistory.Count - halfMovesWithoutCaptureOrPawnMove);
+        for (int i = positionHashHistory.Count - 2; i >= limit; i -= 2)
+        {
+            if (currentHash == positionHashHistory[i])
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /// <summary>
     /// To be used in online tb proving only, with a copy of <see cref="HalfMovesWithoutCaptureOrPawnMove"/>
@@ -172,31 +180,27 @@ public sealed class Game
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool Is50MovesRepetition(int halfMovesWithoutCaptureOrPawnMove) => halfMovesWithoutCaptureOrPawnMove >= 100;
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public GameState MakeMove(Move moveToPlay)
     {
         var gameState = CurrentPosition.MakeMove(moveToPlay);
-        MoveHistory.Add(moveToPlay);
 
-        if (!CurrentPosition.WasProduceByAValidMove())
+        if (CurrentPosition.WasProduceByAValidMove())
         {
-            RevertLastMove(moveToPlay, gameState);
+#if DEBUG
+            MoveHistory.Add(moveToPlay);
+#endif
+        }
+        else
+        {
+            _logger.Warn("Error trying to play {0}", moveToPlay.UCIString());
+            CurrentPosition.UnmakeMove(moveToPlay, gameState);
         }
 
         PositionHashHistory.Add(CurrentPosition.UniqueIdentifier);
-
-        HalfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveToPlay, HalfMovesWithoutCaptureOrPawnMove);
+        Update50movesRule(moveToPlay, moveToPlay.IsCapture());
 
         return gameState;
-    }
-
-    internal void RevertLastMove(Move playedMove, GameState gameState)
-    {
-        CurrentPosition.UnmakeMove(playedMove, gameState);
-
-        if (MoveHistory.Count != 0)
-        {
-            MoveHistory.RemoveAt(MoveHistory.Count - 1);
-        }
     }
 
     /// <summary>
@@ -204,5 +208,7 @@ public sealed class Game
     /// (either by the engine time management logic or by external stop command)
     /// currentPosition won't be the initial one
     /// </summary>
-    public void ResetCurrentPositionToBeforeSearchState() => CurrentPosition = _gameInitialPosition;
+    public void ResetCurrentPositionToBeforeSearchState() => CurrentPosition = new(_gameInitialPosition);
+
+    public void UpdateInitialPosition() => _gameInitialPosition = new(CurrentPosition);
 }

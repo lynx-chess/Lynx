@@ -251,12 +251,12 @@ public static readonly int[] EndGameKingTable =
     /// <summary>
     /// <see cref="Constants.AbsoluteMaxDepth"/> x <see cref="Constants.MaxNumberOfPossibleMovesInAPosition"/>
     /// </summary>
-    public static readonly int[][] LMRReductions = new int[Constants.AbsoluteMaxDepth][];
+    public static readonly int[][] LMRReductions = new int[Configuration.EngineSettings.MaxDepth][];
 
     /// <summary>
     /// [0, 4, 136, 276, 424, 580, 744, 916, 1096, 1284, 1480, 1684, 1896, 1896, 1896, 1896, ...]
     /// </summary>
-    public static readonly int[] HistoryBonus = new int[Constants.AbsoluteMaxDepth];
+    public static readonly int[] HistoryBonus = new int[Configuration.EngineSettings.MaxDepth];
 
     static EvaluationConstants()
     {
@@ -271,7 +271,7 @@ public static readonly int[] EndGameKingTable =
             }
         }
 
-        for (int searchDepth = 1; searchDepth < Constants.AbsoluteMaxDepth; ++searchDepth)    // Depth > 0 or we'd be in QSearch
+        for (int searchDepth = 1; searchDepth < Configuration.EngineSettings.MaxDepth; ++searchDepth)    // Depth > 0 or we'd be in QSearch
         {
             LMRReductions[searchDepth] = new int[Constants.MaxNumberOfPossibleMovesInAPosition];
 

@@ -215,7 +215,7 @@ public class FENGeneration_Benchmark : BaseBenchmark
         var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         var position = new StructCustomPosition(fen);
-        var newPosition = new StructCustomPosition(position, moves.First());
+        var newPosition = new StructCustomPosition(position, moves[0]);
         return newPosition.FEN;
     }
 
@@ -226,7 +226,7 @@ public class FENGeneration_Benchmark : BaseBenchmark
         var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         var position = new StructCustomPosition(fen);
-        var newPosition = new StructCustomPosition(position, moves.First(), default);
+        var newPosition = new StructCustomPosition(position, moves[0], default);
 
         return newPosition.FEN;
     }
@@ -238,7 +238,7 @@ public class FENGeneration_Benchmark : BaseBenchmark
         var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         var position = new ReadonlyStructCustomPosition(fen);
-        var newPosition = new ReadonlyStructCustomPosition(position, moves.First());
+        var newPosition = new ReadonlyStructCustomPosition(position, moves[0]);
 
         return newPosition.FEN;
     }
@@ -250,7 +250,7 @@ public class FENGeneration_Benchmark : BaseBenchmark
         var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         var position = new ReadonlyStructCustomPosition(fen);
-        var newPosition = new ReadonlyStructCustomPosition(position, moves.First(), default);
+        var newPosition = new ReadonlyStructCustomPosition(position, moves[0], default);
 
         return newPosition.FEN;
     }
@@ -262,7 +262,7 @@ public class FENGeneration_Benchmark : BaseBenchmark
         var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         var position = new ClassCustomPosition(fen);
-        var newPosition = new ClassCustomPosition(position, moves.First());
+        var newPosition = new ClassCustomPosition(position, moves[0]);
 
         return newPosition.FEN;
     }
@@ -274,7 +274,7 @@ public class FENGeneration_Benchmark : BaseBenchmark
         var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         var position = new ClassCustomPosition(fen);
-        var newPosition = new ClassCustomPosition(position, moves.First(), default);
+        var newPosition = new ClassCustomPosition(position, moves[0], default);
 
         return newPosition.FEN;
     }
@@ -286,7 +286,7 @@ public class FENGeneration_Benchmark : BaseBenchmark
         var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         var position = new RecordClassCustomPosition(fen);
-        var newPosition = new RecordClassCustomPosition(position, moves.First());
+        var newPosition = new RecordClassCustomPosition(position, moves[0]);
 
         return newPosition.FEN;
     }
@@ -298,7 +298,7 @@ public class FENGeneration_Benchmark : BaseBenchmark
         var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         var position = new RecordClassCustomPosition(fen);
-        var newPosition = new RecordClassCustomPosition(position, moves.First(), default);
+        var newPosition = new RecordClassCustomPosition(position, moves[0], default);
 
         return newPosition.FEN;
     }
@@ -310,7 +310,7 @@ public class FENGeneration_Benchmark : BaseBenchmark
         var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         var position = new RecordStructCustomPosition(fen);
-        var newPosition = new RecordStructCustomPosition(position, moves.First());
+        var newPosition = new RecordStructCustomPosition(position, moves[0]);
 
         return newPosition.FEN;
     }
@@ -322,7 +322,7 @@ public class FENGeneration_Benchmark : BaseBenchmark
         var moves = MoveGenerator.GenerateAllMoves(new Position(fen));
 
         var position = new RecordStructCustomPosition(fen);
-        var newPosition = new RecordStructCustomPosition(position, moves.First(), default);
+        var newPosition = new RecordStructCustomPosition(position, moves[0], default);
 
         return newPosition.FEN;
     }
@@ -339,8 +339,6 @@ public class FENGeneration_Benchmark : BaseBenchmark
 
 internal struct StructCustomPosition
 {
-    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
     private string? _fen;
 
     public string FEN
@@ -692,8 +690,6 @@ internal struct StructCustomPosition
 
 internal readonly struct ReadonlyStructCustomPosition
 {
-    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
     public string FEN { get; private init; }
 
     /// <summary>
@@ -1039,8 +1035,6 @@ internal readonly struct ReadonlyStructCustomPosition
 
 internal class ClassCustomPosition
 {
-    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
     private string? _fen;
 
     public string FEN
@@ -1391,8 +1385,6 @@ internal class ClassCustomPosition
 
 internal record class RecordClassCustomPosition
 {
-    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
     private string? _fen;
 
     public string FEN
@@ -1743,8 +1735,6 @@ internal record class RecordClassCustomPosition
 
 internal record struct RecordStructCustomPosition
 {
-    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
     private string? _fen;
 
     public string FEN

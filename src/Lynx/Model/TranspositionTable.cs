@@ -63,17 +63,22 @@ public struct TranspositionTableElement
 public static class TranspositionTableExtensions
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-    private static readonly int _ttElementSize = Marshal.SizeOf(typeof(TranspositionTableElement));
+    private static readonly ulong _ttElementSize = (ulong)Marshal.SizeOf(typeof(TranspositionTableElement));
 
     public static (int Length, int Mask) CalculateLength(int size)
     {
-        var sizeBytes = size * 1024 * 1024;
-        var ttLength = sizeBytes / _ttElementSize;
+        ulong sizeBytes = (ulong)size * 1024ul * 1024ul;
+        ulong ttLength = sizeBytes / _ttElementSize;
         if (!BitOperations.IsPow2(ttLength))
         {
-            ttLength = (int)BitOperations.RoundUpToPowerOf2((uint)ttLength) >> 1;    // / 2
+            ttLength = BitOperations.RoundUpToPowerOf2(ttLength) >> 1;    // / 2
         }
         var ttLengthMb = ttLength / 1024 / 1024;
+
+        if (ttLength > int.MaxValue)
+        {
+            throw new ArgumentException($"Invalid transpositon table (Hash) size: {ttLengthMb}Mb");
+        }
 
         var mask = ttLength - 1;
 
@@ -83,7 +88,7 @@ public static class TranspositionTableExtensions
         _logger.Info("TT entry:\t{0} bytes", _ttElementSize);
         _logger.Info("TT mask:\t{0}", mask.ToString("X"));
 
-        return (ttLength, mask);
+        return ((int)ttLength, (int)mask);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -198,13 +203,14 @@ public static class TranspositionTableExtensions
     /// <param name="ply"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static int RecalculateMateScores(int score, int ply) => score +
-            score switch
-            {
-                > EvaluationConstants.PositiveCheckmateDetectionLimit => -EvaluationConstants.CheckmateDepthFactor * ply,
-                < EvaluationConstants.NegativeCheckmateDetectionLimit => EvaluationConstants.CheckmateDepthFactor * ply,
-                _ => 0
-            };
+    internal static int RecalculateMateScores(int score, int ply) =>
+        score
+        + score switch
+        {
+            > EvaluationConstants.PositiveCheckmateDetectionLimit => -EvaluationConstants.CheckmateDepthFactor * ply,
+            < EvaluationConstants.NegativeCheckmateDetectionLimit => EvaluationConstants.CheckmateDepthFactor * ply,
+            _ => 0
+        };
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int PopulatedItemsCount(this TranspositionTable transpositionTable)
