@@ -135,7 +135,7 @@ public sealed class OptionCommand : EngineBaseCommand
         #region Search tuning
 
         $"option name {nameof(Configuration.EngineSettings.HardTimeBoundMultiplier)} type spin default {100 * Configuration.EngineSettings.HardTimeBoundMultiplier} min 0 max 100",
-        $"option name {nameof(Configuration.EngineSettings.SoftTimeBoundMultiplier)} type spin default {100 * Configuration.EngineSettings.SoftTimeBoundMultiplier} min 0 max 100",
+        $"option name {nameof(Configuration.EngineSettings.SoftTimeBoundMultiplier)} type spin default {Configuration.EngineSettings.SoftTimeBoundMultiplier} min 0 max 1024",
         $"option name {nameof(Configuration.EngineSettings.DefaultMovesToGo)} type spin default {Configuration.EngineSettings.DefaultMovesToGo} min 0 max 1024",
         $"option name {nameof(Configuration.EngineSettings.SoftTimeBaseIncrementMultiplier)} type spin default {100 * Configuration.EngineSettings.SoftTimeBaseIncrementMultiplier} min 0 max 100",
         $"option name {nameof(Configuration.EngineSettings.LMR_MinDepth)} type spin default {Configuration.EngineSettings.LMR_MinDepth} min 0 max 1024",
