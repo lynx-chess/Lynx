@@ -249,6 +249,38 @@ public sealed class UCIHandler
 
             #region Search tuning
 
+            case "hardtimeboundmultiplier":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.HardTimeBoundMultiplier = UCIToDouble(value);
+                    }
+                    break;
+                }
+            case "softtimeboundmultiplier":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.SoftTimeBoundMultiplier = UCIToDouble(value);
+                    }
+                    break;
+                }
+            case "DefaultMovesToGo":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.DefaultMovesToGo = value;
+                    }
+                    break;
+                }
+            case "softtimebaseincrementmultiplier":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.SoftTimeBaseIncrementMultiplier = UCIToDouble(value);
+                    }
+                    break;
+                }
             case "lmr_mindepth":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
@@ -269,7 +301,7 @@ public sealed class UCIHandler
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
-                        Configuration.EngineSettings.LMR_Base = (value * 0.01);
+                        Configuration.EngineSettings.LMR_Base = UCIToDouble(value);
                     }
                     break;
                 }
@@ -277,7 +309,7 @@ public sealed class UCIHandler
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
-                        Configuration.EngineSettings.LMR_Divisor = (value * 0.01);
+                        Configuration.EngineSettings.LMR_Divisor = UCIToDouble(value);
                     }
                     break;
                 }
@@ -391,6 +423,30 @@ public sealed class UCIHandler
                     }
                     break;
                 }
+            case "history_maxmovevalue":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.History_MaxMoveValue = value;
+                    }
+                    break;
+                }
+            case "history_maxmoverawbonus":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.History_MaxMoveRawBonus = value;
+                    }
+                    break;
+                }
+            case "see_badcapturereduction":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.SEE_BadCaptureReduction = value;
+                    }
+                    break;
+                }
 
             #endregion
 
@@ -399,6 +455,8 @@ public sealed class UCIHandler
                 break;
         }
     }
+
+    private static double UCIToDouble(int uciValue) => uciValue * 0.01;
 
     private void HandleNewGame()
     {

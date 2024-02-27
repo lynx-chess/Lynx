@@ -134,6 +134,10 @@ public sealed class OptionCommand : EngineBaseCommand
 
         #region Search tuning
 
+        //$"option name {nameof(Configuration.EngineSettings.HardTimeBoundMultiplier)} type spin default {100 * Configuration.EngineSettings.HardTimeBoundMultiplier} min 0 max 100",
+        //$"option name {nameof(Configuration.EngineSettings.SoftTimeBoundMultiplier)} type spin default {100 * Configuration.EngineSettings.SoftTimeBoundMultiplier} min 0 max 100",
+        //$"option name {nameof(Configuration.EngineSettings.DefaultMovesToGo)} type spin default {Configuration.EngineSettings.DefaultMovesToGo} min 0 max 1024",
+        //$"option name {nameof(Configuration.EngineSettings.SoftTimeBaseIncrementMultiplier)} type spin default {100 * Configuration.EngineSettings.SoftTimeBaseIncrementMultiplier} min 0 max 100",
         //$"option name {nameof(Configuration.EngineSettings.LMR_MinDepth)} type spin default {Configuration.EngineSettings.LMR_MinDepth} min 0 max 1024",
         //$"option name {nameof(Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves)} type spin default {Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves} min 0 max 1024",
         //$"option name {nameof(Configuration.EngineSettings.LMR_Base)} type spin default {100 * Configuration.EngineSettings.LMR_Base} min 0 max 1024",
@@ -151,6 +155,9 @@ public sealed class OptionCommand : EngineBaseCommand
         //$"option name {nameof(Configuration.EngineSettings.LMP_MaxDepth)} type spin default {Configuration.EngineSettings.LMP_MaxDepth} min 0 max 1024",
         //$"option name {nameof(Configuration.EngineSettings.LMP_BaseMovesToTry)} type spin default {Configuration.EngineSettings.LMP_BaseMovesToTry} min 0 max 1024",
         //$"option name {nameof(Configuration.EngineSettings.LMP_MovesDepthMultiplier)} type spin default {Configuration.EngineSettings.LMP_MovesDepthMultiplier} min 0 max 1024",
+        //$"option name {nameof(Configuration.EngineSettings.History_MaxMoveValue)} type spin default {Configuration.EngineSettings.History_MaxMoveValue} min 0 max 131072",
+        //$"option name {nameof(Configuration.EngineSettings.History_MaxMoveRawBonus)} type spin default {Configuration.EngineSettings.History_MaxMoveRawBonus} min 0 max 131072",
+        //$"option name {nameof(Configuration.EngineSettings.SEE_BadCaptureReduction)} type spin default {Configuration.EngineSettings.SEE_BadCaptureReduction} min 0 max 1024",
 
         #endregion
     ];
