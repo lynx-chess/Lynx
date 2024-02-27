@@ -265,7 +265,7 @@ public sealed class UCIHandler
                     }
                     break;
                 }
-            case "DefaultMovesToGo":
+            case "defaultmovestogo":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
