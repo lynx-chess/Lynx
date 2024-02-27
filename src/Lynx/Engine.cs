@@ -69,7 +69,12 @@ public sealed partial class Engine
 
         _engineWriter = engineWriter;
         ResetEngine();
-# endif
+#endif
+
+#pragma warning disable S1215 // "GC.Collect" should not be called
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+#pragma warning restore S1215 // "GC.Collect" should not be called
     }
 
 #pragma warning disable S1144 // Unused private types or members should be removed - used in Release mode
@@ -121,6 +126,11 @@ public sealed partial class Engine
         _isNewGameCommandSupported = true;
 
         ResetEngine();
+
+#pragma warning disable S1215 // "GC.Collect" should not be called
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+#pragma warning restore S1215 // "GC.Collect" should not be called
     }
 
     public void AdjustPosition(ReadOnlySpan<char> rawPositionCommand)
