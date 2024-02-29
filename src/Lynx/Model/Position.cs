@@ -750,18 +750,48 @@ public class Position
             gamePhase = maxPhase;
         }
 
-        // Check if drawn position due to lack of material
-        if (gamePhase <= 4)
+        // Pawnless endgames with few pieces
+        if (gamePhase <= 5 && pieceCount[(int)Piece.P] == 0 && pieceCount[(int)Piece.p] == 0)
         {
-            var offset = Utils.PieceOffset(endGameScore >= 0);
-
-            bool sideCannotWin = pieceCount[(int)Piece.P + offset] == 0 && pieceCount[(int)Piece.Q + offset] == 0 && pieceCount[(int)Piece.R + offset] == 0
-                && (pieceCount[(int)Piece.B + offset] + pieceCount[(int)Piece.N + offset] == 1                  // B or N
-                    || (pieceCount[(int)Piece.B + offset] == 0 && pieceCount[(int)Piece.N + offset] == 2));     // N+N
-
-            if (sideCannotWin)
+            switch (gamePhase)
             {
-                return (0, gamePhase);
+                case 5:
+                    {
+                        // RB vs R, RN vs R - escale it down due to the chances of it being a draw
+                        if (pieceCount[(int)Piece.R] == 1 && pieceCount[(int)Piece.r] == 1)
+                        {
+                            endGameScore >>= 1; // /2
+                        }
+
+                        break;
+                    }
+                case 3:
+                    {
+                        var winningSideOffset = Utils.PieceOffset(endGameScore >= 0);
+
+                        if (pieceCount[(int)Piece.N + winningSideOffset] == 2)      // NN vs N, NN vs B
+                        {
+                            return (0, gamePhase);
+                        }
+
+
+                        break;
+                    }
+                case 2:
+                    {
+                        if (pieceCount[(int)Piece.N] + pieceCount[(int)Piece.n] == 2            // NN, N vs N
+                                || pieceCount[(int)Piece.N] + pieceCount[(int)Piece.B] == 1)    // B vs N, B vs B
+                        {                                                                       // Only BB and BN are a win
+                            return (0, gamePhase);
+                        }
+
+                        break;
+                    }
+                case 1:
+                case 0:
+                    {
+                        return (0, gamePhase);
+                    }
             }
         }
 

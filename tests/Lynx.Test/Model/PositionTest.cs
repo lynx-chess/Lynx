@@ -924,6 +924,50 @@ public class PositionTest
         Assert.AreEqual(expectedStaticEvaluation, position.StaticEvaluation().Score);
     }
 
+    [TestCase("k7/8/8/3K4/8/8/8/8 w - - 0 1", true, "K vs k")]
+    [TestCase("8/8/8/8/3k4/8/8/K7 w - - 0 1", true, "K vs k")]
+    public void StaticEvaluation_PawnlessEndgames_KingVsKing(string fen, bool isDrawExpected, string _)
+    {
+        EvaluateDrawOrNotDraw(fen, isDrawExpected, 0);
+    }
+
+    [TestCase("1k6/8/8/8/8/8/1B6/1K6 w - - 0 1", true, 1, "B")]
+    [TestCase("1k6/1b6/8/8/8/8/8/1K6 w - - 0 1", true, 1, "b")]
+    [TestCase("1k6/8/8/8/8/8/1N6/1K6 w - - 0 1", true, 1, "N")]
+    [TestCase("1k6/1n6/8/8/8/8/8/1K6 w - - 0 1", true, 1, "n")]
+    [TestCase("1k6/8/8/8/8/8/1R6/1K6 w - - 0 1", false, 2, "R")]
+    [TestCase("rk6/8/8/8/8/8/8/1K6 w - - 0 1", false, 2, "r")]
+    [TestCase("1k6/8/8/8/8/8/1Q6/1K6 w - - 0 1", false, 4, "Q")]
+    [TestCase("qk6/8/8/8/8/8/8/1K6 w - - 0 1", false, 4, "q")]
+    public void StaticEvaluation_PawnlessEndgames_SinglePiece(string fen, bool isDrawExpected, int expectedPhase, string _)
+    {
+        EvaluateDrawOrNotDraw(fen, isDrawExpected, expectedPhase);
+    }
+
+    [TestCase("1k6/n7/8/8/8/8/N7/1K6 w - - 0 1", true, "N vs n")]
+    [TestCase("1k6/b7/8/8/8/8/B7/1K6 w - - 0 1", true, "B vs b")]
+    [TestCase("1k6/n7/8/8/8/8/B7/1K6 w - - 0 1", true, "B vs n")]
+    [TestCase("1k6/b7/8/8/8/8/N7/1K6 w - - 0 1", true, "N vs b")]
+    [TestCase("1k6/8/8/8/8/8/NB6/1K6 w - - 0 1", false, "BN")]
+    [TestCase("1k6/8/8/8/8/8/BB6/1K6 w - - 0 1", false, "BB")]
+    [TestCase("1k6/bb6/8/8/8/8/8/1K6 w - - 0 1", false, "bb")]
+    [TestCase("1k6/bn6/8/8/8/8/8/1K6 w - - 0 1", false, "bn")]
+    [TestCase("1k6/8/8/8/8/8/NN6/1K6 w - - 0 1", true, "NN")]
+    [TestCase("1k6/nn6/8/8/8/8/8/1K6 w - - 0 1", true, "nn")]
+    public void StaticEvaluation_PawnlessEndgames_TwoMinorPieces(string fen, bool isDrawExpected, string _)
+    {
+        EvaluateDrawOrNotDraw(fen, isDrawExpected, 2);
+    }
+
+    [TestCase("8/8/3kb3/8/8/2NN4/3K4/8 w - - 0 1", true, "NN vs b")]
+    [TestCase("8/8/3knn2/8/8/3B4/3K4/8 w - - 0 1", true, "B vs nn")]
+    [TestCase("8/8/3kn3/8/8/2NN4/3K4/8 w - - 0 1", true, "NN vs n")]
+    [TestCase("8/8/3knn2/8/8/3N4/3K4/8 w - - 0 1", true, "N vs nn")]
+    public void StaticEvaluation_PawnlessEndgames_TwoMinorPiecesVsOne(string fen, bool isDrawExpected, string _)
+    {
+        EvaluateDrawOrNotDraw(fen, isDrawExpected, 3);
+    }
+
     [TestCase(0, 0)]
     [TestCase(0, 100)]
     [TestCase(100, 100)]
@@ -971,5 +1015,22 @@ public class PositionTest
         return piece == Piece.K
             ? position.KingAdditionalEvaluation(bitBoard, Side.White, pieceCount).EndGameScore
             : position.KingAdditionalEvaluation(bitBoard, Side.Black, pieceCount).EndGameScore;
+    }
+
+    private static void EvaluateDrawOrNotDraw(string fen, bool isDrawExpected, int expectedPhase)
+    {
+        var position = new Position(fen);
+        var (score, phase) = position.StaticEvaluation();
+
+        Assert.AreEqual(expectedPhase, phase);
+
+        if (isDrawExpected)
+        {
+            Assert.AreEqual(0, score);
+        }
+        else
+        {
+            Assert.AreNotEqual(0, score);
+        }
     }
 }

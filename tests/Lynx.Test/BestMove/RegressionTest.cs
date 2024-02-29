@@ -385,4 +385,13 @@ public class RegressionTest : BaseTest
 
         Assert.DoesNotThrow(() => engine.BestMove(new("go wtime 100000 btime 100000 winc 80 binc 80")));
     }
+
+    [TestCase("8/8/4k3/3n1n2/5P2/8/3K4/8 b - - 0 12", null, new[] { "d5f4" },
+        Description = "NN vs P, where knights can't take the pawn")]
+    [TestCase("8/5R2/1n2RK2/8/8/7k/4r3/8 b - - 0 1", null, new[] { "e2e6" },
+        Description = "RR vs RB, where if the side with the bishop exchanges the rooks, they lose")]
+    public void PawnlessEndgames(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
+    {
+        TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
+    }
 }
