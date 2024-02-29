@@ -759,17 +759,22 @@ public class Position
                     {
                         var winningSideOffset = Utils.PieceOffset(endGameScore >= 0);
 
-                        if (pieceCount[(int)Piece.N + winningSideOffset] == 2)      // NN vs N, NN vs B
+                        if (pieceCount[(int)Piece.N + winningSideOffset] == 2)  // NN vs N, NN vs B
                         {
                             return (0, gamePhase);
+                        }
+
+                        if (pieceCount[(int)Piece.B + winningSideOffset] + pieceCount[(int)Piece.N + winningSideOffset] == 0)   // R vs B, R vs N
+                        {
+                            endGameScore >>= 1; // /2
                         }
 
                         break;
                     }
                 case 2:
                     {
-                        if (pieceCount[(int)Piece.N] + pieceCount[(int)Piece.n] == 2            // NN vs -, N vs N
-                                || pieceCount[(int)Piece.N] + pieceCount[(int)Piece.B] == 1)    // B vs N, B vs B
+                        if (pieceCount[(int)Piece.N] + pieceCount[(int)Piece.n] == 2        // NN vs -, N vs N
+                            || pieceCount[(int)Piece.N] + pieceCount[(int)Piece.B] == 1)    // B vs N, B vs B
                         {
                             return (0, gamePhase);
                         }
