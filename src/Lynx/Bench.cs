@@ -76,12 +76,16 @@ public partial class Engine
         "5R2/2k3PK/8/5N2/7P/5q2/8/q7 w - - 0 69",                       // McShane - Aronian 2012 - knight promotion
         "rnbqk1nr/ppp2ppp/8/4P3/1BP5/8/PP2KpPP/RN1Q1BNR b kq - 1 7",    // Albin Countergambit, Lasker Trap - knight promotion
 
-        "8/8/4k3/3n1n2/5P2/8/3K4/8 b - - 0 12",                         // NN vs P endgame
-        "8/5R2/1n2RK2/8/8/7k/4r3/8 b - - 0 1",                          // RR vs RN endgame, where if black takes, they actually loses
-        "8/n3p3/8/2B5/2b5/7k/P7/7K w - - 0 1",                          // BP vs BNP endgame
-        "8/n3p3/8/2B5/1n6/7k/P7/7K w - - 0 1",                          // BP vs NNP endgame
         "8/nRp5/8/8/8/7k/8/7K w - - 0 1",                               // R vs NP
         "8/bRp5/8/8/8/7k/8/7K w - - 0 1",                               // R vs BP
+        "8/8/4k3/3n1n2/5P2/8/3K4/8 b - - 0 12",                         // NN vs P endgame
+        "8/bQr5/8/8/8/7k/8/7K w - - 0 1",                               // Q vs RB, leading to Q vs R or Q vs B
+        "8/nQr5/8/8/8/7k/8/7K w - - 0 1",                               // Q vs RN, leading to Q vs R or Q vs N
+        "8/5R2/1n2RK2/8/8/7k/4r3/8 b - - 0 1",                          // RR vs RN endgame, where if black takes, they actually loses
+        "8/n3p3/8/2B5/2b5/7k/P7/7K w - - 0 1",                          // BP vs BNP endgame, leading to B vs BN
+        "8/n3p3/8/2B5/1n6/7k/P7/7K w - - 0 1",                          // BP vs NNP endgame, leading to B vs NN
+        "8/bRn5/8/7b/8/7k/8/7K w - - 0 1",                              // R vs BBN, leading to R vs BN or R vs BB
+        "1b6/1R1r4/8/1n6/7k/8/8/7K w - - 0 1",                          // R vs RBN, leading to R vs BN or R vs RB or R vs RN
         "8/q5rk/8/8/8/8/Q5RK/7N w - - 0 1",                             // Endgame that can lead to QN vs Q or RN vs R positions
         "1kr5/2bp3q/Q7/1K6/6q1/6B1/8/8 w - - 0 1",                      // Endgame where triple repetition can and needs to be forced by white
         "1kr5/2bp3q/R7/1K6/6q1/6B1/8/8 w - - 96 200"                    // Endgame where 50 moves draw can and needs to be forced by white
