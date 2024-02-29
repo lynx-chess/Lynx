@@ -78,6 +78,10 @@ public partial class Engine
 
         "8/8/4k3/3n1n2/5P2/8/3K4/8 b - - 0 12",                         // NN vs P endgame
         "8/5R2/1n2RK2/8/8/7k/4r3/8 b - - 0 1",                          // RR vs RN endgame, where if black takes, they actually loses
+        "8/n3p3/8/2B5/2b5/7k/P7/7K w - - 0 1",                          // BP vs BNP endgame
+        "8/n3p3/8/2B5/1n6/7k/P7/7K w - - 0 1",                          // BP vs NNP endgame
+        "8/nRp5/8/8/8/7k/8/7K w - - 0 1",                               // R vs NP
+        "8/bRp5/8/8/8/7k/8/7K w - - 0 1",                               // R vs BP
         "8/q5rk/8/8/8/8/Q5RK/7N w - - 0 1",                             // Endgame that can lead to QN vs Q or RN vs R positions
         "1kr5/2bp3q/Q7/1K6/6q1/6B1/8/8 w - - 0 1",                      // Endgame where triple repetition can and needs to be forced by white
         "1kr5/2bp3q/R7/1K6/6q1/6B1/8/8 w - - 96 200"                    // Endgame where 50 moves draw can and needs to be forced by white
