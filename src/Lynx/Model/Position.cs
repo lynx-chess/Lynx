@@ -753,14 +753,28 @@ public class Position
         // Pawnless endgames with few pieces
         if (gamePhase <= 5 && pieceCount[(int)Piece.P] == 0 && pieceCount[(int)Piece.p] == 0)
         {
+            //var winningSideOffset = Utils.PieceOffset(endGameScore >= 0);
+
             switch (gamePhase)
             {
+                //case 9:
+                //    {
+                //        // QB vs Q, QN vs Q
+                //        if (pieceCount[(int)Piece.Q] == 1
+                //            && pieceCount[(int)Piece.q] == 1)
+                //        {
+                //            endGameScore -= EvaluationConstants.PawnlessDrawishEndgameBonus + (EvaluationConstants.PawnlessDrawishEndgameCoefficient * winningSideOffset);
+                //        }
+
+                //        break;
+                //    }
                 case 5:
                     {
                         // RB vs R, RN vs R - escale it down due to the chances of it being a draw
                         if (pieceCount[(int)Piece.R] == 1 && pieceCount[(int)Piece.r] == 1)
                         {
                             endGameScore >>= 1; // /2
+                            // -= EvaluationConstants.PawnlessDrawishEndgameBonus + (EvaluationConstants.PawnlessDrawishEndgameCoefficient * winningSideOffset);
                         }
 
                         break;
@@ -774,6 +788,13 @@ public class Position
                             return (0, gamePhase);
                         }
 
+                        //if (pieceCount[(int)Piece.R] == 1                           // R vs B, R vs N
+                        //    || pieceCount[(int)Piece.r] == 1
+                        //    || pieceCount[(int)Piece.b - winningSideOffset] == 1    // BN vs B, NN vs B, BB vs B
+                        //    || pieceCount[(int)Piece.B + winningSideOffset] <= 1)   // BN vs N, NN vs N
+                        //{                                                           // Only BB vs N is a win, (BN vs N can have some chances)
+                        //    endGameScore -= EvaluationConstants.PawnlessDrawishEndgameBonus + (EvaluationConstants.PawnlessDrawishEndgameCoefficient * winningSideOffset);
+                        //}
 
                         break;
                     }
