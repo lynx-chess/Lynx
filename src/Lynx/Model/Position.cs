@@ -751,10 +751,20 @@ public class Position
         }
 
         // Pawnless endgames with few pieces
-        if (gamePhase <= 3 && pieceCount[(int)Piece.P] == 0 && pieceCount[(int)Piece.p] == 0)
+        if (gamePhase <= 5 && pieceCount[(int)Piece.P] == 0 && pieceCount[(int)Piece.p] == 0)
         {
             switch (gamePhase)
             {
+                case 5:
+                    {
+                        // RB vs R, RN vs R - escale it down due to the chances of it being a draw
+                        if (pieceCount[(int)Piece.R] == 1 && pieceCount[(int)Piece.r] == 1)
+                        {
+                            endGameScore >>= 1; // /2
+                        }
+
+                        break;
+                    }
                 case 3:
                     {
                         var winningSideOffset = Utils.PieceOffset(endGameScore >= 0);
