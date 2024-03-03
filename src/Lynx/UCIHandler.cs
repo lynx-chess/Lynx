@@ -97,6 +97,9 @@ public sealed class UCIHandler
                     await HandleStaticEval(rawCommand, cancellationToken);
                     HandleQuit();
                     break;
+                case "fen":
+                    await HandleFEN();
+                    break;
                 default:
                     _logger.Warn("Unknown command received: {0}", rawCommand);
                     break;
@@ -523,6 +526,11 @@ public sealed class UCIHandler
             Console.WriteLine(e.Message + e.StackTrace);
             await _engineToUci.Writer.WriteAsync(e.Message + e.StackTrace, cancellationToken);
         }
+    }
+
+    private async Task HandleFEN()
+    {
+        await _engineToUci.Writer.WriteAsync(_engine.Game.CurrentPosition.FEN());
     }
 
     #endregion
