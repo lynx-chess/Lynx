@@ -16,7 +16,8 @@ public sealed class Game
     public int HalfMovesWithoutCaptureOrPawnMove { get; set; }
 
     public Position CurrentPosition { get; private set; }
-    private Position _gameInitialPosition;
+
+    public Position PositionBeforeLastSearch { get; private set; }
 
     public Game() : this(Constants.InitialPositionFEN)
     {
@@ -26,7 +27,7 @@ public sealed class Game
     {
         var parsedFen = FENParser.ParseFEN(fen);
         CurrentPosition = new Position(parsedFen);
-        _gameInitialPosition = new Position(CurrentPosition);
+        PositionBeforeLastSearch = new Position(CurrentPosition);
 
         if (!CurrentPosition.IsValid())
         {
@@ -62,7 +63,7 @@ public sealed class Game
             MakeMove(parsedMove.Value);
         }
 
-        _gameInitialPosition = new Position(CurrentPosition);
+        PositionBeforeLastSearch = new Position(CurrentPosition);
     }
 
     /// <summary>
@@ -208,7 +209,7 @@ public sealed class Game
     /// (either by the engine time management logic or by external stop command)
     /// currentPosition won't be the initial one
     /// </summary>
-    public void ResetCurrentPositionToBeforeSearchState() => CurrentPosition = new(_gameInitialPosition);
+    public void ResetCurrentPositionToBeforeSearchState() => CurrentPosition = new(PositionBeforeLastSearch);
 
-    public void UpdateInitialPosition() => _gameInitialPosition = new(CurrentPosition);
+    public void UpdateInitialPosition() => PositionBeforeLastSearch = new(CurrentPosition);
 }
