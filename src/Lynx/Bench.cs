@@ -81,6 +81,7 @@ public partial class Engine
         "8/8/4k3/3n1n2/5P2/8/3K4/8 b - - 0 12",                         // NN vs P endgame
         "8/bQr5/8/8/8/7k/8/7K w - - 0 1",                               // Q vs RB, leading to Q vs R or Q vs B
         "8/nQr5/8/8/8/7k/8/7K w - - 0 1",                               // Q vs RN, leading to Q vs R or Q vs N
+        "4kq2/8/n7/8/8/3Q3b/8/3K4 w - - 0 1",                           // Q vs QBN, leading to Q vs QB or Q vs QN
         "8/5R2/1n2RK2/8/8/7k/4r3/8 b - - 0 1",                          // RR vs RN endgame, where if black takes, they actually loses
         "8/n3p3/8/2B5/2b5/7k/P7/7K w - - 0 1",                          // BP vs BNP endgame, leading to B vs BN
         "8/n3p3/8/2B5/1n6/7k/P7/7K w - - 0 1",                          // BP vs NNP endgame, leading to B vs NN
