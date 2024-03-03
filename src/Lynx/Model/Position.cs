@@ -764,6 +764,13 @@ public class Position
                             return (0, gamePhase);
                         }
 
+                        // Without rooks, only BB vs N is a win and BN vs N can have some chances
+                        // Not taking that into account here though, we would need this to rule them out: `pieceCount[(int)Piece.b - winningSideOffset] == 1 || pieceCount[(int)Piece.B + winningSideOffset] <= 1`
+                        if (pieceCount[(int)Piece.R + winningSideOffset] == 0)  // BN vs B, NN vs B, BB vs B, BN vs N, NN vs N
+                        {
+                            endGameScore >>= 1; // /2
+                        }
+
                         break;
                     }
                 case 2:
