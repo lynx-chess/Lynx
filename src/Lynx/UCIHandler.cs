@@ -530,7 +530,11 @@ public sealed class UCIHandler
 
     private async Task HandleFEN()
     {
-        await _engineToUci.Writer.WriteAsync(_engine.Game.CurrentPosition.FEN());
+        const string fullMoveCounterString = " 1";
+
+        var fen = _engine.Game.CurrentPosition.FEN()[..^3] + _engine.Game.HalfMovesWithoutCaptureOrPawnMove + fullMoveCounterString;
+
+        await _engineToUci.Writer.WriteAsync(fen);
     }
 
     #endregion
