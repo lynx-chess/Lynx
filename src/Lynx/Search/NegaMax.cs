@@ -66,7 +66,7 @@ public sealed partial class Engine
 
         bool isInCheck = position.IsInCheck();
 
-        if (isInCheck)
+        if (isInCheck && depth < Configuration.EngineSettings.MaxDepth - 1)
         {
             ++depth;
         }
@@ -334,9 +334,17 @@ public sealed partial class Engine
                     var targetSquare = move.TargetSquare();
                     var capturedPiece = move.CapturedPiece();
 
-                    _captureHistory[piece][targetSquare][capturedPiece] = ScoreHistoryMove(
-                        _captureHistory[piece][targetSquare][capturedPiece],
-                        EvaluationConstants.HistoryBonus[depth]);
+                    try
+                    {
+
+                        _captureHistory[piece][targetSquare][capturedPiece] = ScoreHistoryMove(
+                            _captureHistory[piece][targetSquare][capturedPiece],
+                            EvaluationConstants.HistoryBonus[depth]);
+                    }
+                    catch (Exception e)
+                    {
+                        ;
+                    }
 
                     // 🔍 Capture history penalty/malus
                     // When a capture fails high, penalize previous visited captures
