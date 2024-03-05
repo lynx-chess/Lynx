@@ -42,10 +42,11 @@ public sealed partial class Engine
         ShortMove ttBestMove = default;
         NodeType ttElementType = default;
         int ttEvaluation = default;
+        int ttScore = default;
 
         if (!isRoot)
         {
-            (ttEvaluation, ttBestMove, ttElementType) = _tt.ProbeHash(_ttMask, position, depth, ply, alpha, beta);
+            (ttEvaluation, ttBestMove, ttElementType, ttScore) = _tt.ProbeHash(_ttMask, position, depth, ply, alpha, beta);
             if (!pvNode && ttEvaluation != EvaluationConstants.NoHashEntry)
             {
                 return ttEvaluation;
@@ -92,9 +93,9 @@ public sealed partial class Engine
             // If the score is outside what the current bounds are, but it did match flag and depth,
             // then we can trust that this score is more accurate than the current static evaluation,
             // and we can update our static evaluation for better accuracy in pruning
-            if (ttElementType != default && ttElementType != (ttEvaluation > staticEval ? NodeType.Alpha : NodeType.Beta))
+            if (ttElementType != default && ttElementType != (ttScore > staticEval ? NodeType.Alpha : NodeType.Beta))
             {
-                staticEval = ttEvaluation;
+                staticEval = ttScore;
             }
 
             // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
