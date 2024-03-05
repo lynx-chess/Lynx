@@ -113,13 +113,13 @@ public sealed class EngineSettings
 
     #region Time management
 
-    public double HardTimeBoundMultiplier { get; set; } = 0.5;
+    public double HardTimeBoundMultiplier { get; set; } = 0.52;
 
     public double SoftTimeBoundMultiplier { get; set; } = 1;
 
-    public int DefaultMovesToGo { get; set; } = 50;
+    public int DefaultMovesToGo { get; set; } = 45;
 
-    public double SoftTimeBaseIncrementMultiplier { get; set; } = 0.75;
+    public double SoftTimeBaseIncrementMultiplier { get; set; } = 0.8;
 
     #endregion
 
