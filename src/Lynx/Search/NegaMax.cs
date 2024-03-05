@@ -92,7 +92,7 @@ public sealed partial class Engine
             // If the score is outside what the current bounds are, but it did match flag and depth,
             // then we can trust that this score is more accurate than the current static evaluation,
             // and we can update our static evaluation for better accuracy in pruning
-            if (ttElementType != (ttEvaluation > staticEval ? NodeType.Alpha : NodeType.Beta))
+            if (ttElementType != default && ttElementType != (ttEvaluation > staticEval ? NodeType.Alpha : NodeType.Beta))
             {
                 staticEval = ttEvaluation;
             }
