@@ -43,7 +43,7 @@ public static class OnlineTablebaseProber
         TypeInfoResolver = SourceGenerationContext.Default
     };
 
-    public static async Task<(int MateScore, Move BestMove)> RootSearch(Position position, HashSet<long> positionHashHistory, int halfMovesWithoutCaptureOrPawnMove, CancellationToken cancellationToken)
+    public static async Task<(int MateScore, Move BestMove)> RootSearch(Position position, List<long> positionHashHistory, int halfMovesWithoutCaptureOrPawnMove, CancellationToken cancellationToken)
     {
         var fen = position.FEN(halfMovesWithoutCaptureOrPawnMove);
         _logger.Info("[{0}] Querying online tb for position {1}", nameof(RootSearch), fen);

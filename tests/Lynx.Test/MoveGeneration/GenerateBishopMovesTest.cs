@@ -32,7 +32,7 @@ public class GenerateBishopMovesTest
 
         Assert.AreEqual(expectedMoves, moves.Count());
 
-        Assert.AreEqual(moves, MoveGenerator.GenerateBishopMoves(position));
+        Assert.AreEqual(moves, ReferenceMoveGenerator.GenerateBishopMoves(position));
     }
 
     /// <summary>

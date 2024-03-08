@@ -3,7 +3,7 @@ using System.Threading.Channels;
 
 namespace Lynx;
 
-public static class OpenBench
+public partial class Engine
 {
     private static readonly string[] _benchmarkFens =
     [
@@ -78,7 +78,9 @@ public static class OpenBench
 
         "8/8/4k3/3n1n2/5P2/8/3K4/8 b - - 0 12",                         // NN vs P endgame
         "8/5R2/1n2RK2/8/8/7k/4r3/8 b - - 0 1",                          // RR vs RN endgame, where if black takes, they actually loses
-        "8/q5rk/8/8/8/8/Q5RK/7N w - - 0 1"                              // Endgame that can lead to QN vs Q or RN vs R positions
+        "8/q5rk/8/8/8/8/Q5RK/7N w - - 0 1",                             // Endgame that can lead to QN vs Q or RN vs R positions
+        "1kr5/2bp3q/Q7/1K6/6q1/6B1/8/8 w - - 0 1",                      // Endgame where triple repetition can and needs to be forced by white
+        "1kr5/2bp3q/R7/1K6/6q1/6B1/8/8 w - - 96 200"                    // Endgame where 50 moves draw can and needs to be forced by white
     ];
 
     /// <summary>
@@ -86,9 +88,8 @@ public static class OpenBench
     /// (https://github.com/JacquesRW/akimbo/blob/main/resources/fens.txt)
     /// plus random some endgame positions to ensure promotions with/without captures are well covered
     /// </summary>
-    public static async Task<(int TotalNodes, long Nps)> Bench(int depth, Channel<string> engineWriter)
+    public (int TotalNodes, long Nps) Bench(int depth)
     {
-        var engine = new Engine(engineWriter);
         var stopwatch = new Stopwatch();
 
         int totalNodes = 0;
@@ -96,21 +97,27 @@ public static class OpenBench
 
         foreach (var fen in _benchmarkFens)
         {
-            await engineWriter.Writer.WriteAsync($"Benchmarking {fen} at depth {depth}");
+            _engineWriter.TryWrite($"Benchmarking {fen} at depth {depth}");
 
-            engine.AdjustPosition($"position fen {fen}");
+            AdjustPosition($"position fen {fen}");
             stopwatch.Restart();
 
-            var result = await engine.BestMove(new($"go depth {depth}"));
+            var result = BestMove(new($"go depth {depth}"));
             totalTime += stopwatch.ElapsedMilliseconds;
             totalNodes += result.Nodes;
         }
 
-        await engineWriter.Writer.WriteAsync($"Total time: {totalTime}");
+        _engineWriter.TryWrite($"Total time: {totalTime}");
+
+        // Cleanup game
+        NewGame();
+        _isNewGameComing = false;
+        _isNewGameCommandSupported = false;
 
         return (totalNodes, Utils.CalculateNps(totalNodes, totalTime));
     }
 
+    public async ValueTask PrintBenchResults((int TotalNodes, long Nps) benchResult) => await _engineWriter.WriteAsync($"{benchResult.TotalNodes} nodes {benchResult.Nps} nps");
     public static void PrintBenchResults((int TotalNodes, long Nps) benchResult, Action<string> write) => write($"{benchResult.TotalNodes} nodes {benchResult.Nps} nps");
     public static async ValueTask PrintBenchResults((int TotalNodes, long Nps) benchResult, Func<string, ValueTask> write) => await write($"{benchResult.TotalNodes} nodes {benchResult.Nps} nps");
 }

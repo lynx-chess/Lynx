@@ -6,8 +6,6 @@ using NLog;
 using NLog.Extensions.Logging;
 using System.Threading.Channels;
 
-Console.WriteLine($"{IdCommand.EngineName} {IdCommand.GetVersion()} by {IdCommand.EngineAuthor}");
-
 #if DEBUG
 Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
 #endif
@@ -28,23 +26,27 @@ if (Configuration.GeneralSettings.EnableLogging)
     LogManager.Configuration = new NLogLoggingConfiguration(config.GetSection("NLog"));
 }
 
-var uciChannel = Channel.CreateBounded<string>(new BoundedChannelOptions(100) { SingleReader = true, SingleWriter = true });
-var engineChannel = Channel.CreateBounded<string>(new BoundedChannelOptions(100) { SingleReader = true, SingleWriter = false });
+var uciChannel = Channel.CreateBounded<string>(new BoundedChannelOptions(100) { SingleReader = true, SingleWriter = true, FullMode = BoundedChannelFullMode.Wait });
+var engineChannel = Channel.CreateBounded<string>(new BoundedChannelOptions(2 * Configuration.EngineSettings.MaxDepth) { SingleReader = true, SingleWriter = false, FullMode = BoundedChannelFullMode.DropOldest });
 
 using CancellationTokenSource source = new();
 CancellationToken cancellationToken = source.Token;
 
+var engine = new Engine(engineChannel);
+var uciHandler = new UCIHandler(uciChannel, engineChannel, engine);
+
 var tasks = new List<Task>
 {
     Task.Run(() => new Writer(engineChannel).Run(cancellationToken)),
-    Task.Run(() => new LynxDriver(uciChannel, engineChannel, new Engine(engineChannel)).Run(cancellationToken)),
-    Task.Run(() => new Listener(uciChannel).Run(cancellationToken, args)),
+    Task.Run(() => new Searcher(uciChannel, engine).Run(cancellationToken)),
+    Task.Run(() => new Listener(uciHandler).Run(cancellationToken, args)),
     uciChannel.Reader.Completion,
     engineChannel.Reader.Completion
 };
 
 try
 {
+    Console.WriteLine($"{IdCommand.EngineName} {IdCommand.GetVersion()} by {IdCommand.EngineAuthor}");
     await Task.WhenAny(tasks);
 }
 catch (AggregateException ae)

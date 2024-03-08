@@ -36,7 +36,7 @@ public class GenerateQueenMovesTest
 
         Assert.AreEqual(expectedMoves, moves.Count());
 
-        Assert.AreEqual(moves, MoveGenerator.GenerateQueenMoves(position));
+        Assert.AreEqual(moves, ReferenceMoveGenerator.GenerateQueenMoves(position));
     }
 
     /// <summary>

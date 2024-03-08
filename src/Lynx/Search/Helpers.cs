@@ -1,57 +1,10 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 
 namespace Lynx;
-
-public class SearchResult
-{
-    public Move BestMove { get; init; }
-    public int Evaluation { get; init; }
-    public int Depth { get; set; }
-    public List<Move> Moves { get; init; }
-    public int Alpha { get; init; }
-    public int Beta { get; init; }
-    public int Mate { get; init; }
-
-    public int DepthReached { get; set; }
-
-    public int Nodes { get; set; }
-
-    public long Time { get; set; }
-
-    public long NodesPerSecond { get; set; }
-
-    public bool IsCancelled { get; set; }
-
-    public int HashfullPermill { get; set; } = -1;
-
-    public (int WDLWin, int WDLDraw, int WDLLoss)? WDL { get; set; } = null;
-
-    public SearchResult(Move bestMove, int evaluation, int targetDepth, List<Move> moves, int alpha, int beta, int mate = default)
-    {
-        BestMove = bestMove;
-        Evaluation = evaluation;
-        Depth = targetDepth;
-        Moves = moves;
-        Alpha = alpha;
-        Beta = beta;
-        Mate = mate;
-    }
-
-    public SearchResult(SearchResult previousSearchResult)
-    {
-        BestMove = previousSearchResult.Moves.ElementAtOrDefault(2);
-        Evaluation = previousSearchResult.Evaluation;
-        Depth = previousSearchResult.Depth - 2;
-        DepthReached = previousSearchResult.DepthReached - 2;
-        Moves = previousSearchResult.Moves.Skip(2).ToList();
-        Alpha = previousSearchResult.Alpha;
-        Beta = previousSearchResult.Beta;
-        Mate = previousSearchResult.Mate == 0 ? 0 : (int)Math.CopySign(Math.Abs(previousSearchResult.Mate) - 1, previousSearchResult.Mate);
-    }
-}
 
 public sealed partial class Engine
 {
@@ -179,6 +132,26 @@ public sealed partial class Engine
     private static int ScoreHistoryMove(int score, int rawHistoryBonus)
     {
         return score + rawHistoryBonus - (score * Math.Abs(rawHistoryBonus) / Configuration.EngineSettings.History_MaxMoveValue);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void PrefetchTTEntry()
+    {
+        if (Sse.IsSupported)
+        {
+            var index = Game.CurrentPosition.UniqueIdentifier & _ttMask;
+
+            unsafe
+            {
+                // Since _tt is a pinned array
+                // This is no-op pinning as it does not influence the GC compaction
+                // https://tooslowexception.com/pinned-object-heap-in-net-5/
+                fixed (TranspositionTableElement* ttPtr = _tt)
+                {
+                    Sse.Prefetch0(ttPtr + index);
+                }
+            }
+        }
     }
 
 #pragma warning disable RCS1226 // Add paragraph to documentation comment
@@ -376,6 +349,7 @@ $" {484,-3}                                                         {_pVTable[48
 (target == -1 ? "------------------------------------------------------------------------------------" + Environment.NewLine : ""));
     }
 
+    [Conditional("DEBUG")]
     internal void PrintHistoryMoves()
     {
         int max = int.MinValue;
