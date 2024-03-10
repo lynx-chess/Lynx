@@ -10,9 +10,9 @@ public static class EvaluationConstants
     /// </summary>
     public const int EvalNormalizationCoefficient = 142;
 
-    public static readonly double[] As = [-25.59900221, 175.23377472, -145.09355540, 133.49051930];
+    public static readonly double[] As = [-19.12346211, 118.16335522, -65.13621477, 108.37887346];
 
-    public static readonly double[] Bs = [-14.14613328, 84.98205725, -101.16332276, 120.88906952];
+    public static readonly double[] Bs = [-5.65666195, 33.69404882, -34.39300793, 99.06591582];
 
 #pragma warning disable IDE0055 // Discard formatting in this region
 
