@@ -124,7 +124,7 @@ public sealed partial class Engine
 
                 for (int k = 0; k < 12; ++k)
                 {
-                    Array.Clear(_continuationHistory[i][j]/*[contPly]*/[k]);
+                    //Array.Clear(_continuationHistory[i][j]/*[contPly]*/[k]);
                 }
                 //}
             }
