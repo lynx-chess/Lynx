@@ -5,14 +5,14 @@ namespace Lynx;
 public static class EvaluationConstants
 {
     /// <summary>
-    /// 26799 games, 20+0.2, UHO_XXL_+0.90_+1.19.epd
-    /// Retained (W,D,L) = (695493, 1473130, 695796) positions.
+    /// 101192 games, 20+0.2, UHO_XXL_+0.90_+1.19.epd
+    /// Retained (W,D,L) = (2456211, 5250072, 2453504) positions.
     /// </summary>
-    public const int EvalNormalizationCoefficient = 90;
+    public const int EvalNormalizationCoefficient = 142;
 
-    public static readonly double[] As = [-22.42003433, 164.85211203, -163.90358958, 112.35539471];
+    public static readonly double[] As = [-19.12346211, 118.16335522, -65.13621477, 108.37887346];
 
-    public static readonly double[] Bs = [-11.46115172, 75.58863284, -86.52557504, 85.45272407];
+    public static readonly double[] Bs = [-5.65666195, 33.69404882, -34.39300793, 99.06591582];
 
 #pragma warning disable IDE0055 // Discard formatting in this region
 
