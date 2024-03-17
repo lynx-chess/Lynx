@@ -989,7 +989,7 @@ public class PositionTest
             var pieceSquareIndex = bitBoard.GetLS1BIndex();
             bitBoard.ResetLS1B();
             pieceCount[(int)piece]++;
-            eval += position.AdditionalPieceEvaluation(pieceSquareIndex, (int)piece, pieceCount).MiddleGameScore;
+            eval += Utils.UnpackMG(position.AdditionalPieceEvaluation(pieceSquareIndex, (int)piece, pieceCount));
         }
 
         return eval;
@@ -1012,9 +1012,9 @@ public class PositionTest
 
         var bitBoard = position.PieceBitBoards[(int)piece].GetLS1BIndex();
 
-        return piece == Piece.K
-            ? position.KingAdditionalEvaluation(bitBoard, Side.White, pieceCount).EndGameScore
-            : position.KingAdditionalEvaluation(bitBoard, Side.Black, pieceCount).EndGameScore;
+        return Utils.UnpackEG(piece == Piece.K
+            ? position.KingAdditionalEvaluation(bitBoard, Side.White, pieceCount)
+            : position.KingAdditionalEvaluation(bitBoard, Side.Black, pieceCount));
     }
 
     private static void EvaluateDrawOrNotDraw(string fen, bool isDrawExpected, int expectedPhase)

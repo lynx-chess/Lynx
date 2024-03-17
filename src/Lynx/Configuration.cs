@@ -211,18 +211,20 @@ public sealed class EngineSettings
 
 public sealed class TaperedEvaluationTerm
 {
-    public int MG { get; set; }
+    public int PackedEvaluation { get; }
 
-    public int EG { get; set; }
+    public int MG => Utils.UnpackMG(PackedEvaluation);
 
-    internal TaperedEvaluationTerm(int singleValue) : this(singleValue, singleValue)
+    public int EG => Utils.UnpackEG(PackedEvaluation);
+
+    internal TaperedEvaluationTerm(int singleValue)
     {
+        PackedEvaluation = Utils.Pack((short)singleValue, (short)singleValue);
     }
 
     public TaperedEvaluationTerm(int mg, int eg)
     {
-        MG = mg;
-        EG = eg;
+        PackedEvaluation = Utils.Pack((short)mg, (short)eg);
     }
 
     public override string ToString()

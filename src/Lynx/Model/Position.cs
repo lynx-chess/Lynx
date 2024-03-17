@@ -681,8 +681,7 @@ public class Position
 
         Span<int> pieceCount = stackalloc int[PieceBitBoards.Length];
 
-        int middleGameScore = 0;
-        int endGameScore = 0;
+        int packedScore = 0;
         int gamePhase = 0;
 
         for (int pieceIndex = (int)Piece.P; pieceIndex < (int)Piece.K; ++pieceIndex)
@@ -695,16 +694,12 @@ public class Position
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
 
-                middleGameScore += EvaluationConstants.MiddleGameTable[pieceIndex][pieceSquareIndex];
-                endGameScore += EvaluationConstants.EndGameTable[pieceIndex][pieceSquareIndex];
+                packedScore += EvaluationConstants.PackedPSQT[pieceIndex][pieceSquareIndex];
                 gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
 
                 ++pieceCount[pieceIndex];
 
-                (int mgAdditionalScore, int egAdditionalScore) = AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, pieceCount);
-
-                middleGameScore += mgAdditionalScore;
-                endGameScore += egAdditionalScore;
+                packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, pieceCount);
             }
         }
 
@@ -718,30 +713,22 @@ public class Position
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
 
-                middleGameScore += EvaluationConstants.MiddleGameTable[pieceIndex][pieceSquareIndex];
-                endGameScore += EvaluationConstants.EndGameTable[pieceIndex][pieceSquareIndex];
+                packedScore += EvaluationConstants.PackedPSQT[pieceIndex][pieceSquareIndex];
                 gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
 
                 ++pieceCount[pieceIndex];
 
-                (int mgAdditionalScore, int egAdditionalScore) = AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, pieceCount);
-
-                middleGameScore -= mgAdditionalScore;
-                endGameScore -= egAdditionalScore;
+                packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, pieceCount);
             }
         }
 
         var whiteKing = PieceBitBoards[(int)Piece.K].GetLS1BIndex();
-        (int mgKingScore, int egKingScore) = KingAdditionalEvaluation(whiteKing, Side.White, pieceCount);
-
-        middleGameScore += EvaluationConstants.MiddleGameTable[(int)Piece.K][whiteKing] + mgKingScore;
-        endGameScore += EvaluationConstants.EndGameTable[(int)Piece.K][whiteKing] + egKingScore;
-
         var blackKing = PieceBitBoards[(int)Piece.k].GetLS1BIndex();
-        (mgKingScore, egKingScore) = KingAdditionalEvaluation(blackKing, Side.Black, pieceCount);
 
-        middleGameScore += EvaluationConstants.MiddleGameTable[(int)Piece.k][blackKing] - mgKingScore;
-        endGameScore += EvaluationConstants.EndGameTable[(int)Piece.k][blackKing] - egKingScore;
+        packedScore += EvaluationConstants.PackedPSQT[(int)Piece.K][whiteKing]
+            + EvaluationConstants.PackedPSQT[(int)Piece.k][blackKing]
+            + KingAdditionalEvaluation(whiteKing, Side.White, pieceCount)
+            - KingAdditionalEvaluation(blackKing, Side.Black, pieceCount);
 
         const int maxPhase = 24;
 
@@ -760,14 +747,14 @@ public class Position
                         // RB vs R, RN vs R - escale it down due to the chances of it being a draw
                         if (pieceCount[(int)Piece.R] == 1 && pieceCount[(int)Piece.r] == 1)
                         {
-                            endGameScore >>= 1; // /2
+                            packedScore >>= 1; // /2
                         }
 
                         break;
                     }
                 case 3:
                     {
-                        var winningSideOffset = Utils.PieceOffset(endGameScore >= 0);
+                        var winningSideOffset = Utils.PieceOffset(packedScore >= 0);
 
                         if (pieceCount[(int)Piece.N + winningSideOffset] == 2)      // NN vs N, NN vs B
                         {
@@ -778,7 +765,7 @@ public class Position
                         // Not taking that into account here though, we would need this to rule them out: `pieceCount[(int)Piece.b - winningSideOffset] == 1 || pieceCount[(int)Piece.B + winningSideOffset] <= 1`
                         if (pieceCount[(int)Piece.R + winningSideOffset] == 0)  // BN vs B, NN vs B, BB vs B, BN vs N, NN vs N
                         {
-                            endGameScore >>= 1; // /2
+                            packedScore >>= 1; // /2
                         }
 
                         break;
@@ -804,6 +791,8 @@ public class Position
         int endGamePhase = maxPhase - gamePhase;
         //_logger.Trace("Phase: {0}/24", gamePhase);
 
+        var middleGameScore = Utils.UnpackMG(packedScore);
+        var endGameScore = Utils.UnpackEG(packedScore);
         var eval = ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / maxPhase;
 
         eval = Math.Clamp(eval, EvaluationConstants.MinEval, EvaluationConstants.MaxEval);
@@ -854,7 +843,7 @@ public class Position
     /// <param name="pieceCount">Incomplete count</param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal (int MiddleGameScore, int EndGameScore) AdditionalPieceEvaluation(int pieceSquareIndex, int pieceIndex, ReadOnlySpan<int> pieceCount)
+    internal int AdditionalPieceEvaluation(int pieceSquareIndex, int pieceIndex, ReadOnlySpan<int> pieceCount)
     {
         return pieceIndex switch
         {
@@ -862,7 +851,7 @@ public class Position
             (int)Piece.R or (int)Piece.r => RookAdditonalEvaluation(pieceSquareIndex, pieceIndex),
             (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceCount),
             (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex),
-            _ => (0, 0)
+            _ => 0
         };
     }
 
@@ -873,21 +862,19 @@ public class Position
     /// <param name="pieceIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private (int MiddleGameScore, int EndGameScore) PawnAdditionalEvaluation(int squareIndex, int pieceIndex)
+    private int PawnAdditionalEvaluation(int squareIndex, int pieceIndex)
     {
-        int middleGameBonus = 0, endGameBonus = 0;
+        int packedBonus = 0;
 
         var doublePawnsCount = (PieceBitBoards[pieceIndex] & Masks.FileMasks[squareIndex]).CountBits();
         if (doublePawnsCount > 1)
         {
-            middleGameBonus += doublePawnsCount * Configuration.EngineSettings.DoubledPawnPenalty.MG;
-            endGameBonus += doublePawnsCount * Configuration.EngineSettings.DoubledPawnPenalty.EG;
+            packedBonus += doublePawnsCount * Configuration.EngineSettings.DoubledPawnPenalty.PackedEvaluation;
         }
 
         if ((PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default) // isIsolatedPawn
         {
-            middleGameBonus += Configuration.EngineSettings.IsolatedPawnPenalty.MG;
-            endGameBonus += Configuration.EngineSettings.IsolatedPawnPenalty.EG;
+            packedBonus += Configuration.EngineSettings.IsolatedPawnPenalty.PackedEvaluation;
         }
 
         if ((PieceBitBoards[(int)Piece.p - pieceIndex] & Masks.PassedPawns[pieceIndex][squareIndex]) == default)    // isPassedPawn
@@ -897,11 +884,10 @@ public class Position
             {
                 rank = 7 - rank;
             }
-            middleGameBonus += Configuration.EngineSettings.PassedPawnBonus[rank].MG;
-            endGameBonus += Configuration.EngineSettings.PassedPawnBonus[rank].EG;
+            packedBonus += Configuration.EngineSettings.PassedPawnBonus[rank].PackedEvaluation;
         }
 
-        return (middleGameBonus, endGameBonus);
+        return packedBonus;
     }
 
     /// <summary>
@@ -911,27 +897,24 @@ public class Position
     /// <param name="pieceIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private (int MiddleGameScore, int EndGameScore) RookAdditonalEvaluation(int squareIndex, int pieceIndex)
+    private int RookAdditonalEvaluation(int squareIndex, int pieceIndex)
     {
         var attacksCount = Attacks.RookAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
 
-        var middleGameBonus = attacksCount * Configuration.EngineSettings.RookMobilityBonus.MG;
-        var endGameBonus = attacksCount * Configuration.EngineSettings.RookMobilityBonus.EG;
+        var packedBonus = attacksCount * Configuration.EngineSettings.RookMobilityBonus.PackedEvaluation;
 
         const int pawnToRookOffset = (int)Piece.R - (int)Piece.P;
 
         if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default)  // isOpenFile
         {
-            middleGameBonus += Configuration.EngineSettings.OpenFileRookBonus.MG;
-            endGameBonus += Configuration.EngineSettings.OpenFileRookBonus.EG;
+            packedBonus += Configuration.EngineSettings.OpenFileRookBonus.PackedEvaluation;
         }
         else if ((PieceBitBoards[pieceIndex - pawnToRookOffset] & Masks.FileMasks[squareIndex]) == default)  // isSemiOpenFile
         {
-            middleGameBonus += Configuration.EngineSettings.SemiOpenFileRookBonus.MG;
-            endGameBonus += Configuration.EngineSettings.SemiOpenFileRookBonus.EG;
+            packedBonus += Configuration.EngineSettings.SemiOpenFileRookBonus.PackedEvaluation;
         }
 
-        return (middleGameBonus, endGameBonus);
+        return packedBonus;
     }
 
     /// <summary>
@@ -942,20 +925,18 @@ public class Position
     /// <param name="pieceCount">Incomplete (on the fly) count, but can be used to detect the pair of bishops</param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private (int MiddleGameScore, int EndGameScore) BishopAdditionalEvaluation(int squareIndex, int pieceIndex, ReadOnlySpan<int> pieceCount)
+    private int BishopAdditionalEvaluation(int squareIndex, int pieceIndex, ReadOnlySpan<int> pieceCount)
     {
         var attacksCount = Attacks.BishopAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
 
-        var middleGameBonus = attacksCount * Configuration.EngineSettings.BishopMobilityBonus.MG;
-        var endGameBonus = attacksCount * Configuration.EngineSettings.BishopMobilityBonus.EG;
+        var packedBonus = attacksCount * Configuration.EngineSettings.BishopMobilityBonus.PackedEvaluation;
 
         if (pieceCount[pieceIndex] == 2)
         {
-            middleGameBonus += Configuration.EngineSettings.BishopPairBonus.MG;
-            endGameBonus += Configuration.EngineSettings.BishopPairBonus.EG;
+            packedBonus += Configuration.EngineSettings.BishopPairBonus.PackedEvaluation;
         }
 
-        return (middleGameBonus, endGameBonus);
+        return packedBonus;
     }
 
     /// <summary>
@@ -964,12 +945,11 @@ public class Position
     /// <param name="squareIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private (int MiddleGameScore, int EndGameScore) QueenAdditionalEvaluation(int squareIndex)
+    private int QueenAdditionalEvaluation(int squareIndex)
     {
         var attacksCount = Attacks.QueenAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
 
-        return (attacksCount * Configuration.EngineSettings.QueenMobilityBonus.MG,
-            attacksCount * Configuration.EngineSettings.QueenMobilityBonus.EG);
+        return attacksCount * Configuration.EngineSettings.QueenMobilityBonus.PackedEvaluation;
     }
 
     /// <summary>
@@ -980,29 +960,26 @@ public class Position
     /// <param name="pieceCount"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal (int MiddleGameScore, int EndGameScore) KingAdditionalEvaluation(int squareIndex, Side kingSide, ReadOnlySpan<int> pieceCount)
+    internal int KingAdditionalEvaluation(int squareIndex, Side kingSide, ReadOnlySpan<int> pieceCount)
     {
-        int middleGameBonus = 0, endGameBonus = 0;
+        int packedBonus = 0;
         var kingSideOffset = Utils.PieceOffset(kingSide);
 
         if (pieceCount[(int)Piece.r - kingSideOffset] + pieceCount[(int)Piece.q - kingSideOffset] != default) // areThereOppositeSideRooksOrQueens
         {
             if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default)  // isOpenFile
             {
-                middleGameBonus += Configuration.EngineSettings.OpenFileKingPenalty.MG;
-                endGameBonus += Configuration.EngineSettings.OpenFileKingPenalty.EG;
+                packedBonus += Configuration.EngineSettings.OpenFileKingPenalty.PackedEvaluation;
             }
             else if ((PieceBitBoards[(int)Piece.P + kingSideOffset] & Masks.FileMasks[squareIndex]) == default) // isSemiOpenFile
             {
-                middleGameBonus += Configuration.EngineSettings.SemiOpenFileKingPenalty.MG;
-                endGameBonus += Configuration.EngineSettings.SemiOpenFileKingPenalty.EG;
+                packedBonus += Configuration.EngineSettings.SemiOpenFileKingPenalty.PackedEvaluation;
             }
         }
 
         var ownPiecesAroundCount = (Attacks.KingAttacks[squareIndex] & OccupancyBitBoards[(int)kingSide]).CountBits();
 
-        return (middleGameBonus + ownPiecesAroundCount * Configuration.EngineSettings.KingShieldBonus.MG,
-            endGameBonus + ownPiecesAroundCount * Configuration.EngineSettings.KingShieldBonus.EG);
+        return packedBonus + ownPiecesAroundCount * Configuration.EngineSettings.KingShieldBonus.PackedEvaluation;
     }
 
     #endregion
