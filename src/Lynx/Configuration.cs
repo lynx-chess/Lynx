@@ -88,7 +88,7 @@ public sealed class EngineSettings
     /// <summary>
     /// Depth for bench command
     /// </summary>
-    public int BenchDepth { get; set; } = 5;
+    public int BenchDepth { get; set; } = 8;
 
     /// <summary>
     /// MB
@@ -113,13 +113,13 @@ public sealed class EngineSettings
 
     #region Time management
 
-    public int DefaultMovesToGo { get; set; } = 30;
+    public double HardTimeBoundMultiplier { get; set; } = 0.52;
 
-    public double HardTimeBoundMultiplier { get; set; } = 0.25;
+    public double SoftTimeBoundMultiplier { get; set; } = 1;
 
-    public double SoftTimeBoundMultiplier { get; set; } = 0.4;
+    public int DefaultMovesToGo { get; set; } = 45;
 
-    public double SoftTimeBaseIncrementMultiplier { get; set; } = 1;
+    public double SoftTimeBaseIncrementMultiplier { get; set; } = 0.8;
 
     #endregion
 

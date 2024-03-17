@@ -5,14 +5,14 @@ namespace Lynx;
 public static class EvaluationConstants
 {
     /// <summary>
-    /// 26799 games, 20+0.2, UHO_XXL_+0.90_+1.19.epd
-    /// Retained (W,D,L) = (695493, 1473130, 695796) positions.
+    /// 101192 games, 20+0.2, UHO_XXL_+0.90_+1.19.epd
+    /// Retained (W,D,L) = (2456211, 5250072, 2453504) positions.
     /// </summary>
-    public const int EvalNormalizationCoefficient = 90;
+    public const int EvalNormalizationCoefficient = 142;
 
-    public static readonly double[] As = [-22.42003433, 164.85211203, -163.90358958, 112.35539471];
+    public static readonly double[] As = [-19.12346211, 118.16335522, -65.13621477, 108.37887346];
 
-    public static readonly double[] Bs = [-11.46115172, 75.58863284, -86.52557504, 85.45272407];
+    public static readonly double[] Bs = [-5.65666195, 33.69404882, -34.39300793, 99.06591582];
 
 #pragma warning disable IDE0055 // Discard formatting in this region
 
@@ -251,12 +251,12 @@ public static readonly int[] EndGameKingTable =
     /// <summary>
     /// <see cref="Constants.AbsoluteMaxDepth"/> x <see cref="Constants.MaxNumberOfPossibleMovesInAPosition"/>
     /// </summary>
-    public static readonly int[][] LMRReductions = new int[Constants.AbsoluteMaxDepth][];
+    public static readonly int[][] LMRReductions = new int[Configuration.EngineSettings.MaxDepth][];
 
     /// <summary>
     /// [0, 4, 136, 276, 424, 580, 744, 916, 1096, 1284, 1480, 1684, 1896, 1896, 1896, 1896, ...]
     /// </summary>
-    public static readonly int[] HistoryBonus = new int[Constants.AbsoluteMaxDepth];
+    public static readonly int[] HistoryBonus = new int[Configuration.EngineSettings.MaxDepth];
 
     static EvaluationConstants()
     {
@@ -271,7 +271,7 @@ public static readonly int[] EndGameKingTable =
             }
         }
 
-        for (int searchDepth = 1; searchDepth < Constants.AbsoluteMaxDepth; ++searchDepth)    // Depth > 0 or we'd be in QSearch
+        for (int searchDepth = 1; searchDepth < Configuration.EngineSettings.MaxDepth; ++searchDepth)    // Depth > 0 or we'd be in QSearch
         {
             LMRReductions[searchDepth] = new int[Constants.MaxNumberOfPossibleMovesInAPosition];
 

@@ -97,6 +97,9 @@ public sealed class UCIHandler
                     await HandleStaticEval(rawCommand, cancellationToken);
                     HandleQuit();
                     break;
+                case "fen":
+                    await HandleFEN();
+                    break;
                 default:
                     _logger.Warn("Unknown command received: {0}", rawCommand);
                     break;
@@ -186,7 +189,7 @@ public sealed class UCIHandler
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
-                        Configuration.Hash = Math.Clamp(value, 0, 1024);
+                        Configuration.Hash = Math.Clamp(value, 0, Constants.AbsoluteMaxTTSize);
                     }
                     break;
                 }
@@ -523,6 +526,15 @@ public sealed class UCIHandler
             Console.WriteLine(e.Message + e.StackTrace);
             await _engineToUci.Writer.WriteAsync(e.Message + e.StackTrace, cancellationToken);
         }
+    }
+
+    private async Task HandleFEN()
+    {
+        const string fullMoveCounterString = " 1";
+
+        var fen = _engine.Game.CurrentPosition.FEN()[..^3] + _engine.Game.HalfMovesWithoutCaptureOrPawnMove + fullMoveCounterString;
+
+        await _engineToUci.Writer.WriteAsync(fen);
     }
 
     #endregion

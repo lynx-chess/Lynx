@@ -286,10 +286,17 @@ public static class Constants
     ];
 
     /// <summary>
+    /// 16383 is the theoretical limit for the current TT size, which is (2 * 8192) - 1
+    /// </summary>
+    public const int AbsoluteMaxTTSize = 8192;
+
+    /// <summary>
     /// 218 or 224 seems to be the known limit
     /// https://www.reddit.com/r/chess/comments/9j70dc/position_with_the_most_number_of_legal_moves/
     /// </summary>
     public const int MaxNumberOfPossibleMovesInAPosition = 250;
+
+    public const int MaxNumberMovesInAGame = 1024;
 
     public static readonly int SideLimit = Enum.GetValues(typeof(Piece)).Length / 2;
 

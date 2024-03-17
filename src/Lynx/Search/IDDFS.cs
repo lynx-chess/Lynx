@@ -31,7 +31,7 @@ public sealed partial class Engine
     /// </summary>
     private readonly int[][][] _captureHistory;
 
-    private readonly int[] _maxDepthReached = new int[Constants.AbsoluteMaxDepth];
+    private readonly int[] _maxDepthReached = new int[Configuration.EngineSettings.MaxDepth];
     private TranspositionTable _tt = [];
     private int _ttMask;
 
@@ -160,7 +160,7 @@ public sealed partial class Engine
         }
         catch (Exception e) when (e is not AssertException)
         {
-            _logger.Error(e, "Unexpected error ocurred during the search at depth {0}, best move will be returned\n{1}", depth, e.StackTrace);
+            _logger.Error(e, "Unexpected error ocurred during the search of position {0} at depth {1}, best move will be returned\n{2}", Game.PositionBeforeLastSearch.FEN(), depth, e.StackTrace);
         }
         finally
         {
@@ -185,6 +185,12 @@ public sealed partial class Engine
         if (isMateDetected)
         {
             _logger.Info("Stopping at depth {0}: mate detected", depth - 1);
+            return false;
+        }
+
+        if (depth >= Configuration.EngineSettings.MaxDepth)
+        {
+            _logger.Info("Max depth reached: {0}", Configuration.EngineSettings.MaxDepth);
             return false;
         }
 
