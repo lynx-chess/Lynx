@@ -738,7 +738,7 @@ public class Position
         }
 
         // Pawnless endgames with few pieces
-        if (gamePhase <= 5 && pieceCount[(int)Piece.P] == 0 && pieceCount[(int)Piece.p] == 0)
+        if (gamePhase <= 3 && pieceCount[(int)Piece.P] == 0 && pieceCount[(int)Piece.p] == 0)
         {
             switch (gamePhase)
             {
