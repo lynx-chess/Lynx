@@ -211,6 +211,7 @@ public sealed class EngineSettings
 
 public sealed class TaperedEvaluationTerm
 {
+    [JsonIgnore]
     public int PackedEvaluation { get; }
 
     public int MG => Utils.UnpackMG(PackedEvaluation);
