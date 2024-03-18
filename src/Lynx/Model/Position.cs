@@ -752,24 +752,24 @@ public class Position
 
                 //        break;
                 //    }
-                //case 3:
-                //    {
-                //        var winningSideOffset = Utils.PieceOffset(packedScore >= 0);
+                case 3:
+                    {
+                        var winningSideOffset = Utils.PieceOffset(packedScore >= 0);
 
-                //        if (pieceCount[(int)Piece.N + winningSideOffset] == 2)      // NN vs N, NN vs B
-                //        {
-                //            return (0, gamePhase);
-                //        }
+                        if (pieceCount[(int)Piece.N + winningSideOffset] == 2)      // NN vs N, NN vs B
+                        {
+                            return (0, gamePhase);
+                        }
 
-                //        // Without rooks, only BB vs N is a win and BN vs N can have some chances
-                //        // Not taking that into account here though, we would need this to rule them out: `pieceCount[(int)Piece.b - winningSideOffset] == 1 || pieceCount[(int)Piece.B + winningSideOffset] <= 1`
-                //        if (pieceCount[(int)Piece.R + winningSideOffset] == 0)  // BN vs B, NN vs B, BB vs B, BN vs N, NN vs N
-                //        {
-                //            packedScore >>= 1; // /2
-                //        }
+                        // Without rooks, only BB vs N is a win and BN vs N can have some chances
+                        // Not taking that into account here though, we would need this to rule them out: `pieceCount[(int)Piece.b - winningSideOffset] == 1 || pieceCount[(int)Piece.B + winningSideOffset] <= 1`
+                        //if (pieceCount[(int)Piece.R + winningSideOffset] == 0)  // BN vs B, NN vs B, BB vs B, BN vs N, NN vs N
+                        //{
+                        //    packedScore >>= 1; // /2
+                        //}
 
-                //        break;
-                //    }
+                        break;
+                    }
                 case 2:
                     {
                         if (pieceCount[(int)Piece.N] + pieceCount[(int)Piece.n] == 2            // NN vs -, N vs N
