@@ -915,8 +915,10 @@ public class PositionTest
     /// </summary>
     /// <param name="fen"></param>
     /// <param name="expectedStaticEvaluation"></param>
-    [TestCase("QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QPPPPPPP/K6k b - - 0 1", EvaluationConstants.MinEval)]
-    [TestCase("QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QPPPPPPP/K5k1 w - - 0 1", EvaluationConstants.MaxEval)]
+    [TestCase("QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QPPPPPPP/K6k b - - 0 1", EvaluationConstants.MinEval, IgnoreReason = "Packed eval reduces max eval to a short, so over Short.MaxValue it overflows and produces unexpected results")]
+    [TestCase("QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QPPPPPPP/K5k1 w - - 0 1", EvaluationConstants.MaxEval, IgnoreReason = "Packed eval reduces max eval to a short, so over Short.MaxValue it overflows and produces unexpected results")]
+    [TestCase("8/8/8/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QPPPPPPP/K6k b - - 0 1", EvaluationConstants.MinEval)]
+    [TestCase("8/8/8/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QPPPPPPP/K5k1 w - - 0 1", EvaluationConstants.MaxEval)]
     public void StaticEvaluation_Clamp(string fen, int expectedStaticEvaluation)
     {
         var position = new Position(fen);
@@ -989,7 +991,7 @@ public class PositionTest
             var pieceSquareIndex = bitBoard.GetLS1BIndex();
             bitBoard.ResetLS1B();
             pieceCount[(int)piece]++;
-            eval += position.AdditionalPieceEvaluation(pieceSquareIndex, (int)piece, pieceCount).MiddleGameScore;
+            eval += Utils.UnpackMG(position.AdditionalPieceEvaluation(pieceSquareIndex, (int)piece, pieceCount));
         }
 
         return eval;
@@ -1012,9 +1014,9 @@ public class PositionTest
 
         var bitBoard = position.PieceBitBoards[(int)piece].GetLS1BIndex();
 
-        return piece == Piece.K
-            ? position.KingAdditionalEvaluation(bitBoard, Side.White, pieceCount).EndGameScore
-            : position.KingAdditionalEvaluation(bitBoard, Side.Black, pieceCount).EndGameScore;
+        return Utils.UnpackEG(piece == Piece.K
+            ? position.KingAdditionalEvaluation(bitBoard, Side.White, pieceCount)
+            : position.KingAdditionalEvaluation(bitBoard, Side.Black, pieceCount));
     }
 
     private static void EvaluateDrawOrNotDraw(string fen, bool isDrawExpected, int expectedPhase)

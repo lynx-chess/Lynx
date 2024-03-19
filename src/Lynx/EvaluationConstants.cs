@@ -1,5 +1,7 @@
 ﻿using Lynx.Model;
 
+#pragma warning disable IDE1006 // Naming Styles
+
 namespace Lynx;
 
 public static class EvaluationConstants
@@ -22,19 +24,19 @@ public static class EvaluationConstants
         0, 1, 1, 2, 4, 0
     ];
 
-public static readonly int[] MiddleGamePieceValues =
+internal static readonly short[] MiddleGamePieceValues =
 [
         +103, +386, +357, +475, +1084, 0,
         -103, -386, -357, -475, -1084, 0
 ];
 
-public static readonly int[] EndGamePieceValues =
+internal static readonly short[] EndGamePieceValues =
 [
         +149, +485, +434, +843, +1560, 0,
         -149, -485, -434, -843, -1560, 0
 ];
 
-public static readonly int[] MiddleGamePawnTable =
+internal static readonly short[] MiddleGamePawnTable =
 [
         0,      0,      0,      0,      0,      0,      0,      0,
         -26,    -23,    -15,    -9,     -3,     29,     31,     -15,
@@ -46,7 +48,7 @@ public static readonly int[] MiddleGamePawnTable =
         0,      0,      0,      0,      0,      0,      0,      0,
 ];
 
-public static readonly int[] EndGamePawnTable =
+internal static readonly short[] EndGamePawnTable =
 [
         0,      0,      0,      0,      0,      0,      0,      0,
         12,     12,     6,      -15,    6,      2,      -4,     -12,
@@ -58,7 +60,7 @@ public static readonly int[] EndGamePawnTable =
         0,      0,      0,      0,      0,      0,      0,      0,
 ];
 
-public static readonly int[] MiddleGameKnightTable =
+internal static readonly short[] MiddleGameKnightTable =
 [
         -153,   -23,    -52,    -32,    -12,    -21,    -9,     -98,
         -46,    -27,    -3,     15,     18,     25,     -14,    -17,
@@ -70,7 +72,7 @@ public static readonly int[] MiddleGameKnightTable =
         -168,   -24,    -49,    -21,    -9,     -12,    -17,    -91,
 ];
 
-public static readonly int[] EndGameKnightTable =
+internal static readonly short[] EndGameKnightTable =
 [
         -72,    -61,    -13,    -13,    -10,    -28,    -55,    -93,
         -22,    -2,     15,     9,      10,     7,      -13,    -21,
@@ -82,7 +84,7 @@ public static readonly int[] EndGameKnightTable =
         -78,    -60,    -9,     -17,    -11,    -26,    -53,    -93,
 ];
 
-public static readonly int[] MiddleGameBishopTable =
+internal static readonly short[] MiddleGameBishopTable =
 [
         -15,    16,     -2,     -15,    -10,    -16,    -23,    2,
         8,      3,      7,      -18,    1,      -1,     29,     -12,
@@ -94,7 +96,7 @@ public static readonly int[] MiddleGameBishopTable =
         10,     20,     12,     -29,    -13,    -21,    1,      -12,
 ];
 
-public static readonly int[] EndGameBishopTable =
+internal static readonly short[] EndGameBishopTable =
 [
         -14,    18,     -13,    3,      -3,     6,      1,      -31,
         -5,     -8,     -4,     5,      4,      -10,    -2,     -16,
@@ -106,7 +108,7 @@ public static readonly int[] EndGameBishopTable =
         -7,     -12,    -7,     7,      8,      9,      -2,     -22,
 ];
 
-public static readonly int[] MiddleGameRookTable =
+internal static readonly short[] MiddleGameRookTable =
 [
         -4,     -10,    -5,     2,      14,     3,      10,     0,
         -27,    -17,    -14,    -14,    -2,     3,      21,     0,
@@ -118,7 +120,7 @@ public static readonly int[] MiddleGameRookTable =
         -2,     -3,     1,      12,     23,     8,      17,     12,
 ];
 
-public static readonly int[] EndGameRookTable =
+internal static readonly short[] EndGameRookTable =
 [
         6,      3,      7,      -2,     -11,    4,      0,      -5,
         15,     20,     21,     11,     0,      -2,     -6,     2,
@@ -130,7 +132,7 @@ public static readonly int[] EndGameRookTable =
         1,      -3,     2,      -8,     -18,    -4,     -9,     -15,
 ];
 
-public static readonly int[] MiddleGameQueenTable =
+internal static readonly short[] MiddleGameQueenTable =
 [
         -15,    -10,    -5,     9,      3,      -32,    14,     1,
         0,      -10,    7,      -2,     2,      6,      22,     51,
@@ -142,7 +144,7 @@ public static readonly int[] MiddleGameQueenTable =
         -11,    -11,    5,      11,     6,      -39,    -12,    28,
 ];
 
-public static readonly int[] EndGameQueenTable =
+internal static readonly short[] EndGameQueenTable =
 [
         -27,    -24,    -10,    -9,     -19,    -11,    -46,    6,
         -22,    -13,    -28,    0,      -2,     -17,    -48,    -5,
@@ -154,7 +156,7 @@ public static readonly int[] EndGameQueenTable =
         -15,    -18,    -17,    -2,     -9,     21,     13,     -9,
 ];
 
-public static readonly int[] MiddleGameKingTable =
+internal static readonly short[] MiddleGameKingTable =
 [
         34,     55,     30,     -72,    12,     -58,    44,     57,
         -3,     -12,    -33,    -74,    -88,    -58,    -7,     23,
@@ -166,7 +168,7 @@ public static readonly int[] MiddleGameKingTable =
         49,     82,     43,     -55,    25,     -47,    58,     70,
 ];
 
-public static readonly int[] EndGameKingTable =
+internal static readonly short[] EndGameKingTable =
 [
         -85,    -49,    -22,    4,      -36,    -3,     -41,    -96,
         -21,    16,     30,     43,     51,     36,     14,     -24,
@@ -180,73 +182,10 @@ public static readonly int[] EndGameKingTable =
 
 #pragma warning restore IDE0055
 
-    public static readonly int[] MiddleGamePawnTableBlack = MiddleGamePawnTable.Select((_, index) => -MiddleGamePawnTable[index ^ 56]).ToArray();
-    public static readonly int[] EndGamePawnTableBlack = EndGamePawnTable.Select((_, index) => -EndGamePawnTable[index ^ 56]).ToArray();
-
-    public static readonly int[] MiddleGameKnightTableBlack = MiddleGameKnightTable.Select((_, index) => -MiddleGameKnightTable[index ^ 56]).ToArray();
-    public static readonly int[] EndGameKnightTableBlack = EndGameKnightTable.Select((_, index) => -EndGameKnightTable[index ^ 56]).ToArray();
-
-    public static readonly int[] MiddleGameBishopTableBlack = MiddleGameBishopTable.Select((_, index) => -MiddleGameBishopTable[index ^ 56]).ToArray();
-    public static readonly int[] EndGameBishopTableBlack = EndGameBishopTable.Select((_, index) => -EndGameBishopTable[index ^ 56]).ToArray();
-
-    public static readonly int[] MiddleGameRookTableBlack = MiddleGameRookTable.Select((_, index) => -MiddleGameRookTable[index ^ 56]).ToArray();
-    public static readonly int[] EndGameRookTableBlack = EndGameRookTable.Select((_, index) => -EndGameRookTable[index ^ 56]).ToArray();
-
-    public static readonly int[] MiddleGameQueenTableBlack = MiddleGameQueenTable.Select((_, index) => -MiddleGameQueenTable[index ^ 56]).ToArray();
-    public static readonly int[] EndGameQueenTableBlack = EndGameQueenTable.Select((_, index) => -EndGameQueenTable[index ^ 56]).ToArray();
-
-    public static readonly int[] MiddleGameKingTableBlack = MiddleGameKingTable.Select((_, index) => -MiddleGameKingTable[index ^ 56]).ToArray();
-    public static readonly int[] EndGameKingTableBlack = EndGameKingTable.Select((_, index) => -EndGameKingTable[index ^ 56]).ToArray();
-
-    /// <summary>
-    /// [12][64]
-    /// </summary>
-    public static readonly int[][] MiddleGamePositionalTables =
-    [
-        MiddleGamePawnTable,
-        MiddleGameKnightTable,
-        MiddleGameBishopTable,
-        MiddleGameRookTable,
-        MiddleGameQueenTable,
-        MiddleGameKingTable,
-
-        MiddleGamePawnTableBlack,
-        MiddleGameKnightTableBlack,
-        MiddleGameBishopTableBlack,
-        MiddleGameRookTableBlack,
-        MiddleGameQueenTableBlack,
-        MiddleGameKingTableBlack
-    ];
-
-    /// <summary>
-    /// [12][64]
-    /// </summary>
-    public static readonly int[][] EndGamePositionalTables =
-    [
-        EndGamePawnTable,
-        EndGameKnightTable,
-        EndGameBishopTable,
-        EndGameRookTable,
-        EndGameQueenTable,
-        EndGameKingTable,
-
-        EndGamePawnTableBlack,
-        EndGameKnightTableBlack,
-        EndGameBishopTableBlack,
-        EndGameRookTableBlack,
-        EndGameQueenTableBlack,
-        EndGameKingTableBlack
-    ];
-
     /// <summary>
     /// 12x64
     /// </summary>
-    public static readonly int[][] MiddleGameTable = new int[12][];
-
-    /// <summary>
-    /// 12x64
-    /// </summary>
-    public static readonly int[][] EndGameTable = new int[12][];
+    public static readonly int[][] PackedPSQT = new int[12][];
 
     /// <summary>
     /// <see cref="Constants.AbsoluteMaxDepth"/> x <see cref="Constants.MaxNumberOfPossibleMovesInAPosition"/>
@@ -260,14 +199,66 @@ public static readonly int[] EndGameKingTable =
 
     static EvaluationConstants()
     {
+        short[] middleGamePawnTableBlack = MiddleGamePawnTable.Select((_, index) => (short)-MiddleGamePawnTable[index ^ 56]).ToArray();
+        short[] endGamePawnTableBlack = EndGamePawnTable.Select((_, index) => (short)-EndGamePawnTable[index ^ 56]).ToArray();
+
+        short[] middleGameKnightTableBlack = MiddleGameKnightTable.Select((_, index) => (short)-MiddleGameKnightTable[index ^ 56]).ToArray();
+        short[] endGameKnightTableBlack = EndGameKnightTable.Select((_, index) => (short)-EndGameKnightTable[index ^ 56]).ToArray();
+
+        short[] middleGameBishopTableBlack = MiddleGameBishopTable.Select((_, index) => (short)-MiddleGameBishopTable[index ^ 56]).ToArray();
+        short[] endGameBishopTableBlack = EndGameBishopTable.Select((_, index) => (short)-EndGameBishopTable[index ^ 56]).ToArray();
+
+        short[] middleGameRookTableBlack = MiddleGameRookTable.Select((_, index) => (short)-MiddleGameRookTable[index ^ 56]).ToArray();
+        short[] endGameRookTableBlack = EndGameRookTable.Select((_, index) => (short)-EndGameRookTable[index ^ 56]).ToArray();
+
+        short[] middleGameQueenTableBlack = MiddleGameQueenTable.Select((_, index) => (short)-MiddleGameQueenTable[index ^ 56]).ToArray();
+        short[] EndGameQueenTableBlack = EndGameQueenTable.Select((_, index) => (short)-EndGameQueenTable[index ^ 56]).ToArray();
+
+        short[] middleGameKingTableBlack = MiddleGameKingTable.Select((_, index) => (short)-MiddleGameKingTable[index ^ 56]).ToArray();
+        short[] endGameKingTableBlack = EndGameKingTable.Select((_, index) => (short)-EndGameKingTable[index ^ 56]).ToArray();
+
+        short[][] mgPositionalTables =
+        [
+            MiddleGamePawnTable,
+            MiddleGameKnightTable,
+            MiddleGameBishopTable,
+            MiddleGameRookTable,
+            MiddleGameQueenTable,
+            MiddleGameKingTable,
+
+            middleGamePawnTableBlack,
+            middleGameKnightTableBlack,
+            middleGameBishopTableBlack,
+            middleGameRookTableBlack,
+            middleGameQueenTableBlack,
+            middleGameKingTableBlack
+        ];
+
+        short[][] egPositionalTables =
+        [
+            EndGamePawnTable,
+            EndGameKnightTable,
+            EndGameBishopTable,
+            EndGameRookTable,
+            EndGameQueenTable,
+            EndGameKingTable,
+
+            endGamePawnTableBlack,
+            endGameKnightTableBlack,
+            endGameBishopTableBlack,
+            endGameRookTableBlack,
+            EndGameQueenTableBlack,
+            endGameKingTableBlack
+        ];
+
         for (int piece = (int)Piece.P; piece <= (int)Piece.k; ++piece)
         {
-            MiddleGameTable[piece] = new int[64];
-            EndGameTable[piece] = new int[64];
+            PackedPSQT[piece] = new int[64];
             for (int sq = 0; sq < 64; ++sq)
             {
-                MiddleGameTable[piece][sq] = MiddleGamePieceValues[piece] + MiddleGamePositionalTables[piece][sq];
-                EndGameTable[piece][sq] = EndGamePieceValues[piece] + EndGamePositionalTables[piece][sq];
+                PackedPSQT[piece][sq] = Utils.Pack(
+                    (short)(MiddleGamePieceValues[piece] + mgPositionalTables[piece][sq]),
+                    (short)(EndGamePieceValues[piece] + egPositionalTables[piece][sq]));
             }
         }
 
@@ -389,3 +380,5 @@ public static readonly int[] EndGameKingTable =
     /// </summary>
     public const int SingleMoveEvaluation = 200;
 }
+
+#pragma warning restore IDE1006 // Naming Styles
