@@ -379,6 +379,8 @@ internal static readonly short[] EndGameKingTable =
     /// Evaluation to be returned when there's one single legal move
     /// </summary>
     public const int SingleMoveEvaluation = 200;
+
+    public static int PackedPawnEvaluation = Utils.Pack(MiddleGamePieceValues[(int)Piece.P], EndGamePieceValues[(int)Piece.P]);
 }
 
 #pragma warning restore IDE1006 // Naming Styles
