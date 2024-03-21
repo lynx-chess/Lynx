@@ -985,13 +985,11 @@ public class PositionTest
         var bitBoard = position.PieceBitBoards[(int)piece];
         int eval = 0;
 
-        var pieceCount = new int[12];
         while (!bitBoard.Empty())
         {
             var pieceSquareIndex = bitBoard.GetLS1BIndex();
             bitBoard.ResetLS1B();
-            pieceCount[(int)piece]++;
-            eval += Utils.UnpackMG(position.AdditionalPieceEvaluation(pieceSquareIndex, (int)piece, pieceCount));
+            eval += Utils.UnpackMG(position.AdditionalPieceEvaluation(pieceSquareIndex, (int)piece));
         }
 
         return eval;
@@ -999,7 +997,6 @@ public class PositionTest
 
     private static int AdditionalKingEvaluation(Position position, Piece piece)
     {
-        var pieceCount = new int[position.PieceBitBoards.Length];
         for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.k; ++pieceIndex)
         {
             var bitboard = position.PieceBitBoards[pieceIndex];
@@ -1007,16 +1004,14 @@ public class PositionTest
             while (bitboard != default)
             {
                 bitboard.ResetLS1B();
-
-                ++pieceCount[pieceIndex];
             }
         }
 
         var bitBoard = position.PieceBitBoards[(int)piece].GetLS1BIndex();
 
         return Utils.UnpackEG(piece == Piece.K
-            ? position.KingAdditionalEvaluation(bitBoard, Side.White, pieceCount)
-            : position.KingAdditionalEvaluation(bitBoard, Side.Black, pieceCount));
+            ? position.KingAdditionalEvaluation(bitBoard, Side.White)
+            : position.KingAdditionalEvaluation(bitBoard, Side.Black));
     }
 
     private static void EvaluateDrawOrNotDraw(string fen, bool isDrawExpected, int expectedPhase)
