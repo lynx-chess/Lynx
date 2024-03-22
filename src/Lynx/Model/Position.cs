@@ -682,37 +682,34 @@ public class Position
         int packedScore = 0;
         int gamePhase = 0;
 
-        for (int pieceIndex = (int)Piece.P; pieceIndex < (int)Piece.K; ++pieceIndex)
+        for (int whitePieceIndex = (int)Piece.P; whitePieceIndex < (int)Piece.K; ++whitePieceIndex)
         {
-            // Bitboard copy that we 'empty'
-            var bitboard = PieceBitBoards[pieceIndex];
+            var blackPieceIndex = whitePieceIndex + 6;
 
-            while (bitboard != default)
+            // Bitboard copies that we 'empty'
+            var whiteBitboard = PieceBitBoards[whitePieceIndex];
+            var blackBitBoard = PieceBitBoards[blackPieceIndex];
+
+            while (whiteBitboard != default)
             {
-                var pieceSquareIndex = bitboard.GetLS1BIndex();
-                bitboard.ResetLS1B();
+                var whitePieceSquareIndex = whiteBitboard.GetLS1BIndex();
+                whiteBitboard.ResetLS1B();
 
-                packedScore += EvaluationConstants.PackedPSQT[pieceIndex][pieceSquareIndex];
-                gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
+                packedScore += EvaluationConstants.PackedPSQT[whitePieceIndex][whitePieceSquareIndex];
+                gamePhase += EvaluationConstants.GamePhaseByPiece[whitePieceIndex];
 
-                packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
+                packedScore += AdditionalPieceEvaluation(whitePieceSquareIndex, whitePieceIndex);
             }
-        }
 
-        for (int pieceIndex = (int)Piece.p; pieceIndex < (int)Piece.k; ++pieceIndex)
-        {
-            // Bitboard copy that we 'empty'
-            var bitboard = PieceBitBoards[pieceIndex];
-
-            while (bitboard != default)
+            while (blackBitBoard != default)
             {
-                var pieceSquareIndex = bitboard.GetLS1BIndex();
-                bitboard.ResetLS1B();
+                var blackPieceSquareIndex = blackBitBoard.GetLS1BIndex();
+                blackBitBoard.ResetLS1B();
 
-                packedScore += EvaluationConstants.PackedPSQT[pieceIndex][pieceSquareIndex];
-                gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
+                packedScore += EvaluationConstants.PackedPSQT[blackPieceIndex][blackPieceSquareIndex];
+                gamePhase += EvaluationConstants.GamePhaseByPiece[blackPieceIndex];
 
-                packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
+                packedScore -= AdditionalPieceEvaluation(blackPieceSquareIndex, blackPieceIndex);
             }
         }
 
