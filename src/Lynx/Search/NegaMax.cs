@@ -278,17 +278,22 @@ public sealed partial class Engine
                 {
                     reduction = EvaluationConstants.LMRReductions[depth][movesSearched];
 
-                    if (!isCapture)
+                    if (pvNode)
                     {
-                        if (pvNode)
-                        {
-                            --reduction;
-                        }
-                        if (position.IsInCheck())   // i.e. move gives check
-                        {
-                            --reduction;
-                        }
+                        --reduction;
+                    }
+                    if (position.IsInCheck())   // i.e. move gives check
+                    {
+                        --reduction;
+                    }
 
+                    if (isCapture)
+                    {
+                        // -= history/(maxHistory/2)
+                        reduction -= 2 * _captureHistory[move.Piece()][move.TargetSquare()][move.CapturedPiece()] / Configuration.EngineSettings.History_MaxMoveValue;
+                    }
+                    else
+                    {
                         // -= history/(maxHistory/2)
                         reduction -= 2 * _quietHistory[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.History_MaxMoveValue;
                     }
