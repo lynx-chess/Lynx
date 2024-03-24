@@ -286,6 +286,10 @@ public sealed partial class Engine
                     {
                         --reduction;
                     }
+                    if (isInCheck)
+                    {
+                        --reduction;
+                    }
 
                     // -= history/(maxHistory/2)
                     reduction -= 2 * _quietHistory[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.History_MaxMoveValue;
