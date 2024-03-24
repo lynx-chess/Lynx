@@ -30,6 +30,11 @@ public enum SpecialMoveType
 /// </summary>
 public static class MoveExtensions
 {
+    /// <summary>
+    /// Move to represent a null move that fits in 12x64 arrays
+    /// </summary>
+    public static readonly Move NullMove = Encode((int)BoardSquare.e1, (int)BoardSquare.e1, (int)Model.Piece.P);
+
     private const int SourceSquareOffset = 4;
     private const int TargetSquareOffset = 10;
     private const int PieceOffset = 16;

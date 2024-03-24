@@ -112,6 +112,7 @@ public sealed partial class Engine
                 //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
 
                 var gameState = position.MakeNullMove();
+                Game.PushToMoveStack(ply, MoveExtensions.NullMove);
                 var evaluation = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, parentWasNullMove: true);
                 position.UnMakeNullMove(gameState);
 
@@ -232,6 +233,7 @@ public sealed partial class Engine
             var oldHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
             var canBeRepetition = Game.Update50movesRule(move, isCapture);
             Game.PositionHashHistory.Add(position.UniqueIdentifier);
+            Game.PushToMoveStack(ply, move);
 
             int evaluation;
             if (canBeRepetition && (Game.IsThreefoldRepetition() || Game.Is50MovesRepetition()))
@@ -377,8 +379,24 @@ public sealed partial class Engine
                         _quietHistory[piece][targetSquare],
                         EvaluationConstants.HistoryBonus[depth]);
 
-                    // 🔍 Quiet history penalty/malus
-                    // When a quiet move fails high, penalize previous visited quiet moves
+                    // 🔍 Continuation history
+                    // - Counter move history (continuation history, ply - 1)
+                    var previousMove = Game.PopFromMoveStack(ply - 1);
+                    var previousMovePiece = previousMove.Piece();
+                    var previousTargetSquare = previousMove.TargetSquare();
+
+                    _continuationHistory[piece][targetSquare]/*[0]*/[previousMovePiece][previousTargetSquare] = ScoreHistoryMove(
+                        _continuationHistory[piece][targetSquare]/*[0]*/[previousMovePiece][previousTargetSquare],
+                        EvaluationConstants.HistoryBonus[depth]);
+
+                    //    var previousPreviousMove = Game.MoveStack[ply - 2];
+                    //    var previousPreviousMovePiece = previousPreviousMove.Piece();
+                    //    var previousPreviousMoveTargetSquare = previousPreviousMove.TargetSquare();
+
+                    //    _continuationHistory[piece][targetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare] = ScoreHistoryMove(
+                    //        _continuationHistory[piece][targetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare],
+                    //        EvaluationConstants.HistoryBonus[depth]);
+
                     for (int i = 0; i < visitedMovesCounter - 1; ++i)
                     {
                         var visitedMove = visitedMoves[i];
@@ -388,8 +406,15 @@ public sealed partial class Engine
                             var visitedMovePiece = visitedMove.Piece();
                             var visitedMoveTargetSquare = visitedMove.TargetSquare();
 
+                            // 🔍 Quiet history penalty / malus
+                            // When a quiet move fails high, penalize previous visited quiet moves
                             _quietHistory[visitedMovePiece][visitedMoveTargetSquare] = ScoreHistoryMove(
                                 _quietHistory[visitedMovePiece][visitedMoveTargetSquare],
+                                -EvaluationConstants.HistoryBonus[depth]);
+
+                            // 🔍 Continuation history penalty / malus
+                            _continuationHistory[visitedMovePiece][visitedMoveTargetSquare]/*[0]*/[previousMovePiece][previousTargetSquare] = ScoreHistoryMove(
+                                _continuationHistory[visitedMovePiece][visitedMoveTargetSquare]/*[0]*/[previousMovePiece][previousTargetSquare],
                                 -EvaluationConstants.HistoryBonus[depth]);
                         }
                     }
@@ -547,6 +572,7 @@ public sealed partial class Engine
 
             // No need to check for threefold or 50 moves repetitions, since we're only searching captures, promotions, and castles
             // Theoretically there could be a castling move that caused the 50 moves repetitions, but it's highly unlikely
+            Game.PushToMoveStack(ply, move);
 
             int evaluation = -QuiescenceSearch(ply + 1, -beta, -alpha);
             position.UnmakeMove(move, gameState);
