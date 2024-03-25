@@ -274,7 +274,7 @@ public sealed partial class Engine
                 // Impl. based on Ciekce (Stormphrax) and Martin (Motor) advice, and Stormphrax & Akimbo implementations
                 if (movesSearched >= (pvNode ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves - 1)
                     && depth >= Configuration.EngineSettings.LMR_MinDepth
-                    && !isCapture)
+                    && scores[moveIndex] < EvaluationConstants.BadCaptureMoveBaseScoreValue)
                 {
                     reduction = EvaluationConstants.LMRReductions[depth][movesSearched];
 
