@@ -12,17 +12,16 @@ public sealed partial class Engine
     private const int MaxValue = short.MaxValue;
 
     /// <summary>
-    /// Returns the score evaluation of a move taking into account <see cref="_isScoringPV"/>, <paramref name="bestMoveTTCandidate"/>, <see cref="EvaluationConstants.MostValueableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_quietHistory"/>
+    /// Returns the score evaluation of a move
     /// </summary>
     /// <param name="move"></param>
-    /// <param name="depth"></param>
-    /// <param name="isNotQSearch"></param>
+    /// <param name="ply"></param>
     /// <param name="bestMoveTTCandidate"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMove(Move move, int depth, bool isNotQSearch, ShortMove bestMoveTTCandidate = default)
+    internal int ScoreMove(Move move, int ply, ShortMove bestMoveTTCandidate)
     {
-        if (_isScoringPV && move == _pVTable[depth])
+        if (_isScoringPV && move == _pVTable[ply])
         {
             _isScoringPV = false;
 
@@ -72,26 +71,83 @@ public sealed partial class Engine
             return EvaluationConstants.PromotionMoveScoreValue;
         }
 
-        if (isNotQSearch)
+        // 1st killer move
+        if (_killerMoves[0][ply] == move)
         {
-            // 1st killer move
-            if (_killerMoves[0][depth] == move)
-            {
-                return EvaluationConstants.FirstKillerMoveValue;
-            }
+            return EvaluationConstants.FirstKillerMoveValue;
+        }
 
-            if (_killerMoves[1][depth] == move)
-            {
-                return EvaluationConstants.SecondKillerMoveValue;
-            }
+        if (_killerMoves[1][ply] == move)
+        {
+            return EvaluationConstants.SecondKillerMoveValue;
+        }
 
-            if (_killerMoves[2][depth] == move)
-            {
-                return EvaluationConstants.ThirdKillerMoveValue;
-            }
+        if (_killerMoves[2][ply] == move)
+        {
+            return EvaluationConstants.ThirdKillerMoveValue;
+        }
 
-            // History move or 0 if not found
-            return EvaluationConstants.BaseMoveScore + _quietHistory[move.Piece()][move.TargetSquare()];
+        return EvaluationConstants.BaseMoveScore + _quietHistory[move.Piece()][move.TargetSquare()];
+    }
+
+    /// <summary>
+    /// Returns the score evaluation of a QSearch move
+    /// </summary>
+    /// <param name="move"></param>
+    /// <param name="ply"></param>
+    /// <param name="bestMoveTTCandidate"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal int ScoreMoveQuiescence(Move move, int ply, ShortMove bestMoveTTCandidate)
+    {
+        if (_isScoringPV && move == _pVTable[ply])
+        {
+            _isScoringPV = false;
+
+            return EvaluationConstants.PVMoveScoreValue;
+        }
+
+        if ((ShortMove)move == bestMoveTTCandidate)
+        {
+            return EvaluationConstants.TTMoveScoreValue;
+        }
+
+        var promotedPiece = move.PromotedPiece();
+        var isPromotion = promotedPiece != default;
+        var isCapture = move.IsCapture();
+
+        // Queen promotion
+        if ((promotedPiece + 2) % 6 == 0)
+        {
+            var baseScore = SEE.HasPositiveScore(Game.CurrentPosition, move)
+                ? EvaluationConstants.GoodCaptureMoveBaseScoreValue
+                : EvaluationConstants.BadCaptureMoveBaseScoreValue;
+
+            var captureBonus = isCapture ? 1 : 0;
+
+            return baseScore + EvaluationConstants.PromotionMoveScoreValue + captureBonus;
+        }
+
+        if (isCapture)
+        {
+            var baseCaptureScore = (isPromotion || move.IsEnPassant() || SEE.IsGoodCapture(Game.CurrentPosition, move))
+                ? EvaluationConstants.GoodCaptureMoveBaseScoreValue
+                : EvaluationConstants.BadCaptureMoveBaseScoreValue;
+
+            var piece = move.Piece();
+            var capturedPiece = move.CapturedPiece();
+
+            Debug.Assert(capturedPiece != (int)Piece.K && capturedPiece != (int)Piece.k, $"{move.UCIString()} capturing king is generated in position {Game.CurrentPosition.FEN()}");
+
+            return baseCaptureScore
+                + EvaluationConstants.MostValueableVictimLeastValuableAttacker[piece][capturedPiece]
+                //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
+                + _captureHistory[piece][move.TargetSquare()][capturedPiece];
+        }
+
+        if (isPromotion)
+        {
+            return EvaluationConstants.PromotionMoveScoreValue;
         }
 
         return EvaluationConstants.BaseMoveScore;
