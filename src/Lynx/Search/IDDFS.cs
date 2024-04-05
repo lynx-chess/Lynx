@@ -16,9 +16,9 @@ public sealed partial class Engine
     /// </summary>
     private readonly int[][] _killerMoves =
     [
-        new int[Configuration.EngineSettings.MaxDepth],
-        new int[Configuration.EngineSettings.MaxDepth],
-        new int[Configuration.EngineSettings.MaxDepth]
+        new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin],
+        new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin],
+        new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin]
     ];
 
     /// <summary>
@@ -31,7 +31,7 @@ public sealed partial class Engine
     /// </summary>
     private readonly int[][][] _captureHistory;
 
-    private readonly int[] _maxDepthReached = new int[Configuration.EngineSettings.MaxDepth];
+    private readonly int[] _maxDepthReached = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
     private TranspositionTable _tt = [];
     private int _ttMask;
 

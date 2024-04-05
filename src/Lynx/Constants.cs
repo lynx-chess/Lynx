@@ -327,6 +327,11 @@ public static class Constants
     public const int AbsoluteMaxDepth = 255;
 
     /// <summary>
+    /// To take into account array access by depth and depth extensions
+    /// </summary>
+    public const int ArrayDepthMargin = 16;
+
+    /// <summary>
     /// From https://lichess.org/RViT3UWL
     /// Failes input parsing fail if default input buffer size is used (see Lynx.Cli.Listener
     /// </summary>
