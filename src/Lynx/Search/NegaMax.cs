@@ -135,7 +135,7 @@ public sealed partial class Engine
                 {
                     var score = staticEval + Configuration.EngineSettings.Razoring_Depth1Bonus;
 
-                    if (score < beta)               // Static evaluation + bonus indicates fail-low node
+                    if (score <= alpha)               // Static evaluation + bonus indicates fail-low node
                     {
                         if (depth == 1)
                         {
@@ -148,10 +148,10 @@ public sealed partial class Engine
 
                         score += Configuration.EngineSettings.Razoring_NotDepth1Bonus;
 
-                        if (score < beta)               // Static evaluation indicates fail-low node
+                        if (score <= alpha)               // Static evaluation indicates fail-low node
                         {
                             var qSearchScore = QuiescenceSearch(ply, alpha, beta);
-                            if (qSearchScore < beta)    // Quiescence score also indicates fail-low node
+                            if (qSearchScore <= alpha)    // Quiescence score also indicates fail-low node
                             {
                                 return qSearchScore > score
                                     ? qSearchScore
