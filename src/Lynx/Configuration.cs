@@ -1,4 +1,6 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
 
 namespace Lynx;
 
@@ -197,14 +199,14 @@ public sealed class EngineSettings
     public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(30, 88);
 
     public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(
-        new(0),
+        new(0, 0),
         new(-1, 5),
         new(-15, 12),
         new(-15, 43),
         new(19, 84),
         new(53, 176),
         new(74, 260),
-        new(0));
+        new(0, 0));
 
     #endregion
 }
@@ -212,20 +214,48 @@ public sealed class EngineSettings
 public sealed class TaperedEvaluationTerm
 {
     [JsonIgnore]
-    public int PackedEvaluation { get; }
-
-    public int MG => Utils.UnpackMG(PackedEvaluation);
-
-    public int EG => Utils.UnpackEG(PackedEvaluation);
-
-    internal TaperedEvaluationTerm(int singleValue)
+    public int PackedEvaluation
     {
-        PackedEvaluation = Utils.Pack((short)singleValue, (short)singleValue);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get;
+
+        [Obsolete("Test only")]
+        private set;
+    }
+
+    public int MG
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get
+        {
+            return Utils.UnpackMG(PackedEvaluation);
+        }
+        [Obsolete("Test only, will reset internal value")]
+        set
+        {
+            PackedEvaluation = value;
+        }
+    }
+
+    public int EG
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get
+        {
+            return Utils.UnpackEG(PackedEvaluation);
+        }
+        [Obsolete("Test only")]
+        set
+        {
+            PackedEvaluation += (value << 16);
+        }
     }
 
     public TaperedEvaluationTerm(int mg, int eg)
     {
+#pragma warning disable CS0618 // Type or member is obsolete - correct usage here, setter wouldn't even be needed
         PackedEvaluation = Utils.Pack((short)mg, (short)eg);
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     public override string ToString()
