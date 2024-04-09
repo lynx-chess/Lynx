@@ -33,7 +33,9 @@ public sealed partial class Engine
 
     private readonly int[] _maxDepthReached = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
     private TranspositionTable _tt = [];
+    private TranspositionTable _qtt = [];
     private int _ttMask;
+    private int _qttMask;
 
     private int _nodes;
     private bool _isFollowingPV;

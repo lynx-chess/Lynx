@@ -95,6 +95,8 @@ public sealed class EngineSettings
     /// </summary>
     public int TranspositionTableSize { get; set; } = 256;
 
+    public int QSearchTranspositionTableSize { get; set; } = 4;
+
     public bool TranspositionTableEnabled { get; set; } = true;
 
     public bool UseOnlineTablebaseInRootPositions { get; set; } = false;

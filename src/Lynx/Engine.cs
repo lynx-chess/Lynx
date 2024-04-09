@@ -315,6 +315,9 @@ public sealed partial class Engine
         {
             (int ttLength, _ttMask) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
             _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
+
+            (int qttLength, _qttMask) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
+            _qtt = GC.AllocateArray<TranspositionTableElement>(qttLength, pinned: true);
         }
     }
 
