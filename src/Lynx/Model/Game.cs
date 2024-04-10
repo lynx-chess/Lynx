@@ -11,13 +11,36 @@ public sealed class Game
     public List<Move> MoveHistory { get; }
 #endif
 
-    public List<long> PositionHashHistory { get; }
+    private readonly List<long> _positionHashHistory;
+    public List<long> PositionHashHistory
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => _positionHashHistory;
+    }
 
-    public int HalfMovesWithoutCaptureOrPawnMove { get; set; }
+    private int _halfMovesWithoutCaptureOrPawnMove;
+    public int HalfMovesWithoutCaptureOrPawnMove
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => _halfMovesWithoutCaptureOrPawnMove;
 
-    public Position CurrentPosition { get; private set; }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        set => _halfMovesWithoutCaptureOrPawnMove = value;
+    }
 
-    public Position PositionBeforeLastSearch { get; private set; }
+    private Position _currentPosition;
+    public Position CurrentPosition
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => _currentPosition;
+    }
+
+    private Position _positionBeforeLastSearch;
+    public Position PositionBeforeLastSearch
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => _positionBeforeLastSearch;
+    }
 
     public Game() : this(Constants.InitialPositionFEN)
     {
@@ -26,16 +49,16 @@ public sealed class Game
     public Game(ReadOnlySpan<char> fen)
     {
         var parsedFen = FENParser.ParseFEN(fen);
-        CurrentPosition = new Position(parsedFen);
-        PositionBeforeLastSearch = new Position(CurrentPosition);
+        _currentPosition = new Position(parsedFen);
+        _positionBeforeLastSearch = new Position(CurrentPosition);
 
         if (!CurrentPosition.IsValid())
         {
             _logger.Warn($"Invalid position detected: {fen.ToString()}");
         }
 
-        PositionHashHistory = new(Constants.MaxNumberMovesInAGame) { CurrentPosition.UniqueIdentifier };
-        HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
+        _positionHashHistory = new(Constants.MaxNumberMovesInAGame) { CurrentPosition.UniqueIdentifier };
+        _halfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
 
 #if DEBUG
         MoveHistory = new(Constants.MaxNumberMovesInAGame);
@@ -63,17 +86,17 @@ public sealed class Game
             MakeMove(parsedMove.Value);
         }
 
-        PositionBeforeLastSearch = new Position(CurrentPosition);
+        _positionBeforeLastSearch = new Position(CurrentPosition);
     }
 
     /// <summary>
-    /// Updates <paramref name="halfMovesWithoutCaptureOrPawnMove"/>.
+    /// Updates <paramref name="_halfMovesWithoutCaptureOrPawnMove"/>.
     /// See also <see cref="Utils.Update50movesRule(int, int)"/>
     /// </summary>
     /// <param name="moveToPlay"></param>
     /// <param name="isCapture"></param>
     /// <remarks>
-    /// Checking halfMovesWithoutCaptureOrPawnMove >= 100 since a capture/pawn move doesn't necessarily 'clear' the variable.
+    /// Checking _halfMovesWithoutCaptureOrPawnMove >= 100 since a capture/pawn move doesn't necessarily 'clear' the variable.
     /// i.e. while the engine is searching:
     ///     At depth 2, 50 rules move applied and eval is 0
     ///     At depth 3, there's a capture, but the eval should still be 0
@@ -85,13 +108,13 @@ public sealed class Game
     {
         if (isCapture)
         {
-            if (HalfMovesWithoutCaptureOrPawnMove < 100)
+            if (_halfMovesWithoutCaptureOrPawnMove < 100)
             {
-                HalfMovesWithoutCaptureOrPawnMove = 0;
+                _halfMovesWithoutCaptureOrPawnMove = 0;
             }
             else
             {
-                ++HalfMovesWithoutCaptureOrPawnMove;
+                ++_halfMovesWithoutCaptureOrPawnMove;
             }
 
             return false;
@@ -102,15 +125,15 @@ public sealed class Game
 
             if (pieceToMove == (int)Piece.P || pieceToMove == (int)Piece.p)
             {
-                if (HalfMovesWithoutCaptureOrPawnMove < 100)
+                if (_halfMovesWithoutCaptureOrPawnMove < 100)
                 {
-                    HalfMovesWithoutCaptureOrPawnMove = 0;
+                    _halfMovesWithoutCaptureOrPawnMove = 0;
                 }
 
                 return false;
             }
 
-            ++HalfMovesWithoutCaptureOrPawnMove;
+            ++_halfMovesWithoutCaptureOrPawnMove;
 
             return true;
         }
@@ -125,11 +148,11 @@ public sealed class Game
     {
         var currentHash = CurrentPosition.UniqueIdentifier;
 
-        // [Count - 1] would be the last one, we want to start searching 2 ealier and finish HalfMovesWithoutCaptureOrPawnMove earlier
-        var limit = Math.Max(0, PositionHashHistory.Count - 1 - HalfMovesWithoutCaptureOrPawnMove);
-        for (int i = PositionHashHistory.Count - 3; i >= limit; i -= 2)
+        // [Count - 1] would be the last one, we want to start searching 2 ealier and finish _halfMovesWithoutCaptureOrPawnMove earlier
+        var limit = Math.Max(0, _positionHashHistory.Count - 1 - _halfMovesWithoutCaptureOrPawnMove);
+        for (int i = _positionHashHistory.Count - 3; i >= limit; i -= 2)
         {
-            if (currentHash == PositionHashHistory[i])
+            if (currentHash == _positionHashHistory[i])
             {
                 return true;
             }
@@ -141,7 +164,7 @@ public sealed class Game
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool Is50MovesRepetition()
     {
-        if (HalfMovesWithoutCaptureOrPawnMove < 100)
+        if (_halfMovesWithoutCaptureOrPawnMove < 100)
         {
             return false;
         }
@@ -150,7 +173,7 @@ public sealed class Game
     }
 
     /// <summary>
-    /// To be used in online tb proving only, with a copy of <see cref="PositionHashHistory"/> that hasn't been updated with <paramref name="position"/>
+    /// To be used in online tb proving only, with a copy of <see cref="_positionHashHistory"/> that hasn't been updated with <paramref name="position"/>
     /// </summary>
     /// <param name="positionHashHistory"></param>
     /// <param name="position"></param>
@@ -174,7 +197,7 @@ public sealed class Game
     }
 
     /// <summary>
-    /// To be used in online tb proving only, with a copy of <see cref="HalfMovesWithoutCaptureOrPawnMove"/>
+    /// To be used in online tb proving only, with a copy of <see cref="_halfMovesWithoutCaptureOrPawnMove"/>
     /// </summary>
     /// <param name="halfMovesWithoutCaptureOrPawnMove"></param>
     /// <returns></returns>
@@ -198,7 +221,7 @@ public sealed class Game
             CurrentPosition.UnmakeMove(moveToPlay, gameState);
         }
 
-        PositionHashHistory.Add(CurrentPosition.UniqueIdentifier);
+        _positionHashHistory.Add(CurrentPosition.UniqueIdentifier);
         Update50movesRule(moveToPlay, moveToPlay.IsCapture());
 
         return gameState;
@@ -209,7 +232,7 @@ public sealed class Game
     /// (either by the engine time management logic or by external stop command)
     /// currentPosition won't be the initial one
     /// </summary>
-    public void ResetCurrentPositionToBeforeSearchState() => CurrentPosition = new(PositionBeforeLastSearch);
+    public void ResetCurrentPositionToBeforeSearchState() => _currentPosition = new(PositionBeforeLastSearch);
 
-    public void UpdateInitialPosition() => PositionBeforeLastSearch = new(CurrentPosition);
+    public void UpdateInitialPosition() => _positionBeforeLastSearch = new(CurrentPosition);
 }
