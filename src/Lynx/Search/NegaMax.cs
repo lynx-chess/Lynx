@@ -287,6 +287,11 @@ public sealed partial class Engine
                         --reduction;
                     }
 
+                    if (ttBestMove != default && isCapture)
+                    {
+                        ++reduction;
+                    }
+
                     // -= history/(maxHistory/2)
                     reduction -= 2 * _quietHistory[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.History_MaxMoveValue;
 
