@@ -5,8 +5,6 @@ namespace Lynx.Model;
 
 public class Position
 {
-    //private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
     public long UniqueIdentifier { get; private set; }
 
     /// <summary>
@@ -35,7 +33,7 @@ public class Position
     public byte Castle { get; private set; }
 
     /// <summary>
-    /// Beware, half move coutner isn't take into account
+    /// Beware, half move counter isn't take into account
     /// Use alternative cosntructor instead and set it externally if relevant
     /// </summary>
     /// <param name="fen"></param>
@@ -796,7 +794,6 @@ public class Position
         }
 
         int endGamePhase = maxPhase - gamePhase;
-        //_logger.Trace("Phase: {0}/24", gamePhase);
 
         var middleGameScore = Utils.UnpackMG(packedScore);
         var endGameScore = Utils.UnpackEG(packedScore);
@@ -819,7 +816,7 @@ public class Position
 
     /// <summary>
     /// Assuming a current position has no legal moves (<see cref="AllPossibleMoves"/> doesn't produce any <see cref="IsValid"/> position),
-    /// this method determines if a position is a result of either a loss by Checkmate or a draw by stalemate.
+    /// this method determines if a position is a result of either a loss by checkmate or a draw by stalemate.
     /// NegaMax style
     /// </summary>
     /// <param name="ply">Modulates the output, favouring positions with lower ply (i.e. Checkmate in less moves)</param>
@@ -836,14 +833,12 @@ public class Position
         }
         else
         {
-            return default;
+            return 0;
         }
     }
 
     /// <summary>
-    /// Doesn't include <see cref="Piece.K"/> and <see cref="Piece.k"/> evaluation since this method is called
-    /// on the fly while going through the existing pieces and <see cref="KingAdditionalEvaluation(int, Side, int[])"/>
-    /// requires oppposite piece count, which in case of white king it's not available when this method is invoked
+    /// Doesn't include <see cref="Piece.K"/> and <see cref="Piece.k"/> evaluation
     /// </summary>
     /// <param name="pieceSquareIndex"></param>
     /// <param name="pieceIndex"></param>
