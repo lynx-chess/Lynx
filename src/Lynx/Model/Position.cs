@@ -1035,38 +1035,6 @@ public class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsSquareAttackedByWhite(int squareIndex)
-    {
-        const int offset = 0;
-        const int sideToMoveInt = (int)Side.White;
-
-        // I tried to order them from most to least likely - not tested
-        return
-            IsSquareAttackedByPawns(squareIndex, sideToMoveInt, offset)
-            || IsSquareAttackedByKing(squareIndex, offset)
-            || IsSquareAttackedByKnights(squareIndex, offset)
-            || IsSquareAttackedByBishops(squareIndex, offset, out var bishopAttacks)
-            || IsSquareAttackedByRooks(squareIndex, offset, out var rookAttacks)
-            || AreSquaresAttackedByQueens(offset, bishopAttacks, rookAttacks);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsSquareAttackedByBlack(int squareIndex)
-    {
-        const int offset = 6;
-        const int sideToMoveInt = (int)Side.Black;
-
-        // I tried to order them from most to least likely - not tested
-        return
-            IsSquareAttackedByPawns(squareIndex, sideToMoveInt, offset)
-            || IsSquareAttackedByKing(squareIndex, offset)
-            || IsSquareAttackedByKnights(squareIndex, offset)
-            || IsSquareAttackedByBishops(squareIndex, offset, out var bishopAttacks)
-            || IsSquareAttackedByRooks(squareIndex, offset, out var rookAttacks)
-            || AreSquaresAttackedByQueens(offset, bishopAttacks, rookAttacks);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool AreSquaresAttackedByWhite(int square1Index, int square2Index)
     {
         const int offset = 0;
