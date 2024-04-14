@@ -226,7 +226,7 @@ public sealed partial class Engine
         foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, moves))
         {
             var gameState = Game.CurrentPosition.MakeMove(move);
-            bool isPositionValid = Game.CurrentPosition.IsValid();
+            bool isPositionValid = Game.CurrentPosition.WasProduceByAValidMove();
             Game.CurrentPosition.UnmakeMove(move, gameState);
 
             if (isPositionValid)
