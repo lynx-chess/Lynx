@@ -1138,18 +1138,14 @@ public class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool IsSquareAttackedByBishops(int squareIndex, int offset, out BitBoard bishopAttacks)
     {
-        var bothSidesOccupancy = OccupancyBitBoards[(int)Side.Both];
-
-        bishopAttacks = Attacks.BishopAttacks(squareIndex, bothSidesOccupancy);
+        bishopAttacks = Attacks.BishopAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]);
         return (bishopAttacks & PieceBitBoards[(int)Piece.B + offset]) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool IsSquareAttackedByRooks(int squareIndex, int offset, out BitBoard rookAttacks)
     {
-        var bothSidesOccupancy = OccupancyBitBoards[(int)Side.Both];
-
-        rookAttacks = Attacks.RookAttacks(squareIndex, bothSidesOccupancy);
+        rookAttacks = Attacks.RookAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]);
         return (rookAttacks & PieceBitBoards[(int)Piece.R + offset]) != default;
     }
 
