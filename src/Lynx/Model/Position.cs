@@ -1038,30 +1038,32 @@ public class Position
     public bool AreSquaresAttackedByWhite(int square1Index, int square2Index)
     {
         const int offset = 0;
+        const int oppositeColorIndex = (int)Side.Black;
 
         // I tried to order them from most to least likely - not tested
         return
-            AreSquaresAttackedByWhitePawns(square1Index, square2Index)
-            || AreSquaresAttackedByKing(square1Index, square2Index, offset)
-            || AreSquaresAttackedByKnights(square1Index, square2Index, offset)
+            ((Attacks.PawnAttacks[oppositeColorIndex][square1Index] | Attacks.PawnAttacks[oppositeColorIndex][square2Index]) & PieceBitBoards[offset]) != 0   // AreSquaresAttackedByWhitePawns
+            || ((Attacks.KingAttacks[square1Index] | Attacks.KingAttacks[square2Index]) & PieceBitBoards[(int)Piece.K + offset]) != 0 // AreSquaresAttackedByKing(square1Index, square2Index, offset)
+            || ((Attacks.KnightAttacks[square1Index] | Attacks.KnightAttacks[square2Index]) & PieceBitBoards[(int)Piece.N + offset]) != 0 // AreSquaresAttackedByKnights(square1Index, square2Index, offset)
             || AreSquaresAttackedByBishops(square1Index, square2Index, offset, out var bishopAttacks)
             || AreSquaresAttackedByRooks(square1Index, square2Index, offset, out var rookAttacks)
-            || AreSquaresAttackedByQueens(offset, bishopAttacks, rookAttacks);
+            || (Attacks.QueenAttacks(rookAttacks, bishopAttacks) & PieceBitBoards[(int)Piece.Q + offset]) != 0; // AreSquaresAttackedByQueens(offset, bishopAttacks, rookAttacks);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool AreSquaresAttackedByBlack(int square1Index, int square2Index)
     {
         const int offset = 6;
+        const int oppositeColorIndex = (int)Side.Black;
 
         // I tried to order them from most to least likely - not tested
         return
-            AreSquaresAttackedByBlackPawns(square1Index, square2Index)
-            || AreSquaresAttackedByKing(square1Index, square2Index, offset)
-            || AreSquaresAttackedByKnights(square1Index, square2Index, offset)
+            ((Attacks.PawnAttacks[oppositeColorIndex][square1Index] | Attacks.PawnAttacks[oppositeColorIndex][square2Index]) & PieceBitBoards[offset]) != 0 // AreSquaresAttackedByBlackPawns
+            || ((Attacks.KingAttacks[square1Index] | Attacks.KingAttacks[square2Index]) & PieceBitBoards[(int)Piece.K + offset]) != 0 //AreSquaresAttackedByKing(square1Index, square2Index, offset)
+            || ((Attacks.KnightAttacks[square1Index] | Attacks.KnightAttacks[square2Index]) & PieceBitBoards[(int)Piece.N + offset]) != default //AreSquaresAttackedByKnights(square1Index, square2Index, offset)
             || AreSquaresAttackedByBishops(square1Index, square2Index, offset, out var bishopAttacks)
             || AreSquaresAttackedByRooks(square1Index, square2Index, offset, out var rookAttacks)
-            || AreSquaresAttackedByQueens(offset, bishopAttacks, rookAttacks);
+            || (Attacks.QueenAttacks(rookAttacks, bishopAttacks) & PieceBitBoards[(int)Piece.Q + offset]) != 0; // AreSquaresAttackedByQueens(offset, bishopAttacks, rookAttacks);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1076,7 +1078,7 @@ public class Position
         return
             IsSquareAttackedByRooks(kingSquare, oppositeSideOffset, out var rookAttacks)
             || IsSquareAttackedByBishops(kingSquare, oppositeSideOffset, out var bishopAttacks)
-            || AreSquaresAttackedByQueens(oppositeSideOffset, bishopAttacks, rookAttacks)
+            || (Attacks.QueenAttacks(rookAttacks, bishopAttacks) & PieceBitBoards[(int)Piece.Q + oppositeSideOffset]) != 0 // AreSquaresAttackedByQueens(offset, bishopAttacks, rookAttacks);
             || IsSquareAttackedByKnights(kingSquare, oppositeSideOffset)
             || IsSquareAttackedByPawns(kingSquare, oppositeSideInt, oppositeSideOffset);
     }
