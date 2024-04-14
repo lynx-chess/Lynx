@@ -1017,29 +1017,57 @@ public class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsSquareAttackedBySide(int squaredIndex, Side sideToMove) => IsSquareAttacked(squaredIndex, sideToMove);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsSquareAttacked(int squareIndex, Side sideToMove)
     {
         Utils.Assert(sideToMove != Side.Both);
 
         var sideToMoveInt = (int)sideToMove;
         var offset = Utils.PieceOffset(sideToMoveInt);
-        var bothSidesOccupancy = OccupancyBitBoards[(int)Side.Both];
 
         // I tried to order them from most to least likely - not tested
         return
             IsSquareAttackedByPawns(squareIndex, sideToMoveInt, offset)
             || IsSquareAttackedByKing(squareIndex, offset)
             || IsSquareAttackedByKnights(squareIndex, offset)
-            || IsSquareAttackedByBishops(squareIndex, offset, bothSidesOccupancy, out var bishopAttacks)
-            || IsSquareAttackedByRooks(squareIndex, offset, bothSidesOccupancy, out var rookAttacks)
+            || IsSquareAttackedByBishops(squareIndex, offset, out var bishopAttacks)
+            || IsSquareAttackedByRooks(squareIndex, offset, out var rookAttacks)
             || AreSquaresAttackedByQueens(offset, bishopAttacks, rookAttacks);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool WhiteAttacks(int square1Index, int square2Index)
+    public bool IsSquareAttackedByWhite(int squareIndex)
+    {
+        const int offset = 0;
+        const int sideToMoveInt = (int)Side.White;
+
+        // I tried to order them from most to least likely - not tested
+        return
+            IsSquareAttackedByPawns(squareIndex, sideToMoveInt, offset)
+            || IsSquareAttackedByKing(squareIndex, offset)
+            || IsSquareAttackedByKnights(squareIndex, offset)
+            || IsSquareAttackedByBishops(squareIndex, offset, out var bishopAttacks)
+            || IsSquareAttackedByRooks(squareIndex, offset, out var rookAttacks)
+            || AreSquaresAttackedByQueens(offset, bishopAttacks, rookAttacks);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsSquareAttackedByBlack(int squareIndex)
+    {
+        const int offset = 6;
+        const int sideToMoveInt = (int)Side.Black;
+
+        // I tried to order them from most to least likely - not tested
+        return
+            IsSquareAttackedByPawns(squareIndex, sideToMoveInt, offset)
+            || IsSquareAttackedByKing(squareIndex, offset)
+            || IsSquareAttackedByKnights(squareIndex, offset)
+            || IsSquareAttackedByBishops(squareIndex, offset, out var bishopAttacks)
+            || IsSquareAttackedByRooks(squareIndex, offset, out var rookAttacks)
+            || AreSquaresAttackedByQueens(offset, bishopAttacks, rookAttacks);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool AreSquaresAttackedByWhite(int square1Index, int square2Index)
     {
         const int offset = 0;
         const int sideToMoveInt = (int)Side.White;
@@ -1055,7 +1083,7 @@ public class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool BlackAttacks(int square1Index, int square2Index)
+    public bool AreSquaresAttackedByBlack(int square1Index, int square2Index)
     {
         const int offset = 6;
         const int sideToMoveInt = (int)Side.Black;
@@ -1078,12 +1106,10 @@ public class Position
 
         var kingSquare = PieceBitBoards[(int)Piece.k - oppositeSideOffset].GetLS1BIndex();
 
-        var bothSidesOccupancy = OccupancyBitBoards[(int)Side.Both];
-
         // I tried to order them from most to least likely - not tested
         return
-            IsSquareAttackedByRooks(kingSquare, oppositeSideOffset, bothSidesOccupancy, out var rookAttacks)
-            || IsSquareAttackedByBishops(kingSquare, oppositeSideOffset, bothSidesOccupancy, out var bishopAttacks)
+            IsSquareAttackedByRooks(kingSquare, oppositeSideOffset, out var rookAttacks)
+            || IsSquareAttackedByBishops(kingSquare, oppositeSideOffset, out var bishopAttacks)
             || AreSquaresAttackedByQueens(oppositeSideOffset, bishopAttacks, rookAttacks)
             || IsSquareAttackedByKnights(kingSquare, oppositeSideOffset)
             || IsSquareAttackedByPawns(kingSquare, oppositeSideInt, oppositeSideOffset);
@@ -1110,15 +1136,19 @@ public class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool IsSquareAttackedByBishops(int squareIndex, int offset, BitBoard bothSidesOccupancy, out BitBoard bishopAttacks)
+    private bool IsSquareAttackedByBishops(int squareIndex, int offset, out BitBoard bishopAttacks)
     {
+        var bothSidesOccupancy = OccupancyBitBoards[(int)Side.Both];
+
         bishopAttacks = Attacks.BishopAttacks(squareIndex, bothSidesOccupancy);
         return (bishopAttacks & PieceBitBoards[(int)Piece.B + offset]) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool IsSquareAttackedByRooks(int squareIndex, int offset, BitBoard bothSidesOccupancy, out BitBoard rookAttacks)
+    private bool IsSquareAttackedByRooks(int squareIndex, int offset, out BitBoard rookAttacks)
     {
+        var bothSidesOccupancy = OccupancyBitBoards[(int)Side.Both];
+
         rookAttacks = Attacks.RookAttacks(squareIndex, bothSidesOccupancy);
         return (rookAttacks & PieceBitBoards[(int)Piece.R + offset]) != default;
     }

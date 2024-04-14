@@ -73,7 +73,7 @@ public sealed partial class Engine
         }
         if (depth <= 0)
         {
-            if (MoveGenerator.CanGenerateAtLeastAValidMove(position))
+            if (MoveGenerator.CanGenerateAtLeastAValidMove(position, isInCheck))
             {
                 return QuiescenceSearch(ply, alpha, beta);
             }
@@ -234,7 +234,7 @@ public sealed partial class Engine
             Game.PositionHashHistory.Add(position.UniqueIdentifier);
 
             int evaluation;
-            if (canBeRepetition && (Game.IsThreefoldRepetition() || Game.Is50MovesRepetition()))
+            if (canBeRepetition && (Game.IsThreefoldRepetition() || Game.Is50MovesRepetition(isInCheck)))
             {
                 evaluation = 0;
 
@@ -584,7 +584,7 @@ public sealed partial class Engine
 
         if (bestMove is null
             && !isThereAnyValidCapture
-            && !MoveGenerator.CanGenerateAtLeastAValidMove(position))
+            && !MoveGenerator.CanGenerateAtLeastAValidMove(position, isInCheck))
         {
             var finalEval = Position.EvaluateFinalPosition(ply, isInCheck);
             _tt.RecordHash(_ttMask, position, 0, ply, finalEval, NodeType.Exact);

@@ -188,7 +188,7 @@ public class GameTest : BaseTest
         Assert.AreEqual(101 + 1, game.PositionHashHistory.Count);
 
         // If the checkmate is in the move when it's claimed, checkmate remains
-        Assert.False(game.Is50MovesRepetition());
+        Assert.False(game.Is50MovesRepetition(game.CurrentPosition.IsInCheck()));
     }
 
     [Test]
@@ -216,7 +216,7 @@ public class GameTest : BaseTest
 #endif
         Assert.AreEqual(100 + 1, game.PositionHashHistory.Count);
 
-        Assert.True(game.Is50MovesRepetition());
+        Assert.True(game.Is50MovesRepetition(game.CurrentPosition.IsInCheck()));
     }
 
     [Test]
@@ -248,6 +248,6 @@ public class GameTest : BaseTest
 #endif
         Assert.AreEqual(51 + 1, game.PositionHashHistory.Count);
 
-        Assert.False(game.Is50MovesRepetition());
+        Assert.False(game.Is50MovesRepetition(game.CurrentPosition.IsInCheck()));
     }
 }

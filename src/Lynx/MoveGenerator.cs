@@ -12,10 +12,10 @@ public static class MoveGenerator
 
     private const int TRUE = 1;
 
-    public static int WhiteShortCastle = MoveExtensions.EncodeShortCastle(Constants.WhiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K);
-    public static int WhiteLongCastle = MoveExtensions.EncodeLongCastle(Constants.WhiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K);
-    public static int BlackShortCastle = MoveExtensions.EncodeShortCastle(Constants.BlackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.k);
-    public static int BlackLongCastle = MoveExtensions.EncodeLongCastle(Constants.BlackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.k);
+    public static readonly int WhiteShortCastle = MoveExtensions.EncodeShortCastle(Constants.WhiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K);
+    public static readonly int WhiteLongCastle = MoveExtensions.EncodeLongCastle(Constants.WhiteKingSourceSquare, Constants.WhiteLongCastleKingSquare, (int)Piece.K);
+    public static readonly int BlackShortCastle = MoveExtensions.EncodeShortCastle(Constants.BlackKingSourceSquare, Constants.BlackShortCastleKingSquare, (int)Piece.k);
+    public static readonly int BlackLongCastle = MoveExtensions.EncodeLongCastle(Constants.BlackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.k);
 
     /// <summary>
     /// Indexed by <see cref="Piece"/>.
@@ -324,7 +324,7 @@ public static class MoveGenerator
             {
                 if (((position.Castle & (int)CastlingRights.WK) != default)
                     && (position.OccupancyBitBoards[(int)Side.Both] & Constants.WhiteShortCastleMask) == 0
-                    && !position.BlackAttacks((int)BoardSquare.f1, (int)BoardSquare.g1))
+                    && !position.AreSquaresAttackedByBlack((int)BoardSquare.f1, (int)BoardSquare.g1))
                 {
                     movePool[localIndex++] = WhiteShortCastle;
 
@@ -334,7 +334,7 @@ public static class MoveGenerator
 
                 if (((position.Castle & (int)CastlingRights.WQ) != default)
                     && (position.OccupancyBitBoards[(int)Side.Both] & Constants.WhiteLongCastleOccupancyMask) == 0
-                    && !position.BlackAttacks((int)BoardSquare.d1, (int)BoardSquare.c1))
+                    && !position.AreSquaresAttackedByBlack((int)BoardSquare.d1, (int)BoardSquare.c1))
                 {
                     movePool[localIndex++] = WhiteLongCastle;
 
@@ -346,7 +346,7 @@ public static class MoveGenerator
             {
                 if (((position.Castle & (int)CastlingRights.BK) != default)
                     && (position.OccupancyBitBoards[(int)Side.Both] & Constants.BlackShortCastleMask) == 0
-                    && !position.WhiteAttacks((int)BoardSquare.f8, (int)BoardSquare.g8))
+                    && !position.AreSquaresAttackedByWhite((int)BoardSquare.f8, (int)BoardSquare.g8))
                 {
                     movePool[localIndex++] = BlackShortCastle;
 
@@ -356,7 +356,7 @@ public static class MoveGenerator
 
                 if (((position.Castle & (int)CastlingRights.BQ) != default)
                     && (position.OccupancyBitBoards[(int)Side.Both] & Constants.BlackLongCastleOccupancyMask) == 0
-                    && !position.WhiteAttacks((int)BoardSquare.d8, (int)BoardSquare.c8))
+                    && !position.AreSquaresAttackedByWhite((int)BoardSquare.d8, (int)BoardSquare.c8))
                 {
                     movePool[localIndex++] = BlackLongCastle;
 
@@ -447,7 +447,7 @@ public static class MoveGenerator
     /// <param name="position"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool CanGenerateAtLeastAValidMove(Position position)
+    public static bool CanGenerateAtLeastAValidMove(Position position, bool isInCheck)
     {
 #if DEBUG
         if (position.Side == Side.Both)
@@ -468,7 +468,7 @@ public static class MoveGenerator
                 || IsAnyPieceMoveValid((int)Piece.B + offset, position)
                 || IsAnyPieceMoveValid((int)Piece.N + offset, position)
                 || IsAnyPieceMoveValid((int)Piece.R + offset, position)
-                || IsAnyCastlingMoveValid(position);
+                || IsAnyCastlingMoveValid(position, isInCheck);
 #if DEBUG
         }
         catch (Exception e)
@@ -581,20 +581,16 @@ public static class MoveGenerator
     /// <param name="position"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsAnyCastlingMoveValid(Position position)
+    private static bool IsAnyCastlingMoveValid(Position position, bool isInCheck)
     {
-        if (position.Castle != default)
+        if (!isInCheck && position.Castle != default)
         {
             if (position.Side == Side.White)
             {
-                bool ise1Attacked = position.IsSquareAttackedBySide(Constants.WhiteKingSourceSquare, Side.Black);
-
                 if (((position.Castle & (int)CastlingRights.WK) != default)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.f1)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.g1)
-                    && !ise1Attacked
-                    && !position.IsSquareAttackedBySide((int)BoardSquare.f1, Side.Black)
-                    && !position.IsSquareAttackedBySide((int)BoardSquare.g1, Side.Black)
+                    && !position.AreSquaresAttackedByBlack((int)BoardSquare.f1, (int)BoardSquare.g1)
                     && IsValidMove(position, WhiteShortCastle))
                 {
                     return true;
@@ -604,9 +600,7 @@ public static class MoveGenerator
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.d1)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c1)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b1)
-                    && !ise1Attacked
-                    && !position.IsSquareAttackedBySide((int)BoardSquare.d1, Side.Black)
-                    && !position.IsSquareAttackedBySide((int)BoardSquare.c1, Side.Black)
+                    && !position.AreSquaresAttackedByBlack((int)BoardSquare.d1, (int)BoardSquare.c1)
                     && IsValidMove(position, WhiteLongCastle))
                 {
                     return true;
@@ -614,14 +608,10 @@ public static class MoveGenerator
             }
             else
             {
-                bool ise8Attacked = position.IsSquareAttackedBySide(Constants.BlackKingSourceSquare, Side.White);
-
                 if (((position.Castle & (int)CastlingRights.BK) != default)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.f8)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.g8)
-                    && !ise8Attacked
-                    && !position.IsSquareAttackedBySide((int)BoardSquare.f8, Side.White)
-                    && !position.IsSquareAttackedBySide((int)BoardSquare.g8, Side.White)
+                    && !position.AreSquaresAttackedByWhite((int)BoardSquare.f8, (int)BoardSquare.g8)
                     && IsValidMove(position, BlackShortCastle))
                 {
                     return true;
@@ -631,9 +621,7 @@ public static class MoveGenerator
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.d8)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c8)
                     && !position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b8)
-                    && !ise8Attacked
-                    && !position.IsSquareAttackedBySide((int)BoardSquare.d8, Side.White)
-                    && !position.IsSquareAttackedBySide((int)BoardSquare.c8, Side.White)
+                    && !position.AreSquaresAttackedByWhite((int)BoardSquare.d8, (int)BoardSquare.c8)
                     && IsValidMove(position, BlackLongCastle))
                 {
                     return true;
