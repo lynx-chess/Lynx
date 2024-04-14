@@ -1070,11 +1070,10 @@ public class Position
     public bool AreSquaresAttackedByWhite(int square1Index, int square2Index)
     {
         const int offset = 0;
-        const int sideToMoveInt = (int)Side.White;
 
         // I tried to order them from most to least likely - not tested
         return
-            AreSquaresAttackedByPawns(square1Index, square2Index, sideToMoveInt, offset)
+            AreSquaresAttackedByWhitePawns(square1Index, square2Index)
             || AreSquaresAttackedByKing(square1Index, square2Index, offset)
             || AreSquaresAttackedByKnights(square1Index, square2Index, offset)
             || AreSquaresAttackedByBishops(square1Index, square2Index, offset, out var bishopAttacks)
@@ -1086,11 +1085,10 @@ public class Position
     public bool AreSquaresAttackedByBlack(int square1Index, int square2Index)
     {
         const int offset = 6;
-        const int sideToMoveInt = (int)Side.Black;
 
         // I tried to order them from most to least likely - not tested
         return
-            AreSquaresAttackedByPawns(square1Index, square2Index, sideToMoveInt, offset)
+            AreSquaresAttackedByBlackPawns(square1Index, square2Index)
             || AreSquaresAttackedByKing(square1Index, square2Index, offset)
             || AreSquaresAttackedByKnights(square1Index, square2Index, offset)
             || AreSquaresAttackedByBishops(square1Index, square2Index, offset, out var bishopAttacks)
@@ -1150,9 +1148,19 @@ public class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool AreSquaresAttackedByPawns(int square1Index, int square2Index, int sideToMove, int offset)
+    private bool AreSquaresAttackedByWhitePawns(int square1Index, int square2Index)
     {
-        var oppositeColorIndex = sideToMove ^ 1;
+        const int offset = 0;
+        const int oppositeColorIndex = (int)Side.Black;
+
+        return ((Attacks.PawnAttacks[oppositeColorIndex][square1Index] | Attacks.PawnAttacks[oppositeColorIndex][square2Index]) & PieceBitBoards[offset]) != default;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private bool AreSquaresAttackedByBlackPawns(int square1Index, int square2Index)
+    {
+        const int offset = 6;
+        const int oppositeColorIndex = (int)Side.White;
 
         return ((Attacks.PawnAttacks[oppositeColorIndex][square1Index] | Attacks.PawnAttacks[oppositeColorIndex][square2Index]) & PieceBitBoards[offset]) != default;
     }
