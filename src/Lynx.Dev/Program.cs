@@ -405,7 +405,7 @@ static void _23_Castling_Moves()
     int index = 0;
     var moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
 
-    MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
+    MoveGenerator.GenerateCastlingMoves(ref index, moves, position, position.IsInCheck());
 
     foreach (var move in moves[..index])
     {

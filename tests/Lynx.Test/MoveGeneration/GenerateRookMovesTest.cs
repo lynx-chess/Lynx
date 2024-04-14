@@ -8,23 +8,21 @@ public class GenerateRookMovesTest
     private static IEnumerable<Move> GenerateRookMoves(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        return MoveGenerator.GenerateAllMoves(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.R || m.Piece() == (int)Piece.r);
+        return MoveGenerator.GenerateAllMoves(position, moves, position.IsInCheck()).ToArray().Where(m => m.Piece() == (int)Piece.R || m.Piece() == (int)Piece.r);
     }
 
     private static IEnumerable<Move> GenerateRookCaptures(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        return MoveGenerator.GenerateAllCaptures(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.R || m.Piece() == (int)Piece.r);
+        return MoveGenerator.GenerateAllCaptures(position, moves, position.IsInCheck()).ToArray().Where(m => m.Piece() == (int)Piece.R || m.Piece() == (int)Piece.r);
     }
 
-    [TestCase(Constants.EmptyBoardFEN, 0)]
     [TestCase(Constants.InitialPositionFEN, 0)]
-    [TestCase("8/8/2n1n3/3R4/2n1n3/8/8/8 w - - 0 1", 14)]
-    [TestCase("8/8/2N1N3/3r4/2N1N3/8/8/8 b - - 0 1", 14)]
-    [TestCase("8/8/2n1n3/3R4/2n1n3/8/8/3q4 w - - 0 1", 14)]
-    [TestCase("8/8/2N1N3/3r4/2N1N3/8/8/3Q4 b - - 0 1", 14)]
-    [TestCase("8/8/2n1n3/3R4/2n1n3/8/8/3Q4 w - - 0 1", 13)]
-    [TestCase("8/8/2N1N3/3r4/2N1N3/8/8/3q4 b - - 0 1", 13)]
+    [TestCase("k7/8/2n1n3/3R4/2n1n3/8/8/K7 w - - 0 1", 14)]
+    [TestCase("k7/8/2N1N3/3r4/2N1N3/8/8/K7 b - - 0 1", 14)]
+    [TestCase("k7/8/2n1n3/3R4/2n1n3/8/8/K2q4 w - - 0 1", 14)]
+    [TestCase("k7/8/2N1N3/3r4/2N1N3/8/K7/3Q4 b - - 0 1", 14)]
+    [TestCase("k7/8/2n1n3/3R4/2n1n3/8/8/K2Q4 w - - 0 1", 13)]
     public void RookMoves_Count(string fen, int expectedMoves)
     {
         var position = new Position(fen);

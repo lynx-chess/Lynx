@@ -51,7 +51,7 @@ public sealed class Game
                 break;
             }
             var moveString = rawMoves[rangeSpan[i]];
-            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, movePool);
+            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, movePool, CurrentPosition.IsInCheck());
 
             // TODO: consider creating moves on the fly
             if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))

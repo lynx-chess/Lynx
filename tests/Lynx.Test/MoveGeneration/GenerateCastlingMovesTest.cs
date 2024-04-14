@@ -18,7 +18,7 @@ public class GenerateCastlingMovesTest
         int index = 0;
         var moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
 
-        MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
+        MoveGenerator.GenerateCastlingMoves(ref index, moves, position, position.IsInCheck());
 
         Assert.True(1 == moves.Count(m => m.IsCastle()));
         Assert.True(1 == moves.Count(m => m.IsShortCastle()));
@@ -38,7 +38,7 @@ public class GenerateCastlingMovesTest
         int index = 0;
         var moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
 
-        MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
+        MoveGenerator.GenerateCastlingMoves(ref index, moves, position, position.IsInCheck());
 
         Assert.True(1 == moves.Count(m => m.IsCastle()));
         Assert.True(1 == moves.Count(m => m.IsLongCastle()));
@@ -66,7 +66,7 @@ public class GenerateCastlingMovesTest
         int index = 0;
         var moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
 
-        MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
+        MoveGenerator.GenerateCastlingMoves(ref index, moves, position, position.IsInCheck());
 
         Assert.IsEmpty(moves.Where(m => m.IsShortCastle()));
     }
@@ -92,7 +92,7 @@ public class GenerateCastlingMovesTest
         int index = 0;
         var moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
 
-        MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
+        MoveGenerator.GenerateCastlingMoves(ref index, moves, position, position.IsInCheck());
 
         Assert.IsEmpty(moves.Where(m => m.IsLongCastle()));
     }
@@ -116,7 +116,7 @@ public class GenerateCastlingMovesTest
         int index = 0;
         var moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
 
-        MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
+        MoveGenerator.GenerateCastlingMoves(ref index, moves, position, position.IsInCheck());
 
         Assert.IsEmpty(moves.Where(m => m.IsShortCastle()));
     }
@@ -145,7 +145,7 @@ public class GenerateCastlingMovesTest
         int index = 0;
         var moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
 
-        MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
+        MoveGenerator.GenerateCastlingMoves(ref index, moves, position, position.IsInCheck());
 
         Assert.IsEmpty(moves.Where(m => m.IsLongCastle()));
     }
@@ -163,7 +163,7 @@ public class GenerateCastlingMovesTest
         int index = 0;
         var moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
 
-        MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
+        MoveGenerator.GenerateCastlingMoves(ref index, moves, position, position.IsInCheck());
 
         Assert.IsEmpty(moves.Where(m => m.IsShortCastle()));
     }
@@ -172,8 +172,8 @@ public class GenerateCastlingMovesTest
     [TestCase("3r4/8/8/8/8/8/8/R3K1NR w KQkq - 0 1")]
     [TestCase("4r3/8/8/8/8/8/8/R3K1NR w KQkq - 0 1")]
     [TestCase("r3qk1nr/8/8/8/8/8/8/2R5 b KQkq - 0 1")]
-    [TestCase("r3qk1nr/8/8/8/8/8/8/3R4 b KQkq - 0 1")]
-    [TestCase("r3qk1nr/8/8/8/8/8/8/4R3 b KQkq - 0 1")]
+    [TestCase("r2qk1nr/8/8/8/8/8/8/3R4 b KQkq - 0 1")]
+    [TestCase("r2qk1nr/8/8/8/8/8/8/4R3 b KQkq - 0 1")]
     public void ShouldNotLongCastleWhenAttackedSquares(string fen)
     {
         var position = new Position(fen);
@@ -181,7 +181,7 @@ public class GenerateCastlingMovesTest
         int index = 0;
         var moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
 
-        MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
+        MoveGenerator.GenerateCastlingMoves(ref index, moves, position, position.IsInCheck());
 
         Assert.IsEmpty(moves.Where(m => m.IsLongCastle()));
     }

@@ -8,27 +8,26 @@ public class GenerateQueenMovesTest
     private static IEnumerable<Move> GenerateQueenMoves(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        return MoveGenerator.GenerateAllMoves(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.Q || m.Piece() == (int)Piece.q);
+        return MoveGenerator.GenerateAllMoves(position, moves, position.IsInCheck()).ToArray().Where(m => m.Piece() == (int)Piece.Q || m.Piece() == (int)Piece.q);
     }
 
     private static IEnumerable<Move> GenerateQueenCaptures(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        return MoveGenerator.GenerateAllCaptures(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.Q || m.Piece() == (int)Piece.q);
+        return MoveGenerator.GenerateAllCaptures(position, moves, position.IsInCheck()).ToArray().Where(m => m.Piece() == (int)Piece.Q || m.Piece() == (int)Piece.q);
     }
 
-    [TestCase(Constants.EmptyBoardFEN, 0)]
     [TestCase(Constants.InitialPositionFEN, 0)]
-    [TestCase("8/8/8/8/8/8/PP3PPP/RNBQKBNR w KQkq - 0 1", 14)]
-    [TestCase("rnbqkbnr/pp3ppp/8/8/8/8/8/8 b KQkq - 0 1", 14)]
-    [TestCase("8/pppppppp/8/8/8/8/PP3PPP/RNBQKBNR w KQkq - 0 1", 13)]
-    [TestCase("rnbqkbnr/pp3ppp/8/8/8/8/PPPPPPPP/8 b KQkq - 0 1", 13)]
-    [TestCase("8/8/8/8/3Q4/8/8/8 w - - 0 1", 27)]
-    [TestCase("8/8/8/8/3q4/8/8/8 b - - 0 1", 27)]
-    [TestCase("8/8/1P1P1P2/8/1P1Q1P2/8/1P1P1P2/8 w - - 0 1", 8)]
-    [TestCase("8/8/1p1p1p2/8/1p1q1p2/8/1p1p1p2/8 b - - 0 1", 8)]
-    [TestCase("8/8/1p1p1p2/8/1p1Q1p2/8/1p1p1p2/8 w - - 0 1", 16)]
-    [TestCase("8/8/1P1P1P2/8/1P1q1P2/8/1P1P1P2/8 b - - 0 1", 16)]
+    [TestCase("4k3/8/8/8/8/8/PP3PPP/RNBQKBNR w KQ - 0 1", 14)]
+    [TestCase("rnbqkbnr/pp3ppp/8/8/8/8/8/4K3 b kq - 0 1", 14)]
+    [TestCase("4k3/pppppppp/8/8/8/8/PP3PPP/RNBQKBNR w KQ - 0 1", 13)]
+    [TestCase("rnbqkbnr/pp3ppp/8/8/8/8/PPPPPPPP/4K3 b kq - 0 1", 13)]
+    [TestCase("k7/8/8/8/3Q4/8/K7/8 w - - 0 1", 27)]
+    [TestCase("k7/8/8/8/3q4/8/K7/8 b - - 0 1", 27)]
+    [TestCase("k7/8/1P1P1P2/8/1P1Q1P2/8/1P1P1P2/K7 w - - 0 1", 8)]
+    [TestCase("k7/8/1p1p1p2/8/1p1q1p2/8/Kp1p1p2/8 b - - 0 1", 8)]
+    [TestCase("k7/8/1p1p1p2/8/1p1Q1p2/8/1p1p1p2/K7 w - - 0 1", 16)]
+    [TestCase("k7/8/1P1P1P2/8/1P1q1P2/8/1P1P1P2/K7 b - - 0 1", 16)]
     public void QueenMoves_Count(string fen, int expectedMoves)
     {
         var position = new Position(fen);
@@ -141,10 +140,10 @@ public class GenerateQueenMovesTest
             && m.TargetSquare() == (int)BoardSquare.c5));
     }
 
-    [TestCase("8/8/1p1p1p2/8/1p1Q1p2/8/1p1p1p2/8 w - - 0 1", 8)]
-    [TestCase("8/8/1P1P1P2/8/1P1q1P2/8/1P1P1P2/8 b - - 0 1", 8)]
-    [TestCase("p1p1p3/8/p1Q1p3/8/p1p1p1p1/8/4p1Q1/7p w - - 0 1", 12)]
-    [TestCase("P1P1P3/8/P1q1P3/8/P1P1P1P1/8/4P1q1/7P b - - 0 1", 12)]
+    [TestCase("k7/8/1p1p1p2/8/1p1Q1p2/8/1p1p1p2/K7 w - - 0 1", 8)]
+    [TestCase("k7/8/1P1P1P2/8/1P1q1P2/8/1P1P1P2/K7 b - - 0 1", 8)]
+    [TestCase("p1p1p3/8/p1Q1p3/8/p1p1p1p1/8/4p1Q1/K1k4p w - - 0 1", 12)]
+    [TestCase("P1P1P3/8/P1q1P3/8/P1P1P1P1/8/4P1q1/K1k4P b - - 0 1", 12)]
     public void QueenMoves_CapturesOnly(string fen, int expectedCaptures)
     {
         var position = new Position(fen);

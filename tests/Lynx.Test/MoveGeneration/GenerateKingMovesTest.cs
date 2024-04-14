@@ -8,13 +8,13 @@ public class GenerateKingMovesTest
     private static IEnumerable<Move> GenerateKingMoves(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        return MoveGenerator.GenerateAllMoves(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.K || m.Piece() == (int)Piece.k);
+        return MoveGenerator.GenerateAllMoves(position, moves, position.IsInCheck()).ToArray().Where(m => m.Piece() == (int)Piece.K || m.Piece() == (int)Piece.k);
     }
 
     private static IEnumerable<Move> GenerateKingCaptures(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        return MoveGenerator.GenerateAllCaptures(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.K || m.Piece() == (int)Piece.k);
+        return MoveGenerator.GenerateAllCaptures(position, moves, position.IsInCheck() ).ToArray().Where(m => m.Piece() == (int)Piece.K || m.Piece() == (int)Piece.k);
     }
 
     [TestCase(Constants.InitialPositionFEN, 0)]

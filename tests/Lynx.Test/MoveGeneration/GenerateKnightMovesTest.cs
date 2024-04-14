@@ -8,23 +8,22 @@ public class GenerateKnightMovesTest
     private static IEnumerable<Move> GenerateKnightMoves(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        return MoveGenerator.GenerateAllMoves(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.N || m.Piece() == (int)Piece.n);
+        return MoveGenerator.GenerateAllMoves(position, moves, position.IsInCheck()).ToArray().Where(m => m.Piece() == (int)Piece.N || m.Piece() == (int)Piece.n);
     }
 
     private static IEnumerable<Move> GenerateKnightCaptures(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        return MoveGenerator.GenerateAllCaptures(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.N || m.Piece() == (int)Piece.n);
+        return MoveGenerator.GenerateAllCaptures(position, moves, position.IsInCheck()).ToArray().Where(m => m.Piece() == (int)Piece.N || m.Piece() == (int)Piece.n);
     }
 
-    [TestCase(Constants.EmptyBoardFEN, 0)]
     [TestCase(Constants.InitialPositionFEN, 4)]
-    [TestCase("8/8/8/8/8/P1P2P1P/PPPPPPPP/RNBQKBNR w KQkq - 0 1", 0)]
+    [TestCase("k7/8/8/8/8/P1P2P1P/PPPPPPPP/RNBQKBNR w KQ - 0 1", 0)]
     [TestCase("rnbqkbnr/pppppppp/p1p2p1p/8/8/8/8/8 b KQkq - 0 1", 0)]
-    [TestCase("8/8/2P1P3/1P3P2/3N4/1P3P2/2P1P3/8 w - - 0 1", 0)]
-    [TestCase("8/8/2p1p3/1p3p2/3N4/1p3p2/2p1p3/8 w - - 0 1", 8)]
-    [TestCase("8/8/2p1p3/1p3p2/3n4/1p3p2/2p1p3/8 b - - 0 1", 0)]
-    [TestCase("8/8/2P1P3/1P3P2/3n4/1P3P2/2P1P3/8 b - - 0 1", 8)]
+    [TestCase("k7/8/2P1P3/1P3P2/3N4/1P3P2/2P1P3/K7 w - - 0 1", 0)]
+    [TestCase("k7/8/2p1p3/1p3p2/3N4/1p3p2/2p1p3/K7 w - - 0 1", 8)]
+    [TestCase("k7/8/2p1p3/1p3p2/3n4/1p3p2/2p1p3/K7 b - - 0 1", 0)]
+    [TestCase("k7/8/2P1P3/1P3P2/3n4/1P3P2/2P1P3/K7 b - - 0 1", 8)]
     public void KnightMoves_Count(string fen, int expectedMoves)
     {
         var position = new Position(fen);

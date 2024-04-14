@@ -8,23 +8,22 @@ public class GenerateBishopMovesTest
     private static IEnumerable<Move> GenerateBishopMoves(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        return MoveGenerator.GenerateAllMoves(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.B || m.Piece() == (int)Piece.b);
+        return MoveGenerator.GenerateAllMoves(position, moves, position.IsInCheck()).ToArray().Where(m => m.Piece() == (int)Piece.B || m.Piece() == (int)Piece.b);
     }
 
     private static IEnumerable<Move> GenerateBishopCaptures(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        return MoveGenerator.GenerateAllCaptures(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.B || m.Piece() == (int)Piece.b);
+        return MoveGenerator.GenerateAllCaptures(position, moves, position.IsInCheck()).ToArray().Where(m => m.Piece() == (int)Piece.B || m.Piece() == (int)Piece.b);
     }
 
-    [TestCase(Constants.EmptyBoardFEN, 0)]
     [TestCase(Constants.InitialPositionFEN, 0)]
-    [TestCase("8/8/8/8/8/8/P1P2P1P/RNBQKBNR w KQkq - 0 1", 14)]
+    [TestCase("k7/8/8/8/8/8/P1P2P1P/RNBQKBNR w KQ - 0 1", 14)]
     [TestCase("rnbqkbnr/p1p2p1p/8/8/8/8/8/8 b KQkq - 0 1", 14)]
-    [TestCase("8/8/8/3B4/8/8/8/8 w - - 0 1 w - - 0 1", 13)]
-    [TestCase("8/8/8/3b4/8/8/8/8 b - - 0 1 b - - 0 1", 13)]
-    [TestCase("8/2N1N3/1N1P1N2/2PBP3/1N1P1N2/2N1N3/3N4/8 w - - 0 1", 13)]
-    [TestCase("8/2n1n3/1n1p1n2/2pbp3/1n1p1n2/2n1n3/3n4/8 b - - 0 1", 13)]
+    [TestCase("8/k7/8/3B4/8/8/8/K7 w - - 0 1", 13)]
+    [TestCase("8/k7/8/3b4/8/8/8/K7 b - - 0 1", 13)]
+    [TestCase("8/k1N1N3/1N1P1N2/2PBP3/1N1P1N2/2N1N3/3N4/K7 w - - 0 1", 13)]
+    [TestCase("1k6/2n1n3/1n1p1n2/2pbp3/1n1p1n2/2n1n3/3n4/K7 b - - 0 1", 13)]
     public void BishopMoves_Count(string fen, int expectedMoves)
     {
         var position = new Position(fen);
