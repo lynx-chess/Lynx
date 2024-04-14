@@ -229,6 +229,15 @@ public static class Constants
     public const int WhiteLongCastleRookSquare = (int)BoardSquare.d1;
     public const int BlackLongCastleRookSquare = (int)BoardSquare.d8;
 
+    public const BitBoard WhiteShortCastleMask = 1ul << (int)BoardSquare.f1 | 1ul << (int)BoardSquare.g1;
+    public const BitBoard BlackShortCastleMask = 1ul << (int)BoardSquare.f8 | 1ul << (int)BoardSquare.g8;
+
+    public const BitBoard WhiteLongCastleAttacksMask = 1ul << (int)BoardSquare.d1 | 1ul << (int)BoardSquare.c1;
+    public const BitBoard BlackLongCastleAttacksMask = 1ul << (int)BoardSquare.d8 | 1ul << (int)BoardSquare.c8;
+
+    public const BitBoard WhiteLongCastleOccupancyMask = WhiteLongCastleAttacksMask | 1ul << (int)BoardSquare.b1;
+    public const BitBoard BlackLongCastleOccupancyMask = BlackLongCastleAttacksMask | 1ul << (int)BoardSquare.b8;
+
     public const string WhiteShortCastle = "e1g1";
     public const string BlackShortCastle = "e8g8";
     public const string WhiteLongCastle = "e1c1";
