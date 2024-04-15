@@ -13,11 +13,14 @@ public class GeneralMoveGeneratorTest
     {
         var originalPosition = new Position("8/8/8/k1pP3R/8/8/8/n4K2 w - c6 0 1");
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        var enPassantMove = MoveGenerator.GenerateAllMoves(originalPosition, moves, originalPosition.IsInCheck()).ToArray().Single(m => m.IsEnPassant());
+        var (isInCheck, isNotInDoubleCheck) = originalPosition.IsInCheckAndDoubleCheck();
+        var enPassantMove = MoveGenerator.GenerateAllMoves(originalPosition, moves, isInCheck, isNotInDoubleCheck).ToArray().Single(m => m.IsEnPassant());
+
         var positionAferEnPassant = new Position(originalPosition, enPassantMove);
+        (isInCheck, isNotInDoubleCheck) = originalPosition.IsInCheckAndDoubleCheck();
 
         moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        foreach (var move in MoveGenerator.GenerateAllMoves(positionAferEnPassant, moves, positionAferEnPassant.IsInCheck()))
+        foreach (var move in MoveGenerator.GenerateAllMoves(positionAferEnPassant, moves, isInCheck, isNotInDoubleCheck))
         {
             if (new Position(positionAferEnPassant, move).IsValid())
             {

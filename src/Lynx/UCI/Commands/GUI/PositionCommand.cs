@@ -66,9 +66,11 @@ public sealed class PositionCommand : GUIBaseCommand
 
         Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
 
+        var (isInCheck, isNotInDoubleCheck) = game.CurrentPosition.IsInCheckAndDoubleCheck();
+
         if (!MoveExtensions.TryParseFromUCIString(
             moveString,
-            MoveGenerator.GenerateAllMoves(game.CurrentPosition, movePool, game.CurrentPosition.IsInCheck()),
+            MoveGenerator.GenerateAllMoves(game.CurrentPosition, movePool, isInCheck, isNotInDoubleCheck),
             out lastMove))
         {
             _logger.Warn("Error parsing last move {0} from position command {1}", lastMove, positionCommand);

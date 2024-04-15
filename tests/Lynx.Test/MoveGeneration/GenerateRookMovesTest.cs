@@ -8,13 +8,15 @@ public class GenerateRookMovesTest
     private static IEnumerable<Move> GenerateRookMoves(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        return MoveGenerator.GenerateAllMoves(position, moves, position.IsInCheck()).ToArray().Where(m => m.Piece() == (int)Piece.R || m.Piece() == (int)Piece.r);
+        var (isInCheck, isNotInDoubleCheck) = position.IsInCheckAndDoubleCheck();
+        return MoveGenerator.GenerateAllMoves(position, moves, isInCheck, isNotInDoubleCheck).ToArray().Where(m => m.Piece() == (int)Piece.R || m.Piece() == (int)Piece.r);
     }
 
     private static IEnumerable<Move> GenerateRookCaptures(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        return MoveGenerator.GenerateAllCaptures(position, moves, position.IsInCheck()).ToArray().Where(m => m.Piece() == (int)Piece.R || m.Piece() == (int)Piece.r);
+        var (isInCheck, isNotInDoubleCheck) = position.IsInCheckAndDoubleCheck();
+        return MoveGenerator.GenerateAllCaptures(position, moves, isInCheck, isNotInDoubleCheck).ToArray().Where(m => m.Piece() == (int)Piece.R || m.Piece() == (int)Piece.r);
     }
 
     [TestCase(Constants.InitialPositionFEN, 0)]

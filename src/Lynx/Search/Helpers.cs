@@ -205,10 +205,11 @@ public sealed partial class Engine
         static void TryParseMove(Position position, int i, int move)
         {
             Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+            var (isInCheck, isNotInDoubleCheck) = position.IsInCheckAndDoubleCheck();
 
             if (!MoveExtensions.TryParseFromUCIString(
                move.UCIString(),
-               MoveGenerator.GenerateAllMoves(position, movePool, position.IsInCheck()),
+               MoveGenerator.GenerateAllMoves(position, movePool, isInCheck, isNotInDoubleCheck),
                out _))
             {
                 var message = $"Unexpected PV move {i}: {move.UCIString()} from position {position.FEN()}";

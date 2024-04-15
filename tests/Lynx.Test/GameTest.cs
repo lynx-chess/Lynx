@@ -215,7 +215,6 @@ public class GameTest : BaseTest
         Assert.AreEqual(100, game.MoveHistory.Count);
 #endif
         Assert.AreEqual(100 + 1, game.PositionHashHistory.Count);
-
         Assert.True(game.Is50MovesRepetition());
     }
 

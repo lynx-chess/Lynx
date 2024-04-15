@@ -223,7 +223,8 @@ public sealed partial class Engine
         bool onlyOneLegalMove = false;
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, moves, Game.CurrentPosition.IsInCheck()))
+        var (isInCheck, isNotInDoubleCheck) = Game.CurrentPosition.IsInCheckAndDoubleCheck();
+        foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, moves, isInCheck, isNotInDoubleCheck))
         {
             var gameState = Game.CurrentPosition.MakeMove(move);
             bool isPositionValid = Game.CurrentPosition.IsValid();

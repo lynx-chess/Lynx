@@ -1082,6 +1082,30 @@ public class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public (bool IsInCheck, bool IsNotInDoubleCheck) IsInCheckAndDoubleCheck()
+    {
+        var oppositeSideInt = Utils.OppositeSide(Side);
+        var oppositeSideOffset = Utils.PieceOffset(oppositeSideInt);
+
+        var kingSquare = PieceBitBoards[(int)Piece.k - oppositeSideOffset].GetLS1BIndex();
+
+        var rookAttacks = Attacks.RookAttacks(kingSquare, OccupancyBitBoards[(int)Side.Both]);
+        var bishopAttacks = Attacks.BishopAttacks(kingSquare, OccupancyBitBoards[(int)Side.Both]);
+        var queenAttacks = Attacks.QueenAttacks(rookAttacks, bishopAttacks);
+
+        var attacks =
+            (rookAttacks & PieceBitBoards[(int)Piece.R + oppositeSideOffset])
+            | (bishopAttacks & PieceBitBoards[(int)Piece.B + oppositeSideOffset])
+            | (queenAttacks & PieceBitBoards[(int)Piece.Q + oppositeSideOffset])
+            | (Attacks.KnightAttacks[kingSquare] & PieceBitBoards[(int)Piece.N + oppositeSideOffset])
+            | (Attacks.PawnAttacks[(int)Side][kingSquare] & PieceBitBoards[oppositeSideOffset]);
+
+        var attacksCount = attacks.CountBits();
+
+        return (attacksCount >= 1, attacksCount <= 1);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool IsSquareAttackedByPawns(int squareIndex, int sideToMove, int offset)
     {
         var oppositeColorIndex = sideToMove ^ 1;

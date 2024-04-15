@@ -20,7 +20,8 @@ public class MoveGeneratorRegressionTest : BaseTest
         Assert.True(moves.Exists(m => m.IsDoublePawnPush()));
 
         Span<Move> moveSpan = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        var captures = MoveGenerator.GenerateAllCaptures(position, moveSpan, position.IsInCheck()).ToArray().ToList();
+        var (isInCheck, isNotInDoubleCheck) = position.IsInCheckAndDoubleCheck();
+        var captures = MoveGenerator.GenerateAllCaptures(position, moveSpan, isInCheck, isNotInDoubleCheck).ToArray().ToList();
 
         Assert.True(moves.Exists(m => m.IsShortCastle()));
         Assert.True(moves.Exists(m => m.IsLongCastle()));

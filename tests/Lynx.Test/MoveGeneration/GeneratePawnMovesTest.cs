@@ -10,13 +10,15 @@ public class GeneratePawnMovesTest
     private static IEnumerable<Move> GeneratePawnMoves(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        return MoveGenerator.GenerateAllMoves(position, moves, position.IsInCheck()).ToArray().Where(m => m.Piece() % (int)Piece.p == 0);
+        var (isInCheck, isNotInDoubleCheck) = position.IsInCheckAndDoubleCheck();
+        return MoveGenerator.GenerateAllMoves(position, moves, isInCheck, isNotInDoubleCheck).ToArray().Where(m => m.Piece() % (int)Piece.p == 0);
     }
 
     private static IEnumerable<Move> GeneratePawnCaptures(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        return MoveGenerator.GenerateAllCaptures(position, moves, position.IsInCheck()).ToArray().Where(m => m.Piece() % (int)Piece.p == 0);
+        var (isInCheck, isNotInDoubleCheck) = position.IsInCheckAndDoubleCheck();
+        return MoveGenerator.GenerateAllCaptures(position, moves, isInCheck, isNotInDoubleCheck).ToArray().Where(m => m.Piece() % (int)Piece.p == 0);
     }
 
     [Test]

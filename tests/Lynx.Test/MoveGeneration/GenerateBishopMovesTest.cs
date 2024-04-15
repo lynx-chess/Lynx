@@ -8,13 +8,15 @@ public class GenerateBishopMovesTest
     private static IEnumerable<Move> GenerateBishopMoves(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        return MoveGenerator.GenerateAllMoves(position, moves, position.IsInCheck()).ToArray().Where(m => m.Piece() == (int)Piece.B || m.Piece() == (int)Piece.b);
+        var (isInCheck, isNotInDoubleCheck) = position.IsInCheckAndDoubleCheck();
+        return MoveGenerator.GenerateAllMoves(position, moves, isInCheck, isNotInDoubleCheck).ToArray().Where(m => m.Piece() == (int)Piece.B || m.Piece() == (int)Piece.b);
     }
 
     private static IEnumerable<Move> GenerateBishopCaptures(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        return MoveGenerator.GenerateAllCaptures(position, moves, position.IsInCheck()).ToArray().Where(m => m.Piece() == (int)Piece.B || m.Piece() == (int)Piece.b);
+        var (isInCheck, isNotInDoubleCheck) = position.IsInCheckAndDoubleCheck();
+        return MoveGenerator.GenerateAllCaptures(position, moves, isInCheck, isNotInDoubleCheck).ToArray().Where(m => m.Piece() == (int)Piece.B || m.Piece() == (int)Piece.b);
     }
 
     [TestCase(Constants.InitialPositionFEN, 0)]

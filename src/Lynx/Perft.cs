@@ -40,8 +40,9 @@ public static class Perft
     {
         if (depth != 0)
         {
+            var (isInCheck, isNotInDoubleCheck) = position.IsInCheckAndDoubleCheck();
             Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-            foreach (var move in MoveGenerator.GenerateAllMoves(position, moves, position.IsInCheck()))
+            foreach (var move in MoveGenerator.GenerateAllMoves(position, moves, isInCheck, isNotInDoubleCheck))
             {
                 var state = position.MakeMove(move);
 
@@ -62,8 +63,9 @@ public static class Perft
     {
         if (depth != 0)
         {
+            var (isInCheck, isNotInDoubleCheck) = position.IsInCheckAndDoubleCheck();
             Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-            foreach (var move in MoveGenerator.GenerateAllMoves(position, moves, position.IsInCheck()))
+            foreach (var move in MoveGenerator.GenerateAllMoves(position, moves, isInCheck, isNotInDoubleCheck))
             {
                 var state = position.MakeMove(move);
 

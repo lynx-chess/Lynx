@@ -666,7 +666,8 @@ public partial class ParseGame_Benchmark : BaseBenchmark
                     break;
                 }
                 var moveString = rawMoves[rangeSpan[i]];
-                var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, movePool, CurrentPosition.IsInCheck());
+                var (isInCheck, isNotInDoubleCheck) = CurrentPosition.IsInCheckAndDoubleCheck();
+                var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, movePool, isInCheck, isNotInDoubleCheck);
 
                 if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
                 {

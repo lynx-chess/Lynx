@@ -51,7 +51,8 @@ public sealed class Game
                 break;
             }
             var moveString = rawMoves[rangeSpan[i]];
-            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, movePool, CurrentPosition.IsInCheck());
+            var (isInCheck, isNotInDoubleCheck) = CurrentPosition.IsInCheckAndDoubleCheck();
+            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, movePool, isInCheck, isNotInDoubleCheck);
 
             // TODO: consider creating moves on the fly
             if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
@@ -146,9 +147,9 @@ public sealed class Game
             return false;
         }
 
-        var isInCheck = CurrentPosition.IsInCheck();
+        var (isInCheck, isNotInDoubleCheck) = CurrentPosition.IsInCheckAndDoubleCheck();
 
-        return !isInCheck || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition, isInCheck);
+        return !isInCheck || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition, isInCheck, isNotInDoubleCheck);
     }
 
     /// <summary>

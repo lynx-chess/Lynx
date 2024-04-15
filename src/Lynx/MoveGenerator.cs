@@ -51,9 +51,11 @@ public static class MoveGenerator
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
 
+        var (isInCheck, isNotInDoubleCheck) = position.IsInCheckAndDoubleCheck();
+
         return (capturesOnly
-            ? GenerateAllCaptures(position, moves, position.IsInCheck())
-            : GenerateAllMoves(position, moves, position.IsInCheck())).ToArray();
+            ? GenerateAllCaptures(position, moves, isInCheck, isNotInDoubleCheck)
+            : GenerateAllMoves(position, moves, isInCheck, isNotInDoubleCheck)).ToArray();
     }
 
     /// <summary>
@@ -63,7 +65,7 @@ public static class MoveGenerator
     /// <param name="movePool"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Span<Move> GenerateAllMoves(Position position, Span<Move> movePool, bool isInCheck)
+    public static Span<Move> GenerateAllMoves(Position position, Span<Move> movePool, bool isInCheck, bool isNotInDoubleCheck)
     {
 #if DEBUG
         if (position.Side == Side.Both)
@@ -76,13 +78,20 @@ public static class MoveGenerator
 
         var offset = Utils.PieceOffset(position.Side);
 
-        GenerateAllPawnMoves(ref localIndex, movePool, position, offset);
-        GenerateCastlingMoves(ref localIndex, movePool, position, isInCheck);
-        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.K + offset, position, offset);
-        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.N + offset, position, offset);
-        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.B + offset, position, offset);
-        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.R + offset, position, offset);
-        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.Q + offset, position, offset);
+        if (isNotInDoubleCheck)
+        {
+            GenerateAllPawnMoves(ref localIndex, movePool, position, offset);
+            GenerateCastlingMoves(ref localIndex, movePool, position, isInCheck);
+            GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.K + offset, position, offset);
+            GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.N + offset, position, offset);
+            GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.B + offset, position, offset);
+            GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.R + offset, position, offset);
+            GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.Q + offset, position, offset);
+        }
+        else
+        {
+            GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.K + offset, position, offset);
+        }
 
         return movePool[..localIndex];
     }
@@ -94,7 +103,7 @@ public static class MoveGenerator
     /// <param name="movePool"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Span<Move> GenerateAllCaptures(Position position, Span<Move> movePool, bool isInCheck)
+    public static Span<Move> GenerateAllCaptures(Position position, Span<Move> movePool, bool isInCheck, bool isNotInDoubleCheck)
     {
 #if DEBUG
         if (position.Side == Side.Both)
@@ -107,13 +116,20 @@ public static class MoveGenerator
 
         var offset = Utils.PieceOffset(position.Side);
 
-        GeneratePawnCapturesAndPromotions(ref localIndex, movePool, position, offset);
-        GenerateCastlingMoves(ref localIndex, movePool, position, isInCheck);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.K + offset, position, offset);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.N + offset, position, offset);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.B + offset, position, offset);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.R + offset, position, offset);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.Q + offset, position, offset);
+        if (isNotInDoubleCheck)
+        {
+            GeneratePawnCapturesAndPromotions(ref localIndex, movePool, position, offset);
+            GenerateCastlingMoves(ref localIndex, movePool, position, isInCheck);
+            GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.K + offset, position, offset);
+            GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.N + offset, position, offset);
+            GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.B + offset, position, offset);
+            GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.R + offset, position, offset);
+            GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.Q + offset, position, offset);
+        }
+        else
+        {
+            GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.K + offset, position, offset);
+        }
 
         return movePool[..localIndex];
     }
@@ -416,7 +432,7 @@ public static class MoveGenerator
     /// <param name="position"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool CanGenerateAtLeastAValidMove(Position position, bool isInCheck)
+    public static bool CanGenerateAtLeastAValidMove(Position position, bool isInCheck, bool isNotInDoubleCheck)
     {
 #if DEBUG
         if (position.Side == Side.Both)
@@ -431,13 +447,20 @@ public static class MoveGenerator
         try
         {
 #endif
-            return IsAnyPawnMoveValid(position, offset)
-                || IsAnyPieceMoveValid((int)Piece.K + offset, position)
-                || IsAnyPieceMoveValid((int)Piece.Q + offset, position)
-                || IsAnyPieceMoveValid((int)Piece.B + offset, position)
-                || IsAnyPieceMoveValid((int)Piece.N + offset, position)
-                || IsAnyPieceMoveValid((int)Piece.R + offset, position)
-                || IsAnyCastlingMoveValid(position, isInCheck);
+            if (isNotInDoubleCheck)
+            {
+                return IsAnyPawnMoveValid(position, offset)
+                    || IsAnyPieceMoveValid((int)Piece.K + offset, position)
+                    || IsAnyPieceMoveValid((int)Piece.Q + offset, position)
+                    || IsAnyPieceMoveValid((int)Piece.B + offset, position)
+                    || IsAnyPieceMoveValid((int)Piece.N + offset, position)
+                    || IsAnyPieceMoveValid((int)Piece.R + offset, position)
+                    || IsAnyCastlingMoveValid(position, isInCheck);
+            }
+            else
+            {
+                return IsAnyPieceMoveValid((int)Piece.K + offset, position);
+            }
 #if DEBUG
         }
         catch (Exception e)

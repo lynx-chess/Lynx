@@ -8,13 +8,15 @@ public class GenerateKnightMovesTest
     private static IEnumerable<Move> GenerateKnightMoves(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        return MoveGenerator.GenerateAllMoves(position, moves, position.IsInCheck()).ToArray().Where(m => m.Piece() == (int)Piece.N || m.Piece() == (int)Piece.n);
+        var (isInCheck, isNotInDoubleCheck) = position.IsInCheckAndDoubleCheck();
+        return MoveGenerator.GenerateAllMoves(position, moves, isInCheck, isNotInDoubleCheck).ToArray().Where(m => m.Piece() == (int)Piece.N || m.Piece() == (int)Piece.n);
     }
 
     private static IEnumerable<Move> GenerateKnightCaptures(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        return MoveGenerator.GenerateAllCaptures(position, moves, position.IsInCheck()).ToArray().Where(m => m.Piece() == (int)Piece.N || m.Piece() == (int)Piece.n);
+        var (isInCheck, isNotInDoubleCheck) = position.IsInCheckAndDoubleCheck();
+        return MoveGenerator.GenerateAllCaptures(position, moves, isInCheck, isNotInDoubleCheck).ToArray().Where(m => m.Piece() == (int)Piece.N || m.Piece() == (int)Piece.n);
     }
 
     [TestCase(Constants.InitialPositionFEN, 4)]

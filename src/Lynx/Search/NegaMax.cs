@@ -65,7 +65,7 @@ public sealed partial class Engine
         // Before any time-consuming operations
         _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
 
-        bool isInCheck = position.IsInCheck();
+        var (isInCheck, isNotInDoubleCheck) = position.IsInCheckAndDoubleCheck();
 
         if (isInCheck)
         {
@@ -73,7 +73,7 @@ public sealed partial class Engine
         }
         if (depth <= 0)
         {
-            if (MoveGenerator.CanGenerateAtLeastAValidMove(position, isInCheck))
+            if (MoveGenerator.CanGenerateAtLeastAValidMove(position, isInCheck, isNotInDoubleCheck))
             {
                 return QuiescenceSearch(ply, alpha, beta);
             }
@@ -164,7 +164,7 @@ public sealed partial class Engine
         }
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves, isInCheck);
+        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves, isInCheck, isNotInDoubleCheck);
 
         Span<int> scores = stackalloc int[pseudoLegalMoves.Length];
         if (_isFollowingPV)
@@ -499,10 +499,10 @@ public sealed partial class Engine
             alpha = staticEvaluation;
         }
 
-        var isInCheck = position.IsInCheck();
+        var (isInCheck, isNotInDoubleCheck) = position.IsInCheckAndDoubleCheck();
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        var pseudoLegalMoves = MoveGenerator.GenerateAllCaptures(position, moves, isInCheck);
+        var pseudoLegalMoves = MoveGenerator.GenerateAllCaptures(position, moves, isInCheck, isNotInDoubleCheck);
         if (pseudoLegalMoves.Length == 0)
         {
             // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358
@@ -584,7 +584,7 @@ public sealed partial class Engine
 
         if (bestMove is null
             && !isThereAnyValidCapture
-            && !MoveGenerator.CanGenerateAtLeastAValidMove(position, isInCheck))
+            && !MoveGenerator.CanGenerateAtLeastAValidMove(position, isInCheck, isNotInDoubleCheck))
         {
             var finalEval = Position.EvaluateFinalPosition(ply, isInCheck);
             _tt.RecordHash(_ttMask, position, 0, ply, finalEval, NodeType.Exact);
