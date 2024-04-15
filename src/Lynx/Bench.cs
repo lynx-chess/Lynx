@@ -88,22 +88,25 @@ public partial class Engine
         "8/bRn5/8/7b/8/7k/8/7K w - - 0 1",                              // R vs BBN, leading to R vs BN or R vs BB
         "1b6/1R1r4/8/1n6/7k/8/8/7K w - - 0 1",                          // R vs RBN, leading to R vs BN or R vs RB or R vs RN
         "8/q5rk/8/8/8/8/Q5RK/7N w - - 0 1",                             // Endgame that can lead to QN vs Q or RN vs R positions
+
         "1kr5/2bp3q/Q7/1K6/6q1/6B1/8/8 w - - 0 1",                      // Endgame where triple repetition can and needs to be forced by white
-        "1kr5/2bp3q/R7/1K6/6q1/6B1/8/8 w - - 96 200",                    // Endgame where 50 moves draw can and needs to be forced by white
+        "1kr5/2bp3q/R7/1K6/6q1/6B1/8/8 w - - 96 200",                   // Endgame where 50 moves draw can and needs to be forced by white
+        "4Q3/8/1p4pk/1PbB1p1p/7P/p3P1PK/P3qP2/8 w - - 99 88",           // Mate in 1 that takes prececen over 50 moves rule, from https://github.com/PGG106/Alexandria/issues/213
+        "8/7B/8/7k/5KR1/8/4R3/8 w - - 0 1",                             // 50 moves rule needs to be forced in a losing position
+        "r6k/p3b1pp/2pq4/Qp2n1NK/4P1P1/P3Br1P/1P2RP2/8 b - - 0 1",      // 50 moves rule needs to be avoided in a winning position
+
+        "7B/8/7k/8/5KR1/8/5R2/8 w - - 0 1",                             // Threefold repetition needs to be forced in a losing position
+        "r6k/p3b1pp/2pq4/Qp2n1NK/4P1P1/P3Br1P/1P2RP2/8 b - - 0 1",      // Threefold repetition needs to be avoided in a winning position, from https://gameknot.com/chess-puzzle.pl?pz=247493
+        "8/8/4NQ2/7k/2P4p/1q2P2P/5P2/6K1 b - - 5 52",                   // Stalemate needs to be forced in a losing position, from https://lichess.org/sM5ekwnW/black#103
+        "4r3/5P1k/5K2/5N2/8/8/8/8 w - - 0 1",                           // Bishop promotion is the best move
+        "6k1/1R6/5Kn1/3p1N2/1P6/8/8/3r4 b - - 10 37",                   // Mate in 4 needs to be avoided
+
         "rnbqk2r/pppp1ppp/5n2/8/Bb2N3/8/PPPPQPPP/RNB1K2R w KQkq - 2 1", // Petroff defense alike position with double check Q and N
         "rnb1kb1r/pppp1ppp/5n2/8/4N3/8/PPPP1PPP/RNB1R1K1 w kq - 2 5",   // Double check R and N
         "rnbqk2r/ppp2ppp/3p4/8/1b2Bn2/8/PPPPQPPP/RNB1K2R w KQkq - 2 5", // Double check Q and B
         "rnbqk2r/ppp2ppp/3p4/8/1b2B3/3n4/PPPP1PPP/RNBQR1K1 w kq - 2 5", // Double check R and B
         "r3k2r/ppp2ppp/n7/1N1p4/Bb6/8/PPPP1PPP/RNBQ1RK1 w kq - 2 1",    // Double check B and N, castling rights
         "r3k2r/ppp2ppp/n7/1N1p4/Bb6/8/PPPP1PPP/RNBQ1RK1 w - - 2 1",     // Double check B and N, no castling rights
-        "4Q3/8/1p4pk/1PbB1p1p/7P/p3P1PK/P3qP2/8 w - - 99 88",           // Mate in 1 that takes prececen over 50 moves rule, from https://github.com/PGG106/Alexandria/issues/213
-        "8/7B/8/7k/5KR1/8/4R3/8 w - - 0 1",                             // 50 moves rule needs to be forced in a losing position
-        "r6k/p3b1pp/2pq4/Qp2n1NK/4P1P1/P3Br1P/1P2RP2/8 b - - 0 1",      // 50 moves rule needs to be avoided in a winning position
-        "7B/8/7k/8/5KR1/8/5R2/8 w - - 0 1",                             // Threefold repetition needs to be forced in a losing position
-        "r6k/p3b1pp/2pq4/Qp2n1NK/4P1P1/P3Br1P/1P2RP2/8 b - - 0 1",      // Threefold repetition needs to be avoided in a winning position, from https://gameknot.com/chess-puzzle.pl?pz=247493
-        "8/8/4NQ2/7k/2P4p/1q2P2P/5P2/6K1 b - - 5 52",                   // Stalemate needs to be forced in a losing position, from https://lichess.org/sM5ekwnW/black#103
-        "4r3/5P1k/5K2/5N2/8/8/8/8 w - - 0 1",                           // Bishop promotion is the best move
-        "6k1/1R6/5Kn1/3p1N2/1P6/8/8/3r4 b - - 10 37",                   // Mate in 4 needs to be avoided
     ];
 
     /// <summary>
