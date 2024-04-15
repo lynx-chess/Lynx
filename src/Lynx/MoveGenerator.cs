@@ -94,37 +94,6 @@ public static class MoveGenerator
     /// <param name="movePool"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Move[] GenerateAllCaptures(Position position, Move[] movePool)
-    {
-#if DEBUG
-        if (position.Side == Side.Both)
-        {
-            return [];
-        }
-#endif
-
-        int localIndex = 0;
-
-        var offset = Utils.PieceOffset(position.Side);
-
-        GeneratePawnCapturesAndPromotions(ref localIndex, movePool, position, offset);
-        GenerateCastlingMoves(ref localIndex, movePool, position, position.IsInCheck());
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.K + offset, position, offset);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.N + offset, position, offset);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.B + offset, position, offset);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.R + offset, position, offset);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.Q + offset, position, offset);
-
-        return movePool[..localIndex];
-    }
-
-    /// <summary>
-    /// Generates all psuedo-legal captures from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
-    /// </summary>
-    /// <param name="position"></param>
-    /// <param name="movePool"></param>
-    /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Span<Move> GenerateAllCaptures(Position position, Span<Move> movePool, bool isInCheck)
     {
 #if DEBUG
