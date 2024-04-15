@@ -234,7 +234,7 @@ public sealed partial class Engine
             Game.PositionHashHistory.Add(position.UniqueIdentifier);
 
             int evaluation;
-            if (canBeRepetition && (Game.IsThreefoldRepetition() || Game.Is50MovesRepetition(isInCheck)))
+            if (canBeRepetition && (Game.IsThreefoldRepetition() || Game.Is50MovesRepetition()))
             {
                 evaluation = 0;
 

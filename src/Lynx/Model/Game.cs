@@ -139,14 +139,16 @@ public sealed class Game
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool Is50MovesRepetition(bool isInCheck)
+    public bool Is50MovesRepetition()
     {
         if (HalfMovesWithoutCaptureOrPawnMove < 100)
         {
             return false;
         }
 
-        return !CurrentPosition.IsInCheck() || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition, isInCheck);
+        var isInCheck = CurrentPosition.IsInCheck();
+
+        return !isInCheck || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition, isInCheck);
     }
 
     /// <summary>
