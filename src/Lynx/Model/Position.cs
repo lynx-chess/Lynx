@@ -1054,7 +1054,7 @@ public class Position
     public bool AreSquaresAttackedByBlack(int square1Index, int square2Index)
     {
         const int offset = 6;
-        const int oppositeColorIndex = (int)Side.Black;
+        const int oppositeColorIndex = (int)Side.White;
 
         // I tried to order them from most to least likely - not tested
         return
