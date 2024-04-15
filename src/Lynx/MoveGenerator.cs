@@ -41,7 +41,7 @@ public static class MoveGenerator
     internal static int Init() => TRUE;
 
     /// <summary>
-    /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
+    /// Generates all psuedo-legal moves from <paramref name="position"/>
     /// </summary>
     /// <param name="position"></param>
     /// <param name="capturesOnly">Filters out all moves but captures</param>
@@ -57,7 +57,7 @@ public static class MoveGenerator
     }
 
     /// <summary>
-    /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
+    /// Generates all psuedo-legal moves from <paramref name="position"/>
     /// </summary>
     /// <param name="position"></param>
     /// <param name="movePool"></param>
@@ -88,7 +88,7 @@ public static class MoveGenerator
     }
 
     /// <summary>
-    /// Generates all psuedo-legal captures from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
+    /// Generates all psuedo-legal captures, promotions and castling moves from <paramref name="position"/>
     /// </summary>
     /// <param name="position"></param>
     /// <param name="movePool"></param>
@@ -411,7 +411,7 @@ public static class MoveGenerator
     }
 
     /// <summary>
-    /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
+    /// Generates all psuedo-legal moves from <paramref name="position"/>
     /// </summary>
     /// <param name="position"></param>
     /// <returns></returns>
