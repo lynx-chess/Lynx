@@ -584,7 +584,7 @@ public sealed partial class Engine
 
         if (bestMove is null
             && !isThereAnyValidCapture
-            && !MoveGenerator.CanGenerateAtLeastAValidMove(position, isInCheck))
+            && !MoveGenerator.CanGenerateAtLeastAValidMoveExcludingCaptures(position, isInCheck))
         {
             var finalEval = Position.EvaluateFinalPosition(ply, isInCheck);
             _tt.RecordHash(_ttMask, position, 0, ply, finalEval, NodeType.Exact);
