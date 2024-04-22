@@ -3,6 +3,8 @@ using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
 using System.Diagnostics;
+using System.Reflection;
+using System.Reflection.Metadata.Ecma335;
 using System.Runtime.Intrinsics.X86;
 using System.Text.Json;
 using System.Threading.Channels;
@@ -99,6 +101,12 @@ public sealed class UCIHandler
                     break;
                 case "fen":
                     await HandleFEN();
+                    break;
+                case "ob_spsa":
+                    await HandleOpenBenchSPSA(cancellationToken);
+                    break;
+                case "ob_spsa_pretty":
+                    await HandleOpenBenchSPSAPretty(cancellationToken);
                     break;
                 default:
                     _logger.Warn("Unknown command received: {0}", rawCommand);
@@ -298,6 +306,22 @@ public sealed class UCIHandler
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
                         Configuration.EngineSettings.NMP_BaseDepthReduction = value;
+                    }
+                    break;
+                }
+            case "nmp_depthincrement":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.NMP_DepthIncrement = value;
+                    }
+                    break;
+                }
+            case "nmp_depthdivisor":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.NMP_DepthDivisor = value;
                     }
                     break;
                 }
@@ -535,6 +559,80 @@ public sealed class UCIHandler
         var fen = _engine.Game.CurrentPosition.FEN()[..^3] + _engine.Game.HalfMovesWithoutCaptureOrPawnMove + fullMoveCounterString;
 
         await _engineToUci.Writer.WriteAsync(fen);
+    }
+
+    private async ValueTask HandleOpenBenchSPSA(CancellationToken cancellationToken)
+    {
+        foreach (var property in typeof(EngineSettings).GetProperties())
+        {
+            var genericType = typeof(SPSAAttribute<>);
+            var spsaArray = property.GetCustomAttributes(genericType);
+            var count = spsaArray.Count();
+
+            if (count > 1)
+            {
+                _logger.Warn("Property {0} has more than one [{1}]", property.Name, genericType.Name);
+            }
+
+            if (count == 0)
+            {
+                continue;
+            }
+
+            var genericSpsa = spsaArray.First();
+            if (genericSpsa is SPSAAttribute<int> intSpsa)
+            {
+                await SendCommand(intSpsa.ToOBString(property), cancellationToken);
+            }
+            else if (genericSpsa is SPSAAttribute<double> doubleSpsa)
+            {
+                await SendCommand(doubleSpsa.ToOBString(property), cancellationToken);
+            }
+            else
+            {
+                _logger.Error("Property {0} has a [{1}] defined with unsupported type <{2}>", property.Name, genericSpsa);
+            }
+        }
+    }
+
+    private async ValueTask HandleOpenBenchSPSAPretty(CancellationToken cancellationToken)
+    {
+        await SendCommand(
+            $"{"param name",-35} {"type",-5} {"def",-5} {"min",-5} {"max",-5} {"step",-5} {"R_end",-5}"
+                + Environment.NewLine
+                + "-----------------------------------------------------------------------",
+            cancellationToken);
+
+        foreach (var property in typeof(EngineSettings).GetProperties())
+        {
+            var genericType = typeof(SPSAAttribute<>);
+            var spsaArray = property.GetCustomAttributes(genericType);
+            var count = spsaArray.Count();
+
+            if (count > 1)
+            {
+                _logger.Warn("Property {0} has more than one [{1}]", property.Name, genericType.Name);
+            }
+
+            if (count == 0)
+            {
+                continue;
+            }
+
+            var genericSpsa = spsaArray.First();
+            if (genericSpsa is SPSAAttribute<int> intSpsa)
+            {
+                await SendCommand(intSpsa.ToOBPrettyString(property), cancellationToken);
+            }
+            else if (genericSpsa is SPSAAttribute<double> doubleSpsa)
+            {
+                await SendCommand(doubleSpsa.ToOBPrettyString(property), cancellationToken);
+            }
+            else
+            {
+                _logger.Error("Property {0} has a [{1}] defined with unsupported type <{2}>", property.Name, genericSpsa);
+            }
+        }
     }
 
     #endregion
