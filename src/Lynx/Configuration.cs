@@ -151,22 +151,22 @@ public sealed class EngineSettings
     [SPSAAttribute<int>(1, 5, 1)]
     public int NMP_BaseDepthReduction { get; set; } = 1;
 
-    [SPSAAttribute<int>(0, 10, 1)]
+    [SPSAAttribute<int>(0, 20, 1)]
     public int NMP_DepthIncrement { get; set; } = 1;
 
-    [SPSAAttribute<int>(1, 10, 1)]
+    [SPSAAttribute<int>(1, 20, 1)]
     public int NMP_DepthDivisor { get; set; } = 3;
 
     [SPSAAttribute<int>(1, 100, 5)]
     public int AspirationWindow_Delta { get; set; } = 20;
 
-    [SPSAAttribute<int>(1, 10, 1)]
+    [SPSAAttribute<int>(1, 20, 1)]
     public int AspirationWindow_MinDepth { get; set; } = 7;
 
-    [SPSAAttribute<int>(1, 10, 1)]
+    [SPSAAttribute<int>(1, 20, 1)]
     public int RFP_MaxDepth { get; set; } = 4;
 
-    [SPSAAttribute<int>(1, 200, 5)]
+    [SPSAAttribute<int>(1, 300, 5)]
     public int RFP_DepthScalingFactor { get; set; } = 87;
 
     [SPSAAttribute<int>(1, 10, 1)]
