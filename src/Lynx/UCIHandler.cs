@@ -2,11 +2,13 @@
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Metadata.Ecma335;
 using System.Runtime.Intrinsics.X86;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading.Channels;
 
 namespace Lynx;
@@ -107,6 +109,9 @@ public sealed class UCIHandler
                     break;
                 case "ob_spsa_pretty":
                     await HandleOpenBenchSPSAPretty(cancellationToken);
+                    break;
+                case "wf_spsa":
+                    await HandleWeatherFactorySPSA(cancellationToken);
                     break;
                 default:
                     _logger.Warn("Unknown command received: {0}", rawCommand);
@@ -418,7 +423,7 @@ public sealed class UCIHandler
                     }
                     break;
                 }
-                case "see_badcapturereduction":
+            case "see_badcapturereduction":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
@@ -641,6 +646,45 @@ public sealed class UCIHandler
                 _logger.Error("Property {0} has a [{1}] defined with unsupported type <{2}>", property.Name, genericSpsa);
             }
         }
+    }
+
+    private async ValueTask HandleWeatherFactorySPSA(CancellationToken cancellationToken)
+    {
+        var properties = typeof(EngineSettings).GetProperties();
+        List<KeyValuePair<string, JsonNode?>> parameters = new(properties.Length);
+
+        foreach (var property in properties)
+        {
+            var genericType = typeof(SPSAAttribute<>);
+            var spsaArray = property.GetCustomAttributes(genericType);
+            var count = spsaArray.Count();
+
+            if (count > 1)
+            {
+                _logger.Warn("Property {0} has more than one [{1}]", property.Name, genericType.Name);
+            }
+
+            if (count == 0)
+            {
+                continue;
+            }
+
+            var genericSpsa = spsaArray.First();
+            if (genericSpsa is SPSAAttribute<int> intSpsa)
+            {
+                parameters.Add(intSpsa.ToWeatherFactoryString(property));
+            }
+            else if (genericSpsa is SPSAAttribute<double> doubleSpsa)
+            {
+                parameters.Add(doubleSpsa.ToWeatherFactoryString(property));
+            }
+            else
+            {
+                _logger.Error("Property {0} has a [{1}] defined with unsupported type <{2}>", property.Name, genericSpsa);
+            }
+        }
+
+        await SendCommand(new JsonObject(parameters).ToString(), cancellationToken);
     }
 
     #endregion

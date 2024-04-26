@@ -1,5 +1,7 @@
 ﻿using System.Numerics;
 using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Lynx;
 
@@ -62,5 +64,22 @@ internal class SPSAAttribute<T> : Attribute
         T val = GetPropertyValue(property);
 
         return $"{property.Name,-35} {"int",-5} {val,-5} {MinValue,-5} {MaxValue,-5} {Step,-5} {Configuration.EngineSettings.SPSA_OB_R_end,-5}";
+    }
+
+    public KeyValuePair<string, JsonNode?> ToWeatherFactoryString(PropertyInfo property)
+    {
+        T val = GetPropertyValue(property);
+
+#pragma warning disable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
+        return KeyValuePair.Create(
+            property.Name,
+            JsonSerializer.SerializeToNode(new
+            {
+                value = val,
+                min_value = MinValue,
+                max_value = MaxValue,
+                step = Step,
+            }));
+#pragma warning restore IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
     }
 }
