@@ -342,8 +342,6 @@ internal static readonly short[] EndGameKingTable =
 
     public const int MaxEval = PositiveCheckmateDetectionLimit - 1;
 
-    public const int PVMoveScoreValue = 4_194_304;
-
     public const int TTMoveScoreValue = 2_097_152;
 
     #region Move ordering

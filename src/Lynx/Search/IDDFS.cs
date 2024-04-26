@@ -36,8 +36,6 @@ public sealed partial class Engine
     private int _ttMask;
 
     private int _nodes;
-    private bool _isFollowingPV;
-    private bool _isScoringPV;
 
     private SearchResult? _previousSearchResult;
 
@@ -53,8 +51,6 @@ public sealed partial class Engine
     {
         // Cleanup
         _nodes = 0;
-        _isFollowingPV = false;
-        _isScoringPV = false;
         _stopWatch.Reset();
 
         Array.Clear(_pVTable);
@@ -112,7 +108,6 @@ public sealed partial class Engine
 
                     while (true)
                     {
-                        _isFollowingPV = true;
                         bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta);
 
                         if (alpha < bestEvaluation && beta > bestEvaluation)
