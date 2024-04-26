@@ -71,7 +71,7 @@ public sealed partial class Engine
         {
             ++depth;
         }
-        if (depth <= 0)
+        else if (depth <= 0)
         {
             if (MoveGenerator.CanGenerateAtLeastAValidMove(position))
             {
