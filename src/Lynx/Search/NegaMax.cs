@@ -82,8 +82,7 @@ public sealed partial class Engine
             _tt.RecordHash(_ttMask, position, depth, ply, finalPositionEvaluation, NodeType.Exact);
             return finalPositionEvaluation;
         }
-
-        if (!pvNode && !isInCheck)
+        else if (!pvNode)
         {
             var (staticEval, phase) = position.StaticEvaluation();
 
