@@ -311,11 +311,8 @@ public sealed partial class Engine
 
     private void InitializeTT()
     {
-        if (Configuration.EngineSettings.TranspositionTableEnabled)
-        {
-            (int ttLength, _ttMask) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
-            _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
-        }
+        (int ttLength, _ttMask) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
+        _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
     }
 
     private static void InitializeStaticClasses()
