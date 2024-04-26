@@ -5,7 +5,7 @@ namespace Lynx;
 public sealed partial class Engine
 {
     /// <summary>
-    /// NegaMax algorithm implementation using alpha-beta pruning, quiescence search and Iterative Deepeting Depth-First Search (IDDFS)
+    /// NegaMax algorithm implementation using alpha-beta pruning, quiescence search and Iterative Deepening Depth-First Search (IDDFS)
     /// </summary>
     /// <param name="depth"></param>
     /// <param name="ply"></param>
@@ -325,7 +325,7 @@ public sealed partial class Engine
 
                 if (evaluation > alpha && evaluation < beta)
                 {
-                    // PVS Hipothesis invalidated -> search with full depth and full score bandwidth
+                    // PVS Hypothesis invalidated -> search with full depth and full score bandwidth
                     evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
                 }
             }
