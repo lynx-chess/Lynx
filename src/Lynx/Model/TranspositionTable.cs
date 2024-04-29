@@ -117,11 +117,6 @@ public static class TranspositionTableExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static (int Evaluation, ShortMove BestMove, NodeType NodeType, int score) ProbeHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int alpha, int beta)
     {
-        if (!Configuration.EngineSettings.TranspositionTableEnabled)
-        {
-            return (EvaluationConstants.NoHashEntry, default, default, default);
-        }
-
         ref var entry = ref tt[position.UniqueIdentifier & ttMask];
 
         if ((position.UniqueIdentifier >> 48) != entry.Key)
@@ -163,11 +158,6 @@ public static class TranspositionTableExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void RecordHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int eval, NodeType nodeType, Move? move = null)
     {
-        if (!Configuration.EngineSettings.TranspositionTableEnabled)
-        {
-            return;
-        }
-
         ref var entry = ref tt[position.UniqueIdentifier & ttMask];
 
         //if (entry.Key != default && entry.Key != position.UniqueIdentifier)
