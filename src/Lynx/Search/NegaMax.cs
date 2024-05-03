@@ -71,7 +71,7 @@ public sealed partial class Engine
         {
             ++depth;
         }
-        if (depth <= 0)
+        else if (depth <= 0)
         {
             if (MoveGenerator.CanGenerateAtLeastAValidMove(position))
             {
@@ -82,8 +82,7 @@ public sealed partial class Engine
             _tt.RecordHash(_ttMask, position, depth, ply, finalPositionEvaluation, NodeType.Exact);
             return finalPositionEvaluation;
         }
-
-        if (!pvNode && !isInCheck)
+        else if (!pvNode)
         {
             var (staticEval, phase) = position.StaticEvaluation();
 
