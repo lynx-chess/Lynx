@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 
 namespace Lynx;
@@ -66,14 +65,7 @@ public static class Configuration
     public static int Hash
     {
         get => EngineSettings.TranspositionTableSize;
-        set
-        {
-            EngineSettings.TranspositionTableSize = value;
-            if (value == 0)
-            {
-                EngineSettings.TranspositionTableEnabled = false;
-            }
-        }
+        set => EngineSettings.TranspositionTableSize = value;
     }
 }
 
@@ -96,8 +88,6 @@ public sealed class EngineSettings
     /// MB
     /// </summary>
     public int TranspositionTableSize { get; set; } = 256;
-
-    public bool TranspositionTableEnabled { get; set; } = true;
 
     public bool UseOnlineTablebaseInRootPositions { get; set; } = false;
 
