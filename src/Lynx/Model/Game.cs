@@ -1,5 +1,6 @@
 ﻿using NLog;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Lynx.Model;
 
@@ -126,8 +127,11 @@ public sealed class Game
         var currentHash = CurrentPosition.UniqueIdentifier;
 
         // [Count - 1] would be the last one, we want to start searching 2 ealier and finish HalfMovesWithoutCaptureOrPawnMove earlier
-        var limit = Math.Max(0, PositionHashHistory.Count - 1 - HalfMovesWithoutCaptureOrPawnMove);
-        for (int i = PositionHashHistory.Count - 3; i >= limit; i -= 2)
+        var span = CollectionsMarshal.AsSpan(PositionHashHistory);
+        var start = span.Length - 3;
+        var end = Math.Max(0, PositionHashHistory.Count - 1 - HalfMovesWithoutCaptureOrPawnMove);
+
+        for (int i = start; i >= end; i -= 2)
         {
             if (currentHash == PositionHashHistory[i])
             {
@@ -161,8 +165,11 @@ public sealed class Game
         var currentHash = position.UniqueIdentifier;
 
         // Since positionHashHistory hasn't been updated with position, [Count] would be the last one, so we want to start searching 2 ealier
-        var limit = Math.Max(0, positionHashHistory.Count - halfMovesWithoutCaptureOrPawnMove);
-        for (int i = positionHashHistory.Count - 2; i >= limit; i -= 2)
+        var span = CollectionsMarshal.AsSpan(positionHashHistory);
+        var start = span.Length - 3;
+        var end = Math.Max(0, positionHashHistory.Count - 1 - halfMovesWithoutCaptureOrPawnMove);
+
+        for (int i = start; i >= end; i -= 2)
         {
             if (currentHash == positionHashHistory[i])
             {

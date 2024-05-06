@@ -290,6 +290,12 @@ public static class MoveExtensions
     public static bool IsPromotion(this Move move) => (move & 0xF) != default;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsQueenPromotion(this Move move) => (move & 0xF & 0b100) == 0b100;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsQueenPromotion(this Move _, int promotedPiece) => (promotedPiece & 0b100) == 0b100;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int SourceSquare(this Move move) => (move & 0x3F0) >> SourceSquareOffset;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
