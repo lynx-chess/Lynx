@@ -534,7 +534,6 @@ public sealed class UCIHandler
     private async Task HandleEval(CancellationToken cancellationToken)
     {
         var score = -_engine.Game.CurrentPosition.StaticEvaluation().Score;
-
         await _engineToUci.Writer.WriteAsync(score.ToString(), cancellationToken);
     }
 
