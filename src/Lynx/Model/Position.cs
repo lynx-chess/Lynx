@@ -805,7 +805,7 @@ public class Position
             ? eval
             : -eval;
 
-        sideEval += Configuration.EngineSettings.TempoBonus;
+        sideEval -= Configuration.EngineSettings.TempoBonus;
 
         return (sideEval, gamePhase);
     }
