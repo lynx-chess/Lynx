@@ -198,7 +198,7 @@ public sealed class EngineSettings
         new(98, 217),
         new(0, 0));
 
-    public int TempoBonus { get; set; } = 10;
+    public int TempoBonus { get; set; } = 5;
 
     #endregion
 }
