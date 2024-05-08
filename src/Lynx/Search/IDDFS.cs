@@ -110,7 +110,7 @@ public sealed partial class Engine
                     alpha = Math.Max(MinValue, lastSearchResult.Evaluation - window);
                     beta = Math.Min(MaxValue, lastSearchResult.Evaluation + window);
 
-                    int iter = 1;
+                    double windowMultiplier = 0;
                     while (true)
                     {
                         _isFollowingPV = true;
@@ -123,7 +123,7 @@ public sealed partial class Engine
 
                         _logger.Debug("Eval ({0}) outside of aspiration window [{1}, {2}] (depth {3}, nodes {4})", bestEvaluation, alpha, beta, depth, _nodes);
 
-                        window += (int)(window * (0.5 * iter));   // 0.5 x window, window, 1.5 x window, 2 x window...
+                        window += (int)(window * (0.5 + windowMultiplier));   // 0.5 x window, 0.6 x window, 0.7 x window, etc.
 
                         // Depth change: https://github.com/lynx-chess/Lynx/pull/440
                         if (alpha >= bestEvaluation)     // Fail low
@@ -136,7 +136,7 @@ public sealed partial class Engine
                             beta = Math.Min(bestEvaluation + window, MaxValue);
                         }
 
-                        ++iter;
+                        windowMultiplier += 0.1;
                     }
                 }
 
