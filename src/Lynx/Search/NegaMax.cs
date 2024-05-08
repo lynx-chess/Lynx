@@ -483,19 +483,20 @@ public sealed partial class Engine
 
         _maxDepthReached[ply] = ply;
 
-        var staticEvaluation = position.StaticEvaluation().Score;
+        var staticEvaluation = position.StaticEvaluation();
+        var standPat = staticEvaluation.Score;
 
         // Fail-hard beta-cutoff (updating alpha after this check)
-        if (staticEvaluation >= beta)
+        if (standPat >= beta)
         {
             PrintMessage(ply - 1, "Pruning before starting quiescence search");
-            return staticEvaluation;
+            return standPat;
         }
 
         // Better move
-        if (staticEvaluation > alpha)
+        if (standPat > alpha)
         {
-            alpha = staticEvaluation;
+            alpha = standPat;
         }
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
@@ -503,7 +504,7 @@ public sealed partial class Engine
         if (pseudoLegalMoves.Length == 0)
         {
             // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358
-            return staticEvaluation;
+            return standPat;
         }
 
         var nodeType = NodeType.Alpha;
@@ -535,6 +536,14 @@ public sealed partial class Engine
             if (scores[i] < EvaluationConstants.PromotionMoveScoreValue && scores[i] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
             {
                 continue;
+            }
+
+            // Delta pruning
+            // If the captured piece SEE value + stand pat + some the margin aren't enough to raise alpha, this move and the following ones
+            // (which should have lower SEE value) are unlikely to improve
+            if (standPat + SEE.Gain(move) + Configuration.EngineSettings.DeltaPruning_Margin < alpha)
+            {
+                return alpha;
             }
 
             var gameState = position.MakeMove(move);

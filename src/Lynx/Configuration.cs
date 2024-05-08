@@ -164,6 +164,8 @@ public sealed class EngineSettings
 
     public int SEE_BadCaptureReduction { get; set; } = 1;
 
+    public int DeltaPruning_Margin { get; set; } = 150;
+
     #region Evaluation
 
     public TaperedEvaluationTerm DoubledPawnPenalty { get; set; } = new(-6, -12);
