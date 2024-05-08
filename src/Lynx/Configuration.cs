@@ -127,7 +127,7 @@ public sealed class EngineSettings
 
     #endregion
 
-    [SPSAAttribute<int>(1, 10, 1)]
+    [SPSAAttribute<int>(2, 10, 1)]
     public int LMR_MinDepth { get; set; } = 3;
 
     [SPSAAttribute<int>(1, 10, 1)]
@@ -197,7 +197,7 @@ public sealed class EngineSettings
     /// </summary>
     public int History_MaxMoveRawBonus { get; set; } = 1_896;
 
-    [SPSAAttribute<int>(0, 3, 1)]
+    [SPSAAttribute<int>(0, 6, 1)]
     public int SEE_BadCaptureReduction { get; set; } = 1;
 
     #region Evaluation
