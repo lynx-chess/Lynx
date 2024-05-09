@@ -70,6 +70,11 @@ public sealed partial class Engine
         if (isInCheck)
         {
             ++depth;
+
+            if (depth <= 0)
+            {
+                depth = 1;
+            }
         }
         else if (depth <= 0)
         {
@@ -348,9 +353,17 @@ public sealed partial class Engine
                     var targetSquare = move.TargetSquare();
                     var capturedPiece = move.CapturedPiece();
 
-                    _captureHistory[piece][targetSquare][capturedPiece] = ScoreHistoryMove(
-                        _captureHistory[piece][targetSquare][capturedPiece],
-                        EvaluationConstants.HistoryBonus[depth]);
+                    try
+                    {
+
+                        _captureHistory[piece][targetSquare][capturedPiece] = ScoreHistoryMove(
+                            _captureHistory[piece][targetSquare][capturedPiece],
+                            EvaluationConstants.HistoryBonus[depth]);
+                    }
+                    catch (Exception e)
+                    {
+                        ;
+                    }
 
                     // 🔍 Capture history penalty/malus
                     // When a capture fails high, penalize previous visited captures
