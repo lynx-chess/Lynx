@@ -70,11 +70,6 @@ public sealed partial class Engine
         if (isInCheck)
         {
             ++depth;
-
-            if (depth <= 0)
-            {
-                depth = 1;
-            }
         }
         else if (depth <= 0)
         {
@@ -311,6 +306,7 @@ public sealed partial class Engine
                     && scores[moveIndex] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
                 {
                     reduction += Configuration.EngineSettings.SEE_BadCaptureReduction;
+                    reduction = Math.Clamp(reduction, 0, depth - 1);
                 }
 
                 // Search with reduced depth
