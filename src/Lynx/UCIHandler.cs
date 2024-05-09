@@ -2,10 +2,8 @@
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
-using System.Reflection.Metadata.Ecma335;
 using System.Runtime.Intrinsics.X86;
 using System.Text.Json;
 using System.Text.Json.Nodes;

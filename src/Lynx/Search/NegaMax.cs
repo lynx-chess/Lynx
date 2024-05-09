@@ -353,17 +353,9 @@ public sealed partial class Engine
                     var targetSquare = move.TargetSquare();
                     var capturedPiece = move.CapturedPiece();
 
-                    try
-                    {
-
-                        _captureHistory[piece][targetSquare][capturedPiece] = ScoreHistoryMove(
-                            _captureHistory[piece][targetSquare][capturedPiece],
-                            EvaluationConstants.HistoryBonus[depth]);
-                    }
-                    catch (Exception e)
-                    {
-                        ;
-                    }
+                    _captureHistory[piece][targetSquare][capturedPiece] = ScoreHistoryMove(
+                        _captureHistory[piece][targetSquare][capturedPiece],
+                        EvaluationConstants.HistoryBonus[depth]);
 
                     // 🔍 Capture history penalty/malus
                     // When a capture fails high, penalize previous visited captures
