@@ -34,7 +34,7 @@ public class Position
 
     /// <summary>
     /// Beware, half move counter isn't take into account
-    /// Use alternative cosntructor instead and set it externally if relevant
+    /// Use alternative constructor instead and set it externally if relevant
     /// </summary>
     /// <param name="fen"></param>
     public Position(string fen) : this(FENParser.ParseFEN(fen))
@@ -747,7 +747,7 @@ public class Position
             {
                 //case 5:
                 //    {
-                //        // RB vs R, RN vs R - escale it down due to the chances of it being a draw
+                //        // RB vs R, RN vs R - scale it down due to the chances of it being a draw
                 //        if (pieceCount[(int)Piece.R] == 1 && pieceCount[(int)Piece.r] == 1)
                 //        {
                 //            packedScore >>= 1; // /2
@@ -849,7 +849,7 @@ public class Position
         return pieceIndex switch
         {
             (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(pieceSquareIndex, pieceIndex),
-            (int)Piece.R or (int)Piece.r => RookAdditonalEvaluation(pieceSquareIndex, pieceIndex),
+            (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex),
             (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex),
             (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex),
             _ => 0
@@ -898,7 +898,7 @@ public class Position
     /// <param name="pieceIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int RookAdditonalEvaluation(int squareIndex, int pieceIndex)
+    private int RookAdditionalEvaluation(int squareIndex, int pieceIndex)
     {
         var attacksCount = Attacks.RookAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
 
