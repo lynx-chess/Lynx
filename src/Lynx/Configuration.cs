@@ -156,7 +156,7 @@ public sealed class EngineSettings
     [SPSAAttribute<int>(1, 20, 1)]
     public int RFP_MaxDepth { get; set; } = 6;
 
-    [SPSAAttribute<int>(1, 300, 5)]
+    [SPSAAttribute<int>(1, 300, 10)]
     public int RFP_DepthScalingFactor { get; set; } = 107;
 
     [SPSAAttribute<int>(1, 10, 1)]
@@ -189,6 +189,15 @@ public sealed class EngineSettings
 
     [SPSAAttribute<int>(0, 6, 1)]
     public int SEE_BadCaptureReduction { get; set; } = 2;
+
+    [SPSAAttribute<int>(1, 10, 1)]
+    public int FP_MaxDepth { get; set; } = 6;
+
+    [SPSAAttribute<int>(1, 200, 10)]
+    public int FP_DepthScalingFactor { get; set; } = 60;
+
+    [SPSAAttribute<int>(1, 500, 25)]
+    public int FP_Margin { get; set; } = 250;
 
     #region Evaluation
 

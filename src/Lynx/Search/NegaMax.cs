@@ -66,6 +66,7 @@ public sealed partial class Engine
         _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
 
         bool isInCheck = position.IsInCheck();
+        var (staticEval, phase) = position.StaticEvaluation();
 
         if (isInCheck)
         {
@@ -84,8 +85,6 @@ public sealed partial class Engine
         }
         else if (!pvNode)
         {
-            var (staticEval, phase) = position.StaticEvaluation();
-
             // From smol.cs
             // ttEvaluation can be used as a better positional evaluation:
             // If the score is outside what the current bounds are, but it did match flag and depth,
@@ -249,20 +248,37 @@ public sealed partial class Engine
             }
             else
             {
-                // Late Move Pruning (LMP) - all quiet moves can be pruned
-                // after searching the first few given by the move ordering algorithm
-                if (!pvNode
-                    && !isInCheck
-                    && depth <= Configuration.EngineSettings.LMP_MaxDepth
-                    && scores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue  // Quiet moves
-                    && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth)) // Based on formula suggested by Antares
+                if (!pvNode && !isInCheck
+                    && scores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue) // Quiet move
                 {
-                    // After making a move
-                    Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
-                    Game.PositionHashHistory.RemoveAt(Game.PositionHashHistory.Count - 1);
-                    position.UnmakeMove(move, gameState);
+                    // Late Move Pruning (LMP) - all quiet moves can be pruned
+                    // after searching the first few given by the move ordering algorithm
+                    if (depth <= Configuration.EngineSettings.LMP_MaxDepth
+                        && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth)) // Based on formula suggested by Antares
+                    {
+                        // After making a move
+                        Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
+                        Game.PositionHashHistory.RemoveAt(Game.PositionHashHistory.Count - 1);
+                        position.UnmakeMove(move, gameState);
 
-                    break;
+                        break;
+                    }
+
+                    // Futility Pruning (FP) - all quiet moves can be pruned
+                    // once it's considered that they don't have potential to raise alpha
+                    if (movesSearched > 0
+                        //&& alpha < EvaluationConstants.PositiveCheckmateDetectionLimit
+                        //&& beta > EvaluationConstants.NegativeCheckmateDetectionLimit
+                        && depth <= Configuration.EngineSettings.FP_MaxDepth
+                        && staticEval + Configuration.EngineSettings.FP_Margin + (Configuration.EngineSettings.FP_DepthScalingFactor * depth) <= alpha)
+                    {
+                        // After making a move
+                        Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
+                        Game.PositionHashHistory.RemoveAt(Game.PositionHashHistory.Count - 1);
+                        position.UnmakeMove(move, gameState);
+
+                        break;
+                    }
                 }
 
                 PrefetchTTEntry();
