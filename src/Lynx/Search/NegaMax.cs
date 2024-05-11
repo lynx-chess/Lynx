@@ -127,7 +127,9 @@ public sealed partial class Engine
                 // Return formula by Ciekce, instead of just returning static eval
                 if (staticEval - (Configuration.EngineSettings.RFP_DepthScalingFactor * depth) >= beta)
                 {
+#pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
                     return (staticEval + beta) / 2;
+#pragma warning restore S3949 // Calculations should not overflow
                 }
 
                 // 🔍 Razoring - Strelka impl (CPW) - https://www.chessprogramming.org/Razoring#Strelka
