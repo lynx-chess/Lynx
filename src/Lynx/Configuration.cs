@@ -196,7 +196,7 @@ public sealed class EngineSettings
     [SPSAAttribute<int>(1, 200, 10)]
     public int FP_DepthScalingFactor { get; set; } = 60;
 
-    [SPSAAttribute<int>(1, 500, 25)]
+    [SPSAAttribute<int>(0, 500, 25)]
     public int FP_Margin { get; set; } = 250;
 
     #region Evaluation

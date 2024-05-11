@@ -66,7 +66,7 @@ public sealed partial class Engine
         _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
 
         bool isInCheck = position.IsInCheck();
-        var (staticEval, phase) = position.StaticEvaluation();
+        int staticEval = int.MaxValue, phase = int.MaxValue;
 
         if (isInCheck)
         {
@@ -85,6 +85,8 @@ public sealed partial class Engine
         }
         else if (!pvNode)
         {
+            (staticEval, phase) = position.StaticEvaluation();
+
             // From smol.cs
             // ttEvaluation can be used as a better positional evaluation:
             // If the score is outside what the current bounds are, but it did match flag and depth,
