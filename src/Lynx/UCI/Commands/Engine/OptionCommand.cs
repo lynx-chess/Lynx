@@ -124,39 +124,15 @@ public sealed class OptionCommand : EngineBaseCommand
     public const string Id = "option";
 
     public static readonly ImmutableArray<string> AvailableOptions =
-    [
-        "option name UCI_Opponent type string",
-        $"option name UCI_EngineAbout type string default {IdCommand.EngineName} by {IdCommand.EngineAuthor}, see https://github.com/lynx-chess/Lynx",
-        $"option name UCI_ShowWDL type check default {Configuration.EngineSettings.ShowWDL}",
-        $"option name Hash type spin default {Configuration.EngineSettings.TranspositionTableSize} min {Constants.AbsoluteMinTTSize} max {Constants.AbsoluteMaxTTSize}",
-        $"option name OnlineTablebaseInRootPositions type check default {Configuration.EngineSettings.UseOnlineTablebaseInRootPositions}",
-        "option name Threads type spin default 1 min 1 max 1",
-
-        #region Search tuning
-
-        //$"option name {nameof(Configuration.EngineSettings.LMR_MinDepth)} type spin default {Configuration.EngineSettings.LMR_MinDepth} min 0 max 1024",
-        //$"option name {nameof(Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves)} type spin default {Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves} min 0 max 1024",
-        //$"option name {nameof(Configuration.EngineSettings.LMR_Base)} type spin default {100 * Configuration.EngineSettings.LMR_Base} min 0 max 1024",
-        //$"option name {nameof(Configuration.EngineSettings.LMR_Divisor)} type spin default {100 * Configuration.EngineSettings.LMR_Divisor} min 0 max 1024",
-        //$"option name {nameof(Configuration.EngineSettings.NMP_MinDepth)} type spin default {Configuration.EngineSettings.NMP_MinDepth} min 0 max 1024",
-        //$"option name {nameof(Configuration.EngineSettings.NMP_BaseDepthReduction)} type spin default {Configuration.EngineSettings.NMP_BaseDepthReduction} min 0 max 1024",
-        //$"option name {nameof(Configuration.EngineSettings.NMP_DepthIncrement)} type spin default {Configuration.EngineSettings.NMP_DepthIncrement} min 0 max 1024",
-        //$"option name {nameof(Configuration.EngineSettings.NMP_DepthDivisor)} type spin default {Configuration.EngineSettings.NMP_DepthDivisor} min 0 max 1024",
-        //$"option name {nameof(Configuration.EngineSettings.AspirationWindow_Delta)} type spin default {Configuration.EngineSettings.AspirationWindow_Delta} min 0 max 1024",
-        //$"option name {nameof(Configuration.EngineSettings.AspirationWindow_MinDepth)} type spin default {Configuration.EngineSettings.AspirationWindow_MinDepth} min 0 max 1024",
-        //$"option name {nameof(Configuration.EngineSettings.RFP_MaxDepth)} type spin default {Configuration.EngineSettings.RFP_MaxDepth} min 0 max 1024",
-        //$"option name {nameof(Configuration.EngineSettings.RFP_DepthScalingFactor)} type spin default {Configuration.EngineSettings.RFP_DepthScalingFactor} min 0 max 1024",
-        //$"option name {nameof(Configuration.EngineSettings.Razoring_MaxDepth)} type spin default {Configuration.EngineSettings.Razoring_MaxDepth} min 0 max 1024",
-        //$"option name {nameof(Configuration.EngineSettings.Razoring_Depth1Bonus)} type spin default {Configuration.EngineSettings.Razoring_Depth1Bonus} min 0 max 1024",
-        //$"option name {nameof(Configuration.EngineSettings.Razoring_NotDepth1Bonus)} type spin default {Configuration.EngineSettings.Razoring_NotDepth1Bonus} min 0 max 1024",
-        //$"option name {nameof(Configuration.EngineSettings.IIR_MinDepth)} type spin default {Configuration.EngineSettings.IIR_MinDepth} min 0 max 1024",
-        //$"option name {nameof(Configuration.EngineSettings.LMP_MaxDepth)} type spin default {Configuration.EngineSettings.LMP_MaxDepth} min 0 max 1024",
-        //$"option name {nameof(Configuration.EngineSettings.LMP_BaseMovesToTry)} type spin default {Configuration.EngineSettings.LMP_BaseMovesToTry} min 0 max 1024",
-        //$"option name {nameof(Configuration.EngineSettings.LMP_MovesDepthMultiplier)} type spin default {Configuration.EngineSettings.LMP_MovesDepthMultiplier} min 0 max 1024",
-        //$"option name {nameof(Configuration.EngineSettings.SEE_BadCaptureReduction)} type spin default {Configuration.EngineSettings.SEE_BadCaptureReduction} min 0 max 1024",
-
-        #endregion
-    ];
+        [
+            "option name UCI_Opponent type string",
+            $"option name UCI_EngineAbout type string default {IdCommand.EngineName} by {IdCommand.EngineAuthor}, see https://github.com/lynx-chess/Lynx",
+            $"option name UCI_ShowWDL type check default {Configuration.EngineSettings.ShowWDL}",
+            $"option name Hash type spin default {Configuration.EngineSettings.TranspositionTableSize} min {Constants.AbsoluteMinTTSize} max {Constants.AbsoluteMaxTTSize}",
+            $"option name OnlineTablebaseInRootPositions type check default {Configuration.EngineSettings.UseOnlineTablebaseInRootPositions}",
+            "option name Threads type spin default 1 min 1 max 1",
+            .. Configuration.GeneralSettings.EnableTuning ? SPSAAttributeHelpers.GenerateOptionStrings() : []
+        ];
 
     //"option name UCI_AnalyseMode type check",
     //"option name NalimovPath type string default C:/...",
