@@ -608,35 +608,9 @@ public sealed class UCIHandler
 
     private async ValueTask HandleOpenBenchSPSA(CancellationToken cancellationToken)
     {
-        foreach (var property in typeof(EngineSettings).GetProperties())
+        foreach(var tunableValue in SPSAAttributeHelpers.GenerateOpenBenchStrings())
         {
-            var genericType = typeof(SPSAAttribute<>);
-            var spsaArray = property.GetCustomAttributes(genericType);
-            var count = spsaArray.Count();
-
-            if (count > 1)
-            {
-                _logger.Warn("Property {0} has more than one [{1}]", property.Name, genericType.Name);
-            }
-
-            if (count == 0)
-            {
-                continue;
-            }
-
-            var genericSpsa = spsaArray.First();
-            if (genericSpsa is SPSAAttribute<int> intSpsa)
-            {
-                await SendCommand(intSpsa.ToOBString(property), cancellationToken);
-            }
-            else if (genericSpsa is SPSAAttribute<double> doubleSpsa)
-            {
-                await SendCommand(doubleSpsa.ToOBString(property), cancellationToken);
-            }
-            else
-            {
-                _logger.Error("Property {0} has a [{1}] defined with unsupported type <{2}>", property.Name, genericSpsa);
-            }
+            await SendCommand(tunableValue, cancellationToken);
         }
     }
 
@@ -648,75 +622,17 @@ public sealed class UCIHandler
                 + "-----------------------------------------------------------------------",
             cancellationToken);
 
-        foreach (var property in typeof(EngineSettings).GetProperties())
+        foreach (var tunableValue in SPSAAttributeHelpers.GenerateOpenBenchPrettyStrings())
         {
-            var genericType = typeof(SPSAAttribute<>);
-            var spsaArray = property.GetCustomAttributes(genericType);
-            var count = spsaArray.Count();
-
-            if (count > 1)
-            {
-                _logger.Warn("Property {0} has more than one [{1}]", property.Name, genericType.Name);
-            }
-
-            if (count == 0)
-            {
-                continue;
-            }
-
-            var genericSpsa = spsaArray.First();
-            if (genericSpsa is SPSAAttribute<int> intSpsa)
-            {
-                await SendCommand(intSpsa.ToOBPrettyString(property), cancellationToken);
-            }
-            else if (genericSpsa is SPSAAttribute<double> doubleSpsa)
-            {
-                await SendCommand(doubleSpsa.ToOBPrettyString(property), cancellationToken);
-            }
-            else
-            {
-                _logger.Error("Property {0} has a [{1}] defined with unsupported type <{2}>", property.Name, genericSpsa);
-            }
+            await SendCommand(tunableValue, cancellationToken);
         }
     }
 
     private async ValueTask HandleWeatherFactorySPSA(CancellationToken cancellationToken)
     {
-        var properties = typeof(EngineSettings).GetProperties();
-        List<KeyValuePair<string, JsonNode?>> parameters = new(properties.Length);
+        var tunableValues = SPSAAttributeHelpers.GenerateWeatherFactoryStrings();
 
-        foreach (var property in properties)
-        {
-            var genericType = typeof(SPSAAttribute<>);
-            var spsaArray = property.GetCustomAttributes(genericType);
-            var count = spsaArray.Count();
-
-            if (count > 1)
-            {
-                _logger.Warn("Property {0} has more than one [{1}]", property.Name, genericType.Name);
-            }
-
-            if (count == 0)
-            {
-                continue;
-            }
-
-            var genericSpsa = spsaArray.First();
-            if (genericSpsa is SPSAAttribute<int> intSpsa)
-            {
-                parameters.Add(intSpsa.ToWeatherFactoryString(property));
-            }
-            else if (genericSpsa is SPSAAttribute<double> doubleSpsa)
-            {
-                parameters.Add(doubleSpsa.ToWeatherFactoryString(property));
-            }
-            else
-            {
-                _logger.Error("Property {0} has a [{1}] defined with unsupported type <{2}>", property.Name, genericSpsa);
-            }
-        }
-
-        await SendCommand(new JsonObject(parameters).ToString(), cancellationToken);
+        await SendCommand(new JsonObject(tunableValues).ToString(), cancellationToken);
     }
 
     #endregion
