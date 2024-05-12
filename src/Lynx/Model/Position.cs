@@ -970,8 +970,11 @@ public class Position
         }
 
         var ownPiecesAroundCount = (Attacks.KingAttacks[squareIndex] & OccupancyBitBoards[(int)kingSide]).CountBits();
+        var enemyPiecesAttackedIfKingWasAQueen = Attacks.QueenAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
 
-        return packedBonus + (ownPiecesAroundCount * Configuration.EngineSettings.KingShieldBonus.PackedEvaluation);
+        return packedBonus
+            + (ownPiecesAroundCount * Configuration.EngineSettings.KingShieldBonus.PackedEvaluation)
+            + (enemyPiecesAttackedIfKingWasAQueen * Configuration.EngineSettings.KingPseudoAttacksPenalty.PackedEvaluation);
     }
 
     #endregion
