@@ -271,9 +271,9 @@ public sealed partial class Engine
                     // Futility Pruning (FP) - all quiet moves can be pruned
                     // once it's considered that they don't have potential to raise alpha
                     if (movesSearched > 0
-                        //&& alpha < EvaluationConstants.PositiveCheckmateDetectionLimit
-                        //&& beta > EvaluationConstants.NegativeCheckmateDetectionLimit
                         && depth <= Configuration.EngineSettings.FP_MaxDepth
+                        && alpha < EvaluationConstants.PositiveCheckmateDetectionLimit
+                        && beta > EvaluationConstants.NegativeCheckmateDetectionLimit
                         && staticEval + Configuration.EngineSettings.FP_Margin + (Configuration.EngineSettings.FP_DepthScalingFactor * depth) <= alpha)
                     {
                         // After making a move
