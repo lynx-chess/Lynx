@@ -213,6 +213,18 @@ public sealed partial class Engine
 
             var gameState = position.MakeMove(move);
 
+            // Late Move Pruning (LMP) - all quiet moves can be pruned
+            // after searching the first few given by the move ordering algorithm
+            if (!pvNode
+                && !isInCheck
+                && depth <= Configuration.EngineSettings.LMP_MaxDepth
+                && scores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue  // Quiet moves
+                && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth)) // Based on formula suggested by Antares
+            {
+                position.UnmakeMove(move, gameState);
+                break;
+            }
+
             if (!position.WasProduceByAValidMove())
             {
                 position.UnmakeMove(move, gameState);
@@ -249,22 +261,6 @@ public sealed partial class Engine
             }
             else
             {
-                // Late Move Pruning (LMP) - all quiet moves can be pruned
-                // after searching the first few given by the move ordering algorithm
-                if (!pvNode
-                    && !isInCheck
-                    && depth <= Configuration.EngineSettings.LMP_MaxDepth
-                    && scores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue  // Quiet moves
-                    && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth)) // Based on formula suggested by Antares
-                {
-                    // After making a move
-                    Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
-                    Game.PositionHashHistory.RemoveAt(Game.PositionHashHistory.Count - 1);
-                    position.UnmakeMove(move, gameState);
-
-                    break;
-                }
-
                 PrefetchTTEntry();
 
                 int reduction = 0;
