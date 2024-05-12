@@ -3,8 +3,10 @@ using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
 using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.Intrinsics.X86;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading.Channels;
 
 namespace Lynx;
@@ -102,6 +104,15 @@ public sealed class UCIHandler
                     break;
                 case "fen":
                     await HandleFEN(cancellationToken);
+                    break;
+                case "ob_spsa":
+                    await HandleOpenBenchSPSA(cancellationToken);
+                    break;
+                case "ob_spsa_pretty":
+                    await HandleOpenBenchSPSAPretty(cancellationToken);
+                    break;
+                case "wf_spsa":
+                    await HandleWeatherFactorySPSA(cancellationToken);
                     break;
                 default:
                     _logger.Warn("Unknown command received: {0}", rawCommand);
@@ -304,6 +315,22 @@ public sealed class UCIHandler
                     }
                     break;
                 }
+            case "nmp_depthincrement":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.NMP_DepthIncrement = value;
+                    }
+                    break;
+                }
+            case "nmp_depthdivisor":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.NMP_DepthDivisor = value;
+                    }
+                    break;
+                }
 
             case "aspirationwindow_delta":
                 {
@@ -394,6 +421,14 @@ public sealed class UCIHandler
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
                         Configuration.EngineSettings.LMP_MovesDepthMultiplier = value;
+                    }
+                    break;
+                }
+            case "see_badcapturereduction":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.SEE_BadCaptureReduction = value;
                     }
                     break;
                 }
@@ -545,6 +580,35 @@ public sealed class UCIHandler
         var fen = _engine.Game.CurrentPosition.FEN()[..^3] + _engine.Game.HalfMovesWithoutCaptureOrPawnMove + fullMoveCounterString;
 
         await _engineToUci.Writer.WriteAsync(fen, cancellationToken);
+    }
+
+    private async ValueTask HandleOpenBenchSPSA(CancellationToken cancellationToken)
+    {
+        foreach(var tunableValue in SPSAAttributeHelpers.GenerateOpenBenchStrings())
+        {
+            await SendCommand(tunableValue, cancellationToken);
+        }
+    }
+
+    private async ValueTask HandleOpenBenchSPSAPretty(CancellationToken cancellationToken)
+    {
+        await SendCommand(
+            $"{"param name",-35} {"type",-5} {"def",-5} {"min",-5} {"max",-5} {"step",-5} {"R_end",-5}"
+                + Environment.NewLine
+                + "-----------------------------------------------------------------------",
+            cancellationToken);
+
+        foreach (var tunableValue in SPSAAttributeHelpers.GenerateOpenBenchPrettyStrings())
+        {
+            await SendCommand(tunableValue, cancellationToken);
+        }
+    }
+
+    private async ValueTask HandleWeatherFactorySPSA(CancellationToken cancellationToken)
+    {
+        var tunableValues = SPSAAttributeHelpers.GenerateWeatherFactoryStrings();
+
+        await SendCommand(new JsonObject(tunableValues).ToString(), cancellationToken);
     }
 
     #endregion
