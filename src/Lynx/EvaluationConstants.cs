@@ -182,6 +182,8 @@ internal static readonly short[] EndGameKingTable =
 
 #pragma warning restore IDE0055
 
+    internal static readonly int[] PackedPieceValues = new int[12];
+
     /// <summary>
     /// 12x64
     /// </summary>
@@ -253,6 +255,8 @@ internal static readonly short[] EndGameKingTable =
 
         for (int piece = (int)Piece.P; piece <= (int)Piece.k; ++piece)
         {
+            PackedPieceValues[piece] = Utils.Pack(MiddleGamePieceValues[piece], EndGamePieceValues[piece]);
+
             PackedPSQT[piece] = new int[64];
             for (int sq = 0; sq < 64; ++sq)
             {

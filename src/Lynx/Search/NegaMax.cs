@@ -484,6 +484,14 @@ public sealed partial class Engine
 
         _maxDepthReached[ply] = ply;
 
+        // Lazy fail-hard beta-cutoff (updating alpha after this check)
+        var lazyStaticEvaluation = position.SuperLazyStaticEvaluation().Score;
+        if (lazyStaticEvaluation >= beta + Configuration.EngineSettings.LazyStaticEvaluationMargin)
+        {
+            PrintMessage(ply - 1, "Pruning before starting quiescence search using lazy eval");
+            return lazyStaticEvaluation;
+        }
+
         var staticEvaluation = position.StaticEvaluation().Score;
 
         // Fail-hard beta-cutoff (updating alpha after this check)

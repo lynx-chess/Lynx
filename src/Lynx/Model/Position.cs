@@ -808,6 +808,119 @@ public class Position
         return (sideEval, gamePhase);
     }
 
+    /// <summary>
+    /// Evaluates material and position (PQST only) in a NegaMax style.
+    /// That is, positive scores always favour playing <see cref="Side"/>.
+    /// </summary>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public (int Score, int Phase) LazyStaticEvaluation()
+    {
+        int packedScore = 0;
+        int gamePhase = 0;
+
+        for (int pieceIndex = (int)Piece.P; pieceIndex < (int)Piece.K; ++pieceIndex)
+        {
+            // Bitboard copy that we 'empty'
+            var bitboard = PieceBitBoards[pieceIndex];
+
+            while (bitboard != default)
+            {
+                var pieceSquareIndex = bitboard.GetLS1BIndex();
+                bitboard.ResetLS1B();
+
+                packedScore += EvaluationConstants.PackedPSQT[pieceIndex][pieceSquareIndex];
+                gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
+            }
+        }
+
+        for (int pieceIndex = (int)Piece.p; pieceIndex < (int)Piece.k; ++pieceIndex)
+        {
+            // Bitboard copy that we 'empty'
+            var bitboard = PieceBitBoards[pieceIndex];
+
+            while (bitboard != default)
+            {
+                var pieceSquareIndex = bitboard.GetLS1BIndex();
+                bitboard.ResetLS1B();
+
+                packedScore += EvaluationConstants.PackedPSQT[pieceIndex][pieceSquareIndex];
+                gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
+            }
+        }
+
+        var whiteKing = PieceBitBoards[(int)Piece.K].GetLS1BIndex();
+        var blackKing = PieceBitBoards[(int)Piece.k].GetLS1BIndex();
+
+        packedScore += EvaluationConstants.PackedPSQT[(int)Piece.K][whiteKing]
+            + EvaluationConstants.PackedPSQT[(int)Piece.k][blackKing];
+
+        const int maxPhase = 24;
+
+        if (gamePhase > maxPhase)    // Early promotions
+        {
+            gamePhase = maxPhase;
+        }
+
+        int endGamePhase = maxPhase - gamePhase;
+
+        var middleGameScore = Utils.UnpackMG(packedScore);
+        var endGameScore = Utils.UnpackEG(packedScore);
+        var eval = ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / maxPhase;
+
+        eval = Math.Clamp(eval, EvaluationConstants.MinEval, EvaluationConstants.MaxEval);
+
+        var sideEval = Side == Side.White
+            ? eval
+            : -eval;
+
+        return (sideEval, gamePhase);
+    }
+
+    /// <summary>
+    /// Evaluates material only in a NegaMax style.
+    /// That is, positive scores always favour playing <see cref="Side"/>.
+    /// </summary>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public (int Score, int Phase) SuperLazyStaticEvaluation()
+    {
+        int gamePhase = 0;
+        int packedScore = PieceBitBoards[(int)Piece.P].CountBits() * EvaluationConstants.PackedPieceValues[(int)Piece.P]
+            + PieceBitBoards[(int)Piece.p].CountBits() * EvaluationConstants.PackedPieceValues[(int)Piece.p]
+            + PieceBitBoards[(int)Piece.N].CountBits() * EvaluationConstants.PackedPieceValues[(int)Piece.N]
+            + PieceBitBoards[(int)Piece.n].CountBits() * EvaluationConstants.PackedPieceValues[(int)Piece.n]
+            + PieceBitBoards[(int)Piece.B].CountBits() * EvaluationConstants.PackedPieceValues[(int)Piece.B]
+            + PieceBitBoards[(int)Piece.b].CountBits() * EvaluationConstants.PackedPieceValues[(int)Piece.b]
+            + PieceBitBoards[(int)Piece.R].CountBits() * EvaluationConstants.PackedPieceValues[(int)Piece.R]
+            + PieceBitBoards[(int)Piece.r].CountBits() * EvaluationConstants.PackedPieceValues[(int)Piece.r]
+            + PieceBitBoards[(int)Piece.Q].CountBits() * EvaluationConstants.PackedPieceValues[(int)Piece.Q]
+            + PieceBitBoards[(int)Piece.q].CountBits() * EvaluationConstants.PackedPieceValues[(int)Piece.q]
+            + PieceBitBoards[(int)Piece.K].CountBits() * EvaluationConstants.PackedPieceValues[(int)Piece.K]
+            + PieceBitBoards[(int)Piece.k].CountBits() * EvaluationConstants.PackedPieceValues[(int)Piece.k];
+
+        const int maxPhase = 24;
+
+        if (gamePhase > maxPhase)    // Early promotions
+        {
+            gamePhase = maxPhase;
+        }
+
+        int endGamePhase = maxPhase - gamePhase;
+
+        var middleGameScore = Utils.UnpackMG(packedScore);
+        var endGameScore = Utils.UnpackEG(packedScore);
+        var eval = ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / maxPhase;
+
+        eval = Math.Clamp(eval, EvaluationConstants.MinEval, EvaluationConstants.MaxEval);
+
+        var sideEval = Side == Side.White
+            ? eval
+            : -eval;
+
+        return (sideEval, gamePhase);
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static int TaperedEvaluation(TaperedEvaluationTerm taperedEvaluationTerm, int phase)
     {

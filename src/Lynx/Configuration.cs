@@ -192,6 +192,8 @@ public sealed class EngineSettings
     [SPSAAttribute<int>(0, 6, 1)]
     public int SEE_BadCaptureReduction { get; set; } = 2;
 
+    public int LazyStaticEvaluationMargin { get; set; } = 100;
+
     #region Evaluation
 
     public TaperedEvaluationTerm DoubledPawnPenalty { get; set; } = new(-6, -12);
