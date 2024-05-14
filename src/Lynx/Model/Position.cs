@@ -848,7 +848,8 @@ public class Position
     {
         return pieceIndex switch
         {
-            (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(pieceSquareIndex, pieceIndex),
+            (int)Piece.P => PawnAdditionalEvaluation(pieceSquareIndex, pieceIndex, (int)Side.Black),
+            (int)Piece.p => PawnAdditionalEvaluation(pieceSquareIndex, pieceIndex, (int)Side.White),
             (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex),
             (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex),
             (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex),
@@ -863,7 +864,7 @@ public class Position
     /// <param name="pieceIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int PawnAdditionalEvaluation(int squareIndex, int pieceIndex)
+    private int PawnAdditionalEvaluation(int squareIndex, int pieceIndex, int oppositeSide)
     {
         int packedBonus = 0;
 
@@ -886,6 +887,11 @@ public class Position
                 rank = 7 - rank;
             }
             packedBonus += Configuration.EngineSettings.PassedPawnBonus[rank].PackedEvaluation;
+        }
+
+        if ((Attacks.PawnAttacks[oppositeSide][squareIndex] & PieceBitBoards[pieceIndex]) != 0)
+        {
+            packedBonus += Configuration.EngineSettings.ProtectedPawnBonus.PackedEvaluation;
         }
 
         return packedBonus;
