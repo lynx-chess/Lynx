@@ -216,6 +216,33 @@ public sealed partial class Engine
 
             var gameState = position.MakeMove(move);
 
+            if (!pvNode && !isInCheck
+                && scores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue) // Quiet move
+            {
+                // Late Move Pruning (LMP) - all quiet moves can be pruned
+                // after searching the first few given by the move ordering algorithm
+                if (depth <= Configuration.EngineSettings.LMP_MaxDepth
+                    && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth)) // Based on formula suggested by Antares
+                {
+                    position.UnmakeMove(move, gameState);
+
+                    break;
+                }
+
+                // Futility Pruning (FP) - all quiet moves can be pruned
+                // once it's considered that they don't have potential to raise alpha
+                if (movesSearched > 0
+                    //&& alpha < EvaluationConstants.PositiveCheckmateDetectionLimit
+                    //&& beta > EvaluationConstants.NegativeCheckmateDetectionLimit
+                    && depth <= Configuration.EngineSettings.FP_MaxDepth
+                    && staticEval + Configuration.EngineSettings.FP_Margin + (Configuration.EngineSettings.FP_DepthScalingFactor * depth) <= alpha)
+                {
+                    position.UnmakeMove(move, gameState);
+
+                    break;
+                }
+            }
+
             if (!position.WasProduceByAValidMove())
             {
                 position.UnmakeMove(move, gameState);
@@ -252,39 +279,6 @@ public sealed partial class Engine
             }
             else
             {
-                if (!pvNode && !isInCheck
-                    && scores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue) // Quiet move
-                {
-                    // Late Move Pruning (LMP) - all quiet moves can be pruned
-                    // after searching the first few given by the move ordering algorithm
-                    if (depth <= Configuration.EngineSettings.LMP_MaxDepth
-                        && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth)) // Based on formula suggested by Antares
-                    {
-                        // After making a move
-                        Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
-                        Game.PositionHashHistory.RemoveAt(Game.PositionHashHistory.Count - 1);
-                        position.UnmakeMove(move, gameState);
-
-                        break;
-                    }
-
-                    // Futility Pruning (FP) - all quiet moves can be pruned
-                    // once it's considered that they don't have potential to raise alpha
-                    if (movesSearched > 0
-                        //&& alpha < EvaluationConstants.PositiveCheckmateDetectionLimit
-                        //&& beta > EvaluationConstants.NegativeCheckmateDetectionLimit
-                        && depth <= Configuration.EngineSettings.FP_MaxDepth
-                        && staticEval + Configuration.EngineSettings.FP_Margin + (Configuration.EngineSettings.FP_DepthScalingFactor * depth) <= alpha)
-                    {
-                        // After making a move
-                        Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
-                        Game.PositionHashHistory.RemoveAt(Game.PositionHashHistory.Count - 1);
-                        position.UnmakeMove(move, gameState);
-
-                        break;
-                    }
-                }
-
                 PrefetchTTEntry();
 
                 int reduction = 0;
