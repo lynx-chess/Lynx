@@ -207,9 +207,13 @@ public sealed class EngineSettings
 
     public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-17, -13);
 
-    public TaperedEvaluationTerm OpenFileRookBonus { get; set; } = new(47, 10);
+    public TaperedEvaluationTerm RookOpenFileBonus { get; set; } = new(47, 10);
 
-    public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(18, 17);
+    public TaperedEvaluationTerm RookSemiOpenFileBonus { get; set; } = new(18, 17);
+
+    public TaperedEvaluationTerm QueenOpenFileBonus { get; set; } = new(10, 10);
+
+    public TaperedEvaluationTerm QueenSemiOpenFileBonus { get; set; } = new(10, 10);
 
     public TaperedEvaluationTerm BishopMobilityBonus { get; set; } = new(10, 9);
 
@@ -217,9 +221,9 @@ public sealed class EngineSettings
 
     public TaperedEvaluationTerm QueenMobilityBonus { get; set; } = new(4, 7);
 
-    public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-36, 24);
+    public TaperedEvaluationTerm KingSemiOpenFilePenalty { get; set; } = new(-36, 24);
 
-    public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-105, 8);
+    public TaperedEvaluationTerm KingOpenFilePenalty { get; set; } = new(-105, 8);
 
     public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(16, -6);
 

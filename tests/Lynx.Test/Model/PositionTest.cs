@@ -458,7 +458,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(Configuration.EngineSettings.SemiOpenFileRookBonus.MG + (6 * Configuration.EngineSettings.RookMobilityBonus.MG), evaluation);
+        Assert.AreEqual(Configuration.EngineSettings.RookSemiOpenFileBonus.MG + (6 * Configuration.EngineSettings.RookMobilityBonus.MG), evaluation);
     }
 
     /// <summary>
@@ -489,7 +489,7 @@ public class PositionTest
         {
             evaluation = -evaluation;
         }
-        Assert.AreEqual(Configuration.EngineSettings.OpenFileRookBonus.MG + (7 * Configuration.EngineSettings.RookMobilityBonus.MG), evaluation);
+        Assert.AreEqual(Configuration.EngineSettings.RookOpenFileBonus.MG + (7 * Configuration.EngineSettings.RookMobilityBonus.MG), evaluation);
     }
 
     /// <summary>
@@ -521,7 +521,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(2 * Configuration.EngineSettings.SemiOpenFileRookBonus.MG, evaluation);
+        Assert.AreEqual(2 * Configuration.EngineSettings.RookSemiOpenFileBonus.MG, evaluation);
     }
 
     /// <summary>
@@ -553,7 +553,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual((-2 * Configuration.EngineSettings.OpenFileRookBonus.MG) - (5 * Configuration.EngineSettings.RookMobilityBonus.MG), evaluation);
+        Assert.AreEqual((-2 * Configuration.EngineSettings.RookOpenFileBonus.MG) - (5 * Configuration.EngineSettings.RookMobilityBonus.MG), evaluation);
     }
 
     /// <summary>
@@ -585,7 +585,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(Configuration.EngineSettings.SemiOpenFileKingPenalty.EG, evaluation);
+        Assert.AreEqual(Configuration.EngineSettings.KingSemiOpenFilePenalty.EG, evaluation);
     }
 
     /// <summary>
@@ -617,7 +617,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(Configuration.EngineSettings.OpenFileKingPenalty.EG, evaluation);
+        Assert.AreEqual(Configuration.EngineSettings.KingOpenFilePenalty.EG, evaluation);
     }
 
     /// <summary>

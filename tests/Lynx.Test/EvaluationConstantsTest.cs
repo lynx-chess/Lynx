@@ -9,11 +9,11 @@ public class EvaluationConstantsTest
     /// Shy from 14k
     /// </summary>
     private readonly int _sensibleEvaluation =
-        (2 * (Math.Max(MiddleGameBishopTable.Max(), EndGameBishopTable.Max()) + (Configuration.EngineSettings.BishopMobilityBonus.MG * 64))) +
+        (2 * (Math.Max(MiddleGameBishopTable.Max(), EndGameBishopTable.Max()) + (Configuration.EngineSettings.BishopMobilityBonus.MG * 64 + 64 * Configuration.EngineSettings.BishopMobilityBonus.MG + (2 * Configuration.EngineSettings.BishopPairBonus.MG)))) +
         (2 * (Math.Max(MiddleGameKnightTable.Max(), EndGameKnightTable.Max()))) +
-        (2 * (Math.Max(MiddleGameRookTable.Max(), EndGameRookTable.Max()) + Configuration.EngineSettings.OpenFileRookBonus.MG + Configuration.EngineSettings.SemiOpenFileRookBonus.MG)) +
-        (9 * (Math.Max(MiddleGameQueenTable.Max(), EndGameQueenTable.Max()) + (Configuration.EngineSettings.QueenMobilityBonus.MG * 64))) +
-        (1 * (Math.Max(MiddleGameKingTable.Max(), EndGameKingTable.Max()) + (Configuration.EngineSettings.KingShieldBonus.MG * 8))) +
+        (2 * (Math.Max(MiddleGameRookTable.Max(), EndGameRookTable.Max()) + (64 * Configuration.EngineSettings.RookMobilityBonus.MG) + Configuration.EngineSettings.RookOpenFileBonus.MG + Configuration.EngineSettings.RookSemiOpenFileBonus.MG)) +
+        (9 * (Math.Max(MiddleGameQueenTable.Max(), EndGameQueenTable.Max()) + (Configuration.EngineSettings.QueenMobilityBonus.MG * 64) + Configuration.EngineSettings.QueenOpenFileBonus.MG + Configuration.EngineSettings.QueenSemiOpenFileBonus.MG)) +
+        (1 * (Math.Max(MiddleGameKingTable.Max(), EndGameKingTable.Max()) + (Configuration.EngineSettings.KingShieldBonus.MG * 8) + Configuration.EngineSettings.KingOpenFilePenalty.EG)) +
         MiddleGameQueenTable.Max(); // just in case
 
     [TestCase(PositiveCheckmateDetectionLimit)]

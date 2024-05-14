@@ -851,7 +851,7 @@ public class Position
             (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(pieceSquareIndex, pieceIndex),
             (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex),
             (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex),
-            (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex),
+            (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex, pieceIndex),
             _ => 0
         };
     }
@@ -908,11 +908,11 @@ public class Position
 
         if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default)  // isOpenFile
         {
-            packedBonus += Configuration.EngineSettings.OpenFileRookBonus.PackedEvaluation;
+            packedBonus += Configuration.EngineSettings.RookOpenFileBonus.PackedEvaluation;
         }
         else if ((PieceBitBoards[pieceIndex - pawnToRookOffset] & Masks.FileMasks[squareIndex]) == default)  // isSemiOpenFile
         {
-            packedBonus += Configuration.EngineSettings.SemiOpenFileRookBonus.PackedEvaluation;
+            packedBonus += Configuration.EngineSettings.RookSemiOpenFileBonus.PackedEvaluation;
         }
 
         return packedBonus;
@@ -938,11 +938,24 @@ public class Position
     /// <param name="squareIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int QueenAdditionalEvaluation(int squareIndex)
+    private int QueenAdditionalEvaluation(int squareIndex, int pieceIndex)
     {
         var attacksCount = Attacks.QueenAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
 
-        return attacksCount * Configuration.EngineSettings.QueenMobilityBonus.PackedEvaluation;
+        var packedBonus = attacksCount * Configuration.EngineSettings.QueenMobilityBonus.PackedEvaluation;
+
+        const int pawnToQueenOffset = (int)Piece.Q - (int)Piece.P;
+
+        if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default)  // isOpenFile
+        {
+            packedBonus += Configuration.EngineSettings.QueenOpenFileBonus.PackedEvaluation;
+        }
+        else if ((PieceBitBoards[pieceIndex - pawnToQueenOffset] & Masks.FileMasks[squareIndex]) == default)  // isSemiOpenFile
+        {
+            packedBonus += Configuration.EngineSettings.QueenSemiOpenFileBonus.PackedEvaluation;
+        }
+
+        return packedBonus;
     }
 
     /// <summary>
@@ -961,11 +974,11 @@ public class Position
         {
             if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == 0)  // isOpenFile
             {
-                packedBonus += Configuration.EngineSettings.OpenFileKingPenalty.PackedEvaluation;
+                packedBonus += Configuration.EngineSettings.KingOpenFilePenalty.PackedEvaluation;
             }
             else if ((PieceBitBoards[(int)Piece.P + kingSideOffset] & Masks.FileMasks[squareIndex]) == 0) // isSemiOpenFile
             {
-                packedBonus += Configuration.EngineSettings.SemiOpenFileKingPenalty.PackedEvaluation;
+                packedBonus += Configuration.EngineSettings.KingSemiOpenFilePenalty.PackedEvaluation;
             }
         }
 
