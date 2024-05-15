@@ -848,7 +848,7 @@ public class Position
     {
         return pieceIndex switch
         {
-            (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(pieceSquareIndex, pieceIndex),
+            //(int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(pieceSquareIndex, pieceIndex),
             (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex),
             (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex),
             (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex),
@@ -862,34 +862,34 @@ public class Position
     /// <param name="squareIndex"></param>
     /// <param name="pieceIndex"></param>
     /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int PawnAdditionalEvaluation(int squareIndex, int pieceIndex)
-    {
-        int packedBonus = 0;
+    //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+    //private int PawnAdditionalEvaluation(int squareIndex, int pieceIndex)
+    //{
+    //    int packedBonus = 0;
 
-        var doublePawnsCount = (PieceBitBoards[pieceIndex] & Masks.FileMasks[squareIndex]).CountBits();
-        if (doublePawnsCount > 1)
-        {
-            packedBonus += doublePawnsCount * Configuration.EngineSettings.DoubledPawnPenalty.PackedEvaluation;
-        }
+    //    var doublePawnsCount = (PieceBitBoards[pieceIndex] & Masks.FileMasks[squareIndex]).CountBits();
+    //    if (doublePawnsCount > 1)
+    //    {
+    //        packedBonus += doublePawnsCount * Configuration.EngineSettings.DoubledPawnPenalty.PackedEvaluation;
+    //    }
 
-        if ((PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default) // isIsolatedPawn
-        {
-            packedBonus += Configuration.EngineSettings.IsolatedPawnPenalty.PackedEvaluation;
-        }
+    //    if ((PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default) // isIsolatedPawn
+    //    {
+    //        packedBonus += Configuration.EngineSettings.IsolatedPawnPenalty.PackedEvaluation;
+    //    }
 
-        if ((PieceBitBoards[(int)Piece.p - pieceIndex] & Masks.PassedPawns[pieceIndex][squareIndex]) == default)    // isPassedPawn
-        {
-            var rank = Constants.Rank[squareIndex];
-            if (pieceIndex == (int)Piece.p)
-            {
-                rank = 7 - rank;
-            }
-            packedBonus += Configuration.EngineSettings.PassedPawnBonus[rank].PackedEvaluation;
-        }
+    //    if ((PieceBitBoards[(int)Piece.p - pieceIndex] & Masks.PassedPawns[pieceIndex][squareIndex]) == default)    // isPassedPawn
+    //    {
+    //        var rank = Constants.Rank[squareIndex];
+    //        if (pieceIndex == (int)Piece.p)
+    //        {
+    //            rank = 7 - rank;
+    //        }
+    //        packedBonus += Configuration.EngineSettings.PassedPawnBonus[rank].PackedEvaluation;
+    //    }
 
-        return packedBonus;
-    }
+    //    return packedBonus;
+    //}
 
     /// <summary>
     /// Open and semiopen file bonus
