@@ -205,7 +205,7 @@ public sealed class EngineSettings
 
     //public TaperedEvaluationTerm DoubledPawnPenalty { get; set; } = new(-6, -12);
 
-    //public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-17, -13);
+    public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-17, -13);
 
     public TaperedEvaluationTerm OpenFileRookBonus { get; set; } = new(47, 10);
 
@@ -225,15 +225,15 @@ public sealed class EngineSettings
 
     public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(31, 80);
 
-    //public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(
-    //    new(0, 0),
-    //    new(-2, 7),
-    //    new(-15, 13),
-    //    new(-14, 41),
-    //    new(20, 74),
-    //    new(60, 150),
-    //    new(98, 217),
-    //    new(0, 0));
+    public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(
+        new(0, 0),
+        new(-2, 7),
+        new(-15, 13),
+        new(-14, 41),
+        new(20, 74),
+        new(60, 150),
+        new(98, 217),
+        new(0, 0));
 
     #endregion
 }
