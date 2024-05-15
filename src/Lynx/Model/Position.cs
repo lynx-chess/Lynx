@@ -860,38 +860,39 @@ public class Position
     /// <summary>
     /// Doubled pawns penalty, isolated pawns penalty, passed pawns bonus
     /// </summary>
-    /// <param name="squareIndex"></param>
-    /// <param name="pieceIndex"></param>
+    /// <param name="pawnSquareIndex"></param>
+    /// <param name="myPawnIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int PawnAdditionalEvaluation(int squareIndex, int pieceIndex, int oppositeSide)
+    private int PawnAdditionalEvaluation(int pawnSquareIndex, int myPawnIndex, int oppositeSide)
     {
         int packedBonus = 0;
 
-        var doublePawnsCount = (PieceBitBoards[pieceIndex] & Masks.FileMasks[squareIndex]).CountBits();
+        var doublePawnsCount = (PieceBitBoards[myPawnIndex] & Masks.FileMasks[pawnSquareIndex]).CountBits();
         if (doublePawnsCount > 1)
         {
             packedBonus += doublePawnsCount * Configuration.EngineSettings.DoubledPawnPenalty.PackedEvaluation;
         }
 
-        if ((PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default) // isIsolatedPawn
+        if ((PieceBitBoards[myPawnIndex] & Masks.IsolatedPawnMasks[pawnSquareIndex]) == default) // isIsolatedPawn
         {
             packedBonus += Configuration.EngineSettings.IsolatedPawnPenalty.PackedEvaluation;
         }
 
-        if ((PieceBitBoards[(int)Piece.p - pieceIndex] & Masks.PassedPawns[pieceIndex][squareIndex]) == default)    // isPassedPawn
+        var rank = Constants.Rank[pawnSquareIndex];
+        if (myPawnIndex == (int)Piece.p)
         {
-            var rank = Constants.Rank[squareIndex];
-            if (pieceIndex == (int)Piece.p)
-            {
-                rank = 7 - rank;
-            }
+            rank = 7 - rank;
+        }
+
+        if ((PieceBitBoards[(int)Piece.p - myPawnIndex] & Masks.PassedPawns[myPawnIndex][pawnSquareIndex]) == default)    // isPassedPawn
+        {
             packedBonus += Configuration.EngineSettings.PassedPawnBonus[rank].PackedEvaluation;
         }
 
-        if ((Attacks.PawnAttacks[oppositeSide][squareIndex] & PieceBitBoards[pieceIndex]) != 0)
+        if ((Attacks.PawnAttacks[oppositeSide][pawnSquareIndex] & PieceBitBoards[myPawnIndex]) != 0)
         {
-            packedBonus += Configuration.EngineSettings.ProtectedPawnBonus.PackedEvaluation;
+            packedBonus += Configuration.EngineSettings.ProtectedPawnBonus[rank].PackedEvaluation;
         }
 
         return packedBonus;
