@@ -203,9 +203,9 @@ public sealed class EngineSettings
 
     #region Evaluation
 
-    //public TaperedEvaluationTerm DoubledPawnPenalty { get; set; } = new(-6, -12);
+    public TaperedEvaluationTerm DoubledPawnPenalty { get; set; } = new(-6, -12);
 
-    public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-17, -13);
+    //public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-17, -13);
 
     public TaperedEvaluationTerm OpenFileRookBonus { get; set; } = new(47, 10);
 
