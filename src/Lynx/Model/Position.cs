@@ -867,12 +867,6 @@ public class Position
     {
         int packedBonus = 0;
 
-        //var doublePawnsCount = (PieceBitBoards[pieceIndex] & Masks.FileMasks[squareIndex]).CountBits();
-        //if (doublePawnsCount > 1)
-        //{
-        //    packedBonus += doublePawnsCount * Configuration.EngineSettings.DoubledPawnPenalty.PackedEvaluation;
-        //}
-
         if ((PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default) // isIsolatedPawn
         {
             packedBonus += Configuration.EngineSettings.IsolatedPawnPenalty.PackedEvaluation;
