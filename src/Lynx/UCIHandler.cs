@@ -432,6 +432,30 @@ public sealed class UCIHandler
                     }
                     break;
                 }
+            case "fp_maxdepth":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.FP_MaxDepth = value;
+                    }
+                    break;
+                }
+            case "fp_depthscalingfactor":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.FP_DepthScalingFactor = value;
+                    }
+                    break;
+                }
+            case "fp_margin":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.FP_Margin = value;
+                    }
+                    break;
+                }
 
             #endregion
 
