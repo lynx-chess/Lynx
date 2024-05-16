@@ -954,24 +954,24 @@ public class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal int KingAdditionalEvaluation(int squareIndex, Side kingSide)
     {
-        int packedBonus = 0;
-        var kingSideOffset = Utils.PieceOffset(kingSide);
+        //int packedBonus = 0;
+        //var kingSideOffset = Utils.PieceOffset(kingSide);
 
-        if (PieceBitBoards[(int)Piece.r - kingSideOffset] + PieceBitBoards[(int)Piece.q - kingSideOffset] != 0) // areThereOppositeSideRooksOrQueens
-        {
-            if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == 0)  // isOpenFile
-            {
-                packedBonus += Configuration.EngineSettings.OpenFileKingPenalty.PackedEvaluation;
-            }
-            else if ((PieceBitBoards[(int)Piece.P + kingSideOffset] & Masks.FileMasks[squareIndex]) == 0) // isSemiOpenFile
-            {
-                packedBonus += Configuration.EngineSettings.SemiOpenFileKingPenalty.PackedEvaluation;
-            }
-        }
+        //if (PieceBitBoards[(int)Piece.r - kingSideOffset] + PieceBitBoards[(int)Piece.q - kingSideOffset] != 0) // areThereOppositeSideRooksOrQueens
+        //{
+        //    if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == 0)  // isOpenFile
+        //    {
+        //        packedBonus += Configuration.EngineSettings.OpenFileKingPenalty.PackedEvaluation;
+        //    }
+        //    else if ((PieceBitBoards[(int)Piece.P + kingSideOffset] & Masks.FileMasks[squareIndex]) == 0) // isSemiOpenFile
+        //    {
+        //        packedBonus += Configuration.EngineSettings.SemiOpenFileKingPenalty.PackedEvaluation;
+        //    }
+        //}
 
         var ownPiecesAroundCount = (Attacks.KingAttacks[squareIndex] & OccupancyBitBoards[(int)kingSide]).CountBits();
 
-        return packedBonus + (ownPiecesAroundCount * Configuration.EngineSettings.KingShieldBonus.PackedEvaluation);
+        return (ownPiecesAroundCount * Configuration.EngineSettings.KingShieldBonus.PackedEvaluation);
     }
 
     #endregion

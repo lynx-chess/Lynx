@@ -217,9 +217,9 @@ public sealed class EngineSettings
 
     public TaperedEvaluationTerm QueenMobilityBonus { get; set; } = new(4, 7);
 
-    public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-36, 24);
+    //public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-36, 24);
 
-    public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-105, 8);
+    //public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-105, 8);
 
     public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(16, -6);
 
