@@ -97,6 +97,17 @@ public sealed partial class Engine
                 staticEval = ttScore;
             }
 
+            // Razoring implementation, according to modern standards. Based on Ciekce + JW
+            if (depth <= Configuration.EngineSettings.Razoring2_MaxDepth
+                && Math.Abs(alpha) < 2000
+                && staticEval + (Configuration.EngineSettings.Razoring2_DepthScalingFactor * depth) <= alpha)
+            {
+                var score = QuiescenceSearch(ply, alpha, alpha + 1);
+
+                if (score <= alpha)
+                    return score;
+            }
+
             if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
             {
                 // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning

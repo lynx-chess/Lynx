@@ -155,7 +155,10 @@ public sealed class EngineSettings
     [SPSAAttribute<int>(1, 20, 1)]
     public int AspirationWindow_MinDepth { get; set; } = 7;
 
-    [SPSAAttribute<int>(1, 20, 1)]
+    /// <summary>
+    /// Min 2 due to existing logic that assumes RFP_MaxDepth >= Razoring_MaxDepth
+    /// </summary>
+    [SPSAAttribute<int>(2, 20, 1)]
     public int RFP_MaxDepth { get; set; } = 6;
 
     [SPSAAttribute<int>(1, 300, 10)]
@@ -200,6 +203,15 @@ public sealed class EngineSettings
 
     [SPSAAttribute<int>(0, 500, 25)]
     public int FP_Margin { get; set; } = 250;
+
+    [SPSAAttribute<int>(1, 10, 1)]
+    public int Razoring2_MaxDepth { get; set; } = 4;
+
+    [SPSAAttribute<int>(1000, 5000, 500)]
+    public int Razoring2_AlphaMargin { get; set; } = 2000;
+
+    [SPSAAttribute<int>(50, 500, 50)]
+    public int Razoring2_DepthScalingFactor { get; set; } = 250;
 
     #region Evaluation
 
