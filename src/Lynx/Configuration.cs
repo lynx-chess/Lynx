@@ -207,9 +207,9 @@ public sealed class EngineSettings
 
     public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-17, -13);
 
-    public TaperedEvaluationTerm OpenFileRookBonus { get; set; } = new(47, 10);
+    //public TaperedEvaluationTerm OpenFileRookBonus { get; set; } = new(47, 10);
 
-    public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(18, 17);
+    //public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(18, 17);
 
     public TaperedEvaluationTerm BishopMobilityBonus { get; set; } = new(10, 9);
 

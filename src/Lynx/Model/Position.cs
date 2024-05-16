@@ -904,16 +904,16 @@ public class Position
 
         var packedBonus = attacksCount * Configuration.EngineSettings.RookMobilityBonus.PackedEvaluation;
 
-        const int pawnToRookOffset = (int)Piece.R - (int)Piece.P;
+        //const int pawnToRookOffset = (int)Piece.R - (int)Piece.P;
 
-        if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default)  // isOpenFile
-        {
-            packedBonus += Configuration.EngineSettings.OpenFileRookBonus.PackedEvaluation;
-        }
-        else if ((PieceBitBoards[pieceIndex - pawnToRookOffset] & Masks.FileMasks[squareIndex]) == default)  // isSemiOpenFile
-        {
-            packedBonus += Configuration.EngineSettings.SemiOpenFileRookBonus.PackedEvaluation;
-        }
+        //if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default)  // isOpenFile
+        //{
+        //    packedBonus += Configuration.EngineSettings.OpenFileRookBonus.PackedEvaluation;
+        //}
+        //else if ((PieceBitBoards[pieceIndex - pawnToRookOffset] & Masks.FileMasks[squareIndex]) == default)  // isSemiOpenFile
+        //{
+        //    packedBonus += Configuration.EngineSettings.SemiOpenFileRookBonus.PackedEvaluation;
+        //}
 
         return packedBonus;
     }
