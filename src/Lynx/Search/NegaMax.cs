@@ -559,12 +559,11 @@ public sealed partial class Engine
                 continue;
             }
 
-            // Delta pruning
-            // If the captured piece SEE value + stand pat + some the margin aren't enough to raise alpha, this move and the following ones
-            // (which should have lower SEE value) are unlikely to improve
-            if (standPat + SEE.Gain(move) + Configuration.EngineSettings.DeltaPruning_Margin < alpha)
+            // QS Futility Pruning (FP)
+            // Moves without potential to raise alpha are discarded
+            if (!position.IsInCheck() && standPat + Configuration.EngineSettings.FP_QS_Margin < alpha && !SEE.HasPositiveScore(position, move))
             {
-                return alpha;
+                continue;
             }
 
             var gameState = position.MakeMove(move);

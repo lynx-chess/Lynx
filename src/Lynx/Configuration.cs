@@ -202,7 +202,7 @@ public sealed class EngineSettings
     public int FP_Margin { get; set; } = 250;
 
     [SPSAAttribute<int>(0, 500, 25)]
-    public int DeltaPruning_Margin { get; set; } = 200;
+    public int FP_QS_Margin { get; set; } = 75;
 
     #region Evaluation
 
