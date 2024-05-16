@@ -90,4 +90,30 @@ public class ConstantsTest
         [(int)BoardSquare.g3] = (int)BoardSquare.g3 - 8,
         [(int)BoardSquare.h3] = (int)BoardSquare.h3 - 8,
     }.ToFrozenDictionary();
+
+    [Test]
+    public void HFile()
+    {
+        BitBoard bb = 0;
+        bb.SetBit(BoardSquare.h1);
+
+        Assert.NotZero(bb & Constants.HFile);
+        Assert.Zero(bb & Constants.NotHFile);
+        Assert.Zero(bb & Constants.AFile);
+
+        Assert.AreEqual(Constants.NotHFile, ~Constants.HFile);
+    }
+
+    [Test]
+    public void AFile()
+    {
+        BitBoard bb = 0;
+        bb.SetBit(BoardSquare.a1);
+
+        Assert.NotZero(bb & Constants.AFile);
+        Assert.Zero(bb & Constants.NotAFile);
+        Assert.Zero(bb & Constants.HFile);
+
+        Assert.AreEqual(Constants.NotAFile, ~Constants.AFile);
+    }
 }

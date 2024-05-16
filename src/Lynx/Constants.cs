@@ -22,6 +22,19 @@ public static class Constants
     public const BitBoard FullBoard = ulong.MaxValue;
 
     /// <summary>
+    /// 8   1 0 0 0 0 0 0 0
+    /// 7   1 0 0 0 0 0 0 0
+    /// 6   1 0 0 0 0 0 0 0
+    /// 5   1 0 0 0 0 0 0 0
+    /// 4   1 0 0 0 0 0 0 0
+    /// 3   1 0 0 0 0 0 0 0
+    /// 2   1 0 0 0 0 0 0 0
+    /// 1   1 0 0 0 0 0 0 0
+    ///     a b c d e f g h
+    /// </summary>
+    public const BitBoard AFile = 0x101010101010101;
+
+    /// <summary>
     /// 8   0 1 1 1 1 1 1 1
     /// 7   0 1 1 1 1 1 1 1
     /// 6   0 1 1 1 1 1 1 1
@@ -33,6 +46,19 @@ public static class Constants
     ///     a b c d e f g h
     /// </summary>
     public const BitBoard NotAFile = 0xFEFEFEFEFEFEFEFE;
+
+    /// <summary>
+    /// 8   0 0 0 0 0 0 0 1
+    /// 7   0 0 0 0 0 0 0 1
+    /// 6   0 0 0 0 0 0 0 1
+    /// 5   0 0 0 0 0 0 0 1
+    /// 4   0 0 0 0 0 0 0 1
+    /// 3   0 0 0 0 0 0 0 1
+    /// 2   0 0 0 0 0 0 0 1
+    /// 1   0 0 0 0 0 0 0 1
+    ///     a b c d e f g h
+    /// </summary>
+    public const BitBoard HFile = 0x8080808080808080;
 
     /// <summary>
     /// 8   1 1 1 1 1 1 1 0
