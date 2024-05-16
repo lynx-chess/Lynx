@@ -116,6 +116,54 @@ public static class BitBoardExtensions
         return board & (~board + 1);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static BitBoard ShiftUp(this BitBoard board)
+    {
+        return board >> 8;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static BitBoard ShiftDown(this BitBoard board)
+    {
+        return board << 8;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static BitBoard ShiftLeft(this BitBoard board)
+    {
+        return (board >> 1) & Constants.NotHFile;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static BitBoard ShiftRight(this BitBoard board)
+    {
+        return (board << 1) & Constants.NotAFile;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static BitBoard ShiftUpRight(this BitBoard board)
+    {
+        return board.ShiftUp().ShiftRight();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static BitBoard ShiftUpLeft(this BitBoard board)
+    {
+        return board.ShiftUp().ShiftLeft();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static BitBoard ShiftDownRight(this BitBoard board)
+    {
+        return board.ShiftDown().ShiftRight();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static BitBoard ShiftDownLeft(this BitBoard board)
+    {
+        return board.ShiftDown().ShiftLeft();
+    }
+
     #region Static methods
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
