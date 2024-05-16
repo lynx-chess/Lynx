@@ -13,7 +13,7 @@ public class EvaluationConstantsTest
         (2 * (Math.Max(MiddleGameKnightTable.Max(), EndGameKnightTable.Max()))) +
         (2 * (Math.Max(MiddleGameRookTable.Max(), EndGameRookTable.Max()) + Configuration.EngineSettings.OpenFileRookBonus.MG + Configuration.EngineSettings.SemiOpenFileRookBonus.MG)) +
         (9 * (Math.Max(MiddleGameQueenTable.Max(), EndGameQueenTable.Max()) + (Configuration.EngineSettings.QueenMobilityBonus.MG * 64))) +
-        (1 * (Math.Max(MiddleGameKingTable.Max(), EndGameKingTable.Max()) + (Configuration.EngineSettings.KingShieldBonus.MG * 8))) +
+        (1 * (Math.Max(MiddleGameKingTable.Max(), EndGameKingTable.Max()))) +
         MiddleGameQueenTable.Max(); // just in case
 
     [TestCase(PositiveCheckmateDetectionLimit)]

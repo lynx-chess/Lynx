@@ -221,8 +221,6 @@ public sealed class EngineSettings
 
     public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-105, 8);
 
-    public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(16, -6);
-
     public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(31, 80);
 
     public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(

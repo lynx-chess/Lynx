@@ -688,59 +688,59 @@ public class PositionTest
     }
 #pragma warning restore S4144 // Methods should not have identical implementations
 
-    /// <summary>
-    /// 8   . k . . . . . n
-    /// 7   . . . . . p p p
-    /// 6   . . . . . . . .
-    /// 5   . . . . . . . .
-    /// 4   . . . . . . . .
-    /// 3   . . . . . . . .
-    /// 2   P P P . . . . .
-    /// 1   . K . . . . . N
-    ///     a b c d e f g h
-    /// </summary>
-    /// <param name="fen"></param>
-    /// <param name="surroundingPieces"></param>
-    [TestCase("1k5n/5ppp/8/8/8/8/PPP5/1K5N w - - 0 1", 3)]
-    /// <summary>
-    /// Previous one mirrored
-    /// </summary>
-    /// <param name="fen"></param>
-    /// <param name="surroundingPieces"></param>
-    [TestCase("n5k1/5ppp/8/8/8/8/PPP5/N5K1 b - - 0 1", 3)]
-    /// <summary>
-    /// 8   . k . . . b . b
-    /// 7   . . . . . n n n
-    /// 6   . . . . . . . .
-    /// 5   . . . . . . . .
-    /// 4   . . . . . . . .
-    /// 3   . . . . . . . .
-    /// 2   N N N . . . . .
-    /// 1   B K B . . . . .
-    ///     a b c d e f g h
-    /// </summary>
-    /// <param name="fen"></param>
-    /// <param name="surroundingPieces"></param>
-    [TestCase("1k3b1b/5nnn/8/8/8/8/NNN5/BKB5 w - - 0 1", 5)]
-    /// <summary>
-    /// Previous one mirrored
-    /// </summary>
-    /// <param name="fen"></param>
-    /// <param name="surroundingPieces"></param>
-    [TestCase("5bkb/5nnn/8/8/8/8/NNN5/B1B3K1 b - - 0 1", 5)]
-    public void StaticEvaluation_KingShieldBonus(string fen, int surroundingPieces)
-    {
-        Position position = new Position(fen);
-        int evaluation = AdditionalKingEvaluation(position, Piece.K)
-            - AdditionalKingEvaluation(position, Piece.k);
+    ///// <summary>
+    ///// 8   . k . . . . . n
+    ///// 7   . . . . . p p p
+    ///// 6   . . . . . . . .
+    ///// 5   . . . . . . . .
+    ///// 4   . . . . . . . .
+    ///// 3   . . . . . . . .
+    ///// 2   P P P . . . . .
+    ///// 1   . K . . . . . N
+    /////     a b c d e f g h
+    ///// </summary>
+    ///// <param name="fen"></param>
+    ///// <param name="surroundingPieces"></param>
+    //[TestCase("1k5n/5ppp/8/8/8/8/PPP5/1K5N w - - 0 1", 3)]
+    ///// <summary>
+    ///// Previous one mirrored
+    ///// </summary>
+    ///// <param name="fen"></param>
+    ///// <param name="surroundingPieces"></param>
+    //[TestCase("n5k1/5ppp/8/8/8/8/PPP5/N5K1 b - - 0 1", 3)]
+    ///// <summary>
+    ///// 8   . k . . . b . b
+    ///// 7   . . . . . n n n
+    ///// 6   . . . . . . . .
+    ///// 5   . . . . . . . .
+    ///// 4   . . . . . . . .
+    ///// 3   . . . . . . . .
+    ///// 2   N N N . . . . .
+    ///// 1   B K B . . . . .
+    /////     a b c d e f g h
+    ///// </summary>
+    ///// <param name="fen"></param>
+    ///// <param name="surroundingPieces"></param>
+    //[TestCase("1k3b1b/5nnn/8/8/8/8/NNN5/BKB5 w - - 0 1", 5)]
+    ///// <summary>
+    ///// Previous one mirrored
+    ///// </summary>
+    ///// <param name="fen"></param>
+    ///// <param name="surroundingPieces"></param>
+    //[TestCase("5bkb/5nnn/8/8/8/8/NNN5/B1B3K1 b - - 0 1", 5)]
+    //public void StaticEvaluation_KingShieldBonus(string fen, int surroundingPieces)
+    //{
+    //    Position position = new Position(fen);
+    //    int evaluation = AdditionalKingEvaluation(position, Piece.K)
+    //        - AdditionalKingEvaluation(position, Piece.k);
 
-        if (position.Side == Side.Black)
-        {
-            evaluation = -evaluation;
-        }
+    //    if (position.Side == Side.Black)
+    //    {
+    //        evaluation = -evaluation;
+    //    }
 
-        Assert.AreEqual(surroundingPieces * Configuration.EngineSettings.KingShieldBonus.EG, evaluation);
-    }
+    //    Assert.AreEqual(surroundingPieces * Configuration.EngineSettings.KingShieldBonus.EG, evaluation);
+    //}
 
     /// <summary>
     /// 8   n . . . k . . .
