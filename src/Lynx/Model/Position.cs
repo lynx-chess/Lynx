@@ -867,26 +867,26 @@ public class Position
     {
         int packedBonus = 0;
 
-        //var doublePawnsCount = (PieceBitBoards[pieceIndex] & Masks.FileMasks[squareIndex]).CountBits();
-        //if (doublePawnsCount > 1)
-        //{
-        //    packedBonus += doublePawnsCount * Configuration.EngineSettings.DoubledPawnPenalty.PackedEvaluation;
-        //}
+        var doublePawnsCount = (PieceBitBoards[pieceIndex] & Masks.FileMasks[squareIndex]).CountBits();
+        if (doublePawnsCount > 1)
+        {
+            packedBonus += doublePawnsCount * Configuration.EngineSettings.DoubledPawnPenalty.PackedEvaluation;
+        }
 
         if ((PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default) // isIsolatedPawn
         {
             packedBonus += Configuration.EngineSettings.IsolatedPawnPenalty.PackedEvaluation;
         }
 
-        if ((PieceBitBoards[(int)Piece.p - pieceIndex] & Masks.PassedPawns[pieceIndex][squareIndex]) == default)    // isPassedPawn
-        {
-            var rank = Constants.Rank[squareIndex];
-            if (pieceIndex == (int)Piece.p)
-            {
-                rank = 7 - rank;
-            }
-            packedBonus += Configuration.EngineSettings.PassedPawnBonus[rank].PackedEvaluation;
-        }
+        //if ((PieceBitBoards[(int)Piece.p - pieceIndex] & Masks.PassedPawns[pieceIndex][squareIndex]) == default)    // isPassedPawn
+        //{
+        //    var rank = Constants.Rank[squareIndex];
+        //    if (pieceIndex == (int)Piece.p)
+        //    {
+        //        rank = 7 - rank;
+        //    }
+        //    packedBonus += Configuration.EngineSettings.PassedPawnBonus[rank].PackedEvaluation;
+        //}
 
         return packedBonus;
     }
