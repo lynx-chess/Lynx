@@ -859,19 +859,13 @@ public class Position
     /// <summary>
     /// Doubled pawns penalty, isolated pawns penalty, passed pawns bonus
     /// </summary>
-    /// <param name="squareIndex"></param>
-    /// <param name="pieceIndex"></param>
+    /// <param name = "squareIndex" ></ param >
+    /// < param name="pieceIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int PawnAdditionalEvaluation(int squareIndex, int pieceIndex)
     {
         int packedBonus = 0;
-
-        var doublePawnsCount = (PieceBitBoards[pieceIndex] & Masks.FileMasks[squareIndex]).CountBits();
-        if (doublePawnsCount > 1)
-        {
-            packedBonus += doublePawnsCount * Configuration.EngineSettings.DoubledPawnPenalty.PackedEvaluation;
-        }
 
         if ((PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default) // isIsolatedPawn
         {
