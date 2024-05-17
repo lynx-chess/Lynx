@@ -336,7 +336,7 @@ public class BitBoard_Struct_ReadonlyStruct_Class_Record_Benchmark  : BaseBenchm
         }
     }
 
-    public static IEnumerable<int> Data => new[] { 1, 10, 1_000/*, 10_000, 100_000 */};
+    public static IEnumerable<int> Data => [1, 10, 1_000/*, 10_000, 100_000 */];
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]

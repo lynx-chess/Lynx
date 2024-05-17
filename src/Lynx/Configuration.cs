@@ -354,6 +354,4 @@ public sealed class TaperedEvaluationTermByRank
 [JsonSerializable(typeof(TaperedEvaluationTermByRank))]
 [JsonSerializable(typeof(SPSAAttribute<int>))]
 [JsonSerializable(typeof(SPSAAttribute<double>))]
-internal partial class EngineSettingsJsonSerializerContext : JsonSerializerContext
-{
-}
+internal partial class EngineSettingsJsonSerializerContext : JsonSerializerContext;
