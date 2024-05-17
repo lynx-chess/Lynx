@@ -867,18 +867,19 @@ public class Position
     {
         int packedBonus = 0;
 
+        var rank = Constants.Rank[squareIndex];
+        if (pieceIndex == (int)Piece.p)
+        {
+            rank = 7 - rank;
+        }
+
         if ((PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default) // isIsolatedPawn
         {
-            packedBonus += Configuration.EngineSettings.IsolatedPawnPenalty.PackedEvaluation;
+            packedBonus += Configuration.EngineSettings.IsolatedPawnPenalty[rank].PackedEvaluation;
         }
 
         if ((PieceBitBoards[(int)Piece.p - pieceIndex] & Masks.PassedPawns[pieceIndex][squareIndex]) == default)    // isPassedPawn
         {
-            var rank = Constants.Rank[squareIndex];
-            if (pieceIndex == (int)Piece.p)
-            {
-                rank = 7 - rank;
-            }
             packedBonus += Configuration.EngineSettings.PassedPawnBonus[rank].PackedEvaluation;
         }
 

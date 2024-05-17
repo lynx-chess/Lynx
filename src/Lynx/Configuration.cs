@@ -203,8 +203,6 @@ public sealed class EngineSettings
 
     #region Evaluation
 
-    public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-21, -17);
-
     public TaperedEvaluationTerm OpenFileRookBonus { get; set; } = new(46, 9);
 
     public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(15, 15);
@@ -231,6 +229,16 @@ public sealed class EngineSettings
         new(21, 80),
         new(62, 158),
         new(104, 243),
+        new(0, 0));
+
+    public TaperedEvaluationTermByRank IsolatedPawnPenalty { get; set; } = new(
+        new(0, 0),
+        new(-5, -5),
+        new(-5, -5),
+        new(-5, -5),
+        new(-5, -5),
+        new(-5, -5),
+        new(-5, -5),
         new(0, 0));
 
     #endregion
