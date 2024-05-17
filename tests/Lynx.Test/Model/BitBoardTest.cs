@@ -116,7 +116,7 @@ public class BitBoardTest
     public void ResetLS1B()
     {
         // Arrange
-        BitBoard bitBoard = BitBoardExtensions.Initialize(new[] { BoardSquare.d5, BoardSquare.e4 });
+        BitBoard bitBoard = BitBoardExtensions.Initialize(BoardSquare.d5, BoardSquare.e4);
 
         // Act
         bitBoard.ResetLS1B();
@@ -130,7 +130,7 @@ public class BitBoardTest
     public void ResetLS1BNonSideEffect()
     {
         // Arrange
-        BitBoard bitBoard = BitBoardExtensions.Initialize(new[] { BoardSquare.d5, BoardSquare.e4 });
+        BitBoard bitBoard = BitBoardExtensions.Initialize(BoardSquare.d5, BoardSquare.e4);
 
         // Act
         var result = bitBoard.WithoutLS1B();

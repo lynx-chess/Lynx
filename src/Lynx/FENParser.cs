@@ -56,7 +56,7 @@ public static class FENParser
         }
         catch (Exception e)
         {
-            _logger.Error(e.Message);
+            _logger.Error(e, "Error parsing FEN");
             success = false;
             throw;
         }
