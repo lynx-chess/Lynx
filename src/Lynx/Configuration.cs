@@ -205,6 +205,8 @@ public sealed class EngineSettings
 
     public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-21, -17);
 
+    public TaperedEvaluationTerm DoubledPawnPenalty { get; set; } = new(-5, -5);
+
     public TaperedEvaluationTerm OpenFileRookBonus { get; set; } = new(46, 9);
 
     public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(15, 15);

@@ -714,6 +714,9 @@ public class Position
             }
         }
 
+        // Doubled pawns penalty
+        packedScore += DoublePawnPenalty();
+
         // Bishop pair bonus
         if (PieceBitBoards[(int)Piece.B].CountBits() >= 2)
         {
@@ -806,6 +809,15 @@ public class Position
             : -eval;
 
         return (sideEval, gamePhase);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int DoublePawnsPenalty()
+    {
+        return ((PieceBitBoards[(int)Piece.P] & PieceBitBoards[(int)Piece.P].ShiftUp()).CountBits()
+            * Configuration.EngineSettings.DoubledPawnPenalty.PackedEvaluation)
+            - ((PieceBitBoards[(int)Piece.p] & PieceBitBoards[(int)Piece.p].ShiftUp()).CountBits()
+             * Configuration.EngineSettings.DoubledPawnPenalty.PackedEvaluation);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -966,6 +978,16 @@ public class Position
         var ownPiecesAroundCount = (Attacks.KingAttacks[squareIndex] & OccupancyBitBoards[(int)kingSide]).CountBits();
 
         return packedBonus + (ownPiecesAroundCount * Configuration.EngineSettings.KingShieldBonus.PackedEvaluation);
+    }
+
+    internal int DoublePawnPenalty()
+    {
+        var whitePawns = PieceBitBoards[(int)Piece.P];
+        var blackPawns = PieceBitBoards[(int)Piece.p];
+
+        return Configuration.EngineSettings.DoubledPawnPenalty.PackedEvaluation * (
+            (whitePawns & whitePawns.ShiftUp()).CountBits()
+            - (blackPawns & blackPawns.ShiftUp()).CountBits());
     }
 
     #endregion

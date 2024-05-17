@@ -230,25 +230,24 @@ public class PositionTest
     ///     a b c d e f g h
     /// </summary>
     /// <param name="fen"></param>
-    //[TestCase("4k3/ppp5/8/8/8/P7/PP6/4K3 w - - 0 1")]
-    ///// <summary>
-    ///// Previous one mirrored
-    ///// </summary>
-    ///// <param name="fen"></param>
-    //[TestCase("3k4/6pp/7p/8/8/8/5PPP/3K4 b - - 0 1")]
-    //public void StaticEvaluation_DoublePawnPenalty(string fen)
-    //{
-    //    Position position = new Position(fen);
-    //    int evaluation = AdditionalPieceEvaluation(position, Piece.P)
-    //        - AdditionalPieceEvaluation(position, Piece.p);
+    [TestCase("4k3/ppp5/8/8/8/P7/PP6/4K3 w - - 0 1")]
+    /// <summary>
+    /// Previous one mirrored
+    /// </summary>
+    /// <param name="fen"></param>
+    [TestCase("3k4/6pp/7p/8/8/8/5PPP/3K4 b - - 0 1")]
+    public void StaticEvaluation_DoublePawnPenalty(string fen)
+    {
+        Position position = new Position(fen);
+        int evaluation = position.DoublePawnPenalty();
 
-    //    if (position.Side == Side.Black)
-    //    {
-    //        evaluation = -evaluation;
-    //    }
+        if (position.Side == Side.Black)
+        {
+            evaluation = -evaluation;
+        }
 
-    //    Assert.AreEqual(4 * Configuration.EngineSettings.DoubledPawnPenalty.MG, evaluation);
-    //}
+        Assert.AreEqual(1 * Configuration.EngineSettings.DoubledPawnPenalty.PackedEvaluation, evaluation);
+    }
 
     /// <summary>
     /// Illegal position, but avoids any positional bonuses
@@ -263,25 +262,25 @@ public class PositionTest
     ///     a b c d e f g h
     /// </summary>
     /// <param name="fen"></param>
-    //[TestCase("7k/ppp2ppp/8/8/8/P7/PP4PP/P6K w - - 0 1")]
-    ///// <summary>
-    ///// Previous one mirrored
-    ///// </summary>
-    ///// <param name="fen"></param>
-    //[TestCase("k6p/pp4pp/7p/8/8/8/PPP2PPP/K7 b - - 0 1")]
-    //public void StaticEvaluation_TriplePawnPenalty(string fen)
-    //{
-    //    Position position = new Position(fen);
-    //    int evaluation = AdditionalPieceEvaluation(position, Piece.P)
-    //        - AdditionalPieceEvaluation(position, Piece.p);
+    [TestCase("7k/ppp2ppp/8/8/8/P7/PP4PP/P6K w - - 0 1")]
+    /// <summary>
+    /// Previous one mirrored
+    /// </summary>
+    /// <param name="fen"></param>
+    [TestCase("k6p/pp4pp/7p/8/8/8/PPP2PPP/K7 b - - 0 1")]
+    public void StaticEvaluation_TriplePawnPenalty(string fen)
+    {
+        Position position = new Position(fen);
+        int evaluation = position.DoublePawnPenalty();
 
-    //    if (position.Side == Side.Black)
-    //    {
-    //        evaluation = -evaluation;
-    //    }
 
-    //    Assert.AreEqual(9 * Configuration.EngineSettings.DoubledPawnPenalty.MG, evaluation);
-    //}
+        if (position.Side == Side.Black)
+        {
+            evaluation = -evaluation;
+        }
+
+        Assert.AreEqual(2 * Configuration.EngineSettings.DoubledPawnPenalty.PackedEvaluation, evaluation);
+    }
 
     /// <summary>
     /// 8   . . . . . . k .
