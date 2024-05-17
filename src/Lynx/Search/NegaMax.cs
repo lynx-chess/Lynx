@@ -108,16 +108,13 @@ public sealed partial class Engine
                     return score;
             }
 
-            if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
+            // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
+            // Return formula by Ciekce, instead of just returning static eval
+            if (depth <= Configuration.EngineSettings.RFP_MaxDepth && staticEval - (Configuration.EngineSettings.RFP_DepthScalingFactor * depth) >= beta)
             {
-                // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
-                // Return formula by Ciekce, instead of just returning static eval
-                if (staticEval - (Configuration.EngineSettings.RFP_DepthScalingFactor * depth) >= beta)
-                {
 #pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
-                    return (staticEval + beta) / 2;
+                return (staticEval + beta) / 2;
 #pragma warning restore S3949 // Calculations should not overflow
-                }
             }
 
             // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
