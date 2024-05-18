@@ -848,11 +848,9 @@ public class Position
     {
         return pieceIndex switch
         {
-            (int)Piece.P => WhitePawnAdditionalEvaluation(pieceSquareIndex),
-            (int)Piece.p => BlackPawnAdditionalEvaluation(pieceSquareIndex),
-            (int)Piece.R => WhiteRookAdditionalEvaluation(pieceSquareIndex),
-            (int)Piece.r => BlackRookAdditionalEvaluation(pieceSquareIndex),
-            (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex),
+            (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(pieceSquareIndex, pieceIndex),
+            (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex),
+            (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex),
             (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex),
             _ => 0
         };
@@ -861,50 +859,26 @@ public class Position
     /// <summary>
     /// Doubled pawns penalty, isolated pawns penalty, passed pawns bonus
     /// </summary>
-    /// <param name="squareIndex"></param>
+    /// <param name = "squareIndex" ></ param >
+    /// < param name="pieceIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int WhitePawnAdditionalEvaluation(int squareIndex)
+    private int PawnAdditionalEvaluation(int squareIndex, int pieceIndex)
     {
         int packedBonus = 0;
 
         var rank = Constants.Rank[squareIndex];
-        var whitePawns = PieceBitBoards[(int)Piece.P];
-        var blackPawns = PieceBitBoards[(int)Piece.p];
+        if (pieceIndex == (int)Piece.p)
+        {
+            rank = 7 - rank;
+        }
 
-        if ((whitePawns & Masks.IsolatedPawnMasks[squareIndex]) == 0) // isIsolatedPawn
+        if ((PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default) // isIsolatedPawn
         {
             packedBonus += Configuration.EngineSettings.IsolatedPawnPenalty[rank].PackedEvaluation;
         }
 
-        if ((blackPawns & Masks.PassedPawns[(int)Piece.P][squareIndex]) == 0)    // isPassedPawn
-        {
-            packedBonus += Configuration.EngineSettings.PassedPawnBonus[rank].PackedEvaluation;
-        }
-
-        return packedBonus;
-    }
-
-    /// <summary>
-    /// Doubled pawns penalty, isolated pawns penalty, passed pawns bonus
-    /// </summary>
-    /// <param name="squareIndex"></param>
-    /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int BlackPawnAdditionalEvaluation(int squareIndex)
-    {
-        int packedBonus = 0;
-
-        var rank = 7 - Constants.Rank[squareIndex];
-        var whitePawns = PieceBitBoards[(int)Piece.P];
-        var blackPawns = PieceBitBoards[(int)Piece.p];
-
-        if ((blackPawns & Masks.IsolatedPawnMasks[squareIndex]) == 0) // isIsolatedPawn
-        {
-            packedBonus += Configuration.EngineSettings.IsolatedPawnPenalty[rank].PackedEvaluation;
-        }
-
-        if ((whitePawns & Masks.PassedPawns[(int)Piece.p][squareIndex]) == 0)    // isPassedPawn
+        if ((PieceBitBoards[(int)Piece.p - pieceIndex] & Masks.PassedPawns[pieceIndex][squareIndex]) == default)    // isPassedPawn
         {
             packedBonus += Configuration.EngineSettings.PassedPawnBonus[rank].PackedEvaluation;
         }
@@ -916,51 +890,22 @@ public class Position
     /// Open and semiopen file bonus
     /// </summary>
     /// <param name="squareIndex"></param>
+    /// <param name="pieceIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int WhiteRookAdditionalEvaluation(int squareIndex)
+    private int RookAdditionalEvaluation(int squareIndex, int pieceIndex)
     {
         var attacksCount = Attacks.RookAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
 
         var packedBonus = attacksCount * Configuration.EngineSettings.RookMobilityBonus.PackedEvaluation;
 
-        var fileMask = Masks.FileMasks[squareIndex];
-        var whitePawns = PieceBitBoards[(int)Piece.P];
-        var blackPawns = PieceBitBoards[(int)Piece.p];
+        const int pawnToRookOffset = (int)Piece.R - (int)Piece.P;
 
-        if (((whitePawns | blackPawns) & fileMask) == 0)  // isOpenFile
+        if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default)  // isOpenFile
         {
             packedBonus += Configuration.EngineSettings.OpenFileRookBonus.PackedEvaluation;
         }
-        else if ((whitePawns & fileMask) == 0)  // isSemiOpenFile
-        {
-            packedBonus += Configuration.EngineSettings.SemiOpenFileRookBonus.PackedEvaluation;
-        }
-
-        return packedBonus;
-    }
-
-    /// <summary>
-    /// Open and semiopen file bonus
-    /// </summary>
-    /// <param name="squareIndex"></param>
-    /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int BlackRookAdditionalEvaluation(int squareIndex)
-    {
-        var attacksCount = Attacks.RookAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
-
-        var packedBonus = attacksCount * Configuration.EngineSettings.RookMobilityBonus.PackedEvaluation;
-
-        var fileMask = Masks.FileMasks[squareIndex];
-        var whitePawns = PieceBitBoards[(int)Piece.P];
-        var blackPawns = PieceBitBoards[(int)Piece.p];
-
-        if (((whitePawns | blackPawns) & fileMask) == 0)  // isOpenFile
-        {
-            packedBonus += Configuration.EngineSettings.OpenFileRookBonus.PackedEvaluation;
-        }
-        else if ((blackPawns & fileMask) == 0)  // isSemiOpenFile
+        else if ((PieceBitBoards[pieceIndex - pawnToRookOffset] & Masks.FileMasks[squareIndex]) == default)  // isSemiOpenFile
         {
             packedBonus += Configuration.EngineSettings.SemiOpenFileRookBonus.PackedEvaluation;
         }
@@ -972,9 +917,10 @@ public class Position
     /// Mobility and bishop pair bonus
     /// </summary>
     /// <param name="squareIndex"></param>
+    /// <param name="pieceIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int BishopAdditionalEvaluation(int squareIndex)
+    private int BishopAdditionalEvaluation(int squareIndex, int pieceIndex)
     {
         var attacksCount = Attacks.BishopAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
 
