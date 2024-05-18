@@ -215,7 +215,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(Configuration.EngineSettings.IsolatedPawnPenalty[1].MG, evaluation);
+        Assert.AreEqual(Configuration.EngineSettings.IsolatedPawnPenalty.MG, evaluation);
     }
 
     /// <summary>
@@ -423,7 +423,7 @@ public class PositionTest
 
         Assert.AreEqual(
             //(-4 * Configuration.EngineSettings.DoubledPawnPenalty.MG)
-            +Configuration.EngineSettings.IsolatedPawnPenalty[6].MG
+            + Configuration.EngineSettings.IsolatedPawnPenalty.MG
             + Configuration.EngineSettings.PassedPawnBonus[rank].MG,
 
             evaluation);
