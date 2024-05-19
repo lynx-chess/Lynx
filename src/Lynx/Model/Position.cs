@@ -851,6 +851,7 @@ public class Position
             (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(pieceSquareIndex, pieceIndex),
             (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex),
             (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex),
+            (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(pieceSquareIndex),
             (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex),
             _ => 0
         };
@@ -937,6 +938,19 @@ public class Position
         var attacksCount = Attacks.QueenAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
 
         return attacksCount * Configuration.EngineSettings.QueenMobilityBonus.PackedEvaluation;
+    }
+
+    /// <summary>
+    /// Mobility bonus
+    /// </summary>
+    /// <param name="squareIndex"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int KnightAdditionalEvaluation(int squareIndex)
+    {
+        var attacksCount = Attacks.KnightAttacks[squareIndex].CountBits();
+
+        return attacksCount * Configuration.EngineSettings.KnightMobilityBonus.PackedEvaluation;
     }
 
     /// <summary>

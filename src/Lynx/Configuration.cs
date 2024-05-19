@@ -209,6 +209,8 @@ public sealed class EngineSettings
 
     public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(15, 15);
 
+    public TaperedEvaluationTerm KnightMobilityBonus { get; set; } = new(5, 5);
+
     public TaperedEvaluationTerm BishopMobilityBonus { get; set; } = new(10, 9);
 
     public TaperedEvaluationTerm RookMobilityBonus { get; set; } = new(5, 5);
