@@ -867,11 +867,6 @@ public class Position
     {
         int packedBonus = 0;
 
-        if ((PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default) // isIsolatedPawn
-        {
-            packedBonus += Configuration.EngineSettings.IsolatedPawnPenalty.PackedEvaluation;
-        }
-
         if ((PieceBitBoards[(int)Piece.p - pieceIndex] & Masks.PassedPawns[pieceIndex][squareIndex]) == default)    // isPassedPawn
         {
             var rank = Constants.Rank[squareIndex];
@@ -880,6 +875,10 @@ public class Position
                 rank = 7 - rank;
             }
             packedBonus += Configuration.EngineSettings.PassedPawnBonus[rank].PackedEvaluation;
+        }
+        else if ((PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default) // isIsolatedPawn
+        {
+            packedBonus += Configuration.EngineSettings.IsolatedPawnPenalty.PackedEvaluation;
         }
 
         return packedBonus;
