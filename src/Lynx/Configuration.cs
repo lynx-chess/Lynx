@@ -291,15 +291,15 @@ public sealed class TaperedEvaluationTerm
 
 public sealed class TaperedEvaluationTermByRank
 {
-    private readonly List<TaperedEvaluationTerm> _evaluationTermsIndexedByPiece;
+    private readonly TaperedEvaluationTerm[] _evaluationTermsIndexedByPiece;
 
     public TaperedEvaluationTerm Rank0 => _evaluationTermsIndexedByPiece[0];
-    public TaperedEvaluationTerm Rank1  => _evaluationTermsIndexedByPiece[1];
-    public TaperedEvaluationTerm Rank2  => _evaluationTermsIndexedByPiece[2];
-    public TaperedEvaluationTerm Rank3  => _evaluationTermsIndexedByPiece[3];
-    public TaperedEvaluationTerm Rank4  => _evaluationTermsIndexedByPiece[4];
-    public TaperedEvaluationTerm Rank5  => _evaluationTermsIndexedByPiece[5];
-    public TaperedEvaluationTerm Rank6  => _evaluationTermsIndexedByPiece[6];
+    public TaperedEvaluationTerm Rank1 => _evaluationTermsIndexedByPiece[1];
+    public TaperedEvaluationTerm Rank2 => _evaluationTermsIndexedByPiece[2];
+    public TaperedEvaluationTerm Rank3 => _evaluationTermsIndexedByPiece[3];
+    public TaperedEvaluationTerm Rank4 => _evaluationTermsIndexedByPiece[4];
+    public TaperedEvaluationTerm Rank5 => _evaluationTermsIndexedByPiece[5];
+    public TaperedEvaluationTerm Rank6 => _evaluationTermsIndexedByPiece[6];
     public TaperedEvaluationTerm Rank7 => _evaluationTermsIndexedByPiece[7];
 
     public TaperedEvaluationTermByRank(
