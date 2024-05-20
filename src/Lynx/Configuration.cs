@@ -291,38 +291,26 @@ public sealed class TaperedEvaluationTerm
 
 public sealed class TaperedEvaluationTermByRank
 {
-    private readonly List<TaperedEvaluationTerm> _evaluationTermsIndexedByPiece;
+    private readonly TaperedEvaluationTerm[] _evaluationTermsIndexedByPiece;
 
-    public TaperedEvaluationTerm Rank0 { get; set; }
-    public TaperedEvaluationTerm Rank1 { get; set; }
-    public TaperedEvaluationTerm Rank2 { get; set; }
-    public TaperedEvaluationTerm Rank3 { get; set; }
-    public TaperedEvaluationTerm Rank4 { get; set; }
-    public TaperedEvaluationTerm Rank5 { get; set; }
-    public TaperedEvaluationTerm Rank6 { get; set; }
-    public TaperedEvaluationTerm Rank7 { get; set; }
+    public TaperedEvaluationTerm Rank0 => _evaluationTermsIndexedByPiece[0];
+    public TaperedEvaluationTerm Rank1 => _evaluationTermsIndexedByPiece[1];
+    public TaperedEvaluationTerm Rank2 => _evaluationTermsIndexedByPiece[2];
+    public TaperedEvaluationTerm Rank3 => _evaluationTermsIndexedByPiece[3];
+    public TaperedEvaluationTerm Rank4 => _evaluationTermsIndexedByPiece[4];
+    public TaperedEvaluationTerm Rank5 => _evaluationTermsIndexedByPiece[5];
+    public TaperedEvaluationTerm Rank6 => _evaluationTermsIndexedByPiece[6];
+    public TaperedEvaluationTerm Rank7 => _evaluationTermsIndexedByPiece[7];
 
     public TaperedEvaluationTermByRank(
         TaperedEvaluationTerm rank0, TaperedEvaluationTerm rank1, TaperedEvaluationTerm rank2,
         TaperedEvaluationTerm rank3, TaperedEvaluationTerm rank4, TaperedEvaluationTerm rank5,
         TaperedEvaluationTerm rank6, TaperedEvaluationTerm rank7)
     {
-        Rank0 = rank0;
-        Rank1 = rank1;
-        Rank2 = rank2;
-        Rank3 = rank3;
-        Rank4 = rank4;
-        Rank5 = rank5;
-        Rank6 = rank6;
-        Rank7 = rank7;
-
         _evaluationTermsIndexedByPiece = [rank0, rank1, rank2, rank3, rank4, rank5, rank6, rank7];
     }
 
-    public TaperedEvaluationTerm this[int i]
-    {
-        get { return _evaluationTermsIndexedByPiece[i]; }
-    }
+    public TaperedEvaluationTerm this[int i] => _evaluationTermsIndexedByPiece[i];
 
     public override string ToString()
     {
