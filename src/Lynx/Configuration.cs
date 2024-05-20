@@ -203,49 +203,49 @@ public sealed class EngineSettings
 
     #region Evaluation
 
-    public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-21, -17);
+    public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-21, -18);
 
     public TaperedEvaluationTerm OpenFileRookBonus { get; set; } = new(46, 9);
 
-    public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(15, 15);
+    public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(15, 14);
 
     public TaperedEvaluationTerm RookMobilityBonus { get; set; } = new(5, 5);
 
-    public TaperedEvaluationTerm QueenMobilityBonus { get; set; } = new(4, 8);
+    public TaperedEvaluationTerm QueenMobilityBonus { get; set; } = new(4, 7);
 
-    public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-41, 21);
+    public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-39, 21);
 
-    public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-110, 10);
+    public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-105, 7);
 
-    public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(17, -5);
+    public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(16, -6);
 
-    public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(33, 80);
+    public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(31, 80);
 
     public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(
         new(0, 0),
-        new(4, 12),
+        new(2, 12),
         new(-11, 19),
         new(-11, 47),
-        new(21, 80),
-        new(62, 158),
-        new(104, 243),
+        new(19, 80),
+        new(58, 156),
+        new(95, 223),
         new(0, 0));
 
     public TaperedEvaluationTermByCount BishopMobilityBonus { get; set; } = new(
-        new(-1, -1),
-        new(1, 1),
-        new(1, 1),
-        new(1, 1),
-        new(1, 1),
-        new(1, 1),
-        new(1, 1),
-        new(1, 1),
-        new(1, 1),
-        new(1, 1),
-        new(1, 1),
-        new(1, 1),
-        new(1, 1),
-        new(2, 2),
+        new(0, 0),
+        new(196, 160),
+        new(208, 159),
+        new(219, 198),
+        new(233, 214),
+        new(241, 229),
+        new(256, 249),
+        new(266, 259),
+        new(275, 271),
+        new(276, 277),
+        new(282, 282),
+        new(284, 279),
+        new(286, 278),
+        new(315, 272),
         new(0, 0));
 
     #endregion
