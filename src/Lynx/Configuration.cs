@@ -389,10 +389,7 @@ public sealed class TaperedEvaluationTermByCount
             [rank0, rank1, rank2, rank3, rank4, rank5, rank6, rank7, rank8, rank9, rank10, rank11, rank12, rank13, rank14];
     }
 
-    public TaperedEvaluationTerm this[int i]
-    {
-        get { return _evaluationTermsIndexedByCount[i]; }
-    }
+    public TaperedEvaluationTerm this[int i] => _evaluationTermsIndexedByCount[i];
 
     public override string ToString()
     {
