@@ -793,7 +793,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(mobilityDifference * Configuration.EngineSettings.BishopMobilityBonus.MG, evaluation);
+        Assert.AreEqual(Configuration.EngineSettings.BishopMobilityBonus[mobilityDifference].MG, evaluation);
     }
 
     /// <summary>

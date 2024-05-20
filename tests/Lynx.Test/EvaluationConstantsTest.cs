@@ -9,7 +9,7 @@ public class EvaluationConstantsTest
     /// Shy from 14k
     /// </summary>
     private readonly int _sensibleEvaluation =
-        (2 * (Math.Max(MiddleGameBishopTable.Max(), EndGameBishopTable.Max()) + (Configuration.EngineSettings.BishopMobilityBonus.MG * 64))) +
+        (2 * (Math.Max(MiddleGameBishopTable.Max(), EndGameBishopTable.Max()) + Configuration.EngineSettings.BishopMobilityBonus[13].MG)) +
         (2 * (Math.Max(MiddleGameKnightTable.Max(), EndGameKnightTable.Max()))) +
         (2 * (Math.Max(MiddleGameRookTable.Max(), EndGameRookTable.Max()) + Configuration.EngineSettings.OpenFileRookBonus.MG + Configuration.EngineSettings.SemiOpenFileRookBonus.MG)) +
         (9 * (Math.Max(MiddleGameQueenTable.Max(), EndGameQueenTable.Max()) + (Configuration.EngineSettings.QueenMobilityBonus.MG * 64))) +
