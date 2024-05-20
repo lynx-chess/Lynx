@@ -693,7 +693,7 @@ public class Position
                 packedScore += EvaluationConstants.PackedPSQT[pieceIndex][pieceSquareIndex];
                 gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
 
-                packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
+                packedScore += AdditionalWhitePieceEvaluation(pieceSquareIndex, pieceIndex);
             }
         }
 
@@ -710,7 +710,7 @@ public class Position
                 packedScore += EvaluationConstants.PackedPSQT[pieceIndex][pieceSquareIndex];
                 gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
 
-                packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
+                packedScore -= AdditionalBlackPieceEvaluation(pieceSquareIndex, pieceIndex);
             }
         }
 
@@ -838,20 +838,43 @@ public class Position
     }
 
     /// <summary>
-    /// Doesn't include <see cref="Piece.K"/> and <see cref="Piece.k"/> evaluation
+    /// Doesn't include <see cref="Piece.K"/>  evaluation
     /// </summary>
     /// <param name="pieceSquareIndex"></param>
     /// <param name="pieceIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int AdditionalPieceEvaluation(int pieceSquareIndex, int pieceIndex)
+    internal int AdditionalWhitePieceEvaluation(int pieceSquareIndex, int pieceIndex)
     {
+        var passedPawnRankIndex = Constants.Rank[pieceSquareIndex];
+
         return pieceIndex switch
         {
-            (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(pieceSquareIndex, pieceIndex),
-            (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex),
-            (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex),
-            (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex),
+            (int)Piece.P => PawnAdditionalEvaluation(pieceSquareIndex, pieceIndex, passedPawnRankIndex),
+            (int)Piece.B => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex),
+            (int)Piece.R => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex, (int)Piece.P),
+            (int)Piece.Q => QueenAdditionalEvaluation(pieceSquareIndex),
+            _ => 0
+        };
+    }
+
+    /// <summary>
+    /// Doesn't include <see cref="Piece.k"/> evaluation
+    /// </summary>
+    /// <param name="pieceSquareIndex"></param>
+    /// <param name="pieceIndex"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal int AdditionalBlackPieceEvaluation(int pieceSquareIndex, int pieceIndex)
+    {
+        var passedPawnRankIndex = 7 - Constants.Rank[pieceSquareIndex];
+
+        return pieceIndex switch
+        {
+            (int)Piece.p => PawnAdditionalEvaluation(pieceSquareIndex, pieceIndex, passedPawnRankIndex),
+            (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex),
+            (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex, (int)Piece.p),
+            (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex),
             _ => 0
         };
     }
@@ -863,7 +886,7 @@ public class Position
     /// < param name="pieceIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int PawnAdditionalEvaluation(int squareIndex, int pieceIndex)
+    private int PawnAdditionalEvaluation(int squareIndex, int pieceIndex, int passedPawnRankIndex)
     {
         int packedBonus = 0;
 
@@ -892,19 +915,17 @@ public class Position
     /// <param name="pieceIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int RookAdditionalEvaluation(int squareIndex, int pieceIndex)
+    private int RookAdditionalEvaluation(int squareIndex, int pieceIndex, int sameSidePawnIndex)
     {
         var attacksCount = Attacks.RookAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
 
         var packedBonus = attacksCount * Configuration.EngineSettings.RookMobilityBonus.PackedEvaluation;
 
-        const int pawnToRookOffset = (int)Piece.R - (int)Piece.P;
-
         if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default)  // isOpenFile
         {
             packedBonus += Configuration.EngineSettings.OpenFileRookBonus.PackedEvaluation;
         }
-        else if ((PieceBitBoards[pieceIndex - pawnToRookOffset] & Masks.FileMasks[squareIndex]) == default)  // isSemiOpenFile
+        else if ((PieceBitBoards[sameSidePawnIndex] & Masks.FileMasks[squareIndex]) == default)  // isSemiOpenFile
         {
             packedBonus += Configuration.EngineSettings.SemiOpenFileRookBonus.PackedEvaluation;
         }

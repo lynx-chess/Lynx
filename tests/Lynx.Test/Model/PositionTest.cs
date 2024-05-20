@@ -989,7 +989,9 @@ public class PositionTest
         {
             var pieceSquareIndex = bitBoard.GetLS1BIndex();
             bitBoard.ResetLS1B();
-            eval += Utils.UnpackMG(position.AdditionalPieceEvaluation(pieceSquareIndex, (int)piece));
+            eval += Utils.UnpackMG(pieceSquareIndex < (int)Piece.p
+                ? position.AdditionalWhitePieceEvaluation(pieceSquareIndex, (int)piece)
+                : position.AdditionalBlackPieceEvaluation(pieceSquareIndex, (int)piece));
         }
 
         return eval;
