@@ -339,6 +339,68 @@ public sealed class TaperedEvaluationTermByRank
     }
 }
 
+/// <summary>
+/// 13 for bishop,
+/// 14 bor rook
+/// </summary>
+public sealed class TaperedEvaluationTermByCount
+{
+    private readonly List<TaperedEvaluationTerm> _evaluationTermsIndexedByCount;
+
+    public TaperedEvaluationTerm Count0 => _evaluationTermsIndexedByCount[0];
+    public TaperedEvaluationTerm Count1 => _evaluationTermsIndexedByCount[1];
+    public TaperedEvaluationTerm Count2 => _evaluationTermsIndexedByCount[2];
+    public TaperedEvaluationTerm Count3 => _evaluationTermsIndexedByCount[3];
+    public TaperedEvaluationTerm Count4 => _evaluationTermsIndexedByCount[4];
+    public TaperedEvaluationTerm Count5 => _evaluationTermsIndexedByCount[5];
+    public TaperedEvaluationTerm Count6 => _evaluationTermsIndexedByCount[6];
+    public TaperedEvaluationTerm Count7 => _evaluationTermsIndexedByCount[7];
+    public TaperedEvaluationTerm Count8 => _evaluationTermsIndexedByCount[8];
+    public TaperedEvaluationTerm Count9 => _evaluationTermsIndexedByCount[9];
+    public TaperedEvaluationTerm Count10 => _evaluationTermsIndexedByCount[10];
+    public TaperedEvaluationTerm Count11 => _evaluationTermsIndexedByCount[11];
+    public TaperedEvaluationTerm Count12 => _evaluationTermsIndexedByCount[12];
+    public TaperedEvaluationTerm Count13 => _evaluationTermsIndexedByCount[13];
+    public TaperedEvaluationTerm Count14 => _evaluationTermsIndexedByCount[14];
+
+    public TaperedEvaluationTermByCount(
+        TaperedEvaluationTerm rank0, TaperedEvaluationTerm rank1, TaperedEvaluationTerm rank2,
+        TaperedEvaluationTerm rank3, TaperedEvaluationTerm rank4, TaperedEvaluationTerm rank5,
+        TaperedEvaluationTerm rank6, TaperedEvaluationTerm rank7, TaperedEvaluationTerm rank8,
+        TaperedEvaluationTerm rank9, TaperedEvaluationTerm rank10, TaperedEvaluationTerm rank11,
+        TaperedEvaluationTerm rank12, TaperedEvaluationTerm rank13, TaperedEvaluationTerm rank14)
+    {
+        _evaluationTermsIndexedByCount =
+            [rank0, rank1, rank2, rank3, rank4, rank5, rank6, rank7, rank8, rank9, rank10, rank11, rank12, rank13, rank14];
+    }
+
+    public TaperedEvaluationTerm this[int i]
+    {
+        get { return _evaluationTermsIndexedByCount[i]; }
+    }
+
+    public override string ToString()
+    {
+        return "{" +
+            $"\"{nameof(Count0)}\":{Count0}," +
+            $"\"{nameof(Count1)}\":{Count1}," +
+            $"\"{nameof(Count2)}\":{Count2}," +
+            $"\"{nameof(Count3)}\":{Count3}," +
+            $"\"{nameof(Count4)}\":{Count4}," +
+            $"\"{nameof(Count5)}\":{Count5}," +
+            $"\"{nameof(Count6)}\":{Count6}," +
+            $"\"{nameof(Count7)}\":{Count7}," +
+            $"\"{nameof(Count8)}\":{Count8}," +
+            $"\"{nameof(Count9)}\":{Count9}," +
+            $"\"{nameof(Count10)}\":{Count10}," +
+            $"\"{nameof(Count11)}\":{Count11}," +
+            $"\"{nameof(Count12)}\":{Count12}," +
+            $"\"{nameof(Count13)}\":{Count13}," +
+            $"\"{nameof(Count14)}\":{Count14}" +
+            "}";
+    }
+}
+
 [JsonSourceGenerationOptions(
     GenerationMode = JsonSourceGenerationMode.Default, WriteIndented = true)] // https://github.com/dotnet/runtime/issues/78602#issuecomment-1322004254
 [JsonSerializable(typeof(EngineSettings))]
