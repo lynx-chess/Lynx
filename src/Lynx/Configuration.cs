@@ -203,36 +203,36 @@ public sealed class EngineSettings
 
     #region Evaluation
 
-    public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-21, -17);
+    public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-18, -14);
 
-    public TaperedEvaluationTerm DoubledPawnPenalty { get; set; } = new(-5, -5);
+    public TaperedEvaluationTerm DoubledPawnPenalty { get; set; } = new(-16, -30);
 
     public TaperedEvaluationTerm OpenFileRookBonus { get; set; } = new(46, 9);
 
-    public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(15, 15);
+    public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(17, 16);
 
     public TaperedEvaluationTerm BishopMobilityBonus { get; set; } = new(10, 9);
 
     public TaperedEvaluationTerm RookMobilityBonus { get; set; } = new(5, 5);
 
-    public TaperedEvaluationTerm QueenMobilityBonus { get; set; } = new(4, 8);
+    public TaperedEvaluationTerm QueenMobilityBonus { get; set; } = new(4, 7);
 
-    public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-41, 21);
+    public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-37, 23);
 
-    public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-110, 10);
+    public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-105, 8);
 
-    public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(17, -5);
+    public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(16, -6);
 
-    public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(33, 80);
+    public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(31, 80);
 
     public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(
         new(0, 0),
-        new(4, 12),
-        new(-11, 19),
-        new(-11, 47),
-        new(21, 80),
-        new(62, 158),
-        new(104, 243),
+        new(0, 8),
+        new(-14, 15),
+        new(-14, 42),
+        new(18, 75),
+        new(58, 151),
+        new(95, 219),
         new(0, 0));
 
     #endregion
