@@ -5,6 +5,23 @@ namespace Lynx.Model;
 
 public class Position
 {
+    public static readonly Func<Position, int, int>[] AdditionalPieceEvaluation =
+        [
+            (position, pieceSquareIndex) => position.PawnAdditionalEvaluation(pieceSquareIndex, (int)Piece.P),
+            (_, _) => 0,
+            (position, pieceSquareIndex) => position.BishopAdditionalEvaluation(pieceSquareIndex, (int)Piece.B),
+            (position, pieceSquareIndex) => position.RookAdditionalEvaluation(pieceSquareIndex, (int)Piece.R),
+            (position, pieceSquareIndex) => position.QueenAdditionalEvaluation(pieceSquareIndex, (int)Piece.Q),
+            (_, _) => 0,
+
+            (position, pieceSquareIndex) => position.PawnAdditionalEvaluation(pieceSquareIndex, (int)Piece.p),
+            (_, _) => 0,
+            (position, pieceSquareIndex) => position.BishopAdditionalEvaluation(pieceSquareIndex, (int)Piece.b),
+            (position, pieceSquareIndex) => position.RookAdditionalEvaluation(pieceSquareIndex, (int)Piece.r),
+            (position, pieceSquareIndex) => position.QueenAdditionalEvaluation(pieceSquareIndex, (int)Piece.q),
+            (_, _) => 0,
+        ];
+
     public long UniqueIdentifier { get; private set; }
 
     /// <summary>
@@ -693,7 +710,7 @@ public class Position
                 packedScore += EvaluationConstants.PackedPSQT[pieceIndex][pieceSquareIndex];
                 gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
 
-                packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
+                packedScore += AdditionalPieceEvaluation[pieceIndex](this, pieceSquareIndex);
             }
         }
 
@@ -710,7 +727,7 @@ public class Position
                 packedScore += EvaluationConstants.PackedPSQT[pieceIndex][pieceSquareIndex];
                 gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
 
-                packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
+                packedScore -= AdditionalPieceEvaluation[pieceIndex](this, pieceSquareIndex);
             }
         }
 
@@ -838,25 +855,6 @@ public class Position
     }
 
     /// <summary>
-    /// Doesn't include <see cref="Piece.K"/> and <see cref="Piece.k"/> evaluation
-    /// </summary>
-    /// <param name="pieceSquareIndex"></param>
-    /// <param name="pieceIndex"></param>
-    /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int AdditionalPieceEvaluation(int pieceSquareIndex, int pieceIndex)
-    {
-        return pieceIndex switch
-        {
-            (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(pieceSquareIndex, pieceIndex),
-            (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex),
-            (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex),
-            (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex),
-            _ => 0
-        };
-    }
-
-    /// <summary>
     /// Doubled pawns penalty, isolated pawns penalty, passed pawns bonus
     /// </summary>
     /// <param name = "squareIndex" ></ param >
@@ -932,7 +930,7 @@ public class Position
     /// <param name="squareIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int QueenAdditionalEvaluation(int squareIndex)
+    private int QueenAdditionalEvaluation(int squareIndex, int _s)
     {
         var attacksCount = Attacks.QueenAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
 
