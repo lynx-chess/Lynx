@@ -682,6 +682,9 @@ public class Position
 
         for (int pieceIndex = (int)Piece.P; pieceIndex < (int)Piece.K; ++pieceIndex)
         {
+            var pieceTable = EvaluationConstants.PackedPSQT[pieceIndex];
+            var piecePhase = EvaluationConstants.GamePhaseByPiece[pieceIndex];
+
             // Bitboard copy that we 'empty'
             var bitboard = PieceBitBoards[pieceIndex];
 
@@ -690,8 +693,8 @@ public class Position
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
 
-                packedScore += EvaluationConstants.PackedPSQT[pieceIndex][pieceSquareIndex];
-                gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
+                packedScore += pieceTable[pieceSquareIndex];
+                gamePhase += piecePhase;
 
                 packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
             }
@@ -699,6 +702,9 @@ public class Position
 
         for (int pieceIndex = (int)Piece.p; pieceIndex < (int)Piece.k; ++pieceIndex)
         {
+            var pieceTable = EvaluationConstants.PackedPSQT[pieceIndex];
+            var piecePhase = EvaluationConstants.GamePhaseByPiece[pieceIndex];
+
             // Bitboard copy that we 'empty'
             var bitboard = PieceBitBoards[pieceIndex];
 
@@ -707,8 +713,8 @@ public class Position
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
 
-                packedScore += EvaluationConstants.PackedPSQT[pieceIndex][pieceSquareIndex];
-                gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
+                packedScore += pieceTable[pieceSquareIndex];
+                gamePhase += piecePhase;
 
                 packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
             }
