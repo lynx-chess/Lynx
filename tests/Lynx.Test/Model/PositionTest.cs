@@ -446,7 +446,7 @@ public class PositionTest
     /// Previous one mirrored
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("3k3r/p4p2/8/8/8/8/P6P/R2K4 b - - 0 1", 4, 10)]
+    [TestCase("3k3r/p4p2/8/8/8/8/P6P/R2K4 b - - 0 1", 10, 4)]
     public void StaticEvaluation_SemiOpenFileRookBonus(string fen, int rookMobilitySideToMove, int rookMobilitySideNotToMove)
     {
         Position position = new Position(fen);
@@ -475,12 +475,12 @@ public class PositionTest
     ///     a b c d e f g h
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("4k2r/p6p/8/8/8/8/2P4P/1R2K3 w - - 0 1", 10, 4)]
+    [TestCase("4k2r/p6p/8/8/8/8/2P4P/1R2K3 w - - 0 1", 11, 4)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("3k2r1/p4p2/8/8/8/8/P6P/R2K4 b - - 0 1", 4, 10)]
+    [TestCase("3k2r1/p4p2/8/8/8/8/P6P/R2K4 b - - 0 1", 11, 4)]
     public void StaticEvaluation_OpenFileRookBonus(string fen, int rookMobilitySideToMove, int rookMobilitySideNotToMove)
     {
         Position position = new Position(fen);
@@ -497,23 +497,23 @@ public class PositionTest
     }
 
     /// <summary>
-    /// 8   . . . . k . . r
-    /// 7   p . . . . . . r
+    /// 8   . . . . k. .r
+    /// 7   p. . . . . .r
     /// 6   . . . . . . . p
     /// 5   . . . . . . . .
     /// 4   . . . . . . . .
     /// 3   . . . . . . . .
-    /// 2   R . P . . . . P
-    /// 1   R . . . K . . .
+    /// 2   R. .P. . .P
+    /// 1   R. .K. . . .
     ///     a b c d e f g h
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("4k2r/p6r/7p/8/8/8/R1P4P/R3K3 w - - 0 1")]
+    [TestCase("4k2r/p6r/7p/8/8/8/R2P3P/R2K4 w - - 0 1")]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("3k3r/p4p1r/8/8/8/P7/R6P/R2K4 b - - 0 1")]
+    [TestCase("4k2r/p3p2r/8/8/8/P7/R6P/R2K4 b - - 0 1")]
     public void StaticEvaluation_DoubleSemiOpenFileRookBonus(string fen)
     {
         Position position = new Position(fen);
