@@ -209,8 +209,6 @@ public sealed class EngineSettings
 
     public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(15, 14);
 
-    public TaperedEvaluationTerm RookMobilityBonus { get; set; } = new(5, 5);
-
     public TaperedEvaluationTerm QueenMobilityBonus { get; set; } = new(4, 7);
 
     public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-39, 21);
@@ -247,6 +245,23 @@ public sealed class EngineSettings
         new(286, 278),
         new(315, 272),
         new(0, 0));
+
+    public TaperedEvaluationTermByCount RookMobilityBonus { get; set; } = new(
+        new(-1, -1),
+        new(1, 1),
+        new(1, 1),
+        new(1, 1),
+        new(1, 1),
+        new(1, 1),
+        new(1, 1),
+        new(1, 1),
+        new(1, 1),
+        new(1, 1),
+        new(1, 1),
+        new(1, 1),
+        new(1, 1),
+        new(1, 1),
+        new(2, 2));
 
     #endregion
 }

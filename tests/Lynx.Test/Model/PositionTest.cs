@@ -441,13 +441,13 @@ public class PositionTest
     ///     a b c d e f g h
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("4k2r/p6p/8/8/8/8/2P4P/R3K3 w - - 0 1")]
+    [TestCase("4k2r/p6p/8/8/8/8/2P4P/R3K3 w - - 0 1", 10, 4)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("3k3r/p4p2/8/8/8/8/P6P/R2K4 b - - 0 1")]
-    public void StaticEvaluation_SemiOpenFileRookBonus(string fen)
+    [TestCase("3k3r/p4p2/8/8/8/8/P6P/R2K4 b - - 0 1", 4, 10)]
+    public void StaticEvaluation_SemiOpenFileRookBonus(string fen, int rookMobilitySideToMove, int rookMobilitySideNotToMove)
     {
         Position position = new Position(fen);
         int evaluation = AdditionalPieceEvaluation(position, Piece.R)
@@ -458,7 +458,9 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(Configuration.EngineSettings.SemiOpenFileRookBonus.MG + (6 * Configuration.EngineSettings.RookMobilityBonus.MG), evaluation);
+        Assert.AreEqual(Configuration.EngineSettings.SemiOpenFileRookBonus.MG
+                + Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideToMove].MG - Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideNotToMove].MG,
+            evaluation);
     }
 
     /// <summary>
@@ -473,13 +475,13 @@ public class PositionTest
     ///     a b c d e f g h
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("4k2r/p6p/8/8/8/8/2P4P/1R2K3 w - - 0 1")]
+    [TestCase("4k2r/p6p/8/8/8/8/2P4P/1R2K3 w - - 0 1", 10, 4)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("3k2r1/p4p2/8/8/8/8/P6P/R2K4 b - - 0 1")]
-    public void StaticEvaluation_OpenFileRookBonus(string fen)
+    [TestCase("3k2r1/p4p2/8/8/8/8/P6P/R2K4 b - - 0 1", 4, 10)]
+    public void StaticEvaluation_OpenFileRookBonus(string fen, int rookMobilitySideToMove, int rookMobilitySideNotToMove)
     {
         Position position = new Position(fen);
         int evaluation = AdditionalPieceEvaluation(position, Piece.R)
@@ -489,7 +491,9 @@ public class PositionTest
         {
             evaluation = -evaluation;
         }
-        Assert.AreEqual(Configuration.EngineSettings.OpenFileRookBonus.MG + (7 * Configuration.EngineSettings.RookMobilityBonus.MG), evaluation);
+        Assert.AreEqual(Configuration.EngineSettings.OpenFileRookBonus.MG
+            + Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideToMove].MG - Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideNotToMove].MG,
+            evaluation);
     }
 
     /// <summary>
@@ -536,13 +540,13 @@ public class PositionTest
     ///     a b c d e f g h
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("1r2k3/1r5p/p7/8/8/P7/R6P/R3K3 w - - 0 1")]
+    [TestCase("1r2k3/1r5p/p7/8/8/P7/R6P/R3K3 w - - 0 1", 9, 14)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("3k3r/p6r/7p/8/8/7P/P5R1/3K2R1 b - - 0 1")]
-    public void StaticEvaluation_DoubleOpenFileRookBonus(string fen)
+    [TestCase("3k3r/p6r/7p/8/8/7P/P5R1/3K2R1 b - - 0 1", 9, 14)]
+    public void StaticEvaluation_DoubleOpenFileRookBonus(string fen, int rookMobilitySideToMove, int rookMobilitySideNotToMove)
     {
         Position position = new Position(fen);
         int evaluation = AdditionalPieceEvaluation(position, Piece.R)
@@ -553,7 +557,10 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual((-2 * Configuration.EngineSettings.OpenFileRookBonus.MG) - (5 * Configuration.EngineSettings.RookMobilityBonus.MG), evaluation);
+        Assert.AreEqual((-2 * Configuration.EngineSettings.OpenFileRookBonus.MG)
+            + Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideToMove].MG
+            -Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideNotToMove].MG,
+            evaluation);
     }
 
     /// <summary>
@@ -780,7 +787,8 @@ public class PositionTest
     /// Previous one mirrored
     /// </summary>
     /// <param name="fen"></param>
-    /// <param name="mobilityDifference"></param>
+    /// <param name="sideToMoveMobilityCount"></param>
+    /// <param name="nonSideToMoveMobilityCount"></param>
     [TestCase("3k4/1p6/2p5/4b3/4B3/5P2/6P1/3K4 b - - 0 1", 13, 9)]
     public void StaticEvaluation_BishopMobility(string fen, int sideToMoveMobilityCount, int nonSideToMoveMobilityCount)
     {
