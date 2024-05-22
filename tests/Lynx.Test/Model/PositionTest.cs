@@ -423,7 +423,7 @@ public class PositionTest
 
         Assert.AreEqual(
             //(-4 * Configuration.EngineSettings.DoubledPawnPenalty.MG)
-            + Configuration.EngineSettings.IsolatedPawnPenalty.MG
+            +Configuration.EngineSettings.IsolatedPawnPenalty.MG
             + Configuration.EngineSettings.PassedPawnBonus[rank].MG,
 
             evaluation);
@@ -755,13 +755,13 @@ public class PositionTest
     /// </summary>
     /// <param name="fen"></param>
     /// <param name="mobilityDifference"></param>
-    [TestCase("n3k3/1p6/8/3b4/3B4/8/6P1/4K2N w - - 0 1", 2)]
+    [TestCase("n3k3/1p6/8/3b4/3B4/8/6P1/4K2N w - - 0 1", 13, 11)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
     /// <param name="fen"></param>
     /// <param name="mobilityDifference"></param>
-    [TestCase("n2k4/1p6/8/4b3/4B3/8/6P1/3K3N b - - 0 1", 2)]
+    [TestCase("n2k4/1p6/8/4b3/4B3/8/6P1/3K3N b - - 0 1", 13, 11)]
     /// <summary>
     /// 8   . . . . k . . .
     /// 7   . p . . . . . .
@@ -775,14 +775,14 @@ public class PositionTest
     /// </summary>
     /// <param name="fen"></param>
     /// <param name="mobilityDifference"></param>
-    [TestCase("4k3/1p6/2p5/3b4/3B4/5P2/6P1/4K3 w - - 0 1", 4)]
+    [TestCase("4k3/1p6/2p5/3b4/3B4/5P2/6P1/4K3 w - - 0 1", 13, 9)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
     /// <param name="fen"></param>
     /// <param name="mobilityDifference"></param>
-    [TestCase("3k4/1p6/2p5/4b3/4B3/5P2/6P1/3K4 b - - 0 1", 4)]
-    public void StaticEvaluation_BishopMobility(string fen, int mobilityDifference)
+    [TestCase("3k4/1p6/2p5/4b3/4B3/5P2/6P1/3K4 b - - 0 1", 13, 9)]
+    public void StaticEvaluation_BishopMobility(string fen, int sideToMoveMobilityCount, int nonSideToMoveMobilityCount)
     {
         Position position = new Position(fen);
         int evaluation = AdditionalPieceEvaluation(position, Piece.B)
@@ -793,7 +793,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(mobilityDifference * Configuration.EngineSettings.BishopMobilityBonus.MG, evaluation);
+        Assert.AreEqual(Configuration.EngineSettings.BishopMobilityBonus[sideToMoveMobilityCount].MG - Configuration.EngineSettings.BishopMobilityBonus[nonSideToMoveMobilityCount].MG, evaluation);
     }
 
     /// <summary>

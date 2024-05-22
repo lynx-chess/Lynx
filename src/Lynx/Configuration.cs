@@ -203,34 +203,49 @@ public sealed class EngineSettings
 
     #region Evaluation
 
-    public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-21, -17);
+    public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-21, -18);
 
     public TaperedEvaluationTerm OpenFileRookBonus { get; set; } = new(46, 9);
 
-    public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(15, 15);
-
-    public TaperedEvaluationTerm BishopMobilityBonus { get; set; } = new(10, 9);
+    public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(15, 14);
 
     public TaperedEvaluationTerm RookMobilityBonus { get; set; } = new(5, 5);
 
-    public TaperedEvaluationTerm QueenMobilityBonus { get; set; } = new(4, 8);
+    public TaperedEvaluationTerm QueenMobilityBonus { get; set; } = new(4, 7);
 
-    public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-41, 21);
+    public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-39, 21);
 
-    public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-110, 10);
+    public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-105, 7);
 
-    public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(17, -5);
+    public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(16, -6);
 
-    public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(33, 80);
+    public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(31, 80);
 
     public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(
         new(0, 0),
-        new(4, 12),
+        new(2, 12),
         new(-11, 19),
         new(-11, 47),
-        new(21, 80),
-        new(62, 158),
-        new(104, 243),
+        new(19, 80),
+        new(58, 156),
+        new(95, 223),
+        new(0, 0));
+
+    public TaperedEvaluationTermByCount BishopMobilityBonus { get; set; } = new(
+        new(0, 0),
+        new(196, 160),
+        new(208, 159),
+        new(219, 198),
+        new(233, 214),
+        new(241, 229),
+        new(256, 249),
+        new(266, 259),
+        new(275, 271),
+        new(276, 277),
+        new(282, 282),
+        new(284, 279),
+        new(286, 278),
+        new(315, 272),
         new(0, 0));
 
     #endregion
@@ -323,6 +338,65 @@ public sealed class TaperedEvaluationTermByRank
             $"\"{nameof(Rank5)}\":{Rank5}," +
             $"\"{nameof(Rank6)}\":{Rank6}," +
             $"\"{nameof(Rank7)}\":{Rank7}" +
+            "}";
+    }
+}
+
+/// <summary>
+/// 13 for bishop,
+/// 14 bor rook
+/// </summary>
+public sealed class TaperedEvaluationTermByCount
+{
+    private readonly List<TaperedEvaluationTerm> _evaluationTermsIndexedByCount;
+
+    public TaperedEvaluationTerm Count0 => _evaluationTermsIndexedByCount[0];
+    public TaperedEvaluationTerm Count1 => _evaluationTermsIndexedByCount[1];
+    public TaperedEvaluationTerm Count2 => _evaluationTermsIndexedByCount[2];
+    public TaperedEvaluationTerm Count3 => _evaluationTermsIndexedByCount[3];
+    public TaperedEvaluationTerm Count4 => _evaluationTermsIndexedByCount[4];
+    public TaperedEvaluationTerm Count5 => _evaluationTermsIndexedByCount[5];
+    public TaperedEvaluationTerm Count6 => _evaluationTermsIndexedByCount[6];
+    public TaperedEvaluationTerm Count7 => _evaluationTermsIndexedByCount[7];
+    public TaperedEvaluationTerm Count8 => _evaluationTermsIndexedByCount[8];
+    public TaperedEvaluationTerm Count9 => _evaluationTermsIndexedByCount[9];
+    public TaperedEvaluationTerm Count10 => _evaluationTermsIndexedByCount[10];
+    public TaperedEvaluationTerm Count11 => _evaluationTermsIndexedByCount[11];
+    public TaperedEvaluationTerm Count12 => _evaluationTermsIndexedByCount[12];
+    public TaperedEvaluationTerm Count13 => _evaluationTermsIndexedByCount[13];
+    public TaperedEvaluationTerm Count14 => _evaluationTermsIndexedByCount[14];
+
+    public TaperedEvaluationTermByCount(
+        TaperedEvaluationTerm rank0, TaperedEvaluationTerm rank1, TaperedEvaluationTerm rank2,
+        TaperedEvaluationTerm rank3, TaperedEvaluationTerm rank4, TaperedEvaluationTerm rank5,
+        TaperedEvaluationTerm rank6, TaperedEvaluationTerm rank7, TaperedEvaluationTerm rank8,
+        TaperedEvaluationTerm rank9, TaperedEvaluationTerm rank10, TaperedEvaluationTerm rank11,
+        TaperedEvaluationTerm rank12, TaperedEvaluationTerm rank13, TaperedEvaluationTerm rank14)
+    {
+        _evaluationTermsIndexedByCount =
+            [rank0, rank1, rank2, rank3, rank4, rank5, rank6, rank7, rank8, rank9, rank10, rank11, rank12, rank13, rank14];
+    }
+
+    public TaperedEvaluationTerm this[int i] => _evaluationTermsIndexedByCount[i];
+
+    public override string ToString()
+    {
+        return "{" +
+            $"\"{nameof(Count0)}\":{Count0}," +
+            $"\"{nameof(Count1)}\":{Count1}," +
+            $"\"{nameof(Count2)}\":{Count2}," +
+            $"\"{nameof(Count3)}\":{Count3}," +
+            $"\"{nameof(Count4)}\":{Count4}," +
+            $"\"{nameof(Count5)}\":{Count5}," +
+            $"\"{nameof(Count6)}\":{Count6}," +
+            $"\"{nameof(Count7)}\":{Count7}," +
+            $"\"{nameof(Count8)}\":{Count8}," +
+            $"\"{nameof(Count9)}\":{Count9}," +
+            $"\"{nameof(Count10)}\":{Count10}," +
+            $"\"{nameof(Count11)}\":{Count11}," +
+            $"\"{nameof(Count12)}\":{Count12}," +
+            $"\"{nameof(Count13)}\":{Count13}," +
+            $"\"{nameof(Count14)}\":{Count14}" +
             "}";
     }
 }
