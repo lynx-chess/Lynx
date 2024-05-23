@@ -348,7 +348,7 @@ public sealed class TaperedEvaluationTermByRank
 /// </summary>
 public sealed class TaperedEvaluationTermByCount
 {
-    private readonly List<TaperedEvaluationTerm> _evaluationTermsIndexedByCount;
+    private readonly TaperedEvaluationTerm[] _evaluationTermsIndexedByCount;
 
     public TaperedEvaluationTerm Count0 => _evaluationTermsIndexedByCount[0];
     public TaperedEvaluationTerm Count1 => _evaluationTermsIndexedByCount[1];
