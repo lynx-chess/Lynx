@@ -456,6 +456,30 @@ public sealed class UCIHandler
                     }
                     break;
                 }
+            case "razoring2_maxdepth":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.Razoring2_MaxDepth = value;
+                    }
+                    break;
+                }
+            case "razoring2_alphamargin":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.Razoring2_AlphaMargin = value;
+                    }
+                    break;
+                }
+            case "razoring2_depthscalingfactor":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.Razoring2_DepthScalingFactor = value;
+                    }
+                    break;
+                }
 
             #endregion
 

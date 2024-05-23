@@ -97,47 +97,24 @@ public sealed partial class Engine
                 staticEval = ttScore;
             }
 
-            if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
+            // Razoring implementation, according to modern standards. Based on Ciekce + JW
+            if (depth <= Configuration.EngineSettings.Razoring2_MaxDepth
+                && Math.Abs(alpha) < 2000
+                && staticEval + (Configuration.EngineSettings.Razoring2_DepthScalingFactor * depth) <= alpha)
             {
-                // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
-                // Return formula by Ciekce, instead of just returning static eval
-                if (staticEval - (Configuration.EngineSettings.RFP_DepthScalingFactor * depth) >= beta)
-                {
+                var score = QuiescenceSearch(ply, alpha, alpha + 1);
+
+                if (score <= alpha)
+                    return score;
+            }
+
+            // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
+            // Return formula by Ciekce, instead of just returning static eval
+            if (depth <= Configuration.EngineSettings.RFP_MaxDepth && staticEval - (Configuration.EngineSettings.RFP_DepthScalingFactor * depth) >= beta)
+            {
 #pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
-                    return (staticEval + beta) / 2;
+                return (staticEval + beta) / 2;
 #pragma warning restore S3949 // Calculations should not overflow
-                }
-
-                // 🔍 Razoring - Strelka impl (CPW) - https://www.chessprogramming.org/Razoring#Strelka
-                if (depth <= Configuration.EngineSettings.Razoring_MaxDepth)
-                {
-                    var score = staticEval + Configuration.EngineSettings.Razoring_Depth1Bonus;
-
-                    if (score < beta)               // Static evaluation + bonus indicates fail-low node
-                    {
-                        if (depth == 1)
-                        {
-                            var qSearchScore = QuiescenceSearch(ply, alpha, beta);
-
-                            return qSearchScore > score
-                                ? qSearchScore
-                                : score;
-                        }
-
-                        score += Configuration.EngineSettings.Razoring_NotDepth1Bonus;
-
-                        if (score < beta)               // Static evaluation indicates fail-low node
-                        {
-                            var qSearchScore = QuiescenceSearch(ply, alpha, beta);
-                            if (qSearchScore < beta)    // Quiescence score also indicates fail-low node
-                            {
-                                return qSearchScore > score
-                                    ? qSearchScore
-                                    : score;
-                            }
-                        }
-                    }
-                }
             }
 
             // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
