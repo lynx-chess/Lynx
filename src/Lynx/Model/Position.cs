@@ -923,7 +923,7 @@ public class Position
     {
         var attacksCount = Attacks.BishopAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
 
-        return attacksCount * Configuration.EngineSettings.BishopMobilityBonus.PackedEvaluation;
+        return Configuration.EngineSettings.BishopMobilityBonus[attacksCount].PackedEvaluation;
     }
 
     /// <summary>
