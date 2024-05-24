@@ -617,9 +617,9 @@ public sealed class UCIHandler
     private async ValueTask HandleOpenBenchSPSAPretty(CancellationToken cancellationToken)
     {
         await SendCommand(
-            $"{"param name",-35} {"type",-5} {"def",-5} {"min",-5} {"max",-5} {"step",-5} {"R_end",-5}"
+            $"{"param name",-35} {"type",-5} {"def",-5} {"min",-5} {"max",-5} {"step",-5} {"step %",-7} {"R_end",-5}"
                 + Environment.NewLine
-                + "-----------------------------------------------------------------------",
+                + "----------------------------------------------------------------------------------------",
             cancellationToken);
 
         foreach (var tunableValue in SPSAAttributeHelpers.GenerateOpenBenchPrettyStrings())
