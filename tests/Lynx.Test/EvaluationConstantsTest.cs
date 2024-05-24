@@ -12,7 +12,7 @@ public class EvaluationConstantsTest
         (2 * (Math.Max(MiddleGameBishopTable.Max(), EndGameBishopTable.Max()) + Configuration.EngineSettings.BishopMobilityBonus[13].MG)) +
         (2 * (Math.Max(MiddleGameKnightTable.Max(), EndGameKnightTable.Max()))) +
         (2 * (Math.Max(MiddleGameRookTable.Max(), EndGameRookTable.Max()) + Configuration.EngineSettings.OpenFileRookBonus.MG + Configuration.EngineSettings.SemiOpenFileRookBonus.MG)) +
-        (9 * (Math.Max(MiddleGameQueenTable.Max(), EndGameQueenTable.Max()) + (Configuration.EngineSettings.QueenMobilityBonus.MG * 64))) +
+        (9 * (Math.Max(MiddleGameQueenTable.Max(), EndGameQueenTable.Max()) + (Configuration.EngineSettings.QueenMobilityBonus[27].MG * 64))) +
         (1 * (Math.Max(MiddleGameKingTable.Max(), EndGameKingTable.Max()) + (Configuration.EngineSettings.KingShieldBonus.MG * 8))) +
         MiddleGameQueenTable.Max(); // just in case
 

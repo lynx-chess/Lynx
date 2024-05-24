@@ -936,7 +936,7 @@ public class Position
     {
         var attacksCount = Attacks.QueenAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
 
-        return attacksCount * Configuration.EngineSettings.QueenMobilityBonus.PackedEvaluation;
+        return Configuration.EngineSettings.QueenMobilityBonus[attacksCount].PackedEvaluation;
     }
 
     /// <summary>
