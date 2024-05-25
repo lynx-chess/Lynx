@@ -921,13 +921,11 @@ public class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int BishopAdditionalEvaluation(int squareIndex, int pieceIndex)
     {
-        var sameSide = pieceIndex == (int)Piece.B
-            ? (int)Side.White
-            : (int)Side.Black;
+        const int pawnToBishop = (int)Piece.B - (int)Piece.P;
 
         var attacksCount =
             (Attacks.BishopAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both])
-                & (~OccupancyBitBoards[sameSide]))
+                & (~PieceBitBoards[pieceIndex - pawnToBishop]))
             .CountBits();
 
         return Configuration.EngineSettings.BishopMobilityBonus[attacksCount].PackedEvaluation;
