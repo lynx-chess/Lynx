@@ -441,12 +441,12 @@ public class PositionTest
     ///     a b c d e f g h
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("4k2r/p6p/8/8/8/8/2P4P/R3K3 w - - 0 1", 10, 4)]
+    [TestCase("4k2r/p6p/8/8/8/8/2P4P/R3K3 w - - 0 1", 9, 2)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("3k3r/p4p2/8/8/8/8/P6P/R2K4 b - - 0 1", 10, 4)]
+    [TestCase("3k3r/p4p2/8/8/8/8/P6P/R2K4 b - - 0 1", 9, 2)]
     public void StaticEvaluation_SemiOpenFileRookBonus(string fen, int rookMobilitySideToMove, int rookMobilitySideNotToMove)
     {
         Position position = new Position(fen);
@@ -475,12 +475,12 @@ public class PositionTest
     ///     a b c d e f g h
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("4k2r/p6p/8/8/8/8/2P4P/1R2K3 w - - 0 1", 11, 4)]
+    [TestCase("4k2r/p6p/8/8/8/8/2P4P/1R2K3 w - - 0 1", 10, 2)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("3k2r1/p4p2/8/8/8/8/P6P/R2K4 b - - 0 1", 11, 4)]
+    [TestCase("3k2r1/p4p2/8/8/8/8/P6P/R2K4 b - - 0 1", 10, 2)]
     public void StaticEvaluation_OpenFileRookBonus(string fen, int rookMobilitySideToMove, int rookMobilitySideNotToMove)
     {
         Position position = new Position(fen);
@@ -508,13 +508,13 @@ public class PositionTest
     ///     a b c d e f g h
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("4k2r/p6r/7p/8/8/8/R2P3P/R2K4 w - - 0 1")]
+    [TestCase("4k2r/p6r/7p/8/8/8/R2P3P/R2K4 w - - 0 1", 7, 6)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("4k2r/p3p2r/8/8/8/P7/R6P/R2K4 b - - 0 1")]
-    public void StaticEvaluation_DoubleSemiOpenFileRookBonus(string fen)
+    [TestCase("4k2r/p3p2r/8/8/8/P7/R6P/R2K4 b - - 0 1", 7, 6)]
+    public void StaticEvaluation_DoubleSemiOpenFileRookBonus(string fen, int rookMobilitySideToMove, int rookMobilitySideNotToMove)
     {
         Position position = new Position(fen);
         int evaluation = AdditionalPieceEvaluation(position, Piece.R)
@@ -525,7 +525,9 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(2 * Configuration.EngineSettings.SemiOpenFileRookBonus.MG, evaluation);
+        Assert.AreEqual(2 * Configuration.EngineSettings.SemiOpenFileRookBonus.MG
+            + Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideToMove].MG - Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideNotToMove].MG,
+        evaluation);
     }
 
     /// <summary>
@@ -540,12 +542,12 @@ public class PositionTest
     ///     a b c d e f g h
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("1r2k3/1r5p/p7/8/8/P7/R6P/R3K3 w - - 0 1", 9, 14)]
+    [TestCase("1r2k3/1r5p/p7/8/8/P7/R6P/R3K3 w - - 0 1", 6, 12)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("3k3r/p6r/7p/8/8/7P/P5R1/3K2R1 b - - 0 1", 9, 14)]
+    [TestCase("3k3r/p6r/7p/8/8/7P/P5R1/3K2R1 b - - 0 1", 6, 12)]
     public void StaticEvaluation_DoubleOpenFileRookBonus(string fen, int rookMobilitySideToMove, int rookMobilitySideNotToMove)
     {
         Position position = new Position(fen);
@@ -559,7 +561,7 @@ public class PositionTest
 
         Assert.AreEqual((-2 * Configuration.EngineSettings.OpenFileRookBonus.MG)
             + Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideToMove].MG
-            -Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideNotToMove].MG,
+            - Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideNotToMove].MG,
             evaluation);
     }
 
