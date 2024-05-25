@@ -8,13 +8,13 @@ namespace Lynx;
 
 [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
 internal class SPSAAttribute<T> : Attribute
-    where T : INumberBase<T>, IMultiplyOperators<T, T, T>, IConvertible, IParsable<T>, ISpanParsable<T>
+    where T : INumberBase<T>, IMultiplyOperators<T, T, T>, IConvertible, IParsable<T>, ISpanParsable<T>, IDivisionOperators<T, T, T>
 {
     private static readonly T _hundred;
 
     public T MinValue { get; }
     public T MaxValue { get; }
-    public T Step { get; }
+    public double Step { get; }
 
 #pragma warning disable S3963 // "static" fields should be initialized inline
     static SPSAAttribute()
@@ -27,13 +27,13 @@ internal class SPSAAttribute<T> : Attribute
         }
     }
 
-    public SPSAAttribute(T minValue, T maxValue, T step)
+    public SPSAAttribute(T minValue, T maxValue, double step)
     {
         if (typeof(T) == typeof(double))
         {
             minValue *= _hundred;
             maxValue *= _hundred;
-            step *= _hundred;
+            step *= 100;
         }
 
         MinValue = minValue;
@@ -63,8 +63,9 @@ internal class SPSAAttribute<T> : Attribute
     public string ToOBPrettyString(PropertyInfo property)
     {
         T val = GetPropertyValue(property);
+        var percentage = 100 * (Step / double.Parse((MaxValue - MinValue).ToString()!));
 
-        return $"{property.Name,-35} {"int",-5} {val,-5} {MinValue,-5} {MaxValue,-5} {Step,-5} {Configuration.EngineSettings.SPSA_OB_R_end,-5}";
+        return $"{property.Name,-35} {"int",-5} {val,-5} {MinValue,-5} {MaxValue,-5} {Step,-5} {$"{percentage:F2}%",-8}{Configuration.EngineSettings.SPSA_OB_R_end,-5}";
     }
 
     public KeyValuePair<string, JsonNode?> ToWeatherFactoryString(PropertyInfo property)
