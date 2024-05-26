@@ -203,65 +203,65 @@ public sealed class EngineSettings
 
     #region Evaluation
 
-    public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-21, -18);
+        public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-21,-17);
 
-    public TaperedEvaluationTerm OpenFileRookBonus { get; set; } = new(45, 7);
+        public TaperedEvaluationTerm OpenFileRookBonus { get; set; } = new(45,7);
 
-    public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(15, 8);
+        public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(15,8);
 
-    public TaperedEvaluationTerm QueenMobilityBonus { get; set; } = new(4, 7);
+        public TaperedEvaluationTerm QueenMobilityBonus { get; set; } = new(4,7);
 
-    public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-39, 21);
+        public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-39,21);
 
-    public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-105, 8);
+        public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-106,8);
 
-    public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(17, -5);
+        public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(16,-5);
 
-    public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(31, 80);
+        public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(31,79);
 
-    public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(
-            new(0, 0),
-            new(2, 13),
-            new(-11, 19),
-            new(-11, 47),
-            new(20, 80),
-            new(60, 156),
-            new(99, 224),
-            new(0, 0));
+        public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(
+                new(0,0),
+                new(2,13),
+                new(-11,19),
+                new(-12,47),
+                new(20,80),
+                new(60,156),
+                new(98,224),
+                new(0,0));
 
-    public TaperedEvaluationTermByCount BishopMobilityBonus { get; set; } = new(
-            new(0, 0),
-            new(196, 163),
-            new(207, 163),
-            new(218, 202),
-            new(232, 218),
-            new(240, 232),
-            new(255, 252),
-            new(266, 262),
-            new(275, 274),
-            new(276, 280),
-            new(282, 286),
-            new(284, 282),
-            new(285, 282),
-            new(314, 276),
-            new(0, 0));
+        public TaperedEvaluationTermByCount BishopMobilityBonus { get; set; } = new(
+                new(191,157),
+                new(214,185),
+                new(227,194),
+                new(235,217),
+                new(244,236),
+                new(253,255),
+                new(264,261),
+                new(270,270),
+                new(274,279),
+                new(275,280),
+                new(281,278),
+                new(282,279),
+                new(271,288),
+                new(313,271),
+                new(0,0));
 
-    public TaperedEvaluationTermByCount RookMobilityBonus { get; set; } = new(
-            new(296, 364),
-            new(302, 398),
-            new(308, 400),
-            new(311, 407),
-            new(310, 418),
-            new(317, 421),
-            new(320, 426),
-            new(325, 431),
-            new(327, 443),
-            new(330, 449),
-            new(335, 451),
-            new(337, 453),
-            new(338, 457),
-            new(350, 457),
-            new(348, 455));
+        public TaperedEvaluationTermByCount RookMobilityBonus { get; set; } = new(
+                new(296,366),
+                new(302,400),
+                new(308,401),
+                new(312,407),
+                new(311,417),
+                new(318,420),
+                new(320,426),
+                new(325,431),
+                new(327,443),
+                new(331,449),
+                new(335,451),
+                new(338,453),
+                new(338,457),
+                new(351,457),
+                new(348,454));
 
     #endregion
 }
