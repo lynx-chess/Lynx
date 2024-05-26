@@ -429,6 +429,7 @@ public sealed class TaperedEvaluationTermByCount
 [JsonSerializable(typeof(EngineSettings))]
 [JsonSerializable(typeof(TaperedEvaluationTerm))]
 [JsonSerializable(typeof(TaperedEvaluationTermByRank))]
+[JsonSerializable(typeof(TaperedEvaluationTermByCount))]
 [JsonSerializable(typeof(SPSAAttribute<int>))]
 [JsonSerializable(typeof(SPSAAttribute<double>))]
 internal partial class EngineSettingsJsonSerializerContext : JsonSerializerContext;
