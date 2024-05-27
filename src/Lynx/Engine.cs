@@ -306,13 +306,12 @@ public sealed partial class Engine
 
         try
         {
+            _isPondering = goCommand.Ponder;
             var searchResult = BestMove(goCommand);
 
-            // Checking settings in case the implementation inside was costly
-            if (Configuration.EngineSettings.IsPonder)
+            if (_isPondering)
             {
                 // Using either field or local copy for the rest of the method, since goCommand.Ponder could change
-                _isPondering = goCommand.Ponder;
 
                 // Avoiding the scenario where search finishes early (i.e. mate detected, max depth reached) and results comes
                 // before a potential ponderhit command
