@@ -15,7 +15,16 @@ public sealed partial class Engine
     private readonly ChannelWriter<string> _engineWriter;
 
     private bool _isSearching;
+
+    /// <summary>
+    /// Ongoing search is a pondering one and there has been a ponder hit
+    /// </summary>
     private bool _isPonderHit;
+
+    /// <summary>
+    /// Ongoing search is a pondering one
+    /// </summary>
+    private bool _isPondering;
 
 #pragma warning disable IDE0052, CS0414, S4487 // Remove unread private members
     private bool _isNewGameCommandSupported;
@@ -293,26 +302,33 @@ public sealed partial class Engine
         }
         _isSearching = true;
 
-        var isPondering = goCommand.Ponder;
-
         Thread.CurrentThread.Priority = ThreadPriority.Highest;
 
         try
         {
             var searchResult = BestMove(goCommand);
 
-            // Avoiding the scenario where search finishes early (i.e. mate detected, max depth reached) and results comes
-            // before a potential ponderhit command
-            SpinWait.SpinUntil(() => !isPondering || _isPonderHit || _absoluteSearchCancellationTokenSource.IsCancellationRequested);
-
-            if (_isPonderHit)
+            // Checking settings in case the implementation inside was costly
+            if (Configuration.EngineSettings.IsPonder)
             {
-                _isPonderHit = false;
-                goCommand.DisablePonder();
+                // Using either field or local copy for the rest of the method, since goCommand.Ponder could change
+                _isPondering = goCommand.Ponder;
 
-                searchResult = BestMove(goCommand);
+                // Avoiding the scenario where search finishes early (i.e. mate detected, max depth reached) and results comes
+                // before a potential ponderhit command
+                SpinWait.SpinUntil(() => _isPonderHit || _absoluteSearchCancellationTokenSource.IsCancellationRequested);
+
+                if (_isPonderHit)
+                {
+                    _isPonderHit = false;
+                    _isPondering = false;
+                    goCommand.DisablePonder();
+
+                    searchResult = BestMove(goCommand);
+                }
             }
 
+            // We print best move even in case of go pondeer + stop, and IDEs are expected to ignore it
             _moveToPonder = searchResult.Moves.Count >= 2 ? searchResult.Moves[1] : null;
             _engineWriter.TryWrite(BestMoveCommand.BestMove(searchResult.BestMove, _moveToPonder));
         }
@@ -323,6 +339,7 @@ public sealed partial class Engine
         finally
         {
             _isSearching = false;
+            _isPondering = false;
         }
     }
 
