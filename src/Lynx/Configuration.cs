@@ -12,7 +12,6 @@ public static class Configuration
 #pragma warning disable IDE1006 // Naming Styles
     private static int _UCI_AnalyseMode = 0;
 #pragma warning restore IDE1006 // Naming Styles
-    private static int _ponder = 0;
 
     public static bool IsDebug
     {
@@ -42,22 +41,6 @@ public static class Configuration
             else
             {
                 Interlocked.CompareExchange(ref _UCI_AnalyseMode, 0, 1);
-            }
-        }
-    }
-
-    public static bool IsPonder
-    {
-        get => Interlocked.CompareExchange(ref _ponder, 1, 1) == 1;
-        set
-        {
-            if (value)
-            {
-                Interlocked.CompareExchange(ref _ponder, 1, 0);
-            }
-            else
-            {
-                Interlocked.CompareExchange(ref _ponder, 0, 1);
             }
         }
     }
@@ -104,6 +87,8 @@ public sealed class EngineSettings
     public int OnlineTablebaseMaxSupportedPieces { get; set; } = 7;
 
     public bool ShowWDL { get; set; } = false;
+
+    public bool IsPonder { get; set; } = false;
 
     public double SPSA_OB_R_end { get; set; } = 0.02;
 

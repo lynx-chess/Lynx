@@ -14,20 +14,21 @@ public sealed partial class Engine
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
     private readonly ChannelWriter<string> _engineWriter;
 
+    private bool _isSearching;
+    private bool _isPonderHit;
+
 #pragma warning disable IDE0052, CS0414, S4487 // Remove unread private members
     private bool _isNewGameCommandSupported;
     private bool _isNewGameComing;
-    private bool _isPondering;
 #pragma warning restore IDE0052, CS0414 // Remove unread private members
 
     private Move? _moveToPonder;
+
     public double AverageDepth { get; private set; }
 
     public RegisterCommand? Registration { get; set; }
 
     public Game Game { get; private set; }
-
-    public bool IsSearching { get; private set; }
 
     public bool PendingConfirmation { get; set; }
 
@@ -143,12 +144,14 @@ public sealed partial class Engine
 
     public void PonderHit()
     {
-        Game.MakeMove(_moveToPonder!.Value);   // TODO ponder: do we also receive the position command? If so, remove this line
-        _isPondering = false;
+        _isPonderHit = true;
+        StopSearching();
     }
 
     public SearchResult BestMove(GoCommand goCommand)
     {
+        bool isPondering = goCommand.Ponder;
+
         _searchCancellationTokenSource = new();
         _absoluteSearchCancellationTokenSource = new();
 
@@ -172,56 +175,64 @@ public sealed partial class Engine
         // Inspired by Alexandria: time overhead to avoid timing out in the engine-gui communication process
         const int engineGuiCommunicationTimeOverhead = 50;
 
-        if (goCommand.WhiteTime != 0 || goCommand.BlackTime != 0)  // Cutechess sometimes sends negative wtime/btime
+        if (!isPondering)
         {
-            const int minSearchTime = 50;
+            if (goCommand.WhiteTime != 0 || goCommand.BlackTime != 0)  // Cutechess sometimes sends negative wtime/btime
+            {
+                const int minSearchTime = 50;
 
-            var movesDivisor = goCommand.MovesToGo == 0
-                ? Configuration.EngineSettings.DefaultMovesToGo
-                : goCommand.MovesToGo;
+                var movesDivisor = goCommand.MovesToGo == 0
+                    ? Configuration.EngineSettings.DefaultMovesToGo
+                    : goCommand.MovesToGo;
 
-            millisecondsLeft -= engineGuiCommunicationTimeOverhead;
-            millisecondsLeft = Math.Clamp(millisecondsLeft, minSearchTime, int.MaxValue); // Avoiding 0/negative values
+                millisecondsLeft -= engineGuiCommunicationTimeOverhead;
+                millisecondsLeft = Math.Clamp(millisecondsLeft, minSearchTime, int.MaxValue); // Avoiding 0/negative values
 
-            hardLimitTimeBound = (int)(millisecondsLeft * Configuration.EngineSettings.HardTimeBoundMultiplier);
+                hardLimitTimeBound = (int)(millisecondsLeft * Configuration.EngineSettings.HardTimeBoundMultiplier);
 
-            var softLimitBase = (millisecondsLeft / movesDivisor) + (millisecondsIncrement * Configuration.EngineSettings.SoftTimeBaseIncrementMultiplier);
-            softLimitTimeBound = Math.Min(hardLimitTimeBound, (int)(softLimitBase * Configuration.EngineSettings.SoftTimeBoundMultiplier));
+                var softLimitBase = (millisecondsLeft / movesDivisor) + (millisecondsIncrement * Configuration.EngineSettings.SoftTimeBaseIncrementMultiplier);
+                softLimitTimeBound = Math.Min(hardLimitTimeBound, (int)(softLimitBase * Configuration.EngineSettings.SoftTimeBoundMultiplier));
 
-            _logger.Info("Soft time bound: {0}s", 0.001 * softLimitTimeBound);
-            _logger.Info("Hard time bound: {0}s", 0.001 * hardLimitTimeBound);
+                _logger.Info("Soft time bound: {0}s", 0.001 * softLimitTimeBound);
+                _logger.Info("Hard time bound: {0}s", 0.001 * hardLimitTimeBound);
 
-            //return default!;
+                _searchCancellationTokenSource.CancelAfter(hardLimitTimeBound);
+            }
+            else if (goCommand.MoveTime > 0)
+            {
+                softLimitTimeBound = hardLimitTimeBound = goCommand.MoveTime - engineGuiCommunicationTimeOverhead;
+                _logger.Info("Time to move: {0}s", 0.001 * hardLimitTimeBound);
 
-            _searchCancellationTokenSource.CancelAfter(hardLimitTimeBound);
-        }
-        else if (goCommand.MoveTime > 0)
-        {
-            softLimitTimeBound = hardLimitTimeBound = goCommand.MoveTime - engineGuiCommunicationTimeOverhead;
-            _logger.Info("Time to move: {0}s", 0.001 * hardLimitTimeBound);
-
-            _searchCancellationTokenSource.CancelAfter(hardLimitTimeBound);
-        }
-        else if (goCommand.Depth > 0)
-        {
-            maxDepth = goCommand.Depth > Constants.AbsoluteMaxDepth ? Constants.AbsoluteMaxDepth : goCommand.Depth;
-        }
-        else if (goCommand.Infinite)
-        {
-            maxDepth = Configuration.EngineSettings.MaxDepth;
-            _logger.Info("Infinite search (depth {0})", maxDepth);
+                _searchCancellationTokenSource.CancelAfter(hardLimitTimeBound);
+            }
+            else if (goCommand.Depth > 0)
+            {
+                maxDepth = goCommand.Depth > Constants.AbsoluteMaxDepth ? Constants.AbsoluteMaxDepth : goCommand.Depth;
+            }
+            else if (goCommand.Infinite)
+            {
+                maxDepth = Configuration.EngineSettings.MaxDepth;
+                _logger.Info("Infinite search (depth {0})", maxDepth);
+            }
+            else
+            {
+                maxDepth = DefaultMaxDepth;
+                _logger.Warn("Unexpected or unsupported go command");
+            }
         }
         else
         {
-            maxDepth = DefaultMaxDepth;
-            _logger.Warn("Unexpected or unsupported go command");
+            maxDepth = Configuration.EngineSettings.MaxDepth;
+            _logger.Info("Pondering search (depth {0})", maxDepth);
         }
 
         SearchResult resultToReturn = IDDFS(maxDepth, softLimitTimeBound);
         //SearchResult resultToReturn = await SearchBestMove(maxDepth, decisionTime);
 
         Game.ResetCurrentPositionToBeforeSearchState();
-        if (resultToReturn.BestMove != default && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
+        if (!isPondering
+            && resultToReturn.BestMove != default
+            && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
         {
             Game.MakeMove(resultToReturn.BestMove);
             Game.UpdateInitialPosition();
@@ -276,19 +287,32 @@ public sealed partial class Engine
 
     public void Search(GoCommand goCommand)
     {
-        if (IsSearching)
+        if (_isSearching)
         {
             _logger.Warn("Search already in progress");
         }
+        _isSearching = true;
 
-        _isPondering = goCommand.Ponder;
-        IsSearching = true;
+        var isPondering = goCommand.Ponder;
 
         Thread.CurrentThread.Priority = ThreadPriority.Highest;
 
         try
         {
             var searchResult = BestMove(goCommand);
+
+            // Avoiding the scenario where search finishes early (i.e. mate detected, max depth reached) and results comes
+            // before a potential ponderhit command
+            SpinWait.SpinUntil(() => !isPondering || _isPonderHit || _absoluteSearchCancellationTokenSource.IsCancellationRequested);
+
+            if (_isPonderHit)
+            {
+                _isPonderHit = false;
+                goCommand.DisablePonder();
+
+                searchResult = BestMove(goCommand);
+            }
+
             _moveToPonder = searchResult.Moves.Count >= 2 ? searchResult.Moves[1] : null;
             _engineWriter.TryWrite(BestMoveCommand.BestMove(searchResult.BestMove, _moveToPonder));
         }
@@ -298,15 +322,13 @@ public sealed partial class Engine
         }
         finally
         {
-            IsSearching = false;
+            _isSearching = false;
         }
-        // TODO ponder: if ponder, continue with PonderAction, which is searching indefinitely for a move
     }
 
     public void StopSearching()
     {
         _absoluteSearchCancellationTokenSource.Cancel();
-        IsSearching = false;
     }
 
     private void InitializeTT()
