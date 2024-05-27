@@ -245,6 +245,16 @@ public sealed class EngineSettings
             new(285, 282),
             new(314, 276),
             new(0, 0));
+    public TaperedEvaluationTermByCount8 KnightMobilityBonus { get; set; } = new(
+            new(0, 0),
+            new(1, 1),
+            new(1, 1),
+            new(1, 1),
+            new(1, 1),
+            new(1, 1),
+            new(1, 1),
+            new(1, 1),
+            new(2, 2));
 
     public TaperedEvaluationTermByCount RookMobilityBonus { get; set; } = new(
             new(296, 364),
@@ -362,6 +372,54 @@ public sealed class TaperedEvaluationTermByRank
 }
 
 /// <summary>
+/// 9 for knight mobility
+/// </summary>
+public sealed class TaperedEvaluationTermByCount8
+{
+    private readonly TaperedEvaluationTerm[] _evaluationTermsIndexedByCount;
+
+    public TaperedEvaluationTerm Count0 => _evaluationTermsIndexedByCount[0];
+    public TaperedEvaluationTerm Count1 => _evaluationTermsIndexedByCount[1];
+    public TaperedEvaluationTerm Count2 => _evaluationTermsIndexedByCount[2];
+    public TaperedEvaluationTerm Count3 => _evaluationTermsIndexedByCount[3];
+    public TaperedEvaluationTerm Count4 => _evaluationTermsIndexedByCount[4];
+    public TaperedEvaluationTerm Count5 => _evaluationTermsIndexedByCount[5];
+    public TaperedEvaluationTerm Count6 => _evaluationTermsIndexedByCount[6];
+    public TaperedEvaluationTerm Count7 => _evaluationTermsIndexedByCount[7];
+    public TaperedEvaluationTerm Count8 => _evaluationTermsIndexedByCount[8];
+
+    public TaperedEvaluationTermByCount8(
+        TaperedEvaluationTerm rank0, TaperedEvaluationTerm rank1, TaperedEvaluationTerm rank2,
+        TaperedEvaluationTerm rank3, TaperedEvaluationTerm rank4, TaperedEvaluationTerm rank5,
+        TaperedEvaluationTerm rank6, TaperedEvaluationTerm rank7, TaperedEvaluationTerm rank8)
+    {
+        _evaluationTermsIndexedByCount =
+            [rank0, rank1, rank2, rank3, rank4, rank5, rank6, rank7, rank8];
+    }
+
+    public TaperedEvaluationTerm this[int i]
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => _evaluationTermsIndexedByCount[i];
+    }
+
+    public override string ToString()
+    {
+        return "{" +
+            $"\"{nameof(Count0)}\":{Count0}," +
+            $"\"{nameof(Count1)}\":{Count1}," +
+            $"\"{nameof(Count2)}\":{Count2}," +
+            $"\"{nameof(Count3)}\":{Count3}," +
+            $"\"{nameof(Count4)}\":{Count4}," +
+            $"\"{nameof(Count5)}\":{Count5}," +
+            $"\"{nameof(Count6)}\":{Count6}," +
+            $"\"{nameof(Count7)}\":{Count7}," +
+            $"\"{nameof(Count8)}\":{Count8}" +
+            "}";
+    }
+}
+
+/// <summary>
 /// 13 for bishop,
 /// 14 bor rook
 /// </summary>
@@ -430,6 +488,7 @@ public sealed class TaperedEvaluationTermByCount
 [JsonSerializable(typeof(TaperedEvaluationTerm))]
 [JsonSerializable(typeof(TaperedEvaluationTermByRank))]
 [JsonSerializable(typeof(TaperedEvaluationTermByCount))]
+[JsonSerializable(typeof(TaperedEvaluationTermByCount8))]
 [JsonSerializable(typeof(SPSAAttribute<int>))]
 [JsonSerializable(typeof(SPSAAttribute<double>))]
 [JsonSerializable(typeof(WeatherFactoryOutput<int>))]
