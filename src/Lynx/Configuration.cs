@@ -194,8 +194,6 @@ public sealed class EngineSettings
 
     public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(15, 8);
 
-    public TaperedEvaluationTerm QueenMobilityBonus { get; set; } = new(4, 7);
-
     public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-39, 21);
 
     public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-105, 8);
@@ -206,47 +204,77 @@ public sealed class EngineSettings
 
     public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(
             new(0, 0),
-            new(2, 13),
+            new(3, 13),
             new(-11, 19),
             new(-11, 47),
             new(20, 80),
-            new(60, 156),
-            new(99, 224),
+            new(62, 155),
+            new(101, 223),
             new(0, 0));
 
     public TaperedEvaluationTermByCount BishopMobilityBonus { get; set; } = new(
             new(0, 0),
-            new(196, 163),
-            new(207, 163),
-            new(218, 202),
-            new(232, 218),
-            new(240, 232),
-            new(255, 252),
-            new(266, 262),
-            new(275, 274),
-            new(276, 280),
-            new(282, 286),
-            new(284, 282),
-            new(285, 282),
-            new(314, 276),
+            new(196, 164),
+            new(205, 165),
+            new(215, 204),
+            new(230, 219),
+            new(238, 234),
+            new(253, 254),
+            new(264, 264),
+            new(273, 275),
+            new(273, 282),
+            new(279, 287),
+            new(281, 283),
+            new(282, 283),
+            new(311, 277),
             new(0, 0));
 
     public TaperedEvaluationTermByCount RookMobilityBonus { get; set; } = new(
-            new(296, 364),
-            new(302, 398),
-            new(308, 400),
-            new(311, 407),
-            new(310, 418),
-            new(317, 421),
-            new(320, 426),
-            new(325, 431),
-            new(327, 443),
-            new(330, 449),
-            new(335, 451),
-            new(337, 453),
-            new(338, 457),
-            new(350, 457),
-            new(348, 455));
+            new(305, 370),
+            new(311, 405),
+            new(317, 406),
+            new(320, 414),
+            new(318, 425),
+            new(325, 428),
+            new(328, 433),
+            new(333, 438),
+            new(334, 450),
+            new(338, 456),
+            new(342, 458),
+            new(344, 461),
+            new(345, 465),
+            new(357, 464),
+            new(354, 462));
+
+    public TaperedEvaluationTermByLargeCount QueenMobilityBonus { get; set; } = new(
+            new(620, 586),
+            new(618, 609),
+            new(612, 653),
+            new(616, 673),
+            new(622, 667),
+            new(626, 680),
+            new(630, 695),
+            new(630, 717),
+            new(632, 734),
+            new(635, 741),
+            new(636, 759),
+            new(636, 771),
+            new(637, 783),
+            new(637, 794),
+            new(638, 803),
+            new(640, 811),
+            new(641, 820),
+            new(640, 831),
+            new(643, 839),
+            new(644, 841),
+            new(655, 840),
+            new(657, 843),
+            new(665, 840),
+            new(679, 835),
+            new(693, 817),
+            new(780, 773),
+            new(779, 771),
+            new(809, 774));
 
     #endregion
 }
@@ -405,6 +433,97 @@ public sealed class TaperedEvaluationTermByCount
             $"\"{nameof(Count12)}\":{Count12}," +
             $"\"{nameof(Count13)}\":{Count13}," +
             $"\"{nameof(Count14)}\":{Count14}" +
+            "}";
+    }
+}
+
+/// <summary>
+/// 27 for queen,
+/// </summary>
+public sealed class TaperedEvaluationTermByLargeCount
+{
+    private readonly TaperedEvaluationTerm[] _evaluationTermsIndexedByCount;
+
+    public TaperedEvaluationTerm Count0 => _evaluationTermsIndexedByCount[0];
+    public TaperedEvaluationTerm Count1 => _evaluationTermsIndexedByCount[1];
+    public TaperedEvaluationTerm Count2 => _evaluationTermsIndexedByCount[2];
+    public TaperedEvaluationTerm Count3 => _evaluationTermsIndexedByCount[3];
+    public TaperedEvaluationTerm Count4 => _evaluationTermsIndexedByCount[4];
+    public TaperedEvaluationTerm Count5 => _evaluationTermsIndexedByCount[5];
+    public TaperedEvaluationTerm Count6 => _evaluationTermsIndexedByCount[6];
+    public TaperedEvaluationTerm Count7 => _evaluationTermsIndexedByCount[7];
+    public TaperedEvaluationTerm Count8 => _evaluationTermsIndexedByCount[8];
+    public TaperedEvaluationTerm Count9 => _evaluationTermsIndexedByCount[9];
+    public TaperedEvaluationTerm Count10 => _evaluationTermsIndexedByCount[10];
+    public TaperedEvaluationTerm Count11 => _evaluationTermsIndexedByCount[11];
+    public TaperedEvaluationTerm Count12 => _evaluationTermsIndexedByCount[12];
+    public TaperedEvaluationTerm Count13 => _evaluationTermsIndexedByCount[13];
+    public TaperedEvaluationTerm Count14 => _evaluationTermsIndexedByCount[14];
+    public TaperedEvaluationTerm Count15 => _evaluationTermsIndexedByCount[15];
+    public TaperedEvaluationTerm Count16 => _evaluationTermsIndexedByCount[16];
+    public TaperedEvaluationTerm Count17 => _evaluationTermsIndexedByCount[17];
+    public TaperedEvaluationTerm Count18 => _evaluationTermsIndexedByCount[18];
+    public TaperedEvaluationTerm Count19 => _evaluationTermsIndexedByCount[19];
+    public TaperedEvaluationTerm Count20 => _evaluationTermsIndexedByCount[20];
+    public TaperedEvaluationTerm Count21 => _evaluationTermsIndexedByCount[21];
+    public TaperedEvaluationTerm Count22 => _evaluationTermsIndexedByCount[22];
+    public TaperedEvaluationTerm Count23 => _evaluationTermsIndexedByCount[23];
+    public TaperedEvaluationTerm Count24 => _evaluationTermsIndexedByCount[24];
+    public TaperedEvaluationTerm Count25 => _evaluationTermsIndexedByCount[25];
+    public TaperedEvaluationTerm Count26 => _evaluationTermsIndexedByCount[26];
+    public TaperedEvaluationTerm Count27 => _evaluationTermsIndexedByCount[27];
+
+    public TaperedEvaluationTermByLargeCount(
+        TaperedEvaluationTerm rank0, TaperedEvaluationTerm rank1, TaperedEvaluationTerm rank2,
+        TaperedEvaluationTerm rank3, TaperedEvaluationTerm rank4, TaperedEvaluationTerm rank5,
+        TaperedEvaluationTerm rank6, TaperedEvaluationTerm rank7, TaperedEvaluationTerm rank8,
+        TaperedEvaluationTerm rank9, TaperedEvaluationTerm rank10, TaperedEvaluationTerm rank11,
+        TaperedEvaluationTerm rank12, TaperedEvaluationTerm rank13, TaperedEvaluationTerm rank14,
+        TaperedEvaluationTerm rank15, TaperedEvaluationTerm rank16, TaperedEvaluationTerm rank17,
+        TaperedEvaluationTerm rank18, TaperedEvaluationTerm rank19, TaperedEvaluationTerm rank20,
+        TaperedEvaluationTerm rank21, TaperedEvaluationTerm rank22, TaperedEvaluationTerm rank23,
+        TaperedEvaluationTerm rank24, TaperedEvaluationTerm rank25, TaperedEvaluationTerm rank26,
+        TaperedEvaluationTerm rank27)
+    {
+        _evaluationTermsIndexedByCount =
+            [rank0, rank1, rank2, rank3, rank4, rank5, rank6, rank7, rank8, rank9,
+            rank10, rank11, rank12, rank13, rank14, rank15, rank16, rank17, rank18, rank19,
+            rank20, rank21, rank22, rank23, rank24, rank25, rank26, rank27];
+    }
+
+    public TaperedEvaluationTerm this[int i] => _evaluationTermsIndexedByCount[i];
+
+    public override string ToString()
+    {
+        return "{" +
+            $"\"{nameof(Count0)}\":{Count0}," +
+            $"\"{nameof(Count1)}\":{Count1}," +
+            $"\"{nameof(Count2)}\":{Count2}," +
+            $"\"{nameof(Count3)}\":{Count3}," +
+            $"\"{nameof(Count4)}\":{Count4}," +
+            $"\"{nameof(Count5)}\":{Count5}," +
+            $"\"{nameof(Count6)}\":{Count6}," +
+            $"\"{nameof(Count7)}\":{Count7}," +
+            $"\"{nameof(Count8)}\":{Count8}," +
+            $"\"{nameof(Count9)}\":{Count9}," +
+            $"\"{nameof(Count10)}\":{Count10}," +
+            $"\"{nameof(Count11)}\":{Count11}," +
+            $"\"{nameof(Count12)}\":{Count12}," +
+            $"\"{nameof(Count13)}\":{Count13}," +
+            $"\"{nameof(Count14)}\":{Count14}" +
+            $"\"{nameof(Count15)}\":{Count15}" +
+            $"\"{nameof(Count16)}\":{Count16}" +
+            $"\"{nameof(Count17)}\":{Count17}" +
+            $"\"{nameof(Count18)}\":{Count18}" +
+            $"\"{nameof(Count19)}\":{Count19}" +
+            $"\"{nameof(Count20)}\":{Count20}" +
+            $"\"{nameof(Count21)}\":{Count21}" +
+            $"\"{nameof(Count22)}\":{Count22}" +
+            $"\"{nameof(Count23)}\":{Count23}" +
+            $"\"{nameof(Count24)}\":{Count24}" +
+            $"\"{nameof(Count25)}\":{Count25}" +
+            $"\"{nameof(Count26)}\":{Count26}" +
+            $"\"{nameof(Count27)}\":{Count27}" +
             "}";
     }
 }

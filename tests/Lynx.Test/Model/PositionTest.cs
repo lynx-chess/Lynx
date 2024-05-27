@@ -917,7 +917,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(mobilityDifference * Configuration.EngineSettings.QueenMobilityBonus.MG, evaluation);
+        Assert.AreEqual(Configuration.EngineSettings.QueenMobilityBonus[mobilityDifference].MG, evaluation);
     }
 
     /// <summary>
