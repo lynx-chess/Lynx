@@ -72,7 +72,6 @@ internal class SPSAAttribute<T> : Attribute
     {
         T val = GetPropertyValue(property);
 
-#pragma warning disable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
         return KeyValuePair.Create(
             property.Name,
             JsonSerializer.SerializeToNode(new
@@ -81,8 +80,8 @@ internal class SPSAAttribute<T> : Attribute
                 min_value = MinValue,
                 max_value = MaxValue,
                 step = Step,
-            }));
-#pragma warning restore IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
+            },
+            EngineSettingsJsonSerializerContext.Default.EngineSettings));
     }
 }
 
