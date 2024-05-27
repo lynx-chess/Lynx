@@ -205,51 +205,66 @@ public sealed class EngineSettings
 
     public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-21, -18);
 
-    public TaperedEvaluationTerm OpenFileRookBonus { get; set; } = new(46, 9);
+    public TaperedEvaluationTerm OpenFileRookBonus { get; set; } = new(45, 7);
 
-    public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(15, 14);
-
-    public TaperedEvaluationTerm RookMobilityBonus { get; set; } = new(5, 5);
+    public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(15, 8);
 
     public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-39, 21);
 
-    public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-105, 7);
+    public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-105, 8);
 
-    public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(16, -6);
+    public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(17, -5);
 
     public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(31, 80);
 
     public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(
-        new(0, 0),
-        new(2, 12),
-        new(-11, 19),
-        new(-11, 47),
-        new(19, 80),
-        new(58, 156),
-        new(95, 223),
-        new(0, 0));
+            new(0, 0),
+            new(2, 13),
+            new(-11, 19),
+            new(-11, 47),
+            new(20, 80),
+            new(60, 156),
+            new(99, 224),
+            new(0, 0));
 
     public TaperedEvaluationTermByCount BishopMobilityBonus { get; set; } = new(
-        new(0, 0),
-        new(196, 160),
-        new(208, 159),
-        new(219, 198),
-        new(233, 214),
-        new(241, 229),
-        new(256, 249),
-        new(266, 259),
-        new(275, 271),
-        new(276, 277),
-        new(282, 282),
-        new(284, 279),
-        new(286, 278),
-        new(315, 272),
-        new(0, 0));
+            new(0, 0),
+            new(196, 163),
+            new(207, 163),
+            new(218, 202),
+            new(232, 218),
+            new(240, 232),
+            new(255, 252),
+            new(266, 262),
+            new(275, 274),
+            new(276, 280),
+            new(282, 286),
+            new(284, 282),
+            new(285, 282),
+            new(314, 276),
+            new(0, 0));
+
+    public TaperedEvaluationTermByCount RookMobilityBonus { get; set; } = new(
+            new(296, 364),
+            new(302, 398),
+            new(308, 400),
+            new(311, 407),
+            new(310, 418),
+            new(317, 421),
+            new(320, 426),
+            new(325, 431),
+            new(327, 443),
+            new(330, 449),
+            new(335, 451),
+            new(337, 453),
+            new(338, 457),
+            new(350, 457),
+            new(348, 455));
 
     public TaperedEvaluationTermByLargeCount QueenMobilityBonus { get; set; } = new(
-        new(-1, -1),
-        new(-1, -1),
-        new(-1, -1),
+        new(0, 0),
+        new(0, 0),
+        new(0, 0),
         new(1, 1),
         new(1, 1),
         new(1, 1),
@@ -353,7 +368,11 @@ public sealed class TaperedEvaluationTermByRank
         _evaluationTermsIndexedByPiece = [rank0, rank1, rank2, rank3, rank4, rank5, rank6, rank7];
     }
 
-    public TaperedEvaluationTerm this[int i] => _evaluationTermsIndexedByPiece[i];
+    public TaperedEvaluationTerm this[int i]
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => _evaluationTermsIndexedByPiece[i];
+    }
 
     public override string ToString()
     {
@@ -405,7 +424,11 @@ public sealed class TaperedEvaluationTermByCount
             [rank0, rank1, rank2, rank3, rank4, rank5, rank6, rank7, rank8, rank9, rank10, rank11, rank12, rank13, rank14];
     }
 
-    public TaperedEvaluationTerm this[int i] => _evaluationTermsIndexedByCount[i];
+    public TaperedEvaluationTerm this[int i]
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => _evaluationTermsIndexedByCount[i];
+    }
 
     public override string ToString()
     {
@@ -525,6 +548,9 @@ public sealed class TaperedEvaluationTermByLargeCount
 [JsonSerializable(typeof(EngineSettings))]
 [JsonSerializable(typeof(TaperedEvaluationTerm))]
 [JsonSerializable(typeof(TaperedEvaluationTermByRank))]
+[JsonSerializable(typeof(TaperedEvaluationTermByCount))]
 [JsonSerializable(typeof(SPSAAttribute<int>))]
 [JsonSerializable(typeof(SPSAAttribute<double>))]
+[JsonSerializable(typeof(WeatherFactoryOutput<int>))]
+[JsonSerializable(typeof(WeatherFactoryOutput<double>))]
 internal partial class EngineSettingsJsonSerializerContext : JsonSerializerContext;

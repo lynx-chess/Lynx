@@ -894,9 +894,16 @@ public class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int RookAdditionalEvaluation(int squareIndex, int pieceIndex)
     {
-        var attacksCount = Attacks.RookAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
+        var sameSide = pieceIndex == (int)Piece.R
+            ? (int)Side.White
+            : (int)Side.Black;
 
-        var packedBonus = attacksCount * Configuration.EngineSettings.RookMobilityBonus.PackedEvaluation;
+        var attacksCount =
+            (Attacks.RookAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both])
+                & (~OccupancyBitBoards[sameSide]))
+            .CountBits();
+
+        var packedBonus = Configuration.EngineSettings.RookMobilityBonus[attacksCount].PackedEvaluation;
 
         const int pawnToRookOffset = (int)Piece.R - (int)Piece.P;
 
