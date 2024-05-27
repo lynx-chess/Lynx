@@ -217,7 +217,7 @@ public sealed class EngineSettings
 
     public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(17, -5);
 
-    public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(31, 80);
+    public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(30, 80);
 
     public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(
             new(0, 0),
@@ -229,49 +229,50 @@ public sealed class EngineSettings
             new(99, 224),
             new(0, 0));
 
+    public TaperedEvaluationTermByCount8 KnightMobilityBonus { get; set; } = new(
+            new(216, 250),
+            new(242, 246),
+            new(250, 255),
+            new(256, 255),
+            new(260, 263),
+            new(258, 271),
+            new(257, 275),
+            new(260, 276),
+            new(271, 271));
+
     public TaperedEvaluationTermByCount BishopMobilityBonus { get; set; } = new(
             new(0, 0),
-            new(196, 163),
-            new(207, 163),
-            new(218, 202),
-            new(232, 218),
-            new(240, 232),
-            new(255, 252),
-            new(266, 262),
-            new(275, 274),
-            new(276, 280),
-            new(282, 286),
-            new(284, 282),
-            new(285, 282),
-            new(314, 276),
+            new(194, 160),
+            new(205, 160),
+            new(216, 200),
+            new(230, 215),
+            new(238, 229),
+            new(253, 250),
+            new(263, 260),
+            new(272, 271),
+            new(273, 278),
+            new(279, 283),
+            new(281, 280),
+            new(283, 279),
+            new(312, 273),
             new(0, 0));
-    public TaperedEvaluationTermByCount8 KnightMobilityBonus { get; set; } = new(
-            new(0, 0),
-            new(1, 1),
-            new(1, 1),
-            new(1, 1),
-            new(1, 1),
-            new(1, 1),
-            new(1, 1),
-            new(1, 1),
-            new(2, 2));
 
     public TaperedEvaluationTermByCount RookMobilityBonus { get; set; } = new(
-            new(296, 364),
-            new(302, 398),
-            new(308, 400),
-            new(311, 407),
-            new(310, 418),
-            new(317, 421),
-            new(320, 426),
-            new(325, 431),
-            new(327, 443),
-            new(330, 449),
-            new(335, 451),
-            new(337, 453),
-            new(338, 457),
-            new(350, 457),
-            new(348, 455));
+            new(293, 363),
+            new(301, 397),
+            new(307, 399),
+            new(310, 406),
+            new(309, 416),
+            new(316, 419),
+            new(319, 425),
+            new(324, 430),
+            new(325, 442),
+            new(329, 448),
+            new(333, 450),
+            new(336, 452),
+            new(336, 456),
+            new(349, 456),
+            new(346, 453));
 
     #endregion
 }
