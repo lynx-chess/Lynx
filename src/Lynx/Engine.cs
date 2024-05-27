@@ -26,6 +26,11 @@ public sealed partial class Engine
     /// </summary>
     private bool _isPondering;
 
+    /// <summary>
+    /// Stop requested during pondering
+    /// </summary>
+    private bool _stopRequested;
+
 #pragma warning disable IDE0052, CS0414, S4487 // Remove unread private members
     private bool _isNewGameCommandSupported;
     private bool _isNewGameComing;
@@ -134,6 +139,7 @@ public sealed partial class Engine
         Game = new Game();
         _isNewGameComing = true;
         _isNewGameCommandSupported = true;
+        _stopRequested = false;
 
         ResetEngine();
 
@@ -149,6 +155,7 @@ public sealed partial class Engine
 
         Game = PositionCommand.ParseGame(rawPositionCommand, moves);
         _isNewGameComing = false;
+        _stopRequested = false;
     }
 
     public void PonderHit()
@@ -315,7 +322,12 @@ public sealed partial class Engine
 
                 // Avoiding the scenario where search finishes early (i.e. mate detected, max depth reached) and results comes
                 // before a potential ponderhit command
-                SpinWait.SpinUntil(() => _isPonderHit || _absoluteSearchCancellationTokenSource.IsCancellationRequested);
+                SpinWait.SpinUntil(() =>
+                    _isPonderHit
+                    || _absoluteSearchCancellationTokenSource.IsCancellationRequested
+                    || _stopRequested); // The previous one could haven been reset
+                                        // if stop command is processed before go command
+                                        // creates a new cancellation token source
 
                 if (_isPonderHit)
                 {
@@ -339,11 +351,13 @@ public sealed partial class Engine
         {
             _isSearching = false;
             _isPondering = false;
+            _stopRequested = false;
         }
     }
 
     public void StopSearching()
     {
+        _stopRequested = true;
         _absoluteSearchCancellationTokenSource.Cancel();
     }
 
