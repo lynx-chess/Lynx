@@ -3,10 +3,10 @@ using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
 using System.Diagnostics;
-using System.Reflection;
 using System.Runtime.Intrinsics.X86;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Threading;
 using System.Threading.Channels;
 
 namespace Lynx;
@@ -161,9 +161,13 @@ public sealed class UCIHandler
 
     private void HandlePonderHit()
     {
-        if (Configuration.IsPonder)
+        if (Configuration.EngineSettings.IsPonder)
         {
             _engine.PonderHit();
+        }
+        else
+        {
+            _logger.Warn("Unexpected 'ponderhit' command, given pondering is disabled. Ignoring it");
         }
     }
 
@@ -186,9 +190,8 @@ public sealed class UCIHandler
                 {
                     if (length > 4 && bool.TryParse(command[commandItems[4]], out var value))
                     {
-                        Configuration.IsPonder = value;
+                        Configuration.EngineSettings.IsPonder = value;
                     }
-                    _logger.Warn("Ponder not supported yet");
                     break;
                 }
             case "uci_analysemode":
@@ -608,7 +611,7 @@ public sealed class UCIHandler
 
     private async ValueTask HandleOpenBenchSPSA(CancellationToken cancellationToken)
     {
-        foreach(var tunableValue in SPSAAttributeHelpers.GenerateOpenBenchStrings())
+        foreach (var tunableValue in SPSAAttributeHelpers.GenerateOpenBenchStrings())
         {
             await SendCommand(tunableValue, cancellationToken);
         }

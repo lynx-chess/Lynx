@@ -64,7 +64,7 @@ public sealed partial class GoCommand : GUIBaseCommand
     public int Depth { get; }
     public int MoveTime { get; }
     public bool Infinite { get; }
-    public bool Ponder { get; }
+    public bool Ponder { get; private set; }
 
     public int Nodes => throw new NotImplementedException();
     public int Mate => throw new NotImplementedException();
@@ -104,7 +104,10 @@ public sealed partial class GoCommand : GUIBaseCommand
                             Infinite = true;
                             break;
                         case "ponder":
-                            Ponder = true;
+                            if (Configuration.EngineSettings.IsPonder)
+                            {
+                                Ponder = true;
+                            }
                             break;
                         case "depth":
                             Depth = int.Parse(group.Value);
@@ -121,4 +124,6 @@ public sealed partial class GoCommand : GUIBaseCommand
     }
 
     public static string Init() => Id;
+
+    public void DisablePonder() => Ponder = false;
 }

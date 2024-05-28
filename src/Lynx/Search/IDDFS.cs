@@ -307,7 +307,12 @@ public sealed partial class Engine
         SearchResult finalSearchResult;
         if (lastSearchResult is null)
         {
-            _logger.Warn("Search cancelled at depth 1, choosing first found legal move as best one");
+            // In the event of a quick ponderhit/stop while pondering because the opponent moved quickly, we don't want no warning triggered here
+            // when cancelling the pondering search
+            if (!_isPondering)
+            {
+                _logger.Warn("Search cancelled at depth 1, choosing first found legal move as best one");
+            }
             finalSearchResult = new(firstLegalMove, 0, 0, [firstLegalMove], alpha, beta);
         }
         else
