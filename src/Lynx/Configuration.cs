@@ -202,7 +202,7 @@ public sealed class EngineSettings
 
     public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(17, -5);
 
-    public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(31, 80);
+    public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(30, 80);
 
     public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(
             new(0, 0),
@@ -214,39 +214,50 @@ public sealed class EngineSettings
             new(99, 224),
             new(0, 0));
 
+    public TaperedEvaluationTermByCount8 KnightMobilityBonus { get; set; } = new(
+            new(216, 250),
+            new(242, 246),
+            new(250, 255),
+            new(256, 255),
+            new(260, 263),
+            new(258, 271),
+            new(257, 275),
+            new(260, 276),
+            new(271, 271));
+
     public TaperedEvaluationTermByCount BishopMobilityBonus { get; set; } = new(
             new(0, 0),
-            new(196, 163),
-            new(207, 163),
-            new(218, 202),
-            new(232, 218),
-            new(240, 232),
-            new(255, 252),
-            new(266, 262),
-            new(275, 274),
-            new(276, 280),
-            new(282, 286),
-            new(284, 282),
-            new(285, 282),
-            new(314, 276),
+            new(194, 160),
+            new(205, 160),
+            new(216, 200),
+            new(230, 215),
+            new(238, 229),
+            new(253, 250),
+            new(263, 260),
+            new(272, 271),
+            new(273, 278),
+            new(279, 283),
+            new(281, 280),
+            new(283, 279),
+            new(312, 273),
             new(0, 0));
 
     public TaperedEvaluationTermByCount RookMobilityBonus { get; set; } = new(
-            new(296, 364),
-            new(302, 398),
-            new(308, 400),
-            new(311, 407),
-            new(310, 418),
-            new(317, 421),
-            new(320, 426),
-            new(325, 431),
-            new(327, 443),
-            new(330, 449),
-            new(335, 451),
-            new(337, 453),
-            new(338, 457),
-            new(350, 457),
-            new(348, 455));
+            new(293, 363),
+            new(301, 397),
+            new(307, 399),
+            new(310, 406),
+            new(309, 416),
+            new(316, 419),
+            new(319, 425),
+            new(324, 430),
+            new(325, 442),
+            new(329, 448),
+            new(333, 450),
+            new(336, 452),
+            new(336, 456),
+            new(349, 456),
+            new(346, 453));
 
     #endregion
 }
@@ -347,6 +358,54 @@ public sealed class TaperedEvaluationTermByRank
 }
 
 /// <summary>
+/// 9 for knight mobility
+/// </summary>
+public sealed class TaperedEvaluationTermByCount8
+{
+    private readonly TaperedEvaluationTerm[] _evaluationTermsIndexedByCount;
+
+    public TaperedEvaluationTerm Count0 => _evaluationTermsIndexedByCount[0];
+    public TaperedEvaluationTerm Count1 => _evaluationTermsIndexedByCount[1];
+    public TaperedEvaluationTerm Count2 => _evaluationTermsIndexedByCount[2];
+    public TaperedEvaluationTerm Count3 => _evaluationTermsIndexedByCount[3];
+    public TaperedEvaluationTerm Count4 => _evaluationTermsIndexedByCount[4];
+    public TaperedEvaluationTerm Count5 => _evaluationTermsIndexedByCount[5];
+    public TaperedEvaluationTerm Count6 => _evaluationTermsIndexedByCount[6];
+    public TaperedEvaluationTerm Count7 => _evaluationTermsIndexedByCount[7];
+    public TaperedEvaluationTerm Count8 => _evaluationTermsIndexedByCount[8];
+
+    public TaperedEvaluationTermByCount8(
+        TaperedEvaluationTerm rank0, TaperedEvaluationTerm rank1, TaperedEvaluationTerm rank2,
+        TaperedEvaluationTerm rank3, TaperedEvaluationTerm rank4, TaperedEvaluationTerm rank5,
+        TaperedEvaluationTerm rank6, TaperedEvaluationTerm rank7, TaperedEvaluationTerm rank8)
+    {
+        _evaluationTermsIndexedByCount =
+            [rank0, rank1, rank2, rank3, rank4, rank5, rank6, rank7, rank8];
+    }
+
+    public TaperedEvaluationTerm this[int i]
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => _evaluationTermsIndexedByCount[i];
+    }
+
+    public override string ToString()
+    {
+        return "{" +
+            $"\"{nameof(Count0)}\":{Count0}," +
+            $"\"{nameof(Count1)}\":{Count1}," +
+            $"\"{nameof(Count2)}\":{Count2}," +
+            $"\"{nameof(Count3)}\":{Count3}," +
+            $"\"{nameof(Count4)}\":{Count4}," +
+            $"\"{nameof(Count5)}\":{Count5}," +
+            $"\"{nameof(Count6)}\":{Count6}," +
+            $"\"{nameof(Count7)}\":{Count7}," +
+            $"\"{nameof(Count8)}\":{Count8}" +
+            "}";
+    }
+}
+
+/// <summary>
 /// 13 for bishop,
 /// 14 bor rook
 /// </summary>
@@ -415,6 +474,7 @@ public sealed class TaperedEvaluationTermByCount
 [JsonSerializable(typeof(TaperedEvaluationTerm))]
 [JsonSerializable(typeof(TaperedEvaluationTermByRank))]
 [JsonSerializable(typeof(TaperedEvaluationTermByCount))]
+[JsonSerializable(typeof(TaperedEvaluationTermByCount8))]
 [JsonSerializable(typeof(SPSAAttribute<int>))]
 [JsonSerializable(typeof(SPSAAttribute<double>))]
 [JsonSerializable(typeof(WeatherFactoryOutput<int>))]
