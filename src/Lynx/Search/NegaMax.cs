@@ -297,9 +297,9 @@ public sealed partial class Engine
                 {
                     reduction = EvaluationConstants.LMRReductions[depth][movesSearched];
 
-                    if (pvNode)
+                    if (!pvNode)
                     {
-                        --reduction;
+                        ++reduction;
                     }
                     if (position.IsInCheck())   // i.e. move gives check
                     {
