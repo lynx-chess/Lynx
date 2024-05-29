@@ -252,7 +252,7 @@ public sealed partial class Engine
             }
             else
             {
-                if (movesSearched > 0 && !isInCheck
+                if (!isRoot && !isInCheck
                     && scores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue) // Quiet move
                 {
                     // Late Move Pruning (LMP) - all quiet moves can be pruned
