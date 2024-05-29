@@ -419,14 +419,6 @@ public sealed class UCIHandler
                     }
                     break;
                 }
-            case "lmp_movesdepthmultiplier":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.LMP_MovesDepthMultiplier = value;
-                    }
-                    break;
-                }
             case "see_badcapturereduction":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))

@@ -164,9 +164,6 @@ public sealed class EngineSettings
     [SPSAAttribute<int>(0, 10, 0.5)]
     public int LMP_BaseMovesToTry { get; set; } = 3;
 
-    [SPSAAttribute<int>(0, 10, 0.5)]
-    public int LMP_MovesDepthMultiplier { get; set; } = 3;
-
     public int History_MaxMoveValue { get; set; } = 8_192;
 
     /// <summary>
