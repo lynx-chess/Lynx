@@ -403,14 +403,6 @@ public sealed class UCIHandler
                     break;
                 }
 
-            case "lmp_maxdepth":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.LMP_MaxDepth = value;
-                    }
-                    break;
-                }
             case "lmp_basemovestotry":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
@@ -419,6 +411,7 @@ public sealed class UCIHandler
                     }
                     break;
                 }
+
             case "see_badcapturereduction":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
