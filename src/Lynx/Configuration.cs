@@ -546,35 +546,16 @@ public sealed class TaperedEvaluationTermByLargeCount
         TaperedEvaluationTerm rank24, TaperedEvaluationTerm rank25, TaperedEvaluationTerm rank26,
         TaperedEvaluationTerm rank27)
     {
+        #pragma warning disable IDE0055 // Discard formatting in this region
+
         _evaluationTermsIndexedByCount =
-            [rank0,
-                rank1,
-                rank2,
-                rank3,
-                rank4,
-                rank5,
-                rank6,
-                rank7,
-                rank8,
-                rank9,
-                rank10,
-                rank11,
-                rank12,
-                rank13,
-                rank14,
-                rank15,
-                rank16,
-                rank17,
-                rank18,
-                rank19,
-                rank20,
-                rank21,
-                rank22,
-                rank23,
-                rank24,
-                rank25,
-                rank26,
-                rank27];
+        [
+            rank0, rank1, rank2, rank3, rank4, rank5, rank6, rank7, rank8, rank9,
+            rank10, rank11, rank12, rank13, rank14, rank15, rank16, rank17, rank18, rank19,
+            rank20, rank21, rank22, rank23, rank24, rank25, rank26, rank27
+        ];
+
+        #pragma warning restore IDE0055
     }
 
     public TaperedEvaluationTerm this[int i] => _evaluationTermsIndexedByCount[i];
@@ -596,19 +577,19 @@ public sealed class TaperedEvaluationTermByLargeCount
             $"\"{nameof(Count11)}\":{Count11}," +
             $"\"{nameof(Count12)}\":{Count12}," +
             $"\"{nameof(Count13)}\":{Count13}," +
-            $"\"{nameof(Count14)}\":{Count14}" +
-            $"\"{nameof(Count15)}\":{Count15}" +
-            $"\"{nameof(Count16)}\":{Count16}" +
-            $"\"{nameof(Count17)}\":{Count17}" +
-            $"\"{nameof(Count18)}\":{Count18}" +
-            $"\"{nameof(Count19)}\":{Count19}" +
-            $"\"{nameof(Count20)}\":{Count20}" +
-            $"\"{nameof(Count21)}\":{Count21}" +
-            $"\"{nameof(Count22)}\":{Count22}" +
-            $"\"{nameof(Count23)}\":{Count23}" +
-            $"\"{nameof(Count24)}\":{Count24}" +
-            $"\"{nameof(Count25)}\":{Count25}" +
-            $"\"{nameof(Count26)}\":{Count26}" +
+            $"\"{nameof(Count14)}\":{Count14}," +
+            $"\"{nameof(Count15)}\":{Count15}," +
+            $"\"{nameof(Count16)}\":{Count16}," +
+            $"\"{nameof(Count17)}\":{Count17}," +
+            $"\"{nameof(Count18)}\":{Count18}," +
+            $"\"{nameof(Count19)}\":{Count19}," +
+            $"\"{nameof(Count20)}\":{Count20}," +
+            $"\"{nameof(Count21)}\":{Count21}," +
+            $"\"{nameof(Count22)}\":{Count22}," +
+            $"\"{nameof(Count23)}\":{Count23}," +
+            $"\"{nameof(Count24)}\":{Count24}," +
+            $"\"{nameof(Count25)}\":{Count25}," +
+            $"\"{nameof(Count26)}\":{Count26}," +
             $"\"{nameof(Count27)}\":{Count27}" +
             "}";
     }

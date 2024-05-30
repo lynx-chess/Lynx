@@ -968,7 +968,7 @@ public class Position
     }
 
     /// <summary>
-    /// Open and semiopenfile penalties, shield bonus, virtua mobility bonus/penalty
+    /// Open and semiopenfile penalties, shield bonus, virtual mobility bonus/penalty
     /// </summary>
     /// <param name="squareIndex"></param>
     /// <param name="kingSide"></param>
