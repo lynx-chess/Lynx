@@ -976,7 +976,11 @@ public class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal int KingAdditionalEvaluation(int squareIndex, Side kingSide)
     {
-        var attacksCount = Attacks.QueenAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
+        var attacksCount =
+            (Attacks.QueenAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both])
+                & (~OccupancyBitBoards[(int)kingSide]))
+            .CountBits();
+
         int packedBonus = Configuration.EngineSettings.VirtualKingMobilityBonus[attacksCount].PackedEvaluation;
 
         var kingSideOffset = Utils.PieceOffset(kingSide);

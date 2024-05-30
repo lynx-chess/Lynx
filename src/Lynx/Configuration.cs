@@ -190,104 +190,104 @@ public sealed class EngineSettings
 
     public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-21, -18);
 
-    public TaperedEvaluationTerm OpenFileRookBonus { get; set; } = new(45, 7);
+    public TaperedEvaluationTerm OpenFileRookBonus { get; set; } = new(46, 6);
 
     public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(15, 8);
 
-    public TaperedEvaluationTerm QueenMobilityBonus { get; set; } = new(4, 7);
+    public TaperedEvaluationTerm QueenMobilityBonus { get; set; } = new(4, 8);
 
-    public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-39, 21);
+    public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-33, 20);
 
-    public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-105, 8);
+    public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-100, 16);
 
-    public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(17, -5);
+    public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(13, -11);
 
     public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(30, 80);
 
     public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(
             new(0, 0),
-            new(2, 13),
-            new(-11, 19),
-            new(-11, 47),
+            new(2, 11),
+            new(-11, 18),
+            new(-11, 46),
             new(20, 80),
-            new(60, 156),
-            new(99, 224),
+            new(61, 157),
+            new(101, 224),
             new(0, 0));
 
     public TaperedEvaluationTermByLargeCount VirtualKingMobilityBonus { get; set; } = new(
-    new(0, 0),
-    new(0, 0),
-    new(0, 0),
-    new(1, 1),
-    new(1, 1),
-    new(1, 1),
-    new(1, 1),
-    new(1, 1),
-    new(1, 1),
-    new(1, 1),
-    new(1, 1),
-    new(1, 1),
-    new(1, 1),
-    new(1, 1),
-    new(1, 1),
-    new(1, 1),
-    new(1, 1),
-    new(1, 1),
-    new(1, 1),
-    new(1, 1),
-    new(1, 1),
-    new(1, 1),
-    new(1, 1),
-    new(1, 1),
-    new(1, 1),
-    new(1, 1),
-    new(1, 1),
-    new(2, 2));
+            new(28, -6),
+            new(30, 22),
+            new(27, 19),
+            new(25, 6),
+            new(22, 8),
+            new(24, 3),
+            new(21, 2),
+            new(17, 4),
+            new(15, 13),
+            new(7, 12),
+            new(-0, 16),
+            new(-8, 18),
+            new(-14, 20),
+            new(-26, 22),
+            new(-36, 22),
+            new(-51, 22),
+            new(-60, 17),
+            new(-64, 15),
+            new(-62, 10),
+            new(-51, 0),
+            new(-45, -8),
+            new(-45, -15),
+            new(-49, -22),
+            new(-22, -37),
+            new(-36, -48),
+            new(-4, -61),
+            new(-44, -71),
+            new(10, -80));
 
     public TaperedEvaluationTermByCount8 KnightMobilityBonus { get; set; } = new(
-            new(216, 250),
-            new(242, 246),
+            new(216, 249),
+            new(241, 246),
             new(250, 255),
             new(256, 255),
-            new(260, 263),
+            new(260, 262),
             new(258, 271),
-            new(257, 275),
-            new(260, 276),
-            new(271, 271));
+            new(258, 274),
+            new(261, 276),
+            new(272, 270));
 
     public TaperedEvaluationTermByCount BishopMobilityBonus { get; set; } = new(
             new(0, 0),
-            new(194, 160),
-            new(205, 160),
-            new(216, 200),
+            new(194, 162),
+            new(205, 159),
+            new(216, 199),
             new(230, 215),
             new(238, 229),
-            new(253, 250),
-            new(263, 260),
-            new(272, 271),
-            new(273, 278),
+            new(253, 249),
+            new(263, 259),
+            new(273, 271),
+            new(273, 277),
             new(279, 283),
-            new(281, 280),
-            new(283, 279),
-            new(312, 273),
+            new(282, 279),
+            new(284, 277),
+            new(315, 270),
             new(0, 0));
 
     public TaperedEvaluationTermByCount RookMobilityBonus { get; set; } = new(
-            new(293, 363),
-            new(301, 397),
+            new(294, 364),
+            new(302, 396),
             new(307, 399),
-            new(310, 406),
-            new(309, 416),
-            new(316, 419),
-            new(319, 425),
-            new(324, 430),
-            new(325, 442),
-            new(329, 448),
-            new(333, 450),
-            new(336, 452),
-            new(336, 456),
-            new(349, 456),
-            new(346, 453));
+            new(311, 406),
+            new(309, 417),
+            new(316, 421),
+            new(319, 427),
+            new(323, 431),
+            new(325, 443),
+            new(329, 450),
+            new(333, 452),
+            new(335, 454),
+            new(336, 458),
+            new(349, 458),
+            new(345, 457));
 
     #endregion
 }
