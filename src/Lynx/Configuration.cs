@@ -162,7 +162,7 @@ public sealed class EngineSettings
     public int LMP_MaxDepth { get; set; } = 6;
 
     [SPSAAttribute<int>(0, 10, 0.5)]
-    public int LMP_BaseMovesToTry { get; set; } = 0;
+    public int LMP_BaseMovesToTry { get; set; } = 1;
 
     [SPSAAttribute<int>(0, 10, 0.5)]
     public int LMP_MovesDepthMultiplier { get; set; } = 3;
