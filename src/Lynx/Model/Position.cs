@@ -968,7 +968,7 @@ public class Position
     }
 
     /// <summary>
-    /// Open and semiopenfile penalties, shield bonus
+    /// Open and semiopenfile penalties, shield bonus, virtual mobility bonus/penalty
     /// </summary>
     /// <param name="squareIndex"></param>
     /// <param name="kingSide"></param>
@@ -976,7 +976,9 @@ public class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal int KingAdditionalEvaluation(int squareIndex, Side kingSide)
     {
-        int packedBonus = 0;
+        var attacksCount = Attacks.QueenAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
+        int packedBonus = Configuration.EngineSettings.VirtualKingMobilityBonus[attacksCount].PackedEvaluation;
+
         var kingSideOffset = Utils.PieceOffset(kingSide);
 
         if (PieceBitBoards[(int)Piece.r - kingSideOffset] + PieceBitBoards[(int)Piece.q - kingSideOffset] != 0) // areThereOppositeSideRooksOrQueens
