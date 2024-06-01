@@ -196,98 +196,98 @@ public sealed class EngineSettings
 
     public TaperedEvaluationTerm QueenMobilityBonus { get; set; } = new(4, 8);
 
-    public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-34, 19);
+    public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-30, 19);
 
-    public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-102, 19);
+    public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-96, 16);
 
-    public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(14, -12);
+    public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(21, -11);
 
     public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(30, 80);
 
     public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(
             new(0, 0),
-            new(2, 12),
+            new(3, 11),
             new(-11, 19),
             new(-11, 47),
-            new(19, 81),
-            new(60, 159),
-            new(101, 226),
+            new(20, 81),
+            new(61, 158),
+            new(105, 224),
             new(0, 0));
 
     public TaperedEvaluationTermByLargeCount VirtualKingMobilityBonus { get; set; } = new(
             new(0, 0),
             new(0, 0),
             new(0, 0),
-            new(25, 8),
-            new(54, -10),
-            new(20, 31),
-            new(18, 19),
-            new(16, 9),
-            new(12, 11),
+            new(37, -8),
+            new(51, -12),
+            new(24, 21),
+            new(21, 12),
+            new(19, 2),
+            new(15, 5),
+            new(11, 4),
             new(10, 9),
-            new(8, 13),
-            new(3, 16),
-            new(3, 10),
-            new(-2, 13),
-            new(-11, 15),
-            new(-21, 17),
-            new(-30, 13),
-            new(-41, 10),
-            new(-48, 7),
-            new(-56, -0),
-            new(-47, -10),
-            new(-43, -18),
-            new(-42, -30),
-            new(-38, -40),
-            new(-45, -52),
-            new(-23, -74),
-            new(-63, -83),
-            new(-36, -102));
+            new(2, 14),
+            new(1, 9),
+            new(-5, 13),
+            new(-15, 16),
+            new(-25, 19),
+            new(-35, 16),
+            new(-46, 13),
+            new(-52, 11),
+            new(-60, 4),
+            new(-51, -4),
+            new(-47, -13),
+            new(-45, -23),
+            new(-40, -33),
+            new(-46, -43),
+            new(-23, -64),
+            new(-62, -72),
+            new(-37, -90));
 
     public TaperedEvaluationTermByCount8 KnightMobilityBonus { get; set; } = new(
             new(0, 0),
-            new(25, -4),
-            new(34, 5),
+            new(25, -3),
+            new(34, 6),
             new(40, 5),
             new(44, 12),
             new(42, 21),
-            new(42, 24),
-            new(44, 26),
-            new(56, 21));
+            new(42, 25),
+            new(45, 26),
+            new(57, 20));
 
     public TaperedEvaluationTermByCount BishopMobilityBonus { get; set; } = new(
-            new(-193, -164),
+            new(-197, -157),
             new(0, 0),
-            new(11, -3),
-            new(22, 37),
-            new(36, 52),
-            new(44, 66),
-            new(60, 86),
-            new(70, 96),
-            new(79, 108),
-            new(80, 114),
-            new(86, 119),
-            new(89, 115),
-            new(91, 113),
-            new(122, 106),
+            new(11, -0),
+            new(21, 40),
+            new(35, 55),
+            new(43, 70),
+            new(58, 91),
+            new(68, 101),
+            new(77, 112),
+            new(78, 119),
+            new(84, 124),
+            new(87, 120),
+            new(89, 118),
+            new(121, 111),
             new(0, 0));
 
     public TaperedEvaluationTermByCount RookMobilityBonus { get; set; } = new(
             new(0, 0),
-            new(8, 32),
-            new(13, 35),
-            new(16, 42),
-            new(15, 53),
-            new(21, 57),
-            new(24, 63),
-            new(29, 68),
-            new(30, 80),
-            new(34, 86),
-            new(38, 88),
-            new(41, 91),
-            new(41, 95),
-            new(55, 94),
-            new(51, 93));
+            new(7, 32),
+            new(12, 34),
+            new(15, 41),
+            new(14, 52),
+            new(20, 56),
+            new(23, 62),
+            new(28, 67),
+            new(29, 79),
+            new(33, 85),
+            new(38, 87),
+            new(40, 90),
+            new(40, 94),
+            new(55, 93),
+            new(50, 92));
 
     #endregion
 }
