@@ -325,7 +325,7 @@ public sealed partial class Engine
                     && scores[moveIndex] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
                 {
                     reduction += Configuration.EngineSettings.SEE_BadCaptureReduction;
-                    reduction = Math.Clamp(reduction, 0, depth - 1);
+                    reduction = Math.Clamp(reduction, 0, Math.Max(0, depth - 2));
                 }
 
                 // Search with reduced depth
