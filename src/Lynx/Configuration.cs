@@ -104,7 +104,7 @@ public sealed class EngineSettings
 
     #endregion
 
-    [SPSAAttribute<int>(2, 10, 0.5)]
+    [SPSAAttribute<int>(3, 10, 0.5)]
     public int LMR_MinDepth { get; set; } = 3;
 
     [SPSAAttribute<int>(1, 10, 0.5)]
