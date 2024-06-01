@@ -379,6 +379,11 @@ internal static readonly short[] EndGameKingTable =
     /// Evaluation to be returned when there's one single legal move
     /// </summary>
     public const int SingleMoveEvaluation = 200;
+
+    /// <summary>
+    /// Min depth to avoid reductions to fall into QSearch
+    /// </summary>
+    public const int ReductionsMinDepth = 3;
 }
 
 #pragma warning restore IDE1006 // Naming Styles
