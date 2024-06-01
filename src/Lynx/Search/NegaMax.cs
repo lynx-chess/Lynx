@@ -551,12 +551,8 @@ public sealed partial class Engine
 
             var move = pseudoLegalMoves[i];
 
-            // Prune bad captures
-            if (scores[i] < EvaluationConstants.PromotionMoveScoreValue && scores[i] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
-            {
-                continue;
-            }
-
+            // Before pruning, despite the potential impact hit due to the need of accurate isThereAnyValidCapture
+            // in order to being able to use CanGenerateAtLeastAValid_Quiet_Move for mate detection
             var gameState = position.MakeMove(move);
             if (!position.WasProduceByAValidMove())
             {
@@ -564,8 +560,16 @@ public sealed partial class Engine
                 continue;
             }
 
-            ++_nodes;
             isThereAnyValidCapture = true;
+
+            // Prune bad captures
+            if (scores[i] < EvaluationConstants.PromotionMoveScoreValue && scores[i] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
+            {
+                position.UnmakeMove(move, gameState);
+                continue;
+            }
+
+            ++_nodes;
 
             PrintPreMove(position, ply, move, isQuiescence: true);
 
@@ -601,7 +605,7 @@ public sealed partial class Engine
 
         if (bestMove is null
             && !isThereAnyValidCapture
-            && !MoveGenerator.CanGenerateAtLeastAValidMove(position))
+            && !MoveGenerator.CanGenerateAtLeastAValidQuietMove(position))
         {
             var finalEval = Position.EvaluateFinalPosition(ply, position.IsInCheck());
             _tt.RecordHash(_ttMask, position, 0, ply, finalEval, NodeType.Exact);
