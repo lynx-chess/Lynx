@@ -304,6 +304,10 @@ public sealed partial class Engine
                     {
                         --reduction;
                     }
+                    if (isInCheck)
+                    {
+                        --reduction;
+                    }
 
                     if (ttBestMove != default && isCapture)
                     {
