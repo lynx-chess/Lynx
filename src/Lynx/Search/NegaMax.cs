@@ -536,6 +536,8 @@ public sealed partial class Engine
             scores[i] = ScoreMove(pseudoLegalMoves[i], ply, isNotQSearch: false, ttBestMove);
         }
 
+        List<Move> prunedMoves = new(pseudoLegalMoves.Length);
+
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
             // Incremental move sorting, inspired by https://github.com/jw1912/Chess-Challenge and suggested by toanth
@@ -554,6 +556,7 @@ public sealed partial class Engine
             // Prune bad captures
             if (scores[i] < EvaluationConstants.PromotionMoveScoreValue && scores[i] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
             {
+                prunedMoves.Add(move);
                 continue;
             }
 
@@ -600,13 +603,34 @@ public sealed partial class Engine
         }
 
         if (bestMove is null
-            && !isThereAnyValidCapture
-            && !MoveGenerator.CanGenerateAtLeastAValidMove(position))
+            && !isThereAnyValidCapture)
         {
-            var finalEval = Position.EvaluateFinalPosition(ply, position.IsInCheck());
-            _tt.RecordHash(_ttMask, position, 0, ply, finalEval, NodeType.Exact);
+            var isAnyPrunedCaptureValid = false;
 
-            return finalEval;
+            for (int i = 0; i < prunedMoves.Count; ++i)
+            {
+                var prunedMove = prunedMoves[i];
+                var gameState = position.MakeMove(prunedMove);
+
+                if (position.WasProduceByAValidMove())
+                {
+                    isAnyPrunedCaptureValid = true;
+
+                    position.UnmakeMove(prunedMove, gameState);
+                    break;
+                }
+
+                position.UnmakeMove(prunedMove, gameState);
+            }
+
+            if (!isAnyPrunedCaptureValid
+                && !MoveGenerator.CanGenerateAtLeastAValidQuietMove(position))
+            {
+                var finalEval = Position.EvaluateFinalPosition(ply, position.IsInCheck());
+                _tt.RecordHash(_ttMask, position, 0, ply, finalEval, NodeType.Exact);
+
+                return finalEval;
+            }
         }
 
         _tt.RecordHash(_ttMask, position, 0, ply, alpha, nodeType, bestMove);
