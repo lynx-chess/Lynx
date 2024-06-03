@@ -693,7 +693,7 @@ public class Position
                 packedScore += EvaluationConstants.PackedPSQT[pieceIndex][pieceSquareIndex];
                 gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
 
-                packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
+                packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, OccupancyBitBoards[(int)Side.White]);
             }
         }
 
@@ -710,7 +710,7 @@ public class Position
                 packedScore += EvaluationConstants.PackedPSQT[pieceIndex][pieceSquareIndex];
                 gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
 
-                packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
+                packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, OccupancyBitBoards[(int)Side.Black]);
             }
         }
 
@@ -844,14 +844,14 @@ public class Position
     /// <param name="pieceIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int AdditionalPieceEvaluation(int pieceSquareIndex, int pieceIndex)
+    internal int AdditionalPieceEvaluation(int pieceSquareIndex, int pieceIndex, ulong sameSideOccupancy)
     {
         return pieceIndex switch
         {
             (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(pieceSquareIndex, pieceIndex),
-            (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex),
+            (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex, sameSideOccupancy),
             (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex),
-            (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(pieceSquareIndex, pieceIndex),
+            (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(pieceSquareIndex, pieceIndex, sameSideOccupancy),
             (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex),
             _ => 0
         };
@@ -893,15 +893,11 @@ public class Position
     /// <param name="pieceIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int RookAdditionalEvaluation(int squareIndex, int pieceIndex)
+    private int RookAdditionalEvaluation(int squareIndex, int pieceIndex, ulong sameSideOccupancy)
     {
-        var sameSide = pieceIndex == (int)Piece.R
-            ? (int)Side.White
-            : (int)Side.Black;
-
         var attacksCount =
             (Attacks.RookAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both])
-                & (~OccupancyBitBoards[sameSide]))
+                & (~sameSideOccupancy))
             .CountBits();
 
         var packedBonus = Configuration.EngineSettings.RookMobilityBonus[attacksCount].PackedEvaluation;
@@ -927,14 +923,11 @@ public class Position
     /// <param name="pieceIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int KnightAdditionalEvaluation(int squareIndex, int pieceIndex)
+    private static int KnightAdditionalEvaluation(int squareIndex, int pieceIndex, ulong sameSideOccupancy)
     {
-        var sameSide = pieceIndex == (int)Piece.N
-            ? (int)Side.White
-            : (int)Side.Black;
-
         var attacksCount =
-            (Attacks.KnightAttacks[squareIndex] & (~OccupancyBitBoards[sameSide]))
+            (Attacks.KnightAttacks[squareIndex]
+                & (~sameSideOccupancy))
             .CountBits();
 
         return Configuration.EngineSettings.KnightMobilityBonus[attacksCount].PackedEvaluation;
