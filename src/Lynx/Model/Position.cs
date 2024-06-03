@@ -231,6 +231,33 @@ public class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public GameState MakeMoveFast(Move move)
+    {
+        if (move.IsCapture()
+            || move.IsCastle()
+            || move.IsPromotion()
+            || move.IsEnPassant())
+        {
+            return MakeMove(move);
+        }
+
+        return MakeQuietMove(move);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void UnmakeMoveFast(Move move, GameState gameState)
+    {
+        if (gameState.Quiet)
+        {
+            UnmakeQuietMove(move, gameState);
+        }
+        else
+        {
+            UnmakeMove(move, gameState);
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public GameState MakeMove(Move move)
     {
         byte castleCopy = Castle;
@@ -573,7 +600,7 @@ public class Position
 
         UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
 
-        return new GameState(uniqueIdentifierCopy, enpassantCopy, castleCopy);
+        return new GameState(uniqueIdentifierCopy, enpassantCopy, isQuiet: true, castleCopy);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -720,7 +747,7 @@ public class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void UnMakeNullMove(GameState gameState)
+    public void UnmakeNullMove(GameState gameState)
     {
         Side = (Side)Utils.OppositeSide(Side);
         EnPassant = gameState.EnPassant;

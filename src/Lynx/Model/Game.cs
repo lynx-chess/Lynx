@@ -184,7 +184,7 @@ public sealed class Game
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public GameState MakeMove(Move moveToPlay)
     {
-        var gameState = CurrentPosition.MakeMove(moveToPlay);
+        var gameState = CurrentPosition.MakeMoveFast(moveToPlay);
 
         if (CurrentPosition.WasProduceByAValidMove())
         {
@@ -195,7 +195,7 @@ public sealed class Game
         else
         {
             _logger.Warn("Error trying to play {0}", moveToPlay.UCIString());
-            CurrentPosition.UnmakeMove(moveToPlay, gameState);
+            CurrentPosition.UnmakeMoveFast(moveToPlay, gameState);
         }
 
         PositionHashHistory.Add(CurrentPosition.UniqueIdentifier);

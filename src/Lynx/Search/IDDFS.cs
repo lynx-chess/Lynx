@@ -225,9 +225,9 @@ public sealed partial class Engine
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
         foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, moves))
         {
-            var gameState = Game.CurrentPosition.MakeMove(move);
+            var gameState = Game.CurrentPosition.MakeMoveFast(move);
             bool isPositionValid = Game.CurrentPosition.WasProduceByAValidMove();
-            Game.CurrentPosition.UnmakeMove(move, gameState);
+            Game.CurrentPosition.UnmakeMoveFast(move, gameState);
 
             if (isPositionValid)
             {

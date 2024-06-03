@@ -156,7 +156,7 @@ public sealed partial class Engine
 
                 var gameState = position.MakeNullMove();
                 var evaluation = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, parentWasNullMove: true);
-                position.UnMakeNullMove(gameState);
+                position.UnmakeNullMove(gameState);
 
                 if (evaluation >= beta)
                 {
@@ -213,11 +213,11 @@ public sealed partial class Engine
 
             var move = pseudoLegalMoves[moveIndex];
 
-            var gameState = position.MakeMove(move);
+            var gameState = position.MakeMoveFast(move);
 
             if (!position.WasProduceByAValidMove())
             {
-                position.UnmakeMove(move, gameState);
+                position.UnmakeMoveFast(move, gameState);
                 continue;
             }
 
@@ -262,7 +262,7 @@ public sealed partial class Engine
                         // After making a move
                         Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
                         Game.PositionHashHistory.RemoveAt(Game.PositionHashHistory.Count - 1);
-                        position.UnmakeMove(move, gameState);
+                        position.UnmakeMoveFast(move, gameState);
 
                         break;
                     }
@@ -278,7 +278,7 @@ public sealed partial class Engine
                         // After making a move
                         Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
                         Game.PositionHashHistory.RemoveAt(Game.PositionHashHistory.Count - 1);
-                        position.UnmakeMove(move, gameState);
+                        position.UnmakeMoveFast(move, gameState);
 
                         break;
                     }
@@ -353,7 +353,7 @@ public sealed partial class Engine
             // Game.PositionHashHistory is update above
             Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
             Game.PositionHashHistory.RemoveAt(Game.PositionHashHistory.Count - 1);
-            position.UnmakeMove(move, gameState);
+            position.UnmakeMoveFast(move, gameState);
 
             PrintMove(ply, move, evaluation);
 

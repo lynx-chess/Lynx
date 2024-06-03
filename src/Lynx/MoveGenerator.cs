@@ -549,7 +549,7 @@ public static class MoveGenerator
                         return true;
                     }
                 }
-                else if (IsValidMove(position, MoveExtensions.Encode(sourceSquare, singlePushSquare, piece)))
+                else if (IsValidQuietMove(position, MoveExtensions.Encode(sourceSquare, singlePushSquare, piece)))
                 {
                     return true;
                 }
@@ -741,7 +741,7 @@ public static class MoveGenerator
                 {
                     return true;
                 }
-                else if (IsValidMove(position, MoveExtensions.Encode(sourceSquare, targetSquare, piece)))
+                else if (IsValidQuietMove(position, MoveExtensions.Encode(sourceSquare, targetSquare, piece)))
                 {
                     return true;
                 }
