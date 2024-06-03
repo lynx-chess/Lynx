@@ -118,10 +118,12 @@ public sealed class Game
 
     /// <summary>
     /// Basic algorithm described in https://web.archive.org/web/20201107002606/https://marcelk.net/2013-04-06/paper/upcoming-rep-v2.pdf
+    /// Appart from that, tests for three fold repetition if <paramref name="requiresThreefold"/> is true, two otherwise
     /// </summary>
+    /// <param name="requiresThreefold">Whether real threefold repetition is required, 'two-fold' will be checked otherwise. Usual strategy is to do threefold only for pv nodes</param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsThreefoldRepetition()
+    public bool IsThreefoldRepetition(bool requiresThreefold)
     {
         var currentHash = CurrentPosition.UniqueIdentifier;
 
@@ -131,7 +133,14 @@ public sealed class Game
         {
             if (currentHash == PositionHashHistory[i])
             {
-                return true;
+                if (requiresThreefold)
+                {
+                    requiresThreefold = false;
+                }
+                else
+                {
+                    return true;
+                }
             }
         }
 
