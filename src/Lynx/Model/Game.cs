@@ -129,15 +129,29 @@ public sealed class Game
 
         // [Count - 1] would be the last one, we want to start searching 2 ealier and finish HalfMovesWithoutCaptureOrPawnMove earlier
         var limit = Math.Max(0, PositionHashHistory.Count - 1 - HalfMovesWithoutCaptureOrPawnMove);
-        for (int i = PositionHashHistory.Count - 3; i >= limit; i -= 2)
+
+        if (requiresThreefold)
         {
-            if (currentHash == PositionHashHistory[i])
+            for (int i = PositionHashHistory.Count - 3; i >= limit; i -= 2)
             {
-                if (requiresThreefold)
+                if (currentHash == PositionHashHistory[i])
                 {
-                    requiresThreefold = false;
+                    if (requiresThreefold)
+                    {
+                        requiresThreefold = false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
                 }
-                else
+            }
+        }
+        else
+        {
+            for (int i = PositionHashHistory.Count - 3; i >= limit; i -= 2)
+            {
+                if (currentHash == PositionHashHistory[i])
                 {
                     return true;
                 }
