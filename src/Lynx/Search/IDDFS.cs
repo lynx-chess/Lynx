@@ -115,11 +115,6 @@ public sealed partial class Engine
                         _isFollowingPV = true;
                         bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta);
 
-                        if (alpha < bestEvaluation && beta > bestEvaluation)
-                        {
-                            break;
-                        }
-
                         _logger.Debug("Eval ({0}) outside of aspiration window [{1}, {2}] (depth {3}, nodes {4})", bestEvaluation, alpha, beta, depth, _nodes);
 
                         window += window >> 1;   // window / 2
@@ -133,6 +128,10 @@ public sealed partial class Engine
                         else if (beta <= bestEvaluation)     // Fail high
                         {
                             beta = Math.Min(bestEvaluation + window, MaxValue);
+                        }
+                        else
+                        {
+                            break;
                         }
                     }
                 }
