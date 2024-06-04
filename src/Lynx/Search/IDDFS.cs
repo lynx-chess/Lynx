@@ -132,7 +132,8 @@ public sealed partial class Engine
                             break;
                         }
 
-                        _logger.Debug("Eval ({0}) (depth {1}, nodes {2}) outside of aspiration window, new window [{3}, {4}] ", bestEvaluation, alpha, beta, depth, _nodes);
+                        _logger.Debug("Eval ({0}) (depth {1}, nodes {2}) outside of aspiration window, new window [{3}, {4}] ",
+                            bestEvaluation, depth, _nodes, alpha, beta);
                     }
                 }
 
