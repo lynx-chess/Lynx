@@ -105,7 +105,10 @@ public sealed partial class Engine
                 else
                 {
                     // 🔍 Aspiration Windows
+                    // Reduction implementation taken from Simbelmyne
+
                     var window = Configuration.EngineSettings.AspirationWindow_Delta;
+                    int reduction = 0;
 
                     alpha = Math.Max(MinValue, lastSearchResult.Evaluation - window);
                     beta = Math.Min(MaxValue, lastSearchResult.Evaluation + window);
@@ -113,7 +116,7 @@ public sealed partial class Engine
                     while (true)
                     {
                         _isFollowingPV = true;
-                        bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta);
+                        bestEvaluation = NegaMax(depth: depth - reduction, ply: 0, alpha, beta);
 
                         if (alpha < bestEvaluation && beta > bestEvaluation)
                         {
@@ -129,10 +132,12 @@ public sealed partial class Engine
                         {
                             alpha = Math.Max(bestEvaluation - window, MinValue);
                             beta = (alpha + beta) >> 1;  // (alpha + beta) / 2
+                            reduction = 0;
                         }
                         else if (beta <= bestEvaluation)     // Fail high
                         {
                             beta = Math.Min(bestEvaluation + window, MaxValue);
+                            ++reduction;
                         }
                     }
                 }
