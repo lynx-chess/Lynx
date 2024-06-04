@@ -766,13 +766,15 @@ public class PositionTest
     ///     a b c d e f g h
     /// </summary>
     /// <param name="fen"></param>
-    /// <param name="mobilityDifference"></param>
+    /// <param name="sideToMoveMobilityCount"></param>
+    /// <param name="nonSideToMoveMobilityCount"></param>
     [TestCase("n3k3/1p6/8/3b4/3B4/8/6P1/4K2N w - - 0 1", 13, 11)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
     /// <param name="fen"></param>
-    /// <param name="mobilityDifference"></param>
+    /// <param name="sideToMoveMobilityCount"></param>
+    /// <param name="nonSideToMoveMobilityCount"></param>
     [TestCase("n2k4/1p6/8/4b3/4B3/8/6P1/3K3N b - - 0 1", 13, 11)]
     /// <summary>
     /// 8   . . . . k . . .
@@ -786,7 +788,8 @@ public class PositionTest
     ///     a b c d e f g h
     /// </summary>
     /// <param name="fen"></param>
-    /// <param name="mobilityDifference"></param>
+    /// <param name="sideToMoveMobilityCount"></param>
+    /// <param name="nonSideToMoveMobilityCount"></param>
     [TestCase("4k3/1p6/2p5/3b4/3B4/5P2/6P1/4K3 w - - 0 1", 13, 9)]
     /// <summary>
     /// Previous one mirrored
