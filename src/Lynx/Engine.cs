@@ -322,12 +322,9 @@ public sealed partial class Engine
 
                 // Avoiding the scenario where search finishes early (i.e. mate detected, max depth reached) and results comes
                 // before a potential ponderhit command
-                SpinWait.SpinUntil(() =>
-                    _isPonderHit
-                    || _absoluteSearchCancellationTokenSource.IsCancellationRequested
-                    || _stopRequested); // The previous one could haven been reset
-                                        // if stop command is processed before go command
-                                        // creates a new cancellation token source
+                // _absoluteSearchCancellationTokenSource.IsCancellationRequested isn't reliable because
+                // if stop command is processed before go command, a new cancellation token sour
+                SpinWait.SpinUntil(() => _isPonderHit || _stopRequested);
 
                 if (_isPonderHit)
                 {
