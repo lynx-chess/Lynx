@@ -260,7 +260,6 @@ public static class Constants
     public const string WhiteLongCastle = "e1c1";
     public const string BlackLongCastle = "e8c8";
 
-
     public static readonly int[] EnPassantCaptureSquares =
     [
         0, 0, 0, 0, 0, 0, 0, 0,     //  0-7
