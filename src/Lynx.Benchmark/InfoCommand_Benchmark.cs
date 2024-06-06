@@ -79,9 +79,16 @@ public class InfoCommand_Benchmark : BaseBenchmark
 
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
-    public int StringBuilder(SearchResult result)
+    public int StringBuilder_128(SearchResult result)
     {
-        return InfoCommand_StringBuilder.SearchResultInfo(result).Length;
+        return InfoCommand_StringBuilder_128.SearchResultInfo(result).Length;
+    }
+
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public int StringBuilder_256(SearchResult result)
+    {
+        return InfoCommand_StringBuilder_256.SearchResultInfo(result).Length;
     }
 
     public sealed class InfoCommand_StringAddition : EngineBaseCommand

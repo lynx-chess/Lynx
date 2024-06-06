@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using System.Text;
 
 namespace Lynx.UCI.Commands.Engine;
 
@@ -77,18 +78,28 @@ public sealed class InfoCommand : EngineBaseCommand
 
     public static string SearchResultInfo(SearchResult searchResult)
     {
-#pragma warning disable RCS1214 // Unnecessary interpolated string.
-        return Id +
-            $" depth {searchResult.Depth}" +
-            $" seldepth {searchResult.DepthReached}" +
-            $" multipv 1" +
-            $" score {(searchResult.Mate == default ? $"cp {WDL.NormalizeScore(searchResult.Evaluation)}" : $"mate {searchResult.Mate}")}" +
-            $" nodes {searchResult.Nodes}" +
-            $" nps {searchResult.NodesPerSecond}" +
-            $" time {searchResult.Time}" +
-            (searchResult.HashfullPermill != -1 ? $" hashfull {searchResult.HashfullPermill}" : string.Empty) +
-            (searchResult.WDL is not null ? $" wdl {searchResult.WDL.Value.WDLWin} {searchResult.WDL.Value.WDLDraw} {searchResult.WDL.Value.WDLLoss}" : string.Empty) +
-            $" pv {string.Join(" ", searchResult.Moves.Select(move => move.UCIString()))}";
-#pragma warning restore RCS1214 // Unnecessary interpolated string.
+        var sb = new StringBuilder(128);
+
+        sb.Append(Id);
+        sb.Append(" depth ").Append(searchResult.Depth);
+        sb.Append(" seldepth ").Append(searchResult.DepthReached);
+        sb.Append(" multipv 1");
+        sb.Append(" score ").Append(searchResult.Mate == default ? $"cp {WDL.NormalizeScore(searchResult.Evaluation)}" : $"mate {searchResult.Mate}");
+        sb.Append(" nodes ").Append(searchResult.Nodes);
+        sb.Append(" nps ").Append(searchResult.NodesPerSecond);
+        sb.Append(" time ").Append(searchResult.Time)
+            .Append(searchResult.HashfullPermill != -1 ? $" hashfull {searchResult.HashfullPermill}" : string.Empty);
+
+        if (searchResult.WDL is not null)
+        {
+            sb.Append(" wdl ")
+                .Append(searchResult.WDL.Value.WDLWin).Append(' ')
+                .Append(searchResult.WDL.Value.WDLDraw).Append(' ')
+                .Append(searchResult.WDL.Value.WDLLoss);
+        }
+
+        sb.Append(" pv ").AppendJoin(" ", searchResult.Moves.Select(move => move.UCIString()));
+
+        return sb.ToString();
     }
 }
