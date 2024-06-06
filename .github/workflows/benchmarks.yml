@@ -53,7 +53,7 @@ jobs:
       working-directory: ./src/Lynx.Benchmark
 
     - name: 'Upload ${{ matrix.os }} artifacts'
-      continue-on-error: true
+      continue-on-error: false
       uses: actions/upload-artifact@v4
       with:
         name: artifacts-${{ matrix.os }}-${{ github.run_number }}
