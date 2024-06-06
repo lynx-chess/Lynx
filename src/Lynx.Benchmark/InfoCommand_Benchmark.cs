@@ -60,7 +60,6 @@ public class InfoCommand_Benchmark : BaseBenchmark
             sb.Append(Id);
             sb.Append(" depth").Append(searchResult.Depth);
             sb.Append(" seldepth").Append(searchResult.DepthReached);
-            sb.Append(" seldepth").Append(searchResult.DepthReached);
             sb.Append(" multipv 1");
             sb.Append(" score").Append(searchResult.Mate == default ? $"cp {WDL.NormalizeScore(searchResult.Evaluation)}" : $"mate {searchResult.Mate}");
             sb.Append(" nodes").Append(searchResult.Nodes);
