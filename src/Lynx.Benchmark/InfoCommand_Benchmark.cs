@@ -4,7 +4,7 @@ using Lynx.UCI.Commands;
 using System.Text;
 
 namespace Lynx.Benchmark;
-internal class InfoCommand_Benchmark : BaseBenchmark
+public class InfoCommand_Benchmark : BaseBenchmark
 {
     public static IEnumerable<SearchResult> Data => new[] {
         new SearchResult(33592128, 27, 20, [33592128], -500, +500 ),
