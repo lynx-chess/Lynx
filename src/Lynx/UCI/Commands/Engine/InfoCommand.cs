@@ -78,7 +78,7 @@ public sealed class InfoCommand : EngineBaseCommand
 
     public static string SearchResultInfo(SearchResult searchResult)
     {
-        var sb = new StringBuilder(128);
+        var sb = new StringBuilder(256);
 
         sb.Append(Id);
         sb.Append(" depth ").Append(searchResult.Depth);
