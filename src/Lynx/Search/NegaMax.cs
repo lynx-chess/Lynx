@@ -252,7 +252,7 @@ public sealed partial class Engine
             else
             {
                 if (!pvNode && !isInCheck
-                    && scores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue) // Quiet move
+                    && scores[moveIndex] < EvaluationConstants.BadCaptureMoveBaseScoreValue) // Quiet move
                 {
                     // Late Move Pruning (LMP) - all quiet moves can be pruned
                     // after searching the first few given by the move ordering algorithm
