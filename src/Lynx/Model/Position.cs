@@ -690,10 +690,9 @@ public class Position
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
 
-                packedScore += EvaluationConstants.PackedPSQT[pieceIndex][pieceSquareIndex];
                 gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
-
-                packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
+                packedScore += EvaluationConstants.PackedPSQT[pieceIndex][pieceSquareIndex]
+                    + AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
             }
         }
 
@@ -707,10 +706,9 @@ public class Position
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
 
-                packedScore += EvaluationConstants.PackedPSQT[pieceIndex][pieceSquareIndex];
                 gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
-
-                packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
+                packedScore += EvaluationConstants.PackedPSQT[pieceIndex][pieceSquareIndex]
+                    - AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
             }
         }
 
