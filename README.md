@@ -83,41 +83,77 @@ If you're a Linux user and are new to .NET ecosystem, the conversation in [this 
 
 ## Features
 
-- Static, material evaluation
+<details>
 
-- Static, positional evaluation
+<Summary>Feature list</Summary>
+
+_Beware, most of the provided links contained outdated information and don't reflect the current implementation or the state of the art of computer chess programming, at this point they remain here mostly for historical reasons_.
+
+### Search
 
 - NegaMax [[1](https://www.chessprogramming.org/Negamax)]
 
+- Quiescence Search [[1](https://www.chessprogramming.org/Quiescence_Search)]
+
 - Iterative Deepening Depth-First Search (IDDFS) [[1](https://en.wikipedia.org/wiki/Iterative_deepening_depth-first_search)] [[2](https://www.chessprogramming.org/Iterative_Deepening)]
-
-- Most Valuable Victim - Least Valuable Aggressor (MVV-LVA) [[1](https://www.chessprogramming.org/MVV-LVA)]
-
-- Killer heuristic [[1](https://www.chessprogramming.org/Killer_Heuristic)]
-
-- History heuristic [[1](https://www.chessprogramming.org/History_Heuristic)]
-
-- Zobrist hashing [[1](https://www.chessprogramming.org/Zobrist_Hashing)]
-
-- Triangular PV-Table [[1](https://www.chessprogramming.org/Triangular_PV-Table)]
-
-- Principal Variation Search [[1](https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm)]
-
-- Late Move Reductions [[1](https://web.archive.org/web/20150212051846/http://www.glaurungchess.com/lmr.html)] [[2](https://www.chessprogramming.org/Late_Move_Reductions)] [[3](https://talkchess.com/forum3/viewtopic.php?f=7&t=75056#p860118)]
-
-- Verified null-move pruning [[1](https://www.researchgate.net/publication/297377298_Verified_Null-Move_Pruning)] [[2](https://web.archive.org/web/20071031095933/http://www.brucemo.com/compchess/programming/nullmove.htm)] [[3](https://www.chessprogramming.org/Null_Move_Pruning)]
 
 - Aspiration Windows [[1](https://web.archive.org/web/20071031095918/http://www.brucemo.com/compchess/programming/aspiration.htm)] [[2](https://www.chessprogramming.org/Aspiration_Windows)]
 
-- Transposition Table [[1](https://web.archive.org/web/20071031100051/http://www.brucemo.com/compchess/programming/hashing.htm)]
+- Principal Variation Search (PVS) [[1](https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm)]
+
+- Null-move pruning (NMP) [[1](https://web.archive.org/web/20071031095933/http://www.brucemo.com/compchess/programming/nullmove.htm)] [[2](https://www.chessprogramming.org/Null_Move_Pruning)]
+
+- Late Move Pruning (LMP)
+
+- Futility Pruning (FP)
+
+- Reverse Futility Pruning (RFP)
+
+- Late Move Reductions (LMR) [[1](https://web.archive.org/web/20150212051846/http://www.glaurungchess.com/lmr.html)] [[2](https://www.chessprogramming.org/Late_Move_Reductions)] [[3](https://talkchess.com/forum3/viewtopic.php?f=7&t=75056#p860118)]
+
+- Internal Iterative Reduction (IIR)
 
 - Check extensions [[1](https://www.chessprogramming.org/Check_Extensions)]
 
+- Static Exchange Evaluation (SEE) for move ordering and reduction
+
 - Razoring [[1](https://www.chessprogramming.org/Razoring)]
+
+- Killer heuristic [[1](https://www.chessprogramming.org/Killer_Heuristic)]
+
+- History heuristic: quiet history, capture history, history malus [[1](https://www.chessprogramming.org/History_Heuristic)]
+
+### Evaluation
+
+- Piece-Square Tables (PSQT) [[1](https://www.chessprogramming.org/Piece-Square_Tables)]
+
+- Mobility (knight, bishop, rook, queen)
+
+- Bishop pair
+
+- Rook in open and semi-open files
+
+- King pawn shield, king virtual mobility, king in open and semi-open files
+
+- Isolated and passed pawns
+
+### Miscellaneous
 
 - PEXT Bitboards [[1](https://www.chessprogramming.org/BMI2#PEXTBitboards)]  [[2](https://analog-hors.github.io/site/magic-bitboards/)]
 
-- Internal Iterative Deepening [[1](https://www.chessprogramming.org/Internal_Iterative_Deepening)]
+- Zobrist hashing [[1](https://www.chessprogramming.org/Zobrist_Hashing)]
+
+- Transposition Table [[1](https://web.archive.org/web/20071031100051/http://www.brucemo.com/compchess/programming/hashing.htm)]
+
+- Triangular PV-Table [[1](https://www.chessprogramming.org/Triangular_PV-Table)]
+
+- Most Valuable Victim - Least Valuable Aggressor (MVV-LVA) [[1](https://www.chessprogramming.org/MVV-LVA)]
+
+- Incremental move sorting
+
+- Hard/Soft time management
+
+</details>
 
 ## Credits
 
@@ -129,7 +165,7 @@ Lynx development would simply not have been possible without:
 
 I would also like to extend my gratitude to:
 
-- Engine Programming discord group, especially Jamie Whiting
+- Engine Programming discord group. Without it, Lynx wouldn't be as strong as it is nowadays. Especial mention for Jamie Whiting
 ([Akimbo](https://github.com/JacquesRW/akimbo)), Antares ([Altair](https://github.com/Alex2262/AltairChessEngine)), Ciekce ([Stormphrax](https://github.com/Ciekce/Stormphrax/)), Rak ([Mess](https://github.com/raklaptudirm/mess)), AspectOfTheNoob ([Sirius](https://github.com/mcthouacbb/Sirius)), etc.
 
 - The community Discord around [SebLague/Chess-Challenge](https://github.com/SebLague/Chess-Challenge/), which allowed me to discover EP discord and to revisit the basics, this time explained by very knowledgeable developers (such as the ones above) to people without any previous chess engine programming knowledge
@@ -144,7 +180,7 @@ I would also like to extend my gratitude to:
 
 - lichess developers for [lichess-bot](https://github.com/lichess-bot-devs/lichess-bot)
 
-- Open source chess engines with permissive licenses. Their existence encourages knowledge sharing and really helps pushing the Chess Engine Developer community forward. Some engines are credited inside the codebase itself, where relevant 
+- Open source chess engines with permissive licenses. Their existence encourages knowledge sharing and really helps pushing the Chess Engine Developer community forward. Some engines are credited inside the codebase itself, where relevant
 
 - Countless other developers and online resources, who/which I should probably remember, but don't come to my mind right now
 
