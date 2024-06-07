@@ -682,10 +682,10 @@ public class Position
 
         for (int pieceIndex = (int)Piece.P; pieceIndex < (int)Piece.K; ++pieceIndex)
         {
-            // Bitboard copy that we 'empty'
             var bitboard = PieceBitBoards[pieceIndex];
+            int bitCount = bitboard.CountBits();
 
-            while (bitboard != default)
+            for (int i = 0; i < bitCount; ++i)
             {
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
@@ -701,8 +701,9 @@ public class Position
         {
             // Bitboard copy that we 'empty'
             var bitboard = PieceBitBoards[pieceIndex];
+            int bitCount = bitboard.CountBits();
 
-            while (bitboard != default)
+            for (int i = 0; i < bitCount; ++i)
             {
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
