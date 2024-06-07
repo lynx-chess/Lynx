@@ -214,15 +214,14 @@ public sealed class Game
 #if DEBUG
             MoveHistory.Add(moveToPlay);
 #endif
+            PositionHashHistory.Add(CurrentPosition.UniqueIdentifier);
+            Update50movesRule(moveToPlay, moveToPlay.IsCapture());
         }
         else
         {
             _logger.Warn("Error trying to play {0}", moveToPlay.UCIString());
             CurrentPosition.UnmakeMove(moveToPlay, gameState);
         }
-
-        PositionHashHistory.Add(CurrentPosition.UniqueIdentifier);
-        Update50movesRule(moveToPlay, moveToPlay.IsCapture());
 
         return gameState;
     }
