@@ -680,36 +680,125 @@ public class Position
         int packedScore = 0;
         int gamePhase = 0;
 
-        for (int pieceIndex = (int)Piece.P; pieceIndex < (int)Piece.K; ++pieceIndex)
+        // Bitboard copy that we 'empty'
+        var whitePawnBitBoard = PieceBitBoards[(int)Piece.P];
+
+        while (whitePawnBitBoard != default)
         {
-            // Bitboard copy that we 'empty'
-            var bitboard = PieceBitBoards[pieceIndex];
+            var pieceSquareIndex = whitePawnBitBoard.GetLS1BIndex();
+            whitePawnBitBoard.ResetLS1B();
 
-            while (bitboard != default)
-            {
-                var pieceSquareIndex = bitboard.GetLS1BIndex();
-                bitboard.ResetLS1B();
-
-                gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
-                packedScore += EvaluationConstants.PackedPSQT[pieceIndex][pieceSquareIndex]
-                    + AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
-            }
+            gamePhase += EvaluationConstants.GamePhaseByPiece[(int)Piece.P];
+            packedScore += EvaluationConstants.PackedPSQT[(int)Piece.P][pieceSquareIndex]
+                + PawnAdditionalEvaluation(pieceSquareIndex, (int)Piece.P);
         }
 
-        for (int pieceIndex = (int)Piece.p; pieceIndex < (int)Piece.k; ++pieceIndex)
+        var whiteKnightBitBoard = PieceBitBoards[(int)Piece.N];
+
+        while (whiteKnightBitBoard != default)
         {
-            // Bitboard copy that we 'empty'
-            var bitboard = PieceBitBoards[pieceIndex];
+            var pieceSquareIndex = whiteKnightBitBoard.GetLS1BIndex();
+            whiteKnightBitBoard.ResetLS1B();
 
-            while (bitboard != default)
-            {
-                var pieceSquareIndex = bitboard.GetLS1BIndex();
-                bitboard.ResetLS1B();
+            gamePhase += EvaluationConstants.GamePhaseByPiece[(int)Piece.N];
+            packedScore += EvaluationConstants.PackedPSQT[(int)Piece.N][pieceSquareIndex]
+                + KnightAdditionalEvaluation(pieceSquareIndex, (int)Piece.N);
+        }
 
-                gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
-                packedScore += EvaluationConstants.PackedPSQT[pieceIndex][pieceSquareIndex]
-                    - AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
-            }
+        var whiteBishopBitBoard = PieceBitBoards[(int)Piece.B];
+
+        while (whiteBishopBitBoard != default)
+        {
+            var pieceSquareIndex = whiteBishopBitBoard.GetLS1BIndex();
+            whiteBishopBitBoard.ResetLS1B();
+
+            gamePhase += EvaluationConstants.GamePhaseByPiece[(int)Piece.B];
+            packedScore += EvaluationConstants.PackedPSQT[(int)Piece.B][pieceSquareIndex]
+                + BishopAdditionalEvaluation(pieceSquareIndex, (int)Piece.B);
+        }
+
+        var whiteRookBitBoard = PieceBitBoards[(int)Piece.R];
+
+        while (whiteRookBitBoard != default)
+        {
+            var pieceSquareIndex = whiteRookBitBoard.GetLS1BIndex();
+            whiteRookBitBoard.ResetLS1B();
+
+            gamePhase += EvaluationConstants.GamePhaseByPiece[(int)Piece.R];
+            packedScore += EvaluationConstants.PackedPSQT[(int)Piece.R][pieceSquareIndex]
+                + RookAdditionalEvaluation(pieceSquareIndex, (int)Piece.R);
+        }
+
+        var whiteQueenBitBoard = PieceBitBoards[(int)Piece.Q];
+
+        while (whiteQueenBitBoard != default)
+        {
+            var pieceSquareIndex = whiteQueenBitBoard.GetLS1BIndex();
+            whiteQueenBitBoard.ResetLS1B();
+
+            gamePhase += EvaluationConstants.GamePhaseByPiece[(int)Piece.Q];
+            packedScore += EvaluationConstants.PackedPSQT[(int)Piece.Q][pieceSquareIndex]
+                + QueenAdditionalEvaluation(pieceSquareIndex);
+        }
+
+        var blackPawnBitBoard = PieceBitBoards[(int)Piece.p];
+
+        while (blackPawnBitBoard != default)
+        {
+            var pieceSquareIndex = blackPawnBitBoard.GetLS1BIndex();
+            blackPawnBitBoard.ResetLS1B();
+
+            gamePhase += EvaluationConstants.GamePhaseByPiece[(int)Piece.p];
+            packedScore += EvaluationConstants.PackedPSQT[(int)Piece.p][pieceSquareIndex]
+                - PawnAdditionalEvaluation(pieceSquareIndex, (int)Piece.p);
+        }
+
+        var blackKnightBitBoard = PieceBitBoards[(int)Piece.n];
+
+        while (blackKnightBitBoard != default)
+        {
+            var pieceSquareIndex = blackKnightBitBoard.GetLS1BIndex();
+            blackKnightBitBoard.ResetLS1B();
+
+            gamePhase += EvaluationConstants.GamePhaseByPiece[(int)Piece.n];
+            packedScore += EvaluationConstants.PackedPSQT[(int)Piece.n][pieceSquareIndex]
+                - KnightAdditionalEvaluation(pieceSquareIndex, (int)Piece.n);
+        }
+
+        var blackBishopBitBoard = PieceBitBoards[(int)Piece.b];
+
+        while (blackBishopBitBoard != default)
+        {
+            var pieceSquareIndex = blackBishopBitBoard.GetLS1BIndex();
+            blackBishopBitBoard.ResetLS1B();
+
+            gamePhase += EvaluationConstants.GamePhaseByPiece[(int)Piece.b];
+            packedScore += EvaluationConstants.PackedPSQT[(int)Piece.b][pieceSquareIndex]
+                - BishopAdditionalEvaluation(pieceSquareIndex, (int)Piece.b);
+        }
+
+        var blackRookBitBoard = PieceBitBoards[(int)Piece.r];
+
+        while (blackRookBitBoard != default)
+        {
+            var pieceSquareIndex = blackRookBitBoard.GetLS1BIndex();
+            blackRookBitBoard.ResetLS1B();
+
+            gamePhase += EvaluationConstants.GamePhaseByPiece[(int)Piece.r];
+            packedScore += EvaluationConstants.PackedPSQT[(int)Piece.r][pieceSquareIndex]
+                - RookAdditionalEvaluation(pieceSquareIndex, (int)Piece.r);
+        }
+
+        var blackQueenBitBoard = PieceBitBoards[(int)Piece.q];
+
+        while (blackQueenBitBoard != default)
+        {
+            var pieceSquareIndex = blackQueenBitBoard.GetLS1BIndex();
+            blackQueenBitBoard.ResetLS1B();
+
+            gamePhase += EvaluationConstants.GamePhaseByPiece[(int)Piece.q];
+            packedScore += EvaluationConstants.PackedPSQT[(int)Piece.q][pieceSquareIndex]
+                - QueenAdditionalEvaluation(pieceSquareIndex);
         }
 
         // Bishop pair bonus
