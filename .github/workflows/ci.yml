@@ -18,7 +18,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, macos-14]
+        os: [ubuntu-latest, macOS-latest, macOS-13]
       fail-fast: false
 
     steps:
@@ -49,16 +49,16 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest, macos-14]
+        os: [ubuntu-latest, windows-latest, macOS-latest, macOS-13]
         include:
           - os: ubuntu-latest
             runtime-identifier: linux-x64
           - os: windows-latest
             runtime-identifier: win-x64
           - os: macOS-latest
-            runtime-identifier: osx-x64
-          - os: macos-14
             runtime-identifier: osx-arm64
+          - os: macOS-13
+            runtime-identifier: osx-x64
       fail-fast: false
 
     steps:
@@ -116,16 +116,16 @@ jobs:
     strategy:
       matrix:
         configuration: [Debug, Release]
-        os: [ubuntu-latest, windows-latest, macOS-latest, macos-14]
+        os: [ubuntu-latest, windows-latest, macOS-latest, macOS-13]
         include:
           - os: ubuntu-latest
             runtime-identifier: linux-x64
           - os: windows-latest
             runtime-identifier: win-x64
           - os: macOS-latest
-            runtime-identifier: osx-x64
-          - os: macos-14
             runtime-identifier: osx-arm64
+          - os: macOS-13
+            runtime-identifier: osx-x64
       fail-fast: false
 
     steps:
@@ -182,7 +182,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest, macos-14]
+        os: [ubuntu-latest, windows-latest, macOS-latest, macOS-13]
         category: [LongRunning]
       fail-fast: false
 
@@ -215,7 +215,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-14]   # disabled for macOS-latest since that's always the CI bottleneck due to runners availability
+        os: [ubuntu-latest, windows-latest, macOS-latest]   # disabled for macOS-latest since that's always the CI bottleneck due to runners availability
         category: [Perft]
       fail-fast: false
 
@@ -248,7 +248,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest, macos-14]
+        os: [ubuntu-latest, windows-latest, macOS-latest, macOS-13]
         category: [Configuration]
       fail-fast: false
 
@@ -363,7 +363,7 @@ jobs:
 
   #  strategy:
   #    matrix:
-  #      os: [ubuntu-latest, windows-latest, macOS-latest, macos-14]
+  #      os: [ubuntu-latest, windows-latest, macOS-latest, macOS-13]
   #    fail-fast: false
 
   #  env:

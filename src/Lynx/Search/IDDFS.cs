@@ -115,13 +115,6 @@ public sealed partial class Engine
                         _isFollowingPV = true;
                         bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta);
 
-                        if (alpha < bestEvaluation && beta > bestEvaluation)
-                        {
-                            break;
-                        }
-
-                        _logger.Debug("Eval ({0}) outside of aspiration window [{1}, {2}] (depth {3}, nodes {4})", bestEvaluation, alpha, beta, depth, _nodes);
-
                         window += window >> 1;   // window / 2
 
                         // Depth change: https://github.com/lynx-chess/Lynx/pull/440
@@ -134,6 +127,13 @@ public sealed partial class Engine
                         {
                             beta = Math.Min(bestEvaluation + window, MaxValue);
                         }
+                        else
+                        {
+                            break;
+                        }
+
+                        _logger.Debug("Eval ({0}) (depth {1}, nodes {2}) outside of aspiration window, new window [{3}, {4}] ",
+                            bestEvaluation, depth, _nodes, alpha, beta);
                     }
                 }
 
