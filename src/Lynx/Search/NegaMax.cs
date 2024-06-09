@@ -213,7 +213,7 @@ public sealed partial class Engine
 
             var move = pseudoLegalMoves[moveIndex];
 
-            var gameState = position.MakeMoveFast(move);
+            var gameState = position.MakeMove(move);
 
             if (!position.WasProduceByAValidMove())
             {

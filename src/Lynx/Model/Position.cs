@@ -231,20 +231,6 @@ public class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public GameState MakeMoveFast(Move move)
-    {
-        if (move.IsCapture()
-            || move.IsCastle()
-            || move.IsPromotion()
-            || move.IsEnPassant())
-        {
-            return MakeMove(move);
-        }
-
-        return MakeQuietMove(move);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void UnmakeMoveFast(Move move, GameState gameState)
     {
         if (gameState.Quiet)
@@ -273,10 +259,13 @@ public class Position
         int piece = move.Piece();
         int promotedPiece = move.PromotedPiece();
 
+        bool isQuiet = true;
+
         var newPiece = piece;
         if (promotedPiece != default)
         {
             newPiece = promotedPiece;
+            isQuiet = false;
         }
 
         PieceBitBoards[piece].PopBit(sourceSquare);
@@ -306,6 +295,8 @@ public class Position
                         PieceBitBoards[capturedPiece].PopBit(capturedSquare);
                         OccupancyBitBoards[oppositeSide].PopBit(capturedSquare);
                         UniqueIdentifier ^= ZobristTable.PieceHash(capturedSquare, capturedPiece);
+
+                        isQuiet = false;
                     }
 
                     break;
@@ -337,6 +328,8 @@ public class Position
                         ZobristTable.PieceHash(rookSourceSquare, rookIndex)
                         ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
 
+                    isQuiet = false;
+
                     break;
                 }
             case SpecialMoveType.LongCastle:
@@ -355,6 +348,8 @@ public class Position
                         ZobristTable.PieceHash(rookSourceSquare, rookIndex)
                         ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
 
+                    isQuiet = false;
+
                     break;
                 }
             case SpecialMoveType.EnPassant:
@@ -369,6 +364,8 @@ public class Position
                     OccupancyBitBoards[oppositeSide].PopBit(capturedSquare);
                     UniqueIdentifier ^= ZobristTable.PieceHash(capturedSquare, capturedPiece);
 
+                    isQuiet = false;
+
                     break;
                 }
         }
@@ -382,7 +379,7 @@ public class Position
 
         UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
 
-        return new GameState(uniqueIdentifierCopy, enpassantCopy, castleCopy);
+        return new GameState(uniqueIdentifierCopy, enpassantCopy, isQuiet, castleCopy);
         //var clone = new Position(this);
         //clone.UnmakeMove(move, gameState);
         //if (uniqueIdentifierCopy != clone.UniqueIdentifier)

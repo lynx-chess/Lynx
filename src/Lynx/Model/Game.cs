@@ -207,7 +207,7 @@ public sealed class Game
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public GameState MakeMove(Move moveToPlay)
     {
-        var gameState = CurrentPosition.MakeMoveFast(moveToPlay);
+        var gameState = CurrentPosition.MakeMove(moveToPlay);
 
         if (CurrentPosition.WasProduceByAValidMove())
         {

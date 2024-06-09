@@ -43,7 +43,7 @@ public static class Perft
             Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
             foreach (var move in MoveGenerator.GenerateAllMoves(position, moves))
             {
-                var state = position.MakeMoveFast(move);
+                var state = position.MakeMove(move);
 
                 if (position.WasProduceByAValidMove())
                 {
@@ -65,7 +65,7 @@ public static class Perft
             Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
             foreach (var move in MoveGenerator.GenerateAllMoves(position, moves))
             {
-                var state = position.MakeMoveFast(move);
+                var state = position.MakeMove(move);
 
                 if (position.WasProduceByAValidMove())
                 {
