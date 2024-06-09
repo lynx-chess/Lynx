@@ -918,11 +918,19 @@ public class Position
         }
 
         var rookRank = Constants.Rank[squareIndex];
-        var oppositeKingSquare = PieceBitBoards[(int)Piece.K + (6 * sameSide)].GetLS1BIndex();
+
+        var oppositeSideOffset = 6 * sameSide;
+        var seventhRank = 1 + (5 * sameSide);
+        var eightRank = 7 * sameSide;
+
+        var oppositeKingSquare = PieceBitBoards[(int)Piece.K + oppositeSideOffset].GetLS1BIndex();
         var oppositeKingRank = Constants.Rank[oppositeKingSquare];
 
-        if (rookRank == 1 + (5 * sameSide)
-            && oppositeKingRank == 0 + (7 * sameSide))
+        var oppositePawns = PieceBitBoards[(int)Piece.P + oppositeSideOffset];
+
+        if (rookRank == seventhRank
+            && (oppositeKingRank == eightRank
+                || (oppositePawns & Masks.SeventhRankMasks[1 - sameSide]) != 0))
         {
             packedBonus += Configuration.EngineSettings.SeventhRankRookBonus.PackedEvaluation;
         }
