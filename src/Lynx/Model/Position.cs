@@ -907,12 +907,13 @@ public class Position
         var packedBonus = Configuration.EngineSettings.RookMobilityBonus[attacksCount].PackedEvaluation;
 
         const int pawnToRookOffset = (int)Piece.R - (int)Piece.P;
+        var sameSidePawns = PieceBitBoards[pieceIndex - pawnToRookOffset];
 
         if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default)  // isOpenFile
         {
             packedBonus += Configuration.EngineSettings.OpenFileRookBonus.PackedEvaluation;
         }
-        else if ((PieceBitBoards[pieceIndex - pawnToRookOffset] & Masks.FileMasks[squareIndex]) == default)  // isSemiOpenFile
+        else if ((sameSidePawns & Masks.FileMasks[squareIndex]) == default)  // isSemiOpenFile
         {
             packedBonus += Configuration.EngineSettings.SemiOpenFileRookBonus.PackedEvaluation;
         }
