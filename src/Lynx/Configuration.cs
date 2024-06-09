@@ -194,6 +194,8 @@ public sealed class EngineSettings
 
     public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(15, 8);
 
+    public TaperedEvaluationTerm SeventhRankRookBonus { get; set; } = new(1, 1);
+
     public TaperedEvaluationTerm QueenMobilityBonus { get; set; } = new(4, 8);
 
     public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-30, 19);

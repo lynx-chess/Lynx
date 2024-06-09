@@ -917,6 +917,12 @@ public class Position
             packedBonus += Configuration.EngineSettings.SemiOpenFileRookBonus.PackedEvaluation;
         }
 
+        var squareRank = Constants.Rank[squareIndex];
+        if (squareRank == 2 + (5 * sameSide))
+        {
+            packedBonus += Configuration.EngineSettings.SeventhRankRookBonus.PackedEvaluation;
+        }
+
         return packedBonus;
     }
 
