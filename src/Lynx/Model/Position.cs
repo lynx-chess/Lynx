@@ -917,8 +917,12 @@ public class Position
             packedBonus += Configuration.EngineSettings.SemiOpenFileRookBonus.PackedEvaluation;
         }
 
-        var squareRank = Constants.Rank[squareIndex];
-        if (squareRank == 2 + (5 * sameSide))
+        var rookRank = Constants.Rank[squareIndex];
+        var oppositeKingSquare = PieceBitBoards[(int)Piece.K + (6 * sameSide)].GetLS1BIndex();
+        var oppositeKingRank = Constants.Rank[oppositeKingSquare];
+
+        if (rookRank == 1 + (5 * sameSide)
+            && oppositeKingRank == 0 + (7 * sameSide))
         {
             packedBonus += Configuration.EngineSettings.SeventhRankRookBonus.PackedEvaluation;
         }
