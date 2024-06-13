@@ -264,7 +264,8 @@ public static class MoveExtensions
                     var candidatePromotedPiece = candidateMove.PromotedPiece();
 
                     if (candidatePromotedPiece == promotedPiece
-                        || candidatePromotedPiece == promotedPiece - 6)
+                        || candidatePromotedPiece == promotedPiece - 6
+                        || candidatePromotedPiece == promotedPiece + 6) // pgn-extract output - h2h1Q
                     {
                         move = candidateMove;
                         return true;
