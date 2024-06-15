@@ -133,7 +133,9 @@ public sealed class Game
         bool repetitionDetected = false;
         for (int i = PositionHashHistory.Count - 3; i >= limit; i -= 2)
         {
-            bool requiresThreefold = repetitionDetected || i < ply;
+            // We want to detect threefold repetitions for moves ahead of root,
+            // that's why we pass ply and calculate PositionHashHistory.Count - ply -1
+            bool requiresThreefold = repetitionDetected || i >= PositionHashHistory.Count - ply;
             if (currentHash == PositionHashHistory[i])
             {
                 if (requiresThreefold && !repetitionDetected)
