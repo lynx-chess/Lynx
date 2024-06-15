@@ -27,19 +27,19 @@ public class GameTest : BaseTest
         Assert.DoesNotThrow(() => game.MakeMove(repeatedMoves[2]));
 
         game.MakeMove(repeatedMoves[3]);
-        Assert.True(game.IsThreefoldRepetition(false));
+        Assert.True(game.IsThreefoldRepetition());
 
         game.MakeMove(repeatedMoves[4]);
-        Assert.True(game.IsThreefoldRepetition(false));
+        Assert.True(game.IsThreefoldRepetition());
 
         game.MakeMove(repeatedMoves[5]);
-        Assert.True(game.IsThreefoldRepetition(false));
+        Assert.True(game.IsThreefoldRepetition());
 
         game.MakeMove(repeatedMoves[6]);
-        Assert.True(game.IsThreefoldRepetition(false));
+        Assert.True(game.IsThreefoldRepetition());
 
         game.MakeMove(repeatedMoves[7]);
-        Assert.True(game.IsThreefoldRepetition(false));
+        Assert.True(game.IsThreefoldRepetition());
     }
 
     [Test]
@@ -66,21 +66,21 @@ public class GameTest : BaseTest
         Assert.DoesNotThrow(() => game.MakeMove(repeatedMoves[2]));
 
         game.MakeMove(repeatedMoves[3]);
-        Assert.True(game.IsThreefoldRepetition(false));
-        Assert.False(game.IsThreefoldRepetition(true));
+        Assert.True(game.IsThreefoldRepetition());
+        Assert.False(game.IsThreefoldRepetition());
 
         game.MakeMove(repeatedMoves[4]);
-        Assert.True(game.IsThreefoldRepetition(false));
+        Assert.True(game.IsThreefoldRepetition());
 
         game.MakeMove(repeatedMoves[5]);
-        Assert.True(game.IsThreefoldRepetition(false));
+        Assert.True(game.IsThreefoldRepetition());
 
         game.MakeMove(repeatedMoves[6]);
-        Assert.True(game.IsThreefoldRepetition(false));
+        Assert.True(game.IsThreefoldRepetition());
 
         game.MakeMove(repeatedMoves[7]);
-        Assert.True(game.IsThreefoldRepetition(false));
-        Assert.True(game.IsThreefoldRepetition(true));
+        Assert.True(game.IsThreefoldRepetition());
+        Assert.True(game.IsThreefoldRepetition());
     }
 
     [Test]
@@ -134,18 +134,18 @@ public class GameTest : BaseTest
         Assert.DoesNotThrow(() => game.MakeMove(repeatedMoves[2]));
 
         game.MakeMove(repeatedMoves[3]);
-        Assert.True(game.IsThreefoldRepetition(false));
+        Assert.True(game.IsThreefoldRepetition());
 
         Assert.DoesNotThrow(() => game.MakeMove(repeatedMoves[4]));
         Assert.DoesNotThrow(() => game.MakeMove(repeatedMoves[5]));
 
         game.MakeMove(repeatedMoves[6]);
-        Assert.True(game.IsThreefoldRepetition(false));
+        Assert.True(game.IsThreefoldRepetition());
 
         Assert.DoesNotThrow(() => game.MakeMove(repeatedMoves[6]));
 
         game.MakeMove(repeatedMoves[7]);
-        Assert.True(game.IsThreefoldRepetition(false));
+        Assert.True(game.IsThreefoldRepetition());
 
         // Position with castling rights, lost in move Ke1d1
         winningPosition = new Position("1n2k2r/8/8/8/8/8/4PPPP/1N2K2R w Kk - 0 1");
@@ -170,7 +170,7 @@ public class GameTest : BaseTest
         }
 
         game.MakeMove(repeatedMoves[^1]);
-        Assert.False(game.IsThreefoldRepetition(false));                      // Same position, but white not can't castle
+        Assert.False(game.IsThreefoldRepetition());                      // Same position, but white not can't castle
 
 #if DEBUG
         Assert.AreEqual(repeatedMoves.Count, game.MoveHistory.Count);
@@ -183,7 +183,7 @@ public class GameTest : BaseTest
         Assert.DoesNotThrow(() => game.MakeMove(repeatedMoves[5]));
 
         game.MakeMove(repeatedMoves[6]);
-        Assert.True(game.IsThreefoldRepetition(false));
+        Assert.True(game.IsThreefoldRepetition());
     }
 
     [Test]
