@@ -57,6 +57,4 @@ public record class TablebaseEvalMove()
 [JsonSourceGenerationOptions(
     GenerationMode = JsonSourceGenerationMode.Default)] // https://github.com/dotnet/runtime/issues/78602#issuecomment-1322004254
 [JsonSerializable(typeof(TablebaseEvaluation))]
-internal partial class SourceGenerationContext : JsonSerializerContext
-{
-}
+internal partial class SourceGenerationContext : JsonSerializerContext;
