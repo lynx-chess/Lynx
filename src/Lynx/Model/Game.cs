@@ -118,43 +118,20 @@ public sealed class Game
 
     /// <summary>
     /// Basic algorithm described in https://web.archive.org/web/20201107002606/https://marcelk.net/2013-04-06/paper/upcoming-rep-v2.pdf
-    /// Appart from that, tests for three fold repetition if <paramref name="requiresThreefold"/> is true, two otherwise
     /// </summary>
-    /// <param name="requiresThreefold">Whether real threefold repetition is required, 'two-fold' will be checked otherwise. Usual strategy is to do threefold only for pv nodes</param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsThreefoldRepetition(bool requiresThreefold)
+    public bool IsThreefoldRepetition()
     {
         var currentHash = CurrentPosition.UniqueIdentifier;
 
         // [Count - 1] would be the last one, we want to start searching 2 ealier and finish HalfMovesWithoutCaptureOrPawnMove earlier
         var limit = Math.Max(0, PositionHashHistory.Count - 1 - HalfMovesWithoutCaptureOrPawnMove);
-
-        if (!requiresThreefold)
+        for (int i = PositionHashHistory.Count - 3; i >= limit; i -= 2)
         {
-            for (int i = PositionHashHistory.Count - 3; i >= limit; i -= 2)
+            if (currentHash == PositionHashHistory[i])
             {
-                if (currentHash == PositionHashHistory[i])
-                {
-                    return true;
-                }
-            }
-        }
-        else
-        {
-            for (int i = PositionHashHistory.Count - 3; i >= limit; i -= 2)
-            {
-                if (currentHash == PositionHashHistory[i])
-                {
-                    if (requiresThreefold)
-                    {
-                        requiresThreefold = false;
-                    }
-                    else
-                    {
-                        return true;
-                    }
-                }
+                return true;
             }
         }
 
