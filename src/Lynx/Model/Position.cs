@@ -740,8 +740,11 @@ public class Position
             gamePhase = maxPhase;
         }
 
+        var totalPawnsCount = PieceBitBoards[(int)Piece.P].CountBits() + PieceBitBoards[(int)Piece.p].CountBits();
+        packedScore += totalPawnsCount * 6;
+
         // Pawnless endgames with few pieces
-        if (gamePhase <= 3 && PieceBitBoards[(int)Piece.P] == 0 && PieceBitBoards[(int)Piece.p] == 0)
+        if (gamePhase <= 3 && totalPawnsCount == 0)
         {
             switch (gamePhase)
             {
