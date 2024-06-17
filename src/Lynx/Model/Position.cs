@@ -905,8 +905,7 @@ public class Position
 
         var attacksCount =
             (Attacks.RookAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both])
-                & (~OccupancyBitBoards[sameSide])
-                & (~opponentPawnAttacks))
+                & (~(OccupancyBitBoards[sameSide] | opponentPawnAttacks)))
             .CountBits();
 
         var packedBonus = Configuration.EngineSettings.RookMobilityBonus[attacksCount].PackedEvaluation;
@@ -940,8 +939,7 @@ public class Position
 
         var attacksCount =
             (Attacks.KnightAttacks[squareIndex]
-                & (~OccupancyBitBoards[sameSide])
-                & (~opponentPawnAttacks))
+                & (~(OccupancyBitBoards[sameSide] | opponentPawnAttacks)))
             .CountBits();
 
         return Configuration.EngineSettings.KnightMobilityBonus[attacksCount].PackedEvaluation;
