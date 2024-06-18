@@ -206,6 +206,8 @@ public sealed class EngineSettings
 
     public TaperedEvaluationTerm PieceProtectedByPawnBonus { get; set; } = new(6, 11);
 
+    public TaperedEvaluationTerm PieceAttackedByPawnPenalty { get; set; } = new(-1, -1);
+
     public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(
             new(0, 0),
             new(2, 11),
