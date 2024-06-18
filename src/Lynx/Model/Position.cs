@@ -730,7 +730,8 @@ public class Position
 
         // Pieces protected by pawns bonus
         packedScore += Configuration.EngineSettings.PieceProtectedByPawnBonus.PackedEvaluation
-            * ((whitePawnAttacks & OccupancyBitBoards[(int)Side.White]).CountBits() - (blackPawnAttacks & OccupancyBitBoards[(int)Side.Black]).CountBits());
+            * ((whitePawnAttacks & OccupancyBitBoards[(int)Side.White] & (~PieceBitBoards[(int)Piece.P])).CountBits()
+                - (blackPawnAttacks & OccupancyBitBoards[(int)Side.Black] & (~PieceBitBoards[(int)Piece.p])).CountBits());
 
         var whiteKing = PieceBitBoards[(int)Piece.K].GetLS1BIndex();
         var blackKing = PieceBitBoards[(int)Piece.k].GetLS1BIndex();
