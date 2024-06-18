@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 
 namespace Lynx;
@@ -205,7 +205,13 @@ public sealed class EngineSettings
 
     public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(30, 80);
 
-    public TaperedEvaluationTerm PieceProtectedByPawnBonus { get; set; } = new(1, 1);
+    public TaperedEvaluationTermByPiece PieceProtectedByPawnBonus { get; set; } = new(
+            new(0, 0),
+            new(1, 1),
+            new(2, 2),
+            new(3, 3),
+            new(4, 4),
+            new(5, 5));
 
     public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(
             new(0, 0),
@@ -345,6 +351,54 @@ public sealed class TaperedEvaluationTerm
     public override string ToString()
     {
         return $"{{\"MG\":{MG},\"EG\":{EG}}}";
+    }
+}
+
+public sealed class TaperedEvaluationTermByPiece
+{
+    private readonly TaperedEvaluationTerm[] _evaluationTermsIndexedByPiece;
+
+    public TaperedEvaluationTerm Pawn => _evaluationTermsIndexedByPiece[0];
+    public TaperedEvaluationTerm Knight => _evaluationTermsIndexedByPiece[1];
+    public TaperedEvaluationTerm Bishop => _evaluationTermsIndexedByPiece[2];
+    public TaperedEvaluationTerm Rook => _evaluationTermsIndexedByPiece[3];
+    public TaperedEvaluationTerm Queen => _evaluationTermsIndexedByPiece[4];
+    public TaperedEvaluationTerm King => _evaluationTermsIndexedByPiece[5];
+
+    public TaperedEvaluationTermByPiece(
+        TaperedEvaluationTerm pawn, TaperedEvaluationTerm knight, TaperedEvaluationTerm bishop,
+        TaperedEvaluationTerm rook, TaperedEvaluationTerm queen, TaperedEvaluationTerm king)
+    {
+        _evaluationTermsIndexedByPiece =
+        [
+            pawn, knight, bishop, rook, queen, king,
+            new(-pawn.MG, -pawn.EG),
+            new(-knight.MG, -knight.EG),
+            new(-bishop.MG, -bishop.EG),
+            new(-rook.MG, -rook.EG),
+            new(-queen.MG, -queen.EG),
+            new(-king.MG, -king.EG)
+        ];
+
+        Debug.Assert(_evaluationTermsIndexedByPiece.Length == 12);
+    }
+
+    public TaperedEvaluationTerm this[int i]
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => _evaluationTermsIndexedByPiece[i];
+    }
+
+    public override string ToString()
+    {
+        return "{" +
+            $"\"{nameof(Pawn)}\":{Pawn}," +
+            $"\"{nameof(Knight)}\":{Knight}," +
+            $"\"{nameof(Bishop)}\":{Bishop}," +
+            $"\"{nameof(Rook)}\":{Rook}," +
+            $"\"{nameof(Queen)}\":{Queen}," +
+            $"\"{nameof(King)}\":{King}," +
+            "}";
     }
 }
 
@@ -570,7 +624,7 @@ public sealed class TaperedEvaluationTermByCount27
 
         Debug.Assert(_evaluationTermsIndexedByCount.Length == 28);
 
-        #pragma warning restore IDE0055
+#pragma warning restore IDE0055
     }
 
     public TaperedEvaluationTerm this[int i] => _evaluationTermsIndexedByCount[i];
@@ -614,6 +668,7 @@ public sealed class TaperedEvaluationTermByCount27
     GenerationMode = JsonSourceGenerationMode.Default, WriteIndented = true)] // https://github.com/dotnet/runtime/issues/78602#issuecomment-1322004254
 [JsonSerializable(typeof(EngineSettings))]
 [JsonSerializable(typeof(TaperedEvaluationTerm))]
+[JsonSerializable(typeof(TaperedEvaluationTermByPiece))]
 [JsonSerializable(typeof(TaperedEvaluationTermByRank))]
 [JsonSerializable(typeof(TaperedEvaluationTermByCount8))]
 [JsonSerializable(typeof(TaperedEvaluationTermByCount14))]
