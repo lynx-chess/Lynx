@@ -204,6 +204,8 @@ public sealed class EngineSettings
 
     public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(30, 80);
 
+    public TaperedEvaluationTerm PieceProtectedByPawnBonus { get; set; } = new(1, 1);
+
     public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(
             new(0, 0),
             new(3, 11),
