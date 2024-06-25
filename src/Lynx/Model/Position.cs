@@ -744,7 +744,16 @@ public class Position
         if (gamePhase <= 3)
         {
             var totalPawnsCount = PieceBitBoards[(int)Piece.P].CountBits() + PieceBitBoards[(int)Piece.p].CountBits();
-            packedScore -= (16 - totalPawnsCount);
+            var penalty = 16 - totalPawnsCount;
+
+            if (packedScore > 0)
+            {
+                packedScore -= penalty;
+            }
+            else if (packedScore < 0)
+            {
+                packedScore += penalty;
+            }
 
             if (totalPawnsCount == 0)
             {
