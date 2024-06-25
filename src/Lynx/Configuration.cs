@@ -1,3 +1,4 @@
+﻿using System.Diagnostics;
 ﻿using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 
@@ -371,6 +372,8 @@ public sealed class TaperedEvaluationTermByCount7
         TaperedEvaluationTerm rank6, TaperedEvaluationTerm rank7)
     {
         _evaluationTermsIndexedByRank = [rank0, rank1, rank2, rank3, rank4, rank5, rank6, rank7];
+
+        Debug.Assert(_evaluationTermsIndexedByRank.Length == 8);
     }
 
     public TaperedEvaluationTerm this[int i]
@@ -418,6 +421,8 @@ public sealed class TaperedEvaluationTermByCount8
     {
         _evaluationTermsIndexedByCount =
             [count0, count1, count2, count3, count4, count5, count6, count7, count8];
+
+        Debug.Assert(_evaluationTermsIndexedByCount.Length == 9);
     }
 
     public TaperedEvaluationTerm this[int i]
@@ -476,6 +481,8 @@ public sealed class TaperedEvaluationTermByCount14
     {
         _evaluationTermsIndexedByCount =
             [count0, count1, count2, count3, count4, count5, count6, count7, count8, count9, count10, count11, count12, count13, count14];
+
+        Debug.Assert(_evaluationTermsIndexedByCount.Length == 15);
     }
 
     public TaperedEvaluationTerm this[int i]
@@ -562,6 +569,8 @@ public sealed class TaperedEvaluationTermByCount27
             count10, count11, count12, count13, count14, count15, count16, count17, count18, count19,
             count20, count21, count22, count23, count24, count25, count26, count27
         ];
+
+        Debug.Assert(_evaluationTermsIndexedByCount.Length == 28);
 
         #pragma warning restore IDE0055
     }
