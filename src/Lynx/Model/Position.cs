@@ -809,14 +809,15 @@ public class Position
         if (gamePhase <= 3)
         {
             var pawnScalingPenalty = 16 - totalPawnsCount;
-            eval = Math.Max(pawnScalingPenalty - 1, 0);
 
             if (eval > 0)
             {
+                eval = Math.Max(eval - 1, pawnScalingPenalty);
                 eval -= pawnScalingPenalty;
             }
             else if (eval < 0)
             {
+                eval = Math.Max(-eval + 1, pawnScalingPenalty);
                 eval += pawnScalingPenalty;
             }
         }
