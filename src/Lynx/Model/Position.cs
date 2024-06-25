@@ -812,12 +812,12 @@ public class Position
 
             if (eval > 1)
             {
-                pawnScalingPenalty = Math.Max(eval - 1, pawnScalingPenalty);
+                pawnScalingPenalty = Math.Min(eval - 1, pawnScalingPenalty);
                 eval -= pawnScalingPenalty;
             }
             else if (eval < -1)
             {
-                pawnScalingPenalty = Math.Max(-eval + 1, pawnScalingPenalty);
+                pawnScalingPenalty = Math.Min(-eval - 1, pawnScalingPenalty);
                 eval += pawnScalingPenalty;
             }
         }
