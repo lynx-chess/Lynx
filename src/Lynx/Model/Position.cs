@@ -810,14 +810,14 @@ public class Position
         {
             var pawnScalingPenalty = 16 - totalPawnsCount;
 
-            if (eval > 0)
+            if (eval > 1)
             {
-                eval = Math.Max(eval - 1, pawnScalingPenalty);
+                pawnScalingPenalty = Math.Max(eval - 1, pawnScalingPenalty);
                 eval -= pawnScalingPenalty;
             }
-            else if (eval < 0)
+            else if (eval < -1)
             {
-                eval = Math.Max(-eval + 1, pawnScalingPenalty);
+                pawnScalingPenalty = Math.Max(-eval + 1, pawnScalingPenalty);
                 eval += pawnScalingPenalty;
             }
         }
