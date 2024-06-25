@@ -249,6 +249,8 @@ public class RegressionTest : BaseTest
         engine.AdjustPosition(positionCommand);
 
         var bestMove = engine.BestMove(new GoCommand($"go depth {5}"));
+        Assert.Zero(bestMove.Evaluation);
+        Assert.AreEqual(1, bestMove.Moves.Count);
         Assert.AreEqual("b8c7", bestMove.BestMove.UCIString());
     }
 
@@ -391,39 +393,5 @@ public class RegressionTest : BaseTest
     public void PawnlessEndgames(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
     {
         TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
-    }
-
-    [Test]
-    public void FalseThreefoldRepetitionDetected()
-    {
-        const string positionCommand =
-            "position fen rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQK1NR w KQq - 0 1 " +
-            "moves b1c3 c7c5 d2d4 c5d4 d1d4 b8c6 d4a4 d7d5 g1f3 g8f6 c1g5 c8d7 g5f6 e7f6 e1c1 c6b4 a4b3 d7e6 d1d4 " +
-            "d8b6 a2a3 b4c6 b3b6 a7b6 d4d2 f8c5 e2e3 c6e7 h1d1 c5d6 c3b5 e8d7 b5d6 d7d6 f3d4 h8c8 e3e4 c8c5 b2b4 c5c4 " +
-            "e4d5 e7d5 c1b2 g7g6 d4b5 d6c6 b5d4 c6d7 d4b5 d7c6 b5d4 c6d6 d4b5 d6e5 d2e2 e5f4 e2d2 f4e5 d2e2 e5f4 e2d2 " +
-            "d5e7 b5d6 c4c7 d1e1 f4g4 c2c3 g4g5 d6e4 g5h6 e4f6 h6g7 f6e4 h7h6 g2g3 e7d5 d2d4 d5f6 e4d6 c7d7 e1e2 a8d8 " +
-            "d6b5 e6d5 h2h4 d8c8 e2e1 c8d8 e1e3 d8c8";
-
-        var engine = GetEngine();
-
-        engine.AdjustPosition(positionCommand);
-
-        var bestMove = engine.BestMove(new GoCommand("go depth 1"));
-        Assert.Less(bestMove.Evaluation, -150);
-
-        engine.NewGame();
-        engine.AdjustPosition(positionCommand);
-        bestMove = engine.BestMove(new GoCommand("go depth 5"));
-        Assert.Less(bestMove.Evaluation, -150);
-
-        engine.NewGame();
-        engine.AdjustPosition(positionCommand);
-        bestMove = engine.BestMove(new GoCommand("go depth 2"));
-        Assert.Less(bestMove.Evaluation, -150);
-
-        engine.NewGame();
-        engine.AdjustPosition(positionCommand);
-        bestMove = engine.BestMove(new GoCommand("go depth 10"));
-        Assert.Less(bestMove.Evaluation, -150);
     }
 }
