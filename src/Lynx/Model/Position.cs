@@ -740,20 +740,12 @@ public class Position
             gamePhase = maxPhase;
         }
 
+        int totalPawnsCount = int.MinValue;
+
         // Pawnless endgames with few pieces
         if (gamePhase <= 3)
         {
-            var totalPawnsCount = PieceBitBoards[(int)Piece.P].CountBits() + PieceBitBoards[(int)Piece.p].CountBits();
-            var penalty = 16 - totalPawnsCount;
-
-            if (packedScore > 0)
-            {
-                packedScore -= penalty;
-            }
-            else if (packedScore < 0)
-            {
-                packedScore += penalty;
-            }
+            totalPawnsCount = PieceBitBoards[(int)Piece.P].CountBits() + PieceBitBoards[(int)Piece.p].CountBits();
 
             if (totalPawnsCount == 0)
             {
@@ -813,6 +805,21 @@ public class Position
         var middleGameScore = Utils.UnpackMG(packedScore);
         var endGameScore = Utils.UnpackEG(packedScore);
         var eval = ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / maxPhase;
+
+        if (gamePhase <= 3)
+        {
+            var pawnScalingPenalty = 16 - totalPawnsCount;
+            eval = Math.Max(pawnScalingPenalty - 1, 0);
+
+            if (eval > 0)
+            {
+                eval -= pawnScalingPenalty;
+            }
+            else if (eval < 0)
+            {
+                eval += pawnScalingPenalty;
+            }
+        }
 
         eval = Math.Clamp(eval, EvaluationConstants.MinEval, EvaluationConstants.MaxEval);
 
