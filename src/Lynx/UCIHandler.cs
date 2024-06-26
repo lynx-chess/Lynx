@@ -586,12 +586,10 @@ public sealed class UCIHandler
 
                 await _engineToUci.Writer.WriteAsync($"{line}: {eval}", cancellationToken);
 
-#pragma warning disable S2583 // Conditionally executed code should be reachable
                 if (++lineCounter % 100 == 0)
                 {
                     Thread.Sleep(50);
                 }
-#pragma warning restore S2583 // Conditionally executed code should be reachable
             }
         }
         catch (Exception e)
