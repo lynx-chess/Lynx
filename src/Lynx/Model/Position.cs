@@ -680,6 +680,9 @@ public class Position
         int packedScore = 0;
         int gamePhase = 0;
 
+        BitBoard whitePawnAttacks = PieceBitBoards[(int)Piece.P].ShiftUpRight() | PieceBitBoards[(int)Piece.P].ShiftUpLeft();
+        BitBoard blackPawnAttacks = PieceBitBoards[(int)Piece.p].ShiftDownRight() | PieceBitBoards[(int)Piece.p].ShiftDownLeft();
+
         for (int pieceIndex = (int)Piece.P; pieceIndex < (int)Piece.K; ++pieceIndex)
         {
             // Bitboard copy that we 'empty'
@@ -724,6 +727,15 @@ public class Position
         {
             packedScore -= Configuration.EngineSettings.BishopPairBonus.PackedEvaluation;
         }
+
+        // Pieces protected by pawns bonus
+        packedScore += Configuration.EngineSettings.PieceProtectedByPawnBonus.PackedEvaluation
+            * ((whitePawnAttacks & OccupancyBitBoards[(int)Side.White] /*& (~PieceBitBoards[(int)Piece.P])*/).CountBits()
+                - (blackPawnAttacks & OccupancyBitBoards[(int)Side.Black] /*& (~PieceBitBoards[(int)Piece.p])*/).CountBits());
+
+        packedScore += Configuration.EngineSettings.PieceAttackedByPawnPenalty.PackedEvaluation
+            * ((blackPawnAttacks & OccupancyBitBoards[(int)Side.White]).CountBits()
+                - (whitePawnAttacks & OccupancyBitBoards[(int)Side.Black]).CountBits());
 
         var whiteKing = PieceBitBoards[(int)Piece.K].GetLS1BIndex();
         var blackKing = PieceBitBoards[(int)Piece.k].GetLS1BIndex();
