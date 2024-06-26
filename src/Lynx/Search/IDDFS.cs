@@ -92,6 +92,8 @@ public sealed partial class Engine
                 _engineWriter.TryWrite(InfoCommand.SearchResultInfo(lastSearchResult));
             }
 
+            int mate = 0;
+
             do
             {
                 _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
@@ -142,11 +144,14 @@ public sealed partial class Engine
 
                 var bestEvaluationAbs = Math.Abs(bestEvaluation);
                 isMateDetected = bestEvaluationAbs > EvaluationConstants.PositiveCheckmateDetectionLimit;
+                mate = isMateDetected
+                    ? Utils.CalculateMateInX(bestEvaluation, bestEvaluationAbs)
+                    : 0;
 
-                lastSearchResult = UpdateLastSearchResult(lastSearchResult, bestEvaluation, alpha, beta, depth, isMateDetected, bestEvaluationAbs);
+                lastSearchResult = UpdateLastSearchResult(lastSearchResult, bestEvaluation, alpha, beta, depth, mate, bestEvaluationAbs);
 
                 _engineWriter.TryWrite(InfoCommand.SearchResultInfo(lastSearchResult));
-            } while (StopSearchCondition(++depth, maxDepth, isMateDetected, softLimitTimeBound));
+            } while (StopSearchCondition(++depth, maxDepth, mate, softLimitTimeBound));
         }
         catch (OperationCanceledException)
         {
@@ -169,10 +174,12 @@ public sealed partial class Engine
 
         var finalSearchResult = GenerateFinalSearchResult(lastSearchResult, bestEvaluation, alpha, beta, depth, firstLegalMove, isCancelled);
 
-        if (isMateDetected && finalSearchResult.Mate + Game.HalfMovesWithoutCaptureOrPawnMove < 96)
+        if (Configuration.EngineSettings.UseOnlineTablebaseInRootPositions
+            && isMateDetected
+            && (finalSearchResult.Mate * 2) + Game.HalfMovesWithoutCaptureOrPawnMove < Constants.MaxMateDistanceToStopSearching)
         {
-            _logger.Info("Engine search found a short enough mate, cancelling online tb probing if still active");
             _searchCancellationTokenSource.Cancel();
+            _logger.Info("Engine search found a short enough mate, cancelling online tb probing if still active");
         }
 
         _engineWriter.TryWrite(InfoCommand.SearchResultInfo(finalSearchResult));
@@ -180,12 +187,20 @@ public sealed partial class Engine
         return finalSearchResult;
     }
 
-    private bool StopSearchCondition(int depth, int maxDepth, bool isMateDetected, int softLimitTimeBound)
+    private bool StopSearchCondition(int depth, int maxDepth, int mate, int softLimitTimeBound)
     {
-        if (isMateDetected)
+        if (mate != 0)
         {
-            _logger.Info("Stopping at depth {0}: mate detected", depth - 1);
-            return false;
+            var winningMateThreshold = (100 - Game.HalfMovesWithoutCaptureOrPawnMove) / 2;
+            _logger.Info("Depth {0}: mate in {1} detected ({2} moves until draw by repetition)", depth - 1, mate, winningMateThreshold);
+
+            if (mate < 0 || mate + Constants.MateDistanceMarginToStopSearching < winningMateThreshold)
+            {
+                _logger.Info("Stopping search: mate is short enough");
+                return false;
+            }
+
+            _logger.Info("Search continues, hoping to find a faster mate");
         }
 
         if (depth >= Configuration.EngineSettings.MaxDepth)
@@ -277,16 +292,10 @@ public sealed partial class Engine
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private SearchResult UpdateLastSearchResult(SearchResult? lastSearchResult,
-        int bestEvaluation, int alpha, int beta, int depth, bool isMateDetected, int bestEvaluationAbs)
+        int bestEvaluation, int alpha, int beta, int depth, int mate, int bestEvaluationAbs)
     {
         var pvMoves = _pVTable.TakeWhile(m => m != default).ToList();
         var maxDepthReached = _maxDepthReached.LastOrDefault(item => item != default);
-
-        int mate = default;
-        if (isMateDetected)
-        {
-            mate = Utils.CalculateMateInX(bestEvaluation, bestEvaluationAbs);
-        }
 
         var elapsedTime = _stopWatch.ElapsedMilliseconds;
 
