@@ -35,7 +35,7 @@ public sealed partial class Engine
     private TranspositionTable _tt = [];
     private int _ttMask;
 
-    private int _nodes;
+    private long _nodes;
     private bool _isFollowingPV;
     private bool _isScoringPV;
 

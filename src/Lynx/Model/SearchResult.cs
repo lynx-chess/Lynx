@@ -12,7 +12,7 @@ public class SearchResult
 
     public int DepthReached { get; set; }
 
-    public int Nodes { get; set; }
+    public long Nodes { get; set; }
 
     public long Time { get; set; }
 

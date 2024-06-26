@@ -175,7 +175,7 @@ public static class Utils
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static long CalculateNps(int nodes, long elapsedMilliseconds)
+    public static long CalculateNps(long nodes, long elapsedMilliseconds)
     {
         return Convert.ToInt64(Math.Clamp(nodes / ((0.001 * elapsedMilliseconds) + 1), 0, long.MaxValue));
     }
