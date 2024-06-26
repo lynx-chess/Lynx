@@ -76,7 +76,7 @@ public sealed partial class Engine
         {
             if (MoveGenerator.CanGenerateAtLeastAValidMove(position))
             {
-                return QuiescenceSearch(ply, alpha, beta);
+                return QuiescenceSearch(depth, ply, alpha, beta);
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
@@ -117,7 +117,7 @@ public sealed partial class Engine
                     {
                         if (depth == 1)
                         {
-                            var qSearchScore = QuiescenceSearch(ply, alpha, beta);
+                            var qSearchScore = QuiescenceSearch(depth, ply, alpha, beta);
 
                             return qSearchScore > score
                                 ? qSearchScore
@@ -128,7 +128,7 @@ public sealed partial class Engine
 
                         if (score < beta)               // Static evaluation indicates fail-low node
                         {
-                            var qSearchScore = QuiescenceSearch(ply, alpha, beta);
+                            var qSearchScore = QuiescenceSearch(depth, ply, alpha, beta);
                             if (qSearchScore < beta)    // Quiescence score also indicates fail-low node
                             {
                                 return qSearchScore > score
@@ -477,7 +477,7 @@ public sealed partial class Engine
     /// Defaults to the works possible score for Black, Int.MaxValue
     /// </param>
     /// <returns></returns>
-    public int QuiescenceSearch(int ply, int alpha, int beta)
+    public int QuiescenceSearch(int depth, int ply, int alpha, int beta)
     {
         var position = Game.CurrentPosition;
 
@@ -487,6 +487,12 @@ public sealed partial class Engine
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
             _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
+            return position.StaticEvaluation().Score;
+        }
+
+        if (ply - depth >= Configuration.EngineSettings.MaxQSearchRelativeDepth)
+        {
+            _logger.Info("Max QSearch depth {0} reached", ply - depth);
             return position.StaticEvaluation().Score;
         }
 
@@ -572,7 +578,7 @@ public sealed partial class Engine
             // No need to check for threefold or 50 moves repetitions, since we're only searching captures, promotions, and castles
             // Theoretically there could be a castling move that caused the 50 moves repetitions, but it's highly unlikely
 
-            int evaluation = -QuiescenceSearch(ply + 1, -beta, -alpha);
+            int evaluation = -QuiescenceSearch(depth, ply + 1, -beta, -alpha);
             position.UnmakeMove(move, gameState);
 
             PrintMove(ply, move, evaluation);
