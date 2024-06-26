@@ -359,6 +359,13 @@ public static class Constants
     public const int ArrayDepthMargin = 16;
 
     /// <summary>
+    /// Given mate in <see cref="MateDistanceMarginToStopSearching"/> (so this is full moves)
+    /// </summary>
+    public const int MateDistanceMarginToStopSearching = 2;
+
+    public const int MaxMateDistanceToStopSearching = 100 -  (2 * MateDistanceMarginToStopSearching);
+
+    /// <summary>
     /// From https://lichess.org/RViT3UWL
     /// Failes input parsing fail if default input buffer size is used (see Lynx.Cli.Listener
     /// </summary>
