@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 
 namespace Lynx;
@@ -140,6 +140,9 @@ public sealed class EngineSettings
 
     [SPSAAttribute<int>(1, 20, 1)]
     public int AspirationWindow_MinDepth { get; set; } = 8;
+
+    [SPSAAttribute<int>(1, 2000, 250)]
+    public int AspirationWindow_MaxWidth { get; set; } = 1000;
 
     [SPSAAttribute<int>(1, 10, 0.5)]
     public int RFP_MaxDepth { get; set; } = 6;

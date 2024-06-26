@@ -117,8 +117,13 @@ public sealed partial class Engine
 
                         window += window >> 1;   // window / 2
 
+                        if (window > Configuration.EngineSettings.MaxDepth)
+                        {
+                            alpha = MinValue;
+                            beta = MaxValue;
+                        }
                         // Depth change: https://github.com/lynx-chess/Lynx/pull/440
-                        if (alpha >= bestEvaluation)     // Fail low
+                        else if (alpha >= bestEvaluation)     // Fail low
                         {
                             alpha = Math.Max(bestEvaluation - window, MinValue);
                             beta = (alpha + beta) >> 1;  // (alpha + beta) / 2
@@ -126,6 +131,10 @@ public sealed partial class Engine
                         else if (beta <= bestEvaluation)     // Fail high
                         {
                             beta = Math.Min(bestEvaluation + window, MaxValue);
+                            if (beta > 1024)
+                            {
+                                beta = MaxValue;
+                            }
                         }
                         else
                         {
