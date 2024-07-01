@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 
 namespace Lynx;
@@ -68,7 +68,7 @@ public sealed class EngineSettings
     /// <summary>
     /// Depth for bench command
     /// </summary>
-    public int BenchDepth { get; set; } = 8;
+    public int BenchDepth { get; set; } = 10;
 
     /// <summary>
     /// MB
