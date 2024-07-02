@@ -201,7 +201,7 @@ public static class SEE
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int Gain(Move move)
+    public static int Gain(Move move)
     {
         if (move.IsCastle())
         {
