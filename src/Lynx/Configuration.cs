@@ -187,6 +187,9 @@ public sealed class EngineSettings
     [SPSAAttribute<int>(0, 500, 25)]
     public int FP_Margin { get; set; } = 129;
 
+    [SPSAAttribute<int>(0, 500, 25)]
+    public int FP_QS_Margin { get; set; } = 75;
+
     #region Evaluation
 
     public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-19, -14);
