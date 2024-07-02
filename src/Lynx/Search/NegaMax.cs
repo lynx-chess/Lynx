@@ -67,6 +67,8 @@ public sealed partial class Engine
 
         bool isInCheck = position.IsInCheck();
         int staticEval = int.MaxValue, phase = int.MaxValue;
+        var offset = Utils.PieceOffset(position.Side);
+        var friendlyPawnsCount = position.PieceBitBoards[offset].CountBits();
 
         if (isInCheck)
         {
@@ -257,7 +259,7 @@ public sealed partial class Engine
                     // Late Move Pruning (LMP) - all quiet moves can be pruned
                     // after searching the first few given by the move ordering algorithm
                     if (depth <= Configuration.EngineSettings.LMP_MaxDepth
-                        && phase > 2
+                        && friendlyPawnsCount >= 1
                         && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth)) // Based on formula suggested by Antares
                     {
                         // After making a move
