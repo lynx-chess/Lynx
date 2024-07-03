@@ -400,7 +400,8 @@ public static class MoveExtensions
         };
 #pragma warning restore S3358 // Ternary operators should not be nested
 
-        // https://chess.stackexchange.com/a/1819
+        // First file letter, then rank number and finally the whole square
+        // At least according to https://chess.stackexchange.com/a/1819
         static string DisambiguateMove(Move move, Position position)
         {
             var piece = move.Piece();
@@ -413,6 +414,7 @@ public static class MoveExtensions
                 .Where(m => m != move && m.Piece() == piece && m.TargetSquare() == targetSquare)
                 .Where(m =>
                 {
+                    // If any illegal moves exist with the same simple representation there's no need to disambiguate
                     var gameState = position.MakeMove(m);
                     var isLegal = position.WasProduceByAValidMove();
                     position.UnmakeMove(m, gameState);
@@ -437,7 +439,7 @@ public static class MoveExtensions
 
                 var ranks = movesWithSameSimpleRepresentation.Select(m => Constants.Rank[m.SourceSquare()]);
 
-                if (ranks.Any(f => f == moveRank))
+                if (ranks.Any(r => r == moveRank))
                 {
                     return Constants.Coordinates[sourceSquare];
                 }
