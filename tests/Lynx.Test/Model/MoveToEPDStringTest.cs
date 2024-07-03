@@ -61,7 +61,9 @@ public class MoveToEPDStringTest
             }
         }
 
+#pragma warning disable CS0618 // Type or member is obsolete
         Assert.AreEqual(expectedString, move.ToEPDString());
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     [TestCase("3K4/8/8/3k4/8/8/2Q1Q3/R6R w - - 0 1", Piece.R, BoardSquare.d1, "Rad1", "Rhd1")]

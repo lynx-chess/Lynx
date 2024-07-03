@@ -233,7 +233,9 @@ public sealed partial class Engine
             //if (plies < Configuration.Parameters.Depth - 1)
             {
                 //Console.WriteLine($"{Environment.NewLine}{depthStr}{move} ({position.Side}, {depth})");
+#pragma warning disable CS0618 // Type or member is obsolete
                 _logger.Trace($"{Environment.NewLine}{depthStr}{(isQuiescence ? "[Qui] " : "")}{move.ToEPDString()} ({position.Side}, {plies})");
+#pragma warning restore CS0618 // Type or member is obsolete
             }
         }
     }
@@ -261,7 +263,9 @@ public sealed partial class Engine
             //Console.WriteLine($"{depthStr}{move} ({position.Side}, {depthLeft}) | {evaluation}");
             //Console.WriteLine($"{depthStr}{move} | {evaluation}");
 
+#pragma warning disable CS0618 // Type or member is obsolete
             _logger.Trace($"{depthStr}{(isQuiescence ? "[Qui] " : "")}{move.ToEPDString(),-6} | {evaluation}{(prune ? " | prunning" : "")}");
+#pragma warning restore CS0618 // Type or member is obsolete
 
             //Console.ResetColor();
         }
@@ -311,6 +315,7 @@ public sealed partial class Engine
             Console.WriteLine($"Copying {movesToCopy} moves");
         }
 
+#pragma warning disable CS0618 // Type or member is obsolete
         Console.WriteLine(
 (target != -1 ? $"src: {source}, tgt: {target}" + Environment.NewLine : "") +
 $" {0,-3} {_pVTable[0].ToEPDString(),-6} {_pVTable[1].ToEPDString(),-6} {_pVTable[2].ToEPDString(),-6} {_pVTable[3].ToEPDString(),-6} {_pVTable[4].ToEPDString(),-6} {_pVTable[5].ToEPDString(),-6} {_pVTable[6].ToEPDString(),-6} {_pVTable[7].ToEPDString(),-6} {_pVTable[8].ToEPDString(),-6} {_pVTable[9].ToEPDString(),-6} {_pVTable[10].ToEPDString(),-6}" + Environment.NewLine +
@@ -323,6 +328,7 @@ $" {369,-3}                                           {_pVTable[369].ToEPDString
 $" {427,-3}                                                  {_pVTable[427].ToEPDString(),-6} {_pVTable[428].ToEPDString(),-6} {_pVTable[429].ToEPDString(),-6} {_pVTable[430].ToEPDString(),-6}" + Environment.NewLine +
 $" {484,-3}                                                         {_pVTable[484].ToEPDString(),-6} {_pVTable[485].ToEPDString(),-6} {_pVTable[486].ToEPDString(),-6}" + Environment.NewLine +
 (target == -1 ? "------------------------------------------------------------------------------------" + Environment.NewLine : ""));
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     [Conditional("DEBUG")]

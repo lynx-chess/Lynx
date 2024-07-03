@@ -1121,7 +1121,8 @@ static void UnmakeMove()
         var oldZobristKey = position.UniqueIdentifier;
         foreach (var move in allMoves)
         {
-            Console.WriteLine($"Trying {move.ToEPDString()} in\t{position.FEN()}");
+            var epdMoveString = move.ToEPDString(position);
+            Console.WriteLine($"Trying {epdMoveString} in\t{position.FEN()}");
 
             var newPosition = new Position(position, move);
             var savedState = position.MakeMove(move);
@@ -1129,7 +1130,7 @@ static void UnmakeMove()
             Console.WriteLine($"Position\t{newPosition.FEN()}, Zobrist key {newPosition.UniqueIdentifier}");
             Console.WriteLine($"Position\t{position.FEN()}, Zobrist key {position.UniqueIdentifier}");
 
-            Console.WriteLine($"Unmaking {move.ToEPDString()} in\t{position.FEN()}");
+            Console.WriteLine($"Unmaking {epdMoveString} in\t{position.FEN()}");
 
             //position.UnmakeMove(move, savedState);
 
