@@ -355,8 +355,8 @@ public static class MoveExtensions
 #pragma warning disable S3358 // Ternary operators should not be nested
         return move.SpecialMoveFlag() switch
         {
-            SpecialMoveType.ShortCastle => "0-0",
-            SpecialMoveType.LongCastle => "0-0-O",
+            SpecialMoveType.ShortCastle => "O-O",
+            SpecialMoveType.LongCastle => "O-O-O",
             _ =>
                 (piece == (int)Model.Piece.P || piece == (int)Model.Piece.p
                     ? (move.IsCapture()
@@ -366,7 +366,6 @@ public static class MoveExtensions
                 + (move.IsCapture() == default ? "" : "x")
                 + Constants.Coordinates[move.TargetSquare()]
                 + (move.PromotedPiece() == default ? "" : $"={char.ToUpperInvariant(Constants.AsciiPieces[move.PromotedPiece()])}")
-                + (move.IsEnPassant() == default ? "" : " e.p.")
         };
 #pragma warning restore S3358 // Ternary operators should not be nested
     }
@@ -384,8 +383,8 @@ public static class MoveExtensions
 #pragma warning disable S3358 // Ternary operators should not be nested
         return move.SpecialMoveFlag() switch
         {
-            SpecialMoveType.ShortCastle => "0-0",
-            SpecialMoveType.LongCastle => "0-0-O",
+            SpecialMoveType.ShortCastle => "O-O",
+            SpecialMoveType.LongCastle => "O-O-O",
             _ =>
                 (piece == (int)Model.Piece.P || piece == (int)Model.Piece.p
                     ? (move.IsCapture()
