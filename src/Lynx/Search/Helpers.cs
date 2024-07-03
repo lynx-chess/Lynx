@@ -333,7 +333,7 @@ $" {484,-3}                                                         {_pVTable[48
         for (int i = 0; i < 12; ++i)
         {
             var tmp = _quietHistory[i];
-            for (int j = 0; j < 64; ++i)
+            for (int j = 0; j < 64; ++j)
             {
                 var item = tmp[j];
 
