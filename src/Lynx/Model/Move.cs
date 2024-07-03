@@ -345,6 +345,9 @@ public static class MoveExtensions
 #pragma warning restore S3358 // Ternary operators should not be nested
     }
 
+    [Obsolete(
+        "Consider using the override that accepts a position for fully compliant EPD/PGN string representation of the move. " +
+        "This method be removed/renamed in future versions")]
     public static string ToEPDString(this Move move)
     {
         var piece = move.Piece();
@@ -366,6 +369,84 @@ public static class MoveExtensions
                 + (move.IsEnPassant() == default ? "" : "e.p.")
         };
 #pragma warning restore S3358 // Ternary operators should not be nested
+    }
+
+    /// <summary>
+    /// EPD representation of a valid move in a position
+    /// </summary>
+    /// <param name="move">A valid move for the given position</param>
+    /// <param name="position"></param>
+    /// <returns></returns>
+    public static string ToEPDString(this Move move, Position position)
+    {
+        var piece = move.Piece();
+
+#pragma warning disable S3358 // Ternary operators should not be nested
+        return move.SpecialMoveFlag() switch
+        {
+            SpecialMoveType.ShortCastle => "0-0",
+            SpecialMoveType.LongCastle => "0-0-O",
+            _ =>
+                (piece == (int)Model.Piece.P || piece == (int)Model.Piece.p
+                    ? (move.IsCapture()
+                        ? global::Lynx.Constants.Coordinates[move.SourceSquare()][..^1]  // exd5
+                        : "")    // d5
+                    : char.ToUpperInvariant(global::Lynx.Constants.AsciiPieces[move.Piece()]))
+                + DisambiguateMove(move, position)
+                + (move.IsCapture() == default ? "" : "x")
+                + Constants.Coordinates[move.TargetSquare()]
+                + (move.PromotedPiece() == default ? "" : $"={char.ToUpperInvariant(Constants.AsciiPieces[move.PromotedPiece()])}")
+                + (move.IsEnPassant() == default ? "" : "e.p.")
+        };
+#pragma warning restore S3358 // Ternary operators should not be nested
+
+        // https://chess.stackexchange.com/a/1819
+        static string DisambiguateMove(Move move, Position position)
+        {
+            var piece = move.Piece();
+            var targetSquare = move.TargetSquare();
+
+            Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+            var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves).ToArray();
+
+            var movesWithSameSimpleRepresentation = pseudoLegalMoves
+                .Where(m => m != move && m.Piece() == piece && m.TargetSquare() == targetSquare)
+                .Where(m =>
+                {
+                    var gameState = position.MakeMove(m);
+                    var isLegal = position.WasProduceByAValidMove();
+                    position.UnmakeMove(m, gameState);
+
+                    return isLegal;
+                })
+                .ToArray();
+
+            if (movesWithSameSimpleRepresentation.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            int sourceSquare = move.SourceSquare();
+            var moveFile = Constants.File[sourceSquare];
+
+            var files = movesWithSameSimpleRepresentation.Select(m => Constants.File[m.SourceSquare()]);
+
+            if (files.Any(f => f == moveFile))
+            {
+                var moveRank = Constants.Rank[sourceSquare];
+
+                var ranks = movesWithSameSimpleRepresentation.Select(m => Constants.Rank[m.SourceSquare()]);
+
+                if (ranks.Any(f => f == moveRank))
+                {
+                    return Constants.Coordinates[sourceSquare];
+                }
+
+                return (moveRank + 1).ToString();
+            }
+
+            return Constants.FileString[moveFile].ToString();
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
