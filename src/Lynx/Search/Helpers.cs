@@ -234,14 +234,14 @@ public sealed partial class Engine
             {
                 //Console.WriteLine($"{Environment.NewLine}{depthStr}{move} ({position.Side}, {depth})");
 #pragma warning disable CS0618 // Type or member is obsolete
-                _logger.Trace($"{Environment.NewLine}{depthStr}{(isQuiescence ? "[Qui] " : "")}{move.ToEPDString()} ({position.Side}, {plies})");
+                _logger.Trace($"{Environment.NewLine}{depthStr}{(isQuiescence ? "[Qui] " : "")}{move.ToEPDString(position)} ({position.Side}, {plies})");
 #pragma warning restore CS0618 // Type or member is obsolete
             }
         }
     }
 
     [Conditional("DEBUG")]
-    private static void PrintMove(int plies, Move move, int evaluation, bool isQuiescence = false, bool prune = false)
+    private static void PrintMove(Position position, int plies, Move move, int evaluation, bool isQuiescence = false, bool prune = false)
     {
         if (_logger.IsTraceEnabled)
         {
@@ -264,7 +264,7 @@ public sealed partial class Engine
             //Console.WriteLine($"{depthStr}{move} | {evaluation}");
 
 #pragma warning disable CS0618 // Type or member is obsolete
-            _logger.Trace($"{depthStr}{(isQuiescence ? "[Qui] " : "")}{move.ToEPDString(),-6} | {evaluation}{(prune ? " | prunning" : "")}");
+            _logger.Trace($"{depthStr}{(isQuiescence ? "[Qui] " : "")}{move.ToEPDString(position),-6} | {evaluation}{(prune ? " | prnning" : "")}");
 #pragma warning restore CS0618 // Type or member is obsolete
 
             //Console.ResetColor();

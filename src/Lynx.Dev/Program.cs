@@ -516,7 +516,7 @@ static void _32_Make_Move()
         {
             game.CurrentPosition.Print();
 
-            Console.WriteLine(move.ToMoveString());
+            Console.WriteLine(move.ToEPDString(game.CurrentPosition));
             var gameState = game.MakeMove(move);
             game.CurrentPosition.Print();
 
@@ -539,7 +539,7 @@ static void _32_Make_Move()
             {
                 game.CurrentPosition.Print();
 
-                Console.WriteLine(move.ToMoveString());
+                Console.WriteLine(move.ToEPDString(game.CurrentPosition));
                 var gameState = game.MakeMove(move);
                 game.CurrentPosition.Print();
                 game.CurrentPosition.UnmakeMove(move, gameState);
