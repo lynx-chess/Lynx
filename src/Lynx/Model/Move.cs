@@ -366,7 +366,7 @@ public static class MoveExtensions
                 + (move.IsCapture() == default ? "" : "x")
                 + Constants.Coordinates[move.TargetSquare()]
                 + (move.PromotedPiece() == default ? "" : $"={char.ToUpperInvariant(Constants.AsciiPieces[move.PromotedPiece()])}")
-                + (move.IsEnPassant() == default ? "" : "e.p.")
+                + (move.IsEnPassant() == default ? "" : " e.p.")
         };
 #pragma warning restore S3358 // Ternary operators should not be nested
     }
@@ -396,7 +396,6 @@ public static class MoveExtensions
                 + (move.IsCapture() == default ? "" : "x")
                 + Constants.Coordinates[move.TargetSquare()]
                 + (move.PromotedPiece() == default ? "" : $"={char.ToUpperInvariant(Constants.AsciiPieces[move.PromotedPiece()])}")
-                + (move.IsEnPassant() == default ? "" : " e.p.")
         };
 #pragma warning restore S3358 // Ternary operators should not be nested
 

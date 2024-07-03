@@ -79,7 +79,7 @@ public class MoveToEPDStringTest
     [TestCase("8/5K2/4QQ2/3b1Q2/8/8/8/3k4 w - - 0 1", Piece.Q, BoardSquare.e5, "Q5e5", "Q6e5")]
     // Pawn captures, where file is included instead of piece
     [TestCase("3rr1k1/5ppp/p1p5/1P6/8/Q2B4/PK6/3b4 b - - 0 33", Piece.p, BoardSquare.b5, "axb5", "cxb5")]
-    [TestCase("rnbqkbnr/1pp2p2/p3p2p/2PpP1p1/3P4/8/PP3PPP/RNBQKBNR w KQkq d6 0 6", Piece.P, BoardSquare.d6, "cxd6 e.p.", "exd6 e.p.")]
+    [TestCase("rnbqkbnr/1pp2p2/p3p2p/2PpP1p1/3P4/8/PP3PPP/RNBQKBNR w KQkq d6 0 6", Piece.P, BoardSquare.d6, "cxd6", "exd6")]
     public void ToStrictEPDString(string fen, Piece piece, BoardSquare targetSquare, string m0, string? m1 = default, string? m2 = default)
     {
         var position = new Position(fen);
