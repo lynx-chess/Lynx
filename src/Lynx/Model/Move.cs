@@ -389,14 +389,14 @@ public static class MoveExtensions
             _ =>
                 (piece == (int)Model.Piece.P || piece == (int)Model.Piece.p
                     ? (move.IsCapture()
-                        ? global::Lynx.Constants.Coordinates[move.SourceSquare()][..^1]  // exd5
+                        ? global::Lynx.Constants.FileString[global::Lynx.Constants.File[move.SourceSquare()]]  // exd5
                         : "")    // d5
-                    : char.ToUpperInvariant(global::Lynx.Constants.AsciiPieces[move.Piece()]))
-                + DisambiguateMove(move, position)
+                    : (char.ToUpperInvariant(global::Lynx.Constants.AsciiPieces[move.Piece()]))
+                        + DisambiguateMove(move, position))
                 + (move.IsCapture() == default ? "" : "x")
                 + Constants.Coordinates[move.TargetSquare()]
                 + (move.PromotedPiece() == default ? "" : $"={char.ToUpperInvariant(Constants.AsciiPieces[move.PromotedPiece()])}")
-                + (move.IsEnPassant() == default ? "" : "e.p.")
+                + (move.IsEnPassant() == default ? "" : " e.p.")
         };
 #pragma warning restore S3358 // Ternary operators should not be nested
 
