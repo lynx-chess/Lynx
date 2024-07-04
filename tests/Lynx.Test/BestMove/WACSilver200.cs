@@ -37,6 +37,7 @@ public class WACSilver200 : BaseTest
     private static void VerifyBestMove(string fen, string bestMove, string id, GoCommand goCommand)
     {
         var engine = GetEngine(fen);
+        var currentPositionClone = new Position(engine.Game.CurrentPosition);
 
         var bestResult = engine.BestMove(goCommand);
 
@@ -44,11 +45,11 @@ public class WACSilver200 : BaseTest
         if (bestMoveArray.Length == 1)
         {
             var expectedMove = bestMoveArray[0].TrimEnd('+');
-            Assert.AreEqual(expectedMove, bestResult.BestMove.ToEPDString(), $"id {id} depth {bestResult.Depth} seldepth {bestResult.Depth} nodes {bestResult.Nodes}");
+            Assert.AreEqual(expectedMove, bestResult.BestMove.ToEPDString(currentPositionClone), $"id {id} depth {bestResult.Depth} seldepth {bestResult.Depth} nodes {bestResult.Nodes}");
         }
         else if (bestMoveArray.Length == 2)
         {
-            var bestResultGot = bestResult.BestMove.ToEPDString();
+            var bestResultGot = bestResult.BestMove.ToEPDString(currentPositionClone);
             Assert.True(
                 bestMoveArray[0].TrimEnd('+') == bestResultGot
                 || bestMoveArray[1].TrimEnd('+') == bestResultGot

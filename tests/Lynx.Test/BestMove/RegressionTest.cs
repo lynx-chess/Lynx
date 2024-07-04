@@ -230,7 +230,7 @@ public class RegressionTest : BaseTest
         Assert.False(engine.Game.Is50MovesRepetition());
         var bestMove = engine.BestMove(new GoCommand("go depth 1"));
 
-        engine.AdjustPosition(positionCommand + " " + bestMove.BestMove.ToEPDString());
+        engine.AdjustPosition(positionCommand + " " + bestMove.BestMove.UCIString());
         Assert.IsFalse(engine.Game.Is50MovesRepetition());
     }
 

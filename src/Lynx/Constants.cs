@@ -351,6 +351,8 @@ public static class Constants
         0, 1, 2, 3, 4, 5, 6, 7
     ];
 
+    public static readonly char[] FileString = [ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' ];
+
     public const int AbsoluteMaxDepth = 255;
 
     /// <summary>

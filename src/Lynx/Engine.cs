@@ -282,13 +282,13 @@ public sealed partial class Engine
         if (searchResult is not null)
         {
             _logger.Info("Search evaluation result - eval: {0}, mate: {1}, depth: {2}, pv: {3}",
-                searchResult.Evaluation, searchResult.Mate, searchResult.Depth, string.Join(", ", searchResult.Moves.Select(m => m.ToMoveString())));
+                searchResult.Evaluation, searchResult.Mate, searchResult.Depth, string.Join(", ", searchResult.Moves.Select(m => m.UCIString())));
         }
 
         if (tbResult is not null)
         {
             _logger.Info("Online tb probing result - mate: {0}, moves: {1}",
-                tbResult.Mate, string.Join(", ", tbResult.Moves.Select(m => m.ToMoveString())));
+                tbResult.Mate, string.Join(", ", tbResult.Moves.Select(m => m.UCIString())));
 
             if (searchResult?.Mate > 0 && searchResult.Mate <= tbResult.Mate && searchResult.Mate + currentHalfMovesWithoutCaptureOrPawnMove < 96)
             {
