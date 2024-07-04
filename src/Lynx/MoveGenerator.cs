@@ -727,20 +727,4 @@ public static class MoveGenerator
 
         return result;
     }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int FindCapturedPiece(Position position, int offset, int targetSquare)
-    {
-        // TODO replace with position.Board[]
-        var start = (int)Piece.p - offset;
-        for (int pieceIndex = start; pieceIndex < start + 5; ++pieceIndex)
-        {
-            if (position.PieceBitBoards[pieceIndex].GetBit(targetSquare))
-            {
-                return pieceIndex;
-            }
-        }
-
-        throw new AssertException("No captured piece found");
-    }
 }
