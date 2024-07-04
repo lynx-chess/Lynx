@@ -103,7 +103,7 @@ public static class FENParser
 
         return success;
 
-        static void ParseBoardSection(ulong[] pieceBitBoards, int rankIndex, ReadOnlySpan<char> boardfenSection
+        static void ParseBoardSection(BitBoard[] pieceBitBoards, int rankIndex, ReadOnlySpan<char> boardfenSection
 #if DEBUG
             , ref bool success
 #endif
