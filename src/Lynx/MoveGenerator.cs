@@ -672,6 +672,7 @@ public static class MoveGenerator
     private static bool IsAnyPieceMoveValid(int piece, Position position)
     {
         var bitboard = position.PieceBitBoards[piece];
+        var oppositeSide = Utils.OppositeSide(position.Side);
         int sourceSquare, targetSquare;
 
         while (bitboard != default)
@@ -687,12 +688,15 @@ public static class MoveGenerator
                 targetSquare = attacks.GetLS1BIndex();
                 attacks.ResetLS1B();
 
-                if (position.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare)
-                    && IsValidMove(position, MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece)))
+                if (position.OccupancyBitBoards[oppositeSide].GetBit(targetSquare))
                 {
-                    return true;
+                    if(IsValidMove(position, MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece)))
+                    {
+                        return true;
+                    }
                 }
-                else if (IsValidMove(position, MoveExtensions.Encode(sourceSquare, targetSquare, piece)))
+                else if (!position.OccupancyBitBoards[(int)position.Side].GetBit(targetSquare)
+                    && IsValidMove(position, MoveExtensions.Encode(sourceSquare, targetSquare, piece)))
                 {
                     return true;
                 }
