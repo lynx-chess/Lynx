@@ -19,7 +19,6 @@ public sealed partial class Engine
     /// <param name="isNotQSearch"></param>
     /// <param name="bestMoveTTCandidate"></param>
     /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal int ScoreMove(Move move, int depth, bool isNotQSearch, ShortMove bestMoveTTCandidate = default)
     {
         if (_isScoringPV && move == _pVTable[depth])
