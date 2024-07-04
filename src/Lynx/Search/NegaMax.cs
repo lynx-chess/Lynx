@@ -36,6 +36,9 @@ public sealed partial class Engine
         var nextPvIndex = PVTable.Indexes[ply + 1];
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
+        _killerMoves[0][ply + 1] = 0;
+        _killerMoves[1][ply + 1] = 0;
+
         bool isRoot = ply == 0;
         bool pvNode = beta - alpha > 1;
         ShortMove ttBestMove = default;
