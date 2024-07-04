@@ -5,6 +5,8 @@ public readonly struct GameState
 
     public readonly BoardSquare EnPassant;
 
+    public readonly bool Quiet;
+
     public readonly byte Castle;
 
     public GameState(long zobristKey, BoardSquare enpassant, byte castle)
@@ -12,5 +14,14 @@ public readonly struct GameState
         ZobristKey = zobristKey;
         EnPassant = enpassant;
         Castle = castle;
+        Quiet = false;
+    }
+
+    public GameState(long zobristKey, BoardSquare enpassant, bool isQuiet, byte castle)
+    {
+        ZobristKey = zobristKey;
+        EnPassant = enpassant;
+        Castle = castle;
+        Quiet = isQuiet;
     }
 }
