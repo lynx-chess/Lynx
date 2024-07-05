@@ -55,7 +55,7 @@ internal class SPSAAttribute<T> : Attribute
     {
         T val = GetPropertyValue(property);
 
-        return $"{property.Name}, int, {val}, {MinValue}, {MaxValue}, {Step}, {Configuration.EngineSettings.SPSA_OB_R_end}";
+        return $"{property.Name}, int, {val}, {MinValue}, {MaxValue}, {Step}, {EngineSettings.SPSA_OB_R_end}";
     }
 
     internal static T GetPropertyValue(PropertyInfo property)
@@ -75,7 +75,7 @@ internal class SPSAAttribute<T> : Attribute
         T val = GetPropertyValue(property);
         var percentage = 100 * (Step / double.Parse((MaxValue - MinValue).ToString()!));
 
-        return $"{property.Name,-35} {"int",-5} {val,-5} {MinValue,-5} {MaxValue,-5} {Step,-5} {$"{percentage:F2}%",-8}{Configuration.EngineSettings.SPSA_OB_R_end,-5}";
+        return $"{property.Name,-35} {"int",-5} {val,-5} {MinValue,-5} {MaxValue,-5} {Step,-5} {$"{percentage:F2}%",-8}{EngineSettings.SPSA_OB_R_end,-5}";
     }
 
     public KeyValuePair<string, JsonNode?> ToWeatherFactoryString(PropertyInfo property)

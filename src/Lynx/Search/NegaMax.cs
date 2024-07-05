@@ -56,7 +56,7 @@ public sealed partial class Engine
             // so the search will be potentially expensive.
             // Therefore, we search with reduced depth for now, expecting to record a TT move
             // which we'll be able to use later for the full depth search
-            if (ttElementType == default && depth >= Configuration.EngineSettings.IIR_MinDepth)
+            if (ttElementType == default && depth >= EngineSettings.IIR_MinDepth)
             {
                 --depth;
             }
@@ -97,11 +97,11 @@ public sealed partial class Engine
                 staticEval = ttScore;
             }
 
-            if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
+            if (depth <= EngineSettings.RFP_MaxDepth)
             {
                 // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
                 // Return formula by Ciekce, instead of just returning static eval
-                if (staticEval - (Configuration.EngineSettings.RFP_DepthScalingFactor * depth) >= beta)
+                if (staticEval - (EngineSettings.RFP_DepthScalingFactor * depth) >= beta)
                 {
 #pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
                     return (staticEval + beta) / 2;
@@ -109,9 +109,9 @@ public sealed partial class Engine
                 }
 
                 // 🔍 Razoring - Strelka impl (CPW) - https://www.chessprogramming.org/Razoring#Strelka
-                if (depth <= Configuration.EngineSettings.Razoring_MaxDepth)
+                if (depth <= EngineSettings.Razoring_MaxDepth)
                 {
-                    var score = staticEval + Configuration.EngineSettings.Razoring_Depth1Bonus;
+                    var score = staticEval + EngineSettings.Razoring_Depth1Bonus;
 
                     if (score < beta)               // Static evaluation + bonus indicates fail-low node
                     {
@@ -124,7 +124,7 @@ public sealed partial class Engine
                                 : score;
                         }
 
-                        score += Configuration.EngineSettings.Razoring_NotDepth1Bonus;
+                        score += EngineSettings.Razoring_NotDepth1Bonus;
 
                         if (score < beta)               // Static evaluation indicates fail-low node
                         {
@@ -141,13 +141,13 @@ public sealed partial class Engine
             }
 
             // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
-            if (depth >= Configuration.EngineSettings.NMP_MinDepth
+            if (depth >= EngineSettings.NMP_MinDepth
                 && staticEval >= beta
                 && !parentWasNullMove
                 && phase > 2   // Zugzwang risk reduction: pieces other than pawn presents
                 && (ttElementType != NodeType.Alpha || ttEvaluation >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
             {
-                var nmpReduction = Configuration.EngineSettings.NMP_BaseDepthReduction + ((depth + Configuration.EngineSettings.NMP_DepthIncrement) / Configuration.EngineSettings.NMP_DepthDivisor);   // Clarity
+                var nmpReduction = EngineSettings.NMP_BaseDepthReduction + ((depth + EngineSettings.NMP_DepthIncrement) / EngineSettings.NMP_DepthDivisor);   // Clarity
 
                 // TODO more advanced adaptative reduction, similar to what Ethereal and Stormphrax are doing
                 //var nmpReduction = Math.Min(
@@ -256,8 +256,8 @@ public sealed partial class Engine
                 {
                     // Late Move Pruning (LMP) - all quiet moves can be pruned
                     // after searching the first few given by the move ordering algorithm
-                    if (depth <= Configuration.EngineSettings.LMP_MaxDepth
-                        && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth)) // Based on formula suggested by Antares
+                    if (depth <= EngineSettings.LMP_MaxDepth
+                        && moveIndex >= EngineSettings.LMP_BaseMovesToTry + (EngineSettings.LMP_MovesDepthMultiplier * depth)) // Based on formula suggested by Antares
                     {
                         // After making a move
                         Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
@@ -272,8 +272,8 @@ public sealed partial class Engine
                     if (visitedMovesCounter > 0
                         //&& alpha < EvaluationConstants.PositiveCheckmateDetectionLimit
                         //&& beta > EvaluationConstants.NegativeCheckmateDetectionLimit
-                        && depth <= Configuration.EngineSettings.FP_MaxDepth
-                        && staticEval + Configuration.EngineSettings.FP_Margin + (Configuration.EngineSettings.FP_DepthScalingFactor * depth) <= alpha)
+                        && depth <= EngineSettings.FP_MaxDepth
+                        && staticEval + EngineSettings.FP_Margin + (EngineSettings.FP_DepthScalingFactor * depth) <= alpha)
                     {
                         // After making a move
                         Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
@@ -290,8 +290,8 @@ public sealed partial class Engine
 
                 // 🔍 Late Move Reduction (LMR) - search with reduced depth
                 // Impl. based on Ciekce (Stormphrax) and Martin (Motor) advice, and Stormphrax & Akimbo implementations
-                if (visitedMovesCounter >= (pvNode ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves - 1)
-                    && depth >= Configuration.EngineSettings.LMR_MinDepth
+                if (visitedMovesCounter >= (pvNode ? EngineSettings.LMR_MinFullDepthSearchedMoves : EngineSettings.LMR_MinFullDepthSearchedMoves - 1)
+                    && depth >= EngineSettings.LMR_MinDepth
                     && !isCapture)
                 {
                     reduction = EvaluationConstants.LMRReductions[depth][visitedMovesCounter];
@@ -311,7 +311,7 @@ public sealed partial class Engine
                     }
 
                     // -= history/(maxHistory/2)
-                    reduction -= 2 * _quietHistory[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.History_MaxMoveValue;
+                    reduction -= 2 * _quietHistory[move.Piece()][move.TargetSquare()] / EngineSettings.History_MaxMoveValue;
 
                     // Don't allow LMR to drop into qsearch or increase the depth
                     // depth - 1 - depth +2 = 1, min depth we want
@@ -324,7 +324,7 @@ public sealed partial class Engine
                     && scores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue
                     && scores[moveIndex] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
                 {
-                    reduction += Configuration.EngineSettings.SEE_BadCaptureReduction;
+                    reduction += EngineSettings.SEE_BadCaptureReduction;
                     reduction = Math.Clamp(reduction, 0, depth - 1);
                 }
 

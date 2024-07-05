@@ -100,14 +100,14 @@ public sealed partial class Engine
                 _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
                 _nodes = 0;
 
-                if (depth < Configuration.EngineSettings.AspirationWindow_MinDepth || lastSearchResult?.Evaluation is null)
+                if (depth < EngineSettings.AspirationWindow_MinDepth || lastSearchResult?.Evaluation is null)
                 {
                     bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta);
                 }
                 else
                 {
                     // 🔍 Aspiration Windows
-                    var window = Configuration.EngineSettings.AspirationWindow_Delta;
+                    var window = EngineSettings.AspirationWindow_Delta;
 
                     alpha = Math.Max(MinValue, lastSearchResult.Evaluation - window);
                     beta = Math.Min(MaxValue, lastSearchResult.Evaluation + window);

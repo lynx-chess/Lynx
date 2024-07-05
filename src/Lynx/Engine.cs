@@ -198,16 +198,16 @@ public sealed partial class Engine
                 const int minSearchTime = 50;
 
                 var movesDivisor = goCommand.MovesToGo == 0
-                    ? Configuration.EngineSettings.DefaultMovesToGo
+                    ? EngineSettings.DefaultMovesToGo
                     : goCommand.MovesToGo;
 
                 millisecondsLeft -= engineGuiCommunicationTimeOverhead;
                 millisecondsLeft = Math.Clamp(millisecondsLeft, minSearchTime, int.MaxValue); // Avoiding 0/negative values
 
-                hardLimitTimeBound = (int)(millisecondsLeft * Configuration.EngineSettings.HardTimeBoundMultiplier);
+                hardLimitTimeBound = (int)(millisecondsLeft * EngineSettings.HardTimeBoundMultiplier);
 
-                var softLimitBase = (millisecondsLeft / movesDivisor) + (millisecondsIncrement * Configuration.EngineSettings.SoftTimeBaseIncrementMultiplier);
-                softLimitTimeBound = Math.Min(hardLimitTimeBound, (int)(softLimitBase * Configuration.EngineSettings.SoftTimeBoundMultiplier));
+                var softLimitBase = (millisecondsLeft / movesDivisor) + (millisecondsIncrement * EngineSettings.SoftTimeBaseIncrementMultiplier);
+                softLimitTimeBound = Math.Min(hardLimitTimeBound, (int)(softLimitBase * EngineSettings.SoftTimeBoundMultiplier));
 
                 _logger.Info("Soft time bound: {0}s", 0.001 * softLimitTimeBound);
                 _logger.Info("Hard time bound: {0}s", 0.001 * hardLimitTimeBound);
@@ -261,7 +261,7 @@ public sealed partial class Engine
 
     private async ValueTask<SearchResult> SearchBestMove(int maxDepth, int softLimitTimeBound)
     {
-        if (!Configuration.EngineSettings.UseOnlineTablebaseInRootPositions || Game.CurrentPosition.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
+        if (!Configuration.EngineSettings.UseOnlineTablebaseInRootPositions || Game.CurrentPosition.CountPieces() > EngineSettings.OnlineTablebaseMaxSupportedPieces)
         {
             return IDDFS(maxDepth, softLimitTimeBound)!;
         }

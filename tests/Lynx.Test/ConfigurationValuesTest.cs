@@ -14,7 +14,7 @@ public class ConfigurationValuesTest
     [Test]
     public void RazoringValues()
     {
-        Assert.Greater(Configuration.EngineSettings.RFP_MaxDepth, Configuration.EngineSettings.Razoring_MaxDepth);
+        Assert.Greater(EngineSettings.RFP_MaxDepth, EngineSettings.Razoring_MaxDepth);
 
         var config = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
@@ -24,6 +24,6 @@ public class ConfigurationValuesTest
         Assert.IsNotNull(engineSettingsSection);
         engineSettingsSection.Bind(Configuration.EngineSettings);
 
-        Assert.Greater(Configuration.EngineSettings.RFP_MaxDepth, Configuration.EngineSettings.Razoring_MaxDepth);
+        Assert.Greater(EngineSettings.RFP_MaxDepth, EngineSettings.Razoring_MaxDepth);
     }
 }

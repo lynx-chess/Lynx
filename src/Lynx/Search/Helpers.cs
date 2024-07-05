@@ -107,7 +107,7 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int ScoreHistoryMove(int score, int rawHistoryBonus)
     {
-        return score + rawHistoryBonus - (score * Math.Abs(rawHistoryBonus) / Configuration.EngineSettings.History_MaxMoveValue);
+        return score + rawHistoryBonus - (score * Math.Abs(rawHistoryBonus) / EngineSettings.History_MaxMoveValue);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

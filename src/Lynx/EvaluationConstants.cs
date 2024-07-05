@@ -269,11 +269,11 @@ internal static readonly short[] EndGameKingTable =
             for (int movesSearchedCount = 1; movesSearchedCount < Constants.MaxNumberOfPossibleMovesInAPosition; ++movesSearchedCount) // movesSearchedCount > 0 or we wouldn't be applying LMR
             {
                 LMRReductions[searchDepth][movesSearchedCount] = Convert.ToInt32(Math.Round(
-                    Configuration.EngineSettings.LMR_Base + (Math.Log(movesSearchedCount) * Math.Log(searchDepth) / Configuration.EngineSettings.LMR_Divisor)));
+                    EngineSettings.LMR_Base + (Math.Log(movesSearchedCount) * Math.Log(searchDepth) / EngineSettings.LMR_Divisor)));
             }
 
             HistoryBonus[searchDepth] = Math.Min(
-                Configuration.EngineSettings.History_MaxMoveRawBonus,
+                EngineSettings.History_MaxMoveRawBonus,
                 (4 * searchDepth * searchDepth) + (120 * searchDepth) - 120);   // Sirius, originally from Berserk
         }
     }

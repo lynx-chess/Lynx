@@ -350,7 +350,7 @@ public static class OnlineTablebaseProber
 
     public static int EvaluationSearch(Position position, int halfMovesWithoutCaptureOrPawnMove, CancellationToken cancellationToken)
     {
-        if (!Configuration.EngineSettings.UseOnlineTablebaseInSearch || position.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
+        if (!Configuration.EngineSettings.UseOnlineTablebaseInSearch || position.CountPieces() > EngineSettings.OnlineTablebaseMaxSupportedPieces)
         {
             return NoResult;
         }
