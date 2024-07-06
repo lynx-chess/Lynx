@@ -40,16 +40,28 @@ public static class Perft
     {
         if (depth != 0)
         {
-            Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-            foreach (var move in MoveGenerator.GenerateAllMoves(position, moves))
-            {
-                var state = position.MakeMoveFast(move);
+            Move[] moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+            var pseudoLegalMovesStaged = MoveGenerator.GenerateAllMovesStaged(position, moves);
+            var enumerator = pseudoLegalMovesStaged.GetEnumerator();
 
-                if (position.WasProduceByAValidMove())
+            bool enumeratorHasNext = true;
+            var lowerLimit = 0;
+            while (enumeratorHasNext)
+            {
+                enumeratorHasNext = enumerator.MoveNext();
+                var pseudoLegalMoves = moves[lowerLimit..enumerator.Current];
+                lowerLimit = enumerator.Current;
+
+                foreach (var move in pseudoLegalMoves)
                 {
-                    nodes = ResultsImpl(position, depth - 1, nodes);
+                    var state = position.MakeMoveFast(move, enumeratorHasNext);
+
+                    if (position.WasProduceByAValidMove())
+                    {
+                        nodes = ResultsImpl(position, depth - 1, nodes);
+                    }
+                    position.UnmakeMoveFast(move, state);
                 }
-                position.UnmakeMoveFast(move, state);
             }
 
             return nodes;

@@ -174,13 +174,15 @@ public sealed partial class Engine
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
+        Span<Move> visitedMoves = stackalloc Move[moves.Length];
+        int visitedMovesCounter = 0;
+
         bool enumeratorHasNext = true;
         var lowerLimit = 0;
         while (enumeratorHasNext)
         {
             enumeratorHasNext = enumerator.MoveNext();
-            var pseudoLegalMoves = moves[lowerLimit..enumerator.Current];
-            lowerLimit = enumerator.Current;
+            var pseudoLegalMoves = moves[lowerLimit..enumerator.Current];       // Copy can be allowed using lower and upper limits
             Span<int> scores = stackalloc int[pseudoLegalMoves.Length];
             if (_isFollowingPV)
             {
@@ -204,10 +206,6 @@ public sealed partial class Engine
                 }
             }
 
-
-            Span<Move> visitedMoves = stackalloc Move[pseudoLegalMoves.Length];
-            int visitedMovesCounter = 0;
-
             for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
             {
                 // Incremental move sorting, inspired by https://github.com/jw1912/Chess-Challenge and suggested by toanth
@@ -223,7 +221,7 @@ public sealed partial class Engine
 
                 var move = pseudoLegalMoves[moveIndex];
 
-                var gameState = position.MakeMoveFast(move);
+                var gameState = position.MakeMoveFast(move, enumeratorHasNext);
 
                 if (!position.WasProduceByAValidMove())
                 {
@@ -459,6 +457,8 @@ public sealed partial class Engine
 
                 ++visitedMovesCounter;
             }
+
+            lowerLimit = enumerator.Current;
         }
 
         if (bestMove is null && !isAnyMoveValid)

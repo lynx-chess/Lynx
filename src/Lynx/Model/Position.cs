@@ -245,6 +245,17 @@ public class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public GameState MakeMoveFast(Move move, bool isNoisy)
+    {
+        if (isNoisy)
+        {
+            return MakeMove(move);
+        }
+
+        return MakeQuietMove(move);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void UnmakeMoveFast(Move move, GameState gameState)
     {
         if (gameState.Quiet)
