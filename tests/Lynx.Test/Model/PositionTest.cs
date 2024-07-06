@@ -215,7 +215,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(Configuration.EngineSettings.IsolatedPawnPenalty.MG, evaluation);
+        Assert.AreEqual(Utils.UnpackMG(EngineSettings.IsolatedPawnPenalty), evaluation);
     }
 
     /// <summary>
@@ -423,8 +423,8 @@ public class PositionTest
 
         Assert.AreEqual(
             //(-4 * Configuration.EngineSettings.DoubledPawnPenalty.MG)
-            +Configuration.EngineSettings.IsolatedPawnPenalty.MG
-            + Configuration.EngineSettings.PassedPawnBonus[rank].MG,
+            +Utils.UnpackMG(EngineSettings.IsolatedPawnPenalty)
+            + Utils.UnpackMG(EngineSettings.PassedPawnBonus[rank]),
 
             evaluation);
     }
@@ -458,8 +458,8 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(Configuration.EngineSettings.SemiOpenFileRookBonus.MG
-                + Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideToMove].MG - Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideNotToMove].MG,
+        Assert.AreEqual(Utils.UnpackMG(EngineSettings.SemiOpenFileRookBonus)
+                + Utils.UnpackMG(EngineSettings.RookMobilityBonus[rookMobilitySideToMove]) - Utils.UnpackMG(EngineSettings.RookMobilityBonus[rookMobilitySideNotToMove]),
             evaluation);
     }
 
@@ -491,8 +491,8 @@ public class PositionTest
         {
             evaluation = -evaluation;
         }
-        Assert.AreEqual(Configuration.EngineSettings.OpenFileRookBonus.MG
-            + Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideToMove].MG - Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideNotToMove].MG,
+        Assert.AreEqual(Utils.UnpackMG(EngineSettings.OpenFileRookBonus)
+            + Utils.UnpackMG(EngineSettings.RookMobilityBonus[rookMobilitySideToMove]) - Utils.UnpackMG(EngineSettings.RookMobilityBonus[rookMobilitySideNotToMove]),
             evaluation);
     }
 
@@ -525,8 +525,8 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(2 * Configuration.EngineSettings.SemiOpenFileRookBonus.MG
-            + Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideToMove].MG - Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideNotToMove].MG,
+        Assert.AreEqual(2 * Utils.UnpackMG(EngineSettings.SemiOpenFileRookBonus)
+            + Utils.UnpackMG(EngineSettings.RookMobilityBonus[rookMobilitySideToMove]) - Utils.UnpackMG(EngineSettings.RookMobilityBonus[rookMobilitySideNotToMove]),
         evaluation);
     }
 
@@ -559,9 +559,9 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual((-2 * Configuration.EngineSettings.OpenFileRookBonus.MG)
-            + Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideToMove].MG
-            - Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideNotToMove].MG,
+        Assert.AreEqual((-2 * Utils.UnpackMG(EngineSettings.OpenFileRookBonus))
+            + Utils.UnpackMG(EngineSettings.RookMobilityBonus[rookMobilitySideToMove])
+            - Utils.UnpackMG(EngineSettings.RookMobilityBonus[rookMobilitySideNotToMove]),
             evaluation);
     }
 
@@ -595,7 +595,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(Configuration.EngineSettings.SemiOpenFileKingPenalty.EG, evaluation);
+        Assert.AreEqual(Utils.UnpackEG(EngineSettings.SemiOpenFileKingPenalty), evaluation);
     }
 
     /// <summary>
@@ -627,7 +627,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(Configuration.EngineSettings.OpenFileKingPenalty.EG, evaluation);
+        Assert.AreEqual(Utils.UnpackEG(EngineSettings.OpenFileKingPenalty), evaluation);
     }
 
     /// <summary>
@@ -751,7 +751,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(surroundingPieces * Configuration.EngineSettings.KingShieldBonus.EG, evaluation);
+        Assert.AreEqual(surroundingPieces * Utils.UnpackEG(EngineSettings.KingShieldBonus), evaluation);
     }
 
     /// <summary>
@@ -809,7 +809,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(Configuration.EngineSettings.BishopMobilityBonus[sideToMoveMobilityCount].MG - Configuration.EngineSettings.BishopMobilityBonus[nonSideToMoveMobilityCount].MG, evaluation);
+        Assert.AreEqual(Utils.UnpackMG(EngineSettings.BishopMobilityBonus[sideToMoveMobilityCount]) - Utils.UnpackMG(EngineSettings.BishopMobilityBonus[nonSideToMoveMobilityCount]), evaluation);
     }
 
     /// <summary>
@@ -923,7 +923,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(mobilityDifference * Configuration.EngineSettings.QueenMobilityBonus.MG, evaluation);
+        Assert.AreEqual(mobilityDifference * Utils.UnpackMG(EngineSettings.QueenMobilityBonus), evaluation);
     }
 
     /// <summary>
@@ -992,8 +992,8 @@ public class PositionTest
     [TestCase(100, 200)]
     public void TaperedEvaluation(int mg, int eg)
     {
-        Assert.AreEqual(mg, Position.TaperedEvaluation(new(mg, eg), 24));
-        Assert.AreEqual(eg, Position.TaperedEvaluation(new(mg, eg), 0));
+        Assert.AreEqual(mg, Position.TaperedEvaluation(Utils.Pack((short)mg, (short)eg), 24));
+        Assert.AreEqual(eg, Position.TaperedEvaluation(Utils.Pack((short)mg, (short)eg), 0));
     }
 
     private static int AdditionalPieceEvaluation(Position position, Piece piece)

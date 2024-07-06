@@ -189,437 +189,127 @@ public sealed class EngineSettings
 
     #region Evaluation
 
-    public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-19, -14);
+    public static readonly TaperedEvaluationTerm IsolatedPawnPenalty = Utils.Pack(-19, -14);
 
-    public TaperedEvaluationTerm OpenFileRookBonus { get; set; } = new(45, 6);
+    public static readonly TaperedEvaluationTerm OpenFileRookBonus = Utils.Pack(45, 6);
 
-    public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(15, 8);
+    public static readonly TaperedEvaluationTerm SemiOpenFileRookBonus = Utils.Pack(15, 8);
 
-    public TaperedEvaluationTerm QueenMobilityBonus { get; set; } = new(3, 8);
+    public static readonly TaperedEvaluationTerm QueenMobilityBonus = Utils.Pack(3, 8);
 
-    public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-30, 18);
+    public static readonly TaperedEvaluationTerm SemiOpenFileKingPenalty = Utils.Pack(-30, 18);
 
-    public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-96, 15);
+    public static readonly TaperedEvaluationTerm OpenFileKingPenalty = Utils.Pack(-96, 15);
 
-    public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(23, -11);
+    public static readonly TaperedEvaluationTerm KingShieldBonus = Utils.Pack(23, -11);
 
-    public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(30, 81);
+    public static readonly TaperedEvaluationTerm BishopPairBonus = Utils.Pack(30, 81);
 
-    public TaperedEvaluationTerm PieceProtectedByPawnBonus { get; set; } = new(7, 11);
+    public static readonly TaperedEvaluationTerm PieceProtectedByPawnBonus = Utils.Pack(7, 11);
 
-    public TaperedEvaluationTerm PieceAttackedByPawnPenalty { get; set; } = new(-45, -18);
+    public static readonly TaperedEvaluationTerm PieceAttackedByPawnPenalty = Utils.Pack(-45, -18);
 
-    public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(
-            new(0, 0),
-            new(2, 11),
-            new(-11, 20),
-            new(-12, 47),
-            new(18, 81),
-            new(63, 161),
-            new(102, 225),
-            new(0, 0));
+    public static readonly TaperedEvaluationTermByRank PassedPawnBonus =
+    [
+        Utils.Pack(0, 0),
+        Utils.Pack(2, 11),
+        Utils.Pack(-11, 20),
+        Utils.Pack(-12, 47),
+        Utils.Pack(18, 81),
+        Utils.Pack(63, 161),
+        Utils.Pack(102, 225),
+        Utils.Pack(0, 0)
+    ];
 
-    public TaperedEvaluationTermByCount27 VirtualKingMobilityBonus { get; set; } = new(
-            new(0, 0),
-            new(0, 0),
-            new(0, 0),
-            new(37, -5),
-            new(51, -8),
-            new(24, 24),
-            new(22, 13),
-            new(19, 3),
-            new(15, 6),
-            new(11, 5),
-            new(9, 9),
-            new(2, 13),
-            new(0, 9),
-            new(-5, 12),
-            new(-15, 15),
-            new(-26, 18),
-            new(-35, 15),
-            new(-46, 12),
-            new(-52, 10),
-            new(-60, 3),
-            new(-51, -5),
-            new(-46, -13),
-            new(-44, -24),
-            new(-39, -34),
-            new(-45, -44),
-            new(-22, -65),
-            new(-62, -72),
-            new(-36, -90));
+    public static readonly TaperedEvaluationTermByCount27 VirtualKingMobilityBonus =
+    [
+        Utils.Pack(0, 0),
+        Utils.Pack(0, 0),
+        Utils.Pack(0, 0),
+        Utils.Pack(37, -5),
+        Utils.Pack(51, -8),
+        Utils.Pack(24, 24),
+        Utils.Pack(22, 13),
+        Utils.Pack(19, 3),
+        Utils.Pack(15, 6),
+        Utils.Pack(11, 5),
+        Utils.Pack(9, 9),
+        Utils.Pack(2, 13),
+        Utils.Pack(0, 9),
+        Utils.Pack(-5, 12),
+        Utils.Pack(-15, 15),
+        Utils.Pack(-26, 18),
+        Utils.Pack(-35, 15),
+        Utils.Pack(-46, 12),
+        Utils.Pack(-52, 10),
+        Utils.Pack(-60, 3),
+        Utils.Pack(-51, -5),
+        Utils.Pack(-46, -13),
+        Utils.Pack(-44, -24),
+        Utils.Pack(-39, -34),
+        Utils.Pack(-45, -44),
+        Utils.Pack(-22, -65),
+        Utils.Pack(-62, -72),
+        Utils.Pack(-36, -90)
+    ];
 
-    public TaperedEvaluationTermByCount8 KnightMobilityBonus { get; set; } = new(
-            new(0, 0),
-            new(25, -4),
-            new(34, 5),
-            new(40, 5),
-            new(44, 11),
-            new(42, 20),
-            new(41, 22),
-            new(43, 24),
-            new(55, 17));
+    public static readonly TaperedEvaluationTermByCount8 KnightMobilityBonus =
+    [
+        Utils.Pack(0, 0),
+        Utils.Pack(25, -4),
+        Utils.Pack(34, 5),
+        Utils.Pack(40, 5),
+        Utils.Pack(44, 11),
+        Utils.Pack(42, 20),
+        Utils.Pack(41, 22),
+        Utils.Pack(43, 24),
+        Utils.Pack(55, 17)
+    ];
 
-    public TaperedEvaluationTermByCount14 BishopMobilityBonus { get; set; } = new(
-            new(-198, -154),
-            new(0, 0),
-            new(12, 2),
-            new(21, 41),
-            new(36, 57),
-            new(42, 72),
-            new(58, 92),
-            new(67, 102),
-            new(76, 114),
-            new(76, 121),
-            new(82, 126),
-            new(85, 125),
-            new(87, 126),
-            new(119, 118),
-            new(0, 0));
+    public static readonly TaperedEvaluationTermByCount14 BishopMobilityBonus =
+    [
+        Utils.Pack(-198, -154),
+        Utils.Pack(0, 0),
+        Utils.Pack(12, 2),
+        Utils.Pack(21, 41),
+        Utils.Pack(36, 57),
+        Utils.Pack(42, 72),
+        Utils.Pack(58, 92),
+        Utils.Pack(67, 102),
+        Utils.Pack(76, 114),
+        Utils.Pack(76, 121),
+        Utils.Pack(82, 126),
+        Utils.Pack(85, 125),
+        Utils.Pack(87, 126),
+        Utils.Pack(119, 118),
+        Utils.Pack(0, 0)
+    ];
 
-    public TaperedEvaluationTermByCount14 RookMobilityBonus { get; set; } = new(
-            new(0, 0),
-            new(7, 31),
-            new(12, 34),
-            new(16, 42),
-            new(14, 52),
-            new(21, 55),
-            new(24, 62),
-            new(29, 66),
-            new(30, 78),
-            new(34, 85),
-            new(38, 87),
-            new(41, 89),
-            new(41, 93),
-            new(55, 92),
-            new(50, 90));
+    public static readonly TaperedEvaluationTermByCount14 RookMobilityBonus =
+    [
+        Utils.Pack(0, 0),
+        Utils.Pack(7, 31),
+        Utils.Pack(12, 34),
+        Utils.Pack(16, 42),
+        Utils.Pack(14, 52),
+        Utils.Pack(21, 55),
+        Utils.Pack(24, 62),
+        Utils.Pack(29, 66),
+        Utils.Pack(30, 78),
+        Utils.Pack(34, 85),
+        Utils.Pack(38, 87),
+        Utils.Pack(41, 89),
+        Utils.Pack(41, 93),
+        Utils.Pack(55, 92),
+        Utils.Pack(50, 90)
+    ];
 
     #endregion
-}
-
-public sealed class TaperedEvaluationTerm
-{
-    [JsonIgnore]
-    public int PackedEvaluation
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get;
-
-        [Obsolete("Test only")]
-        private set;
-    }
-
-    public int MG
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get
-        {
-            return Utils.UnpackMG(PackedEvaluation);
-        }
-        [Obsolete("Test only, will reset internal value")]
-        set
-        {
-            PackedEvaluation = value;
-        }
-    }
-
-    public int EG
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get
-        {
-            return Utils.UnpackEG(PackedEvaluation);
-        }
-        [Obsolete("Test only")]
-        set
-        {
-            PackedEvaluation += (value << 16);
-        }
-    }
-
-    public TaperedEvaluationTerm(int mg, int eg)
-    {
-#pragma warning disable CS0618 // Type or member is obsolete - correct usage here, setter wouldn't even be needed
-        PackedEvaluation = Utils.Pack((short)mg, (short)eg);
-#pragma warning restore CS0618 // Type or member is obsolete
-    }
-
-    public override string ToString()
-    {
-        return $"{{\"MG\":{MG},\"EG\":{EG}}}";
-    }
-}
-
-/// <summary>
-/// 7 for ranks. Aliased as TaperedEvaluationTermByRank
-/// </summary>
-public sealed class TaperedEvaluationTermByCount7
-{
-    private readonly TaperedEvaluationTerm[] _evaluationTermsIndexedByRank;
-
-    public TaperedEvaluationTerm Rank0 => _evaluationTermsIndexedByRank[0];
-    public TaperedEvaluationTerm Rank1 => _evaluationTermsIndexedByRank[1];
-    public TaperedEvaluationTerm Rank2 => _evaluationTermsIndexedByRank[2];
-    public TaperedEvaluationTerm Rank3 => _evaluationTermsIndexedByRank[3];
-    public TaperedEvaluationTerm Rank4 => _evaluationTermsIndexedByRank[4];
-    public TaperedEvaluationTerm Rank5 => _evaluationTermsIndexedByRank[5];
-    public TaperedEvaluationTerm Rank6 => _evaluationTermsIndexedByRank[6];
-    public TaperedEvaluationTerm Rank7 => _evaluationTermsIndexedByRank[7];
-
-    public TaperedEvaluationTermByCount7(
-        TaperedEvaluationTerm rank0, TaperedEvaluationTerm rank1, TaperedEvaluationTerm rank2,
-        TaperedEvaluationTerm rank3, TaperedEvaluationTerm rank4, TaperedEvaluationTerm rank5,
-        TaperedEvaluationTerm rank6, TaperedEvaluationTerm rank7)
-    {
-        _evaluationTermsIndexedByRank = [rank0, rank1, rank2, rank3, rank4, rank5, rank6, rank7];
-
-        Debug.Assert(_evaluationTermsIndexedByRank.Length == 8);
-    }
-
-    public TaperedEvaluationTerm this[int i]
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => _evaluationTermsIndexedByRank[i];
-    }
-
-    public override string ToString()
-    {
-        return "{" +
-            $"\"{nameof(Rank0)}\":{Rank0}," +
-            $"\"{nameof(Rank1)}\":{Rank1}," +
-            $"\"{nameof(Rank2)}\":{Rank2}," +
-            $"\"{nameof(Rank3)}\":{Rank3}," +
-            $"\"{nameof(Rank4)}\":{Rank4}," +
-            $"\"{nameof(Rank5)}\":{Rank5}," +
-            $"\"{nameof(Rank6)}\":{Rank6}," +
-            $"\"{nameof(Rank7)}\":{Rank7}" +
-            "}";
-    }
-}
-
-/// <summary>
-/// 8 for max knight attacks count
-/// </summary>
-public sealed class TaperedEvaluationTermByCount8
-{
-    private readonly TaperedEvaluationTerm[] _evaluationTermsIndexedByCount;
-
-    public TaperedEvaluationTerm Count0 => _evaluationTermsIndexedByCount[0];
-    public TaperedEvaluationTerm Count1 => _evaluationTermsIndexedByCount[1];
-    public TaperedEvaluationTerm Count2 => _evaluationTermsIndexedByCount[2];
-    public TaperedEvaluationTerm Count3 => _evaluationTermsIndexedByCount[3];
-    public TaperedEvaluationTerm Count4 => _evaluationTermsIndexedByCount[4];
-    public TaperedEvaluationTerm Count5 => _evaluationTermsIndexedByCount[5];
-    public TaperedEvaluationTerm Count6 => _evaluationTermsIndexedByCount[6];
-    public TaperedEvaluationTerm Count7 => _evaluationTermsIndexedByCount[7];
-    public TaperedEvaluationTerm Count8 => _evaluationTermsIndexedByCount[8];
-
-    public TaperedEvaluationTermByCount8(
-        TaperedEvaluationTerm count0, TaperedEvaluationTerm count1, TaperedEvaluationTerm count2,
-        TaperedEvaluationTerm count3, TaperedEvaluationTerm count4, TaperedEvaluationTerm count5,
-        TaperedEvaluationTerm count6, TaperedEvaluationTerm count7, TaperedEvaluationTerm count8)
-    {
-        _evaluationTermsIndexedByCount =
-            [count0, count1, count2, count3, count4, count5, count6, count7, count8];
-
-        Debug.Assert(_evaluationTermsIndexedByCount.Length == 9);
-    }
-
-    public TaperedEvaluationTerm this[int i]
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => _evaluationTermsIndexedByCount[i];
-    }
-
-    public override string ToString()
-    {
-        return "{" +
-            $"\"{nameof(Count0)}\":{Count0}," +
-            $"\"{nameof(Count1)}\":{Count1}," +
-            $"\"{nameof(Count2)}\":{Count2}," +
-            $"\"{nameof(Count3)}\":{Count3}," +
-            $"\"{nameof(Count4)}\":{Count4}," +
-            $"\"{nameof(Count5)}\":{Count5}," +
-            $"\"{nameof(Count6)}\":{Count6}," +
-            $"\"{nameof(Count7)}\":{Count7}," +
-            $"\"{nameof(Count8)}\":{Count8}" +
-            "}";
-    }
-}
-
-/// <summary>
-/// 14 for max rook atacks count
-/// Firs also max bishop attacks count (13), in which case the last item
-/// should always be zero
-/// </summary>
-public sealed class TaperedEvaluationTermByCount14
-{
-    private readonly TaperedEvaluationTerm[] _evaluationTermsIndexedByCount;
-
-    public TaperedEvaluationTerm Count0 => _evaluationTermsIndexedByCount[0];
-    public TaperedEvaluationTerm Count1 => _evaluationTermsIndexedByCount[1];
-    public TaperedEvaluationTerm Count2 => _evaluationTermsIndexedByCount[2];
-    public TaperedEvaluationTerm Count3 => _evaluationTermsIndexedByCount[3];
-    public TaperedEvaluationTerm Count4 => _evaluationTermsIndexedByCount[4];
-    public TaperedEvaluationTerm Count5 => _evaluationTermsIndexedByCount[5];
-    public TaperedEvaluationTerm Count6 => _evaluationTermsIndexedByCount[6];
-    public TaperedEvaluationTerm Count7 => _evaluationTermsIndexedByCount[7];
-    public TaperedEvaluationTerm Count8 => _evaluationTermsIndexedByCount[8];
-    public TaperedEvaluationTerm Count9 => _evaluationTermsIndexedByCount[9];
-    public TaperedEvaluationTerm Count10 => _evaluationTermsIndexedByCount[10];
-    public TaperedEvaluationTerm Count11 => _evaluationTermsIndexedByCount[11];
-    public TaperedEvaluationTerm Count12 => _evaluationTermsIndexedByCount[12];
-    public TaperedEvaluationTerm Count13 => _evaluationTermsIndexedByCount[13];
-    public TaperedEvaluationTerm Count14 => _evaluationTermsIndexedByCount[14];
-
-    public TaperedEvaluationTermByCount14(
-        TaperedEvaluationTerm count0, TaperedEvaluationTerm count1, TaperedEvaluationTerm count2,
-        TaperedEvaluationTerm count3, TaperedEvaluationTerm count4, TaperedEvaluationTerm count5,
-        TaperedEvaluationTerm count6, TaperedEvaluationTerm count7, TaperedEvaluationTerm count8,
-        TaperedEvaluationTerm count9, TaperedEvaluationTerm count10, TaperedEvaluationTerm count11,
-        TaperedEvaluationTerm count12, TaperedEvaluationTerm count13, TaperedEvaluationTerm count14)
-    {
-        _evaluationTermsIndexedByCount =
-            [count0, count1, count2, count3, count4, count5, count6, count7, count8, count9, count10, count11, count12, count13, count14];
-
-        Debug.Assert(_evaluationTermsIndexedByCount.Length == 15);
-    }
-
-    public TaperedEvaluationTerm this[int i]
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => _evaluationTermsIndexedByCount[i];
-    }
-
-    public override string ToString()
-    {
-        return "{" +
-            $"\"{nameof(Count0)}\":{Count0}," +
-            $"\"{nameof(Count1)}\":{Count1}," +
-            $"\"{nameof(Count2)}\":{Count2}," +
-            $"\"{nameof(Count3)}\":{Count3}," +
-            $"\"{nameof(Count4)}\":{Count4}," +
-            $"\"{nameof(Count5)}\":{Count5}," +
-            $"\"{nameof(Count6)}\":{Count6}," +
-            $"\"{nameof(Count7)}\":{Count7}," +
-            $"\"{nameof(Count8)}\":{Count8}," +
-            $"\"{nameof(Count9)}\":{Count9}," +
-            $"\"{nameof(Count10)}\":{Count10}," +
-            $"\"{nameof(Count11)}\":{Count11}," +
-            $"\"{nameof(Count12)}\":{Count12}," +
-            $"\"{nameof(Count13)}\":{Count13}," +
-            $"\"{nameof(Count14)}\":{Count14}" +
-            "}";
-    }
-}
-
-/// <summary>
-/// 27 for max. queen attacks count
-/// </summary>
-public sealed class TaperedEvaluationTermByCount27
-{
-    private readonly TaperedEvaluationTerm[] _evaluationTermsIndexedByCount;
-
-    public TaperedEvaluationTerm Count0 => _evaluationTermsIndexedByCount[0];
-    public TaperedEvaluationTerm Count1 => _evaluationTermsIndexedByCount[1];
-    public TaperedEvaluationTerm Count2 => _evaluationTermsIndexedByCount[2];
-    public TaperedEvaluationTerm Count3 => _evaluationTermsIndexedByCount[3];
-    public TaperedEvaluationTerm Count4 => _evaluationTermsIndexedByCount[4];
-    public TaperedEvaluationTerm Count5 => _evaluationTermsIndexedByCount[5];
-    public TaperedEvaluationTerm Count6 => _evaluationTermsIndexedByCount[6];
-    public TaperedEvaluationTerm Count7 => _evaluationTermsIndexedByCount[7];
-    public TaperedEvaluationTerm Count8 => _evaluationTermsIndexedByCount[8];
-    public TaperedEvaluationTerm Count9 => _evaluationTermsIndexedByCount[9];
-    public TaperedEvaluationTerm Count10 => _evaluationTermsIndexedByCount[10];
-    public TaperedEvaluationTerm Count11 => _evaluationTermsIndexedByCount[11];
-    public TaperedEvaluationTerm Count12 => _evaluationTermsIndexedByCount[12];
-    public TaperedEvaluationTerm Count13 => _evaluationTermsIndexedByCount[13];
-    public TaperedEvaluationTerm Count14 => _evaluationTermsIndexedByCount[14];
-    public TaperedEvaluationTerm Count15 => _evaluationTermsIndexedByCount[15];
-    public TaperedEvaluationTerm Count16 => _evaluationTermsIndexedByCount[16];
-    public TaperedEvaluationTerm Count17 => _evaluationTermsIndexedByCount[17];
-    public TaperedEvaluationTerm Count18 => _evaluationTermsIndexedByCount[18];
-    public TaperedEvaluationTerm Count19 => _evaluationTermsIndexedByCount[19];
-    public TaperedEvaluationTerm Count20 => _evaluationTermsIndexedByCount[20];
-    public TaperedEvaluationTerm Count21 => _evaluationTermsIndexedByCount[21];
-    public TaperedEvaluationTerm Count22 => _evaluationTermsIndexedByCount[22];
-    public TaperedEvaluationTerm Count23 => _evaluationTermsIndexedByCount[23];
-    public TaperedEvaluationTerm Count24 => _evaluationTermsIndexedByCount[24];
-    public TaperedEvaluationTerm Count25 => _evaluationTermsIndexedByCount[25];
-    public TaperedEvaluationTerm Count26 => _evaluationTermsIndexedByCount[26];
-    public TaperedEvaluationTerm Count27 => _evaluationTermsIndexedByCount[27];
-
-    public TaperedEvaluationTermByCount27(
-        TaperedEvaluationTerm count0, TaperedEvaluationTerm count1, TaperedEvaluationTerm count2,
-        TaperedEvaluationTerm count3, TaperedEvaluationTerm count4, TaperedEvaluationTerm count5,
-        TaperedEvaluationTerm count6, TaperedEvaluationTerm count7, TaperedEvaluationTerm count8,
-        TaperedEvaluationTerm count9, TaperedEvaluationTerm count10, TaperedEvaluationTerm count11,
-        TaperedEvaluationTerm count12, TaperedEvaluationTerm count13, TaperedEvaluationTerm count14,
-        TaperedEvaluationTerm count15, TaperedEvaluationTerm count16, TaperedEvaluationTerm count17,
-        TaperedEvaluationTerm count18, TaperedEvaluationTerm count19, TaperedEvaluationTerm count20,
-        TaperedEvaluationTerm count21, TaperedEvaluationTerm count22, TaperedEvaluationTerm count23,
-        TaperedEvaluationTerm count24, TaperedEvaluationTerm count25, TaperedEvaluationTerm count26,
-        TaperedEvaluationTerm count27)
-    {
-        #pragma warning disable IDE0055 // Discard formatting in this region
-
-        _evaluationTermsIndexedByCount =
-        [
-            count0, count1, count2, count3, count4, count5, count6, count7, count8, count9,
-            count10, count11, count12, count13, count14, count15, count16, count17, count18, count19,
-            count20, count21, count22, count23, count24, count25, count26, count27
-        ];
-
-        Debug.Assert(_evaluationTermsIndexedByCount.Length == 28);
-
-        #pragma warning restore IDE0055
-    }
-
-    public TaperedEvaluationTerm this[int i] => _evaluationTermsIndexedByCount[i];
-
-    public override string ToString()
-    {
-        return "{" +
-            $"\"{nameof(Count0)}\":{Count0}," +
-            $"\"{nameof(Count1)}\":{Count1}," +
-            $"\"{nameof(Count2)}\":{Count2}," +
-            $"\"{nameof(Count3)}\":{Count3}," +
-            $"\"{nameof(Count4)}\":{Count4}," +
-            $"\"{nameof(Count5)}\":{Count5}," +
-            $"\"{nameof(Count6)}\":{Count6}," +
-            $"\"{nameof(Count7)}\":{Count7}," +
-            $"\"{nameof(Count8)}\":{Count8}," +
-            $"\"{nameof(Count9)}\":{Count9}," +
-            $"\"{nameof(Count10)}\":{Count10}," +
-            $"\"{nameof(Count11)}\":{Count11}," +
-            $"\"{nameof(Count12)}\":{Count12}," +
-            $"\"{nameof(Count13)}\":{Count13}," +
-            $"\"{nameof(Count14)}\":{Count14}," +
-            $"\"{nameof(Count15)}\":{Count15}," +
-            $"\"{nameof(Count16)}\":{Count16}," +
-            $"\"{nameof(Count17)}\":{Count17}," +
-            $"\"{nameof(Count18)}\":{Count18}," +
-            $"\"{nameof(Count19)}\":{Count19}," +
-            $"\"{nameof(Count20)}\":{Count20}," +
-            $"\"{nameof(Count21)}\":{Count21}," +
-            $"\"{nameof(Count22)}\":{Count22}," +
-            $"\"{nameof(Count23)}\":{Count23}," +
-            $"\"{nameof(Count24)}\":{Count24}," +
-            $"\"{nameof(Count25)}\":{Count25}," +
-            $"\"{nameof(Count26)}\":{Count26}," +
-            $"\"{nameof(Count27)}\":{Count27}" +
-            "}";
-    }
 }
 
 [JsonSourceGenerationOptions(
     GenerationMode = JsonSourceGenerationMode.Default, WriteIndented = true)] // https://github.com/dotnet/runtime/issues/78602#issuecomment-1322004254
 [JsonSerializable(typeof(EngineSettings))]
-[JsonSerializable(typeof(TaperedEvaluationTerm))]
-[JsonSerializable(typeof(TaperedEvaluationTermByRank))]
-[JsonSerializable(typeof(TaperedEvaluationTermByCount8))]
-[JsonSerializable(typeof(TaperedEvaluationTermByCount14))]
-[JsonSerializable(typeof(TaperedEvaluationTermByCount27))]
 [JsonSerializable(typeof(SPSAAttribute<int>))]
 [JsonSerializable(typeof(SPSAAttribute<double>))]
 [JsonSerializable(typeof(WeatherFactoryOutput<int>))]

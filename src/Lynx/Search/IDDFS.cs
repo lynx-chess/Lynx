@@ -165,7 +165,7 @@ public sealed partial class Engine
         }
         catch (Exception e) when (e is not AssertException)
         {
-            _logger.Error(e, "Unexpected error ocurred during the search of position {0} at depth {1}, best move will be returned\n{2}", Game.PositionBeforeLastSearch.FEN(), depth, e.StackTrace);
+            _logger.Error(e, "Unexpected error ocurred during the search of position {0} at depth {1}, best move will be returne d\n{2}", Game.PositionBeforeLastSearch.FEN(), depth, e.StackTrace);
         }
         finally
         {

@@ -720,20 +720,20 @@ public class Position
         // Bishop pair bonus
         if (PieceBitBoards[(int)Piece.B].CountBits() >= 2)
         {
-            packedScore += Configuration.EngineSettings.BishopPairBonus.PackedEvaluation;
+            packedScore += EngineSettings.BishopPairBonus;
         }
 
         if (PieceBitBoards[(int)Piece.b].CountBits() >= 2)
         {
-            packedScore -= Configuration.EngineSettings.BishopPairBonus.PackedEvaluation;
+            packedScore -= EngineSettings.BishopPairBonus;
         }
 
         // Pieces protected by pawns bonus
-        packedScore += Configuration.EngineSettings.PieceProtectedByPawnBonus.PackedEvaluation
+        packedScore += EngineSettings.PieceProtectedByPawnBonus
             * ((whitePawnAttacks & OccupancyBitBoards[(int)Side.White] /*& (~PieceBitBoards[(int)Piece.P])*/).CountBits()
                 - (blackPawnAttacks & OccupancyBitBoards[(int)Side.Black] /*& (~PieceBitBoards[(int)Piece.p])*/).CountBits());
 
-        packedScore += Configuration.EngineSettings.PieceAttackedByPawnPenalty.PackedEvaluation
+        packedScore += EngineSettings.PieceAttackedByPawnPenalty
             * ((blackPawnAttacks & OccupancyBitBoards[(int)Side.White]).CountBits()
                 - (whitePawnAttacks & OccupancyBitBoards[(int)Side.Black]).CountBits());
 
@@ -846,7 +846,7 @@ public class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static int TaperedEvaluation(TaperedEvaluationTerm taperedEvaluationTerm, int phase)
     {
-        return ((taperedEvaluationTerm.MG * phase) + (taperedEvaluationTerm.EG * (24 - phase))) / 24;
+        return ((Utils.UnpackMG(taperedEvaluationTerm) * phase) + (Utils.UnpackEG(taperedEvaluationTerm) * (24 - phase))) / 24;
     }
 
     /// <summary>
@@ -905,7 +905,7 @@ public class Position
 
         if ((PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default) // isIsolatedPawn
         {
-            packedBonus += Configuration.EngineSettings.IsolatedPawnPenalty.PackedEvaluation;
+            packedBonus += EngineSettings.IsolatedPawnPenalty;
         }
 
         if ((PieceBitBoards[(int)Piece.p - pieceIndex] & Masks.PassedPawns[pieceIndex][squareIndex]) == default)    // isPassedPawn
@@ -915,7 +915,7 @@ public class Position
             {
                 rank = 7 - rank;
             }
-            packedBonus += Configuration.EngineSettings.PassedPawnBonus[rank].PackedEvaluation;
+            packedBonus += EngineSettings.PassedPawnBonus[rank];
         }
 
         return packedBonus;
@@ -939,17 +939,17 @@ public class Position
                 & (~OccupancyBitBoards[sameSide]))
             .CountBits();
 
-        var packedBonus = Configuration.EngineSettings.RookMobilityBonus[attacksCount].PackedEvaluation;
+        var packedBonus = EngineSettings.RookMobilityBonus[attacksCount];
 
         const int pawnToRookOffset = (int)Piece.R - (int)Piece.P;
 
         if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default)  // isOpenFile
         {
-            packedBonus += Configuration.EngineSettings.OpenFileRookBonus.PackedEvaluation;
+            packedBonus += EngineSettings.OpenFileRookBonus;
         }
         else if ((PieceBitBoards[pieceIndex - pawnToRookOffset] & Masks.FileMasks[squareIndex]) == default)  // isSemiOpenFile
         {
-            packedBonus += Configuration.EngineSettings.SemiOpenFileRookBonus.PackedEvaluation;
+            packedBonus += EngineSettings.SemiOpenFileRookBonus;
         }
 
         return packedBonus;
@@ -972,7 +972,7 @@ public class Position
             (Attacks.KnightAttacks[squareIndex] & (~OccupancyBitBoards[sameSide]))
             .CountBits();
 
-        return Configuration.EngineSettings.KnightMobilityBonus[attacksCount].PackedEvaluation;
+        return EngineSettings.KnightMobilityBonus[attacksCount];
     }
 
     /// <summary>
@@ -986,7 +986,7 @@ public class Position
     {
         var attacksCount = Attacks.BishopAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
 
-        return Configuration.EngineSettings.BishopMobilityBonus[attacksCount].PackedEvaluation;
+        return EngineSettings.BishopMobilityBonus[attacksCount];
     }
 
     /// <summary>
@@ -999,7 +999,7 @@ public class Position
     {
         var attacksCount = Attacks.QueenAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
 
-        return attacksCount * Configuration.EngineSettings.QueenMobilityBonus.PackedEvaluation;
+        return attacksCount * EngineSettings.QueenMobilityBonus;
     }
 
     /// <summary>
@@ -1012,7 +1012,7 @@ public class Position
     internal int KingAdditionalEvaluation(int squareIndex, Side kingSide)
     {
         var attacksCount = Attacks.QueenAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
-        int packedBonus = Configuration.EngineSettings.VirtualKingMobilityBonus[attacksCount].PackedEvaluation;
+        int packedBonus = EngineSettings.VirtualKingMobilityBonus[attacksCount];
 
         var kingSideOffset = Utils.PieceOffset(kingSide);
 
@@ -1020,17 +1020,17 @@ public class Position
         {
             if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == 0)  // isOpenFile
             {
-                packedBonus += Configuration.EngineSettings.OpenFileKingPenalty.PackedEvaluation;
+                packedBonus += EngineSettings.OpenFileKingPenalty;
             }
             else if ((PieceBitBoards[(int)Piece.P + kingSideOffset] & Masks.FileMasks[squareIndex]) == 0) // isSemiOpenFile
             {
-                packedBonus += Configuration.EngineSettings.SemiOpenFileKingPenalty.PackedEvaluation;
+                packedBonus += EngineSettings.SemiOpenFileKingPenalty;
             }
         }
 
         var ownPiecesAroundCount = (Attacks.KingAttacks[squareIndex] & PieceBitBoards[(int)Piece.P + kingSideOffset]).CountBits();
 
-        return packedBonus + (ownPiecesAroundCount * Configuration.EngineSettings.KingShieldBonus.PackedEvaluation);
+        return packedBonus + (ownPiecesAroundCount * EngineSettings.KingShieldBonus);
     }
 
     #endregion
