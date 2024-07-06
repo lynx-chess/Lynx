@@ -44,17 +44,12 @@ public static class Perft
             var pseudoLegalMovesStaged = MoveGenerator.GenerateAllMovesStaged(position, moves);
             var enumerator = pseudoLegalMovesStaged.GetEnumerator();
 
-            bool enumeratorHasNext = true;
-            var lowerLimit = 0;
-            while (enumeratorHasNext)
+            bool isCaptureStage = true;
+            while (enumerator.MoveNext())
             {
-                enumeratorHasNext = enumerator.MoveNext();
-                var pseudoLegalMoves = moves[lowerLimit..enumerator.Current];
-                lowerLimit = enumerator.Current;
-
-                foreach (var move in pseudoLegalMoves)
+                foreach (var move in moves[enumerator.Current])
                 {
-                    var state = position.MakeMoveFast(move, enumeratorHasNext);
+                    var state = position.MakeMoveFast(move, isCaptureStage);
 
                     if (position.WasProduceByAValidMove())
                     {
@@ -62,6 +57,7 @@ public static class Perft
                     }
                     position.UnmakeMoveFast(move, state);
                 }
+                isCaptureStage = false;
             }
 
             return nodes;

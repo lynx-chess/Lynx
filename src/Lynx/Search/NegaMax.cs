@@ -177,12 +177,10 @@ public sealed partial class Engine
         Span<Move> visitedMoves = stackalloc Move[moves.Length];
         int visitedMovesCounter = 0;
 
-        bool enumeratorHasNext = true;
-        var lowerLimit = 0;
-        while (enumeratorHasNext)
+        bool isCaptureStage = true;
+        while (enumerator.MoveNext())
         {
-            enumeratorHasNext = enumerator.MoveNext();
-            var pseudoLegalMoves = moves[lowerLimit..enumerator.Current];       // Copy can be allowed using lower and upper limits
+            var pseudoLegalMoves = moves[enumerator.Current];       // Copy can be allowed using lower and upper limits
             Span<int> scores = stackalloc int[pseudoLegalMoves.Length];
             if (_isFollowingPV)
             {
@@ -221,7 +219,7 @@ public sealed partial class Engine
 
                 var move = pseudoLegalMoves[moveIndex];
 
-                var gameState = position.MakeMoveFast(move, enumeratorHasNext);
+                var gameState = position.MakeMoveFast(move, isCaptureStage);
 
                 if (!position.WasProduceByAValidMove())
                 {
@@ -458,7 +456,7 @@ public sealed partial class Engine
                 ++visitedMovesCounter;
             }
 
-            lowerLimit = enumerator.Current;
+            isCaptureStage = false;
         }
 
         if (bestMove is null && !isAnyMoveValid)
