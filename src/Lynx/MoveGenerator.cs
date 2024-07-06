@@ -99,12 +99,12 @@ public static class MoveGenerator
         var offset = Utils.PieceOffset(position.Side);
 
         GeneratePawnCapturesAndPromotions(ref localIndex, movePool, position, offset);
-        GenerateCastlingMoves(ref localIndex, movePool, position);
         GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.K + offset, position, offset);
         GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.N + offset, position, offset);
         GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.B + offset, position, offset);
         GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.R + offset, position, offset);
         GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.Q + offset, position, offset);
+        GenerateCastlingMoves(ref localIndex, movePool, position);
 
         yield return localIndex;
 
