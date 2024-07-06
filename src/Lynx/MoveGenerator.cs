@@ -420,6 +420,7 @@ public static class MoveGenerator
     internal static void GeneratePieceCaptures(ref int localIndex, Span<Move> movePool, int piece, Position position, int offset)
     {
         var bitboard = position.PieceBitBoards[piece];
+        var oppositeSide = (int)Utils.OppositeSide(position.Side);
         int sourceSquare, targetSquare;
 
         while (bitboard != default)
@@ -428,18 +429,15 @@ public static class MoveGenerator
             bitboard.ResetLS1B();
 
             var attacks = _pieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
-                & ~position.OccupancyBitBoards[(int)position.Side];
+                & position.OccupancyBitBoards[oppositeSide];
 
             while (attacks != default)
             {
                 targetSquare = attacks.GetLS1BIndex();
                 attacks.ResetLS1B();
 
-                if (position.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare))
-                {
-                    var capturedPiece = FindCapturedPiece(position, offset, targetSquare);
-                    movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece: capturedPiece);
-                }
+                var capturedPiece = FindCapturedPiece(position, offset, targetSquare);
+                movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece: capturedPiece);
             }
         }
     }
@@ -736,10 +734,12 @@ public static class MoveGenerator
                 targetSquare = attacks.GetLS1BIndex();
                 attacks.ResetLS1B();
 
-                if (position.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare)
-                    && IsValidMove(position, MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece)))
+                if (position.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare))
                 {
-                    return true;
+                    if(IsValidMove(position, MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece)))
+                    {
+                        return true;
+                    }
                 }
                 else if (IsValidQuietMove(position, MoveExtensions.Encode(sourceSquare, targetSquare, piece)))
                 {
