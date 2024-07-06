@@ -83,6 +83,42 @@ public static class MoveGenerator
     }
 
     /// <summary>
+    /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="movePool"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static IEnumerable<int> GenerateAllMovesStaged(Position position, Move[] movePool)
+    {
+        //https://antao-almada.medium.com/how-to-use-span-t-and-memory-t-c0b126aae652
+        Debug.Assert(position.Side != Side.Both);
+
+        int localIndex = 0;
+
+        var offset = Utils.PieceOffset(position.Side);
+
+        GeneratePawnCapturesAndPromotions(ref localIndex, movePool, position, offset);
+        GenerateCastlingMoves(ref localIndex, movePool, position);
+        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.K + offset, position, offset);
+        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.N + offset, position, offset);
+        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.B + offset, position, offset);
+        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.R + offset, position, offset);
+        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.Q + offset, position, offset);
+
+        yield return localIndex;
+
+        GeneratePawnQuietMoves(ref localIndex, movePool, position, offset);
+        GeneratePieceQuietMoves(ref localIndex, movePool, (int)Piece.K + offset, position, offset);
+        GeneratePieceQuietMoves(ref localIndex, movePool, (int)Piece.N + offset, position, offset);
+        GeneratePieceQuietMoves(ref localIndex, movePool, (int)Piece.B + offset, position, offset);
+        GeneratePieceQuietMoves(ref localIndex, movePool, (int)Piece.R + offset, position, offset);
+        GeneratePieceQuietMoves(ref localIndex, movePool, (int)Piece.Q + offset, position, offset);
+
+        yield return localIndex;
+    }
+
+    /// <summary>
     /// Generates all psuedo-legal captures from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
     /// </summary>
     /// <param name="position"></param>
