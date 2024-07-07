@@ -3,10 +3,10 @@ using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
 using System.Diagnostics;
-using System.Reflection;
 using System.Runtime.Intrinsics.X86;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Threading;
 using System.Threading.Channels;
 
 namespace Lynx;
@@ -161,9 +161,13 @@ public sealed class UCIHandler
 
     private void HandlePonderHit()
     {
-        if (Configuration.IsPonder)
+        if (Configuration.EngineSettings.IsPonder)
         {
             _engine.PonderHit();
+        }
+        else
+        {
+            _logger.Warn("Unexpected 'ponderhit' command, given pondering is disabled. Ignoring it");
         }
     }
 
@@ -186,9 +190,8 @@ public sealed class UCIHandler
                 {
                     if (length > 4 && bool.TryParse(command[commandItems[4]], out var value))
                     {
-                        Configuration.IsPonder = value;
+                        Configuration.EngineSettings.IsPonder = value;
                     }
-                    _logger.Warn("Ponder not supported yet");
                     break;
                 }
             case "uci_analysemode":
@@ -557,6 +560,7 @@ public sealed class UCIHandler
                 return;
             }
 
+            int lineCounter = 0;
             foreach (var line in await File.ReadAllLinesAsync(fullPath, cancellationToken))
             {
                 var fen = line[..line.IndexOfAny([';', '[', '"'])];
@@ -581,6 +585,11 @@ public sealed class UCIHandler
                 }
 
                 await _engineToUci.Writer.WriteAsync($"{line}: {eval}", cancellationToken);
+
+                if (++lineCounter % 100 == 0)
+                {
+                    Thread.Sleep(50);
+                }
             }
         }
         catch (Exception e)
@@ -592,7 +601,7 @@ public sealed class UCIHandler
 
     private async Task HandleEval(CancellationToken cancellationToken)
     {
-        var score = _engine.Game.CurrentPosition.StaticEvaluation().Score;
+        var score = WDL.NormalizeScore(_engine.Game.CurrentPosition.StaticEvaluation().Score);
 
         await _engineToUci.Writer.WriteAsync(score.ToString(), cancellationToken);
     }
@@ -608,7 +617,7 @@ public sealed class UCIHandler
 
     private async ValueTask HandleOpenBenchSPSA(CancellationToken cancellationToken)
     {
-        foreach(var tunableValue in SPSAAttributeHelpers.GenerateOpenBenchStrings())
+        foreach (var tunableValue in SPSAAttributeHelpers.GenerateOpenBenchStrings())
         {
             await SendCommand(tunableValue, cancellationToken);
         }
@@ -617,9 +626,9 @@ public sealed class UCIHandler
     private async ValueTask HandleOpenBenchSPSAPretty(CancellationToken cancellationToken)
     {
         await SendCommand(
-            $"{"param name",-35} {"type",-5} {"def",-5} {"min",-5} {"max",-5} {"step",-5} {"R_end",-5}"
+            $"{"param name",-35} {"type",-5} {"def",-5} {"min",-5} {"max",-5} {"step",-5} {"step %",-7} {"R_end",-5}"
                 + Environment.NewLine
-                + "-----------------------------------------------------------------------",
+                + "----------------------------------------------------------------------------------------",
             cancellationToken);
 
         foreach (var tunableValue in SPSAAttributeHelpers.GenerateOpenBenchPrettyStrings())

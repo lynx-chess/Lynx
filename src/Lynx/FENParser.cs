@@ -56,7 +56,7 @@ public static class FENParser
         }
         catch (Exception e)
         {
-            _logger.Error(e.Message);
+            _logger.Error(e, "Error parsing FEN");
             success = false;
             throw;
         }
@@ -103,7 +103,7 @@ public static class FENParser
 
         return success;
 
-        static void ParseBoardSection(ulong[] pieceBitBoards, int rankIndex, ReadOnlySpan<char> boardfenSection
+        static void ParseBoardSection(BitBoard[] pieceBitBoards, int rankIndex, ReadOnlySpan<char> boardfenSection
 #if DEBUG
             , ref bool success
 #endif

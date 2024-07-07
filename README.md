@@ -25,28 +25,26 @@ See [Releases](https://github.com/lynx-chess/Lynx/releases) for the complete lis
 
 Here are the ones 'properly' rated over at least a few hundred of games:
 
-
-| Lynx version | Release date | Estimated elo | [CCRL Blitz](https://www.computerchess.org.uk/ccrl/404/) | [CCRL](https://www.computerchess.org.uk/ccrl/4040/) | [MCERL](https://www.chessengeria.eu/mcerl) | [CEDR](https://chessengines.blogspot.com/p/rating-jcer.html) |
-|---|---|---|---|---|---|---|
-| [1.4.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.4.0) | 2024-03-21  | [2747](https://github.com/lynx-chess/Lynx/commit/70a81b9d08482c691b8c8cd6885e3e1eaf2c16b2#commitcomment-140146920) |  |  |  |  |
-| [1.3.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.3.0) | 2024-02-04  | [2651](https://github.com/lynx-chess/Lynx/commit/1f2384804f69ad68a58a5d363225a809b7c1b0d9#commitcomment-138257203) | [2650](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%201.3.0%2064-bit#Lynx_1_3_0_64-bit) | [2682](https://www.computerchess.org.uk/ccrl/4040/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%201.3.0%2064-bit#Lynx_1_3_0_64-bit) | 2831 |  |
-| [1.2.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.2.0) | 2024-01-11  | [2611](https://github.com/lynx-chess/Lynx/commit/38f0d147fe049c89e56e6ea66ce28f9fa29907c2) / [2551](https://github.com/lynx-chess/Lynx/commit/38f0d147fe049c89e56e6ea66ce28f9fa29907c2#commitcomment-137001006)<sup>1</sup> |  | [2584](https://www.computerchess.org.uk/ccrl/4040/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%201.2.0%2064-bit#Lynx_1_2_0_64-bit) | 2862 | 2738 |
-| [1.1.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.1.0) | 2023-12-14  | [2533](https://github.com/lynx-chess/Lynx/commit/b7d0131909977fe7c398f70e29daf3dc02f9fdcb#commitcomment-134947966) | [2429](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%201.1.0%2064-bit#Lynx_1_1_0_64-bit) | [2506](https://www.computerchess.org.uk/ccrl/4040/cgi/engine_details.cgi?print=Details&each_game=0&eng=Lynx%201.1.0%2064-bit#Lynx_1_1_0_64-bit) | 2597 |  |
-| [1.0.1](https://github.com/lynx-chess/Lynx/releases/tag/v1.0.1) | 2023-11-20  | [2511](https://github.com/lynx-chess/Lynx/commit/66d340232298768bba57d6876f59831645a6dffb#commitcomment-132727293) | [2431](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%201.0.1%2064-bit#Lynx_1_0_1_64-bit) | [2435](https://www.computerchess.org.uk/ccrl/4040/cgi/engine_details.cgi?print=Details&each_game=0&eng=Lynx%201.0.1%2064-bit#Lynx_1_0_1_64-bit) | 2566 | 2648  |
-| [0.19.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.19.0) | 2023-10-27  | [2434](https://github.com/lynx-chess/Lynx/commit/b42d235a2815ddb989c5d83218750167c43be7bb#commitcomment-131057706) | [2347](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.19.0%2064-bit#Lynx_0_19_0_64-bit) |  | 2508 | 2469  |
-| [0.18.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.18.0) | 2023-10-21  | [2283](https://github.com/lynx-chess/Lynx/commit/3397c86c27bccb521f08306564325ff3cd64335d#commitcomment-130585961) |  |  | 2395  |  |
-| [0.17.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.17.0) | 2023-09-19  | [2178](https://github.com/lynx-chess/Lynx/commit/ecd462bf48923deb7fe7449ff74da3bcc8afe75c#commitcomment-127755063) |  |  | 2368 | 2275 |
-| [0.16.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.16.0) | 2023-08-26 | [2053](https://github.com/lynx-chess/Lynx/commit/8743436f4e0cca508dc9fd419a5498c46f15866c#commitcomment-125145952) | [1986](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.16.0%2064-bit#Lynx_0_16_0_64-bit) |  |  | 2165 |
-| [0.15.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.15.0) | 2023-08-13 | [2039](https://github.com/lynx-chess/Lynx/commit/519d69302f855971d502724de0cdfef5e56ffed2#commitcomment-124397606) |  |  | 2098 | 2237 |
-| [0.14.1](https://github.com/lynx-chess/Lynx/releases/tag/v0.14.0) | 2023-07-30 |  | [1677](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.14.0%2064-bit#Lynx_0_14_0_64-bit)  |  |  | 2012 |
-| [0.13.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.13.0) | 2022-11-25 |  | [1645](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.13.0%2064-bit#Lynx_0_13_0_64-bit) |  | 1773 | 2029 |
-| [0.12.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.12.0) | 2022-10-07 |  |  |  |  | 2071 |
-| [0.11.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.11.0) | 2022-09-18 |  | [1487](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.11.0%2064-bit#Lynx_0_11_0_64-bit) |  |  |  |
-| [0.10.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.10.0) | 2022-05-09 |  | [1439](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.10.0%2064-bit#Lynx_0_10_0_64-bit) |  |  | 1792 |
-| [0.9.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.9.0) | 2021-11-29 |  | [1460](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.9.0%2064-bit#Lynx_0_9_0_64-bit) |  |  |  |
-| [0.6.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.6.0) | 2021-10-19 |  | [1274](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.6.0%2064-bit#Lynx_0_6_0_64-bit) |  |  |  |
-| [0.4.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.4.0) | 2021-09-20  |  | [1220](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.4.0%2064-bit#Lynx_0_4_0_64-bit) |  |  |  |
-
+| Lynx version | Release date | Estimated elo | [CCRL Blitz](https://www.computerchess.org.uk/ccrl/404/) | [CCRL](https://www.computerchess.org.uk/ccrl/4040/) | [MCERL](https://www.chessengeria.eu/mcerl) |
+|---|---|---|---|---|---|
+| [1.5.1](https://github.com/lynx-chess/Lynx/releases/tag/v1.5.1) | 2024-06-21  | [2830](https://github.com/lynx-chess/Lynx/commit/47e7b8799cfac433c1004213e51daf35ae0fcd97#commitcomment-143384223) |   |  |  |
+| [1.4.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.4.0) | 2024-03-21  | [2747](https://github.com/lynx-chess/Lynx/commit/70a81b9d08482c691b8c8cd6885e3e1eaf2c16b2#commitcomment-140146920) |  | [2754](https://www.computerchess.org.uk/ccrl/4040/cgi/engine_details.cgi?print=Details&each_game=0&eng=Lynx%201.4.0%2064-bit#Lynx_1_4_0_64-bit) |  |
+| [1.3.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.3.0) | 2024-02-04  | [2651](https://github.com/lynx-chess/Lynx/commit/1f2384804f69ad68a58a5d363225a809b7c1b0d9#commitcomment-138257203) | [2650](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%201.3.0%2064-bit#Lynx_1_3_0_64-bit) | [2682](https://www.computerchess.org.uk/ccrl/4040/cgi/engine_details.cgi?print=Details&each_game=0&eng=Lynx%201.3.0%2064-bit#Lynx_1_3_0_64-bit) | 2831 |
+| [1.2.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.2.0) | 2024-01-11  | [2611](https://github.com/lynx-chess/Lynx/commit/38f0d147fe049c89e56e6ea66ce28f9fa29907c2) / [2551](https://github.com/lynx-chess/Lynx/commit/38f0d147fe049c89e56e6ea66ce28f9fa29907c2#commitcomment-137001006)<sup>1</sup> |  | [2584](https://www.computerchess.org.uk/ccrl/4040/cgi/engine_details.cgi?print=Details&each_game=0&eng=Lynx%201.2.0%2064-bit#Lynx_1_2_0_64-bit) | 2862 |
+| [1.1.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.1.0) | 2023-12-14  | [2533](https://github.com/lynx-chess/Lynx/commit/b7d0131909977fe7c398f70e29daf3dc02f9fdcb#commitcomment-134947966) | [2429](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%201.1.0%2064-bit#Lynx_1_1_0_64-bit) | [2506](https://www.computerchess.org.uk/ccrl/4040/cgi/engine_details.cgi?print=Details&each_game=0&eng=Lynx%201.1.0%2064-bit#Lynx_1_1_0_64-bit) | 2597 |
+| [1.0.1](https://github.com/lynx-chess/Lynx/releases/tag/v1.0.1) | 2023-11-20  | [2511](https://github.com/lynx-chess/Lynx/commit/66d340232298768bba57d6876f59831645a6dffb#commitcomment-132727293) | [2431](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%201.0.1%2064-bit#Lynx_1_0_1_64-bit) | [2435](https://www.computerchess.org.uk/ccrl/4040/cgi/engine_details.cgi?print=Details&each_game=0&eng=Lynx%201.0.1%2064-bit#Lynx_1_0_1_64-bit) | 2566 |
+| [0.19.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.19.0) | 2023-10-27  | [2434](https://github.com/lynx-chess/Lynx/commit/b42d235a2815ddb989c5d83218750167c43be7bb#commitcomment-131057706) | [2347](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.19.0%2064-bit#Lynx_0_19_0_64-bit) |  | 2508 |
+| [0.18.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.18.0) | 2023-10-21  | [2283](https://github.com/lynx-chess/Lynx/commit/3397c86c27bccb521f08306564325ff3cd64335d#commitcomment-130585961) |  |  | 2395  |
+| [0.17.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.17.0) | 2023-09-19  | [2178](https://github.com/lynx-chess/Lynx/commit/ecd462bf48923deb7fe7449ff74da3bcc8afe75c#commitcomment-127755063) |  |  | 2368 |
+| [0.16.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.16.0) | 2023-08-26 | [2053](https://github.com/lynx-chess/Lynx/commit/8743436f4e0cca508dc9fd419a5498c46f15866c#commitcomment-125145952) | [1986](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.16.0%2064-bit#Lynx_0_16_0_64-bit) |  |  |
+| [0.15.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.15.0) | 2023-08-13 | [2039](https://github.com/lynx-chess/Lynx/commit/519d69302f855971d502724de0cdfef5e56ffed2#commitcomment-124397606) |  |  | 2098 |
+| [0.14.1](https://github.com/lynx-chess/Lynx/releases/tag/v0.14.0) | 2023-07-30 |  | [1677](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.14.0%2064-bit#Lynx_0_14_0_64-bit)  |  |  |
+| [0.13.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.13.0) | 2022-11-25 |  | [1645](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.13.0%2064-bit#Lynx_0_13_0_64-bit) |  | 1773 |
+| [0.11.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.11.0) | 2022-09-18 |  | [1487](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.11.0%2064-bit#Lynx_0_11_0_64-bit) |  |  |
+| [0.10.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.10.0) | 2022-05-09 |  | [1439](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.10.0%2064-bit#Lynx_0_10_0_64-bit) |  |  |
+| [0.9.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.9.0) | 2021-11-29 |  | [1460](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.9.0%2064-bit#Lynx_0_9_0_64-bit) |  |  |
+| [0.6.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.6.0) | 2021-10-19 |  | [1274](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.6.0%2064-bit#Lynx_0_6_0_64-bit) |  |  |
+| [0.4.0](https://github.com/lynx-chess/Lynx/releases/tag/v0.4.0) | 2021-09-20  |  | [1220](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%200.4.0%2064-bit#Lynx_0_4_0_64-bit) |  |  |
 
 <sup>1</sup> After 2024-01-13 CCRL blitz elo recalculation, where Lynx 1.0.1 went from 2497 to 2432
 
@@ -83,41 +81,77 @@ If you're a Linux user and are new to .NET ecosystem, the conversation in [this 
 
 ## Features
 
-- Static, material evaluation
+<details>
 
-- Static, positional evaluation
+<Summary>Feature list</Summary>
+
+_Beware, most of the provided links contained outdated information and don't reflect the current implementation or the state of the art of computer chess programming, at this point they remain here mostly for historical reasons_.
+
+### Search
 
 - NegaMax [[1](https://www.chessprogramming.org/Negamax)]
 
+- Quiescence Search [[1](https://www.chessprogramming.org/Quiescence_Search)]
+
 - Iterative Deepening Depth-First Search (IDDFS) [[1](https://en.wikipedia.org/wiki/Iterative_deepening_depth-first_search)] [[2](https://www.chessprogramming.org/Iterative_Deepening)]
-
-- Most Valuable Victim - Least Valuable Aggressor (MVV-LVA) [[1](https://www.chessprogramming.org/MVV-LVA)]
-
-- Killer heuristic [[1](https://www.chessprogramming.org/Killer_Heuristic)]
-
-- History heuristic [[1](https://www.chessprogramming.org/History_Heuristic)]
-
-- Zobrist hashing [[1](https://www.chessprogramming.org/Zobrist_Hashing)]
-
-- Triangular PV-Table [[1](https://www.chessprogramming.org/Triangular_PV-Table)]
-
-- Principal Variation Search [[1](https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm)]
-
-- Late Move Reductions [[1](https://web.archive.org/web/20150212051846/http://www.glaurungchess.com/lmr.html)] [[2](https://www.chessprogramming.org/Late_Move_Reductions)] [[3](https://talkchess.com/forum3/viewtopic.php?f=7&t=75056#p860118)]
-
-- Verified null-move pruning [[1](https://www.researchgate.net/publication/297377298_Verified_Null-Move_Pruning)] [[2](https://web.archive.org/web/20071031095933/http://www.brucemo.com/compchess/programming/nullmove.htm)] [[3](https://www.chessprogramming.org/Null_Move_Pruning)]
 
 - Aspiration Windows [[1](https://web.archive.org/web/20071031095918/http://www.brucemo.com/compchess/programming/aspiration.htm)] [[2](https://www.chessprogramming.org/Aspiration_Windows)]
 
-- Transposition Table [[1](https://web.archive.org/web/20071031100051/http://www.brucemo.com/compchess/programming/hashing.htm)]
+- Principal Variation Search (PVS) [[1](https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm)]
+
+- Null-move pruning (NMP) [[1](https://web.archive.org/web/20071031095933/http://www.brucemo.com/compchess/programming/nullmove.htm)] [[2](https://www.chessprogramming.org/Null_Move_Pruning)]
+
+- Late Move Pruning (LMP)
+
+- Futility Pruning (FP)
+
+- Reverse Futility Pruning (RFP)
+
+- Late Move Reductions (LMR) [[1](https://web.archive.org/web/20150212051846/http://www.glaurungchess.com/lmr.html)] [[2](https://www.chessprogramming.org/Late_Move_Reductions)] [[3](https://talkchess.com/forum3/viewtopic.php?f=7&t=75056#p860118)]
+
+- Internal Iterative Reduction (IIR)
 
 - Check extensions [[1](https://www.chessprogramming.org/Check_Extensions)]
 
+- Static Exchange Evaluation (SEE) for move ordering and reduction
+
 - Razoring [[1](https://www.chessprogramming.org/Razoring)]
+
+- Killer heuristic [[1](https://www.chessprogramming.org/Killer_Heuristic)]
+
+- History heuristic: quiet history, capture history, history malus [[1](https://www.chessprogramming.org/History_Heuristic)]
+
+### Evaluation
+
+- Piece-Square Tables (PSQT) [[1](https://www.chessprogramming.org/Piece-Square_Tables)]
+
+- Mobility (knight, bishop, rook, queen)
+
+- Bishop pair
+
+- Rook in open and semi-open files
+
+- King pawn shield, king virtual mobility, king in open and semi-open files
+
+- Isolated and passed pawns
+
+### Miscellaneous
 
 - PEXT Bitboards [[1](https://www.chessprogramming.org/BMI2#PEXTBitboards)]  [[2](https://analog-hors.github.io/site/magic-bitboards/)]
 
-- Internal Iterative Deepening [[1](https://www.chessprogramming.org/Internal_Iterative_Deepening)]
+- Zobrist hashing [[1](https://www.chessprogramming.org/Zobrist_Hashing)]
+
+- Transposition Table [[1](https://web.archive.org/web/20071031100051/http://www.brucemo.com/compchess/programming/hashing.htm)]
+
+- Triangular PV-Table [[1](https://www.chessprogramming.org/Triangular_PV-Table)]
+
+- Most Valuable Victim - Least Valuable Aggressor (MVV-LVA) [[1](https://www.chessprogramming.org/MVV-LVA)]
+
+- Incremental move sorting
+
+- Hard/Soft time management
+
+</details>
 
 ## Credits
 
@@ -129,7 +163,7 @@ Lynx development would simply not have been possible without:
 
 I would also like to extend my gratitude to:
 
-- Engine Programming discord group, especially Jamie Whiting
+- Engine Programming discord group. Without it, Lynx wouldn't be as strong as it is nowadays. Especial mention for Jamie Whiting
 ([Akimbo](https://github.com/JacquesRW/akimbo)), Antares ([Altair](https://github.com/Alex2262/AltairChessEngine)), Ciekce ([Stormphrax](https://github.com/Ciekce/Stormphrax/)), Rak ([Mess](https://github.com/raklaptudirm/mess)), AspectOfTheNoob ([Sirius](https://github.com/mcthouacbb/Sirius)), etc.
 
 - The community Discord around [SebLague/Chess-Challenge](https://github.com/SebLague/Chess-Challenge/), which allowed me to discover EP discord and to revisit the basics, this time explained by very knowledgeable developers (such as the ones above) to people without any previous chess engine programming knowledge
@@ -144,7 +178,7 @@ I would also like to extend my gratitude to:
 
 - lichess developers for [lichess-bot](https://github.com/lichess-bot-devs/lichess-bot)
 
-- Open source chess engines with permissive licenses. Their existence encourages knowledge sharing and really helps pushing the Chess Engine Developer community forward. Some engines are credited inside the codebase itself, where relevant 
+- Open source chess engines with permissive licenses. Their existence encourages knowledge sharing and really helps pushing the Chess Engine Developer community forward. Some engines are credited inside the codebase itself, where relevant
 
 - Countless other developers and online resources, who/which I should probably remember, but don't come to my mind right now
 
