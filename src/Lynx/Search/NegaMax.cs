@@ -357,7 +357,7 @@ public sealed partial class Engine
             Game.PositionHashHistory.RemoveAt(Game.PositionHashHistory.Count - 1);
             position.UnmakeMove(move, gameState);
 
-            PrintMove(ply, move, evaluation);
+            PrintMove(position, ply, move, evaluation);
 
             // Fail-hard beta-cutoff - refutation found, no need to keep searching this line
             if (evaluation >= beta)
@@ -577,7 +577,7 @@ public sealed partial class Engine
             int evaluation = -QuiescenceSearch(ply + 1, -beta, -alpha);
             position.UnmakeMove(move, gameState);
 
-            PrintMove(ply, move, evaluation);
+            PrintMove(position, ply, move, evaluation);
 
             // Fail-hard beta-cutoff
             if (evaluation >= beta)
