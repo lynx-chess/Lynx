@@ -6,8 +6,8 @@ RUNTIME=
 OUTPUT_DIR=artifacts/Lynx/
 
 ifeq ($(OS),Windows_NT)
-    ifeq ($(PROCESSOR_ARCHITEW6432),AMD64)
-        RUNTIME=win-x64
+	ifeq ($(PROCESSOR_ARCHITEW6432),AMD64)
+		RUNTIME=win-x64
 	else
 		RUNTIME=win-x86
 	endif
@@ -15,7 +15,7 @@ else
 	UNAME_S := $(shell uname -s)
 	UNAME_P := $(shell uname -p)
 	ifeq ($(UNAME_S),Linux)
-	    RUNTIME=linux-x64
+		RUNTIME=linux-x64
 		ifneq ($(filter aarch64%,$(UNAME_P)),)
 			RUNTIME=linux-arm64
 		else ifneq ($(filter armv8%,$(UNAME_P)),)
@@ -31,11 +31,11 @@ else
 endif
 
 ifndef RUNTIME
-$(error RUNTIME is not set for $(OS) $(UNAME_S) $(UNAME_P), please fill an issue in https://github.com/lynx-chess/Lynx/issues/new/choose)
+	$(error RUNTIME is not set for $(OS) $(UNAME_S) $(UNAME_P), please fill an issue in https://github.com/lynx-chess/Lynx/issues/new/choose)
 endif
 
 ifdef EXE
-OUTPUT_DIR=./
+	OUTPUT_DIR=./
 endif
 
 build:

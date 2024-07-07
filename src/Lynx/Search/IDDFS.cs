@@ -16,9 +16,9 @@ public sealed partial class Engine
     /// </summary>
     private readonly int[][] _killerMoves =
     [
-        new int[Configuration.EngineSettings.MaxDepth],
-        new int[Configuration.EngineSettings.MaxDepth],
-        new int[Configuration.EngineSettings.MaxDepth]
+        new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin],
+        new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin],
+        new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin]
     ];
 
     /// <summary>
@@ -48,11 +48,11 @@ public sealed partial class Engine
     /// </summary>
     //private readonly int[][][] _continuationHistory;
 
-    private readonly int[] _maxDepthReached = new int[Configuration.EngineSettings.MaxDepth];
+    private readonly int[] _maxDepthReached = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
     private TranspositionTable _tt = [];
     private int _ttMask;
 
-    private int _nodes;
+    private long _nodes;
     private bool _isFollowingPV;
     private bool _isScoringPV;
 
@@ -109,6 +109,8 @@ public sealed partial class Engine
                 _engineWriter.TryWrite(InfoCommand.SearchResultInfo(lastSearchResult));
             }
 
+            int mate = 0;
+
             do
             {
                 _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
@@ -132,13 +134,6 @@ public sealed partial class Engine
                         _isFollowingPV = true;
                         bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta);
 
-                        if (alpha < bestEvaluation && beta > bestEvaluation)
-                        {
-                            break;
-                        }
-
-                        _logger.Debug("Eval ({0}) outside of aspiration window [{1}, {2}] (depth {3}, nodes {4})", bestEvaluation, alpha, beta, depth, _nodes);
-
                         window += window >> 1;   // window / 2
 
                         // Depth change: https://github.com/lynx-chess/Lynx/pull/440
@@ -151,6 +146,13 @@ public sealed partial class Engine
                         {
                             beta = Math.Min(bestEvaluation + window, MaxValue);
                         }
+                        else
+                        {
+                            break;
+                        }
+
+                        _logger.Debug("Eval ({0}) (depth {1}, nodes {2}) outside of aspiration window, new window [{3}, {4}]",
+                            bestEvaluation, depth, _nodes, alpha, beta);
                     }
                 }
 
@@ -159,11 +161,14 @@ public sealed partial class Engine
 
                 var bestEvaluationAbs = Math.Abs(bestEvaluation);
                 isMateDetected = bestEvaluationAbs > EvaluationConstants.PositiveCheckmateDetectionLimit;
+                mate = isMateDetected
+                    ? Utils.CalculateMateInX(bestEvaluation, bestEvaluationAbs)
+                    : 0;
 
-                lastSearchResult = UpdateLastSearchResult(lastSearchResult, bestEvaluation, alpha, beta, depth, isMateDetected, bestEvaluationAbs);
+                lastSearchResult = UpdateLastSearchResult(lastSearchResult, bestEvaluation, alpha, beta, depth, mate, bestEvaluationAbs);
 
                 _engineWriter.TryWrite(InfoCommand.SearchResultInfo(lastSearchResult));
-            } while (StopSearchCondition(++depth, maxDepth, isMateDetected, softLimitTimeBound));
+            } while (StopSearchCondition(++depth, maxDepth, mate, softLimitTimeBound));
         }
         catch (OperationCanceledException)
         {
@@ -186,10 +191,12 @@ public sealed partial class Engine
 
         var finalSearchResult = GenerateFinalSearchResult(lastSearchResult, bestEvaluation, alpha, beta, depth, firstLegalMove, isCancelled);
 
-        if (isMateDetected && finalSearchResult.Mate + Game.HalfMovesWithoutCaptureOrPawnMove < 96)
+        if (Configuration.EngineSettings.UseOnlineTablebaseInRootPositions
+            && isMateDetected
+            && (finalSearchResult.Mate * 2) + Game.HalfMovesWithoutCaptureOrPawnMove < Constants.MaxMateDistanceToStopSearching)
         {
-            _logger.Info("Engine search found a short enough mate, cancelling online tb probing if still active");
             _searchCancellationTokenSource.Cancel();
+            _logger.Info("Engine search found a short enough mate, cancelling online tb probing if still active");
         }
 
         _engineWriter.TryWrite(InfoCommand.SearchResultInfo(finalSearchResult));
@@ -197,12 +204,20 @@ public sealed partial class Engine
         return finalSearchResult;
     }
 
-    private bool StopSearchCondition(int depth, int maxDepth, bool isMateDetected, int softLimitTimeBound)
+    private bool StopSearchCondition(int depth, int maxDepth, int mate, int softLimitTimeBound)
     {
-        if (isMateDetected)
+        if (mate != 0)
         {
-            _logger.Info("Stopping at depth {0}: mate detected", depth - 1);
-            return false;
+            var winningMateThreshold = (100 - Game.HalfMovesWithoutCaptureOrPawnMove) / 2;
+            _logger.Info("Depth {0}: mate in {1} detected ({2} moves until draw by repetition)", depth - 1, mate, winningMateThreshold);
+
+            if (mate < 0 || mate + Constants.MateDistanceMarginToStopSearching < winningMateThreshold)
+            {
+                _logger.Info("Stopping search: mate is short enough");
+                return false;
+            }
+
+            _logger.Info("Search continues, hoping to find a faster mate");
         }
 
         if (depth >= Configuration.EngineSettings.MaxDepth)
@@ -243,7 +258,7 @@ public sealed partial class Engine
         foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, moves))
         {
             var gameState = Game.CurrentPosition.MakeMove(move);
-            bool isPositionValid = Game.CurrentPosition.IsValid();
+            bool isPositionValid = Game.CurrentPosition.WasProduceByAValidMove();
             Game.CurrentPosition.UnmakeMove(move, gameState);
 
             if (isPositionValid)
@@ -294,16 +309,10 @@ public sealed partial class Engine
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private SearchResult UpdateLastSearchResult(SearchResult? lastSearchResult,
-        int bestEvaluation, int alpha, int beta, int depth, bool isMateDetected, int bestEvaluationAbs)
+        int bestEvaluation, int alpha, int beta, int depth, int mate, int bestEvaluationAbs)
     {
         var pvMoves = _pVTable.TakeWhile(m => m != default).ToList();
         var maxDepthReached = _maxDepthReached.LastOrDefault(item => item != default);
-
-        int mate = default;
-        if (isMateDetected)
-        {
-            mate = Utils.CalculateMateInX(bestEvaluation, bestEvaluationAbs);
-        }
 
         var elapsedTime = _stopWatch.ElapsedMilliseconds;
 
@@ -324,7 +333,12 @@ public sealed partial class Engine
         SearchResult finalSearchResult;
         if (lastSearchResult is null)
         {
-            _logger.Warn("Search cancelled at depth 1, choosing first found legal move as best one");
+            // In the event of a quick ponderhit/stop while pondering because the opponent moved quickly, we don't want no warning triggered here
+            // when cancelling the pondering search
+            if (!_isPondering)
+            {
+                _logger.Warn("Search cancelled at depth 1, choosing first found legal move as best one");
+            }
             finalSearchResult = new(firstLegalMove, 0, 0, [firstLegalMove], alpha, beta);
         }
         else

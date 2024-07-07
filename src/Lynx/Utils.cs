@@ -175,9 +175,43 @@ public static class Utils
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static long CalculateNps(int nodes, long elapsedMilliseconds)
+    public static long CalculateNps(long nodes, long elapsedMilliseconds)
     {
         return Convert.ToInt64(Math.Clamp(nodes / ((0.001 * elapsedMilliseconds) + 1), 0, long.MaxValue));
+    }
+
+    /// <summary>
+    /// https://minuskelvin.net/chesswiki/content/packed-eval.html
+    /// </summary>
+    /// <param name="mg"></param>
+    /// <param name="eg"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int Pack(short mg, short eg)
+    {
+        return (eg << 16) + mg;
+    }
+
+    /// <summary>
+    /// https://minuskelvin.net/chesswiki/content/packed-eval.html
+    /// </summary>
+    /// <param name="packed"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static short UnpackMG(int packed)
+    {
+        return (short)packed;
+    }
+
+    /// <summary>
+    /// https://minuskelvin.net/chesswiki/content/packed-eval.html
+    /// </summary>
+    /// <param name="packed"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static short UnpackEG(int packed)
+    {
+        return (short)((packed + 0x8000) >> 16);
     }
 
     [Conditional("DEBUG")]

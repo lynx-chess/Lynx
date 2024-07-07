@@ -1,18 +1,20 @@
 ﻿using Lynx.Model;
 
+#pragma warning disable IDE1006 // Naming Styles
+
 namespace Lynx;
 
 public static class EvaluationConstants
 {
     /// <summary>
-    /// 101192 games, 20+0.2, UHO_XXL_+0.90_+1.19.epd
-    /// Retained (W,D,L) = (2456211, 5250072, 2453504) positions.
+    /// 18110 games, 20+0.2, 8moves_v3.epd
+    /// Retained (W,D,L) = (443253, 1225563, 445851) positions.
     /// </summary>
-    public const int EvalNormalizationCoefficient = 142;
+    public const int EvalNormalizationCoefficient = 90;
 
-    public static readonly double[] As = [-19.12346211, 118.16335522, -65.13621477, 108.37887346];
+    public static readonly double[] As = [-8.04766150, 80.50520447, -50.49187611, 68.23641282];
 
-    public static readonly double[] Bs = [-5.65666195, 33.69404882, -34.39300793, 99.06591582];
+    public static readonly double[] Bs = [-2.50118978, 19.26481735, -6.98361835, 49.93026650];
 
 #pragma warning disable IDE0055 // Discard formatting in this region
 
@@ -22,256 +24,245 @@ public static class EvaluationConstants
         0, 1, 1, 2, 4, 0
     ];
 
-public static readonly int[] MiddleGamePieceValues =
+internal static readonly short[] MiddleGamePieceValues =
 [
-        +103, +386, +357, +475, +1084, 0,
-        -103, -386, -357, -475, -1084, 0
+        +97, +356, +373, +507, +1123, 0,
+        -97, -356, -373, -507, -1123, 0
 ];
 
-public static readonly int[] EndGamePieceValues =
+internal static readonly short[] EndGamePieceValues =
 [
-        +149, +485, +434, +843, +1560, 0,
-        -149, -485, -434, -843, -1560, 0
+        +123, +427, +363, +747, +1424, 0,
+        -123, -427, -363, -747, -1424, 0
 ];
 
-public static readonly int[] MiddleGamePawnTable =
+internal static readonly short[] MiddleGamePawnTable =
 [
-        0,      0,      0,      0,      0,      0,      0,      0,
-        -26,    -23,    -15,    -9,     -3,     29,     31,     -15,
-        -27,    -25,    -5,     11,     18,     27,     24,     7,
-        -27,    -15,    3,      18,     27,     30,     3,      -6,
-        -26,    -11,    1,      19,     27,     27,     2,      -7,
-        -24,    -19,    -3,     4,      14,     23,     17,     1,
-        -27,    -21,    -20,    -14,    -5,     22,     20,     -22,
-        0,      0,      0,      0,      0,      0,      0,      0,
+           0,      0,      0,      0,      0,      0,      0,      0,
+         -21,    -22,    -14,    -12,     -6,     20,     23,    -12,
+         -24,    -26,     -6,      9,     15,     23,     20,      8,
+         -20,    -14,      5,     18,     27,     30,      4,     -1,
+         -20,    -10,      3,     20,     29,     29,      3,     -2,
+         -22,    -21,     -5,      2,     10,     20,     13,      2,
+         -21,    -19,    -19,    -15,     -9,     14,     12,    -19,
+           0,      0,      0,      0,      0,      0,      0,      0,
 ];
 
-public static readonly int[] EndGamePawnTable =
+internal static readonly short[] EndGamePawnTable =
 [
-        0,      0,      0,      0,      0,      0,      0,      0,
-        12,     12,     6,      -15,    6,      2,      -4,     -12,
-        11,     13,     0,      -14,    -7,     -5,     -2,     -11,
-        28,     20,     0,      -22,    -18,    -12,    8,      -1,
-        25,     19,     -2,     -17,    -16,    -9,     6,      -3,
-        12,     10,     -4,     -13,    -2,     -3,     -1,     -11,
-        15,     12,     9,      -14,    16,     6,      -1,     -9,
-        0,      0,      0,      0,      0,      0,      0,      0,
+           0,      0,      0,      0,      0,      0,      0,      0,
+          16,     11,      5,     -7,      8,      3,     -5,     -3,
+          10,      6,     -3,    -15,    -10,    -10,    -10,     -9,
+          27,     17,     -1,    -20,    -16,    -15,      4,      1,
+          24,     16,     -3,    -16,    -15,    -12,      2,     -1,
+          12,      3,     -6,    -13,     -7,     -8,     -9,    -10,
+          18,     11,      9,     -5,     17,      7,     -1,      0,
+           0,      0,      0,      0,      0,      0,      0,      0,
 ];
 
-public static readonly int[] MiddleGameKnightTable =
+internal static readonly short[] MiddleGameKnightTable =
 [
-        -153,   -23,    -52,    -32,    -12,    -21,    -9,     -98,
-        -46,    -27,    -3,     15,     18,     25,     -14,    -17,
-        -28,    1,      20,     57,     61,     42,     35,     -3,
-        -11,    25,     43,     60,     60,     61,     46,     18,
-        -8,     24,     45,     48,     57,     59,     47,     17,
-        -26,    3,      20,     49,     60,     35,     28,     -4,
-        -48,    -19,    0,      15,     17,     19,     -11,    -18,
-        -168,   -24,    -49,    -21,    -9,     -12,    -17,    -91,
+        -142,    -19,    -51,    -28,    -10,    -13,     -7,    -79,
+         -42,    -27,     -5,     16,     18,     28,     -8,      0,
+         -35,     -4,     12,     50,     52,     33,     26,     -7,
+         -13,     21,     37,     51,     51,     52,     43,     14,
+         -10,     21,     39,     39,     50,     51,     43,     13,
+         -33,     -3,     12,     43,     49,     26,     20,     -8,
+         -45,    -20,     -2,     15,     17,     23,     -6,      0,
+        -157,    -22,    -49,    -20,     -8,     -4,    -15,    -67,
 ];
 
-public static readonly int[] EndGameKnightTable =
+internal static readonly short[] EndGameKnightTable =
 [
-        -72,    -61,    -13,    -13,    -10,    -28,    -55,    -93,
-        -22,    -2,     15,     9,      10,     7,      -13,    -21,
-        -14,    16,     38,     38,     37,     18,     10,     -15,
-        7,      20,     52,     53,     56,     50,     25,     -6,
-        4,      27,     51,     55,     58,     47,     31,     0,
-        -18,    19,     27,     45,     35,     20,     7,      -11,
-        -28,    2,      5,      13,     5,      0,      -15,    -25,
-        -78,    -60,    -9,     -17,    -11,    -26,    -53,    -93,
+         -56,    -38,     -5,     -3,     -3,    -25,    -31,    -80,
+          -9,      6,     10,      4,      4,     -3,     -7,    -16,
+          -8,      7,     26,     27,     22,      7,     -1,     -9,
+          10,     11,     37,     38,     43,     35,     15,     -3,
+           7,     16,     36,     42,     43,     32,     19,      4,
+         -10,     11,     16,     31,     22,      8,     -3,     -5,
+         -15,      8,      1,      7,     -0,     -8,     -8,    -20,
+         -60,    -35,      0,     -6,     -5,    -25,    -30,    -79,
 ];
 
-public static readonly int[] MiddleGameBishopTable =
+internal static readonly short[] MiddleGameBishopTable =
 [
-        -15,    16,     -2,     -15,    -10,    -16,    -23,    2,
-        8,      3,      7,      -18,    1,      -1,     29,     -12,
-        -6,     5,      -4,     3,      -8,     14,     5,      28,
-        -7,     -7,     -6,     23,     19,     -18,    2,      -2,
-        -16,    -2,     -15,    17,     6,      -13,    -6,     5,
-        5,      5,      7,      -5,     6,      7,      8,      24,
-        10,     15,     12,     -6,     -3,     4,      21,     -2,
-        10,     20,     12,     -29,    -13,    -21,    1,      -12,
+         -13,     13,     -9,    -20,    -15,    -10,    -21,     14,
+           4,      1,      4,    -17,      1,      3,     36,     -6,
+          -9,     -0,     -9,      4,    -12,      6,     -2,     26,
+          -9,     -8,     -2,     23,     21,    -13,      2,     -3,
+         -17,     -3,    -11,     20,      9,    -10,     -5,      3,
+           2,     -2,      2,     -4,     -0,     -1,      0,     21,
+           7,     12,      7,     -6,     -4,      5,     28,      6,
+          11,     16,      3,    -35,    -17,    -16,      2,     -3,
 ];
 
-public static readonly int[] EndGameBishopTable =
+internal static readonly short[] EndGameBishopTable =
 [
-        -14,    18,     -13,    3,      -3,     6,      1,      -31,
-        -5,     -8,     -4,     5,      4,      -10,    -2,     -16,
-        14,     16,     8,      3,      12,     4,      7,      10,
-        13,     8,      7,      -2,     -6,     6,      4,      5,
-        9,      10,     6,      4,      -10,    5,      4,      5,
-        12,     4,      0,      1,      5,      -1,     4,      7,
-        -15,    -11,    -17,    3,      1,      -3,     -2,     -11,
-        -7,     -12,    -7,     7,      8,      9,      -2,     -22,
+           1,     17,     -3,      5,      2,      3,      1,    -19,
+           3,     -7,     -6,     -0,     -2,    -14,     -7,    -10,
+          13,      8,      4,     -2,      6,      1,      0,     10,
+          13,      0,      3,      0,     -1,      2,     -1,      6,
+           7,      3,      1,      4,     -3,      3,     -1,      7,
+          10,     -2,     -2,     -4,      1,     -4,     -2,      7,
+          -6,     -9,    -16,     -2,     -4,     -8,     -7,     -5,
+           3,     -8,     -2,      9,      9,      4,     -1,     -6,
 ];
 
-public static readonly int[] MiddleGameRookTable =
+internal static readonly short[] MiddleGameRookTable =
 [
-        -4,     -10,    -5,     2,      14,     3,      10,     0,
-        -27,    -17,    -14,    -14,    -2,     3,      21,     0,
-        -29,    -19,    -23,    -13,    4,      9,      55,     31,
-        -26,    -21,    -18,    -12,    -7,     8,      44,     21,
-        -20,    -17,    -12,    -5,     -10,    7,      33,     16,
-        -24,    -16,    -19,    -5,     1,      19,     50,     30,
-        -25,    -28,    -9,     -7,     -1,     1,      27,     4,
-        -2,     -3,     1,      12,     23,     8,      17,     12,
+          -4,    -10,     -6,      0,      9,      8,     11,      2,
+         -29,    -18,    -11,     -8,      4,     12,     29,     -2,
+         -33,    -22,    -23,    -12,      3,      9,     48,     24,
+         -29,    -26,    -23,    -11,     -6,      6,     37,     16,
+         -24,    -21,    -17,     -7,     -8,      7,     28,     12,
+         -26,    -18,    -19,     -2,      0,     19,     48,     22,
+         -26,    -27,     -7,     -2,      5,     10,     35,      5,
+          -2,     -4,     -1,     10,     17,     12,     19,     14,
 ];
 
-public static readonly int[] EndGameRookTable =
+internal static readonly short[] EndGameRookTable =
 [
-        6,      3,      7,      -2,     -11,    4,      0,      -5,
-        15,     20,     21,     11,     0,      -2,     -6,     2,
-        11,     8,      12,     5,      -9,     -11,    -23,    -20,
-        15,     10,     12,     6,      -2,     -2,     -16,    -15,
-        14,     9,      12,     2,      -1,     -9,     -13,    -11,
-        12,     13,     3,      -4,     -11,    -16,    -22,    -14,
-        20,     23,     16,     5,      -3,     -2,     -8,     2,
-        1,      -3,     2,      -8,     -18,    -4,     -9,     -15,
+           7,      5,      9,      1,     -7,     -1,     -3,     -6,
+          17,     19,     19,      9,     -1,     -5,     -9,      0,
+          14,     10,     12,      4,     -8,    -12,    -23,    -18,
+          15,     11,     12,      4,     -3,     -5,    -17,    -16,
+          14,     10,     11,      2,     -2,    -10,    -15,    -12,
+          14,     13,      4,     -3,    -10,    -15,    -24,    -11,
+          20,     22,     15,      4,     -3,     -5,    -10,     -0,
+           2,     -1,      4,     -5,    -14,     -9,     -9,    -14,
 ];
 
-public static readonly int[] MiddleGameQueenTable =
+internal static readonly short[] MiddleGameQueenTable =
 [
-        -15,    -10,    -5,     9,      3,      -32,    14,     1,
-        0,      -10,    7,      -2,     2,      6,      22,     51,
-        -8,     -5,     -10,    -9,     -14,    6,      35,     59,
-        -12,    -20,    -19,    -9,     -11,    -5,     11,     25,
-        -12,    -15,    -20,    -20,    -10,    -6,     9,      22,
-        -5,     -3,     -16,    -13,    -8,     4,      20,     39,
-        -15,    -21,    3,      9,      7,      3,      6,      37,
-        -11,    -11,    5,      11,     6,      -39,    -12,    28,
+         -13,    -12,    -13,      5,     -2,    -30,      6,      2,
+          -4,    -10,      7,     -0,      3,     11,     28,     50,
+         -12,     -8,    -10,    -10,    -14,      5,     30,     53,
+         -12,    -20,    -17,     -8,     -8,     -3,     13,     26,
+         -12,    -16,    -16,    -16,     -6,     -3,     12,     23,
+          -9,     -6,    -16,    -11,     -9,      1,     17,     33,
+         -16,    -19,      3,     12,      8,      7,     12,     38,
+         -11,    -12,     -2,      7,      1,    -35,    -15,     25,
 ];
 
-public static readonly int[] EndGameQueenTable =
+internal static readonly short[] EndGameQueenTable =
 [
-        -27,    -24,    -10,    -9,     -19,    -11,    -46,    6,
-        -22,    -13,    -28,    0,      -2,     -17,    -48,    -5,
-        -17,    -7,     4,      -1,     23,     23,     -8,     3,
-        -11,    8,      5,      12,     28,     40,     49,     35,
-        -2,     2,      14,     26,     26,     34,     27,     48,
-        -20,    -14,    15,     13,     19,     22,     23,     18,
-        -15,    -6,     -23,    -18,    -12,    -10,    -32,    6,
-        -15,    -18,    -17,    -2,     -9,     21,     13,     -9,
+         -22,    -16,     -3,    -11,    -15,    -15,    -32,      8,
+         -14,     -9,    -25,     -2,     -4,    -21,    -49,     -5,
+         -13,     -4,      7,      2,     22,     19,     -8,      5,
+         -10,      7,      6,     11,     23,     33,     40,     28,
+          -2,      3,     12,     22,     19,     29,     20,     38,
+         -13,    -10,     14,     11,     13,     18,     16,     18,
+          -9,     -3,    -21,    -21,    -13,    -17,    -34,      3,
+         -13,    -13,    -10,     -6,     -9,     11,     15,     -2,
 ];
 
-public static readonly int[] MiddleGameKingTable =
+internal static readonly short[] MiddleGameKingTable =
 [
-        34,     55,     30,     -72,    12,     -58,    44,     57,
-        -3,     -12,    -33,    -74,    -88,    -58,    -7,     23,
-        -83,    -71,    -116,   -119,   -133,   -137,   -88,    -100,
-        -120,   -119,   -138,   -181,   -172,   -160,   -157,   -190,
-        -85,    -87,    -128,   -159,   -174,   -144,   -161,   -182,
-        -77,    -42,    -108,   -119,   -103,   -116,   -78,    -92,
-        83,     -2,     -34,    -64,    -69,    -46,    9,      32,
-        49,     82,     43,     -55,    25,     -47,    58,     70,
+           6,     39,     36,    -64,     19,    -55,     35,     24,
+         -21,    -15,    -20,    -54,    -67,    -44,     -5,      5,
+         -83,    -65,    -99,    -97,   -106,   -115,    -79,    -99,
+         -99,    -80,   -104,   -151,   -145,   -122,   -121,   -155,
+         -66,    -54,    -92,   -129,   -143,   -108,   -125,   -151,
+         -81,    -44,    -91,    -91,    -82,    -92,    -70,    -90,
+          59,     -9,    -21,    -42,    -46,    -29,     11,     14,
+          16,     60,     46,    -46,     34,    -42,     51,     38,
 ];
 
-public static readonly int[] EndGameKingTable =
+internal static readonly short[] EndGameKingTable =
 [
-        -85,    -49,    -22,    4,      -36,    -3,     -41,    -96,
-        -21,    16,     30,     43,     51,     36,     14,     -24,
-        7,      44,     65,     77,     81,     71,     47,     25,
-        17,     60,     85,     102,    98,     90,     75,     47,
-        5,      50,     82,     98,     103,    88,     78,     46,
-        6,      40,     64,     77,     74,     66,     47,     20,
-        -45,    11,     31,     41,     44,     33,     9,      -27,
-        -97,    -61,    -29,    -3,     -31,    -7,     -45,    -101,
+         -77,    -49,    -28,     -1,    -41,     -9,    -43,    -90,
+         -23,     15,     24,     37,     43,     30,      8,    -29,
+          -2,     40,     69,     81,     84,     73,     40,     10,
+           0,     52,     90,    122,    120,     92,     63,     23,
+         -10,     43,     88,    119,    123,     91,     65,     22,
+          -1,     37,     70,     81,     78,     68,     39,      5,
+         -47,     11,     26,     35,     37,     26,      3,    -33,
+         -88,    -57,    -34,     -9,    -38,    -14,    -48,    -96,
 ];
 
 #pragma warning restore IDE0055
 
-    public static readonly int[] MiddleGamePawnTableBlack = MiddleGamePawnTable.Select((_, index) => -MiddleGamePawnTable[index ^ 56]).ToArray();
-    public static readonly int[] EndGamePawnTableBlack = EndGamePawnTable.Select((_, index) => -EndGamePawnTable[index ^ 56]).ToArray();
-
-    public static readonly int[] MiddleGameKnightTableBlack = MiddleGameKnightTable.Select((_, index) => -MiddleGameKnightTable[index ^ 56]).ToArray();
-    public static readonly int[] EndGameKnightTableBlack = EndGameKnightTable.Select((_, index) => -EndGameKnightTable[index ^ 56]).ToArray();
-
-    public static readonly int[] MiddleGameBishopTableBlack = MiddleGameBishopTable.Select((_, index) => -MiddleGameBishopTable[index ^ 56]).ToArray();
-    public static readonly int[] EndGameBishopTableBlack = EndGameBishopTable.Select((_, index) => -EndGameBishopTable[index ^ 56]).ToArray();
-
-    public static readonly int[] MiddleGameRookTableBlack = MiddleGameRookTable.Select((_, index) => -MiddleGameRookTable[index ^ 56]).ToArray();
-    public static readonly int[] EndGameRookTableBlack = EndGameRookTable.Select((_, index) => -EndGameRookTable[index ^ 56]).ToArray();
-
-    public static readonly int[] MiddleGameQueenTableBlack = MiddleGameQueenTable.Select((_, index) => -MiddleGameQueenTable[index ^ 56]).ToArray();
-    public static readonly int[] EndGameQueenTableBlack = EndGameQueenTable.Select((_, index) => -EndGameQueenTable[index ^ 56]).ToArray();
-
-    public static readonly int[] MiddleGameKingTableBlack = MiddleGameKingTable.Select((_, index) => -MiddleGameKingTable[index ^ 56]).ToArray();
-    public static readonly int[] EndGameKingTableBlack = EndGameKingTable.Select((_, index) => -EndGameKingTable[index ^ 56]).ToArray();
-
-    /// <summary>
-    /// [12][64]
-    /// </summary>
-    public static readonly int[][] MiddleGamePositionalTables =
-    [
-        MiddleGamePawnTable,
-        MiddleGameKnightTable,
-        MiddleGameBishopTable,
-        MiddleGameRookTable,
-        MiddleGameQueenTable,
-        MiddleGameKingTable,
-
-        MiddleGamePawnTableBlack,
-        MiddleGameKnightTableBlack,
-        MiddleGameBishopTableBlack,
-        MiddleGameRookTableBlack,
-        MiddleGameQueenTableBlack,
-        MiddleGameKingTableBlack
-    ];
-
-    /// <summary>
-    /// [12][64]
-    /// </summary>
-    public static readonly int[][] EndGamePositionalTables =
-    [
-        EndGamePawnTable,
-        EndGameKnightTable,
-        EndGameBishopTable,
-        EndGameRookTable,
-        EndGameQueenTable,
-        EndGameKingTable,
-
-        EndGamePawnTableBlack,
-        EndGameKnightTableBlack,
-        EndGameBishopTableBlack,
-        EndGameRookTableBlack,
-        EndGameQueenTableBlack,
-        EndGameKingTableBlack
-    ];
-
     /// <summary>
     /// 12x64
     /// </summary>
-    public static readonly int[][] MiddleGameTable = new int[12][];
-
-    /// <summary>
-    /// 12x64
-    /// </summary>
-    public static readonly int[][] EndGameTable = new int[12][];
+    public static readonly int[][] PackedPSQT = new int[12][];
 
     /// <summary>
     /// <see cref="Constants.AbsoluteMaxDepth"/> x <see cref="Constants.MaxNumberOfPossibleMovesInAPosition"/>
     /// </summary>
-    public static readonly int[][] LMRReductions = new int[Configuration.EngineSettings.MaxDepth][];
+    public static readonly int[][] LMRReductions = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin][];
 
     /// <summary>
     /// [0, 4, 136, 276, 424, 580, 744, 916, 1096, 1284, 1480, 1684, 1896, 1896, 1896, 1896, ...]
     /// </summary>
-    public static readonly int[] HistoryBonus = new int[Configuration.EngineSettings.MaxDepth];
+    public static readonly int[] HistoryBonus = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
 
     static EvaluationConstants()
     {
+        short[] middleGamePawnTableBlack = MiddleGamePawnTable.Select((_, index) => (short)-MiddleGamePawnTable[index ^ 56]).ToArray();
+        short[] endGamePawnTableBlack = EndGamePawnTable.Select((_, index) => (short)-EndGamePawnTable[index ^ 56]).ToArray();
+
+        short[] middleGameKnightTableBlack = MiddleGameKnightTable.Select((_, index) => (short)-MiddleGameKnightTable[index ^ 56]).ToArray();
+        short[] endGameKnightTableBlack = EndGameKnightTable.Select((_, index) => (short)-EndGameKnightTable[index ^ 56]).ToArray();
+
+        short[] middleGameBishopTableBlack = MiddleGameBishopTable.Select((_, index) => (short)-MiddleGameBishopTable[index ^ 56]).ToArray();
+        short[] endGameBishopTableBlack = EndGameBishopTable.Select((_, index) => (short)-EndGameBishopTable[index ^ 56]).ToArray();
+
+        short[] middleGameRookTableBlack = MiddleGameRookTable.Select((_, index) => (short)-MiddleGameRookTable[index ^ 56]).ToArray();
+        short[] endGameRookTableBlack = EndGameRookTable.Select((_, index) => (short)-EndGameRookTable[index ^ 56]).ToArray();
+
+        short[] middleGameQueenTableBlack = MiddleGameQueenTable.Select((_, index) => (short)-MiddleGameQueenTable[index ^ 56]).ToArray();
+        short[] EndGameQueenTableBlack = EndGameQueenTable.Select((_, index) => (short)-EndGameQueenTable[index ^ 56]).ToArray();
+
+        short[] middleGameKingTableBlack = MiddleGameKingTable.Select((_, index) => (short)-MiddleGameKingTable[index ^ 56]).ToArray();
+        short[] endGameKingTableBlack = EndGameKingTable.Select((_, index) => (short)-EndGameKingTable[index ^ 56]).ToArray();
+
+        short[][] mgPositionalTables =
+        [
+            MiddleGamePawnTable,
+            MiddleGameKnightTable,
+            MiddleGameBishopTable,
+            MiddleGameRookTable,
+            MiddleGameQueenTable,
+            MiddleGameKingTable,
+
+            middleGamePawnTableBlack,
+            middleGameKnightTableBlack,
+            middleGameBishopTableBlack,
+            middleGameRookTableBlack,
+            middleGameQueenTableBlack,
+            middleGameKingTableBlack
+        ];
+
+        short[][] egPositionalTables =
+        [
+            EndGamePawnTable,
+            EndGameKnightTable,
+            EndGameBishopTable,
+            EndGameRookTable,
+            EndGameQueenTable,
+            EndGameKingTable,
+
+            endGamePawnTableBlack,
+            endGameKnightTableBlack,
+            endGameBishopTableBlack,
+            endGameRookTableBlack,
+            EndGameQueenTableBlack,
+            endGameKingTableBlack
+        ];
+
         for (int piece = (int)Piece.P; piece <= (int)Piece.k; ++piece)
         {
-            MiddleGameTable[piece] = new int[64];
-            EndGameTable[piece] = new int[64];
+            PackedPSQT[piece] = new int[64];
             for (int sq = 0; sq < 64; ++sq)
             {
-                MiddleGameTable[piece][sq] = MiddleGamePieceValues[piece] + MiddleGamePositionalTables[piece][sq];
-                EndGameTable[piece][sq] = EndGamePieceValues[piece] + EndGamePositionalTables[piece][sq];
+                PackedPSQT[piece][sq] = Utils.Pack(
+                    (short)(MiddleGamePieceValues[piece] + mgPositionalTables[piece][sq]),
+                    (short)(EndGamePieceValues[piece] + egPositionalTables[piece][sq]));
             }
         }
 
-        for (int searchDepth = 1; searchDepth < Configuration.EngineSettings.MaxDepth; ++searchDepth)    // Depth > 0 or we'd be in QSearch
+        for (int searchDepth = 1; searchDepth < Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin; ++searchDepth)    // Depth > 0 or we'd be in QSearch
         {
             LMRReductions[searchDepth] = new int[Constants.MaxNumberOfPossibleMovesInAPosition];
 
@@ -391,3 +382,5 @@ public static readonly int[] EndGameKingTable =
 
     public const int ContinuationHistoryPlyCount = 1;
 }
+
+#pragma warning restore IDE1006 // Naming Styles

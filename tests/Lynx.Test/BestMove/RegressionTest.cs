@@ -230,7 +230,7 @@ public class RegressionTest : BaseTest
         Assert.False(engine.Game.Is50MovesRepetition());
         var bestMove = engine.BestMove(new GoCommand("go depth 1"));
 
-        engine.AdjustPosition(positionCommand + " " + bestMove.BestMove.ToEPDString());
+        engine.AdjustPosition(positionCommand + " " + bestMove.BestMove.UCIString());
         Assert.IsFalse(engine.Game.Is50MovesRepetition());
     }
 
@@ -384,5 +384,14 @@ public class RegressionTest : BaseTest
         engine.AdjustPosition("position startpos moves e2e4 c7c5 g1f3 g7g6 d2d4 f8g7 d4d5 d7d6 f1e2 c8g4 f3d2 g4e2 d1e2 g8f6 b1c3 f6d7 d2f3 d8b6 e1g1 b8a6 a2a4 a6c7 c3b5 c7b5 a4b5 h7h6 c2c4 e8g8 c1d2 a7a5 h2h3 g7b2 d2a5 a8a5 e2b2 f8a8 e4e5 a5a1 f1a1 a8a1 b2a1 d6e5 f3e5 d7e5 a1e5 b6d6 e5d6 e7d6 f2f4 f7f5 g1h2 g8f7 h2g3 f7f6 h3h4 g6g5 h4h5 f6g7 b5b6 g7f6 g3f3 g5g4 f3e3 f6f7 e3d2 f7e7 d2e2 e7f6 e2d3 f6g7 d3c2 g7f6 c2b3 f6f7 b3c3 f7f6 c3c2 f6e7 c2b2 e7f7 b2b1 f7f6 b1a1 f6e7 a1a2 e7f6 a2b1 f6e7 b1a1 e7f7 a1b2 f7f6 b2a2 f6e7 g2g3 e7f6 a2b2 f6e7 b2c3 e7f6 c3d3 f6f7 d3c3");
 
         Assert.DoesNotThrow(() => engine.BestMove(new("go wtime 100000 btime 100000 winc 80 binc 80")));
+    }
+
+    [TestCase("8/8/4k3/3n1n2/5P2/8/3K4/8 b - - 0 12", null, new[] { "d5f4" },
+        Description = "NN vs P, where knights can't take the pawn")]
+    [TestCase("8/5R2/1n2RK2/8/8/7k/4r3/8 b - - 0 1", null, new[] { "e2e6" },
+        Description = "RR vs RB, where if the side with the bishop exchanges the rooks, they lose")]
+    public void PawnlessEndgames(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
+    {
+        TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
     }
 }

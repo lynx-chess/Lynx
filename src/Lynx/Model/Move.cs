@@ -327,38 +327,18 @@ public static class MoveExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsCastle(this Move move) => (move & 0xE00_0000) >> SpecialMoveFlagOffset >= (int)SpecialMoveType.ShortCastle;
 
-    /// <summary>
-    /// Typical format when humans write moves
-    /// </summary>
-    /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static string ToMoveString(this Move move)
-    {
-#pragma warning disable S3358 // Ternary operators should not be nested
-        return move.SpecialMoveFlag() switch
-        {
-            SpecialMoveType.ShortCastle => "0-0",
-            SpecialMoveType.LongCastle => "0-0-O",
-            _ =>
-                Constants.AsciiPieces[move.Piece()] +
-                Constants.Coordinates[move.SourceSquare()] +
-                (move.IsCapture() ? "x" : "") +
-                Constants.Coordinates[move.TargetSquare()] +
-                (move.PromotedPiece() == default ? "" : $"={Constants.AsciiPieces[move.PromotedPiece()]}") +
-                (move.IsEnPassant() ? "e.p." : "")
-        };
-#pragma warning restore S3358 // Ternary operators should not be nested
-    }
-
-    public static string ToEPDString(this Move move)
+    [Obsolete(
+        "Consider using the override that accepts a position for fully compliant EPD/PGN string representation of the move. " +
+        "This method be removed/renamed in future versions")]
+    internal static string ToEPDString(this Move move)
     {
         var piece = move.Piece();
 
 #pragma warning disable S3358 // Ternary operators should not be nested
         return move.SpecialMoveFlag() switch
         {
-            SpecialMoveType.ShortCastle => "0-0",
-            SpecialMoveType.LongCastle => "0-0-O",
+            SpecialMoveType.ShortCastle => "O-O",
+            SpecialMoveType.LongCastle => "O-O-O",
             _ =>
                 (piece == (int)Model.Piece.P || piece == (int)Model.Piece.p
                     ? (move.IsCapture()
@@ -368,7 +348,35 @@ public static class MoveExtensions
                 + (move.IsCapture() == default ? "" : "x")
                 + Constants.Coordinates[move.TargetSquare()]
                 + (move.PromotedPiece() == default ? "" : $"={char.ToUpperInvariant(Constants.AsciiPieces[move.PromotedPiece()])}")
-                + (move.IsEnPassant() == default ? "" : "e.p.")
+        };
+#pragma warning restore S3358 // Ternary operators should not be nested
+    }
+
+    /// <summary>
+    /// EPD representation of a valid move in a position
+    /// </summary>
+    /// <param name="move">A valid move for the given position</param>
+    /// <param name="position"></param>
+    /// <returns></returns>
+    public static string ToEPDString(this Move move, Position position)
+    {
+        var piece = move.Piece();
+
+#pragma warning disable S3358 // Ternary operators should not be nested
+        return move.SpecialMoveFlag() switch
+        {
+            SpecialMoveType.ShortCastle => "O-O",
+            SpecialMoveType.LongCastle => "O-O-O",
+            _ =>
+                (piece == (int)Model.Piece.P || piece == (int)Model.Piece.p
+                    ? (move.IsCapture()
+                        ? global::Lynx.Constants.FileString[global::Lynx.Constants.File[move.SourceSquare()]]  // exd5
+                        : "")    // d5
+                    : (char.ToUpperInvariant(global::Lynx.Constants.AsciiPieces[move.Piece()]))
+                        + DisambiguateMove(move, position))
+                + (move.IsCapture() == default ? "" : "x")
+                + Constants.Coordinates[move.TargetSquare()]
+                + (move.PromotedPiece() == default ? "" : $"={char.ToUpperInvariant(Constants.AsciiPieces[move.PromotedPiece()])}")
         };
 #pragma warning restore S3358 // Ternary operators should not be nested
     }
@@ -395,5 +403,60 @@ public static class MoveExtensions
         }
 
         return span[..^1].ToString();
+    }
+
+    /// <summary>
+    /// First file letter, then rank number and finally the whole square.
+    /// At least according to https://chess.stackexchange.com/a/1819
+    /// </summary>
+    /// <param name="move"></param>
+    /// <param name="position"></param>
+    /// <returns></returns>
+    private static string DisambiguateMove(Move move, Position position)
+    {
+        var piece = move.Piece();
+        var targetSquare = move.TargetSquare();
+
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves).ToArray();
+
+        var movesWithSameSimpleRepresentation = pseudoLegalMoves
+            .Where(m => m != move && m.Piece() == piece && m.TargetSquare() == targetSquare)
+            .Where(m =>
+            {
+                // If any illegal moves exist with the same simple representation there's no need to disambiguate
+                var gameState = position.MakeMove(m);
+                var isLegal = position.WasProduceByAValidMove();
+                position.UnmakeMove(m, gameState);
+
+                return isLegal;
+            })
+            .ToArray();
+
+        if (movesWithSameSimpleRepresentation.Length == 0)
+        {
+            return string.Empty;
+        }
+
+        int sourceSquare = move.SourceSquare();
+        var moveFile = Constants.File[sourceSquare];
+
+        var files = movesWithSameSimpleRepresentation.Select(m => Constants.File[m.SourceSquare()]);
+
+        if (files.Any(f => f == moveFile))
+        {
+            var moveRank = Constants.Rank[sourceSquare];
+
+            var ranks = movesWithSameSimpleRepresentation.Select(m => Constants.Rank[m.SourceSquare()]);
+
+            if (ranks.Any(r => r == moveRank))
+            {
+                return Constants.Coordinates[sourceSquare];
+            }
+
+            return (moveRank + 1).ToString();
+        }
+
+        return Constants.FileString[moveFile].ToString();
     }
 }
