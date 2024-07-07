@@ -67,6 +67,7 @@ public sealed partial class Engine
 
         _killerMoves[0][ply + 1] = 0;
         _killerMoves[1][ply + 1] = 0;
+        _killerMoves[2][ply + 1] = 0;
 
         bool isInCheck = position.IsInCheck();
         int staticEval = int.MaxValue, phase = int.MaxValue;
