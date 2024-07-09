@@ -189,25 +189,25 @@ public sealed class EngineSettings
 
     #region Evaluation
 
-    public static readonly TaperedEvaluationTerm IsolatedPawnPenalty = Utils.Pack(-19, -14);
+    public const TaperedEvaluationTerm IsolatedPawnPenalty = (-14 << 16) + (-19);
 
-    public static readonly TaperedEvaluationTerm OpenFileRookBonus = Utils.Pack(45, 6);
+    public const TaperedEvaluationTerm OpenFileRookBonus = (6 << 16) + 45;
 
-    public static readonly TaperedEvaluationTerm SemiOpenFileRookBonus = Utils.Pack(15, 8);
+    public const TaperedEvaluationTerm SemiOpenFileRookBonus = (8 << 16) + 15;
 
-    public static readonly TaperedEvaluationTerm QueenMobilityBonus = Utils.Pack(3, 8);
+    public const TaperedEvaluationTerm QueenMobilityBonus = (8 << 16) + 3;
 
-    public static readonly TaperedEvaluationTerm SemiOpenFileKingPenalty = Utils.Pack(-30, 18);
+    public const TaperedEvaluationTerm SemiOpenFileKingPenalty = (18 << 16) + (-30);
 
-    public static readonly TaperedEvaluationTerm OpenFileKingPenalty = Utils.Pack(-96, 15);
+    public const TaperedEvaluationTerm OpenFileKingPenalty = (15 << 16) + (-96);
 
-    public static readonly TaperedEvaluationTerm KingShieldBonus = Utils.Pack(23, -11);
+    public const TaperedEvaluationTerm KingShieldBonus = (-11 << 16) + 23;
 
-    public static readonly TaperedEvaluationTerm BishopPairBonus = Utils.Pack(30, 81);
+    public const TaperedEvaluationTerm BishopPairBonus = (81 << 16) + 30;
 
-    public static readonly TaperedEvaluationTerm PieceProtectedByPawnBonus = Utils.Pack(7, 11);
+    public const TaperedEvaluationTerm PieceProtectedByPawnBonus = (11 << 16) + 7;
 
-    public static readonly TaperedEvaluationTerm PieceAttackedByPawnPenalty = Utils.Pack(-45, -18);
+    public const TaperedEvaluationTerm PieceAttackedByPawnPenalty = (-18 << 16) + (-45);
 
     public static readonly TaperedEvaluationTermByRank PassedPawnBonus =
     [
