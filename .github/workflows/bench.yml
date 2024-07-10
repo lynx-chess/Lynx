@@ -37,6 +37,6 @@ jobs:
     - name: Build
       run: dotnet build -c Release
 
-    - name: Run bench ${{ github.event.inputs.depth }} on ${{ github.event.inputs.fen }}
+    - name: Run perft ${{ github.event.inputs.depth }} on ${{ github.event.inputs.fen }}
       run: dotnet run -c Release --no-build "bench"
       working-directory: ./src/Lynx.Cli
