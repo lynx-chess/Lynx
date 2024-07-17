@@ -91,7 +91,7 @@ public sealed partial class Engine
             }
 
             // History move or 0 if not found
-            return EvaluationConstants.BaseMoveScore + _quietHistory[move.Piece()][move.TargetSquare()];
+            return EvaluationConstants.BaseMoveScore + _quietHistory[QuietHistoryIndex(move.Piece(), move.TargetSquare())];
         }
 
         return EvaluationConstants.BaseMoveScore;
@@ -170,6 +170,22 @@ public sealed partial class Engine
         Array.Copy(_pVTable, source, _pVTable, target, moveCountToCopy);
         //PrintPvTable();
     }
+
+    /// <summary>
+    /// [12][64]
+    /// </summary>
+    /// <param name="piece"></param>
+    /// <param name="targetSquare"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int QuietHistoryIndex(int piece, int targetSquare)
+    {
+        const int pieceOffset = 64;
+
+        return (piece * pieceOffset)
+            + targetSquare;
+    }
+
 
     #region Debugging
 
@@ -338,10 +354,9 @@ $" {484,-3}                                                         {_pVTable[48
 
         for (int i = 0; i < 12; ++i)
         {
-            var tmp = _quietHistory[i];
             for (int j = 0; j < 64; ++j)
             {
-                var item = tmp[j];
+                var item = _quietHistory[QuietHistoryIndex(i, j)];
 
                 if (item > max)
                 {

@@ -24,7 +24,7 @@ public sealed partial class Engine
     /// <summary>
     /// 12x64
     /// </summary>
-    private readonly int[][] _quietHistory;
+    private readonly int[] _quietHistory;
 
     /// <summary>
     /// 12x64x12

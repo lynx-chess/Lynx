@@ -311,7 +311,7 @@ public sealed partial class Engine
                     }
 
                     // -= history/(maxHistory/2)
-                    reduction -= 2 * _quietHistory[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.History_MaxMoveValue;
+                    reduction -= 2 * _quietHistory[QuietHistoryIndex(move.Piece(), move.TargetSquare())] / Configuration.EngineSettings.History_MaxMoveValue;
 
                     // Don't allow LMR to drop into qsearch or increase the depth
                     // depth - 1 - depth +2 = 1, min depth we want
@@ -396,9 +396,10 @@ public sealed partial class Engine
                     // Doing this only in beta cutoffs (instead of when eval > alpha) was suggested by Sirius author
                     var piece = move.Piece();
                     var targetSquare = move.TargetSquare();
+                    var quietHistoryIndex = QuietHistoryIndex(piece, targetSquare);
 
-                    _quietHistory[piece][targetSquare] = ScoreHistoryMove(
-                        _quietHistory[piece][targetSquare],
+                    _quietHistory[quietHistoryIndex] = ScoreHistoryMove(
+                        _quietHistory[quietHistoryIndex],
                         EvaluationConstants.HistoryBonus[depth]);
 
                     // 🔍 Quiet history penalty/malus
@@ -411,9 +412,10 @@ public sealed partial class Engine
                         {
                             var visitedMovePiece = visitedMove.Piece();
                             var visitedMoveTargetSquare = visitedMove.TargetSquare();
+                            quietHistoryIndex = QuietHistoryIndex(visitedMovePiece, visitedMoveTargetSquare);
 
-                            _quietHistory[visitedMovePiece][visitedMoveTargetSquare] = ScoreHistoryMove(
-                                _quietHistory[visitedMovePiece][visitedMoveTargetSquare],
+                            _quietHistory[quietHistoryIndex] = ScoreHistoryMove(
+                                _quietHistory[quietHistoryIndex],
                                 -EvaluationConstants.HistoryBonus[depth]);
                         }
                     }
