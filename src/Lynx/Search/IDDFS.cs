@@ -148,7 +148,7 @@ public sealed partial class Engine
                     ? Utils.CalculateMateInX(bestEvaluation, bestEvaluationAbs)
                     : 0;
 
-                lastSearchResult = UpdateLastSearchResult(lastSearchResult, bestEvaluation, alpha, beta, depth, mate, bestEvaluationAbs);
+                lastSearchResult = UpdateLastSearchResult(lastSearchResult, bestEvaluation, alpha, beta, depth, mate);
 
                 _engineWriter.TryWrite(InfoCommand.SearchResultInfo(lastSearchResult));
             } while (StopSearchCondition(++depth, maxDepth, mate, softLimitTimeBound));
@@ -292,7 +292,7 @@ public sealed partial class Engine
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private SearchResult UpdateLastSearchResult(SearchResult? lastSearchResult,
-        int bestEvaluation, int alpha, int beta, int depth, int mate, int bestEvaluationAbs)
+        int bestEvaluation, int alpha, int beta, int depth, int mate)
     {
         var pvMoves = _pVTable.TakeWhile(m => m != default).ToList();
         var maxDepthReached = _maxDepthReached.LastOrDefault(item => item != default);
