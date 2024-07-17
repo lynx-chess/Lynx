@@ -231,6 +231,44 @@ public class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public GameState MakeMoveFast(Move move)
+    {
+        if (move.IsCapture()
+            || move.IsCastle()
+            || move.IsPromotion()
+            || move.IsEnPassant())
+        {
+            return MakeMove(move);
+        }
+
+        return MakeQuietMove(move);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public GameState MakeMoveFast(Move move, bool isNoisy)
+    {
+        if (isNoisy)
+        {
+            return MakeMove(move);
+        }
+
+        return MakeQuietMove(move);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void UnmakeMoveFast(Move move, GameState gameState)
+    {
+        if (gameState.Quiet)
+        {
+            UnmakeQuietMove(move, gameState);
+        }
+        else
+        {
+            UnmakeMove(move, gameState);
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public GameState MakeMove(Move move)
     {
         byte castleCopy = Castle;
@@ -364,6 +402,11 @@ public class Position
         //}
     }
 
+    /// <summary>
+    /// Special version of <see cref="MakeMove(Move)"/> for those cases when we know the capture piece isn't already included in the move
+    /// </summary>
+    /// <param name="move">Move that doesn't have the capture piece encoded</param>
+    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public GameState MakeMoveCalculatingCapturedPiece(ref Move move)
     {
@@ -508,6 +551,69 @@ public class Position
         //}
     }
 
+    /// <summary>
+    /// Special version of <see cref="MakeMove(Move)"/> optimized for quiet moves
+    /// </summary>
+    /// <param name="move">Not a capture, en-passant, promotion or castling move</param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public GameState MakeQuietMove(Move move)
+    {
+        Debug.Assert(!move.IsCapture(), "Quiet move expected");
+        Debug.Assert(!move.IsEnPassant(), "Quiet move expected");
+        Debug.Assert(!move.IsCastle(), "Quiet move expected");
+        Debug.Assert(!move.IsPromotion(), "Quiet move expected");
+        Debug.Assert(move.SpecialMoveFlag() == SpecialMoveType.None || move.SpecialMoveFlag() == SpecialMoveType.DoublePawnPush, "Quiet move expected");
+        Debug.Assert(move.CapturedPiece() == (int)Piece.None || move.CapturedPiece() == 0, "Quiet move expected");
+
+        byte castleCopy = Castle;
+        BoardSquare enpassantCopy = EnPassant;
+        long uniqueIdentifierCopy = UniqueIdentifier;
+
+        var oldSide = (int)Side;
+        var oppositeSide = Utils.OppositeSide(oldSide);
+
+        int sourceSquare = move.SourceSquare();
+        int targetSquare = move.TargetSquare();
+        int piece = move.Piece();
+
+        PieceBitBoards[piece].PopBit(sourceSquare);
+        OccupancyBitBoards[oldSide].PopBit(sourceSquare);
+
+        PieceBitBoards[piece].SetBit(targetSquare);
+        OccupancyBitBoards[oldSide].SetBit(targetSquare);
+
+        UniqueIdentifier ^=
+            ZobristTable.SideHash()
+            ^ ZobristTable.PieceHash(sourceSquare, piece)
+            ^ ZobristTable.PieceHash(targetSquare, piece)
+            ^ ZobristTable.EnPassantHash((int)EnPassant)            // We clear the existing enpassant square, if any
+            ^ ZobristTable.CastleHash(Castle);                      // We clear the existing castle rights
+
+        EnPassant = BoardSquare.noSquare;
+
+        if (move.SpecialMoveFlag() == SpecialMoveType.DoublePawnPush)
+        {
+            var pawnPush = +8 - (oldSide * 16);
+            var enPassantSquare = sourceSquare + pawnPush;
+            Utils.Assert(Constants.EnPassantCaptureSquares.Length > enPassantSquare && Constants.EnPassantCaptureSquares[enPassantSquare] != 0, $"Unexpected en passant square : {(BoardSquare)enPassantSquare}");
+
+            EnPassant = (BoardSquare)enPassantSquare;
+            UniqueIdentifier ^= ZobristTable.EnPassantHash(enPassantSquare);
+        }
+
+        Side = (Side)oppositeSide;
+        OccupancyBitBoards[2] = OccupancyBitBoards[1] | OccupancyBitBoards[0];
+
+        // Updating castling rights
+        Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
+        Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
+
+        UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
+
+        return new GameState(uniqueIdentifierCopy, enpassantCopy, isQuiet: true, castleCopy);
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void UnmakeMove(Move move, GameState gameState)
     {
@@ -598,6 +704,43 @@ public class Position
         UniqueIdentifier = gameState.ZobristKey;
     }
 
+    /// <summary>
+    /// Special case of <see cref="UnmakeMove(Move)"/> optimized quiet moves
+    /// </summary>
+    /// <param name="move">Not a capture, en-passant, promotion or castling move</param>
+    /// /// <param name="gameState"></param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void UnmakeQuietMove(Move move, GameState gameState)
+    {
+        Debug.Assert(!move.IsCapture(), "Quiet move expected");
+        Debug.Assert(!move.IsEnPassant(), "Quiet move expected");
+        Debug.Assert(!move.IsCastle(), "Quiet move expected");
+        Debug.Assert(!move.IsPromotion(), "Quiet move expected");
+        Debug.Assert(move.SpecialMoveFlag() == SpecialMoveType.None || move.SpecialMoveFlag() == SpecialMoveType.DoublePawnPush, "Quiet move expected");
+        Debug.Assert(move.CapturedPiece() == (int)Piece.None || move.CapturedPiece() == 0, "Quiet move expected");
+
+        var oppositeSide = (int)Side;
+        var side = Utils.OppositeSide(oppositeSide);
+        Side = (Side)side;
+
+        int sourceSquare = move.SourceSquare();
+        int targetSquare = move.TargetSquare();
+        int piece = move.Piece();
+
+        PieceBitBoards[piece].PopBit(targetSquare);
+        OccupancyBitBoards[side].PopBit(targetSquare);
+
+        PieceBitBoards[piece].SetBit(sourceSquare);
+        OccupancyBitBoards[side].SetBit(sourceSquare);
+
+        OccupancyBitBoards[2] = OccupancyBitBoards[1] | OccupancyBitBoards[0];
+
+        // Updating saved values
+        Castle = gameState.Castle;
+        EnPassant = gameState.EnPassant;
+        UniqueIdentifier = gameState.ZobristKey;
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public GameState MakeNullMove()
     {
@@ -614,7 +757,7 @@ public class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void UnMakeNullMove(GameState gameState)
+    public void UnmakeNullMove(GameState gameState)
     {
         Side = (Side)Utils.OppositeSide(Side);
         EnPassant = gameState.EnPassant;

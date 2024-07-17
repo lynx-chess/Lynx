@@ -40,16 +40,24 @@ public static class Perft
     {
         if (depth != 0)
         {
-            Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-            foreach (var move in MoveGenerator.GenerateAllMoves(position, moves))
-            {
-                var state = position.MakeMove(move);
+            Move[] moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+            var pseudoLegalMovesStaged = MoveGenerator.GenerateAllMovesStaged(position, moves);
+            var enumerator = pseudoLegalMovesStaged.GetEnumerator();
 
-                if (position.WasProduceByAValidMove())
+            bool isCaptureStage = true;
+            while (enumerator.MoveNext())
+            {
+                foreach (var move in moves[enumerator.Current])
                 {
-                    nodes = ResultsImpl(position, depth - 1, nodes);
+                    var state = position.MakeMoveFast(move, isCaptureStage);
+
+                    if (position.WasProduceByAValidMove())
+                    {
+                        nodes = ResultsImpl(position, depth - 1, nodes);
+                    }
+                    position.UnmakeMoveFast(move, state);
                 }
-                position.UnmakeMove(move, state);
+                isCaptureStage = false;
             }
 
             return nodes;
@@ -65,7 +73,7 @@ public static class Perft
             Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
             foreach (var move in MoveGenerator.GenerateAllMoves(position, moves))
             {
-                var state = position.MakeMove(move);
+                var state = position.MakeMoveFast(move);
 
                 if (position.WasProduceByAValidMove())
                 {
@@ -75,7 +83,7 @@ public static class Perft
                     write($"{move.UCIString()}\t\t{nodes - accumulatedNodes}");
                 }
 
-                position.UnmakeMove(move, state);
+                position.UnmakeMoveFast(move, state);
             }
 
             write(string.Empty);
