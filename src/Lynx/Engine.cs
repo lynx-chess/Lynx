@@ -60,19 +60,10 @@ public sealed partial class Engine
 
         // Update ResetEngine() after any changes here
         _quietHistory = new int[12][];
+        _captureHistory = new int[12 * 64 * 12];
         for (int i = 0; i < _quietHistory.Length; ++i)
         {
             _quietHistory[i] = new int[64];
-        }
-
-        _captureHistory = new int[12][][];
-        for (int i = 0; i < 12; ++i)
-        {
-            _captureHistory[i] = new int[64][];
-            for (var j = 0; j < 64; ++j)
-            {
-                _captureHistory[i][j] = new int[12];
-            }
         }
 
         InitializeTT();
@@ -119,11 +110,8 @@ public sealed partial class Engine
         for (int i = 0; i < 12; ++i)
         {
             Array.Clear(_quietHistory[i]);
-            for (var j = 0; j < 64; ++j)
-            {
-                Array.Clear(_captureHistory[i][j]);
-            }
         }
+        Array.Clear(_captureHistory);
 
         // No need to clear killer move or pv table because they're cleared on every search (IDDFS)
     }

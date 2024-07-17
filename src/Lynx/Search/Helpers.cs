@@ -64,7 +64,7 @@ public sealed partial class Engine
             return baseCaptureScore
                 + EvaluationConstants.MostValueableVictimLeastValuableAttacker[piece][capturedPiece]
                 //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
-                + _captureHistory[piece][move.TargetSquare()][capturedPiece];
+                + _captureHistory[CaptureHistoryIndex(piece, move.TargetSquare(), capturedPiece)];
         }
 
         if (isPromotion)
@@ -169,6 +169,24 @@ public sealed partial class Engine
         //PrintPvTable(target: target, source: source, movesToCopy: moveCountToCopy);
         Array.Copy(_pVTable, source, _pVTable, target, moveCountToCopy);
         //PrintPvTable();
+    }
+
+    /// <summary>
+    /// [12][64][12]
+    /// </summary>
+    /// <param name="piece"></param>
+    /// <param name="targetSquare"></param>
+    /// <param name="capturedPiece"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int CaptureHistoryIndex(int piece, int targetSquare, int capturedPiece)
+    {
+        const int pieceOffset = 64 * 12;
+        const int targetSquareOffset = 12;
+
+        return (piece * pieceOffset)
+            + (targetSquare * targetSquareOffset)
+            + capturedPiece;
     }
 
     #region Debugging

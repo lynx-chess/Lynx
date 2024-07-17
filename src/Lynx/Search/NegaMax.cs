@@ -368,8 +368,9 @@ public sealed partial class Engine
                     var targetSquare = move.TargetSquare();
                     var capturedPiece = move.CapturedPiece();
 
-                    _captureHistory[piece][targetSquare][capturedPiece] = ScoreHistoryMove(
-                        _captureHistory[piece][targetSquare][capturedPiece],
+                    var captureHistoryIndex = CaptureHistoryIndex(piece, targetSquare, capturedPiece);
+                    _captureHistory[captureHistoryIndex] = ScoreHistoryMove(
+                        _captureHistory[captureHistoryIndex],
                         EvaluationConstants.HistoryBonus[depth]);
 
                     // 🔍 Capture history penalty/malus
@@ -384,8 +385,10 @@ public sealed partial class Engine
                             var visitedMoveTargetSquare = visitedMove.TargetSquare();
                             var visitedMoveCapturedPiece = visitedMove.CapturedPiece();
 
-                            _captureHistory[visitedMovePiece][visitedMoveTargetSquare][visitedMoveCapturedPiece] = ScoreHistoryMove(
-                                _captureHistory[visitedMovePiece][visitedMoveTargetSquare][visitedMoveCapturedPiece],
+                            captureHistoryIndex = CaptureHistoryIndex(visitedMovePiece, visitedMoveTargetSquare, visitedMoveCapturedPiece);
+
+                            _captureHistory[captureHistoryIndex] = ScoreHistoryMove(
+                                _captureHistory[captureHistoryIndex],
                                 -EvaluationConstants.HistoryBonus[depth]);
                         }
                     }

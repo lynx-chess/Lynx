@@ -29,7 +29,7 @@ public sealed partial class Engine
     /// <summary>
     /// 12x64x12
     /// </summary>
-    private readonly int[][][] _captureHistory;
+    private readonly int[] _captureHistory;
 
     private readonly int[] _maxDepthReached = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
     private TranspositionTable _tt = [];
