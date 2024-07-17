@@ -39,7 +39,7 @@ public sealed partial class Engine
     /// ply 0 -> Continuation move history
     /// ply 1 -> Followup move history
     /// </summary>
-    private readonly int[][]/*[]*/[][] _continuationHistory;
+    private readonly int[] _continuationHistory;
 
     /// <summary>
     /// <see cref="Configuration.EngineSettings.MaxDepth"/>x12x64,
