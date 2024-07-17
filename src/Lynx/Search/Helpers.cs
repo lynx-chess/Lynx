@@ -110,7 +110,7 @@ public sealed partial class Engine
                 //}
                 return EvaluationConstants.BaseMoveScore
                     + _quietHistory[move.Piece()][move.TargetSquare()]
-                    + _continuationHistory[move.Piece()][move.TargetSquare()]/*[0]*/[previousMove.Piece()][previousMove.TargetSquare()];
+                    + _continuationHistory[move.Piece()][move.TargetSquare()][0][previousMove.Piece()][previousMove.TargetSquare()];
             }
 
             // History move or 0 if not found

@@ -3,6 +3,7 @@ using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 using System.Threading.Channels;
 
 namespace Lynx;
@@ -61,28 +62,28 @@ public sealed partial class Engine
         // Update ResetEngine() after any changes here
         _quietHistory = new int[12][];
         _captureHistory = new int[12][][];
-        _continuationHistory = new int[12][]/*[]*/[][];
+        _continuationHistory = new int[12][][][][];
 
         for (int i = 0; i < 12; ++i)                                            // 12
         {
             _quietHistory[i] = new int[64];
             _captureHistory[i] = new int[64][];
-            _continuationHistory[i] = new int[64]/*[]*/[][];
+            _continuationHistory[i] = new int[64][][][];
 
             for (var j = 0; j < 64; ++j)                                        // 64
             {
                 _captureHistory[i][j] = new int[12];                            // 12
-                //_continuationHistory[i][j] = new int[2][][];
+                _continuationHistory[i][j] = new int[2][][];
 
-                //for (int contPly = 0; contPly < 2; ++contPly)                       // 2
-                //{
-                _continuationHistory[i][j]/*[contPly]*/ = new int[12][];
-
-                for (int k = 0; k < 12; ++k)                                    // 12
+                for (int contPly = 0; contPly < EvaluationConstants.ContinuationHistoryPlyCount; ++contPly)                       // 2
                 {
-                    _continuationHistory[i][j]/*[contPly]*/[k] = new int[64];       // 64
+                    _continuationHistory[i][j][contPly] = new int[12][];
+
+                    for (int k = 0; k < 12; ++k)                                    // 12
+                    {
+                        _continuationHistory[i][j][contPly][k] = new int[64];       // 64
+                    }
                 }
-                //}
             }
         }
 
@@ -134,14 +135,13 @@ public sealed partial class Engine
             {
                 Array.Clear(_captureHistory[i][j]);
 
-                //for (int contPly = 0; contPly < 2; ++contPly)
-                //{
-
-                for (int k = 0; k < 12; ++k)
+                for (int contPly = 0; contPly < EvaluationConstants.ContinuationHistoryPlyCount; ++contPly)
                 {
-                    Array.Clear(_continuationHistory[i][j]/*[contPly]*/[k]);
+                    for (int k = 0; k < 12; ++k)
+                    {
+                        Array.Clear(_continuationHistory[i][j][contPly][k]);
+                    }
                 }
-                //}
             }
         }
 
