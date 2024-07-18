@@ -408,8 +408,10 @@ public sealed partial class Engine
                     var previousMovePiece = previousMove.Piece();
                     var previousTargetSquare = previousMove.TargetSquare();
 
-                    _continuationHistory[piece][targetSquare]/*[0]*/[previousMovePiece][previousTargetSquare] = ScoreHistoryMove(
-                        _continuationHistory[piece][targetSquare]/*[0]*/[previousMovePiece][previousTargetSquare],
+                    var continuationHistoryIndex = ContinuationHistoryIndex(piece, targetSquare, previousMovePiece, previousTargetSquare, 0);
+
+                    _continuationHistory[continuationHistoryIndex] = ScoreHistoryMove(
+                        _continuationHistory[continuationHistoryIndex],
                         EvaluationConstants.HistoryBonus[depth]);
 
                     //    var previousPreviousMove = Game.MoveStack[ply - 2];
@@ -436,8 +438,10 @@ public sealed partial class Engine
                                 -EvaluationConstants.HistoryBonus[depth]);
 
                             // 🔍 Continuation history penalty / malus
-                            _continuationHistory[visitedMovePiece][visitedMoveTargetSquare]/*[0]*/[previousMovePiece][previousTargetSquare] = ScoreHistoryMove(
-                                _continuationHistory[visitedMovePiece][visitedMoveTargetSquare]/*[0]*/[previousMovePiece][previousTargetSquare],
+                            continuationHistoryIndex = ContinuationHistoryIndex(visitedMovePiece, visitedMoveTargetSquare, previousMovePiece, previousTargetSquare, 0);
+
+                            _continuationHistory[continuationHistoryIndex] = ScoreHistoryMove(
+                                _continuationHistory[continuationHistoryIndex],
                                 -EvaluationConstants.HistoryBonus[depth]);
                         }
                     }

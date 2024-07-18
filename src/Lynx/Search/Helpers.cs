@@ -110,7 +110,7 @@ public sealed partial class Engine
                 //}
                 return EvaluationConstants.BaseMoveScore
                     + _quietHistory[move.Piece()][move.TargetSquare()]
-                    + _continuationHistory[move.Piece()][move.TargetSquare()]/*[0]*/[previousMove.Piece()][previousMove.TargetSquare()];
+                    + _continuationHistory[ContinuationHistoryIndex(move.Piece(), move.TargetSquare(), previousMove.Piece(), previousMove.TargetSquare(), 0)];
             }
 
             // History move or 0 if not found
@@ -193,6 +193,31 @@ public sealed partial class Engine
         //PrintPvTable(target: target, source: source, movesToCopy: moveCountToCopy);
         Array.Copy(_pVTable, source, _pVTable, target, moveCountToCopy);
         //PrintPvTable();
+    }
+
+
+    /// <summary>
+    /// [12][64][12][64][ContinuationHistoryPlyCount]
+    /// </summary>
+    /// <param name="piece"></param>
+    /// <param name="targetSquare"></param>
+    /// <param name="previousMovePiece"></param>
+    /// <param name="previousMoveTargetSquare"></param>
+    /// <param name="ply"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int ContinuationHistoryIndex(int piece, int targetSquare, int previousMovePiece, int previousMoveTargetSquare, int ply)
+    {
+        const int pieceOffset = 64 * 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount;
+        const int targetSquareOffset = 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount;
+        const int previousMovePieceOffset = 64 * EvaluationConstants.ContinuationHistoryPlyCount;
+        const int previousMoveTargetSquareOffset = EvaluationConstants.ContinuationHistoryPlyCount;
+
+        return (piece * pieceOffset)
+            + (targetSquare * targetSquareOffset)
+            + (previousMovePiece * previousMovePieceOffset)
+            + (previousMoveTargetSquare * previousMoveTargetSquareOffset)
+            + ply;
     }
 
     #region Debugging
