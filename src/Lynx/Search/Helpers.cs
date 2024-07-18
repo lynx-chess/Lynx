@@ -196,9 +196,8 @@ public sealed partial class Engine
     }
 
 
-
     /// <summary>
-    /// [12][64][12][64][1]
+    /// [12][64][12][64][ContinuationHistoryPlyCount]
     /// </summary>
     /// <param name="piece"></param>
     /// <param name="targetSquare"></param>
