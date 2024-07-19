@@ -92,25 +92,22 @@ public sealed partial class Engine
                 return EvaluationConstants.ThirdKillerMoveValue;
             }
 
-            // Counter move history
             if (ply >= 1)
             {
                 var previousMove = Game.PopFromMoveStack(ply - 1);
                 Debug.Assert(previousMove != 0);
+                var previousMoveTargetSquare = previousMove.TargetSquare();
 
-                // Counter move and follow up history
-                //if (ply >= 2)
-                //{
-                //    var previousPreviousMove = Game.MoveStack[ply - 2];
+                // Countermove
+                if (_counterMoves[previousMove.SourceSquare()][previousMoveTargetSquare] == move)
+                {
+                    return EvaluationConstants.CounterMoveValue;
+                }
 
-                //    return EvaluationConstants.BaseMoveScore
-                //        + _quietHistory[move.Piece()][move.TargetSquare()]
-                //        + _continuationHistory[move.Piece()][move.TargetSquare()][0][previousMove.Piece()][previousMove.TargetSquare()]
-                //        + _continuationHistory[move.Piece()][move.TargetSquare()][1][previousPreviousMove.Piece()][previousPreviousMove.TargetSquare()];
-                //}
+                // Counter move history
                 return EvaluationConstants.BaseMoveScore
                     + _quietHistory[move.Piece()][move.TargetSquare()]
-                    + _continuationHistory[ContinuationHistoryIndex(move.Piece(), move.TargetSquare(), previousMove.Piece(), previousMove.TargetSquare(), 0)];
+                    + _continuationHistory[ContinuationHistoryIndex(move.Piece(), move.TargetSquare(), previousMove.Piece(), previousMoveTargetSquare, 0)];
             }
 
             // History move or 0 if not found

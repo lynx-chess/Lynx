@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using NLog.Filters;
 
 namespace Lynx;
 
@@ -446,9 +447,9 @@ public sealed partial class Engine
                         }
                     }
 
-                    // 🔍 Killer moves
                     if (move.PromotedPiece() == default && move != _killerMoves[0][ply])
                     {
+                        // 🔍 Killer moves
                         if (move != _killerMoves[1][ply])
                         {
                             _killerMoves[2][ply] = _killerMoves[1][ply];
@@ -456,6 +457,9 @@ public sealed partial class Engine
 
                         _killerMoves[1][ply] = _killerMoves[0][ply];
                         _killerMoves[0][ply] = move;
+
+                        // 🔍 Countermoves
+                        _counterMoves[previousMove.SourceSquare()][previousTargetSquare] = move;
                     }
                 }
 

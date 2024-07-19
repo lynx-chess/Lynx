@@ -75,6 +75,13 @@ public sealed partial class Engine
             }
         }
 
+        _counterMoves = new int[64][];
+
+        for (int i = 0; i < 64; ++i)
+        {
+            _counterMoves[i] = new int[64];
+        }
+
         InitializeTT();
 
 #if !DEBUG

@@ -22,6 +22,11 @@ public sealed partial class Engine
     ];
 
     /// <summary>
+    /// 64x64
+    /// </summary>
+    private readonly int[][] _counterMoves;
+
+    /// <summary>
     /// 12x64
     /// piece x target square
     /// </summary>
