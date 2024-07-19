@@ -134,6 +134,11 @@ public sealed partial class Engine
 
         Array.Clear(_continuationHistory);
 
+        for (int i = 0; i < _counterMoves.Length; ++i)
+        {
+            Array.Clear(_counterMoves[i]);
+        }
+
         // No need to clear killer move or pv table because they're cleared on every search (IDDFS)
     }
 
