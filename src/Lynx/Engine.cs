@@ -63,23 +63,18 @@ public sealed partial class Engine
         _quietHistory = new int[12][];
         _captureHistory = new int[12][][];
         _continuationHistory = new int[12 * 64 * 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount];
+        _counterMoves = new int[12][];
 
         for (int i = 0; i < 12; ++i)                                            // 12
         {
             _quietHistory[i] = new int[64];
             _captureHistory[i] = new int[64][];
+            _counterMoves[i] = new int[64];
 
             for (var j = 0; j < 64; ++j)                                        // 64
             {
                 _captureHistory[i][j] = new int[12];                            // 12
             }
-        }
-
-        _counterMoves = new int[64][];
-
-        for (int i = 0; i < 64; ++i)
-        {
-            _counterMoves[i] = new int[64];
         }
 
         InitializeTT();
