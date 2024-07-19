@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using System.Diagnostics;
 
 namespace Lynx;
 
@@ -404,23 +405,22 @@ public sealed partial class Engine
 
                     // 🔍 Continuation history
                     // - Counter move history (continuation history, ply - 1)
-                    var previousMove = Game.PopFromMoveStack(ply - 1);
-                    var previousMovePiece = previousMove.Piece();
-                    var previousTargetSquare = previousMove.TargetSquare();
+                    int continuationHistoryIndex;
+                    int previousMovePiece = -1;
+                    int previousTargetSquare = -1;
+                    if (!isRoot)
+                    {
+                        var previousMove = Game.PopFromMoveStack(ply - 1);
+                        Debug.Assert(previousMove != 0);
+                        previousMovePiece = previousMove.Piece();
+                        previousTargetSquare = previousMove.TargetSquare();
 
-                    var continuationHistoryIndex = ContinuationHistoryIndex(piece, targetSquare, previousMovePiece, previousTargetSquare, 0);
+                        continuationHistoryIndex = ContinuationHistoryIndex(piece, targetSquare, previousMovePiece, previousTargetSquare, 0);
 
-                    _continuationHistory[continuationHistoryIndex] = ScoreHistoryMove(
-                        _continuationHistory[continuationHistoryIndex],
-                        EvaluationConstants.HistoryBonus[depth]);
-
-                    //    var previousPreviousMove = Game.MoveStack[ply - 2];
-                    //    var previousPreviousMovePiece = previousPreviousMove.Piece();
-                    //    var previousPreviousMoveTargetSquare = previousPreviousMove.TargetSquare();
-
-                    //    _continuationHistory[piece][targetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare] = ScoreHistoryMove(
-                    //        _continuationHistory[piece][targetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare],
-                    //        EvaluationConstants.HistoryBonus[depth]);
+                        _continuationHistory[continuationHistoryIndex] = ScoreHistoryMove(
+                            _continuationHistory[continuationHistoryIndex],
+                            EvaluationConstants.HistoryBonus[depth]);
+                    }
 
                     for (int i = 0; i < visitedMovesCounter - 1; ++i)
                     {
@@ -438,11 +438,14 @@ public sealed partial class Engine
                                 -EvaluationConstants.HistoryBonus[depth]);
 
                             // 🔍 Continuation history penalty / malus
-                            continuationHistoryIndex = ContinuationHistoryIndex(visitedMovePiece, visitedMoveTargetSquare, previousMovePiece, previousTargetSquare, 0);
+                            if (!isRoot)
+                            {
+                                continuationHistoryIndex = ContinuationHistoryIndex(visitedMovePiece, visitedMoveTargetSquare, previousMovePiece, previousTargetSquare, 0);
 
-                            _continuationHistory[continuationHistoryIndex] = ScoreHistoryMove(
-                                _continuationHistory[continuationHistoryIndex],
-                                -EvaluationConstants.HistoryBonus[depth]);
+                                _continuationHistory[continuationHistoryIndex] = ScoreHistoryMove(
+                                    _continuationHistory[continuationHistoryIndex],
+                                    -EvaluationConstants.HistoryBonus[depth]);
+                            }
                         }
                     }
 
