@@ -23,13 +23,23 @@ public sealed partial class Engine
 
     /// <summary>
     /// 12x64
+    /// piece x target square
     /// </summary>
     private readonly int[][] _quietHistory;
 
     /// <summary>
-    /// 12x64x12
+    /// 12x64x12,
+    /// piece x target square x captured piece
     /// </summary>
     private readonly int[][][] _captureHistory;
+
+    /// <summary>
+    /// 12 x 64 x 12 x 64 x ContinuationHistoryPlyCount
+    /// piece x target square x last piece x last target square x plies back
+    /// ply 0 -> Continuation move history
+    /// ply 1 -> Follow-up move history
+    /// </summary>
+    private readonly int[] _continuationHistory;
 
     private readonly int[] _maxDepthReached = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
     private TranspositionTable _tt = [];

@@ -13,6 +13,11 @@ public sealed class Game
 
     public List<long> PositionHashHistory { get; }
 
+    /// <summary>
+    /// Indexed by ply
+    /// </summary>
+    private readonly Move[] _moveStack;
+
     public int HalfMovesWithoutCaptureOrPawnMove { get; set; }
 
     public Position CurrentPosition { get; private set; }
@@ -36,6 +41,7 @@ public sealed class Game
 
         PositionHashHistory = new(Constants.MaxNumberMovesInAGame) { CurrentPosition.UniqueIdentifier };
         HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
+        _moveStack = new Move[1024];
 
 #if DEBUG
         MoveHistory = new(Constants.MaxNumberMovesInAGame);
@@ -211,4 +217,10 @@ public sealed class Game
     public void ResetCurrentPositionToBeforeSearchState() => CurrentPosition = new(PositionBeforeLastSearch);
 
     public void UpdateInitialPosition() => PositionBeforeLastSearch = new(CurrentPosition);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void PushToMoveStack(int n, Move move) => _moveStack[n + EvaluationConstants.ContinuationHistoryPlyCount] = move;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public Move PopFromMoveStack(int n) => _moveStack[n + EvaluationConstants.ContinuationHistoryPlyCount];
 }

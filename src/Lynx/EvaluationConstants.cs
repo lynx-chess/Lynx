@@ -379,6 +379,8 @@ internal static readonly short[] EndGameKingTable =
     /// Evaluation to be returned when there's one single legal move
     /// </summary>
     public const int SingleMoveEvaluation = 200;
+
+    public const int ContinuationHistoryPlyCount = 1;
 }
 
 #pragma warning restore IDE1006 // Naming Styles
