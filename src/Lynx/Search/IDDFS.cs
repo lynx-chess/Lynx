@@ -14,7 +14,7 @@ public sealed partial class Engine
     /// <summary>
     /// (<see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/> x 3
     /// </summary>
-    private readonly int[][] _killerMoves;
+    private readonly int[] _killerMoves;
 
     /// <summary>
     /// 12x64
@@ -85,10 +85,7 @@ public sealed partial class Engine
                 return onlyOneLegalMoveSearchResult;
             }
 
-            for (int i = 0; i < _killerMoves.Length; ++i)
-            {
-                Array.Clear(_killerMoves[i]);
-            }
+            Array.Clear(_killerMoves);
             // Not clearing _quietHistory on purpose
             // Not clearing _captureHistory on purpose
 

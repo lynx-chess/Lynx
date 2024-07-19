@@ -447,16 +447,17 @@ public sealed partial class Engine
                     }
 
                     // 🔍 Killer moves
-                    var thisPlyKillerMoves = _killerMoves[ply];
-                    if (move.PromotedPiece() == default && move != thisPlyKillerMoves[0])
+                    var thisPlyKillerMovesBaseIndex = ply * 3;
+                    var firstKillerMove = _killerMoves[thisPlyKillerMovesBaseIndex];
+                    if (move.PromotedPiece() == default && move != firstKillerMove)
                     {
-                        if (move != thisPlyKillerMoves[1])
+                        if (move != _killerMoves[thisPlyKillerMovesBaseIndex + 1])
                         {
-                            thisPlyKillerMoves[2] = thisPlyKillerMoves[1];
+                            _killerMoves[thisPlyKillerMovesBaseIndex + 2] = _killerMoves[thisPlyKillerMovesBaseIndex + 1];
                         }
 
-                        thisPlyKillerMoves[1] = thisPlyKillerMoves[0];
-                        thisPlyKillerMoves[0] = move;
+                        _killerMoves[thisPlyKillerMovesBaseIndex + 1] = firstKillerMove;
+                        _killerMoves[thisPlyKillerMovesBaseIndex + 0] = move;
                     }
                 }
 

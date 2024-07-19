@@ -74,22 +74,22 @@ public sealed partial class Engine
 
         if (isNotQSearch)
         {
-            var thisPlyKillerMoves = _killerMoves[ply];
+            var thisPlyKillerMovesBaseIndex = ply * 3;
 
             // 1st killer move
-            if (thisPlyKillerMoves[0] == move)
+            if (_killerMoves[thisPlyKillerMovesBaseIndex] == move)
             {
                 return EvaluationConstants.FirstKillerMoveValue;
             }
 
             // 2nd killer move
-            if (thisPlyKillerMoves[1] == move)
+            if (_killerMoves[thisPlyKillerMovesBaseIndex + 1] == move)
             {
                 return EvaluationConstants.SecondKillerMoveValue;
             }
 
             // 3rd killer move
-            if (thisPlyKillerMoves[2] == move)
+            if (_killerMoves[thisPlyKillerMovesBaseIndex + 2] == move)
             {
                 return EvaluationConstants.ThirdKillerMoveValue;
             }
