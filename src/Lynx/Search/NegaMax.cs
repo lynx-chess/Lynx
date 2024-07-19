@@ -403,24 +403,27 @@ public sealed partial class Engine
                         EvaluationConstants.HistoryBonus[depth]);
 
                     // 🔍 Continuation history
-                    // - Counter move history (continuation history, ply - 1)
+                    // - Countermove history (continuation history, ply - 1)
                     var previousMove = Game.PopFromMoveStack(ply - 1);
                     var previousMovePiece = previousMove.Piece();
                     var previousTargetSquare = previousMove.TargetSquare();
 
-                    var continuationHistoryIndex = ContinuationHistoryIndex(piece, targetSquare, previousMovePiece, previousTargetSquare, 0);
+                    var counterMoveHistoryIndex = ContinuationHistoryIndex(piece, targetSquare, previousMovePiece, previousTargetSquare, 0);
 
-                    _continuationHistory[continuationHistoryIndex] = ScoreHistoryMove(
-                        _continuationHistory[continuationHistoryIndex],
+                    _continuationHistory[counterMoveHistoryIndex] = ScoreHistoryMove(
+                        _continuationHistory[counterMoveHistoryIndex],
                         EvaluationConstants.HistoryBonus[depth]);
 
-                    //    var previousPreviousMove = Game.MoveStack[ply - 2];
-                    //    var previousPreviousMovePiece = previousPreviousMove.Piece();
-                    //    var previousPreviousMoveTargetSquare = previousPreviousMove.TargetSquare();
+                    // - Follow-up move history (continuation history, ply - 2)
+                    var previousPreviousMove = Game.PopFromMoveStack(ply - 2);
+                    var previousPreviousMovePiece = previousPreviousMove.Piece();
+                    var previousPreviousTargetSquare = previousPreviousMove.TargetSquare();
 
-                    //    _continuationHistory[piece][targetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare] = ScoreHistoryMove(
-                    //        _continuationHistory[piece][targetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare],
-                    //        EvaluationConstants.HistoryBonus[depth]);
+                    var followUpHistoryIndex = ContinuationHistoryIndex(piece, targetSquare, previousPreviousMovePiece, previousPreviousTargetSquare, 1);
+
+                    _continuationHistory[followUpHistoryIndex] = ScoreHistoryMove(
+                        _continuationHistory[followUpHistoryIndex],
+                        EvaluationConstants.HistoryBonus[depth]);
 
                     for (int i = 0; i < visitedMovesCounter - 1; ++i)
                     {
@@ -438,10 +441,18 @@ public sealed partial class Engine
                                 -EvaluationConstants.HistoryBonus[depth]);
 
                             // 🔍 Continuation history penalty / malus
-                            continuationHistoryIndex = ContinuationHistoryIndex(visitedMovePiece, visitedMoveTargetSquare, previousMovePiece, previousTargetSquare, 0);
+                            // - Countermove history, ply - 1
+                            counterMoveHistoryIndex = ContinuationHistoryIndex(visitedMovePiece, visitedMoveTargetSquare, previousMovePiece, previousTargetSquare, 0);
 
-                            _continuationHistory[continuationHistoryIndex] = ScoreHistoryMove(
-                                _continuationHistory[continuationHistoryIndex],
+                            _continuationHistory[counterMoveHistoryIndex] = ScoreHistoryMove(
+                                _continuationHistory[counterMoveHistoryIndex],
+                                -EvaluationConstants.HistoryBonus[depth]);
+
+                            // - Follow-up history, ply - 1
+                            followUpHistoryIndex = ContinuationHistoryIndex(visitedMovePiece, visitedMoveTargetSquare, previousPreviousMovePiece, previousPreviousTargetSquare, 1);
+
+                            _continuationHistory[followUpHistoryIndex] = ScoreHistoryMove(
+                                _continuationHistory[followUpHistoryIndex],
                                 -EvaluationConstants.HistoryBonus[depth]);
                         }
                     }

@@ -380,7 +380,7 @@ internal static readonly short[] EndGameKingTable =
     /// </summary>
     public const int SingleMoveEvaluation = 200;
 
-    public const int ContinuationHistoryPlyCount = 1;
+    public const int ContinuationHistoryPlyCount = 2;
 }
 
 #pragma warning restore IDE1006 // Naming Styles

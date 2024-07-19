@@ -36,7 +36,7 @@ public sealed partial class Engine
     /// <summary>
     /// 12 x 64 x 12 x 64 x ContinuationHistoryPlyCount
     /// piece x target square x last piece x last target square x plies back
-    /// ply 0 -> Continuation move history
+    /// ply 0 -> Countermove history
     /// ply 1 -> Follow-up move history
     /// </summary>
     private readonly int[] _continuationHistory;

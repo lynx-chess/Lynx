@@ -99,15 +99,19 @@ public sealed partial class Engine
                 Debug.Assert(previousMove != 0);
 
                 // Counter move and follow up history
-                //if (ply >= 2)
-                //{
-                //    var previousPreviousMove = Game.MoveStack[ply - 2];
+                if (ply >= 2)
+                {
+                    var piece = move.Piece();
+                    var targetSquare = move.TargetSquare();
+                    var previousPreviousMove = Game.PopFromMoveStack(ply - 2);
+                    Debug.Assert(previousPreviousMove != 0);
 
-                //    return EvaluationConstants.BaseMoveScore
-                //        + _quietHistory[move.Piece()][move.TargetSquare()]
-                //        + _continuationHistory[move.Piece()][move.TargetSquare()][0][previousMove.Piece()][previousMove.TargetSquare()]
-                //        + _continuationHistory[move.Piece()][move.TargetSquare()][1][previousPreviousMove.Piece()][previousPreviousMove.TargetSquare()];
-                //}
+                    return EvaluationConstants.BaseMoveScore
+                        + _quietHistory[move.Piece()][move.TargetSquare()]
+                        + _continuationHistory[ContinuationHistoryIndex(piece, targetSquare, previousMove.Piece(), previousMove.TargetSquare(), 0)]
+                        + _continuationHistory[ContinuationHistoryIndex(piece, targetSquare, previousPreviousMove.Piece(), previousPreviousMove.TargetSquare(), 1)];
+                }
+
                 return EvaluationConstants.BaseMoveScore
                     + _quietHistory[move.Piece()][move.TargetSquare()]
                     + _continuationHistory[ContinuationHistoryIndex(move.Piece(), move.TargetSquare(), previousMove.Piece(), previousMove.TargetSquare(), 0)];
