@@ -459,7 +459,7 @@ public sealed partial class Engine
                         _killerMoves[0][ply] = move;
 
                         // 🔍 Countermoves
-                        _counterMoves[previousMove.SourceSquare()][previousTargetSquare] = move;
+                        _counterMoves[CounterMoveIndex(previousMove.SourceSquare(), previousTargetSquare)] = move;
                     }
                 }
 

@@ -75,12 +75,7 @@ public sealed partial class Engine
             }
         }
 
-        _counterMoves = new int[64][];
-
-        for (int i = 0; i < 64; ++i)
-        {
-            _counterMoves[i] = new int[64];
-        }
+        _counterMoves = new int[64 * 64];
 
         InitializeTT();
 
@@ -133,11 +128,7 @@ public sealed partial class Engine
         }
 
         Array.Clear(_continuationHistory);
-
-        for (int i = 0; i < _counterMoves.Length; ++i)
-        {
-            Array.Clear(_counterMoves[i]);
-        }
+        Array.Clear(_counterMoves);
 
         // No need to clear killer move or pv table because they're cleared on every search (IDDFS)
     }
