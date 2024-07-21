@@ -3,6 +3,7 @@ using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading.Channels;
 
@@ -158,6 +159,7 @@ public sealed partial class Engine
 #pragma warning restore S1215 // "GC.Collect" should not be called
     }
 
+    [SkipLocalsInit]
     public void AdjustPosition(ReadOnlySpan<char> rawPositionCommand)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];

@@ -64,6 +64,7 @@ public sealed partial class Engine
     /// <param name="maxDepth"></param>
     /// <param name="softLimitTimeBound"></param>
     /// <returns>Not null <see cref="SearchResult"/>, although made nullable in order to match online tb probing signature</returns>
+    [SkipLocalsInit]
     public SearchResult IDDFS(int maxDepth, int softLimitTimeBound)
     {
         // Cleanup
@@ -247,6 +248,7 @@ public sealed partial class Engine
         return true;
     }
 
+    [SkipLocalsInit]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool OnlyOneLegalMove(ref Move firstLegalMove, [NotNullWhen(true)] out SearchResult? result)
     {
