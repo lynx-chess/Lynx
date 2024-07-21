@@ -1,5 +1,5 @@
 ﻿using Lynx.Model;
-using NLog.Filters;
+using System.Runtime.CompilerServices;
 
 namespace Lynx;
 
@@ -19,6 +19,7 @@ public sealed partial class Engine
     /// Defaults to the worse possible score for Side to move's opponent, Int.MaxValue
     /// </param>
     /// <returns></returns>
+    [SkipLocalsInit]
     private int NegaMax(int depth, int ply, int alpha, int beta, bool parentWasNullMove = false)
     {
         var position = Game.CurrentPosition;
@@ -459,7 +460,7 @@ public sealed partial class Engine
                         _killerMoves[0][ply] = move;
 
                         // 🔍 Countermoves
-                        _counterMoves[CounterMoveIndex(previousMove.SourceSquare(), previousTargetSquare)] = move;
+                        _counterMoves[CounterMoveIndex(previousMovePiece, previousTargetSquare)] = move;
                     }
                 }
 
@@ -509,6 +510,7 @@ public sealed partial class Engine
     /// Defaults to the works possible score for Black, Int.MaxValue
     /// </param>
     /// <returns></returns>
+    [SkipLocalsInit]
     public int QuiescenceSearch(int ply, int alpha, int beta)
     {
         var position = Game.CurrentPosition;

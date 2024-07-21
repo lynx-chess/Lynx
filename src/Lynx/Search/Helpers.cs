@@ -96,10 +96,11 @@ public sealed partial class Engine
             {
                 var previousMove = Game.PopFromMoveStack(ply - 1);
                 Debug.Assert(previousMove != 0);
+                var previousMovePiece = previousMove.Piece();
                 var previousMoveTargetSquare = previousMove.TargetSquare();
 
                 // Countermove
-                if (_counterMoves[CounterMoveIndex(previousMove.SourceSquare(), previousMoveTargetSquare)] == move)
+                if (_counterMoves[CounterMoveIndex(previousMovePiece, previousMoveTargetSquare)] == move)
                 {
                     return EvaluationConstants.CounterMoveValue;
                 }
@@ -107,7 +108,7 @@ public sealed partial class Engine
                 // Counter move history
                 return EvaluationConstants.BaseMoveScore
                     + _quietHistory[move.Piece()][move.TargetSquare()]
-                    + _continuationHistory[ContinuationHistoryIndex(move.Piece(), move.TargetSquare(), previousMove.Piece(), previousMoveTargetSquare, 0)];
+                    + _continuationHistory[ContinuationHistoryIndex(move.Piece(), move.TargetSquare(), previousMovePiece, previousMoveTargetSquare, 0)];
             }
 
             // History move or 0 if not found
