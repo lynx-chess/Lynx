@@ -460,7 +460,7 @@ public sealed partial class Engine
                         _killerMoves[0][ply] = move;
 
                         // 🔍 Countermoves
-                        _counterMoves[previousMovePiece][previousTargetSquare] = move;
+                        _counterMoves[CounterMoveIndex(previousMovePiece, previousTargetSquare)] = move;
                     }
                 }
 

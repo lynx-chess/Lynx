@@ -100,7 +100,7 @@ public sealed partial class Engine
                 var previousMoveTargetSquare = previousMove.TargetSquare();
 
                 // Countermove
-                if (_counterMoves[previousMovePiece][previousMoveTargetSquare] == move)
+                if (_counterMoves[CounterMoveIndex(previousMovePiece, previousMoveTargetSquare)] == move)
                 {
                     return EvaluationConstants.CounterMoveValue;
                 }
@@ -216,6 +216,21 @@ public sealed partial class Engine
             + (previousMovePiece * previousMovePieceOffset)
             + (previousMoveTargetSquare * previousMoveTargetSquareOffset)
             + ply;
+    }
+
+    /// <summary>
+    /// [64][64]
+    /// </summary>
+    /// <param name="previousMoveSourceSquare"></param>
+    /// <param name="previousMoveTargetSquare"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int CounterMoveIndex(int previousMoveSourceSquare, int previousMoveTargetSquare)
+    {
+        const int sourceSquareOffset = 64;
+
+        return (previousMoveSourceSquare * sourceSquareOffset)
+            + previousMoveTargetSquare;
     }
 
     #region Debugging
