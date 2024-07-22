@@ -4,7 +4,6 @@
     <IsPackable>false</IsPackable>
     <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
     <InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);Microsoft.Extensions.Configuration.Binder.SourceGeneration</InterceptorsPreviewNamespaces>
-    <RunSettingsFilePath>$(MSBuildThisFileDirectory)runsettings.xml</RunSettingsFilePath>
   </PropertyGroup>
 
   <ItemGroup>
