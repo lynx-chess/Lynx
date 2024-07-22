@@ -5,7 +5,10 @@
       <DataCollector friendlyName="XPlat Code Coverage">
         <Configuration>
           <Format>cobertura</Format>
+          <SkipAutoProps>true</SkipAutoProps>
+          <ExcludeByAttribute>Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute</ExcludeByAttribute>
           <SingleHit>true</SingleHit>
+          <!--https://github.com/coverlet-coverage/coverlet/issues/1192#issuecomment-2243274829-->
         </Configuration>
       </DataCollector>
     </DataCollectors>
