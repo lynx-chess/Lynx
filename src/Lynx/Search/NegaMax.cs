@@ -416,16 +416,24 @@ public sealed partial class Engine
                         _continuationHistory[counterMoveHistoryIndex],
                         EvaluationConstants.HistoryBonus[depth]);
 
-                    // - Follow-up move history (continuation history, ply - 2)
-                    var previousPreviousMove = Game.PopFromMoveStack(ply - 2);
-                    var previousPreviousMovePiece = previousPreviousMove.Piece();
-                    var previousPreviousTargetSquare = previousPreviousMove.TargetSquare();
+                    int previousPreviousMove;
+                    int previousPreviousMovePiece = -1;
+                    int previousPreviousTargetSquare = -1;
+                    int followUpHistoryIndex;
 
-                    var followUpHistoryIndex = ContinuationHistoryIndex(piece, targetSquare, previousPreviousMovePiece, previousPreviousTargetSquare, 1);
+                    if (ply >= 2)
+                    {
+                        // - Follow-up move history (continuation history, ply - 2)
+                        previousPreviousMove = Game.PopFromMoveStack(ply - 2);
+                        previousPreviousMovePiece = previousPreviousMove.Piece();
+                        previousPreviousTargetSquare = previousPreviousMove.TargetSquare();
 
-                    _continuationHistory[followUpHistoryIndex] = ScoreHistoryMove(
-                        _continuationHistory[followUpHistoryIndex],
-                        EvaluationConstants.HistoryBonus[depth]);
+                        followUpHistoryIndex = ContinuationHistoryIndex(piece, targetSquare, previousPreviousMovePiece, previousPreviousTargetSquare, 1);
+
+                        _continuationHistory[followUpHistoryIndex] = ScoreHistoryMove(
+                            _continuationHistory[followUpHistoryIndex],
+                            EvaluationConstants.HistoryBonus[depth]);
+                    }
 
                     for (int i = 0; i < visitedMovesCounter - 1; ++i)
                     {
@@ -450,12 +458,15 @@ public sealed partial class Engine
                                 _continuationHistory[counterMoveHistoryIndex],
                                 -EvaluationConstants.HistoryBonus[depth]);
 
-                            // - Follow-up history, ply - 1
-                            followUpHistoryIndex = ContinuationHistoryIndex(visitedMovePiece, visitedMoveTargetSquare, previousPreviousMovePiece, previousPreviousTargetSquare, 1);
+                            if (ply >= 2)
+                            {
+                                // - Follow-up history, ply - 1
+                                followUpHistoryIndex = ContinuationHistoryIndex(visitedMovePiece, visitedMoveTargetSquare, previousPreviousMovePiece, previousPreviousTargetSquare, 1);
 
-                            _continuationHistory[followUpHistoryIndex] = ScoreHistoryMove(
-                                _continuationHistory[followUpHistoryIndex],
-                                -EvaluationConstants.HistoryBonus[depth]);
+                                _continuationHistory[followUpHistoryIndex] = ScoreHistoryMove(
+                                    _continuationHistory[followUpHistoryIndex],
+                                    -EvaluationConstants.HistoryBonus[depth]);
+                            }
                         }
                     }
 
