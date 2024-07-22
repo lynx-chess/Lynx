@@ -76,6 +76,13 @@ public sealed partial class Engine
             }
         }
 
+        _killerMoves = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin][];
+
+        for (int i = 0; i < Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin; ++i)
+        {
+            _killerMoves[i] = new Move[3];
+        }
+
         InitializeTT();
 
 #if !DEBUG
