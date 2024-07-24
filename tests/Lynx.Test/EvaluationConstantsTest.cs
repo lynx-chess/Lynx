@@ -24,6 +24,8 @@ public class EvaluationConstantsTest
             checkmateDetectionLimit);
 
         Assert.Greater(checkmateDetectionLimit, _sensibleEvaluation);
+
+        Assert.Greater(short.MaxValue, checkmateDetectionLimit);
     }
 
     [Test]
