@@ -136,7 +136,7 @@ public sealed class EngineSettings
     public int NMP_DepthDivisor { get; set; } = 4;
 
     [SPSAAttribute<int>(1, 1000, 50)]
-    public int NMP_StaticEvalBetaDivisor { get; set; } = 250;
+    public int NMP_StaticEvalBetaDivisor { get; set; } = 350;
 
     [SPSAAttribute<int>(1, 100, 5)]
     public int AspirationWindow_Delta { get; set; } = 13;
