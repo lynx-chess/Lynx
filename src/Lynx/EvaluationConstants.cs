@@ -352,11 +352,11 @@ internal static readonly short[] EndGameKingTable =
 
     public const int FirstKillerMoveValue = 524_288;
 
-    public const int SecondKillerMoveValue = 262_144;
+    public const int CounterMoveValue = 262_144;
 
-    public const int ThirdKillerMoveValue = 131_072;
+    public const int SecondKillerMoveValue = 131_072;
 
-    public const int CounterMoveValue = 65_536;
+    public const int ThirdKillerMoveValue = 65_536;
 
     // Revisit bad capture pruning in NegaMax.cs if order changes and promos aren't the lowest before bad captures
     public const int PromotionMoveScoreValue = 32_768;
