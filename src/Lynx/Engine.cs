@@ -64,6 +64,7 @@ public sealed partial class Engine
         _quietHistory = new int[12][];
         _captureHistory = new int[12][][];
         _continuationHistory = new int[12 * 64 * 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount];
+        _counterMoves = new int[12 * 64];
 
         for (int i = 0; i < 12; ++i)                                            // 12
         {
@@ -127,6 +128,7 @@ public sealed partial class Engine
         }
 
         Array.Clear(_continuationHistory);
+        Array.Clear(_counterMoves);
 
         // No need to clear killer move or pv table because they're cleared on every search (IDDFS)
     }

@@ -92,25 +92,23 @@ public sealed partial class Engine
                 return EvaluationConstants.ThirdKillerMoveValue;
             }
 
-            // Counter move history
             if (ply >= 1)
             {
                 var previousMove = Game.PopFromMoveStack(ply - 1);
                 Debug.Assert(previousMove != 0);
+                var previousMovePiece = previousMove.Piece();
+                var previousMoveTargetSquare = previousMove.TargetSquare();
 
-                // Counter move and follow up history
-                //if (ply >= 2)
-                //{
-                //    var previousPreviousMove = Game.MoveStack[ply - 2];
+                // Countermove
+                if (_counterMoves[CounterMoveIndex(previousMovePiece, previousMoveTargetSquare)] == move)
+                {
+                    return EvaluationConstants.CounterMoveValue;
+                }
 
-                //    return EvaluationConstants.BaseMoveScore
-                //        + _quietHistory[move.Piece()][move.TargetSquare()]
-                //        + _continuationHistory[move.Piece()][move.TargetSquare()][0][previousMove.Piece()][previousMove.TargetSquare()]
-                //        + _continuationHistory[move.Piece()][move.TargetSquare()][1][previousPreviousMove.Piece()][previousPreviousMove.TargetSquare()];
-                //}
+                // Counter move history
                 return EvaluationConstants.BaseMoveScore
                     + _quietHistory[move.Piece()][move.TargetSquare()]
-                    + _continuationHistory[ContinuationHistoryIndex(move.Piece(), move.TargetSquare(), previousMove.Piece(), previousMove.TargetSquare(), 0)];
+                    + _continuationHistory[ContinuationHistoryIndex(move.Piece(), move.TargetSquare(), previousMovePiece, previousMoveTargetSquare, 0)];
             }
 
             // History move or 0 if not found
@@ -218,6 +216,21 @@ public sealed partial class Engine
             + (previousMovePiece * previousMovePieceOffset)
             + (previousMoveTargetSquare * previousMoveTargetSquareOffset)
             + ply;
+    }
+
+    /// <summary>
+    /// [64][64]
+    /// </summary>
+    /// <param name="previousMoveSourceSquare"></param>
+    /// <param name="previousMoveTargetSquare"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int CounterMoveIndex(int previousMoveSourceSquare, int previousMoveTargetSquare)
+    {
+        const int sourceSquareOffset = 64;
+
+        return (previousMoveSourceSquare * sourceSquareOffset)
+            + previousMoveTargetSquare;
     }
 
     #region Debugging
