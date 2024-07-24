@@ -62,7 +62,7 @@ public sealed partial class Engine
             Debug.Assert(capturedPiece != (int)Piece.K && capturedPiece != (int)Piece.k, $"{move.UCIString()} capturing king is generated in position {Game.CurrentPosition.FEN()}");
 
             return baseCaptureScore
-                + EvaluationConstants.MostValueableVictimLeastValuableAttacker[piece][capturedPiece]
+                + EvaluationConstants.MVVLVA[EvaluationConstants.MVVLVAIndex(piece, capturedPiece)]
                 //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
                 + _captureHistory[piece][move.TargetSquare()][capturedPiece];
         }
@@ -192,7 +192,6 @@ public sealed partial class Engine
         Array.Copy(_pVTable, source, _pVTable, target, moveCountToCopy);
         //PrintPvTable();
     }
-
 
     /// <summary>
     /// [12][64][12][64][ContinuationHistoryPlyCount]

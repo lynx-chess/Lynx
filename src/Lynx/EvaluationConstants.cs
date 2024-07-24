@@ -1,4 +1,6 @@
 ﻿using Lynx.Model;
+using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 
 #pragma warning disable IDE1006 // Naming Styles
 
@@ -293,7 +295,7 @@ internal static readonly short[] EndGameKingTable =
     ///      Queen              101    201    301    401    501    0
     ///       King              100    200    300    400    500    0
     /// </summary>
-    public static readonly int[][] MostValueableVictimLeastValuableAttacker =
+    private static readonly int[][] MostValueableVictimLeastValuableAttackerJagged =
     [         //    P     N     B     R      Q  K    p    n      b    r      q          k
         /* P */ [   0,    0,    0,    0,     0, 0,  1500, 4000, 4500, 5500, 11500 ], // 0],
         /* N */ [   0,    0,    0,    0,     0, 0,  1400, 3900, 4400, 5400, 11400 ], // 0],
@@ -308,6 +310,16 @@ internal static readonly short[] EndGameKingTable =
         /* q */ [1100, 3600, 4100, 5100, 11100, 0,     0,    0,    0,    0,     0 ], // 0],
         /* k */ [1000, 3500, 4001, 5000, 11000, 0,     0,    0,    0,    0,     0 ], // 0]
     ];
+
+    public static readonly ImmutableArray<int> MVVLVA =
+        MostValueableVictimLeastValuableAttackerJagged.SelectMany(victim => victim).ToImmutableArray();
+
+    /// <summary>
+    /// [12][11]
+    /// </summary>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int MVVLVAIndex(int piece, int capturedPiece) => (piece * 11) + capturedPiece;
 
     public static readonly int[] MVV_PieceValues =
     [
