@@ -275,7 +275,7 @@ public static class TranspositionTableExtensions
         {
             if (transpositionTable[i].Key != default)
             {
-                Console.WriteLine($"{i}: Key = {transpositionTable[i].Key}, Depth: {transpositionTable[i].Depth}, Score: {transpositionTable[i].Score}, Move: {(transpositionTable[i].Move != 0 ? ((Move)transpositionTable[i].Move).ToMoveString() : "-")} {transpositionTable[i].Type}");
+                Console.WriteLine($"{i}: Key = {transpositionTable[i].Key}, Depth: {transpositionTable[i].Depth}, Score: {transpositionTable[i].Score}, Move: {(transpositionTable[i].Move != 0 ? ((Move)transpositionTable[i].Move).UCIString() : "-")} {transpositionTable[i].Type}");
             }
         }
         Console.WriteLine("");

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -12,12 +13,6 @@ public class Position
     /// </summary>
     public BitBoard[] PieceBitBoards { get; }
 
-    public BitBoard Queens => PieceBitBoards[(int)Piece.Q] | PieceBitBoards[(int)Piece.q];
-    public BitBoard Rooks => PieceBitBoards[(int)Piece.R] | PieceBitBoards[(int)Piece.r];
-    public BitBoard Bishops => PieceBitBoards[(int)Piece.B] | PieceBitBoards[(int)Piece.b];
-    public BitBoard Knights => PieceBitBoards[(int)Piece.N] | PieceBitBoards[(int)Piece.n];
-    public BitBoard Kings => PieceBitBoards[(int)Piece.K] | PieceBitBoards[(int)Piece.k];
-
     /// <summary>
     /// Black, White, Both
     /// </summary>
@@ -31,6 +26,12 @@ public class Position
     /// See <see cref="<CastlingRights"/>
     /// </summary>
     public byte Castle { get; private set; }
+
+    public BitBoard Queens => PieceBitBoards[(int)Piece.Q] | PieceBitBoards[(int)Piece.q];
+    public BitBoard Rooks => PieceBitBoards[(int)Piece.R] | PieceBitBoards[(int)Piece.r];
+    public BitBoard Bishops => PieceBitBoards[(int)Piece.B] | PieceBitBoards[(int)Piece.b];
+    public BitBoard Knights => PieceBitBoards[(int)Piece.N] | PieceBitBoards[(int)Piece.n];
+    public BitBoard Kings => PieceBitBoards[(int)Piece.K] | PieceBitBoards[(int)Piece.k];
 
     /// <summary>
     /// Beware, half move counter isn't take into account
@@ -574,17 +575,16 @@ public class Position
                 }
             case SpecialMoveType.EnPassant:
                 {
+                    Debug.Assert(move.IsEnPassant());
+
                     var oppositePawnIndex = (int)Piece.p - offset;
+                    var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
 
-                    if (move.IsEnPassant())
-                    {
-                        var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                        Utils.Assert(OccupancyBitBoards[(int)Side.Both].GetBit(capturedPawnSquare) == default,
-                            $"Expected empty {capturedPawnSquare}");
+                    Utils.Assert(OccupancyBitBoards[(int)Side.Both].GetBit(capturedPawnSquare) == default,
+                        $"Expected empty {capturedPawnSquare}");
 
-                        PieceBitBoards[oppositePawnIndex].SetBit(capturedPawnSquare);
-                        OccupancyBitBoards[oppositeSide].SetBit(capturedPawnSquare);
-                    }
+                    PieceBitBoards[oppositePawnIndex].SetBit(capturedPawnSquare);
+                    OccupancyBitBoards[oppositeSide].SetBit(capturedPawnSquare);
 
                     break;
                 }
@@ -1040,7 +1040,7 @@ public class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ulong AllAttackersTo(int square, BitBoard occupancy)
     {
-        System.Diagnostics.Debug.Assert(square != (int)BoardSquare.noSquare);
+        Debug.Assert(square != (int)BoardSquare.noSquare);
 
         var queens = Queens;
         var rooks = queens | Rooks;
@@ -1065,7 +1065,7 @@ public class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ulong AllAttackersTo(int square, BitBoard occupancy, BitBoard rooks, BitBoard bishops)
     {
-        System.Diagnostics.Debug.Assert(square != (int)BoardSquare.noSquare);
+        Debug.Assert(square != (int)BoardSquare.noSquare);
 
         return (rooks & Attacks.RookAttacks(square, occupancy))
             | (bishops & Attacks.BishopAttacks(square, occupancy))
@@ -1197,7 +1197,7 @@ public class Position
             }
         }
 
-        System.Diagnostics.Debug.Fail($"Bit set in {Side} occupancy bitboard, but not piece found");
+        Debug.Fail($"Bit set in {Side} occupancy bitboard, but not piece found");
 
         return (int)Piece.None;
     }

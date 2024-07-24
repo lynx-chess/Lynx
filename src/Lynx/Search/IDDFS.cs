@@ -23,13 +23,23 @@ public sealed partial class Engine
 
     /// <summary>
     /// 12x64
+    /// piece x target square
     /// </summary>
     private readonly int[][] _quietHistory;
 
     /// <summary>
-    /// 12x64x12
+    /// 12x64x12,
+    /// piece x target square x captured piece
     /// </summary>
     private readonly int[][][] _captureHistory;
+
+    /// <summary>
+    /// 12 x 64 x 12 x 64 x ContinuationHistoryPlyCount
+    /// piece x target square x last piece x last target square x plies back
+    /// ply 0 -> Continuation move history
+    /// ply 1 -> Follow-up move history
+    /// </summary>
+    private readonly int[] _continuationHistory;
 
     private readonly int[] _maxDepthReached = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
     private TranspositionTable _tt = [];
@@ -49,6 +59,7 @@ public sealed partial class Engine
     /// <param name="maxDepth"></param>
     /// <param name="softLimitTimeBound"></param>
     /// <returns>Not null <see cref="SearchResult"/>, although made nullable in order to match online tb probing signature</returns>
+    [SkipLocalsInit]
     public SearchResult IDDFS(int maxDepth, int softLimitTimeBound)
     {
         // Cleanup
@@ -148,7 +159,7 @@ public sealed partial class Engine
                     ? Utils.CalculateMateInX(bestEvaluation, bestEvaluationAbs)
                     : 0;
 
-                lastSearchResult = UpdateLastSearchResult(lastSearchResult, bestEvaluation, alpha, beta, depth, mate, bestEvaluationAbs);
+                lastSearchResult = UpdateLastSearchResult(lastSearchResult, bestEvaluation, alpha, beta, depth, mate);
 
                 _engineWriter.TryWrite(InfoCommand.SearchResultInfo(lastSearchResult));
             } while (StopSearchCondition(++depth, maxDepth, mate, softLimitTimeBound));
@@ -232,6 +243,7 @@ public sealed partial class Engine
         return true;
     }
 
+    [SkipLocalsInit]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool OnlyOneLegalMove(ref Move firstLegalMove, [NotNullWhen(true)] out SearchResult? result)
     {
@@ -292,7 +304,7 @@ public sealed partial class Engine
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private SearchResult UpdateLastSearchResult(SearchResult? lastSearchResult,
-        int bestEvaluation, int alpha, int beta, int depth, int mate, int bestEvaluationAbs)
+        int bestEvaluation, int alpha, int beta, int depth, int mate)
     {
         var pvMoves = _pVTable.TakeWhile(m => m != default).ToList();
         var maxDepthReached = _maxDepthReached.LastOrDefault(item => item != default);

@@ -3,6 +3,8 @@ using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using System.Threading.Channels;
 
 namespace Lynx;
@@ -60,18 +62,17 @@ public sealed partial class Engine
 
         // Update ResetEngine() after any changes here
         _quietHistory = new int[12][];
-        for (int i = 0; i < _quietHistory.Length; ++i)
+        _captureHistory = new int[12][][];
+        _continuationHistory = new int[12 * 64 * 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount];
+
+        for (int i = 0; i < 12; ++i)                                            // 12
         {
             _quietHistory[i] = new int[64];
-        }
-
-        _captureHistory = new int[12][][];
-        for (int i = 0; i < 12; ++i)
-        {
             _captureHistory[i] = new int[64][];
-            for (var j = 0; j < 64; ++j)
+
+            for (var j = 0; j < 64; ++j)                                        // 64
             {
-                _captureHistory[i][j] = new int[12];
+                _captureHistory[i][j] = new int[12];                            // 12
             }
         }
 
@@ -125,6 +126,8 @@ public sealed partial class Engine
             }
         }
 
+        Array.Clear(_continuationHistory);
+
         // No need to clear killer move or pv table because they're cleared on every search (IDDFS)
     }
 
@@ -149,6 +152,7 @@ public sealed partial class Engine
 #pragma warning restore S1215 // "GC.Collect" should not be called
     }
 
+    [SkipLocalsInit]
     public void AdjustPosition(ReadOnlySpan<char> rawPositionCommand)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
@@ -282,13 +286,13 @@ public sealed partial class Engine
         if (searchResult is not null)
         {
             _logger.Info("Search evaluation result - eval: {0}, mate: {1}, depth: {2}, pv: {3}",
-                searchResult.Evaluation, searchResult.Mate, searchResult.Depth, string.Join(", ", searchResult.Moves.Select(m => m.ToMoveString())));
+                searchResult.Evaluation, searchResult.Mate, searchResult.Depth, string.Join(", ", searchResult.Moves.Select(m => m.UCIString())));
         }
 
         if (tbResult is not null)
         {
             _logger.Info("Online tb probing result - mate: {0}, moves: {1}",
-                tbResult.Mate, string.Join(", ", tbResult.Moves.Select(m => m.ToMoveString())));
+                tbResult.Mate, string.Join(", ", tbResult.Moves.Select(m => m.UCIString())));
 
             if (searchResult?.Mate > 0 && searchResult.Mate <= tbResult.Mate && searchResult.Mate + currentHalfMovesWithoutCaptureOrPawnMove < 96)
             {
@@ -336,7 +340,7 @@ public sealed partial class Engine
                 }
             }
 
-            // We print best move even in case of go pondeer + stop, and IDEs are expected to ignore it
+            // We print best move even in case of go ponder + stop, and IDEs are expected to ignore it
             _moveToPonder = searchResult.Moves.Count >= 2 ? searchResult.Moves[1] : null;
             _engineWriter.TryWrite(BestMoveCommand.BestMove(searchResult.BestMove, _moveToPonder));
         }
