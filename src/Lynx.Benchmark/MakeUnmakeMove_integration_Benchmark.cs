@@ -145,7 +145,6 @@
 #pragma warning disable S101, S1854 // Types should be named in PascalCase
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
-using NLog;
 using System.Runtime.CompilerServices;
 
 namespace Lynx.Benchmark;
