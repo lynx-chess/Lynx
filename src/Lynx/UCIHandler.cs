@@ -610,7 +610,7 @@ public sealed class UCIHandler
     {
         const string fullMoveCounterString = " 1";
 
-        var fen = _engine.Game.CurrentPosition.FEN()[..^3] + _engine.Game.HalfMovesWithoutCaptureOrPawnMove + fullMoveCounterString;
+        var fen = _engine.Game.CurrentPosition.FEN()[..^3] + _engine.Game.HalfMovesWithoutCaptureOrPawnMove.ToString() + fullMoveCounterString;
 
         await _engineToUci.Writer.WriteAsync(fen, cancellationToken);
     }
