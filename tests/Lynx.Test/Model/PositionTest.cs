@@ -525,7 +525,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(2 * Configuration.EngineSettings.SemiOpenFileRookBonus.MG
+        Assert.AreEqual((2 * Configuration.EngineSettings.SemiOpenFileRookBonus.MG)
             + Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideToMove].MG - Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideNotToMove].MG,
         evaluation);
     }
