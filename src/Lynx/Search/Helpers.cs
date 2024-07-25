@@ -193,7 +193,6 @@ public sealed partial class Engine
         //PrintPvTable();
     }
 
-
     /// <summary>
     /// [12][64][12][64][ContinuationHistoryPlyCount]
     /// </summary>
