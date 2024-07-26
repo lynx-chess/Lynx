@@ -619,6 +619,36 @@ public sealed partial class Engine
 
                 _tt.RecordHash(_ttMask, position, 0, ply, beta, NodeType.Beta, bestMove);
 
+                if (move.IsCapture())
+                {
+                    // 🔍 Capture history
+                    var piece = move.Piece();
+                    var targetSquare = move.TargetSquare();
+                    var capturedPiece = move.CapturedPiece();
+
+                    _captureHistory[piece][targetSquare][capturedPiece] = ScoreHistoryMove(
+                        _captureHistory[piece][targetSquare][capturedPiece],
+                        EvaluationConstants.HistoryBonus[1]);
+
+                    // TODO Capture history penalty/malus
+                    // When a capture fails high, penalize previous visited captures
+                    //for (int i = 0; i < visitedMovesCounter; ++i)
+                    //{
+                    //    var visitedMove = visitedMoves[i];
+
+                    //    if (visitedMove.IsCapture())
+                    //    {
+                    //        var visitedMovePiece = visitedMove.Piece();
+                    //        var visitedMoveTargetSquare = visitedMove.TargetSquare();
+                    //        var visitedMoveCapturedPiece = visitedMove.CapturedPiece();
+
+                    //        _captureHistory[visitedMovePiece][visitedMoveTargetSquare][visitedMoveCapturedPiece] = ScoreHistoryMove(
+                    //            _captureHistory[visitedMovePiece][visitedMoveTargetSquare][visitedMoveCapturedPiece],
+                    //            -EvaluationConstants.HistoryBonus[depth]);
+                    //    }
+                    //}
+                }
+
                 return evaluation; // The refutation doesn't matter, since it'll be pruned
             }
 
