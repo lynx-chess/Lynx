@@ -216,7 +216,7 @@ public static class MoveExtensions
                 var actualPromotedPiece = m.PromotedPiece();
 
                 return actualPromotedPiece == promotedPiece
-                || actualPromotedPiece == promotedPiece - 6;
+                    || actualPromotedPiece == promotedPiece - 6;
             }
 
             move = candidateMoves.FirstOrDefault(predicate);

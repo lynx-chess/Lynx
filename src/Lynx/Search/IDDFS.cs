@@ -172,7 +172,9 @@ public sealed partial class Engine
         catch (OperationCanceledException)
         {
             isCancelled = true;
+#pragma warning disable S6667 // Logging in a catch clause should pass the caught exception as a parameter - expected exception we want to ignore
             _logger.Info("Search cancellation requested after {0}ms (depth {1}, nodes {2}), best move will be returned", _stopWatch.ElapsedMilliseconds, depth, _nodes);
+#pragma warning restore S6667 // Logging in a catch clause should pass the caught exception as a parameter.
 
             for (int i = 0; i < lastSearchResult?.Moves.Count; ++i)
             {
