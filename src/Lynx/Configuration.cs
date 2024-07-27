@@ -168,14 +168,20 @@ public sealed class EngineSettings
     [SPSAAttribute<int>(0, 10, 0.5)]
     public int LMP_MovesDepthMultiplier { get; set; } = 4;
 
+    [SPSAAttribute<int>(8_192, 65_536, 8_192)]
     public int History_MaxMoveValue { get; set; } = 8_192;
-
-    public int CaptureHistory_QSearchBonusDepth { get; set; } = 1;
 
     /// <summary>
     /// 1896: constant from depth 12
     /// </summary>
+    [SPSAAttribute<int>(1, 1_896, 100)]
     public int History_MaxMoveRawBonus { get; set; } = 1_896;
+
+    /// <summary>
+    /// See <see cref="EvaluationConstants.HistoryBonus"/> values
+    /// </summary>
+    [SPSAAttribute<int>(1, 12, 0.5)]
+    public int CaptureHistory_QSearchBonusDepth { get; set; } = 1;
 
     [SPSAAttribute<int>(0, 6, 0.5)]
     public int SEE_BadCaptureReduction { get; set; } = 2;

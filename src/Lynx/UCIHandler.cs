@@ -402,6 +402,31 @@ public sealed class UCIHandler
                     break;
                 }
 
+            case "history_maxmovevalue":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.History_MaxMoveValue = value;
+                    }
+                    break;
+                }
+            case "history_maxmoverawbonus":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.History_MaxMoveRawBonus = value;
+                    }
+                    break;
+                }
+            case "capturehistory_qsearchbonusdepth":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.CaptureHistory_QSearchBonusDepth = value;
+                    }
+                    break;
+                }
+
             case "lmp_maxdepth":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
