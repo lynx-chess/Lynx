@@ -570,6 +570,9 @@ public sealed partial class Engine
             scores[i] = ScoreMove(pseudoLegalMoves[i], ply, isNotQSearch: false, ttBestMove);
         }
 
+        Span<Move> visitedMoves = stackalloc Move[pseudoLegalMoves.Length];
+        int visitedMovesCounter = 0;
+
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
             // Incremental move sorting, inspired by https://github.com/jw1912/Chess-Challenge and suggested by toanth
@@ -597,6 +600,8 @@ public sealed partial class Engine
                 position.UnmakeMove(move, gameState);
                 continue;
             }
+
+            visitedMoves[visitedMovesCounter] = move;
 
             ++_nodes;
             isThereAnyValidCapture = true;
@@ -630,23 +635,23 @@ public sealed partial class Engine
                         _captureHistory[piece][targetSquare][capturedPiece],
                         EvaluationConstants.HistoryBonus[1]);
 
-                    // TODO Capture history penalty/malus
+                    // Capture history penalty/malus
                     // When a capture fails high, penalize previous visited captures
-                    //for (int i = 0; i < visitedMovesCounter; ++i)
-                    //{
-                    //    var visitedMove = visitedMoves[i];
+                    for (int m = 0; m < visitedMovesCounter; ++m)
+                    {
+                        var visitedMove = visitedMoves[m];
 
-                    //    if (visitedMove.IsCapture())
-                    //    {
-                    //        var visitedMovePiece = visitedMove.Piece();
-                    //        var visitedMoveTargetSquare = visitedMove.TargetSquare();
-                    //        var visitedMoveCapturedPiece = visitedMove.CapturedPiece();
+                        if (visitedMove.IsCapture())
+                        {
+                            var visitedMovePiece = visitedMove.Piece();
+                            var visitedMoveTargetSquare = visitedMove.TargetSquare();
+                            var visitedMoveCapturedPiece = visitedMove.CapturedPiece();
 
-                    //        _captureHistory[visitedMovePiece][visitedMoveTargetSquare][visitedMoveCapturedPiece] = ScoreHistoryMove(
-                    //            _captureHistory[visitedMovePiece][visitedMoveTargetSquare][visitedMoveCapturedPiece],
-                    //            -EvaluationConstants.HistoryBonus[depth]);
-                    //    }
-                    //}
+                            _captureHistory[visitedMovePiece][visitedMoveTargetSquare][visitedMoveCapturedPiece] = ScoreHistoryMove(
+                                _captureHistory[visitedMovePiece][visitedMoveTargetSquare][visitedMoveCapturedPiece],
+                                -EvaluationConstants.HistoryBonus[1]);
+                        }
+                    }
                 }
 
                 return evaluation; // The refutation doesn't matter, since it'll be pruned
@@ -662,6 +667,8 @@ public sealed partial class Engine
 
                 nodeType = NodeType.Exact;
             }
+
+            ++visitedMovesCounter;
         }
 
         if (bestMove is null
