@@ -628,7 +628,7 @@ public sealed partial class Engine
 
                     _captureHistory[piece][targetSquare][capturedPiece] = ScoreHistoryMove(
                         _captureHistory[piece][targetSquare][capturedPiece],
-                        EvaluationConstants.HistoryBonus[1]);
+                        EvaluationConstants.HistoryBonus[Configuration.EngineSettings.CaptureHistory_QSearchBonusDepth]);
 
                     // TODO Capture history penalty/malus
                     // When a capture fails high, penalize previous visited captures
@@ -644,7 +644,7 @@ public sealed partial class Engine
 
                     //        _captureHistory[visitedMovePiece][visitedMoveTargetSquare][visitedMoveCapturedPiece] = ScoreHistoryMove(
                     //            _captureHistory[visitedMovePiece][visitedMoveTargetSquare][visitedMoveCapturedPiece],
-                    //            -EvaluationConstants.HistoryBonus[depth]);
+                    //            -EvaluationConstants.HistoryBonus[Configuration.EngineSettings.CaptureHistory_QSearchBonusDepth]);
                     //    }
                     //}
                 }

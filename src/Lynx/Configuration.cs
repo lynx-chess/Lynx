@@ -170,6 +170,8 @@ public sealed class EngineSettings
 
     public int History_MaxMoveValue { get; set; } = 8_192;
 
+    public int CaptureHistory_QSearchBonusDepth { get; set; } = 1;
+
     /// <summary>
     /// 1896: constant from depth 12
     /// </summary>
