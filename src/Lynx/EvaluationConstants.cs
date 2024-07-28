@@ -199,24 +199,6 @@ internal static readonly short[] EndGameKingTable =
 
     static EvaluationConstants()
     {
-        short[] middleGamePawnTableBlack = MiddleGamePawnTable.Select((_, index) => (short)-MiddleGamePawnTable[index ^ 56]).ToArray();
-        short[] endGamePawnTableBlack = EndGamePawnTable.Select((_, index) => (short)-EndGamePawnTable[index ^ 56]).ToArray();
-
-        short[] middleGameKnightTableBlack = MiddleGameKnightTable.Select((_, index) => (short)-MiddleGameKnightTable[index ^ 56]).ToArray();
-        short[] endGameKnightTableBlack = EndGameKnightTable.Select((_, index) => (short)-EndGameKnightTable[index ^ 56]).ToArray();
-
-        short[] middleGameBishopTableBlack = MiddleGameBishopTable.Select((_, index) => (short)-MiddleGameBishopTable[index ^ 56]).ToArray();
-        short[] endGameBishopTableBlack = EndGameBishopTable.Select((_, index) => (short)-EndGameBishopTable[index ^ 56]).ToArray();
-
-        short[] middleGameRookTableBlack = MiddleGameRookTable.Select((_, index) => (short)-MiddleGameRookTable[index ^ 56]).ToArray();
-        short[] endGameRookTableBlack = EndGameRookTable.Select((_, index) => (short)-EndGameRookTable[index ^ 56]).ToArray();
-
-        short[] middleGameQueenTableBlack = MiddleGameQueenTable.Select((_, index) => (short)-MiddleGameQueenTable[index ^ 56]).ToArray();
-        short[] EndGameQueenTableBlack = EndGameQueenTable.Select((_, index) => (short)-EndGameQueenTable[index ^ 56]).ToArray();
-
-        short[] middleGameKingTableBlack = MiddleGameKingTable.Select((_, index) => (short)-MiddleGameKingTable[index ^ 56]).ToArray();
-        short[] endGameKingTableBlack = EndGameKingTable.Select((_, index) => (short)-EndGameKingTable[index ^ 56]).ToArray();
-
         short[][] mgPositionalTables =
         [
             MiddleGamePawnTable,
@@ -224,14 +206,7 @@ internal static readonly short[] EndGameKingTable =
             MiddleGameBishopTable,
             MiddleGameRookTable,
             MiddleGameQueenTable,
-            MiddleGameKingTable,
-
-            middleGamePawnTableBlack,
-            middleGameKnightTableBlack,
-            middleGameBishopTableBlack,
-            middleGameRookTableBlack,
-            middleGameQueenTableBlack,
-            middleGameKingTableBlack
+            MiddleGameKingTable
         ];
 
         short[][] egPositionalTables =
@@ -241,24 +216,23 @@ internal static readonly short[] EndGameKingTable =
             EndGameBishopTable,
             EndGameRookTable,
             EndGameQueenTable,
-            EndGameKingTable,
-
-            endGamePawnTableBlack,
-            endGameKnightTableBlack,
-            endGameBishopTableBlack,
-            endGameRookTableBlack,
-            EndGameQueenTableBlack,
-            endGameKingTableBlack
+            EndGameKingTable
         ];
 
-        for (int piece = (int)Piece.P; piece <= (int)Piece.k; ++piece)
+        for (int piece = (int)Piece.P; piece <= (int)Piece.K; ++piece)
         {
             PackedPSQT[piece] = new int[64];
+            PackedPSQT[piece + 6] = new int[64];
+
             for (int sq = 0; sq < 64; ++sq)
             {
                 PackedPSQT[piece][sq] = Utils.Pack(
                     (short)(MiddleGamePieceValues[piece] + mgPositionalTables[piece][sq]),
                     (short)(EndGamePieceValues[piece] + egPositionalTables[piece][sq]));
+
+                PackedPSQT[piece + 6][sq] = Utils.Pack(
+                    (short)(MiddleGamePieceValues[piece + 6] - mgPositionalTables[piece][sq ^ 56]),
+                    (short)(EndGamePieceValues[piece + 6] - egPositionalTables[piece][sq ^ 56]));
             }
         }
 
