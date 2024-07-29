@@ -1,11 +1,8 @@
 ﻿using NLog;
-using NLog.Targets;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Runtime.Intrinsics.X86;
-using System.Threading.Tasks;
 
 namespace Lynx.Model;
 

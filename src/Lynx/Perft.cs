@@ -1,5 +1,6 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace Lynx;
 
@@ -36,6 +37,7 @@ public static class Perft
     /// <param name="depth"></param>
     /// <param name="nodes"></param>
     /// <returns></returns>
+    [SkipLocalsInit]
     internal static long ResultsImpl(Position position, int depth, long nodes)
     {
         if (depth != 0)
@@ -58,6 +60,7 @@ public static class Perft
         return nodes + 1;
     }
 
+    [SkipLocalsInit]
     private static long DivideImpl(Position position, int depth, long nodes, Action<string> write)
     {
         if (depth != 0)

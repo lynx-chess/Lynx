@@ -435,7 +435,7 @@ public static class MoveGenerator
     internal static void GeneratePieceCaptures(ref int localIndex, Span<Move> movePool, int piece, Position position, int offset)
     {
         var bitboard = position.PieceBitBoards[piece];
-        var oppositeSide = (int)Utils.OppositeSide(position.Side);
+        var oppositeSide = Utils.OppositeSide(position.Side);
         int sourceSquare, targetSquare;
 
         while (bitboard != default)

@@ -20,10 +20,12 @@ public class EvaluationConstantsTest
     [TestCase(-NegativeCheckmateDetectionLimit)]
     public void CheckmateDetectionLimitConstants(int checkmateDetectionLimit)
     {
-        Assert.Greater(CheckMateBaseEvaluation - Constants.AbsoluteMaxDepth * CheckmateDepthFactor,
+        Assert.Greater(CheckMateBaseEvaluation - (Constants.AbsoluteMaxDepth * CheckmateDepthFactor),
             checkmateDetectionLimit);
 
         Assert.Greater(checkmateDetectionLimit, _sensibleEvaluation);
+
+        Assert.Greater(short.MaxValue, checkmateDetectionLimit);
     }
 
     [Test]

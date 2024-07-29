@@ -20,7 +20,7 @@ public class MoveToEPDStringTest
         int isCapture = default, int isDoublePawnPush = default, int isEnPassant = default,
         int isShortCastle = default, int isLongCastle = default)
     {
-        int move = 0;
+        int move;
 
         if (isShortCastle != default)
         {
