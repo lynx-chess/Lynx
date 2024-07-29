@@ -380,34 +380,25 @@ internal static readonly short[][] EndGameKingTable =
             EndGameKingTable
         ];
 
-        try
+        for (int bucket = 0; bucket < PSQTBucketCount; ++bucket)
         {
-
-            for (int bucket = 0; bucket < PSQTBucketCount; ++bucket)
+            PackedPSQT[bucket] = new int[12][];
+            for (int piece = (int)Piece.P; piece <= (int)Piece.K; ++piece)
             {
-                PackedPSQT[bucket] = new int[12][];
-                for (int piece = (int)Piece.P; piece <= (int)Piece.K; ++piece)
+                PackedPSQT[bucket][piece] = new int[64];
+                PackedPSQT[bucket][piece + 6] = new int[64];
+
+                for (int sq = 0; sq < 64; ++sq)
                 {
-                    PackedPSQT[bucket][piece] = new int[64];
-                    PackedPSQT[bucket][piece + 6] = new int[64];
+                    PackedPSQT[bucket][piece][sq] = Utils.Pack(
+                        (short)(MiddleGamePieceValues[bucket][piece] + mgPositionalTables[piece][bucket][sq]),
+                        (short)(EndGamePieceValues[bucket][piece] + egPositionalTables[piece][bucket][sq]));
 
-                    for (int sq = 0; sq < 64; ++sq)
-                    {
-                        PackedPSQT[bucket][piece][sq] = Utils.Pack(
-                            (short)(MiddleGamePieceValues[bucket][piece] + mgPositionalTables[piece][bucket][sq]),
-                            (short)(EndGamePieceValues[bucket][piece] + egPositionalTables[piece][bucket][sq]));
-
-                        PackedPSQT[bucket][piece + 6][sq] = Utils.Pack(
-                            (short)(MiddleGamePieceValues[bucket][piece + 6] - mgPositionalTables[piece][bucket][sq ^ 56]),
-                            (short)(EndGamePieceValues[bucket][piece + 6] - egPositionalTables[piece][bucket][sq ^ 56]));
-                    }
+                    PackedPSQT[bucket][piece + 6][sq] = Utils.Pack(
+                        (short)(MiddleGamePieceValues[bucket][piece + 6] - mgPositionalTables[piece][bucket][sq ^ 56]),
+                        (short)(EndGamePieceValues[bucket][piece + 6] - egPositionalTables[piece][bucket][sq ^ 56]));
                 }
             }
-        }
-        catch (Exception e)
-        {
-            ;
-            throw;
         }
 
         for (int searchDepth = 1; searchDepth < Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin; ++searchDepth)    // Depth > 0 or we'd be in QSearch
