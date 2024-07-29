@@ -32,8 +32,8 @@ internal static readonly short[] MiddleGamePieceValues =
 
 internal static readonly short[] EndGamePieceValues =
 [
-        +123, +427, +363, +747, +1424, 0,
-        -123, -427, -363, -747, -1424, 0
+        +123, +427, +363, +747, +1425, 0,
+        -123, -427, -363, -747, -1425, 0
 ];
 
 internal static readonly short[] MiddleGamePawnTable =
@@ -170,7 +170,7 @@ internal static readonly short[] MiddleGameKingTable =
 
 internal static readonly short[] EndGameKingTable =
 [
-         -77,    -49,    -28,     -1,    -41,     -9,    -43,    -90,
+         -77,    -49,    -28,     -1,    -41,     -9,    -43,    -91,
          -23,     15,     24,     37,     43,     30,      8,    -29,
           -2,     40,     69,     81,     84,     73,     40,     10,
            0,     52,     90,    122,    120,     92,     63,     23,
