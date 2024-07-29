@@ -1,5 +1,6 @@
 ﻿using Lynx.Model;
 using NUnit.Framework;
+using static Lynx.EvaluationConstants;
 
 namespace Lynx.Test.Model;
 
@@ -136,8 +137,8 @@ public class PositionTest
     [TestCase("7K/8/8/8/8/3b4/1k6/6q1 w - - 0 1", 0)]
     [TestCase("8/5K2/7p/6pk/6p1/6P1/7P/8 b - - 0 1", 0)]
     [TestCase("8/7p/6p1/6P1/6PK/5k1P/8/8 w - - 0 1", 0)]
-    [TestCase("7k/8/8/8/8/8/1K5R/6R1 b - - 0 1", -EvaluationConstants.CheckMateBaseEvaluation)]
-    [TestCase("7K/8/8/8/8/8/1k5r/6r1 w - - 0 1", -EvaluationConstants.CheckMateBaseEvaluation)]
+    [TestCase("7k/8/8/8/8/8/1K5R/6R1 b - - 0 1", -CheckMateBaseEvaluation)]
+    [TestCase("7K/8/8/8/8/8/1k5r/6r1 w - - 0 1", -CheckMateBaseEvaluation)]
     public void EvaluateFinalPosition(string fen, int expectedEvaluationValue)
     {
         // Arrange
@@ -215,7 +216,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(Utils.UnpackMG(EngineSettings.IsolatedPawnPenalty), evaluation);
+        Assert.AreEqual(Utils.UnpackMG(IsolatedPawnPenalty), evaluation);
     }
 
     /// <summary>
@@ -422,9 +423,9 @@ public class PositionTest
         }
 
         Assert.AreEqual(
-            //(-4 * Configuration.EngineSettings.DoubledPawnPenalty.MG)
-            +Utils.UnpackMG(EngineSettings.IsolatedPawnPenalty)
-            + Utils.UnpackMG(EngineSettings.PassedPawnBonus[rank]),
+            //(-4 * Configuration.DoubledPawnPenalty.MG)
+            +Utils.UnpackMG(IsolatedPawnPenalty)
+            + Utils.UnpackMG(PassedPawnBonus[rank]),
 
             evaluation);
     }
@@ -458,8 +459,8 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(Utils.UnpackMG(EngineSettings.SemiOpenFileRookBonus)
-                + Utils.UnpackMG(EngineSettings.RookMobilityBonus[rookMobilitySideToMove]) - Utils.UnpackMG(EngineSettings.RookMobilityBonus[rookMobilitySideNotToMove]),
+        Assert.AreEqual(Utils.UnpackMG(SemiOpenFileRookBonus)
+                + Utils.UnpackMG(RookMobilityBonus[rookMobilitySideToMove]) - Utils.UnpackMG(RookMobilityBonus[rookMobilitySideNotToMove]),
             evaluation);
     }
 
@@ -491,8 +492,8 @@ public class PositionTest
         {
             evaluation = -evaluation;
         }
-        Assert.AreEqual(Utils.UnpackMG(EngineSettings.OpenFileRookBonus)
-            + Utils.UnpackMG(EngineSettings.RookMobilityBonus[rookMobilitySideToMove]) - Utils.UnpackMG(EngineSettings.RookMobilityBonus[rookMobilitySideNotToMove]),
+        Assert.AreEqual(Utils.UnpackMG(OpenFileRookBonus)
+            + Utils.UnpackMG(RookMobilityBonus[rookMobilitySideToMove]) - Utils.UnpackMG(RookMobilityBonus[rookMobilitySideNotToMove]),
             evaluation);
     }
 
@@ -525,8 +526,8 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(2 * Utils.UnpackMG(EngineSettings.SemiOpenFileRookBonus)
-            + Utils.UnpackMG(EngineSettings.RookMobilityBonus[rookMobilitySideToMove]) - Utils.UnpackMG(EngineSettings.RookMobilityBonus[rookMobilitySideNotToMove]),
+        Assert.AreEqual(2 * Utils.UnpackMG(SemiOpenFileRookBonus)
+            + Utils.UnpackMG(RookMobilityBonus[rookMobilitySideToMove]) - Utils.UnpackMG(RookMobilityBonus[rookMobilitySideNotToMove]),
         evaluation);
     }
 
@@ -559,9 +560,9 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual((-2 * Utils.UnpackMG(EngineSettings.OpenFileRookBonus))
-            + Utils.UnpackMG(EngineSettings.RookMobilityBonus[rookMobilitySideToMove])
-            - Utils.UnpackMG(EngineSettings.RookMobilityBonus[rookMobilitySideNotToMove]),
+        Assert.AreEqual((-2 * Utils.UnpackMG(OpenFileRookBonus))
+            + Utils.UnpackMG(RookMobilityBonus[rookMobilitySideToMove])
+            - Utils.UnpackMG(RookMobilityBonus[rookMobilitySideNotToMove]),
             evaluation);
     }
 
@@ -595,7 +596,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(Utils.UnpackEG(EngineSettings.SemiOpenFileKingPenalty), evaluation);
+        Assert.AreEqual(Utils.UnpackEG(SemiOpenFileKingPenalty), evaluation);
     }
 
     /// <summary>
@@ -627,7 +628,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(Utils.UnpackEG(EngineSettings.OpenFileKingPenalty), evaluation);
+        Assert.AreEqual(Utils.UnpackEG(OpenFileKingPenalty), evaluation);
     }
 
     /// <summary>
@@ -751,7 +752,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(surroundingPieces * Utils.UnpackEG(EngineSettings.KingShieldBonus), evaluation);
+        Assert.AreEqual(surroundingPieces * Utils.UnpackEG(KingShieldBonus), evaluation);
     }
 
     /// <summary>
@@ -809,7 +810,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(Utils.UnpackMG(EngineSettings.BishopMobilityBonus[sideToMoveMobilityCount]) - Utils.UnpackMG(EngineSettings.BishopMobilityBonus[nonSideToMoveMobilityCount]), evaluation);
+        Assert.AreEqual(Utils.UnpackMG(BishopMobilityBonus[sideToMoveMobilityCount]) - Utils.UnpackMG(BishopMobilityBonus[nonSideToMoveMobilityCount]), evaluation);
     }
 
     /// <summary>
@@ -923,7 +924,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(mobilityDifference * Utils.UnpackMG(EngineSettings.QueenMobilityBonus), evaluation);
+        Assert.AreEqual(mobilityDifference * Utils.UnpackMG(QueenMobilityBonus), evaluation);
     }
 
     /// <summary>
@@ -931,10 +932,10 @@ public class PositionTest
     /// </summary>
     /// <param name="fen"></param>
     /// <param name="expectedStaticEvaluation"></param>
-    [TestCase("QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QPPPPPPP/K6k b - - 0 1", EvaluationConstants.MinEval, IgnoreReason = "Packed eval reduces max eval to a short, so over Short.MaxValue it overflows and produces unexpected results")]
-    [TestCase("QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QPPPPPPP/K5k1 w - - 0 1", EvaluationConstants.MaxEval, IgnoreReason = "Packed eval reduces max eval to a short, so over Short.MaxValue it overflows and produces unexpected results")]
-    [TestCase("8/8/8/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QPPPPPPP/K6k b - - 0 1", EvaluationConstants.MinEval)]
-    [TestCase("8/8/8/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QPPPPPPP/K5k1 w - - 0 1", EvaluationConstants.MaxEval)]
+    [TestCase("QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QPPPPPPP/K6k b - - 0 1", MinEval, IgnoreReason = "Packed eval reduces max eval to a short, so over Short.MaxValue it overflows and produces unexpected results")]
+    [TestCase("QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QPPPPPPP/K5k1 w - - 0 1", MaxEval, IgnoreReason = "Packed eval reduces max eval to a short, so over Short.MaxValue it overflows and produces unexpected results")]
+    [TestCase("8/8/8/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QPPPPPPP/K6k b - - 0 1", MinEval)]
+    [TestCase("8/8/8/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QPPPPPPP/K5k1 w - - 0 1", MaxEval)]
     public void StaticEvaluation_Clamp(string fen, int expectedStaticEvaluation)
     {
         var position = new Position(fen);
