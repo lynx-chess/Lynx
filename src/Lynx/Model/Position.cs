@@ -688,8 +688,6 @@ public class Position
 
         var whiteBucket = Constants.File[whiteKing] / 4;
         var blackBucket = Constants.File[blackKing] / 4;
-        Debug.Assert(whiteBucket <= 1);
-        Debug.Assert(blackBucket <= 1);
 
         for (int pieceIndex = (int)Piece.P; pieceIndex < (int)Piece.K; ++pieceIndex)
         {
