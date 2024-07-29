@@ -6,8 +6,8 @@ namespace Lynx;
 
 public static class Configuration
 {
-    public static EngineSettings EngineSettings { get; set; } = new EngineSettings();
-    public static GeneralSettings GeneralSettings { get; set; } = new GeneralSettings();
+    public static EngineSettings EngineSettings { get; } = new EngineSettings();
+    public static GeneralSettings GeneralSettings { get; } = new GeneralSettings();
 
     private static int _isDebug = 0;
 #pragma warning disable IDE1006 // Naming Styles
@@ -55,9 +55,9 @@ public static class Configuration
 
 public sealed class GeneralSettings
 {
-    public bool EnableLogging { get; set; } = false;
+    public bool EnableLogging = false;
 
-    public bool EnableTuning { get; set; } = false;
+    public bool EnableTuning = false;
 }
 
 public sealed class EngineSettings
@@ -68,124 +68,101 @@ public sealed class EngineSettings
     /// <summary>
     /// Depth for bench command
     /// </summary>
-    public int BenchDepth { get; set; } = 10;
+    public const int BenchDepth = 10;
 
     /// <summary>
     /// MB
     /// </summary>
-    public int TranspositionTableSize { get; set; } = 256;
+    public int TranspositionTableSize = 256;
 
-    public bool UseOnlineTablebaseInRootPositions { get; set; } = false;
+    public bool UseOnlineTablebaseInRootPositions = false;
 
     /// <summary>
     /// Experimental, might misbehave due to tablebase API limits
     /// </summary>
-    public bool UseOnlineTablebaseInSearch { get; set; } = false;
+    public bool UseOnlineTablebaseInSearch = false;
 
     /// <summary>
     /// This can also de used to reduce online probing
     /// </summary>
-    public int OnlineTablebaseMaxSupportedPieces { get; set; } = 7;
+    public const int OnlineTablebaseMaxSupportedPieces = 7;
 
-    public bool ShowWDL { get; set; } = false;
+    public bool ShowWDL = false;
 
-    public bool IsPonder { get; set; } = false;
+    public bool IsPonder = false;
 
-    public double SPSA_OB_R_end { get; set; } = 0.02;
+    public const double SPSA_OB_R_end = 0.02;
 
     #region Time management
 
-    public double HardTimeBoundMultiplier { get; set; } = 0.52;
+    public const double HardTimeBoundMultiplier = 0.52;
 
-    public double SoftTimeBoundMultiplier { get; set; } = 1;
+    public const double SoftTimeBoundMultiplier = 1;
 
-    public int DefaultMovesToGo { get; set; } = 45;
+    public const int DefaultMovesToGo = 45;
 
-    public double SoftTimeBaseIncrementMultiplier { get; set; } = 0.8;
+    public const double SoftTimeBaseIncrementMultiplier = 0.8;
 
     #endregion
 
-    [SPSAAttribute<int>(3, 10, 0.5)]
-    public int LMR_MinDepth { get; set; } = 3;
+    public const int LMR_MinDepth = 3;
 
-    [SPSAAttribute<int>(1, 10, 0.5)]
-    public int LMR_MinFullDepthSearchedMoves { get; set; } = 4;
+    public const int LMR_MinFullDepthSearchedMoves = 4;
 
     /// <summary>
     /// Value originally from Stormphrax, who apparently took it from Viridithas
     /// </summary>
-    [SPSAAttribute<double>(0.1, 2, 0.10)]
-    public double LMR_Base { get; set; } = 0.91;
+    public const double LMR_Base = 0.91;
 
     /// <summary>
     /// Value originally from Akimbo
     /// </summary>
-    [SPSAAttribute<double>(1, 5, 0.1)]
-    public double LMR_Divisor { get; set; } = 3.42;
+    public const double LMR_Divisor = 3.42;
 
-    [SPSAAttribute<int>(1, 10, 0.5)]
-    public int NMP_MinDepth { get; set; } = 2;
+    public const int NMP_MinDepth = 2;
 
-    [SPSAAttribute<int>(1, 5, 0.5)]
-    public int NMP_BaseDepthReduction { get; set; } = 2;
+    public const int NMP_BaseDepthReduction = 2;
 
-    [SPSAAttribute<int>(0, 10, 0.5)]
-    public int NMP_DepthIncrement { get; set; } = 1;
+    public const int NMP_DepthIncrement = 1;
 
-    [SPSAAttribute<int>(1, 10, 0.5)]
-    public int NMP_DepthDivisor { get; set; } = 4;
+    public const int NMP_DepthDivisor = 4;
 
-    [SPSAAttribute<int>(1, 100, 5)]
-    public int AspirationWindow_Delta { get; set; } = 13;
+    public const int AspirationWindow_Delta = 13;
 
-    [SPSAAttribute<int>(1, 20, 1)]
-    public int AspirationWindow_MinDepth { get; set; } = 8;
+    public const int AspirationWindow_MinDepth = 8;
 
-    [SPSAAttribute<int>(1, 10, 0.5)]
-    public int RFP_MaxDepth { get; set; } = 6;
+    public const int RFP_MaxDepth = 6;
 
-    [SPSAAttribute<int>(1, 300, 15)]
-    public int RFP_DepthScalingFactor { get; set; } = 82;
+    public const int RFP_DepthScalingFactor = 82;
 
-    [SPSAAttribute<int>(1, 10, 0.5)]
-    public int Razoring_MaxDepth { get; set; } = 1;
+    public const int Razoring_MaxDepth = 1;
 
-    [SPSAAttribute<int>(1, 300, 15)]
-    public int Razoring_Depth1Bonus { get; set; } = 129;
+    public const int Razoring_Depth1Bonus = 129;
 
-    [SPSAAttribute<int>(1, 300, 15)]
-    public int Razoring_NotDepth1Bonus { get; set; } = 178;
+    public const int Razoring_NotDepth1Bonus = 178;
 
-    [SPSAAttribute<int>(1, 10, 0.5)]
-    public int IIR_MinDepth { get; set; } = 3;
+    public const int IIR_MinDepth = 3;
 
-    [SPSAAttribute<int>(1, 10, 0.5)]
-    public int LMP_MaxDepth { get; set; } = 7;
+    public const int LMP_MaxDepth = 7;
 
-    [SPSAAttribute<int>(0, 10, 0.5)]
-    public int LMP_BaseMovesToTry { get; set; } = 0;
+    public const int LMP_BaseMovesToTry = 0;
 
-    [SPSAAttribute<int>(0, 10, 0.5)]
-    public int LMP_MovesDepthMultiplier { get; set; } = 4;
+    public const int LMP_MovesDepthMultiplier = 4;
 
-    public int History_MaxMoveValue { get; set; } = 8_192;
+    public const int History_MaxMoveValue = 8_192;
 
     /// <summary>
     /// 1896: constant from depth 12
     /// </summary>
-    public int History_MaxMoveRawBonus { get; set; } = 1_896;
+    public const int History_MaxMoveRawBonus = 1_896;
 
-    [SPSAAttribute<int>(0, 6, 0.5)]
-    public int SEE_BadCaptureReduction { get; set; } = 2;
+    public const int SEE_BadCaptureReduction = 2;
 
-    [SPSAAttribute<int>(1, 10, 0.5)]
-    public int FP_MaxDepth { get; set; } = 5;
+    public const int FP_MaxDepth = 5;
 
-    [SPSAAttribute<int>(1, 200, 10)]
-    public int FP_DepthScalingFactor { get; set; } = 78;
+    public const int FP_DepthScalingFactor = 78;
 
-    [SPSAAttribute<int>(0, 500, 25)]
-    public int FP_Margin { get; set; } = 129;
+    public const int FP_Margin = 129;
 
     #region Evaluation
 
@@ -220,34 +197,34 @@ public sealed class EngineSettings
             new(0, 0));
 
     public TaperedEvaluationTermByCount27 VirtualKingMobilityBonus { get; set; } = new(
-            new(0, 0),
-            new(0, 0),
-            new(0, 0),
-            new(37, -5),
-            new(51, -8),
-            new(24, 24),
-            new(22, 13),
-            new(19, 3),
-            new(15, 6),
-            new(11, 5),
-            new(9, 9),
-            new(2, 13),
-            new(0, 9),
-            new(-5, 12),
-            new(-15, 15),
-            new(-26, 18),
-            new(-35, 15),
-            new(-46, 12),
-            new(-52, 10),
-            new(-60, 3),
-            new(-51, -5),
-            new(-46, -13),
-            new(-44, -24),
-            new(-39, -34),
-            new(-45, -44),
-            new(-22, -65),
-            new(-62, -72),
-            new(-36, -90));
+                new(0, 0),
+                new(0, 0),
+                new(0, 0),
+                new(37, -5),
+                new(51, -8),
+                new(24, 24),
+                new(22, 13),
+                new(19, 3),
+                new(15, 6),
+                new(11, 5),
+                new(9, 9),
+                new(2, 13),
+                new(0, 9),
+                new(-5, 12),
+                new(-15, 15),
+                new(-26, 18),
+                new(-35, 15),
+                new(-46, 12),
+                new(-52, 10),
+                new(-60, 3),
+                new(-51, -5),
+                new(-46, -13),
+                new(-44, -24),
+                new(-39, -34),
+                new(-45, -44),
+                new(-22, -65),
+                new(-62, -72),
+                new(-36, -90));
 
     public TaperedEvaluationTermByCount8 KnightMobilityBonus { get; set; } = new(
             new(0, 0),
