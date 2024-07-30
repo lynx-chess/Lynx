@@ -1106,12 +1106,64 @@ public static class EvaluationConstants
                 ],
         ];
 
+internal static readonly short[][] MiddleEnemyKingTable =
+[
+        [
+                 330,    351,    334,    276,      0,      0,      0,      0,
+                 309,    321,    313,    292,      0,      0,      0,      0,
+                 252,    273,    238,    236,      0,      0,      0,      0,
+                 233,    251,    231,    180,      0,      0,      0,      0,
+                 255,    277,    239,    199,      0,      0,      0,      0,
+                 240,    274,    230,    227,      0,      0,      0,      0,
+                 347,    313,    286,    280,      0,      0,      0,      0,
+                 317,    345,    322,    266,      0,      0,      0,      0,
+        ],
+        [
+                   0,      0,      0,      0,   -108,   -171,    -78,    -90,
+                   0,      0,      0,      0,   -176,   -153,   -107,   -101,
+                   0,      0,      0,      0,   -215,   -215,   -174,   -199,
+                   0,      0,      0,      0,   -260,   -227,   -220,   -256,
+                   0,      0,      0,      0,   -256,   -215,   -221,   -251,
+                   0,      0,      0,      0,   -193,   -194,   -167,   -190,
+                   0,      0,      0,      0,   -163,   -142,    -91,    -93,
+                   0,      0,      0,      0,   -101,   -163,    -64,    -76,
+        ],
+];
+
+internal static readonly short[][] EndGameEnemyKingTable =
+[
+        [
+                 -98,    -68,    -47,    -30,      0,      0,      0,      0,
+                 -46,    -11,     -1,      8,      0,      0,      0,      0,
+                 -26,     15,     44,     55,      0,      0,      0,      0,
+                 -23,     29,     65,     97,      0,      0,      0,      0,
+                 -31,     20,     63,     94,      0,      0,      0,      0,
+                 -22,     15,     46,     58,      0,      0,      0,      0,
+                 -62,    -13,      6,     10,      0,      0,      0,      0,
+                -102,    -74,    -49,    -30,      0,      0,      0,      0,
+        ],
+        [
+                   0,      0,      0,      0,    -26,      1,    -32,    -79,
+                   0,      0,      0,      0,     52,     39,     15,    -22,
+                   0,      0,      0,      0,     92,     80,     44,     15,
+                   0,      0,      0,      0,    128,     98,     67,     27,
+                   0,      0,      0,      0,    130,     97,     69,     26,
+                   0,      0,      0,      0,     88,     75,     43,     11,
+                   0,      0,      0,      0,     48,     36,     10,    -25,
+                   0,      0,      0,      0,    -21,     -2,    -35,    -83,
+        ],
+];
+
 #pragma warning restore IDE0055
 
     /// <summary>
     /// PSQTBucketCountx12x64
     /// </summary>
     public static readonly int[][][] PackedPSQT = new int[PSQTBucketCount][][];
+
+    public const int WhiteEnemyKingTableIndex = 12;
+
+    public const int BlackEnemyKingTableIndex = 13;
 
     /// <summary>
     /// <see cref="Constants.AbsoluteMaxDepth"/> x <see cref="Constants.MaxNumberOfPossibleMovesInAPosition"/>
@@ -1147,7 +1199,7 @@ public static class EvaluationConstants
 
         for (int bucket = 0; bucket < PSQTBucketCount; ++bucket)
         {
-            PackedPSQT[bucket] = new int[12][];
+            PackedPSQT[bucket] = new int[14][];
             for (int piece = (int)Piece.P; piece <= (int)Piece.K; ++piece)
             {
                 PackedPSQT[bucket][piece] = new int[64];
@@ -1163,6 +1215,20 @@ public static class EvaluationConstants
                         (short)(MiddleGamePieceValues[bucket][piece + 6] - mgPositionalTables[piece][bucket][sq ^ 56]),
                         (short)(EndGamePieceValues[bucket][piece + 6] - egPositionalTables[piece][bucket][sq ^ 56]));
                 }
+            }
+
+            PackedPSQT[bucket][WhiteEnemyKingTableIndex] = new int[64];
+            PackedPSQT[bucket][BlackEnemyKingTableIndex] = new int[64];
+
+            for (int sq = 0; sq < 64; ++sq)
+            {
+                PackedPSQT[bucket][WhiteEnemyKingTableIndex][sq] = Utils.Pack(
+                    MiddleEnemyKingTable[bucket][sq],
+                    EndGameEnemyKingTable[bucket][sq]);
+
+                PackedPSQT[bucket][BlackEnemyKingTableIndex][sq] = Utils.Pack(
+                    (short)(-MiddleEnemyKingTable[bucket][sq ^ 56]),
+                    (short)(-EndGameEnemyKingTable[bucket][sq ^ 56]));
             }
         }
 
