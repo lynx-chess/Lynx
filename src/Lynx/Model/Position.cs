@@ -735,13 +735,18 @@ public class Position
         }
 
         // Pieces protected by pawns bonus
-        packedScore += Configuration.EngineSettings.PieceProtectedByPawnBonus[whiteBucket].PackedEvaluation
-            * ((whitePawnAttacks & OccupancyBitBoards[(int)Side.White] /*& (~PieceBitBoards[(int)Piece.P])*/).CountBits()
-                - (blackPawnAttacks & OccupancyBitBoards[(int)Side.Black] /*& (~PieceBitBoards[(int)Piece.p])*/).CountBits());
+        packedScore +=
+            (Configuration.EngineSettings.PieceProtectedByPawnBonus[whiteBucket].PackedEvaluation
+                * (whitePawnAttacks & OccupancyBitBoards[(int)Side.White] /*& (~PieceBitBoards[(int)Piece.P])*/).CountBits())
+            - (Configuration.EngineSettings.PieceProtectedByPawnBonus[blackBucket].PackedEvaluation
+                * (blackPawnAttacks & OccupancyBitBoards[(int)Side.Black] /*& (~PieceBitBoards[(int)Piece.p])*/).CountBits());
 
-        packedScore += Configuration.EngineSettings.PieceAttackedByPawnPenalty[blackBucket].PackedEvaluation
-            * ((blackPawnAttacks & OccupancyBitBoards[(int)Side.White]).CountBits()
-                - (whitePawnAttacks & OccupancyBitBoards[(int)Side.Black]).CountBits());
+        // TODO: invert?
+        packedScore +=
+            (Configuration.EngineSettings.PieceAttackedByPawnPenalty[whiteBucket].PackedEvaluation
+                * (blackPawnAttacks & OccupancyBitBoards[(int)Side.White]).CountBits())
+            - (Configuration.EngineSettings.PieceAttackedByPawnPenalty[blackBucket].PackedEvaluation
+                * (whitePawnAttacks & OccupancyBitBoards[(int)Side.Black]).CountBits());
 
         packedScore += EvaluationConstants.PackedPSQT[whiteBucket][(int)Piece.K][whiteKing]
             + EvaluationConstants.PackedPSQT[blackBucket][(int)Piece.k][blackKing]
