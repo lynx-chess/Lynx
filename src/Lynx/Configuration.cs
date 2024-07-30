@@ -189,25 +189,65 @@ public sealed class EngineSettings
 
     #region Evaluation
 
-    public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-20, -14);
+    public TaperedEvaluationTerm[] IsolatedPawnPenalty { get; set; } =
+    [
+        new(-20, -14),
+        new(-20, -14)
+    ];
 
-    public TaperedEvaluationTerm OpenFileRookBonus { get; set; } = new(45, 6);
+    public TaperedEvaluationTerm[] OpenFileRookBonus { get; set; } =
+    [
+        new(45, 6),
+        new(45, 6)
+    ];
 
-    public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(15, 8);
+    public TaperedEvaluationTerm[] SemiOpenFileRookBonus { get; set; } =
+    [
+        new (15, 8),
+        new (15, 8)
+    ];
 
-    public TaperedEvaluationTerm QueenMobilityBonus { get; set; } = new(3, 8);
+    public TaperedEvaluationTerm[] QueenMobilityBonus { get; set; } =
+    [
+        new (3, 8),
+        new (3, 8)
+    ];
 
-    public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-21, 17);
+    public TaperedEvaluationTerm[] SemiOpenFileKingPenalty { get; set; } =
+    [
+        new (-21, 17),
+        new (-21, 17)
+    ];
 
-    public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-86, 15);
+    public TaperedEvaluationTerm[] OpenFileKingPenalty { get; set; } =
+    [
+        new (-86, 15),
+        new (-86, 15)
+    ];
 
-    public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(11, -9);
+    public TaperedEvaluationTerm[] KingShieldBonus { get; set; } =
+    [
+        new (11, -9),
+        new (11, -9)
+    ];
 
-    public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(31, 81);
+    public TaperedEvaluationTerm[] BishopPairBonus { get; set; } =
+    [
+        new (31, 81),
+        new (31, 81)
+    ];
 
-    public TaperedEvaluationTerm PieceProtectedByPawnBonus { get; set; } = new(6, 11);
+    public TaperedEvaluationTerm[] PieceProtectedByPawnBonus { get; set; } =
+    [
+        new (6, 11),
+        new (6, 11)
+    ];
 
-    public TaperedEvaluationTerm PieceAttackedByPawnPenalty { get; set; } = new(-45, -18);
+    public TaperedEvaluationTerm[] PieceAttackedByPawnPenalty { get; set; } =
+    [
+        new (-45, -18),
+        new (-45, -18)
+    ];
 
     public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(
             new(0, 0),
