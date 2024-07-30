@@ -683,6 +683,12 @@ public class Position
         BitBoard whitePawnAttacks = PieceBitBoards[(int)Piece.P].ShiftUpRight() | PieceBitBoards[(int)Piece.P].ShiftUpLeft();
         BitBoard blackPawnAttacks = PieceBitBoards[(int)Piece.p].ShiftDownRight() | PieceBitBoards[(int)Piece.p].ShiftDownLeft();
 
+        var whiteKing = PieceBitBoards[(int)Piece.K].GetLS1BIndex();
+        var blackKing = PieceBitBoards[(int)Piece.k].GetLS1BIndex();
+
+        var whiteBucket = Constants.File[whiteKing] / 4;
+        var blackBucket = Constants.File[blackKing] / 4;
+
         for (int pieceIndex = (int)Piece.P; pieceIndex < (int)Piece.K; ++pieceIndex)
         {
             // Bitboard copy that we 'empty'
@@ -693,7 +699,7 @@ public class Position
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
 
-                packedScore += EvaluationConstants.PackedPSQT[pieceIndex][pieceSquareIndex];
+                packedScore += EvaluationConstants.PackedPSQT[whiteBucket][pieceIndex][pieceSquareIndex];
                 gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
 
                 packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
@@ -710,7 +716,7 @@ public class Position
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
 
-                packedScore += EvaluationConstants.PackedPSQT[pieceIndex][pieceSquareIndex];
+                packedScore += EvaluationConstants.PackedPSQT[blackBucket][pieceIndex][pieceSquareIndex];
                 gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
 
                 packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
@@ -737,11 +743,8 @@ public class Position
             * ((blackPawnAttacks & OccupancyBitBoards[(int)Side.White]).CountBits()
                 - (whitePawnAttacks & OccupancyBitBoards[(int)Side.Black]).CountBits());
 
-        var whiteKing = PieceBitBoards[(int)Piece.K].GetLS1BIndex();
-        var blackKing = PieceBitBoards[(int)Piece.k].GetLS1BIndex();
-
-        packedScore += EvaluationConstants.PackedPSQT[(int)Piece.K][whiteKing]
-            + EvaluationConstants.PackedPSQT[(int)Piece.k][blackKing]
+        packedScore += EvaluationConstants.PackedPSQT[whiteBucket][(int)Piece.K][whiteKing]
+            + EvaluationConstants.PackedPSQT[blackBucket][(int)Piece.k][blackKing]
             + KingAdditionalEvaluation(whiteKing, Side.White)
             - KingAdditionalEvaluation(blackKing, Side.Black);
 

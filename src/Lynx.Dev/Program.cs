@@ -1151,8 +1151,8 @@ static void UnmakeMove()
 
 static void PieceSquareTables()
 {
-    short[] middleGamePawnTableBlack = EvaluationConstants.MiddleGamePawnTable.Select((_, index) => (short)-EvaluationConstants.MiddleGamePawnTable[index ^ 56]).ToArray();
-    short[] endGamePawnTableBlack = EvaluationConstants.EndGamePawnTable.Select((_, index) => (short)-EvaluationConstants.EndGamePawnTable[index ^ 56]).ToArray();
+    short[] middleGamePawnTableBlack = EvaluationConstants.MiddleGamePawnTable.Select((_, index) => (short)-EvaluationConstants.MiddleGamePawnTable[0][index ^ 56]).ToArray();
+    short[] endGamePawnTableBlack = EvaluationConstants.EndGamePawnTable.Select((_, index) => (short)-EvaluationConstants.EndGamePawnTable[0][index ^ 56]).ToArray();
 
     PrintBitBoard(EvaluationConstants.MiddleGamePawnTable);
     PrintBitBoard(middleGamePawnTableBlack);
