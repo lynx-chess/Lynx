@@ -18,18 +18,18 @@ public static partial class EvaluationConstants
 
 #pragma warning disable IDE0055 // Discard formatting in this region
 
-    public const int PSQTBucketCount = 23;
+    public const int PSQTBucketCount = 16;
 
     public static readonly int[] PSQTBucketLayout =
     [
-        15, 16, 17, 18, 19, 20, 21, 22,
-        15, 16, 17, 18, 19, 20, 21, 22,
-        15, 16, 17, 18, 19, 20, 21, 22,
-        15, 16, 17, 18, 19, 20, 21, 22,
-        15, 8, 9, 10, 11, 12, 13, 14,
-        15, 8, 9, 10, 11, 12, 13, 14,
-        0, 8, 9, 10, 11, 12, 13, 14,
-        0, 1, 2, 3, 4, 5, 6, 7, //
+         8,   9,  10,  11,  12,  13,  14,  15,
+         8,   9,  10,  11,  12,  13,  14,  15,
+         8,   9,  10,  11,  12,  13,  14,  15,
+         8,   9,  10,  11,  12,  13,  14,  15,
+         0,   1,   2,   3,   4,   5,   6,   7,
+         0,   1,   2,   3,   4,   5,   6,   7,
+         0,   1,   2,   3,   4,   5,   6,   7,
+         0,   1,   2,   3,   4,   5,   6,   7,
     ];
 
     public static readonly int[] GamePhaseByPiece =
@@ -42,6 +42,10 @@ public static partial class EvaluationConstants
     /// PSQTBucketCountx12x64
     /// </summary>
     public static readonly int[][][] PackedPSQT = new int[PSQTBucketCount][][];
+
+    public const int WhiteEnemyKingTableIndex = 12;
+
+    public const int BlackEnemyKingTableIndex = 13;
 
     /// <summary>
     /// <see cref="Constants.AbsoluteMaxDepth"/> x <see cref="Constants.MaxNumberOfPossibleMovesInAPosition"/>
@@ -77,7 +81,7 @@ public static partial class EvaluationConstants
 
         for (int bucket = 0; bucket < PSQTBucketCount; ++bucket)
         {
-            PackedPSQT[bucket] = new int[12][];
+            PackedPSQT[bucket] = new int[14][];
             for (int piece = (int)Piece.P; piece <= (int)Piece.K; ++piece)
             {
                 PackedPSQT[bucket][piece] = new int[64];
@@ -93,6 +97,20 @@ public static partial class EvaluationConstants
                         (short)(MiddleGamePieceValues[bucket][piece + 6] - mgPositionalTables[piece][bucket][sq ^ 56]),
                         (short)(EndGamePieceValues[bucket][piece + 6] - egPositionalTables[piece][bucket][sq ^ 56]));
                 }
+            }
+
+            PackedPSQT[bucket][WhiteEnemyKingTableIndex] = new int[64];
+            PackedPSQT[bucket][BlackEnemyKingTableIndex] = new int[64];
+
+            for (int sq = 0; sq < 64; ++sq)
+            {
+                PackedPSQT[bucket][WhiteEnemyKingTableIndex][sq] = Utils.Pack(
+                    MiddleGameEnemyKingTable[bucket][sq],
+                    EndGameEnemyKingTable[bucket][sq]);
+
+                PackedPSQT[bucket][BlackEnemyKingTableIndex][sq] = Utils.Pack(
+                    (short)(-MiddleGameEnemyKingTable[bucket][sq ^ 56]),
+                    (short)(-EndGameEnemyKingTable[bucket][sq ^ 56]));
             }
         }
 

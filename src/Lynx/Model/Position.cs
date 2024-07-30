@@ -750,6 +750,9 @@ public class Position
             + KingAdditionalEvaluation(whiteKing, Side.White)
             - KingAdditionalEvaluation(blackKing, Side.Black);
 
+        packedScore += PackedPSQT[whiteBucket][WhiteEnemyKingTableIndex][blackKing]
+            + PackedPSQT[blackBucket][BlackEnemyKingTableIndex][whiteKing];
+
         const int maxPhase = 24;
 
         if (gamePhase > maxPhase)    // Early promotions
