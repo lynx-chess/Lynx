@@ -1109,7 +1109,7 @@ public static class EvaluationConstants
 #pragma warning restore IDE0055
 
     /// <summary>
-    /// 2x12x64
+    /// PSQTBucketCountx12x64
     /// </summary>
     public static readonly int[][][] PackedPSQT = new int[PSQTBucketCount][][];
 
