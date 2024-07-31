@@ -205,7 +205,7 @@ public sealed class EngineSettings
 
     public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(31, 81);
 
-    public TaperedEvaluationTerm PieceProtectedByPawnBonus { get; set; } = new(6, 11);
+    public TaperedEvaluationTerm PieceProtectedByPawnBonus { get; set; } = new(7, 11);
 
     public TaperedEvaluationTerm PieceAttackedByPawnPenalty { get; set; } = new(-45, -18);
 
@@ -216,38 +216,38 @@ public sealed class EngineSettings
             new(-8, 46),
             new(21, 81),
             new(64, 161),
-            new(100, 227),
+            new(100, 228),
             new(0, 0));
 
     public TaperedEvaluationTermByCount27 VirtualKingMobilityBonus { get; set; } = new(
             new(0, 0),
             new(0, 0),
             new(0, 0),
-            new(36, 0),
-            new(47, -6),
-            new(20, 23),
-            new(18, 14),
-            new(18, 3),
-            new(14, 6),
-            new(11, 5),
-            new(9, 9),
-            new(4, 13),
-            new(3, 9),
-            new(-3, 13),
-            new(-12, 15),
-            new(-22, 17),
-            new(-30, 14),
-            new(-42, 12),
-            new(-47, 9),
-            new(-53, 2),
-            new(-42, -6),
+            new(35, 1),
+            new(46, -5),
+            new(19, 23),
+            new(17, 14),
+            new(17, 3),
+            new(13, 7),
+            new(9, 6),
+            new(8, 9),
+            new(3, 14),
+            new(2, 10),
+            new(-4, 13),
+            new(-13, 15),
+            new(-23, 17),
+            new(-31, 14),
+            new(-43, 12),
+            new(-48, 9),
+            new(-54, 3),
+            new(-43, -6),
             new(-35, -15),
             new(-35, -24),
-            new(-26, -35),
+            new(-26, -34),
             new(-34, -44),
-            new(-9, -64),
-            new(-58, -71),
-            new(-22, -90));
+            new(-8, -64),
+            new(-57, -70),
+            new(-20, -89));
 
     public TaperedEvaluationTermByCount8 KnightMobilityBonus { get; set; } = new(
             new(0, 0),
@@ -255,32 +255,32 @@ public sealed class EngineSettings
             new(31, 6),
             new(36, 6),
             new(41, 12),
-            new(39, 20),
+            new(39, 21),
             new(39, 24),
             new(42, 25),
-            new(53, 18));
+            new(53, 19));
 
     public TaperedEvaluationTermByCount14 BishopMobilityBonus { get; set; } = new(
-            new(-214, -182),
+            new(-216, -183),
             new(0, 0),
             new(14, -2),
             new(21, 37),
             new(35, 54),
-            new(42, 68),
+            new(41, 69),
             new(57, 89),
-            new(66, 98),
+            new(66, 99),
             new(75, 111),
             new(75, 118),
             new(81, 123),
             new(85, 122),
-            new(86, 122),
+            new(86, 123),
             new(117, 116),
             new(0, 0));
 
     public TaperedEvaluationTermByCount14 RookMobilityBonus { get; set; } = new(
             new(0, 0),
             new(9, 28),
-            new(14, 29),
+            new(14, 30),
             new(19, 36),
             new(17, 46),
             new(24, 50),
@@ -289,7 +289,7 @@ public sealed class EngineSettings
             new(33, 73),
             new(36, 80),
             new(41, 82),
-            new(44, 83),
+            new(44, 84),
             new(44, 88),
             new(59, 87),
             new(54, 85));
