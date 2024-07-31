@@ -18,7 +18,7 @@ public static class EvaluationConstants
 
 #pragma warning disable IDE0055 // Discard formatting in this region
 
-    public const int PSQTBucketCount = 2;
+    public const int PSQTBucketCount = 8;
 
     public static readonly int[] GamePhaseByPiece =
     [
@@ -343,7 +343,7 @@ internal static readonly short[][] EndGameKingTable =
     /// <summary>
     /// 2x12x64
     /// </summary>
-    public static readonly int[][][] PackedPSQT = new int[2][][];
+    public static readonly int[][][] PackedPSQT = new int[PSQTBucketCount][][];
 
     /// <summary>
     /// <see cref="Constants.AbsoluteMaxDepth"/> x <see cref="Constants.MaxNumberOfPossibleMovesInAPosition"/>
