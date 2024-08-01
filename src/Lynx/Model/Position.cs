@@ -702,7 +702,7 @@ public class Position
                 packedScore += EvaluationConstants.PackedPSQT[whiteBucket][pieceIndex][pieceSquareIndex];
                 gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
 
-                packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
+                packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, whiteBucket);
             }
         }
 
@@ -719,34 +719,39 @@ public class Position
                 packedScore += EvaluationConstants.PackedPSQT[blackBucket][pieceIndex][pieceSquareIndex];
                 gamePhase += EvaluationConstants.GamePhaseByPiece[pieceIndex];
 
-                packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
+                packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, blackBucket);
             }
         }
 
         // Bishop pair bonus
         if (PieceBitBoards[(int)Piece.B].CountBits() >= 2)
         {
-            packedScore += Configuration.EngineSettings.BishopPairBonus.PackedEvaluation;
+            packedScore += Configuration.EngineSettings.BishopPairBonus[whiteBucket].PackedEvaluation;
         }
 
         if (PieceBitBoards[(int)Piece.b].CountBits() >= 2)
         {
-            packedScore -= Configuration.EngineSettings.BishopPairBonus.PackedEvaluation;
+            packedScore -= Configuration.EngineSettings.BishopPairBonus[blackBucket].PackedEvaluation;
         }
 
         // Pieces protected by pawns bonus
-        packedScore += Configuration.EngineSettings.PieceProtectedByPawnBonus.PackedEvaluation
-            * ((whitePawnAttacks & OccupancyBitBoards[(int)Side.White] /*& (~PieceBitBoards[(int)Piece.P])*/).CountBits()
-                - (blackPawnAttacks & OccupancyBitBoards[(int)Side.Black] /*& (~PieceBitBoards[(int)Piece.p])*/).CountBits());
+        packedScore +=
+            (Configuration.EngineSettings.PieceProtectedByPawnBonus[whiteBucket].PackedEvaluation
+                * (whitePawnAttacks & OccupancyBitBoards[(int)Side.White] /*& (~PieceBitBoards[(int)Piece.P])*/).CountBits())
+            - (Configuration.EngineSettings.PieceProtectedByPawnBonus[blackBucket].PackedEvaluation
+                * (blackPawnAttacks & OccupancyBitBoards[(int)Side.Black] /*& (~PieceBitBoards[(int)Piece.p])*/).CountBits());
 
-        packedScore += Configuration.EngineSettings.PieceAttackedByPawnPenalty.PackedEvaluation
-            * ((blackPawnAttacks & OccupancyBitBoards[(int)Side.White]).CountBits()
-                - (whitePawnAttacks & OccupancyBitBoards[(int)Side.Black]).CountBits());
+        // TODO: invert?
+        packedScore +=
+            (Configuration.EngineSettings.PieceAttackedByPawnPenalty[whiteBucket].PackedEvaluation
+                * (blackPawnAttacks & OccupancyBitBoards[(int)Side.White]).CountBits())
+            - (Configuration.EngineSettings.PieceAttackedByPawnPenalty[blackBucket].PackedEvaluation
+                * (whitePawnAttacks & OccupancyBitBoards[(int)Side.Black]).CountBits());
 
         packedScore += EvaluationConstants.PackedPSQT[whiteBucket][(int)Piece.K][whiteKing]
             + EvaluationConstants.PackedPSQT[blackBucket][(int)Piece.k][blackKing]
-            + KingAdditionalEvaluation(whiteKing, Side.White)
-            - KingAdditionalEvaluation(blackKing, Side.Black);
+            + KingAdditionalEvaluation(whiteKing, Side.White, whiteBucket)
+            - KingAdditionalEvaluation(blackKing, Side.Black, blackBucket);
 
         const int maxPhase = 24;
 
@@ -882,15 +887,15 @@ public class Position
     /// <param name="pieceIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int AdditionalPieceEvaluation(int pieceSquareIndex, int pieceIndex)
+    internal int AdditionalPieceEvaluation(int pieceSquareIndex, int pieceIndex, int bucket)
     {
         return pieceIndex switch
         {
-            (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(pieceSquareIndex, pieceIndex),
-            (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex),
-            (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex),
-            (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(pieceSquareIndex, pieceIndex),
-            (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex),
+            (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(pieceSquareIndex, pieceIndex, bucket),
+            (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex, bucket),
+            (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex, bucket),
+            (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(pieceSquareIndex, pieceIndex, bucket),
+            (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex, bucket),
             _ => 0
         };
     }
@@ -902,13 +907,13 @@ public class Position
     /// < param name="pieceIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int PawnAdditionalEvaluation(int squareIndex, int pieceIndex)
+    private int PawnAdditionalEvaluation(int squareIndex, int pieceIndex, int bucket)
     {
         int packedBonus = 0;
 
         if ((PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default) // isIsolatedPawn
         {
-            packedBonus += Configuration.EngineSettings.IsolatedPawnPenalty.PackedEvaluation;
+            packedBonus += Configuration.EngineSettings.IsolatedPawnPenalty[bucket].PackedEvaluation;
         }
 
         if ((PieceBitBoards[(int)Piece.p - pieceIndex] & Masks.PassedPawns[pieceIndex][squareIndex]) == default)    // isPassedPawn
@@ -931,7 +936,7 @@ public class Position
     /// <param name="pieceIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int RookAdditionalEvaluation(int squareIndex, int pieceIndex)
+    private int RookAdditionalEvaluation(int squareIndex, int pieceIndex, int bucket)
     {
         var sameSide = pieceIndex == (int)Piece.R
             ? (int)Side.White
@@ -948,11 +953,11 @@ public class Position
 
         if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default)  // isOpenFile
         {
-            packedBonus += Configuration.EngineSettings.OpenFileRookBonus.PackedEvaluation;
+            packedBonus += Configuration.EngineSettings.OpenFileRookBonus[bucket].PackedEvaluation;
         }
         else if ((PieceBitBoards[pieceIndex - pawnToRookOffset] & Masks.FileMasks[squareIndex]) == default)  // isSemiOpenFile
         {
-            packedBonus += Configuration.EngineSettings.SemiOpenFileRookBonus.PackedEvaluation;
+            packedBonus += Configuration.EngineSettings.SemiOpenFileRookBonus[bucket].PackedEvaluation;
         }
 
         return packedBonus;
@@ -965,7 +970,7 @@ public class Position
     /// <param name="pieceIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int KnightAdditionalEvaluation(int squareIndex, int pieceIndex)
+    private int KnightAdditionalEvaluation(int squareIndex, int pieceIndex, int bucket)
     {
         var sameSide = pieceIndex == (int)Piece.N
             ? (int)Side.White
@@ -985,7 +990,7 @@ public class Position
     /// <param name="pieceIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int BishopAdditionalEvaluation(int squareIndex, int pieceIndex)
+    private int BishopAdditionalEvaluation(int squareIndex, int pieceIndex, int bucket)
     {
         var attacksCount = Attacks.BishopAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
 
@@ -998,11 +1003,11 @@ public class Position
     /// <param name="squareIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int QueenAdditionalEvaluation(int squareIndex)
+    private int QueenAdditionalEvaluation(int squareIndex, int bucket)
     {
         var attacksCount = Attacks.QueenAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
 
-        return attacksCount * Configuration.EngineSettings.QueenMobilityBonus.PackedEvaluation;
+        return attacksCount * Configuration.EngineSettings.QueenMobilityBonus[bucket].PackedEvaluation;
     }
 
     /// <summary>
@@ -1012,7 +1017,7 @@ public class Position
     /// <param name="kingSide"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int KingAdditionalEvaluation(int squareIndex, Side kingSide)
+    internal int KingAdditionalEvaluation(int squareIndex, Side kingSide, int bucket)
     {
         var attacksCount = Attacks.QueenAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
         int packedBonus = Configuration.EngineSettings.VirtualKingMobilityBonus[attacksCount].PackedEvaluation;
@@ -1023,17 +1028,17 @@ public class Position
         {
             if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == 0)  // isOpenFile
             {
-                packedBonus += Configuration.EngineSettings.OpenFileKingPenalty.PackedEvaluation;
+                packedBonus += Configuration.EngineSettings.OpenFileKingPenalty[bucket].PackedEvaluation;
             }
             else if ((PieceBitBoards[(int)Piece.P + kingSideOffset] & Masks.FileMasks[squareIndex]) == 0) // isSemiOpenFile
             {
-                packedBonus += Configuration.EngineSettings.SemiOpenFileKingPenalty.PackedEvaluation;
+                packedBonus += Configuration.EngineSettings.SemiOpenFileKingPenalty[bucket].PackedEvaluation;
             }
         }
 
         var ownPiecesAroundCount = (Attacks.KingAttacks[squareIndex] & PieceBitBoards[(int)Piece.P + kingSideOffset]).CountBits();
 
-        return packedBonus + (ownPiecesAroundCount * Configuration.EngineSettings.KingShieldBonus.PackedEvaluation);
+        return packedBonus + (ownPiecesAroundCount * Configuration.EngineSettings.KingShieldBonus[bucket].PackedEvaluation);
     }
 
     #endregion

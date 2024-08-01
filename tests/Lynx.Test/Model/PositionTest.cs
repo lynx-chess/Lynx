@@ -215,7 +215,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(Configuration.EngineSettings.IsolatedPawnPenalty.MG, evaluation);
+        Assert.AreEqual(Configuration.EngineSettings.IsolatedPawnPenalty[0].MG, evaluation);
     }
 
     /// <summary>
@@ -423,7 +423,7 @@ public class PositionTest
 
         Assert.AreEqual(
             //(-4 * Configuration.EngineSettings.DoubledPawnPenalty.MG)
-            +Configuration.EngineSettings.IsolatedPawnPenalty.MG
+            +Configuration.EngineSettings.IsolatedPawnPenalty[0].MG
             + Configuration.EngineSettings.PassedPawnBonus[rank].MG,
 
             evaluation);
@@ -458,7 +458,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(Configuration.EngineSettings.SemiOpenFileRookBonus.MG
+        Assert.AreEqual(Configuration.EngineSettings.SemiOpenFileRookBonus[0].MG
                 + Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideToMove].MG - Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideNotToMove].MG,
             evaluation);
     }
@@ -491,7 +491,7 @@ public class PositionTest
         {
             evaluation = -evaluation;
         }
-        Assert.AreEqual(Configuration.EngineSettings.OpenFileRookBonus.MG
+        Assert.AreEqual(Configuration.EngineSettings.OpenFileRookBonus[0].MG
             + Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideToMove].MG - Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideNotToMove].MG,
             evaluation);
     }
@@ -525,7 +525,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual((2 * Configuration.EngineSettings.SemiOpenFileRookBonus.MG)
+        Assert.AreEqual((2 * Configuration.EngineSettings.SemiOpenFileRookBonus[0].MG)
             + Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideToMove].MG - Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideNotToMove].MG,
         evaluation);
     }
@@ -559,7 +559,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual((-2 * Configuration.EngineSettings.OpenFileRookBonus.MG)
+        Assert.AreEqual((-2 * Configuration.EngineSettings.OpenFileRookBonus[0].MG)
             + Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideToMove].MG
             - Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideNotToMove].MG,
             evaluation);
@@ -595,7 +595,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(Configuration.EngineSettings.SemiOpenFileKingPenalty.EG, evaluation);
+        Assert.AreEqual(Configuration.EngineSettings.SemiOpenFileKingPenalty[0].EG, evaluation);
     }
 
     /// <summary>
@@ -627,7 +627,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(Configuration.EngineSettings.OpenFileKingPenalty.EG, evaluation);
+        Assert.AreEqual(Configuration.EngineSettings.OpenFileKingPenalty[0].EG, evaluation);
     }
 
     /// <summary>
@@ -751,7 +751,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(surroundingPieces * Configuration.EngineSettings.KingShieldBonus.EG, evaluation);
+        Assert.AreEqual(surroundingPieces * Configuration.EngineSettings.KingShieldBonus[0].EG, evaluation);
     }
 
     /// <summary>
@@ -923,7 +923,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(mobilityDifference * Configuration.EngineSettings.QueenMobilityBonus.MG, evaluation);
+        Assert.AreEqual(mobilityDifference * Configuration.EngineSettings.QueenMobilityBonus[0].MG, evaluation);
     }
 
     /// <summary>
@@ -1001,11 +1001,17 @@ public class PositionTest
         var bitBoard = position.PieceBitBoards[(int)piece];
         int eval = 0;
 
+        var whiteKing = position.PieceBitBoards[(int)Piece.K].GetLS1BIndex();
+        var blackKing = position.PieceBitBoards[(int)Piece.k].GetLS1BIndex();
+
+        var whiteBucket = Constants.File[whiteKing] / 4;
+        var blackBucket = Constants.File[blackKing] / 4;
+
         while (!bitBoard.Empty())
         {
             var pieceSquareIndex = bitBoard.GetLS1BIndex();
             bitBoard.ResetLS1B();
-            eval += Utils.UnpackMG(position.AdditionalPieceEvaluation(pieceSquareIndex, (int)piece));
+            eval += Utils.UnpackMG(position.AdditionalPieceEvaluation(pieceSquareIndex, (int)piece, (int)piece < (int)Piece.p ? whiteBucket : blackBucket));
         }
 
         return eval;
@@ -1025,9 +1031,11 @@ public class PositionTest
 
         var bitBoard = position.PieceBitBoards[(int)piece].GetLS1BIndex();
 
+        var bucket = Constants.File[bitBoard] / 4;
+
         return Utils.UnpackEG(piece == Piece.K
-            ? position.KingAdditionalEvaluation(bitBoard, Side.White)
-            : position.KingAdditionalEvaluation(bitBoard, Side.Black));
+            ? position.KingAdditionalEvaluation(bitBoard, Side.White, bucket)
+            : position.KingAdditionalEvaluation(bitBoard, Side.Black, bucket));
     }
 
     private static void EvaluateDrawOrNotDraw(string fen, bool isDrawExpected, int expectedPhase)
