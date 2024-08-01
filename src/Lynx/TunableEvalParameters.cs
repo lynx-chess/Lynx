@@ -1083,6 +1083,111 @@ public static partial class EvaluationConstants
 			   0,	   0,	   0,	   0,	   0,	   0,	   0,	 -59,
 		],
 	];
+
+	public static readonly TaperedEvaluationTerm IsolatedPawnPenalty = new(-19, -14);
+
+    public static readonly TaperedEvaluationTerm OpenFileRookBonus = new(45, 7);
+
+    public static readonly TaperedEvaluationTerm SemiOpenFileRookBonus = new(14, 9);
+
+    public static readonly TaperedEvaluationTerm QueenMobilityBonus = new(3, 8);
+
+    public static readonly TaperedEvaluationTerm SemiOpenFileKingPenalty = new(-31, 13);
+
+    public static readonly TaperedEvaluationTerm OpenFileKingPenalty = new(-98, 10);
+
+    public static readonly TaperedEvaluationTerm KingShieldBonus = new(14, -8);
+
+    public static readonly TaperedEvaluationTerm BishopPairBonus = new(31, 81);
+
+    public static readonly TaperedEvaluationTerm PieceProtectedByPawnBonus = new(7, 11);
+
+    public static readonly TaperedEvaluationTerm PieceAttackedByPawnPenalty = new(-46, -19);
+
+    public static readonly TaperedEvaluationTermByRank PassedPawnBonus = new(
+        new(0, 0),
+        new(7, 11),
+        new(-4, 18),
+        new(-6, 44),
+        new(22, 80),
+        new(65, 161),
+        new(102, 227),
+        new(0, 0));
+
+    public static readonly TaperedEvaluationTermByCount27 VirtualKingMobilityBonus = new(
+        new(0, 0),
+        new(0, 0),
+        new(0, 0),
+        new(11, 17),
+        new(27, 5),
+        new(8, 28),
+        new(11, 17),
+        new(13, 8),
+        new(11, 11),
+        new(8, 10),
+        new(6, 12),
+        new(2, 17),
+        new(2, 13),
+        new(-4, 16),
+        new(-11, 18),
+        new(-19, 20),
+        new(-24, 15),
+        new(-32, 11),
+        new(-33, 8),
+        new(-33, 0),
+        new(-16, -10),
+        new(-4, -19),
+        new(3, -29),
+        new(16, -40),
+        new(18, -50),
+        new(52, -71),
+        new(5, -77),
+        new(43, -95));
+
+    public static readonly TaperedEvaluationTermByCount8 KnightMobilityBonus = new(
+        new(0, 0),
+        new(24, -5),
+        new(32, 6),
+        new(37, 6),
+        new(41, 12),
+        new(39, 20),
+        new(40, 23),
+        new(42, 24),
+        new(53, 18));
+
+    public static readonly TaperedEvaluationTermByCount14 BishopMobilityBonus = new(
+        new(-279, -259),
+        new(0, 0),
+        new(18, -11),
+        new(23, 28),
+        new(36, 45),
+        new(43, 60),
+        new(59, 80),
+        new(67, 90),
+        new(76, 102),
+        new(77, 109),
+        new(82, 114),
+        new(86, 114),
+        new(86, 115),
+        new(112, 111),
+        new(0, 0));
+
+    public static readonly TaperedEvaluationTermByCount14 RookMobilityBonus = new(
+        new(0, 0),
+        new(10, 24),
+        new(15, 28),
+        new(20, 35),
+        new(19, 45),
+        new(26, 48),
+        new(28, 55),
+        new(32, 60),
+        new(34, 72),
+        new(37, 78),
+        new(42, 80),
+        new(44, 82),
+        new(45, 86),
+        new(61, 84),
+        new(58, 82));
 }
 
 #pragma warning restore IDE0055, IDE1006 // Discard formatting and naming styles
