@@ -3007,28 +3007,71 @@ public static partial class EvaluationConstants
 			   0,	   0,	   0,	   0,	   0,	   0,	   0,	   0,
 		],
 	];
+}
 
-	public static readonly TaperedEvaluationTerm IsolatedPawnPenalty = new(-19, -15);
+public static class EvaluationParams
+{
+    public static readonly TaperedEvaluationTerm[] IsolatedPawnPenalty =
+    [
+            new (-21, -11),
+            new (-19, -15),
+    ];
 
-	public static readonly TaperedEvaluationTerm OpenFileRookBonus = new(42, 7);
+    public static readonly TaperedEvaluationTerm[] OpenFileRookBonus =
+    [
+            new (67, -7),
+            new (43, 9),
+    ];
 
-	public static readonly TaperedEvaluationTerm SemiOpenFileRookBonus = new(14, 10);
+    public static readonly TaperedEvaluationTerm[] SemiOpenFileRookBonus =
+    [
+            new (25, 3),
+            new (14, 8),
+    ];
 
-	public static readonly TaperedEvaluationTerm QueenMobilityBonus = new(1, 13);
+    public static readonly TaperedEvaluationTerm[] QueenMobilityBonus =
+    [
+            new (5, 9),
+            new (3, 8),
+    ];
 
-	public static readonly TaperedEvaluationTerm SemiOpenFileKingPenalty = new(-22, 7);
+    public static readonly TaperedEvaluationTerm[] SemiOpenFileKingPenalty =
+    [
+            new (-10, 23),
+            new (-22, 15),
+    ];
 
-	public static readonly TaperedEvaluationTerm OpenFileKingPenalty = new(-86, 5);
+    public static readonly TaperedEvaluationTerm[] OpenFileKingPenalty =
+    [
+            new (-91, 17),
+            new (-84, 15),
+    ];
 
-	public static readonly TaperedEvaluationTerm KingShieldBonus = new(26, -8);
+    public static readonly TaperedEvaluationTerm[] KingShieldBonus =
+    [
+            new (17, -10),
+            new (11, -9),
+    ];
 
-	public static readonly TaperedEvaluationTerm BishopPairBonus = new(31, 81);
+    public static readonly TaperedEvaluationTerm[] BishopPairBonus =
+    [
+            new (30, 79),
+            new (31, 82),
+    ];
 
-	public static readonly TaperedEvaluationTerm PieceProtectedByPawnBonus = new(10, 11);
+    public static readonly TaperedEvaluationTerm[] PieceProtectedByPawnBonus =
+    [
+            new (9, 7),
+            new (6, 12),
+    ];
 
-	public static readonly TaperedEvaluationTerm PieceAttackedByPawnPenalty = new(-43, -27);
+    public static readonly TaperedEvaluationTerm[] PieceAttackedByPawnPenalty =
+    [
+            new (-41, -24),
+            new (-46, -17),
+    ];
 
-	public static TaperedEvaluationTermByRank PassedPawnBonus { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(
+	public static readonly TaperedEvaluationTermByRank PassedPawnBonus = new(
 		new(0, 0),
 		new(7, 15),
 		new(-0, 21),
@@ -3038,7 +3081,7 @@ public static partial class EvaluationConstants
 		new(228, 273),
 		new(0, 0));
 
-	public static TaperedEvaluationTermByCount27 VirtualKingMobilityBonus { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(
+	public static readonly TaperedEvaluationTermByCount27 VirtualKingMobilityBonus = new(
 		new(0, 0),
 		new(0, 0),
 		new(0, 0),
@@ -3068,7 +3111,7 @@ public static partial class EvaluationConstants
 		new(-16, -75),
 		new(-2, -87));
 
-	public static TaperedEvaluationTermByCount8 KnightMobilityBonus { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(
+	public static readonly TaperedEvaluationTermByCount8 KnightMobilityBonus = new(
 		new(0, 0),
 		new(20, -7),
 		new(27, 4),
@@ -3079,7 +3122,7 @@ public static partial class EvaluationConstants
 		new(29, 11),
 		new(30, 5));
 
-	public static TaperedEvaluationTermByCount14 BishopMobilityBonus { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(
+	public static readonly TaperedEvaluationTermByCount14 BishopMobilityBonus = new(
 		new(-277, -301),
 		new(0, 0),
 		new(10, -20),
@@ -3096,7 +3139,7 @@ public static partial class EvaluationConstants
 		new(86, 110),
 		new(0, 0));
 
-	public static TaperedEvaluationTermByCount14 RookMobilityBonus { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(
+	public static readonly TaperedEvaluationTermByCount14 RookMobilityBonus = new(
 		new(0, 0),
 		new(9, 24),
 		new(14, 25),
