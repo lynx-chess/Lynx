@@ -207,7 +207,7 @@ public sealed class EngineSettings
 
     public TaperedEvaluationTerm PieceProtectedByPawnBonus { get; set; } = new(7, 11);
 
-    public TaperedEvaluationTerm PieceAttackedByPawnPenalty { get; set; } = new(-46, -19);
+    public TaperedEvaluationTerm PieceAttackedByPawnPenalty { get; set; } = new(-45, -19);
 
     public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(
             new(0, 0),
@@ -215,8 +215,8 @@ public sealed class EngineSettings
             new(-4, 18),
             new(-6, 44),
             new(22, 80),
-            new(65, 161),
-            new(102, 227),
+            new(64, 161),
+            new(102, 228),
             new(0, 0));
 
     public TaperedEvaluationTermByCount27 VirtualKingMobilityBonus { get; set; } = new(
@@ -226,46 +226,46 @@ public sealed class EngineSettings
             new(11, 17),
             new(27, 5),
             new(8, 28),
-            new(11, 17),
+            new(12, 17),
             new(13, 8),
             new(11, 11),
             new(8, 10),
             new(6, 12),
             new(2, 17),
             new(2, 13),
-            new(-4, 16),
-            new(-11, 18),
-            new(-19, 20),
+            new(-3, 16),
+            new(-10, 18),
+            new(-19, 19),
             new(-24, 15),
             new(-32, 11),
-            new(-33, 8),
+            new(-32, 8),
             new(-33, 0),
             new(-16, -10),
             new(-4, -19),
             new(3, -29),
             new(16, -40),
-            new(18, -50),
-            new(52, -71),
-            new(5, -77),
-            new(43, -95));
+            new(17, -50),
+            new(51, -71),
+            new(4, -77),
+            new(42, -95));
 
     public TaperedEvaluationTermByCount8 KnightMobilityBonus { get; set; } = new(
             new(0, 0),
-            new(24, -5),
+            new(24, -4),
             new(32, 6),
             new(37, 6),
             new(41, 12),
-            new(39, 20),
-            new(40, 23),
+            new(39, 21),
+            new(39, 23),
             new(42, 24),
             new(53, 18));
 
     public TaperedEvaluationTermByCount14 BishopMobilityBonus { get; set; } = new(
-            new(-279, -259),
+            new(-278, -261),
             new(0, 0),
             new(18, -11),
             new(23, 28),
-            new(36, 45),
+            new(37, 45),
             new(43, 60),
             new(59, 80),
             new(67, 90),
