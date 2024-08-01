@@ -18,18 +18,18 @@ public static partial class EvaluationConstants
 
 #pragma warning disable IDE0055 // Discard formatting in this region
 
-    public const int PSQTBucketCount = 11;
+    public const int PSQTBucketCount = 8;
 
     public static readonly int[] PSQTBucketLayout =
     [
-         7,   7,   8,   8,   9,   9,  10,   5,
-         7,   7,   8,   8,   9,   9,  10,   5,
-         7,   7,   8,   8,   9,   9,  10,   5,
-         7,   7,   8,   8,   9,   9,  10,   5,
-         7,   7,   1,   2,   3,   9,  10,   5,
-         8,   8,   1,   2,   3,   9,  10,   5,
-         0,   0,   1,   2,   3,   4,   4,   5,
-         0,   0,   1,   2,   3,   4,   4,   4,
+         3,   3,   4,   4,   5,   5,   6,   7,
+         3,   3,   4,   4,   5,   5,   6,   7,
+         3,   3,   4,   4,   5,   5,   6,   7,
+         3,   3,   4,   4,   5,   5,   6,   7,
+         3,   3,   4,   4,   5,   5,   6,   7,
+         3,   3,   1,   1,   1,   9,   6,   7,
+         0,   0,   1,   1,   1,   2,   2,   5,
+         0,   0,   1,   1,   1,   2,   2,   2,
     ];
 
     public static readonly int[] GamePhaseByPiece =
