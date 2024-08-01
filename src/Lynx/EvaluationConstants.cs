@@ -18,16 +18,16 @@ public static class EvaluationConstants
 
 #pragma warning disable IDE0055 // Discard formatting in this region
 
-    public const int PSQTBucketCount = 8;
+    public const int PSQTBucketCount = 11;
 
     public static readonly int[] PSQTBucketLayout =
     [
-         6,   6,   6,   6,   7,   7,   7,   7,
-         6,   6,   6,   6,   7,   7,   7,   7,
-         3,   3,   4,   4,   4,   4,   5,   5,
-         3,   3,   4,   4,   4,   4,   5,   5,
-         3,   3,   4,   4,   4,   4,   5,   5,
-         3,   3,   3,   3,   5,   5,   5,   5,
+         3,   4,   5,   6,   7,   8,   9,  10,
+         3,   4,   5,   6,   7,   8,   9,  10,
+         3,   4,   5,   6,   7,   8,   9,  10,
+         3,   4,   5,   6,   7,   8,   9,  10,
+         3,   4,   5,   6,   7,   8,   9,  10,
+         3,   4,   5,   6,   7,   8,   9,  10,
          0,   0,   1,   1,   1,   2,   2,   2,
          0,   0,   1,   1,   1,   2,   2,   2,
     ];
