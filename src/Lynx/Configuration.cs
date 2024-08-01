@@ -105,67 +105,67 @@ public sealed class EngineSettings
 
     #endregion
 
-    [SPSAAttribute<int>(3, 10, 0.5)]
+    [SPSA<int>(3, 10, 0.5)]
     public int LMR_MinDepth { get; set; } = 3;
 
-    [SPSAAttribute<int>(1, 10, 0.5)]
+    [SPSA<int>(1, 10, 0.5)]
     public int LMR_MinFullDepthSearchedMoves { get; set; } = 4;
 
     /// <summary>
     /// Value originally from Stormphrax, who apparently took it from Viridithas
     /// </summary>
-    [SPSAAttribute<double>(0.1, 2, 0.10)]
+    [SPSA<double>(0.1, 2, 0.10)]
     public double LMR_Base { get; set; } = 0.91;
 
     /// <summary>
     /// Value originally from Akimbo
     /// </summary>
-    [SPSAAttribute<double>(1, 5, 0.1)]
+    [SPSA<double>(1, 5, 0.1)]
     public double LMR_Divisor { get; set; } = 3.42;
 
-    [SPSAAttribute<int>(1, 10, 0.5)]
+    [SPSA<int>(1, 10, 0.5)]
     public int NMP_MinDepth { get; set; } = 2;
 
-    [SPSAAttribute<int>(1, 5, 0.5)]
+    [SPSA<int>(1, 5, 0.5)]
     public int NMP_BaseDepthReduction { get; set; } = 2;
 
-    [SPSAAttribute<int>(0, 10, 0.5)]
+    [SPSA<int>(0, 10, 0.5)]
     public int NMP_DepthIncrement { get; set; } = 1;
 
-    [SPSAAttribute<int>(1, 10, 0.5)]
+    [SPSA<int>(1, 10, 0.5)]
     public int NMP_DepthDivisor { get; set; } = 4;
 
-    [SPSAAttribute<int>(1, 100, 5)]
+    [SPSA<int>(1, 100, 5)]
     public int AspirationWindow_Delta { get; set; } = 13;
 
-    [SPSAAttribute<int>(1, 20, 1)]
+    [SPSA<int>(1, 20, 1)]
     public int AspirationWindow_MinDepth { get; set; } = 8;
 
-    [SPSAAttribute<int>(1, 10, 0.5)]
+    [SPSA<int>(1, 10, 0.5)]
     public int RFP_MaxDepth { get; set; } = 6;
 
-    [SPSAAttribute<int>(1, 300, 15)]
+    [SPSA<int>(1, 300, 15)]
     public int RFP_DepthScalingFactor { get; set; } = 82;
 
-    [SPSAAttribute<int>(1, 10, 0.5)]
+    [SPSA<int>(1, 10, 0.5)]
     public int Razoring_MaxDepth { get; set; } = 1;
 
-    [SPSAAttribute<int>(1, 300, 15)]
+    [SPSA<int>(1, 300, 15)]
     public int Razoring_Depth1Bonus { get; set; } = 129;
 
-    [SPSAAttribute<int>(1, 300, 15)]
+    [SPSA<int>(1, 300, 15)]
     public int Razoring_NotDepth1Bonus { get; set; } = 178;
 
-    [SPSAAttribute<int>(1, 10, 0.5)]
+    [SPSA<int>(1, 10, 0.5)]
     public int IIR_MinDepth { get; set; } = 3;
 
-    [SPSAAttribute<int>(1, 10, 0.5)]
+    [SPSA<int>(1, 10, 0.5)]
     public int LMP_MaxDepth { get; set; } = 7;
 
-    [SPSAAttribute<int>(0, 10, 0.5)]
+    [SPSA<int>(0, 10, 0.5)]
     public int LMP_BaseMovesToTry { get; set; } = 0;
 
-    [SPSAAttribute<int>(0, 10, 0.5)]
+    [SPSA<int>(0, 10, 0.5)]
     public int LMP_MovesDepthMultiplier { get; set; } = 4;
 
     public int History_MaxMoveValue { get; set; } = 8_192;
@@ -175,16 +175,16 @@ public sealed class EngineSettings
     /// </summary>
     public int History_MaxMoveRawBonus { get; set; } = 1_896;
 
-    [SPSAAttribute<int>(0, 6, 0.5)]
+    [SPSA<int>(0, 6, 0.5)]
     public int SEE_BadCaptureReduction { get; set; } = 2;
 
-    [SPSAAttribute<int>(1, 10, 0.5)]
+    [SPSA<int>(1, 10, 0.5)]
     public int FP_MaxDepth { get; set; } = 5;
 
-    [SPSAAttribute<int>(1, 200, 10)]
+    [SPSA<int>(1, 200, 10)]
     public int FP_DepthScalingFactor { get; set; } = 78;
 
-    [SPSAAttribute<int>(0, 500, 25)]
+    [SPSA<int>(0, 500, 25)]
     public int FP_Margin { get; set; } = 129;
 
     #region Evaluation
