@@ -31,7 +31,7 @@ public sealed partial class Engine
     /// 12x64x12,
     /// piece x target square x captured piece
     /// </summary>
-    private readonly int[][][] _captureHistory;
+    private readonly int[] _captureHistory;
 
     /// <summary>
     /// 12 x 64 x 12 x 64 x ContinuationHistoryPlyCount
