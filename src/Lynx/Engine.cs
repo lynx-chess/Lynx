@@ -60,14 +60,13 @@ public sealed partial class Engine
         _engineWriter = engineWriter;
 
         // Update ResetEngine() after any changes here
-        _quietHistory = new int[12][];
+        _quietHistory = new int[12 * 64];
         _captureHistory = new int[12][][];
         _continuationHistory = new int[12 * 64 * 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount];
         _counterMoves = new int[12 * 64];
 
         for (int i = 0; i < 12; ++i)                                            // 12
         {
-            _quietHistory[i] = new int[64];
             _captureHistory[i] = new int[64][];
 
             for (var j = 0; j < 64; ++j)                                        // 64
@@ -117,9 +116,10 @@ public sealed partial class Engine
         InitializeTT(); // TODO SPRT clearing instead
 
         // Clear histories
+        Array.Clear(_quietHistory);
+
         for (int i = 0; i < 12; ++i)
         {
-            Array.Clear(_quietHistory[i]);
             for (var j = 0; j < 64; ++j)
             {
                 Array.Clear(_captureHistory[i][j]);
