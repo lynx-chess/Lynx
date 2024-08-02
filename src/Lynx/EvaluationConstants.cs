@@ -16,7 +16,21 @@ public static partial class EvaluationConstants
 
     public static readonly double[] Bs = [-2.50118978, 19.26481735, -6.98361835, 49.93026650];
 
-    public const int PSQTBucketCount = 8;
+#pragma warning disable IDE0055 // Discard formatting in this region
+
+    public const int PSQTBucketCount = 16;
+
+    public static readonly int[] PSQTBucketLayout =
+    [
+         8,   9,  10,  11,  12,  13,  14,  15,
+         8,   9,  10,  11,  12,  13,  14,  15,
+         8,   9,  10,  11,  12,  13,  14,  15,
+         8,   9,  10,  11,  12,  13,  14,  15,
+         0,   1,   2,   3,   4,   5,   6,   7,
+         0,   1,   2,   3,   4,   5,   6,   7,
+         0,   1,   2,   3,   4,   5,   6,   7,
+         0,   1,   2,   3,   4,   5,   6,   7,
+    ];
 
     public static readonly int[] GamePhaseByPiece =
     [
