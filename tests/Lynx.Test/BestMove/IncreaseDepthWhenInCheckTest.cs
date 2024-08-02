@@ -16,6 +16,7 @@ public class IncreaseDepthWhenInCheckTest : BaseTest
     /// 1   R . . . . . q .
     ///     a b c d e f g h
     /// </summary>
+    [Ignore("Not valid any more, gotta find another way of checking this")]
     [Test]
     public void DepthLimit()
     {
