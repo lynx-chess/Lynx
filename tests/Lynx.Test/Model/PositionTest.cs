@@ -1,5 +1,6 @@
 ﻿using Lynx.Model;
 using NUnit.Framework;
+using static Lynx.EvaluationConstants;
 
 namespace Lynx.Test.Model;
 
@@ -215,7 +216,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(Configuration.EngineSettings.IsolatedPawnPenalty.MG, evaluation);
+        Assert.AreEqual(IsolatedPawnPenalty.MG, evaluation);
     }
 
     /// <summary>
@@ -423,8 +424,8 @@ public class PositionTest
 
         Assert.AreEqual(
             //(-4 * Configuration.EngineSettings.DoubledPawnPenalty.MG)
-            +Configuration.EngineSettings.IsolatedPawnPenalty.MG
-            + Configuration.EngineSettings.PassedPawnBonus[rank].MG,
+            + IsolatedPawnPenalty.MG
+            + PassedPawnBonus[rank].MG,
 
             evaluation);
     }
@@ -458,8 +459,8 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(Configuration.EngineSettings.SemiOpenFileRookBonus.MG
-                + Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideToMove].MG - Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideNotToMove].MG,
+        Assert.AreEqual(SemiOpenFileRookBonus.MG
+                + RookMobilityBonus[rookMobilitySideToMove].MG - RookMobilityBonus[rookMobilitySideNotToMove].MG,
             evaluation);
     }
 
@@ -491,8 +492,8 @@ public class PositionTest
         {
             evaluation = -evaluation;
         }
-        Assert.AreEqual(Configuration.EngineSettings.OpenFileRookBonus.MG
-            + Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideToMove].MG - Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideNotToMove].MG,
+        Assert.AreEqual(OpenFileRookBonus.MG
+            + RookMobilityBonus[rookMobilitySideToMove].MG - RookMobilityBonus[rookMobilitySideNotToMove].MG,
             evaluation);
     }
 
@@ -525,8 +526,8 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual((2 * Configuration.EngineSettings.SemiOpenFileRookBonus.MG)
-            + Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideToMove].MG - Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideNotToMove].MG,
+        Assert.AreEqual((2 * SemiOpenFileRookBonus.MG)
+            + RookMobilityBonus[rookMobilitySideToMove].MG - RookMobilityBonus[rookMobilitySideNotToMove].MG,
         evaluation);
     }
 
@@ -559,9 +560,9 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual((-2 * Configuration.EngineSettings.OpenFileRookBonus.MG)
-            + Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideToMove].MG
-            - Configuration.EngineSettings.RookMobilityBonus[rookMobilitySideNotToMove].MG,
+        Assert.AreEqual((-2 * OpenFileRookBonus.MG)
+            + RookMobilityBonus[rookMobilitySideToMove].MG
+            - RookMobilityBonus[rookMobilitySideNotToMove].MG,
             evaluation);
     }
 
@@ -595,7 +596,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(Configuration.EngineSettings.SemiOpenFileKingPenalty.EG, evaluation);
+        Assert.AreEqual(SemiOpenFileKingPenalty.EG, evaluation);
     }
 
     /// <summary>
@@ -627,7 +628,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(Configuration.EngineSettings.OpenFileKingPenalty.EG, evaluation);
+        Assert.AreEqual(OpenFileKingPenalty.EG, evaluation);
     }
 
     /// <summary>
@@ -751,7 +752,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(surroundingPieces * Configuration.EngineSettings.KingShieldBonus.EG, evaluation);
+        Assert.AreEqual(surroundingPieces * KingShieldBonus.EG, evaluation);
     }
 
     /// <summary>
@@ -809,7 +810,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(Configuration.EngineSettings.BishopMobilityBonus[sideToMoveMobilityCount].MG - Configuration.EngineSettings.BishopMobilityBonus[nonSideToMoveMobilityCount].MG, evaluation);
+        Assert.AreEqual(BishopMobilityBonus[sideToMoveMobilityCount].MG - BishopMobilityBonus[nonSideToMoveMobilityCount].MG, evaluation);
     }
 
     /// <summary>
@@ -923,7 +924,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(mobilityDifference * Configuration.EngineSettings.QueenMobilityBonus.MG, evaluation);
+        Assert.AreEqual(mobilityDifference * QueenMobilityBonus.MG, evaluation);
     }
 
     /// <summary>
