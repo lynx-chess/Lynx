@@ -933,8 +933,8 @@ public class PositionTest
     /// <param name="expectedStaticEvaluation"></param>
     [TestCase("QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QPPPPPPP/K6k b - - 0 1", EvaluationConstants.MinEval, IgnoreReason = "Packed eval reduces max eval to a short, so over Short.MaxValue it overflows and produces unexpected results")]
     [TestCase("QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QPPPPPPP/K5k1 w - - 0 1", EvaluationConstants.MaxEval, IgnoreReason = "Packed eval reduces max eval to a short, so over Short.MaxValue it overflows and produces unexpected results")]
-    [TestCase("8/8/8/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQPPPP/K6k b - - 0 1", EvaluationConstants.MinEval)]
-    [TestCase("8/8/8/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQPPPP/K5k1 w - - 0 1", EvaluationConstants.MaxEval)]
+    [TestCase("8/8/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQ6/K6k b - - 0 1", EvaluationConstants.MinEval)]
+    [TestCase("8/8/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQ6/K5k1 w - - 0 1", EvaluationConstants.MaxEval)]
     public void StaticEvaluation_Clamp(string fen, int expectedStaticEvaluation)
     {
         var position = new Position(fen);
