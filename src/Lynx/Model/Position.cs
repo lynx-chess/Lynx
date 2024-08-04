@@ -688,8 +688,8 @@ public class Position
         var whiteKing = PieceBitBoards[(int)Piece.K].GetLS1BIndex();
         var blackKing = PieceBitBoards[(int)Piece.k].GetLS1BIndex();
 
-        var whiteBucket = EvaluationConstants.PSQTBucketLayout[whiteKing];
-        var blackBucket = EvaluationConstants.PSQTBucketLayout[blackKing ^ 56];
+        var whiteBucket = whiteKing;
+        var blackBucket = blackKing ^ 56;
 
         for (int pieceIndex = (int)Piece.P; pieceIndex < (int)Piece.K; ++pieceIndex)
         {
