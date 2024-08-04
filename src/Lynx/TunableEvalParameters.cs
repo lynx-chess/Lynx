@@ -1,5 +1,7 @@
 ﻿// 2024-8-2 19:33:50  43
 
+using System.Runtime.CompilerServices;
+
 namespace Lynx;
 
 #pragma warning disable IDE0055, IDE1006 // Discard formatting and naming styles
@@ -2110,6 +2112,110 @@ public static partial class EvaluationConstants
 		],
 	];
 
+    public static TaperedEvaluationTerm IsolatedPawnPenalty { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(-19, -15);
+
+    public static TaperedEvaluationTerm OpenFileRookBonus { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(45, 6);
+
+    public static TaperedEvaluationTerm SemiOpenFileRookBonus { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(15, 10);
+
+    public static TaperedEvaluationTerm QueenMobilityBonus { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(-0, 17);
+
+    public static TaperedEvaluationTerm SemiOpenFileKingPenalty { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(-23, 5);
+
+    public static TaperedEvaluationTerm OpenFileKingPenalty { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(-86, 1);
+
+    public static TaperedEvaluationTerm KingShieldBonus { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(8, -4);
+
+    public static TaperedEvaluationTerm BishopPairBonus { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(32, 80);
+
+    public static TaperedEvaluationTerm PieceProtectedByPawnBonus { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(10, 11);
+
+    public static TaperedEvaluationTerm PieceAttackedByPawnPenalty { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(-45, -23);
+
+    public static TaperedEvaluationTermByRank PassedPawnBonus { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(
+            new(0, 0),
+            new(6, 15),
+            new(-0, 21),
+            new(-0, 46),
+            new(25, 71),
+            new(35, 129),
+            new(257, 248),
+            new(0, 0));
+
+    public static TaperedEvaluationTermByCount27 VirtualKingMobilityBonus { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(
+            new(0, 0),
+            new(0, 0),
+            new(0, 0),
+            new(24, 31),
+            new(43, 11),
+            new(28, 30),
+            new(29, 21),
+            new(28, 10),
+            new(24, 12),
+            new(19, 9),
+            new(16, 10),
+            new(10, 14),
+            new(8, 9),
+            new(-0, 11),
+            new(-10, 12),
+            new(-20, 13),
+            new(-27, 9),
+            new(-39, 5),
+            new(-43, 3),
+            new(-47, -4),
+            new(-34, -13),
+            new(-25, -21),
+            new(-22, -29),
+            new(-8, -39),
+            new(-26, -46),
+            new(2, -64),
+            new(-42, -66),
+            new(-14, -80));
+
+    public static TaperedEvaluationTermByCount8 KnightMobilityBonus { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(
+            new(0, 0),
+            new(23, -8),
+            new(30, 4),
+            new(35, 3),
+            new(37, 6),
+            new(35, 11),
+            new(34, 11),
+            new(33, 9),
+            new(34, 3));
+
+    public static TaperedEvaluationTermByCount14 BishopMobilityBonus { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(
+            new(-236, -243),
+            new(0, 0),
+            new(23, -16),
+            new(28, 21),
+            new(43, 40),
+            new(48, 54),
+            new(62, 74),
+            new(70, 83),
+            new(78, 95),
+            new(79, 102),
+            new(84, 108),
+            new(88, 107),
+            new(86, 110),
+            new(104, 111),
+            new(0, 0));
+
+    public static TaperedEvaluationTermByCount14 RookMobilityBonus { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(
+            new(0, 0),
+            new(9, 25),
+            new(13, 30),
+            new(18, 34),
+            new(16, 42),
+            new(22, 44),
+            new(23, 50),
+            new(26, 53),
+            new(26, 61),
+            new(28, 66),
+            new(32, 68),
+            new(34, 70),
+            new(34, 75),
+            new(48, 71),
+            new(46, 66));
 }
 
 #pragma warning restore IDE0055, IDE1006 // Discard formatting and naming styles
