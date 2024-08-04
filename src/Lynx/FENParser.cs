@@ -1,5 +1,5 @@
 ﻿using Lynx.Model;
-using NLog;
+//using NLog;
 using System.Runtime.CompilerServices;
 
 using ParseResult = (ulong[] PieceBitBoards, ulong[] OccupancyBitBoards, Lynx.Model.Side Side, byte Castle, Lynx.Model.BoardSquare EnPassant,
@@ -9,7 +9,7 @@ namespace Lynx;
 
 public static class FENParser
 {
-    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+    //private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ParseResult ParseFEN(ReadOnlySpan<char> fen)
@@ -46,17 +46,17 @@ public static class FENParser
 
             if (partsLength < 4 || !int.TryParse(unparsedStringAsSpan[parts[3]], out halfMoveClock))
             {
-                _logger.Debug("No half move clock detected");
+                //_logger.Debug("No half move clock detected");
             }
 
             //if (partsLength < 5 || !int.TryParse(unparsedStringAsSpan[parts[4]], out fullMoveCounter))
             //{
-            //    _logger.Debug("No full move counter detected");
+            //    //_logger.Debug("No full move counter detected");
             //}
         }
         catch (Exception e)
         {
-            _logger.Error(e, "Error parsing FEN");
+            //_logger.Error(e, "Error parsing FEN");
             success = false;
             throw;
         }
@@ -209,7 +209,7 @@ public static class FENParser
             if (rank != 3 && rank != 6)
             {
                 success = false;
-                _logger.Error("Invalid en passant square: {0}", enPassantSpan.ToString());
+                //_logger.Error("Invalid en passant square: {0}", enPassantSpan.ToString());
             }
 
             // Check that there's an actual pawn to be captured
@@ -226,13 +226,13 @@ public static class FENParser
             if (!pawnBitBoard.GetBit(pawnSquare))
             {
                 success = false;
-                _logger.Error("Invalid board: en passant square {0}, but no {1} pawn located in {2}", enPassantSpan.ToString(), side, pawnSquare);
+                //_logger.Error("Invalid board: en passant square {0}, but no {1} pawn located in {2}", enPassantSpan.ToString(), side, pawnSquare);
             }
         }
         else if (enPassantSpan[0] != '-')
         {
             success = false;
-            _logger.Error("Invalid en passant square: {0}", enPassantSpan.ToString());
+            //_logger.Error("Invalid en passant square: {0}", enPassantSpan.ToString());
         }
 
         return (enPassant, success);

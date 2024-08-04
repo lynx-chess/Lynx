@@ -1,6 +1,6 @@
 ﻿using Lynx.Model;
 using Microsoft.Extensions.Http;
-using NLog;
+//using NLog;
 using Polly;
 using Polly.Extensions.Http;
 using Polly.Retry;
@@ -19,7 +19,7 @@ public static class OnlineTablebaseProber
 {
     public const int NoResult = 6666;
 
-    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+    //private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     private readonly static AsyncRetryPolicy<HttpResponseMessage> _retryPolicy = HttpPolicyExtensions
         .HandleTransientHttpError()
@@ -46,13 +46,13 @@ public static class OnlineTablebaseProber
     public static async Task<(int MateScore, Move BestMove)> RootSearch(Position position, List<long> positionHashHistory, int halfMovesWithoutCaptureOrPawnMove, CancellationToken cancellationToken)
     {
         var fen = position.FEN(halfMovesWithoutCaptureOrPawnMove);
-        _logger.Info("[{0}] Querying online tb for position {1}", nameof(RootSearch), fen);
+        //_logger.Info("[{0}] Querying online tb for position {1}", nameof(RootSearch), fen);
 
         var tablebaseEval = await GetEvaluation(fen, cancellationToken);
 
         if (tablebaseEval is null || tablebaseEval.Category == TablebaseEvaluationCategory.Unknown)
         {
-            _logger.Warn("An answer was expected from online tablebase for position {0}", fen);
+            //_logger.Warn("An answer was expected from online tablebase for position {0}", fen);
             return (NoResult, default);
         }
 
@@ -91,7 +91,7 @@ public static class OnlineTablebaseProber
 
                 if (Math.Abs(tablebaseEval.DistanceToZero ?? 0) + halfMovesWithoutCaptureOrPawnMove > 100)
                 {
-                    _logger.Info("Cursed win due to already {0} moves without captures/pawn moves {1}", halfMovesWithoutCaptureOrPawnMove, fen);
+                    //_logger.Info("Cursed win due to already {0} moves without captures/pawn moves {1}", halfMovesWithoutCaptureOrPawnMove, fen);
                     // We don't set mate to 0 since we don't really care about it due to being root node search: let it play the best moves anyway
                 }
 
@@ -141,7 +141,7 @@ public static class OnlineTablebaseProber
 
                     if (bestMove is null)
                     {
-                        _logger.Info("Can't find a safe path to win in position {0} due to potential repetitions via all the possible candidate moves :O", fen);
+                        //_logger.Info("Can't find a safe path to win in position {0} due to potential repetitions via all the possible candidate moves :O", fen);
                         mate = 0;
                         bestMove = bestMoveList.FirstOrDefault();
                     }
@@ -162,7 +162,7 @@ public static class OnlineTablebaseProber
 
                 if (Math.Abs(tablebaseEval.DistanceToZero ?? 0) + halfMovesWithoutCaptureOrPawnMove > 100)
                 {
-                    _logger.Info("Blessed loss due to already {0} moves without captures/pawn moves {1}", halfMovesWithoutCaptureOrPawnMove, fen);
+                    //_logger.Info("Blessed loss due to already {0} moves without captures/pawn moves {1}", halfMovesWithoutCaptureOrPawnMove, fen);
                     // We don't set mate to 0 since we don't really care about it due to being root node search: let it play the best moves anyway
                 }
 
@@ -205,7 +205,7 @@ public static class OnlineTablebaseProber
                     }
                     else
                     {
-                        _logger.Info("There's a potentially miraculous move ({0}) that saves {1} due to repetition :O", bestMove.Uci, fen);
+                        //_logger.Info("There's a potentially miraculous move ({0}) that saves {1} due to repetition :O", bestMove.Uci, fen);
                         mate = 0;
                     }
                 }
@@ -227,7 +227,7 @@ public static class OnlineTablebaseProber
                     mate = +51;
                 }
 
-                _logger.Info("Cursed win {0}", fen);
+                //_logger.Info("Cursed win {0}", fen);
 
                 bestMoveList = tablebaseEval.Moves
                     ?.Where(m => m.Category == TablebaseEvaluationCategory.BlessedLoss)
@@ -263,7 +263,7 @@ public static class OnlineTablebaseProber
 
                     if (bestMove is null)
                     {
-                        _logger.Info("All moves potentially draw earlier than the expected cursed win due to repetitions :O");
+                        //_logger.Info("All moves potentially draw earlier than the expected cursed win due to repetitions :O");
                         mate = 0;
                         bestMove = bestMoveList.FirstOrDefault();
                     }
@@ -286,7 +286,7 @@ public static class OnlineTablebaseProber
                     mate = -51;
                 }
 
-                _logger.Info("Blessed loss {0}", fen);
+                //_logger.Info("Blessed loss {0}", fen);
 
                 bestMoveList = tablebaseEval.Moves
                     ?.Where(m => m.Category == TablebaseEvaluationCategory.CursedWin)
@@ -326,7 +326,7 @@ public static class OnlineTablebaseProber
                     }
                     else
                     {
-                        _logger.Info("Move {0} potentially draws the game due to repetition earlier than the expected blessed loss in {1} position :O", bestMove.Uci, fen);
+                        //_logger.Info("Move {0} potentially draws the game due to repetition earlier than the expected blessed loss in {1} position :O", bestMove.Uci, fen);
                         mate = 0;
                     }
                 }
@@ -356,7 +356,7 @@ public static class OnlineTablebaseProber
         }
 
         var fen = position.FEN(halfMovesWithoutCaptureOrPawnMove);
-        _logger.Debug("[{0}] Querying online tb for position {1}", nameof(EvaluationSearch), fen);
+        //_logger.Debug("[{0}] Querying online tb for position {1}", nameof(EvaluationSearch), fen);
 
         var result = GetEvaluation(fen, cancellationToken).Result;
 
@@ -401,7 +401,7 @@ public static class OnlineTablebaseProber
         }
         catch (Exception e)
         {
-            _logger.Error(e, "Error querying tablebase for evaluation of position {0}", fen);
+            //_logger.Error(e, "Error querying tablebase for evaluation of position {0}", fen);
             return null;
         }
     }

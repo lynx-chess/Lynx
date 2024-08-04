@@ -41,7 +41,7 @@
 
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
-using NLog;
+//using NLog;
 using System.Collections.Concurrent;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -104,7 +104,7 @@ public class MoveGeneratorParallel_Benchmark : BaseBenchmark
 }
 file static class CustomMoveGenerator
 {
-    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+    //private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     private const int TRUE = 1;
 
@@ -212,7 +212,7 @@ file static class CustomMoveGenerator
             var sourceRank = (sourceSquare / 8) + 1;
             if (sourceRank == 1 || sourceRank == 8)
             {
-                _logger.Warn("There's a non-promoted {0} pawn in rank {1}", position.Side, sourceRank);
+                //_logger.Warn("There's a non-promoted {0} pawn in rank {1}", position.Side, sourceRank);
                 continue;
             }
 

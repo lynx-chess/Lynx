@@ -1,7 +1,7 @@
 ﻿using Lynx.Model;
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
-using NLog;
+//using NLog;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading.Channels;
@@ -12,7 +12,7 @@ public sealed partial class Engine
 {
     internal const int DefaultMaxDepth = 5;
 
-    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+    //private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
     private readonly ChannelWriter<string> _engineWriter;
 
     private bool _isSearching;
@@ -96,7 +96,7 @@ public sealed partial class Engine
 #pragma warning disable S1144 // Unused private types or members should be removed - used in Release mode
     private void WarmupEngine()
     {
-        _logger.Info("Warming up engine");
+        //_logger.Info("Warming up engine");
         var sw = Stopwatch.StartNew();
 
         InitializeStaticClasses();
@@ -108,7 +108,7 @@ public sealed partial class Engine
         Bench(2);
 
         sw.Stop();
-        _logger.Info("Warm-up finished in {0}ms", sw.ElapsedMilliseconds);
+        //_logger.Info("Warm-up finished in {0}ms", sw.ElapsedMilliseconds);
     }
 #pragma warning restore S1144 // Unused private types or members should be removed
 
@@ -214,15 +214,15 @@ public sealed partial class Engine
                 var softLimitBase = (millisecondsLeft / movesDivisor) + (millisecondsIncrement * Configuration.EngineSettings.SoftTimeBaseIncrementMultiplier);
                 softLimitTimeBound = Math.Min(hardLimitTimeBound, (int)(softLimitBase * Configuration.EngineSettings.SoftTimeBoundMultiplier));
 
-                _logger.Info("Soft time bound: {0}s", 0.001 * softLimitTimeBound);
-                _logger.Info("Hard time bound: {0}s", 0.001 * hardLimitTimeBound);
+                //_logger.Info("Soft time bound: {0}s", 0.001 * softLimitTimeBound);
+                //_logger.Info("Hard time bound: {0}s", 0.001 * hardLimitTimeBound);
 
                 _searchCancellationTokenSource.CancelAfter(hardLimitTimeBound);
             }
             else if (goCommand.MoveTime > 0)
             {
                 softLimitTimeBound = hardLimitTimeBound = goCommand.MoveTime - engineGuiCommunicationTimeOverhead;
-                _logger.Info("Time to move: {0}s", 0.001 * hardLimitTimeBound);
+                //_logger.Info("Time to move: {0}s", 0.001 * hardLimitTimeBound);
 
                 _searchCancellationTokenSource.CancelAfter(hardLimitTimeBound);
             }
@@ -233,18 +233,18 @@ public sealed partial class Engine
             else if (goCommand.Infinite)
             {
                 maxDepth = Configuration.EngineSettings.MaxDepth;
-                _logger.Info("Infinite search (depth {0})", maxDepth);
+                //_logger.Info("Infinite search (depth {0})", maxDepth);
             }
             else
             {
                 maxDepth = DefaultMaxDepth;
-                _logger.Warn("Unexpected or unsupported go command");
+                //_logger.Warn("Unexpected or unsupported go command");
             }
         }
         else
         {
             maxDepth = Configuration.EngineSettings.MaxDepth;
-            _logger.Info("Pondering search (depth {0})", maxDepth);
+            //_logger.Info("Pondering search (depth {0})", maxDepth);
         }
 
         SearchResult resultToReturn = IDDFS(maxDepth, softLimitTimeBound);
@@ -286,18 +286,18 @@ public sealed partial class Engine
 
         if (searchResult is not null)
         {
-            _logger.Info("Search evaluation result - eval: {0}, mate: {1}, depth: {2}, pv: {3}",
-                searchResult.Evaluation, searchResult.Mate, searchResult.Depth, string.Join(", ", searchResult.Moves.Select(m => m.UCIString())));
+            //_logger.Info("Search evaluation result - eval: {0}, mate: {1}, depth: {2}, pv: {3}",
+                //searchResult.Evaluation, searchResult.Mate, searchResult.Depth, string.Join(", ", searchResult.Moves.Select(m => m.UCIString())));
         }
 
         if (tbResult is not null)
         {
-            _logger.Info("Online tb probing result - mate: {0}, moves: {1}",
-                tbResult.Mate, string.Join(", ", tbResult.Moves.Select(m => m.UCIString())));
+            //_logger.Info("Online tb probing result - mate: {0}, moves: {1}",
+                //tbResult.Mate, string.Join(", ", tbResult.Moves.Select(m => m.UCIString())));
 
             if (searchResult?.Mate > 0 && searchResult.Mate <= tbResult.Mate && searchResult.Mate + currentHalfMovesWithoutCaptureOrPawnMove < 96)
             {
-                _logger.Info("Relying on search result mate line due to dtm match and low enough dtz");
+                //_logger.Info("Relying on search result mate line due to dtm match and low enough dtz");
                 ++searchResult.Depth;
                 tbResult = null;
             }
@@ -310,7 +310,7 @@ public sealed partial class Engine
     {
         if (_isSearching)
         {
-            _logger.Warn("Search already in progress");
+            //_logger.Warn("Search already in progress");
         }
         _isSearching = true;
 
@@ -347,7 +347,7 @@ public sealed partial class Engine
         }
         catch (Exception e)
         {
-            _logger.Fatal(e, "Error in {0} while calculating BestMove", nameof(Search));
+            //_logger.Fatal(e, "Error in {0} while calculating BestMove", nameof(Search));
         }
         finally
         {

@@ -2,8 +2,8 @@
 using Lynx.Cli;
 using Lynx.UCI.Commands.Engine;
 using Microsoft.Extensions.Configuration;
-using NLog;
-using NLog.Extensions.Logging;
+//using NLog;
+//using NLog.Extensions.Logging;
 using System.Threading.Channels;
 
 #if DEBUG
@@ -23,7 +23,7 @@ config.GetSection(nameof(GeneralSettings)).Bind(Configuration.GeneralSettings);
 
 if (Configuration.GeneralSettings.EnableLogging)
 {
-    LogManager.Configuration = new NLogLoggingConfiguration(config.GetSection("NLog"));
+    //LogManager.Configuration = new NLogLoggingConfiguration(config.GetSection("NLog"));
 }
 
 var uciChannel = Channel.CreateBounded<string>(new BoundedChannelOptions(100) { SingleReader = true, SingleWriter = true, FullMode = BoundedChannelFullMode.Wait });
@@ -73,7 +73,7 @@ finally
     engineChannel.Writer.TryComplete();
     uciChannel.Writer.TryComplete();
     //source.Cancel();
-    LogManager.Shutdown(); // Flush and close down internal threads and timers
+    //LogManager.Shutdown(); // Flush and close down internal threads and timers
 }
 
 Thread.Sleep(2_000);

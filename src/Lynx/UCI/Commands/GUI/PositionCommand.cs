@@ -1,5 +1,5 @@
 ﻿using Lynx.Model;
-using NLog;
+//using NLog;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Lynx.UCI.Commands.GUI;
@@ -19,7 +19,7 @@ public sealed class PositionCommand : GUIBaseCommand
     public const string StartPositionString = "startpos";
     public const string MovesString = "moves";
 
-    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+    //private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public static Game ParseGame(ReadOnlySpan<char> positionCommandSpan, Span<Move> movePool)
     {
@@ -54,7 +54,7 @@ public sealed class PositionCommand : GUIBaseCommand
         }
         catch (Exception e)
         {
-            _logger.Error(e, "Error parsing position command '{0}'", positionCommandSpan.ToString());
+            //_logger.Error(e, "Error parsing position command '{0}'", positionCommandSpan.ToString());
             return new Game();
         }
     }
@@ -71,7 +71,7 @@ public sealed class PositionCommand : GUIBaseCommand
             MoveGenerator.GenerateAllMoves(game.CurrentPosition, movePool),
             out lastMove))
         {
-            _logger.Warn("Error parsing last move {0} from position command {1}", lastMove, positionCommand);
+            //_logger.Warn("Error parsing last move {0} from position command {1}", lastMove, positionCommand);
             return false;
         }
 

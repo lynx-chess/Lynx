@@ -139,7 +139,7 @@
 
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
-using NLog;
+//using NLog;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
@@ -192,7 +192,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
         private static readonly Regex _fenRegex = FenRegex();
         private static readonly Regex _movesRegex = MovesRegex();
 
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        //private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         public static OriginalGame ParseGame(string positionCommand)
         {
@@ -207,7 +207,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
 
                 if (string.IsNullOrEmpty(initialPosition))
                 {
-                    _logger.Error("Error parsing position command '{0}': no initial position found", positionCommand);
+                    //_logger.Error("Error parsing position command '{0}': no initial position found", positionCommand);
                 }
 
                 var moves = _movesRegex.Match(positionCommand).Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
@@ -216,7 +216,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
             }
             catch (Exception e)
             {
-                _logger.Error(e, "Error parsing position command '{0}'", positionCommand);
+                //_logger.Error(e, "Error parsing position command '{0}'", positionCommand);
                 throw;
             }
         }
@@ -236,7 +236,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
         private static readonly Regex _fenRegex = FenRegex();
         private static readonly Regex _movesRegex = MovesRegex();
 
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        //private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         public static OriginalGame ParseGame(string positionCommand)
         {
@@ -253,7 +253,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
 
                 if (string.IsNullOrEmpty(initialPosition))
                 {
-                    _logger.Error("Error parsing position command '{0}': no initial position found", positionCommand);
+                    //_logger.Error("Error parsing position command '{0}': no initial position found", positionCommand);
                 }
 
                 var moves = _movesRegex.Match(positionCommand).Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
@@ -262,7 +262,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
             }
             catch (Exception e)
             {
-                _logger.Error(e, "Error parsing position command '{0}'", positionCommand);
+                //_logger.Error(e, "Error parsing position command '{0}'", positionCommand);
                 throw;
             }
         }
@@ -282,7 +282,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
         private static readonly Regex _fenRegex = FenRegex();
         private static readonly Regex _movesRegex = MovesRegex();
 
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        //private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         public static ImprovedGame ParseGame(string positionCommand)
         {
@@ -299,7 +299,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
 
                 if (string.IsNullOrEmpty(initialPosition))
                 {
-                    _logger.Error("Error parsing position command '{0}': no initial position found", positionCommand);
+                    //_logger.Error("Error parsing position command '{0}': no initial position found", positionCommand);
                 }
 
                 var movesRegexResultAsSpan = _movesRegex.Match(positionCommand).ValueSpan;
@@ -310,7 +310,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
             }
             catch (Exception e)
             {
-                _logger.Error(e, "Error parsing position command '{0}'", positionCommand);
+                //_logger.Error(e, "Error parsing position command '{0}'", positionCommand);
                 throw;
             }
         }
@@ -330,7 +330,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
         private static readonly Regex _fenRegex = FenRegex();
         private static readonly Regex _movesRegex = MovesRegex();
 
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        //private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         public static ImprovedGame ParseGame(string positionCommand)
         {
@@ -345,7 +345,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
 
                 if (string.IsNullOrEmpty(initialPosition))
                 {
-                    _logger.Error("Error parsing position command '{0}': no initial position found", positionCommand);
+                    //_logger.Error("Error parsing position command '{0}': no initial position found", positionCommand);
                 }
 
                 var movesRegexResultAsSpan = _movesRegex.Match(positionCommand).ValueSpan;
@@ -356,7 +356,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
             }
             catch (Exception e)
             {
-                _logger.Error(e, "Error parsing position command '{0}'", positionCommand);
+                //_logger.Error(e, "Error parsing position command '{0}'", positionCommand);
                 throw;
             }
         }
@@ -371,7 +371,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
         public const string StartPositionString = "startpos";
         public const string MovesString = "moves";
 
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        //private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         public static ImprovedGame2 ParseGame(string positionCommand)
         {
@@ -408,7 +408,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
             }
             catch (Exception e)
             {
-                _logger.Error(e, "Error parsing position command '{0}'", positionCommand);
+                //_logger.Error(e, "Error parsing position command '{0}'", positionCommand);
                 throw;
             }
         }
@@ -423,7 +423,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
         public const string StartPositionString = "startpos";
         public const string MovesString = "moves";
 
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        //private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         public static ImprovedGame2 ParseGame(string positionCommand)
         {
@@ -460,7 +460,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
             }
             catch (Exception e)
             {
-                _logger.Error(e, "Error parsing position command '{0}'", positionCommand);
+                //_logger.Error(e, "Error parsing position command '{0}'", positionCommand);
                 throw;
             }
         }
@@ -470,7 +470,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
 
     public sealed class OriginalGame
     {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        //private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
 #if DEBUG
         public List<Move> MoveHistory { get; }
@@ -490,7 +490,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
             CurrentPosition = new Position(parsedFen);
             if (!CurrentPosition.IsValid())
             {
-                _logger.Warn($"Invalid position detected: {fen.ToString()}");
+                //_logger.Warn($"Invalid position detected: {fen.ToString()}");
             }
 
             PositionHashHistory = new(1024) { CurrentPosition.UniqueIdentifier };
@@ -509,7 +509,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
 
                 if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
                 {
-                    _logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen, string.Join(' ', movesUCIString), moveString);
+                    //_logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen, string.Join(' ', movesUCIString), moveString);
                     break;
                 }
 
@@ -532,7 +532,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
             }
             else
             {
-                _logger.Warn("Error trying to play {0}", moveToPlay.UCIString());
+                //_logger.Warn("Error trying to play {0}", moveToPlay.UCIString());
                 CurrentPosition.UnmakeMove(moveToPlay, gameState);
             }
 
@@ -545,7 +545,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
 
     public sealed class ImprovedGame
     {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        //private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
 #if DEBUG
         public List<Move> MoveHistory { get; }
@@ -565,7 +565,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
             CurrentPosition = new Position(parsedFen);
             if (!CurrentPosition.IsValid())
             {
-                _logger.Warn($"Invalid position detected: {fen.ToString()}");
+                //_logger.Warn($"Invalid position detected: {fen.ToString()}");
             }
 
             PositionHashHistory = new(1024) { CurrentPosition.UniqueIdentifier };
@@ -590,7 +590,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
 
                 if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
                 {
-                    _logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen, string.Join(' ', rawMoves.ToString()), moveString.ToString());
+                    //_logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen, string.Join(' ', rawMoves.ToString()), moveString.ToString());
                     break;
                 }
 
@@ -613,7 +613,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
             }
             else
             {
-                _logger.Warn("Error trying to play {0}", moveToPlay.UCIString());
+                //_logger.Warn("Error trying to play {0}", moveToPlay.UCIString());
                 CurrentPosition.UnmakeMove(moveToPlay, gameState);
             }
 
@@ -626,7 +626,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
 
     public sealed class ImprovedGame2
     {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        //private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
 #if DEBUG
         public List<Move> MoveHistory { get; }
@@ -646,7 +646,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
             CurrentPosition = new Position(parsedFen);
             if (!CurrentPosition.IsValid())
             {
-                _logger.Warn($"Invalid position detected: {fen.ToString()}");
+                //_logger.Warn($"Invalid position detected: {fen.ToString()}");
             }
 
             PositionHashHistory = new(1024) { CurrentPosition.UniqueIdentifier };
@@ -670,7 +670,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
 
                 if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
                 {
-                    _logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen.ToString(), rawMoves.ToString(), moveString.ToString());
+                    //_logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen.ToString(), rawMoves.ToString(), moveString.ToString());
                     break;
                 }
 
@@ -693,7 +693,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
             }
             else
             {
-                _logger.Warn("Error trying to play {0}", moveToPlay.UCIString());
+                //_logger.Warn("Error trying to play {0}", moveToPlay.UCIString());
                 CurrentPosition.UnmakeMove(moveToPlay, gameState);
             }
 

@@ -1,5 +1,5 @@
 ﻿using Lynx.Model;
-using NLog;
+//using NLog;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
@@ -7,7 +7,7 @@ namespace Lynx;
 
 public static class Utils
 {
-    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+    //private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     /// <summary>
     /// Side.White -> 0
@@ -228,7 +228,7 @@ public static class Utils
     {
         if (!value)
         {
-            _logger.Error(errorMessage);
+            //_logger.Error(errorMessage);
             throw new AssertException(errorMessage);
         }
     }

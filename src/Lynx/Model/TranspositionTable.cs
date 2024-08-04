@@ -1,4 +1,4 @@
-﻿using NLog;
+﻿//using NLog;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -62,7 +62,7 @@ public struct TranspositionTableElement
 
 public static class TranspositionTableExtensions
 {
-    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+    //private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
     private static readonly ulong _ttElementSize = (ulong)Marshal.SizeOf(typeof(TranspositionTableElement));
 
     public static (int Length, int Mask) CalculateLength(int size)
@@ -82,11 +82,11 @@ public static class TranspositionTableExtensions
 
         var mask = ttLength - 1;
 
-        _logger.Info("Hash value:\t{0} MB", size);
-        _logger.Info("TT memory:\t{0} MB", ttLengthMb * _ttElementSize);
-        _logger.Info("TT length:\t{0} items", ttLength);
-        _logger.Info("TT entry:\t{0} bytes", _ttElementSize);
-        _logger.Info("TT mask:\t{0}", mask.ToString("X"));
+        //_logger.Info("Hash value:\t{0} MB", size);
+        //_logger.Info("TT memory:\t{0} MB", ttLengthMb * _ttElementSize);
+        //_logger.Info("TT length:\t{0} items", ttLength);
+        //_logger.Info("TT entry:\t{0} bytes", _ttElementSize);
+        //_logger.Info("TT mask:\t{0}", mask.ToString("X"));
 
         return ((int)ttLength, (int)mask);
     }
@@ -159,7 +159,7 @@ public static class TranspositionTableExtensions
 
         //if (entry.Key != default && entry.Key != position.UniqueIdentifier)
         //{
-        //    _logger.Warn("TT collision");
+        //    //_logger.Warn("TT collision");
         //}
 
         bool shouldReplace =
@@ -259,9 +259,9 @@ public static class TranspositionTableExtensions
                 ++items;
             }
         }
-        _logger.Info("TT Occupancy:\t{0}% ({1}MB)",
-            100 * transpositionTable.PopulatedItemsCount() / transpositionTable.Length,
-            transpositionTable.Length * Marshal.SizeOf(typeof(TranspositionTableElement)) / 1024 / 1024);
+        //_logger.Info("TT Occupancy:\t{0}% ({1}MB)",
+            //100 * transpositionTable.PopulatedItemsCount() / transpositionTable.Length,
+            //transpositionTable.Length * Marshal.SizeOf(typeof(TranspositionTableElement)) / 1024 / 1024);
     }
 
     [Conditional("DEBUG")]

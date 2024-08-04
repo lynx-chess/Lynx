@@ -177,7 +177,7 @@
 
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
-using NLog;
+//using NLog;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
@@ -228,7 +228,7 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
 
         private static readonly Regex _ranksRegex = RanksRegex();
 
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        //private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         public static ParseResult ParseFEN(string fen)
         {
@@ -268,18 +268,18 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
 
                 if (parts.Length < 4 || !int.TryParse(parts[3], out halfMoveClock))
                 {
-                    _logger.Debug("No half move clock detected");
+                    //_logger.Debug("No half move clock detected");
                 }
 
                 if (parts.Length < 5 || !int.TryParse(parts[4], out fullMoveCounter))
                 {
-                    _logger.Debug("No full move counter detected");
+                    //_logger.Debug("No full move counter detected");
                 }
             }
             catch (Exception e)
             {
-                _logger.Error("Error parsing FEN string {0}", fen);
-                _logger.Error(e.Message);
+                //_logger.Error("Error parsing FEN string {0}", fen);
+                //_logger.Error(e.Message);
                 success = false;
             }
 
@@ -319,7 +319,7 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
                     }
                     else
                     {
-                        _logger.Error("Unrecognized character in FEN: {0} (within {1})", ch, ((Group)match).Value);
+                        //_logger.Error("Unrecognized character in FEN: {0} (within {1})", ch, ((Group)match).Value);
                         success = false;
                         break;
                     }
@@ -394,7 +394,7 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
                 if (rank != 3 && rank != 6)
                 {
                     success = false;
-                    _logger.Error("Invalid en passant square: {0}", enPassantString);
+                    //_logger.Error("Invalid en passant square: {0}", enPassantString);
                 }
 
                 // Check that there's an actual pawn to be captured
@@ -411,13 +411,13 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
                 if (!pawnBitBoard.GetBit(pawnSquare))
                 {
                     success = false;
-                    _logger.Error("Invalid board: en passant square {0}, but no {1} pawn located in {2}", enPassantString, side, pawnSquare);
+                    //_logger.Error("Invalid board: en passant square {0}, but no {1} pawn located in {2}", enPassantString, side, pawnSquare);
                 }
             }
             else if (enPassantString != "-")
             {
                 success = false;
-                _logger.Error("Invalid en passant square: {0}", enPassantString);
+                //_logger.Error("Invalid en passant square: {0}", enPassantString);
             }
 
             return (enPassant, success);
@@ -431,7 +431,7 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
 
         private static readonly Regex _ranksRegex = RanksRegex();
 
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        //private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         public static ParseResult ParseFEN(string fen)
         {
@@ -472,18 +472,18 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
 
                 if (partsLength < 4 || !int.TryParse(unparsedString[parts[3]], out halfMoveClock))
                 {
-                    _logger.Debug("No half move clock detected");
+                    //_logger.Debug("No half move clock detected");
                 }
 
                 if (partsLength < 5 || !int.TryParse(unparsedString[parts[4]], out fullMoveCounter))
                 {
-                    _logger.Debug("No full move counter detected");
+                    //_logger.Debug("No full move counter detected");
                 }
             }
             catch (Exception e)
             {
-                _logger.Error("Error parsing FEN string {0}", fen);
-                _logger.Error(e.Message);
+                //_logger.Error("Error parsing FEN string {0}", fen);
+                //_logger.Error(e.Message);
                 success = false;
             }
 
@@ -523,7 +523,7 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
                     }
                     else
                     {
-                        _logger.Error("Unrecognized character in FEN: {0} (within {1})", ch, ((Group)match).Value);
+                        //_logger.Error("Unrecognized character in FEN: {0} (within {1})", ch, ((Group)match).Value);
                         success = false;
                         break;
                     }
@@ -600,7 +600,7 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
                 if (rank != 3 && rank != 6)
                 {
                     success = false;
-                    _logger.Error("Invalid en passant square: {0}", enPassantPart.ToString());
+                    //_logger.Error("Invalid en passant square: {0}", enPassantPart.ToString());
                 }
 
                 // Check that there's an actual pawn to be captured
@@ -617,13 +617,13 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
                 if (!pawnBitBoard.GetBit(pawnSquare))
                 {
                     success = false;
-                    _logger.Error("Invalid board: en passant square {0}, but no {1} pawn located in {2}", enPassantPart.ToString(), side, pawnSquare);
+                    //_logger.Error("Invalid board: en passant square {0}, but no {1} pawn located in {2}", enPassantPart.ToString(), side, pawnSquare);
                 }
             }
             else if (enPassantPart[0] != '-')
             {
                 success = false;
-                _logger.Error("Invalid en passant square: {0}", enPassantPart.ToString());
+                //_logger.Error("Invalid en passant square: {0}", enPassantPart.ToString());
             }
 
             return (enPassant, success);
@@ -637,7 +637,7 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
 
         private static readonly Regex _ranksRegex = RanksRegex();
 
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        //private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         public static ParseResult ParseFEN(ReadOnlySpan<char> fen)
         {
@@ -674,18 +674,18 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
 
                 if (partsLength < 4 || !int.TryParse(unparsedStringAsSpan[parts[3]], out halfMoveClock))
                 {
-                    _logger.Debug("No half move clock detected");
+                    //_logger.Debug("No half move clock detected");
                 }
 
                 if (partsLength < 5 || !int.TryParse(unparsedStringAsSpan[parts[4]], out fullMoveCounter))
                 {
-                    _logger.Debug("No full move counter detected");
+                    //_logger.Debug("No full move counter detected");
                 }
             }
             catch (Exception e)
             {
-                _logger.Error("Error parsing FEN string {0}", fen.ToString());
-                _logger.Error(e.Message);
+                //_logger.Error("Error parsing FEN string {0}", fen.ToString());
+                //_logger.Error(e.Message);
                 success = false;
             }
 
@@ -726,7 +726,7 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
                     }
                     else
                     {
-                        _logger.Error("Unrecognized character in FEN: {0} (within {1})", ch, ((Group)match).Value);
+                        //_logger.Error("Unrecognized character in FEN: {0} (within {1})", ch, ((Group)match).Value);
                         success = false;
                         break;
                     }
@@ -803,7 +803,7 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
                 if (rank != 3 && rank != 6)
                 {
                     success = false;
-                    _logger.Error("Invalid en passant square: {0}", enPassantSpan.ToString());
+                    //_logger.Error("Invalid en passant square: {0}", enPassantSpan.ToString());
                 }
 
                 // Check that there's an actual pawn to be captured
@@ -820,13 +820,13 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
                 if (!pawnBitBoard.GetBit(pawnSquare))
                 {
                     success = false;
-                    _logger.Error("Invalid board: en passant square {0}, but no {1} pawn located in {2}", enPassantSpan.ToString(), side, pawnSquare);
+                    //_logger.Error("Invalid board: en passant square {0}, but no {1} pawn located in {2}", enPassantSpan.ToString(), side, pawnSquare);
                 }
             }
             else if (enPassantSpan[0] != '-')
             {
                 success = false;
-                _logger.Error("Invalid en passant square: {0}", enPassantSpan.ToString());
+                //_logger.Error("Invalid en passant square: {0}", enPassantSpan.ToString());
             }
 
             return (enPassant, success);
@@ -835,7 +835,7 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
 
     public static class ParseFEN_FENParser_NoRegex
     {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        //private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         public static ParseResult ParseFEN(ReadOnlySpan<char> fen)
         {
@@ -871,18 +871,18 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
 
                 if (partsLength < 4 || !int.TryParse(unparsedStringAsSpan[parts[3]], out halfMoveClock))
                 {
-                    _logger.Debug("No half move clock detected");
+                    //_logger.Debug("No half move clock detected");
                 }
 
                 if (partsLength < 5 || !int.TryParse(unparsedStringAsSpan[parts[4]], out fullMoveCounter))
                 {
-                    _logger.Debug("No full move counter detected");
+                    //_logger.Debug("No full move counter detected");
                 }
             }
             catch (Exception e)
             {
-                _logger.Error("Error parsing FEN string {0}", fen.ToString());
-                _logger.Error(e.Message);
+                //_logger.Error("Error parsing FEN string {0}", fen.ToString());
+                //_logger.Error(e.Message);
                 success = false;
             }
 
@@ -935,7 +935,7 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
                     }
                     else
                     {
-                        _logger.Error("Unrecognized character in FEN: {0} (within {1})", ch, boardfenSection.ToString());
+                        //_logger.Error("Unrecognized character in FEN: {0} (within {1})", ch, boardfenSection.ToString());
                         success = false;
                         break;
                     }
@@ -1006,7 +1006,7 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
                 if (rank != 3 && rank != 6)
                 {
                     success = false;
-                    _logger.Error("Invalid en passant square: {0}", enPassantSpan.ToString());
+                    //_logger.Error("Invalid en passant square: {0}", enPassantSpan.ToString());
                 }
 
                 // Check that there's an actual pawn to be captured
@@ -1023,13 +1023,13 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
                 if (!pawnBitBoard.GetBit(pawnSquare))
                 {
                     success = false;
-                    _logger.Error("Invalid board: en passant square {0}, but no {1} pawn located in {2}", enPassantSpan.ToString(), side, pawnSquare);
+                    //_logger.Error("Invalid board: en passant square {0}, but no {1} pawn located in {2}", enPassantSpan.ToString(), side, pawnSquare);
                 }
             }
             else if (enPassantSpan[0] != '-')
             {
                 success = false;
-                _logger.Error("Invalid en passant square: {0}", enPassantSpan.ToString());
+                //_logger.Error("Invalid en passant square: {0}", enPassantSpan.ToString());
             }
 
             return (enPassant, success);
@@ -1038,7 +1038,7 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
 
     public static class ParseFEN_FENParser_OptimizedParseBoard
     {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        //private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         public static ParseResult ParseFEN(ReadOnlySpan<char> fen)
         {
@@ -1074,18 +1074,18 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
 
                 if (partsLength < 4 || !int.TryParse(unparsedStringAsSpan[parts[3]], out halfMoveClock))
                 {
-                    _logger.Debug("No half move clock detected");
+                    //_logger.Debug("No half move clock detected");
                 }
 
                 if (partsLength < 5 || !int.TryParse(unparsedStringAsSpan[parts[4]], out fullMoveCounter))
                 {
-                    _logger.Debug("No full move counter detected");
+                    //_logger.Debug("No full move counter detected");
                 }
             }
             catch (Exception e)
             {
-                _logger.Error("Error parsing FEN string {0}", fen.ToString());
-                _logger.Error(e.Message);
+                //_logger.Error("Error parsing FEN string {0}", fen.ToString());
+                //_logger.Error(e.Message);
                 success = false;
             }
 
@@ -1243,7 +1243,7 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
                 if (rank != 3 && rank != 6)
                 {
                     success = false;
-                    _logger.Error("Invalid en passant square: {0}", enPassantSpan.ToString());
+                    //_logger.Error("Invalid en passant square: {0}", enPassantSpan.ToString());
                 }
 
                 // Check that there's an actual pawn to be captured
@@ -1260,13 +1260,13 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
                 if (!pawnBitBoard.GetBit(pawnSquare))
                 {
                     success = false;
-                    _logger.Error("Invalid board: en passant square {0}, but no {1} pawn located in {2}", enPassantSpan.ToString(), side, pawnSquare);
+                    //_logger.Error("Invalid board: en passant square {0}, but no {1} pawn located in {2}", enPassantSpan.ToString(), side, pawnSquare);
                 }
             }
             else if (enPassantSpan[0] != '-')
             {
                 success = false;
-                _logger.Error("Invalid en passant square: {0}", enPassantSpan.ToString());
+                //_logger.Error("Invalid en passant square: {0}", enPassantSpan.ToString());
             }
 
             return (enPassant, success);
@@ -1275,7 +1275,7 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
 
     public static class ParseFEN_FENParser_OptimizedPopulateOccupancies
     {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        //private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         public static ParseResult ParseFEN(ReadOnlySpan<char> fen)
         {
@@ -1311,18 +1311,18 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
 
                 if (partsLength < 4 || !int.TryParse(unparsedStringAsSpan[parts[3]], out halfMoveClock))
                 {
-                    _logger.Debug("No half move clock detected");
+                    //_logger.Debug("No half move clock detected");
                 }
 
                 if (partsLength < 5 || !int.TryParse(unparsedStringAsSpan[parts[4]], out fullMoveCounter))
                 {
-                    _logger.Debug("No full move counter detected");
+                    //_logger.Debug("No full move counter detected");
                 }
             }
             catch (Exception e)
             {
-                _logger.Error("Error parsing FEN string {0}", fen.ToString());
-                _logger.Error(e.Message);
+                //_logger.Error("Error parsing FEN string {0}", fen.ToString());
+                //_logger.Error(e.Message);
                 success = false;
             }
 
@@ -1474,7 +1474,7 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
                 if (rank != 3 && rank != 6)
                 {
                     success = false;
-                    _logger.Error("Invalid en passant square: {0}", enPassantSpan.ToString());
+                    //_logger.Error("Invalid en passant square: {0}", enPassantSpan.ToString());
                 }
 
                 // Check that there's an actual pawn to be captured
@@ -1491,13 +1491,13 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
                 if (!pawnBitBoard.GetBit(pawnSquare))
                 {
                     success = false;
-                    _logger.Error("Invalid board: en passant square {0}, but no {1} pawn located in {2}", enPassantSpan.ToString(), side, pawnSquare);
+                    //_logger.Error("Invalid board: en passant square {0}, but no {1} pawn located in {2}", enPassantSpan.ToString(), side, pawnSquare);
                 }
             }
             else if (enPassantSpan[0] != '-')
             {
                 success = false;
-                _logger.Error("Invalid en passant square: {0}", enPassantSpan.ToString());
+                //_logger.Error("Invalid en passant square: {0}", enPassantSpan.ToString());
             }
 
             return (enPassant, success);

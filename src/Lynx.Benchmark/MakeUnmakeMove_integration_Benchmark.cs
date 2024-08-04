@@ -1374,7 +1374,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
     public static class MakeMoveMoveGenerator
     {
 #if DEBUG
-        private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
+        //private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 #endif
 
         /// <summary>
@@ -1450,7 +1450,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
 #if DEBUG
                 if (sourceRank == 1 || sourceRank == 8)
                 {
-                    _logger.Warn("There's a non-promoted {0} pawn in rank {1}", position.Side, sourceRank);
+                    //_logger.Warn("There's a non-promoted {0} pawn in rank {1}", position.Side, sourceRank);
                     continue;
                 }
 #endif

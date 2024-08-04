@@ -1,11 +1,11 @@
-﻿using NLog;
+﻿//using NLog;
 using System.Runtime.CompilerServices;
 
 namespace Lynx.Model;
 
 public sealed class Game
 {
-    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+    //private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
 #if DEBUG
     public List<Move> MoveHistory { get; }
@@ -36,7 +36,7 @@ public sealed class Game
 
         if (!CurrentPosition.IsValid())
         {
-            _logger.Warn($"Invalid position detected: {fen.ToString()}");
+            //_logger.Warn($"Invalid position detected: {fen.ToString()}");
         }
 
         PositionHashHistory = new(Constants.MaxNumberMovesInAGame) { CurrentPosition.UniqueIdentifier };
@@ -62,7 +62,7 @@ public sealed class Game
             // TODO: consider creating moves on the fly
             if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
             {
-                _logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen.ToString(), rawMoves.ToString(), moveString.ToString());
+                //_logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen.ToString(), rawMoves.ToString(), moveString.ToString());
                 break;
             }
 
@@ -202,7 +202,7 @@ public sealed class Game
         }
         else
         {
-            _logger.Warn("Error trying to play {0}", moveToPlay.UCIString());
+            //_logger.Warn("Error trying to play {0}", moveToPlay.UCIString());
             CurrentPosition.UnmakeMove(moveToPlay, gameState);
         }
 

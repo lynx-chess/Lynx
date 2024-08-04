@@ -1,4 +1,4 @@
-﻿using NLog;
+﻿//using NLog;
 using System.Numerics;
 using System.Reflection;
 using System.Text.Json;
@@ -94,7 +94,7 @@ internal class SPSAAttribute<T> : Attribute
 
 public static class SPSAAttributeHelpers
 {
-    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+    //private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public static IEnumerable<string> GenerateOpenBenchStrings()
     {
@@ -106,7 +106,7 @@ public static class SPSAAttributeHelpers
 
             if (count > 1)
             {
-                _logger.Warn("Property {0} has more than one [{1}]", property.Name, genericType.Name);
+                //_logger.Warn("Property {0} has more than one [{1}]", property.Name, genericType.Name);
             }
 
             if (count == 0)
@@ -125,7 +125,7 @@ public static class SPSAAttributeHelpers
             }
             else
             {
-                _logger.Error("Property {0} has a [{1}] defined with unsupported type <{2}>", property.Name, genericSpsa);
+                //_logger.Error("Property {0} has a [{1}] defined with unsupported type <{2}>", property.Name, genericSpsa);
             }
         }
     }
@@ -140,7 +140,7 @@ public static class SPSAAttributeHelpers
 
             if (count > 1)
             {
-                _logger.Warn("Property {0} has more than one [{1}]", property.Name, genericType.Name);
+                //_logger.Warn("Property {0} has more than one [{1}]", property.Name, genericType.Name);
             }
 
             if (count == 0)
@@ -159,7 +159,7 @@ public static class SPSAAttributeHelpers
             }
             else
             {
-                _logger.Error("Property {0} has a [{1}] defined with unsupported type <{2}>", property.Name, genericSpsa);
+                //_logger.Error("Property {0} has a [{1}] defined with unsupported type <{2}>", property.Name, genericSpsa);
             }
         }
     }
@@ -174,7 +174,7 @@ public static class SPSAAttributeHelpers
 
             if (count > 1)
             {
-                _logger.Warn("Property {0} has more than one [{1}]", property.Name, genericType.Name);
+                //_logger.Warn("Property {0} has more than one [{1}]", property.Name, genericType.Name);
             }
 
             if (count == 0)
@@ -193,7 +193,7 @@ public static class SPSAAttributeHelpers
             }
             else
             {
-                _logger.Error("Property {0} has a [{1}] defined with unsupported type <{2}>", property.Name, genericSpsa);
+                //_logger.Error("Property {0} has a [{1}] defined with unsupported type <{2}>", property.Name, genericSpsa);
             }
         }
     }
@@ -208,7 +208,7 @@ public static class SPSAAttributeHelpers
 
             if (count > 1)
             {
-                _logger.Warn("Property {0} has more than one [{1}]", property.Name, genericType.Name);
+                //_logger.Warn("Property {0} has more than one [{1}]", property.Name, genericType.Name);
             }
 
             if (count == 0)
@@ -231,7 +231,7 @@ public static class SPSAAttributeHelpers
             }
             else
             {
-                _logger.Error("Property {0} has a [{1}] defined with unsupported type <{2}>", property.Name, genericSpsa);
+                //_logger.Error("Property {0} has a [{1}] defined with unsupported type <{2}>", property.Name, genericSpsa);
             }
         }
     }

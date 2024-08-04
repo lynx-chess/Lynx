@@ -39,13 +39,13 @@ public sealed partial class Engine
         }
         catch (OperationCanceledException) // Also catches TaskCanceledException
         {
-            _logger.Info("Online tb probing cancellation requested after {0}ms", _stopWatch.ElapsedMilliseconds);
+            //_logger.Info("Online tb probing cancellation requested after {0}ms", _stopWatch.ElapsedMilliseconds);
 
             return null;
         }
         catch (Exception e)
         {
-            _logger.Error(e, "Unexpected error ocurred during the online tb probing\n{0}", e.StackTrace);
+            //_logger.Error(e, "Unexpected error ocurred during the online tb probing\n{0}", e.StackTrace);
 
             return null;
         }

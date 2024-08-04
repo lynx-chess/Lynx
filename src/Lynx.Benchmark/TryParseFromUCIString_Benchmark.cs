@@ -91,7 +91,7 @@
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
 using Lynx.UCI.Commands.GUI;
-using NLog;
+//using NLog;
 using System.Runtime.CompilerServices;
 
 namespace Lynx.Benchmark;
@@ -166,7 +166,7 @@ public class TryParseFromUCIString_Benchmark : BaseBenchmark
 
     public sealed class TryParseFromUCIString_Benchmark_Game
     {
-        private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        //private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
 #if DEBUG
         public List<Move> MoveHistory { get; }
@@ -188,7 +188,7 @@ public class TryParseFromUCIString_Benchmark : BaseBenchmark
             CurrentPosition = new Position(parsedFen);
             if (!CurrentPosition.IsValid())
             {
-                _logger.Warn($"Invalid position detected: {fen.ToString()}");
+                //_logger.Warn($"Invalid position detected: {fen.ToString()}");
             }
 
             PositionHashHistory = new(1024) { CurrentPosition.UniqueIdentifier };
@@ -212,7 +212,7 @@ public class TryParseFromUCIString_Benchmark : BaseBenchmark
 
                 if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
                 {
-                    _logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen.ToString(), rawMoves.ToString(), moveString.ToString());
+                    //_logger.Error("Error parsing game with fen {0} and moves {1}: error detected in {2}", fen.ToString(), rawMoves.ToString(), moveString.ToString());
                     break;
                 }
 
@@ -234,7 +234,7 @@ public class TryParseFromUCIString_Benchmark : BaseBenchmark
             }
             else
             {
-                _logger.Warn("Error trying to play {0}", moveToPlay.UCIString());
+                //_logger.Warn("Error trying to play {0}", moveToPlay.UCIString());
                 CurrentPosition.UnmakeMove(moveToPlay, gameState);
             }
 
