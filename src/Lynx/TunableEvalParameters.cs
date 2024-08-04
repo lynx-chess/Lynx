@@ -2111,10 +2111,7 @@ public static partial class EvaluationConstants
 			   0,	   0,	   0,	   0,	   0,	   0,	   0,	   0,
 		],
 	];
-}
 
-public static class EvaluationParams
-{
     public static readonly TaperedEvaluationTerm IsolatedPawnPenalty = new(-19, -15);
 
     public static readonly TaperedEvaluationTerm OpenFileRookBonus = new(45, 6);

@@ -3,7 +3,6 @@ using System.Runtime.CompilerServices;
 using System.Text;
 
 using static Lynx.EvaluationConstants;
-using static Lynx.EvaluationParams;
 
 namespace Lynx.Model;
 
