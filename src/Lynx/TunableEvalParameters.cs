@@ -2112,27 +2112,27 @@ public static partial class EvaluationConstants
 		],
 	];
 
-    public static TaperedEvaluationTerm IsolatedPawnPenalty { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(-19, -15);
+    public static readonly TaperedEvaluationTerm IsolatedPawnPenalty = new(-19, -15);
 
-    public static TaperedEvaluationTerm OpenFileRookBonus { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(45, 6);
+    public static readonly TaperedEvaluationTerm OpenFileRookBonus = new(45, 6);
 
-    public static TaperedEvaluationTerm SemiOpenFileRookBonus { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(15, 10);
+    public static readonly TaperedEvaluationTerm SemiOpenFileRookBonus = new(15, 10);
 
-    public static TaperedEvaluationTerm QueenMobilityBonus { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(-0, 17);
+    public static readonly TaperedEvaluationTerm QueenMobilityBonus = new(-0, 17);
 
-    public static TaperedEvaluationTerm SemiOpenFileKingPenalty { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(-23, 5);
+    public static readonly TaperedEvaluationTerm SemiOpenFileKingPenalty = new(-23, 5);
 
-    public static TaperedEvaluationTerm OpenFileKingPenalty { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(-86, 1);
+    public static readonly TaperedEvaluationTerm OpenFileKingPenalty = new(-86, 1);
 
-    public static TaperedEvaluationTerm KingShieldBonus { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(8, -4);
+    public static readonly TaperedEvaluationTerm KingShieldBonus = new(8, -4);
 
-    public static TaperedEvaluationTerm BishopPairBonus { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(32, 80);
+    public static readonly TaperedEvaluationTerm BishopPairBonus = new(32, 80);
 
-    public static TaperedEvaluationTerm PieceProtectedByPawnBonus { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(10, 11);
+    public static readonly TaperedEvaluationTerm PieceProtectedByPawnBonus = new(10, 11);
 
-    public static TaperedEvaluationTerm PieceAttackedByPawnPenalty { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(-45, -23);
+    public static readonly TaperedEvaluationTerm PieceAttackedByPawnPenalty = new(-45, -23);
 
-    public static TaperedEvaluationTermByRank PassedPawnBonus { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(
+    public static readonly TaperedEvaluationTermByRank PassedPawnBonus = new(
             new(0, 0),
             new(6, 15),
             new(-0, 21),
@@ -2142,7 +2142,7 @@ public static partial class EvaluationConstants
             new(257, 248),
             new(0, 0));
 
-    public static TaperedEvaluationTermByCount27 VirtualKingMobilityBonus { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(
+    public static readonly TaperedEvaluationTermByCount27 VirtualKingMobilityBonus = new(
             new(0, 0),
             new(0, 0),
             new(0, 0),
@@ -2172,7 +2172,7 @@ public static partial class EvaluationConstants
             new(-42, -66),
             new(-14, -80));
 
-    public static TaperedEvaluationTermByCount8 KnightMobilityBonus { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(
+    public static readonly TaperedEvaluationTermByCount8 KnightMobilityBonus = new(
             new(0, 0),
             new(23, -8),
             new(30, 4),
@@ -2183,7 +2183,7 @@ public static partial class EvaluationConstants
             new(33, 9),
             new(34, 3));
 
-    public static TaperedEvaluationTermByCount14 BishopMobilityBonus { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(
+    public static readonly TaperedEvaluationTermByCount14 BishopMobilityBonus = new(
             new(-236, -243),
             new(0, 0),
             new(23, -16),
@@ -2200,7 +2200,7 @@ public static partial class EvaluationConstants
             new(104, 111),
             new(0, 0));
 
-    public static TaperedEvaluationTermByCount14 RookMobilityBonus { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(
+    public static readonly TaperedEvaluationTermByCount14 RookMobilityBonus = new(
             new(0, 0),
             new(9, 25),
             new(13, 30),
