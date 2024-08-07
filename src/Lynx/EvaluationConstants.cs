@@ -18,7 +18,7 @@ public static partial class EvaluationConstants
 
 #pragma warning disable IDE0055 // Discard formatting in this region
 
-    public const int PSQTBucketCount = 23;
+    public const int PSQTBucketCount = 24;
 
     public static readonly int[] PSQTBucketLayout =
     [
