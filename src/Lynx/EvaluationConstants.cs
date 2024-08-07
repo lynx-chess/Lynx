@@ -20,7 +20,7 @@ public static partial class EvaluationConstants
 
     public const int PSQTBucketCount = 22;
 
-    public static readonly int[] PSQTBucketLayouts =
+    public static readonly int[] PSQTBucketLayout =
     [
         14, 15, 16, 17, 18, 19, 20, 21,
         14, 15, 16, 17, 18, 19, 20, 21,
