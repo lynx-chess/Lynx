@@ -7,14 +7,14 @@ namespace Lynx;
 public static partial class EvaluationConstants
 {
     /// <summary>
-    /// 18110 games, 20+0.2, 8moves_v3.epd
-    /// Retained (W,D,L) = (443253, 1225563, 445851) positions.
+    /// 20000 games, 20+0.2, 8moves_v3.epd
+    /// Retained (W,D,L) = (415984, 1356391, 417074) positions.
     /// </summary>
-    public const int EvalNormalizationCoefficient = 90;
+    public const int EvalNormalizationCoefficient = 139;
 
-    public static readonly double[] As = [-8.04766150, 80.50520447, -50.49187611, 68.23641282];
+    public static readonly double[] As = [-22.39558276, 143.95892718, -98.84854041, 117.14472929];
 
-    public static readonly double[] Bs = [-2.50118978, 19.26481735, -6.98361835, 49.93026650];
+    public static readonly double[] Bs = [-6.67029772, 41.06172677, -36.37312580, 80.73370363];
 
 #pragma warning disable IDE0055 // Discard formatting in this region
 
