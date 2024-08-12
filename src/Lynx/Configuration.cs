@@ -103,6 +103,8 @@ public sealed class EngineSettings
 
     public double SoftTimeBaseIncrementMultiplier { get; set; } = 0.8;
 
+    public int DivisibleNodesToCheckTimeLimit { get; set; } = 1024;
+
     #endregion
 
     [SPSA<int>(3, 10, 0.5)]
