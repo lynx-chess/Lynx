@@ -1,6 +1,8 @@
 ﻿using Lynx.Model;
 using NUnit.Framework;
+
 using static Lynx.EvaluationConstants;
+using static Lynx.EvaluationParams;
 
 namespace Lynx.Test;
 public class EvaluationConstantsTest
