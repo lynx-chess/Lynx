@@ -106,7 +106,7 @@ public sealed class EngineSettings
     #endregion
 
     [SPSA<int>(3, 10, 0.5)]
-    public int LMR_MinDepth { get; set; } = 3;
+    public int LMR_MinDepth { get; set; } = 4;
 
     [SPSA<int>(1, 10, 0.5)]
     public int LMR_MinFullDepthSearchedMoves { get; set; } = 4;
@@ -115,19 +115,19 @@ public sealed class EngineSettings
     /// Value originally from Stormphrax, who apparently took it from Viridithas
     /// </summary>
     [SPSA<double>(0.1, 2, 0.10)]
-    public double LMR_Base { get; set; } = 0.67;
+    public double LMR_Base { get; set; } = 0.60;
 
     /// <summary>
     /// Value originally from Akimbo
     /// </summary>
     [SPSA<double>(1, 5, 0.1)]
-    public double LMR_Divisor { get; set; } = 3.16;
+    public double LMR_Divisor { get; set; } = 3.18;
 
     [SPSA<int>(1, 10, 0.5)]
     public int NMP_MinDepth { get; set; } = 2;
 
     [SPSA<int>(1, 5, 0.5)]
-    public int NMP_BaseDepthReduction { get; set; } = 2;
+    public int NMP_BaseDepthReduction { get; set; } = 1;
 
     [SPSA<int>(0, 10, 0.5)]
     public int NMP_DepthIncrement { get; set; } = 2;
@@ -139,22 +139,22 @@ public sealed class EngineSettings
     public int AspirationWindow_Delta { get; set; } = 15;
 
     [SPSA<int>(1, 20, 1)]
-    public int AspirationWindow_MinDepth { get; set; } = 7;
+    public int AspirationWindow_MinDepth { get; set; } = 8;
 
     [SPSA<int>(1, 10, 0.5)]
     public int RFP_MaxDepth { get; set; } = 9;
 
     [SPSA<int>(1, 300, 15)]
-    public int RFP_DepthScalingFactor { get; set; } = 60;
+    public int RFP_DepthScalingFactor { get; set; } = 51;
 
     [SPSA<int>(1, 10, 0.5)]
     public int Razoring_MaxDepth { get; set; } = 2;
 
     [SPSA<int>(1, 300, 15)]
-    public int Razoring_Depth1Bonus { get; set; } = 164;
+    public int Razoring_Depth1Bonus { get; set; } = 165;
 
     [SPSA<int>(1, 300, 15)]
-    public int Razoring_NotDepth1Bonus { get; set; } = 183;
+    public int Razoring_NotDepth1Bonus { get; set; } = 189;
 
     [SPSA<int>(1, 10, 0.5)]
     public int IIR_MinDepth { get; set; } = 4;
@@ -182,10 +182,10 @@ public sealed class EngineSettings
     public int FP_MaxDepth { get; set; } = 7;
 
     [SPSA<int>(1, 200, 10)]
-    public int FP_DepthScalingFactor { get; set; } = 68;
+    public int FP_DepthScalingFactor { get; set; } = 73;
 
     [SPSA<int>(0, 500, 25)]
-    public int FP_Margin { get; set; } = 103;
+    public int FP_Margin { get; set; } = 93;
 }
 
 public sealed class TaperedEvaluationTerm
