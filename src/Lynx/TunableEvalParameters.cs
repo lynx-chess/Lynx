@@ -1,7 +1,5 @@
 ﻿// 2024-8-12 13:37:35  51
 
-using System.Runtime.CompilerServices;
-
 namespace Lynx;
 
 #pragma warning disable IDE0055, IDE1006 // Discard formatting and naming styles
@@ -3007,7 +3005,10 @@ public static partial class EvaluationConstants
 			   0,	   0,	   0,	   0,	   0,	   0,	   0,	   0,
 		],
 	];
+}
 
+public static class EvaluationParams
+{
 	public static readonly TaperedEvaluationTerm IsolatedPawnPenalty = new(-19, -15);
 
 	public static readonly TaperedEvaluationTerm OpenFileRookBonus = new(41, 7);
@@ -3028,7 +3029,7 @@ public static partial class EvaluationConstants
 
 	public static readonly TaperedEvaluationTerm PieceAttackedByPawnPenalty = new(-40, -29);
 
-	public static TaperedEvaluationTermByRank PassedPawnBonus { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(
+	public static readonly TaperedEvaluationTermByRank PassedPawnBonus = new(
 		new(0, 0),
 		new(7, 15),
 		new(-1, 22),
@@ -3038,7 +3039,7 @@ public static partial class EvaluationConstants
 		new(234, 269),
 		new(0, 0));
 
-	public static TaperedEvaluationTermByCount27 VirtualKingMobilityBonus { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(
+	public static readonly TaperedEvaluationTermByCount27 VirtualKingMobilityBonus = new(
 		new(0, 0),
 		new(0, 0),
 		new(0, 0),
@@ -3068,7 +3069,7 @@ public static partial class EvaluationConstants
 		new(-14, -78),
 		new(17, -93));
 
-	public static TaperedEvaluationTermByCount8 KnightMobilityBonus { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(
+	public static readonly TaperedEvaluationTermByCount8 KnightMobilityBonus = new(
 		new(0, 0),
 		new(11, -1),
 		new(16, 15),
@@ -3079,7 +3080,7 @@ public static partial class EvaluationConstants
 		new(18, 20),
 		new(18, 14));
 
-	public static TaperedEvaluationTermByCount14 BishopMobilityBonus { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(
+	public static readonly TaperedEvaluationTermByCount14 BishopMobilityBonus= new(
 		new(-247, -213),
 		new(0, 0),
 		new(39, 63),
@@ -3096,7 +3097,7 @@ public static partial class EvaluationConstants
 		new(119, 197),
 		new(0, 0));
 
-	public static TaperedEvaluationTermByCount14 RookMobilityBonus { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = new(
+	public static readonly TaperedEvaluationTermByCount14 RookMobilityBonus = new(
 		new(0, 0),
 		new(9, 21),
 		new(14, 26),
