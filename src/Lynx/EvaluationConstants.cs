@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using System.Runtime.CompilerServices;
 
 #pragma warning disable IDE1006 // Naming Styles
 
@@ -39,9 +40,9 @@ public static partial class EvaluationConstants
     ];
 
     /// <summary>
-    /// PSQTBucketCountx12x64
+    /// PSQTBucketCount x 12 x 64
     /// </summary>
-    public static readonly int[][][] PackedPSQT = new int[PSQTBucketCount][][];
+    public static readonly int[] PackedPSQT = new int[PSQTBucketCount * 12 * 64];
 
     /// <summary>
     /// <see cref="Constants.AbsoluteMaxDepth"/> x <see cref="Constants.MaxNumberOfPossibleMovesInAPosition"/>
@@ -77,19 +78,15 @@ public static partial class EvaluationConstants
 
         for (int bucket = 0; bucket < PSQTBucketCount; ++bucket)
         {
-            PackedPSQT[bucket] = new int[12][];
             for (int piece = (int)Piece.P; piece <= (int)Piece.K; ++piece)
             {
-                PackedPSQT[bucket][piece] = new int[64];
-                PackedPSQT[bucket][piece + 6] = new int[64];
-
                 for (int sq = 0; sq < 64; ++sq)
                 {
-                    PackedPSQT[bucket][piece][sq] = Utils.Pack(
+                    PackedPSQT[PSQTIndex(bucket, piece, sq)] = Utils.Pack(
                         (short)(MiddleGamePieceValues[bucket][piece] + mgPositionalTables[piece][bucket][sq]),
                         (short)(EndGamePieceValues[bucket][piece] + egPositionalTables[piece][bucket][sq]));
 
-                    PackedPSQT[bucket][piece + 6][sq] = Utils.Pack(
+                    PackedPSQT[PSQTIndex(bucket, piece + 6, sq)] = Utils.Pack(
                         (short)(MiddleGamePieceValues[bucket][piece + 6] - mgPositionalTables[piece][bucket][sq ^ 56]),
                         (short)(EndGamePieceValues[bucket][piece + 6] - egPositionalTables[piece][bucket][sq ^ 56]));
                 }
@@ -217,6 +214,21 @@ public static partial class EvaluationConstants
     public const int SingleMoveEvaluation = 200;
 
     public const int ContinuationHistoryPlyCount = 1;
+
+    /// <summary>
+    /// [PSQTBucketCount][12][64]
+    /// </summary>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int PSQTIndex(int bucket, int piece, int square)
+    {
+        const int bucketOffset = 12 * 64;
+        const int pieceOffset = 64;
+
+        return (bucket * bucketOffset)
+            + (piece * pieceOffset)
+            + square;
+    }
 }
 
 #pragma warning restore IDE1006 // Naming Styles
