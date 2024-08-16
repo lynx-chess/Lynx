@@ -750,6 +750,8 @@ public class Position
 
         packedScore += PackedPSQT[whiteBucket][(int)Piece.K][whiteKing]
             + PackedPSQT[blackBucket][(int)Piece.k][blackKing]
+            + PackedEnemyPSQT[blackBucket][(int)Piece.K][whiteKing]
+            + PackedEnemyPSQT[whiteBucket][(int)Piece.k][blackKing]
             + KingAdditionalEvaluation(whiteKing, Side.White)
             - KingAdditionalEvaluation(blackKing, Side.Black);
 
