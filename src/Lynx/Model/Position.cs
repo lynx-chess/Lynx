@@ -689,8 +689,8 @@ public class Position
         var whiteKing = PieceBitBoards[(int)Piece.K].GetLS1BIndex();
         var blackKing = PieceBitBoards[(int)Piece.k].GetLS1BIndex();
 
-        var whiteBucket = EvaluationConstants.PSQTBucketLayout[whiteKing];
-        var blackBucket = EvaluationConstants.PSQTBucketLayout[blackKing ^ 56];
+        var whiteBucket = PSQTBucketLayout[whiteKing];
+        var blackBucket = PSQTBucketLayout[blackKing ^ 56];
 
         for (int pieceIndex = (int)Piece.P; pieceIndex < (int)Piece.K; ++pieceIndex)
         {
@@ -702,7 +702,8 @@ public class Position
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
 
-                packedScore += PackedPSQT[whiteBucket][pieceIndex][pieceSquareIndex];
+                packedScore += PackedPSQT[whiteBucket][pieceIndex][pieceSquareIndex]
+                            + PackedEnemyPSQT[blackBucket][pieceIndex][pieceSquareIndex];
                 gamePhase += GamePhaseByPiece[pieceIndex];
 
                 packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
@@ -719,7 +720,8 @@ public class Position
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
 
-                packedScore += PackedPSQT[blackBucket][pieceIndex][pieceSquareIndex];
+                packedScore += PackedPSQT[blackBucket][pieceIndex][pieceSquareIndex]
+                            + PackedEnemyPSQT[whiteBucket][pieceIndex][pieceSquareIndex];
                 gamePhase += GamePhaseByPiece[pieceIndex];
 
                 packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
