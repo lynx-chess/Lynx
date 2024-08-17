@@ -122,12 +122,12 @@ public static partial class EvaluationConstants
                         (short)(EndGamePieceValues[bucket][piece + 6] - egPositionalTables[piece][bucket][sq ^ 56]));
 
                     PackedEnemyPSQT[bucket][piece][sq] = Utils.Pack(
-                        mgEnemyPositionalTables[piece][bucket][sq],
-                        egEnemyPositionalTables[piece][bucket][sq]);
+                       (short)(MiddleGameEnemyPieceValues[bucket][piece] + mgEnemyPositionalTables[piece][bucket][sq]),
+                        (short)(EndGameEnemyPieceValues[bucket][piece] + egEnemyPositionalTables[piece][bucket][sq]));
 
                     PackedEnemyPSQT[bucket][piece + 6][sq] = Utils.Pack(
-                        (short)-mgEnemyPositionalTables[piece][bucket][sq ^ 56],
-                        (short)-egEnemyPositionalTables[piece][bucket][sq ^ 56]);
+                        (short)(MiddleGameEnemyPieceValues[bucket][piece + 6] -mgEnemyPositionalTables[piece][bucket][sq ^ 56]),
+                        (short)(EndGameEnemyPieceValues[bucket][piece + 6] - egEnemyPositionalTables[piece][bucket][sq ^ 56]));
                 }
             }
         }
