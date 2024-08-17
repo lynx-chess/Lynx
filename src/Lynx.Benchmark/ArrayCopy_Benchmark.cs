@@ -39,43 +39,43 @@ public class ArrayCopy_Benchmark : BaseBenchmark
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]
-    public ulong[] ArrayDotCopy(ulong[] array)
+    public int[] ArrayDotCopy(int[] array)
     {
         return ArrayDotCopyImpl(array);
     }
 
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
-    public ulong[] ManualLoop(ulong[] array)
+    public int[] ManualLoop(int[] array)
     {
         return ManualLoopImpl(array);
     }
 
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
-    public ulong[] ManualLoopSpan(ulong[] array)
+    public int[] ManualLoopSpan(int[] array)
     {
         return ManualLoopImplSpan(array);
     }
 
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
-    public ulong[] UnrolledManualLoop(ulong[] array)
+    public int[] UnrolledManualLoop(int[] array)
     {
         return UnrolledManualLoopImpl(array);
     }
 
-    private static ulong[] ArrayDotCopyImpl(ulong[] array)
+    private static int[] ArrayDotCopyImpl(int[] array)
     {
-        var result = new ulong[array.Length];
+        var result = new int[array.Length];
         Array.Copy(array, result, array.Length);
 
         return result;
     }
 
-    private static ulong[] ManualLoopImpl(ulong[] array)
+    private static int[] ManualLoopImpl(int[] array)
     {
-        var result = new ulong[array.Length];
+        var result = new int[array.Length];
         for (int i = 0; i < array.Length; ++i)
         {
             result[i] = array[i];
@@ -84,9 +84,9 @@ public class ArrayCopy_Benchmark : BaseBenchmark
         return result;
     }
 
-    private static ulong[] ManualLoopImplSpan(ReadOnlySpan<ulong> array)
+    private static int[] ManualLoopImplSpan(ReadOnlySpan<int> array)
     {
-        var result = new ulong[array.Length];
+        var result = new int[array.Length];
         for (int i = 0; i < array.Length; ++i)
         {
             result[i] = array[i];
@@ -95,15 +95,15 @@ public class ArrayCopy_Benchmark : BaseBenchmark
         return result;
     }
 
-    private static unsafe ulong[] UnrolledManualLoopImpl(ReadOnlySpan<ulong> array)
+    private static unsafe int[] UnrolledManualLoopImpl(ReadOnlySpan<int> array)
     {
-        var result = new ulong[array.Length];
+        var result = new int[array.Length];
 
         int i = 0;
         int lastBlockIndex = array.Length - (array.Length % 4);
 
         // Pin source so we can elide the bounds checks
-        fixed (ulong* pSource = array)
+        fixed (int* pSource = array)
         {
             while (i < lastBlockIndex)
             {
