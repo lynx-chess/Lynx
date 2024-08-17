@@ -689,8 +689,8 @@ public class Position
         var whiteKing = PieceBitBoards[(int)Piece.K].GetLS1BIndex();
         var blackKing = PieceBitBoards[(int)Piece.k].GetLS1BIndex();
 
-        var whiteBucket = EvaluationConstants.PSQTBucketLayout[whiteKing];
-        var blackBucket = EvaluationConstants.PSQTBucketLayout[blackKing ^ 56];
+        var whiteBucket = PSQTBucketLayout[whiteKing];
+        var blackBucket = PSQTBucketLayout[blackKing ^ 56];
 
         for (int pieceIndex = (int)Piece.P; pieceIndex < (int)Piece.K; ++pieceIndex)
         {
@@ -702,7 +702,7 @@ public class Position
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
 
-                packedScore += PackedPSQT[PSQTIndex(whiteBucket, pieceIndex, pieceSquareIndex)];
+                packedScore += PSQT(whiteBucket, pieceIndex, pieceSquareIndex);
                 gamePhase += GamePhaseByPiece[pieceIndex];
 
                 packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
@@ -719,7 +719,7 @@ public class Position
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
 
-                packedScore += PackedPSQT[PSQTIndex(blackBucket, pieceIndex, pieceSquareIndex)];
+                packedScore += PSQT(blackBucket, pieceIndex, pieceSquareIndex);
                 gamePhase += GamePhaseByPiece[pieceIndex];
 
                 packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
@@ -746,8 +746,8 @@ public class Position
             * ((blackPawnAttacks & OccupancyBitBoards[(int)Side.White]).CountBits()
                 - (whitePawnAttacks & OccupancyBitBoards[(int)Side.Black]).CountBits());
 
-        packedScore += PackedPSQT[PSQTIndex(whiteBucket, (int)Piece.K, whiteKing)]
-            + PackedPSQT[PSQTIndex(blackBucket, (int)Piece.k, blackKing)]
+        packedScore += PSQT(whiteBucket, (int)Piece.K, whiteKing)
+            + PSQT(blackBucket, (int)Piece.k, blackKing)
             + KingAdditionalEvaluation(whiteKing, Side.White)
             - KingAdditionalEvaluation(blackKing, Side.Black);
 

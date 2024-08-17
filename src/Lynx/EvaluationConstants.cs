@@ -42,7 +42,7 @@ public static partial class EvaluationConstants
     /// <summary>
     /// PSQTBucketCount x 12 x 64
     /// </summary>
-    public static readonly int[] PackedPSQT = new int[PSQTBucketCount * 12 * 64];
+    public static readonly int[] PackedPSQT = GC.AllocateArray<int>(PSQTBucketCount * 12 * 64, pinned: true);
 
     /// <summary>
     /// <see cref="Constants.AbsoluteMaxDepth"/> x <see cref="Constants.MaxNumberOfPossibleMovesInAPosition"/>
@@ -214,6 +214,27 @@ public static partial class EvaluationConstants
     public const int SingleMoveEvaluation = 200;
 
     public const int ContinuationHistoryPlyCount = 1;
+
+    /// <summary>
+    /// [PSQTBucketCount][12][64]
+    /// </summary>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int PSQT(int bucket, int piece, int square)
+    {
+        var index = PSQTIndex(bucket, piece, square);
+
+        unsafe
+        {
+            // Since _tt is a pinned array
+            // This is no-op pinning as it does not influence the GC compaction
+            // https://tooslowexception.com/pinned-object-heap-in-net-5/
+            fixed (int* psqtPtr = &PackedPSQT[0])
+            {
+                return psqtPtr[index];
+            }
+        }
+    }
 
     /// <summary>
     /// [PSQTBucketCount][12][64]
