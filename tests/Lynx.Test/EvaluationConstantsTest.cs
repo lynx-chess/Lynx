@@ -271,8 +271,8 @@ public class EvaluationConstantsTest
                     var mg = (short)(MiddleGamePieceValues[bucket][piece] + mgPositionalTables[piece][bucket][sq]);
                     var eg = (short)(EndGamePieceValues[bucket][piece] + egPositionalTables[piece][bucket][sq]);
 
-                    Assert.AreEqual(Utils.UnpackMG(PackedPSQT[bucket][piece][sq]), mg);
-                    Assert.AreEqual(Utils.UnpackEG(PackedPSQT[bucket][piece][sq]), eg);
+                    Assert.AreEqual(Utils.UnpackMG(PackedPSQT[PSQTIndex(bucket,piece,sq)]), mg);
+                    Assert.AreEqual(Utils.UnpackEG(PackedPSQT[PSQTIndex(bucket,piece,sq)]), eg);
                 }
             }
         }
