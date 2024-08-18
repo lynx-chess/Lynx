@@ -262,17 +262,17 @@ public class EvaluationConstantsTest
             endGameKingTableBlack
         ];
 
-        for (int bucket = 0; bucket < EvaluationConstants.PSQTBucketCount; ++bucket)
+        for (int bucket = 0; bucket < PSQTBucketCount; ++bucket)
         {
             for (int piece = (int)Piece.P; piece <= (int)Piece.k; ++piece)
             {
                 for (int sq = 0; sq < 64; ++sq)
                 {
-                    var mg = (short)(MiddleGamePieceValues[bucket][piece] + mgPositionalTables[piece][bucket][sq]);
-                    var eg = (short)(EndGamePieceValues[bucket][piece] + egPositionalTables[piece][bucket][sq]);
+                    var mg = (short)(MiddleGamePieceValues[0][bucket][piece] + mgPositionalTables[piece][bucket][sq]);
+                    var eg = (short)(EndGamePieceValues[0][bucket][piece] + egPositionalTables[piece][bucket][sq]);
 
-                    Assert.AreEqual(Utils.UnpackMG(PackedPSQT[bucket][piece][sq]), mg);
-                    Assert.AreEqual(Utils.UnpackEG(PackedPSQT[bucket][piece][sq]), eg);
+                    Assert.AreEqual(Utils.UnpackMG(PackedPSQT[0][bucket][piece][sq]), mg);
+                    Assert.AreEqual(Utils.UnpackEG(PackedPSQT[0][bucket][piece][sq]), eg);
                 }
             }
         }

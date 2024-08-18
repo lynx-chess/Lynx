@@ -702,8 +702,8 @@ public class Position
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
 
-                packedScore += PackedPSQT[whiteBucket][pieceIndex][pieceSquareIndex]
-                            + PackedEnemyPSQT[blackBucket][pieceIndex][pieceSquareIndex];
+                packedScore += PackedPSQT[0][whiteBucket][pieceIndex][pieceSquareIndex]
+                            + PackedPSQT[1][blackBucket][pieceIndex][pieceSquareIndex];
                 gamePhase += GamePhaseByPiece[pieceIndex];
 
                 packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
@@ -720,8 +720,8 @@ public class Position
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
 
-                packedScore += PackedPSQT[blackBucket][pieceIndex][pieceSquareIndex]
-                            + PackedEnemyPSQT[whiteBucket][pieceIndex][pieceSquareIndex];
+                packedScore += PackedPSQT[0][blackBucket][pieceIndex][pieceSquareIndex]
+                            + PackedPSQT[1][whiteBucket][pieceIndex][pieceSquareIndex];
                 gamePhase += GamePhaseByPiece[pieceIndex];
 
                 packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
@@ -748,10 +748,10 @@ public class Position
             * ((blackPawnAttacks & OccupancyBitBoards[(int)Side.White]).CountBits()
                 - (whitePawnAttacks & OccupancyBitBoards[(int)Side.Black]).CountBits());
 
-        packedScore += PackedPSQT[whiteBucket][(int)Piece.K][whiteKing]
-            + PackedPSQT[blackBucket][(int)Piece.k][blackKing]
-            + PackedEnemyPSQT[blackBucket][(int)Piece.K][whiteKing]
-            + PackedEnemyPSQT[whiteBucket][(int)Piece.k][blackKing]
+        packedScore += PackedPSQT[0][whiteBucket][(int)Piece.K][whiteKing]
+            + PackedPSQT[0][blackBucket][(int)Piece.k][blackKing]
+            + PackedPSQT[1][blackBucket][(int)Piece.K][whiteKing]
+            + PackedPSQT[1][whiteBucket][(int)Piece.k][blackKing]
             + KingAdditionalEvaluation(whiteKing, Side.White)
             - KingAdditionalEvaluation(blackKing, Side.Black);
 
