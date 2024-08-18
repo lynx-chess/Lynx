@@ -39,9 +39,14 @@ public static partial class EvaluationConstants
     ];
 
     /// <summary>
-    /// PSQTBucketCountx12x64
+    /// PSQTBucketCount x 12 x 64
     /// </summary>
     public static readonly int[][][] PackedPSQT = new int[PSQTBucketCount][][];
+
+    /// <summary>
+    /// PSQTBucketCount x 12 x 64
+    /// </summary>
+    public static readonly int[][][] PackedEnemyPSQT = new int[PSQTBucketCount][][];
 
     /// <summary>
     /// <see cref="Constants.AbsoluteMaxDepth"/> x <see cref="Constants.MaxNumberOfPossibleMovesInAPosition"/>
@@ -75,13 +80,36 @@ public static partial class EvaluationConstants
             EndGameKingTable
         ];
 
+        short[][][] mgEnemyPositionalTables =
+        [
+            MiddleGameEnemyPawnTable,
+            MiddleGameEnemyKnightTable,
+            MiddleGameEnemyBishopTable,
+            MiddleGameEnemyRookTable,
+            MiddleGameEnemyQueenTable,
+            MiddleGameEnemyKingTable
+        ];
+
+        short[][][] egEnemyPositionalTables =
+        [
+            EndGameEnemyPawnTable,
+            EndGameEnemyKnightTable,
+            EndGameEnemyBishopTable,
+            EndGameEnemyRookTable,
+            EndGameEnemyQueenTable,
+            EndGameEnemyKingTable
+        ];
+
         for (int bucket = 0; bucket < PSQTBucketCount; ++bucket)
         {
             PackedPSQT[bucket] = new int[12][];
+            PackedEnemyPSQT[bucket] = new int[12][];
             for (int piece = (int)Piece.P; piece <= (int)Piece.K; ++piece)
             {
                 PackedPSQT[bucket][piece] = new int[64];
                 PackedPSQT[bucket][piece + 6] = new int[64];
+                PackedEnemyPSQT[bucket][piece] = new int[64];
+                PackedEnemyPSQT[bucket][piece + 6] = new int[64];
 
                 for (int sq = 0; sq < 64; ++sq)
                 {
@@ -92,6 +120,14 @@ public static partial class EvaluationConstants
                     PackedPSQT[bucket][piece + 6][sq] = Utils.Pack(
                         (short)(MiddleGamePieceValues[bucket][piece + 6] - mgPositionalTables[piece][bucket][sq ^ 56]),
                         (short)(EndGamePieceValues[bucket][piece + 6] - egPositionalTables[piece][bucket][sq ^ 56]));
+
+                    PackedEnemyPSQT[bucket][piece][sq] = Utils.Pack(
+                       (short)(MiddleGameEnemyPieceValues[bucket][piece] + mgEnemyPositionalTables[piece][bucket][sq]),
+                        (short)(EndGameEnemyPieceValues[bucket][piece] + egEnemyPositionalTables[piece][bucket][sq]));
+
+                    PackedEnemyPSQT[bucket][piece + 6][sq] = Utils.Pack(
+                        (short)(MiddleGameEnemyPieceValues[bucket][piece + 6] -mgEnemyPositionalTables[piece][bucket][sq ^ 56]),
+                        (short)(EndGameEnemyPieceValues[bucket][piece + 6] - egEnemyPositionalTables[piece][bucket][sq ^ 56]));
                 }
             }
         }
