@@ -704,6 +704,7 @@ public class Position
 
                 packedScore += PSQT(0, whiteBucket, pieceIndex, pieceSquareIndex)
                              + PSQT(1, blackBucket, pieceIndex, pieceSquareIndex);
+
                 gamePhase += GamePhaseByPiece[pieceIndex];
 
                 packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
@@ -721,7 +722,8 @@ public class Position
                 bitboard.ResetLS1B();
 
                 packedScore += PSQT(0, blackBucket, pieceIndex, pieceSquareIndex)
-                    + PSQT(1, whiteBucket, pieceIndex, pieceSquareIndex);
+                             + PSQT(1, whiteBucket, pieceIndex, pieceSquareIndex);
+
                 gamePhase += GamePhaseByPiece[pieceIndex];
 
                 packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
