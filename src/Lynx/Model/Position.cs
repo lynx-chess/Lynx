@@ -762,58 +762,63 @@ public class Position
             gamePhase = maxPhase;
         }
 
-        int totalPawnsCount = PieceBitBoards[(int)Piece.P].CountBits() + PieceBitBoards[(int)Piece.p].CountBits();
+        int totalPawnsCount = int.MinValue;
 
         // Pawnless endgames with few pieces
-        if (gamePhase <= 3 && totalPawnsCount == 0)
+        if (gamePhase <= 3)
         {
-            switch (gamePhase)
+            totalPawnsCount = PieceBitBoards[(int)Piece.P].CountBits() + PieceBitBoards[(int)Piece.p].CountBits();
+
+            if (totalPawnsCount == 0)
             {
-                //case 5:
-                //    {
-                //        // RB vs R, RN vs R - scale it down due to the chances of it being a draw
-                //        if (pieceCount[(int)Piece.R] == 1 && pieceCount[(int)Piece.r] == 1)
-                //        {
-                //            packedScore >>= 1; // /2
-                //        }
+                switch (gamePhase)
+                {
+                    //case 5:
+                    //    {
+                    //        // RB vs R, RN vs R - scale it down due to the chances of it being a draw
+                    //        if (pieceCount[(int)Piece.R] == 1 && pieceCount[(int)Piece.r] == 1)
+                    //        {
+                    //            packedScore >>= 1; // /2
+                    //        }
 
-                //        break;
-                //    }
-                case 3:
-                    {
-                        var winningSideOffset = Utils.PieceOffset(packedScore >= 0);
+                    //        break;
+                    //    }
+                    case 3:
+                        {
+                            var winningSideOffset = Utils.PieceOffset(packedScore >= 0);
 
-                        if (PieceBitBoards[(int)Piece.N + winningSideOffset].CountBits() == 2)      // NN vs N, NN vs B
+                            if (PieceBitBoards[(int)Piece.N + winningSideOffset].CountBits() == 2)      // NN vs N, NN vs B
+                            {
+                                return (0, gamePhase);
+                            }
+
+                            // Without rooks, only BB vs N is a win and BN vs N can have some chances
+                            // Not taking that into account here though, we would need this to rule them out: `pieceCount[(int)Piece.b - winningSideOffset] == 1 || pieceCount[(int)Piece.B + winningSideOffset] <= 1`
+                            //if (pieceCount[(int)Piece.R + winningSideOffset] == 0)  // BN vs B, NN vs B, BB vs B, BN vs N, NN vs N
+                            //{
+                            //    packedScore >>= 1; // /2
+                            //}
+
+                            break;
+                        }
+                    case 2:
+                        {
+                            var whiteKnightsCount = PieceBitBoards[(int)Piece.N].CountBits();
+
+                            if (whiteKnightsCount + PieceBitBoards[(int)Piece.n].CountBits() == 2            // NN vs -, N vs N
+                                    || whiteKnightsCount + PieceBitBoards[(int)Piece.B].CountBits() == 1)    // B vs N, B vs B
+                            {
+                                return (0, gamePhase);
+                            }
+
+                            break;
+                        }
+                    case 1:
+                    case 0:
                         {
                             return (0, gamePhase);
                         }
-
-                        // Without rooks, only BB vs N is a win and BN vs N can have some chances
-                        // Not taking that into account here though, we would need this to rule them out: `pieceCount[(int)Piece.b - winningSideOffset] == 1 || pieceCount[(int)Piece.B + winningSideOffset] <= 1`
-                        //if (pieceCount[(int)Piece.R + winningSideOffset] == 0)  // BN vs B, NN vs B, BB vs B, BN vs N, NN vs N
-                        //{
-                        //    packedScore >>= 1; // /2
-                        //}
-
-                        break;
-                    }
-                case 2:
-                    {
-                        var whiteKnightsCount = PieceBitBoards[(int)Piece.N].CountBits();
-
-                        if (whiteKnightsCount + PieceBitBoards[(int)Piece.n].CountBits() == 2            // NN vs -, N vs N
-                                || whiteKnightsCount + PieceBitBoards[(int)Piece.B].CountBits() == 1)    // B vs N, B vs B
-                        {
-                            return (0, gamePhase);
-                        }
-
-                        break;
-                    }
-                case 1:
-                case 0:
-                    {
-                        return (0, gamePhase);
-                    }
+                }
             }
         }
 
@@ -823,8 +828,11 @@ public class Position
         var endGameScore = Utils.UnpackEG(packedScore);
         var eval = ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / maxPhase;
 
-        // Formula yoinked from Sirius
-        eval *= ((80 + (totalPawnsCount * 7)) / 128);
+        if (gamePhase <= 3)
+        {
+            // Formula yoinked from Sirius
+            eval *= ((80 + (totalPawnsCount * 7)) / 128);
+        }
 
         eval = Math.Clamp(eval, MinEval, MaxEval);
 
