@@ -44,6 +44,7 @@ jobs:
 
     - name: Build
       run: dotnet build -c Release
+      working-directory: ./src/Lynx.Cli
 
     - name: Run perft ${{ github.event.inputs.depth }} on ${{ github.event.inputs.fen }}
       run: dotnet run -c Release --no-build "position fen ${{ github.event.inputs.fen }}" "perft ${{ github.event.inputs.depth }}" "quit"
