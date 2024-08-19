@@ -824,7 +824,7 @@ public class Position
         var eval = ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / maxPhase;
 
         // Formula yoinked from Sirius
-        eval *= ((80 + (totalPawnsCount * 7)) / 128);
+        eval = (int)(eval * ((80 + (totalPawnsCount * 7)) / 128.0));
 
         eval = Math.Clamp(eval, MinEval, MaxEval);
 
