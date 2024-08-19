@@ -10,7 +10,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest, macos-14]
+        os: [ubuntu-latest, windows-latest, macOS-latest, macOS-13]
       fail-fast: false
 
     env:
@@ -36,7 +36,8 @@ jobs:
 
     - name: Build
       run: dotnet build -c Release
+      working-directory: ./src/Lynx.Cli
 
-    - name: Run perft ${{ github.event.inputs.depth }} on ${{ github.event.inputs.fen }}
+    - name: Run bench ${{ github.event.inputs.depth }} on ${{ github.event.inputs.fen }}
       run: dotnet run -c Release --no-build "bench"
       working-directory: ./src/Lynx.Cli

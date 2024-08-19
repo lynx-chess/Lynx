@@ -3,7 +3,6 @@ using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
 using System.Diagnostics;
-using System.Reflection;
 using System.Runtime.Intrinsics.X86;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -161,9 +160,13 @@ public sealed class UCIHandler
 
     private void HandlePonderHit()
     {
-        if (Configuration.IsPonder)
+        if (Configuration.EngineSettings.IsPonder)
         {
             _engine.PonderHit();
+        }
+        else
+        {
+            _logger.Warn("Unexpected 'ponderhit' command, given pondering is disabled. Ignoring it");
         }
     }
 
@@ -186,9 +189,8 @@ public sealed class UCIHandler
                 {
                     if (length > 4 && bool.TryParse(command[commandItems[4]], out var value))
                     {
-                        Configuration.IsPonder = value;
+                        Configuration.EngineSettings.IsPonder = value;
                     }
-                    _logger.Warn("Ponder not supported yet");
                     break;
                 }
             case "uci_analysemode":
@@ -557,6 +559,7 @@ public sealed class UCIHandler
                 return;
             }
 
+            int lineCounter = 0;
             foreach (var line in await File.ReadAllLinesAsync(fullPath, cancellationToken))
             {
                 var fen = line[..line.IndexOfAny([';', '[', '"'])];
@@ -581,6 +584,11 @@ public sealed class UCIHandler
                 }
 
                 await _engineToUci.Writer.WriteAsync($"{line}: {eval}", cancellationToken);
+
+                if (++lineCounter % 100 == 0)
+                {
+                    Thread.Sleep(50);
+                }
             }
         }
         catch (Exception e)
@@ -601,14 +609,14 @@ public sealed class UCIHandler
     {
         const string fullMoveCounterString = " 1";
 
-        var fen = _engine.Game.CurrentPosition.FEN()[..^3] + _engine.Game.HalfMovesWithoutCaptureOrPawnMove + fullMoveCounterString;
+        var fen = _engine.Game.CurrentPosition.FEN()[..^3] + _engine.Game.HalfMovesWithoutCaptureOrPawnMove.ToString() + fullMoveCounterString;
 
         await _engineToUci.Writer.WriteAsync(fen, cancellationToken);
     }
 
     private async ValueTask HandleOpenBenchSPSA(CancellationToken cancellationToken)
     {
-        foreach(var tunableValue in SPSAAttributeHelpers.GenerateOpenBenchStrings())
+        foreach (var tunableValue in SPSAAttributeHelpers.GenerateOpenBenchStrings())
         {
             await SendCommand(tunableValue, cancellationToken);
         }

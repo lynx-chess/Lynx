@@ -24,7 +24,7 @@ namespace Lynx.Benchmark;
 
 public class EnumCasting_Benchmark : BaseBenchmark
 {
-    public static IEnumerable<int> Data => new[] { 1, 10, 1_000, 10_000, 100_000 };
+    public static IEnumerable<int> Data => [1, 10, 1_000, 10_000, 100_000];
 
     private const int Pawn = (int)Piece.P;
 
@@ -35,12 +35,12 @@ public class EnumCasting_Benchmark : BaseBenchmark
         var sum = 0;
         for (int i = 0; i < iterations; ++i)
         {
-            sum += EvaluationConstants.MiddleGamePieceValues[Pawn];
-            sum += EvaluationConstants.MiddleGamePieceValues[Pawn];
-            sum += EvaluationConstants.MiddleGamePieceValues[Pawn];
-            sum += EvaluationConstants.MiddleGamePieceValues[Pawn];
-            sum += EvaluationConstants.MiddleGamePieceValues[Pawn];
-            sum += EvaluationConstants.MiddleGamePieceValues[Pawn];
+            sum += EvaluationConstants.MiddleGamePieceValues[0][0][Pawn];
+            sum += EvaluationConstants.MiddleGamePieceValues[0][0][Pawn];
+            sum += EvaluationConstants.MiddleGamePieceValues[0][0][Pawn];
+            sum += EvaluationConstants.MiddleGamePieceValues[0][0][Pawn];
+            sum += EvaluationConstants.MiddleGamePieceValues[0][0][Pawn];
+            sum += EvaluationConstants.MiddleGamePieceValues[0][0][Pawn];
         }
 
         return sum;
@@ -53,12 +53,12 @@ public class EnumCasting_Benchmark : BaseBenchmark
         var sum = 0;
         for (int i = 0; i < iterations; ++i)
         {
-            sum += EvaluationConstants.MiddleGamePieceValues[(int)Piece.P];
-            sum += EvaluationConstants.MiddleGamePieceValues[(int)Piece.P];
-            sum += EvaluationConstants.MiddleGamePieceValues[(int)Piece.P];
-            sum += EvaluationConstants.MiddleGamePieceValues[(int)Piece.P];
-            sum += EvaluationConstants.MiddleGamePieceValues[(int)Piece.P];
-            sum += EvaluationConstants.MiddleGamePieceValues[(int)Piece.P];
+            sum += EvaluationConstants.MiddleGamePieceValues[0][0][(int)Piece.P];
+            sum += EvaluationConstants.MiddleGamePieceValues[0][0][(int)Piece.P];
+            sum += EvaluationConstants.MiddleGamePieceValues[0][0][(int)Piece.P];
+            sum += EvaluationConstants.MiddleGamePieceValues[0][0][(int)Piece.P];
+            sum += EvaluationConstants.MiddleGamePieceValues[0][0][(int)Piece.P];
+            sum += EvaluationConstants.MiddleGamePieceValues[0][0][(int)Piece.P];
         }
 
         return sum;

@@ -18,7 +18,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, macos-14]
+        os: [ubuntu-latest, macOS-latest, macOS-13]
       fail-fast: false
 
     steps:
@@ -49,16 +49,16 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest, macos-14]
+        os: [ubuntu-latest, windows-latest, macOS-latest, macOS-13]
         include:
           - os: ubuntu-latest
             runtime-identifier: linux-x64
           - os: windows-latest
             runtime-identifier: win-x64
           - os: macOS-latest
-            runtime-identifier: osx-x64
-          - os: macos-14
             runtime-identifier: osx-arm64
+          - os: macOS-13
+            runtime-identifier: osx-x64
       fail-fast: false
 
     steps:
@@ -116,16 +116,16 @@ jobs:
     strategy:
       matrix:
         configuration: [Debug, Release]
-        os: [ubuntu-latest, windows-latest, macOS-latest, macos-14]
+        os: [ubuntu-latest, windows-latest, macOS-latest, macOS-13]
         include:
           - os: ubuntu-latest
             runtime-identifier: linux-x64
           - os: windows-latest
             runtime-identifier: win-x64
           - os: macOS-latest
-            runtime-identifier: osx-x64
-          - os: macos-14
             runtime-identifier: osx-arm64
+          - os: macOS-13
+            runtime-identifier: osx-x64
       fail-fast: false
 
     steps:
@@ -152,11 +152,11 @@ jobs:
       run: dotnet build -c ${{ matrix.configuration }} /p:DeterministicBuild=true
 
     - name: Run ${{ matrix.category }} tests
-      run: dotnet test -c ${{ matrix.configuration }} --no-build --collect:"XPlat Code Coverage" -v normal --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true" -- RunConfiguration.CollectSourceInformation=true
+      run: dotnet test -c ${{ matrix.configuration }} --no-build --collect:"XPlat Code Coverage" --settings tests/runsettings.xml -v normal --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true"
 
     - name: '[Ubuntu] Generate test coverage report'
       if: matrix.os == 'ubuntu-latest' && matrix.configuration == 'Release'
-      uses: danielpalme/ReportGenerator-GitHub-Action@5
+      uses: danielpalme/ReportGenerator-GitHub-Action@v5
       with:
         reports: 'tests/**/*.cobertura.xml'
         targetdir: 'coveragereport'
@@ -182,7 +182,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest, macos-14]
+        os: [ubuntu-latest, windows-latest, macOS-latest, macOS-13]
         category: [LongRunning]
       fail-fast: false
 
@@ -207,15 +207,14 @@ jobs:
       run: dotnet build -c Release
 
     - name: Run ${{ matrix.category }} tests
-      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true" -- RunConfiguration.CollectSourceInformation=true
-        # --collect:"XPlat Code Coverage" https://github.com/coverlet-coverage/coverlet/issues/1192
+      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal --collect:"XPlat Code Coverage" --settings tests/runsettings.xml --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true"
 
   perft-tests:
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-14]   # disabled for macOS-latest since that's always the CI bottleneck due to runners availability
+        os: [ubuntu-latest, windows-latest, macOS-latest]   # disabled for macOS-latest since that's always the CI bottleneck due to runners availability
         category: [Perft]
       fail-fast: false
 
@@ -240,15 +239,15 @@ jobs:
       run: dotnet build -c Release
 
     - name: Run ${{ matrix.category }} tests
-      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true" -- RunConfiguration.CollectSourceInformation=true
-        # --collect:"XPlat Code Coverage" https://github.com/coverlet-coverage/coverlet/issues/1192
+      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true"
+        # --collect:"XPlat Code Coverage" causes too long test runs (>20 min) https://github.com/coverlet-coverage/coverlet/issues/1192
 
   other-tests:
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest, macos-14]
+        os: [ubuntu-latest, windows-latest, macOS-latest, macOS-13]
         category: [Configuration]
       fail-fast: false
 
@@ -273,7 +272,7 @@ jobs:
       run: dotnet build -c Release
 
     - name: Run ${{ matrix.category }} tests
-      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal --collect:"XPlat Code Coverage" --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true" -- RunConfiguration.CollectSourceInformation=true
+      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal --collect:"XPlat Code Coverage" --settings tests/runsettings.xml --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true"
 
   winning-at-chess:
     runs-on: ${{ matrix.os }}
@@ -305,9 +304,9 @@ jobs:
       run: dotnet build -c Release
 
     - name: Run ${{ matrix.category }} tests
-      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true" -- RunConfiguration.CollectSourceInformation=true
+      run: dotnet test -c Release --no-build --filter "TestCategory=${{ matrix.category }}" -v normal --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true"
       continue-on-error: true
-        # --collect:"XPlat Code Coverage" https://github.com/coverlet-coverage/coverlet/issues/1192
+        # --collect:"XPlat Code Coverage" --settings tests/runsettings.xml https://github.com/coverlet-coverage/coverlet/issues/1192
 
   #unify-coverage-reports:
   #  needs: [build, non-parallelizable-tests] # long-running-tests
@@ -337,7 +336,7 @@ jobs:
   #  #    path: artifacts/partial-coverage/long-running/
 
   #  - name: '[Ubuntu] Generate test coverage report'
-  #    uses: danielpalme/ReportGenerator-GitHub-Action@5
+  #    uses: danielpalme/ReportGenerator-GitHub-Action@v5
   #    with:
   #      reports: 'artifacts/partial-coverage/**/Cobertura.xml;tests/**/*.cobertura.xml'
   #      targetdir: 'coveragereport'
@@ -363,7 +362,7 @@ jobs:
 
   #  strategy:
   #    matrix:
-  #      os: [ubuntu-latest, windows-latest, macOS-latest, macos-14]
+  #      os: [ubuntu-latest, windows-latest, macOS-latest, macOS-13]
   #    fail-fast: false
 
   #  env:
@@ -391,7 +390,7 @@ jobs:
   #    run: dotnet build -c Release
 
   #  - name: Run non-parallelizable tests
-  #    run: dotnet test -c Release --no-build -v=normal --filter "TestCategory=NonParallelizable" --collect:"XPlat Code Coverage" --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true" -- RunConfiguration.CollectSourceInformation=true
+  #    run: dotnet test -c Release --no-build -v=normal --filter "TestCategory=NonParallelizable" --collect:"XPlat Code Coverage" --settings tests/runsettings.xml --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true"
 
   #  - name: '[Ubuntu] Generate test coverage report'
   #    if: matrix.os == 'ubuntu-latest'

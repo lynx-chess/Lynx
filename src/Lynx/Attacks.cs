@@ -96,6 +96,7 @@ public static class Attacks
             : MagicNumbersRookAttacks(squareIndex, occupancy);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static BitBoard MagicNumbersRookAttacks(int squareIndex, BitBoard occupancy)
     {
         var occ = occupancy & _rookOccupancyMasks[squareIndex];

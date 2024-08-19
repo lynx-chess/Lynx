@@ -140,7 +140,6 @@
 
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
-using NLog;
 using System.Runtime.CompilerServices;
 
 namespace Lynx.Benchmark;

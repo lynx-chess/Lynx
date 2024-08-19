@@ -37,6 +37,7 @@ public class WACSilver200 : BaseTest
     private static void VerifyBestMove(string fen, string bestMove, string id, GoCommand goCommand)
     {
         var engine = GetEngine(fen);
+        var currentPositionClone = new Position(engine.Game.CurrentPosition);
 
         var bestResult = engine.BestMove(goCommand);
 
@@ -44,11 +45,11 @@ public class WACSilver200 : BaseTest
         if (bestMoveArray.Length == 1)
         {
             var expectedMove = bestMoveArray[0].TrimEnd('+');
-            Assert.AreEqual(expectedMove, bestResult.BestMove.ToEPDString(), $"id {id} depth {bestResult.Depth} seldepth {bestResult.Depth} nodes {bestResult.Nodes}");
+            Assert.AreEqual(expectedMove, bestResult.BestMove.ToEPDString(currentPositionClone), $"id {id} depth {bestResult.Depth} seldepth {bestResult.Depth} nodes {bestResult.Nodes}");
         }
         else if (bestMoveArray.Length == 2)
         {
-            var bestResultGot = bestResult.BestMove.ToEPDString();
+            var bestResultGot = bestResult.BestMove.ToEPDString(currentPositionClone);
             Assert.True(
                 bestMoveArray[0].TrimEnd('+') == bestResultGot
                 || bestMoveArray[1].TrimEnd('+') == bestResultGot
@@ -63,8 +64,8 @@ public class WACSilver200 : BaseTest
 
     private static class WACData
     {
-        public static object[] Data = new object[]
-        {
+        public static object[] Data =
+        [
             new object[] {"5rk1/1ppb3p/p1pb4/6q1/3P1p1r/2P1R2P/PP1BQ1P1/5RKN w - -              ", "Rg3", "WAC.003"},
             new object[] {"r1bq2rk/pp3pbp/2p1p1pQ/7P/3P4/2PB1N2/PP3PPR/2KR4 w - -               ", "Qxh7+", "WAC.004"},
             new object[] {"5k2/6pp/p1qN4/1p1p4/3P4/2PKP2Q/PP3r2/3R4 b - -                       ", "Qc4+", "WAC.005"},
@@ -265,6 +266,6 @@ public class WACSilver200 : BaseTest
             new object[] {"3Q4/p3b1k1/2p2rPp/2q5/4B3/P2P4/7P/6RK w - -                          ", "Qh8+", "WAC.298"},
             new object[] {"b2b1r1k/3R1ppp/4qP2/4p1PQ/4P3/5B2/4N1K1/8 w - -                      ", "g6", "WAC.300"},
             new object[] {"r2q1rk1/2p2ppp/p1n2n2/Pp2p3/1P2P3/1BPPQR2/6PP/RN4K1 b - -            ", "Nd4", "WAC.301" }
-        };
+        ];
     }
 }

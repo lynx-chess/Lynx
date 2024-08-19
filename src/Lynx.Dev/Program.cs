@@ -516,7 +516,7 @@ static void _32_Make_Move()
         {
             game.CurrentPosition.Print();
 
-            Console.WriteLine(move.ToMoveString());
+            Console.WriteLine(move.ToEPDString(game.CurrentPosition));
             var gameState = game.MakeMove(move);
             game.CurrentPosition.Print();
 
@@ -539,7 +539,7 @@ static void _32_Make_Move()
             {
                 game.CurrentPosition.Print();
 
-                Console.WriteLine(move.ToMoveString());
+                Console.WriteLine(move.ToEPDString(game.CurrentPosition));
                 var gameState = game.MakeMove(move);
                 game.CurrentPosition.Print();
                 game.CurrentPosition.UnmakeMove(move, gameState);
@@ -1121,7 +1121,8 @@ static void UnmakeMove()
         var oldZobristKey = position.UniqueIdentifier;
         foreach (var move in allMoves)
         {
-            Console.WriteLine($"Trying {move.ToEPDString()} in\t{position.FEN()}");
+            var epdMoveString = move.ToEPDString(position);
+            Console.WriteLine($"Trying {epdMoveString} in\t{position.FEN()}");
 
             var newPosition = new Position(position, move);
             var savedState = position.MakeMove(move);
@@ -1129,7 +1130,7 @@ static void UnmakeMove()
             Console.WriteLine($"Position\t{newPosition.FEN()}, Zobrist key {newPosition.UniqueIdentifier}");
             Console.WriteLine($"Position\t{position.FEN()}, Zobrist key {position.UniqueIdentifier}");
 
-            Console.WriteLine($"Unmaking {move.ToEPDString()} in\t{position.FEN()}");
+            Console.WriteLine($"Unmaking {epdMoveString} in\t{position.FEN()}");
 
             //position.UnmakeMove(move, savedState);
 
@@ -1150,8 +1151,8 @@ static void UnmakeMove()
 
 static void PieceSquareTables()
 {
-    short[] middleGamePawnTableBlack = EvaluationConstants.MiddleGamePawnTable.Select((_, index) => (short)-EvaluationConstants.MiddleGamePawnTable[index ^ 56]).ToArray();
-    short[] endGamePawnTableBlack = EvaluationConstants.EndGamePawnTable.Select((_, index) => (short)-EvaluationConstants.EndGamePawnTable[index ^ 56]).ToArray();
+    short[] middleGamePawnTableBlack = EvaluationConstants.MiddleGamePawnTable.Select((_, index) => (short)-EvaluationConstants.MiddleGamePawnTable[0][index ^ 56]).ToArray();
+    short[] endGamePawnTableBlack = EvaluationConstants.EndGamePawnTable.Select((_, index) => (short)-EvaluationConstants.EndGamePawnTable[0][index ^ 56]).ToArray();
 
     PrintBitBoard(EvaluationConstants.MiddleGamePawnTable);
     PrintBitBoard(middleGamePawnTableBlack);

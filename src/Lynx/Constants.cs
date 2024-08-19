@@ -260,7 +260,6 @@ public static class Constants
     public const string WhiteLongCastle = "e1c1";
     public const string BlackLongCastle = "e8c8";
 
-
     public static readonly int[] EnPassantCaptureSquares =
     [
         0, 0, 0, 0, 0, 0, 0, 0,     //  0-7
@@ -352,12 +351,21 @@ public static class Constants
         0, 1, 2, 3, 4, 5, 6, 7
     ];
 
+    public static readonly char[] FileString = [ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' ];
+
     public const int AbsoluteMaxDepth = 255;
 
     /// <summary>
     /// To take into account array access by depth and depth extensions
     /// </summary>
     public const int ArrayDepthMargin = 16;
+
+    /// <summary>
+    /// Given mate in <see cref="MateDistanceMarginToStopSearching"/> (so this is full moves)
+    /// </summary>
+    public const int MateDistanceMarginToStopSearching = 2;
+
+    public const int MaxMateDistanceToStopSearching = 100 -  (2 * MateDistanceMarginToStopSearching);
 
     /// <summary>
     /// From https://lichess.org/RViT3UWL

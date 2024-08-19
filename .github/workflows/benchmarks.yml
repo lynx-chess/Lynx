@@ -15,7 +15,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest, macos-14]
+        os: [ubuntu-latest, windows-latest, macOS-latest, macOS-13]
       fail-fast: false
 
     env:
@@ -41,6 +41,7 @@ jobs:
 
     - name: Build
       run: dotnet build -c Release
+      working-directory: ./src/Lynx.Benchmark
 
     - name: Run ${{ github.event.inputs.benchmark_name }} benchmark
       if: matrix.os == 'windows-latest'
@@ -53,7 +54,7 @@ jobs:
       working-directory: ./src/Lynx.Benchmark
 
     - name: 'Upload ${{ matrix.os }} artifacts'
-      continue-on-error: true
+      continue-on-error: false
       uses: actions/upload-artifact@v4
       with:
         name: artifacts-${{ matrix.os }}-${{ github.run_number }}
