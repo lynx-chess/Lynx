@@ -1,5 +1,4 @@
 ﻿using Lynx.Model;
-using System.Net.Sockets;
 
 #pragma warning disable IDE1006 // Naming Styles
 
@@ -42,7 +41,7 @@ public static partial class EvaluationConstants
     /// <summary>
     /// 2 x PSQTBucketCount x 12 x 64
     /// </summary>
-    public static readonly int[][][][] PackedPSQT = new int[2][][][];
+    public static readonly int[][][][] PackedPSQT = GC.AllocateArray<int[][][]>(2, pinned: true);
 
     /// <summary>
     /// <see cref="Constants.AbsoluteMaxDepth"/> x <see cref="Constants.MaxNumberOfPossibleMovesInAPosition"/>
@@ -99,15 +98,15 @@ public static partial class EvaluationConstants
 
         for(int friendEnemy = 0; friendEnemy < 2; ++friendEnemy)
         {
-            PackedPSQT[friendEnemy] = new int[PSQTBucketCount][][];
+            PackedPSQT[friendEnemy] = GC.AllocateArray<int[][]>(PSQTBucketCount, pinned: true);
 
             for (int bucket = 0; bucket < PSQTBucketCount; ++bucket)
             {
-                PackedPSQT[friendEnemy][bucket] = new int[12][];
+                PackedPSQT[friendEnemy][bucket] = GC.AllocateArray<int[]>(12, pinned: true);
                 for (int piece = (int)Piece.P; piece <= (int)Piece.K; ++piece)
                 {
-                    PackedPSQT[friendEnemy][bucket][piece] = new int[64];
-                    PackedPSQT[friendEnemy][bucket][piece + 6] = new int[64];
+                    PackedPSQT[friendEnemy][bucket][piece] = GC.AllocateArray<int>(64, pinned: true);
+                    PackedPSQT[friendEnemy][bucket][piece + 6] = GC.AllocateArray<int>(64, pinned: true);
 
                     for (int sq = 0; sq < 64; ++sq)
                     {
