@@ -823,7 +823,7 @@ public class Position
         var endGameScore = Utils.UnpackEG(packedScore);
         var eval = ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / maxPhase;
 
-        // Formula yoinked from Sirius
+        // Endgame scaling with pawn count, formula yoinked from Sirius
         eval = (int)(eval * ((80 + (totalPawnsCount * 7)) / 128.0));
 
         eval = Math.Clamp(eval, MinEval, MaxEval);
