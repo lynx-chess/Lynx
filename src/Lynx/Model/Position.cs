@@ -823,8 +823,19 @@ public class Position
         var endGameScore = Utils.UnpackEG(packedScore);
         var eval = ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / maxPhase;
 
-        // Formula yoinked from Sirius
-        eval = (int)(eval * ((80 + (totalPawnsCount * 7)) / 128.0));
+        // Scaling with pawn count
+        var pawnScalingPenalty = 16 - totalPawnsCount;
+
+        if (eval > 1)
+        {
+            pawnScalingPenalty = Math.Min(eval - 1, pawnScalingPenalty);
+            eval -= pawnScalingPenalty;
+        }
+        else if (eval < -1)
+        {
+            pawnScalingPenalty = Math.Min(-eval - 1, pawnScalingPenalty);
+            eval += pawnScalingPenalty;
+        }
 
         eval = Math.Clamp(eval, MinEval, MaxEval);
 
