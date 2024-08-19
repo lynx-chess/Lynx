@@ -1016,7 +1016,7 @@ public class Position
                 & (~OccupancyBitBoards[sameSide]))
             .CountBits();
 
-        return attacksCount * QueenMobilityBonus[attacksCount].PackedEvaluation;
+        return QueenMobilityBonus[attacksCount].PackedEvaluation;
     }
 
     /// <summary>
