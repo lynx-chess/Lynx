@@ -47,9 +47,39 @@ public sealed partial class Engine
 
         if (!isRoot)
         {
+            // History update - Idea from Stormphrax
             (ttEvaluation, ttBestMove, ttElementType, ttScore) = _tt.ProbeHash(_ttMask, position, depth, ply, alpha, beta);
+
             if (!pvNode && ttEvaluation != EvaluationConstants.NoHashEntry)
             {
+                if (ttScore >= beta && ttBestMove != default && depth > 0)
+                {
+                    Move fullMove = default;
+
+                    // TODO could generate only the quiet ones here
+                    var psuedoLegalMoves = MoveGenerator.GenerateAllMoves(position, stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition]);
+
+                    for (int i = 1; i < psuedoLegalMoves.Length; ++i)
+                    {
+                        var move = psuedoLegalMoves[i];
+                        if ((ShortMove)move == ttBestMove)
+                        {
+                            fullMove = move;
+                            break;
+                        }
+                    }
+
+                    if (fullMove != default && !(fullMove.IsCapture() || fullMove.IsPromotion()))
+                    {
+                        var piece = fullMove.Piece();
+                        var targetSquare = fullMove.TargetSquare();
+
+                        _quietHistory[piece][targetSquare] = ScoreHistoryMove(
+                            _quietHistory[piece][targetSquare],
+                            EvaluationConstants.HistoryBonus[depth]);
+                    }
+                }
+
                 return ttEvaluation;
             }
 
