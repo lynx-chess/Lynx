@@ -57,7 +57,7 @@ public sealed partial class Engine
                     Move fullMove = default;
 
                     // TODO could generate only the quiet ones here
-                    var psuedoLegalMoves = MoveGenerator.GenerateAllMoves(position, stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition]);
+                    var psuedoLegalMoves = MoveGenerator.GenerateAllQuietMoves(position, stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition]);
 
                     for (int i = 1; i < psuedoLegalMoves.Length; ++i)
                     {
@@ -69,7 +69,7 @@ public sealed partial class Engine
                         }
                     }
 
-                    if (fullMove != default && !(fullMove.IsCapture() || fullMove.IsPromotion()))
+                    if (fullMove != default)
                     {
                         var piece = fullMove.Piece();
                         var targetSquare = fullMove.TargetSquare();
