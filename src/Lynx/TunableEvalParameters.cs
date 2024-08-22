@@ -2,6 +2,8 @@
 
 namespace Lynx;
 
+using static Utils;
+
 #pragma warning disable IDE0055, IDE1006 // Discard formatting and naming styles
 
 public static partial class EvaluationConstants
@@ -6011,111 +6013,119 @@ public static partial class EvaluationConstants
 
 public static class EvaluationParams
 {
-	public static readonly TaperedEvaluationTerm IsolatedPawnPenalty = new(-19, -16);
+	public static readonly TaperedEvaluationTerm IsolatedPawnPenalty = Pack(-19, -16);
 
-	public static readonly TaperedEvaluationTerm OpenFileRookBonus = new(41, 5);
+	public static readonly TaperedEvaluationTerm OpenFileRookBonus = Pack(41, 5);
 
-	public static readonly TaperedEvaluationTerm SemiOpenFileRookBonus = new(13, 12);
+	public static readonly TaperedEvaluationTerm SemiOpenFileRookBonus = Pack(13, 12);
 
-	public static readonly TaperedEvaluationTerm QueenMobilityBonus = new(2, 9);
+	public static readonly TaperedEvaluationTerm QueenMobilityBonus = Pack(2, 9);
 
-	public static readonly TaperedEvaluationTerm SemiOpenFileKingPenalty = new(-25, 4);
+	public static readonly TaperedEvaluationTerm SemiOpenFileKingPenalty = Pack(-25, 4);
 
-	public static readonly TaperedEvaluationTerm OpenFileKingPenalty = new(-70, -0);
+	public static readonly TaperedEvaluationTerm OpenFileKingPenalty = Pack(-70, -0);
 
-	public static readonly TaperedEvaluationTerm KingShieldBonus = new(26, -5);
+	public static readonly TaperedEvaluationTerm KingShieldBonus = Pack(26, -5);
 
-	public static readonly TaperedEvaluationTerm BishopPairBonus = new(29, 79);
+	public static readonly TaperedEvaluationTerm BishopPairBonus = Pack(29, 79);
 
-	public static readonly TaperedEvaluationTerm PieceProtectedByPawnBonus = new(9, 11);
+	public static readonly TaperedEvaluationTerm PieceProtectedByPawnBonus = Pack(9, 11);
 
-	public static readonly TaperedEvaluationTerm PieceAttackedByPawnPenalty = new(-41, -30);
+	public static readonly TaperedEvaluationTerm PieceAttackedByPawnPenalty = Pack(-41, -30);
 
-	public static readonly TaperedEvaluationTermByRank PassedPawnBonus = new(
-		new(0, 0),
-		new(7, 20),
-		new(-2, 27),
-		new(0, 49),
-		new(24, 75),
-		new(37, 139),
-		new(144, 270),
-		new(0, 0));
+	public static readonly TaperedEvaluationTermByRank PassedPawnBonus =
+	[
+		Pack(0, 0),
+		Pack(7, 20),
+		Pack(-2, 27),
+		Pack(0, 49),
+		Pack(24, 75),
+		Pack(37, 139),
+		Pack(144, 270),
+		Pack(0, 0)
+	];
 
-	public static readonly TaperedEvaluationTermByCount27 VirtualKingMobilityBonus = new(
-		new(0, 0),
-		new(0, 0),
-		new(0, 0),
-		new(-11, 54),
-		new(12, 22),
-		new(13, 19),
-		new(17, 10),
-		new(19, -0),
-		new(17, 2),
-		new(15, 1),
-		new(14, -0),
-		new(11, 3),
-		new(13, -1),
-		new(7, 1),
-		new(-0, 2),
-		new(-9, 4),
-		new(-17, 5),
-		new(-28, 4),
-		new(-37, 4),
-		new(-46, 2),
-		new(-40, -2),
-		new(-37, -7),
-		new(-44, -10),
-		new(-36, -17),
-		new(-54, -21),
-		new(-29, -33),
-		new(-58, -38),
-		new(-21, -48));
+    public static readonly TaperedEvaluationTermByCount27 VirtualKingMobilityBonus =
+    [
+        Pack(0, 0),
+		Pack(0, 0),
+		Pack(0, 0),
+		Pack(-11, 54),
+		Pack(12, 22),
+		Pack(13, 19),
+		Pack(17, 10),
+		Pack(19, -0),
+		Pack(17, 2),
+		Pack(15, 1),
+		Pack(14, -0),
+		Pack(11, 3),
+		Pack(13, -1),
+		Pack(7, 1),
+		Pack(-0, 2),
+		Pack(-9, 4),
+		Pack(-17, 5),
+		Pack(-28, 4),
+		Pack(-37, 4),
+		Pack(-46, 2),
+		Pack(-40, -2),
+		Pack(-37, -7),
+		Pack(-44, -10),
+		Pack(-36, -17),
+		Pack(-54, -21),
+		Pack(-29, -33),
+		Pack(-58, -38),
+		Pack(-21, -48)
+	];
 
-	public static readonly TaperedEvaluationTermByCount8 KnightMobilityBonus = new(
-		new(0, 0),
-		new(10, -1),
-		new(15, 14),
-		new(19, 14),
-		new(21, 18),
-		new(20, 21),
-		new(18, 21),
-		new(17, 19),
-		new(17, 14));
+    public static readonly TaperedEvaluationTermByCount8 KnightMobilityBonus =
+    [
+        Pack(0, 0),
+		Pack(10, -1),
+		Pack(15, 14),
+		Pack(19, 14),
+		Pack(21, 18),
+		Pack(20, 21),
+		Pack(18, 21),
+		Pack(17, 19),
+		Pack(17, 14)
+	];
 
-	public static readonly TaperedEvaluationTermByCount14 BishopMobilityBonus = new(
-		new(-155, -207),
-		new(0, 0),
-		new(38, 62),
-		new(43, 102),
-		new(56, 126),
-		new(61, 141),
-		new(74, 161),
-		new(83, 170),
-		new(91, 182),
-		new(91, 189),
-		new(96, 194),
-		new(100, 194),
-		new(99, 197),
-		new(124, 191),
-		new(0, 0));
+    public static readonly TaperedEvaluationTermByCount14 BishopMobilityBonus =
+    [
+        Pack(-155, -207),
+		Pack(0, 0),
+		Pack(38, 62),
+		Pack(43, 102),
+		Pack(56, 126),
+		Pack(61, 141),
+		Pack(74, 161),
+		Pack(83, 170),
+		Pack(91, 182),
+		Pack(91, 189),
+		Pack(96, 194),
+		Pack(100, 194),
+		Pack(99, 197),
+		Pack(124, 191)
+	];
 
-	public static readonly TaperedEvaluationTermByCount14 RookMobilityBonus = new(
-		new(0, 0),
-		new(9, 22),
-		new(13, 29),
-		new(18, 32),
-		new(18, 38),
-		new(24, 42),
-		new(25, 47),
-		new(28, 50),
-		new(29, 57),
-		new(31, 63),
-		new(35, 65),
-		new(37, 67),
-		new(38, 70),
-		new(54, 66),
-		new(56, 61));
-
+    public static readonly TaperedEvaluationTermByCount14 RookMobilityBonus =
+	[
+		Pack(0, 0),
+		Pack(9, 22),
+		Pack(13, 29),
+		Pack(18, 32),
+		Pack(18, 38),
+		Pack(24, 42),
+		Pack(25, 47),
+		Pack(28, 50),
+		Pack(29, 57),
+		Pack(31, 63),
+		Pack(35, 65),
+		Pack(37, 67),
+		Pack(38, 70),
+		Pack(54, 66),
+		Pack(56, 61)
+	];
 }
 
 #pragma warning restore IDE0055, IDE1006 // Discard formatting and naming styles
