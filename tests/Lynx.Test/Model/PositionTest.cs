@@ -599,7 +599,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(UnpackMG(SemiOpenFileKingPenalty), evaluation);
+        Assert.AreEqual(UnpackEG(SemiOpenFileKingPenalty), evaluation);
     }
 
     /// <summary>
@@ -631,7 +631,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(UnpackMG(OpenFileKingPenalty), evaluation);
+        Assert.AreEqual(UnpackEG(OpenFileKingPenalty), evaluation);
     }
 
     /// <summary>
@@ -755,7 +755,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(surroundingPieces * UnpackMG(KingShieldBonus), evaluation);
+        Assert.AreEqual(surroundingPieces * UnpackEG(KingShieldBonus), evaluation);
     }
 
     /// <summary>
