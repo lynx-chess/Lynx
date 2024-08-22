@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using System.Net.Sockets;
 
 #pragma warning disable IDE1006 // Naming Styles
 
@@ -39,9 +40,9 @@ public static partial class EvaluationConstants
     ];
 
     /// <summary>
-    /// PSQTBucketCountx12x64
+    /// 2 x PSQTBucketCount x 12 x 64
     /// </summary>
-    public static readonly int[][][] PackedPSQT = new int[PSQTBucketCount][][];
+    public static readonly int[][][][] PackedPSQT = new int[2][][][];
 
     /// <summary>
     /// <see cref="Constants.AbsoluteMaxDepth"/> x <see cref="Constants.MaxNumberOfPossibleMovesInAPosition"/>
@@ -55,43 +56,69 @@ public static partial class EvaluationConstants
 
     static EvaluationConstants()
     {
-        short[][][] mgPositionalTables =
+        short[][][][] mgPositionalTables =
         [
-            MiddleGamePawnTable,
-            MiddleGameKnightTable,
-            MiddleGameBishopTable,
-            MiddleGameRookTable,
-            MiddleGameQueenTable,
-            MiddleGameKingTable
+            [
+                MiddleGamePawnTable,
+                MiddleGameKnightTable,
+                MiddleGameBishopTable,
+                MiddleGameRookTable,
+                MiddleGameQueenTable,
+                MiddleGameKingTable
+            ],
+            [
+                MiddleGameEnemyPawnTable,
+                MiddleGameEnemyKnightTable,
+                MiddleGameEnemyBishopTable,
+                MiddleGameEnemyRookTable,
+                MiddleGameEnemyQueenTable,
+                MiddleGameEnemyKingTable
+            ]
+
         ];
 
-        short[][][] egPositionalTables =
+        short[][][][] egPositionalTables =
         [
-            EndGamePawnTable,
-            EndGameKnightTable,
-            EndGameBishopTable,
-            EndGameRookTable,
-            EndGameQueenTable,
-            EndGameKingTable
+            [
+                EndGamePawnTable,
+                EndGameKnightTable,
+                EndGameBishopTable,
+                EndGameRookTable,
+                EndGameQueenTable,
+                EndGameKingTable
+            ],
+            [
+                EndGameEnemyPawnTable,
+                EndGameEnemyKnightTable,
+                EndGameEnemyBishopTable,
+                EndGameEnemyRookTable,
+                EndGameEnemyQueenTable,
+                EndGameEnemyKingTable
+            ]
         ];
 
-        for (int bucket = 0; bucket < PSQTBucketCount; ++bucket)
+        for(int friendEnemy = 0; friendEnemy < 2; ++friendEnemy)
         {
-            PackedPSQT[bucket] = new int[12][];
-            for (int piece = (int)Piece.P; piece <= (int)Piece.K; ++piece)
+            PackedPSQT[friendEnemy] = new int[PSQTBucketCount][][];
+
+            for (int bucket = 0; bucket < PSQTBucketCount; ++bucket)
             {
-                PackedPSQT[bucket][piece] = new int[64];
-                PackedPSQT[bucket][piece + 6] = new int[64];
-
-                for (int sq = 0; sq < 64; ++sq)
+                PackedPSQT[friendEnemy][bucket] = new int[12][];
+                for (int piece = (int)Piece.P; piece <= (int)Piece.K; ++piece)
                 {
-                    PackedPSQT[bucket][piece][sq] = Utils.Pack(
-                        (short)(MiddleGamePieceValues[bucket][piece] + mgPositionalTables[piece][bucket][sq]),
-                        (short)(EndGamePieceValues[bucket][piece] + egPositionalTables[piece][bucket][sq]));
+                    PackedPSQT[friendEnemy][bucket][piece] = new int[64];
+                    PackedPSQT[friendEnemy][bucket][piece + 6] = new int[64];
 
-                    PackedPSQT[bucket][piece + 6][sq] = Utils.Pack(
-                        (short)(MiddleGamePieceValues[bucket][piece + 6] - mgPositionalTables[piece][bucket][sq ^ 56]),
-                        (short)(EndGamePieceValues[bucket][piece + 6] - egPositionalTables[piece][bucket][sq ^ 56]));
+                    for (int sq = 0; sq < 64; ++sq)
+                    {
+                        PackedPSQT[friendEnemy][bucket][piece][sq] = Utils.Pack(
+                            (short)(MiddleGamePieceValues[friendEnemy][bucket][piece] + mgPositionalTables[friendEnemy][piece][bucket][sq]),
+                            (short)(EndGamePieceValues[friendEnemy][bucket][piece] + egPositionalTables[friendEnemy][piece][bucket][sq]));
+
+                        PackedPSQT[friendEnemy][bucket][piece + 6][sq] = Utils.Pack(
+                            (short)(MiddleGamePieceValues[friendEnemy][bucket][piece + 6] - mgPositionalTables[friendEnemy][piece][bucket][sq ^ 56]),
+                            (short)(EndGamePieceValues[friendEnemy][bucket][piece + 6] - egPositionalTables[friendEnemy][piece][bucket][sq ^ 56]));
+                    }
                 }
             }
         }
