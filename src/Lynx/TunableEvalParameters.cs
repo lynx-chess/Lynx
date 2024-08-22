@@ -6105,8 +6105,7 @@ public static class EvaluationParams
 		Pack(96, 194),
 		Pack(100, 194),
 		Pack(99, 197),
-		Pack(124, 191),
-		Pack(0, 0)
+		Pack(124, 191)
 	];
 
     public static readonly TaperedEvaluationTermByCount14 RookMobilityBonus =
