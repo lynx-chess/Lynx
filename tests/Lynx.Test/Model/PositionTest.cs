@@ -463,7 +463,7 @@ public class PositionTest
         }
 
         Assert.AreEqual(UnpackMG(SemiOpenFileRookBonus)
-                + UnpackMG(RookMobilityBonus[rookMobilitySideToMove]) - UnpackMG(RookMobilityBonus[rookMobilitySideNotToMove]),
+                + UnpackMG(RookMobilityBonus[0][rookMobilitySideToMove]) - UnpackMG(RookMobilityBonus[0][rookMobilitySideNotToMove]),
             evaluation);
     }
 
@@ -496,7 +496,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
         Assert.AreEqual(UnpackMG(OpenFileRookBonus)
-            + UnpackMG(RookMobilityBonus[rookMobilitySideToMove]) - UnpackMG(RookMobilityBonus[rookMobilitySideNotToMove]),
+            + UnpackMG(RookMobilityBonus[0][rookMobilitySideToMove]) - UnpackMG(RookMobilityBonus[0][rookMobilitySideNotToMove]),
             evaluation);
     }
 
@@ -530,7 +530,7 @@ public class PositionTest
         }
 
         Assert.AreEqual((2 * UnpackMG(SemiOpenFileRookBonus))
-            + UnpackMG(RookMobilityBonus[rookMobilitySideToMove]) - UnpackMG(RookMobilityBonus[rookMobilitySideNotToMove]),
+            + UnpackMG(RookMobilityBonus[0][rookMobilitySideToMove]) - UnpackMG(RookMobilityBonus[0][rookMobilitySideNotToMove]),
         evaluation);
     }
 
@@ -564,8 +564,8 @@ public class PositionTest
         }
 
         Assert.AreEqual((-2 * UnpackMG(OpenFileRookBonus))
-            + UnpackMG(RookMobilityBonus[rookMobilitySideToMove])
-            - UnpackMG(RookMobilityBonus[rookMobilitySideNotToMove]),
+            + UnpackMG(RookMobilityBonus[0][rookMobilitySideToMove])
+            - UnpackMG(RookMobilityBonus[0][rookMobilitySideNotToMove]),
             evaluation);
     }
 
@@ -813,7 +813,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(UnpackMG(BishopMobilityBonus[sideToMoveMobilityCount]) - UnpackMG(BishopMobilityBonus[nonSideToMoveMobilityCount]), evaluation);
+        Assert.AreEqual(UnpackMG(BishopMobilityBonus[0][sideToMoveMobilityCount]) - UnpackMG(BishopMobilityBonus[0][nonSideToMoveMobilityCount]), evaluation);
     }
 
     /// <summary>
@@ -1009,7 +1009,7 @@ public class PositionTest
         {
             var pieceSquareIndex = bitBoard.GetLS1BIndex();
             bitBoard.ResetLS1B();
-            eval += UnpackMG(position.AdditionalPieceEvaluation(pieceSquareIndex, (int)piece));
+            eval += UnpackMG(position.AdditionalPieceEvaluation(0, pieceSquareIndex, (int)piece));
         }
 
         return eval;
@@ -1030,8 +1030,8 @@ public class PositionTest
         var bitBoard = position.PieceBitBoards[(int)piece].GetLS1BIndex();
 
         return UnpackEG(piece == Piece.K
-            ? position.KingAdditionalEvaluation(bitBoard, Side.White)
-            : position.KingAdditionalEvaluation(bitBoard, Side.Black));
+            ? position.KingAdditionalEvaluation(0, bitBoard, Side.White)
+            : position.KingAdditionalEvaluation(0, bitBoard, Side.Black));
     }
 
     private static void EvaluateDrawOrNotDraw(string fen, bool isDrawExpected, int expectedPhase)
