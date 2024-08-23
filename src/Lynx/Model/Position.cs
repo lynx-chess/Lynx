@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using System.Drawing;
+using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -706,7 +708,7 @@ public class Position
                             + PackedPSQT[1][blackBucket][pieceIndex][pieceSquareIndex];
                 gamePhase += GamePhaseByPiece[pieceIndex];
 
-                packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
+                packedScore += AdditionalPieceEvaluation(whiteBucket, pieceSquareIndex, pieceIndex);
             }
         }
 
@@ -724,7 +726,7 @@ public class Position
                             + PackedPSQT[1][whiteBucket][pieceIndex][pieceSquareIndex];
                 gamePhase += GamePhaseByPiece[pieceIndex];
 
-                packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
+                packedScore -= AdditionalPieceEvaluation(blackBucket, pieceSquareIndex, pieceIndex);
             }
         }
 
@@ -871,11 +873,11 @@ public class Position
     /// <param name="pieceIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int AdditionalPieceEvaluation(int pieceSquareIndex, int pieceIndex)
+    internal int AdditionalPieceEvaluation(int bucket, int pieceSquareIndex, int pieceIndex)
     {
         return pieceIndex switch
         {
-            (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(pieceSquareIndex, pieceIndex),
+            (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(bucket, pieceSquareIndex, pieceIndex),
             (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex),
             (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex),
             (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(pieceSquareIndex, pieceIndex),
@@ -891,9 +893,15 @@ public class Position
     /// < param name="pieceIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int PawnAdditionalEvaluation(int squareIndex, int pieceIndex)
+    private int PawnAdditionalEvaluation(int bucket, int squareIndex, int pieceIndex)
     {
         int packedBonus = 0;
+
+        var doublePawnsCount = (PieceBitBoards[pieceIndex] & Masks.FileMasks[squareIndex]).CountBits();
+        if (doublePawnsCount > 1)   // isDoubledPawn
+        {
+            packedBonus += doublePawnsCount * DoubledPawnPenalty[bucket];
+        }
 
         if ((PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default) // isIsolatedPawn
         {
