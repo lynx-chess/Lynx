@@ -64,7 +64,7 @@ public sealed partial class Engine
             return baseCaptureScore
                 + EvaluationConstants.MostValueableVictimLeastValuableAttacker[piece][capturedPiece]
                 //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
-                + _captureHistory[piece][move.TargetSquare()][capturedPiece];
+                + _captureHistory[CaptureHistoryIndex(piece, move.TargetSquare(), capturedPiece)];
         }
 
         if (isPromotion)
@@ -75,19 +75,19 @@ public sealed partial class Engine
         if (isNotQSearch)
         {
             // 1st killer move
-            if (_killerMoves[0][ply] == move)
+            if (_killerMoves[KillerMoveIndex(0, ply)] == move)
             {
                 return EvaluationConstants.FirstKillerMoveValue;
             }
 
             // 2nd killer move
-            if (_killerMoves[1][ply] == move)
+            if (_killerMoves[KillerMoveIndex(1, ply)] == move)
             {
                 return EvaluationConstants.SecondKillerMoveValue;
             }
 
             // 3rd killer move
-            if (_killerMoves[2][ply] == move)
+            if (_killerMoves[KillerMoveIndex(2, ply)] == move)
             {
                 return EvaluationConstants.ThirdKillerMoveValue;
             }
@@ -107,13 +107,13 @@ public sealed partial class Engine
 
                 // Counter move history
                 return EvaluationConstants.BaseMoveScore
-                    + _quietHistory[move.Piece()][move.TargetSquare()]
+                    + _quietHistory[QuietHistoryIndex(move.Piece(), move.TargetSquare())]
                     + _continuationHistory[ContinuationHistoryIndex(move.Piece(), move.TargetSquare(), previousMovePiece, previousMoveTargetSquare, 0)];
             }
 
             // History move or 0 if not found
             return EvaluationConstants.BaseMoveScore
-                + _quietHistory[move.Piece()][move.TargetSquare()];
+                + _quietHistory[QuietHistoryIndex(move.Piece(), move.TargetSquare())];
         }
 
         return EvaluationConstants.BaseMoveScore;
@@ -194,6 +194,36 @@ public sealed partial class Engine
     }
 
     /// <summary>
+    /// [12][64]
+    /// </summary>
+    /// <returns></returns>
+    private static int QuietHistoryIndex(int piece, int targetSquare)
+    {
+        const int pieceOffset = 64;
+
+        return (piece * pieceOffset)
+            + targetSquare;
+    }
+
+    /// <summary>
+    /// [12][64][12]
+    /// </summary>
+    /// <param name="piece"></param>
+    /// <param name="targetSquare"></param>
+    /// <param name="capturedPiece"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int CaptureHistoryIndex(int piece, int targetSquare, int capturedPiece)
+    {
+        const int pieceOffset = 64 * 12;
+        const int targetSquareOffset = 12;
+
+        return (piece * pieceOffset)
+            + (targetSquare * targetSquareOffset)
+            + capturedPiece;
+    }
+
+    /// <summary>
     /// [12][64][12][64][ContinuationHistoryPlyCount]
     /// </summary>
     /// <param name="piece"></param>
@@ -230,6 +260,20 @@ public sealed partial class Engine
 
         return (previousMoveSourceSquare * sourceSquareOffset)
             + previousMoveTargetSquare;
+    }
+
+    /// <summary>
+    /// [3][<see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/>]
+    /// </summary>
+    /// <param name="index"></param>
+    /// <param name="ply"></param>
+    /// <returns></returns>
+    private static int KillerMoveIndex(int index, int ply)
+    {
+        int indexOffset = Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin;
+
+        return (index * indexOffset)
+            + ply;
     }
 
     #region Debugging
@@ -397,17 +441,13 @@ $" {484,-3}                                                         {_pVTable[48
     {
         int max = int.MinValue;
 
-        for (int i = 0; i < 12; ++i)
+        for (int i = 0; i < _quietHistory.Length; ++i)
         {
-            var tmp = _quietHistory[i];
-            for (int j = 0; j < 64; ++j)
-            {
-                var item = tmp[j];
+            var item = _quietHistory[i];
 
-                if (item > max)
-                {
-                    max = item;
-                }
+            if (item > max)
+            {
+                max = item;
             }
         }
 

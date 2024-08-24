@@ -9,45 +9,42 @@ namespace Lynx;
 public sealed partial class Engine
 {
     private readonly Stopwatch _stopWatch = new();
-    private readonly Move[] _pVTable = new Move[Configuration.EngineSettings.MaxDepth * (Configuration.EngineSettings.MaxDepth + 1) / 2];
+
+    private readonly Move[] _pVTable = GC.AllocateArray<Move>(Configuration.EngineSettings.MaxDepth * (Configuration.EngineSettings.MaxDepth + 1) / 2, pinned: true);
 
     /// <summary>
-    /// 3x<see cref="Configuration.EngineSettings.MaxDepth"/>
+    /// 3 x (<see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/>), flattened
     /// </summary>
-    private readonly int[][] _killerMoves =
-    [
-        new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin],
-        new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin],
-        new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin]
-    ];
+    private readonly int[] _killerMoves = GC.AllocateArray<int>(3 *(Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin), pinned: true);
 
     /// <summary>
-    /// 12x64
+    /// 12 x 64, flattened
     /// </summary>
-    private readonly int[] _counterMoves;
+    private readonly int[] _counterMoves = GC.AllocateArray<int>(12 * 64, pinned: true);
 
     /// <summary>
-    /// 12x64
+    /// 12 x 64, flattened
     /// piece x target square
     /// </summary>
-    private readonly int[][] _quietHistory;
+    private readonly int[] _quietHistory = GC.AllocateArray<int>(12 * 64, pinned: true);
 
     /// <summary>
-    /// 12x64x12,
+    /// 12 x 64 x 12, flattened
     /// piece x target square x captured piece
     /// </summary>
-    private readonly int[][][] _captureHistory;
+    private readonly int[] _captureHistory = GC.AllocateArray<int>(12 * 64 * 12, pinned: true);
 
     /// <summary>
-    /// 12 x 64 x 12 x 64 x ContinuationHistoryPlyCount
+    /// 12 x 64 x 12 x 64 x ContinuationHistoryPlyCount, flattened
     /// piece x target square x last piece x last target square x plies back
     /// ply 0 -> Continuation move history
     /// ply 1 -> Follow-up move history
     /// </summary>
-    private readonly int[] _continuationHistory;
+    private readonly int[] _continuationHistory = GC.AllocateArray<int>(12 * 64 * 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount, pinned: true);
 
-    private readonly int[] _maxDepthReached = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
-    private TranspositionTable _tt = [];
+    private readonly int[] _maxDepthReached = GC.AllocateArray<int>(Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin, pinned: true);
+
+    private readonly TranspositionTable _tt;
     private int _ttMask;
 
     private long _nodes;
@@ -96,10 +93,8 @@ public sealed partial class Engine
                 return onlyOneLegalMoveSearchResult;
             }
 
-            Debug.Assert(_killerMoves.Length == 3);
-            Array.Clear(_killerMoves[0]);
-            Array.Clear(_killerMoves[1]);
-            Array.Clear(_killerMoves[2]);
+            Debug.Assert(_killerMoves.Length == 3 * (Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin));
+            Array.Clear(_killerMoves);
             // Not clearing _quietHistory on purpose
             // Not clearing _captureHistory on purpose
 

@@ -60,23 +60,8 @@ public sealed partial class Engine
         _engineWriter = engineWriter;
 
         // Update ResetEngine() after any changes here
-        _quietHistory = new int[12][];
-        _captureHistory = new int[12][][];
-        _continuationHistory = new int[12 * 64 * 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount];
-        _counterMoves = new int[12 * 64];
-
-        for (int i = 0; i < 12; ++i)                                            // 12
-        {
-            _quietHistory[i] = new int[64];
-            _captureHistory[i] = new int[64][];
-
-            for (var j = 0; j < 64; ++j)                                        // 64
-            {
-                _captureHistory[i][j] = new int[12];                            // 12
-            }
-        }
-
-        InitializeTT();
+        (int ttLength, _ttMask) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
+        _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
 
 #if !DEBUG
         // Temporary channel so that no output is generated
@@ -114,18 +99,11 @@ public sealed partial class Engine
 
     private void ResetEngine()
     {
-        InitializeTT(); // TODO SPRT clearing instead
+        Array.Clear(_tt);
 
         // Clear histories
-        for (int i = 0; i < 12; ++i)
-        {
-            Array.Clear(_quietHistory[i]);
-            for (var j = 0; j < 64; ++j)
-            {
-                Array.Clear(_captureHistory[i][j]);
-            }
-        }
-
+        Array.Clear(_quietHistory);
+        Array.Clear(_captureHistory);
         Array.Clear(_continuationHistory);
         Array.Clear(_counterMoves);
 
@@ -361,12 +339,6 @@ public sealed partial class Engine
     {
         _stopRequested = true;
         _absoluteSearchCancellationTokenSource.Cancel();
-    }
-
-    private void InitializeTT()
-    {
-        (int ttLength, _ttMask) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
-        _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
     }
 
     private static void InitializeStaticClasses()
