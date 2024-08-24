@@ -123,7 +123,7 @@ public sealed partial class Engine
                 else
                 {
                     // 🔍 Aspiration Windows
-                    var window = Configuration.EngineSettings.AspirationWindow_Delta;
+                    var window = Configuration.EngineSettings.AspirationWindow_Base;
 
                     alpha = Math.Max(MinValue, lastSearchResult.Evaluation - window);
                     beta = Math.Min(MaxValue, lastSearchResult.Evaluation + window);
@@ -133,7 +133,8 @@ public sealed partial class Engine
                         _isFollowingPV = true;
                         bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta);
 
-                        window += window >> 1;   // window / 2
+                        // Formula yoinked from Stormphrax
+                        window += window * Configuration.EngineSettings.AspirationWindow_Delta / 16;
 
                         // Depth change: https://github.com/lynx-chess/Lynx/pull/440
                         if (alpha >= bestEvaluation)     // Fail low
