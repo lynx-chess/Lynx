@@ -64,7 +64,7 @@ public sealed partial class Engine
             return baseCaptureScore
                 + EvaluationConstants.MostValueableVictimLeastValuableAttacker[piece][capturedPiece]
                 //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
-                + _captureHistory[CaptureHistoryIndex(piece, move.TargetSquare(), capturedPiece)];
+                + _captureHistory[CaptureHistoryIndex(move)];
         }
 
         if (isPromotion)
@@ -96,24 +96,22 @@ public sealed partial class Engine
             {
                 var previousMove = Game.PopFromMoveStack(ply - 1);
                 Debug.Assert(previousMove != 0);
-                var previousMovePiece = previousMove.Piece();
-                var previousMoveTargetSquare = previousMove.TargetSquare();
 
                 // Countermove
-                if (_counterMoves[CounterMoveIndex(previousMovePiece, previousMoveTargetSquare)] == move)
+                if (_counterMoves[CounterMoveIndex(previousMove)] == move)
                 {
                     return EvaluationConstants.CounterMoveValue;
                 }
 
                 // Counter move history
                 return EvaluationConstants.BaseMoveScore
-                    + _quietHistory[QuietHistoryIndex(move.Piece(), move.TargetSquare())]
-                    + _continuationHistory[ContinuationHistoryIndex(move.Piece(), move.TargetSquare(), previousMovePiece, previousMoveTargetSquare, 0)];
+                    + _quietHistory[QuietHistoryIndex(move)]
+                    + _continuationHistory[ContinuationHistoryIndex(move, previousMove, 0)];
             }
 
             // History move or 0 if not found
             return EvaluationConstants.BaseMoveScore
-                + _quietHistory[QuietHistoryIndex(move.Piece(), move.TargetSquare())];
+                + _quietHistory[QuietHistoryIndex(move)];
         }
 
         return EvaluationConstants.BaseMoveScore;
@@ -197,69 +195,65 @@ public sealed partial class Engine
     /// [12][64]
     /// </summary>
     /// <returns></returns>
-    private static int QuietHistoryIndex(int piece, int targetSquare)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int QuietHistoryIndex(Move move)
     {
         const int pieceOffset = 64;
 
-        return (piece * pieceOffset)
-            + targetSquare;
+        return (move.Piece() * pieceOffset)
+            + move.TargetSquare();
     }
 
     /// <summary>
     /// [12][64][12]
     /// </summary>
-    /// <param name="piece"></param>
-    /// <param name="targetSquare"></param>
-    /// <param name="capturedPiece"></param>
+    /// <param name="move"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int CaptureHistoryIndex(int piece, int targetSquare, int capturedPiece)
+    private int CaptureHistoryIndex(Move move)
     {
         const int pieceOffset = 64 * 12;
         const int targetSquareOffset = 12;
 
-        return (piece * pieceOffset)
-            + (targetSquare * targetSquareOffset)
-            + capturedPiece;
+        return (move.Piece() * pieceOffset)
+            + (move.TargetSquare() * targetSquareOffset)
+            + move.CapturedPiece();
     }
 
     /// <summary>
     /// [12][64][12][64][ContinuationHistoryPlyCount]
     /// </summary>
-    /// <param name="piece"></param>
-    /// <param name="targetSquare"></param>
-    /// <param name="previousMovePiece"></param>
-    /// <param name="previousMoveTargetSquare"></param>
+    /// <param name="move"></param>
+    /// <param name="previousMove"></param>
     /// <param name="ply"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int ContinuationHistoryIndex(int piece, int targetSquare, int previousMovePiece, int previousMoveTargetSquare, int ply)
+    private static int ContinuationHistoryIndex(Move move, Move previousMove, int ply)
     {
         const int pieceOffset = 64 * 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount;
         const int targetSquareOffset = 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount;
         const int previousMovePieceOffset = 64 * EvaluationConstants.ContinuationHistoryPlyCount;
         const int previousMoveTargetSquareOffset = EvaluationConstants.ContinuationHistoryPlyCount;
 
-        return (piece * pieceOffset)
-            + (targetSquare * targetSquareOffset)
-            + (previousMovePiece * previousMovePieceOffset)
-            + (previousMoveTargetSquare * previousMoveTargetSquareOffset)
+        return (move.Piece() * pieceOffset)
+            + (move.TargetSquare() * targetSquareOffset)
+            + (previousMove.Piece() * previousMovePieceOffset)
+            + (previousMove.TargetSquare() * previousMoveTargetSquareOffset)
             + ply;
     }
 
     /// <summary>
-    /// [64][64]
+    /// [12][64]
     /// </summary>
-    /// <param name="previousMoveSourceSquare"></param>
-    /// <param name="previousMoveTargetSquare"></param>
+    /// <param name="previousMove"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int CounterMoveIndex(int previousMoveSourceSquare, int previousMoveTargetSquare)
+    private static int CounterMoveIndex(int previousMove)
     {
-        const int sourceSquareOffset = 64;
+        const int pieceOffset = 64;
 
-        return (previousMoveSourceSquare * sourceSquareOffset)
-            + previousMoveTargetSquare;
+        return (previousMove.Piece() * pieceOffset)
+            + previousMove.TargetSquare();
     }
 
     /// <summary>
@@ -268,6 +262,7 @@ public sealed partial class Engine
     /// <param name="index"></param>
     /// <param name="ply"></param>
     /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int KillerMoveIndex(int index, int ply)
     {
         int indexOffset = Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin;

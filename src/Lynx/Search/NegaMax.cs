@@ -314,7 +314,7 @@ public sealed partial class Engine
                     }
 
                     // -= history/(maxHistory/2)
-                    reduction -= 2 * _quietHistory[QuietHistoryIndex(move.Piece(), move.TargetSquare())] / Configuration.EngineSettings.History_MaxMoveValue;
+                    reduction -= 2 * _quietHistory[QuietHistoryIndex(move)] / Configuration.EngineSettings.History_MaxMoveValue;
 
                     // Don't allow LMR to drop into qsearch or increase the depth
                     // depth - 1 - depth +2 = 1, min depth we want
@@ -367,11 +367,7 @@ public sealed partial class Engine
 
                 if (isCapture)
                 {
-                    var piece = move.Piece();
-                    var targetSquare = move.TargetSquare();
-                    var capturedPiece = move.CapturedPiece();
-
-                    var captureHistoryIndex = CaptureHistoryIndex(piece, targetSquare, capturedPiece);
+                    var captureHistoryIndex = CaptureHistoryIndex(move);
 
                     _captureHistory[captureHistoryIndex] = ScoreHistoryMove(
                         _captureHistory[captureHistoryIndex],
@@ -385,11 +381,7 @@ public sealed partial class Engine
 
                         if (visitedMove.IsCapture())
                         {
-                            var visitedMovePiece = visitedMove.Piece();
-                            var visitedMoveTargetSquare = visitedMove.TargetSquare();
-                            var visitedMoveCapturedPiece = visitedMove.CapturedPiece();
-
-                            captureHistoryIndex = CaptureHistoryIndex(visitedMovePiece, visitedMoveTargetSquare, visitedMoveCapturedPiece);
+                            captureHistoryIndex = CaptureHistoryIndex(visitedMove);
 
                             _captureHistory[captureHistoryIndex] = ScoreHistoryMove(
                                 _captureHistory[captureHistoryIndex],
@@ -401,10 +393,7 @@ public sealed partial class Engine
                 {
                     // 🔍 Quiet history moves
                     // Doing this only in beta cutoffs (instead of when eval > alpha) was suggested by Sirius author
-                    var piece = move.Piece();
-                    var targetSquare = move.TargetSquare();
-
-                    var quietHistoryIndex = QuietHistoryIndex(piece, targetSquare);
+                    var quietHistoryIndex = QuietHistoryIndex(move);
                     _quietHistory[quietHistoryIndex] = ScoreHistoryMove(
                         _quietHistory[quietHistoryIndex],
                         EvaluationConstants.HistoryBonus[depth]);
@@ -412,10 +401,8 @@ public sealed partial class Engine
                     // 🔍 Continuation history
                     // - Counter move history (continuation history, ply - 1)
                     var previousMove = Game.PopFromMoveStack(ply - 1);
-                    var previousMovePiece = previousMove.Piece();
-                    var previousTargetSquare = previousMove.TargetSquare();
 
-                    var continuationHistoryIndex = ContinuationHistoryIndex(piece, targetSquare, previousMovePiece, previousTargetSquare, 0);
+                    var continuationHistoryIndex = ContinuationHistoryIndex(move, previousMove, 0);
 
                     _continuationHistory[continuationHistoryIndex] = ScoreHistoryMove(
                         _continuationHistory[continuationHistoryIndex],
@@ -435,19 +422,16 @@ public sealed partial class Engine
 
                         if (!visitedMove.IsCapture())
                         {
-                            var visitedMovePiece = visitedMove.Piece();
-                            var visitedMoveTargetSquare = visitedMove.TargetSquare();
-
                             // 🔍 Quiet history penalty / malus
                             // When a quiet move fails high, penalize previous visited quiet moves
-                            quietHistoryIndex = QuietHistoryIndex(visitedMovePiece, visitedMoveTargetSquare);
+                            quietHistoryIndex = QuietHistoryIndex(visitedMove);
 
                             _quietHistory[quietHistoryIndex] = ScoreHistoryMove(
                                 _quietHistory[quietHistoryIndex],
                                 -EvaluationConstants.HistoryBonus[depth]);
 
                             // 🔍 Continuation history penalty / malus
-                            continuationHistoryIndex = ContinuationHistoryIndex(visitedMovePiece, visitedMoveTargetSquare, previousMovePiece, previousTargetSquare, 0);
+                            continuationHistoryIndex = ContinuationHistoryIndex(visitedMove, previousMove, 0);
 
                             _continuationHistory[continuationHistoryIndex] = ScoreHistoryMove(
                                 _continuationHistory[continuationHistoryIndex],
@@ -470,7 +454,7 @@ public sealed partial class Engine
                         _killerMoves[killerMove0Index] = move;
 
                         // 🔍 Countermoves
-                        _counterMoves[CounterMoveIndex(previousMovePiece, previousTargetSquare)] = move;
+                        _counterMoves[CounterMoveIndex(previousMove)] = move;
                     }
                 }
 
