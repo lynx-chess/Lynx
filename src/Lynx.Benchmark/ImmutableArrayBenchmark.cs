@@ -117,7 +117,7 @@ public class ImmutableArrayBenchmark : BaseBenchmark
         return sum;
     }
 
-    [Benchmark(Baseline = true)]
+    [Benchmark]
     public ulong ImmutableArrayRead()
     {
         ulong sum = 0;
