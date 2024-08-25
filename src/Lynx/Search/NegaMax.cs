@@ -448,20 +448,23 @@ public sealed partial class Engine
                         }
                     }
 
-                    if (move.PromotedPiece() == default && move != _killerMoves[0][ply])
+                    var killerMove = _killerMoves[ply];
+                    if (move.PromotedPiece() == default && move != killerMove.Zero)
                     {
                         // 🔍 Killer moves
-                        if (move != _killerMoves[1][ply])
+                        if (move != killerMove.One)
                         {
-                            _killerMoves[2][ply] = _killerMoves[1][ply];
+                            killerMove.Two = killerMove.One;
                         }
 
-                        _killerMoves[1][ply] = _killerMoves[0][ply];
-                        _killerMoves[0][ply] = move;
+                        killerMove.One = killerMove.Zero;
+                        killerMove.Zero = move;
 
                         // 🔍 Countermoves
                         _counterMoves[CounterMoveIndex(previousMovePiece, previousTargetSquare)] = move;
                     }
+
+                    _killerMoves[ply] = killerMove;
                 }
 
                 _tt.RecordHash(_ttMask, position, depth, ply, beta, NodeType.Beta, bestMove);

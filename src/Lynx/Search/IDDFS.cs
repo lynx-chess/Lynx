@@ -14,12 +14,7 @@ public sealed partial class Engine
     /// <summary>
     /// 3x<see cref="Configuration.EngineSettings.MaxDepth"/>
     /// </summary>
-    private readonly int[][] _killerMoves =
-    [
-        new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin],
-        new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin],
-        new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin]
-    ];
+    private readonly KillerMoves _killerMoves;
 
     /// <summary>
     /// 12x64
@@ -96,10 +91,9 @@ public sealed partial class Engine
                 return onlyOneLegalMoveSearchResult;
             }
 
-            Debug.Assert(_killerMoves.Length == 3);
-            Array.Clear(_killerMoves[0]);
-            Array.Clear(_killerMoves[1]);
-            Array.Clear(_killerMoves[2]);
+            _killerMoves.Zero.Clear();
+            _killerMoves.One.Clear();
+            _killerMoves.Two.Clear();
             // Not clearing _quietHistory on purpose
             // Not clearing _captureHistory on purpose
 

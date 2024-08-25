@@ -60,6 +60,15 @@ public sealed partial class Engine
         _engineWriter = engineWriter;
 
         // Update ResetEngine() after any changes here
+
+        var killerMovesLength = Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin;
+        var byteSize = KillerMoves.GetByteSize(length: killerMovesLength);
+
+        var rentArray = GC.AllocateArray<byte>(byteSize, pinned: true);
+
+        // Create ArrayPool byte[] backed MultiArray
+        _killerMoves = new KillerMoves(killerMovesLength, rentArray);
+
         _quietHistory = new int[12][];
         _captureHistory = new int[12][][];
         _continuationHistory = new int[12 * 64 * 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount];
