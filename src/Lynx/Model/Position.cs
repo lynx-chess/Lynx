@@ -4,6 +4,7 @@ using System.Text;
 
 using static Lynx.EvaluationConstants;
 using static Lynx.EvaluationParams;
+using static Lynx.PSQT;
 
 namespace Lynx.Model;
 
