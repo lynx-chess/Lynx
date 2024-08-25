@@ -6,7 +6,7 @@ using static Lynx.TunableEvalParameters;
 
 namespace Lynx.Benchmark;
 
-internal class ImmutableArrayBenchmark : BaseBenchmark
+public class ImmutableArrayBenchmark : BaseBenchmark
 {
     [Params(1, 10, 100, 1_000)]
     public int Size { get; set; }
