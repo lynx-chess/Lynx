@@ -1,9 +1,10 @@
 ﻿using Lynx.Model;
+using System.Runtime.CompilerServices;
 using static Lynx.TunableEvalParameters;
 
 namespace Lynx;
 
-public static class PSQT
+public static class EvaluationPSQTs
 {
     public const int PSQTBucketCount = 23;
 
@@ -22,9 +23,9 @@ public static class PSQT
     /// <summary>
     /// 2 x PSQTBucketCount x 12 x 64
     /// </summary>
-    public static readonly int[][][][] PackedPSQT = new int[2][][][];
+    internal static readonly int[] _packedPSQT = GC.AllocateArray<int>(2 * PSQTBucketCount * 12 * 64, pinned: true);
 
-    static PSQT()
+    static EvaluationPSQTs()
     {
         short[][][][] mgPositionalTables =
         [
@@ -69,28 +70,60 @@ public static class PSQT
 
         for (int friendEnemy = 0; friendEnemy < 2; ++friendEnemy)
         {
-            PackedPSQT[friendEnemy] = new int[PSQTBucketCount][][];
-
             for (int bucket = 0; bucket < PSQTBucketCount; ++bucket)
             {
-                PackedPSQT[friendEnemy][bucket] = new int[12][];
                 for (int piece = (int)Piece.P; piece <= (int)Piece.K; ++piece)
                 {
-                    PackedPSQT[friendEnemy][bucket][piece] = new int[64];
-                    PackedPSQT[friendEnemy][bucket][piece + 6] = new int[64];
-
                     for (int sq = 0; sq < 64; ++sq)
                     {
-                        PackedPSQT[friendEnemy][bucket][piece][sq] = Utils.Pack(
+                        _packedPSQT[PSQTIndex(friendEnemy, bucket, piece, sq)] = Utils.Pack(
                             (short)(MiddleGamePieceValues[friendEnemy][bucket][piece] + mgPositionalTables[friendEnemy][piece][bucket][sq]),
                             (short)(EndGamePieceValues[friendEnemy][bucket][piece] + egPositionalTables[friendEnemy][piece][bucket][sq]));
 
-                        PackedPSQT[friendEnemy][bucket][piece + 6][sq] = Utils.Pack(
+                        _packedPSQT[PSQTIndex(friendEnemy, bucket, piece + 6, sq)] = Utils.Pack(
                             (short)(MiddleGamePieceValues[friendEnemy][bucket][piece + 6] - mgPositionalTables[friendEnemy][piece][bucket][sq ^ 56]),
                             (short)(EndGamePieceValues[friendEnemy][bucket][piece + 6] - egPositionalTables[friendEnemy][piece][bucket][sq ^ 56]));
                     }
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// [2][PSQTBucketCount][12][64]
+    /// </summary>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int PSQT(int friendEnemy, int bucket, int piece, int square)
+    {
+        var index = PSQTIndex(friendEnemy, bucket, piece, square);
+
+        unsafe
+        {
+            // Since _tt is a pinned array
+            // This is no-op pinning as it does not influence the GC compaction
+            // https://tooslowexception.com/pinned-object-heap-in-net-5/
+            fixed (int* psqtPtr = &_packedPSQT[0])
+            {
+                return psqtPtr[index];
+            }
+        }
+    }
+
+    /// <summary>
+    /// [2][PSQTBucketCount][12][64]
+    /// </summary>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int PSQTIndex(int friendEnemy, int bucket, int piece, int square)
+    {
+        const int friendEnemyOffset = PSQTBucketCount * 12 * 64;
+        const int bucketOffset = 12 * 64;
+        const int pieceOffset = 64;
+
+        return (friendEnemy * friendEnemyOffset)
+            + (bucket * bucketOffset)
+            + (piece * pieceOffset)
+            + square;
     }
 }

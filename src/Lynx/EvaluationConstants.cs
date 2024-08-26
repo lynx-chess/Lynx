@@ -1,5 +1,4 @@
 ﻿using Lynx.Model;
-using System.Net.Sockets;
 
 #pragma warning disable IDE1006 // Naming Styles
 
@@ -16,8 +15,6 @@ public static partial class EvaluationConstants
     public static readonly double[] As = [-22.39558276, 143.95892718, -98.84854041, 117.14472929];
 
     public static readonly double[] Bs = [-6.67029772, 41.06172677, -36.37312580, 80.73370363];
-
-#pragma warning disable IDE0055 // Discard formatting in this region
 
     public static readonly int[] GamePhaseByPiece =
     [
@@ -52,8 +49,6 @@ public static partial class EvaluationConstants
                 (4 * searchDepth * searchDepth) + (120 * searchDepth) - 120);   // Sirius, originally from Berserk
         }
     }
-
-    #pragma warning disable IDE0055 // Discard formatting in this region
 
     /// <summary>
     /// MVV LVA [attacker,victim] 12x11
@@ -90,8 +85,6 @@ public static partial class EvaluationConstants
         1000, 3500, 4000, 5000, 11000, 0,
         0
     ];
-
-#pragma warning restore IDE0055
 
     /// <summary>
     /// Base absolute checkmate evaluation value. Actual absolute evaluations are lower than this one by a number of <see cref="Position.DepthCheckmateFactor"/>

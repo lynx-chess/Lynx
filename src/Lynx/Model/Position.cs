@@ -4,7 +4,7 @@ using System.Text;
 
 using static Lynx.EvaluationConstants;
 using static Lynx.EvaluationParams;
-using static Lynx.PSQT;
+using static Lynx.EvaluationPSQTs;
 
 namespace Lynx.Model;
 
@@ -703,8 +703,9 @@ public class Position
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
 
-                packedScore += PackedPSQT[0][whiteBucket][pieceIndex][pieceSquareIndex]
-                            + PackedPSQT[1][blackBucket][pieceIndex][pieceSquareIndex];
+                packedScore += PSQT(0, whiteBucket, pieceIndex, pieceSquareIndex)
+                             + PSQT(1, blackBucket, pieceIndex, pieceSquareIndex);
+
                 gamePhase += GamePhaseByPiece[pieceIndex];
 
                 packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
@@ -721,8 +722,9 @@ public class Position
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
 
-                packedScore += PackedPSQT[0][blackBucket][pieceIndex][pieceSquareIndex]
-                            + PackedPSQT[1][whiteBucket][pieceIndex][pieceSquareIndex];
+                packedScore += PSQT(0, blackBucket, pieceIndex, pieceSquareIndex)
+                             + PSQT(1, whiteBucket, pieceIndex, pieceSquareIndex);
+
                 gamePhase += GamePhaseByPiece[pieceIndex];
 
                 packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
@@ -749,10 +751,10 @@ public class Position
             * ((blackPawnAttacks & OccupancyBitBoards[(int)Side.White]).CountBits()
                 - (whitePawnAttacks & OccupancyBitBoards[(int)Side.Black]).CountBits());
 
-        packedScore += PackedPSQT[0][whiteBucket][(int)Piece.K][whiteKing]
-            + PackedPSQT[0][blackBucket][(int)Piece.k][blackKing]
-            + PackedPSQT[1][blackBucket][(int)Piece.K][whiteKing]
-            + PackedPSQT[1][whiteBucket][(int)Piece.k][blackKing]
+        packedScore += PSQT(0, whiteBucket, (int)Piece.K, whiteKing)
+            + PSQT(0, blackBucket, (int)Piece.k, blackKing)
+            + PSQT(1, blackBucket, (int)Piece.K, whiteKing)
+            + PSQT(1, whiteBucket, (int)Piece.k, blackKing)
             + KingAdditionalEvaluation(whiteKing, Side.White)
             - KingAdditionalEvaluation(blackKing, Side.Black);
 

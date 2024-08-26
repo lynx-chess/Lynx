@@ -3,8 +3,8 @@ using NUnit.Framework;
 
 using static Lynx.EvaluationConstants;
 using static Lynx.EvaluationParams;
+using static Lynx.EvaluationPSQTs;
 using static Lynx.TunableEvalParameters;
-using static Lynx.PSQT;
 using static Lynx.Utils;
 
 namespace Lynx.Test;
@@ -274,8 +274,8 @@ public class EvaluationConstantsTest
                     var mg = (short)(MiddleGamePieceValues[0][bucket][piece] + mgPositionalTables[piece][bucket][sq]);
                     var eg = (short)(EndGamePieceValues[0][bucket][piece] + egPositionalTables[piece][bucket][sq]);
 
-                    Assert.AreEqual(Utils.UnpackMG(PackedPSQT[0][bucket][piece][sq]), mg);
-                    Assert.AreEqual(Utils.UnpackEG(PackedPSQT[0][bucket][piece][sq]), eg);
+                    Assert.AreEqual(Utils.UnpackEG(PSQT(0, bucket, piece, sq)), eg);
+                    Assert.AreEqual(Utils.UnpackMG(PSQT(0, bucket, piece, sq)), mg);
                 }
             }
         }
