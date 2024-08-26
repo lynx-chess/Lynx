@@ -197,6 +197,7 @@ public sealed partial class Engine
     /// [12][64]
     /// </summary>
     /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int QuietHistoryIndex(int piece, int targetSquare)
     {
         const int pieceOffset = 64;
@@ -268,6 +269,7 @@ public sealed partial class Engine
     /// <param name="index"></param>
     /// <param name="ply"></param>
     /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int KillerMoveIndex(int index, int ply)
     {
         int indexOffset = Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin;
