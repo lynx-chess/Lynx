@@ -448,16 +448,19 @@ public sealed partial class Engine
                         }
                     }
 
-                    if (move.PromotedPiece() == default && move != _killerMoves[0][ply])
+                    if (move.PromotedPiece() == default)
                     {
                         // 🔍 Killer moves
-                        if (move != _killerMoves[1][ply])
+                        if (move != _killerMoves[0][ply])
                         {
-                            _killerMoves[2][ply] = _killerMoves[1][ply];
-                        }
+                            if (move != _killerMoves[1][ply])
+                            {
+                                _killerMoves[2][ply] = _killerMoves[1][ply];
+                            }
 
-                        _killerMoves[1][ply] = _killerMoves[0][ply];
-                        _killerMoves[0][ply] = move;
+                            _killerMoves[1][ply] = _killerMoves[0][ply];
+                            _killerMoves[0][ply] = move;
+                        }
 
                         // 🔍 Countermoves
                         _counterMoves[CounterMoveIndex(previousMovePiece, previousTargetSquare)] = move;
