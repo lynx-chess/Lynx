@@ -4,6 +4,7 @@ using System.Text;
 
 using static Lynx.EvaluationConstants;
 using static Lynx.EvaluationParams;
+using static Lynx.EvaluationPSQTs;
 
 namespace Lynx.Model;
 
@@ -733,20 +734,20 @@ public class Position
         // Bishop pair bonus
         if (PieceBitBoards[(int)Piece.B].CountBits() >= 2)
         {
-            packedScore += BishopPairBonus.PackedEvaluation;
+            packedScore += BishopPairBonus;
         }
 
         if (PieceBitBoards[(int)Piece.b].CountBits() >= 2)
         {
-            packedScore -= BishopPairBonus.PackedEvaluation;
+            packedScore -= BishopPairBonus;
         }
 
         // Pieces protected by pawns bonus
-        packedScore += PieceProtectedByPawnBonus.PackedEvaluation
+        packedScore += PieceProtectedByPawnBonus
             * ((whitePawnAttacks & OccupancyBitBoards[(int)Side.White] /*& (~PieceBitBoards[(int)Piece.P])*/).CountBits()
                 - (blackPawnAttacks & OccupancyBitBoards[(int)Side.Black] /*& (~PieceBitBoards[(int)Piece.p])*/).CountBits());
 
-        packedScore += PieceAttackedByPawnPenalty.PackedEvaluation
+        packedScore += PieceAttackedByPawnPenalty
             * ((blackPawnAttacks & OccupancyBitBoards[(int)Side.White]).CountBits()
                 - (whitePawnAttacks & OccupancyBitBoards[(int)Side.Black]).CountBits());
 
@@ -764,63 +765,58 @@ public class Position
             gamePhase = maxPhase;
         }
 
-        int totalPawnsCount = int.MinValue;
+        int totalPawnsCount = PieceBitBoards[(int)Piece.P].CountBits() + PieceBitBoards[(int)Piece.p].CountBits();
 
         // Pawnless endgames with few pieces
-        if (gamePhase <= 3)
+        if (gamePhase <= 3 && totalPawnsCount == 0)
         {
-            totalPawnsCount = PieceBitBoards[(int)Piece.P].CountBits() + PieceBitBoards[(int)Piece.p].CountBits();
-
-            if (totalPawnsCount == 0)
+            switch (gamePhase)
             {
-                switch (gamePhase)
-                {
-                    //case 5:
-                    //    {
-                    //        // RB vs R, RN vs R - scale it down due to the chances of it being a draw
-                    //        if (pieceCount[(int)Piece.R] == 1 && pieceCount[(int)Piece.r] == 1)
-                    //        {
-                    //            packedScore >>= 1; // /2
-                    //        }
+                //case 5:
+                //    {
+                //        // RB vs R, RN vs R - scale it down due to the chances of it being a draw
+                //        if (pieceCount[(int)Piece.R] == 1 && pieceCount[(int)Piece.r] == 1)
+                //        {
+                //            packedScore >>= 1; // /2
+                //        }
 
-                    //        break;
-                    //    }
-                    case 3:
-                        {
-                            var winningSideOffset = Utils.PieceOffset(packedScore >= 0);
+                //        break;
+                //    }
+                case 3:
+                    {
+                        var winningSideOffset = Utils.PieceOffset(packedScore >= 0);
 
-                            if (PieceBitBoards[(int)Piece.N + winningSideOffset].CountBits() == 2)      // NN vs N, NN vs B
-                            {
-                                return (0, gamePhase);
-                            }
-
-                            // Without rooks, only BB vs N is a win and BN vs N can have some chances
-                            // Not taking that into account here though, we would need this to rule them out: `pieceCount[(int)Piece.b - winningSideOffset] == 1 || pieceCount[(int)Piece.B + winningSideOffset] <= 1`
-                            //if (pieceCount[(int)Piece.R + winningSideOffset] == 0)  // BN vs B, NN vs B, BB vs B, BN vs N, NN vs N
-                            //{
-                            //    packedScore >>= 1; // /2
-                            //}
-
-                            break;
-                        }
-                    case 2:
-                        {
-                            var whiteKnightsCount = PieceBitBoards[(int)Piece.N].CountBits();
-
-                            if (whiteKnightsCount + PieceBitBoards[(int)Piece.n].CountBits() == 2            // NN vs -, N vs N
-                                    || whiteKnightsCount + PieceBitBoards[(int)Piece.B].CountBits() == 1)    // B vs N, B vs B
-                            {
-                                return (0, gamePhase);
-                            }
-
-                            break;
-                        }
-                    case 1:
-                    case 0:
+                        if (PieceBitBoards[(int)Piece.N + winningSideOffset].CountBits() == 2)      // NN vs N, NN vs B
                         {
                             return (0, gamePhase);
                         }
-                }
+
+                        // Without rooks, only BB vs N is a win and BN vs N can have some chances
+                        // Not taking that into account here though, we would need this to rule them out: `pieceCount[(int)Piece.b - winningSideOffset] == 1 || pieceCount[(int)Piece.B + winningSideOffset] <= 1`
+                        //if (pieceCount[(int)Piece.R + winningSideOffset] == 0)  // BN vs B, NN vs B, BB vs B, BN vs N, NN vs N
+                        //{
+                        //    packedScore >>= 1; // /2
+                        //}
+
+                        break;
+                    }
+                case 2:
+                    {
+                        var whiteKnightsCount = PieceBitBoards[(int)Piece.N].CountBits();
+
+                        if (whiteKnightsCount + PieceBitBoards[(int)Piece.n].CountBits() == 2            // NN vs -, N vs N
+                                || whiteKnightsCount + PieceBitBoards[(int)Piece.B].CountBits() == 1)    // B vs N, B vs B
+                        {
+                            return (0, gamePhase);
+                        }
+
+                        break;
+                    }
+                case 1:
+                case 0:
+                    {
+                        return (0, gamePhase);
+                    }
             }
         }
 
@@ -830,21 +826,8 @@ public class Position
         var endGameScore = Utils.UnpackEG(packedScore);
         var eval = ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / maxPhase;
 
-        if (gamePhase <= 3)
-        {
-            var pawnScalingPenalty = 16 - totalPawnsCount;
-
-            if (eval > 1)
-            {
-                pawnScalingPenalty = Math.Min(eval - 1, pawnScalingPenalty);
-                eval -= pawnScalingPenalty;
-            }
-            else if (eval < -1)
-            {
-                pawnScalingPenalty = Math.Min(-eval - 1, pawnScalingPenalty);
-                eval += pawnScalingPenalty;
-            }
-        }
+        // Endgame scaling with pawn count, formula yoinked from Sirius
+        eval = (int)(eval * ((80 + (totalPawnsCount * 7)) / 128.0));
 
         eval = Math.Clamp(eval, MinEval, MaxEval);
 
@@ -858,7 +841,7 @@ public class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static int TaperedEvaluation(TaperedEvaluationTerm taperedEvaluationTerm, int phase)
     {
-        return ((taperedEvaluationTerm.MG * phase) + (taperedEvaluationTerm.EG * (24 - phase))) / 24;
+        return ((Utils.UnpackMG(taperedEvaluationTerm) * phase) + (Utils.UnpackEG(taperedEvaluationTerm) * (24 - phase))) / 24;
     }
 
     /// <summary>
@@ -917,7 +900,7 @@ public class Position
 
         if ((PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default) // isIsolatedPawn
         {
-            packedBonus += IsolatedPawnPenalty.PackedEvaluation;
+            packedBonus += IsolatedPawnPenalty;
         }
 
         if ((PieceBitBoards[(int)Piece.p - pieceIndex] & Masks.PassedPawns[pieceIndex][squareIndex]) == default)    // isPassedPawn
@@ -927,7 +910,7 @@ public class Position
             {
                 rank = 7 - rank;
             }
-            packedBonus += PassedPawnBonus[rank].PackedEvaluation;
+            packedBonus += PassedPawnBonus[rank];
         }
 
         return packedBonus;
@@ -951,17 +934,17 @@ public class Position
                 & (~OccupancyBitBoards[sameSide]))
             .CountBits();
 
-        var packedBonus = RookMobilityBonus[attacksCount].PackedEvaluation;
+        var packedBonus = RookMobilityBonus[attacksCount];
 
         const int pawnToRookOffset = (int)Piece.R - (int)Piece.P;
 
         if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default)  // isOpenFile
         {
-            packedBonus += OpenFileRookBonus.PackedEvaluation;
+            packedBonus += OpenFileRookBonus;
         }
         else if ((PieceBitBoards[pieceIndex - pawnToRookOffset] & Masks.FileMasks[squareIndex]) == default)  // isSemiOpenFile
         {
-            packedBonus += SemiOpenFileRookBonus.PackedEvaluation;
+            packedBonus += SemiOpenFileRookBonus;
         }
 
         return packedBonus;
@@ -984,7 +967,7 @@ public class Position
             (Attacks.KnightAttacks[squareIndex] & (~OccupancyBitBoards[sameSide]))
             .CountBits();
 
-        return KnightMobilityBonus[attacksCount].PackedEvaluation;
+        return KnightMobilityBonus[attacksCount];
     }
 
     /// <summary>
@@ -998,7 +981,7 @@ public class Position
     {
         var attacksCount = Attacks.BishopAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
 
-        return BishopMobilityBonus[attacksCount].PackedEvaluation;
+        return BishopMobilityBonus[attacksCount];
     }
 
     /// <summary>
@@ -1011,7 +994,7 @@ public class Position
     {
         var attacksCount = Attacks.QueenAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
 
-        return attacksCount * QueenMobilityBonus.PackedEvaluation;
+        return attacksCount * QueenMobilityBonus;
     }
 
     /// <summary>
@@ -1024,7 +1007,7 @@ public class Position
     internal int KingAdditionalEvaluation(int squareIndex, Side kingSide)
     {
         var attacksCount = Attacks.QueenAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
-        int packedBonus = VirtualKingMobilityBonus[attacksCount].PackedEvaluation;
+        int packedBonus = VirtualKingMobilityBonus[attacksCount];
 
         var kingSideOffset = Utils.PieceOffset(kingSide);
 
@@ -1032,17 +1015,17 @@ public class Position
         {
             if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == 0)  // isOpenFile
             {
-                packedBonus += OpenFileKingPenalty.PackedEvaluation;
+                packedBonus += OpenFileKingPenalty;
             }
             else if ((PieceBitBoards[(int)Piece.P + kingSideOffset] & Masks.FileMasks[squareIndex]) == 0) // isSemiOpenFile
             {
-                packedBonus += SemiOpenFileKingPenalty.PackedEvaluation;
+                packedBonus += SemiOpenFileKingPenalty;
             }
         }
 
         var ownPiecesAroundCount = (Attacks.KingAttacks[squareIndex] & PieceBitBoards[(int)Piece.P + kingSideOffset]).CountBits();
 
-        return packedBonus + (ownPiecesAroundCount * KingShieldBonus.PackedEvaluation);
+        return packedBonus + (ownPiecesAroundCount * KingShieldBonus);
     }
 
     #endregion
