@@ -459,7 +459,7 @@ public sealed partial class Engine
                         _killerMoves[1][ply] = _killerMoves[0][ply];
                         _killerMoves[0][ply] = move;
 
-                        // 🔍 Countermoves
+                        // 🔍 Countermoves - fails to fix the bug and remove killer moves condition, see  https://github.com/lynx-chess/Lynx/pull/944
                         _counterMoves[CounterMoveIndex(previousMovePiece, previousTargetSquare)] = move;
                     }
                 }
