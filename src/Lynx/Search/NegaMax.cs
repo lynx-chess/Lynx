@@ -314,7 +314,7 @@ public sealed partial class Engine
                     }
 
                     // -= history/(maxHistory/2)
-                    reduction -= 2 * _quietHistory[QuietHistoryIndex(move.Piece(), move.TargetSquare())] / Configuration.EngineSettings.History_MaxMoveValue;
+                    reduction -= 2 * QuietHistory(move.Piece(), move.TargetSquare()) / Configuration.EngineSettings.History_MaxMoveValue;
 
                     // Don't allow LMR to drop into qsearch or increase the depth
                     // depth - 1 - depth +2 = 1, min depth we want
@@ -374,7 +374,7 @@ public sealed partial class Engine
                     var captureHistoryIndex = CaptureHistoryIndex(piece, targetSquare, capturedPiece);
 
                     _captureHistory[captureHistoryIndex] = ScoreHistoryMove(
-                        _captureHistory[captureHistoryIndex],
+                        CaptureHistory(captureHistoryIndex),
                         EvaluationConstants.HistoryBonus[depth]);
 
                     // 🔍 Capture history penalty/malus
@@ -392,7 +392,7 @@ public sealed partial class Engine
                             captureHistoryIndex = CaptureHistoryIndex(visitedMovePiece, visitedMoveTargetSquare, visitedMoveCapturedPiece);
 
                             _captureHistory[captureHistoryIndex] = ScoreHistoryMove(
-                                _captureHistory[captureHistoryIndex],
+                                CaptureHistory(captureHistoryIndex),
                                 -EvaluationConstants.HistoryBonus[depth]);
                         }
                     }
@@ -406,7 +406,7 @@ public sealed partial class Engine
 
                     var quietHistoryIndex = QuietHistoryIndex(piece, targetSquare);
                     _quietHistory[quietHistoryIndex] = ScoreHistoryMove(
-                        _quietHistory[quietHistoryIndex],
+                        QuietHistory(quietHistoryIndex),
                         EvaluationConstants.HistoryBonus[depth]);
 
                     // 🔍 Continuation history
@@ -418,7 +418,7 @@ public sealed partial class Engine
                     var continuationHistoryIndex = ContinuationHistoryIndex(piece, targetSquare, previousMovePiece, previousTargetSquare, 0);
 
                     _continuationHistory[continuationHistoryIndex] = ScoreHistoryMove(
-                        _continuationHistory[continuationHistoryIndex],
+                        ContinuationHistory(continuationHistoryIndex),
                         EvaluationConstants.HistoryBonus[depth]);
 
                     //    var previousPreviousMove = Game.MoveStack[ply - 2];
@@ -443,14 +443,14 @@ public sealed partial class Engine
                             quietHistoryIndex = QuietHistoryIndex(visitedMovePiece, visitedMoveTargetSquare);
 
                             _quietHistory[quietHistoryIndex] = ScoreHistoryMove(
-                                _quietHistory[quietHistoryIndex],
+                                QuietHistory(quietHistoryIndex),
                                 -EvaluationConstants.HistoryBonus[depth]);
 
                             // 🔍 Continuation history penalty / malus
                             continuationHistoryIndex = ContinuationHistoryIndex(visitedMovePiece, visitedMoveTargetSquare, previousMovePiece, previousTargetSquare, 0);
 
                             _continuationHistory[continuationHistoryIndex] = ScoreHistoryMove(
-                                _continuationHistory[continuationHistoryIndex],
+                                ContinuationHistory(continuationHistoryIndex),
                                 -EvaluationConstants.HistoryBonus[depth]);
                         }
                     }
@@ -458,15 +458,18 @@ public sealed partial class Engine
                     var killerMove0Index = KillerMoveIndex(0, ply);
                     var killerMove1Index = KillerMoveIndex(1, ply);
                     var killerMove2Index = KillerMoveIndex(2, ply);
-                    if (move.PromotedPiece() == default && move != _killerMoves[killerMove0Index])
+
+                    var killerMove0 = KillerMove(killerMove0Index);
+                    if (move.PromotedPiece() == default && move != killerMove0)
                     {
+                        var killerMove1 = KillerMove(killerMove1Index);
                         // 🔍 Killer moves
-                        if (move != _killerMoves[killerMove1Index])
+                        if (move != killerMove1)
                         {
-                            _killerMoves[killerMove2Index] = _killerMoves[killerMove1Index];
+                            _killerMoves[killerMove2Index] = killerMove1;
                         }
 
-                        _killerMoves[killerMove1Index] = _killerMoves[killerMove0Index];
+                        _killerMoves[killerMove1Index] = killerMove0;
                         _killerMoves[killerMove0Index] = move;
 
                         // 🔍 Countermoves

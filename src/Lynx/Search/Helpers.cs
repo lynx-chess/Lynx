@@ -75,19 +75,19 @@ public sealed partial class Engine
         if (isNotQSearch)
         {
             // 1st killer move
-            if (_killerMoves[KillerMoveIndex(0, ply)] == move)
+            if (KillerMove(0, ply) == move)
             {
                 return EvaluationConstants.FirstKillerMoveValue;
             }
 
             // 2nd killer move
-            if (_killerMoves[KillerMoveIndex(1, ply)] == move)
+            if (KillerMove(1, ply) == move)
             {
                 return EvaluationConstants.SecondKillerMoveValue;
             }
 
             // 3rd killer move
-            if (_killerMoves[KillerMoveIndex(2, ply)] == move)
+            if (KillerMove(2, ply) == move)
             {
                 return EvaluationConstants.ThirdKillerMoveValue;
             }
@@ -100,20 +100,20 @@ public sealed partial class Engine
                 var previousMoveTargetSquare = previousMove.TargetSquare();
 
                 // Countermove
-                if (_counterMoves[CounterMoveIndex(previousMovePiece, previousMoveTargetSquare)] == move)
+                if (CounterMove(previousMovePiece, previousMoveTargetSquare) == move)
                 {
                     return EvaluationConstants.CounterMoveValue;
                 }
 
                 // Counter move history
                 return EvaluationConstants.BaseMoveScore
-                    + _quietHistory[QuietHistoryIndex(move.Piece(), move.TargetSquare())]
-                    + _continuationHistory[ContinuationHistoryIndex(move.Piece(), move.TargetSquare(), previousMovePiece, previousMoveTargetSquare, 0)];
+                    + QuietHistory(move.Piece(), move.TargetSquare())
+                    + ContinuationHistory(move.Piece(), move.TargetSquare(), previousMovePiece, previousMoveTargetSquare, 0);
             }
 
             // History move or 0 if not found
             return EvaluationConstants.BaseMoveScore
-                + _quietHistory[QuietHistoryIndex(move.Piece(), move.TargetSquare())];
+                + QuietHistory(move.Piece(), move.TargetSquare());
         }
 
         return EvaluationConstants.BaseMoveScore;
@@ -206,6 +206,21 @@ public sealed partial class Engine
             + targetSquare;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int QuietHistory(int arrayIndex)
+    {
+        unsafe
+        {
+            fixed (int* ptr = &_quietHistory[0])
+            {
+                return ptr[arrayIndex];
+            }
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int QuietHistory(int piece, int targetSquare) => QuietHistory(QuietHistoryIndex(piece, targetSquare));
+
     /// <summary>
     /// [12][64][12]
     /// </summary>
@@ -223,6 +238,21 @@ public sealed partial class Engine
             + (targetSquare * targetSquareOffset)
             + capturedPiece;
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int CaptureHistory(int arrayIndex)
+    {
+        unsafe
+        {
+            fixed (int* ptr = &_captureHistory[0])
+            {
+                return ptr[arrayIndex];
+            }
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int CaptureHistory(int piece, int targetSquare, int capturedPiece) => CaptureHistory(CaptureHistoryIndex(piece, targetSquare, capturedPiece));
 
     /// <summary>
     /// [12][64][12][64][ContinuationHistoryPlyCount]
@@ -248,6 +278,22 @@ public sealed partial class Engine
             + ply;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int ContinuationHistory(int arrayIndex)
+    {
+        unsafe
+        {
+            fixed (int* ptr = &_continuationHistory[0])
+            {
+                return ptr[arrayIndex];
+            }
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int ContinuationHistory(int piece, int targetSquare, int previousMovePiece, int previousMoveTargetSquare, int ply) =>
+        ContinuationHistory(ContinuationHistoryIndex(piece, targetSquare, previousMovePiece, previousMoveTargetSquare, ply));
+
     /// <summary>
     /// [64][64]
     /// </summary>
@@ -263,6 +309,21 @@ public sealed partial class Engine
             + previousMoveTargetSquare;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int CounterMove(int arrayIndex)
+    {
+        unsafe
+        {
+            fixed (int* ptr = &_counterMoves[0])
+            {
+                return ptr[arrayIndex];
+            }
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int CounterMove(int previousMoveSourceSquare, int previousMoveTargetSquare) => CounterMove(CounterMoveIndex(previousMoveSourceSquare, previousMoveTargetSquare));
+
     /// <summary>
     /// [3][<see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/>]
     /// </summary>
@@ -277,6 +338,21 @@ public sealed partial class Engine
         return (index * indexOffset)
             + ply;
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int KillerMove(int arrayIndex)
+    {
+        unsafe
+        {
+            fixed (int* ptr = &_killerMoves[0])
+            {
+                return ptr[arrayIndex];
+            }
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int KillerMove(int index, int ply) => KillerMove(KillerMoveIndex(index, ply));
 
     #region Debugging
 
