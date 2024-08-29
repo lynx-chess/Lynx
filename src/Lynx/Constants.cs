@@ -167,7 +167,7 @@ public static class Constants
     /// <summary>
     /// Relevant bishop occupancy bit count per square
     /// </summary>
-    public static readonly int[] BishopRelevantOccupancyBits =
+    public static ReadOnlySpan<int> BishopRelevantOccupancyBits =>
     [
         6, 5, 5, 5, 5, 5, 5, 6,
         5, 5, 5, 5, 5, 5, 5, 5,
@@ -182,7 +182,7 @@ public static class Constants
     /// <summary>
     /// Relevant rook occupancy bit count per square
     /// </summary>
-    public static readonly int[] RookRelevantOccupancyBits =
+    public static ReadOnlySpan<int> RookRelevantOccupancyBits =>
     [
         12, 11, 11, 11, 11, 11, 11, 12,
         11, 10, 10, 10, 10, 10, 10, 11,
@@ -197,7 +197,7 @@ public static class Constants
     /// <summary>
     /// https://github.com/maksimKorzh/chess_programming/blob/master/src/bbc/init_magics/bbc.c
     /// </summary>
-    public static readonly BitBoard[] RookMagicNumbers =
+    public static ReadOnlySpan<BitBoard> RookMagicNumbers =>
     [
         0x8a80104000800020UL, 0x140002000100040UL, 0x2801880a0017001UL, 0x100081001000420UL, 0x200020010080420UL, 0x3001c0002010008UL, 0x8480008002000100UL, 0x2080088004402900UL,
         0x800098204000UL, 0x2024401000200040UL, 0x100802000801000UL, 0x120800800801000UL, 0x208808088000400UL, 0x2802200800400UL, 0x2200800100020080UL, 0x801000060821100UL,
@@ -212,7 +212,7 @@ public static class Constants
     /// <summary>
     /// https://github.com/maksimKorzh/chess_programming/blob/master/src/bbc/init_magics/bbc.c
     /// </summary>
-    public static readonly BitBoard[] BishopMagicNumbers =
+    public static ReadOnlySpan<BitBoard> BishopMagicNumbers =>
     [
         0x40040844404084UL, 0x2004208a004208UL, 0x10190041080202UL, 0x108060845042010UL, 0x581104180800210UL, 0x2112080446200010UL, 0x1080820820060210UL, 0x3c0808410220200UL,
         0x4050404440404UL, 0x21001420088UL, 0x24d0080801082102UL, 0x1020a0a020400UL, 0x40308200402UL, 0x4011002100800UL, 0x401484104104005UL, 0x801010402020200UL,
@@ -260,7 +260,7 @@ public static class Constants
     public const string WhiteLongCastle = "e1c1";
     public const string BlackLongCastle = "e8c8";
 
-    public static readonly int[] EnPassantCaptureSquares =
+    public static ReadOnlySpan<int> EnPassantCaptureSquares =>
     [
         0, 0, 0, 0, 0, 0, 0, 0,     //  0-7
         0, 0, 0, 0, 0, 0, 0, 0,     //  8-15
@@ -327,7 +327,7 @@ public static class Constants
 
     public static readonly int SideLimit = Enum.GetValues(typeof(Piece)).Length / 2;
 
-    public static readonly int[] Rank =
+    public static ReadOnlySpan<int> Rank =>
     [
         7, 7, 7, 7, 7, 7, 7, 7,
         6, 6, 6, 6, 6, 6, 6, 6,
@@ -339,7 +339,7 @@ public static class Constants
         0, 0, 0, 0, 0, 0, 0, 0
     ];
 
-    public static readonly int[] File =
+    public static ReadOnlySpan<int> File =>
     [
         0, 1, 2, 3, 4, 5, 6, 7,
         0, 1, 2, 3, 4, 5, 6, 7,
@@ -351,7 +351,7 @@ public static class Constants
         0, 1, 2, 3, 4, 5, 6, 7
     ];
 
-    public static readonly char[] FileString = [ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' ];
+    public static ReadOnlySpan<char> FileString => [ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' ];
 
     public const int AbsoluteMaxDepth = 255;
 
