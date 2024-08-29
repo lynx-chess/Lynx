@@ -7,6 +7,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Channels;
+using static Lynx.EvaluationConstants;
+using static Lynx.TunableEvalParameters;
 
 //_2_GettingStarted();
 //_3_PawnAttacks();
@@ -676,7 +678,7 @@ static void _53_MVVLVA()
     {
         for (int victim = (int)Piece.p; victim <= (int)Piece.k; ++victim)
         {
-            var score = EvaluationConstants.MostValueableVictimLeastValuableAttacker[attacker][victim];
+            var score = MostValueableVictimLeastValuableAttacker[attacker][victim];
             Console.WriteLine($"Score {(Piece)attacker}x{(Piece)victim}: {score}");
         }
         Console.WriteLine();
@@ -686,7 +688,7 @@ static void _53_MVVLVA()
     {
         for (int victim = (int)Piece.P; victim <= (int)Piece.K; ++victim)
         {
-            var score = EvaluationConstants.MostValueableVictimLeastValuableAttacker[attacker][victim];
+            var score = MostValueableVictimLeastValuableAttacker[attacker][victim];
             Console.WriteLine($"Score {(Piece)attacker}x{(Piece)victim}: {score}");
         }
         Console.WriteLine();
@@ -1151,13 +1153,13 @@ static void UnmakeMove()
 
 static void PieceSquareTables()
 {
-    short[] middleGamePawnTableBlack = EvaluationConstants.MiddleGamePawnTable.Select((_, index) => (short)-EvaluationConstants.MiddleGamePawnTable[0][index ^ 56]).ToArray();
-    short[] endGamePawnTableBlack = EvaluationConstants.EndGamePawnTable.Select((_, index) => (short)-EvaluationConstants.EndGamePawnTable[0][index ^ 56]).ToArray();
+    short[] middleGamePawnTableBlack = MiddleGamePawnTable.Select((_, index) => (short)-MiddleGamePawnTable[0][index ^ 56]).ToArray();
+    short[] endGamePawnTableBlack = EndGamePawnTable.Select((_, index) => (short)-EndGamePawnTable[0][index ^ 56]).ToArray();
 
-    PrintBitBoard(EvaluationConstants.MiddleGamePawnTable);
+    PrintBitBoard(MiddleGamePawnTable);
     PrintBitBoard(middleGamePawnTableBlack);
 
-    PrintBitBoard(EvaluationConstants.EndGamePawnTable);
+    PrintBitBoard(EndGamePawnTable);
     PrintBitBoard(endGamePawnTableBlack);
 
     static void PrintBitBoard<T>(T[] bitboard)

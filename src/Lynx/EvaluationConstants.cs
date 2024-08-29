@@ -1,5 +1,4 @@
 ﻿using Lynx.Model;
-using System.Net.Sockets;
 
 #pragma warning disable IDE1006 // Naming Styles
 
@@ -17,32 +16,11 @@ public static partial class EvaluationConstants
 
     public static readonly double[] Bs = [-6.67029772, 41.06172677, -36.37312580, 80.73370363];
 
-#pragma warning disable IDE0055 // Discard formatting in this region
-
-    public const int PSQTBucketCount = 23;
-
-    public static readonly int[] PSQTBucketLayout =
-    [
-        15, 16, 17, 18, 19, 20, 21, 22,
-        15, 16, 17, 18, 19, 20, 21, 22,
-        15, 16, 17, 18, 19, 20, 21, 22,
-        15, 16, 17, 18, 19, 20, 21, 22,
-        15, 8, 9, 10, 11, 12, 13, 14,
-        15, 8, 9, 10, 11, 12, 13, 14,
-        0, 8, 9, 10, 11, 12, 13, 14,
-        0, 1, 2, 3, 4, 5, 6, 7, //
-    ];
-
     public static readonly int[] GamePhaseByPiece =
     [
         0, 1, 1, 2, 4, 0,
         0, 1, 1, 2, 4, 0
     ];
-
-    /// <summary>
-    /// 2 x PSQTBucketCount x 12 x 64
-    /// </summary>
-    public static readonly int[][][][] PackedPSQT = new int[2][][][];
 
     /// <summary>
     /// <see cref="Constants.AbsoluteMaxDepth"/> x <see cref="Constants.MaxNumberOfPossibleMovesInAPosition"/>
@@ -56,73 +34,6 @@ public static partial class EvaluationConstants
 
     static EvaluationConstants()
     {
-        short[][][][] mgPositionalTables =
-        [
-            [
-                MiddleGamePawnTable,
-                MiddleGameKnightTable,
-                MiddleGameBishopTable,
-                MiddleGameRookTable,
-                MiddleGameQueenTable,
-                MiddleGameKingTable
-            ],
-            [
-                MiddleGameEnemyPawnTable,
-                MiddleGameEnemyKnightTable,
-                MiddleGameEnemyBishopTable,
-                MiddleGameEnemyRookTable,
-                MiddleGameEnemyQueenTable,
-                MiddleGameEnemyKingTable
-            ]
-
-        ];
-
-        short[][][][] egPositionalTables =
-        [
-            [
-                EndGamePawnTable,
-                EndGameKnightTable,
-                EndGameBishopTable,
-                EndGameRookTable,
-                EndGameQueenTable,
-                EndGameKingTable
-            ],
-            [
-                EndGameEnemyPawnTable,
-                EndGameEnemyKnightTable,
-                EndGameEnemyBishopTable,
-                EndGameEnemyRookTable,
-                EndGameEnemyQueenTable,
-                EndGameEnemyKingTable
-            ]
-        ];
-
-        for(int friendEnemy = 0; friendEnemy < 2; ++friendEnemy)
-        {
-            PackedPSQT[friendEnemy] = new int[PSQTBucketCount][][];
-
-            for (int bucket = 0; bucket < PSQTBucketCount; ++bucket)
-            {
-                PackedPSQT[friendEnemy][bucket] = new int[12][];
-                for (int piece = (int)Piece.P; piece <= (int)Piece.K; ++piece)
-                {
-                    PackedPSQT[friendEnemy][bucket][piece] = new int[64];
-                    PackedPSQT[friendEnemy][bucket][piece + 6] = new int[64];
-
-                    for (int sq = 0; sq < 64; ++sq)
-                    {
-                        PackedPSQT[friendEnemy][bucket][piece][sq] = Utils.Pack(
-                            (short)(MiddleGamePieceValues[friendEnemy][bucket][piece] + mgPositionalTables[friendEnemy][piece][bucket][sq]),
-                            (short)(EndGamePieceValues[friendEnemy][bucket][piece] + egPositionalTables[friendEnemy][piece][bucket][sq]));
-
-                        PackedPSQT[friendEnemy][bucket][piece + 6][sq] = Utils.Pack(
-                            (short)(MiddleGamePieceValues[friendEnemy][bucket][piece + 6] - mgPositionalTables[friendEnemy][piece][bucket][sq ^ 56]),
-                            (short)(EndGamePieceValues[friendEnemy][bucket][piece + 6] - egPositionalTables[friendEnemy][piece][bucket][sq ^ 56]));
-                    }
-                }
-            }
-        }
-
         for (int searchDepth = 1; searchDepth < Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin; ++searchDepth)    // Depth > 0 or we'd be in QSearch
         {
             LMRReductions[searchDepth] = new int[Constants.MaxNumberOfPossibleMovesInAPosition];
@@ -138,8 +49,6 @@ public static partial class EvaluationConstants
                 (4 * searchDepth * searchDepth) + (120 * searchDepth) - 120);   // Sirius, originally from Berserk
         }
     }
-
-    #pragma warning disable IDE0055 // Discard formatting in this region
 
     /// <summary>
     /// MVV LVA [attacker,victim] 12x11
@@ -176,8 +85,6 @@ public static partial class EvaluationConstants
         1000, 3500, 4000, 5000, 11000, 0,
         0
     ];
-
-#pragma warning restore IDE0055
 
     /// <summary>
     /// Base absolute checkmate evaluation value. Actual absolute evaluations are lower than this one by a number of <see cref="Position.DepthCheckmateFactor"/>
