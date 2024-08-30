@@ -428,7 +428,7 @@ public class PositionTest
         Assert.AreEqual(
             //(-4 * Configuration.EngineSettings.DoubledPawnPenalty.MG)
             +UnpackMG(IsolatedPawnPenalty)
-            + UnpackMG(PassedPawnBonus[rank]),
+            + UnpackMG(PassedPawnBonus[0][rank]),
 
             evaluation);
     }
