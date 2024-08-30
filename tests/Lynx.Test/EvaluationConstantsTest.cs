@@ -3,6 +3,9 @@ using NUnit.Framework;
 
 using static Lynx.EvaluationConstants;
 using static Lynx.EvaluationParams;
+using static Lynx.EvaluationPSQTs;
+using static Lynx.TunableEvalParameters;
+using static Lynx.Utils;
 
 namespace Lynx.Test;
 public class EvaluationConstantsTest
@@ -11,11 +14,11 @@ public class EvaluationConstantsTest
     /// Shy from 14k
     /// </summary>
     private readonly int _sensibleEvaluation =
-        (2 * (Math.Max(MiddleGameBishopTable[0].Max(), EndGameBishopTable[0].Max()) + BishopMobilityBonus[13].MG)) +
+        (2 * (Math.Max(MiddleGameBishopTable[0].Max(), EndGameBishopTable[0].Max()) + UnpackMG(BishopMobilityBonus[13]))) +
         (2 * (Math.Max(MiddleGameKnightTable[0].Max(), EndGameKnightTable[0].Max()))) +
-        (2 * (Math.Max(MiddleGameRookTable[0].Max(), EndGameRookTable[0].Max()) +OpenFileRookBonus.MG + SemiOpenFileRookBonus.MG)) +
-        (9 * (Math.Max(MiddleGameQueenTable[0].Max(), EndGameQueenTable[0].Max()) + (QueenMobilityBonus.Count27.MG * 64))) +
-        (1 * (Math.Max(MiddleGameKingTable[0].Max(), EndGameKingTable[0].Max()) + (KingShieldBonus.MG * 8))) +
+        (2 * (Math.Max(MiddleGameRookTable[0].Max(), EndGameRookTable[0].Max()) + UnpackMG(OpenFileRookBonus) + UnpackMG(SemiOpenFileRookBonus))) +
+        (9 * (Math.Max(MiddleGameQueenTable[0].Max(), EndGameQueenTable[0].Max()) + (UnpackMG(QueenMobilityBonus[27]) * 64))) +
+        (1 * (Math.Max(MiddleGameKingTable[0].Max(), EndGameKingTable[0].Max()) + (UnpackMG(KingShieldBonus) * 8))) +
         MiddleGameQueenTable[0].Max(); // just in case
 
     [TestCase(PositiveCheckmateDetectionLimit)]
@@ -271,8 +274,8 @@ public class EvaluationConstantsTest
                     var mg = (short)(MiddleGamePieceValues[0][bucket][piece] + mgPositionalTables[piece][bucket][sq]);
                     var eg = (short)(EndGamePieceValues[0][bucket][piece] + egPositionalTables[piece][bucket][sq]);
 
-                    Assert.AreEqual(Utils.UnpackMG(PackedPSQT[0][bucket][piece][sq]), mg);
-                    Assert.AreEqual(Utils.UnpackEG(PackedPSQT[0][bucket][piece][sq]), eg);
+                    Assert.AreEqual(Utils.UnpackEG(PSQT(0, bucket, piece, sq)), eg);
+                    Assert.AreEqual(Utils.UnpackMG(PSQT(0, bucket, piece, sq)), mg);
                 }
             }
         }
