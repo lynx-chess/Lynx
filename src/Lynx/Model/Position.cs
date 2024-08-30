@@ -708,7 +708,7 @@ public class Position
 
                 gamePhase += GamePhaseByPiece[pieceIndex];
 
-                packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
+                packedScore += AdditionalPieceEvaluation(whiteBucket, pieceSquareIndex, pieceIndex);
             }
         }
 
@@ -727,7 +727,7 @@ public class Position
 
                 gamePhase += GamePhaseByPiece[pieceIndex];
 
-                packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
+                packedScore -= AdditionalPieceEvaluation(blackBucket, pieceSquareIndex, pieceIndex);
             }
         }
 
@@ -874,11 +874,11 @@ public class Position
     /// <param name="pieceIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int AdditionalPieceEvaluation(int pieceSquareIndex, int pieceIndex)
+    internal int AdditionalPieceEvaluation(int bucket, int pieceSquareIndex, int pieceIndex)
     {
         return pieceIndex switch
         {
-            (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(pieceSquareIndex, pieceIndex),
+            (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(bucket, pieceSquareIndex, pieceIndex),
             (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex),
             (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex),
             (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(pieceSquareIndex, pieceIndex),
@@ -894,7 +894,7 @@ public class Position
     /// < param name="pieceIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int PawnAdditionalEvaluation(int squareIndex, int pieceIndex)
+    private int PawnAdditionalEvaluation(int bucket, int squareIndex, int pieceIndex)
     {
         int packedBonus = 0;
 
@@ -910,7 +910,7 @@ public class Position
             {
                 rank = 7 - rank;
             }
-            packedBonus += PassedPawnBonus[rank];
+            packedBonus += PassedPawnBonus[bucket][rank];
         }
 
         return packedBonus;
