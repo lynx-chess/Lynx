@@ -123,7 +123,7 @@ public sealed partial class Engine
                 else
                 {
                     // 🔍 Aspiration Windows
-                    var window = Configuration.EngineSettings.AspirationWindow_Delta;
+                    var window = Configuration.EngineSettings.AspirationWindow_Base;
 
                     alpha = Math.Max(MinValue, lastSearchResult.Evaluation - window);
                     beta = Math.Min(MaxValue, lastSearchResult.Evaluation + window);
