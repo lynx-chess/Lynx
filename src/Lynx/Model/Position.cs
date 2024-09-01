@@ -693,15 +693,15 @@ public class Position
         var whiteBucket = PSQTBucketLayout[whiteKing];
         var blackBucket = PSQTBucketLayout[blackKing ^ 56];
 
+        int sameSideBucket = whiteBucket;
+        int oppositeSideBucket = blackBucket;
+
         for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.k; ++pieceIndex)
         {
-            int sideBucket = whiteBucket;
-            int oppositeBucket = blackBucket;
-
-            if (pieceIndex >= (int)Piece.p)
+            if (pieceIndex == (int)Piece.p)
             {
-                sideBucket = blackBucket;
-                oppositeBucket = whiteBucket;
+                sameSideBucket = blackBucket;
+                oppositeSideBucket = whiteBucket;
             }
 
             // Bitboard copy that we 'empty'
@@ -712,12 +712,11 @@ public class Position
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
 
-                packedScore += PSQT(0, sideBucket, pieceIndex, pieceSquareIndex)
-                             + PSQT(1, oppositeBucket, pieceIndex, pieceSquareIndex);
+                packedScore += PSQT(0, sameSideBucket, pieceIndex, pieceSquareIndex)
+                             + PSQT(1, oppositeSideBucket, pieceIndex, pieceSquareIndex)
+                             + AdditionalPieceEvaluationWithSign(sameSideBucket, pieceSquareIndex, pieceIndex);
 
                 gamePhase += GamePhaseByPiece[pieceIndex];
-
-                packedScore += AdditionalPieceEvaluation2(sideBucket, pieceSquareIndex, pieceIndex);
             }
         }
 
@@ -871,7 +870,7 @@ public class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int AdditionalPieceEvaluation2(int bucket, int pieceSquareIndex, int pieceIndex)
+    internal int AdditionalPieceEvaluationWithSign(int bucket, int pieceSquareIndex, int pieceIndex)
     {
         return pieceIndex switch
         {
@@ -890,8 +889,8 @@ public class Position
             (int)Piece.Q => QueenAdditionalEvaluation(pieceSquareIndex),
             (int)Piece.q => -QueenAdditionalEvaluation(pieceSquareIndex),
 
-            (int)Piece.K => KingAdditionalEvaluation(pieceSquareIndex, Side.White),
-            (int)Piece.k => -KingAdditionalEvaluation(pieceSquareIndex, Side.Black),
+            (int)Piece.K => KingAdditionalEvaluation(pieceSquareIndex, 0),
+            (int)Piece.k => -KingAdditionalEvaluation(pieceSquareIndex, 6),
         };
     }
 
@@ -1012,12 +1011,10 @@ public class Position
     /// <param name="kingSide"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int KingAdditionalEvaluation(int squareIndex, Side kingSide)
+    internal int KingAdditionalEvaluation(int squareIndex, int kingSideOffset)
     {
         var attacksCount = Attacks.QueenAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
         int packedBonus = VirtualKingMobilityBonus[attacksCount];
-
-        var kingSideOffset = Utils.PieceOffset(kingSide);
 
         if (PieceBitBoards[(int)Piece.r - kingSideOffset] + PieceBitBoards[(int)Piece.q - kingSideOffset] != 0) // areThereOppositeSideRooksOrQueens
         {
