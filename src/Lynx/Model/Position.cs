@@ -693,38 +693,31 @@ public class Position
         var whiteBucket = PSQTBucketLayout[whiteKing];
         var blackBucket = PSQTBucketLayout[blackKing ^ 56];
 
-        for (int pieceIndexWhite = (int)Piece.P; pieceIndexWhite < (int)Piece.K; ++pieceIndexWhite)
+        for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.k; ++pieceIndex)
         {
-            var pieceIndexBlack = pieceIndexWhite + 6;
+            int sideBucket = whiteBucket;
+            int oppositeBucket = blackBucket;
 
-            // Bitboard copies that we 'empty'
-            var bitboardWhite = PieceBitBoards[pieceIndexWhite];
-            var bitboardBlack = PieceBitBoards[pieceIndexBlack];
-
-            while (bitboardWhite != default)
+            if (pieceIndex >= (int)Piece.p)
             {
-                var pieceSquareIndex = bitboardWhite.GetLS1BIndex();
-                bitboardWhite.ResetLS1B();
-
-                packedScore += PSQT(0, whiteBucket, pieceIndexWhite, pieceSquareIndex)
-                             + PSQT(1, blackBucket, pieceIndexWhite, pieceSquareIndex);
-
-                gamePhase += GamePhaseByPiece[pieceIndexWhite];
-
-                packedScore += AdditionalPieceEvaluation(whiteBucket, pieceSquareIndex, pieceIndexWhite);
+                sideBucket = blackBucket;
+                oppositeBucket = whiteBucket;
             }
 
-            while (bitboardBlack != default)
+            // Bitboard copy that we 'empty'
+            var bitboard = PieceBitBoards[pieceIndex];
+
+            while (bitboard != default)
             {
-                var pieceSquareIndex = bitboardBlack.GetLS1BIndex();
-                bitboardBlack.ResetLS1B();
+                var pieceSquareIndex = bitboard.GetLS1BIndex();
+                bitboard.ResetLS1B();
 
-                packedScore += PSQT(0, blackBucket, pieceIndexBlack, pieceSquareIndex)
-                             + PSQT(1, whiteBucket, pieceIndexBlack, pieceSquareIndex);
+                packedScore += PSQT(0, sideBucket, pieceIndex, pieceSquareIndex)
+                             + PSQT(1, oppositeBucket, pieceIndex, pieceSquareIndex);
 
-                gamePhase += GamePhaseByPiece[pieceIndexBlack];
+                gamePhase += GamePhaseByPiece[pieceIndex];
 
-                packedScore -= AdditionalPieceEvaluation(blackBucket, pieceSquareIndex, pieceIndexBlack);
+                packedScore += AdditionalPieceEvaluation2(sideBucket, pieceSquareIndex, pieceIndex);
             }
         }
 
@@ -747,13 +740,6 @@ public class Position
         packedScore += PieceAttackedByPawnPenalty
             * ((blackPawnAttacks & OccupancyBitBoards[(int)Side.White]).CountBits()
                 - (whitePawnAttacks & OccupancyBitBoards[(int)Side.Black]).CountBits());
-
-        packedScore += PSQT(0, whiteBucket, (int)Piece.K, whiteKing)
-            + PSQT(0, blackBucket, (int)Piece.k, blackKing)
-            + PSQT(1, blackBucket, (int)Piece.K, whiteKing)
-            + PSQT(1, whiteBucket, (int)Piece.k, blackKing)
-            + KingAdditionalEvaluation(whiteKing, Side.White)
-            - KingAdditionalEvaluation(blackKing, Side.Black);
 
         const int maxPhase = 24;
 
@@ -885,20 +871,6 @@ public class Position
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int AdditionalPieceEvaluationWhiteIndex(int bucket, int pieceSquareIndex, int pieceIndex)
-    {
-        return pieceIndex switch
-        {
-            (int)Piece.P => PawnAdditionalEvaluation(bucket, pieceSquareIndex, pieceIndex),
-            (int)Piece.R => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex),
-            (int)Piece.B => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex),
-            (int)Piece.N => KnightAdditionalEvaluation(pieceSquareIndex, pieceIndex),
-            (int)Piece.Q => QueenAdditionalEvaluation(pieceSquareIndex),
-            _ => throw new ArgumentException($"Only white indexes expected, but {pieceIndex} was used")
-        };
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal int AdditionalPieceEvaluation2(int bucket, int pieceSquareIndex, int pieceIndex)
     {
         return pieceIndex switch
@@ -918,7 +890,8 @@ public class Position
             (int)Piece.Q => QueenAdditionalEvaluation(pieceSquareIndex),
             (int)Piece.q => -QueenAdditionalEvaluation(pieceSquareIndex),
 
-            _ => 0
+            (int)Piece.K => KingAdditionalEvaluation(pieceSquareIndex, Side.White),
+            (int)Piece.k => -KingAdditionalEvaluation(pieceSquareIndex, Side.Black),
         };
     }
 
