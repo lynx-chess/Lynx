@@ -428,7 +428,7 @@ public class PositionTest
         Assert.AreEqual(
             //(-4 * Configuration.EngineSettings.DoubledPawnPenalty.MG)
             +UnpackMG(IsolatedPawnPenalty)
-            + UnpackMG(PassedPawnBonus[rank]),
+            + UnpackMG(PassedPawnBonus[0][rank]),
 
             evaluation);
     }
@@ -1009,7 +1009,7 @@ public class PositionTest
         {
             var pieceSquareIndex = bitBoard.GetLS1BIndex();
             bitBoard.ResetLS1B();
-            eval += UnpackMG(position.AdditionalPieceEvaluation(pieceSquareIndex, (int)piece));
+            eval += UnpackMG(position.AdditionalPieceEvaluation(0, pieceSquareIndex, (int)piece));
         }
 
         return eval;
