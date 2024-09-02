@@ -32,13 +32,6 @@ public static partial class EvaluationConstants
     /// </summary>
     public static readonly int[] HistoryBonus = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
 
-    //#pragma warning disable S2365 // Properties should not make collection or array copies
-    //    public static ReadOnlySpan<int> HistoryBonus => Enumerable.Range(1, Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin)
-    //        .Select(searchDepth => Math.Min(
-    //                Configuration.EngineSettings.History_MaxMoveRawBonus,
-    //                (4 * searchDepth * searchDepth) + (120 * searchDepth) - 120)).ToArray();
-    //#pragma warning restore S2365 // Properties should not make collection or array copies
-
     static EvaluationConstants()
     {
         for (int searchDepth = 1; searchDepth < Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin; ++searchDepth)    // Depth > 0 or we'd be in QSearch
@@ -53,7 +46,7 @@ public static partial class EvaluationConstants
 
             HistoryBonus[searchDepth] = Math.Min(
                 Configuration.EngineSettings.History_MaxMoveRawBonus,
-                (4 * searchDepth * searchDepth) + (120 * searchDepth) - 120);   // Sirius, originally from Berserk        }
+                (4 * searchDepth * searchDepth) + (120 * searchDepth) - 120);   // Sirius, originally from Berserk
         }
     }
 
