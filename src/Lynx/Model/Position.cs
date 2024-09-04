@@ -693,7 +693,7 @@ public class Position
         var whiteBucket = PSQTBucketLayout[whiteKing];
         var blackBucket = PSQTBucketLayout[blackKing ^ 56];
 
-        for (int pieceIndexWhite = (int)Piece.P; pieceIndexWhite < (int)Piece.K; ++pieceIndexWhite)
+        for (int pieceIndexWhite = (int)Piece.P; pieceIndexWhite <= (int)Piece.K; ++pieceIndexWhite)
         {
             var pieceIndexBlack = pieceIndexWhite + 6;
 
@@ -707,11 +707,10 @@ public class Position
                 bitboardWhite.ResetLS1B();
 
                 packedScore += PSQT(0, whiteBucket, pieceIndexWhite, pieceSquareIndex)
-                             + PSQT(1, blackBucket, pieceIndexWhite, pieceSquareIndex);
+                             + PSQT(1, blackBucket, pieceIndexWhite, pieceSquareIndex)
+                    + AdditionalPieceEvaluationWithSign(whiteBucket, pieceSquareIndex, pieceIndexWhite);
 
                 gamePhase += GamePhaseByPiece[pieceIndexWhite];
-
-                packedScore += AdditionalPieceEvaluation(whiteBucket, pieceSquareIndex, pieceIndexWhite);
             }
 
             while (bitboardBlack != default)
@@ -720,11 +719,10 @@ public class Position
                 bitboardBlack.ResetLS1B();
 
                 packedScore += PSQT(0, blackBucket, pieceIndexBlack, pieceSquareIndex)
-                             + PSQT(1, whiteBucket, pieceIndexBlack, pieceSquareIndex);
+                             + PSQT(1, whiteBucket, pieceIndexBlack, pieceSquareIndex)
+                    + AdditionalPieceEvaluationWithSign(blackBucket, pieceSquareIndex, pieceIndexBlack);
 
                 gamePhase += GamePhaseByPiece[pieceIndexBlack];
-
-                packedScore -= AdditionalPieceEvaluation(blackBucket, pieceSquareIndex, pieceIndexBlack);
             }
         }
 
@@ -747,13 +745,6 @@ public class Position
         packedScore += PieceAttackedByPawnPenalty
             * ((blackPawnAttacks & OccupancyBitBoards[(int)Side.White]).CountBits()
                 - (whitePawnAttacks & OccupancyBitBoards[(int)Side.Black]).CountBits());
-
-        packedScore += PSQT(0, whiteBucket, (int)Piece.K, whiteKing)
-            + PSQT(0, blackBucket, (int)Piece.k, blackKing)
-            + PSQT(1, blackBucket, (int)Piece.K, whiteKing)
-            + PSQT(1, whiteBucket, (int)Piece.k, blackKing)
-            + KingAdditionalEvaluation(whiteKing, Side.White)
-            - KingAdditionalEvaluation(blackKing, Side.Black);
 
         const int maxPhase = 24;
 
@@ -881,6 +872,34 @@ public class Position
             (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(pieceSquareIndex, pieceIndex),
             (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex),
             _ => 0
+        };
+    }
+
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal int AdditionalPieceEvaluationWithSign(int bucket, int pieceSquareIndex, int pieceIndex)
+    {
+        return pieceIndex switch
+        {
+            (int)Piece.P => PawnAdditionalEvaluation(bucket, pieceSquareIndex, pieceIndex),
+            (int)Piece.p => -PawnAdditionalEvaluation(bucket, pieceSquareIndex, pieceIndex),
+
+            (int)Piece.R => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex),
+            (int)Piece.r => -RookAdditionalEvaluation(pieceSquareIndex, pieceIndex),
+
+            (int)Piece.B => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex),
+            (int)Piece.b => -BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex),
+
+            (int)Piece.N => KnightAdditionalEvaluation(pieceSquareIndex, pieceIndex),
+            (int)Piece.n => -KnightAdditionalEvaluation(pieceSquareIndex, pieceIndex),
+
+            (int)Piece.Q => QueenAdditionalEvaluation(pieceSquareIndex),
+            (int)Piece.q => -QueenAdditionalEvaluation(pieceSquareIndex),
+
+            (int)Piece.K => KingAdditionalEvaluation(pieceSquareIndex, 0),
+            (int)Piece.k => -KingAdditionalEvaluation(pieceSquareIndex, 6),
+
+            _ => throw new()
         };
     }
 
@@ -1039,12 +1058,10 @@ public class Position
     /// <param name="kingSide"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int KingAdditionalEvaluation(int squareIndex, Side kingSide)
+    internal int KingAdditionalEvaluation(int squareIndex, int kingSideOffset)
     {
         var attacksCount = Attacks.QueenAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
         int packedBonus = VirtualKingMobilityBonus[attacksCount];
-
-        var kingSideOffset = Utils.PieceOffset(kingSide);
 
         if (PieceBitBoards[(int)Piece.r - kingSideOffset] + PieceBitBoards[(int)Piece.q - kingSideOffset] != 0) // areThereOppositeSideRooksOrQueens
         {

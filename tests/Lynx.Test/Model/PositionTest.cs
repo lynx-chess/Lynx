@@ -1030,8 +1030,8 @@ public class PositionTest
         var bitBoard = position.PieceBitBoards[(int)piece].GetLS1BIndex();
 
         return UnpackEG(piece == Piece.K
-            ? position.KingAdditionalEvaluation(bitBoard, Side.White)
-            : position.KingAdditionalEvaluation(bitBoard, Side.Black));
+            ? position.KingAdditionalEvaluation(bitBoard, 0)
+            : position.KingAdditionalEvaluation(bitBoard, 6));
     }
 
     private static void EvaluateDrawOrNotDraw(string fen, bool isDrawExpected, int expectedPhase)
