@@ -30,6 +30,11 @@ public enum SpecialMoveType
 /// </summary>
 public static class MoveExtensions
 {
+    /// <summary>
+    /// Move to represent a null move that fits in 12x64 arrays
+    /// </summary>
+    public static readonly Move NullMove = Encode((int)BoardSquare.e1, (int)BoardSquare.e1, (int)Model.Piece.P);
+
     private const int SourceSquareOffset = 4;
     private const int TargetSquareOffset = 10;
     private const int PieceOffset = 16;
@@ -211,7 +216,7 @@ public static class MoveExtensions
                 var actualPromotedPiece = m.PromotedPiece();
 
                 return actualPromotedPiece == promotedPiece
-                || actualPromotedPiece == promotedPiece - 6;
+                    || actualPromotedPiece == promotedPiece - 6;
             }
 
             move = candidateMoves.FirstOrDefault(predicate);
@@ -376,6 +381,7 @@ public static class MoveExtensions
 #pragma warning restore S3358 // Ternary operators should not be nested
     }
 
+    [SkipLocalsInit]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string UCIString(this Move move)
     {
