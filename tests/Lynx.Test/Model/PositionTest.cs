@@ -1005,10 +1005,6 @@ public class PositionTest
         var whiteKing = position.PieceBitBoards[(int)Piece.K].GetLS1BIndex();
         var blackKing = position.PieceBitBoards[(int)Piece.k].GetLS1BIndex();
 
-        var sameSideKingSquare = piece <= Piece.K
-            ? whiteKing
-            : blackKing;
-
         var oppositeSideKingSquare = piece <= Piece.K
             ? blackKing
             : whiteKing;
@@ -1020,7 +1016,7 @@ public class PositionTest
         {
             var pieceSquareIndex = bitBoard.GetLS1BIndex();
             bitBoard.ResetLS1B();
-            eval += UnpackMG(position.AdditionalPieceEvaluation(0, pieceSquareIndex, (int)piece, sameSideKingSquare, oppositeSideKingSquare));
+            eval += UnpackMG(position.AdditionalPieceEvaluation(0, pieceSquareIndex, (int)piece, oppositeSideKingSquare));
         }
 
         return eval;

@@ -708,7 +708,7 @@ public class Position
 
                 gamePhase += GamePhaseByPiece[pieceIndex];
 
-                packedScore += AdditionalPieceEvaluation(whiteBucket, pieceSquareIndex, pieceIndex, whiteKing, blackKing);
+                packedScore += AdditionalPieceEvaluation(whiteBucket, pieceSquareIndex, pieceIndex, blackKing);
             }
         }
 
@@ -727,7 +727,7 @@ public class Position
 
                 gamePhase += GamePhaseByPiece[pieceIndex];
 
-                packedScore -= AdditionalPieceEvaluation(blackBucket, pieceSquareIndex, pieceIndex, blackKing, whiteKing);
+                packedScore -= AdditionalPieceEvaluation(blackBucket, pieceSquareIndex, pieceIndex, whiteKing);
             }
         }
 
@@ -874,11 +874,11 @@ public class Position
     /// <param name="pieceIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int AdditionalPieceEvaluation(int bucket, int pieceSquareIndex, int pieceIndex, int sameSideKingSquare, int oppositeSideKingSquare)
+    internal int AdditionalPieceEvaluation(int bucket, int pieceSquareIndex, int pieceIndex, int oppositeSideKingSquare)
     {
         return pieceIndex switch
         {
-            (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(bucket, pieceSquareIndex, pieceIndex, sameSideKingSquare, oppositeSideKingSquare),
+            (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(bucket, pieceSquareIndex, pieceIndex, oppositeSideKingSquare),
             (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex),
             (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex),
             (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(pieceSquareIndex, pieceIndex),
@@ -894,7 +894,7 @@ public class Position
     /// < param name="pieceIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int PawnAdditionalEvaluation(int bucket, int squareIndex, int pieceIndex, int sameSideKingSquare, int oppositeSideKingSquare)
+    private int PawnAdditionalEvaluation(int bucket, int squareIndex, int pieceIndex, int oppositeSideKingSquare)
     {
         int packedBonus = 0;
 
@@ -911,12 +911,9 @@ public class Position
                 rank = 7 - rank;
             }
 
-            var friendlyKingDistance = Utils.ChebyshevDistance(sameSideKingSquare, squareIndex);
-
             var enemyKingDistance = Utils.ChebyshevDistance(oppositeSideKingSquare, squareIndex);
 
             packedBonus += PassedPawnBonus[bucket][rank]
-                + FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance]
                 + EnemyKingDistanceToPassedPawnPenalty[enemyKingDistance];
         }
 

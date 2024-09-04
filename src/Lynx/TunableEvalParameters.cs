@@ -6327,18 +6327,6 @@ public static class EvaluationParams
 		Pack(56, 61)
 	];
 
-	public static readonly int[] FriendlyKingDistanceToPassedPawnBonus =
-	[
-		Pack(0, 0),
-		Pack(1, 1),
-		Pack(2, 2),
-		Pack(3, 3),
-		Pack(4, 4),
-		Pack(5, 5),
-		Pack(6, 6),
-        Pack(7, 7)
-	];
-
 	public static readonly int[] EnemyKingDistanceToPassedPawnPenalty =
 	[
 		Pack(0, 0),
