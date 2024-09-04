@@ -8,7 +8,7 @@ public static class EvaluationPSQTs
 {
     public const int PSQTBucketCount = 23;
 
-    public static readonly int[] PSQTBucketLayout =
+    public static ReadOnlySpan<int> PSQTBucketLayout =>
     [
         15, 16, 17, 18, 19, 20, 21, 22,
         15, 16, 17, 18, 19, 20, 21, 22,

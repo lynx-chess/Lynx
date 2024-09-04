@@ -60,20 +60,20 @@ public sealed partial class Engine
         _engineWriter = engineWriter;
 
         // Update ResetEngine() after any changes here
-        _quietHistory = new int[12][];
-        _captureHistory = new int[12][][];
+        _captureHistory = new int[12 * 64 * 12];
         _continuationHistory = new int[12 * 64 * 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount];
         _counterMoves = new int[12 * 64];
 
-        for (int i = 0; i < 12; ++i)                                            // 12
+        _quietHistory = new int[12][];
+        for (int i = 0; i < _quietHistory.Length; ++i)
         {
             _quietHistory[i] = new int[64];
-            _captureHistory[i] = new int[64][];
+        }
 
-            for (var j = 0; j < 64; ++j)                                        // 64
-            {
-                _captureHistory[i][j] = new int[12];                            // 12
-            }
+        _killerMoves = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin][];
+        for (int i = 0; i < Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin; ++i)
+        {
+            _killerMoves[i] = new Move[3];
         }
 
         InitializeTT();
@@ -120,12 +120,9 @@ public sealed partial class Engine
         for (int i = 0; i < 12; ++i)
         {
             Array.Clear(_quietHistory[i]);
-            for (var j = 0; j < 64; ++j)
-            {
-                Array.Clear(_captureHistory[i][j]);
-            }
         }
 
+        Array.Clear(_captureHistory);
         Array.Clear(_continuationHistory);
         Array.Clear(_counterMoves);
 
