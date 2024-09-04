@@ -22,21 +22,21 @@ public sealed partial class Engine
     ];
 
     /// <summary>
-    /// 12x64
+    /// 12 x 64
     /// </summary>
     private readonly int[] _counterMoves;
 
     /// <summary>
-    /// 12x64
+    /// 12 x 64
     /// piece x target square
     /// </summary>
     private readonly int[][] _quietHistory;
 
     /// <summary>
-    /// 12x64x12,
+    /// 12 x 64 x 12,
     /// piece x target square x captured piece
     /// </summary>
-    private readonly int[][][] _captureHistory;
+    private readonly int[] _captureHistory;
 
     /// <summary>
     /// 12 x 64 x 12 x 64 x ContinuationHistoryPlyCount
