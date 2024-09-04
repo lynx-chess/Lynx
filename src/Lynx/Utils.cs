@@ -214,6 +214,21 @@ public static class Utils
         return (short)((packed + 0x8000) >> 16);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int ChebyshevDistance(BoardSquare square1, BoardSquare square2) =>
+        ChebyshevDistance((int)square1, (int)square2);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int ChebyshevDistance(int square1, int square2)
+    {
+        var xDelta = Math.Abs(Constants.File[square1] - Constants.File[square2]);
+        var yDelta = Math.Abs(Constants.Rank[square1] - Constants.Rank[square2]);
+
+        return xDelta >= yDelta
+            ? xDelta
+            : yDelta;
+    }
+
     [Conditional("DEBUG")]
     private static void GuardAgainstSideBoth(int side)
     {
