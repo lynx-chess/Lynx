@@ -6338,6 +6338,18 @@ public static class EvaluationParams
 		Pack(6, 6),
         Pack(7, 7)
 	];
+
+	public static readonly int[] EnemyKingDistanceToPassedPawnPenalty =
+	[
+		Pack(0, 0),
+		Pack(-1, -1),
+		Pack(-2, -2),
+		Pack(-3, -3),
+		Pack(-4, -4),
+		Pack(-5, -5),
+		Pack(-6, -6),
+        Pack(-7, -7)
+	];
 }
 
 #pragma warning restore IDE0055, IDE1006 // Discard formatting and naming styles
