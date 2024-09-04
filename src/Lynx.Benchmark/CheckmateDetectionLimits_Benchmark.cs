@@ -75,7 +75,6 @@
  */
 
 using BenchmarkDotNet.Attributes;
-using Lynx.Model;
 
 namespace Lynx.Benchmark;
 

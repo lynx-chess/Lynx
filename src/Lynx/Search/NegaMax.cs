@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using System.Runtime.CompilerServices;
 
 namespace Lynx;
 
@@ -18,6 +19,7 @@ public sealed partial class Engine
     /// Defaults to the worse possible score for Side to move's opponent, Int.MaxValue
     /// </param>
     /// <returns></returns>
+    [SkipLocalsInit]
     private int NegaMax(int depth, int ply, int alpha, int beta, bool parentWasNullMove = false)
     {
         var position = Game.CurrentPosition;
@@ -369,8 +371,9 @@ public sealed partial class Engine
                     var targetSquare = move.TargetSquare();
                     var capturedPiece = move.CapturedPiece();
 
-                    _captureHistory[piece][targetSquare][capturedPiece] = ScoreHistoryMove(
-                        _captureHistory[piece][targetSquare][capturedPiece],
+                    var captureHistoryIndex = CaptureHistoryIndex(piece, targetSquare, capturedPiece);
+                    _captureHistory[captureHistoryIndex] = ScoreHistoryMove(
+                        _captureHistory[captureHistoryIndex],
                         EvaluationConstants.HistoryBonus[depth]);
 
                     // 🔍 Capture history penalty/malus
@@ -385,8 +388,10 @@ public sealed partial class Engine
                             var visitedMoveTargetSquare = visitedMove.TargetSquare();
                             var visitedMoveCapturedPiece = visitedMove.CapturedPiece();
 
-                            _captureHistory[visitedMovePiece][visitedMoveTargetSquare][visitedMoveCapturedPiece] = ScoreHistoryMove(
-                                _captureHistory[visitedMovePiece][visitedMoveTargetSquare][visitedMoveCapturedPiece],
+                            captureHistoryIndex = CaptureHistoryIndex(visitedMovePiece, visitedMoveTargetSquare, visitedMoveCapturedPiece);
+
+                            _captureHistory[captureHistoryIndex] = ScoreHistoryMove(
+                                _captureHistory[captureHistoryIndex],
                                 -EvaluationConstants.HistoryBonus[depth]);
                         }
                     }
@@ -446,10 +451,10 @@ public sealed partial class Engine
                         }
                     }
 
-                    // 🔍 Killer moves
                     var thisPlyKillerMoves = _killerMoves[ply];
                     if (move.PromotedPiece() == default && move != thisPlyKillerMoves[0])
                     {
+                        // 🔍 Killer moves
                         if (move != thisPlyKillerMoves[1])
                         {
                             thisPlyKillerMoves[2] = thisPlyKillerMoves[1];
@@ -457,6 +462,9 @@ public sealed partial class Engine
 
                         thisPlyKillerMoves[1] = thisPlyKillerMoves[0];
                         thisPlyKillerMoves[0] = move;
+
+                        // 🔍 Countermoves - fails to fix the bug and remove killer moves condition, see  https://github.com/lynx-chess/Lynx/pull/944
+                        _counterMoves[CounterMoveIndex(previousMovePiece, previousTargetSquare)] = move;
                     }
                 }
 
@@ -506,6 +514,7 @@ public sealed partial class Engine
     /// Defaults to the works possible score for Black, Int.MaxValue
     /// </param>
     /// <returns></returns>
+    [SkipLocalsInit]
     public int QuiescenceSearch(int ply, int alpha, int beta)
     {
         var position = Game.CurrentPosition;

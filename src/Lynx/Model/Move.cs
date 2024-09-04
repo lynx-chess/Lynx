@@ -216,7 +216,7 @@ public static class MoveExtensions
                 var actualPromotedPiece = m.PromotedPiece();
 
                 return actualPromotedPiece == promotedPiece
-                || actualPromotedPiece == promotedPiece - 6;
+                    || actualPromotedPiece == promotedPiece - 6;
             }
 
             move = candidateMoves.FirstOrDefault(predicate);
@@ -381,6 +381,7 @@ public static class MoveExtensions
 #pragma warning restore S3358 // Ternary operators should not be nested
     }
 
+    [SkipLocalsInit]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string UCIString(this Move move)
     {

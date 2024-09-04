@@ -201,7 +201,6 @@
 
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
-using NLog;
 using System.Text;
 
 namespace Lynx.Benchmark;

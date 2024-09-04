@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.Runtime.Intrinsics.X86;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Threading;
 using System.Threading.Channels;
 
 namespace Lynx;
@@ -610,7 +609,7 @@ public sealed class UCIHandler
     {
         const string fullMoveCounterString = " 1";
 
-        var fen = _engine.Game.CurrentPosition.FEN()[..^3] + _engine.Game.HalfMovesWithoutCaptureOrPawnMove + fullMoveCounterString;
+        var fen = _engine.Game.CurrentPosition.FEN()[..^3] + _engine.Game.HalfMovesWithoutCaptureOrPawnMove.ToString() + fullMoveCounterString;
 
         await _engineToUci.Writer.WriteAsync(fen, cancellationToken);
     }
