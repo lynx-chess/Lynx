@@ -922,12 +922,19 @@ public class PositionTest
         int evaluation = AdditionalPieceEvaluation(position, Piece.Q)
             - AdditionalPieceEvaluation(position, Piece.q);
 
-        if (position.Side == Side.Black)
-        {
-            evaluation = -evaluation;
-        }
+        var whiteMobility =
+            (Attacks.QueenAttacks(position.PieceBitBoards[(int)Piece.Q].GetLS1BIndex(), position.OccupancyBitBoards[(int)Side.Both])
+                & (~position.OccupancyBitBoards[(int)Side.White]))
+            .CountBits();
 
-        Assert.AreEqual(mobilityDifference * UnpackMG(QueenMobilityBonus), evaluation);
+        var blackMobility =
+            (Attacks.QueenAttacks(position.PieceBitBoards[(int)Piece.q].GetLS1BIndex(), position.OccupancyBitBoards[(int)Side.Both])
+                & (~position.OccupancyBitBoards[(int)Side.Black]))
+            .CountBits();
+
+        var expectedEvaluation = QueenMobilityBonus[whiteMobility] - QueenMobilityBonus[blackMobility];
+
+        Assert.AreEqual(UnpackMG(expectedEvaluation), evaluation);
     }
 
     /// <summary>
