@@ -9,7 +9,7 @@ namespace Lynx;
 public sealed partial class Engine
 {
     private readonly Stopwatch _stopWatch = new();
-    private readonly Move[] _pVTable = new Move[Configuration.EngineSettings.MaxDepth * (Configuration.EngineSettings.MaxDepth + 1) / 2];
+    private readonly Move[] _pVTable = GC.AllocateArray<Move>(Configuration.EngineSettings.MaxDepth * (Configuration.EngineSettings.MaxDepth + 1) / 2, pinned: true);
 
     /// <summary>
     /// (<see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/>) x 3
@@ -19,7 +19,7 @@ public sealed partial class Engine
     /// <summary>
     /// 12 x 64
     /// </summary>
-    private readonly int[] _counterMoves;
+    private readonly int[] _counterMoves = GC.AllocateArray<int>(12 * 64, pinned: true);
 
     /// <summary>
     /// 12 x 64
@@ -31,7 +31,7 @@ public sealed partial class Engine
     /// 12 x 64 x 12,
     /// piece x target square x captured piece
     /// </summary>
-    private readonly int[] _captureHistory;
+    private readonly int[] _captureHistory = GC.AllocateArray<int>(12 * 64 * 12, pinned: true);
 
     /// <summary>
     /// 12 x 64 x 12 x 64 x ContinuationHistoryPlyCount
@@ -39,11 +39,12 @@ public sealed partial class Engine
     /// ply 0 -> Continuation move history
     /// ply 1 -> Follow-up move history
     /// </summary>
-    private readonly int[] _continuationHistory;
+    private readonly int[] _continuationHistory = GC.AllocateArray<int>(12 * 64 * 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount, pinned: true);
 
-    private readonly int[] _maxDepthReached = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
-    private TranspositionTable _tt = [];
+    private readonly int[] _maxDepthReached = GC.AllocateArray<int>(Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin, pinned: true);
+
     private int _ttMask;
+    private readonly TranspositionTable _tt;
 
     private long _nodes;
     private bool _isFollowingPV;
