@@ -114,8 +114,8 @@ public sealed partial class Engine
         {
             Array.Clear(_quietHistory[i]);
         }
-        Array.Clear(_captureHistory);
 
+        Array.Clear(_captureHistory);
         Array.Clear(_continuationHistory);
         Array.Clear(_counterMoves);
 
