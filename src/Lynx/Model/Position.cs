@@ -882,7 +882,7 @@ public class Position
             (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex),
             (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex),
             (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(pieceSquareIndex, pieceIndex),
-            (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex),
+            (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex, pieceIndex),
             _ => 0
         };
     }
@@ -990,11 +990,18 @@ public class Position
     /// <param name="squareIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int QueenAdditionalEvaluation(int squareIndex)
+    private int QueenAdditionalEvaluation(int squareIndex, int pieceIndex)
     {
-        var attacksCount = Attacks.QueenAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both]).CountBits();
+        var sameSide = pieceIndex == (int)Piece.Q
+            ? (int)Side.White
+            : (int)Side.Black;
 
-        return attacksCount * QueenMobilityBonus;
+        var attacksCount =
+            (Attacks.QueenAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both])
+                & (~OccupancyBitBoards[sameSide]))
+            .CountBits();
+
+        return QueenMobilityBonus[attacksCount];
     }
 
     /// <summary>

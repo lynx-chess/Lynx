@@ -371,8 +371,9 @@ public sealed partial class Engine
                     var targetSquare = move.TargetSquare();
                     var capturedPiece = move.CapturedPiece();
 
-                    _captureHistory[piece][targetSquare][capturedPiece] = ScoreHistoryMove(
-                        _captureHistory[piece][targetSquare][capturedPiece],
+                    var captureHistoryIndex = CaptureHistoryIndex(piece, targetSquare, capturedPiece);
+                    _captureHistory[captureHistoryIndex] = ScoreHistoryMove(
+                        _captureHistory[captureHistoryIndex],
                         EvaluationConstants.HistoryBonus[depth]);
 
                     // 🔍 Capture history penalty/malus
@@ -387,8 +388,10 @@ public sealed partial class Engine
                             var visitedMoveTargetSquare = visitedMove.TargetSquare();
                             var visitedMoveCapturedPiece = visitedMove.CapturedPiece();
 
-                            _captureHistory[visitedMovePiece][visitedMoveTargetSquare][visitedMoveCapturedPiece] = ScoreHistoryMove(
-                                _captureHistory[visitedMovePiece][visitedMoveTargetSquare][visitedMoveCapturedPiece],
+                            captureHistoryIndex = CaptureHistoryIndex(visitedMovePiece, visitedMoveTargetSquare, visitedMoveCapturedPiece);
+
+                            _captureHistory[captureHistoryIndex] = ScoreHistoryMove(
+                                _captureHistory[captureHistoryIndex],
                                 -EvaluationConstants.HistoryBonus[depth]);
                         }
                     }
@@ -448,16 +451,17 @@ public sealed partial class Engine
                         }
                     }
 
-                    if (move.PromotedPiece() == default && move != _killerMoves[0][ply])
+                    var thisPlyKillerMoves = _killerMoves[ply];
+                    if (move.PromotedPiece() == default && move != thisPlyKillerMoves[0])
                     {
                         // 🔍 Killer moves
-                        if (move != _killerMoves[1][ply])
+                        if (move != thisPlyKillerMoves[1])
                         {
-                            _killerMoves[2][ply] = _killerMoves[1][ply];
+                            thisPlyKillerMoves[2] = thisPlyKillerMoves[1];
                         }
 
-                        _killerMoves[1][ply] = _killerMoves[0][ply];
-                        _killerMoves[0][ply] = move;
+                        thisPlyKillerMoves[1] = thisPlyKillerMoves[0];
+                        thisPlyKillerMoves[0] = move;
 
                         // 🔍 Countermoves - fails to fix the bug and remove killer moves condition, see  https://github.com/lynx-chess/Lynx/pull/944
                         _counterMoves[CounterMoveIndex(previousMovePiece, previousTargetSquare)] = move;
