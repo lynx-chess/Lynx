@@ -4,13 +4,7 @@ using System.Runtime.CompilerServices;
 namespace Lynx.Benchmark;
 public class ChebyshevDistance_Benchmark : BaseBenchmark
 {
-    private Random _rnd = null!;
-
-    [GlobalSetup]
-    public void Setup()
-    {
-        _rnd = new Random(1234); // using the seed
-    }
+    private readonly Random _rnd = new(1234);
 
     public IEnumerable<object[]> Data()
     {
