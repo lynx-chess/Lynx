@@ -425,10 +425,23 @@ public class PositionTest
             rank = 7 - rank;
         }
 
+        var whiteKingDistance = ChebyshevDistance((int)square, position.PieceBitBoards[(int)Piece.K].GetLS1BIndex());
+        var blackKingDistance = ChebyshevDistance((int)square, position.PieceBitBoards[(int)Piece.k].GetLS1BIndex());
+
+        var friendlyKingDistance = position.Side == Side.White
+            ? whiteKingDistance
+            : blackKingDistance;
+
+        var enemyKingDistance = position.Side == Side.White
+            ? blackKingDistance
+            : whiteKingDistance;
+
         Assert.AreEqual(
             //(-4 * Configuration.EngineSettings.DoubledPawnPenalty.MG)
-            +UnpackMG(IsolatedPawnPenalty)
-            + UnpackMG(PassedPawnBonus[0][rank]),
+            UnpackMG(IsolatedPawnPenalty)
+            + UnpackMG(PassedPawnBonus[0][rank])
+            + UnpackMG(FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance])
+            + UnpackMG(EnemyKingDistanceToPassedPawnPenalty[enemyKingDistance]),
 
             evaluation);
     }
