@@ -42,7 +42,7 @@ public sealed partial class Engine
     private readonly int[] _continuationHistory;
 
     private readonly int[] _maxDepthReached = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
-    private TranspositionTable _tt = [];
+    private readonly TranspositionTable _tt;
     private int _ttMask;
 
     private long _nodes;

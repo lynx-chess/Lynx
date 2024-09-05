@@ -76,7 +76,8 @@ public sealed partial class Engine
             _killerMoves[i] = new Move[3];
         }
 
-        InitializeTT();
+        (int ttLength, _ttMask) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
+        _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
 
 #if !DEBUG
         // Temporary channel so that no output is generated
@@ -114,7 +115,7 @@ public sealed partial class Engine
 
     private void ResetEngine()
     {
-        InitializeTT(); // TODO SPRT clearing instead
+        Array.Clear(_tt);
 
         // Clear histories
         for (int i = 0; i < 12; ++i)
@@ -358,12 +359,6 @@ public sealed partial class Engine
     {
         _stopRequested = true;
         _absoluteSearchCancellationTokenSource.Cancel();
-    }
-
-    private void InitializeTT()
-    {
-        (int ttLength, _ttMask) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
-        _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
     }
 
     private static void InitializeStaticClasses()
