@@ -136,13 +136,13 @@ public sealed class EngineSettings
     public int NMP_DepthDivisor { get; set; } = 4;
 
     [SPSA<int>(5, 30, 1)]
-    public int AspirationWindow_Base { get; set; } = 13;
+    public int AspirationWindow_Base { get; set; } = 12;
 
     [SPSA<int>(5, 30, 1)]
-    public int AspirationWindow_Delta { get; set; } = 13;
+    public int AspirationWindow_Delta { get; set; } = 16;
 
     [SPSA<int>(1, 20, 1)]
-    public int AspirationWindow_MinDepth { get; set; } = 8;
+    public int AspirationWindow_MinDepth { get; set; } = 9;
 
     [SPSA<int>(1, 10, 0.5)]
     public int RFP_MaxDepth { get; set; } = 6;
