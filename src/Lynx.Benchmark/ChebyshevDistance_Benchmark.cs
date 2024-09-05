@@ -73,6 +73,31 @@
  *  | OnTheFly          | Int32[64] | Int32[64] | 7,658.2115 ns | 58.9772 ns | 52.2818 ns | 37.548 |    0.28 |         - |          NA |
  *  | Lookup            | Int32[64] | Int32[64] | 2,434.3557 ns |  8.8069 ns |  8.2380 ns | 11.936 |    0.06 |         - |          NA |
  *  | LookupDoubleArray | Int32[64] | Int32[64] | 2,618.9650 ns |  3.5368 ns |  2.9533 ns | 12.841 |    0.05 |         - |          NA |
+ *
+ *
+ *  BenchmarkDotNet v0.14.0, macOS Ventura 13.6.9 (22G830) [Darwin 22.6.0]
+ *  Intel Core i7-8700B CPU 3.20GHz (Max: 3.19GHz) (Coffee Lake), 1 CPU, 4 logical and 4 physical cores
+ *  .NET SDK 8.0.401
+ *    [Host]     : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
+ *    DefaultJob : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
+ *
+ *  | Method            | sq1Array  | sq2Array  | Mean          | Error       | StdDev        | Median        | Ratio  | RatioSD | Allocated | Alloc Ratio |
+ *  |------------------ |---------- |---------- |--------------:|------------:|--------------:|--------------:|-------:|--------:|----------:|------------:|
+ *  | OnTheFly          | Int32[10] | Int32[10] |    432.910 ns |  25.2507 ns |    73.2570 ns |    405.984 ns |  1.026 |    0.23 |         - |          NA |
+ *  | Lookup            | Int32[10] | Int32[10] |    103.680 ns |   5.5528 ns |    15.8423 ns |    101.424 ns |  0.246 |    0.05 |         - |          NA |
+ *  | LookupDoubleArray | Int32[10] | Int32[10] |    220.981 ns |   7.1806 ns |    20.3702 ns |    223.290 ns |  0.524 |    0.09 |         - |          NA |
+ *  | OnTheFly          | Int32[1]  | Int32[1]  |      7.648 ns |   0.5938 ns |     1.6844 ns |      7.342 ns |  0.018 |    0.00 |         - |          NA |
+ *  | Lookup            | Int32[1]  | Int32[1]  |      2.797 ns |   0.2408 ns |     0.6752 ns |      2.770 ns |  0.007 |    0.00 |         - |          NA |
+ *  | LookupDoubleArray | Int32[1]  | Int32[1]  |      4.518 ns |   0.4389 ns |     1.2378 ns |      4.372 ns |  0.011 |    0.00 |         - |          NA |
+ *  | OnTheFly          | Int32[30] | Int32[30] |  4,978.725 ns | 359.7031 ns | 1,032.0557 ns |  4,819.208 ns | 11.796 |    3.04 |         - |          NA |
+ *  | Lookup            | Int32[30] | Int32[30] |  1,173.871 ns |  74.5105 ns |   206.4682 ns |  1,159.219 ns |  2.781 |    0.65 |         - |          NA |
+ *  | LookupDoubleArray | Int32[30] | Int32[30] |  1,786.069 ns | 119.1448 ns |   341.8487 ns |  1,693.852 ns |  4.232 |    1.03 |         - |          NA |
+ *  | OnTheFly          | Int32[5]  | Int32[5]  |    111.509 ns |   6.3467 ns |    18.5137 ns |    106.364 ns |  0.264 |    0.06 |         - |          NA |
+ *  | Lookup            | Int32[5]  | Int32[5]  |     28.691 ns |   1.7239 ns |     4.9740 ns |     27.317 ns |  0.068 |    0.02 |         - |          NA |
+ *  | LookupDoubleArray | Int32[5]  | Int32[5]  |     64.047 ns |   2.5143 ns |     7.3741 ns |     62.387 ns |  0.152 |    0.03 |         - |          NA |
+ *  | OnTheFly          | Int32[64] | Int32[64] | 19,400.238 ns | 832.7044 ns | 2,334.9927 ns | 18,673.381 ns | 45.964 |    8.89 |         - |          NA |
+ *  | Lookup            | Int32[64] | Int32[64] |  3,342.320 ns |  83.0324 ns |   235.5490 ns |  3,367.147 ns |  7.919 |    1.32 |         - |          NA |
+ *  | LookupDoubleArray | Int32[64] | Int32[64] |  5,538.155 ns | 108.5760 ns |   133.3411 ns |  5,576.830 ns | 13.121 |    2.00 |         - |          NA |
  */
 
 using BenchmarkDotNet.Attributes;
