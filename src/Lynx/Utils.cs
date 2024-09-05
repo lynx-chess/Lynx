@@ -218,15 +218,18 @@ public static class Utils
     public static int ChebyshevDistance(BoardSquare square1, BoardSquare square2) =>
         ChebyshevDistance((int)square1, (int)square2);
 
+    /// <summary>
+    /// [64][64]
+    /// </summary>
+    /// <param name="square1"></param>
+    /// <param name="square2"></param>
+    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int ChebyshevDistance(int square1, int square2)
     {
-        var xDelta = Math.Abs(Constants.File[square1] - Constants.File[square2]);
-        var yDelta = Math.Abs(Constants.Rank[square1] - Constants.Rank[square2]);
+        const int square1Offset = 64;
 
-        return xDelta >= yDelta
-            ? xDelta
-            : yDelta;
+        return Constants.ChebyshevDistance[(square1 * square1Offset) + square2];
     }
 
     [Conditional("DEBUG")]
