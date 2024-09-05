@@ -42,7 +42,7 @@ public class ChebyshevDistance_Benchmark : BaseBenchmark
         {
             for (int sq2 = 0; sq2 < sq2Array.Length; ++sq2)
             {
-                result += ChebyshevDistanceOnTheFly(sq1Array[sq1], sq2Array[sq2]);
+                result += ChebyshevDistanceLookup(sq1Array[sq1], sq2Array[sq2]);
             }
         }
 
