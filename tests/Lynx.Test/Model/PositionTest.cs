@@ -425,10 +425,23 @@ public class PositionTest
             rank = 7 - rank;
         }
 
+        var whiteKingDistance = ChebyshevDistance((int)square, position.PieceBitBoards[(int)Piece.K].GetLS1BIndex());
+        var blackKingDistance = ChebyshevDistance((int)square, position.PieceBitBoards[(int)Piece.k].GetLS1BIndex());
+
+        var friendlyKingDistance = position.Side == Side.White
+            ? whiteKingDistance
+            : blackKingDistance;
+
+        var enemyKingDistance = position.Side == Side.White
+            ? blackKingDistance
+            : whiteKingDistance;
+
         Assert.AreEqual(
             //(-4 * Configuration.EngineSettings.DoubledPawnPenalty.MG)
-            +UnpackMG(IsolatedPawnPenalty)
-            + UnpackMG(PassedPawnBonus[0][rank]),
+            UnpackMG(IsolatedPawnPenalty)
+            + UnpackMG(PassedPawnBonus[0][rank])
+            + UnpackMG(FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance])
+            + UnpackMG(EnemyKingDistanceToPassedPawnPenalty[enemyKingDistance]),
 
             evaluation);
     }
@@ -1009,6 +1022,17 @@ public class PositionTest
 
     private static int AdditionalPieceEvaluation(Position position, Piece piece)
     {
+        var whiteKing = position.PieceBitBoards[(int)Piece.K].GetLS1BIndex();
+        var blackKing = position.PieceBitBoards[(int)Piece.k].GetLS1BIndex();
+
+        var sameSideKingSquare = piece <= Piece.K
+            ? whiteKing
+            : blackKing;
+
+        var oppositeSideKingSquare = piece <= Piece.K
+            ? blackKing
+            : whiteKing;
+
         var bitBoard = position.PieceBitBoards[(int)piece];
         int eval = 0;
 
@@ -1016,7 +1040,7 @@ public class PositionTest
         {
             var pieceSquareIndex = bitBoard.GetLS1BIndex();
             bitBoard.ResetLS1B();
-            eval += UnpackMG(position.AdditionalPieceEvaluation(0, pieceSquareIndex, (int)piece));
+            eval += UnpackMG(position.AdditionalPieceEvaluation(0, pieceSquareIndex, (int)piece, sameSideKingSquare, oppositeSideKingSquare));
         }
 
         return eval;
