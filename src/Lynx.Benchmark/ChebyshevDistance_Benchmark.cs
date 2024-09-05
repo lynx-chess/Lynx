@@ -34,15 +34,15 @@ public class ChebyshevDistance_Benchmark : BaseBenchmark
 
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
-    public int Lookup()
+    public int Lookup(int[] sq1Array, int[] sq2Array)
     {
         var result = 0;
 
-        for (int sq1 = 0; sq1 < 64; ++sq1)
+        for (int sq1 = 0; sq1 < sq1Array.Length; ++sq1)
         {
-            for (int sq2 = 0; sq2 < 64; ++sq2)
+            for (int sq2 = 0; sq2 < sq2Array.Length; ++sq2)
             {
-                result += ChebyshevDistanceLookup(sq1, sq2);
+                result += ChebyshevDistanceOnTheFly(sq1Array[sq1], sq2Array[sq2]);
             }
         }
 
