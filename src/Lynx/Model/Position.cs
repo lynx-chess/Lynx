@@ -755,8 +755,8 @@ public class Position
             + PSQT(0, blackBucket, (int)Piece.k, blackKing)
             + PSQT(1, blackBucket, (int)Piece.K, whiteKing)
             + PSQT(1, whiteBucket, (int)Piece.k, blackKing)
-            + KingAdditionalEvaluation(whiteKing, Side.White, blackPawnAttacks)
-            - KingAdditionalEvaluation(blackKing, Side.Black, whitePawnAttacks);
+            + KingAdditionalEvaluation(whiteKing, (int)Side.White, blackPawnAttacks)
+            - KingAdditionalEvaluation(blackKing, (int)Side.Black, whitePawnAttacks);
 
         const int maxPhase = 24;
 
@@ -987,9 +987,13 @@ public class Position
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int BishopAdditionalEvaluation(int squareIndex, int pieceIndex, BitBoard enemyPawnAttacks)
     {
+        var sameSide = pieceIndex <= (int)Piece.B
+            ? (int)Side.White
+            : (int)Side.Black;
+
         var attacksCount =
             (Attacks.BishopAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both])
-                & (~enemyPawnAttacks))
+                & (~(OccupancyBitBoards[sameSide] | enemyPawnAttacks)))
             .CountBits();
 
         return BishopMobilityBonus[attacksCount];
@@ -1022,11 +1026,11 @@ public class Position
     /// <param name="kingSide"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int KingAdditionalEvaluation(int squareIndex, Side kingSide, BitBoard enemyPawnAttacks)
+    internal int KingAdditionalEvaluation(int squareIndex, int kingSide, BitBoard enemyPawnAttacks)
     {
         var attacksCount =
             (Attacks.QueenAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both])
-            & ~(enemyPawnAttacks)).CountBits();
+            & ~(OccupancyBitBoards[kingSide] | enemyPawnAttacks)).CountBits();
         int packedBonus = VirtualKingMobilityBonus[attacksCount];
 
         var kingSideOffset = Utils.PieceOffset(kingSide);
