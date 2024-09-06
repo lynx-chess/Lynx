@@ -203,7 +203,7 @@ public sealed partial class Engine
     /// <param name="capturedPiece"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int CaptureHistoryIndex(int piece, int targetSquare, int capturedPiece)
+    private static int CaptureHistoryIndex(int piece, int targetSquare, int capturedPiece)
     {
         const int pieceOffset = 64 * 12;
         const int targetSquareOffset = 12;
