@@ -188,6 +188,21 @@ public static class BitBoardExtensions
     }
 
     /// <summary>
+    /// Assumes that <paramref name="board"/> != default
+    /// See GetAndResetLS1BIndex_Benchmark
+    /// </summary>
+    /// <param name="board"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int GetLS1BIndexAndResetIt(ref this BitBoard board)
+    {
+        var index = GetLS1BIndex(board);
+        board.PopBit(index);
+
+        return index;
+    }
+
+    /// <summary>
     /// https://www.chessprogramming.org/General_Setwise_Operations#LS1BReset
     /// </summary>
     /// <param name="board"></param>

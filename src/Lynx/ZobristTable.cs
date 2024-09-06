@@ -111,8 +111,7 @@ public static class ZobristTable
 
             while (bitboard != default)
             {
-                var pieceSquareIndex = bitboard.GetLS1BIndex();
-                bitboard.ResetLS1B();
+                var pieceSquareIndex = bitboard.GetLS1BIndexAndResetIt();
 
                 positionHash ^= PieceHash(pieceSquareIndex, pieceIndex);
             }

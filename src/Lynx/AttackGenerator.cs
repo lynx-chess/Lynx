@@ -566,8 +566,7 @@ public static class AttackGenerator
         for (int count = 0; count < bitsInMask; ++count)
         {
             // Extract LS1B and reset it
-            int squareIndex = occupancyMask.GetLS1BIndex();
-            occupancyMask.PopBit(squareIndex);
+            int squareIndex = occupancyMask.GetLS1BIndexAndResetIt();
 
             // Make sure occupancy is on board
             if ((index & (1 << count)) != default)

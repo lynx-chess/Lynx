@@ -700,8 +700,7 @@ public class Position
 
             while (bitboard != default)
             {
-                var pieceSquareIndex = bitboard.GetLS1BIndex();
-                bitboard.ResetLS1B();
+                var pieceSquareIndex = bitboard.GetLS1BIndexAndResetIt();
 
                 packedScore += PSQT(0, whiteBucket, pieceIndex, pieceSquareIndex)
                              + PSQT(1, blackBucket, pieceIndex, pieceSquareIndex);
@@ -719,8 +718,7 @@ public class Position
 
             while (bitboard != default)
             {
-                var pieceSquareIndex = bitboard.GetLS1BIndex();
-                bitboard.ResetLS1B();
+                var pieceSquareIndex = bitboard.GetLS1BIndexAndResetIt();
 
                 packedScore += PSQT(0, blackBucket, pieceIndex, pieceSquareIndex)
                              + PSQT(1, whiteBucket, pieceIndex, pieceSquareIndex);

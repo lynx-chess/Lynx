@@ -161,8 +161,7 @@ public static class MoveGenerator
 
         while (bitboard != default)
         {
-            sourceSquare = bitboard.GetLS1BIndex();
-            bitboard.ResetLS1B();
+            sourceSquare = bitboard.GetLS1BIndexAndResetIt();
 
             var sourceRank = (sourceSquare >> 3) + 1;
 
@@ -215,8 +214,7 @@ public static class MoveGenerator
             var attackedSquares = attacks & position.OccupancyBitBoards[oppositeSide];
             while (attackedSquares != default)
             {
-                targetSquare = attackedSquares.GetLS1BIndex();
-                attackedSquares.ResetLS1B();
+                targetSquare = attackedSquares.GetLS1BIndexAndResetIt();
                 var capturedPiece = FindCapturedPiece(position, offset, targetSquare);
 
                 var targetRank = (targetSquare >> 3) + 1;
@@ -247,8 +245,7 @@ public static class MoveGenerator
 
         while (bitboard != default)
         {
-            sourceSquare = bitboard.GetLS1BIndex();
-            bitboard.ResetLS1B();
+            sourceSquare = bitboard.GetLS1BIndexAndResetIt();
 
             var sourceRank = (sourceSquare >> 3) + 1;
 
@@ -288,8 +285,7 @@ public static class MoveGenerator
             var attackedSquares = attacks & position.OccupancyBitBoards[oppositeSide];
             while (attackedSquares != default)
             {
-                targetSquare = attackedSquares.GetLS1BIndex();
-                attackedSquares.ResetLS1B();
+                targetSquare = attackedSquares.GetLS1BIndexAndResetIt();
                 var capturedPiece = FindCapturedPiece(position, offset, targetSquare);
 
                 var targetRank = (targetSquare >> 3) + 1;
@@ -400,16 +396,14 @@ public static class MoveGenerator
 
         while (bitboard != default)
         {
-            sourceSquare = bitboard.GetLS1BIndex();
-            bitboard.ResetLS1B();
+            sourceSquare = bitboard.GetLS1BIndexAndResetIt();
 
             var attacks = _pieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
                 & ~position.OccupancyBitBoards[(int)position.Side];
 
             while (attacks != default)
             {
-                targetSquare = attacks.GetLS1BIndex();
-                attacks.ResetLS1B();
+                targetSquare = attacks.GetLS1BIndexAndResetIt();
 
                 if (position.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare))
                 {
@@ -440,16 +434,14 @@ public static class MoveGenerator
 
         while (bitboard != default)
         {
-            sourceSquare = bitboard.GetLS1BIndex();
-            bitboard.ResetLS1B();
+            sourceSquare = bitboard.GetLS1BIndexAndResetIt();
 
             var attacks = _pieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
                 & position.OccupancyBitBoards[oppositeSide];
 
             while (attacks != default)
             {
-                targetSquare = attacks.GetLS1BIndex();
-                attacks.ResetLS1B();
+                targetSquare = attacks.GetLS1BIndexAndResetIt();
 
                 var capturedPiece = FindCapturedPiece(position, offset, targetSquare);
                 movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece: capturedPiece);
@@ -507,8 +499,7 @@ public static class MoveGenerator
 
         while (bitboard != default)
         {
-            sourceSquare = bitboard.GetLS1BIndex();
-            bitboard.ResetLS1B();
+            sourceSquare = bitboard.GetLS1BIndexAndResetIt();
 
             var sourceRank = (sourceSquare >> 3) + 1;
 
@@ -566,8 +557,7 @@ public static class MoveGenerator
             var attackedSquares = attacks & position.OccupancyBitBoards[oppositeSide];
             while (attackedSquares != default)
             {
-                targetSquare = attackedSquares.GetLS1BIndex();
-                attackedSquares.ResetLS1B();
+                targetSquare = attackedSquares.GetLS1BIndexAndResetIt();
 
                 var targetRank = (targetSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)  // Capture with promotion
@@ -674,20 +664,18 @@ public static class MoveGenerator
 
         while (bitboard != default)
         {
-            sourceSquare = bitboard.GetLS1BIndex();
-            bitboard.ResetLS1B();
+            sourceSquare = bitboard.GetLS1BIndexAndResetIt();
 
             var attacks = _pieceAttacks[piece](sourceSquare, position.OccupancyBitBoards[(int)Side.Both])
                 & ~position.OccupancyBitBoards[(int)position.Side];
 
             while (attacks != default)
             {
-                targetSquare = attacks.GetLS1BIndex();
-                attacks.ResetLS1B();
+                targetSquare = attacks.GetLS1BIndexAndResetIt();
 
                 if (position.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare))
                 {
-                    if(IsValidMove(position, MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece)))
+                    if (IsValidMove(position, MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece)))
                     {
                         return true;
                     }
