@@ -73,7 +73,7 @@ public class GetAndResetLS1BIndex_Benchmark : BaseBenchmark
     }
 }
 
-internal static class BitBoardExtensions
+internal static class BitBoardExtensions_GetAndResetLS1BIndex_Benchmark
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int GetLS1BIndex(this BitBoard board)
