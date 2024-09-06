@@ -60,9 +60,6 @@ public sealed partial class Engine
         _engineWriter = engineWriter;
 
         // Update ResetEngine() after any changes here
-        _captureHistory = new int[12 * 64 * 12];
-        _continuationHistory = new int[12 * 64 * 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount];
-        _counterMoves = new int[12 * 64];
 
         _quietHistory = new int[12][];
         for (int i = 0; i < _quietHistory.Length; ++i)
@@ -114,7 +111,7 @@ public sealed partial class Engine
 
     private void ResetEngine()
     {
-        InitializeTT(); // TODO SPRT clearing instead
+        InitializeTT(); // Attempt to clear instead in https://github.com/lynx-chess/Lynx/pull/960
 
         // Clear histories
         for (int i = 0; i < 12; ++i)
