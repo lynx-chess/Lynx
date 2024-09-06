@@ -1033,6 +1033,13 @@ public class PositionTest
             ? blackKing
             : whiteKing;
 
+        BitBoard whitePawnAttacks = position.PieceBitBoards[(int)Piece.P].ShiftUpRight() | position.PieceBitBoards[(int)Piece.P].ShiftUpLeft();
+        BitBoard blackPawnAttacks = position.PieceBitBoards[(int)Piece.p].ShiftDownRight() | position.PieceBitBoards[(int)Piece.p].ShiftDownLeft();
+
+        var oppositeSidePawnAttacks = piece <= Piece.K
+            ? blackPawnAttacks
+            : whitePawnAttacks;
+
         var bitBoard = position.PieceBitBoards[(int)piece];
         int eval = 0;
 
@@ -1040,7 +1047,7 @@ public class PositionTest
         {
             var pieceSquareIndex = bitBoard.GetLS1BIndex();
             bitBoard.ResetLS1B();
-            eval += UnpackMG(position.AdditionalPieceEvaluation(0, pieceSquareIndex, (int)piece, sameSideKingSquare, oppositeSideKingSquare));
+            eval += UnpackMG(position.AdditionalPieceEvaluation(0, pieceSquareIndex, (int)piece, sameSideKingSquare, oppositeSideKingSquare, oppositeSidePawnAttacks));
         }
 
         return eval;
@@ -1058,11 +1065,18 @@ public class PositionTest
             }
         }
 
+        BitBoard whitePawnAttacks = position.PieceBitBoards[(int)Piece.P].ShiftUpRight() | position.PieceBitBoards[(int)Piece.P].ShiftUpLeft();
+        BitBoard blackPawnAttacks = position.PieceBitBoards[(int)Piece.p].ShiftDownRight() | position.PieceBitBoards[(int)Piece.p].ShiftDownLeft();
+
+        var oppositeSidePawnAttacks = piece <= Piece.K
+            ? blackPawnAttacks
+            : whitePawnAttacks;
+
         var bitBoard = position.PieceBitBoards[(int)piece].GetLS1BIndex();
 
         return UnpackEG(piece == Piece.K
-            ? position.KingAdditionalEvaluation(bitBoard, Side.White)
-            : position.KingAdditionalEvaluation(bitBoard, Side.Black));
+            ? position.KingAdditionalEvaluation(bitBoard, Side.White, blackPawnAttacks)
+            : position.KingAdditionalEvaluation(bitBoard, Side.Black, whitePawnAttacks));
     }
 
     private static void EvaluateDrawOrNotDraw(string fen, bool isDrawExpected, int expectedPhase)
