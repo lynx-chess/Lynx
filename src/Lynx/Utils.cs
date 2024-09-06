@@ -214,24 +214,6 @@ public static class Utils
         return (short)((packed + 0x8000) >> 16);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int ChebyshevDistance(BoardSquare square1, BoardSquare square2) =>
-        ChebyshevDistance((int)square1, (int)square2);
-
-    /// <summary>
-    /// [64][64]
-    /// </summary>
-    /// <param name="square1"></param>
-    /// <param name="square2"></param>
-    /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int ChebyshevDistance(int square1, int square2)
-    {
-        const int square1Offset = 64;
-
-        return Constants.ChebyshevDistance[(square1 * square1Offset) + square2];
-    }
-
     [Conditional("DEBUG")]
     private static void GuardAgainstSideBoth(int side)
     {
