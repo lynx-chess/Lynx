@@ -4,7 +4,8 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 
 namespace Lynx.Benchmark;
-internal class GetAndResetLS1BIndex_Benchmark : BaseBenchmark
+
+public class GetAndResetLS1BIndex_Benchmark : BaseBenchmark
 {
     public static IEnumerable<Position> Data =>
     [
