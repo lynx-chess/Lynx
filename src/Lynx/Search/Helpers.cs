@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics.X86;
@@ -52,19 +53,21 @@ public sealed partial class Engine
 
         if (isCapture)
         {
-            var baseCaptureScore = (isPromotion || move.IsEnPassant() || SEE.IsGoodCapture(Game.CurrentPosition, move))
-                ? EvaluationConstants.GoodCaptureMoveBaseScoreValue
-                : EvaluationConstants.BadCaptureMoveBaseScoreValue;
-
             var piece = move.Piece();
             var capturedPiece = move.CapturedPiece();
+
+            var captureHistoryValue = _captureHistory[CaptureHistoryIndex(piece, move.TargetSquare(), capturedPiece)];
+            var threshold = -((captureHistoryValue / Configuration.EngineSettings.History_MaxMoveValue) * 100);  // Formula from Drofa
+            var baseCaptureScore = (isPromotion || move.IsEnPassant() || SEE.IsGoodCapture(Game.CurrentPosition, move, threshold))
+                ? EvaluationConstants.GoodCaptureMoveBaseScoreValue
+                : EvaluationConstants.BadCaptureMoveBaseScoreValue;
 
             Debug.Assert(capturedPiece != (int)Piece.K && capturedPiece != (int)Piece.k, $"{move.UCIString()} capturing king is generated in position {Game.CurrentPosition.FEN()}");
 
             return baseCaptureScore
                 + EvaluationConstants.MostValueableVictimLeastValuableAttacker[piece][capturedPiece]
                 //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
-                + _captureHistory[CaptureHistoryIndex(piece, move.TargetSquare(), capturedPiece)];
+                + captureHistoryValue;
         }
 
         if (isPromotion)
