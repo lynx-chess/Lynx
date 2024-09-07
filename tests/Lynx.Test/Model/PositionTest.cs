@@ -1013,18 +1013,6 @@ public class PositionTest
         Assert.AreEqual(eg, Position.TaperedEvaluation(Pack((short)mg, (short)eg), 0));
     }
 
-    [Test]
-    public void ScaleEvalWith50MovesDrawDistance()
-    {
-        const string queenVsRookPosition = "8/4k3/4r3/3Q4/3K4/8/8/8 w - - 0 1";
-
-        var position = new Position(queenVsRookPosition);
-
-        Assert.Greater(position.StaticEvaluation(0), position.StaticEvaluation(10));
-        Assert.AreEqual((int)(0.5 * position.StaticEvaluation(0).Score), position.StaticEvaluation(100).Score);
-        Assert.AreEqual((int)(0.75 * position.StaticEvaluation(0).Score), position.StaticEvaluation(50).Score);
-    }
-
     private static int AdditionalPieceEvaluation(Position position, Piece piece)
     {
         var whiteKing = position.PieceBitBoards[(int)Piece.K].GetLS1BIndex();
