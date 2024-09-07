@@ -911,9 +911,9 @@ public class Position
                 rank = 7 - rank;
             }
 
-            var friendlyKingDistance = Utils.ChebyshevDistance(sameSideKingSquare, squareIndex);
+            var friendlyKingDistance = Constants.ChebyshevDistance[squareIndex][sameSideKingSquare];
 
-            var enemyKingDistance = Utils.ChebyshevDistance(oppositeSideKingSquare, squareIndex);
+            var enemyKingDistance = Constants.ChebyshevDistance[squareIndex][oppositeSideKingSquare];
 
             packedBonus += PassedPawnBonus[bucket][rank]
                 + FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance]

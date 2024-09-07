@@ -122,6 +122,6 @@ public class UtilsTest
     [TestCase(BoardSquare.h8, BoardSquare.a1, 7)]
     public void ChebyshevDistance(BoardSquare square1, BoardSquare square2, int expectedDistance)
     {
-        Assert.AreEqual(expectedDistance, Utils.ChebyshevDistance(square1, square2));
+        Assert.AreEqual(expectedDistance, Constants.ChebyshevDistance[(int)square1][(int)square2]);
     }
 }
