@@ -1047,7 +1047,7 @@ public class Position
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static int ScaleEvalWith50MovesDrawDistance(int eval, int movesWithoutCaptureOrPawnMove) =>
-        eval * (200 - movesWithoutCaptureOrPawnMove) / 200;
+        eval * (288 - movesWithoutCaptureOrPawnMove) / 256; // Formula from Halogen
 
     #endregion
 
