@@ -1047,7 +1047,7 @@ public class Position
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static int ScaleEvalWith50MovesDrawDistance(int eval, int movesWithoutCaptureOrPawnMove) =>
-        eval * (200 - movesWithoutCaptureOrPawnMove) / 214; // Formula from an old SF version
+        eval * (178 - movesWithoutCaptureOrPawnMove) / 207; // Formula from an old SF version
 
     #endregion
 
