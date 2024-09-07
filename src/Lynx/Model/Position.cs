@@ -708,7 +708,7 @@ public class Position
 
                 gamePhase += GamePhaseByPiece[pieceIndex];
 
-                packedScore += AdditionalPieceEvaluation(whiteBucket, pieceSquareIndex, pieceIndex, whiteKing, blackKing, blackPawnAttacks);
+                packedScore += AdditionalPieceEvaluation(whiteBucket, pieceSquareIndex, pieceIndex, (int)Side.White, whiteKing, blackKing, blackPawnAttacks);
             }
         }
 
@@ -727,7 +727,7 @@ public class Position
 
                 gamePhase += GamePhaseByPiece[pieceIndex];
 
-                packedScore -= AdditionalPieceEvaluation(blackBucket, pieceSquareIndex, pieceIndex, blackKing, whiteKing, whitePawnAttacks);
+                packedScore -= AdditionalPieceEvaluation(blackBucket, pieceSquareIndex, pieceIndex, (int)Side.Black, blackKing, whiteKing, whitePawnAttacks);
             }
         }
 
@@ -874,15 +874,15 @@ public class Position
     /// <param name="pieceIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int AdditionalPieceEvaluation(int bucket, int pieceSquareIndex, int pieceIndex, int sameSideKingSquare, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+    internal int AdditionalPieceEvaluation(int bucket, int pieceSquareIndex, int pieceIndex, int pieceSide, int sameSideKingSquare, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
     {
         return pieceIndex switch
         {
             (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(bucket, pieceSquareIndex, pieceIndex, sameSideKingSquare, oppositeSideKingSquare),
-            (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex, enemyPawnAttacks),
-            (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex, enemyPawnAttacks),
-            (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(pieceSquareIndex, pieceIndex, enemyPawnAttacks),
-            (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex, pieceIndex, enemyPawnAttacks),
+            (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, enemyPawnAttacks),
+            (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, enemyPawnAttacks),
+            (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, enemyPawnAttacks),
+            (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, enemyPawnAttacks),
             _ => 0
         };
     }
@@ -930,15 +930,11 @@ public class Position
     /// <param name="pieceIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int RookAdditionalEvaluation(int squareIndex, int pieceIndex, BitBoard enemyPawnAttacks)
+    private int RookAdditionalEvaluation(int squareIndex, int pieceIndex, int pieceSide, BitBoard enemyPawnAttacks)
     {
-        var sameSide = pieceIndex == (int)Piece.R
-            ? (int)Side.White
-            : (int)Side.Black;
-
         var attacksCount =
             (Attacks.RookAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both])
-                & (~(OccupancyBitBoards[sameSide] | enemyPawnAttacks)))
+                & (~(OccupancyBitBoards[pieceSide] | enemyPawnAttacks)))
             .CountBits();
 
         var packedBonus = RookMobilityBonus[attacksCount];
@@ -964,15 +960,11 @@ public class Position
     /// <param name="pieceIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int KnightAdditionalEvaluation(int squareIndex, int pieceIndex, BitBoard enemyPawnAttacks)
+    private int KnightAdditionalEvaluation(int squareIndex, int pieceIndex, int pieceSide, BitBoard enemyPawnAttacks)
     {
-        var sameSide = pieceIndex == (int)Piece.N
-            ? (int)Side.White
-            : (int)Side.Black;
-
         var attacksCount =
             (Attacks.KnightAttacks[squareIndex]
-                & (~(OccupancyBitBoards[sameSide] | enemyPawnAttacks)))
+                & (~(OccupancyBitBoards[pieceSide] | enemyPawnAttacks)))
             .CountBits();
 
         return KnightMobilityBonus[attacksCount];
@@ -985,15 +977,11 @@ public class Position
     /// <param name="pieceIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int BishopAdditionalEvaluation(int squareIndex, int pieceIndex, BitBoard enemyPawnAttacks)
+    private int BishopAdditionalEvaluation(int squareIndex, int pieceIndex, int pieceSide, BitBoard enemyPawnAttacks)
     {
-        var sameSide = pieceIndex <= (int)Piece.B
-            ? (int)Side.White
-            : (int)Side.Black;
-
         var attacksCount =
             (Attacks.BishopAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both])
-                & (~(OccupancyBitBoards[sameSide] | enemyPawnAttacks)))
+                & (~(OccupancyBitBoards[pieceSide] | enemyPawnAttacks)))
             .CountBits();
 
         return BishopMobilityBonus[attacksCount];
@@ -1005,15 +993,11 @@ public class Position
     /// <param name="squareIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int QueenAdditionalEvaluation(int squareIndex, int pieceIndex, BitBoard enemyPawnAttacks)
+    private int QueenAdditionalEvaluation(int squareIndex, int pieceIndex, int pieceSide, BitBoard enemyPawnAttacks)
     {
-        var sameSide = pieceIndex == (int)Piece.Q
-            ? (int)Side.White
-            : (int)Side.Black;
-
         var attacksCount =
             (Attacks.QueenAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both])
-                & (~(OccupancyBitBoards[sameSide] | enemyPawnAttacks)))
+                & (~(OccupancyBitBoards[pieceSide] | enemyPawnAttacks)))
             .CountBits();
 
         return QueenMobilityBonus[attacksCount];
@@ -1023,17 +1007,17 @@ public class Position
     /// Open and semiopenfile penalties, shield bonus, virtual mobility bonus/penalty
     /// </summary>
     /// <param name="squareIndex"></param>
-    /// <param name="kingSide"></param>
+    /// <param name="pieceSide"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int KingAdditionalEvaluation(int squareIndex, int kingSide, BitBoard enemyPawnAttacks)
+    internal int KingAdditionalEvaluation(int squareIndex, int pieceSide, BitBoard enemyPawnAttacks)
     {
         var attacksCount =
             (Attacks.QueenAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both])
-            & ~(OccupancyBitBoards[kingSide] | enemyPawnAttacks)).CountBits();
+            & ~(OccupancyBitBoards[pieceSide] | enemyPawnAttacks)).CountBits();
         int packedBonus = VirtualKingMobilityBonus[attacksCount];
 
-        var kingSideOffset = Utils.PieceOffset(kingSide);
+        var kingSideOffset = Utils.PieceOffset(pieceSide);
 
         if (PieceBitBoards[(int)Piece.r - kingSideOffset] + PieceBitBoards[(int)Piece.q - kingSideOffset] != 0) // areThereOppositeSideRooksOrQueens
         {
