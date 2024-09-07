@@ -1021,8 +1021,8 @@ public class PositionTest
         var position = new Position(queenVsRookPosition);
 
         Assert.Greater(position.StaticEvaluation(0), position.StaticEvaluation(10));
-        Assert.AreEqual(0.5 * position.StaticEvaluation(0).Score, position.StaticEvaluation(100));
-        Assert.AreEqual(0.75 * position.StaticEvaluation(0).Score, position.StaticEvaluation(50));
+        Assert.AreEqual((int)(0.5 * position.StaticEvaluation(0).Score), position.StaticEvaluation(100).Score);
+        Assert.AreEqual((int)(0.75 * position.StaticEvaluation(0).Score), position.StaticEvaluation(50).Score);
     }
 
     private static int AdditionalPieceEvaluation(Position position, Piece piece)
