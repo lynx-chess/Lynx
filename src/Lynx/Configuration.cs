@@ -99,7 +99,7 @@ public sealed class EngineSettings
 
     public double SoftTimeBoundMultiplier { get; set; } = 1;
 
-    public int DefaultMovesToGo { get; set; } = 45;
+    public int DefaultMovesToGo { get; set; } = 35;
 
     public double SoftTimeBaseIncrementMultiplier { get; set; } = 0.8;
 
