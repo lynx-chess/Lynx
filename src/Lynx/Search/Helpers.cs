@@ -214,10 +214,8 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int CaptureHistory(int piece, int targetSquare, int capturedPiece)
+    private int CaptureHistory(int arrayIndex)
     {
-        var arrayIndex = CaptureHistoryIndex(piece, targetSquare, capturedPiece);
-
         unsafe
         {
             fixed (int* ptr = &_captureHistory[0])
@@ -226,6 +224,10 @@ public sealed partial class Engine
             }
         }
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int CaptureHistory(int piece, int targetSquare, int capturedPiece)
+        => CaptureHistory(CaptureHistoryIndex(piece, targetSquare, capturedPiece));
 
     /// <summary>
     /// [12][64][12][64][ContinuationHistoryPlyCount]
@@ -252,10 +254,8 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int ContinuationHistory(int piece, int targetSquare, int previousMovePiece, int previousMoveTargetSquare, int ply)
+    private int ContinuationHistory(int arrayIndex)
     {
-        var arrayIndex = ContinuationHistoryIndex(piece, targetSquare, previousMovePiece, previousMoveTargetSquare, ply);
-
         unsafe
         {
             fixed (int* ptr = &_continuationHistory[0])
@@ -264,6 +264,10 @@ public sealed partial class Engine
             }
         }
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int ContinuationHistory(int piece, int targetSquare, int previousMovePiece, int previousMoveTargetSquare, int ply)
+        => ContinuationHistory(ContinuationHistoryIndex(piece, targetSquare, previousMovePiece, previousMoveTargetSquare, ply));
 
     /// <summary>
     /// [64][64]
