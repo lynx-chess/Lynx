@@ -64,7 +64,7 @@ public sealed partial class Engine
             return baseCaptureScore
                 + EvaluationConstants.MostValueableVictimLeastValuableAttacker[piece][capturedPiece]
                 //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
-                + _captureHistory[CaptureHistoryIndex(piece, move.TargetSquare(), capturedPiece)];
+                + CaptureHistory(piece, move.TargetSquare(), capturedPiece);
         }
 
         if (isPromotion)
@@ -102,7 +102,7 @@ public sealed partial class Engine
                 var previousMoveTargetSquare = previousMove.TargetSquare();
 
                 // Countermove
-                if (_counterMoves[CounterMoveIndex(previousMovePiece, previousMoveTargetSquare)] == move)
+                if (CounterMove(previousMovePiece, previousMoveTargetSquare) == move)
                 {
                     return EvaluationConstants.CounterMoveValue;
                 }
@@ -110,7 +110,7 @@ public sealed partial class Engine
                 // Counter move history
                 return EvaluationConstants.BaseMoveScore
                     + _quietHistory[move.Piece()][move.TargetSquare()]
-                    + _continuationHistory[ContinuationHistoryIndex(move.Piece(), move.TargetSquare(), previousMovePiece, previousMoveTargetSquare, 0)];
+                    + ContinuationHistory(move.Piece(), move.TargetSquare(), previousMovePiece, previousMoveTargetSquare, 0);
             }
 
             // History move or 0 if not found
@@ -213,6 +213,20 @@ public sealed partial class Engine
             + capturedPiece;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int CaptureHistory(int piece, int targetSquare, int capturedPiece)
+    {
+        var arrayIndex = CaptureHistoryIndex(piece, targetSquare, capturedPiece);
+
+        unsafe
+        {
+            fixed (int* ptr = &_captureHistory[0])
+            {
+                return ptr[arrayIndex];
+            }
+        }
+    }
+
     /// <summary>
     /// [12][64][12][64][ContinuationHistoryPlyCount]
     /// </summary>
@@ -237,6 +251,20 @@ public sealed partial class Engine
             + ply;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int ContinuationHistory(int piece, int targetSquare, int previousMovePiece, int previousMoveTargetSquare, int ply)
+    {
+        var arrayIndex = ContinuationHistoryIndex(piece, targetSquare, previousMovePiece, previousMoveTargetSquare, ply);
+
+        unsafe
+        {
+            fixed (int* ptr = &_continuationHistory[0])
+            {
+                return ptr[arrayIndex];
+            }
+        }
+    }
+
     /// <summary>
     /// [64][64]
     /// </summary>
@@ -250,6 +278,20 @@ public sealed partial class Engine
 
         return (previousMoveSourceSquare * sourceSquareOffset)
             + previousMoveTargetSquare;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int CounterMove(int previousMoveSourceSquare, int previousMoveTargetSquare)
+    {
+        var arrayIndex = CounterMoveIndex(previousMoveSourceSquare, previousMoveTargetSquare);
+
+        unsafe
+        {
+            fixed (int* ptr = &_counterMoves[0])
+            {
+                return ptr[arrayIndex];
+            }
+        }
     }
 
     #region Debugging
