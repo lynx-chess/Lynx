@@ -670,7 +670,7 @@ public class Position
     /// </summary>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public (int Score, int Phase) StaticEvaluation()
+    public (int Score, int Phase) StaticEvaluation(int movesWithoutCaptureOrPawnMove = 0)
     {
         //var result = OnlineTablebaseProber.EvaluationSearch(this, movesWithoutCaptureOrPawnMove, cancellationToken);
         //Debug.Assert(result < CheckMateBaseEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
@@ -828,6 +828,8 @@ public class Position
 
         // Endgame scaling with pawn count, formula yoinked from Sirius
         eval = (int)(eval * ((80 + (totalPawnsCount * 7)) / 128.0));
+
+        eval = ScaleEvalWith50MovesDrawDistance(eval, movesWithoutCaptureOrPawnMove);
 
         eval = Math.Clamp(eval, MinEval, MaxEval);
 
@@ -1035,6 +1037,17 @@ public class Position
 
         return packedBonus + (ownPiecesAroundCount * KingShieldBonus);
     }
+
+    /// <summary>
+    /// Scales <paramref name="eval"/> with <paramref name="movesWithoutCaptureOrPawnMove"/>, so that
+    /// an eval with 100 halfmove counter is half of the value of one with 0 halfmove counter
+    /// </summary>
+    /// <param name="eval"></param>
+    /// <param name="movesWithoutCaptureOrPawnMove"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static int ScaleEvalWith50MovesDrawDistance(int eval, int movesWithoutCaptureOrPawnMove) =>
+        eval * (200 - movesWithoutCaptureOrPawnMove) / 200;
 
     #endregion
 
