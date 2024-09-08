@@ -911,16 +911,14 @@ public class Position
                 rank = 7 - rank;
             }
 
-            if (friendlyPawnAttacks.GetBit(squareIndex))
-            {
-                packedBonus += ProtectedPassedPawnBonus[bucket][rank];
-            }
+            packedBonus += friendlyPawnAttacks.GetBit(squareIndex)
+                ? ProtectedPassedPawnBonus[bucket][rank]
+                : PassedPawnBonus[bucket][rank];
 
             var friendlyKingDistance = Constants.ChebyshevDistance[squareIndex][sameSideKingSquare];
             var enemyKingDistance = Constants.ChebyshevDistance[squareIndex][oppositeSideKingSquare];
 
-            packedBonus += PassedPawnBonus[bucket][rank]
-                + FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance]
+            packedBonus += FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance]
                 + EnemyKingDistanceToPassedPawnPenalty[enemyKingDistance];
         }
 
