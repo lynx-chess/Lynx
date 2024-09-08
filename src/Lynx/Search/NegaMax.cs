@@ -257,7 +257,7 @@ public sealed partial class Engine
                 if (!pvNode && !isInCheck
                     && scores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue) // Quiet move
                 {
-                    // Late Move Pruning (LMP) - all quiet moves can be pruned
+                    // 🔍 Late Move Pruning (LMP) - all quiet moves can be pruned
                     // after searching the first few given by the move ordering algorithm
                     if (depth <= Configuration.EngineSettings.LMP_MaxDepth
                         && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth)) // Based on formula suggested by Antares
@@ -270,7 +270,35 @@ public sealed partial class Engine
                         break;
                     }
 
-                    // Futility Pruning (FP) - all quiet moves can be pruned
+                    if (!isCapture
+                        && scores[moveIndex] < EvaluationConstants.CounterMoveValue
+                        && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth)  // TODO use LMR depth
+                    {
+                        var piece = move.Piece();
+                        var targetSquare = move.TargetSquare();
+
+                        var previousMove = Game.PopFromMoveStack(ply - 1);
+                        var previousMovePiece = previousMove.Piece();
+                        var previousTargetSquare = previousMove.TargetSquare();
+
+                        var historyScore = _quietHistory[piece][targetSquare]
+                            + _continuationHistory[ContinuationHistoryIndex(piece, targetSquare, previousMovePiece, previousTargetSquare, ply)];
+
+                        // 🔍 History pruning -  all quiet moves can be pruned
+                        // once we find one with a history score too low
+                        // if this move's history score is too low, we start skipping moves.
+                        if (historyScore < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
+                        {
+                            // After making a move
+                            Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
+                            Game.PositionHashHistory.RemoveAt(Game.PositionHashHistory.Count - 1);
+                            position.UnmakeMove(move, gameState);
+
+                            break;
+                        }
+                    }
+
+                    // 🔍 Futility Pruning (FP) - all quiet moves can be pruned
                     // once it's considered that they don't have potential to raise alpha
                     if (visitedMovesCounter > 0
                         //&& alpha < EvaluationConstants.PositiveCheckmateDetectionLimit
