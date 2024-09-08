@@ -321,8 +321,6 @@ public sealed partial class Engine
                     var previousMovePiece = previousMove.Piece();
                     var previousTargetSquare = previousMove.TargetSquare();
 
-                    var continuationHistoryIndex = ContinuationHistoryIndex(move.Piece(), move.TargetSquare(), previousMovePiece, previousTargetSquare, 0);
-
                     reduction -= 2
                         * (_quietHistory[pìece][targetSquare] + _continuationHistory[ContinuationHistoryIndex(pìece, targetSquare, previousMovePiece, previousTargetSquare, ply)])
                         / Configuration.EngineSettings.History_MaxMoveValue;
