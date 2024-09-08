@@ -322,7 +322,7 @@ public sealed partial class Engine
                     var previousTargetSquare = previousMove.TargetSquare();
 
                     var historyReduction = 2
-                        * (_quietHistory[pìece][targetSquare] + _continuationHistory[ContinuationHistoryIndex(pìece, targetSquare, previousMovePiece, previousTargetSquare, ply)])
+                        * (_quietHistory[pìece][targetSquare])
                         / Configuration.EngineSettings.History_MaxMoveValue;
 
                     reduction -= Math.Clamp(
