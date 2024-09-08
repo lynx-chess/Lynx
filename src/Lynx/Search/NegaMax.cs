@@ -274,20 +274,10 @@ public sealed partial class Engine
                         && scores[moveIndex] < EvaluationConstants.CounterMoveValue
                         && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth)  // TODO use LMR depth
                     {
-                        var piece = move.Piece();
-                        var targetSquare = move.TargetSquare();
-
-                        var previousMove = Game.PopFromMoveStack(ply - 1);
-                        var previousMovePiece = previousMove.Piece();
-                        var previousTargetSquare = previousMove.TargetSquare();
-
-                        var historyScore = _quietHistory[piece][targetSquare]
-                            + _continuationHistory[ContinuationHistoryIndex(piece, targetSquare, previousMovePiece, previousTargetSquare, ply)];
-
                         // 🔍 History pruning -  all quiet moves can be pruned
                         // once we find one with a history score too low
                         // if this move's history score is too low, we start skipping moves.
-                        if (historyScore < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
+                        if (_quietHistory[move.Piece()][move.TargetSquare()] < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
                         {
                             // After making a move
                             Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
