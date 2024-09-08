@@ -1029,6 +1029,10 @@ public class PositionTest
         BitBoard whitePawnAttacks = position.PieceBitBoards[(int)Piece.P].ShiftUpRight() | position.PieceBitBoards[(int)Piece.P].ShiftUpLeft();
         BitBoard blackPawnAttacks = position.PieceBitBoards[(int)Piece.p].ShiftDownRight() | position.PieceBitBoards[(int)Piece.p].ShiftDownLeft();
 
+        var sameSidePawnAttacks = piece <= Piece.K
+            ? whitePawnAttacks
+            : blackPawnAttacks;
+
         var oppositeSidePawnAttacks = piece <= Piece.K
             ? blackPawnAttacks
             : whitePawnAttacks;
@@ -1044,7 +1048,7 @@ public class PositionTest
         {
             var pieceSquareIndex = bitBoard.GetLS1BIndex();
             bitBoard.ResetLS1B();
-            eval += UnpackMG(position.AdditionalPieceEvaluation(0, pieceSquareIndex, (int)piece, pieceSide, sameSideKingSquare, oppositeSideKingSquare, oppositeSidePawnAttacks));
+            eval += UnpackMG(position.AdditionalPieceEvaluation(0, pieceSquareIndex, (int)piece, pieceSide, sameSideKingSquare, oppositeSideKingSquare, sameSidePawnAttacks, oppositeSidePawnAttacks));
         }
 
         return eval;
