@@ -907,17 +907,11 @@ public class Position
 
         if ((PieceBitBoards[(int)Piece.p - pieceIndex] & Masks.PassedPawns[pieceIndex][squareIndex]) == default)    // isPassedPawn
         {
-            var rank = Constants.Rank[squareIndex];
-            if (pieceIndex == (int)Piece.p)
-            {
-                rank = 7 - rank;
-            }
-
             var friendlyKingDistance = Constants.ChebyshevDistance[squareIndex][sameSideKingSquare];
 
             var enemyKingDistance = Constants.ChebyshevDistance[squareIndex][oppositeSideKingSquare];
 
-            packedBonus += PassedPawnBonus[bucket][rank]
+            packedBonus += PassedPawnBonus[bucket][squareIndex - 8]
                 + FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance]
                 + EnemyKingDistanceToPassedPawnPenalty[enemyKingDistance];
         }
