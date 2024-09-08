@@ -314,7 +314,18 @@ public sealed partial class Engine
                     }
 
                     // -= history/(maxHistory/2)
-                    reduction -= 2 * _quietHistory[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.History_MaxMoveValue;
+                    var pìece = move.Piece();
+                    var targetSquare = move.TargetSquare();
+
+                    var previousMove = Game.PopFromMoveStack(ply - 1);
+                    var previousMovePiece = previousMove.Piece();
+                    var previousTargetSquare = previousMove.TargetSquare();
+
+                    var continuationHistoryIndex = ContinuationHistoryIndex(move.Piece(), move.TargetSquare(), previousMovePiece, previousTargetSquare, 0);
+
+                    reduction -= 2
+                        * (_quietHistory[pìece][targetSquare] + _continuationHistory[ContinuationHistoryIndex(pìece, targetSquare, previousMovePiece, previousTargetSquare, ply)])
+                        / Configuration.EngineSettings.History_MaxMoveValue;
 
                     // Don't allow LMR to drop into qsearch or increase the depth
                     // depth - 1 - depth +2 = 1, min depth we want
