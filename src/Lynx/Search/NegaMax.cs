@@ -321,9 +321,14 @@ public sealed partial class Engine
                     var previousMovePiece = previousMove.Piece();
                     var previousTargetSquare = previousMove.TargetSquare();
 
-                    reduction -= 2
+                    var historyReduction = 2
                         * (_quietHistory[pìece][targetSquare] + _continuationHistory[ContinuationHistoryIndex(pìece, targetSquare, previousMovePiece, previousTargetSquare, ply)])
                         / Configuration.EngineSettings.History_MaxMoveValue;
+
+                    reduction -= Math.Clamp(
+                        historyReduction,
+                        -Configuration.EngineSettings.LMR_MaxHistoryReduction,
+                        +Configuration.EngineSettings.LMR_MaxHistoryReduction);
 
                     // Don't allow LMR to drop into qsearch or increase the depth
                     // depth - 1 - depth +2 = 1, min depth we want

@@ -123,6 +123,8 @@ public sealed class EngineSettings
     [SPSA<double>(1, 5, 0.1)]
     public double LMR_Divisor { get; set; } = 3.42;
 
+    public int LMR_MaxHistoryReduction { get; set; } = 1;
+
     [SPSA<int>(1, 10, 0.5)]
     public int NMP_MinDepth { get; set; } = 2;
 
