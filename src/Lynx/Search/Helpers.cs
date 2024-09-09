@@ -41,7 +41,7 @@ public sealed partial class Engine
         // Queen promotion
         if ((promotedPiece + 2) % 6 == 0)
         {
-            var baseScore = SEE.HasPositiveScore(Game.CurrentPosition, move)
+            var baseScore = SEE.HasPositiveScore(Game.CurrentPosition, move, -109)
                 ? EvaluationConstants.GoodCaptureMoveBaseScoreValue
                 : EvaluationConstants.BadCaptureMoveBaseScoreValue;
 
