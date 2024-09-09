@@ -314,15 +314,8 @@ public sealed partial class Engine
                     }
 
                     // -= history/(maxHistory/2)
-                    var pìece = move.Piece();
-                    var targetSquare = move.TargetSquare();
-
-                    var previousMove = Game.PopFromMoveStack(ply - 1);
-                    var previousMovePiece = previousMove.Piece();
-                    var previousTargetSquare = previousMove.TargetSquare();
-
                     var historyReduction = 2
-                        * (_quietHistory[pìece][targetSquare])
+                        * (_quietHistory[move.Piece()][move.TargetSquare()])
                         / Configuration.EngineSettings.History_MaxMoveValue;
 
                     reduction -= Math.Clamp(
