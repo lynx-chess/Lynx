@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using System.Runtime.CompilerServices;
 
 namespace Lynx;
 
@@ -18,6 +19,7 @@ public sealed partial class Engine
     /// Defaults to the worse possible score for Side to move's opponent, Int.MaxValue
     /// </param>
     /// <returns></returns>
+    [SkipLocalsInit]
     private int NegaMax(int depth, int ply, int alpha, int beta, bool parentWasNullMove = false)
     {
         var position = Game.CurrentPosition;
@@ -26,7 +28,7 @@ public sealed partial class Engine
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
             _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
-            return position.StaticEvaluation().Score;
+            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
         }
 
         _maxDepthReached[ply] = ply;
@@ -85,7 +87,7 @@ public sealed partial class Engine
         }
         else if (!pvNode)
         {
-            (staticEval, phase) = position.StaticEvaluation();
+            (staticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
 
             // From smol.cs
             // ttEvaluation can be used as a better positional evaluation:
@@ -233,6 +235,7 @@ public sealed partial class Engine
             var oldHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
             var canBeRepetition = Game.Update50movesRule(move, isCapture);
             Game.PositionHashHistory.Add(position.UniqueIdentifier);
+            Game.PushToMoveStack(ply, move);
 
             int evaluation;
             if (canBeRepetition && (Game.IsThreefoldRepetition() || Game.Is50MovesRepetition()))
@@ -355,7 +358,7 @@ public sealed partial class Engine
             Game.PositionHashHistory.RemoveAt(Game.PositionHashHistory.Count - 1);
             position.UnmakeMove(move, gameState);
 
-            PrintMove(ply, move, evaluation);
+            PrintMove(position, ply, move, evaluation);
 
             // Fail-hard beta-cutoff - refutation found, no need to keep searching this line
             if (evaluation >= beta)
@@ -368,8 +371,9 @@ public sealed partial class Engine
                     var targetSquare = move.TargetSquare();
                     var capturedPiece = move.CapturedPiece();
 
-                    _captureHistory[piece][targetSquare][capturedPiece] = ScoreHistoryMove(
-                        _captureHistory[piece][targetSquare][capturedPiece],
+                    var captureHistoryIndex = CaptureHistoryIndex(piece, targetSquare, capturedPiece);
+                    _captureHistory[captureHistoryIndex] = ScoreHistoryMove(
+                        _captureHistory[captureHistoryIndex],
                         EvaluationConstants.HistoryBonus[depth]);
 
                     // 🔍 Capture history penalty/malus
@@ -384,8 +388,10 @@ public sealed partial class Engine
                             var visitedMoveTargetSquare = visitedMove.TargetSquare();
                             var visitedMoveCapturedPiece = visitedMove.CapturedPiece();
 
-                            _captureHistory[visitedMovePiece][visitedMoveTargetSquare][visitedMoveCapturedPiece] = ScoreHistoryMove(
-                                _captureHistory[visitedMovePiece][visitedMoveTargetSquare][visitedMoveCapturedPiece],
+                            captureHistoryIndex = CaptureHistoryIndex(visitedMovePiece, visitedMoveTargetSquare, visitedMoveCapturedPiece);
+
+                            _captureHistory[captureHistoryIndex] = ScoreHistoryMove(
+                                _captureHistory[captureHistoryIndex],
                                 -EvaluationConstants.HistoryBonus[depth]);
                         }
                     }
@@ -401,9 +407,27 @@ public sealed partial class Engine
                         _quietHistory[piece][targetSquare],
                         EvaluationConstants.HistoryBonus[depth]);
 
-                    // 🔍 Quiet history penalty/malus
-                    // When a quiet move fails high, penalize previous visited quiet moves
-                    for (int i = 0; i < visitedMovesCounter; ++i)
+                    // 🔍 Continuation history
+                    // - Counter move history (continuation history, ply - 1)
+                    var previousMove = Game.PopFromMoveStack(ply - 1);
+                    var previousMovePiece = previousMove.Piece();
+                    var previousTargetSquare = previousMove.TargetSquare();
+
+                    var continuationHistoryIndex = ContinuationHistoryIndex(piece, targetSquare, previousMovePiece, previousTargetSquare, 0);
+
+                    _continuationHistory[continuationHistoryIndex] = ScoreHistoryMove(
+                        _continuationHistory[continuationHistoryIndex],
+                        EvaluationConstants.HistoryBonus[depth]);
+
+                    //    var previousPreviousMove = Game.MoveStack[ply - 2];
+                    //    var previousPreviousMovePiece = previousPreviousMove.Piece();
+                    //    var previousPreviousMoveTargetSquare = previousPreviousMove.TargetSquare();
+
+                    //    _continuationHistory[piece][targetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare] = ScoreHistoryMove(
+                    //        _continuationHistory[piece][targetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare],
+                    //        EvaluationConstants.HistoryBonus[depth]);
+
+                    for (int i = 0; i < visitedMovesCounter - 1; ++i)
                     {
                         var visitedMove = visitedMoves[i];
 
@@ -412,22 +436,35 @@ public sealed partial class Engine
                             var visitedMovePiece = visitedMove.Piece();
                             var visitedMoveTargetSquare = visitedMove.TargetSquare();
 
+                            // 🔍 Quiet history penalty / malus
+                            // When a quiet move fails high, penalize previous visited quiet moves
                             _quietHistory[visitedMovePiece][visitedMoveTargetSquare] = ScoreHistoryMove(
                                 _quietHistory[visitedMovePiece][visitedMoveTargetSquare],
+                                -EvaluationConstants.HistoryBonus[depth]);
+
+                            // 🔍 Continuation history penalty / malus
+                            continuationHistoryIndex = ContinuationHistoryIndex(visitedMovePiece, visitedMoveTargetSquare, previousMovePiece, previousTargetSquare, 0);
+
+                            _continuationHistory[continuationHistoryIndex] = ScoreHistoryMove(
+                                _continuationHistory[continuationHistoryIndex],
                                 -EvaluationConstants.HistoryBonus[depth]);
                         }
                     }
 
-                    // 🔍 Killer moves
-                    if (move.PromotedPiece() == default && move != _killerMoves[0][ply])
+                    var thisPlyKillerMoves = _killerMoves[ply];
+                    if (move.PromotedPiece() == default && move != thisPlyKillerMoves[0])
                     {
-                        if (move != _killerMoves[1][ply])
+                        // 🔍 Killer moves
+                        if (move != thisPlyKillerMoves[1])
                         {
-                            _killerMoves[2][ply] = _killerMoves[1][ply];
+                            thisPlyKillerMoves[2] = thisPlyKillerMoves[1];
                         }
 
-                        _killerMoves[1][ply] = _killerMoves[0][ply];
-                        _killerMoves[0][ply] = move;
+                        thisPlyKillerMoves[1] = thisPlyKillerMoves[0];
+                        thisPlyKillerMoves[0] = move;
+
+                        // 🔍 Countermoves - fails to fix the bug and remove killer moves condition, see  https://github.com/lynx-chess/Lynx/pull/944
+                        _counterMoves[CounterMoveIndex(previousMovePiece, previousTargetSquare)] = move;
                     }
                 }
 
@@ -477,6 +514,7 @@ public sealed partial class Engine
     /// Defaults to the works possible score for Black, Int.MaxValue
     /// </param>
     /// <returns></returns>
+    [SkipLocalsInit]
     public int QuiescenceSearch(int ply, int alpha, int beta)
     {
         var position = Game.CurrentPosition;
@@ -487,7 +525,7 @@ public sealed partial class Engine
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
             _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
-            return position.StaticEvaluation().Score;
+            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
         }
 
         var pvIndex = PVTable.Indexes[ply];
@@ -503,7 +541,7 @@ public sealed partial class Engine
 
         _maxDepthReached[ply] = ply;
 
-        var staticEvaluation = position.StaticEvaluation().Score;
+        var staticEvaluation = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
 
         // Fail-hard beta-cutoff (updating alpha after this check)
         if (staticEvaluation >= beta)
@@ -571,11 +609,12 @@ public sealed partial class Engine
 
             // No need to check for threefold or 50 moves repetitions, since we're only searching captures, promotions, and castles
             // Theoretically there could be a castling move that caused the 50 moves repetitions, but it's highly unlikely
+            Game.PushToMoveStack(ply, move);
 
             int evaluation = -QuiescenceSearch(ply + 1, -beta, -alpha);
             position.UnmakeMove(move, gameState);
 
-            PrintMove(ply, move, evaluation);
+            PrintMove(position, ply, move, evaluation);
 
             // Fail-hard beta-cutoff
             if (evaluation >= beta)

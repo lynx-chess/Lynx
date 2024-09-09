@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat Code Coverage">
+        <Configuration>
+          <Format>cobertura</Format>
+          <SkipAutoProps>true</SkipAutoProps>
+          <ExcludeByAttribute>Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute</ExcludeByAttribute>
+          <!--https://github.com/coverlet-coverage/coverlet/issues/1192#issuecomment-2243274829-->
+          <!--<SingleHit>true</SingleHit> can be enabled to reduce the time of long runs-->
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+  <RunConfiguration>
+    <CollectSourceInformation>true</CollectSourceInformation>
+  </RunConfiguration>
+</RunSettings>

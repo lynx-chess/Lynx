@@ -7,6 +7,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Channels;
+using static Lynx.EvaluationConstants;
+using static Lynx.TunableEvalParameters;
 
 //_2_GettingStarted();
 //_3_PawnAttacks();
@@ -516,7 +518,7 @@ static void _32_Make_Move()
         {
             game.CurrentPosition.Print();
 
-            Console.WriteLine(move.ToMoveString());
+            Console.WriteLine(move.ToEPDString(game.CurrentPosition));
             var gameState = game.MakeMove(move);
             game.CurrentPosition.Print();
 
@@ -539,7 +541,7 @@ static void _32_Make_Move()
             {
                 game.CurrentPosition.Print();
 
-                Console.WriteLine(move.ToMoveString());
+                Console.WriteLine(move.ToEPDString(game.CurrentPosition));
                 var gameState = game.MakeMove(move);
                 game.CurrentPosition.Print();
                 game.CurrentPosition.UnmakeMove(move, gameState);
@@ -676,7 +678,7 @@ static void _53_MVVLVA()
     {
         for (int victim = (int)Piece.p; victim <= (int)Piece.k; ++victim)
         {
-            var score = EvaluationConstants.MostValueableVictimLeastValuableAttacker[attacker][victim];
+            var score = MostValueableVictimLeastValuableAttacker[attacker][victim];
             Console.WriteLine($"Score {(Piece)attacker}x{(Piece)victim}: {score}");
         }
         Console.WriteLine();
@@ -686,7 +688,7 @@ static void _53_MVVLVA()
     {
         for (int victim = (int)Piece.P; victim <= (int)Piece.K; ++victim)
         {
-            var score = EvaluationConstants.MostValueableVictimLeastValuableAttacker[attacker][victim];
+            var score = MostValueableVictimLeastValuableAttacker[attacker][victim];
             Console.WriteLine($"Score {(Piece)attacker}x{(Piece)victim}: {score}");
         }
         Console.WriteLine();
@@ -1121,7 +1123,8 @@ static void UnmakeMove()
         var oldZobristKey = position.UniqueIdentifier;
         foreach (var move in allMoves)
         {
-            Console.WriteLine($"Trying {move.ToEPDString()} in\t{position.FEN()}");
+            var epdMoveString = move.ToEPDString(position);
+            Console.WriteLine($"Trying {epdMoveString} in\t{position.FEN()}");
 
             var newPosition = new Position(position, move);
             var savedState = position.MakeMove(move);
@@ -1129,7 +1132,7 @@ static void UnmakeMove()
             Console.WriteLine($"Position\t{newPosition.FEN()}, Zobrist key {newPosition.UniqueIdentifier}");
             Console.WriteLine($"Position\t{position.FEN()}, Zobrist key {position.UniqueIdentifier}");
 
-            Console.WriteLine($"Unmaking {move.ToEPDString()} in\t{position.FEN()}");
+            Console.WriteLine($"Unmaking {epdMoveString} in\t{position.FEN()}");
 
             //position.UnmakeMove(move, savedState);
 
@@ -1150,13 +1153,13 @@ static void UnmakeMove()
 
 static void PieceSquareTables()
 {
-    short[] middleGamePawnTableBlack = EvaluationConstants.MiddleGamePawnTable.Select((_, index) => (short)-EvaluationConstants.MiddleGamePawnTable[index ^ 56]).ToArray();
-    short[] endGamePawnTableBlack = EvaluationConstants.EndGamePawnTable.Select((_, index) => (short)-EvaluationConstants.EndGamePawnTable[index ^ 56]).ToArray();
+    short[] middleGamePawnTableBlack = MiddleGamePawnTable.Select((_, index) => (short)-MiddleGamePawnTable[0][index ^ 56]).ToArray();
+    short[] endGamePawnTableBlack = EndGamePawnTable.Select((_, index) => (short)-EndGamePawnTable[0][index ^ 56]).ToArray();
 
-    PrintBitBoard(EvaluationConstants.MiddleGamePawnTable);
+    PrintBitBoard(MiddleGamePawnTable);
     PrintBitBoard(middleGamePawnTableBlack);
 
-    PrintBitBoard(EvaluationConstants.EndGamePawnTable);
+    PrintBitBoard(EndGamePawnTable);
     PrintBitBoard(endGamePawnTableBlack);
 
     static void PrintBitBoard<T>(T[] bitboard)

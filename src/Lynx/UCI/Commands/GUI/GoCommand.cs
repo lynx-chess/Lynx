@@ -1,5 +1,4 @@
-﻿using NLog.LayoutRenderers.Wrappers;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace Lynx.UCI.Commands.GUI;
 

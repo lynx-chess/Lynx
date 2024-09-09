@@ -61,7 +61,7 @@ public sealed class Listener
     /// Something like this would work as well to read input without the input buffer limitation
     /// </summary>
     /// <returns></returns>
-    private static string ReadInput()
+    private static string  ReadInput()
     {
         Span<byte> bytes = stackalloc byte[4096 * 4];
         Stream inputStream = Console.OpenStandardInput();

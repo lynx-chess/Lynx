@@ -9,31 +9,42 @@ namespace Lynx;
 public sealed partial class Engine
 {
     private readonly Stopwatch _stopWatch = new();
-    private readonly Move[] _pVTable = new Move[Configuration.EngineSettings.MaxDepth * (Configuration.EngineSettings.MaxDepth + 1) / 2];
+    private readonly Move[] _pVTable = GC.AllocateArray<Move>(Configuration.EngineSettings.MaxDepth * (Configuration.EngineSettings.MaxDepth + 1) / 2, pinned: true);
 
     /// <summary>
-    /// 3x<see cref="Configuration.EngineSettings.MaxDepth"/>
+    /// (<see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/>) x 3
     /// </summary>
-    private readonly int[][] _killerMoves =
-    [
-        new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin],
-        new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin],
-        new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin]
-    ];
+    private readonly int[][] _killerMoves;
 
     /// <summary>
-    /// 12x64
+    /// 12 x 64
+    /// </summary>
+    private readonly int[] _counterMoves = GC.AllocateArray<int>(12 * 64, pinned: true);
+
+    /// <summary>
+    /// 12 x 64
+    /// piece x target square
     /// </summary>
     private readonly int[][] _quietHistory;
 
     /// <summary>
-    /// 12x64x12
+    /// 12 x 64 x 12,
+    /// piece x target square x captured piece
     /// </summary>
-    private readonly int[][][] _captureHistory;
+    private readonly int[] _captureHistory = GC.AllocateArray<int>(12 * 64 * 12, pinned: true);
 
-    private readonly int[] _maxDepthReached = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
-    private TranspositionTable _tt = [];
+    /// <summary>
+    /// 12 x 64 x 12 x 64 x ContinuationHistoryPlyCount
+    /// piece x target square x last piece x last target square x plies back
+    /// ply 0 -> Continuation move history
+    /// ply 1 -> Follow-up move history
+    /// </summary>
+    private readonly int[] _continuationHistory = GC.AllocateArray<int>(12 * 64 * 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount, pinned: true);
+
+    private readonly int[] _maxDepthReached = GC.AllocateArray<int>(Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin, pinned: true);
+
     private int _ttMask;
+    private TranspositionTable _tt = [];
 
     private long _nodes;
     private bool _isFollowingPV;
@@ -49,6 +60,7 @@ public sealed partial class Engine
     /// <param name="maxDepth"></param>
     /// <param name="softLimitTimeBound"></param>
     /// <returns>Not null <see cref="SearchResult"/>, although made nullable in order to match online tb probing signature</returns>
+    [SkipLocalsInit]
     public SearchResult IDDFS(int maxDepth, int softLimitTimeBound)
     {
         // Cleanup
@@ -80,10 +92,10 @@ public sealed partial class Engine
                 return onlyOneLegalMoveSearchResult;
             }
 
-            Debug.Assert(_killerMoves.Length == 3);
-            Array.Clear(_killerMoves[0]);
-            Array.Clear(_killerMoves[1]);
-            Array.Clear(_killerMoves[2]);
+            for (int i = 0; i < _killerMoves.Length; ++i)
+            {
+                Array.Clear(_killerMoves[i]);
+            }
             // Not clearing _quietHistory on purpose
             // Not clearing _captureHistory on purpose
 
@@ -107,7 +119,7 @@ public sealed partial class Engine
                 else
                 {
                     // 🔍 Aspiration Windows
-                    var window = Configuration.EngineSettings.AspirationWindow_Delta;
+                    var window = Configuration.EngineSettings.AspirationWindow_Base;
 
                     alpha = Math.Max(MinValue, lastSearchResult.Evaluation - window);
                     beta = Math.Min(MaxValue, lastSearchResult.Evaluation + window);
@@ -148,7 +160,7 @@ public sealed partial class Engine
                     ? Utils.CalculateMateInX(bestEvaluation, bestEvaluationAbs)
                     : 0;
 
-                lastSearchResult = UpdateLastSearchResult(lastSearchResult, bestEvaluation, alpha, beta, depth, mate, bestEvaluationAbs);
+                lastSearchResult = UpdateLastSearchResult(lastSearchResult, bestEvaluation, alpha, beta, depth, mate);
 
                 _engineWriter.TryWrite(InfoCommand.SearchResultInfo(lastSearchResult));
             } while (StopSearchCondition(++depth, maxDepth, mate, softLimitTimeBound));
@@ -156,7 +168,9 @@ public sealed partial class Engine
         catch (OperationCanceledException)
         {
             isCancelled = true;
+#pragma warning disable S6667 // Logging in a catch clause should pass the caught exception as a parameter - expected exception we want to ignore
             _logger.Info("Search cancellation requested after {0}ms (depth {1}, nodes {2}), best move will be returned", _stopWatch.ElapsedMilliseconds, depth, _nodes);
+#pragma warning restore S6667 // Logging in a catch clause should pass the caught exception as a parameter.
 
             for (int i = 0; i < lastSearchResult?.Moves.Count; ++i)
             {
@@ -232,6 +246,7 @@ public sealed partial class Engine
         return true;
     }
 
+    [SkipLocalsInit]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool OnlyOneLegalMove(ref Move firstLegalMove, [NotNullWhen(true)] out SearchResult? result)
     {
@@ -292,7 +307,7 @@ public sealed partial class Engine
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private SearchResult UpdateLastSearchResult(SearchResult? lastSearchResult,
-        int bestEvaluation, int alpha, int beta, int depth, int mate, int bestEvaluationAbs)
+        int bestEvaluation, int alpha, int beta, int depth, int mate)
     {
         var pvMoves = _pVTable.TakeWhile(m => m != default).ToList();
         var maxDepthReached = _maxDepthReached.LastOrDefault(item => item != default);

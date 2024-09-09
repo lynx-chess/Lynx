@@ -3,6 +3,7 @@ using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Threading.Channels;
 
 namespace Lynx;
@@ -59,20 +60,17 @@ public sealed partial class Engine
         _engineWriter = engineWriter;
 
         // Update ResetEngine() after any changes here
+
         _quietHistory = new int[12][];
         for (int i = 0; i < _quietHistory.Length; ++i)
         {
             _quietHistory[i] = new int[64];
         }
 
-        _captureHistory = new int[12][][];
-        for (int i = 0; i < 12; ++i)
+        _killerMoves = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin][];
+        for (int i = 0; i < Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin; ++i)
         {
-            _captureHistory[i] = new int[64][];
-            for (var j = 0; j < 64; ++j)
-            {
-                _captureHistory[i][j] = new int[12];
-            }
+            _killerMoves[i] = new Move[3];
         }
 
         InitializeTT();
@@ -113,17 +111,17 @@ public sealed partial class Engine
 
     private void ResetEngine()
     {
-        InitializeTT(); // TODO SPRT clearing instead
+        InitializeTT(); // Attempt to clear instead in https://github.com/lynx-chess/Lynx/pull/960
 
         // Clear histories
         for (int i = 0; i < 12; ++i)
         {
             Array.Clear(_quietHistory[i]);
-            for (var j = 0; j < 64; ++j)
-            {
-                Array.Clear(_captureHistory[i][j]);
-            }
         }
+
+        Array.Clear(_captureHistory);
+        Array.Clear(_continuationHistory);
+        Array.Clear(_counterMoves);
 
         // No need to clear killer move or pv table because they're cleared on every search (IDDFS)
     }
@@ -149,6 +147,7 @@ public sealed partial class Engine
 #pragma warning restore S1215 // "GC.Collect" should not be called
     }
 
+    [SkipLocalsInit]
     public void AdjustPosition(ReadOnlySpan<char> rawPositionCommand)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
@@ -282,13 +281,13 @@ public sealed partial class Engine
         if (searchResult is not null)
         {
             _logger.Info("Search evaluation result - eval: {0}, mate: {1}, depth: {2}, pv: {3}",
-                searchResult.Evaluation, searchResult.Mate, searchResult.Depth, string.Join(", ", searchResult.Moves.Select(m => m.ToMoveString())));
+                searchResult.Evaluation, searchResult.Mate, searchResult.Depth, string.Join(", ", searchResult.Moves.Select(m => m.UCIString())));
         }
 
         if (tbResult is not null)
         {
             _logger.Info("Online tb probing result - mate: {0}, moves: {1}",
-                tbResult.Mate, string.Join(", ", tbResult.Moves.Select(m => m.ToMoveString())));
+                tbResult.Mate, string.Join(", ", tbResult.Moves.Select(m => m.UCIString())));
 
             if (searchResult?.Mate > 0 && searchResult.Mate <= tbResult.Mate && searchResult.Mate + currentHalfMovesWithoutCaptureOrPawnMove < 96)
             {

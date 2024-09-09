@@ -56,7 +56,7 @@ public class ZobristTableTest
     [Test]
     public void EnPassantHash()
     {
-        var enPassantSquares = Constants.EnPassantCaptureSquares.Select((item, index) => (item, index)).Where(pair => pair.item != 0).Select(pair => pair.index);
+        var enPassantSquares = Constants.EnPassantCaptureSquares.ToArray().Select((item, index) => (item, index)).Where(pair => pair.item != 0).Select(pair => pair.index);
 
         foreach (var enPassantSquare in enPassantSquares)
         {
