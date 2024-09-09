@@ -1126,7 +1126,8 @@ static void UnmakeMove()
             var epdMoveString = move.ToEPDString(position);
             Console.WriteLine($"Trying {epdMoveString} in\t{position.FEN()}");
 
-            var newPosition = new Position(position, move);
+            var newPosition = new Position(position);
+            newPosition.MakeMove(move);
             var savedState = position.MakeMove(move);
 
             Console.WriteLine($"Position\t{newPosition.FEN()}, Zobrist key {newPosition.UniqueIdentifier}");

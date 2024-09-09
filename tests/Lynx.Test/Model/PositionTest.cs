@@ -96,15 +96,6 @@ public class PositionTest
         Assert.AreEqual(shouldBeValid, new Position(fen).IsValid());
     }
 
-    [Test]
-    public void CustomIsValid()
-    {
-        var origin = new Position("r2k4/1K6/8/8/8/8/8/8 b - - 0 1");
-        var move = MoveExtensions.EncodeCapture((int)BoardSquare.b7, (int)BoardSquare.a8, (int)Piece.K, capturedPiece: 1);
-
-        Assert.NotNull(new Position(origin, move));
-    }
-
     [TestCase(Constants.EmptyBoardFEN, false, Ignore = "WasProduceByAValidMove doesn't check the presence of both kings on the board")]
     [TestCase("K/8/8/8/8/8/8/8 w - - 0 1", false, Ignore = "WasProduceByAValidMove doesn't check the presence of both kings on the board")]
     [TestCase("K/8/8/8/8/8/8/8 b - - 0 1", false, Ignore = "WasProduceByAValidMove doesn't check the presence of both kings on the board")]
@@ -146,7 +137,12 @@ public class PositionTest
     {
         // Arrange
         var position = new Position(fen);
-        Assert.IsEmpty(MoveGenerator.GenerateAllMoves(position).Where(move => new Position(position, move).IsValid()));
+        Assert.IsEmpty(MoveGenerator.GenerateAllMoves(position).Where(move =>
+        {
+            var newPosition = new Position(position);
+            newPosition.MakeMove(move);
+            return newPosition.IsValid();
+        }));
         var isInCheck = position.IsInCheck();
 
         // Act
