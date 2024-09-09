@@ -125,7 +125,8 @@ public static class OnlineTablebaseProber
                             throw new AssertException($"{move!.Uci} should be parsable from position {fen}");
                         }
 
-                        var newPosition = new Position(position, moveCandidate.Value);
+                        var newPosition = new Position(position);
+                        newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
@@ -185,7 +186,8 @@ public static class OnlineTablebaseProber
                             throw new AssertException($"{move!.Uci} should be parsable from position {fen}");
                         }
 
-                        var newPosition = new Position(position, moveCandidate.Value);
+                        var newPosition = new Position(position);
+                        newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
@@ -247,7 +249,8 @@ public static class OnlineTablebaseProber
                             throw new AssertException($"{move!.Uci} should be parsable from position {fen}");
                         }
 
-                        var newPosition = new Position(position, moveCandidate.Value);
+                        var newPosition = new Position(position);
+                        newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
@@ -306,7 +309,8 @@ public static class OnlineTablebaseProber
                             throw new AssertException($"{move!.Uci} should be parsable from position {fen}");
                         }
 
-                        var newPosition = new Position(position, moveCandidate.Value);
+                        var newPosition = new Position(position);
+                        newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
