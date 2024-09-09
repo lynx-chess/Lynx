@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics.X86;
 using System.Text;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace Lynx;
 
@@ -20,7 +21,7 @@ public sealed partial class Engine
     /// <param name="bestMoveTTCandidate"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMove(Move move, int ply, bool isNotQSearch, ShortMove bestMoveTTCandidate = default)
+    internal int ScoreMove(Move move, int ply, bool isNotQSearch, int staticScore, ShortMove bestMoveTTCandidate = default)
     {
         if (_isScoringPV && move == _pVTable[ply])
         {
@@ -41,7 +42,9 @@ public sealed partial class Engine
         // Queen promotion
         if ((promotedPiece + 2) % 6 == 0)
         {
-            var baseScore = SEE.HasPositiveScore(Game.CurrentPosition, move)
+            var threshold = (-staticScore / 32) + 236;    // SF server
+
+            var baseScore = SEE.HasPositiveScore(Game.CurrentPosition, move, threshold)
                 ? EvaluationConstants.GoodCaptureMoveBaseScoreValue
                 : EvaluationConstants.BadCaptureMoveBaseScoreValue;
 
