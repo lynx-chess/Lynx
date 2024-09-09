@@ -1080,7 +1080,7 @@ static void TranspositionTable()
     var hashKey2 = position.UniqueIdentifier & mask;
     Console.WriteLine(hashKey2);
 
-    transpositionTable.ClearTranspositionTable();
+    Array.Clear(transpositionTable);
 
     //transpositionTable.RecordHash(position, depth: 3, maxDepth: 5, move: 1234, eval: +5, nodeType: NodeType.Alpha);
     //var entry = transpositionTable.ProbeHash(position, maxDepth: 5, depth: 3, alpha: 1, beta: 2);
