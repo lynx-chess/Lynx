@@ -336,7 +336,7 @@ public sealed partial class Engine
             }
 
             // We print best move even in case of go ponder + stop, and IDEs are expected to ignore it
-            _moveToPonder = searchResult.Moves.Count >= 2 ? searchResult.Moves[1] : null;
+            _moveToPonder = searchResult.Moves.Length >= 2 ? searchResult.Moves[1] : null;
             _engineWriter.TryWrite(BestMoveCommand.BestMove(searchResult.BestMove, _moveToPonder));
         }
         catch (Exception e)
