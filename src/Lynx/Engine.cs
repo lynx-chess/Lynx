@@ -53,7 +53,7 @@ public sealed partial class Engine
     public Engine(ChannelWriter<string> engineWriter)
     {
         AverageDepth = 0;
-        Game = new Game();
+        Game = new Game(Constants.InitialPositionFEN);
         _isNewGameComing = true;
         _searchCancellationTokenSource = new();
         _absoluteSearchCancellationTokenSource = new();
@@ -134,7 +134,7 @@ public sealed partial class Engine
     public void NewGame()
     {
         AverageDepth = 0;
-        Game = new Game();
+        Game = new Game(Constants.InitialPositionFEN);
         _isNewGameComing = true;
         _isNewGameCommandSupported = true;
         _stopRequested = false;

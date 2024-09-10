@@ -24,15 +24,14 @@ public sealed class Game
 
     public Position PositionBeforeLastSearch { get; private set; }
 
-    public Game() : this(Constants.InitialPositionFEN)
+    public Game(ReadOnlySpan<char> fen) : this(fen, [], [], [])
     {
     }
 
-    public Game(ReadOnlySpan<char> fen)
+    public Game(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan, Span<Move> movePool)
     {
         var parsedFen = FENParser.ParseFEN(fen);
         CurrentPosition = new Position(parsedFen);
-        PositionBeforeLastSearch = new Position(CurrentPosition);
 
         if (!CurrentPosition.IsValid())
         {
@@ -46,10 +45,7 @@ public sealed class Game
 #if DEBUG
         MoveHistory = new(Constants.MaxNumberMovesInAGame);
 #endif
-    }
 
-    public Game(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan, Span<Move> movePool) : this(fen)
-    {
         for (int i = 0; i < rangeSpan.Length; ++i)
         {
             if (rangeSpan[i].Start.Equals(rangeSpan[i].End))
