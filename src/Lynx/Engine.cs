@@ -73,7 +73,7 @@ public sealed partial class Engine
             _killerMoves[i] = new Move[3];
         }
 
-        InitializeTT();// Attempt to clear instead failed in https://github.com/lynx-chess/Lynx/pull/960
+        InitializeTT();
 
 #if !DEBUG
         // Temporary channel so that no output is generated
