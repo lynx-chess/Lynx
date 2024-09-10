@@ -248,7 +248,9 @@ static void _13_GeneratingMagicNumbersCandidates()
 
 static void _14_GeneratingMagicNumbersByBruteForce()
 {
+    var sw = Stopwatch.StartNew();
     MagicNumberGenerator.InitializeMagicNumbers();
+    Console.WriteLine($"Time: {sw.ElapsedMilliseconds}ms");
 
     // Should generate something similar to Constants.RookMagicNumbers
 }
