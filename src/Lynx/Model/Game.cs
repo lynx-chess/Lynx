@@ -1,4 +1,6 @@
 ﻿using NLog;
+using System.Buffers;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Lynx.Model;
@@ -43,7 +45,9 @@ public sealed class Game : IDisposable
         _positionHashHistory = new long[Constants.MaxNumberMovesInAGame];
         AddToPositionHashHistory(CurrentPosition.UniqueIdentifier);
         HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
-        _moveStack = new Move[1024];
+
+        Debug.Assert(Constants.MaxNumberMovesInAGame < 1024, "Need to customized ArrayPool due to desired array size requirements");
+        _moveStack = ArrayPool<Move>.Shared.Rent(Constants.MaxNumberMovesInAGame);
 
 #if DEBUG
         MoveHistory = new(Constants.MaxNumberMovesInAGame);
@@ -247,6 +251,34 @@ public sealed class Game : IDisposable
 
     public void FreeResources()
     {
+        CurrentPosition.FreeResources();
+        PositionBeforeLastSearch.FreeResources();
+    }
+
+    private void Dispose(bool disposing)
+    {
+        _logger.Warn("Disposing Game instance");
+        if (!_disposedValue)
+        {
+            if (disposing)
+            {
+                FreeResources();
+            }
+            _disposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    public void FreeResources()
+    {
+        ArrayPool<Move>.Shared.Return(_moveStack);
+
         CurrentPosition.FreeResources();
         PositionBeforeLastSearch.FreeResources();
     }
