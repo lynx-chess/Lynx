@@ -151,6 +151,8 @@ public static partial class EvaluationConstants
     public const int SingleMoveEvaluation = 200;
 
     public const int ContinuationHistoryPlyCount = 1;
+
+    public const int MaxPhase = 24;
 }
 
 #pragma warning restore IDE1006 // Naming Styles

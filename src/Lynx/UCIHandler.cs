@@ -600,7 +600,9 @@ public sealed class UCIHandler
 
     private async Task HandleEval(CancellationToken cancellationToken)
     {
+        //_engine.Game.CurrentPosition.SetNeedsFullEvalRecalculation();
         var score = WDL.NormalizeScore(_engine.Game.CurrentPosition.StaticEvaluation().Score);
+        _engine.Game.CurrentPosition.SetNeedsFullEvalRecalculation();
 
         await _engineToUci.Writer.WriteAsync(score.ToString(), cancellationToken);
     }
