@@ -80,25 +80,39 @@ public sealed class InfoCommand : EngineBaseCommand
     {
         var sb = new StringBuilder(256);
 
-        sb.Append(Id);
-        sb.Append(" depth ").Append(searchResult.Depth);
-        sb.Append(" seldepth ").Append(searchResult.DepthReached);
-        sb.Append(" multipv 1");
-        sb.Append(" score ").Append(searchResult.Mate == default ? $"cp {WDL.NormalizeScore(searchResult.Evaluation)}" : $"mate {searchResult.Mate}");
-        sb.Append(" nodes ").Append(searchResult.Nodes);
-        sb.Append(" nps ").Append(searchResult.NodesPerSecond);
-        sb.Append(" time ").Append(searchResult.Time)
-            .Append(searchResult.HashfullPermill != -1 ? $" hashfull {searchResult.HashfullPermill}" : string.Empty);
+        sb.Append(Id)
+          .Append(" depth ").Append(searchResult.Depth)
+          .Append(" seldepth ").Append(searchResult.DepthReached)
+          .Append(" multipv 1")
+          .Append(" score ").Append(searchResult.Mate == default ? "cp " + WDL.NormalizeScore(searchResult.Evaluation) : "mate " + searchResult.Mate)
+          .Append(" nodes ").Append(searchResult.Nodes)
+          .Append(" nps ").Append(searchResult.NodesPerSecond)
+          .Append(" time ").Append(searchResult.Time);
+
+        if (searchResult.HashfullPermill != -1)
+        {
+            sb.Append(" hashfull ").Append(searchResult.HashfullPermill);
+        }
 
         if (searchResult.WDL is not null)
         {
             sb.Append(" wdl ")
-                .Append(searchResult.WDL.Value.WDLWin).Append(' ')
-                .Append(searchResult.WDL.Value.WDLDraw).Append(' ')
-                .Append(searchResult.WDL.Value.WDLLoss);
+              .Append(searchResult.WDL.Value.WDLWin).Append(' ')
+              .Append(searchResult.WDL.Value.WDLDraw).Append(' ')
+              .Append(searchResult.WDL.Value.WDLLoss);
         }
 
-        sb.Append(" pv ").AppendJoin(" ", searchResult.Moves.Select(move => move.UCIString()));
+        sb.Append(" pv ");
+        foreach (var move in searchResult.Moves)
+        {
+            sb.Append(move.UCIString()).Append(' ');
+        }
+
+        // Remove the trailing space
+        if (searchResult.Moves.Count > 0)
+        {
+            sb.Length--;
+        }
 
         return sb.ToString();
     }
