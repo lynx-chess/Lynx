@@ -10,9 +10,9 @@ namespace Lynx.Model;
 
 public class Position
 {
-    private bool _needsFullEvalRecalculation;
-    private int _incrementalEvaluation;
-    private int _incrementalPhase;
+    internal bool _needsFullEvalRecalculation;
+    internal int _incrementalEvaluation;
+    internal int _incrementalPhase;
 
     public long UniqueIdentifier { get; private set; }
 
@@ -58,7 +58,9 @@ public class Position
         Side = parsedFEN.Side;
         Castle = parsedFEN.Castle;
         EnPassant = parsedFEN.EnPassant;
-        (_incrementalEvaluation, _incrementalPhase) = InitialStaticEvaluation();
+        _needsFullEvalRecalculation = true;
+        _incrementalEvaluation = int.MinValue / 2;
+        _incrementalPhase = int.MinValue / 2;
 
         UniqueIdentifier = ZobristTable.PositionHash(this);
     }
@@ -244,8 +246,11 @@ public class Position
             newPiece = promotedPiece;
         }
 
-        _needsFullEvalRecalculation = _needsFullEvalRecalculation || piece == (int)Piece.K || piece == (int)Piece.k;
-
+        _needsFullEvalRecalculation = /*true || */  move.IsCapture() || move.IsCastle() || move.IsPromotion() || move.IsEnPassant() || move.IsDoublePawnPush() ||
+            _needsFullEvalRecalculation || piece == (int)Piece.K || piece == (int)Piece.k;
+//ucinewgame
+//position fen 4b3/8/2p1p3/1pPpPp2/kPpKpPp1/PpP1P1P1/1P6/4B3 w - - 0 1
+//go depth 15
         PieceBitBoards[piece].PopBit(sourceSquare);
         OccupancyBitBoards[oldSide].PopBit(sourceSquare);
 
@@ -271,7 +276,7 @@ public class Position
             var whiteBucket = PSQTBucketLayout[whiteKing];
             var blackBucket = PSQTBucketLayout[blackKing ^ 56];
 
-            if (oldSide == (int)Side.White)
+            if (piece <= (int)Piece.K)
             {
                 sameSideBucket = whiteBucket;
                 oppositeSideBucket = blackBucket;
@@ -392,6 +397,18 @@ public class Position
 
         UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
 
+        var alternativeEval = InitialStaticEvaluation().PackedScore;
+
+        if (!_needsFullEvalRecalculation)
+        {
+
+            if (_incrementalEvaluation != alternativeEval)
+            {
+                Console.WriteLine($"{FEN()} -> Incremental = {_incrementalEvaluation} vs Initial = {alternativeEval}");
+            }
+        }
+
+
         return new GameState(uniqueIdentifierCopy, incrementalEvaluationCopy, incrementalPhaseCopy, enpassantCopy, castleCopy);
     }
 
@@ -419,7 +436,7 @@ public class Position
             newPiece = promotedPiece;
         }
 
-        _needsFullEvalRecalculation = _needsFullEvalRecalculation || piece == (int)Piece.K || piece == (int)Piece.k;
+        _needsFullEvalRecalculation = true || _needsFullEvalRecalculation || piece == (int)Piece.K || piece == (int)Piece.k;
 
         PieceBitBoards[piece].PopBit(sourceSquare);
         OccupancyBitBoards[oldSide].PopBit(sourceSquare);
@@ -575,6 +592,16 @@ public class Position
 
         UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
 
+        if (!_needsFullEvalRecalculation)
+        {
+            var alternativeEval = InitialStaticEvaluation().PackedScore;
+            if (_incrementalEvaluation != alternativeEval)
+            {
+                ;
+                //Console.WriteLine($"{FEN()} -> Incremental = {_incrementalEvaluation} vs Initial = {alternativeEval}");
+            }
+        }
+
         return new GameState(uniqueIdentifierCopy, incrementalEvaluationCopy, incrementalPhaseCopy, enpassantCopy, castleCopy);
     }
 
@@ -667,6 +694,17 @@ public class Position
         EnPassant = gameState.EnPassant;
         UniqueIdentifier = gameState.ZobristKey;
         _incrementalEvaluation = gameState.IncrementalEvaluation;
+
+        if (!_needsFullEvalRecalculation)
+        {
+            var alternativeEval = InitialStaticEvaluation().PackedScore;
+            if (_incrementalEvaluation != alternativeEval)
+            {
+                ;
+                //Console.WriteLine($"{FEN()} -> Incremental = {_incrementalEvaluation} vs Initial = {alternativeEval}");
+            }
+        }
+
         _incrementalPhase = gameState.IncrementalPhase;
     }
 
@@ -826,6 +864,15 @@ public class Position
         {
             _needsFullEvalRecalculation = false;
             (_incrementalEvaluation, int _) = InitialStaticEvaluation();
+        }
+        else
+        {
+            var alternativeEval = InitialStaticEvaluation().PackedScore;
+
+            if (_incrementalEvaluation != alternativeEval)
+            {
+                Console.WriteLine($"{FEN()} -> Incremental = {_incrementalEvaluation} vs Initial = {alternativeEval}");
+            }
         }
 
         var packedScore = _incrementalEvaluation;

@@ -202,6 +202,17 @@ public sealed partial class Engine
 
         for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
         {
+            var alternativeEval = position.InitialStaticEvaluation().PackedScore;
+
+            if (!position._needsFullEvalRecalculation)
+            {
+
+                if (position._incrementalEvaluation != alternativeEval)
+                {
+                    ;
+                }
+            }
+
             // Incremental move sorting, inspired by https://github.com/jw1912/Chess-Challenge and suggested by toanth
             // There's no need to sort all the moves since most of them don't get checked anyway
             // So just find the first unsearched one with the best score and try it
@@ -215,7 +226,15 @@ public sealed partial class Engine
 
             var move = pseudoLegalMoves[moveIndex];
 
+            var oldPosition = new Position(position);
             var gameState = position.MakeMove(move);
+
+            alternativeEval = position.InitialStaticEvaluation().PackedScore;
+
+            if (!position._needsFullEvalRecalculation && position._incrementalEvaluation != alternativeEval)
+            {
+                Console.WriteLine($"{position.FEN()} -> Incremental = {position._incrementalEvaluation} vs Initial = {alternativeEval}");
+            }
 
             if (!position.WasProduceByAValidMove())
             {
@@ -592,6 +611,12 @@ public sealed partial class Engine
             }
 
             var gameState = position.MakeMove(move);
+            var alternativeEval = position.InitialStaticEvaluation().PackedScore;
+
+            if (!position._needsFullEvalRecalculation && position._incrementalEvaluation != alternativeEval)
+            {
+                Console.WriteLine($"{position.FEN()} -> Incremental = {position._incrementalEvaluation} vs Initial = {alternativeEval}");
+            }
             if (!position.WasProduceByAValidMove())
             {
                 position.UnmakeMove(move, gameState);
