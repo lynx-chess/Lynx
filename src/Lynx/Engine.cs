@@ -112,7 +112,7 @@ public sealed partial class Engine
 
     private void ResetEngine()
     {
-        InitializeTT();
+        InitializeTT(); // Attempt to clear instead in https://github.com/lynx-chess/Lynx/pull/960
 
         // Clear histories
         for (int i = 0; i < 12; ++i)
