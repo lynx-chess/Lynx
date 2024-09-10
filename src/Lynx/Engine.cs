@@ -81,7 +81,8 @@ public sealed partial class Engine
         WarmupEngine();
 
         _engineWriter = engineWriter;
-        ResetEngine();
+
+        // No need for ResetEngine() call here, WarmupEngine -> Bench -> NewGame() calls it
 #endif
 
 #pragma warning disable S1215 // "GC.Collect" should not be called
