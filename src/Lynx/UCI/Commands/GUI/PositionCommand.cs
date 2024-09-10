@@ -55,7 +55,7 @@ public sealed class PositionCommand : GUIBaseCommand
         catch (Exception e)
         {
             _logger.Error(e, "Error parsing position command '{0}'", positionCommandSpan.ToString());
-            return new Game();
+            return new Game(Constants.InitialPositionFEN);
         }
     }
 
