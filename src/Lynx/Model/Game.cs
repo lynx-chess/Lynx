@@ -46,7 +46,7 @@ public sealed class Game : IDisposable
         AddToPositionHashHistory(CurrentPosition.UniqueIdentifier);
         HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
 
-        Debug.Assert(Constants.MaxNumberMovesInAGame < 1024, "Need to customized ArrayPool due to desired array size requirements");
+        Debug.Assert(Constants.MaxNumberMovesInAGame <= 1024, "Need to customized ArrayPool due to desired array size requirements");
         _moveStack = ArrayPool<Move>.Shared.Rent(Constants.MaxNumberMovesInAGame);
 
 #if DEBUG
