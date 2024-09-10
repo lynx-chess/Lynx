@@ -73,7 +73,8 @@ public sealed partial class Engine
             _killerMoves[i] = new Move[3];
         }
 
-        InitializeTT();
+        (int ttLength, _ttMask) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
+        _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
 
 #if !DEBUG
         // Temporary channel so that no output is generated
@@ -81,7 +82,8 @@ public sealed partial class Engine
         WarmupEngine();
 
         _engineWriter = engineWriter;
-        ResetEngine();
+
+        // No need for ResetEngine() call here, WarmupEngine -> Bench -> NewGame() calls it
 #endif
 
 #pragma warning disable S1215 // "GC.Collect" should not be called
@@ -111,7 +113,7 @@ public sealed partial class Engine
 
     private void ResetEngine()
     {
-        InitializeTT(); // Attempt to clear instead in https://github.com/lynx-chess/Lynx/pull/960
+        Array.Clear(_tt);
 
         // Clear histories
         for (int i = 0; i < 12; ++i)
