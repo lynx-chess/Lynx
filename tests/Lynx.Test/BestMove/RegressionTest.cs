@@ -88,7 +88,7 @@ public class RegressionTest : BaseTest
         var engine = GetEngine(fen);
         var bestResult = engine.BestMove(goCommand);
 
-        if (bestResult.Moves.Count > depth)
+        if (bestResult.Moves.Length > depth)
         {
             Assert.AreNotEqual(notExpectedMove, bestResult.Moves[depth].UCIString());
         }
@@ -250,7 +250,7 @@ public class RegressionTest : BaseTest
 
         var bestMove = engine.BestMove(new GoCommand($"go depth {5}"));
         Assert.Zero(bestMove.Evaluation);
-        Assert.AreEqual(1, bestMove.Moves.Count);
+        Assert.AreEqual(1, bestMove.Moves.Length);
         Assert.AreEqual("b8c7", bestMove.BestMove.UCIString());
     }
 

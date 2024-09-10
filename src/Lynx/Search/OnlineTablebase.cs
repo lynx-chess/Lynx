@@ -15,7 +15,7 @@ public sealed partial class Engine
 
             if (tablebaseResult.BestMove != 0)
             {
-                var searchResult = new SearchResult(tablebaseResult.BestMove, evaluation: 0, targetDepth: 0, new List<Move> { tablebaseResult.BestMove }, MinValue, MaxValue, mate: tablebaseResult.MateScore)
+                var searchResult = new SearchResult(tablebaseResult.BestMove, evaluation: 0, targetDepth: 0, [tablebaseResult.BestMove], MinValue, MaxValue, mate: tablebaseResult.MateScore)
                 {
                     DepthReached = 0,
                     Nodes = 666,                // In case some guis proritize the info command with biggest depth
