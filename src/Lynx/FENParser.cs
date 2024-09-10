@@ -1,5 +1,6 @@
 ﻿using Lynx.Model;
 using NLog;
+using System.Buffers;
 using System.Runtime.CompilerServices;
 
 using ParseResult = (ulong[] PieceBitBoards, ulong[] OccupancyBitBoards, Lynx.Model.Side Side, byte Castle, Lynx.Model.BoardSquare EnPassant,
@@ -16,8 +17,8 @@ public static class FENParser
     {
         fen = fen.Trim();
 
-        var pieceBitBoards = new BitBoard[12];
-        var occupancyBitBoards = new BitBoard[3];
+        var pieceBitBoards = ArrayPool<BitBoard>.Shared.Rent(12);
+        var occupancyBitBoards = ArrayPool<BitBoard>.Shared.Rent(3);
 
         bool success;
         Side side = Side.Both;

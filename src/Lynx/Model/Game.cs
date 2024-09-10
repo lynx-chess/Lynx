@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace Lynx.Model;
 
-public sealed class Game
+public sealed class Game : IDisposable
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
@@ -18,6 +18,7 @@ public sealed class Game
     /// Indexed by ply
     /// </summary>
     private readonly Move[] _moveStack;
+    private bool _disposedValue;
 
     public int HalfMovesWithoutCaptureOrPawnMove { get; set; }
 
@@ -212,9 +213,17 @@ public sealed class Game
     /// (either by the engine time management logic or by external stop command)
     /// currentPosition won't be the initial one
     /// </summary>
-    public void ResetCurrentPositionToBeforeSearchState() => CurrentPosition = new(PositionBeforeLastSearch);
+    public void ResetCurrentPositionToBeforeSearchState()
+    {
+        CurrentPosition.FreeResources();
+        CurrentPosition = new(PositionBeforeLastSearch);
+    }
 
-    public void UpdateInitialPosition() => PositionBeforeLastSearch = new(CurrentPosition);
+    public void UpdateInitialPosition()
+    {
+        PositionBeforeLastSearch.FreeResources();
+        PositionBeforeLastSearch = new(CurrentPosition);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void PushToMoveStack(int n, Move move) => _moveStack[n + EvaluationConstants.ContinuationHistoryPlyCount] = move;
@@ -235,4 +244,30 @@ public sealed class Game
     public long[] CopyPositionHashHistory() => _positionHashHistory[.._positionHashHistoryPointer];
 
     internal void ClearPositionHashHistory() => _positionHashHistoryPointer = 0;
+
+    public void FreeResources()
+    {
+        CurrentPosition.FreeResources();
+        PositionBeforeLastSearch.FreeResources();
+    }
+
+    private void Dispose(bool disposing)
+    {
+        _logger.Warn("Disposing Game instance");
+        if (!_disposedValue)
+        {
+            if (disposing)
+            {
+                FreeResources();
+            }
+            _disposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
 }
