@@ -23,7 +23,7 @@ public static class AttackGenerator
 
     public static BitBoard[] InitializeKnightAttacks()
     {
-        BitBoard[] knightAttacks = new BitBoard[64];
+        BitBoard[] knightAttacks = GC.AllocateArray<BitBoard>(64, pinned: true);
 
         for (int square = 0; square < 64; ++square)
         {
@@ -35,7 +35,7 @@ public static class AttackGenerator
 
     public static BitBoard[] InitializeKingAttacks()
     {
-        BitBoard[] kingAttacks = new BitBoard[64];
+        BitBoard[] kingAttacks = GC.AllocateArray<BitBoard>(64, pinned: true);
 
         for (int square = 0; square < 64; ++square)
         {
@@ -75,7 +75,7 @@ public static class AttackGenerator
     /// <returns>(BitBoard[64], BitBoard[64, 512])</returns>
     public static (BitBoard[] BishopOccupancyMasks, BitBoard[][] BishopAttacks) InitializeBishopMagicAttacks()
     {
-        BitBoard[] occupancyMasks = new BitBoard[64];
+        BitBoard[] occupancyMasks = GC.AllocateArray<BitBoard>(64, pinned: true);
         BitBoard[][] attacks = new BitBoard[64][];  // 64x512
 
         for (int square = 0; square < 64; ++square)
@@ -107,7 +107,7 @@ public static class AttackGenerator
     /// <returns>(BitBoard[64], BitBoard[64, 512])</returns>
     public static (BitBoard[] RookOccupancyMasks, BitBoard[][] RookAttacks) InitializeRookMagicAttacks()
     {
-        BitBoard[] occupancyMasks = new BitBoard[64];
+        BitBoard[] occupancyMasks = GC.AllocateArray<BitBoard>(64, pinned: true);
         BitBoard[][] attacks = new BitBoard[64][];   // 64x4096
 
         for (int square = 0; square < 64; ++square)

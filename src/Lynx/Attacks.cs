@@ -44,9 +44,9 @@ public static class Attacks
 
         if (Bmi2.X64.IsSupported)
         {
-            _pextAttacks = new ulong[5248 + 102400];
-            _pextBishopOffset = new ulong[64];
-            _pextRookOffset = new ulong[64];
+            _pextAttacks = GC.AllocateArray<BitBoard>(5248 + 102400, pinned: true);
+            _pextBishopOffset = GC.AllocateArray<BitBoard>(64, pinned: true);
+            _pextRookOffset = GC.AllocateArray<BitBoard>(64, pinned: true);
 
             InitializeBishopAndRookPextAttacks();
         }
