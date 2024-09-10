@@ -109,7 +109,7 @@ public sealed class InfoCommand : EngineBaseCommand
         }
 
         // Remove the trailing space
-        if (searchResult.Moves.Count > 0)
+        if (searchResult.Moves.Length > 0)
         {
             sb.Length--;
         }
