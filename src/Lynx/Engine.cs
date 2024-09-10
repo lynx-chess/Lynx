@@ -73,8 +73,7 @@ public sealed partial class Engine
             _killerMoves[i] = new Move[3];
         }
 
-        (int ttLength, _ttMask) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
-        _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
+        InitializeTT();
 
 #if !DEBUG
         // Temporary channel so that no output is generated
@@ -113,7 +112,7 @@ public sealed partial class Engine
 
     private void ResetEngine()
     {
-        Array.Clear(_tt);
+        InitializeTT();
 
         // Clear histories
         for (int i = 0; i < 12; ++i)
