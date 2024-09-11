@@ -34,6 +34,10 @@ public sealed class Game : IDisposable
 
     public Game(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan, Span<Move> movePool)
     {
+        Debug.Assert(Constants.MaxNumberMovesInAGame <= 1024, "Need to customized ArrayPool due to desired array size requirements");
+        _positionHashHistory = ArrayPool<long>.Shared.Rent(Constants.MaxNumberMovesInAGame);
+        _moveStack = ArrayPool<Move>.Shared.Rent(Constants.MaxNumberMovesInAGame);
+
         var parsedFen = FENParser.ParseFEN(fen);
         CurrentPosition = new Position(parsedFen);
 
@@ -42,12 +46,8 @@ public sealed class Game : IDisposable
             _logger.Warn($"Invalid position detected: {fen.ToString()}");
         }
 
-        _positionHashHistory = new long[Constants.MaxNumberMovesInAGame];
         AddToPositionHashHistory(CurrentPosition.UniqueIdentifier);
         HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
-
-        Debug.Assert(Constants.MaxNumberMovesInAGame <= 1024, "Need to customized ArrayPool due to desired array size requirements");
-        _moveStack = ArrayPool<Move>.Shared.Rent(Constants.MaxNumberMovesInAGame);
 
 #if DEBUG
         MoveHistory = new(Constants.MaxNumberMovesInAGame);
@@ -252,6 +252,7 @@ public sealed class Game : IDisposable
     public void FreeResources()
     {
         ArrayPool<Move>.Shared.Return(_moveStack);
+        ArrayPool<long>.Shared.Return(_positionHashHistory);
 
         CurrentPosition.FreeResources();
         PositionBeforeLastSearch.FreeResources();
