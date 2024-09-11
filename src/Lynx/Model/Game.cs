@@ -129,7 +129,7 @@ public sealed class Game
     {
         var currentHash = CurrentPosition.UniqueIdentifier;
 
-        // [Count - 1] would be the last one, we want to start searching 2 ealier and finish HalfMovesWithoutCaptureOrPawnMove earlier
+        // We want to start searching 2 half-moves ealier thaan the last one and finish HalfMovesWithoutCaptureOrPawnMove earlier
         var limit = Math.Max(0, _positionHashHistoryPointer - HalfMovesWithoutCaptureOrPawnMove);
         for (int i = _positionHashHistoryPointer - 2; i >= limit; i -= 2)
         {
