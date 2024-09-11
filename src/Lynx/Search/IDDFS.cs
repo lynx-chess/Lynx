@@ -310,7 +310,7 @@ public sealed partial class Engine
         int bestEvaluation, int alpha, int beta, int depth, int mate)
     {
         var pvTableSpan = _pVTable.AsSpan();
-        var pvMoves = pvTableSpan[..(pvTableSpan.IndexOf(0))].ToArray();
+        var pvMoves = pvTableSpan[..pvTableSpan.IndexOf(0)].ToArray();
 
         var maxDepthReached = _maxDepthReached.LastOrDefault(item => item != default);
 
