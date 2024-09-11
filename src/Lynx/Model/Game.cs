@@ -129,9 +129,9 @@ public sealed class Game
     {
         var currentHash = CurrentPosition.UniqueIdentifier;
 
-        // We want to start searching 2 half-moves ealier thaan the last one and finish HalfMovesWithoutCaptureOrPawnMove earlier
-        var limit = Math.Max(0, _positionHashHistoryPointer - HalfMovesWithoutCaptureOrPawnMove);
-        for (int i = _positionHashHistoryPointer - 2; i >= limit; i -= 2)
+        // [_positionHashHistoryPointer - 1] would be the last one, we want to start searching 2 ealier and finish HalfMovesWithoutCaptureOrPawnMove earlier
+        var limit = Math.Max(0, _positionHashHistoryPointer - 1 - HalfMovesWithoutCaptureOrPawnMove);
+        for (int i = _positionHashHistoryPointer - 3; i >= limit; i -= 2)
         {
             if (currentHash == _positionHashHistory[i])
             {
@@ -154,7 +154,7 @@ public sealed class Game
     }
 
     /// <summary>
-    /// To be used in online tb proving only, with a copy of <see cref="_positionHashHistory"/> that hasn't been updated with <paramref name="position"/>
+    /// To be used in online tb proving only, in combination with the result of <see cref="CopyPositionHashHistory"/>
     /// </summary>
     /// <param name="positionHashHistory"></param>
     /// <param name="position"></param>
@@ -226,7 +226,7 @@ public sealed class Game
     public int PositionHashHistoryLength() => _positionHashHistoryPointer;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void AddToPositionHashHistory(long hash) => _positionHashHistory[++_positionHashHistoryPointer] = hash;
+    public void AddToPositionHashHistory(long hash) => _positionHashHistory[_positionHashHistoryPointer++] = hash;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void RemoveFromPositionHashHistory() => --_positionHashHistoryPointer;
