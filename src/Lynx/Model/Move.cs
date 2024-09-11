@@ -1,4 +1,5 @@
 ﻿using NLog;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -381,10 +382,17 @@ public static class MoveExtensions
 #pragma warning restore S3358 // Ternary operators should not be nested
     }
 
+    private static readonly ConcurrentDictionary<Move, string> UCIStringCache = new(1, 2048);   // Threads
+
     [SkipLocalsInit]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string UCIString(this Move move)
     {
+        if (UCIStringCache.TryGetValue(move, out var uciString))
+        {
+            return uciString;
+        }
+
         Span<char> span = stackalloc char[5];
 
         var source = Constants.CoordinatesCharArray[move.SourceSquare()];
@@ -396,14 +404,21 @@ public static class MoveExtensions
         span[3] = target[1];
 
         var promotedPiece = move.PromotedPiece();
-        if (promotedPiece != default)
-        {
-            span[4] = Constants.AsciiPiecesLowercase[promotedPiece];
 
-            return span.ToString();
+        if (promotedPiece == default)
+        {
+            var str = span[..^1].ToString();
+            UCIStringCache.TryAdd(move, str);
+
+            return str;
         }
 
-        return span[..^1].ToString();
+        span[4] = Constants.AsciiPiecesLowercase[promotedPiece];
+
+        var promoStr = span.ToString();
+        UCIStringCache.TryAdd(move, promoStr);
+
+        return promoStr;
     }
 
     /// <summary>
