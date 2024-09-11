@@ -11,7 +11,8 @@ public sealed class Game
     public List<Move> MoveHistory { get; }
 #endif
 
-    public List<long> PositionHashHistory { get; }
+    private int _positionHashHistoryPointer;
+    private readonly long[] _positionHashHistory;
 
     /// <summary>
     /// Indexed by ply
@@ -38,7 +39,8 @@ public sealed class Game
             _logger.Warn($"Invalid position detected: {fen.ToString()}");
         }
 
-        PositionHashHistory = new(Constants.MaxNumberMovesInAGame) { CurrentPosition.UniqueIdentifier };
+        _positionHashHistory = new long[Constants.MaxNumberMovesInAGame];
+        AddToPositionHashHistory(CurrentPosition.UniqueIdentifier);
         HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
         _moveStack = new Move[1024];
 
@@ -127,11 +129,11 @@ public sealed class Game
     {
         var currentHash = CurrentPosition.UniqueIdentifier;
 
-        // [Count - 1] would be the last one, we want to start searching 2 ealier and finish HalfMovesWithoutCaptureOrPawnMove earlier
-        var limit = Math.Max(0, PositionHashHistory.Count - 1 - HalfMovesWithoutCaptureOrPawnMove);
-        for (int i = PositionHashHistory.Count - 3; i >= limit; i -= 2)
+        // [_positionHashHistoryPointer - 1] would be the last one, we want to start searching 2 ealier and finish HalfMovesWithoutCaptureOrPawnMove earlier
+        var limit = Math.Max(0, _positionHashHistoryPointer - 1 - HalfMovesWithoutCaptureOrPawnMove);
+        for (int i = _positionHashHistoryPointer - 3; i >= limit; i -= 2)
         {
-            if (currentHash == PositionHashHistory[i])
+            if (currentHash == _positionHashHistory[i])
             {
                 return true;
             }
@@ -152,19 +154,19 @@ public sealed class Game
     }
 
     /// <summary>
-    /// To be used in online tb proving only, with a copy of <see cref="PositionHashHistory"/> that hasn't been updated with <paramref name="position"/>
+    /// To be used in online tb proving only, in combination with the result of <see cref="CopyPositionHashHistory"/>
     /// </summary>
     /// <param name="positionHashHistory"></param>
     /// <param name="position"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsThreefoldRepetition(List<long> positionHashHistory, Position position, int halfMovesWithoutCaptureOrPawnMove = Constants.MaxNumberMovesInAGame)
+    public static bool IsThreefoldRepetition(ReadOnlySpan<long> positionHashHistory, Position position, int halfMovesWithoutCaptureOrPawnMove = Constants.MaxNumberMovesInAGame)
     {
         var currentHash = position.UniqueIdentifier;
 
         // Since positionHashHistory hasn't been updated with position, [Count] would be the last one, so we want to start searching 2 ealier
-        var limit = Math.Max(0, positionHashHistory.Count - halfMovesWithoutCaptureOrPawnMove);
-        for (int i = positionHashHistory.Count - 2; i >= limit; i -= 2)
+        var limit = Math.Max(0, positionHashHistory.Length - halfMovesWithoutCaptureOrPawnMove);
+        for (int i = positionHashHistory.Length - 2; i >= limit; i -= 2)
         {
             if (currentHash == positionHashHistory[i])
             {
@@ -193,7 +195,7 @@ public sealed class Game
 #if DEBUG
             MoveHistory.Add(moveToPlay);
 #endif
-            PositionHashHistory.Add(CurrentPosition.UniqueIdentifier);
+            AddToPositionHashHistory(CurrentPosition.UniqueIdentifier);
             Update50movesRule(moveToPlay, moveToPlay.IsCapture());
         }
         else
@@ -219,4 +221,18 @@ public sealed class Game
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Move PopFromMoveStack(int n) => _moveStack[n + EvaluationConstants.ContinuationHistoryPlyCount];
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public int PositionHashHistoryLength() => _positionHashHistoryPointer;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void AddToPositionHashHistory(long hash) => _positionHashHistory[_positionHashHistoryPointer++] = hash;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void RemoveFromPositionHashHistory() => --_positionHashHistoryPointer;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public long[] CopyPositionHashHistory() => _positionHashHistory[.._positionHashHistoryPointer];
+
+    internal void ClearPositionHashHistory() => _positionHashHistoryPointer = 0;
 }
