@@ -234,4 +234,5 @@ public sealed class Game
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public long[] CopyPositionHashHistory() => _positionHashHistory[.._positionHashHistoryPointer];
 
+    internal void ClearPositionHashHistory() => _positionHashHistoryPointer = 0;
 }
