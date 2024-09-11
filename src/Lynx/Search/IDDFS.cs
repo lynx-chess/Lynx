@@ -172,7 +172,7 @@ public sealed partial class Engine
             _logger.Info("Search cancellation requested after {0}ms (depth {1}, nodes {2}), best move will be returned", _stopWatch.ElapsedMilliseconds, depth, _nodes);
 #pragma warning restore S6667 // Logging in a catch clause should pass the caught exception as a parameter.
 
-            for (int i = 0; i < lastSearchResult?.Moves.Count; ++i)
+            for (int i = 0; i < lastSearchResult?.Moves.Length; ++i)
             {
                 _pVTable[i] = lastSearchResult.Moves[i];
             }
@@ -309,7 +309,9 @@ public sealed partial class Engine
     private SearchResult UpdateLastSearchResult(SearchResult? lastSearchResult,
         int bestEvaluation, int alpha, int beta, int depth, int mate)
     {
-        var pvMoves = _pVTable.TakeWhile(m => m != default).ToList();
+        var pvTableSpan = _pVTable.AsSpan();
+        var pvMoves = pvTableSpan[..(pvTableSpan.IndexOf(0))].ToArray();
+
         var maxDepthReached = _maxDepthReached.LastOrDefault(item => item != default);
 
         var elapsedTime = _stopWatch.ElapsedMilliseconds;
