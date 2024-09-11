@@ -164,7 +164,7 @@ public class ForceOrAvoidDrawTest : BaseTest
         Assert.AreEqual(98, engine.Game.MoveHistory.Count);
 #endif
 
-        engine.Game.PositionHashHistory.Clear(); // Make sure we don't take account threefold repetition
+        engine.Game.ClearPositionHashHistory(); // Make sure we don't take account threefold repetition
 
         // Act
         var searchResult = engine.BestMove(new($"go depth {Engine.DefaultMaxDepth}"));
@@ -215,7 +215,7 @@ public class ForceOrAvoidDrawTest : BaseTest
         Assert.AreEqual(99, engine.Game.MoveHistory.Count);
 #endif
 
-        engine.Game.PositionHashHistory.Clear(); // Make sure we don't take account threefold repetition
+        engine.Game.ClearPositionHashHistory(); // Make sure we don't take account threefold repetition
 
         // Act
         var searchResult = engine.BestMove(new($"go depth {Engine.DefaultMaxDepth}"));
@@ -236,7 +236,7 @@ public class ForceOrAvoidDrawTest : BaseTest
         // Source: https://github.com/PGG106/Alexandria/issues/213
         const string mateIn1Fen = "4Q3/8/1p4pk/1PbB1p1p/7P/p3P1PK/P3qP2/8 w - - 99 88";
 
-        var result = TestBestMove(mateIn1Fen, new[] { "e8h8" }, Array.Empty<string>(), depth: 1);
+        var result = TestBestMove(mateIn1Fen, ["e8h8"], [], depth: 1);
         Assert.AreEqual(1, result.Mate);
     }
 }

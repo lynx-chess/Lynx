@@ -53,7 +53,7 @@ public sealed partial class Engine
     public Engine(ChannelWriter<string> engineWriter)
     {
         AverageDepth = 0;
-        Game = new Game();
+        Game = new Game(Constants.InitialPositionFEN);
         _isNewGameComing = true;
         _searchCancellationTokenSource = new();
         _absoluteSearchCancellationTokenSource = new();
@@ -81,7 +81,8 @@ public sealed partial class Engine
         WarmupEngine();
 
         _engineWriter = engineWriter;
-        ResetEngine();
+
+        // No need for ResetEngine() call here, WarmupEngine -> Bench -> NewGame() calls it
 #endif
 
 #pragma warning disable S1215 // "GC.Collect" should not be called
@@ -134,7 +135,7 @@ public sealed partial class Engine
     public void NewGame()
     {
         AverageDepth = 0;
-        Game = new Game();
+        Game = new Game(Constants.InitialPositionFEN);
         _isNewGameComing = true;
         _isNewGameCommandSupported = true;
         _stopRequested = false;
@@ -253,7 +254,7 @@ public sealed partial class Engine
             Game.UpdateInitialPosition();
         }
 
-        AverageDepth += (resultToReturn.Depth - AverageDepth) / Math.Ceiling(0.5 * Game.PositionHashHistory.Count);
+        AverageDepth += (resultToReturn.Depth - AverageDepth) / Math.Ceiling(0.5 * Game.PositionHashHistoryLength());
 
         return resultToReturn;
     }
@@ -270,7 +271,7 @@ public sealed partial class Engine
 
         var tasks = new Task<SearchResult?>[] {
                 // Other copies of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove (same reason)
-                ProbeOnlineTablebase(Game.CurrentPosition, new(Game.PositionHashHistory),  Game.HalfMovesWithoutCaptureOrPawnMove),
+                ProbeOnlineTablebase(Game.CurrentPosition, Game.CopyPositionHashHistory(),  Game.HalfMovesWithoutCaptureOrPawnMove),
                 Task.Run(()=>(SearchResult?)IDDFS(maxDepth, softLimitTimeBound))
             };
 
@@ -336,7 +337,7 @@ public sealed partial class Engine
             }
 
             // We print best move even in case of go ponder + stop, and IDEs are expected to ignore it
-            _moveToPonder = searchResult.Moves.Count >= 2 ? searchResult.Moves[1] : null;
+            _moveToPonder = searchResult.Moves.Length >= 2 ? searchResult.Moves[1] : null;
             _engineWriter.TryWrite(BestMoveCommand.BestMove(searchResult.BestMove, _moveToPonder));
         }
         catch (Exception e)
