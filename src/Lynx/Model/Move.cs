@@ -385,6 +385,7 @@ public static class MoveExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string UCIString(this Move move)
     {
+        // TODO memoize them with dict or even array?
         Span<char> span = stackalloc char[5];
 
         var source = Constants.CoordinatesCharArray[move.SourceSquare()];

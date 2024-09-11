@@ -251,32 +251,6 @@ public sealed class Game : IDisposable
 
     public void FreeResources()
     {
-        CurrentPosition.FreeResources();
-        PositionBeforeLastSearch.FreeResources();
-    }
-
-    private void Dispose(bool disposing)
-    {
-        _logger.Warn("Disposing Game instance");
-        if (!_disposedValue)
-        {
-            if (disposing)
-            {
-                FreeResources();
-            }
-            _disposedValue = true;
-        }
-    }
-
-    public void Dispose()
-    {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
-    }
-
-    public void FreeResources()
-    {
         ArrayPool<Move>.Shared.Return(_moveStack);
 
         CurrentPosition.FreeResources();
