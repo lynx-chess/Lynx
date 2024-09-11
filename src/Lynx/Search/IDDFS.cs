@@ -87,7 +87,7 @@ public sealed partial class Engine
 
             if (OnlyOneLegalMove(ref firstLegalMove, out var onlyOneLegalMoveSearchResult))
             {
-                _engineWriter.TryWrite(InfoCommand.SearchResultInfo(onlyOneLegalMoveSearchResult));
+                _engineWriter.TryWrite(new InfoCommand(onlyOneLegalMoveSearchResult));
 
                 return onlyOneLegalMoveSearchResult;
             }
@@ -101,7 +101,7 @@ public sealed partial class Engine
 
             if (lastSearchResult is not null)
             {
-                _engineWriter.TryWrite(InfoCommand.SearchResultInfo(lastSearchResult));
+                _engineWriter.TryWrite(new InfoCommand(lastSearchResult));
             }
 
             int mate = 0;
@@ -162,7 +162,7 @@ public sealed partial class Engine
 
                 lastSearchResult = UpdateLastSearchResult(lastSearchResult, bestEvaluation, alpha, beta, depth, mate);
 
-                _engineWriter.TryWrite(InfoCommand.SearchResultInfo(lastSearchResult));
+                _engineWriter.TryWrite(new InfoCommand(lastSearchResult));
             } while (StopSearchCondition(++depth, maxDepth, mate, softLimitTimeBound));
         }
         catch (OperationCanceledException)
@@ -196,7 +196,7 @@ public sealed partial class Engine
             _logger.Info("Engine search found a short enough mate, cancelling online tb probing if still active");
         }
 
-        _engineWriter.TryWrite(InfoCommand.SearchResultInfo(finalSearchResult));
+        _engineWriter.TryWrite(new InfoCommand(finalSearchResult));
 
         return finalSearchResult;
     }

@@ -1,14 +1,16 @@
-﻿using NLog;
+﻿using Lynx.UCI.Commands;
+using Lynx.UCI.Commands.Engine;
+using NLog;
 using System.Threading.Channels;
 
 namespace Lynx.Cli;
 
 public sealed class Writer
 {
-    private readonly ChannelReader<string> _engineOutputReader;
+    private readonly ChannelReader<EngineBaseCommand> _engineOutputReader;
     private readonly Logger _logger;
 
-    public Writer(ChannelReader<string> engineOutputReader)
+    public Writer(ChannelReader<EngineBaseCommand> engineOutputReader)
     {
         _engineOutputReader = engineOutputReader;
         _logger = LogManager.GetCurrentClassLogger();
@@ -20,8 +22,7 @@ public sealed class Writer
         {
             await foreach (var output in _engineOutputReader.ReadAllAsync(cancellationToken))
             {
-                _logger.Debug("[Lynx]\t{0}", output);
-                Console.WriteLine(output);
+                Console.WriteLine(output.ToString());
             }
         }
         catch (Exception e)

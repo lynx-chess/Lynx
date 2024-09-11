@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using Lynx.UCI.Commands.Engine;
+using System.Diagnostics;
 
 namespace Lynx;
 
@@ -111,7 +112,7 @@ public partial class Engine
 
         foreach (var fen in _benchmarkFens)
         {
-            _engineWriter.TryWrite($"Benchmarking {fen} at depth {depth}");
+            _engineWriter.TryWrite(new MiscellaneousCommand($"Benchmarking {fen} at depth {depth}"));
 
             AdjustPosition($"position fen {fen}");
             stopwatch.Restart();
@@ -121,7 +122,7 @@ public partial class Engine
             totalNodes += result.Nodes;
         }
 
-        _engineWriter.TryWrite($"Total time: {totalTime}");
+        _engineWriter.TryWrite(new MiscellaneousCommand($"Total time: {totalTime}"));
 
         // Cleanup game
         NewGame();
@@ -131,7 +132,7 @@ public partial class Engine
         return (totalNodes, Utils.CalculateNps(totalNodes, totalTime));
     }
 
-    public async ValueTask PrintBenchResults((long TotalNodes, long Nps) benchResult) => await _engineWriter.WriteAsync($"{benchResult.TotalNodes} nodes {benchResult.Nps} nps");
+    public async ValueTask PrintBenchResults((long TotalNodes, long Nps) benchResult) => await _engineWriter.WriteAsync(new MiscellaneousCommand($"{benchResult.TotalNodes} nodes {benchResult.Nps} nps"));
     public static void PrintBenchResults((long TotalNodes, long Nps) benchResult, Action<string> write) => write($"{benchResult.TotalNodes} nodes {benchResult.Nps} nps");
     public static async ValueTask PrintBenchResults((long TotalNodes, long Nps) benchResult, Func<string, ValueTask> write) => await write($"{benchResult.TotalNodes} nodes {benchResult.Nps} nps");
 }

@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using Lynx.UCI.Commands;
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
@@ -13,7 +14,7 @@ public sealed partial class Engine
     internal const int DefaultMaxDepth = 5;
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-    private readonly ChannelWriter<string> _engineWriter;
+    private readonly ChannelWriter<EngineBaseCommand> _engineWriter;
 
     private bool _isSearching;
 
@@ -50,7 +51,7 @@ public sealed partial class Engine
     private CancellationTokenSource _searchCancellationTokenSource;
     private CancellationTokenSource _absoluteSearchCancellationTokenSource;
 
-    public Engine(ChannelWriter<string> engineWriter)
+    public Engine(ChannelWriter<EngineBaseCommand> engineWriter)
     {
         AverageDepth = 0;
         Game = new Game(Constants.InitialPositionFEN);
@@ -77,7 +78,7 @@ public sealed partial class Engine
 
 #if !DEBUG
         // Temporary channel so that no output is generated
-        _engineWriter = Channel.CreateUnbounded<string>(new UnboundedChannelOptions() { SingleReader = true, SingleWriter = false }).Writer;
+        _engineWriter = Channel.CreateUnbounded<EngineBaseCommand>(new UnboundedChannelOptions() { SingleReader = true, SingleWriter = false }).Writer;
         WarmupEngine();
 
         _engineWriter = engineWriter;
@@ -338,7 +339,7 @@ public sealed partial class Engine
 
             // We print best move even in case of go ponder + stop, and IDEs are expected to ignore it
             _moveToPonder = searchResult.Moves.Length >= 2 ? searchResult.Moves[1] : null;
-            _engineWriter.TryWrite(BestMoveCommand.BestMove(searchResult.BestMove, _moveToPonder));
+            _engineWriter.TryWrite(new BestMoveCommand(searchResult.BestMove, _moveToPonder));
         }
         catch (Exception e)
         {

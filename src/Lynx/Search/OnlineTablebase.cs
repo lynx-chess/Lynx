@@ -29,7 +29,7 @@ public sealed partial class Engine
                         0)
                 };
 
-                await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(searchResult));
+                await _engineWriter.WriteAsync(new InfoCommand(searchResult));
                 _searchCancellationTokenSource.Cancel();
 
                 return searchResult;

@@ -76,40 +76,47 @@ public sealed class InfoCommand : EngineBaseCommand
 {
     public const string Id = "info";
 
-    public static string SearchResultInfo(SearchResult searchResult)
+    private readonly SearchResult _searchResult;
+
+    public InfoCommand(SearchResult searchResult)
+    {
+        _searchResult = searchResult;
+    }
+
+    public override string ToString()
     {
         var sb = new StringBuilder(256);
 
         sb.Append(Id)
-          .Append(" depth ").Append(searchResult.Depth)
-          .Append(" seldepth ").Append(searchResult.DepthReached)
+          .Append(" depth ").Append(_searchResult.Depth)
+          .Append(" seldepth ").Append(_searchResult.DepthReached)
           .Append(" multipv 1")
-          .Append(" score ").Append(searchResult.Mate == default ? "cp " + WDL.NormalizeScore(searchResult.Evaluation) : "mate " + searchResult.Mate)
-          .Append(" nodes ").Append(searchResult.Nodes)
-          .Append(" nps ").Append(searchResult.NodesPerSecond)
-          .Append(" time ").Append(searchResult.Time);
+          .Append(" score ").Append(_searchResult.Mate == default ? "cp " + WDL.NormalizeScore(_searchResult.Evaluation) : "mate " + _searchResult.Mate)
+          .Append(" nodes ").Append(_searchResult.Nodes)
+          .Append(" nps ").Append(_searchResult.NodesPerSecond)
+          .Append(" time ").Append(_searchResult.Time);
 
-        if (searchResult.HashfullPermill != -1)
+        if (_searchResult.HashfullPermill != -1)
         {
-            sb.Append(" hashfull ").Append(searchResult.HashfullPermill);
+            sb.Append(" hashfull ").Append(_searchResult.HashfullPermill);
         }
 
-        if (searchResult.WDL is not null)
+        if (_searchResult.WDL is not null)
         {
             sb.Append(" wdl ")
-              .Append(searchResult.WDL.Value.WDLWin).Append(' ')
-              .Append(searchResult.WDL.Value.WDLDraw).Append(' ')
-              .Append(searchResult.WDL.Value.WDLLoss);
+              .Append(_searchResult.WDL.Value.WDLWin).Append(' ')
+              .Append(_searchResult.WDL.Value.WDLDraw).Append(' ')
+              .Append(_searchResult.WDL.Value.WDLLoss);
         }
 
         sb.Append(" pv ");
-        foreach (var move in searchResult.Moves)
+        foreach (var move in _searchResult.Moves)
         {
             sb.Append(move.UCIString()).Append(' ');
         }
 
         // Remove the trailing space
-        if (searchResult.Moves.Length > 0)
+        if (_searchResult.Moves.Length > 0)
         {
             sb.Length--;
         }

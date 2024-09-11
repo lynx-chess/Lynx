@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using Lynx.UCI.Commands;
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
@@ -13,12 +14,12 @@ namespace Lynx;
 public sealed class UCIHandler
 {
     private readonly Channel<string> _uciToEngine;
-    private readonly Channel<string> _engineToUci;
+    private readonly Channel<EngineBaseCommand> _engineToUci;
 
     private readonly Engine _engine;
     private readonly Logger _logger;
 
-    public UCIHandler(Channel<string> uciToEngine, Channel<string> engineToUci, Engine engine)
+    public UCIHandler(Channel<string> uciToEngine, Channel<EngineBaseCommand> engineToUci, Engine engine)
     {
         _uciToEngine = uciToEngine;
         _engineToUci = engineToUci;
@@ -496,7 +497,7 @@ public sealed class UCIHandler
         if (items.Length >= 2 && int.TryParse(items[1], out int depth) && depth >= 1)
         {
             var results = Perft.Results(_engine.Game.CurrentPosition, depth);
-            await Perft.PrintPerftResult(depth, results, str => _engineToUci.Writer.WriteAsync(str));
+            await Perft.PrintPerftResult(depth, results, str => _engineToUci.Writer.WriteAsync(new MiscellaneousCommand(str)));
         }
     }
 
@@ -506,8 +507,8 @@ public sealed class UCIHandler
 
         if (items.Length >= 2 && int.TryParse(items[1], out int depth) && depth >= 1)
         {
-            var results = Perft.Divide(_engine.Game.CurrentPosition, depth, str => _engineToUci.Writer.TryWrite(str));
-            await Perft.PrintPerftResult(depth, results, str => _engineToUci.Writer.WriteAsync(str));
+            var results = Perft.Divide(_engine.Game.CurrentPosition, depth, str => _engineToUci.Writer.TryWrite(new MiscellaneousCommand(str)));
+            await Perft.PrintPerftResult(depth, results, str => _engineToUci.Writer.WriteAsync(new MiscellaneousCommand(str)));
         }
     }
 
@@ -529,7 +530,7 @@ public sealed class UCIHandler
 
         var message = $"{nameof(Configuration)}.{nameof(Configuration.EngineSettings)}:{Environment.NewLine}{engineSettings}";
 
-        await _engineToUci.Writer.WriteAsync(message);
+        await _engineToUci.Writer.WriteAsync(new MiscellaneousCommand(message));
     }
 
     private async ValueTask HandleSystemInfo()
@@ -540,7 +541,7 @@ public sealed class UCIHandler
                 ? "Bmi2.X64 supported, PEXT BitBoards will be used"
                 : "Bmi2.X64 not supported";
 
-            await _engineToUci.Writer.WriteAsync(simd);
+            await _engineToUci.Writer.WriteAsync(new MiscellaneousCommand(simd));
         }
         catch (Exception e)
         {
@@ -583,7 +584,7 @@ public sealed class UCIHandler
                     eval = -eval;   // White perspective
                 }
 
-                await _engineToUci.Writer.WriteAsync($"{line}: {eval}", cancellationToken);
+                await _engineToUci.Writer.WriteAsync(new MiscellaneousCommand($"{line}: {eval}"), cancellationToken);
 
                 if (++lineCounter % 100 == 0)
                 {
@@ -594,7 +595,7 @@ public sealed class UCIHandler
         catch (Exception e)
         {
             Console.WriteLine(e.Message + e.StackTrace);
-            await _engineToUci.Writer.WriteAsync(e.Message + e.StackTrace, cancellationToken);
+            await _engineToUci.Writer.WriteAsync(new MiscellaneousCommand(e.Message + e.StackTrace), cancellationToken);
         }
     }
 
@@ -602,7 +603,7 @@ public sealed class UCIHandler
     {
         var score = WDL.NormalizeScore(_engine.Game.CurrentPosition.StaticEvaluation().Score);
 
-        await _engineToUci.Writer.WriteAsync(score.ToString(), cancellationToken);
+        await _engineToUci.Writer.WriteAsync(new MiscellaneousCommand(score.ToString()), cancellationToken);
     }
 
     private async Task HandleFEN(CancellationToken cancellationToken)
@@ -611,7 +612,7 @@ public sealed class UCIHandler
 
         var fen = _engine.Game.CurrentPosition.FEN()[..^3] + _engine.Game.HalfMovesWithoutCaptureOrPawnMove.ToString() + fullMoveCounterString;
 
-        await _engineToUci.Writer.WriteAsync(fen, cancellationToken);
+        await _engineToUci.Writer.WriteAsync(new MiscellaneousCommand(fen), cancellationToken);
     }
 
     private async ValueTask HandleOpenBenchSPSA(CancellationToken cancellationToken)
@@ -647,6 +648,6 @@ public sealed class UCIHandler
 
     private async Task SendCommand(string command, CancellationToken cancellationToken)
     {
-        await _engineToUci.Writer.WriteAsync(command, cancellationToken);
+        await _engineToUci.Writer.WriteAsync(new MiscellaneousCommand(command), cancellationToken);
     }
 }
