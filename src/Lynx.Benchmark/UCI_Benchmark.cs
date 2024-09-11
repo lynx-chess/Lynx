@@ -33,13 +33,14 @@
  */
 
 using BenchmarkDotNet.Attributes;
+using Lynx.UCI.Commands;
 using System.Threading.Channels;
 
 namespace Lynx.Benchmark;
 
 public class UCI_Benchmark : BaseBenchmark
 {
-    private readonly Channel<string> _channel = Channel.CreateBounded<string>(new BoundedChannelOptions(100_000) { SingleReader = true, SingleWriter = false });
+    private readonly Channel<EngineBaseCommand> _channel = Channel.CreateBounded<EngineBaseCommand>(new BoundedChannelOptions(100_000) { SingleReader = true, SingleWriter = false });
 
     [Benchmark]
     public (long, long) Bench_DefaultDepth()
