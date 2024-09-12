@@ -1,5 +1,4 @@
 ﻿using Lynx.UCI.Commands.Engine;
-using System.Text;
 
 namespace Lynx.Model;
 
@@ -46,7 +45,7 @@ public sealed class SearchResult
 
     public override string ToString()
     {
-        var sb = new StringBuilder(256);
+        var sb = ObjectPools.StringBuilderPool.Get();
 
         sb.Append(InfoCommand.Id)
           .Append(" depth ").Append(Depth)
@@ -73,7 +72,7 @@ public sealed class SearchResult
         sb.Append(" pv ");
         foreach (var move in Moves)
         {
-            sb.Append(move.UCIString()).Append(' ');
+            sb.Append(move.UCIStringMemoized()).Append(' ');
         }
 
         // Remove the trailing space
@@ -82,6 +81,10 @@ public sealed class SearchResult
             sb.Length--;
         }
 
-        return sb.ToString();
+        var result = sb.ToString();
+
+        ObjectPools.StringBuilderPool.Return(sb);
+
+        return result;
     }
 }

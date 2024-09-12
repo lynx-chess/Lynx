@@ -407,6 +407,28 @@ public static class MoveExtensions
         return span[..^1].ToString();
     }
 
+    private static readonly Dictionary<int, string> _uCIStringCache = new(1024);
+
+    /// <summary>
+    /// NOT thread-safe
+    /// </summary>
+    /// <param name="move"></param>
+    /// <returns></returns>
+    [SkipLocalsInit]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static string UCIStringMemoized(this Move move)
+    {
+        if (_uCIStringCache.TryGetValue(move, out var uciString))
+        {
+            return uciString;
+        }
+
+        var str = move.UCIString();
+        _uCIStringCache[move] = str;
+
+        return str;
+    }
+
     /// <summary>
     /// First file letter, then rank number and finally the whole square.
     /// At least according to https://chess.stackexchange.com/a/1819
