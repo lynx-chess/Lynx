@@ -75,9 +75,4 @@ namespace Lynx.UCI.Commands.Engine;
 public sealed class InfoCommand : EngineBaseCommand
 {
     public const string Id = "info";
-
-    private InfoCommand()
-    {
-
-    }
 }

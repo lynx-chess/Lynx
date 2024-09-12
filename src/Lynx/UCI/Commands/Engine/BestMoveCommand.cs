@@ -15,20 +15,11 @@ public sealed class BestMoveCommand : EngineBaseCommand
 {
     public const string Id = "bestmove";
 
-    private readonly Move _move;
-    private readonly Move? _moveToPonder;
-
-    public BestMoveCommand(Move move, Move? moveToPonder)
+    public static string BestMove(Move move, Move? moveToPonder = null)
     {
-        _move = move;
-        _moveToPonder = moveToPonder;
-    }
-
-    public override string ToString()
-    {
-        return $"bestmove {_move.UCIString()}" +
-            (_moveToPonder.HasValue
-                ? $" ponder {_moveToPonder!.Value.UCIString()}"
+        return $"bestmove {move.UCIString()}" +
+            (moveToPonder.HasValue
+                ? $" ponder {moveToPonder!.Value.UCIString()}"
                 : string.Empty);
     }
 }

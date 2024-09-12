@@ -20,6 +20,7 @@ public sealed class Writer
         {
             await foreach (var output in _engineOutputReader.ReadAllAsync(cancellationToken))
             {
+                _logger.Debug("[Lynx]\t{0}", output);
                 Console.WriteLine(output.ToString());
             }
         }
