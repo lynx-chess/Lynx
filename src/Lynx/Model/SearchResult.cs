@@ -73,7 +73,7 @@ public sealed class SearchResult
         sb.Append(" pv ");
         foreach (var move in Moves)
         {
-            sb.Append(move.UCIString()).Append(' ');
+            sb.Append(move.UCIStringMemoized()).Append(' ');
         }
 
         // Remove the trailing space
