@@ -17,7 +17,7 @@ public class PositionCommandTest
     public async Task PositionCommandShouldNotTakeIntoAccountInternalState()
     {
         // Arrange
-        var engine = new Engine(new Mock<ChannelWriter<string>>().Object);
+        var engine = new Engine(new Mock<ChannelWriter<object>>().Object);
         engine.NewGame();
         engine.AdjustPosition($"position fen {Constants.InitialPositionFEN} moves e2e4");
 

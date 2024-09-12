@@ -1,5 +1,4 @@
 ﻿using Lynx.Model;
-using Lynx.UCI.Commands;
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
@@ -14,7 +13,7 @@ public sealed partial class Engine
     internal const int DefaultMaxDepth = 5;
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-    private readonly ChannelWriter<EngineBaseCommand> _engineWriter;
+    private readonly ChannelWriter<object> _engineWriter;
 
     private bool _isSearching;
 
@@ -51,7 +50,7 @@ public sealed partial class Engine
     private CancellationTokenSource _searchCancellationTokenSource;
     private CancellationTokenSource _absoluteSearchCancellationTokenSource;
 
-    public Engine(ChannelWriter<EngineBaseCommand> engineWriter)
+    public Engine(ChannelWriter<object> engineWriter)
     {
         AverageDepth = 0;
         Game = new Game(Constants.InitialPositionFEN);
@@ -78,7 +77,7 @@ public sealed partial class Engine
 
 #if !DEBUG
         // Temporary channel so that no output is generated
-        _engineWriter = Channel.CreateUnbounded<EngineBaseCommand>(new UnboundedChannelOptions() { SingleReader = true, SingleWriter = false }).Writer;
+        _engineWriter = Channel.CreateUnbounded<object>(new UnboundedChannelOptions() { SingleReader = true, SingleWriter = false }).Writer;
         WarmupEngine();
 
         _engineWriter = engineWriter;

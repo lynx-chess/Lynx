@@ -1,16 +1,14 @@
-﻿using Lynx.UCI.Commands;
-using Lynx.UCI.Commands.Engine;
-using NLog;
+﻿using NLog;
 using System.Threading.Channels;
 
 namespace Lynx.Cli;
 
 public sealed class Writer
 {
-    private readonly ChannelReader<EngineBaseCommand> _engineOutputReader;
+    private readonly ChannelReader<object> _engineOutputReader;
     private readonly Logger _logger;
 
-    public Writer(ChannelReader<EngineBaseCommand> engineOutputReader)
+    public Writer(ChannelReader<object> engineOutputReader)
     {
         _engineOutputReader = engineOutputReader;
         _logger = LogManager.GetCurrentClassLogger();

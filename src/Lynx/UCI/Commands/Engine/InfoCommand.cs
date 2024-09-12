@@ -76,51 +76,8 @@ public sealed class InfoCommand : EngineBaseCommand
 {
     public const string Id = "info";
 
-    private readonly SearchResult _searchResult;
-
-    public InfoCommand(SearchResult searchResult)
+    private InfoCommand()
     {
-        _searchResult = searchResult;
-    }
 
-    public override string ToString()
-    {
-        var sb = new StringBuilder(256);
-
-        sb.Append(Id)
-          .Append(" depth ").Append(_searchResult.Depth)
-          .Append(" seldepth ").Append(_searchResult.DepthReached)
-          .Append(" multipv 1")
-          .Append(" score ").Append(_searchResult.Mate == default ? "cp " + WDL.NormalizeScore(_searchResult.Evaluation) : "mate " + _searchResult.Mate)
-          .Append(" nodes ").Append(_searchResult.Nodes)
-          .Append(" nps ").Append(_searchResult.NodesPerSecond)
-          .Append(" time ").Append(_searchResult.Time);
-
-        if (_searchResult.HashfullPermill != -1)
-        {
-            sb.Append(" hashfull ").Append(_searchResult.HashfullPermill);
-        }
-
-        if (_searchResult.WDL is not null)
-        {
-            sb.Append(" wdl ")
-              .Append(_searchResult.WDL.Value.WDLWin).Append(' ')
-              .Append(_searchResult.WDL.Value.WDLDraw).Append(' ')
-              .Append(_searchResult.WDL.Value.WDLLoss);
-        }
-
-        sb.Append(" pv ");
-        foreach (var move in _searchResult.Moves)
-        {
-            sb.Append(move.UCIString()).Append(' ');
-        }
-
-        // Remove the trailing space
-        if (_searchResult.Moves.Length > 0)
-        {
-            sb.Length--;
-        }
-
-        return sb.ToString();
     }
 }

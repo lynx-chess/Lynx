@@ -1,5 +1,4 @@
 ﻿using Lynx.Model;
-using Lynx.UCI.Commands.Engine;
 using System.Diagnostics;
 
 namespace Lynx;
@@ -29,8 +28,8 @@ public sealed partial class Engine
                         0)
                 };
 
-                await _engineWriter.WriteAsync(new InfoCommand(searchResult));
-                _searchCancellationTokenSource.Cancel();
+                await _engineWriter.WriteAsync(searchResult);
+                await _searchCancellationTokenSource.CancelAsync();
 
                 return searchResult;
             }
@@ -39,7 +38,7 @@ public sealed partial class Engine
         }
         catch (OperationCanceledException) // Also catches TaskCanceledException
         {
-            _logger.Info("Online tb probing cancellation requested after {0}ms", _stopWatch.ElapsedMilliseconds);
+            _logger.Info("Online tb probing cancellation requested after {0}ms ()", _stopWatch.ElapsedMilliseconds);
 
             return null;
         }
