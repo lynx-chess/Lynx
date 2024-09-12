@@ -46,7 +46,7 @@ public abstract class BaseTest
 
     protected static Engine GetEngine()
     {
-        var mock = new Mock<ChannelWriter<string>>();
+        var mock = new Mock<ChannelWriter<object>>();
 
         mock
             .Setup(m => m.WriteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))

@@ -1,13 +1,22 @@
-﻿namespace Lynx.Model;
+﻿using Lynx.UCI.Commands.Engine;
+using System.Text;
 
-public class SearchResult
+namespace Lynx.Model;
+
+public sealed class SearchResult
 {
     public Move BestMove { get; init; }
+
     public int Evaluation { get; init; }
+
     public int Depth { get; set; }
+
     public Move[] Moves { get; init; }
+
     public int Alpha { get; init; }
+
     public int Beta { get; init; }
+
     public int Mate { get; init; }
 
     public int DepthReached { get; set; }
@@ -33,5 +42,46 @@ public class SearchResult
         Alpha = alpha;
         Beta = beta;
         Mate = mate;
+    }
+
+    public override string ToString()
+    {
+        var sb = new StringBuilder(256);
+
+        sb.Append(InfoCommand.Id)
+          .Append(" depth ").Append(Depth)
+          .Append(" seldepth ").Append(DepthReached)
+          .Append(" multipv 1")
+          .Append(" score ").Append(Mate == default ? "cp " + Lynx.WDL.NormalizeScore(Evaluation) : "mate " + Mate)
+          .Append(" nodes ").Append(Nodes)
+          .Append(" nps ").Append(NodesPerSecond)
+          .Append(" time ").Append(Time);
+
+        if (HashfullPermill != -1)
+        {
+            sb.Append(" hashfull ").Append(HashfullPermill);
+        }
+
+        if (WDL is not null)
+        {
+            sb.Append(" wdl ")
+              .Append(WDL.Value.WDLWin).Append(' ')
+              .Append(WDL.Value.WDLDraw).Append(' ')
+              .Append(WDL.Value.WDLLoss);
+        }
+
+        sb.Append(" pv ");
+        foreach (var move in Moves)
+        {
+            sb.Append(move.UCIString()).Append(' ');
+        }
+
+        // Remove the trailing space
+        if (Moves.Length > 0)
+        {
+            sb.Length--;
+        }
+
+        return sb.ToString();
     }
 }
