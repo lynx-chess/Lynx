@@ -1,5 +1,4 @@
 ﻿using Lynx.Model;
-using Lynx.UCI.Commands.Engine;
 using System.Diagnostics;
 
 namespace Lynx;
@@ -29,8 +28,8 @@ public sealed partial class Engine
                         0)
                 };
 
-                await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(searchResult));
-                _searchCancellationTokenSource.Cancel();
+                await _engineWriter.WriteAsync(searchResult);
+                await _searchCancellationTokenSource.CancelAsync();
 
                 return searchResult;
             }

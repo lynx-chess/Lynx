@@ -35,7 +35,7 @@ public class ForceOrAvoidDrawTest : BaseTest
         // https://gameknot.com/chess-puzzle.pl?pz=247493
         const string fen = "r6k/p3b1pp/2pq4/Qp2n1NK/4P1P1/P3Br1P/1P2RP2/8 b - - 0 1";
 
-        var mock = new Mock<ChannelWriter<string>>();
+        var mock = new Mock<ChannelWriter<object>>();
 
         mock
             .Setup(m => m.WriteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
@@ -82,7 +82,7 @@ public class ForceOrAvoidDrawTest : BaseTest
 
         const string fen = "7B/8/7k/8/5KR1/8/5R2/8 w - - 0 1";
 
-        var mock = new Mock<ChannelWriter<string>>();
+        var mock = new Mock<ChannelWriter<object>>();
 
         mock
             .Setup(m => m.WriteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
@@ -133,7 +133,7 @@ public class ForceOrAvoidDrawTest : BaseTest
         // https://gameknot.com/chess-puzzle.pl?pz=247493
         const string fen = "r6k/p3b1pp/2pq4/Qp2n1NK/4P1P1/P3Br1P/1P2RP2/8 b - - 0 1";
 
-        var mock = new Mock<ChannelWriter<string>>();
+        var mock = new Mock<ChannelWriter<object>>();
 
         mock
             .Setup(m => m.WriteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
@@ -181,7 +181,7 @@ public class ForceOrAvoidDrawTest : BaseTest
 
         const string fen = "8/7B/8/7k/5KR1/8/4R3/8 w - - 0 1";
 
-        var mock = new Mock<ChannelWriter<string>>();
+        var mock = new Mock<ChannelWriter<object>>();
 
         mock
             .Setup(m => m.WriteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))

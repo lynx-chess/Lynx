@@ -1,5 +1,4 @@
 ﻿using Lynx.Model;
-using Lynx.UCI.Commands.Engine;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -87,7 +86,7 @@ public sealed partial class Engine
 
             if (OnlyOneLegalMove(ref firstLegalMove, out var onlyOneLegalMoveSearchResult))
             {
-                _engineWriter.TryWrite(InfoCommand.SearchResultInfo(onlyOneLegalMoveSearchResult));
+                _engineWriter.TryWrite(onlyOneLegalMoveSearchResult);
 
                 return onlyOneLegalMoveSearchResult;
             }
@@ -101,7 +100,7 @@ public sealed partial class Engine
 
             if (lastSearchResult is not null)
             {
-                _engineWriter.TryWrite(InfoCommand.SearchResultInfo(lastSearchResult));
+                _engineWriter.TryWrite(lastSearchResult);
             }
 
             int mate = 0;
@@ -162,7 +161,7 @@ public sealed partial class Engine
 
                 lastSearchResult = UpdateLastSearchResult(lastSearchResult, bestEvaluation, alpha, beta, depth, mate);
 
-                _engineWriter.TryWrite(InfoCommand.SearchResultInfo(lastSearchResult));
+                _engineWriter.TryWrite(lastSearchResult);
             } while (StopSearchCondition(++depth, maxDepth, mate, softLimitTimeBound));
         }
         catch (OperationCanceledException)
@@ -196,7 +195,7 @@ public sealed partial class Engine
             _logger.Info("Engine search found a short enough mate, cancelling online tb probing if still active");
         }
 
-        _engineWriter.TryWrite(InfoCommand.SearchResultInfo(finalSearchResult));
+        _engineWriter.TryWrite(finalSearchResult);
 
         return finalSearchResult;
     }
@@ -310,7 +309,7 @@ public sealed partial class Engine
         int bestEvaluation, int alpha, int beta, int depth, int mate)
     {
         var pvTableSpan = _pVTable.AsSpan();
-        var pvMoves = pvTableSpan[..(pvTableSpan.IndexOf(0))].ToArray();
+        var pvMoves = pvTableSpan[..pvTableSpan.IndexOf(0)].ToArray();
 
         var maxDepthReached = _maxDepthReached.LastOrDefault(item => item != default);
 

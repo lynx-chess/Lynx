@@ -756,13 +756,21 @@ public class Position : IDisposable
         if ((PieceBitBoards[(int)Piece.p - pieceIndex] & Masks.PassedPawns[pieceIndex][squareIndex]) == default)    // isPassedPawn
         {
             var rank = Constants.Rank[squareIndex];
+            var blockingSquare = squareIndex + 8;
+            var oppositeSide = (int)Side.Black;
             if (pieceIndex == (int)Piece.p)
             {
                 rank = 7 - rank;
+                blockingSquare -= 16;
+                oppositeSide = (int)Side.White;
+            }
+
+            if (OccupancyBitBoards[oppositeSide].GetBit(blockingSquare))
+            {
+                packedBonus += PassedPawnBlockedPenalty[bucket][rank];
             }
 
             var friendlyKingDistance = Constants.ChebyshevDistance[squareIndex][sameSideKingSquare];
-
             var enemyKingDistance = Constants.ChebyshevDistance[squareIndex][oppositeSideKingSquare];
 
             packedBonus += PassedPawnBonus[bucket][rank]
