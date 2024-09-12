@@ -753,12 +753,12 @@ public class Position
         if ((PieceBitBoards[(int)Piece.p - pieceIndex] & Masks.PassedPawns[pieceIndex][squareIndex]) == default)    // isPassedPawn
         {
             var rank = Constants.Rank[squareIndex];
-            var blockingSquare = squareIndex + 8;
+            var blockingSquare = squareIndex - 8;
             var oppositeSide = (int)Side.Black;
             if (pieceIndex == (int)Piece.p)
             {
                 rank = 7 - rank;
-                blockingSquare -= 16;
+                blockingSquare += 16;
                 oppositeSide = (int)Side.White;
             }
 
