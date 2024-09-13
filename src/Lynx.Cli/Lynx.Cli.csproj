@@ -33,7 +33,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="appsettings.Development.json" Condition="'$(Configuration)'=='Debug' OR '$(CIBuild.ToLower())' == 'true'">
+    <None Update="appsettings.Development.json" Condition="'$(Configuration)'=='Debug'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="appsettings.json">
