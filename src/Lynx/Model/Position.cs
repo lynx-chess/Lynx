@@ -753,7 +753,8 @@ public class Position : IDisposable
             packedBonus += IsolatedPawnPenalty;
         }
 
-        if ((PieceBitBoards[(int)Piece.p - pieceIndex] & Masks.PassedPawns[pieceIndex][squareIndex]) == default)    // isPassedPawn
+        ulong passedPawnsMask = Masks.PassedPawns[pieceIndex][squareIndex];
+        if ((PieceBitBoards[(int)Piece.p - pieceIndex] & passedPawnsMask) == default)    // isPassedPawn
         {
             var rank = Constants.Rank[squareIndex];
             var blockingSquare = squareIndex + 8;
@@ -765,9 +766,9 @@ public class Position : IDisposable
                 oppositeSide = (int)Side.White;
             }
 
-            if (OccupancyBitBoards[oppositeSide].GetBit(blockingSquare))
+            if ((passedPawnsMask & OccupancyBitBoards[oppositeSide]) == 0)
             {
-                packedBonus += PassedPawnBlockedPenalty[bucket][rank];
+                packedBonus += PassedPawnBonusNoEnemiesAheadBonus[bucket][rank];
             }
 
             var friendlyKingDistance = Constants.ChebyshevDistance[squareIndex][sameSideKingSquare];
