@@ -82,7 +82,7 @@ jobs:
           ${{ runner.os }}-nuget-
 
     - name: Build
-      run: dotnet build -c Release src/Lynx.Cli/Lynx.Cli.csproj /p:DeterministicBuild=true
+      run: dotnet build -c Release src/Lynx.Cli/Lynx.Cli.csproj /p:DeterministicBuild=true /p:CIBuild=true
 
     - name: Publish CLI
       run: dotnet publish src/Lynx.Cli/Lynx.Cli.csproj -c Release --runtime ${{ matrix.runtime-identifier }} --self-contained /p:Optimized=true -o artifacts/${{ matrix.runtime-identifier }}
@@ -149,7 +149,7 @@ jobs:
           ${{ runner.os }}-nuget-
 
     - name: Build
-      run: dotnet build -c ${{ matrix.configuration }} /p:DeterministicBuild=true
+      run: dotnet build -c ${{ matrix.configuration }} /p:DeterministicBuild=true /p:CIBuild=true
 
     - name: Run ${{ matrix.category }} tests
       run: dotnet test -c ${{ matrix.configuration }} --no-build --collect:"XPlat Code Coverage" --settings tests/runsettings.xml -v normal --logger "GitHubActions;summary.includePassedTests=true;summary.includeSkippedTests=true"
