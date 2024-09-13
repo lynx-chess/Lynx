@@ -81,11 +81,8 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-nuget-
 
-    - name: Build
-      run: dotnet build -c Release src/Lynx.Cli/Lynx.Cli.csproj /p:DeterministicBuild=true /p:CIBuild=true
-
     - name: Publish CLI
-      run: dotnet publish src/Lynx.Cli/Lynx.Cli.csproj -c Release --runtime ${{ matrix.runtime-identifier }} --self-contained /p:Optimized=true -o artifacts/${{ matrix.runtime-identifier }}
+      run: dotnet publish src/Lynx.Cli/Lynx.Cli.csproj -c Release --runtime ${{ matrix.runtime-identifier }} --self-contained /p:Optimized=true /p:DeterministicBuild=true /p:CIBuild=true -o artifacts/${{ matrix.runtime-identifier }}
 
     - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-${{ matrix.runtime-identifier }} artifact
       uses: actions/upload-artifact@v4
