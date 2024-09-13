@@ -256,11 +256,12 @@ public sealed class Game : IDisposable
 
         CurrentPosition.FreeResources();
         PositionBeforeLastSearch.FreeResources();
+
+        _disposedValue = true;
     }
 
     private void Dispose(bool disposing)
     {
-        _logger.Warn("Disposing Game instance");
         if (!_disposedValue)
         {
             if (disposing)

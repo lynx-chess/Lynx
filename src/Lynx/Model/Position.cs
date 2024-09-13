@@ -1261,12 +1261,12 @@ public class Position : IDisposable
     {
         ArrayPool<BitBoard>.Shared.Return(PieceBitBoards, clearArray: true);
         ArrayPool<BitBoard>.Shared.Return(OccupancyBitBoards, clearArray: true);
+
+        _disposedValue = true;
     }
 
     protected virtual void Dispose(bool disposing)
     {
-        Console.WriteLine("Disposing Position instance");
-
         if (!_disposedValue)
         {
             if (disposing)
