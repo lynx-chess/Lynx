@@ -200,7 +200,7 @@ public sealed partial class Engine
                 const int minSearchTime = 50;
 
                 var movesDivisor = goCommand.MovesToGo == 0
-                    ? ExpectedMovesLeft(Game.PositionHashHistory.Count) * 3 / 2
+                    ? ExpectedMovesLeft(Game.PositionHashHistoryLength()) * 3 / 2
                     : goCommand.MovesToGo;
 
                 millisecondsLeft -= engineGuiCommunicationTimeOverhead;
