@@ -407,7 +407,7 @@ public static class MoveExtensions
         return span[..^1].ToString();
     }
 
-    private static readonly Dictionary<int, string> _uCIStringCache = new(1024);
+    private static readonly Dictionary<int, string> _uCIStringCache = new(4096);
 
     /// <summary>
     /// NOT thread-safe
