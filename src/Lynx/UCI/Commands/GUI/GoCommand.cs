@@ -71,7 +71,7 @@ public sealed class GoCommand : GUIBaseCommand
         Span<Range> ranges = stackalloc Range[commandAsSpan.Length];
         var rangesLength = commandAsSpan.Split(ranges, ' ', StringSplitOptions.RemoveEmptyEntries);
 
-        for (int i = 0; i < rangesLength; i++)
+        for (int i = 1; i < rangesLength; i++)  // Skipping go keyword
         {
             switch (commandAsSpan[ranges[i]])
             {

@@ -432,7 +432,7 @@ public partial class GoCommandParsingAlternatives_Benchmark : BaseBenchmark
         Span<Range> ranges = stackalloc Range[commandAsSpan.Length];
         var rangesLength = commandAsSpan.Split(ranges, ' ', StringSplitOptions.RemoveEmptyEntries);
 
-        for (int i = 0; i < rangesLength; i++)
+        for (int i = 1; i < rangesLength; i++)
         {
             switch (commandAsSpan[ranges[i]])
             {
