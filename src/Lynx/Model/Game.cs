@@ -1,9 +1,11 @@
 ﻿using NLog;
+using System.Buffers;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Lynx.Model;
 
-public sealed class Game
+public sealed class Game : IDisposable
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
@@ -18,6 +20,7 @@ public sealed class Game
     /// Indexed by ply
     /// </summary>
     private readonly Move[] _moveStack;
+    private bool _disposedValue;
 
     public int HalfMovesWithoutCaptureOrPawnMove { get; set; }
 
@@ -31,6 +34,10 @@ public sealed class Game
 
     public Game(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan, Span<Move> movePool)
     {
+        Debug.Assert(Constants.MaxNumberMovesInAGame <= 1024, "Need to customized ArrayPool due to desired array size requirements");
+        _positionHashHistory = ArrayPool<long>.Shared.Rent(Constants.MaxNumberMovesInAGame);
+        _moveStack = ArrayPool<Move>.Shared.Rent(Constants.MaxNumberMovesInAGame);
+
         var parsedFen = FENParser.ParseFEN(fen);
         CurrentPosition = new Position(parsedFen);
 
@@ -39,10 +46,8 @@ public sealed class Game
             _logger.Warn($"Invalid position detected: {fen.ToString()}");
         }
 
-        _positionHashHistory = new long[Constants.MaxNumberMovesInAGame];
         AddToPositionHashHistory(CurrentPosition.UniqueIdentifier);
         HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
-        _moveStack = new Move[1024];
 
 #if DEBUG
         MoveHistory = new(Constants.MaxNumberMovesInAGame);
@@ -212,9 +217,17 @@ public sealed class Game
     /// (either by the engine time management logic or by external stop command)
     /// currentPosition won't be the initial one
     /// </summary>
-    public void ResetCurrentPositionToBeforeSearchState() => CurrentPosition = new(PositionBeforeLastSearch);
+    public void ResetCurrentPositionToBeforeSearchState()
+    {
+        CurrentPosition.FreeResources();
+        CurrentPosition = new(PositionBeforeLastSearch);
+    }
 
-    public void UpdateInitialPosition() => PositionBeforeLastSearch = new(CurrentPosition);
+    public void UpdateInitialPosition()
+    {
+        PositionBeforeLastSearch.FreeResources();
+        PositionBeforeLastSearch = new(CurrentPosition);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void PushToMoveStack(int n, Move move) => _moveStack[n + EvaluationConstants.ContinuationHistoryPlyCount] = move;
@@ -235,4 +248,34 @@ public sealed class Game
     public long[] CopyPositionHashHistory() => _positionHashHistory[.._positionHashHistoryPointer];
 
     internal void ClearPositionHashHistory() => _positionHashHistoryPointer = 0;
+
+    public void FreeResources()
+    {
+        ArrayPool<Move>.Shared.Return(_moveStack);
+        ArrayPool<long>.Shared.Return(_positionHashHistory);
+
+        CurrentPosition.FreeResources();
+        PositionBeforeLastSearch.FreeResources();
+
+        _disposedValue = true;
+    }
+
+    private void Dispose(bool disposing)
+    {
+        if (!_disposedValue)
+        {
+            if (disposing)
+            {
+                FreeResources();
+            }
+            _disposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
 }

@@ -129,12 +129,14 @@ public sealed partial class Engine
 
     internal void SetGame(Game game)
     {
+        Game.FreeResources();
         Game = game;
     }
 
     public void NewGame()
     {
         AverageDepth = 0;
+        Game.FreeResources();
         Game = new Game(Constants.InitialPositionFEN);
         _isNewGameComing = true;
         _isNewGameCommandSupported = true;
@@ -152,7 +154,7 @@ public sealed partial class Engine
     public void AdjustPosition(ReadOnlySpan<char> rawPositionCommand)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-
+        Game.FreeResources();
         Game = PositionCommand.ParseGame(rawPositionCommand, moves);
         _isNewGameComing = false;
         _stopRequested = false;
