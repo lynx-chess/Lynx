@@ -138,7 +138,7 @@ public partial class GoCommandParsingAlternatives_Benchmark : BaseBenchmark
 
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
-    public async Task Parallell(string command)
+    public async Task Parallel(string command)
     {
         await ParseInParallel(command);
     }
@@ -148,6 +148,13 @@ public partial class GoCommandParsingAlternatives_Benchmark : BaseBenchmark
     public async Task CapturingGroups(string command)
     {
         await Task.Run(() => ParseRegexCapturingGroups(command));
+    }
+
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public async Task NoRegex(string command)
+    {
+        await Task.Run(() => ParseNoRegex(command));
     }
 
     [GeneratedRegex("(?<=wtime).+?(?=searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled, "es-ES")]
