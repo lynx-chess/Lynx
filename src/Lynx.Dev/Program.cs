@@ -248,7 +248,9 @@ static void _13_GeneratingMagicNumbersCandidates()
 
 static void _14_GeneratingMagicNumbersByBruteForce()
 {
+    var sw = Stopwatch.StartNew();
     MagicNumberGenerator.InitializeMagicNumbers();
+    Console.WriteLine($"Time: {sw.ElapsedMilliseconds}ms");
 
     // Should generate something similar to Constants.RookMagicNumbers
 }
@@ -700,7 +702,7 @@ static void _54_ScoreMove()
     var position = new Position(KillerPosition);
     position.Print();
 
-    var engine = new Engine(Channel.CreateBounded<string>(new BoundedChannelOptions(100) { SingleReader = true, SingleWriter = false }));
+    var engine = new Engine(Channel.CreateBounded<object>(new BoundedChannelOptions(100) { SingleReader = true, SingleWriter = false }));
     engine.SetGame(new(position.FEN()));
     foreach (var move in MoveGenerator.GenerateAllMoves(position, capturesOnly: true))
     {
@@ -1080,7 +1082,7 @@ static void TranspositionTable()
     var hashKey2 = position.UniqueIdentifier & mask;
     Console.WriteLine(hashKey2);
 
-    transpositionTable.ClearTranspositionTable();
+    Array.Clear(transpositionTable);
 
     //transpositionTable.RecordHash(position, depth: 3, maxDepth: 5, move: 1234, eval: +5, nodeType: NodeType.Alpha);
     //var entry = transpositionTable.ProbeHash(position, maxDepth: 5, depth: 3, alpha: 1, beta: 2);
@@ -1126,7 +1128,8 @@ static void UnmakeMove()
             var epdMoveString = move.ToEPDString(position);
             Console.WriteLine($"Trying {epdMoveString} in\t{position.FEN()}");
 
-            var newPosition = new Position(position, move);
+            var newPosition = new Position(position);
+            newPosition.MakeMove(move);
             var savedState = position.MakeMove(move);
 
             Console.WriteLine($"Position\t{newPosition.FEN()}, Zobrist key {newPosition.UniqueIdentifier}");

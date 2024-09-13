@@ -28,7 +28,7 @@ public sealed partial class Engine
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
             _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
-            return position.StaticEvaluation().Score;
+            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
         }
 
         _maxDepthReached[ply] = ply;
@@ -87,7 +87,7 @@ public sealed partial class Engine
         }
         else if (!pvNode)
         {
-            (staticEval, phase) = position.StaticEvaluation();
+            (staticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
 
             // From smol.cs
             // ttEvaluation can be used as a better positional evaluation:
@@ -234,7 +234,7 @@ public sealed partial class Engine
             // Before making a move
             var oldHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
             var canBeRepetition = Game.Update50movesRule(move, isCapture);
-            Game.PositionHashHistory.Add(position.UniqueIdentifier);
+            Game.AddToPositionHashHistory(position.UniqueIdentifier);
             Game.PushToMoveStack(ply, move);
 
             int evaluation;
@@ -264,7 +264,7 @@ public sealed partial class Engine
                     {
                         // After making a move
                         Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
-                        Game.PositionHashHistory.RemoveAt(Game.PositionHashHistory.Count - 1);
+                        Game.RemoveFromPositionHashHistory();
                         position.UnmakeMove(move, gameState);
 
                         break;
@@ -280,7 +280,7 @@ public sealed partial class Engine
                     {
                         // After making a move
                         Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
-                        Game.PositionHashHistory.RemoveAt(Game.PositionHashHistory.Count - 1);
+                        Game.RemoveFromPositionHashHistory();
                         position.UnmakeMove(move, gameState);
 
                         break;
@@ -355,7 +355,7 @@ public sealed partial class Engine
             // After making a move
             // Game.PositionHashHistory is update above
             Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
-            Game.PositionHashHistory.RemoveAt(Game.PositionHashHistory.Count - 1);
+            Game.RemoveFromPositionHashHistory();
             position.UnmakeMove(move, gameState);
 
             PrintMove(position, ply, move, evaluation);
@@ -525,7 +525,7 @@ public sealed partial class Engine
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
             _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
-            return position.StaticEvaluation().Score;
+            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
         }
 
         var pvIndex = PVTable.Indexes[ply];
@@ -541,7 +541,7 @@ public sealed partial class Engine
 
         _maxDepthReached[ply] = ply;
 
-        var staticEvaluation = position.StaticEvaluation().Score;
+        var staticEvaluation = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
 
         // Fail-hard beta-cutoff (updating alpha after this check)
         if (staticEvaluation >= beta)

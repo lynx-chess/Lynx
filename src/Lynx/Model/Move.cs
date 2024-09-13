@@ -385,6 +385,7 @@ public static class MoveExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string UCIString(this Move move)
     {
+        // TODO memoize them with dict or even array?
         Span<char> span = stackalloc char[5];
 
         var source = Constants.CoordinatesCharArray[move.SourceSquare()];
@@ -404,6 +405,28 @@ public static class MoveExtensions
         }
 
         return span[..^1].ToString();
+    }
+
+    private static readonly Dictionary<int, string> _uCIStringCache = new(4096);
+
+    /// <summary>
+    /// NOT thread-safe
+    /// </summary>
+    /// <param name="move"></param>
+    /// <returns></returns>
+    [SkipLocalsInit]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static string UCIStringMemoized(this Move move)
+    {
+        if (_uCIStringCache.TryGetValue(move, out var uciString))
+        {
+            return uciString;
+        }
+
+        var str = move.UCIString();
+        _uCIStringCache[move] = str;
+
+        return str;
     }
 
     /// <summary>
