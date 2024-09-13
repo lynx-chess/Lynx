@@ -6,7 +6,7 @@ namespace Lynx;
 
 #pragma warning disable IDE0055, IDE1006 // Discard formatting and naming styles
 
-internal static partial class TunableEvalParameters
+internal static class TunableEvalParameters
 {
 	internal static readonly short[][][] MiddleGamePieceValues =
 	[
