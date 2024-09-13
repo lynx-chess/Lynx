@@ -234,7 +234,7 @@ public sealed partial class Engine
             // Before making a move
             var oldHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
             var canBeRepetition = Game.Update50movesRule(move, isCapture);
-            Game.PositionHashHistory.Add(position.UniqueIdentifier);
+            Game.AddToPositionHashHistory(position.UniqueIdentifier);
             Game.PushToMoveStack(ply, move);
 
             int evaluation;
@@ -264,7 +264,7 @@ public sealed partial class Engine
                     {
                         // After making a move
                         Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
-                        Game.PositionHashHistory.RemoveAt(Game.PositionHashHistory.Count - 1);
+                        Game.RemoveFromPositionHashHistory();
                         position.UnmakeMove(move, gameState);
 
                         break;
@@ -280,7 +280,7 @@ public sealed partial class Engine
                     {
                         // After making a move
                         Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
-                        Game.PositionHashHistory.RemoveAt(Game.PositionHashHistory.Count - 1);
+                        Game.RemoveFromPositionHashHistory();
                         position.UnmakeMove(move, gameState);
 
                         break;
@@ -355,7 +355,7 @@ public sealed partial class Engine
             // After making a move
             // Game.PositionHashHistory is update above
             Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
-            Game.PositionHashHistory.RemoveAt(Game.PositionHashHistory.Count - 1);
+            Game.RemoveFromPositionHashHistory();
             position.UnmakeMove(move, gameState);
 
             PrintMove(position, ply, move, evaluation);

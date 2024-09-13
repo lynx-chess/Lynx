@@ -14,7 +14,7 @@ public class StopCommandTest
     public async Task StopCommandShouldNotModifyPositionOrAddMoveToMoveHistory(string initialPositionFEN)
     {
         // Arrange
-        var engine = new Engine(new Mock<ChannelWriter<string>>().Object);
+        var engine = new Engine(new Mock<ChannelWriter<object>>().Object);
         engine.NewGame();
         engine.AdjustPosition($"position fen {initialPositionFEN}");
 

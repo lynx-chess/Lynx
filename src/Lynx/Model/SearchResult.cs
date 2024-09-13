@@ -1,13 +1,21 @@
-﻿namespace Lynx.Model;
+﻿using Lynx.UCI.Commands.Engine;
 
-public class SearchResult
+namespace Lynx.Model;
+
+public sealed class SearchResult
 {
     public Move BestMove { get; init; }
+
     public int Evaluation { get; init; }
+
     public int Depth { get; set; }
-    public List<Move> Moves { get; init; }
+
+    public Move[] Moves { get; init; }
+
     public int Alpha { get; init; }
+
     public int Beta { get; init; }
+
     public int Mate { get; init; }
 
     public int DepthReached { get; set; }
@@ -24,7 +32,7 @@ public class SearchResult
 
     public (int WDLWin, int WDLDraw, int WDLLoss)? WDL { get; set; } = null;
 
-    public SearchResult(Move bestMove, int evaluation, int targetDepth, List<Move> moves, int alpha, int beta, int mate = default)
+    public SearchResult(Move bestMove, int evaluation, int targetDepth, Move[] moves, int alpha, int beta, int mate = default)
     {
         BestMove = bestMove;
         Evaluation = evaluation;
@@ -35,15 +43,48 @@ public class SearchResult
         Mate = mate;
     }
 
-    public SearchResult(SearchResult previousSearchResult)
+    public override string ToString()
     {
-        BestMove = previousSearchResult.Moves.ElementAtOrDefault(2);
-        Evaluation = previousSearchResult.Evaluation;
-        Depth = previousSearchResult.Depth - 2;
-        DepthReached = previousSearchResult.DepthReached - 2;
-        Moves = previousSearchResult.Moves.Skip(2).ToList();
-        Alpha = previousSearchResult.Alpha;
-        Beta = previousSearchResult.Beta;
-        Mate = previousSearchResult.Mate == 0 ? 0 : (int)Math.CopySign(Math.Abs(previousSearchResult.Mate) - 1, previousSearchResult.Mate);
+        var sb = ObjectPools.StringBuilderPool.Get();
+
+        sb.Append(InfoCommand.Id)
+          .Append(" depth ").Append(Depth)
+          .Append(" seldepth ").Append(DepthReached)
+          .Append(" multipv 1")
+          .Append(" score ").Append(Mate == default ? "cp " + Lynx.WDL.NormalizeScore(Evaluation) : "mate " + Mate)
+          .Append(" nodes ").Append(Nodes)
+          .Append(" nps ").Append(NodesPerSecond)
+          .Append(" time ").Append(Time);
+
+        if (HashfullPermill != -1)
+        {
+            sb.Append(" hashfull ").Append(HashfullPermill);
+        }
+
+        if (WDL is not null)
+        {
+            sb.Append(" wdl ")
+              .Append(WDL.Value.WDLWin).Append(' ')
+              .Append(WDL.Value.WDLDraw).Append(' ')
+              .Append(WDL.Value.WDLLoss);
+        }
+
+        sb.Append(" pv ");
+        foreach (var move in Moves)
+        {
+            sb.Append(move.UCIStringMemoized()).Append(' ');
+        }
+
+        // Remove the trailing space
+        if (Moves.Length > 0)
+        {
+            sb.Length--;
+        }
+
+        var result = sb.ToString();
+
+        ObjectPools.StringBuilderPool.Return(sb);
+
+        return result;
     }
 }

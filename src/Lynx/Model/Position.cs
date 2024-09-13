@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -8,8 +9,10 @@ using static Lynx.EvaluationPSQTs;
 
 namespace Lynx.Model;
 
-public class Position
+public class Position : IDisposable
 {
+    private bool _disposedValue;
+
     public long UniqueIdentifier { get; private set; }
 
     /// <summary>
@@ -66,10 +69,10 @@ public class Position
     public Position(Position position)
     {
         UniqueIdentifier = position.UniqueIdentifier;
-        PieceBitBoards = new BitBoard[12];
+        PieceBitBoards = ArrayPool<BitBoard>.Shared.Rent(12);
         Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
 
-        OccupancyBitBoards = new BitBoard[3];
+        OccupancyBitBoards = ArrayPool<BitBoard>.Shared.Rent(3);
         Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
 
         Side = position.Side;
@@ -753,13 +756,21 @@ public class Position
         if ((PieceBitBoards[(int)Piece.p - pieceIndex] & Masks.PassedPawns[pieceIndex][squareIndex]) == default)    // isPassedPawn
         {
             var rank = Constants.Rank[squareIndex];
+            var blockingSquare = squareIndex + 8;
+            var oppositeSide = (int)Side.Black;
             if (pieceIndex == (int)Piece.p)
             {
                 rank = 7 - rank;
+                blockingSquare -= 16;
+                oppositeSide = (int)Side.White;
+            }
+
+            if (OccupancyBitBoards[oppositeSide].GetBit(blockingSquare))
+            {
+                packedBonus += PassedPawnBlockedPenalty[bucket][rank];
             }
 
             var friendlyKingDistance = Constants.ChebyshevDistance[squareIndex][sameSideKingSquare];
-
             var enemyKingDistance = Constants.ChebyshevDistance[squareIndex][oppositeSideKingSquare];
 
             packedBonus += PassedPawnBonus[bucket][rank]
@@ -1244,5 +1255,32 @@ public class Position
 
         Console.Write("\n    a b c d e f g h\n");
         Console.WriteLine(separator);
+    }
+
+    public void FreeResources()
+    {
+        ArrayPool<BitBoard>.Shared.Return(PieceBitBoards, clearArray: true);
+        ArrayPool<BitBoard>.Shared.Return(OccupancyBitBoards, clearArray: true);
+
+        _disposedValue = true;
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposedValue)
+        {
+            if (disposing)
+            {
+                FreeResources();
+            }
+            _disposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
     }
 }
