@@ -113,21 +113,21 @@
  */
 
 using BenchmarkDotNet.Attributes;
+using NLog;
 using System.Text.RegularExpressions;
 
 namespace Lynx.Benchmark;
 
 public partial class GoCommandParsingAlternatives_Benchmark : BaseBenchmark
 {
-    public static IEnumerable<string> Data => new[] {
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+
+    public static IEnumerable<string> Data => [
             "go infinite",
-            "go infinite searchmoves e2e4 d2d4",
-            "go wtime 7000 wince 500 btime 8000 binc 500",
-            "go wtime 7000 wince 500 btime 8000 binc 500 ponder",
-            "go infinite searchmoves e2e4 d2d4 wtime 10000 btime 10000 winc 100",
-            "go infinite searchmoves e2e4 d2d4 wtime 10000 btime 10000 winc 100 binc 100 movestogo 10 depth 50 mate 10 movetime 500",
-            "go infinite searchmoves e2e4 d2d4 a2a4 a2a3 b2b4 b2b3 wtime 10000 btime 10000 winc 100 binc 100 movestogo 10 depth 50 mate 10 nodes 1000 movetime 500"
-        };
+            "go wtime 7000 winc 500 btime 8000 binc 500",
+            "go wtime 7000 winc 500 btime 8000 binc 500 ponder movestogo 40",
+            "go wtime 7000 winc 500 btime 8000 binc 500 movestogo 40 depth 14 nodes 1000000",
+        ];
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]
@@ -150,9 +150,6 @@ public partial class GoCommandParsingAlternatives_Benchmark : BaseBenchmark
         await Task.Run(() => ParseRegexCapturingGroups(command));
     }
 
-    [GeneratedRegex("(?<=searchmoves).+?(?=searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled, "es-ES")]
-    private static partial Regex SearchMovesRegex();
-
     [GeneratedRegex("(?<=wtime).+?(?=searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled, "es-ES")]
     private static partial Regex WhiteTimeRegex();
 
@@ -168,6 +165,9 @@ public partial class GoCommandParsingAlternatives_Benchmark : BaseBenchmark
     [GeneratedRegex("(?<=movestogo).+?(?=searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled, "es-ES")]
     private static partial Regex MovesToGoRegex();
 
+    [GeneratedRegex("(?<=movetime).+?(?=searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled, "es-ES")]
+    private static partial Regex MoveTimeRegex();
+
     [GeneratedRegex("(?<=depth).+?(?=searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled, "es-ES")]
     private static partial Regex DepthRegex();
 
@@ -177,8 +177,8 @@ public partial class GoCommandParsingAlternatives_Benchmark : BaseBenchmark
     [GeneratedRegex("(?<=mate).+?(?=searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled, "es-ES")]
     private static partial Regex MateRegex();
 
-    [GeneratedRegex("(?<=movetime).+?(?=searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled, "es-ES")]
-    private static partial Regex MoveTimeRegex();
+    [GeneratedRegex("(?<=searchmoves).+?(?=searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled, "es-ES")]
+    private static partial Regex SearchMovesRegex();
 
     [GeneratedRegex(@"(?<wtime>(?<=wtime\s+)\d+)|(?<btime>(?<=btime\s+)\d+)|(?<winc>(?<=winc\s+)\d+)|(?<binc>(?<=binc\s+)\d+)|(?<movestogo>(?<=movestogo\s+)\d+)|(?<depth>(?<=depth\s+)\d+)|(?<movetime>(?<=movetime\s+)\d+)|(?<infinite>infinite)|(?<ponder>ponder)")]
     private static partial Regex CapturingGroups();
@@ -198,10 +198,7 @@ public partial class GoCommandParsingAlternatives_Benchmark : BaseBenchmark
 
     private void ParseSequentially(string command)
     {
-        var match = SearchMovesRegex().Match(command);
-        SearchMoves = match.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList();
-
-        match = WhiteTimeRegex().Match(command);
+        var match = WhiteTimeRegex().Match(command);
         if (int.TryParse(match.Value, out var value))
         {
             WhiteTime = value;
@@ -231,45 +228,42 @@ public partial class GoCommandParsingAlternatives_Benchmark : BaseBenchmark
             MovesToGo = value;
         }
 
-        match = DepthRegex().Match(command);
-        if (int.TryParse(match.Value, out value))
-        {
-            Depth = value;
-        }
-
-        match = NodesRegex().Match(command);
-        if (int.TryParse(match.Value, out value))
-        {
-            Nodes = value;
-        }
-
-        match = MateRegex().Match(command);
-        if (int.TryParse(match.Value, out value))
-        {
-            Mate = value;
-        }
-
         match = MoveTimeRegex().Match(command);
         if (int.TryParse(match.Value, out value))
         {
             MoveTime = value;
         }
 
+        match = DepthRegex().Match(command);
+        if (int.TryParse(match.Value, out value))
+        {
+            Depth = value;
+        }
+
         Infinite = command.Contains("infinite", StringComparison.OrdinalIgnoreCase);
 
         Ponder = command.Contains("ponder", StringComparison.OrdinalIgnoreCase);
+
+        //match = NodesRegex().Match(command);
+        //if (int.TryParse(match.Value, out value))
+        //{
+        //    Nodes = value;
+        //}
+
+        //match = MateRegex().Match(command);
+        //if (int.TryParse(match.Value, out value))
+        //{
+        //    Mate = value;
+        //}
+
+        //var match = SearchMovesRegex().Match(command);
+        //SearchMoves = [.. match.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries)];ç
     }
 
     private async Task ParseInParallel(string command)
     {
         var taskList = new List<Task>
             {
-                Task.Run(() =>
-                {
-                    var match = SearchMovesRegex().Match(command);
-
-                    SearchMoves = Enumerable.ToList<string>(match.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries));
-                }),
                 Task.Run(() =>
                 {
                     var match = WhiteTimeRegex().Match(command);
@@ -317,33 +311,6 @@ public partial class GoCommandParsingAlternatives_Benchmark : BaseBenchmark
                 }),
                 Task.Run(() =>
                 {
-                    var match = DepthRegex().Match(command);
-
-                    if(int.TryParse(match.Value, out var value))
-                    {
-                        Depth = value;
-                    }
-                }),
-                Task.Run(() =>
-                {
-                    var match = NodesRegex().Match(command);
-
-                    if(int.TryParse(match.Value, out var value))
-                    {
-                        Nodes = value;
-                    }
-                }),
-                Task.Run(() =>
-                {
-                    var match = MateRegex().Match(command);
-
-                    if(int.TryParse(match.Value, out var value))
-                    {
-                        Mate = value;
-                    }
-                }),
-                Task.Run(() =>
-                {
                     var match = MoveTimeRegex().Match(command);
 
                     if(int.TryParse(match.Value, out var value))
@@ -351,8 +318,41 @@ public partial class GoCommandParsingAlternatives_Benchmark : BaseBenchmark
                         MoveTime = value;
                     }
                 }),
+                Task.Run(() =>
+                {
+                    var match = DepthRegex().Match(command);
+
+                    if(int.TryParse(match.Value, out var value))
+                    {
+                        Depth = value;
+                    }
+                }),
                 Task.Run(() => Infinite = command.Contains("infinite", StringComparison.OrdinalIgnoreCase)),
-                Task.Run(() => Ponder = command.Contains("ponder", StringComparison.OrdinalIgnoreCase))
+                Task.Run(() => Ponder = command.Contains("ponder", StringComparison.OrdinalIgnoreCase)),
+                //Task.Run(() =>
+                //{
+                //    var match = NodesRegex().Match(command);
+
+                //    if(int.TryParse(match.Value, out var value))
+                //    {
+                //        Nodes = value;
+                //    }
+                //}),
+                //Task.Run(() =>
+                //{
+                //    var match = MateRegex().Match(command);
+
+                //    if(int.TryParse(match.Value, out var value))
+                //    {
+                //        Mate = value;
+                //    }
+                //}),
+                //Task.Run(() =>
+                //{
+                //    var match = SearchMovesRegex().Match(command);
+
+                //    SearchMoves = Enumerable.ToList<string>(match.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries));
+                //}),
             };
 
         await Task.WhenAll(taskList);
@@ -384,23 +384,143 @@ public partial class GoCommandParsingAlternatives_Benchmark : BaseBenchmark
                         case "movestogo":
                             MovesToGo = int.Parse(group.Value);
                             break;
+                        case "movetime":
+                            MoveTime = int.Parse(group.Value);
+                            break;
+                        case "depth":
+                            Depth = int.Parse(group.Value);
+                            break;
                         case "infinite":
                             Infinite = true;
                             break;
                         case "ponder":
                             Ponder = true;
                             break;
-                        case "depth":
-                            Depth = int.Parse(group.Value);
-                            break;
-                        case "movetime":
-                            MoveTime = int.Parse(group.Value);
-                            break;
+                            //case "nodes":
+                            //    Nodes = int.Parse(group.Value);
+                            //    break;
+                            //case "mate":
+                            //    Nodes = int.Parse(group.Value);
+                            //    break;
+                            //case "searchmoves":
+                            //    Nodes = int.Parse(group.Value);
+                            //    break;
                     }
 
                     break;
                 }
             }
+        }
+    }
+
+
+    private void ParseNoRegex(string command)
+    {
+        var commandAsSpan = command.AsSpan();
+        Span<Range> ranges = stackalloc Range[commandAsSpan.Length];
+        var rangesLength = commandAsSpan.Split(ranges, ' ', StringSplitOptions.RemoveEmptyEntries);
+
+        for (int i = 0; i < rangesLength; i++)
+        {
+            switch (commandAsSpan[ranges[i]])
+            {
+                case "wtime":
+                    {
+                        if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
+                        {
+                            WhiteTime = value;
+                        }
+
+                        break;
+                    }
+                case "btime":
+                    {
+                        if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
+                        {
+                            BlackTime = value;
+                        }
+
+                        break;
+                    }
+                case "winc":
+                    {
+                        if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
+                        {
+                            WhiteIncrement = value;
+                        }
+
+                        break;
+                    }
+                case "binc":
+                    {
+                        if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
+                        {
+                            BlackIncrement = value;
+                        }
+
+                        break;
+                    }
+                case "movestogo":
+                    {
+                        if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
+                        {
+                            MovesToGo = value;
+                        }
+
+                        break;
+                    }
+                case "movetime":
+                    {
+                        if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
+                        {
+                            MoveTime = value;
+                        }
+
+                        break;
+                    }
+                case "depth":
+                    {
+                        if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
+                        {
+                            Depth = value;
+                        }
+
+                        break;
+                    }
+                case "infinite":
+                    {
+                        Infinite = true;
+                        break;
+                    }
+                case "ponder":
+                    {
+                        Ponder = true;
+                        break;
+                    }
+                case "nodes":
+                    {
+                        _logger.Warn("nodes not supported in go command, it will be safely ignored");
+                        ++i;
+                        break;
+                    }
+                case "mate":
+                    {
+                        _logger.Warn("mate not supported in go command, it will be safely ignored");
+                        ++i;
+                        break;
+                    }
+                case "searchmoves":
+                    {
+                        const string message = "searchmoves not supported in go command";
+                        _logger.Error(message);
+                        throw new InvalidDataException(message);
+                    }
+                default:
+                    {
+                        _logger.Warn("{0} not supported in go command", commandAsSpan[ranges[i]].ToString());
+                        break;
+                    }
+            };
         }
     }
 }
