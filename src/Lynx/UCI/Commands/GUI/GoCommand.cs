@@ -1,4 +1,4 @@
-﻿using System.Text.RegularExpressions;
+﻿using NLog;
 
 namespace Lynx.UCI.Commands.GUI;
 
@@ -44,16 +44,11 @@ namespace Lynx.UCI.Commands.GUI;
 ///	* infinite
 ///		search until the "stop" command. Do not exit the search without being told so in this mode!
 /// </summary>
-public sealed partial class GoCommand : GUIBaseCommand
+public sealed class GoCommand : GUIBaseCommand
 {
-    public const string Id = "go";
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    /// <summary>
-    /// Note that wtime and btime need to support negative numbers because of cutechess
-    /// </summary>
-    /// <returns></returns>
-    [GeneratedRegex(@"(?<wtime>(?<=wtime\s+)-?\d+)|(?<btime>(?<=btime\s+)-?\d+)|(?<winc>(?<=winc\s+)\d+)|(?<binc>(?<=binc\s+)\d+)|(?<movestogo>(?<=movestogo\s+)\d+)|(?<depth>(?<=depth\s+)\d+)|(?<movetime>(?<=movetime\s+)\d+)|(?<infinite>infinite)|(?<ponder>ponder)")]
-    private static partial Regex Regex();
+    public const string Id = "go";
 
     public int WhiteTime { get; }
     public int BlackTime { get; }
@@ -69,56 +64,115 @@ public sealed partial class GoCommand : GUIBaseCommand
     public int Mate => throw new NotImplementedException();
     public List<string> SearchMoves => throw new NotImplementedException();
 
-    /// <summary>
-    /// Invokes <see cref="Parse(string)" synchronously/>
-    /// </summary>
-    /// <param name="command"></param>
     public GoCommand(string command)
     {
-        foreach (var match in Regex().Matches(command).Cast<Match>())
-        {
-            for (int i = 1; i < match.Groups.Count; ++i)
-            {
-                var group = match.Groups[i];
-                if (group.Success)
-                {
-                    switch (group.Name)
-                    {
-                        case "wtime":
-                            WhiteTime = int.Parse(group.Value);
-                            break;
-                        case "btime":
-                            BlackTime = int.Parse(group.Value);
-                            break;
-                        case "winc":
-                            WhiteIncrement = int.Parse(group.Value);
-                            break;
-                        case "binc":
-                            BlackIncrement = int.Parse(group.Value);
-                            break;
-                        case "movestogo":
-                            MovesToGo = int.Parse(group.Value);
-                            break;
-                        case "infinite":
-                            Infinite = true;
-                            break;
-                        case "ponder":
-                            if (Configuration.EngineSettings.IsPonder)
-                            {
-                                Ponder = true;
-                            }
-                            break;
-                        case "depth":
-                            Depth = int.Parse(group.Value);
-                            break;
-                        case "movetime":
-                            MoveTime = int.Parse(group.Value);
-                            break;
-                    }
+        var commandAsSpan = command.AsSpan();
 
-                    break;
-                }
-            }
+        Span<Range> ranges = stackalloc Range[commandAsSpan.Length];
+        var rangesLength = commandAsSpan.Split(ranges, ' ', StringSplitOptions.RemoveEmptyEntries);
+
+        for (int i = 1; i < rangesLength; i++)  // Skipping go keyword
+        {
+            switch (commandAsSpan[ranges[i]])
+            {
+                case "wtime":
+                    {
+                        if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
+                        {
+                            WhiteTime = value;
+                        }
+
+                        break;
+                    }
+                case "btime":
+                    {
+                        if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
+                        {
+                            BlackTime = value;
+                        }
+
+                        break;
+                    }
+                case "winc":
+                    {
+                        if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
+                        {
+                            WhiteIncrement = value;
+                        }
+
+                        break;
+                    }
+                case "binc":
+                    {
+                        if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
+                        {
+                            BlackIncrement = value;
+                        }
+
+                        break;
+                    }
+                case "movestogo":
+                    {
+                        if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
+                        {
+                            MovesToGo = value;
+                        }
+
+                        break;
+                    }
+                case "movetime":
+                    {
+                        if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
+                        {
+                            MoveTime = value;
+                        }
+
+                        break;
+                    }
+                case "depth":
+                    {
+                        if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
+                        {
+                            Depth = value;
+                        }
+
+                        break;
+                    }
+                case "infinite":
+                    {
+                        Infinite = true;
+                        break;
+                    }
+                case "ponder":
+                    {
+                        Ponder = true;
+                        break;
+                    }
+                case "nodes":
+                    {
+                        _logger.Warn("nodes not supported in go command, it will be safely ignored");
+                        ++i;
+                        break;
+                    }
+                case "mate":
+                    {
+                        _logger.Warn("mate not supported in go command, it will be safely ignored");
+                        ++i;
+                        break;
+                    }
+                case "searchmoves":
+                    {
+                        const string message = "searchmoves not supported in go command";
+                        
+                        _logger.Error(message);
+                        throw new NotImplementedException(message);
+                    }
+                default:
+                    {
+                        _logger.Warn("{0} not supported in go command, attempting to continue command parsing", commandAsSpan[ranges[i]].ToString());
+                        break;
+                    }
+            };
         }
     }
 
