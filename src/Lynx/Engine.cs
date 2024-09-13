@@ -200,7 +200,7 @@ public sealed partial class Engine
                 const int minSearchTime = 50;
 
                 var movesDivisor = goCommand.MovesToGo == 0
-                    ? Configuration.EngineSettings.DefaultMovesToGo
+                    ? ExpectedMovesLeft(Game.PositionHashHistoryLength()) * 3 / 2
                     : goCommand.MovesToGo;
 
                 millisecondsLeft -= engineGuiCommunicationTimeOverhead;
@@ -259,6 +259,21 @@ public sealed partial class Engine
         AverageDepth += (resultToReturn.Depth - AverageDepth) / Math.Ceiling(0.5 * Game.PositionHashHistoryLength());
 
         return resultToReturn;
+    }
+
+    /// <summary>
+    /// Straight from expositor's author paper, https://expositor.dev/pdf/movetime.pdf
+    /// </summary>
+    /// <param name="plies_played"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int ExpectedMovesLeft(int plies_played)
+    {
+        double p = (double)(plies_played);
+
+        return (int)Math.Round(
+            (59.3 + (72830.0 - p * 2330.0) / (p * p + p * 10.0 + 2644.0))   // Plies remaining
+            / 2.0); // Full moves remaining
     }
 
     private async ValueTask<SearchResult> SearchBestMove(int maxDepth, int softLimitTimeBound)
