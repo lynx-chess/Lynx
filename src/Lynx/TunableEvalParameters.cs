@@ -6031,7 +6031,18 @@ public static class EvaluationParams
 
 	public static readonly TaperedEvaluationTerm PieceAttackedByPawnPenalty = Pack(-49, -32);
 
-	public static readonly TaperedEvaluationTermByRank[] PassedPawnBonus =
+    public static readonly TaperedEvaluationTermByRank PawnPhalanxBonus =
+	[
+		Pack(0, 0),
+		Pack(1, 1),
+		Pack(2, 3),
+		Pack(3, 3),
+		Pack(4, 4),
+		Pack(5, 5),
+		Pack(6, 6),
+	];
+
+    public static readonly TaperedEvaluationTermByRank[] PassedPawnBonus =
 	[
 		[
 			Pack(0, 0),
