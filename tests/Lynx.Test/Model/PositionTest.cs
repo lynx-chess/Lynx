@@ -215,7 +215,7 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(UnpackMG(IsolatedPawnPenalty), evaluation);
+        Assert.AreEqual(UnpackMG(IsolatedPawnPenalty[0]), evaluation);
     }
 
     /// <summary>
@@ -434,7 +434,7 @@ public class PositionTest
 
         Assert.AreEqual(
             //(-4 * Configuration.EngineSettings.DoubledPawnPenalty.MG)
-            UnpackMG(IsolatedPawnPenalty)
+            UnpackMG(IsolatedPawnPenalty[0])
             + UnpackMG(PassedPawnBonus[0][rank])
             + UnpackMG(FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance])
             + UnpackMG(EnemyKingDistanceToPassedPawnPenalty[enemyKingDistance]),
