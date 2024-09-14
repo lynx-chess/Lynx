@@ -757,14 +757,12 @@ public class Position : IDisposable
         if ((PieceBitBoards[(int)Piece.p - pieceIndex] & passedPawnsMask) == default)    // isPassedPawn
         {
             var rank = Constants.Rank[squareIndex];
-            var blockingSquare = squareIndex + 8;
             var oppositeSide = (int)Side.Black;
             if (pieceIndex == (int)Piece.p)
             {
                 rank = 7 - rank;
-                blockingSquare -= 16;
                 oppositeSide = (int)Side.White;
-            }
+            }   
 
             if ((passedPawnsMask & OccupancyBitBoards[oppositeSide]) == 0)
             {
