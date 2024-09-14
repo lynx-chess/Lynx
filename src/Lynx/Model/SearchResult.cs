@@ -1,41 +1,65 @@
 ﻿using Lynx.UCI.Commands.Engine;
+using System.Runtime.CompilerServices;
 
 namespace Lynx.Model;
 
-public sealed class SearchResult
+public struct SearchResult
 {
-    public Move[] Moves { get; init; }
+    private readonly Move[] _moves;
+    public readonly Move[] Moves
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => _moves;
+    }
 
-    public (int WDLWin, int WDLDraw, int WDLLoss)? WDL { get; set; } = null;
-    
-    public long Nodes { get; set; }
+    public (int WDLWin, int WDLDraw, int WDLLoss)? WDL = null;
 
-    public long Time { get; set; }
+    public long Nodes;
 
-    public long NodesPerSecond { get; set; }
+    public long Time;
 
-    public int Evaluation { get; init; }
+    public long NodesPerSecond;
 
-    public int Depth { get; set; }
+    public int Depth;
 
-    public int Mate { get; init; }
+    private readonly int _mate;
+    public readonly int Mate
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => _mate;
+    }
 
-    public int DepthReached { get; set; }
+    public int DepthReached;
 
-    public int HashfullPermill { get; set; } = -1;
+    public int HashfullPermill = -1;
 
-    public Move BestMove { get; init; }
+    private readonly int _evaluation = int.MinValue;
+    public readonly int Evaluation
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => _evaluation;
+    }
+
+    private readonly Move _bestMove;
+    public readonly Move BestMove
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => _bestMove;
+    }
 
     public SearchResult(Move bestMove, int evaluation, int targetDepth, Move[] moves, int mate = default)
     {
-        BestMove = bestMove;
-        Evaluation = evaluation;
+        _bestMove = bestMove;
+        _evaluation = evaluation;
         Depth = targetDepth;
-        Moves = moves;
-        Mate = mate;
+        _moves = moves;
+        _mate = mate;
     }
 
-    public override string ToString()
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public readonly bool IsDefault() => _bestMove == default;
+
+    public override readonly string ToString()
     {
         var sb = ObjectPools.StringBuilderPool.Get();
 
@@ -43,7 +67,7 @@ public sealed class SearchResult
           .Append(" depth ").Append(Depth)
           .Append(" seldepth ").Append(DepthReached)
           .Append(" multipv 1")
-          .Append(" score ").Append(Mate == default ? "cp " + Lynx.WDL.NormalizeScore(Evaluation) : "mate " + Mate)
+          .Append(" score ").Append(_mate == default ? "cp " + Lynx.WDL.NormalizeScore(_evaluation) : "mate " + _mate)
           .Append(" nodes ").Append(Nodes)
           .Append(" nps ").Append(NodesPerSecond)
           .Append(" time ").Append(Time);
@@ -62,13 +86,13 @@ public sealed class SearchResult
         }
 
         sb.Append(" pv ");
-        foreach (var move in Moves)
+        foreach (var move in _moves)
         {
             sb.Append(move.UCIStringMemoized()).Append(' ');
         }
 
         // Remove the trailing space
-        if (Moves.Length > 0)
+        if (_moves.Length > 0)
         {
             sb.Length--;
         }

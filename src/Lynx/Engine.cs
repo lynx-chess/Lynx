@@ -286,36 +286,36 @@ public sealed partial class Engine
         // Local copy of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove so that it doesn't interfere with regular search
         var currentHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
 
-        var tasks = new Task<SearchResult?>[] {
+            var tasks = new Task<SearchResult>[] {
                 // Other copies of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove (same reason)
                 ProbeOnlineTablebase(Game.CurrentPosition, Game.CopyPositionHashHistory(),  Game.HalfMovesWithoutCaptureOrPawnMove),
-                Task.Run(()=>(SearchResult?)IDDFS(maxDepth, softLimitTimeBound))
+                Task.Run(()=>(SearchResult)IDDFS(maxDepth, softLimitTimeBound))
             };
 
         var resultList = await Task.WhenAll(tasks);
         var searchResult = resultList[1];
         var tbResult = resultList[0];
 
-        if (searchResult is not null)
+        if (!searchResult.IsDefault())
         {
             _logger.Info("Search evaluation result - eval: {0}, mate: {1}, depth: {2}, pv: {3}",
                 searchResult.Evaluation, searchResult.Mate, searchResult.Depth, string.Join(", ", searchResult.Moves.Select(m => m.UCIString())));
         }
 
-        if (tbResult is not null)
+        if (!tbResult.IsDefault())
         {
             _logger.Info("Online tb probing result - mate: {0}, moves: {1}",
                 tbResult.Mate, string.Join(", ", tbResult.Moves.Select(m => m.UCIString())));
 
-            if (searchResult?.Mate > 0 && searchResult.Mate <= tbResult.Mate && searchResult.Mate + currentHalfMovesWithoutCaptureOrPawnMove < 96)
+            if (searchResult.Mate > 0 && searchResult.Mate <= tbResult.Mate && searchResult.Mate + currentHalfMovesWithoutCaptureOrPawnMove < 96)
             {
                 _logger.Info("Relying on search result mate line due to dtm match and low enough dtz");
                 ++searchResult.Depth;
-                tbResult = null;
+                tbResult = default;
             }
         }
 
-        return tbResult ?? searchResult!;
+        return tbResult.IsDefault() ? searchResult : tbResult;
     }
 
     public void Search(GoCommand goCommand)

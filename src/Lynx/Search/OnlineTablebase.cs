@@ -4,7 +4,7 @@ using System.Diagnostics;
 namespace Lynx;
 public sealed partial class Engine
 {
-    public async Task<SearchResult?> ProbeOnlineTablebase(Position position, long[] positionHashHistory, int halfMovesWithoutCaptureOrPawnMove)
+    public async Task<SearchResult> ProbeOnlineTablebase(Position position, long[] positionHashHistory, int halfMovesWithoutCaptureOrPawnMove)
     {
         var stopWatch = Stopwatch.StartNew();
 
@@ -34,19 +34,19 @@ public sealed partial class Engine
                 return searchResult;
             }
 
-            return null;
+            return default;
         }
         catch (OperationCanceledException) // Also catches TaskCanceledException
         {
             _logger.Info("Online tb probing cancellation requested after {0}ms", _stopWatch.ElapsedMilliseconds);
 
-            return null;
+            return default;
         }
         catch (Exception e)
         {
             _logger.Error(e, "Unexpected error ocurred during the online tb probing\n{0}", e.StackTrace);
 
-            return null;
+            return default;
         }
         finally
         {

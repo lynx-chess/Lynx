@@ -1,6 +1,5 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 namespace Lynx;
@@ -49,7 +48,7 @@ public sealed partial class Engine
     private bool _isFollowingPV;
     private bool _isScoringPV;
 
-    private SearchResult? _previousSearchResult;
+    private SearchResult _previousSearchResult;
 
     private readonly Move _defaultMove = default;
 
@@ -74,7 +73,7 @@ public sealed partial class Engine
         int bestEvaluation = 0;
         int alpha = MinValue;
         int beta = MaxValue;
-        SearchResult? lastSearchResult = null;
+        SearchResult lastSearchResult = default;
         int depth = 1;
         bool isCancelled = false;
         bool isMateDetected = false;
@@ -98,7 +97,7 @@ public sealed partial class Engine
             // Not clearing _quietHistory on purpose
             // Not clearing _captureHistory on purpose
 
-            if (lastSearchResult is not null)
+            if (!lastSearchResult.IsDefault())
             {
                 _engineWriter.TryWrite(lastSearchResult);
             }
@@ -111,7 +110,7 @@ public sealed partial class Engine
                 _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
                 _nodes = 0;
 
-                if (depth < Configuration.EngineSettings.AspirationWindow_MinDepth || lastSearchResult?.Evaluation is null)
+                if (depth < Configuration.EngineSettings.AspirationWindow_MinDepth || lastSearchResult.IsDefault())
                 {
                     bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta);
                 }
@@ -171,7 +170,7 @@ public sealed partial class Engine
             _logger.Info("Search cancellation requested after {0}ms (depth {1}, nodes {2}), best move will be returned", _stopWatch.ElapsedMilliseconds, depth, _nodes);
 #pragma warning restore S6667 // Logging in a catch clause should pass the caught exception as a parameter.
 
-            for (int i = 0; i < lastSearchResult?.Moves.Length; ++i)
+            for (int i = 0; i < lastSearchResult.Moves.Length; ++i)
             {
                 _pVTable[i] = lastSearchResult.Moves[i];
             }
@@ -247,7 +246,7 @@ public sealed partial class Engine
 
     [SkipLocalsInit]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool OnlyOneLegalMove(ref Move firstLegalMove, [NotNullWhen(true)] out SearchResult? result)
+    private bool OnlyOneLegalMove(ref Move firstLegalMove, out SearchResult result)
     {
         bool onlyOneLegalMove = false;
 
@@ -300,12 +299,12 @@ public sealed partial class Engine
             return true;
         }
 
-        result = null;
+        result = default;
         return false;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private SearchResult UpdateLastSearchResult(SearchResult? lastSearchResult,
+    private SearchResult UpdateLastSearchResult(SearchResult lastSearchResult,
         int bestEvaluation, int alpha, int beta, int depth, int mate)
     {
         var pvTableSpan = _pVTable.AsSpan();
@@ -326,11 +325,11 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private SearchResult GenerateFinalSearchResult(SearchResult? lastSearchResult,
+    private SearchResult GenerateFinalSearchResult(SearchResult lastSearchResult,
         int bestEvaluation, int alpha, int beta, int depth, Move firstLegalMove, bool isCancelled)
     {
         SearchResult finalSearchResult;
-        if (lastSearchResult is null)
+        if (lastSearchResult.IsDefault())
         {
             // In the event of a quick ponderhit/stop while pondering because the opponent moved quickly, we don't want no warning triggered here
             // when cancelling the pondering search
