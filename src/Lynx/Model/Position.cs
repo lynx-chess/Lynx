@@ -775,7 +775,20 @@ public class Position : IDisposable
     {
         int packedBonus = 0;
 
-        if ((PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default) // isIsolatedPawn
+        var rank = Constants.Rank[squareIndex];
+        var oppositeSide = (int)Side.Black;
+        var oppositePawn = (int)Piece.p;
+
+        if (pieceIndex == (int)Piece.p)
+        {
+            rank = 7 - rank;
+            oppositeSide = (int)Side.White;
+            oppositePawn = (int)Piece.P;
+        }
+
+        ulong sameSidePawns = PieceBitBoards[pieceIndex];
+
+        if ((sameSidePawns & Masks.IsolatedPawnMasks[squareIndex]) == default) // isIsolatedPawn
         {
             packedBonus += IsolatedPawnPenalty;
         }
@@ -783,14 +796,6 @@ public class Position : IDisposable
         ulong passedPawnsMask = Masks.PassedPawns[pieceIndex][squareIndex];
         if ((PieceBitBoards[(int)Piece.p - pieceIndex] & passedPawnsMask) == default)    // isPassedPawn
         {
-            var rank = Constants.Rank[squareIndex];
-            var oppositeSide = (int)Side.Black;
-            if (pieceIndex == (int)Piece.p)
-            {
-                rank = 7 - rank;
-                oppositeSide = (int)Side.White;
-            }   
-
             if ((passedPawnsMask & OccupancyBitBoards[oppositeSide]) == 0)
             {
                 packedBonus += PassedPawnBonusNoEnemiesAheadBonus[bucket][rank];
@@ -802,6 +807,19 @@ public class Position : IDisposable
             packedBonus += PassedPawnBonus[bucket][rank]
                 + FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance]
                 + EnemyKingDistanceToPassedPawnPenalty[enemyKingDistance];
+        }
+
+        var squaresInFrontOfEnemyKing = Masks.PassedPawns[oppositePawn][oppositeSideKingSquare];
+        var sameSidePawnsInFrontOfEnemyKing = sameSidePawns & squaresInFrontOfEnemyKing;
+
+        while (sameSidePawnsInFrontOfEnemyKing != 0)
+        {
+            var stormPawn = sameSidePawnsInFrontOfEnemyKing.GetLS1BIndex();
+            sameSidePawnsInFrontOfEnemyKing.ResetLS1B();
+
+            // TODO try to limit it, i.e. Math.Max(4, Constants.ChebyshevDistance[oppositeSideKingSquare][stormPawn]);
+            var stormPawnDistance = Constants.ChebyshevDistance[oppositeSideKingSquare][stormPawn];
+            packedBonus += PawnStormBonus[stormPawnDistance];
         }
 
         return packedBonus;
