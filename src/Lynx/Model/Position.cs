@@ -775,22 +775,22 @@ public class Position : IDisposable
     {
         int packedBonus = 0;
 
+        var rank = Constants.Rank[squareIndex];
+        var oppositeSide = (int)Side.Black;
+        if (pieceIndex == (int)Piece.p)
+        {
+            rank = 7 - rank;
+            oppositeSide = (int)Side.White;
+        }
+
         if ((PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default) // isIsolatedPawn
         {
-            packedBonus += IsolatedPawnPenalty;
+            packedBonus += IsolatedPawnPenalty[rank];
         }
 
         ulong passedPawnsMask = Masks.PassedPawns[pieceIndex][squareIndex];
         if ((PieceBitBoards[(int)Piece.p - pieceIndex] & passedPawnsMask) == default)    // isPassedPawn
         {
-            var rank = Constants.Rank[squareIndex];
-            var oppositeSide = (int)Side.Black;
-            if (pieceIndex == (int)Piece.p)
-            {
-                rank = 7 - rank;
-                oppositeSide = (int)Side.White;
-            }   
-
             if ((passedPawnsMask & OccupancyBitBoards[oppositeSide]) == 0)
             {
                 packedBonus += PassedPawnBonusNoEnemiesAheadBonus[bucket][rank];
