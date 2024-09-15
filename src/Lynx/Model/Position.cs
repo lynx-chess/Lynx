@@ -532,8 +532,11 @@ public class Position : IDisposable
         int packedScore = 0;
         int gamePhase = 0;
 
-        BitBoard whitePawnAttacks = PieceBitBoards[(int)Piece.P].ShiftUpRight() | PieceBitBoards[(int)Piece.P].ShiftUpLeft();
-        BitBoard blackPawnAttacks = PieceBitBoards[(int)Piece.p].ShiftDownRight() | PieceBitBoards[(int)Piece.p].ShiftDownLeft();
+        var whitePawns = PieceBitBoards[(int)Piece.P];
+        var blackPawns = PieceBitBoards[(int)Piece.p];
+
+        BitBoard whitePawnAttacks = whitePawns.ShiftUpRight() | whitePawns.ShiftUpLeft();
+        BitBoard blackPawnAttacks = blackPawns.ShiftDownRight() | blackPawns.ShiftDownLeft();
 
         var whiteKing = PieceBitBoards[(int)Piece.K].GetLS1BIndex();
         var blackKing = PieceBitBoards[(int)Piece.k].GetLS1BIndex();
@@ -590,6 +593,30 @@ public class Position : IDisposable
             packedScore -= BishopPairBonus;
         }
 
+        // Pawn phalanx
+        var whitePawnsRight = whitePawns.ShiftRight();
+        var whitePhalanx = whitePawns & whitePawnsRight;
+        while (whitePhalanx != 0)
+        {
+            var square = whitePhalanx.GetLS1BIndex();
+            whitePhalanx.ResetLS1B();
+
+            var rank = Constants.Rank[square];
+            packedScore += PawnPhalanxBonus[rank];
+        }
+
+        var blackPawnsRight = blackPawns.ShiftRight();
+        var blackPhalanx = blackPawns & blackPawnsRight;
+        while (blackPhalanx != 0)
+        {
+            var square = blackPhalanx.GetLS1BIndex();
+            blackPhalanx.ResetLS1B();
+
+            var rank = 7 - Constants.Rank[square];
+            packedScore -= PawnPhalanxBonus[rank];
+        }
+
+
         // Pieces protected by pawns bonus
         packedScore += PieceProtectedByPawnBonus
             * ((whitePawnAttacks & OccupancyBitBoards[(int)Side.White] /*& (~PieceBitBoards[(int)Piece.P])*/).CountBits()
@@ -613,7 +640,7 @@ public class Position : IDisposable
             gamePhase = maxPhase;
         }
 
-        int totalPawnsCount = PieceBitBoards[(int)Piece.P].CountBits() + PieceBitBoards[(int)Piece.p].CountBits();
+        int totalPawnsCount = whitePawns.CountBits() + blackPawns.CountBits();
 
         // Pawnless endgames with few pieces
         if (gamePhase <= 3 && totalPawnsCount == 0)
