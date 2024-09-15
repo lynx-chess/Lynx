@@ -289,7 +289,7 @@ public sealed partial class Engine
                 ? +EvaluationConstants.SingleMoveEvaluation
                 : -EvaluationConstants.SingleMoveEvaluation;
 
-            result = new SearchResult(firstLegalMove, eval, 0, [firstLegalMove], MinValue, MaxValue)
+            result = new SearchResult(firstLegalMove, eval, 0, [firstLegalMove])
             {
                 DepthReached = 0,
                 Nodes = 0,
@@ -316,7 +316,7 @@ public sealed partial class Engine
         var elapsedTime = _stopWatch.ElapsedMilliseconds;
 
         _previousSearchResult = lastSearchResult;
-        return new SearchResult(pvMoves.FirstOrDefault(), bestEvaluation, depth, pvMoves, alpha, beta, mate)
+        return new SearchResult(pvMoves.FirstOrDefault(), bestEvaluation, depth, pvMoves, mate)
         {
             DepthReached = maxDepthReached,
             Nodes = _nodes,
@@ -338,14 +338,13 @@ public sealed partial class Engine
             {
                 _logger.Warn("Search cancelled at depth 1, choosing first found legal move as best one");
             }
-            finalSearchResult = new(firstLegalMove, 0, 0, [firstLegalMove], alpha, beta);
+            finalSearchResult = new(firstLegalMove, 0, 0, [firstLegalMove]);
         }
         else
         {
             finalSearchResult = _previousSearchResult = lastSearchResult;
         }
 
-        finalSearchResult.IsCancelled = isCancelled;
         finalSearchResult.DepthReached = Math.Max(finalSearchResult.DepthReached, _maxDepthReached.LastOrDefault(item => item != default));
         finalSearchResult.Nodes = _nodes;
         finalSearchResult.Time = _stopWatch.ElapsedMilliseconds;
