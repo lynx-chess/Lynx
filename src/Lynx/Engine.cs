@@ -376,12 +376,6 @@ public sealed partial class Engine
         _absoluteSearchCancellationTokenSource.Cancel();
     }
 
-    private void InitializeTT()
-    {
-        (int ttLength, _ttMask) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
-        _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
-    }
-
     private static void InitializeStaticClasses()
     {
         _ = PVTable.Indexes[0];
