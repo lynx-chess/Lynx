@@ -593,29 +593,6 @@ public class Position : IDisposable
             packedScore -= BishopPairBonus;
         }
 
-        // Pawn phalanx
-        var whitePawnsRight = whitePawns.ShiftRight();
-        var whitePhalanx = whitePawns & whitePawnsRight;
-        while (whitePhalanx != 0)
-        {
-            var square = whitePhalanx.GetLS1BIndex();
-            whitePhalanx.ResetLS1B();
-
-            var rank = Constants.Rank[square];
-            packedScore += PawnPhalanxBonus[rank];
-        }
-
-        var blackPawnsRight = blackPawns.ShiftRight();
-        var blackPhalanx = blackPawns & blackPawnsRight;
-        while (blackPhalanx != 0)
-        {
-            var square = blackPhalanx.GetLS1BIndex();
-            blackPhalanx.ResetLS1B();
-
-            var rank = 7 - Constants.Rank[square];
-            packedScore -= PawnPhalanxBonus[rank];
-        }
-
 
         // Pieces protected by pawns bonus
         packedScore += PieceProtectedByPawnBonus
@@ -755,7 +732,7 @@ public class Position : IDisposable
     {
         return pieceIndex switch
         {
-            (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(bucket, pieceSquareIndex, pieceIndex, sameSideKingSquare, oppositeSideKingSquare),
+            (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(bucket, pieceSquareIndex, pieceIndex, pieceSide, sameSideKingSquare, oppositeSideKingSquare),
             (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, enemyPawnAttacks),
             (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, enemyPawnAttacks),
             (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, enemyPawnAttacks),
@@ -771,26 +748,29 @@ public class Position : IDisposable
     /// < param name="pieceIndex"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int PawnAdditionalEvaluation(int bucket, int squareIndex, int pieceIndex, int sameSideKingSquare, int oppositeSideKingSquare)
+    private int PawnAdditionalEvaluation(int bucket, int squareIndex, int pieceIndex, int pieceSide, int sameSideKingSquare, int oppositeSideKingSquare)
     {
         int packedBonus = 0;
 
-        if ((PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default) // isIsolatedPawn
+        // Isolated pawn
+        if ((PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default)
         {
             packedBonus += IsolatedPawnPenalty;
         }
 
-        ulong passedPawnsMask = Masks.PassedPawns[pieceIndex][squareIndex];
-        if ((PieceBitBoards[(int)Piece.p - pieceIndex] & passedPawnsMask) == default)    // isPassedPawn
+        var rank = Constants.Rank[squareIndex];
+        var oppositeSide = (int)Side.Black;
+        if (pieceIndex == (int)Piece.p)
         {
-            var rank = Constants.Rank[squareIndex];
-            var oppositeSide = (int)Side.Black;
-            if (pieceIndex == (int)Piece.p)
-            {
-                rank = 7 - rank;
-                oppositeSide = (int)Side.White;
-            }   
+            rank = 7 - rank;
+            oppositeSide = (int)Side.White;
+        }
 
+        // Passed pawn
+        ulong passedPawnsMask = Masks.PassedPawns[pieceIndex][squareIndex];
+        if ((PieceBitBoards[(int)Piece.p - pieceIndex] & passedPawnsMask) == default)
+        {
+            // Passed pawn without opponent pieces ahead (in its passed pawn mask)
             if ((passedPawnsMask & OccupancyBitBoards[oppositeSide]) == 0)
             {
                 packedBonus += PassedPawnBonusNoEnemiesAheadBonus[bucket][rank];
@@ -802,6 +782,12 @@ public class Position : IDisposable
             packedBonus += PassedPawnBonus[bucket][rank]
                 + FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance]
                 + EnemyKingDistanceToPassedPawnPenalty[enemyKingDistance];
+        }
+
+        // Pawn phalanx
+        if (Constants.File[squareIndex] != 7 && PieceBitBoards[pieceIndex].GetBit(squareIndex + 1))
+        {
+            packedBonus += PawnPhalanxBonus[rank];
         }
 
         return packedBonus;
