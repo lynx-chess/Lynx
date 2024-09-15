@@ -415,10 +415,12 @@ public class PositionTest
             - AdditionalPieceEvaluation(position, Piece.p);
 
         var rank = Constants.Rank[(int)square];
+        var pieceIndex = (int)Piece.P;
         if (position.Side == Side.Black)
         {
             evaluation = -evaluation;
             rank = 7 - rank;
+            pieceIndex = (int)Piece.p;
         }
 
         var whiteKingDistance = Constants.ChebyshevDistance[(int)square][position.PieceBitBoards[(int)Piece.K].GetLS1BIndex()];
@@ -432,9 +434,18 @@ public class PositionTest
             ? blackKingDistance
             : whiteKingDistance;
 
+        ulong passedPawnsMask = Masks.PassedPawns[pieceIndex][(int)square];
+
+        var expectedEval = 0;
+        if ((passedPawnsMask & position.OccupancyBitBoards[OppositeSide(position.Side)]) == 0)
+        {
+            expectedEval += UnpackMG(PassedPawnBonusNoEnemiesAheadBonus[0][rank]);
+        }
+
         Assert.AreEqual(
+            expectedEval
             //(-4 * Configuration.EngineSettings.DoubledPawnPenalty.MG)
-            UnpackMG(IsolatedPawnPenalty)
+            + UnpackMG(IsolatedPawnPenalty)
             + UnpackMG(PassedPawnBonus[0][rank])
             + UnpackMG(FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance])
             + UnpackMG(EnemyKingDistanceToPassedPawnPenalty[enemyKingDistance]),
