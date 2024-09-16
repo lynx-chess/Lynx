@@ -52,7 +52,8 @@ using static Lynx.TunableEvalParameters;
 //TranspositionTable();
 //UnmakeMove();
 //PieceSquareTables();
-NewMasks();
+//NewMasks();
+DarkLightSquares();
 
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
 const string TrickyPosition = Constants.TrickyTestPositionFEN;
@@ -1222,4 +1223,15 @@ static void PrintBitBoardArray(ulong[] bb)
     }
 
     Console.WriteLine();
+}
+
+static void DarkLightSquares()
+{
+    Constants.DarkSquaresBitBoard.Print();
+    Constants.LightSquaresBitBoard.Print();
+
+    for (int i = 0; i < 64; ++i)
+    {
+        Debug.Assert(Constants.DarkSquaresBitBoard.GetBit(i) ^ Constants.LightSquaresBitBoard.GetBit(i));
+    }
 }
