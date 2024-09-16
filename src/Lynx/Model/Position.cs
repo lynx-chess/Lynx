@@ -770,7 +770,10 @@ public class Position : IDisposable
                 packedBonus += PassedPawnBonusNoEnemiesAheadBonus[bucket][rank];
             }
 
+            // King distance to passed pawn
             var friendlyKingDistance = Constants.ChebyshevDistance[squareIndex][sameSideKingSquare];
+
+            // Enemy king distance to passed pawn
             var enemyKingDistance = Constants.ChebyshevDistance[squareIndex][oppositeSideKingSquare];
 
             packedBonus += PassedPawnBonus[bucket][rank]
@@ -876,7 +879,7 @@ public class Position : IDisposable
         var kingSideOffset = Utils.PieceOffset(pieceSide);
 
         // Opposite side rooks or queens on the board
-        if (PieceBitBoards[(int)Piece.r - kingSideOffset] + PieceBitBoards[(int)Piece.q - kingSideOffset] != 0) 
+        if (PieceBitBoards[(int)Piece.r - kingSideOffset] + PieceBitBoards[(int)Piece.q - kingSideOffset] != 0)
         {
             // King on open file
             if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == 0)
@@ -890,6 +893,7 @@ public class Position : IDisposable
             }
         }
 
+        // King shield
         var ownPiecesAroundCount = (Attacks.KingAttacks[squareIndex] & PieceBitBoards[(int)Piece.P + kingSideOffset]).CountBits();
 
         return packedBonus + (ownPiecesAroundCount * KingShieldBonus);
