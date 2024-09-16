@@ -81,7 +81,7 @@ public class Position : IDisposable
         OccupancyBitBoards = ArrayPool<BitBoard>.Shared.Rent(3);
         Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
 
-        Board = new int[64];
+        Board = ArrayPool<int>.Shared.Rent(64);
         Array.Copy(position.Board, Board, position.Board.Length);
 
         Side = position.Side;
@@ -1282,6 +1282,7 @@ public class Position : IDisposable
     {
         ArrayPool<BitBoard>.Shared.Return(PieceBitBoards, clearArray: true);
         ArrayPool<BitBoard>.Shared.Return(OccupancyBitBoards, clearArray: true);
+        ArrayPool<int>.Shared.Return(Board, clearArray: false);
 
         _disposedValue = true;
     }
