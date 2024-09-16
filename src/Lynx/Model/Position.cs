@@ -740,29 +740,24 @@ public class Position : IDisposable
         };
     }
 
-    /// <summary>
-    /// Doubled pawns penalty, isolated pawns penalty, passed pawns bonus
-    /// </summary>
-    /// <param name = "squareIndex" ></ param >
-    /// < param name="pieceIndex"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int PawnAdditionalEvaluation(int bucket, int squareIndex, int pieceIndex, int sameSideKingSquare, int oppositeSideKingSquare)
     {
         int packedBonus = 0;
 
-        // Isolated pawn
-        if ((PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default)
-        {
-            packedBonus += IsolatedPawnPenalty;
-        }
-
         var rank = Constants.Rank[squareIndex];
         var oppositeSide = (int)Side.Black;
+
         if (pieceIndex == (int)Piece.p)
         {
             rank = 7 - rank;
             oppositeSide = (int)Side.White;
+        }
+
+        // Isolated pawn
+        if ((PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default)
+        {
+            packedBonus += IsolatedPawnPenalty;
         }
 
         // Passed pawn
@@ -792,12 +787,6 @@ public class Position : IDisposable
         return packedBonus;
     }
 
-    /// <summary>
-    /// Open and semiopen file bonus
-    /// </summary>
-    /// <param name="squareIndex"></param>
-    /// <param name="pieceIndex"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int RookAdditionalEvaluation(int squareIndex, int pieceIndex, int pieceSide, BitBoard enemyPawnAttacks)
     {
@@ -822,12 +811,6 @@ public class Position : IDisposable
         return packedBonus;
     }
 
-    /// <summary>
-    /// Mobility and bishop pair bonus
-    /// </summary>
-    /// <param name="squareIndex"></param>
-    /// <param name="pieceIndex"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int KnightAdditionalEvaluation(int squareIndex, int pieceIndex, int pieceSide, BitBoard enemyPawnAttacks)
     {
@@ -839,12 +822,6 @@ public class Position : IDisposable
         return KnightMobilityBonus[attacksCount];
     }
 
-    /// <summary>
-    /// Mobility and bishop pair bonus
-    /// </summary>
-    /// <param name="squareIndex"></param>
-    /// <param name="pieceIndex"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int BishopAdditionalEvaluation(int squareIndex, int pieceIndex, int pieceSide, BitBoard enemyPawnAttacks)
     {
@@ -856,11 +833,6 @@ public class Position : IDisposable
         return BishopMobilityBonus[attacksCount];
     }
 
-    /// <summary>
-    /// Mobility bonus
-    /// </summary>
-    /// <param name="squareIndex"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int QueenAdditionalEvaluation(int squareIndex, int pieceIndex, int pieceSide, BitBoard enemyPawnAttacks)
     {
@@ -872,12 +844,6 @@ public class Position : IDisposable
         return QueenMobilityBonus[attacksCount];
     }
 
-    /// <summary>
-    /// Open and semiopenfile penalties, shield bonus, virtual mobility bonus/penalty
-    /// </summary>
-    /// <param name="squareIndex"></param>
-    /// <param name="pieceSide"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal int KingAdditionalEvaluation(int squareIndex, int pieceSide, BitBoard enemyPawnAttacks)
     {
