@@ -583,9 +583,8 @@ public class Position : IDisposable
         }
 
         // Doubled pawns
-        packedScore += DoubledPawnPenalty * (
-            (whitePawns & whitePawns.ShiftUp()).CountBits()
-            - (blackPawns & blackPawns.ShiftUp()).CountBits());
+        packedScore += (DoubledPawnPenalty[whiteBucket] * (whitePawns & whitePawns.ShiftUp()).CountBits()) -
+            (DoubledPawnPenalty[blackBucket] * (blackPawns & blackPawns.ShiftUp()).CountBits());
 
         // Bishop pair bonus
         if (PieceBitBoards[(int)Piece.B].CountBits() >= 2)
