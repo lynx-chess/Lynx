@@ -593,30 +593,6 @@ public class Position : IDisposable
             packedScore -= BishopPairBonus;
         }
 
-        // Pawn phalanx
-        var whitePawnsRight = whitePawns.ShiftRight();
-        var whitePhalanx = whitePawns & whitePawnsRight;
-        while (whitePhalanx != 0)
-        {
-            var square = whitePhalanx.GetLS1BIndex();
-            whitePhalanx.ResetLS1B();
-
-            var rank = Constants.Rank[square];
-            packedScore += PawnPhalanxBonus[rank];
-        }
-
-        var blackPawnsRight = blackPawns.ShiftRight();
-        var blackPhalanx = blackPawns & blackPawnsRight;
-        while (blackPhalanx != 0)
-        {
-            var square = blackPhalanx.GetLS1BIndex();
-            blackPhalanx.ResetLS1B();
-
-            var rank = 7 - Constants.Rank[square];
-            packedScore -= PawnPhalanxBonus[rank];
-        }
-
-
         // Pieces protected by pawns bonus
         packedScore += PieceProtectedByPawnBonus
             * ((whitePawnAttacks & OccupancyBitBoards[(int)Side.White] /*& (~PieceBitBoards[(int)Piece.P])*/).CountBits()
@@ -775,22 +751,25 @@ public class Position : IDisposable
     {
         int packedBonus = 0;
 
-        if ((PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default) // isIsolatedPawn
+        // Isolated pawn
+        if ((PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default)
         {
             packedBonus += IsolatedPawnPenalty;
         }
 
-        ulong passedPawnsMask = Masks.PassedPawns[pieceIndex][squareIndex];
-        if ((PieceBitBoards[(int)Piece.p - pieceIndex] & passedPawnsMask) == default)    // isPassedPawn
+        var rank = Constants.Rank[squareIndex];
+        var oppositeSide = (int)Side.Black;
+        if (pieceIndex == (int)Piece.p)
         {
-            var rank = Constants.Rank[squareIndex];
-            var oppositeSide = (int)Side.Black;
-            if (pieceIndex == (int)Piece.p)
-            {
-                rank = 7 - rank;
-                oppositeSide = (int)Side.White;
-            }   
+            rank = 7 - rank;
+            oppositeSide = (int)Side.White;
+        }
 
+        // Passed pawn
+        ulong passedPawnsMask = Masks.PassedPawns[pieceIndex][squareIndex];
+        if ((PieceBitBoards[(int)Piece.p - pieceIndex] & passedPawnsMask) == default)
+        {
+            // Passed pawn without opponent pieces ahead (in its passed pawn mask)
             if ((passedPawnsMask & OccupancyBitBoards[oppositeSide]) == 0)
             {
                 packedBonus += PassedPawnBonusNoEnemiesAheadBonus[bucket][rank];
@@ -802,6 +781,12 @@ public class Position : IDisposable
             packedBonus += PassedPawnBonus[bucket][rank]
                 + FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance]
                 + EnemyKingDistanceToPassedPawnPenalty[enemyKingDistance];
+        }
+
+        // Pawn phalanx
+        if (Constants.File[squareIndex] != 7 && PieceBitBoards[pieceIndex].GetBit(squareIndex + 1))
+        {
+            packedBonus += PawnPhalanxBonus[rank];
         }
 
         return packedBonus;
