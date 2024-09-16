@@ -1282,6 +1282,7 @@ public class Position : IDisposable
     {
         ArrayPool<BitBoard>.Shared.Return(PieceBitBoards, clearArray: true);
         ArrayPool<BitBoard>.Shared.Return(OccupancyBitBoards, clearArray: true);
+        // No need to clear, since we always have to initialize it to Piece.None after renting it anyway
         ArrayPool<int>.Shared.Return(Board, clearArray: false);
 
         _disposedValue = true;
