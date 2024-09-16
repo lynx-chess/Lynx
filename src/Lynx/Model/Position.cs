@@ -849,8 +849,8 @@ public class Position : IDisposable
             (Constants.DarkSquares[squareIndex] == 1
                 ? Constants.DarkSquaresBitBoard
                 : Constants.LightSquaresBitBoard);
-
-        packedBonus += BadBishopPenalty[sameSidePawns.CountBits() - sameColorPawns.CountBits()];
+        var sameColorsParamsDiff = (2 * sameColorPawns.CountBits()) - sameSidePawns.CountBits();
+        packedBonus += BadBishopPenalty[8 + sameColorsParamsDiff];
 
         return packedBonus;
     }
