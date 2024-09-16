@@ -790,6 +790,9 @@ public class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int RookAdditionalEvaluation(int squareIndex, int pieceIndex, int pieceSide, BitBoard enemyPawnAttacks)
     {
+        const int pawnToRookOffset = (int)Piece.R - (int)Piece.P;
+
+        // Mobility
         var attacksCount =
             (Attacks.RookAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both])
                 & (~(OccupancyBitBoards[pieceSide] | enemyPawnAttacks)))
@@ -797,13 +800,13 @@ public class Position : IDisposable
 
         var packedBonus = RookMobilityBonus[attacksCount];
 
-        const int pawnToRookOffset = (int)Piece.R - (int)Piece.P;
-
-        if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default)  // isOpenFile
+        // Rook on open file
+        if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default)
         {
             packedBonus += OpenFileRookBonus;
         }
-        else if ((PieceBitBoards[pieceIndex - pawnToRookOffset] & Masks.FileMasks[squareIndex]) == default)  // isSemiOpenFile
+        // Rook on semi-open file
+        else if ((PieceBitBoards[pieceIndex - pawnToRookOffset] & Masks.FileMasks[squareIndex]) == default)
         {
             packedBonus += SemiOpenFileRookBonus;
         }
@@ -814,6 +817,7 @@ public class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int KnightAdditionalEvaluation(int squareIndex, int pieceSide, BitBoard enemyPawnAttacks)
     {
+        // Mobility
         var attacksCount =
             (Attacks.KnightAttacks[squareIndex]
                 & (~(OccupancyBitBoards[pieceSide] | enemyPawnAttacks)))
@@ -825,6 +829,7 @@ public class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int BishopAdditionalEvaluation(int squareIndex, int pieceSide, BitBoard enemyPawnAttacks)
     {
+        // Mobility
         var attacksCount =
             (Attacks.BishopAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both])
                 & (~(OccupancyBitBoards[pieceSide] | enemyPawnAttacks)))
@@ -836,6 +841,7 @@ public class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int QueenAdditionalEvaluation(int squareIndex, int pieceSide, BitBoard enemyPawnAttacks)
     {
+        // Mobility
         var attacksCount =
             (Attacks.QueenAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both])
                 & (~(OccupancyBitBoards[pieceSide] | enemyPawnAttacks)))
@@ -847,6 +853,7 @@ public class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal int KingAdditionalEvaluation(int squareIndex, int pieceSide, BitBoard enemyPawnAttacks)
     {
+        // Virtual mobility (as if Queen)
         var attacksCount =
             (Attacks.QueenAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both])
             & ~(OccupancyBitBoards[pieceSide] | enemyPawnAttacks)).CountBits();
@@ -854,13 +861,16 @@ public class Position : IDisposable
 
         var kingSideOffset = Utils.PieceOffset(pieceSide);
 
-        if (PieceBitBoards[(int)Piece.r - kingSideOffset] + PieceBitBoards[(int)Piece.q - kingSideOffset] != 0) // areThereOppositeSideRooksOrQueens
+        // Opposite side rooks or queens on the board
+        if (PieceBitBoards[(int)Piece.r - kingSideOffset] + PieceBitBoards[(int)Piece.q - kingSideOffset] != 0) 
         {
-            if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == 0)  // isOpenFile
+            // King on open file
+            if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == 0)
             {
                 packedBonus += OpenFileKingPenalty;
             }
-            else if ((PieceBitBoards[(int)Piece.P + kingSideOffset] & Masks.FileMasks[squareIndex]) == 0) // isSemiOpenFile
+            // King on semi-open file
+            else if ((PieceBitBoards[(int)Piece.P + kingSideOffset] & Masks.FileMasks[squareIndex]) == 0)
             {
                 packedBonus += SemiOpenFileKingPenalty;
             }
