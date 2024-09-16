@@ -117,22 +117,6 @@ public static class MoveExtensions
             | (1 << IsCaptureOffset);
     }
 
-    /// <summary>
-    /// Override when captured piece isn't provided
-    /// </summary>
-    /// <param name="sourceSquare"></param>
-    /// <param name="targetSquare"></param>
-    /// <param name="piece"></param>
-    /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Move EncodeCapture(int sourceSquare, int targetSquare, int piece)
-    {
-        return (sourceSquare << SourceSquareOffset)
-            | (targetSquare << TargetSquareOffset)
-            | (piece << PieceOffset)
-            | (1 << IsCaptureOffset);
-    }
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Move EncodePromotion(int sourceSquare, int targetSquare, int piece, int promotedPiece)
     {
@@ -150,24 +134,6 @@ public static class MoveExtensions
             | (targetSquare << TargetSquareOffset)
             | (piece << PieceOffset)
             | (capturedPiece << CapturedPieceOffset)
-            | (1 << IsCaptureOffset);
-    }
-
-    /// <summary>
-    /// Override when captured piece isn't provided
-    /// </summary>
-    /// <param name="sourceSquare"></param>
-    /// <param name="targetSquare"></param>
-    /// <param name="piece"></param>
-    /// <param name="promotedPiece"></param>
-    /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Move EncodePromotionWithCapture(int sourceSquare, int targetSquare, int piece, int promotedPiece)
-    {
-        return promotedPiece
-            | (sourceSquare << SourceSquareOffset)
-            | (targetSquare << TargetSquareOffset)
-            | (piece << PieceOffset)
             | (1 << IsCaptureOffset);
     }
 
