@@ -1,11 +1,10 @@
 ﻿using Lynx.Model;
-using Lynx.UCI.Commands.Engine;
 using System.Diagnostics;
 
 namespace Lynx;
 public sealed partial class Engine
 {
-    public async Task<SearchResult?> ProbeOnlineTablebase(Position position, List<long> positionHashHistory, int halfMovesWithoutCaptureOrPawnMove)
+    public async Task<SearchResult?> ProbeOnlineTablebase(Position position, long[] positionHashHistory, int halfMovesWithoutCaptureOrPawnMove)
     {
         var stopWatch = Stopwatch.StartNew();
 
@@ -15,7 +14,7 @@ public sealed partial class Engine
 
             if (tablebaseResult.BestMove != 0)
             {
-                var searchResult = new SearchResult(tablebaseResult.BestMove, evaluation: 0, targetDepth: 0, new List<Move> { tablebaseResult.BestMove }, MinValue, MaxValue, mate: tablebaseResult.MateScore)
+                var searchResult = new SearchResult(tablebaseResult.BestMove, evaluation: 0, targetDepth: 0, [tablebaseResult.BestMove], mate: tablebaseResult.MateScore)
                 {
                     DepthReached = 0,
                     Nodes = 666,                // In case some guis proritize the info command with biggest depth
@@ -24,13 +23,13 @@ public sealed partial class Engine
                     HashfullPermill = _tt.HashfullPermillApprox(),
                     WDL = WDL.WDLModel(
                         (int)Math.CopySign(
-                            EvaluationConstants.PositiveCheckmateDetectionLimit + EvaluationConstants.CheckmateDepthFactor * tablebaseResult.MateScore,
+                            EvaluationConstants.PositiveCheckmateDetectionLimit + (EvaluationConstants.CheckmateDepthFactor * tablebaseResult.MateScore),
                             tablebaseResult.MateScore),
                         0)
                 };
 
-                await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(searchResult));
-                _searchCancellationTokenSource.Cancel();
+                await _engineWriter.WriteAsync(searchResult);
+                await _searchCancellationTokenSource.CancelAsync();
 
                 return searchResult;
             }

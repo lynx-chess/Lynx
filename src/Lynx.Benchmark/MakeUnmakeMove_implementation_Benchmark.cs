@@ -1350,7 +1350,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         /// <summary>
         /// Lightweight version of <see cref="IsValid"/>
         /// False if the opponent king is in check.
-        /// This method is meant to be invoked only after <see cref="Position(Position, Move)"/>
+        /// This method is meant to be invoked only after <see cref="Position.MakeMove(int)"/>
         /// </summary>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

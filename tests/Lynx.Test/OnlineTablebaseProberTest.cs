@@ -380,7 +380,7 @@ public class OnlineTablebaseProberTest
         var position = game.CurrentPosition;
 
         // Act
-        var result = await OnlineTablebaseProber.RootSearch(position, game.PositionHashHistory, game.HalfMovesWithoutCaptureOrPawnMove, default);
+        var result = await OnlineTablebaseProber.RootSearch(position, game.CopyPositionHashHistory(), game.HalfMovesWithoutCaptureOrPawnMove, default);
 
         // Assert
         Assert.AreEqual(0, result.MateScore);
@@ -406,7 +406,7 @@ public class OnlineTablebaseProberTest
         var position = game.CurrentPosition;
 
         // Act
-        var result = await OnlineTablebaseProber.RootSearch(position, game.PositionHashHistory, game.HalfMovesWithoutCaptureOrPawnMove, default);
+        var result = await OnlineTablebaseProber.RootSearch(position, game.CopyPositionHashHistory(), game.HalfMovesWithoutCaptureOrPawnMove, default);
 
         // Assert
         Assert.AreEqual(0, result.MateScore);

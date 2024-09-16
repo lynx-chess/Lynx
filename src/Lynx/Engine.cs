@@ -13,7 +13,7 @@ public sealed partial class Engine
     internal const int DefaultMaxDepth = 5;
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-    private readonly ChannelWriter<string> _engineWriter;
+    private readonly ChannelWriter<object> _engineWriter;
 
     private bool _isSearching;
 
@@ -50,10 +50,10 @@ public sealed partial class Engine
     private CancellationTokenSource _searchCancellationTokenSource;
     private CancellationTokenSource _absoluteSearchCancellationTokenSource;
 
-    public Engine(ChannelWriter<string> engineWriter)
+    public Engine(ChannelWriter<object> engineWriter)
     {
         AverageDepth = 0;
-        Game = new Game();
+        Game = new Game(Constants.InitialPositionFEN);
         _isNewGameComing = true;
         _searchCancellationTokenSource = new();
         _absoluteSearchCancellationTokenSource = new();
@@ -73,15 +73,17 @@ public sealed partial class Engine
             _killerMoves[i] = new Move[3];
         }
 
-        InitializeTT();
+        (int ttLength, _ttMask) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
+        _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
 
 #if !DEBUG
         // Temporary channel so that no output is generated
-        _engineWriter = Channel.CreateUnbounded<string>(new UnboundedChannelOptions() { SingleReader = true, SingleWriter = false }).Writer;
+        _engineWriter = Channel.CreateUnbounded<object>(new UnboundedChannelOptions() { SingleReader = true, SingleWriter = false }).Writer;
         WarmupEngine();
 
         _engineWriter = engineWriter;
-        ResetEngine();
+
+        // No need for ResetEngine() call here, WarmupEngine -> Bench -> NewGame() calls it
 #endif
 
 #pragma warning disable S1215 // "GC.Collect" should not be called
@@ -111,7 +113,7 @@ public sealed partial class Engine
 
     private void ResetEngine()
     {
-        InitializeTT(); // Attempt to clear instead in https://github.com/lynx-chess/Lynx/pull/960
+        Array.Clear(_tt);
 
         // Clear histories
         for (int i = 0; i < 12; ++i)
@@ -128,13 +130,15 @@ public sealed partial class Engine
 
     internal void SetGame(Game game)
     {
+        Game.FreeResources();
         Game = game;
     }
 
     public void NewGame()
     {
         AverageDepth = 0;
-        Game = new Game();
+        Game.FreeResources();
+        Game = new Game(Constants.InitialPositionFEN);
         _isNewGameComing = true;
         _isNewGameCommandSupported = true;
         _stopRequested = false;
@@ -151,7 +155,7 @@ public sealed partial class Engine
     public void AdjustPosition(ReadOnlySpan<char> rawPositionCommand)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-
+        Game.FreeResources();
         Game = PositionCommand.ParseGame(rawPositionCommand, moves);
         _isNewGameComing = false;
         _stopRequested = false;
@@ -197,7 +201,7 @@ public sealed partial class Engine
                 const int minSearchTime = 50;
 
                 var movesDivisor = goCommand.MovesToGo == 0
-                    ? Configuration.EngineSettings.DefaultMovesToGo
+                    ? ExpectedMovesLeft(Game.PositionHashHistoryLength()) * 3 / 2
                     : goCommand.MovesToGo;
 
                 millisecondsLeft -= engineGuiCommunicationTimeOverhead;
@@ -253,9 +257,24 @@ public sealed partial class Engine
             Game.UpdateInitialPosition();
         }
 
-        AverageDepth += (resultToReturn.Depth - AverageDepth) / Math.Ceiling(0.5 * Game.PositionHashHistory.Count);
+        AverageDepth += (resultToReturn.Depth - AverageDepth) / Math.Ceiling(0.5 * Game.PositionHashHistoryLength());
 
         return resultToReturn;
+    }
+
+    /// <summary>
+    /// Straight from expositor's author paper, https://expositor.dev/pdf/movetime.pdf
+    /// </summary>
+    /// <param name="plies_played"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int ExpectedMovesLeft(int plies_played)
+    {
+        double p = (double)(plies_played);
+
+        return (int)Math.Round(
+            (59.3 + (72830.0 - p * 2330.0) / (p * p + p * 10.0 + 2644.0))   // Plies remaining
+            / 2.0); // Full moves remaining
     }
 
     private async ValueTask<SearchResult> SearchBestMove(int maxDepth, int softLimitTimeBound)
@@ -270,7 +289,7 @@ public sealed partial class Engine
 
         var tasks = new Task<SearchResult?>[] {
                 // Other copies of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove (same reason)
-                ProbeOnlineTablebase(Game.CurrentPosition, new(Game.PositionHashHistory),  Game.HalfMovesWithoutCaptureOrPawnMove),
+                ProbeOnlineTablebase(Game.CurrentPosition, Game.CopyPositionHashHistory(),  Game.HalfMovesWithoutCaptureOrPawnMove),
                 Task.Run(()=>(SearchResult?)IDDFS(maxDepth, softLimitTimeBound))
             };
 
@@ -336,8 +355,8 @@ public sealed partial class Engine
             }
 
             // We print best move even in case of go ponder + stop, and IDEs are expected to ignore it
-            _moveToPonder = searchResult.Moves.Count >= 2 ? searchResult.Moves[1] : null;
-            _engineWriter.TryWrite(BestMoveCommand.BestMove(searchResult.BestMove, _moveToPonder));
+            _moveToPonder = searchResult.Moves.Length >= 2 ? searchResult.Moves[1] : null;
+            _engineWriter.TryWrite(new BestMoveCommand(searchResult.BestMove, _moveToPonder));
         }
         catch (Exception e)
         {
@@ -355,12 +374,6 @@ public sealed partial class Engine
     {
         _stopRequested = true;
         _absoluteSearchCancellationTokenSource.Cancel();
-    }
-
-    private void InitializeTT()
-    {
-        (int ttLength, _ttMask) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
-        _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
     }
 
     private static void InitializeStaticClasses()
