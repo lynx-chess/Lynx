@@ -600,8 +600,8 @@ public class Position : IDisposable
 
         // Pieces attacked by pawns bonus
         packedScore += PieceAttackedByPawnPenalty
-            * ((blackPawnAttacks & OccupancyBitBoards[(int)Side.White] /* & (~whitePawns) */).CountBits()
-                - (whitePawnAttacks & OccupancyBitBoards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
+            * ((blackPawnAttacks & OccupancyBitBoards[(int)Side.White] & (~whitePawns)).CountBits()
+                - (whitePawnAttacks & OccupancyBitBoards[(int)Side.Black] & (~blackPawns)).CountBits());
 
         packedScore += PSQT(0, whiteBucket, (int)Piece.K, whiteKing)
             + PSQT(0, blackBucket, (int)Piece.k, blackKing)
