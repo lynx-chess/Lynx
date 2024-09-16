@@ -6038,6 +6038,8 @@ public static class EvaluationParams
 
 	public static readonly TaperedEvaluationTerm BishopPairBonus = Pack(29, 77);
 
+	public static readonly TaperedEvaluationTerm BadBishopPenalty = Pack(-1, -2);
+
 	public static readonly TaperedEvaluationTerm PieceProtectedByPawnBonus = Pack(12, 16);
 
 	public static readonly TaperedEvaluationTerm PieceAttackedByPawnPenalty = Pack(-48, -34);
