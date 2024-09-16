@@ -593,7 +593,6 @@ public class Position : IDisposable
             packedScore -= BishopPairBonus;
         }
 
-
         // Pieces protected by pawns bonus
         packedScore += PieceProtectedByPawnBonus
             * ((whitePawnAttacks & OccupancyBitBoards[(int)Side.White] /*& (~PieceBitBoards[(int)Piece.P])*/).CountBits()
