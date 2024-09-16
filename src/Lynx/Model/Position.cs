@@ -582,6 +582,11 @@ public class Position : IDisposable
             }
         }
 
+        // Doubled pawns
+        packedScore += DoubledPawnPenalty * (
+            (whitePawns & whitePawns.ShiftUp()).CountBits()
+            - (blackPawns & blackPawns.ShiftUp()).CountBits());
+
         // Bishop pair bonus
         if (PieceBitBoards[(int)Piece.B].CountBits() >= 2)
         {
@@ -603,6 +608,7 @@ public class Position : IDisposable
             * ((blackPawnAttacks & OccupancyBitBoards[(int)Side.White] /* & (~whitePawns) */).CountBits()
                 - (whitePawnAttacks & OccupancyBitBoards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
 
+        // Kings
         packedScore += PSQT(0, whiteBucket, (int)Piece.K, whiteKing)
             + PSQT(0, blackBucket, (int)Piece.k, blackKing)
             + PSQT(1, blackBucket, (int)Piece.K, whiteKing)
