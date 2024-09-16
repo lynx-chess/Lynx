@@ -6026,15 +6026,13 @@ public static class EvaluationParams
 		Pack(-134, 429)
 	];
 
-	public static readonly TaperedEvaluationTermByRank PawnStormBonus =
+	public static readonly int[] PawnStormBonus =
 	[
 		Pack(0, 0),
 		Pack(-4, 3),
 		Pack(1, 8),
 		Pack(2, 6),
-		Pack(4, 5),
-		Pack(2, 6),
-		Pack(-0, 7)
+		Pack(4, 5)
 	];
 
 	public static readonly TaperedEvaluationTerm OpenFileRookBonus = Pack(42, 2);
