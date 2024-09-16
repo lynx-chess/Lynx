@@ -630,8 +630,8 @@ public class Position : IDisposable
             + PSQT(0, blackBucket, (int)Piece.k, blackKing)
             + PSQT(1, blackBucket, (int)Piece.K, whiteKing)
             + PSQT(1, whiteBucket, (int)Piece.k, blackKing)
-            + KingAdditionalEvaluation(whiteKing, (int)Side.White, blackPawnAttacks)
-            - KingAdditionalEvaluation(blackKing, (int)Side.Black, whitePawnAttacks);
+            + KingAdditionalEvaluation(whiteBucket, whiteKing, (int)Side.White, blackPawnAttacks)
+            - KingAdditionalEvaluation(blackBucket, blackKing, (int)Side.Black, whitePawnAttacks);
 
         const int maxPhase = 24;
 
@@ -789,7 +789,7 @@ public class Position : IDisposable
             {
                 rank = 7 - rank;
                 oppositeSide = (int)Side.White;
-            }   
+            }
 
             if ((passedPawnsMask & OccupancyBitBoards[oppositeSide]) == 0)
             {
@@ -894,7 +894,7 @@ public class Position : IDisposable
     /// <param name="pieceSide"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int KingAdditionalEvaluation(int squareIndex, int pieceSide, BitBoard enemyPawnAttacks)
+    internal int KingAdditionalEvaluation(int bucket, int squareIndex, int pieceSide, BitBoard enemyPawnAttacks)
     {
         var attacksCount =
             (Attacks.QueenAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both])
@@ -915,9 +915,9 @@ public class Position : IDisposable
             }
         }
 
-        var ownPiecesAroundCount = (Attacks.KingAttacks[squareIndex] & PieceBitBoards[(int)Piece.P + kingSideOffset]).CountBits();
+        var ownPawnsAroundCount = (Attacks.KingAttacks[squareIndex] & PieceBitBoards[(int)Piece.P + kingSideOffset]).CountBits();
 
-        return packedBonus + (ownPiecesAroundCount * KingShieldBonus);
+        return packedBonus + (ownPawnsAroundCount * KingShieldBonus[bucket]);
     }
 
     /// <summary>

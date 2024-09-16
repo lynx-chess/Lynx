@@ -770,12 +770,17 @@ public class PositionTest
         int evaluation = AdditionalKingEvaluation(position, Piece.K)
             - AdditionalKingEvaluation(position, Piece.k);
 
+        var whiteBucket = EvaluationPSQTs.PSQTBucketLayout[position.PieceBitBoards[(int)Piece.K].GetLS1BIndex()];
+        var blackBucket = EvaluationPSQTs.PSQTBucketLayout[position.PieceBitBoards[(int)Piece.k ^56].GetLS1BIndex()];
+
+        var bucket = whiteBucket;
         if (position.Side == Side.Black)
         {
             evaluation = -evaluation;
+            bucket = blackBucket;
         }
 
-        Assert.AreEqual(surroundingPieces * UnpackEG(KingShieldBonus), evaluation);
+        Assert.AreEqual(surroundingPieces * UnpackEG(KingShieldBonus[bucket]), evaluation);
     }
 
     /// <summary>
@@ -1086,9 +1091,12 @@ public class PositionTest
 
         var bitBoard = position.PieceBitBoards[(int)piece].GetLS1BIndex();
 
+        var whiteBucket = EvaluationPSQTs.PSQTBucketLayout[position.PieceBitBoards[(int)Piece.K].GetLS1BIndex()];
+        var blackBucket = EvaluationPSQTs.PSQTBucketLayout[position.PieceBitBoards[(int)Piece.k ^ 56].GetLS1BIndex()];
+
         return UnpackEG(piece == Piece.K
-            ? position.KingAdditionalEvaluation(bitBoard, (int)Side.White, blackPawnAttacks)
-            : position.KingAdditionalEvaluation(bitBoard, (int)Side.Black, whitePawnAttacks));
+            ? position.KingAdditionalEvaluation(whiteBucket, bitBoard, (int)Side.White, blackPawnAttacks)
+            : position.KingAdditionalEvaluation(blackBucket, bitBoard, (int)Side.Black, whitePawnAttacks));
     }
 
     private static void EvaluateDrawOrNotDraw(string fen, bool isDrawExpected, int expectedPhase)
