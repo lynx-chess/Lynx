@@ -39,7 +39,7 @@ public class EncodeDecodeMoveTest
     public void SourceSquare_TargetSquare_Piece_Capture(BoardSquare sourceSquare, BoardSquare targetSquare, Piece piece, bool isCapture)
     {
         var move = isCapture
-            ? MoveExtensions.EncodeCapture((int)sourceSquare, (int)targetSquare, (int)piece, capturedPiece: 1)
+            ? MoveExtensions.EncodeCapture((int)sourceSquare, (int)targetSquare, (int)piece)
             : MoveExtensions.Encode((int)sourceSquare, (int)targetSquare, (int)piece);
 
         Assert.AreEqual((int)sourceSquare, move.SourceSquare());
@@ -75,22 +75,21 @@ public class EncodeDecodeMoveTest
         Assert.False(move.IsEnPassant());
     }
 
-    [TestCase(BoardSquare.a7, BoardSquare.a8, Piece.Q, Piece.q)]
-    [TestCase(BoardSquare.a7, BoardSquare.a8, Piece.R, Piece.q)]
-    [TestCase(BoardSquare.a7, BoardSquare.a8, Piece.B, Piece.q)]
-    [TestCase(BoardSquare.a7, BoardSquare.a8, Piece.N, Piece.q)]
-    [TestCase(BoardSquare.a2, BoardSquare.a1, Piece.q, Piece.Q)]
-    [TestCase(BoardSquare.a2, BoardSquare.a1, Piece.r, Piece.Q)]
-    [TestCase(BoardSquare.a2, BoardSquare.a1, Piece.b, Piece.Q)]
-    [TestCase(BoardSquare.a2, BoardSquare.a1, Piece.n, Piece.Q)]
-    public void PromotionWithCapture(BoardSquare sourceSquare, BoardSquare targetSquare, Piece promotedPiece, Piece capturedPiece)
+    [TestCase(BoardSquare.a7, BoardSquare.a8, Piece.Q)]
+    [TestCase(BoardSquare.a7, BoardSquare.a8, Piece.R)]
+    [TestCase(BoardSquare.a7, BoardSquare.a8, Piece.B)]
+    [TestCase(BoardSquare.a7, BoardSquare.a8, Piece.N)]
+    [TestCase(BoardSquare.a2, BoardSquare.a1, Piece.q)]
+    [TestCase(BoardSquare.a2, BoardSquare.a1, Piece.r)]
+    [TestCase(BoardSquare.a2, BoardSquare.a1, Piece.b)]
+    [TestCase(BoardSquare.a2, BoardSquare.a1, Piece.n)]
+    public void PromotionWithCapture(BoardSquare sourceSquare, BoardSquare targetSquare, Piece promotedPiece)
     {
-        var move = MoveExtensions.EncodePromotion((int)sourceSquare, (int)targetSquare, (int)Piece.P, promotedPiece: (int)promotedPiece, capturedPiece: (int)capturedPiece);
+        var move = MoveExtensions.EncodePromotionWithCapture((int)sourceSquare, (int)targetSquare, (int)Piece.P, promotedPiece: (int)promotedPiece);
 
         Assert.AreEqual((int)sourceSquare, move.SourceSquare());
         Assert.AreEqual((int)targetSquare, move.TargetSquare());
         Assert.AreEqual((int)promotedPiece, move.PromotedPiece());
-        Assert.AreEqual((int)capturedPiece, move.CapturedPiece());
         Assert.True(move.IsCapture());
         Assert.True(move.IsPromotion());
         Assert.False(move.IsEnPassant());

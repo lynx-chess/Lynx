@@ -197,7 +197,7 @@ public sealed partial class Engine
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
-        Span<Move> visitedMoves = stackalloc Move[pseudoLegalMoves.Length];
+        Span<ValueTuple<Move, int>> visitedMoves = stackalloc ValueTuple<Move, int>[pseudoLegalMoves.Length];
         int visitedMovesCounter = 0;
 
         for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
@@ -214,6 +214,11 @@ public sealed partial class Engine
             }
 
             var move = pseudoLegalMoves[moveIndex];
+            var targetSquare = move.TargetSquare();
+
+            var capturedPiece = move.IsNotEnPassant()
+                ? position.Board[targetSquare]
+                : (int)Piece.p - Utils.PieceOffset(position.Side);
 
             var gameState = position.MakeMove(move);
 
@@ -223,7 +228,7 @@ public sealed partial class Engine
                 continue;
             }
 
-            visitedMoves[visitedMovesCounter] = move;
+            visitedMoves[visitedMovesCounter] = (move, capturedPiece);
 
             ++_nodes;
             isAnyMoveValid = true;
@@ -314,7 +319,7 @@ public sealed partial class Engine
                     }
 
                     // -= history/(maxHistory/2)
-                    reduction -= 2 * _quietHistory[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.History_MaxMoveValue;
+                    reduction -= 2 * _quietHistory[move.Piece()][targetSquare] / Configuration.EngineSettings.History_MaxMoveValue;
 
                     // Don't allow LMR to drop into qsearch or increase the depth
                     // depth - 1 - depth +2 = 1, min depth we want
@@ -368,8 +373,6 @@ public sealed partial class Engine
                 if (isCapture)
                 {
                     var piece = move.Piece();
-                    var targetSquare = move.TargetSquare();
-                    var capturedPiece = move.CapturedPiece();
 
                     var captureHistoryIndex = CaptureHistoryIndex(piece, targetSquare, capturedPiece);
                     _captureHistory[captureHistoryIndex] = ScoreHistoryMove(
@@ -380,13 +383,13 @@ public sealed partial class Engine
                     // When a capture fails high, penalize previous visited captures
                     for (int i = 0; i < visitedMovesCounter; ++i)
                     {
-                        var visitedMove = visitedMoves[i];
+                        (Move visitedMove, int visitedCapturedPiece) = visitedMoves[i];
 
                         if (visitedMove.IsCapture())
                         {
                             var visitedMovePiece = visitedMove.Piece();
                             var visitedMoveTargetSquare = visitedMove.TargetSquare();
-                            var visitedMoveCapturedPiece = visitedMove.CapturedPiece();
+                            var visitedMoveCapturedPiece = visitedCapturedPiece;
 
                             captureHistoryIndex = CaptureHistoryIndex(visitedMovePiece, visitedMoveTargetSquare, visitedMoveCapturedPiece);
 
@@ -401,7 +404,6 @@ public sealed partial class Engine
                     // 🔍 Quiet history moves
                     // Doing this only in beta cutoffs (instead of when eval > alpha) was suggested by Sirius author
                     var piece = move.Piece();
-                    var targetSquare = move.TargetSquare();
 
                     _quietHistory[piece][targetSquare] = ScoreHistoryMove(
                         _quietHistory[piece][targetSquare],
@@ -429,7 +431,7 @@ public sealed partial class Engine
 
                     for (int i = 0; i < visitedMovesCounter - 1; ++i)
                     {
-                        var visitedMove = visitedMoves[i];
+                        Move visitedMove = visitedMoves[i].Item1;
 
                         if (!visitedMove.IsCapture())
                         {

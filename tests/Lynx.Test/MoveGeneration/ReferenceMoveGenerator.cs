@@ -90,7 +90,7 @@ public static class ReferenceMoveGenerator
             if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
             // We assume that position.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
             {
-                yield return MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece, capturedPiece: (int)Piece.p - offset);
+                yield return MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece);
             }
 
             // Captures
@@ -104,14 +104,14 @@ public static class ReferenceMoveGenerator
                 var targetRank = (targetSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)  // Capture with promotion
                 {
-                    yield return MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.Q + offset, capturedPiece: capturedPiece);
-                    yield return MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.R + offset, capturedPiece: capturedPiece);
-                    yield return MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.N + offset, capturedPiece: capturedPiece);
-                    yield return MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.B + offset, capturedPiece: capturedPiece);
+                    yield return MoveExtensions.EncodePromotionWithCapture(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.Q + offset);
+                    yield return MoveExtensions.EncodePromotionWithCapture(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.R + offset);
+                    yield return MoveExtensions.EncodePromotionWithCapture(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.N + offset);
+                    yield return MoveExtensions.EncodePromotionWithCapture(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.B + offset);
                 }
                 else
                 {
-                    yield return MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece: capturedPiece);
+                    yield return MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece);
                 }
             }
         }
@@ -179,8 +179,7 @@ public static class ReferenceMoveGenerator
 
                 if (position.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare))
                 {
-                    var capturedPiece = FindCapturedPiece(position, offset, targetSquare);
-                    yield return MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece: capturedPiece);
+                    yield return MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece);
                 }
                 else if (!capturesOnly)
                 {

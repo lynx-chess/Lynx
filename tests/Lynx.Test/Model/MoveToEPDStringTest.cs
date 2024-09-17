@@ -44,7 +44,7 @@ public class MoveToEPDStringTest
             {
                 if (isCapture != default)
                 {
-                    move = MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece, capturedPiece: 1);
+                    move = MoveExtensions.EncodePromotionWithCapture(sourceSquare, targetSquare, piece, promotedPiece);
                 }
                 else
                 {
@@ -53,7 +53,7 @@ public class MoveToEPDStringTest
             }
             else if (isCapture != default)
             {
-                move = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece: 1);
+                move = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece);
             }
             else
             {

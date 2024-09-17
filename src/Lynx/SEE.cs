@@ -35,7 +35,8 @@ public static class SEE
 
         var sideToMove = position.Side;
 
-        var score = _pieceValues[move.CapturedPiece()] - threshold;    // Gain() - threshold
+        var capturedPiece = position.Board[move.TargetSquare()];
+        var score = _pieceValues[capturedPiece] - threshold;    // Gain() - threshold
 
         // If taking the opponent's piece without any risk is still negative
         if (score < 0)
@@ -122,7 +123,7 @@ public static class SEE
     {
         var sideToMove = position.Side;
 
-        var score = Gain(move) - threshold;
+        var score = Gain(position, move) - threshold;
 
         // If taking the opponent's piece without any risk is still negative
         if (score < 0)
@@ -201,7 +202,7 @@ public static class SEE
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int Gain(Move move)
+    private static int Gain(Position position, Move move)
     {
         if (move.IsCastle())
         {
@@ -212,11 +213,13 @@ public static class SEE
             return _pieceValues[(int)Piece.P];
         }
 
+        var capturedPiece = position.Board[move.TargetSquare()];
         var promotedPiece = move.PromotedPiece();
 
         return promotedPiece == default
-            ? _pieceValues[move.CapturedPiece()]
-            : _pieceValues[promotedPiece] - _pieceValues[(int)Piece.P] + (move.IsCapture() ? _pieceValues[move.CapturedPiece()] : 0);
+            ? _pieceValues[capturedPiece]
+            : _pieceValues[promotedPiece] - _pieceValues[(int)Piece.P]
+                + (move.IsCapture() ? _pieceValues[capturedPiece] : 0);
     }
 
     /// <summary>
