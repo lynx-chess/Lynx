@@ -51,14 +51,14 @@ namespace Lynx.Benchmark;
 
 public class MoveGeneratorParallel_Benchmark : BaseBenchmark
 {
-    public static IEnumerable<string> Data => new[]
-    {
-            Constants.InitialPositionFEN,
-            Constants.TrickyTestPositionFEN,
-            Constants.TrickyTestPositionReversedFEN,
-            Constants.CmkTestPositionFEN,
-            Constants.KillerTestPositionFEN
-        };
+    public static IEnumerable<string> Data =>
+    [
+        Constants.InitialPositionFEN,
+        Constants.TrickyTestPositionFEN,
+        Constants.TrickyTestPositionReversedFEN,
+        Constants.CmkTestPositionFEN,
+        Constants.KillerTestPositionFEN
+    ];
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]
@@ -105,8 +105,6 @@ public class MoveGeneratorParallel_Benchmark : BaseBenchmark
 file static class CustomMoveGenerator
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
-    private const int TRUE = 1;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IOrderedEnumerable<Move> GenerateAllMoves_SingleThread(Position position, int[,]? killerMoves = null, int? plies = null, bool capturesOnly = false)
@@ -273,7 +271,7 @@ file static class CustomMoveGenerator
                 }
                 else
                 {
-                    yield return MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece);
+                    yield return MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, position.Board[targetSquare]);
                 }
             }
         }
