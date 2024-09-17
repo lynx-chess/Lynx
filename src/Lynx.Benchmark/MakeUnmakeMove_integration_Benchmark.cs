@@ -299,6 +299,8 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
 
         public BitBoard[] OccupancyBitBoards { get; }
 
+        public int[] Board { get; }
+
         public Side Side { get; private set; }
 
         public BoardSquare EnPassant { get; private set; }
@@ -314,6 +316,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         {
             PieceBitBoards = parsedFEN.PieceBitBoards;
             OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
+            Board = parsedFEN.board;
             Side = parsedFEN.Side;
             Castle = parsedFEN.Castle;
             EnPassant = parsedFEN.EnPassant;
@@ -335,6 +338,9 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
             OccupancyBitBoards = new BitBoard[3];
             Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
 
+            Board = new int[64];
+            Array.Copy(position.Board, Board, position.Board.Length);
+
             Side = position.Side;
             Castle = position.Castle;
             EnPassant = position.EnPassant;
@@ -355,6 +361,9 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
 
             OccupancyBitBoards = new BitBoard[3];
             Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
+
+            Board = new int[64];
+            Array.Copy(position.Board, Board, position.Board.Length);
 
             Side = (Side)Utils.OppositeSide(position.Side);
             Castle = position.Castle;
@@ -1512,7 +1521,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                     }
                     else
                     {
-                        movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece);
+                        movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, position.Board[targetSquare]);
                     }
                 }
             }

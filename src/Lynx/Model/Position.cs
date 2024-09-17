@@ -233,152 +233,6 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public GameState MakeMoveCalculatingCapturedPiece(ref Move move)
-    {
-        byte castleCopy = Castle;
-        BoardSquare enpassantCopy = EnPassant;
-        long uniqueIdentifierCopy = UniqueIdentifier;
-
-        var oldSide = (int)Side;
-        var offset = Utils.PieceOffset(oldSide);
-        var oppositeSide = Utils.OppositeSide(oldSide);
-
-        int sourceSquare = move.SourceSquare();
-        int targetSquare = move.TargetSquare();
-        int piece = move.Piece();
-        int promotedPiece = move.PromotedPiece();
-        int capturedPiece = Board[targetSquare];
-
-        var newPiece = piece;
-        if (promotedPiece != default)
-        {
-            newPiece = promotedPiece;
-        }
-
-        PieceBitBoards[piece].PopBit(sourceSquare);
-        OccupancyBitBoards[oldSide].PopBit(sourceSquare);
-        Board[sourceSquare] = (int)Piece.None;
-
-        PieceBitBoards[newPiece].SetBit(targetSquare);
-        OccupancyBitBoards[oldSide].SetBit(targetSquare);
-        Board[targetSquare] = newPiece;
-
-        UniqueIdentifier ^=
-            ZobristTable.SideHash()
-            ^ ZobristTable.PieceHash(sourceSquare, piece)
-            ^ ZobristTable.PieceHash(targetSquare, newPiece)
-            ^ ZobristTable.EnPassantHash((int)EnPassant)            // We clear the existing enpassant square, if any
-            ^ ZobristTable.CastleHash(Castle);                      // We clear the existing castle rights
-
-        EnPassant = BoardSquare.noSquare;
-
-        switch (move.SpecialMoveFlag())
-        {
-            case SpecialMoveType.DoublePawnPush:
-                {
-                    var pawnPush = +8 - (oldSide * 16);
-                    var enPassantSquare = sourceSquare + pawnPush;
-                    Utils.Assert(Constants.EnPassantCaptureSquares.Length > enPassantSquare && Constants.EnPassantCaptureSquares[enPassantSquare] != 0, $"Unexpected en passant square : {(BoardSquare)enPassantSquare}");
-
-                    EnPassant = (BoardSquare)enPassantSquare;
-                    UniqueIdentifier ^= ZobristTable.EnPassantHash(enPassantSquare);
-
-                    break;
-                }
-            case SpecialMoveType.ShortCastle:
-                {
-                    var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
-                    var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
-                    var rookIndex = (int)Piece.R + offset;
-
-                    PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                    OccupancyBitBoards[oldSide].PopBit(rookSourceSquare);
-                    Board[rookSourceSquare] = (int)Piece.None;
-
-                    PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                    OccupancyBitBoards[oldSide].SetBit(rookTargetSquare);
-                    Board[rookTargetSquare] = rookIndex;
-
-                    UniqueIdentifier ^=
-                        ZobristTable.PieceHash(rookSourceSquare, rookIndex)
-                        ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
-
-                    break;
-                }
-            case SpecialMoveType.LongCastle:
-                {
-                    var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
-                    var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
-                    var rookIndex = (int)Piece.R + offset;
-
-                    PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                    OccupancyBitBoards[oldSide].PopBit(rookSourceSquare);
-                    Board[rookSourceSquare] = (int)Piece.None;
-
-                    PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                    OccupancyBitBoards[oldSide].SetBit(rookTargetSquare);
-                    Board[rookTargetSquare] = rookIndex;
-
-                    UniqueIdentifier ^=
-                        ZobristTable.PieceHash(rookSourceSquare, rookIndex)
-                        ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
-
-                    break;
-                }
-
-            case SpecialMoveType.EnPassant:
-                {
-                    var oppositePawnIndex = (int)Piece.p - offset;
-
-                    var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                    Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
-
-                    PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
-                    OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
-                    Board[capturedPawnSquare] = (int)Piece.None;
-                    UniqueIdentifier ^= ZobristTable.PieceHash(capturedPawnSquare, oppositePawnIndex);
-                    move = MoveExtensions.EncodeCapturedPiece(move, oppositePawnIndex);
-
-                    break;
-                }
-            default:
-                {
-                    if (move.IsCapture())
-                    {
-                        Debug.Assert(capturedPiece != (int)Piece.None, $"Expected piece at {targetSquare}, since it was supposed to be captured");
-
-                        PieceBitBoards[capturedPiece].PopBit(targetSquare);
-                        OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
-                        // No need to update Board here, it already has newPiece
-
-                        move = MoveExtensions.EncodeCapturedPiece(move, capturedPiece);
-
-                        UniqueIdentifier ^= ZobristTable.PieceHash(targetSquare, capturedPiece);
-                    }
-
-                    break;
-                }
-        }
-
-        Side = (Side)oppositeSide;
-        OccupancyBitBoards[2] = OccupancyBitBoards[1] | OccupancyBitBoards[0];
-
-        // Updating castling rights
-        Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
-        Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
-
-        UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
-
-        return new GameState(uniqueIdentifierCopy, enpassantCopy, castleCopy);
-        //var clone = new Position(this);
-        //clone.UnmakeMove(move, gameState);
-        //if (uniqueIdentifierCopy != clone.UniqueIdentifier)
-        //{
-        //    throw new($"{FEN()}: {uniqueIdentifierCopy} expected, got {clone.UniqueIdentifier} got after Make/Unmake move {move.ToEPDString()}");
-        //}
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void UnmakeMove(Move move, GameState gameState)
     {
         var oppositeSide = (int)Side;
@@ -773,7 +627,7 @@ public class Position : IDisposable
         {
             (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(bucket, pieceSquareIndex, pieceIndex, sameSideKingSquare, oppositeSideKingSquare),
             (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, enemyPawnAttacks),
-            (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceSide, enemyPawnAttacks),
+            (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, enemyPawnAttacks),
             (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(pieceSquareIndex, pieceSide, enemyPawnAttacks),
             (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex, pieceSide, enemyPawnAttacks),
             _ => 0
@@ -870,15 +724,29 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int BishopAdditionalEvaluation(int squareIndex, int pieceSide, BitBoard enemyPawnAttacks)
+    private int BishopAdditionalEvaluation(int squareIndex, int pieceIndex, int pieceSide, BitBoard enemyPawnAttacks)
     {
+        const int pawnToBishopOffset = (int)Piece.B - (int)Piece.P;
+
         // Mobility
         var attacksCount =
             (Attacks.BishopAttacks(squareIndex, OccupancyBitBoards[(int)Side.Both])
                 & (~(OccupancyBitBoards[pieceSide] | enemyPawnAttacks)))
             .CountBits();
 
-        return BishopMobilityBonus[attacksCount];
+        var packedBonus = BishopMobilityBonus[attacksCount];
+
+        // Bad bishop
+        var sameSidePawns = PieceBitBoards[pieceIndex - pawnToBishopOffset];
+
+        var sameColorPawns = sameSidePawns &
+            (Constants.DarkSquares[squareIndex] == 1
+                ? Constants.DarkSquaresBitBoard
+                : Constants.LightSquaresBitBoard);
+
+        packedBonus += BadBishopPenalty[sameColorPawns.CountBits()];
+
+        return packedBonus;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
