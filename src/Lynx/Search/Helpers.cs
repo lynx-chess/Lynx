@@ -57,14 +57,18 @@ public sealed partial class Engine
                 : EvaluationConstants.BadCaptureMoveBaseScoreValue;
 
             var piece = move.Piece();
-            var capturedPiece = move.CapturedPiece();
+            var targetSquare = move.TargetSquare();
+
+            var capturedPiece = move.IsNotEnPassant()
+                ? Game.CurrentPosition.Board[targetSquare]
+                : (int)Piece.p - Utils.PieceOffset(Game.CurrentPosition.Side);
 
             Debug.Assert(capturedPiece != (int)Piece.K && capturedPiece != (int)Piece.k, $"{move.UCIString()} capturing king is generated in position {Game.CurrentPosition.FEN()}");
 
             return baseCaptureScore
                 + EvaluationConstants.MostValueableVictimLeastValuableAttacker[piece][capturedPiece]
                 //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
-                + _captureHistory[CaptureHistoryIndex(piece, move.TargetSquare(), capturedPiece)];
+                + _captureHistory[CaptureHistoryIndex(piece, targetSquare, capturedPiece)];
         }
 
         if (isPromotion)

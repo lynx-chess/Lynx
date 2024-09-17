@@ -360,7 +360,7 @@ file static class CustomMoveGenerator
 
                 if (position.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare))
                 {
-                    yield return MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, 1);
+                    yield return MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece);
                 }
                 else if (!capturesOnly)
                 {

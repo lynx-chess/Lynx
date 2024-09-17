@@ -833,7 +833,6 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public MakeMoveGameStateWithZobristKey MakeMove_WithZobristKey_PreSwitchSpecialMove(Move move)
         {
-            int capturedPiece = -1;
             byte castleCopy = Castle;
             BoardSquare enpassantCopy = EnPassant;
             long uniqueIdentifierCopy = UniqueIdentifier;
@@ -846,6 +845,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
             int targetSquare = move.TargetSquare();
             int piece = move.Piece();
             int promotedPiece = move.PromotedPiece();
+            int capturedPiece = Board[targetSquare];
 
             var newPiece = piece;
             if (promotedPiece != default)
@@ -877,10 +877,6 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
                 {
                     capturedSquare = Constants.EnPassantCaptureSquares[targetSquare];
                     Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedSquare), $"Expected {(Side)oppositeSide} pawn in {capturedSquare}");
-                }
-                else
-                {
-                    capturedPiece = move.CapturedPiece();
                 }
 
                 PieceBitBoards[capturedPiece].PopBit(capturedSquare);
@@ -944,8 +940,6 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public MakeMoveGameStateWithZobristKey MakeMove_WithZobristKey_SwitchSpecialMove(Move move)
         {
-            int capturedPiece = -1;
-
             byte castleCopy = Castle;
             BoardSquare enpassantCopy = EnPassant;
             long uniqueIdentifierCopy = UniqueIdentifier;
@@ -958,6 +952,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
             int targetSquare = move.TargetSquare();
             int piece = move.Piece();
             int promotedPiece = move.PromotedPiece();
+            int capturedPiece = Board[targetSquare];
 
             var newPiece = piece;
             if (promotedPiece != default)
@@ -987,7 +982,6 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
                         if (move.IsCapture())
                         {
                             var capturedSquare = targetSquare;
-                            capturedPiece = move.CapturedPiece();
 
                             PieceBitBoards[capturedPiece].PopBit(capturedSquare);
                             OccupancyBitBoards[oppositeSide].PopBit(capturedSquare);
@@ -1045,11 +1039,9 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
                     }
                 case SpecialMoveType.EnPassant:
                     {
-                        var oppositePawnIndex = (int)Piece.p - offset;
-
                         var capturedSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                        capturedPiece = oppositePawnIndex;
-                        Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedSquare), $"Expected {(Side)oppositeSide} pawn in {capturedSquare}");
+                        capturedPiece = (int)Piece.p - offset;
+                        Utils.Assert(PieceBitBoards[capturedPiece].GetBit(capturedSquare), $"Expected {(Side)oppositeSide} pawn in {capturedSquare}");
 
                         PieceBitBoards[capturedPiece].PopBit(capturedSquare);
                         OccupancyBitBoards[oppositeSide].PopBit(capturedSquare);
@@ -1160,6 +1152,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
             int targetSquare = move.TargetSquare();
             int piece = move.Piece();
             int promotedPiece = move.PromotedPiece();
+            int capturedPiece = Board[targetSquare];
 
             var newPiece = piece;
             if (promotedPiece != default)
@@ -1188,7 +1181,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
                 }
                 else
                 {
-                    PieceBitBoards[move.CapturedPiece()].SetBit(targetSquare);
+                    PieceBitBoards[capturedPiece].SetBit(targetSquare);
                     OccupancyBitBoards[oppositeSide].SetBit(targetSquare);
                 }
             }
@@ -1237,6 +1230,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
             int targetSquare = move.TargetSquare();
             int piece = move.Piece();
             int promotedPiece = move.PromotedPiece();
+            int capturedPiece = Board[targetSquare];
 
             var newPiece = piece;
             if (promotedPiece != default)
@@ -1256,7 +1250,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
                     {
                         if (move.IsCapture())
                         {
-                            PieceBitBoards[move.CapturedPiece()].SetBit(targetSquare);
+                            PieceBitBoards[capturedPiece].SetBit(targetSquare);
                             OccupancyBitBoards[oppositeSide].SetBit(targetSquare);
                         }
 
@@ -1654,7 +1648,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
                     }
                     else
                     {
-                        movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, position.Board[targetSquare]);
+                        movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece);
                     }
                 }
             }
@@ -1757,7 +1751,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
 
                     if (position.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare))
                     {
-                        movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece: 1);
+                        movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece);
                     }
                     else if (!capturesOnly)
                     {

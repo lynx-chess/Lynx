@@ -21,10 +21,9 @@ public enum SpecialMoveType
 /// 0000 0000 0000 0000 1111 1100 0000 0000     0xFC00          Target Square (0-63)
 /// --------------------------------------------------------------------------------------------
 /// 0000 0000 0000 1111 0000 0000 0000 0000     0xF_0000        Piece (0-11)
-/// 0000 0000 1111 0000 0000 0000 0000 0000     0xF0_0000       Captured piece (0-11)
-/// 0000 0001 0000 0000 0000 0000 0000 0000     0x100_0000      Capture flag (1)
-/// 0000 1110 0000 0000 0000 0000 0000 0000     0xE00_0000      SpecialMoveFlagOffset: Double pawn push, en-passant, short castle or long castle (1-5)
-/// Total: 28 bits -> fits an int
+/// 0000 0000 0001 0000 0000 0000 0000 0000     0x10_0000       Capture flag (1)
+/// 0000 0000 1110 0000 0000 0000 0000 0000     0xE0_0000       SpecialMoveFlagOffset: Double pawn push, en-passant, short castle or long castle (1-5)
+/// Total: 24 bits -> fits an int
 /// By casting it to ShortMove, a unique int16 (short) move is achieved, since
 /// source and target square and promoted piece can only represent a move in a given position
 /// </summary>
@@ -38,9 +37,8 @@ public static class MoveExtensions
     private const int SourceSquareOffset = 4;
     private const int TargetSquareOffset = 10;
     private const int PieceOffset = 16;
-    private const int CapturedPieceOffset = 20;
-    private const int IsCaptureOffset = 24;
-    private const int SpecialMoveFlagOffset = 25;
+    private const int IsCaptureOffset = 20;
+    private const int SpecialMoveFlagOffset = 21;
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
@@ -61,24 +59,6 @@ public static class MoveExtensions
             | (int)SpecialMoveType.DoublePawnPush << SpecialMoveFlagOffset;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Move EncodeEnPassant(int sourceSquare, int targetSquare, int piece, int capturedPiece)
-    {
-        return (sourceSquare << SourceSquareOffset)
-            | (targetSquare << TargetSquareOffset)
-            | (piece << PieceOffset)
-            | (capturedPiece << CapturedPieceOffset)
-            | (1 << IsCaptureOffset)
-            | (int)SpecialMoveType.EnPassant << SpecialMoveFlagOffset;
-    }
-
-    /// <summary>
-    ///  Override when captured piece (aka side) isn't provided
-    /// </summary>
-    /// <param name="sourceSquare"></param>
-    /// <param name="targetSquare"></param>
-    /// <param name="piece"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Move EncodeEnPassant(int sourceSquare, int targetSquare, int piece)
     {
@@ -108,12 +88,11 @@ public static class MoveExtensions
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Move EncodeCapture(int sourceSquare, int targetSquare, int piece, int capturedPiece)
+    public static Move EncodeCapture(int sourceSquare, int targetSquare, int piece)
     {
         return (sourceSquare << SourceSquareOffset)
             | (targetSquare << TargetSquareOffset)
             | (piece << PieceOffset)
-            | (capturedPiece << CapturedPieceOffset)
             | (1 << IsCaptureOffset);
     }
 
@@ -127,18 +106,14 @@ public static class MoveExtensions
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Move EncodePromotion(int sourceSquare, int targetSquare, int piece, int promotedPiece, int capturedPiece)
+    public static Move EncodePromotionWithCapture(int sourceSquare, int targetSquare, int piece, int promotedPiece)
     {
         return promotedPiece
             | (sourceSquare << SourceSquareOffset)
             | (targetSquare << TargetSquareOffset)
             | (piece << PieceOffset)
-            | (capturedPiece << CapturedPieceOffset)
             | (1 << IsCaptureOffset);
     }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Move EncodeCapturedPiece(int move, int capturedPiece) => move | (capturedPiece << 20);
 
     /// <summary>
     /// Returns the move from <paramref name="moveList"/> indicated by <paramref name="UCIString"/>
@@ -269,29 +244,30 @@ public static class MoveExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int Piece(this Move move) => (move & 0xF_0000) >> PieceOffset;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int CapturedPiece(this Move move) => (move & 0xF0_0000) >> CapturedPieceOffset;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsCapture(this Move move) => (move & 0x100_0000) >> IsCaptureOffset != default;
+    public static bool IsCapture(this Move move) => (move & 0x10_0000) >> IsCaptureOffset != default;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static SpecialMoveType SpecialMoveFlag(this Move move) => (SpecialMoveType)((move & 0xE00_0000) >> SpecialMoveFlagOffset);
+    public static SpecialMoveType SpecialMoveFlag(this Move move) => (SpecialMoveType)((move & 0xE0_0000) >> SpecialMoveFlagOffset);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsDoublePawnPush(this Move move) => (move & 0xE00_0000) >> SpecialMoveFlagOffset == (int)SpecialMoveType.DoublePawnPush;
+    public static bool IsDoublePawnPush(this Move move) => (move & 0xE0_0000) >> SpecialMoveFlagOffset == (int)SpecialMoveType.DoublePawnPush;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsEnPassant(this Move move) => (move & 0xE00_0000) >> SpecialMoveFlagOffset == (int)SpecialMoveType.EnPassant;
+    public static bool IsEnPassant(this Move move) => (move & 0xE0_0000) >> SpecialMoveFlagOffset == (int)SpecialMoveType.EnPassant;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsShortCastle(this Move move) => (move & 0xE00_0000) >> SpecialMoveFlagOffset == (int)SpecialMoveType.ShortCastle;
+    public static bool IsNotEnPassant(this Move move) => (move & 0xE0_0000) >> SpecialMoveFlagOffset != (int)SpecialMoveType.EnPassant;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsLongCastle(this Move move) => (move & 0xE00_0000) >> SpecialMoveFlagOffset == (int)SpecialMoveType.LongCastle;
+    public static bool IsShortCastle(this Move move) => (move & 0xE0_0000) >> SpecialMoveFlagOffset == (int)SpecialMoveType.ShortCastle;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsCastle(this Move move) => (move & 0xE00_0000) >> SpecialMoveFlagOffset >= (int)SpecialMoveType.ShortCastle;
+    public static bool IsLongCastle(this Move move) => (move & 0xE0_0000) >> SpecialMoveFlagOffset == (int)SpecialMoveType.LongCastle;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsCastle(this Move move) => (move & 0xE0_0000) >> SpecialMoveFlagOffset >= (int)SpecialMoveType.ShortCastle;
 
     [Obsolete(
         "Consider using the override that accepts a position for fully compliant EPD/PGN string representation of the move. " +

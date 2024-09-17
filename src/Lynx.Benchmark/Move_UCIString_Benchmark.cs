@@ -52,8 +52,8 @@ public class Move_UCIString_Benchmark : BaseBenchmark
         MoveExtensions.EncodeLongCastle(Constants.BlackKingSourceSquare, Constants.BlackLongCastleKingSquare, (int)Piece.k),
         MoveExtensions.Encode((int)BoardSquare.e2, (int)BoardSquare.e4, (int)Piece.P),
         MoveExtensions.EncodePromotion((int)BoardSquare.e7, (int)BoardSquare.e8, (int)Piece.p, promotedPiece: (int)Piece.q),
-        MoveExtensions.EncodePromotion((int)BoardSquare.a7, (int)BoardSquare.b8, (int)Piece.p, promotedPiece: (int)Piece.n, capturedPiece: (int)Piece.B),
-        MoveExtensions.EncodeCapture((int)BoardSquare.a8, (int)BoardSquare.h1, (int)Piece.B, capturedPiece: (int)Piece.b),
+        MoveExtensions.EncodePromotionWithCapture((int)BoardSquare.a7, (int)BoardSquare.b8, (int)Piece.p, promotedPiece: (int)Piece.n),
+        MoveExtensions.EncodeCapture((int)BoardSquare.a8, (int)BoardSquare.h1, (int)Piece.B),
         MoveExtensions.EncodeCapture((int)BoardSquare.a8, (int)BoardSquare.h1, (int)Piece.B),
         MoveExtensions.EncodeEnPassant((int)BoardSquare.e5, (int)BoardSquare.d6, (int)Piece.P)
     ];

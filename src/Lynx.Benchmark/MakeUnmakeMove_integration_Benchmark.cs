@@ -1521,7 +1521,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                     }
                     else
                     {
-                        movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, position.Board[targetSquare]);
+                        movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece);
                     }
                 }
             }
@@ -1624,7 +1624,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
 
                     if (position.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare))
                     {
-                        movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, 1);
+                        movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece);
                     }
                     else if (!capturesOnly)
                     {

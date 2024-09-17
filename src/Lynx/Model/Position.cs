@@ -106,6 +106,7 @@ public class Position : IDisposable
         int targetSquare = move.TargetSquare();
         int piece = move.Piece();
         int promotedPiece = move.PromotedPiece();
+        int capturedPiece = Board[targetSquare];
 
         var newPiece = piece;
         if (promotedPiece != default)
@@ -137,7 +138,6 @@ public class Position : IDisposable
                     if (move.IsCapture())
                     {
                         var capturedSquare = targetSquare;
-                        var capturedPiece = move.CapturedPiece();
 
                         PieceBitBoards[capturedPiece].PopBit(capturedSquare);
                         OccupancyBitBoards[oppositeSide].PopBit(capturedSquare);
@@ -199,11 +199,10 @@ public class Position : IDisposable
                 }
             case SpecialMoveType.EnPassant:
                 {
-                    var oppositePawnIndex = (int)Piece.p - offset;
+                    capturedPiece = (int)Piece.p - offset;
 
                     var capturedSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                    var capturedPiece = oppositePawnIndex;
-                    Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedSquare), $"Expected {(Side)oppositeSide} pawn in {capturedSquare}");
+                    Utils.Assert(PieceBitBoards[capturedPiece].GetBit(capturedSquare), $"Expected {(Side)oppositeSide} pawn in {capturedSquare}");
 
                     PieceBitBoards[capturedPiece].PopBit(capturedSquare);
                     OccupancyBitBoards[oppositeSide].PopBit(capturedSquare);
@@ -223,7 +222,7 @@ public class Position : IDisposable
 
         UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
 
-        return new GameState(uniqueIdentifierCopy, enpassantCopy, castleCopy);
+        return new GameState(uniqueIdentifierCopy, capturedPiece, enpassantCopy, castleCopy);
         //var clone = new Position(this);
         //clone.UnmakeMove(move, gameState);
         //if (uniqueIdentifierCopy != clone.UniqueIdentifier)
@@ -265,11 +264,9 @@ public class Position : IDisposable
                 {
                     if (move.IsCapture())
                     {
-                        var capturedPiece = move.CapturedPiece();
-
-                        PieceBitBoards[capturedPiece].SetBit(targetSquare);
+                        PieceBitBoards[gameState.CapturedPiece].SetBit(targetSquare);
                         OccupancyBitBoards[oppositeSide].SetBit(targetSquare);
-                        Board[targetSquare] = capturedPiece;
+                        Board[targetSquare] = gameState.CapturedPiece;
                     }
 
                     break;
@@ -310,15 +307,15 @@ public class Position : IDisposable
                 {
                     Debug.Assert(move.IsEnPassant());
 
-                    var oppositePawnIndex = (int)Piece.p - offset;
+                    var capturedPiece = gameState.CapturedPiece;
                     var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
 
                     Utils.Assert(OccupancyBitBoards[(int)Side.Both].GetBit(capturedPawnSquare) == default,
                         $"Expected empty {capturedPawnSquare}");
 
-                    PieceBitBoards[oppositePawnIndex].SetBit(capturedPawnSquare);
+                    PieceBitBoards[capturedPiece].SetBit(capturedPawnSquare);
                     OccupancyBitBoards[oppositeSide].SetBit(capturedPawnSquare);
-                    Board[capturedPawnSquare] = oppositePawnIndex;
+                    Board[capturedPawnSquare] = capturedPiece;
 
                     break;
                 }
@@ -344,7 +341,7 @@ public class Position : IDisposable
             ZobristTable.SideHash()
             ^ ZobristTable.EnPassantHash((int)oldEnPassant);
 
-        return new GameState(oldUniqueIdentifier, oldEnPassant, byte.MaxValue);
+        return new GameState(oldUniqueIdentifier, int.MaxValue, oldEnPassant, byte.MaxValue);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
