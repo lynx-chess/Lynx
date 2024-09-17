@@ -792,14 +792,14 @@ public class PositionTest
     /// <param name="fen"></param>
     /// <param name="sideToMoveMobilityCount"></param>
     /// <param name="nonSideToMoveMobilityCount"></param>
-    [TestCase("n3k3/1p6/8/3b4/3B4/8/6P1/4K2N w - - 0 1", 13, 9)]
+    [TestCase("n3k3/1n6/8/3b4/3B4/8/6N1/4K2N w - - 0 1", 13, 10)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
     /// <param name="fen"></param>
     /// <param name="sideToMoveMobilityCount"></param>
     /// <param name="nonSideToMoveMobilityCount"></param>
-    [TestCase("n2k4/1p6/8/4b3/4B3/8/6P1/3K3N b - - 0 1", 13, 9)]
+    [TestCase("n2k4/1n6/8/4b3/4B3/8/6N1/3K3N b - - 0 1", 13, 10)]
     /// <summary>
     /// 8   . . . . k . . .
     /// 7   . p . . . . . .
@@ -814,14 +814,14 @@ public class PositionTest
     /// <param name="fen"></param>
     /// <param name="sideToMoveMobilityCount"></param>
     /// <param name="nonSideToMoveMobilityCount"></param>
-    [TestCase("4k3/1p6/2p5/3b4/3B4/5P2/6P1/4K3 w - - 0 1", 13, 6)]
+    [TestCase("4k3/1n6/2n5/3b4/3B4/5N2/6N1/4K3 w - - 0 1", 13, 8)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
     /// <param name="fen"></param>
     /// <param name="sideToMoveMobilityCount"></param>
     /// <param name="nonSideToMoveMobilityCount"></param>
-    [TestCase("3k4/1p6/2p5/4b3/4B3/5P2/6P1/3K4 b - - 0 1", 13, 6)]
+    [TestCase("3k4/1n6/2n5/4b3/4B3/5N2/6N1/3K4 b - - 0 1", 13, 8)]
     public void StaticEvaluation_BishopMobility(string fen, int sideToMoveMobilityCount, int nonSideToMoveMobilityCount)
     {
         Position position = new Position(fen);
