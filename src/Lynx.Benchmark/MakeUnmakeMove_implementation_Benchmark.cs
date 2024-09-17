@@ -145,14 +145,15 @@ using System.Runtime.CompilerServices;
 namespace Lynx.Benchmark;
 public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
 {
-    public static IEnumerable<(string, int)> Data => new[] {
-            (Constants.InitialPositionFEN, 4),
-            (Constants.TrickyTestPositionFEN, 4),
-            ("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10", 4),
-            ("3K4/8/8/8/8/8/4p3/2k2R2 b - - 0 1", 6),
-            ("2K2r2/4P3/8/8/8/8/8/3k4 w - - 0 1", 6),
-            ("8/p7/8/1P6/K1k3p1/6P1/7P/8 w - -", 6),
-        };
+    public static IEnumerable<(string, int)> Data =>
+    [
+        (Constants.InitialPositionFEN, 4),
+        (Constants.TrickyTestPositionFEN, 4),
+        ("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10", 4),
+        ("3K4/8/8/8/8/8/4p3/2k2R2 b - - 0 1", 6),
+        ("2K2r2/4P3/8/8/8/8/8/3k4 w - - 0 1", 6),
+        ("8/p7/8/1P6/K1k3p1/6P1/7P/8 w - -", 6),
+    ];
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]

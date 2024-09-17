@@ -5,6 +5,7 @@ namespace Lynx.Test.MoveGeneration;
 
 public class EncodeDecodeMoveTest
 {
+    [Test]
     public void SpecialMoveTypeValues()
     {
         foreach (var value in Enum.GetValues(typeof(SpecialMoveType)).Cast<int>())

@@ -78,11 +78,11 @@ public static class MoveGenerator
 
         GenerateAllPawnMoves(ref localIndex, movePool, position, offset);
         GenerateCastlingMoves(ref localIndex, movePool, position);
-        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.K + offset, position, offset);
-        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.N + offset, position, offset);
-        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.B + offset, position, offset);
-        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.R + offset, position, offset);
-        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.Q + offset, position, offset);
+        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.K + offset, position);
+        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.N + offset, position);
+        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.B + offset, position);
+        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.R + offset, position);
+        GenerateAllPieceMoves(ref localIndex, movePool, (int)Piece.Q + offset, position);
 
         return movePool[..localIndex];
     }
@@ -109,11 +109,11 @@ public static class MoveGenerator
 
         GeneratePawnCapturesAndPromotions(ref localIndex, movePool, position, offset);
         GenerateCastlingMoves(ref localIndex, movePool, position);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.K + offset, position, offset);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.N + offset, position, offset);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.B + offset, position, offset);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.R + offset, position, offset);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.Q + offset, position, offset);
+        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.K + offset, position);
+        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.N + offset, position);
+        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.B + offset, position);
+        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.R + offset, position);
+        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.Q + offset, position);
 
         return movePool[..localIndex];
     }
@@ -140,11 +140,11 @@ public static class MoveGenerator
 
         GeneratePawnCapturesAndPromotions(ref localIndex, movePool, position, offset);
         GenerateCastlingMoves(ref localIndex, movePool, position);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.K + offset, position, offset);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.N + offset, position, offset);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.B + offset, position, offset);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.R + offset, position, offset);
-        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.Q + offset, position, offset);
+        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.K + offset, position);
+        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.N + offset, position);
+        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.B + offset, position);
+        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.R + offset, position);
+        GeneratePieceCaptures(ref localIndex, movePool, (int)Piece.Q + offset, position);
 
         return movePool[..localIndex];
     }
@@ -393,7 +393,7 @@ public static class MoveGenerator
     /// <param name="position"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void GenerateAllPieceMoves(ref int localIndex, Span<Move> movePool, int piece, Position position, int offset)
+    internal static void GenerateAllPieceMoves(ref int localIndex, Span<Move> movePool, int piece, Position position)
     {
         var bitboard = position.PieceBitBoards[piece];
         int sourceSquare, targetSquare;
@@ -432,7 +432,7 @@ public static class MoveGenerator
     /// <param name="position"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static void GeneratePieceCaptures(ref int localIndex, Span<Move> movePool, int piece, Position position, int offset)
+    internal static void GeneratePieceCaptures(ref int localIndex, Span<Move> movePool, int piece, Position position)
     {
         var bitboard = position.PieceBitBoards[piece];
         var oppositeSide = Utils.OppositeSide(position.Side);
