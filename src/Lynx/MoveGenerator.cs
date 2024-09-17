@@ -217,7 +217,7 @@ public static class MoveGenerator
             {
                 targetSquare = attackedSquares.GetLS1BIndex();
                 attackedSquares.ResetLS1B();
-                var capturedPiece = FindCapturedPiece(position, offset, targetSquare);
+                var capturedPiece = position.Board[targetSquare];
 
                 var targetRank = (targetSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)  // Capture with promotion
@@ -290,7 +290,7 @@ public static class MoveGenerator
             {
                 targetSquare = attackedSquares.GetLS1BIndex();
                 attackedSquares.ResetLS1B();
-                var capturedPiece = FindCapturedPiece(position, offset, targetSquare);
+                var capturedPiece = position.Board[targetSquare];
 
                 var targetRank = (targetSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)  // Capture with promotion
@@ -413,7 +413,7 @@ public static class MoveGenerator
 
                 if (position.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare))
                 {
-                    var capturedPiece = FindCapturedPiece(position, offset, targetSquare);
+                    var capturedPiece = position.Board[targetSquare];
                     movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece: capturedPiece);
                 }
                 else
@@ -450,8 +450,7 @@ public static class MoveGenerator
             {
                 targetSquare = attacks.GetLS1BIndex();
                 attacks.ResetLS1B();
-
-                var capturedPiece = FindCapturedPiece(position, offset, targetSquare);
+                var capturedPiece = position.Board[targetSquare];
                 movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece: capturedPiece);
             }
         }
@@ -687,7 +686,7 @@ public static class MoveGenerator
 
                 if (position.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare))
                 {
-                    if(IsValidMove(position, MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece)))
+                    if (IsValidMove(position, MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece)))
                     {
                         return true;
                     }
@@ -710,7 +709,6 @@ public static class MoveGenerator
 #if DEBUG
         if (move.IsCapture())
         {
-            Debug.Assert(move.IsCapture());
             Debug.Assert(move.CapturedPiece() != (int)Piece.None);
         }
         else
@@ -725,20 +723,5 @@ public static class MoveGenerator
         position.UnmakeMove(move, gameState);
 
         return result;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int FindCapturedPiece(Position position, int offset, int targetSquare)
-    {
-        var start = (int)Piece.p - offset;
-        for (int pieceIndex = start; pieceIndex < start + 5; ++pieceIndex)
-        {
-            if (position.PieceBitBoards[pieceIndex].GetBit(targetSquare))
-            {
-                return pieceIndex;
-            }
-        }
-
-        throw new AssertException("No captured piece found");
     }
 }

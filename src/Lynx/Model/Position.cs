@@ -25,6 +25,11 @@ public class Position : IDisposable
     /// </summary>
     public BitBoard[] OccupancyBitBoards { get; }
 
+    /// <summary>
+    /// Piece location indexed by square
+    /// </summary>
+    public int[] Board { get; }
+
     public Side Side { get; private set; }
 
     public BoardSquare EnPassant { get; private set; }
@@ -49,11 +54,12 @@ public class Position : IDisposable
     {
     }
 
-    public Position((BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, byte Castle, BoardSquare EnPassant,
+    public Position((BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, int[] Board, Side Side, byte Castle, BoardSquare EnPassant,
         int _/*, int FullMoveCounter*/) parsedFEN)
     {
         PieceBitBoards = parsedFEN.PieceBitBoards;
         OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
+        Board = parsedFEN.Board;
         Side = parsedFEN.Side;
         Castle = parsedFEN.Castle;
         EnPassant = parsedFEN.EnPassant;
@@ -74,6 +80,9 @@ public class Position : IDisposable
 
         OccupancyBitBoards = ArrayPool<BitBoard>.Shared.Rent(3);
         Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
+
+        Board = ArrayPool<int>.Shared.Rent(64);
+        Array.Copy(position.Board, Board, position.Board.Length);
 
         Side = position.Side;
         Castle = position.Castle;
@@ -106,9 +115,11 @@ public class Position : IDisposable
 
         PieceBitBoards[piece].PopBit(sourceSquare);
         OccupancyBitBoards[oldSide].PopBit(sourceSquare);
+        Board[sourceSquare] = (int)Piece.None;
 
         PieceBitBoards[newPiece].SetBit(targetSquare);
         OccupancyBitBoards[oldSide].SetBit(targetSquare);
+        Board[targetSquare] = newPiece;
 
         UniqueIdentifier ^=
             ZobristTable.SideHash()
@@ -154,9 +165,11 @@ public class Position : IDisposable
 
                     PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
                     OccupancyBitBoards[oldSide].PopBit(rookSourceSquare);
+                    Board[rookSourceSquare] = (int)Piece.None;
 
                     PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
                     OccupancyBitBoards[oldSide].SetBit(rookTargetSquare);
+                    Board[rookTargetSquare] = rookIndex;
 
                     UniqueIdentifier ^=
                         ZobristTable.PieceHash(rookSourceSquare, rookIndex)
@@ -172,9 +185,11 @@ public class Position : IDisposable
 
                     PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
                     OccupancyBitBoards[oldSide].PopBit(rookSourceSquare);
+                    Board[rookSourceSquare] = (int)Piece.None;
 
                     PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
                     OccupancyBitBoards[oldSide].SetBit(rookTargetSquare);
+                    Board[rookTargetSquare] = rookIndex;
 
                     UniqueIdentifier ^=
                         ZobristTable.PieceHash(rookSourceSquare, rookIndex)
@@ -192,6 +207,7 @@ public class Position : IDisposable
 
                     PieceBitBoards[capturedPiece].PopBit(capturedSquare);
                     OccupancyBitBoards[oppositeSide].PopBit(capturedSquare);
+                    Board[capturedSquare] = (int)Piece.None;
                     UniqueIdentifier ^= ZobristTable.PieceHash(capturedSquare, capturedPiece);
 
                     break;
@@ -231,6 +247,7 @@ public class Position : IDisposable
         int targetSquare = move.TargetSquare();
         int piece = move.Piece();
         int promotedPiece = move.PromotedPiece();
+        int capturedPiece = Board[targetSquare];
 
         var newPiece = piece;
         if (promotedPiece != default)
@@ -240,9 +257,11 @@ public class Position : IDisposable
 
         PieceBitBoards[piece].PopBit(sourceSquare);
         OccupancyBitBoards[oldSide].PopBit(sourceSquare);
+        Board[sourceSquare] = (int)Piece.None;
 
         PieceBitBoards[newPiece].SetBit(targetSquare);
         OccupancyBitBoards[oldSide].SetBit(targetSquare);
+        Board[targetSquare] = newPiece;
 
         UniqueIdentifier ^=
             ZobristTable.SideHash()
@@ -274,9 +293,11 @@ public class Position : IDisposable
 
                     PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
                     OccupancyBitBoards[oldSide].PopBit(rookSourceSquare);
+                    Board[rookSourceSquare] = (int)Piece.None;
 
                     PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
                     OccupancyBitBoards[oldSide].SetBit(rookTargetSquare);
+                    Board[rookTargetSquare] = rookIndex;
 
                     UniqueIdentifier ^=
                         ZobristTable.PieceHash(rookSourceSquare, rookIndex)
@@ -292,9 +313,11 @@ public class Position : IDisposable
 
                     PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
                     OccupancyBitBoards[oldSide].PopBit(rookSourceSquare);
+                    Board[rookSourceSquare] = (int)Piece.None;
 
                     PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
                     OccupancyBitBoards[oldSide].SetBit(rookTargetSquare);
+                    Board[rookTargetSquare] = rookIndex;
 
                     UniqueIdentifier ^=
                         ZobristTable.PieceHash(rookSourceSquare, rookIndex)
@@ -312,6 +335,7 @@ public class Position : IDisposable
 
                     PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
                     OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
+                    Board[capturedPawnSquare] = (int)Piece.None;
                     UniqueIdentifier ^= ZobristTable.PieceHash(capturedPawnSquare, oppositePawnIndex);
                     move = MoveExtensions.EncodeCapturedPiece(move, oppositePawnIndex);
 
@@ -321,21 +345,15 @@ public class Position : IDisposable
                 {
                     if (move.IsCapture())
                     {
-                        var oppositePawnIndex = (int)Piece.p - offset;
+                        Debug.Assert(capturedPiece != (int)Piece.None, $"Expected piece at {targetSquare}, since it was supposed to be captured");
 
-                        var limit = (int)Piece.K + oppositePawnIndex;
-                        for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
-                        {
-                            if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
-                            {
-                                PieceBitBoards[pieceIndex].PopBit(targetSquare);
-                                UniqueIdentifier ^= ZobristTable.PieceHash(targetSquare, pieceIndex);
-                                move = MoveExtensions.EncodeCapturedPiece(move, pieceIndex);
-                                break;
-                            }
-                        }
-
+                        PieceBitBoards[capturedPiece].PopBit(targetSquare);
                         OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
+                        // No need to update Board here, it already has newPiece
+
+                        move = MoveExtensions.EncodeCapturedPiece(move, capturedPiece);
+
+                        UniqueIdentifier ^= ZobristTable.PieceHash(targetSquare, capturedPiece);
                     }
 
                     break;
@@ -381,9 +399,11 @@ public class Position : IDisposable
 
         PieceBitBoards[newPiece].PopBit(targetSquare);
         OccupancyBitBoards[side].PopBit(targetSquare);
+        Board[targetSquare] = (int)Piece.None;
 
         PieceBitBoards[piece].SetBit(sourceSquare);
         OccupancyBitBoards[side].SetBit(sourceSquare);
+        Board[sourceSquare] = piece;
 
         switch (move.SpecialMoveFlag())
         {
@@ -391,8 +411,11 @@ public class Position : IDisposable
                 {
                     if (move.IsCapture())
                     {
-                        PieceBitBoards[move.CapturedPiece()].SetBit(targetSquare);
+                        var capturedPiece = move.CapturedPiece();
+
+                        PieceBitBoards[capturedPiece].SetBit(targetSquare);
                         OccupancyBitBoards[oppositeSide].SetBit(targetSquare);
+                        Board[targetSquare] = capturedPiece;
                     }
 
                     break;
@@ -405,9 +428,11 @@ public class Position : IDisposable
 
                     PieceBitBoards[rookIndex].SetBit(rookSourceSquare);
                     OccupancyBitBoards[side].SetBit(rookSourceSquare);
+                    Board[rookSourceSquare] = rookIndex;
 
                     PieceBitBoards[rookIndex].PopBit(rookTargetSquare);
                     OccupancyBitBoards[side].PopBit(rookTargetSquare);
+                    Board[rookTargetSquare] = (int)Piece.None;
 
                     break;
                 }
@@ -419,9 +444,11 @@ public class Position : IDisposable
 
                     PieceBitBoards[rookIndex].SetBit(rookSourceSquare);
                     OccupancyBitBoards[side].SetBit(rookSourceSquare);
+                    Board[rookSourceSquare] = rookIndex;
 
                     PieceBitBoards[rookIndex].PopBit(rookTargetSquare);
                     OccupancyBitBoards[side].PopBit(rookTargetSquare);
+                    Board[rookTargetSquare] = (int)Piece.None;
 
                     break;
                 }
@@ -437,6 +464,7 @@ public class Position : IDisposable
 
                     PieceBitBoards[oppositePawnIndex].SetBit(capturedPawnSquare);
                     OccupancyBitBoards[oppositeSide].SetBit(capturedPawnSquare);
+                    Board[capturedPawnSquare] = oppositePawnIndex;
 
                     break;
                 }
@@ -503,6 +531,7 @@ public class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool WasProduceByAValidMove()
     {
+        Debug.Assert(PieceBitBoards[(int)Piece.k - Utils.PieceOffset(Side)].CountBits() == 1);
         var oppositeKingSquare = PieceBitBoards[(int)Piece.k - Utils.PieceOffset(Side)].GetLS1BIndex();
 
         return !IsSquareAttacked(oppositeKingSquare, Side);
@@ -1253,6 +1282,8 @@ public class Position : IDisposable
     {
         ArrayPool<BitBoard>.Shared.Return(PieceBitBoards, clearArray: true);
         ArrayPool<BitBoard>.Shared.Return(OccupancyBitBoards, clearArray: true);
+        // No need to clear, since we always have to initialize it to Piece.None after renting it anyway
+        ArrayPool<int>.Shared.Return(Board, clearArray: false);
 
         _disposedValue = true;
     }
