@@ -25,6 +25,11 @@ public class Position : IDisposable
     /// </summary>
     public BitBoard[] OccupancyBitBoards { get; }
 
+    /// <summary>
+    /// Piece location indexed by square
+    /// </summary>
+    public int[] Board { get; }
+
     public Side Side { get; private set; }
 
     public BoardSquare EnPassant { get; private set; }
@@ -49,11 +54,12 @@ public class Position : IDisposable
     {
     }
 
-    public Position((BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, byte Castle, BoardSquare EnPassant,
+    public Position((BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, int[] Board, Side Side, byte Castle, BoardSquare EnPassant,
         int _/*, int FullMoveCounter*/) parsedFEN)
     {
         PieceBitBoards = parsedFEN.PieceBitBoards;
         OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
+        Board = parsedFEN.Board;
         Side = parsedFEN.Side;
         Castle = parsedFEN.Castle;
         EnPassant = parsedFEN.EnPassant;
@@ -74,6 +80,9 @@ public class Position : IDisposable
 
         OccupancyBitBoards = ArrayPool<BitBoard>.Shared.Rent(3);
         Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
+
+        Board = ArrayPool<int>.Shared.Rent(64);
+        Array.Copy(position.Board, Board, position.Board.Length);
 
         Side = position.Side;
         Castle = position.Castle;
@@ -106,9 +115,11 @@ public class Position : IDisposable
 
         PieceBitBoards[piece].PopBit(sourceSquare);
         OccupancyBitBoards[oldSide].PopBit(sourceSquare);
+        Board[sourceSquare] = (int)Piece.None;
 
         PieceBitBoards[newPiece].SetBit(targetSquare);
         OccupancyBitBoards[oldSide].SetBit(targetSquare);
+        Board[targetSquare] = newPiece;
 
         UniqueIdentifier ^=
             ZobristTable.SideHash()
@@ -154,9 +165,11 @@ public class Position : IDisposable
 
                     PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
                     OccupancyBitBoards[oldSide].PopBit(rookSourceSquare);
+                    Board[rookSourceSquare] = (int)Piece.None;
 
                     PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
                     OccupancyBitBoards[oldSide].SetBit(rookTargetSquare);
+                    Board[rookTargetSquare] = rookIndex;
 
                     UniqueIdentifier ^=
                         ZobristTable.PieceHash(rookSourceSquare, rookIndex)
@@ -172,9 +185,11 @@ public class Position : IDisposable
 
                     PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
                     OccupancyBitBoards[oldSide].PopBit(rookSourceSquare);
+                    Board[rookSourceSquare] = (int)Piece.None;
 
                     PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
                     OccupancyBitBoards[oldSide].SetBit(rookTargetSquare);
+                    Board[rookTargetSquare] = rookIndex;
 
                     UniqueIdentifier ^=
                         ZobristTable.PieceHash(rookSourceSquare, rookIndex)
@@ -192,151 +207,8 @@ public class Position : IDisposable
 
                     PieceBitBoards[capturedPiece].PopBit(capturedSquare);
                     OccupancyBitBoards[oppositeSide].PopBit(capturedSquare);
+                    Board[capturedSquare] = (int)Piece.None;
                     UniqueIdentifier ^= ZobristTable.PieceHash(capturedSquare, capturedPiece);
-
-                    break;
-                }
-        }
-
-        Side = (Side)oppositeSide;
-        OccupancyBitBoards[2] = OccupancyBitBoards[1] | OccupancyBitBoards[0];
-
-        // Updating castling rights
-        Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
-        Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
-
-        UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
-
-        return new GameState(uniqueIdentifierCopy, enpassantCopy, castleCopy);
-        //var clone = new Position(this);
-        //clone.UnmakeMove(move, gameState);
-        //if (uniqueIdentifierCopy != clone.UniqueIdentifier)
-        //{
-        //    throw new($"{FEN()}: {uniqueIdentifierCopy} expected, got {clone.UniqueIdentifier} got after Make/Unmake move {move.ToEPDString()}");
-        //}
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public GameState MakeMoveCalculatingCapturedPiece(ref Move move)
-    {
-        byte castleCopy = Castle;
-        BoardSquare enpassantCopy = EnPassant;
-        long uniqueIdentifierCopy = UniqueIdentifier;
-
-        var oldSide = (int)Side;
-        var offset = Utils.PieceOffset(oldSide);
-        var oppositeSide = Utils.OppositeSide(oldSide);
-
-        int sourceSquare = move.SourceSquare();
-        int targetSquare = move.TargetSquare();
-        int piece = move.Piece();
-        int promotedPiece = move.PromotedPiece();
-
-        var newPiece = piece;
-        if (promotedPiece != default)
-        {
-            newPiece = promotedPiece;
-        }
-
-        PieceBitBoards[piece].PopBit(sourceSquare);
-        OccupancyBitBoards[oldSide].PopBit(sourceSquare);
-
-        PieceBitBoards[newPiece].SetBit(targetSquare);
-        OccupancyBitBoards[oldSide].SetBit(targetSquare);
-
-        UniqueIdentifier ^=
-            ZobristTable.SideHash()
-            ^ ZobristTable.PieceHash(sourceSquare, piece)
-            ^ ZobristTable.PieceHash(targetSquare, newPiece)
-            ^ ZobristTable.EnPassantHash((int)EnPassant)            // We clear the existing enpassant square, if any
-            ^ ZobristTable.CastleHash(Castle);                      // We clear the existing castle rights
-
-        EnPassant = BoardSquare.noSquare;
-
-        switch (move.SpecialMoveFlag())
-        {
-            case SpecialMoveType.DoublePawnPush:
-                {
-                    var pawnPush = +8 - (oldSide * 16);
-                    var enPassantSquare = sourceSquare + pawnPush;
-                    Utils.Assert(Constants.EnPassantCaptureSquares.Length > enPassantSquare && Constants.EnPassantCaptureSquares[enPassantSquare] != 0, $"Unexpected en passant square : {(BoardSquare)enPassantSquare}");
-
-                    EnPassant = (BoardSquare)enPassantSquare;
-                    UniqueIdentifier ^= ZobristTable.EnPassantHash(enPassantSquare);
-
-                    break;
-                }
-            case SpecialMoveType.ShortCastle:
-                {
-                    var rookSourceSquare = Utils.ShortCastleRookSourceSquare(oldSide);
-                    var rookTargetSquare = Utils.ShortCastleRookTargetSquare(oldSide);
-                    var rookIndex = (int)Piece.R + offset;
-
-                    PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                    OccupancyBitBoards[oldSide].PopBit(rookSourceSquare);
-
-                    PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                    OccupancyBitBoards[oldSide].SetBit(rookTargetSquare);
-
-                    UniqueIdentifier ^=
-                        ZobristTable.PieceHash(rookSourceSquare, rookIndex)
-                        ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
-
-                    break;
-                }
-            case SpecialMoveType.LongCastle:
-                {
-                    var rookSourceSquare = Utils.LongCastleRookSourceSquare(oldSide);
-                    var rookTargetSquare = Utils.LongCastleRookTargetSquare(oldSide);
-                    var rookIndex = (int)Piece.R + offset;
-
-                    PieceBitBoards[rookIndex].PopBit(rookSourceSquare);
-                    OccupancyBitBoards[oldSide].PopBit(rookSourceSquare);
-
-                    PieceBitBoards[rookIndex].SetBit(rookTargetSquare);
-                    OccupancyBitBoards[oldSide].SetBit(rookTargetSquare);
-
-                    UniqueIdentifier ^=
-                        ZobristTable.PieceHash(rookSourceSquare, rookIndex)
-                        ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
-
-                    break;
-                }
-
-            case SpecialMoveType.EnPassant:
-                {
-                    var oppositePawnIndex = (int)Piece.p - offset;
-
-                    var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-                    Utils.Assert(PieceBitBoards[oppositePawnIndex].GetBit(capturedPawnSquare), $"Expected {(Side)oppositeSide} pawn in {capturedPawnSquare}");
-
-                    PieceBitBoards[oppositePawnIndex].PopBit(capturedPawnSquare);
-                    OccupancyBitBoards[oppositeSide].PopBit(capturedPawnSquare);
-                    UniqueIdentifier ^= ZobristTable.PieceHash(capturedPawnSquare, oppositePawnIndex);
-                    move = MoveExtensions.EncodeCapturedPiece(move, oppositePawnIndex);
-
-                    break;
-                }
-            default:
-                {
-                    if (move.IsCapture())
-                    {
-                        var oppositePawnIndex = (int)Piece.p - offset;
-
-                        var limit = (int)Piece.K + oppositePawnIndex;
-                        for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
-                        {
-                            if (PieceBitBoards[pieceIndex].GetBit(targetSquare))
-                            {
-                                PieceBitBoards[pieceIndex].PopBit(targetSquare);
-                                UniqueIdentifier ^= ZobristTable.PieceHash(targetSquare, pieceIndex);
-                                move = MoveExtensions.EncodeCapturedPiece(move, pieceIndex);
-                                break;
-                            }
-                        }
-
-                        OccupancyBitBoards[oppositeSide].PopBit(targetSquare);
-                    }
 
                     break;
                 }
@@ -381,9 +253,11 @@ public class Position : IDisposable
 
         PieceBitBoards[newPiece].PopBit(targetSquare);
         OccupancyBitBoards[side].PopBit(targetSquare);
+        Board[targetSquare] = (int)Piece.None;
 
         PieceBitBoards[piece].SetBit(sourceSquare);
         OccupancyBitBoards[side].SetBit(sourceSquare);
+        Board[sourceSquare] = piece;
 
         switch (move.SpecialMoveFlag())
         {
@@ -391,8 +265,11 @@ public class Position : IDisposable
                 {
                     if (move.IsCapture())
                     {
-                        PieceBitBoards[move.CapturedPiece()].SetBit(targetSquare);
+                        var capturedPiece = move.CapturedPiece();
+
+                        PieceBitBoards[capturedPiece].SetBit(targetSquare);
                         OccupancyBitBoards[oppositeSide].SetBit(targetSquare);
+                        Board[targetSquare] = capturedPiece;
                     }
 
                     break;
@@ -405,9 +282,11 @@ public class Position : IDisposable
 
                     PieceBitBoards[rookIndex].SetBit(rookSourceSquare);
                     OccupancyBitBoards[side].SetBit(rookSourceSquare);
+                    Board[rookSourceSquare] = rookIndex;
 
                     PieceBitBoards[rookIndex].PopBit(rookTargetSquare);
                     OccupancyBitBoards[side].PopBit(rookTargetSquare);
+                    Board[rookTargetSquare] = (int)Piece.None;
 
                     break;
                 }
@@ -419,9 +298,11 @@ public class Position : IDisposable
 
                     PieceBitBoards[rookIndex].SetBit(rookSourceSquare);
                     OccupancyBitBoards[side].SetBit(rookSourceSquare);
+                    Board[rookSourceSquare] = rookIndex;
 
                     PieceBitBoards[rookIndex].PopBit(rookTargetSquare);
                     OccupancyBitBoards[side].PopBit(rookTargetSquare);
+                    Board[rookTargetSquare] = (int)Piece.None;
 
                     break;
                 }
@@ -437,6 +318,7 @@ public class Position : IDisposable
 
                     PieceBitBoards[oppositePawnIndex].SetBit(capturedPawnSquare);
                     OccupancyBitBoards[oppositeSide].SetBit(capturedPawnSquare);
+                    Board[capturedPawnSquare] = oppositePawnIndex;
 
                     break;
                 }
@@ -503,6 +385,7 @@ public class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool WasProduceByAValidMove()
     {
+        Debug.Assert(PieceBitBoards[(int)Piece.k - Utils.PieceOffset(Side)].CountBits() == 1);
         var oppositeKingSquare = PieceBitBoards[(int)Piece.k - Utils.PieceOffset(Side)].GetLS1BIndex();
 
         return !IsSquareAttacked(oppositeKingSquare, Side);
@@ -595,12 +478,13 @@ public class Position : IDisposable
 
         // Pieces protected by pawns bonus
         packedScore += PieceProtectedByPawnBonus
-            * ((whitePawnAttacks & OccupancyBitBoards[(int)Side.White] /*& (~PieceBitBoards[(int)Piece.P])*/).CountBits()
-                - (blackPawnAttacks & OccupancyBitBoards[(int)Side.Black] /*& (~PieceBitBoards[(int)Piece.p])*/).CountBits());
+            * ((whitePawnAttacks & OccupancyBitBoards[(int)Side.White] /* & (~whitePawns) */).CountBits()
+                - (blackPawnAttacks & OccupancyBitBoards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
 
+        // Pieces attacked by pawns bonus
         packedScore += PieceAttackedByPawnPenalty
-            * ((blackPawnAttacks & OccupancyBitBoards[(int)Side.White]).CountBits()
-                - (whitePawnAttacks & OccupancyBitBoards[(int)Side.Black]).CountBits());
+            * ((blackPawnAttacks & OccupancyBitBoards[(int)Side.White] /* & (~whitePawns) */).CountBits()
+                - (whitePawnAttacks & OccupancyBitBoards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
 
         packedScore += PSQT(0, whiteBucket, (int)Piece.K, whiteKing)
             + PSQT(0, blackBucket, (int)Piece.k, blackKing)
@@ -1266,6 +1150,8 @@ public class Position : IDisposable
     {
         ArrayPool<BitBoard>.Shared.Return(PieceBitBoards, clearArray: true);
         ArrayPool<BitBoard>.Shared.Return(OccupancyBitBoards, clearArray: true);
+        // No need to clear, since we always have to initialize it to Piece.None after renting it anyway
+        ArrayPool<int>.Shared.Return(Board, clearArray: false);
 
         _disposedValue = true;
     }
