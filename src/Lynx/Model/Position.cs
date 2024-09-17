@@ -541,13 +541,16 @@ public class Position : IDisposable
 
     #region Evaluation
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public (int Score, int Phase) StaticEvaluation(int movesWithoutCaptureOrPawnMove = 0) => StaticEvaluation(IsInCheck(), movesWithoutCaptureOrPawnMove);
+
     /// <summary>
     /// Evaluates material and position in a NegaMax style.
     /// That is, positive scores always favour playing <see cref="Side"/>.
     /// </summary>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public (int Score, int Phase) StaticEvaluation(int movesWithoutCaptureOrPawnMove = 0)
+    public (int Score, int Phase) StaticEvaluation(bool isInCheck, int movesWithoutCaptureOrPawnMove = 0)
     {
         //var result = OnlineTablebaseProber.EvaluationSearch(this, movesWithoutCaptureOrPawnMove, cancellationToken);
         //Debug.Assert(result < CheckMateBaseEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
@@ -611,6 +614,14 @@ public class Position : IDisposable
             }
         }
 
+        // Kings
+        packedScore += PSQT(0, whiteBucket, (int)Piece.K, whiteKing)
+            + PSQT(0, blackBucket, (int)Piece.k, blackKing)
+            + PSQT(1, blackBucket, (int)Piece.K, whiteKing)
+            + PSQT(1, whiteBucket, (int)Piece.k, blackKing)
+            + KingAdditionalEvaluation(whiteKing, (int)Side.White, blackPawnAttacks)
+            - KingAdditionalEvaluation(blackKing, (int)Side.Black, whitePawnAttacks);
+
         // Bishop pair bonus
         if (PieceBitBoards[(int)Piece.B].CountBits() >= 2)
         {
@@ -632,12 +643,11 @@ public class Position : IDisposable
             * ((blackPawnAttacks & OccupancyBitBoards[(int)Side.White] /* & (~whitePawns) */).CountBits()
                 - (whitePawnAttacks & OccupancyBitBoards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
 
-        packedScore += PSQT(0, whiteBucket, (int)Piece.K, whiteKing)
-            + PSQT(0, blackBucket, (int)Piece.k, blackKing)
-            + PSQT(1, blackBucket, (int)Piece.K, whiteKing)
-            + PSQT(1, whiteBucket, (int)Piece.k, blackKing)
-            + KingAdditionalEvaluation(whiteKing, (int)Side.White, blackPawnAttacks)
-            - KingAdditionalEvaluation(blackKing, (int)Side.Black, whitePawnAttacks);
+        // Unsafe checks
+        if (isInCheck)
+        {
+            packedScore -= UnsafeCheckBonus;
+        }
 
         const int maxPhase = 24;
 

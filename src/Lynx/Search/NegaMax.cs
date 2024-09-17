@@ -78,7 +78,7 @@ public sealed partial class Engine
         {
             if (MoveGenerator.CanGenerateAtLeastAValidMove(position))
             {
-                return QuiescenceSearch(ply, alpha, beta);
+                return QuiescenceSearch(ply, alpha, beta, isInCheck);
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
@@ -87,7 +87,7 @@ public sealed partial class Engine
         }
         else if (!pvNode)
         {
-            (staticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
+            (staticEval, phase) = position.StaticEvaluation(isInCheck, Game.HalfMovesWithoutCaptureOrPawnMove);
 
             // From smol.cs
             // ttEvaluation can be used as a better positional evaluation:
@@ -119,7 +119,7 @@ public sealed partial class Engine
                     {
                         if (depth == 1)
                         {
-                            var qSearchScore = QuiescenceSearch(ply, alpha, beta);
+                            var qSearchScore = QuiescenceSearch(ply, alpha, beta, isInCheck);
 
                             return qSearchScore > score
                                 ? qSearchScore
@@ -130,7 +130,7 @@ public sealed partial class Engine
 
                         if (score < beta)               // Static evaluation indicates fail-low node
                         {
-                            var qSearchScore = QuiescenceSearch(ply, alpha, beta);
+                            var qSearchScore = QuiescenceSearch(ply, alpha, beta, isInCheck);
                             if (qSearchScore < beta)    // Quiescence score also indicates fail-low node
                             {
                                 return qSearchScore > score
@@ -515,7 +515,7 @@ public sealed partial class Engine
     /// </param>
     /// <returns></returns>
     [SkipLocalsInit]
-    public int QuiescenceSearch(int ply, int alpha, int beta)
+    public int QuiescenceSearch(int ply, int alpha, int beta, bool isInCheck)
     {
         var position = Game.CurrentPosition;
 
@@ -525,7 +525,7 @@ public sealed partial class Engine
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
             _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
-            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
+            return position.StaticEvaluation(isInCheck, Game.HalfMovesWithoutCaptureOrPawnMove).Score;
         }
 
         var pvIndex = PVTable.Indexes[ply];
@@ -541,7 +541,7 @@ public sealed partial class Engine
 
         _maxDepthReached[ply] = ply;
 
-        var staticEvaluation = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
+        var staticEvaluation = position.StaticEvaluation(isInCheck, Game.HalfMovesWithoutCaptureOrPawnMove).Score;
 
         // Fail-hard beta-cutoff (updating alpha after this check)
         if (staticEvaluation >= beta)
@@ -611,7 +611,7 @@ public sealed partial class Engine
             // Theoretically there could be a castling move that caused the 50 moves repetitions, but it's highly unlikely
             Game.PushToMoveStack(ply, move);
 
-            int evaluation = -QuiescenceSearch(ply + 1, -beta, -alpha);
+            int evaluation = -QuiescenceSearch(ply + 1, -beta, -alpha, position.IsInCheck());
             position.UnmakeMove(move, gameState);
 
             PrintMove(position, ply, move, evaluation);
@@ -642,7 +642,7 @@ public sealed partial class Engine
             && !isThereAnyValidCapture
             && !MoveGenerator.CanGenerateAtLeastAValidMove(position))
         {
-            var finalEval = Position.EvaluateFinalPosition(ply, position.IsInCheck());
+            var finalEval = Position.EvaluateFinalPosition(ply, isInCheck);
             _tt.RecordHash(_ttMask, position, 0, ply, finalEval, NodeType.Exact);
 
             return finalEval;

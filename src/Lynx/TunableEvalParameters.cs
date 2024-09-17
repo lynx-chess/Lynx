@@ -6015,6 +6015,8 @@ public static class EvaluationParams
 {
 	public static readonly TaperedEvaluationTerm IsolatedPawnPenalty = Pack(-16, -13);
 
+	public static readonly TaperedEvaluationTerm UnsafeCheckBonus = Pack(5, 10);
+
 	public static readonly TaperedEvaluationTermByRank PawnPhalanxBonus =
 	[
 		Pack(0, 0),
