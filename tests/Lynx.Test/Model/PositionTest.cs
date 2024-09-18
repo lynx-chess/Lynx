@@ -198,7 +198,7 @@ public class PositionTest
     ///     a b c d e f g h
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("4k3/1ppp4/8/8/8/8/PP1P4/4K3 w - - 0 1")]
+    [TestCase("7k/1ppp2pp/8/8/8/8/PP1P2PP/7K w - - 0 1")]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
@@ -215,7 +215,9 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(UnpackMG(IsolatedPawnPenalty), evaluation);
+        var expectedEval = UnpackMG(IsolatedPawnPenalty) - UnpackMG(PawnPhalanxBonus[1]);
+
+        Assert.AreEqual(expectedEval, evaluation);
     }
 
     /// <summary>
@@ -499,12 +501,12 @@ public class PositionTest
     ///     a b c d e f g h
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("4k2r/p6p/8/8/8/8/2P4P/1R2K3 w - - 0 1", 9, 2)]
+    [TestCase("7r/2p1k2p/8/8/8/8/2P1K2P/1R6 w - - 0 1", 9, 2)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("3k2r1/p4p2/8/8/8/8/P6P/R2K4 b - - 0 1", 9, 2)]
+    [TestCase("6r1/p2k1p2/8/8/8/8/P2K1P2/R7 b - - 0 1", 9, 2)]
     public void StaticEvaluation_OpenFileRookBonus(string fen, int rookMobilitySideToMove, int rookMobilitySideNotToMove)
     {
         Position position = new Position(fen);
@@ -566,12 +568,12 @@ public class PositionTest
     ///     a b c d e f g h
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("1r2k3/1r5p/p7/8/8/P7/R6P/R3K3 w - - 0 1", 6, 11)]
+    [TestCase("1r5k/1r5p/2p5/8/8/2P5/2R4P/2R4K w - - 0 1", 6, 11)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("3k3r/p6r/7p/8/8/7P/P5R1/3K2R1 b - - 0 1", 6, 11)]
+    [TestCase("k4r2/p4r2/5p2/8/8/5P2/P5R1/K5R1 b - - 0 1", 6, 11)]
     public void StaticEvaluation_DoubleOpenFileRookBonus(string fen, int rookMobilitySideToMove, int rookMobilitySideNotToMove)
     {
         Position position = new Position(fen);
@@ -848,12 +850,12 @@ public class PositionTest
     ///     a b c d e f g h
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("n3k3/1p6/8/3q4/3Q4/8/6P1/4K2N w - - 0 1")]
+    [TestCase("n7/1p6/3k4/3q4/3Q4/3K4/6P1/7N w - - 0 1")]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("n2k4/1p6/8/4q3/4Q3/8/6P1/3K3N b - - 0 1")]
+    [TestCase("n7/1p6/4k3/4q3/4Q3/4K3/6P1/7N b - - 0 1")]
     /// <summary>
     /// 8   . . . . k . . .
     /// 7   . p . . . . . .
@@ -884,12 +886,12 @@ public class PositionTest
     ///     a b c d e f g h
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("n3k3/1p6/8/3q4/3Q4/8/6P1/4K2N w - - 0 1")]
+    [TestCase("n7/1p6/3k4/3q4/3Q4/3K4/6P1/7N w - - 0 1")]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("n2k4/1p6/8/4q3/4Q3/8/6P1/3K3N b - - 0 1")]
+    [TestCase("n7/1p6/4k3/4q3/4Q3/4K3/6P1/7N b - - 0 1")]
     /// <summary>
     /// 8   . . . . k . . .
     /// 7   . p . . . . . .
@@ -920,12 +922,12 @@ public class PositionTest
     ///     a b c d e f g h
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("n3k3/8/2p5/1r1q3R/3Q4/5P2/8/4K2N w - - 0 1")]
+    [TestCase("2n1kn2/4n3/2p5/1r1q3R/3Q4/5P2/6NN/7K w - - 0 1")]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("n2k4/8/2p5/4q3/r3Q1R1/5P2/8/3K3N b - - 0 1")]
+    [TestCase("n7/k7/2p5/4q3/r3Q1R1/5P2/8/3K3N b - - 0 1")]
     public void StaticEvaluation_QueenMobility(string fen)
     {
         Position position = new Position(fen);
