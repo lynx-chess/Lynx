@@ -713,7 +713,7 @@ public class Position : IDisposable
             var checkSquare = checks.GetLS1BIndex();
             checks.ResetLS1B();
 
-            var piecesProtectingCheckSquare = AllAttackersFromOppositeSideTo(checkSquare).CountBits();
+            var piecesProtectingCheckSquare = AllAttackersFromOppositeSideTo(checkSquare, pieceSide).CountBits();
 
             if (piecesProtectingCheckSquare > 0)
             {
@@ -749,8 +749,8 @@ public class Position : IDisposable
         {
             var checkSquare = checks.GetLS1BIndex();
             checks.ResetLS1B();
-            
-            var piecesProtectingCheckSquare = AllAttackersFromOppositeSideTo(checkSquare).CountBits();
+
+            var piecesProtectingCheckSquare = AllAttackersFromOppositeSideTo(checkSquare, pieceSide).CountBits();
 
             if (piecesProtectingCheckSquare > 0)
             {
@@ -800,7 +800,7 @@ public class Position : IDisposable
             var checkSquare = checks.GetLS1BIndex();
             checks.ResetLS1B();
 
-            var piecesProtectingCheckSquare = AllAttackersFromOppositeSideTo(checkSquare).CountBits();
+            var piecesProtectingCheckSquare = AllAttackersFromOppositeSideTo(checkSquare, pieceSide).CountBits();
 
             if (piecesProtectingCheckSquare > 0)
             {
@@ -838,7 +838,7 @@ public class Position : IDisposable
             var checkSquare = checks.GetLS1BIndex();
             checks.ResetLS1B();
 
-            var piecesProtectingCheckSquare = AllAttackersFromOppositeSideTo(checkSquare).CountBits();
+            var piecesProtectingCheckSquare = AllAttackersFromOppositeSideTo(checkSquare, pieceSide).CountBits();
 
             if (piecesProtectingCheckSquare > 0)
             {
@@ -901,11 +901,11 @@ public class Position : IDisposable
     #region Attacks
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ulong AllAttackersFromOppositeSideTo(int square)
+    public ulong AllAttackersFromOppositeSideTo(int square, int side)
     {
         Debug.Assert(square != (int)BoardSquare.noSquare);
 
-        var oppositeSide = Utils.OppositeSide(Side);
+        var oppositeSide = Utils.OppositeSide(side);
         var pieceOffset = Utils.PieceOffset(oppositeSide);
 
         var occupancy = OccupancyBitBoards[(int)Side.Both];
@@ -917,7 +917,7 @@ public class Position : IDisposable
         var bishops = queens | PieceBitBoards[(int)Piece.B + pieceOffset];
 
         return
-            (pawns & Attacks.PawnAttacks[(int)Side][square])
+            (pawns & Attacks.PawnAttacks[side][square])
             | (knights & Attacks.KnightAttacks[square])
             | (bishops & Attacks.BishopAttacks(square, occupancy))
             | (rooks & Attacks.RookAttacks(square, occupancy))
