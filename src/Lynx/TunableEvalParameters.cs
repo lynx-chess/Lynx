@@ -6038,7 +6038,16 @@ public static class EvaluationParams
 
 	public static readonly TaperedEvaluationTerm BishopPairBonus = Pack(30, 74);
 
-	public static readonly TaperedEvaluationTermByCount8 BadBishopPenalty =
+	public static readonly int[] CheckBonus =
+    [
+        Pack(0, 0),
+        Pack(1, 2),
+        Pack(3, 4),
+        Pack(5, 6),
+        Pack(7, 8),
+    ];
+
+    public static readonly TaperedEvaluationTermByCount8 BadBishopPenalty =
 	[
 		Pack(190, 235),
 		Pack(189, 229),

@@ -128,9 +128,29 @@ public static class Attacks
     /// <param name="bishopAttacks"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard QueenAttacks(BitBoard rookAttacks, BitBoard bishopAttacks)
+    public static BitBoard QueenAttacks(BitBoard rookAttacks, BitBoard bishopAttacks) => rookAttacks | bishopAttacks;
+
+    /// <summary>
+    /// No pawn or king
+    /// </summary>
+    /// <param name="side"></param>
+    /// <param name="squareIndex"></param>
+    /// <param name="occupancy"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static BitBoard[] AllPieceAttacks(int squareIndex, BitBoard occupancy)
     {
-        return rookAttacks | bishopAttacks;
+        var bishopAttacks = BishopAttacks(squareIndex, occupancy);
+        var rookAttacks = RookAttacks(squareIndex, occupancy);
+
+        return
+        [
+            KnightAttacks[squareIndex],
+            bishopAttacks,
+            rookAttacks,
+            QueenAttacks(bishopAttacks, rookAttacks)
+        ];
+
     }
 
     /// <summary>
