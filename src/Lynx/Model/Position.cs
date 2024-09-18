@@ -427,6 +427,7 @@ public class Position : IDisposable
         var whiteBucket = PSQTBucketLayout[whiteKing];
         var blackBucket = PSQTBucketLayout[blackKing ^ 56];
 
+        // White pieces PSQTs and additional eval, except king
         for (int pieceIndex = (int)Piece.P; pieceIndex < (int)Piece.K; ++pieceIndex)
         {
             // Bitboard copy that we 'empty'
@@ -446,6 +447,7 @@ public class Position : IDisposable
             }
         }
 
+        // Black pieces PSQTs and additional eval, except king
         for (int pieceIndex = (int)Piece.p; pieceIndex < (int)Piece.k; ++pieceIndex)
         {
             // Bitboard copy that we 'empty'
@@ -464,6 +466,14 @@ public class Position : IDisposable
                 packedScore -= AdditionalPieceEvaluation(blackBucket, pieceSquareIndex, pieceIndex, (int)Side.Black, blackKing, whiteKing, whitePawnAttacks);
             }
         }
+
+        // Kings
+        packedScore += PSQT(0, whiteBucket, (int)Piece.K, whiteKing)
+            + PSQT(0, blackBucket, (int)Piece.k, blackKing)
+            + PSQT(1, blackBucket, (int)Piece.K, whiteKing)
+            + PSQT(1, whiteBucket, (int)Piece.k, blackKing)
+            + KingAdditionalEvaluation(whiteKing, (int)Side.White, blackPawnAttacks)
+            - KingAdditionalEvaluation(blackKing, (int)Side.Black, whitePawnAttacks);
 
         // Bishop pair bonus
         if (PieceBitBoards[(int)Piece.B].CountBits() >= 2)
@@ -485,13 +495,6 @@ public class Position : IDisposable
         packedScore += PieceAttackedByPawnPenalty
             * ((blackPawnAttacks & OccupancyBitBoards[(int)Side.White] /* & (~whitePawns) */).CountBits()
                 - (whitePawnAttacks & OccupancyBitBoards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
-
-        packedScore += PSQT(0, whiteBucket, (int)Piece.K, whiteKing)
-            + PSQT(0, blackBucket, (int)Piece.k, blackKing)
-            + PSQT(1, blackBucket, (int)Piece.K, whiteKing)
-            + PSQT(1, whiteBucket, (int)Piece.k, blackKing)
-            + KingAdditionalEvaluation(whiteKing, (int)Side.White, blackPawnAttacks)
-            - KingAdditionalEvaluation(blackKing, (int)Side.Black, whitePawnAttacks);
 
         const int maxPhase = 24;
 
