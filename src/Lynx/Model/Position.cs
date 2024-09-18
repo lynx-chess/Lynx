@@ -497,10 +497,29 @@ public class Position : IDisposable
             * ((blackPawnAttacks & OccupancyBitBoards[(int)Side.White] /* & (~whitePawns) */).CountBits()
                 - (whitePawnAttacks & OccupancyBitBoards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
 
-        // Unsafe checks
+        // Safe checks
         if (isInCheck)
         {
-            packedScore -= UnsafeCheckBonus;
+            bool safeCheck = true;
+            var squaresGivingCheck = SquaresGivingCheck();
+
+            while (squaresGivingCheck != 0)
+            {
+                var squareGivingCheck = squaresGivingCheck.GetLS1BIndex();
+
+                if (AllAttackersTo(squareGivingCheck) != 0)
+                {
+                    safeCheck = false;
+                    break;
+                }
+
+                squaresGivingCheck.ResetLS1B();
+            }
+
+            if (safeCheck)
+            {
+                packedScore -= SafeCheckBonus;
+            }
         }
 
         const int maxPhase = 24;
@@ -809,10 +828,11 @@ public class Position : IDisposable
     #region Attacks
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ulong AllAttackersTo(int square, BitBoard occupancy)
+    public ulong AllAttackersTo(int square)
     {
         Debug.Assert(square != (int)BoardSquare.noSquare);
 
+        var occupancy = OccupancyBitBoards[(int)Side.Both];
         var queens = Queens;
         var rooks = queens | Rooks;
         var bishops = queens | Bishops;
@@ -885,6 +905,26 @@ public class Position : IDisposable
             || IsSquareAttackedByQueens(oppositeSideOffset, bishopAttacks, rookAttacks)
             || IsSquareAttackedByKnights(kingSquare, oppositeSideOffset)
             || IsSquareAttackedByPawns(kingSquare, oppositeSideInt, oppositeSideOffset);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public BitBoard SquaresGivingCheck()
+    {
+        var oppositeSideInt = Utils.OppositeSide(Side);
+        var oppositeSideOffset = Utils.PieceOffset(oppositeSideInt);
+
+        var kingSquare = PieceBitBoards[(int)Piece.k - oppositeSideOffset].GetLS1BIndex();
+
+        var bothSidesOccupancy = OccupancyBitBoards[(int)Side.Both];
+
+        var rookAttacks = Attacks.RookAttacks(kingSquare, bothSidesOccupancy);
+        var bishopAttacks = Attacks.BishopAttacks(kingSquare, bothSidesOccupancy);
+
+        return (PieceBitBoards[(int)Piece.B + oppositeSideOffset] & bishopAttacks)
+            | (PieceBitBoards[(int)Piece.R + oppositeSideOffset] & rookAttacks)
+            | (PieceBitBoards[(int)Piece.Q + oppositeSideOffset] & Attacks.QueenAttacks(rookAttacks, bishopAttacks))
+            | (PieceBitBoards[(int)Piece.N + oppositeSideOffset] & Attacks.KnightAttacks[kingSquare])
+            | (PieceBitBoards[(int)Piece.P + oppositeSideOffset] & Attacks.PawnAttacks[oppositeSideInt][kingSquare]);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -6013,7 +6013,7 @@ internal static partial class TunableEvalParameters
 
 public static class EvaluationParams
 {
-	public static readonly TaperedEvaluationTerm UnsafeCheckBonus = Pack(7, -12);
+	public static readonly TaperedEvaluationTerm SafeCheckBonus = Pack(7, -12);
 
 	public static readonly TaperedEvaluationTerm IsolatedPawnPenalty = Pack(-16, -13);
 
