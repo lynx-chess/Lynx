@@ -131,29 +131,6 @@ public static class Attacks
     public static BitBoard QueenAttacks(BitBoard rookAttacks, BitBoard bishopAttacks) => rookAttacks | bishopAttacks;
 
     /// <summary>
-    /// No pawn or king
-    /// </summary>
-    /// <param name="side"></param>
-    /// <param name="squareIndex"></param>
-    /// <param name="occupancy"></param>
-    /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard[] AllPieceAttacks(int squareIndex, BitBoard occupancy)
-    {
-        var bishopAttacks = BishopAttacks(squareIndex, occupancy);
-        var rookAttacks = RookAttacks(squareIndex, occupancy);
-
-        return
-        [
-            KnightAttacks[squareIndex],
-            bishopAttacks,
-            rookAttacks,
-            QueenAttacks(bishopAttacks, rookAttacks)
-        ];
-
-    }
-
-    /// <summary>
     /// Taken from Leorik (https://github.com/lithander/Leorik/blob/master/Leorik.Core/Slider/Pext.cs)
     /// Based on https://www.chessprogramming.org/BMI2#PEXT_Bitboards
     /// </summary>
