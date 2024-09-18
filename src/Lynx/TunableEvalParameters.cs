@@ -6055,7 +6055,16 @@ public static class EvaluationParams
 
 	public static readonly TaperedEvaluationTerm PieceAttackedByPawnPenalty = Pack(-47, -34);
 
-	public static readonly int[] CheckBonus =
+	public static readonly int[] SafeCheckBonus =
+	[
+		Pack(0, 0),
+		Pack(15, 3),
+		Pack(17, 15),
+		Pack(30, 4),
+		Pack(13, 18)
+	];
+
+	public static readonly int[] UnsafeCheckBonus =
 	[
 		Pack(0, 0),
 		Pack(15, 3),

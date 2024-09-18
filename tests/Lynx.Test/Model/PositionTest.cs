@@ -1032,6 +1032,61 @@ public class PositionTest
         Assert.AreEqual((int)(0.75 * position.StaticEvaluation(0).Score), position.StaticEvaluation(50).Score);
     }
 
+    [Test]
+    public void AllAttackersFromOppositeSideTo()
+    {
+        const string fenWithBlackAttacksWhiteSide = "8/4n3/2pkb3/r2P3q/R6Q/2PKB3/4N3/8 w - - 0 1";
+        const string fenWithBlackAttacksBlackSide = "8/4n3/2pkb3/r2P3q/R6Q/2PKB3/4N3/8 b - - 0 1";
+        const int square = (int)BoardSquare.d5;
+
+        using(var position = new Position(fenWithBlackAttacksWhiteSide))
+        {
+            var allAttacks = position.AllAttackersTo(square);
+            Assert.AreEqual(6, allAttacks.CountBits());
+
+            var blackAttacks = position.AllAttackersFromOppositeSideTo(square);
+            Assert.AreEqual(6, blackAttacks.CountBits());
+        }
+
+        using (var position = new Position(fenWithBlackAttacksBlackSide))
+        {
+            var allAttacks = position.AllAttackersTo(square);
+            Assert.AreEqual(6, allAttacks.CountBits());
+
+            var whiteAttacks = position.AllAttackersFromOppositeSideTo(square);
+            Assert.Zero(whiteAttacks.CountBits());
+        }
+    }
+
+    /// <summary>
+    /// <see cref="AllAttackersFromOppositeSideTo"/> reversed
+    /// </summary>
+    [Test]
+    public void AllAttackersFromOppositeSideTo2()
+    {
+        const string fenWithWhiteAttacksWhiteSide = "8/4n3/2pkb3/r5q1/R2p3Q/2PKB3/4N3/8 w - - 0 1";
+        const string fenWithWhiteAttacksBlackSide = "8/4n3/2pkb3/r5q1/R2p3Q/2PKB3/4N3/8 b - - 0 1";
+        const int square = (int)BoardSquare.d4;
+
+        using(var position = new Position(fenWithWhiteAttacksWhiteSide))
+        {
+            var allAttacks = position.AllAttackersTo(square);
+            Assert.AreEqual(6, allAttacks.CountBits());
+
+            var blackAttacks = position.AllAttackersFromOppositeSideTo(square);
+            Assert.Zero(blackAttacks.CountBits());
+        }
+
+        using (var position = new Position(fenWithWhiteAttacksBlackSide))
+        {
+            var allAttacks = position.AllAttackersTo(square);
+            Assert.AreEqual(6, allAttacks.CountBits());
+
+            var whiteAttacks = position.AllAttackersFromOppositeSideTo(square);
+            Assert.AreEqual(6, whiteAttacks.CountBits());
+        }
+    }
+
     private static int AdditionalPieceEvaluation(Position position, Piece piece)
     {
         var whiteKing = position.PieceBitBoards[(int)Piece.K].GetLS1BIndex();
