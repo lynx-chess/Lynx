@@ -759,7 +759,7 @@ public class Position : IDisposable
                 ? Constants.DarkSquaresBitBoard
                 : Constants.LightSquaresBitBoard);
 
-        packedBonus += BadBishopPenalty[sameColorPawns.CountBits()];
+        packedBonus += BadBishop_SameColorPawnsPenalty[sameColorPawns.CountBits()];
 
         // Checks
         var enemyKingCheckThreats = Attacks.BishopAttacks(oppositeSideKingSquare, occupancy);
