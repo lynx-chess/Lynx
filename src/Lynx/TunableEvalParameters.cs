@@ -6015,17 +6015,6 @@ public static class EvaluationParams
 {
 	public static readonly TaperedEvaluationTerm IsolatedPawnPenalty = Pack(-16, -13);
 
-	public static readonly TaperedEvaluationTermByRank PawnPhalanxBonus =
-	[
-		Pack(0, 0),
-		Pack(0, 3),
-		Pack(11, 11),
-		Pack(24, 25),
-		Pack(56, 79),
-		Pack(205, 193),
-		Pack(-135, 425)
-	];
-
 	public static readonly TaperedEvaluationTerm OpenFileRookBonus = Pack(43, 2);
 
 	public static readonly TaperedEvaluationTerm SemiOpenFileRookBonus = Pack(15, 7);
@@ -6038,7 +6027,22 @@ public static class EvaluationParams
 
 	public static readonly TaperedEvaluationTerm BishopPairBonus = Pack(30, 74);
 
-	public static readonly TaperedEvaluationTermByCount8 BadBishopPenalty =
+	public static readonly TaperedEvaluationTerm PieceProtectedByPawnBonus = Pack(12, 16);
+
+	public static readonly TaperedEvaluationTerm PieceAttackedByPawnPenalty = Pack(-48, -34);
+
+	public static readonly TaperedEvaluationTermByRank PawnPhalanxBonus =
+	[
+		Pack(0, 0),
+		Pack(0, 3),
+		Pack(11, 11),
+		Pack(24, 25),
+		Pack(56, 79),
+		Pack(205, 193),
+		Pack(-135, 425)
+	];
+
+	public static readonly TaperedEvaluationTermByCount8 BadBishop_SameColorPawnsPenalty =
 	[
 		Pack(190, 235),
 		Pack(189, 229),
@@ -6050,10 +6054,6 @@ public static class EvaluationParams
 		Pack(164, 161),
 		Pack(162, 157)
 	];
-
-	public static readonly TaperedEvaluationTerm PieceProtectedByPawnBonus = Pack(12, 16);
-
-	public static readonly TaperedEvaluationTerm PieceAttackedByPawnPenalty = Pack(-48, -34);
 
 	public static readonly TaperedEvaluationTermByRank[] PassedPawnBonus = 
 	[

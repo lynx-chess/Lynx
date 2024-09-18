@@ -737,7 +737,7 @@ public class Position : IDisposable
                 ? Constants.DarkSquaresBitBoard
                 : Constants.LightSquaresBitBoard);
 
-        packedBonus += BadBishopPenalty[sameColorPawns.CountBits()];
+        packedBonus += BadBishop_SameColorPawnsPenalty[sameColorPawns.CountBits()];
 
         return packedBonus;
     }
