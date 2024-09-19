@@ -46,22 +46,26 @@ public sealed partial class Engine
         int ttScore = default;
         int ttEntryDepth = default;
 
-        if (!isRoot && !isVerifyingSE)
+        if (!isRoot)
         {
             (ttEvaluation, ttBestMove, ttElementType, ttScore, ttEntryDepth) = _tt.ProbeHash(_ttMask, position, depth, ply, alpha, beta);
-            if (!pvNode && ttEvaluation != EvaluationConstants.NoHashEntry)
-            {
-                return ttEvaluation;
-            }
 
-            // Internal iterative reduction (IIR)
-            // If this position isn't found in TT, it has never been searched before,
-            // so the search will be potentially expensive.
-            // Therefore, we search with reduced depth for now, expecting to record a TT move
-            // which we'll be able to use later for the full depth search
-            if (ttElementType == default && depth >= Configuration.EngineSettings.IIR_MinDepth)
+            if (!isVerifyingSE)
             {
-                --depth;
+                if (!pvNode && ttEvaluation != EvaluationConstants.NoHashEntry)
+                {
+                    return ttEvaluation;
+                }
+
+                // Internal iterative reduction (IIR)
+                // If this position isn't found in TT, it has never been searched before,
+                // so the search will be potentially expensive.
+                // Therefore, we search with reduced depth for now, expecting to record a TT move
+                // which we'll be able to use later for the full depth search
+                if (ttElementType == default && depth >= Configuration.EngineSettings.IIR_MinDepth)
+                {
+                    --depth;
+                }
             }
         }
 
@@ -295,10 +299,13 @@ public sealed partial class Engine
                 // 🔍 Singular extensions (SE) - extend TT move when it looks better than every other move
                 // We check if that's the case by doing a reduced-depth
 
-                if (move == ttBestMove
+                if (
+                    //!isRoot
+                    //&& !isVerifyingSE
+                    move == ttBestMove
                     && depth >= Configuration.EngineSettings.SE_MinDepth
-                    && ttEntryDepth + Configuration.EngineSettings.SE_TTDepthOffset >= depth 
-                    //&& Math.Abs(ttScore) < EvaluationConstants.PositiveCheckmateDetectionLimit 
+                    && ttEntryDepth + Configuration.EngineSettings.SE_TTDepthOffset >= depth
+                    //&& Math.Abs(ttScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
                     && ttElementType != NodeType.Alpha)
                 {
                     Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
@@ -310,7 +317,7 @@ public sealed partial class Engine
                     //var singularBeta = Math.Max(EvaluationConstants.NegativeCheckmateDetectionLimit, ttScore - depth);
 
                     var singularScore = NegaMax(verificationDepth, ply, singularBeta - 1, singularBeta, isVerifyingSE: true);
-                    if(singularScore < singularBeta)
+                    if (singularScore < singularBeta)
                     {
                         ++depth;
                     }
