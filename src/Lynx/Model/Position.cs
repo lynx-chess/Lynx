@@ -768,12 +768,12 @@ public class Position : IDisposable
                     : Constants.DarkSquaresBitBoard))
             .CountBits();
 
-        //packedBonus += BadBishop_SameColorPawnsPenalty[sameColorBlockedPawnsCount];
+        packedBonus += BadBishop_SameColorPawnsPenalty[sameColorBlockedPawnsCount];
 
         // Blocked central pawns
         var opposideSideCentralBlockersCount = (opposideSidePawnBlockers & Constants.CentralFiles).CountBits();
 
-        //packedBonus += BadBishop_BlockedCentralPawnsPenalty[opposideSideCentralBlockersCount];
+        packedBonus += BadBishop_BlockedCentralPawnsPenalty[opposideSideCentralBlockersCount];
 
         // Checks
         var enemyKingCheckThreats = Attacks.BishopAttacks(oppositeSideKingSquare, occupancy);
