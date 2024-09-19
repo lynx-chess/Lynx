@@ -223,6 +223,11 @@ public sealed partial class Engine
 
             var move = pseudoLegalMoves[moveIndex];
 
+            if (isVerifyingSE && move == ttBestMove)
+            {
+                continue;
+            }
+
             var gameState = position.MakeMove(move);
 
             if (!position.WasProduceByAValidMove())
@@ -300,8 +305,8 @@ public sealed partial class Engine
                 // We check if that's the case by doing a reduced-depth
 
                 if (
-                    //!isVerifyingSE
-                    move == ttBestMove   // Ensures !isRoot and TT hit
+                    //!isVerifyingSE        // Implicit, otherwise the move would have been skipped already
+                    move == ttBestMove      // Ensures !isRoot and TT hit
                     && depth >= Configuration.EngineSettings.SE_MinDepth
                     && ttEntryDepth + Configuration.EngineSettings.SE_TTDepthOffset >= depth
                     //&& Math.Abs(ttScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
