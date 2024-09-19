@@ -6038,7 +6038,7 @@ public static class EvaluationParams
 
 	public static readonly TaperedEvaluationTerm BishopPairBonus = Pack(29, 77);
 
-	public static readonly TaperedEvaluationTermByCount8 BadBishopPenalty =
+	public static readonly TaperedEvaluationTermByCount8 BadBishop_SameColorPawnPenalty =
 	[
 		Pack(149, 177),
 		Pack(148, 172),
