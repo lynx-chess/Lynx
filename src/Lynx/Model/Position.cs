@@ -759,7 +759,7 @@ public class Position : IDisposable
                 ? Constants.DarkSquaresBitBoard
                 : Constants.LightSquaresBitBoard);
 
-        packedBonus += BadBishop_SameColorPawnPenalty[sameColorPawns.CountBits()];
+        packedBonus += BadBishop_SameColorPawnsPenalty[sameColorPawns.CountBits()];
 
         // Blocked central pawns
         var sameSideCentralPawns = sameSidePawns & Constants.CentralFiles;
