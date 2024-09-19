@@ -1046,7 +1046,7 @@ public class PositionTest
             var allAttacks = position.AllAttackersTo(square);
             Assert.AreEqual(6, allAttacks.CountBits());
 
-            var blackAttacks = position.AllAttackersFromOppositeSideTo(square);
+            var blackAttacks = position.AllAttackersFromOppositeSideTo(square, (int)Side.White);
             Assert.AreEqual(6, blackAttacks.CountBits());
         }
 
@@ -1055,7 +1055,7 @@ public class PositionTest
             var allAttacks = position.AllAttackersTo(square);
             Assert.AreEqual(6, allAttacks.CountBits());
 
-            var whiteAttacks = position.AllAttackersFromOppositeSideTo(square);
+            var whiteAttacks = position.AllAttackersFromOppositeSideTo(square, (int)Side.Black);
             Assert.Zero(whiteAttacks.CountBits());
         }
     }
@@ -1075,7 +1075,7 @@ public class PositionTest
             var allAttacks = position.AllAttackersTo(square);
             Assert.AreEqual(6, allAttacks.CountBits());
 
-            var blackAttacks = position.AllAttackersFromOppositeSideTo(square);
+            var blackAttacks = position.AllAttackersFromOppositeSideTo(square, (int)Side.White);
             Assert.Zero(blackAttacks.CountBits());
         }
 
@@ -1084,7 +1084,7 @@ public class PositionTest
             var allAttacks = position.AllAttackersTo(square);
             Assert.AreEqual(6, allAttacks.CountBits());
 
-            var whiteAttacks = position.AllAttackersFromOppositeSideTo(square);
+            var whiteAttacks = position.AllAttackersFromOppositeSideTo(square, (int)Side.Black);
             Assert.AreEqual(6, whiteAttacks.CountBits());
         }
     }
