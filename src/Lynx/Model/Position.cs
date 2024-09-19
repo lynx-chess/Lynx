@@ -684,7 +684,7 @@ public class Position : IDisposable
 
         var occupancy = OccupancyBitBoards[(int)Side.Both];
         var attacks = Attacks.RookAttacks(squareIndex, occupancy);
-        
+
         // Mobility
         var attacksCount =
             (attacks
@@ -739,7 +739,7 @@ public class Position : IDisposable
     private int BishopAdditionalEvaluation(int squareIndex, int pieceIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
     {
         const int pawnToBishopOffset = (int)Piece.B - (int)Piece.P;
-        
+
         var occupancy = OccupancyBitBoards[(int)Side.Both];
         var attacks = Attacks.BishopAttacks(squareIndex, occupancy);
 
@@ -751,32 +751,29 @@ public class Position : IDisposable
 
         var packedBonus = BishopMobilityBonus[attacksCount];
 
-        // Bad bishop - same color, blocked pawns only
+        // Blockers calculations
         var sameSidePawns = PieceBitBoards[pieceIndex - pawnToBishopOffset];
 
-        var sameColorPawns = sameSidePawns &
-            (Constants.DarkSquares[squareIndex] == 1
-                ? Constants.DarkSquaresBitBoard
-                : Constants.LightSquaresBitBoard);
+        var opposideSidePawnBlockerSquares = pieceSide == (int)Side.White
+            ? sameSidePawns.ShiftUp()
+            : sameSidePawns.ShiftDown();
 
-        var pawnBlockerSquares = pieceSide == (int)Side.White
-            ? sameColorPawns.ShiftUp()
-            : sameColorPawns.ShiftDown();
+        var opposideSidePawnBlockers = opposideSidePawnBlockerSquares & OccupancyBitBoards[Utils.OppositeSide(pieceSide)];
 
-        var pawnBlockers = pawnBlockerSquares & OccupancyBitBoards[Utils.OppositeSide(pieceSide)];
+        // Bad bishop - same color, blocked pawns only
+        var sameColorBlockedPawnsCount =
+            (opposideSidePawnBlockers &
+                (Constants.DarkSquares[squareIndex] == 1
+                    ? Constants.LightSquaresBitBoard            // Exchanged because we're using the opposide pawn blockers instead of our own pawns
+                    : Constants.DarkSquaresBitBoard))
+            .CountBits();
 
-        packedBonus += BadBishop_SameColorPawnsPenalty[pawnBlockers.CountBits()];
+        //packedBonus += BadBishop_SameColorPawnsPenalty[sameColorBlockedPawnsCount];
 
         // Blocked central pawns
-        var sameSideCentralPawns = sameSidePawns & Constants.CentralFiles;
+        var opposideSideCentralBlockersCount = (opposideSidePawnBlockers & Constants.CentralFiles).CountBits();
 
-        var pawnBlockerSquares = pieceSide == (int)Side.White
-            ? sameSideCentralPawns.ShiftUp()
-            : sameSideCentralPawns.ShiftDown();
-
-        var pawnBlockers = pawnBlockerSquares & OccupancyBitBoards[Utils.OppositeSide(pieceSide)];
-
-        packedBonus += BadBishop_BlockedCentralPawnsPenalty[pawnBlockers.CountBits()];
+        //packedBonus += BadBishop_BlockedCentralPawnsPenalty[opposideSideCentralBlockersCount];
 
         // Checks
         var enemyKingCheckThreats = Attacks.BishopAttacks(oppositeSideKingSquare, occupancy);
@@ -792,7 +789,7 @@ public class Position : IDisposable
     {
         var occupancy = OccupancyBitBoards[(int)Side.Both];
         var attacks = Attacks.QueenAttacks(squareIndex, occupancy);
-        
+
         // Mobility
         var attacksCount =
             (attacks
