@@ -40,7 +40,10 @@ public sealed class UCIHandler
 
         try
         {
-            _logger.Debug("[GUI]\t{0}", rawCommand);
+            if (_logger.IsDebugEnabled)
+            {
+                _logger.Debug("[GUI]\t{0}", rawCommand);
+            }
 
             switch (ExtractCommandItems(rawCommand))
             {
@@ -86,6 +89,10 @@ public sealed class UCIHandler
                     break;
                 case "bench":
                     await HandleBench(rawCommand);
+                    HandleQuit();
+                    break;
+                case "quietbench":
+                    await HandleQuietBench(rawCommand);
                     HandleQuit();
                     break;
                 case "printsettings":
