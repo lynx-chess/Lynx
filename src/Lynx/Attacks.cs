@@ -128,10 +128,7 @@ public static class Attacks
     /// <param name="bishopAttacks"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard QueenAttacks(BitBoard rookAttacks, BitBoard bishopAttacks)
-    {
-        return rookAttacks | bishopAttacks;
-    }
+    public static BitBoard QueenAttacks(BitBoard rookAttacks, BitBoard bishopAttacks) => rookAttacks | bishopAttacks;
 
     /// <summary>
     /// Taken from Leorik (https://github.com/lithander/Leorik/blob/master/Leorik.Core/Slider/Pext.cs)
