@@ -20,7 +20,7 @@ public sealed partial class Engine
     /// </param>
     /// <returns></returns>
     [SkipLocalsInit]
-    private int NegaMax(int depth, int ply, int alpha, int beta, bool parentWasNullMove)
+    private int NegaMax(int depth, int ply, int alpha, int beta, bool ancestorWasNullMove)
     {
         var position = Game.CurrentPosition;
 
@@ -145,7 +145,7 @@ public sealed partial class Engine
             // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
             if (depth >= Configuration.EngineSettings.NMP_MinDepth
                 && staticEval >= beta
-                && !parentWasNullMove
+                && !ancestorWasNullMove
                 && phase > 2   // Zugzwang risk reduction: pieces other than pawn presents
                 && (ttElementType != NodeType.Alpha || ttEvaluation >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
             {
@@ -157,7 +157,7 @@ public sealed partial class Engine
                 //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
 
                 var gameState = position.MakeNullMove();
-                var evaluation = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, parentWasNullMove: true);
+                var evaluation = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, ancestorWasNullMove: true);
                 position.UnMakeNullMove(gameState);
 
                 if (evaluation >= beta)
@@ -250,7 +250,7 @@ public sealed partial class Engine
             else if (pvNode && visitedMovesCounter == 0)
             {
                 PrefetchTTEntry();
-                evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha, parentWasNullMove);
+                evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha, ancestorWasNullMove);
             }
             else
             {
@@ -332,7 +332,7 @@ public sealed partial class Engine
                 }
 
                 // Search with reduced depth
-                evaluation = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha, parentWasNullMove);
+                evaluation = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha, ancestorWasNullMove);
 
                 // 🔍 Principal Variation Search (PVS)
                 if (evaluation > alpha && reduction > 0)
@@ -342,13 +342,13 @@ public sealed partial class Engine
                     // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
 
                     // Search with full depth but narrowed score bandwidth
-                    evaluation = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha, parentWasNullMove);
+                    evaluation = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha, ancestorWasNullMove);
                 }
 
                 if (evaluation > alpha && evaluation < beta)
                 {
                     // PVS Hypothesis invalidated -> search with full depth and full score bandwidth
-                    evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha, parentWasNullMove);
+                    evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha, ancestorWasNullMove);
                 }
             }
 
