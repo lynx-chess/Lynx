@@ -300,9 +300,9 @@ public sealed partial class Engine
                 // We check if that's the case by doing a reduced-depth
 
                 if (
-                    //!isRoot
+                    !isRoot
                     //&& !isVerifyingSE
-                    move == ttBestMove
+                    && move == ttBestMove
                     && depth >= Configuration.EngineSettings.SE_MinDepth
                     && ttEntryDepth + Configuration.EngineSettings.SE_TTDepthOffset >= depth
                     //&& Math.Abs(ttScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
