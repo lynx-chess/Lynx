@@ -552,7 +552,7 @@ public sealed class UCIHandler
     {
         try
         {
-            var fullPath = Path.GetFullPath(rawCommand[(rawCommand.IndexOf(' ') + 1)..]);
+            var fullPath = Path.GetFullPath(rawCommand[(rawCommand.IndexOf(' ') + 1)..].Replace("\"", string.Empty));
             if (!File.Exists(fullPath))
             {
                 _logger.Warn("File {0} not found in (1), ignoring command", rawCommand, fullPath);
