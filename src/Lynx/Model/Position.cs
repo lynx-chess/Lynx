@@ -751,7 +751,7 @@ public class Position : IDisposable
 
         var packedBonus = BishopMobilityBonus[attacksCount];
 
-        // Bad bishop
+        // Bad bishop - same color, blocked pawns only
         var sameSidePawns = PieceBitBoards[pieceIndex - pawnToBishopOffset];
 
         var sameColorPawns = sameSidePawns &
@@ -759,7 +759,13 @@ public class Position : IDisposable
                 ? Constants.DarkSquaresBitBoard
                 : Constants.LightSquaresBitBoard);
 
-        packedBonus += BadBishop_SameColorPawnPenalty[sameColorPawns.CountBits()];
+        var pawnBlockerSquares = pieceSide == (int)Side.White
+            ? sameColorPawns.ShiftUp()
+            : sameColorPawns.ShiftDown();
+
+        var pawnBlockers = pawnBlockerSquares & OccupancyBitBoards[Utils.OppositeSide(pieceSide)];
+
+        packedBonus += BadBishop_SameColorPawnsPenalty[pawnBlockers.CountBits()];
 
         // Blocked central pawns
         var sameSideCentralPawns = sameSidePawns & Constants.CentralFiles;
