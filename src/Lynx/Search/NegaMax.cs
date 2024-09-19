@@ -104,7 +104,7 @@ public sealed partial class Engine
                 staticEval = ttScore;
             }
 
-            if (!isVerifyingSE) // Exclude pruning in case in SE verification searches
+            if (!isVerifyingSE) // Exclude pruning in SE verification searches
             {
                 if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
                 {
@@ -300,9 +300,8 @@ public sealed partial class Engine
                 // We check if that's the case by doing a reduced-depth
 
                 if (
-                    !isRoot
-                    //&& !isVerifyingSE
-                    && move == ttBestMove
+                    //!isVerifyingSE
+                    move == ttBestMove   // Ensures !isRoot and TT hit
                     && depth >= Configuration.EngineSettings.SE_MinDepth
                     && ttEntryDepth + Configuration.EngineSettings.SE_TTDepthOffset >= depth
                     //&& Math.Abs(ttScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
