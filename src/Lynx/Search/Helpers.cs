@@ -432,7 +432,7 @@ $" {484,-3}                                                         {_pVTable[48
             }
         }
 
-        _logger.Debug($"Max history: {max}");
+        _logger.ConditionalDebug($"Max history: {max}");
     }
 
 #pragma warning restore S125 // Sections of code should not be commented out
