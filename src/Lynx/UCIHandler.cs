@@ -91,10 +91,6 @@ public sealed class UCIHandler
                     await HandleBench(rawCommand);
                     HandleQuit();
                     break;
-                case "quietbench":
-                    await HandleQuietBench(rawCommand);
-                    HandleQuit();
-                    break;
                 case "printsettings":
                     await HandleSettings();
                     break;
