@@ -113,7 +113,7 @@ public sealed partial class Engine
 
                 if (depth < Configuration.EngineSettings.AspirationWindow_MinDepth || lastSearchResult?.Evaluation is null)
                 {
-                    bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta);
+                    bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta, parentWasNullMove: false);
                 }
                 else
                 {
@@ -126,7 +126,7 @@ public sealed partial class Engine
                     while (true)
                     {
                         _isFollowingPV = true;
-                        bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta);
+                        bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta, parentWasNullMove: false);
 
                         window += window >> 1;   // window / 2
 

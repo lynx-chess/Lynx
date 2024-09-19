@@ -20,7 +20,7 @@ public sealed partial class Engine
     /// </param>
     /// <returns></returns>
     [SkipLocalsInit]
-    private int NegaMax(int depth, int ply, int alpha, int beta, bool parentWasNullMove = false)
+    private int NegaMax(int depth, int ply, int alpha, int beta, bool parentWasNullMove)
     {
         var position = Game.CurrentPosition;
 
@@ -250,7 +250,7 @@ public sealed partial class Engine
             else if (pvNode && visitedMovesCounter == 0)
             {
                 PrefetchTTEntry();
-                evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
+                evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha, parentWasNullMove);
             }
             else
             {
@@ -332,7 +332,7 @@ public sealed partial class Engine
                 }
 
                 // Search with reduced depth
-                evaluation = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha);
+                evaluation = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha, parentWasNullMove);
 
                 // 🔍 Principal Variation Search (PVS)
                 if (evaluation > alpha && reduction > 0)
@@ -342,13 +342,13 @@ public sealed partial class Engine
                     // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
 
                     // Search with full depth but narrowed score bandwidth
-                    evaluation = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha);
+                    evaluation = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha, parentWasNullMove);
                 }
 
                 if (evaluation > alpha && evaluation < beta)
                 {
                     // PVS Hypothesis invalidated -> search with full depth and full score bandwidth
-                    evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
+                    evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha, parentWasNullMove);
                 }
             }
 
