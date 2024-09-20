@@ -163,9 +163,9 @@ public class ReadonlyStruct_vs_Tuple_Benchmark : BaseBenchmark
         return sum;
     }
 
-    private static ReadonlyStruct ReadonlyStructImpl() => new ReadonlyStruct(123, 20);
-    private static Struct StructImpl() => new Struct(123, 20);
-    private static Class ClassImpl() => new Class(123, 20);
+    private static ReadonlyStruct ReadonlyStructImpl() => new(123, 20);
+    private static Struct StructImpl() => new(123, 20);
+    private static Class ClassImpl() => new(123, 20);
     private static (int Evaluation, int Phase) TupleImpl() => (123, 20);
 
     private readonly struct ReadonlyStruct

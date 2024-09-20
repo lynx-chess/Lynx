@@ -44,7 +44,7 @@ using Lynx.Model;
 namespace Lynx.Benchmark;
 public class PEXTBenchmark_Benchmark : BaseBenchmark
 {
-    private readonly Position _position = new Position(Constants.TrickyTestPositionFEN);
+    private readonly Position _position = new(Constants.TrickyTestPositionFEN);
 
     [Benchmark(Baseline = true)]
     public ulong MagicNumbers()

@@ -44,15 +44,15 @@ public class RegisterCommand_Benchmark : BaseBenchmark
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]
-    public RegisterCommandBenchmark_RegisterCommandStringSplit StringSplit(string command) => new RegisterCommandBenchmark_RegisterCommandStringSplit(command);
+    public RegisterCommandBenchmark_RegisterCommandStringSplit StringSplit(string command) => new(command);
 
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
-    public RegisterCommandBenchmark_RegisterCommandSpanSplit SpanSplit(string command) => new RegisterCommandBenchmark_RegisterCommandSpanSplit(command);
+    public RegisterCommandBenchmark_RegisterCommandSpanSplit SpanSplit(string command) => new(command);
 
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
-    public RegisterCommandBenchmark_RegisterCommandSpanSplitStruct SpanSplitStruct(string command) => new RegisterCommandBenchmark_RegisterCommandSpanSplitStruct(command);
+    public RegisterCommandBenchmark_RegisterCommandSpanSplitStruct SpanSplitStruct(string command) => new(command);
 
     public sealed class RegisterCommandBenchmark_RegisterCommandStringSplit : GUIBaseCommand
     {
