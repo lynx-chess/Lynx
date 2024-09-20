@@ -20,9 +20,9 @@ public sealed partial class Engine
     /// <param name="bestMoveTTCandidate"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMove(Move move, int ply, bool isNotQSearch, ShortMove bestMoveTTCandidate = default)
+    internal int ScoreMove(Move move, int ply, int pvIndex, bool isNotQSearch, ShortMove bestMoveTTCandidate = default)
     {
-        if (_isScoringPV && move == _pVTable[ply])
+        if (_isScoringPV && move == _pVTable[pvIndex])
         {
             _isScoringPV = false;
 
