@@ -173,8 +173,6 @@ public class IsSquareInCheck_PassBitBoard_Benchmark : BaseBenchmark
         {
             for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
             {
-                var sideToMoveInt = (int)position.Side;
-
                 if (Attacks_PassingArray.IsSquareInCheck(squareIndex, position.Side, position.PieceBitBoards, position.OccupancyBitBoards))
                 {
                     b = true;

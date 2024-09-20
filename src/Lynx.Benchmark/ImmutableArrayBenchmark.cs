@@ -176,8 +176,6 @@ public class ImmutableArrayBenchmark : BaseBenchmark
                             (short)(MiddleGamePieceValues[friendEnemy][bucket][piece + 6] - mgPositionalTables[friendEnemy][piece][bucket][sq ^ 56]),
                             (short)(EndGamePieceValues[friendEnemy][bucket][piece + 6] - egPositionalTables[friendEnemy][piece][bucket][sq ^ 56]));
                     }
-
-                    var immutable = RegularArray[friendEnemy][bucket][piece].ToImmutableArray();
                 }
             }
         }
