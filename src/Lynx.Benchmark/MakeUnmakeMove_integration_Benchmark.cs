@@ -1233,6 +1233,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         }
     }
 
+#pragma warning disable S1104 // Fields should not have public accessibility
     public struct MakeMoveGameState_PassOut
     {
         public int CapturedPiece;
@@ -1248,6 +1249,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
             EnPassant = enpassant;
         }
     }
+#pragma warning restore IDE0290 // Use primary constructor
 
     public struct MakeMoveGameState_PassRef
     {
