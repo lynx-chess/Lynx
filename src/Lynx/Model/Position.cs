@@ -761,6 +761,17 @@ public class Position : IDisposable
 
         packedBonus += BadBishop_SameColorPawnsPenalty[sameColorPawns.CountBits()];
 
+        // Blocked central pawns
+        var sameSideCentralPawns = sameSidePawns & Constants.CentralFiles;
+
+        var pawnBlockerSquares = pieceSide == (int)Side.White
+            ? sameSideCentralPawns.ShiftUp()
+            : sameSideCentralPawns.ShiftDown();
+
+        var pawnBlockers = pawnBlockerSquares & OccupancyBitBoards[Utils.OppositeSide(pieceSide)];
+
+        packedBonus += BadBishop_BlockedCentralPawnsPenalty[pawnBlockers.CountBits()];
+
         // Checks
         var enemyKingCheckThreats = Attacks.BishopAttacks(oppositeSideKingSquare, occupancy);
         var checks = (attacks & enemyKingCheckThreats).CountBits();
