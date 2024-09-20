@@ -23,9 +23,9 @@ public sealed class IdCommand : IEngineBaseCommand
     {
         return
             Assembly.GetAssembly(typeof(IdCommand))
-            !.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-            ?.InformationalVersion?.Split('+')?[0]
-            ?? "Unknown";
+                !.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                ?.InformationalVersion?.Split('+')[0]
+                ?? "Unknown";
     }
 
     public static string Name => $"id name {EngineName} {GetVersion()}";
