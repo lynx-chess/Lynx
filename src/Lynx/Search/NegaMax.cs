@@ -69,10 +69,11 @@ public sealed partial class Engine
 
         bool isInCheck = position.IsInCheck();
         int staticEval = int.MaxValue, phase = int.MaxValue;
+        int nextSearchDepth = depth;
 
         if (isInCheck)
         {
-            ++depth;
+            ++nextSearchDepth;
         }
         else if (depth <= 0)
         {
@@ -250,7 +251,7 @@ public sealed partial class Engine
             else if (pvNode && visitedMovesCounter == 0)
             {
                 PrefetchTTEntry();
-                evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
+                evaluation = -NegaMax(nextSearchDepth - 1, ply + 1, -beta, -alpha);
             }
             else
             {
@@ -318,7 +319,7 @@ public sealed partial class Engine
 
                     // Don't allow LMR to drop into qsearch or increase the depth
                     // depth - 1 - depth +2 = 1, min depth we want
-                    reduction = Math.Clamp(reduction, 0, depth - 2);
+                    reduction = Math.Clamp(reduction, 0, nextSearchDepth - 2);
                 }
 
                 // 🔍 Static Exchange Evaluation (SEE) reduction
@@ -328,11 +329,11 @@ public sealed partial class Engine
                     && scores[moveIndex] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
                 {
                     reduction += Configuration.EngineSettings.SEE_BadCaptureReduction;
-                    reduction = Math.Clamp(reduction, 0, depth - 1);
+                    reduction = Math.Clamp(reduction, 0, nextSearchDepth - 1);
                 }
 
                 // Search with reduced depth
-                evaluation = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha);
+                evaluation = -NegaMax(nextSearchDepth - 1 - reduction, ply + 1, -alpha - 1, -alpha);
 
                 // 🔍 Principal Variation Search (PVS)
                 if (evaluation > alpha && reduction > 0)
@@ -342,13 +343,13 @@ public sealed partial class Engine
                     // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
 
                     // Search with full depth but narrowed score bandwidth
-                    evaluation = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha);
+                    evaluation = -NegaMax(nextSearchDepth - 1, ply + 1, -alpha - 1, -alpha);
                 }
 
                 if (evaluation > alpha && evaluation < beta)
                 {
                     // PVS Hypothesis invalidated -> search with full depth and full score bandwidth
-                    evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
+                    evaluation = -NegaMax(nextSearchDepth - 1, ply + 1, -beta, -alpha);
                 }
             }
 
