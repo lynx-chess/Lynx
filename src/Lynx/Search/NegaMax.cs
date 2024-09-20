@@ -223,10 +223,10 @@ public sealed partial class Engine
 
             var move = pseudoLegalMoves[moveIndex];
 
-            //if (isVerifyingSE && move == ttBestMove)
-            //{
-            //    continue;
-            //}
+            if (isVerifyingSE && move == ttBestMove)
+            {
+                continue;
+            }
 
             var gameState = position.MakeMove(move);
 
