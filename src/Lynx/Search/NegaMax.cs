@@ -334,7 +334,9 @@ public sealed partial class Engine
                 if (evaluation > alpha && evaluation < beta)
                 {
                     // PVS Hypothesis invalidated -> search with full depth and full score bandwidth
+#pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
                     evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
+#pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
                 }
             }
 

@@ -57,12 +57,14 @@ public static class FENParser
             //    _logger.Debug("No full move counter detected");
             //}
         }
+#pragma warning disable S2139 // Exceptions should be either logged or rethrown but not both - meh
         catch (Exception e)
         {
             _logger.Error(e, "Error parsing FEN");
             success = false;
             throw;
         }
+#pragma warning restore S2139 // Exceptions should be either logged or rethrown but not both
 
         return success
             ? (pieceBitBoards, occupancyBitBoards, board, side, castle, enPassant, halfMoveClock/*, fullMoveCounter*/)

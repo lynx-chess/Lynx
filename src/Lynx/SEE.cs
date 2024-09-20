@@ -214,9 +214,11 @@ public static class SEE
 
         var promotedPiece = move.PromotedPiece();
 
+#pragma warning disable S3358 // Ternary operators should not be nested
         return promotedPiece == default
             ? _pieceValues[move.CapturedPiece()]
             : _pieceValues[promotedPiece] - _pieceValues[(int)Piece.P] + (move.IsCapture() ? _pieceValues[move.CapturedPiece()] : 0);
+#pragma warning restore S3358 // Ternary operators should not be nested
     }
 
     /// <summary>
