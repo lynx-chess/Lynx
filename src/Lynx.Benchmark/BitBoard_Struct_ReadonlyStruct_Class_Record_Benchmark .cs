@@ -139,7 +139,9 @@ public class BitBoard_Struct_ReadonlyStruct_Class_Record_Benchmark  : BaseBenchm
         #endregion
     }
 
+#pragma warning disable S3260 // Non-derived "private" classes and records should be "sealed"
     private class BitBoardOpsClass
+#pragma warning restore S3260 // Non-derived "private" classes and records should be "sealed"
     {
         public ulong Board { get; private set; }
         public BitBoardOpsClass() { }
@@ -204,7 +206,9 @@ public class BitBoard_Struct_ReadonlyStruct_Class_Record_Benchmark  : BaseBenchm
 
     }
 
+#pragma warning disable S3260 // Non-derived "private" classes and records should be "sealed"
     private record BitBoardOpsRecord
+#pragma warning restore S3260 // Non-derived "private" classes and records should be "sealed"
     {
         public ulong Board { get; private set; }
 
@@ -269,7 +273,9 @@ public class BitBoard_Struct_ReadonlyStruct_Class_Record_Benchmark  : BaseBenchm
         #endregion
     }
 
+#pragma warning disable S3260 // Non-derived "private" classes and records should be "sealed"
     private record BitBoardOpsProperRecord(ulong Board)
+#pragma warning restore S3260 // Non-derived "private" classes and records should be "sealed"
     {
         public static ulong SetBit(ulong bb, int square)
         {
