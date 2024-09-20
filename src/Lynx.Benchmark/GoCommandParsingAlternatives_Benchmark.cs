@@ -372,6 +372,7 @@ public partial class GoCommandParsingAlternatives_Benchmark : BaseBenchmark
 
     private void ParseRegexCapturingGroups(string command)
     {
+#pragma warning disable S3267 // Loops should be simplified with "LINQ" expressions
         foreach (var match in CapturingGroups().Matches(command).Cast<Match>())
         {
             for (int i = 1; i < match.Groups.Count; ++i)
@@ -423,6 +424,7 @@ public partial class GoCommandParsingAlternatives_Benchmark : BaseBenchmark
                 }
             }
         }
+#pragma warning restore S3267 // Loops should be simplified with "LINQ" expressions
     }
 
     private void ParseNoRegex(string command)

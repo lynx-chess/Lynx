@@ -38,7 +38,9 @@ public sealed partial class Engine
         }
         catch (OperationCanceledException) // Also catches TaskCanceledException
         {
+#pragma warning disable S6667 // Logging in a catch clause should pass the caught exception as a parameter. - expected
             _logger.Info("Online tb probing cancellation requested after {0}ms", _stopWatch.ElapsedMilliseconds);
+#pragma warning restore S6667 // Logging in a catch clause should pass the caught exception as a parameter.
 
             return null;
         }

@@ -100,7 +100,9 @@ public class ImmutableArrayBenchmark : BaseBenchmark
     public const int PSQTBucketCount = 23;
 
 #pragma warning disable S2386 // Mutable fields should not be "public static"
+#pragma warning disable S3887 // Mutable, non-private fields should not be "readonly"
     public static readonly int[][][][] RegularArray;
+#pragma warning restore S3887 // Mutable, non-private fields should not be "readonly"
 #pragma warning restore S2386 // Mutable fields should not be "public static"
 
     public static readonly ImmutableArray<ImmutableArray<ImmutableArray<ImmutableArray<int>>>> ImmutableArray;

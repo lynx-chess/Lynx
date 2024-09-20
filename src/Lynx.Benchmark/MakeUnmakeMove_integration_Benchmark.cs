@@ -206,6 +206,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         {
             if (depth != 0)
             {
+#pragma warning disable S3267 // Loops should be simplified with "LINQ" expressions
                 foreach (var move in MakeMoveMoveGenerator.GenerateAllMoves(position))
                 {
                     if (position.WasProduceByAValidMove())
@@ -213,6 +214,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                         nodes = ResultsImpl_AllocBase(position, depth - 1, nodes);
                     }
                 }
+#pragma warning restore S3267 // Loops should be simplified with "LINQ" expressions
 
                 return nodes;
             }
