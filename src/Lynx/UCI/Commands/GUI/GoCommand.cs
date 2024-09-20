@@ -60,9 +60,9 @@ public sealed class GoCommand : IGUIBaseCommand
     public bool Infinite { get; }
     public bool Ponder { get; private set; }
 
-    public int Nodes => throw new NotImplementedException();
-    public int Mate => throw new NotImplementedException();
-    public List<string> SearchMoves => throw new NotImplementedException();
+    public static int Nodes => throw new NotImplementedException();
+    public static int Mate => throw new NotImplementedException();
+    public static List<string> SearchMoves => throw new NotImplementedException();
 
     public GoCommand(string command)
     {
