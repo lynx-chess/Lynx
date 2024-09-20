@@ -171,26 +171,10 @@ public sealed partial class Engine
         var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves);
 
         Span<int> scores = stackalloc int[pseudoLegalMoves.Length];
-        if (_isFollowingPV)
-        {
-            _isFollowingPV = false;
-            for (int i = 0; i < pseudoLegalMoves.Length; ++i)
-            {
-                scores[i] = ScoreMove(pseudoLegalMoves[i], ply, isNotQSearch: true, ttBestMove);
 
-                if (pseudoLegalMoves[i] == _pVTable[depth])
-                {
-                    _isFollowingPV = true;
-                    _isScoringPV = true;
-                }
-            }
-        }
-        else
+        for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            for (int i = 0; i < pseudoLegalMoves.Length; ++i)
-            {
-                scores[i] = ScoreMove(pseudoLegalMoves[i], ply, isNotQSearch: true, ttBestMove);
-            }
+            scores[i] = ScoreMove(pseudoLegalMoves[i], ply, isNotQSearch: true, ttBestMove);
         }
 
         var nodeType = NodeType.Alpha;
