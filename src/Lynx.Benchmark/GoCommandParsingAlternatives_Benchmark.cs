@@ -431,6 +431,7 @@ public partial class GoCommandParsingAlternatives_Benchmark : BaseBenchmark
         Span<Range> ranges = stackalloc Range[commandAsSpan.Length];
         var rangesLength = commandAsSpan.Split(ranges, ' ', StringSplitOptions.RemoveEmptyEntries);
 
+#pragma warning disable S127 // "for" loop stop conditions should be invariant
         for (int i = 1; i < rangesLength; i++)
         {
             switch (commandAsSpan[ranges[i]])
@@ -533,5 +534,6 @@ public partial class GoCommandParsingAlternatives_Benchmark : BaseBenchmark
                     }
             }
         }
+#pragma warning restore S127 // "for" loop stop conditions should be invariant
     }
 }

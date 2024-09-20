@@ -71,6 +71,7 @@ public sealed class GoCommand : IGUIBaseCommand
         Span<Range> ranges = stackalloc Range[commandAsSpan.Length];
         var rangesLength = commandAsSpan.Split(ranges, ' ', StringSplitOptions.RemoveEmptyEntries);
 
+#pragma warning disable S127 // "for" loop stop conditions should be invariant
         for (int i = 1; i < rangesLength; i++)  // Skipping go keyword
         {
             switch (commandAsSpan[ranges[i]])
@@ -174,6 +175,7 @@ public sealed class GoCommand : IGUIBaseCommand
                     }
             }
         }
+#pragma warning restore S127 // "for" loop stop conditions should be invariant
     }
 
     public static string Init() => Id;
