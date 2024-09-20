@@ -273,7 +273,7 @@ public sealed partial class Engine
         double p = (double)(plies_played);
 
         return (int)Math.Round(
-            (59.3 + (72830.0 - p * 2330.0) / (p * p + p * 10.0 + 2644.0))   // Plies remaining
+            (59.3 + ((72830.0 - (p * 2330.0)) / ((p * p) + (p * 10.0) + 2644.0)))   // Plies remaining
             / 2.0); // Full moves remaining
     }
 
