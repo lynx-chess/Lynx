@@ -46,7 +46,7 @@ public sealed partial class Engine
         int ttScore = default;
         int ttEntryDepth = default;
 
-        if (!isRoot)
+        if (!isRoot/* && !isVerifyingSE*/)
         {
             (ttEvaluation, ttBestMove, ttElementType, ttScore, ttEntryDepth) = _tt.ProbeHash(_ttMask, position, depth, ply, alpha, beta);
 
@@ -234,6 +234,38 @@ public sealed partial class Engine
             Game.AddToPositionHashHistory(position.UniqueIdentifier);
             Game.PushToMoveStack(ply, move);
 
+            // 🔍 Singular extensions (SE) - extend TT move when it looks better than every other move
+            // We check if that's the case by doing a reduced-depth
+
+            // To be used in subsequet searches
+            var extendedDepth = depth;
+
+            if (move == ttBestMove      // Ensures !isRoot and TT hit
+                                        //&& !isVerifyingSE        // Implicit, otherwise the move would have been skipped already
+                && depth >= Configuration.EngineSettings.SE_MinDepth
+                && ttEntryDepth + Configuration.EngineSettings.SE_TTDepthOffset >= depth
+                //&& Math.Abs(ttScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
+                && ttElementType != NodeType.Alpha)
+            {
+                Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
+                Game.RemoveFromPositionHashHistory();
+                position.UnmakeMove(move, gameState);
+
+                var verificationDepth = (depth - 1) / 2;    // TODO tune?
+                var singularBeta = ttScore - (depth * Configuration.EngineSettings.SEE_DepthMultiplier);
+                //var singularBeta = Math.Max(EvaluationConstants.NegativeCheckmateDetectionLimit, ttScore - depth);
+
+                var singularScore = NegaMax(verificationDepth, ply, singularBeta - 1, singularBeta, isVerifyingSE: true);
+                if (singularScore < singularBeta)
+                {
+                    ++extendedDepth;
+                }
+
+                gameState = position.MakeMove(move);
+                _ = Game.Update50movesRule(move, isCapture);
+                Game.AddToPositionHashHistory(position.UniqueIdentifier);
+            }
+
             int evaluation;
             if (canBeRepetition && (Game.IsThreefoldRepetition() || Game.Is50MovesRepetition()))
             {
@@ -248,7 +280,7 @@ public sealed partial class Engine
             {
                 PrefetchTTEntry();
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
-                evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
+                evaluation = -NegaMax(extendedDepth - 1, ply + 1, -beta, -alpha);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
             }
             else
@@ -285,38 +317,6 @@ public sealed partial class Engine
 
                         break;
                     }
-                }
-
-                // 🔍 Singular extensions (SE) - extend TT move when it looks better than every other move
-                // We check if that's the case by doing a reduced-depth
-
-                // To be used in subsequet searches
-                var extendedDepth = depth;
-
-                if (move == ttBestMove      // Ensures !isRoot and TT hit
-                                            //&& !isVerifyingSE        // Implicit, otherwise the move would have been skipped already
-                    && depth >= Configuration.EngineSettings.SE_MinDepth
-                    && ttEntryDepth + Configuration.EngineSettings.SE_TTDepthOffset >= depth
-                    //&& Math.Abs(ttScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
-                    && ttElementType != NodeType.Alpha)
-                {
-                    Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
-                    Game.RemoveFromPositionHashHistory();
-                    position.UnmakeMove(move, gameState);
-
-                    var verificationDepth = (depth - 1) / 2;    // TODO tune?
-                    var singularBeta = ttScore - (depth * Configuration.EngineSettings.SEE_DepthMultiplier);
-                    //var singularBeta = Math.Max(EvaluationConstants.NegativeCheckmateDetectionLimit, ttScore - depth);
-
-                    var singularScore = NegaMax(verificationDepth, ply, singularBeta - 1, singularBeta, isVerifyingSE: true);
-                    if (singularScore < singularBeta)
-                    {
-                        ++extendedDepth;
-                    }
-
-                    gameState = position.MakeMove(move);
-                    _ = Game.Update50movesRule(move, isCapture);
-                    Game.AddToPositionHashHistory(position.UniqueIdentifier);
                 }
 
                 PrefetchTTEntry();
