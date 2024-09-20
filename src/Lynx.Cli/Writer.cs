@@ -20,8 +20,13 @@ public sealed class Writer
         {
             await foreach (var output in _engineOutputReader.ReadAllAsync(cancellationToken))
             {
-                _logger.Debug("[Lynx]\t{0}", output);
-                Console.WriteLine(output.ToString());
+                var str = output.ToString();
+                Console.WriteLine(str);
+
+                if (_logger.IsDebugEnabled)
+                {
+                    _logger.Debug("[Lynx]\t{0}", str);
+                }
             }
         }
         catch (Exception e)
