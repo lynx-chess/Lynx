@@ -706,24 +706,12 @@ public class Position : IDisposable
 
         // Checks
         var enemyKingCheckThreats = Attacks.RookAttacks(oppositeSideKingSquare, occupancy);
-        var checks = attacks & enemyKingCheckThreats;
+        var allChecks = attacks & enemyKingCheckThreats;
 
-        while (checks != 0)
-        {
-            var checkSquare = checks.GetLS1BIndex();
-            checks.ResetLS1B();
+        var safeChecksCount = (allChecks & (~enemyPawnAttacks)).CountBits();
 
-            var piecesProtectingCheckSquare = AllAttackersFromOppositeSideTo(checkSquare, pieceSide).CountBits();
-
-            if (piecesProtectingCheckSquare > 0)
-            {
-                packedBonus += UnsafeCheckBonus[(int)Piece.R];
-            }
-            else
-            {
-                packedBonus += SafeCheckBonus[(int)Piece.R];
-            }
-        }
+        packedBonus += SafeCheckBonus[(int)Piece.R] * safeChecksCount;
+        packedBonus += UnsafeCheckBonus[(int)Piece.R] * (allChecks.CountBits() - safeChecksCount);
 
         return packedBonus;
     }
@@ -743,24 +731,12 @@ public class Position : IDisposable
 
         // Checks
         var enemyKingCheckThreats = Attacks.KnightAttacks[oppositeSideKingSquare];
-        var checks = attacks & enemyKingCheckThreats;
+        var allChecks = attacks & enemyKingCheckThreats;
 
-        while (checks != 0)
-        {
-            var checkSquare = checks.GetLS1BIndex();
-            checks.ResetLS1B();
+        var safeChecksCount = (allChecks & (~enemyPawnAttacks)).CountBits();
 
-            var piecesProtectingCheckSquare = AllAttackersFromOppositeSideTo(checkSquare, pieceSide).CountBits();
-
-            if (piecesProtectingCheckSquare > 0)
-            {
-                packedBonus += UnsafeCheckBonus[(int)Piece.N];
-            }
-            else
-            {
-                packedBonus += SafeCheckBonus[(int)Piece.N];
-            }
-        }
+        packedBonus += SafeCheckBonus[(int)Piece.N] * safeChecksCount;
+        packedBonus += UnsafeCheckBonus[(int)Piece.N] * (allChecks.CountBits() - safeChecksCount);
 
         return packedBonus;
     }
@@ -804,24 +780,12 @@ public class Position : IDisposable
 
         // Checks
         var enemyKingCheckThreats = Attacks.BishopAttacks(oppositeSideKingSquare, occupancy);
-        var checks = attacks & enemyKingCheckThreats;
+        var allChecks = attacks & enemyKingCheckThreats;
 
-        while (checks != 0)
-        {
-            var checkSquare = checks.GetLS1BIndex();
-            checks.ResetLS1B();
+        var safeChecksCount = (allChecks & (~enemyPawnAttacks)).CountBits();
 
-            var piecesProtectingCheckSquare = AllAttackersFromOppositeSideTo(checkSquare, pieceSide).CountBits();
-
-            if (piecesProtectingCheckSquare > 0)
-            {
-                packedBonus += UnsafeCheckBonus[(int)Piece.B];
-            }
-            else
-            {
-                packedBonus += SafeCheckBonus[(int)Piece.B];
-            }
-        }
+        packedBonus += SafeCheckBonus[(int)Piece.B] * safeChecksCount;
+        packedBonus += UnsafeCheckBonus[(int)Piece.B] * (allChecks.CountBits() - safeChecksCount);
 
         return packedBonus;
     }
@@ -842,24 +806,12 @@ public class Position : IDisposable
 
         // Checks
         var enemyKingCheckThreats = Attacks.QueenAttacks(oppositeSideKingSquare, occupancy);
-        var checks = attacks & enemyKingCheckThreats;
+        var allChecks = attacks & enemyKingCheckThreats;
 
-        while (checks != 0)
-        {
-            var checkSquare = checks.GetLS1BIndex();
-            checks.ResetLS1B();
+        var safeChecksCount = (allChecks & (~enemyPawnAttacks)).CountBits();
 
-            var piecesProtectingCheckSquare = AllAttackersFromOppositeSideTo(checkSquare, pieceSide).CountBits();
-
-            if (piecesProtectingCheckSquare > 0)
-            {
-                packedBonus += UnsafeCheckBonus[(int)Piece.Q];
-            }
-            else
-            {
-                packedBonus += SafeCheckBonus[(int)Piece.Q];
-            }
-        }
+        packedBonus += SafeCheckBonus[(int)Piece.Q] * safeChecksCount;
+        packedBonus += UnsafeCheckBonus[(int)Piece.Q] * (allChecks.CountBits() - safeChecksCount);
 
         return packedBonus;
     }
