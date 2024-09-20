@@ -4,7 +4,7 @@
  *  .NET SDK 8.0.401
  *    [Host]     : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
  *    DefaultJob : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
- *  
+ *
  *  | Method             | Size | Mean         | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
  *  |------------------- |----- |-------------:|----------:|----------:|------:|----------:|------------:|
  *  | RegularArrayRead   | 1    |     42.85 us |  0.237 us |  0.210 us |  1.00 |         - |          NA |
@@ -18,14 +18,14 @@
  *  |                    |      |              |           |           |       |           |             |
  *  | RegularArrayRead   | 1000 | 42,737.13 us | 56.820 us | 44.361 us |  1.00 |      61 B |        1.00 |
  *  | ImmutableArrayRead | 1000 | 45,354.81 us | 88.633 us | 69.199 us |  1.06 |      67 B |        1.10 |
- *  
- *  
+ *
+ *
  *  BenchmarkDotNet v0.14.0, Windows 10 (10.0.20348.2582) (Hyper-V)
  *  AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
  *  .NET SDK 8.0.401
  *    [Host]     : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
  *    DefaultJob : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
- *  
+ *
  *  | Method             | Size | Mean         | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
  *  |------------------- |----- |-------------:|----------:|----------:|------:|----------:|------------:|
  *  | RegularArrayRead   | 1    |     42.72 us |  0.064 us |  0.054 us |  1.00 |         - |          NA |
@@ -39,14 +39,14 @@
  *  |                    |      |              |           |           |       |           |             |
  *  | RegularArrayRead   | 1000 | 42,642.88 us | 36.591 us | 28.568 us |  1.00 |      33 B |        1.00 |
  *  | ImmutableArrayRead | 1000 | 45,267.93 us | 78.477 us | 69.568 us |  1.06 |      36 B |        1.09 |
- *  
- *  
+ *
+ *
  *  BenchmarkDotNet v0.14.0, macOS Sonoma 14.6.1 (23G93) [Darwin 23.6.0]
  *  Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
  *  .NET SDK 8.0.401
  *    [Host]     : .NET 8.0.8 (8.0.824.36612), Arm64 RyuJIT AdvSIMD
  *    DefaultJob : .NET 8.0.8 (8.0.824.36612), Arm64 RyuJIT AdvSIMD
- *  
+ *
  *  | Method             | Size | Mean         | Error      | StdDev     | Ratio | RatioSD | Allocated | Alloc Ratio |
  *  |------------------- |----- |-------------:|-----------:|-----------:|------:|--------:|----------:|------------:|
  *  | RegularArrayRead   | 1    |     38.24 us |   0.879 us |   2.563 us |  1.00 |    0.09 |         - |          NA |
@@ -60,14 +60,14 @@
  *  |                    |      |              |            |            |       |         |           |             |
  *  | RegularArrayRead   | 1000 | 33,188.84 us | 542.930 us | 481.294 us |  1.00 |    0.02 |      49 B |        1.00 |
  *  | ImmutableArrayRead | 1000 | 33,308.08 us | 563.796 us | 499.791 us |  1.00 |    0.02 |      46 B |        0.94 |
- *  
- *  
+ *
+ *
  *  BenchmarkDotNet v0.14.0, macOS Ventura 13.6.9 (22G830) [Darwin 22.6.0]
  *  Intel Core i7-8700B CPU 3.20GHz (Max: 3.19GHz) (Coffee Lake), 1 CPU, 4 logical and 4 physical cores
  *  .NET SDK 8.0.401
  *    [Host]     : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
  *    DefaultJob : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
- *  
+ *
  *  | Method             | Size | Mean         | Error      | StdDev     | Ratio | RatioSD | Allocated | Alloc Ratio |
  *  |------------------- |----- |-------------:|-----------:|-----------:|------:|--------:|----------:|------------:|
  *  | RegularArrayRead   | 1    |     48.07 us |   0.954 us |   1.671 us |  1.00 |    0.05 |         - |          NA |
@@ -81,7 +81,7 @@
  *  |                    |      |              |            |            |       |         |           |             |
  *  | RegularArrayRead   | 1000 | 42,278.86 us | 582.666 us | 545.026 us |  1.00 |    0.02 |      74 B |        1.00 |
  *  | ImmutableArrayRead | 1000 | 36,701.69 us | 696.642 us | 651.640 us |  0.87 |    0.02 |      74 B |        1.00 |
- *  
+ *
  */
 
 using BenchmarkDotNet.Attributes;
@@ -99,11 +99,15 @@ public class ImmutableArrayBenchmark : BaseBenchmark
 
     public const int PSQTBucketCount = 23;
 
+#pragma warning disable S2386 // Mutable fields should not be "public static"
     public static readonly int[][][][] RegularArray;
+#pragma warning restore S2386 // Mutable fields should not be "public static"
 
     public static readonly ImmutableArray<ImmutableArray<ImmutableArray<ImmutableArray<int>>>> ImmutableArray;
 
+#pragma warning disable S3963 // "static" fields should be initialized inline
     static ImmutableArrayBenchmark()
+#pragma warning restore S3963 // "static" fields should be initialized inline
     {
         short[][][][] mgPositionalTables =
         [
