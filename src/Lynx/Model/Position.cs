@@ -684,7 +684,7 @@ public class Position : IDisposable
 
         var occupancy = OccupancyBitBoards[(int)Side.Both];
         var attacks = Attacks.RookAttacks(squareIndex, occupancy);
-        
+
         // Mobility
         var attacksCount =
             (attacks
@@ -739,7 +739,7 @@ public class Position : IDisposable
     private int BishopAdditionalEvaluation(int squareIndex, int pieceIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
     {
         const int pawnToBishopOffset = (int)Piece.B - (int)Piece.P;
-        
+
         var occupancy = OccupancyBitBoards[(int)Side.Both];
         var attacks = Attacks.BishopAttacks(squareIndex, occupancy);
 
@@ -786,7 +786,7 @@ public class Position : IDisposable
     {
         var occupancy = OccupancyBitBoards[(int)Side.Both];
         var attacks = Attacks.QueenAttacks(squareIndex, occupancy);
-        
+
         // Mobility
         var attacksCount =
             (attacks

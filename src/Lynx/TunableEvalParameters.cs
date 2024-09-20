@@ -6077,7 +6077,7 @@ public static class EvaluationParams
 		Pack(12, 19)
 	];
 
-	public static readonly TaperedEvaluationTermByRank[] PassedPawnBonus = 
+	public static readonly TaperedEvaluationTermByRank[] PassedPawnBonus =
 	[
 		[
 			Pack(0, 0),
@@ -6288,7 +6288,7 @@ public static class EvaluationParams
 		],
 	];
 
-	public static readonly TaperedEvaluationTermByRank[] PassedPawnBonusNoEnemiesAheadBonus = 
+	public static readonly TaperedEvaluationTermByRank[] PassedPawnBonusNoEnemiesAheadBonus =
 	[
 		[
 			Pack(0, 0),

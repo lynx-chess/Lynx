@@ -7,7 +7,7 @@ public sealed class SearchResult
     public Move[] Moves { get; init; }
 
     public (int WDLWin, int WDLDraw, int WDLLoss)? WDL { get; set; } = null;
-    
+
     public long Nodes { get; set; }
 
     public long Time { get; set; }
