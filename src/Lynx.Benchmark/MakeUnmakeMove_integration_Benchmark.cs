@@ -206,6 +206,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         {
             if (depth != 0)
             {
+#pragma warning disable S3267 // Loops should be simplified with "LINQ" expressions
                 foreach (var move in MakeMoveMoveGenerator.GenerateAllMoves(position))
                 {
                     if (position.WasProduceByAValidMove())
@@ -213,6 +214,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                         nodes = ResultsImpl_AllocBase(position, depth - 1, nodes);
                     }
                 }
+#pragma warning restore S3267 // Loops should be simplified with "LINQ" expressions
 
                 return nodes;
             }
@@ -1231,6 +1233,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         }
     }
 
+#pragma warning disable S1104 // Fields should not have public accessibility
     public struct MakeMoveGameState_PassOut
     {
         public int CapturedPiece;
@@ -1246,6 +1249,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
             EnPassant = enpassant;
         }
     }
+#pragma warning restore IDE0290 // Use primary constructor
 
     public struct MakeMoveGameState_PassRef
     {

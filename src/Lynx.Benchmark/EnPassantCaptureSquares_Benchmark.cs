@@ -107,10 +107,11 @@ using System.Collections.Frozen;
 namespace Lynx.Benchmark;
 public class EnPassantCaptureSquares_Benchmark : BaseBenchmark
 {
-    public static IEnumerable<BoardSquare> Data => new[] {
+    public static IEnumerable<BoardSquare> Data =>
+    [
         BoardSquare.a3, BoardSquare.c3, BoardSquare.e3, BoardSquare.g3,
         BoardSquare.b6, BoardSquare.d6, BoardSquare.f6, BoardSquare.h6
-    };
+    ];
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]

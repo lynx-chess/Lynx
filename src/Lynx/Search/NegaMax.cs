@@ -234,7 +234,9 @@ public sealed partial class Engine
             else if (pvNode && visitedMovesCounter == 0)
             {
                 PrefetchTTEntry();
+#pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
                 evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
+#pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
             }
             else
             {
@@ -332,7 +334,9 @@ public sealed partial class Engine
                 if (evaluation > alpha && evaluation < beta)
                 {
                     // PVS Hypothesis invalidated -> search with full depth and full score bandwidth
+#pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
                     evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
+#pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
                 }
             }
 
@@ -595,7 +599,9 @@ public sealed partial class Engine
             // Theoretically there could be a castling move that caused the 50 moves repetitions, but it's highly unlikely
             Game.PushToMoveStack(ply, move);
 
+#pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
             int evaluation = -QuiescenceSearch(ply + 1, -beta, -alpha);
+#pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
             position.UnmakeMove(move, gameState);
 
             PrintMove(position, ply, move, evaluation);

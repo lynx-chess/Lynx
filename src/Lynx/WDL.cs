@@ -39,8 +39,8 @@ public static class WDL
         // The model only captures up to 240 plies, so limit the input and then rescale
         double m = Math.Min(240, ply) / 64.0;
 
-        double a = (((As[0] * m + As[1]) * m + As[2]) * m) + As[3];
-        double b = (((Bs[0] * m + Bs[1]) * m + Bs[2]) * m) + Bs[3];
+        double a = (((((As[0] * m) + As[1]) * m) + As[2]) * m) + As[3];
+        double b = (((((Bs[0] * m) + Bs[1]) * m) + Bs[2]) * m) + Bs[3];
 
         // Transform the eval to centipawns with limited range
         double x = Math.Clamp(score, -4000.0, 4000.0);

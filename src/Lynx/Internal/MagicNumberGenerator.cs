@@ -88,8 +88,10 @@ public static class MagicNumberGenerator
                 }
                 else if (usedAttacks[magicIndex] != attacks[index])
                 {
+#pragma warning disable S127 // "for" loop stop conditions should be invariant - intentional
                     // Magic index doesn't work
                     fail = true;
+#pragma warning restore S127 // "for" loop stop conditions should be invariant
                 }
             }
 

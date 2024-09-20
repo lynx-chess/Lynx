@@ -316,7 +316,6 @@ public class PositionMakeMoveTest
         var newPosition = new Position(position);
         newPosition.MakeMove(enPassant);
 
-
         // Assert
         Assert.AreEqual(BoardSquare.b3, newPosition.EnPassant);
 

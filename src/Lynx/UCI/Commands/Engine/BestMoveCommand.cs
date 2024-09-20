@@ -11,7 +11,7 @@ namespace Lynx.UCI.Commands.Engine;
 ///	Directly before that the engine should send a final "info" command with the final search information,
 ///	the GUI has the complete statistics about the last search.
 /// </summary>
-public sealed class BestMoveCommand : EngineBaseCommand
+public sealed class BestMoveCommand : IEngineBaseCommand
 {
     public const string Id = "bestmove";
 

@@ -23,7 +23,7 @@ public static class FENParser
         Array.Fill(board, (int)Piece.None);
 
         bool success;
-        Side side = Side.Both;
+        Side side;
         byte castle = 0;
         int halfMoveClock = 0/*, fullMoveCounter = 1*/;
         BoardSquare enPassant = BoardSquare.noSquare;
@@ -57,12 +57,14 @@ public static class FENParser
             //    _logger.Debug("No full move counter detected");
             //}
         }
+#pragma warning disable S2139 // Exceptions should be either logged or rethrown but not both - meh
         catch (Exception e)
         {
             _logger.Error(e, "Error parsing FEN");
             success = false;
             throw;
         }
+#pragma warning restore S2139 // Exceptions should be either logged or rethrown but not both
 
         return success
             ? (pieceBitBoards, occupancyBitBoards, board, side, castle, enPassant, halfMoveClock/*, fullMoveCounter*/)

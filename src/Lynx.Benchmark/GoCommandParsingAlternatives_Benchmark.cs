@@ -5,7 +5,7 @@
  * .NET SDK 8.0.401
  *   [Host]     : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
  *   DefaultJob : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
- * 
+ *
  * | Method          | command              | Mean       | Error     | StdDev    | Median     | Ratio | RatioSD | Gen0   | Allocated | Alloc Ratio |
  * |---------------- |--------------------- |-----------:|----------:|----------:|-----------:|------:|--------:|-------:|----------:|------------:|
  * | Sequential      | go infinite          | 1,889.8 ns |  22.33 ns |  19.80 ns | 1,883.3 ns |  1.00 |    0.01 |      - |     272 B |        1.00 |
@@ -27,14 +27,14 @@
  * | Parallel        | go wt(...)go 40 [62] | 4,559.2 ns |  90.55 ns | 190.99 ns | 4,537.0 ns |  0.91 |    0.04 | 0.0305 |    3048 B |        2.05 |
  * | CapturingGroups | go wt(...)go 40 [62] | 5,236.4 ns |  62.20 ns |  55.14 ns | 5,242.3 ns |  1.04 |    0.02 | 0.0839 |    7032 B |        4.73 |
  * | NoRegex         | go wt(...)go 40 [62] | 1,089.1 ns |   4.17 ns |   3.90 ns | 1,088.7 ns |  0.22 |    0.00 | 0.0019 |     272 B |        0.18 |
- * 
- * 
+ *
+ *
  * BenchmarkDotNet v0.14.0, Windows 10 (10.0.20348.2655) (Hyper-V)
  * AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
  * .NET SDK 8.0.401
  *   [Host]     : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
  *   DefaultJob : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
- * 
+ *
  * | Method          | command              | Mean       | Error     | StdDev    | Median     | Ratio | RatioSD | Gen0   | Gen1   | Allocated | Alloc Ratio |
  * |---------------- |--------------------- |-----------:|----------:|----------:|-----------:|------:|--------:|-------:|-------:|----------:|------------:|
  * | Sequential      | go infinite          | 1,810.8 ns |   8.83 ns |   8.26 ns | 1,814.1 ns |  1.00 |    0.01 | 0.0153 |      - |     272 B |        1.00 |
@@ -56,14 +56,14 @@
  * | Parallel        | go wt(...)go 40 [62] | 4,339.3 ns |  82.89 ns | 167.44 ns | 4,294.7 ns |  0.96 |    0.04 | 0.1755 |      - |    3048 B |        2.05 |
  * | CapturingGroups | go wt(...)go 40 [62] | 4,279.5 ns |  74.97 ns |  73.63 ns | 4,260.6 ns |  0.94 |    0.02 | 0.4196 | 0.0076 |    7033 B |        4.72 |
  * | NoRegex         | go wt(...)go 40 [62] | 1,003.3 ns |   1.81 ns |   1.60 ns | 1,002.7 ns |  0.22 |    0.00 | 0.0153 |      - |     272 B |        0.18 |
- * 
- * 
+ *
+ *
  * BenchmarkDotNet v0.14.0, macOS Sonoma 14.6.1 (23G93) [Darwin 23.6.0]
  * Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
  * .NET SDK 8.0.401
  *   [Host]     : .NET 8.0.8 (8.0.824.36612), Arm64 RyuJIT AdvSIMD
  *   DefaultJob : .NET 8.0.8 (8.0.824.36612), Arm64 RyuJIT AdvSIMD
- * 
+ *
  * | Method          | command              | Mean       | Error     | StdDev    | Median     | Ratio | RatioSD | Gen0   | Gen1   | Allocated | Alloc Ratio |
  * |---------------- |--------------------- |-----------:|----------:|----------:|-----------:|------:|--------:|-------:|-------:|----------:|------------:|
  * | Sequential      | go infinite          | 1,386.9 ns |  13.19 ns |  11.01 ns | 1,381.0 ns |  1.00 |    0.01 | 0.0420 |      - |     272 B |        1.00 |
@@ -85,14 +85,14 @@
  * | Parallel        | go wt(...)go 40 [62] | 4,821.8 ns |  50.13 ns |  44.44 ns | 4,808.8 ns |  1.01 |    0.01 | 0.4883 |      - |    3048 B |        2.05 |
  * | CapturingGroups | go wt(...)go 40 [62] | 3,102.9 ns |  42.35 ns |  37.54 ns | 3,107.2 ns |  0.65 |    0.01 | 1.1253 | 0.0267 |    7032 B |        4.73 |
  * | NoRegex         | go wt(...)go 40 [62] |   907.2 ns |  17.28 ns |  17.75 ns |   904.3 ns |  0.19 |    0.00 | 0.0420 |      - |     272 B |        0.18 |
- * 
- * 
+ *
+ *
  * BenchmarkDotNet v0.14.0, macOS Ventura 13.6.9 (22G830) [Darwin 22.6.0]
  * Intel Core i7-8700B CPU 3.20GHz (Max: 3.19GHz) (Coffee Lake), 1 CPU, 4 logical and 4 physical cores
  * .NET SDK 8.0.401
  *   [Host]     : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
  *   DefaultJob : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
- * 
+ *
  * | Method          | command              | Mean      | Error     | StdDev     | Median   | Ratio | RatioSD | Gen0   | Allocated | Alloc Ratio |
  * |---------------- |--------------------- |----------:|----------:|-----------:|---------:|------:|--------:|-------:|----------:|------------:|
  * | Sequential      | go infinite          |  58.04 us | 13.959 us |  37.259 us | 42.16 us |  1.43 |    2.04 |      - |     272 B |        1.00 |
@@ -372,6 +372,7 @@ public partial class GoCommandParsingAlternatives_Benchmark : BaseBenchmark
 
     private void ParseRegexCapturingGroups(string command)
     {
+#pragma warning disable S3267 // Loops should be simplified with "LINQ" expressions
         foreach (var match in CapturingGroups().Matches(command).Cast<Match>())
         {
             for (int i = 1; i < match.Groups.Count; ++i)
@@ -423,8 +424,8 @@ public partial class GoCommandParsingAlternatives_Benchmark : BaseBenchmark
                 }
             }
         }
+#pragma warning restore S3267 // Loops should be simplified with "LINQ" expressions
     }
-
 
     private void ParseNoRegex(string command)
     {
@@ -432,6 +433,7 @@ public partial class GoCommandParsingAlternatives_Benchmark : BaseBenchmark
         Span<Range> ranges = stackalloc Range[commandAsSpan.Length];
         var rangesLength = commandAsSpan.Split(ranges, ' ', StringSplitOptions.RemoveEmptyEntries);
 
+#pragma warning disable S127 // "for" loop stop conditions should be invariant
         for (int i = 1; i < rangesLength; i++)
         {
             switch (commandAsSpan[ranges[i]])
@@ -532,7 +534,8 @@ public partial class GoCommandParsingAlternatives_Benchmark : BaseBenchmark
                         _logger.Warn("{0} not supported in go command", commandAsSpan[ranges[i]].ToString());
                         break;
                     }
-            };
+            }
         }
+#pragma warning restore S127 // "for" loop stop conditions should be invariant
     }
 }
