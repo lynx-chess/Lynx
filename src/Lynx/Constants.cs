@@ -400,6 +400,19 @@ public static class Constants
     ///     a b c d e f g h
     /// </summary>
     public const BitBoard DarkSquaresBitBoard = 0x55AA55AA55AA55AAUL;
+
+    /// <summary>
+    /// 8   0 0 1 1 1 1 0 0
+    /// 7   0 0 1 1 1 1 0 0
+    /// 6   0 0 1 1 1 1 0 0
+    /// 5   0 0 1 1 1 1 0 0
+    /// 4   0 0 1 1 1 1 0 0
+    /// 3   0 0 1 1 1 1 0 0
+    /// 2   0 0 1 1 1 1 0 0
+    /// 1   0 0 1 1 1 1 0 0
+    ///     a b c d e f g h
+    /// </summary>
+    public const BitBoard CentralFiles = 0x3c3c3c3c3c3c3c3c;
     
 
     public static ReadOnlySpan<char> FileString => [ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' ];
