@@ -154,7 +154,7 @@ public sealed partial class Engine
                     ? Utils.CalculateMateInX(bestEvaluation, bestEvaluationAbs)
                     : 0;
 
-                lastSearchResult = UpdateLastSearchResult(lastSearchResult, bestEvaluation, alpha, beta, depth, mate);
+                lastSearchResult = UpdateLastSearchResult(lastSearchResult, bestEvaluation, depth, mate);
 
                 _engineWriter.TryWrite(lastSearchResult);
             } while (StopSearchCondition(++depth, maxDepth, mate, softLimitTimeBound));
@@ -180,7 +180,7 @@ public sealed partial class Engine
             _stopWatch.Stop();
         }
 
-        var finalSearchResult = GenerateFinalSearchResult(lastSearchResult, bestEvaluation, alpha, beta, depth, firstLegalMove, isCancelled);
+        var finalSearchResult = GenerateFinalSearchResult(lastSearchResult, bestEvaluation, depth, firstLegalMove, isCancelled);
 
         if (Configuration.EngineSettings.UseOnlineTablebaseInRootPositions
             && isMateDetected
@@ -301,7 +301,7 @@ public sealed partial class Engine
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private SearchResult UpdateLastSearchResult(SearchResult? lastSearchResult,
-        int bestEvaluation, int alpha, int beta, int depth, int mate)
+        int bestEvaluation, int depth, int mate)
     {
         var pvTableSpan = _pVTable.AsSpan();
         var pvMoves = pvTableSpan[..pvTableSpan.IndexOf(0)].ToArray();
@@ -322,7 +322,7 @@ public sealed partial class Engine
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private SearchResult GenerateFinalSearchResult(SearchResult? lastSearchResult,
-        int bestEvaluation, int alpha, int beta, int depth, Move firstLegalMove, bool isCancelled)
+        int bestEvaluation, int depth, Move firstLegalMove, bool isCancelled)
     {
         SearchResult finalSearchResult;
         if (lastSearchResult is null)
