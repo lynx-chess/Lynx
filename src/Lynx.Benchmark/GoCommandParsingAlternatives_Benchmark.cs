@@ -531,7 +531,7 @@ public partial class GoCommandParsingAlternatives_Benchmark : BaseBenchmark
                         _logger.Warn("{0} not supported in go command", commandAsSpan[ranges[i]].ToString());
                         break;
                     }
-            };
+            }
         }
     }
 }

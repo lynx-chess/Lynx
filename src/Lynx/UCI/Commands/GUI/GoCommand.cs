@@ -172,7 +172,7 @@ public sealed class GoCommand : IGUIBaseCommand
                         _logger.Warn("{0} not supported in go command, attempting to continue command parsing", commandAsSpan[ranges[i]].ToString());
                         break;
                     }
-            };
+            }
         }
     }
 
