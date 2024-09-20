@@ -181,7 +181,9 @@ public class ReadonlyStruct_vs_Tuple_Benchmark : BaseBenchmark
         }
     }
 
+#pragma warning disable IDE0250 // Make struct 'readonly' - would go against the purpose of the benchmark
     private struct Struct
+#pragma warning restore IDE0250 // Make struct 'readonly'
     {
         public int Evaluation { get; }
 
