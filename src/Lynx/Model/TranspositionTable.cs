@@ -141,8 +141,13 @@ public static class TranspositionTableExtensions
     /// <param name="nodeType"></param>
     /// <param name="move"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void RecordHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int eval, NodeType nodeType, Move? move = null)
+    public static void RecordHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int eval, NodeType nodeType, bool isVerifyingSE, Move? move = null)
     {
+        if (isVerifyingSE)
+        {
+            return;
+        }
+
         ref var entry = ref tt[position.UniqueIdentifier & ttMask];
 
         //if (entry.Key != default && entry.Key != position.UniqueIdentifier)

@@ -87,7 +87,7 @@ public sealed partial class Engine
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
-            _tt.RecordHash(_ttMask, position, depth, ply, finalPositionEvaluation, NodeType.Exact);
+            _tt.RecordHash(_ttMask, position, depth, ply, finalPositionEvaluation, NodeType.Exact, isVerifyingSE);
             return finalPositionEvaluation;
         }
         else if (!pvNode)
@@ -514,7 +514,7 @@ public sealed partial class Engine
                     }
                 }
 
-                _tt.RecordHash(_ttMask, position, depth, ply, beta, NodeType.Beta, bestMove);
+                _tt.RecordHash(_ttMask, position, depth, ply, beta, NodeType.Beta, isVerifyingSE, bestMove);
 
                 return beta;    // TODO return evaluation?
             }
@@ -541,11 +541,11 @@ public sealed partial class Engine
             }
             var eval = Position.EvaluateFinalPosition(ply, isInCheck);
 
-            _tt.RecordHash(_ttMask, position, depth, ply, eval, NodeType.Exact);
+            _tt.RecordHash(_ttMask, position, depth, ply, eval, NodeType.Exact, isVerifyingSE);
             return eval;
         }
 
-        _tt.RecordHash(_ttMask, position, depth, ply, alpha, nodeType, bestMove);
+        _tt.RecordHash(_ttMask, position, depth, ply, alpha, nodeType, isVerifyingSE, bestMove);
 
         // Node fails low
         return alpha;
@@ -671,7 +671,7 @@ public sealed partial class Engine
             {
                 PrintMessage($"Pruning: {move} is enough to discard this line");
 
-                _tt.RecordHash(_ttMask, position, 0, ply, beta, NodeType.Beta, bestMove);
+                _tt.RecordHash(_ttMask, position, 0, ply, beta, NodeType.Beta, false, bestMove);
 
                 return evaluation; // The refutation doesn't matter, since it'll be pruned
             }
@@ -693,12 +693,12 @@ public sealed partial class Engine
             && !MoveGenerator.CanGenerateAtLeastAValidMove(position))
         {
             var finalEval = Position.EvaluateFinalPosition(ply, position.IsInCheck());
-            _tt.RecordHash(_ttMask, position, 0, ply, finalEval, NodeType.Exact);
+            _tt.RecordHash(_ttMask, position, 0, ply, finalEval, NodeType.Exact, false);
 
             return finalEval;
         }
 
-        _tt.RecordHash(_ttMask, position, 0, ply, alpha, nodeType, bestMove);
+        _tt.RecordHash(_ttMask, position, 0, ply, alpha, nodeType, false, bestMove);
 
         return alpha;
     }
