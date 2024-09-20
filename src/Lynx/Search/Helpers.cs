@@ -12,7 +12,7 @@ public sealed partial class Engine
     private const int MaxValue = short.MaxValue;
 
     /// <summary>
-    /// Returns the score evaluation of a move taking into account <see cref="_isScoringPV"/>, <paramref name="bestMoveTTCandidate"/>, <see cref="EvaluationConstants.MostValueableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_quietHistory"/>
+    /// Returns the score evaluation of a move taking into account <paramref name="bestMoveTTCandidate"/>, <see cref="EvaluationConstants.MostValueableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_quietHistory"/>
     /// </summary>
     /// <param name="move"></param>
     /// <param name="ply"></param>
@@ -22,13 +22,6 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal int ScoreMove(Move move, int ply, bool isNotQSearch, ShortMove bestMoveTTCandidate = default)
     {
-        if (_isScoringPV && move == _pVTable[ply])
-        {
-            _isScoringPV = false;
-
-            return EvaluationConstants.PVMoveScoreValue;
-        }
-
         if ((ShortMove)move == bestMoveTTCandidate)
         {
             return EvaluationConstants.TTMoveScoreValue;

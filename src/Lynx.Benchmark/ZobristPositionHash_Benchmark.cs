@@ -73,14 +73,15 @@ using Lynx.Model;
 namespace Lynx.Benchmark;
 public class ZobristPositionHash_Benchmark : BaseBenchmark
 {
-    public static IEnumerable<Position> Data => new[] {
+    public static IEnumerable<Position> Data =>
+    [
         new Position(Constants.InitialPositionFEN),
         new Position(Constants.TrickyTestPositionFEN),
         new Position(Constants.TrickyTestPositionReversedFEN),
         new Position(Constants.CmkTestPositionFEN),
         new Position(Constants.ComplexPositionFEN),
         new Position(Constants.KillerTestPositionFEN),
-    };
+    ];
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]

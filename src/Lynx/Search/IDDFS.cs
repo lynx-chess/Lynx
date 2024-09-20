@@ -43,11 +43,9 @@ public sealed partial class Engine
     private readonly int[] _maxDepthReached = GC.AllocateArray<int>(Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin, pinned: true);
 
     private int _ttMask;
-    private TranspositionTable _tt = [];
+    private TranspositionTable _tt;
 
     private long _nodes;
-    private bool _isFollowingPV;
-    private bool _isScoringPV;
 
     private SearchResult? _previousSearchResult;
 
@@ -64,8 +62,6 @@ public sealed partial class Engine
     {
         // Cleanup
         _nodes = 0;
-        _isFollowingPV = false;
-        _isScoringPV = false;
         _stopWatch.Reset();
 
         Array.Clear(_pVTable);
@@ -76,7 +72,6 @@ public sealed partial class Engine
         int beta = MaxValue;
         SearchResult? lastSearchResult = null;
         int depth = 1;
-        bool isCancelled = false;
         bool isMateDetected = false;
         Move firstLegalMove = default;
 
@@ -125,7 +120,6 @@ public sealed partial class Engine
 
                     while (true)
                     {
-                        _isFollowingPV = true;
                         bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta);
 
                         window += window >> 1;   // window / 2
@@ -159,14 +153,13 @@ public sealed partial class Engine
                     ? Utils.CalculateMateInX(bestEvaluation, bestEvaluationAbs)
                     : 0;
 
-                lastSearchResult = UpdateLastSearchResult(lastSearchResult, bestEvaluation, alpha, beta, depth, mate);
+                lastSearchResult = UpdateLastSearchResult(lastSearchResult, bestEvaluation, depth, mate);
 
                 _engineWriter.TryWrite(lastSearchResult);
             } while (StopSearchCondition(++depth, maxDepth, mate, softLimitTimeBound));
         }
         catch (OperationCanceledException)
         {
-            isCancelled = true;
 #pragma warning disable S6667 // Logging in a catch clause should pass the caught exception as a parameter - expected exception we want to ignore
             _logger.Info("Search cancellation requested after {0}ms (depth {1}, nodes {2}), best move will be returned", _stopWatch.ElapsedMilliseconds, depth, _nodes);
 #pragma warning restore S6667 // Logging in a catch clause should pass the caught exception as a parameter.
@@ -185,7 +178,7 @@ public sealed partial class Engine
             _stopWatch.Stop();
         }
 
-        var finalSearchResult = GenerateFinalSearchResult(lastSearchResult, bestEvaluation, alpha, beta, depth, firstLegalMove, isCancelled);
+        var finalSearchResult = GenerateFinalSearchResult(lastSearchResult, bestEvaluation, depth, firstLegalMove);
 
         if (Configuration.EngineSettings.UseOnlineTablebaseInRootPositions
             && isMateDetected
@@ -306,7 +299,7 @@ public sealed partial class Engine
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private SearchResult UpdateLastSearchResult(SearchResult? lastSearchResult,
-        int bestEvaluation, int alpha, int beta, int depth, int mate)
+        int bestEvaluation, int depth, int mate)
     {
         var pvTableSpan = _pVTable.AsSpan();
         var pvMoves = pvTableSpan[..pvTableSpan.IndexOf(0)].ToArray();
@@ -327,7 +320,7 @@ public sealed partial class Engine
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private SearchResult GenerateFinalSearchResult(SearchResult? lastSearchResult,
-        int bestEvaluation, int alpha, int beta, int depth, Move firstLegalMove, bool isCancelled)
+        int bestEvaluation, int depth, Move firstLegalMove)
     {
         SearchResult finalSearchResult;
         if (lastSearchResult is null)

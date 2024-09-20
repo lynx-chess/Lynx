@@ -127,7 +127,7 @@ public class InfoCommand_Benchmark : BaseBenchmark
         return InfoCommand_StringBuilder_256.SearchResultInfo(result).Length;
     }
 
-    public sealed class InfoCommand_StringAddition : EngineBaseCommand
+    public sealed class InfoCommand_StringAddition : IEngineBaseCommand
     {
         public const string Id = "info";
 
@@ -149,7 +149,7 @@ public class InfoCommand_Benchmark : BaseBenchmark
         }
     }
 
-    public sealed class InfoCommand_StringBuilder_256 : EngineBaseCommand
+    public sealed class InfoCommand_StringBuilder_256 : IEngineBaseCommand
     {
         public const string Id = "info";
 
@@ -181,7 +181,7 @@ public class InfoCommand_Benchmark : BaseBenchmark
         }
     }
 
-    public sealed class InfoCommand_StringBuilder_128 : EngineBaseCommand
+    public sealed class InfoCommand_StringBuilder_128 : IEngineBaseCommand
     {
         public const string Id = "info";
 

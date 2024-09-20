@@ -179,26 +179,10 @@ public sealed partial class Engine
         var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves);
 
         Span<int> scores = stackalloc int[pseudoLegalMoves.Length];
-        if (_isFollowingPV)
-        {
-            _isFollowingPV = false;
-            for (int i = 0; i < pseudoLegalMoves.Length; ++i)
-            {
-                scores[i] = ScoreMove(pseudoLegalMoves[i], ply, isNotQSearch: true, ttBestMove);
 
-                if (pseudoLegalMoves[i] == _pVTable[depth])
-                {
-                    _isFollowingPV = true;
-                    _isScoringPV = true;
-                }
-            }
-        }
-        else
+        for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            for (int i = 0; i < pseudoLegalMoves.Length; ++i)
-            {
-                scores[i] = ScoreMove(pseudoLegalMoves[i], ply, isNotQSearch: true, ttBestMove);
-            }
+            scores[i] = ScoreMove(pseudoLegalMoves[i], ply, isNotQSearch: true, ttBestMove);
         }
 
         var nodeType = NodeType.Alpha;
@@ -263,7 +247,9 @@ public sealed partial class Engine
             else if (pvNode && visitedMovesCounter == 0)
             {
                 PrefetchTTEntry();
+#pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
                 evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
+#pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
             }
             else
             {
@@ -394,7 +380,9 @@ public sealed partial class Engine
                 if (evaluation > alpha && evaluation < beta)
                 {
                     // PVS Hypothesis invalidated -> search with full depth and full score bandwidth
+#pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
                     evaluation = -NegaMax(extendedDepth - 1, ply + 1, -beta, -alpha);
+#pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
                 }
             }
 
@@ -661,7 +649,9 @@ public sealed partial class Engine
             // Theoretically there could be a castling move that caused the 50 moves repetitions, but it's highly unlikely
             Game.PushToMoveStack(ply, move);
 
+#pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
             int evaluation = -QuiescenceSearch(ply + 1, -beta, -alpha);
+#pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
             position.UnmakeMove(move, gameState);
 
             PrintMove(position, ply, move, evaluation);

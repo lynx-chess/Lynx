@@ -187,7 +187,8 @@ using ParseResult = (bool Success, ulong[] PieceBitBoards, ulong[] OccupancyBitB
 namespace Lynx.Benchmark;
 public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
 {
-    public static IEnumerable<string> Data => new[] {
+    public static IEnumerable<string> Data =>
+    [
         Constants.InitialPositionFEN,
         Constants.TrickyTestPositionFEN,
         Constants.TrickyTestPositionReversedFEN,
@@ -195,7 +196,7 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
         Constants.ComplexPositionFEN,
         Constants.KillerTestPositionFEN,
         Constants.TTPositionFEN
-    };
+    ];
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]

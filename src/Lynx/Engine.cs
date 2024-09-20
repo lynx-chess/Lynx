@@ -3,6 +3,7 @@ using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading.Channels;
 
@@ -273,11 +274,13 @@ public sealed partial class Engine
         double p = (double)(plies_played);
 
         return (int)Math.Round(
-            (59.3 + (72830.0 - p * 2330.0) / (p * p + p * 10.0 + 2644.0))   // Plies remaining
+            (59.3 + ((72830.0 - (p * 2330.0)) / ((p * p) + (p * 10.0) + 2644.0)))   // Plies remaining
             / 2.0); // Full moves remaining
     }
 
+#pragma warning disable S1144 // Unused private types or members should be removed - wanna keep this around
     private async ValueTask<SearchResult> SearchBestMove(int maxDepth, int softLimitTimeBound)
+#pragma warning restore S1144 // Unused private types or members should be removed
     {
         if (!Configuration.EngineSettings.UseOnlineTablebaseInRootPositions || Game.CurrentPosition.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
         {

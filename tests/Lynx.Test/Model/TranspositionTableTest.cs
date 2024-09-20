@@ -3,7 +3,7 @@ using NUnit.Framework;
 using System.Numerics;
 using static Lynx.EvaluationConstants;
 
-namespace Lynx.Test;
+namespace Lynx.Test.Model;
 public class TranspositionTableTests
 {
     [TestCase(2)]

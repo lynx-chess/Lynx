@@ -109,7 +109,7 @@ namespace Lynx.Benchmark;
 
 public class ReadonlyStruct_vs_Tuple_Benchmark : BaseBenchmark
 {
-    public static IEnumerable<int> Data => new[] { 1, 10, 1_000, 10_000, 100_000 };
+    public static IEnumerable<int> Data => [1, 10, 1_000, 10_000, 100_000];
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]
@@ -163,9 +163,9 @@ public class ReadonlyStruct_vs_Tuple_Benchmark : BaseBenchmark
         return sum;
     }
 
-    private static ReadonlyStruct ReadonlyStructImpl() => new ReadonlyStruct(123, 20);
-    private static Struct StructImpl() => new Struct(123, 20);
-    private static Class ClassImpl() => new Class(123, 20);
+    private static ReadonlyStruct ReadonlyStructImpl() => new(123, 20);
+    private static Struct StructImpl() => new(123, 20);
+    private static Class ClassImpl() => new(123, 20);
     private static (int Evaluation, int Phase) TupleImpl() => (123, 20);
 
     private readonly struct ReadonlyStruct
@@ -181,7 +181,9 @@ public class ReadonlyStruct_vs_Tuple_Benchmark : BaseBenchmark
         }
     }
 
+#pragma warning disable IDE0250 // Make struct 'readonly' - would go against the purpose of the benchmark
     private struct Struct
+#pragma warning restore IDE0250 // Make struct 'readonly'
     {
         public int Evaluation { get; }
 

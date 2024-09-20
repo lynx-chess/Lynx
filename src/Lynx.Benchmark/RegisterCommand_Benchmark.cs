@@ -34,27 +34,27 @@ using System.Text;
 namespace Lynx.Benchmark;
 public class RegisterCommand_Benchmark : BaseBenchmark
 {
-    public static IEnumerable<string> Data => new[]
-    {
+    public static IEnumerable<string> Data =>
+    [
         "register late",
         "register name Stefan MK code 4359874324",
         "register name Lynx 0.16.0 code 4359874324",
         "register name Lynx 0.16.0 by eduherminio, check https://github.com/lync-chess/lynx code 4359874324",
-    };
+    ];
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]
-    public RegisterCommandBenchmark_RegisterCommandStringSplit StringSplit(string command) => new RegisterCommandBenchmark_RegisterCommandStringSplit(command);
+    public RegisterCommandBenchmark_RegisterCommandStringSplit StringSplit(string command) => new(command);
 
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
-    public RegisterCommandBenchmark_RegisterCommandSpanSplit SpanSplit(string command) => new RegisterCommandBenchmark_RegisterCommandSpanSplit(command);
+    public RegisterCommandBenchmark_RegisterCommandSpanSplit SpanSplit(string command) => new(command);
 
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
-    public RegisterCommandBenchmark_RegisterCommandSpanSplitStruct SpanSplitStruct(string command) => new RegisterCommandBenchmark_RegisterCommandSpanSplitStruct(command);
+    public RegisterCommandBenchmark_RegisterCommandSpanSplitStruct SpanSplitStruct(string command) => new(command);
 
-    public sealed class RegisterCommandBenchmark_RegisterCommandStringSplit : GUIBaseCommand
+    public sealed class RegisterCommandBenchmark_RegisterCommandStringSplit : IGUIBaseCommand
     {
         public const string Id = "register";
 
@@ -106,7 +106,7 @@ public class RegisterCommand_Benchmark : BaseBenchmark
         }
     }
 
-    public sealed class RegisterCommandBenchmark_RegisterCommandSpanSplit : GUIBaseCommand
+    public sealed class RegisterCommandBenchmark_RegisterCommandSpanSplit : IGUIBaseCommand
     {
         public const string Id = "register";
 
