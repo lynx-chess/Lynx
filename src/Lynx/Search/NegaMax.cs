@@ -303,7 +303,9 @@ public sealed partial class Engine
 
                 // 🔍 Singular extensions (SE) - extend TT move when it looks better than every other move
                 // We check if that's the case by doing a reduced-depth
-                int ttMoveExtension = 0;
+
+                // To be used in subsequet searches
+                var extendedDepth = depth;
 
                 if (move == ttBestMove      // Ensures !isRoot and TT hit
                                             //&& !isVerifyingSE        // Implicit, otherwise the move would have been skipped already
@@ -323,16 +325,13 @@ public sealed partial class Engine
                     var singularScore = NegaMax(verificationDepth, ply, singularBeta - 1, singularBeta, isVerifyingSE: true);
                     if (singularScore < singularBeta)
                     {
-                        ++ttMoveExtension;
+                        ++extendedDepth;
                     }
 
                     gameState = position.MakeMove(move);
                     _ = Game.Update50movesRule(move, isCapture);
                     Game.AddToPositionHashHistory(position.UniqueIdentifier);
                 }
-
-                // To be used in subsequet searches
-                var extendedDepth = depth + ttMoveExtension;
 
                 PrefetchTTEntry();
 
@@ -365,7 +364,7 @@ public sealed partial class Engine
 
                     // Don't allow LMR to drop into qsearch or increase the depth
                     // depth - 1 - depth +2 = 1, min depth we want
-                    reduction = Math.Clamp(reduction, 0, depth - 2);
+                    reduction = Math.Clamp(reduction, 0, extendedDepth - 2);
                 }
 
                 // 🔍 Static Exchange Evaluation (SEE) reduction
@@ -375,7 +374,7 @@ public sealed partial class Engine
                     && scores[moveIndex] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
                 {
                     reduction += Configuration.EngineSettings.SEE_BadCaptureReduction;
-                    reduction = Math.Clamp(reduction, 0, depth - 1);
+                    reduction = Math.Clamp(reduction, 0, extendedDepth - 1);
                 }
 
                 // Search with reduced depth
