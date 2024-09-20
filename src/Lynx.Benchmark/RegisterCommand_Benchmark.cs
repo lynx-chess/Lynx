@@ -34,13 +34,13 @@ using System.Text;
 namespace Lynx.Benchmark;
 public class RegisterCommand_Benchmark : BaseBenchmark
 {
-    public static IEnumerable<string> Data => new[]
-    {
+    public static IEnumerable<string> Data =>
+    [
         "register late",
         "register name Stefan MK code 4359874324",
         "register name Lynx 0.16.0 code 4359874324",
         "register name Lynx 0.16.0 by eduherminio, check https://github.com/lync-chess/lynx code 4359874324",
-    };
+    ];
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]

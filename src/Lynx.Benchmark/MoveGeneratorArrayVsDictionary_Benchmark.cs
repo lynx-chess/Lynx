@@ -26,14 +26,14 @@ namespace Lynx.Benchmark;
 
 public class MoveGeneratorArrayVsDictionary_Benchmark : BaseBenchmark
 {
-    public static IEnumerable<string> Data => new[]
-    {
+    public static IEnumerable<string> Data =>
+        [
             Constants.InitialPositionFEN,
             Constants.TrickyTestPositionFEN,
             Constants.TrickyTestPositionReversedFEN,
             Constants.CmkTestPositionFEN,
             Constants.KillerTestPositionFEN
-        };
+        ];
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]

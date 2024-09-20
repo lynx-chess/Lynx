@@ -29,12 +29,12 @@ using Lynx.UCI.Commands;
 namespace Lynx.Benchmark;
 public class DebugCommand_Benchmark : BaseBenchmark
 {
-    public static IEnumerable<string> Data => new[]
-    {
+    public static IEnumerable<string> Data =>
+    [
         "debug on",
         "debug off",
         "debug onf",
-    };
+    ];
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]
