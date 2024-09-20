@@ -23,7 +23,7 @@ public static class FENParser
         Array.Fill(board, (int)Piece.None);
 
         bool success;
-        Side side = Side.Both;
+        Side side;
         byte castle = 0;
         int halfMoveClock = 0/*, fullMoveCounter = 1*/;
         BoardSquare enPassant = BoardSquare.noSquare;
