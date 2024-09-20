@@ -708,10 +708,10 @@ public class Position : IDisposable
         var enemyKingCheckThreats = Attacks.RookAttacks(oppositeSideKingSquare, occupancy);
         var allChecks = attacks & enemyKingCheckThreats;
 
-        var safeChecksCount = (allChecks & (~enemyPawnAttacks)).CountBits();
+        var unsafeChecksCount = (allChecks & enemyPawnAttacks).CountBits();
 
-        packedBonus += SafeCheckBonus[(int)Piece.R] * safeChecksCount;
-        packedBonus += UnsafeCheckBonus[(int)Piece.R] * (allChecks.CountBits() - safeChecksCount);
+        packedBonus += UnsafeCheckBonus[(int)Piece.R] * unsafeChecksCount;
+        packedBonus += SafeCheckBonus[(int)Piece.R] * (allChecks.CountBits() - unsafeChecksCount);
 
         return packedBonus;
     }
@@ -733,10 +733,10 @@ public class Position : IDisposable
         var enemyKingCheckThreats = Attacks.KnightAttacks[oppositeSideKingSquare];
         var allChecks = attacks & enemyKingCheckThreats;
 
-        var safeChecksCount = (allChecks & (~enemyPawnAttacks)).CountBits();
+        var unsafeChecksCount = (allChecks & enemyPawnAttacks).CountBits();
 
-        packedBonus += SafeCheckBonus[(int)Piece.N] * safeChecksCount;
-        packedBonus += UnsafeCheckBonus[(int)Piece.N] * (allChecks.CountBits() - safeChecksCount);
+        packedBonus += UnsafeCheckBonus[(int)Piece.N] * unsafeChecksCount;
+        packedBonus += SafeCheckBonus[(int)Piece.N] * (allChecks.CountBits() - unsafeChecksCount);
 
         return packedBonus;
     }
@@ -782,10 +782,10 @@ public class Position : IDisposable
         var enemyKingCheckThreats = Attacks.BishopAttacks(oppositeSideKingSquare, occupancy);
         var allChecks = attacks & enemyKingCheckThreats;
 
-        var safeChecksCount = (allChecks & (~enemyPawnAttacks)).CountBits();
+        var unsafeChecksCount = (allChecks & enemyPawnAttacks).CountBits();
 
-        packedBonus += SafeCheckBonus[(int)Piece.B] * safeChecksCount;
-        packedBonus += UnsafeCheckBonus[(int)Piece.B] * (allChecks.CountBits() - safeChecksCount);
+        packedBonus += UnsafeCheckBonus[(int)Piece.B] * unsafeChecksCount;
+        packedBonus += SafeCheckBonus[(int)Piece.B] * (allChecks.CountBits() - unsafeChecksCount);
 
         return packedBonus;
     }
@@ -808,10 +808,10 @@ public class Position : IDisposable
         var enemyKingCheckThreats = Attacks.QueenAttacks(oppositeSideKingSquare, occupancy);
         var allChecks = attacks & enemyKingCheckThreats;
 
-        var safeChecksCount = (allChecks & (~enemyPawnAttacks)).CountBits();
+        var unsafeChecksCount = (allChecks & enemyPawnAttacks).CountBits();
 
-        packedBonus += SafeCheckBonus[(int)Piece.Q] * safeChecksCount;
-        packedBonus += UnsafeCheckBonus[(int)Piece.Q] * (allChecks.CountBits() - safeChecksCount);
+        packedBonus += UnsafeCheckBonus[(int)Piece.Q] * unsafeChecksCount;
+        packedBonus += SafeCheckBonus[(int)Piece.Q] * (allChecks.CountBits() - unsafeChecksCount);
 
         return packedBonus;
     }
