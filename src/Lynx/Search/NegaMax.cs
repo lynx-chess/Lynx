@@ -303,10 +303,10 @@ public sealed partial class Engine
 
                 // 🔍 Singular extensions (SE) - extend TT move when it looks better than every other move
                 // We check if that's the case by doing a reduced-depth
+                int ttMoveExtension = 0;
 
-                if (
-                    //!isVerifyingSE        // Implicit, otherwise the move would have been skipped already
-                    move == ttBestMove      // Ensures !isRoot and TT hit
+                if (move == ttBestMove      // Ensures !isRoot and TT hit
+                                            //&& !isVerifyingSE        // Implicit, otherwise the move would have been skipped already
                     && depth >= Configuration.EngineSettings.SE_MinDepth
                     && ttEntryDepth + Configuration.EngineSettings.SE_TTDepthOffset >= depth
                     //&& Math.Abs(ttScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
@@ -323,13 +323,16 @@ public sealed partial class Engine
                     var singularScore = NegaMax(verificationDepth, ply, singularBeta - 1, singularBeta, isVerifyingSE: true);
                     if (singularScore < singularBeta)
                     {
-                        ++depth;
+                        ++ttMoveExtension;
                     }
 
                     gameState = position.MakeMove(move);
                     _ = Game.Update50movesRule(move, isCapture);
                     Game.AddToPositionHashHistory(position.UniqueIdentifier);
                 }
+
+                // To be used in subsequet searches
+                var extendedDepth = depth + ttMoveExtension;
 
                 PrefetchTTEntry();
 
@@ -376,7 +379,7 @@ public sealed partial class Engine
                 }
 
                 // Search with reduced depth
-                evaluation = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha);
+                evaluation = -NegaMax(extendedDepth - 1 - reduction, ply + 1, -alpha - 1, -alpha);
 
                 // 🔍 Principal Variation Search (PVS)
                 if (evaluation > alpha && reduction > 0)
@@ -386,13 +389,13 @@ public sealed partial class Engine
                     // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
 
                     // Search with full depth but narrowed score bandwidth
-                    evaluation = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha);
+                    evaluation = -NegaMax(extendedDepth - 1, ply + 1, -alpha - 1, -alpha);
                 }
 
                 if (evaluation > alpha && evaluation < beta)
                 {
                     // PVS Hypothesis invalidated -> search with full depth and full score bandwidth
-                    evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
+                    evaluation = -NegaMax(extendedDepth - 1, ply + 1, -beta, -alpha);
                 }
             }
 
