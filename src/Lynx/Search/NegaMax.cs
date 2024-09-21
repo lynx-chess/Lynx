@@ -349,9 +349,9 @@ public sealed partial class Engine
             PrintMove(position, ply, move, evaluation);
 
             // Improving alpha
-            if (score > alpha)
+            if (evaluation > alpha)
             {
-                alpha = score;
+                alpha = evaluation;
 
                 if (pvNode)
                 {
@@ -474,7 +474,6 @@ public sealed partial class Engine
 
                 return beta;    // TODO return evaluation?
             }
-
 
             ++visitedMovesCounter;
         }
