@@ -352,7 +352,7 @@ public sealed partial class Engine
             if(score > bestScore)
             {
                 bestScore = score;
-            }
+
 
             // Improving alpha
             if (score > alpha)
@@ -478,7 +478,7 @@ public sealed partial class Engine
 
                 return bestScore;
             }
-
+            }
             ++visitedMovesCounter;
         }
 
