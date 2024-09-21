@@ -349,7 +349,7 @@ public sealed partial class Engine
 
             PrintMove(position, ply, move, score);
 
-            if(score > bestScore)
+            if (score > bestScore)
             {
                 bestScore = score;
             }
@@ -360,8 +360,11 @@ public sealed partial class Engine
                 alpha = score;
                 bestMove = move;
 
-                _pVTable[pvIndex] = move;
-                CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
+                if (pvNode)
+                {
+                    _pVTable[pvIndex] = move;
+                    CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
+                }
 
                 nodeType = NodeType.Exact;
             }
