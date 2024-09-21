@@ -348,6 +348,17 @@ public sealed partial class Engine
 
             PrintMove(position, ply, move, evaluation);
 
+            if (evaluation > alpha)
+            {
+                alpha = evaluation;
+                bestMove = move;
+
+                _pVTable[pvIndex] = move;
+                CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
+
+                nodeType = NodeType.Exact;
+            }
+
             // Fail-hard beta-cutoff - refutation found, no need to keep searching this line
             if (evaluation >= beta)
             {
@@ -459,17 +470,6 @@ public sealed partial class Engine
                 _tt.RecordHash(_ttMask, position, depth, ply, beta, NodeType.Beta, bestMove);
 
                 return beta;    // TODO return evaluation?
-            }
-
-            if (evaluation > alpha)
-            {
-                alpha = evaluation;
-                bestMove = move;
-
-                _pVTable[pvIndex] = move;
-                CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
-
-                nodeType = NodeType.Exact;
             }
 
             ++visitedMovesCounter;
