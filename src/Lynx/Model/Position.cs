@@ -569,7 +569,7 @@ public class Position : IDisposable
 
         eval = ScaleEvalWith50MovesDrawDistance(eval, movesWithoutCaptureOrPawnMove);
 
-        eval = Math.Clamp(eval, MinEval, MaxEval);
+        eval = Math.Clamp(eval, MinStaticEval, MaxStaticEval);
 
         var sideEval = Side == Side.White
             ? eval

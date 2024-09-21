@@ -8,9 +8,6 @@ namespace Lynx;
 
 public sealed partial class Engine
 {
-    private const int MinValue = short.MinValue;
-    private const int MaxValue = short.MaxValue;
-
     /// <summary>
     /// Returns the score evaluation of a move taking into account <paramref name="bestMoveTTCandidate"/>, <see cref="EvaluationConstants.MostValueableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_quietHistory"/>
     /// </summary>
@@ -409,7 +406,7 @@ $" {484,-3}                                                         {_pVTable[48
     [Conditional("DEBUG")]
     internal void PrintHistoryMoves()
     {
-        int max = int.MinValue;
+        int max = EvaluationConstants.MinEval;
 
         for (int i = 0; i < 12; ++i)
         {
