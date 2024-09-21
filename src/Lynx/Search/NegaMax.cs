@@ -231,7 +231,7 @@ public sealed partial class Engine
                 // don't belong to this line and if this move were to beat alpha, they'd incorrectly copied to pv line.
                 Array.Clear(_pVTable, nextPvIndex, _pVTable.Length - nextPvIndex);
             }
-            else if (pvNode && visitedMovesCounter == 0)
+            else if (visitedMovesCounter == 0)
             {
                 PrefetchTTEntry();
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
