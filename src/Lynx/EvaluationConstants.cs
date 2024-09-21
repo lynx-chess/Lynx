@@ -92,6 +92,16 @@ public static partial class EvaluationConstants
     public const int CheckMateBaseEvaluation = 30_000;
 
     /// <summary>
+    /// Max eval, including checkmate values
+    /// </summary>
+    public const int MaxEval = CheckMateBaseEvaluation + 1;
+
+    /// <summary>
+    /// Min eval, including checkmate values
+    /// </summary>
+    public const int MinEval = -CheckMateBaseEvaluation - 1;
+
+    /// <summary>
     /// This value combined with <see cref="PositiveCheckmateDetectionLimit"/> and <see cref="NegativeCheckmateDetectionLimit"/> should allows mates up to in <see cref="Constants.AbsoluteMaxDepth"/> moves.
     /// </summary>
     public const int CheckmateDepthFactor = 10;
@@ -106,9 +116,16 @@ public static partial class EvaluationConstants
     /// </summary>
     public const int NegativeCheckmateDetectionLimit = -27_000; // -CheckMateBaseEvaluation + (Constants.AbsoluteMaxDepth + 45) * DepthCheckmateFactor;
 
-    public const int MinEval = NegativeCheckmateDetectionLimit + 1;
+    /// <summary>
+    /// Max static eval. It doesn't include checkmate values and it's below <see cref="PositiveCheckmateDetectionLimit"/>
+    /// </summary>
+    public const int MaxStaticEval = PositiveCheckmateDetectionLimit - 1;
 
-    public const int MaxEval = PositiveCheckmateDetectionLimit - 1;
+    /// <summary>
+    /// Min static eval. It doesn't include checkmate values and it's above <see cref="NegativeCheckmateDetectionLimit"/>
+    /// </summary>
+    public const int MinStaticEval = NegativeCheckmateDetectionLimit + 1;
+
 
     public const int PVMoveScoreValue = 4_194_304;
 
