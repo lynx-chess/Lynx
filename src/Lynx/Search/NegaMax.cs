@@ -615,16 +615,6 @@ public sealed partial class Engine
 
             PrintMove(position, ply, move, evaluation);
 
-            // Fail-hard beta-cutoff
-            if (evaluation >= beta)
-            {
-                PrintMessage($"Pruning: {move} is enough to discard this line");
-
-                _tt.RecordHash(_ttMask, position, 0, ply, beta, NodeType.Beta, bestMove);
-
-                return evaluation; // The refutation doesn't matter, since it'll be pruned
-            }
-
             if (evaluation > alpha)
             {
                 alpha = evaluation;
@@ -634,6 +624,16 @@ public sealed partial class Engine
                 CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
 
                 nodeType = NodeType.Exact;
+            }
+
+            // Fail-hard beta-cutoff
+            if (evaluation >= beta)
+            {
+                PrintMessage($"Pruning: {move} is enough to discard this line");
+
+                _tt.RecordHash(_ttMask, position, 0, ply, beta, NodeType.Beta, bestMove);
+
+                return evaluation; // The refutation doesn't matter, since it'll be pruned
             }
         }
 
