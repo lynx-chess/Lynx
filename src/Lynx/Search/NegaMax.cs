@@ -178,7 +178,7 @@ public sealed partial class Engine
         }
 
         var nodeType = NodeType.Alpha;
-        int bestScore = EvaluationConstants.NegativeCheckmateDetectionLimit;
+        int bestScore = EvaluationConstants.MinEval;
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
