@@ -350,7 +350,7 @@ public sealed partial class Engine
 
                     // Don't allow LMR to drop into qsearch or increase the depth
                     // depth - 1 - depth +2 = 1, min depth we want
-                    reduction = Math.Clamp(reduction, 0, extendedDepth - 2);
+                    reduction = Math.Clamp(reduction, 0, depth - 2);
                 }
 
                 // 🔍 Static Exchange Evaluation (SEE) reduction
@@ -360,11 +360,11 @@ public sealed partial class Engine
                     && scores[moveIndex] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
                 {
                     reduction += Configuration.EngineSettings.SEE_BadCaptureReduction;
-                    reduction = Math.Clamp(reduction, 0, extendedDepth - 1);
+                    reduction = Math.Clamp(reduction, 0, depth - 1);
                 }
 
                 // Search with reduced depth
-                evaluation = -NegaMax(extendedDepth - 1 - reduction, ply + 1, -alpha - 1, -alpha);
+                evaluation = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha);
 
                 // 🔍 Principal Variation Search (PVS)
                 if (evaluation > alpha && reduction > 0)
@@ -374,14 +374,14 @@ public sealed partial class Engine
                     // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
 
                     // Search with full depth but narrowed score bandwidth
-                    evaluation = -NegaMax(extendedDepth - 1, ply + 1, -alpha - 1, -alpha);
+                    evaluation = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha);
                 }
 
                 if (evaluation > alpha && evaluation < beta)
                 {
                     // PVS Hypothesis invalidated -> search with full depth and full score bandwidth
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
-                    evaluation = -NegaMax(extendedDepth - 1, ply + 1, -beta, -alpha);
+                    evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
                 }
             }
