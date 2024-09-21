@@ -178,6 +178,7 @@ public sealed partial class Engine
         }
 
         var nodeType = NodeType.Alpha;
+        int bestScore = EvaluationConstants.MinEval;
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
@@ -221,10 +222,10 @@ public sealed partial class Engine
             Game.AddToPositionHashHistory(position.UniqueIdentifier);
             Game.PushToMoveStack(ply, move);
 
-            int evaluation;
+            int score;
             if (canBeRepetition && (Game.IsThreefoldRepetition() || Game.Is50MovesRepetition()))
             {
-                evaluation = 0;
+                score = 0;
 
                 // We don't need to evaluate further down to know it's a draw.
                 // Since we won't be evaluating further down, we need to clear the PV table because those moves there
@@ -235,7 +236,7 @@ public sealed partial class Engine
             {
                 PrefetchTTEntry();
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
-                evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
+                score = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
             }
             else
@@ -318,24 +319,24 @@ public sealed partial class Engine
                 }
 
                 // Search with reduced depth
-                evaluation = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha);
+                score = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha);
 
                 // 🔍 Principal Variation Search (PVS)
-                if (evaluation > alpha && reduction > 0)
+                if (score > alpha && reduction > 0)
                 {
                     // Optimistic search, validating that the rest of the moves are worse than bestmove.
                     // It should produce more cutoffs and therefore be faster.
                     // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
 
                     // Search with full depth but narrowed score bandwidth
-                    evaluation = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha);
+                    score = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha);
                 }
 
-                if (evaluation > alpha && evaluation < beta)
+                if (score > alpha && score < beta)
                 {
                     // PVS Hypothesis invalidated -> search with full depth and full score bandwidth
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
-                    evaluation = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
+                    score = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
                 }
             }
@@ -346,10 +347,30 @@ public sealed partial class Engine
             Game.RemoveFromPositionHashHistory();
             position.UnmakeMove(move, gameState);
 
-            PrintMove(position, ply, move, evaluation);
+            PrintMove(position, ply, move, score);
+
+            if (score > bestScore)
+            {
+                bestScore = score;
+            }
+
+            // Improving alpha
+            if (score > alpha)
+            {
+                alpha = score;
+                bestMove = move;
+
+                if (pvNode)
+                {
+                    _pVTable[pvIndex] = move;
+                    CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
+                }
+
+                nodeType = NodeType.Exact;
+            }
 
             // Fail-hard beta-cutoff - refutation found, no need to keep searching this line
-            if (evaluation >= beta)
+            if (score >= beta)
             {
                 PrintMessage($"Pruning: {move} is enough");
 
@@ -456,20 +477,9 @@ public sealed partial class Engine
                     }
                 }
 
-                _tt.RecordHash(_ttMask, position, depth, ply, beta, NodeType.Beta, bestMove);
+                _tt.RecordHash(_ttMask, position, depth, ply, bestScore, NodeType.Beta, bestMove);
 
-                return beta;    // TODO return evaluation?
-            }
-
-            if (evaluation > alpha)
-            {
-                alpha = evaluation;
-                bestMove = move;
-
-                _pVTable[pvIndex] = move;
-                CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
-
-                nodeType = NodeType.Exact;
+                return bestScore;
             }
 
             ++visitedMovesCounter;
@@ -483,10 +493,10 @@ public sealed partial class Engine
             return eval;
         }
 
-        _tt.RecordHash(_ttMask, position, depth, ply, alpha, nodeType, bestMove);
+        _tt.RecordHash(_ttMask, position, depth, ply, bestScore, nodeType, bestMove);
 
         // Node fails low
-        return alpha;
+        return bestScore;
     }
 
     /// <summary>
