@@ -564,6 +564,8 @@ public sealed partial class Engine
 
         var nodeType = NodeType.Alpha;
         Move? bestMove = null;
+        int bestScore = staticEvaluation;
+
         bool isThereAnyValidCapture = false;
 
         Span<int> scores = stackalloc int[pseudoLegalMoves.Length];
@@ -610,31 +612,37 @@ public sealed partial class Engine
             Game.PushToMoveStack(ply, move);
 
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
-            int evaluation = -QuiescenceSearch(ply + 1, -beta, -alpha);
+            int score = -QuiescenceSearch(ply + 1, -beta, -alpha);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
             position.UnmakeMove(move, gameState);
 
-            PrintMove(position, ply, move, evaluation);
+            PrintMove(position, ply, move, score);
 
-            // Fail-hard beta-cutoff
-            if (evaluation >= beta)
+            if(score > bestScore)
             {
-                PrintMessage($"Pruning: {move} is enough to discard this line");
-
-                _tt.RecordHash(_ttMask, position, 0, ply, beta, NodeType.Beta, bestMove);
-
-                return evaluation; // The refutation doesn't matter, since it'll be pruned
+                bestScore = score;
             }
 
-            if (evaluation > alpha)
+            // Improving alpha
+            if (score > alpha)
             {
-                alpha = evaluation;
+                alpha = score;
                 bestMove = move;
 
                 _pVTable[pvIndex] = move;
                 CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
 
                 nodeType = NodeType.Exact;
+            }
+
+            // Fail-hard beta-cutoff
+            if (score >= beta)
+            {
+                PrintMessage($"Pruning: {move} is enough to discard this line");
+
+                _tt.RecordHash(_ttMask, position, 0, ply, bestScore, NodeType.Beta, bestMove);
+
+                return bestScore; // The refutation doesn't matter, since it'll be pruned
             }
         }
 
@@ -648,8 +656,8 @@ public sealed partial class Engine
             return finalEval;
         }
 
-        _tt.RecordHash(_ttMask, position, 0, ply, alpha, nodeType, bestMove);
+        _tt.RecordHash(_ttMask, position, 0, ply, bestScore, nodeType, bestMove);
 
-        return alpha;
+        return bestScore;
     }
 }
