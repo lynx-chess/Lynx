@@ -46,23 +46,26 @@ public sealed partial class Engine
         int ttScore = default;
         int ttEntryDepth = default;
 
-        if (!isRoot && !isVerifyingSE)
+        if (!isRoot/* && !isVerifyingSE*/)
         {
             (ttEvaluation, ttBestMove, ttElementType, ttScore, ttEntryDepth) = _tt.ProbeHash(_ttMask, position, depth, ply, alpha, beta);
 
-            if (!pvNode && ttEvaluation != EvaluationConstants.NoHashEntry)
+            if (!isVerifyingSE)
             {
-                return ttEvaluation;
-            }
+                if (!pvNode && ttEvaluation != EvaluationConstants.NoHashEntry)
+                {
+                    return ttEvaluation;
+                }
 
-            // Internal iterative reduction (IIR)
-            // If this position isn't found in TT, it has never been searched before,
-            // so the search will be potentially expensive.
-            // Therefore, we search with reduced depth for now, expecting to record a TT move
-            // which we'll be able to use later for the full depth search
-            if (ttElementType == default && depth >= Configuration.EngineSettings.IIR_MinDepth)
-            {
-                --depth;
+                // Internal iterative reduction (IIR)
+                // If this position isn't found in TT, it has never been searched before,
+                // so the search will be potentially expensive.
+                // Therefore, we search with reduced depth for now, expecting to record a TT move
+                // which we'll be able to use later for the full depth search
+                if (ttElementType == default && depth >= Configuration.EngineSettings.IIR_MinDepth)
+                {
+                    --depth;
+                }
             }
         }
 
