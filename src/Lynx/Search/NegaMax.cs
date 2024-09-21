@@ -186,7 +186,7 @@ public sealed partial class Engine
         }
 
         var nodeType = NodeType.Alpha;
-        int bestScore = EvaluationConstants.NegativeCheckmateDetectionLimit;
+        int bestScore = EvaluationConstants.MinEval;
         Move? bestMove = null;
         bool isAnyMoveValid = false;
 
@@ -277,7 +277,7 @@ public sealed partial class Engine
                 // don't belong to this line and if this move were to beat alpha, they'd incorrectly copied to pv line.
                 Array.Clear(_pVTable, nextPvIndex, _pVTable.Length - nextPvIndex);
             }
-            else if (pvNode && visitedMovesCounter == 0)
+            else if (visitedMovesCounter == 0)
             {
                 PrefetchTTEntry();
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
@@ -395,7 +395,7 @@ public sealed partial class Engine
 
             PrintMove(position, ply, move, score);
 
-            if(score > bestScore)
+            if (score > bestScore)
             {
                 bestScore = score;
             }
@@ -406,8 +406,11 @@ public sealed partial class Engine
                 alpha = score;
                 bestMove = move;
 
-                _pVTable[pvIndex] = move;
-                CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
+                if (pvNode)
+                {
+                    _pVTable[pvIndex] = move;
+                    CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
+                }
 
                 nodeType = NodeType.Exact;
             }
