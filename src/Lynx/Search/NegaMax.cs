@@ -617,31 +617,31 @@ public sealed partial class Engine
 
             PrintMove(position, ply, move, score);
 
-            if(score > bestScore)
+            if (score > bestScore)
             {
                 bestScore = score;
-            }
 
-            // Improving alpha
-            if (score > alpha)
-            {
-                alpha = score;
-                bestMove = move;
+                // Improving alpha
+                if (score > alpha)
+                {
+                    alpha = score;
+                    bestMove = move;
 
-                _pVTable[pvIndex] = move;
-                CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
+                    _pVTable[pvIndex] = move;
+                    CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
 
-                nodeType = NodeType.Exact;
-            }
+                    nodeType = NodeType.Exact;
+                }
 
-            // Fail-hard beta-cutoff
-            if (score >= beta)
-            {
-                PrintMessage($"Pruning: {move} is enough to discard this line");
+                // Fail-hard beta-cutoff
+                if (score >= beta)
+                {
+                    PrintMessage($"Pruning: {move} is enough to discard this line");
 
-                _tt.RecordHash(_ttMask, position, 0, ply, bestScore, NodeType.Beta, bestMove);
+                    _tt.RecordHash(_ttMask, position, 0, ply, bestScore, NodeType.Beta, bestMove);
 
-                return bestScore; // The refutation doesn't matter, since it'll be pruned
+                    return bestScore; // The refutation doesn't matter, since it'll be pruned
+                }
             }
         }
 
