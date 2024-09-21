@@ -21,16 +21,50 @@ public class EvaluationConstantsTest
         (1 * (Math.Max(MiddleGameKingTable[0].Max(), EndGameKingTable[0].Max()) + (UnpackMG(KingShieldBonus) * 8))) +
         MiddleGameQueenTable[0].Max(); // just in case
 
-    [TestCase(PositiveCheckmateDetectionLimit)]
-    [TestCase(-NegativeCheckmateDetectionLimit)]
-    public void CheckmateDetectionLimitConstants(int checkmateDetectionLimit)
+    [Test]
+    public void PositiveCheckmateDetectionLimitTest()
     {
-        Assert.Greater(CheckMateBaseEvaluation - (Constants.AbsoluteMaxDepth * CheckmateDepthFactor),
-            checkmateDetectionLimit);
+        Assert.Greater(CheckMateBaseEvaluation - ((Constants.AbsoluteMaxDepth + 10) * CheckmateDepthFactor),
+            PositiveCheckmateDetectionLimit);
 
-        Assert.Greater(checkmateDetectionLimit, _sensibleEvaluation);
+        Assert.Greater(PositiveCheckmateDetectionLimit, _sensibleEvaluation);
 
-        Assert.Greater(short.MaxValue, checkmateDetectionLimit);
+        Assert.Greater(short.MaxValue, PositiveCheckmateDetectionLimit);
+    }
+
+    [Test]
+    public void NegativeCheckmateDetectionLimitTest()
+    {
+        Assert.Less(-(CheckMateBaseEvaluation - ((Constants.AbsoluteMaxDepth + 10) * CheckmateDepthFactor)),
+            NegativeCheckmateDetectionLimit);
+
+        Assert.Less(NegativeCheckmateDetectionLimit, -_sensibleEvaluation);
+
+        Assert.Less(short.MinValue, NegativeCheckmateDetectionLimit);
+    }
+
+    [Test]
+    public void MaxEvalTest()
+    {
+        Assert.Greater(MaxEval, PositiveCheckmateDetectionLimit + ((Constants.AbsoluteMaxDepth + 10) * CheckmateDepthFactor));
+    }
+
+    [Test]
+    public void MinEvalTest()
+    {
+        Assert.Less(MinEval, NegativeCheckmateDetectionLimit - ((Constants.AbsoluteMaxDepth + 10) * CheckmateDepthFactor));
+    }
+
+    [Test]
+    public void MaxStaticEvalTest()
+    {
+        Assert.Less(MaxStaticEval, PositiveCheckmateDetectionLimit);
+    }
+
+    [Test]
+    public void MinStaticEvalTest()
+    {
+        Assert.Greater(MinStaticEval, NegativeCheckmateDetectionLimit);
     }
 
     [Test]

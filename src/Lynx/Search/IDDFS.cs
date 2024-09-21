@@ -68,8 +68,8 @@ public sealed partial class Engine
         Array.Clear(_maxDepthReached);
 
         int bestEvaluation = 0;
-        int alpha = MinValue;
-        int beta = MaxValue;
+        int alpha = EvaluationConstants.MinEval;
+        int beta = EvaluationConstants.MaxEval;
         SearchResult? lastSearchResult = null;
         int depth = 1;
         bool isMateDetected = false;
@@ -115,8 +115,8 @@ public sealed partial class Engine
                     // 🔍 Aspiration Windows
                     var window = Configuration.EngineSettings.AspirationWindow_Base;
 
-                    alpha = Math.Max(MinValue, lastSearchResult.Evaluation - window);
-                    beta = Math.Min(MaxValue, lastSearchResult.Evaluation + window);
+                    alpha = Math.Max(EvaluationConstants.MinEval, lastSearchResult.Evaluation - window);
+                    beta = Math.Min(EvaluationConstants.MaxEval, lastSearchResult.Evaluation + window);
 
                     while (true)
                     {
@@ -127,12 +127,12 @@ public sealed partial class Engine
                         // Depth change: https://github.com/lynx-chess/Lynx/pull/440
                         if (alpha >= bestEvaluation)     // Fail low
                         {
-                            alpha = Math.Max(bestEvaluation - window, MinValue);
+                            alpha = Math.Max(bestEvaluation - window, EvaluationConstants.MinEval);
                             beta = (alpha + beta) >> 1;  // (alpha + beta) / 2
                         }
                         else if (beta <= bestEvaluation)     // Fail high
                         {
-                            beta = Math.Min(bestEvaluation + window, MaxValue);
+                            beta = Math.Min(bestEvaluation + window, EvaluationConstants.MaxEval);
                         }
                         else
                         {
