@@ -353,21 +353,6 @@ public sealed partial class Engine
             {
                 bestScore = score;
 
-                // Improving alpha
-                if (score > alpha)
-                {
-                    alpha = score;
-                    bestMove = move;
-
-                    if (pvNode)
-                    {
-                        _pVTable[pvIndex] = move;
-                        CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
-                    }
-
-                    nodeType = NodeType.Exact;
-                }
-
                 // Fail-hard beta-cutoff - refutation found, no need to keep searching this line
                 if (score >= beta)
                 {
@@ -479,6 +464,21 @@ public sealed partial class Engine
                     _tt.RecordHash(_ttMask, position, depth, ply, bestScore, NodeType.Beta, bestMove);
 
                     return bestScore;
+                }
+
+                // Improving alpha
+                if (score > alpha)
+                {
+                    alpha = score;
+                    bestMove = move;
+
+                    if (pvNode)
+                    {
+                        _pVTable[pvIndex] = move;
+                        CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
+                    }
+
+                    nodeType = NodeType.Exact;
                 }
             }
             ++visitedMovesCounter;
