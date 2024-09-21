@@ -42,12 +42,11 @@ public sealed partial class Engine
         bool pvNode = beta - alpha > 1;
         ShortMove ttBestMove = default;
         NodeType ttElementType = default;
-        int ttEvaluation = default;
-        int ttScore = default;
+        int ttEvaluation = default;             // TODO rename ttScore
 
         if (!isRoot)
         {
-            (ttEvaluation, ttBestMove, ttElementType, ttScore) = _tt.ProbeHash(_ttMask, position, depth, ply, alpha, beta);
+            (ttEvaluation, ttBestMove, ttElementType) = _tt.ProbeHash(_ttMask, position, depth, ply, alpha, beta);
             if (!pvNode && ttEvaluation != EvaluationConstants.NoHashEntry)
             {
                 return ttEvaluation;
@@ -94,9 +93,9 @@ public sealed partial class Engine
             // If the score is outside what the current bounds are, but it did match flag and depth,
             // then we can trust that this score is more accurate than the current static evaluation,
             // and we can update our static evaluation for better accuracy in pruning
-            if (ttElementType != default && ttElementType != (ttScore > staticEval ? NodeType.Alpha : NodeType.Beta))
+            if (ttElementType != default && ttElementType != (ttEvaluation > staticEval ? NodeType.Alpha : NodeType.Beta))
             {
-                staticEval = ttScore;
+                staticEval = ttEvaluation;
             }
 
             if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
