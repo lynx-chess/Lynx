@@ -157,12 +157,18 @@ public sealed partial class Engine
                 //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
 
                 var gameState = position.MakeNullMove();
-                var evaluation = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, parentWasNullMove: true);
+                var nmpScore = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, parentWasNullMove: true);
                 position.UnMakeNullMove(gameState);
 
-                if (evaluation >= beta)
+                if (nmpScore >= beta)
                 {
-                    return evaluation;
+                    // Avoid false mates in NMP fail soft - idea by cj5716
+                    if (nmpScore > EvaluationConstants.PositiveCheckmateDetectionLimit)
+                    {
+                        nmpScore = beta;
+                    }
+
+                    return nmpScore;
                 }
             }
         }
@@ -349,7 +355,7 @@ public sealed partial class Engine
 
             PrintMove(position, ply, move, score);
 
-            if(score > bestScore)
+            if (score > bestScore)
             {
                 bestScore = score;
             }
