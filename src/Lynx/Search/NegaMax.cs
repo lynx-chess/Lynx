@@ -466,8 +466,11 @@ public sealed partial class Engine
                 alpha = evaluation;
                 bestMove = move;
 
-                _pVTable[pvIndex] = move;
-                CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
+                if (pvNode)
+                {
+                    _pVTable[pvIndex] = move;
+                    CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
+                }
 
                 nodeType = NodeType.Exact;
             }
