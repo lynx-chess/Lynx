@@ -162,7 +162,7 @@ public sealed partial class Engine
 
                 if (evaluation >= beta)
                 {
-                    return evaluation;
+                    return beta;
                 }
             }
         }
