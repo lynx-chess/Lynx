@@ -96,7 +96,7 @@ public sealed partial class Engine
             // and we can update our static evaluation for better accuracy in pruning
             if (ttElementType != default && ttElementType != (ttScore > staticEval ? NodeType.Alpha : NodeType.Beta))
             {
-                staticEval = ttEvaluation;
+                staticEval = ttScore;
             }
 
             if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
