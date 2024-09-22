@@ -52,7 +52,7 @@ public sealed partial class Engine
     private readonly Move _defaultMove = default;
 
     /// <summary>
-    /// IDDFs search
+    /// Iterative Deepening Depth-First Search (IDDFS) using alpha-beta pruning
     /// </summary>
     /// <param name="maxDepth"></param>
     /// <param name="softLimitTimeBound"></param>

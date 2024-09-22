@@ -6,17 +6,15 @@ namespace Lynx;
 public sealed partial class Engine
 {
     /// <summary>
-    /// NegaMax algorithm implementation using alpha-beta pruning, quiescence search and Iterative Deepening Depth-First Search (IDDFS)
+    /// NegaMax algorithm implementation using alpha-beta pruning and quiescence search
     /// </summary>
     /// <param name="depth"></param>
     /// <param name="ply"></param>
     /// <param name="alpha">
     /// Best score the Side to move can achieve, assuming best play by the opponent.
-    /// Defaults to the worse possible score for Side to move, Int.MinValue.
     /// </param>
     /// <param name="beta">
     /// Best score Side's to move's opponent can achieve, assuming best play by Side to move.
-    /// Defaults to the worse possible score for Side to move's opponent, Int.MaxValue
     /// </param>
     /// <returns></returns>
     [SkipLocalsInit]
@@ -368,7 +366,7 @@ public sealed partial class Engine
                     nodeType = NodeType.Exact;
                 }
 
-                // Fail-hard beta-cutoff - refutation found, no need to keep searching this line
+                // Beta-cutoff - refutation found, no need to keep searching this line
                 if (score >= beta)
                 {
                     PrintMessage($"Pruning: {move} is enough");
@@ -499,7 +497,7 @@ public sealed partial class Engine
     }
 
     /// <summary>
-    /// Quiescence search implementation, NegaMax alpha-beta style, fail-hard
+    /// Quiescence search implementation, NegaMax alpha-beta style, fail-soft
     /// </summary>
     /// <param name="ply"></param>
     /// <param name="alpha">
@@ -540,7 +538,7 @@ public sealed partial class Engine
 
         var staticEvaluation = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
 
-        // Fail-hard beta-cutoff (updating alpha after this check)
+        // Beta-cutoff (updating alpha after this check)
         if (staticEvaluation >= beta)
         {
             PrintMessage(ply - 1, "Pruning before starting quiescence search");
@@ -607,7 +605,6 @@ public sealed partial class Engine
             PrintPreMove(position, ply, move, isQuiescence: true);
 
             // No need to check for threefold or 50 moves repetitions, since we're only searching captures, promotions, and castles
-            // Theoretically there could be a castling move that caused the 50 moves repetitions, but it's highly unlikely
             Game.PushToMoveStack(ply, move);
 
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
@@ -621,7 +618,7 @@ public sealed partial class Engine
             {
                 bestScore = score;
 
-                // Fail-hard beta-cutoff
+                // Beta-cutoff
                 if (score >= beta)
                 {
                     PrintMessage($"Pruning: {move} is enough to discard this line");
