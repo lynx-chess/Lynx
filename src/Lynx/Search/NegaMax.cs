@@ -40,15 +40,15 @@ public sealed partial class Engine
         bool pvNode = beta - alpha > 1;
         ShortMove ttBestMove = default;
         NodeType ttElementType = default;
-        int ttEvaluation = default;             // TODO rename ttScore
-        int ttScore = default;                  // TODO rename ttRawScore
+        int ttScore = default;
+        int ttRawScore = default;
 
         if (!isRoot)
         {
-            (ttEvaluation, ttBestMove, ttElementType, ttScore) = _tt.ProbeHash(_ttMask, position, depth, ply, alpha, beta);
-            if (!pvNode && ttEvaluation != EvaluationConstants.NoHashEntry)
+            (ttScore, ttBestMove, ttElementType, ttRawScore) = _tt.ProbeHash(_ttMask, position, depth, ply, alpha, beta);
+            if (!pvNode && ttScore != EvaluationConstants.NoHashEntry)
             {
-                return ttEvaluation;
+                return ttScore;
             }
 
             // Internal iterative reduction (IIR)
@@ -92,9 +92,9 @@ public sealed partial class Engine
             // If the score is outside what the current bounds are, but it did match flag and depth,
             // then we can trust that this score is more accurate than the current static evaluation,
             // and we can update our static evaluation for better accuracy in pruning
-            if (ttElementType != default && ttElementType != (ttScore > staticEval ? NodeType.Alpha : NodeType.Beta))
+            if (ttElementType != default && ttElementType != (ttRawScore > staticEval ? NodeType.Alpha : NodeType.Beta))
             {
-                staticEval = ttScore;
+                staticEval = ttRawScore;
             }
 
             if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
@@ -145,7 +145,7 @@ public sealed partial class Engine
                 && staticEval >= beta
                 && !parentWasNullMove
                 && phase > 2   // Zugzwang risk reduction: pieces other than pawn presents
-                && (ttElementType != NodeType.Alpha || ttEvaluation >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
+                && (ttElementType != NodeType.Alpha || ttScore >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
             {
                 var nmpReduction = Configuration.EngineSettings.NMP_BaseDepthReduction + ((depth + Configuration.EngineSettings.NMP_DepthIncrement) / Configuration.EngineSettings.NMP_DepthDivisor);   // Clarity
 
@@ -155,12 +155,12 @@ public sealed partial class Engine
                 //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
 
                 var gameState = position.MakeNullMove();
-                var evaluation = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, parentWasNullMove: true);
+                var nmpScore = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, parentWasNullMove: true);
                 position.UnMakeNullMove(gameState);
 
-                if (evaluation >= beta)
+                if (nmpScore >= beta)
                 {
-                    return evaluation;
+                    return nmpScore;
                 }
             }
         }
@@ -168,11 +168,11 @@ public sealed partial class Engine
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
         var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves);
 
-        Span<int> scores = stackalloc int[pseudoLegalMoves.Length];
+        Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
 
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            scores[i] = ScoreMove(pseudoLegalMoves[i], ply, isNotQSearch: true, ttBestMove);
+            moveScores[i] = ScoreMove(pseudoLegalMoves[i], ply, isNotQSearch: true, ttBestMove);
         }
 
         var nodeType = NodeType.Alpha;
@@ -190,9 +190,9 @@ public sealed partial class Engine
             // So just find the first unsearched one with the best score and try it
             for (int j = moveIndex + 1; j < pseudoLegalMoves.Length; j++)
             {
-                if (scores[j] > scores[moveIndex])
+                if (moveScores[j] > moveScores[moveIndex])
                 {
-                    (scores[moveIndex], scores[j], pseudoLegalMoves[moveIndex], pseudoLegalMoves[j]) = (scores[j], scores[moveIndex], pseudoLegalMoves[j], pseudoLegalMoves[moveIndex]);
+                    (moveScores[moveIndex], moveScores[j], pseudoLegalMoves[moveIndex], pseudoLegalMoves[j]) = (moveScores[j], moveScores[moveIndex], pseudoLegalMoves[j], pseudoLegalMoves[moveIndex]);
                 }
             }
 
@@ -240,7 +240,7 @@ public sealed partial class Engine
             else
             {
                 if (!pvNode && !isInCheck
-                    && scores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue) // Quiet move
+                    && moveScores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue) // Quiet move
                 {
                     // Late Move Pruning (LMP) - all quiet moves can be pruned
                     // after searching the first few given by the move ordering algorithm
@@ -309,8 +309,8 @@ public sealed partial class Engine
                 // 🔍 Static Exchange Evaluation (SEE) reduction
                 // Bad captures are reduced more
                 if (!isInCheck
-                    && scores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue
-                    && scores[moveIndex] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
+                    && moveScores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue
+                    && moveScores[moveIndex] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
                 {
                     reduction += Configuration.EngineSettings.SEE_BadCaptureReduction;
                     reduction = Math.Clamp(reduction, 0, depth - 1);
@@ -565,10 +565,10 @@ public sealed partial class Engine
 
         bool isThereAnyValidCapture = false;
 
-        Span<int> scores = stackalloc int[pseudoLegalMoves.Length];
+        Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            scores[i] = ScoreMove(pseudoLegalMoves[i], ply, isNotQSearch: false, ttBestMove);
+            moveScores[i] = ScoreMove(pseudoLegalMoves[i], ply, isNotQSearch: false, ttBestMove);
         }
 
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
@@ -578,16 +578,16 @@ public sealed partial class Engine
             // So just find the first unsearched one with the best score and try it
             for (int j = i + 1; j < pseudoLegalMoves.Length; j++)
             {
-                if (scores[j] > scores[i])
+                if (moveScores[j] > moveScores[i])
                 {
-                    (scores[i], scores[j], pseudoLegalMoves[i], pseudoLegalMoves[j]) = (scores[j], scores[i], pseudoLegalMoves[j], pseudoLegalMoves[i]);
+                    (moveScores[i], moveScores[j], pseudoLegalMoves[i], pseudoLegalMoves[j]) = (moveScores[j], moveScores[i], pseudoLegalMoves[j], pseudoLegalMoves[i]);
                 }
             }
 
             var move = pseudoLegalMoves[i];
 
             // Prune bad captures
-            if (scores[i] < EvaluationConstants.PromotionMoveScoreValue && scores[i] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
+            if (moveScores[i] < EvaluationConstants.PromotionMoveScoreValue && moveScores[i] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
             {
                 continue;
             }
