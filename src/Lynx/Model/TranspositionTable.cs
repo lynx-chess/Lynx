@@ -94,7 +94,7 @@ public static class TranspositionTableExtensions
     /// <param name="beta"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static (int Evaluation, ShortMove BestMove, NodeType NodeType, int RawScore) ProbeHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int alpha, int beta)
+    public static (int Score, ShortMove BestMove, NodeType NodeType, int RawScore) ProbeHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int alpha, int beta)
     {
         ref var entry = ref tt[position.UniqueIdentifier & ttMask];
 
@@ -103,24 +103,24 @@ public static class TranspositionTableExtensions
             return (EvaluationConstants.NoHashEntry, default, default, default);
         }
 
-        var eval = EvaluationConstants.NoHashEntry;
+        var rawScore = entry.Score;
+        var score = EvaluationConstants.NoHashEntry;
 
         if (entry.Depth >= depth)
         {
-            // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
-            // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
-            var score = RecalculateMateScores(entry.Score, ply);
+            var recalculatedScore = RecalculateMateScores(rawScore, ply);
 
-            eval = entry.Type switch
+            if (entry.Type == NodeType.Exact
+                || (entry.Type == NodeType.Alpha && recalculatedScore <= alpha)
+                || (entry.Type == NodeType.Beta && recalculatedScore >= beta))
             {
-                NodeType.Exact => score,
-                NodeType.Alpha when score <= alpha => score,
-                NodeType.Beta when score >= beta => score,
-                _ => EvaluationConstants.NoHashEntry
-            };
+                // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
+                // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
+                score = recalculatedScore;
+        }
         }
 
-        return (eval, entry.Move, entry.Type, entry.Score);
+        return (score, entry.Move, entry.Type, rawScore);
     }
 
     /// <summary>

@@ -530,9 +530,9 @@ public sealed partial class Engine
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
         var ttProbeResult = _tt.ProbeHash(_ttMask, position, 0, ply, alpha, beta);
-        if (ttProbeResult.Evaluation != EvaluationConstants.NoHashEntry)
+        if (ttProbeResult.Score != EvaluationConstants.NoHashEntry)
         {
-            return ttProbeResult.Evaluation;
+            return ttProbeResult.Score;
         }
         ShortMove ttBestMove = ttProbeResult.BestMove;
 
