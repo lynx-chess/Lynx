@@ -74,10 +74,10 @@ public class TranspositionTableTests
         Assert.AreEqual(expectedEvaluation, TranspositionTableExtensions.RecalculateMateScores(evaluation, depth));
     }
 
-    [TestCase(+19, NodeType.Alpha, +20, +30, 20)]
+    [TestCase(+19, NodeType.Alpha, +20, +30, +19)]
     [TestCase(+21, NodeType.Alpha, +20, +30, NoHashEntry)]
     [TestCase(+29, NodeType.Beta, +20, +30, NoHashEntry)]
-    [TestCase(+31, NodeType.Beta, +20, +30, 30)]
+    [TestCase(+31, NodeType.Beta, +20, +30, +31)]
     public void RecordHash_ProbeHash(int recordedEval, NodeType recordNodeType, int probeAlpha, int probeBeta, int expectedProbeEval)
     {
         var position = new Position(Constants.InitialPositionFEN);
