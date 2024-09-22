@@ -175,14 +175,19 @@ public static class TranspositionTableExtensions
     /// <param name="ply"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static int RecalculateMateScores(int score, int ply) =>
-        score
-        + score switch
+    internal static int RecalculateMateScores(int score, int ply)
+    {
+        if (score > EvaluationConstants.PositiveCheckmateDetectionLimit)
         {
-            > EvaluationConstants.PositiveCheckmateDetectionLimit => -EvaluationConstants.CheckmateDepthFactor * ply,
-            < EvaluationConstants.NegativeCheckmateDetectionLimit => EvaluationConstants.CheckmateDepthFactor * ply,
-            _ => 0
-        };
+            return score - (EvaluationConstants.CheckmateDepthFactor * ply);
+        }
+        else if (score < EvaluationConstants.NegativeCheckmateDetectionLimit)
+        {
+            return score + (EvaluationConstants.CheckmateDepthFactor * ply);
+        }
+
+        return score;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int PopulatedItemsCount(this TranspositionTable transpositionTable)
