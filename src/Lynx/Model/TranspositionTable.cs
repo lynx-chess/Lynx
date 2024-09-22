@@ -94,13 +94,13 @@ public static class TranspositionTableExtensions
     /// <param name="beta"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static (int Evaluation, ShortMove BestMove, NodeType NodeType) ProbeHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int alpha, int beta)
+    public static (int Evaluation, ShortMove BestMove, NodeType NodeType, int RawScore) ProbeHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int alpha, int beta)
     {
         ref var entry = ref tt[position.UniqueIdentifier & ttMask];
 
         if ((position.UniqueIdentifier >> 48) != entry.Key)
         {
-            return (EvaluationConstants.NoHashEntry, default, default);
+            return (EvaluationConstants.NoHashEntry, default, default, default);
         }
 
         var eval = EvaluationConstants.NoHashEntry;
@@ -120,7 +120,7 @@ public static class TranspositionTableExtensions
             };
         }
 
-        return (eval, entry.Move, entry.Type);
+        return (eval, entry.Move, entry.Type, entry.Score);
     }
 
     /// <summary>
