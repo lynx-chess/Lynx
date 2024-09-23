@@ -256,7 +256,7 @@ public sealed partial class Engine
                     }
 
                     if (!isCapture
-                        && scores[moveIndex] < EvaluationConstants.CounterMoveValue
+                        && moveScores[moveIndex] < EvaluationConstants.CounterMoveValue
                         && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth)  // TODO use LMR depth
                     {
                         // 🔍 History pruning -  all quiet moves can be pruned
@@ -266,7 +266,7 @@ public sealed partial class Engine
                         {
                             // After making a move
                             Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
-                            Game.PositionHashHistory.RemoveAt(Game.PositionHashHistory.Count - 1);
+                            Game.RemoveFromPositionHashHistory();
                             position.UnmakeMove(move, gameState);
 
                             break;
