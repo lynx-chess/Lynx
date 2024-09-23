@@ -66,7 +66,7 @@ namespace Lynx.Benchmark;
 
 public class PawnAttacks_MultiDimensionalInitialization_Benchmark : BaseBenchmark
 {
-    public static IEnumerable<int> Data => new[] { 64, 1_000, 10_000, 100_000 };
+    public static IEnumerable<int> Data => [64, 1_000, 10_000, 100_000];
 
     /// <summary>
     /// Best for data <= 1000 (64 in real life)

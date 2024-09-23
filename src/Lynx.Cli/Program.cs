@@ -27,7 +27,7 @@ if (Configuration.GeneralSettings.EnableLogging)
 }
 
 var uciChannel = Channel.CreateBounded<string>(new BoundedChannelOptions(100) { SingleReader = true, SingleWriter = true, FullMode = BoundedChannelFullMode.Wait });
-var engineChannel = Channel.CreateBounded<string>(new BoundedChannelOptions(2 * Configuration.EngineSettings.MaxDepth) { SingleReader = true, SingleWriter = false, FullMode = BoundedChannelFullMode.DropOldest });
+var engineChannel = Channel.CreateBounded<object>(new BoundedChannelOptions(2 * Configuration.EngineSettings.MaxDepth) { SingleReader = true, SingleWriter = false, FullMode = BoundedChannelFullMode.DropOldest });
 
 using CancellationTokenSource source = new();
 CancellationToken cancellationToken = source.Token;

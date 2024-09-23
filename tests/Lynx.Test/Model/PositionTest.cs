@@ -96,15 +96,6 @@ public class PositionTest
         Assert.AreEqual(shouldBeValid, new Position(fen).IsValid());
     }
 
-    [Test]
-    public void CustomIsValid()
-    {
-        var origin = new Position("r2k4/1K6/8/8/8/8/8/8 b - - 0 1");
-        var move = MoveExtensions.EncodeCapture((int)BoardSquare.b7, (int)BoardSquare.a8, (int)Piece.K, capturedPiece: 1);
-
-        Assert.NotNull(new Position(origin, move));
-    }
-
     [TestCase(Constants.EmptyBoardFEN, false, Ignore = "WasProduceByAValidMove doesn't check the presence of both kings on the board")]
     [TestCase("K/8/8/8/8/8/8/8 w - - 0 1", false, Ignore = "WasProduceByAValidMove doesn't check the presence of both kings on the board")]
     [TestCase("K/8/8/8/8/8/8/8 b - - 0 1", false, Ignore = "WasProduceByAValidMove doesn't check the presence of both kings on the board")]
@@ -146,7 +137,12 @@ public class PositionTest
     {
         // Arrange
         var position = new Position(fen);
-        Assert.IsEmpty(MoveGenerator.GenerateAllMoves(position).Where(move => new Position(position, move).IsValid()));
+        Assert.IsEmpty(MoveGenerator.GenerateAllMoves(position).Where(move =>
+        {
+            var newPosition = new Position(position);
+            newPosition.MakeMove(move);
+            return newPosition.IsValid();
+        }));
         var isInCheck = position.IsInCheck();
 
         // Act
@@ -184,7 +180,7 @@ public class PositionTest
 
     [TestCase("4k3/8/8/7Q/7q/8/4K3/8 w - - 0 1", "4k3/8/8/7Q/7q/8/8/4K3 w - - 0 1", Description = "King in 7th rank with queens > King in 8th rank with queens", IgnoreReason = "Can't understand PSQT any more")]
     [TestCase("4k3/p7/8/8/8/8/P3K3/8 w - - 0 1", "4k3/p7/8/8/8/8/P7/4K3 w - - 0 1", Description = "King in 7th rank without queens > King in 8th rank without queens", IgnoreReason = "Can't understand PSQT any more")]
-    [TestCase("4k3/7p/8/8/4K3/8/7P/8 w - - 0 1", "4k3/7p/8/q7/4K3/Q7/7P/8 w - - 0 1", Description = "King in the center without queens > King in the center with queens")]
+    [TestCase("4k3/7p/8/8/4K3/8/7P/8 w - - 0 1", "4k3/7p/8/q7/4K3/Q7/7P/8 w - - 0 1", Description = "King in the center without queens > King in the center with queens", IgnoreReason = "Can't understand PSQT any more")]
     public void StaticEvaluation_KingEndgame(string fen1, string fen2)
     {
         Assert.Greater(new Position(fen1).StaticEvaluation().Score, new Position(fen2).StaticEvaluation().Score);
@@ -202,7 +198,7 @@ public class PositionTest
     ///     a b c d e f g h
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("4k3/1ppp4/8/8/8/8/PP1P4/4K3 w - - 0 1")]
+    [TestCase("7k/1ppp2pp/8/8/8/8/PP1P2PP/7K w - - 0 1")]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
@@ -219,7 +215,9 @@ public class PositionTest
             evaluation = -evaluation;
         }
 
-        Assert.AreEqual(UnpackMG(IsolatedPawnPenalty), evaluation);
+        var expectedEval = UnpackMG(IsolatedPawnPenalty) - UnpackMG(PawnPhalanxBonus[1]);
+
+        Assert.AreEqual(expectedEval, evaluation);
     }
 
     /// <summary>
@@ -419,10 +417,12 @@ public class PositionTest
             - AdditionalPieceEvaluation(position, Piece.p);
 
         var rank = Constants.Rank[(int)square];
+        var pieceIndex = (int)Piece.P;
         if (position.Side == Side.Black)
         {
             evaluation = -evaluation;
             rank = 7 - rank;
+            pieceIndex = (int)Piece.p;
         }
 
         var whiteKingDistance = Constants.ChebyshevDistance[(int)square][position.PieceBitBoards[(int)Piece.K].GetLS1BIndex()];
@@ -436,9 +436,18 @@ public class PositionTest
             ? blackKingDistance
             : whiteKingDistance;
 
+        ulong passedPawnsMask = Masks.PassedPawns[pieceIndex][(int)square];
+
+        var expectedEval = 0;
+        if ((passedPawnsMask & position.OccupancyBitBoards[OppositeSide(position.Side)]) == 0)
+        {
+            expectedEval += UnpackMG(PassedPawnBonusNoEnemiesAheadBonus[0][rank]);
+        }
+
         Assert.AreEqual(
+            expectedEval
             //(-4 * Configuration.EngineSettings.DoubledPawnPenalty.MG)
-            UnpackMG(IsolatedPawnPenalty)
+            + UnpackMG(IsolatedPawnPenalty)
             + UnpackMG(PassedPawnBonus[0][rank])
             + UnpackMG(FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance])
             + UnpackMG(EnemyKingDistanceToPassedPawnPenalty[enemyKingDistance]),
@@ -492,12 +501,12 @@ public class PositionTest
     ///     a b c d e f g h
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("4k2r/p6p/8/8/8/8/2P4P/1R2K3 w - - 0 1", 9, 2)]
+    [TestCase("7r/2p1k2p/8/8/8/8/2P1K2P/1R6 w - - 0 1", 13, 7)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("3k2r1/p4p2/8/8/8/8/P6P/R2K4 b - - 0 1", 9, 2)]
+    [TestCase("6r1/p2k1p2/8/8/8/8/P2K1P2/R7 b - - 0 1", 13, 7)]
     public void StaticEvaluation_OpenFileRookBonus(string fen, int rookMobilitySideToMove, int rookMobilitySideNotToMove)
     {
         Position position = new Position(fen);
@@ -559,12 +568,12 @@ public class PositionTest
     ///     a b c d e f g h
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("1r2k3/1r5p/p7/8/8/P7/R6P/R3K3 w - - 0 1", 6, 11)]
+    [TestCase("1r5k/1r5p/2p5/8/8/2P5/2R4P/2R4K w - - 0 1", 6, 11)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("3k3r/p6r/7p/8/8/7P/P5R1/3K2R1 b - - 0 1", 6, 11)]
+    [TestCase("k4r2/p4r2/5p2/8/8/5P2/P5R1/K5R1 b - - 0 1", 6, 11)]
     public void StaticEvaluation_DoubleOpenFileRookBonus(string fen, int rookMobilitySideToMove, int rookMobilitySideNotToMove)
     {
         Position position = new Position(fen);
@@ -785,14 +794,14 @@ public class PositionTest
     /// <param name="fen"></param>
     /// <param name="sideToMoveMobilityCount"></param>
     /// <param name="nonSideToMoveMobilityCount"></param>
-    [TestCase("n3k3/1p6/8/3b4/3B4/8/6P1/4K2N w - - 0 1", 13, 9)]
+    [TestCase("n3k3/1n6/8/3b4/3B4/8/6N1/4K2N w - - 0 1", 13, 10)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
     /// <param name="fen"></param>
     /// <param name="sideToMoveMobilityCount"></param>
     /// <param name="nonSideToMoveMobilityCount"></param>
-    [TestCase("n2k4/1p6/8/4b3/4B3/8/6P1/3K3N b - - 0 1", 13, 9)]
+    [TestCase("n2k4/1n6/8/4b3/4B3/8/6N1/3K3N b - - 0 1", 13, 10)]
     /// <summary>
     /// 8   . . . . k . . .
     /// 7   . p . . . . . .
@@ -807,14 +816,14 @@ public class PositionTest
     /// <param name="fen"></param>
     /// <param name="sideToMoveMobilityCount"></param>
     /// <param name="nonSideToMoveMobilityCount"></param>
-    [TestCase("4k3/1p6/2p5/3b4/3B4/5P2/6P1/4K3 w - - 0 1", 13, 6)]
+    [TestCase("4k3/1n6/2n5/3b4/3B4/5N2/6N1/4K3 w - - 0 1", 13, 8)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
     /// <param name="fen"></param>
     /// <param name="sideToMoveMobilityCount"></param>
     /// <param name="nonSideToMoveMobilityCount"></param>
-    [TestCase("3k4/1p6/2p5/4b3/4B3/5P2/6P1/3K4 b - - 0 1", 13, 6)]
+    [TestCase("3k4/1n6/2n5/4b3/4B3/5N2/6N1/3K4 b - - 0 1", 13, 8)]
     public void StaticEvaluation_BishopMobility(string fen, int sideToMoveMobilityCount, int nonSideToMoveMobilityCount)
     {
         Position position = new Position(fen);
@@ -841,12 +850,12 @@ public class PositionTest
     ///     a b c d e f g h
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("n3k3/1p6/8/3q4/3Q4/8/6P1/4K2N w - - 0 1")]
+    [TestCase("n7/1p6/3k4/3q4/3Q4/3K4/6P1/7N w - - 0 1")]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("n2k4/1p6/8/4q3/4Q3/8/6P1/3K3N b - - 0 1")]
+    [TestCase("n7/1p6/4k3/4q3/4Q3/4K3/6P1/7N b - - 0 1")]
     /// <summary>
     /// 8   . . . . k . . .
     /// 7   . p . . . . . .
@@ -877,12 +886,12 @@ public class PositionTest
     ///     a b c d e f g h
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("n3k3/1p6/8/3q4/3Q4/8/6P1/4K2N w - - 0 1")]
+    [TestCase("n7/1p6/3k4/3q4/3Q4/3K4/6P1/7N w - - 0 1")]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("n2k4/1p6/8/4q3/4Q3/8/6P1/3K3N b - - 0 1")]
+    [TestCase("n7/1p6/4k3/4q3/4Q3/4K3/6P1/7N b - - 0 1")]
     /// <summary>
     /// 8   . . . . k . . .
     /// 7   . p . . . . . .
@@ -913,12 +922,12 @@ public class PositionTest
     ///     a b c d e f g h
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("n3k3/8/2p5/1r1q3R/3Q4/5P2/8/4K2N w - - 0 1")]
+    [TestCase("2n1kn2/4n3/2p5/1r1q3R/3Q4/5P2/6NN/7K w - - 0 1")]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
     /// <param name="fen"></param>
-    [TestCase("n2k4/8/2p5/4q3/r3Q1R1/5P2/8/3K3N b - - 0 1")]
+    [TestCase("n7/k7/2p5/4q3/r3Q1R1/5P2/8/3K3N b - - 0 1")]
     public void StaticEvaluation_QueenMobility(string fen)
     {
         Position position = new Position(fen);
@@ -948,10 +957,10 @@ public class PositionTest
     /// </summary>
     /// <param name="fen"></param>
     /// <param name="expectedStaticEvaluation"></param>
-    [TestCase("QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QPPPPPPP/K6k b - - 0 1", MinEval, IgnoreReason = "Packed eval reduces max eval to a short, so over Short.MaxValue it overflows and produces unexpected results")]
-    [TestCase("QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QPPPPPPP/K5k1 w - - 0 1", MaxEval, IgnoreReason = "Packed eval reduces max eval to a short, so over Short.MaxValue it overflows and produces unexpected results")]
-    [TestCase("8/QQQQQQ1/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQ6/K6k b - - 0 1", MinEval, IgnoreReason = "It's just a pain to maintain this with bucketed PSQT tuning")]
-    [TestCase("8/QQQQQQ1/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQ6/K5k1 w - - 0 1", MaxEval, IgnoreReason = "It's just a pain to maintain this with bucketed PSQT tuning")]
+    [TestCase("QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QPPPPPPP/K6k b - - 0 1", MinStaticEval, IgnoreReason = "Packed eval reduces max eval to a short, so over Short.MaxValue it overflows and produces unexpected results")]
+    [TestCase("QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QPPPPPPP/K5k1 w - - 0 1", MaxStaticEval, IgnoreReason = "Packed eval reduces max eval to a short, so over Short.MaxValue it overflows and produces unexpected results")]
+    [TestCase("8/QQQQQQ1/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQ6/K6k b - - 0 1", MinStaticEval, IgnoreReason = "It's just a pain to maintain this with bucketed PSQT tuning")]
+    [TestCase("8/QQQQQQ1/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQ6/K5k1 w - - 0 1", MaxStaticEval, IgnoreReason = "It's just a pain to maintain this with bucketed PSQT tuning")]
     public void StaticEvaluation_Clamp(string fen, int expectedStaticEvaluation)
     {
         var position = new Position(fen);

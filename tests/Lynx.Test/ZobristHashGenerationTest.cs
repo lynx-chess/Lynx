@@ -10,10 +10,14 @@ public class ZobristHashGenerationTest
     {
         var originalPosition = new Position(Constants.InitialPositionFEN);
 
-        var position = new Position(originalPosition, MoveGenerator.GenerateAllMoves(originalPosition).Single(m => m.UCIString() == "g1f3"));
-        position = new Position(position, MoveGenerator.GenerateAllMoves(position).Single(m => m.UCIString() == "g8f6"));
-        position = new Position(position, MoveGenerator.GenerateAllMoves(position).Single(m => m.UCIString() == "f3g1"));
-        position = new Position(position, MoveGenerator.GenerateAllMoves(position).Single(m => m.UCIString() == "f6g8"));
+        var position = new Position(originalPosition);
+        position.MakeMove(MoveGenerator.GenerateAllMoves(originalPosition).Single(m => m.UCIString() == "g1f3"));
+        position = new Position(position);
+        position.MakeMove(MoveGenerator.GenerateAllMoves(position).Single(m => m.UCIString() == "g8f6"));
+        position = new Position(position);
+        position.MakeMove(MoveGenerator.GenerateAllMoves(position).Single(m => m.UCIString() == "f3g1"));
+        position = new Position(position);
+        position.MakeMove(MoveGenerator.GenerateAllMoves(position).Single(m => m.UCIString() == "f6g8"));
 
         Assert.AreEqual(originalPosition.UniqueIdentifier, position.UniqueIdentifier);
     }
@@ -58,7 +62,8 @@ public class ZobristHashGenerationTest
     {
         foreach (var move in MoveGenerator.GenerateAllMoves(originalPosition))
         {
-            var newPosition = new Position(originalPosition, move);
+            var newPosition = new Position(originalPosition);
+            newPosition.MakeMove(move);
             if (!newPosition.IsValid())
             {
                 continue;

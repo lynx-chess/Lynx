@@ -1,6 +1,8 @@
 ﻿using Lynx.Model;
 using NUnit.Framework;
 using System.Collections.Frozen;
+using System.Diagnostics;
+using static Lynx.Constants;
 
 namespace Lynx.Test;
 
@@ -47,7 +49,7 @@ public class ConstantsTest
         {
             if (value > 0 && value != Piece.None)
             {
-                Assert.AreEqual(value, Constants.PiecesByChar[value.ToString()[0]]);
+                Assert.AreEqual(value, PiecesByChar[value.ToString()[0]]);
             }
         }
     }
@@ -98,10 +100,10 @@ public class ConstantsTest
         bb.SetBit(BoardSquare.h1);
 
         Assert.NotZero(bb & Constants.HFile);
-        Assert.Zero(bb & Constants.NotHFile);
+        Assert.Zero(bb & NotHFile);
         Assert.Zero(bb & Constants.AFile);
 
-        Assert.AreEqual(Constants.NotHFile, ~Constants.HFile);
+        Assert.AreEqual(NotHFile, ~Constants.HFile);
     }
 
     [Test]
@@ -111,9 +113,38 @@ public class ConstantsTest
         bb.SetBit(BoardSquare.a1);
 
         Assert.NotZero(bb & Constants.AFile);
-        Assert.Zero(bb & Constants.NotAFile);
+        Assert.Zero(bb & NotAFile);
         Assert.Zero(bb & Constants.HFile);
 
-        Assert.AreEqual(Constants.NotAFile, ~Constants.AFile);
+        Assert.AreEqual(NotAFile, ~Constants.AFile);
+    }
+
+    [Test]
+    public void DarkLightSquares()
+    {
+        for (int i = 0; i < 64; ++i)
+        {
+            Assert.True(DarkSquaresBitBoard.GetBit(i) ^ LightSquaresBitBoard.GetBit(i));
+        }
+
+        Assert.True(DarkSquaresBitBoard.GetBit((int)BoardSquare.a1));
+        Assert.True(DarkSquaresBitBoard.GetBit((int)BoardSquare.h8));
+        Assert.False(DarkSquaresBitBoard.GetBit((int)BoardSquare.a8));
+        Assert.False(DarkSquaresBitBoard.GetBit((int)BoardSquare.h1));
+
+        Assert.AreEqual(1, DarkSquares[(int)BoardSquare.a1]);
+        Assert.AreEqual(1, DarkSquares[(int)BoardSquare.h8]);
+        Assert.AreEqual(0, DarkSquares[(int)BoardSquare.a8]);
+        Assert.AreEqual(0, DarkSquares[(int)BoardSquare.h1]);
+
+        Assert.True(LightSquaresBitBoard.GetBit((int)BoardSquare.a8));
+        Assert.True(LightSquaresBitBoard.GetBit((int)BoardSquare.h1));
+        Assert.False(LightSquaresBitBoard.GetBit((int)BoardSquare.a1));
+        Assert.False(LightSquaresBitBoard.GetBit((int)BoardSquare.h8));
+
+        Assert.AreEqual(1, LightSquares[(int)BoardSquare.a8]);
+        Assert.AreEqual(1, LightSquares[(int)BoardSquare.h1]);
+        Assert.AreEqual(0, LightSquares[(int)BoardSquare.a1]);
+        Assert.AreEqual(0, LightSquares[(int)BoardSquare.h8]);
     }
 }

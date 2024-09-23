@@ -49,15 +49,6 @@ public struct TranspositionTableElement
     public int Score { readonly get => _score; set => _score = (short)value; }
 
     public long Key { readonly get => _key; set => _key = (ShortMove)(value >> 48); }
-
-    public void Clear()
-    {
-        Key = 0;
-        Score = 0;
-        Depth = 0;
-        Move = 0;
-        Type = NodeType.Unknown;
-    }
 }
 
 public static class TranspositionTableExtensions
@@ -91,15 +82,6 @@ public static class TranspositionTableExtensions
         return ((int)ttLength, (int)mask);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void ClearTranspositionTable(this TranspositionTable transpositionTable)
-    {
-        foreach (var element in transpositionTable)
-        {
-            element.Clear();
-        }
-    }
-
     /// <summary>
     /// Checks the transposition table and, if there's a eval value that can be deducted from it of there's a previously recorded <paramref name="position"/>, it's returned. <see cref="EvaluationConstants.NoHashEntry"/> is returned otherwise
     /// </summary>
@@ -112,7 +94,7 @@ public static class TranspositionTableExtensions
     /// <param name="beta"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static (int Evaluation, ShortMove BestMove, NodeType NodeType, int score) ProbeHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int alpha, int beta)
+    public static (int Score, ShortMove BestMove, NodeType NodeType, int RawScore) ProbeHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int alpha, int beta)
     {
         ref var entry = ref tt[position.UniqueIdentifier & ttMask];
 
@@ -121,24 +103,24 @@ public static class TranspositionTableExtensions
             return (EvaluationConstants.NoHashEntry, default, default, default);
         }
 
-        var eval = EvaluationConstants.NoHashEntry;
+        var rawScore = entry.Score;
+        var score = EvaluationConstants.NoHashEntry;
 
         if (entry.Depth >= depth)
         {
-            // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
-            // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
-            var score = RecalculateMateScores(entry.Score, ply);
+            var recalculatedScore = RecalculateMateScores(rawScore, ply);
 
-            eval = entry.Type switch
+            if (entry.Type == NodeType.Exact
+                || (entry.Type == NodeType.Alpha && recalculatedScore <= alpha)
+                || (entry.Type == NodeType.Beta && recalculatedScore >= beta))
             {
-                NodeType.Exact => score,
-                NodeType.Alpha when score <= alpha => alpha,
-                NodeType.Beta when score >= beta => beta,
-                _ => EvaluationConstants.NoHashEntry
-            };
+                // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
+                // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
+                score = recalculatedScore;
+        }
         }
 
-        return (eval, entry.Move, entry.Type, entry.Score);
+        return (score, entry.Move, entry.Type, rawScore);
     }
 
     /// <summary>
@@ -193,14 +175,19 @@ public static class TranspositionTableExtensions
     /// <param name="ply"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static int RecalculateMateScores(int score, int ply) =>
-        score
-        + score switch
+    internal static int RecalculateMateScores(int score, int ply)
+    {
+        if (score > EvaluationConstants.PositiveCheckmateDetectionLimit)
         {
-            > EvaluationConstants.PositiveCheckmateDetectionLimit => -EvaluationConstants.CheckmateDepthFactor * ply,
-            < EvaluationConstants.NegativeCheckmateDetectionLimit => EvaluationConstants.CheckmateDepthFactor * ply,
-            _ => 0
-        };
+            return score - (EvaluationConstants.CheckmateDepthFactor * ply);
+        }
+        else if (score < EvaluationConstants.NegativeCheckmateDetectionLimit)
+        {
+            return score + (EvaluationConstants.CheckmateDepthFactor * ply);
+        }
+
+        return score;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int PopulatedItemsCount(this TranspositionTable transpositionTable)

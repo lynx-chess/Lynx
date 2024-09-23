@@ -351,6 +351,69 @@ public static class Constants
         0, 1, 2, 3, 4, 5, 6, 7
     ];
 
+    public static ReadOnlySpan<int> LightSquares =>
+    [
+        1, 0, 1, 0, 1, 0, 1, 0,
+        0, 1, 0, 1, 0, 1, 0, 1,
+        1, 0, 1, 0, 1, 0, 1, 0,
+        0, 1, 0, 1, 0, 1, 0, 1,
+        1, 0, 1, 0, 1, 0, 1, 0,
+        0, 1, 0, 1, 0, 1, 0, 1,
+        1, 0, 1, 0, 1, 0, 1, 0,
+        0, 1, 0, 1, 0, 1, 0, 1,
+    ];
+
+    public static ReadOnlySpan<int> DarkSquares =>
+    [
+        0, 1, 0, 1, 0, 1, 0, 1,
+        1, 0, 1, 0, 1, 0, 1, 0,
+        0, 1, 0, 1, 0, 1, 0, 1,
+        1, 0, 1, 0, 1, 0, 1, 0,
+        0, 1, 0, 1, 0, 1, 0, 1,
+        1, 0, 1, 0, 1, 0, 1, 0,
+        0, 1, 0, 1, 0, 1, 0, 1,
+        1, 0, 1, 0, 1, 0, 1, 0,
+    ];
+
+    /// <summary>
+    /// 8   1 0 1 0 1 0 1 0
+    /// 7   0 1 0 1 0 1 0 1
+    /// 6   1 0 1 0 1 0 1 0
+    /// 5   0 1 0 1 0 1 0 1
+    /// 4   1 0 1 0 1 0 1 0
+    /// 3   0 1 0 1 0 1 0 1
+    /// 2   1 0 1 0 1 0 1 0
+    /// 1   0 1 0 1 0 1 0 1
+    ///     a b c d e f g h
+    /// </summary>
+    public const BitBoard LightSquaresBitBoard = 0xAA55AA55AA55AA55UL;
+
+    /// <summary>
+    /// 8   0 1 0 1 0 1 0 1
+    /// 7   1 0 1 0 1 0 1 0
+    /// 6   0 1 0 1 0 1 0 1
+    /// 5   1 0 1 0 1 0 1 0
+    /// 4   0 1 0 1 0 1 0 1
+    /// 3   1 0 1 0 1 0 1 0
+    /// 2   0 1 0 1 0 1 0 1
+    /// 1   1 0 1 0 1 0 1 0
+    ///     a b c d e f g h
+    /// </summary>
+    public const BitBoard DarkSquaresBitBoard = 0x55AA55AA55AA55AAUL;
+
+    /// <summary>
+    /// 8   0 0 1 1 1 1 0 0
+    /// 7   0 0 1 1 1 1 0 0
+    /// 6   0 0 1 1 1 1 0 0
+    /// 5   0 0 1 1 1 1 0 0
+    /// 4   0 0 1 1 1 1 0 0
+    /// 3   0 0 1 1 1 1 0 0
+    /// 2   0 0 1 1 1 1 0 0
+    /// 1   0 0 1 1 1 1 0 0
+    ///     a b c d e f g h
+    /// </summary>
+    public const BitBoard CentralFiles = 0x3c3c3c3c3c3c3c3c;
+
     public static ReadOnlySpan<char> FileString => [ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' ];
 
     public const int AbsoluteMaxDepth = 255;
