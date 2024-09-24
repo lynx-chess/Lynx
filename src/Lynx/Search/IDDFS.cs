@@ -114,14 +114,15 @@ public sealed partial class Engine
                 }
                 else
                 {
-                    // 🔍 Aspiration Windows
+                    // 🔍 Aspiration windows
                     var window = Configuration.EngineSettings.AspirationWindow_Base;
 
                     alpha = Math.Max(EvaluationConstants.MinEval, lastSearchResult.Evaluation - window);
                     beta = Math.Min(EvaluationConstants.MaxEval, lastSearchResult.Evaluation + window);
 
+                    _logger.Debug("Aspiration windows: [{Alpha}, {Beta}] for eval {Eval}, nodes {Nodes}, depth {Depth}",
+                        alpha, beta, lastSearchResult.Evaluation, _nodes, depth);
                     Debug.Assert(lastSearchResult.Mate == 0 && lastSearchResult.Evaluation > EvaluationConstants.NegativeCheckmateDetectionLimit && lastSearchResult.Evaluation < EvaluationConstants.PositiveCheckmateDetectionLimit);
-                    _logger.Debug("[{{alpha}}, {{beta}}], {{last search eval}} -> [{Alpha}, {Beta}], {Eval}", alpha, beta, lastSearchResult.Evaluation);
 
                     while (true)
                     {
@@ -144,8 +145,7 @@ public sealed partial class Engine
                             break;
                         }
 
-                        _logger.Debug("Eval ({0}) (depth {1}, nodes {2}) outside of aspiration window, new window [{3}, {4}]",
-                            bestEvaluation, depth, _nodes, alpha, beta);
+                        _logger.Debug("Aspiration windows: eval {Eval} outside of aspiration window", bestEvaluation);
                     }
                 }
 
