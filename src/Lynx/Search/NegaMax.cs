@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Lynx;
@@ -391,9 +392,11 @@ public sealed partial class Engine
 
         if (!isAnyMoveValid)
         {
-            var eval = Position.EvaluateFinalPosition(ply, isInCheck);
+            Debug.Assert(bestMove is null);
 
+            var eval = Position.EvaluateFinalPosition(ply, isInCheck);
             _tt.RecordHash(_ttMask, position, depth, ply, eval, NodeType.Exact);
+
             return eval;
         }
 
@@ -552,6 +555,8 @@ public sealed partial class Engine
         if (!isAnyCaptureValid
             && !MoveGenerator.CanGenerateAtLeastAValidMove(position)) // Bad captures can be pruned, so all moves need to be generated for now
         {
+            Debug.Assert(bestMove is null);
+
             var finalEval = Position.EvaluateFinalPosition(ply, position.IsInCheck());
             _tt.RecordHash(_ttMask, position, 0, ply, finalEval, NodeType.Exact);
 
