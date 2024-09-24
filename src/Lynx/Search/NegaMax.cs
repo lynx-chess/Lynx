@@ -389,7 +389,7 @@ public sealed partial class Engine
             ++visitedMovesCounter;
         }
 
-        if (bestMove is null && !isAnyMoveValid)
+        if (!isAnyMoveValid)
         {
             var eval = Position.EvaluateFinalPosition(ply, isInCheck);
 
@@ -470,7 +470,7 @@ public sealed partial class Engine
         Move? bestMove = null;
         int bestScore = staticEvaluation;
 
-        bool isThereAnyValidCapture = false;
+        bool isAnyCaptureValid = false;
 
         Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
@@ -493,7 +493,7 @@ public sealed partial class Engine
 
             var move = pseudoLegalMoves[i];
 
-            // Prune bad captures
+            // 🔍 QSearch SEE pruning: pruning bad captures
             if (moveScores[i] < EvaluationConstants.PromotionMoveScoreValue && moveScores[i] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
             {
                 continue;
@@ -507,7 +507,7 @@ public sealed partial class Engine
             }
 
             ++_nodes;
-            isThereAnyValidCapture = true;
+            isAnyCaptureValid = true;
 
             PrintPreMove(position, ply, move, isQuiescence: true);
 
@@ -549,9 +549,8 @@ public sealed partial class Engine
             }
         }
 
-        if (bestMove is null
-            && !isThereAnyValidCapture
-            && !MoveGenerator.CanGenerateAtLeastAValidMove(position))
+        if (!isAnyCaptureValid
+            && !MoveGenerator.CanGenerateAtLeastAValidMove(position)) // Bad captures can be pruned, so all moves need to be generated for now
         {
             var finalEval = Position.EvaluateFinalPosition(ply, position.IsInCheck());
             _tt.RecordHash(_ttMask, position, 0, ply, finalEval, NodeType.Exact);
