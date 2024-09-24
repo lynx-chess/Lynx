@@ -106,20 +106,29 @@ public sealed partial class Engine
                 _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
                 _nodes = 0;
 
-                if (depth < Configuration.EngineSettings.AspirationWindow_MinDepth || lastSearchResult?.Evaluation is null)
+                if (depth < Configuration.EngineSettings.AspirationWindow_MinDepth
+                    || lastSearchResult?.Evaluation is null
+                    || lastSearchResult.Mate != 0)
                 {
                     bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta);
                 }
                 else
                 {
-                    // 🔍 Aspiration Windows
+                    // 🔍 Aspiration windows
                     var window = Configuration.EngineSettings.AspirationWindow_Base;
 
                     alpha = Math.Max(EvaluationConstants.MinEval, lastSearchResult.Evaluation - window);
                     beta = Math.Min(EvaluationConstants.MaxEval, lastSearchResult.Evaluation + window);
 
+                    _logger.Debug("Aspiration windows: [{Alpha}, {Beta}] for eval {Eval}, nodes {Nodes}, depth {Depth}",
+                        alpha, beta, lastSearchResult.Evaluation, _nodes, depth);
+                    Debug.Assert(lastSearchResult.Mate == 0 && lastSearchResult.Evaluation > EvaluationConstants.NegativeCheckmateDetectionLimit && lastSearchResult.Evaluation < EvaluationConstants.PositiveCheckmateDetectionLimit);
+
                     while (true)
                     {
+                        _logger.Debug("Aspiration windows: [{Alpha}, {Beta}] for eval {Eval}, nodes {Nodes}, depth {Depth}",
+                            alpha, beta, bestEvaluation, _nodes, depth);
+
                         bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta);
 
                         window += window >> 1;   // window / 2
@@ -139,8 +148,7 @@ public sealed partial class Engine
                             break;
                         }
 
-                        _logger.Debug("Eval ({0}) (depth {1}, nodes {2}) outside of aspiration window, new window [{3}, {4}]",
-                            bestEvaluation, depth, _nodes, alpha, beta);
+                        _logger.Debug("Aspiration windows: eval {Eval} outside of aspiration window", bestEvaluation);
                     }
                 }
 
