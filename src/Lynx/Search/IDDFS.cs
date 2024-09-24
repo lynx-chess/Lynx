@@ -106,7 +106,9 @@ public sealed partial class Engine
                 _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
                 _nodes = 0;
 
-                if (depth < Configuration.EngineSettings.AspirationWindow_MinDepth || lastSearchResult?.Evaluation is null)
+                if (depth < Configuration.EngineSettings.AspirationWindow_MinDepth
+                    || lastSearchResult?.Evaluation is null
+                    || lastSearchResult.Mate != 0)
                 {
                     bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta);
                 }
@@ -117,6 +119,9 @@ public sealed partial class Engine
 
                     alpha = Math.Max(EvaluationConstants.MinEval, lastSearchResult.Evaluation - window);
                     beta = Math.Min(EvaluationConstants.MaxEval, lastSearchResult.Evaluation + window);
+
+                    Debug.Assert(lastSearchResult.Mate == 0 && lastSearchResult.Evaluation > EvaluationConstants.NegativeCheckmateDetectionLimit && lastSearchResult.Evaluation < EvaluationConstants.PositiveCheckmateDetectionLimit);
+                    _logger.Debug("[{{alpha}}, {{beta}}], {{last search eval}} -> [{Alpha}, {Beta}], {Eval}", alpha, beta, lastSearchResult.Evaluation);
 
                     while (true)
                     {
