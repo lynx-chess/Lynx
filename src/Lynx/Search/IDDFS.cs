@@ -126,6 +126,9 @@ public sealed partial class Engine
 
                     while (true)
                     {
+                        _logger.Debug("Aspiration windows: [{Alpha}, {Beta}] for eval {Eval}, nodes {Nodes}, depth {Depth}",
+                            alpha, beta, bestEvaluation, _nodes, depth);
+
                         bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta);
 
                         window += window >> 1;   // window / 2
