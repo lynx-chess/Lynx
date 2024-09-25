@@ -275,6 +275,11 @@ public sealed partial class Engine
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
                 score = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
+
+                if (score == bestScore)
+                {
+                    _logger.Debug("Full search in first visited move returned minEval");
+                }
             }
             else
             {
@@ -358,8 +363,18 @@ public sealed partial class Engine
                     reduction = Math.Clamp(reduction, 0, depth - 1);
                 }
 
+                if (bestScore == EvaluationConstants.MinEval)
+                {
+                    _logger.Debug("Before reduced depth, [alpha = {Alpha}, beta = {Beta}]", alpha, beta);
+                }
+
                 // Search with reduced depth
                 score = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha);
+
+                if (bestScore == EvaluationConstants.MinEval)
+                {
+                    _logger.Debug("Reduced depth result, {Score}", score);
+                }
 
                 // 🔍 Principal Variation Search (PVS)
                 if (score > alpha && reduction > 0)
@@ -370,6 +385,11 @@ public sealed partial class Engine
 
                     // Search with full depth but narrowed score bandwidth
                     score = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha);
+
+                    if (bestScore == EvaluationConstants.MinEval)
+                    {
+                        _logger.Debug("Narrowed full depth result, {Score}", score);
+                    }
                 }
 
                 if (score > alpha && score < beta)
@@ -378,6 +398,11 @@ public sealed partial class Engine
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
                     score = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
+
+                    if (bestScore == EvaluationConstants.MinEval)
+                    {
+                        _logger.Debug("Full bandwith full depth result, {Score}", score);
+                    }
                 }
             }
 
@@ -388,6 +413,11 @@ public sealed partial class Engine
             position.UnmakeMove(move, gameState);
 
             PrintMove(position, ply, move, score);
+
+            if (score == bestScore)
+            {
+                _logger.Debug("We somehow managed to get a score equals to minEval");
+            }
 
             if (score > bestScore)
             {
@@ -459,7 +489,8 @@ public sealed partial class Engine
 
         if (bestScore == EvaluationConstants.MinEval)
         {
-            _logger.Debug("Returning minEval from fail low node at depth {Depth}", depth);
+            _logger.Debug("Returning minEval from fail low node at depth {Depth}, ply {Ply}, after {Moves}", depth, ply, visitedMovesCounter);
+            _logger.Debug("Visited moves: {Moves}", string.Join(' ', visitedMoves.ToArray()));
         }
 
         return bestScore;
@@ -631,7 +662,7 @@ public sealed partial class Engine
 
             _logger.Debug("[QUI] No legal moves found for {Position}, position evaluated as {FinalEval}", position.FEN(), finalEval);
 
-            if (ttProbeResult.Score == EvaluationConstants.MinEval)
+            if (finalEval == EvaluationConstants.MinEval)
             {
                 _logger.Debug("[QUI] Returning minEval from final position evaluation at ply {Ply}", ply);
             }
@@ -641,7 +672,7 @@ public sealed partial class Engine
 
         _tt.RecordHash(_ttMask, position, 0, ply, bestScore, nodeType, bestMove);
 
-        if (ttProbeResult.Score == EvaluationConstants.MinEval)
+        if (bestScore == EvaluationConstants.MinEval)
         {
             _logger.Debug("[QUI] Returning minEval from fail low node at ply {Ply}", ply);
         }
