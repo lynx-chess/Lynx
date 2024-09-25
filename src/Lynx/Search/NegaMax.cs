@@ -94,6 +94,12 @@ public sealed partial class Engine
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
             _tt.RecordHash(_ttMask, position, depth, ply, finalPositionEvaluation, NodeType.Exact);
+
+
+            if (finalPositionEvaluation == EvaluationConstants.MinEval)
+            {
+                _logger.Debug("[QUI] Returning minEval from dinL POAIRION evaluation 0 at depth {Depth} at ply {Ply}", depth, ply);
+            }
             return finalPositionEvaluation;
         }
         else if (!pvNode)
@@ -547,6 +553,12 @@ public sealed partial class Engine
         if (staticEvaluation >= beta)
         {
             PrintMessage(ply - 1, "Pruning before starting quiescence search");
+
+
+            if (staticEvaluation == EvaluationConstants.MinEval)
+            {
+                _logger.Debug("[QUI] Returning minEval from static evaluation beta cutoff at ply {Ply}", ply);
+            }
             return staticEvaluation;
         }
 
@@ -561,6 +573,13 @@ public sealed partial class Engine
         if (pseudoLegalMoves.Length == 0)
         {
             // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358
+
+
+            if (staticEvaluation == EvaluationConstants.MinEval)
+            {
+                _logger.Debug("[QUI] Returning minEval from static evaluation II (final pos) at ply {Ply}", ply);
+            }
+
             return staticEvaluation;
         }
 
