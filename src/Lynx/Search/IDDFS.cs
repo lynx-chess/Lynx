@@ -152,6 +152,7 @@ public sealed partial class Engine
 
                 //PrintPvTable(depth: depth);
                 ValidatePVTable();
+                Debug.Assert(bestScore != EvaluationConstants.MinEval);
 
                 var bestScoreAbs = Math.Abs(bestScore);
                 isMateDetected = bestScoreAbs > EvaluationConstants.PositiveCheckmateDetectionLimit;
