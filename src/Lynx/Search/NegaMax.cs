@@ -240,7 +240,7 @@ public sealed partial class Engine
             }
             else
             {
-                // If we prune while getting checmated, we risk not finding any move and having an empty PV
+                // If we prune while getting checkmated, we risk not finding any move and having an empty PV
                 bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
 
                 if (!pvNode && !isInCheck && isNotGettingCheckmated
@@ -499,6 +499,7 @@ public sealed partial class Engine
 
             var move = pseudoLegalMoves[i];
 
+            // If we prune while getting checkmated, we risk not finding any move and having an empty PV
             bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
 
             // 🔍 QSearch SEE pruning: pruning bad captures
