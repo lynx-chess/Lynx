@@ -115,7 +115,7 @@ public class InfoCommand_CopilotRefactoring_Benchmark : BaseBenchmark
             sb.Append(" depth ").Append(searchResult.Depth);
             sb.Append(" seldepth ").Append(searchResult.DepthReached);
             sb.Append(" multipv 1");
-            sb.Append(" score ").Append(searchResult.Mate == default ? $"cp {WDL.NormalizeScore(searchResult.Evaluation)}" : $"mate {searchResult.Mate}");
+            sb.Append(" score ").Append(searchResult.Mate == default ? $"cp {WDL.NormalizeScore(searchResult.Score)}" : $"mate {searchResult.Mate}");
             sb.Append(" nodes ").Append(searchResult.Nodes);
             sb.Append(" nps ").Append(searchResult.NodesPerSecond);
             sb.Append(" time ").Append(searchResult.Time)
@@ -142,7 +142,7 @@ public class InfoCommand_CopilotRefactoring_Benchmark : BaseBenchmark
               .Append(" depth ").Append(searchResult.Depth)
               .Append(" seldepth ").Append(searchResult.DepthReached)
               .Append(" multipv 1")
-              .Append(" score ").Append(searchResult.Mate == default ? "cp " + WDL.NormalizeScore(searchResult.Evaluation) : "mate " + searchResult.Mate)
+              .Append(" score ").Append(searchResult.Mate == default ? "cp " + WDL.NormalizeScore(searchResult.Score) : "mate " + searchResult.Mate)
               .Append(" nodes ").Append(searchResult.Nodes)
               .Append(" nps ").Append(searchResult.NodesPerSecond)
               .Append(" time ").Append(searchResult.Time);

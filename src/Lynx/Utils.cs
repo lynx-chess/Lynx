@@ -161,17 +161,17 @@ public static class Utils
     }
 
     /// <summary>
-    /// Providing there's a checkmate detected in <paramref name="bestEvaluation"/>, returns in how many moves
+    /// Providing there's a checkmate detected in <paramref name="score"/>, returns in how many moves
     /// </summary>
-    /// <param name="bestEvaluation"></param>
-    /// <param name="bestEvaluationAbs"></param>
+    /// <param name="score"></param>
+    /// <param name="bestScoreAbs"></param>
     /// <returns>Positive value if white is checkmating, negative value if black is</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int CalculateMateInX(int bestEvaluation, int bestEvaluationAbs)
+    public static int CalculateMateInX(int score, int bestScoreAbs)
     {
-        int mate = (int)Math.Ceiling(0.5 * ((EvaluationConstants.CheckMateBaseEvaluation - bestEvaluationAbs) / EvaluationConstants.CheckmateDepthFactor));
+        int mate = (int)Math.Ceiling(0.5 * ((EvaluationConstants.CheckMateBaseEvaluation - bestScoreAbs) / EvaluationConstants.CheckmateDepthFactor));
 
-        return (int)Math.CopySign(mate, bestEvaluation);
+        return (int)Math.CopySign(mate, score);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

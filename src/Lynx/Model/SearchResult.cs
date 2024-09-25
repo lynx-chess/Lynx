@@ -14,7 +14,7 @@ public sealed class SearchResult
 
     public long NodesPerSecond { get; set; }
 
-    public int Evaluation { get; init; }
+    public int Score { get; init; }
 
     public int Depth { get; set; }
 
@@ -26,10 +26,10 @@ public sealed class SearchResult
 
     public Move BestMove { get; init; }
 
-    public SearchResult(Move bestMove, int evaluation, int targetDepth, Move[] moves, int mate = default)
+    public SearchResult(Move bestMove, int score, int targetDepth, Move[] moves, int mate = default)
     {
         BestMove = bestMove;
-        Evaluation = evaluation;
+        Score = score;
         Depth = targetDepth;
         Moves = moves;
         Mate = mate;
@@ -43,7 +43,7 @@ public sealed class SearchResult
           .Append(" depth ").Append(Depth)
           .Append(" seldepth ").Append(DepthReached)
           .Append(" multipv 1")
-          .Append(" score ").Append(Mate == default ? "cp " + Lynx.WDL.NormalizeScore(Evaluation) : "mate " + Mate)
+          .Append(" score ").Append(Mate == default ? "cp " + Lynx.WDL.NormalizeScore(Score) : "mate " + Mate)
           .Append(" nodes ").Append(Nodes)
           .Append(" nps ").Append(NodesPerSecond)
           .Append(" time ").Append(Time);
