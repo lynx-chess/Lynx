@@ -522,7 +522,7 @@ public sealed partial class Engine
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
             position.UnmakeMove(move, gameState);
 
-            PrintMove(position, ply, move, score);
+            PrintMove(position, ply, move, score, isQuiescence: true);
 
             if (score > bestScore)
             {
