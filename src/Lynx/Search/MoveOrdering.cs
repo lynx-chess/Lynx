@@ -30,13 +30,15 @@ public sealed partial class Engine
         // Queen promotion
         if ((promotedPiece + 2) % 6 == 0)
         {
-            var baseScore = SEE.HasPositiveScore(Game.CurrentPosition, move)
-                ? GoodCaptureMoveBaseScoreValue
-                : BadCaptureMoveBaseScoreValue;
+            if (isCapture)
+            {
+                return QueenPromotionWithCaptureBaseValue + move.CapturedPiece();
+            }
 
-            var captureBonus = isCapture ? 1 : 0;
-
-            return baseScore + PromotionMoveScoreValue + captureBonus;
+            return PromotionMoveScoreValue
+                + (SEE.HasPositiveScore(Game.CurrentPosition, move)
+                    ? GoodCaptureMoveBaseScoreValue
+                    : BadCaptureMoveBaseScoreValue);
         }
 
         if (isCapture)
