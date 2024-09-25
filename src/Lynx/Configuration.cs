@@ -138,8 +138,8 @@ public sealed class EngineSettings
     [SPSA<int>(5, 30, 1)]
     public int AspirationWindow_Base { get; set; } = 13;
 
-    [SPSA<int>(5, 30, 1)]
-    public int AspirationWindow_Delta { get; set; } = 13;
+    //[SPSA<int>(5, 30, 1)]
+    //public int AspirationWindow_Delta { get; set; } = 13;
 
     [SPSA<int>(1, 20, 1)]
     public int AspirationWindow_MinDepth { get; set; } = 8;
