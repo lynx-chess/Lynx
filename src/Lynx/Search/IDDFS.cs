@@ -42,8 +42,8 @@ public sealed partial class Engine
 
     private readonly int[] _maxDepthReached = GC.AllocateArray<int>(Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin, pinned: true);
 
-    private int _ttMask;
-    private TranspositionTable _tt;
+    private readonly int _ttMask;
+    private readonly TranspositionTable _tt;
 
     private long _nodes;
 
@@ -67,7 +67,7 @@ public sealed partial class Engine
         Array.Clear(_pVTable);
         Array.Clear(_maxDepthReached);
 
-        int bestEvaluation = 0;
+        int bestScore = 0;
         int alpha = EvaluationConstants.MinEval;
         int beta = EvaluationConstants.MaxEval;
         SearchResult? lastSearchResult = null;
@@ -106,54 +106,61 @@ public sealed partial class Engine
                 _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
                 _nodes = 0;
 
-                if (depth < Configuration.EngineSettings.AspirationWindow_MinDepth || lastSearchResult?.Evaluation is null)
+                if (depth < Configuration.EngineSettings.AspirationWindow_MinDepth
+                    || lastSearchResult?.Score is null
+                    || lastSearchResult.Mate != 0)
                 {
-                    bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta);
+                    bestScore = NegaMax(depth: depth, ply: 0, alpha, beta);
                 }
                 else
                 {
-                    // 🔍 Aspiration Windows
+                    // 🔍 Aspiration windows
                     var window = Configuration.EngineSettings.AspirationWindow_Base;
 
-                    alpha = Math.Max(EvaluationConstants.MinEval, lastSearchResult.Evaluation - window);
-                    beta = Math.Min(EvaluationConstants.MaxEval, lastSearchResult.Evaluation + window);
+                    alpha = Math.Max(EvaluationConstants.MinEval, lastSearchResult.Score - window);
+                    beta = Math.Min(EvaluationConstants.MaxEval, lastSearchResult.Score + window);
+
+                    _logger.Debug("Aspiration windows depth {Depth}: [{Alpha}, {Beta}] for previous search score {Score}, nodes {Nodes}",
+                        depth, alpha, beta, lastSearchResult.Score, _nodes);
+                    Debug.Assert(lastSearchResult.Mate == 0 && lastSearchResult.Score > EvaluationConstants.NegativeCheckmateDetectionLimit && lastSearchResult.Score < EvaluationConstants.PositiveCheckmateDetectionLimit);
 
                     while (true)
                     {
-                        bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta);
+                        _logger.Debug("Aspiration windows depth {Depth}: [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
+                            depth, alpha, beta, bestScore, _nodes);
+
+                        bestScore = NegaMax(depth: depth, ply: 0, alpha, beta);
 
                         window += window >> 1;   // window / 2
 
                         // Depth change: https://github.com/lynx-chess/Lynx/pull/440
-                        if (alpha >= bestEvaluation)     // Fail low
+                        if (alpha >= bestScore)     // Fail low
                         {
-                            alpha = Math.Max(bestEvaluation - window, EvaluationConstants.MinEval);
+                            alpha = Math.Max(bestScore - window, EvaluationConstants.MinEval);
                             beta = (alpha + beta) >> 1;  // (alpha + beta) / 2
                         }
-                        else if (beta <= bestEvaluation)     // Fail high
+                        else if (beta <= bestScore)     // Fail high
                         {
-                            beta = Math.Min(bestEvaluation + window, EvaluationConstants.MaxEval);
+                            beta = Math.Min(bestScore + window, EvaluationConstants.MaxEval);
                         }
                         else
                         {
                             break;
                         }
-
-                        _logger.Debug("Eval ({0}) (depth {1}, nodes {2}) outside of aspiration window, new window [{3}, {4}]",
-                            bestEvaluation, depth, _nodes, alpha, beta);
                     }
                 }
 
                 //PrintPvTable(depth: depth);
                 ValidatePVTable();
+                Debug.Assert(bestScore != EvaluationConstants.MinEval);
 
-                var bestEvaluationAbs = Math.Abs(bestEvaluation);
-                isMateDetected = bestEvaluationAbs > EvaluationConstants.PositiveCheckmateDetectionLimit;
+                var bestScoreAbs = Math.Abs(bestScore);
+                isMateDetected = bestScoreAbs > EvaluationConstants.PositiveCheckmateDetectionLimit;
                 mate = isMateDetected
-                    ? Utils.CalculateMateInX(bestEvaluation, bestEvaluationAbs)
+                    ? Utils.CalculateMateInX(bestScore, bestScoreAbs)
                     : 0;
 
-                lastSearchResult = UpdateLastSearchResult(lastSearchResult, bestEvaluation, depth, mate);
+                lastSearchResult = UpdateLastSearchResult(lastSearchResult, bestScore, depth, mate);
 
                 _engineWriter.TryWrite(lastSearchResult);
             } while (StopSearchCondition(++depth, maxDepth, mate, softLimitTimeBound));
@@ -178,7 +185,7 @@ public sealed partial class Engine
             _stopWatch.Stop();
         }
 
-        var finalSearchResult = GenerateFinalSearchResult(lastSearchResult, bestEvaluation, depth, firstLegalMove);
+        var finalSearchResult = GenerateFinalSearchResult(lastSearchResult, bestScore, depth, firstLegalMove);
 
         if (Configuration.EngineSettings.UseOnlineTablebaseInRootPositions
             && isMateDetected
@@ -278,11 +285,11 @@ public sealed partial class Engine
             // could make the GUI resign or take a draw from this position.
             // Since this only happens in root, we don't really care about being more precise for raising
             // alphas or betas of parent moves, so let's just return +-2 pawns depending on the side to move
-            var eval = Game.CurrentPosition.Side == Side.White
-                ? +EvaluationConstants.SingleMoveEvaluation
-                : -EvaluationConstants.SingleMoveEvaluation;
+            var score = Game.CurrentPosition.Side == Side.White
+                ? +EvaluationConstants.SingleMoveScore
+                : -EvaluationConstants.SingleMoveScore;
 
-            result = new SearchResult(firstLegalMove, eval, 0, [firstLegalMove])
+            result = new SearchResult(firstLegalMove, score, 0, [firstLegalMove])
             {
                 DepthReached = 0,
                 Nodes = 0,
@@ -299,7 +306,7 @@ public sealed partial class Engine
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private SearchResult UpdateLastSearchResult(SearchResult? lastSearchResult,
-        int bestEvaluation, int depth, int mate)
+        int bestScore, int depth, int mate)
     {
         var pvTableSpan = _pVTable.AsSpan();
         var pvMoves = pvTableSpan[..pvTableSpan.IndexOf(0)].ToArray();
@@ -309,7 +316,7 @@ public sealed partial class Engine
         var elapsedTime = _stopWatch.ElapsedMilliseconds;
 
         _previousSearchResult = lastSearchResult;
-        return new SearchResult(pvMoves.FirstOrDefault(), bestEvaluation, depth, pvMoves, mate)
+        return new SearchResult(pvMoves.FirstOrDefault(), bestScore, depth, pvMoves, mate)
         {
             DepthReached = maxDepthReached,
             Nodes = _nodes,
@@ -320,7 +327,7 @@ public sealed partial class Engine
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private SearchResult GenerateFinalSearchResult(SearchResult? lastSearchResult,
-        int bestEvaluation, int depth, Move firstLegalMove)
+        int bestScore, int depth, Move firstLegalMove)
     {
         SearchResult finalSearchResult;
         if (lastSearchResult is null)
@@ -345,7 +352,7 @@ public sealed partial class Engine
         finalSearchResult.HashfullPermill = _tt.HashfullPermillApprox();
         if (Configuration.EngineSettings.ShowWDL)
         {
-            finalSearchResult.WDL = WDL.WDLModel(bestEvaluation, depth);
+            finalSearchResult.WDL = WDL.WDLModel(bestScore, depth);
         }
 
         return finalSearchResult;

@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Lynx;
@@ -239,7 +240,10 @@ public sealed partial class Engine
             }
             else
             {
-                if (!pvNode && !isInCheck
+                // If we prune while getting checmated, we risk not finding any move and having an empty PV
+                bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
+
+                if (!pvNode && !isInCheck && isNotGettingCheckmated
                     && moveScores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue) // Quiet move
                 {
                     // 🔍 Late Move Pruning (LMP) - all quiet moves can be pruned
@@ -407,12 +411,14 @@ public sealed partial class Engine
             ++visitedMovesCounter;
         }
 
-        if (bestMove is null && !isAnyMoveValid)
+        if (!isAnyMoveValid)
         {
-            var eval = Position.EvaluateFinalPosition(ply, isInCheck);
+            Debug.Assert(bestMove is null);
 
-            _tt.RecordHash(_ttMask, position, depth, ply, eval, NodeType.Exact);
-            return eval;
+            var finalEval = Position.EvaluateFinalPosition(ply, isInCheck);
+            _tt.RecordHash(_ttMask, position, depth, ply, finalEval, NodeType.Exact);
+
+            return finalEval;
         }
 
         _tt.RecordHash(_ttMask, position, depth, ply, bestScore, nodeType, bestMove);
@@ -488,7 +494,7 @@ public sealed partial class Engine
         Move? bestMove = null;
         int bestScore = staticEvaluation;
 
-        bool isThereAnyValidCapture = false;
+        bool isAnyCaptureValid = false;
 
         Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
@@ -511,7 +517,7 @@ public sealed partial class Engine
 
             var move = pseudoLegalMoves[i];
 
-            // Prune bad captures
+            // 🔍 QSearch SEE pruning: pruning bad captures
             if (moveScores[i] < EvaluationConstants.PromotionMoveScoreValue && moveScores[i] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
             {
                 continue;
@@ -525,7 +531,7 @@ public sealed partial class Engine
             }
 
             ++_nodes;
-            isThereAnyValidCapture = true;
+            isAnyCaptureValid = true;
 
             PrintPreMove(position, ply, move, isQuiescence: true);
 
@@ -537,7 +543,7 @@ public sealed partial class Engine
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
             position.UnmakeMove(move, gameState);
 
-            PrintMove(position, ply, move, score);
+            PrintMove(position, ply, move, score, isQuiescence: true);
 
             if (score > bestScore)
             {
@@ -567,10 +573,11 @@ public sealed partial class Engine
             }
         }
 
-        if (bestMove is null
-            && !isThereAnyValidCapture
-            && !MoveGenerator.CanGenerateAtLeastAValidMove(position))
+        if (!isAnyCaptureValid
+            && !MoveGenerator.CanGenerateAtLeastAValidMove(position)) // Bad captures can be pruned, so all moves need to be generated for now
         {
+            Debug.Assert(bestMove is null);
+
             var finalEval = Position.EvaluateFinalPosition(ply, position.IsInCheck());
             _tt.RecordHash(_ttMask, position, 0, ply, finalEval, NodeType.Exact);
 

@@ -220,7 +220,7 @@ public sealed partial class Engine
             //Console.WriteLine($"{depthStr}{move} | {evaluation}");
 
 #pragma warning disable CS0618 // Type or member is obsolete
-            _logger.Trace($"{depthStr}{(isQuiescence ? "[Qui] " : "")}{move.ToEPDString(position),-6} | {evaluation}{(prune ? " | prnning" : "")}");
+            _logger.Trace($"{depthStr}{(isQuiescence ? "[Qui] " : "")}{move.ToEPDString(position),-6} | {evaluation}{(prune ? " | pruning" : "")}");
 #pragma warning restore CS0618 // Type or member is obsolete
 
             //Console.ResetColor();

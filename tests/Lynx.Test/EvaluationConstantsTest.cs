@@ -102,12 +102,6 @@ public class EvaluationConstantsTest
     }
 
     [Test]
-    public void PVMoveScoreValueConstant()
-    {
-        Assert.Greater(PVMoveScoreValue, TTMoveScoreValue);
-    }
-
-    [Test]
     public void FirstKillerMoveValueConstant()
     {
         var minMVVLVAMoveValue = int.MaxValue;
@@ -239,9 +233,9 @@ public class EvaluationConstantsTest
     [Test]
     public void SingleMoveEvaluation()
     {
-        Assert.NotZero(EvaluationConstants.SingleMoveEvaluation);
-        Assert.Greater(EvaluationConstants.SingleMoveEvaluation, 100);
-        Assert.Less(EvaluationConstants.SingleMoveEvaluation, 400);
+        Assert.NotZero(EvaluationConstants.SingleMoveScore);
+        Assert.Greater(EvaluationConstants.SingleMoveScore, 100);
+        Assert.Less(EvaluationConstants.SingleMoveScore, 400);
     }
 
     [Test]

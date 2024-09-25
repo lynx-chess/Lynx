@@ -126,12 +126,9 @@ public static partial class EvaluationConstants
     /// </summary>
     public const int MinStaticEval = NegativeCheckmateDetectionLimit + 1;
 
-
-    public const int PVMoveScoreValue = 4_194_304;
+    #region Move ordering
 
     public const int TTMoveScoreValue = 2_097_152;
-
-    #region Move ordering
 
     public const int GoodCaptureMoveBaseScoreValue = 1_048_576;
 
@@ -165,7 +162,7 @@ public static partial class EvaluationConstants
     /// <summary>
     /// Evaluation to be returned when there's one single legal move
     /// </summary>
-    public const int SingleMoveEvaluation = 200;
+    public const int SingleMoveScore = 200;
 
     public const int ContinuationHistoryPlyCount = 1;
 }
