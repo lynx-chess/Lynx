@@ -377,7 +377,7 @@ public sealed partial class Engine
                 // Search with reduced depth
                 score = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha);
 
-                if (bestScore == EvaluationConstants.MinEval)
+                if (score == EvaluationConstants.MinEval)
                 {
                     _logger.Debug("Reduced depth result, {Score}", score);
                 }
@@ -392,7 +392,7 @@ public sealed partial class Engine
                     // Search with full depth but narrowed score bandwidth
                     score = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha);
 
-                    if (bestScore == EvaluationConstants.MinEval)
+                    if (score == EvaluationConstants.MinEval)
                     {
                         _logger.Debug("Narrowed full depth result, {Score}", score);
                     }
@@ -405,7 +405,7 @@ public sealed partial class Engine
                     score = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
 
-                    if (bestScore == EvaluationConstants.MinEval)
+                    if (score == EvaluationConstants.MinEval)
                     {
                         _logger.Debug("Full bandwith full depth result, {Score}", score);
                     }
@@ -423,6 +423,10 @@ public sealed partial class Engine
             if (score == bestScore)
             {
                 _logger.Debug("We somehow managed to get a score equals to minEval");
+                if (EvaluationConstants.MinEval == bestScore)
+                {
+                    _logger.Debug("Expected issue, bestScore is also minEval");
+                }
             }
 
             if (score > bestScore)
