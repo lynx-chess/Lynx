@@ -241,7 +241,7 @@ public sealed partial class Engine
             else
             {
                 // If we prune while getting checmated, we risk not finding any move and having an empty PV
-                bool isNotGettingCheckmated = bestMove > EvaluationConstants.NegativeCheckmateDetectionLimit;
+                bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
 
                 if (!pvNode && !isInCheck && isNotGettingCheckmated
                     && moveScores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue) // Quiet move
