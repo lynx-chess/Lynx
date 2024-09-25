@@ -394,10 +394,10 @@ public sealed partial class Engine
         {
             Debug.Assert(bestMove is null);
 
-            var eval = Position.EvaluateFinalPosition(ply, isInCheck);
-            _tt.RecordHash(_ttMask, position, depth, ply, eval, NodeType.Exact);
+            var finalEval = Position.EvaluateFinalPosition(ply, isInCheck);
+            _tt.RecordHash(_ttMask, position, depth, ply, finalEval, NodeType.Exact);
 
-            return eval;
+            return finalEval;
         }
 
         _tt.RecordHash(_ttMask, position, depth, ply, bestScore, nodeType, bestMove);

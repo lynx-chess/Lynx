@@ -15,7 +15,7 @@ public class ForceOrAvoidDrawTest : BaseTest
     public void ForceStaleMate(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
     {
         var result = TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 12);
-        Assert.AreEqual(0, result.Evaluation, "No drawn position detected");
+        Assert.AreEqual(0, result.Score, "No drawn position detected");
     }
 
     [Test]
@@ -122,7 +122,7 @@ public class ForceOrAvoidDrawTest : BaseTest
 
         // Assert
         Assert.AreEqual(movesThatAllowsRepetition.UCIString(), bestMoveFound.UCIString(), "No threefold repetition forced");
-        Assert.AreEqual(0, searchResult.Evaluation, "No drawn position detected");
+        Assert.AreEqual(0, searchResult.Score, "No drawn position detected");
     }
 
     [Test]
@@ -223,7 +223,7 @@ public class ForceOrAvoidDrawTest : BaseTest
 
         // Assert
         Assert.AreEqual(movesThatAllowsRepetition.UCIString(), bestMoveFound.UCIString(), "No 50 moves rule forced");
-        Assert.AreEqual(0, searchResult.Evaluation, "No drawn position detected");
+        Assert.AreEqual(0, searchResult.Score, "No drawn position detected");
     }
 
     /// <summary>
