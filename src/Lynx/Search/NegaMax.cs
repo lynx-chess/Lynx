@@ -240,7 +240,10 @@ public sealed partial class Engine
             }
             else
             {
-                if (!pvNode && !isInCheck
+                // If we prune while getting checmated, we risk not finding any move and having an empty PV
+                bool isNotGettingCheckmated = bestMove > EvaluationConstants.NegativeCheckmateDetectionLimit;
+
+                if (!pvNode && !isInCheck && isNotGettingCheckmated
                     && moveScores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue) // Quiet move
                 {
                     // Late Move Pruning (LMP) - all quiet moves can be pruned
