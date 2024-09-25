@@ -283,6 +283,7 @@ public sealed partial class Engine
                 // 🔍 Late Move Reduction (LMR) - search with reduced depth
                 // Impl. based on Ciekce (Stormphrax) and Martin (Motor) advice, and Stormphrax & Akimbo implementations
                 if (visitedMovesCounter >= (pvNode ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves - 1)
+                    && alpha >= EvaluationConstants.PositiveCheckmateDetectionLimit
                     && depth >= Configuration.EngineSettings.LMR_MinDepth
                     && !isCapture)
                 {
@@ -499,8 +500,12 @@ public sealed partial class Engine
 
             var move = pseudoLegalMoves[i];
 
+            bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
+
             // 🔍 QSearch SEE pruning: pruning bad captures
-            if (moveScores[i] < EvaluationConstants.PromotionMoveScoreValue && moveScores[i] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
+            if (isNotGettingCheckmated
+                && moveScores[i] < EvaluationConstants.PromotionMoveScoreValue
+                && moveScores[i] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
             {
                 continue;
             }
