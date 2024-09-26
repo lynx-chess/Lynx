@@ -176,7 +176,7 @@ public static class TranspositionTableExtensions
 
         if (rawScore <= EvaluationConstants.MinEval || score <= EvaluationConstants.MinEval)
         {
-            _logger.Debug("ProbeHash: for position {Position}, with raw score {RawSore}, saving {Score} from TT", position.FEN(), rawScore, score);
+            _logger.Debug("RecordHash: for position {Position}, with raw score {RawSore}, saving {Score} from TT", position.FEN(), rawScore, score);
         }
 
         entry.Key = position.UniqueIdentifier;
