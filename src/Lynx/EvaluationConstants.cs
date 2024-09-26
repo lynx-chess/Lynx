@@ -130,6 +130,8 @@ public static partial class EvaluationConstants
 
     public const int TTMoveScoreValue = 2_097_152;
 
+    public const int QueenPromotionWithCaptureBaseValue = GoodCaptureMoveBaseScoreValue + PromotionMoveScoreValue;
+
     public const int GoodCaptureMoveBaseScoreValue = 1_048_576;
 
     public const int FirstKillerMoveValue = 524_288;
