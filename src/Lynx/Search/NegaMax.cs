@@ -49,9 +49,9 @@ public sealed partial class Engine
             (ttScore, ttBestMove, ttElementType, ttRawScore) = _tt.ProbeHash(_ttMask, position, depth, ply, alpha, beta);
             if (!pvNode && ttScore != EvaluationConstants.NoHashEntry)
             {
-                if (ttScore == EvaluationConstants.MinEval)
+                if (ttScore <= EvaluationConstants.MinEval)
                 {
-                    _logger.Debug("Returning minEval from TT at depth {Depth}", depth);
+                    _logger.Debug("Returning {MinEval} from TT at depth {Depth}", ttScore, depth);
                 }
 
                 return ttScore;
@@ -84,9 +84,9 @@ public sealed partial class Engine
             {
                 var qsearchScore = QuiescenceSearch(ply, alpha, beta);
 
-                if (qsearchScore == EvaluationConstants.MinEval)
+                if (qsearchScore <= EvaluationConstants.MinEval)
                 {
-                    _logger.Debug("Returning minEval from QSearch call at depth {Depth}", depth);
+                    _logger.Debug("Returning {MinEval} from QSearch call at depth {Depth}", qsearchScore, depth);
                 }
 
                 return qsearchScore;
@@ -96,9 +96,9 @@ public sealed partial class Engine
             _tt.RecordHash(_ttMask, position, depth, ply, finalPositionEvaluation, NodeType.Exact);
 
 
-            if (finalPositionEvaluation == EvaluationConstants.MinEval)
+            if (finalPositionEvaluation <= EvaluationConstants.MinEval)
             {
-                _logger.Debug("[QUI] Returning minEval from dinL POAIRION evaluation 0 at depth {Depth} at ply {Ply}", depth, ply);
+                _logger.Debug("[QUI] Returning {MinEval} from final position evaluation 0 at depth {Depth} at ply {Ply}", finalPositionEvaluation, depth, ply);
             }
             return finalPositionEvaluation;
         }
@@ -125,9 +125,9 @@ public sealed partial class Engine
 #pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
                     int rfpScore = (staticEval + beta) / 2;
 
-                    if (rfpScore == EvaluationConstants.MinEval)
+                    if (rfpScore <= EvaluationConstants.MinEval)
                     {
-                        _logger.Debug("Returning minEval from RFP at depth {Depth}", depth);
+                        _logger.Debug("Returning {MinEval} from RFP at depth {Depth}", rfpScore, depth);
                     }
 
                     return rfpScore;
@@ -149,9 +149,9 @@ public sealed partial class Engine
                                 ? qSearchScore
                                 : score;
 
-                            if (razoringScore == EvaluationConstants.MinEval)
+                            if (razoringScore <= EvaluationConstants.MinEval)
                             {
-                                _logger.Debug("Returning minEval from Razoring at depth {Depth}", depth);
+                                _logger.Debug("Returning {MinEval} from Razoring at depth {Depth}", razoringScore, depth);
                             }
 
                             return razoringScore;
@@ -168,9 +168,9 @@ public sealed partial class Engine
                                     ? qSearchScore
                                     : score;
 
-                                if (razoringScore == EvaluationConstants.MinEval)
+                                if (razoringScore <= EvaluationConstants.MinEval)
                                 {
-                                    _logger.Debug("Returning minEval from Razoring II at depth {Depth}", depth);
+                                    _logger.Debug("Returning {MinEval} from Razoring II at depth {Depth}", razoringScore, depth);
                                 }
 
                                 return razoringScore;
@@ -200,9 +200,9 @@ public sealed partial class Engine
 
                 if (nmpScore >= beta)
                 {
-                    if (nmpScore == EvaluationConstants.MinEval)
+                    if (nmpScore <= EvaluationConstants.MinEval)
                     {
-                        _logger.Debug("Returning minEval from NMP at depth {Depth}", depth);
+                        _logger.Debug("Returning {MinEval} from NMP at depth {Depth}", nmpScore, depth);
                     }
 
                     return nmpScore;
@@ -282,9 +282,9 @@ public sealed partial class Engine
                 score = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
 
-                if (score == EvaluationConstants.MinEval)
+                if (score <= EvaluationConstants.MinEval)
                 {
-                    _logger.Debug("Full search in first visited move returned minEval");
+                    _logger.Debug("Full search in first visited move returned {MinEval}", score);
                 }
             }
             else
@@ -369,15 +369,15 @@ public sealed partial class Engine
                     reduction = Math.Clamp(reduction, 0, depth - 1);
                 }
 
-                if (bestScore == EvaluationConstants.MinEval)
+                if (bestScore <= EvaluationConstants.MinEval)
                 {
-                    _logger.Debug("Before reduced depth, [alpha = {Alpha}, beta = {Beta}]", alpha, beta);
+                    _logger.Debug("Before reduced depth, [alpha = {Alpha}, beta = {Beta}], bestScore = {MinEval}", alpha, beta, bestScore);
                 }
 
                 // Search with reduced depth
                 score = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha);
 
-                if (score == EvaluationConstants.MinEval)
+                if (score <= EvaluationConstants.MinEval)
                 {
                     _logger.Debug("Reduced depth result, {Score}", score);
                 }
@@ -392,7 +392,7 @@ public sealed partial class Engine
                     // Search with full depth but narrowed score bandwidth
                     score = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha);
 
-                    if (score == EvaluationConstants.MinEval)
+                    if (score <= EvaluationConstants.MinEval)
                     {
                         _logger.Debug("Narrowed full depth result, {Score}", score);
                     }
@@ -405,7 +405,7 @@ public sealed partial class Engine
                     score = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
 
-                    if (score == EvaluationConstants.MinEval)
+                    if (score <= EvaluationConstants.MinEval)
                     {
                         _logger.Debug("Full bandwith full depth result, {Score}", score);
                     }
@@ -420,9 +420,9 @@ public sealed partial class Engine
 
             PrintMove(position, ply, move, score);
 
-            if (score == EvaluationConstants.MinEval)
+            if (score <= EvaluationConstants.MinEval)
             {
-                _logger.Debug("We somehow managed to get a score equals to minEval");
+                _logger.Debug("We somehow managed to get a score <= to minEval: {Score}", score);
                 if (EvaluationConstants.MinEval == bestScore)
                 {
                     _logger.Debug("Expected issue, bestScore is also minEval");
@@ -464,9 +464,9 @@ public sealed partial class Engine
 
                     _tt.RecordHash(_ttMask, position, depth, ply, bestScore, NodeType.Beta, bestMove);
 
-                    if (bestScore == EvaluationConstants.MinEval)
+                    if (bestScore <= EvaluationConstants.MinEval)
                     {
-                        _logger.Debug("Returning minEval from Beta cutoff at depth {Depth}", depth);
+                        _logger.Debug("Returning {MinEval} from Beta cutoff at depth {Depth}", bestScore, depth);
                     }
 
                     return bestScore;
@@ -485,9 +485,9 @@ public sealed partial class Engine
 
             _logger.Debug("No legal moves found for {Position}, position evaluated as {FinalEval}", position.FEN(), finalEval);
 
-            if (finalEval == EvaluationConstants.MinEval)
+            if (finalEval <= EvaluationConstants.MinEval)
             {
-                _logger.Debug("Returning minEval from final position evaluation at depth {Depth}", depth);
+                _logger.Debug("Returning {MinEval} from final position evaluation at depth {Depth}", finalEval, depth);
             }
 
             return finalEval;
@@ -497,9 +497,10 @@ public sealed partial class Engine
 
         // Node fails low
 
-        if (bestScore == EvaluationConstants.MinEval)
+        if (bestScore <= EvaluationConstants.MinEval)
         {
-            _logger.Debug("Returning minEval from fail low node at depth {Depth}, ply {Ply}, after {Moves}", depth, ply, visitedMovesCounter);
+            _logger.Debug("Returning {MinEval} from fail low node at depth {Depth}, ply {Ply}, after {Moves}. Alpha was {Alpha}, beta was {Beta}",
+                bestScore, depth, ply, visitedMovesCounter, alpha, beta);
             _logger.Debug("Visited moves: {Moves}", string.Join(' ', visitedMoves.ToArray()));
         }
 
@@ -540,9 +541,9 @@ public sealed partial class Engine
         var ttProbeResult = _tt.ProbeHash(_ttMask, position, 0, ply, alpha, beta);
         if (ttProbeResult.Score != EvaluationConstants.NoHashEntry)
         {
-            if (ttProbeResult.Score == EvaluationConstants.MinEval)
+            if (ttProbeResult.Score <= EvaluationConstants.MinEval)
             {
-                _logger.Debug("[QUI] Returning minEval from TT at ply {Ply}", ply);
+                _logger.Debug("[QUI] Returning {MinEval} from TT at ply {Ply}", ttProbeResult.Score, ply);
             }
 
             return ttProbeResult.Score;
@@ -559,9 +560,9 @@ public sealed partial class Engine
             PrintMessage(ply - 1, "Pruning before starting quiescence search");
 
 
-            if (staticEvaluation == EvaluationConstants.MinEval)
+            if (staticEvaluation <= EvaluationConstants.MinEval)
             {
-                _logger.Debug("[QUI] Returning minEval from static evaluation beta cutoff at ply {Ply}", ply);
+                _logger.Debug("[QUI] Returning {MinEval} from static evaluation beta cutoff at ply {Ply}", staticEvaluation, ply);
             }
             return staticEvaluation;
         }
@@ -579,9 +580,9 @@ public sealed partial class Engine
             // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358
 
 
-            if (staticEvaluation == EvaluationConstants.MinEval)
+            if (staticEvaluation <= EvaluationConstants.MinEval)
             {
-                _logger.Debug("[QUI] Returning minEval from static evaluation II (final pos) at ply {Ply}", ply);
+                _logger.Debug("[QUI] Returning {MinEval} from static evaluation II (final pos) at ply {Ply}", staticEvaluation, ply);
             }
 
             return staticEvaluation;
@@ -653,9 +654,9 @@ public sealed partial class Engine
 
                     _tt.RecordHash(_ttMask, position, 0, ply, bestScore, NodeType.Beta, bestMove);
 
-                    if (bestScore == EvaluationConstants.MinEval)
+                    if (bestScore <= EvaluationConstants.MinEval)
                     {
-                        _logger.Debug("[QUI] Returning minEval from Beta cutoff at ply {Ply}", ply);
+                        _logger.Debug("[QUI] Returning {MinEval} from Beta cutoff at ply {Ply}", bestScore, ply);
                     }
 
                     return bestScore; // The refutation doesn't matter, since it'll be pruned
@@ -685,9 +686,9 @@ public sealed partial class Engine
 
             _logger.Debug("[QUI] No legal moves found for {Position}, position evaluated as {FinalEval}", position.FEN(), finalEval);
 
-            if (finalEval == EvaluationConstants.MinEval)
+            if (finalEval <= EvaluationConstants.MinEval)
             {
-                _logger.Debug("[QUI] Returning minEval from final position evaluation at ply {Ply}", ply);
+                _logger.Debug("[QUI] Returning {MinEval} from final position evaluation at ply {Ply}", finalEval, ply);
             }
 
             return finalEval;
@@ -695,9 +696,9 @@ public sealed partial class Engine
 
         _tt.RecordHash(_ttMask, position, 0, ply, bestScore, nodeType, bestMove);
 
-        if (bestScore == EvaluationConstants.MinEval)
+        if (bestScore <= EvaluationConstants.MinEval)
         {
-            _logger.Debug("[QUI] Returning minEval from fail low node at ply {Ply}", ply);
+            _logger.Debug("[QUI] Returning {MinEval} from fail low node at ply {Ply}", bestScore, ply);
         }
 
         return bestScore;
