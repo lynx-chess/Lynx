@@ -51,7 +51,7 @@ public sealed partial class Engine
             {
                 if (ttScore <= EvaluationConstants.MinEval)
                 {
-                    _logger.Debug("Returning {MinEval} from TT at depth {Depth}", ttScore, depth);
+                    _logger.Debug("Returning {MinEval} from TT at depth {Depth}, ply {Ply}", ttScore, depth, ply);
                 }
 
                 return ttScore;
@@ -543,7 +543,7 @@ public sealed partial class Engine
         {
             if (ttProbeResult.Score <= EvaluationConstants.MinEval)
             {
-                _logger.Debug("[QUI] Returning {MinEval} from TT at ply {Ply}", ttProbeResult.Score, ply);
+                _logger.Debug("[QUI] Returning {MinEval} from TT at depth 0, ply {Ply}", ttProbeResult.Score, ply);
             }
 
             return ttProbeResult.Score;

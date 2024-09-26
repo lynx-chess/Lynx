@@ -117,7 +117,22 @@ public static class TranspositionTableExtensions
                 // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
                 // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
                 score = recalculatedScore;
+            }
         }
+
+        if (score <= EvaluationConstants.MinEval)
+        {
+            _logger.Debug("ProbeHash: for position {Position}, with raw score {RawScore}, returning {Score} from TT. Alpha {Alta}^, Beta {Beta}, Type {Type}, Recalculated score {RecalcualtedScore}",
+                position.FEN(), rawScore, score, alpha, beta, entry.Type.ToString(), RecalculateMateScores(rawScore, ply));
+
+            // frame 1, true for source info
+            StackFrame frame = new StackFrame(1, true);
+            var method = frame.GetMethod();
+            var fileName = frame.GetFileName();
+            var lineNumber = frame.GetFileLineNumber();
+
+            // we'll just use a simple Console write for now
+            Console.WriteLine("{0}({1}):{2}", fileName, lineNumber, method?.Name);
         }
 
         return (score, entry.Move, entry.Type, rawScore);
@@ -131,11 +146,11 @@ public static class TranspositionTableExtensions
     /// <param name="position"></param>
     /// <param name="depth"></param>
     /// <param name="ply">Ply</param>
-    /// <param name="eval"></param>
+    /// <param name="rawScore"></param>
     /// <param name="nodeType"></param>
     /// <param name="move"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void RecordHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int eval, NodeType nodeType, Move? move = null)
+    public static void RecordHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int rawScore, NodeType nodeType, Move? move = null)
     {
         ref var entry = ref tt[position.UniqueIdentifier & ttMask];
 
@@ -157,7 +172,12 @@ public static class TranspositionTableExtensions
 
         // We want to store the distance to the checkmate position relative to the current node, independently from the root
         // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
-        var score = RecalculateMateScores(eval, -ply);
+        var score = RecalculateMateScores(rawScore, -ply);
+
+        if (rawScore <= EvaluationConstants.MinEval || score <= EvaluationConstants.MinEval)
+        {
+            _logger.Debug("ProbeHash: for position {Position}, with raw score {RawSore}, saving {Score} from TT", position.FEN(), rawScore, score);
+        }
 
         entry.Key = position.UniqueIdentifier;
         entry.Score = score;
