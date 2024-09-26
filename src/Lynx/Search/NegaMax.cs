@@ -282,7 +282,7 @@ public sealed partial class Engine
                 score = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
 
-                if (score == bestScore)
+                if (score == EvaluationConstants.MinEval)
                 {
                     _logger.Debug("Full search in first visited move returned minEval");
                 }
@@ -420,7 +420,7 @@ public sealed partial class Engine
 
             PrintMove(position, ply, move, score);
 
-            if (score == bestScore)
+            if (score == EvaluationConstants.MinEval)
             {
                 _logger.Debug("We somehow managed to get a score equals to minEval");
                 if (EvaluationConstants.MinEval == bestScore)
