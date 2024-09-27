@@ -47,12 +47,14 @@ public class EvaluationConstantsTest
     public void MaxEvalTest()
     {
         Assert.Greater(MaxEval, PositiveCheckmateDetectionLimit + ((Constants.AbsoluteMaxDepth + 10) * CheckmateDepthFactor));
+        Assert.Less(MaxEval, short.MaxValue);
     }
 
     [Test]
     public void MinEvalTest()
     {
         Assert.Less(MinEval, NegativeCheckmateDetectionLimit - ((Constants.AbsoluteMaxDepth + 10) * CheckmateDepthFactor));
+        Assert.Greater(MinEval, short.MinValue);
     }
 
     [Test]
