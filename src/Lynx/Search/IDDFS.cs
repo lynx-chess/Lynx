@@ -131,6 +131,7 @@ public sealed partial class Engine
 
                         bestScore = NegaMax(depth: depth, ply: 0, alpha, beta);
 
+                        // 13, 19, 28, 42, 63, 94, 141, 211, 316, 474, 711, 1066, 1599, 2398, 3597, 5395, 8092, 12138, 18207, 27310, 40965, 61447, 92170
                         window += window >> 1;   // window / 2
 
                         // Depth change: https://github.com/lynx-chess/Lynx/pull/440
