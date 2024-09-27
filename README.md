@@ -109,13 +109,15 @@ _Beware, most of the provided links contain outdated information and don't refle
 
 - Reverse Futility Pruning (RFP)
 
+- History pruning
+
 - Late Move Reductions (LMR) [[1](https://web.archive.org/web/20150212051846/http://www.glaurungchess.com/lmr.html)] [[2](https://www.chessprogramming.org/Late_Move_Reductions)] [[3](https://talkchess.com/forum3/viewtopic.php?f=7&t=75056#p860118)]
 
 - Internal Iterative Reduction (IIR)
 
 - Check extensions [[1](https://www.chessprogramming.org/Check_Extensions)]
 
-- Static Exchange Evaluation (SEE) for move ordering and reduction
+- Static Exchange Evaluation (SEE) for move ordering, reduction and QSearch pruning
 
 - Razoring [[1](https://www.chessprogramming.org/Razoring)]
 

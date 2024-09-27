@@ -246,7 +246,7 @@ public sealed partial class Engine
                 if (!pvNode && !isInCheck && isNotGettingCheckmated
                     && moveScores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue) // Quiet move
                 {
-                    // Late Move Pruning (LMP) - all quiet moves can be pruned
+                    // 🔍 Late Move Pruning (LMP) - all quiet moves can be pruned
                     // after searching the first few given by the move ordering algorithm
                     if (depth <= Configuration.EngineSettings.LMP_MaxDepth
                         && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth)) // Based on formula suggested by Antares
@@ -259,7 +259,25 @@ public sealed partial class Engine
                         break;
                     }
 
-                    // Futility Pruning (FP) - all quiet moves can be pruned
+                    if (!isCapture
+                        && moveScores[moveIndex] < EvaluationConstants.CounterMoveValue
+                        && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth)  // TODO use LMR depth
+                    {
+                        // 🔍 History pruning -  all quiet moves can be pruned
+                        // once we find one with a history score too low
+                        // if this move's history score is too low, we start skipping moves.
+                        if (_quietHistory[move.Piece()][move.TargetSquare()] < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
+                        {
+                            // After making a move
+                            Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
+                            Game.RemoveFromPositionHashHistory();
+                            position.UnmakeMove(move, gameState);
+
+                            break;
+                        }
+                    }
+
+                    // 🔍 Futility Pruning (FP) - all quiet moves can be pruned
                     // once it's considered that they don't have potential to raise alpha
                     if (visitedMovesCounter > 0
                         //&& alpha < EvaluationConstants.PositiveCheckmateDetectionLimit
