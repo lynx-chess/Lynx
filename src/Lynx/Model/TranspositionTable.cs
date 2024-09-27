@@ -146,11 +146,11 @@ public static class TranspositionTableExtensions
     /// <param name="position"></param>
     /// <param name="depth"></param>
     /// <param name="ply">Ply</param>
-    /// <param name="rawScore"></param>
+    /// <param name="eval"></param>
     /// <param name="nodeType"></param>
     /// <param name="move"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void RecordHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int rawScore, NodeType nodeType, Move? move = null)
+    public static void RecordHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int eval, NodeType nodeType, Move? move = null)
     {
         ref var entry = ref tt[position.UniqueIdentifier & ttMask];
 
@@ -172,11 +172,11 @@ public static class TranspositionTableExtensions
 
         // We want to store the distance to the checkmate position relative to the current node, independently from the root
         // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
-        var score = RecalculateMateScores(rawScore, -ply);
+        var score = RecalculateMateScores(eval, -ply);
 
-        if (rawScore <= EvaluationConstants.MinEval || score <= EvaluationConstants.MinEval)
+        if (eval <= EvaluationConstants.MinEval || score <= EvaluationConstants.MinEval)
         {
-            _logger.Debug("RecordHash: for position {Position}, with raw score {RawSore}, saving {Score} from TT", position.FEN(), rawScore, score);
+            _logger.Debug("RecordHash: for position {Position}, with raw score {RawSore}, saving {Score} from TT", position.FEN(), eval, score);
         }
 
         entry.Key = position.UniqueIdentifier;
