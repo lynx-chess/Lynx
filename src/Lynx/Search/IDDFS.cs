@@ -107,8 +107,7 @@ public sealed partial class Engine
                 _nodes = 0;
 
                 if (depth < Configuration.EngineSettings.AspirationWindow_MinDepth
-                    || lastSearchResult?.Score is null
-                    || lastSearchResult.Mate != 0)
+                    || lastSearchResult?.Score is null)
                 {
                     bestScore = NegaMax(depth: depth, ply: 0, alpha, beta);
                 }
