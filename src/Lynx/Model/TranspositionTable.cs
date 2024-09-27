@@ -174,9 +174,9 @@ public static class TranspositionTableExtensions
         // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
         var recalculatedScore = RecalculateMateScores(score, -ply);
 
-        if (eval <= EvaluationConstants.MinEval || score <= EvaluationConstants.MinEval)
+        if (score <= EvaluationConstants.MinEval || recalculatedScore <= EvaluationConstants.MinEval)
         {
-            _logger.Debug("RecordHash: for position {Position}, with raw score {RawSore}, saving {Score} from TT", position.FEN(), eval, score);
+            _logger.Debug("RecordHash: for position {Position}, with raw score {RawSore}, saving {Score} from TT", position.FEN(), score, score);
         }
 
         entry.Key = position.UniqueIdentifier;
