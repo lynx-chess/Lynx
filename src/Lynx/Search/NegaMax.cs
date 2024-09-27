@@ -51,7 +51,7 @@ public sealed partial class Engine
             {
                 if (ttScore <= EvaluationConstants.MinEval)
                 {
-                    _logger.Debug("Returning {MinEval} from TT at depth {Depth}, ply {Ply}", ttScore, depth, ply);
+                    _logger.Debug("_eduherminio_ Returning {MinEval} from TT at depth {Depth}, ply {Ply}", ttScore, depth, ply);
                 }
 
                 return ttScore;
@@ -86,7 +86,7 @@ public sealed partial class Engine
 
                 if (qsearchScore <= EvaluationConstants.MinEval)
                 {
-                    _logger.Debug("Returning {MinEval} from QSearch call at depth {Depth}", qsearchScore, depth);
+                    _logger.Debug("_eduherminio_ Returning {MinEval} from QSearch call at depth {Depth}", qsearchScore, depth);
                 }
 
                 return qsearchScore;
@@ -98,7 +98,7 @@ public sealed partial class Engine
 
             if (finalPositionEvaluation <= EvaluationConstants.MinEval)
             {
-                _logger.Debug("[QUI] Returning {MinEval} from final position evaluation 0 at depth {Depth} at ply {Ply}", finalPositionEvaluation, depth, ply);
+                _logger.Debug("_eduherminio_ [QUI] Returning {MinEval} from final position evaluation 0 at depth {Depth} at ply {Ply}", finalPositionEvaluation, depth, ply);
             }
             return finalPositionEvaluation;
         }
@@ -127,7 +127,7 @@ public sealed partial class Engine
 
                     if (rfpScore <= EvaluationConstants.MinEval)
                     {
-                        _logger.Debug("Returning {MinEval} from RFP at depth {Depth}", rfpScore, depth);
+                        _logger.Debug("_eduherminio_ Returning {MinEval} from RFP at depth {Depth}", rfpScore, depth);
                     }
 
                     return rfpScore;
@@ -151,7 +151,7 @@ public sealed partial class Engine
 
                             if (razoringScore <= EvaluationConstants.MinEval)
                             {
-                                _logger.Debug("Returning {MinEval} from Razoring at depth {Depth}", razoringScore, depth);
+                                _logger.Debug("_eduherminio_ Returning {MinEval} from Razoring at depth {Depth}", razoringScore, depth);
                             }
 
                             return razoringScore;
@@ -170,7 +170,7 @@ public sealed partial class Engine
 
                                 if (razoringScore <= EvaluationConstants.MinEval)
                                 {
-                                    _logger.Debug("Returning {MinEval} from Razoring II at depth {Depth}", razoringScore, depth);
+                                    _logger.Debug("_eduherminio_ Returning {MinEval} from Razoring II at depth {Depth}", razoringScore, depth);
                                 }
 
                                 return razoringScore;
@@ -202,7 +202,7 @@ public sealed partial class Engine
                 {
                     if (nmpScore <= EvaluationConstants.MinEval)
                     {
-                        _logger.Debug("Returning {MinEval} from NMP at depth {Depth}", nmpScore, depth);
+                        _logger.Debug("_eduherminio_ Returning {MinEval} from NMP at depth {Depth}", nmpScore, depth);
                     }
 
                     return nmpScore;
@@ -284,7 +284,7 @@ public sealed partial class Engine
 
                 if (score <= EvaluationConstants.MinEval)
                 {
-                    _logger.Debug("Full search in first visited move returned {MinEval}", score);
+                    _logger.Debug("_eduherminio_ Full search in first visited move returned {MinEval}", score);
                 }
             }
             else
@@ -389,7 +389,7 @@ public sealed partial class Engine
 
                 if (bestScore <= EvaluationConstants.MinEval)
                 {
-                    _logger.Debug("Before reduced depth, [alpha = {Alpha}, beta = {Beta}], bestScore = {MinEval}", alpha, beta, bestScore);
+                    _logger.Debug("_eduherminio_ Before reduced depth, [alpha = {Alpha}, beta = {Beta}], bestScore = {MinEval}", alpha, beta, bestScore);
                 }
 
                 // Search with reduced depth
@@ -397,7 +397,7 @@ public sealed partial class Engine
 
                 if (score <= EvaluationConstants.MinEval)
                 {
-                    _logger.Debug("Reduced depth result, {Score}", score);
+                    _logger.Debug("_eduherminio_ Reduced depth result, {Score}", score);
                 }
 
                 // 🔍 Principal Variation Search (PVS)
@@ -412,7 +412,7 @@ public sealed partial class Engine
 
                     if (score <= EvaluationConstants.MinEval)
                     {
-                        _logger.Debug("Narrowed full depth result, {Score}", score);
+                        _logger.Debug("_eduherminio_ Narrowed full depth result, {Score}", score);
                     }
                 }
 
@@ -425,7 +425,7 @@ public sealed partial class Engine
 
                     if (score <= EvaluationConstants.MinEval)
                     {
-                        _logger.Debug("Full bandwith full depth result, {Score}", score);
+                        _logger.Debug("_eduherminio_ Full bandwith full depth result, {Score}", score);
                     }
                 }
             }
@@ -440,10 +440,10 @@ public sealed partial class Engine
 
             if (score <= EvaluationConstants.MinEval)
             {
-                _logger.Debug("We somehow managed to get a score <= to minEval: {Score}", score);
+                _logger.Debug("_eduherminio_ We somehow managed to get a score <= to minEval: {Score}", score);
                 if (EvaluationConstants.MinEval == bestScore)
                 {
-                    _logger.Debug("Expected issue, bestScore is also minEval");
+                    _logger.Debug("_eduherminio_ Expected issue, bestScore is also minEval");
                 }
             }
 
@@ -484,7 +484,7 @@ public sealed partial class Engine
 
                     if (bestScore <= EvaluationConstants.MinEval)
                     {
-                        _logger.Debug("Returning {MinEval} from Beta cutoff at depth {Depth}", bestScore, depth);
+                        _logger.Debug("_eduherminio_ Returning {MinEval} from Beta cutoff at depth {Depth}", bestScore, depth);
                     }
 
                     return bestScore;
@@ -501,11 +501,11 @@ public sealed partial class Engine
             var finalEval = Position.EvaluateFinalPosition(ply, isInCheck);
             _tt.RecordHash(_ttMask, position, depth, ply, finalEval, NodeType.Exact);
 
-            _logger.Debug("No legal moves found for {Position}, position evaluated as {FinalEval}", position.FEN(), finalEval);
+            _logger.Debug("_eduherminio_ No legal moves found for {Position}, position evaluated as {FinalEval}", position.FEN(), finalEval);
 
             if (finalEval <= EvaluationConstants.MinEval)
             {
-                _logger.Debug("Returning {MinEval} from final position evaluation at depth {Depth}", finalEval, depth);
+                _logger.Debug("_eduherminio_ Returning {MinEval} from final position evaluation at depth {Depth}", finalEval, depth);
             }
 
             return finalEval;
@@ -517,9 +517,9 @@ public sealed partial class Engine
 
         if (bestScore <= EvaluationConstants.MinEval)
         {
-            _logger.Debug("Returning {MinEval} from fail low node at depth {Depth}, ply {Ply}, after {Moves}. Alpha was {Alpha}, beta was {Beta}",
+            _logger.Debug("_eduherminio_ Returning {MinEval} from fail low node at depth {Depth}, ply {Ply}, after {Moves}. Alpha was {Alpha}, beta was {Beta}",
                 bestScore, depth, ply, visitedMovesCounter, alpha, beta);
-            _logger.Debug("Visited moves: {Moves}", string.Join(' ', visitedMoves.ToArray()));
+            _logger.Debug("_eduherminio_ Visited moves: {Moves}", string.Join(' ', visitedMoves.ToArray()));
         }
 
         return bestScore;
@@ -561,7 +561,7 @@ public sealed partial class Engine
         {
             if (ttProbeResult.Score <= EvaluationConstants.MinEval)
             {
-                _logger.Debug("[QUI] Returning {MinEval} from TT at depth 0, ply {Ply}", ttProbeResult.Score, ply);
+                _logger.Debug("_eduherminio_ [QUI] Returning {MinEval} from TT at depth 0, ply {Ply}", ttProbeResult.Score, ply);
             }
 
             return ttProbeResult.Score;
@@ -580,7 +580,7 @@ public sealed partial class Engine
 
             if (staticEvaluation <= EvaluationConstants.MinEval)
             {
-                _logger.Debug("[QUI] Returning {MinEval} from static evaluation beta cutoff at ply {Ply}", staticEvaluation, ply);
+                _logger.Debug("_eduherminio_ [QUI] Returning {MinEval} from static evaluation beta cutoff at ply {Ply}", staticEvaluation, ply);
             }
             return staticEvaluation;
         }
@@ -600,7 +600,7 @@ public sealed partial class Engine
 
             if (staticEvaluation <= EvaluationConstants.MinEval)
             {
-                _logger.Debug("[QUI] Returning {MinEval} from static evaluation II (final pos) at ply {Ply}", staticEvaluation, ply);
+                _logger.Debug("_eduherminio_ [QUI] Returning {MinEval} from static evaluation II (final pos) at ply {Ply}", staticEvaluation, ply);
             }
 
             return staticEvaluation;
@@ -674,7 +674,7 @@ public sealed partial class Engine
 
                     if (bestScore <= EvaluationConstants.MinEval)
                     {
-                        _logger.Debug("[QUI] Returning {MinEval} from Beta cutoff at ply {Ply}", bestScore, ply);
+                        _logger.Debug("_eduherminio_ [QUI] Returning {MinEval} from Beta cutoff at ply {Ply}", bestScore, ply);
                     }
 
                     return bestScore; // The refutation doesn't matter, since it'll be pruned
@@ -702,11 +702,11 @@ public sealed partial class Engine
             var finalEval = Position.EvaluateFinalPosition(ply, position.IsInCheck());
             _tt.RecordHash(_ttMask, position, 0, ply, finalEval, NodeType.Exact);
 
-            _logger.Debug("[QUI] No legal moves found for {Position}, position evaluated as {FinalEval}", position.FEN(), finalEval);
+            _logger.Debug("_eduherminio_ [QUI] No legal moves found for {Position}, position evaluated as {FinalEval}", position.FEN(), finalEval);
 
             if (finalEval <= EvaluationConstants.MinEval)
             {
-                _logger.Debug("[QUI] Returning {MinEval} from final position evaluation at ply {Ply}", finalEval, ply);
+                _logger.Debug("_eduherminio_ [QUI] Returning {MinEval} from final position evaluation at ply {Ply}", finalEval, ply);
             }
 
             return finalEval;
@@ -716,7 +716,7 @@ public sealed partial class Engine
 
         if (bestScore <= EvaluationConstants.MinEval)
         {
-            _logger.Debug("[QUI] Returning {MinEval} from fail low node at ply {Ply}", bestScore, ply);
+            _logger.Debug("_eduherminio_ [QUI] Returning {MinEval} from fail low node at ply {Ply}", bestScore, ply);
         }
 
         return bestScore;
