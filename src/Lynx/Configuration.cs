@@ -189,6 +189,12 @@ public sealed class EngineSettings
 
     [SPSA<int>(0, 500, 25)]
     public int FP_Margin { get; set; } = 129;
+
+    [SPSA<int>(0, 10, 0.5)]
+    public int HistoryPrunning_MaxDepth { get; set; } = 7;
+
+    [SPSA<int>(0, -8192, 512)]
+    public int HistoryPrunning_Margin { get; set; } = -2500;
 }
 
 [JsonSourceGenerationOptions(
