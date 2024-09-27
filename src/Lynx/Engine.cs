@@ -302,7 +302,7 @@ public sealed partial class Engine
 
         if (searchResult is not null)
         {
-            _logger.Info("Search evaluation result - eval: {0}, mate: {1}, depth: {2}, pv: {3}",
+            _logger.Info("Search evaluation result - score: {0}, mate: {1}, depth: {2}, pv: {3}",
                 searchResult.Score, searchResult.Mate, searchResult.Depth, string.Join(", ", searchResult.Moves.Select(m => m.UCIString())));
         }
 
