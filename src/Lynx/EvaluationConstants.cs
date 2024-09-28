@@ -4,7 +4,7 @@
 
 namespace Lynx;
 
-public static partial class EvaluationConstants
+public static class EvaluationConstants
 {
     /// <summary>
     /// 20000 games, 20+0.2, 8moves_v3.epd
