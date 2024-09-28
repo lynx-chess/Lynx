@@ -501,7 +501,7 @@ public sealed partial class Engine
             var finalEval = Position.EvaluateFinalPosition(ply, isInCheck);
             _tt.RecordHash(_ttMask, position, depth, ply, finalEval, NodeType.Exact);
 
-            _logger.Debug("No legal moves found for {Position}, position evaluated as {FinalEval}", position.FEN(), finalEval);
+            //_logger.Debug("No legal moves found for {Position}, position evaluated as {FinalEval}", position.FEN(), finalEval);
 
             if (finalEval <= EvaluationConstants.MinEval)
             {
@@ -702,7 +702,7 @@ public sealed partial class Engine
             var finalEval = Position.EvaluateFinalPosition(ply, position.IsInCheck());
             _tt.RecordHash(_ttMask, position, 0, ply, finalEval, NodeType.Exact);
 
-            _logger.Debug("[QUI] No legal moves found for {Position}, position evaluated as {FinalEval}", position.FEN(), finalEval);
+            //_logger.Debug("[QUI] No legal moves found for {Position}, position evaluated as {FinalEval}", position.FEN(), finalEval);
 
             if (finalEval <= EvaluationConstants.MinEval)
             {
