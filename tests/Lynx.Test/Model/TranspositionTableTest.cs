@@ -64,11 +64,11 @@ public class TranspositionTableTests
     [TestCase(-10_000, 5, -10_000)]
     [TestCase(NegativeCheckmateDetectionLimit + 1, 5, NegativeCheckmateDetectionLimit + 1)]
 
-    [TestCase(CheckMateBaseEvaluation - 5 * CheckmateDepthFactor, 2, CheckMateBaseEvaluation - 7 * CheckmateDepthFactor)]
-    [TestCase(CheckMateBaseEvaluation - 2 * CheckmateDepthFactor, 4, CheckMateBaseEvaluation - 6 * CheckmateDepthFactor)]
+    [TestCase(CheckMateBaseEvaluation - (5 * CheckmateDepthFactor), 2, CheckMateBaseEvaluation - (7 * CheckmateDepthFactor))]
+    [TestCase(CheckMateBaseEvaluation - (2 * CheckmateDepthFactor), 4, CheckMateBaseEvaluation - (6 * CheckmateDepthFactor))]
 
-    [TestCase(-CheckMateBaseEvaluation + 5 * CheckmateDepthFactor, 2, -CheckMateBaseEvaluation + 7 * CheckmateDepthFactor)]
-    [TestCase(-CheckMateBaseEvaluation + 2 * CheckmateDepthFactor, 4, -CheckMateBaseEvaluation + 6 * CheckmateDepthFactor)]
+    [TestCase(-CheckMateBaseEvaluation + (5 * CheckmateDepthFactor), 2, -CheckMateBaseEvaluation + (7 * CheckmateDepthFactor))]
+    [TestCase(-CheckMateBaseEvaluation + (2 * CheckmateDepthFactor), 4, -CheckMateBaseEvaluation + (6 * CheckmateDepthFactor))]
     public void RecalculateMateScores(int evaluation, int depth, int expectedEvaluation)
     {
         Assert.AreEqual(expectedEvaluation, TranspositionTableExtensions.RecalculateMateScores(evaluation, depth));
@@ -89,8 +89,8 @@ public class TranspositionTableTests
         Assert.AreEqual(expectedProbeEval, transpositionTable.ProbeHash(mask, position, depth: 5, ply: 3, alpha: probeAlpha, beta: probeBeta).Score);
     }
 
-    [TestCase(CheckMateBaseEvaluation - 8 * CheckmateDepthFactor)]
-    [TestCase(-CheckMateBaseEvaluation + 3 * CheckmateDepthFactor)]
+    [TestCase(CheckMateBaseEvaluation - (8 * CheckmateDepthFactor))]
+    [TestCase(-CheckMateBaseEvaluation + (3 * CheckmateDepthFactor))]
     public void RecordHash_ProbeHash_CheckmateSameDepth(int recordedEval)
     {
         const int sharedDepth = 5;
@@ -103,10 +103,10 @@ public class TranspositionTableTests
         Assert.AreEqual(recordedEval, transpositionTable.ProbeHash(mask, position, depth: 7, ply: sharedDepth, alpha: 50, beta: 100).Score);
     }
 
-    [TestCase(CheckMateBaseEvaluation - 8 * CheckmateDepthFactor, 5, 4, CheckMateBaseEvaluation - 7 * CheckmateDepthFactor)]
-    [TestCase(CheckMateBaseEvaluation - 8 * CheckmateDepthFactor, 5, 6, CheckMateBaseEvaluation - 9 * CheckmateDepthFactor)]
-    [TestCase(-CheckMateBaseEvaluation + 8 * CheckmateDepthFactor, 5, 4, -CheckMateBaseEvaluation + 7 * CheckmateDepthFactor)]
-    [TestCase(-CheckMateBaseEvaluation + 8 * CheckmateDepthFactor, 5, 6, -CheckMateBaseEvaluation + 9 * CheckmateDepthFactor)]
+    [TestCase(CheckMateBaseEvaluation - (8 * CheckmateDepthFactor), 5, 4, CheckMateBaseEvaluation - (7 * CheckmateDepthFactor))]
+    [TestCase(CheckMateBaseEvaluation - (8 * CheckmateDepthFactor), 5, 6, CheckMateBaseEvaluation - (9 * CheckmateDepthFactor))]
+    [TestCase(-CheckMateBaseEvaluation + (8 * CheckmateDepthFactor), 5, 4, -CheckMateBaseEvaluation + (7 * CheckmateDepthFactor))]
+    [TestCase(-CheckMateBaseEvaluation + (8 * CheckmateDepthFactor), 5, 6, -CheckMateBaseEvaluation + (9 * CheckmateDepthFactor))]
     public void RecordHash_ProbeHash_CheckmateDifferentDepth(int recordedEval, int recordedDeph, int probeDepth, int expectedProbeEval)
     {
         var position = new Position(Constants.InitialPositionFEN);
