@@ -1,7 +1,6 @@
 ﻿using Lynx.Model;
 using NUnit.Framework;
 using System.Collections.Frozen;
-using System.Diagnostics;
 using static Lynx.Constants;
 
 namespace Lynx.Test;
