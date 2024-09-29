@@ -34,11 +34,9 @@ public static class MagicNumberGenerator
 
     public static ulong FindMagicNumbers(int squareIndex, bool isBishop)
     {
-        BitBoard[] occupancies = new BitBoard[4096];
-
-        BitBoard[] attacks = new BitBoard[4096];
-
-        var usedAttacks = new ulong[4096];
+        Span<BitBoard> occupancies = stackalloc BitBoard[4096];
+        Span<BitBoard> attacks = stackalloc BitBoard[4096];
+        Span<BitBoard> usedAttacks = stackalloc BitBoard[4096];
 
         var occupancyMask = isBishop
             ? AttackGenerator.MaskBishopOccupancy(squareIndex)
@@ -90,8 +88,10 @@ public static class MagicNumberGenerator
                 }
                 else if (usedAttacks[magicIndex] != attacks[index])
                 {
+#pragma warning disable S127 // "for" loop stop conditions should be invariant - intentional
                     // Magic index doesn't work
                     fail = true;
+#pragma warning restore S127 // "for" loop stop conditions should be invariant
                 }
             }
 
@@ -114,13 +114,13 @@ public static class MagicNumberGenerator
         {
             // Rook
             var magicRook = FindMagicNumbers(square, false);
-            Console.WriteLine(magicRook);
+            Console.WriteLine(magicRook.ToString("x"));
 
             Console.WriteLine();
 
             // Bishop
             var magicBishop = FindMagicNumbers(square, true);
-            Console.WriteLine(magicBishop);
+            Console.WriteLine(magicBishop.ToString("x"));
         }
     }
 }

@@ -3,7 +3,7 @@ using NUnit.Framework;
 using System.Numerics;
 using static Lynx.EvaluationConstants;
 
-namespace Lynx.Test;
+namespace Lynx.Test.Model;
 public class TranspositionTableTests
 {
     [TestCase(2)]
@@ -64,33 +64,33 @@ public class TranspositionTableTests
     [TestCase(-10_000, 5, -10_000)]
     [TestCase(NegativeCheckmateDetectionLimit + 1, 5, NegativeCheckmateDetectionLimit + 1)]
 
-    [TestCase(CheckMateBaseEvaluation - 5 * CheckmateDepthFactor, 2, CheckMateBaseEvaluation - 7 * CheckmateDepthFactor)]
-    [TestCase(CheckMateBaseEvaluation - 2 * CheckmateDepthFactor, 4, CheckMateBaseEvaluation - 6 * CheckmateDepthFactor)]
+    [TestCase(CheckMateBaseEvaluation - (5 * CheckmateDepthFactor), 2, CheckMateBaseEvaluation - (7 * CheckmateDepthFactor))]
+    [TestCase(CheckMateBaseEvaluation - (2 * CheckmateDepthFactor), 4, CheckMateBaseEvaluation - (6 * CheckmateDepthFactor))]
 
-    [TestCase(-CheckMateBaseEvaluation + 5 * CheckmateDepthFactor, 2, -CheckMateBaseEvaluation + 7 * CheckmateDepthFactor)]
-    [TestCase(-CheckMateBaseEvaluation + 2 * CheckmateDepthFactor, 4, -CheckMateBaseEvaluation + 6 * CheckmateDepthFactor)]
+    [TestCase(-CheckMateBaseEvaluation + (5 * CheckmateDepthFactor), 2, -CheckMateBaseEvaluation + (7 * CheckmateDepthFactor))]
+    [TestCase(-CheckMateBaseEvaluation + (2 * CheckmateDepthFactor), 4, -CheckMateBaseEvaluation + (6 * CheckmateDepthFactor))]
     public void RecalculateMateScores(int evaluation, int depth, int expectedEvaluation)
     {
         Assert.AreEqual(expectedEvaluation, TranspositionTableExtensions.RecalculateMateScores(evaluation, depth));
     }
 
-    [TestCase(+19, NodeType.Alpha, +20, +30, 20)]
+    [TestCase(+19, NodeType.Alpha, +20, +30, +19)]
     [TestCase(+21, NodeType.Alpha, +20, +30, NoHashEntry)]
     [TestCase(+29, NodeType.Beta, +20, +30, NoHashEntry)]
-    [TestCase(+31, NodeType.Beta, +20, +30, 30)]
+    [TestCase(+31, NodeType.Beta, +20, +30, +31)]
     public void RecordHash_ProbeHash(int recordedEval, NodeType recordNodeType, int probeAlpha, int probeBeta, int expectedProbeEval)
     {
         var position = new Position(Constants.InitialPositionFEN);
         var (mask, length) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
         var transpositionTable = new TranspositionTableElement[length];
 
-        transpositionTable.RecordHash(mask, position, depth: 5, ply: 3, eval: recordedEval, nodeType: recordNodeType, move: 1234);
+        transpositionTable.RecordHash(mask, position, depth: 5, ply: 3, score: recordedEval, nodeType: recordNodeType, move: 1234);
 
-        Assert.AreEqual(expectedProbeEval, transpositionTable.ProbeHash(mask, position, depth: 5, ply: 3, alpha: probeAlpha, beta: probeBeta).Evaluation);
+        Assert.AreEqual(expectedProbeEval, transpositionTable.ProbeHash(mask, position, depth: 5, ply: 3, alpha: probeAlpha, beta: probeBeta).Score);
     }
 
-    [TestCase(CheckMateBaseEvaluation - 8 * CheckmateDepthFactor)]
-    [TestCase(-CheckMateBaseEvaluation + 3 * CheckmateDepthFactor)]
+    [TestCase(CheckMateBaseEvaluation - (8 * CheckmateDepthFactor))]
+    [TestCase(-CheckMateBaseEvaluation + (3 * CheckmateDepthFactor))]
     public void RecordHash_ProbeHash_CheckmateSameDepth(int recordedEval)
     {
         const int sharedDepth = 5;
@@ -98,23 +98,23 @@ public class TranspositionTableTests
         var (mask, length) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
         var transpositionTable = new TranspositionTableElement[length];
 
-        transpositionTable.RecordHash(mask, position, depth: 10, ply: sharedDepth, eval: recordedEval, nodeType: NodeType.Exact, move: 1234);
+        transpositionTable.RecordHash(mask, position, depth: 10, ply: sharedDepth, score: recordedEval, nodeType: NodeType.Exact, move: 1234);
 
-        Assert.AreEqual(recordedEval, transpositionTable.ProbeHash(mask, position, depth: 7, ply: sharedDepth, alpha: 50, beta: 100).Evaluation);
+        Assert.AreEqual(recordedEval, transpositionTable.ProbeHash(mask, position, depth: 7, ply: sharedDepth, alpha: 50, beta: 100).Score);
     }
 
-    [TestCase(CheckMateBaseEvaluation - 8 * CheckmateDepthFactor, 5, 4, CheckMateBaseEvaluation - 7 * CheckmateDepthFactor)]
-    [TestCase(CheckMateBaseEvaluation - 8 * CheckmateDepthFactor, 5, 6, CheckMateBaseEvaluation - 9 * CheckmateDepthFactor)]
-    [TestCase(-CheckMateBaseEvaluation + 8 * CheckmateDepthFactor, 5, 4, -CheckMateBaseEvaluation + 7 * CheckmateDepthFactor)]
-    [TestCase(-CheckMateBaseEvaluation + 8 * CheckmateDepthFactor, 5, 6, -CheckMateBaseEvaluation + 9 * CheckmateDepthFactor)]
+    [TestCase(CheckMateBaseEvaluation - (8 * CheckmateDepthFactor), 5, 4, CheckMateBaseEvaluation - (7 * CheckmateDepthFactor))]
+    [TestCase(CheckMateBaseEvaluation - (8 * CheckmateDepthFactor), 5, 6, CheckMateBaseEvaluation - (9 * CheckmateDepthFactor))]
+    [TestCase(-CheckMateBaseEvaluation + (8 * CheckmateDepthFactor), 5, 4, -CheckMateBaseEvaluation + (7 * CheckmateDepthFactor))]
+    [TestCase(-CheckMateBaseEvaluation + (8 * CheckmateDepthFactor), 5, 6, -CheckMateBaseEvaluation + (9 * CheckmateDepthFactor))]
     public void RecordHash_ProbeHash_CheckmateDifferentDepth(int recordedEval, int recordedDeph, int probeDepth, int expectedProbeEval)
     {
         var position = new Position(Constants.InitialPositionFEN);
         var (mask, length) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
         var transpositionTable = new TranspositionTableElement[length];
 
-        transpositionTable.RecordHash(mask, position, depth: 10, ply: recordedDeph, eval: recordedEval, nodeType: NodeType.Exact, move: 1234);
+        transpositionTable.RecordHash(mask, position, depth: 10, ply: recordedDeph, score: recordedEval, nodeType: NodeType.Exact, move: 1234);
 
-        Assert.AreEqual(expectedProbeEval, transpositionTable.ProbeHash(mask, position, depth: 7, ply: probeDepth, alpha: 50, beta: 100).Evaluation);
+        Assert.AreEqual(expectedProbeEval, transpositionTable.ProbeHash(mask, position, depth: 7, ply: probeDepth, alpha: 50, beta: 100).Score);
     }
 }

@@ -29,12 +29,12 @@ using Lynx.UCI.Commands;
 namespace Lynx.Benchmark;
 public class DebugCommand_Benchmark : BaseBenchmark
 {
-    public static IEnumerable<string> Data => new[]
-    {
+    public static IEnumerable<string> Data =>
+    [
         "debug on",
         "debug off",
         "debug onf",
-    };
+    ];
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]
@@ -48,7 +48,7 @@ public class DebugCommand_Benchmark : BaseBenchmark
     [ArgumentsSource(nameof(Data))]
     public bool SpanSplit2(string command) => DebugCommandBenchmark_DebugCommandSpanSplit2.Parse(command);
 
-    public sealed class DebugCommandBenchmark_DebugCommandStringSplit : GUIBaseCommand
+    public sealed class DebugCommandBenchmark_DebugCommandStringSplit : IGUIBaseCommand
     {
         public const string Id = "debug";
 
@@ -65,7 +65,7 @@ public class DebugCommand_Benchmark : BaseBenchmark
         }
     }
 
-    public sealed class DebugCommandBenchmark_DebugCommandSpanSplit : GUIBaseCommand
+    public sealed class DebugCommandBenchmark_DebugCommandSpanSplit : IGUIBaseCommand
     {
         public const string Id = "debug";
 
@@ -83,7 +83,7 @@ public class DebugCommand_Benchmark : BaseBenchmark
         }
     }
 
-    public sealed class DebugCommandBenchmark_DebugCommandSpanSplit2 : GUIBaseCommand
+    public sealed class DebugCommandBenchmark_DebugCommandSpanSplit2 : IGUIBaseCommand
     {
         public const string Id = "debug";
 

@@ -1,9 +1,11 @@
 ﻿using NLog;
+using System.Buffers;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Lynx.Model;
 
-public sealed class Game
+public sealed class Game : IDisposable
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
@@ -11,12 +13,14 @@ public sealed class Game
     public List<Move> MoveHistory { get; }
 #endif
 
-    public List<long> PositionHashHistory { get; }
+    private int _positionHashHistoryPointer;
+    private readonly long[] _positionHashHistory;
 
     /// <summary>
     /// Indexed by ply
     /// </summary>
     private readonly Move[] _moveStack;
+    private bool _disposedValue;
 
     public int HalfMovesWithoutCaptureOrPawnMove { get; set; }
 
@@ -24,32 +28,31 @@ public sealed class Game
 
     public Position PositionBeforeLastSearch { get; private set; }
 
-    public Game() : this(Constants.InitialPositionFEN)
+    public Game(ReadOnlySpan<char> fen) : this(fen, [], [], [])
     {
     }
 
-    public Game(ReadOnlySpan<char> fen)
+    public Game(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan, Span<Move> movePool)
     {
+        Debug.Assert(Constants.MaxNumberMovesInAGame <= 1024, "Need to customized ArrayPool due to desired array size requirements");
+        _positionHashHistory = ArrayPool<long>.Shared.Rent(Constants.MaxNumberMovesInAGame);
+        _moveStack = ArrayPool<Move>.Shared.Rent(Constants.MaxNumberMovesInAGame);
+
         var parsedFen = FENParser.ParseFEN(fen);
         CurrentPosition = new Position(parsedFen);
-        PositionBeforeLastSearch = new Position(CurrentPosition);
 
         if (!CurrentPosition.IsValid())
         {
             _logger.Warn($"Invalid position detected: {fen.ToString()}");
         }
 
-        PositionHashHistory = new(Constants.MaxNumberMovesInAGame) { CurrentPosition.UniqueIdentifier };
+        AddToPositionHashHistory(CurrentPosition.UniqueIdentifier);
         HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
-        _moveStack = new Move[1024];
 
 #if DEBUG
         MoveHistory = new(Constants.MaxNumberMovesInAGame);
 #endif
-    }
 
-    public Game(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan, Span<Move> movePool) : this(fen)
-    {
         for (int i = 0; i < rangeSpan.Length; ++i)
         {
             if (rangeSpan[i].Start.Equals(rangeSpan[i].End))
@@ -138,11 +141,11 @@ public sealed class Game
     {
         var currentHash = CurrentPosition.UniqueIdentifier;
 
-        // [Count - 1] would be the last one, we want to start searching 2 ealier and finish HalfMovesWithoutCaptureOrPawnMove earlier
-        var limit = Math.Max(0, PositionHashHistory.Count - 1 - HalfMovesWithoutCaptureOrPawnMove);
-        for (int i = PositionHashHistory.Count - 3; i >= limit; i -= 2)
+        // [_positionHashHistoryPointer - 1] would be the last one, we want to start searching 2 ealier and finish HalfMovesWithoutCaptureOrPawnMove earlier
+        var limit = Math.Max(0, _positionHashHistoryPointer - 1 - HalfMovesWithoutCaptureOrPawnMove);
+        for (int i = _positionHashHistoryPointer - 3; i >= limit; i -= 2)
         {
-            if (currentHash == PositionHashHistory[i])
+            if (currentHash == _positionHashHistory[i])
             {
                 return true;
             }
@@ -163,19 +166,19 @@ public sealed class Game
     }
 
     /// <summary>
-    /// To be used in online tb proving only, with a copy of <see cref="PositionHashHistory"/> that hasn't been updated with <paramref name="position"/>
+    /// To be used in online tb proving only, in combination with the result of <see cref="CopyPositionHashHistory"/>
     /// </summary>
     /// <param name="positionHashHistory"></param>
     /// <param name="position"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsThreefoldRepetition(List<long> positionHashHistory, Position position, int halfMovesWithoutCaptureOrPawnMove = Constants.MaxNumberMovesInAGame)
+    public static bool IsThreefoldRepetition(ReadOnlySpan<long> positionHashHistory, Position position, int halfMovesWithoutCaptureOrPawnMove = Constants.MaxNumberMovesInAGame)
     {
         var currentHash = position.UniqueIdentifier;
 
         // Since positionHashHistory hasn't been updated with position, [Count] would be the last one, so we want to start searching 2 ealier
-        var limit = Math.Max(0, positionHashHistory.Count - halfMovesWithoutCaptureOrPawnMove);
-        for (int i = positionHashHistory.Count - 2; i >= limit; i -= 2)
+        var limit = Math.Max(0, positionHashHistory.Length - halfMovesWithoutCaptureOrPawnMove);
+        for (int i = positionHashHistory.Length - 2; i >= limit; i -= 2)
         {
             if (currentHash == positionHashHistory[i])
             {
@@ -204,7 +207,7 @@ public sealed class Game
 #if DEBUG
             MoveHistory.Add(moveToPlay);
 #endif
-            PositionHashHistory.Add(CurrentPosition.UniqueIdentifier);
+            AddToPositionHashHistory(CurrentPosition.UniqueIdentifier);
             Update50movesRule(moveToPlay, moveToPlay.IsCapture());
         }
         else
@@ -221,13 +224,65 @@ public sealed class Game
     /// (either by the engine time management logic or by external stop command)
     /// currentPosition won't be the initial one
     /// </summary>
-    public void ResetCurrentPositionToBeforeSearchState() => CurrentPosition = new(PositionBeforeLastSearch);
+    public void ResetCurrentPositionToBeforeSearchState()
+    {
+        CurrentPosition.FreeResources();
+        CurrentPosition = new(PositionBeforeLastSearch);
+    }
 
-    public void UpdateInitialPosition() => PositionBeforeLastSearch = new(CurrentPosition);
+    public void UpdateInitialPosition()
+    {
+        PositionBeforeLastSearch.FreeResources();
+        PositionBeforeLastSearch = new(CurrentPosition);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void PushToMoveStack(int n, Move move) => _moveStack[n + EvaluationConstants.ContinuationHistoryPlyCount] = move;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Move PopFromMoveStack(int n) => _moveStack[n + EvaluationConstants.ContinuationHistoryPlyCount];
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public int PositionHashHistoryLength() => _positionHashHistoryPointer;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void AddToPositionHashHistory(long hash) => _positionHashHistory[_positionHashHistoryPointer++] = hash;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void RemoveFromPositionHashHistory() => --_positionHashHistoryPointer;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public long[] CopyPositionHashHistory() => _positionHashHistory[.._positionHashHistoryPointer];
+
+    internal void ClearPositionHashHistory() => _positionHashHistoryPointer = 0;
+
+    public void FreeResources()
+    {
+        ArrayPool<Move>.Shared.Return(_moveStack);
+        ArrayPool<long>.Shared.Return(_positionHashHistory);
+
+        CurrentPosition.FreeResources();
+        PositionBeforeLastSearch.FreeResources();
+
+        _disposedValue = true;
+    }
+
+    private void Dispose(bool disposing)
+    {
+        if (!_disposedValue)
+        {
+            if (disposing)
+            {
+                FreeResources();
+            }
+            _disposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
 }

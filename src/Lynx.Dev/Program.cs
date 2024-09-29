@@ -52,7 +52,8 @@ using static Lynx.TunableEvalParameters;
 //TranspositionTable();
 //UnmakeMove();
 //PieceSquareTables();
-NewMasks();
+//NewMasks();
+DarkLightSquares();
 
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
 const string TrickyPosition = Constants.TrickyTestPositionFEN;
@@ -248,7 +249,9 @@ static void _13_GeneratingMagicNumbersCandidates()
 
 static void _14_GeneratingMagicNumbersByBruteForce()
 {
+    var sw = Stopwatch.StartNew();
     MagicNumberGenerator.InitializeMagicNumbers();
+    Console.WriteLine($"Time: {sw.ElapsedMilliseconds}ms");
 
     // Should generate something similar to Constants.RookMagicNumbers
 }
@@ -700,7 +703,7 @@ static void _54_ScoreMove()
     var position = new Position(KillerPosition);
     position.Print();
 
-    var engine = new Engine(Channel.CreateBounded<string>(new BoundedChannelOptions(100) { SingleReader = true, SingleWriter = false }));
+    var engine = new Engine(Channel.CreateBounded<object>(new BoundedChannelOptions(100) { SingleReader = true, SingleWriter = false }));
     engine.SetGame(new(position.FEN()));
     foreach (var move in MoveGenerator.GenerateAllMoves(position, capturesOnly: true))
     {
@@ -1080,24 +1083,24 @@ static void TranspositionTable()
     var hashKey2 = position.UniqueIdentifier & mask;
     Console.WriteLine(hashKey2);
 
-    transpositionTable.ClearTranspositionTable();
+    Array.Clear(transpositionTable);
 
     //transpositionTable.RecordHash(position, depth: 3, maxDepth: 5, move: 1234, eval: +5, nodeType: NodeType.Alpha);
     //var entry = transpositionTable.ProbeHash(position, maxDepth: 5, depth: 3, alpha: 1, beta: 2);
 
-    transpositionTable.RecordHash(mask, position, depth: 5, ply: 3, eval: +19, nodeType: NodeType.Alpha, move: 1234);
+    transpositionTable.RecordHash(mask, position, depth: 5, ply: 3, score: +19, nodeType: NodeType.Alpha, move: 1234);
     var entry = transpositionTable.ProbeHash(mask, position, depth: 5, ply: 3, alpha: 20, beta: 30);
     Console.WriteLine(entry); // Expected 20
 
-    transpositionTable.RecordHash(mask, position, depth: 5, ply: 3, eval: +21, nodeType: NodeType.Alpha, move: 1234);
+    transpositionTable.RecordHash(mask, position, depth: 5, ply: 3, score: +21, nodeType: NodeType.Alpha, move: 1234);
     entry = transpositionTable.ProbeHash(mask, position, depth: 5, ply: 3, alpha: 20, beta: 30);
     Console.WriteLine(entry); // Expected 12_345_678
 
-    transpositionTable.RecordHash(mask, position, depth: 5, ply: 3, eval: +29, nodeType: NodeType.Beta, move: 1234);
+    transpositionTable.RecordHash(mask, position, depth: 5, ply: 3, score: +29, nodeType: NodeType.Beta, move: 1234);
     entry = transpositionTable.ProbeHash(mask, position, depth: 5, ply: 3, alpha: 20, beta: 30);
     Console.WriteLine(entry); // Expected 12_345_678
 
-    transpositionTable.RecordHash(mask, position, depth: 5, ply: 3, eval: +31, nodeType: NodeType.Beta, move: 1234);
+    transpositionTable.RecordHash(mask, position, depth: 5, ply: 3, score: +31, nodeType: NodeType.Beta, move: 1234);
     entry = transpositionTable.ProbeHash(mask, position, depth: 5, ply: 3, alpha: 20, beta: 30);
     Console.WriteLine(entry); // Expected 30
 }
@@ -1126,7 +1129,8 @@ static void UnmakeMove()
             var epdMoveString = move.ToEPDString(position);
             Console.WriteLine($"Trying {epdMoveString} in\t{position.FEN()}");
 
-            var newPosition = new Position(position, move);
+            var newPosition = new Position(position);
+            newPosition.MakeMove(move);
             var savedState = position.MakeMove(move);
 
             Console.WriteLine($"Position\t{newPosition.FEN()}, Zobrist key {newPosition.UniqueIdentifier}");
@@ -1219,4 +1223,15 @@ static void PrintBitBoardArray(ulong[] bb)
     }
 
     Console.WriteLine();
+}
+
+static void DarkLightSquares()
+{
+    Constants.DarkSquaresBitBoard.Print();
+    Constants.LightSquaresBitBoard.Print();
+
+    for (int i = 0; i < 64; ++i)
+    {
+        Debug.Assert(Constants.DarkSquaresBitBoard.GetBit(i) ^ Constants.LightSquaresBitBoard.GetBit(i));
+    }
 }

@@ -13,12 +13,12 @@ namespace Lynx;
 public sealed class UCIHandler
 {
     private readonly Channel<string> _uciToEngine;
-    private readonly Channel<string> _engineToUci;
+    private readonly Channel<object> _engineToUci;
 
     private readonly Engine _engine;
     private readonly Logger _logger;
 
-    public UCIHandler(Channel<string> uciToEngine, Channel<string> engineToUci, Engine engine)
+    public UCIHandler(Channel<string> uciToEngine, Channel<object> engineToUci, Engine engine)
     {
         _uciToEngine = uciToEngine;
         _engineToUci = engineToUci;
@@ -40,7 +40,10 @@ public sealed class UCIHandler
 
         try
         {
-            _logger.Debug("[GUI]\t{0}", rawCommand);
+            if (_logger.IsDebugEnabled)
+            {
+                _logger.Debug("[GUI]\t{0}", rawCommand);
+            }
 
             switch (ExtractCommandItems(rawCommand))
             {
@@ -334,19 +337,27 @@ public sealed class UCIHandler
                     break;
                 }
 
-            case "aspirationwindow_delta":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.AspirationWindow_Delta = value;
-                    }
-                    break;
-                }
+            //case "aspirationwindow_delta":
+            //    {
+            //        if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+            //        {
+            //            Configuration.EngineSettings.AspirationWindow_Delta = value;
+            //        }
+            //        break;
+            //    }
             case "aspirationwindow_mindepth":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
                         Configuration.EngineSettings.AspirationWindow_MinDepth = value;
+                    }
+                    break;
+                }
+            case "aspirationwindow_base":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.AspirationWindow_Base = value;
                     }
                     break;
                 }
@@ -458,6 +469,22 @@ public sealed class UCIHandler
                     }
                     break;
                 }
+            case "historyprunning_maxdepth":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.HistoryPrunning_MaxDepth = value;
+                    }
+                    break;
+                }
+            case "historyprunning_margin":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.HistoryPrunning_Margin = value;
+                    }
+                    break;
+                }
 
             #endregion
 
@@ -552,7 +579,7 @@ public sealed class UCIHandler
     {
         try
         {
-            var fullPath = Path.GetFullPath(rawCommand[(rawCommand.IndexOf(' ') + 1)..]);
+            var fullPath = Path.GetFullPath(rawCommand[(rawCommand.IndexOf(' ') + 1)..].Replace("\"", string.Empty));
             if (!File.Exists(fullPath))
             {
                 _logger.Warn("File {0} not found in (1), ignoring command", rawCommand, fullPath);
@@ -604,7 +631,7 @@ public sealed class UCIHandler
         var score = WDL.NormalizeScore(_engine.Game.CurrentPosition.StaticEvaluation().Score);
         _engine.Game.CurrentPosition.SetNeedsFullEvalRecalculation();
 
-        await _engineToUci.Writer.WriteAsync(score.ToString(), cancellationToken);
+        await _engineToUci.Writer.WriteAsync(score, cancellationToken);
     }
 
     private async Task HandleFEN(CancellationToken cancellationToken)

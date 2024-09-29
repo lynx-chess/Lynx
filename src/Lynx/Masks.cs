@@ -93,7 +93,6 @@ public static class Masks
         [],
     ];
 
-
     /// <summary>
     /// Passed 'side' pawn mask for square c4
     /// 8  0 1 0 1 0 0 0 0

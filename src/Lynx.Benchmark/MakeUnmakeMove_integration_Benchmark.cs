@@ -206,6 +206,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         {
             if (depth != 0)
             {
+#pragma warning disable S3267 // Loops should be simplified with "LINQ" expressions
                 foreach (var move in MakeMoveMoveGenerator.GenerateAllMoves(position))
                 {
                     if (position.WasProduceByAValidMove())
@@ -213,6 +214,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                         nodes = ResultsImpl_AllocBase(position, depth - 1, nodes);
                     }
                 }
+#pragma warning restore S3267 // Loops should be simplified with "LINQ" expressions
 
                 return nodes;
             }
@@ -299,6 +301,8 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
 
         public BitBoard[] OccupancyBitBoards { get; }
 
+        public int[] Board { get; }
+
         public Side Side { get; private set; }
 
         public BoardSquare EnPassant { get; private set; }
@@ -309,11 +313,12 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         {
         }
 
-        public MakeMovePosition((BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, byte Castle, BoardSquare EnPassant,
+        public MakeMovePosition((BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, int[] board, Side Side, byte Castle, BoardSquare EnPassant,
             int HalfMoveClock/*, int FullMoveCounter*/) parsedFEN)
         {
             PieceBitBoards = parsedFEN.PieceBitBoards;
             OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
+            Board = parsedFEN.board;
             Side = parsedFEN.Side;
             Castle = parsedFEN.Castle;
             EnPassant = parsedFEN.EnPassant;
@@ -335,6 +340,9 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
             OccupancyBitBoards = new BitBoard[3];
             Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
 
+            Board = new int[64];
+            Array.Copy(position.Board, Board, position.Board.Length);
+
             Side = position.Side;
             Castle = position.Castle;
             EnPassant = position.EnPassant;
@@ -355,6 +363,9 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
 
             OccupancyBitBoards = new BitBoard[3];
             Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
+
+            Board = new int[64];
+            Array.Copy(position.Board, Board, position.Board.Length);
 
             Side = (Side)Utils.OppositeSide(position.Side);
             Castle = position.Castle;
@@ -1190,7 +1201,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         /// <summary>
         /// Lightweight version of <see cref="IsValid"/>
         /// False if the opponent king is in check.
-        /// This method is meant to be invoked only after <see cref="Position(Position, Move)"/>
+        /// This method is meant to be invoked only after <see cref="Position.MakeMove(int)"/>
         /// </summary>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1222,6 +1233,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         }
     }
 
+#pragma warning disable S1104 // Fields should not have public accessibility
     public struct MakeMoveGameState_PassOut
     {
         public int CapturedPiece;
@@ -1237,6 +1249,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
             EnPassant = enpassant;
         }
     }
+#pragma warning restore IDE0290 // Use primary constructor
 
     public struct MakeMoveGameState_PassRef
     {
@@ -1512,7 +1525,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                     }
                     else
                     {
-                        movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece);
+                        movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, position.Board[targetSquare]);
                     }
                 }
             }

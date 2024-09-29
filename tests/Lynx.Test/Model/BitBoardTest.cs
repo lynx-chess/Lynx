@@ -94,25 +94,6 @@ public class BitBoardTest
     }
 
     [Test]
-    public void CountBits_ulong()
-    {
-        var bitBoard = new BitBoard();
-        Assert.AreEqual(0, bitBoard.CountBits());
-
-        bitBoard.SetBit(BoardSquare.e4);
-        Assert.AreEqual(1, bitBoard.CountBits());
-
-        bitBoard.SetBit(BoardSquare.e4);
-        Assert.AreEqual(1, bitBoard.CountBits());
-
-        bitBoard.SetBit(BoardSquare.d4);
-        Assert.AreEqual(2, bitBoard.CountBits());
-
-        bitBoard.PopBit(BoardSquare.d4);
-        Assert.AreEqual(1, bitBoard.CountBits());
-    }
-
-    [Test]
     public void ResetLS1B()
     {
         // Arrange

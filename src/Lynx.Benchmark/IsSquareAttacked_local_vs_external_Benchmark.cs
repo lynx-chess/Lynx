@@ -33,13 +33,13 @@ namespace Lynx.Benchmark;
 
 public class IsSquareAttacked_local_vs_external_Benchmark : BaseBenchmark
 {
-    private readonly Position[] _positions = new[]
-    {
+    private readonly Position[] _positions =
+        [
             new Position(Constants.InitialPositionFEN),
             new Position(Constants.TrickyTestPositionFEN),
             new Position("rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1"),
             new Position("r2q1rk1/ppp2ppp/2n1bn2/2b1p3/3pP3/3P1NPP/PPP1NPB1/R1BQ1RK1 b - - 0 9"),
-        };
+        ];
 
     [Benchmark(Baseline = true)]
     public bool LocalMethods()

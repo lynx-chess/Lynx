@@ -6,6 +6,4 @@ namespace Lynx.Benchmark;
 [HtmlExporter]
 [MemoryDiagnoser]
 //[NativeMemoryProfiler]
-public class BaseBenchmark
-{
-}
+public class BaseBenchmark;

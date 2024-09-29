@@ -87,7 +87,7 @@ If you're a Linux user and are new to .NET ecosystem, the conversation in [this 
 
 <Summary>Feature list</Summary>
 
-_Beware, most of the provided links contained outdated information and don't reflect the current implementation or the state of the art of computer chess programming, at this point they remain here mostly for historical reasons_.
+_Beware, most of the provided links contain outdated information and don't reflect the current implementation or the state of the art of computer chess programming, at this point they remain here mostly for historical reasons_.
 
 ### Search
 
@@ -109,33 +109,57 @@ _Beware, most of the provided links contained outdated information and don't ref
 
 - Reverse Futility Pruning (RFP)
 
+- History pruning
+
 - Late Move Reductions (LMR) [[1](https://web.archive.org/web/20150212051846/http://www.glaurungchess.com/lmr.html)] [[2](https://www.chessprogramming.org/Late_Move_Reductions)] [[3](https://talkchess.com/forum3/viewtopic.php?f=7&t=75056#p860118)]
 
 - Internal Iterative Reduction (IIR)
 
 - Check extensions [[1](https://www.chessprogramming.org/Check_Extensions)]
 
-- Static Exchange Evaluation (SEE) for move ordering and reduction
+- Static Exchange Evaluation (SEE) for move ordering, reduction and QSearch pruning
 
 - Razoring [[1](https://www.chessprogramming.org/Razoring)]
 
 - Killer heuristic [[1](https://www.chessprogramming.org/Killer_Heuristic)]
 
-- History heuristic: quiet history, capture history, history malus [[1](https://www.chessprogramming.org/History_Heuristic)]
+- History heuristic: quiet history, capture history, continuation history, history malus [[1](https://www.chessprogramming.org/History_Heuristic)]
+
+- Countermoves
 
 ### Evaluation
 
 - Piece-Square Tables (PSQT) [[1](https://www.chessprogramming.org/Piece-Square_Tables)]
 
+- King-bucketed PSQT
+
+- Enemy king PSQT
+
 - Mobility (knight, bishop, rook, queen)
 
 - Bishop pair
+
+- Bishop penalty for same color pawns
+
+- Bishop penalty for blocked central pawns
 
 - Rook in open and semi-open files
 
 - King pawn shield, king virtual mobility, king in open and semi-open files
 
-- Isolated and passed pawns
+- Isolated pawns
+
+- Passed pawns, including bonus for not opponent pieces ahead and friend/opponent king distance to it
+
+- Pawn phalanx
+
+- Pieces protected and attacked by pawns
+
+- Pieces capable of deliverying checks
+
+- Eval scaling with pawn count and 50 moves rule
+
+- 50 moves rule eval scaling
 
 ### Miscellaneous
 
@@ -152,6 +176,8 @@ _Beware, most of the provided links contained outdated information and don't ref
 - Incremental move sorting
 
 - Hard/Soft time management
+
+- Expected moves to go [[1](https://expositor.dev/pdf/movetime.pdf)]
 
 </details>
 

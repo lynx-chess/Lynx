@@ -8,7 +8,8 @@ public static class EvaluationPSQTs
 {
     public const int PSQTBucketCount = 23;
 
-    public static readonly int[] PSQTBucketLayout =
+#pragma warning disable S4663 // Comments should not be empty - comes from C++
+    public static ReadOnlySpan<int> PSQTBucketLayout =>
     [
         15, 16, 17, 18, 19, 20, 21, 22,
         15, 16, 17, 18, 19, 20, 21, 22,
@@ -19,6 +20,7 @@ public static class EvaluationPSQTs
         0, 8, 9, 10, 11, 12, 13, 14,
         0, 1, 2, 3, 4, 5, 6, 7, //
     ];
+#pragma warning restore S4663 // Comments should not be empty
 
     /// <summary>
     /// 2 x PSQTBucketCount x 12 x 64

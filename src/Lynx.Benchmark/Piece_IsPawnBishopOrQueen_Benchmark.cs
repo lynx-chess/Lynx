@@ -141,14 +141,15 @@ using Lynx.Model;
 namespace Lynx.Benchmark;
 public class Piece_IsPawnBishopOrQueen_Benchmark : BaseBenchmark
 {
-    public static IEnumerable<Piece> Data => new[] {
+    public static IEnumerable<Piece> Data =>
+    [
         Piece.P, Piece.p,
         Piece.N, Piece.n,
         Piece.B, Piece.b,
         Piece.R, Piece.r,
         Piece.Q, Piece.q,
         Piece.K, Piece.k
-    };
+    ];
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]
