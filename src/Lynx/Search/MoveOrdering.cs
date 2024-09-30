@@ -36,14 +36,14 @@ public sealed partial class Engine
             }
 
             return PromotionMoveScoreValue
-                + (SEE.HasPositiveScore(Game.CurrentPosition, move)
+                + (SEE.HasPositiveScore(Game.CurrentPosition, move, threshold: 10)
                     ? GoodCaptureMoveBaseScoreValue
                     : BadCaptureMoveBaseScoreValue);
         }
 
         if (isCapture)
         {
-            var baseCaptureScore = (isPromotion || move.IsEnPassant() || SEE.IsGoodCapture(Game.CurrentPosition, move))
+            var baseCaptureScore = (isPromotion || move.IsEnPassant() || SEE.IsGoodCapture(Game.CurrentPosition, move, threshold: 10))
                 ? GoodCaptureMoveBaseScoreValue
                 : BadCaptureMoveBaseScoreValue;
 
