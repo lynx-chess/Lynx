@@ -6027,9 +6027,25 @@ public static class EvaluationParams
 
 	public static readonly TaperedEvaluationTerm BishopPairBonus = Pack(30, 72);
 
-	public static readonly TaperedEvaluationTerm PieceProtectedByPawnBonus = Pack(12, 15);
+	public static readonly int[] PieceProtectedByPawnBonus =
+	[
+		Pack(11, 12),
+		Pack(13, 14),
+		Pack(15, 16),
+		Pack(17, 18),
+		Pack(19, 110),
+		Pack(111, 112)
+	];
 
-	public static readonly TaperedEvaluationTerm PieceAttackedByPawnPenalty = Pack(-47, -33);
+	public static readonly int[] PieceAttackedByPawnPenalty =
+	[
+		Pack(1, 2),
+		Pack(3, 4),
+		Pack(5, 6),
+		Pack(7, 8),
+		Pack(9, 10),
+		Pack(11, 12)
+	];
 
 	public static readonly TaperedEvaluationTermByRank PawnPhalanxBonus =
 	[

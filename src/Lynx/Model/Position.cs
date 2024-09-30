@@ -487,14 +487,44 @@ public class Position : IDisposable
         }
 
         // Pieces protected by pawns bonus
-        packedScore += PieceProtectedByPawnBonus
-            * ((whitePawnAttacks & OccupancyBitBoards[(int)Side.White] /* & (~whitePawns) */).CountBits()
-                - (blackPawnAttacks & OccupancyBitBoards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
+        // Skipping the king, since it's pointless to have it protected
+        packedScore +=
+            (PieceProtectedByPawnBonus[(int)Piece.P]
+                * ((whitePawnAttacks & PieceBitBoards[(int)Piece.P]).CountBits()
+                    - (blackPawnAttacks & PieceBitBoards[(int)Piece.p]).CountBits()))
+            + (PieceProtectedByPawnBonus[(int)Piece.N]
+                * ((whitePawnAttacks & PieceBitBoards[(int)Piece.N]).CountBits()
+                    - (blackPawnAttacks & PieceBitBoards[(int)Piece.n]).CountBits()))
+            + (PieceProtectedByPawnBonus[(int)Piece.B]
+                * ((whitePawnAttacks & PieceBitBoards[(int)Piece.B]).CountBits()
+                    - (blackPawnAttacks & PieceBitBoards[(int)Piece.b]).CountBits()))
+            + (PieceProtectedByPawnBonus[(int)Piece.R]
+                * ((whitePawnAttacks & PieceBitBoards[(int)Piece.R]).CountBits()
+                    - (blackPawnAttacks & PieceBitBoards[(int)Piece.r]).CountBits()))
+            + (PieceProtectedByPawnBonus[(int)Piece.Q]
+                * ((whitePawnAttacks & PieceBitBoards[(int)Piece.Q]).CountBits()
+                    - (blackPawnAttacks & PieceBitBoards[(int)Piece.q]).CountBits()));
 
-        // Pieces attacked by pawns bonus
-        packedScore += PieceAttackedByPawnPenalty
-            * ((blackPawnAttacks & OccupancyBitBoards[(int)Side.White] /* & (~whitePawns) */).CountBits()
-                - (whitePawnAttacks & OccupancyBitBoards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
+        // Pieces attacked by pawns penalty
+        packedScore +=
+            (PieceAttackedByPawnPenalty[(int)Piece.P]
+                * ((blackPawnAttacks & PieceBitBoards[(int)Piece.P]).CountBits()
+                    - (whitePawnAttacks & PieceBitBoards[(int)Piece.p]).CountBits()))
+            + (PieceAttackedByPawnPenalty[(int)Piece.N]
+                * ((blackPawnAttacks & PieceBitBoards[(int)Piece.N]).CountBits()
+                    - (whitePawnAttacks & PieceBitBoards[(int)Piece.n]).CountBits()))
+            + (PieceAttackedByPawnPenalty[(int)Piece.B]
+                * ((blackPawnAttacks & PieceBitBoards[(int)Piece.B]).CountBits()
+                    - (whitePawnAttacks & PieceBitBoards[(int)Piece.b]).CountBits()))
+            + (PieceAttackedByPawnPenalty[(int)Piece.R]
+                * ((blackPawnAttacks & PieceBitBoards[(int)Piece.R]).CountBits()
+                    - (whitePawnAttacks & PieceBitBoards[(int)Piece.r]).CountBits()))
+            + (PieceAttackedByPawnPenalty[(int)Piece.Q]
+                * ((blackPawnAttacks & PieceBitBoards[(int)Piece.Q]).CountBits()
+                    - (whitePawnAttacks & PieceBitBoards[(int)Piece.q]).CountBits()))
+            + (PieceAttackedByPawnPenalty[(int)Piece.K]
+                * ((blackPawnAttacks & PieceBitBoards[(int)Piece.K]).CountBits()
+                    - (whitePawnAttacks & PieceBitBoards[(int)Piece.k]).CountBits()));
 
         const int maxPhase = 24;
 
