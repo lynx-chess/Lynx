@@ -7,14 +7,14 @@ namespace Lynx;
 public static class EvaluationConstants
 {
     /// <summary>
-    /// 20000 games, 20+0.2, 8moves_v3.epd
-    /// Retained (W,D,L) = (415984, 1356391, 417074) positions.
+    /// 20_000 games, 20+0.2, 8moves_v3.epd, no draw or win adj.
+    /// Retained (W,D,L) = (432747, 1652733, 434200) positions.
     /// </summary>
-    public const int EvalNormalizationCoefficient = 139;
+    public const int EvalNormalizationCoefficient = 99;
 
-    public static ReadOnlySpan<double> As => [-22.39558276, 143.95892718, -98.84854041, 117.14472929];
+    public static ReadOnlySpan<double> As => [-3.65736087, 46.66362338, -38.24834086, 94.32750834];
 
-    public static ReadOnlySpan<double> Bs => [-6.67029772, 41.06172677, -36.37312580, 80.73370363];
+    public static ReadOnlySpan<double> Bs => [-0.59179904, 16.00808254, -30.40319388, 61.53258225];
 
     public static ReadOnlySpan<int> GamePhaseByPiece =>
     [
