@@ -58,7 +58,7 @@ public static class TranspositionTableExtensions
     {
         ulong sizeBytes = (ulong)size * 1024ul * 1024ul;
         ulong ttLength = sizeBytes / _ttElementSize;
-        var ttLengthMb = ttLength / 1024 / 1024;
+        var ttLengthMb = (double)ttLength / 1024 / 1024;
 
         if (ttLength > int.MaxValue)
         {
