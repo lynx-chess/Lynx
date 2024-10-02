@@ -113,13 +113,13 @@ public sealed class EngineSettings
     /// Value originally from Stormphrax, who apparently took it from Viridithas
     /// </summary>
     [SPSA<double>(0.1, 2, 0.10)]
-    public double LMR_Base { get; set; } = 0.77;
+    public double LMR_Base { get; set; } = 0.75;
 
     /// <summary>
     /// Value originally from Akimbo
     /// </summary>
     [SPSA<double>(1, 5, 0.1)]
-    public double LMR_Divisor { get; set; } = 3.51;
+    public double LMR_Divisor { get; set; } = 3.49;
 
     [SPSA<int>(1, 10, 0.5)]
     public int NMP_MinDepth { get; set; } = 3;
@@ -146,22 +146,22 @@ public sealed class EngineSettings
     public int RFP_MaxDepth { get; set; } = 7;
 
     [SPSA<int>(1, 300, 15)]
-    public int RFP_DepthScalingFactor { get; set; } = 50;
+    public int RFP_DepthScalingFactor { get; set; } = 52;
 
     [SPSA<int>(1, 10, 0.5)]
     public int Razoring_MaxDepth { get; set; } = 2;
 
     [SPSA<int>(1, 300, 15)]
-    public int Razoring_Depth1Bonus { get; set; } = 72;
+    public int Razoring_Depth1Bonus { get; set; } = 68;
 
     [SPSA<int>(1, 300, 15)]
-    public int Razoring_NotDepth1Bonus { get; set; } = 213;
+    public int Razoring_NotDepth1Bonus { get; set; } = 208;
 
     [SPSA<int>(1, 10, 0.5)]
     public int IIR_MinDepth { get; set; } = 4;
 
     [SPSA<int>(1, 10, 0.5)]
-    public int LMP_MaxDepth { get; set; } = 7;
+    public int LMP_MaxDepth { get; set; } = 8;
 
     [SPSA<int>(0, 10, 0.5)]
     public int LMP_BaseMovesToTry { get; set; } = 1;
@@ -177,22 +177,22 @@ public sealed class EngineSettings
     public int History_MaxMoveRawBonus { get; set; } = 1_896;
 
     [SPSA<int>(0, 6, 0.5)]
-    public int SEE_BadCaptureReduction { get; set; } = 1;
+    public int SEE_BadCaptureReduction { get; set; } = 2;
 
     [SPSA<int>(1, 10, 0.5)]
-    public int FP_MaxDepth { get; set; } = 8;
+    public int FP_MaxDepth { get; set; } = 7;
 
     [SPSA<int>(1, 200, 10)]
-    public int FP_DepthScalingFactor { get; set; } = 70;
+    public int FP_DepthScalingFactor { get; set; } = 73;
 
     [SPSA<int>(0, 500, 25)]
-    public int FP_Margin { get; set; } = 211;
+    public int FP_Margin { get; set; } = 218;
 
     [SPSA<int>(0, 10, 0.5)]
-    public int HistoryPrunning_MaxDepth { get; set; } = 4;
+    public int HistoryPrunning_MaxDepth { get; set; } = 5;
 
     [SPSA<int>(-8192, 0, 512)]
-    public int HistoryPrunning_Margin { get; set; } = -1926;
+    public int HistoryPrunning_Margin { get; set; } = -1940;
 }
 
 [JsonSourceGenerationOptions(
