@@ -73,7 +73,7 @@ public sealed partial class Engine
             _killerMoves[i] = new Move[3];
         }
 
-        (int ttLength, _ttMask) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
+        int ttLength = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
         _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
 
 #if !DEBUG
