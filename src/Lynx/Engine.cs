@@ -113,7 +113,15 @@ public sealed partial class Engine
 
     private void ResetEngine()
     {
-        Array.Clear(_tt);
+        if (Configuration.EngineSettings.TranspositionTableSize == _tt.Length)
+        {
+            Array.Clear(_tt);
+        }
+        else
+        {
+            (int ttLength, _ttMask) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
+            _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
+        }
 
         // Clear histories
         for (int i = 0; i < 12; ++i)
