@@ -19,7 +19,7 @@ public struct TranspositionTableElement
     /// <summary>
     /// 16 MSB of Zobrist key
     /// </summary>
-    private short _key;
+    private ushort _key;
 
     /// <summary>
     /// Best move found in a position. 0 if the position failed low (score <= alpha)
@@ -48,7 +48,7 @@ public struct TranspositionTableElement
     /// </summary>
     public int Score { readonly get => _score; set => _score = (short)value; }
 
-    public long Key { readonly get => _key; set => _key = (ShortMove)(value >> 48); }
+    public long Key { readonly get => _key; set => _key = (ushort)(value >> 48); }
 }
 
 public static class TranspositionTableExtensions
