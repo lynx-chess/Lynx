@@ -126,7 +126,7 @@ public sealed partial class Engine
         }
         else
         {
-            _logger.Warn("Resizing TT {CurrentSize} -> {NewSize}", _currentTranspositionTableSize, Configuration.EngineSettings.TranspositionTableSize);
+            _logger.Warn("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _currentTranspositionTableSize, Configuration.EngineSettings.TranspositionTableSize);
             AllocateTT();
         }
 
