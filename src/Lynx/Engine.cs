@@ -73,8 +73,7 @@ public sealed partial class Engine
             _killerMoves[i] = new Move[3];
         }
 
-        (int ttLength, _ttMask) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
-        _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
+        AllocateTT();
 
 #if !DEBUG
         // Temporary channel so that no output is generated
@@ -90,6 +89,14 @@ public sealed partial class Engine
         GC.Collect();
         GC.WaitForPendingFinalizers();
 #pragma warning restore S1215 // "GC.Collect" should not be called
+    }
+
+    private void AllocateTT()
+    {
+        _currentTranspositionTableSize = Configuration.EngineSettings.TranspositionTableSize;
+
+        (var ttLength, _ttMask) = TranspositionTableExtensions.CalculateLength(_currentTranspositionTableSize);
+        _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
     }
 
 #pragma warning disable S1144 // Unused private types or members should be removed - used in Release mode
@@ -113,14 +120,14 @@ public sealed partial class Engine
 
     private void ResetEngine()
     {
-        if (Configuration.EngineSettings.TranspositionTableSize == _tt.Length)
+        if (_currentTranspositionTableSize == Configuration.EngineSettings.TranspositionTableSize)
         {
             Array.Clear(_tt);
         }
         else
         {
-            (int ttLength, _ttMask) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
-            _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
+            _logger.Warn("Resizing TT {CurrentSize} -> {NewSize}", _currentTranspositionTableSize, Configuration.EngineSettings.TranspositionTableSize);
+            AllocateTT();
         }
 
         // Clear histories
