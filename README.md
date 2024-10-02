@@ -27,7 +27,9 @@ Here are the ones 'properly' rated over at least a few hundred of games:
 
 | Lynx version | Release date | Estimated elo | [CCRL Blitz](https://www.computerchess.org.uk/ccrl/404/) | [CCRL](https://www.computerchess.org.uk/ccrl/4040/) | [MCERL](https://www.chessengeria.eu/mcerl) |
 |---|---|---|---|---|---|
-| [1.5.1](https://github.com/lynx-chess/Lynx/releases/tag/v1.5.1) | 2024-06-21  | [2830](https://github.com/lynx-chess/Lynx/commit/47e7b8799cfac433c1004213e51daf35ae0fcd97#commitcomment-143384223) |   |  |  |
+| [1.6.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.6.0) | 2024-08-15  | [2952](https://github.com/lynx-chess/Lynx/commit/a230d0518bf2743ec0dd27931928719e43ac5334#commitcomment-145399551) |  |  |  |
+| [1.5.1](https://github.com/lynx-chess/Lynx/releases/tag/v1.5.1) | 2024-06-21  | [2830](https://github.com/lynx-chess/Lynx/commit/47e7b8799cfac433c1004213e51daf35ae0fcd97#commitcomment-143384223) |  | [2856](https://www.computerchess.org.uk/ccrl/4040/cgi/engine_details.cgi?print=Details&each_game=0&eng=Lynx%201.5.1%2064-bit#Lynx_1_5_1_64-bit) |  |
+| [1.5.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.5.0) | 2024-06-09  | [2817](https://github.com/lynx-chess/Lynx/commit/70f23d96a2789ef22440cd0955a8b9557eb2682f#commitcomment-142930835) | [2814](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%201.5.0%2064-bit#Lynx_1_5_0_64-bit) |  |  |
 | [1.4.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.4.0) | 2024-03-21  | [2747](https://github.com/lynx-chess/Lynx/commit/70a81b9d08482c691b8c8cd6885e3e1eaf2c16b2#commitcomment-140146920) |  | [2754](https://www.computerchess.org.uk/ccrl/4040/cgi/engine_details.cgi?print=Details&each_game=0&eng=Lynx%201.4.0%2064-bit#Lynx_1_4_0_64-bit) |  |
 | [1.3.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.3.0) | 2024-02-04  | [2651](https://github.com/lynx-chess/Lynx/commit/1f2384804f69ad68a58a5d363225a809b7c1b0d9#commitcomment-138257203) | [2650](https://www.computerchess.org.uk/ccrl/404/cgi/engine_details.cgi?print=Details&each_game=1&eng=Lynx%201.3.0%2064-bit#Lynx_1_3_0_64-bit) | [2682](https://www.computerchess.org.uk/ccrl/4040/cgi/engine_details.cgi?print=Details&each_game=0&eng=Lynx%201.3.0%2064-bit#Lynx_1_3_0_64-bit) | 2831 |
 | [1.2.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.2.0) | 2024-01-11  | [2611](https://github.com/lynx-chess/Lynx/commit/38f0d147fe049c89e56e6ea66ce28f9fa29907c2) / [2551](https://github.com/lynx-chess/Lynx/commit/38f0d147fe049c89e56e6ea66ce28f9fa29907c2#commitcomment-137001006)<sup>1</sup> |  | [2584](https://www.computerchess.org.uk/ccrl/4040/cgi/engine_details.cgi?print=Details&each_game=0&eng=Lynx%201.2.0%2064-bit#Lynx_1_2_0_64-bit) | 2862 |
@@ -85,7 +87,7 @@ If you're a Linux user and are new to .NET ecosystem, the conversation in [this 
 
 <Summary>Feature list</Summary>
 
-_Beware, most of the provided links contained outdated information and don't reflect the current implementation or the state of the art of computer chess programming, at this point they remain here mostly for historical reasons_.
+_Beware, most of the provided links contain outdated information and don't reflect the current implementation or the state of the art of computer chess programming, at this point they remain here mostly for historical reasons_.
 
 ### Search
 
@@ -107,33 +109,57 @@ _Beware, most of the provided links contained outdated information and don't ref
 
 - Reverse Futility Pruning (RFP)
 
+- History pruning
+
 - Late Move Reductions (LMR) [[1](https://web.archive.org/web/20150212051846/http://www.glaurungchess.com/lmr.html)] [[2](https://www.chessprogramming.org/Late_Move_Reductions)] [[3](https://talkchess.com/forum3/viewtopic.php?f=7&t=75056#p860118)]
 
 - Internal Iterative Reduction (IIR)
 
 - Check extensions [[1](https://www.chessprogramming.org/Check_Extensions)]
 
-- Static Exchange Evaluation (SEE) for move ordering and reduction
+- Static Exchange Evaluation (SEE) for move ordering, reduction and QSearch pruning
 
 - Razoring [[1](https://www.chessprogramming.org/Razoring)]
 
 - Killer heuristic [[1](https://www.chessprogramming.org/Killer_Heuristic)]
 
-- History heuristic: quiet history, capture history, history malus [[1](https://www.chessprogramming.org/History_Heuristic)]
+- History heuristic: quiet history, capture history, continuation history, history malus [[1](https://www.chessprogramming.org/History_Heuristic)]
+
+- Countermoves
 
 ### Evaluation
 
 - Piece-Square Tables (PSQT) [[1](https://www.chessprogramming.org/Piece-Square_Tables)]
 
+- King-bucketed PSQT
+
+- Enemy king PSQT
+
 - Mobility (knight, bishop, rook, queen)
 
 - Bishop pair
+
+- Bishop penalty for same color pawns
+
+- Bishop penalty for blocked central pawns
 
 - Rook in open and semi-open files
 
 - King pawn shield, king virtual mobility, king in open and semi-open files
 
-- Isolated and passed pawns
+- Isolated pawns
+
+- Passed pawns, including bonus for not opponent pieces ahead and friend/opponent king distance to it
+
+- Pawn phalanx
+
+- Pieces protected and attacked by pawns
+
+- Pieces capable of deliverying checks
+
+- Eval scaling with pawn count and 50 moves rule
+
+- 50 moves rule eval scaling
 
 ### Miscellaneous
 
@@ -150,6 +176,8 @@ _Beware, most of the provided links contained outdated information and don't ref
 - Incremental move sorting
 
 - Hard/Soft time management
+
+- Expected moves to go [[1](https://expositor.dev/pdf/movetime.pdf)]
 
 </details>
 

@@ -101,7 +101,9 @@ public class PVTable_SumVsArrayAccess_Benchmark : BaseBenchmark
     {
         public static readonly int[] Indexes;
 
+#pragma warning disable S3963 // "static" fields should be initialized inline
         static PVTable()
+#pragma warning restore S3963 // "static" fields should be initialized inline
         {
             Indexes = new int[MaxDepth];
             int previousPVIndex = 0;

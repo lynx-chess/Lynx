@@ -145,20 +145,20 @@
 #pragma warning disable S101, S1854 // Types should be named in PascalCase
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
-using NLog;
 using System.Runtime.CompilerServices;
 
 namespace Lynx.Benchmark;
 public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
 {
-    public static IEnumerable<(string, int)> Data => new[] {
-            (Constants.InitialPositionFEN, 4),
-            (Constants.TrickyTestPositionFEN, 4),
-            ("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10", 4),
-            ("3K4/8/8/8/8/8/4p3/2k2R2 b - - 0 1", 6),
-            ("2K2r2/4P3/8/8/8/8/8/3k4 w - - 0 1", 6),
-            ("8/p7/8/1P6/K1k3p1/6P1/7P/8 w - -", 6)
-        };
+    public static IEnumerable<(string, int)> Data =>
+    [
+        (Constants.InitialPositionFEN, 4),
+        (Constants.TrickyTestPositionFEN, 4),
+        ("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10", 4),
+        ("3K4/8/8/8/8/8/4p3/2k2R2 b - - 0 1", 6),
+        ("2K2r2/4P3/8/8/8/8/8/3k4 w - - 0 1", 6),
+        ("8/p7/8/1P6/K1k3p1/6P1/7P/8 w - -", 6)
+    ];
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]
@@ -206,6 +206,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         {
             if (depth != 0)
             {
+#pragma warning disable S3267 // Loops should be simplified with "LINQ" expressions
                 foreach (var move in MakeMoveMoveGenerator.GenerateAllMoves(position))
                 {
                     if (position.WasProduceByAValidMove())
@@ -213,6 +214,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                         nodes = ResultsImpl_AllocBase(position, depth - 1, nodes);
                     }
                 }
+#pragma warning restore S3267 // Loops should be simplified with "LINQ" expressions
 
                 return nodes;
             }
@@ -299,6 +301,8 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
 
         public BitBoard[] OccupancyBitBoards { get; }
 
+        public int[] Board { get; }
+
         public Side Side { get; private set; }
 
         public BoardSquare EnPassant { get; private set; }
@@ -309,11 +313,12 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         {
         }
 
-        public MakeMovePosition((BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, byte Castle, BoardSquare EnPassant,
+        public MakeMovePosition((BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, int[] board, Side Side, byte Castle, BoardSquare EnPassant,
             int HalfMoveClock/*, int FullMoveCounter*/) parsedFEN)
         {
             PieceBitBoards = parsedFEN.PieceBitBoards;
             OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
+            Board = parsedFEN.board;
             Side = parsedFEN.Side;
             Castle = parsedFEN.Castle;
             EnPassant = parsedFEN.EnPassant;
@@ -335,6 +340,9 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
             OccupancyBitBoards = new BitBoard[3];
             Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
 
+            Board = new int[64];
+            Array.Copy(position.Board, Board, position.Board.Length);
+
             Side = position.Side;
             Castle = position.Castle;
             EnPassant = position.EnPassant;
@@ -355,6 +363,9 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
 
             OccupancyBitBoards = new BitBoard[3];
             Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
+
+            Board = new int[64];
+            Array.Copy(position.Board, Board, position.Board.Length);
 
             Side = (Side)Utils.OppositeSide(position.Side);
             Castle = position.Castle;
@@ -1190,7 +1201,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         /// <summary>
         /// Lightweight version of <see cref="IsValid"/>
         /// False if the opponent king is in check.
-        /// This method is meant to be invoked only after <see cref="Position(Position, Move)"/>
+        /// This method is meant to be invoked only after <see cref="Position.MakeMove(int)"/>
         /// </summary>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1222,6 +1233,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         }
     }
 
+#pragma warning disable S1104 // Fields should not have public accessibility
     public struct MakeMoveGameState_PassOut
     {
         public int CapturedPiece;
@@ -1237,6 +1249,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
             EnPassant = enpassant;
         }
     }
+#pragma warning restore IDE0290 // Use primary constructor
 
     public struct MakeMoveGameState_PassRef
     {
@@ -1377,8 +1390,6 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
 #endif
 
-        private const int TRUE = 1;
-
         /// <summary>
         /// Indexed by <see cref="Piece"/>.
         /// Checks are not considered
@@ -1412,7 +1423,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
 #if DEBUG
             if (position.Side == Side.Both)
             {
-                return new List<Move>();
+                return [];
             }
 #endif
 
@@ -1514,7 +1525,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
                     }
                     else
                     {
-                        movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece);
+                        movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, position.Board[targetSquare]);
                     }
                 }
             }

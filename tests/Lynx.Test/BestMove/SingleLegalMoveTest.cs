@@ -55,11 +55,11 @@ public class SingleLegalMoveTest : BaseTest
 
         if (pos.Side == Side.White)
         {
-            Assert.AreEqual(EvaluationConstants.SingleMoveEvaluation, result.Evaluation);
+            Assert.AreEqual(EvaluationConstants.SingleMoveScore, result.Score);
         }
         else
         {
-            Assert.AreEqual(-EvaluationConstants.SingleMoveEvaluation, result.Evaluation);
+            Assert.AreEqual(-EvaluationConstants.SingleMoveScore, result.Score);
         }
 
         Assert.AreEqual(0, result.Depth);

@@ -10,7 +10,7 @@ public static class SEE
 {
     #pragma warning disable IDE0055 // Discard formatting in this region
 
-    private static readonly int[] _pieceValues =
+    private static ReadOnlySpan<int> _pieceValues =>
     [
         100, 450, 450, 650, 1250, 0,
         100, 450, 450, 650, 1250, 0,
@@ -214,9 +214,11 @@ public static class SEE
 
         var promotedPiece = move.PromotedPiece();
 
+#pragma warning disable S3358 // Ternary operators should not be nested
         return promotedPiece == default
             ? _pieceValues[move.CapturedPiece()]
             : _pieceValues[promotedPiece] - _pieceValues[(int)Piece.P] + (move.IsCapture() ? _pieceValues[move.CapturedPiece()] : 0);
+#pragma warning restore S3358 // Ternary operators should not be nested
     }
 
     /// <summary>

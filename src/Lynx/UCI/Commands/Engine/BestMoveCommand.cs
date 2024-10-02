@@ -11,15 +11,24 @@ namespace Lynx.UCI.Commands.Engine;
 ///	Directly before that the engine should send a final "info" command with the final search information,
 ///	the GUI has the complete statistics about the last search.
 /// </summary>
-public sealed class BestMoveCommand : EngineBaseCommand
+public sealed class BestMoveCommand : IEngineBaseCommand
 {
     public const string Id = "bestmove";
 
-    public static string BestMove(Move move, Move? moveToPonder = null)
+    private readonly Move _move;
+    private readonly Move? _moveToPonder;
+
+    public BestMoveCommand(Move move, Move? moveToPonder = null)
     {
-        return $"bestmove {move.UCIString()}" +
-            (moveToPonder.HasValue
-                ? $" ponder {moveToPonder!.Value.UCIString()}"
+        _move = move;
+        _moveToPonder = moveToPonder;
+    }
+
+    public override string ToString()
+    {
+        return $"bestmove {_move.UCIStringMemoized()}" +
+            (_moveToPonder.HasValue
+                ? $" ponder {_moveToPonder!.Value.UCIStringMemoized()}"
                 : string.Empty);
     }
 }

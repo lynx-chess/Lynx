@@ -11,7 +11,7 @@ namespace Lynx.UCI.Commands.Engine;
 ///		this must be sent after receiving the "uci" command to identify the engine,
 ///		e.g. "id author Stefan MK\n"
 /// </summary>
-public sealed class IdCommand : EngineBaseCommand
+public sealed class IdCommand : IEngineBaseCommand
 {
     public const string IdString = "id";
 
@@ -23,9 +23,9 @@ public sealed class IdCommand : EngineBaseCommand
     {
         return
             Assembly.GetAssembly(typeof(IdCommand))
-            !.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-            ?.InformationalVersion?.Split('+')?[0]
-            ?? "Unknown";
+                !.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                ?.InformationalVersion?.Split('+')[0]
+                ?? "Unknown";
     }
 
     public static string Name => $"id name {EngineName} {GetVersion()}";

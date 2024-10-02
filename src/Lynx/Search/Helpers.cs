@@ -8,134 +8,8 @@ namespace Lynx;
 
 public sealed partial class Engine
 {
-    private const int MinValue = short.MinValue;
-    private const int MaxValue = short.MaxValue;
-
-    /// <summary>
-    /// Returns the score evaluation of a move taking into account <see cref="_isScoringPV"/>, <paramref name="bestMoveTTCandidate"/>, <see cref="EvaluationConstants.MostValueableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_quietHistory"/>
-    /// </summary>
-    /// <param name="move"></param>
-    /// <param name="ply"></param>
-    /// <param name="isNotQSearch"></param>
-    /// <param name="bestMoveTTCandidate"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMove(Move move, int ply, bool isNotQSearch, ShortMove bestMoveTTCandidate = default)
-    {
-        if (_isScoringPV && move == _pVTable[ply])
-        {
-            _isScoringPV = false;
-
-            return EvaluationConstants.PVMoveScoreValue;
-        }
-
-        if ((ShortMove)move == bestMoveTTCandidate)
-        {
-            return EvaluationConstants.TTMoveScoreValue;
-        }
-
-        var promotedPiece = move.PromotedPiece();
-        var isPromotion = promotedPiece != default;
-        var isCapture = move.IsCapture();
-
-        // Queen promotion
-        if ((promotedPiece + 2) % 6 == 0)
-        {
-            var baseScore = SEE.HasPositiveScore(Game.CurrentPosition, move)
-                ? EvaluationConstants.GoodCaptureMoveBaseScoreValue
-                : EvaluationConstants.BadCaptureMoveBaseScoreValue;
-
-            var captureBonus = isCapture ? 1 : 0;
-
-            return baseScore + EvaluationConstants.PromotionMoveScoreValue + captureBonus;
-        }
-
-        if (isCapture)
-        {
-            var baseCaptureScore = (isPromotion || move.IsEnPassant() || SEE.IsGoodCapture(Game.CurrentPosition, move))
-                ? EvaluationConstants.GoodCaptureMoveBaseScoreValue
-                : EvaluationConstants.BadCaptureMoveBaseScoreValue;
-
-            var piece = move.Piece();
-            var capturedPiece = move.CapturedPiece();
-
-            Debug.Assert(capturedPiece != (int)Piece.K && capturedPiece != (int)Piece.k, $"{move.UCIString()} capturing king is generated in position {Game.CurrentPosition.FEN()}");
-
-            return baseCaptureScore
-                + EvaluationConstants.MostValueableVictimLeastValuableAttacker[piece][capturedPiece]
-                //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
-                + _captureHistory[piece][move.TargetSquare()][capturedPiece];
-        }
-
-        if (isPromotion)
-        {
-            return EvaluationConstants.PromotionMoveScoreValue;
-        }
-
-        if (isNotQSearch)
-        {
-            // 1st killer move
-            if (_killerMoves[0][ply] == move)
-            {
-                return EvaluationConstants.FirstKillerMoveValue;
-            }
-
-            // 2nd killer move
-            if (_killerMoves[1][ply] == move)
-            {
-                return EvaluationConstants.SecondKillerMoveValue;
-            }
-
-            // 3rd killer move
-            if (_killerMoves[2][ply] == move)
-            {
-                return EvaluationConstants.ThirdKillerMoveValue;
-            }
-
-            // Counter move history
-            if (ply >= 1)
-            {
-                var previousMove = Game.PopFromMoveStack(ply - 1);
-                Debug.Assert(previousMove != 0);
-
-                // Counter move and follow up history
-                //if (ply >= 2)
-                //{
-                //    var previousPreviousMove = Game.MoveStack[ply - 2];
-
-                //    return EvaluationConstants.BaseMoveScore
-                //        + _quietHistory[move.Piece()][move.TargetSquare()]
-                //        + _continuationHistory[move.Piece()][move.TargetSquare()][0][previousMove.Piece()][previousMove.TargetSquare()]
-                //        + _continuationHistory[move.Piece()][move.TargetSquare()][1][previousPreviousMove.Piece()][previousPreviousMove.TargetSquare()];
-                //}
-                return EvaluationConstants.BaseMoveScore
-                    + _quietHistory[move.Piece()][move.TargetSquare()]
-                    + _continuationHistory[ContinuationHistoryIndex(move.Piece(), move.TargetSquare(), previousMove.Piece(), previousMove.TargetSquare(), 0)];
-            }
-
-            // History move or 0 if not found
-            return EvaluationConstants.BaseMoveScore
-                + _quietHistory[move.Piece()][move.TargetSquare()];
-        }
-
-        return EvaluationConstants.BaseMoveScore;
-    }
-
-    /// <summary>
-    /// Soft caps history score
-    /// Formula taken from EP discord, https://discord.com/channels/1132289356011405342/1132289356447625298/1141102105847922839
-    /// </summary>
-    /// <param name="score"></param>
-    /// <param name="rawHistoryBonus"></param>
-    /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int ScoreHistoryMove(int score, int rawHistoryBonus)
-    {
-        return score + rawHistoryBonus - (score * Math.Abs(rawHistoryBonus) / Configuration.EngineSettings.History_MaxMoveValue);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void PrefetchTTEntry()
+    private void PrefetchTTEntry()
     {
         if (Sse.IsSupported)
         {
@@ -195,6 +69,23 @@ public sealed partial class Engine
         //PrintPvTable();
     }
 
+    /// <summary>
+    /// [12][64][12]
+    /// </summary>
+    /// <param name="piece"></param>
+    /// <param name="targetSquare"></param>
+    /// <param name="capturedPiece"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int CaptureHistoryIndex(int piece, int targetSquare, int capturedPiece)
+    {
+        const int pieceOffset = 64 * 12;
+        const int targetSquareOffset = 12;
+
+        return (piece * pieceOffset)
+            + (targetSquare * targetSquareOffset)
+            + capturedPiece;
+    }
 
     /// <summary>
     /// [12][64][12][64][ContinuationHistoryPlyCount]
@@ -220,6 +111,21 @@ public sealed partial class Engine
             + ply;
     }
 
+    /// <summary>
+    /// [64][64]
+    /// </summary>
+    /// <param name="previousMoveSourceSquare"></param>
+    /// <param name="previousMoveTargetSquare"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int CounterMoveIndex(int previousMoveSourceSquare, int previousMoveTargetSquare)
+    {
+        const int sourceSquareOffset = 64;
+
+        return (previousMoveSourceSquare * sourceSquareOffset)
+            + previousMoveTargetSquare;
+    }
+
     #region Debugging
 
 #pragma warning disable S125 // Sections of code should not be commented out
@@ -243,7 +149,8 @@ public sealed partial class Engine
             var move = _pVTable[i];
             TryParseMove(position, i, move);
 
-            var newPosition = new Position(position, move);
+            var newPosition = new Position(position);
+            newPosition.MakeMove(move);
             if (!newPosition.WasProduceByAValidMove())
             {
                 throw new AssertException($"Invalid position after move {move.UCIString()} from position {position.FEN()}");
@@ -313,7 +220,7 @@ public sealed partial class Engine
             //Console.WriteLine($"{depthStr}{move} | {evaluation}");
 
 #pragma warning disable CS0618 // Type or member is obsolete
-            _logger.Trace($"{depthStr}{(isQuiescence ? "[Qui] " : "")}{move.ToEPDString(position),-6} | {evaluation}{(prune ? " | prnning" : "")}");
+            _logger.Trace($"{depthStr}{(isQuiescence ? "[Qui] " : "")}{move.ToEPDString(position),-6} | {evaluation}{(prune ? " | pruning" : "")}");
 #pragma warning restore CS0618 // Type or member is obsolete
 
             //Console.ResetColor();
@@ -383,7 +290,7 @@ $" {484,-3}                                                         {_pVTable[48
     [Conditional("DEBUG")]
     internal void PrintHistoryMoves()
     {
-        int max = int.MinValue;
+        int max = EvaluationConstants.MinEval;
 
         for (int i = 0; i < 12; ++i)
         {
@@ -399,7 +306,7 @@ $" {484,-3}                                                         {_pVTable[48
             }
         }
 
-        _logger.Debug($"Max history: {max}");
+        _logger.ConditionalDebug($"Max history: {max}");
     }
 
 #pragma warning restore S125 // Sections of code should not be commented out

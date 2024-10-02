@@ -124,17 +124,17 @@ public class GameTest : BaseTest
         winningPosition = new Position("1n2k2r/8/8/8/8/8/4PPPP/1N2K2R w Kk - 0 1");
 
         game = new Game(winningPosition.FEN());
-        repeatedMoves = new List<Move>
-            {
-                MoveExtensions.Encode((int)BoardSquare.b1, (int)BoardSquare.c3, (int)Piece.N),
-                MoveExtensions.Encode((int)BoardSquare.b8, (int)BoardSquare.c6, (int)Piece.n),
-                MoveExtensions.Encode((int)BoardSquare.c3, (int)BoardSquare.b1, (int)Piece.N),
-                MoveExtensions.Encode((int)BoardSquare.c6, (int)BoardSquare.b8, (int)Piece.n),  // Repetition detected, but that's not what we want to test
-                MoveExtensions.Encode((int)BoardSquare.e1, (int)BoardSquare.d1, (int)Piece.K),
-                MoveExtensions.Encode((int)BoardSquare.b8, (int)BoardSquare.c6, (int)Piece.n),
-                MoveExtensions.Encode((int)BoardSquare.d1, (int)BoardSquare.e1, (int)Piece.K),
-                MoveExtensions.Encode((int)BoardSquare.c6, (int)BoardSquare.b8, (int)Piece.n)   // Not repetition, due to castling rights removal
-            };
+        repeatedMoves =
+        [
+            MoveExtensions.Encode((int)BoardSquare.b1, (int)BoardSquare.c3, (int)Piece.N),
+            MoveExtensions.Encode((int)BoardSquare.b8, (int)BoardSquare.c6, (int)Piece.n),
+            MoveExtensions.Encode((int)BoardSquare.c3, (int)BoardSquare.b1, (int)Piece.N),
+            MoveExtensions.Encode((int)BoardSquare.c6, (int)BoardSquare.b8, (int)Piece.n),  // Repetition detected, but that's not what we want to test
+            MoveExtensions.Encode((int)BoardSquare.e1, (int)BoardSquare.d1, (int)Piece.K),
+            MoveExtensions.Encode((int)BoardSquare.b8, (int)BoardSquare.c6, (int)Piece.n),
+            MoveExtensions.Encode((int)BoardSquare.d1, (int)BoardSquare.e1, (int)Piece.K),
+            MoveExtensions.Encode((int)BoardSquare.c6, (int)BoardSquare.b8, (int)Piece.n)   // Not repetition, due to castling rights removal
+        ];
 
         // Act
         foreach (var move in repeatedMoves.Take(7))
@@ -148,7 +148,7 @@ public class GameTest : BaseTest
 #if DEBUG
         Assert.AreEqual(repeatedMoves.Count, game.MoveHistory.Count);
 #endif
-        Assert.AreEqual(repeatedMoves.Count + 1, game.PositionHashHistory.Count);
+        Assert.AreEqual(repeatedMoves.Count + 1, game.PositionHashHistoryLength());
 
         var eval = winningPosition.StaticEvaluation().Score;
         Assert.AreNotEqual(0, eval);
@@ -185,7 +185,7 @@ public class GameTest : BaseTest
 #if DEBUG
         Assert.AreEqual(101, game.MoveHistory.Count);
 #endif
-        Assert.AreEqual(101 + 1, game.PositionHashHistory.Count);
+        Assert.AreEqual(101 + 1, game.PositionHashHistoryLength());
 
         // If the checkmate is in the move when it's claimed, checkmate remains
         Assert.False(game.Is50MovesRepetition());
@@ -214,7 +214,7 @@ public class GameTest : BaseTest
 #if DEBUG
         Assert.AreEqual(100, game.MoveHistory.Count);
 #endif
-        Assert.AreEqual(100 + 1, game.PositionHashHistory.Count);
+        Assert.AreEqual(100 + 1, game.PositionHashHistoryLength());
 
         Assert.True(game.Is50MovesRepetition());
     }
@@ -246,7 +246,7 @@ public class GameTest : BaseTest
 #if DEBUG
         Assert.AreEqual(51, game.MoveHistory.Count);
 #endif
-        Assert.AreEqual(51 + 1, game.PositionHashHistory.Count);
+        Assert.AreEqual(51 + 1, game.PositionHashHistoryLength());
 
         Assert.False(game.Is50MovesRepetition());
     }

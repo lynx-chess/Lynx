@@ -127,8 +127,8 @@ namespace Lynx.Benchmark;
 
 public class TranspositionTableIndex_Benchmark : BaseBenchmark
 {
-    public static IEnumerable<int> Data => new int[]
-    {
+    public static IEnumerable<int> Data =>
+    [
         2 * 1024 * 1024,
         4 * 1024 * 1024,
         8 * 1024 * 1024,
@@ -139,7 +139,7 @@ public class TranspositionTableIndex_Benchmark : BaseBenchmark
         256 * 1024 * 1024,
         512 * 1024 * 1024,
         1024 * 1024 * 1024
-    };
+    ];
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]

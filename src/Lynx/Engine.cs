@@ -3,7 +3,7 @@ using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
 using System.Diagnostics;
-using System.Text.RegularExpressions;
+using System.Runtime.CompilerServices;
 using System.Threading.Channels;
 
 namespace Lynx;
@@ -13,7 +13,7 @@ public sealed partial class Engine
     internal const int DefaultMaxDepth = 5;
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-    private readonly ChannelWriter<string> _engineWriter;
+    private readonly ChannelWriter<object> _engineWriter;
 
     private bool _isSearching;
 
@@ -50,46 +50,53 @@ public sealed partial class Engine
     private CancellationTokenSource _searchCancellationTokenSource;
     private CancellationTokenSource _absoluteSearchCancellationTokenSource;
 
-    public Engine(ChannelWriter<string> engineWriter)
+    public Engine(ChannelWriter<object> engineWriter)
     {
         AverageDepth = 0;
-        Game = new Game();
+        Game = new Game(Constants.InitialPositionFEN);
         _isNewGameComing = true;
         _searchCancellationTokenSource = new();
         _absoluteSearchCancellationTokenSource = new();
         _engineWriter = engineWriter;
 
         // Update ResetEngine() after any changes here
-        _quietHistory = new int[12][];
-        _captureHistory = new int[12][][];
-        _continuationHistory = new int[12 * 64 * 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount];
 
-        for (int i = 0; i < 12; ++i)                                            // 12
+        _quietHistory = new int[12][];
+        for (int i = 0; i < _quietHistory.Length; ++i)
         {
             _quietHistory[i] = new int[64];
-            _captureHistory[i] = new int[64][];
-
-            for (var j = 0; j < 64; ++j)                                        // 64
-            {
-                _captureHistory[i][j] = new int[12];                            // 12
-            }
         }
 
-        InitializeTT();
+        _killerMoves = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin][];
+        for (int i = 0; i < Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin; ++i)
+        {
+            _killerMoves[i] = new Move[3];
+        }
+
+        AllocateTT();
 
 #if !DEBUG
         // Temporary channel so that no output is generated
-        _engineWriter = Channel.CreateUnbounded<string>(new UnboundedChannelOptions() { SingleReader = true, SingleWriter = false }).Writer;
+        _engineWriter = Channel.CreateUnbounded<object>(new UnboundedChannelOptions() { SingleReader = true, SingleWriter = false }).Writer;
         WarmupEngine();
 
         _engineWriter = engineWriter;
-        ResetEngine();
+
+        // No need for ResetEngine() call here, WarmupEngine -> Bench -> NewGame() calls it
 #endif
 
 #pragma warning disable S1215 // "GC.Collect" should not be called
         GC.Collect();
         GC.WaitForPendingFinalizers();
 #pragma warning restore S1215 // "GC.Collect" should not be called
+    }
+
+    private void AllocateTT()
+    {
+        _currentTranspositionTableSize = Configuration.EngineSettings.TranspositionTableSize;
+
+        (var ttLength, _ttMask) = TranspositionTableExtensions.CalculateLength(_currentTranspositionTableSize);
+        _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
     }
 
 #pragma warning disable S1144 // Unused private types or members should be removed - used in Release mode
@@ -113,32 +120,40 @@ public sealed partial class Engine
 
     private void ResetEngine()
     {
-        InitializeTT(); // TODO SPRT clearing instead
+        if (_currentTranspositionTableSize == Configuration.EngineSettings.TranspositionTableSize)
+        {
+            Array.Clear(_tt);
+        }
+        else
+        {
+            _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _currentTranspositionTableSize, Configuration.EngineSettings.TranspositionTableSize);
+            AllocateTT();
+        }
 
         // Clear histories
         for (int i = 0; i < 12; ++i)
         {
             Array.Clear(_quietHistory[i]);
-            for (var j = 0; j < 64; ++j)
-            {
-                Array.Clear(_captureHistory[i][j]);
-            }
         }
 
+        Array.Clear(_captureHistory);
         Array.Clear(_continuationHistory);
+        Array.Clear(_counterMoves);
 
         // No need to clear killer move or pv table because they're cleared on every search (IDDFS)
     }
 
     internal void SetGame(Game game)
     {
+        Game.FreeResources();
         Game = game;
     }
 
     public void NewGame()
     {
         AverageDepth = 0;
-        Game = new Game();
+        Game.FreeResources();
+        Game = new Game(Constants.InitialPositionFEN);
         _isNewGameComing = true;
         _isNewGameCommandSupported = true;
         _stopRequested = false;
@@ -151,10 +166,11 @@ public sealed partial class Engine
 #pragma warning restore S1215 // "GC.Collect" should not be called
     }
 
+    [SkipLocalsInit]
     public void AdjustPosition(ReadOnlySpan<char> rawPositionCommand)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-
+        Game.FreeResources();
         Game = PositionCommand.ParseGame(rawPositionCommand, moves);
         _isNewGameComing = false;
         _stopRequested = false;
@@ -200,7 +216,7 @@ public sealed partial class Engine
                 const int minSearchTime = 50;
 
                 var movesDivisor = goCommand.MovesToGo == 0
-                    ? Configuration.EngineSettings.DefaultMovesToGo
+                    ? ExpectedMovesLeft(Game.PositionHashHistoryLength()) * 3 / 2
                     : goCommand.MovesToGo;
 
                 millisecondsLeft -= engineGuiCommunicationTimeOverhead;
@@ -256,12 +272,29 @@ public sealed partial class Engine
             Game.UpdateInitialPosition();
         }
 
-        AverageDepth += (resultToReturn.Depth - AverageDepth) / Math.Ceiling(0.5 * Game.PositionHashHistory.Count);
+        AverageDepth += (resultToReturn.Depth - AverageDepth) / Math.Ceiling(0.5 * Game.PositionHashHistoryLength());
 
         return resultToReturn;
     }
 
+    /// <summary>
+    /// Straight from expositor's author paper, https://expositor.dev/pdf/movetime.pdf
+    /// </summary>
+    /// <param name="plies_played"></param>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int ExpectedMovesLeft(int plies_played)
+    {
+        double p = (double)(plies_played);
+
+        return (int)Math.Round(
+            (59.3 + ((72830.0 - (p * 2330.0)) / ((p * p) + (p * 10.0) + 2644.0)))   // Plies remaining
+            / 2.0); // Full moves remaining
+    }
+
+#pragma warning disable S1144 // Unused private types or members should be removed - wanna keep this around
     private async ValueTask<SearchResult> SearchBestMove(int maxDepth, int softLimitTimeBound)
+#pragma warning restore S1144 // Unused private types or members should be removed
     {
         if (!Configuration.EngineSettings.UseOnlineTablebaseInRootPositions || Game.CurrentPosition.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
         {
@@ -273,7 +306,7 @@ public sealed partial class Engine
 
         var tasks = new Task<SearchResult?>[] {
                 // Other copies of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove (same reason)
-                ProbeOnlineTablebase(Game.CurrentPosition, new(Game.PositionHashHistory),  Game.HalfMovesWithoutCaptureOrPawnMove),
+                ProbeOnlineTablebase(Game.CurrentPosition, Game.CopyPositionHashHistory(),  Game.HalfMovesWithoutCaptureOrPawnMove),
                 Task.Run(()=>(SearchResult?)IDDFS(maxDepth, softLimitTimeBound))
             };
 
@@ -283,8 +316,8 @@ public sealed partial class Engine
 
         if (searchResult is not null)
         {
-            _logger.Info("Search evaluation result - eval: {0}, mate: {1}, depth: {2}, pv: {3}",
-                searchResult.Evaluation, searchResult.Mate, searchResult.Depth, string.Join(", ", searchResult.Moves.Select(m => m.UCIString())));
+            _logger.Info("Search evaluation result - score: {0}, mate: {1}, depth: {2}, pv: {3}",
+                searchResult.Score, searchResult.Mate, searchResult.Depth, string.Join(", ", searchResult.Moves.Select(m => m.UCIString())));
         }
 
         if (tbResult is not null)
@@ -339,8 +372,8 @@ public sealed partial class Engine
             }
 
             // We print best move even in case of go ponder + stop, and IDEs are expected to ignore it
-            _moveToPonder = searchResult.Moves.Count >= 2 ? searchResult.Moves[1] : null;
-            _engineWriter.TryWrite(BestMoveCommand.BestMove(searchResult.BestMove, _moveToPonder));
+            _moveToPonder = searchResult.Moves.Length >= 2 ? searchResult.Moves[1] : null;
+            _engineWriter.TryWrite(new BestMoveCommand(searchResult.BestMove, _moveToPonder));
         }
         catch (Exception e)
         {
@@ -358,12 +391,6 @@ public sealed partial class Engine
     {
         _stopRequested = true;
         _absoluteSearchCancellationTokenSource.Cancel();
-    }
-
-    private void InitializeTT()
-    {
-        (int ttLength, _ttMask) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
-        _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
     }
 
     private static void InitializeStaticClasses()
