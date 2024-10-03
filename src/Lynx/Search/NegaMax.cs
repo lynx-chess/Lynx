@@ -245,36 +245,8 @@ public sealed partial class Engine
 
                 if (!pvNode && !isInCheck && isNotGettingCheckmated)
                 {
-                    // Noisy moves
-                    if (moveScores[moveIndex] >= EvaluationConstants.PromotionMoveScoreValue)
-                    {
-                        if (depth <= Configuration.EngineSettings.SEE_Pruning_CaptureHistory_MaxDepth)
-                        {
-                            // 🔍 SEE pruning using capture history
-                            var captureHistoryValue = _captureHistory[CaptureHistoryIndex(move.Piece(), move.TargetSquare(), move.CapturedPiece())];
-
-                            int captureHistoryThresholdLimit = Configuration.EngineSettings.SEE_Pruning_CaptureHistory_Divisor * depth;
-
-                            // Formula from SF
-                            var threshold =
-                                captureHistoryThresholdLimit
-                                - Math.Clamp(
-                                    captureHistoryValue / Configuration.EngineSettings.SEE_Pruning_CaptureHistory_Divisor,
-                                    -captureHistoryThresholdLimit,
-                                    +captureHistoryThresholdLimit);
-
-                            if (!SEE.HasPositiveScore(position, move, threshold))
-                            {
-                                // After making a move
-                                Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
-                                Game.RemoveFromPositionHashHistory();
-                                position.UnmakeMove(move, gameState);
-
-                                continue;
-                            }
-                        }
-                    }
-                    else // Quiet moves
+                    // Quiet moves
+                    if (moveScores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue)
                     {
                         // 🔍 Late Move Pruning (LMP) - all quiet moves can be pruned
                         // after searching the first few given by the move ordering algorithm
@@ -321,6 +293,32 @@ public sealed partial class Engine
                             position.UnmakeMove(move, gameState);
 
                             break;
+                        }
+                    }
+
+                    if (isCapture && depth <= Configuration.EngineSettings.SEE_Pruning_CaptureHistory_MaxDepth)
+                    {
+                        // 🔍 SEE pruning using capture history
+                        var captureHistoryValue = _captureHistory[CaptureHistoryIndex(move.Piece(), move.TargetSquare(), move.CapturedPiece())];
+
+                        int captureHistoryThresholdLimit = Configuration.EngineSettings.SEE_Pruning_CaptureHistory_Divisor * depth;
+
+                        // Formula from SF
+                        var threshold =
+                            captureHistoryThresholdLimit
+                            - Math.Clamp(
+                                captureHistoryValue / Configuration.EngineSettings.SEE_Pruning_CaptureHistory_Divisor,
+                                -captureHistoryThresholdLimit,
+                                +captureHistoryThresholdLimit);
+
+                        if (!SEE.IsGoodCapture(position, move, threshold))
+                        {
+                            // After making a move
+                            Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
+                            Game.RemoveFromPositionHashHistory();
+                            position.UnmakeMove(move, gameState);
+
+                            continue;
                         }
                     }
                 }
