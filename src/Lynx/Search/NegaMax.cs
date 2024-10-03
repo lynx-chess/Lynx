@@ -294,7 +294,7 @@ public sealed partial class Engine
                     }
 
                     // 🔍 SEE pruning
-                    if (!SEE.HasPositiveScore(position, move, threshold: -100 * depth))
+                    if (depth <= 5 && !SEE.HasPositiveScore(position, move, threshold: -100 * depth))
                     {
                         // After making a move
                         Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
