@@ -180,6 +180,15 @@ public sealed class EngineSettings
     public int SEE_BadCaptureReduction { get; set; } = 2;
 
     [SPSA<int>(1, 10, 0.5)]
+    public int SEE_Pruning_CaptureHistory_MaxDepth { get; set; } = 5;
+
+    [SPSA<int>(1, 100, 5)]
+    public int SEE_Pruning_CaptureHistory_Divisor { get; set; } = 32;
+
+    [SPSA<int>(50, 200, 8)]
+    public int SEE_Pruning_CaptureHistory_Limit { get; set; } = 128;
+
+    [SPSA<int>(1, 10, 0.5)]
     public int FP_MaxDepth { get; set; } = 7;
 
     [SPSA<int>(1, 200, 10)]
