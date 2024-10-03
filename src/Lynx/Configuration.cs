@@ -180,6 +180,15 @@ public sealed class EngineSettings
     public int SEE_BadCaptureReduction { get; set; } = 2;
 
     [SPSA<int>(1, 10, 0.5)]
+    public int SEE_Pruning_MaxDepth { get; set; } = 5;
+
+    [SPSA<int>(-150, -50, 5)]
+    public int SEE_Pruning_Noisy_DepthScalingFactor { get; set; } = -99;
+
+    [SPSA<int>(-100, 0, 5)]
+    public int SEE_Pruning_Quiet_DepthScalingFactor { get; set; } = -50;
+
+    [SPSA<int>(1, 10, 0.5)]
     public int FP_MaxDepth { get; set; } = 7;
 
     [SPSA<int>(1, 200, 10)]

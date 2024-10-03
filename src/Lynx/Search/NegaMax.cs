@@ -294,14 +294,21 @@ public sealed partial class Engine
                     }
 
                     // 🔍 SEE pruning
-                    if (depth <= 5 && !SEE.HasPositiveScore(position, move, threshold: -99 * depth))
+                    if (depth <= Configuration.EngineSettings.SEE_Pruning_MaxDepth)
                     {
-                        // After making a move
-                        Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
-                        Game.RemoveFromPositionHashHistory();
-                        position.UnmakeMove(move, gameState);
+                        var threshold = isCapture
+                            ? Configuration.EngineSettings.SEE_Pruning_Noisy_DepthScalingFactor * depth
+                            : Configuration.EngineSettings.SEE_Pruning_Quiet_DepthScalingFactor * depth;
 
-                        continue;
+                        if (!SEE.HasPositiveScore(position, move, threshold))
+                        {
+                            // After making a move
+                            Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
+                            Game.RemoveFromPositionHashHistory();
+                            position.UnmakeMove(move, gameState);
+
+                            continue;
+                        }
                     }
                 }
 
