@@ -290,7 +290,7 @@ public sealed partial class Engine
                         Game.RemoveFromPositionHashHistory();
                         position.UnmakeMove(move, gameState);
 
-                        break;
+                        continue;
                     }
                 }
 
