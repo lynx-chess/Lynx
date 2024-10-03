@@ -292,6 +292,17 @@ public sealed partial class Engine
 
                         break;
                     }
+
+                    // 🔍 SEE pruning
+                    if (!SEE.HasPositiveScore(position, move))
+                    {
+                        // After making a move
+                        Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
+                        Game.RemoveFromPositionHashHistory();
+                        position.UnmakeMove(move, gameState);
+
+                        continue;
+                    }
                 }
 
                 PrefetchTTEntry();
