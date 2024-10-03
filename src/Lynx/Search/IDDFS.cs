@@ -103,6 +103,7 @@ public sealed partial class Engine
 
             do
             {
+                Game.CurrentPosition.SetNeedsFullEvalRecalculation();
                 _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
                 _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
                 _nodes = 0;
@@ -110,6 +111,17 @@ public sealed partial class Engine
                 if (depth < Configuration.EngineSettings.AspirationWindow_MinDepth
                     || lastSearchResult?.Score is null)
                 {
+                    if (!Game.CurrentPosition._needsFullEvalRecalculation)
+                    {
+                        var alternativeEval = Game.CurrentPosition.InitialStaticEvaluation().PackedScore;
+
+                        if (Game.CurrentPosition._incrementalEvaluation != alternativeEval)
+                        {
+                            ;
+                            //Console.WriteLine($"{FEN()} -> Incremental = {_incrementalEvaluation} vs Initial = {alternativeEval}");
+                        }
+                    }
+
                     bestScore = NegaMax(depth: depth, ply: 0, alpha, beta);
                 }
                 else

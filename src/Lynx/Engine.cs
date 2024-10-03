@@ -269,6 +269,7 @@ public sealed partial class Engine
             && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
         {
             Game.MakeMove(resultToReturn.BestMove);
+            Game.CurrentPosition.SetNeedsFullEvalRecalculation();
             Game.UpdateInitialPosition();
         }
 

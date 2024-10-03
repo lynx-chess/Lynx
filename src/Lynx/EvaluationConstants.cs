@@ -167,6 +167,8 @@ public static class EvaluationConstants
     #endregion
 
     public const int ContinuationHistoryPlyCount = 1;
+
+    public const int MaxPhase = 24;
 }
 
 #pragma warning restore IDE1006 // Naming Styles

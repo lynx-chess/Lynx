@@ -13,6 +13,10 @@ public class Position : IDisposable
 {
     private bool _disposedValue;
 
+    internal bool _needsFullEvalRecalculation;
+    internal int _incrementalEvaluation;
+    internal int _incrementalPhase;
+
     public long UniqueIdentifier { get; private set; }
 
     /// <summary>
@@ -63,6 +67,9 @@ public class Position : IDisposable
         Side = parsedFEN.Side;
         Castle = parsedFEN.Castle;
         EnPassant = parsedFEN.EnPassant;
+        _needsFullEvalRecalculation = true;
+        _incrementalEvaluation = int.MinValue / 2;
+        _incrementalPhase = int.MinValue / 2;
 
         UniqueIdentifier = ZobristTable.PositionHash(this);
     }
@@ -87,6 +94,8 @@ public class Position : IDisposable
         Side = position.Side;
         Castle = position.Castle;
         EnPassant = position.EnPassant;
+        _incrementalEvaluation = position._incrementalEvaluation;
+        _incrementalPhase = position._incrementalPhase;
     }
 
     #region Move making
@@ -97,6 +106,8 @@ public class Position : IDisposable
         byte castleCopy = Castle;
         BoardSquare enpassantCopy = EnPassant;
         long uniqueIdentifierCopy = UniqueIdentifier;
+        int incrementalEvaluationCopy = _incrementalEvaluation;
+        int incrementalPhaseCopy = _incrementalPhase;
 
         var oldSide = (int)Side;
         var offset = Utils.PieceOffset(oldSide);
@@ -113,6 +124,11 @@ public class Position : IDisposable
             newPiece = promotedPiece;
         }
 
+        _needsFullEvalRecalculation = /*true || */  move.IsCapture() || move.IsCastle() || move.IsPromotion() || move.IsEnPassant() || move.IsDoublePawnPush() ||
+            _needsFullEvalRecalculation || piece == (int)Piece.K || piece == (int)Piece.k;
+//ucinewgame
+//position fen 4b3/8/2p1p3/1pPpPp2/kPpKpPp1/PpP1P1P1/1P6/4B3 w - - 0 1
+//go depth 15
         PieceBitBoards[piece].PopBit(sourceSquare);
         OccupancyBitBoards[oldSide].PopBit(sourceSquare);
         Board[sourceSquare] = (int)Piece.None;
@@ -130,6 +146,35 @@ public class Position : IDisposable
 
         EnPassant = BoardSquare.noSquare;
 
+        int sameSideBucket = -1, oppositeSideBucket = -1;
+
+        if (!_needsFullEvalRecalculation)
+        {
+            var whiteKing = PieceBitBoards[(int)Piece.K].GetLS1BIndex();
+            var blackKing = PieceBitBoards[(int)Piece.k].GetLS1BIndex();
+
+            var whiteBucket = PSQTBucketLayout[whiteKing];
+            var blackBucket = PSQTBucketLayout[blackKing ^ 56];
+
+            if (piece <= (int)Piece.K)
+            {
+                sameSideBucket = whiteBucket;
+                oppositeSideBucket = blackBucket;
+            }
+            else
+            {
+                sameSideBucket = blackBucket;
+                oppositeSideBucket = whiteBucket;
+            }
+
+            _incrementalEvaluation -= (PSQT(0, sameSideBucket, piece, sourceSquare)
+                                    + PSQT(1, oppositeSideBucket, piece, sourceSquare));
+            _incrementalEvaluation += PSQT(0, sameSideBucket, newPiece, targetSquare)
+                                    + PSQT(1, oppositeSideBucket, newPiece, targetSquare);
+        }
+
+        // TODO position starpos moves e2e3 e7e6 g1f3 d8g5 f3g5 b8c6 b1c3 h7h6 g5f7 e8f7 d1g4
+
         switch (move.SpecialMoveFlag())
         {
             case SpecialMoveType.None:
@@ -142,6 +187,12 @@ public class Position : IDisposable
                         PieceBitBoards[capturedPiece].PopBit(capturedSquare);
                         OccupancyBitBoards[oppositeSide].PopBit(capturedSquare);
                         UniqueIdentifier ^= ZobristTable.PieceHash(capturedSquare, capturedPiece);
+
+                        if (!_needsFullEvalRecalculation)
+                        {
+                            _incrementalEvaluation -= (PSQT(0, oppositeSideBucket, capturedPiece, targetSquare)
+                                                + PSQT(1, sameSideBucket, capturedPiece, targetSquare));
+                        }
                     }
 
                     break;
@@ -175,6 +226,7 @@ public class Position : IDisposable
                         ZobristTable.PieceHash(rookSourceSquare, rookIndex)
                         ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
 
+                    // No need incremental evaluation update, since recalculation is needed anyway
                     break;
                 }
             case SpecialMoveType.LongCastle:
@@ -195,6 +247,7 @@ public class Position : IDisposable
                         ZobristTable.PieceHash(rookSourceSquare, rookIndex)
                         ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
 
+                    // No need incremental evaluation update, since recalculation is needed anyway
                     break;
                 }
             case SpecialMoveType.EnPassant:
@@ -210,6 +263,12 @@ public class Position : IDisposable
                     Board[capturedSquare] = (int)Piece.None;
                     UniqueIdentifier ^= ZobristTable.PieceHash(capturedSquare, capturedPiece);
 
+                    if (!_needsFullEvalRecalculation)
+                    {
+                        _incrementalEvaluation -= (PSQT(0, oppositeSideBucket, oppositePawnIndex, capturedSquare)
+                                            + PSQT(1, sameSideBucket, oppositePawnIndex, capturedSquare));
+                    }
+
                     break;
                 }
         }
@@ -223,13 +282,19 @@ public class Position : IDisposable
 
         UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
 
-        return new GameState(uniqueIdentifierCopy, enpassantCopy, castleCopy);
-        //var clone = new Position(this);
-        //clone.UnmakeMove(move, gameState);
-        //if (uniqueIdentifierCopy != clone.UniqueIdentifier)
-        //{
-        //    throw new($"{FEN()}: {uniqueIdentifierCopy} expected, got {clone.UniqueIdentifier} got after Make/Unmake move {move.ToEPDString()}");
-        //}
+        var alternativeEval = InitialStaticEvaluation().PackedScore;
+
+        if (!_needsFullEvalRecalculation)
+        {
+
+            if (_incrementalEvaluation != alternativeEval)
+            {
+                Console.WriteLine($"{FEN()} -> Incremental = {_incrementalEvaluation} vs Initial = {alternativeEval}");
+            }
+        }
+
+
+        return new GameState(uniqueIdentifierCopy, incrementalEvaluationCopy, incrementalPhaseCopy, enpassantCopy, castleCopy);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -330,6 +395,19 @@ public class Position : IDisposable
         Castle = gameState.Castle;
         EnPassant = gameState.EnPassant;
         UniqueIdentifier = gameState.ZobristKey;
+        _incrementalEvaluation = gameState.IncrementalEvaluation;
+
+        if (!_needsFullEvalRecalculation)
+        {
+            var alternativeEval = InitialStaticEvaluation().PackedScore;
+            if (_incrementalEvaluation != alternativeEval)
+            {
+                ;
+                //Console.WriteLine($"{FEN()} -> Incremental = {_incrementalEvaluation} vs Initial = {alternativeEval}");
+            }
+        }
+
+        _incrementalPhase = gameState.IncrementalPhase;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -344,7 +422,7 @@ public class Position : IDisposable
             ZobristTable.SideHash()
             ^ ZobristTable.EnPassantHash((int)oldEnPassant);
 
-        return new GameState(oldUniqueIdentifier, oldEnPassant, byte.MaxValue);
+        return new GameState(oldUniqueIdentifier, _incrementalEvaluation, _incrementalPhase, oldEnPassant, byte.MaxValue);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -395,6 +473,83 @@ public class Position : IDisposable
 
     #region Evaluation
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void SetNeedsFullEvalRecalculation() => _needsFullEvalRecalculation = true;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public (int PackedScore, int Phase) InitialStaticEvaluation()
+    {
+        int packedScore = 0;
+        int gamePhase = 0;
+
+        var whiteKing = PieceBitBoards[(int)Piece.K].GetLS1BIndex();
+        var blackKing = PieceBitBoards[(int)Piece.k].GetLS1BIndex();
+
+        var whiteBucket = PSQTBucketLayout[whiteKing];
+        var blackBucket = PSQTBucketLayout[blackKing ^ 56];
+
+        for (int pieceIndex = (int)Piece.P; pieceIndex < (int)Piece.K; ++pieceIndex)
+        {
+            var bitboard = PieceBitBoards[pieceIndex];
+
+            while (bitboard != default)
+            {
+                var pieceSquareIndex = bitboard.GetLS1BIndex();
+                bitboard.ResetLS1B();
+
+                packedScore += PSQT(0, whiteBucket, pieceIndex, pieceSquareIndex)
+                            + PSQT(1, blackBucket, pieceIndex, pieceSquareIndex);
+
+                gamePhase += GamePhaseByPiece[pieceIndex];
+
+                //packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
+            }
+        }
+
+        for (int pieceIndex = (int)Piece.p; pieceIndex < (int)Piece.k; ++pieceIndex)
+        {
+            var bitboard = PieceBitBoards[pieceIndex];
+
+            while (bitboard != default)
+            {
+                var pieceSquareIndex = bitboard.GetLS1BIndex();
+                bitboard.ResetLS1B();
+
+                packedScore += PSQT(0, blackBucket, pieceIndex, pieceSquareIndex)
+                            + PSQT(1, whiteBucket, pieceIndex, pieceSquareIndex);
+
+                gamePhase += GamePhaseByPiece[pieceIndex];
+
+                //packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex);
+            }
+        }
+
+        packedScore +=
+             PSQT(0, whiteBucket, (int)Piece.K, whiteKing)
+            + PSQT(1, blackBucket, (int)Piece.K, whiteKing)
+            + PSQT(0, blackBucket, (int)Piece.k, blackKing)
+            + PSQT(1, whiteBucket, (int)Piece.k, blackKing);
+        //+ KingAdditionalEvaluation(whiteKing, (int)Piece.K)
+        //- KingAdditionalEvaluation(blackKing, (int)Piece.k);
+
+        return (packedScore, gamePhase);
+
+        int endGamePhase = MaxPhase - gamePhase;
+
+        var middleGameScore = Utils.UnpackMG(packedScore);
+        var endGameScore = Utils.UnpackEG(packedScore);
+        var eval = ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / MaxPhase;
+
+        //int totalPawnsCount = PieceBitBoards[(int)Piece.P].CountBits() + PieceBitBoards[(int)Piece.p].CountBits();
+        //eval = ScaleEvalWithPawnCount(eval, totalPawnsCount);
+
+        //var sideEval = Side == Side.White
+        //    ? eval
+        //    : -eval;
+
+        return (eval, gamePhase);
+    }
+
     /// <summary>
     /// Evaluates material and position in a NegaMax style.
     /// That is, positive scores always favour playing <see cref="Side"/>.
@@ -412,7 +567,22 @@ public class Position : IDisposable
         //    return result;
         //}
 
-        int packedScore = 0;
+        if (_needsFullEvalRecalculation)
+        {
+            _needsFullEvalRecalculation = false;
+            (_incrementalEvaluation, int _) = InitialStaticEvaluation();
+        }
+        else
+        {
+            var alternativeEval = InitialStaticEvaluation().PackedScore;
+
+            if (_incrementalEvaluation != alternativeEval)
+            {
+                Console.WriteLine($"{FEN()} -> Incremental = {_incrementalEvaluation} vs Initial = {alternativeEval}");
+            }
+        }
+
+        var packedScore = _incrementalEvaluation;
         int gamePhase = 0;
 
         var whitePawns = PieceBitBoards[(int)Piece.P];
@@ -438,8 +608,11 @@ public class Position : IDisposable
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
 
-                packedScore += PSQT(0, whiteBucket, pieceIndex, pieceSquareIndex)
-                             + PSQT(1, blackBucket, pieceIndex, pieceSquareIndex);
+                //if (_needsFullEvalRecalculation)
+                //{
+                //    packedScore += PSQT(0, whiteBucket, pieceIndex, pieceSquareIndex)
+                //                 + PSQT(1, blackBucket, pieceIndex, pieceSquareIndex);
+                //}
 
                 gamePhase += GamePhaseByPiece[pieceIndex];
 
@@ -458,9 +631,11 @@ public class Position : IDisposable
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
                 bitboard.ResetLS1B();
 
-                packedScore += PSQT(0, blackBucket, pieceIndex, pieceSquareIndex)
-                             + PSQT(1, whiteBucket, pieceIndex, pieceSquareIndex);
-
+                //if (_needsFullEvalRecalculation)
+                //{
+                //    packedScore += PSQT(0, blackBucket, pieceIndex, pieceSquareIndex)
+                //                 + PSQT(1, whiteBucket, pieceIndex, pieceSquareIndex);
+                //}
                 gamePhase += GamePhaseByPiece[pieceIndex];
 
                 packedScore -= AdditionalPieceEvaluation(blackBucket, pieceSquareIndex, pieceIndex, (int)Side.Black, blackKing, whiteKing, whitePawnAttacks);
@@ -468,12 +643,18 @@ public class Position : IDisposable
         }
 
         // Kings
-        packedScore += PSQT(0, whiteBucket, (int)Piece.K, whiteKing)
-            + PSQT(0, blackBucket, (int)Piece.k, blackKing)
-            + PSQT(1, blackBucket, (int)Piece.K, whiteKing)
-            + PSQT(1, whiteBucket, (int)Piece.k, blackKing)
-            + KingAdditionalEvaluation(whiteKing, (int)Side.White, blackPawnAttacks)
-            - KingAdditionalEvaluation(blackKing, (int)Side.Black, whitePawnAttacks);
+        //if (_needsFullEvalRecalculation)
+        //{
+        //    packedScore +=
+        //PSQT(0, whiteBucket, (int)Piece.K, whiteKing)
+        //+ PSQT(0, blackBucket, (int)Piece.k, blackKing)
+        //+ PSQT(1, blackBucket, (int)Piece.K, whiteKing)
+        //+ PSQT(1, whiteBucket, (int)Piece.k, blackKing)
+        //}
+
+        packedScore +=
+            KingAdditionalEvaluation(whiteKing, (int)Piece.K, blackPawnAttacks)
+            - KingAdditionalEvaluation(blackKing, (int)Piece.k, whitePawnAttacks);
 
         // Bishop pair bonus
         if (PieceBitBoards[(int)Piece.B].CountBits() >= 2)
@@ -496,11 +677,9 @@ public class Position : IDisposable
             * ((blackPawnAttacks & OccupancyBitBoards[(int)Side.White] /* & (~whitePawns) */).CountBits()
                 - (whitePawnAttacks & OccupancyBitBoards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
 
-        const int maxPhase = 24;
-
-        if (gamePhase > maxPhase)    // Early promotions
+        if (gamePhase > MaxPhase)    // Early promotions
         {
-            gamePhase = maxPhase;
+            gamePhase = MaxPhase;
         }
 
         int totalPawnsCount = whitePawns.CountBits() + blackPawns.CountBits();
@@ -558,14 +737,11 @@ public class Position : IDisposable
             }
         }
 
-        int endGamePhase = maxPhase - gamePhase;
+        int endGamePhase = MaxPhase - gamePhase;
 
         var middleGameScore = Utils.UnpackMG(packedScore);
         var endGameScore = Utils.UnpackEG(packedScore);
-        var eval = ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / maxPhase;
-
-        // Endgame scaling with pawn count, formula yoinked from Sirius
-        eval = (int)(eval * ((80 + (totalPawnsCount * 7)) / 128.0));
+        var eval = ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / MaxPhase;
 
         eval = ScaleEvalWith50MovesDrawDistance(eval, movesWithoutCaptureOrPawnMove);
 
@@ -623,6 +799,7 @@ public class Position : IDisposable
             (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
             (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
             (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.K or (int)Piece.K => KingAdditionalEvaluation(pieceSquareIndex, pieceIndex, enemyPawnAttacks),
             _ => 0
         };
     }

@@ -70,6 +70,13 @@ public sealed class Game : IDisposable
             }
 
             MakeMove(parsedMove.Value);
+            var alternativeEval = CurrentPosition.InitialStaticEvaluation().PackedScore;
+
+            if (CurrentPosition._needsFullEvalRecalculation && CurrentPosition._incrementalEvaluation != alternativeEval)
+            {
+                Console.WriteLine($"{CurrentPosition.FEN()} -> Incremental = {CurrentPosition._incrementalEvaluation} vs Initial = {alternativeEval}");
+            }
+
         }
 
         PositionBeforeLastSearch = new Position(CurrentPosition);
