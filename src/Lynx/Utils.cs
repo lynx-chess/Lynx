@@ -214,17 +214,6 @@ public static class Utils
         return (short)((packed + 0x8000) >> 16);
     }
 
-    /// <summary>
-    /// Returns a random <see cref="UInt64"/>
-    /// </summary>
-    public static ulong NextUInt64(this Random random)
-    {
-        Span<byte> arr = stackalloc byte[8];
-        random.NextBytes(arr);
-
-        return BitConverter.ToUInt64(arr);
-    }
-
     [Conditional("DEBUG")]
     private static void GuardAgainstSideBoth(int side)
     {
