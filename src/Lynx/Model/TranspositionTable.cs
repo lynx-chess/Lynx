@@ -83,7 +83,7 @@ public static class TranspositionTableExtensions
     /// <param name="ttLength"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static long CalculateTTIndex(long positionUniqueIdentifier, int ttLength) => (long)(((UInt128)positionUniqueIdentifier * (UInt128)ttLength) >> 64);
+    public static ulong CalculateTTIndex(long positionUniqueIdentifier, int ttLength) => (ulong)(((UInt128)positionUniqueIdentifier * (UInt128)ttLength) >> 64);
 
     /// <summary>
     /// Checks the transposition table and, if there's a eval value that can be deducted from it of there's a previously recorded <paramref name="position"/>, it's returned. <see cref="EvaluationConstants.NoHashEntry"/> is returned otherwise
@@ -98,7 +98,7 @@ public static class TranspositionTableExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static (int Score, ShortMove BestMove, NodeType NodeType, int RawScore) ProbeHash(this TranspositionTable tt, Position position, int depth, int ply, int alpha, int beta)
     {
-        long ttIndex = CalculateTTIndex(position.UniqueIdentifier, tt.Length);
+        var ttIndex = CalculateTTIndex(position.UniqueIdentifier, tt.Length);
         ref var entry = ref tt[ttIndex];
 
         if ((ushort)position.UniqueIdentifier != entry.Key)
@@ -139,7 +139,7 @@ public static class TranspositionTableExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void RecordHash(this TranspositionTable tt, Position position, int depth, int ply, int score, NodeType nodeType, Move? move = null)
     {
-        long ttIndex = CalculateTTIndex(position.UniqueIdentifier, tt.Length);
+        var ttIndex = CalculateTTIndex(position.UniqueIdentifier, tt.Length);
         ref var entry = ref tt[ttIndex];
 
         //if (entry.Key != default && entry.Key != position.UniqueIdentifier)
