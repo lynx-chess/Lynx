@@ -48,7 +48,7 @@ public struct TranspositionTableElement
     /// </summary>
     public int Score { readonly get => _score; set => _score = (short)value; }
 
-    public long Key { readonly get => _key; set => _key = (ushort)(value >> 48); }
+    public ulong Key { readonly get => _key; set => _key = (ushort)(value >> 48); }
 }
 
 public static class TranspositionTableExtensions
@@ -56,7 +56,7 @@ public static class TranspositionTableExtensions
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
     private static readonly ulong _ttElementSize = (ulong)Marshal.SizeOf(typeof(TranspositionTableElement));
 
-    public static (int Length, int Mask) CalculateLength(int size)
+    public static (int Length, ulong Mask) CalculateLength(int size)
     {
         ulong sizeBytes = (ulong)size * 1024ul * 1024ul;
         ulong ttLength = sizeBytes / _ttElementSize;
@@ -79,7 +79,7 @@ public static class TranspositionTableExtensions
         _logger.Info("TT entry:\t{0} bytes", _ttElementSize);
         _logger.Info("TT mask:\t{0}", mask.ToString("X"));
 
-        return ((int)ttLength, (int)mask);
+        return ((int)ttLength, mask);
     }
 
     /// <summary>
@@ -94,7 +94,7 @@ public static class TranspositionTableExtensions
     /// <param name="beta"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static (int Score, ShortMove BestMove, NodeType NodeType, int RawScore) ProbeHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int alpha, int beta)
+    public static (int Score, ShortMove BestMove, NodeType NodeType, int RawScore) ProbeHash(this TranspositionTable tt, ulong ttMask, Position position, int depth, int ply, int alpha, int beta)
     {
         ref var entry = ref tt[position.UniqueIdentifier & ttMask];
 
@@ -135,7 +135,7 @@ public static class TranspositionTableExtensions
     /// <param name="nodeType"></param>
     /// <param name="move"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void RecordHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int score, NodeType nodeType, Move? move = null)
+    public static void RecordHash(this TranspositionTable tt, ulong ttMask, Position position, int depth, int ply, int score, NodeType nodeType, Move? move = null)
     {
         ref var entry = ref tt[position.UniqueIdentifier & ttMask];
 

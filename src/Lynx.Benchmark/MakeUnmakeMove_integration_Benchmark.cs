@@ -295,7 +295,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
 
     public struct MakeMovePosition
     {
-        public long UniqueIdentifier { get; private set; }
+        public ulong UniqueIdentifier { get; private set; }
 
         public BitBoard[] PieceBitBoards { get; }
 
@@ -1266,10 +1266,10 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
 
     public static class MakeMoveZobristTable
     {
-        private static readonly long[,] _table = Initialize();
+        private static readonly ulong[,] _table = Initialize();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long PieceHash(int boardSquare, int piece) => _table[boardSquare, piece];
+        public static ulong PieceHash(int boardSquare, int piece) => _table[boardSquare, piece];
 
         /// <summary>
         /// Uses <see cref="Piece.P"/> and squares <see cref="BoardSquare.a1"/>-<see cref="BoardSquare.h1"/>
@@ -1277,7 +1277,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         /// <param name="enPassantSquare"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long EnPassantHash(int enPassantSquare)
+        public static ulong EnPassantHash(int enPassantSquare)
         {
             if (enPassantSquare == (int)BoardSquare.noSquare)
             {
@@ -1294,7 +1294,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         /// </summary>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long SideHash()
+        public static ulong SideHash()
         {
             return _table[(int)BoardSquare.h8, (int)Piece.p];
         }
@@ -1307,9 +1307,9 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         /// <param name="castle"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long CastleHash(int castle)
+        public static ulong CastleHash(int castle)
         {
-            long combinedHash = 0;
+            ulong combinedHash = 0;
 
             if ((castle & (int)CastlingRights.WK) != default)
             {
@@ -1340,9 +1340,9 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         /// <param name="position"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long PositionHash(MakeMovePosition position)
+        public static ulong PositionHash(MakeMovePosition position)
         {
-            long positionHash = 0;
+            ulong positionHash = 0;
 
             for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
             {
@@ -1367,16 +1367,16 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         /// </summary>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static long[,] Initialize()
+        internal static ulong[,] Initialize()
         {
-            var zobristTable = new long[64, 12];
+            var zobristTable = new ulong[64, 12];
             var randomInstance = new Random(int.MaxValue);
 
             for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
             {
                 for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
                 {
-                    zobristTable[squareIndex, pieceIndex] = randomInstance.NextInt64();
+                    zobristTable[squareIndex, pieceIndex] = randomInstance.NextUInt64();
                 }
             }
 

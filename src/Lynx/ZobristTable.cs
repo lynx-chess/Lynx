@@ -12,15 +12,15 @@ public static class ZobristTable
     /// <summary>
     /// 64x12
     /// </summary>
-    private static readonly long[][] _table = Initialize();
+    private static readonly ulong[][] _table = Initialize();
 
-    private static readonly long WK_Hash = _table[(int)BoardSquare.a8][(int)Piece.p];
-    private static readonly long WQ_Hash = _table[(int)BoardSquare.b8][(int)Piece.p];
-    private static readonly long BK_Hash = _table[(int)BoardSquare.c8][(int)Piece.p];
-    private static readonly long BQ_Hash = _table[(int)BoardSquare.d8][(int)Piece.p];
+    private static readonly ulong WK_Hash = _table[(int)BoardSquare.a8][(int)Piece.p];
+    private static readonly ulong WQ_Hash = _table[(int)BoardSquare.b8][(int)Piece.p];
+    private static readonly ulong BK_Hash = _table[(int)BoardSquare.c8][(int)Piece.p];
+    private static readonly ulong BQ_Hash = _table[(int)BoardSquare.d8][(int)Piece.p];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static long PieceHash(int boardSquare, int piece) => _table[boardSquare][piece];
+    public static ulong PieceHash(int boardSquare, int piece) => _table[boardSquare][piece];
 
     /// <summary>
     /// Uses <see cref="Piece.P"/> and squares <see cref="BoardSquare.a1"/>-<see cref="BoardSquare.h1"/>
@@ -28,7 +28,7 @@ public static class ZobristTable
     /// <param name="enPassantSquare"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static long EnPassantHash(int enPassantSquare)
+    public static ulong EnPassantHash(int enPassantSquare)
     {
         if (enPassantSquare == (int)BoardSquare.noSquare)
         {
@@ -52,7 +52,7 @@ public static class ZobristTable
     /// </summary>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static long SideHash()
+    public static ulong SideHash()
     {
         return _table[(int)BoardSquare.h8][(int)Piece.p];
     }
@@ -65,7 +65,7 @@ public static class ZobristTable
     /// <param name="castle"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static long CastleHash(byte castle)
+    public static ulong CastleHash(byte castle)
     {
         return castle switch
         {
@@ -101,9 +101,9 @@ public static class ZobristTable
     /// <param name="position"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static long PositionHash(Position position)
+    public static ulong PositionHash(Position position)
     {
-        long positionHash = 0;
+        ulong positionHash = 0;
 
         for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
         {
@@ -130,17 +130,17 @@ public static class ZobristTable
     /// </summary>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static long[][] Initialize()
+    internal static ulong[][] Initialize()
     {
-        var zobristTable = new long[64][];
+        var zobristTable = new ulong[64][];
         var randomInstance = new Random(int.MaxValue);
 
         for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
         {
-            zobristTable[squareIndex] = new long[12];
+            zobristTable[squareIndex] = new ulong[12];
             for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
             {
-                zobristTable[squareIndex][pieceIndex] = randomInstance.NextInt64();
+                zobristTable[squareIndex][pieceIndex] = randomInstance.NextUInt64();
             }
         }
 

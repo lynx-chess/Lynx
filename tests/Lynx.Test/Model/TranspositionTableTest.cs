@@ -32,7 +32,7 @@ public class TranspositionTableTests
         }
 
         // Mask: 111....11
-        Assert.AreEqual(1, Convert.ToString(mask, 2).AsEnumerable().Distinct().Count());
+        Assert.AreEqual(1, Convert.ToString((long)mask, 2).AsEnumerable().Distinct().Count());
 
         if (sizeMb <= 16)
         {
@@ -49,9 +49,9 @@ public class TranspositionTableTests
             }
         }
 
-        static void Verify(int length, int mask, int i)
+        static void Verify(int length, ulong mask, int i)
         {
-            Assert.AreEqual(i % length, i & mask, $"Error in {i}: {i} %{length} should be {i} & 0x{mask:X}");
+            Assert.AreEqual(i % length, (ulong)i & mask, $"Error in {i}: {i} %{length} should be {i} & 0x{mask:X}");
         }
     }
 
@@ -81,7 +81,7 @@ public class TranspositionTableTests
     public void RecordHash_ProbeHash(int recordedEval, NodeType recordNodeType, int probeAlpha, int probeBeta, int expectedProbeEval)
     {
         var position = new Position(Constants.InitialPositionFEN);
-        var (mask, length) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
+        var (length, mask) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
         var transpositionTable = new TranspositionTableElement[length];
 
         transpositionTable.RecordHash(mask, position, depth: 5, ply: 3, score: recordedEval, nodeType: recordNodeType, move: 1234);
@@ -95,7 +95,7 @@ public class TranspositionTableTests
     {
         const int sharedDepth = 5;
         var position = new Position(Constants.InitialPositionFEN);
-        var (mask, length) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
+        var (length, mask) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
         var transpositionTable = new TranspositionTableElement[length];
 
         transpositionTable.RecordHash(mask, position, depth: 10, ply: sharedDepth, score: recordedEval, nodeType: NodeType.Exact, move: 1234);
@@ -110,7 +110,7 @@ public class TranspositionTableTests
     public void RecordHash_ProbeHash_CheckmateDifferentDepth(int recordedEval, int recordedDeph, int probeDepth, int expectedProbeEval)
     {
         var position = new Position(Constants.InitialPositionFEN);
-        var (mask, length) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
+        var (length, mask) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
         var transpositionTable = new TranspositionTableElement[length];
 
         transpositionTable.RecordHash(mask, position, depth: 10, ply: recordedDeph, score: recordedEval, nodeType: NodeType.Exact, move: 1234);
