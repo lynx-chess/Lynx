@@ -173,7 +173,7 @@ public class TryParseFromUCIString_Benchmark : BaseBenchmark
         public List<Move> MoveHistory { get; }
 #endif
 
-        public HashSet<long> PositionHashHistory { get; }
+        public HashSet<ulong> PositionHashHistory { get; }
 
         public int HalfMovesWithoutCaptureOrPawnMove { get; set; }
 

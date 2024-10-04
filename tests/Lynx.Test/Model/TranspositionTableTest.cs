@@ -32,7 +32,7 @@ public class TranspositionTableTests
         }
 
         // Mask: 111....11
-        Assert.AreEqual(1, Convert.ToString(mask, 2).AsEnumerable().Distinct().Count());
+        Assert.AreEqual(1, Convert.ToString((long)mask, 2).AsEnumerable().Distinct().Count());
 
         if (sizeMb <= 16)
         {
@@ -49,9 +49,9 @@ public class TranspositionTableTests
             }
         }
 
-        static void Verify(int length, int mask, int i)
+        static void Verify(int length, ulong mask, int i)
         {
-            Assert.AreEqual(i % length, i & mask, $"Error in {i}: {i} %{length} should be {i} & 0x{mask:X}");
+            Assert.AreEqual(i % length, (ulong)i & mask, $"Error in {i}: {i} %{length} should be {i} & 0x{mask:X}");
         }
     }
 
