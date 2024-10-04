@@ -294,7 +294,7 @@ public static class Constants
     /// </summary>
     public static ReadOnlySpan<byte> CastlingRightsUpdateConstants =>
     [
-        7, 15, 15, 15, 3, 15, 15, 11,
+         7, 15, 15, 15,  3, 15, 15, 11,
         15, 15, 15, 15, 15, 15, 15, 15,
         15, 15, 15, 15, 15, 15, 15, 15,
         15, 15, 15, 15, 15, 15, 15, 15,
