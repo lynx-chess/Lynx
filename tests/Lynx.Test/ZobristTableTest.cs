@@ -5,6 +5,7 @@ namespace Lynx.Test;
 
 public class ZobristTableTest
 {
+    private readonly LynxRandom _random = new LynxRandom();
     private readonly ulong[][] _zobristTable = ZobristTable.Initialize();
 
     [Test]
@@ -16,7 +17,7 @@ public class ZobristTableTest
             {
                 var hash = _zobristTable[i][j];
 
-                var n = Random.Shared.NextUInt64();
+                var n = _random.NextUInt64();
 
                 var xored = n ^ hash;
 

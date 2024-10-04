@@ -1370,7 +1370,7 @@ public class MakeUnmakeMove_integration_Benchmark : BaseBenchmark
         internal static ulong[,] Initialize()
         {
             var zobristTable = new ulong[64, 12];
-            var randomInstance = new Random(int.MaxValue);
+            var randomInstance = new LynxRandom(int.MaxValue);
 
             for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
             {
