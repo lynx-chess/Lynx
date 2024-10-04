@@ -43,7 +43,7 @@ public sealed partial class Engine
     private readonly int[] _maxDepthReached = GC.AllocateArray<int>(Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin, pinned: true);
 
     private int _currentTranspositionTableSize;
-    private int _ttMask;
+    private ulong _ttMask;
     private TranspositionTable _tt = null!;
 
     private long _nodes;

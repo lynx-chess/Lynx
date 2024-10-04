@@ -4,7 +4,7 @@ using System.Diagnostics;
 namespace Lynx;
 public sealed partial class Engine
 {
-    public async Task<SearchResult?> ProbeOnlineTablebase(Position position, long[] positionHashHistory, int halfMovesWithoutCaptureOrPawnMove)
+    public async Task<SearchResult?> ProbeOnlineTablebase(Position position, ulong[] positionHashHistory, int halfMovesWithoutCaptureOrPawnMove)
     {
         var stopWatch = Stopwatch.StartNew();
 

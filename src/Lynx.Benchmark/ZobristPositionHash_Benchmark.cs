@@ -85,15 +85,15 @@ public class ZobristPositionHash_Benchmark : BaseBenchmark
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]
-    public long Original(Position position) => PositionHash_Original_DoubleLoop(position);
+    public ulong Original(Position position) => PositionHash_Original_DoubleLoop(position);
 
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
-    public long Improved(Position position) => PositionHash_Improved(position);
+    public ulong Improved(Position position) => PositionHash_Improved(position);
 
-    private static long PositionHash_Original_DoubleLoop(Position position)
+    private static ulong PositionHash_Original_DoubleLoop(Position position)
     {
-        long positionHash = 0;
+        ulong positionHash = 0;
 
         for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
         {
@@ -113,9 +113,9 @@ public class ZobristPositionHash_Benchmark : BaseBenchmark
         return positionHash;
     }
 
-    private static long PositionHash_Improved(Position position)
+    private static ulong PositionHash_Improved(Position position)
     {
-        long positionHash = 0;
+        ulong positionHash = 0;
 
         for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
         {

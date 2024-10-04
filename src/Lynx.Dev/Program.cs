@@ -1056,7 +1056,7 @@ static void TranspositionTable()
 
         Console.WriteLine("TT memory: {0} MB", lengthMb * Marshal.SizeOf(typeof(TranspositionTableElement)));
         Console.WriteLine("TT array length: {0}MB, (0x{1}, {2} items)", lengthMb, length.ToString("X"), length);
-        Console.WriteLine("TT mask: 0x{0} ({1})\n", mask.ToString("X"), Convert.ToString(mask, 2));
+        Console.WriteLine("TT mask: 0x{0} ({1})\n", mask.ToString("X"), Convert.ToString((long)mask, 2));
     }
 
     Console.WriteLine($"{nameof(TranspositionTableElement)} size: {Marshal.SizeOf(typeof(TranspositionTableElement))} bytes\n");
@@ -1071,7 +1071,7 @@ static void TranspositionTable()
     TesSize(512);
     TesSize(1024);
 
-    var (mask, length) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
+    var (length, mask) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
     var transpositionTable = new TranspositionTableElement[length];
     var position = new Position(Constants.InitialPositionFEN);
     position.Print();

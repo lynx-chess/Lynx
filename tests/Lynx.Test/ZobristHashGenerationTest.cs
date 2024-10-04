@@ -32,7 +32,7 @@ public class ZobristHashGenerationTest
     {
         var originalPosition = new Position(fen);
 
-        var fenDictionary = new Dictionary<string, (string Move, long Hash)>()
+        var fenDictionary = new Dictionary<string, (string Move, ulong Hash)>()
         {
             [originalPosition.FEN()] = ("", originalPosition.UniqueIdentifier)
         };
@@ -48,7 +48,7 @@ public class ZobristHashGenerationTest
     {
         var originalPosition = new Position(fen);
 
-        var fenDictionary = new Dictionary<string, (string Move, long Hash)>()
+        var fenDictionary = new Dictionary<string, (string Move, ulong Hash)>()
         {
             [originalPosition.FEN()] = ("", originalPosition.UniqueIdentifier)
         };
@@ -58,7 +58,7 @@ public class ZobristHashGenerationTest
 
 #pragma warning restore S4144 // Methods should not have identical implementations
 
-    private static void TransversePosition(Position originalPosition, Dictionary<string, (string Move, long Hash)> fenDictionary, int maxDepth = 10, int depth = 0)
+    private static void TransversePosition(Position originalPosition, Dictionary<string, (string Move, ulong Hash)> fenDictionary, int maxDepth = 10, int depth = 0)
     {
         foreach (var move in MoveGenerator.GenerateAllMoves(originalPosition))
         {
