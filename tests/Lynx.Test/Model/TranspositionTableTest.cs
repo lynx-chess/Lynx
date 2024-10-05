@@ -49,9 +49,9 @@ public class TranspositionTableTests
             }
         }
 
-        static void Verify(int length, ulong mask, int i)
+        static void Verify(int length, int mask, int i)
         {
-            Assert.AreEqual(i % length, (ulong)i & mask, $"Error in {i}: {i} %{length} should be {i} & 0x{mask:X}");
+            Assert.AreEqual(i % length, i & mask, $"Error in {i}: {i} %{length} should be {i} & 0x{mask:X}");
         }
     }
 
