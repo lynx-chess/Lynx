@@ -13,7 +13,7 @@ public class Position : IDisposable
 {
     private bool _disposedValue;
 
-    public long UniqueIdentifier { get; private set; }
+    public ulong UniqueIdentifier { get; private set; }
 
     /// <summary>
     /// Use <see cref="Piece"/> as index
@@ -96,7 +96,7 @@ public class Position : IDisposable
     {
         byte castleCopy = Castle;
         BoardSquare enpassantCopy = EnPassant;
-        long uniqueIdentifierCopy = UniqueIdentifier;
+        var uniqueIdentifierCopy = UniqueIdentifier;
 
         var oldSide = (int)Side;
         var offset = Utils.PieceOffset(oldSide);
