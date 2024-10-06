@@ -46,7 +46,7 @@ public sealed partial class Engine
 
         if (!isRoot)
         {
-            (ttScore, ttBestMove, ttElementType, ttRawScore) = _tt.ProbeHash(_ttMask, position, depth, ply, alpha, beta);
+            (ttScore, ttBestMove, ttElementType, ttRawScore) = _tt.ProbeHash(position, depth, ply, alpha, beta);
             if (!pvNode && ttScore != EvaluationConstants.NoHashEntry)
             {
                 return ttScore;
@@ -81,7 +81,7 @@ public sealed partial class Engine
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
-            _tt.RecordHash(_ttMask, position, depth, ply, finalPositionEvaluation, NodeType.Exact);
+            _tt.RecordHash(position, depth, ply, finalPositionEvaluation, NodeType.Exact);
             return finalPositionEvaluation;
         }
         else if (!pvNode)
@@ -399,10 +399,10 @@ public sealed partial class Engine
                     }
                     else
                     {
-                        UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(depth, ply, visitedMoves, visitedMovesCounter, move);
+                        UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(depth, ply, visitedMoves, visitedMovesCounter, move, isRoot);
                     }
 
-                    _tt.RecordHash(_ttMask, position, depth, ply, bestScore, NodeType.Beta, bestMove);
+                    _tt.RecordHash(position, depth, ply, bestScore, NodeType.Beta, bestMove);
 
                     return bestScore;
                 }
@@ -416,12 +416,12 @@ public sealed partial class Engine
             Debug.Assert(bestMove is null);
 
             var finalEval = Position.EvaluateFinalPosition(ply, isInCheck);
-            _tt.RecordHash(_ttMask, position, depth, ply, finalEval, NodeType.Exact);
+            _tt.RecordHash(position, depth, ply, finalEval, NodeType.Exact);
 
             return finalEval;
         }
 
-        _tt.RecordHash(_ttMask, position, depth, ply, bestScore, nodeType, bestMove);
+        _tt.RecordHash(position, depth, ply, bestScore, nodeType, bestMove);
 
         // Node fails low
         return bestScore;
@@ -458,7 +458,7 @@ public sealed partial class Engine
         var nextPvIndex = PVTable.Indexes[ply + 1];
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
-        var ttProbeResult = _tt.ProbeHash(_ttMask, position, 0, ply, alpha, beta);
+        var ttProbeResult = _tt.ProbeHash(position, 0, ply, alpha, beta);
         if (ttProbeResult.Score != EvaluationConstants.NoHashEntry)
         {
             return ttProbeResult.Score;
@@ -554,7 +554,7 @@ public sealed partial class Engine
                 {
                     PrintMessage($"Pruning: {move} is enough to discard this line");
 
-                    _tt.RecordHash(_ttMask, position, 0, ply, bestScore, NodeType.Beta, bestMove);
+                    _tt.RecordHash(position, 0, ply, bestScore, NodeType.Beta, bestMove);
 
                     return bestScore; // The refutation doesn't matter, since it'll be pruned
                 }
@@ -579,12 +579,12 @@ public sealed partial class Engine
             Debug.Assert(bestMove is null);
 
             var finalEval = Position.EvaluateFinalPosition(ply, position.IsInCheck());
-            _tt.RecordHash(_ttMask, position, 0, ply, finalEval, NodeType.Exact);
+            _tt.RecordHash(position, 0, ply, finalEval, NodeType.Exact);
 
             return finalEval;
         }
 
-        _tt.RecordHash(_ttMask, position, 0, ply, bestScore, nodeType, bestMove);
+        _tt.RecordHash(position, 0, ply, bestScore, nodeType, bestMove);
 
         return bestScore;
     }

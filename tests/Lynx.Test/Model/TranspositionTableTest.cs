@@ -18,13 +18,13 @@ public class TranspositionTableTests
     [TestCase(1024)]
     public void TranspositionTableLength(int sizeMb)
     {
-        var (length, mask) = TranspositionTableExtensions.CalculateLength(sizeMb);
-        Assert.AreEqual(length - 1, mask);
-        Assert.AreEqual(0, length % 2);
-        Assert.IsTrue(BitOperations.IsPow2(length));
+        var ttLength = TranspositionTableExtensions.CalculateLength(sizeMb);
+        var mask = ttLength - 1;
+        Assert.AreEqual(0, ttLength % 2);
+        Assert.IsTrue(BitOperations.IsPow2(ttLength));
 
         // Length: 100....000
-        var lengthHexString = length.ToString("X");
+        var lengthHexString = ttLength.ToString("X");
         Assert.AreNotEqual('0', lengthHexString[0]);
         for (int i = 1; i < lengthHexString.Length; i++)
         {
@@ -36,22 +36,22 @@ public class TranspositionTableTests
 
         if (sizeMb <= 16)
         {
-            for (int i = 0; i < length; ++i)
+            for (int i = 0; i < ttLength; ++i)
             {
-                Verify(length, mask, i);
+                Verify(ttLength, mask, i);
             }
         }
         else
         {
-            for (int i = 0; i < length; i += Random.Shared.Next(100))
+            for (int i = 0; i < ttLength; i += Random.Shared.Next(100))
             {
-                Verify(length, mask, i);
+                Verify(ttLength, mask, i);
             }
         }
 
-        static void Verify(int length, ulong mask, int i)
+        static void Verify(int length, int mask, int i)
         {
-            Assert.AreEqual(i % length, (ulong)i & mask, $"Error in {i}: {i} %{length} should be {i} & 0x{mask:X}");
+            Assert.AreEqual(i % length, i & mask, $"Error in {i}: {i} %{length} should be {i} & 0x{mask:X}");
         }
     }
 
@@ -81,12 +81,12 @@ public class TranspositionTableTests
     public void RecordHash_ProbeHash(int recordedEval, NodeType recordNodeType, int probeAlpha, int probeBeta, int expectedProbeEval)
     {
         var position = new Position(Constants.InitialPositionFEN);
-        var (length, mask) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
-        var transpositionTable = new TranspositionTableElement[length];
+        var ttLength = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
+        var transpositionTable = new TranspositionTableElement[ttLength];
 
-        transpositionTable.RecordHash(mask, position, depth: 5, ply: 3, score: recordedEval, nodeType: recordNodeType, move: 1234);
+        transpositionTable.RecordHash(position, depth: 5, ply: 3, score: recordedEval, nodeType: recordNodeType, move: 1234);
 
-        Assert.AreEqual(expectedProbeEval, transpositionTable.ProbeHash(mask, position, depth: 5, ply: 3, alpha: probeAlpha, beta: probeBeta).Score);
+        Assert.AreEqual(expectedProbeEval, transpositionTable.ProbeHash(position, depth: 5, ply: 3, alpha: probeAlpha, beta: probeBeta).Score);
     }
 
     [TestCase(CheckMateBaseEvaluation - (8 * CheckmateDepthFactor))]
@@ -95,12 +95,12 @@ public class TranspositionTableTests
     {
         const int sharedDepth = 5;
         var position = new Position(Constants.InitialPositionFEN);
-        var (length, mask) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
-        var transpositionTable = new TranspositionTableElement[length];
+        var ttLength = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
+        var transpositionTable = new TranspositionTableElement[ttLength];
 
-        transpositionTable.RecordHash(mask, position, depth: 10, ply: sharedDepth, score: recordedEval, nodeType: NodeType.Exact, move: 1234);
+        transpositionTable.RecordHash(position, depth: 10, ply: sharedDepth, score: recordedEval, nodeType: NodeType.Exact, move: 1234);
 
-        Assert.AreEqual(recordedEval, transpositionTable.ProbeHash(mask, position, depth: 7, ply: sharedDepth, alpha: 50, beta: 100).Score);
+        Assert.AreEqual(recordedEval, transpositionTable.ProbeHash(position, depth: 7, ply: sharedDepth, alpha: 50, beta: 100).Score);
     }
 
     [TestCase(CheckMateBaseEvaluation - (8 * CheckmateDepthFactor), 5, 4, CheckMateBaseEvaluation - (7 * CheckmateDepthFactor))]
@@ -110,11 +110,11 @@ public class TranspositionTableTests
     public void RecordHash_ProbeHash_CheckmateDifferentDepth(int recordedEval, int recordedDeph, int probeDepth, int expectedProbeEval)
     {
         var position = new Position(Constants.InitialPositionFEN);
-        var (length, mask) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
-        var transpositionTable = new TranspositionTableElement[length];
+        var ttLength = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
+        var transpositionTable = new TranspositionTableElement[ttLength];
 
-        transpositionTable.RecordHash(mask, position, depth: 10, ply: recordedDeph, score: recordedEval, nodeType: NodeType.Exact, move: 1234);
+        transpositionTable.RecordHash(position, depth: 10, ply: recordedDeph, score: recordedEval, nodeType: NodeType.Exact, move: 1234);
 
-        Assert.AreEqual(expectedProbeEval, transpositionTable.ProbeHash(mask, position, depth: 7, ply: probeDepth, alpha: 50, beta: 100).Score);
+        Assert.AreEqual(expectedProbeEval, transpositionTable.ProbeHash(position, depth: 7, ply: probeDepth, alpha: 50, beta: 100).Score);
     }
 }

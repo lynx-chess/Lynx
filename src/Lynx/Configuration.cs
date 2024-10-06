@@ -68,10 +68,19 @@ public sealed class EngineSettings
     /// </summary>
     public int BenchDepth { get; set; } = 10;
 
+    private int _transpositionTableSize = 256;
     /// <summary>
-    /// MB
+    /// In MB, clamped to [<see cref="Constants.AbsoluteMinTTSize"/>, <see cref="Constants.AbsoluteMaxTTSize"/>]
     /// </summary>
-    public int TranspositionTableSize { get; set; } = 256;
+    public int TranspositionTableSize
+    {
+        get => _transpositionTableSize;
+        set => _transpositionTableSize =
+            Math.Clamp(
+                value,
+                Constants.AbsoluteMinTTSize,
+                Constants.AbsoluteMaxTTSize);
+    }
 
     public bool UseOnlineTablebaseInRootPositions { get; set; } = false;
 
