@@ -62,7 +62,6 @@ public sealed partial class Engine
     {
         // Cleanup
         _nodes = 0;
-        _stopWatch.Reset();
 
         Array.Clear(_pVTable);
         Array.Clear(_maxDepthReached);
@@ -75,10 +74,10 @@ public sealed partial class Engine
         bool isMateDetected = false;
         Move firstLegalMove = default;
 
+        _stopWatch.Restart();
+
         try
         {
-            _stopWatch.Start();
-
             if (OnlyOneLegalMove(ref firstLegalMove, out var onlyOneLegalMoveSearchResult))
             {
                 _engineWriter.TryWrite(onlyOneLegalMoveSearchResult);
@@ -104,7 +103,6 @@ public sealed partial class Engine
             {
                 _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
                 _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
-                _nodes = 0;
 
                 if (depth < Configuration.EngineSettings.AspirationWindow_MinDepth
                     || lastSearchResult?.Score is null)
@@ -279,7 +277,6 @@ public sealed partial class Engine
         if (onlyOneLegalMove)
         {
             _logger.Debug("One single move found");
-            var elapsedTime = _stopWatch.ElapsedMilliseconds;
 
             // We don't have or need any eval, and we don't want to return 0 or a negative eval that
             // could make the GUI resign or take a draw from this position.
@@ -293,7 +290,7 @@ public sealed partial class Engine
             {
                 DepthReached = 0,
                 Nodes = 0,
-                Time = elapsedTime,
+                Time = 0,
                 NodesPerSecond = 0
             };
 
@@ -313,15 +310,15 @@ public sealed partial class Engine
 
         var maxDepthReached = _maxDepthReached.LastOrDefault(item => item != default);
 
-        var elapsedTime = _stopWatch.ElapsedMilliseconds;
+        var elapsedSeconds = Utils.CalculateElapsedSeconds(_stopWatch);
 
         _previousSearchResult = lastSearchResult;
         return new SearchResult(pvMoves.FirstOrDefault(), bestScore, depth, pvMoves, mate)
         {
             DepthReached = maxDepthReached,
             Nodes = _nodes,
-            Time = elapsedTime,
-            NodesPerSecond = Utils.CalculateNps(_nodes, elapsedTime)
+            Time = Utils.CalculateUCITime(elapsedSeconds),
+            NodesPerSecond = Utils.CalculateNps(_nodes, elapsedSeconds)
         };
     }
 
@@ -345,10 +342,12 @@ public sealed partial class Engine
             finalSearchResult = _previousSearchResult = lastSearchResult;
         }
 
+        var elapsedSeconds = Utils.CalculateElapsedSeconds(_stopWatch);
+
         finalSearchResult.DepthReached = Math.Max(finalSearchResult.DepthReached, _maxDepthReached.LastOrDefault(item => item != default));
         finalSearchResult.Nodes = _nodes;
-        finalSearchResult.Time = _stopWatch.ElapsedMilliseconds;
-        finalSearchResult.NodesPerSecond = Utils.CalculateNps(_nodes, _stopWatch.ElapsedMilliseconds);
+        finalSearchResult.Time = Utils.CalculateUCITime(elapsedSeconds);
+        finalSearchResult.NodesPerSecond = Utils.CalculateNps(_nodes, elapsedSeconds);
         finalSearchResult.HashfullPermill = _tt.HashfullPermillApprox();
         if (Configuration.EngineSettings.ShowWDL)
         {
