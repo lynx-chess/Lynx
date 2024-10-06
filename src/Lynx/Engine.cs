@@ -95,7 +95,7 @@ public sealed partial class Engine
     {
         _currentTranspositionTableSize = Configuration.EngineSettings.TranspositionTableSize;
 
-        (var ttLength, _ttMask) = TranspositionTableExtensions.CalculateLength(_currentTranspositionTableSize);
+        var ttLength = TranspositionTableExtensions.CalculateLength(_currentTranspositionTableSize);
         _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
     }
 

@@ -304,12 +304,9 @@ public static class Constants
         13, 15, 15, 15, 12, 15, 15, 14
     ];
 
-    /// <summary>
-    /// 16383 is the theoretical limit for the current TT size, which is (2 * 8192) - 1
-    /// </summary>
-    public const int AbsoluteMaxTTSize = 8192;
+    public static int AbsoluteMaxTTSize => (int)((ulong)Array.MaxLength * TranspositionTableElement.Size / (1024 * 1024));
 
-    public const int AbsoluteMinTTSize = 2;
+    public const int AbsoluteMinTTSize = 1;
 
     /// <summary>
     /// 218 or 224 seems to be the known limit

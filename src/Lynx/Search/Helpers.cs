@@ -13,7 +13,7 @@ public sealed partial class Engine
     {
         if (Sse.IsSupported)
         {
-            var index = Game.CurrentPosition.UniqueIdentifier & _ttMask;
+            var index = TranspositionTableExtensions.CalculateTTIndex(Game.CurrentPosition.UniqueIdentifier, _tt.Length);
 
             unsafe
             {
