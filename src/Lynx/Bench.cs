@@ -107,7 +107,7 @@ public partial class Engine
         var stopwatch = new Stopwatch();
 
         long totalNodes = 0;
-        long totalTime = 0;
+        double totalSeconds = 0;
 
         foreach (var fen in _benchmarkFens)
         {
@@ -117,18 +117,19 @@ public partial class Engine
             stopwatch.Restart();
 
             var result = BestMove(new($"go depth {depth}"));
-            totalTime += stopwatch.ElapsedMilliseconds;
+            var elapsedSeconds = Utils.CalculateElapsedSeconds(_stopWatch);
+            totalSeconds += elapsedSeconds;
             totalNodes += result.Nodes;
         }
 
-        _engineWriter.TryWrite($"Total time: {totalTime}");
+        _engineWriter.TryWrite($"Total time: {Utils.CalculateUCITime(totalSeconds)}");
 
         // Cleanup game
         NewGame();
         _isNewGameComing = false;
         _isNewGameCommandSupported = false;
 
-        return (totalNodes, Utils.CalculateNps(totalNodes, totalTime));
+        return (totalNodes, Utils.CalculateNps(totalNodes, totalSeconds));
     }
 
     public async ValueTask PrintBenchResults((long TotalNodes, long Nps) benchResult) => await _engineWriter.WriteAsync($"{benchResult.TotalNodes} nodes {benchResult.Nps} nps");
