@@ -46,30 +46,33 @@ public struct TranspositionTableElement
     /// Position evaluation
     /// </summary>
     public int Score { readonly get => _score; set => _score = (short)value; }
+
+    public static ulong Size => (ulong)Marshal.SizeOf(typeof(TranspositionTableElement));
 }
 
 public static class TranspositionTableExtensions
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-    private static readonly ulong _ttElementSize = (ulong)Marshal.SizeOf(typeof(TranspositionTableElement));
 
     public static int CalculateLength(int size)
     {
+        var ttEntrySize = TranspositionTableElement.Size;
+
         ulong sizeBytes = (ulong)size * 1024ul * 1024ul;
-        ulong ttLength = sizeBytes / _ttElementSize;
+        ulong ttLength = sizeBytes / ttEntrySize;
         var ttLengthMb = (double)ttLength / 1024 / 1024;
 
-        if (ttLength > int.MaxValue)
+        if (ttLength > (ulong)Array.MaxLength)
         {
-            throw new ArgumentException($"Invalid transpositon table (Hash) size: {ttLengthMb}Mb");
+            throw new ArgumentException($"Invalid transpositon table (Hash) size: {ttLengthMb}Mb, {ttLength} values (> Array.MaxLength, {Array.MaxLength})");
         }
 
         var mask = ttLength - 1;
 
         _logger.Info("Hash value:\t{0} MB", size);
-        _logger.Info("TT memory:\t{0} MB", ttLengthMb * _ttElementSize);
+        _logger.Info("TT memory:\t{0} MB", ttLengthMb * ttEntrySize);
         _logger.Info("TT length:\t{0} items", ttLength);
-        _logger.Info("TT entry:\t{0} bytes", _ttElementSize);
+        _logger.Info("TT entry:\t{0} bytes", ttEntrySize);
         _logger.Info("TT mask:\t{0}", mask.ToString("X"));
 
         return (int)ttLength;
