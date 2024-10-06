@@ -63,7 +63,6 @@ public sealed partial class Engine
     {
         // Cleanup
         _nodes = 0;
-        _stopWatch.Reset();
 
         Array.Clear(_pVTable);
         Array.Clear(_maxDepthReached);
@@ -76,10 +75,10 @@ public sealed partial class Engine
         bool isMateDetected = false;
         Move firstLegalMove = default;
 
+        _stopWatch.Restart();
+
         try
         {
-            _stopWatch.Start();
-
             if (OnlyOneLegalMove(ref firstLegalMove, out var onlyOneLegalMoveSearchResult))
             {
                 _engineWriter.TryWrite(onlyOneLegalMoveSearchResult);
@@ -105,7 +104,6 @@ public sealed partial class Engine
             {
                 _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
                 _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
-                _nodes = 0;
 
                 if (depth < Configuration.EngineSettings.AspirationWindow_MinDepth
                     || lastSearchResult?.Score is null)
