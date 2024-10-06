@@ -399,7 +399,7 @@ public sealed partial class Engine
                     }
                     else
                     {
-                        UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(depth, ply, visitedMoves, visitedMovesCounter, move);
+                        UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(depth, ply, visitedMoves, visitedMovesCounter, move, isRoot);
                     }
 
                     _tt.RecordHash(_ttMask, position, depth, ply, bestScore, NodeType.Beta, bestMove);
