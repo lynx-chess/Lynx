@@ -278,7 +278,6 @@ public sealed partial class Engine
         if (onlyOneLegalMove)
         {
             _logger.Debug("One single move found");
-            var elapsedTime = _stopWatch.ElapsedMilliseconds;
 
             // We don't have or need any eval, and we don't want to return 0 or a negative eval that
             // could make the GUI resign or take a draw from this position.
@@ -292,7 +291,7 @@ public sealed partial class Engine
             {
                 DepthReached = 0,
                 Nodes = 0,
-                Time = elapsedTime,
+                Time = 0,
                 NodesPerSecond = 0
             };
 
@@ -319,7 +318,7 @@ public sealed partial class Engine
         {
             DepthReached = maxDepthReached,
             Nodes = _nodes,
-            Time = Math.Clamp(Convert.ToInt64(elapsedSeconds * 1_000), 1, long.MaxValue),
+            Time = Utils.CalculateUCITime(elapsedSeconds),
             NodesPerSecond = Utils.CalculateNps(_nodes, elapsedSeconds)
         };
     }
@@ -348,7 +347,7 @@ public sealed partial class Engine
 
         finalSearchResult.DepthReached = Math.Max(finalSearchResult.DepthReached, _maxDepthReached.LastOrDefault(item => item != default));
         finalSearchResult.Nodes = _nodes;
-        finalSearchResult.Time = Math.Clamp(Convert.ToInt64(elapsedSeconds * 1_000), 1, long.MaxValue);
+        finalSearchResult.Time = Utils.CalculateUCITime(elapsedSeconds);
         finalSearchResult.NodesPerSecond = Utils.CalculateNps(_nodes, elapsedSeconds);
         finalSearchResult.HashfullPermill = _tt.HashfullPermillApprox();
         if (Configuration.EngineSettings.ShowWDL)

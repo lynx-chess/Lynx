@@ -181,13 +181,19 @@ public static class Utils
     }
 
     /// <summary>
-    /// Calculates elapsed ms with sub-ms precision.
+    /// Calculates elapsed time with sub-ms precision.
     /// We care when reporting nps for low depths, but more importantly to avoid the risk of dividing by zero.
     /// http://geekswithblogs.net/BlackRabbitCoder/archive/2012/01/12/c.net-little-pitfalls-stopwatch-ticks-are-not-timespan-ticks.aspx
     /// </summary>
+    /// <returns>Elapsed time in seconds</returns>
     public static double CalculateElapsedSeconds(Stopwatch stopwatch)
     {
         return stopwatch.ElapsedTicks / (double)Stopwatch.Frequency;
+    }
+
+    public static long CalculateUCITime(double elapsedSeconds)
+    {
+        return Math.Clamp(Convert.ToInt64(elapsedSeconds * 1_000), 1, long.MaxValue);
     }
 
     /// <summary>
