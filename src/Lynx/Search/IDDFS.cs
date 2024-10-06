@@ -312,15 +312,15 @@ public sealed partial class Engine
 
         var maxDepthReached = _maxDepthReached.LastOrDefault(item => item != default);
 
-        var elapsedTime = _stopWatch.ElapsedMilliseconds;
+        var elapsedSeconds = Utils.CalculateElapsedSeconds(_stopWatch);
 
         _previousSearchResult = lastSearchResult;
         return new SearchResult(pvMoves.FirstOrDefault(), bestScore, depth, pvMoves, mate)
         {
             DepthReached = maxDepthReached,
             Nodes = _nodes,
-            Time = elapsedTime,
-            NodesPerSecond = Utils.CalculateNps(_nodes, elapsedTime)
+            Time = Math.Clamp(Convert.ToInt64(elapsedSeconds * 1_000), 1, long.MaxValue),
+            NodesPerSecond = Utils.CalculateNps(_nodes, elapsedSeconds)
         };
     }
 
@@ -344,10 +344,12 @@ public sealed partial class Engine
             finalSearchResult = _previousSearchResult = lastSearchResult;
         }
 
+        var elapsedSeconds = Utils.CalculateElapsedSeconds(_stopWatch);
+
         finalSearchResult.DepthReached = Math.Max(finalSearchResult.DepthReached, _maxDepthReached.LastOrDefault(item => item != default));
         finalSearchResult.Nodes = _nodes;
-        finalSearchResult.Time = _stopWatch.ElapsedMilliseconds;
-        finalSearchResult.NodesPerSecond = Utils.CalculateNps(_nodes, _stopWatch.ElapsedMilliseconds);
+        finalSearchResult.Time = Math.Clamp(Convert.ToInt64(elapsedSeconds * 1_000), 1, long.MaxValue);
+        finalSearchResult.NodesPerSecond = Utils.CalculateNps(_nodes, elapsedSeconds);
         finalSearchResult.HashfullPermill = _tt.HashfullPermillApprox();
         if (Configuration.EngineSettings.ShowWDL)
         {

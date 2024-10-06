@@ -175,9 +175,19 @@ public static class Utils
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static long CalculateNps(long nodes, long elapsedMilliseconds)
+    public static long CalculateNps(long nodes, double elapsedSeconds)
     {
-        return Convert.ToInt64(Math.Clamp(nodes / ((0.001 * elapsedMilliseconds) + 1), 0, long.MaxValue));
+        return Convert.ToInt64(Math.Clamp(nodes / elapsedSeconds, 1, long.MaxValue));
+    }
+
+    /// <summary>
+    /// Calculates elapsed ms with sub-ms precision.
+    /// We care when reporting nps for low depths, but more importantly to avoid the risk of dividing by zero.
+    /// http://geekswithblogs.net/BlackRabbitCoder/archive/2012/01/12/c.net-little-pitfalls-stopwatch-ticks-are-not-timespan-ticks.aspx
+    /// </summary>
+    public static double CalculateElapsedSeconds(Stopwatch stopwatch)
+    {
+        return stopwatch.ElapsedTicks / (double)Stopwatch.Frequency;
     }
 
     /// <summary>
