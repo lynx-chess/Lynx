@@ -191,6 +191,9 @@ public static class Utils
         return stopwatch.ElapsedTicks / (double)Stopwatch.Frequency;
     }
 
+    /// <summary>
+    /// Transforms the high precision elapsed time in seconds into the time format UCI expects: ms
+    /// </summary>
     public static long CalculateUCITime(double elapsedSeconds)
     {
         return Math.Clamp(Convert.ToInt64(elapsedSeconds * 1_000), 1, long.MaxValue);
