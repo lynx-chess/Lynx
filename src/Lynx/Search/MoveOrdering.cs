@@ -10,11 +10,6 @@ public sealed partial class Engine
     /// <summary>
     /// Returns the score evaluation of a move taking into account <paramref name="bestMoveTTCandidate"/>, <see cref="MostValueableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_quietHistory"/>
     /// </summary>
-    /// <param name="move"></param>
-    /// <param name="ply"></param>
-    /// <param name="isNotQSearch"></param>
-    /// <param name="bestMoveTTCandidate"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal int ScoreMove(Move move, int ply, bool isNotQSearch, ShortMove bestMoveTTCandidate = default)
     {
@@ -115,13 +110,8 @@ public sealed partial class Engine
     /// <summary>
     /// Quiet history, contination history, killers and counter moves
     /// </summary>
-    /// <param name="depth"></param>
-    /// <param name="ply"></param>
-    /// <param name="visitedMoves"></param>
-    /// <param name="visitedMovesCounter"></param>
-    /// <param name="move"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(int depth, int ply, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move)
+    private void UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(int depth, int ply, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move, bool isRoot)
     {
         // 🔍 Quiet history moves
         // Doing this only in beta cutoffs (instead of when eval > alpha) was suggested by Sirius author
@@ -132,25 +122,34 @@ public sealed partial class Engine
             _quietHistory[piece][targetSquare],
             HistoryBonus[depth]);
 
-        // 🔍 Continuation history
-        // - Counter move history (continuation history, ply - 1)
-        var previousMove = Game.PopFromMoveStack(ply - 1);
-        var previousMovePiece = previousMove.Piece();
-        var previousTargetSquare = previousMove.TargetSquare();
+        int continuationHistoryIndex;
+        int previousMovePiece = -1;
+        int previousTargetSquare = -1;
 
-        var continuationHistoryIndex = ContinuationHistoryIndex(piece, targetSquare, previousMovePiece, previousTargetSquare, 0);
+        if (!isRoot)
+        {
+            // 🔍 Continuation history
+            // - Counter move history (continuation history, ply - 1)
+            var previousMove = Game.PopFromMoveStack(ply - 1);
+            Debug.Assert(previousMove != 0);
 
-        _continuationHistory[continuationHistoryIndex] = ScoreHistoryMove(
-            _continuationHistory[continuationHistoryIndex],
-            HistoryBonus[depth]);
+            previousMovePiece = previousMove.Piece();
+            previousTargetSquare = previousMove.TargetSquare();
 
-        //    var previousPreviousMove = Game.MoveStack[ply - 2];
-        //    var previousPreviousMovePiece = previousPreviousMove.Piece();
-        //    var previousPreviousMoveTargetSquare = previousPreviousMove.TargetSquare();
+            continuationHistoryIndex = ContinuationHistoryIndex(piece, targetSquare, previousMovePiece, previousTargetSquare, 0);
 
-        //    _continuationHistory[piece][targetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare] = ScoreHistoryMove(
-        //        _continuationHistory[piece][targetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare],
-        //        EvaluationConstants.HistoryBonus[depth]);
+            _continuationHistory[continuationHistoryIndex] = ScoreHistoryMove(
+                _continuationHistory[continuationHistoryIndex],
+                HistoryBonus[depth]);
+
+            //    var previousPreviousMove = Game.MoveStack[ply - 2];
+            //    var previousPreviousMovePiece = previousPreviousMove.Piece();
+            //    var previousPreviousMoveTargetSquare = previousPreviousMove.TargetSquare();
+
+            //    _continuationHistory[piece][targetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare] = ScoreHistoryMove(
+            //        _continuationHistory[piece][targetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare],
+            //        EvaluationConstants.HistoryBonus[depth]);
+        }
 
         for (int i = 0; i < visitedMovesCounter - 1; ++i)
         {
@@ -167,12 +166,15 @@ public sealed partial class Engine
                     _quietHistory[visitedMovePiece][visitedMoveTargetSquare],
                     -HistoryBonus[depth]);
 
-                // 🔍 Continuation history penalty / malus
-                continuationHistoryIndex = ContinuationHistoryIndex(visitedMovePiece, visitedMoveTargetSquare, previousMovePiece, previousTargetSquare, 0);
+                if (!isRoot)
+                {
+                    // 🔍 Continuation history penalty / malus
+                    continuationHistoryIndex = ContinuationHistoryIndex(visitedMovePiece, visitedMoveTargetSquare, previousMovePiece, previousTargetSquare, 0);
 
-                _continuationHistory[continuationHistoryIndex] = ScoreHistoryMove(
-                    _continuationHistory[continuationHistoryIndex],
-                    -HistoryBonus[depth]);
+                    _continuationHistory[continuationHistoryIndex] = ScoreHistoryMove(
+                        _continuationHistory[continuationHistoryIndex],
+                        -HistoryBonus[depth]);
+                }
             }
         }
 
@@ -188,18 +190,17 @@ public sealed partial class Engine
             thisPlyKillerMoves[1] = thisPlyKillerMoves[0];
             thisPlyKillerMoves[0] = move;
 
-            // 🔍 Countermoves - fails to fix the bug and remove killer moves condition, see  https://github.com/lynx-chess/Lynx/pull/944
-            _counterMoves[CounterMoveIndex(previousMovePiece, previousTargetSquare)] = move;
+            if (!isRoot)
+            {
+                // 🔍 Countermoves - fails to fix the bug and remove killer moves condition, see  https://github.com/lynx-chess/Lynx/pull/944
+                _counterMoves[CounterMoveIndex(previousMovePiece, previousTargetSquare)] = move;
+            }
         }
     }
 
     /// <summary>
     /// Capture history
     /// </summary>
-    /// <param name="depth"></param>
-    /// <param name="visitedMoves"></param>
-    /// <param name="visitedMovesCounter"></param>
-    /// <param name="move"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(int depth, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move)
     {
@@ -237,9 +238,6 @@ public sealed partial class Engine
     /// Soft caps history score
     /// Formula taken from EP discord, https://discord.com/channels/1132289356011405342/1132289356447625298/1141102105847922839
     /// </summary>
-    /// <param name="score"></param>
-    /// <param name="rawHistoryBonus"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int ScoreHistoryMove(int score, int rawHistoryBonus)
     {
