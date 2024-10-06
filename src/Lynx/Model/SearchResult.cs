@@ -8,11 +8,11 @@ public sealed class SearchResult
 
     public (int WDLWin, int WDLDraw, int WDLLoss)? WDL { get; set; } = null;
 
-    public long Nodes { get; set; }
+    public ulong Nodes { get; set; }
 
-    public long Time { get; set; }
+    public ulong Time { get; set; }
 
-    public long NodesPerSecond { get; set; }
+    public ulong NodesPerSecond { get; set; }
 
     public int Score { get; init; }
 

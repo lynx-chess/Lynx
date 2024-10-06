@@ -46,7 +46,7 @@ public sealed partial class Engine
     private ulong _ttMask;
     private TranspositionTable _tt = null!;
 
-    private long _nodes;
+    private ulong _nodes;
 
     private SearchResult? _previousSearchResult;
 

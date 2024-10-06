@@ -175,9 +175,9 @@ public static class Utils
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static long CalculateNps(long nodes, double elapsedSeconds)
+    public static ulong CalculateNps(ulong nodes, double elapsedSeconds)
     {
-        return Convert.ToInt64(Math.Clamp(nodes / elapsedSeconds, 1, long.MaxValue));
+        return Convert.ToUInt64(Math.Clamp(nodes / elapsedSeconds, 1, ulong.MaxValue));
     }
 
     /// <summary>
@@ -194,9 +194,9 @@ public static class Utils
     /// <summary>
     /// Transforms the high precision elapsed time in seconds into the time format UCI expects: ms
     /// </summary>
-    public static long CalculateUCITime(double elapsedSeconds)
+    public static ulong CalculateUCITime(double elapsedSeconds)
     {
-        return Math.Clamp(Convert.ToInt64(elapsedSeconds * 1_000), 1, long.MaxValue);
+        return Math.Clamp(Convert.ToUInt64(elapsedSeconds * 1_000), 1, ulong.MaxValue);
     }
 
     /// <summary>
