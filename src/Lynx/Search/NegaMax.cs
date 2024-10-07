@@ -467,19 +467,19 @@ public sealed partial class Engine
 
         _maxDepthReached[ply] = ply;
 
-        var staticEvaluation = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
+        var staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
 
         // Beta-cutoff (updating alpha after this check)
-        if (staticEvaluation >= beta)
+        if (staticEval >= beta)
         {
             PrintMessage(ply - 1, "Pruning before starting quiescence search");
-            return staticEvaluation;
+            return staticEval;
         }
 
         // Better move
-        if (staticEvaluation > alpha)
+        if (staticEval > alpha)
         {
-            alpha = staticEvaluation;
+            alpha = staticEval;
         }
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
@@ -487,12 +487,12 @@ public sealed partial class Engine
         if (pseudoLegalMoves.Length == 0)
         {
             // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358
-            return staticEvaluation;
+            return staticEval;
         }
 
         var nodeType = NodeType.Alpha;
         Move? bestMove = null;
-        int bestScore = staticEvaluation;
+        int bestScore = staticEval;
 
         bool isAnyCaptureValid = false;
 
