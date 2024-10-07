@@ -45,7 +45,7 @@ public sealed partial class Engine
     private int _currentTranspositionTableSize;
     private TranspositionTable _tt = null!;
 
-    private long _nodes;
+    private ulong _nodes;
 
     private SearchResult? _previousSearchResult;
 
