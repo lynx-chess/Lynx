@@ -6,7 +6,6 @@ namespace Lynx.Test.MoveGeneration;
 #pragma warning disable RCS1098 // Constant values should be placed on right side of comparisons.
 public class GeneratePawnMovesTest
 {
-
     private static IEnumerable<Move> GeneratePawnMoves(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];

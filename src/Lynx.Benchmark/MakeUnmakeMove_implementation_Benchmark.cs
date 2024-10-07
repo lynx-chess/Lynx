@@ -140,20 +140,20 @@
 
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
-using NLog;
 using System.Runtime.CompilerServices;
 
 namespace Lynx.Benchmark;
 public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
 {
-    public static IEnumerable<(string, int)> Data => new[] {
-            (Constants.InitialPositionFEN, 4),
-            (Constants.TrickyTestPositionFEN, 4),
-            ("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10", 4),
-            ("3K4/8/8/8/8/8/4p3/2k2R2 b - - 0 1", 6),
-            ("2K2r2/4P3/8/8/8/8/8/3k4 w - - 0 1", 6),
-            ("8/p7/8/1P6/K1k3p1/6P1/7P/8 w - -", 6),
-        };
+    public static IEnumerable<(string, int)> Data =>
+    [
+        (Constants.InitialPositionFEN, 4),
+        (Constants.TrickyTestPositionFEN, 4),
+        ("r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10", 4),
+        ("3K4/8/8/8/8/8/4p3/2k2R2 b - - 0 1", 6),
+        ("2K2r2/4P3/8/8/8/8/8/3k4 w - - 0 1", 6),
+        ("8/p7/8/1P6/K1k3p1/6P1/7P/8 w - -", 6),
+    ];
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]
@@ -292,11 +292,13 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
 
     public struct MakeMovePosition
     {
-        public long UniqueIdentifier { get; private set; }
+        public ulong UniqueIdentifier { get; private set; }
 
         public BitBoard[] PieceBitBoards { get; }
 
         public BitBoard[] OccupancyBitBoards { get; }
+
+        public int[] Board { get; }
 
         public Side Side { get; private set; }
 
@@ -308,11 +310,12 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         {
         }
 
-        public MakeMovePosition((BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, Side Side, byte Castle, BoardSquare EnPassant,
+        public MakeMovePosition((BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, int[] board, Side Side, byte Castle, BoardSquare EnPassant,
             int HalfMoveClock/*, int FullMoveCounter*/) parsedFEN)
         {
             PieceBitBoards = parsedFEN.PieceBitBoards;
             OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
+            Board = parsedFEN.board;
             Side = parsedFEN.Side;
             Castle = parsedFEN.Castle;
             EnPassant = parsedFEN.EnPassant;
@@ -334,6 +337,9 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
             OccupancyBitBoards = new BitBoard[3];
             Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
 
+            Board = new int[64];
+            Array.Copy(position.Board, Board, position.Board.Length);
+
             Side = position.Side;
             Castle = position.Castle;
             EnPassant = position.EnPassant;
@@ -354,6 +360,9 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
 
             OccupancyBitBoards = new BitBoard[3];
             Array.Copy(position.OccupancyBitBoards, OccupancyBitBoards, position.OccupancyBitBoards.Length);
+
+            Board = new int[64];
+            Array.Copy(position.Board, Board, position.Board.Length);
 
             Side = (Side)Utils.OppositeSide(position.Side);
             Castle = position.Castle;
@@ -706,7 +715,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
             int capturedPiece = -1;
             var castleCopy = Castle;
             BoardSquare enpassantCopy = EnPassant;
-            long uniqueIdentifierCopy = UniqueIdentifier;
+            var uniqueIdentifierCopy = UniqueIdentifier;
 
             var oldSide = Side;
             var offset = Utils.PieceOffset(oldSide);
@@ -828,7 +837,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
             int capturedPiece = -1;
             byte castleCopy = Castle;
             BoardSquare enpassantCopy = EnPassant;
-            long uniqueIdentifierCopy = UniqueIdentifier;
+            var uniqueIdentifierCopy = UniqueIdentifier;
 
             var oldSide = (int)Side;
             var offset = Utils.PieceOffset(oldSide);
@@ -940,7 +949,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
 
             byte castleCopy = Castle;
             BoardSquare enpassantCopy = EnPassant;
-            long uniqueIdentifierCopy = UniqueIdentifier;
+            var uniqueIdentifierCopy = UniqueIdentifier;
 
             var oldSide = (int)Side;
             var offset = Utils.PieceOffset(oldSide);
@@ -1351,7 +1360,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         /// <summary>
         /// Lightweight version of <see cref="IsValid"/>
         /// False if the opponent king is in check.
-        /// This method is meant to be invoked only after <see cref="Position(Position, Move)"/>
+        /// This method is meant to be invoked only after <see cref="Position.MakeMove(int)"/>
         /// </summary>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1385,7 +1394,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
 
     public readonly struct MakeMoveGameStateWithZobristKey
     {
-        public readonly long ZobristKey;
+        public readonly ulong ZobristKey;
 
         public readonly int CapturedPiece;
 
@@ -1393,7 +1402,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
 
         public readonly byte Castle;
 
-        public MakeMoveGameStateWithZobristKey(int capturedPiece, byte castle, BoardSquare enpassant, long zobristKey)
+        public MakeMoveGameStateWithZobristKey(int capturedPiece, byte castle, BoardSquare enpassant, ulong zobristKey)
         {
             CapturedPiece = capturedPiece;
             Castle = castle;
@@ -1406,10 +1415,10 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
 
     public static class MakeMoveZobristTable
     {
-        private static readonly long[,] _table = Initialize();
+        private static readonly ulong[,] _table = Initialize();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long PieceHash(int boardSquare, int piece) => _table[boardSquare, piece];
+        public static ulong PieceHash(int boardSquare, int piece) => _table[boardSquare, piece];
 
         /// <summary>
         /// Uses <see cref="Piece.P"/> and squares <see cref="BoardSquare.a1"/>-<see cref="BoardSquare.h1"/>
@@ -1417,7 +1426,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         /// <param name="enPassantSquare"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long EnPassantHash(int enPassantSquare)
+        public static ulong EnPassantHash(int enPassantSquare)
         {
             if (enPassantSquare == (int)BoardSquare.noSquare)
             {
@@ -1434,7 +1443,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         /// </summary>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long SideHash()
+        public static ulong SideHash()
         {
             return _table[(int)BoardSquare.h8, (int)Piece.p];
         }
@@ -1447,9 +1456,9 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         /// <param name="castle"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long CastleHash(byte castle)
+        public static ulong CastleHash(byte castle)
         {
-            long combinedHash = 0;
+            ulong combinedHash = 0;
 
             if ((castle & (int)CastlingRights.WK) != default)
             {
@@ -1480,9 +1489,9 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         /// <param name="position"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long PositionHash(MakeMovePosition position)
+        public static ulong PositionHash(MakeMovePosition position)
         {
-            long positionHash = 0;
+            ulong positionHash = 0;
 
             for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
             {
@@ -1507,16 +1516,16 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         /// </summary>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static long[,] Initialize()
+        internal static ulong[,] Initialize()
         {
-            var zobristTable = new long[64, 12];
-            var randomInstance = new Random(int.MaxValue);
+            var zobristTable = new ulong[64, 12];
+            var randomInstance = new LynxRandom(int.MaxValue);
 
             for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
             {
                 for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
                 {
-                    zobristTable[squareIndex, pieceIndex] = randomInstance.NextInt64();
+                    zobristTable[squareIndex, pieceIndex] = randomInstance.NextUInt64();
                 }
             }
 
@@ -1646,7 +1655,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
                     }
                     else
                     {
-                        movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece);
+                        movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, position.Board[targetSquare]);
                     }
                 }
             }

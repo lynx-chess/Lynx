@@ -55,7 +55,7 @@ public class MutableReadonlyBitBoard_Benchmark : BaseBenchmark
     private Mutable _mutableBoard = new(1234);
     private MutableReadonly _mutableReadonlyBoard = new(1234);
 
-    public static IEnumerable<int> Data => new[] { 1, 10, 1_000, 10_000 };
+    public static IEnumerable<int> Data => [1, 10, 1_000, 10_000];
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]

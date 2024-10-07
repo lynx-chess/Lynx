@@ -5,7 +5,8 @@ namespace Lynx.Test;
 
 public class ZobristTableTest
 {
-    private readonly long[][] _zobristTable = ZobristTable.Initialize();
+    private readonly LynxRandom _random = new LynxRandom();
+    private readonly ulong[][] _zobristTable = ZobristTable.Initialize();
 
     [Test]
     public void XorBehavior()
@@ -16,7 +17,7 @@ public class ZobristTableTest
             {
                 var hash = _zobristTable[i][j];
 
-                var n = Random.Shared.NextInt64();
+                var n = _random.NextUInt64();
 
                 var xored = n ^ hash;
 
@@ -56,7 +57,7 @@ public class ZobristTableTest
     [Test]
     public void EnPassantHash()
     {
-        var enPassantSquares = Constants.EnPassantCaptureSquares.Select((item, index) => (item, index)).Where(pair => pair.item != 0).Select(pair => pair.index);
+        var enPassantSquares = Constants.EnPassantCaptureSquares.ToArray().Select((item, index) => (item, index)).Where(pair => pair.item != 0).Select(pair => pair.index);
 
         foreach (var enPassantSquare in enPassantSquares)
         {
@@ -127,9 +128,9 @@ public class ZobristTableTest
         Assert.AreEqual(originalHash, currentHash);
     }
 
-    private long CalculateCastleHash(byte castle)
+    private ulong CalculateCastleHash(byte castle)
     {
-        long combinedHash = 0;
+        ulong combinedHash = 0;
 
         if ((castle & (int)CastlingRights.WK) != default)
         {
@@ -154,9 +155,9 @@ public class ZobristTableTest
         return combinedHash;
     }
 
-    private static long OriginalPositionHash(Position position)
+    private static ulong OriginalPositionHash(Position position)
     {
-        long positionHash = 0;
+        ulong positionHash = 0;
 
         for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
         {

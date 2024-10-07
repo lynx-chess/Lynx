@@ -34,7 +34,8 @@ using Lynx.Model;
 namespace Lynx.Benchmark;
 public class PopulateOcurriencies_Benchmark : BaseBenchmark
 {
-    public static IEnumerable<Position> Positions => new Position[] {
+    public static IEnumerable<Position> Positions =>
+        [
             new(Constants.InitialPositionFEN),
             new(Constants.TrickyTestPositionFEN),
             new(Constants.TrickyTestPositionReversedFEN),
@@ -44,7 +45,7 @@ public class PopulateOcurriencies_Benchmark : BaseBenchmark
             new("3K4/8/8/8/8/8/4p3/2k2R2 b - - 0 1"),
             new("2K2r2/4P3/8/8/8/8/8/3k4 w - - 0 1"),
             new("8/p7/8/1P6/K1k3p1/6P1/7P/8 w - -"),
-        };
+        ];
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Positions))]

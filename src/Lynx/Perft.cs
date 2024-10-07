@@ -1,5 +1,6 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace Lynx;
 
@@ -9,24 +10,24 @@ namespace Lynx;
 /// </summary>
 public static class Perft
 {
-    public static (long Nodes, double ElapsedMilliseconds) Results(Position position, int depth)
+    public static (long Nodes, double ElapsedSeconds) Results(Position position, int depth)
     {
         var sw = new Stopwatch();
         sw.Start();
         var nodes = ResultsImpl(position, depth, 0);
         sw.Stop();
 
-        return (nodes, CalculateElapsedMilliseconds(sw));
+        return (nodes, Utils.CalculateElapsedSeconds(sw));
     }
 
-    public static (long Nodes, double ElapsedMilliseconds) Divide(Position position, int depth, Action<string> write)
+    public static (long Nodes, double ElapsedSeconds) Divide(Position position, int depth, Action<string> write)
     {
         var sw = new Stopwatch();
         sw.Start();
         var nodes = DivideImpl(position, depth, 0, write);
         sw.Stop();
 
-        return (nodes, CalculateElapsedMilliseconds(sw));
+        return (nodes, Utils.CalculateElapsedSeconds(sw));
     }
 
     /// <summary>
@@ -36,6 +37,7 @@ public static class Perft
     /// <param name="depth"></param>
     /// <param name="nodes"></param>
     /// <returns></returns>
+    [SkipLocalsInit]
     internal static long ResultsImpl(Position position, int depth, long nodes)
     {
         if (depth != 0)
@@ -58,6 +60,7 @@ public static class Perft
         return nodes + 1;
     }
 
+    [SkipLocalsInit]
     private static long DivideImpl(Position position, int depth, long nodes, Action<string> write)
     {
         if (depth != 0)
@@ -86,36 +89,26 @@ public static class Perft
         return nodes + 1;
     }
 
-    public static void PrintPerftResult(int depth, (long Nodes, double ElapsedMilliseconds) peftResult, Action<string> write)
+    public static void PrintPerftResult(int depth, (long Nodes, double ElapsedSeconds) peftResult, Action<string> write)
     {
-        var timeStr = TimeToString(peftResult.ElapsedMilliseconds);
+        var timeStr = TimeToString(peftResult.ElapsedSeconds * 1_000);
 
         write(
             $"Depth:\t{depth}" + Environment.NewLine +
             $"Nodes:\t{peftResult.Nodes}" + Environment.NewLine +
             $"Time:\t{timeStr}" + Environment.NewLine +
-            $"nps:\t{(Math.Round(peftResult.Nodes / peftResult.ElapsedMilliseconds)) / 1000} Mnps" + Environment.NewLine);
+            $"nps:\t{peftResult.Nodes / (peftResult.ElapsedSeconds * 1_000_000):F} Mnps" + Environment.NewLine);
     }
 
-    public static async ValueTask PrintPerftResult(int depth, (long Nodes, double ElapsedMilliseconds) peftResult, Func<string, ValueTask> write)
+    public static async ValueTask PrintPerftResult(int depth, (long Nodes, double ElapsedSeconds) peftResult, Func<string, ValueTask> write)
     {
-        var timeStr = TimeToString(peftResult.ElapsedMilliseconds);
+        var timeStr = TimeToString(peftResult.ElapsedSeconds * 1_000);
 
         await write(
             $"Depth:\t{depth}" + Environment.NewLine +
             $"Nodes:\t{peftResult.Nodes}" + Environment.NewLine +
             $"Time:\t{timeStr}" + Environment.NewLine +
-            $"nps:\t{(Math.Round(peftResult.Nodes / peftResult.ElapsedMilliseconds)) / 1000} Mnps" + Environment.NewLine);
-    }
-
-    /// <summary>
-    /// http://geekswithblogs.net/BlackRabbitCoder/archive/2012/01/12/c.net-little-pitfalls-stopwatch-ticks-are-not-timespan-ticks.aspx
-    /// </summary>
-    /// <param name="stopwatch"></param>
-    /// <returns></returns>
-    private static double CalculateElapsedMilliseconds(Stopwatch stopwatch)
-    {
-        return 1000 * stopwatch.ElapsedTicks / (double)Stopwatch.Frequency;
+            $"nps:\t{peftResult.Nodes / (peftResult.ElapsedSeconds * 1_000_000):F} Mnps" + Environment.NewLine);
     }
 
     private static string TimeToString(double milliseconds)

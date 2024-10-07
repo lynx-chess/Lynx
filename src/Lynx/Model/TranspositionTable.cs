@@ -1,11 +1,7 @@
 ﻿using NLog;
-using NLog.Targets;
 using System.Diagnostics;
-using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Runtime.Intrinsics.X86;
-using System.Threading.Tasks;
 
 namespace Lynx.Model;
 
@@ -22,7 +18,7 @@ public struct TranspositionTableElement
     /// <summary>
     /// 16 MSB of Zobrist key
     /// </summary>
-    private short _key;
+    public ushort Key { get; set; }
 
     /// <summary>
     /// Best move found in a position. 0 if the position failed low (score <= alpha)
@@ -51,63 +47,50 @@ public struct TranspositionTableElement
     /// </summary>
     public int Score { readonly get => _score; set => _score = (short)value; }
 
-    public long Key { readonly get => _key; set => _key = (ShortMove)(value >> 48); }
-
-    public void Clear()
-    {
-        Key = 0;
-        Score = 0;
-        Depth = 0;
-        Move = 0;
-        Type = NodeType.Unknown;
-    }
+    public static ulong Size => (ulong)Marshal.SizeOf(typeof(TranspositionTableElement));
 }
 
 public static class TranspositionTableExtensions
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-    private static readonly ulong _ttElementSize = (ulong)Marshal.SizeOf(typeof(TranspositionTableElement));
 
-    public static (int Length, int Mask) CalculateLength(int size)
+    public static int CalculateLength(int size)
     {
-        ulong sizeBytes = (ulong)size * 1024ul * 1024ul;
-        ulong ttLength = sizeBytes / _ttElementSize;
-        if (!BitOperations.IsPow2(ttLength))
-        {
-            ttLength = BitOperations.RoundUpToPowerOf2(ttLength) >> 1;    // / 2
-        }
-        var ttLengthMb = ttLength / 1024 / 1024;
+        var ttEntrySize = TranspositionTableElement.Size;
 
-        if (ttLength > int.MaxValue)
+        ulong sizeBytes = (ulong)size * 1024ul * 1024ul;
+        ulong ttLength = sizeBytes / ttEntrySize;
+        var ttLengthMb = (double)ttLength / 1024 / 1024;
+
+        if (ttLength > (ulong)Array.MaxLength)
         {
-            throw new ArgumentException($"Invalid transpositon table (Hash) size: {ttLengthMb}Mb");
+            throw new ArgumentException($"Invalid transpositon table (Hash) size: {ttLengthMb}Mb, {ttLength} values (> Array.MaxLength, {Array.MaxLength})");
         }
 
         var mask = ttLength - 1;
 
         _logger.Info("Hash value:\t{0} MB", size);
-        _logger.Info("TT memory:\t{0} MB", ttLengthMb * _ttElementSize);
+        _logger.Info("TT memory:\t{0} MB", ttLengthMb * ttEntrySize);
         _logger.Info("TT length:\t{0} items", ttLength);
-        _logger.Info("TT entry:\t{0} bytes", _ttElementSize);
+        _logger.Info("TT entry:\t{0} bytes", ttEntrySize);
         _logger.Info("TT mask:\t{0}", mask.ToString("X"));
 
-        return ((int)ttLength, (int)mask);
+        return (int)ttLength;
     }
 
+    /// <summary>
+    /// 'Fixed-point multiplication trick', see https://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
+    /// </summary>
+    /// <param name="positionUniqueIdentifier"></param>
+    /// <param name="ttLength"></param>
+    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void ClearTranspositionTable(this TranspositionTable transpositionTable)
-    {
-        foreach (var element in transpositionTable)
-        {
-            element.Clear();
-        }
-    }
+    public static ulong CalculateTTIndex(ulong positionUniqueIdentifier, int ttLength) => (ulong)(((UInt128)positionUniqueIdentifier * (UInt128)ttLength) >> 64);
 
     /// <summary>
     /// Checks the transposition table and, if there's a eval value that can be deducted from it of there's a previously recorded <paramref name="position"/>, it's returned. <see cref="EvaluationConstants.NoHashEntry"/> is returned otherwise
     /// </summary>
     /// <param name="tt"></param>
-    /// <param name="ttMask"></param>
     /// <param name="position"></param>
     /// <param name="depth"></param>
     /// <param name="ply">Ply</param>
@@ -115,50 +98,51 @@ public static class TranspositionTableExtensions
     /// <param name="beta"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static (int Evaluation, ShortMove BestMove, NodeType NodeType, int score) ProbeHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int alpha, int beta)
+    public static (int Score, ShortMove BestMove, NodeType NodeType, int RawScore) ProbeHash(this TranspositionTable tt, Position position, int depth, int ply, int alpha, int beta)
     {
-        ref var entry = ref tt[position.UniqueIdentifier & ttMask];
+        var ttIndex = CalculateTTIndex(position.UniqueIdentifier, tt.Length);
+        ref var entry = ref tt[ttIndex];
 
-        if ((position.UniqueIdentifier >> 48) != entry.Key)
+        if ((ushort)position.UniqueIdentifier != entry.Key)
         {
             return (EvaluationConstants.NoHashEntry, default, default, default);
         }
 
-        var eval = EvaluationConstants.NoHashEntry;
+        var rawScore = entry.Score;
+        var score = EvaluationConstants.NoHashEntry;
 
         if (entry.Depth >= depth)
         {
-            // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
-            // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
-            var score = RecalculateMateScores(entry.Score, ply);
+            var recalculatedScore = RecalculateMateScores(rawScore, ply);
 
-            eval = entry.Type switch
+            if (entry.Type == NodeType.Exact
+                || (entry.Type == NodeType.Alpha && recalculatedScore <= alpha)
+                || (entry.Type == NodeType.Beta && recalculatedScore >= beta))
             {
-                NodeType.Exact => score,
-                NodeType.Alpha when score <= alpha => alpha,
-                NodeType.Beta when score >= beta => beta,
-                _ => EvaluationConstants.NoHashEntry
-            };
+                // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
+                // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
+                score = recalculatedScore;
+            }
         }
 
-        return (eval, entry.Move, entry.Type, entry.Score);
+        return (score, entry.Move, entry.Type, rawScore);
     }
 
     /// <summary>
     /// Adds a <see cref="TranspositionTableElement"/> to the transposition tabke
     /// </summary>
     /// <param name="tt"></param>
-    /// <param name="ttMask"></param>
     /// <param name="position"></param>
     /// <param name="depth"></param>
     /// <param name="ply">Ply</param>
-    /// <param name="eval"></param>
+    /// <param name="score"></param>
     /// <param name="nodeType"></param>
     /// <param name="move"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void RecordHash(this TranspositionTable tt, int ttMask, Position position, int depth, int ply, int eval, NodeType nodeType, Move? move = null)
+    public static void RecordHash(this TranspositionTable tt, Position position, int depth, int ply, int score, NodeType nodeType, Move? move = null)
     {
-        ref var entry = ref tt[position.UniqueIdentifier & ttMask];
+        var ttIndex = CalculateTTIndex(position.UniqueIdentifier, tt.Length);
+        ref var entry = ref tt[ttIndex];
 
         //if (entry.Key != default && entry.Key != position.UniqueIdentifier)
         //{
@@ -178,10 +162,10 @@ public static class TranspositionTableExtensions
 
         // We want to store the distance to the checkmate position relative to the current node, independently from the root
         // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
-        var score = RecalculateMateScores(eval, -ply);
+        var recalculatedScore = RecalculateMateScores(score, -ply);
 
-        entry.Key = position.UniqueIdentifier;
-        entry.Score = score;
+        entry.Key = (ushort)position.UniqueIdentifier;
+        entry.Score = recalculatedScore;
         entry.Depth = depth;
         entry.Type = nodeType;
         entry.Move = move != null ? (ShortMove)move : entry.Move;    // Suggested by cj5716 instead of 0. https://github.com/lynx-chess/Lynx/pull/462
@@ -196,14 +180,19 @@ public static class TranspositionTableExtensions
     /// <param name="ply"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static int RecalculateMateScores(int score, int ply) =>
-        score
-        + score switch
+    internal static int RecalculateMateScores(int score, int ply)
+    {
+        if (score > EvaluationConstants.PositiveCheckmateDetectionLimit)
         {
-            > EvaluationConstants.PositiveCheckmateDetectionLimit => -EvaluationConstants.CheckmateDepthFactor * ply,
-            < EvaluationConstants.NegativeCheckmateDetectionLimit => EvaluationConstants.CheckmateDepthFactor * ply,
-            _ => 0
-        };
+            return score - (EvaluationConstants.CheckmateDepthFactor * ply);
+        }
+        else if (score < EvaluationConstants.NegativeCheckmateDetectionLimit)
+        {
+            return score + (EvaluationConstants.CheckmateDepthFactor * ply);
+        }
+
+        return score;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int PopulatedItemsCount(this TranspositionTable transpositionTable)
@@ -275,7 +264,7 @@ public static class TranspositionTableExtensions
         {
             if (transpositionTable[i].Key != default)
             {
-                Console.WriteLine($"{i}: Key = {transpositionTable[i].Key}, Depth: {transpositionTable[i].Depth}, Score: {transpositionTable[i].Score}, Move: {(transpositionTable[i].Move != 0 ? ((Move)transpositionTable[i].Move).ToMoveString() : "-")} {transpositionTable[i].Type}");
+                Console.WriteLine($"{i}: Key = {transpositionTable[i].Key}, Depth: {transpositionTable[i].Depth}, Score: {transpositionTable[i].Score}, Move: {(transpositionTable[i].Move != 0 ? ((Move)transpositionTable[i].Move).UCIString() : "-")} {transpositionTable[i].Type}");
             }
         }
         Console.WriteLine("");

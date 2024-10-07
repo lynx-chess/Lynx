@@ -28,7 +28,8 @@ namespace Lynx.Benchmark;
 
 public partial class GoCommandParsing_GeneratedAttribute_Benchmark : BaseBenchmark
 {
-    public static IEnumerable<string> Data => new[] {
+    public static IEnumerable<string> Data =>
+        [
             "go infinite",
             "go infinite searchmoves e2e4 d2d4",
             "go wtime 7000 wince 500 btime 8000 binc 500",
@@ -36,7 +37,7 @@ public partial class GoCommandParsing_GeneratedAttribute_Benchmark : BaseBenchma
             "go infinite searchmoves e2e4 d2d4 wtime 10000 btime 10000 winc 100",
             "go infinite searchmoves e2e4 d2d4 wtime 10000 btime 10000 winc 100 binc 100 movestogo 10 depth 50 mate 10 movetime 500",
             "go infinite searchmoves e2e4 d2d4 a2a4 a2a3 b2b4 b2b3 wtime 10000 btime 10000 winc 100 binc 100 movestogo 10 depth 50 mate 10 nodes 1000 movetime 500"
-        };
+        ];
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]

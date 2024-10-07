@@ -8,7 +8,7 @@
 ///	but it can be used anytime, even when the engine is searching,
 ///	and must always be answered with "isready".
 /// </summary>
-public sealed class ReadyOKCommand : EngineBaseCommand
+public sealed class ReadyOKCommand : IEngineBaseCommand
 {
     public const string Id = "readyok";
 }

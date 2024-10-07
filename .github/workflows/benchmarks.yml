@@ -41,6 +41,7 @@ jobs:
 
     - name: Build
       run: dotnet build -c Release
+      working-directory: ./src/Lynx.Benchmark
 
     - name: Run ${{ github.event.inputs.benchmark_name }} benchmark
       if: matrix.os == 'windows-latest'

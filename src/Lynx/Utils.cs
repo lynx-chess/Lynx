@@ -161,23 +161,42 @@ public static class Utils
     }
 
     /// <summary>
-    /// Providing there's a checkmate detected in <paramref name="bestEvaluation"/>, returns in how many moves
+    /// Providing there's a checkmate detected in <paramref name="score"/>, returns in how many moves
     /// </summary>
-    /// <param name="bestEvaluation"></param>
-    /// <param name="bestEvaluationAbs"></param>
+    /// <param name="score"></param>
+    /// <param name="bestScoreAbs"></param>
     /// <returns>Positive value if white is checkmating, negative value if black is</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int CalculateMateInX(int bestEvaluation, int bestEvaluationAbs)
+    public static int CalculateMateInX(int score, int bestScoreAbs)
     {
-        int mate = (int)Math.Ceiling(0.5 * ((EvaluationConstants.CheckMateBaseEvaluation - bestEvaluationAbs) / EvaluationConstants.CheckmateDepthFactor));
+        int mate = (int)Math.Ceiling(0.5 * ((EvaluationConstants.CheckMateBaseEvaluation - bestScoreAbs) / EvaluationConstants.CheckmateDepthFactor));
 
-        return (int)Math.CopySign(mate, bestEvaluation);
+        return (int)Math.CopySign(mate, score);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static long CalculateNps(int nodes, long elapsedMilliseconds)
+    public static ulong CalculateNps(ulong nodes, double elapsedSeconds)
     {
-        return Convert.ToInt64(Math.Clamp(nodes / ((0.001 * elapsedMilliseconds) + 1), 0, long.MaxValue));
+        return Convert.ToUInt64(Math.Clamp(nodes / elapsedSeconds, 1, ulong.MaxValue));
+    }
+
+    /// <summary>
+    /// Calculates elapsed time with sub-ms precision.
+    /// We care when reporting nps for low depths, but more importantly to avoid the risk of dividing by zero.
+    /// http://geekswithblogs.net/BlackRabbitCoder/archive/2012/01/12/c.net-little-pitfalls-stopwatch-ticks-are-not-timespan-ticks.aspx
+    /// </summary>
+    /// <returns>Elapsed time in seconds</returns>
+    public static double CalculateElapsedSeconds(Stopwatch stopwatch)
+    {
+        return stopwatch.ElapsedTicks / (double)Stopwatch.Frequency;
+    }
+
+    /// <summary>
+    /// Transforms the high precision elapsed time in seconds into the time format UCI expects: ms
+    /// </summary>
+    public static ulong CalculateUCITime(double elapsedSeconds)
+    {
+        return Math.Clamp(Convert.ToUInt64(elapsedSeconds * 1_000), 1, ulong.MaxValue);
     }
 
     /// <summary>

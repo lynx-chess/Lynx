@@ -43,7 +43,7 @@ public static class OnlineTablebaseProber
         TypeInfoResolver = SourceGenerationContext.Default
     };
 
-    public static async Task<(int MateScore, Move BestMove)> RootSearch(Position position, List<long> positionHashHistory, int halfMovesWithoutCaptureOrPawnMove, CancellationToken cancellationToken)
+    public static async Task<(int MateScore, Move BestMove)> RootSearch(Position position, ulong[] positionHashHistory, int halfMovesWithoutCaptureOrPawnMove, CancellationToken cancellationToken)
     {
         var fen = position.FEN(halfMovesWithoutCaptureOrPawnMove);
         _logger.Info("[{0}] Querying online tb for position {1}", nameof(RootSearch), fen);
@@ -125,7 +125,8 @@ public static class OnlineTablebaseProber
                             throw new AssertException($"{move!.Uci} should be parsable from position {fen}");
                         }
 
-                        var newPosition = new Position(position, moveCandidate.Value);
+                        var newPosition = new Position(position);
+                        newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
@@ -185,7 +186,8 @@ public static class OnlineTablebaseProber
                             throw new AssertException($"{move!.Uci} should be parsable from position {fen}");
                         }
 
-                        var newPosition = new Position(position, moveCandidate.Value);
+                        var newPosition = new Position(position);
+                        newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
@@ -247,7 +249,8 @@ public static class OnlineTablebaseProber
                             throw new AssertException($"{move!.Uci} should be parsable from position {fen}");
                         }
 
-                        var newPosition = new Position(position, moveCandidate.Value);
+                        var newPosition = new Position(position);
+                        newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
@@ -306,7 +309,8 @@ public static class OnlineTablebaseProber
                             throw new AssertException($"{move!.Uci} should be parsable from position {fen}");
                         }
 
-                        var newPosition = new Position(position, moveCandidate.Value);
+                        var newPosition = new Position(position);
+                        newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);

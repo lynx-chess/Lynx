@@ -44,9 +44,9 @@ public static class Attacks
 
         if (Bmi2.X64.IsSupported)
         {
-            _pextAttacks = new ulong[5248 + 102400];
-            _pextBishopOffset = new ulong[64];
-            _pextRookOffset = new ulong[64];
+            _pextAttacks = GC.AllocateArray<BitBoard>(5248 + 102400, pinned: true);
+            _pextBishopOffset = GC.AllocateArray<BitBoard>(64, pinned: true);
+            _pextRookOffset = GC.AllocateArray<BitBoard>(64, pinned: true);
 
             InitializeBishopAndRookPextAttacks();
         }
@@ -96,6 +96,7 @@ public static class Attacks
             : MagicNumbersRookAttacks(squareIndex, occupancy);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static BitBoard MagicNumbersRookAttacks(int squareIndex, BitBoard occupancy)
     {
         var occ = occupancy & _rookOccupancyMasks[squareIndex];
@@ -127,10 +128,7 @@ public static class Attacks
     /// <param name="bishopAttacks"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard QueenAttacks(BitBoard rookAttacks, BitBoard bishopAttacks)
-    {
-        return rookAttacks | bishopAttacks;
-    }
+    public static BitBoard QueenAttacks(BitBoard rookAttacks, BitBoard bishopAttacks) => rookAttacks | bishopAttacks;
 
     /// <summary>
     /// Taken from Leorik (https://github.com/lithander/Leorik/blob/master/Leorik.Core/Slider/Pext.cs)

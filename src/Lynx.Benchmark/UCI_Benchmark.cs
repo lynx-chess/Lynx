@@ -39,10 +39,10 @@ namespace Lynx.Benchmark;
 
 public class UCI_Benchmark : BaseBenchmark
 {
-    private readonly Channel<string> _channel = Channel.CreateBounded<string>(new BoundedChannelOptions(100_000) { SingleReader = true, SingleWriter = false });
+    private readonly Channel<object> _channel = Channel.CreateBounded<object>(new BoundedChannelOptions(100_000) { SingleReader = true, SingleWriter = false });
 
     [Benchmark]
-    public (int, long) Bench_DefaultDepth()
+    public (ulong, ulong) Bench_DefaultDepth()
     {
         var engine = new Engine(_channel.Writer);
         return engine.Bench(Configuration.EngineSettings.BenchDepth);
