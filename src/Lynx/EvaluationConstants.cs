@@ -22,6 +22,8 @@ public static class EvaluationConstants
         0, 1, 1, 2, 4, 0
     ];
 
+    public const int MaxPhase = 24;
+
     /// <summary>
     /// <see cref="Constants.AbsoluteMaxDepth"/> x <see cref="Constants.MaxNumberOfPossibleMovesInAPosition"/>
     /// </summary>

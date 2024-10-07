@@ -20,6 +20,8 @@ public struct TranspositionTableElement
     /// </summary>
     public ushort Key { get; set; }
 
+    public short StaticEval { get; set; }
+
     /// <summary>
     /// Best move found in a position. 0 if the position failed low (score <= alpha)
     /// </summary>
@@ -98,14 +100,14 @@ public static class TranspositionTableExtensions
     /// <param name="beta"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static (int Score, ShortMove BestMove, NodeType NodeType, int RawScore) ProbeHash(this TranspositionTable tt, Position position, int depth, int ply, int alpha, int beta)
+    public static (int Score, ShortMove BestMove, NodeType NodeType, int RawScore, int StaticEval) ProbeHash(this TranspositionTable tt, Position position, int depth, int ply, int alpha, int beta)
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier, tt.Length);
         ref var entry = ref tt[ttIndex];
 
         if ((ushort)position.UniqueIdentifier != entry.Key)
         {
-            return (EvaluationConstants.NoHashEntry, default, default, default);
+            return (EvaluationConstants.NoHashEntry, default, default, default, default);
         }
 
         var rawScore = entry.Score;
@@ -125,7 +127,7 @@ public static class TranspositionTableExtensions
             }
         }
 
-        return (score, entry.Move, entry.Type, rawScore);
+        return (score, entry.Move, entry.Type, rawScore, entry.StaticEval);
     }
 
     /// <summary>
@@ -139,7 +141,7 @@ public static class TranspositionTableExtensions
     /// <param name="nodeType"></param>
     /// <param name="move"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void RecordHash(this TranspositionTable tt, Position position, int depth, int ply, int score, NodeType nodeType, Move? move = null)
+    public static void RecordHash(this TranspositionTable tt, Position position, int staticEval, int depth, int ply, int score, NodeType nodeType, Move? move = null)
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier, tt.Length);
         ref var entry = ref tt[ttIndex];
@@ -165,6 +167,7 @@ public static class TranspositionTableExtensions
         var recalculatedScore = RecalculateMateScores(score, -ply);
 
         entry.Key = (ushort)position.UniqueIdentifier;
+        entry.StaticEval = (short)staticEval;
         entry.Score = recalculatedScore;
         entry.Depth = depth;
         entry.Type = nodeType;
