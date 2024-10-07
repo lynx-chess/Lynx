@@ -165,9 +165,10 @@ public static class TranspositionTableExtensions
         // We want to store the distance to the checkmate position relative to the current node, independently from the root
         // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
         var recalculatedScore = RecalculateMateScores(score, -ply);
+        var recalculatedStaticEval = RecalculateMateScores(staticEval, -ply);
 
         entry.Key = (ushort)position.UniqueIdentifier;
-        entry.StaticEval = (short)staticEval;
+        entry.StaticEval = (short)recalculatedStaticEval;
         entry.Score = recalculatedScore;
         entry.Depth = depth;
         entry.Type = nodeType;
