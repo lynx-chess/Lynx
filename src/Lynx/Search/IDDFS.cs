@@ -111,8 +111,13 @@ public sealed partial class Engine
                 }
                 else
                 {
-                    // 🔍 Aspiration windows
+                    // 🔍 Aspiration windows - search using a window around an expected score (the previous search one)
+                    // If the resulting score doesn't fall inside of the window, it is widened it until it does
                     var window = Configuration.EngineSettings.AspirationWindow_Base;
+
+                    // A temporary reduction is used for fail highs, because the verification for those 'too good' lines
+                    // are expected to happen at lower depths
+                    int failHighReduction = 0;
 
                     alpha = Math.Max(EvaluationConstants.MinEval, lastSearchResult.Score - window);
                     beta = Math.Min(EvaluationConstants.MaxEval, lastSearchResult.Score + window);
@@ -126,7 +131,7 @@ public sealed partial class Engine
                         _logger.Debug("Aspiration windows depth {Depth}: [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
                             depth, alpha, beta, bestScore, _nodes);
 
-                        bestScore = NegaMax(depth: depth, ply: 0, alpha, beta);
+                        bestScore = NegaMax(depth: depth - failHighReduction, ply: 0, alpha, beta);
 
                         // 13, 19, 28, 42, 63, 94, 141, 211, 316, 474, 711, 1066, 1599, 2398, 3597, 5395, 8092, 12138, 18207, 27310, 40965, 61447, 92170
                         window += window >> 1;   // window / 2
@@ -136,10 +141,12 @@ public sealed partial class Engine
                         {
                             alpha = Math.Max(bestScore - window, EvaluationConstants.MinEval);
                             beta = (alpha + beta) >> 1;  // (alpha + beta) / 2
+                            failHighReduction = 0;
                         }
                         else if (beta <= bestScore)     // Fail high
                         {
                             beta = Math.Min(bestScore + window, EvaluationConstants.MaxEval);
+                            ++failHighReduction;
                         }
                         else
                         {
