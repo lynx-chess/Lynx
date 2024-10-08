@@ -221,6 +221,14 @@ public sealed partial class Engine
             Game.AddToPositionHashHistory(position.UniqueIdentifier);
             Game.PushToMoveStack(ply, move);
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            void RevertMove()
+            {
+                Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
+                Game.RemoveFromPositionHashHistory();
+                position.UnmakeMove(move, gameState);
+            }
+
             int score;
             if (canBeRepetition && (Game.IsThreefoldRepetition() || Game.Is50MovesRepetition()))
             {
@@ -251,30 +259,19 @@ public sealed partial class Engine
                     if (depth <= Configuration.EngineSettings.LMP_MaxDepth
                         && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth)) // Based on formula suggested by Antares
                     {
-                        // After making a move
-                        Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
-                        Game.RemoveFromPositionHashHistory();
-                        position.UnmakeMove(move, gameState);
-
+                        RevertMove();
                         break;
                     }
 
+                    // 🔍 History pruning -  all quiet moves can be pruned
+                    // once we find one with a history score too low
                     if (!isCapture
                         && moveScores[moveIndex] < EvaluationConstants.CounterMoveValue
-                        && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth)  // TODO use LMR depth
+                        && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth  // TODO use LMR depth
+                        && _quietHistory[move.Piece()][move.TargetSquare()] < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
                     {
-                        // 🔍 History pruning -  all quiet moves can be pruned
-                        // once we find one with a history score too low
-                        // if this move's history score is too low, we start skipping moves.
-                        if (_quietHistory[move.Piece()][move.TargetSquare()] < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
-                        {
-                            // After making a move
-                            Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
-                            Game.RemoveFromPositionHashHistory();
-                            position.UnmakeMove(move, gameState);
-
-                            break;
-                        }
+                        RevertMove();
+                        break;
                     }
 
                     // 🔍 Futility Pruning (FP) - all quiet moves can be pruned
@@ -285,11 +282,7 @@ public sealed partial class Engine
                         && depth <= Configuration.EngineSettings.FP_MaxDepth
                         && staticEval + Configuration.EngineSettings.FP_Margin + (Configuration.EngineSettings.FP_DepthScalingFactor * depth) <= alpha)
                     {
-                        // After making a move
-                        Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
-                        Game.RemoveFromPositionHashHistory();
-                        position.UnmakeMove(move, gameState);
-
+                        RevertMove();
                         break;
                     }
                 }
@@ -362,10 +355,7 @@ public sealed partial class Engine
             }
 
             // After making a move
-            // Game.PositionHashHistory is update above
-            Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
-            Game.RemoveFromPositionHashHistory();
-            position.UnmakeMove(move, gameState);
+            RevertMove();
 
             PrintMove(position, ply, move, score);
 

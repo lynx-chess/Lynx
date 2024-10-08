@@ -224,12 +224,6 @@ public class Position : IDisposable
         UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
 
         return new GameState(uniqueIdentifierCopy, enpassantCopy, castleCopy);
-        //var clone = new Position(this);
-        //clone.UnmakeMove(move, gameState);
-        //if (uniqueIdentifierCopy != clone.UniqueIdentifier)
-        //{
-        //    throw new($"{FEN()}: {uniqueIdentifierCopy} expected, got {clone.UniqueIdentifier} got after Make/Unmake move {move.ToEPDString()}");
-        //}
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
