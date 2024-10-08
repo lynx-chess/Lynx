@@ -127,7 +127,7 @@ public static class TranspositionTableExtensions
             }
         }
 
-        return (score, entry.Move, entry.Type, rawScore, entry.StaticEval);
+        return (score, entry.Move, entry.Type, rawScore, RecalculateMateScores(entry.StaticEval, ply));
     }
 
     /// <summary>
