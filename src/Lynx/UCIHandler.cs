@@ -469,6 +469,14 @@ public sealed class UCIHandler
                     }
                     break;
                 }
+            case "fp_historydepthfactor":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.FP_HistoryDepthFactor = value;
+                    }
+                    break;
+                }
             case "historyprunning_maxdepth":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))

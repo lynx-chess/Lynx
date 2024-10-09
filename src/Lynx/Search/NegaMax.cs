@@ -271,12 +271,14 @@ public sealed partial class Engine
                         break;
                     }
 
+                    var moveHistory = _quietHistory[move.Piece()][move.TargetSquare()];
+
                     // 🔍 History pruning -  all quiet moves can be pruned
                     // once we find one with a history score too low
                     if (!isCapture
                         && moveScores[moveIndex] < EvaluationConstants.CounterMoveValue
                         && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth // TODO use LMR depth
-                        && _quietHistory[move.Piece()][move.TargetSquare()] < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
+                        && moveHistory < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
                     {
                         // After making a move
                         Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
@@ -289,10 +291,12 @@ public sealed partial class Engine
                     // 🔍 Futility Pruning (FP) - all quiet moves can be pruned
                     // once it's considered that they don't have potential to raise alpha
                     if (visitedMovesCounter > 0
-                        //&& alpha < EvaluationConstants.PositiveCheckmateDetectionLimit
-                        //&& beta > EvaluationConstants.NegativeCheckmateDetectionLimit
                         && depth <= Configuration.EngineSettings.FP_MaxDepth
-                        && staticEval + Configuration.EngineSettings.FP_Margin + (Configuration.EngineSettings.FP_DepthScalingFactor * depth) <= alpha)
+                        && staticEval
+                            + Configuration.EngineSettings.FP_Margin
+                            + (Configuration.EngineSettings.FP_DepthScalingFactor * depth)
+                            + (moveHistory * depth / Configuration.EngineSettings.FP_HistoryDepthFactor)
+                        <= alpha)
                     {
                         // After making a move
                         Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
