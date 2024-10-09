@@ -243,30 +243,49 @@ public sealed partial class Engine
                 // If we prune while getting checmated, we risk not finding any move and having an empty PV
                 bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
 
-                if (!pvNode && !isInCheck && isNotGettingCheckmated
-                    && moveScores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue) // Quiet move
+                if (!pvNode && !isInCheck && isNotGettingCheckmated)
                 {
-                    // 🔍 Late Move Pruning (LMP) - all quiet moves can be pruned
-                    // after searching the first few given by the move ordering algorithm
-                    if (depth <= Configuration.EngineSettings.LMP_MaxDepth
-                        && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth)) // Based on formula suggested by Antares
+                    // Quiet moves
+                    if (moveScores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue)
                     {
-                        // After making a move
-                        Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
-                        Game.RemoveFromPositionHashHistory();
-                        position.UnmakeMove(move, gameState);
+                        // 🔍 Late Move Pruning (LMP) - all quiet moves can be pruned
+                        // after searching the first few given by the move ordering algorithm
+                        if (depth <= Configuration.EngineSettings.LMP_MaxDepth
+                            && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth)) // Based on formula suggested by Antares
+                        {
+                            // After making a move
+                            Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
+                            Game.RemoveFromPositionHashHistory();
+                            position.UnmakeMove(move, gameState);
 
-                        break;
-                    }
+                            break;
+                        }
 
-                    if (!isCapture
-                        && moveScores[moveIndex] < EvaluationConstants.CounterMoveValue
-                        && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth)  // TODO use LMR depth
-                    {
-                        // 🔍 History pruning -  all quiet moves can be pruned
-                        // once we find one with a history score too low
-                        // if this move's history score is too low, we start skipping moves.
-                        if (_quietHistory[move.Piece()][move.TargetSquare()] < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
+                        if (!isCapture
+                            && moveScores[moveIndex] < EvaluationConstants.CounterMoveValue
+                            && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth)  // TODO use LMR depth
+                        {
+                            // 🔍 History pruning -  all quiet moves can be pruned
+                            // once we find one with a history score too low
+                            // if this move's history score is too low, we start skipping moves.
+                            if (_quietHistory[move.Piece()][move.TargetSquare()] < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
+                            {
+                                // After making a move
+                                Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
+                                Game.RemoveFromPositionHashHistory();
+                                position.UnmakeMove(move, gameState);
+
+                                break;
+                            }
+                        }
+
+                        // 🔍 Futility Pruning (FP) - all quiet moves can be pruned
+                        // once it's considered that they don't have potential to raise alpha
+                        if (visitedMovesCounter > 0
+                            //&& alpha < EvaluationConstants.PositiveCheckmateDetectionLimit
+                            //&& beta > EvaluationConstants.NegativeCheckmateDetectionLimit
+                            && depth <= Configuration.EngineSettings.FP_MaxDepth
+                            && staticEval + Configuration.EngineSettings.FP_Margin + (Configuration.EngineSettings.FP_DepthScalingFactor * depth) <= alpha)
                         {
                             // After making a move
                             Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
@@ -277,20 +296,30 @@ public sealed partial class Engine
                         }
                     }
 
-                    // 🔍 Futility Pruning (FP) - all quiet moves can be pruned
-                    // once it's considered that they don't have potential to raise alpha
-                    if (visitedMovesCounter > 0
-                        //&& alpha < EvaluationConstants.PositiveCheckmateDetectionLimit
-                        //&& beta > EvaluationConstants.NegativeCheckmateDetectionLimit
-                        && depth <= Configuration.EngineSettings.FP_MaxDepth
-                        && staticEval + Configuration.EngineSettings.FP_Margin + (Configuration.EngineSettings.FP_DepthScalingFactor * depth) <= alpha)
+                    if (isCapture && depth <= Configuration.EngineSettings.SEE_Pruning_CaptureHistory_MaxDepth)
                     {
-                        // After making a move
-                        Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
-                        Game.RemoveFromPositionHashHistory();
-                        position.UnmakeMove(move, gameState);
+                        // 🔍 SEE pruning using capture history
+                        var captureHistoryValue = _captureHistory[CaptureHistoryIndex(move.Piece(), move.TargetSquare(), move.CapturedPiece())];
 
-                        break;
+                        int captureHistoryThresholdLimit = Configuration.EngineSettings.SEE_Pruning_CaptureHistory_Divisor * depth;
+
+                        // Formula from SF
+                        var threshold =
+                            captureHistoryThresholdLimit
+                            - Math.Clamp(
+                                captureHistoryValue / Configuration.EngineSettings.SEE_Pruning_CaptureHistory_Divisor,
+                                -captureHistoryThresholdLimit,
+                                +captureHistoryThresholdLimit);
+
+                        if (!SEE.IsGoodCapture(position, move, threshold))
+                        {
+                            // After making a move
+                            Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
+                            Game.RemoveFromPositionHashHistory();
+                            position.UnmakeMove(move, gameState);
+
+                            continue;
+                        }
                     }
                 }
 
