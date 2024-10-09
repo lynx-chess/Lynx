@@ -28,22 +28,22 @@ public struct TranspositionTableElement
     private NodeType _type;
 
     /// <summary>
-    /// 16 MSB of Zobrist key
+    /// 16 MSB of Position's Zobrist key
     /// </summary>
     public readonly ushort Key => _key;
 
     /// <summary>
-    /// Best move found in a position. 0 if the position failed low (score <= alpha)
+    /// Best move found in the position. 0 if the search failed low (score <= alpha)
     /// </summary>
     public readonly ShortMove Move => _move;
 
     /// <summary>
-    /// Position evaluation
+    /// Position's score
     /// </summary>
     public readonly int Score => _score;
 
     /// <summary>
-    /// Position evaluation
+    /// Position's static evaluation
     /// </summary>
     public readonly int StaticEval => _staticEval;
 
@@ -69,7 +69,7 @@ public struct TranspositionTableElement
     {
         _key = (ushort)key;
         _score = (short)score;
-        _score = (short)staticEval;
+        _staticEval = (short)staticEval;
         _depth = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref depth, 1))[0];
         _type = nodeType;
         _move = move != null ? (ShortMove)move : Move;    // Suggested by cj5716 instead of 0. https://github.com/lynx-chess/Lynx/pull/462
