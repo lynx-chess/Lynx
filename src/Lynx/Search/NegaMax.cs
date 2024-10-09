@@ -68,7 +68,6 @@ public sealed partial class Engine
         _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
 
         bool isInCheck = position.IsInCheck();
-        int rawStaticEval = int.MaxValue;
         int staticEval = int.MaxValue;
         int phase = int.MaxValue;
 
@@ -91,13 +90,13 @@ public sealed partial class Engine
         {
             if (ttElementType == default)
             {
-                (rawStaticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
+                (staticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
             }
             else
             {
                 Debug.Assert(ttStaticEval != int.MinValue);
 
-                rawStaticEval = ttStaticEval;
+                staticEval = ttStaticEval;
                 phase = position.Phase();
             }
 
@@ -106,13 +105,9 @@ public sealed partial class Engine
             // If the score is outside what the current bounds are, but it did match flag and depth,
             // then we can trust that this score is more accurate than the current static evaluation,
             // and we can update our static evaluation for better accuracy in pruning
-            if (ttElementType != default && ttElementType != (ttRawScore > rawStaticEval ? NodeType.Alpha : NodeType.Beta))
+            if (ttElementType != default && ttElementType != (ttRawScore > staticEval ? NodeType.Alpha : NodeType.Beta))
             {
                 staticEval = ttRawScore;
-            }
-            else
-            {
-                staticEval = rawStaticEval;
             }
 
             if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
@@ -409,7 +404,7 @@ public sealed partial class Engine
                         UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(depth, ply, visitedMoves, visitedMovesCounter, move, isRoot);
                     }
 
-                    _tt.RecordHash(position, rawStaticEval, depth, ply, bestScore, NodeType.Beta, bestMove);
+                    _tt.RecordHash(position, staticEval, depth, ply, bestScore, NodeType.Beta, bestMove);
 
                     return bestScore;
                 }
@@ -423,12 +418,12 @@ public sealed partial class Engine
             Debug.Assert(bestMove is null);
 
             var finalEval = Position.EvaluateFinalPosition(ply, isInCheck);
-            _tt.RecordHash(position, rawStaticEval, depth, ply, finalEval, NodeType.Exact);
+            _tt.RecordHash(position, staticEval, depth, ply, finalEval, NodeType.Exact);
 
             return finalEval;
         }
 
-        _tt.RecordHash(position, rawStaticEval, depth, ply, bestScore, nodeType, bestMove);
+        _tt.RecordHash(position, staticEval, depth, ply, bestScore, nodeType, bestMove);
 
         // Node fails low
         return bestScore;
