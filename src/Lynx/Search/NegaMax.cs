@@ -43,10 +43,11 @@ public sealed partial class Engine
         NodeType ttElementType = default;
         int ttScore = default;
         int ttRawScore = default;
+        int ttStaticEval = int.MinValue;
 
         if (!isRoot)
         {
-            (ttScore, ttBestMove, ttElementType, ttRawScore) = _tt.ProbeHash(position, depth, ply, alpha, beta);
+            (ttScore, ttBestMove, ttElementType, ttRawScore, ttStaticEval) = _tt.ProbeHash(position, depth, ply, alpha, beta);
             if (!pvNode && ttScore != EvaluationConstants.NoHashEntry)
             {
                 return ttScore;
@@ -67,7 +68,9 @@ public sealed partial class Engine
         _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
 
         bool isInCheck = position.IsInCheck();
-        int staticEval = int.MaxValue, phase = int.MaxValue;
+        int rawStaticEval = int.MaxValue;
+        int staticEval = int.MaxValue;
+        int phase = int.MaxValue;
 
         if (isInCheck)
         {
@@ -81,21 +84,35 @@ public sealed partial class Engine
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
-            _tt.RecordHash(position, depth, ply, finalPositionEvaluation, NodeType.Exact);
+            _tt.RecordHash(position, finalPositionEvaluation, depth, ply, finalPositionEvaluation, NodeType.Exact);
             return finalPositionEvaluation;
         }
         else if (!pvNode)
         {
-            (staticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
+            if (ttElementType == default)
+            {
+                (rawStaticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
+            }
+            else
+            {
+                Debug.Assert(ttStaticEval != int.MinValue);
+
+                rawStaticEval = ttStaticEval;
+                phase = position.Phase();
+            }
 
             // From smol.cs
             // ttEvaluation can be used as a better positional evaluation:
             // If the score is outside what the current bounds are, but it did match flag and depth,
             // then we can trust that this score is more accurate than the current static evaluation,
             // and we can update our static evaluation for better accuracy in pruning
-            if (ttElementType != default && ttElementType != (ttRawScore > staticEval ? NodeType.Alpha : NodeType.Beta))
+            if (ttElementType != default && ttElementType != (ttRawScore > rawStaticEval ? NodeType.Alpha : NodeType.Beta))
             {
                 staticEval = ttRawScore;
+            }
+            else
+            {
+                staticEval = rawStaticEval;
             }
 
             if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
@@ -259,22 +276,19 @@ public sealed partial class Engine
                         break;
                     }
 
+                    // 🔍 History pruning -  all quiet moves can be pruned
+                    // once we find one with a history score too low
                     if (!isCapture
                         && moveScores[moveIndex] < EvaluationConstants.CounterMoveValue
-                        && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth)  // TODO use LMR depth
+                        && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth // TODO use LMR depth
+                        && _quietHistory[move.Piece()][move.TargetSquare()] < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
                     {
-                        // 🔍 History pruning -  all quiet moves can be pruned
-                        // once we find one with a history score too low
-                        // if this move's history score is too low, we start skipping moves.
-                        if (_quietHistory[move.Piece()][move.TargetSquare()] < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
-                        {
-                            // After making a move
-                            Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
-                            Game.RemoveFromPositionHashHistory();
-                            position.UnmakeMove(move, gameState);
+                        // After making a move
+                        Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
+                        Game.RemoveFromPositionHashHistory();
+                        position.UnmakeMove(move, gameState);
 
-                            break;
-                        }
+                        break;
                     }
 
                     // 🔍 Futility Pruning (FP) - all quiet moves can be pruned
@@ -402,7 +416,7 @@ public sealed partial class Engine
                         UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(depth, ply, visitedMoves, visitedMovesCounter, move, isRoot);
                     }
 
-                    _tt.RecordHash(position, depth, ply, bestScore, NodeType.Beta, bestMove);
+                    _tt.RecordHash(position, rawStaticEval, depth, ply, bestScore, NodeType.Beta, bestMove);
 
                     return bestScore;
                 }
@@ -416,12 +430,12 @@ public sealed partial class Engine
             Debug.Assert(bestMove is null);
 
             var finalEval = Position.EvaluateFinalPosition(ply, isInCheck);
-            _tt.RecordHash(position, depth, ply, finalEval, NodeType.Exact);
+            _tt.RecordHash(position, rawStaticEval, depth, ply, finalEval, NodeType.Exact);
 
             return finalEval;
         }
 
-        _tt.RecordHash(position, depth, ply, bestScore, nodeType, bestMove);
+        _tt.RecordHash(position, rawStaticEval, depth, ply, bestScore, nodeType, bestMove);
 
         // Node fails low
         return bestScore;
@@ -467,7 +481,9 @@ public sealed partial class Engine
 
         _maxDepthReached[ply] = ply;
 
-        var staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
+        var staticEval = ttProbeResult.NodeType != NodeType.Unknown
+            ? ttProbeResult.StaticEval
+            : position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
 
         // Beta-cutoff (updating alpha after this check)
         if (staticEval >= beta)
@@ -554,7 +570,7 @@ public sealed partial class Engine
                 {
                     PrintMessage($"Pruning: {move} is enough to discard this line");
 
-                    _tt.RecordHash(position, 0, ply, bestScore, NodeType.Beta, bestMove);
+                    _tt.RecordHash(position, staticEval, 0, ply, bestScore, NodeType.Beta, bestMove);
 
                     return bestScore; // The refutation doesn't matter, since it'll be pruned
                 }
@@ -579,12 +595,12 @@ public sealed partial class Engine
             Debug.Assert(bestMove is null);
 
             var finalEval = Position.EvaluateFinalPosition(ply, position.IsInCheck());
-            _tt.RecordHash(position, 0, ply, finalEval, NodeType.Exact);
+            _tt.RecordHash(position, staticEval, 0, ply, finalEval, NodeType.Exact);
 
             return finalEval;
         }
 
-        _tt.RecordHash(position, 0, ply, bestScore, nodeType, bestMove);
+        _tt.RecordHash(position, staticEval, 0, ply, bestScore, nodeType, bestMove);
 
         return bestScore;
     }
