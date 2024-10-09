@@ -15,21 +15,42 @@ public enum NodeType : byte
 
 public struct TranspositionTableElement
 {
-    /// <summary>
-    /// 16 MSB of Zobrist key
-    /// </summary>
-    public ushort Key { get; set; }
+    private ushort _key;
 
-    public short StaticEval { get; set; }
-
-    /// <summary>
-    /// Best move found in a position. 0 if the position failed low (score <= alpha)
-    /// </summary>
-    public ShortMove Move { get; set; }
+    private ShortMove _move;
 
     private short _score;
 
+    private short _staticEval;
+
     private byte _depth;
+
+    private NodeType _type;
+
+    /// <summary>
+    /// 16 MSB of Position's Zobrist key
+    /// </summary>
+    public readonly ushort Key => _key;
+
+    /// <summary>
+    /// Best move found in the position. 0 if the search failed low (score <= alpha)
+    /// </summary>
+    public readonly ShortMove Move => _move;
+
+    /// <summary>
+    /// Position's score
+    /// </summary>
+    public readonly int Score => _score;
+
+    /// <summary>
+    /// Position's static evaluation
+    /// </summary>
+    public readonly int StaticEval => _staticEval;
+
+    /// <summary>
+    /// How deep the recorded search went. For us this numberis targetDepth - ply
+    /// </summary>
+    public readonly int Depth => _depth;
 
     /// <summary>
     /// Node (position) type:
@@ -37,19 +58,22 @@ public struct TranspositionTableElement
     /// <see cref="NodeType.Alpha"/>: &lt;= <see cref="Score"/>,
     /// <see cref="NodeType.Beta"/>: &gt;= <see cref="Score"/>
     /// </summary>
-    public NodeType Type { get; set; }
+    public readonly NodeType Type => _type;
 
     /// <summary>
-    /// How deep the recorded search went. For us this numberis targetDepth - ply
+    /// Struct size in bytes
     /// </summary>
-    public int Depth { readonly get => _depth; set => _depth = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref value, 1))[0]; }
-
-    /// <summary>
-    /// Position evaluation
-    /// </summary>
-    public int Score { readonly get => _score; set => _score = (short)value; }
-
     public static ulong Size => (ulong)Marshal.SizeOf(typeof(TranspositionTableElement));
+
+    public void Update(ulong key, int score, int staticEval, int depth, NodeType nodeType, Move? move)
+    {
+        _key = (ushort)key;
+        _score = (short)score;
+        _staticEval = (short)staticEval;
+        _depth = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref depth, 1))[0];
+        _type = nodeType;
+        _move = move != null ? (ShortMove)move : Move;    // Suggested by cj5716 instead of 0. https://github.com/lynx-chess/Lynx/pull/462
+    }
 }
 
 public static class TranspositionTableExtensions
@@ -110,6 +134,7 @@ public static class TranspositionTableExtensions
             return (EvaluationConstants.NoHashEntry, default, default, default, default);
         }
 
+        var type = entry.Type;
         var rawScore = entry.Score;
         var score = EvaluationConstants.NoHashEntry;
 
@@ -117,9 +142,9 @@ public static class TranspositionTableExtensions
         {
             var recalculatedScore = RecalculateMateScores(rawScore, ply);
 
-            if (entry.Type == NodeType.Exact
-                || (entry.Type == NodeType.Alpha && recalculatedScore <= alpha)
-                || (entry.Type == NodeType.Beta && recalculatedScore >= beta))
+            if (type == NodeType.Exact
+                || (type == NodeType.Alpha && recalculatedScore <= alpha)
+                || (type == NodeType.Beta && recalculatedScore >= beta))
             {
                 // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
                 // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
@@ -166,12 +191,7 @@ public static class TranspositionTableExtensions
         // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
         var recalculatedScore = RecalculateMateScores(score, -ply);
 
-        entry.Key = (ushort)position.UniqueIdentifier;
-        entry.StaticEval = (short)staticEval;
-        entry.Score = recalculatedScore;
-        entry.Depth = depth;
-        entry.Type = nodeType;
-        entry.Move = move != null ? (ShortMove)move : entry.Move;    // Suggested by cj5716 instead of 0. https://github.com/lynx-chess/Lynx/pull/462
+        entry.Update(position.UniqueIdentifier, recalculatedScore, staticEval, depth, nodeType, move);
     }
 
     /// <summary>
