@@ -194,6 +194,9 @@ public sealed class EngineSettings
     [SPSA<int>(1, 200, 10)]
     public int FP_DepthScalingFactor { get; set; } = 73;
 
+    [SPSA<int>(50, 1000, 50)]
+    public int FP_HistoryDepthFactor { get; set; } = 100;
+
     [SPSA<int>(0, 500, 25)]
     public int FP_Margin { get; set; } = 218;
 
