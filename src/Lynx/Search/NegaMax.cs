@@ -276,22 +276,19 @@ public sealed partial class Engine
                         break;
                     }
 
+                    // 🔍 History pruning -  all quiet moves can be pruned
+                    // once we find one with a history score too low
                     if (!isCapture
                         && moveScores[moveIndex] < EvaluationConstants.CounterMoveValue
-                        && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth)  // TODO use LMR depth
+                        && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth // TODO use LMR depth
+                        && _quietHistory[move.Piece()][move.TargetSquare()] < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
                     {
-                        // 🔍 History pruning -  all quiet moves can be pruned
-                        // once we find one with a history score too low
-                        // if this move's history score is too low, we start skipping moves.
-                        if (_quietHistory[move.Piece()][move.TargetSquare()] < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
-                        {
-                            // After making a move
-                            Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
-                            Game.RemoveFromPositionHashHistory();
-                            position.UnmakeMove(move, gameState);
+                        // After making a move
+                        Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
+                        Game.RemoveFromPositionHashHistory();
+                        position.UnmakeMove(move, gameState);
 
-                            break;
-                        }
+                        break;
                     }
 
                     // 🔍 Futility Pruning (FP) - all quiet moves can be pruned
