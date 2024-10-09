@@ -490,11 +490,9 @@ public class Position : IDisposable
             * ((blackPawnAttacks & OccupancyBitBoards[(int)Side.White] /* & (~whitePawns) */).CountBits()
                 - (whitePawnAttacks & OccupancyBitBoards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
 
-        const int maxPhase = 24;
-
-        if (gamePhase > maxPhase)    // Early promotions
+        if (gamePhase > MaxPhase)    // Early promotions
         {
-            gamePhase = maxPhase;
+            gamePhase = MaxPhase;
         }
 
         int totalPawnsCount = whitePawns.CountBits() + blackPawns.CountBits();
@@ -552,11 +550,11 @@ public class Position : IDisposable
             }
         }
 
-        int endGamePhase = maxPhase - gamePhase;
+        int endGamePhase = MaxPhase - gamePhase;
 
         var middleGameScore = Utils.UnpackMG(packedScore);
         var endGameScore = Utils.UnpackEG(packedScore);
-        var eval = ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / maxPhase;
+        var eval = ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / MaxPhase;
 
         // Endgame scaling with pawn count, formula yoinked from Sirius
         eval = (int)(eval * ((80 + (totalPawnsCount * 7)) / 128.0));
@@ -570,6 +568,23 @@ public class Position : IDisposable
             : -eval;
 
         return (sideEval, gamePhase);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public int Phase()
+    {
+        int gamePhase =
+             ((PieceBitBoards[(int)Piece.N] | PieceBitBoards[(int)Piece.n]).CountBits() * GamePhaseByPiece[(int)Piece.N])
+            + ((PieceBitBoards[(int)Piece.B] | PieceBitBoards[(int)Piece.b]).CountBits() * GamePhaseByPiece[(int)Piece.B])
+            + ((PieceBitBoards[(int)Piece.R] | PieceBitBoards[(int)Piece.r]).CountBits() * GamePhaseByPiece[(int)Piece.R])
+            + ((PieceBitBoards[(int)Piece.Q] | PieceBitBoards[(int)Piece.q]).CountBits() * GamePhaseByPiece[(int)Piece.Q]);
+
+        if (gamePhase > MaxPhase)    // Early promotions
+        {
+            gamePhase = MaxPhase;
+        }
+
+        return gamePhase;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
