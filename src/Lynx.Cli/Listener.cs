@@ -1,17 +1,14 @@
-﻿using NLog;
-using System.Text;
+﻿using System.Text;
 
 namespace Lynx.Cli;
 
 public sealed class Listener
 {
-    private readonly Logger _logger;
     private readonly UCIHandler _uciHandler;
 
     public Listener(UCIHandler uCIHandler)
     {
         _uciHandler = uCIHandler;
-        _logger = LogManager.GetCurrentClassLogger();
     }
 
     public async Task Run(CancellationToken cancellationToken, params string[] args)
@@ -37,11 +34,9 @@ public sealed class Listener
         }
         catch (Exception e)
         {
-            _logger.Fatal(e);
         }
         finally
         {
-            _logger.Info("Finishing {0}", nameof(Listener));
         }
     }
 

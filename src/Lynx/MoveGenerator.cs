@@ -6,10 +6,6 @@ namespace Lynx;
 
 public static class MoveGenerator
 {
-#if DEBUG
-    private static readonly NLog.Logger _logger = NLog.LogManager.GetCurrentClassLogger();
-#endif
-
     private const int TRUE = 1;
 
     public static readonly int WhiteShortCastle = MoveExtensions.EncodeShortCastle(Constants.WhiteKingSourceSquare, Constants.WhiteShortCastleKingSquare, (int)Piece.K);
@@ -169,7 +165,6 @@ public static class MoveGenerator
 #if DEBUG
             if (sourceRank == 1 || sourceRank == 8)
             {
-                _logger.Warn("There's a non-promoted {0} pawn in rank {1}", position.Side, sourceRank);
                 continue;
             }
 #endif
@@ -255,7 +250,6 @@ public static class MoveGenerator
 #if DEBUG
             if (sourceRank == 1 || sourceRank == 8)
             {
-                _logger.Warn("There's a non-promoted {0} pawn in rank {1}", position.Side, sourceRank);
                 continue;
             }
 #endif
@@ -514,7 +508,6 @@ public static class MoveGenerator
 #if DEBUG
             if (sourceRank == 1 || sourceRank == 8)
             {
-                _logger.Warn("There's a non-promoted {0} pawn in rank {1}", position.Side, sourceRank);
                 continue;
             }
 #endif

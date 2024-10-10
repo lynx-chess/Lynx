@@ -1,5 +1,4 @@
-﻿using NLog;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
@@ -41,8 +40,6 @@ public static class MoveExtensions
     private const int CapturedPieceOffset = 20;
     private const int IsCaptureOffset = 24;
     private const int SpecialMoveFlagOffset = 25;
-
-    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Move Encode(int sourceSquare, int targetSquare, int piece)
@@ -165,7 +162,6 @@ public static class MoveExtensions
 
             if (move.Equals(default(Move)))
             {
-                _logger.Warn("Unable to link last move string {0} to a valid move in the current position. That move may have already been played", UCIString.ToString());
                 move = null;
                 return false;
             }
@@ -188,7 +184,6 @@ public static class MoveExtensions
             move = candidateMoves.FirstOrDefault(predicate);
             if (move.Equals(default(Move)))
             {
-                _logger.Warn("Unable to link move {0} to a valid move in the current position. That move may have already been played", UCIString.ToString());
                 move = null;
                 return false;
             }
@@ -248,7 +243,6 @@ public static class MoveExtensions
             }
         }
 
-        _logger.Warn("Unable to link last move string {0} to a valid move in the current position. That move may have already been played", UCIString.ToString());
         move = null;
 
         return false;

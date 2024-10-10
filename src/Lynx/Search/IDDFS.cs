@@ -122,15 +122,10 @@ public sealed partial class Engine
                     alpha = Math.Max(EvaluationConstants.MinEval, lastSearchResult.Score - window);
                     beta = Math.Min(EvaluationConstants.MaxEval, lastSearchResult.Score + window);
 
-                    _logger.Debug("Aspiration windows depth {Depth}: [{Alpha}, {Beta}] for previous search score {Score}, nodes {Nodes}",
-                        depth, alpha, beta, lastSearchResult.Score, _nodes);
                     Debug.Assert(lastSearchResult.Mate == 0 && lastSearchResult.Score > EvaluationConstants.NegativeCheckmateDetectionLimit && lastSearchResult.Score < EvaluationConstants.PositiveCheckmateDetectionLimit);
 
                     while (true)
                     {
-                        _logger.Debug("Aspiration windows depth {Depth}: [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
-                            depth, alpha, beta, bestScore, _nodes);
-
                         bestScore = NegaMax(depth: depth - failHighReduction, ply: 0, alpha, beta);
 
                         // 13, 19, 28, 42, 63, 94, 141, 211, 316, 474, 711, 1066, 1599, 2398, 3597, 5395, 8092, 12138, 18207, 27310, 40965, 61447, 92170
@@ -172,10 +167,6 @@ public sealed partial class Engine
         }
         catch (OperationCanceledException)
         {
-#pragma warning disable S6667 // Logging in a catch clause should pass the caught exception as a parameter - expected exception we want to ignore
-            _logger.Info("Search cancellation requested after {0}ms (depth {1}, nodes {2}), best move will be returned", _stopWatch.ElapsedMilliseconds, depth, _nodes);
-#pragma warning restore S6667 // Logging in a catch clause should pass the caught exception as a parameter.
-
             for (int i = 0; i < lastSearchResult?.Moves.Length; ++i)
             {
                 _pVTable[i] = lastSearchResult.Moves[i];
@@ -183,7 +174,6 @@ public sealed partial class Engine
         }
         catch (Exception e) when (e is not AssertException)
         {
-            _logger.Error(e, "Unexpected error ocurred during the search of position {0} at depth {1}, best move will be returned\n{2}", Game.PositionBeforeLastSearch.FEN(), depth, e.StackTrace);
         }
         finally
         {
@@ -197,7 +187,6 @@ public sealed partial class Engine
             && (finalSearchResult.Mate * 2) + Game.HalfMovesWithoutCaptureOrPawnMove < Constants.MaxMateDistanceToStopSearching)
         {
             _searchCancellationTokenSource.Cancel();
-            _logger.Info("Engine search found a short enough mate, cancelling online tb probing if still active");
         }
 
         _engineWriter.TryWrite(finalSearchResult);
@@ -210,31 +199,21 @@ public sealed partial class Engine
         if (mate != 0)
         {
             var winningMateThreshold = (100 - Game.HalfMovesWithoutCaptureOrPawnMove) / 2;
-            _logger.Info("Depth {0}: mate in {1} detected ({2} moves until draw by repetition)", depth - 1, mate, winningMateThreshold);
 
             if (mate < 0 || mate + Constants.MateDistanceMarginToStopSearching < winningMateThreshold)
             {
-                _logger.Info("Stopping search: mate is short enough");
                 return false;
             }
-
-            _logger.Info("Search continues, hoping to find a faster mate");
         }
 
         if (depth >= Configuration.EngineSettings.MaxDepth)
         {
-            _logger.Info("Max depth reached: {0}", Configuration.EngineSettings.MaxDepth);
             return false;
         }
 
         if (maxDepth > 0)
         {
             var shouldContinue = depth <= maxDepth;
-
-            if (!shouldContinue)
-            {
-                _logger.Info("Stopping at depth {0}: max. depth reached", depth - 1);
-            }
 
             return shouldContinue;
         }
@@ -243,7 +222,6 @@ public sealed partial class Engine
 
         if (elapsedMilliseconds > softLimitTimeBound)
         {
-            _logger.Info("Stopping at depth {0} (nodes {1}): {2}ms > {3}ms", depth - 1, _nodes, elapsedMilliseconds, softLimitTimeBound);
             return false;
         }
 
@@ -283,8 +261,6 @@ public sealed partial class Engine
         // Detect if there was only one legal move
         if (onlyOneLegalMove)
         {
-            _logger.Debug("One single move found");
-
             // We don't have or need any eval, and we don't want to return 0 or a negative eval that
             // could make the GUI resign or take a draw from this position.
             // Since this only happens in root, we don't really care about being more precise for raising
@@ -338,10 +314,6 @@ public sealed partial class Engine
         {
             // In the event of a quick ponderhit/stop while pondering because the opponent moved quickly, we don't want no warning triggered here
             // when cancelling the pondering search
-            if (!_isPondering)
-            {
-                _logger.Warn("Search cancelled at depth 1, choosing first found legal move as best one");
-            }
             finalSearchResult = new(firstLegalMove, 0, 0, [firstLegalMove]);
         }
         else

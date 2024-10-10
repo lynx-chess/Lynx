@@ -26,7 +26,6 @@ public sealed partial class Engine
         // Prevents runtime failure in case depth is increased due to check extension, since we're using ply when calculating pvTable index,
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
-            _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
             return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
         }
 
@@ -452,7 +451,6 @@ public sealed partial class Engine
 
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
-            _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
             return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
         }
 

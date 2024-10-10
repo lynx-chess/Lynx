@@ -1,6 +1,4 @@
-﻿using NLog;
-
-namespace Lynx.UCI.Commands.GUI;
+﻿namespace Lynx.UCI.Commands.GUI;
 
 /// <summary>
 /// go
@@ -46,8 +44,6 @@ namespace Lynx.UCI.Commands.GUI;
 /// </summary>
 public sealed class GoCommand : IGUIBaseCommand
 {
-    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
     public const string Id = "go";
 
     public int WhiteTime { get; }
@@ -151,26 +147,21 @@ public sealed class GoCommand : IGUIBaseCommand
                     }
                 case "nodes":
                     {
-                        _logger.Warn("nodes not supported in go command, it will be safely ignored");
                         ++i;
                         break;
                     }
                 case "mate":
                     {
-                        _logger.Warn("mate not supported in go command, it will be safely ignored");
                         ++i;
                         break;
                     }
                 case "searchmoves":
                     {
                         const string message = "searchmoves not supported in go command";
-
-                        _logger.Error(message);
                         throw new NotImplementedException(message);
                     }
                 default:
                     {
-                        _logger.Warn("{0} not supported in go command, attempting to continue command parsing", commandAsSpan[ranges[i]].ToString());
                         break;
                     }
             }

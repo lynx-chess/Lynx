@@ -1,7 +1,6 @@
 ﻿using Lynx.Model;
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
-using NLog;
 using System.Diagnostics;
 using System.Runtime.Intrinsics.X86;
 using System.Text.Json;
@@ -16,7 +15,6 @@ public sealed class UCIHandler
     private readonly Channel<object> _engineToUci;
 
     private readonly Engine _engine;
-    private readonly Logger _logger;
 
     public UCIHandler(Channel<string> uciToEngine, Channel<object> engineToUci, Engine engine)
     {
@@ -24,7 +22,6 @@ public sealed class UCIHandler
         _engineToUci = engineToUci;
 
         _engine = engine;
-        _logger = LogManager.GetCurrentClassLogger();
     }
 
     public async Task Handle(string rawCommand, CancellationToken cancellationToken)
@@ -40,11 +37,6 @@ public sealed class UCIHandler
 
         try
         {
-            if (_logger.IsDebugEnabled)
-            {
-                _logger.Debug("[GUI]\t{0}", rawCommand);
-            }
-
             switch (ExtractCommandItems(rawCommand))
             {
                 case GoCommand.Id:
@@ -117,13 +109,11 @@ public sealed class UCIHandler
                     await HandleWeatherFactorySPSA(cancellationToken);
                     break;
                 default:
-                    _logger.Warn("Unknown command received: {0}", rawCommand);
                     break;
             }
         }
         catch (Exception e)
         {
-            _logger.Error(e, "Error trying to read/parse UCI command");
         }
     }
 
@@ -140,8 +130,6 @@ public sealed class UCIHandler
 #if DEBUG
         _engine.Game.CurrentPosition.Print();
 #endif
-
-        _logger.Info("Position parsing took {0}ms", sw.ElapsedMilliseconds);
     }
 
     private void HandleStop() => _engine.StopSearching();
@@ -166,10 +154,6 @@ public sealed class UCIHandler
         if (Configuration.EngineSettings.IsPonder)
         {
             _engine.PonderHit();
-        }
-        else
-        {
-            _logger.Warn("Unexpected 'ponderhit' command, given pondering is disabled. Ignoring it");
         }
     }
 
@@ -215,20 +199,10 @@ public sealed class UCIHandler
             case "uci_opponent":
                 {
                     const string none = "none ";
-                    if (length > 4)
-                    {
-                        var opponent = command[commandItems[4].Start.Value..].ToString();
-
-                        _logger.Info("Game against {0}", opponent.Replace(none, string.Empty));
-                    }
                     break;
                 }
             case "uci_engineabout":
                 {
-                    if (length > 4)
-                    {
-                        _logger.Info("UCI_EngineAbout: {0}", command[commandItems[4].Start.Value..].ToString());
-                    }
                     break;
                 }
             case "onlinetablebaseinrootpositions":
@@ -252,10 +226,6 @@ public sealed class UCIHandler
 #pragma warning disable S1066 // Collapsible "if" statements should be merged
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
-                        if (value != 1)
-                        {
-                            _logger.Warn("Unsopported threads value: {0}", value);
-                        }
                     }
                     break;
 #pragma warning restore S1066 // Collapsible "if" statements should be merged
@@ -489,17 +459,12 @@ public sealed class UCIHandler
             #endregion
 
             default:
-                _logger.Warn("Unsupported option: {0}", command.ToString());
                 break;
         }
     }
 
     private void HandleNewGame()
     {
-        if (_engine.AverageDepth > 0 && _engine.AverageDepth < int.MaxValue)
-        {
-            _logger.Info("Average depth: {0}", _engine.AverageDepth);
-        }
         _engine.NewGame();
     }
 
@@ -507,10 +472,6 @@ public sealed class UCIHandler
 
     private void HandleQuit()
     {
-        if (_engine.AverageDepth > 0 && _engine.AverageDepth < int.MaxValue)
-        {
-            _logger.Info("Average depth: {0}", _engine.AverageDepth);
-        }
         _engineToUci.Writer.Complete();
     }
 
@@ -571,7 +532,6 @@ public sealed class UCIHandler
         }
         catch (Exception e)
         {
-            _logger.Error(e);
         }
     }
 
@@ -582,7 +542,6 @@ public sealed class UCIHandler
             var fullPath = Path.GetFullPath(rawCommand[(rawCommand.IndexOf(' ') + 1)..].Replace("\"", string.Empty));
             if (!File.Exists(fullPath))
             {
-                _logger.Warn("File {0} not found in (1), ignoring command", rawCommand, fullPath);
                 return;
             }
 
@@ -594,15 +553,10 @@ public sealed class UCIHandler
                 var position = new Position(fen);
                 if (!position.IsValid())
                 {
-                    _logger.Warn("Position {0}, parsed as {1} and then {2} not valid, skipping it", line, fen, position.FEN());
                     continue;
                 }
 
                 var ourFen = position.FEN();
-                if (ourFen != fen)
-                {
-                    _logger.Debug("Raw fen: {0}, parsed fen: {1}", fen, ourFen);
-                }
 
                 var eval = WDL.NormalizeScore(position.StaticEvaluation().Score);
                 if (position.Side == Side.Black)
