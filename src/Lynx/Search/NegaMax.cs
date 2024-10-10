@@ -275,12 +275,15 @@ public sealed partial class Engine
                         break;
                     }
 
+                    var moveHistory = isCapture
+                        ? _captureHistory[CaptureHistoryIndex(move.Piece(), move.TargetSquare(), move.CapturedPiece())]
+                        : _quietHistory[move.Piece()][move.TargetSquare()];
+
                     // 🔍 History pruning -  all quiet moves can be pruned
                     // once we find one with a history score too low
-                    if (!isCapture
-                        && moveScores[moveIndex] < EvaluationConstants.CounterMoveValue
+                    if (moveScores[moveIndex] < EvaluationConstants.CounterMoveValue
                         && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth    // TODO use LMR depth
-                        && _quietHistory[move.Piece()][move.TargetSquare()] < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
+                        && moveHistory < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
                     {
                         RevertMove();
                         break;
