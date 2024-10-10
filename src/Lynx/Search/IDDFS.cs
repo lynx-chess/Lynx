@@ -128,10 +128,12 @@ public sealed partial class Engine
 
                     while (true)
                     {
-                        _logger.Debug("Aspiration windows depth {Depth}: [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
-                            depth, alpha, beta, bestScore, _nodes);
+                        var aspWindowDepth = depth - Math.Min(2, failHighReduction);
 
-                        bestScore = NegaMax(depth: depth - failHighReduction, ply: 0, alpha, beta);
+                        _logger.Debug("Aspiration windows depth {Depth}: [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
+                            aspWindowDepth, alpha, beta, bestScore, _nodes);
+
+                        bestScore = NegaMax(depth: aspWindowDepth, ply: 0, alpha, beta);
 
                         // 13, 19, 28, 42, 63, 94, 141, 211, 316, 474, 711, 1066, 1599, 2398, 3597, 5395, 8092, 12138, 18207, 27310, 40965, 61447, 92170
                         window += window >> 1;   // window / 2
