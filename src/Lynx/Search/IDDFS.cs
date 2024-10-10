@@ -128,7 +128,7 @@ public sealed partial class Engine
 
                     while (true)
                     {
-                        var aspWindowDepth = depth - Math.Min(2, failHighReduction);
+                        var aspWindowDepth = depth - Math.Min(3, failHighReduction);
 
                         _logger.Debug("Aspiration windows depth {Depth}: [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
                             aspWindowDepth, alpha, beta, bestScore, _nodes);
