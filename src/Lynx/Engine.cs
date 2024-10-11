@@ -73,8 +73,7 @@ public sealed partial class Engine
             _killerMoves[i] = new Move[3];
         }
 
-        (int ttLength, _ttMask) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
-        _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
+        AllocateTT();
 
 #if !DEBUG
         // Temporary channel so that no output is generated
@@ -90,6 +89,14 @@ public sealed partial class Engine
         GC.Collect();
         GC.WaitForPendingFinalizers();
 #pragma warning restore S1215 // "GC.Collect" should not be called
+    }
+
+    private void AllocateTT()
+    {
+        _currentTranspositionTableSize = Configuration.EngineSettings.TranspositionTableSize;
+
+        var ttLength = TranspositionTableExtensions.CalculateLength(_currentTranspositionTableSize);
+        _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
     }
 
 #pragma warning disable S1144 // Unused private types or members should be removed - used in Release mode
@@ -113,7 +120,15 @@ public sealed partial class Engine
 
     private void ResetEngine()
     {
-        Array.Clear(_tt);
+        if (_currentTranspositionTableSize == Configuration.EngineSettings.TranspositionTableSize)
+        {
+            Array.Clear(_tt);
+        }
+        else
+        {
+            _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _currentTranspositionTableSize, Configuration.EngineSettings.TranspositionTableSize);
+            AllocateTT();
+        }
 
         // Clear histories
         for (int i = 0; i < 12; ++i)
@@ -273,11 +288,13 @@ public sealed partial class Engine
         double p = (double)(plies_played);
 
         return (int)Math.Round(
-            (59.3 + (72830.0 - p * 2330.0) / (p * p + p * 10.0 + 2644.0))   // Plies remaining
+            (59.3 + ((72830.0 - (p * 2330.0)) / ((p * p) + (p * 10.0) + 2644.0)))   // Plies remaining
             / 2.0); // Full moves remaining
     }
 
+#pragma warning disable S1144 // Unused private types or members should be removed - wanna keep this around
     private async ValueTask<SearchResult> SearchBestMove(int maxDepth, int softLimitTimeBound)
+#pragma warning restore S1144 // Unused private types or members should be removed
     {
         if (!Configuration.EngineSettings.UseOnlineTablebaseInRootPositions || Game.CurrentPosition.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
         {
@@ -299,8 +316,8 @@ public sealed partial class Engine
 
         if (searchResult is not null)
         {
-            _logger.Info("Search evaluation result - eval: {0}, mate: {1}, depth: {2}, pv: {3}",
-                searchResult.Evaluation, searchResult.Mate, searchResult.Depth, string.Join(", ", searchResult.Moves.Select(m => m.UCIString())));
+            _logger.Info("Search evaluation result - score: {0}, mate: {1}, depth: {2}, pv: {3}",
+                searchResult.Score, searchResult.Mate, searchResult.Depth, string.Join(", ", searchResult.Moves.Select(m => m.UCIString())));
         }
 
         if (tbResult is not null)

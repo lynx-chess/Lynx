@@ -14,7 +14,7 @@ public sealed class Game : IDisposable
 #endif
 
     private int _positionHashHistoryPointer;
-    private readonly long[] _positionHashHistory;
+    private readonly ulong[] _positionHashHistory;
 
     /// <summary>
     /// Indexed by ply
@@ -35,7 +35,7 @@ public sealed class Game : IDisposable
     public Game(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan, Span<Move> movePool)
     {
         Debug.Assert(Constants.MaxNumberMovesInAGame <= 1024, "Need to customized ArrayPool due to desired array size requirements");
-        _positionHashHistory = ArrayPool<long>.Shared.Rent(Constants.MaxNumberMovesInAGame);
+        _positionHashHistory = ArrayPool<ulong>.Shared.Rent(Constants.MaxNumberMovesInAGame);
         _moveStack = ArrayPool<Move>.Shared.Rent(Constants.MaxNumberMovesInAGame);
 
         var parsedFen = FENParser.ParseFEN(fen);
@@ -165,7 +165,7 @@ public sealed class Game : IDisposable
     /// <param name="position"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsThreefoldRepetition(ReadOnlySpan<long> positionHashHistory, Position position, int halfMovesWithoutCaptureOrPawnMove = Constants.MaxNumberMovesInAGame)
+    public static bool IsThreefoldRepetition(ReadOnlySpan<ulong> positionHashHistory, Position position, int halfMovesWithoutCaptureOrPawnMove = Constants.MaxNumberMovesInAGame)
     {
         var currentHash = position.UniqueIdentifier;
 
@@ -239,20 +239,20 @@ public sealed class Game : IDisposable
     public int PositionHashHistoryLength() => _positionHashHistoryPointer;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void AddToPositionHashHistory(long hash) => _positionHashHistory[_positionHashHistoryPointer++] = hash;
+    public void AddToPositionHashHistory(ulong hash) => _positionHashHistory[_positionHashHistoryPointer++] = hash;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void RemoveFromPositionHashHistory() => --_positionHashHistoryPointer;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public long[] CopyPositionHashHistory() => _positionHashHistory[.._positionHashHistoryPointer];
+    public ulong[] CopyPositionHashHistory() => _positionHashHistory[.._positionHashHistoryPointer];
 
     internal void ClearPositionHashHistory() => _positionHashHistoryPointer = 0;
 
     public void FreeResources()
     {
         ArrayPool<Move>.Shared.Return(_moveStack);
-        ArrayPool<long>.Shared.Return(_positionHashHistory);
+        ArrayPool<ulong>.Shared.Return(_positionHashHistory);
 
         CurrentPosition.FreeResources();
         PositionBeforeLastSearch.FreeResources();

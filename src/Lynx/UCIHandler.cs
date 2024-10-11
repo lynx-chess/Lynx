@@ -208,7 +208,7 @@ public sealed class UCIHandler
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
-                        Configuration.Hash = Math.Clamp(value, Constants.AbsoluteMinTTSize, Constants.AbsoluteMaxTTSize);
+                        Configuration.Hash = value;
                     }
                     break;
                 }
@@ -337,19 +337,27 @@ public sealed class UCIHandler
                     break;
                 }
 
-            case "aspirationwindow_delta":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.AspirationWindow_Delta = value;
-                    }
-                    break;
-                }
+            //case "aspirationwindow_delta":
+            //    {
+            //        if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+            //        {
+            //            Configuration.EngineSettings.AspirationWindow_Delta = value;
+            //        }
+            //        break;
+            //    }
             case "aspirationwindow_mindepth":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
                         Configuration.EngineSettings.AspirationWindow_MinDepth = value;
+                    }
+                    break;
+                }
+            case "aspirationwindow_base":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.AspirationWindow_Base = value;
                     }
                     break;
                 }
@@ -458,6 +466,22 @@ public sealed class UCIHandler
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
                         Configuration.EngineSettings.FP_Margin = value;
+                    }
+                    break;
+                }
+            case "historyprunning_maxdepth":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.HistoryPrunning_MaxDepth = value;
+                    }
+                    break;
+                }
+            case "historyprunning_margin":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.HistoryPrunning_Margin = value;
                     }
                     break;
                 }

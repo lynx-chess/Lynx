@@ -4,7 +4,7 @@ using System.Diagnostics;
 namespace Lynx;
 public sealed partial class Engine
 {
-    public async Task<SearchResult?> ProbeOnlineTablebase(Position position, long[] positionHashHistory, int halfMovesWithoutCaptureOrPawnMove)
+    public async Task<SearchResult?> ProbeOnlineTablebase(Position position, ulong[] positionHashHistory, int halfMovesWithoutCaptureOrPawnMove)
     {
         var stopWatch = Stopwatch.StartNew();
 
@@ -14,11 +14,13 @@ public sealed partial class Engine
 
             if (tablebaseResult.BestMove != 0)
             {
-                var searchResult = new SearchResult(tablebaseResult.BestMove, evaluation: 0, targetDepth: 0, [tablebaseResult.BestMove], mate: tablebaseResult.MateScore)
+                var elapsedSeconds = Utils.CalculateElapsedSeconds(stopWatch);
+
+                var searchResult = new SearchResult(tablebaseResult.BestMove, score: 0, targetDepth: 0, [tablebaseResult.BestMove], mate: tablebaseResult.MateScore)
                 {
                     DepthReached = 0,
                     Nodes = 666,                // In case some guis proritize the info command with biggest depth
-                    Time = stopWatch.ElapsedMilliseconds,
+                    Time = Utils.CalculateUCITime(elapsedSeconds),
                     NodesPerSecond = 0,
                     HashfullPermill = _tt.HashfullPermillApprox(),
                     WDL = WDL.WDLModel(
@@ -38,7 +40,9 @@ public sealed partial class Engine
         }
         catch (OperationCanceledException) // Also catches TaskCanceledException
         {
+#pragma warning disable S6667 // Logging in a catch clause should pass the caught exception as a parameter. - expected
             _logger.Info("Online tb probing cancellation requested after {0}ms", _stopWatch.ElapsedMilliseconds);
+#pragma warning restore S6667 // Logging in a catch clause should pass the caught exception as a parameter.
 
             return null;
         }

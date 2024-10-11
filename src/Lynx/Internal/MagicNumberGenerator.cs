@@ -88,8 +88,10 @@ public static class MagicNumberGenerator
                 }
                 else if (usedAttacks[magicIndex] != attacks[index])
                 {
+#pragma warning disable S127 // "for" loop stop conditions should be invariant - intentional
                     // Magic index doesn't work
                     fail = true;
+#pragma warning restore S127 // "for" loop stop conditions should be invariant
                 }
             }
 
@@ -104,21 +106,36 @@ public static class MagicNumberGenerator
     }
 
     /// <summary>
-    /// *Untested*
+    /// Used to generate <see cref="Constants.RookMagicNumbers"/> and <see cref="Constants.BishopMagicNumbers">
     /// </summary>
     public static void InitializeMagicNumbers()
     {
+        Console.Write("\tpublic static ReadOnlySpan<BitBoard> RookMagicNumbers =>\n\t[\n\t\t");
         for (int square = 0; square < 64; ++square)
         {
-            // Rook
             var magicRook = FindMagicNumbers(square, false);
-            Console.WriteLine(magicRook.ToString("x"));
+            Console.Write($"0x{magicRook:x},".PadRight(22));
 
-            Console.WriteLine();
-
-            // Bishop
-            var magicBishop = FindMagicNumbers(square, true);
-            Console.WriteLine(magicBishop.ToString("x"));
+            if ((square + 1) % 8 == 0 && square != 63)
+            {
+                Console.Write($"{Environment.NewLine}\t\t");
+            }
         }
+
+        Console.WriteLine("\n\t];\n");
+
+        Console.Write("\tpublic static ReadOnlySpan<BitBoard> BishopMagicNumbers =>\n\t[\n\t\t");
+        for (int square = 0; square < 64; ++square)
+        {
+            var magicBishop = FindMagicNumbers(square, true);
+            Console.Write($"0x{magicBishop:x},".PadRight(22));
+
+            if ((square + 1) % 8 == 0 && square != 63)
+            {
+                Console.Write($"{Environment.NewLine}\t\t");
+            }
+        }
+
+        Console.WriteLine("\n\t];\n");
     }
 }

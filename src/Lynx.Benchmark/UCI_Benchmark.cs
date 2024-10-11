@@ -42,7 +42,7 @@ public class UCI_Benchmark : BaseBenchmark
     private readonly Channel<object> _channel = Channel.CreateBounded<object>(new BoundedChannelOptions(100_000) { SingleReader = true, SingleWriter = false });
 
     [Benchmark]
-    public (long, long) Bench_DefaultDepth()
+    public (ulong, ulong) Bench_DefaultDepth()
     {
         var engine = new Engine(_channel.Writer);
         return engine.Bench(Configuration.EngineSettings.BenchDepth);

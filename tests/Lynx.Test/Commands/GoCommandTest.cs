@@ -18,8 +18,8 @@ public class GoCommandTest
         Assert.AreEqual(50, goCommand.MovesToGo);
         Assert.AreEqual(60, goCommand.Depth);
         Assert.AreEqual(70, goCommand.MoveTime);
-        _ = Assert.Throws<NotImplementedException>(() => _ = goCommand.Mate);
-        _ = Assert.Throws<NotImplementedException>(() => _ = goCommand.Nodes);
-        _ = Assert.Throws<NotImplementedException>(() => _ = goCommand.SearchMoves);
+        _ = Assert.Throws<NotImplementedException>(() => _ = GoCommand.Mate);
+        _ = Assert.Throws<NotImplementedException>(() => _ = GoCommand.Nodes);
+        _ = Assert.Throws<NotImplementedException>(() => _ = GoCommand.SearchMoves);
     }
 }

@@ -1,7 +1,4 @@
-﻿using Lynx.Model;
-using System.Text;
-
-namespace Lynx.UCI.Commands.Engine;
+﻿namespace Lynx.UCI.Commands.Engine;
 
 /// <summary>
 /// info
@@ -72,7 +69,7 @@ namespace Lynx.UCI.Commands.Engine;
 ///	    If is greater than 1, always send all k lines in k strings together.
 ///		The engine should only send this if the option "UCI_ShowCurrLine" is set to true.
 /// </summary>
-public sealed class InfoCommand : EngineBaseCommand
+public sealed class InfoCommand : IEngineBaseCommand
 {
     public const string Id = "info";
 }

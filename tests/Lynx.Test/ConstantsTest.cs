@@ -1,7 +1,6 @@
 ﻿using Lynx.Model;
 using NUnit.Framework;
 using System.Collections.Frozen;
-using System.Diagnostics;
 using static Lynx.Constants;
 
 namespace Lynx.Test;
@@ -141,7 +140,7 @@ public class ConstantsTest
         Assert.True(LightSquaresBitBoard.GetBit((int)BoardSquare.h1));
         Assert.False(LightSquaresBitBoard.GetBit((int)BoardSquare.a1));
         Assert.False(LightSquaresBitBoard.GetBit((int)BoardSquare.h8));
-        
+
         Assert.AreEqual(1, LightSquares[(int)BoardSquare.a8]);
         Assert.AreEqual(1, LightSquares[(int)BoardSquare.h1]);
         Assert.AreEqual(0, LightSquares[(int)BoardSquare.a1]);

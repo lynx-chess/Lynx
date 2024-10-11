@@ -127,7 +127,7 @@ public class InfoCommand_Benchmark : BaseBenchmark
         return InfoCommand_StringBuilder_256.SearchResultInfo(result).Length;
     }
 
-    public sealed class InfoCommand_StringAddition : EngineBaseCommand
+    public sealed class InfoCommand_StringAddition : IEngineBaseCommand
     {
         public const string Id = "info";
 
@@ -138,7 +138,7 @@ public class InfoCommand_Benchmark : BaseBenchmark
                 $" depth {searchResult.Depth}" +
                 $" seldepth {searchResult.DepthReached}" +
                 $" multipv 1" +
-                $" score {(searchResult.Mate == default ? $"cp {WDL.NormalizeScore(searchResult.Evaluation)}" : $"mate {searchResult.Mate}")}" +
+                $" score {(searchResult.Mate == default ? $"cp {WDL.NormalizeScore(searchResult.Score)}" : $"mate {searchResult.Mate}")}" +
                 $" nodes {searchResult.Nodes}" +
                 $" nps {searchResult.NodesPerSecond}" +
                 $" time {searchResult.Time}" +
@@ -149,7 +149,7 @@ public class InfoCommand_Benchmark : BaseBenchmark
         }
     }
 
-    public sealed class InfoCommand_StringBuilder_256 : EngineBaseCommand
+    public sealed class InfoCommand_StringBuilder_256 : IEngineBaseCommand
     {
         public const string Id = "info";
 
@@ -161,7 +161,7 @@ public class InfoCommand_Benchmark : BaseBenchmark
             sb.Append(" depth ").Append(searchResult.Depth);
             sb.Append(" seldepth ").Append(searchResult.DepthReached);
             sb.Append(" multipv 1");
-            sb.Append(" score ").Append(searchResult.Mate == default ? $"cp {WDL.NormalizeScore(searchResult.Evaluation)}" : $"mate {searchResult.Mate}");
+            sb.Append(" score ").Append(searchResult.Mate == default ? $"cp {WDL.NormalizeScore(searchResult.Score)}" : $"mate {searchResult.Mate}");
             sb.Append(" nodes ").Append(searchResult.Nodes);
             sb.Append(" nps ").Append(searchResult.NodesPerSecond);
             sb.Append(" time ").Append(searchResult.Time)
@@ -181,7 +181,7 @@ public class InfoCommand_Benchmark : BaseBenchmark
         }
     }
 
-    public sealed class InfoCommand_StringBuilder_128 : EngineBaseCommand
+    public sealed class InfoCommand_StringBuilder_128 : IEngineBaseCommand
     {
         public const string Id = "info";
 
@@ -193,7 +193,7 @@ public class InfoCommand_Benchmark : BaseBenchmark
             sb.Append(" depth ").Append(searchResult.Depth);
             sb.Append(" seldepth ").Append(searchResult.DepthReached);
             sb.Append(" multipv 1");
-            sb.Append(" score ").Append(searchResult.Mate == default ? $"cp {WDL.NormalizeScore(searchResult.Evaluation)}" : $"mate {searchResult.Mate}");
+            sb.Append(" score ").Append(searchResult.Mate == default ? $"cp {WDL.NormalizeScore(searchResult.Score)}" : $"mate {searchResult.Mate}");
             sb.Append(" nodes ").Append(searchResult.Nodes);
             sb.Append(" nps ").Append(searchResult.NodesPerSecond);
             sb.Append(" time ").Append(searchResult.Time)

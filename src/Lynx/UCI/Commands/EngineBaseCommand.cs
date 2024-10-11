@@ -1,3 +1,3 @@
 ﻿namespace Lynx.UCI.Commands;
 
-public interface EngineBaseCommand;
+public interface IEngineBaseCommand;

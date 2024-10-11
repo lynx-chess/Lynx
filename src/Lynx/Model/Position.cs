@@ -13,7 +13,7 @@ public class Position : IDisposable
 {
     private bool _disposedValue;
 
-    public long UniqueIdentifier { get; private set; }
+    public ulong UniqueIdentifier { get; private set; }
 
     /// <summary>
     /// Use <see cref="Piece"/> as index
@@ -96,7 +96,7 @@ public class Position : IDisposable
     {
         byte castleCopy = Castle;
         BoardSquare enpassantCopy = EnPassant;
-        long uniqueIdentifierCopy = UniqueIdentifier;
+        var uniqueIdentifierCopy = UniqueIdentifier;
 
         var oldSide = (int)Side;
         var offset = Utils.PieceOffset(oldSide);
@@ -224,12 +224,6 @@ public class Position : IDisposable
         UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
 
         return new GameState(uniqueIdentifierCopy, enpassantCopy, castleCopy);
-        //var clone = new Position(this);
-        //clone.UnmakeMove(move, gameState);
-        //if (uniqueIdentifierCopy != clone.UniqueIdentifier)
-        //{
-        //    throw new($"{FEN()}: {uniqueIdentifierCopy} expected, got {clone.UniqueIdentifier} got after Make/Unmake move {move.ToEPDString()}");
-        //}
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -496,11 +490,9 @@ public class Position : IDisposable
             * ((blackPawnAttacks & OccupancyBitBoards[(int)Side.White] /* & (~whitePawns) */).CountBits()
                 - (whitePawnAttacks & OccupancyBitBoards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
 
-        const int maxPhase = 24;
-
-        if (gamePhase > maxPhase)    // Early promotions
+        if (gamePhase > MaxPhase)    // Early promotions
         {
-            gamePhase = maxPhase;
+            gamePhase = MaxPhase;
         }
 
         int totalPawnsCount = whitePawns.CountBits() + blackPawns.CountBits();
@@ -558,24 +550,41 @@ public class Position : IDisposable
             }
         }
 
-        int endGamePhase = maxPhase - gamePhase;
+        int endGamePhase = MaxPhase - gamePhase;
 
         var middleGameScore = Utils.UnpackMG(packedScore);
         var endGameScore = Utils.UnpackEG(packedScore);
-        var eval = ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / maxPhase;
+        var eval = ((middleGameScore * gamePhase) + (endGameScore * endGamePhase)) / MaxPhase;
 
         // Endgame scaling with pawn count, formula yoinked from Sirius
         eval = (int)(eval * ((80 + (totalPawnsCount * 7)) / 128.0));
 
         eval = ScaleEvalWith50MovesDrawDistance(eval, movesWithoutCaptureOrPawnMove);
 
-        eval = Math.Clamp(eval, MinEval, MaxEval);
+        eval = Math.Clamp(eval, MinStaticEval, MaxStaticEval);
 
         var sideEval = Side == Side.White
             ? eval
             : -eval;
 
         return (sideEval, gamePhase);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public int Phase()
+    {
+        int gamePhase =
+             ((PieceBitBoards[(int)Piece.N] | PieceBitBoards[(int)Piece.n]).CountBits() * GamePhaseByPiece[(int)Piece.N])
+            + ((PieceBitBoards[(int)Piece.B] | PieceBitBoards[(int)Piece.b]).CountBits() * GamePhaseByPiece[(int)Piece.B])
+            + ((PieceBitBoards[(int)Piece.R] | PieceBitBoards[(int)Piece.r]).CountBits() * GamePhaseByPiece[(int)Piece.R])
+            + ((PieceBitBoards[(int)Piece.Q] | PieceBitBoards[(int)Piece.q]).CountBits() * GamePhaseByPiece[(int)Piece.Q]);
+
+        if (gamePhase > MaxPhase)    // Early promotions
+        {
+            gamePhase = MaxPhase;
+        }
+
+        return gamePhase;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -684,7 +693,7 @@ public class Position : IDisposable
 
         var occupancy = OccupancyBitBoards[(int)Side.Both];
         var attacks = Attacks.RookAttacks(squareIndex, occupancy);
-        
+
         // Mobility
         var attacksCount =
             (attacks
@@ -739,7 +748,7 @@ public class Position : IDisposable
     private int BishopAdditionalEvaluation(int squareIndex, int pieceIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
     {
         const int pawnToBishopOffset = (int)Piece.B - (int)Piece.P;
-        
+
         var occupancy = OccupancyBitBoards[(int)Side.Both];
         var attacks = Attacks.BishopAttacks(squareIndex, occupancy);
 
@@ -761,6 +770,17 @@ public class Position : IDisposable
 
         packedBonus += BadBishop_SameColorPawnsPenalty[sameColorPawns.CountBits()];
 
+        // Blocked central pawns
+        var sameSideCentralPawns = sameSidePawns & Constants.CentralFiles;
+
+        var pawnBlockerSquares = pieceSide == (int)Side.White
+            ? sameSideCentralPawns.ShiftUp()
+            : sameSideCentralPawns.ShiftDown();
+
+        var pawnBlockers = pawnBlockerSquares & OccupancyBitBoards[Utils.OppositeSide(pieceSide)];
+
+        packedBonus += BadBishop_BlockedCentralPawnsPenalty[pawnBlockers.CountBits()];
+
         // Checks
         var enemyKingCheckThreats = Attacks.BishopAttacks(oppositeSideKingSquare, occupancy);
         var checks = (attacks & enemyKingCheckThreats).CountBits();
@@ -775,7 +795,7 @@ public class Position : IDisposable
     {
         var occupancy = OccupancyBitBoards[(int)Side.Both];
         var attacks = Attacks.QueenAttacks(squareIndex, occupancy);
-        
+
         // Mobility
         var attacksCount =
             (attacks

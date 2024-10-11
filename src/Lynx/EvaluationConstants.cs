@@ -4,23 +4,25 @@
 
 namespace Lynx;
 
-public static partial class EvaluationConstants
+public static class EvaluationConstants
 {
     /// <summary>
-    /// 20000 games, 20+0.2, 8moves_v3.epd
-    /// Retained (W,D,L) = (415984, 1356391, 417074) positions.
+    /// 20_000 games, 20+0.2, 8moves_v3.epd, no draw or win adj.
+    /// Retained (W,D,L) = (432747, 1652733, 434200) positions.
     /// </summary>
-    public const int EvalNormalizationCoefficient = 139;
+    public const int EvalNormalizationCoefficient = 99;
 
-    public static ReadOnlySpan<double> As => [-22.39558276, 143.95892718, -98.84854041, 117.14472929];
+    public static ReadOnlySpan<double> As => [-3.65736087, 46.66362338, -38.24834086, 94.32750834];
 
-    public static ReadOnlySpan<double> Bs => [-6.67029772, 41.06172677, -36.37312580, 80.73370363];
+    public static ReadOnlySpan<double> Bs => [-0.59179904, 16.00808254, -30.40319388, 61.53258225];
 
     public static ReadOnlySpan<int> GamePhaseByPiece =>
     [
         0, 1, 1, 2, 4, 0,
         0, 1, 1, 2, 4, 0
     ];
+
+    public const int MaxPhase = 24;
 
     /// <summary>
     /// <see cref="Constants.AbsoluteMaxDepth"/> x <see cref="Constants.MaxNumberOfPossibleMovesInAPosition"/>
@@ -89,7 +91,17 @@ public static partial class EvaluationConstants
     /// <summary>
     /// Base absolute checkmate evaluation value. Actual absolute evaluations are lower than this one by a number of <see cref="Position.DepthCheckmateFactor"/>
     /// </summary>
-    public const int CheckMateBaseEvaluation = 30_000;
+    public const int CheckMateBaseEvaluation = 29_000;
+
+    /// <summary>
+    /// Max eval, including checkmate values
+    /// </summary>
+    public const int MaxEval = 32_000;  // CheckMateBaseEvaluation + (Constants.AbsoluteMaxDepth + 45) * DepthCheckmateFactor;
+
+    /// <summary>
+    /// Min eval, including checkmate values
+    /// </summary>
+    public const int MinEval = -32_000;    // -CheckMateBaseEvaluation - (Constants.AbsoluteMaxDepth + 45) * DepthCheckmateFactor;
 
     /// <summary>
     /// This value combined with <see cref="PositiveCheckmateDetectionLimit"/> and <see cref="NegativeCheckmateDetectionLimit"/> should allows mates up to in <see cref="Constants.AbsoluteMaxDepth"/> moves.
@@ -99,22 +111,38 @@ public static partial class EvaluationConstants
     /// <summary>
     /// Minimum evaluation for a position to be White checkmate
     /// </summary>
-    public const int PositiveCheckmateDetectionLimit = 27_000; // CheckMateBaseEvaluation - (Constants.AbsoluteMaxDepth + 45) * DepthCheckmateFactor;
+    public const int PositiveCheckmateDetectionLimit = 26_000; // CheckMateBaseEvaluation - (Constants.AbsoluteMaxDepth + 45) * DepthCheckmateFactor;
 
     /// <summary>
     /// Minimum evaluation for a position to be Black checkmate
     /// </summary>
-    public const int NegativeCheckmateDetectionLimit = -27_000; // -CheckMateBaseEvaluation + (Constants.AbsoluteMaxDepth + 45) * DepthCheckmateFactor;
+    public const int NegativeCheckmateDetectionLimit = -26_000; // -CheckMateBaseEvaluation + (Constants.AbsoluteMaxDepth + 45) * DepthCheckmateFactor;
 
-    public const int MinEval = NegativeCheckmateDetectionLimit + 1;
+    /// <summary>
+    /// Max static eval. It doesn't include checkmate values and it's below <see cref="PositiveCheckmateDetectionLimit"/>
+    /// </summary>
+    public const int MaxStaticEval = PositiveCheckmateDetectionLimit - 1;
 
-    public const int MaxEval = PositiveCheckmateDetectionLimit - 1;
+    /// <summary>
+    /// Min static eval. It doesn't include checkmate values and it's above <see cref="NegativeCheckmateDetectionLimit"/>
+    /// </summary>
+    public const int MinStaticEval = NegativeCheckmateDetectionLimit + 1;
 
-    public const int PVMoveScoreValue = 4_194_304;
+    /// <summary>
+    /// Outside of the evaluation ranges (higher than any sensible evaluation, lower than <see cref="PositiveCheckmateDetectionLimit"/>)
+    /// </summary>
+    public const int NoHashEntry = 25_000;
+
+    /// <summary>
+    /// Evaluation to be returned when there's one single legal move
+    /// </summary>
+    public const int SingleMoveScore = 200;
+
+    #region Move ordering
 
     public const int TTMoveScoreValue = 2_097_152;
 
-    #region Move ordering
+    public const int QueenPromotionWithCaptureBaseValue = GoodCaptureMoveBaseScoreValue + PromotionMoveScoreValue;
 
     public const int GoodCaptureMoveBaseScoreValue = 1_048_576;
 
@@ -139,16 +167,6 @@ public static partial class EvaluationConstants
     public const int BaseMoveScore = int.MinValue / 2;
 
     #endregion
-
-    /// <summary>
-    /// Outside of the evaluation ranges (higher than any sensible evaluation, lower than <see cref="PositiveCheckmateDetectionLimit"/>)
-    /// </summary>
-    public const int NoHashEntry = 25_000;
-
-    /// <summary>
-    /// Evaluation to be returned when there's one single legal move
-    /// </summary>
-    public const int SingleMoveEvaluation = 200;
 
     public const int ContinuationHistoryPlyCount = 1;
 }

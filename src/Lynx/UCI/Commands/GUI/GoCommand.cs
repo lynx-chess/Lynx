@@ -44,7 +44,7 @@ namespace Lynx.UCI.Commands.GUI;
 ///	* infinite
 ///		search until the "stop" command. Do not exit the search without being told so in this mode!
 /// </summary>
-public sealed class GoCommand : GUIBaseCommand
+public sealed class GoCommand : IGUIBaseCommand
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
@@ -60,9 +60,9 @@ public sealed class GoCommand : GUIBaseCommand
     public bool Infinite { get; }
     public bool Ponder { get; private set; }
 
-    public int Nodes => throw new NotImplementedException();
-    public int Mate => throw new NotImplementedException();
-    public List<string> SearchMoves => throw new NotImplementedException();
+    public static int Nodes => throw new NotImplementedException();
+    public static int Mate => throw new NotImplementedException();
+    public static List<string> SearchMoves => throw new NotImplementedException();
 
     public GoCommand(string command)
     {
@@ -71,6 +71,7 @@ public sealed class GoCommand : GUIBaseCommand
         Span<Range> ranges = stackalloc Range[commandAsSpan.Length];
         var rangesLength = commandAsSpan.Split(ranges, ' ', StringSplitOptions.RemoveEmptyEntries);
 
+#pragma warning disable S127 // "for" loop stop conditions should be invariant
         for (int i = 1; i < rangesLength; i++)  // Skipping go keyword
         {
             switch (commandAsSpan[ranges[i]])
@@ -163,7 +164,7 @@ public sealed class GoCommand : GUIBaseCommand
                 case "searchmoves":
                     {
                         const string message = "searchmoves not supported in go command";
-                        
+
                         _logger.Error(message);
                         throw new NotImplementedException(message);
                     }
@@ -172,8 +173,9 @@ public sealed class GoCommand : GUIBaseCommand
                         _logger.Warn("{0} not supported in go command, attempting to continue command parsing", commandAsSpan[ranges[i]].ToString());
                         break;
                     }
-            };
+            }
         }
+#pragma warning restore S127 // "for" loop stop conditions should be invariant
     }
 
     public static string Init() => Id;
