@@ -189,16 +189,16 @@ public sealed class EngineSettings
     public int SEE_BadCaptureReduction { get; set; } = 2;
 
     [SPSA<int>(1, 10, 0.5)]
-    public int FP_MaxDepth { get; set; } = 8;
+    public int FP_MaxDepth { get; set; } = 7;
 
     [SPSA<int>(1, 200, 10)]
-    public int FP_DepthScalingFactor { get; set; } = 95;
+    public int FP_DepthScalingFactor { get; set; } = 90;
 
     [SPSA<int>(50, 1000, 50)]
-    public int FP_HistoryDepthFactor { get; set; } = 218;
+    public int FP_HistoryDepthFactor { get; set; } = 241;
 
     [SPSA<int>(0, 500, 25)]
-    public int FP_Margin { get; set; } = 182;
+    public int FP_Margin { get; set; } = 185;
 
     [SPSA<int>(0, 10, 0.5)]
     public int HistoryPrunning_MaxDepth { get; set; } = 5;
