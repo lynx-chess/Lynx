@@ -137,7 +137,7 @@ public static class TranspositionTableExtensions
 
         if ((ushort)position.UniqueIdentifier != entry.Key)
         {
-            return (EvaluationConstants.NoHashEntry, default, default, default, default);
+            return (EvaluationConstants.NoHashEntry, default, default, default, default, default);
         }
 
         var type = entry.Type;

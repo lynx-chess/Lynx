@@ -48,13 +48,13 @@ public sealed partial class Engine
 
         if (!isRoot)
         {
-            (ttScore, ttBestMove, ttElementType, ttRawScore, ttStaticEval, ttEntryDepth) = _tt.ProbeHash(_ttMask, position, depth, ply, alpha, beta);
+            (ttScore, ttBestMove, ttElementType, ttRawScore, ttStaticEval, ttEntryDepth) = _tt.ProbeHash(position, depth, ply, alpha, beta);
 
             if (!isVerifyingSE)
             {
-                if (!pvNode && ttEvaluation != EvaluationConstants.NoHashEntry)
+                if (!pvNode && ttScore != EvaluationConstants.NoHashEntry)
                 {
-                    return ttEvaluation;
+                    return ttScore;
                 }
 
                 // Internal iterative reduction (IIR)
@@ -160,27 +160,28 @@ public sealed partial class Engine
                     }
                 }
 
-            // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
-            if (depth >= Configuration.EngineSettings.NMP_MinDepth
-                && staticEval >= beta
-                && !parentWasNullMove
-                && phase > 2   // Zugzwang risk reduction: pieces other than pawn presents
-                && (ttElementType != NodeType.Alpha || ttScore >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
-            {
-                var nmpReduction = Configuration.EngineSettings.NMP_BaseDepthReduction + ((depth + Configuration.EngineSettings.NMP_DepthIncrement) / Configuration.EngineSettings.NMP_DepthDivisor);   // Clarity
+                // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
+                if (depth >= Configuration.EngineSettings.NMP_MinDepth
+                    && staticEval >= beta
+                    && !parentWasNullMove
+                    && phase > 2   // Zugzwang risk reduction: pieces other than pawn presents
+                    && (ttElementType != NodeType.Alpha || ttScore >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
+                {
+                    var nmpReduction = Configuration.EngineSettings.NMP_BaseDepthReduction + ((depth + Configuration.EngineSettings.NMP_DepthIncrement) / Configuration.EngineSettings.NMP_DepthDivisor);   // Clarity
 
                     // TODO more advanced adaptative reduction, similar to what Ethereal and Stormphrax are doing
                     //var nmpReduction = Math.Min(
                     //    depth,
                     //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
 
-                var gameState = position.MakeNullMove();
-                var nmpScore = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, parentWasNullMove: true);
-                position.UnMakeNullMove(gameState);
+                    var gameState = position.MakeNullMove();
+                    var nmpScore = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, parentWasNullMove: true);
+                    position.UnMakeNullMove(gameState);
 
-                if (nmpScore >= beta)
-                {
-                    return nmpScore;
+                    if (nmpScore >= beta)
+                    {
+                        return nmpScore;
+                    }
                 }
             }
         }

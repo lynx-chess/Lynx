@@ -202,7 +202,6 @@ public sealed class EngineSettings
 
     [SPSA<int>(-8192, 0, 512)]
     public int HistoryPrunning_Margin { get; set; } = -1940;
-    public int FP_Margin { get; set; } = 129;
 
     [SPSA<int>(1, 10, 0.5)]
     public int SE_MinDepth { get; set; } = 6;
