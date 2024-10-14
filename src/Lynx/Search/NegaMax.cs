@@ -48,7 +48,9 @@ public sealed partial class Engine
         if (!isRoot)
         {
             (ttScore, ttBestMove, ttElementType, ttRawScore, ttStaticEval) = _tt.ProbeHash(position, depth, ply, alpha, beta);
-            if (!pvNode && ttScore != EvaluationConstants.NoHashEntry)
+            if (!pvNode
+                && ttScore != EvaluationConstants.NoHashEntry
+                && ttScore >= alpha) // TODO || cutnode
             {
                 return ttScore;
             }
