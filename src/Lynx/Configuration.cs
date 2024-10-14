@@ -55,7 +55,7 @@ public sealed class GeneralSettings
 {
     public bool EnableLogging { get; set; } = false;
 
-    public bool EnableTuning { get; set; } = true;
+    public bool EnableTuning { get; set; } = false;
 }
 
 public sealed class EngineSettings
@@ -192,13 +192,13 @@ public sealed class EngineSettings
     public int FP_MaxDepth { get; set; } = 7;
 
     [SPSA<int>(1, 200, 10)]
-    public int FP_DepthScalingFactor { get; set; } = 90;
+    public int FP_DepthScalingFactor { get; set; } = 145;
 
     [SPSA<int>(50, 1000, 50)]
-    public int FP_HistoryDepthFactor { get; set; } = 241;
+    public int FP_HistoryDepthFactor { get; set; } = 580;
 
     [SPSA<int>(0, 500, 25)]
-    public int FP_Margin { get; set; } = 185;
+    public int FP_Margin { get; set; } = 30;
 
     [SPSA<int>(0, 10, 0.5)]
     public int HistoryPrunning_MaxDepth { get; set; } = 5;
