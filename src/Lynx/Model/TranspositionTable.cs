@@ -67,12 +67,25 @@ public struct TranspositionTableElement
 
     public void Update(ulong key, int score, int staticEval, int depth, NodeType nodeType, Move? move)
     {
-        _key = (ushort)key;
+        var newKey = (ushort)key;
         _score = (short)score;
         _staticEval = (short)staticEval;
         _depth = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref depth, 1))[0];
         _type = nodeType;
-        _move = move != null ? (ShortMove)move : Move;    // Suggested by cj5716 instead of 0. https://github.com/lynx-chess/Lynx/pull/462
+
+#pragma warning disable S3358 // Ternary operators should not be nested
+
+        // Original idea of reusing the move suggested by cj5716 (instead of having 0, no move)
+        // but I only apply it if keys match, i.e. we're replacing an entry for the same position
+        _move = move != null
+            ? (ShortMove)move
+            : (_key == newKey
+                ? Move
+                : default);
+
+#pragma warning restore S3358 // Ternary operators should not be nested
+
+        _key = newKey;
     }
 }
 
