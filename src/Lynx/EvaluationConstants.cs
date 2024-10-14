@@ -131,7 +131,7 @@ public static class EvaluationConstants
     /// <summary>
     /// Outside of the evaluation ranges (higher than any sensible evaluation, lower than <see cref="PositiveCheckmateDetectionLimit"/>)
     /// </summary>
-    public const int NoHashEntry = 25_000;
+    public const int NoHashEntry = short.MinValue;
 
     /// <summary>
     /// Evaluation to be returned when there's one single legal move
