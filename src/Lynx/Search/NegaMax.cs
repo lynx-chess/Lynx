@@ -260,6 +260,10 @@ public sealed partial class Engine
             }
             else
             {
+                var moveHistory = move.IsCapture()
+                    ? _captureHistory[CaptureHistoryIndex(move.Piece(), move.TargetSquare(), move.CapturedPiece())]
+                    : _quietHistory[move.Piece()][move.TargetSquare()];
+
                 // If we prune while getting checmated, we risk not finding any move and having an empty PV
                 bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
 
@@ -280,7 +284,7 @@ public sealed partial class Engine
                     if (!isCapture
                         && moveScores[moveIndex] < EvaluationConstants.CounterMoveValue
                         && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth    // TODO use LMR depth
-                        && _quietHistory[move.Piece()][move.TargetSquare()] < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
+                        && moveHistory < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
                     {
                         RevertMove();
                         break;
@@ -292,7 +296,11 @@ public sealed partial class Engine
                         //&& alpha < EvaluationConstants.PositiveCheckmateDetectionLimit
                         //&& beta > EvaluationConstants.NegativeCheckmateDetectionLimit
                         && depth <= Configuration.EngineSettings.FP_MaxDepth
-                        && staticEval + Configuration.EngineSettings.FP_Margin + (Configuration.EngineSettings.FP_DepthScalingFactor * depth) <= alpha)
+                        && alpha >=
+                            staticEval
+                            + Configuration.EngineSettings.FP_Margin
+                            + (Configuration.EngineSettings.FP_DepthScalingFactor * depth)
+                            + (moveHistory * 0.01 * depth)) // Potential
                     {
                         RevertMove();
                         break;
