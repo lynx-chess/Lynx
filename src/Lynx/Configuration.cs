@@ -142,6 +142,11 @@ public sealed class EngineSettings
     [SPSA<int>(1, 10, 0.5)]
     public int NMP_DepthDivisor { get; set; } = 3;
 
+    [SPSA<int>(10, 30, 1)]
+    public int NMP_DepthBeta { get; set; } = 23;
+
+    public int NMP_MarginBeta { get; set; } = 400;
+
     [SPSA<int>(5, 30, 1)]
     public int AspirationWindow_Base { get; set; } = 13;
 
