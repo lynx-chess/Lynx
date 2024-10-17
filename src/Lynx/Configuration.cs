@@ -151,6 +151,9 @@ public sealed class EngineSettings
     [SPSA<int>(1, 20, 1)]
     public int AspirationWindow_MinDepth { get; set; } = 8;
 
+    [SPSA<int>(500, 3000, 150)]
+    public int AspirationWindow_MaxAlpha { get; set; } = 2000;
+
     [SPSA<int>(1, 10, 0.5)]
     public int RFP_MaxDepth { get; set; } = 7;
 
