@@ -9,7 +9,13 @@ public enum NodeType : byte
 {
     Unknown,    // Making it 0 instead of -1 because of default struct initialization
     Exact,
+    /// <summary>
+    /// Upper bound
+    /// </summary>
     Alpha,
+    /// <summary>
+    /// Lower bound
+    /// </summary>
     Beta
 }
 
@@ -124,14 +130,14 @@ public static class TranspositionTableExtensions
     /// <param name="beta"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static (int Score, ShortMove BestMove, NodeType NodeType, int RawScore, int StaticEval) ProbeHash(this TranspositionTable tt, Position position, int depth, int ply, int alpha, int beta)
+    public static (int Score, ShortMove BestMove, NodeType NodeType, int RawScore, int StaticEval, int EntryDepth) ProbeHash(this TranspositionTable tt, Position position, int depth, int ply, int alpha, int beta)
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier, tt.Length);
         ref var entry = ref tt[ttIndex];
 
         if ((ushort)position.UniqueIdentifier != entry.Key)
         {
-            return (EvaluationConstants.NoHashEntry, default, default, default, default);
+            return (EvaluationConstants.NoHashEntry, default, default, default, default, default);
         }
 
         var type = entry.Type;
@@ -152,7 +158,7 @@ public static class TranspositionTableExtensions
             }
         }
 
-        return (score, entry.Move, entry.Type, rawScore, entry.StaticEval);
+        return (score, entry.Move, entry.Type, rawScore, entry.StaticEval, entry.Depth);
     }
 
     /// <summary>
