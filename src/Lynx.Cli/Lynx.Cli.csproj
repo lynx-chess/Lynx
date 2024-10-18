@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <ServerGarbageCollection>true</ServerGarbageCollection>
     <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
     <!--<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>-->
     <InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);Microsoft.Extensions.Configuration.Binder.SourceGeneration</InterceptorsPreviewNamespaces>
@@ -15,10 +14,14 @@
     <PublishTrimmed>true</PublishTrimmed>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+
     <TieredPGO>true</TieredPGO>
     <TieredCompilationQuickJitForLoops>true</TieredCompilationQuickJitForLoops>
     <!--In favour of tiered compilation-->
     <PublishReadyToRun>false</PublishReadyToRun>
+
+    <ServerGarbageCollection>true</ServerGarbageCollection>
+    <GarbageCollectionAdaptationMode>0</GarbageCollectionAdaptationMode>
   </PropertyGroup>
 
   <ItemGroup>
