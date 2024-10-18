@@ -397,7 +397,7 @@ public sealed partial class Engine
 
                     var historyDepth = depth;
 
-                    if (staticEval <= alpha)
+                    if (bestScore >= beta + 80)
                     {
                         ++historyDepth;
                     }
