@@ -395,13 +395,21 @@ public sealed partial class Engine
                 {
                     PrintMessage($"Pruning: {move} is enough");
 
+                    var historyDepth = depth;
+
+                    // Suggestion by Sirius author
+                    if (bestScore >= beta + 80)
+                    {
+                        ++historyDepth;
+                    }
+
                     if (isCapture)
                     {
-                        UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(depth, visitedMoves, visitedMovesCounter, move);
+                        UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(historyDepth, visitedMoves, visitedMovesCounter, move);
                     }
                     else
                     {
-                        UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(depth, ply, visitedMoves, visitedMovesCounter, move, isRoot);
+                        UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(historyDepth, ply, visitedMoves, visitedMovesCounter, move, isRoot);
                     }
 
                     _tt.RecordHash(position, staticEval, depth, ply, bestScore, NodeType.Beta, bestMove);
