@@ -146,7 +146,11 @@ public sealed partial class Engine
                         else if (beta <= bestScore)     // Fail high
                         {
                             beta = Math.Min(bestScore + window, EvaluationConstants.MaxEval);
-                            ++failHighReduction;
+
+                            if (alpha <= Configuration.EngineSettings.AspirationWindow_MaxAlpha)
+                            {
+                                ++failHighReduction;
+                            }
                         }
                         else
                         {
