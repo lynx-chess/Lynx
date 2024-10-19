@@ -398,7 +398,7 @@ public sealed partial class Engine
                     var historyDepth = depth;
 
                     // Suggestion by Sirius author
-                    if (bestScore >= beta + 80)
+                    if (bestScore >= beta + Configuration.EngineSettings.History_BestScoreBetaMargin)
                     {
                         ++historyDepth;
                     }
