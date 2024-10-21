@@ -481,10 +481,12 @@ public class Position : IDisposable
         }
 
         // Knight outpost bonus
-        var whiteKnightOutposts = PieceBitBoards[(int)Piece.N] & whitePawnAttacks & (~blackPawnAttacks);
+        var whiteKnightOutposts = PieceBitBoards[(int)Piece.N] & Constants.CentralAttackingSquares
+            & whitePawnAttacks & (~blackPawnAttacks);
         packedScore += KnightOutpostBonus * whiteKnightOutposts.CountBits();
 
-        var blackKnightOutposts = PieceBitBoards[(int)Piece.n] & blackPawnAttacks & (~whitePawnAttacks);
+        var blackKnightOutposts = PieceBitBoards[(int)Piece.n] & Constants.CentralAttackingSquares
+            & blackPawnAttacks & (~whitePawnAttacks);
         packedScore -= KnightOutpostBonus * blackKnightOutposts.CountBits();
 
         // Pieces protected by pawns bonus
