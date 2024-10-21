@@ -110,7 +110,20 @@ public static class Constants
     /// 1   0 0 0 0 0 0 0 0
     ///     a b c d e f g h
     /// </summary>
-    public const BitBoard CentralAttackingSquares = 0x3C3C3C0000;
+    public const BitBoard CentralAttackingWhiteSquares = 0x3C3C3C0000;
+
+    /// <summary>
+    /// 8   0 0 0 0 0 0 0 0
+    /// 7   0 0 0 0 0 0 0 0
+    /// 6   0 0 0 0 0 0 0 0
+    /// 5   0 0 1 1 1 1 0 0
+    /// 4   0 0 1 1 1 1 0 0
+    /// 3   0 0 1 1 1 1 0 0
+    /// 2   0 0 0 0 0 0 0 0
+    /// 1   0 0 0 0 0 0 0 0
+    ///     a b c d e f g h
+    /// </summary>
+    public const BitBoard CentralAttackingBlackSquares = 0x3C3C3C000000;
 
     public static readonly string[] Coordinates =
     [
