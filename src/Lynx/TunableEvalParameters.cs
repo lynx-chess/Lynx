@@ -6027,8 +6027,6 @@ public static class EvaluationParams
 
 	public static readonly TaperedEvaluationTerm BishopPairBonus = Pack(30, 72);
 
-	public static readonly TaperedEvaluationTerm KnightOutpostBonus = Pack(5, 10);
-
 	public static readonly TaperedEvaluationTerm PieceProtectedByPawnBonus = Pack(12, 15);
 
 	public static readonly TaperedEvaluationTerm PieceAttackedByPawnPenalty = Pack(-47, -33);
@@ -6042,6 +6040,18 @@ public static class EvaluationParams
 		Pack(55, 77),
 		Pack(208, 187),
 		Pack(-54, 403)
+	];
+
+	public static readonly TaperedEvaluationTermByRank KnightOutpostBonus =
+	[
+		Pack(0, 0),
+		Pack(1, 2),
+		Pack(10, 10),
+		Pack(22, 24),
+		Pack(55, 77),
+		Pack(208, 187),
+		Pack(-54, 403),
+		Pack(505, 606)
 	];
 
 	public static readonly TaperedEvaluationTermByCount8 BadBishop_SameColorPawnsPenalty =
