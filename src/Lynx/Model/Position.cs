@@ -480,6 +480,13 @@ public class Position : IDisposable
             packedScore -= BishopPairBonus;
         }
 
+        // Knight outpost bonus
+        var whiteKnightOutposts = PieceBitBoards[(int)Piece.N] & whitePawnAttacks & (~blackPawnAttacks);
+        packedScore += KnightOutpostBonus * whiteKnightOutposts.CountBits();
+
+        var blackKnightOutposts = PieceBitBoards[(int)Piece.n] & blackPawnAttacks & (~whitePawnAttacks);
+        packedScore -= KnightOutpostBonus * blackKnightOutposts.CountBits();
+
         // Pieces protected by pawns bonus
         packedScore += PieceProtectedByPawnBonus
             * ((whitePawnAttacks & OccupancyBitBoards[(int)Side.White] /* & (~whitePawns) */).CountBits()

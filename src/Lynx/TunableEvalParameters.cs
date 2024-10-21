@@ -6027,6 +6027,8 @@ public static class EvaluationParams
 
 	public static readonly TaperedEvaluationTerm BishopPairBonus = Pack(30, 72);
 
+	public static readonly TaperedEvaluationTerm KnightOutpostBonus = Pack(5, 10);
+
 	public static readonly TaperedEvaluationTerm PieceProtectedByPawnBonus = Pack(12, 15);
 
 	public static readonly TaperedEvaluationTerm PieceAttackedByPawnPenalty = Pack(-47, -33);
