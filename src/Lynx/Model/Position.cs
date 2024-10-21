@@ -487,7 +487,10 @@ public class Position : IDisposable
             var knightSquareIndex = whiteKnightOutposts.GetLS1BIndex();
             whiteKnightOutposts.ResetLS1B();
 
-            packedScore += KnightOutpostBonus[Constants.Rank[knightSquareIndex]];
+            if ((PieceBitBoards[(int)Piece.p] & Masks.WhiteSidePassedPawnMasks[knightSquareIndex]) == 0)
+            {
+                packedScore += KnightOutpostBonus[Constants.Rank[knightSquareIndex]];
+            }
         }
 
         var blackKnightOutposts = PieceBitBoards[(int)Piece.n] & blackPawnAttacks & (~whitePawnAttacks);
@@ -496,7 +499,10 @@ public class Position : IDisposable
             var knightSquareIndex = blackKnightOutposts.GetLS1BIndex();
             blackKnightOutposts.ResetLS1B();
 
-            packedScore -= KnightOutpostBonus[7 - Constants.Rank[knightSquareIndex]];
+            if ((PieceBitBoards[(int)Piece.P] & Masks.BlackSidePassedPawnMasks[knightSquareIndex]) == 0)
+            {
+                packedScore -= KnightOutpostBonus[7 - Constants.Rank[knightSquareIndex]];
+            }
         }
 
         // Pieces protected by pawns bonus
