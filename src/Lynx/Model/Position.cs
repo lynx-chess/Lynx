@@ -564,8 +564,8 @@ public class Position : IDisposable
         eval = Math.Clamp(eval, MinStaticEval, MaxStaticEval);
 
         var sideEval = Side == Side.White
-            ? eval
-            : -eval;
+            ? eval + EngineSettings.Tempo
+            : -eval - EngineSettings.Tempo;
 
         return (sideEval, gamePhase);
     }

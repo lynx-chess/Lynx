@@ -204,6 +204,8 @@ public sealed class EngineSettings
 
     [SPSA<int>(-8192, 0, 512)]
     public int HistoryPrunning_Margin { get; set; } = -1940;
+
+    public const int Tempo = 10;
 }
 
 [JsonSourceGenerationOptions(
