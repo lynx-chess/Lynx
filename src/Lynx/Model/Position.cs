@@ -491,7 +491,7 @@ public class Position : IDisposable
         }
 
         var blackKnightOutposts = PieceBitBoards[(int)Piece.n] & blackPawnAttacks & (~whitePawnAttacks);
-        while (whiteKnightOutposts != 0)
+        while (blackKnightOutposts != 0)
         {
             var knightSquareIndex = blackKnightOutposts.GetLS1BIndex();
             blackKnightOutposts.ResetLS1B();
