@@ -79,7 +79,7 @@ public sealed partial class Engine
         {
             if (MoveGenerator.CanGenerateAtLeastAValidMove(position))
             {
-                return QuiescenceSearch(ply, alpha, beta);
+                return QuiescenceSearch(ply, alpha, beta, pvNode);
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
@@ -130,7 +130,7 @@ public sealed partial class Engine
                     {
                         if (depth == 1)
                         {
-                            var qSearchScore = QuiescenceSearch(ply, alpha, beta);
+                            var qSearchScore = QuiescenceSearch(ply, alpha, beta, pvNode);
 
                             return qSearchScore > score
                                 ? qSearchScore
@@ -141,7 +141,7 @@ public sealed partial class Engine
 
                         if (score < beta)               // Static evaluation indicates fail-low node
                         {
-                            var qSearchScore = QuiescenceSearch(ply, alpha, beta);
+                            var qSearchScore = QuiescenceSearch(ply, alpha, beta, pvNode);
                             if (qSearchScore < beta)    // Quiescence score also indicates fail-low node
                             {
                                 return qSearchScore > score
@@ -451,7 +451,7 @@ public sealed partial class Engine
     /// </param>
     /// <returns></returns>
     [SkipLocalsInit]
-    public int QuiescenceSearch(int ply, int alpha, int beta)
+    public int QuiescenceSearch(int ply, int alpha, int beta, bool pvNode)
     {
         var position = Game.CurrentPosition;
 
@@ -469,7 +469,7 @@ public sealed partial class Engine
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
         var ttProbeResult = _tt.ProbeHash(position, 0, ply, alpha, beta);
-        if (ttProbeResult.Score != EvaluationConstants.NoHashEntry)
+        if (!pvNode && ttProbeResult.Score != EvaluationConstants.NoHashEntry)
         {
             return ttProbeResult.Score;
         }
@@ -551,7 +551,7 @@ public sealed partial class Engine
             Game.PushToMoveStack(ply, move);
 
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
-            int score = -QuiescenceSearch(ply + 1, -beta, -alpha);
+            int score = -QuiescenceSearch(ply + 1, -beta, -alpha, pvNode);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
             position.UnmakeMove(move, gameState);
 
