@@ -141,10 +141,10 @@ public static class Masks
     /// 7  0 0 0 0 0 0 0 0
     /// 6  0 0 0 0 0 0 0 0
     /// 5  0 0 x 0 0 0 0 0
-    /// 4  0 1 1 1 0 0 0 0
-    /// 3  0 1 1 1 0 0 0 0
-    /// 2  0 1 1 1 0 0 0 0
-    /// 1  0 1 1 1 0 0 0 0
+    /// 4  0 1 0 1 0 0 0 0
+    /// 3  0 1 0 1 0 0 0 0
+    /// 2  0 1 0 1 0 0 0 0
+    /// 1  0 1 0 1 0 0 0 0
     ///    a b c d e f g h
     /// </summary>
     public static BitBoard[] BlackSidePassedPawnMasks { get; } = new BitBoard[64];
