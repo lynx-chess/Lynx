@@ -25,7 +25,7 @@ See [Releases](https://github.com/lynx-chess/Lynx/releases) for the complete lis
 
 Here are the ones 'properly' rated over at least a few hundred of games:
 
-| Version | Date | Est. elo<sup>0</sup>| [CCRL](https://www.computerchess.org.uk/ccrl/4040/) | [CCRL Blitz](https://www.computerchess.org.uk/ccrl/404/) | [MCERL](https://www.chessengeria.eu/mcerl) | [CEGT 40/20](http://www.cegt.net/40_40%20Rating%20List/40_40%20All%20Versions/rangliste.html) | [CEGT 40/4](http://www.cegt.net/40_4_Ratinglist/40_4_AllVersion/rangliste.html) | [CEGT 5+3 pb](http://www.cegt.net/5Plus3Rating/5Plus3AllVersion/rangliste.html) |
+| Version | Date | Estimated<br>elo<sup>0</sup>| [CCRL](https://www.computerchess.org.uk/ccrl/4040/) | [CCRL<br>Blitz](https://www.computerchess.org.uk/ccrl/404/) | [MCERL](https://www.chessengeria.eu/mcerl) | [CEGT<br>40/20](http://www.cegt.net/40_40%20Rating%20List/40_40%20All%20Versions/rangliste.html) | [CEGT<br>40/4](http://www.cegt.net/40_4_Ratinglist/40_4_AllVersion/rangliste.html) | [CEGT<br>5+3 pb](http://www.cegt.net/5Plus3Rating/5Plus3AllVersion/rangliste.html) |
 |---|---|---|---|---|---|---|---|---|
 | [1.7.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.7.0) | 2024-10-05 | [3101](https://github.com/lynx-chess/Lynx/commit/06da9363b7f38dce5690e8c2c0dcd2914cdfaa30#commitcomment-147596793) |  |  |  | 2974 | 2936 |  |
 | [1.6.0](https://github.com/lynx-chess/Lynx/releases/tag/v1.6.0) | 2024-08-15 | [2952](https://github.com/lynx-chess/Lynx/commit/a230d0518bf2743ec0dd27931928719e43ac5334#commitcomment-145399551) | [2981](https://www.computerchess.org.uk/ccrl/4040/cgi/engine_details.cgi?print=Details&each_game=0&eng=Lynx%201.6.0%2064-bit#Lynx_1_6_0_64-bit)* |  | 3039 |  |  |  |
