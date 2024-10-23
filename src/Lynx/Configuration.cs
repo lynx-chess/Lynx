@@ -186,7 +186,7 @@ public sealed class EngineSettings
     public int History_MaxMoveRawBonus { get; set; } = 1_896;
 
     //[SPSA<int>(0, 200, 10)]
-    public int History_BestScoreBetaMargin { get; set; } = 60;
+    public int History_BestScoreBetaMargin { get; set; } = 40;
 
     [SPSA<int>(0, 6, 0.5)]
     public int SEE_BadCaptureReduction { get; set; } = 2;
