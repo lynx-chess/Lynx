@@ -156,6 +156,7 @@ public sealed partial class Engine
             // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
             if (depth >= Configuration.EngineSettings.NMP_MinDepth
                 && staticEval >= beta
+                && staticEval >= beta + Configuration.EngineSettings.NMP_BetaBase - (Configuration.EngineSettings.NMP_BetaDepthScalingFactor * depth)
                 && !parentWasNullMove
                 && phase > 2   // Zugzwang risk reduction: pieces other than pawn presents
                 && (ttElementType != NodeType.Alpha || ttScore >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal

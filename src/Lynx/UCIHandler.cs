@@ -336,6 +336,22 @@ public sealed class UCIHandler
                     }
                     break;
                 }
+            case "nmp_betabase":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.NMP_BetaBase = value;
+                    }
+                    break;
+                }
+            case "nmp_betadepthscalingfactor":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.NMP_BetaDepthScalingFactor = value;
+                    }
+                    break;
+                }
 
             //case "aspirationwindow_delta":
             //    {
