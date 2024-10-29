@@ -68,7 +68,7 @@ public sealed partial class Engine
         _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
 
         bool isInCheck = position.IsInCheck();
-        int staticEval = int.MaxValue;
+        int staticEval = int.MinValue;
         int phase = int.MaxValue;
 
         if (isInCheck)
