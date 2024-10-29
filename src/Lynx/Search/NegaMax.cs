@@ -74,6 +74,7 @@ public sealed partial class Engine
         if (isInCheck)
         {
             ++depth;
+            staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
         }
         else if (depth <= 0)
         {
@@ -177,6 +178,8 @@ public sealed partial class Engine
                 }
             }
         }
+
+        Debug.Assert(staticEval != int.MaxValue);
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
         var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves);
