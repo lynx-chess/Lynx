@@ -402,7 +402,8 @@ public sealed partial class Engine
                         ++historyDepth;
                     }
 
-                    if (bestScore >= beta + 80)
+                    // Suggestion by Sirius author
+                    if (bestScore >= beta + Configuration.EngineSettings.History_BestScoreBetaMargin)
                     {
                         ++historyDepth;
                     }
