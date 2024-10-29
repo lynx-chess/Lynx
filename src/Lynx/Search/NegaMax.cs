@@ -126,6 +126,7 @@ public sealed partial class Engine
                 staticEval = ttRawScore;
             }
 
+            // Fail-high pruning (moves with high scores) - prune more when improving
             if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
             {
                 // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
@@ -279,6 +280,7 @@ public sealed partial class Engine
                 // If we prune while getting checmated, we risk not finding any move and having an empty PV
                 bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
 
+                // Fail-low pruning (moves with low scores) - prune less when improving
                 if (!pvNode && !isInCheck && isNotGettingCheckmated
                     && moveScores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue) // Quiet move
                 {
