@@ -70,7 +70,7 @@ public sealed partial class Engine
         _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
 
         // 🔍 Improving heuristic: the current position has a better static evaluation than
-        // the previous evaluation from the same side (pñy - 2).
+        // the previous evaluation from the same side (ply - 2).
         // When true, we can:
         // - Prune more aggressively when evaluation is too high: current position is even getter
         // - Prune less aggressively when evaluation is low low: uncertainty on how bad the position really is
@@ -285,7 +285,7 @@ public sealed partial class Engine
                     // 🔍 Late Move Pruning (LMP) - all quiet moves can be pruned
                     // after searching the first few given by the move ordering algorithm
                     if (depth <= Configuration.EngineSettings.LMP_MaxDepth
-                        && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth)) // Based on formula suggested by Antares
+                        && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth / (improving ? 1 : 2))) // Based on formula suggested by Antares
                     {
                         RevertMove();
                         break;
