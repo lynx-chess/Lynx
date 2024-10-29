@@ -131,7 +131,7 @@ public sealed partial class Engine
             {
                 // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
                 // Return formula by Ciekce, instead of just returning static eval
-                if (staticEval - (Configuration.EngineSettings.RFP_DepthScalingFactor * depth) >= beta)
+                if (staticEval - (Configuration.EngineSettings.RFP_DepthScalingFactor * depth / (1 + (improving ? 1 : 0))) >= beta)
                 {
 #pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
                     return (staticEval + beta) / 2;
