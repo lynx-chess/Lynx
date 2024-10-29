@@ -48,6 +48,8 @@ public sealed partial class Engine
         if (!isRoot)
         {
             (ttScore, ttBestMove, ttElementType, ttRawScore, ttStaticEval) = _tt.ProbeHash(position, depth, ply, alpha, beta);
+
+            // TT cutoffs
             if (!pvNode && ttScore != EvaluationConstants.NoHashEntry)
             {
                 return ttScore;
@@ -66,6 +68,13 @@ public sealed partial class Engine
 
         // Before any time-consuming operations
         _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
+
+        // 🔍 Improving heuristic: the current position has a better static evaluation than
+        // the previous evaluation from the same side (pñy - 2).
+        // When true, we can:
+        // - Prune more aggressively when evaluation is too high: current position is even getter
+        // - Prune less aggressively when evaluation is low low: uncertainty on how bad the position really is
+        bool improving = false;
 
         bool isInCheck = position.IsInCheck();
         int staticEval = int.MaxValue;
@@ -98,6 +107,13 @@ public sealed partial class Engine
 
                 staticEval = ttStaticEval;
                 phase = position.Phase();
+            }
+
+            Game.UpdateStaticEvalInStack(ply, staticEval);
+
+            if (ply >= 2)
+            {
+                improving = staticEval > Game.ReadStaticEvalFromStack(ply - 2);
             }
 
             // From smol.cs
@@ -231,7 +247,7 @@ public sealed partial class Engine
             var oldHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
             var canBeRepetition = Game.Update50movesRule(move, isCapture);
             Game.AddToPositionHashHistory(position.UniqueIdentifier);
-            Game.PushToMoveStack(ply, move);
+            Game.UpdateMoveinStack(ply, move);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void RevertMove()
@@ -486,6 +502,8 @@ public sealed partial class Engine
             ? ttProbeResult.StaticEval
             : position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
 
+        Game.UpdateStaticEvalInStack(ply, staticEval);
+
         // Beta-cutoff (updating alpha after this check)
         if (staticEval >= beta)
         {
@@ -553,7 +571,7 @@ public sealed partial class Engine
             PrintPreMove(position, ply, move, isQuiescence: true);
 
             // No need to check for threefold or 50 moves repetitions, since we're only searching captures, promotions, and castles
-            Game.PushToMoveStack(ply, move);
+            Game.UpdateMoveinStack(ply, move);
 
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
             int score = -QuiescenceSearch(ply + 1, -beta, -alpha);
