@@ -378,6 +378,14 @@ public sealed class UCIHandler
                     }
                     break;
                 }
+            case "rfp_improvingfactor":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.RFP_ImprovingFactor = value;
+                    }
+                    break;
+                }
 
             case "razoring_maxdepth":
                 {
