@@ -82,7 +82,7 @@ public sealed partial class Engine
 
             if (ply >= 1)
             {
-                var previousMove = Game.PopFromMoveStack(ply - 1);
+                var previousMove = Game.ReadMoveFromStack(ply - 1);
                 Debug.Assert(previousMove != 0);
                 var previousMovePiece = previousMove.Piece();
                 var previousMoveTargetSquare = previousMove.TargetSquare();
@@ -130,7 +130,7 @@ public sealed partial class Engine
         {
             // 🔍 Continuation history
             // - Counter move history (continuation history, ply - 1)
-            var previousMove = Game.PopFromMoveStack(ply - 1);
+            var previousMove = Game.ReadMoveFromStack(ply - 1);
             Debug.Assert(previousMove != 0);
 
             previousMovePiece = previousMove.Piece();

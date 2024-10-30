@@ -48,6 +48,8 @@ public sealed partial class Engine
         if (!isRoot)
         {
             (ttScore, ttBestMove, ttElementType, ttRawScore, ttStaticEval) = _tt.ProbeHash(position, depth, ply, alpha, beta);
+
+            // TT cutoffs
             if (!pvNode && ttScore != EvaluationConstants.NoHashEntry)
             {
                 return ttScore;
@@ -66,6 +68,13 @@ public sealed partial class Engine
 
         // Before any time-consuming operations
         _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
+
+        // 🔍 Improving heuristic: the current position has a better static evaluation than
+        // the previous evaluation from the same side (ply - 2).
+        // When true, we can:
+        // - Prune more aggressively when evaluation is too high: current position is even getter
+        // - Prune less aggressively when evaluation is low low: uncertainty on how bad the position really is
+        bool improving = false;
 
         bool isInCheck = position.IsInCheck();
         int staticEval = int.MaxValue;
@@ -100,6 +109,13 @@ public sealed partial class Engine
                 phase = position.Phase();
             }
 
+            Game.UpdateStaticEvalInStack(ply, staticEval);
+
+            if (ply >= 2)
+            {
+                improving = staticEval > Game.ReadStaticEvalFromStack(ply - 2);
+            }
+
             // From smol.cs
             // ttEvaluation can be used as a better positional evaluation:
             // If the score is outside what the current bounds are, but it did match flag and depth,
@@ -110,6 +126,7 @@ public sealed partial class Engine
                 staticEval = ttRawScore;
             }
 
+            // Fail-high pruning (moves with high scores) - prune more when improving
             if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
             {
                 // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
@@ -231,7 +248,7 @@ public sealed partial class Engine
             var oldHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
             var canBeRepetition = Game.Update50movesRule(move, isCapture);
             Game.AddToPositionHashHistory(position.UniqueIdentifier);
-            Game.PushToMoveStack(ply, move);
+            Game.UpdateMoveinStack(ply, move);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void RevertMove()
@@ -263,13 +280,14 @@ public sealed partial class Engine
                 // If we prune while getting checmated, we risk not finding any move and having an empty PV
                 bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
 
+                // Fail-low pruning (moves with low scores) - prune less when improving
                 if (!pvNode && !isInCheck && isNotGettingCheckmated
                     && moveScores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue) // Quiet move
                 {
                     // 🔍 Late Move Pruning (LMP) - all quiet moves can be pruned
                     // after searching the first few given by the move ordering algorithm
                     if (depth <= Configuration.EngineSettings.LMP_MaxDepth
-                        && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth)) // Based on formula suggested by Antares
+                        && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth * (improving ? 2 : 1))) // Based on formula suggested by Antares
                     {
                         RevertMove();
                         break;
@@ -486,6 +504,8 @@ public sealed partial class Engine
             ? ttProbeResult.StaticEval
             : position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
 
+        Game.UpdateStaticEvalInStack(ply, staticEval);
+
         // Beta-cutoff (updating alpha after this check)
         if (staticEval >= beta)
         {
@@ -553,7 +573,7 @@ public sealed partial class Engine
             PrintPreMove(position, ply, move, isQuiescence: true);
 
             // No need to check for threefold or 50 moves repetitions, since we're only searching captures, promotions, and castles
-            Game.PushToMoveStack(ply, move);
+            Game.UpdateMoveinStack(ply, move);
 
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
             int score = -QuiescenceSearch(ply + 1, -beta, -alpha);

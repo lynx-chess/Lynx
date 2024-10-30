@@ -19,7 +19,8 @@ public sealed class Game : IDisposable
     /// <summary>
     /// Indexed by ply
     /// </summary>
-    private readonly Move[] _moveStack;
+    private readonly PlyStackEntry[] _gameStack;
+
     private bool _disposedValue;
 
     public int HalfMovesWithoutCaptureOrPawnMove { get; set; }
@@ -36,7 +37,7 @@ public sealed class Game : IDisposable
     {
         Debug.Assert(Constants.MaxNumberMovesInAGame <= 1024, "Need to customized ArrayPool due to desired array size requirements");
         _positionHashHistory = ArrayPool<ulong>.Shared.Rent(Constants.MaxNumberMovesInAGame);
-        _moveStack = ArrayPool<Move>.Shared.Rent(Constants.MaxNumberMovesInAGame);
+        _gameStack = ArrayPool<PlyStackEntry>.Shared.Rent(Constants.MaxNumberMovesInAGame);
 
         var parsedFen = FENParser.ParseFEN(fen);
         CurrentPosition = new Position(parsedFen);
@@ -230,10 +231,19 @@ public sealed class Game : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void PushToMoveStack(int n, Move move) => _moveStack[n + EvaluationConstants.ContinuationHistoryPlyCount] = move;
+    public void UpdateMoveinStack(int n, Move move) => _gameStack[n + EvaluationConstants.ContinuationHistoryPlyCount].Move = move;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public Move PopFromMoveStack(int n) => _moveStack[n + EvaluationConstants.ContinuationHistoryPlyCount];
+    public Move ReadMoveFromStack(int n) => _gameStack[n + EvaluationConstants.ContinuationHistoryPlyCount].Move;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public int ReadStaticEvalFromStack(int n) => _gameStack[n].StaticEval;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public int UpdateStaticEvalInStack(int n, int value) => _gameStack[n].StaticEval = value;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ref PlyStackEntry GameStack(int n) => ref _gameStack[n];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int PositionHashHistoryLength() => _positionHashHistoryPointer;
@@ -251,7 +261,7 @@ public sealed class Game : IDisposable
 
     public void FreeResources()
     {
-        ArrayPool<Move>.Shared.Return(_moveStack);
+        ArrayPool<PlyStackEntry>.Shared.Return(_gameStack);
         ArrayPool<ulong>.Shared.Return(_positionHashHistory);
 
         CurrentPosition.FreeResources();
