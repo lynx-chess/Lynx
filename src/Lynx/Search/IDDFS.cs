@@ -146,7 +146,11 @@ public sealed partial class Engine
                         else if (beta <= bestScore)     // Fail high
                         {
                             beta = Math.Min(bestScore + window, EvaluationConstants.MaxEval);
-                            ++failHighReduction;
+
+                            if (alpha <= 2000 && failHighReduction <= 2)
+                            {
+                                ++failHighReduction;
+                            }
                         }
                         else
                         {
