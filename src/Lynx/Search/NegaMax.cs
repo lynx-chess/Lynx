@@ -333,7 +333,13 @@ public sealed partial class Engine
                     {
                         --reduction;
                     }
+
                     if (position.IsInCheck())   // i.e. move gives check
+                    {
+                        --reduction;
+                    }
+
+                    if (improving)
                     {
                         --reduction;
                     }
