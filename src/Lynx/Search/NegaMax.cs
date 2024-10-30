@@ -315,7 +315,12 @@ public sealed partial class Engine
                     {
                         --reduction;
                     }
-                    if (position.IsInCheck())   // i.e. move gives check
+                    if (position.IsInCheck())   // Move gives check
+                    {
+                        --reduction;
+                    }
+
+                    if (isInCheck)  // Position before move is in check
                     {
                         --reduction;
                     }
