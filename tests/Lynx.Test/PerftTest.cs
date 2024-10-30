@@ -161,6 +161,7 @@ public class PerftTest
 
     /// <summary>
     /// By kz04px
+    /// https://github.com/kz04px/libchess/blob/71c3543da7ad64387b618e889feef5406f1ee851/tests/perft.cpp
     /// https://github.com/kz04px/rawr/blob/1c97b8da895f919c1eb7af215b902599c09532b3/tests/perft_extra.rs
     /// </summary>
     // EP
@@ -168,6 +169,7 @@ public class PerftTest
     [TestCase("8/8/8/8/1k1Ppn1R/8/8/4K3 b - d3 0 1  ", 1, 17, 220)]
     [TestCase("4k3/8/8/2PpP3/8/8/8/4K3 w - d6 0 1   ", 1, 9, 47, 376)]
     [TestCase("4k3/8/8/8/2pPp3/8/8/4K3 b - d3 0 1   ", 1, 9, 47, 376)]
+    [TestCase("r3k2r/p2pqpb1/bn2pnp1/2pPN3/1p2P3/2N2Q1p/PPPBBPPP/R4K1R w kq c6 0 2", 1, 46)]
     // EP - pinned diagonal
     [TestCase("4k3/b7/8/2Pp4/8/8/8/6K1 w - d6 0 1   ", 1, 5, 45)]
     [TestCase("4k3/7b/8/4pP2/8/8/8/1K6 w - e6 0 1   ", 1, 5, 45)]
@@ -204,9 +206,33 @@ public class PerftTest
     // EP - in check
     [TestCase("4k3/8/8/4pP2/3K4/8/8/8 w - e6 0 1    ", 1, 9, 49)]
     [TestCase("8/8/8/4k3/5Pp1/8/8/3K4 b - f3 0 1    ", 1, 9, 50)]
+    [TestCase("2b1k3/8/8/2Pp4/8/7K/8/8 w - - 0 1", 1, 4, 52)]
+    [TestCase("2b1k3/8/8/2Pp4/8/7K/8/8 w - d6 0 1", 1, 4, 52)]
+    [TestCase("4k3/r6K/8/2Pp4/8/8/8/8 w - - 0 1", 1, 4, 77)]
+    [TestCase("4k3/r6K/8/2Pp4/8/8/8/8 w - d6 0 1", 1, 4, 77)]
+    [TestCase("2K1k3/8/8/2Pp4/8/7b/8/8 w - - 0 1", 1, 3, 37)]
+    [TestCase("2K1k3/8/8/2Pp4/8/7b/8/8 w - d6 0 1", 1, 3, 37)]
+    [TestCase("2K1k3/8/8/2Pp4/8/7q/8/8 w - - 0 1", 1, 3, 79)]
+    [TestCase("2K1k3/8/8/2Pp4/8/7q/8/8 w - d6 0 1", 1, 3, 79)]
+    [TestCase("8/8/7k/8/2pP4/8/8/2B1K3 b - - 0 1", 1, 4, 52)]
+    [TestCase("8/8/7k/8/2pP4/8/8/2B1K3 b - d3 0 1", 1, 4, 52)]
+    [TestCase("8/8/7k/8/2pP4/8/8/2Q1K3 b - - 0 1", 1, 4, 76)]
+    [TestCase("8/8/7k/8/2pP4/8/8/2Q1K3 b - d3 0 1", 1, 4, 76)]
+    [TestCase("8/8/8/8/2pP4/8/R6k/4K3 b - - 0 1", 1, 4, 77)]
+    [TestCase("8/8/8/8/2pP4/8/R6k/4K3 b - d3 0 1", 1, 4, 77)]
     // EP - block check
     [TestCase("4k3/8/K6r/3pP3/8/8/8/8 w - d6 0 1    ", 1, 6, 109)]
     [TestCase("4k3/8/K6q/3pP3/8/8/8/8 w - d6 0 1    ", 1, 6, 151)]
+    [TestCase("4kb2/8/8/3pP3/8/K7/8/8 w - d6 0 1    ", 1, 5, 55)]
+    [TestCase("4kq2/8/8/3pP3/8/K7/8/8 w - d6 0 1    ", 1, 5, 100)]
+    [TestCase("4k3/8/r6K/3pP3/8/8/8/8 w - d6 0 1    ", 1, 6, 107)]
+    [TestCase("4k3/8/q6K/3pP3/8/8/8/8 w - d6 0 1    ", 1, 6, 149)]
+    [TestCase("3k1K2/8/8/3pP3/8/b7/8/8 w - d6 0 1   ", 1, 4, 44)]
+    [TestCase("3k1K2/8/8/3pP3/8/q7/8/8 w - d6 0 1   ", 1, 4, 100)]
+    [TestCase("8/8/8/8/3Pp3/k6R/8/4K3 b - d3 0 1    ", 1, 6, 109)]
+    [TestCase("8/8/8/8/3Pp3/k6Q/8/4K3 b - d3 0 1    ", 1, 6, 151)]
+    [TestCase("8/8/k7/8/3Pp3/8/8/4KB2 b - d3 0 1    ", 1, 5, 55)]
+    [TestCase("8/8/k7/8/3Pp3/8/8/4KQ2 b - d3 0 1    ", 1, 5, 100)]
     // Double checks
     [TestCase("4k3/8/4r3/8/8/8/3p4/4K3 w - - 0 1    ", 1, 4, 80, 320)]
     [TestCase("4k3/8/4q3/8/8/8/3b4/4K3 w - - 0 1    ", 1, 4, 143, 496)]
@@ -217,16 +243,25 @@ public class PerftTest
     [TestCase("4k3/8/8/8/1b5b/2R5/5P2/4K3 w - - 0 1 ", 1, 4, 72, 1300)]
     [TestCase("4k3/8/8/8/1b2r3/8/3Q4/4K3 w - - 0 1  ", 1, 3, 66, 1390)]
     [TestCase("4k3/8/8/8/1b2r3/8/3QP3/4K3 w - - 0 1 ", 1, 6, 119, 2074)]
-    public void Kz04pxPositions(string fen, long _, long nodesD1, long nodesD2, long nodesD3 = 0)
+    // Many moves
+    [TestCase("R6R/3Q4/1Q4Q1/4Q3/2Q4Q/Q4Q2/pp1Q4/kBNN1KB1 w - - 0 1 ", 1, 218)]
+    public void Kz04pxPositions(string fen, long _, long nodesD1, long nodesD2 = 0, long nodesD3 = 0)
     {
         Validate(fen, 1, nodesD1);
-        Validate(fen, 2, nodesD2);
+
+        if (nodesD2 != 0)
+        {
+            Validate(fen, 2, nodesD2);
+        }
 
         if (nodesD3 != 0)
         {
             Validate(fen, 3, nodesD3);
         }
     }
+
+    [Test]
+    public void PositionWithHighestKnownNumberOfMoves() => Validate("R6R/3Q4/1Q4Q1/4Q3/2Q4Q/Q4Q2/pp1Q4/kBNN1KB1 w - - 0 1", 1, 218);
 
     private static void Validate(string fen, int depth, long expectedNumberOfNodes)
     {
