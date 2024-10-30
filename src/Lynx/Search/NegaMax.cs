@@ -339,9 +339,9 @@ public sealed partial class Engine
                         --reduction;
                     }
 
-                    if (improving)
+                    if (!improving)
                     {
-                        --reduction;
+                        ++reduction;
                     }
 
                     if (ttBestMove != default && isCapture)
