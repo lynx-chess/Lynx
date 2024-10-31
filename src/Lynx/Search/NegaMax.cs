@@ -92,7 +92,8 @@ public sealed partial class Engine
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
-            _tt.RecordHash(position, finalPositionEvaluation, depth, ply, finalPositionEvaluation, NodeType.Exact);
+            _tt.RecordHash(position, finalPositionEvaluation, depth, ply, finalPositionEvaluation, NodeType.Exact, improving);
+
             return finalPositionEvaluation;
         }
         else if (!pvNode)
@@ -441,7 +442,7 @@ public sealed partial class Engine
                         UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(historyDepth, ply, visitedMoves, visitedMovesCounter, move, isRoot);
                     }
 
-                    _tt.RecordHash(position, staticEval, depth, ply, bestScore, NodeType.Beta, bestMove);
+                    _tt.RecordHash(position, staticEval, depth, ply, bestScore, NodeType.Beta, improving, bestMove);
 
                     return bestScore;
                 }
@@ -455,12 +456,12 @@ public sealed partial class Engine
             Debug.Assert(bestMove is null);
 
             var finalEval = Position.EvaluateFinalPosition(ply, isInCheck);
-            _tt.RecordHash(position, staticEval, depth, ply, finalEval, NodeType.Exact);
+            _tt.RecordHash(position, staticEval, depth, ply, finalEval, NodeType.Exact, improving);
 
             return finalEval;
         }
 
-        _tt.RecordHash(position, staticEval, depth, ply, bestScore, nodeType, bestMove);
+        _tt.RecordHash(position, staticEval, depth, ply, bestScore, nodeType, improving, bestMove);
 
         // Node fails low
         return bestScore;
@@ -597,7 +598,7 @@ public sealed partial class Engine
                 {
                     PrintMessage($"Pruning: {move} is enough to discard this line");
 
-                    _tt.RecordHash(position, staticEval, 0, ply, bestScore, NodeType.Beta, bestMove);
+                    _tt.RecordHash(position, staticEval, 0, ply, bestScore, NodeType.Beta, improving: false, bestMove);
 
                     return bestScore; // The refutation doesn't matter, since it'll be pruned
                 }
@@ -622,12 +623,12 @@ public sealed partial class Engine
             Debug.Assert(bestMove is null);
 
             var finalEval = Position.EvaluateFinalPosition(ply, position.IsInCheck());
-            _tt.RecordHash(position, staticEval, 0, ply, finalEval, NodeType.Exact);
+            _tt.RecordHash(position, staticEval, 0, ply, finalEval, NodeType.Exact, improving: false);
 
             return finalEval;
         }
 
-        _tt.RecordHash(position, staticEval, 0, ply, bestScore, nodeType, bestMove);
+        _tt.RecordHash(position, staticEval, 0, ply, bestScore, nodeType, improving: false, bestMove);
 
         return bestScore;
     }

@@ -35,7 +35,7 @@ public class TranspositionTableTests
         var transpositionTable = new TranspositionTableElement[ttLength];
         var staticEval = position.StaticEvaluation().Score;
 
-        transpositionTable.RecordHash(position, staticEval, depth: 5, ply: 3, score: recordedEval, nodeType: recordNodeType, move: 1234);
+        transpositionTable.RecordHash(position, staticEval, depth: 5, ply: 3, score: recordedEval, nodeType: recordNodeType, improving: false, move: 1234);
 
         var ttEntry = transpositionTable.ProbeHash(position, depth: 5, ply: 3, alpha: probeAlpha, beta: probeBeta);
         Assert.AreEqual(expectedProbeEval, ttEntry.Score);
@@ -51,7 +51,7 @@ public class TranspositionTableTests
         var ttLength = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
         var transpositionTable = new TranspositionTableElement[ttLength];
 
-        transpositionTable.RecordHash(position, recordedEval, depth: 10, ply: sharedDepth, score: recordedEval, nodeType: NodeType.Exact, move: 1234);
+        transpositionTable.RecordHash(position, recordedEval, depth: 10, ply: sharedDepth, score: recordedEval, nodeType: NodeType.Exact, improving: false, move: 1234);
 
         var ttEntry = transpositionTable.ProbeHash(position, depth: 7, ply: sharedDepth, alpha: 50, beta: 100);
         Assert.AreEqual(recordedEval, ttEntry.Score);
@@ -68,7 +68,7 @@ public class TranspositionTableTests
         var ttLength = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
         var transpositionTable = new TranspositionTableElement[ttLength];
 
-        transpositionTable.RecordHash(position, recordedEval, depth: 10, ply: recordedDeph, score: recordedEval, nodeType: NodeType.Exact, move: 1234);
+        transpositionTable.RecordHash(position, recordedEval, depth: 10, ply: recordedDeph, score: recordedEval, nodeType: NodeType.Exact, improving: false, move: 1234);
 
         var ttEntry = transpositionTable.ProbeHash(position, depth: 7, ply: probeDepth, alpha: 50, beta: 100);
         Assert.AreEqual(expectedProbeEval, ttEntry.Score);
