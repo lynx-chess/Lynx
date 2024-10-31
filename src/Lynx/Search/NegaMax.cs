@@ -535,7 +535,10 @@ public sealed partial class Engine
 
         var nodeType = NodeType.Alpha;
         Move? bestMove = null;
-        int bestScore = staticEval;
+        var bestScore = staticEval;
+        var futilityScore = position.IsInCheck()
+            ? EvaluationConstants.MinEval
+            : staticEval + Configuration.EngineSettings.FP_QS_Margin;
 
         bool isAnyCaptureValid = false;
 
@@ -562,6 +565,13 @@ public sealed partial class Engine
 
             // 🔍 QSearch SEE pruning: pruning bad captures
             if (moveScores[i] < EvaluationConstants.PromotionMoveScoreValue && moveScores[i] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
+            {
+                continue;
+            }
+
+            // QSearch Futility Pruning (FP)
+            // Moves without potential to raise alpha are discarded
+            if (!position.IsInCheck() && futilityScore < alpha && !SEE.HasPositiveScore(position, move))
             {
                 continue;
             }
