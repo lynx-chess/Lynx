@@ -6,6 +6,8 @@ public struct PlyStackEntry
 
     public Move Move { get; set; }
 
+    public bool InCheck { get; set; }
+
     public PlyStackEntry()
     {
         StaticEval = int.MaxValue;

@@ -243,6 +243,9 @@ public sealed class Game : IDisposable
     public int UpdateStaticEvalInStack(int n, int value) => _gameStack[n].StaticEval = value;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void UpdateInCheckInStack(int n, bool inCheck) => _gameStack[n].InCheck = inCheck;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ref PlyStackEntry GameStack(int n) => ref _gameStack[n];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

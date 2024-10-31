@@ -110,8 +110,19 @@ public sealed partial class Engine
             }
 
             Game.UpdateStaticEvalInStack(ply, staticEval);
+            Game.UpdateInCheckInStack(ply, isInCheck);
 
-            if (ply >= 2)
+            if (ply >= 4)
+            {
+                var minus2Ply = Game.GameStack(ply - 2);
+
+                var previousStaticEval = !minus2Ply.InCheck
+                    ? minus2Ply.StaticEval
+                    : Game.ReadStaticEvalFromStack(ply - 4);
+
+                improving = staticEval > previousStaticEval;
+            }
+            else if (ply >= 2)
             {
                 improving = staticEval > Game.ReadStaticEvalFromStack(ply - 2);
             }
@@ -510,7 +521,10 @@ public sealed partial class Engine
             ? ttProbeResult.StaticEval
             : position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
 
+        var isInCheck = position.IsInCheck();
+
         Game.UpdateStaticEvalInStack(ply, staticEval);
+        Game.UpdateInCheckInStack(ply, isInCheck);
 
         // Beta-cutoff (updating alpha after this check)
         if (staticEval >= beta)
@@ -621,7 +635,7 @@ public sealed partial class Engine
         {
             Debug.Assert(bestMove is null);
 
-            var finalEval = Position.EvaluateFinalPosition(ply, position.IsInCheck());
+            var finalEval = Position.EvaluateFinalPosition(ply, isInCheck);
             _tt.RecordHash(position, staticEval, 0, ply, finalEval, NodeType.Exact);
 
             return finalEval;
