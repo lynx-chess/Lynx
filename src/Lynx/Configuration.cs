@@ -134,7 +134,7 @@ public sealed class EngineSettings
     public int NMP_MinDepth { get; set; } = 3;
 
     [SPSA<int>(1, 5, 0.5)]
-    public int NMP_BaseDepthReduction { get; set; } = 2;
+    public int NMP_BaseDepthReduction { get; set; } = 1;
 
     [SPSA<int>(0, 10, 0.5)]
     public int NMP_DepthIncrement { get; set; } = 0;
