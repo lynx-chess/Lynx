@@ -310,7 +310,10 @@ public sealed partial class Engine
                         //&& alpha < EvaluationConstants.PositiveCheckmateDetectionLimit
                         //&& beta > EvaluationConstants.NegativeCheckmateDetectionLimit
                         && depth <= Configuration.EngineSettings.FP_MaxDepth
-                        && staticEval + Configuration.EngineSettings.FP_Margin + (Configuration.EngineSettings.FP_DepthScalingFactor * depth) <= alpha)
+                        && staticEval
+                                + (improving ? Configuration.EngineSettings.FP_Margin_Improving : Configuration.EngineSettings.FP_Margin)
+                                + (Configuration.EngineSettings.FP_DepthScalingFactor * depth)
+                            <= alpha)
                     {
                         RevertMove();
                         break;
