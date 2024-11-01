@@ -571,7 +571,7 @@ public sealed partial class Engine
 
             // QSearch Futility Pruning (FP)
             // Moves without potential to raise alpha are discarded
-            if (!position.IsInCheck() && futilityScore < alpha && !SEE.HasPositiveScore(position, move))
+            if (!position.IsInCheck() && futilityScore < alpha) // TODO SEE score
             {
                 continue;
             }
