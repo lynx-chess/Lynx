@@ -232,7 +232,7 @@ public sealed partial class Engine
             var move = pseudoLegalMoves[moveIndex];
 
             // SEE pruning
-            if (depth <= 2 && !pvNode && move != ttBestMove && isNotGettingCheckmated && moveScores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue)
+            if (depth == 1 && !pvNode && move != ttBestMove && isNotGettingCheckmated && moveScores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue)
             {
                 continue;
             }
