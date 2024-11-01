@@ -573,6 +573,9 @@ public sealed partial class Engine
             // Moves without potential to raise alpha are discarded
             if (!position.IsInCheck() && futilityScore < alpha && moveScores[i] < EvaluationConstants.PromotionMoveScoreValue) // TODO SEE score
             {
+                if (futilityScore > bestScore)
+                    bestScore = futilityScore;
+
                 continue;
             }
 
