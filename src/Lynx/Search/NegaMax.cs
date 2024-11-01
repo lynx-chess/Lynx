@@ -215,6 +215,9 @@ public sealed partial class Engine
 
         for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
         {
+            // If we prune while getting checKmated, we risk not finding any move and having an empty PV
+            bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
+
             // Incremental move sorting, inspired by https://github.com/jw1912/Chess-Challenge and suggested by toanth
             // There's no need to sort all the moves since most of them don't get checked anyway
             // So just find the first unsearched one with the best score and try it
@@ -227,6 +230,12 @@ public sealed partial class Engine
             }
 
             var move = pseudoLegalMoves[moveIndex];
+
+            // SEE pruning
+            if (depth == 1 && !pvNode && move != ttBestMove && isNotGettingCheckmated && !SEE.HasPositiveScore(position, move))
+            {
+                continue;
+            }
 
             var gameState = position.MakeMove(move);
 
@@ -277,9 +286,6 @@ public sealed partial class Engine
             }
             else
             {
-                // If we prune while getting checmated, we risk not finding any move and having an empty PV
-                bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
-
                 // Fail-low pruning (moves with low scores) - prune less when improving
                 if (!pvNode && !isInCheck && isNotGettingCheckmated
                     && moveScores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue) // Quiet move
