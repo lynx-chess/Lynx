@@ -93,10 +93,29 @@ public sealed partial class Engine
                     return CounterMoveValue;
                 }
 
-                // Counter move history
-                return BaseMoveScore
-                    + _quietHistory[move.Piece()][move.TargetSquare()]
-                    + _continuationHistory[ContinuationHistoryIndex(move.Piece(), move.TargetSquare(), previousMovePiece, previousMoveTargetSquare, 0)];
+                if (ply >= 2)
+                {
+                    var previousPreviousMove = Game.ReadMoveFromStack(ply - 2);
+                    Debug.Assert(previousPreviousMove != 0);
+                    var previousPreviousMovePiece = previousPreviousMove.Piece();
+                    var previousPreviousMoveTargetSquare = previousPreviousMove.TargetSquare();
+
+                    var piece = move.Piece();
+                    var targetSquare = move.TargetSquare();
+
+                    // Includes counter-move and follow-up move history
+                    return BaseMoveScore
+                        + _quietHistory[move.Piece()][move.TargetSquare()]
+                        + _continuationHistory[ContinuationHistoryIndex(piece, targetSquare, previousMovePiece, previousMoveTargetSquare, 0)]
+                        + _continuationHistory[ContinuationHistoryIndex(piece, targetSquare, previousPreviousMovePiece, previousPreviousMoveTargetSquare, 1)];
+                }
+                else
+                {
+                    // Includes counter-move history
+                    return BaseMoveScore
+                        + _quietHistory[move.Piece()][move.TargetSquare()]
+                        + _continuationHistory[ContinuationHistoryIndex(move.Piece(), move.TargetSquare(), previousMovePiece, previousMoveTargetSquare, 0)];
+                }
             }
 
             // History move or 0 if not found
@@ -111,7 +130,7 @@ public sealed partial class Engine
     /// Quiet history, contination history, killers and counter moves
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(int depth, int ply, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move, bool isRoot)
+    private void UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(int depth, int ply, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move)
     {
         // 🔍 Quiet history moves
         // Doing this only in beta cutoffs (instead of when eval > alpha) was suggested by Sirius author
@@ -123,13 +142,16 @@ public sealed partial class Engine
             HistoryBonus[depth]);
 
         int continuationHistoryIndex;
+        int followUpHistoryIndex;
         int previousMovePiece = -1;
         int previousTargetSquare = -1;
+        int previousPreviousMovePiece = -1;
+        int previousPreviousMoveTargetSquare = -1;
 
-        if (!isRoot)
+        // 🔍 Continuation history
+        // - Counter move history (continuation history, ply - 1)
+        if (ply >= 1)
         {
-            // 🔍 Continuation history
-            // - Counter move history (continuation history, ply - 1)
             var previousMove = Game.ReadMoveFromStack(ply - 1);
             Debug.Assert(previousMove != 0);
 
@@ -137,18 +159,22 @@ public sealed partial class Engine
             previousTargetSquare = previousMove.TargetSquare();
 
             continuationHistoryIndex = ContinuationHistoryIndex(piece, targetSquare, previousMovePiece, previousTargetSquare, 0);
-
             _continuationHistory[continuationHistoryIndex] = ScoreHistoryMove(
                 _continuationHistory[continuationHistoryIndex],
                 HistoryBonus[depth]);
 
-            //    var previousPreviousMove = Game.MoveStack[ply - 2];
-            //    var previousPreviousMovePiece = previousPreviousMove.Piece();
-            //    var previousPreviousMoveTargetSquare = previousPreviousMove.TargetSquare();
+            // - Follow-up history (continuation history, ply - 2)
+            if (ply >= 2)
+            {
+                var previousPreviousMove = Game.ReadMoveFromStack(ply - 2);
+                previousPreviousMovePiece = previousPreviousMove.Piece();
+                previousPreviousMoveTargetSquare = previousPreviousMove.TargetSquare();
 
-            //    _continuationHistory[piece][targetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare] = ScoreHistoryMove(
-            //        _continuationHistory[piece][targetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare],
-            //        EvaluationConstants.HistoryBonus[depth]);
+                followUpHistoryIndex = ContinuationHistoryIndex(piece, targetSquare, previousPreviousMovePiece, previousPreviousMoveTargetSquare, 1);
+                _continuationHistory[followUpHistoryIndex] = ScoreHistoryMove(
+                    _continuationHistory[followUpHistoryIndex],
+                    HistoryBonus[depth]);
+            }
         }
 
         for (int i = 0; i < visitedMovesCounter - 1; ++i)
@@ -166,14 +192,24 @@ public sealed partial class Engine
                     _quietHistory[visitedMovePiece][visitedMoveTargetSquare],
                     -HistoryBonus[depth]);
 
-                if (!isRoot)
+                // 🔍 Continuation history penalty / malus
+                if (ply >= 1)
                 {
-                    // 🔍 Continuation history penalty / malus
                     continuationHistoryIndex = ContinuationHistoryIndex(visitedMovePiece, visitedMoveTargetSquare, previousMovePiece, previousTargetSquare, 0);
 
                     _continuationHistory[continuationHistoryIndex] = ScoreHistoryMove(
                         _continuationHistory[continuationHistoryIndex],
                         -HistoryBonus[depth]);
+
+                    // 🔍 Follow-up history penalty / malus
+                    if (ply >= 2)
+                    {
+                        followUpHistoryIndex = ContinuationHistoryIndex(visitedMovePiece, visitedMoveTargetSquare, previousPreviousMovePiece, previousPreviousMoveTargetSquare, 1);
+
+                        _continuationHistory[followUpHistoryIndex] = ScoreHistoryMove(
+                            _continuationHistory[followUpHistoryIndex],
+                            -HistoryBonus[depth]);
+                    }
                 }
             }
         }
@@ -190,7 +226,7 @@ public sealed partial class Engine
             thisPlyKillerMoves[1] = thisPlyKillerMoves[0];
             thisPlyKillerMoves[0] = move;
 
-            if (!isRoot)
+            if (ply >= 1)
             {
                 // 🔍 Countermoves - fails to fix the bug and remove killer moves condition, see  https://github.com/lynx-chess/Lynx/pull/944
                 _counterMoves[CounterMoveIndex(previousMovePiece, previousTargetSquare)] = move;
