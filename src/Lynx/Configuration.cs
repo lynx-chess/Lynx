@@ -198,7 +198,10 @@ public sealed class EngineSettings
     public int FP_DepthScalingFactor { get; set; } = 73;
 
     [SPSA<int>(0, 500, 25)]
-    public int FP_Margin { get; set; } = 218;
+    public int FP_Margin { get; set; } = 100;
+
+    [SPSA<int>(0, 500, 25)]
+    public int FP_Margin_Improving { get; set; } = 300;
 
     [SPSA<int>(50, 250, 10)]
     public int FP_QS_Margin { get; set; } = 75;
