@@ -16,10 +16,10 @@ public class TranspositionTable
 
     public TranspositionTable()
     {
-        InitializeTT();
+        Allocate();
     }
 
-    private void InitializeTT()
+    private void Allocate()
     {
         _currentTranspositionTableSize = Configuration.EngineSettings.TranspositionTableSize;
 
@@ -27,7 +27,7 @@ public class TranspositionTable
         _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
     }
 
-    public void ResetTT()
+    public void Reset()
     {
         if (_currentTranspositionTableSize == Configuration.EngineSettings.TranspositionTableSize)
         {
@@ -36,7 +36,7 @@ public class TranspositionTable
         else
         {
             _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _currentTranspositionTableSize, Configuration.EngineSettings.TranspositionTableSize);
-            InitializeTT();
+            Allocate();
         }
     }
 

@@ -1084,7 +1084,7 @@ static void TranspositionTable()
     var hashKey2 = transpositionTable.CalculateTTIndex(position.UniqueIdentifier);
     Console.WriteLine(hashKey2);
 
-    transpositionTable.ResetTT();
+    transpositionTable.Reset();
 
     //transpositionTable.RecordHash(position, depth: 3, maxDepth: 5, move: 1234, eval: +5, nodeType: NodeType.Alpha);
     //var entry = transpositionTable.ProbeHash(position, maxDepth: 5, depth: 3, alpha: 1, beta: 2);

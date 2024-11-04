@@ -115,7 +115,7 @@ public sealed partial class Engine
 
     private void ResetEngine()
     {
-        _tt.ResetTT();
+        _tt.Reset();
 
         // Clear histories
         for (int i = 0; i < 12; ++i)
