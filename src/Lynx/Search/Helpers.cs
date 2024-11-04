@@ -13,14 +13,14 @@ public sealed partial class Engine
     {
         if (Sse.IsSupported)
         {
-            var index = _ttWraper.CalculateTTIndex(Game.CurrentPosition.UniqueIdentifier);
+            var index = _tt.CalculateTTIndex(Game.CurrentPosition.UniqueIdentifier);
 
             unsafe
             {
                 // Since _tt is a pinned array
                 // This is no-op pinning as it does not influence the GC compaction
                 // https://tooslowexception.com/pinned-object-heap-in-net-5/
-                fixed (TranspositionTableElement* ttPtr = _ttWraper.TT)
+                fixed (TranspositionTableElement* ttPtr = _tt.TT)
                 {
                     Sse.Prefetch0(ttPtr + index);
                 }

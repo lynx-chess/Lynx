@@ -14,7 +14,7 @@ public sealed partial class Engine
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
     private readonly ChannelWriter<object> _engineWriter;
-    private readonly TranspositionTable _ttWraper;
+    private readonly TranspositionTable _tt;
 
     private bool _isSearching;
 
@@ -59,7 +59,7 @@ public sealed partial class Engine
         _searchCancellationTokenSource = new();
         _absoluteSearchCancellationTokenSource = new();
         _engineWriter = engineWriter;
-        _ttWraper = tt;
+        _tt = tt;
         // Update ResetEngine() after any changes here
 
         _quietHistory = new int[12][];
@@ -115,7 +115,7 @@ public sealed partial class Engine
 
     private void ResetEngine()
     {
-        _ttWraper.ResetTT();
+        _tt.ResetTT();
 
         // Clear histories
         for (int i = 0; i < 12; ++i)

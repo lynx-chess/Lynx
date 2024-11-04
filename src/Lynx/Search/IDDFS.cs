@@ -352,7 +352,7 @@ public sealed partial class Engine
         finalSearchResult.Nodes = _nodes;
         finalSearchResult.Time = Utils.CalculateUCITime(elapsedSeconds);
         finalSearchResult.NodesPerSecond = Utils.CalculateNps(_nodes, elapsedSeconds);
-        finalSearchResult.HashfullPermill = _ttWraper.HashfullPermillApprox();
+        finalSearchResult.HashfullPermill = _tt.HashfullPermillApprox();
         if (Configuration.EngineSettings.ShowWDL)
         {
             finalSearchResult.WDL = WDL.WDLModel(bestScore, depth);

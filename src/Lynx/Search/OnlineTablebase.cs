@@ -22,7 +22,7 @@ public sealed partial class Engine
                     Nodes = 666,                // In case some guis proritize the info command with biggest depth
                     Time = Utils.CalculateUCITime(elapsedSeconds),
                     NodesPerSecond = 0,
-                    HashfullPermill = _ttWraper.HashfullPermillApprox(),
+                    HashfullPermill = _tt.HashfullPermillApprox(),
                     WDL = WDL.WDLModel(
                         (int)Math.CopySign(
                             EvaluationConstants.PositiveCheckmateDetectionLimit + (EvaluationConstants.CheckmateDepthFactor * tablebaseResult.MateScore),
