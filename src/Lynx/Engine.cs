@@ -111,7 +111,7 @@ public sealed partial class Engine
         AdjustPosition(Constants.SuperLongPositionCommand);
 
         var searchConstrains = TimeManager.CalculateTimeManagement(Game, command);
-        BestMove(command, searchConstrains);
+        BestMove(command, in searchConstrains);
 
         Bench(2);
 
