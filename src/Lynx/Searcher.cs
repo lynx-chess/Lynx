@@ -12,12 +12,14 @@ public sealed class Searcher
     private readonly ChannelWriter<object> _engineWriter;
     private readonly Engine _engine;
     private readonly Logger _logger;
+    private readonly TranspositionTable _tt;
 
-    public Searcher(ChannelReader<string> uciReader, ChannelWriter<object> engineWriter, Engine engine)
+    public Searcher(ChannelReader<string> uciReader, ChannelWriter<object> engineWriter, Engine engine, TranspositionTable tt)
     {
         _uciReader = uciReader;
         _engineWriter = engineWriter;
         _engine = engine;
+        _tt = tt;
         _logger = LogManager.GetCurrentClassLogger();
     }
 

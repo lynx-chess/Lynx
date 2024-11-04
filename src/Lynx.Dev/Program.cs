@@ -703,7 +703,7 @@ static void _54_ScoreMove()
     var position = new Position(KillerPosition);
     position.Print();
 
-    var engine = new Engine(Channel.CreateBounded<object>(new BoundedChannelOptions(100) { SingleReader = true, SingleWriter = false }));
+    var engine = new Engine(Channel.CreateBounded<object>(new BoundedChannelOptions(100) { SingleReader = true, SingleWriter = false }), new TranspositionTable());
     engine.SetGame(new(position.FEN()));
     foreach (var move in MoveGenerator.GenerateAllMoves(position, capturesOnly: true))
     {
@@ -1050,13 +1050,13 @@ static void TranspositionTable()
     static void TesSize(int size)
     {
         Console.WriteLine("Hash: {0} MB", size);
-        var length = TranspositionTableExtensions.CalculateLength(size);
+        var length = Lynx.Model.TranspositionTable.CalculateLength(size);
 
         var lengthMb = length / 1024 / 1024;
 
         Console.WriteLine("TT memory: {0} MB", lengthMb * Marshal.SizeOf(typeof(TranspositionTableElement)));
         Console.WriteLine("TT array length: {0}MB, (0x{1}, {2} items)", lengthMb, length.ToString("X"), length);
-        Console.WriteLine("TT mask: 0x{0} ({1})\n", (length - 1).ToString("X"), Convert.ToString((length - 1), 2));
+        Console.WriteLine("TT mask: 0x{0} ({1})\n", (length - 1).ToString("X"), Convert.ToString(length - 1, 2));
     }
 
     Console.WriteLine($"{nameof(TranspositionTableElement)} size: {Marshal.SizeOf(typeof(TranspositionTableElement))} bytes\n");
@@ -1071,8 +1071,9 @@ static void TranspositionTable()
     TesSize(512);
     TesSize(1024);
 
-    var ttLength = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
-    var transpositionTable = new TranspositionTableElement[ttLength];
+    var ttLength = Lynx.Model.TranspositionTable.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
+    var transpositionTable = new TranspositionTable();
+
     var position = new Position(Constants.InitialPositionFEN);
     position.Print();
     Console.WriteLine($"Hash: {position.UniqueIdentifier}");
@@ -1080,10 +1081,10 @@ static void TranspositionTable()
     var hashKey = position.UniqueIdentifier % 0x400000;
     Console.WriteLine(hashKey);
 
-    var hashKey2 = TranspositionTableExtensions.CalculateTTIndex(position.UniqueIdentifier, ttLength);
+    var hashKey2 = transpositionTable.CalculateTTIndex(position.UniqueIdentifier);
     Console.WriteLine(hashKey2);
 
-    Array.Clear(transpositionTable);
+    transpositionTable.ResetTT();
 
     //transpositionTable.RecordHash(position, depth: 3, maxDepth: 5, move: 1234, eval: +5, nodeType: NodeType.Alpha);
     //var entry = transpositionTable.ProbeHash(position, maxDepth: 5, depth: 3, alpha: 1, beta: 2);

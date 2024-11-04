@@ -42,9 +42,6 @@ public sealed partial class Engine
 
     private readonly int[] _maxDepthReached = GC.AllocateArray<int>(Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin, pinned: true);
 
-    private int _currentTranspositionTableSize;
-    private TranspositionTable _tt = null!;
-
     private ulong _nodes;
 
     private SearchResult? _previousSearchResult;
@@ -355,7 +352,7 @@ public sealed partial class Engine
         finalSearchResult.Nodes = _nodes;
         finalSearchResult.Time = Utils.CalculateUCITime(elapsedSeconds);
         finalSearchResult.NodesPerSecond = Utils.CalculateNps(_nodes, elapsedSeconds);
-        finalSearchResult.HashfullPermill = _tt.HashfullPermillApprox();
+        finalSearchResult.HashfullPermill = _ttWraper.HashfullPermillApprox();
         if (Configuration.EngineSettings.ShowWDL)
         {
             finalSearchResult.WDL = WDL.WDLModel(bestScore, depth);
