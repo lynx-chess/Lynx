@@ -1,6 +1,8 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
 
+using static Lynx.Model.TranspositionTable;
+
 namespace Lynx;
 public sealed partial class Engine
 {
@@ -22,7 +24,7 @@ public sealed partial class Engine
                     Nodes = 666,                // In case some guis proritize the info command with biggest depth
                     Time = Utils.CalculateUCITime(elapsedSeconds),
                     NodesPerSecond = 0,
-                    HashfullPermill = _tt.HashfullPermillApprox(),
+                    HashfullPermill = HashfullPermillApprox(),
                     WDL = WDL.WDLModel(
                         (int)Math.CopySign(
                             EvaluationConstants.PositiveCheckmateDetectionLimit + (EvaluationConstants.CheckmateDepthFactor * tablebaseResult.MateScore),

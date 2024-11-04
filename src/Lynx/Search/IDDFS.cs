@@ -3,6 +3,8 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
+using static Lynx.Model.TranspositionTable;
+
 namespace Lynx;
 
 public sealed partial class Engine
@@ -41,9 +43,6 @@ public sealed partial class Engine
     private readonly int[] _continuationHistory = GC.AllocateArray<int>(12 * 64 * 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount, pinned: true);
 
     private readonly int[] _maxDepthReached = GC.AllocateArray<int>(Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin, pinned: true);
-
-    private int _currentTranspositionTableSize;
-    private TranspositionTable _tt = null!;
 
     private ulong _nodes;
 
@@ -355,7 +354,7 @@ public sealed partial class Engine
         finalSearchResult.Nodes = _nodes;
         finalSearchResult.Time = Utils.CalculateUCITime(elapsedSeconds);
         finalSearchResult.NodesPerSecond = Utils.CalculateNps(_nodes, elapsedSeconds);
-        finalSearchResult.HashfullPermill = _tt.HashfullPermillApprox();
+        finalSearchResult.HashfullPermill = HashfullPermillApprox();
         if (Configuration.EngineSettings.ShowWDL)
         {
             finalSearchResult.WDL = WDL.WDLModel(bestScore, depth);

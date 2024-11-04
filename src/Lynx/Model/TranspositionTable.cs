@@ -76,42 +76,43 @@ public struct TranspositionTableElement
     }
 }
 
-public static class TranspositionTableExtensions
+public static class TranspositionTable
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    public static int CalculateLength(int size)
+    private static int _currentTranspositionTableSize;
+
+    private static TranspositionTableElement[] _tt = [];
+    public static TranspositionTableElement[] TT { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _tt; }
+
+    public static void InitializeTT()
     {
-        var ttEntrySize = TranspositionTableElement.Size;
+        _currentTranspositionTableSize = Configuration.EngineSettings.TranspositionTableSize;
 
-        ulong sizeBytes = (ulong)size * 1024ul * 1024ul;
-        ulong ttLength = sizeBytes / ttEntrySize;
-        var ttLengthMb = (double)ttLength / 1024 / 1024;
+        var ttLength = CalculateLength(_currentTranspositionTableSize);
+        _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
+    }
 
-        if (ttLength > (ulong)Array.MaxLength)
+    public static void ResetTT()
+    {
+        if (_currentTranspositionTableSize == Configuration.EngineSettings.TranspositionTableSize)
         {
-            throw new ArgumentException($"Invalid transpositon table (Hash) size: {ttLengthMb}Mb, {ttLength} values (> Array.MaxLength, {Array.MaxLength})");
+            Array.Clear(TT);
         }
-
-        var mask = ttLength - 1;
-
-        _logger.Info("Hash value:\t{0} MB", size);
-        _logger.Info("TT memory:\t{0} MB", (ttLengthMb * ttEntrySize).ToString("F"));
-        _logger.Info("TT length:\t{0} items", ttLength);
-        _logger.Info("TT entry:\t{0} bytes", ttEntrySize);
-        _logger.Info("TT mask:\t{0}", mask.ToString("X"));
-
-        return (int)ttLength;
+        else
+        {
+            _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _currentTranspositionTableSize, Configuration.EngineSettings.TranspositionTableSize);
+            InitializeTT();
+        }
     }
 
     /// <summary>
     /// 'Fixed-point multiplication trick', see https://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
     /// </summary>
     /// <param name="positionUniqueIdentifier"></param>
-    /// <param name="ttLength"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ulong CalculateTTIndex(ulong positionUniqueIdentifier, int ttLength) => (ulong)(((UInt128)positionUniqueIdentifier * (UInt128)ttLength) >> 64);
+    public static ulong CalculateTTIndex(ulong positionUniqueIdentifier) => (ulong)(((UInt128)positionUniqueIdentifier * (UInt128)_tt.Length) >> 64);
 
     /// <summary>
     /// Checks the transposition table and, if there's a eval value that can be deducted from it of there's a previously recorded <paramref name="position"/>, it's returned. <see cref="EvaluationConstants.NoHashEntry"/> is returned otherwise
@@ -124,10 +125,10 @@ public static class TranspositionTableExtensions
     /// <param name="beta"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static (int Score, ShortMove BestMove, NodeType NodeType, int RawScore, int StaticEval) ProbeHash(this TranspositionTable tt, Position position, int depth, int ply, int alpha, int beta)
+    public static (int Score, ShortMove BestMove, NodeType NodeType, int RawScore, int StaticEval) ProbeHash(Position position, int depth, int ply, int alpha, int beta)
     {
-        var ttIndex = CalculateTTIndex(position.UniqueIdentifier, tt.Length);
-        ref var entry = ref tt[ttIndex];
+        var ttIndex = CalculateTTIndex(position.UniqueIdentifier);
+        ref var entry = ref _tt[ttIndex];
 
         if ((ushort)position.UniqueIdentifier != entry.Key)
         {
@@ -158,7 +159,6 @@ public static class TranspositionTableExtensions
     /// <summary>
     /// Adds a <see cref="TranspositionTableElement"/> to the transposition tabke
     /// </summary>
-    /// <param name="tt"></param>
     /// <param name="position"></param>
     /// <param name="depth"></param>
     /// <param name="ply">Ply</param>
@@ -166,10 +166,10 @@ public static class TranspositionTableExtensions
     /// <param name="nodeType"></param>
     /// <param name="move"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void RecordHash(this TranspositionTable tt, Position position, int staticEval, int depth, int ply, int score, NodeType nodeType, Move? move = null)
+    public static void RecordHash(Position position, int staticEval, int depth, int ply, int score, NodeType nodeType, Move? move = null)
     {
-        var ttIndex = CalculateTTIndex(position.UniqueIdentifier, tt.Length);
-        ref var entry = ref tt[ttIndex];
+        var ttIndex = CalculateTTIndex(position.UniqueIdentifier);
+        ref var entry = ref _tt[ttIndex];
 
         //if (entry.Key != default && entry.Key != position.UniqueIdentifier)
         //{
@@ -192,6 +192,59 @@ public static class TranspositionTableExtensions
         var recalculatedScore = RecalculateMateScores(score, -ply);
 
         entry.Update(position.UniqueIdentifier, recalculatedScore, staticEval, depth, nodeType, move);
+    }
+
+    /// <summary>
+    /// Exact TT occupancy per mill
+    /// </summary>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int HashfullPermill() => _tt.Length > 0
+        ? (int)(1000L * PopulatedItemsCount() / _tt.LongLength)
+        : 0;
+
+    /// <summary>
+    /// Orders of magnitude faster than <see cref="HashfullPermill(TranspositionTableElement[])"/>
+    /// </summary>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int HashfullPermillApprox()
+    {
+        int items = 0;
+        for (int i = 0; i < 1000; ++i)
+        {
+            if (_tt[i].Key != default)
+            {
+                ++items;
+            }
+        }
+
+        //Console.WriteLine($"Real: {HashfullPermill(transpositionTable)}, estimated: {items}");
+        return items;
+    }
+
+    internal static int CalculateLength(int size)
+    {
+        var ttEntrySize = TranspositionTableElement.Size;
+
+        ulong sizeBytes = (ulong)size * 1024ul * 1024ul;
+        ulong ttLength = sizeBytes / ttEntrySize;
+        var ttLengthMb = (double)ttLength / 1024 / 1024;
+
+        if (ttLength > (ulong)Array.MaxLength)
+        {
+            throw new ArgumentException($"Invalid transpositon table (Hash) size: {ttLengthMb}Mb, {ttLength} values (> Array.MaxLength, {Array.MaxLength})");
+        }
+
+        var mask = ttLength - 1;
+
+        _logger.Info("Hash value:\t{0} MB", size);
+        _logger.Info("TT memory:\t{0} MB", (ttLengthMb * ttEntrySize).ToString("F"));
+        _logger.Info("TT length:\t{0} items", ttLength);
+        _logger.Info("TT entry:\t{0} bytes", ttEntrySize);
+        _logger.Info("TT mask:\t{0}", mask.ToString("X"));
+
+        return (int)ttLength;
     }
 
     /// <summary>
@@ -218,76 +271,45 @@ public static class TranspositionTableExtensions
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int PopulatedItemsCount(this TranspositionTable transpositionTable)
+    private static int PopulatedItemsCount()
     {
         int items = 0;
-        for (int i = 0; i < transpositionTable.Length; ++i)
+        for (int i = 0; i < _tt.Length; ++i)
         {
-            if (transpositionTable[i].Key != default)
+            if (_tt[i].Key != default)
             {
                 ++items;
             }
         }
 
-        return items;
-    }
-
-    /// <summary>
-    /// Exact TT occupancy per mill
-    /// </summary>
-    /// <param name="transpositionTable"></param>
-    /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int HashfullPermill(this TranspositionTable transpositionTable) => transpositionTable.Length > 0
-        ? (int)(1000L * transpositionTable.PopulatedItemsCount() / transpositionTable.LongLength)
-        : 0;
-
-    /// <summary>
-    /// Orders of magnitude faster than <see cref="HashfullPermill(TranspositionTableElement[])"/>
-    /// </summary>
-    /// <param name="transpositionTable"></param>
-    /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int HashfullPermillApprox(this TranspositionTable transpositionTable)
-    {
-        int items = 0;
-        for (int i = 0; i < 1000; ++i)
-        {
-            if (transpositionTable[i].Key != default)
-            {
-                ++items;
-            }
-        }
-
-        //Console.WriteLine($"Real: {HashfullPermill(transpositionTable)}, estimated: {items}");
         return items;
     }
 
     [Conditional("DEBUG")]
-    internal static void Stats(this TranspositionTable transpositionTable)
+    private static void Stats()
     {
         int items = 0;
-        for (int i = 0; i < transpositionTable.Length; ++i)
+        for (int i = 0; i < _tt.Length; ++i)
         {
-            if (transpositionTable[i].Key != default)
+            if (_tt[i].Key != default)
             {
                 ++items;
             }
         }
         _logger.Info("TT Occupancy:\t{0}% ({1}MB)",
-            100 * transpositionTable.PopulatedItemsCount() / transpositionTable.Length,
-            transpositionTable.Length * Marshal.SizeOf(typeof(TranspositionTableElement)) / 1024 / 1024);
+            100 * PopulatedItemsCount() / _tt.Length,
+            _tt.Length * Marshal.SizeOf(typeof(TranspositionTableElement)) / 1024 / 1024);
     }
 
     [Conditional("DEBUG")]
-    internal static void Print(this TranspositionTable transpositionTable)
+    private static void Print()
     {
         Console.WriteLine("Transposition table content:");
-        for (int i = 0; i < transpositionTable.Length; ++i)
+        for (int i = 0; i < _tt.Length; ++i)
         {
-            if (transpositionTable[i].Key != default)
+            if (_tt[i].Key != default)
             {
-                Console.WriteLine($"{i}: Key = {transpositionTable[i].Key}, Depth: {transpositionTable[i].Depth}, Score: {transpositionTable[i].Score}, Move: {(transpositionTable[i].Move != 0 ? ((Move)transpositionTable[i].Move).UCIString() : "-")} {transpositionTable[i].Type}");
+                Console.WriteLine($"{i}: Key = {_tt[i].Key}, Depth: {_tt[i].Depth}, Score: {_tt[i].Score}, Move: {(_tt[i].Move != 0 ? ((Move)_tt[i].Move).UCIString() : "-")} {_tt[i].Type}");
             }
         }
         Console.WriteLine("");
