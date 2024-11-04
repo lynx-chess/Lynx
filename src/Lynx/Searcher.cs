@@ -1,4 +1,6 @@
-﻿using Lynx.UCI.Commands.GUI;
+﻿using Lynx.Model;
+using Lynx.UCI.Commands.Engine;
+using Lynx.UCI.Commands.GUI;
 using NLog;
 using System.Threading.Channels;
 
@@ -7,12 +9,14 @@ namespace Lynx;
 public sealed class Searcher
 {
     private readonly ChannelReader<string> _uciReader;
+    private readonly ChannelWriter<object> _engineWriter;
     private readonly Engine _engine;
     private readonly Logger _logger;
 
-    public Searcher(ChannelReader<string> uciReader, Engine engine)
+    public Searcher(ChannelReader<string> uciReader, ChannelWriter<object> engineWriter, Engine engine)
     {
         _uciReader = uciReader;
+        _engineWriter = engineWriter;
         _engine = engine;
         _logger = LogManager.GetCurrentClassLogger();
     }
@@ -27,7 +31,7 @@ public sealed class Searcher
                 {
                     if (_uciReader.TryRead(out var rawCommand))
                     {
-                        _engine.Search(new GoCommand(rawCommand));
+                        OnGoCommand(new GoCommand(rawCommand));
                     }
                 }
                 catch (Exception e)
@@ -43,6 +47,19 @@ public sealed class Searcher
         finally
         {
             _logger.Info("Finishing {0}", nameof(Searcher));
+        }
+    }
+
+    private void OnGoCommand(GoCommand goCommand)
+    {
+        var searchConstraints = TimeManager.CalculateTimeManagement(_engine.Game, goCommand);
+
+        var searchResult = _engine.Search(goCommand, searchConstraints);
+
+        if (searchResult is not null)
+        {
+            // We always print best move, even in case of go ponder + stop, in which case IDEs are expected to ignore it
+            _engineWriter.TryWrite(new BestMoveCommand(searchResult));
         }
     }
 }
