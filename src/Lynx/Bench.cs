@@ -105,6 +105,9 @@ public partial class Engine
     /// </summary>
     public (ulong TotalNodes, ulong Nps) Bench(int depth)
     {
+        _logger.Warn("Starting benchmark at depth {0}", depth);
+        _logger.Warn("TT size {0} occupation: {1}", _tt.TT.Length, _tt.PopulatedItemsCount());
+
         var stopwatch = new Stopwatch();
 
         ulong totalNodes = 0;
@@ -133,6 +136,8 @@ public partial class Engine
         NewGame();
         _isNewGameComing = false;
         _isNewGameCommandSupported = false;
+
+        _logger.Warn("Benchmark completed: nodes {0}", totalNodes);
 
         return (totalNodes, Utils.CalculateNps(totalNodes, totalSeconds));
     }

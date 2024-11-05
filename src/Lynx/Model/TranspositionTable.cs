@@ -204,7 +204,7 @@ public class TranspositionTable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int PopulatedItemsCount()
+    internal int PopulatedItemsCount()
     {
         int items = 0;
         for (int i = 0; i < _tt.Length; ++i)
