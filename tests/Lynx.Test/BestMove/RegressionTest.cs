@@ -55,8 +55,8 @@ public class RegressionTest : BaseTest
         TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString);
     }
 
-    [TestCase(5)]
-    [TestCase(6)]
+    [TestCase(10)]
+    [TestCase(11)]
     public void KeepNonGoodQuiescenceMoves(int depth)
     {
         const string fen = Constants.InitialPositionFEN;
