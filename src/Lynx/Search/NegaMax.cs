@@ -75,6 +75,7 @@ public sealed partial class Engine
         // - Prune more aggressively when evaluation is too high: current position is even getter
         // - Prune less aggressively when evaluation is low low: uncertainty on how bad the position really is
         bool improving = false;
+
         // From Potential
         double improvingRate = 0;
 
@@ -343,9 +344,15 @@ public sealed partial class Engine
                     {
                         --reduction;
                     }
+
                     if (position.IsInCheck())   // i.e. move gives check
                     {
                         --reduction;
+                    }
+
+                    if (!improving)
+                    {
+                        ++reduction;
                     }
 
                     if (ttBestMove != default && isCapture)
