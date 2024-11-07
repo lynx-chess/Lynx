@@ -24,7 +24,7 @@ public class TranspositionTable
         _currentTranspositionTableSize = Configuration.EngineSettings.TranspositionTableSize;
 
         var ttLength = CalculateLength(_currentTranspositionTableSize);
-        _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
+        _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: false);
     }
 
     public void Reset()
