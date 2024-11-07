@@ -108,10 +108,12 @@ public partial class Engine
         _logger.Warn("Starting benchmark at depth {0}", depth);
         _logger.Warn("TT size {0} occupation: {1}", _tt.TT.Length, _tt.PopulatedItemsCount());
 
-        var stopwatch = new Stopwatch();
-
+        NewGame();
+        var goCommand = new GoCommand($"go depth {depth}");
         ulong totalNodes = 0;
         double totalSeconds = 0;
+
+        var stopwatch = new Stopwatch();
 
         foreach (var fen in _benchmarkFens)
         {
@@ -120,7 +122,6 @@ public partial class Engine
             AdjustPosition($"position fen {fen}");
             stopwatch.Restart();
 
-            var goCommand = new GoCommand($"go depth {depth}");
             var searchConstraints = TimeManager.CalculateTimeManagement(Game, goCommand);
 
             var result = BestMove(goCommand, in searchConstraints);
