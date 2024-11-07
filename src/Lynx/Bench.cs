@@ -131,6 +131,7 @@ public partial class Engine
         }
 
         _engineWriter.TryWrite($"Total time: {Utils.CalculateUCITime(totalSeconds)}");
+        _logger.Warn("Final ccupation: {0}", _tt.PopulatedItemsCount());
 
         // Cleanup game
         NewGame();
