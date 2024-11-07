@@ -195,16 +195,16 @@ public sealed class EngineSettings
     public int FP_MaxDepth { get; set; } = 7;
 
     [SPSA<int>(1, 200, 10)]
-    public int FP_DepthScalingFactor { get; set; } = 73;
+    public int FP_DepthScalingFactor { get; set; } = 65;
 
     [SPSA<int>(0, 500, 25)]
-    public int FP_Margin { get; set; } = 100;
+    public int FP_Margin { get; set; } = 130;
 
     [SPSA<int>(0, 500, 25)]
     public int FP_Margin_Improving { get; set; } = 300;
 
     [SPSA<int>(50, 250, 10)]
-    public int FP_QS_Margin { get; set; } = 75;
+    public int FP_QS_Margin { get; set; } = 64;
 
     [SPSA<int>(0, 10, 0.5)]
     public int HistoryPrunning_MaxDepth { get; set; } = 5;
