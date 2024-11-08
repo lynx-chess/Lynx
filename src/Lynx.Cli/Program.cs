@@ -1,9 +1,8 @@
 ﻿using Lynx;
-using Lynx.Model;
+using Lynx.Cli;
 using Microsoft.Extensions.Configuration;
 using NLog;
 using NLog.Extensions.Logging;
-using System.Threading.Channels;
 
 var config = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
@@ -17,36 +16,6 @@ if (Configuration.GeneralSettings.EnableLogging)
     LogManager.Configuration = new NLogLoggingConfiguration(config.GetSection("NLog"));
 }
 
-var logger = LogManager.GetCurrentClassLogger();
-
-if (args.Length >= 1 && args[0] == "bench")
-{
-    var engineChannel = Channel.CreateBounded<object>(new BoundedChannelOptions(2 * Configuration.EngineSettings.MaxDepth) { SingleReader = true, SingleWriter = false, FullMode = BoundedChannelFullMode.DropOldest });
-
-    var tt = new TranspositionTable();
-    var engine = new Engine(engineChannel, tt);
-
-    engine.NewGame();
-
-    var n = (ushort)Random.Shared.Next(ushort.MinValue, ushort.MaxValue);
-    logger.Warn("using {0}", n);
-
-    tt.Populate(n);
-
-    for (var i = 0; i < tt.TT.Length; ++i)
-    {
-        if (tt.TT[i].Key != n)
-        {
-            var message = $"Item {i} shouldn't be {tt.TT[i].Key}!";
-
-            logger.Fatal(message);
-            Console.WriteLine(message);
-        }
-    }
-
-    engine.NewGame();
-    var results = engine.Bench(Configuration.EngineSettings.BenchDepth);
-    await engine.PrintBenchResults(results);
-}
+await Runner.Run(args);
 
 Thread.Sleep(2_000);

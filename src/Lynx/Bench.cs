@@ -105,6 +105,24 @@ public partial class Engine
     /// </summary>
     public (ulong TotalNodes, ulong Nps) Bench(int depth)
     {
+        var n = (ushort)Random.Shared.Next(ushort.MinValue, ushort.MaxValue);
+        _logger.Warn("using {0}", n);
+
+        _tt.Populate(n);
+
+        for (var i = 0; i < _tt.TT.Length; ++i)
+        {
+            if (_tt.TT[i].Key != n)
+            {
+                var message = $"Item {i} shouldn't be {_tt.TT[i].Key}!";
+
+                _logger.Fatal(message);
+                Console.WriteLine(message);
+            }
+        }
+
+        NewGame();
+
         _logger.Warn("Starting benchmark at depth {0}", depth);
         _logger.Warn("TT size {0} occupation: {1}", _tt.TT.Length, _tt.PopulatedItemsCount());
 
