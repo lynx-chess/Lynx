@@ -108,16 +108,24 @@ public partial class Engine
         var n = (ushort)Random.Shared.Next(ushort.MinValue, ushort.MaxValue);
         _logger.Warn("using {0}", n);
 
-        _tt.Populate(n);
-
-        for (var i = 0; i < _tt.TT.Length; ++i)
+        if (Environment.OSVersion.Platform == PlatformID.Unix)
         {
-            if (_tt.TT[i].Key != n)
+            while (true)
             {
-                var message = $"Item {i} shouldn't be {_tt.TT[i].Key}!";
+                _tt.Populate(n);
 
-                _logger.Fatal(message);
-                Console.WriteLine(message);
+                for (var i = 0; i < _tt.TT.Length; ++i)
+                {
+                    if (_tt.TT[i].Key != n)
+                    {
+                        var message = $"Item {i} shouldn't be {_tt.TT[i].Key}!";
+
+                        _logger.Fatal(message);
+                        Console.WriteLine(message);
+                    }
+                }
+
+                _tt.Populate(n);
             }
         }
 
