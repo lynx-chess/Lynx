@@ -1,19 +1,12 @@
 ﻿using Lynx;
-using Lynx.Cli;
+using Lynx.Model;
 using Microsoft.Extensions.Configuration;
 using NLog;
 using NLog.Extensions.Logging;
-
-#if DEBUG
-Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development");
-#endif
-
-var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
+using System.Threading.Channels;
 
 var config = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
-    .AddJsonFile($"appsettings.{environmentName}.json", optional: true, reloadOnChange: false)
-    .AddEnvironmentVariables()
     .Build();
 
 config.GetSection(nameof(EngineSettings)).Bind(Configuration.EngineSettings);
@@ -24,6 +17,16 @@ if (Configuration.GeneralSettings.EnableLogging)
     LogManager.Configuration = new NLogLoggingConfiguration(config.GetSection("NLog"));
 }
 
-await Runner.Run(args);
+if (args.Length >= 1 && args[0] == "bench")
+{
+    var engineChannel = Channel.CreateBounded<object>(new BoundedChannelOptions(2 * Configuration.EngineSettings.MaxDepth) { SingleReader = true, SingleWriter = false, FullMode = BoundedChannelFullMode.DropOldest });
+
+    var tt = new TranspositionTable();
+    var engine = new Engine(engineChannel, tt);
+
+    engine.NewGame();
+
+    engine.Bench(Configuration.EngineSettings.BenchDepth);
+}
 
 Thread.Sleep(2_000);
