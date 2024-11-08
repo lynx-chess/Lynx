@@ -45,7 +45,8 @@ if (args.Length >= 1 && args[0] == "bench")
     }
 
     engine.NewGame();
-    engine.Bench(Configuration.EngineSettings.BenchDepth);
+    var results = engine.Bench(Configuration.EngineSettings.BenchDepth);
+    await engine.PrintBenchResults(results);
 }
 
 Thread.Sleep(2_000);
