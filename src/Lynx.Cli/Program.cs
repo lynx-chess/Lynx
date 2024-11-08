@@ -17,6 +17,8 @@ if (Configuration.GeneralSettings.EnableLogging)
     LogManager.Configuration = new NLogLoggingConfiguration(config.GetSection("NLog"));
 }
 
+var logger = LogManager.GetCurrentClassLogger();
+
 if (args.Length >= 1 && args[0] == "bench")
 {
     var engineChannel = Channel.CreateBounded<object>(new BoundedChannelOptions(2 * Configuration.EngineSettings.MaxDepth) { SingleReader = true, SingleWriter = false, FullMode = BoundedChannelFullMode.DropOldest });
@@ -32,7 +34,10 @@ if (args.Length >= 1 && args[0] == "bench")
     {
         if (tt.TT[i].Key != (ushort)i)
         {
-            throw new Exception($"Item {i} shouldn't be {tt.TT[i].Key}!");
+            var message = $"Item {i} shouldn't be {tt.TT[i].Key}!";
+
+            logger.Fatal(message);
+            Console.WriteLine(message);
         }
     }
 
