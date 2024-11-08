@@ -108,7 +108,7 @@ public partial class Engine
         var n = (ushort)Random.Shared.Next(ushort.MinValue, ushort.MaxValue);
         _logger.Warn("using {0}", n);
 
-        if (Environment.OSVersion.Platform == PlatformID.Unix && Random.Shared.Next(1, 2) == 2)
+        if (Environment.OSVersion.Platform == PlatformID.Unix && Random.Shared.Next(1, 3) == 2)
         {
             while (true)
             {
