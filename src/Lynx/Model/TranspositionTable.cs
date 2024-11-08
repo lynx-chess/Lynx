@@ -40,6 +40,14 @@ public class TranspositionTable
         }
     }
 
+    public void Populate()
+    {
+        for (var i = 0; i < _tt.Length; ++i)
+        {
+            _tt[i].Update((ushort)i, i, i, i, NodeType.Exact, i);
+        }
+    }
+
     /// <summary>
     /// 'Fixed-point multiplication trick', see https://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
     /// </summary>

@@ -26,6 +26,17 @@ if (args.Length >= 1 && args[0] == "bench")
 
     engine.NewGame();
 
+    tt.Populate();
+
+    for (var i = 0; i < tt.TT.Length; ++i)
+    {
+        if (tt.TT[i].Key != (ushort)i)
+        {
+            throw new Exception($"Item {i} shouldn't be {tt.TT[i].Key}!");
+        }
+    }
+
+    engine.NewGame();
     engine.Bench(Configuration.EngineSettings.BenchDepth);
 }
 
