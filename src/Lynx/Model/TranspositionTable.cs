@@ -40,11 +40,11 @@ public class TranspositionTable
         }
     }
 
-    public void Populate()
+    public void Populate(ushort n)
     {
         for (var i = 0; i < _tt.Length; ++i)
         {
-            _tt[i].Update((ushort)i, i, i, i, NodeType.Exact, i);
+            _tt[i].Update(n, n, n, n, NodeType.Exact, n);
         }
     }
 

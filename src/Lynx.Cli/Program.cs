@@ -28,11 +28,14 @@ if (args.Length >= 1 && args[0] == "bench")
 
     engine.NewGame();
 
-    tt.Populate();
+    var n = (ushort)Random.Shared.Next(ushort.MinValue, ushort.MaxValue);
+    logger.Warn("using {0}", n);
+
+    tt.Populate(n);
 
     for (var i = 0; i < tt.TT.Length; ++i)
     {
-        if (tt.TT[i].Key != (ushort)i)
+        if (tt.TT[i].Key != n)
         {
             var message = $"Item {i} shouldn't be {tt.TT[i].Key}!";
 
