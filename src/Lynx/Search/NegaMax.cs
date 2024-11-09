@@ -114,7 +114,7 @@ public sealed partial class Engine
 
             if (ply >= 2)
             {
-                improving = staticEval > Game.ReadStaticEvalFromStack(ply - 2);
+                improving = staticEval >= Game.ReadStaticEvalFromStack(ply - 2);
             }
 
             // From smol.cs
