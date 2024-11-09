@@ -1,6 +1,7 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Security.Authentication;
 
 namespace Lynx;
 
@@ -181,14 +182,20 @@ public sealed partial class Engine
                 }
             }
 
+            var staticEvalBetaDiff = staticEval - beta;
+
             // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
             if (depth >= Configuration.EngineSettings.NMP_MinDepth
-                && staticEval >= beta
+                && staticEvalBetaDiff >= 0
                 && !parentWasNullMove
                 && phase > 2   // Zugzwang risk reduction: pieces other than pawn presents
                 && (ttElementType != NodeType.Alpha || ttScore >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
             {
-                var nmpReduction = Configuration.EngineSettings.NMP_BaseDepthReduction + ((depth + Configuration.EngineSettings.NMP_DepthIncrement) / Configuration.EngineSettings.NMP_DepthDivisor);   // Clarity
+                var nmpReduction = Configuration.EngineSettings.NMP_BaseDepthReduction
+                    + ((depth + Configuration.EngineSettings.NMP_DepthIncrement) / Configuration.EngineSettings.NMP_DepthDivisor)   // Clarity
+                    + Math.Min(
+                        Configuration.EngineSettings.NMP_StaticEvalBetaMaxReduction,
+                        staticEvalBetaDiff / Configuration.EngineSettings.NMP_StaticEvalBetaDivisor);
 
                 // TODO more advanced adaptative reduction, similar to what Ethereal and Stormphrax are doing
                 //var nmpReduction = Math.Min(
