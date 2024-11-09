@@ -10,18 +10,20 @@ public sealed class Searcher
 {
     private readonly ChannelReader<string> _uciReader;
     private readonly ChannelWriter<object> _engineWriter;
-    private readonly Engine _engine;
     private readonly Logger _logger;
     private readonly TranspositionTable _tt;
 
-    public Searcher(ChannelReader<string> uciReader, ChannelWriter<object> engineWriter, Engine engine, TranspositionTable tt)
+    public Searcher(ChannelReader<string> uciReader, ChannelWriter<object> engineWriter)
     {
         _uciReader = uciReader;
         _engineWriter = engineWriter;
-        _engine = engine;
-        _tt = tt;
+
+        _tt = new TranspositionTable();
         _logger = LogManager.GetCurrentClassLogger();
+        Engine = new Engine(_engineWriter, _tt);
     }
+
+    public Engine Engine { get; }
 
     public async Task Run(CancellationToken cancellationToken)
     {
@@ -54,9 +56,9 @@ public sealed class Searcher
 
     private void OnGoCommand(GoCommand goCommand)
     {
-        var searchConstraints = TimeManager.CalculateTimeManagement(_engine.Game, goCommand);
+        var searchConstraints = TimeManager.CalculateTimeManagement(Engine.Game, goCommand);
 
-        var searchResult = _engine.Search(goCommand, searchConstraints);
+        var searchResult = Engine.Search(goCommand, searchConstraints);
 
         if (searchResult is not null)
         {

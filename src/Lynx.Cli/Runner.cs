@@ -1,5 +1,4 @@
-﻿using Lynx.Model;
-using Lynx.UCI.Commands.Engine;
+﻿using Lynx.UCI.Commands.Engine;
 using NLog;
 using System.Threading.Channels;
 
@@ -17,14 +16,13 @@ public static class Runner
         using CancellationTokenSource source = new();
         CancellationToken cancellationToken = source.Token;
 
-        var tt = new TranspositionTable();
-        var engine = new Engine(engineChannel, tt);
-        var uciHandler = new UCIHandler(uciChannel, engineChannel, engine);
+        var searcher = new Searcher(uciChannel, engineChannel);
+        var uciHandler = new UCIHandler(uciChannel, engineChannel, searcher.Engine);
 
         var tasks = new List<Task>
         {
             Task.Run(() => new Writer(engineChannel).Run(cancellationToken)),
-            Task.Run(() => new Searcher(uciChannel, engineChannel, engine, tt).Run(cancellationToken)),
+            Task.Run(() => searcher.Run(cancellationToken)),
             Task.Run(() => new Listener(uciHandler).Run(cancellationToken, args)),
             uciChannel.Reader.Completion,
             engineChannel.Reader.Completion
