@@ -77,6 +77,9 @@ public sealed partial class Engine
         // - Prune less aggressively when evaluation is low low: uncertainty on how bad the position really is
         bool improving = false;
 
+        // From Potential
+        double improvingRate = 0;
+
         bool isInCheck = position.IsInCheck();
         int staticEval = int.MaxValue;
         int phase = int.MaxValue;
@@ -114,7 +117,9 @@ public sealed partial class Engine
 
             if (ply >= 2)
             {
-                improving = staticEval > Game.ReadStaticEvalFromStack(ply - 2);
+                var evalDiff = staticEval - Game.ReadStaticEvalFromStack(ply - 2);
+                improving = evalDiff >= 0;
+                improvingRate = evalDiff / 50.0;
             }
 
             // From smol.cs
@@ -132,7 +137,13 @@ public sealed partial class Engine
             {
                 // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
                 // Return formula by Ciekce, instead of just returning static eval
-                if (staticEval - (Configuration.EngineSettings.RFP_DepthScalingFactor * (depth - (improving ? 1 : 0))) >= beta)
+                // Improving impl. based on Potential's
+                var rfpMargin = improving ? 80 * (depth - 1) : 100 * depth;
+                var improvingFactor = improvingRate * (0.75 * depth);
+
+                var rfpThreshold = rfpMargin + improvingFactor;
+
+                if (staticEval - rfpThreshold >= beta)
                 {
 #pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
                     return (staticEval + beta) / 2;
