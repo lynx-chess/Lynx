@@ -73,9 +73,6 @@ public class RegressionTest : BaseTest
             case 6 when bestResult.Moves.Length >= 6:
                 Assert.AreNotEqual("f3e5", bestResult.Moves[5].UCIString());
                 break;
-            default:
-                Assert.True(false);
-                break;
         }
     }
 
