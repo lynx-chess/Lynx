@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics.X86;
 
 namespace Lynx.Model;
 public class TranspositionTable
@@ -10,9 +11,7 @@ public class TranspositionTable
 
     private int _currentTranspositionTableSize;
 
-    TranspositionTableElement[] _tt = [];
-
-    public TranspositionTableElement[] TT { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _tt; }
+    private TranspositionTableElement[] _tt = [];
 
     public TranspositionTable()
     {
@@ -31,12 +30,32 @@ public class TranspositionTable
     {
         if (_currentTranspositionTableSize == Configuration.EngineSettings.TranspositionTableSize)
         {
-            Array.Clear(TT);
+            Array.Clear(_tt);
         }
         else
         {
             _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _currentTranspositionTableSize, Configuration.EngineSettings.TranspositionTableSize);
             Allocate();
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void PrefetchTTEntry(Position position)
+    {
+        if (Sse.IsSupported)
+        {
+            var index = CalculateTTIndex(position.UniqueIdentifier);
+
+            unsafe
+            {
+                // Since _tt is a pinned array
+                // This is no-op pinning as it does not influence the GC compaction
+                // https://tooslowexception.com/pinned-object-heap-in-net-5/
+                fixed (TranspositionTableElement* ttPtr = _tt)
+                {
+                    Sse.Prefetch0(ttPtr + index);
+                }
+            }
         }
     }
 
