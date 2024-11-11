@@ -1,5 +1,7 @@
 ﻿using Lynx.Model;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using static Lynx.TunableEvalParameters;
 
 namespace Lynx;
@@ -99,16 +101,11 @@ public static class EvaluationPSQTs
     public static int PSQT(int friendEnemy, int bucket, int piece, int square)
     {
         var index = PSQTIndex(friendEnemy, bucket, piece, square);
+        Debug.Assert(index >= 0 && index < _packedPSQT.Length);
 
         unsafe
         {
-            // Since _tt is a pinned array
-            // This is no-op pinning as it does not influence the GC compaction
-            // https://tooslowexception.com/pinned-object-heap-in-net-5/
-            fixed (int* psqtPtr = &_packedPSQT[0])
-            {
-                return psqtPtr[index];
-            }
+            return Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_packedPSQT), index);
         }
     }
 
