@@ -8,26 +8,6 @@ namespace Lynx;
 
 public sealed partial class Engine
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void PrefetchTTEntry()
-    {
-        if (Sse.IsSupported)
-        {
-            var index = _tt.CalculateTTIndex(Game.CurrentPosition.UniqueIdentifier);
-
-            unsafe
-            {
-                // Since _tt is a pinned array
-                // This is no-op pinning as it does not influence the GC compaction
-                // https://tooslowexception.com/pinned-object-heap-in-net-5/
-                fixed (TranspositionTableElement* ttPtr = _tt.TT)
-                {
-                    Sse.Prefetch0(ttPtr + index);
-                }
-            }
-        }
-    }
-
 #pragma warning disable RCS1226 // Add paragraph to documentation comment
 #pragma warning disable RCS1243 // Duplicate word in a comment
     /// <summary>
