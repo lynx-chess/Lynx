@@ -258,6 +258,22 @@ public class PerftTest
         }
     }
 
+    /// <summary>
+    /// martinn = Motor's author
+    /// </summary>
+    // Motor vs Avalanche
+    [TestCase("6r1/2q2pp1/1PB2k2/3P1P2/5Q1B/8/6K1/7R b - - 0 1", 1, 1)]
+    [TestCase("6r1/2q2pp1/1PB2k2/3P1P2/5Q1B/8/6K1/7R b - - 0 1", 2, 48)]
+    [TestCase("6r1/2q2pp1/1PB2k2/3P1P2/5Q1B/8/6K1/7R b - - 0 1", 3, 1_060)]
+    [TestCase("6r1/2q2pp1/1PB2k2/3P1P2/5Q1B/8/6K1/7R b - - 0 1", 4, 42_723)]
+    [TestCase("6r1/2q2pp1/1PB2k2/3P1P2/5Q1B/8/6K1/7R b - - 0 1", 5, 981_168)]
+    [TestCase("6r1/2q2pp1/1PB2k2/3P1P2/5Q1B/8/6K1/7R b - - 0 1", 6, 37_765_954)]
+    [TestCase("6r1/2q2pp1/1PB2k2/3P1P2/5Q1B/8/6K1/7R b - - 0 1", 7, 891_192_699)]   // ~40s
+    public void MartinnPositions(string fen, int depth, long expectedNumberOfNodes)
+    {
+        Validate(fen, depth, expectedNumberOfNodes);
+    }
+
     [Test]
     public void PositionWithHighestKnownNumberOfMoves() => Validate("R6R/3Q4/1Q4Q1/4Q3/2Q4Q/Q4Q2/pp1Q4/kBNN1KB1 w - - 0 1", 1, 218);
 
