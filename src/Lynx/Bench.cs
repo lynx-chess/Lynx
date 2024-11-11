@@ -106,7 +106,7 @@ public partial class Engine
     public (ulong TotalNodes, ulong Nps) Bench(int depth)
     {
         _logger.Warn("Starting benchmark at depth {0}", depth);
-        _logger.Warn("TT size {0} occupation: {1}", _tt.TT.Length, _tt.PopulatedItemsCount());
+        _logger.Warn("TT occupation: {0}", _tt.PopulatedItemsCount());
 
         var goCommand = new GoCommand($"go depth {depth}");
         ulong totalNodes = 0;
