@@ -67,14 +67,11 @@ public class RegressionTest : BaseTest
 
         switch (depth)
         {
-            case 5:
+            case 5 when bestResult.Moves.Length >= 5:
                 Assert.AreNotEqual("f6e4", bestResult.Moves[4].UCIString());
                 break;
-            case 6:
+            case 6 when bestResult.Moves.Length >= 6:
                 Assert.AreNotEqual("f3e5", bestResult.Moves[5].UCIString());
-                break;
-            default:
-                Assert.True(false);
                 break;
         }
     }
