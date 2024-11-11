@@ -48,7 +48,7 @@ public sealed partial class Engine
     private CancellationTokenSource _searchCancellationTokenSource;
     private CancellationTokenSource _absoluteSearchCancellationTokenSource;
 
-    public Engine(ChannelWriter<object> engineWriter)
+    public Engine(ChannelWriter<object> engineWriter, TranspositionTable tt)
     {
         AverageDepth = 0;
         Game = new Game(Constants.InitialPositionFEN);
@@ -71,7 +71,7 @@ public sealed partial class Engine
             _killerMoves[i] = new Move[3];
         }
 
-        AllocateTT();
+        _tt = tt;
 
 #if !DEBUG
         // Temporary channel so that no output is generated
