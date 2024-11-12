@@ -65,12 +65,7 @@ public static class MoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Span<Move> GenerateAllMoves(Position position, Span<Move> movePool)
     {
-#if DEBUG
-        if (position.Side == Side.Both)
-        {
-            return [];
-        }
-#endif
+        Debug.Assert(position.Side != Side.Both);
 
         int localIndex = 0;
 
@@ -96,12 +91,7 @@ public static class MoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Move[] GenerateAllCaptures(Position position, Move[] movePool)
     {
-#if DEBUG
-        if (position.Side == Side.Both)
-        {
-            return [];
-        }
-#endif
+        Debug.Assert(position.Side != Side.Both);
 
         int localIndex = 0;
 
@@ -127,12 +117,8 @@ public static class MoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Span<Move> GenerateAllCaptures(Position position, Span<Move> movePool)
     {
-#if DEBUG
-        if (position.Side == Side.Both)
-        {
-            return [];
-        }
-#endif
+        Debug.Assert(position.Side != Side.Both);
+
 
         int localIndex = 0;
 
@@ -166,13 +152,7 @@ public static class MoveGenerator
 
             var sourceRank = (sourceSquare >> 3) + 1;
 
-#if DEBUG
-            if (sourceRank == 1 || sourceRank == 8)
-            {
-                _logger.Warn("There's a non-promoted {0} pawn in rank {1}", position.Side, sourceRank);
-                continue;
-            }
-#endif
+            Debug.Assert(sourceRank != 1 && sourceRank != 8, $"There's a non-promoted {position.Side} pawn in rank {sourceRank})");
 
             // Pawn pushes
             var singlePushSquare = sourceSquare + pawnPush;
@@ -252,13 +232,7 @@ public static class MoveGenerator
 
             var sourceRank = (sourceSquare >> 3) + 1;
 
-#if DEBUG
-            if (sourceRank == 1 || sourceRank == 8)
-            {
-                _logger.Warn("There's a non-promoted {0} pawn in rank {1}", position.Side, sourceRank);
-                continue;
-            }
-#endif
+            Debug.Assert(sourceRank != 1 && sourceRank != 8, $"There's a non-promoted {position.Side} pawn in rank {sourceRank})");
 
             // Pawn pushes
             var singlePushSquare = sourceSquare + pawnPush;
@@ -464,12 +438,7 @@ public static class MoveGenerator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool CanGenerateAtLeastAValidMove(Position position)
     {
-#if DEBUG
-        if (position.Side == Side.Both)
-        {
-            return false;
-        }
-#endif
+        Debug.Assert(position.Side != Side.Both);
 
         var offset = Utils.PieceOffset(position.Side);
 
@@ -488,7 +457,7 @@ public static class MoveGenerator
         }
         catch (Exception e)
         {
-            Debug.Fail($"Error in {nameof(CanGenerateAtLeastAValidMove)}", e.StackTrace);
+            _logger.Error(e, $"Error in {nameof(CanGenerateAtLeastAValidMove)}");
             return false;
         }
 #endif
@@ -511,13 +480,8 @@ public static class MoveGenerator
 
             var sourceRank = (sourceSquare >> 3) + 1;
 
-#if DEBUG
-            if (sourceRank == 1 || sourceRank == 8)
-            {
-                _logger.Warn("There's a non-promoted {0} pawn in rank {1}", position.Side, sourceRank);
-                continue;
-            }
-#endif
+            Debug.Assert(sourceRank != 1 && sourceRank != 8, $"There's a non-promoted {position.Side} pawn in rank {sourceRank})");
+
             // Pawn pushes
             var singlePushSquare = sourceSquare + pawnPush;
             if (!position.OccupancyBitBoards[2].GetBit(singlePushSquare))

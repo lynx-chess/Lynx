@@ -159,6 +159,124 @@ public class PerftTest
         Validate(fen, depth, expectedNumberOfNodes);
     }
 
+    /// <summary>
+    /// By kz04px
+    /// https://github.com/kz04px/libchess/blob/71c3543da7ad64387b618e889feef5406f1ee851/tests/perft.cpp
+    /// https://github.com/kz04px/rawr/blob/1c97b8da895f919c1eb7af215b902599c09532b3/tests/perft_extra.rs
+    /// </summary>
+    // EP
+    [TestCase("8/8/8/8/1k1PpN1R/8/8/4K3 b - d3 0 1  ", 1, 9, 193)]
+    [TestCase("8/8/8/8/1k1Ppn1R/8/8/4K3 b - d3 0 1  ", 1, 17, 220)]
+    [TestCase("4k3/8/8/2PpP3/8/8/8/4K3 w - d6 0 1   ", 1, 9, 47, 376)]
+    [TestCase("4k3/8/8/8/2pPp3/8/8/4K3 b - d3 0 1   ", 1, 9, 47, 376)]
+    [TestCase("r3k2r/p2pqpb1/bn2pnp1/2pPN3/1p2P3/2N2Q1p/PPPBBPPP/R4K1R w kq c6 0 2", 1, 46)]
+    // EP - pinned diagonal
+    [TestCase("4k3/b7/8/2Pp4/8/8/8/6K1 w - d6 0 1   ", 1, 5, 45)]
+    [TestCase("4k3/7b/8/4pP2/8/8/8/1K6 w - e6 0 1   ", 1, 5, 45)]
+    [TestCase("6k1/8/8/8/2pP4/8/B7/3K4 b - d3 0 1   ", 1, 5, 45)]
+    [TestCase("1k6/8/8/8/4Pp2/8/7B/4K3 b - e3 0 1   ", 1, 5, 45)]
+    [TestCase("4k3/b7/8/1pP5/8/8/8/6K1 w - b6 0 1   ", 1, 6, 52)]
+    [TestCase("4k3/7b/8/5Pp1/8/8/8/1K6 w - g6 0 1   ", 1, 6, 51)]
+    [TestCase("6k1/8/8/8/1Pp5/8/B7/4K3 b - b3 0 1   ", 1, 6, 52)]
+    [TestCase("1k6/8/8/8/5pP1/8/7B/4K3 b - g3 0 1   ", 1, 6, 51)]
+    [TestCase("4k3/K7/8/1pP5/8/8/8/6b1 w - b6 0 1   ", 1, 6, 66)]
+    [TestCase("4k3/7K/8/5Pp1/8/8/8/1b6 w - g6 0 1   ", 1, 6, 60)]
+    [TestCase("6B1/8/8/8/1Pp5/8/k7/4K3 b - b3 0 1   ", 1, 6, 66)]
+    [TestCase("1B6/8/8/8/5pP1/8/7k/4K3 b - g3 0 1   ", 1, 6, 60)]
+    [TestCase("4k3/b7/8/2Pp4/3K4/8/8/8 w - d6 0 1   ", 1, 5, 44)]
+    [TestCase("4k3/8/1b6/2Pp4/3K4/8/8/8 w - d6 0 1  ", 1, 6, 59)]
+    [TestCase("4k3/8/b7/1Pp5/2K5/8/8/8 w - c6 0 1   ", 1, 6, 49)]
+    [TestCase("4k3/8/7b/5pP1/5K2/8/8/8 w - f6 0 1   ", 1, 6, 49)]
+    [TestCase("4k3/7b/8/4pP2/4K3/8/8/8 w - e6 0 1   ", 1, 5, 44)]
+    [TestCase("4k3/8/6b1/4pP2/4K3/8/8/8 w - e6 0 1  ", 1, 6, 53)]
+    [TestCase("4k3/8/3K4/1pP5/8/q7/8/8 w - b6 0 1   ", 1, 5, 114)]
+    [TestCase("7k/4K3/8/1pP5/8/q7/8/8 w - b6 0 1    ", 1, 8, 171)]
+    // EP - double check
+    [TestCase("4k3/2rn4/8/2K1pP2/8/8/8/8 w - e6 0 1 ", 1, 4, 75)]
+    // EP - pinned horizontal
+    [TestCase("4k3/8/8/K2pP2r/8/8/8/8 w - d6 0 1    ", 1, 6, 94)]
+    [TestCase("4k3/8/8/K2pP2q/8/8/8/8 w - d6 0 1    ", 1, 6, 130)]
+    [TestCase("4k3/8/8/r2pP2K/8/8/8/8 w - d6 0 1    ", 1, 6, 87)]
+    [TestCase("4k3/8/8/q2pP2K/8/8/8/8 w - d6 0 1    ", 1, 6, 129)]
+    [TestCase("8/8/8/8/1k1Pp2R/8/8/4K3 b - d3 0 1   ", 1, 8, 125)]
+    [TestCase("8/8/8/8/1R1Pp2k/8/8/4K3 b - d3 0 1   ", 1, 6, 87)]
+    // EP - pinned vertical
+    [TestCase("k7/8/4r3/3pP3/8/8/8/4K3 w - d6 0 1   ", 1, 5, 70)]
+    [TestCase("k3K3/8/8/3pP3/8/8/8/4r3 w - d6 0 1   ", 1, 6, 91)]
+    // EP - in check
+    [TestCase("4k3/8/8/4pP2/3K4/8/8/8 w - e6 0 1    ", 1, 9, 49)]
+    [TestCase("8/8/8/4k3/5Pp1/8/8/3K4 b - f3 0 1    ", 1, 9, 50)]
+    [TestCase("2b1k3/8/8/2Pp4/8/7K/8/8 w - - 0 1    ", 1, 4, 52)]
+    [TestCase("2b1k3/8/8/2Pp4/8/7K/8/8 w - d6 0 1   ", 1, 4, 52)]
+    [TestCase("4k3/r6K/8/2Pp4/8/8/8/8 w - - 0 1     ", 1, 4, 77)]
+    [TestCase("4k3/r6K/8/2Pp4/8/8/8/8 w - d6 0 1    ", 1, 4, 77)]
+    [TestCase("2K1k3/8/8/2Pp4/8/7b/8/8 w - - 0 1    ", 1, 3, 37)]
+    [TestCase("2K1k3/8/8/2Pp4/8/7b/8/8 w - d6 0 1   ", 1, 3, 37)]
+    [TestCase("2K1k3/8/8/2Pp4/8/7q/8/8 w - - 0 1    ", 1, 3, 79)]
+    [TestCase("2K1k3/8/8/2Pp4/8/7q/8/8 w - d6 0 1   ", 1, 3, 79)]
+    [TestCase("8/8/7k/8/2pP4/8/8/2B1K3 b - - 0 1    ", 1, 4, 52)]
+    [TestCase("8/8/7k/8/2pP4/8/8/2B1K3 b - d3 0 1   ", 1, 4, 52)]
+    [TestCase("8/8/7k/8/2pP4/8/8/2Q1K3 b - - 0 1    ", 1, 4, 76)]
+    [TestCase("8/8/7k/8/2pP4/8/8/2Q1K3 b - d3 0 1   ", 1, 4, 76)]
+    [TestCase("8/8/8/8/2pP4/8/R6k/4K3 b - - 0 1     ", 1, 4, 77)]
+    [TestCase("8/8/8/8/2pP4/8/R6k/4K3 b - d3 0 1    ", 1, 4, 77)]
+    // EP - block check
+    [TestCase("4k3/8/K6r/3pP3/8/8/8/8 w - d6 0 1    ", 1, 6, 109)]
+    [TestCase("4k3/8/K6q/3pP3/8/8/8/8 w - d6 0 1    ", 1, 6, 151)]
+    [TestCase("4kb2/8/8/3pP3/8/K7/8/8 w - d6 0 1    ", 1, 5, 55)]
+    [TestCase("4kq2/8/8/3pP3/8/K7/8/8 w - d6 0 1    ", 1, 5, 100)]
+    [TestCase("4k3/8/r6K/3pP3/8/8/8/8 w - d6 0 1    ", 1, 6, 107)]
+    [TestCase("4k3/8/q6K/3pP3/8/8/8/8 w - d6 0 1    ", 1, 6, 149)]
+    [TestCase("3k1K2/8/8/3pP3/8/b7/8/8 w - d6 0 1   ", 1, 4, 44)]
+    [TestCase("3k1K2/8/8/3pP3/8/q7/8/8 w - d6 0 1   ", 1, 4, 100)]
+    [TestCase("8/8/8/8/3Pp3/k6R/8/4K3 b - d3 0 1    ", 1, 6, 109)]
+    [TestCase("8/8/8/8/3Pp3/k6Q/8/4K3 b - d3 0 1    ", 1, 6, 151)]
+    [TestCase("8/8/k7/8/3Pp3/8/8/4KB2 b - d3 0 1    ", 1, 5, 55)]
+    [TestCase("8/8/k7/8/3Pp3/8/8/4KQ2 b - d3 0 1    ", 1, 5, 100)]
+    // Double checks
+    [TestCase("4k3/8/4r3/8/8/8/3p4/4K3 w - - 0 1    ", 1, 4, 80, 320)]
+    [TestCase("4k3/8/4q3/8/8/8/3b4/4K3 w - - 0 1    ", 1, 4, 143, 496)]
+    // Pins
+    [TestCase("4k3/8/8/8/1b5b/8/3Q4/4K3 w - - 0 1   ", 1, 3, 54, 1256)]
+    [TestCase("4k3/8/8/8/1b5b/8/3R4/4K3 w - - 0 1   ", 1, 3, 54, 836)]
+    [TestCase("4k3/8/8/8/1b5b/2Q5/5P2/4K3 w - - 0 1 ", 1, 6, 98, 2274)]
+    [TestCase("4k3/8/8/8/1b5b/2R5/5P2/4K3 w - - 0 1 ", 1, 4, 72, 1300)]
+    [TestCase("4k3/8/8/8/1b2r3/8/3Q4/4K3 w - - 0 1  ", 1, 3, 66, 1390)]
+    [TestCase("4k3/8/8/8/1b2r3/8/3QP3/4K3 w - - 0 1 ", 1, 6, 119, 2074)]
+    public void Kz04pxPositions(string fen, long _, long nodesD1, long nodesD2 = 0, long nodesD3 = 0)
+    {
+        Validate(fen, 1, nodesD1);
+
+        if (nodesD2 != 0)
+        {
+            Validate(fen, 2, nodesD2);
+        }
+
+        if (nodesD3 != 0)
+        {
+            Validate(fen, 3, nodesD3);
+        }
+    }
+
+    /// <summary>
+    /// martinn = Motor's author
+    /// </summary>
+    // Motor vs Avalanche
+    [TestCase("6r1/2q2pp1/1PB2k2/3P1P2/5Q1B/8/6K1/7R b - - 0 1", 1, 1)]
+    [TestCase("6r1/2q2pp1/1PB2k2/3P1P2/5Q1B/8/6K1/7R b - - 0 1", 2, 48)]
+    [TestCase("6r1/2q2pp1/1PB2k2/3P1P2/5Q1B/8/6K1/7R b - - 0 1", 3, 1_060)]
+    [TestCase("6r1/2q2pp1/1PB2k2/3P1P2/5Q1B/8/6K1/7R b - - 0 1", 4, 42_723)]
+    [TestCase("6r1/2q2pp1/1PB2k2/3P1P2/5Q1B/8/6K1/7R b - - 0 1", 5, 981_168)]
+    [TestCase("6r1/2q2pp1/1PB2k2/3P1P2/5Q1B/8/6K1/7R b - - 0 1", 6, 37_765_954)]
+    [TestCase("6r1/2q2pp1/1PB2k2/3P1P2/5Q1B/8/6K1/7R b - - 0 1", 7, 891_192_699)]   // ~40s
+    public void MartinnPositions(string fen, int depth, long expectedNumberOfNodes)
+    {
+        Validate(fen, depth, expectedNumberOfNodes);
+    }
+
+    [Test]
+    public void PositionWithHighestKnownNumberOfMoves() => Validate("R6R/3Q4/1Q4Q1/4Q3/2Q4Q/Q4Q2/pp1Q4/kBNN1KB1 w - - 0 1", 1, 218);
+
     private static void Validate(string fen, int depth, long expectedNumberOfNodes)
     {
         Assert.AreEqual(expectedNumberOfNodes, Perft.ResultsImpl(new Position(fen), depth, default));

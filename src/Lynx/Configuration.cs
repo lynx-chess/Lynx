@@ -142,6 +142,12 @@ public sealed class EngineSettings
     [SPSA<int>(1, 10, 0.5)]
     public int NMP_DepthDivisor { get; set; } = 3;
 
+    [SPSA<int>(150, 350, 10)]
+    public int NMP_StaticEvalBetaDivisor { get; set; } = 100;
+
+    [SPSA<int>(1, 10, 0.5)]
+    public int NMP_StaticEvalBetaMaxReduction { get; set; } = 3;
+
     [SPSA<int>(5, 30, 1)]
     public int AspirationWindow_Base { get; set; } = 13;
 
@@ -185,7 +191,8 @@ public sealed class EngineSettings
     /// </summary>
     public int History_MaxMoveRawBonus { get; set; } = 1_896;
 
-    public int History_BestScoreBetaMargin { get; set; } = 80;
+    //[SPSA<int>(0, 200, 10)]
+    public int History_BestScoreBetaMargin { get; set; } = 60;
 
     [SPSA<int>(0, 6, 0.5)]
     public int SEE_BadCaptureReduction { get; set; } = 2;
