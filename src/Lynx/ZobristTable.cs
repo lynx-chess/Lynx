@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Lynx;
@@ -35,12 +36,8 @@ public static class ZobristTable
             return default;
         }
 
-#if DEBUG
-        if (Constants.EnPassantCaptureSquares.Length <= enPassantSquare || Constants.EnPassantCaptureSquares[enPassantSquare] == 0)
-        {
-            throw new ArgumentException($"{Constants.Coordinates[enPassantSquare]} is not a valid en-passant square");
-        }
-#endif
+        Debug.Assert(Constants.EnPassantCaptureSquares.Length > enPassantSquare && Constants.EnPassantCaptureSquares[enPassantSquare] != 0,
+            $"{Constants.Coordinates[enPassantSquare]} is not a valid en-passant square");
 
         var file = enPassantSquare & 0x07;  // enPassantSquare % 8
 
