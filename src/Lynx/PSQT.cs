@@ -103,10 +103,7 @@ public static class EvaluationPSQTs
         var index = PSQTIndex(friendEnemy, bucket, piece, square);
         Debug.Assert(index >= 0 && index < _packedPSQT.Length);
 
-        unsafe
-        {
-            return Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_packedPSQT), index);
-        }
+        return Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_packedPSQT), index);
     }
 
     /// <summary>
