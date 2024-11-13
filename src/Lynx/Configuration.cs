@@ -143,7 +143,7 @@ public sealed class EngineSettings
     public int NMP_DepthDivisor { get; set; } = 3;
 
     [SPSA<int>(50, 350, 15)]
-    public int NMP_StaticEvalBetaDivisor { get; set; } = 100;
+    public int NMP_StaticEvalBetaDivisor { get; set; } = 50;
 
     [SPSA<int>(1, 10, 0.5)]
     public int NMP_StaticEvalBetaMaxReduction { get; set; } = 3;
