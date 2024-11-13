@@ -860,14 +860,14 @@ public class Position : IDisposable
     /// <summary>
     /// Formula based on Stormphrax
     /// </summary>
-    internal  int ScaleEvalWithMaterial(int eval)
+    internal int ScaleEvalWithMaterial(int eval)
     {
         var material_phase =
-            (SEE.PieceValues[(int)Piece.P] * (PieceBitBoards[(int)Piece.P] & PieceBitBoards[(int)Piece.p]).CountBits())
-            + (SEE.PieceValues[(int)Piece.N] * (PieceBitBoards[(int)Piece.N] & PieceBitBoards[(int)Piece.n]).CountBits())
-            + (SEE.PieceValues[(int)Piece.B] * (PieceBitBoards[(int)Piece.B] & PieceBitBoards[(int)Piece.b]).CountBits())
-            + (SEE.PieceValues[(int)Piece.R] * (PieceBitBoards[(int)Piece.R] & PieceBitBoards[(int)Piece.r]).CountBits())
-            + (SEE.PieceValues[(int)Piece.Q] * (PieceBitBoards[(int)Piece.Q] & PieceBitBoards[(int)Piece.q]).CountBits());
+            (SEE.PieceValues[(int)Piece.P] * (PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]).CountBits())
+            + (SEE.PieceValues[(int)Piece.N] * (PieceBitBoards[(int)Piece.N] | PieceBitBoards[(int)Piece.n]).CountBits())
+            + (SEE.PieceValues[(int)Piece.B] * (PieceBitBoards[(int)Piece.B] | PieceBitBoards[(int)Piece.b]).CountBits())
+            + (SEE.PieceValues[(int)Piece.R] * (PieceBitBoards[(int)Piece.R] | PieceBitBoards[(int)Piece.r]).CountBits())
+            + (SEE.PieceValues[(int)Piece.Q] * (PieceBitBoards[(int)Piece.Q] | PieceBitBoards[(int)Piece.q]).CountBits());
 
         return eval * (26500 + material_phase) / 32768;
     }
