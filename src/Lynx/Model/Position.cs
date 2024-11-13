@@ -560,6 +560,7 @@ public class Position : IDisposable
         eval = (int)(eval * ((80 + (totalPawnsCount * 7)) / 128.0));
 
         eval = ScaleEvalWith50MovesDrawDistance(eval, movesWithoutCaptureOrPawnMove);
+        eval = ScaleEvalWithMaterial(eval);
 
         eval = Math.Clamp(eval, MinStaticEval, MaxStaticEval);
 
@@ -855,6 +856,21 @@ public class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static int ScaleEvalWith50MovesDrawDistance(int eval, int movesWithoutCaptureOrPawnMove) =>
         eval * (200 - movesWithoutCaptureOrPawnMove) / 200;
+
+    /// <summary>
+    /// Formula based on Stormphrax
+    /// </summary>
+    internal  int ScaleEvalWithMaterial(int eval)
+    {
+        var material_phase =
+            (SEE.PieceValues[(int)Piece.P] * (PieceBitBoards[(int)Piece.P] & PieceBitBoards[(int)Piece.p]).CountBits())
+            + (SEE.PieceValues[(int)Piece.N] * (PieceBitBoards[(int)Piece.N] & PieceBitBoards[(int)Piece.n]).CountBits())
+            + (SEE.PieceValues[(int)Piece.B] * (PieceBitBoards[(int)Piece.B] & PieceBitBoards[(int)Piece.b]).CountBits())
+            + (SEE.PieceValues[(int)Piece.R] * (PieceBitBoards[(int)Piece.R] & PieceBitBoards[(int)Piece.r]).CountBits())
+            + (SEE.PieceValues[(int)Piece.Q] * (PieceBitBoards[(int)Piece.Q] & PieceBitBoards[(int)Piece.q]).CountBits());
+
+        return eval * (26500 + material_phase) / 32768;
+    }
 
     #endregion
 
