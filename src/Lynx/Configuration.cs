@@ -211,6 +211,21 @@ public sealed class EngineSettings
 
     [SPSA<int>(-8192, 0, 512)]
     public int HistoryPrunning_Margin { get; set; } = -1940;
+
+    [SPSA<int>(0, 1500, 50)]
+    public int SEE_Pawn { get; set; } = 100;
+
+    [SPSA<int>(0, 1500, 50)]
+    public int SEE_Knight { get; set; } = 450;
+
+    [SPSA<int>(0, 1500, 50)]
+    public int SEE_Bishop { get; set; } = 450;
+
+    [SPSA<int>(0, 1500, 50)]
+    public int SEE_Rook { get; set; } = 650;
+
+    [SPSA<int>(0, 1500, 50)]
+    public int SEE_Queen { get; set; } = 1250;
 }
 
 [JsonSourceGenerationOptions(

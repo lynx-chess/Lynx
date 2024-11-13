@@ -525,6 +525,46 @@ public sealed class UCIHandler
                     }
                     break;
                 }
+            case "see_pawn":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.SEE_Pawn = value;
+                    }
+                    break;
+                }
+            case "see_knight":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.SEE_Knight = value;
+                    }
+                    break;
+                }
+            case "see_bishop":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.SEE_Bishop = value;
+                    }
+                    break;
+                }
+            case "see_rook":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.SEE_Rook = value;
+                    }
+                    break;
+                }
+            case "see_queen":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.SEE_Queen = value;
+                    }
+                    break;
+                }
 
             #endregion
 

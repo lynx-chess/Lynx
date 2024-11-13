@@ -10,10 +10,19 @@ public static class SEE
 {
     #pragma warning disable IDE0055 // Discard formatting in this region
 
-    private static ReadOnlySpan<int> _pieceValues =>
+    private static readonly int[] _pieceValues =
     [
-        100, 450, 450, 650, 1250, 0,
-        100, 450, 450, 650, 1250, 0,
+        Configuration.EngineSettings.SEE_Pawn,
+        Configuration.EngineSettings.SEE_Knight,
+        Configuration.EngineSettings.SEE_Bishop,
+        Configuration.EngineSettings.SEE_Rook,
+        Configuration.EngineSettings.SEE_Queen,
+        0,
+        Configuration.EngineSettings.SEE_Pawn,
+        Configuration.EngineSettings.SEE_Knight,
+        Configuration.EngineSettings.SEE_Bishop,
+        Configuration.EngineSettings.SEE_Rook,
+        Configuration.EngineSettings.SEE_Queen,
         0
     ];
 
