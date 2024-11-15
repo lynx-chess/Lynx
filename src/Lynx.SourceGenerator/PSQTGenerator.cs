@@ -1,7 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using System;
 using System.Text;
 
 namespace Lynx.SourceGenerator;
@@ -18,16 +17,15 @@ public class PSQTGenerator : IIncrementalGenerator
 
                 namespace GeneratedNamespace
                 {
-                    internal sealed class GeneratePSQT : Attribute
+                    internal sealed class GeneratePSQTAttribute : Attribute
                     {
                     }
                 }
                 """, Encoding.UTF8));
         });
 
-
         var pipeline = context.SyntaxProvider.ForAttributeWithMetadataName(
-            fullyQualifiedMetadataName: "GeneratedNamespace.GeneratePSQT",
+            fullyQualifiedMetadataName: "GeneratedNamespace.GeneratePSQTAttribute",
             predicate: static (syntaxNode, _) => syntaxNode is ClassDeclarationSyntax,
             transform: static (context, _) =>
             {

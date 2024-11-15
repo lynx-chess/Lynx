@@ -127,5 +127,8 @@ public static class EvaluationPSQTs
 [GeneratedNamespace.GeneratePSQT]
 public partial class UserClass
 {
+    [GeneratedNamespace.GeneratePackedConstant]
+    public static readonly TaperedEvaluationTerm IsolatedPawnPenalty = 66;
+
     partial void UserMethod();
 }

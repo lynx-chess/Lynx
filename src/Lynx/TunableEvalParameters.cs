@@ -6017,7 +6017,7 @@ public partial class EvaluationParams
 	public static readonly TaperedEvaluationTerm IsolatedPawnPenalty = 54;
 
 	[GeneratedNamespace.GeneratePackedConstant]
-	public int IsolatedPawnPenalty2 = 55;
+	public int IsolatedPawnPenalty2= 55;
 
 	public static readonly TaperedEvaluationTerm OpenFileRookBonus = Pack(40, 2);
 

@@ -17,7 +17,7 @@ public class PackedTaperedEvaluationTermGenerator : IIncrementalGenerator
 
                 namespace GeneratedNamespace
                 {
-                    internal sealed class GeneratePackedConstant : Attribute
+                    internal sealed class GeneratePackedConstantAttribute : Attribute
                     {
                     }
                 }
@@ -25,13 +25,14 @@ public class PackedTaperedEvaluationTermGenerator : IIncrementalGenerator
         });
 
         var pipeline = context.SyntaxProvider.ForAttributeWithMetadataName(
-            fullyQualifiedMetadataName: "GeneratedNamespace.GeneratePackedConstant",
+            //"GeneratePackedConstantAttribute",
+            fullyQualifiedMetadataName: "GeneratedNamespace.GeneratePackedConstantAttribute",
+            //predicate: static (syntaxNode, _) => true,
             predicate: static (syntaxNode, _) => syntaxNode is FieldDeclarationSyntax,
             transform: static (context, _) =>
             {
                 var classSymbol = context.TargetSymbol.ContainingSymbol;
-                 // Debugging output
-                System.Diagnostics.Debug.WriteLine($"Processing field: {context.TargetSymbol.Name} in class: {classSymbol.Name}");
+
                 return new Model(
                     Namespace: classSymbol.ContainingNamespace?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted)) ?? string.Empty,
                     ClassName: classSymbol.Name,
@@ -42,7 +43,7 @@ public class PackedTaperedEvaluationTermGenerator : IIncrementalGenerator
 
         static int ExtractValueFromIntField(SemanticModel semanticModel, SyntaxNode fieldDeclarationSyntax)
         {
-            var fieldDeclaration = (FieldDeclarationSyntax)fieldDeclarationSyntax;
+            var fieldDeclaration = (BaseFieldDeclarationSyntax)fieldDeclarationSyntax;
             var variableDeclaration = fieldDeclaration.Declaration;
             var variable = variableDeclaration.Variables.FirstOrDefault();
 
@@ -79,7 +80,7 @@ public class PackedTaperedEvaluationTermGenerator : IIncrementalGenerator
             {
                 var sourceText = SourceText.From($$"""
                     namespace {{model.Namespace}};
-                    partial class {{model.ClassName}}
+                    public partial class {{model.ClassName}}
                     {
                         public const TaperedEvaluationTerm {{model.PropertyName}} = {{model.Value}};
                     }
