@@ -28,21 +28,16 @@ public class PackedTaperedEvaluationTermGenerator : IIncrementalGenerator
 
         var pipeline = context.SyntaxProvider.ForAttributeWithMetadataName(
             fullyQualifiedMetadataName: "GeneratedNamespace.GeneratePackedConstantAttribute",
-            predicate: static (syntaxNode, _) => syntaxNode is VariableDeclaratorSyntax || syntaxNode is ClassDeclarationSyntax,
+            predicate: static (syntaxNode, _) => syntaxNode is VariableDeclaratorSyntax,
             transform: static (context, _) =>
             {
-                if (context.TargetNode is VariableDeclaratorSyntax)
-                {
-                    var classSymbol = context.TargetSymbol.ContainingSymbol;
+                var classSymbol = context.TargetSymbol.ContainingSymbol;
 
-                    return new Model(
-                        Namespace: classSymbol.ContainingNamespace?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted)) ?? string.Empty,
-                        ClassName: classSymbol.Name,
-                        PropertyName: context.TargetSymbol.Name[1..],
-                        Value: ExtractValueFromIntField(context.TargetNode));
-                }
-
-                return null;
+                return new Model(
+                    Namespace: classSymbol.ContainingNamespace?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted)) ?? string.Empty,
+                    ClassName: classSymbol.Name,
+                    PropertyName: context.TargetSymbol.Name[1..],
+                    Value: ExtractValueFromIntField(context.TargetNode));
             }
         ).Collect();
 
@@ -81,9 +76,9 @@ public class PackedTaperedEvaluationTermGenerator : IIncrementalGenerator
 
         context.RegisterSourceOutput(pipeline, static (context, models) =>
         {
-            foreach (var group in models.GroupBy(m => m?.Namespace))
+            foreach (var group in models.GroupBy(m => m.Namespace))
             {
-                foreach (var subgroup in group.GroupBy(m => m?.ClassName))
+                foreach (var subgroup in group.GroupBy(m => m.ClassName))
                 {
                     var sb = new StringBuilder();
                     sb.Append("namespace ").Append(group.Key ?? "GeneratedNamespace").AppendLine(";");
@@ -93,11 +88,6 @@ public class PackedTaperedEvaluationTermGenerator : IIncrementalGenerator
 
                     foreach (var model in subgroup)
                     {
-                        if (model is null)
-                        {
-                            continue;
-                        }
-
                         sb.AppendLine($$"""
             public const int {{model.PropertyName}} = {{model.Value}};
         """);
