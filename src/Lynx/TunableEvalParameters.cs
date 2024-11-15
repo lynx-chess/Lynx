@@ -1,6 +1,7 @@
 ﻿// 2024-9-19 13:24:58  6
 
 using static Lynx.Utils;
+using GeneratedNamespace;
 
 namespace Lynx;
 
@@ -6013,34 +6014,38 @@ public static class TunableEvalParameters
 
 public partial class EvaluationParams
 {
-    [GeneratedNamespace.GeneratePackedConstant]
-    public static readonly TaperedEvaluationTerm IsolatedPawnPenalty = 54;
+#pragma warning disable IDE0052 // Remove unread private members
 
-    [GeneratedNamespace.GeneratePackedConstant]
-    public static readonly TaperedEvaluationTerm OpenFileRookBonus = Utils.Pack(40, 2);
+    [GeneratePackedConstant]
+    private static readonly TaperedEvaluationTerm _IsolatedPawnPenalty = Pack(-17, -14);
 
-    [GeneratedNamespace.GeneratePackedConstant]
-    public static readonly TaperedEvaluationTerm SemiOpenFileRookBonus = Pack(15, 8);
+    [GeneratePackedConstant]
+    private static readonly TaperedEvaluationTerm _OpenFileRookBonus = Utils.Pack(40, 2);
 
-    [GeneratedNamespace.GeneratePackedConstant]
-    public static readonly TaperedEvaluationTerm SemiOpenFileKingPenalty = Pack(-24, 5);
+    [GeneratePackedConstant]
+    private static readonly TaperedEvaluationTerm _SemiOpenFileRookBonus = Pack(15, 8);
 
-    [GeneratedNamespace.GeneratePackedConstant]
-    public static readonly TaperedEvaluationTerm OpenFileKingPenalty = Pack(-65, 2);
+    [GeneratePackedConstant]
+    private static readonly TaperedEvaluationTerm _SemiOpenFileKingPenalty = Pack(-24, 5);
 
-    [GeneratedNamespace.GeneratePackedConstant]
-    public static readonly TaperedEvaluationTerm KingShieldBonus = Pack(23, -3);
+    [GeneratePackedConstant]
+    private static readonly TaperedEvaluationTerm _OpenFileKingPenalty = Pack(-65, 2);
 
-    [GeneratedNamespace.GeneratePackedConstant]
-    public static readonly TaperedEvaluationTerm BishopPairBonus = Pack(30, 72);
+    [GeneratePackedConstant]
+    private static readonly TaperedEvaluationTerm _KingShieldBonus = Pack(23, -3);
 
-    [GeneratedNamespace.GeneratePackedConstant]
-    public static readonly TaperedEvaluationTerm PieceProtectedByPawnBonus = Pack(12, 15);
+    [GeneratePackedConstant]
+    private static readonly TaperedEvaluationTerm _BishopPairBonus = Pack(30, 72);
 
-    [GeneratedNamespace.GeneratePackedConstant]
-    public static readonly TaperedEvaluationTerm PieceAttackedByPawnPenalty = Pack(-47, -33);
+    [GeneratePackedConstant]
+    private static readonly TaperedEvaluationTerm _PieceProtectedByPawnBonus = Pack(12, 15);
 
-	public static readonly TaperedEvaluationTermByRank PawnPhalanxBonus =
+    [GeneratePackedConstant]
+    private static readonly TaperedEvaluationTerm _PieceAttackedByPawnPenalty = Pack(-47, -33);
+
+#pragma warning restore IDE0052 // Remove unread private members
+
+    public static readonly TaperedEvaluationTermByRank PawnPhalanxBonus =
 	[
         Pack(0, 0),
 		Pack(1, 2),

@@ -128,15 +128,15 @@ public static class EvaluationPSQTs
 public partial class UserClass
 {
     [GeneratedNamespace.GeneratePackedConstant]
-    public static readonly TaperedEvaluationTerm Test = 66;
+    public static readonly int _Test01 = 66;
 
     partial void UserMethod();
 }
 
 public partial class UserClass2
 {
-    //[GeneratedNamespace.GeneratePackedConstant]
-    //public int IsolatedPawnPenalty = Utils.Pack(40, 2);
+    [GeneratedNamespace.GeneratePackedConstant]
+    public int _Test1 = Utils.Pack(40, 2);
 
     partial void UserMethod();
 }

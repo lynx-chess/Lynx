@@ -28,16 +28,21 @@ public class PackedTaperedEvaluationTermGenerator : IIncrementalGenerator
 
         var pipeline = context.SyntaxProvider.ForAttributeWithMetadataName(
             fullyQualifiedMetadataName: "GeneratedNamespace.GeneratePackedConstantAttribute",
-            predicate: static (syntaxNode, _) => syntaxNode is VariableDeclaratorSyntax,
+            predicate: static (syntaxNode, _) => syntaxNode is VariableDeclaratorSyntax || syntaxNode is ClassDeclarationSyntax,
             transform: static (context, _) =>
             {
-                var classSymbol = context.TargetSymbol.ContainingSymbol;
+                if (context.TargetNode is VariableDeclaratorSyntax)
+                {
+                    var classSymbol = context.TargetSymbol.ContainingSymbol;
 
-                return new Model(
-                    Namespace: classSymbol.ContainingNamespace?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted)) ?? string.Empty,
-                    ClassName: classSymbol.Name,
-                    PropertyName: $"Packed{context.TargetSymbol.Name}",
-                    Value: ExtractValueFromIntField(context.TargetNode));
+                    return new Model(
+                        Namespace: classSymbol.ContainingNamespace?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted)) ?? string.Empty,
+                        ClassName: classSymbol.Name,
+                        PropertyName: context.TargetSymbol.Name[1..],
+                        Value: ExtractValueFromIntField(context.TargetNode));
+                }
+
+                return null;
             }
         ).Collect();
 
@@ -76,24 +81,34 @@ public class PackedTaperedEvaluationTermGenerator : IIncrementalGenerator
 
         context.RegisterSourceOutput(pipeline, static (context, models) =>
         {
-            var sb = new StringBuilder();
-            sb.AppendLine("namespace GeneratedNamespace");
-            sb.AppendLine("{");
-            sb.AppendLine("    public static class PackedTaperedEvaluationTerm");
-            sb.AppendLine("    {");
-
-            foreach (var model in models)
+            foreach (var group in models.GroupBy(m => m?.Namespace))
             {
-                sb.AppendLine($$"""
-                public const TaperedEvaluationTerm {{model.PropertyName}} = {{model.Value}};
+                foreach (var subgroup in group.GroupBy(m => m?.ClassName))
+                {
+                    var sb = new StringBuilder();
+                    sb.Append("namespace ").Append(group.Key ?? "GeneratedNamespace").AppendLine(";");
+                    sb.AppendLine();
+                    sb.Append("partial class ").AppendLine(subgroup.Key ?? "GeneratedClass");
+                    sb.AppendLine("{");
+
+                    foreach (var model in subgroup)
+                    {
+                        if (model is null)
+                        {
+                            continue;
+                        }
+
+                        sb.AppendLine($$"""
+            public const int {{model.PropertyName}} = {{model.Value}};
         """);
+                    }
+
+                    sb.AppendLine("}");
+
+                    var sourceText = SourceText.From(sb.ToString(), Encoding.UTF8);
+                    context.AddSource($"{subgroup.Key}.g.cs", sourceText);
+                }
             }
-
-            sb.AppendLine("    }");
-            sb.AppendLine("}");
-
-            var sourceText = SourceText.From(sb.ToString(), Encoding.UTF8);
-            context.AddSource("PackedTaperedEvaluationTerm.g.cs", sourceText);
         });
 
         static short ParseArgument(ExpressionSyntax expression)
