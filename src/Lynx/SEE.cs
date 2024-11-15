@@ -12,8 +12,8 @@ public static class SEE
 
     private static ReadOnlySpan<int> _pieceValues =>
     [
-        100, 450, 450, 650, 1250, 0,
-        100, 450, 450, 650, 1250, 0,
+        92, 422, 474, 606, 1256, 0,
+        92, 422, 474, 606, 1256, 0,
         0
     ];
 
