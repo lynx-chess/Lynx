@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using System.Text;
@@ -17,6 +18,7 @@ public class PackedTaperedEvaluationTermGenerator : IIncrementalGenerator
 
                 namespace GeneratedNamespace
                 {
+                    [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
                     internal sealed class GeneratePackedConstantAttribute : Attribute
                     {
                     }
@@ -25,10 +27,8 @@ public class PackedTaperedEvaluationTermGenerator : IIncrementalGenerator
         });
 
         var pipeline = context.SyntaxProvider.ForAttributeWithMetadataName(
-            //"GeneratePackedConstantAttribute",
             fullyQualifiedMetadataName: "GeneratedNamespace.GeneratePackedConstantAttribute",
-            //predicate: static (syntaxNode, _) => true,
-            predicate: static (syntaxNode, _) => syntaxNode is FieldDeclarationSyntax,
+            predicate: static (syntaxNode, _) => syntaxNode is VariableDeclaratorSyntax,
             transform: static (context, _) =>
             {
                 var classSymbol = context.TargetSymbol.ContainingSymbol;
@@ -37,38 +37,38 @@ public class PackedTaperedEvaluationTermGenerator : IIncrementalGenerator
                     Namespace: classSymbol.ContainingNamespace?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted)) ?? string.Empty,
                     ClassName: classSymbol.Name,
                     PropertyName: $"Packed{context.TargetSymbol.Name}",
-                    Value: ExtractValueFromIntField(context.SemanticModel, context.TargetNode));
+                    Value: ExtractValueFromIntField(context.TargetNode));
             }
         ).Collect();
 
-        static int ExtractValueFromIntField(SemanticModel semanticModel, SyntaxNode fieldDeclarationSyntax)
+        static int ExtractValueFromIntField(SyntaxNode variableDeclarationSyntax)
         {
-            var fieldDeclaration = (BaseFieldDeclarationSyntax)fieldDeclarationSyntax;
-            var variableDeclaration = fieldDeclaration.Declaration;
-            var variable = variableDeclaration.Variables.FirstOrDefault();
+            var varableDeclaration = (VariableDeclaratorSyntax)variableDeclarationSyntax;
 
-            if (variable != null && variable.Initializer != null)
+            // Simple, constant initialized
+            if (varableDeclaration.Initializer?.Value is LiteralExpressionSyntax literal)
             {
-                var initializer = variable.Initializer.Value;
-                var constantValue = semanticModel.GetConstantValue(initializer);
-                if (constantValue.HasValue && constantValue.Value is int intValue)
+                return int.Parse(literal.Token.ValueText);
+            }
+            else if (varableDeclaration.Initializer?.Value is InvocationExpressionSyntax invocation)
+            {
+                var methodName = invocation.Expression.ToString();
+
+                if ((methodName.Equals("Pack", StringComparison.OrdinalIgnoreCase) || methodName.Equals("Utils.Pack", StringComparison.OrdinalIgnoreCase))
+                    && invocation.ArgumentList.Arguments.Count == 2)
                 {
-                    return intValue;
+                    short mg = ParseArgument(invocation.ArgumentList.Arguments[0].Expression);
+                    short eg = ParseArgument(invocation.ArgumentList.Arguments[1].Expression);
+
+                    if (mg != Model.DefaultShortValue && eg != Model.DefaultShortValue)
+                    {
+                        return (eg << 16) + mg;
+                    }
+
+                    return 777_777_777;
                 }
 
-                // Handle cases where the initializer is an object creation expression
-                if (initializer is ObjectCreationExpressionSyntax objectCreation)
-                {
-                    var argument = objectCreation?.ArgumentList?.Arguments.FirstOrDefault();
-                    if (argument != null)
-                    {
-                        constantValue = semanticModel.GetConstantValue(argument.Expression);
-                        if (constantValue.HasValue && constantValue.Value is int intArgValue)
-                        {
-                            return intArgValue;
-                        }
-                    }
-                }
+                return 888_888_888;
             }
 
             return Model.DefaultValue;
@@ -76,23 +76,47 @@ public class PackedTaperedEvaluationTermGenerator : IIncrementalGenerator
 
         context.RegisterSourceOutput(pipeline, static (context, models) =>
         {
+            var sb = new StringBuilder();
+            sb.AppendLine("namespace GeneratedNamespace");
+            sb.AppendLine("{");
+            sb.AppendLine("    public static class PackedTaperedEvaluationTerm");
+            sb.AppendLine("    {");
+
             foreach (var model in models)
             {
-                var sourceText = SourceText.From($$"""
-                    namespace {{model.Namespace}};
-                    public partial class {{model.ClassName}}
-                    {
-                        public const TaperedEvaluationTerm {{model.PropertyName}} = {{model.Value}};
-                    }
-                    """, Encoding.UTF8);
-
-                context.AddSource($"{model.ClassName}_{model.PropertyName}.g.cs", sourceText);
+                sb.AppendLine($$"""
+                public const TaperedEvaluationTerm {{model.PropertyName}} = {{model.Value}};
+        """);
             }
+
+            sb.AppendLine("    }");
+            sb.AppendLine("}");
+
+            var sourceText = SourceText.From(sb.ToString(), Encoding.UTF8);
+            context.AddSource("PackedTaperedEvaluationTerm.g.cs", sourceText);
         });
+
+        static short ParseArgument(ExpressionSyntax expression)
+        {
+            if (expression is LiteralExpressionSyntax literal)
+            {
+                return short.Parse(literal.Token.ValueText);
+            }
+            else if (expression is PrefixUnaryExpressionSyntax unary && unary.Operand is LiteralExpressionSyntax operand)
+            {
+                var value = short.Parse(operand.Token.ValueText);
+
+                return unary.OperatorToken.IsKind(SyntaxKind.MinusToken) ? (short)-value : value;
+            }
+
+            return Model.DefaultShortValue;
+        }
     }
 
     private sealed record Model(string Namespace, string ClassName, string PropertyName, int Value)
     {
         public const int DefaultValue = 999_999_999;
+
+        public const short DefaultShortValue = 32_323;
     }
 }

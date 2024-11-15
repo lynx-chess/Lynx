@@ -6013,27 +6013,32 @@ public static class TunableEvalParameters
 
 public partial class EvaluationParams
 {
-	[GeneratedNamespace.GeneratePackedConstant]
-	public static readonly TaperedEvaluationTerm IsolatedPawnPenalty = 54;
+    [GeneratedNamespace.GeneratePackedConstant]
+    public static readonly TaperedEvaluationTerm IsolatedPawnPenalty = 54;
 
-	[GeneratedNamespace.GeneratePackedConstant]
-	public int IsolatedPawnPenalty2= 55;
+    [GeneratedNamespace.GeneratePackedConstant]
+    public static readonly TaperedEvaluationTerm OpenFileRookBonus = Utils.Pack(40, 2);
 
-	public static readonly TaperedEvaluationTerm OpenFileRookBonus = Pack(40, 2);
+    [GeneratedNamespace.GeneratePackedConstant]
+    public static readonly TaperedEvaluationTerm SemiOpenFileRookBonus = Pack(15, 8);
 
-	public static readonly TaperedEvaluationTerm SemiOpenFileRookBonus = Pack(15, 8);
+    [GeneratedNamespace.GeneratePackedConstant]
+    public static readonly TaperedEvaluationTerm SemiOpenFileKingPenalty = Pack(-24, 5);
 
-	public static readonly TaperedEvaluationTerm SemiOpenFileKingPenalty = Pack(-24, 5);
+    [GeneratedNamespace.GeneratePackedConstant]
+    public static readonly TaperedEvaluationTerm OpenFileKingPenalty = Pack(-65, 2);
 
-	public static readonly TaperedEvaluationTerm OpenFileKingPenalty = Pack(-65, 2);
+    [GeneratedNamespace.GeneratePackedConstant]
+    public static readonly TaperedEvaluationTerm KingShieldBonus = Pack(23, -3);
 
-	public static readonly TaperedEvaluationTerm KingShieldBonus = Pack(23, -3);
+    [GeneratedNamespace.GeneratePackedConstant]
+    public static readonly TaperedEvaluationTerm BishopPairBonus = Pack(30, 72);
 
-	public static readonly TaperedEvaluationTerm BishopPairBonus = Pack(30, 72);
+    [GeneratedNamespace.GeneratePackedConstant]
+    public static readonly TaperedEvaluationTerm PieceProtectedByPawnBonus = Pack(12, 15);
 
-	public static readonly TaperedEvaluationTerm PieceProtectedByPawnBonus = Pack(12, 15);
-
-	public static readonly TaperedEvaluationTerm PieceAttackedByPawnPenalty = Pack(-47, -33);
+    [GeneratedNamespace.GeneratePackedConstant]
+    public static readonly TaperedEvaluationTerm PieceAttackedByPawnPenalty = Pack(-47, -33);
 
 	public static readonly TaperedEvaluationTermByRank PawnPhalanxBonus =
 	[
