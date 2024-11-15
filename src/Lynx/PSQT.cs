@@ -123,3 +123,9 @@ public static class EvaluationPSQTs
             + square;
     }
 }
+
+[GeneratedNamespace.GeneratePSQT]
+public partial class UserClass
+{
+    partial void UserMethod();
+}
