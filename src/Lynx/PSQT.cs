@@ -125,18 +125,14 @@ public static class EvaluationPSQTs
 }
 
 [GeneratedNamespace.GeneratePSQT]
-public partial class UserClass
+public static partial class UserClass
 {
     [GeneratedNamespace.GeneratePackedConstant]
     public static readonly int _Test01 = 66;
-
-    partial void UserMethod();
 }
 
-public partial class UserClass2
+public static partial class UserClass2
 {
     [GeneratedNamespace.GeneratePackedConstant]
-    public int _Test1 = Utils.Pack(40, 2);
-
-    partial void UserMethod();
+    public static int _Test1 = Utils.Pack(40, 2);
 }

@@ -6012,36 +6012,36 @@ public static class TunableEvalParameters
 	];
 }
 
-public partial class EvaluationParams
+public static partial class EvaluationParams
 {
-#pragma warning disable IDE0052 // Remove unread private members
+#pragma warning disable IDE0052, CS0169 // Remove unread private members
 
-    [GeneratePackedConstant]
-    private static readonly TaperedEvaluationTerm _IsolatedPawnPenalty = Pack(-17, -14);
+    [GeneratedPack(-17, -14)]
+    private static readonly TaperedEvaluationTerm _IsolatedPawnPenalty;
 
-    [GeneratePackedConstant]
-    private static readonly TaperedEvaluationTerm _OpenFileRookBonus = Utils.Pack(40, 2);
+    [GeneratedPack(40, 2)]
+    private static readonly TaperedEvaluationTerm _OpenFileRookBonus;
 
-    [GeneratePackedConstant]
-    private static readonly TaperedEvaluationTerm _SemiOpenFileRookBonus = Pack(15, 8);
+    [GeneratedPack(15, 8)]
+    private static readonly TaperedEvaluationTerm _SemiOpenFileRookBonus;
 
-    [GeneratePackedConstant]
-    private static readonly TaperedEvaluationTerm _SemiOpenFileKingPenalty = Pack(-24, 5);
+    [GeneratedPack(-24, 5)]
+    private static readonly TaperedEvaluationTerm _SemiOpenFileKingPenalty;
 
-    [GeneratePackedConstant]
-    private static readonly TaperedEvaluationTerm _OpenFileKingPenalty = Pack(-65, 2);
+    [GeneratedPack(-65, 2)]
+    private static readonly TaperedEvaluationTerm _OpenFileKingPenalty;
 
-    [GeneratePackedConstant]
-    private static readonly TaperedEvaluationTerm _KingShieldBonus = Pack(23, -3);
+    [GeneratedPack(23, -3)]
+    private static readonly TaperedEvaluationTerm _KingShieldBonus;
 
-    [GeneratePackedConstant]
-    private static readonly TaperedEvaluationTerm _BishopPairBonus = Pack(30, 72);
+    [GeneratedPack(30, 72)]
+    private static readonly TaperedEvaluationTerm _BishopPairBonus;
 
-    [GeneratePackedConstant]
-    private static readonly TaperedEvaluationTerm _PieceProtectedByPawnBonus = Pack(12, 15);
+    [GeneratedPack(12, 15)]
+    private static readonly TaperedEvaluationTerm _PieceProtectedByPawnBonus;
 
-    [GeneratePackedConstant]
-    private static readonly TaperedEvaluationTerm _PieceAttackedByPawnPenalty = Pack(-47, -33);
+    [GeneratedPack(-47, -33)]
+    private static readonly TaperedEvaluationTerm _PieceAttackedByPawnPenalty;
 
 #pragma warning restore IDE0052 // Remove unread private members
 

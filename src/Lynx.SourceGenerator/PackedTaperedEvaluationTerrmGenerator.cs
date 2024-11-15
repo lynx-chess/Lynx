@@ -83,7 +83,7 @@ public class PackedTaperedEvaluationTermGenerator : IIncrementalGenerator
                     var sb = new StringBuilder();
                     sb.Append("namespace ").Append(group.Key ?? "GeneratedNamespace").AppendLine(";");
                     sb.AppendLine();
-                    sb.Append("partial class ").AppendLine(subgroup.Key ?? "GeneratedClass");
+                    sb.Append("static partial class ").AppendLine(subgroup.Key ?? "GeneratedClass");
                     sb.AppendLine("{");
 
                     foreach (var model in subgroup)

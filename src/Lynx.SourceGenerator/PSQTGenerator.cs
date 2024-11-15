@@ -41,9 +41,9 @@ public class PSQTGenerator : IIncrementalGenerator
         {
             var sourceText = SourceText.From($$"""
                 namespace {{model.Namespace}};
-                partial class {{model.ClassName}}
+                static partial class {{model.ClassName}}
                 {
-                    public ReadOnlySpan<int> {{model.PropertyName}} => [];
+                    public static ReadOnlySpan<int> {{model.PropertyName}} => [];
                 }
                 """, Encoding.UTF8);
 
