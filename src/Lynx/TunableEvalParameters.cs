@@ -1,7 +1,7 @@
 ﻿// 2024-9-19 13:24:58  6
 
 using static Lynx.Utils;
-using GeneratedNamespace;
+using Lynx.SourceGenerator;
 
 namespace Lynx;
 
@@ -6017,31 +6017,31 @@ public static partial class EvaluationParams
 #pragma warning disable IDE0052, CS0169 // Remove unread private members
 
     [GeneratedPack(-17, -14)]
-    private static readonly TaperedEvaluationTerm _IsolatedPawnPenalty;
+    private static readonly int _IsolatedPawnPenalty;
 
     [GeneratedPack(40, 2)]
-    private static readonly TaperedEvaluationTerm _OpenFileRookBonus;
+    private static readonly int _OpenFileRookBonus;
 
-    [GeneratedPack(15, 8)]
-    private static readonly TaperedEvaluationTerm _SemiOpenFileRookBonus;
+	[GeneratedPack(15, 8)]
+	private static readonly int _SemiOpenFileRookBonus;
 
-    [GeneratedPack(-24, 5)]
-    private static readonly TaperedEvaluationTerm _SemiOpenFileKingPenalty;
+	[GeneratedPack(-24, 5)]
+	private static readonly int _SemiOpenFileKingPenalty;
 
     [GeneratedPack(-65, 2)]
-    private static readonly TaperedEvaluationTerm _OpenFileKingPenalty;
+    private static readonly int _OpenFileKingPenalty;
 
     [GeneratedPack(23, -3)]
-    private static readonly TaperedEvaluationTerm _KingShieldBonus;
+    private static readonly int _KingShieldBonus;
 
     [GeneratedPack(30, 72)]
-    private static readonly TaperedEvaluationTerm _BishopPairBonus;
+    private static readonly int _BishopPairBonus;
 
     [GeneratedPack(12, 15)]
-    private static readonly TaperedEvaluationTerm _PieceProtectedByPawnBonus;
+    private static readonly int _PieceProtectedByPawnBonus;
 
     [GeneratedPack(-47, -33)]
-    private static readonly TaperedEvaluationTerm _PieceAttackedByPawnPenalty;
+    private static readonly int _PieceAttackedByPawnPenalty;
 
 #pragma warning restore IDE0052 // Remove unread private members
 
