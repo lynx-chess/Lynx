@@ -1,7 +1,7 @@
 ﻿// 2024-9-19 13:24:58  6
 
 using static Lynx.Utils;
-using Lynx.SourceGenerator;
+using Lynx.Generator;
 
 namespace Lynx;
 

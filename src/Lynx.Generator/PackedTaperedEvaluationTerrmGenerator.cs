@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using System.Text;
 
-namespace Lynx.SourceGenerator;
+namespace Lynx.Generator;
 
 [Generator(LanguageNames.CSharp)]
 public class PackedTaperedEvaluationTermGenerator : IIncrementalGenerator

@@ -6,12 +6,12 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Text;
 
-namespace Lynx.SourceGenerator;
+namespace Lynx.Generator;
 
 [Generator(LanguageNames.CSharp)]
 public class GeneratedPackGenerator : IIncrementalGenerator
 {
-    private const string OurAttribute = "Lynx.SourceGenerator.GeneratedPackAttribute";
+    private const string OurAttribute = "Lynx.Generator.GeneratedPackAttribute";
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -32,7 +32,7 @@ public class GeneratedPackGenerator : IIncrementalGenerator
     private static SourceText AttributeSource() => SourceText.From("""
         using System;
 
-        namespace Lynx.SourceGenerator
+        namespace Lynx.Generator
         {
             [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
             internal sealed class GeneratedPackAttribute : Attribute

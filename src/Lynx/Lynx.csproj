@@ -40,9 +40,9 @@
     </AssemblyAttribute>
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Lynx.SourceGenerator\Lynx.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-  </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\Lynx.Generator\Lynx.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    </ItemGroup>
 
   <ItemGroup>
     <Using Include="Lynx.Model.TranspositionTableElement[]" Alias="TranspositionTable" />
