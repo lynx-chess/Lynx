@@ -123,16 +123,3 @@ public static class EvaluationPSQTs
             + square;
     }
 }
-
-[GeneratedNamespace.GeneratePSQT]
-public static partial class UserClass
-{
-    [GeneratedNamespace.GeneratePackedConstant]
-    public static readonly int _Test01 = 66;
-}
-
-public static partial class UserClass2
-{
-    [GeneratedNamespace.GeneratePackedConstant]
-    public static int _Test1 = Utils.Pack(40, 2);
-}
