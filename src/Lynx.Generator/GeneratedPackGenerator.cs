@@ -92,13 +92,21 @@ public class GeneratedPackGenerator : IIncrementalGenerator
             }
 
             // Loop through all of the attributes on the enum until we find the [EnumExtensions] attribute
-            foreach (AttributeData attributeData in variableSymbol.GetAttributes())
+            foreach (var group in variableSymbol.GetAttributes().GroupBy(static attr => attr.AttributeClass, SymbolEqualityComparer.Default))
             {
                 // Verify that this is our attribute
-                if (!ourAttribute!.Equals(attributeData.AttributeClass, SymbolEqualityComparer.Default))
+                if (!ourAttribute.Equals(group.Key, SymbolEqualityComparer.Default))
                 {
                     continue;
                 }
+
+                // More than one of our attributes -> invalid for our use case
+                if(group.Count() > 1)
+                {
+                    return Model.DefaultValue;
+                }
+
+                AttributeData attributeData = group.First();
 
                 // Constructor arguments
                 if (!attributeData.ConstructorArguments.IsEmpty)

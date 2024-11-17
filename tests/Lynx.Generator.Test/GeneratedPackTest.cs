@@ -5,55 +5,103 @@ namespace Lynx.Generator.Test;
 
 public class GeneratedPackTest
 {
-    //[Test]
-    //public Task Driver()
-    //{
-    //    var driver = BuildDriver();
-
-    //    return Verify(driver);
-    //}
-
-    //[Test]
-    //public Task RunResults()
-    //{
-    //    var driver = BuildDriver();
-
-    //    var results = driver.GetRunResult();
-    //    return Verify(results);
-    //}
-
-    //[Test]
-    //public Task RunResult()
-    //{
-    //    var driver = BuildDriver();
-
-    //    var result = driver.GetRunResult().Results.Single();
-    //    return Verify(result);
-    //}
-
     [Test]
-    public Task GeneratesGeneratedPackCorrectly()
+    public Task StaticClass()
     {
         // The source code to test
         const string source = @"
 using namespace Lynx.Generator;
 
-public static partial class EvaluationParams
+public static partial class TestClass
 {
-    [GeneratedPack(-1, 2)]
-    private static readonly int _IsolatedPawnPenalty;
+    [GeneratedPack(1, 2)]
+    public static readonly int _TestConstant;
 }";
 
         // Pass the source code to our helper and snapshot test the output
         return TestHelper.Verify(source);
     }
 
-    private static GeneratorDriver BuildDriver()
+    [Test]
+    public Task NonStaticClass()
     {
-        var compilation = CSharpCompilation.Create(nameof(GeneratedPackTest));
-        var generator = new GeneratedPackGenerator();
+        // The source code to test
+        const string source = @"
+using namespace Lynx.Generator;
 
-        var driver = CSharpGeneratorDriver.Create(generator);
-        return driver.RunGenerators(compilation);
+public partial class TestClass
+{
+    [GeneratedPack(-1, 2)]
+    public static readonly int _TestConstant;
+}";
+
+        // Pass the source code to our helper and snapshot test the output
+        return TestHelper.Verify(source);
+    }
+
+    [Test]
+    public Task PrivateStaticReadonlyField()
+    {
+        // The source code to test
+        const string source = @"
+using namespace Lynx.Generator;
+
+public partial class TestClass
+{
+    [GeneratedPack(-1, -2)]
+    private static readonly int _TestConstant;
+}";
+
+        // Pass the source code to our helper and snapshot test the output
+        return TestHelper.Verify(source);
+    }
+
+    [Test]
+    public Task NoNamespaceImport_ShouldNotGenerateConstant()
+    {
+        // The source code to test
+        const string source = @"
+public partial class TestClass
+{
+    [GeneratedPack(1, 2)]
+    private static readonly int _TestConstant;
+}";
+
+        // Pass the source code to our helper and snapshot test the output
+        return TestHelper.Verify(source);
+    }
+
+    [Test]
+    public Task TwoAttributes_ShouldNotGenerateConstant()
+    {
+        // The source code to test
+        const string source = @"
+using namespace Lynx.Generator;
+
+public partial class TestClass
+{
+    [GeneratedPack(1, 2)]
+    [GeneratedPack(1, 3)]
+    private static readonly int _TestConstant;
+}";
+
+        // Pass the source code to our helper and snapshot test the output
+        return TestHelper.Verify(source);
+    }
+
+    [Test]
+    public Task NoAttributes_ShouldNotGenerateConstant()
+    {
+        // The source code to test
+        const string source = @"
+using namespace Lynx.Generator;
+
+public partial class TestClass
+{
+    private static readonly int _TestConstant;
+}";
+
+        // Pass the source code to our helper and snapshot test the output
+        return TestHelper.Verify(source);
     }
 }
