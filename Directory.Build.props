@@ -13,13 +13,11 @@
     <Using Include="System.Int32" Alias="Move" />
     <Using Include="System.Int16" Alias="ShortMove" />
     <Using Include="System.UInt64" Alias="BitBoard" />
-    <Using Include="System.Int32" Alias="TaperedEvaluationTerm" />
     <Using Include="System.Int32[]" Alias="TaperedEvaluationTermByRank" />
     <Using Include="System.Int32[]" Alias="TaperedEvaluationTermByCount7" />
     <Using Include="System.Int32[]" Alias="TaperedEvaluationTermByCount8" />
     <Using Include="System.Int32[]" Alias="TaperedEvaluationTermByCount14" />
     <Using Include="System.Int32[]" Alias="TaperedEvaluationTermByCount27" />
-    <Using Include="Lynx.Model.TranspositionTableElement[]" Alias="TranspositionTable" />
   </ItemGroup >
 
   <PropertyGroup>

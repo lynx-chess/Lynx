@@ -377,3 +377,6 @@ tmp/
 
 # EPD files
 *.epd
+
+# Verify exclusions
+**/Snapshots/*.g.received.cs
