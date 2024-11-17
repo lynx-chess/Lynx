@@ -1,4 +1,6 @@
-﻿// https://github.com/dotnet/runtime/blob/419e949d258ecee4c40a460fb09c66d974229623/src/libraries/System.Private.CoreLib/src/System/Index.cs
+﻿// Based on https://www.meziantou.net/how-to-use-csharp-8-indices-and-ranges-in-dotnet-standard-2-0-and-dotn.htm
+
+// https://github.com/dotnet/runtime/blob/419e949d258ecee4c40a460fb09c66d974229623/src/libraries/System.Private.CoreLib/src/System/Index.cs
 // https://github.com/dotnet/runtime/blob/419e949d258ecee4c40a460fb09c66d974229623/src/libraries/System.Private.CoreLib/src/System/Range.cs
 
 using System.Runtime.CompilerServices;
@@ -24,7 +26,9 @@ namespace System
         /// If the Index constructed from the end, index value 1 means pointing at the last element and index value 0 means pointing at beyond last element.
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#pragma warning disable S3427 // Method overloads with default parameter values should not overlap
         public Index(int value, bool fromEnd = false)
+#pragma warning restore S3427 // Method overloads with default parameter values should not overlap
         {
             if (value < 0)
             {
@@ -44,10 +48,10 @@ namespace System
         }
 
         /// <summary>Create an Index pointing at first element.</summary>
-        public static Index Start => new Index(0);
+        public static Index Start => new(0);
 
         /// <summary>Create an Index pointing at beyond last element.</summary>
-        public static Index End => new Index(~0);
+        public static Index End => new(~0);
 
         /// <summary>Create an Index from the start at the position indicated by the value.</summary>
         /// <param name="value">The index value from the start.</param>
@@ -118,8 +122,8 @@ namespace System
         }
 
         /// <summary>Indicates whether the current Index object is equal to another object of the same type.</summary>
-        /// <param name="value">An object to compare with this object</param>
-        public override bool Equals(object? value) => value is Index && _value == ((Index)value)._value;
+        /// <param name="obj">An object to compare with this object</param>
+        public override bool Equals(object? obj) => obj is Index index && _value == (index)._value;
 
         /// <summary>Indicates whether the current Index object is equal to another Index object.</summary>
         /// <param name="other">An object to compare with this object</param>
@@ -168,9 +172,9 @@ namespace System
         }
 
         /// <summary>Indicates whether the current Range object is equal to another object of the same type.</summary>
-        /// <param name="value">An object to compare with this object</param>
-        public override bool Equals(object? value) =>
-            value is Range r &&
+        /// <param name="obj">An object to compare with this object</param>
+        public override bool Equals(object? obj) =>
+            obj is Range r &&
             r.Start.Equals(Start) &&
             r.End.Equals(End);
 
@@ -181,7 +185,7 @@ namespace System
         /// <summary>Returns the hash code for this instance.</summary>
         public override int GetHashCode()
         {
-            return Start.GetHashCode() * 31 + End.GetHashCode();
+            return (Start.GetHashCode() * 31) + End.GetHashCode();
         }
 
         /// <summary>Converts the value of the current Range object to its equivalent string representation.</summary>
@@ -249,6 +253,7 @@ namespace System.Runtime.CompilerServices
 
             (int offset, int length) = range.GetOffsetAndLength(array.Length);
 
+#pragma warning disable S2955 // Generic parameters not constrained to reference types should not be compared to "null"
             if (default(T) != null || typeof(T[]) == array.GetType())
             {
                 // We know the type of the array to be exactly T[].
@@ -269,6 +274,7 @@ namespace System.Runtime.CompilerServices
                 Array.Copy(array, offset, dest, 0, length);
                 return dest;
             }
+#pragma warning restore S2955 // Generic parameters not constrained to reference types should not be compared to "null"
         }
     }
 }
