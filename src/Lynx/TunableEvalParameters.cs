@@ -7,7 +7,7 @@ namespace Lynx;
 
 #pragma warning disable IDE0055, IDE1006 // Discard formatting and naming styles
 
-public static class TunableEvalParameters
+internal static partial class TunableEvalParameters
 {
 	internal static readonly short[][][] MiddleGamePieceValues =
 	[
@@ -6014,7 +6014,7 @@ public static class TunableEvalParameters
 
 public static partial class EvaluationParams
 {
-#pragma warning disable IDE0052, CS0169 // Remove unread private members
+#pragma warning disable IDE0051, IDE0052, CS0169 // Remove unread private members
 
     [GeneratedPack(-17, -14)]
     private static readonly int _IsolatedPawnPenalty;
@@ -6043,7 +6043,7 @@ public static partial class EvaluationParams
     [GeneratedPack(-47, -33)]
     private static readonly int _PieceAttackedByPawnPenalty;
 
-#pragma warning restore IDE0052 // Remove unread private members
+#pragma warning restore IDE0051, IDE0052, CS0169 // Remove unread private members
 
     public static readonly TaperedEvaluationTermByRank PawnPhalanxBonus =
 	[
