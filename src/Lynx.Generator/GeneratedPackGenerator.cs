@@ -64,7 +64,7 @@ public class GeneratedPackGenerator : IIncrementalGenerator
                 Namespace: classSymbol.ContainingNamespace?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted)) ?? string.Empty,
                 ClassName: classSymbol.Name,
                 PropertyName: context.TargetSymbol.Name[1..],
-                Value: value);
+                PackedValue: value);
         }
 
         return null;
@@ -77,8 +77,8 @@ public class GeneratedPackGenerator : IIncrementalGenerator
         {
             const short DefaultShortValue = 32_323;
 
-            int mg = DefaultShortValue;
-            int eg = DefaultShortValue;
+            short mg = DefaultShortValue;
+            short eg = DefaultShortValue;
 
             if (semanticModel.GetDeclaredSymbol(variableDeclarationSyntax) is not IFieldSymbol variableSymbol)
             {
@@ -164,8 +164,7 @@ public class GeneratedPackGenerator : IIncrementalGenerator
                 return Model.DefaultValue;
             }
 
-            // Utils.Pack(mg, eg)
-            return (eg << 16) + mg;
+            return Utils.Pack(mg, eg);
         }
     }
 
@@ -197,7 +196,7 @@ public class GeneratedPackGenerator : IIncrementalGenerator
 #pragma warning restore S2589 // Boolean expressions should not be gratuitous
 
                     sb.AppendLine($$"""
-            public const int {{model.PropertyName}} = {{model.Value}};
+            public const int {{model.PropertyName}} = {{model.PackedValue}};
         """);
                 }
 
@@ -209,7 +208,7 @@ public class GeneratedPackGenerator : IIncrementalGenerator
         }
     }
 
-    private sealed record Model(string Namespace, string ClassName, string PropertyName, int Value)
+    private sealed record Model(string Namespace, string ClassName, string PropertyName, int PackedValue)
     {
         public const int DefaultValue = 999_999_999;
     }
