@@ -381,6 +381,6 @@ tmp/
 # Verify exclusions
 **/Snapshots/*.g.received.cs
 
-# Configuration binder source generator output
+# Exclude all source generators output but ours
 **/Generated/*
 !**/Generated/Lynx.Generator/
