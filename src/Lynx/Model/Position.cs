@@ -588,7 +588,7 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static int TaperedEvaluation(TaperedEvaluationTerm taperedEvaluationTerm, int phase)
+    internal static int TaperedEvaluation(int taperedEvaluationTerm, int phase)
     {
         return ((Utils.UnpackMG(taperedEvaluationTerm) * phase) + (Utils.UnpackEG(taperedEvaluationTerm) * (24 - phase))) / 24;
     }

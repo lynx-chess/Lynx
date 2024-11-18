@@ -131,17 +131,17 @@ public sealed class UCIHandler
 
     private void HandlePosition(ReadOnlySpan<char> command)
     {
-        var sw = Stopwatch.StartNew();
 #if DEBUG
+        var sw = Stopwatch.StartNew();
         _engine.Game.CurrentPosition.Print();
 #endif
 
         _engine.AdjustPosition(command);
+
 #if DEBUG
         _engine.Game.CurrentPosition.Print();
-#endif
-
         _logger.Info("Position parsing took {0}ms", sw.ElapsedMilliseconds);
+#endif
     }
 
     private void HandleStop() => _engine.StopSearching();
