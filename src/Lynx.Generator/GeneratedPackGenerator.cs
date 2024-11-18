@@ -204,9 +204,12 @@ public class GeneratedPackGenerator : IIncrementalGenerator
                     }
 #pragma warning restore S2589 // Boolean expressions should not be gratuitous
 
-                    string leftSide = string.Format("public const int {0} = {1};", model.PropertyName, Utils.Pack(model.MG, model.EG));
-                    sb.AppendLine($$$"""
-                            {{{string.Format("{0,-60}", leftSide)}}}// Pack({{{string.Format("{0,4}", model.MG.ToString())}}}, {{{string.Format("{0,4}", model.EG.ToString())}}})
+                    sb.AppendLine($$"""
+                            /// <summary>
+                            /// <see cref="Utils.Pack({{model.MG}}, {{model.EG}})"/>
+                            /// </summary>
+                            {{string.Format("public const int {0} = {1};", model.PropertyName, Utils.Pack(model.MG, model.EG))}}
+
                         """);
                 }
 
