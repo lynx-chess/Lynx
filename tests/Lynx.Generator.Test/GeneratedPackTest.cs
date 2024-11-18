@@ -65,6 +65,39 @@ public partial class TestClass
     }
 
     [Test]
+    public Task MultipleNamespacesAndClasses()
+    {
+        const string source = @"
+using namespace Lynx.Generator;
+
+namespace Namespace1
+{
+    public partial class TestClass1_1
+    {
+        [GeneratedPack(0, 1)]
+        private static readonly int _TestConstant1_1;
+    }
+
+    public partial class TestClass1_2
+    {
+        [GeneratedPack(2, 3)]
+        private static readonly int _TestConstant1_2;
+    }
+}
+
+namespace Namespace2
+{
+    public partial class TestClass2_1
+    {
+        [GeneratedPack(4, 5)]
+        private static readonly int _TestConstant2_1;
+    }
+}";
+
+        return Verify(source);
+    }
+
+    [Test]
     public Task NoNamespaceImport_ShouldNotGenerateConstant()
     {
         const string source = @"
