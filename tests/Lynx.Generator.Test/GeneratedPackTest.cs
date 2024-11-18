@@ -57,6 +57,23 @@ public partial class TestClass
     }
 
     [Test]
+    public Task NamedArguments()
+    {
+        // The source code to test
+        const string source = @"
+using namespace Lynx.Generator;
+
+public partial class TestClass
+{
+    [GeneratedPack(mg : -1, eg : -2)]
+    private static readonly int _TestConstant;
+}";
+
+        // Pass the source code to our helper and snapshot test the output
+        return Verify(source);
+    }
+
+    [Test]
     public Task NoNamespaceImport_ShouldNotGenerateConstant()
     {
         // The source code to test
