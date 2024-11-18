@@ -380,3 +380,7 @@ tmp/
 
 # Verify exclusions
 **/Snapshots/*.g.received.cs
+
+# Configuration binder source generator output
+**/Generated/*
+!**/Generated/Lynx.Generator/
