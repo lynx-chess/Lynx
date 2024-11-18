@@ -54,9 +54,9 @@ public class GeneratedPackGenerator : IIncrementalGenerator
 
     private static Model? GetModel(GeneratorAttributeSyntaxContext context)
     {
-        var value = ExtractPackedValueFromAttribute(context.TargetNode, context.SemanticModel);
+        var (mg, eg) = ExtractPackedValueFromAttribute(context.TargetNode, context.SemanticModel);
 
-        if (value != Model.DefaultValue)
+        if (mg != Model.DefaultShortValue && eg != Model.DefaultShortValue)
         {
             var classSymbol = context.TargetSymbol.ContainingSymbol;
 
@@ -64,7 +64,8 @@ public class GeneratedPackGenerator : IIncrementalGenerator
                 Namespace: classSymbol.ContainingNamespace?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat.WithGlobalNamespaceStyle(SymbolDisplayGlobalNamespaceStyle.Omitted)) ?? string.Empty,
                 ClassName: classSymbol.Name,
                 PropertyName: context.TargetSymbol.Name[1..],
-                PackedValue: value);
+                MG: mg,
+                EG: eg);
         }
 
         return null;
@@ -73,22 +74,22 @@ public class GeneratedPackGenerator : IIncrementalGenerator
         /// Heavily inspired by https://andrewlock.net/creating-a-source-generator-part-4-customising-generated-code-with-marker-attributes/
         /// Code in https://github.com/andrewlock/blog-examples/tree/c35edf1c1f0e1f9adf84c215e2ce7ab644b374f5/NetEscapades.EnumGenerators4
         /// </summary>
-        static int ExtractPackedValueFromAttribute(SyntaxNode variableDeclarationSyntax, SemanticModel semanticModel)
+        static (short MG, short EG) ExtractPackedValueFromAttribute(SyntaxNode variableDeclarationSyntax, SemanticModel semanticModel)
         {
-            const short DefaultShortValue = 32_323;
+            (short, short)defaultResult = (Model.DefaultShortValue, Model.DefaultShortValue);
 
-            short mg = DefaultShortValue;
-            short eg = DefaultShortValue;
+            short mg = Model.DefaultShortValue;
+            short eg = Model.DefaultShortValue;
 
             if (semanticModel.GetDeclaredSymbol(variableDeclarationSyntax) is not IFieldSymbol variableSymbol)
             {
-                return Model.DefaultValue;
+                return defaultResult;
             }
 
             INamedTypeSymbol? ourAttribute = semanticModel.Compilation.GetTypeByMetadataName(OurAttribute);
             if (ourAttribute is null)
             {
-                return Model.DefaultValue;
+                return defaultResult;
             }
 
             // Loop through all of the attributes on the enum until we find the [EnumExtensions] attribute
@@ -103,7 +104,7 @@ public class GeneratedPackGenerator : IIncrementalGenerator
                 // More than one of our attributes -> invalid for our use case
                 if(group.Count() > 1)
                 {
-                    return Model.DefaultValue;
+                    return defaultResult;
                 }
 
                 AttributeData attributeData = group.First();
@@ -118,14 +119,14 @@ public class GeneratedPackGenerator : IIncrementalGenerator
                     {
                         if (arg.Kind == TypedConstantKind.Error)
                         {
-                            return Model.DefaultValue;
+                            return defaultResult;
                         }
                     }
 
                     // Make sure both arguments are present
                     if (args.Length != 2 || args[0].IsNull || args[1].IsNull)
                     {
-                        return Model.DefaultValue;
+                        return defaultResult;
                     }
 
                     mg = (short)args[0].Value!;
@@ -142,7 +143,7 @@ public class GeneratedPackGenerator : IIncrementalGenerator
                         // Make sure we don't have any errors, otherwise don't do generation
                         if (typedConstant.Kind == TypedConstantKind.Error)
                         {
-                            return Model.DefaultValue;
+                            return defaultResult;
                         }
                         else
                         {
@@ -151,12 +152,12 @@ public class GeneratedPackGenerator : IIncrementalGenerator
                             {
                                 case "mg":
                                     mg = typedConstant.IsNull
-                                        ? DefaultShortValue
+                                        ? Model.DefaultShortValue
                                         : (short)typedConstant.Value!;
                                     break;
                                 case "eg":
                                     eg = typedConstant.IsNull
-                                        ? DefaultShortValue
+                                        ? Model.DefaultShortValue
                                         : (short)typedConstant.Value!;
                                     break;
                             }
@@ -167,12 +168,12 @@ public class GeneratedPackGenerator : IIncrementalGenerator
                 break;
             }
 
-            if (mg == DefaultShortValue || eg == DefaultShortValue)
+            if (mg == Model.DefaultShortValue || eg == Model.DefaultShortValue)
             {
-                return Model.DefaultValue;
+                return defaultResult;
             }
 
-            return Utils.Pack(mg, eg);
+            return (mg, eg);
         }
     }
 
@@ -203,9 +204,10 @@ public class GeneratedPackGenerator : IIncrementalGenerator
                     }
 #pragma warning restore S2589 // Boolean expressions should not be gratuitous
 
-                    sb.AppendLine($$"""
-            public const int {{model.PropertyName}} = {{model.PackedValue}};
-        """);
+                    string leftSide = string.Format("public const int {0} = {1};", model.PropertyName, Utils.Pack(model.MG, model.EG));
+                    sb.AppendLine($$$"""
+                            {{{string.Format("{0,-60}", leftSide)}}}// Pack({{{string.Format("{0,4}", model.MG.ToString())}}}, {{{string.Format("{0,4}", model.EG.ToString())}}})
+                        """);
                 }
 
                 sb.AppendLine("}");
@@ -216,8 +218,8 @@ public class GeneratedPackGenerator : IIncrementalGenerator
         }
     }
 
-    private sealed record Model(string Namespace, string ClassName, string PropertyName, int PackedValue)
+    private sealed record Model(string Namespace, string ClassName, string PropertyName, short MG, short EG)
     {
-        public const int DefaultValue = 999_999_999;
+        public const short DefaultShortValue = 32_323;
     }
 }
