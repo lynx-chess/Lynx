@@ -88,7 +88,11 @@ public sealed class UCIHandler
                     await HandleDivide(rawCommand);
                     break;
                 case "bench":
-                    await HandleBench(rawCommand);
+                    await HandleBench(rawCommand, quiet: false);
+                    HandleQuit();
+                    break;
+                case "quietbench":
+                    await HandleBench(rawCommand, quiet: true);
                     HandleQuit();
                     break;
                 case "printsettings":
@@ -578,7 +582,7 @@ public sealed class UCIHandler
         }
     }
 
-    private async ValueTask HandleBench(string rawCommand)
+    private async ValueTask HandleBench(string rawCommand, bool quiet)
     {
         var items = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
@@ -586,7 +590,7 @@ public sealed class UCIHandler
         {
             depth = Configuration.EngineSettings.BenchDepth;
         }
-        var results = _engine.Bench(depth);
+        var results = _engine.Bench(depth, quiet);
         await _engine.PrintBenchResults(results);
     }
 

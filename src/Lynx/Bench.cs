@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Threading.Channels;
 
 namespace Lynx;
 
@@ -102,8 +103,15 @@ public partial class Engine
     /// (https://github.com/JacquesRW/akimbo/blob/main/resources/fens.txt)
     /// plus random some endgame positions to ensure promotions with/without captures are well covered
     /// </summary>
-    public (ulong TotalNodes, ulong Nps) Bench(int depth)
+    public (ulong TotalNodes, ulong Nps) Bench(int depth, bool isQuiet = false)
     {
+        ChannelWriter<object>? tmpEngineWriter = null;
+
+        if (isQuiet)
+        {
+            tmpEngineWriter = _engineWriter;
+            _engineWriter = Channel.CreateUnbounded<object>(new UnboundedChannelOptions() { SingleReader = true, SingleWriter = false }).Writer;
+        }
         var stopwatch = new Stopwatch();
 
         ulong totalNodes = 0;
@@ -122,6 +130,10 @@ public partial class Engine
             totalNodes += result.Nodes;
         }
 
+        if (isQuiet)
+        {
+            _engineWriter = tmpEngineWriter!;
+        }
         _engineWriter.TryWrite($"Total time: {Utils.CalculateUCITime(totalSeconds)}");
 
         // Cleanup game
