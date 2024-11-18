@@ -6045,51 +6045,56 @@ public static partial class EvaluationParams
 
 #pragma warning restore IDE0051, IDE0052, CS0169 // Remove unread private members
 
-    public static readonly TaperedEvaluationTermByRank PawnPhalanxBonus =
+	[GeneratedPackArray(
 	[
-        Pack(0, 0),
-		Pack(1, 2),
-		Pack(10, 10),
-		Pack(22, 24),
-		Pack(55, 77),
-		Pack(208, 187),
-		Pack(-54, 403)
-	];
+		"0, 0",
+		"1, 2",
+		"10, 10",
+		"22, 24",
+		"55, 77",
+		"208, 187",
+		"-54, 403"
+	])]
+	public static readonly TaperedEvaluationTermByRank? _PawnPhalanxBonus;
 
-	public static readonly TaperedEvaluationTermByCount8 BadBishop_SameColorPawnsPenalty =
+	[GeneratedPackArray(
 	[
-		Pack(139, 162),
-		Pack(137, 158),
-		Pack(133, 145),
-		Pack(127, 136),
-		Pack(121, 129),
-		Pack(117, 121),
-		Pack(114, 114),
-		Pack(109, 107),
-		Pack(108, 104)
-	];
+		"139, 162",
+		"137, 158",
+		"133, 145",
+		"127, 136",
+		"121, 129",
+		"117, 121",
+		"114, 114",
+		"109, 107",
+		"108, 104"
+	])]
+	public static readonly TaperedEvaluationTermByCount8? _BadBishop_SameColorPawnsPenalty;
 
-	public static readonly TaperedEvaluationTermByCount8 BadBishop_BlockedCentralPawnsPenalty =
-	[
-		Pack(133, 154),
-		Pack(129, 139),
-		Pack(125, 116),
-		Pack(125, 93),
-		Pack(124, 83),
-		Pack(121, 101),
-		Pack(0, 0),
-		Pack(0, 0),
-		Pack(0, 0)
-	];
 
-	public static readonly int[] CheckBonus =
-	[
-		Pack(0, 0),
-		Pack(16, 3),
-		Pack(17, 15),
-		Pack(30, 3),
-		Pack(12, 19)
-	];
+    [GeneratedPackArray(
+    [
+        "133, 154",
+		"129, 139",
+		"125, 116",
+		"125, 93",
+		"124, 83",
+		"121, 101",
+		"0, 0",
+		"0, 0",
+		"0, 0"
+    ])]
+	public static readonly TaperedEvaluationTermByCount8? _BadBishop_BlockedCentralPawnsPenalty;
+
+    [GeneratedPackArray(
+    [
+        "0, 0",
+		"16, 3",
+		"17, 15",
+		"30, 3",
+		"12, 19"
+    ])]
+    public static readonly int[]? _CheckBonus;
 
 	public static readonly TaperedEvaluationTermByRank[] PassedPawnBonus =
 	[
@@ -6513,145 +6518,155 @@ public static partial class EvaluationParams
 		],
 	];
 
-	public static readonly TaperedEvaluationTermByRank FriendlyKingDistanceToPassedPawnBonus =
+	[GeneratedPackArray(
 	[
-		Pack(0, 0),
-		Pack(27, 38),
-		Pack(9, 32),
-		Pack(2, 20),
-		Pack(3, 14),
-		Pack(12, 11),
-		Pack(15, 11),
-		Pack(23, 3)
-	];
+		"0, 0",
+		"27, 38",
+		"9, 32",
+		"2, 20",
+		"3, 14",
+		"12, 11",
+		"15, 11",
+		"23, 3"
+	])]
+	public static readonly TaperedEvaluationTermByRank? _FriendlyKingDistanceToPassedPawnBonus;
 
-	public static readonly TaperedEvaluationTermByRank EnemyKingDistanceToPassedPawnPenalty =
+    [GeneratedPackArray(
+    [
+		"0, 0",
+		"-33, -21",
+		"-10, 6",
+		"5, 18",
+		"13, 27",
+		"25, 36",
+		"25, 47",
+		"32, 51"
+    ])]
+
+	public static readonly TaperedEvaluationTermByRank? _EnemyKingDistanceToPassedPawnPenalty;
+
+    [GeneratedPackArray(
+    [
+		"-0, -22",
+		"2, -7",
+		"-0, -6",
+		"1, -10",
+		"1, -8",
+		"2, -7",
+		"2, -5",
+		"2, -6",
+		"6, -2",
+		"2, 3",
+		"-2, 6",
+		"-6, 8",
+		"-10, 10",
+		"-15, 12",
+		"-14, 13",
+		"-17, 13",
+		"-10, 11",
+		"-9, 11",
+		"11, 5",
+		"24, 2",
+		"18, 2",
+		"38, -4",
+		"38, -5",
+		"44, -8",
+		"55, -13",
+		"100, -20",
+		"118, -34",
+		"145, -26"
+    ])]
+
+	public static readonly TaperedEvaluationTermByCount27? _VirtualKingMobilityBonus;
+
+	[GeneratedPackArray(
 	[
-		Pack(0, 0),
-		Pack(-33, -21),
-		Pack(-10, 6),
-		Pack(5, 18),
-		Pack(13, 27),
-		Pack(25, 36),
-		Pack(25, 47),
-		Pack(32, 51)
-	];
+		"0, 0",
+		"19, 59",
+		"30, 92",
+		"37, 109",
+		"45, 123",
+		"51, 138",
+		"60, 142",
+		"68, 143",
+		"78, 134"
+	])]
+	public static readonly TaperedEvaluationTermByCount8? _KnightMobilityBonus;
 
-	public static readonly TaperedEvaluationTermByCount27 VirtualKingMobilityBonus =
-	[
-		Pack(-0, -22),
-		Pack(2, -7),
-		Pack(-0, -6),
-		Pack(1, -10),
-		Pack(1, -8),
-		Pack(2, -7),
-		Pack(2, -5),
-		Pack(2, -6),
-		Pack(6, -2),
-		Pack(2, 3),
-		Pack(-2, 6),
-		Pack(-6, 8),
-		Pack(-10, 10),
-		Pack(-15, 12),
-		Pack(-14, 13),
-		Pack(-17, 13),
-		Pack(-10, 11),
-		Pack(-9, 11),
-		Pack(11, 5),
-		Pack(24, 2),
-		Pack(18, 2),
-		Pack(38, -4),
-		Pack(38, -5),
-		Pack(44, -8),
-		Pack(55, -13),
-		Pack(100, -20),
-		Pack(118, -34),
-		Pack(145, -26)
-	];
+    [GeneratedPackArray(
+    [
+		"0, 0",
+		"10, 33",
+		"21, 56",
+		"28, 74",
+		"36, 85",
+		"41, 95",
+		"46, 100",
+		"50, 101",
+		"52, 105",
+		"60, 102",
+		"65, 100",
+		"74, 98",
+		"79, 105",
+		"71, 89",
+		"0, 0"
+    ])]
 
-	public static readonly TaperedEvaluationTermByCount8 KnightMobilityBonus =
-	[
-		Pack(0, 0),
-		Pack(19, 59),
-		Pack(30, 92),
-		Pack(37, 109),
-		Pack(45, 123),
-		Pack(51, 138),
-		Pack(60, 142),
-		Pack(68, 143),
-		Pack(78, 134)
-	];
+	public static readonly TaperedEvaluationTermByCount14? _BishopMobilityBonus;
 
-	public static readonly TaperedEvaluationTermByCount14 BishopMobilityBonus =
-	[
-		Pack(0, 0),
-		Pack(10, 33),
-		Pack(21, 56),
-		Pack(28, 74),
-		Pack(36, 85),
-		Pack(41, 95),
-		Pack(46, 100),
-		Pack(50, 101),
-		Pack(52, 105),
-		Pack(60, 102),
-		Pack(65, 100),
-		Pack(74, 98),
-		Pack(79, 105),
-		Pack(71, 89),
-		Pack(0, 0)
-	];
+    [GeneratedPackArray(
+    [
+		"0, 0",
+		"12, 22",
+		"15, 31",
+		"20, 36",
+		"20, 45",
+		"26, 50",
+		"29, 58",
+		"32, 60",
+		"35, 66",
+		"37, 70",
+		"39, 74",
+		"40, 77",
+		"47, 79",
+		"55, 72",
+		"75, 63"
+    ])]
 
-	public static readonly TaperedEvaluationTermByCount14 RookMobilityBonus =
-	[
-		Pack(0, 0),
-		Pack(12, 22),
-		Pack(15, 31),
-		Pack(20, 36),
-		Pack(20, 45),
-		Pack(26, 50),
-		Pack(29, 58),
-		Pack(32, 60),
-		Pack(35, 66),
-		Pack(37, 70),
-		Pack(39, 74),
-		Pack(40, 77),
-		Pack(47, 79),
-		Pack(55, 72),
-		Pack(75, 63)
-	];
+	public static readonly TaperedEvaluationTermByCount14? _RookMobilityBonus;
 
-	public static readonly TaperedEvaluationTermByCount27 QueenMobilityBonus =
-	[
-		Pack(0, 0),
-		Pack(-1, 200),
-		Pack(-5, 310),
-		Pack(-2, 345),
-		Pack(0, 364),
-		Pack(4, 379),
-		Pack(6, 398),
-		Pack(7, 411),
-		Pack(11, 419),
-		Pack(13, 424),
-		Pack(15, 431),
-		Pack(18, 435),
-		Pack(21, 436),
-		Pack(22, 442),
-		Pack(23, 444),
-		Pack(25, 447),
-		Pack(26, 453),
-		Pack(34, 444),
-		Pack(41, 441),
-		Pack(58, 427),
-		Pack(62, 421),
-		Pack(111, 390),
-		Pack(119, 382),
-		Pack(134, 362),
-		Pack(218, 325),
-		Pack(230, 296),
-		Pack(67, 392),
-		Pack(-43, 419)
-	];
-
+    [GeneratedPackArray(
+    [
+		"0, 0",
+		"-1, 200",
+		"-5, 310",
+		"-2, 345",
+		"0, 364",
+		"4, 379",
+		"6, 398",
+		"7, 411",
+		"11, 419",
+		"13, 424",
+		"15, 431",
+		"18, 435",
+		"21, 436",
+		"22, 442",
+		"23, 444",
+		"25, 447",
+		"26, 453",
+		"34, 444",
+		"41, 441",
+		"58, 427",
+		"62, 421",
+		"111, 390",
+		"119, 382",
+		"134, 362",
+		"218, 325",
+		"230, 296",
+		"67, 392",
+		"-43, 419"
+    ])]
+	public static readonly TaperedEvaluationTermByCount27? _QueenMobilityBonus;
 }
 
 #pragma warning restore IDE0055, IDE1006 // Discard formatting and naming styles
