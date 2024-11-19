@@ -76,27 +76,14 @@ public sealed partial class Engine
         // - Prune less aggressively when evaluation is low low: uncertainty on how bad the position really is
         bool improving = false;
 
-        // From Potential
-        double improvingRate = 0;
 
         bool isInCheck = position.IsInCheck();
         int staticEval = int.MaxValue;
         int phase = int.MaxValue;
 
-        if (isInCheck)
+        if (depth <= 0)
         {
-            ++depth;
-        }
-        else if (depth <= 0)
-        {
-            if (MoveGenerator.CanGenerateAtLeastAValidMove(position))
-            {
-                return QuiescenceSearch(ply, alpha, beta);
-            }
-
-            var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
-            _tt.RecordHash(position, finalPositionEvaluation, depth, ply, finalPositionEvaluation, NodeType.Exact);
-            return finalPositionEvaluation;
+            return 0;
         }
         else if (!pvNode)
         {
@@ -329,19 +316,4 @@ public sealed partial class Engine
         // Node fails low
         return bestScore;
     }
-
-    /// <summary>
-    /// Quiescence search implementation, NegaMax alpha-beta style, fail-soft
-    /// </summary>
-    /// <param name="ply"></param>
-    /// <param name="alpha">
-    /// Best score White can achieve, assuming best play by Black.
-    /// Defaults to the worse possible score for white, Int.MinValue.
-    /// </param>
-    /// <param name="beta">
-    /// Best score Black can achieve, assuming best play by White
-    /// Defaults to the works possible score for Black, Int.MaxValue
-    /// </param>
-    /// <returns></returns>
-    public int QuiescenceSearch(int ply, int alpha, int beta) => 0;
 }
