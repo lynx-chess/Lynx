@@ -19,8 +19,9 @@ public sealed class Searcher
         _engineWriter = engineWriter;
 
         _tt = new TranspositionTable();
-        _logger = LogManager.GetCurrentClassLogger();
         Engine = new Engine(_engineWriter, _tt);
+
+        _logger = LogManager.GetCurrentClassLogger();
     }
 
     public Engine Engine { get; }
@@ -57,7 +58,6 @@ public sealed class Searcher
     private void OnGoCommand(GoCommand goCommand)
     {
         var searchConstraints = TimeManager.CalculateTimeManagement(Engine.Game, goCommand);
-
         var searchResult = Engine.Search(goCommand, searchConstraints);
 
         if (searchResult is not null)
