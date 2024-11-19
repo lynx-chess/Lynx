@@ -165,28 +165,10 @@ public sealed partial class Engine
                 {
                     reduction = EvaluationConstants.LMRReductions[depth][visitedMovesCounter];
 
-                    if (pvNode)
-                    {
-                        --reduction;
-                    }
-
-                    if (position.IsInCheck())   // i.e. move gives check
-                    {
-                        --reduction;
-                    }
-
                     if (!improving)
                     {
                         ++reduction;
                     }
-
-                    if (0 != default && isCapture)
-                    {
-                        ++reduction;
-                    }
-
-                    // -= history/(maxHistory/2)
-                    reduction -= 2 * _quietHistory[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.History_MaxMoveValue;
 
                     // Don't allow LMR to drop into qsearch or increase the depth
                     // depth - 1 - depth +2 = 1, min depth we want
