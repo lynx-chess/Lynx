@@ -20,7 +20,7 @@
     <!--In favour of tiered compilation-->
     <PublishReadyToRun>false</PublishReadyToRun>
 
-    <ServerGarbageCollection>true</ServerGarbageCollection>
+    <ServerGarbageCollection>false</ServerGarbageCollection>
     <GarbageCollectionAdaptationMode>0</GarbageCollectionAdaptationMode>
 
     <!--https://learn.microsoft.com/en-us/dotnet/core/compatibility/interop/9.0/cet-support-->
