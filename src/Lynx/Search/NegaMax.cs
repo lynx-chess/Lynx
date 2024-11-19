@@ -305,28 +305,6 @@ public sealed partial class Engine
                 {
                     PrintMessage($"Pruning: {move} is enough");
 
-                    var historyDepth = depth;
-
-                    if (staticEval <= alpha)
-                    {
-                        ++historyDepth;
-                    }
-
-                    // Suggestion by Sirius author
-                    if (bestScore >= beta + Configuration.EngineSettings.History_BestScoreBetaMargin)
-                    {
-                        ++historyDepth;
-                    }
-
-                    if (isCapture)
-                    {
-                        UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(historyDepth, visitedMoves, visitedMovesCounter, move);
-                    }
-                    else
-                    {
-                        UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(historyDepth, ply, visitedMoves, visitedMovesCounter, move, isRoot);
-                    }
-
                     _tt.RecordHash(position, staticEval, depth, ply, bestScore, NodeType.Beta, bestMove);
 
                     return bestScore;
