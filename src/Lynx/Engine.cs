@@ -120,17 +120,15 @@ public sealed partial class Engine
 
     private void ResetEngine()
     {
-        AllocateTT();
-
-        //if (_currentTranspositionTableSize == Configuration.EngineSettings.TranspositionTableSize)
-        //{
-        //    Array.Clear(_tt);
-        //}
-        //else
-        //{
-        //    _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _currentTranspositionTableSize, Configuration.EngineSettings.TranspositionTableSize);
-        //    AllocateTT();
-        //}
+        if (_currentTranspositionTableSize == Configuration.EngineSettings.TranspositionTableSize)
+        {
+            Array.Clear(_tt);
+        }
+        else
+        {
+            _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _currentTranspositionTableSize, Configuration.EngineSettings.TranspositionTableSize);
+            AllocateTT();
+        }
 
         // Clear histories
         for (int i = 0; i < 12; ++i)
