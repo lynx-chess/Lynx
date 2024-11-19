@@ -2,8 +2,6 @@
 
   <PropertyGroup>
     <IsPackable>false</IsPackable>
-    <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
-    <InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);Microsoft.Extensions.Configuration.Binder.SourceGeneration</InterceptorsPreviewNamespaces>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,23 +13,26 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.11.0" PrivateAssets="all" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
-    <PackageReference Include="Moq" Version="4.18.4" />
     <PackageReference Include="NUnit" Version="4.2.2" />
-    <!--<PackageReference Include="NUnit.Analyzers" Version="4.3.0" />-->
+    <PackageReference Include="NUnit.Analyzers" Version="4.4.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
+    <PackageReference Include="Verify.NUnit" Version="28.3.1" />
+    <PackageReference Include="Verify.SourceGenerators" Version="2.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Lynx.Generator\Lynx.Generator.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Using Include="NUnit.Framework.Legacy.ClassicAssert" Alias="Assert"/>
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Lynx.Cli\Lynx.Cli.csproj" />
-  </ItemGroup>
-
   <PropertyGroup>
-    <NoWarn>$(NoWarn),CA1861,CS0618</NoWarn>
+    <NoWarn>$(NoWarn),NUnit2005</NoWarn>
   </PropertyGroup>
 
 </Project>

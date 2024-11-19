@@ -261,7 +261,7 @@ public sealed class Game : IDisposable
 
     public void FreeResources()
     {
-        ArrayPool<PlyStackEntry>.Shared.Return(_gameStack);
+        ArrayPool<PlyStackEntry>.Shared.Return(_gameStack, clearArray: true);
         ArrayPool<ulong>.Shared.Return(_positionHashHistory);
 
         CurrentPosition.FreeResources();
