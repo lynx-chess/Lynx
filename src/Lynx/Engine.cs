@@ -78,7 +78,7 @@ public sealed partial class Engine
 #if !DEBUG
         // Temporary channel so that no output is generated
         _engineWriter = Channel.CreateUnbounded<object>(new UnboundedChannelOptions() { SingleReader = true, SingleWriter = false }).Writer;
-        WarmupEngine();
+        //WarmupEngine();
 
         _engineWriter = engineWriter;
 
@@ -120,15 +120,17 @@ public sealed partial class Engine
 
     private void ResetEngine()
     {
-        if (_currentTranspositionTableSize == Configuration.EngineSettings.TranspositionTableSize)
-        {
-            Array.Clear(_tt);
-        }
-        else
-        {
-            _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _currentTranspositionTableSize, Configuration.EngineSettings.TranspositionTableSize);
-            AllocateTT();
-        }
+        AllocateTT();
+
+        //if (_currentTranspositionTableSize == Configuration.EngineSettings.TranspositionTableSize)
+        //{
+        //    Array.Clear(_tt);
+        //}
+        //else
+        //{
+        //    _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _currentTranspositionTableSize, Configuration.EngineSettings.TranspositionTableSize);
+        //    AllocateTT();
+        //}
 
         // Clear histories
         for (int i = 0; i < 12; ++i)

@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using Lynx.Model;
+using System.Diagnostics;
 
 namespace Lynx;
 
@@ -104,6 +105,7 @@ public partial class Engine
     /// </summary>
     public (ulong TotalNodes, ulong Nps) Bench(int depth)
     {
+        _logger.Info("Occupation: {0}", _tt.PopulatedItemsCount());
         var stopwatch = new Stopwatch();
 
         ulong totalNodes = 0;

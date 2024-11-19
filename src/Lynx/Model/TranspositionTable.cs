@@ -126,33 +126,7 @@ public static class TranspositionTableExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static (int Score, ShortMove BestMove, NodeType NodeType, int RawScore, int StaticEval) ProbeHash(this TranspositionTable tt, Position position, int depth, int ply, int alpha, int beta)
     {
-        var ttIndex = CalculateTTIndex(position.UniqueIdentifier, tt.Length);
-        ref var entry = ref tt[ttIndex];
-
-        if ((ushort)position.UniqueIdentifier != entry.Key)
-        {
-            return (EvaluationConstants.NoHashEntry, default, default, default, default);
-        }
-
-        var type = entry.Type;
-        var rawScore = entry.Score;
-        var score = EvaluationConstants.NoHashEntry;
-
-        if (entry.Depth >= depth)
-        {
-            var recalculatedScore = RecalculateMateScores(rawScore, ply);
-
-            if (type == NodeType.Exact
-                || (type == NodeType.Alpha && recalculatedScore <= alpha)
-                || (type == NodeType.Beta && recalculatedScore >= beta))
-            {
-                // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
-                // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
-                score = recalculatedScore;
-            }
-        }
-
-        return (score, entry.Move, entry.Type, rawScore, entry.StaticEval);
+        return (EvaluationConstants.NoHashEntry, default, default, default, default);
     }
 
     /// <summary>
@@ -168,30 +142,7 @@ public static class TranspositionTableExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void RecordHash(this TranspositionTable tt, Position position, int staticEval, int depth, int ply, int score, NodeType nodeType, Move? move = null)
     {
-        var ttIndex = CalculateTTIndex(position.UniqueIdentifier, tt.Length);
-        ref var entry = ref tt[ttIndex];
-
-        //if (entry.Key != default && entry.Key != position.UniqueIdentifier)
-        //{
-        //    _logger.Warn("TT collision");
-        //}
-
-        bool shouldReplace =
-            entry.Key == 0                                      // No actual entry
-            || (position.UniqueIdentifier >> 48) != entry.Key   // Different key: collision
-            || nodeType == NodeType.Exact                       // Entering PV data
-            || depth >= entry.Depth;                            // Higher depth
-
-        if (!shouldReplace)
-        {
-            return;
-        }
-
-        // We want to store the distance to the checkmate position relative to the current node, independently from the root
-        // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
-        var recalculatedScore = RecalculateMateScores(score, -ply);
-
-        entry.Update(position.UniqueIdentifier, recalculatedScore, staticEval, depth, nodeType, move);
+        return;
     }
 
     /// <summary>
