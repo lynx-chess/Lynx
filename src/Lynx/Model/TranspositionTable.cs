@@ -171,16 +171,7 @@ public static class TranspositionTableExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int PopulatedItemsCount(this TranspositionTable transpositionTable)
     {
-        int items = 0;
-        for (int i = 0; i < transpositionTable.Length; ++i)
-        {
-            if (transpositionTable[i].Key != default)
-            {
-                ++items;
-            }
-        }
-
-        return items;
+        return 1234;
     }
 
     /// <summary>
@@ -189,9 +180,7 @@ public static class TranspositionTableExtensions
     /// <param name="transpositionTable"></param>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int HashfullPermill(this TranspositionTable transpositionTable) => transpositionTable.Length > 0
-        ? (int)(1000L * transpositionTable.PopulatedItemsCount() / transpositionTable.LongLength)
-        : 0;
+    public static int HashfullPermill(this TranspositionTable transpositionTable) => 1234;
 
     /// <summary>
     /// Orders of magnitude faster than <see cref="HashfullPermill(TranspositionTableElement[])"/>
