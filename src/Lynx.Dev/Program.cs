@@ -49,7 +49,7 @@ using static Lynx.TunableEvalParameters;
 //FileAndRankMasks();
 //EnhancedPawnEvaluation();
 //RookEvaluation();
-//TranspositionTable();
+//TranspositionTableMethod();
 //UnmakeMove();
 //PieceSquareTables();
 //NewMasks();
@@ -1045,12 +1045,12 @@ static void RookEvaluation()
     Console.WriteLine(eval);
 }
 
-static void TranspositionTable()
+static void TranspositionTableMethod()
 {
     static void TesSize(int size)
     {
         Console.WriteLine("Hash: {0} MB", size);
-        var length = Lynx.Model.TranspositionTable.CalculateLength(size);
+        var length = TranspositionTable.CalculateLength(size);
 
         var lengthMb = length / 1024 / 1024;
 
@@ -1071,7 +1071,7 @@ static void TranspositionTable()
     TesSize(512);
     TesSize(1024);
 
-    var ttLength = Lynx.Model.TranspositionTable.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
+    var ttLength = TranspositionTable.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
     var transpositionTable = new TranspositionTable();
 
     var position = new Position(Constants.InitialPositionFEN);
