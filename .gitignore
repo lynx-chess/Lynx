@@ -377,3 +377,10 @@ tmp/
 
 # EPD files
 *.epd
+
+# Verify exclusions
+**/Snapshots/*.g.received.cs
+
+# Exclude all source generators output but ours
+**/Generated/*
+!**/Generated/Lynx.Generator/

@@ -36,10 +36,7 @@ public static class Utils
     /// </summary>
     /// <param name="isWhite"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int PieceOffset(bool isWhite)
-    {
-        return 6 - (6 * Unsafe.As<bool, byte>(ref isWhite));
-    }
+    public static int PieceOffset(bool isWhite) => isWhite ? 0 : 6;
 
     /// <summary>
     /// Side.Black -> Side.White

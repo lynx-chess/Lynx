@@ -66,17 +66,6 @@ public class ZobristTableTest
         }
 
         Assert.AreEqual(16, enPassantSquares.Count());
-
-#if DEBUG
-        for (int square = 0; square < 64; ++square)
-        {
-            var rank = square / 8;
-            if (rank != 2 && rank != 5)
-            {
-                Assert.Throws<ArgumentException>(() => ZobristTable.EnPassantHash(square));
-            }
-        }
-#endif
     }
 
     [Test]

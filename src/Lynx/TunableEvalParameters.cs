@@ -1,6 +1,7 @@
 ﻿// 2024-9-19 13:24:58  6
 
 using static Lynx.Utils;
+using Lynx.Generator;
 
 namespace Lynx;
 
@@ -6011,29 +6012,42 @@ internal static partial class TunableEvalParameters
 	];
 }
 
-public static class EvaluationParams
+public static partial class EvaluationParams
 {
-	public static readonly TaperedEvaluationTerm IsolatedPawnPenalty = Pack(-17, -14);
+#pragma warning disable IDE0051, IDE0052, CS0169 // Remove unread private members
 
-	public static readonly TaperedEvaluationTerm OpenFileRookBonus = Pack(40, 2);
+    [GeneratedPack(-17, -14)]
+    private static readonly int _IsolatedPawnPenalty;
 
-	public static readonly TaperedEvaluationTerm SemiOpenFileRookBonus = Pack(15, 8);
+    [GeneratedPack(40, 2)]
+    private static readonly int _OpenFileRookBonus;
 
-	public static readonly TaperedEvaluationTerm SemiOpenFileKingPenalty = Pack(-24, 5);
+	[GeneratedPack(15, 8)]
+	private static readonly int _SemiOpenFileRookBonus;
 
-	public static readonly TaperedEvaluationTerm OpenFileKingPenalty = Pack(-65, 2);
+	[GeneratedPack(-24, 5)]
+	private static readonly int _SemiOpenFileKingPenalty;
 
-	public static readonly TaperedEvaluationTerm KingShieldBonus = Pack(23, -3);
+    [GeneratedPack(-65, 2)]
+    private static readonly int _OpenFileKingPenalty;
 
-	public static readonly TaperedEvaluationTerm BishopPairBonus = Pack(30, 72);
+    [GeneratedPack(23, -3)]
+    private static readonly int _KingShieldBonus;
 
-	public static readonly TaperedEvaluationTerm PieceProtectedByPawnBonus = Pack(12, 15);
+    [GeneratedPack(30, 72)]
+    private static readonly int _BishopPairBonus;
 
-	public static readonly TaperedEvaluationTerm PieceAttackedByPawnPenalty = Pack(-47, -33);
+    [GeneratedPack(12, 15)]
+    private static readonly int _PieceProtectedByPawnBonus;
 
-	public static readonly TaperedEvaluationTermByRank PawnPhalanxBonus =
+    [GeneratedPack(-47, -33)]
+    private static readonly int _PieceAttackedByPawnPenalty;
+
+#pragma warning restore IDE0051, IDE0052, CS0169 // Remove unread private members
+
+    public static readonly TaperedEvaluationTermByRank PawnPhalanxBonus =
 	[
-		Pack(0, 0),
+        Pack(0, 0),
 		Pack(1, 2),
 		Pack(10, 10),
 		Pack(22, 24),
