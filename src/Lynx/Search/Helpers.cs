@@ -11,21 +11,7 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void PrefetchTTEntry()
     {
-        if (Sse.IsSupported)
-        {
-            var index = TranspositionTableExtensions.CalculateTTIndex(Game.CurrentPosition.UniqueIdentifier, _tt.Length);
-
-            unsafe
-            {
-                // Since _tt is a pinned array
-                // This is no-op pinning as it does not influence the GC compaction
-                // https://tooslowexception.com/pinned-object-heap-in-net-5/
-                fixed (TranspositionTableElement* ttPtr = _tt)
-                {
-                    Sse.Prefetch0(ttPtr + index);
-                }
-            }
-        }
+        return;
     }
 
 #pragma warning disable RCS1226 // Add paragraph to documentation comment
