@@ -213,46 +213,6 @@ public sealed partial class Engine
             }
             else
             {
-                // If we prune while getting checmated, we risk not finding any move and having an empty PV
-                bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
-
-                // Fail-low pruning (moves with low scores) - prune less when improving
-                if (!pvNode && !isInCheck && isNotGettingCheckmated
-                    && moveScores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue) // Quiet move
-                {
-                    // 🔍 Late Move Pruning (LMP) - all quiet moves can be pruned
-                    // after searching the first few given by the move ordering algorithm
-                    if (depth <= Configuration.EngineSettings.LMP_MaxDepth
-                        && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth * (improving ? 2 : 1))) // Based on formula suggested by Antares
-                    {
-                        RevertMove();
-                        break;
-                    }
-
-                    // 🔍 History pruning -  all quiet moves can be pruned
-                    // once we find one with a history score too low
-                    if (!isCapture
-                        && moveScores[moveIndex] < EvaluationConstants.CounterMoveValue
-                        && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth    // TODO use LMR depth
-                        && _quietHistory[move.Piece()][move.TargetSquare()] < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
-                    {
-                        RevertMove();
-                        break;
-                    }
-
-                    // 🔍 Futility Pruning (FP) - all quiet moves can be pruned
-                    // once it's considered that they don't have potential to raise alpha
-                    if (visitedMovesCounter > 0
-                        //&& alpha < EvaluationConstants.PositiveCheckmateDetectionLimit
-                        //&& beta > EvaluationConstants.NegativeCheckmateDetectionLimit
-                        && depth <= Configuration.EngineSettings.FP_MaxDepth
-                        && staticEval + Configuration.EngineSettings.FP_Margin + (Configuration.EngineSettings.FP_DepthScalingFactor * depth) <= alpha)
-                    {
-                        RevertMove();
-                        break;
-                    }
-                }
-
                 PrefetchTTEntry();
 
                 int reduction = 0;
