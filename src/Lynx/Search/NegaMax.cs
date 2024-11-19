@@ -37,34 +37,7 @@ public sealed partial class Engine
         var nextPvIndex = PVTable.Indexes[ply + 1];
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
-        bool isRoot = ply == 0;
         bool pvNode = beta - alpha > 1;
-        ShortMove ttBestMove = default;
-        NodeType ttElementType = default;
-        int ttScore = default;
-        int ttRawScore = default;
-        int ttStaticEval = int.MinValue;
-
-        if (!isRoot)
-        {
-            (ttScore, ttBestMove, ttElementType, ttRawScore, ttStaticEval) = _tt.ProbeHash(position, depth, ply, alpha, beta);
-
-            // TT cutoffs
-            if (!pvNode && ttScore != EvaluationConstants.NoHashEntry)
-            {
-                return ttScore;
-            }
-
-            // Internal iterative reduction (IIR)
-            // If this position isn't found in TT, it has never been searched before,
-            // so the search will be potentially expensive.
-            // Therefore, we search with reduced depth for now, expecting to record a TT move
-            // which we'll be able to use later for the full depth search
-            if (ttElementType == default && depth >= Configuration.EngineSettings.IIR_MinDepth)
-            {
-                --depth;
-            }
-        }
 
         // Before any time-consuming operations
         _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
@@ -87,17 +60,7 @@ public sealed partial class Engine
         }
         else if (!pvNode)
         {
-            if (ttElementType == default)
-            {
                 (staticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
-            }
-            else
-            {
-                Debug.Assert(ttStaticEval != int.MinValue);
-
-                staticEval = ttStaticEval;
-                phase = position.Phase();
-            }
 
             Game.UpdateStaticEvalInStack(ply, staticEval);
 
@@ -105,16 +68,6 @@ public sealed partial class Engine
             {
                 var evalDiff = staticEval - Game.ReadStaticEvalFromStack(ply - 2);
                 improving = evalDiff >= 0;
-            }
-
-            // From smol.cs
-            // ttEvaluation can be used as a better positional evaluation:
-            // If the score is outside what the current bounds are, but it did match flag and depth,
-            // then we can trust that this score is more accurate than the current static evaluation,
-            // and we can update our static evaluation for better accuracy in pruning
-            if (ttElementType != default && ttElementType != (ttRawScore > staticEval ? NodeType.Alpha : NodeType.Beta))
-            {
-                staticEval = ttRawScore;
             }
         }
 
@@ -125,7 +78,7 @@ public sealed partial class Engine
 
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            moveScores[i] = ScoreMove(pseudoLegalMoves[i], ply, isNotQSearch: true, ttBestMove);
+            moveScores[i] = ScoreMove(pseudoLegalMoves[i], ply, isNotQSearch: true, 0);
         }
 
         var nodeType = NodeType.Alpha;
@@ -227,7 +180,7 @@ public sealed partial class Engine
                         ++reduction;
                     }
 
-                    if (ttBestMove != default && isCapture)
+                    if (0 != default && isCapture)
                     {
                         ++reduction;
                     }
