@@ -190,17 +190,7 @@ public static class TranspositionTableExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int HashfullPermillApprox(this TranspositionTable transpositionTable)
     {
-        int items = 0;
-        for (int i = 0; i < 1000; ++i)
-        {
-            if (transpositionTable[i].Key != default)
-            {
-                ++items;
-            }
-        }
-
-        //Console.WriteLine($"Real: {HashfullPermill(transpositionTable)}, estimated: {items}");
-        return items;
+        return 1234;
     }
 
     [Conditional("DEBUG")]
