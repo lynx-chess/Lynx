@@ -243,9 +243,6 @@ public sealed class Game : IDisposable
     public int UpdateStaticEvalInStack(int n, int value) => _gameStack[n].StaticEval = value;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ref PlyStackEntry GameStack(int n) => ref _gameStack[n];
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int PositionHashHistoryLength() => _positionHashHistoryPointer;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -261,7 +258,7 @@ public sealed class Game : IDisposable
 
     public void FreeResources()
     {
-        ArrayPool<PlyStackEntry>.Shared.Return(_gameStack);
+        ArrayPool<PlyStackEntry>.Shared.Return(_gameStack, clearArray: true);
         ArrayPool<ulong>.Shared.Return(_positionHashHistory);
 
         CurrentPosition.FreeResources();
