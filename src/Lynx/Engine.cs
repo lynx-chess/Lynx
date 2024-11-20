@@ -1,5 +1,4 @@
 ﻿using Lynx.Model;
-using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
 using System.Diagnostics;
@@ -14,6 +13,9 @@ public sealed partial class Engine
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
     private readonly ChannelWriter<object> _engineWriter;
+
+    private readonly TranspositionTable _ttWrapper;
+    private TranspositionTableElement[] TT { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _ttWrapper.TT; }
 
     private bool _isSearching;
 
@@ -48,6 +50,8 @@ public sealed partial class Engine
     private CancellationTokenSource _searchCancellationTokenSource;
     private CancellationTokenSource _absoluteSearchCancellationTokenSource;
 
+    public Engine(ChannelWriter<object> engineWriter) :this(engineWriter, new()) { }
+
     public Engine(ChannelWriter<object> engineWriter, TranspositionTable tt)
     {
         AverageDepth = 0;
@@ -71,7 +75,7 @@ public sealed partial class Engine
             _killerMoves[i] = new Move[3];
         }
 
-        _tt = tt;
+        _ttWrapper = tt;
 
 #if !DEBUG
         // Temporary channel so that no output is generated
@@ -89,13 +93,6 @@ public sealed partial class Engine
 #pragma warning restore S1215 // "GC.Collect" should not be called
     }
 
-    private void AllocateTT()
-    {
-        _currentTranspositionTableSize = Configuration.EngineSettings.TranspositionTableSize;
-
-        var ttLength = TranspositionTableExtensions.CalculateLength(_currentTranspositionTableSize);
-        _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
-    }
 
 #pragma warning disable S1144 // Unused private types or members should be removed - used in Release mode
     private void WarmupEngine()
@@ -122,15 +119,7 @@ public sealed partial class Engine
 
     private void ResetEngine()
     {
-        if (_currentTranspositionTableSize == Configuration.EngineSettings.TranspositionTableSize)
-        {
-            Array.Clear(_tt);
-        }
-        else
-        {
-            _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _currentTranspositionTableSize, Configuration.EngineSettings.TranspositionTableSize);
-            AllocateTT();
-        }
+        _ttWrapper.Reset();
 
         // Clear histories
         for (int i = 0; i < 12; ++i)

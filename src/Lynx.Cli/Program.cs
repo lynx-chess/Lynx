@@ -33,8 +33,7 @@ var engineChannel = Channel.CreateBounded<object>(new BoundedChannelOptions(2 * 
 using CancellationTokenSource source = new();
 CancellationToken cancellationToken = source.Token;
 
-var ttLength = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
-var tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
+var tt = new TranspositionTable();
 
 var engine = new Engine(engineChannel, tt);
 var uciHandler = new UCIHandler(uciChannel, engineChannel, engine);
