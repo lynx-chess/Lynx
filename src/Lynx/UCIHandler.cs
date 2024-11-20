@@ -562,7 +562,7 @@ public sealed class UCIHandler
 
         if (items.Length >= 2 && int.TryParse(items[1], out int depth) && depth >= 1)
         {
-            Perft.RunPerft(_engine.CurrentPosition, depth, str => _engineToUci.Writer.TryWrite(str));
+            Perft.RunPerft(_engine.Game.CurrentPosition, depth, str => _engineToUci.Writer.TryWrite(str));
         }
     }
 
@@ -572,7 +572,7 @@ public sealed class UCIHandler
 
         if (items.Length >= 2 && int.TryParse(items[1], out int depth) && depth >= 1)
         {
-            Perft.RunDivide(_engine.CurrentPosition, depth, str => _engineToUci.Writer.TryWrite(str));
+            Perft.RunDivide(_engine.Game.CurrentPosition, depth, str => _engineToUci.Writer.TryWrite(str));
         }
     }
 
