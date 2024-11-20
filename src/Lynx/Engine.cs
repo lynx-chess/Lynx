@@ -37,8 +37,6 @@ public sealed partial class Engine
     private bool _isNewGameComing;
 #pragma warning restore IDE0052, CS0414 // Remove unread private members
 
-    private Move? _moveToPonder;
-
     public double AverageDepth { get; private set; }
 
     public RegisterCommand? Registration { get; set; }
@@ -106,10 +104,14 @@ public sealed partial class Engine
         var sw = Stopwatch.StartNew();
 
         InitializeStaticClasses();
+
         const string goWarmupCommand = "go depth 10";   // ~300 ms
+        var command = new GoCommand(goWarmupCommand);
 
         AdjustPosition(Constants.SuperLongPositionCommand);
-        BestMove(new(goWarmupCommand));
+
+        var searchConstrains = TimeManager.CalculateTimeManagement(Game, command);
+        BestMove(command, in searchConstrains);
 
         Bench(2);
 
@@ -182,89 +184,33 @@ public sealed partial class Engine
         StopSearching();
     }
 
+    /// <summary>
+    /// Uses <see cref="TimeManager.CalculateTimeManagement(Game, GoCommand)"/> internally
+    /// </summary>
+    /// <param name="goCommand"></param>
+    /// <returns></returns>
     public SearchResult BestMove(GoCommand goCommand)
     {
-        bool isPondering = goCommand.Ponder;
+        var searchConstraints = TimeManager.CalculateTimeManagement(Game, goCommand);
 
+        return BestMove(goCommand, in searchConstraints);
+    }
+
+    public SearchResult BestMove(GoCommand goCommand, in SearchConstraints searchConstrains)
+    {
         _searchCancellationTokenSource = new();
         _absoluteSearchCancellationTokenSource = new();
 
-        int maxDepth = -1;
-        int hardLimitTimeBound;
-        int softLimitTimeBound = int.MaxValue;
-
-        double millisecondsLeft;
-        int millisecondsIncrement;
-        if (Game.CurrentPosition.Side == Side.White)
+        if (searchConstrains.HardLimitTimeBound != SearchConstraints.DefaultHardLimitTimeBound)
         {
-            millisecondsLeft = goCommand.WhiteTime;
-            millisecondsIncrement = goCommand.WhiteIncrement;
-        }
-        else
-        {
-            millisecondsLeft = goCommand.BlackTime;
-            millisecondsIncrement = goCommand.BlackIncrement;
+            _searchCancellationTokenSource.CancelAfter(searchConstrains.HardLimitTimeBound);
         }
 
-        // Inspired by Alexandria: time overhead to avoid timing out in the engine-gui communication process
-        const int engineGuiCommunicationTimeOverhead = 50;
-
-        if (!isPondering)
-        {
-            if (goCommand.WhiteTime != 0 || goCommand.BlackTime != 0)  // Cutechess sometimes sends negative wtime/btime
-            {
-                const int minSearchTime = 50;
-
-                var movesDivisor = goCommand.MovesToGo == 0
-                    ? ExpectedMovesLeft(Game.PositionHashHistoryLength()) * 3 / 2
-                    : goCommand.MovesToGo;
-
-                millisecondsLeft -= engineGuiCommunicationTimeOverhead;
-                millisecondsLeft = Math.Clamp(millisecondsLeft, minSearchTime, int.MaxValue); // Avoiding 0/negative values
-
-                hardLimitTimeBound = (int)(millisecondsLeft * Configuration.EngineSettings.HardTimeBoundMultiplier);
-
-                var softLimitBase = (millisecondsLeft / movesDivisor) + (millisecondsIncrement * Configuration.EngineSettings.SoftTimeBaseIncrementMultiplier);
-                softLimitTimeBound = Math.Min(hardLimitTimeBound, (int)(softLimitBase * Configuration.EngineSettings.SoftTimeBoundMultiplier));
-
-                _logger.Info("Soft time bound: {0}s", 0.001 * softLimitTimeBound);
-                _logger.Info("Hard time bound: {0}s", 0.001 * hardLimitTimeBound);
-
-                _searchCancellationTokenSource.CancelAfter(hardLimitTimeBound);
-            }
-            else if (goCommand.MoveTime > 0)
-            {
-                softLimitTimeBound = hardLimitTimeBound = goCommand.MoveTime - engineGuiCommunicationTimeOverhead;
-                _logger.Info("Time to move: {0}s", 0.001 * hardLimitTimeBound);
-
-                _searchCancellationTokenSource.CancelAfter(hardLimitTimeBound);
-            }
-            else if (goCommand.Depth > 0)
-            {
-                maxDepth = goCommand.Depth > Constants.AbsoluteMaxDepth ? Constants.AbsoluteMaxDepth : goCommand.Depth;
-            }
-            else if (goCommand.Infinite)
-            {
-                maxDepth = Configuration.EngineSettings.MaxDepth;
-                _logger.Info("Infinite search (depth {0})", maxDepth);
-            }
-            else
-            {
-                maxDepth = DefaultMaxDepth;
-                _logger.Warn("Unexpected or unsupported go command");
-            }
-        }
-        else
-        {
-            maxDepth = Configuration.EngineSettings.MaxDepth;
-            _logger.Info("Pondering search (depth {0})", maxDepth);
-        }
-
-        SearchResult resultToReturn = IDDFS(maxDepth, softLimitTimeBound);
+        SearchResult resultToReturn = IDDFS(searchConstrains.MaxDepth, searchConstrains.SoftLimitTimeBound);
         //SearchResult resultToReturn = await SearchBestMove(maxDepth, decisionTime);
 
         Game.ResetCurrentPositionToBeforeSearchState();
-        if (!isPondering
+        if (!goCommand.Ponder
             && resultToReturn.BestMove != default
             && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
         {
@@ -275,21 +221,6 @@ public sealed partial class Engine
         AverageDepth += (resultToReturn.Depth - AverageDepth) / Math.Ceiling(0.5 * Game.PositionHashHistoryLength());
 
         return resultToReturn;
-    }
-
-    /// <summary>
-    /// Straight from expositor's author paper, https://expositor.dev/pdf/movetime.pdf
-    /// </summary>
-    /// <param name="plies_played"></param>
-    /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int ExpectedMovesLeft(int plies_played)
-    {
-        double p = (double)(plies_played);
-
-        return (int)Math.Round(
-            (59.3 + ((72830.0 - (p * 2330.0)) / ((p * p) + (p * 10.0) + 2644.0)))   // Plies remaining
-            / 2.0); // Full moves remaining
     }
 
 #pragma warning disable S1144 // Unused private types or members should be removed - wanna keep this around
@@ -336,7 +267,7 @@ public sealed partial class Engine
         return tbResult ?? searchResult!;
     }
 
-    public void Search(GoCommand goCommand)
+    public SearchResult? Search(GoCommand goCommand, in SearchConstraints searchConstraints)
     {
         if (_isSearching)
         {
@@ -349,7 +280,7 @@ public sealed partial class Engine
         try
         {
             _isPondering = goCommand.Ponder;
-            var searchResult = BestMove(goCommand);
+            var searchResult = BestMove(goCommand, in searchConstraints);
 
             if (_isPondering)
             {
@@ -367,17 +298,16 @@ public sealed partial class Engine
                     _isPondering = false;
                     goCommand.DisablePonder();
 
-                    searchResult = BestMove(goCommand);
+                    searchResult = BestMove(goCommand, in searchConstraints);
                 }
             }
 
-            // We print best move even in case of go ponder + stop, and IDEs are expected to ignore it
-            _moveToPonder = searchResult.Moves.Length >= 2 ? searchResult.Moves[1] : null;
-            _engineWriter.TryWrite(new BestMoveCommand(searchResult.BestMove, _moveToPonder));
+            return searchResult;
         }
         catch (Exception e)
         {
             _logger.Fatal(e, "Error in {0} while calculating BestMove", nameof(Search));
+            return null;
         }
         finally
         {

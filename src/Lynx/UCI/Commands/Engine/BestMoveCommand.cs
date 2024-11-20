@@ -18,10 +18,12 @@ public sealed class BestMoveCommand : IEngineBaseCommand
     private readonly Move _move;
     private readonly Move? _moveToPonder;
 
-    public BestMoveCommand(Move move, Move? moveToPonder = null)
+    public BestMoveCommand(SearchResult searchResult)
     {
-        _move = move;
-        _moveToPonder = moveToPonder;
+        _move = searchResult.BestMove;
+
+        // We alwaus try to print ponder move, regardless of ponder on/off
+        _moveToPonder = searchResult.Moves.Length >= 2 ? searchResult.Moves[1] : null;
     }
 
     public override string ToString()
