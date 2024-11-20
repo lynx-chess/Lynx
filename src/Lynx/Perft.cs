@@ -10,35 +10,35 @@ namespace Lynx;
 /// </summary>
 public static class Perft
 {
-    public static (long Nodes, double ElapsedSeconds) Results(Position position, int depth)
+    public static void RunPerft(Position position, int depth, Action<string> write)
     {
         var sw = new Stopwatch();
         sw.Start();
-        var nodes = ResultsImpl(position, depth, 0);
+        var nodes = PerftRecursiveImpl(position, depth, 0);
         sw.Stop();
 
-        return (nodes, Utils.CalculateElapsedSeconds(sw));
+        PrintPerftResult(depth, nodes, Utils.CalculateElapsedSeconds(sw), write);
     }
 
-    public static (long Nodes, double ElapsedSeconds) Divide(Position position, int depth, Action<string> write)
+    public static void RunDivide(Position position, int depth, Action<string> write)
     {
         var sw = new Stopwatch();
         sw.Start();
-        var nodes = DivideImpl(position, depth, 0, write);
+        var nodes = DivideRecursiveImpl(position, depth, 0, write);
         sw.Stop();
 
-        return (nodes, Utils.CalculateElapsedSeconds(sw));
+        PrintPerftResult(depth, nodes, Utils.CalculateElapsedSeconds(sw), write);
     }
 
     /// <summary>
-    /// Proper implementation, used by <see cref="DivideImpl(Position, int, long)"/> as well
+    /// Proper implementation, used by <see cref="DivideRecursiveImpl(Position, int, long, Action{string})"/> as well
     /// </summary>
     /// <param name="position"></param>
     /// <param name="depth"></param>
     /// <param name="nodes"></param>
     /// <returns></returns>
     [SkipLocalsInit]
-    internal static long ResultsImpl(Position position, int depth, long nodes)
+    internal static long PerftRecursiveImpl(Position position, int depth, long nodes)
     {
         if (depth != 0)
         {
@@ -49,7 +49,7 @@ public static class Perft
 
                 if (position.WasProduceByAValidMove())
                 {
-                    nodes = ResultsImpl(position, depth - 1, nodes);
+                    nodes = PerftRecursiveImpl(position, depth - 1, nodes);
                 }
                 position.UnmakeMove(move, state);
             }
@@ -61,7 +61,7 @@ public static class Perft
     }
 
     [SkipLocalsInit]
-    private static long DivideImpl(Position position, int depth, long nodes, Action<string> write)
+    private static long DivideRecursiveImpl(Position position, int depth, long nodes, Action<string> write)
     {
         if (depth != 0)
         {
@@ -73,7 +73,7 @@ public static class Perft
                 if (position.WasProduceByAValidMove())
                 {
                     var accumulatedNodes = nodes;
-                    nodes = ResultsImpl(position, depth - 1, nodes);
+                    nodes = PerftRecursiveImpl(position, depth - 1, nodes);
 
                     write($"{move.UCIString()}\t\t{nodes - accumulatedNodes}");
                 }
@@ -89,26 +89,15 @@ public static class Perft
         return nodes + 1;
     }
 
-    public static void PrintPerftResult(int depth, (long Nodes, double ElapsedSeconds) peftResult, Action<string> write)
+    private static void PrintPerftResult(int depth, long nodes, double elapsedSeconds, Action<string> write)
     {
-        var timeStr = TimeToString(peftResult.ElapsedSeconds * 1_000);
+        var timeStr = TimeToString(elapsedSeconds * 1_000);
 
         write(
             $"Depth:\t{depth}" + Environment.NewLine +
-            $"Nodes:\t{peftResult.Nodes}" + Environment.NewLine +
+            $"Nodes:\t{nodes}" + Environment.NewLine +
             $"Time:\t{timeStr}" + Environment.NewLine +
-            $"nps:\t{peftResult.Nodes / (peftResult.ElapsedSeconds * 1_000_000):F} Mnps" + Environment.NewLine);
-    }
-
-    public static async ValueTask PrintPerftResult(int depth, (long Nodes, double ElapsedSeconds) peftResult, Func<string, ValueTask> write)
-    {
-        var timeStr = TimeToString(peftResult.ElapsedSeconds * 1_000);
-
-        await write(
-            $"Depth:\t{depth}" + Environment.NewLine +
-            $"Nodes:\t{peftResult.Nodes}" + Environment.NewLine +
-            $"Time:\t{timeStr}" + Environment.NewLine +
-            $"nps:\t{peftResult.Nodes / (peftResult.ElapsedSeconds * 1_000_000):F} Mnps" + Environment.NewLine);
+            $"nps:\t{nodes / (elapsedSeconds * 1_000_000):F} Mnps" + Environment.NewLine);
     }
 
     private static string TimeToString(double milliseconds)

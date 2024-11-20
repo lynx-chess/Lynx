@@ -82,10 +82,10 @@ public sealed class UCIHandler
                     HandleNewGame();
                     break;
                 case "perft":
-                    await HandlePerft(rawCommand);
+                    HandlePerft(rawCommand);
                     break;
                 case "divide":
-                    await HandleDivide(rawCommand);
+                    HandleDivide(rawCommand);
                     break;
                 case "bench":
                     await HandleBench(rawCommand);
@@ -556,25 +556,23 @@ public sealed class UCIHandler
 
     private void HandleRegister(ReadOnlySpan<char> rawCommand) => _engine.Registration = new RegisterCommand(rawCommand);
 
-    private async Task HandlePerft(string rawCommand)
+    private void HandlePerft(string rawCommand)
     {
         var items = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
         if (items.Length >= 2 && int.TryParse(items[1], out int depth) && depth >= 1)
         {
-            var results = Perft.Results(_engine.Game.CurrentPosition, depth);
-            await Perft.PrintPerftResult(depth, results, str => _engineToUci.Writer.WriteAsync(str));
+            Perft.RunPerft(_engine.CurrentPosition, depth, str => _engineToUci.Writer.TryWrite(str));
         }
     }
 
-    private async ValueTask HandleDivide(string rawCommand)
+    private void HandleDivide(string rawCommand)
     {
         var items = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
         if (items.Length >= 2 && int.TryParse(items[1], out int depth) && depth >= 1)
         {
-            var results = Perft.Divide(_engine.Game.CurrentPosition, depth, str => _engineToUci.Writer.TryWrite(str));
-            await Perft.PrintPerftResult(depth, results, str => _engineToUci.Writer.WriteAsync(str));
+            Perft.RunDivide(_engine.CurrentPosition, depth, str => _engineToUci.Writer.TryWrite(str));
         }
     }
 
