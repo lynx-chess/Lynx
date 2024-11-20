@@ -24,14 +24,14 @@ public static class Perft
     {
         var sw = new Stopwatch();
         sw.Start();
-        var nodes = DivideRecursiveImpl(position, depth, 0, write);
+        var nodes = DivideImpl(position, depth, 0, write);
         sw.Stop();
 
         PrintPerftResult(depth, nodes, Utils.CalculateElapsedSeconds(sw), write);
     }
 
     /// <summary>
-    /// Proper implementation, used by <see cref="DivideRecursiveImpl(Position, int, long, Action{string})"/> as well
+    /// Proper implementation, used by <see cref="DivideImpl(Position, int, long, Action{string})"/> as well
     /// </summary>
     /// <param name="position"></param>
     /// <param name="depth"></param>
@@ -61,7 +61,7 @@ public static class Perft
     }
 
     [SkipLocalsInit]
-    private static long DivideRecursiveImpl(Position position, int depth, long nodes, Action<string> write)
+    private static long DivideImpl(Position position, int depth, long nodes, Action<string> write)
     {
         if (depth != 0)
         {
