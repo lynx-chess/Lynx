@@ -878,6 +878,26 @@ public class Position : IDisposable
             | (Kings & Attacks.KingAttacks[square]);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ulong AllSideAttackersTo(int square, int side)
+    {
+        Debug.Assert(square != (int)BoardSquare.noSquare);
+        Debug.Assert(side != (int)Side.Both);
+
+        var offset = Utils.PieceOffset(side);
+
+        var occupancy = OccupancyBitBoards[(int)Side.Both];
+
+        var queens = PieceBitBoards[(int)Piece.q - offset];
+        var rooks = queens | PieceBitBoards[(int)Piece.r - offset];
+        var bishops = queens | PieceBitBoards[(int)Piece.b - offset];
+
+        return (rooks & Attacks.RookAttacks(square, occupancy))
+            | (bishops & Attacks.BishopAttacks(square, occupancy))
+            | (PieceBitBoards[(int)Piece.p - offset] & Attacks.PawnAttacks[side][square])
+            | (PieceBitBoards[(int)Piece.n - offset] & Attacks.KnightAttacks[square]);
+    }
+
     /// <summary>
     /// Overload that has rooks and bishops precalculated for the position
     /// </summary>
