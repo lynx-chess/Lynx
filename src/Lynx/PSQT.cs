@@ -96,7 +96,6 @@ public static class EvaluationPSQTs
     /// <summary>
     /// [2][PSQTBucketCount][12][64]
     /// </summary>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int PSQT(int friendEnemy, int bucket, int piece, int square)
     {
@@ -109,7 +108,6 @@ public static class EvaluationPSQTs
     /// <summary>
     /// [2][PSQTBucketCount][12][64]
     /// </summary>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int PSQTIndex(int friendEnemy, int bucket, int piece, int square)
     {

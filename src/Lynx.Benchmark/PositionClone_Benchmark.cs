@@ -70,15 +70,12 @@ file readonly struct Position
     /// <summary>
     /// 'Pasing FEN' Clone constructor
     /// </summary>
-    /// <param name="position"></param>
     public Position(Position position) : this(position.FEN)
     { }
 
     /// <summary>
     /// 'Manual' Clone constructor
     /// </summary>
-    /// <param name="position"></param>
-    /// <param name="_"></param>
     public Position(Position position, int _)
     {
         FEN = position.FEN;
@@ -94,8 +91,6 @@ file readonly struct Position
     /// <summary>
     /// 'Manual' Clone constructor using Array.Copy
     /// </summary>
-    /// <param name="position"></param>
-    /// <param name="_"></param>
     public Position(Position position, string _)
     {
         FEN = position.FEN;
@@ -135,7 +130,6 @@ public class PositionClone_Benchmark : BaseBenchmark
     /// <summary>
     /// ~2x faster and 0.5 less memory allocated
     /// </summary>
-    /// <param name="fen"></param>
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
     public void ManualClone(string fen)
@@ -147,7 +141,6 @@ public class PositionClone_Benchmark : BaseBenchmark
     /// <summary>
     /// ~2x faster and 0.5 less memory allocated
     /// </summary>
-    /// <param name="fen"></param>
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
     public void ManualClone_ArrayCopy(string fen)

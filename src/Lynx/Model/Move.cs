@@ -75,10 +75,6 @@ public static class MoveExtensions
     /// <summary>
     ///  Override when captured piece (aka side) isn't provided
     /// </summary>
-    /// <param name="sourceSquare"></param>
-    /// <param name="targetSquare"></param>
-    /// <param name="piece"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Move EncodeEnPassant(int sourceSquare, int targetSquare, int piece)
     {
@@ -143,12 +139,8 @@ public static class MoveExtensions
     /// <summary>
     /// Returns the move from <paramref name="moveList"/> indicated by <paramref name="UCIString"/>
     /// </summary>
-    /// <param name="UCIString"></param>
-    /// <param name="moveList"></param>
-    /// <param name="move"></param>
     /// <exception cref="InvalidOperationException"></exception>
     /// <exception cref="IndexOutOfRangeException"></exception>
-    /// <returns></returns>
     [Obsolete("Just intended for testing purposes")]
     public static bool TryParseFromUCIString(ReadOnlySpan<char> UCIString, Move[] moveList, [NotNullWhen(true)] out Move? move)
     {
@@ -203,12 +195,8 @@ public static class MoveExtensions
     /// <summary>
     /// Returns the move from <paramref name="moveList"/> indicated by <paramref name="UCIString"/>
     /// </summary>
-    /// <param name="UCIString"></param>
-    /// <param name="moveList"></param>
-    /// <param name="move"></param>
     /// <exception cref="InvalidOperationException"></exception>
     /// <exception cref="IndexOutOfRangeException"></exception>
-    /// <returns></returns>
     public static bool TryParseFromUCIString(ReadOnlySpan<char> UCIString, ReadOnlySpan<Move> moveList, [NotNullWhen(true)] out Move? move)
     {
         Utils.Assert(UCIString.Length == 4 || UCIString.Length == 5);
@@ -322,8 +310,6 @@ public static class MoveExtensions
     /// EPD representation of a valid move in a position
     /// </summary>
     /// <param name="move">A valid move for the given position</param>
-    /// <param name="position"></param>
-    /// <returns></returns>
     public static string ToEPDString(this Move move, Position position)
     {
         var piece = move.Piece();
@@ -378,8 +364,6 @@ public static class MoveExtensions
     /// <summary>
     /// NOT thread-safe
     /// </summary>
-    /// <param name="move"></param>
-    /// <returns></returns>
     [SkipLocalsInit]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string UCIStringMemoized(this Move move)
@@ -399,9 +383,6 @@ public static class MoveExtensions
     /// First file letter, then rank number and finally the whole square.
     /// At least according to https://chess.stackexchange.com/a/1819
     /// </summary>
-    /// <param name="move"></param>
-    /// <param name="position"></param>
-    /// <returns></returns>
     private static string DisambiguateMove(Move move, Position position)
     {
         var piece = move.Piece();

@@ -10,15 +10,12 @@ public sealed partial class Engine
     /// <summary>
     /// NegaMax algorithm implementation using alpha-beta pruning and quiescence search
     /// </summary>
-    /// <param name="depth"></param>
-    /// <param name="ply"></param>
     /// <param name="alpha">
     /// Best score the Side to move can achieve, assuming best play by the opponent.
     /// </param>
     /// <param name="beta">
     /// Best score Side's to move's opponent can achieve, assuming best play by Side to move.
     /// </param>
-    /// <returns></returns>
     [SkipLocalsInit]
     private int NegaMax(int depth, int ply, int alpha, int beta, bool parentWasNullMove = false)
     {
@@ -487,7 +484,6 @@ public sealed partial class Engine
     /// <summary>
     /// Quiescence search implementation, NegaMax alpha-beta style, fail-soft
     /// </summary>
-    /// <param name="ply"></param>
     /// <param name="alpha">
     /// Best score White can achieve, assuming best play by Black.
     /// Defaults to the worse possible score for white, Int.MinValue.
@@ -496,7 +492,6 @@ public sealed partial class Engine
     /// Best score Black can achieve, assuming best play by White
     /// Defaults to the works possible score for Black, Int.MaxValue
     /// </param>
-    /// <returns></returns>
     [SkipLocalsInit]
     public int QuiescenceSearch(int ply, int alpha, int beta)
     {

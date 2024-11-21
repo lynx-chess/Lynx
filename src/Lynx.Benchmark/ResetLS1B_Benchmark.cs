@@ -46,7 +46,6 @@ public class ResetLS1B_Benchmark : BaseBenchmark
     /// <summary>
     /// Same perf.
     /// </summary>
-    /// <param name="iterations"></param>
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]
     public int GetAndReset(int iterations)
@@ -76,7 +75,6 @@ public class ResetLS1B_Benchmark : BaseBenchmark
     /// <summary>
     /// Same perf.
     /// </summary>
-    /// <param name="iterations"></param>
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
     public int GetAndPop(int iterations)

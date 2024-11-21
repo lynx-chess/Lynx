@@ -326,7 +326,6 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         /// <summary>
         /// Clone constructor
         /// </summary>
-        /// <param name="position"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public MakeMovePosition(MakeMovePosition position)
         {
@@ -348,7 +347,6 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         /// <summary>
         /// Null moves constructor
         /// </summary>
-        /// <param name="position"></param>
         /// <param name="nullMove"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #pragma warning disable RCS1163, IDE0060 // Unused parameter.
@@ -1343,7 +1341,6 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         /// <summary>
         /// False if any of the kings has been captured, or if the opponent king is in check.
         /// </summary>
-        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal readonly bool IsValid()
         {
@@ -1362,7 +1359,6 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         /// False if the opponent king is in check.
         /// This method is meant to be invoked only after <see cref="Position.MakeMove(int)"/>
         /// </summary>
-        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public readonly bool WasProduceByAValidMove()
         {
@@ -1423,8 +1419,6 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         /// <summary>
         /// Uses <see cref="Piece.P"/> and squares <see cref="BoardSquare.a1"/>-<see cref="BoardSquare.h1"/>
         /// </summary>
-        /// <param name="enPassantSquare"></param>
-        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ulong EnPassantHash(int enPassantSquare)
         {
@@ -1441,7 +1435,6 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         /// <summary>
         /// Uses <see cref="Piece.p"/> and <see cref="BoardSquare.h8"/>
         /// </summary>
-        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ulong SideHash()
         {
@@ -1453,8 +1446,6 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         /// <see cref="BoardSquare.a8"/> for <see cref="CastlingRights.WK"/>, <see cref="BoardSquare.b8"/> for <see cref="CastlingRights.WQ"/>
         /// <see cref="BoardSquare.c8"/> for <see cref="CastlingRights.BK"/>, <see cref="BoardSquare.d8"/> for <see cref="CastlingRights.BQ"/>
         /// </summary>
-        /// <param name="castle"></param>
-        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ulong CastleHash(byte castle)
         {
@@ -1486,8 +1477,6 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         /// <summary>
         /// Calculates from scratch the hash of a position
         /// </summary>
-        /// <param name="position"></param>
-        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ulong PositionHash(MakeMovePosition position)
         {
@@ -1514,7 +1503,6 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         /// <summary>
         /// Initializes Zobrist table (long[64, 12])
         /// </summary>
-        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static ulong[,] Initialize()
         {
@@ -1559,9 +1547,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         /// <summary>
         /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
         /// </summary>
-        /// <param name="position"></param>
         /// <param name="capturesOnly">Filters out all moves but captures</param>
-        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IEnumerable<Move> GenerateAllMoves(MakeMovePosition position, Move[]? movePool = null, bool capturesOnly = false)
         {
@@ -1665,9 +1651,6 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         /// Obvious moves that put the king in check have been discarded, but the rest still need to be discarded
         /// see FEN position "8/8/8/2bbb3/2bKb3/2bbb3/8/8 w - - 0 1", where 4 legal moves (corners) are found
         /// </summary>
-        /// <param name="position"></param>
-        /// <param name="offset"></param>
-        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void GenerateCastlingMoves(ref int localIndex, Move[] movePool, MakeMovePosition position, int offset)
         {
@@ -1734,9 +1717,6 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         /// Generate Knight, Bishop, Rook and Queen moves
         /// </summary>
         /// <param name="piece"><see cref="Piece"/></param>
-        /// <param name="position"></param>
-        /// <param name="capturesOnly"></param>
-        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static void GeneratePieceMoves(ref int localIndex, Move[] movePool, int piece, MakeMovePosition position, bool capturesOnly = false)
         {
@@ -1806,9 +1786,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         /// <summary>
         /// Get Bishop attacks assuming current board occupancy
         /// </summary>
-        /// <param name="squareIndex"></param>
         /// <param name="occupancy">Occupancy of <see cref="Side.Both"/></param>
-        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static BitBoard BishopAttacks(int squareIndex, BitBoard occupancy)
         {
@@ -1822,9 +1800,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         /// <summary>
         /// Get Rook attacks assuming current board occupancy
         /// </summary>
-        /// <param name="squareIndex"></param>
         /// <param name="occupancy">Occupancy of <see cref="Side.Both"/></param>
-        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static BitBoard RookAttacks(int squareIndex, BitBoard occupancy)
         {
@@ -1839,9 +1815,7 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         /// Get Queen attacks assuming current board occupancy
         /// Use <see cref="QueenAttacks(BitBoard, BitBoard)"/> if rook and bishop attacks are already calculated
         /// </summary>
-        /// <param name="squareIndex"></param>
         /// <param name="occupancy">Occupancy of <see cref="Side.Both"/></param>
-        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static BitBoard QueenAttacks(int squareIndex, BitBoard occupancy)
         {
@@ -1853,9 +1827,6 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         /// <summary>
         /// Get Queen attacks having rook and bishop attacks pre-calculated
         /// </summary>
-        /// <param name="rookAttacks"></param>
-        /// <param name="bishopAttacks"></param>
-        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static BitBoard QueenAttacks(BitBoard rookAttacks, BitBoard bishopAttacks)
         {

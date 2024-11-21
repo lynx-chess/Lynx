@@ -43,8 +43,6 @@ public class PositionIdGeneration_Benchmark : BaseBenchmark
     /// <summary>
     /// Twice as faster, but allocates three times more
     /// </summary>
-    /// <param name="newPosition"></param>
-    /// <returns></returns>
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
     public string Id(Position newPosition)
@@ -84,8 +82,6 @@ internal static class PositionExtensions
     /// <summary>
     /// Used to be part of Position
     /// </summary>
-    /// <param name="position"></param>
-    /// <returns></returns>
     internal static string CalculateId(this Position position)
     {
         var sb = new StringBuilder(260);    // 252 = 12 * $"{ulong.MaxValue}".Length + 2

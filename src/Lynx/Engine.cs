@@ -187,8 +187,6 @@ public sealed partial class Engine
     /// <summary>
     /// Uses <see cref="TimeManager.CalculateTimeManagement(Game, GoCommand)"/> internally
     /// </summary>
-    /// <param name="goCommand"></param>
-    /// <returns></returns>
     public SearchResult BestMove(GoCommand goCommand)
     {
         var searchConstraints = TimeManager.CalculateTimeManagement(Game, goCommand);

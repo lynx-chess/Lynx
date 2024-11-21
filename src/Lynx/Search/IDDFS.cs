@@ -54,8 +54,6 @@ public sealed partial class Engine
     /// <summary>
     /// Iterative Deepening Depth-First Search (IDDFS) using alpha-beta pruning
     /// </summary>
-    /// <param name="maxDepth"></param>
-    /// <param name="softLimitTimeBound"></param>
     /// <returns>Not null <see cref="SearchResult"/>, although made nullable in order to match online tb probing signature</returns>
     [SkipLocalsInit]
     public SearchResult IDDFS(int maxDepth, int softLimitTimeBound)

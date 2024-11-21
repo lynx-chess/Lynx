@@ -85,8 +85,6 @@ public static class TimeManager
     /// <summary>
     /// Straight from expositor's author paper, https://expositor.dev/pdf/movetime.pdf
     /// </summary>
-    /// <param name="plies_played"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int ExpectedMovesLeft(int plies_played)
     {

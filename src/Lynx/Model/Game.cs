@@ -80,8 +80,6 @@ public sealed class Game : IDisposable
     /// Updates <paramref name="halfMovesWithoutCaptureOrPawnMove"/>.
     /// See also <see cref="Utils.Update50movesRule(int, int)"/>
     /// </summary>
-    /// <param name="moveToPlay"></param>
-    /// <param name="isCapture"></param>
     /// <remarks>
     /// Checking halfMovesWithoutCaptureOrPawnMove >= 100 since a capture/pawn move doesn't necessarily 'clear' the variable.
     /// i.e. while the engine is searching:
@@ -129,7 +127,6 @@ public sealed class Game : IDisposable
     /// <summary>
     /// Basic algorithm described in https://web.archive.org/web/20201107002606/https://marcelk.net/2013-04-06/paper/upcoming-rep-v2.pdf
     /// </summary>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsThreefoldRepetition()
     {
@@ -162,9 +159,6 @@ public sealed class Game : IDisposable
     /// <summary>
     /// To be used in online tb proving only, in combination with the result of <see cref="CopyPositionHashHistory"/>
     /// </summary>
-    /// <param name="positionHashHistory"></param>
-    /// <param name="position"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsThreefoldRepetition(ReadOnlySpan<ulong> positionHashHistory, Position position, int halfMovesWithoutCaptureOrPawnMove = Constants.MaxNumberMovesInAGame)
     {
@@ -186,8 +180,6 @@ public sealed class Game : IDisposable
     /// <summary>
     /// To be used in online tb proving only, with a copy of <see cref="HalfMovesWithoutCaptureOrPawnMove"/>
     /// </summary>
-    /// <param name="halfMovesWithoutCaptureOrPawnMove"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool Is50MovesRepetition(int halfMovesWithoutCaptureOrPawnMove) => halfMovesWithoutCaptureOrPawnMove >= 100;
 
