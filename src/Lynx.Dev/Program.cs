@@ -561,21 +561,14 @@ static void _42_Perft()
 
     for (int depth = 0; depth < 7; ++depth)
     {
-        var sw = new Stopwatch();
-        sw.Start();
-        var result = Perft.Results(pos, depth);
-        sw.Stop();
-
-        Perft.PrintPerftResult(depth, result, Console.WriteLine);
+        Perft.RunPerft(pos, depth, Console.WriteLine);
     }
 }
 
 static void _43_Divide()
 {
-    var result = Perft.Divide(new Position(Constants.InitialPositionFEN), 5, Console.WriteLine);
-    Perft.PrintPerftResult(5, result, Console.WriteLine);
-    result = Perft.Divide(new Position(TrickyPosition), 5, Console.WriteLine);
-    Perft.PrintPerftResult(5, result, Console.WriteLine);
+    Perft.RunDivide(new Position(Constants.InitialPositionFEN), 5, Console.WriteLine);
+    Perft.RunDivide(new Position(TrickyPosition), 5, Console.WriteLine);
 }
 
 static void _44_ParseUCI()
@@ -1109,7 +1102,7 @@ static void TranspositionTableMethod()
 static void UnmakeMove()
 {
     var pos = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq");
-    var a = Perft.ResultsImpl(pos, 1, default);
+    var a = Perft.PerftRecursiveImpl(pos, 1, default);
 
     TestMoveGen(Constants.InitialPositionFEN);
     TestMoveGen(Constants.TTPositionFEN);

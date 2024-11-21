@@ -279,6 +279,6 @@ public class PerftTest
 
     private static void Validate(string fen, int depth, long expectedNumberOfNodes)
     {
-        Assert.AreEqual(expectedNumberOfNodes, Perft.ResultsImpl(new Position(fen), depth, default));
+        Assert.AreEqual(expectedNumberOfNodes, Perft.PerftRecursiveImpl(new Position(fen), depth, default));
     }
 }
