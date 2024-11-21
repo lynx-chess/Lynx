@@ -58,14 +58,6 @@ public static class Attacks
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard BishopAttacks(int squareIndex, BitBoard occupancy)
-    {
-        return Bmi2.X64.IsSupported
-            ? _pextAttacks[_pextBishopOffset[squareIndex] + Bmi2.X64.ParallelBitExtract(occupancy, _bishopOccupancyMasks[squareIndex])]
-            : MagicNumbersBishopAttacks(squareIndex, occupancy);
-    }
-
     /// <summary>
     /// Get Bishop attacks assuming current board occupancy
     /// </summary>

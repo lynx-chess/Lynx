@@ -26,7 +26,6 @@ public class PerftTest
     /// <summary>
     /// aka <see cref="Constants.TrickyTestPositionFEN"/>
     /// </summary>
-    /// <param name="expectedNumberOfNodes"></param>
     [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 1, 48, Ignore = "Included in PerftTestSuite")]
     [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 2, 2_039, Ignore = "Included in PerftTestSuite")]
     [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 3, 97_862, Ignore = "Included in PerftTestSuite")]

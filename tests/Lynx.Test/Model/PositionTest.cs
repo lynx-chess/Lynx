@@ -292,12 +292,10 @@ public class PositionTest
     /// 1   . . . . . . K .
     ///     a b c d e f g h
     /// </summary>
-    /// <param name="square"></param>
     [TestCase("6k1/pp6/p7/8/8/8/PP1P4/6K1 w - - 0 1", BoardSquare.d2)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    /// <param name="square"></param>
     [TestCase("1k6/4p1pp/8/8/8/7P/6PP/1K6 b - - 0 1", BoardSquare.e7)]
 
     /// <summary>
@@ -311,12 +309,10 @@ public class PositionTest
     /// 1   . . . . . . K .
     ///     a b c d e f g h
     /// </summary>
-    /// <param name="square"></param>
     [TestCase("6k1/pp6/p7/8/8/3P4/PP6/6K1 w - - 0 1", BoardSquare.d3)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    /// <param name="square"></param>
     [TestCase("1k6/6pp/4p3/8/8/7P/6PP/1K6 b - - 0 1", BoardSquare.e6)]
 
     /// <summary>
@@ -330,12 +326,10 @@ public class PositionTest
     /// 1   . . . . . . K .
     ///     a b c d e f g h
     /// </summary>
-    /// <param name="square"></param>
     [TestCase("6k1/pp6/p7/8/3P4/8/PP6/6K1 w - - 0 1", BoardSquare.d4)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    /// <param name="square"></param>
     [TestCase("1k6/6pp/8/4p3/8/7P/6PP/1K6 b - - 0 1", BoardSquare.e5)]
 
     /// <summary>
@@ -349,12 +343,10 @@ public class PositionTest
     /// 1   . . . . . . K .
     ///     a b c d e f g h
     /// </summary>
-    /// <param name="square"></param>
     [TestCase("6k1/pp6/p7/3P4/8/8/PP6/6K1 w - - 0 1", BoardSquare.d5)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    /// <param name="square"></param>
     [TestCase("1k6/6pp/8/8/4p3/7P/6PP/1K6 b - - 0 1", BoardSquare.e4)]
 
     /// <summary>
@@ -368,12 +360,10 @@ public class PositionTest
     /// 1   . . . . . . K .
     ///     a b c d e f g h
     /// </summary>
-    /// <param name="square"></param>
     [TestCase("6k1/pp6/p2P4/8/8/8/PP6/6K1 w - - 0 1", BoardSquare.d6)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    /// <param name="square"></param>
     [TestCase("1k6/6pp/8/8/8/4p2P/6PP/1K6 b - - 0 1", BoardSquare.e3)]
 
     /// <summary>
@@ -387,12 +377,10 @@ public class PositionTest
     /// 1   . . . . . . K .
     ///     a b c d e f g h
     /// </summary>
-    /// <param name="square"></param>
     [TestCase("6k1/pp1P4/p7/8/8/8/PP6/6K1 w - - 0 1", BoardSquare.d7)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    /// <param name="square"></param>
     [TestCase("1k6/6pp/8/8/8/7P/4p1PP/1K6 b - - 0 1", BoardSquare.e2)]
     public void StaticEvaluation_PassedPawnBonus(string fen, BoardSquare square)
     {
@@ -704,12 +692,10 @@ public class PositionTest
     /// 1   . K . . . . . N
     ///     a b c d e f g h
     /// </summary>
-    /// <param name="surroundingPieces"></param>
     [TestCase("1k5n/5ppp/8/8/8/8/PPP5/1K5N w - - 0 1", 3)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    /// <param name="surroundingPieces"></param>
     [TestCase("n5k1/5ppp/8/8/8/8/PPP5/N5K1 b - - 0 1", 3)]
     /// <summary>
     /// 8   . k . . . b . b
@@ -722,12 +708,10 @@ public class PositionTest
     /// 1   B K B . . . . .
     ///     a b c d e f g h
     /// </summary>
-    /// <param name="surroundingPieces"></param>
     [TestCase("1k3b1b/5nnn/8/8/8/8/NNN5/BKB5 w - - 0 1", 5)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    /// <param name="surroundingPieces"></param>
     [TestCase("5bkb/5nnn/8/8/8/8/NNN5/B1B3K1 b - - 0 1", 5)]
     [Ignore("Broken by virtual king mobility")]
     public void StaticEvaluation_KingShieldBonus(string fen, int surroundingPieces)
@@ -755,12 +739,10 @@ public class PositionTest
     /// 1   . . . . K . . N
     ///     a b c d e f g h
     /// </summary>
-    /// <param name="nonSideToMoveMobilityCount"></param>
     [TestCase("n3k3/1n6/8/3b4/3B4/8/6N1/4K2N w - - 0 1", 13, 10)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    /// <param name="nonSideToMoveMobilityCount"></param>
     [TestCase("n2k4/1n6/8/4b3/4B3/8/6N1/3K3N b - - 0 1", 13, 10)]
     /// <summary>
     /// 8   . . . . k . . .
@@ -773,12 +755,10 @@ public class PositionTest
     /// 1   . . . . K . . .
     ///     a b c d e f g h
     /// </summary>
-    /// <param name="nonSideToMoveMobilityCount"></param>
     [TestCase("4k3/1n6/2n5/3b4/3B4/5N2/6N1/4K3 w - - 0 1", 13, 8)]
     /// <summary>
     /// Previous one mirrored
     /// </summary>
-    /// <param name="nonSideToMoveMobilityCount"></param>
     [TestCase("3k4/1n6/2n5/4b3/4B3/5N2/6N1/3K4 b - - 0 1", 13, 8)]
     public void StaticEvaluation_BishopMobility(string fen, int sideToMoveMobilityCount, int nonSideToMoveMobilityCount)
     {
@@ -901,7 +881,6 @@ public class PositionTest
     /// <summary>
     /// https://github.com/lynx-chess/Lynx/pull/510
     /// </summary>
-    /// <param name="expectedStaticEvaluation"></param>
     [TestCase("QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QPPPPPPP/K6k b - - 0 1", MinStaticEval, IgnoreReason = "Packed eval reduces max eval to a short, so over Short.MaxValue it overflows and produces unexpected results")]
     [TestCase("QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QPPPPPPP/K5k1 w - - 0 1", MaxStaticEval, IgnoreReason = "Packed eval reduces max eval to a short, so over Short.MaxValue it overflows and produces unexpected results")]
     [TestCase("8/QQQQQQ1/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQQQQQQQ/QQ6/K6k b - - 0 1", MinStaticEval, IgnoreReason = "It's just a pain to maintain this with bucketed PSQT tuning")]

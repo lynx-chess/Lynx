@@ -347,7 +347,6 @@ public class MakeUnmakeMove_implementation_Benchmark : BaseBenchmark
         /// <summary>
         /// Null moves constructor
         /// </summary>
-        /// <param name="nullMove"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #pragma warning disable RCS1163, IDE0060 // Unused parameter.
         public MakeMovePosition(MakeMovePosition position, bool nullMove)
