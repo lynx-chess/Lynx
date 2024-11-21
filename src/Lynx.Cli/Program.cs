@@ -38,7 +38,7 @@ var uciHandler = new UCIHandler(uciChannel, engineChannel, engine);
 var tasks = new List<Task>
 {
     Task.Run(() => new Writer(engineChannel).Run(cancellationToken)),
-    Task.Run(() => new Searcher(uciChannel, engine).Run(cancellationToken)),
+    Task.Run(() => new Searcher(uciChannel, engineChannel, engine).Run(cancellationToken)),
     Task.Run(() => new Listener(uciHandler).Run(cancellationToken, args)),
     uciChannel.Reader.Completion,
     engineChannel.Reader.Completion

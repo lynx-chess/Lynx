@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using Lynx.UCI.Commands.GUI;
+using System.Diagnostics;
 using System.Threading.Channels;
 
 namespace Lynx;
@@ -124,7 +125,11 @@ public partial class Engine
             AdjustPosition($"position fen {fen}");
             stopwatch.Restart();
 
-            var result = BestMove(new($"go depth {depth}"));
+            var goCommand = new GoCommand($"go depth {depth}");
+            var searchConstraints = TimeManager.CalculateTimeManagement(Game, goCommand);
+
+            var result = BestMove(goCommand, in searchConstraints);
+
             var elapsedSeconds = Utils.CalculateElapsedSeconds(_stopWatch);
             totalSeconds += elapsedSeconds;
             totalNodes += result.Nodes;
