@@ -31,7 +31,7 @@ public static class Perft
     }
 
     /// <summary>
-    /// Proper implementation, used by <see cref="DivideRecursiveImpl(Position, int, long, Action{string})"/> as well
+    /// Proper implementation, used by <see cref="DivideImpl(Position, int, long, Action{string})"/> as well
     /// </summary>
     /// <param name="position"></param>
     /// <param name="depth"></param>
