@@ -10,22 +10,24 @@ public sealed class Searcher
 {
     private readonly ChannelReader<string> _uciReader;
     private readonly ChannelWriter<object> _engineWriter;
-    private readonly Engine _engine;
     private readonly Logger _logger;
-    private readonly TranspositionTable _tt;
 
-    public Searcher(ChannelReader<string> uciReader, ChannelWriter<object> engineWriter, Engine engine)
+    private readonly Engine _engine;
+
+    public Position CurrentPosition => _engine.Game.CurrentPosition;
+
+    public string FEN => _engine.Game.FEN;
+
+    public Searcher(ChannelReader<string> uciReader, ChannelWriter<object> engineWriter)
     {
         _uciReader = uciReader;
         _engineWriter = engineWriter;
 
-        _tt = new TranspositionTable();
-        _engine = engine;
+        TranspositionTable _ttWrapper = new();
+        _engine = new Engine(_engineWriter, _ttWrapper);
 
         _logger = LogManager.GetCurrentClassLogger();
     }
-
-    public Engine Engine => _engine;
 
     public async Task Run(CancellationToken cancellationToken)
     {
@@ -56,6 +58,8 @@ public sealed class Searcher
         }
     }
 
+    public void PrintCurrentPosition() => _engine.Game.CurrentPosition.Print();
+
     private void OnGoCommand(GoCommand goCommand)
     {
         var searchConstraints = TimeManager.CalculateTimeManagement(_engine.Game, goCommand);
@@ -67,5 +71,46 @@ public sealed class Searcher
             // We always print best move, even in case of go ponder + stop, in which case IDEs are expected to ignore it
             _engineWriter.TryWrite(new BestMoveCommand(searchResult));
         }
+    }
+
+    public void AdjustPosition(ReadOnlySpan<char> command)
+    {
+        _engine.AdjustPosition(command);
+    }
+
+    public void StopSearching()
+    {
+        _engine.StopSearching();
+    }
+
+    public void PonderHit()
+    {
+        _engine.PonderHit();
+    }
+
+    public void NewGame()
+    {
+        var averageDepth = _engine.AverageDepth;
+        if (averageDepth > 0 && averageDepth < int.MaxValue)
+        {
+            _logger.Info("Average depth: {0}", averageDepth);
+        }
+
+        _engine.NewGame();
+    }
+
+    public void Quit()
+    {
+        var averageDepth = _engine.AverageDepth;
+        if (averageDepth > 0 && averageDepth < int.MaxValue)
+        {
+            _logger.Info("Average depth: {0}", averageDepth);
+        }
+    }
+
+    public async ValueTask RunBench(int depth)
+    {
+        var results = _engine.Bench(depth);
+        await _engine.PrintBenchResults(results);
     }
 }

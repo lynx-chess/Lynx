@@ -1047,12 +1047,12 @@ static void TranspositionTableMethod()
 
         var lengthMb = length / 1024 / 1024;
 
-        Console.WriteLine("TT memory: {0} MB", lengthMb * Marshal.SizeOf(typeof(TranspositionTableElement)));
+        Console.WriteLine("TT memory: {0} MB", lengthMb * Marshal.SizeOf<TranspositionTableElement>());
         Console.WriteLine("TT array length: {0}MB, (0x{1}, {2} items)", lengthMb, length.ToString("X"), length);
         Console.WriteLine("TT mask: 0x{0} ({1})\n", (length - 1).ToString("X"), Convert.ToString(length - 1, 2));
     }
 
-    Console.WriteLine($"{nameof(TranspositionTableElement)} size: {Marshal.SizeOf(typeof(TranspositionTableElement))} bytes\n");
+    Console.WriteLine($"{nameof(TranspositionTableElement)} size: {Marshal.SizeOf<TranspositionTableElement>()} bytes\n");
 
     TesSize(2);
     TesSize(4);

@@ -17,13 +17,15 @@ public static class Runner
         CancellationToken cancellationToken = source.Token;
 
         var searcher = new Searcher(uciChannel, engineChannel);
-        var uciHandler = new UCIHandler(uciChannel, engineChannel, searcher.Engine);
+        var uciHandler = new UCIHandler(uciChannel, engineChannel, searcher);
+        var writer = new Writer(engineChannel);
+        var listener = new Listener(uciHandler);
 
         var tasks = new List<Task>
         {
-            Task.Run(() => new Writer(engineChannel).Run(cancellationToken)),
+            Task.Run(() => writer.Run(cancellationToken)),
             Task.Run(() => searcher.Run(cancellationToken)),
-            Task.Run(() => new Listener(uciHandler).Run(cancellationToken, args)),
+            Task.Run(() => listener.Run(cancellationToken, args)),
             uciChannel.Reader.Completion,
             engineChannel.Reader.Completion
         };

@@ -39,8 +39,6 @@ public sealed partial class Engine
 
     public double AverageDepth { get; private set; }
 
-    public RegisterCommand? Registration { get; set; }
-
     public Game Game { get; private set; }
 
     public bool PendingConfirmation { get; set; }
