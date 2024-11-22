@@ -734,7 +734,7 @@ public class Position : IDisposable
         packedBonus += CheckBonus[(int)Piece.N] * checks;
 
         // Forks
-        if (attacks.GetBit(oppositeSideKingSquare))
+        if (attacks.GetBit(oppositeSideKingSquare) && !enemyPawnAttacks.GetBit(squareIndex))
         {
             var offset = Utils.PieceOffset(pieceSide);
             var attackedOponentPieces = PieceBitBoards[(int)Piece.q - offset]
