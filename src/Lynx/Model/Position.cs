@@ -726,11 +726,18 @@ public class Position : IDisposable
 
         var packedBonus = KnightMobilityBonus[attacksCount];
 
-        // Checks
-        var enemyKingCheckThreats = Attacks.KnightAttacks[oppositeSideKingSquare];
-        var checks = (attacks & enemyKingCheckThreats).CountBits();
+        var knightAttacks = Attacks.KnightAttacks;
 
+        // Checks
+        var enemyKingCheckThreats = knightAttacks[oppositeSideKingSquare];
+        var checks = (attacks & enemyKingCheckThreats).CountBits();
         packedBonus += CheckBonus[(int)Piece.N] * checks;
+
+        // Attacks to enemy queens
+        if ((attacks & PieceBitBoards[(int)Piece.q - Utils.PieceOffset(pieceSide)]) != 0)
+        {
+            packedBonus += KnightAttacksQueenBonus;
+        }
 
         return packedBonus;
     }

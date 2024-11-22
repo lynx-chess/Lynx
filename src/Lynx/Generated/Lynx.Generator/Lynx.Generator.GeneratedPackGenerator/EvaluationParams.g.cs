@@ -47,4 +47,9 @@ static partial class EvaluationParams
     /// </summary>
     public const int PieceAttackedByPawnPenalty = -2162735;
 
+    /// <summary>
+    /// <see cref="Utils.Pack(1, 2)"/>
+    /// </summary>
+    public const int QueenAttackedByKnightBonus = 131073;
+
 }

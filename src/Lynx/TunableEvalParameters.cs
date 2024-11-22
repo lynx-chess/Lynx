@@ -6043,6 +6043,9 @@ public static partial class EvaluationParams
     [GeneratedPack(-47, -33)]
     private static readonly int _PieceAttackedByPawnPenalty;
 
+    [GeneratedPack(1, 2)]
+    private static readonly int _KnightAttacksQueenBonus;
+
 #pragma warning restore IDE0051, IDE0052, CS0169 // Remove unread private members
 
     public static readonly TaperedEvaluationTermByRank PawnPhalanxBonus =

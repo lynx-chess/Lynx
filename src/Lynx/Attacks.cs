@@ -30,7 +30,15 @@ public static class Attacks
     /// [2 (B|W), 64 (Squares)]
     /// </summary>
     public static BitBoard[][] PawnAttacks { get; }
+
+    /// <summary>
+    /// [64]
+    /// </summary>
     public static BitBoard[] KnightAttacks { get; }
+
+    /// <summary>
+    /// [64]
+    /// </summary>
     public static BitBoard[] KingAttacks { get; }
 
     static Attacks()
