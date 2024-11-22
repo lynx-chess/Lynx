@@ -13,7 +13,7 @@ public sealed partial class Engine
     internal const int DefaultMaxDepth = 5;
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-    private readonly ChannelWriter<object> _engineWriter;
+    private ChannelWriter<object> _engineWriter;
 
     private bool _isSearching;
 
