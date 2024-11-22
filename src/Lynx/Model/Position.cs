@@ -737,7 +737,8 @@ public class Position : IDisposable
         var offset = Utils.PieceOffset(pieceSide);
         var majorPieces = PieceBitBoards[(int)Piece.k - offset] |
                           PieceBitBoards[(int)Piece.q - offset] |
-                          PieceBitBoards[(int)Piece.r - offset];
+                          PieceBitBoards[(int)Piece.r - offset] |
+                          PieceBitBoards[(int)Piece.b - offset];
 
         var enemyPiecesAttackedCount = (attacks & majorPieces).CountBits();
 
