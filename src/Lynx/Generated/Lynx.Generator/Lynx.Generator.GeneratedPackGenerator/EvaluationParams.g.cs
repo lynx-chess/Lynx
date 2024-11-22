@@ -48,8 +48,8 @@ static partial class EvaluationParams
     public const int PieceAttackedByPawnPenalty = -2162735;
 
     /// <summary>
-    /// <see cref="Utils.Pack(1, 2)"/>
+    /// <see cref="Utils.Pack(65, -10)"/>
     /// </summary>
-    public const int KnightAttacksRooksBonus = 131073;
+    public const int KnightAttacksRookBonus = -655295;
 
 }
