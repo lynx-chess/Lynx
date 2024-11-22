@@ -229,7 +229,6 @@ public class ForceOrAvoidDrawTest : BaseTest
     /// <summary>
     /// If a checkmate is delivered in move 50 (ply 100), the result of the game is checkmate
     /// </summary>
-    /// <returns></returns>
     [Test]
     public void CheckmateHasPrecedenceOver50MovesRule()
     {

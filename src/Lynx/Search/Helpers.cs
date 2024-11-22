@@ -30,9 +30,6 @@ public sealed partial class Engine
     ///  250                             a8     a8     a8     a8
     ///  310                                    a8     a8     a8
     /// </summary>
-    /// <param name="target"></param>
-    /// <param name="source"></param>
-    /// <param name="moveCountToCopy"></param>
 #pragma warning restore RCS1243 // Duplicate word in a comment
 #pragma warning restore RCS1226 // Add paragraph to documentation comment
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -52,10 +49,6 @@ public sealed partial class Engine
     /// <summary>
     /// [12][64][12]
     /// </summary>
-    /// <param name="piece"></param>
-    /// <param name="targetSquare"></param>
-    /// <param name="capturedPiece"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int CaptureHistoryIndex(int piece, int targetSquare, int capturedPiece)
     {
@@ -70,12 +63,6 @@ public sealed partial class Engine
     /// <summary>
     /// [12][64][12][64][ContinuationHistoryPlyCount]
     /// </summary>
-    /// <param name="piece"></param>
-    /// <param name="targetSquare"></param>
-    /// <param name="previousMovePiece"></param>
-    /// <param name="previousMoveTargetSquare"></param>
-    /// <param name="ply"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int ContinuationHistoryIndex(int piece, int targetSquare, int previousMovePiece, int previousMoveTargetSquare, int ply)
     {
@@ -94,9 +81,6 @@ public sealed partial class Engine
     /// <summary>
     /// [64][64]
     /// </summary>
-    /// <param name="previousMoveSourceSquare"></param>
-    /// <param name="previousMoveTargetSquare"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int CounterMoveIndex(int previousMoveSourceSquare, int previousMoveTargetSquare)
     {
@@ -235,10 +219,6 @@ public sealed partial class Engine
     /// <summary>
     /// Assumes Configuration.EngineSettings.MaxDepth = 64
     /// </summary>
-    /// <param name="target"></param>
-    /// <param name="source"></param>
-    /// <param name="movesToCopy"></param>
-    /// <param name="depth"></param>
     [Conditional("DEBUG")]
     private void PrintPvTable(int target = -1, int source = -1, int movesToCopy = 0, int depth = 0)
     {

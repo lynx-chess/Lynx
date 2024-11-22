@@ -475,9 +475,7 @@ file static class LocalAttacks
     /// <summary>
     /// Get Bishop LocalAttacks assuming current board occupancy
     /// </summary>
-    /// <param name="squareIndex"></param>
     /// <param name="occupancy">Occupancy of <see cref="Side.Both"/></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static BitBoard MagicNumbersBishopLocalAttacks(int squareIndex, BitBoard occupancy)
     {
@@ -491,9 +489,7 @@ file static class LocalAttacks
     /// <summary>
     /// Get Rook LocalAttacks assuming current board occupancy
     /// </summary>
-    /// <param name="squareIndex"></param>
     /// <param name="occupancy">Occupancy of <see cref="Side.Both"/></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static BitBoard RookLocalAttacks(int squareIndex, BitBoard occupancy)
     {
@@ -515,9 +511,7 @@ file static class LocalAttacks
     /// Get Queen LocalAttacks assuming current board occupancy
     /// Use <see cref="QueenLocalAttacks(BitBoard, BitBoard)"/> if rook and bishop LocalAttacks are already calculated
     /// </summary>
-    /// <param name="squareIndex"></param>
     /// <param name="occupancy">Occupancy of <see cref="Side.Both"/></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static BitBoard QueenLocalAttacks(int squareIndex, BitBoard occupancy)
     {
@@ -529,9 +523,6 @@ file static class LocalAttacks
     /// <summary>
     /// Get Queen LocalAttacks having rook and bishop LocalAttacks pre-calculated
     /// </summary>
-    /// <param name="rookLocalAttacks"></param>
-    /// <param name="bishopLocalAttacks"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static BitBoard QueenLocalAttacks(BitBoard rookLocalAttacks, BitBoard bishopLocalAttacks)
     {

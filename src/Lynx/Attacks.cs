@@ -69,9 +69,7 @@ public static class Attacks
     /// <summary>
     /// Get Bishop attacks assuming current board occupancy
     /// </summary>
-    /// <param name="squareIndex"></param>
     /// <param name="occupancy">Occupancy of <see cref="Side.Both"/></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static BitBoard MagicNumbersBishopAttacks(int squareIndex, BitBoard occupancy)
     {
@@ -85,9 +83,7 @@ public static class Attacks
     /// <summary>
     /// Get Rook attacks assuming current board occupancy
     /// </summary>
-    /// <param name="squareIndex"></param>
     /// <param name="occupancy">Occupancy of <see cref="Side.Both"/></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static BitBoard RookAttacks(int squareIndex, BitBoard occupancy)
     {
@@ -110,9 +106,7 @@ public static class Attacks
     /// Get Queen attacks assuming current board occupancy
     /// Use <see cref="QueenAttacks(BitBoard, BitBoard)"/> if rook and bishop attacks are already calculated
     /// </summary>
-    /// <param name="squareIndex"></param>
     /// <param name="occupancy">Occupancy of <see cref="Side.Both"/></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static BitBoard QueenAttacks(int squareIndex, BitBoard occupancy)
     {
@@ -124,9 +118,6 @@ public static class Attacks
     /// <summary>
     /// Get Queen attacks having rook and bishop attacks pre-calculated
     /// </summary>
-    /// <param name="rookAttacks"></param>
-    /// <param name="bishopAttacks"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static BitBoard QueenAttacks(BitBoard rookAttacks, BitBoard bishopAttacks) => rookAttacks | bishopAttacks;
 

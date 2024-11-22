@@ -26,9 +26,6 @@ public class PerftTest
     /// <summary>
     /// aka <see cref="Constants.TrickyTestPositionFEN"/>
     /// </summary>
-    /// <param name="fen"></param>
-    /// <param name="depth"></param>
-    /// <param name="expectedNumberOfNodes"></param>
     [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 1, 48, Ignore = "Included in PerftTestSuite")]
     [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 2, 2_039, Ignore = "Included in PerftTestSuite")]
     [TestCase("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -", 3, 97_862, Ignore = "Included in PerftTestSuite")]
@@ -103,9 +100,6 @@ public class PerftTest
     /// By Martin Sedlak
     /// http://talkchess.com/forum3/viewtopic.php?t=47318
     /// </summary>
-    /// <param name="fen"></param>
-    /// <param name="depth"></param>
-    /// <param name="expectedNumberOfNodes"></param>
     [TestCase("8/5bk1/8/2Pp4/8/1K6/8/8 w - d6 0 1           ", 6, 824064, Description = "avoid illegal en passant capture")]
     [TestCase("8/8/1k6/8/2pP4/8/5BK1/8 b - d3 0 1           ", 6, 824064, Description = "avoid illegal en passant capture")]
     [TestCase("8/8/1k6/2b5/2pP4/8/5K2/8 b - d3 0 1          ", 6, 1440467, Description = "en passant capture checks opponent")]
@@ -141,9 +135,6 @@ public class PerftTest
     /// By John Merlino
     /// https://talkchess.com/forum3/viewtopic.php?topic_view=threads&p=509159&t=47318#p509159
     /// </summary>
-    /// <param name="fen"></param>
-    /// <param name="depth"></param>
-    /// <param name="expectedNumberOfNodes"></param>
     [TestCase("r3k2r/8/8/8/3pPp2/8/8/R3K1RR b KQkq e3 0 1                           ", 6, 485_647_607, Category = Categories.TooLong, Explicit = true)]  // 6m 30s
     [TestCase("8/7p/p5pb/4k3/P1pPn3/8/P5PP/1rB2RK1 b - d3 0 28                      ", 4, 67_197, Description = "resolving check by en-passant capture of the checking pawn")]
     [TestCase("8/7p/p5pb/4k3/P1pPn3/8/P5PP/1rB2RK1 b - d3 0 28                      ", 6, 38_633_283, Description = "resolving check by en-passant capture of the checking pawn")]

@@ -480,8 +480,6 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
         /// Outer squares don't matter in terms of occupancy (see https://www.chessprogramming.org/First_Rank_Attacks#TheOuterSquares)
         /// Therefore, there are max 6 occupancy squares per direction (if a bishop is placed on a corner)
         /// </summary>
-        /// <param name="squareIndex"></param>
-        /// <returns></returns>
         public static BitBoard MaskBishopOccupancy(int squareIndex)
         {
             // Results attack bitboard
@@ -550,8 +548,6 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
         /// Outer squares don't matter in terms of occupancy (see https://www.chessprogramming.org/First_Rank_Attacks#TheOuterSquares)
         /// Therefore, there are max 6 occupancy squares per direction (if a rook is placed on a corner)
         /// </summary>
-        /// <param name="squareIndex"></param>
-        /// <returns></returns>
         public static BitBoard MaskRookOccupancy(int squareIndex)
         {
             // Results attack bitboard
@@ -1235,8 +1231,6 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
         /// Outer squares don't matter in terms of occupancy (see https://www.chessprogramming.org/First_Rank_Attacks#TheOuterSquares)
         /// Therefore, there are max 6 occupancy squares per direction (if a bishop is placed on a corner)
         /// </summary>
-        /// <param name="squareIndex"></param>
-        /// <returns></returns>
         public static BitBoard MaskBishopOccupancy(int squareIndex)
         {
             // Results attack bitboard
@@ -1305,8 +1299,6 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
         /// Outer squares don't matter in terms of occupancy (see https://www.chessprogramming.org/First_Rank_Attacks#TheOuterSquares)
         /// Therefore, there are max 6 occupancy squares per direction (if a rook is placed on a corner)
         /// </summary>
-        /// <param name="squareIndex"></param>
-        /// <returns></returns>
         public static BitBoard MaskRookOccupancy(int squareIndex)
         {
             // Results attack bitboard
@@ -1963,8 +1955,6 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
         /// Outer squares don't matter in terms of occupancy (see https://www.chessprogramming.org/First_Rank_Attacks#TheOuterSquares)
         /// Therefore, there are max 6 occupancy squares per direction (if a bishop is placed on a corner)
         /// </summary>
-        /// <param name="squareIndex"></param>
-        /// <returns></returns>
         public static BitBoard MaskBishopOccupancy(int squareIndex)
         {
             // Results attack bitboard
@@ -2033,8 +2023,6 @@ public class SkipLocalsInit_Benchmark : BaseBenchmark
         /// Outer squares don't matter in terms of occupancy (see https://www.chessprogramming.org/First_Rank_Attacks#TheOuterSquares)
         /// Therefore, there are max 6 occupancy squares per direction (if a rook is placed on a corner)
         /// </summary>
-        /// <param name="squareIndex"></param>
-        /// <returns></returns>
         public static BitBoard MaskRookOccupancy(int squareIndex)
         {
             // Results attack bitboard

@@ -64,7 +64,6 @@ public class EncodeMove_Benchmark : BaseBenchmark
     /// <summary>
     /// ~70x faster
     /// </summary>
-    /// <param name="iterations"></param>
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
     public void EncodeMoveInt(int iterations)

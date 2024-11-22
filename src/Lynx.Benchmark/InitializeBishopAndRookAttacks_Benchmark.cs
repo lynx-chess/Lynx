@@ -41,7 +41,6 @@ public class InitializeBishopAndRookAttacks_Benchmark : BaseBenchmark
         /// <summary>
         /// Current reusing squares loop
         /// </summary>
-        /// <param name="_"></param>
         public CustomPosition(string _)
         {
             InitializePawnKnightAndKingAttacks();
@@ -53,7 +52,6 @@ public class InitializeBishopAndRookAttacks_Benchmark : BaseBenchmark
         /// <summary>
         /// Initial approach
         /// </summary>
-        /// <param name="_"></param>
         public CustomPosition(int _)
         {
             InitializePawnKnightAndKingAttacks();

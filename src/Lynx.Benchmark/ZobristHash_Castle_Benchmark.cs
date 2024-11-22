@@ -462,7 +462,6 @@ file static class LocalZobristTable
     /// <summary>
     /// Initializes Zobrist table (long[64, 12])
     /// </summary>
-    /// <returns></returns>
     private static long[,] Initialize()
     {
         var zobristTable = new long[64, 12];

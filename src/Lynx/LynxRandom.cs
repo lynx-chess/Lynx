@@ -21,7 +21,6 @@ public class LynxRandom : Random
     /// Based on dotnet/runtime implementation,
     /// https://github.com/dotnet/runtime/blob/508fef51e841aa16ffed1aae32bf4793a2cea363/src/libraries/System.Private.CoreLib/src/System/Random.Xoshiro256StarStarImpl.cs
     /// </summary>
-    /// <returns></returns>
     public ulong NextUInt64() => _impl.NextUInt64();
 
     /// <summary>

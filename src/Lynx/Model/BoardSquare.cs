@@ -31,9 +31,6 @@ public static class BoardSquareExtensions
     /// <summary>
     /// https://www.chessprogramming.org/Color_of_a_Square
     /// </summary>
-    /// <param name="squareIndex1"></param>
-    /// <param name="squareIndex2"></param>
-    /// <returns></returns>
     public static bool DifferentColor(int squareIndex1, int squareIndex2)
     {
         return ((9 * (squareIndex1 ^ squareIndex2)) & 8) != 0;
@@ -42,9 +39,6 @@ public static class BoardSquareExtensions
     /// <summary>
     /// https://www.chessprogramming.org/Color_of_a_Square
     /// </summary>
-    /// <param name="squareIndex1"></param>
-    /// <param name="squareIndex2"></param>
-    /// <returns></returns>
     public static bool SameColor(int squareIndex1, int squareIndex2)
     {
         return ((9 * (squareIndex1 ^ squareIndex2)) & 8) == 0;

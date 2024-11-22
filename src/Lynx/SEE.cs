@@ -22,10 +22,6 @@ public static class SEE
     /// <summary>
     /// Doesn't handle non-captures, promotions and en-passants
     /// </summary>
-    /// <param name="position"></param>
-    /// <param name="move"></param>
-    /// <param name="threshold"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsGoodCapture(Position position, Move move, int threshold = 0)
     {
@@ -113,10 +109,6 @@ public static class SEE
     /// <summary>
     /// Handles all kinds of moves
     /// </summary>
-    /// <param name="position"></param>
-    /// <param name="move"></param>
-    /// <param name="threshold"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool HasPositiveScore(Position position, Move move, int threshold = 0)
     {
@@ -224,11 +216,6 @@ public static class SEE
     /// <summary>
     /// Returns only <see cref="Side.White"/> pieces
     /// </summary>
-    /// <param name="position"></param>
-    /// <param name="occupancy"></param>
-    /// <param name="attackers"></param>
-    /// <param name="color"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int PopLeastValuableAttacker(Position position, ref BitBoard occupancy, BitBoard attackers, int color)
     {

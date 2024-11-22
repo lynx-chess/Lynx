@@ -43,9 +43,7 @@ public static class MoveGenerator
     /// <summary>
     /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
     /// </summary>
-    /// <param name="position"></param>
     /// <param name="capturesOnly">Filters out all moves but captures</param>
-    /// <returns></returns>
     [Obsolete("dev and test only")]
     internal static Move[] GenerateAllMoves(Position position, bool capturesOnly = false)
     {
@@ -59,9 +57,6 @@ public static class MoveGenerator
     /// <summary>
     /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
     /// </summary>
-    /// <param name="position"></param>
-    /// <param name="movePool"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Span<Move> GenerateAllMoves(Position position, Span<Move> movePool)
     {
@@ -85,9 +80,6 @@ public static class MoveGenerator
     /// <summary>
     /// Generates all psuedo-legal captures from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
     /// </summary>
-    /// <param name="position"></param>
-    /// <param name="movePool"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Move[] GenerateAllCaptures(Position position, Move[] movePool)
     {
@@ -111,9 +103,6 @@ public static class MoveGenerator
     /// <summary>
     /// Generates all psuedo-legal captures from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
     /// </summary>
-    /// <param name="position"></param>
-    /// <param name="movePool"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Span<Move> GenerateAllCaptures(Position position, Span<Move> movePool)
     {
@@ -286,9 +275,6 @@ public static class MoveGenerator
     /// Obvious moves that put the king in check have been discarded, but the rest still need to be discarded
     /// see FEN position "8/8/8/2bbb3/2bKb3/2bbb3/8/8 w - - 0 1", where 4 legal moves (corners) are found
     /// </summary>
-    /// <param name="movePool"></param>
-    /// <param name="position"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static void GenerateCastlingMoves(ref int localIndex, Span<Move> movePool, Position position)
     {
@@ -362,10 +348,7 @@ public static class MoveGenerator
     /// <summary>
     /// Generate Knight, Bishop, Rook and Queen moves
     /// </summary>
-    /// <param name="movePool"></param>
     /// <param name="piece"><see cref="Piece"/></param>
-    /// <param name="position"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static void GenerateAllPieceMoves(ref int localIndex, Span<Move> movePool, int piece, Position position)
     {
@@ -401,10 +384,7 @@ public static class MoveGenerator
     /// <summary>
     /// Generate Knight, Bishop, Rook and Queen capture moves
     /// </summary>
-    /// <param name="movePool"></param>
     /// <param name="piece"><see cref="Piece"/></param>
-    /// <param name="position"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static void GeneratePieceCaptures(ref int localIndex, Span<Move> movePool, int piece, Position position)
     {
@@ -433,8 +413,6 @@ public static class MoveGenerator
     /// <summary>
     /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
     /// </summary>
-    /// <param name="position"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool CanGenerateAtLeastAValidMove(Position position)
     {
@@ -558,8 +536,6 @@ public static class MoveGenerator
     /// Obvious moves that put the king in check have been discarded, but the rest still need to be discarded
     /// see FEN position "8/8/8/2bbb3/2bKb3/2bbb3/8/8 w - - 0 1", where 4 legal moves (corners) are found
     /// </summary>
-    /// <param name="position"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsAnyCastlingMoveValid(Position position)
     {
@@ -628,8 +604,6 @@ public static class MoveGenerator
     /// Generate Knight, Bishop, Rook and Queen moves
     /// </summary>
     /// <param name="piece"><see cref="Piece"/></param>
-    /// <param name="position"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsAnyPieceMoveValid(int piece, Position position)
     {

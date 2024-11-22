@@ -33,10 +33,6 @@ public static class Perft
     /// <summary>
     /// Proper implementation, used by <see cref="DivideImpl(Position, int, long, Action{string})"/> as well
     /// </summary>
-    /// <param name="position"></param>
-    /// <param name="depth"></param>
-    /// <param name="nodes"></param>
-    /// <returns></returns>
     [SkipLocalsInit]
     internal static long PerftRecursiveImpl(Position position, int depth, long nodes)
     {

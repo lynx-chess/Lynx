@@ -85,8 +85,6 @@ public static class BitBoardExtensions
     /// <summary>
     /// https://github.com/SebLague/Chess-Challenge/blob/4ef9025ebf5f3386e416ce8244bbdf3fc488f95b/Chess-Challenge/src/Framework/Chess/Move%20Generation/Bitboards/BitBoardUtility.cs#L32
     /// </summary>
-    /// <param name="bitboard"></param>
-    /// <param name="squareIndex"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void ToggleBit(this ref BitBoard bitboard, int squareIndex)
     {
@@ -96,9 +94,6 @@ public static class BitBoardExtensions
     /// <summary>
     /// https://github.com/SebLague/Chess-Challenge/blob/4ef9025ebf5f3386e416ce8244bbdf3fc488f95b/Chess-Challenge/src/Framework/Chess/Move%20Generation/Bitboards/BitBoardUtility.cs#L37
     /// </summary>
-    /// <param name="bitboard"></param>
-    /// <param name="squareA"></param>
-    /// <param name="squareB"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void ToggleBits(this ref BitBoard bitboard, int squareA, int squareB)
     {
@@ -177,8 +172,6 @@ public static class BitBoardExtensions
     /// https://www.chessprogramming.org/General_Setwise_Operations#Separation.
     /// Cannot use (Board & -Board) - 1 due to limitation applying unary - to ulong.
     /// </summary>
-    /// <param name="board"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int GetLS1BIndex(this BitBoard board)
     {
@@ -190,7 +183,6 @@ public static class BitBoardExtensions
     /// <summary>
     /// https://www.chessprogramming.org/General_Setwise_Operations#LS1BReset
     /// </summary>
-    /// <param name="board"></param>
     /// <returns>Bitboard</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static BitBoard WithoutLS1B(this BitBoard board)
@@ -201,7 +193,6 @@ public static class BitBoardExtensions
     /// <summary>
     /// https://www.chessprogramming.org/General_Setwise_Operations#LS1BReset
     /// </summary>
-    /// <param name="board"></param>
     /// <returns>Bitboard</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void ResetLS1B(this ref BitBoard board)
@@ -218,8 +209,6 @@ public static class BitBoardExtensions
     /// <summary>
     /// Extracts the bit that represents each square on a bitboard
     /// </summary>
-    /// <param name="boardSquare"></param>
-    /// <returns></returns>
     public static ulong SquareBit(int boardSquare)
     {
         return 1UL << boardSquare;

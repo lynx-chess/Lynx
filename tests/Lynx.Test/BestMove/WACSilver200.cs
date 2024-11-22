@@ -14,8 +14,6 @@ public class WACSilver200 : BaseTest
     /// <summary>
     /// 5s
     /// </summary>
-    /// <param name="fen"></param>
-    /// <param name="bestMove"></param>
     public void WinningAtChess_FixedTime(string fen, string bestMove, string id)
     {
         VerifyBestMove(fen, bestMove, id, new GoCommand("go wtime 5500 btime 5500 winc 0 binc 0 movestogo 1"));
@@ -27,8 +25,6 @@ public class WACSilver200 : BaseTest
     /// <summary>
     /// 10s, see first case of <see cref="TimeManagementTest"/>
     /// </summary>
-    /// <param name="fen"></param>
-    /// <param name="bestMove"></param>
     public void WinningAtChess_DefaultSearchDepth(string fen, string bestMove, string id)
     {
         VerifyBestMove(fen, bestMove, id, new GoCommand($"go depth {DefaultSearchDepth}"));
