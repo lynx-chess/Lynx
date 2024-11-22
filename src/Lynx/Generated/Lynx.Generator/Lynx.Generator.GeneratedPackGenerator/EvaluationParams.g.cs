@@ -3,9 +3,9 @@
 static partial class EvaluationParams
 {
     /// <summary>
-    /// <see cref="Utils.Pack(-17, -14)"/>
+    /// <see cref="Utils.Pack(-16, -14)"/>
     /// </summary>
-    public const int IsolatedPawnPenalty = -917521;
+    public const int IsolatedPawnPenalty = -917520;
 
     /// <summary>
     /// <see cref="Utils.Pack(40, 2)"/>
@@ -43,8 +43,8 @@ static partial class EvaluationParams
     public const int PieceProtectedByPawnBonus = 983052;
 
     /// <summary>
-    /// <see cref="Utils.Pack(-47, -33)"/>
+    /// <see cref="Utils.Pack(-49, -32)"/>
     /// </summary>
-    public const int PieceAttackedByPawnPenalty = -2162735;
+    public const int PieceAttackedByPawnPenalty = -2097201;
 
 }
