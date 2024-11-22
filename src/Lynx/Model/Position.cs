@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Diagnostics;
+using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -731,6 +732,19 @@ public class Position : IDisposable
         var checks = (attacks & enemyKingCheckThreats).CountBits();
 
         packedBonus += CheckBonus[(int)Piece.N] * checks;
+
+        // Forks
+        var offset = Utils.PieceOffset(pieceSide);
+        var majorPieces = PieceBitBoards[(int)Piece.k - offset] |
+                          PieceBitBoards[(int)Piece.q - offset] |
+                          PieceBitBoards[(int)Piece.r - offset];
+
+        var enemyPiecesAttackedCount = (attacks & majorPieces).CountBits();
+
+        if (enemyPiecesAttackedCount > 1)
+        {
+            packedBonus += KnightForkBounus * enemyPiecesAttackedCount;
+        }
 
         return packedBonus;
     }
