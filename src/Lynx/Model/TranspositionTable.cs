@@ -9,15 +9,11 @@ public readonly struct TranspositionTable
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    private readonly int _currentTranspositionTableSize;
-
     private readonly TranspositionTableElement[] _tt = [];
 
     public TranspositionTable()
     {
-        _currentTranspositionTableSize = Configuration.EngineSettings.TranspositionTableSize;
-
-        var ttLength = CalculateLength(_currentTranspositionTableSize);
+        var ttLength = CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
         _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
     }
 
