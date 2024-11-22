@@ -50,6 +50,6 @@ static partial class EvaluationParams
     /// <summary>
     /// <see cref="Utils.Pack(1, 2)"/>
     /// </summary>
-    public const int QueenAttackedByKnightBonus = 131073;
+    public const int KnightAttacksRooksBonus = 131073;
 
 }
