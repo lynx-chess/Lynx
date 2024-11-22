@@ -734,16 +734,14 @@ public class Position : IDisposable
         packedBonus += CheckBonus[(int)Piece.N] * checks;
 
         // Forks
-        var offset = Utils.PieceOffset(pieceSide);
-        var majorPieces = PieceBitBoards[(int)Piece.k - offset] |
-                          PieceBitBoards[(int)Piece.q - offset] |
-                          PieceBitBoards[(int)Piece.r - offset] |
-                          PieceBitBoards[(int)Piece.b - offset];
-
-        var enemyPiecesAttackedCount = (attacks & majorPieces).CountBits();
-
-        if (enemyPiecesAttackedCount > 1)
+        if (attacks.GetBit(oppositeSideKingSquare))
         {
+            var offset = Utils.PieceOffset(pieceSide);
+            var attackedOponentPieces = PieceBitBoards[(int)Piece.q - offset]
+                | PieceBitBoards[(int)Piece.r - offset]
+                | PieceBitBoards[(int)Piece.b - offset];
+
+            var enemyPiecesAttackedCount = (attacks & attackedOponentPieces).CountBits();
             packedBonus += KnightForkBounus * enemyPiecesAttackedCount;
         }
 
