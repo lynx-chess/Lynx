@@ -734,8 +734,8 @@ public class Position : IDisposable
         packedBonus += CheckBonus[(int)Piece.N] * checks;
 
         // Attacks to enemy rooks
-        var rookAttacksCount = (attacks & PieceBitBoards[(int)Piece.r - Utils.PieceOffset(pieceSide)]).CountBits();
-        packedBonus += KnightAttacksRooksBonus * rookAttacksCount;
+        var queenAttacksCount = (attacks & PieceBitBoards[(int)Piece.q - Utils.PieceOffset(pieceSide)]).CountBits();
+        packedBonus += KnightAttacksQueenBonus * queenAttacksCount;
 
         return packedBonus;
     }
