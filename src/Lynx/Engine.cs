@@ -46,7 +46,7 @@ public sealed partial class Engine
     private CancellationTokenSource _searchCancellationTokenSource;
     private CancellationTokenSource _absoluteSearchCancellationTokenSource;
 
-    public Engine(ChannelWriter<object> engineWriter, ref TranspositionTable? tt)
+    public Engine(ChannelWriter<object> engineWriter, in TranspositionTable tt)
     {
         AverageDepth = 0;
         Game = new Game(Constants.InitialPositionFEN);
@@ -54,7 +54,7 @@ public sealed partial class Engine
         _searchCancellationTokenSource = new();
         _absoluteSearchCancellationTokenSource = new();
         _engineWriter = engineWriter;
-        _tt = tt ?? new();
+        _tt = tt;
         // Update ResetEngine() after any changes here
 
         _quietHistory = new int[12][];
@@ -110,8 +110,6 @@ public sealed partial class Engine
 
     private void ResetEngine()
     {
-        _tt.Reset();
-
         // Clear histories
         for (int i = 0; i < 12; ++i)
         {

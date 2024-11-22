@@ -5,20 +5,15 @@ using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics.X86;
 
 namespace Lynx.Model;
-public struct TranspositionTable
+public readonly struct TranspositionTable
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    private int _currentTranspositionTableSize;
+    private readonly int _currentTranspositionTableSize;
 
-    private TranspositionTableElement[] _tt = [];
+    private readonly TranspositionTableElement[] _tt = [];
 
     public TranspositionTable()
-    {
-        Allocate();
-    }
-
-    private void Allocate()
     {
         _currentTranspositionTableSize = Configuration.EngineSettings.TranspositionTableSize;
 
@@ -26,17 +21,9 @@ public struct TranspositionTable
         _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
     }
 
-    public void Reset()
+    public void Clear()
     {
-        if (_currentTranspositionTableSize == Configuration.EngineSettings.TranspositionTableSize)
-        {
-            Array.Clear(_tt);
-        }
-        else
-        {
-            _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _currentTranspositionTableSize, Configuration.EngineSettings.TranspositionTableSize);
-            Allocate();
-        }
+        Array.Clear(_tt);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
