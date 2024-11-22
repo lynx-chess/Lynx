@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics.X86;
 
 namespace Lynx.Model;
-public class TranspositionTable
+public struct TranspositionTable
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
@@ -63,7 +63,7 @@ public class TranspositionTable
     /// 'Fixed-point multiplication trick', see https://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ulong CalculateTTIndex(ulong positionUniqueIdentifier) => (ulong)(((UInt128)positionUniqueIdentifier * (UInt128)_tt.Length) >> 64);
+    public readonly ulong CalculateTTIndex(ulong positionUniqueIdentifier) => (ulong)(((UInt128)positionUniqueIdentifier * (UInt128)_tt.Length) >> 64);
 
     /// <summary>
     /// Checks the transposition table and, if there's a eval value that can be deducted from it of there's a previously recorded <paramref name="position"/>, it's returned. <see cref="EvaluationConstants.NoHashEntry"/> is returned otherwise
@@ -148,7 +148,7 @@ public class TranspositionTable
     /// </summary>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int HashfullPermillApprox()
+    public readonly int HashfullPermillApprox()
     {
         int items = 0;
         for (int i = 0; i < 1000; ++i)
@@ -208,7 +208,7 @@ public class TranspositionTable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int PopulatedItemsCount()
+    private readonly int PopulatedItemsCount()
     {
         int items = 0;
         for (int i = 0; i < _tt.Length; ++i)
@@ -239,7 +239,7 @@ public class TranspositionTable
     }
 
     [Conditional("DEBUG")]
-    private void Print()
+    private readonly void Print()
     {
         Console.WriteLine("Transposition table content:");
         for (int i = 0; i < _tt.Length; ++i)

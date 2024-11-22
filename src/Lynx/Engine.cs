@@ -46,9 +46,7 @@ public sealed partial class Engine
     private CancellationTokenSource _searchCancellationTokenSource;
     private CancellationTokenSource _absoluteSearchCancellationTokenSource;
 
-    public Engine(ChannelWriter<object> engineWriter) : this(engineWriter, new()) { }
-
-    public Engine(ChannelWriter<object> engineWriter, TranspositionTable tt)
+    public Engine(ChannelWriter<object> engineWriter, ref TranspositionTable? tt)
     {
         AverageDepth = 0;
         Game = new Game(Constants.InitialPositionFEN);
@@ -56,7 +54,7 @@ public sealed partial class Engine
         _searchCancellationTokenSource = new();
         _absoluteSearchCancellationTokenSource = new();
         _engineWriter = engineWriter;
-        _tt = tt;
+        _tt = tt ?? new();
         // Update ResetEngine() after any changes here
 
         _quietHistory = new int[12][];

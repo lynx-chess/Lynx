@@ -23,8 +23,8 @@ public sealed class Searcher
         _uciReader = uciReader;
         _engineWriter = engineWriter;
 
-        TranspositionTable _ttWrapper = new();
-        _engine = new Engine(_engineWriter, _ttWrapper);
+        TranspositionTable? _ttWrapper = new TranspositionTable();
+        _engine = new Engine(_engineWriter, ref _ttWrapper);
 
         _logger = LogManager.GetCurrentClassLogger();
     }
