@@ -42,7 +42,7 @@
     <CETCompat>false</CETCompat>
 
     <PublishAot>true</PublishAot>
-    <OptimizationPreference>Speed</OptimizationPreference>
+    <OptimizationPreference>Size</OptimizationPreference>
     <PublishSingleFile>false</PublishSingleFile>
   </PropertyGroup>
 
