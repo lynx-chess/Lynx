@@ -18,6 +18,8 @@ public sealed class Searcher
 
     public string FEN => _engine.Game.FEN;
 
+    //private bool _isNewGameCommandSupported;
+
     public Searcher(ChannelReader<string> uciReader, ChannelWriter<object> engineWriter)
     {
         _uciReader = uciReader;
@@ -92,6 +94,8 @@ public sealed class Searcher
 
     public void NewGame()
     {
+        //_isNewGameCommandSupported = true;
+
         var averageDepth = _engine.AverageDepth;
         if (averageDepth > 0 && averageDepth < int.MaxValue)
         {

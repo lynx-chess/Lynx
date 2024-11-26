@@ -34,11 +34,6 @@ public sealed partial class Engine : IDisposable
     /// </summary>
     private bool _stopRequested;
 
-#pragma warning disable IDE0052, CS0414, S4487 // Remove unread private members
-    private bool _isNewGameCommandSupported;
-    private bool _isNewGameComing;
-#pragma warning restore IDE0052, CS0414 // Remove unread private members
-
     public double AverageDepth { get; private set; }
 
     public Game Game { get; private set; }
@@ -54,7 +49,6 @@ public sealed partial class Engine : IDisposable
     {
         AverageDepth = 0;
         Game = new Game(Constants.InitialPositionFEN);
-        _isNewGameComing = true;
         _searchCancellationTokenSource = new();
         _absoluteSearchCancellationTokenSource = new();
         _engineWriter = engineWriter;
@@ -133,8 +127,6 @@ public sealed partial class Engine : IDisposable
         AverageDepth = 0;
         Game.FreeResources();
         Game = new Game(Constants.InitialPositionFEN);
-        _isNewGameComing = true;
-        _isNewGameCommandSupported = true;
         _stopRequested = false;
 
         ResetEngine();
@@ -146,7 +138,6 @@ public sealed partial class Engine : IDisposable
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
         Game.FreeResources();
         Game = PositionCommand.ParseGame(rawPositionCommand, moves);
-        _isNewGameComing = false;
         _stopRequested = false;
     }
 
