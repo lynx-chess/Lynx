@@ -15,15 +15,15 @@ public sealed class UCIHandler
     private readonly Channel<string> _uciToEngine;
     private readonly Channel<object> _engineToUci;
 
-    private readonly Engine _engine;
+    private readonly Searcher _searcher;
     private readonly Logger _logger;
 
-    public UCIHandler(Channel<string> uciToEngine, Channel<object> engineToUci, Engine engine)
+    public UCIHandler(Channel<string> uciToEngine, Channel<object> engineToUci, Searcher searcher)
     {
         _uciToEngine = uciToEngine;
         _engineToUci = engineToUci;
 
-        _engine = engine;
+        _searcher = searcher;
         _logger = LogManager.GetCurrentClassLogger();
     }
 
@@ -66,9 +66,6 @@ public sealed class UCIHandler
                 case QuitCommand.Id:
                     HandleQuit();
                     return;
-                case RegisterCommand.Id:
-                    HandleRegister(rawCommand);
-                    break;
                 case SetOptionCommand.Id:
                     HandleSetOption(rawCommand);
                     break;
@@ -133,18 +130,18 @@ public sealed class UCIHandler
     {
 #if DEBUG
         var sw = Stopwatch.StartNew();
-        _engine.Game.CurrentPosition.Print();
+        _searcher.PrintCurrentPosition();
 #endif
 
-        _engine.AdjustPosition(command);
+        _searcher.AdjustPosition(command);
 
 #if DEBUG
-        _engine.Game.CurrentPosition.Print();
+        _searcher.PrintCurrentPosition();
         _logger.Info("Position parsing took {0}ms", sw.ElapsedMilliseconds);
 #endif
     }
 
-    private void HandleStop() => _engine.StopSearching();
+    private void HandleStop() => _searcher.StopSearching();
 
     private async Task HandleUCI(CancellationToken cancellationToken)
     {
@@ -165,7 +162,7 @@ public sealed class UCIHandler
     {
         if (Configuration.EngineSettings.IsPonder)
         {
-            _engine.PonderHit();
+            _searcher.PonderHit();
         }
         else
         {
@@ -536,25 +533,16 @@ public sealed class UCIHandler
 
     private void HandleNewGame()
     {
-        if (_engine.AverageDepth > 0 && _engine.AverageDepth < int.MaxValue)
-        {
-            _logger.Info("Average depth: {0}", _engine.AverageDepth);
-        }
-        _engine.NewGame();
+        _searcher.NewGame();
     }
 
     private static void HandleDebug(ReadOnlySpan<char> command) => Configuration.IsDebug = DebugCommand.Parse(command);
 
     private void HandleQuit()
     {
-        if (_engine.AverageDepth > 0 && _engine.AverageDepth < int.MaxValue)
-        {
-            _logger.Info("Average depth: {0}", _engine.AverageDepth);
-        }
+        _searcher.Quit();
         _engineToUci.Writer.Complete();
     }
-
-    private void HandleRegister(ReadOnlySpan<char> rawCommand) => _engine.Registration = new RegisterCommand(rawCommand);
 
     private void HandlePerft(string rawCommand)
     {
@@ -562,7 +550,7 @@ public sealed class UCIHandler
 
         if (items.Length >= 2 && int.TryParse(items[1], out int depth) && depth >= 1)
         {
-            Perft.RunPerft(_engine.Game.CurrentPosition, depth, str => _engineToUci.Writer.TryWrite(str));
+            Perft.RunPerft(_searcher.CurrentPosition, depth, str => _engineToUci.Writer.TryWrite(str));
         }
     }
 
@@ -572,7 +560,7 @@ public sealed class UCIHandler
 
         if (items.Length >= 2 && int.TryParse(items[1], out int depth) && depth >= 1)
         {
-            Perft.RunDivide(_engine.Game.CurrentPosition, depth, str => _engineToUci.Writer.TryWrite(str));
+            Perft.RunDivide(_searcher.CurrentPosition, depth, str => _engineToUci.Writer.TryWrite(str));
         }
     }
 
@@ -584,8 +572,8 @@ public sealed class UCIHandler
         {
             depth = Configuration.EngineSettings.BenchDepth;
         }
-        var results = _engine.Bench(depth);
-        await _engine.PrintBenchResults(results);
+
+        await _searcher.RunBench(depth);
     }
 
     private async ValueTask HandleSettings()
@@ -665,18 +653,13 @@ public sealed class UCIHandler
 
     private async Task HandleEval(CancellationToken cancellationToken)
     {
-        var score = WDL.NormalizeScore(_engine.Game.CurrentPosition.StaticEvaluation().Score);
-
-        await _engineToUci.Writer.WriteAsync(score, cancellationToken);
+        var normalizedScore = WDL.NormalizeScore(_searcher.CurrentPosition.StaticEvaluation().Score);
+        await _engineToUci.Writer.WriteAsync(normalizedScore, cancellationToken);
     }
 
     private async Task HandleFEN(CancellationToken cancellationToken)
     {
-        const string fullMoveCounterString = " 1";
-
-        var fen = _engine.Game.CurrentPosition.FEN()[..^3] + _engine.Game.HalfMovesWithoutCaptureOrPawnMove.ToString() + fullMoveCounterString;
-
-        await _engineToUci.Writer.WriteAsync(fen, cancellationToken);
+        await _engineToUci.Writer.WriteAsync(_searcher.FEN, cancellationToken);
     }
 
     private async ValueTask HandleOpenBenchSPSA(CancellationToken cancellationToken)

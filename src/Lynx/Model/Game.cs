@@ -29,6 +29,8 @@ public sealed class Game : IDisposable
 
     public Position PositionBeforeLastSearch { get; private set; }
 
+    public string FEN => CurrentPosition.FEN(HalfMovesWithoutCaptureOrPawnMove);
+
     public Game(ReadOnlySpan<char> fen) : this(fen, [], [], [])
     {
     }

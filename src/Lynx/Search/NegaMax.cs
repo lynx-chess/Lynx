@@ -285,7 +285,7 @@ public sealed partial class Engine
             }
             else if (visitedMovesCounter == 0)
             {
-                PrefetchTTEntry();
+                _tt.PrefetchTTEntry(position);
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
                 score = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
@@ -332,7 +332,7 @@ public sealed partial class Engine
                     }
                 }
 
-                PrefetchTTEntry();
+                _tt.PrefetchTTEntry(position);
 
                 int reduction = 0;
 
