@@ -7,13 +7,15 @@ using System.Threading.Channels;
 
 namespace Lynx;
 
-public sealed partial class Engine
+public sealed partial class Engine : IDisposable
 {
     internal const int DefaultMaxDepth = 5;
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
     private readonly ChannelWriter<object> _engineWriter;
     private readonly TranspositionTable _tt;
+
+    private bool _disposedValue;
 
     private bool _isSearching;
 
@@ -78,13 +80,8 @@ public sealed partial class Engine
 
         _engineWriter = engineWriter;
 
-        // No need for ResetEngine() call here, WarmupEngine -> Bench -> NewGame() calls it
+        NewGame();
 #endif
-
-#pragma warning disable S1215 // "GC.Collect" should not be called
-        GC.Collect();
-        GC.WaitForPendingFinalizers();
-#pragma warning restore S1215 // "GC.Collect" should not be called
     }
 
 #pragma warning disable S1144 // Unused private types or members should be removed - used in Release mode
@@ -92,8 +89,6 @@ public sealed partial class Engine
     {
         _logger.Info("Warming up engine");
         var sw = Stopwatch.StartNew();
-
-        InitializeStaticClasses();
 
         const string goWarmupCommand = "go depth 10";   // ~300 ms
         var command = new GoCommand(goWarmupCommand);
@@ -143,11 +138,6 @@ public sealed partial class Engine
         _stopRequested = false;
 
         ResetEngine();
-
-#pragma warning disable S1215 // "GC.Collect" should not be called
-        GC.Collect();
-        GC.WaitForPendingFinalizers();
-#pragma warning restore S1215 // "GC.Collect" should not be called
     }
 
     [SkipLocalsInit]
@@ -303,14 +293,29 @@ public sealed partial class Engine
         _absoluteSearchCancellationTokenSource.Cancel();
     }
 
-    private static void InitializeStaticClasses()
+    public void FreeResources()
     {
-        _ = PVTable.Indexes[0];
-        _ = Attacks.KingAttacks;
-        _ = ZobristTable.SideHash();
-        _ = Masks.FileMasks;
-        _ = EvaluationConstants.HistoryBonus[1];
-        _ = MoveGenerator.Init();
-        _ = GoCommand.Init();
+        Game.FreeResources();
+
+        _disposedValue = true;
+    }
+
+    private void Dispose(bool disposing)
+    {
+        if (!_disposedValue)
+        {
+            if (disposing)
+            {
+                FreeResources();
+            }
+            _disposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
     }
 }
