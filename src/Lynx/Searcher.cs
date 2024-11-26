@@ -113,6 +113,8 @@ public sealed class Searcher
             _currentTranspositionTableSize = Configuration.EngineSettings.TranspositionTableSize;
 
             _ttWrapper = new TranspositionTable();
+
+            _engine.FreeResources();
             _engine = new Engine(_engineWriter, in _ttWrapper);
         }
 
