@@ -102,12 +102,13 @@ public sealed class EngineSettings
 
     #region Time management
 
+    [SPSA<double>(0.1, 1, 0.05)]
     public double HardTimeBoundMultiplier { get; set; } = 0.52;
 
+    [SPSA<double>(0.5, 1.5, 0.05)]
     public double SoftTimeBoundMultiplier { get; set; } = 1;
 
-    public int DefaultMovesToGo { get; set; } = 45;
-
+    [SPSA<double>(0.1, 2, 0.1)]
     public double SoftTimeBaseIncrementMultiplier { get; set; } = 0.8;
 
     [SPSA<double>(1, 3, 0.1)]

@@ -267,6 +267,30 @@ public sealed class UCIHandler
                 }
 
             #region Time management
+            case "hardtimeboundmultiplier":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.HardTimeBoundMultiplier = value * 0.01;
+                    }
+                    break;
+                }
+            case "softtimeboundmultiplier":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.SoftTimeBoundMultiplier = value * 0.01;
+                    }
+                    break;
+                }
+            case "softtimebaseincrementmultiplier":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.SoftTimeBaseIncrementMultiplier = value * 0.01;
+                    }
+                    break;
+                }
             case "nodetmbase":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
