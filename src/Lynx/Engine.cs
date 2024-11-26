@@ -43,6 +43,8 @@ public sealed partial class Engine : IDisposable
     private CancellationTokenSource _searchCancellationTokenSource;
     private CancellationTokenSource _absoluteSearchCancellationTokenSource;
 
+    public Engine(ChannelWriter<object> engineWriter) : this(engineWriter, new()) { }
+
     public Engine(ChannelWriter<object> engineWriter, in TranspositionTable tt)
     {
         AverageDepth = 0;
