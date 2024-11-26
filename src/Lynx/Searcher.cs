@@ -31,6 +31,8 @@ public sealed class Searcher
         _logger = LogManager.GetCurrentClassLogger();
 
         _currentTranspositionTableSize = Configuration.EngineSettings.TranspositionTableSize;
+
+        InitializeStaticClasses();
     }
 
     public async Task Run(CancellationToken cancellationToken)
@@ -114,6 +116,10 @@ public sealed class Searcher
             _engine = new Engine(_engineWriter, in _ttWrapper);
         }
 
+#pragma warning disable S1215 // "GC.Collect" should not be called
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+#pragma warning restore S1215 // "GC.Collect" should not be called
     }
 
     public void Quit()
@@ -129,5 +135,16 @@ public sealed class Searcher
     {
         var results = _engine.Bench(depth);
         await _engine.PrintBenchResults(results);
+    }
+
+    private static void InitializeStaticClasses()
+    {
+        _ = PVTable.Indexes[0];
+        _ = Attacks.KingAttacks;
+        _ = ZobristTable.SideHash();
+        _ = Masks.FileMasks;
+        _ = EvaluationConstants.HistoryBonus[1];
+        _ = MoveGenerator.Init();
+        _ = GoCommand.Init();
     }
 }

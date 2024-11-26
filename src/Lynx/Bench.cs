@@ -129,11 +129,6 @@ public partial class Engine
 
         _engineWriter.TryWrite($"Total time: {Utils.CalculateUCITime(totalSeconds)}");
 
-        // Cleanup game
-        NewGame();
-        _isNewGameComing = false;
-        _isNewGameCommandSupported = false;
-
         return (totalNodes, Utils.CalculateNps(totalNodes, totalSeconds));
     }
 
