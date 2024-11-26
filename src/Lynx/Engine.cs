@@ -14,6 +14,7 @@ public sealed partial class Engine : IDisposable
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
     private readonly ChannelWriter<object> _engineWriter;
     private readonly TranspositionTable _tt;
+    private SearchConstraints _searchConstraints;
 
     private bool _disposedValue;
 
@@ -56,9 +57,11 @@ public sealed partial class Engine : IDisposable
         // Update ResetEngine() after any changes here
 
         _quietHistory = new int[12][];
+        _moveNodeCount = new ulong[12][];
         for (int i = 0; i < _quietHistory.Length; ++i)
         {
             _quietHistory[i] = new int[64];
+            _moveNodeCount[i] = new ulong[64];
         }
 
         _killerMoves = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin][];
@@ -107,6 +110,7 @@ public sealed partial class Engine : IDisposable
         for (int i = 0; i < 12; ++i)
         {
             Array.Clear(_quietHistory[i]);
+            Array.Clear(_moveNodeCount[i]);
         }
 
         Array.Clear(_captureHistory);
@@ -159,6 +163,8 @@ public sealed partial class Engine : IDisposable
 
     public SearchResult BestMove(GoCommand goCommand, in SearchConstraints searchConstrains)
     {
+        _searchConstraints = searchConstrains;
+
         _searchCancellationTokenSource = new();
         _absoluteSearchCancellationTokenSource = new();
 
@@ -167,7 +173,7 @@ public sealed partial class Engine : IDisposable
             _searchCancellationTokenSource.CancelAfter(searchConstrains.HardLimitTimeBound);
         }
 
-        SearchResult resultToReturn = IDDFS(searchConstrains.MaxDepth, searchConstrains.SoftLimitTimeBound);
+        SearchResult resultToReturn = IDDFS();
         //SearchResult resultToReturn = await SearchBestMove(maxDepth, decisionTime);
 
         Game.ResetCurrentPositionToBeforeSearchState();
@@ -185,12 +191,12 @@ public sealed partial class Engine : IDisposable
     }
 
 #pragma warning disable S1144 // Unused private types or members should be removed - wanna keep this around
-    private async ValueTask<SearchResult> SearchBestMove(int maxDepth, int softLimitTimeBound)
+    private async ValueTask<SearchResult> SearchBestMove()
 #pragma warning restore S1144 // Unused private types or members should be removed
     {
         if (!Configuration.EngineSettings.UseOnlineTablebaseInRootPositions || Game.CurrentPosition.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
         {
-            return IDDFS(maxDepth, softLimitTimeBound)!;
+            return IDDFS()!;
         }
 
         // Local copy of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove so that it doesn't interfere with regular search
@@ -199,7 +205,7 @@ public sealed partial class Engine : IDisposable
         var tasks = new Task<SearchResult?>[] {
                 // Other copies of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove (same reason)
                 ProbeOnlineTablebase(Game.CurrentPosition, Game.CopyPositionHashHistory(),  Game.HalfMovesWithoutCaptureOrPawnMove),
-                Task.Run(()=>(SearchResult?)IDDFS(maxDepth, softLimitTimeBound))
+                Task.Run(()=>(SearchResult?)IDDFS())
             };
 
         var resultList = await Task.WhenAll(tasks);

@@ -90,6 +90,12 @@ public sealed partial class Engine
             + previousMoveTargetSquare;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void UpdateMoveNodeCount(Move move, ulong nodesToAdd)
+    {
+        _moveNodeCount[move.Piece()][move.TargetSquare()] += nodesToAdd;
+    }
+
     #region Debugging
 
 #pragma warning disable S125 // Sections of code should not be commented out

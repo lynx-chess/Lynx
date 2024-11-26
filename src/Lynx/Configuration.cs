@@ -110,6 +110,12 @@ public sealed class EngineSettings
 
     public double SoftTimeBaseIncrementMultiplier { get; set; } = 0.8;
 
+    [SPSA<double>(1, 3, 0.1)]
+    public double NodeTmBase { get; set; } = 1.5;
+
+    [SPSA<double>(0.5, 2.5, 0.1)]
+    public double NodeTmScale { get; set; } = 1;
+
     #endregion
 
     [SPSA<int>(3, 10, 0.5)]
@@ -121,7 +127,7 @@ public sealed class EngineSettings
     /// <summary>
     /// Value originally from Stormphrax, who apparently took it from Viridithas
     /// </summary>
-    [SPSA<double>(0.1, 2, 0.10)]
+    [SPSA<double>(0.1, 2, 0.1)]
     public double LMR_Base { get; set; } = 0.75;
 
     /// <summary>

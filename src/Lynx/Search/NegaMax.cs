@@ -251,6 +251,7 @@ public sealed partial class Engine
                 continue;
             }
 
+            var previousNodes = _nodes;
             visitedMoves[visitedMovesCounter] = move;
 
             ++_nodes;
@@ -407,6 +408,11 @@ public sealed partial class Engine
 
             // After making a move
             RevertMove();
+            if (isRoot)
+            {
+                var nodesSpentInThisMove = _nodes - previousNodes;
+                UpdateMoveNodeCount(move, nodesSpentInThisMove);
+            }
 
             PrintMove(position, ply, move, score);
 

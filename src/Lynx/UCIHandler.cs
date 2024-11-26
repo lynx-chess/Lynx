@@ -266,6 +266,25 @@ public sealed class UCIHandler
                     break;
                 }
 
+            #region Time management
+            case "nodetmbase":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.NodeTmBase = value * 0.01;
+                    }
+                    break;
+                }
+            case "nodetmscale":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.NodeTmScale = value * 0.01;
+                    }
+                    break;
+                }
+            #endregion
+
             #region Search tuning
 
             case "lmr_mindepth":
@@ -288,7 +307,7 @@ public sealed class UCIHandler
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
-                        Configuration.EngineSettings.LMR_Base = (value * 0.01);
+                        Configuration.EngineSettings.LMR_Base = value * 0.01;
                     }
                     break;
                 }
@@ -296,7 +315,7 @@ public sealed class UCIHandler
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
-                        Configuration.EngineSettings.LMR_Divisor = (value * 0.01);
+                        Configuration.EngineSettings.LMR_Divisor = value * 0.01;
                     }
                     break;
                 }
