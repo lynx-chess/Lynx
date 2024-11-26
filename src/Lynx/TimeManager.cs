@@ -1,6 +1,7 @@
 ﻿using Lynx.Model;
 using Lynx.UCI.Commands.GUI;
 using NLog;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Lynx;
@@ -98,6 +99,9 @@ public static class TimeManager
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int SoftLimit(SearchConstraints searchConstraints, ulong bestMoveNodeCount, ulong totalNodeCount)
     {
+        Debug.Assert(totalNodeCount > 0);
+        Debug.Assert(totalNodeCount >= bestMoveNodeCount);
+
         double nodeTmBase = Configuration.EngineSettings.NodeTmBase;
         double nodeTmScale = Configuration.EngineSettings.NodeTmScale;
 

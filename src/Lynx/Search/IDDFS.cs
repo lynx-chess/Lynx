@@ -67,6 +67,10 @@ public sealed partial class Engine
 
         Array.Clear(_pVTable);
         Array.Clear(_maxDepthReached);
+        for (int i = 0; i < 12; ++i)
+        {
+            Array.Clear(_moveNodeCount[i]);
+        }
 
         int bestScore = 0;
         int alpha = EvaluationConstants.MinEval;
@@ -246,7 +250,7 @@ public sealed partial class Engine
 
         var bestMoveNodeCount = _moveNodeCount[bestMove.Piece()][bestMove.TargetSquare()];
         var scaledSoftLimitTimeBound = TimeManager.SoftLimit(_searchConstraints, bestMoveNodeCount, _nodes);
-        _logger.Debug("[TM] Depth {Depth}: Base soft limit {BaseSoftLimit}, scaled soft limit {ScaledSoftLimit}", depth - 1, _searchConstraints.SoftLimitTimeBound, scaledSoftLimitTimeBound);
+        _logger.Warn("[TM] Depth {Depth}: Base soft limit {BaseSoftLimit}, scaled soft limit {ScaledSoftLimit}", depth - 1, _searchConstraints.SoftLimitTimeBound, scaledSoftLimitTimeBound);
 
         if (elapsedMilliseconds > scaledSoftLimitTimeBound)
         {
