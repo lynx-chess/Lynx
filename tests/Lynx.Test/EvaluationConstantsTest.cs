@@ -48,8 +48,8 @@ public class EvaluationConstantsTest
     {
         Assert.Greater(MaxEval, PositiveCheckmateDetectionLimit + ((Constants.AbsoluteMaxDepth + 10) * CheckmateDepthFactor));
         Assert.Greater(MaxEval, CheckMateBaseEvaluation + ((Constants.AbsoluteMaxDepth + 10) * CheckmateDepthFactor));
-        Assert.Greater(MaxEval, TranspositionTableExtensions.RecalculateMateScores(CheckMateBaseEvaluation, Constants.AbsoluteMaxDepth));
-        Assert.Greater(MaxEval, TranspositionTableExtensions.RecalculateMateScores(CheckMateBaseEvaluation, -Constants.AbsoluteMaxDepth));
+        Assert.Greater(MaxEval, TranspositionTable.RecalculateMateScores(CheckMateBaseEvaluation, Constants.AbsoluteMaxDepth));
+        Assert.Greater(MaxEval, TranspositionTable.RecalculateMateScores(CheckMateBaseEvaluation, -Constants.AbsoluteMaxDepth));
         Assert.Less(MaxEval, short.MaxValue);
     }
 
@@ -58,8 +58,8 @@ public class EvaluationConstantsTest
     {
         Assert.Less(MinEval, NegativeCheckmateDetectionLimit - ((Constants.AbsoluteMaxDepth + 10) * CheckmateDepthFactor));
         Assert.Less(MinEval, -CheckMateBaseEvaluation - ((Constants.AbsoluteMaxDepth + 10) * CheckmateDepthFactor));
-        Assert.Less(MinEval, TranspositionTableExtensions.RecalculateMateScores(-CheckMateBaseEvaluation, Constants.AbsoluteMaxDepth));
-        Assert.Less(MinEval, TranspositionTableExtensions.RecalculateMateScores(-CheckMateBaseEvaluation, -Constants.AbsoluteMaxDepth));
+        Assert.Less(MinEval, TranspositionTable.RecalculateMateScores(-CheckMateBaseEvaluation, Constants.AbsoluteMaxDepth));
+        Assert.Less(MinEval, TranspositionTable.RecalculateMateScores(-CheckMateBaseEvaluation, -Constants.AbsoluteMaxDepth));
         Assert.Greater(MinEval, short.MinValue);
     }
 

@@ -13,7 +13,6 @@ public static class Utils
     /// Side.White -> 0
     /// Side.Black -> 6
     /// </summary>
-    /// <param name="side"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int PieceOffset(Side side) => PieceOffset((int)side);
 
@@ -21,7 +20,6 @@ public static class Utils
     /// Side.White -> 0
     /// Side.Black -> 6
     /// </summary>
-    /// <param name="side"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int PieceOffset(int side)
     {
@@ -34,19 +32,13 @@ public static class Utils
     /// Side.White -> 0
     /// Side.Black -> 6
     /// </summary>
-    /// <param name="isWhite"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int PieceOffset(bool isWhite)
-    {
-        return 6 - (6 * Unsafe.As<bool, byte>(ref isWhite));
-    }
+    public static int PieceOffset(bool isWhite) => isWhite ? 0 : 6;
 
     /// <summary>
     /// Side.Black -> Side.White
     /// Side.White -> Side.Black
     /// </summary>
-    /// <param name="side"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int OppositeSide(Side side) => OppositeSide((int)side);
 
@@ -54,8 +46,6 @@ public static class Utils
     /// Side.Black -> Side.White
     /// Side.White -> Side.Black
     /// </summary>
-    /// <param name="side"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int OppositeSide(int side)
     {
@@ -132,8 +122,6 @@ public static class Utils
     /// Updates <paramref name="halfMovesWithoutCaptureOrPawnMove"/>.
     /// See also <see cref="Game.Update50movesRule(int, bool)"/>
     /// </summary>
-    /// <param name="moveToPlay"></param>
-    /// <param name="halfMovesWithoutCaptureOrPawnMove"></param>
     /// <remarks>
     /// Checking halfMovesWithoutCaptureOrPawnMove >= 100 since a capture/pawn move doesn't necessarily 'clear' the variable.
     /// i.e. while the engine is searching:
@@ -163,8 +151,6 @@ public static class Utils
     /// <summary>
     /// Providing there's a checkmate detected in <paramref name="score"/>, returns in how many moves
     /// </summary>
-    /// <param name="score"></param>
-    /// <param name="bestScoreAbs"></param>
     /// <returns>Positive value if white is checkmating, negative value if black is</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int CalculateMateInX(int score, int bestScoreAbs)
@@ -202,9 +188,6 @@ public static class Utils
     /// <summary>
     /// https://minuskelvin.net/chesswiki/content/packed-eval.html
     /// </summary>
-    /// <param name="mg"></param>
-    /// <param name="eg"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int Pack(short mg, short eg)
     {
@@ -214,8 +197,6 @@ public static class Utils
     /// <summary>
     /// https://minuskelvin.net/chesswiki/content/packed-eval.html
     /// </summary>
-    /// <param name="packed"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static short UnpackMG(int packed)
     {
@@ -225,8 +206,6 @@ public static class Utils
     /// <summary>
     /// https://minuskelvin.net/chesswiki/content/packed-eval.html
     /// </summary>
-    /// <param name="packed"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static short UnpackEG(int packed)
     {

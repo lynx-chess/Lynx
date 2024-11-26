@@ -42,9 +42,6 @@ public sealed partial class Engine
 
     private readonly int[] _maxDepthReached = GC.AllocateArray<int>(Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin, pinned: true);
 
-    private int _currentTranspositionTableSize;
-    private TranspositionTable _tt = null!;
-
     private ulong _nodes;
 
     private SearchResult? _previousSearchResult;
@@ -54,8 +51,6 @@ public sealed partial class Engine
     /// <summary>
     /// Iterative Deepening Depth-First Search (IDDFS) using alpha-beta pruning
     /// </summary>
-    /// <param name="maxDepth"></param>
-    /// <param name="softLimitTimeBound"></param>
     /// <returns>Not null <see cref="SearchResult"/>, although made nullable in order to match online tb probing signature</returns>
     [SkipLocalsInit]
     public SearchResult IDDFS(int maxDepth, int softLimitTimeBound)
@@ -133,7 +128,7 @@ public sealed partial class Engine
 
                         bestScore = NegaMax(depth: depth - failHighReduction, ply: 0, alpha, beta);
 
-                        // 13, 19, 28, 42, 63, 94, 141, 211, 316, 474, 711, 1066, 1599, 2398, 3597, 5395, 8092, 12138, 18207, 27310, 40965, 61447, 92170
+                        // 13, 19, 28, 42, 63, 94, 141, 211, 316, 474, 711, 1066, 1599, 2398, 3597, 5395, 8092, 12138, 18207, 27310, |EvaluationConstants.MaxEval|, 40965
                         window += window >> 1;   // window / 2
 
                         // Depth change: https://github.com/lynx-chess/Lynx/pull/440

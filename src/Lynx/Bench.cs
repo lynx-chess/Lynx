@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using Lynx.UCI.Commands.GUI;
+using System.Diagnostics;
 
 namespace Lynx;
 
@@ -116,18 +117,17 @@ public partial class Engine
             AdjustPosition($"position fen {fen}");
             stopwatch.Restart();
 
-            var result = BestMove(new($"go depth {depth}"));
+            var goCommand = new GoCommand($"go depth {depth}");
+            var searchConstraints = TimeManager.CalculateTimeManagement(Game, goCommand);
+
+            var result = BestMove(goCommand, in searchConstraints);
+
             var elapsedSeconds = Utils.CalculateElapsedSeconds(_stopWatch);
             totalSeconds += elapsedSeconds;
             totalNodes += result.Nodes;
         }
 
         _engineWriter.TryWrite($"Total time: {Utils.CalculateUCITime(totalSeconds)}");
-
-        // Cleanup game
-        NewGame();
-        _isNewGameComing = false;
-        _isNewGameCommandSupported = false;
 
         return (totalNodes, Utils.CalculateNps(totalNodes, totalSeconds));
     }

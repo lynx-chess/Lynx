@@ -73,8 +73,6 @@ public class OnlineTablebaseProberTest
     /// <summary>
     /// For some reason this position isn't detected as no material one
     /// </summary>
-    /// <param name="fen"></param>
-    /// <param name="distanceToMate"></param>
     [TestCase("3k4/8/1K6/8/8/6N1/4N3/8 w - - 0 1", 0)]  // 2 horses
     [TestCase("3k4/8/1K6/8/8/6N1/4N3/8 b - - 0 1", 0)]  // 2 horses
     [TestCase("3k4/8/1K6/8/8/6n1/4n3/8 w - - 0 1", 0)]  // 2 horses
@@ -94,8 +92,6 @@ public class OnlineTablebaseProberTest
     /// <summary>
     /// For some reason this position isn't detected as no material one
     /// </summary>
-    /// <param name="fen"></param>
-    /// <param name="distanceToMate"></param>
     [TestCase("3k4/8/1K6/8/8/6N1/4N3/8 w - - 0 1", 0)]  // 2 horses
     [TestCase("3k4/8/1K6/8/8/6N1/4N3/8 b - - 0 1", 0)]  // 2 horses
     [TestCase("3k4/8/1K6/8/8/6n1/4n3/8 w - - 0 1", 0)]  // 2 horses
@@ -215,10 +211,6 @@ public class OnlineTablebaseProberTest
     /// <summary>
     /// In root search mate score will always be the detected one, even if over 50 moves with or without previous <paramref name="halfMovesWithoutCaptureOrPawnMove"/>
     /// </summary>
-    /// <param name="fen"></param>
-    /// <param name="distanceToMate"></param>
-    /// <param name="bestMove"></param>
-    /// <param name="halfMovesWithoutCaptureOrPawnMove"></param>
     [TestCase("kN6/8/8/8/8/8/8/B3K3 w - - 0 1", 27, "a1e5", 0)]    // B+N, Mate in 27, DTZ?==DTM=58
     [TestCase("kN6/8/8/8/8/8/8/B3K3 w - - 0 1", 27, "a1e5", 50)]   // B+N, Mate in 27, DTZ?==DTM=58
     [TestCase("Kn6/8/8/8/8/8/8/b3k3 b - - 0 1", 27, "a1e5", 0)]    // B+N, Mate in 27, DTZ?==DTM=58
@@ -234,9 +226,6 @@ public class OnlineTablebaseProberTest
     /// <summary>
     /// In evaluation search we need to check <paramref name="halfMovesWithoutCaptureOrPawnMove"/> to make sure to apply the 50 moves rule correctly
     /// </summary>
-    /// <param name="fen"></param>
-    /// <param name="halfMovesWithoutCaptureOrPawnMove"></param>
-    /// <param name="expectedEvaluation"></param>
     [TestCase("kN6/8/8/8/8/8/8/B3K3 w - - 0 1", 0, CheckMateBaseEvaluation - (27 * CheckmateDepthFactor))]    // B+N, Mate in 27, DTZ==DTM=58
     [TestCase("kN6/8/8/8/8/8/8/B3K3 w - - 0 1", 50, 0)]                                                                     // B+N, Mate in 27, DTM=58, DTZ >100
     [TestCase("Kn6/8/8/8/8/8/8/b3k3 b - - 0 1", 0, +CheckMateBaseEvaluation - (27 * CheckmateDepthFactor))]   // B+N, Mate in 27, DTZ?==DTM=58
@@ -251,10 +240,6 @@ public class OnlineTablebaseProberTest
     /// <summary>
     /// In root search mate score will always be the detected one, even if over 50 moves with or without previous <paramref name="halfMovesWithoutCaptureOrPawnMove"/>
     /// </summary>
-    /// <param name="fen"></param>
-    /// <param name="distanceToMate"></param>
-    /// <param name="bestMove"></param>
-    /// <param name="halfMovesWithoutCaptureOrPawnMove"></param>
     [TestCase("6kN/8/8/8/8/8/8/B3K3 b - - 0 1", -30, "g8f8", 0)]    // B+N, Mate in 30, DTZ?==DTM=60
     [TestCase("6kN/8/8/8/8/8/8/B3K3 b - - 0 1", -30, "g8f8", 42)]   // B+N, Mate in 30, DTZ?==DTM=60
     [TestCase("6Kn/8/8/8/8/8/8/b3k3 w - - 0 1", -30, "g8f8", 0)]    // B+N, Mate in 30, DTZ?==DTM=60
@@ -270,9 +255,6 @@ public class OnlineTablebaseProberTest
     /// <summary>
     /// In evaluation search we need to check <paramref name="halfMovesWithoutCaptureOrPawnMove"/> to make sure to apply the 50 moves rule correctly
     /// </summary>
-    /// <param name="fen"></param>
-    /// <param name="halfMovesWithoutCaptureOrPawnMove"></param>
-    /// <param name="expectedEvaluation"></param>
     [TestCase("6kN/8/8/8/8/8/8/B3K3 b - - 0 1", 0, -CheckMateBaseEvaluation + (30 * CheckmateDepthFactor))]   // B+N, Mate in 30, DTZ?==DTM=60
     [TestCase("6kN/8/8/8/8/8/8/B3K3 b - - 0 1", 42, 0)]                                                                     // B+N, Mate in 30, DTZ?==DTM=60
     [TestCase("6Kn/8/8/8/8/8/8/b3k3 w - - 0 1", 0, -CheckMateBaseEvaluation + (30 * CheckmateDepthFactor))]   // B+N, Mate in 30, DTZ?==DTM=60

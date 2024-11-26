@@ -222,9 +222,6 @@ public class PieceAtSquare_Benchmark : BaseBenchmark
     /// <summary>
     /// Based on Stormphrax
     /// </summary>
-    /// <param name="position"></param>
-    /// <param name="targetSquare"></param>
-    /// <returns></returns>
     private static int PieceAt(Position position, int targetSquare)
     {
         var bit = BitBoardExtensions.SquareBit(targetSquare);

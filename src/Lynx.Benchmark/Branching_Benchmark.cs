@@ -81,7 +81,6 @@ public class Branching_Benchmark : BaseBenchmark
     /// <summary>
     /// Seems the best alternative
     /// </summary>
-    /// <param name="iterations"></param>
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
     public void IfReturnBranchOpt(int iterations)

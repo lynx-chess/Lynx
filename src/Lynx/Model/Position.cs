@@ -49,7 +49,6 @@ public class Position : IDisposable
     /// Beware, half move counter isn't take into account
     /// Use alternative constructor instead and set it externally if relevant
     /// </summary>
-    /// <param name="fen"></param>
     public Position(string fen) : this(FENParser.ParseFEN(fen))
     {
     }
@@ -70,7 +69,6 @@ public class Position : IDisposable
     /// <summary>
     /// Clone constructor
     /// </summary>
-    /// <param name="position"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Position(Position position)
     {
@@ -353,7 +351,6 @@ public class Position : IDisposable
     /// <summary>
     /// False if any of the kings has been captured, or if the opponent king is in check.
     /// </summary>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal bool IsValid()
     {
@@ -375,7 +372,6 @@ public class Position : IDisposable
     /// This method is meant to be invoked only after a pseudolegal <see cref="MakeMove(int)"/>.
     /// i.e. it doesn't ensure that both kings are on the board
     /// </summary>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool WasProduceByAValidMove()
     {
@@ -393,7 +389,6 @@ public class Position : IDisposable
     /// Evaluates material and position in a NegaMax style.
     /// That is, positive scores always favour playing <see cref="Side"/>.
     /// </summary>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public (int Score, int Phase) StaticEvaluation(int movesWithoutCaptureOrPawnMove = 0)
     {
@@ -588,7 +583,7 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static int TaperedEvaluation(TaperedEvaluationTerm taperedEvaluationTerm, int phase)
+    internal static int TaperedEvaluation(int taperedEvaluationTerm, int phase)
     {
         return ((Utils.UnpackMG(taperedEvaluationTerm) * phase) + (Utils.UnpackEG(taperedEvaluationTerm) * (24 - phase))) / 24;
     }
@@ -599,7 +594,6 @@ public class Position : IDisposable
     /// NegaMax style
     /// </summary>
     /// <param name="ply">Modulates the output, favouring positions with lower ply (i.e. Checkmate in less moves)</param>
-    /// <param name="isInCheck"></param>
     /// <returns>At least <see cref="CheckMateEvaluation"/> if Position.Side lost (more extreme values when <paramref name="ply"/> increases)
     /// or 0 if Position.Side was stalemated</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -619,9 +613,6 @@ public class Position : IDisposable
     /// <summary>
     /// Doesn't include <see cref="Piece.K"/> and <see cref="Piece.k"/> evaluation
     /// </summary>
-    /// <param name="pieceSquareIndex"></param>
-    /// <param name="pieceIndex"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal int AdditionalPieceEvaluation(int bucket, int pieceSquareIndex, int pieceIndex, int pieceSide, int sameSideKingSquare, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
     {
@@ -849,9 +840,6 @@ public class Position : IDisposable
     /// Scales <paramref name="eval"/> with <paramref name="movesWithoutCaptureOrPawnMove"/>, so that
     /// an eval with 100 halfmove counter is half of the value of one with 0 halfmove counter
     /// </summary>
-    /// <param name="eval"></param>
-    /// <param name="movesWithoutCaptureOrPawnMove"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static int ScaleEvalWith50MovesDrawDistance(int eval, int movesWithoutCaptureOrPawnMove) =>
         eval * (200 - movesWithoutCaptureOrPawnMove) / 200;
@@ -878,14 +866,31 @@ public class Position : IDisposable
             | (Kings & Attacks.KingAttacks[square]);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ulong AllSideAttackersTo(int square, int side)
+    {
+        Debug.Assert(square != (int)BoardSquare.noSquare);
+        Debug.Assert(side != (int)Side.Both);
+
+        var offset = Utils.PieceOffset(side);
+
+        var occupancy = OccupancyBitBoards[(int)Side.Both];
+
+        var queens = PieceBitBoards[(int)Piece.q - offset];
+        var rooks = queens | PieceBitBoards[(int)Piece.r - offset];
+        var bishops = queens | PieceBitBoards[(int)Piece.b - offset];
+
+        return (rooks & Attacks.RookAttacks(square, occupancy))
+            | (bishops & Attacks.BishopAttacks(square, occupancy))
+            | (PieceBitBoards[(int)Piece.p - offset] & Attacks.PawnAttacks[side][square])
+            | (PieceBitBoards[(int)Piece.n - offset] & Attacks.KnightAttacks[square]);
+    }
+
     /// <summary>
     /// Overload that has rooks and bishops precalculated for the position
     /// </summary>
-    /// <param name="square"></param>
-    /// <param name="occupancy"></param>
     /// <param name="rooks">Includes Queen bitboard</param>
     /// <param name="bishops">Includes Queen bitboard</param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ulong AllAttackersTo(int square, BitBoard occupancy, BitBoard rooks, BitBoard bishops)
     {
@@ -989,8 +994,6 @@ public class Position : IDisposable
     /// <summary>
     /// Based on Stormphrax
     /// </summary>
-    /// <param name="square"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int PieceAt(int square)
     {

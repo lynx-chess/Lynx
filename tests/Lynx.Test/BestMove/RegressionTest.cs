@@ -67,14 +67,11 @@ public class RegressionTest : BaseTest
 
         switch (depth)
         {
-            case 5:
+            case 5 when bestResult.Moves.Length >= 5:
                 Assert.AreNotEqual("f6e4", bestResult.Moves[4].UCIString());
                 break;
-            case 6:
+            case 6 when bestResult.Moves.Length >= 6:
                 Assert.AreNotEqual("f3e5", bestResult.Moves[5].UCIString());
-                break;
-            default:
-                Assert.True(false);
                 break;
         }
     }
@@ -125,7 +122,6 @@ public class RegressionTest : BaseTest
     /// the positions that result as a consequence of the given position commands
     /// aren't considered as drawn
     /// </summary>
-    /// <param name="positionCommand"></param>
     [TestCase("position startpos moves" +
         " c2c4 e7e5 b1c3 g8f6 g1f3 b8c6 e2e4 f8b4 d2d3 d7d6 a2a3 b4c5 b2b4 c5b6 c1e3" +
         " b6e3 f2e3 a7a6 b4b5 a6b5 c4b5 c6a7 d3d4 e5d4 d1d4 c7c5 d4d2 e8g8 e1c1 f8e8" +

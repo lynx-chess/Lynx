@@ -1,5 +1,4 @@
 ﻿using Lynx.Model;
-using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
 using System.Diagnostics;
@@ -8,12 +7,15 @@ using System.Threading.Channels;
 
 namespace Lynx;
 
-public sealed partial class Engine
+public sealed partial class Engine : IDisposable
 {
     internal const int DefaultMaxDepth = 5;
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
     private readonly ChannelWriter<object> _engineWriter;
+    private readonly TranspositionTable _tt;
+
+    private bool _disposedValue;
 
     private bool _isSearching;
 
@@ -32,16 +34,7 @@ public sealed partial class Engine
     /// </summary>
     private bool _stopRequested;
 
-#pragma warning disable IDE0052, CS0414, S4487 // Remove unread private members
-    private bool _isNewGameCommandSupported;
-    private bool _isNewGameComing;
-#pragma warning restore IDE0052, CS0414 // Remove unread private members
-
-    private Move? _moveToPonder;
-
     public double AverageDepth { get; private set; }
-
-    public RegisterCommand? Registration { get; set; }
 
     public Game Game { get; private set; }
 
@@ -50,15 +43,16 @@ public sealed partial class Engine
     private CancellationTokenSource _searchCancellationTokenSource;
     private CancellationTokenSource _absoluteSearchCancellationTokenSource;
 
-    public Engine(ChannelWriter<object> engineWriter)
+    public Engine(ChannelWriter<object> engineWriter) : this(engineWriter, new()) { }
+
+    public Engine(ChannelWriter<object> engineWriter, in TranspositionTable tt)
     {
         AverageDepth = 0;
         Game = new Game(Constants.InitialPositionFEN);
-        _isNewGameComing = true;
         _searchCancellationTokenSource = new();
         _absoluteSearchCancellationTokenSource = new();
         _engineWriter = engineWriter;
-
+        _tt = tt;
         // Update ResetEngine() after any changes here
 
         _quietHistory = new int[12][];
@@ -73,8 +67,6 @@ public sealed partial class Engine
             _killerMoves[i] = new Move[3];
         }
 
-        AllocateTT();
-
 #if !DEBUG
         // Temporary channel so that no output is generated
         _engineWriter = Channel.CreateUnbounded<object>(new UnboundedChannelOptions() { SingleReader = true, SingleWriter = false }).Writer;
@@ -82,21 +74,8 @@ public sealed partial class Engine
 
         _engineWriter = engineWriter;
 
-        // No need for ResetEngine() call here, WarmupEngine -> Bench -> NewGame() calls it
+        NewGame();
 #endif
-
-#pragma warning disable S1215 // "GC.Collect" should not be called
-        GC.Collect();
-        GC.WaitForPendingFinalizers();
-#pragma warning restore S1215 // "GC.Collect" should not be called
-    }
-
-    private void AllocateTT()
-    {
-        _currentTranspositionTableSize = Configuration.EngineSettings.TranspositionTableSize;
-
-        var ttLength = TranspositionTableExtensions.CalculateLength(_currentTranspositionTableSize);
-        _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
     }
 
 #pragma warning disable S1144 // Unused private types or members should be removed - used in Release mode
@@ -105,11 +84,13 @@ public sealed partial class Engine
         _logger.Info("Warming up engine");
         var sw = Stopwatch.StartNew();
 
-        InitializeStaticClasses();
         const string goWarmupCommand = "go depth 10";   // ~300 ms
+        var command = new GoCommand(goWarmupCommand);
 
         AdjustPosition(Constants.SuperLongPositionCommand);
-        BestMove(new(goWarmupCommand));
+
+        var searchConstrains = TimeManager.CalculateTimeManagement(Game, command);
+        BestMove(command, in searchConstrains);
 
         Bench(2);
 
@@ -120,15 +101,7 @@ public sealed partial class Engine
 
     private void ResetEngine()
     {
-        if (_currentTranspositionTableSize == Configuration.EngineSettings.TranspositionTableSize)
-        {
-            Array.Clear(_tt);
-        }
-        else
-        {
-            _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _currentTranspositionTableSize, Configuration.EngineSettings.TranspositionTableSize);
-            AllocateTT();
-        }
+        _tt.Clear();
 
         // Clear histories
         for (int i = 0; i < 12; ++i)
@@ -154,16 +127,9 @@ public sealed partial class Engine
         AverageDepth = 0;
         Game.FreeResources();
         Game = new Game(Constants.InitialPositionFEN);
-        _isNewGameComing = true;
-        _isNewGameCommandSupported = true;
         _stopRequested = false;
 
         ResetEngine();
-
-#pragma warning disable S1215 // "GC.Collect" should not be called
-        GC.Collect();
-        GC.WaitForPendingFinalizers();
-#pragma warning restore S1215 // "GC.Collect" should not be called
     }
 
     [SkipLocalsInit]
@@ -172,7 +138,6 @@ public sealed partial class Engine
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
         Game.FreeResources();
         Game = PositionCommand.ParseGame(rawPositionCommand, moves);
-        _isNewGameComing = false;
         _stopRequested = false;
     }
 
@@ -182,89 +147,31 @@ public sealed partial class Engine
         StopSearching();
     }
 
+    /// <summary>
+    /// Uses <see cref="TimeManager.CalculateTimeManagement(Game, GoCommand)"/> internally
+    /// </summary>
     public SearchResult BestMove(GoCommand goCommand)
     {
-        bool isPondering = goCommand.Ponder;
+        var searchConstraints = TimeManager.CalculateTimeManagement(Game, goCommand);
 
+        return BestMove(goCommand, in searchConstraints);
+    }
+
+    public SearchResult BestMove(GoCommand goCommand, in SearchConstraints searchConstrains)
+    {
         _searchCancellationTokenSource = new();
         _absoluteSearchCancellationTokenSource = new();
 
-        int maxDepth = -1;
-        int hardLimitTimeBound;
-        int softLimitTimeBound = int.MaxValue;
-
-        double millisecondsLeft;
-        int millisecondsIncrement;
-        if (Game.CurrentPosition.Side == Side.White)
+        if (searchConstrains.HardLimitTimeBound != SearchConstraints.DefaultHardLimitTimeBound)
         {
-            millisecondsLeft = goCommand.WhiteTime;
-            millisecondsIncrement = goCommand.WhiteIncrement;
-        }
-        else
-        {
-            millisecondsLeft = goCommand.BlackTime;
-            millisecondsIncrement = goCommand.BlackIncrement;
+            _searchCancellationTokenSource.CancelAfter(searchConstrains.HardLimitTimeBound);
         }
 
-        // Inspired by Alexandria: time overhead to avoid timing out in the engine-gui communication process
-        const int engineGuiCommunicationTimeOverhead = 50;
-
-        if (!isPondering)
-        {
-            if (goCommand.WhiteTime != 0 || goCommand.BlackTime != 0)  // Cutechess sometimes sends negative wtime/btime
-            {
-                const int minSearchTime = 50;
-
-                var movesDivisor = goCommand.MovesToGo == 0
-                    ? ExpectedMovesLeft(Game.PositionHashHistoryLength()) * 3 / 2
-                    : goCommand.MovesToGo;
-
-                millisecondsLeft -= engineGuiCommunicationTimeOverhead;
-                millisecondsLeft = Math.Clamp(millisecondsLeft, minSearchTime, int.MaxValue); // Avoiding 0/negative values
-
-                hardLimitTimeBound = (int)(millisecondsLeft * Configuration.EngineSettings.HardTimeBoundMultiplier);
-
-                var softLimitBase = (millisecondsLeft / movesDivisor) + (millisecondsIncrement * Configuration.EngineSettings.SoftTimeBaseIncrementMultiplier);
-                softLimitTimeBound = Math.Min(hardLimitTimeBound, (int)(softLimitBase * Configuration.EngineSettings.SoftTimeBoundMultiplier));
-
-                _logger.Info("Soft time bound: {0}s", 0.001 * softLimitTimeBound);
-                _logger.Info("Hard time bound: {0}s", 0.001 * hardLimitTimeBound);
-
-                _searchCancellationTokenSource.CancelAfter(hardLimitTimeBound);
-            }
-            else if (goCommand.MoveTime > 0)
-            {
-                softLimitTimeBound = hardLimitTimeBound = goCommand.MoveTime - engineGuiCommunicationTimeOverhead;
-                _logger.Info("Time to move: {0}s", 0.001 * hardLimitTimeBound);
-
-                _searchCancellationTokenSource.CancelAfter(hardLimitTimeBound);
-            }
-            else if (goCommand.Depth > 0)
-            {
-                maxDepth = goCommand.Depth > Constants.AbsoluteMaxDepth ? Constants.AbsoluteMaxDepth : goCommand.Depth;
-            }
-            else if (goCommand.Infinite)
-            {
-                maxDepth = Configuration.EngineSettings.MaxDepth;
-                _logger.Info("Infinite search (depth {0})", maxDepth);
-            }
-            else
-            {
-                maxDepth = DefaultMaxDepth;
-                _logger.Warn("Unexpected or unsupported go command");
-            }
-        }
-        else
-        {
-            maxDepth = Configuration.EngineSettings.MaxDepth;
-            _logger.Info("Pondering search (depth {0})", maxDepth);
-        }
-
-        SearchResult resultToReturn = IDDFS(maxDepth, softLimitTimeBound);
+        SearchResult resultToReturn = IDDFS(searchConstrains.MaxDepth, searchConstrains.SoftLimitTimeBound);
         //SearchResult resultToReturn = await SearchBestMove(maxDepth, decisionTime);
 
         Game.ResetCurrentPositionToBeforeSearchState();
-        if (!isPondering
+        if (!goCommand.Ponder
             && resultToReturn.BestMove != default
             && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
         {
@@ -275,21 +182,6 @@ public sealed partial class Engine
         AverageDepth += (resultToReturn.Depth - AverageDepth) / Math.Ceiling(0.5 * Game.PositionHashHistoryLength());
 
         return resultToReturn;
-    }
-
-    /// <summary>
-    /// Straight from expositor's author paper, https://expositor.dev/pdf/movetime.pdf
-    /// </summary>
-    /// <param name="plies_played"></param>
-    /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int ExpectedMovesLeft(int plies_played)
-    {
-        double p = (double)(plies_played);
-
-        return (int)Math.Round(
-            (59.3 + ((72830.0 - (p * 2330.0)) / ((p * p) + (p * 10.0) + 2644.0)))   // Plies remaining
-            / 2.0); // Full moves remaining
     }
 
 #pragma warning disable S1144 // Unused private types or members should be removed - wanna keep this around
@@ -336,7 +228,7 @@ public sealed partial class Engine
         return tbResult ?? searchResult!;
     }
 
-    public void Search(GoCommand goCommand)
+    public SearchResult? Search(GoCommand goCommand, in SearchConstraints searchConstraints)
     {
         if (_isSearching)
         {
@@ -349,7 +241,7 @@ public sealed partial class Engine
         try
         {
             _isPondering = goCommand.Ponder;
-            var searchResult = BestMove(goCommand);
+            var searchResult = BestMove(goCommand, in searchConstraints);
 
             if (_isPondering)
             {
@@ -367,17 +259,16 @@ public sealed partial class Engine
                     _isPondering = false;
                     goCommand.DisablePonder();
 
-                    searchResult = BestMove(goCommand);
+                    searchResult = BestMove(goCommand, in searchConstraints);
                 }
             }
 
-            // We print best move even in case of go ponder + stop, and IDEs are expected to ignore it
-            _moveToPonder = searchResult.Moves.Length >= 2 ? searchResult.Moves[1] : null;
-            _engineWriter.TryWrite(new BestMoveCommand(searchResult.BestMove, _moveToPonder));
+            return searchResult;
         }
         catch (Exception e)
         {
             _logger.Fatal(e, "Error in {0} while calculating BestMove", nameof(Search));
+            return null;
         }
         finally
         {
@@ -393,14 +284,32 @@ public sealed partial class Engine
         _absoluteSearchCancellationTokenSource.Cancel();
     }
 
-    private static void InitializeStaticClasses()
+    public void FreeResources()
     {
-        _ = PVTable.Indexes[0];
-        _ = Attacks.KingAttacks;
-        _ = ZobristTable.SideHash();
-        _ = Masks.FileMasks;
-        _ = EvaluationConstants.HistoryBonus[1];
-        _ = MoveGenerator.Init();
-        _ = GoCommand.Init();
+        Game.FreeResources();
+
+        _absoluteSearchCancellationTokenSource.Dispose();
+        _searchCancellationTokenSource.Dispose();
+
+        _disposedValue = true;
+    }
+
+    private void Dispose(bool disposing)
+    {
+        if (!_disposedValue)
+        {
+            if (disposing)
+            {
+                FreeResources();
+            }
+            _disposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
     }
 }

@@ -49,9 +49,6 @@ public class BishopAttacksTest
     /// <summary>
     /// Implicitly tests <see cref="AttackGenerator.InitializeBishopMagicAttacks"/> and <see cref="Constants.BishopMagicNumbers"/>
     /// </summary>
-    /// <param name="bishopSquare"></param>
-    /// <param name="occupiedSquares"></param>
-    /// <param name="attackedSquares"></param>
     [TestCase(BS.a8, new BS[] { }, new[] { BS.b7, BS.c6, BS.d5, BS.e4, BS.f3, BS.g2, BS.h1 })]
     [TestCase(BS.a8, new[] { BS.g2 }, new[] { BS.b7, BS.c6, BS.d5, BS.e4, BS.f3, BS.g2 })]
     [TestCase(BS.a8, new[] { BS.b7 }, new[] { BS.b7 })]

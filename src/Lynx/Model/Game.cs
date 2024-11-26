@@ -19,7 +19,8 @@ public sealed class Game : IDisposable
     /// <summary>
     /// Indexed by ply
     /// </summary>
-    private readonly Move[] _moveStack;
+    private readonly PlyStackEntry[] _gameStack;
+
     private bool _disposedValue;
 
     public int HalfMovesWithoutCaptureOrPawnMove { get; set; }
@@ -27,6 +28,8 @@ public sealed class Game : IDisposable
     public Position CurrentPosition { get; private set; }
 
     public Position PositionBeforeLastSearch { get; private set; }
+
+    public string FEN => CurrentPosition.FEN(HalfMovesWithoutCaptureOrPawnMove);
 
     public Game(ReadOnlySpan<char> fen) : this(fen, [], [], [])
     {
@@ -36,7 +39,7 @@ public sealed class Game : IDisposable
     {
         Debug.Assert(Constants.MaxNumberMovesInAGame <= 1024, "Need to customized ArrayPool due to desired array size requirements");
         _positionHashHistory = ArrayPool<ulong>.Shared.Rent(Constants.MaxNumberMovesInAGame);
-        _moveStack = ArrayPool<Move>.Shared.Rent(Constants.MaxNumberMovesInAGame);
+        _gameStack = ArrayPool<PlyStackEntry>.Shared.Rent(Constants.MaxNumberMovesInAGame);
 
         var parsedFen = FENParser.ParseFEN(fen);
         CurrentPosition = new Position(parsedFen);
@@ -79,8 +82,6 @@ public sealed class Game : IDisposable
     /// Updates <paramref name="halfMovesWithoutCaptureOrPawnMove"/>.
     /// See also <see cref="Utils.Update50movesRule(int, int)"/>
     /// </summary>
-    /// <param name="moveToPlay"></param>
-    /// <param name="isCapture"></param>
     /// <remarks>
     /// Checking halfMovesWithoutCaptureOrPawnMove >= 100 since a capture/pawn move doesn't necessarily 'clear' the variable.
     /// i.e. while the engine is searching:
@@ -128,7 +129,6 @@ public sealed class Game : IDisposable
     /// <summary>
     /// Basic algorithm described in https://web.archive.org/web/20201107002606/https://marcelk.net/2013-04-06/paper/upcoming-rep-v2.pdf
     /// </summary>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsThreefoldRepetition()
     {
@@ -161,9 +161,6 @@ public sealed class Game : IDisposable
     /// <summary>
     /// To be used in online tb proving only, in combination with the result of <see cref="CopyPositionHashHistory"/>
     /// </summary>
-    /// <param name="positionHashHistory"></param>
-    /// <param name="position"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsThreefoldRepetition(ReadOnlySpan<ulong> positionHashHistory, Position position, int halfMovesWithoutCaptureOrPawnMove = Constants.MaxNumberMovesInAGame)
     {
@@ -185,8 +182,6 @@ public sealed class Game : IDisposable
     /// <summary>
     /// To be used in online tb proving only, with a copy of <see cref="HalfMovesWithoutCaptureOrPawnMove"/>
     /// </summary>
-    /// <param name="halfMovesWithoutCaptureOrPawnMove"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool Is50MovesRepetition(int halfMovesWithoutCaptureOrPawnMove) => halfMovesWithoutCaptureOrPawnMove >= 100;
 
@@ -230,10 +225,19 @@ public sealed class Game : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void PushToMoveStack(int n, Move move) => _moveStack[n + EvaluationConstants.ContinuationHistoryPlyCount] = move;
+    public void UpdateMoveinStack(int n, Move move) => _gameStack[n + EvaluationConstants.ContinuationHistoryPlyCount].Move = move;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public Move PopFromMoveStack(int n) => _moveStack[n + EvaluationConstants.ContinuationHistoryPlyCount];
+    public Move ReadMoveFromStack(int n) => _gameStack[n + EvaluationConstants.ContinuationHistoryPlyCount].Move;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public int ReadStaticEvalFromStack(int n) => _gameStack[n].StaticEval;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public int UpdateStaticEvalInStack(int n, int value) => _gameStack[n].StaticEval = value;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ref PlyStackEntry GameStack(int n) => ref _gameStack[n];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int PositionHashHistoryLength() => _positionHashHistoryPointer;
@@ -251,7 +255,7 @@ public sealed class Game : IDisposable
 
     public void FreeResources()
     {
-        ArrayPool<Move>.Shared.Return(_moveStack);
+        ArrayPool<PlyStackEntry>.Shared.Return(_gameStack, clearArray: true);
         ArrayPool<ulong>.Shared.Return(_positionHashHistory);
 
         CurrentPosition.FreeResources();

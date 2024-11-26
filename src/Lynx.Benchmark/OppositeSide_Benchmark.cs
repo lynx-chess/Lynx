@@ -57,7 +57,6 @@ public class OppositeSide_Benchmark : BaseBenchmark
     /// <summary>
     /// Faster than <see cref="Array(int)"/>
     /// </summary>
-    /// <param name="iterations"></param>
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
     public void Method_Substraction(int iterations)
@@ -72,7 +71,6 @@ public class OppositeSide_Benchmark : BaseBenchmark
     /// <summary>
     /// Very similar to <see cref="Method_Substraction(int)"/>
     /// </summary>
-    /// <param name="iterations"></param>
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
     public void Method_BitwiseOr(int iterations)

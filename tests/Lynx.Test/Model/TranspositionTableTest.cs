@@ -21,7 +21,7 @@ public class TranspositionTableTests
     [TestCase(-CheckMateBaseEvaluation + (2 * CheckmateDepthFactor), 4, -CheckMateBaseEvaluation + (6 * CheckmateDepthFactor))]
     public void RecalculateMateScores(int evaluation, int depth, int expectedEvaluation)
     {
-        Assert.AreEqual(expectedEvaluation, TranspositionTableExtensions.RecalculateMateScores(evaluation, depth));
+        Assert.AreEqual(expectedEvaluation, TranspositionTable.RecalculateMateScores(evaluation, depth));
     }
 
     [TestCase(+19, NodeType.Alpha, +20, +30, +19)]
@@ -31,8 +31,8 @@ public class TranspositionTableTests
     public void RecordHash_ProbeHash(int recordedEval, NodeType recordNodeType, int probeAlpha, int probeBeta, int expectedProbeEval)
     {
         var position = new Position(Constants.InitialPositionFEN);
-        var ttLength = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
-        var transpositionTable = new TranspositionTableElement[ttLength];
+        var transpositionTable = new TranspositionTable();
+
         var staticEval = position.StaticEvaluation().Score;
 
         transpositionTable.RecordHash(position, staticEval, depth: 5, ply: 3, score: recordedEval, nodeType: recordNodeType, move: 1234);
@@ -48,8 +48,7 @@ public class TranspositionTableTests
     {
         const int sharedDepth = 5;
         var position = new Position(Constants.InitialPositionFEN);
-        var ttLength = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
-        var transpositionTable = new TranspositionTableElement[ttLength];
+        var transpositionTable = new TranspositionTable();
 
         transpositionTable.RecordHash(position, recordedEval, depth: 10, ply: sharedDepth, score: recordedEval, nodeType: NodeType.Exact, move: 1234);
 
@@ -65,8 +64,7 @@ public class TranspositionTableTests
     public void RecordHash_ProbeHash_CheckmateDifferentDepth(int recordedEval, int recordedDeph, int probeDepth, int expectedProbeEval)
     {
         var position = new Position(Constants.InitialPositionFEN);
-        var ttLength = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
-        var transpositionTable = new TranspositionTableElement[ttLength];
+        var transpositionTable = new TranspositionTable();
 
         transpositionTable.RecordHash(position, recordedEval, depth: 10, ply: recordedDeph, score: recordedEval, nodeType: NodeType.Exact, move: 1234);
 

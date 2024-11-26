@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Lynx;
@@ -25,8 +26,6 @@ public static class ZobristTable
     /// <summary>
     /// Uses <see cref="Piece.P"/> and squares <see cref="BoardSquare.a1"/>-<see cref="BoardSquare.h1"/>
     /// </summary>
-    /// <param name="enPassantSquare"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong EnPassantHash(int enPassantSquare)
     {
@@ -35,12 +34,8 @@ public static class ZobristTable
             return default;
         }
 
-#if DEBUG
-        if (Constants.EnPassantCaptureSquares.Length <= enPassantSquare || Constants.EnPassantCaptureSquares[enPassantSquare] == 0)
-        {
-            throw new ArgumentException($"{Constants.Coordinates[enPassantSquare]} is not a valid en-passant square");
-        }
-#endif
+        Debug.Assert(Constants.EnPassantCaptureSquares.Length > enPassantSquare && Constants.EnPassantCaptureSquares[enPassantSquare] != 0,
+            $"{Constants.Coordinates[enPassantSquare]} is not a valid en-passant square");
 
         var file = enPassantSquare & 0x07;  // enPassantSquare % 8
 
@@ -50,7 +45,6 @@ public static class ZobristTable
     /// <summary>
     /// Uses <see cref="Piece.p"/> and <see cref="BoardSquare.h8"/>
     /// </summary>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong SideHash()
     {
@@ -62,8 +56,6 @@ public static class ZobristTable
     /// <see cref="BoardSquare.a8"/> for <see cref="CastlingRights.WK"/>, <see cref="BoardSquare.b8"/> for <see cref="CastlingRights.WQ"/>
     /// <see cref="BoardSquare.c8"/> for <see cref="CastlingRights.BK"/>, <see cref="BoardSquare.d8"/> for <see cref="CastlingRights.BQ"/>
     /// </summary>
-    /// <param name="castle"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong CastleHash(byte castle)
     {
@@ -98,8 +90,6 @@ public static class ZobristTable
     /// <summary>
     /// Calculates from scratch the hash of a position
     /// </summary>
-    /// <param name="position"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong PositionHash(Position position)
     {
@@ -128,7 +118,6 @@ public static class ZobristTable
     /// <summary>
     /// Initializes Zobrist table (long[64][12])
     /// </summary>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static ulong[][] Initialize()
     {

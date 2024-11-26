@@ -1,6 +1,7 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Security.Authentication;
 
 namespace Lynx;
 
@@ -9,15 +10,12 @@ public sealed partial class Engine
     /// <summary>
     /// NegaMax algorithm implementation using alpha-beta pruning and quiescence search
     /// </summary>
-    /// <param name="depth"></param>
-    /// <param name="ply"></param>
     /// <param name="alpha">
     /// Best score the Side to move can achieve, assuming best play by the opponent.
     /// </param>
     /// <param name="beta">
     /// Best score Side's to move's opponent can achieve, assuming best play by Side to move.
     /// </param>
-    /// <returns></returns>
     [SkipLocalsInit]
     private int NegaMax(int depth, int ply, int alpha, int beta, bool parentWasNullMove = false)
     {
@@ -48,6 +46,8 @@ public sealed partial class Engine
         if (!isRoot)
         {
             (ttScore, ttBestMove, ttElementType, ttRawScore, ttStaticEval) = _tt.ProbeHash(position, depth, ply, alpha, beta);
+
+            // TT cutoffs
             if (!pvNode && ttScore != EvaluationConstants.NoHashEntry)
             {
                 return ttScore;
@@ -66,6 +66,16 @@ public sealed partial class Engine
 
         // Before any time-consuming operations
         _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
+
+        // 🔍 Improving heuristic: the current position has a better static evaluation than
+        // the previous evaluation from the same side (ply - 2).
+        // When true, we can:
+        // - Prune more aggressively when evaluation is too high: current position is even getter
+        // - Prune less aggressively when evaluation is low low: uncertainty on how bad the position really is
+        bool improving = false;
+
+        // From Potential
+        double improvingRate = 0;
 
         bool isInCheck = position.IsInCheck();
         int staticEval = int.MaxValue;
@@ -100,6 +110,15 @@ public sealed partial class Engine
                 phase = position.Phase();
             }
 
+            Game.UpdateStaticEvalInStack(ply, staticEval);
+
+            if (ply >= 2)
+            {
+                var evalDiff = staticEval - Game.ReadStaticEvalFromStack(ply - 2);
+                improving = evalDiff >= 0;
+                improvingRate = evalDiff / 50.0;
+            }
+
             // From smol.cs
             // ttEvaluation can be used as a better positional evaluation:
             // If the score is outside what the current bounds are, but it did match flag and depth,
@@ -110,11 +129,18 @@ public sealed partial class Engine
                 staticEval = ttRawScore;
             }
 
+            // Fail-high pruning (moves with high scores) - prune more when improving
             if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
             {
                 // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
                 // Return formula by Ciekce, instead of just returning static eval
-                if (staticEval - (Configuration.EngineSettings.RFP_DepthScalingFactor * depth) >= beta)
+                // Improving impl. based on Potential's
+                var rfpMargin = improving ? 80 * (depth - 1) : 100 * depth;
+                var improvingFactor = improvingRate * (0.75 * depth);
+
+                var rfpThreshold = rfpMargin + improvingFactor;
+
+                if (staticEval - rfpThreshold >= beta)
                 {
 #pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
                     return (staticEval + beta) / 2;
@@ -153,14 +179,20 @@ public sealed partial class Engine
                 }
             }
 
+            var staticEvalBetaDiff = staticEval - beta;
+
             // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
             if (depth >= Configuration.EngineSettings.NMP_MinDepth
-                && staticEval >= beta
+                && staticEvalBetaDiff >= 0
                 && !parentWasNullMove
                 && phase > 2   // Zugzwang risk reduction: pieces other than pawn presents
                 && (ttElementType != NodeType.Alpha || ttScore >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
             {
-                var nmpReduction = Configuration.EngineSettings.NMP_BaseDepthReduction + ((depth + Configuration.EngineSettings.NMP_DepthIncrement) / Configuration.EngineSettings.NMP_DepthDivisor);   // Clarity
+                var nmpReduction = Configuration.EngineSettings.NMP_BaseDepthReduction
+                    + ((depth + Configuration.EngineSettings.NMP_DepthIncrement) / Configuration.EngineSettings.NMP_DepthDivisor)   // Clarity
+                    + Math.Min(
+                        Configuration.EngineSettings.NMP_StaticEvalBetaMaxReduction,
+                        staticEvalBetaDiff / Configuration.EngineSettings.NMP_StaticEvalBetaDivisor);
 
                 // TODO more advanced adaptative reduction, similar to what Ethereal and Stormphrax are doing
                 //var nmpReduction = Math.Min(
@@ -231,7 +263,7 @@ public sealed partial class Engine
             var oldHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
             var canBeRepetition = Game.Update50movesRule(move, isCapture);
             Game.AddToPositionHashHistory(position.UniqueIdentifier);
-            Game.PushToMoveStack(ply, move);
+            Game.UpdateMoveinStack(ply, move);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void RevertMove()
@@ -253,7 +285,7 @@ public sealed partial class Engine
             }
             else if (visitedMovesCounter == 0)
             {
-                PrefetchTTEntry();
+                _tt.PrefetchTTEntry(position);
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
                 score = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
@@ -263,13 +295,14 @@ public sealed partial class Engine
                 // If we prune while getting checmated, we risk not finding any move and having an empty PV
                 bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
 
+                // Fail-low pruning (moves with low scores) - prune less when improving
                 if (!pvNode && !isInCheck && isNotGettingCheckmated
                     && moveScores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue) // Quiet move
                 {
                     // 🔍 Late Move Pruning (LMP) - all quiet moves can be pruned
                     // after searching the first few given by the move ordering algorithm
                     if (depth <= Configuration.EngineSettings.LMP_MaxDepth
-                        && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth)) // Based on formula suggested by Antares
+                        && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth * (improving ? 2 : 1))) // Based on formula suggested by Antares
                     {
                         RevertMove();
                         break;
@@ -299,7 +332,7 @@ public sealed partial class Engine
                     }
                 }
 
-                PrefetchTTEntry();
+                _tt.PrefetchTTEntry(position);
 
                 int reduction = 0;
 
@@ -315,9 +348,15 @@ public sealed partial class Engine
                     {
                         --reduction;
                     }
+
                     if (position.IsInCheck())   // i.e. move gives check
                     {
                         --reduction;
+                    }
+
+                    if (!improving)
+                    {
+                        ++reduction;
                     }
 
                     if (ttBestMove != default && isCapture)
@@ -395,13 +434,26 @@ public sealed partial class Engine
                 {
                     PrintMessage($"Pruning: {move} is enough");
 
+                    var historyDepth = depth;
+
+                    if (staticEval <= alpha)
+                    {
+                        ++historyDepth;
+                    }
+
+                    // Suggestion by Sirius author
+                    if (bestScore >= beta + Configuration.EngineSettings.History_BestScoreBetaMargin)
+                    {
+                        ++historyDepth;
+                    }
+
                     if (isCapture)
                     {
-                        UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(depth, visitedMoves, visitedMovesCounter, move);
+                        UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(historyDepth, visitedMoves, visitedMovesCounter, move);
                     }
                     else
                     {
-                        UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(depth, ply, visitedMoves, visitedMovesCounter, move, isRoot);
+                        UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(historyDepth, ply, visitedMoves, visitedMovesCounter, move, isRoot);
                     }
 
                     _tt.RecordHash(position, staticEval, depth, ply, bestScore, NodeType.Beta, bestMove);
@@ -432,7 +484,6 @@ public sealed partial class Engine
     /// <summary>
     /// Quiescence search implementation, NegaMax alpha-beta style, fail-soft
     /// </summary>
-    /// <param name="ply"></param>
     /// <param name="alpha">
     /// Best score White can achieve, assuming best play by Black.
     /// Defaults to the worse possible score for white, Int.MinValue.
@@ -441,7 +492,6 @@ public sealed partial class Engine
     /// Best score Black can achieve, assuming best play by White
     /// Defaults to the works possible score for Black, Int.MaxValue
     /// </param>
-    /// <returns></returns>
     [SkipLocalsInit]
     public int QuiescenceSearch(int ply, int alpha, int beta)
     {
@@ -472,6 +522,8 @@ public sealed partial class Engine
         var staticEval = ttProbeResult.NodeType != NodeType.Unknown
             ? ttProbeResult.StaticEval
             : position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
+
+        Game.UpdateStaticEvalInStack(ply, staticEval);
 
         // Beta-cutoff (updating alpha after this check)
         if (staticEval >= beta)
@@ -540,7 +592,7 @@ public sealed partial class Engine
             PrintPreMove(position, ply, move, isQuiescence: true);
 
             // No need to check for threefold or 50 moves repetitions, since we're only searching captures, promotions, and castles
-            Game.PushToMoveStack(ply, move);
+            Game.UpdateMoveinStack(ply, move);
 
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
             int score = -QuiescenceSearch(ply + 1, -beta, -alpha);

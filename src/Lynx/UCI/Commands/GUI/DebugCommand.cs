@@ -15,7 +15,6 @@ public sealed class DebugCommand : IGUIBaseCommand
     /// <summary>
     /// Parse debug command
     /// </summary>
-    /// <param name="command"></param>
     /// <returns>
     /// true if debug command sent 'on'
     /// false if debug command sent 'off'
