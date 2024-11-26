@@ -288,6 +288,9 @@ public sealed partial class Engine : IDisposable
     {
         Game.FreeResources();
 
+        _absoluteSearchCancellationTokenSource.Dispose();
+        _searchCancellationTokenSource.Dispose();
+
         _disposedValue = true;
     }
 
