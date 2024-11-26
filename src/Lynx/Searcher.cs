@@ -33,6 +33,8 @@ public sealed class Searcher
         _currentTranspositionTableSize = Configuration.EngineSettings.TranspositionTableSize;
 
         InitializeStaticClasses();
+
+        ForceGCCollection();
     }
 
     public async Task Run(CancellationToken cancellationToken)
@@ -118,10 +120,7 @@ public sealed class Searcher
             _engine = new Engine(_engineWriter, in _ttWrapper);
         }
 
-#pragma warning disable S1215 // "GC.Collect" should not be called
-        GC.Collect();
-        GC.WaitForPendingFinalizers();
-#pragma warning restore S1215 // "GC.Collect" should not be called
+        ForceGCCollection();
     }
 
     public void Quit()
@@ -148,5 +147,13 @@ public sealed class Searcher
         _ = EvaluationConstants.HistoryBonus[1];
         _ = MoveGenerator.Init();
         _ = GoCommand.Init();
+    }
+
+    private static void ForceGCCollection()
+    {
+#pragma warning disable S1215 // "GC.Collect" should not be called
+        GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
+        GC.WaitForPendingFinalizers();
+#pragma warning restore S1215 // "GC.Collect" should not be called
     }
 }
