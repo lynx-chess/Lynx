@@ -5,6 +5,18 @@ namespace Lynx.Test.MoveGeneration;
 
 public class GenerateRookMovesTest
 {
+    private static IEnumerable<Move> GenerateRookMoves(Position position)
+    {
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        return MoveGenerator.GenerateAllMoves(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.R || m.Piece() == (int)Piece.r);
+    }
+
+    private static IEnumerable<Move> GenerateRookCaptures(Position position)
+    {
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        return MoveGenerator.GenerateAllCaptures(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.R || m.Piece() == (int)Piece.r);
+    }
+
     [TestCase(Constants.EmptyBoardFEN, 0)]
     [TestCase(Constants.InitialPositionFEN, 0)]
     [TestCase("8/8/2n1n3/3R4/2n1n3/8/8/8 w - - 0 1", 14)]
@@ -16,12 +28,11 @@ public class GenerateRookMovesTest
     public void RookMoves_Count(string fen, int expectedMoves)
     {
         var position = new Position(fen);
-        var offset = Utils.PieceOffset(position.Side);
-        var moves = MoveGenerator.GeneratePieceMovesForReference((int)Piece.R + offset, position);
+        var moves = GenerateRookMoves(position);
 
         Assert.AreEqual(expectedMoves, moves.Count());
 
-        Assert.AreEqual(moves, MoveGenerator.GenerateRookMoves(position));
+        Assert.AreEqual(moves, ReferenceMoveGenerator.GenerateRookMoves(position));
     }
 
     /// <summary>
@@ -44,7 +55,7 @@ public class GenerateRookMovesTest
         var position = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1P/1PPBBPP1/R3K2R w KQkq - 0 1");
         var offset = Utils.PieceOffset(position.Side);
         var piece = (int)Piece.R + offset;
-        var moves = MoveGenerator.GeneratePieceMovesForReference(piece, position);
+        var moves = GenerateRookMoves(position);
 
         Assert.AreEqual(11, moves.Count(m => m.Piece() == piece));
 
@@ -113,7 +124,7 @@ public class GenerateRookMovesTest
         var position = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1P/1PPBBPP1/R3K2R b KQkq - 0 1");
         var offset = Utils.PieceOffset(position.Side);
         var piece = (int)Piece.R + offset;
-        var moves = MoveGenerator.GeneratePieceMovesForReference(piece, position);
+        var moves = GenerateRookMoves(position);
 
         Assert.AreEqual(10, moves.Count(m => m.Piece() == piece));
 
@@ -178,7 +189,7 @@ public class GenerateRookMovesTest
         var position = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1P/1PPBBPP1/R3K2R w KQkq - 0 1");
         var offset = Utils.PieceOffset(position.Side);
         var piece = (int)Piece.R + offset;
-        var moves = MoveGenerator.GeneratePieceMovesForReference(piece, position, capturesOnly: true);
+        var moves = GenerateRookCaptures(position);
 
         Assert.AreEqual(1, moves.Count(m => m.Piece() == piece));
 
@@ -208,7 +219,7 @@ public class GenerateRookMovesTest
         var position = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1P/1PPBBPP1/R3K2R b KQkq - 0 1");
         var offset = Utils.PieceOffset(position.Side);
         var piece = (int)Piece.R + offset;
-        var moves = MoveGenerator.GeneratePieceMovesForReference(piece, position, capturesOnly: true);
+        var moves = GenerateRookCaptures(position);
 
         Assert.AreEqual(1, moves.Count(m => m.Piece() == piece));
 

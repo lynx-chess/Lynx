@@ -30,11 +30,8 @@ on:
         required: false
 
 env:
-  DOTNET_VERSION: 8.0.x
+  DOTNET_VERSION: 9.0.x
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
-  DOTNET_TieredPGO: 1
-  DOTNET_ReadyToRun: 0
-  DOTNET_TC_QuickJitForLoops: 1
 
 jobs:
   publish-artifacts:
@@ -58,7 +55,7 @@ jobs:
           - runtime-identifier: linux-musl-x64
             os: ubuntu-latest
           - runtime-identifier: osx-x64
-            os: macos-latest
+            os: macos-13
           - runtime-identifier: osx-arm64
             os: macos-latest
       fail-fast: false
@@ -71,12 +68,12 @@ jobs:
       uses: rlespinasse/github-slug-action@v3.x
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
     - name: Nuget cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path:
           ~/.nuget/packages
@@ -96,7 +93,7 @@ jobs:
 
     - name: Upload Lynx-${{ matrix.runtime-identifier }} artifact
       if: github.event.inputs.new_engine_version != ''
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Lynx-${{ github.event.inputs.new_engine_version }}-${{ matrix.runtime-identifier }}
         path: |
@@ -108,7 +105,7 @@ jobs:
 
     - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-${{ matrix.runtime-identifier }} artifact
       if: github.event.inputs.new_engine_version == ''
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-${{ matrix.runtime-identifier }}
         path: |
@@ -128,7 +125,7 @@ jobs:
 
     - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }} NuGet package
       if: matrix.runtime-identifier == 'linux-x64' && github.event.inputs.new_engine_version != ''
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Lynx-${{ github.event.inputs.new_engine_version }}-nuget
         path: |
@@ -138,7 +135,7 @@ jobs:
 
     - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }} NuGet package
       if: matrix.runtime-identifier == 'linux-x64' && github.event.inputs.new_engine_version == ''
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-nuget
         path: |
@@ -195,7 +192,7 @@ jobs:
         git tag -a v${{ github.event.inputs.new_engine_version }} -m "v${{ github.event.inputs.new_engine_version }}"
         git push --tags
 
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4
       with:
         path: artifacts/
 

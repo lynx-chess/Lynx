@@ -1,8 +1,10 @@
 ﻿using Lynx.Model;
 using NLog;
+using System.Buffers;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-using ParseResult = (ulong[] PieceBitBoards, ulong[] OccupancyBitBoards, Lynx.Model.Side Side, byte Castle, Lynx.Model.BoardSquare EnPassant,
+using ParseResult = (ulong[] PieceBitBoards, ulong[] OccupancyBitBoards, int[] board, Lynx.Model.Side Side, byte Castle, Lynx.Model.BoardSquare EnPassant,
             int HalfMoveClock/*, int FullMoveCounter*/);
 
 namespace Lynx;
@@ -16,18 +18,20 @@ public static class FENParser
     {
         fen = fen.Trim();
 
-        var pieceBitBoards = new BitBoard[12];
-        var occupancyBitBoards = new BitBoard[3];
+        var pieceBitBoards = ArrayPool<BitBoard>.Shared.Rent(12);
+        var occupancyBitBoards = ArrayPool<BitBoard>.Shared.Rent(3);
+        var board = ArrayPool<int>.Shared.Rent(64);
+        Array.Fill(board, (int)Piece.None);
 
         bool success;
-        Side side = Side.Both;
+        Side side;
         byte castle = 0;
         int halfMoveClock = 0/*, fullMoveCounter = 1*/;
         BoardSquare enPassant = BoardSquare.noSquare;
 
         try
         {
-            success = ParseBoard(fen, pieceBitBoards, occupancyBitBoards);
+            ParseBoard(fen, pieceBitBoards, occupancyBitBoards, board);
 
             var unparsedStringAsSpan = fen[fen.IndexOf(' ')..];
             Span<Range> parts = stackalloc Range[5];
@@ -54,30 +58,31 @@ public static class FENParser
             //    _logger.Debug("No full move counter detected");
             //}
         }
+#pragma warning disable S2139 // Exceptions should be either logged or rethrown but not both - meh
         catch (Exception e)
         {
-            _logger.Error(e.Message);
+            _logger.Error(e, "Error parsing FEN");
             success = false;
             throw;
         }
+#pragma warning restore S2139 // Exceptions should be either logged or rethrown but not both
 
         return success
-            ? (pieceBitBoards, occupancyBitBoards, side, castle, enPassant, halfMoveClock/*, fullMoveCounter*/)
+            ? (pieceBitBoards, occupancyBitBoards, board, side, castle, enPassant, halfMoveClock/*, fullMoveCounter*/)
             : throw new AssertException($"Error parsing {fen.ToString()}");
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool ParseBoard(ReadOnlySpan<char> fen, BitBoard[] pieceBitBoards, BitBoard[] occupancyBitBoards)
+    private static void ParseBoard(ReadOnlySpan<char> fen, BitBoard[] pieceBitBoards, BitBoard[] occupancyBitBoards, int[] board)
     {
-        bool success = true;
         var rankIndex = 0;
         var end = fen.IndexOf('/');
 
-        while (success && end != -1)
+        while (end != -1)
         {
             var match = fen[..end];
 
-            ParseBoardSection(pieceBitBoards, ref success, rankIndex, match);
+            ParseBoardSection(pieceBitBoards, board, rankIndex, match);
             PopulateOccupancies(pieceBitBoards, occupancyBitBoards);
 
             fen = fen[(end + 1)..];
@@ -85,47 +90,55 @@ public static class FENParser
             ++rankIndex;
         }
 
-        ParseBoardSection(pieceBitBoards, ref success, rankIndex, fen[..fen.IndexOf(' ')]);
+        ParseBoardSection(pieceBitBoards, board, rankIndex, fen[..fen.IndexOf(' ')]);
         PopulateOccupancies(pieceBitBoards, occupancyBitBoards);
 
-        return success;
-
-        static void ParseBoardSection(ulong[] pieceBitBoards, ref bool success, int rankIndex, ReadOnlySpan<char> boardfenSection)
+        static void ParseBoardSection(BitBoard[] pieceBitBoards, int[] board, int rankIndex, ReadOnlySpan<char> boardfenSection)
         {
             int fileIndex = 0;
 
             foreach (var ch in boardfenSection)
             {
-                if (Constants.PiecesByChar.TryGetValue(ch, out Piece piece))
+                var piece = ch switch
                 {
-                    pieceBitBoards[(int)piece] = pieceBitBoards[(int)piece].SetBit(BitBoardExtensions.SquareIndex(rankIndex, fileIndex));
+                    'P' => Piece.P,
+                    'N' => Piece.N,
+                    'B' => Piece.B,
+                    'R' => Piece.R,
+                    'Q' => Piece.Q,
+                    'K' => Piece.K,
+
+                    'p' => Piece.p,
+                    'n' => Piece.n,
+                    'b' => Piece.b,
+                    'r' => Piece.r,
+                    'q' => Piece.q,
+                    'k' => Piece.k,
+
+                    _ => Piece.None
+                };
+
+                if (piece != Piece.None)
+                {
+                    var square = BitBoardExtensions.SquareIndex(rankIndex, fileIndex);
+                    pieceBitBoards[(int)piece] = pieceBitBoards[(int)piece].SetBit(square);
+                    board[square] = (int)piece;
                     ++fileIndex;
-                }
-                else if (int.TryParse($"{ch}", out int emptySquares))
-                {
-                    fileIndex += emptySquares;
                 }
                 else
                 {
-                    _logger.Error("Unrecognized character in FEN: {0} (within {1})", ch, boardfenSection.ToString());
-                    success = false;
-                    break;
+                    fileIndex += ch - '0';
+                    Debug.Assert(fileIndex >= 1 && fileIndex <= 8, $"Error parsing char {ch} in fen {boardfenSection.ToString()}");
                 }
             }
         }
 
         static void PopulateOccupancies(BitBoard[] pieceBitBoards, BitBoard[] occupancyBitBoards)
         {
-            var limit = (int)Piece.K;
-            for (int piece = (int)Piece.P; piece <= limit; ++piece)
+            for (int piece = (int)Piece.P; piece <= (int)Piece.K; ++piece)
             {
                 occupancyBitBoards[(int)Side.White] |= pieceBitBoards[piece];
-            }
-
-            limit = (int)Piece.k;
-            for (int piece = (int)Piece.p; piece <= limit; ++piece)
-            {
-                occupancyBitBoards[(int)Side.Black] |= pieceBitBoards[piece];
+                occupancyBitBoards[(int)Side.Black] |= pieceBitBoards[piece + 6];
             }
 
             occupancyBitBoards[(int)Side.Both] = occupancyBitBoards[(int)Side.White] | occupancyBitBoards[(int)Side.Black];

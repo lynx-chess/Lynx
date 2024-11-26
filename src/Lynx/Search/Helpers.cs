@@ -1,201 +1,40 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 
 namespace Lynx;
 
-public class SearchResult
-{
-    public Move BestMove { get; init; }
-    public int Evaluation { get; init; }
-    public int Depth { get; set; }
-    public List<Move> Moves { get; init; }
-    public int Alpha { get; init; }
-    public int Beta { get; init; }
-    public int Mate { get; init; }
-
-    public int DepthReached { get; set; }
-
-    public int Nodes { get; set; }
-
-    public long Time { get; set; }
-
-    public long NodesPerSecond { get; set; }
-
-    public bool IsCancelled { get; set; }
-
-    public int HashfullPermill { get; set; } = -1;
-
-    public (int WDLWin, int WDLDraw, int WDLLoss)? WDL { get; set; } = null;
-
-    public SearchResult(Move bestMove, int evaluation, int targetDepth, List<Move> moves, int alpha, int beta, int mate = default)
-    {
-        BestMove = bestMove;
-        Evaluation = evaluation;
-        Depth = targetDepth;
-        Moves = moves;
-        Alpha = alpha;
-        Beta = beta;
-        Mate = mate;
-    }
-
-    public SearchResult(SearchResult previousSearchResult)
-    {
-        BestMove = previousSearchResult.Moves.ElementAtOrDefault(2);
-        Evaluation = previousSearchResult.Evaluation;
-        Depth = previousSearchResult.Depth - 2;
-        DepthReached = previousSearchResult.DepthReached - 2;
-        Moves = previousSearchResult.Moves.Skip(2).ToList();
-        Alpha = previousSearchResult.Alpha;
-        Beta = previousSearchResult.Beta;
-        Mate = previousSearchResult.Mate == 0 ? 0 : (int)Math.CopySign(Math.Abs(previousSearchResult.Mate) - 1, previousSearchResult.Mate);
-    }
-}
-
 public sealed partial class Engine
 {
-    private const int MinValue = short.MinValue;
-    private const int MaxValue = short.MaxValue;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private List<Move> SortMoves(IEnumerable<Move> moves, int depth, Move bestMoveTTCandidate)
-    {
-        if (_isFollowingPV)
-        {
-            _isFollowingPV = false;
-            foreach (var move in moves)
-            {
-                if (move == _pVTable[depth])
-                {
-                    _isFollowingPV = true;
-                    _isScoringPV = true;
-                    break;
-                }
-            }
-        }
-
-        var orderedMoves = moves
-            .OrderByDescending(move => ScoreMove(move, depth, true, bestMoveTTCandidate))
-            .ToList();
-
-        PrintMessage($"For position {Game.CurrentPosition.FEN()}:\n{string.Join(", ", orderedMoves.Select(m => $"{m.ToEPDString()} ({ScoreMove(m, depth, true, bestMoveTTCandidate)})"))})");
-
-        return orderedMoves;
-    }
-
+#pragma warning disable RCS1226 // Add paragraph to documentation comment
+#pragma warning disable RCS1243 // Duplicate word in a comment
     /// <summary>
-    /// Returns the score evaluation of a move taking into account <see cref="_isScoringPV"/>, <paramref name="bestMoveTTCandidate"/>, <see cref="EvaluationConstants.MostValueableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_historyMoves"/>
+    /// When asked to copy an incomplete PV one level ahead, clears the rest of the PV Table+
+    /// PV Table at depth 3
+    /// Copying 60 moves
+    /// src: 250, tgt: 190
+    ///  0   Qxb2   Qxb2   h4     a8     a8     a8     a8     a8
+    ///  64         b1=Q   exf6   Kxf6   a8     a8     a8     a8
+    ///  127               a8     b1=Q   Qxb1   Qxb1   a8     a8
+    ///  189                      Qxb1   Qxb1   Qxb1   a8     a8
+    ///  250                             a8     Qxb1   a8     a8
+    ///  310                                    a8     a8     a8
+    ///
+    /// PV Table at depth 3
+    ///  0   Qxb2   Qxb2   h4     a8     a8     a8     a8     a8
+    ///  64         b1=Q   exf6   Kxf6   a8     a8     a8     a8
+    ///  127               a8     b1=Q   Qxb1   Qxb1   a8     a8
+    ///  189                      Qxb1   a8     a8     a8     a8
+    ///  250                             a8     a8     a8     a8
+    ///  310                                    a8     a8     a8
     /// </summary>
-    /// <param name="move"></param>
-    /// <param name="depth"></param>
-    /// <param name="useKillerAndPositionMoves"></param>
-    /// <param name="bestMoveTTCandidate"></param>
-    /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMove(Move move, int depth, bool useKillerAndPositionMoves, Move bestMoveTTCandidate = default)
-    {
-        if (_isScoringPV && move == _pVTable[depth])
-        {
-            _isScoringPV = false;
-
-            return EvaluationConstants.PVMoveScoreValue;
-        }
-
-        if (move == bestMoveTTCandidate)
-        {
-            return EvaluationConstants.TTMoveScoreValue;
-        }
-
-        var promotedPiece = move.PromotedPiece();
-
-        // Queen promotion
-        if ((promotedPiece + 2) % 6 == 0)
-        {
-            return EvaluationConstants.CaptureMoveBaseScoreValue + EvaluationConstants.PromotionMoveScoreValue;
-        }
-
-        if (move.IsCapture())
-        {
-            var sourcePiece = move.Piece();
-            int targetPiece = (int)Piece.P;    // Important to initialize to P or p, due to en-passant captures
-
-            var targetSquare = move.TargetSquare();
-            var offset = Utils.PieceOffset(Game.CurrentPosition.Side);
-            var oppositePawnIndex = (int)Piece.p - offset;
-
-            var limit = (int)Piece.k - offset;
-            for (int pieceIndex = oppositePawnIndex; pieceIndex < limit; ++pieceIndex)
-            {
-                if (Game.CurrentPosition.PieceBitBoards[pieceIndex].GetBit(targetSquare))
-                {
-                    targetPiece = pieceIndex;
-                    break;
-                }
-            }
-
-            return EvaluationConstants.CaptureMoveBaseScoreValue + EvaluationConstants.MostValueableVictimLeastValuableAttacker[sourcePiece, targetPiece];
-        }
-
-        if (promotedPiece != default)
-        {
-            return EvaluationConstants.PromotionMoveScoreValue;
-        }
-
-        if (useKillerAndPositionMoves)
-        {
-            // 1st killer move
-            if (_killerMoves[0, depth] == move)
-            {
-                return EvaluationConstants.FirstKillerMoveValue;
-            }
-
-            if (_killerMoves[1, depth] == move)
-            {
-                return EvaluationConstants.SecondKillerMoveValue;
-            }
-
-            // History move or 0 if not found
-            return EvaluationConstants.BaseMoveScore + _historyMoves[move.Piece(), move.TargetSquare()];
-        }
-
-        return EvaluationConstants.BaseMoveScore;
-    }
-
-    /// <summary>
-    /// Soft caps history score
-    /// Formula taken from EP discord, https://discord.com/channels/1132289356011405342/1132289356447625298/1141102105847922839
-    /// </summary>
-    /// <param name="score"></param>
-    /// <param name="rawHistoryBonus"></param>
-    /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int ScoreHistoryMove(int score, int rawHistoryBonus)
-    {
-        return score + rawHistoryBonus - (score * Math.Abs(rawHistoryBonus) / Configuration.EngineSettings.MaxHistoryMoveValue);
-    }
-
+#pragma warning restore RCS1243 // Duplicate word in a comment
+#pragma warning restore RCS1226 // Add paragraph to documentation comment
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void CopyPVTableMoves(int target, int source, int moveCountToCopy)
     {
-        // When asked to copy an incomplete PV one level ahead, clears the rest of the PV Table+
-        // PV Table at depth 3
-        // Copying 60 moves
-        // src: 250, tgt: 190
-        //  0   Qxb2   Qxb2   h4     a8     a8     a8     a8     a8
-        //  64         b1=Q   exf6   Kxf6   a8     a8     a8     a8
-        //  127               a8     b1=Q   Qxb1   Qxb1   a8     a8
-        //  189                      Qxb1   Qxb1   Qxb1   a8     a8
-        //  250                             a8     Qxb1   a8     a8
-        //  310                                    a8     a8     a8
-        //
-        // PV Table at depth 3
-        //  0   Qxb2   Qxb2   h4     a8     a8     a8     a8     a8
-        //  64         b1=Q   exf6   Kxf6   a8     a8     a8     a8
-        //  127               a8     b1=Q   Qxb1   Qxb1   a8     a8
-        //  189                      Qxb1   a8     a8     a8     a8
-        //  250                             a8     a8     a8     a8
-        //  310                                    a8     a8     a8
         if (_pVTable[source] == default)
         {
             Array.Clear(_pVTable, target, _pVTable.Length - target);
@@ -207,7 +46,54 @@ public sealed partial class Engine
         //PrintPvTable();
     }
 
+    /// <summary>
+    /// [12][64][12]
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int CaptureHistoryIndex(int piece, int targetSquare, int capturedPiece)
+    {
+        const int pieceOffset = 64 * 12;
+        const int targetSquareOffset = 12;
+
+        return (piece * pieceOffset)
+            + (targetSquare * targetSquareOffset)
+            + capturedPiece;
+    }
+
+    /// <summary>
+    /// [12][64][12][64][ContinuationHistoryPlyCount]
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int ContinuationHistoryIndex(int piece, int targetSquare, int previousMovePiece, int previousMoveTargetSquare, int ply)
+    {
+        const int pieceOffset = 64 * 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount;
+        const int targetSquareOffset = 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount;
+        const int previousMovePieceOffset = 64 * EvaluationConstants.ContinuationHistoryPlyCount;
+        const int previousMoveTargetSquareOffset = EvaluationConstants.ContinuationHistoryPlyCount;
+
+        return (piece * pieceOffset)
+            + (targetSquare * targetSquareOffset)
+            + (previousMovePiece * previousMovePieceOffset)
+            + (previousMoveTargetSquare * previousMoveTargetSquareOffset)
+            + ply;
+    }
+
+    /// <summary>
+    /// [64][64]
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int CounterMoveIndex(int previousMoveSourceSquare, int previousMoveTargetSquare)
+    {
+        const int sourceSquareOffset = 64;
+
+        return (previousMoveSourceSquare * sourceSquareOffset)
+            + previousMoveTargetSquare;
+    }
+
     #region Debugging
+
+#pragma warning disable S125 // Sections of code should not be commented out
+#pragma warning disable S1199 // Nested code blocks should not be used
 
     [Conditional("DEBUG")]
     private void ValidatePVTable()
@@ -223,25 +109,32 @@ public sealed partial class Engine
                 }
                 break;
             }
+
             var move = _pVTable[i];
+            TryParseMove(position, i, move);
+
+            var newPosition = new Position(position);
+            newPosition.MakeMove(move);
+            if (!newPosition.WasProduceByAValidMove())
+            {
+                throw new AssertException($"Invalid position after move {move.UCIString()} from position {position.FEN()}");
+            }
+            position = newPosition;
+        }
+
+        static void TryParseMove(Position position, int i, int move)
+        {
+            Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
 
             if (!MoveExtensions.TryParseFromUCIString(
                move.UCIString(),
-               MoveGenerator.GenerateAllMoves(position, Game.MovePool),
+               MoveGenerator.GenerateAllMoves(position, movePool),
                out _))
             {
                 var message = $"Unexpected PV move {i}: {move.UCIString()} from position {position.FEN()}";
                 _logger.Error(message);
                 throw new AssertException(message);
             }
-
-            var newPosition = new Position(position, move);
-
-            if (!newPosition.WasProduceByAValidMove())
-            {
-                throw new AssertException($"Invalid position after move {move.UCIString()} from position {position.FEN()}");
-            }
-            position = newPosition;
         }
     }
 
@@ -260,13 +153,15 @@ public sealed partial class Engine
             //if (plies < Configuration.Parameters.Depth - 1)
             {
                 //Console.WriteLine($"{Environment.NewLine}{depthStr}{move} ({position.Side}, {depth})");
-                _logger.Trace($"{Environment.NewLine}{depthStr}{(isQuiescence ? "[Qui] " : "")}{move.ToEPDString()} ({position.Side}, {plies})");
+#pragma warning disable CS0618 // Type or member is obsolete
+                _logger.Trace($"{Environment.NewLine}{depthStr}{(isQuiescence ? "[Qui] " : "")}{move.ToEPDString(position)} ({position.Side}, {plies})");
+#pragma warning restore CS0618 // Type or member is obsolete
             }
         }
     }
 
     [Conditional("DEBUG")]
-    private static void PrintMove(int plies, Move move, int evaluation, bool isQuiescence = false, bool prune = false)
+    private static void PrintMove(Position position, int plies, Move move, int evaluation, bool isQuiescence = false, bool prune = false)
     {
         if (_logger.IsTraceEnabled)
         {
@@ -288,7 +183,9 @@ public sealed partial class Engine
             //Console.WriteLine($"{depthStr}{move} ({position.Side}, {depthLeft}) | {evaluation}");
             //Console.WriteLine($"{depthStr}{move} | {evaluation}");
 
-            _logger.Trace($"{depthStr}{(isQuiescence ? "[Qui] " : "")}{move.ToEPDString(),-6} | {evaluation}{(prune ? " | prunning" : "")}");
+#pragma warning disable CS0618 // Type or member is obsolete
+            _logger.Trace($"{depthStr}{(isQuiescence ? "[Qui] " : "")}{move.ToEPDString(position),-6} | {evaluation}{(prune ? " | pruning" : "")}");
+#pragma warning restore CS0618 // Type or member is obsolete
 
             //Console.ResetColor();
         }
@@ -322,10 +219,6 @@ public sealed partial class Engine
     /// <summary>
     /// Assumes Configuration.EngineSettings.MaxDepth = 64
     /// </summary>
-    /// <param name="target"></param>
-    /// <param name="source"></param>
-    /// <param name="movesToCopy"></param>
-    /// <param name="depth"></param>
     [Conditional("DEBUG")]
     private void PrintPvTable(int target = -1, int source = -1, int movesToCopy = 0, int depth = 0)
     {
@@ -338,6 +231,7 @@ public sealed partial class Engine
             Console.WriteLine($"Copying {movesToCopy} moves");
         }
 
+#pragma warning disable CS0618 // Type or member is obsolete
         Console.WriteLine(
 (target != -1 ? $"src: {source}, tgt: {target}" + Environment.NewLine : "") +
 $" {0,-3} {_pVTable[0].ToEPDString(),-6} {_pVTable[1].ToEPDString(),-6} {_pVTable[2].ToEPDString(),-6} {_pVTable[3].ToEPDString(),-6} {_pVTable[4].ToEPDString(),-6} {_pVTable[5].ToEPDString(),-6} {_pVTable[6].ToEPDString(),-6} {_pVTable[7].ToEPDString(),-6} {_pVTable[8].ToEPDString(),-6} {_pVTable[9].ToEPDString(),-6} {_pVTable[10].ToEPDString(),-6}" + Environment.NewLine +
@@ -350,22 +244,33 @@ $" {369,-3}                                           {_pVTable[369].ToEPDString
 $" {427,-3}                                                  {_pVTable[427].ToEPDString(),-6} {_pVTable[428].ToEPDString(),-6} {_pVTable[429].ToEPDString(),-6} {_pVTable[430].ToEPDString(),-6}" + Environment.NewLine +
 $" {484,-3}                                                         {_pVTable[484].ToEPDString(),-6} {_pVTable[485].ToEPDString(),-6} {_pVTable[486].ToEPDString(),-6}" + Environment.NewLine +
 (target == -1 ? "------------------------------------------------------------------------------------" + Environment.NewLine : ""));
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 
+    [Conditional("DEBUG")]
     internal void PrintHistoryMoves()
     {
-        int max = int.MinValue;
+        int max = EvaluationConstants.MinEval;
 
-        foreach (var item in _historyMoves)
+        for (int i = 0; i < 12; ++i)
         {
-            if (item > max)
+            var tmp = _quietHistory[i];
+            for (int j = 0; j < 64; ++j)
             {
-                max = item;
+                var item = tmp[j];
+
+                if (item > max)
+                {
+                    max = item;
+                }
             }
         }
 
-        _logger.Debug($"Max history: {max}");
+        _logger.ConditionalDebug($"Max history: {max}");
     }
+
+#pragma warning restore S125 // Sections of code should not be commented out
+#pragma warning restore S1199 // Nested code blocks should not be used
 
     #endregion
 }

@@ -1,6 +1,4 @@
-﻿using Lynx.Model;
-
-namespace Lynx.UCI.Commands.Engine;
+﻿namespace Lynx.UCI.Commands.Engine;
 
 /// <summary>
 /// info
@@ -71,24 +69,7 @@ namespace Lynx.UCI.Commands.Engine;
 ///	    If is greater than 1, always send all k lines in k strings together.
 ///		The engine should only send this if the option "UCI_ShowCurrLine" is set to true.
 /// </summary>
-public sealed class InfoCommand : EngineBaseCommand
+public sealed class InfoCommand : IEngineBaseCommand
 {
     public const string Id = "info";
-
-    public static string SearchResultInfo(SearchResult searchResult)
-    {
-#pragma warning disable RCS1214 // Unnecessary interpolated string.
-        return Id +
-            $" depth {searchResult.Depth}" +
-            $" seldepth {searchResult.DepthReached}" +
-            $" multipv 1" +
-            $" score {(searchResult.Mate == default ? $"cp {WDL.NormalizeScore(searchResult.Evaluation)}" : $"mate {searchResult.Mate}")}" +
-            $" nodes {searchResult.Nodes}" +
-            $" nps {searchResult.NodesPerSecond}" +
-            $" time {searchResult.Time}" +
-            (searchResult.HashfullPermill != -1 ? $" hashfull {searchResult.HashfullPermill}" : string.Empty) +
-            (searchResult.WDL is not null ? $" wdl {searchResult.WDL.Value.WDLWin} {searchResult.WDL.Value.WDLDraw} {searchResult.WDL.Value.WDLLoss}" : string.Empty) +
-            $" pv {string.Join(" ", searchResult.Moves.Select(move => move.UCIString()))}";
-#pragma warning restore RCS1214 // Unnecessary interpolated string.
-    }
 }

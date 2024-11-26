@@ -15,7 +15,10 @@ public class GenerateCastlingMovesTest
     {
         var position = new Position(fen);
 
-        var moves = MoveGenerator.GenerateCastlingMovesForReference(position, Utils.PieceOffset(position.Side));
+        int index = 0;
+        var moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+
+        MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
 
         Assert.True(1 == moves.Count(m => m.IsCastle()));
         Assert.True(1 == moves.Count(m => m.IsShortCastle()));
@@ -32,7 +35,10 @@ public class GenerateCastlingMovesTest
     {
         var position = new Position(fen);
 
-        var moves = MoveGenerator.GenerateCastlingMovesForReference(position, Utils.PieceOffset(position.Side));
+        int index = 0;
+        var moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+
+        MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
 
         Assert.True(1 == moves.Count(m => m.IsCastle()));
         Assert.True(1 == moves.Count(m => m.IsLongCastle()));
@@ -57,7 +63,10 @@ public class GenerateCastlingMovesTest
     {
         var position = new Position(fen);
 
-        var moves = MoveGenerator.GenerateCastlingMovesForReference(position, Utils.PieceOffset(position.Side));
+        int index = 0;
+        var moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+
+        MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
 
         Assert.IsEmpty(moves.Where(m => m.IsShortCastle()));
     }
@@ -80,7 +89,10 @@ public class GenerateCastlingMovesTest
     {
         var position = new Position(fen);
 
-        var moves = MoveGenerator.GenerateCastlingMovesForReference(position, Utils.PieceOffset(position.Side));
+        int index = 0;
+        var moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+
+        MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
 
         Assert.IsEmpty(moves.Where(m => m.IsLongCastle()));
     }
@@ -101,7 +113,10 @@ public class GenerateCastlingMovesTest
     {
         var position = new Position(fen);
 
-        var moves = MoveGenerator.GenerateCastlingMovesForReference(position, Utils.PieceOffset(position.Side));
+        int index = 0;
+        var moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+
+        MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
 
         Assert.IsEmpty(moves.Where(m => m.IsShortCastle()));
     }
@@ -127,7 +142,10 @@ public class GenerateCastlingMovesTest
     {
         var position = new Position(fen);
 
-        var moves = MoveGenerator.GenerateCastlingMovesForReference(position, Utils.PieceOffset(position.Side));
+        int index = 0;
+        var moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+
+        MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
 
         Assert.IsEmpty(moves.Where(m => m.IsLongCastle()));
     }
@@ -142,7 +160,10 @@ public class GenerateCastlingMovesTest
     {
         var position = new Position(fen);
 
-        var moves = MoveGenerator.GenerateCastlingMovesForReference(position, Utils.PieceOffset(position.Side));
+        int index = 0;
+        var moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+
+        MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
 
         Assert.IsEmpty(moves.Where(m => m.IsShortCastle()));
     }
@@ -157,7 +178,10 @@ public class GenerateCastlingMovesTest
     {
         var position = new Position(fen);
 
-        var moves = MoveGenerator.GenerateCastlingMovesForReference(position, Utils.PieceOffset(position.Side));
+        int index = 0;
+        var moves = new Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+
+        MoveGenerator.GenerateCastlingMoves(ref index, moves, position);
 
         Assert.IsEmpty(moves.Where(m => m.IsLongCastle()));
     }

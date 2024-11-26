@@ -1,300 +1,361 @@
 ﻿using Lynx.Model;
-using Lynx.UCI.Commands.Engine;
-using NLog;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Lynx;
 
 public sealed partial class Engine
 {
     private readonly Stopwatch _stopWatch = new();
-    private readonly Move[] _pVTable = new Move[Configuration.EngineSettings.MaxDepth * (Configuration.EngineSettings.MaxDepth + 1) / 2];
-    private readonly int[,] _killerMoves = new int[2, Configuration.EngineSettings.MaxDepth];
-    private readonly int[,] _historyMoves = new int[12, 64];
-    private readonly int[] _maxDepthReached = new int[Constants.AbsoluteMaxDepth];
-    private TranspositionTable _tt = Array.Empty<TranspositionTableElement>();
-    private int _ttMask;
+    private readonly Move[] _pVTable = GC.AllocateArray<Move>(Configuration.EngineSettings.MaxDepth * (Configuration.EngineSettings.MaxDepth + 1) / 2, pinned: true);
 
-    private int _nodes;
-    private bool _isFollowingPV;
-    private bool _isScoringPV;
+    /// <summary>
+    /// (<see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/>) x 3
+    /// </summary>
+    private readonly int[][] _killerMoves;
+
+    /// <summary>
+    /// 12 x 64
+    /// </summary>
+    private readonly int[] _counterMoves = GC.AllocateArray<int>(12 * 64, pinned: true);
+
+    /// <summary>
+    /// 12 x 64
+    /// piece x target square
+    /// </summary>
+    private readonly int[][] _quietHistory;
+
+    /// <summary>
+    /// 12 x 64 x 12,
+    /// piece x target square x captured piece
+    /// </summary>
+    private readonly int[] _captureHistory = GC.AllocateArray<int>(12 * 64 * 12, pinned: true);
+
+    /// <summary>
+    /// 12 x 64 x 12 x 64 x ContinuationHistoryPlyCount
+    /// piece x target square x last piece x last target square x plies back
+    /// ply 0 -> Continuation move history
+    /// ply 1 -> Follow-up move history
+    /// </summary>
+    private readonly int[] _continuationHistory = GC.AllocateArray<int>(12 * 64 * 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount, pinned: true);
+
+    private readonly int[] _maxDepthReached = GC.AllocateArray<int>(Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin, pinned: true);
+
+    private ulong _nodes;
 
     private SearchResult? _previousSearchResult;
-    private readonly int[,] _previousKillerMoves = new int[2, Configuration.EngineSettings.MaxDepth];
 
     private readonly Move _defaultMove = default;
 
     /// <summary>
-    /// IDDFs search
+    /// Iterative Deepening Depth-First Search (IDDFS) using alpha-beta pruning
     /// </summary>
-    /// <param name="minDepth"></param>
-    /// <param name="maxDepth"></param>
-    /// <param name="decisionTime"></param>
     /// <returns>Not null <see cref="SearchResult"/>, although made nullable in order to match online tb probing signature</returns>
-    public async Task<SearchResult?> IDDFS(int minDepth, int? maxDepth, int? decisionTime)
+    [SkipLocalsInit]
+    public SearchResult IDDFS(int maxDepth, int softLimitTimeBound)
     {
         // Cleanup
         _nodes = 0;
-        _isFollowingPV = false;
-        _isScoringPV = false;
-        _stopWatch.Reset();
 
         Array.Clear(_pVTable);
         Array.Clear(_maxDepthReached);
 
-        int bestEvaluation = 0;
-        int alpha = MinValue;
-        int beta = MaxValue;
+        int bestScore = 0;
+        int alpha = EvaluationConstants.MinEval;
+        int beta = EvaluationConstants.MaxEval;
         SearchResult? lastSearchResult = null;
         int depth = 1;
-        bool isCancelled = false;
         bool isMateDetected = false;
+        Move firstLegalMove = default;
+
+        _stopWatch.Restart();
 
         try
         {
-            _stopWatch.Start();
-
-            bool onlyOneLegalMove = false;
-            Move firstLegalMove = default;
-            foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition))
+            if (OnlyOneLegalMove(ref firstLegalMove, out var onlyOneLegalMoveSearchResult))
             {
-                var gameState = Game.CurrentPosition.MakeMove(move);
-                bool isPositionValid = Game.CurrentPosition.IsValid();
-                Game.CurrentPosition.UnmakeMove(move, gameState);
+                _engineWriter.TryWrite(onlyOneLegalMoveSearchResult);
 
-                if (isPositionValid)
-                {
-                    // We save the first legal move and check if there's at least another one
-                    if (firstLegalMove == default)
-                    {
-                        firstLegalMove = move;
-                        onlyOneLegalMove = true;
-                    }
-                    // If there's a second legal move, we exit and let the search continue
-                    else
-                    {
-                        onlyOneLegalMove = false;
-                        break;
-                    }
-                }
+                return onlyOneLegalMoveSearchResult;
             }
 
-            // Detect if there was only one legal move
-            if (onlyOneLegalMove)
+            for (int i = 0; i < _killerMoves.Length; ++i)
             {
-                _logger.Debug("One single move found");
-                var elapsedTime = _stopWatch.ElapsedMilliseconds;
+                Array.Clear(_killerMoves[i]);
+            }
+            // Not clearing _quietHistory on purpose
+            // Not clearing _captureHistory on purpose
 
-                // We don't have or need any eval, and we don't want to return 0 or a negative eval that
-                // could make the GUI resign or take a draw from this position.
-                // Since this only happens in root, we don't really care about being more precise for raising
-                // alphas or betas of parent moves, so let's just return +-2 pawns depending on the side to move
-                var eval = Game.CurrentPosition.Side == Side.White
-                    ? +EvaluationConstants.SingleMoveEvaluation
-                    : -EvaluationConstants.SingleMoveEvaluation;
-
-                var result = new SearchResult(firstLegalMove, eval, 0, [firstLegalMove], alpha, beta)
-                {
-                    DepthReached = 0,
-                    Nodes = 0,
-                    Time = elapsedTime,
-                    NodesPerSecond = 0
-                };
-
-                await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(result));
-
-                return result;
+            if (lastSearchResult is not null)
+            {
+                _engineWriter.TryWrite(lastSearchResult);
             }
 
-            if (Game.MoveHistory.Count >= 2
-                && _previousSearchResult?.Moves.Count > 2
-                && _previousSearchResult.BestMove != default
-                && Game.MoveHistory[^2] == _previousSearchResult.Moves[0]
-                && Game.MoveHistory[^1] == _previousSearchResult.Moves[1])
-            {
-                _logger.Debug("Ponder hit");
-
-                lastSearchResult = new SearchResult(_previousSearchResult);
-
-                Array.Copy(_previousSearchResult.Moves.ToArray(), 2, _pVTable, 0, _previousSearchResult.Moves.Count - 2);
-
-                await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult));
-
-                for (int d = 0; d < Configuration.EngineSettings.MaxDepth - 2; ++d)
-                {
-                    _killerMoves[0, d] = _previousKillerMoves[0, d + 2];
-                    _killerMoves[1, d] = _previousKillerMoves[1, d + 2];
-                }
-
-                // depth Already reduced by 2 in SearchResult constructor
-                depth = lastSearchResult.Depth + 1;
-                depth = Math.Clamp(depth, 1, Configuration.EngineSettings.MaxDepth - 1);
-            }
-            else
-            {
-                Array.Clear(_killerMoves);
-                Array.Clear(_historyMoves);
-            }
+            int mate = 0;
 
             do
             {
                 _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
-                if (minDepth == maxDepth    // go depth n commands
-                    || depth - 1 > minDepth)
-                {
-                    _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
-                }
-                _nodes = 0;
+                _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
 
-                if (depth < Configuration.EngineSettings.AspirationWindowMinDepth || lastSearchResult?.Evaluation is null)
+                if (depth < Configuration.EngineSettings.AspirationWindow_MinDepth
+                    || lastSearchResult?.Score is null)
                 {
-                    bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta, isVerifyingNullMoveCutOff: true);
+                    bestScore = NegaMax(depth: depth, ply: 0, alpha, beta);
                 }
                 else
                 {
-                    // 🔍 Aspiration Windows
-                    var window = Configuration.EngineSettings.AspirationWindowDelta;
+                    // 🔍 Aspiration windows - search using a window around an expected score (the previous search one)
+                    // If the resulting score doesn't fall inside of the window, it is widened it until it does
+                    var window = Configuration.EngineSettings.AspirationWindow_Base;
 
-                    alpha = Math.Max(MinValue, lastSearchResult.Evaluation - window);
-                    beta = Math.Min(MaxValue, lastSearchResult.Evaluation + window);
+                    // A temporary reduction is used for fail highs, because the verification for those 'too good' lines
+                    // are expected to happen at lower depths
+                    int failHighReduction = 0;
+
+                    alpha = Math.Max(EvaluationConstants.MinEval, lastSearchResult.Score - window);
+                    beta = Math.Min(EvaluationConstants.MaxEval, lastSearchResult.Score + window);
+
+                    _logger.Debug("Aspiration windows depth {Depth}: [{Alpha}, {Beta}] for previous search score {Score}, nodes {Nodes}",
+                        depth, alpha, beta, lastSearchResult.Score, _nodes);
+                    Debug.Assert(lastSearchResult.Mate == 0 && lastSearchResult.Score > EvaluationConstants.NegativeCheckmateDetectionLimit && lastSearchResult.Score < EvaluationConstants.PositiveCheckmateDetectionLimit);
 
                     while (true)
                     {
-                        _isFollowingPV = true;
-                        bestEvaluation = NegaMax(depth: depth, ply: 0, alpha, beta, isVerifyingNullMoveCutOff: true);
+                        _logger.Debug("Aspiration windows depth {Depth}: [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
+                            depth, alpha, beta, bestScore, _nodes);
 
-                        if (alpha < bestEvaluation && beta > bestEvaluation)
-                        {
-                            break;
-                        }
+                        bestScore = NegaMax(depth: depth - failHighReduction, ply: 0, alpha, beta);
 
-                        _logger.Debug("Eval ({0}) outside of aspiration window [{1}, {2}] (depth {3}, nodes {4})", bestEvaluation, alpha, beta, depth, _nodes);
-
-                        window += window / 2;
+                        // 13, 19, 28, 42, 63, 94, 141, 211, 316, 474, 711, 1066, 1599, 2398, 3597, 5395, 8092, 12138, 18207, 27310, |EvaluationConstants.MaxEval|, 40965
+                        window += window >> 1;   // window / 2
 
                         // Depth change: https://github.com/lynx-chess/Lynx/pull/440
-                        if (alpha >= bestEvaluation)     // Fail low
+                        if (alpha >= bestScore)     // Fail low
                         {
-                            alpha = Math.Max(bestEvaluation - window, MinValue);
-                            beta = (alpha + beta) / 2;
+                            alpha = Math.Max(bestScore - window, EvaluationConstants.MinEval);
+                            beta = (alpha + beta) >> 1;  // (alpha + beta) / 2
+                            failHighReduction = 0;
                         }
-                        else if (beta <= bestEvaluation)     // Fail high
+                        else if (beta <= bestScore)     // Fail high
                         {
-                            beta = Math.Min(bestEvaluation + window, MaxValue);
+                            beta = Math.Min(bestScore + window, EvaluationConstants.MaxEval);
+                            ++failHighReduction;
+                        }
+                        else
+                        {
+                            break;
                         }
                     }
                 }
 
                 //PrintPvTable(depth: depth);
                 ValidatePVTable();
+                Debug.Assert(bestScore != EvaluationConstants.MinEval);
 
-                var pvMoves = _pVTable.TakeWhile(m => m != default).ToList();
-                var maxDepthReached = _maxDepthReached.LastOrDefault(item => item != default);
+                var bestScoreAbs = Math.Abs(bestScore);
+                isMateDetected = bestScoreAbs > EvaluationConstants.PositiveCheckmateDetectionLimit;
+                mate = isMateDetected
+                    ? Utils.CalculateMateInX(bestScore, bestScoreAbs)
+                    : 0;
 
-                int mate = default;
-                var bestEvaluationAbs = Math.Abs(bestEvaluation);
-                isMateDetected = bestEvaluationAbs > EvaluationConstants.PositiveCheckmateDetectionLimit;
-                if (isMateDetected)
-                {
-                    mate = Utils.CalculateMateInX(bestEvaluation, bestEvaluationAbs);
-                }
+                lastSearchResult = UpdateLastSearchResult(lastSearchResult, bestScore, depth, mate);
 
-                var elapsedTime = _stopWatch.ElapsedMilliseconds;
-
-                _previousSearchResult = lastSearchResult;
-                lastSearchResult = new SearchResult(pvMoves.FirstOrDefault(), bestEvaluation, depth, pvMoves, alpha, beta, mate)
-                {
-                    DepthReached = maxDepthReached,
-                    Nodes = _nodes,
-                    Time = elapsedTime,
-                    NodesPerSecond = Utils.CalculateNps(_nodes, elapsedTime)
-                };
-
-                await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(lastSearchResult));
-
-                Array.Copy(_killerMoves, _previousKillerMoves, _killerMoves.Length);
-
-            } while (stopSearchCondition(++depth, maxDepth, isMateDetected, _nodes, decisionTime, _stopWatch, _logger));
+                _engineWriter.TryWrite(lastSearchResult);
+            } while (StopSearchCondition(++depth, maxDepth, mate, softLimitTimeBound));
         }
         catch (OperationCanceledException)
         {
-            isCancelled = true;
+#pragma warning disable S6667 // Logging in a catch clause should pass the caught exception as a parameter - expected exception we want to ignore
             _logger.Info("Search cancellation requested after {0}ms (depth {1}, nodes {2}), best move will be returned", _stopWatch.ElapsedMilliseconds, depth, _nodes);
+#pragma warning restore S6667 // Logging in a catch clause should pass the caught exception as a parameter.
 
-            for (int i = 0; i < lastSearchResult?.Moves.Count; ++i)
+            for (int i = 0; i < lastSearchResult?.Moves.Length; ++i)
             {
                 _pVTable[i] = lastSearchResult.Moves[i];
             }
         }
         catch (Exception e) when (e is not AssertException)
         {
-            _logger.Error(e, "Unexpected error ocurred during the search at depth {0}, best move will be returned\n{1}", depth, e.StackTrace);
+            _logger.Error(e, "Unexpected error ocurred during the search of position {0} at depth {1}, best move will be returned\n{2}", Game.PositionBeforeLastSearch.FEN(), depth, e.StackTrace);
         }
         finally
         {
             _stopWatch.Stop();
         }
 
+        var finalSearchResult = GenerateFinalSearchResult(lastSearchResult, bestScore, depth, firstLegalMove);
+
+        if (Configuration.EngineSettings.UseOnlineTablebaseInRootPositions
+            && isMateDetected
+            && (finalSearchResult.Mate * 2) + Game.HalfMovesWithoutCaptureOrPawnMove < Constants.MaxMateDistanceToStopSearching)
+        {
+            _searchCancellationTokenSource.Cancel();
+            _logger.Info("Engine search found a short enough mate, cancelling online tb probing if still active");
+        }
+
+        _engineWriter.TryWrite(finalSearchResult);
+
+        return finalSearchResult;
+    }
+
+    private bool StopSearchCondition(int depth, int maxDepth, int mate, int softLimitTimeBound)
+    {
+        if (mate != 0)
+        {
+            var winningMateThreshold = (100 - Game.HalfMovesWithoutCaptureOrPawnMove) / 2;
+            _logger.Info("Depth {0}: mate in {1} detected ({2} moves until draw by repetition)", depth - 1, mate, winningMateThreshold);
+
+            if (mate < 0 || mate + Constants.MateDistanceMarginToStopSearching < winningMateThreshold)
+            {
+                _logger.Info("Stopping search: mate is short enough");
+                return false;
+            }
+
+            _logger.Info("Search continues, hoping to find a faster mate");
+        }
+
+        if (depth >= Configuration.EngineSettings.MaxDepth)
+        {
+            _logger.Info("Max depth reached: {0}", Configuration.EngineSettings.MaxDepth);
+            return false;
+        }
+
+        if (maxDepth > 0)
+        {
+            var shouldContinue = depth <= maxDepth;
+
+            if (!shouldContinue)
+            {
+                _logger.Info("Stopping at depth {0}: max. depth reached", depth - 1);
+            }
+
+            return shouldContinue;
+        }
+
+        var elapsedMilliseconds = _stopWatch.ElapsedMilliseconds;
+
+        if (elapsedMilliseconds > softLimitTimeBound)
+        {
+            _logger.Info("Stopping at depth {0} (nodes {1}): {2}ms > {3}ms", depth - 1, _nodes, elapsedMilliseconds, softLimitTimeBound);
+            return false;
+        }
+
+        return true;
+    }
+
+    [SkipLocalsInit]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private bool OnlyOneLegalMove(ref Move firstLegalMove, [NotNullWhen(true)] out SearchResult? result)
+    {
+        bool onlyOneLegalMove = false;
+
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, moves))
+        {
+            var gameState = Game.CurrentPosition.MakeMove(move);
+            bool isPositionValid = Game.CurrentPosition.WasProduceByAValidMove();
+            Game.CurrentPosition.UnmakeMove(move, gameState);
+
+            if (isPositionValid)
+            {
+                // We save the first legal move and check if there's at least another one
+                if (firstLegalMove == default)
+                {
+                    firstLegalMove = move;
+                    onlyOneLegalMove = true;
+                }
+                // If there's a second legal move, we exit and let the search continue
+                else
+                {
+                    onlyOneLegalMove = false;
+                    break;
+                }
+            }
+        }
+
+        // Detect if there was only one legal move
+        if (onlyOneLegalMove)
+        {
+            _logger.Debug("One single move found");
+
+            // We don't have or need any eval, and we don't want to return 0 or a negative eval that
+            // could make the GUI resign or take a draw from this position.
+            // Since this only happens in root, we don't really care about being more precise for raising
+            // alphas or betas of parent moves, so let's just return +-2 pawns depending on the side to move
+            var score = Game.CurrentPosition.Side == Side.White
+                ? +EvaluationConstants.SingleMoveScore
+                : -EvaluationConstants.SingleMoveScore;
+
+            result = new SearchResult(firstLegalMove, score, 0, [firstLegalMove])
+            {
+                DepthReached = 0,
+                Nodes = 0,
+                Time = 0,
+                NodesPerSecond = 0
+            };
+
+            return true;
+        }
+
+        result = null;
+        return false;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private SearchResult UpdateLastSearchResult(SearchResult? lastSearchResult,
+        int bestScore, int depth, int mate)
+    {
+        var pvTableSpan = _pVTable.AsSpan();
+        var pvMoves = pvTableSpan[..pvTableSpan.IndexOf(0)].ToArray();
+
+        var maxDepthReached = _maxDepthReached.LastOrDefault(item => item != default);
+
+        var elapsedSeconds = Utils.CalculateElapsedSeconds(_stopWatch);
+
+        _previousSearchResult = lastSearchResult;
+        return new SearchResult(pvMoves.FirstOrDefault(), bestScore, depth, pvMoves, mate)
+        {
+            DepthReached = maxDepthReached,
+            Nodes = _nodes,
+            Time = Utils.CalculateUCITime(elapsedSeconds),
+            NodesPerSecond = Utils.CalculateNps(_nodes, elapsedSeconds)
+        };
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private SearchResult GenerateFinalSearchResult(SearchResult? lastSearchResult,
+        int bestScore, int depth, Move firstLegalMove)
+    {
         SearchResult finalSearchResult;
         if (lastSearchResult is null)
         {
-            finalSearchResult = new(default, bestEvaluation, depth, new List<Move>(), alpha, beta);
+            // In the event of a quick ponderhit/stop while pondering because the opponent moved quickly, we don't want no warning triggered here
+            // when cancelling the pondering search
+            if (!_isPondering)
+            {
+                _logger.Warn("Search cancelled at depth 1, choosing first found legal move as best one");
+            }
+            finalSearchResult = new(firstLegalMove, 0, 0, [firstLegalMove]);
         }
         else
         {
             finalSearchResult = _previousSearchResult = lastSearchResult;
         }
 
-        finalSearchResult.IsCancelled = isCancelled;
+        var elapsedSeconds = Utils.CalculateElapsedSeconds(_stopWatch);
+
         finalSearchResult.DepthReached = Math.Max(finalSearchResult.DepthReached, _maxDepthReached.LastOrDefault(item => item != default));
         finalSearchResult.Nodes = _nodes;
-        finalSearchResult.Time = _stopWatch.ElapsedMilliseconds;
-        finalSearchResult.NodesPerSecond = Utils.CalculateNps(_nodes, _stopWatch.ElapsedMilliseconds);
+        finalSearchResult.Time = Utils.CalculateUCITime(elapsedSeconds);
+        finalSearchResult.NodesPerSecond = Utils.CalculateNps(_nodes, elapsedSeconds);
         finalSearchResult.HashfullPermill = _tt.HashfullPermillApprox();
         if (Configuration.EngineSettings.ShowWDL)
         {
-            finalSearchResult.WDL = WDL.WDLModel(bestEvaluation, depth);
+            finalSearchResult.WDL = WDL.WDLModel(bestScore, depth);
         }
-
-        if (isMateDetected && finalSearchResult.Mate + Game.HalfMovesWithoutCaptureOrPawnMove < 96)
-        {
-            _logger.Info("Engine search found a short enough mate, cancelling online tb probing if still active");
-            _searchCancellationTokenSource.Cancel();
-        }
-
-        await _engineWriter.WriteAsync(InfoCommand.SearchResultInfo(finalSearchResult));
 
         return finalSearchResult;
-
-        static bool stopSearchCondition(int depth, int? maxDepth, bool isMateDetected, int nodes, int? decisionTime, Stopwatch stopWatch, Logger logger)
-        {
-            if (isMateDetected)
-            {
-                logger.Info($"Stopping at depth {depth - 1}: mate detected");
-                return false;
-            }
-
-            if (maxDepth is not null)
-            {
-                bool shouldContinue = depth <= maxDepth;
-                if (!shouldContinue)
-                {
-                    logger.Info("Stopping at depth {0}: max. depth reached", depth - 1);
-                }
-                return shouldContinue;
-            }
-
-            var elapsedMilliseconds = stopWatch.ElapsedMilliseconds;
-            var minTimeToConsiderStopSearching = Configuration.EngineSettings.MinElapsedTimeToConsiderStopSearching;
-            var decisionTimePercentageToStopSearching = Configuration.EngineSettings.DecisionTimePercentageToStopSearching;
-            if (decisionTime is not null && elapsedMilliseconds > minTimeToConsiderStopSearching && elapsedMilliseconds > decisionTimePercentageToStopSearching * decisionTime)
-            {
-                logger.Info("Stopping at depth {0} (nodes {1}): {2} > {3} (elapsed time > [{4}, {5} * decision time])",
-                    depth - 1, nodes, elapsedMilliseconds, decisionTimePercentageToStopSearching * decisionTime, minTimeToConsiderStopSearching, decisionTimePercentageToStopSearching);
-                return false;
-            }
-
-            return true;
-        }
     }
 }

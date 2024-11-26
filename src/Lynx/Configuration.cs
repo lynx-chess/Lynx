@@ -11,7 +11,6 @@ public static class Configuration
 #pragma warning disable IDE1006 // Naming Styles
     private static int _UCI_AnalyseMode = 0;
 #pragma warning restore IDE1006 // Naming Styles
-    private static int _ponder = 0;
 
     public static bool IsDebug
     {
@@ -45,250 +44,43 @@ public static class Configuration
         }
     }
 
-    public static bool IsPonder
-    {
-        get => Interlocked.CompareExchange(ref _ponder, 1, 1) == 1;
-        set
-        {
-            if (value)
-            {
-                Interlocked.CompareExchange(ref _ponder, 1, 0);
-            }
-            else
-            {
-                Interlocked.CompareExchange(ref _ponder, 0, 1);
-            }
-        }
-    }
-
     public static int Hash
     {
         get => EngineSettings.TranspositionTableSize;
-        set
-        {
-            EngineSettings.TranspositionTableSize = value;
-            if (value == 0)
-            {
-                EngineSettings.TranspositionTableEnabled = false;
-            }
-        }
+        set => EngineSettings.TranspositionTableSize = value;
     }
 }
 
 public sealed class GeneralSettings
 {
     public bool EnableLogging { get; set; } = false;
-}
 
-public class TaperedEvaluationTerm
-{
-    public int MG { get; set; }
-
-    public int EG { get; set; }
-
-    internal TaperedEvaluationTerm(int singleValue) : this(singleValue, singleValue)
-    {
-    }
-
-    public TaperedEvaluationTerm(int mg, int eg)
-    {
-        MG = mg;
-        EG = eg;
-    }
-
-    public override string ToString()
-    {
-        return $"{{\"MG\":{MG},\"EG\":{EG}}}";
-    }
-}
-
-public class TaperedEvaluationTermByRank
-{
-    private readonly List<TaperedEvaluationTerm> _evaluationTermsIndexedByPiece;
-
-    public TaperedEvaluationTerm Rank0 { get; set; }
-    public TaperedEvaluationTerm Rank1 { get; set; }
-    public TaperedEvaluationTerm Rank2 { get; set; }
-    public TaperedEvaluationTerm Rank3 { get; set; }
-    public TaperedEvaluationTerm Rank4 { get; set; }
-    public TaperedEvaluationTerm Rank5 { get; set; }
-    public TaperedEvaluationTerm Rank6 { get; set; }
-    public TaperedEvaluationTerm Rank7 { get; set; }
-
-    public TaperedEvaluationTermByRank(
-        TaperedEvaluationTerm rank0, TaperedEvaluationTerm rank1, TaperedEvaluationTerm rank2,
-        TaperedEvaluationTerm rank3, TaperedEvaluationTerm rank4, TaperedEvaluationTerm rank5,
-        TaperedEvaluationTerm rank6, TaperedEvaluationTerm rank7)
-    {
-        Rank0 = rank0;
-        Rank1 = rank1;
-        Rank2 = rank2;
-        Rank3 = rank3;
-        Rank4 = rank4;
-        Rank5 = rank5;
-        Rank6 = rank6;
-        Rank7 = rank7;
-
-        _evaluationTermsIndexedByPiece = [rank0, rank1, rank2, rank3, rank4, rank5, rank6, rank7];
-    }
-
-    public TaperedEvaluationTerm this[int i]
-    {
-        get { return _evaluationTermsIndexedByPiece[i]; }
-    }
-
-    public override string ToString()
-    {
-        return "{" +
-            $"\"{nameof(Rank0)}\":{Rank0}," +
-            $"\"{nameof(Rank1)}\":{Rank1}," +
-            $"\"{nameof(Rank2)}\":{Rank2}," +
-            $"\"{nameof(Rank3)}\":{Rank3}," +
-            $"\"{nameof(Rank4)}\":{Rank4}," +
-            $"\"{nameof(Rank5)}\":{Rank5}," +
-            $"\"{nameof(Rank6)}\":{Rank6}," +
-            $"\"{nameof(Rank7)}\":{Rank7}" +
-            "}";
-    }
+    public bool EnableTuning { get; set; } = false;
 }
 
 public sealed class EngineSettings
 {
-    public int DefaultMaxDepth { get; set; } = 5;
-
-    #region MovesToGo provided
-
-    /// <summary>
-    /// Coefficient applied to ensure more time is allocated to moves when there are over <see cref="KeyMovesBeforeMovesToGo"/> moves left
-    /// </summary>
-    public double CoefficientBeforeKeyMovesBeforeMovesToGo { get; set; } = 1.5;
-
-    public int KeyMovesBeforeMovesToGo { get; set; } = 10;
-
-    /// <summary>
-    /// Security coefficient applied to ensure there are no timeouts when there are less than <see cref="KeyMovesBeforeMovesToGo"/>  movesleft
-    /// </summary>
-    public double CoefficientAfterKeyMovesBeforeMovesToGo { get; set; } = 0.95;
-
-    #endregion
-
-    #region No MovesToGo provided
-
-    /// <summary>
-    /// Number of total moves to calculate decision time against
-    /// </summary>
-    public int TotalMovesWhenNoMovesToGoProvided { get; set; } = 100;
-
-    /// <summary>
-    /// Number of extra moves to calculate decision time against, when the number of moves exceeds <see cref="TotalMovesWhenNoMovesToGoProvided"/>
-    /// </summary>
-    public int FixedMovesLeftWhenNoMovesToGoProvidedAndOverTotalMovesWhenNoMovesToGoProvided { get; set; } = 20;
-
-    /// <summary>
-    /// Min time to apply <see cref="FirstCoefficientWhenNoMovesToGoProvided"/>
-    /// </summary>
-    public int FirstTimeLimitWhenNoMovesToGoProvided { get; set; } = 120_000;
-
-    /// <summary>
-    /// Coefficient applied to ensure more time is allocated to moves when there's over <see cref="FirstTimeLimitWhenNoMovesToGoProvided"/> ms on the clock
-    /// </summary>
-    public int FirstCoefficientWhenNoMovesToGoProvided { get; set; } = 3;
-
-    /// <summary>
-    /// Min time to apply <see cref="SecondCoefficientWhenNoMovesToGoProvided"/>
-    /// </summary>
-    public int SecondTimeLimitWhenNoMovesToGoProvided { get; set; } = 30_000;
-
-    /// <summary>
-    /// Coefficient applied to ensure more time is allocated to moves when there's over <see cref="SecondTimeLimitWhenNoMovesToGoProvided"/> ms on the clock
-    /// </summary>
-    public int SecondCoefficientWhenNoMovesToGoProvided { get; set; } = 2;
-
-    #endregion
-
-    /// <summary>
-    /// Min. time left in the clock if all decision time is used before <see cref="CoefficientSecurityTime"/> is used over that decision time
-    /// </summary>
-    public int MinSecurityTime { get; set; } = 1_000;
-
-    /// <summary>
-    /// Coefficient applied to devision tim if the time left in the clock after spending it is less than <see cref="MinSecurityTime"/>
-    /// </summary>
-    public double CoefficientSecurityTime { get; set; } = 0.9;
-
-    public int MinDepth { get; set; } = 4;
-
     private int _maxDepth = 128;
     public int MaxDepth { get => _maxDepth; set => _maxDepth = Math.Clamp(value, 1, Constants.AbsoluteMaxDepth); }
 
-    //public int MinMoveTime { get; set; } = 1_000;
-
-    //public int DepthWhenLessThanMinMoveTime { get; set; } = 4;
-
-    public int MinElapsedTimeToConsiderStopSearching { get; set; } = 0;
-
-    public double DecisionTimePercentageToStopSearching { get; set; } = 0.4;
-
-    public int LMR_MinDepth { get; set; } = 3;
-
-    public int LMR_MinFullDepthSearchedMoves { get; set; } = 4;
-
     /// <summary>
-    /// Value originally from Stormphrax, who apparently took it from Viridithas
+    /// Depth for bench command
     /// </summary>
-    public double LMR_Base { get; set; } = 0.77;
+    public int BenchDepth { get; set; } = 10;
 
+    private int _transpositionTableSize = 256;
     /// <summary>
-    /// Value originally from Akimbo
+    /// In MB, clamped to [<see cref="Constants.AbsoluteMinTTSize"/>, <see cref="Constants.AbsoluteMaxTTSize"/>]
     /// </summary>
-    public double LMR_Divisor { get; set; } = 2.67;
-
-    public int NMP_DepthReduction { get; set; } = 3;
-
-    public int AspirationWindowDelta { get; set; } = 50;
-
-    public int AspirationWindowMinDepth { get; set; } = 6;
-
-    #region Evaluation
-
-    public TaperedEvaluationTerm DoubledPawnPenalty { get; set; } = new(-3, -11);
-
-    public TaperedEvaluationTerm IsolatedPawnPenalty { get; set; } = new(-13, -10);
-
-    public TaperedEvaluationTerm OpenFileRookBonus { get; set; } = new(43, 22);
-
-    public TaperedEvaluationTerm SemiOpenFileRookBonus { get; set; } = new(18, 16);
-
-    public TaperedEvaluationTerm BishopMobilityBonus { get; set; } = new(8, 7);
-
-    public TaperedEvaluationTerm QueenMobilityBonus { get; set; } = new(2, 7);
-
-    public TaperedEvaluationTerm SemiOpenFileKingPenalty { get; set; } = new(-29, 19);
-
-    public TaperedEvaluationTerm OpenFileKingPenalty { get; set; } = new(-81, 3);
-
-    public TaperedEvaluationTerm KingShieldBonus { get; set; } = new(15, -5);
-
-    public TaperedEvaluationTerm BishopPairBonus { get; set; } = new(22, 65);
-
-    public TaperedEvaluationTermByRank PassedPawnBonus { get; set; } = new(
-        new(0),
-        new(-2, 5),
-        new(-13, 10),
-        new(-12, 32),
-        new(13, 62),
-        new(38, 132),
-        new(53, 191),
-        new(200));
-
-    #endregion
-
-    public bool TranspositionTableEnabled { get; set; } = true;
-
-    /// <summary>
-    /// MB
-    /// </summary>
-    public int TranspositionTableSize { get; set; } = 256;
+    public int TranspositionTableSize
+    {
+        get => _transpositionTableSize;
+        set => _transpositionTableSize =
+            Math.Clamp(
+                value,
+                Constants.AbsoluteMinTTSize,
+                Constants.AbsoluteMaxTTSize);
+    }
 
     public bool UseOnlineTablebaseInRootPositions { get; set; } = false;
 
@@ -302,31 +94,130 @@ public sealed class EngineSettings
     /// </summary>
     public int OnlineTablebaseMaxSupportedPieces { get; set; } = 7;
 
-    /// <summary>
-    /// Depth for bench command
-    /// </summary>
-    public int BenchDepth { get; set; } = 5;
-
-    public int RFP_MaxDepth { get; set; } = 6;
-
-    public int RFP_DepthScalingFactor { get; set; } = 75;
-
     public bool ShowWDL { get; set; } = false;
 
+    public bool IsPonder { get; set; } = false;
+
+    public double SPSA_OB_R_end { get; set; } = 0.02;
+
+    #region Time management
+
+    public double HardTimeBoundMultiplier { get; set; } = 0.52;
+
+    public double SoftTimeBoundMultiplier { get; set; } = 1;
+
+    public int DefaultMovesToGo { get; set; } = 45;
+
+    public double SoftTimeBaseIncrementMultiplier { get; set; } = 0.8;
+
+    #endregion
+
+    [SPSA<int>(3, 10, 0.5)]
+    public int LMR_MinDepth { get; set; } = 3;
+
+    [SPSA<int>(1, 10, 0.5)]
+    public int LMR_MinFullDepthSearchedMoves { get; set; } = 3;
+
+    /// <summary>
+    /// Value originally from Stormphrax, who apparently took it from Viridithas
+    /// </summary>
+    [SPSA<double>(0.1, 2, 0.10)]
+    public double LMR_Base { get; set; } = 0.75;
+
+    /// <summary>
+    /// Value originally from Akimbo
+    /// </summary>
+    [SPSA<double>(1, 5, 0.1)]
+    public double LMR_Divisor { get; set; } = 3.49;
+
+    [SPSA<int>(1, 10, 0.5)]
+    public int NMP_MinDepth { get; set; } = 3;
+
+    [SPSA<int>(1, 5, 0.5)]
+    public int NMP_BaseDepthReduction { get; set; } = 2;
+
+    [SPSA<int>(0, 10, 0.5)]
+    public int NMP_DepthIncrement { get; set; } = 0;
+
+    [SPSA<int>(1, 10, 0.5)]
+    public int NMP_DepthDivisor { get; set; } = 3;
+
+    [SPSA<int>(50, 350, 15)]
+    public int NMP_StaticEvalBetaDivisor { get; set; } = 100;
+
+    [SPSA<int>(1, 10, 0.5)]
+    public int NMP_StaticEvalBetaMaxReduction { get; set; } = 3;
+
+    [SPSA<int>(5, 30, 1)]
+    public int AspirationWindow_Base { get; set; } = 13;
+
+    //[SPSA<int>(5, 30, 1)]
+    //public int AspirationWindow_Delta { get; set; } = 13;
+
+    [SPSA<int>(1, 20, 1)]
+    public int AspirationWindow_MinDepth { get; set; } = 8;
+
+    [SPSA<int>(1, 10, 0.5)]
+    public int RFP_MaxDepth { get; set; } = 7;
+
+    [SPSA<int>(1, 300, 15)]
+    public int RFP_DepthScalingFactor { get; set; } = 52;
+
+    [SPSA<int>(1, 10, 0.5)]
     public int Razoring_MaxDepth { get; set; } = 2;
 
-    public int Razoring_Depth1Bonus { get; set; } = 125;
+    [SPSA<int>(1, 300, 15)]
+    public int Razoring_Depth1Bonus { get; set; } = 68;
 
-    public int Razoring_NotDepth1Bonus { get; set; } = 175;
+    [SPSA<int>(1, 300, 15)]
+    public int Razoring_NotDepth1Bonus { get; set; } = 208;
 
-    public int MaxHistoryMoveValue { get; set; } = 8_192;
+    [SPSA<int>(1, 10, 0.5)]
+    public int IIR_MinDepth { get; set; } = 4;
+
+    [SPSA<int>(1, 10, 0.5)]
+    public int LMP_MaxDepth { get; set; } = 8;
+
+    [SPSA<int>(0, 10, 0.5)]
+    public int LMP_BaseMovesToTry { get; set; } = 1;
+
+    [SPSA<int>(0, 10, 0.5)]
+    public int LMP_MovesDepthMultiplier { get; set; } = 3;
+
+    public int History_MaxMoveValue { get; set; } = 8_192;
+
+    /// <summary>
+    /// 1896: constant from depth 12
+    /// </summary>
+    public int History_MaxMoveRawBonus { get; set; } = 1_896;
+
+    //[SPSA<int>(0, 200, 10)]
+    public int History_BestScoreBetaMargin { get; set; } = 60;
+
+    [SPSA<int>(0, 6, 0.5)]
+    public int SEE_BadCaptureReduction { get; set; } = 2;
+
+    [SPSA<int>(1, 10, 0.5)]
+    public int FP_MaxDepth { get; set; } = 7;
+
+    [SPSA<int>(1, 200, 10)]
+    public int FP_DepthScalingFactor { get; set; } = 73;
+
+    [SPSA<int>(0, 500, 25)]
+    public int FP_Margin { get; set; } = 218;
+
+    [SPSA<int>(0, 10, 0.5)]
+    public int HistoryPrunning_MaxDepth { get; set; } = 5;
+
+    [SPSA<int>(-8192, 0, 512)]
+    public int HistoryPrunning_Margin { get; set; } = -1940;
 }
 
 [JsonSourceGenerationOptions(
     GenerationMode = JsonSourceGenerationMode.Default, WriteIndented = true)] // https://github.com/dotnet/runtime/issues/78602#issuecomment-1322004254
 [JsonSerializable(typeof(EngineSettings))]
-[JsonSerializable(typeof(TaperedEvaluationTerm))]
-[JsonSerializable(typeof(TaperedEvaluationTermByRank))]
-internal partial class EngineSettingsJsonSerializerContext : JsonSerializerContext
-{
-}
+[JsonSerializable(typeof(SPSAAttribute<int>))]
+[JsonSerializable(typeof(SPSAAttribute<double>))]
+[JsonSerializable(typeof(WeatherFactoryOutput<int>))]
+[JsonSerializable(typeof(WeatherFactoryOutput<double>))]
+internal partial class EngineSettingsJsonSerializerContext : JsonSerializerContext;

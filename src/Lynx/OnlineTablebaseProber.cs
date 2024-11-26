@@ -43,7 +43,7 @@ public static class OnlineTablebaseProber
         TypeInfoResolver = SourceGenerationContext.Default
     };
 
-    public static async Task<(int MateScore, Move BestMove)> RootSearch(Position position, HashSet<long> positionHashHistory, int halfMovesWithoutCaptureOrPawnMove, CancellationToken cancellationToken)
+    public static async Task<(int MateScore, Move BestMove)> RootSearch(Position position, ulong[] positionHashHistory, int halfMovesWithoutCaptureOrPawnMove, CancellationToken cancellationToken)
     {
         var fen = position.FEN(halfMovesWithoutCaptureOrPawnMove);
         _logger.Info("[{0}] Querying online tb for position {1}", nameof(RootSearch), fen);
@@ -59,7 +59,7 @@ public static class OnlineTablebaseProber
         TablebaseEvalMove? bestMove = null;
         int mate = 0;
 
-        IEnumerable<int>? allPossibleMoves = null;
+        int[]? allPossibleMoves = null;
 
         switch (tablebaseEval.Category)
         {
@@ -114,16 +114,19 @@ public static class OnlineTablebaseProber
 
                 if (bestMoveList is not null)
                 {
+#pragma warning disable CS0618 // Type or member is obsolete
                     allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position);
 
                     foreach (var move in bestMoveList)
                     {
                         if (!MoveExtensions.TryParseFromUCIString(move!.Uci, allPossibleMoves, out var moveCandidate))
+#pragma warning restore CS0618 // Type or member is obsolete
                         {
                             throw new AssertException($"{move!.Uci} should be parsable from position {fen}");
                         }
 
-                        var newPosition = new Position(position, moveCandidate.Value);
+                        var newPosition = new Position(position);
+                        newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
@@ -172,16 +175,19 @@ public static class OnlineTablebaseProber
 
                 if (bestMoveList is not null)
                 {
+#pragma warning disable CS0618 // Type or member is obsolete
                     allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position);
 
                     foreach (var move in bestMoveList)
                     {
                         if (!MoveExtensions.TryParseFromUCIString(move!.Uci, allPossibleMoves, out var moveCandidate))
+#pragma warning restore CS0618 // Type or member is obsolete
                         {
                             throw new AssertException($"{move!.Uci} should be parsable from position {fen}");
                         }
 
-                        var newPosition = new Position(position, moveCandidate.Value);
+                        var newPosition = new Position(position);
+                        newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
@@ -232,16 +238,19 @@ public static class OnlineTablebaseProber
 
                 if (bestMoveList is not null)
                 {
+#pragma warning disable CS0618 // Type or member is obsolete
                     allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position);
 
                     foreach (var move in bestMoveList)
                     {
                         if (!MoveExtensions.TryParseFromUCIString(move!.Uci, allPossibleMoves, out var moveCandidate))
+#pragma warning restore CS0618 // Type or member is obsolete
                         {
                             throw new AssertException($"{move!.Uci} should be parsable from position {fen}");
                         }
 
-                        var newPosition = new Position(position, moveCandidate.Value);
+                        var newPosition = new Position(position);
+                        newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
@@ -289,15 +298,19 @@ public static class OnlineTablebaseProber
 
                 if (bestMoveList is not null)
                 {
+#pragma warning disable CS0618 // Type or member is obsolete
                     allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position);
+
                     foreach (var move in bestMoveList)
                     {
                         if (!MoveExtensions.TryParseFromUCIString(move!.Uci, allPossibleMoves, out var moveCandidate))
+#pragma warning restore CS0618 // Type or member is obsolete
                         {
                             throw new AssertException($"{move!.Uci} should be parsable from position {fen}");
                         }
 
-                        var newPosition = new Position(position, moveCandidate.Value);
+                        var newPosition = new Position(position);
+                        newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
@@ -329,10 +342,12 @@ public static class OnlineTablebaseProber
         }
 
         Move? parsedMove = 0;
+#pragma warning disable CS0618 // Type or member is obsolete
         if (bestMove?.Uci is not null && !MoveExtensions.TryParseFromUCIString(bestMove.Uci, MoveGenerator.GenerateAllMoves(position), out parsedMove))
         {
             throw new AssertException($"{bestMove.Uci} should be parsable from position {fen}");
         }
+#pragma warning restore CS0618 // Type or member is obsolete
 
         return (mate, parsedMove ?? 0);
     }
@@ -361,13 +376,13 @@ public static class OnlineTablebaseProber
                     ? 0
                     : result.DistanceToMate.HasValue
                         ? EvaluationConstants.CheckMateBaseEvaluation - (EvaluationConstants.CheckmateDepthFactor * (int)Math.Ceiling(0.5 * Math.Abs(result.DistanceToMate.Value)))
-                    : EvaluationConstants.CheckMateBaseEvaluation - 49 * EvaluationConstants.CheckmateDepthFactor,
+                    : EvaluationConstants.CheckMateBaseEvaluation - (49 * EvaluationConstants.CheckmateDepthFactor),
             TablebaseEvaluationCategory.Loss or TablebaseEvaluationCategory.MaybeLoss =>
                 Math.Abs(result.DistanceToZero ?? 0) + halfMovesWithoutCaptureOrPawnMove > 100
                     ? 0
                     : result.DistanceToMate.HasValue
                         ? -EvaluationConstants.CheckMateBaseEvaluation + (EvaluationConstants.CheckmateDepthFactor * (int)Math.Ceiling(0.5 * Math.Abs(result.DistanceToMate.Value)))
-                        : -EvaluationConstants.CheckMateBaseEvaluation + 49 * EvaluationConstants.CheckmateDepthFactor,
+                        : -EvaluationConstants.CheckMateBaseEvaluation + (49 * EvaluationConstants.CheckmateDepthFactor),
             _ => NoResult
         };
 #pragma warning restore S3358 // Ternary operators should not be nested

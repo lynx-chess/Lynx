@@ -12,10 +12,10 @@ public class ForceOrAvoidDrawTest : BaseTest
         Description = "Force stalemate - https://lichess.org/sM5ekwnW/black#103, Having issues with null pruning implemeneted")]
     [TestCase("8/8/4NQ2/7k/2P4p/4P2P/5PK1/3q4 b - - 7 53", new[] { "d1h1", "d1g1", "d1f1" },
         Description = "Force stalemate - https://lichess.org/sM5ekwnW/black#105")]
-    public async Task ForceStaleMate(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
+    public void ForceStaleMate(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
     {
-        var result = await TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 12);
-        Assert.AreEqual(0, result.Evaluation, "No drawn position detected");
+        var result = TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 12);
+        Assert.AreEqual(0, result.Score, "No drawn position detected");
     }
 
     [Test]
@@ -28,14 +28,14 @@ public class ForceOrAvoidDrawTest : BaseTest
     [TestCase(7)]
     [TestCase(8)]
     [TestCase(9)]
-    public async Task AvoidThreefoldRepetitionWhenWinningPosition(int depth)
+    public void AvoidThreefoldRepetitionWhenWinningPosition(int depth)
     {
         // Arrange
 
         // https://gameknot.com/chess-puzzle.pl?pz=247493
         const string fen = "r6k/p3b1pp/2pq4/Qp2n1NK/4P1P1/P3Br1P/1P2RP2/8 b - - 0 1";
 
-        var mock = new Mock<ChannelWriter<string>>();
+        var mock = new Mock<ChannelWriter<object>>();
 
         mock
             .Setup(m => m.WriteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
@@ -63,10 +63,12 @@ public class ForceOrAvoidDrawTest : BaseTest
             engine.AdjustPosition(sb.ToString());
         }
 
+#if DEBUG
         Assert.AreEqual(repeatedMoves.Count, engine.Game.MoveHistory.Count);
+#endif
 
         // Act
-        var searchResult = await engine.BestMove(new($"go depth {depth}"));
+        var searchResult = engine.BestMove(new($"go depth {depth}"));
         var bestMoveFound = searchResult.BestMove;
 
         // Assert
@@ -74,13 +76,13 @@ public class ForceOrAvoidDrawTest : BaseTest
     }
 
     [Test]
-    public async Task ForceThreefoldRepetitionWhenLosingPosition()
+    public void ForceThreefoldRepetitionWhenLosingPosition()
     {
         // Arrange
 
         const string fen = "7B/8/7k/8/5KR1/8/5R2/8 w - - 0 1";
 
-        var mock = new Mock<ChannelWriter<string>>();
+        var mock = new Mock<ChannelWriter<object>>();
 
         mock
             .Setup(m => m.WriteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
@@ -110,26 +112,28 @@ public class ForceOrAvoidDrawTest : BaseTest
             engine.AdjustPosition(sb.ToString());
         }
 
+#if DEBUG
         Assert.AreEqual(repeatedMoves.Count, engine.Game.MoveHistory.Count);
+#endif
 
         // Act
-        var searchResult = await engine.BestMove();
+        var searchResult = engine.BestMove(new($"go depth {Engine.DefaultMaxDepth}"));
         var bestMoveFound = searchResult.BestMove;
 
         // Assert
         Assert.AreEqual(movesThatAllowsRepetition.UCIString(), bestMoveFound.UCIString(), "No threefold repetition forced");
-        Assert.AreEqual(0, searchResult.Evaluation, "No drawn position detected");
+        Assert.AreEqual(0, searchResult.Score, "No drawn position detected");
     }
 
     [Test]
-    public async Task Avoid50MovesRuleRepetitionWhenWinningPosition()
+    public void Avoid50MovesRuleRepetitionWhenWinningPosition()
     {
         // Arrange
 
         // https://gameknot.com/chess-puzzle.pl?pz=247493
         const string fen = "r6k/p3b1pp/2pq4/Qp2n1NK/4P1P1/P3Br1P/1P2RP2/8 b - - 0 1";
 
-        var mock = new Mock<ChannelWriter<string>>();
+        var mock = new Mock<ChannelWriter<object>>();
 
         mock
             .Setup(m => m.WriteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
@@ -156,12 +160,14 @@ public class ForceOrAvoidDrawTest : BaseTest
             engine.AdjustPosition(sb.ToString());
         }
 
+#if DEBUG
         Assert.AreEqual(98, engine.Game.MoveHistory.Count);
+#endif
 
-        engine.Game.PositionHashHistory.Clear(); // Make sure we don't take account threefold repetition
+        engine.Game.ClearPositionHashHistory(); // Make sure we don't take account threefold repetition
 
         // Act
-        var searchResult = await engine.BestMove();
+        var searchResult = engine.BestMove(new($"go depth {Engine.DefaultMaxDepth}"));
         var bestMoveFound = searchResult.BestMove;
 
         // Assert
@@ -169,13 +175,13 @@ public class ForceOrAvoidDrawTest : BaseTest
     }
 
     [Test]
-    public async Task Force50MovesRuleRepetitionWhenLosingPosition()
+    public void Force50MovesRuleRepetitionWhenLosingPosition()
     {
         // Arrange
 
         const string fen = "8/7B/8/7k/5KR1/8/4R3/8 w - - 0 1";
 
-        var mock = new Mock<ChannelWriter<string>>();
+        var mock = new Mock<ChannelWriter<object>>();
 
         mock
             .Setup(m => m.WriteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
@@ -205,29 +211,31 @@ public class ForceOrAvoidDrawTest : BaseTest
         sb.Append(' ').Append(nonCaptureOrPawnMoveMoves[2].UCIString());
         engine.AdjustPosition(sb.ToString());
 
+#if DEBUG
         Assert.AreEqual(99, engine.Game.MoveHistory.Count);
-        engine.Game.PositionHashHistory.Clear(); // Make sure we don't take account threefold repetition
+#endif
+
+        engine.Game.ClearPositionHashHistory(); // Make sure we don't take account threefold repetition
 
         // Act
-        var searchResult = await engine.BestMove();
+        var searchResult = engine.BestMove(new($"go depth {Engine.DefaultMaxDepth}"));
         var bestMoveFound = searchResult.BestMove;
 
         // Assert
         Assert.AreEqual(movesThatAllowsRepetition.UCIString(), bestMoveFound.UCIString(), "No 50 moves rule forced");
-        Assert.AreEqual(0, searchResult.Evaluation, "No drawn position detected");
+        Assert.AreEqual(0, searchResult.Score, "No drawn position detected");
     }
 
     /// <summary>
     /// If a checkmate is delivered in move 50 (ply 100), the result of the game is checkmate
     /// </summary>
-    /// <returns></returns>
     [Test]
-    public async Task CheckmateHasPrecedenceOver50MovesRule()
+    public void CheckmateHasPrecedenceOver50MovesRule()
     {
         // Source: https://github.com/PGG106/Alexandria/issues/213
         const string mateIn1Fen = "4Q3/8/1p4pk/1PbB1p1p/7P/p3P1PK/P3qP2/8 w - - 99 88";
 
-        var result = await TestBestMove(mateIn1Fen, new[] { "e8h8" }, Array.Empty<string>(), depth: 1);
+        var result = TestBestMove(mateIn1Fen, ["e8h8"], [], depth: 1);
         Assert.AreEqual(1, result.Mate);
     }
 }

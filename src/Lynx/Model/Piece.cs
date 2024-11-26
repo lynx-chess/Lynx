@@ -1,8 +1,9 @@
 ﻿namespace Lynx.Model;
 
-public enum Piece : sbyte
+public enum Piece
 {
     Unknown = -1,
     P, N, B, R, Q, K,   // White
-    p, n, b, r, q, k    // Black
+    p, n, b, r, q, k,   // Black
+    None
 }

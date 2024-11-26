@@ -12,7 +12,7 @@ namespace Lynx.UCI.Commands.GUI;
 ///	Note: no "new" command is needed. However, if this position is from a different game than
 ///	the last position sent to the engine, the GUI should have sent a "ucinewgame" inbetween.
 /// </summary>
-public sealed class PositionCommand : GUIBaseCommand
+public sealed class PositionCommand : IGUIBaseCommand
 {
     public const string Id = "position";
 
@@ -21,7 +21,7 @@ public sealed class PositionCommand : GUIBaseCommand
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    public static Game ParseGame(ReadOnlySpan<char> positionCommandSpan)
+    public static Game ParseGame(ReadOnlySpan<char> positionCommandSpan, Span<Move> movePool)
     {
         try
         {
@@ -50,12 +50,12 @@ public sealed class PositionCommand : GUIBaseCommand
             Span<Range> moves = stackalloc Range[(movesSection.Length / 5) + 1]; // Number of potential half-moves provided in the string
             movesSection.Split(moves, ' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
-            return new Game(fen, movesSection, moves);
+            return new Game(fen, movesSection, moves, movePool);
         }
         catch (Exception e)
         {
             _logger.Error(e, "Error parsing position command '{0}'", positionCommandSpan.ToString());
-            return new Game();
+            return new Game(Constants.InitialPositionFEN);
         }
     }
 
@@ -64,9 +64,11 @@ public sealed class PositionCommand : GUIBaseCommand
         var moveString = positionCommand
                 .Split(' ', StringSplitOptions.RemoveEmptyEntries)[^1];
 
+        Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+
         if (!MoveExtensions.TryParseFromUCIString(
             moveString,
-            MoveGenerator.GenerateAllMoves(game.CurrentPosition, game.MovePool),
+            MoveGenerator.GenerateAllMoves(game.CurrentPosition, movePool),
             out lastMove))
         {
             _logger.Warn("Error parsing last move {0} from position command {1}", lastMove, positionCommand);

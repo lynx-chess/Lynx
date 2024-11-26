@@ -14,17 +14,16 @@ public class StopCommandTest
     public async Task StopCommandShouldNotModifyPositionOrAddMoveToMoveHistory(string initialPositionFEN)
     {
         // Arrange
-        var engine = new Engine(new Mock<ChannelWriter<string>>().Object);
+        var engine = new Engine(new Mock<ChannelWriter<object>>().Object);
         engine.NewGame();
         engine.AdjustPosition($"position fen {initialPositionFEN}");
 
         // A command that guarantees that the search doesn't finish before the end of the test
-        var goCommand = new GoCommand();
-        await goCommand.Parse($"go depth {Configuration.EngineSettings.MaxDepth}");
+        var goCommand = new GoCommand($"go depth {Configuration.EngineSettings.MaxDepth}");
 
         var resultTask = Task.Run(() => engine.BestMove(goCommand));
         // Wait 2s so that there's some best move available
-        Thread.Sleep(2000);
+        await Task.Delay(2000);
 
         // Act
         engine.StopSearching();
@@ -33,6 +32,9 @@ public class StopCommandTest
         Assert.AreNotEqual(default, (await resultTask).BestMove);
 
         Assert.AreEqual(initialPositionFEN, engine.Game.CurrentPosition.FEN());
+
+#if DEBUG
         Assert.IsEmpty(engine.Game.MoveHistory);
+#endif
     }
 }

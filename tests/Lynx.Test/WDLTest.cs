@@ -13,11 +13,16 @@ public class WDLTest
     [Test]
     public void NormalizeCoefficientAndArrayValues()
     {
-        Assert.AreEqual(EvaluationConstants.EvalNormalizationCoefficient, (int)EvaluationConstants.As.Sum());
+        Assert.AreEqual(EvaluationConstants.EvalNormalizationCoefficient, (int)EvaluationConstants.As.ToArray().Sum());
     }
 
-    [TestCase(500, 641)]
-    [TestCase(1000, 1282)]
+    [TestCase(500)]
+    [TestCase(1000)]
+    public void NormalizeScore(int score)
+    {
+        Assert.AreEqual(score * 100 / EvaluationConstants.EvalNormalizationCoefficient, WDL.NormalizeScore(score));
+    }
+
     [TestCase(0, 0)]
     [TestCase(EvaluationConstants.PositiveCheckmateDetectionLimit + 5, EvaluationConstants.PositiveCheckmateDetectionLimit + 5)]
     [TestCase(EvaluationConstants.NegativeCheckmateDetectionLimit - 5, EvaluationConstants.NegativeCheckmateDetectionLimit - 5)]
@@ -26,8 +31,13 @@ public class WDLTest
         Assert.AreEqual(expectecNormalizedEval, WDL.NormalizeScore(score));
     }
 
-    [TestCase(1000, 780)]
-    [TestCase(2000, 1560)]
+    [TestCase(1000)]
+    [TestCase(2000)]
+    public void UnNormalizeScore(int score)
+    {
+        Assert.AreEqual(score * EvaluationConstants.EvalNormalizationCoefficient / 100, WDL.UnNormalizeScore(score));
+    }
+
     [TestCase(0, 0)]
     [TestCase(EvaluationConstants.PositiveCheckmateDetectionLimit + 5, EvaluationConstants.PositiveCheckmateDetectionLimit + 5)]
     [TestCase(EvaluationConstants.NegativeCheckmateDetectionLimit - 5, EvaluationConstants.NegativeCheckmateDetectionLimit - 5)]

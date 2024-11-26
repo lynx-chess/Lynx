@@ -94,29 +94,10 @@ public class BitBoardTest
     }
 
     [Test]
-    public void CountBits_ulong()
-    {
-        var bitBoard = new BitBoard();
-        Assert.AreEqual(0, bitBoard.CountBits());
-
-        bitBoard.SetBit(BoardSquare.e4);
-        Assert.AreEqual(1, bitBoard.CountBits());
-
-        bitBoard.SetBit(BoardSquare.e4);
-        Assert.AreEqual(1, bitBoard.CountBits());
-
-        bitBoard.SetBit(BoardSquare.d4);
-        Assert.AreEqual(2, bitBoard.CountBits());
-
-        bitBoard.PopBit(BoardSquare.d4);
-        Assert.AreEqual(1, bitBoard.CountBits());
-    }
-
-    [Test]
     public void ResetLS1B()
     {
         // Arrange
-        BitBoard bitBoard = BitBoardExtensions.Initialize(new[] { BoardSquare.d5, BoardSquare.e4 });
+        BitBoard bitBoard = BitBoardExtensions.Initialize(BoardSquare.d5, BoardSquare.e4);
 
         // Act
         bitBoard.ResetLS1B();
@@ -130,7 +111,7 @@ public class BitBoardTest
     public void ResetLS1BNonSideEffect()
     {
         // Arrange
-        BitBoard bitBoard = BitBoardExtensions.Initialize(new[] { BoardSquare.d5, BoardSquare.e4 });
+        BitBoard bitBoard = BitBoardExtensions.Initialize(BoardSquare.d5, BoardSquare.e4);
 
         // Act
         var result = bitBoard.WithoutLS1B();
@@ -159,5 +140,231 @@ public class BitBoardTest
         {
             Assert.AreEqual(((BoardSquare)expectedLS1B).ToString(), Constants.Coordinates[expectedLS1B]);
         }
+    }
+
+    [Test]
+    public void ShiftUp()
+    {
+        BitBoard bb = 0;
+        bb.SetBit(BoardSquare.a8);
+        bb.SetBit(BoardSquare.b8);
+        bb.SetBit(BoardSquare.c8);
+        bb.SetBit(BoardSquare.d8);
+        bb.SetBit(BoardSquare.e8);
+        bb.SetBit(BoardSquare.f8);
+        bb.SetBit(BoardSquare.g8);
+        bb.SetBit(BoardSquare.h8);
+
+        Assert.Zero(bb.ShiftUp());
+
+        BitBoard another = 0;
+        another.SetBit(BoardSquare.a7);
+        another.SetBit(BoardSquare.a7);
+        another.SetBit(BoardSquare.b7);
+        another.SetBit(BoardSquare.c7);
+        another.SetBit(BoardSquare.d7);
+        another.SetBit(BoardSquare.e7);
+        another.SetBit(BoardSquare.f7);
+        another.SetBit(BoardSquare.g7);
+        another.SetBit(BoardSquare.h7);
+
+        Assert.AreEqual(bb, another.ShiftUp());
+        Assert.AreEqual(another, bb.ShiftDown());
+    }
+
+    [Test]
+    public void ShiftDown()
+    {
+        BitBoard bb = 0;
+        bb.SetBit(BoardSquare.a1);
+        bb.SetBit(BoardSquare.b1);
+        bb.SetBit(BoardSquare.c1);
+        bb.SetBit(BoardSquare.d1);
+        bb.SetBit(BoardSquare.e1);
+        bb.SetBit(BoardSquare.f1);
+        bb.SetBit(BoardSquare.g1);
+        bb.SetBit(BoardSquare.h1);
+
+        Assert.Zero(bb.ShiftDown());
+
+        BitBoard another = 0;
+        another.SetBit(BoardSquare.a2);
+        another.SetBit(BoardSquare.a2);
+        another.SetBit(BoardSquare.b2);
+        another.SetBit(BoardSquare.c2);
+        another.SetBit(BoardSquare.d2);
+        another.SetBit(BoardSquare.e2);
+        another.SetBit(BoardSquare.f2);
+        another.SetBit(BoardSquare.g2);
+        another.SetBit(BoardSquare.h2);
+
+        Assert.AreEqual(bb, another.ShiftDown());
+        Assert.AreEqual(another, bb.ShiftUp());
+    }
+
+    [Test]
+    public void ShiftLeft()
+    {
+        BitBoard bb = 0;
+        bb.SetBit(BoardSquare.a8);
+        bb.SetBit(BoardSquare.a7);
+        bb.SetBit(BoardSquare.a6);
+        bb.SetBit(BoardSquare.a5);
+        bb.SetBit(BoardSquare.a4);
+        bb.SetBit(BoardSquare.a3);
+        bb.SetBit(BoardSquare.a2);
+        bb.SetBit(BoardSquare.a1);
+
+        Assert.Zero(bb.ShiftLeft());
+
+        BitBoard another = 0;
+        another.SetBit(BoardSquare.b8);
+        another.SetBit(BoardSquare.b7);
+        another.SetBit(BoardSquare.b6);
+        another.SetBit(BoardSquare.b5);
+        another.SetBit(BoardSquare.b4);
+        another.SetBit(BoardSquare.b3);
+        another.SetBit(BoardSquare.b2);
+        another.SetBit(BoardSquare.b1);
+
+        Assert.AreEqual(bb, another.ShiftLeft());
+        Assert.AreEqual(another, bb.ShiftRight());
+    }
+
+    [Test]
+    public void ShiftRight()
+    {
+        BitBoard bb = 0;
+        bb.SetBit(BoardSquare.h8);
+        bb.SetBit(BoardSquare.h7);
+        bb.SetBit(BoardSquare.h6);
+        bb.SetBit(BoardSquare.h5);
+        bb.SetBit(BoardSquare.h4);
+        bb.SetBit(BoardSquare.h3);
+        bb.SetBit(BoardSquare.h2);
+        bb.SetBit(BoardSquare.h1);
+
+        Assert.Zero(bb.ShiftRight());
+
+        BitBoard another = 0;
+        another.SetBit(BoardSquare.g8);
+        another.SetBit(BoardSquare.g7);
+        another.SetBit(BoardSquare.g6);
+        another.SetBit(BoardSquare.g5);
+        another.SetBit(BoardSquare.g4);
+        another.SetBit(BoardSquare.g3);
+        another.SetBit(BoardSquare.g2);
+        another.SetBit(BoardSquare.g1);
+
+        Assert.AreEqual(bb, another.ShiftRight());
+        Assert.AreEqual(another, bb.ShiftLeft());
+    }
+
+    [Test]
+    public void ShiftUpRight()
+    {
+        BitBoard defaultbb = 0;
+
+        BitBoard bb = 0;
+        bb.SetBit(BoardSquare.a1);
+
+        Assert.AreEqual(defaultbb.SetBit(BoardSquare.b2), bb.ShiftUpRight());
+
+        bb = 0;
+        bb.SetBit(BoardSquare.h8);
+        Assert.Zero(bb.ShiftUpRight());
+
+        bb = 0;
+        bb.SetBit(BoardSquare.a8);
+        Assert.Zero(bb.ShiftUpRight());
+
+        bb = 0;
+        bb.SetBit(BoardSquare.h5);
+        Assert.Zero(bb.ShiftUpRight());
+
+        bb = 0;
+        bb.SetBit(BoardSquare.h1);
+        Assert.Zero(bb.ShiftUpRight());
+    }
+
+    [Test]
+    public void ShiftUpLeft()
+    {
+        BitBoard defaultbb = 0;
+
+        BitBoard bb = 0;
+        bb.SetBit(BoardSquare.h1);
+
+        Assert.AreEqual(defaultbb.SetBit(BoardSquare.g2), bb.ShiftUpLeft());
+
+        bb = 0;
+        bb.SetBit(BoardSquare.a8);
+        Assert.Zero(bb.ShiftUpLeft());
+
+        bb = 0;
+        bb.SetBit(BoardSquare.h8);
+        Assert.Zero(bb.ShiftUpLeft());
+
+        bb = 0;
+        bb.SetBit(BoardSquare.a5);
+        Assert.Zero(bb.ShiftUpLeft());
+
+        bb = 0;
+        bb.SetBit(BoardSquare.a1);
+        Assert.Zero(bb.ShiftUpLeft());
+    }
+
+    [Test]
+    public void ShiftDownLeft()
+    {
+        BitBoard defaultbb = 0;
+
+        BitBoard bb = 0;
+        bb.SetBit(BoardSquare.h8);
+
+        Assert.AreEqual(defaultbb.SetBit(BoardSquare.g7), bb.ShiftDownLeft());
+
+        bb = 0;
+        bb.SetBit(BoardSquare.a1);
+        Assert.Zero(bb.ShiftDownLeft());
+
+        bb = 0;
+        bb.SetBit(BoardSquare.h1);
+        Assert.Zero(bb.ShiftDownLeft());
+
+        bb = 0;
+        bb.SetBit(BoardSquare.a5);
+        Assert.Zero(bb.ShiftDownLeft());
+
+        bb = 0;
+        bb.SetBit(BoardSquare.a8);
+        Assert.Zero(bb.ShiftDownLeft());
+    }
+
+    [Test]
+    public void ShiftDownRight()
+    {
+        BitBoard defaultbb = 0;
+
+        BitBoard bb = 0;
+        bb.SetBit(BoardSquare.a8);
+
+        Assert.AreEqual(defaultbb.SetBit(BoardSquare.b7), bb.ShiftDownRight());
+
+        bb = 0;
+        bb.SetBit(BoardSquare.h1);
+        Assert.Zero(bb.ShiftDownRight());
+
+        bb = 0;
+        bb.SetBit(BoardSquare.a1);
+        Assert.Zero(bb.ShiftDownRight());
+
+        bb = 0;
+        bb.SetBit(BoardSquare.h5);
+        Assert.Zero(bb.ShiftDownRight());
+
+        bb = 0;
+        bb.SetBit(BoardSquare.h8);
+        Assert.Zero(bb.ShiftDownRight());
     }
 }

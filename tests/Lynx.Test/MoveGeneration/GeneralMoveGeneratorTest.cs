@@ -12,12 +12,17 @@ public class GeneralMoveGeneratorTest
     public void DiscoveredCheckAfterEnPassantCapture()
     {
         var originalPosition = new Position("8/8/8/k1pP3R/8/8/8/n4K2 w - c6 0 1");
-        var enPassantMove = MoveGenerator.GenerateAllMoves(originalPosition).Single(m => m.IsEnPassant());
-        var positionAferEnPassant = new Position(originalPosition, enPassantMove);
+        Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        var enPassantMove = MoveGenerator.GenerateAllMoves(originalPosition, moves).ToArray().Single(m => m.IsEnPassant());
+        var positionAfterEnPassant = new Position(originalPosition);
+        positionAfterEnPassant.MakeMove(enPassantMove);
 
-        foreach (var move in MoveGenerator.GenerateAllMoves(positionAferEnPassant))
+        moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        foreach (var move in MoveGenerator.GenerateAllMoves(positionAfterEnPassant, moves))
         {
-            if (new Position(positionAferEnPassant, move).IsValid())
+            var newPosition = new Position(positionAfterEnPassant);
+            newPosition.MakeMove(move);
+            if (newPosition.IsValid())
             {
                 Assert.AreNotEqual(Piece.n, (Piece)move.Piece());
                 Assert.AreEqual(Piece.k, (Piece)move.Piece());

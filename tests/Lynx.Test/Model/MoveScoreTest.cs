@@ -18,7 +18,6 @@ public class MoveScoreTest : BaseTest
     ///     a b c d e f g h
     /// This tests indirectly <see cref="EvaluationConstants.MostValueableVictimLeastValuableAttacker"/>
     /// </summary>
-    /// <param name="fen"></param>
     [TestCase(Constants.TrickyTestPositionFEN)]
     public void MoveScore(string fen)
     {
@@ -27,9 +26,9 @@ public class MoveScoreTest : BaseTest
         var allMoves = MoveGenerator.GenerateAllMoves(engine.Game.CurrentPosition).OrderByDescending(move => engine.ScoreMove(move, default, default)).ToList();
 
         Assert.AreEqual("e2a6", allMoves[0].UCIString());     // BxB
-        Assert.AreEqual("f3f6", allMoves[1].UCIString());     // QxN
-        Assert.AreEqual("d5e6", allMoves[2].UCIString());     // PxP
-        Assert.AreEqual("g2h3", allMoves[3].UCIString());     // PxP
+        Assert.AreEqual("d5e6", allMoves[1].UCIString());     // PxP
+        Assert.AreEqual("g2h3", allMoves[2].UCIString());     // PxP
+        Assert.AreEqual("f3f6", allMoves[3].UCIString());     // QxN
         Assert.AreEqual("e5d7", allMoves[4].UCIString());     // NxP
         Assert.AreEqual("e5f7", allMoves[5].UCIString());     // NxP
         Assert.AreEqual("e5g6", allMoves[6].UCIString());     // NxP
@@ -53,8 +52,6 @@ public class MoveScoreTest : BaseTest
     /// 1   R N B Q K B N R
     ///     a b c d e f g h
     /// </summary>
-    /// <param name="fen"></param>
-    /// <param name="moveWithHighestScore"></param>
     [TestCase("rnbqkbnr/ppp1pppp/8/3pP3/8/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 1", "e5d6")]
     [TestCase("rnbqkbnr/ppp1pppp/8/8/3pP3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1", "d4e3")]
     public void MoveScoreEnPassant(string fen, string moveWithHighestScore)
@@ -64,6 +61,6 @@ public class MoveScoreTest : BaseTest
         var allMoves = MoveGenerator.GenerateAllMoves(engine.Game.CurrentPosition).OrderByDescending(move => engine.ScoreMove(move, default, default)).ToList();
 
         Assert.AreEqual(moveWithHighestScore, allMoves[0].UCIString());
-        Assert.AreEqual(EvaluationConstants.CaptureMoveBaseScoreValue + EvaluationConstants.MostValueableVictimLeastValuableAttacker[0, 0], engine.ScoreMove(allMoves[0], default, default));
+        Assert.AreEqual(EvaluationConstants.GoodCaptureMoveBaseScoreValue + EvaluationConstants.MostValueableVictimLeastValuableAttacker[0][6], engine.ScoreMove(allMoves[0], default, default));
     }
 }
