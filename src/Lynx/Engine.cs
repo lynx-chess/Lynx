@@ -46,7 +46,7 @@ public sealed partial class Engine : IDisposable
 
     public Engine(ChannelWriter<object> engineWriter) : this(engineWriter, new()) { }
 
-    public Engine(ChannelWriter<object> engineWriter, TranspositionTable tt)
+    public Engine(ChannelWriter<object> engineWriter, in TranspositionTable tt)
     {
         AverageDepth = 0;
         Game = new Game(Constants.InitialPositionFEN);
@@ -104,7 +104,7 @@ public sealed partial class Engine : IDisposable
 
     private void ResetEngine()
     {
-        _tt.Reset();
+        _tt.Clear();
 
         // Clear histories
         for (int i = 0; i < 12; ++i)

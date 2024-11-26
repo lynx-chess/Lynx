@@ -12,7 +12,8 @@ public sealed class Searcher
     private readonly ChannelWriter<object> _engineWriter;
     private readonly Logger _logger;
 
-    private readonly Engine _engine;
+    private Engine _engine;
+    private TranspositionTable _ttWrapper;
 
     public Position CurrentPosition => _engine.Game.CurrentPosition;
 
@@ -23,12 +24,14 @@ public sealed class Searcher
         _uciReader = uciReader;
         _engineWriter = engineWriter;
 
-        TranspositionTable _ttWrapper = new();
-        _engine = new Engine(_engineWriter, _ttWrapper);
+        _ttWrapper = new TranspositionTable();
+        _engine = new Engine(_engineWriter, in _ttWrapper);
 
         _logger = LogManager.GetCurrentClassLogger();
 
         InitializeStaticClasses();
+
+        ForceGCCollection();
     }
 
     public async Task Run(CancellationToken cancellationToken)
@@ -98,12 +101,22 @@ public sealed class Searcher
             _logger.Info("Average depth: {0}", averageDepth);
         }
 
-        _engine.NewGame();
+        if (_ttWrapper.Size == Configuration.EngineSettings.TranspositionTableSize)
+        {
+            _ttWrapper.Clear();
+            _engine.NewGame();
+        }
+        else
+        {
+            _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _ttWrapper.Size, Configuration.EngineSettings.TranspositionTableSize);
 
-#pragma warning disable S1215 // "GC.Collect" should not be called
-        GC.Collect();
-        GC.WaitForPendingFinalizers();
-#pragma warning restore S1215 // "GC.Collect" should not be called
+            _ttWrapper = new TranspositionTable();
+
+            _engine.FreeResources();
+            _engine = new Engine(_engineWriter, in _ttWrapper);
+        }
+
+        ForceGCCollection();
     }
 
     public void Quit()
@@ -130,5 +143,13 @@ public sealed class Searcher
         _ = EvaluationConstants.HistoryBonus[1];
         _ = MoveGenerator.Init();
         _ = GoCommand.Init();
+    }
+
+    private static void ForceGCCollection()
+    {
+#pragma warning disable S1215 // "GC.Collect" should not be called
+        GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
+        GC.WaitForPendingFinalizers();
+#pragma warning restore S1215 // "GC.Collect" should not be called
     }
 }
