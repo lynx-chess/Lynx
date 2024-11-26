@@ -13,7 +13,6 @@ public sealed class Searcher
     private readonly Logger _logger;
 
     private Engine _engine;
-    private int _currentTranspositionTableSize;
     private TranspositionTable _ttWrapper;
 
     public Position CurrentPosition => _engine.Game.CurrentPosition;
@@ -29,8 +28,6 @@ public sealed class Searcher
         _engine = new Engine(_engineWriter, in _ttWrapper);
 
         _logger = LogManager.GetCurrentClassLogger();
-
-        _currentTranspositionTableSize = Configuration.EngineSettings.TranspositionTableSize;
 
         InitializeStaticClasses();
 
@@ -104,15 +101,14 @@ public sealed class Searcher
             _logger.Info("Average depth: {0}", averageDepth);
         }
 
-        if (_currentTranspositionTableSize == Configuration.EngineSettings.TranspositionTableSize)
+        if (_ttWrapper.Size == Configuration.EngineSettings.TranspositionTableSize)
         {
             _ttWrapper.Clear();
             _engine.NewGame();
         }
         else
         {
-            _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _currentTranspositionTableSize, Configuration.EngineSettings.TranspositionTableSize);
-            _currentTranspositionTableSize = Configuration.EngineSettings.TranspositionTableSize;
+            _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _ttWrapper.Size, Configuration.EngineSettings.TranspositionTableSize);
 
             _ttWrapper = new TranspositionTable();
 

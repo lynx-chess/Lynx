@@ -10,10 +10,13 @@ public readonly struct TranspositionTable
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     private readonly TranspositionTableElement[] _tt = [];
+    public readonly int Size;
 
     public TranspositionTable()
     {
-        var ttLength = CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
+        Size = Configuration.EngineSettings.TranspositionTableSize;
+
+        var ttLength = CalculateLength(Size);
         _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
     }
 
