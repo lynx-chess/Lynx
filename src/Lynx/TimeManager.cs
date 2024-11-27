@@ -108,8 +108,9 @@ public static class TimeManager
         double scale = 1.0;
 
         // Node time management: scale soft limit time bound by the proportion of nodes spent
-        // searching the best move at root level vs the total nodes searched
-        // More time spent in best move -> less time for the rest of the search
+        //   searching the best move at root level vs the total nodes searched.
+        // The more time spent in best move -> the more sure we are about our previous results,
+        //   so the less time we spent in the search.
         // i.e. with nodeTmBase = 2 and nodeTmScale = 1
         // - bestMoveFraction = 0.50 -> scale = 1.0 x (2 - 0.5) = 1.5
         // - bestMoveFraction = 0.25 -> scale = 1.0 x (2 - 0.25) = 1.75
