@@ -40,6 +40,12 @@ public sealed partial class Engine
     /// </summary>
     private readonly int[] _continuationHistory = GC.AllocateArray<int>(12 * 64 * 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount, pinned: true);
 
+    /// <summary>
+    /// 12 x 64
+    /// piece x target square
+    /// </summary>
+    private readonly ulong[][] _moveNodeCount;
+
     private readonly int[] _maxDepthReached = GC.AllocateArray<int>(Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin, pinned: true);
 
     private ulong _nodes;
@@ -49,17 +55,22 @@ public sealed partial class Engine
     private readonly Move _defaultMove = default;
 
     /// <summary>
-    /// Iterative Deepening Depth-First Search (IDDFS) using alpha-beta pruning
+    /// Iterative Deepening Depth-First Search (IDDFS) using alpha-beta pruning.
+    /// Requires <see cref="_searchConstraints"/> to be populated before invoking it
     /// </summary>
     /// <returns>Not null <see cref="SearchResult"/>, although made nullable in order to match online tb probing signature</returns>
     [SkipLocalsInit]
-    public SearchResult IDDFS(int maxDepth, int softLimitTimeBound)
+    private SearchResult IDDFS()
     {
         // Cleanup
         _nodes = 0;
 
         Array.Clear(_pVTable);
         Array.Clear(_maxDepthReached);
+        for (int i = 0; i < 12; ++i)
+        {
+            Array.Clear(_moveNodeCount[i]);
+        }
 
         int bestScore = 0;
         int alpha = EvaluationConstants.MinEval;
@@ -163,7 +174,7 @@ public sealed partial class Engine
                 lastSearchResult = UpdateLastSearchResult(lastSearchResult, bestScore, depth, mate);
 
                 _engineWriter.TryWrite(lastSearchResult);
-            } while (StopSearchCondition(++depth, maxDepth, mate, softLimitTimeBound));
+            } while (StopSearchCondition(lastSearchResult.BestMove, ++depth, mate));
         }
         catch (OperationCanceledException)
         {
@@ -200,7 +211,7 @@ public sealed partial class Engine
         return finalSearchResult;
     }
 
-    private bool StopSearchCondition(int depth, int maxDepth, int mate, int softLimitTimeBound)
+    private bool StopSearchCondition(Move bestMove, int depth, int mate)
     {
         if (mate != 0)
         {
@@ -222,6 +233,7 @@ public sealed partial class Engine
             return false;
         }
 
+        var maxDepth = _searchConstraints.MaxDepth;
         if (maxDepth > 0)
         {
             var shouldContinue = depth <= maxDepth;
@@ -236,9 +248,13 @@ public sealed partial class Engine
 
         var elapsedMilliseconds = _stopWatch.ElapsedMilliseconds;
 
-        if (elapsedMilliseconds > softLimitTimeBound)
+        var bestMoveNodeCount = _moveNodeCount[bestMove.Piece()][bestMove.TargetSquare()];
+        var scaledSoftLimitTimeBound = TimeManager.SoftLimit(_searchConstraints, bestMoveNodeCount, _nodes);
+        _logger.Warn("[TM] Depth {Depth}: Base soft limit {BaseSoftLimit}, scaled soft limit {ScaledSoftLimit}", depth - 1, _searchConstraints.SoftLimitTimeBound, scaledSoftLimitTimeBound);
+
+        if (elapsedMilliseconds > scaledSoftLimitTimeBound)
         {
-            _logger.Info("Stopping at depth {0} (nodes {1}): {2}ms > {3}ms", depth - 1, _nodes, elapsedMilliseconds, softLimitTimeBound);
+            _logger.Info("Stopping at depth {0} (nodes {1}): {2}ms > {3}ms", depth - 1, _nodes, elapsedMilliseconds, scaledSoftLimitTimeBound);
             return false;
         }
 
