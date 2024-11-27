@@ -106,8 +106,6 @@ public sealed class EngineSettings
 
     public double SoftTimeBoundMultiplier { get; set; } = 1;
 
-    public int DefaultMovesToGo { get; set; } = 45;
-
     public double SoftTimeBaseIncrementMultiplier { get; set; } = 0.8;
 
     [SPSA<double>(1, 3, 0.1)]
