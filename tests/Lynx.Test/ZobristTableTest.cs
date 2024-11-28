@@ -5,7 +5,7 @@ namespace Lynx.Test;
 
 public class ZobristTableTest
 {
-    private readonly LynxRandom _random = new LynxRandom();
+    private readonly LynxRandom _random = new();
     private readonly ulong[][] _zobristTable = ZobristTable.Initialize();
 
     [Test]
