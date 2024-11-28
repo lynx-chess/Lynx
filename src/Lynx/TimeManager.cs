@@ -103,10 +103,12 @@ public static class TimeManager
         // - bestMoveFraction = 0.25 -> scale = 1.0 x (2 - 0.25) = 1.75
         // - bestMoveFraction = 1.00 -> scale = 1.0 x (2 - 1.00) = 1
         double bestMoveFraction = (double)bestMoveNodeCount / totalNodeCount;
-        var nodeTmFactor = nodeTmBase - (bestMoveFraction * nodeTmScale);
+        double nodeTmFactor = nodeTmBase - (bestMoveFraction * nodeTmScale);
         scale *= nodeTmFactor;
 
-        return (int)Math.Round(searchConstraints.SoftLimitTimeBound * scale);
+        int newSoftTimeLimit = (int)Math.Round(searchConstraints.SoftLimitTimeBound * scale);
+
+        return Math.Min(newSoftTimeLimit, searchConstraints.HardLimitTimeBound);
     }
 
     /// <summary>
