@@ -83,6 +83,32 @@ public static class TimeManager
         return new(hardLimitTimeBound, softLimitTimeBound, maxDepth);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int SoftLimit(SearchConstraints searchConstraints, ulong bestMoveNodeCount, ulong totalNodeCount)
+    {
+        Debug.Assert(totalNodeCount > 0);
+        Debug.Assert(totalNodeCount >= bestMoveNodeCount);
+
+        double nodeTmBase = Configuration.EngineSettings.NodeTmBase;
+        double nodeTmScale = Configuration.EngineSettings.NodeTmScale;
+
+        double scale = 1.0;
+
+        // Node time management: scale soft limit time bound by the proportion of nodes spent
+        //   searching the best move at root level vs the total nodes searched.
+        // The more time spent in best move -> the more sure we are about our previous results,
+        //   so the less time we spent in the search.
+        // i.e. with nodeTmBase = 2 and nodeTmScale = 1
+        // - bestMoveFraction = 0.50 -> scale = 1.0 x (2 - 0.5) = 1.5
+        // - bestMoveFraction = 0.25 -> scale = 1.0 x (2 - 0.25) = 1.75
+        // - bestMoveFraction = 1.00 -> scale = 1.0 x (2 - 1.00) = 1
+        double bestMoveFraction = (double)bestMoveNodeCount / totalNodeCount;
+        var nodeTmFactor = nodeTmBase - (bestMoveFraction * nodeTmScale);
+        scale *= nodeTmFactor;
+
+        return (int)Math.Round(searchConstraints.SoftLimitTimeBound * scale);
+    }
+
     /// <summary>
     /// Offset applied after <see cref="ExpectedMovesLeft(int)"/>
     /// Moves 0 - 20: 64 64 63 63 61 61 60 60 58 58 57 57 55 55 54 54 52 52 52 51
@@ -113,7 +139,6 @@ public static class TimeManager
     /// </summary>
     /// <param name="expectedMovesLeft"></param>
     /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int MovesDivisor(int expectedMovesLeft)
     {
         return expectedMovesLeft * 3 / 2;
@@ -139,7 +164,6 @@ public static class TimeManager
     /// Moves 279-289:  26 26 26 26 26 26 26 26 26 26 26 26 26 26 26 26 26 26 26 26
     /// Moves 299-309:  26 26 26 26 26 26 26 26 26 26 26 26 26 26 26 27 27 27 27 27
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int ExpectedMovesLeft(int plies_played)
     {
         double p = plies_played;
@@ -147,31 +171,5 @@ public static class TimeManager
         return (int)Math.Round(
             (59.3 + ((72830.0 - (p * 2330.0)) / ((p * p) + (p * 10.0) + 2644.0)))   // Plies remaining
             / 2.0); // Full moves remaining
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int SoftLimit(SearchConstraints searchConstraints, ulong bestMoveNodeCount, ulong totalNodeCount)
-    {
-        Debug.Assert(totalNodeCount > 0);
-        Debug.Assert(totalNodeCount >= bestMoveNodeCount);
-
-        double nodeTmBase = Configuration.EngineSettings.NodeTmBase;
-        double nodeTmScale = Configuration.EngineSettings.NodeTmScale;
-
-        double scale = 1.0;
-
-        // Node time management: scale soft limit time bound by the proportion of nodes spent
-        //   searching the best move at root level vs the total nodes searched.
-        // The more time spent in best move -> the more sure we are about our previous results,
-        //   so the less time we spent in the search.
-        // i.e. with nodeTmBase = 2 and nodeTmScale = 1
-        // - bestMoveFraction = 0.50 -> scale = 1.0 x (2 - 0.5) = 1.5
-        // - bestMoveFraction = 0.25 -> scale = 1.0 x (2 - 0.25) = 1.75
-        // - bestMoveFraction = 1.00 -> scale = 1.0 x (2 - 1.00) = 1
-        double bestMoveFraction = (double)bestMoveNodeCount / totalNodeCount;
-        var nodeTmFactor = nodeTmBase - (bestMoveFraction * nodeTmScale);
-        scale *= nodeTmFactor;
-
-        return (int)Math.Round(searchConstraints.SoftLimitTimeBound * scale);
     }
 }
