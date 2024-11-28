@@ -8,10 +8,9 @@ namespace Lynx;
 public static class TimeManager
 {
     /// <summary>
-    /// Source of the values: god, according to disservin
-    /// I saw it in Lizard, Sirius and Clarity though
+    /// Values from Stash
     /// </summary>
-    private static ReadOnlySpan<double> _bestMoveStabilityValues => [2.2, 1.6, 1.4, 1.1, 1, 0.95, 0.9];
+    private static ReadOnlySpan<double> _bestMoveStabilityValues => [2.50, 1.20, 0.90, 0.80, 0.75];
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
