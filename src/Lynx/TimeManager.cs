@@ -7,6 +7,12 @@ using System.Runtime.CompilerServices;
 namespace Lynx;
 public static class TimeManager
 {
+    /// <summary>
+    /// Source of the values: god, according to disservin
+    /// I saw it in Lizard, Sirius and Clarity though
+    /// </summary>
+    private static ReadOnlySpan<double> _bestMoveStabilityValues => [2.2, 1.6, 1.4, 1.1, 1, 0.95, 0.9];
+
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public static SearchConstraints CalculateTimeManagement(Game game, GoCommand goCommand)
@@ -84,7 +90,7 @@ public static class TimeManager
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int SoftLimit(SearchConstraints searchConstraints, ulong bestMoveNodeCount, ulong totalNodeCount)
+    public static int SoftLimit(SearchConstraints searchConstraints, ulong bestMoveNodeCount, ulong totalNodeCount, int bestMoveStability)
     {
         Debug.Assert(totalNodeCount > 0);
         Debug.Assert(totalNodeCount >= bestMoveNodeCount);
@@ -106,9 +112,20 @@ public static class TimeManager
         double nodeTmFactor = nodeTmBase - (bestMoveFraction * nodeTmScale);
         scale *= nodeTmFactor;
 
-        int newSoftTimeLimit = (int)Math.Round(searchConstraints.SoftLimitTimeBound * scale);
+        // Best move stability: The less best move changes, the less time we spend in the search
+        Debug.Assert(_bestMoveStabilityValues.Length > 0);
 
-        return Math.Min(newSoftTimeLimit, searchConstraints.HardLimitTimeBound);
+        double bestMoveStabilityFactor = _bestMoveStabilityValues[Math.Min(bestMoveStability, _bestMoveStabilityValues.Length - 1)];
+        scale *= bestMoveStabilityFactor;
+
+        int newSoftTimeLimit = Math.Min(
+            (int)Math.Round(searchConstraints.SoftLimitTimeBound * scale),
+            searchConstraints.HardLimitTimeBound);
+
+        _logger.Trace("[TM] Node tm factor: {0}, bm stability factor: {1}, soft time limit: {2} -> {3}",
+            nodeTmFactor, bestMoveStabilityFactor, searchConstraints.SoftLimitTimeBound, newSoftTimeLimit);
+
+        return newSoftTimeLimit;
     }
 
     /// <summary>
