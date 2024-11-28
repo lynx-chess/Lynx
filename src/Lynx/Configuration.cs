@@ -106,16 +106,16 @@ public sealed class EngineSettings
     public double HardTimeBoundMultiplier { get; set; } = 0.52;
 
     [SPSA<double>(0.5, 1.5, 0.05)]
-    public double SoftTimeBoundMultiplier { get; set; } = 1;
+    public double SoftTimeBoundMultiplier { get; set; } = 0.97;
 
     [SPSA<double>(0.1, 2, 0.1)]
-    public double SoftTimeBaseIncrementMultiplier { get; set; } = 0.8;
+    public double SoftTimeBaseIncrementMultiplier { get; set; } = 0.6;
 
     [SPSA<double>(1, 3, 0.1)]
-    public double NodeTmBase { get; set; } = 2.4;
+    public double NodeTmBase { get; set; } = 2.53;
 
     [SPSA<double>(0.5, 2.5, 0.1)]
-    public double NodeTmScale { get; set; } = 1.65;
+    public double NodeTmScale { get; set; } = 1.63;
 
     #endregion
 
