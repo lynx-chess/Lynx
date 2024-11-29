@@ -117,6 +117,21 @@ public sealed class EngineSettings
     [SPSA<double>(0.5, 2.5, 0.1)]
     public double NodeTmScale { get; set; } = 1.61;
 
+    [SPSA<double>(2, 3.5, 0.1)]
+    public double BM_Stability_0 { get; set; } = 2.5;
+
+    [SPSA<double>(1, 2, 0.05)]
+    public double BM_Stability_1 { get; set; } = 1.2;
+
+    [SPSA<double>(0.5, 1.5, 0.05)]
+    public double BM_Stability_2 { get; set; } = 0.9;
+
+    [SPSA<double>(0.25, 1.25, 0.05)]
+    public double BM_Stability_3 { get; set; } = 0.8;
+
+    [SPSA<double>(0, 1, 0.05)]
+    public double BM_Stability_4 { get; set; } = 0.75;
+
     #endregion
 
     [SPSA<int>(3, 10, 0.5)]
