@@ -219,13 +219,13 @@ public static class SPSAAttributeHelpers
             var genericSpsa = spsaArray.First();
             if (genericSpsa is SPSAAttribute<int> intSpsa)
             {
-                var val = SPSAAttribute<int>.GetPropertyValue(property);
+                int val = SPSAAttribute<int>.GetPropertyValue(property);
 
                 yield return $"option name {property.Name} type spin default {val} min {intSpsa.MinValue} max {intSpsa.MaxValue}";
             }
             else if (genericSpsa is SPSAAttribute<double> doubleSpsa)
             {
-                var val = SPSAAttribute<double>.GetPropertyValue(property);
+                int val = (int)SPSAAttribute<double>.GetPropertyValue(property);
 
                 yield return $"option name {property.Name} type spin default {val} min {doubleSpsa.MinValue} max {doubleSpsa.MaxValue}";
             }
