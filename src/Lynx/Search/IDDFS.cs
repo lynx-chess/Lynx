@@ -54,6 +54,8 @@ public sealed partial class Engine
 
     private readonly Move _defaultMove = default;
 
+    private int _bestMoveStability = 0;
+
     /// <summary>
     /// Iterative Deepening Depth-First Search (IDDFS) using alpha-beta pruning.
     /// Requires <see cref="_searchConstraints"/> to be populated before invoking it
@@ -171,7 +173,17 @@ public sealed partial class Engine
                     ? Utils.CalculateMateInX(bestScore, bestScoreAbs)
                     : 0;
 
+                var oldBestMove = lastSearchResult?.BestMove;
                 lastSearchResult = UpdateLastSearchResult(lastSearchResult, bestScore, depth, mate);
+
+                if (oldBestMove == lastSearchResult.BestMove)
+                {
+                    ++_bestMoveStability;
+                }
+                else
+                {
+                    _bestMoveStability = 0;
+                }
 
                 _engineWriter.TryWrite(lastSearchResult);
             } while (StopSearchCondition(lastSearchResult.BestMove, ++depth, mate));
@@ -249,8 +261,8 @@ public sealed partial class Engine
         var elapsedMilliseconds = _stopWatch.ElapsedMilliseconds;
 
         var bestMoveNodeCount = _moveNodeCount[bestMove.Piece()][bestMove.TargetSquare()];
-        var scaledSoftLimitTimeBound = TimeManager.SoftLimit(_searchConstraints, bestMoveNodeCount, _nodes);
-        _logger.Debug("[TM] Depth {Depth}: hard limit {HardLimit}, base soft limit {BaseSoftLimit}, scaled soft limit {ScaledSoftLimit}", depth - 1,  _searchConstraints.HardLimitTimeBound, _searchConstraints.SoftLimitTimeBound, scaledSoftLimitTimeBound);
+        var scaledSoftLimitTimeBound = TimeManager.SoftLimit(_searchConstraints, bestMoveNodeCount, _nodes, _bestMoveStability);
+        _logger.Debug("[TM] Depth {Depth}: hard limit {HardLimit}, base soft limit {BaseSoftLimit}, scaled soft limit {ScaledSoftLimit}", depth - 1, _searchConstraints.HardLimitTimeBound, _searchConstraints.SoftLimitTimeBound, scaledSoftLimitTimeBound);
 
         if (elapsedMilliseconds > scaledSoftLimitTimeBound)
         {
