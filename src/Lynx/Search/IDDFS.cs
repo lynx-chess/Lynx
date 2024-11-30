@@ -190,7 +190,7 @@ public sealed partial class Engine
 
                 searchScores[depth] = lastSearchResult.Score;
 
-                _scoreDelta = lastSearchResult.Score - oldScore;
+                _scoreDelta = oldScore - lastSearchResult.Score;
 
                 _engineWriter.TryWrite(lastSearchResult);
             } while (StopSearchCondition(lastSearchResult.BestMove, ++depth, mate));
