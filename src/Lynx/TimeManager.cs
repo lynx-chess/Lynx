@@ -12,11 +12,6 @@ public static class TimeManager
     /// </summary>
     private static ReadOnlySpan<double> _bestMoveStabilityValues => [2.50, 1.20, 0.90, 0.80, 0.75];
 
-    /// <summary>
-    /// Values from Calvin
-    /// </summary>
-    private static ReadOnlySpan<double> _scoreStabilityValues => [1.25, 1.15, 1.00, 0.94, 0.88];
-
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public static SearchConstraints CalculateTimeManagement(Game game, GoCommand goCommand)
@@ -101,6 +96,9 @@ public static class TimeManager
 
         double nodeTmBase = Configuration.EngineSettings.NodeTmBase;
         double nodeTmScale = Configuration.EngineSettings.NodeTmScale;
+        double scoreStabilityMax = Configuration.EngineSettings.ScoreStability_Max;
+        double scoreStabilityMin = Configuration.EngineSettings.ScoreStability_Min;
+        double scoreStabilityDivisor = Configuration.EngineSettings.ScoreStability_Divisor;
 
         double scale = 1.0;
 
@@ -123,9 +121,8 @@ public static class TimeManager
         scale *= bestMoveStabilityFactor;
 
         // Score stability: the less score changes vs last search, the less time we spend in the search
-        Debug.Assert(_scoreStabilityValues.Length > 0);
-
-        double scoreStabilityFactor = _scoreStabilityValues[Math.Min(scoreStability, _scoreStabilityValues.Length - 1)];
+        // Implementation based on Lizard's
+        double scoreStabilityFactor = Math.Clamp(scoreStability / scoreStabilityDivisor, scoreStabilityMin, scoreStabilityMax);
         scale *= scoreStabilityFactor;
 
         int newSoftTimeLimit = Math.Min(
