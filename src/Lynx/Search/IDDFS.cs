@@ -55,8 +55,7 @@ public sealed partial class Engine
     private readonly Move _defaultMove = default;
 
     private int _bestMoveStability = 0;
-
-    private int _scoreStability = 0;
+    private int _scoreDelta = 0;
 
     /// <summary>
     /// Iterative Deepening Depth-First Search (IDDFS) using alpha-beta pruning.
@@ -83,6 +82,7 @@ public sealed partial class Engine
         int depth = 1;
         bool isMateDetected = false;
         Move firstLegalMove = default;
+        Span<int> searchScores = stackalloc int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
 
         _stopWatch.Restart();
 
@@ -176,7 +176,7 @@ public sealed partial class Engine
                     : 0;
 
                 var oldBestMove = lastSearchResult?.BestMove;
-                var oldScore = lastSearchResult?.Score;
+                var oldScore = lastSearchResult?.Score ?? 0;
                 lastSearchResult = UpdateLastSearchResult(lastSearchResult, bestScore, depth, mate);
 
                 if (oldBestMove == lastSearchResult.BestMove)
@@ -188,14 +188,9 @@ public sealed partial class Engine
                     _bestMoveStability = 0;
                 }
 
-                if (oldScore is not null && Math.Abs(lastSearchResult.Score - oldScore.Value) < Configuration.EngineSettings.ScoreStabilityDelta)
-                {
-                    ++_scoreStability;
-                }
-                else
-                {
-                    _scoreStability = 0;
-                }
+                searchScores[depth] = lastSearchResult.Score;
+
+                _scoreDelta = lastSearchResult.Score - oldScore;
 
                 _engineWriter.TryWrite(lastSearchResult);
             } while (StopSearchCondition(lastSearchResult.BestMove, ++depth, mate));
@@ -273,7 +268,7 @@ public sealed partial class Engine
         var elapsedMilliseconds = _stopWatch.ElapsedMilliseconds;
 
         var bestMoveNodeCount = _moveNodeCount[bestMove.Piece()][bestMove.TargetSquare()];
-        var scaledSoftLimitTimeBound = TimeManager.SoftLimit(_searchConstraints, depth - 1, bestMoveNodeCount, _nodes, _bestMoveStability, _scoreStability);
+        var scaledSoftLimitTimeBound = TimeManager.SoftLimit(_searchConstraints, depth - 1, bestMoveNodeCount, _nodes, _bestMoveStability, _scoreDelta);
         _logger.Debug("[TM] Depth {Depth}: hard limit {HardLimit}, base soft limit {BaseSoftLimit}, scaled soft limit {ScaledSoftLimit}", depth - 1, _searchConstraints.HardLimitTimeBound, _searchConstraints.SoftLimitTimeBound, scaledSoftLimitTimeBound);
 
         if (elapsedMilliseconds > scaledSoftLimitTimeBound)

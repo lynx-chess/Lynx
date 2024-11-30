@@ -94,7 +94,7 @@ public static class TimeManager
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int SoftLimit(SearchConstraints searchConstraints, int depth, ulong bestMoveNodeCount, ulong totalNodeCount, int bestMoveStability, int scoreStability)
+    public static int SoftLimit(SearchConstraints searchConstraints, int depth, ulong bestMoveNodeCount, ulong totalNodeCount, int bestMoveStability, int scoreDelta)
     {
         Debug.Assert(totalNodeCount > 0);
         Debug.Assert(totalNodeCount >= bestMoveNodeCount);
@@ -103,9 +103,6 @@ public static class TimeManager
         double nodeTmScale = Configuration.EngineSettings.NodeTmScale;
 
         double scale = 1.0;
-        double nodeTmFactor;
-        double bestMoveStabilityFactor;
-        double scoreStabilityFactor = 0;
 
         // Node time management: scale soft limit time bound by the proportion of nodes spent
         //   searching the best move at root level vs the total nodes searched.
@@ -116,23 +113,20 @@ public static class TimeManager
         // - bestMoveFraction = 0.25 -> scale = 1.0 x (2 - 0.25) = 1.75
         // - bestMoveFraction = 1.00 -> scale = 1.0 x (2 - 1.00) = 1
         double bestMoveFraction = (double)bestMoveNodeCount / totalNodeCount;
-        nodeTmFactor = nodeTmBase - (bestMoveFraction * nodeTmScale);
+        double nodeTmFactor = nodeTmBase - (bestMoveFraction * nodeTmScale);
         scale *= nodeTmFactor;
 
         // Best move stability: The less best move changes, the less time we spend in the search
         Debug.Assert(_bestMoveStabilityValues.Length > 0);
 
-        bestMoveStabilityFactor = _bestMoveStabilityValues[Math.Min(bestMoveStability, _bestMoveStabilityValues.Length - 1)];
+        double bestMoveStabilityFactor = _bestMoveStabilityValues[Math.Min(bestMoveStability, _bestMoveStabilityValues.Length - 1)];
         scale *= bestMoveStabilityFactor;
 
-        if (depth > Configuration.EngineSettings.ScoreStability_MinDepth)
-        {
-            // Score stability: the less score changes vs last search, the less time we spend in the search
-            Debug.Assert(_scoreStabilityValues.Length > 0);
+        // Score stability: if score improves, we spend less timespend in the search
+        Debug.Assert(_scoreStabilityValues.Length > 0);
 
-            scoreStabilityFactor = _scoreStabilityValues[Math.Min(scoreStability, _scoreStabilityValues.Length - 1)];
-            scale *= scoreStabilityFactor;
-        }
+        double scoreStabilityFactor = CalculateScoreStability(scoreDelta);
+        scale *= scoreStabilityFactor;
 
         int newSoftTimeLimit = Math.Min(
             (int)Math.Round(searchConstraints.SoftLimitTimeBound * scale),
@@ -142,6 +136,29 @@ public static class TimeManager
             nodeTmFactor, bestMoveStabilityFactor, scoreStabilityFactor, searchConstraints.SoftLimitTimeBound, newSoftTimeLimit);
 
         return newSoftTimeLimit;
+    }
+
+    /// <summary>
+    /// Implementation based on Stash's
+    /// </summary>
+    /// <param name="scoreDelta"></param>
+    /// <returns>[0.5, 2.0]</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static double CalculateScoreStability(int scoreDelta)
+    {
+        const int limit = 100;
+        const int potBase = 2;
+
+        // Score delta is clamped to [-100, 100]
+        var clampedScore = Math.Clamp(scoreDelta, -limit, limit);
+
+        // Clamped score is mapped to the range [-100, 100]
+        // -100 -> 2.000x time
+        //  -50 -> 1.414x time
+        //    0 -> 1.000x time
+        //  +50 -> 0.707x time
+        // +100 -> 0.500x time
+        return Math.Pow(potBase, (double)clampedScore / limit);
     }
 
     /// <summary>

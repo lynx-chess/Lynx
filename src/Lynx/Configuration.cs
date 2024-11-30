@@ -114,12 +114,6 @@ public sealed class EngineSettings
     [SPSA<double>(0.5, 2.5, 0.1)]
     public double NodeTmScale { get; set; } = 1.65;
 
-    [SPSA<int>(1, 15, 1)]
-    public int ScoreStability_MinDepth { get; set; } = 7;
-
-    [SPSA<int>(5, 50, 5)]
-    public int ScoreStabilityDelta { get; set; } = 10;
-
     #endregion
 
     [SPSA<int>(3, 10, 0.5)]
