@@ -283,6 +283,14 @@ public sealed class UCIHandler
                     }
                     break;
                 }
+            case "scorestabilitydelta":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.ScoreStabilityDelta = value * 0.01;
+                    }
+                    break;
+                }
             #endregion
 
             #region Search tuning

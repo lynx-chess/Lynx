@@ -12,6 +12,11 @@ public static class TimeManager
     /// </summary>
     private static ReadOnlySpan<double> _bestMoveStabilityValues => [2.50, 1.20, 0.90, 0.80, 0.75];
 
+    /// <summary>
+    /// Values from Calvin
+    /// </summary>
+    private static ReadOnlySpan<double> _scoreStabilityValues => [1.25, 1.15, 1.00, 0.94, 0.88];
+
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public static SearchConstraints CalculateTimeManagement(Game game, GoCommand goCommand)
@@ -89,7 +94,7 @@ public static class TimeManager
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int SoftLimit(SearchConstraints searchConstraints, ulong bestMoveNodeCount, ulong totalNodeCount, int bestMoveStability)
+    public static int SoftLimit(SearchConstraints searchConstraints, ulong bestMoveNodeCount, ulong totalNodeCount, int bestMoveStability, int scoreStability)
     {
         Debug.Assert(totalNodeCount > 0);
         Debug.Assert(totalNodeCount >= bestMoveNodeCount);
@@ -117,12 +122,18 @@ public static class TimeManager
         double bestMoveStabilityFactor = _bestMoveStabilityValues[Math.Min(bestMoveStability, _bestMoveStabilityValues.Length - 1)];
         scale *= bestMoveStabilityFactor;
 
+        // Score stability: the less score changes vs last search, the less time we spend in the search
+        Debug.Assert(_scoreStabilityValues.Length > 0);
+
+        double scoreStabilityFactor = _scoreStabilityValues[Math.Min(scoreStability, _scoreStabilityValues.Length - 1)];
+        scale *= scoreStabilityFactor;
+
         int newSoftTimeLimit = Math.Min(
             (int)Math.Round(searchConstraints.SoftLimitTimeBound * scale),
             searchConstraints.HardLimitTimeBound);
 
-        _logger.Trace("[TM] Node tm factor: {0}, bm stability factor: {1}, soft time limit: {2} -> {3}",
-            nodeTmFactor, bestMoveStabilityFactor, searchConstraints.SoftLimitTimeBound, newSoftTimeLimit);
+        _logger.Trace("[TM] Node tm factor: {0}, bm stability factor: {1}, score stability factor: {2}, soft time limit: {3} -> {4}",
+            nodeTmFactor, bestMoveStabilityFactor, scoreStabilityFactor, searchConstraints.SoftLimitTimeBound, newSoftTimeLimit);
 
         return newSoftTimeLimit;
     }
