@@ -115,7 +115,7 @@ public sealed class EngineSettings
     public double NodeTmScale { get; set; } = 1.65;
 
     [SPSA<int>(5, 50, 5)]
-    public int ScoreStability { get; set; } = 10;
+    public int ScoreStabilityDelta { get; set; } = 10;
 
     #endregion
 
