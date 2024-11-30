@@ -283,6 +283,14 @@ public sealed class UCIHandler
                     }
                     break;
                 }
+            case "scorestability_mindepth":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.ScoreStability_MinDepth = value;
+                    }
+                    break;
+                }
             case "scorestabilitydelta":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
