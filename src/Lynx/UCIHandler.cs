@@ -287,7 +287,7 @@ public sealed class UCIHandler
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
-                        Configuration.EngineSettings.ScoreStabilityDelta = value * 0.01;
+                        Configuration.EngineSettings.ScoreStabilityDelta = value;
                     }
                     break;
                 }
