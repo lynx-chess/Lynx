@@ -99,6 +99,32 @@ public static class Constants
     /// </summary>
     public const BitBoard NotABFiles = 0xFCFCFCFCFCFCFCFC;
 
+    /// <summary>
+    /// 8   0 0 0 0 0 0 0 0
+    /// 7   0 0 0 0 0 0 0 0
+    /// 6   1 1 1 1 1 1 1 1
+    /// 5   1 1 1 1 1 1 1 1
+    /// 4   1 1 1 1 1 1 1 1
+    /// 3   0 0 0 0 0 0 0 0
+    /// 2   0 0 0 0 0 0 0 0
+    /// 1   0 0 0 0 0 0 0 0
+    ///     a b c d e f g h
+    /// </summary>
+    public const BitBoard KnightOutpostWhiteRanks = 0xFFFFFF0000;
+
+    /// <summary>
+    /// 8   0 0 0 0 0 0 0 0
+    /// 7   0 0 0 0 0 0 0 0
+    /// 6   0 0 0 0 0 0 0 0
+    /// 6   1 1 1 1 1 1 1 1
+    /// 5   1 1 1 1 1 1 1 1
+    /// 3   1 1 1 1 1 1 1 1
+    /// 2   0 0 0 0 0 0 0 0
+    /// 1   0 0 0 0 0 0 0 0
+    ///     a b c d e f g h
+    /// </summary>
+    public const BitBoard KnightOutpostBlackRanks = 0xFFFFFF000000;
+
     public static readonly string[] Coordinates =
     [
         "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
