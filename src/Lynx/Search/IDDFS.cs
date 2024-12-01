@@ -82,7 +82,6 @@ public sealed partial class Engine
         int depth = 1;
         bool isMateDetected = false;
         Move firstLegalMove = default;
-        Span<int> searchScores = stackalloc int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
 
         _stopWatch.Restart();
 
@@ -187,8 +186,6 @@ public sealed partial class Engine
                 {
                     _bestMoveStability = 0;
                 }
-
-                searchScores[depth] = lastSearchResult.Score;
 
                 _scoreDelta = oldScore - lastSearchResult.Score;
 
