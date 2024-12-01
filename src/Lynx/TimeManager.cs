@@ -98,6 +98,7 @@ public static class TimeManager
         double nodeTmScale = Configuration.EngineSettings.NodeTmScale;
 
         double scale = 1.0;
+        double scoreStabilityFactor = 1;
 
         // Node time management: scale soft limit time bound by the proportion of nodes spent
         //   searching the best move at root level vs the total nodes searched.
@@ -117,9 +118,12 @@ public static class TimeManager
         double bestMoveStabilityFactor = _bestMoveStabilityValues[Math.Min(bestMoveStability, _bestMoveStabilityValues.Length - 1)];
         scale *= bestMoveStabilityFactor;
 
-        // Score stability: if score improves, we spend less timespend in the search
-        double scoreStabilityFactor = CalculateScoreStability(scoreDelta);
-        scale *= scoreStabilityFactor;
+        if (depth >= Configuration.EngineSettings.ScoreStabiity_MinDepth)
+        {
+            // Score stability: if score improves, we spend less timespend in the search
+            scoreStabilityFactor = CalculateScoreStability(scoreDelta);
+            scale *= scoreStabilityFactor;
+        }
 
         int newSoftTimeLimit = Math.Min(
             (int)Math.Round(searchConstraints.SoftLimitTimeBound * scale),
