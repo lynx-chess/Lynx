@@ -6037,6 +6037,9 @@ public static partial class EvaluationParams
     [GeneratedPack(30, 72)]
     private static readonly int _BishopPairBonus;
 
+    [GeneratedPack(1, 2)]
+    private static readonly int _KnightOutpostBonus;
+
     [GeneratedPack(12, 15)]
     private static readonly int _PieceProtectedByPawnBonus;
 

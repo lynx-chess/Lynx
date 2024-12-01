@@ -38,6 +38,11 @@ static partial class EvaluationParams
     public const int BishopPairBonus = 4718622;
 
     /// <summary>
+    /// <see cref="Utils.Pack(1, 2)"/>
+    /// </summary>
+    public const int KnightOutpostBonus = 131073;
+
+    /// <summary>
     /// <see cref="Utils.Pack(12, 15)"/>
     /// </summary>
     public const int PieceProtectedByPawnBonus = 983052;
