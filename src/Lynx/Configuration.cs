@@ -111,7 +111,7 @@ public sealed class EngineSettings
     [SPSA<double>(0.1, 2, 0.1)]
     public double SoftTimeBaseIncrementMultiplier { get; set; } = 0.60;
 
-    [SPSA<double>(1, 2, 0.05)]
+    [SPSA<double>(1, 2, 0.1)]
     public double NodeTmBase { get; set; } = 1.5;
 
     public double NodeTmScale { get; set; } = 1;
@@ -119,16 +119,16 @@ public sealed class EngineSettings
     [SPSA<double>(2, 3.5, 0.1)]
     public double BM_Stability_0 { get; set; } = 2.69;
 
-    [SPSA<double>(1, 2, 0.05)]
+    [SPSA<double>(1, 2, 0.1)]
     public double BM_Stability_1 { get; set; } = 1.19;
 
-    [SPSA<double>(0.5, 1.5, 0.05)]
+    [SPSA<double>(0.5, 1.5, 0.1)]
     public double BM_Stability_2 { get; set; } = 1.03;
 
-    [SPSA<double>(0.25, 1.25, 0.05)]
+    [SPSA<double>(0.25, 1.25, 0.1)]
     public double BM_Stability_3 { get; set; } = 0.68;
 
-    [SPSA<double>(0, 1, 0.05)]
+    [SPSA<double>(0, 1, 0.1)]
     public double BM_Stability_4 { get; set; } = 0.83;
 
     #endregion
