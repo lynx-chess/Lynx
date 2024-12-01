@@ -12,11 +12,6 @@ public static class TimeManager
     /// </summary>
     private static ReadOnlySpan<double> _bestMoveStabilityValues => [2.50, 1.20, 0.90, 0.80, 0.75];
 
-    /// <summary>
-    /// Values from Calvin
-    /// </summary>
-    private static ReadOnlySpan<double> _scoreStabilityValues => [1.25, 1.15, 1.00, 0.94, 0.88];
-
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public static SearchConstraints CalculateTimeManagement(Game game, GoCommand goCommand)
@@ -123,8 +118,6 @@ public static class TimeManager
         scale *= bestMoveStabilityFactor;
 
         // Score stability: if score improves, we spend less timespend in the search
-        Debug.Assert(_scoreStabilityValues.Length > 0);
-
         double scoreStabilityFactor = CalculateScoreStability(scoreDelta);
         scale *= scoreStabilityFactor;
 
@@ -140,8 +133,10 @@ public static class TimeManager
 
     /// <summary>
     /// Implementation based on Stash's
+    /// When new score is higher than old score (negative <paramref name="scoreDelta"/>),
+    /// use less time
     /// </summary>
-    /// <param name="scoreDelta"></param>
+    /// <param name="scoreDelta">oldScore - currentScore, negative when score improved</param>
     /// <returns>[0.5, 2.0]</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static double CalculateScoreStability(int scoreDelta)
@@ -152,13 +147,15 @@ public static class TimeManager
         // Score delta is clamped to [-100, 100]
         var clampedScore = Math.Clamp(scoreDelta, -limit, limit);
 
-        // Clamped score is mapped to the range [-100, 100]
-        // -100 -> 2.000x time
-        //  -50 -> 1.414x time
-        //    0 -> 1.000x time
-        //  +50 -> 0.707x time
-        // +100 -> 0.500x time
-        return Math.Pow(potBase, (double)clampedScore / limit);
+        // Clamped score is mapped to the range [-1, 1]
+        var mappedScore = (double)clampedScore / limit;
+
+        // -100 -> -1   -> 2 ^ -1   = 0.5       New score was higher (score increase)
+        //  -50 -> -0.5 -> 2 ^ -0.5 = 0.707
+        //    0 ->  0   -> 2 ^ 0    = 1
+        //  +50 -> 0.5  -> 2 ^ 0.5  = 1.414
+        // +100 -> +1   -> 2 ^1     = 2         Old score was higher (score decrease)
+        return Math.Pow(potBase, mappedScore);
     }
 
     /// <summary>
