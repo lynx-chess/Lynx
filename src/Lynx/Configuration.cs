@@ -103,33 +103,33 @@ public sealed class EngineSettings
     #region Time management
 
     [SPSA<double>(0.1, 1, 0.05)]
-    public double HardTimeBoundMultiplier { get; set; } = 0.69;
+    public double HardTimeBoundMultiplier { get; set; } = 0.68;
 
     [SPSA<double>(0.5, 1.5, 0.05)]
-    public double SoftTimeBoundMultiplier { get; set; } = 1.08;
+    public double SoftTimeBoundMultiplier { get; set; } = 1.04;
 
     [SPSA<double>(0.1, 2, 0.1)]
-    public double SoftTimeBaseIncrementMultiplier { get; set; } = 0.60;
+    public double SoftTimeBaseIncrementMultiplier { get; set; } = 0.69;
 
     [SPSA<double>(1, 2, 0.1)]
-    public double NodeTmBase { get; set; } = 1.5;
+    public double NodeTmBase { get; set; } = 1.56;
 
     public double NodeTmScale { get; set; } = 1;
 
     [SPSA<double>(2, 3.5, 0.1)]
-    public double BM_Stability_0 { get; set; } = 2.69;
+    public double BM_Stability_0 { get; set; } = 2.73;
 
     [SPSA<double>(1, 2, 0.1)]
-    public double BM_Stability_1 { get; set; } = 1.19;
+    public double BM_Stability_1 { get; set; } = 1.21;
 
     [SPSA<double>(0.5, 1.5, 0.1)]
-    public double BM_Stability_2 { get; set; } = 1.03;
+    public double BM_Stability_2 { get; set; } = 0.97;
 
     [SPSA<double>(0.25, 1.25, 0.1)]
-    public double BM_Stability_3 { get; set; } = 0.68;
+    public double BM_Stability_3 { get; set; } = 0.70;
 
     [SPSA<double>(0, 1, 0.1)]
-    public double BM_Stability_4 { get; set; } = 0.83;
+    public double BM_Stability_4 { get; set; } = 0.65;
 
     #endregion
 
