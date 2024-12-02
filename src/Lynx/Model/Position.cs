@@ -432,7 +432,7 @@ public class Position : IDisposable
 
                 gamePhase += GamePhaseByPiece[pieceIndex];
 
-                packedScore += AdditionalPieceEvaluation(whiteBucket, pieceSquareIndex, pieceIndex, (int)Side.White, whiteKing, blackKing, blackPawnAttacks);
+                packedScore += AdditionalPieceEvaluation(whiteBucket, pieceSquareIndex, pieceIndex, (int)Side.White, whiteKing, blackKing, whitePawnAttacks, blackPawnAttacks);
             }
         }
 
@@ -452,7 +452,7 @@ public class Position : IDisposable
 
                 gamePhase += GamePhaseByPiece[pieceIndex];
 
-                packedScore -= AdditionalPieceEvaluation(blackBucket, pieceSquareIndex, pieceIndex, (int)Side.Black, blackKing, whiteKing, whitePawnAttacks);
+                packedScore -= AdditionalPieceEvaluation(blackBucket, pieceSquareIndex, pieceIndex, (int)Side.Black, blackKing, whiteKing, blackPawnAttacks, whitePawnAttacks);
             }
         }
 
@@ -474,13 +474,6 @@ public class Position : IDisposable
         {
             packedScore -= BishopPairBonus;
         }
-
-        // Knight outpost
-        var whiteOutposts = PieceBitBoards[(int)Piece.N] & Constants.KnightOutpostWhiteRanks & whitePawnAttacks & (~blackPawnAttacks);
-        packedScore += KnightOutpostBonus * whiteOutposts.CountBits();
-
-        var blackOutposts = PieceBitBoards[(int)Piece.n] & Constants.KnightOutpostBlackRanks & blackPawnAttacks & (~whitePawnAttacks);
-        packedScore -= KnightOutpostBonus * blackOutposts.CountBits();
 
         // Pieces protected by pawns bonus
         packedScore += PieceProtectedByPawnBonus
@@ -621,14 +614,14 @@ public class Position : IDisposable
     /// Doesn't include <see cref="Piece.K"/> and <see cref="Piece.k"/> evaluation
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int AdditionalPieceEvaluation(int bucket, int pieceSquareIndex, int pieceIndex, int pieceSide, int sameSideKingSquare, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+    internal int AdditionalPieceEvaluation(int bucket, int pieceSquareIndex, int pieceIndex, int pieceSide, int sameSideKingSquare, int oppositeSideKingSquare, BitBoard friendlyPawnAttacks, BitBoard enemyPawnAttacks)
     {
         return pieceIndex switch
         {
             (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(bucket, pieceSquareIndex, pieceIndex, sameSideKingSquare, oppositeSideKingSquare),
             (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
             (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
-            (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(pieceSquareIndex, pieceSide, oppositeSideKingSquare, friendlyPawnAttacks, enemyPawnAttacks),
             (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
             _ => 0
         };
@@ -721,7 +714,7 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int KnightAdditionalEvaluation(int squareIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+    private int KnightAdditionalEvaluation(int squareIndex, int pieceSide, int oppositeSideKingSquare, BitBoard friendlyPawnAttacks, BitBoard enemyPawnAttacks)
     {
         var attacks = Attacks.KnightAttacks[squareIndex];
 
@@ -738,6 +731,16 @@ public class Position : IDisposable
         var checks = (attacks & enemyKingCheckThreats).CountBits();
 
         packedBonus += CheckBonus[(int)Piece.N] * checks;
+
+        // Knight outpost
+        var offset = Utils.PieceOffset(pieceSide);
+
+        if (Constants.KnightOutpostRanksBySide[pieceSide].GetBit(squareIndex)                                               // Central ranks
+             && friendlyPawnAttacks.GetBit(squareIndex)                                                                     // Protected by one of our pawns
+             && ((Masks.SidePassedPawnMasksBySide[pieceSide][squareIndex] & PieceBitBoards[(int)Piece.p - offset]) == 0))   // Not attackable by enemy pawns
+        {
+            packedBonus += KnightOutpostBonus;
+        }
 
         return packedBonus;
     }

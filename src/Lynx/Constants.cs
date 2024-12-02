@@ -125,6 +125,8 @@ public static class Constants
     /// </summary>
     public const BitBoard KnightOutpostBlackRanks = 0xFFFFFF000000;
 
+    public static ReadOnlySpan<BitBoard> KnightOutpostRanksBySide => [KnightOutpostBlackRanks, KnightOutpostWhiteRanks];
+
     public static readonly string[] Coordinates =
     [
         "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",

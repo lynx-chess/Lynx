@@ -108,6 +108,22 @@ public static class Masks
     public static BitBoard[] WhiteSidePassedPawnMasks { get; } = new BitBoard[64];
 
     /// <summary>
+    /// Passed 'side' pawn mask for square c5
+    /// 8  0 0 0 0 0 0 0 0
+    /// 7  0 0 0 0 0 0 0 0
+    /// 6  0 0 0 0 0 0 0 0
+    /// 5  0 0 x 0 0 0 0 0
+    /// 4  0 1 0 1 0 0 0 0
+    /// 3  0 1 0 1 0 0 0 0
+    /// 2  0 1 0 1 0 0 0 0
+    /// 1  0 1 0 1 0 0 0 0
+    ///    a b c d e f g h
+    /// </summary>
+    public static BitBoard[] BlackSidePassedPawnMasks { get; } = new BitBoard[64];
+
+    public static readonly BitBoard[][] SidePassedPawnMasksBySide = [BlackSidePassedPawnMasks, WhiteSidePassedPawnMasks];
+
+    /// <summary>
     /// 8   0 1 1 1 1 1 1 0
     /// 7   0 1 1 1 1 1 1 0
     /// 6   0 1 1 1 1 1 1 0
@@ -134,20 +150,6 @@ public static class Masks
     ///     Bitboard: 9114861775475441664 (0x7E7E7E7E00000000)
     /// </summary>
     public static BitBoard BlackKnightOutpostMask { get; }
-
-    /// <summary>
-    /// Passed 'side' pawn mask for square c5
-    /// 8  0 0 0 0 0 0 0 0
-    /// 7  0 0 0 0 0 0 0 0
-    /// 6  0 0 0 0 0 0 0 0
-    /// 5  0 0 x 0 0 0 0 0
-    /// 4  0 1 0 1 0 0 0 0
-    /// 3  0 1 0 1 0 0 0 0
-    /// 2  0 1 0 1 0 0 0 0
-    /// 1  0 1 0 1 0 0 0 0
-    ///    a b c d e f g h
-    /// </summary>
-    public static BitBoard[] BlackSidePassedPawnMasks { get; } = new BitBoard[64];
 
     /// <summary>
     /// __builtin_bswap64(<see cref="LightSquaresMask"/>)
