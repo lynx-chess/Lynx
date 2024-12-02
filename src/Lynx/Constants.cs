@@ -110,7 +110,7 @@ public static class Constants
     /// 1   0 0 0 0 0 0 0 0
     ///     a b c d e f g h
     /// </summary>
-    public const BitBoard KnightOutpostWhiteRanks = 0xFFFFFF0000;
+    public const BitBoard KnightOutpostWhiteRanks = 0x187E7E7E7E3C;
 
     /// <summary>
     /// 8   0 0 0 0 0 0 0 0
@@ -123,7 +123,7 @@ public static class Constants
     /// 1   0 0 0 0 0 0 0 0
     ///     a b c d e f g h
     /// </summary>
-    public const BitBoard KnightOutpostBlackRanks = 0xFFFFFF000000;
+    public const BitBoard KnightOutpostBlackRanks = 0x3C7E7E7E7E180000;
 
     public static ReadOnlySpan<BitBoard> KnightOutpostRanksBySide => [KnightOutpostBlackRanks, KnightOutpostWhiteRanks];
 
