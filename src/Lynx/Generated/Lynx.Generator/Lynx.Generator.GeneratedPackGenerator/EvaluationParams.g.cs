@@ -8,9 +8,9 @@ static partial class EvaluationParams
     public const int IsolatedPawnPenalty = -917521;
 
     /// <summary>
-    /// <see cref="Utils.Pack(40, 2)"/>
+    /// <see cref="Utils.Pack(41, 2)"/>
     /// </summary>
-    public const int OpenFileRookBonus = 131112;
+    public const int OpenFileRookBonus = 131113;
 
     /// <summary>
     /// <see cref="Utils.Pack(15, 8)"/>
@@ -38,18 +38,18 @@ static partial class EvaluationParams
     public const int BishopPairBonus = 4718622;
 
     /// <summary>
-    /// <see cref="Utils.Pack(1, 2)"/>
+    /// <see cref="Utils.Pack(32, 4)"/>
     /// </summary>
-    public const int KnightOutpostBonus = 131073;
+    public const int KnightOutpostBonus = 262176;
 
     /// <summary>
-    /// <see cref="Utils.Pack(12, 15)"/>
+    /// <see cref="Utils.Pack(10, 15)"/>
     /// </summary>
-    public const int PieceProtectedByPawnBonus = 983052;
+    public const int PieceProtectedByPawnBonus = 983050;
 
     /// <summary>
-    /// <see cref="Utils.Pack(-47, -33)"/>
+    /// <see cref="Utils.Pack(-46, -32)"/>
     /// </summary>
-    public const int PieceAttackedByPawnPenalty = -2162735;
+    public const int PieceAttackedByPawnPenalty = -2097198;
 
 }
