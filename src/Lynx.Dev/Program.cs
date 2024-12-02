@@ -53,7 +53,9 @@ using static Lynx.TunableEvalParameters;
 //UnmakeMove();
 //PieceSquareTables();
 //NewMasks();
-DarkLightSquares();
+//DarkLightSquares();
+Constants.KnightOutpostRanksBySide[0].Print();
+Constants.KnightOutpostRanksBySide[1].Print();
 
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
 const string TrickyPosition = Constants.TrickyTestPositionFEN;

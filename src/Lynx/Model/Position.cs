@@ -733,11 +733,8 @@ public class Position : IDisposable
         packedBonus += CheckBonus[(int)Piece.N] * checks;
 
         // Knight outpost
-        var offset = Utils.PieceOffset(pieceSide);
-
-        if (Constants.KnightOutpostRanksBySide[pieceSide].GetBit(squareIndex)                                               // Central ranks
-             && friendlyPawnAttacks.GetBit(squareIndex)                                                                     // Protected by one of our pawns
-             && ((Masks.SidePassedPawnMasksBySide[pieceSide][squareIndex] & PieceBitBoards[(int)Piece.p - offset]) == 0))   // Not attackable by enemy pawns
+        if ((Constants.KnightOutpostRanksBySide[pieceSide] & friendlyPawnAttacks).GetBit(squareIndex)               // Central position & protected by one of our pawns
+             && ((Masks.SidePassedPawnMasksBySide[pieceSide][squareIndex] & PieceBitBoards[(int)Piece.p - Utils.PieceOffset(pieceSide)]) == 0))   // Not attackable by enemy pawns
         {
             packedBonus += KnightOutpostBonus;
         }
