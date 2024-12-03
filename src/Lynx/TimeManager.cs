@@ -89,7 +89,7 @@ public static class TimeManager
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int SoftLimit(SearchConstraints searchConstraints, ulong bestMoveNodeCount, ulong totalNodeCount, int bestMoveStability)
+    public static int SoftLimit(SearchConstraints searchConstraints, int depth, ulong bestMoveNodeCount, ulong totalNodeCount, int bestMoveStability)
     {
         Debug.Assert(totalNodeCount > 0);
         Debug.Assert(totalNodeCount >= bestMoveNodeCount);
@@ -98,6 +98,7 @@ public static class TimeManager
         double nodeTmScale = Configuration.EngineSettings.NodeTmScale;
 
         double scale = 1.0;
+        double bestMoveStabilityFactor = 1.0;
 
         // Node time management: scale soft limit time bound by the proportion of nodes spent
         //   searching the best move at root level vs the total nodes searched.
@@ -111,11 +112,14 @@ public static class TimeManager
         double nodeTmFactor = nodeTmBase - (bestMoveFraction * nodeTmScale);
         scale *= nodeTmFactor;
 
-        // Best move stability: The less best move changes, the less time we spend in the search
-        Debug.Assert(_bestMoveStabilityValues.Length > 0);
+        if (depth >= Configuration.EngineSettings.BestMoveScale_MinDepth)
+        {
+            // Best move stability: The less best move changes, the less time we spend in the search
+            Debug.Assert(_bestMoveStabilityValues.Length > 0);
 
-        double bestMoveStabilityFactor = _bestMoveStabilityValues[Math.Min(bestMoveStability, _bestMoveStabilityValues.Length - 1)];
-        scale *= bestMoveStabilityFactor;
+            bestMoveStabilityFactor = _bestMoveStabilityValues[Math.Min(bestMoveStability, _bestMoveStabilityValues.Length - 1)];
+            scale *= bestMoveStabilityFactor;
+        }
 
         int newSoftTimeLimit = Math.Min(
             (int)Math.Round(searchConstraints.SoftLimitTimeBound * scale),
