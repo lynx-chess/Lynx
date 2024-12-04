@@ -344,8 +344,7 @@ public sealed partial class Engine
                     : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_NonPV;
 
                 if (visitedMovesCounter >= minLMRMoves
-                    && depth >= Configuration.EngineSettings.LMR_MinDepth
-                    && !isCapture)
+                    && depth >= Configuration.EngineSettings.LMR_MinDepth)
                 {
                     reduction = EvaluationConstants.LMRReductions[depth][visitedMovesCounter];
 
