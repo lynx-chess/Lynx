@@ -372,6 +372,11 @@ public sealed partial class Engine
                         ++reduction;
                     }
 
+                    if (cutnode)
+                    {
+                        ++reduction;
+                    }
+
                     // -= history/(maxHistory/2)
                     reduction -= 2 * _quietHistory[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.History_MaxMoveValue;
 
