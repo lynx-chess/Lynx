@@ -119,7 +119,7 @@ public sealed partial class Engine
             {
                 var evalDiff = staticEval - Game.ReadStaticEvalFromStack(ply - 2);
                 improving = evalDiff >= 0;
-                improvingRate = evalDiff / 50.0;
+                improvingRate = Math.Clamp(evalDiff / 50.0, -1.0, +1.0);
             }
 
             // From smol.cs
