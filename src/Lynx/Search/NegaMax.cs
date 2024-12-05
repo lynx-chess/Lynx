@@ -339,51 +339,56 @@ public sealed partial class Engine
 
                 // 🔍 Late Move Reduction (LMR) - search with reduced depth
                 // Impl. based on Ciekce (Stormphrax) and Martin (Motor) advice, and Stormphrax & Akimbo implementations
-                if (!isCapture
-                    && depth >= Configuration.EngineSettings.LMR_MinDepth
-                    && visitedMovesCounter >=
-                        (pvNode
-                            ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_PV
-                            : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_NonPV))
+                if (isNotGettingCheckmated)
                 {
-                    reduction = EvaluationConstants.LMRReductions[depth][visitedMovesCounter];
 
-                    if (pvNode)
+
+                    if (!isCapture
+                        && depth >= Configuration.EngineSettings.LMR_MinDepth
+                        && visitedMovesCounter >=
+                            (pvNode
+                                ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_PV
+                                : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_NonPV))
                     {
-                        --reduction;
+                        reduction = EvaluationConstants.LMRReductions[depth][visitedMovesCounter];
+
+                        if (pvNode)
+                        {
+                            --reduction;
+                        }
+
+                        if (position.IsInCheck())   // i.e. move gives check
+                        {
+                            --reduction;
+                        }
+
+                        if (!improving)
+                        {
+                            ++reduction;
+                        }
+
+                        if (ttBestMove != default && isCapture)
+                        {
+                            ++reduction;
+                        }
+
+                        // -= history/(maxHistory/2)
+                        reduction -= 2 * _quietHistory[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.History_MaxMoveValue;
+
+                        // Don't allow LMR to drop into qsearch or increase the depth
+                        // depth - 1 - depth +2 = 1, min depth we want
+                        reduction = Math.Clamp(reduction, 0, depth - 2);
                     }
 
-                    if (position.IsInCheck())   // i.e. move gives check
+                    // 🔍 Static Exchange Evaluation (SEE) reduction
+                    // Bad captures are reduced more
+                    if (!isInCheck
+                        && moveScores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue
+                        && moveScores[moveIndex] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
                     {
-                        --reduction;
+                        reduction += Configuration.EngineSettings.SEE_BadCaptureReduction;
+                        reduction = Math.Clamp(reduction, 0, depth - 1);
                     }
-
-                    if (!improving)
-                    {
-                        ++reduction;
-                    }
-
-                    if (ttBestMove != default && isCapture)
-                    {
-                        ++reduction;
-                    }
-
-                    // -= history/(maxHistory/2)
-                    reduction -= 2 * _quietHistory[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.History_MaxMoveValue;
-
-                    // Don't allow LMR to drop into qsearch or increase the depth
-                    // depth - 1 - depth +2 = 1, min depth we want
-                    reduction = Math.Clamp(reduction, 0, depth - 2);
-                }
-
-                // 🔍 Static Exchange Evaluation (SEE) reduction
-                // Bad captures are reduced more
-                if (!isInCheck
-                    && moveScores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue
-                    && moveScores[moveIndex] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
-                {
-                    reduction += Configuration.EngineSettings.SEE_BadCaptureReduction;
-                    reduction = Math.Clamp(reduction, 0, depth - 1);
                 }
 
                 // Search with reduced depth
