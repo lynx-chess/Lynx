@@ -341,7 +341,6 @@ public sealed partial class Engine
                 // Impl. based on Ciekce (Stormphrax) and Martin (Motor) advice, and Stormphrax & Akimbo implementations
                 if (!isCapture
                     && depth >= Configuration.EngineSettings.LMR_MinDepth
-                    && isNotGettingCheckmated
                     && visitedMovesCounter >=
                         (pvNode
                             ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_PV
