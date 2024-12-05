@@ -367,6 +367,13 @@ public sealed partial class Engine
                         ++reduction;
                     }
 
+                    if (moveScores[0] == EvaluationConstants.TTMoveScoreValue
+                        && moves[0].IsCapture())
+                    {
+                        Debug.Assert((ShortMove)moves[0] == ttBestMove);
+                        ++reduction;
+                    }
+
                     if (cutnode)
                     {
                         ++reduction;
