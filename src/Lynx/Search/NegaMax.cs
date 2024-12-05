@@ -374,7 +374,7 @@ public sealed partial class Engine
 
                     if (cutnode)
                     {
-                        ++reduction;
+                        reduction += 2;
                     }
 
                     // -= history/(maxHistory/2)
