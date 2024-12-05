@@ -89,7 +89,7 @@ public static class TimeManager
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int SoftLimit(SearchConstraints searchConstraints, ulong bestMoveNodeCount, ulong totalNodeCount, int bestMoveStability)
+    public static int SoftLimit(SearchConstraints searchConstraints, int depth, ulong bestMoveNodeCount, ulong totalNodeCount, int bestMoveStability, int scoreDelta)
     {
         Debug.Assert(totalNodeCount > 0);
         Debug.Assert(totalNodeCount >= bestMoveNodeCount);
@@ -98,6 +98,7 @@ public static class TimeManager
         double nodeTmScale = Configuration.EngineSettings.NodeTmScale;
 
         double scale = 1.0;
+        double scoreStabilityFactor = 1;
 
         // Node time management: scale soft limit time bound by the proportion of nodes spent
         //   searching the best move at root level vs the total nodes searched.
@@ -117,14 +118,48 @@ public static class TimeManager
         double bestMoveStabilityFactor = _bestMoveStabilityValues[Math.Min(bestMoveStability, _bestMoveStabilityValues.Length - 1)];
         scale *= bestMoveStabilityFactor;
 
+        if (depth >= Configuration.EngineSettings.ScoreStabiity_MinDepth)
+        {
+            // Score stability: if score improves, we spend less timespend in the search
+            scoreStabilityFactor = CalculateScoreStability(scoreDelta);
+            scale *= scoreStabilityFactor;
+        }
+
         int newSoftTimeLimit = Math.Min(
             (int)Math.Round(searchConstraints.SoftLimitTimeBound * scale),
             searchConstraints.HardLimitTimeBound);
 
-        _logger.Trace("[TM] Node tm factor: {0}, bm stability factor: {1}, soft time limit: {2} -> {3}",
-            nodeTmFactor, bestMoveStabilityFactor, searchConstraints.SoftLimitTimeBound, newSoftTimeLimit);
+        _logger.Trace("[TM] Node tm factor: {0}, bm stability factor: {1}, score stability factor: {2}, soft time limit: {3} -> {4}",
+            nodeTmFactor, bestMoveStabilityFactor, scoreStabilityFactor, searchConstraints.SoftLimitTimeBound, newSoftTimeLimit);
 
         return newSoftTimeLimit;
+    }
+
+    /// <summary>
+    /// Implementation based on Stash's
+    /// When new score is higher than old score (negative <paramref name="scoreDelta"/>),
+    /// use less time
+    /// </summary>
+    /// <param name="scoreDelta">oldScore - currentScore, negative when score improved</param>
+    /// <returns>[0.5, 2.0]</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static double CalculateScoreStability(int scoreDelta)
+    {
+        const int limit = 100;
+        const int potBase = 2;
+
+        // Score delta is clamped to [-100, 100]
+        var clampedScore = Math.Clamp(scoreDelta, -limit, limit);
+
+        // Clamped score is mapped to the range [-1, 1]
+        var mappedScore = (double)clampedScore / limit;
+
+        // -100 -> -1   -> 2 ^ -1   = 0.5       New score was higher (score increase)
+        //  -50 -> -0.5 -> 2 ^ -0.5 = 0.707
+        //    0 ->  0   -> 2 ^ 0    = 1
+        //  +50 -> 0.5  -> 2 ^ 0.5  = 1.414
+        // +100 -> +1   -> 2 ^1     = 2         Old score was higher (score decrease)
+        return Math.Pow(potBase, mappedScore);
     }
 
     /// <summary>

@@ -55,6 +55,7 @@ public sealed partial class Engine
     private readonly Move _defaultMove = default;
 
     private int _bestMoveStability = 0;
+    private int _scoreDelta = 0;
 
     /// <summary>
     /// Iterative Deepening Depth-First Search (IDDFS) using alpha-beta pruning.
@@ -174,6 +175,7 @@ public sealed partial class Engine
                     : 0;
 
                 var oldBestMove = lastSearchResult?.BestMove;
+                var oldScore = lastSearchResult?.Score ?? 0;
                 lastSearchResult = UpdateLastSearchResult(lastSearchResult, bestScore, depth, mate);
 
                 if (oldBestMove == lastSearchResult.BestMove)
@@ -184,6 +186,8 @@ public sealed partial class Engine
                 {
                     _bestMoveStability = 0;
                 }
+
+                _scoreDelta = oldScore - lastSearchResult.Score;
 
                 _engineWriter.TryWrite(lastSearchResult);
             } while (StopSearchCondition(lastSearchResult.BestMove, ++depth, mate));
@@ -261,7 +265,7 @@ public sealed partial class Engine
         var elapsedMilliseconds = _stopWatch.ElapsedMilliseconds;
 
         var bestMoveNodeCount = _moveNodeCount[bestMove.Piece()][bestMove.TargetSquare()];
-        var scaledSoftLimitTimeBound = TimeManager.SoftLimit(_searchConstraints, bestMoveNodeCount, _nodes, _bestMoveStability);
+        var scaledSoftLimitTimeBound = TimeManager.SoftLimit(_searchConstraints, depth - 1, bestMoveNodeCount, _nodes, _bestMoveStability, _scoreDelta);
         _logger.Debug("[TM] Depth {Depth}: hard limit {HardLimit}, base soft limit {BaseSoftLimit}, scaled soft limit {ScaledSoftLimit}", depth - 1, _searchConstraints.HardLimitTimeBound, _searchConstraints.SoftLimitTimeBound, scaledSoftLimitTimeBound);
 
         if (elapsedMilliseconds > scaledSoftLimitTimeBound)
