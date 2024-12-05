@@ -383,8 +383,6 @@ public sealed partial class Engine
                     // Don't allow LMR to drop into qsearch or increase the depth
                     // depth - 1 - depth +2 = 1, min depth we want
                     reduction = Math.Clamp(reduction, 0, depth - 2);
-
-                    Debug.Assert(!pvNode || !cutnode);
                 }
 
                 // 🔍 Static Exchange Evaluation (SEE) reduction
