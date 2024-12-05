@@ -83,8 +83,8 @@ public static class EvaluationConstants
 
     public static ReadOnlySpan<int> MVV_PieceValues =>
     [
-        100, 350, 400, 500, 1100, 0,
-        100, 350, 400, 500, 1100, 0,
+        100, 300, 300, 500, 1200, 0,
+        100, 300, 300, 500, 1200, 0,
         0
     ];
 
