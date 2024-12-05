@@ -367,11 +367,6 @@ public sealed partial class Engine
                         ++reduction;
                     }
 
-                    if (ttBestMove != default && isCapture)
-                    {
-                        ++reduction;
-                    }
-
                     if (cutnode)
                     {
                         ++reduction;
