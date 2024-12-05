@@ -1,5 +1,6 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
+using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Security.Authentication;
 using System.Xml.Linq;
@@ -61,7 +62,9 @@ public sealed partial class Engine
             // so the search will be potentially expensive.
             // Therefore, we search with reduced depth for now, expecting to record a TT move
             // which we'll be able to use later for the full depth search
-            if (ttElementType == default && depth >= Configuration.EngineSettings.IIR_MinDepth)
+            if (ttElementType == default
+                && depth >= Configuration.EngineSettings.IIR_MinDepth
+                && (pvNode || cutnode))
             {
                 --depth;
             }
