@@ -56,6 +56,8 @@ public sealed partial class Engine
 
     private int _bestMoveStability = 0;
 
+    private int _scoreStability = 0;
+
     /// <summary>
     /// Iterative Deepening Depth-First Search (IDDFS) using alpha-beta pruning.
     /// Requires <see cref="_searchConstraints"/> to be populated before invoking it
@@ -174,6 +176,7 @@ public sealed partial class Engine
                     : 0;
 
                 var oldBestMove = lastSearchResult?.BestMove;
+                var oldScore = lastSearchResult?.Score;
                 lastSearchResult = UpdateLastSearchResult(lastSearchResult, bestScore, depth, mate);
 
                 if (oldBestMove == lastSearchResult.BestMove)
@@ -183,6 +186,15 @@ public sealed partial class Engine
                 else
                 {
                     _bestMoveStability = 0;
+                }
+
+                if (oldScore is not null && Math.Abs(lastSearchResult.Score - oldScore.Value) < Configuration.EngineSettings.ScoreStabilityDelta)
+                {
+                    ++_scoreStability;
+                }
+                else
+                {
+                    _scoreStability = 0;
                 }
 
                 _engineWriter.TryWrite(lastSearchResult);
@@ -261,7 +273,7 @@ public sealed partial class Engine
         var elapsedMilliseconds = _stopWatch.ElapsedMilliseconds;
 
         var bestMoveNodeCount = _moveNodeCount[bestMove.Piece()][bestMove.TargetSquare()];
-        var scaledSoftLimitTimeBound = TimeManager.SoftLimit(_searchConstraints, bestMoveNodeCount, _nodes, _bestMoveStability);
+        var scaledSoftLimitTimeBound = TimeManager.SoftLimit(_searchConstraints, bestMoveNodeCount, _nodes, _bestMoveStability, _scoreStability);
         _logger.Debug("[TM] Depth {Depth}: hard limit {HardLimit}, base soft limit {BaseSoftLimit}, scaled soft limit {ScaledSoftLimit}", depth - 1, _searchConstraints.HardLimitTimeBound, _searchConstraints.SoftLimitTimeBound, scaledSoftLimitTimeBound);
 
         if (elapsedMilliseconds > scaledSoftLimitTimeBound)

@@ -2,7 +2,6 @@
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
-using System.Diagnostics;
 using System.Runtime.Intrinsics.X86;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -280,6 +279,30 @@ public sealed class UCIHandler
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
                         Configuration.EngineSettings.NodeTmScale = value * 0.01;
+                    }
+                    break;
+                }
+            case "scorestability_min":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.ScoreStability_Min = value * 0.01;
+                    }
+                    break;
+                }
+            case "scorestability_max":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.ScoreStability_Max = value * 0.01;
+                    }
+                    break;
+                }
+            case "scorestability_divisor":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.ScoreStability_Divisor = value;
                     }
                     break;
                 }

@@ -89,13 +89,16 @@ public static class TimeManager
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int SoftLimit(SearchConstraints searchConstraints, ulong bestMoveNodeCount, ulong totalNodeCount, int bestMoveStability)
+    public static int SoftLimit(SearchConstraints searchConstraints, ulong bestMoveNodeCount, ulong totalNodeCount, int bestMoveStability, int scoreStability)
     {
         Debug.Assert(totalNodeCount > 0);
         Debug.Assert(totalNodeCount >= bestMoveNodeCount);
 
         double nodeTmBase = Configuration.EngineSettings.NodeTmBase;
         double nodeTmScale = Configuration.EngineSettings.NodeTmScale;
+        double scoreStabilityMax = Configuration.EngineSettings.ScoreStability_Max;
+        double scoreStabilityMin = Configuration.EngineSettings.ScoreStability_Min;
+        double scoreStabilityDivisor = Configuration.EngineSettings.ScoreStability_Divisor;
 
         double scale = 1.0;
 
@@ -117,12 +120,17 @@ public static class TimeManager
         double bestMoveStabilityFactor = _bestMoveStabilityValues[Math.Min(bestMoveStability, _bestMoveStabilityValues.Length - 1)];
         scale *= bestMoveStabilityFactor;
 
+        // Score stability: the less score changes vs last search, the less time we spend in the search
+        // Implementation based on Lizard's
+        double scoreStabilityFactor = Math.Clamp(scoreStability / scoreStabilityDivisor, scoreStabilityMin, scoreStabilityMax);
+        scale *= scoreStabilityFactor;
+
         int newSoftTimeLimit = Math.Min(
             (int)Math.Round(searchConstraints.SoftLimitTimeBound * scale),
             searchConstraints.HardLimitTimeBound);
 
-        _logger.Trace("[TM] Node tm factor: {0}, bm stability factor: {1}, soft time limit: {2} -> {3}",
-            nodeTmFactor, bestMoveStabilityFactor, searchConstraints.SoftLimitTimeBound, newSoftTimeLimit);
+        _logger.Trace("[TM] Node tm factor: {0}, bm stability factor: {1}, score stability factor: {2}, soft time limit: {3} -> {4}",
+            nodeTmFactor, bestMoveStabilityFactor, scoreStabilityFactor, searchConstraints.SoftLimitTimeBound, newSoftTimeLimit);
 
         return newSoftTimeLimit;
     }
