@@ -41,8 +41,6 @@ public class MatesTest : BaseTest
     /// <summary>
     /// http://www.talkchess.com/forum3/viewtopic.php?f=7&t=78583
     /// </summary>
-    /// <param name="fen"></param>
-    /// <param name="allowedUCIMoveString"></param>
     [Explicit]
     [Category(Categories.LongRunning)]
     [TestCaseSource(typeof(MatePositions), nameof(MatePositions.Mates_in_4_Collection))]

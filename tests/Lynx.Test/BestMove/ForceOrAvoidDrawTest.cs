@@ -15,7 +15,7 @@ public class ForceOrAvoidDrawTest : BaseTest
     public void ForceStaleMate(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
     {
         var result = TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 12);
-        Assert.AreEqual(0, result.Evaluation, "No drawn position detected");
+        Assert.AreEqual(0, result.Score, "No drawn position detected");
     }
 
     [Test]
@@ -35,7 +35,7 @@ public class ForceOrAvoidDrawTest : BaseTest
         // https://gameknot.com/chess-puzzle.pl?pz=247493
         const string fen = "r6k/p3b1pp/2pq4/Qp2n1NK/4P1P1/P3Br1P/1P2RP2/8 b - - 0 1";
 
-        var mock = new Mock<ChannelWriter<string>>();
+        var mock = new Mock<ChannelWriter<object>>();
 
         mock
             .Setup(m => m.WriteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
@@ -82,7 +82,7 @@ public class ForceOrAvoidDrawTest : BaseTest
 
         const string fen = "7B/8/7k/8/5KR1/8/5R2/8 w - - 0 1";
 
-        var mock = new Mock<ChannelWriter<string>>();
+        var mock = new Mock<ChannelWriter<object>>();
 
         mock
             .Setup(m => m.WriteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
@@ -122,7 +122,7 @@ public class ForceOrAvoidDrawTest : BaseTest
 
         // Assert
         Assert.AreEqual(movesThatAllowsRepetition.UCIString(), bestMoveFound.UCIString(), "No threefold repetition forced");
-        Assert.AreEqual(0, searchResult.Evaluation, "No drawn position detected");
+        Assert.AreEqual(0, searchResult.Score, "No drawn position detected");
     }
 
     [Test]
@@ -133,7 +133,7 @@ public class ForceOrAvoidDrawTest : BaseTest
         // https://gameknot.com/chess-puzzle.pl?pz=247493
         const string fen = "r6k/p3b1pp/2pq4/Qp2n1NK/4P1P1/P3Br1P/1P2RP2/8 b - - 0 1";
 
-        var mock = new Mock<ChannelWriter<string>>();
+        var mock = new Mock<ChannelWriter<object>>();
 
         mock
             .Setup(m => m.WriteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
@@ -164,7 +164,7 @@ public class ForceOrAvoidDrawTest : BaseTest
         Assert.AreEqual(98, engine.Game.MoveHistory.Count);
 #endif
 
-        engine.Game.PositionHashHistory.Clear(); // Make sure we don't take account threefold repetition
+        engine.Game.ClearPositionHashHistory(); // Make sure we don't take account threefold repetition
 
         // Act
         var searchResult = engine.BestMove(new($"go depth {Engine.DefaultMaxDepth}"));
@@ -181,7 +181,7 @@ public class ForceOrAvoidDrawTest : BaseTest
 
         const string fen = "8/7B/8/7k/5KR1/8/4R3/8 w - - 0 1";
 
-        var mock = new Mock<ChannelWriter<string>>();
+        var mock = new Mock<ChannelWriter<object>>();
 
         mock
             .Setup(m => m.WriteAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
@@ -215,7 +215,7 @@ public class ForceOrAvoidDrawTest : BaseTest
         Assert.AreEqual(99, engine.Game.MoveHistory.Count);
 #endif
 
-        engine.Game.PositionHashHistory.Clear(); // Make sure we don't take account threefold repetition
+        engine.Game.ClearPositionHashHistory(); // Make sure we don't take account threefold repetition
 
         // Act
         var searchResult = engine.BestMove(new($"go depth {Engine.DefaultMaxDepth}"));
@@ -223,20 +223,19 @@ public class ForceOrAvoidDrawTest : BaseTest
 
         // Assert
         Assert.AreEqual(movesThatAllowsRepetition.UCIString(), bestMoveFound.UCIString(), "No 50 moves rule forced");
-        Assert.AreEqual(0, searchResult.Evaluation, "No drawn position detected");
+        Assert.AreEqual(0, searchResult.Score, "No drawn position detected");
     }
 
     /// <summary>
     /// If a checkmate is delivered in move 50 (ply 100), the result of the game is checkmate
     /// </summary>
-    /// <returns></returns>
     [Test]
     public void CheckmateHasPrecedenceOver50MovesRule()
     {
         // Source: https://github.com/PGG106/Alexandria/issues/213
         const string mateIn1Fen = "4Q3/8/1p4pk/1PbB1p1p/7P/p3P1PK/P3qP2/8 w - - 99 88";
 
-        var result = TestBestMove(mateIn1Fen, new[] { "e8h8" }, Array.Empty<string>(), depth: 1);
+        var result = TestBestMove(mateIn1Fen, ["e8h8"], [], depth: 1);
         Assert.AreEqual(1, result.Mate);
     }
 }

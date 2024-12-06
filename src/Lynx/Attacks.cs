@@ -44,9 +44,9 @@ public static class Attacks
 
         if (Bmi2.X64.IsSupported)
         {
-            _pextAttacks = new ulong[5248 + 102400];
-            _pextBishopOffset = new ulong[64];
-            _pextRookOffset = new ulong[64];
+            _pextAttacks = GC.AllocateArray<BitBoard>(5248 + 102400, pinned: true);
+            _pextBishopOffset = GC.AllocateArray<BitBoard>(64, pinned: true);
+            _pextRookOffset = GC.AllocateArray<BitBoard>(64, pinned: true);
 
             InitializeBishopAndRookPextAttacks();
         }
@@ -69,9 +69,7 @@ public static class Attacks
     /// <summary>
     /// Get Bishop attacks assuming current board occupancy
     /// </summary>
-    /// <param name="squareIndex"></param>
     /// <param name="occupancy">Occupancy of <see cref="Side.Both"/></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static BitBoard MagicNumbersBishopAttacks(int squareIndex, BitBoard occupancy)
     {
@@ -85,9 +83,7 @@ public static class Attacks
     /// <summary>
     /// Get Rook attacks assuming current board occupancy
     /// </summary>
-    /// <param name="squareIndex"></param>
     /// <param name="occupancy">Occupancy of <see cref="Side.Both"/></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static BitBoard RookAttacks(int squareIndex, BitBoard occupancy)
     {
@@ -96,6 +92,7 @@ public static class Attacks
             : MagicNumbersRookAttacks(squareIndex, occupancy);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static BitBoard MagicNumbersRookAttacks(int squareIndex, BitBoard occupancy)
     {
         var occ = occupancy & _rookOccupancyMasks[squareIndex];
@@ -109,9 +106,7 @@ public static class Attacks
     /// Get Queen attacks assuming current board occupancy
     /// Use <see cref="QueenAttacks(BitBoard, BitBoard)"/> if rook and bishop attacks are already calculated
     /// </summary>
-    /// <param name="squareIndex"></param>
     /// <param name="occupancy">Occupancy of <see cref="Side.Both"/></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static BitBoard QueenAttacks(int squareIndex, BitBoard occupancy)
     {
@@ -123,14 +118,8 @@ public static class Attacks
     /// <summary>
     /// Get Queen attacks having rook and bishop attacks pre-calculated
     /// </summary>
-    /// <param name="rookAttacks"></param>
-    /// <param name="bishopAttacks"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static BitBoard QueenAttacks(BitBoard rookAttacks, BitBoard bishopAttacks)
-    {
-        return rookAttacks | bishopAttacks;
-    }
+    public static BitBoard QueenAttacks(BitBoard rookAttacks, BitBoard bishopAttacks) => rookAttacks | bishopAttacks;
 
     /// <summary>
     /// Taken from Leorik (https://github.com/lithander/Leorik/blob/master/Leorik.Core/Slider/Pext.cs)

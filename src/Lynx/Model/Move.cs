@@ -75,10 +75,6 @@ public static class MoveExtensions
     /// <summary>
     ///  Override when captured piece (aka side) isn't provided
     /// </summary>
-    /// <param name="sourceSquare"></param>
-    /// <param name="targetSquare"></param>
-    /// <param name="piece"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Move EncodeEnPassant(int sourceSquare, int targetSquare, int piece)
     {
@@ -117,22 +113,6 @@ public static class MoveExtensions
             | (1 << IsCaptureOffset);
     }
 
-    /// <summary>
-    /// Override when captured piece isn't provided
-    /// </summary>
-    /// <param name="sourceSquare"></param>
-    /// <param name="targetSquare"></param>
-    /// <param name="piece"></param>
-    /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Move EncodeCapture(int sourceSquare, int targetSquare, int piece)
-    {
-        return (sourceSquare << SourceSquareOffset)
-            | (targetSquare << TargetSquareOffset)
-            | (piece << PieceOffset)
-            | (1 << IsCaptureOffset);
-    }
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Move EncodePromotion(int sourceSquare, int targetSquare, int piece, int promotedPiece)
     {
@@ -153,36 +133,14 @@ public static class MoveExtensions
             | (1 << IsCaptureOffset);
     }
 
-    /// <summary>
-    /// Override when captured piece isn't provided
-    /// </summary>
-    /// <param name="sourceSquare"></param>
-    /// <param name="targetSquare"></param>
-    /// <param name="piece"></param>
-    /// <param name="promotedPiece"></param>
-    /// <returns></returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Move EncodePromotionWithCapture(int sourceSquare, int targetSquare, int piece, int promotedPiece)
-    {
-        return promotedPiece
-            | (sourceSquare << SourceSquareOffset)
-            | (targetSquare << TargetSquareOffset)
-            | (piece << PieceOffset)
-            | (1 << IsCaptureOffset);
-    }
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Move EncodeCapturedPiece(int move, int capturedPiece) => move | (capturedPiece << 20);
 
     /// <summary>
     /// Returns the move from <paramref name="moveList"/> indicated by <paramref name="UCIString"/>
     /// </summary>
-    /// <param name="UCIString"></param>
-    /// <param name="moveList"></param>
-    /// <param name="move"></param>
     /// <exception cref="InvalidOperationException"></exception>
     /// <exception cref="IndexOutOfRangeException"></exception>
-    /// <returns></returns>
     [Obsolete("Just intended for testing purposes")]
     public static bool TryParseFromUCIString(ReadOnlySpan<char> UCIString, Move[] moveList, [NotNullWhen(true)] out Move? move)
     {
@@ -216,7 +174,7 @@ public static class MoveExtensions
                 var actualPromotedPiece = m.PromotedPiece();
 
                 return actualPromotedPiece == promotedPiece
-                || actualPromotedPiece == promotedPiece - 6;
+                    || actualPromotedPiece == promotedPiece - 6;
             }
 
             move = candidateMoves.FirstOrDefault(predicate);
@@ -237,12 +195,8 @@ public static class MoveExtensions
     /// <summary>
     /// Returns the move from <paramref name="moveList"/> indicated by <paramref name="UCIString"/>
     /// </summary>
-    /// <param name="UCIString"></param>
-    /// <param name="moveList"></param>
-    /// <param name="move"></param>
     /// <exception cref="InvalidOperationException"></exception>
     /// <exception cref="IndexOutOfRangeException"></exception>
-    /// <returns></returns>
     public static bool TryParseFromUCIString(ReadOnlySpan<char> UCIString, ReadOnlySpan<Move> moveList, [NotNullWhen(true)] out Move? move)
     {
         Utils.Assert(UCIString.Length == 4 || UCIString.Length == 5);
@@ -356,8 +310,6 @@ public static class MoveExtensions
     /// EPD representation of a valid move in a position
     /// </summary>
     /// <param name="move">A valid move for the given position</param>
-    /// <param name="position"></param>
-    /// <returns></returns>
     public static string ToEPDString(this Move move, Position position)
     {
         var piece = move.Piece();
@@ -381,9 +333,11 @@ public static class MoveExtensions
 #pragma warning restore S3358 // Ternary operators should not be nested
     }
 
+    [SkipLocalsInit]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string UCIString(this Move move)
     {
+        // TODO memoize them with dict or even array?
         Span<char> span = stackalloc char[5];
 
         var source = Constants.CoordinatesCharArray[move.SourceSquare()];
@@ -405,13 +359,30 @@ public static class MoveExtensions
         return span[..^1].ToString();
     }
 
+    private static readonly Dictionary<int, string> _uCIStringCache = new(4096);
+
+    /// <summary>
+    /// NOT thread-safe
+    /// </summary>
+    [SkipLocalsInit]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static string UCIStringMemoized(this Move move)
+    {
+        if (_uCIStringCache.TryGetValue(move, out var uciString))
+        {
+            return uciString;
+        }
+
+        var str = move.UCIString();
+        _uCIStringCache[move] = str;
+
+        return str;
+    }
+
     /// <summary>
     /// First file letter, then rank number and finally the whole square.
     /// At least according to https://chess.stackexchange.com/a/1819
     /// </summary>
-    /// <param name="move"></param>
-    /// <param name="position"></param>
-    /// <returns></returns>
     private static string DisambiguateMove(Move move, Position position)
     {
         var piece = move.Piece();

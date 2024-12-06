@@ -424,7 +424,6 @@ file static class LocalZobristTable
             (byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BQ => WK_Hash ^ WQ_Hash ^ BQ_Hash,    // KQ   | q
             (byte)CastlingRights.WQ | (byte)CastlingRights.BK | (byte)CastlingRights.BQ => WQ_Hash ^ BK_Hash ^ BQ_Hash,    // Q    | kq
 
-
             _ => new()
         };
     }
@@ -463,7 +462,6 @@ file static class LocalZobristTable
     /// <summary>
     /// Initializes Zobrist table (long[64, 12])
     /// </summary>
-    /// <returns></returns>
     private static long[,] Initialize()
     {
         var zobristTable = new long[64, 12];

@@ -75,13 +75,12 @@
  */
 
 using BenchmarkDotNet.Attributes;
-using Lynx.Model;
 
 namespace Lynx.Benchmark;
 
 public class CheckmateDetectionLimits_Benchmark : BaseBenchmark
 {
-    public static IEnumerable<int> Data => new[] { 1, 10, 1_000, 10_000, 100_000 };
+    public static IEnumerable<int> Data => [1, 10, 1_000, 10_000, 100_000];
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]

@@ -51,14 +51,14 @@ namespace Lynx.Benchmark;
 
 public class MoveGeneratorParallel_Benchmark : BaseBenchmark
 {
-    public static IEnumerable<string> Data => new[]
-    {
-            Constants.InitialPositionFEN,
-            Constants.TrickyTestPositionFEN,
-            Constants.TrickyTestPositionReversedFEN,
-            Constants.CmkTestPositionFEN,
-            Constants.KillerTestPositionFEN
-        };
+    public static IEnumerable<string> Data =>
+    [
+        Constants.InitialPositionFEN,
+        Constants.TrickyTestPositionFEN,
+        Constants.TrickyTestPositionReversedFEN,
+        Constants.CmkTestPositionFEN,
+        Constants.KillerTestPositionFEN
+    ];
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]
@@ -105,8 +105,6 @@ public class MoveGeneratorParallel_Benchmark : BaseBenchmark
 file static class CustomMoveGenerator
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-
-    private const int TRUE = 1;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IOrderedEnumerable<Move> GenerateAllMoves_SingleThread(Position position, int[,]? killerMoves = null, int? plies = null, bool capturesOnly = false)
@@ -273,7 +271,7 @@ file static class CustomMoveGenerator
                 }
                 else
                 {
-                    yield return MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece);
+                    yield return MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, position.Board[targetSquare]);
                 }
             }
         }
@@ -477,9 +475,7 @@ file static class LocalAttacks
     /// <summary>
     /// Get Bishop LocalAttacks assuming current board occupancy
     /// </summary>
-    /// <param name="squareIndex"></param>
     /// <param name="occupancy">Occupancy of <see cref="Side.Both"/></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static BitBoard MagicNumbersBishopLocalAttacks(int squareIndex, BitBoard occupancy)
     {
@@ -493,9 +489,7 @@ file static class LocalAttacks
     /// <summary>
     /// Get Rook LocalAttacks assuming current board occupancy
     /// </summary>
-    /// <param name="squareIndex"></param>
     /// <param name="occupancy">Occupancy of <see cref="Side.Both"/></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static BitBoard RookLocalAttacks(int squareIndex, BitBoard occupancy)
     {
@@ -517,9 +511,7 @@ file static class LocalAttacks
     /// Get Queen LocalAttacks assuming current board occupancy
     /// Use <see cref="QueenLocalAttacks(BitBoard, BitBoard)"/> if rook and bishop LocalAttacks are already calculated
     /// </summary>
-    /// <param name="squareIndex"></param>
     /// <param name="occupancy">Occupancy of <see cref="Side.Both"/></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static BitBoard QueenLocalAttacks(int squareIndex, BitBoard occupancy)
     {
@@ -531,9 +523,6 @@ file static class LocalAttacks
     /// <summary>
     /// Get Queen LocalAttacks having rook and bishop LocalAttacks pre-calculated
     /// </summary>
-    /// <param name="rookLocalAttacks"></param>
-    /// <param name="bishopLocalAttacks"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static BitBoard QueenLocalAttacks(BitBoard rookLocalAttacks, BitBoard bishopLocalAttacks)
     {

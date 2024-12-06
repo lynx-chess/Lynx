@@ -41,12 +41,11 @@ public static class ResetLS1BImplementations
 
 public class ResetLS1B_Benchmark : BaseBenchmark
 {
-    public static IEnumerable<int> Data => new[] { 1, 10, 1_000, 10_000, 100_000 };
+    public static IEnumerable<int> Data => [1, 10, 1_000, 10_000, 100_000];
 
     /// <summary>
     /// Same perf.
     /// </summary>
-    /// <param name="iterations"></param>
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]
     public int GetAndReset(int iterations)
@@ -76,7 +75,6 @@ public class ResetLS1B_Benchmark : BaseBenchmark
     /// <summary>
     /// Same perf.
     /// </summary>
-    /// <param name="iterations"></param>
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
     public int GetAndPop(int iterations)

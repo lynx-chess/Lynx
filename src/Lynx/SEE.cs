@@ -10,7 +10,7 @@ public static class SEE
 {
     #pragma warning disable IDE0055 // Discard formatting in this region
 
-    private static readonly int[] _pieceValues =
+    private static ReadOnlySpan<int> _pieceValues =>
     [
         100, 450, 450, 650, 1250, 0,
         100, 450, 450, 650, 1250, 0,
@@ -22,10 +22,6 @@ public static class SEE
     /// <summary>
     /// Doesn't handle non-captures, promotions and en-passants
     /// </summary>
-    /// <param name="position"></param>
-    /// <param name="move"></param>
-    /// <param name="threshold"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsGoodCapture(Position position, Move move, int threshold = 0)
     {
@@ -113,10 +109,6 @@ public static class SEE
     /// <summary>
     /// Handles all kinds of moves
     /// </summary>
-    /// <param name="position"></param>
-    /// <param name="move"></param>
-    /// <param name="threshold"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool HasPositiveScore(Position position, Move move, int threshold = 0)
     {
@@ -214,19 +206,16 @@ public static class SEE
 
         var promotedPiece = move.PromotedPiece();
 
+#pragma warning disable S3358 // Ternary operators should not be nested
         return promotedPiece == default
             ? _pieceValues[move.CapturedPiece()]
             : _pieceValues[promotedPiece] - _pieceValues[(int)Piece.P] + (move.IsCapture() ? _pieceValues[move.CapturedPiece()] : 0);
+#pragma warning restore S3358 // Ternary operators should not be nested
     }
 
     /// <summary>
     /// Returns only <see cref="Side.White"/> pieces
     /// </summary>
-    /// <param name="position"></param>
-    /// <param name="occupancy"></param>
-    /// <param name="attackers"></param>
-    /// <param name="color"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int PopLeastValuableAttacker(Position position, ref BitBoard occupancy, BitBoard attackers, int color)
     {

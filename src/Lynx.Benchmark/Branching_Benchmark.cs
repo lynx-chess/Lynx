@@ -56,7 +56,7 @@ namespace Lynx.Benchmark;
 [SimpleJob]
 public class Branching_Benchmark : BaseBenchmark
 {
-    public static IEnumerable<int> Data => new[] { 1, 10, 1_000, 10_000, 100_000 };
+    public static IEnumerable<int> Data => [1, 10, 1_000, 10_000, 100_000];
 
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
@@ -81,7 +81,6 @@ public class Branching_Benchmark : BaseBenchmark
     /// <summary>
     /// Seems the best alternative
     /// </summary>
-    /// <param name="iterations"></param>
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
     public void IfReturnBranchOpt(int iterations)

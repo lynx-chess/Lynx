@@ -70,15 +70,12 @@ file readonly struct Position
     /// <summary>
     /// 'Pasing FEN' Clone constructor
     /// </summary>
-    /// <param name="position"></param>
     public Position(Position position) : this(position.FEN)
     { }
 
     /// <summary>
     /// 'Manual' Clone constructor
     /// </summary>
-    /// <param name="position"></param>
-    /// <param name="_"></param>
     public Position(Position position, int _)
     {
         FEN = position.FEN;
@@ -94,8 +91,6 @@ file readonly struct Position
     /// <summary>
     /// 'Manual' Clone constructor using Array.Copy
     /// </summary>
-    /// <param name="position"></param>
-    /// <param name="_"></param>
     public Position(Position position, string _)
     {
         FEN = position.FEN;
@@ -114,14 +109,15 @@ file readonly struct Position
 
 public class PositionClone_Benchmark : BaseBenchmark
 {
-    public static IEnumerable<string> Data => new[] {
+    public static IEnumerable<string> Data =>
+        [
             Constants.EmptyBoardFEN,
             Constants.InitialPositionFEN,
             Constants.TrickyTestPositionFEN,
             "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1",
             "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1",
             "r2q1rk1/ppp2ppp/2n1bn2/2b1p3/3pP3/3P1NPP/PPP1NPB1/R1BQ1RK1 b - - 0 9 "
-        };
+        ];
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]
@@ -134,7 +130,6 @@ public class PositionClone_Benchmark : BaseBenchmark
     /// <summary>
     /// ~2x faster and 0.5 less memory allocated
     /// </summary>
-    /// <param name="fen"></param>
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
     public void ManualClone(string fen)
@@ -146,7 +141,6 @@ public class PositionClone_Benchmark : BaseBenchmark
     /// <summary>
     /// ~2x faster and 0.5 less memory allocated
     /// </summary>
-    /// <param name="fen"></param>
     [Benchmark]
     [ArgumentsSource(nameof(Data))]
     public void ManualClone_ArrayCopy(string fen)

@@ -7,6 +7,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Channels;
+using static Lynx.EvaluationConstants;
+using static Lynx.TunableEvalParameters;
 
 //_2_GettingStarted();
 //_3_PawnAttacks();
@@ -47,10 +49,11 @@ using System.Threading.Channels;
 //FileAndRankMasks();
 //EnhancedPawnEvaluation();
 //RookEvaluation();
-//TranspositionTable();
+//TranspositionTableMethod();
 //UnmakeMove();
 //PieceSquareTables();
-NewMasks();
+//NewMasks();
+DarkLightSquares();
 
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
 const string TrickyPosition = Constants.TrickyTestPositionFEN;
@@ -246,7 +249,9 @@ static void _13_GeneratingMagicNumbersCandidates()
 
 static void _14_GeneratingMagicNumbersByBruteForce()
 {
+    var sw = Stopwatch.StartNew();
     MagicNumberGenerator.InitializeMagicNumbers();
+    Console.WriteLine($"Time: {sw.ElapsedMilliseconds}ms");
 
     // Should generate something similar to Constants.RookMagicNumbers
 }
@@ -556,21 +561,14 @@ static void _42_Perft()
 
     for (int depth = 0; depth < 7; ++depth)
     {
-        var sw = new Stopwatch();
-        sw.Start();
-        var result = Perft.Results(pos, depth);
-        sw.Stop();
-
-        Perft.PrintPerftResult(depth, result, Console.WriteLine);
+        Perft.RunPerft(pos, depth, Console.WriteLine);
     }
 }
 
 static void _43_Divide()
 {
-    var result = Perft.Divide(new Position(Constants.InitialPositionFEN), 5, Console.WriteLine);
-    Perft.PrintPerftResult(5, result, Console.WriteLine);
-    result = Perft.Divide(new Position(TrickyPosition), 5, Console.WriteLine);
-    Perft.PrintPerftResult(5, result, Console.WriteLine);
+    Perft.RunDivide(new Position(Constants.InitialPositionFEN), 5, Console.WriteLine);
+    Perft.RunDivide(new Position(TrickyPosition), 5, Console.WriteLine);
 }
 
 static void _44_ParseUCI()
@@ -676,7 +674,7 @@ static void _53_MVVLVA()
     {
         for (int victim = (int)Piece.p; victim <= (int)Piece.k; ++victim)
         {
-            var score = EvaluationConstants.MostValueableVictimLeastValuableAttacker[attacker][victim];
+            var score = MostValueableVictimLeastValuableAttacker[attacker][victim];
             Console.WriteLine($"Score {(Piece)attacker}x{(Piece)victim}: {score}");
         }
         Console.WriteLine();
@@ -686,7 +684,7 @@ static void _53_MVVLVA()
     {
         for (int victim = (int)Piece.P; victim <= (int)Piece.K; ++victim)
         {
-            var score = EvaluationConstants.MostValueableVictimLeastValuableAttacker[attacker][victim];
+            var score = MostValueableVictimLeastValuableAttacker[attacker][victim];
             Console.WriteLine($"Score {(Piece)attacker}x{(Piece)victim}: {score}");
         }
         Console.WriteLine();
@@ -698,7 +696,7 @@ static void _54_ScoreMove()
     var position = new Position(KillerPosition);
     position.Print();
 
-    var engine = new Engine(Channel.CreateBounded<string>(new BoundedChannelOptions(100) { SingleReader = true, SingleWriter = false }));
+    var engine = new Engine(Channel.CreateBounded<object>(new BoundedChannelOptions(100) { SingleReader = true, SingleWriter = false }));
     engine.SetGame(new(position.FEN()));
     foreach (var move in MoveGenerator.GenerateAllMoves(position, capturesOnly: true))
     {
@@ -1040,21 +1038,21 @@ static void RookEvaluation()
     Console.WriteLine(eval);
 }
 
-static void TranspositionTable()
+static void TranspositionTableMethod()
 {
     static void TesSize(int size)
     {
         Console.WriteLine("Hash: {0} MB", size);
-        var (length, mask) = TranspositionTableExtensions.CalculateLength(size);
+        var length = TranspositionTable.CalculateLength(size);
 
         var lengthMb = length / 1024 / 1024;
 
-        Console.WriteLine("TT memory: {0} MB", lengthMb * Marshal.SizeOf(typeof(TranspositionTableElement)));
+        Console.WriteLine("TT memory: {0} MB", lengthMb * Marshal.SizeOf<TranspositionTableElement>());
         Console.WriteLine("TT array length: {0}MB, (0x{1}, {2} items)", lengthMb, length.ToString("X"), length);
-        Console.WriteLine("TT mask: 0x{0} ({1})\n", mask.ToString("X"), Convert.ToString(mask, 2));
+        Console.WriteLine("TT mask: 0x{0} ({1})\n", (length - 1).ToString("X"), Convert.ToString(length - 1, 2));
     }
 
-    Console.WriteLine($"{nameof(TranspositionTableElement)} size: {Marshal.SizeOf(typeof(TranspositionTableElement))} bytes\n");
+    Console.WriteLine($"{nameof(TranspositionTableElement)} size: {Marshal.SizeOf<TranspositionTableElement>()} bytes\n");
 
     TesSize(2);
     TesSize(4);
@@ -1066,8 +1064,9 @@ static void TranspositionTable()
     TesSize(512);
     TesSize(1024);
 
-    var (mask, length) = TranspositionTableExtensions.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
-    var transpositionTable = new TranspositionTableElement[length];
+    var ttLength = TranspositionTable.CalculateLength(Configuration.EngineSettings.TranspositionTableSize);
+    var transpositionTable = new TranspositionTable();
+
     var position = new Position(Constants.InitialPositionFEN);
     position.Print();
     Console.WriteLine($"Hash: {position.UniqueIdentifier}");
@@ -1075,35 +1074,35 @@ static void TranspositionTable()
     var hashKey = position.UniqueIdentifier % 0x400000;
     Console.WriteLine(hashKey);
 
-    var hashKey2 = position.UniqueIdentifier & mask;
+    var hashKey2 = transpositionTable.CalculateTTIndex(position.UniqueIdentifier);
     Console.WriteLine(hashKey2);
 
-    transpositionTable.ClearTranspositionTable();
+    transpositionTable.Clear();
 
     //transpositionTable.RecordHash(position, depth: 3, maxDepth: 5, move: 1234, eval: +5, nodeType: NodeType.Alpha);
     //var entry = transpositionTable.ProbeHash(position, maxDepth: 5, depth: 3, alpha: 1, beta: 2);
 
-    transpositionTable.RecordHash(mask, position, depth: 5, ply: 3, eval: +19, nodeType: NodeType.Alpha, move: 1234);
-    var entry = transpositionTable.ProbeHash(mask, position, depth: 5, ply: 3, alpha: 20, beta: 30);
+    transpositionTable.RecordHash(position, position.StaticEvaluation().Score, depth: 5, ply: 3, score: +19, nodeType: NodeType.Alpha, move: 1234);
+    var entry = transpositionTable.ProbeHash(position, depth: 5, ply: 3, alpha: 20, beta: 30);
     Console.WriteLine(entry); // Expected 20
 
-    transpositionTable.RecordHash(mask, position, depth: 5, ply: 3, eval: +21, nodeType: NodeType.Alpha, move: 1234);
-    entry = transpositionTable.ProbeHash(mask, position, depth: 5, ply: 3, alpha: 20, beta: 30);
+    transpositionTable.RecordHash(position, position.StaticEvaluation().Score, depth: 5, ply: 3, score: +21, nodeType: NodeType.Alpha, move: 1234);
+    entry = transpositionTable.ProbeHash(position, depth: 5, ply: 3, alpha: 20, beta: 30);
     Console.WriteLine(entry); // Expected 12_345_678
 
-    transpositionTable.RecordHash(mask, position, depth: 5, ply: 3, eval: +29, nodeType: NodeType.Beta, move: 1234);
-    entry = transpositionTable.ProbeHash(mask, position, depth: 5, ply: 3, alpha: 20, beta: 30);
+    transpositionTable.RecordHash(position, position.StaticEvaluation().Score, depth: 5, ply: 3, score: +29, nodeType: NodeType.Beta, move: 1234);
+    entry = transpositionTable.ProbeHash(position, depth: 5, ply: 3, alpha: 20, beta: 30);
     Console.WriteLine(entry); // Expected 12_345_678
 
-    transpositionTable.RecordHash(mask, position, depth: 5, ply: 3, eval: +31, nodeType: NodeType.Beta, move: 1234);
-    entry = transpositionTable.ProbeHash(mask, position, depth: 5, ply: 3, alpha: 20, beta: 30);
+    transpositionTable.RecordHash(position, position.StaticEvaluation().Score, depth: 5, ply: 3, score: +31, nodeType: NodeType.Beta, move: 1234);
+    entry = transpositionTable.ProbeHash(position, depth: 5, ply: 3, alpha: 20, beta: 30);
     Console.WriteLine(entry); // Expected 30
 }
 
 static void UnmakeMove()
 {
     var pos = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq");
-    var a = Perft.ResultsImpl(pos, 1, default);
+    var a = Perft.PerftRecursiveImpl(pos, 1, default);
 
     TestMoveGen(Constants.InitialPositionFEN);
     TestMoveGen(Constants.TTPositionFEN);
@@ -1124,7 +1123,8 @@ static void UnmakeMove()
             var epdMoveString = move.ToEPDString(position);
             Console.WriteLine($"Trying {epdMoveString} in\t{position.FEN()}");
 
-            var newPosition = new Position(position, move);
+            var newPosition = new Position(position);
+            newPosition.MakeMove(move);
             var savedState = position.MakeMove(move);
 
             Console.WriteLine($"Position\t{newPosition.FEN()}, Zobrist key {newPosition.UniqueIdentifier}");
@@ -1139,7 +1139,7 @@ static void UnmakeMove()
             if (oldZobristKey != position.UniqueIdentifier)
             {
                 Console.WriteLine($"{oldZobristKey} != {position.UniqueIdentifier}");
-                throw new();
+                throw new DirectoryNotFoundException();
             }
 
             Console.WriteLine("----------------------------------------------------------------------------");
@@ -1151,13 +1151,13 @@ static void UnmakeMove()
 
 static void PieceSquareTables()
 {
-    short[] middleGamePawnTableBlack = EvaluationConstants.MiddleGamePawnTable.Select((_, index) => (short)-EvaluationConstants.MiddleGamePawnTable[index ^ 56]).ToArray();
-    short[] endGamePawnTableBlack = EvaluationConstants.EndGamePawnTable.Select((_, index) => (short)-EvaluationConstants.EndGamePawnTable[index ^ 56]).ToArray();
+    short[] middleGamePawnTableBlack = MiddleGamePawnTable.Select((_, index) => (short)-MiddleGamePawnTable[0][index ^ 56]).ToArray();
+    short[] endGamePawnTableBlack = EndGamePawnTable.Select((_, index) => (short)-EndGamePawnTable[0][index ^ 56]).ToArray();
 
-    PrintBitBoard(EvaluationConstants.MiddleGamePawnTable);
+    PrintBitBoard(MiddleGamePawnTable);
     PrintBitBoard(middleGamePawnTableBlack);
 
-    PrintBitBoard(EvaluationConstants.EndGamePawnTable);
+    PrintBitBoard(EndGamePawnTable);
     PrintBitBoard(endGamePawnTableBlack);
 
     static void PrintBitBoard<T>(T[] bitboard)
@@ -1217,4 +1217,15 @@ static void PrintBitBoardArray(ulong[] bb)
     }
 
     Console.WriteLine();
+}
+
+static void DarkLightSquares()
+{
+    Constants.DarkSquaresBitBoard.Print();
+    Constants.LightSquaresBitBoard.Print();
+
+    for (int i = 0; i < 64; ++i)
+    {
+        Debug.Assert(Constants.DarkSquaresBitBoard.GetBit(i) ^ Constants.LightSquaresBitBoard.GetBit(i));
+    }
 }

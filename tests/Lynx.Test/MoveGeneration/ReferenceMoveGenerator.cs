@@ -28,10 +28,6 @@ public static class ReferenceMoveGenerator
     /// <summary>
     /// Sames as <see cref="GeneratePawnMoves(Position, int, bool)"/> but returning them
     /// </summary>
-    /// <param name="position"></param>
-    /// <param name="offset"></param>
-    /// <param name="capturesOnly"></param>
-    /// <returns></returns>
     internal static IEnumerable<Move> GeneratePawnMovesForReference(Position position, int offset, bool capturesOnly = false)
     {
         int sourceSquare, targetSquare;
@@ -156,9 +152,6 @@ public static class ReferenceMoveGenerator
     /// Same as <see cref="GeneratePieceMoves(int, Position, bool)"/> but returning them
     /// </summary>
     /// <param name="piece"><see cref="Piece"/></param>
-    /// <param name="position"></param>
-    /// <param name="capturesOnly"></param>
-    /// <returns></returns>
     private static IEnumerable<Move> GeneratePieceMovesForReference(int piece, Position position, int offset, bool capturesOnly = false)
     {
         var bitboard = position.PieceBitBoards[piece];

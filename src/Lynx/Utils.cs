@@ -13,7 +13,6 @@ public static class Utils
     /// Side.White -> 0
     /// Side.Black -> 6
     /// </summary>
-    /// <param name="side"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int PieceOffset(Side side) => PieceOffset((int)side);
 
@@ -21,7 +20,6 @@ public static class Utils
     /// Side.White -> 0
     /// Side.Black -> 6
     /// </summary>
-    /// <param name="side"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int PieceOffset(int side)
     {
@@ -34,19 +32,13 @@ public static class Utils
     /// Side.White -> 0
     /// Side.Black -> 6
     /// </summary>
-    /// <param name="isWhite"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int PieceOffset(bool isWhite)
-    {
-        return 6 - (6 * Unsafe.As<bool, byte>(ref isWhite));
-    }
+    public static int PieceOffset(bool isWhite) => isWhite ? 0 : 6;
 
     /// <summary>
     /// Side.Black -> Side.White
     /// Side.White -> Side.Black
     /// </summary>
-    /// <param name="side"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int OppositeSide(Side side) => OppositeSide((int)side);
 
@@ -54,8 +46,6 @@ public static class Utils
     /// Side.Black -> Side.White
     /// Side.White -> Side.Black
     /// </summary>
-    /// <param name="side"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int OppositeSide(int side)
     {
@@ -132,8 +122,6 @@ public static class Utils
     /// Updates <paramref name="halfMovesWithoutCaptureOrPawnMove"/>.
     /// See also <see cref="Game.Update50movesRule(int, bool)"/>
     /// </summary>
-    /// <param name="moveToPlay"></param>
-    /// <param name="halfMovesWithoutCaptureOrPawnMove"></param>
     /// <remarks>
     /// Checking halfMovesWithoutCaptureOrPawnMove >= 100 since a capture/pawn move doesn't necessarily 'clear' the variable.
     /// i.e. while the engine is searching:
@@ -161,31 +149,45 @@ public static class Utils
     }
 
     /// <summary>
-    /// Providing there's a checkmate detected in <paramref name="bestEvaluation"/>, returns in how many moves
+    /// Providing there's a checkmate detected in <paramref name="score"/>, returns in how many moves
     /// </summary>
-    /// <param name="bestEvaluation"></param>
-    /// <param name="bestEvaluationAbs"></param>
     /// <returns>Positive value if white is checkmating, negative value if black is</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int CalculateMateInX(int bestEvaluation, int bestEvaluationAbs)
+    public static int CalculateMateInX(int score, int bestScoreAbs)
     {
-        int mate = (int)Math.Ceiling(0.5 * ((EvaluationConstants.CheckMateBaseEvaluation - bestEvaluationAbs) / EvaluationConstants.CheckmateDepthFactor));
+        int mate = (int)Math.Ceiling(0.5 * ((EvaluationConstants.CheckMateBaseEvaluation - bestScoreAbs) / EvaluationConstants.CheckmateDepthFactor));
 
-        return (int)Math.CopySign(mate, bestEvaluation);
+        return (int)Math.CopySign(mate, score);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static long CalculateNps(long nodes, long elapsedMilliseconds)
+    public static ulong CalculateNps(ulong nodes, double elapsedSeconds)
     {
-        return Convert.ToInt64(Math.Clamp(nodes / ((0.001 * elapsedMilliseconds) + 1), 0, long.MaxValue));
+        return Convert.ToUInt64(Math.Clamp(nodes / elapsedSeconds, 1, ulong.MaxValue));
+    }
+
+    /// <summary>
+    /// Calculates elapsed time with sub-ms precision.
+    /// We care when reporting nps for low depths, but more importantly to avoid the risk of dividing by zero.
+    /// http://geekswithblogs.net/BlackRabbitCoder/archive/2012/01/12/c.net-little-pitfalls-stopwatch-ticks-are-not-timespan-ticks.aspx
+    /// </summary>
+    /// <returns>Elapsed time in seconds</returns>
+    public static double CalculateElapsedSeconds(Stopwatch stopwatch)
+    {
+        return stopwatch.ElapsedTicks / (double)Stopwatch.Frequency;
+    }
+
+    /// <summary>
+    /// Transforms the high precision elapsed time in seconds into the time format UCI expects: ms
+    /// </summary>
+    public static ulong CalculateUCITime(double elapsedSeconds)
+    {
+        return Math.Clamp(Convert.ToUInt64(elapsedSeconds * 1_000), 1, ulong.MaxValue);
     }
 
     /// <summary>
     /// https://minuskelvin.net/chesswiki/content/packed-eval.html
     /// </summary>
-    /// <param name="mg"></param>
-    /// <param name="eg"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int Pack(short mg, short eg)
     {
@@ -195,8 +197,6 @@ public static class Utils
     /// <summary>
     /// https://minuskelvin.net/chesswiki/content/packed-eval.html
     /// </summary>
-    /// <param name="packed"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static short UnpackMG(int packed)
     {
@@ -206,8 +206,6 @@ public static class Utils
     /// <summary>
     /// https://minuskelvin.net/chesswiki/content/packed-eval.html
     /// </summary>
-    /// <param name="packed"></param>
-    /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static short UnpackEG(int packed)
     {

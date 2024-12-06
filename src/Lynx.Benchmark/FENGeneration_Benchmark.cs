@@ -201,7 +201,6 @@
 
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
-using NLog;
 using System.Text;
 
 namespace Lynx.Benchmark;
@@ -327,14 +326,15 @@ public class FENGeneration_Benchmark : BaseBenchmark
         return newPosition.FEN;
     }
 
-    public static IEnumerable<string> Data => new[] {
+    public static IEnumerable<string> Data =>
+        [
             //Constants.EmptyBoardFEN,
             Constants.InitialPositionFEN,
             Constants.TrickyTestPositionFEN,
             "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1",
             "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1",
             "r2q1rk1/ppp2ppp/2n1bn2/2b1p3/3pP3/3P1NPP/PPP1NPB1/R1BQ1RK1 b - - 0 1"
-        };
+        ];
 }
 
 internal struct StructCustomPosition
@@ -379,7 +379,6 @@ internal struct StructCustomPosition
     /// <summary>
     /// Clone constructor
     /// </summary>
-    /// <param name="position"></param>
     public StructCustomPosition(StructCustomPosition position)
     {
         _fen = position.FEN;
@@ -492,9 +491,6 @@ internal struct StructCustomPosition
     /// <summary>
     /// https://arxiv.org/ftp/arxiv/papers/2009/2009.03193.pdf
     /// </summary>
-    /// <param name="position"></param>
-    /// <param name="move"></param>
-    /// <param name="calculateFen"></param>
     public StructCustomPosition(StructCustomPosition position, Move move, bool calculateFen) : this(position)
 
     {
@@ -724,7 +720,6 @@ internal readonly struct ReadonlyStructCustomPosition
     /// <summary>
     /// Clone constructor
     /// </summary>
-    /// <param name="position"></param>
     public ReadonlyStructCustomPosition(ReadonlyStructCustomPosition position)
     {
         FEN = position.FEN;
@@ -838,9 +833,6 @@ internal readonly struct ReadonlyStructCustomPosition
     /// <summary>
     /// https://arxiv.org/ftp/arxiv/papers/2009/2009.03193.pdf
     /// </summary>
-    /// <param name="position"></param>
-    /// <param name="move"></param>
-    /// <param name="calculateFen"></param>
     public ReadonlyStructCustomPosition(ReadonlyStructCustomPosition position, Move move, bool calculateFen) : this(position)
     {
         var oldSide = Side;
@@ -1075,7 +1067,6 @@ internal class ClassCustomPosition
     /// <summary>
     /// Clone constructor
     /// </summary>
-    /// <param name="position"></param>
     public ClassCustomPosition(ClassCustomPosition position)
     {
         _fen = position.FEN;
@@ -1188,9 +1179,6 @@ internal class ClassCustomPosition
     /// <summary>
     /// https://arxiv.org/ftp/arxiv/papers/2009/2009.03193.pdf
     /// </summary>
-    /// <param name="position"></param>
-    /// <param name="move"></param>
-    /// <param name="calculateFen"></param>
     public ClassCustomPosition(ClassCustomPosition position, Move move, bool calculateFen) : this(position)
     {
         var oldSide = Side;
@@ -1425,7 +1413,6 @@ internal record class RecordClassCustomPosition
     /// <summary>
     /// Clone constructor
     /// </summary>
-    /// <param name="position"></param>
     public RecordClassCustomPosition(RecordClassCustomPosition position)
     {
         _fen = position.FEN;
@@ -1538,9 +1525,6 @@ internal record class RecordClassCustomPosition
     /// <summary>
     /// https://arxiv.org/ftp/arxiv/papers/2009/2009.03193.pdf
     /// </summary>
-    /// <param name="position"></param>
-    /// <param name="move"></param>
-    /// <param name="calculateFen"></param>
     public RecordClassCustomPosition(RecordClassCustomPosition position, Move move, bool calculateFen) : this(position)
     {
         var oldSide = Side;
@@ -1775,7 +1759,6 @@ internal record struct RecordStructCustomPosition
     /// <summary>
     /// Clone constructor
     /// </summary>
-    /// <param name="position"></param>
     public RecordStructCustomPosition(RecordStructCustomPosition position)
     {
         _fen = position.FEN;
@@ -1888,9 +1871,6 @@ internal record struct RecordStructCustomPosition
     /// <summary>
     /// https://arxiv.org/ftp/arxiv/papers/2009/2009.03193.pdf
     /// </summary>
-    /// <param name="position"></param>
-    /// <param name="move"></param>
-    /// <param name="calculateFen"></param>
     public RecordStructCustomPosition(RecordStructCustomPosition position, Move move, bool calculateFen) : this(position)
     {
         var oldSide = Side;
@@ -2587,7 +2567,6 @@ internal static class FENHelpers
     /// <param name="side">Update <see cref="Position.Side"/></param>
     /// <param name="castle">Updated <see cref="Position.Castle"/></param>
     /// <param name="enPassant">Updated <see cref="Position.EnPassant"/></param>
-    /// <returns></returns>
     public static string UpdateSecondPartOfFEN(StringBuilder fenSb, Side side, int castle, BoardSquare enPassant)
     {
         fenSb.Append(' ');

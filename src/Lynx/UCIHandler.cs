@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.Runtime.Intrinsics.X86;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Threading;
 using System.Threading.Channels;
 
 namespace Lynx;
@@ -14,17 +13,17 @@ namespace Lynx;
 public sealed class UCIHandler
 {
     private readonly Channel<string> _uciToEngine;
-    private readonly Channel<string> _engineToUci;
+    private readonly Channel<object> _engineToUci;
 
-    private readonly Engine _engine;
+    private readonly Searcher _searcher;
     private readonly Logger _logger;
 
-    public UCIHandler(Channel<string> uciToEngine, Channel<string> engineToUci, Engine engine)
+    public UCIHandler(Channel<string> uciToEngine, Channel<object> engineToUci, Searcher searcher)
     {
         _uciToEngine = uciToEngine;
         _engineToUci = engineToUci;
 
-        _engine = engine;
+        _searcher = searcher;
         _logger = LogManager.GetCurrentClassLogger();
     }
 
@@ -41,7 +40,10 @@ public sealed class UCIHandler
 
         try
         {
-            _logger.Debug("[GUI]\t{0}", rawCommand);
+            if (_logger.IsDebugEnabled)
+            {
+                _logger.Debug("[GUI]\t{0}", rawCommand);
+            }
 
             switch (ExtractCommandItems(rawCommand))
             {
@@ -64,9 +66,6 @@ public sealed class UCIHandler
                 case QuitCommand.Id:
                     HandleQuit();
                     return;
-                case RegisterCommand.Id:
-                    HandleRegister(rawCommand);
-                    break;
                 case SetOptionCommand.Id:
                     HandleSetOption(rawCommand);
                     break;
@@ -80,10 +79,10 @@ public sealed class UCIHandler
                     HandleNewGame();
                     break;
                 case "perft":
-                    await HandlePerft(rawCommand);
+                    HandlePerft(rawCommand);
                     break;
                 case "divide":
-                    await HandleDivide(rawCommand);
+                    HandleDivide(rawCommand);
                     break;
                 case "bench":
                     await HandleBench(rawCommand);
@@ -129,20 +128,20 @@ public sealed class UCIHandler
 
     private void HandlePosition(ReadOnlySpan<char> command)
     {
+#if DEBUG
         var sw = Stopwatch.StartNew();
-#if DEBUG
-        _engine.Game.CurrentPosition.Print();
+        _searcher.PrintCurrentPosition();
 #endif
 
-        _engine.AdjustPosition(command);
-#if DEBUG
-        _engine.Game.CurrentPosition.Print();
-#endif
+        _searcher.AdjustPosition(command);
 
+#if DEBUG
+        _searcher.PrintCurrentPosition();
         _logger.Info("Position parsing took {0}ms", sw.ElapsedMilliseconds);
+#endif
     }
 
-    private void HandleStop() => _engine.StopSearching();
+    private void HandleStop() => _searcher.StopSearching();
 
     private async Task HandleUCI(CancellationToken cancellationToken)
     {
@@ -163,7 +162,7 @@ public sealed class UCIHandler
     {
         if (Configuration.EngineSettings.IsPonder)
         {
-            _engine.PonderHit();
+            _searcher.PonderHit();
         }
         else
         {
@@ -206,7 +205,7 @@ public sealed class UCIHandler
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
-                        Configuration.Hash = Math.Clamp(value, Constants.AbsoluteMinTTSize, Constants.AbsoluteMaxTTSize);
+                        Configuration.Hash = value;
                     }
                     break;
                 }
@@ -267,6 +266,33 @@ public sealed class UCIHandler
                     break;
                 }
 
+            #region Time management
+            case "nodetmbase":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.NodeTmBase = value * 0.01;
+                    }
+                    break;
+                }
+            case "nodetmscale":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.NodeTmScale = value * 0.01;
+                    }
+                    break;
+                }
+            case "scorestabiity_mindepth":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.ScoreStabiity_MinDepth = value;
+                    }
+                    break;
+                }
+            #endregion
+
             #region Search tuning
 
             case "lmr_mindepth":
@@ -277,11 +303,19 @@ public sealed class UCIHandler
                     }
                     break;
                 }
-            case "lmr_minfulldepthsearchedmoves":
+            case "lmr_minfulldepthsearchedmoves_pv":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
-                        Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves = value;
+                        Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_PV = value;
+                    }
+                    break;
+                }
+            case "lmr_minfulldepthsearchedmoves_nonpv":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_NonPV = value;
                     }
                     break;
                 }
@@ -289,7 +323,7 @@ public sealed class UCIHandler
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
-                        Configuration.EngineSettings.LMR_Base = (value * 0.01);
+                        Configuration.EngineSettings.LMR_Base = value * 0.01;
                     }
                     break;
                 }
@@ -297,7 +331,7 @@ public sealed class UCIHandler
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
-                        Configuration.EngineSettings.LMR_Divisor = (value * 0.01);
+                        Configuration.EngineSettings.LMR_Divisor = value * 0.01;
                     }
                     break;
                 }
@@ -334,20 +368,44 @@ public sealed class UCIHandler
                     }
                     break;
                 }
-
-            case "aspirationwindow_delta":
+            case "nmp_staticevalbetadivisor":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
-                        Configuration.EngineSettings.AspirationWindow_Delta = value;
+                        Configuration.EngineSettings.NMP_StaticEvalBetaDivisor = value;
                     }
                     break;
                 }
+            case "nmp_staticevalbetamaxreduction":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.NMP_StaticEvalBetaMaxReduction = value;
+                    }
+                    break;
+                }
+
+            //case "aspirationwindow_delta":
+            //    {
+            //        if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+            //        {
+            //            Configuration.EngineSettings.AspirationWindow_Delta = value;
+            //        }
+            //        break;
+            //    }
             case "aspirationwindow_mindepth":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
                         Configuration.EngineSettings.AspirationWindow_MinDepth = value;
+                    }
+                    break;
+                }
+            case "aspirationwindow_base":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.AspirationWindow_Base = value;
                     }
                     break;
                 }
@@ -427,6 +485,30 @@ public sealed class UCIHandler
                     }
                     break;
                 }
+            case "history_maxmovevalue":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.History_MaxMoveValue = value;
+                    }
+                    break;
+                }
+            case "history_maxmoverawbonus":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.History_MaxMoveRawBonus = value;
+                    }
+                    break;
+                }
+            case "history_bestscorebetamargin":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.History_BestScoreBetaMargin = value;
+                    }
+                    break;
+                }
             case "see_badcapturereduction":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
@@ -459,6 +541,22 @@ public sealed class UCIHandler
                     }
                     break;
                 }
+            case "historyprunning_maxdepth":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.HistoryPrunning_MaxDepth = value;
+                    }
+                    break;
+                }
+            case "historyprunning_margin":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.HistoryPrunning_Margin = value;
+                    }
+                    break;
+                }
 
             #endregion
 
@@ -470,45 +568,34 @@ public sealed class UCIHandler
 
     private void HandleNewGame()
     {
-        if (_engine.AverageDepth > 0 && _engine.AverageDepth < int.MaxValue)
-        {
-            _logger.Info("Average depth: {0}", _engine.AverageDepth);
-        }
-        _engine.NewGame();
+        _searcher.NewGame();
     }
 
     private static void HandleDebug(ReadOnlySpan<char> command) => Configuration.IsDebug = DebugCommand.Parse(command);
 
     private void HandleQuit()
     {
-        if (_engine.AverageDepth > 0 && _engine.AverageDepth < int.MaxValue)
-        {
-            _logger.Info("Average depth: {0}", _engine.AverageDepth);
-        }
+        _searcher.Quit();
         _engineToUci.Writer.Complete();
     }
 
-    private void HandleRegister(ReadOnlySpan<char> rawCommand) => _engine.Registration = new RegisterCommand(rawCommand);
-
-    private async Task HandlePerft(string rawCommand)
+    private void HandlePerft(string rawCommand)
     {
         var items = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
         if (items.Length >= 2 && int.TryParse(items[1], out int depth) && depth >= 1)
         {
-            var results = Perft.Results(_engine.Game.CurrentPosition, depth);
-            await Perft.PrintPerftResult(depth, results, str => _engineToUci.Writer.WriteAsync(str));
+            Perft.RunPerft(_searcher.CurrentPosition, depth, str => _engineToUci.Writer.TryWrite(str));
         }
     }
 
-    private async ValueTask HandleDivide(string rawCommand)
+    private void HandleDivide(string rawCommand)
     {
         var items = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
         if (items.Length >= 2 && int.TryParse(items[1], out int depth) && depth >= 1)
         {
-            var results = Perft.Divide(_engine.Game.CurrentPosition, depth, str => _engineToUci.Writer.TryWrite(str));
-            await Perft.PrintPerftResult(depth, results, str => _engineToUci.Writer.WriteAsync(str));
+            Perft.RunDivide(_searcher.CurrentPosition, depth, str => _engineToUci.Writer.TryWrite(str));
         }
     }
 
@@ -520,8 +607,8 @@ public sealed class UCIHandler
         {
             depth = Configuration.EngineSettings.BenchDepth;
         }
-        var results = _engine.Bench(depth);
-        await _engine.PrintBenchResults(results);
+
+        await _searcher.RunBench(depth);
     }
 
     private async ValueTask HandleSettings()
@@ -553,7 +640,7 @@ public sealed class UCIHandler
     {
         try
         {
-            var fullPath = Path.GetFullPath(rawCommand[(rawCommand.IndexOf(' ') + 1)..]);
+            var fullPath = Path.GetFullPath(rawCommand[(rawCommand.IndexOf(' ') + 1)..].Replace("\"", string.Empty));
             if (!File.Exists(fullPath))
             {
                 _logger.Warn("File {0} not found in (1), ignoring command", rawCommand, fullPath);
@@ -601,18 +688,13 @@ public sealed class UCIHandler
 
     private async Task HandleEval(CancellationToken cancellationToken)
     {
-        var score = WDL.NormalizeScore(_engine.Game.CurrentPosition.StaticEvaluation().Score);
-
-        await _engineToUci.Writer.WriteAsync(score.ToString(), cancellationToken);
+        var normalizedScore = WDL.NormalizeScore(_searcher.CurrentPosition.StaticEvaluation().Score);
+        await _engineToUci.Writer.WriteAsync(normalizedScore, cancellationToken);
     }
 
     private async Task HandleFEN(CancellationToken cancellationToken)
     {
-        const string fullMoveCounterString = " 1";
-
-        var fen = _engine.Game.CurrentPosition.FEN()[..^3] + _engine.Game.HalfMovesWithoutCaptureOrPawnMove + fullMoveCounterString;
-
-        await _engineToUci.Writer.WriteAsync(fen, cancellationToken);
+        await _engineToUci.Writer.WriteAsync(_searcher.FEN, cancellationToken);
     }
 
     private async ValueTask HandleOpenBenchSPSA(CancellationToken cancellationToken)

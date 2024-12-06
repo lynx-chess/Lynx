@@ -1,7 +1,4 @@
-﻿using Lynx.Model;
-using System.Text;
-
-namespace Lynx.UCI.Commands.Engine;
+﻿namespace Lynx.UCI.Commands.Engine;
 
 /// <summary>
 /// info
@@ -72,34 +69,7 @@ namespace Lynx.UCI.Commands.Engine;
 ///	    If is greater than 1, always send all k lines in k strings together.
 ///		The engine should only send this if the option "UCI_ShowCurrLine" is set to true.
 /// </summary>
-public sealed class InfoCommand : EngineBaseCommand
+public sealed class InfoCommand : IEngineBaseCommand
 {
     public const string Id = "info";
-
-    public static string SearchResultInfo(SearchResult searchResult)
-    {
-        var sb = new StringBuilder(256);
-
-        sb.Append(Id);
-        sb.Append(" depth ").Append(searchResult.Depth);
-        sb.Append(" seldepth ").Append(searchResult.DepthReached);
-        sb.Append(" multipv 1");
-        sb.Append(" score ").Append(searchResult.Mate == default ? $"cp {WDL.NormalizeScore(searchResult.Evaluation)}" : $"mate {searchResult.Mate}");
-        sb.Append(" nodes ").Append(searchResult.Nodes);
-        sb.Append(" nps ").Append(searchResult.NodesPerSecond);
-        sb.Append(" time ").Append(searchResult.Time)
-            .Append(searchResult.HashfullPermill != -1 ? $" hashfull {searchResult.HashfullPermill}" : string.Empty);
-
-        if (searchResult.WDL is not null)
-        {
-            sb.Append(" wdl ")
-                .Append(searchResult.WDL.Value.WDLWin).Append(' ')
-                .Append(searchResult.WDL.Value.WDLDraw).Append(' ')
-                .Append(searchResult.WDL.Value.WDLLoss);
-        }
-
-        sb.Append(" pv ").AppendJoin(" ", searchResult.Moves.Select(move => move.UCIString()));
-
-        return sb.ToString();
-    }
 }

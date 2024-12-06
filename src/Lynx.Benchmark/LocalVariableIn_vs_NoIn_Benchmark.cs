@@ -6,14 +6,15 @@ namespace Lynx.Benchmark;
 
 public class LocalVariableIn_vs_NoIn_Benchmark : BaseBenchmark
 {
-    public static IEnumerable<string> Data => new[] {
+    public static IEnumerable<string> Data =>
+        [
             Constants.EmptyBoardFEN,
             Constants.InitialPositionFEN,
             Constants.TrickyTestPositionFEN,
             "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1",
             "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1",
             "r2q1rk1/ppp2ppp/2n1bn2/2b1p3/3pP3/3P1NPP/PPP1NPB1/R1BQ1RK1 b - - 0 9 "
-        };
+        ];
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]
@@ -63,9 +64,6 @@ public static class BenchmarkLegacyMoveExtensions
     /// Returns the score evaluation of a move taking into account <see cref="EvaluationConstants.MostValueableVictimLeastValuableAttacker"/>
     /// </summary>
     /// <param name="position">The position that precedes a move</param>
-    /// <param name="killerMoves"></param>
-    /// <param name="plies"></param>
-    /// <param name="historyMoves"></param>
     /// <returns>The higher the score is, the more valuable is the captured piece and the less valuable is the piece that makes the such capture</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int OldScore(this Move move, in Position position, int[,]? killerMoves = null, int? plies = null, int[,]? historyMoves = null)

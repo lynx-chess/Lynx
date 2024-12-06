@@ -6,7 +6,6 @@ namespace Lynx.Test.MoveGeneration;
 #pragma warning disable RCS1098 // Constant values should be placed on right side of comparisons.
 public class GeneratePawnMovesTest
 {
-
     private static IEnumerable<Move> GeneratePawnMoves(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
@@ -234,10 +233,6 @@ public class GeneratePawnMovesTest
         Assert.AreEqual(2, moves.Count(m => m.IsEnPassant() && m.IsCapture()));
     }
 
-#if DEBUG
-    [TestCase("PPPPPPPP/8/8/8/8/8/8/8 w - - 0 1", Description = "Last rank")]
-    [TestCase("8/8/8/8/8/8/8/pppppppp b - - 0 1", Description = "Last rank")]
-#endif
     [TestCase("8/8/8/p1p1p1p1/PpPpPpPp/1P1P1P1P/8/8 w - - 0 1", Description = "Blocked position")]
     [TestCase("8/8/8/p1p1p1p1/PpPpPpPp/1P1P1P1P/8/8 b - - 0 1", Description = "Blocked position")]
     [TestCase("8/8/8/N7/P7/1p6/8/8 w - - 0 1", Description = "Backwards/inverse capture")]

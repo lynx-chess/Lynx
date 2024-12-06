@@ -23,7 +23,7 @@ public class PriorityQueue_EnqueueRange_Benchmark : BaseBenchmark
 {
     private const int Priority = 1_1111_111;
 
-    public static IEnumerable<int> Data => new[] { 10, 100, 1_000, 1_000_000 };
+    public static IEnumerable<int> Data => [10, 100, 1_000, 1_000_000];
 
     [Benchmark(Baseline = true)]
     [ArgumentsSource(nameof(Data))]

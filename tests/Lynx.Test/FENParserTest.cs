@@ -13,12 +13,12 @@ public class FENParserTest
 
         // Make sure a previous Fen doesn't change anything
         const string previuosFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-        var result = FENParser.ParseFEN(previuosFen);
+        _ = FENParser.ParseFEN(previuosFen);
 
         const string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
         // Act
-        result = FENParser.ParseFEN(fen);
+        var result = FENParser.ParseFEN(fen);
         BitBoard[] pieceBitBoards = result.PieceBitBoards;
 
         // Assert
@@ -119,10 +119,10 @@ public class FENParserTest
         // Arrange
         // Make sure a previous Fen doesn't change anything
         const string previuosFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-        var result = FENParser.ParseFEN(previuosFen);
+        _ = FENParser.ParseFEN(previuosFen);
 
         // Act
-        result = FENParser.ParseFEN(fen);
+        var result = FENParser.ParseFEN(fen);
         BitBoard[] pieceBitBoards = result.PieceBitBoards;
         BitBoard[] occupancyBitBoards = result.OccupancyBitBoards;
 

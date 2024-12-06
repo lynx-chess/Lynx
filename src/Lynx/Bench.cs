@@ -1,5 +1,5 @@
-﻿using System.Diagnostics;
-using System.Threading.Channels;
+﻿using Lynx.UCI.Commands.GUI;
+using System.Diagnostics;
 
 namespace Lynx;
 
@@ -70,7 +70,7 @@ public partial class Engine
         "3qr2k/1p3rbp/2p3p1/p7/P2pBNn1/1P3n2/6P1/B1Q1RR1K b - - 1 30",
         "3qk1b1/1p4r1/1n4r1/2P1b2B/p3N2p/P2Q3P/8/1R3R1K w - - 2 39",
 
-        "6RR/4bP2/8/8/5r2/3K4/5p2/4k3 w - -",                           // SEE test suite - regular promotion
+        "6RR/4bP2/8/8/5r2/3K4/5p2/4k3 w - - 0 0",                       // SEE test suite - regular promotion
         "1n2kb1r/p1P4p/2qb4/5pP1/4n2Q/8/PP1PPP1P/RNB1KBNR w KQk - 0 1", // SEE test suite - promotion with capture
         "6Q1/8/1kp4P/2q1p3/2PpP3/2nP2P1/p7/5BK1 b - - 1 35",            // Fischer vs Petrosian - double promotion
         "5R2/2k3PK/8/5N2/7P/5q2/8/q7 w - - 0 69",                       // McShane - Aronian 2012 - knight promotion
@@ -103,12 +103,12 @@ public partial class Engine
     /// (https://github.com/JacquesRW/akimbo/blob/main/resources/fens.txt)
     /// plus random some endgame positions to ensure promotions with/without captures are well covered
     /// </summary>
-    public (long TotalNodes, long Nps) Bench(int depth)
+    public (ulong TotalNodes, ulong Nps) Bench(int depth)
     {
         var stopwatch = new Stopwatch();
 
-        long totalNodes = 0;
-        long totalTime = 0;
+        ulong totalNodes = 0;
+        double totalSeconds = 0;
 
         foreach (var fen in _benchmarkFens)
         {
@@ -117,22 +117,22 @@ public partial class Engine
             AdjustPosition($"position fen {fen}");
             stopwatch.Restart();
 
-            var result = BestMove(new($"go depth {depth}"));
-            totalTime += stopwatch.ElapsedMilliseconds;
+            var goCommand = new GoCommand($"go depth {depth}");
+            var searchConstraints = TimeManager.CalculateTimeManagement(Game, goCommand);
+
+            var result = BestMove(goCommand, in searchConstraints);
+
+            var elapsedSeconds = Utils.CalculateElapsedSeconds(_stopWatch);
+            totalSeconds += elapsedSeconds;
             totalNodes += result.Nodes;
         }
 
-        _engineWriter.TryWrite($"Total time: {totalTime}");
+        _engineWriter.TryWrite($"Total time: {Utils.CalculateUCITime(totalSeconds)}");
 
-        // Cleanup game
-        NewGame();
-        _isNewGameComing = false;
-        _isNewGameCommandSupported = false;
-
-        return (totalNodes, Utils.CalculateNps(totalNodes, totalTime));
+        return (totalNodes, Utils.CalculateNps(totalNodes, totalSeconds));
     }
 
-    public async ValueTask PrintBenchResults((long TotalNodes, long Nps) benchResult) => await _engineWriter.WriteAsync($"{benchResult.TotalNodes} nodes {benchResult.Nps} nps");
-    public static void PrintBenchResults((long TotalNodes, long Nps) benchResult, Action<string> write) => write($"{benchResult.TotalNodes} nodes {benchResult.Nps} nps");
-    public static async ValueTask PrintBenchResults((long TotalNodes, long Nps) benchResult, Func<string, ValueTask> write) => await write($"{benchResult.TotalNodes} nodes {benchResult.Nps} nps");
+    public async ValueTask PrintBenchResults((ulong TotalNodes, ulong Nps) benchResult) => await _engineWriter.WriteAsync($"{benchResult.TotalNodes} nodes {benchResult.Nps} nps");
+    public static void PrintBenchResults((ulong TotalNodes, ulong Nps) benchResult, Action<string> write) => write($"{benchResult.TotalNodes} nodes {benchResult.Nps} nps");
+    public static async ValueTask PrintBenchResults((ulong TotalNodes, ulong Nps) benchResult, Func<string, ValueTask> write) => await write($"{benchResult.TotalNodes} nodes {benchResult.Nps} nps");
 }

@@ -8,14 +8,13 @@
 ///	This mode should be switched off by default and this command can be sent
 ///	any time, also when the engine is thinking.
 /// </summary>
-public sealed class DebugCommand : GUIBaseCommand
+public sealed class DebugCommand : IGUIBaseCommand
 {
     public const string Id = "debug";
 
     /// <summary>
     /// Parse debug command
     /// </summary>
-    /// <param name="command"></param>
     /// <returns>
     /// true if debug command sent 'on'
     /// false if debug command sent 'off'
