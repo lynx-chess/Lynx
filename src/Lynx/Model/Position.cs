@@ -627,7 +627,29 @@ public class Position : IDisposable
         };
     }
 
-    internal readonly record struct AdditionalPieceEvaluationContext(int Bucket, int PieceSquareIndex, int PieceIndex, int PieceSide, int SameSideKingSquare, int OppositeSideKingSquare, ulong EnemyPawnAttacks);
+    internal readonly ref struct AdditionalPieceEvaluationContext
+    {
+        public readonly int Bucket;
+        public readonly int PieceSquareIndex;
+        public readonly int PieceIndex;
+        public readonly int PieceSide;
+        public readonly int SameSideKingSquare;
+        public readonly int OppositeSideKingSquare;
+        public readonly ulong EnemyPawnAttacks;
+
+        public AdditionalPieceEvaluationContext(
+            int bucket, int pieceSquareIndex, int pieceIndex, int pieceSide,
+            int sameSideKingSquare, int oppositeSideKingSquare, ulong enemyPawnAttacks)
+        {
+            Bucket = bucket;
+            PieceSquareIndex = pieceSquareIndex;
+            PieceIndex = pieceIndex;
+            PieceSide = pieceSide;
+            SameSideKingSquare = sameSideKingSquare;
+            OppositeSideKingSquare = oppositeSideKingSquare;
+            EnemyPawnAttacks = enemyPawnAttacks;
+        }
+    };
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int PawnAdditionalEvaluation(in AdditionalPieceEvaluationContext context)
