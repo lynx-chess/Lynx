@@ -63,7 +63,7 @@ public struct TranspositionTableElement
     /// <summary>
     /// Struct size in bytes
     /// </summary>
-    public static ulong Size => (ulong)Marshal.SizeOf(typeof(TranspositionTableElement));
+    public static ulong Size => (ulong)Marshal.SizeOf<TranspositionTableElement>();
 
     public void Update(ulong key, int score, int staticEval, int depth, NodeType nodeType, Move? move)
     {
