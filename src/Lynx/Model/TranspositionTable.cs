@@ -8,6 +8,7 @@ namespace Lynx.Model;
 public readonly struct TranspositionTable
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+    private static readonly TranspositionTableElement _emptyTTElement = default;
 
     private readonly TranspositionTableElement[] _tt = [];
     public readonly int Size;
@@ -52,39 +53,21 @@ public readonly struct TranspositionTable
     public readonly ulong CalculateTTIndex(ulong positionUniqueIdentifier) => (ulong)(((UInt128)positionUniqueIdentifier * (UInt128)_tt.Length) >> 64);
 
     /// <summary>
-    /// Checks the transposition table and, if there's a eval value that can be deducted from it of there's a previously recorded <paramref name="position"/>, it's returned. <see cref="EvaluationConstants.NoHashEntry"/> is returned otherwise
+    /// Checks the transposition table and, if there's a eval value that can be deducted from it of there's a previously recorded <paramref name="position"/>, the entry it's returned
     /// </summary>
     /// <param name="ply">Ply</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public (int Score, ShortMove BestMove, NodeType NodeType, int RawScore, int StaticEval) ProbeHash(Position position, int depth, int ply, int alpha, int beta)
+    public ref readonly TranspositionTableElement ProbeHash(Position position, int depth, int ply, int alpha, int beta)
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier);
         ref var entry = ref _tt[ttIndex];
 
         if ((ushort)position.UniqueIdentifier != entry.Key)
         {
-            return (EvaluationConstants.NoHashEntry, default, default, default, default);
+            return ref _emptyTTElement;
         }
 
-        var type = entry.Type;
-        var rawScore = entry.Score;
-        var score = EvaluationConstants.NoHashEntry;
-
-        if (entry.Depth >= depth)
-        {
-            var recalculatedScore = RecalculateMateScores(rawScore, ply);
-
-            if (type == NodeType.Exact
-                || (type == NodeType.Alpha && recalculatedScore <= alpha)
-                || (type == NodeType.Beta && recalculatedScore >= beta))
-            {
-                // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
-                // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
-                score = recalculatedScore;
-            }
-        }
-
-        return (score, entry.Move, entry.Type, rawScore, entry.StaticEval);
+        return ref entry;
     }
 
     /// <summary>

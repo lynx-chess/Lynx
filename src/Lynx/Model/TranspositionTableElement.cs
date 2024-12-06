@@ -1,6 +1,4 @@
-﻿using NLog;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Lynx.Model;
@@ -63,7 +61,7 @@ public struct TranspositionTableElement
     /// <summary>
     /// Struct size in bytes
     /// </summary>
-    public static ulong Size => (ulong)Marshal.SizeOf(typeof(TranspositionTableElement));
+    public static ulong Size => (ulong)Marshal.SizeOf<TranspositionTableElement>();
 
     public void Update(ulong key, int score, int staticEval, int depth, NodeType nodeType, Move? move)
     {
@@ -74,4 +72,7 @@ public struct TranspositionTableElement
         _type = nodeType;
         _move = move != null ? (ShortMove)move : Move;    // Suggested by cj5716 instead of 0. https://github.com/lynx-chess/Lynx/pull/462
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public readonly bool IsTTHit() => Type != NodeType.Unknown;
 }

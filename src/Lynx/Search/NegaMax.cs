@@ -41,19 +41,35 @@ public sealed partial class Engine
         ShortMove ttBestMove = default;
         NodeType ttElementType = default;
         int ttScore = default;
-        int ttRawScore = default;
+        bool ttHit = false;
         int ttStaticEval = int.MinValue;
 
         Debug.Assert(!pvNode || !cutnode);
 
         if (!isRoot)
         {
-            (ttScore, ttBestMove, ttElementType, ttRawScore, ttStaticEval) = _tt.ProbeHash(position, depth, ply, alpha, beta);
+            ref readonly var ttEntry = ref _tt.ProbeHash(position, depth, ply, alpha, beta);
+
+            ttHit = ttEntry.IsTTHit();
+            var entryDepth = ttEntry.Depth;
+            ttScore = ttEntry.Score;
+            ttBestMove = ttEntry.Move;
+            ttElementType = ttEntry.Type;
+            ttStaticEval = ttEntry.StaticEval;
 
             // TT cutoffs
-            if (!pvNode && ttScore != EvaluationConstants.NoHashEntry)
+            if (!pvNode
+                && ttHit
+                && entryDepth >= depth)
             {
-                return ttScore;
+                var recalculatedScore = TranspositionTable.RecalculateMateScores(ttScore, ply);
+
+                if (ttElementType == NodeType.Exact
+                    || (ttElementType == NodeType.Alpha && recalculatedScore <= alpha)
+                    || (ttElementType == NodeType.Beta && recalculatedScore >= beta))
+                {
+                    return recalculatedScore;
+                }
             }
 
             // Internal iterative reduction (IIR)
@@ -61,7 +77,7 @@ public sealed partial class Engine
             // so the search will be potentially expensive.
             // Therefore, we search with reduced depth for now, expecting to record a TT move
             // which we'll be able to use later for the full depth search
-            if (ttElementType == default && depth >= Configuration.EngineSettings.IIR_MinDepth)
+            if (!ttHit && depth >= Configuration.EngineSettings.IIR_MinDepth)
             {
                 --depth;
             }
@@ -101,7 +117,7 @@ public sealed partial class Engine
         }
         else if (!pvNode)
         {
-            if (ttElementType == default)
+            if (!ttHit)
             {
                 (staticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
             }
@@ -127,9 +143,9 @@ public sealed partial class Engine
             // If the score is outside what the current bounds are, but it did match flag and depth,
             // then we can trust that this score is more accurate than the current static evaluation,
             // and we can update our static evaluation for better accuracy in pruning
-            if (ttElementType != default && ttElementType != (ttRawScore > staticEval ? NodeType.Alpha : NodeType.Beta))
+            if (ttHit && ttElementType != (ttScore > staticEval ? NodeType.Alpha : NodeType.Beta))
             {
-                staticEval = ttRawScore;
+                staticEval = ttScore;
             }
 
             // Fail-high pruning (moves with high scores) - prune more when improving
@@ -525,15 +541,29 @@ public sealed partial class Engine
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
         var ttProbeResult = _tt.ProbeHash(position, 0, ply, alpha, beta);
-        if (ttProbeResult.Score != EvaluationConstants.NoHashEntry)
+        var ttHit = ttProbeResult.IsTTHit();
+        var ttNodeType = ttProbeResult.Type;
+
+        if (ttHit)
         {
-            return ttProbeResult.Score;
+            var recalculatedScore = TranspositionTable.RecalculateMateScores(ttProbeResult.Score, ply);
+
+            // QS TT cutoffs - no need to check entry depth
+            if (ttNodeType == NodeType.Exact
+                || (ttNodeType == NodeType.Alpha && recalculatedScore <= alpha)
+                || (ttNodeType == NodeType.Beta && recalculatedScore >= beta))
+            {
+                // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
+                // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
+                return recalculatedScore;
+            }
         }
-        ShortMove ttBestMove = ttProbeResult.BestMove;
+
+        ShortMove ttBestMove = ttProbeResult.Move;
 
         _maxDepthReached[ply] = ply;
 
-        var staticEval = ttProbeResult.NodeType != NodeType.Unknown
+        var staticEval = ttHit
             ? ttProbeResult.StaticEval
             : position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
 
