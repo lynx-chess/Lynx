@@ -1,6 +1,4 @@
-﻿using NLog;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Lynx.Model;
@@ -30,27 +28,47 @@ public struct TranspositionTableElement
     /// <summary>
     /// 16 MSB of Position's Zobrist key
     /// </summary>
-    public readonly ushort Key => _key;
+    public readonly ushort Key
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => _key;
+    }
 
     /// <summary>
     /// Best move found in the position. 0 if the search failed low (score <= alpha)
     /// </summary>
-    public readonly ShortMove Move => _move;
+    public readonly ShortMove Move
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => _move;
+    }
 
     /// <summary>
     /// Position's score
     /// </summary>
-    public readonly int Score => _score;
+    public readonly int Score
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => _score;
+    }
 
     /// <summary>
     /// Position's static evaluation
     /// </summary>
-    public readonly int StaticEval => _staticEval;
+    public readonly int StaticEval
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => _staticEval;
+    }
 
     /// <summary>
     /// How deep the recorded search went. For us this numberis targetDepth - ply
     /// </summary>
-    public readonly int Depth => _depth;
+    public readonly int Depth
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => _depth;
+    }
 
     /// <summary>
     /// Node (position) type:
@@ -58,13 +76,22 @@ public struct TranspositionTableElement
     /// <see cref="NodeType.Alpha"/>: &lt;= <see cref="Score"/>,
     /// <see cref="NodeType.Beta"/>: &gt;= <see cref="Score"/>
     /// </summary>
-    public readonly NodeType Type => _type;
+    public readonly NodeType Type
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => _type;
+    }
 
     /// <summary>
     /// Struct size in bytes
     /// </summary>
-    public static ulong Size => (ulong)Marshal.SizeOf(typeof(TranspositionTableElement));
+    public static ulong Size
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => (ulong)Marshal.SizeOf<TranspositionTableElement>();
+    }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Update(ulong key, int score, int staticEval, int depth, NodeType nodeType, Move? move)
     {
         _key = (ushort)key;
