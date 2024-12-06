@@ -432,7 +432,7 @@ public class Position : IDisposable
 
                 gamePhase += GamePhaseByPiece[pieceIndex];
 
-                packedScore += AdditionalPieceEvaluation(whiteBucket, pieceSquareIndex, pieceIndex, (int)Side.White, whiteKing, blackKing, blackPawnAttacks);
+                packedScore += AdditionalPieceEvaluation(new(whiteBucket, pieceSquareIndex, pieceIndex, (int)Side.White, whiteKing, blackKing, blackPawnAttacks));
             }
         }
 
@@ -452,7 +452,7 @@ public class Position : IDisposable
 
                 gamePhase += GamePhaseByPiece[pieceIndex];
 
-                packedScore -= AdditionalPieceEvaluation(blackBucket, pieceSquareIndex, pieceIndex, (int)Side.Black, blackKing, whiteKing, whitePawnAttacks);
+                packedScore -= AdditionalPieceEvaluation(new(blackBucket, pieceSquareIndex, pieceIndex, (int)Side.Black, blackKing, whiteKing, whitePawnAttacks));
             }
         }
 
@@ -614,22 +614,27 @@ public class Position : IDisposable
     /// Doesn't include <see cref="Piece.K"/> and <see cref="Piece.k"/> evaluation
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int AdditionalPieceEvaluation(int bucket, int pieceSquareIndex, int pieceIndex, int pieceSide, int sameSideKingSquare, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+    internal int AdditionalPieceEvaluation(in AdditionalPieceEvaluationContext context)
     {
-        return pieceIndex switch
+        return context.PieceIndex switch
         {
-            (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(bucket, pieceSquareIndex, pieceIndex, sameSideKingSquare, oppositeSideKingSquare),
-            (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
-            (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
-            (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
-            (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(in context),
+            (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(in context),
+            (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(in context),
+            (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(in context),
+            (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(in context),
             _ => 0
         };
     }
 
+    internal readonly record struct AdditionalPieceEvaluationContext(int Bucket, int PieceSquareIndex, int PieceIndex, int PieceSide, int SameSideKingSquare, int OppositeSideKingSquare, ulong EnemyPawnAttacks);
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int PawnAdditionalEvaluation(int bucket, int squareIndex, int pieceIndex, int sameSideKingSquare, int oppositeSideKingSquare)
+    private int PawnAdditionalEvaluation(in AdditionalPieceEvaluationContext context)
     {
+        var squareIndex = context.PieceSquareIndex;
+        var pieceIndex = context.PieceIndex;
+
         int packedBonus = 0;
 
         var rank = Constants.Rank[squareIndex];
@@ -654,16 +659,16 @@ public class Position : IDisposable
             // Passed pawn without opponent pieces ahead (in its passed pawn mask)
             if ((passedPawnsMask & OccupancyBitBoards[oppositeSide]) == 0)
             {
-                packedBonus += PassedPawnBonusNoEnemiesAheadBonus[bucket][rank];
+                packedBonus += PassedPawnBonusNoEnemiesAheadBonus[context.Bucket][rank];
             }
 
             // King distance to passed pawn
-            var friendlyKingDistance = Constants.ChebyshevDistance[squareIndex][sameSideKingSquare];
+            var friendlyKingDistance = Constants.ChebyshevDistance[squareIndex][context.SameSideKingSquare];
 
             // Enemy king distance to passed pawn
-            var enemyKingDistance = Constants.ChebyshevDistance[squareIndex][oppositeSideKingSquare];
+            var enemyKingDistance = Constants.ChebyshevDistance[squareIndex][context.OppositeSideKingSquare];
 
-            packedBonus += PassedPawnBonus[bucket][rank]
+            packedBonus += PassedPawnBonus[context.Bucket][rank]
                 + FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance]
                 + EnemyKingDistanceToPassedPawnPenalty[enemyKingDistance];
         }
@@ -678,34 +683,34 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int RookAdditionalEvaluation(int squareIndex, int pieceIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+    private int RookAdditionalEvaluation(in AdditionalPieceEvaluationContext context)
     {
         const int pawnToRookOffset = (int)Piece.R - (int)Piece.P;
 
         var occupancy = OccupancyBitBoards[(int)Side.Both];
-        var attacks = Attacks.RookAttacks(squareIndex, occupancy);
+        var attacks = Attacks.RookAttacks(context.PieceSquareIndex, occupancy);
 
         // Mobility
         var attacksCount =
             (attacks
-                & (~(OccupancyBitBoards[pieceSide] | enemyPawnAttacks)))
+                & (~(OccupancyBitBoards[context.PieceSide] | context.EnemyPawnAttacks)))
             .CountBits();
 
         var packedBonus = RookMobilityBonus[attacksCount];
 
         // Rook on open file
-        if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default)
+        if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[context.PieceSquareIndex]) == default)
         {
             packedBonus += OpenFileRookBonus;
         }
         // Rook on semi-open file
-        else if ((PieceBitBoards[pieceIndex - pawnToRookOffset] & Masks.FileMasks[squareIndex]) == default)
+        else if ((PieceBitBoards[context.PieceIndex - pawnToRookOffset] & Masks.FileMasks[context.PieceSquareIndex]) == default)
         {
             packedBonus += SemiOpenFileRookBonus;
         }
 
         // Checks
-        var enemyKingCheckThreats = Attacks.RookAttacks(oppositeSideKingSquare, occupancy);
+        var enemyKingCheckThreats = Attacks.RookAttacks(context.OppositeSideKingSquare, occupancy);
         var checks = (attacks & enemyKingCheckThreats).CountBits();
 
         packedBonus += CheckBonus[(int)Piece.R] * checks;
@@ -714,20 +719,20 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int KnightAdditionalEvaluation(int squareIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+    private int KnightAdditionalEvaluation(in AdditionalPieceEvaluationContext context)
     {
-        var attacks = Attacks.KnightAttacks[squareIndex];
+        var attacks = Attacks.KnightAttacks[context.PieceSquareIndex];
 
         // Mobility
         var attacksCount =
             (attacks
-                & (~(OccupancyBitBoards[pieceSide] | enemyPawnAttacks)))
+                & (~(OccupancyBitBoards[context.PieceSide] | context.EnemyPawnAttacks)))
             .CountBits();
 
         var packedBonus = KnightMobilityBonus[attacksCount];
 
         // Checks
-        var enemyKingCheckThreats = Attacks.KnightAttacks[oppositeSideKingSquare];
+        var enemyKingCheckThreats = Attacks.KnightAttacks[context.OppositeSideKingSquare];
         var checks = (attacks & enemyKingCheckThreats).CountBits();
 
         packedBonus += CheckBonus[(int)Piece.N] * checks;
@@ -736,26 +741,26 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int BishopAdditionalEvaluation(int squareIndex, int pieceIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+    private int BishopAdditionalEvaluation(in AdditionalPieceEvaluationContext context)
     {
         const int pawnToBishopOffset = (int)Piece.B - (int)Piece.P;
 
         var occupancy = OccupancyBitBoards[(int)Side.Both];
-        var attacks = Attacks.BishopAttacks(squareIndex, occupancy);
+        var attacks = Attacks.BishopAttacks(context.PieceSquareIndex, occupancy);
 
         // Mobility
         var attacksCount =
             (attacks
-                & (~(OccupancyBitBoards[pieceSide] | enemyPawnAttacks)))
+                & (~(OccupancyBitBoards[context.PieceSide] | context.EnemyPawnAttacks)))
             .CountBits();
 
         var packedBonus = BishopMobilityBonus[attacksCount];
 
         // Bad bishop
-        var sameSidePawns = PieceBitBoards[pieceIndex - pawnToBishopOffset];
+        var sameSidePawns = PieceBitBoards[context.PieceIndex - pawnToBishopOffset];
 
         var sameColorPawns = sameSidePawns &
-            (Constants.DarkSquares[squareIndex] == 1
+            (Constants.DarkSquares[context.PieceSquareIndex] == 1
                 ? Constants.DarkSquaresBitBoard
                 : Constants.LightSquaresBitBoard);
 
@@ -764,16 +769,16 @@ public class Position : IDisposable
         // Blocked central pawns
         var sameSideCentralPawns = sameSidePawns & Constants.CentralFiles;
 
-        var pawnBlockerSquares = pieceSide == (int)Side.White
+        var pawnBlockerSquares = context.PieceSide == (int)Side.White
             ? sameSideCentralPawns.ShiftUp()
             : sameSideCentralPawns.ShiftDown();
 
-        var pawnBlockers = pawnBlockerSquares & OccupancyBitBoards[Utils.OppositeSide(pieceSide)];
+        var pawnBlockers = pawnBlockerSquares & OccupancyBitBoards[Utils.OppositeSide(context.PieceSide)];
 
         packedBonus += BadBishop_BlockedCentralPawnsPenalty[pawnBlockers.CountBits()];
 
         // Checks
-        var enemyKingCheckThreats = Attacks.BishopAttacks(oppositeSideKingSquare, occupancy);
+        var enemyKingCheckThreats = Attacks.BishopAttacks(context.OppositeSideKingSquare, occupancy);
         var checks = (attacks & enemyKingCheckThreats).CountBits();
 
         packedBonus += CheckBonus[(int)Piece.B] * checks;
@@ -782,21 +787,21 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int QueenAdditionalEvaluation(int squareIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+    private int QueenAdditionalEvaluation(in AdditionalPieceEvaluationContext context)
     {
         var occupancy = OccupancyBitBoards[(int)Side.Both];
-        var attacks = Attacks.QueenAttacks(squareIndex, occupancy);
+        var attacks = Attacks.QueenAttacks(context.PieceSquareIndex, occupancy);
 
         // Mobility
         var attacksCount =
             (attacks
-                & (~(OccupancyBitBoards[pieceSide] | enemyPawnAttacks)))
+                & (~(OccupancyBitBoards[context.PieceSide] | context.EnemyPawnAttacks)))
             .CountBits();
 
         var packedBonus = QueenMobilityBonus[attacksCount];
 
         // Checks
-        var enemyKingCheckThreats = Attacks.QueenAttacks(oppositeSideKingSquare, occupancy);
+        var enemyKingCheckThreats = Attacks.QueenAttacks(context.OppositeSideKingSquare, occupancy);
         var checks = (attacks & enemyKingCheckThreats).CountBits();
 
         packedBonus += CheckBonus[(int)Piece.Q] * checks;
