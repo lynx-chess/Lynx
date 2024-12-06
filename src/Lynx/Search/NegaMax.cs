@@ -48,10 +48,9 @@ public sealed partial class Engine
 
         if (!isRoot)
         {
-            ref readonly var ttEntry = ref _tt.ProbeHash(position, depth, ply, alpha, beta);
+            var ttEntry = _tt.ProbeHash(position, depth, ply, alpha, beta);
 
             ttHit = ttEntry.IsTTHit();
-            var entryDepth = ttEntry.Depth;
             ttScore = ttEntry.Score;
             ttBestMove = ttEntry.Move;
             ttElementType = ttEntry.Type;
@@ -60,7 +59,7 @@ public sealed partial class Engine
             // TT cutoffs
             if (!pvNode
                 && ttHit
-                && entryDepth >= depth)
+                && ttEntry.Depth >= depth)
             {
                 var recalculatedScore = TranspositionTable.RecalculateMateScores(ttScore, ply);
 

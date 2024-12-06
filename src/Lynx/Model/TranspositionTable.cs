@@ -57,17 +57,17 @@ public readonly struct TranspositionTable
     /// </summary>
     /// <param name="ply">Ply</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ref readonly TranspositionTableElement ProbeHash(Position position, int depth, int ply, int alpha, int beta)
+    public TranspositionTableElement ProbeHash(Position position, int depth, int ply, int alpha, int beta)
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier);
-        ref var entry = ref _tt[ttIndex];
+        var entry = _tt[ttIndex];
 
         if ((ushort)position.UniqueIdentifier != entry.Key)
         {
-            return ref _emptyTTElement;
+            return _emptyTTElement;
         }
 
-        return ref entry;
+        return entry;
     }
 
     /// <summary>

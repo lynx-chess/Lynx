@@ -76,18 +76,9 @@ public class EvaluationConstantsTest
     }
 
     [Test]
-    public void NoHashEntryConstant()
-    {
-        Assert.Greater(NoHashEntry, _sensibleEvaluation);
-        Assert.Greater(PositiveCheckmateDetectionLimit, NoHashEntry);
-        Assert.Greater(-NegativeCheckmateDetectionLimit, NoHashEntry);
-    }
-
-    [Test]
     public void EvaluationFitsIntoDepth16()
     {
         Assert.Greater(short.MaxValue, PositiveCheckmateDetectionLimit);
-        Assert.Greater(short.MaxValue, NoHashEntry);
         Assert.Greater(short.MaxValue, _sensibleEvaluation);
     }
 
