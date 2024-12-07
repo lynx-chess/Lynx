@@ -133,8 +133,9 @@ public sealed class Searcher
 
     public async ValueTask RunBench(int depth)
     {
-        var results = _engine.Bench(depth);
-        await _engine.PrintBenchResults(results);
+        var benchEngine = new Engine(_engineWriter);
+        var results = benchEngine.Bench(depth);
+        await benchEngine.PrintBenchResults(results);
     }
 
     private static void InitializeStaticClasses()
