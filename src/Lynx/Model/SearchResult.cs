@@ -29,6 +29,13 @@ public sealed class SearchResult
 
     public Move BestMove { get; init; }
 
+#if MULTITHREAD_DEBUG
+    public SearchResult(Move bestMove, int score, int targetDepth, Move[] moves, int mate = default)
+        : this("-1", bestMove, score, targetDepth, moves, mate)
+    {
+    }
+#endif
+
     public SearchResult(
 #if MULTITHREAD_DEBUG
         string engineId,
