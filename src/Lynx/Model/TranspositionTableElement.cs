@@ -13,19 +13,30 @@ public enum NodeType : byte
 /// <summary>
 /// 10 bytes
 /// </summary>
-public struct TranspositionTableElement
+[StructLayout(LayoutKind.Explicit)]
+public unsafe struct TranspositionTableElement
 {
+    [FieldOffset(0)]
     private ushort _key;        // 2 bytes
 
+    [FieldOffset(2)]
     private ShortMove _move;    // 2 bytes
 
+    [FieldOffset(4)]
     private short _score;       // 2 bytes
 
+    [FieldOffset(6)]
     private short _staticEval;  // 2 bytes
 
+    [FieldOffset(8)]
     private byte _depth;        // 1 byte
 
+    [FieldOffset(9)]
     private NodeType _type;     // 1 byte
+
+    [FieldOffset(2)]
+    [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.I1, SizeConst = 255)]
+    private fixed byte _data[8];
 
     /// <summary>
     /// 16 MSB of Position's Zobrist key
@@ -63,7 +74,14 @@ public struct TranspositionTableElement
     /// <summary>
     /// Struct size in bytes
     /// </summary>
-    public static ulong Size => (ulong)Marshal.SizeOf<TranspositionTableElement>();
+    public static ulong Size => 10;// (ulong)Marshal.SizeOf<TranspositionTableElement>();
+
+    public readonly int Data()
+    {
+        var result = _data[0] + _data[1] + _data[2] + _data[3] + _data[4] +_data[5] +_data[6] +_data[7];
+
+        return result;
+    }
 
     public void Update(ulong key, int score, int staticEval, int depth, NodeType nodeType, Move? move)
     {
