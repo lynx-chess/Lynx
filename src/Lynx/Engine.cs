@@ -65,12 +65,7 @@ public sealed partial class Engine : IDisposable
         }
 
 #if !DEBUG
-        // Temporary channel so that no output is generated
-        _engineWriter = Channel.CreateUnbounded<object>(new UnboundedChannelOptions() { SingleReader = true, SingleWriter = false }).Writer;
         WarmupEngine();
-
-        _engineWriter = engineWriter;
-
         NewGame();
 #endif
     }

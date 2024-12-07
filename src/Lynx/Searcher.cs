@@ -25,7 +25,7 @@ public sealed class Searcher
         _engineWriter = engineWriter;
 
         _ttWrapper = new TranspositionTable();
-        _engine = new Engine(_engineWriter, in _ttWrapper);
+        _engine = new Engine(SilentChannelWriter<object>.Instance, in _ttWrapper);
 
         _logger = LogManager.GetCurrentClassLogger();
 
@@ -73,6 +73,9 @@ public sealed class Searcher
 
         if (searchResult is not null)
         {
+            // Final info command
+            _engineWriter.TryWrite(searchResult);
+
             // We always print best move, even in case of go ponder + stop, in which case IDEs are expected to ignore it
             _engineWriter.TryWrite(new BestMoveCommand(searchResult));
         }
@@ -113,7 +116,7 @@ public sealed class Searcher
             _ttWrapper = new TranspositionTable();
 
             _engine.FreeResources();
-            _engine = new Engine(_engineWriter, in _ttWrapper);
+            _engine = new Engine(SilentChannelWriter<object>.Instance, in _ttWrapper);
         }
 
         ForceGCCollection();
