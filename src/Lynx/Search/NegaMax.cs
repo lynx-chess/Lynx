@@ -627,7 +627,7 @@ public sealed partial class Engine
                 {
                     PrintMessage($"Pruning: {move} is enough to discard this line");
 
-                    _tt.RecordHash(position, staticEval, 0, ply, bestScore, NodeType.Beta, bestMove);
+                    _tt.RecordHash(position, staticEval, 0, ply, bestScore, NodeType.Beta);
 
                     return bestScore; // The refutation doesn't matter, since it'll be pruned
                 }
@@ -657,7 +657,7 @@ public sealed partial class Engine
             return finalEval;
         }
 
-        _tt.RecordHash(position, staticEval, 0, ply, bestScore, nodeType, bestMove);
+        _tt.RecordHash(position, staticEval, 0, ply, bestScore, nodeType);
 
         return bestScore;
     }
