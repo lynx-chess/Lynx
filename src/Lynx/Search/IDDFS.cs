@@ -269,7 +269,7 @@ public sealed partial class Engine
 
         if (elapsedMilliseconds > scaledSoftLimitTimeBound)
         {
-            _logger.Warn(
+            _logger.Info(
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif

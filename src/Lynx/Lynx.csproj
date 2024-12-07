@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <DefineConstants>MULTITHREAD_DEBUG</DefineConstants>
+    <!--<DefineConstants>MULTITHREAD_DEBUG</DefineConstants>-->
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
