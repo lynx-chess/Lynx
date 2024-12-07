@@ -130,7 +130,7 @@ public sealed class OptionCommand : IEngineBaseCommand
             $"option name UCI_ShowWDL type check default {Configuration.EngineSettings.ShowWDL}",
             $"option name Hash type spin default {Configuration.EngineSettings.TranspositionTableSize} min {Constants.AbsoluteMinTTSize} max {Constants.AbsoluteMaxTTSize}",
             $"option name OnlineTablebaseInRootPositions type check default {Configuration.EngineSettings.UseOnlineTablebaseInRootPositions}",
-            "option name Threads type spin default 1 min 1 max 1",
+            $"option name Threads type spin default {Configuration.EngineSettings.Threads} min 1 max {Constants.MaxThreadCount}",
             $"option name Ponder type check default {Configuration.EngineSettings.IsPonder}",
             .. Configuration.GeneralSettings.EnableTuning ? SPSAAttributeHelpers.GenerateOptionStrings() : []
         ];

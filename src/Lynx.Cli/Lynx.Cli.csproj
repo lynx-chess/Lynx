@@ -7,6 +7,10 @@
     <InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);Microsoft.Extensions.Configuration.Binder.SourceGeneration</InterceptorsPreviewNamespaces>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <DefineConstants>MULTITHREAD_DEBUG</DefineConstants>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(Optimized.ToLower())'=='true'">
     <Configuration>Release</Configuration>
     <SelfContained>true</SelfContained>
