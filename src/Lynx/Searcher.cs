@@ -261,7 +261,13 @@ public sealed class Searcher
 
             for (int i = 0; i < _searchThreadsCount - mainEngineOffset; ++i)
             {
-                _extraEngines[i] = new Engine($"{i + 2}", _engineWriter, in _ttWrapper, warmup: false);
+                _extraEngines[i] = new Engine($"{i + 2}",
+#if MULTITHREAD_DEBUG
+                    SilentChannelWriter<object>.Instance,
+#else
+                    _engineWriter,
+#endif
+                    in _ttWrapper, warmup: false);
             }
         }
         else
