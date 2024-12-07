@@ -308,6 +308,8 @@ public static class Constants
 
     public const int AbsoluteMinTTSize = 1;
 
+    public static readonly int MaxThreadCount = Array.MaxLength + 1;
+
     /// <summary>
     /// 218 or 224 seems to be the known limit
     /// https://www.reddit.com/r/chess/comments/9j70dc/position_with_the_most_number_of_legal_moves/
