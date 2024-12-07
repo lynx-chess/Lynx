@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Security.Authentication;
+using System.Xml.Linq;
 
 namespace Lynx;
 
@@ -17,7 +18,7 @@ public sealed partial class Engine
     /// Best score Side's to move's opponent can achieve, assuming best play by Side to move.
     /// </param>
     [SkipLocalsInit]
-    private int NegaMax(int depth, int ply, int alpha, int beta, bool parentWasNullMove = false)
+    private int NegaMax(int depth, int ply, int alpha, int beta, bool cutnode, bool parentWasNullMove = false)
     {
         var position = Game.CurrentPosition;
 
@@ -42,6 +43,8 @@ public sealed partial class Engine
         int ttScore = default;
         int ttRawScore = default;
         int ttStaticEval = int.MinValue;
+
+        Debug.Assert(!pvNode || !cutnode);
 
         if (!isRoot)
         {
@@ -200,7 +203,7 @@ public sealed partial class Engine
                 //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
 
                 var gameState = position.MakeNullMove();
-                var nmpScore = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, parentWasNullMove: true);
+                var nmpScore = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, !cutnode, parentWasNullMove: true);
                 position.UnMakeNullMove(gameState);
 
                 if (nmpScore >= beta)
@@ -287,8 +290,9 @@ public sealed partial class Engine
             else if (visitedMovesCounter == 0)
             {
                 _tt.PrefetchTTEntry(position);
+                bool isCutNode = !pvNode && !cutnode;   // Linter 'simplification' of pvNode ? false : !cutnode
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
-                score = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
+                score = -NegaMax(depth - 1, ply + 1, -beta, -alpha, isCutNode);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
             }
             else
@@ -365,7 +369,7 @@ public sealed partial class Engine
                             ++reduction;
                         }
 
-                        if (ttBestMove != default && isCapture)
+                        if (cutnode)
                         {
                             ++reduction;
                         }
@@ -389,8 +393,9 @@ public sealed partial class Engine
                     }
                 }
 
+                cutnode = reduction > 0;
                 // Search with reduced depth
-                score = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha);
+                score = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha, cutnode);
 
                 // 🔍 Principal Variation Search (PVS)
                 if (score > alpha && reduction > 0)
@@ -400,14 +405,14 @@ public sealed partial class Engine
                     // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
 
                     // Search with full depth but narrowed score bandwidth
-                    score = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha);
+                    score = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha, !cutnode);
                 }
 
                 if (score > alpha && score < beta)
                 {
                     // PVS Hypothesis invalidated -> search with full depth and full score bandwidth
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
-                    score = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
+                    score = -NegaMax(depth - 1, ply + 1, -beta, -alpha, cutnode: false);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
                 }
             }

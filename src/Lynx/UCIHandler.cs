@@ -283,6 +283,14 @@ public sealed class UCIHandler
                     }
                     break;
                 }
+            case "scorestabiity_mindepth":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.ScoreStabiity_MinDepth = value;
+                    }
+                    break;
+                }
             #endregion
 
             #region Search tuning

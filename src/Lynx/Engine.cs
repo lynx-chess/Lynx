@@ -64,12 +64,6 @@ public sealed partial class Engine : IDisposable
             _moveNodeCount[i] = new ulong[64];
         }
 
-        _killerMoves = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin][];
-        for (int i = 0; i < Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin; ++i)
-        {
-            _killerMoves[i] = new Move[3];
-        }
-
 #if !DEBUG
         // Temporary channel so that no output is generated
         _engineWriter = Channel.CreateUnbounded<object>(new UnboundedChannelOptions() { SingleReader = true, SingleWriter = false }).Writer;
