@@ -137,7 +137,7 @@ public sealed partial class Engine
                         _logger.Debug("Aspiration windows depth {Depth}: [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
                             depth, alpha, beta, bestScore, _nodes);
 
-                        bestScore = NegaMax(depth: depth - failHighReduction, ply: 0, alpha, beta, cutnode:false);
+                        bestScore = NegaMax(depth: depth - failHighReduction, ply: 0, alpha, beta, cutnode: false);
 
                         // 13, 19, 28, 42, 63, 94, 141, 211, 316, 474, 711, 1066, 1599, 2398, 3597, 5395, 8092, 12138, 18207, 27310, |EvaluationConstants.MaxEval|, 40965
                         window += window >> 1;   // window / 2
@@ -219,8 +219,6 @@ public sealed partial class Engine
             _logger.Info("Engine search found a short enough mate, cancelling online tb probing if still active");
         }
 
-        _engineWriter.TryWrite(finalSearchResult);
-
         return finalSearchResult;
     }
 
@@ -267,7 +265,11 @@ public sealed partial class Engine
 
         if (elapsedMilliseconds > scaledSoftLimitTimeBound)
         {
-            _logger.Info("Stopping at depth {0} (nodes {1}): {2}ms > {3}ms", depth - 1, _nodes, elapsedMilliseconds, scaledSoftLimitTimeBound);
+            _logger.Debug(
+#if MULTITHREAD_DEBUG
+                $"[{_id}] " +
+#endif
+                "[TM] Stopping at depth {0} (nodes {1}): {2}ms > {3}ms", depth - 1, _nodes, elapsedMilliseconds, scaledSoftLimitTimeBound);
             return false;
         }
 
@@ -317,7 +319,11 @@ public sealed partial class Engine
                 ? +EvaluationConstants.SingleMoveScore
                 : -EvaluationConstants.SingleMoveScore;
 
-            result = new SearchResult(firstLegalMove, score, 0, [firstLegalMove])
+            result = new SearchResult(
+#if MULTITHREAD_DEBUG
+                _id,
+#endif
+                firstLegalMove, score, 0, [firstLegalMove])
             {
                 DepthReached = 0,
                 Nodes = 0,
@@ -344,7 +350,11 @@ public sealed partial class Engine
         var elapsedSeconds = Utils.CalculateElapsedSeconds(_stopWatch);
 
         _previousSearchResult = lastSearchResult;
-        return new SearchResult(pvMoves.FirstOrDefault(), bestScore, depth, pvMoves, mate)
+        return new SearchResult(
+#if MULTITHREAD_DEBUG
+                _id,
+#endif
+            pvMoves.FirstOrDefault(), bestScore, depth, pvMoves, mate)
         {
             DepthReached = maxDepthReached,
             Nodes = _nodes,
@@ -366,7 +376,11 @@ public sealed partial class Engine
             {
                 _logger.Warn("Search cancelled at depth 1, choosing first found legal move as best one");
             }
-            finalSearchResult = new(firstLegalMove, 0, 0, [firstLegalMove]);
+            finalSearchResult = new(
+#if MULTITHREAD_DEBUG
+                _id,
+#endif
+                firstLegalMove, 0, 0, [firstLegalMove]);
         }
         else
         {

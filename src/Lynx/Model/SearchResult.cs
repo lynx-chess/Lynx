@@ -4,6 +4,9 @@ namespace Lynx.Model;
 
 public sealed class SearchResult
 {
+#if MULTITHREAD_DEBUG
+    public string EngineId { get; init; }
+#endif
     public Move[] Moves { get; init; }
 
     public (int WDLWin, int WDLDraw, int WDLLoss)? WDL { get; set; } = null;
@@ -26,8 +29,15 @@ public sealed class SearchResult
 
     public Move BestMove { get; init; }
 
-    public SearchResult(Move bestMove, int score, int targetDepth, Move[] moves, int mate = default)
+    public SearchResult(
+#if MULTITHREAD_DEBUG
+        string engineId,
+#endif
+        Move bestMove, int score, int targetDepth, Move[] moves, int mate = default)
     {
+#if MULTITHREAD_DEBUG
+        EngineId = engineId;
+#endif
         BestMove = bestMove;
         Score = score;
         Depth = targetDepth;
@@ -38,6 +48,10 @@ public sealed class SearchResult
     public override string ToString()
     {
         var sb = ObjectPools.StringBuilderPool.Get();
+
+#if MULTITHREAD_DEBUG
+        sb.Append("[#" + EngineId + "] ");
+#endif
 
         sb.Append(InfoCommand.Id)
           .Append(" depth ").Append(Depth)
