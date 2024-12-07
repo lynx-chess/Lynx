@@ -263,9 +263,9 @@ public sealed class Searcher
             {
                 _extraEngines[i] = new Engine($"{i + 2}",
 #if MULTITHREAD_DEBUG
-                    SilentChannelWriter<object>.Instance,
-#else
                     _engineWriter,
+#else
+                    SilentChannelWriter<object>.Instance,
 #endif
                     in _ttWrapper, warmup: false);
             }
