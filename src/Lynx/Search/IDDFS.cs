@@ -11,9 +11,9 @@ public sealed partial class Engine
     private readonly Move[] _pVTable = GC.AllocateArray<Move>(Configuration.EngineSettings.MaxDepth * (Configuration.EngineSettings.MaxDepth + 1) / 2, pinned: true);
 
     /// <summary>
-    /// (<see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/>) x 3
+    /// 3 x (<see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/>)
     /// </summary>
-    private readonly int[][] _killerMoves;
+    private readonly int[] _killerMoves = GC.AllocateArray<int>(3 * (Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin), pinned: true);
 
     /// <summary>
     /// 12 x 64
@@ -94,10 +94,7 @@ public sealed partial class Engine
                 return onlyOneLegalMoveSearchResult;
             }
 
-            for (int i = 0; i < _killerMoves.Length; ++i)
-            {
-                Array.Clear(_killerMoves[i]);
-            }
+            Array.Clear(_killerMoves);
             // Not clearing _quietHistory on purpose
             // Not clearing _captureHistory on purpose
 
