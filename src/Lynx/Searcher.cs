@@ -74,9 +74,6 @@ public sealed class Searcher
 
     private async Task OnGoCommand(GoCommand goCommand)
     {
-        //TaskFactory taskFactory = new();
-        var searchConstraints = TimeManager.CalculateTimeManagement(_mainEngine.Game, goCommand);
-
         if (_searchThreadsCount == 1)
         {
             SingleThreadedSearch(goCommand);
@@ -114,6 +111,7 @@ public sealed class Searcher
         // TODO: fix pondering, since pondering logic updated the boolean in the constraint object instead of a field
         var extraEnginesSearchConstraint = SearchConstraints.InfiniteSearchConstraint;
 
+        //TaskFactory taskFactory = new();
         var tasks = _extraEngines
             .Select(engine =>
                 Task.Run(() => engine.Search(goCommand, extraEnginesSearchConstraint)))
