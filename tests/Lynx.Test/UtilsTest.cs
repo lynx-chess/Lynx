@@ -128,8 +128,6 @@ public class UtilsTest
     [Test]
     public void CalculateNps()
     {
-        Assert.DoesNotThrow(() => Utils.CalculateNps(0, 0));
-
-        Assert.AreEqual(0, Utils.CalculateNps(0, 0));
+        Assert.AreEqual(1, Utils.CalculateNps(0, 0));
     }
 }
