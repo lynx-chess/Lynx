@@ -226,6 +226,12 @@ public sealed partial class Engine
 
     private bool StopSearchCondition(Move bestMove, int depth, int mate)
     {
+        if (bestMove == default)
+        {
+            _logger.Warn("Search at depth {0} didn't produce a best move. Mate in {1} detected, and/but search continues", depth - 1, mate);
+            return true;
+        }
+
         if (mate != 0)
         {
             var winningMateThreshold = (100 - Game.HalfMovesWithoutCaptureOrPawnMove) / 2;
