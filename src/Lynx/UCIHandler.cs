@@ -266,6 +266,33 @@ public sealed class UCIHandler
                     break;
                 }
 
+            #region Time management
+            case "nodetmbase":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.NodeTmBase = value * 0.01;
+                    }
+                    break;
+                }
+            case "nodetmscale":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.NodeTmScale = value * 0.01;
+                    }
+                    break;
+                }
+            case "scorestabiity_mindepth":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.ScoreStabiity_MinDepth = value;
+                    }
+                    break;
+                }
+            #endregion
+
             #region Search tuning
 
             case "lmr_mindepth":
@@ -276,11 +303,19 @@ public sealed class UCIHandler
                     }
                     break;
                 }
-            case "lmr_minfulldepthsearchedmoves":
+            case "lmr_minfulldepthsearchedmoves_pv":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
-                        Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves = value;
+                        Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_PV = value;
+                    }
+                    break;
+                }
+            case "lmr_minfulldepthsearchedmoves_nonpv":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_NonPV = value;
                     }
                     break;
                 }
@@ -288,7 +323,7 @@ public sealed class UCIHandler
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
-                        Configuration.EngineSettings.LMR_Base = (value * 0.01);
+                        Configuration.EngineSettings.LMR_Base = value * 0.01;
                     }
                     break;
                 }
@@ -296,7 +331,7 @@ public sealed class UCIHandler
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
-                        Configuration.EngineSettings.LMR_Divisor = (value * 0.01);
+                        Configuration.EngineSettings.LMR_Divisor = value * 0.01;
                     }
                     break;
                 }

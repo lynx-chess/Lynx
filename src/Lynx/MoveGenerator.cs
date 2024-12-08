@@ -108,7 +108,6 @@ public static class MoveGenerator
     {
         Debug.Assert(position.Side != Side.Both);
 
-
         int localIndex = 0;
 
         var offset = Utils.PieceOffset(position.Side);

@@ -848,6 +848,24 @@ public class Position : IDisposable
 
     #region Attacks
 
+    /// <summary>
+    /// Overload that has rooks and bishops precalculated for the position
+    /// </summary>
+    /// <param name="rooks">Includes Queen bitboard</param>
+    /// <param name="bishops">Includes Queen bitboard</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ulong AllAttackersTo(int square, BitBoard occupancy, BitBoard rooks, BitBoard bishops)
+    {
+        Debug.Assert(square != (int)BoardSquare.noSquare);
+
+        return (rooks & Attacks.RookAttacks(square, occupancy))
+            | (bishops & Attacks.BishopAttacks(square, occupancy))
+            | (PieceBitBoards[(int)Piece.p] & Attacks.PawnAttacks[(int)Side.White][square])
+            | (PieceBitBoards[(int)Piece.P] & Attacks.PawnAttacks[(int)Side.Black][square])
+            | (Knights & Attacks.KnightAttacks[square])
+            | (Kings & Attacks.KingAttacks[square]);
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ulong AllAttackersTo(int square)
     {
@@ -884,24 +902,6 @@ public class Position : IDisposable
             | (bishops & Attacks.BishopAttacks(square, occupancy))
             | (PieceBitBoards[(int)Piece.p - offset] & Attacks.PawnAttacks[side][square])
             | (PieceBitBoards[(int)Piece.n - offset] & Attacks.KnightAttacks[square]);
-    }
-
-    /// <summary>
-    /// Overload that has rooks and bishops precalculated for the position
-    /// </summary>
-    /// <param name="rooks">Includes Queen bitboard</param>
-    /// <param name="bishops">Includes Queen bitboard</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ulong AllAttackersTo(int square, BitBoard occupancy, BitBoard rooks, BitBoard bishops)
-    {
-        Debug.Assert(square != (int)BoardSquare.noSquare);
-
-        return (rooks & Attacks.RookAttacks(square, occupancy))
-            | (bishops & Attacks.BishopAttacks(square, occupancy))
-            | (PieceBitBoards[(int)Piece.p] & Attacks.PawnAttacks[(int)Side.White][square])
-            | (PieceBitBoards[(int)Piece.P] & Attacks.PawnAttacks[(int)Side.Black][square])
-            | (Knights & Attacks.KnightAttacks[square])
-            | (Kings & Attacks.KingAttacks[square]);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

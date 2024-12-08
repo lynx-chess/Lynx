@@ -106,9 +106,16 @@ public sealed class EngineSettings
 
     public double SoftTimeBoundMultiplier { get; set; } = 1;
 
-    public int DefaultMovesToGo { get; set; } = 45;
-
     public double SoftTimeBaseIncrementMultiplier { get; set; } = 0.8;
+
+    [SPSA<double>(1, 3, 0.1)]
+    public double NodeTmBase { get; set; } = 2.4;
+
+    [SPSA<double>(0.5, 2.5, 0.1)]
+    public double NodeTmScale { get; set; } = 1.65;
+
+    [SPSA<int>(1, 15, 1)]
+    public int ScoreStabiity_MinDepth { get; set; } = 7;
 
     #endregion
 
@@ -116,12 +123,15 @@ public sealed class EngineSettings
     public int LMR_MinDepth { get; set; } = 3;
 
     [SPSA<int>(1, 10, 0.5)]
-    public int LMR_MinFullDepthSearchedMoves { get; set; } = 3;
+    public int LMR_MinFullDepthSearchedMoves_PV { get; set; } = 5;
+
+    [SPSA<int>(1, 10, 0.5)]
+    public int LMR_MinFullDepthSearchedMoves_NonPV { get; set; } = 2;
 
     /// <summary>
     /// Value originally from Stormphrax, who apparently took it from Viridithas
     /// </summary>
-    [SPSA<double>(0.1, 2, 0.10)]
+    [SPSA<double>(0.1, 2, 0.1)]
     public double LMR_Base { get; set; } = 0.75;
 
     /// <summary>
