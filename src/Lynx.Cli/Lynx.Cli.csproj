@@ -25,6 +25,20 @@
 
     <!--https://learn.microsoft.com/en-us/dotnet/core/compatibility/interop/9.0/cet-support-->
     <CETCompat>false</CETCompat>
+
+    <!--Size reductions-->
+    <DebuggerSupport>false</DebuggerSupport>
+    <EnableUnsafeBinaryFormatterSerialization>false</EnableUnsafeBinaryFormatterSerialization>
+    <EnableUnsafeUTF7Encoding>false</EnableUnsafeUTF7Encoding>
+    <EventSourceSupport>false</EventSourceSupport>
+    <HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <MetadataUpdaterSupport>false</MetadataUpdaterSupport>
+    <MetricsSupport>false</MetricsSupport>
+    <StackTraceSupport>false</StackTraceSupport>
+    <UseNativeHttpHandler>true</UseNativeHttpHandler>
+    <UseSystemResourceKeys>true</UseSystemResourceKeys>
+    <XmlResolverIsNetworkingEnabledByDefault>false</XmlResolverIsNetworkingEnabledByDefault>
   </PropertyGroup>
 
   <ItemGroup>
