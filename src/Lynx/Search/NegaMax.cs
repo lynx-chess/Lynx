@@ -1,5 +1,6 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
+using System.Formats.Tar;
 using System.Runtime.CompilerServices;
 using System.Security.Authentication;
 using System.Xml.Linq;
@@ -51,7 +52,9 @@ public sealed partial class Engine
             (ttScore, ttBestMove, ttElementType, ttRawScore, ttStaticEval) = _tt.ProbeHash(position, depth, ply, alpha, beta);
 
             // TT cutoffs
-            if (!pvNode && ttScore != EvaluationConstants.NoHashEntry)
+            if (!pvNode
+                && ttScore != EvaluationConstants.NoHashEntry
+                && (ttScore <= alpha || cutnode))
             {
                 return ttScore;
             }
