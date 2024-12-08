@@ -1,7 +1,4 @@
-﻿using NLog;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace Lynx.Model;
 
@@ -13,19 +10,22 @@ public enum NodeType : byte
     Beta
 }
 
+/// <summary>
+/// 10 bytes
+/// </summary>
 public struct TranspositionTableElement
 {
-    private ushort _key;
+    private ushort _key;        // 2 bytes
 
-    private ShortMove _move;
+    private ShortMove _move;    // 2 bytes
 
-    private short _score;
+    private short _score;       // 2 bytes
 
-    private short _staticEval;
+    private short _staticEval;  // 2 bytes
 
-    private byte _depth;
+    private byte _depth;        // 1 byte
 
-    private NodeType _type;
+    private NodeType _type;     // 1 byte
 
     /// <summary>
     /// 16 MSB of Position's Zobrist key
