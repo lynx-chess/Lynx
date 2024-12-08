@@ -129,10 +129,11 @@ public sealed class Game : IDisposable
     /// <summary>
     /// Basic algorithm described in https://web.archive.org/web/20201107002606/https://marcelk.net/2013-04-06/paper/upcoming-rep-v2.pdf
     /// </summary>
+    /// <param name="threefold">Wether an actual threefold repetition needs to be checked, or 'twofold' is enough</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsThreefoldRepetition()
+    public bool IsThreefoldRepetition(bool threefold = false)
     {
-        var repetitionsLeft = 2;    // 1 if we ever want to also be able to detect 2-fold repetition
+        var repetitionsLeft = threefold ? 2 : 1;
         var currentHash = CurrentPosition.UniqueIdentifier;
 
         // [_positionHashHistoryPointer - 1] would be the last one, we want to start searching 2 ealier and finish HalfMovesWithoutCaptureOrPawnMove earlier

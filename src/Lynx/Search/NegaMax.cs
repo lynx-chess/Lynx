@@ -278,7 +278,7 @@ public sealed partial class Engine
             }
 
             int score;
-            if (canBeRepetition && (Game.IsThreefoldRepetition() || Game.Is50MovesRepetition()))
+            if (canBeRepetition && (Game.IsThreefoldRepetition(threefold: isRoot) || Game.Is50MovesRepetition()))
             {
                 score = 0;
 
