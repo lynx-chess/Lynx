@@ -59,7 +59,7 @@ public readonly struct TranspositionTable
     public (int Score, ShortMove BestMove, NodeType NodeType, int RawScore, int StaticEval) ProbeHash(Position position, int depth, int ply, int alpha, int beta)
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier);
-        ref var entry = ref _tt[ttIndex];
+        var entry = _tt[ttIndex];
 
         if ((ushort)position.UniqueIdentifier != entry.Key)
         {
@@ -162,13 +162,10 @@ public readonly struct TranspositionTable
             throw new ArgumentException($"Invalid transpositon table (Hash) size: {ttLengthMb}Mb, {ttLength} values (> Array.MaxLength, {Array.MaxLength})");
         }
 
-        var mask = ttLength - 1;
-
         _logger.Info("Hash value:\t{0} MB", size);
         _logger.Info("TT memory:\t{0} MB", (ttLengthMb * ttEntrySize).ToString("F"));
         _logger.Info("TT length:\t{0} items", ttLength);
         _logger.Info("TT entry:\t{0} bytes", ttEntrySize);
-        _logger.Info("TT mask:\t{0}", mask.ToString("X"));
 
         return (int)ttLength;
     }

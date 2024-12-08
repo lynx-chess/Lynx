@@ -11,9 +11,9 @@ public sealed partial class Engine
     private readonly Move[] _pVTable = GC.AllocateArray<Move>(Configuration.EngineSettings.MaxDepth * (Configuration.EngineSettings.MaxDepth + 1) / 2, pinned: true);
 
     /// <summary>
-    /// (<see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/>) x 3
+    /// 3 x (<see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/>)
     /// </summary>
-    private readonly int[][] _killerMoves;
+    private readonly int[] _killerMoves = GC.AllocateArray<int>(3 * (Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin), pinned: true);
 
     /// <summary>
     /// 12 x 64
@@ -94,10 +94,7 @@ public sealed partial class Engine
                 return onlyOneLegalMoveSearchResult;
             }
 
-            for (int i = 0; i < _killerMoves.Length; ++i)
-            {
-                Array.Clear(_killerMoves[i]);
-            }
+            Array.Clear(_killerMoves);
             // Not clearing _quietHistory on purpose
             // Not clearing _captureHistory on purpose
 
@@ -116,7 +113,7 @@ public sealed partial class Engine
                 if (depth < Configuration.EngineSettings.AspirationWindow_MinDepth
                     || lastSearchResult?.Score is null)
                 {
-                    bestScore = NegaMax(depth: depth, ply: 0, alpha, beta);
+                    bestScore = NegaMax(depth: depth, ply: 0, alpha, beta, cutnode: false);
                 }
                 else
                 {
@@ -140,7 +137,7 @@ public sealed partial class Engine
                         _logger.Debug("Aspiration windows depth {Depth}: [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
                             depth, alpha, beta, bestScore, _nodes);
 
-                        bestScore = NegaMax(depth: depth - failHighReduction, ply: 0, alpha, beta);
+                        bestScore = NegaMax(depth: depth - failHighReduction, ply: 0, alpha, beta, cutnode:false);
 
                         // 13, 19, 28, 42, 63, 94, 141, 211, 316, 474, 711, 1066, 1599, 2398, 3597, 5395, 8092, 12138, 18207, 27310, |EvaluationConstants.MaxEval|, 40965
                         window += window >> 1;   // window / 2
@@ -229,6 +226,12 @@ public sealed partial class Engine
 
     private bool StopSearchCondition(Move bestMove, int depth, int mate)
     {
+        if (bestMove == default)
+        {
+            _logger.Warn("Search at depth {0} didn't produce a best move. Mate in {1} detected, and/but search continues", depth - 1, mate);
+            return true;
+        }
+
         if (mate != 0)
         {
             var winningMateThreshold = (100 - Game.HalfMovesWithoutCaptureOrPawnMove) / 2;

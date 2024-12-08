@@ -60,22 +60,22 @@ public sealed partial class Engine
 
         if (isNotQSearch)
         {
-            var thisPlyKillerMoves = _killerMoves[ply];
+            var thisPlyKillerMovesBaseIndex = ply * 3;
 
             // 1st killer move
-            if (thisPlyKillerMoves[0] == move)
+            if (_killerMoves[thisPlyKillerMovesBaseIndex] == move)
             {
                 return FirstKillerMoveValue;
             }
 
             // 2nd killer move
-            if (thisPlyKillerMoves[1] == move)
+            if (_killerMoves[thisPlyKillerMovesBaseIndex + 1] == move)
             {
                 return SecondKillerMoveValue;
             }
 
             // 3rd killer move
-            if (thisPlyKillerMoves[2] == move)
+            if (_killerMoves[thisPlyKillerMovesBaseIndex + 2] == move)
             {
                 return ThirdKillerMoveValue;
             }
@@ -178,17 +178,19 @@ public sealed partial class Engine
             }
         }
 
-        var thisPlyKillerMoves = _killerMoves[ply];
-        if (move.PromotedPiece() == default && move != thisPlyKillerMoves[0])
+        var thisPlyKillerMovesBaseIndex = ply * 3;
+        var firstKillerMove = _killerMoves[thisPlyKillerMovesBaseIndex];
+
+        if (move.PromotedPiece() == default && move != firstKillerMove)
         {
             // 🔍 Killer moves
-            if (move != thisPlyKillerMoves[1])
+            if (move != _killerMoves[thisPlyKillerMovesBaseIndex + 1])
             {
-                thisPlyKillerMoves[2] = thisPlyKillerMoves[1];
+                _killerMoves[thisPlyKillerMovesBaseIndex + 2] = _killerMoves[thisPlyKillerMovesBaseIndex + 1];
             }
 
-            thisPlyKillerMoves[1] = thisPlyKillerMoves[0];
-            thisPlyKillerMoves[0] = move;
+            _killerMoves[thisPlyKillerMovesBaseIndex + 1] = firstKillerMove;
+            _killerMoves[thisPlyKillerMovesBaseIndex] = move;
 
             if (!isRoot)
             {
