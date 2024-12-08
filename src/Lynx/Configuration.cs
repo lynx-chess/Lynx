@@ -123,7 +123,7 @@ public sealed class EngineSettings
     public int LMR_MinDepth { get; set; } = 3;
 
     [SPSA<int>(1, 10, 0.5)]
-    public int LMR_MinFullDepthSearchedMoves_PV { get; set; } = 3;
+    public int LMR_MinFullDepthSearchedMoves_PV { get; set; } = 5;
 
     [SPSA<int>(1, 10, 0.5)]
     public int LMR_MinFullDepthSearchedMoves_NonPV { get; set; } = 2;
