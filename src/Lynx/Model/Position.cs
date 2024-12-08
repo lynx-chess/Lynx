@@ -653,14 +653,16 @@ public class Position : IDisposable
         ulong passedPawnsMask = Masks.PassedPawns[pieceIndex][squareIndex];
         if ((PieceBitBoards[(int)Piece.p - pieceIndex] & passedPawnsMask) == default)
         {
+            var oopositeSideOccupancy = OccupancyBitBoards[oppositeSide];
+
             // Passed pawn without opponent pieces ahead (in its passed pawn mask)
-            if ((passedPawnsMask & OccupancyBitBoards[oppositeSide]) == 0)
+            if ((passedPawnsMask & oopositeSideOccupancy) == 0)
             {
                 packedBonus += PassedPawnBonusNoEnemiesAheadBonus[bucket][rank];
             }
 
             // Passed pawn without a piece right in front of him
-            if (!OccupancyBitBoards[(int)Side.Both].GetBit(squareInFrontOfPawn))
+            else if (!oopositeSideOccupancy.GetBit(squareInFrontOfPawn))
             {
                 packedBonus += PassedPawnBonusCanMove[bucket][rank];
             }

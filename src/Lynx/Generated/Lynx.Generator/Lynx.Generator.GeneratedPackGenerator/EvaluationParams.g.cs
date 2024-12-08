@@ -3,19 +3,19 @@
 static partial class EvaluationParams
 {
     /// <summary>
-    /// <see cref="Utils.Pack(-17, -13)"/>
+    /// <see cref="Utils.Pack(-16, -13)"/>
     /// </summary>
-    public const int IsolatedPawnPenalty = -851985;
+    public const int IsolatedPawnPenalty = -851984;
 
     /// <summary>
-    /// <see cref="Utils.Pack(40, 0)"/>
+    /// <see cref="Utils.Pack(40, 2)"/>
     /// </summary>
-    public const int OpenFileRookBonus = 40;
+    public const int OpenFileRookBonus = 131112;
 
     /// <summary>
-    /// <see cref="Utils.Pack(16, 6)"/>
+    /// <see cref="Utils.Pack(15, 7)"/>
     /// </summary>
-    public const int SemiOpenFileRookBonus = 393232;
+    public const int SemiOpenFileRookBonus = 458767;
 
     /// <summary>
     /// <see cref="Utils.Pack(-24, 5)"/>
@@ -43,8 +43,8 @@ static partial class EvaluationParams
     public const int PieceProtectedByPawnBonus = 1048588;
 
     /// <summary>
-    /// <see cref="Utils.Pack(-47, -31)"/>
+    /// <see cref="Utils.Pack(-47, -30)"/>
     /// </summary>
-    public const int PieceAttackedByPawnPenalty = -2031663;
+    public const int PieceAttackedByPawnPenalty = -1966127;
 
 }
