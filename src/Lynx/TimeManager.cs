@@ -18,7 +18,7 @@ public static class TimeManager
     {
         int maxDepth = -1;
         int hardLimitTimeBound = SearchConstraints.DefaultHardLimitTimeBound;
-        int softLimitTimeBound = int.MaxValue;
+        int softLimitTimeBound = SearchConstraints.DefaultSoftLimitTimeBound;
 
         double millisecondsLeft;
         int millisecondsIncrement;
@@ -52,8 +52,8 @@ public static class TimeManager
             var softLimitBase = (millisecondsLeft / movesDivisor) + (millisecondsIncrement * Configuration.EngineSettings.SoftTimeBaseIncrementMultiplier);
             softLimitTimeBound = Math.Min(hardLimitTimeBound, (int)(softLimitBase * Configuration.EngineSettings.SoftTimeBoundMultiplier));
 
-            _logger.Info("Soft time bound: {0}s", 0.001 * softLimitTimeBound);
-            _logger.Info("Hard time bound: {0}s", 0.001 * hardLimitTimeBound);
+            _logger.Info("[TM] Soft time bound: {0}s", 0.001 * softLimitTimeBound);
+            _logger.Info("[TM] Hard time bound: {0}s", 0.001 * hardLimitTimeBound);
         }
         else if (goCommand.MoveTime > 0)
         {

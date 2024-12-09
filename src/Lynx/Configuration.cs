@@ -82,6 +82,17 @@ public sealed class EngineSettings
                 Constants.AbsoluteMaxTTSize);
     }
 
+    private int _threads = 1;
+    public int Threads
+    {
+        get => _threads;
+        set => _threads =
+            Math.Clamp(
+                value,
+                1,
+                Constants.MaxThreadCount);
+    }
+
     public bool UseOnlineTablebaseInRootPositions { get; set; } = false;
 
     /// <summary>
@@ -118,6 +129,8 @@ public sealed class EngineSettings
     public int ScoreStabiity_MinDepth { get; set; } = 7;
 
     #endregion
+
+    #region Search
 
     [SPSA<int>(3, 10, 0.5)]
     public int LMR_MinDepth { get; set; } = 3;
@@ -221,6 +234,8 @@ public sealed class EngineSettings
 
     [SPSA<int>(-8192, 0, 512)]
     public int HistoryPrunning_Margin { get; set; } = -1940;
+
+    #endregion
 }
 
 [JsonSourceGenerationOptions(

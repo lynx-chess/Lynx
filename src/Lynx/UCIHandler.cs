@@ -249,10 +249,7 @@ public sealed class UCIHandler
 #pragma warning disable S1066 // Collapsible "if" statements should be merged
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
-                        if (value != 1)
-                        {
-                            _logger.Warn("Unsopported threads value: {0}", value);
-                        }
+                        Configuration.EngineSettings.Threads = value;
                     }
                     break;
 #pragma warning restore S1066 // Collapsible "if" statements should be merged

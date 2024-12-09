@@ -124,4 +124,10 @@ public class UtilsTest
     {
         Assert.AreEqual(expectedDistance, Constants.ChebyshevDistance[(int)square1][(int)square2]);
     }
+
+    [Test]
+    public void CalculateNps()
+    {
+        Assert.AreEqual(1, Utils.CalculateNps(0, 0));
+    }
 }
