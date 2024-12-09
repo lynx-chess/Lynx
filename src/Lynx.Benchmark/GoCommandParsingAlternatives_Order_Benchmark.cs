@@ -6,7 +6,7 @@ namespace Lynx.Benchmark;
 /// <summary>
 /// Implementation chosen from <see cref="GoCommandParsingAlternatives_Benchmark"/>
 /// </summary>
-public sealed class GoCommandParsingAlternatives_Order_Benchmark : BaseBenchmark
+public class GoCommandParsingAlternatives_Order_Benchmark : BaseBenchmark
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
