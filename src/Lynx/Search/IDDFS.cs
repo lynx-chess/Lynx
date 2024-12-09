@@ -192,7 +192,11 @@ public sealed partial class Engine
         catch (OperationCanceledException)
         {
 #pragma warning disable S6667 // Logging in a catch clause should pass the caught exception as a parameter - expected exception we want to ignore
-            _logger.Info("Search cancellation requested after {0}ms (depth {1}, nodes {2}), best move will be returned", _stopWatch.ElapsedMilliseconds, depth, _nodes);
+            _logger.Info(
+#if MULTITHREAD_DEBUG
+                $"[#{_id}] " +
+#endif
+                "Search cancellation requested after {0}ms (depth {1}, nodes {2}), best move will be returned", _stopWatch.ElapsedMilliseconds, depth, _nodes);
 #pragma warning restore S6667 // Logging in a catch clause should pass the caught exception as a parameter.
 
             for (int i = 0; i < lastSearchResult?.Moves.Length; ++i)
@@ -202,7 +206,11 @@ public sealed partial class Engine
         }
         catch (Exception e) when (e is not AssertException)
         {
-            _logger.Error(e, "Unexpected error ocurred during the search of position {0} at depth {1}, best move will be returned\n{2}", Game.PositionBeforeLastSearch.FEN(), depth, e.StackTrace);
+            _logger.Error(e,
+#if MULTITHREAD_DEBUG
+                $"[#{_id}] " +
+#endif
+                "Unexpected error ocurred during the search of position {0} at depth {1}, best move will be returned\n{2}", Game.PositionBeforeLastSearch.FEN(), depth, e.StackTrace);
         }
         finally
         {
@@ -226,22 +234,38 @@ public sealed partial class Engine
     {
         if (bestMove == default)
         {
-            _logger.Warn("Search at depth {0} didn't produce a best move. Mate in {1} detected, and/but search continues", depth - 1, mate);
+            _logger.Warn(
+#if s
+                $"[#{_id}] " +
+#endif
+                "Search at depth {0} didn't produce a best move. Mate in {1} detected, and/but search continues", depth - 1, mate);
             return true;
         }
 
         if (mate != 0)
         {
             var winningMateThreshold = (100 - Game.HalfMovesWithoutCaptureOrPawnMove) / 2;
-            _logger.Info("Depth {0}: mate in {1} detected ({2} moves until draw by repetition)", depth - 1, mate, winningMateThreshold);
+            _logger.Info(
+#if MULTITHREAD_DEBUG
+                $"[#{_id}] " +
+#endif
+                "Depth {0}: mate in {1} detected ({2} moves until draw by repetition)", depth - 1, mate, winningMateThreshold);
 
             if (mate < 0 || mate + Constants.MateDistanceMarginToStopSearching < winningMateThreshold)
             {
-                _logger.Info("Stopping search: mate is short enough");
+                _logger.Info(
+#if MULTITHREAD_DEBUG
+                $"[#{_id}] " +
+#endif
+                    "Stopping search: mate is short enough");
                 return false;
             }
 
-            _logger.Info("Search continues, hoping to find a faster mate");
+            _logger.Info(
+#if MULTITHREAD_DEBUG
+                $"[#{_id}] " +
+#endif
+                "Search continues, hoping to find a faster mate");
         }
 
         if (depth >= Configuration.EngineSettings.MaxDepth)
