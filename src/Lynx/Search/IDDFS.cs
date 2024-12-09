@@ -235,7 +235,7 @@ public sealed partial class Engine
         if (bestMove == default)
         {
             _logger.Warn(
-#if s
+#if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
                 "Search at depth {0} didn't produce a best move. Mate in {1} detected, and/but search continues", depth - 1, mate);
