@@ -59,7 +59,7 @@ public readonly struct TranspositionTable
     public (int Score, ShortMove BestMove, NodeType NodeType, int RawScore, int StaticEval) ProbeHash(Position position, int depth, int ply, int alpha, int beta)
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier);
-        var entry = _tt[ttIndex];
+        ref var entry = ref _tt[ttIndex];
 
         if ((ushort)position.UniqueIdentifier != entry.Key)
         {
