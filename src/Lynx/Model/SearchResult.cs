@@ -7,6 +7,7 @@ public sealed class SearchResult
 #if MULTITHREAD_DEBUG
     public string EngineId { get; init; }
 #endif
+
     public Move[] Moves { get; init; }
 
     public (int WDLWin, int WDLDraw, int WDLLoss)? WDL { get; set; } = null;

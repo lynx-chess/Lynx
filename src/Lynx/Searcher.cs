@@ -74,16 +74,13 @@ public sealed class Searcher
 
     private async Task OnGoCommand(GoCommand goCommand)
     {
-        //TaskFactory taskFactory = new();
-        var searchConstraints = TimeManager.CalculateTimeManagement(_mainEngine.Game, goCommand);
-
         if (_searchThreadsCount == 1)
         {
             SingleThreadedSearch(goCommand);
         }
         else
         {
-            MultiThreadedSearch(goCommand);
+            await MultiThreadedSearch(goCommand);
         }
     }
 
@@ -99,9 +96,69 @@ public sealed class Searcher
         }
     }
 
-    private void MultiThreadedSearch(GoCommand goCommand)
+    private async Task MultiThreadedSearch(GoCommand goCommand)
     {
-        SingleThreadedSearch(goCommand);
+        var searchConstraints = TimeManager.CalculateTimeManagement(_mainEngine.Game, goCommand);
+
+#if MULTITHREAD_DEBUG
+        var sw = Stopwatch.StartNew();
+        var lastElapsed = sw.ElapsedMilliseconds;
+#endif
+
+        // Basic lazy SMP implementation
+        // Extra engines run in "go infinite" mode and their purpose is to populate the TT
+        // Not UCI output is produced by them nor their search results are taken into account
+        var extraEnginesSearchConstraint = SearchConstraints.InfiniteSearchConstraint;
+
+        var tasks = _extraEngines
+            .Select(engine =>
+                Task.Run(() => engine.Search(goCommand, extraEnginesSearchConstraint)))
+            .ToArray();
+
+#if MULTITHREAD_DEBUG
+        _logger.Debug("End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+        lastElapsed = sw.ElapsedMilliseconds;
+#endif
+
+        SearchResult? finalSearchResult = _mainEngine.Search(goCommand, searchConstraints);
+
+#if MULTITHREAD_DEBUG
+        _logger.Debug("End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+        lastElapsed = sw.ElapsedMilliseconds;
+#endif
+
+        foreach (var engine in _extraEngines)
+        {
+            engine.StopSearching();
+        }
+
+        // We wait just for the node count, so there's room for improvement here with thread voting
+        // and other strategies that take other thread results into account
+        var extraResults = await Task.WhenAll(tasks);
+
+#if MULTITHREAD_DEBUG
+        _logger.Debug("End of extra searches, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+#endif
+
+        if (finalSearchResult is not null)
+        {
+            foreach (var extraResult in extraResults)
+            {
+                finalSearchResult.Nodes += extraResult?.Nodes ?? 0;
+            }
+
+            finalSearchResult.NodesPerSecond = Utils.CalculateNps(finalSearchResult.Nodes, 0.001 * finalSearchResult.Time);
+
+#if MULTITHREAD_DEBUG
+            _logger.Debug("End of multithread calculations, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+#endif
+
+            // Final info command
+            _engineWriter.TryWrite(finalSearchResult);
+
+            // We always print best move, even in case of go ponder + stop, in which case IDEs are expected to ignore it
+            _engineWriter.TryWrite(new BestMoveCommand(finalSearchResult));
+        }
     }
 
     public void AdjustPosition(ReadOnlySpan<char> command)
@@ -127,6 +184,11 @@ public sealed class Searcher
     public void PonderHit()
     {
         _mainEngine.PonderHit();
+
+        foreach (var engine in _extraEngines)
+        {
+            engine.PonderHit();
+        }
     }
 
     public void NewGame()
@@ -141,7 +203,13 @@ public sealed class Searcher
         if (_ttWrapper.Size == Configuration.EngineSettings.TranspositionTableSize)
         {
             _ttWrapper.Clear();
+
             _mainEngine.NewGame();
+
+            foreach (var engine in _extraEngines)
+            {
+                engine.NewGame();
+            }
         }
         else
         {
@@ -151,6 +219,8 @@ public sealed class Searcher
 
             _mainEngine.FreeResources();
             _mainEngine = new Engine("1", _engineWriter, in _ttWrapper, warmup: true);
+
+            AllocateExtraEngines();
         }
 
         // Threads update
@@ -203,7 +273,13 @@ public sealed class Searcher
 
             for (int i = 0; i < _searchThreadsCount - mainEngineOffset; ++i)
             {
-                _extraEngines[i] = new Engine($"{i + 2}", _engineWriter, in _ttWrapper, warmup: false);
+                _extraEngines[i] = new Engine($"{i + 2}",
+#if MULTITHREAD_DEBUG
+                    _engineWriter,
+#else
+                    SilentChannelWriter<object>.Instance,
+#endif
+                    in _ttWrapper, warmup: false);
             }
         }
         else

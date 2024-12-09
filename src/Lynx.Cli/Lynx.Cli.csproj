@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <DefineConstants>MULTITHREAD_DEBUG</DefineConstants>
+    <!--<DefineConstants>MULTITHREAD_DEBUG</DefineConstants>-->
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Optimized.ToLower())'=='true'">
