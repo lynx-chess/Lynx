@@ -28,6 +28,12 @@
 
     <PublishAot>true</PublishAot>
     <OptimizationPreference>Speed</OptimizationPreference>
+
+    <!--'native' instruction set optimizes for the running CPU-->
+    <!--https://github.com/dotnet/runtime/blob/main/src/coreclr/nativeaot/docs/optimizing.md-->
+    <!--This is not useful for cross-compiling, but for this PoC it'll do.-->
+    <!--See Lizard's makefile for an example how to provide multiple instruction sets to produce different binaries-->
+    <IlcInstructionSet>native</IlcInstructionSet>
   </PropertyGroup>
 
   <ItemGroup>
