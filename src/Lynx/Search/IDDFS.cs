@@ -137,7 +137,7 @@ public sealed partial class Engine
                         _logger.Debug("Aspiration windows depth {Depth}: [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
                             depth, alpha, beta, bestScore, _nodes);
 
-                        bestScore = NegaMax(depth: depth - failHighReduction, ply: 0, alpha, beta, cutnode:false);
+                        bestScore = NegaMax(depth: depth - failHighReduction, ply: 0, alpha, beta, cutnode: false);
 
                         // 13, 19, 28, 42, 63, 94, 141, 211, 316, 474, 711, 1066, 1599, 2398, 3597, 5395, 8092, 12138, 18207, 27310, |EvaluationConstants.MaxEval|, 40965
                         window += window >> 1;   // window / 2
@@ -265,16 +265,19 @@ public sealed partial class Engine
             return shouldContinue;
         }
 
-        var elapsedMilliseconds = _stopWatch.ElapsedMilliseconds;
-
-        var bestMoveNodeCount = _moveNodeCount[bestMove.Piece()][bestMove.TargetSquare()];
-        var scaledSoftLimitTimeBound = TimeManager.SoftLimit(_searchConstraints, depth - 1, bestMoveNodeCount, _nodes, _bestMoveStability, _scoreDelta);
-        _logger.Debug("[TM] Depth {Depth}: hard limit {HardLimit}, base soft limit {BaseSoftLimit}, scaled soft limit {ScaledSoftLimit}", depth - 1, _searchConstraints.HardLimitTimeBound, _searchConstraints.SoftLimitTimeBound, scaledSoftLimitTimeBound);
-
-        if (elapsedMilliseconds > scaledSoftLimitTimeBound)
+        if (!_isPondering)
         {
-            _logger.Info("Stopping at depth {0} (nodes {1}): {2}ms > {3}ms", depth - 1, _nodes, elapsedMilliseconds, scaledSoftLimitTimeBound);
-            return false;
+            var elapsedMilliseconds = _stopWatch.ElapsedMilliseconds;
+
+            var bestMoveNodeCount = _moveNodeCount[bestMove.Piece()][bestMove.TargetSquare()];
+            var scaledSoftLimitTimeBound = TimeManager.SoftLimit(_searchConstraints, depth - 1, bestMoveNodeCount, _nodes, _bestMoveStability, _scoreDelta);
+            _logger.Debug("[TM] Depth {Depth}: hard limit {HardLimit}, base soft limit {BaseSoftLimit}, scaled soft limit {ScaledSoftLimit}", depth - 1, _searchConstraints.HardLimitTimeBound, _searchConstraints.SoftLimitTimeBound, scaledSoftLimitTimeBound);
+
+            if (elapsedMilliseconds > scaledSoftLimitTimeBound)
+            {
+                _logger.Info("Stopping at depth {0} (nodes {1}): {2}ms > {3}ms", depth - 1, _nodes, elapsedMilliseconds, scaledSoftLimitTimeBound);
+                return false;
+            }
         }
 
         return true;
