@@ -411,7 +411,11 @@ public sealed partial class Engine
             // when cancelling the pondering search
             if (!_isPondering)
             {
-                _logger.Warn("Search cancelled at depth 1, choosing first found legal move as best one");
+                _logger.Warn(
+#if MULTITHREAD_DEBUG
+                $"[#{_id}] " +
+#endif
+                    "Search cancelled at depth 1, choosing first found legal move as best one");
             }
             finalSearchResult = new(
 #if MULTITHREAD_DEBUG
