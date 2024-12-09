@@ -120,7 +120,7 @@ public partial class Engine
             var goCommand = new GoCommand($"go depth {depth}");
             var searchConstraints = TimeManager.CalculateTimeManagement(Game, goCommand);
 
-            var result = BestMove(goCommand, in searchConstraints);
+            var result = BestMove(in searchConstraints);
 
             var elapsedSeconds = Utils.CalculateElapsedSeconds(_stopWatch);
             totalSeconds += elapsedSeconds;
