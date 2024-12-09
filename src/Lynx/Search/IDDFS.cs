@@ -287,24 +287,27 @@ public sealed partial class Engine
             return shouldContinue;
         }
 
-        var elapsedMilliseconds = _stopWatch.ElapsedMilliseconds;
-
-        var bestMoveNodeCount = _moveNodeCount[bestMove.Piece()][bestMove.TargetSquare()];
-        var scaledSoftLimitTimeBound = TimeManager.SoftLimit(_searchConstraints, depth - 1, bestMoveNodeCount, _nodes, _bestMoveStability, _scoreDelta);
-        _logger.Debug(
-#if MULTITHREAD_DEBUG
-                $"[#{_id}] " +
-#endif
-            "[TM] Depth {Depth}: hard limit {HardLimit}, base soft limit {BaseSoftLimit}, scaled soft limit {ScaledSoftLimit}", depth - 1, _searchConstraints.HardLimitTimeBound, _searchConstraints.SoftLimitTimeBound, scaledSoftLimitTimeBound);
-
-        if (elapsedMilliseconds > scaledSoftLimitTimeBound)
+        if (!_isPondering)
         {
-            _logger.Info(
+            var elapsedMilliseconds = _stopWatch.ElapsedMilliseconds;
+
+            var bestMoveNodeCount = _moveNodeCount[bestMove.Piece()][bestMove.TargetSquare()];
+            var scaledSoftLimitTimeBound = TimeManager.SoftLimit(_searchConstraints, depth - 1, bestMoveNodeCount, _nodes, _bestMoveStability, _scoreDelta);
+            _logger.Debug(
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                "[TM] Stopping at depth {0} (nodes {1}): {2}ms > {3}ms", depth - 1, _nodes, elapsedMilliseconds, scaledSoftLimitTimeBound);
-            return false;
+                "[TM] Depth {Depth}: hard limit {HardLimit}, base soft limit {BaseSoftLimit}, scaled soft limit {ScaledSoftLimit}", depth - 1, _searchConstraints.HardLimitTimeBound, _searchConstraints.SoftLimitTimeBound, scaledSoftLimitTimeBound);
+
+            if (elapsedMilliseconds > scaledSoftLimitTimeBound)
+            {
+                _logger.Info(
+#if MULTITHREAD_DEBUG
+                $"[#{_id}] " +
+#endif
+                    "[TM] Stopping at depth {0} (nodes {1}): {2}ms > {3}ms", depth - 1, _nodes, elapsedMilliseconds, scaledSoftLimitTimeBound);
+                return false;
+            }
         }
 
         return true;

@@ -1,8 +1,6 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Security.Authentication;
-using System.Xml.Linq;
 
 namespace Lynx;
 
