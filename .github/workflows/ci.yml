@@ -94,6 +94,8 @@ jobs:
         path: |
           artifacts/${{ matrix.runtime-identifier }}/
           !artifacts/**/*.pdb
+          !artifacts/**/*.dbg
+          !artifacts/**/Lynx.Cli.dsym/**
         if-no-files-found: error
 
     - name: Publish library

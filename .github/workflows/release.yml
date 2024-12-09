@@ -99,6 +99,8 @@ jobs:
         path: |
           artifacts/${{ matrix.runtime-identifier }}/
           !artifacts/**/*.pdb
+          !artifacts/**/*.dbg
+          !artifacts/**/Lynx.Cli.dsym/**
         if-no-files-found: error
 
     - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-${{ matrix.runtime-identifier }} artifact
@@ -109,6 +111,8 @@ jobs:
         path: |
           artifacts/${{ matrix.runtime-identifier }}/
           !artifacts/**/*.pdb
+          !artifacts/**/*.dbg
+          !artifacts/**/Lynx.Cli.dsym/**
         if-no-files-found: error
 
     - name: Deterministic build
