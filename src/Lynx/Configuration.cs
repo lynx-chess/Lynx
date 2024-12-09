@@ -55,7 +55,7 @@ public sealed class GeneralSettings
 {
     public bool EnableLogging { get; set; } = false;
 
-    public bool EnableTuning { get; set; } = true;
+    public bool EnableTuning { get; set; } = false;
 }
 
 public sealed class EngineSettings
