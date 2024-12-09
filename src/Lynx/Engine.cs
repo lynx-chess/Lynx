@@ -162,7 +162,7 @@ public sealed partial class Engine : IDisposable
         _searchCancellationTokenSource = new();
         _absoluteSearchCancellationTokenSource = new();
 
-        if (searchConstrains.HardLimitTimeBound != SearchConstraints.DefaultHardLimitTimeBound)
+        if (!_isPondering && searchConstrains.HardLimitTimeBound != SearchConstraints.DefaultHardLimitTimeBound)
         {
             _searchCancellationTokenSource.CancelAfter(searchConstrains.HardLimitTimeBound);
         }
