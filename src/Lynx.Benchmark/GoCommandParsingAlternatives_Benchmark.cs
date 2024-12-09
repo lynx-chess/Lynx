@@ -1,126 +1,188 @@
 ﻿/*
  *
- * BenchmarkDotNet v0.14.0, Ubuntu 22.04.4 LTS (Jammy Jellyfish)
- * AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
- * .NET SDK 8.0.401
- *   [Host]     : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
- *   DefaultJob : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
- *
- * | Method          | command              | Mean       | Error     | StdDev    | Median     | Ratio | RatioSD | Gen0   | Allocated | Alloc Ratio |
- * |---------------- |--------------------- |-----------:|----------:|----------:|-----------:|------:|--------:|-------:|----------:|------------:|
- * | Sequential      | go infinite          | 1,889.8 ns |  22.33 ns |  19.80 ns | 1,883.3 ns |  1.00 |    0.01 |      - |     272 B |        1.00 |
- * | Parallel        | go infinite          | 3,257.4 ns |  63.33 ns | 132.20 ns | 3,232.4 ns |  1.72 |    0.07 | 0.0191 |    1826 B |        6.71 |
- * | CapturingGroups | go infinite          | 1,577.6 ns |   5.56 ns |   4.34 ns | 1,577.9 ns |  0.83 |    0.01 | 0.0172 |    1504 B |        5.53 |
- * | NoRegex         | go infinite          |   868.0 ns |  10.13 ns |   9.47 ns |   864.2 ns |  0.46 |    0.01 | 0.0029 |     272 B |        1.00 |
- * |                 |                      |            |           |           |            |       |         |        |           |             |
- * | Sequential      | go wt(...)c 500 [42] | 4,330.4 ns |  52.75 ns |  49.34 ns | 4,327.7 ns |  1.00 |    0.02 | 0.0076 |    1248 B |        1.00 |
- * | Parallel        | go wt(...)c 500 [42] | 4,263.0 ns |  82.61 ns | 234.34 ns | 4,185.8 ns |  0.98 |    0.05 | 0.0305 |    2808 B |        2.25 |
- * | CapturingGroups | go wt(...)c 500 [42] | 3,883.5 ns |  22.45 ns |  21.00 ns | 3,885.4 ns |  0.90 |    0.01 | 0.0534 |    4800 B |        3.85 |
- * | NoRegex         | go wt(...)c 500 [42] | 1,011.2 ns |   6.44 ns |   6.02 ns | 1,010.5 ns |  0.23 |    0.00 | 0.0019 |     272 B |        0.22 |
- * |                 |                      |            |           |           |            |       |         |        |           |             |
- * | Sequential      | go wt(...)00000 [78] | 5,401.7 ns | 101.28 ns |  94.74 ns | 5,400.7 ns |  1.00 |    0.02 | 0.0153 |    1728 B |        1.00 |
- * | Parallel        | go wt(...)00000 [78] | 5,129.1 ns | 101.88 ns | 125.11 ns | 5,122.6 ns |  0.95 |    0.03 | 0.0381 |    3288 B |        1.90 |
- * | CapturingGroups | go wt(...)00000 [78] | 5,515.9 ns | 105.29 ns | 103.41 ns | 5,489.9 ns |  1.02 |    0.03 | 0.0839 |    7064 B |        4.09 |
- * | NoRegex         | go wt(...)00000 [78] | 1,179.3 ns |  10.16 ns |   9.01 ns | 1,179.2 ns |  0.22 |    0.00 | 0.0019 |     272 B |        0.16 |
- * |                 |                      |            |           |           |            |       |         |        |           |             |
- * | Sequential      | go wt(...)go 40 [62] | 5,020.1 ns |  67.46 ns |  63.10 ns | 5,036.3 ns |  1.00 |    0.02 | 0.0153 |    1488 B |        1.00 |
- * | Parallel        | go wt(...)go 40 [62] | 4,559.2 ns |  90.55 ns | 190.99 ns | 4,537.0 ns |  0.91 |    0.04 | 0.0305 |    3048 B |        2.05 |
- * | CapturingGroups | go wt(...)go 40 [62] | 5,236.4 ns |  62.20 ns |  55.14 ns | 5,242.3 ns |  1.04 |    0.02 | 0.0839 |    7032 B |        4.73 |
- * | NoRegex         | go wt(...)go 40 [62] | 1,089.1 ns |   4.17 ns |   3.90 ns | 1,088.7 ns |  0.22 |    0.00 | 0.0019 |     272 B |        0.18 |
+ *  BenchmarkDotNet v0.14.0, Ubuntu 22.04.5 LTS (Jammy Jellyfish)
+ *  AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
+ *  .NET SDK 9.0.101
+ *    [Host]     : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
+ *    DefaultJob : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
  *
  *
- * BenchmarkDotNet v0.14.0, Windows 10 (10.0.20348.2655) (Hyper-V)
- * AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
- * .NET SDK 8.0.401
- *   [Host]     : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
- *   DefaultJob : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
- *
- * | Method          | command              | Mean       | Error     | StdDev    | Median     | Ratio | RatioSD | Gen0   | Gen1   | Allocated | Alloc Ratio |
- * |---------------- |--------------------- |-----------:|----------:|----------:|-----------:|------:|--------:|-------:|-------:|----------:|------------:|
- * | Sequential      | go infinite          | 1,810.8 ns |   8.83 ns |   8.26 ns | 1,814.1 ns |  1.00 |    0.01 | 0.0153 |      - |     272 B |        1.00 |
- * | Parallel        | go infinite          | 2,747.5 ns |  32.83 ns |  30.71 ns | 2,747.9 ns |  1.52 |    0.02 | 0.1068 |      - |    1823 B |        6.70 |
- * | CapturingGroups | go infinite          | 1,387.9 ns |  13.33 ns |  12.47 ns | 1,381.1 ns |  0.77 |    0.01 | 0.0896 |      - |    1504 B |        5.53 |
- * | NoRegex         | go infinite          |   796.1 ns |   5.17 ns |   4.83 ns |   794.8 ns |  0.44 |    0.00 | 0.0162 |      - |     272 B |        1.00 |
- * |                 |                      |            |           |           |            |       |         |        |        |           |             |
- * | Sequential      | go wt(...)c 500 [42] | 3,916.6 ns |  27.85 ns |  26.06 ns | 3,916.1 ns |  1.00 |    0.01 | 0.0687 |      - |    1249 B |        1.00 |
- * | Parallel        | go wt(...)c 500 [42] | 3,910.5 ns |  74.81 ns |  69.98 ns | 3,889.4 ns |  1.00 |    0.02 | 0.1678 |      - |    2808 B |        2.25 |
- * | CapturingGroups | go wt(...)c 500 [42] | 2,986.8 ns |  22.93 ns |  21.45 ns | 2,979.8 ns |  0.76 |    0.01 | 0.2861 | 0.0038 |    4800 B |        3.84 |
- * | NoRegex         | go wt(...)c 500 [42] |   962.8 ns |   1.75 ns |   1.55 ns |   963.2 ns |  0.25 |    0.00 | 0.0153 |      - |     272 B |        0.22 |
- * |                 |                      |            |           |           |            |       |         |        |        |           |             |
- * | Sequential      | go wt(...)00000 [78] | 5,817.6 ns | 115.51 ns | 192.99 ns | 5,799.9 ns |  1.00 |    0.05 | 0.0992 |      - |    1731 B |        1.00 |
- * | Parallel        | go wt(...)00000 [78] | 4,679.0 ns |  92.75 ns | 227.52 ns | 4,543.7 ns |  0.81 |    0.05 | 0.1907 |      - |    3288 B |        1.90 |
- * | CapturingGroups | go wt(...)00000 [78] | 4,446.6 ns |  40.87 ns |  38.23 ns | 4,442.5 ns |  0.77 |    0.03 | 0.4196 | 0.0076 |    7065 B |        4.08 |
- * | NoRegex         | go wt(...)00000 [78] | 1,051.2 ns |   5.68 ns |   5.32 ns | 1,053.6 ns |  0.18 |    0.01 | 0.0153 |      - |     272 B |        0.16 |
- * |                 |                      |            |           |           |            |       |         |        |        |           |             |
- * | Sequential      | go wt(...)go 40 [62] | 4,540.9 ns |  22.86 ns |  55.65 ns | 4,545.7 ns |  1.00 |    0.02 | 0.0763 |      - |    1489 B |        1.00 |
- * | Parallel        | go wt(...)go 40 [62] | 4,339.3 ns |  82.89 ns | 167.44 ns | 4,294.7 ns |  0.96 |    0.04 | 0.1755 |      - |    3048 B |        2.05 |
- * | CapturingGroups | go wt(...)go 40 [62] | 4,279.5 ns |  74.97 ns |  73.63 ns | 4,260.6 ns |  0.94 |    0.02 | 0.4196 | 0.0076 |    7033 B |        4.72 |
- * | NoRegex         | go wt(...)go 40 [62] | 1,003.3 ns |   1.81 ns |   1.60 ns | 1,002.7 ns |  0.22 |    0.00 | 0.0153 |      - |     272 B |        0.18 |
- *
- *
- * BenchmarkDotNet v0.14.0, macOS Sonoma 14.6.1 (23G93) [Darwin 23.6.0]
- * Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
- * .NET SDK 8.0.401
- *   [Host]     : .NET 8.0.8 (8.0.824.36612), Arm64 RyuJIT AdvSIMD
- *   DefaultJob : .NET 8.0.8 (8.0.824.36612), Arm64 RyuJIT AdvSIMD
- *
- * | Method          | command              | Mean       | Error     | StdDev    | Median     | Ratio | RatioSD | Gen0   | Gen1   | Allocated | Alloc Ratio |
- * |---------------- |--------------------- |-----------:|----------:|----------:|-----------:|------:|--------:|-------:|-------:|----------:|------------:|
- * | Sequential      | go infinite          | 1,386.9 ns |  13.19 ns |  11.01 ns | 1,381.0 ns |  1.00 |    0.01 | 0.0420 |      - |     272 B |        1.00 |
- * | Parallel        | go infinite          | 3,580.8 ns | 101.24 ns | 296.93 ns | 3,552.0 ns |  2.58 |    0.21 | 0.2899 |      - |    1832 B |        6.74 |
- * | CapturingGroups | go infinite          | 1,225.3 ns |  16.07 ns |  19.73 ns | 1,218.6 ns |  0.88 |    0.02 | 0.2403 |      - |    1504 B |        5.53 |
- * | NoRegex         | go infinite          |   797.5 ns |  11.16 ns |   9.32 ns |   797.6 ns |  0.58 |    0.01 | 0.0429 |      - |     272 B |        1.00 |
- * |                 |                      |            |           |           |            |       |         |        |        |           |             |
- * | Sequential      | go wt(...)c 500 [42] | 3,723.5 ns |  62.03 ns |  48.43 ns | 3,721.0 ns |  1.00 |    0.02 | 0.1984 |      - |    1248 B |        1.00 |
- * | Parallel        | go wt(...)c 500 [42] | 4,551.0 ns |  97.53 ns | 284.49 ns | 4,503.9 ns |  1.22 |    0.08 | 0.4425 |      - |    2808 B |        2.25 |
- * | CapturingGroups | go wt(...)c 500 [42] | 2,127.0 ns |  10.58 ns |  14.13 ns | 2,123.0 ns |  0.57 |    0.01 | 0.7668 | 0.0114 |    4800 B |        3.85 |
- * | NoRegex         | go wt(...)c 500 [42] |   860.7 ns |  16.97 ns |  17.42 ns |   855.2 ns |  0.23 |    0.01 | 0.0420 |      - |     272 B |        0.22 |
- * |                 |                      |            |           |           |            |       |         |        |        |           |             |
- * | Sequential      | go wt(...)00000 [78] | 4,767.2 ns | 195.39 ns | 576.10 ns | 5,088.8 ns |  1.02 |    0.19 | 0.2747 |      - |    1728 B |        1.00 |
- * | Parallel        | go wt(...)00000 [78] | 5,383.0 ns | 114.51 ns | 328.56 ns | 5,304.6 ns |  1.15 |    0.18 | 0.5264 |      - |    3288 B |        1.90 |
- * | CapturingGroups | go wt(...)00000 [78] | 4,288.4 ns |  74.53 ns |  58.19 ns | 4,270.0 ns |  0.92 |    0.13 | 1.1292 | 0.0153 |    7064 B |        4.09 |
- * | NoRegex         | go wt(...)00000 [78] |   905.3 ns |   7.45 ns |   6.96 ns |   902.6 ns |  0.19 |    0.03 | 0.0420 |      - |     272 B |        0.16 |
- * |                 |                      |            |           |           |            |       |         |        |        |           |             |
- * | Sequential      | go wt(...)go 40 [62] | 4,767.8 ns |  34.09 ns |  26.61 ns | 4,770.5 ns |  1.00 |    0.01 | 0.2136 |      - |    1488 B |        1.00 |
- * | Parallel        | go wt(...)go 40 [62] | 4,821.8 ns |  50.13 ns |  44.44 ns | 4,808.8 ns |  1.01 |    0.01 | 0.4883 |      - |    3048 B |        2.05 |
- * | CapturingGroups | go wt(...)go 40 [62] | 3,102.9 ns |  42.35 ns |  37.54 ns | 3,107.2 ns |  0.65 |    0.01 | 1.1253 | 0.0267 |    7032 B |        4.73 |
- * | NoRegex         | go wt(...)go 40 [62] |   907.2 ns |  17.28 ns |  17.75 ns |   904.3 ns |  0.19 |    0.00 | 0.0420 |      - |     272 B |        0.18 |
+ *  | Method                                   | command              | Mean       | Error    | StdDev    | Ratio | RatioSD | Gen0   | Allocated | Alloc Ratio |
+ *  |----------------------------------------- |--------------------- |-----------:|---------:|----------:|------:|--------:|-------:|----------:|------------:|
+ *  | Sequential                               | go infinite          | 1,483.0 ns | 20.03 ns |  18.74 ns |  1.00 |    0.02 | 0.0019 |     272 B |        1.00 |
+ *  | Parallel                                 | go infinite          | 3,223.2 ns | 64.17 ns | 154.98 ns |  2.17 |    0.11 | 0.0153 |    1822 B |        6.70 |
+ *  | CapturingGroups                          | go infinite          | 1,271.1 ns |  5.60 ns |   4.97 ns |  0.86 |    0.01 | 0.0172 |    1504 B |        5.53 |
+ *  | NoRegex                                  | go infinite          |   734.4 ns |  9.31 ns |   8.71 ns |  0.50 |    0.01 | 0.0029 |     272 B |        1.00 |
+ *  | NoRegex_DictionaryAction                 | go infinite          |   720.0 ns |  9.13 ns |   8.54 ns |  0.49 |    0.01 | 0.0029 |     312 B |        1.15 |
+ *  | NoRegex_DictionaryActionAndMemoryValues  | go infinite          |   868.7 ns |  3.73 ns |   3.30 ns |  0.59 |    0.01 | 0.0029 |     312 B |        1.15 |
+ *  | NoRegex_DictionaryActionAndMemoryValues2 | go infinite          |   748.9 ns |  6.02 ns |   5.63 ns |  0.51 |    0.01 | 0.0029 |     312 B |        1.15 |
+ *  | NoRegex_ReadOnlySpanComparison           | go infinite          |   724.8 ns |  6.53 ns |   5.78 ns |  0.49 |    0.01 | 0.0029 |     272 B |        1.00 |
+ *  |                                          |                      |            |          |           |       |         |        |           |             |
+ *  | Sequential                               | go wt(...)c 500 [42] | 3,569.1 ns | 35.79 ns |  33.48 ns |  1.00 |    0.01 | 0.0114 |    1248 B |        1.00 |
+ *  | Parallel                                 | go wt(...)c 500 [42] | 4,096.2 ns | 70.57 ns | 151.91 ns |  1.15 |    0.04 | 0.0305 |    2800 B |        2.24 |
+ *  | CapturingGroups                          | go wt(...)c 500 [42] | 2,873.7 ns | 45.78 ns |  42.82 ns |  0.81 |    0.01 | 0.0572 |    4800 B |        3.85 |
+ *  | NoRegex                                  | go wt(...)c 500 [42] |   900.5 ns |  9.23 ns |   8.63 ns |  0.25 |    0.00 | 0.0019 |     272 B |        0.22 |
+ *  | NoRegex_DictionaryAction                 | go wt(...)c 500 [42] | 1,087.4 ns |  7.07 ns |   6.26 ns |  0.30 |    0.00 | 0.0038 |     400 B |        0.32 |
+ *  | NoRegex_DictionaryActionAndMemoryValues  | go wt(...)c 500 [42] | 1,659.2 ns | 11.66 ns |  10.34 ns |  0.46 |    0.01 | 0.0076 |     784 B |        0.63 |
+ *  | NoRegex_DictionaryActionAndMemoryValues2 | go wt(...)c 500 [42] | 1,062.2 ns |  9.55 ns |   8.93 ns |  0.30 |    0.00 | 0.0038 |     400 B |        0.32 |
+ *  | NoRegex_ReadOnlySpanComparison           | go wt(...)c 500 [42] |   912.1 ns |  7.88 ns |   7.37 ns |  0.26 |    0.00 | 0.0029 |     272 B |        0.22 |
+ *  |                                          |                      |            |          |           |       |         |        |           |             |
+ *  | Sequential                               | go wt(...)00000 [78] | 3,827.4 ns | 63.06 ns |  58.99 ns |  1.00 |    0.02 | 0.0191 |    1728 B |        1.00 |
+ *  | Parallel                                 | go wt(...)00000 [78] | 4,666.2 ns | 93.19 ns | 196.57 ns |  1.22 |    0.05 | 0.0381 |    3280 B |        1.90 |
+ *  | CapturingGroups                          | go wt(...)00000 [78] | 4,536.0 ns | 88.17 ns | 123.60 ns |  1.19 |    0.04 | 0.0839 |    7064 B |        4.09 |
+ *  | NoRegex                                  | go wt(...)00000 [78] |   920.6 ns |  8.38 ns |   7.43 ns |  0.24 |    0.00 | 0.0019 |     272 B |        0.16 |
+ *  | NoRegex_DictionaryAction                 | go wt(...)00000 [78] | 1,187.0 ns |  3.34 ns |   2.96 ns |  0.31 |    0.00 | 0.0057 |     504 B |        0.29 |
+ *  | NoRegex_DictionaryActionAndMemoryValues  | go wt(...)00000 [78] | 2,409.8 ns | 48.02 ns |  58.97 ns |  0.63 |    0.02 | 0.0114 |    1088 B |        0.63 |
+ *  | NoRegex_DictionaryActionAndMemoryValues2 | go wt(...)00000 [78] | 1,195.9 ns |  4.15 ns |   3.68 ns |  0.31 |    0.00 | 0.0057 |     504 B |        0.29 |
+ *  | NoRegex_ReadOnlySpanComparison           | go wt(...)00000 [78] | 1,062.3 ns |  5.13 ns |   4.79 ns |  0.28 |    0.00 | 0.0019 |     272 B |        0.16 |
+ *  |                                          |                      |            |          |           |       |         |        |           |             |
+ *  | Sequential                               | go wt(...)go 40 [62] | 3,340.7 ns | 66.03 ns |  78.60 ns |  1.00 |    0.03 | 0.0153 |    1488 B |        1.00 |
+ *  | Parallel                                 | go wt(...)go 40 [62] | 4,440.2 ns | 88.39 ns | 197.71 ns |  1.33 |    0.07 | 0.0305 |    3040 B |        2.04 |
+ *  | CapturingGroups                          | go wt(...)go 40 [62] | 4,256.4 ns | 81.40 ns | 111.43 ns |  1.27 |    0.04 | 0.0839 |    7032 B |        4.73 |
+ *  | NoRegex                                  | go wt(...)go 40 [62] |   891.4 ns |  3.82 ns |   3.58 ns |  0.27 |    0.01 | 0.0029 |     272 B |        0.18 |
+ *  | NoRegex_DictionaryAction                 | go wt(...)go 40 [62] | 1,102.6 ns |  4.03 ns |   3.77 ns |  0.33 |    0.01 | 0.0057 |     480 B |        0.32 |
+ *  | NoRegex_DictionaryActionAndMemoryValues  | go wt(...)go 40 [62] | 2,107.2 ns | 13.83 ns |  12.94 ns |  0.63 |    0.02 | 0.0114 |     968 B |        0.65 |
+ *  | NoRegex_DictionaryActionAndMemoryValues2 | go wt(...)go 40 [62] | 1,125.3 ns |  3.62 ns |   3.02 ns |  0.34 |    0.01 | 0.0057 |     480 B |        0.32 |
+ *  | NoRegex_ReadOnlySpanComparison           | go wt(...)go 40 [62] |   917.6 ns |  4.75 ns |   4.21 ns |  0.27 |    0.01 | 0.0029 |     272 B |        0.18 |
  *
  *
- * BenchmarkDotNet v0.14.0, macOS Ventura 13.6.9 (22G830) [Darwin 22.6.0]
- * Intel Core i7-8700B CPU 3.20GHz (Max: 3.19GHz) (Coffee Lake), 1 CPU, 4 logical and 4 physical cores
- * .NET SDK 8.0.401
- *   [Host]     : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
- *   DefaultJob : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
+ *  BenchmarkDotNet v0.14.0, Windows 10 (10.0.20348.2849) (Hyper-V)
+ *  AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
+ *  .NET SDK 9.0.101
+ *    [Host]     : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
+ *    DefaultJob : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
  *
- * | Method          | command              | Mean      | Error     | StdDev     | Median   | Ratio | RatioSD | Gen0   | Allocated | Alloc Ratio |
- * |---------------- |--------------------- |----------:|----------:|-----------:|---------:|------:|--------:|-------:|----------:|------------:|
- * | Sequential      | go infinite          |  58.04 us | 13.959 us |  37.259 us | 42.16 us |  1.43 |    2.04 |      - |     272 B |        1.00 |
- * | Parallel        | go infinite          | 177.16 us | 67.495 us | 194.738 us | 84.03 us |  4.38 |    8.46 | 0.2441 |    1831 B |        6.73 |
- * | CapturingGroups | go infinite          | 112.30 us | 27.751 us |  77.358 us | 75.78 us |  2.77 |    4.08 | 0.1831 |    1504 B |        5.53 |
- * | NoRegex         | go infinite          |  32.00 us | 10.268 us |  27.759 us | 19.85 us |  0.79 |    1.31 |      - |     272 B |        1.00 |
- * |                 |                      |           |           |            |          |       |         |        |           |             |
- * | Sequential      | go wt(...)c 500 [42] | 129.38 us | 42.167 us | 123.003 us | 55.16 us |  2.41 |    3.51 | 0.1221 |    1249 B |        1.00 |
- * | Parallel        | go wt(...)c 500 [42] |  60.64 us |  1.570 us |   4.376 us | 60.84 us |  1.13 |    0.92 | 0.3662 |    2808 B |        2.25 |
- * | CapturingGroups | go wt(...)c 500 [42] |  36.44 us |  2.684 us |   7.829 us | 37.74 us |  0.68 |    0.58 | 0.7324 |    4800 B |        3.84 |
- * | NoRegex         | go wt(...)c 500 [42] |  22.26 us |  1.077 us |   3.055 us | 21.99 us |  0.41 |    0.34 | 0.0305 |     272 B |        0.22 |
- * |                 |                      |           |           |            |          |       |         |        |           |             |
- * | Sequential      | go wt(...)00000 [78] |  38.51 us |  2.774 us |   8.137 us | 38.37 us |  1.05 |    0.34 | 0.2747 |    1728 B |        1.00 |
- * | Parallel        | go wt(...)00000 [78] |  48.18 us |  0.947 us |   1.297 us | 48.00 us |  1.31 |    0.32 | 0.4883 |    3288 B |        1.90 |
- * | CapturingGroups | go wt(...)00000 [78] |  40.83 us |  1.883 us |   5.462 us | 40.64 us |  1.11 |    0.31 | 1.1292 |    7065 B |        4.09 |
- * | NoRegex         | go wt(...)00000 [78] |  33.89 us |  2.446 us |   7.174 us | 33.60 us |  0.92 |    0.30 |      - |     272 B |        0.16 |
- * |                 |                      |           |           |            |          |       |         |        |           |             |
- * | Sequential      | go wt(...)go 40 [62] |  30.76 us |  3.056 us |   8.913 us | 30.54 us |  1.10 |    0.50 | 0.2136 |    1488 B |        1.00 |
- * | Parallel        | go wt(...)go 40 [62] |  34.94 us |  0.690 us |   1.744 us | 34.76 us |  1.25 |    0.43 | 0.4883 |    3048 B |        2.05 |
- * | CapturingGroups | go wt(...)go 40 [62] |  33.42 us |  2.963 us |   8.597 us | 34.12 us |  1.19 |    0.52 | 1.0986 |    7032 B |        4.73 |
- * | NoRegex         | go wt(...)go 40 [62] |  18.27 us |  1.997 us |   5.887 us | 17.60 us |  0.65 |    0.31 | 0.0381 |     272 B |        0.18 |
+ *  | Method                                   | command              | Mean       | Error    | StdDev    | Ratio | RatioSD | Gen0   | Gen1   | Allocated | Alloc Ratio |
+ *  |----------------------------------------- |--------------------- |-----------:|---------:|----------:|------:|--------:|-------:|-------:|----------:|------------:|
+ *  | Sequential                               | go infinite          | 1,550.1 ns | 18.80 ns |  17.59 ns |  1.00 |    0.02 | 0.0153 |      - |     271 B |        1.00 |
+ *  | Parallel                                 | go infinite          | 2,536.8 ns | 17.51 ns |  15.52 ns |  1.64 |    0.02 | 0.1068 |      - |    1820 B |        6.72 |
+ *  | CapturingGroups                          | go infinite          | 1,068.2 ns |  5.45 ns |   5.10 ns |  0.69 |    0.01 | 0.0896 |      - |    1504 B |        5.55 |
+ *  | NoRegex                                  | go infinite          |   662.5 ns |  2.72 ns |   2.55 ns |  0.43 |    0.01 | 0.0162 |      - |     272 B |        1.00 |
+ *  | NoRegex_DictionaryAction                 | go infinite          |   705.7 ns |  5.98 ns |   5.60 ns |  0.46 |    0.01 | 0.0172 |      - |     312 B |        1.15 |
+ *  | NoRegex_DictionaryActionAndMemoryValues  | go infinite          |   741.8 ns |  5.34 ns |   5.00 ns |  0.48 |    0.01 | 0.0181 |      - |     312 B |        1.15 |
+ *  | NoRegex_DictionaryActionAndMemoryValues2 | go infinite          |   708.4 ns |  3.07 ns |   2.87 ns |  0.46 |    0.01 | 0.0181 |      - |     312 B |        1.15 |
+ *  | NoRegex_ReadOnlySpanComparison           | go infinite          |   689.2 ns |  3.24 ns |   3.03 ns |  0.44 |    0.01 | 0.0153 |      - |     272 B |        1.00 |
+ *  |                                          |                      |            |          |           |       |         |        |        |           |             |
+ *  | Sequential                               | go wt(...)c 500 [42] | 3,204.6 ns | 23.94 ns |  22.39 ns |  1.00 |    0.01 | 0.0725 |      - |    1247 B |        1.00 |
+ *  | Parallel                                 | go wt(...)c 500 [42] | 3,616.0 ns | 72.25 ns | 132.11 ns |  1.13 |    0.04 | 0.1678 |      - |    2800 B |        2.25 |
+ *  | CapturingGroups                          | go wt(...)c 500 [42] | 2,424.8 ns |  9.21 ns |   8.61 ns |  0.76 |    0.01 | 0.2861 | 0.0038 |    4799 B |        3.85 |
+ *  | NoRegex                                  | go wt(...)c 500 [42] |   844.1 ns |  3.31 ns |   2.94 ns |  0.26 |    0.00 | 0.0162 |      - |     272 B |        0.22 |
+ *  | NoRegex_DictionaryAction                 | go wt(...)c 500 [42] |   853.8 ns |  1.70 ns |   1.42 ns |  0.27 |    0.00 | 0.0229 |      - |     400 B |        0.32 |
+ *  | NoRegex_DictionaryActionAndMemoryValues  | go wt(...)c 500 [42] | 1,399.0 ns |  6.58 ns |   5.14 ns |  0.44 |    0.00 | 0.0458 |      - |     784 B |        0.63 |
+ *  | NoRegex_DictionaryActionAndMemoryValues2 | go wt(...)c 500 [42] |   871.8 ns |  2.50 ns |   1.95 ns |  0.27 |    0.00 | 0.0229 |      - |     400 B |        0.32 |
+ *  | NoRegex_ReadOnlySpanComparison           | go wt(...)c 500 [42] |   839.4 ns |  2.87 ns |   2.69 ns |  0.26 |    0.00 | 0.0153 |      - |     272 B |        0.22 |
+ *  |                                          |                      |            |          |           |       |         |        |        |           |             |
+ *  | Sequential                               | go wt(...)00000 [78] | 4,220.3 ns | 12.18 ns |  10.17 ns |  1.00 |    0.00 | 0.0992 |      - |    1727 B |        1.00 |
+ *  | Parallel                                 | go wt(...)00000 [78] | 4,378.3 ns | 87.02 ns | 245.43 ns |  1.04 |    0.06 | 0.1907 |      - |    3280 B |        1.90 |
+ *  | CapturingGroups                          | go wt(...)00000 [78] | 3,620.8 ns | 44.23 ns |  41.37 ns |  0.86 |    0.01 | 0.4196 | 0.0076 |    7063 B |        4.09 |
+ *  | NoRegex                                  | go wt(...)00000 [78] |   866.4 ns |  3.90 ns |   3.64 ns |  0.21 |    0.00 | 0.0162 |      - |     272 B |        0.16 |
+ *  | NoRegex_DictionaryAction                 | go wt(...)00000 [78] | 1,222.8 ns |  4.58 ns |   4.29 ns |  0.29 |    0.00 | 0.0286 |      - |     503 B |        0.29 |
+ *  | NoRegex_DictionaryActionAndMemoryValues  | go wt(...)00000 [78] | 1,828.1 ns |  6.08 ns |   5.39 ns |  0.43 |    0.00 | 0.0648 |      - |    1088 B |        0.63 |
+ *  | NoRegex_DictionaryActionAndMemoryValues2 | go wt(...)00000 [78] | 1,227.5 ns |  3.80 ns |   3.37 ns |  0.29 |    0.00 | 0.0286 |      - |     503 B |        0.29 |
+ *  | NoRegex_ReadOnlySpanComparison           | go wt(...)00000 [78] |   934.1 ns |  6.21 ns |   5.81 ns |  0.22 |    0.00 | 0.0153 |      - |     272 B |        0.16 |
+ *  |                                          |                      |            |          |           |       |         |        |        |           |             |
+ *  | Sequential                               | go wt(...)go 40 [62] | 3,916.9 ns | 30.81 ns |  28.82 ns |  1.00 |    0.01 | 0.0839 |      - |    1486 B |        1.00 |
+ *  | Parallel                                 | go wt(...)go 40 [62] | 3,916.9 ns | 63.58 ns |  59.47 ns |  1.00 |    0.02 | 0.1755 |      - |    3040 B |        2.05 |
+ *  | CapturingGroups                          | go wt(...)go 40 [62] | 3,271.6 ns |  5.10 ns |   4.77 ns |  0.84 |    0.01 | 0.4196 | 0.0076 |    7031 B |        4.73 |
+ *  | NoRegex                                  | go wt(...)go 40 [62] |   871.0 ns |  2.65 ns |   2.35 ns |  0.22 |    0.00 | 0.0153 |      - |     272 B |        0.18 |
+ *  | NoRegex_DictionaryAction                 | go wt(...)go 40 [62] |   973.3 ns |  4.96 ns |   4.64 ns |  0.25 |    0.00 | 0.0286 |      - |     480 B |        0.32 |
+ *  | NoRegex_DictionaryActionAndMemoryValues  | go wt(...)go 40 [62] | 1,639.3 ns |  3.96 ns |   3.31 ns |  0.42 |    0.00 | 0.0572 |      - |     968 B |        0.65 |
+ *  | NoRegex_DictionaryActionAndMemoryValues2 | go wt(...)go 40 [62] | 1,019.8 ns |  5.61 ns |   5.25 ns |  0.26 |    0.00 | 0.0286 |      - |     480 B |        0.32 |
+ *  | NoRegex_ReadOnlySpanComparison           | go wt(...)go 40 [62] |   838.1 ns |  2.75 ns |   2.44 ns |  0.21 |    0.00 | 0.0153 |      - |     272 B |        0.18 |
+ *
+ *
+ *  BenchmarkDotNet v0.14.0, macOS Sonoma 14.7.1 (23H222) [Darwin 23.6.0]
+ *  Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
+ *  .NET SDK 9.0.101
+ *    [Host]     : .NET 9.0.0 (9.0.24.52809), Arm64 RyuJIT AdvSIMD
+ *    DefaultJob : .NET 9.0.0 (9.0.24.52809), Arm64 RyuJIT AdvSIMD
+ *
+ *  | Method                                   | command              | Mean       | Error     | StdDev    | Median     | Ratio | RatioSD | Gen0   | Gen1   | Allocated | Alloc Ratio |
+ *  |----------------------------------------- |--------------------- |-----------:|----------:|----------:|-----------:|------:|--------:|-------:|-------:|----------:|------------:|
+ *  | Sequential                               | go infinite          | 1,279.9 ns |  25.37 ns |  47.02 ns | 1,257.4 ns |  1.00 |    0.05 | 0.0420 |      - |     272 B |        1.00 |
+ *  | Parallel                                 | go infinite          | 3,306.9 ns |  62.92 ns | 121.22 ns | 3,308.9 ns |  2.59 |    0.13 | 0.2899 |      - |    1824 B |        6.71 |
+ *  | CapturingGroups                          | go infinite          | 1,129.0 ns |   9.11 ns |   7.11 ns | 1,126.4 ns |  0.88 |    0.03 | 0.2403 |      - |    1504 B |        5.53 |
+ *  | NoRegex                                  | go infinite          |   783.9 ns |  15.16 ns |  19.18 ns |   776.9 ns |  0.61 |    0.03 | 0.0429 |      - |     272 B |        1.00 |
+ *  | NoRegex_DictionaryAction                 | go infinite          |   807.0 ns |  14.54 ns |  23.88 ns |   795.7 ns |  0.63 |    0.03 | 0.0496 |      - |     312 B |        1.15 |
+ *  | NoRegex_DictionaryActionAndMemoryValues  | go infinite          |   785.9 ns |   4.79 ns |   4.48 ns |   786.6 ns |  0.61 |    0.02 | 0.0496 |      - |     312 B |        1.15 |
+ *  | NoRegex_DictionaryActionAndMemoryValues2 | go infinite          |   782.9 ns |   3.06 ns |   2.71 ns |   782.7 ns |  0.61 |    0.02 | 0.0496 |      - |     312 B |        1.15 |
+ *  | NoRegex_ReadOnlySpanComparison           | go infinite          |   754.6 ns |   4.44 ns |   3.71 ns |   753.7 ns |  0.59 |    0.02 | 0.0429 |      - |     272 B |        1.00 |
+ *  |                                          |                      |            |           |           |            |       |         |        |        |           |             |
+ *  | Sequential                               | go wt(...)c 500 [42] | 2,397.1 ns |  36.15 ns |  37.12 ns | 2,383.2 ns |  1.00 |    0.02 | 0.1984 |      - |    1248 B |        1.00 |
+ *  | Parallel                                 | go wt(...)c 500 [42] | 6,004.7 ns | 318.08 ns | 912.64 ns | 5,822.3 ns |  2.51 |    0.38 | 0.4425 |      - |    2798 B |        2.24 |
+ *  | CapturingGroups                          | go wt(...)c 500 [42] | 2,649.4 ns | 157.13 ns | 455.88 ns | 2,518.8 ns |  1.11 |    0.19 | 0.7629 | 0.0076 |    4800 B |        3.85 |
+ *  | NoRegex                                  | go wt(...)c 500 [42] | 1,187.6 ns |  98.99 ns | 291.88 ns | 1,082.3 ns |  0.50 |    0.12 | 0.0420 |      - |     272 B |        0.22 |
+ *  | NoRegex_DictionaryAction                 | go wt(...)c 500 [42] | 1,739.4 ns |  34.47 ns |  47.19 ns | 1,753.1 ns |  0.73 |    0.02 | 0.0629 |      - |     400 B |        0.32 |
+ *  | NoRegex_DictionaryActionAndMemoryValues  | go wt(...)c 500 [42] | 2,474.3 ns |  49.52 ns | 126.05 ns | 2,478.2 ns |  1.03 |    0.05 | 0.1221 |      - |     784 B |        0.63 |
+ *  | NoRegex_DictionaryActionAndMemoryValues2 | go wt(...)c 500 [42] | 1,738.4 ns |  52.54 ns | 154.93 ns | 1,732.9 ns |  0.73 |    0.07 | 0.0610 |      - |     400 B |        0.32 |
+ *  | NoRegex_ReadOnlySpanComparison           | go wt(...)c 500 [42] |   807.2 ns |  16.16 ns |  37.78 ns |   791.2 ns |  0.34 |    0.02 | 0.0420 |      - |     272 B |        0.22 |
+ *  |                                          |                      |            |           |           |            |       |         |        |        |           |             |
+ *  | Sequential                               | go wt(...)00000 [78] | 4,220.4 ns | 217.97 ns | 618.35 ns | 4,171.4 ns |  1.02 |    0.21 | 0.2747 |      - |    1728 B |        1.00 |
+ *  | Parallel                                 | go wt(...)00000 [78] | 6,456.2 ns | 299.17 ns | 882.12 ns | 6,228.8 ns |  1.56 |    0.31 | 0.5188 |      - |    3280 B |        1.90 |
+ *  | CapturingGroups                          | go wt(...)00000 [78] | 3,207.1 ns |  63.48 ns | 147.13 ns | 3,256.4 ns |  0.78 |    0.11 | 1.1292 | 0.0153 |    7064 B |        4.09 |
+ *  | NoRegex                                  | go wt(...)00000 [78] |   905.8 ns |   9.26 ns |   8.21 ns |   905.1 ns |  0.22 |    0.03 | 0.0420 |      - |     272 B |        0.16 |
+ *  | NoRegex_DictionaryAction                 | go wt(...)00000 [78] |   948.7 ns |   4.33 ns |   3.84 ns |   949.3 ns |  0.23 |    0.03 | 0.0801 |      - |     504 B |        0.29 |
+ *  | NoRegex_DictionaryActionAndMemoryValues  | go wt(...)00000 [78] | 1,750.8 ns |  34.60 ns |  63.26 ns | 1,721.5 ns |  0.42 |    0.06 | 0.1717 |      - |    1088 B |        0.63 |
+ *  | NoRegex_DictionaryActionAndMemoryValues2 | go wt(...)00000 [78] |   968.0 ns |   7.41 ns |   6.57 ns |   966.5 ns |  0.23 |    0.03 | 0.0801 |      - |     504 B |        0.29 |
+ *  | NoRegex_ReadOnlySpanComparison           | go wt(...)00000 [78] |   963.3 ns |   8.31 ns |   7.77 ns |   962.4 ns |  0.23 |    0.03 | 0.0420 |      - |     272 B |        0.16 |
+ *  |                                          |                      |            |           |           |            |       |         |        |        |           |             |
+ *  | Sequential                               | go wt(...)go 40 [62] | 3,146.3 ns |  60.14 ns |  80.29 ns | 3,154.8 ns |  1.00 |    0.04 | 0.2365 |      - |    1488 B |        1.00 |
+ *  | Parallel                                 | go wt(...)go 40 [62] | 4,920.4 ns |  98.05 ns | 100.69 ns | 4,897.8 ns |  1.56 |    0.05 | 0.4730 |      - |    3040 B |        2.04 |
+ *  | CapturingGroups                          | go wt(...)go 40 [62] | 3,004.4 ns |  58.40 ns |  51.77 ns | 3,013.6 ns |  0.96 |    0.03 | 1.1215 | 0.0267 |    7032 B |        4.73 |
+ *  | NoRegex                                  | go wt(...)go 40 [62] |   859.0 ns |   7.83 ns |   7.33 ns |   857.7 ns |  0.27 |    0.01 | 0.0420 |      - |     272 B |        0.18 |
+ *  | NoRegex_DictionaryAction                 | go wt(...)go 40 [62] |   971.5 ns |  13.72 ns |  12.16 ns |   969.8 ns |  0.31 |    0.01 | 0.0763 |      - |     480 B |        0.32 |
+ *  | NoRegex_DictionaryActionAndMemoryValues  | go wt(...)go 40 [62] | 1,509.1 ns |  13.32 ns |  11.81 ns | 1,504.8 ns |  0.48 |    0.01 | 0.1545 |      - |     968 B |        0.65 |
+ *  | NoRegex_DictionaryActionAndMemoryValues2 | go wt(...)go 40 [62] |   967.4 ns |  16.52 ns |  14.64 ns |   960.2 ns |  0.31 |    0.01 | 0.0763 |      - |     480 B |        0.32 |
+ *  | NoRegex_ReadOnlySpanComparison           | go wt(...)go 40 [62] |   937.5 ns |  18.69 ns |  52.11 ns |   926.5 ns |  0.30 |    0.02 | 0.0420 |      - |     272 B |        0.18 |
+ *
+ *
+ *  BenchmarkDotNet v0.14.0, macOS Ventura 13.7.1 (22H221) [Darwin 22.6.0]
+ *  Intel Core i7-8700B CPU 3.20GHz (Max: 3.19GHz) (Coffee Lake), 1 CPU, 4 logical and 4 physical cores
+ *  .NET SDK 9.0.101
+ *    [Host]     : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
+ *    DefaultJob : .NET 9.0.0 (9.0.24.52809), X64 RyuJIT AVX2
+ *  s
+ *  | Method                                   | command              | Mean      | Error     | StdDev    | Median    | Ratio | RatioSD | Gen0   | Gen1   | Allocated | Alloc Ratio |
+ *  |----------------------------------------- |--------------------- |----------:|----------:|----------:|----------:|------:|--------:|-------:|-------:|----------:|------------:|
+ *  | Sequential                               | go infinite          |  1.786 us | 0.0332 us | 0.0554 us |  1.765 us |  1.00 |    0.04 | 0.0420 |      - |     272 B |        1.00 |
+ *  | Parallel                                 | go infinite          | 22.265 us | 0.4398 us | 0.6165 us | 22.340 us | 12.48 |    0.50 | 0.2441 |      - |    1824 B |        6.71 |
+ *  | CapturingGroups                          | go infinite          |  1.685 us | 0.0334 us | 0.0539 us |  1.677 us |  0.94 |    0.04 | 0.2403 |      - |    1504 B |        5.53 |
+ *  | NoRegex                                  | go infinite          |  1.107 us | 0.0220 us | 0.0548 us |  1.107 us |  0.62 |    0.04 | 0.0420 |      - |     272 B |        1.00 |
+ *  | NoRegex_DictionaryAction                 | go infinite          |  1.161 us | 0.0231 us | 0.0511 us |  1.162 us |  0.65 |    0.03 | 0.0496 |      - |     312 B |        1.15 |
+ *  | NoRegex_DictionaryActionAndMemoryValues  | go infinite          |  1.229 us | 0.0243 us | 0.0473 us |  1.217 us |  0.69 |    0.03 | 0.0496 |      - |     312 B |        1.15 |
+ *  | NoRegex_DictionaryActionAndMemoryValues2 | go infinite          |  1.175 us | 0.0233 us | 0.0491 us |  1.171 us |  0.66 |    0.03 | 0.0496 |      - |     312 B |        1.15 |
+ *  | NoRegex_ReadOnlySpanComparison           | go infinite          |  1.359 us | 0.0463 us | 0.1312 us |  1.332 us |  0.76 |    0.08 | 0.0420 |      - |     272 B |        1.00 |
+ *  |                                          |                      |           |           |           |           |       |         |        |        |           |             |
+ *  | Sequential                               | go wt(...)c 500 [42] |  3.776 us | 0.1164 us | 0.3263 us |  3.681 us |  1.01 |    0.12 | 0.1984 |      - |    1248 B |        1.00 |
+ *  | Parallel                                 | go wt(...)c 500 [42] | 30.027 us | 0.5963 us | 1.3089 us | 29.792 us |  8.01 |    0.73 | 0.4272 |      - |    2800 B |        2.24 |
+ *  | CapturingGroups                          | go wt(...)c 500 [42] |  3.485 us | 0.0833 us | 0.2295 us |  3.382 us |  0.93 |    0.10 | 0.7629 | 0.0076 |    4800 B |        3.85 |
+ *  | NoRegex                                  | go wt(...)c 500 [42] |  1.149 us | 0.0311 us | 0.0887 us |  1.126 us |  0.31 |    0.03 | 0.0381 |      - |     272 B |        0.22 |
+ *  | NoRegex_DictionaryAction                 | go wt(...)c 500 [42] |  1.890 us | 0.1562 us | 0.4532 us |  1.743 us |  0.50 |    0.13 | 0.0629 |      - |     400 B |        0.32 |
+ *  | NoRegex_DictionaryActionAndMemoryValues  | go wt(...)c 500 [42] |  1.961 us | 0.0388 us | 0.0556 us |  1.948 us |  0.52 |    0.04 | 0.1221 |      - |     784 B |        0.63 |
+ *  | NoRegex_DictionaryActionAndMemoryValues2 | go wt(...)c 500 [42] |  1.653 us | 0.0811 us | 0.2366 us |  1.618 us |  0.44 |    0.07 | 0.0629 |      - |     400 B |        0.32 |
+ *  | NoRegex_ReadOnlySpanComparison           | go wt(...)c 500 [42] |  1.224 us | 0.0541 us | 0.1527 us |  1.175 us |  0.33 |    0.05 | 0.0381 |      - |     272 B |        0.22 |
+ *  |                                          |                      |           |           |           |           |       |         |        |        |           |             |
+ *  | Sequential                               | go wt(...)00000 [78] |  4.444 us | 0.0675 us | 0.0598 us |  4.432 us |  1.00 |    0.02 | 0.2747 |      - |    1728 B |        1.00 |
+ *  | Parallel                                 | go wt(...)00000 [78] | 33.309 us | 0.6608 us | 1.4082 us | 33.202 us |  7.50 |    0.33 | 0.4883 |      - |    3280 B |        1.90 |
+ *  | CapturingGroups                          | go wt(...)00000 [78] |  5.002 us | 0.0992 us | 0.1957 us |  4.948 us |  1.13 |    0.05 | 1.1215 | 0.0229 |    7064 B |        4.09 |
+ *  | NoRegex                                  | go wt(...)00000 [78] |  1.632 us | 0.0858 us | 0.2477 us |  1.629 us |  0.37 |    0.06 | 0.0420 |      - |     272 B |        0.16 |
+ *  | NoRegex_DictionaryAction                 | go wt(...)00000 [78] |  1.813 us | 0.0894 us | 0.2593 us |  1.743 us |  0.41 |    0.06 | 0.0801 |      - |     504 B |        0.29 |
+ *  | NoRegex_DictionaryActionAndMemoryValues  | go wt(...)00000 [78] |  2.954 us | 0.1064 us | 0.3000 us |  3.022 us |  0.66 |    0.07 | 0.1678 |      - |    1088 B |        0.63 |
+ *  | NoRegex_DictionaryActionAndMemoryValues2 | go wt(...)00000 [78] |  2.169 us | 0.1363 us | 0.3888 us |  2.111 us |  0.49 |    0.09 | 0.0763 |      - |     504 B |        0.29 |
+ *  | NoRegex_ReadOnlySpanComparison           | go wt(...)00000 [78] |  1.792 us | 0.1027 us | 0.2997 us |  1.785 us |  0.40 |    0.07 | 0.0420 |      - |     272 B |        0.16 |
+ *  |                                          |                      |           |           |           |           |       |         |        |        |           |             |
+ *  | Sequential                               | go wt(...)go 40 [62] |  4.705 us | 0.1885 us | 0.5285 us |  4.736 us |  1.01 |    0.16 | 0.2365 |      - |    1488 B |        1.00 |
+ *  | Parallel                                 | go wt(...)go 40 [62] | 40.416 us | 1.3169 us | 3.8828 us | 40.841 us |  8.70 |    1.27 | 0.4883 |      - |    3040 B |        2.04 |
+ *  | CapturingGroups                          | go wt(...)go 40 [62] |  5.624 us | 0.1568 us | 0.4345 us |  5.527 us |  1.21 |    0.16 | 1.1215 | 0.0229 |    7032 B |        4.73 |
+ *  | NoRegex                                  | go wt(...)go 40 [62] |  1.595 us | 0.0611 us | 0.1732 us |  1.576 us |  0.34 |    0.05 | 0.0420 |      - |     272 B |        0.18 |
+ *  | NoRegex_DictionaryAction                 | go wt(...)go 40 [62] |  1.455 us | 0.0167 us | 0.0148 us |  1.450 us |  0.31 |    0.03 | 0.0763 |      - |     480 B |        0.32 |
+ *  | NoRegex_DictionaryActionAndMemoryValues  | go wt(...)go 40 [62] |  2.291 us | 0.0217 us | 0.0203 us |  2.285 us |  0.49 |    0.05 | 0.1526 |      - |     968 B |        0.65 |
+ *  | NoRegex_DictionaryActionAndMemoryValues2 | go wt(...)go 40 [62] |  1.462 us | 0.0292 us | 0.0273 us |  1.451 us |  0.31 |    0.03 | 0.0763 |      - |     480 B |        0.32 |
+ *  | NoRegex_ReadOnlySpanComparison           | go wt(...)go 40 [62] |  1.264 us | 0.0304 us | 0.0887 us |  1.262 us |  0.27 |    0.04 | 0.0420 |      - |     272 B |        0.18 |
  *
  */
 
 using BenchmarkDotNet.Attributes;
-using Lynx.UCI.Commands.GUI;
-using Microsoft.CodeAnalysis.Operations;
-using Microsoft.Diagnostics.Utilities;
 using NLog;
 using System.Text.RegularExpressions;
 

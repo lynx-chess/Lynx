@@ -50,6 +50,19 @@ public sealed class GoCommand : IGUIBaseCommand
 
     public const string Id = "go";
 
+    private static ReadOnlySpan<char> WtimeSpan => "wtime".AsSpan();
+    private static ReadOnlySpan<char> BtimeSpan => "btime".AsSpan();
+    private static ReadOnlySpan<char> WincSpan => "winc".AsSpan();
+    private static ReadOnlySpan<char> BincSpan => "binc".AsSpan();
+    private static ReadOnlySpan<char> MovestogoSpan => "movestogo".AsSpan();
+    private static ReadOnlySpan<char> MovetimeSpan => "movetime".AsSpan();
+    private static ReadOnlySpan<char> DepthSpan => "depth".AsSpan();
+    private static ReadOnlySpan<char> InfiniteSpan => "infinite".AsSpan();
+    private static ReadOnlySpan<char> PonderSpan => "ponder".AsSpan();
+    private static ReadOnlySpan<char> NodesSpan => "nodes".AsSpan();
+    private static ReadOnlySpan<char> MateSpan => "mate".AsSpan();
+    private static ReadOnlySpan<char> SearchmovesSpan => "searchmoves".AsSpan();
+
     public int WhiteTime { get; }
     public int BlackTime { get; }
     public int WhiteIncrement { get; }
@@ -72,107 +85,148 @@ public sealed class GoCommand : IGUIBaseCommand
         var rangesLength = commandAsSpan.Split(ranges, ' ', StringSplitOptions.RemoveEmptyEntries);
 
 #pragma warning disable S127 // "for" loop stop conditions should be invariant
-        for (int i = 1; i < rangesLength; i++)  // Skipping go keyword
+        for (int i = 1; i < rangesLength; i++)
         {
-            switch (commandAsSpan[ranges[i]])
+            var key = commandAsSpan[ranges[i]];
+
+            if (key.Equals(WtimeSpan, StringComparison.OrdinalIgnoreCase))
             {
-                case "wtime":
-                    {
-                        if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
-                        {
-                            WhiteTime = value;
-                        }
+                if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
+                {
+                    WhiteTime = value;
+                }
 
-                        break;
-                    }
-                case "btime":
+                // Following cutechess (and kinda logical) order of go wtime btime winc binc
+                if (i + 1 < rangesLength && commandAsSpan[ranges[i + 1]].Equals(WincSpan, StringComparison.OrdinalIgnoreCase))
+                {
+                    i++;
+                    if (int.TryParse(commandAsSpan[ranges[++i]], out value))
                     {
-                        if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
-                        {
-                            BlackTime = value;
-                        }
+                        WhiteIncrement = value;
+                    }
+                }
+                if (i + 1 < rangesLength && commandAsSpan[ranges[i + 1]].Equals(BtimeSpan, StringComparison.OrdinalIgnoreCase))
+                {
+                    i++;
+                    if (int.TryParse(commandAsSpan[ranges[++i]], out value))
+                    {
+                        BlackTime = value;
+                    }
+                }
+                if (i + 1 < rangesLength && commandAsSpan[ranges[i + 1]].Equals(BincSpan, StringComparison.OrdinalIgnoreCase))
+                {
+                    i++;
+                    if (int.TryParse(commandAsSpan[ranges[++i]], out value))
+                    {
+                        BlackIncrement = value;
+                    }
+                }
+            }
+            else if (key.Equals(BtimeSpan, StringComparison.OrdinalIgnoreCase))
+            {
+                if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
+                {
+                    BlackTime = value;
+                }
+            }
+            else if (key.Equals(WincSpan, StringComparison.OrdinalIgnoreCase))
+            {
+                if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
+                {
+                    WhiteIncrement = value;
+                }
+            }
+            else if (key.Equals(BincSpan, StringComparison.OrdinalIgnoreCase))
+            {
+                if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
+                {
+                    BlackIncrement = value;
+                }
+            }
+            else if (key.Equals(MovestogoSpan, StringComparison.OrdinalIgnoreCase))
+            {
+                if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
+                {
+                    MovesToGo = value;
+                }
+            }
+            else if (key.Equals(MovetimeSpan, StringComparison.OrdinalIgnoreCase))
+            {
+                if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
+                {
+                    MoveTime = value;
+                }
+            }
+            else if (key.Equals(DepthSpan, StringComparison.OrdinalIgnoreCase))
+            {
+                if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
+                {
+                    Depth = value;
+                }
+            }
+            else if (key.Equals(InfiniteSpan, StringComparison.OrdinalIgnoreCase))
+            {
+                Infinite = true;
+            }
+            else if (key.Equals(PonderSpan, StringComparison.OrdinalIgnoreCase))
+            {
+                Ponder = true;
 
-                        break;
-                    }
-                case "winc":
-                    {
-                        if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
-                        {
-                            WhiteIncrement = value;
-                        }
+                // Following cutechess order of go ponder wtime btime winc binc
+                int value;
 
-                        break;
-                    }
-                case "binc":
+                if (i + 1 < rangesLength && commandAsSpan[ranges[i + 1]].Equals(WtimeSpan, StringComparison.OrdinalIgnoreCase))
+                {
+                    i++;
+                    if (int.TryParse(commandAsSpan[ranges[++i]], out value))
                     {
-                        if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
-                        {
-                            BlackIncrement = value;
-                        }
-
-                        break;
+                        WhiteTime = value;
                     }
-                case "movestogo":
+                }
+                if (i + 1 < rangesLength && commandAsSpan[ranges[i + 1]].Equals(WincSpan, StringComparison.OrdinalIgnoreCase))
+                {
+                    i++;
+                    if (int.TryParse(commandAsSpan[ranges[++i]], out value))
                     {
-                        if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
-                        {
-                            MovesToGo = value;
-                        }
-
-                        break;
+                        WhiteIncrement = value;
                     }
-                case "movetime":
+                }
+                if (i + 1 < rangesLength && commandAsSpan[ranges[i + 1]].Equals(BtimeSpan, StringComparison.OrdinalIgnoreCase))
+                {
+                    i++;
+                    if (int.TryParse(commandAsSpan[ranges[++i]], out value))
                     {
-                        if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
-                        {
-                            MoveTime = value;
-                        }
-
-                        break;
+                        BlackTime = value;
                     }
-                case "depth":
+                }
+                if (i + 1 < rangesLength && commandAsSpan[ranges[i + 1]].Equals(BincSpan, StringComparison.OrdinalIgnoreCase))
+                {
+                    i++;
+                    if (int.TryParse(commandAsSpan[ranges[++i]], out value))
                     {
-                        if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
-                        {
-                            Depth = value;
-                        }
-
-                        break;
+                        BlackIncrement = value;
                     }
-                case "infinite":
-                    {
-                        Infinite = true;
-                        break;
-                    }
-                case "ponder":
-                    {
-                        Ponder = true;
-                        break;
-                    }
-                case "nodes":
-                    {
-                        _logger.Warn("nodes not supported in go command, it will be safely ignored");
-                        ++i;
-                        break;
-                    }
-                case "mate":
-                    {
-                        _logger.Warn("mate not supported in go command, it will be safely ignored");
-                        ++i;
-                        break;
-                    }
-                case "searchmoves":
-                    {
-                        const string message = "searchmoves not supported in go command";
-
-                        _logger.Error(message);
-                        throw new NotImplementedException(message);
-                    }
-                default:
-                    {
-                        _logger.Warn("{0} not supported in go command, attempting to continue command parsing", commandAsSpan[ranges[i]].ToString());
-                        break;
-                    }
+                }
+            }
+            else if (key.Equals(NodesSpan, StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.Warn("nodes not supported in go command, it will be safely ignored");
+                ++i;
+            }
+            else if (key.Equals(MateSpan, StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.Warn("mate not supported in go command, it will be safely ignored");
+                ++i;
+            }
+            else if (key.Equals(SearchmovesSpan, StringComparison.OrdinalIgnoreCase))
+            {
+                const string message = "searchmoves not supported in go command";
+                _logger.Error(message);
+                throw new NotImplementedException(message);
+            }
+            else
+            {
+                _logger.Warn("{0} not supported in go command, attempting to continue command parsing", key.ToString());
             }
         }
 #pragma warning restore S127 // "for" loop stop conditions should be invariant
