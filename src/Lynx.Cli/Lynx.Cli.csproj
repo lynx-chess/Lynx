@@ -25,6 +25,9 @@
 
     <!--https://learn.microsoft.com/en-us/dotnet/core/compatibility/interop/9.0/cet-support-->
     <CETCompat>false</CETCompat>
+
+    <PublishAot>true</PublishAot>
+    <OptimizationPreference>Speed</OptimizationPreference>
   </PropertyGroup>
 
   <ItemGroup>
