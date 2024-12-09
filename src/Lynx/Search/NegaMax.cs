@@ -1,7 +1,6 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Security.Authentication;
 
 namespace Lynx;
 
@@ -17,7 +16,7 @@ public sealed partial class Engine
     /// Best score Side's to move's opponent can achieve, assuming best play by Side to move.
     /// </param>
     [SkipLocalsInit]
-    private int NegaMax(int depth, int ply, int alpha, int beta, bool parentWasNullMove = false)
+    private int NegaMax(int depth, int ply, int alpha, int beta, bool cutnode, bool parentWasNullMove = false)
     {
         var position = Game.CurrentPosition;
 
@@ -42,6 +41,8 @@ public sealed partial class Engine
         int ttScore = default;
         int ttRawScore = default;
         int ttStaticEval = int.MinValue;
+
+        Debug.Assert(!pvNode || !cutnode);
 
         if (!isRoot)
         {
@@ -200,7 +201,7 @@ public sealed partial class Engine
                 //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
 
                 var gameState = position.MakeNullMove();
-                var nmpScore = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, parentWasNullMove: true);
+                var nmpScore = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, !cutnode, parentWasNullMove: true);
                 position.UnMakeNullMove(gameState);
 
                 if (nmpScore >= beta)
@@ -287,8 +288,9 @@ public sealed partial class Engine
             else if (visitedMovesCounter == 0)
             {
                 _tt.PrefetchTTEntry(position);
+                bool isCutNode = !pvNode && !cutnode;   // Linter 'simplification' of pvNode ? false : !cutnode
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
-                score = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
+                score = -NegaMax(depth - 1, ply + 1, -beta, -alpha, isCutNode);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
             }
             else
@@ -339,52 +341,59 @@ public sealed partial class Engine
 
                 // 🔍 Late Move Reduction (LMR) - search with reduced depth
                 // Impl. based on Ciekce (Stormphrax) and Martin (Motor) advice, and Stormphrax & Akimbo implementations
-                if (visitedMovesCounter >= (pvNode ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves - 1)
-                    && depth >= Configuration.EngineSettings.LMR_MinDepth
-                    && !isCapture)
+                if (isNotGettingCheckmated)
                 {
-                    reduction = EvaluationConstants.LMRReductions[depth][visitedMovesCounter];
-
-                    if (pvNode)
+                    if (!isCapture
+                        && depth >= Configuration.EngineSettings.LMR_MinDepth
+                        && visitedMovesCounter >=
+                            (pvNode
+                                ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_PV
+                                : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_NonPV))
                     {
-                        --reduction;
+                        reduction = EvaluationConstants.LMRReductions[depth][visitedMovesCounter];
+
+                        if (pvNode)
+                        {
+                            --reduction;
+                        }
+
+                        if (position.IsInCheck())   // i.e. move gives check
+                        {
+                            --reduction;
+                        }
+
+                        if (!improving)
+                        {
+                            ++reduction;
+                        }
+
+                        if (cutnode)
+                        {
+                            ++reduction;
+                        }
+
+                        // -= history/(maxHistory/2)
+                        reduction -= 2 * _quietHistory[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.History_MaxMoveValue;
+
+                        // Don't allow LMR to drop into qsearch or increase the depth
+                        // depth - 1 - depth +2 = 1, min depth we want
+                        reduction = Math.Clamp(reduction, 0, depth - 2);
                     }
 
-                    if (position.IsInCheck())   // i.e. move gives check
+                    // 🔍 Static Exchange Evaluation (SEE) reduction
+                    // Bad captures are reduced more
+                    if (!isInCheck
+                        && moveScores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue
+                        && moveScores[moveIndex] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
                     {
-                        --reduction;
+                        reduction += Configuration.EngineSettings.SEE_BadCaptureReduction;
+                        reduction = Math.Clamp(reduction, 0, depth - 1);
                     }
-
-                    if (!improving)
-                    {
-                        ++reduction;
-                    }
-
-                    if (ttBestMove != default && isCapture)
-                    {
-                        ++reduction;
-                    }
-
-                    // -= history/(maxHistory/2)
-                    reduction -= 2 * _quietHistory[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.History_MaxMoveValue;
-
-                    // Don't allow LMR to drop into qsearch or increase the depth
-                    // depth - 1 - depth +2 = 1, min depth we want
-                    reduction = Math.Clamp(reduction, 0, depth - 2);
                 }
 
-                // 🔍 Static Exchange Evaluation (SEE) reduction
-                // Bad captures are reduced more
-                if (!isInCheck
-                    && moveScores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue
-                    && moveScores[moveIndex] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
-                {
-                    reduction += Configuration.EngineSettings.SEE_BadCaptureReduction;
-                    reduction = Math.Clamp(reduction, 0, depth - 1);
-                }
-
+                cutnode = reduction > 0;
                 // Search with reduced depth
-                score = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha);
+                score = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha, cutnode);
 
                 // 🔍 Principal Variation Search (PVS)
                 if (score > alpha && reduction > 0)
@@ -394,14 +403,14 @@ public sealed partial class Engine
                     // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
 
                     // Search with full depth but narrowed score bandwidth
-                    score = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha);
+                    score = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha, !cutnode);
                 }
 
                 if (score > alpha && score < beta)
                 {
                     // PVS Hypothesis invalidated -> search with full depth and full score bandwidth
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
-                    score = -NegaMax(depth - 1, ply + 1, -beta, -alpha);
+                    score = -NegaMax(depth - 1, ply + 1, -beta, -alpha, cutnode: false);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
                 }
             }

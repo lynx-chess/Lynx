@@ -347,6 +347,14 @@ public sealed class UCIHandler
                     }
                     break;
                 }
+            case "scorestabiity_mindepth":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.ScoreStabiity_MinDepth = value;
+                    }
+                    break;
+                }
             #endregion
 
             #region Search tuning
@@ -359,11 +367,19 @@ public sealed class UCIHandler
                     }
                     break;
                 }
-            case "lmr_minfulldepthsearchedmoves":
+            case "lmr_minfulldepthsearchedmoves_pv":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
-                        Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves = value;
+                        Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_PV = value;
+                    }
+                    break;
+                }
+            case "lmr_minfulldepthsearchedmoves_nonpv":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_NonPV = value;
                     }
                     break;
                 }

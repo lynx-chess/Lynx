@@ -1139,7 +1139,7 @@ static void UnmakeMove()
             if (oldZobristKey != position.UniqueIdentifier)
             {
                 Console.WriteLine($"{oldZobristKey} != {position.UniqueIdentifier}");
-                throw new();
+                throw new DirectoryNotFoundException();
             }
 
             Console.WriteLine("----------------------------------------------------------------------------");

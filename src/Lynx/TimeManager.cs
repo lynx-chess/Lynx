@@ -24,8 +24,6 @@ public static class TimeManager
 
     public static SearchConstraints CalculateTimeManagement(Game game, GoCommand goCommand)
     {
-        bool isPondering = goCommand.Ponder;
-
         int maxDepth = -1;
         int hardLimitTimeBound = SearchConstraints.DefaultHardLimitTimeBound;
         int softLimitTimeBound = int.MaxValue;
@@ -46,58 +44,50 @@ public static class TimeManager
         // Inspired by Alexandria: time overhead to avoid timing out in the engine-gui communication process
         const int engineGuiCommunicationTimeOverhead = 50;
 
-        if (!isPondering)
+        if (goCommand.WhiteTime != 0 || goCommand.BlackTime != 0)  // Cutechess sometimes sends negative wtime/btime
         {
-            if (goCommand.WhiteTime != 0 || goCommand.BlackTime != 0)  // Cutechess sometimes sends negative wtime/btime
-            {
-                const int minSearchTime = 50;
+            const int minSearchTime = 50;
 
-                var movesDivisor = goCommand.MovesToGo == 0
-                    ? MovesDivisor(ExpectedMovesLeft(game.PositionHashHistoryLength()))
-                    : goCommand.MovesToGo;
+            var movesDivisor = goCommand.MovesToGo == 0
+                ? MovesDivisor(ExpectedMovesLeft(game.PositionHashHistoryLength()))
+                : goCommand.MovesToGo;
 
-                millisecondsLeft -= engineGuiCommunicationTimeOverhead;
-                millisecondsLeft = Math.Clamp(millisecondsLeft, minSearchTime, int.MaxValue); // Avoiding 0/negative values
+            millisecondsLeft -= engineGuiCommunicationTimeOverhead;
+            millisecondsLeft = Math.Clamp(millisecondsLeft, minSearchTime, int.MaxValue); // Avoiding 0/negative values
 
-                hardLimitTimeBound = (int)(millisecondsLeft * Configuration.EngineSettings.HardTimeBoundMultiplier);
+            hardLimitTimeBound = (int)(millisecondsLeft * Configuration.EngineSettings.HardTimeBoundMultiplier);
 
-                var softLimitBase = (millisecondsLeft / movesDivisor) + (millisecondsIncrement * Configuration.EngineSettings.SoftTimeBaseIncrementMultiplier);
-                softLimitTimeBound = Math.Min(hardLimitTimeBound, (int)(softLimitBase * Configuration.EngineSettings.SoftTimeBoundMultiplier));
+            var softLimitBase = (millisecondsLeft / movesDivisor) + (millisecondsIncrement * Configuration.EngineSettings.SoftTimeBaseIncrementMultiplier);
+            softLimitTimeBound = Math.Min(hardLimitTimeBound, (int)(softLimitBase * Configuration.EngineSettings.SoftTimeBoundMultiplier));
 
-                _logger.Info("Soft time bound: {0}s", 0.001 * softLimitTimeBound);
-                _logger.Info("Hard time bound: {0}s", 0.001 * hardLimitTimeBound);
-            }
-            else if (goCommand.MoveTime > 0)
-            {
-                softLimitTimeBound = hardLimitTimeBound = goCommand.MoveTime - engineGuiCommunicationTimeOverhead;
-                _logger.Info("Time to move: {0}s", 0.001 * hardLimitTimeBound);
-            }
-            else if (goCommand.Depth > 0)
-            {
-                maxDepth = goCommand.Depth > Constants.AbsoluteMaxDepth ? Constants.AbsoluteMaxDepth : goCommand.Depth;
-            }
-            else if (goCommand.Infinite)
-            {
-                maxDepth = Configuration.EngineSettings.MaxDepth;
-                _logger.Info("Infinite search (depth {0})", maxDepth);
-            }
-            else
-            {
-                maxDepth = Engine.DefaultMaxDepth;
-                _logger.Warn("Unexpected or unsupported go command");
-            }
+            _logger.Info("Soft time bound: {0}s", 0.001 * softLimitTimeBound);
+            _logger.Info("Hard time bound: {0}s", 0.001 * hardLimitTimeBound);
+        }
+        else if (goCommand.MoveTime > 0)
+        {
+            softLimitTimeBound = hardLimitTimeBound = goCommand.MoveTime - engineGuiCommunicationTimeOverhead;
+            _logger.Info("Time to move: {0}s", 0.001 * hardLimitTimeBound);
+        }
+        else if (goCommand.Depth > 0)
+        {
+            maxDepth = goCommand.Depth > Constants.AbsoluteMaxDepth ? Constants.AbsoluteMaxDepth : goCommand.Depth;
+        }
+        else if (goCommand.Infinite)
+        {
+            maxDepth = Configuration.EngineSettings.MaxDepth;
+            _logger.Info("Infinite search (depth {0})", maxDepth);
         }
         else
         {
-            maxDepth = Configuration.EngineSettings.MaxDepth;
-            _logger.Info("Pondering search (depth {0})", maxDepth);
+            maxDepth = Engine.DefaultMaxDepth;
+            _logger.Warn("Unexpected or unsupported go command");
         }
 
         return new(hardLimitTimeBound, softLimitTimeBound, maxDepth);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int SoftLimit(SearchConstraints searchConstraints, ulong bestMoveNodeCount, ulong totalNodeCount, int bestMoveStability)
+    public static int SoftLimit(SearchConstraints searchConstraints, int depth, ulong bestMoveNodeCount, ulong totalNodeCount, int bestMoveStability, int scoreDelta)
     {
         Debug.Assert(totalNodeCount > 0);
         Debug.Assert(totalNodeCount >= bestMoveNodeCount);
@@ -106,6 +96,7 @@ public static class TimeManager
         double nodeTmScale = Configuration.EngineSettings.NodeTmScale;
 
         double scale = 1.0;
+        double scoreStabilityFactor = 1;
 
         // Node time management: scale soft limit time bound by the proportion of nodes spent
         //   searching the best move at root level vs the total nodes searched.
@@ -125,14 +116,48 @@ public static class TimeManager
         double bestMoveStabilityFactor = _bestMoveStabilityValues[Math.Min(bestMoveStability, _bestMoveStabilityValues.Length - 1)];
         scale *= bestMoveStabilityFactor;
 
+        if (depth >= Configuration.EngineSettings.ScoreStabiity_MinDepth)
+        {
+            // Score stability: if score improves, we spend less timespend in the search
+            scoreStabilityFactor = CalculateScoreStability(scoreDelta);
+            scale *= scoreStabilityFactor;
+        }
+
         int newSoftTimeLimit = Math.Min(
             (int)Math.Round(searchConstraints.SoftLimitTimeBound * scale),
             searchConstraints.HardLimitTimeBound);
 
-        _logger.Trace("[TM] Node tm factor: {0}, bm stability factor: {1}, soft time limit: {2} -> {3}",
-            nodeTmFactor, bestMoveStabilityFactor, searchConstraints.SoftLimitTimeBound, newSoftTimeLimit);
+        _logger.Trace("[TM] Node tm factor: {0}, bm stability factor: {1}, score stability factor: {2}, soft time limit: {3} -> {4}",
+            nodeTmFactor, bestMoveStabilityFactor, scoreStabilityFactor, searchConstraints.SoftLimitTimeBound, newSoftTimeLimit);
 
         return newSoftTimeLimit;
+    }
+
+    /// <summary>
+    /// Implementation based on Stash's
+    /// When new score is higher than old score (negative <paramref name="scoreDelta"/>),
+    /// use less time
+    /// </summary>
+    /// <param name="scoreDelta">oldScore - currentScore, negative when score improved</param>
+    /// <returns>[0.5, 2.0]</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static double CalculateScoreStability(int scoreDelta)
+    {
+        const int limit = 100;
+        const int potBase = 2;
+
+        // Score delta is clamped to [-100, 100]
+        var clampedScore = Math.Clamp(scoreDelta, -limit, limit);
+
+        // Clamped score is mapped to the range [-1, 1]
+        var mappedScore = (double)clampedScore / limit;
+
+        // -100 -> -1   -> 2 ^ -1   = 0.5       New score was higher (score increase)
+        //  -50 -> -0.5 -> 2 ^ -0.5 = 0.707
+        //    0 ->  0   -> 2 ^ 0    = 1
+        //  +50 -> 0.5  -> 2 ^ 0.5  = 1.414
+        // +100 -> +1   -> 2 ^1     = 2         Old score was higher (score decrease)
+        return Math.Pow(potBase, mappedScore);
     }
 
     /// <summary>

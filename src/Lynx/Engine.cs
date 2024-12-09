@@ -64,12 +64,6 @@ public sealed partial class Engine : IDisposable
             _moveNodeCount[i] = new ulong[64];
         }
 
-        _killerMoves = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin][];
-        for (int i = 0; i < Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin; ++i)
-        {
-            _killerMoves[i] = new Move[3];
-        }
-
 #if !DEBUG
         // Temporary channel so that no output is generated
         _engineWriter = Channel.CreateUnbounded<object>(new UnboundedChannelOptions() { SingleReader = true, SingleWriter = false }).Writer;
@@ -93,7 +87,7 @@ public sealed partial class Engine : IDisposable
         AdjustPosition(Constants.SuperLongPositionCommand);
 
         var searchConstrains = TimeManager.CalculateTimeManagement(Game, command);
-        BestMove(command, in searchConstrains);
+        BestMove(in searchConstrains);
 
         Bench(2);
 
@@ -158,17 +152,17 @@ public sealed partial class Engine : IDisposable
     {
         var searchConstraints = TimeManager.CalculateTimeManagement(Game, goCommand);
 
-        return BestMove(goCommand, in searchConstraints);
+        return BestMove(in searchConstraints);
     }
 
-    public SearchResult BestMove(GoCommand goCommand, in SearchConstraints searchConstrains)
+    public SearchResult BestMove(in SearchConstraints searchConstrains)
     {
         _searchConstraints = searchConstrains;
 
         _searchCancellationTokenSource = new();
         _absoluteSearchCancellationTokenSource = new();
 
-        if (searchConstrains.HardLimitTimeBound != SearchConstraints.DefaultHardLimitTimeBound)
+        if (!_isPondering && searchConstrains.HardLimitTimeBound != SearchConstraints.DefaultHardLimitTimeBound)
         {
             _searchCancellationTokenSource.CancelAfter(searchConstrains.HardLimitTimeBound);
         }
@@ -177,7 +171,7 @@ public sealed partial class Engine : IDisposable
         //SearchResult resultToReturn = await SearchBestMove(maxDepth, decisionTime);
 
         Game.ResetCurrentPositionToBeforeSearchState();
-        if (!goCommand.Ponder
+        if (!_isPondering
             && resultToReturn.BestMove != default
             && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
         {
@@ -247,12 +241,10 @@ public sealed partial class Engine : IDisposable
         try
         {
             _isPondering = goCommand.Ponder;
-            var searchResult = BestMove(goCommand, in searchConstraints);
+            var searchResult = BestMove(in searchConstraints);
 
             if (_isPondering)
             {
-                // Using either field or local copy for the rest of the method, since goCommand.Ponder could change
-
                 // Avoiding the scenario where search finishes early (i.e. mate detected, max depth reached) and results comes
                 // before a potential ponderhit command
                 // _absoluteSearchCancellationTokenSource.IsCancellationRequested isn't reliable because
@@ -263,9 +255,8 @@ public sealed partial class Engine : IDisposable
                 {
                     _isPonderHit = false;
                     _isPondering = false;
-                    goCommand.DisablePonder();
 
-                    searchResult = BestMove(goCommand, in searchConstraints);
+                    searchResult = BestMove(in searchConstraints);
                 }
             }
 

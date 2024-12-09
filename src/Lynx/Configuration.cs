@@ -131,13 +131,19 @@ public sealed class EngineSettings
     [SPSA<double>(0, 1, 0.1)]
     public double BM_Stability_4 { get; set; } = 0.65;
 
+    [SPSA<int>(1, 15, 1)]
+    public int ScoreStabiity_MinDepth { get; set; } = 7;
+
     #endregion
 
     [SPSA<int>(3, 10, 0.5)]
     public int LMR_MinDepth { get; set; } = 3;
 
     [SPSA<int>(1, 10, 0.5)]
-    public int LMR_MinFullDepthSearchedMoves { get; set; } = 3;
+    public int LMR_MinFullDepthSearchedMoves_PV { get; set; } = 5;
+
+    [SPSA<int>(1, 10, 0.5)]
+    public int LMR_MinFullDepthSearchedMoves_NonPV { get; set; } = 2;
 
     /// <summary>
     /// Value originally from Stormphrax, who apparently took it from Viridithas
