@@ -333,6 +333,24 @@ public sealed partial class Engine
                         RevertMove();
                         break;
                     }
+
+                    // 🔍 SEE pruning
+                    if (depth <= Configuration.EngineSettings.SEE_Pruning_MaxDepth)
+                    {
+                        var threshold = isCapture
+                            ? Configuration.EngineSettings.SEE_Pruning_Noisy_DepthScalingFactor * depth
+                            : Configuration.EngineSettings.SEE_Pruning_Quiet_DepthScalingFactor * depth;
+
+                        if (!SEE.HasPositiveScore(position, move, threshold))
+                        {
+                            // After making a move
+                            Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
+                            Game.RemoveFromPositionHashHistory();
+                            position.UnmakeMove(move, gameState);
+
+                            continue;
+                        }
+                    }
                 }
 
                 _tt.PrefetchTTEntry(position);
