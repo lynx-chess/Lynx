@@ -16,8 +16,6 @@ public static class TimeManager
 
     public static SearchConstraints CalculateTimeManagement(Game game, GoCommand goCommand)
     {
-        bool isPondering = goCommand.Ponder;
-
         int maxDepth = -1;
         int hardLimitTimeBound = SearchConstraints.DefaultHardLimitTimeBound;
         int softLimitTimeBound = int.MaxValue;
