@@ -171,6 +171,13 @@ public partial class GoCommandParsingAlternatives_Benchmark : BaseBenchmark
         await Task.Run(() => ParseNoRegex_DictionaryAction(command));
     }
 
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public async Task NoRegex_DictionaryActionAndMemoryValues(string command)
+    {
+        await Task.Run(() => ParseNoRegex_DictionaryActionAndMemoryValues(command));
+    }
+
     [GeneratedRegex("(?<=wtime).+?(?=searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled, "es-ES")]
     private static partial Regex WhiteTimeRegex();
 
@@ -602,6 +609,72 @@ public partial class GoCommandParsingAlternatives_Benchmark : BaseBenchmark
                         _logger.Warn("{0} not supported in go command, attempting to continue command parsing", key);
                         break;
                 }
+            }
+        }
+#pragma warning restore S127 // "for" loop stop conditions should be invariant
+    }
+
+    private static readonly ReadOnlyMemory<char> InfiniteMemory = "infinite".AsMemory();
+    private static readonly ReadOnlyMemory<char> PonderMemory = "ponder".AsMemory();
+    private static readonly ReadOnlyMemory<char> NodesMemory = "nodes".AsMemory();
+    private static readonly ReadOnlyMemory<char> MateMemory = "mate".AsMemory();
+    private static readonly ReadOnlyMemory<char> SearchMovesMemory = "searchmoves".AsMemory();
+
+    private static readonly Dictionary<ReadOnlyMemory<char>, Action<GoCommandParsingAlternatives_Benchmark, int>> _commandActions2 = new()
+    {
+        ["wtime".AsMemory()] = (command, value) => command.WhiteTime = value,
+        ["btime".AsMemory()] = (command, value) => command.BlackTime = value,
+        ["winc".AsMemory()] = (command, value) => command.WhiteIncrement = value,
+        ["binc".AsMemory()] = (command, value) => command.BlackIncrement = value,
+        ["movestogo".AsMemory()] = (command, value) => command.MovesToGo = value,
+        ["movetime".AsMemory()] = (command, value) => command.MoveTime = value,
+        ["depth".AsMemory()] = (command, value) => command.Depth = value
+    };
+
+    private void ParseNoRegex_DictionaryActionAndMemoryValues(string command)
+    {
+        var commandAsSpan = command.AsSpan();
+        Span<Range> ranges = stackalloc Range[commandAsSpan.Length];
+        var rangesLength = commandAsSpan.Split(ranges, ' ', StringSplitOptions.RemoveEmptyEntries);
+
+#pragma warning disable S127 // "for" loop stop conditions should be invariant
+        for (int i = 1; i < rangesLength; i++)
+        {
+            var key = commandAsSpan[ranges[i]];
+            if (_commandActions2.TryGetValue(key.ToString().AsMemory(), out var action))
+            {
+                if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
+                {
+                    action(this, value);
+                }
+            }
+            else if (key.Equals(InfiniteMemory.Span, StringComparison.OrdinalIgnoreCase))
+            {
+                Infinite = true;
+            }
+            else if (key.Equals(PonderMemory.Span, StringComparison.OrdinalIgnoreCase))
+            {
+                Ponder = true;
+            }
+            else if (key.Equals(NodesMemory.Span, StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.Warn("nodes not supported in go command, it will be safely ignored");
+                ++i;
+            }
+            else if (key.Equals(MateMemory.Span, StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.Warn("mate not supported in go command, it will be safely ignored");
+                ++i;
+            }
+            else if (key.Equals(SearchMovesMemory.Span, StringComparison.OrdinalIgnoreCase))
+            {
+                const string message = "searchmoves not supported in go command";
+                _logger.Error(message);
+                throw new NotImplementedException(message);
+            }
+            else
+            {
+                _logger.Warn("{0} not supported in go command, attempting to continue command parsing", key.ToString());
             }
         }
 #pragma warning restore S127 // "for" loop stop conditions should be invariant
