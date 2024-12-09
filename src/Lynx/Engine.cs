@@ -87,7 +87,7 @@ public sealed partial class Engine : IDisposable
         AdjustPosition(Constants.SuperLongPositionCommand);
 
         var searchConstrains = TimeManager.CalculateTimeManagement(Game, command);
-        BestMove(command, in searchConstrains);
+        BestMove(in searchConstrains);
 
         Bench(2);
 
@@ -152,10 +152,10 @@ public sealed partial class Engine : IDisposable
     {
         var searchConstraints = TimeManager.CalculateTimeManagement(Game, goCommand);
 
-        return BestMove(goCommand, in searchConstraints);
+        return BestMove(in searchConstraints);
     }
 
-    public SearchResult BestMove(GoCommand goCommand, in SearchConstraints searchConstrains)
+    public SearchResult BestMove(in SearchConstraints searchConstrains)
     {
         _searchConstraints = searchConstrains;
 
@@ -171,7 +171,7 @@ public sealed partial class Engine : IDisposable
         //SearchResult resultToReturn = await SearchBestMove(maxDepth, decisionTime);
 
         Game.ResetCurrentPositionToBeforeSearchState();
-        if (!goCommand.Ponder
+        if (!_isPondering
             && resultToReturn.BestMove != default
             && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
         {
@@ -241,12 +241,10 @@ public sealed partial class Engine : IDisposable
         try
         {
             _isPondering = goCommand.Ponder;
-            var searchResult = BestMove(goCommand, in searchConstraints);
+            var searchResult = BestMove(in searchConstraints);
 
             if (_isPondering)
             {
-                // Using either field or local copy for the rest of the method, since goCommand.Ponder could change
-
                 // Avoiding the scenario where search finishes early (i.e. mate detected, max depth reached) and results comes
                 // before a potential ponderhit command
                 // _absoluteSearchCancellationTokenSource.IsCancellationRequested isn't reliable because
@@ -257,9 +255,8 @@ public sealed partial class Engine : IDisposable
                 {
                     _isPonderHit = false;
                     _isPondering = false;
-                    goCommand.DisablePonder();
 
-                    searchResult = BestMove(goCommand, in searchConstraints);
+                    searchResult = BestMove(in searchConstraints);
                 }
             }
 
