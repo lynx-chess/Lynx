@@ -83,7 +83,7 @@ public sealed partial class Engine : IDisposable
     }
 
 #pragma warning disable S1144 // Unused private types or members should be removed - used in Release mode
-    public void WarmupEngine()
+    private void WarmupEngine()
     {
         _logger.Info("Warming up engine");
         var sw = Stopwatch.StartNew();
