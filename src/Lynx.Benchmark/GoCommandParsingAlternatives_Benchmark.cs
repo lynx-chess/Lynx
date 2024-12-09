@@ -118,6 +118,8 @@
  */
 
 using BenchmarkDotNet.Attributes;
+using Lynx.UCI.Commands.GUI;
+using Microsoft.Diagnostics.Utilities;
 using NLog;
 using System.Text.RegularExpressions;
 
@@ -160,6 +162,13 @@ public partial class GoCommandParsingAlternatives_Benchmark : BaseBenchmark
     public async Task NoRegex(string command)
     {
         await Task.Run(() => ParseNoRegex(command));
+    }
+
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public async Task NoRegex_DictionaryAction(string command)
+    {
+        await Task.Run(() => ParseNoRegex_DictionaryAction(command));
     }
 
     [GeneratedRegex("(?<=wtime).+?(?=searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled, "es-ES")]
@@ -534,6 +543,65 @@ public partial class GoCommandParsingAlternatives_Benchmark : BaseBenchmark
                         _logger.Warn("{0} not supported in go command", commandAsSpan[ranges[i]].ToString());
                         break;
                     }
+            }
+        }
+#pragma warning restore S127 // "for" loop stop conditions should be invariant
+    }
+
+    private static readonly Dictionary<string, Action<GoCommandParsingAlternatives_Benchmark, int>> _commandActions = new Dictionary<string, Action<GoCommandParsingAlternatives_Benchmark, int>>
+    {
+        ["wtime"] = (command, value) => command.WhiteTime = value,
+        ["btime"] = (command, value) => command.BlackTime = value,
+        ["winc"] = (command, value) => command.WhiteIncrement = value,
+        ["binc"] = (command, value) => command.BlackIncrement = value,
+        ["movestogo"] = (command, value) => command.MovesToGo = value,
+        ["movetime"] = (command, value) => command.MoveTime = value,
+        ["depth"] = (command, value) => command.Depth = value
+    };
+
+    private void ParseNoRegex_DictionaryAction(string command)
+    {
+        var commandAsSpan = command.AsSpan();
+        Span<Range> ranges = stackalloc Range[commandAsSpan.Length];
+        var rangesLength = commandAsSpan.Split(ranges, ' ', StringSplitOptions.RemoveEmptyEntries);
+
+#pragma warning disable S127 // "for" loop stop conditions should be invariant
+        for (int i = 1; i < rangesLength; i++)
+        {
+            var key = commandAsSpan[ranges[i]].ToString();
+            if (_commandActions.TryGetValue(key, out var action))
+            {
+                if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
+                {
+                    action(this, value);
+                }
+            }
+            else
+            {
+                switch (key)
+                {
+                    case "infinite":
+                        Infinite = true;
+                        break;
+                    case "ponder":
+                        Ponder = true;
+                        break;
+                    case "nodes":
+                        _logger.Warn("nodes not supported in go command, it will be safely ignored");
+                        ++i;
+                        break;
+                    case "mate":
+                        _logger.Warn("mate not supported in go command, it will be safely ignored");
+                        ++i;
+                        break;
+                    case "searchmoves":
+                        const string message = "searchmoves not supported in go command";
+                        _logger.Error(message);
+                        throw new NotImplementedException(message);
+                    default:
+                        _logger.Warn("{0} not supported in go command, attempting to continue command parsing", key);
+                        break;
+                }
             }
         }
 #pragma warning restore S127 // "for" loop stop conditions should be invariant
