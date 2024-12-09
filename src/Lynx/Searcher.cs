@@ -105,17 +105,14 @@ public sealed class Searcher
         var lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
-        // Lazy SMP implementation
-
-        // Extra engines run in "go infinite" mode
-        // TODO: fix pondering, since pondering logic updated the boolean in the constraint object instead of a field
+        // Basic lazy SMP implementation
+        // Extra engines run in "go infinite" mode and their purpose is to populate the TT
+        // Not UCI output is produced by them nor their search results are taken into account
         var extraEnginesSearchConstraint = SearchConstraints.InfiniteSearchConstraint;
 
-        //TaskFactory taskFactory = new();
         var tasks = _extraEngines
             .Select(engine =>
                 Task.Run(() => engine.Search(goCommand, extraEnginesSearchConstraint)))
-            //taskFactory.StartNew(() => engine.Search(goCommand, extraEnginesSearchConstraint)))
             .ToArray();
 
 #if MULTITHREAD_DEBUG
@@ -135,6 +132,8 @@ public sealed class Searcher
             engine.StopSearching();
         }
 
+        // We wait just for the node count, so there's room for improvement here with thread voting
+        // and other strategies that take other thread results into account
         var extraResults = await Task.WhenAll(tasks);
 
 #if MULTITHREAD_DEBUG
@@ -185,6 +184,11 @@ public sealed class Searcher
     public void PonderHit()
     {
         _mainEngine.PonderHit();
+
+        foreach (var engine in _extraEngines)
+        {
+            engine.PonderHit();
+        }
     }
 
     public void NewGame()
@@ -199,7 +203,13 @@ public sealed class Searcher
         if (_ttWrapper.Size == Configuration.EngineSettings.TranspositionTableSize)
         {
             _ttWrapper.Clear();
+
             _mainEngine.NewGame();
+
+            foreach (var engine in _extraEngines)
+            {
+                engine.NewGame();
+            }
         }
         else
         {
@@ -209,6 +219,8 @@ public sealed class Searcher
 
             _mainEngine.FreeResources();
             _mainEngine = new Engine("1", _engineWriter, in _ttWrapper, warmup: true);
+
+            AllocateExtraEngines();
         }
 
         // Threads update

@@ -47,7 +47,9 @@ public sealed partial class Engine : IDisposable
 
     public Engine(ChannelWriter<object> engineWriter) : this("0", engineWriter, new()) { }
 
+#pragma warning disable RCS1163 // Unused parameter - used in Release mode
     public Engine(string id, ChannelWriter<object> engineWriter, in TranspositionTable tt, bool warmup = false)
+#pragma warning restore RCS1163 // Unused parameter
     {
         _id = id;
         _engineWriter = engineWriter;
@@ -80,6 +82,8 @@ public sealed partial class Engine : IDisposable
             NewGame();
         }
 #endif
+
+        _logger.Info("Engine {0} initialized", _id);
     }
 
 #pragma warning disable S1144 // Unused private types or members should be removed - used in Release mode
