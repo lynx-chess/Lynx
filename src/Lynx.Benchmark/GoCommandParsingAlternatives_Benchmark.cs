@@ -119,6 +119,7 @@
 
 using BenchmarkDotNet.Attributes;
 using Lynx.UCI.Commands.GUI;
+using Microsoft.CodeAnalysis.Operations;
 using Microsoft.Diagnostics.Utilities;
 using NLog;
 using System.Text.RegularExpressions;
@@ -183,6 +184,13 @@ public partial class GoCommandParsingAlternatives_Benchmark : BaseBenchmark
     public async Task NoRegex_DictionaryActionAndMemoryValues2(string command)
     {
         await Task.Run(() => ParseNoRegex_DictionaryActionAndMemoryValues_2(command));
+    }
+
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public async Task NoRegex_ReadOnlySpanComparison(string command)
+    {
+        await Task.Run(() => ParseNoRegex_ReadOnlySpanComparison(command));
     }
 
     [GeneratedRegex("(?<=wtime).+?(?=searchmoves|wtime|btime|winc|binc|movestogo|depth|nodes|mate|movetime|ponder|infinite|$)", RegexOptions.IgnoreCase | RegexOptions.Compiled, "es-ES")]
@@ -742,6 +750,111 @@ public partial class GoCommandParsingAlternatives_Benchmark : BaseBenchmark
             else
             {
                 _logger.Warn("{0} not supported in go command, attempting to continue command parsing", key.ToString());
+            }
+        }
+#pragma warning restore S127 // "for" loop stop conditions should be invariant
+    }
+
+    private static ReadOnlySpan<char> WtimeSpan => "wtime".AsSpan();
+    private static ReadOnlySpan<char> BtimeSpan => "btime".AsSpan();
+    private static ReadOnlySpan<char> WincSpan => "winc".AsSpan();
+    private static ReadOnlySpan<char> BincSpan => "binc".AsSpan();
+    private static ReadOnlySpan<char> MovestogoSpan => "movestogo".AsSpan();
+    private static ReadOnlySpan<char> MovetimeSpan => "movetime".AsSpan();
+    private static ReadOnlySpan<char> DepthSpan => "depth".AsSpan();
+    private static ReadOnlySpan<char> InfiniteSpan => "infinite".AsSpan();
+    private static ReadOnlySpan<char> PonderSpan => "ponder".AsSpan();
+    private static ReadOnlySpan<char> NodesSpan => "nodes".AsSpan();
+    private static ReadOnlySpan<char> MateSpan => "mate".AsSpan();
+    private static ReadOnlySpan<char> SearchmovesSpan => "searchmoves".AsSpan();
+
+    private void ParseNoRegex_ReadOnlySpanComparison(string command)
+    {
+        var commandAsSpan = command.AsSpan();
+        Span<Range> ranges = stackalloc Range[commandAsSpan.Length];
+        var rangesLength = commandAsSpan.Split(ranges, ' ', StringSplitOptions.RemoveEmptyEntries);
+
+#pragma warning disable S127 // "for" loop stop conditions should be invariant
+        for (int i = 1; i < rangesLength; i++)
+        {
+            var key = commandAsSpan[ranges[i]];
+
+            if (key.Equals(WtimeSpan, StringComparison.OrdinalIgnoreCase))
+            {
+                if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
+                {
+                    WhiteTime = value;
+                }
+            }
+            else if (key.Equals(BtimeSpan, StringComparison.OrdinalIgnoreCase))
+            {
+                if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
+                {
+                    BlackTime = value;
+                }
+            }
+            else if (key.Equals(WincSpan, StringComparison.OrdinalIgnoreCase))
+            {
+                if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
+                {
+                    WhiteIncrement = value;
+                }
+            }
+            else if (key.Equals(BincSpan, StringComparison.OrdinalIgnoreCase))
+            {
+                if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
+                {
+                    BlackIncrement = value;
+                }
+            }
+            else if (key.Equals(MovestogoSpan, StringComparison.OrdinalIgnoreCase))
+            {
+                if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
+                {
+                    MovesToGo = value;
+                }
+            }
+            else if (key.Equals(MovetimeSpan, StringComparison.OrdinalIgnoreCase))
+            {
+                if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
+                {
+                    MoveTime = value;
+                }
+            }
+            else if (key.Equals(DepthSpan, StringComparison.OrdinalIgnoreCase))
+            {
+                if (int.TryParse(commandAsSpan[ranges[++i]], out var value))
+                {
+                    Depth = value;
+                }
+            }
+            else if (key.Equals(InfiniteSpan, StringComparison.OrdinalIgnoreCase))
+            {
+                Infinite = true;
+            }
+            else if (key.Equals(PonderSpan, StringComparison.OrdinalIgnoreCase))
+            {
+                Ponder = true;
+            }
+            else if (key.Equals(NodesSpan, StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.Warn("nodes not supported in go command, it will be safely ignored");
+                ++i;
+            }
+            else if (key.Equals(MateSpan, StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.Warn("mate not supported in go command, it will be safely ignored");
+                ++i;
+            }
+            else if (key.Equals(SearchmovesSpan, StringComparison.OrdinalIgnoreCase))
+            {
+                const string message = "searchmoves not supported in go command";
+                _logger.Error(message);
+                throw new InvalidDataException(message);
+            }
+            else
+            {
+                _logger.Warn("{0} not supported in go command", key.ToString());
             }
         }
 #pragma warning restore S127 // "for" loop stop conditions should be invariant
