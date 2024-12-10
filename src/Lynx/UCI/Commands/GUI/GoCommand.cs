@@ -71,7 +71,7 @@ public sealed class GoCommand : IGUIBaseCommand
     public int Depth { get; }
     public int MoveTime { get; }
     public bool Infinite { get; }
-    public bool Ponder { get; private set; }
+    public bool Ponder { get; }
 
     public static int Nodes => throw new NotImplementedException();
     public static int Mate => throw new NotImplementedException();
@@ -233,6 +233,4 @@ public sealed class GoCommand : IGUIBaseCommand
     }
 
     public static string Init() => Id;
-
-    public void DisablePonder() => Ponder = false;
 }

@@ -16,7 +16,11 @@ public sealed partial class Engine
             {
                 var elapsedSeconds = Utils.CalculateElapsedSeconds(stopWatch);
 
-                var searchResult = new SearchResult(tablebaseResult.BestMove, score: 0, targetDepth: 0, [tablebaseResult.BestMove], mate: tablebaseResult.MateScore)
+                var searchResult = new SearchResult(
+#if MULTITHREAD_DEBUG
+                _id,
+#endif
+                    tablebaseResult.BestMove, score: 0, targetDepth: 0, [tablebaseResult.BestMove], mate: tablebaseResult.MateScore)
                 {
                     DepthReached = 0,
                     Nodes = 666,                // In case some guis proritize the info command with biggest depth
