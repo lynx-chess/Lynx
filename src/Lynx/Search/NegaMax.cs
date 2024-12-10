@@ -211,6 +211,16 @@ public sealed partial class Engine
             }
         }
 
+        // 🔍 IIR again - the return of the nonsense
+        // Jokes aside, idea seen in Plentychess but heavily tweaked
+        if (!isRoot
+            && pvNode
+            && depth >= Configuration.EngineSettings.IIR_MinDepth
+            && ttBestMove == default)
+        {
+            --depth;
+        }
+
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
         var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves);
 
