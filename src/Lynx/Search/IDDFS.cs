@@ -173,7 +173,20 @@ public sealed partial class Engine
 
                 var oldBestMove = lastSearchResult?.BestMove;
                 var oldScore = lastSearchResult?.Score ?? 0;
-                lastSearchResult = UpdateLastSearchResult(lastSearchResult, bestScore, depth, mate);
+                var lastSearchResultCandidate = UpdateLastSearchResult(lastSearchResult, bestScore, depth, mate);
+
+                if (lastSearchResultCandidate.BestMove == default)
+                {
+                    _logger.Warn(
+#if MULTITHREAD_DEBUG
+                $"[#{_id}] " +
+#endif
+                        "Search at depth {0} didn't produce a best move. Score {1} (mate in {2}) detected, and/but search continues", depth, bestScore, mate);
+
+                    continue;
+                }
+
+                lastSearchResult = lastSearchResultCandidate;
 
                 if (oldBestMove == lastSearchResult.BestMove)
                 {
@@ -187,7 +200,7 @@ public sealed partial class Engine
                 _scoreDelta = oldScore - lastSearchResult.Score;
 
                 _engineWriter.TryWrite(lastSearchResult);
-            } while (StopSearchCondition(lastSearchResult.BestMove, ++depth, mate));
+            } while (StopSearchCondition(lastSearchResult?.BestMove, ++depth, mate));
         }
         catch (OperationCanceledException)
         {
@@ -230,15 +243,15 @@ public sealed partial class Engine
         return finalSearchResult;
     }
 
-    private bool StopSearchCondition(Move bestMove, int depth, int mate)
+    private bool StopSearchCondition(Move? bestMove, int depth, int mate)
     {
-        if (bestMove == default)
+        if (bestMove is null || bestMove == 0)
         {
             _logger.Warn(
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                "Search at depth {0} didn't produce a best move. Mate in {1} detected, and/but search continues", depth - 1, mate);
+                "Search continues, due to lack of best move at depth {0}", depth - 1);
             return true;
         }
 
