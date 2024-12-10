@@ -18,6 +18,8 @@ public sealed partial class Engine
     [SkipLocalsInit]
     private int NegaMax(int depth, int ply, int alpha, int beta, bool cutnode, bool parentWasNullMove = false)
     {
+        Debug.Assert(depth > 0);
+
         var position = Game.CurrentPosition;
 
         // Prevents runtime failure in case depth is increased due to check extension, since we're using ply when calculating pvTable index,

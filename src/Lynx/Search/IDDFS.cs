@@ -160,7 +160,7 @@ public sealed partial class Engine
                         }
 
                         // We don't reduce if we're being checkmated
-                        if (bestScore <= EvaluationConstants.NegativeCheckmateDetectionLimit)
+                        if (failHighReduction >= depth)
                         {
                             failHighReduction = 0;
                         }
