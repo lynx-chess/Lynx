@@ -134,10 +134,13 @@ public sealed partial class Engine
 
                     while (true)
                     {
-                        _logger.Debug("Aspiration windows depth {Depth} ({DepthWithoutReduction} - {Reduction}): [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
-                            depth - failHighReduction, depth, failHighReduction, alpha, beta, bestScore, _nodes);
+                        var depthToSearch = depth - failHighReduction;
+                        Debug.Assert(depthToSearch > 0);
 
-                        bestScore = NegaMax(depth: depth - failHighReduction, ply: 0, alpha, beta, cutnode: false);
+                        _logger.Debug("Aspiration windows depth {Depth} ({DepthWithoutReduction} - {Reduction}): [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
+                            depthToSearch, depth, failHighReduction, alpha, beta, bestScore, _nodes);
+
+                        bestScore = NegaMax(depth: depthToSearch, ply: 0, alpha, beta, cutnode: false);
 
                         // 13, 19, 28, 42, 63, 94, 141, 211, 316, 474, 711, 1066, 1599, 2398, 3597, 5395, 8092, 12138, 18207, 27310, |EvaluationConstants.MaxEval|, 40965
                         window += window >> 1;   // window / 2
