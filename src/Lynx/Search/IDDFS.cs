@@ -134,10 +134,15 @@ public sealed partial class Engine
 
                     while (true)
                     {
-                        _logger.Debug("Aspiration windows depth {Depth}: [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
-                            depth, alpha, beta, bestScore, _nodes);
+                        // We don't reduce if we're being checkmated
+                        var reduction = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit
+                            ? failHighReduction
+                            : 0;
 
-                        bestScore = NegaMax(depth: depth - failHighReduction, ply: 0, alpha, beta, cutnode: false);
+                        _logger.Debug("Aspiration windows depth {Depth} ({DepthWithoutReduction} - {Reduction}): [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
+                            depth - reduction, depth, reduction, alpha, beta, bestScore, _nodes);
+
+                        bestScore = NegaMax(depth: depth - reduction, ply: 0, alpha, beta, cutnode: false);
 
                         // 13, 19, 28, 42, 63, 94, 141, 211, 316, 474, 711, 1066, 1599, 2398, 3597, 5395, 8092, 12138, 18207, 27310, |EvaluationConstants.MaxEval|, 40965
                         window += window >> 1;   // window / 2
@@ -252,6 +257,7 @@ public sealed partial class Engine
                 $"[#{_id}] " +
 #endif
                 "Search continues, due to lack of best move at depth {0}", depth - 1);
+
             return true;
         }
 
