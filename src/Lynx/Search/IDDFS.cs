@@ -155,17 +155,14 @@ public sealed partial class Engine
                         else if (beta <= bestScore)     // Fail high
                         {
                             beta = Math.Min(bestScore + window, EvaluationConstants.MaxEval);
-                            ++failHighReduction;
+                            if (failHighReduction <= depth - 2)
+                            {
+                                ++failHighReduction;
+                            }
                         }
                         else
                         {
                             break;
-                        }
-
-                        // We don't reduce if we're being checkmated
-                        if (failHighReduction >= depth)
-                        {
-                            failHighReduction = 0;
                         }
                     }
                 }
