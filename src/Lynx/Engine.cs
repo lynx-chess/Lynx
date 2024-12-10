@@ -12,6 +12,7 @@ public sealed partial class Engine : IDisposable
     internal const int DefaultMaxDepth = 5;
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+    private readonly string _id;
     private readonly ChannelWriter<object> _engineWriter;
     private readonly TranspositionTable _tt;
     private SearchConstraints _searchConstraints;
@@ -44,16 +45,21 @@ public sealed partial class Engine : IDisposable
     private CancellationTokenSource _searchCancellationTokenSource;
     private CancellationTokenSource _absoluteSearchCancellationTokenSource;
 
-    public Engine(ChannelWriter<object> engineWriter) : this(engineWriter, new()) { }
+    public Engine(ChannelWriter<object> engineWriter) : this("0", engineWriter, new()) { }
 
-    public Engine(ChannelWriter<object> engineWriter, in TranspositionTable tt)
+#pragma warning disable RCS1163 // Unused parameter - used in Release mode
+    public Engine(string id, ChannelWriter<object> engineWriter, in TranspositionTable tt, bool warmup = false)
+#pragma warning restore RCS1163 // Unused parameter
     {
-        AverageDepth = 0;
-        Game = new Game(Constants.InitialPositionFEN);
-        _searchCancellationTokenSource = new();
-        _absoluteSearchCancellationTokenSource = new();
+        _id = id;
         _engineWriter = engineWriter;
         _tt = tt;
+
+        AverageDepth = 0;
+        Game = new Game(Constants.InitialPositionFEN);
+
+        _searchCancellationTokenSource = new();
+        _absoluteSearchCancellationTokenSource = new();
         // Update ResetEngine() after any changes here
 
         _quietHistory = new int[12][];
@@ -65,14 +71,19 @@ public sealed partial class Engine : IDisposable
         }
 
 #if !DEBUG
-        // Temporary channel so that no output is generated
-        _engineWriter = Channel.CreateUnbounded<object>(new UnboundedChannelOptions() { SingleReader = true, SingleWriter = false }).Writer;
-        WarmupEngine();
+        if (warmup)
+        {
+            // Temporary channel so that no output is generated
+            _engineWriter = Channel.CreateUnbounded<object>(new UnboundedChannelOptions() { SingleReader = true, SingleWriter = false }).Writer;
+            WarmupEngine();
 
-        _engineWriter = engineWriter;
+            _engineWriter = engineWriter;
 
-        NewGame();
+            NewGame();
+        }
 #endif
+
+        _logger.Info("Engine {0} initialized", _id);
     }
 
 #pragma warning disable S1144 // Unused private types or members should be removed - used in Release mode

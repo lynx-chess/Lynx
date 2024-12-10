@@ -2,6 +2,7 @@
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
+using System.Diagnostics;
 using System.Threading.Channels;
 
 namespace Lynx;
@@ -12,12 +13,14 @@ public sealed class Searcher
     private readonly ChannelWriter<object> _engineWriter;
     private readonly Logger _logger;
 
-    private Engine _engine;
+    private int _searchThreadsCount;
+    private Engine _mainEngine;
+    private Engine[] _extraEngines = [];
     private TranspositionTable _ttWrapper;
 
-    public Position CurrentPosition => _engine.Game.CurrentPosition;
+    public Position CurrentPosition => _mainEngine.Game.CurrentPosition;
 
-    public string FEN => _engine.Game.FEN;
+    public string FEN => _mainEngine.Game.FEN;
 
     public Searcher(ChannelReader<string> uciReader, ChannelWriter<object> engineWriter)
     {
@@ -25,9 +28,13 @@ public sealed class Searcher
         _engineWriter = engineWriter;
 
         _ttWrapper = new TranspositionTable();
-        _engine = new Engine(_engineWriter, in _ttWrapper);
+        _mainEngine = new Engine("1", _engineWriter, in _ttWrapper, warmup: true);
+
+        _searchThreadsCount = Configuration.EngineSettings.Threads;
+        AllocateExtraEngines();
 
         _logger = LogManager.GetCurrentClassLogger();
+        _logger.Info("Threads:\t{0}", _searchThreadsCount);
 
         InitializeStaticClasses();
 
@@ -44,7 +51,7 @@ public sealed class Searcher
                 {
                     if (_uciReader.TryRead(out var rawCommand))
                     {
-                        OnGoCommand(new GoCommand(rawCommand));
+                        await OnGoCommand(new GoCommand(rawCommand));
                     }
                 }
                 catch (Exception e)
@@ -63,13 +70,24 @@ public sealed class Searcher
         }
     }
 
-    public void PrintCurrentPosition() => _engine.Game.CurrentPosition.Print();
+    public void PrintCurrentPosition() => _mainEngine.Game.CurrentPosition.Print();
 
-    private void OnGoCommand(GoCommand goCommand)
+    private async Task OnGoCommand(GoCommand goCommand)
     {
-        var searchConstraints = TimeManager.CalculateTimeManagement(_engine.Game, goCommand);
+        if (_searchThreadsCount == 1)
+        {
+            SingleThreadedSearch(goCommand);
+        }
+        else
+        {
+            await MultiThreadedSearch(goCommand);
+        }
+    }
 
-        var searchResult = _engine.Search(goCommand, searchConstraints);
+    private void SingleThreadedSearch(GoCommand goCommand)
+    {
+        var searchConstraints = TimeManager.CalculateTimeManagement(_mainEngine.Game, goCommand);
+        var searchResult = _mainEngine.Search(goCommand, searchConstraints);
 
         if (searchResult is not null)
         {
@@ -78,33 +96,120 @@ public sealed class Searcher
         }
     }
 
+    private async Task MultiThreadedSearch(GoCommand goCommand)
+    {
+        var searchConstraints = TimeManager.CalculateTimeManagement(_mainEngine.Game, goCommand);
+
+#if MULTITHREAD_DEBUG
+        var sw = Stopwatch.StartNew();
+        var lastElapsed = sw.ElapsedMilliseconds;
+#endif
+
+        // Basic lazy SMP implementation
+        // Extra engines run in "go infinite" mode and their purpose is to populate the TT
+        // Not UCI output is produced by them nor their search results are taken into account
+        var extraEnginesSearchConstraint = SearchConstraints.InfiniteSearchConstraint;
+
+        var tasks = _extraEngines
+            .Select(engine =>
+                Task.Run(() => engine.Search(goCommand, extraEnginesSearchConstraint)))
+            .ToArray();
+
+#if MULTITHREAD_DEBUG
+        _logger.Debug("End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+        lastElapsed = sw.ElapsedMilliseconds;
+#endif
+
+        SearchResult? finalSearchResult = _mainEngine.Search(goCommand, searchConstraints);
+
+#if MULTITHREAD_DEBUG
+        _logger.Debug("End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+        lastElapsed = sw.ElapsedMilliseconds;
+#endif
+
+        foreach (var engine in _extraEngines)
+        {
+            engine.StopSearching();
+        }
+
+        // We wait just for the node count, so there's room for improvement here with thread voting
+        // and other strategies that take other thread results into account
+        var extraResults = await Task.WhenAll(tasks);
+
+#if MULTITHREAD_DEBUG
+        _logger.Debug("End of extra searches, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+#endif
+
+        if (finalSearchResult is not null)
+        {
+            foreach (var extraResult in extraResults)
+            {
+                finalSearchResult.Nodes += extraResult?.Nodes ?? 0;
+            }
+
+            finalSearchResult.NodesPerSecond = Utils.CalculateNps(finalSearchResult.Nodes, 0.001 * finalSearchResult.Time);
+
+#if MULTITHREAD_DEBUG
+            _logger.Debug("End of multithread calculations, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+#endif
+
+            // Final info command
+            _engineWriter.TryWrite(finalSearchResult);
+
+            // We always print best move, even in case of go ponder + stop, in which case IDEs are expected to ignore it
+            _engineWriter.TryWrite(new BestMoveCommand(finalSearchResult));
+        }
+    }
+
     public void AdjustPosition(ReadOnlySpan<char> command)
     {
-        _engine.AdjustPosition(command);
+        _mainEngine.AdjustPosition(command);
+
+        foreach (var engine in _extraEngines)
+        {
+            engine.AdjustPosition(command);
+        }
     }
 
     public void StopSearching()
     {
-        _engine.StopSearching();
+        foreach (var engine in _extraEngines)
+        {
+            engine.StopSearching();
+        }
+
+        _mainEngine.StopSearching();
     }
 
     public void PonderHit()
     {
-        _engine.PonderHit();
+        _mainEngine.PonderHit();
+
+        foreach (var engine in _extraEngines)
+        {
+            engine.PonderHit();
+        }
     }
 
     public void NewGame()
     {
-        var averageDepth = _engine.AverageDepth;
+        var averageDepth = _mainEngine.AverageDepth;
         if (averageDepth > 0 && averageDepth < int.MaxValue)
         {
             _logger.Info("Average depth: {0}", averageDepth);
         }
 
+        // Hash update
         if (_ttWrapper.Size == Configuration.EngineSettings.TranspositionTableSize)
         {
             _ttWrapper.Clear();
-            _engine.NewGame();
+
+            _mainEngine.NewGame();
+
+            foreach (var engine in _extraEngines)
+            {
+                engine.NewGame();
+            }
         }
         else
         {
@@ -112,8 +217,26 @@ public sealed class Searcher
 
             _ttWrapper = new TranspositionTable();
 
-            _engine.FreeResources();
-            _engine = new Engine(_engineWriter, in _ttWrapper);
+            _mainEngine.FreeResources();
+            _mainEngine = new Engine("1", _engineWriter, in _ttWrapper, warmup: true);
+
+            AllocateExtraEngines();
+        }
+
+        // Threads update
+        if (_searchThreadsCount == Configuration.EngineSettings.Threads)
+        {
+            foreach (var engine in _extraEngines)
+            {
+                engine.NewGame();
+            }
+        }
+        else
+        {
+            _logger.Info("Updating search threads count ({CurrentCount} threads -> {NewCount} threads)", _searchThreadsCount, Configuration.EngineSettings.Threads);
+            _searchThreadsCount = Configuration.EngineSettings.Threads;
+
+            AllocateExtraEngines();
         }
 
         ForceGCCollection();
@@ -121,7 +244,7 @@ public sealed class Searcher
 
     public void Quit()
     {
-        var averageDepth = _engine.AverageDepth;
+        var averageDepth = _mainEngine.AverageDepth;
         if (averageDepth > 0 && averageDepth < int.MaxValue)
         {
             _logger.Info("Average depth: {0}", averageDepth);
@@ -130,8 +253,39 @@ public sealed class Searcher
 
     public async ValueTask RunBench(int depth)
     {
-        var results = _engine.Bench(depth);
-        await _engine.PrintBenchResults(results);
+        var results = _mainEngine.Bench(depth);
+        await _mainEngine.PrintBenchResults(results);
+    }
+
+    private void AllocateExtraEngines()
+    {
+        // _searchThreadsCount includes _mainEngine
+        const int mainEngineOffset = 1;
+
+        foreach (var engine in _extraEngines)
+        {
+            engine.FreeResources();
+        }
+
+        if (_searchThreadsCount > 1)
+        {
+            _extraEngines = new Engine[_searchThreadsCount - mainEngineOffset];
+
+            for (int i = 0; i < _searchThreadsCount - mainEngineOffset; ++i)
+            {
+                _extraEngines[i] = new Engine($"{i + 2}",
+#if MULTITHREAD_DEBUG
+                    _engineWriter,
+#else
+                    SilentChannelWriter<object>.Instance,
+#endif
+                    in _ttWrapper, warmup: false);
+            }
+        }
+        else
+        {
+            _extraEngines = [];
+        }
     }
 
     private static void InitializeStaticClasses()
