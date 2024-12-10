@@ -264,6 +264,30 @@ public sealed class UCIHandler
                 }
 
             #region Time management
+            case "hardtimeboundmultiplier":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.HardTimeBoundMultiplier = value * 0.01;
+                    }
+                    break;
+                }
+            case "softtimeboundmultiplier":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.SoftTimeBoundMultiplier = value * 0.01;
+                    }
+                    break;
+                }
+            case "softtimebaseincrementmultiplier":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.SoftTimeBaseIncrementMultiplier = value * 0.01;
+                    }
+                    break;
+                }
             case "nodetmbase":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
@@ -277,6 +301,46 @@ public sealed class UCIHandler
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
                         Configuration.EngineSettings.NodeTmScale = value * 0.01;
+                    }
+                    break;
+                }
+            case "bm_stability_0":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.BM_Stability_0 = value * 0.01;
+                    }
+                    break;
+                }
+            case "bm_stability_1":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.BM_Stability_1 = value * 0.01;
+                    }
+                    break;
+                }
+            case "bm_stability_2":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.BM_Stability_2 = value * 0.01;
+                    }
+                    break;
+                }
+            case "bm_stability_3":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.BM_Stability_3 = value * 0.01;
+                    }
+                    break;
+                }
+            case "bm_stability_4":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.BM_Stability_4 = value * 0.01;
                     }
                     break;
                 }
