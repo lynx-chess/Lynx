@@ -634,11 +634,13 @@ public class Position : IDisposable
 
         var rank = Constants.Rank[squareIndex];
         var oppositeSide = (int)Side.Black;
+        var squareInFrontOfPawn = squareIndex - 8;
 
         if (pieceIndex == (int)Piece.p)
         {
             rank = 7 - rank;
             oppositeSide = (int)Side.White;
+            squareInFrontOfPawn = squareIndex + 8;
         }
 
         // Isolated pawn
@@ -655,6 +657,12 @@ public class Position : IDisposable
             if ((passedPawnsMask & OccupancyBitBoards[oppositeSide]) == 0)
             {
                 packedBonus += PassedPawnBonusNoEnemiesAheadBonus[bucket][rank];
+            }
+
+            // Passed pawn without a piece right in front of him
+            if (!OccupancyBitBoards[(int)Side.Both].GetBit(squareInFrontOfPawn))
+            {
+                packedBonus += PassedPawnBonusCanMove[bucket][rank];
             }
 
             // King distance to passed pawn
