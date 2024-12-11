@@ -10,7 +10,7 @@ public static class TimeManager
     /// <summary>
     /// Values from Stash
     /// </summary>
-    private static ReadOnlySpan<double> _bestMoveStabilityValues => [2.50, 1.20, 0.90, 0.80, 0.75];
+    private static ReadOnlySpan<double> _bestMoveStabilityValues => [2.66, 1.49, 0.96, 0.79, 0.75];
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
