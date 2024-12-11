@@ -19,7 +19,7 @@ public sealed class PositionCommand : IGUIBaseCommand
     public const string StartPositionString = "startpos";
     public const string MovesString = "moves";
 
-    private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public static Game ParseGame(ReadOnlySpan<char> positionCommandSpan, Span<Move> movePool)
     {
