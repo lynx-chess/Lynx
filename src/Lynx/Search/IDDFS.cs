@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using NLog;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -427,16 +428,25 @@ public sealed partial class Engine
         SearchResult finalSearchResult;
         if (lastSearchResult is null)
         {
-            // In the event of a quick ponderhit/stop while pondering because the opponent moved quickly, we don't want no warning triggered here
-            // when cancelling the pondering search
-            if (!_isPondering)
-            {
-                _logger.Warn(
+            var noDepth1Message =
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                    "Search cancelled at depth 1, choosing first found legal move as best one");
+                $"Search cancelled at depth {depth} with no result, choosing first found legal move as best one";
+
+            // In the event of a quick ponderhit/stop while pondering because the opponent moved quickly, we don't want no warning triggered here
+            //  when cancelling the pondering search
+            // The other condition reflects what happens in helper engines when a mate is quickly detected in the main:
+            //  search in helper engines sometimes get cancelled before any meaningful result is found, so we don't want a warning either
+            if (_isPondering || IsMainEngine())
+            {
+                _logger.Info(noDepth1Message);
             }
+            else
+            {
+                _logger.Warn(noDepth1Message);
+            }
+
             finalSearchResult = new(
 #if MULTITHREAD_DEBUG
                 _id,
