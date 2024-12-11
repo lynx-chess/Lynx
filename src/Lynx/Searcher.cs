@@ -2,7 +2,6 @@
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
-using System.Diagnostics;
 using System.Threading.Channels;
 
 namespace Lynx;
@@ -12,6 +11,8 @@ public sealed class Searcher
     private readonly ChannelReader<string> _uciReader;
     private readonly ChannelWriter<object> _engineWriter;
     private readonly Logger _logger;
+
+    internal const string MainEngineId = "1";
 
     private int _searchThreadsCount;
     private Engine _mainEngine;
@@ -28,7 +29,7 @@ public sealed class Searcher
         _engineWriter = engineWriter;
 
         _ttWrapper = new TranspositionTable();
-        _mainEngine = new Engine("1", _engineWriter, in _ttWrapper, warmup: true);
+        _mainEngine = new Engine(MainEngineId, _engineWriter, in _ttWrapper, warmup: true);
 
         _searchThreadsCount = Configuration.EngineSettings.Threads;
         AllocateExtraEngines();
@@ -218,7 +219,7 @@ public sealed class Searcher
             _ttWrapper = new TranspositionTable();
 
             _mainEngine.FreeResources();
-            _mainEngine = new Engine("1", _engineWriter, in _ttWrapper, warmup: true);
+            _mainEngine = new Engine(MainEngineId, _engineWriter, in _ttWrapper, warmup: true);
 
             AllocateExtraEngines();
         }

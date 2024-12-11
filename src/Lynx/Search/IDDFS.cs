@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using NLog;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -134,10 +135,13 @@ public sealed partial class Engine
 
                     while (true)
                     {
-                        _logger.Debug("Aspiration windows depth {Depth}: [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
-                            depth, alpha, beta, bestScore, _nodes);
+                        var depthToSearch = depth - failHighReduction;
+                        Debug.Assert(depthToSearch > 0);
 
-                        bestScore = NegaMax(depth: depth - failHighReduction, ply: 0, alpha, beta, cutnode: false);
+                        _logger.Debug("Aspiration windows depth {Depth} ({DepthWithoutReduction} - {Reduction}): [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
+                            depthToSearch, depth, failHighReduction, alpha, beta, bestScore, _nodes);
+
+                        bestScore = NegaMax(depth: depthToSearch, ply: 0, alpha, beta, cutnode: false);
 
                         // 13, 19, 28, 42, 63, 94, 141, 211, 316, 474, 711, 1066, 1599, 2398, 3597, 5395, 8092, 12138, 18207, 27310, |EvaluationConstants.MaxEval|, 40965
                         window += window >> 1;   // window / 2
@@ -152,7 +156,10 @@ public sealed partial class Engine
                         else if (beta <= bestScore)     // Fail high
                         {
                             beta = Math.Min(bestScore + window, EvaluationConstants.MaxEval);
-                            ++failHighReduction;
+                            if (failHighReduction <= depth - 2)
+                            {
+                                ++failHighReduction;
+                            }
                         }
                         else
                         {
@@ -173,7 +180,20 @@ public sealed partial class Engine
 
                 var oldBestMove = lastSearchResult?.BestMove;
                 var oldScore = lastSearchResult?.Score ?? 0;
-                lastSearchResult = UpdateLastSearchResult(lastSearchResult, bestScore, depth, mate);
+                var lastSearchResultCandidate = UpdateLastSearchResult(lastSearchResult, bestScore, depth, mate);
+
+                if (lastSearchResultCandidate.BestMove == default)
+                {
+                    _logger.Warn(
+#if MULTITHREAD_DEBUG
+                $"[#{_id}] " +
+#endif
+                        "Search at depth {0} didn't produce a best move. Score {1} (mate in {2}) detected, and/but search continues", depth, bestScore, mate);
+
+                    continue;
+                }
+
+                lastSearchResult = lastSearchResultCandidate;
 
                 if (oldBestMove == lastSearchResult.BestMove)
                 {
@@ -187,7 +207,7 @@ public sealed partial class Engine
                 _scoreDelta = oldScore - lastSearchResult.Score;
 
                 _engineWriter.TryWrite(lastSearchResult);
-            } while (StopSearchCondition(lastSearchResult.BestMove, ++depth, mate));
+            } while (StopSearchCondition(lastSearchResult?.BestMove, ++depth, mate));
         }
         catch (OperationCanceledException)
         {
@@ -230,15 +250,16 @@ public sealed partial class Engine
         return finalSearchResult;
     }
 
-    private bool StopSearchCondition(Move bestMove, int depth, int mate)
+    private bool StopSearchCondition(Move? bestMove, int depth, int mate)
     {
-        if (bestMove == default)
+        if (bestMove is null || bestMove == 0)
         {
             _logger.Warn(
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                "Search at depth {0} didn't produce a best move. Mate in {1} detected, and/but search continues", depth - 1, mate);
+                "Search continues, due to lack of best move at depth {0}", depth - 1);
+
             return true;
         }
 
@@ -291,7 +312,7 @@ public sealed partial class Engine
         {
             var elapsedMilliseconds = _stopWatch.ElapsedMilliseconds;
 
-            var bestMoveNodeCount = _moveNodeCount[bestMove.Piece()][bestMove.TargetSquare()];
+            var bestMoveNodeCount = _moveNodeCount[bestMove.Value.Piece()][bestMove.Value.TargetSquare()];
             var scaledSoftLimitTimeBound = TimeManager.SoftLimit(_searchConstraints, depth - 1, bestMoveNodeCount, _nodes, _bestMoveStability, _scoreDelta);
             _logger.Debug(
 #if MULTITHREAD_DEBUG
@@ -407,16 +428,25 @@ public sealed partial class Engine
         SearchResult finalSearchResult;
         if (lastSearchResult is null)
         {
-            // In the event of a quick ponderhit/stop while pondering because the opponent moved quickly, we don't want no warning triggered here
-            // when cancelling the pondering search
-            if (!_isPondering)
-            {
-                _logger.Warn(
+            var noDepth1Message =
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                    "Search cancelled at depth 1, choosing first found legal move as best one");
+                $"Search cancelled at depth {depth} with no result, choosing first found legal move as best one";
+
+            // In the event of a quick ponderhit/stop while pondering because the opponent moved quickly, we don't want no warning triggered here
+            //  when cancelling the pondering search
+            // The other condition reflects what happens in helper engines when a mate is quickly detected in the main:
+            //  search in helper engines sometimes get cancelled before any meaningful result is found, so we don't want a warning either
+            if (_isPondering || !IsMainEngine())
+            {
+                _logger.Info(noDepth1Message);
             }
+            else
+            {
+                _logger.Warn(noDepth1Message);
+            }
+
             finalSearchResult = new(
 #if MULTITHREAD_DEBUG
                 _id,
