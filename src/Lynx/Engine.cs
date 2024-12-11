@@ -11,7 +11,7 @@ public sealed partial class Engine : IDisposable
 {
     internal const int DefaultMaxDepth = 5;
 
-    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+    private readonly Logger _logger = LogManager.GetCurrentClassLogger();
     private readonly string _id;
     private readonly ChannelWriter<object> _engineWriter;
     private readonly TranspositionTable _tt;

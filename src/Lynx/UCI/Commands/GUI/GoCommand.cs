@@ -46,7 +46,7 @@ namespace Lynx.UCI.Commands.GUI;
 /// </summary>
 public sealed class GoCommand : IGUIBaseCommand
 {
-    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+    private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public const string Id = "go";
 

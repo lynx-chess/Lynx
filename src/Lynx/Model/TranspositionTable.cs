@@ -7,7 +7,7 @@ using System.Runtime.Intrinsics.X86;
 namespace Lynx.Model;
 public readonly struct TranspositionTable
 {
-    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+    private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     private readonly TranspositionTableElement[] _tt = [];
     public readonly int Size;

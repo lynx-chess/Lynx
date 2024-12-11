@@ -127,7 +127,7 @@ public sealed partial class Engine
             position = newPosition;
         }
 
-        static void TryParseMove(Position position, int i, int move)
+        void TryParseMove(Position position, int i, int move)
         {
             Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
 
@@ -144,7 +144,7 @@ public sealed partial class Engine
     }
 
     [Conditional("DEBUG")]
-    private static void PrintPreMove(Position position, int plies, Move move, bool isQuiescence = false)
+    private void PrintPreMove(Position position, int plies, Move move, bool isQuiescence = false)
     {
         if (_logger.IsTraceEnabled)
         {
@@ -166,7 +166,7 @@ public sealed partial class Engine
     }
 
     [Conditional("DEBUG")]
-    private static void PrintMove(Position position, int plies, Move move, int evaluation, bool isQuiescence = false, bool prune = false)
+    private void PrintMove(Position position, int plies, Move move, int evaluation, bool isQuiescence = false, bool prune = false)
     {
         if (_logger.IsTraceEnabled)
         {
@@ -197,7 +197,7 @@ public sealed partial class Engine
     }
 
     [Conditional("DEBUG")]
-    private static void PrintMessage(int plies, string message)
+    private void PrintMessage(int plies, string message)
     {
         if (_logger.IsTraceEnabled)
         {
@@ -213,7 +213,7 @@ public sealed partial class Engine
     }
 
     [Conditional("DEBUG")]
-    private static void PrintMessage(string message)
+    private void PrintMessage(string message)
     {
         if (_logger.IsTraceEnabled)
         {

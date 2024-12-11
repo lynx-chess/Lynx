@@ -7,7 +7,7 @@ namespace Lynx.Model;
 
 public sealed class Game : IDisposable
 {
-    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+    private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
 #if DEBUG
     public List<Move> MoveHistory { get; }
