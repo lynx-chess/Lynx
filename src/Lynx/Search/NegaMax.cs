@@ -22,7 +22,10 @@ public sealed partial class Engine
 
     private void Log(int depth, string message, params object[] args)
     {
-        _logger.Debug(Padding(depth) + message, args);
+        if (_id == Searcher.MainEngineId)
+        {
+            _logger.Debug(Padding(depth) + message, args);
+        }
     }
 
     /// <summary>
