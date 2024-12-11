@@ -418,7 +418,7 @@ public sealed partial class Engine
             //  when cancelling the pondering search
             // The other condition reflects what happens in helper engines when a mate is quickly detected in the main:
             //  search in helper engines sometimes get cancelled before any meaningful result is found, so we don't want a warning either
-            if (_isPondering || IsMainEngine())
+            if (_isPondering || !IsMainEngine())
             {
                 _logger.Info(noDepth1Message);
             }
