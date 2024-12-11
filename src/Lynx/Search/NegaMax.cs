@@ -299,7 +299,9 @@ public sealed partial class Engine
                 bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
 
                 // Fail-low pruning (moves with low scores) - prune less when improving
-                if (!pvNode && !isInCheck && isNotGettingCheckmated
+                if (!pvNode
+                    && !isInCheck
+                    && isNotGettingCheckmated
                     && moveScores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue) // Quiet move
                 {
                     // 🔍 Late Move Pruning (LMP) - all quiet moves can be pruned
@@ -324,10 +326,7 @@ public sealed partial class Engine
 
                     // 🔍 Futility Pruning (FP) - all quiet moves can be pruned
                     // once it's considered that they don't have potential to raise alpha
-                    if (visitedMovesCounter > 0
-                        //&& alpha < EvaluationConstants.PositiveCheckmateDetectionLimit
-                        //&& beta > EvaluationConstants.NegativeCheckmateDetectionLimit
-                        && depth <= Configuration.EngineSettings.FP_MaxDepth
+                    if (depth <= Configuration.EngineSettings.FP_MaxDepth
                         && staticEval + Configuration.EngineSettings.FP_Margin + (Configuration.EngineSettings.FP_DepthScalingFactor * depth) <= alpha)
                     {
                         RevertMove();
