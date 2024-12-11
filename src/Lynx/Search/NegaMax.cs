@@ -1,11 +1,30 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace Lynx;
 
 public sealed partial class Engine
 {
+    private static string Padding(int depth)
+    {
+        var sb = new StringBuilder(Configuration.EngineSettings.MaxDepth);
+
+        for (int i = 0; i < depth; ++i)
+        {
+            sb.Append('-');
+        }
+        sb.Append(' ');
+
+        return sb.ToString();
+    }
+
+    private void Log(int depth, string message, params object[] args)
+    {
+        _logger.Debug(Padding(depth) + message, args);
+    }
+
     /// <summary>
     /// NegaMax algorithm implementation using alpha-beta pruning and quiescence search
     /// </summary>
@@ -18,13 +37,19 @@ public sealed partial class Engine
     [SkipLocalsInit]
     private int NegaMax(int depth, int ply, int alpha, int beta, bool cutnode, bool parentWasNullMove = false)
     {
+        Log(depth, "NegaMax start: [alpha {Alpha}, beta {Beta}]", alpha, beta);
+
         var position = Game.CurrentPosition;
 
         // Prevents runtime failure in case depth is increased due to check extension, since we're using ply when calculating pvTable index,
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
             _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
-            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
+            var returnScore = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
+
+            Log(depth, "NegaMax end: NMP: {ReturnScore}", returnScore);
+
+            return returnScore;
         }
 
         _maxDepthReached[ply] = ply;
@@ -51,6 +76,7 @@ public sealed partial class Engine
             // TT cutoffs
             if (!pvNode && ttScore != EvaluationConstants.NoHashEntry)
             {
+                Log(depth, "NegaMax end -> TT cutoff: {ReturnScore}", ttScore);
                 return ttScore;
             }
 
@@ -90,11 +116,16 @@ public sealed partial class Engine
         {
             if (MoveGenerator.CanGenerateAtLeastAValidMove(position))
             {
-                return QuiescenceSearch(ply, alpha, beta);
+                var qsearchScore = QuiescenceSearch(ply, alpha, beta);
+
+                Log(depth, "NegaMax end -> QSearch score: {ReturnScore}", qsearchScore);
+
+                return qsearchScore;
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
             _tt.RecordHash(position, finalPositionEvaluation, depth, ply, finalPositionEvaluation, NodeType.Exact);
+            Log(depth, "NegaMax end -> final position: {ReturnScore}", finalPositionEvaluation);
             return finalPositionEvaluation;
         }
         else if (!pvNode)
@@ -144,7 +175,9 @@ public sealed partial class Engine
                 if (staticEval - rfpThreshold >= beta)
                 {
 #pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
-                    return (staticEval + beta) / 2;
+                    var returnScore = (staticEval + beta) / 2;
+                    Log(depth, "NegaMax end -> RFP: {ReturnScore}", returnScore);
+                    return returnScore;
 #pragma warning restore S3949 // Calculations should not overflow
                 }
 
@@ -159,9 +192,13 @@ public sealed partial class Engine
                         {
                             var qSearchScore = QuiescenceSearch(ply, alpha, beta);
 
-                            return qSearchScore > score
+                            var returnScore = qSearchScore > score
                                 ? qSearchScore
                                 : score;
+
+                            Log(depth, "NegaMax end -> razoring: {ReturnScore}", returnScore);
+
+                            return returnScore;
                         }
 
                         score += Configuration.EngineSettings.Razoring_NotDepth1Bonus;
@@ -171,9 +208,13 @@ public sealed partial class Engine
                             var qSearchScore = QuiescenceSearch(ply, alpha, beta);
                             if (qSearchScore < beta)    // Quiescence score also indicates fail-low node
                             {
-                                return qSearchScore > score
+                                var returnScore = qSearchScore > score
                                     ? qSearchScore
                                     : score;
+
+                                Log(depth, "NegaMax end -> razoring: {ReturnScore}", returnScore);
+
+                                return returnScore;
                             }
                         }
                     }
@@ -206,6 +247,8 @@ public sealed partial class Engine
 
                 if (nmpScore >= beta)
                 {
+                    Log(depth, "NegaMax end -> NMP: {ReturnScore}", nmpScore);
+
                     return nmpScore;
                 }
             }
@@ -473,6 +516,8 @@ public sealed partial class Engine
 
                     _tt.RecordHash(position, staticEval, depth, ply, bestScore, NodeType.Beta, bestMove);
 
+                    Log(depth, "NegaMax end -> beta cutoff: {ReturnScore}, best move {BestMove}", bestScore, bestMove ?? 0);
+
                     return bestScore;
                 }
             }
@@ -487,12 +532,15 @@ public sealed partial class Engine
             var finalEval = Position.EvaluateFinalPosition(ply, isInCheck);
             _tt.RecordHash(position, staticEval, depth, ply, finalEval, NodeType.Exact);
 
+            Log(depth, "NegaMax end -> final eval: {ReturnScore}", finalEval);
+
             return finalEval;
         }
 
         _tt.RecordHash(position, staticEval, depth, ply, bestScore, nodeType, bestMove);
 
         // Node fails low
+        Log(depth, "NegaMax end -> fail low: {ReturnScore}, best move {BestMove}", bestScore, bestMove ?? 0);
         return bestScore;
     }
 
