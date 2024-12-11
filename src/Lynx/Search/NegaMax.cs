@@ -24,7 +24,7 @@ public sealed partial class Engine
     {
         if (_id == Searcher.MainEngineId)
         {
-            _logger.Debug(Padding(depth) + message, args);
+            _logger.Trace(Padding(depth) + message, args);
         }
     }
 
