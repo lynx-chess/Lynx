@@ -216,7 +216,10 @@ public sealed partial class Engine
                                 if (returnScore % EvaluationConstants.CheckmateDepthFactor != 0
                  && (returnScore < EvaluationConstants.NegativeCheckmateDetectionLimit
                  || returnScore > EvaluationConstants.PositiveCheckmateDetectionLimit))
-                                    Log(depth, "NegaMax end -> razoring: {ReturnScore}", returnScore);
+                                {
+                                    _logger.Warn("Positon {FEN}: static eval {StaticEval}, QSearch score {QSearchScore}", position.FEN(), staticEval, qSearchScore);
+                                    Log(depth, "NegaMax end -> razoring I: {ReturnScore}", returnScore);
+                                }
 
                                 return returnScore;
                             }
@@ -235,7 +238,10 @@ public sealed partial class Engine
                                     if (returnScore % EvaluationConstants.CheckmateDepthFactor != 0
                                         && (returnScore < EvaluationConstants.NegativeCheckmateDetectionLimit
                                         || returnScore > EvaluationConstants.PositiveCheckmateDetectionLimit))
-                                        Log(depth, "NegaMax end -> razoring: {ReturnScore}", returnScore);
+                                    {
+                                        _logger.Warn("Positon {FEN}: static eval {StaticEval}, QSearch score {QSearchScore}", position.FEN(), staticEval, qSearchScore);
+                                        Log(depth, "NegaMax end -> razoring II: {ReturnScore}", returnScore);
+                                    }
 
                                     return returnScore;
                                 }
