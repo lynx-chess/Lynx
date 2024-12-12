@@ -129,7 +129,11 @@ public sealed partial class Engine
                     alpha = Math.Max(EvaluationConstants.MinEval, lastSearchResult.Score - window);
                     beta = Math.Min(EvaluationConstants.MaxEval, lastSearchResult.Score + window);
 
-                    _logger.Debug("Aspiration windows depth {Depth}: [{Alpha}, {Beta}] for previous search score {Score}, nodes {Nodes}",
+                    _logger.Info(
+#if MULTITHREAD_DEBUG
+                $"[#{_id}] " +
+#endif
+                        "Aspiration windows depth {Depth}: [{Alpha}, {Beta}] for previous search score {Score}, nodes {Nodes}",
                         depth, alpha, beta, lastSearchResult.Score, _nodes);
                     Debug.Assert(lastSearchResult.Mate == 0 && lastSearchResult.Score > EvaluationConstants.NegativeCheckmateDetectionLimit && lastSearchResult.Score < EvaluationConstants.PositiveCheckmateDetectionLimit);
 
@@ -138,7 +142,11 @@ public sealed partial class Engine
                         var depthToSearch = depth - failHighReduction;
                         Debug.Assert(depthToSearch > 0);
 
-                        _logger.Debug("Aspiration windows depth {Depth} ({DepthWithoutReduction} - {Reduction}): [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
+                        _logger.Info(
+#if MULTITHREAD_DEBUG
+                $"[#{_id}] " +
+#endif
+                            "Aspiration windows depth {Depth} ({DepthWithoutReduction} - {Reduction}): [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
                             depthToSearch, depth, failHighReduction, alpha, beta, bestScore, _nodes);
 
                         bestScore = NegaMax(depth: depthToSearch, ply: 0, alpha, beta, cutnode: false);
@@ -190,6 +198,10 @@ public sealed partial class Engine
 #endif
                         "Search at depth {0} didn't produce a best move. Score {1} (mate in {2}) detected, and/but search continues", depth, bestScore, mate);
 
+                    lastSearchResult = null;
+                    _bestMoveStability = 0;
+                    _scoreDelta = 0;
+
                     continue;
                 }
 
@@ -207,7 +219,7 @@ public sealed partial class Engine
                 _scoreDelta = oldScore - lastSearchResult.Score;
 
                 _engineWriter.TryWrite(lastSearchResult);
-            } while (StopSearchCondition(lastSearchResult?.BestMove, ++depth, mate));
+            } while (StopSearchCondition(lastSearchResult?.BestMove, ++depth, mate, bestScore));
         }
         catch (OperationCanceledException)
         {
@@ -250,7 +262,7 @@ public sealed partial class Engine
         return finalSearchResult;
     }
 
-    private bool StopSearchCondition(Move? bestMove, int depth, int mate)
+    private bool StopSearchCondition(Move? bestMove, int depth, int mate, int bestScore)
     {
         if (bestMove is null || bestMove == 0)
         {
@@ -270,7 +282,7 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                "Depth {0}: mate in {1} detected ({2} moves until draw by repetition)", depth - 1, mate, winningMateThreshold);
+                "Depth {0}: mate in {1} detected (score {2}, {3} moves until draw by repetition)", depth - 1, mate, bestScore, winningMateThreshold);
 
             if (mate < 0 || mate + Constants.MateDistanceMarginToStopSearching < winningMateThreshold)
             {

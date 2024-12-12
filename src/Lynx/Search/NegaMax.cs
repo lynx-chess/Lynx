@@ -130,83 +130,88 @@ public sealed partial class Engine
                 staticEval = ttRawScore;
             }
 
+            bool isNotGettingCheckmated = staticEval > EvaluationConstants.NegativeCheckmateDetectionLimit;
+
             // Fail-high pruning (moves with high scores) - prune more when improving
-            if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
+            if (isNotGettingCheckmated)
             {
-                // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
-                // Return formula by Ciekce, instead of just returning static eval
-                // Improving impl. based on Potential's
-                var rfpMargin = improving ? 80 * (depth - 1) : 100 * depth;
-                var improvingFactor = improvingRate * (0.75 * depth);
-
-                var rfpThreshold = rfpMargin + improvingFactor;
-
-                if (staticEval - rfpThreshold >= beta)
+                if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
                 {
-#pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
-                    return (staticEval + beta) / 2;
-#pragma warning restore S3949 // Calculations should not overflow
-                }
+                    // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
+                    // Return formula by Ciekce, instead of just returning static eval
+                    // Improving impl. based on Potential's
+                    var rfpMargin = improving ? 80 * (depth - 1) : 100 * depth;
+                    var improvingFactor = improvingRate * (0.75 * depth);
 
-                // 🔍 Razoring - Strelka impl (CPW) - https://www.chessprogramming.org/Razoring#Strelka
-                if (depth <= Configuration.EngineSettings.Razoring_MaxDepth)
-                {
-                    var score = staticEval + Configuration.EngineSettings.Razoring_Depth1Bonus;
+                    var rfpThreshold = rfpMargin + improvingFactor;
 
-                    if (score < beta)               // Static evaluation + bonus indicates fail-low node
+                    if (staticEval - rfpThreshold >= beta)
                     {
-                        if (depth == 1)
+#pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
+                        return (staticEval + beta) / 2;
+#pragma warning restore S3949 // Calculations should not overflow
+                    }
+
+                    // 🔍 Razoring - Strelka impl (CPW) - https://www.chessprogramming.org/Razoring#Strelka
+                    if (depth <= Configuration.EngineSettings.Razoring_MaxDepth)
+                    {
+                        var score = staticEval + Configuration.EngineSettings.Razoring_Depth1Bonus;
+
+                        if (score < beta)               // Static evaluation + bonus indicates fail-low node
                         {
-                            var qSearchScore = QuiescenceSearch(ply, alpha, beta);
-
-                            return qSearchScore > score
-                                ? qSearchScore
-                                : score;
-                        }
-
-                        score += Configuration.EngineSettings.Razoring_NotDepth1Bonus;
-
-                        if (score < beta)               // Static evaluation indicates fail-low node
-                        {
-                            var qSearchScore = QuiescenceSearch(ply, alpha, beta);
-                            if (qSearchScore < beta)    // Quiescence score also indicates fail-low node
+                            if (depth == 1)
                             {
+                                var qSearchScore = QuiescenceSearch(ply, alpha, beta);
+
                                 return qSearchScore > score
                                     ? qSearchScore
                                     : score;
                             }
+
+                            score += Configuration.EngineSettings.Razoring_NotDepth1Bonus;
+
+                            if (score < beta)               // Static evaluation indicates fail-low node
+                            {
+                                var qSearchScore = QuiescenceSearch(ply, alpha, beta);
+                                if (qSearchScore < beta)    // Quiescence score also indicates fail-low node
+                                {
+                                    return qSearchScore > score
+                                        ? qSearchScore
+                                        : score;
+                                }
+                            }
                         }
                     }
                 }
-            }
 
-            var staticEvalBetaDiff = staticEval - beta;
+                var staticEvalBetaDiff = staticEval - beta;
 
-            // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
-            if (depth >= Configuration.EngineSettings.NMP_MinDepth
-                && staticEvalBetaDiff >= 0
-                && !parentWasNullMove
-                && phase > 2   // Zugzwang risk reduction: pieces other than pawn presents
-                && (ttElementType != NodeType.Alpha || ttRawScore >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
-            {
-                var nmpReduction = Configuration.EngineSettings.NMP_BaseDepthReduction
-                    + ((depth + Configuration.EngineSettings.NMP_DepthIncrement) / Configuration.EngineSettings.NMP_DepthDivisor)   // Clarity
-                    + Math.Min(
-                        Configuration.EngineSettings.NMP_StaticEvalBetaMaxReduction,
-                        staticEvalBetaDiff / Configuration.EngineSettings.NMP_StaticEvalBetaDivisor);
-
-                // TODO more advanced adaptative reduction, similar to what Ethereal and Stormphrax are doing
-                //var nmpReduction = Math.Min(
-                //    depth,
-                //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
-
-                var gameState = position.MakeNullMove();
-                var nmpScore = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, !cutnode, parentWasNullMove: true);
-                position.UnMakeNullMove(gameState);
-
-                if (nmpScore >= beta)
+                // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
+                if (depth >= Configuration.EngineSettings.NMP_MinDepth
+                    && staticEvalBetaDiff >= 0
+                    && !parentWasNullMove
+                    && phase > 2   // Zugzwang risk reduction: pieces other than pawn presents
+                    && (ttElementType != NodeType.Alpha || ttRawScore >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
                 {
-                    return nmpScore;
+                    var nmpReduction = Configuration.EngineSettings.NMP_BaseDepthReduction
+                        + ((depth + Configuration.EngineSettings.NMP_DepthIncrement) / Configuration.EngineSettings.NMP_DepthDivisor)   // Clarity
+                        + Math.Min(
+                            Configuration.EngineSettings.NMP_StaticEvalBetaMaxReduction,
+                            staticEvalBetaDiff / Configuration.EngineSettings.NMP_StaticEvalBetaDivisor);
+
+                    // TODO more advanced adaptative reduction, similar to what Ethereal and Stormphrax are doing
+                    //var nmpReduction = Math.Min(
+                    //    depth,
+                    //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
+
+                    var gameState = position.MakeNullMove();
+                    var nmpScore = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, !cutnode, parentWasNullMove: true);
+                    position.UnMakeNullMove(gameState);
+
+                    if (nmpScore >= beta)
+                    {
+                        return nmpScore;
+                    }
                 }
             }
         }
