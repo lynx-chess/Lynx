@@ -170,8 +170,7 @@ public sealed partial class Engine
             // Fail-high pruning (moves with high scores) - prune more when improving
             if (isNotGettingCheckmated) // Alternatively, if !inCheck is what people tend to use
             {
-                if (depth <= Configuration.EngineSettings.RFP_MaxDepth
-                    && staticEval < EvaluationConstants.PositiveCheckmateDetectionLimit)    // (staticEval + beta) / 2 and razoring bonus can mess with mate scores
+                if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
                 {
                     // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
                     // Return formula by Ciekce, instead of just returning static eval
@@ -184,7 +183,12 @@ public sealed partial class Engine
                     if (staticEval - rfpThreshold >= beta)
                     {
 #pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
-                        var returnScore = (staticEval + beta) / 2;
+                        var failMediumScore = (staticEval + beta) / 2;
+
+                        var returnScore = failMediumScore > EvaluationConstants.NegativeCheckmateDetectionLimit && failMediumScore < EvaluationConstants.PositiveCheckmateDetectionLimit
+                            ? (staticEval + beta) / 2
+                            : staticEval;
+
                         if (returnScore % EvaluationConstants.CheckmateDepthFactor != 0
                             && (returnScore < EvaluationConstants.NegativeCheckmateDetectionLimit
                             || returnScore > EvaluationConstants.PositiveCheckmateDetectionLimit))
@@ -194,7 +198,8 @@ public sealed partial class Engine
                     }
 
                     // 🔍 Razoring - Strelka impl (CPW) - https://www.chessprogramming.org/Razoring#Strelka
-                    if (depth <= Configuration.EngineSettings.Razoring_MaxDepth)
+                    if (depth <= Configuration.EngineSettings.Razoring_MaxDepth
+                        && staticEval < EvaluationConstants.PositiveCheckmateDetectionLimit)    // Razoring bonus can mess with mate scores
                     {
                         var score = staticEval + Configuration.EngineSettings.Razoring_Depth1Bonus;
 
