@@ -131,11 +131,11 @@ public sealed partial class Engine
             }
 
             bool isNotGettingCheckmated = staticEval > EvaluationConstants.NegativeCheckmateDetectionLimit;
-
             // Fail-high pruning (moves with high scores) - prune more when improving
-            if (isNotGettingCheckmated)
+            if (isNotGettingCheckmated) // Alternatively, if !inCheck is what people tend to use
             {
-                if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
+                if (depth <= Configuration.EngineSettings.RFP_MaxDepth
+                    && staticEval < EvaluationConstants.PositiveCheckmateDetectionLimit)    // (staticEval + beta) / 2 and razoring bonus can mess with mate scores
                 {
                     // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
                     // Return formula by Ciekce, instead of just returning static eval
@@ -147,9 +147,7 @@ public sealed partial class Engine
 
                     if (staticEval - rfpThreshold >= beta)
                     {
-#pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
                         return (staticEval + beta) / 2;
-#pragma warning restore S3949 // Calculations should not overflow
                     }
 
                     // 🔍 Razoring - Strelka impl (CPW) - https://www.chessprogramming.org/Razoring#Strelka
@@ -300,7 +298,7 @@ public sealed partial class Engine
             }
             else
             {
-                // If we prune while getting checmated, we risk not finding any move and having an empty PV
+                // If we prune while getting checkmated, we risk not finding any move and having an empty PV
                 bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
 
                 // Fail-low pruning (moves with low scores) - prune less when improving
