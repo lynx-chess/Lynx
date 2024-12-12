@@ -70,7 +70,7 @@ public readonly struct TranspositionTable
         var rawScore = entry.Score;
         var score = EvaluationConstants.NoHashEntry;
 
-        rawScore = RecalculateMateScores(position, rawScore, ply);
+        rawScore = RecalculateMateScores(rawScore, ply);
 
         if (entry.Depth >= depth
             && (type == NodeType.Exact
@@ -113,7 +113,7 @@ public readonly struct TranspositionTable
 
         // We want to store the distance to the checkmate position relative to the current node, independently from the root
         // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
-        var recalculatedScore = RecalculateMateScores(position, score, -ply);
+        var recalculatedScore = RecalculateMateScores(score, -ply);
 
         entry.Update(position.UniqueIdentifier, recalculatedScore, staticEval, depth, nodeType, move);
     }
@@ -174,8 +174,7 @@ public readonly struct TranspositionTable
     /// Logic for when to pass +depth or -depth for the desired effect in https://www.talkchess.com/forum3/viewtopic.php?f=7&t=74411 and https://talkchess.com/forum3/viewtopic.php?p=861852#p861852
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static int RecalculateMateScores(int score, int ply) => RecalculateMateScores(new(Constants.InitialPositionFEN), score, ply);
-    internal static int RecalculateMateScores(Position position, int score, int ply)
+    internal static int RecalculateMateScores(int score, int ply)
     {
         if (score > EvaluationConstants.PositiveCheckmateDetectionLimit)
         {
@@ -185,9 +184,9 @@ public readonly struct TranspositionTable
             //    _logger.Warn("Fake mate score: {0}", score);
             //}
 
-            var action = ply < 0 ? "saving" : "retrieving";
-            _logger.Warn("{0} -> Ply {1}, {2} mate in {3} ({4}) -> mate in {5} ({6})",
-                position.FEN(), ply, action, Utils.CalculateMateInX(score, Math.Abs(score)), score, Utils.CalculateMateInX(score - (EvaluationConstants.CheckmateDepthFactor * ply), Math.Abs(score - (EvaluationConstants.CheckmateDepthFactor * ply))), score - (EvaluationConstants.CheckmateDepthFactor * ply));
+            //var action = ply < 0 ? "saving" : "retrieving";
+            //_logger.Warn("{0} -> Ply {1}, {2} mate in {3} ({4}) -> mate in {5} ({6})",
+            //    position.FEN(), ply, action, Utils.CalculateMateInX(score, Math.Abs(score)), score, Utils.CalculateMateInX(score - (EvaluationConstants.CheckmateDepthFactor * ply), Math.Abs(score - (EvaluationConstants.CheckmateDepthFactor * ply))), score - (EvaluationConstants.CheckmateDepthFactor * ply));
             return score - (EvaluationConstants.CheckmateDepthFactor * ply);
         }
         else if (score < EvaluationConstants.NegativeCheckmateDetectionLimit)
@@ -198,9 +197,9 @@ public readonly struct TranspositionTable
             //    _logger.Warn("Fake mate score: {0}", score);
             //}
 
-            var action = ply < 0 ? "saving" : "retrieving";
-            _logger.Warn("{0} -> Ply {1}, {2} mate in {3} ({4}) -> mate in {5} ({6})",
-                position.FEN(), ply, action, Utils.CalculateMateInX(score, Math.Abs(score)), score, Utils.CalculateMateInX(score + (EvaluationConstants.CheckmateDepthFactor * ply), Math.Abs(score + (EvaluationConstants.CheckmateDepthFactor * ply))), score + (EvaluationConstants.CheckmateDepthFactor * ply));
+            //var action = ply < 0 ? "saving" : "retrieving";
+            //_logger.Warn("{0} -> Ply {1}, {2} mate in {3} ({4}) -> mate in {5} ({6})",
+            //    position.FEN(), ply, action, Utils.CalculateMateInX(score, Math.Abs(score)), score, Utils.CalculateMateInX(score + (EvaluationConstants.CheckmateDepthFactor * ply), Math.Abs(score + (EvaluationConstants.CheckmateDepthFactor * ply))), score + (EvaluationConstants.CheckmateDepthFactor * ply));
 
             return score + (EvaluationConstants.CheckmateDepthFactor * ply);
         }
