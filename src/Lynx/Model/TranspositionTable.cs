@@ -180,10 +180,18 @@ public readonly struct TranspositionTable
     {
         if (score > EvaluationConstants.PositiveCheckmateDetectionLimit)
         {
+            if (score % EvaluationConstants.CheckmateDepthFactor != 0)
+            {
+                _logger.Info("Fake mate score: {0}", score);
+            }
             return score - (EvaluationConstants.CheckmateDepthFactor * ply);
         }
         else if (score < EvaluationConstants.NegativeCheckmateDetectionLimit)
         {
+            if (score % EvaluationConstants.CheckmateDepthFactor != 0)
+            {
+                _logger.Info("Fake mate score: {0}", score);
+            }
             return score + (EvaluationConstants.CheckmateDepthFactor * ply);
         }
 
