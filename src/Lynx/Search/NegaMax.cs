@@ -79,12 +79,13 @@ public sealed partial class Engine
         double improvingRate = 0;
 
         bool isInCheck = position.IsInCheck();
-        int staticEval = int.MaxValue;
+        int staticEval;
         int phase = int.MaxValue;
 
         if (isInCheck)
         {
             ++depth;
+            staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
         }
         else if (depth <= 0)
         {
@@ -214,6 +215,10 @@ public sealed partial class Engine
                     }
                 }
             }
+        }
+        else
+        {
+            staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
         }
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
