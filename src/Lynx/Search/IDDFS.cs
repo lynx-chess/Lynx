@@ -129,7 +129,7 @@ public sealed partial class Engine
                     alpha = Math.Max(EvaluationConstants.MinEval, lastSearchResult.Score - window);
                     beta = Math.Min(EvaluationConstants.MaxEval, lastSearchResult.Score + window);
 
-                    _logger.Debug("Aspiration windows depth {Depth}: [{Alpha}, {Beta}] for previous search score {Score}, nodes {Nodes}",
+                    _logger.Info("Aspiration windows depth {Depth}: [{Alpha}, {Beta}] for previous search score {Score}, nodes {Nodes}",
                         depth, alpha, beta, lastSearchResult.Score, _nodes);
                     Debug.Assert(lastSearchResult.Mate == 0 && lastSearchResult.Score > EvaluationConstants.NegativeCheckmateDetectionLimit && lastSearchResult.Score < EvaluationConstants.PositiveCheckmateDetectionLimit);
 
@@ -138,7 +138,7 @@ public sealed partial class Engine
                         var depthToSearch = depth - failHighReduction;
                         Debug.Assert(depthToSearch > 0);
 
-                        _logger.Debug("Aspiration windows depth {Depth} ({DepthWithoutReduction} - {Reduction}): [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
+                        _logger.Info("Aspiration windows depth {Depth} ({DepthWithoutReduction} - {Reduction}): [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
                             depthToSearch, depth, failHighReduction, alpha, beta, bestScore, _nodes);
 
                         bestScore = NegaMax(depth: depthToSearch, ply: 0, alpha, beta, cutnode: false);
@@ -189,6 +189,10 @@ public sealed partial class Engine
                 $"[#{_id}] " +
 #endif
                         "Search at depth {0} didn't produce a best move. Score {1} (mate in {2}) detected, and/but search continues", depth, bestScore, mate);
+
+                    lastSearchResult = null;
+                    _bestMoveStability = 0;
+                    _scoreDelta = 0;
 
                     continue;
                 }
