@@ -130,7 +130,11 @@ public sealed partial class Engine
                 staticEval = ttRawScore;
             }
 
+            bool isNotGettingCheckmated = staticEval > EvaluationConstants.NegativeCheckmateDetectionLimit;
+
             // Fail-high pruning (moves with high scores) - prune more when improving
+            if (isNotGettingCheckmated)
+            {
             if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
             {
                 // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
@@ -209,6 +213,7 @@ public sealed partial class Engine
                     return nmpScore;
                 }
             }
+        }
         }
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
