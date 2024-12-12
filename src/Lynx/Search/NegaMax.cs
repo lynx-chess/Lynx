@@ -1,11 +1,30 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace Lynx;
 
 public sealed partial class Engine
 {
+    private static string Padding(int depth)
+    {
+        var sb = new StringBuilder(Configuration.EngineSettings.MaxDepth);
+
+        for (int i = 0; i < depth; ++i)
+        {
+            sb.Append('-');
+        }
+        sb.Append(' ');
+
+        return sb.ToString();
+    }
+
+    private void Log(int depth, string message, params object[] args)
+    {
+        _logger.Warn(Padding(depth) + message, args);
+    }
+
     /// <summary>
     /// NegaMax algorithm implementation using alpha-beta pruning and quiescence search
     /// </summary>
@@ -24,7 +43,14 @@ public sealed partial class Engine
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
             _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
-            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
+            var returnScore = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
+
+            if (returnScore % EvaluationConstants.CheckmateDepthFactor != 0
+                && (returnScore < EvaluationConstants.NegativeCheckmateDetectionLimit
+                || returnScore > EvaluationConstants.PositiveCheckmateDetectionLimit))
+                Log(depth, "NegaMax end: NMP: {ReturnScore}", returnScore);
+
+            return returnScore;
         }
 
         _maxDepthReached[ply] = ply;
@@ -90,12 +116,22 @@ public sealed partial class Engine
         {
             if (MoveGenerator.CanGenerateAtLeastAValidMove(position))
             {
-                return QuiescenceSearch(ply, alpha, beta);
+                var sSearchScore = QuiescenceSearch(ply, alpha, beta);
+
+                if (sSearchScore % EvaluationConstants.CheckmateDepthFactor != 0
+                    && (sSearchScore < EvaluationConstants.NegativeCheckmateDetectionLimit
+                    || sSearchScore > EvaluationConstants.PositiveCheckmateDetectionLimit))
+                    Log(depth, "NegaMax end -> QSearch score: {ReturnScore}", sSearchScore);
+
+                return sSearchScore;
             }
 
-            var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
-            _tt.RecordHash(position, finalPositionEvaluation, depth, ply, finalPositionEvaluation, NodeType.Exact);
-            return finalPositionEvaluation;
+            var returnScore = Position.EvaluateFinalPosition(ply, isInCheck);
+            _tt.RecordHash(position, returnScore, depth, ply, returnScore, NodeType.Exact);
+            if (returnScore % EvaluationConstants.CheckmateDepthFactor != 0
+    && (returnScore < EvaluationConstants.NegativeCheckmateDetectionLimit
+    || returnScore > EvaluationConstants.PositiveCheckmateDetectionLimit))
+                return returnScore;
         }
         else if (!pvNode)
         {
@@ -147,7 +183,14 @@ public sealed partial class Engine
 
                     if (staticEval - rfpThreshold >= beta)
                     {
-                        return (staticEval + beta) / 2;
+#pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
+                        var returnScore = (staticEval + beta) / 2;
+                        if (returnScore % EvaluationConstants.CheckmateDepthFactor != 0
+                            && (returnScore < EvaluationConstants.NegativeCheckmateDetectionLimit
+                            || returnScore > EvaluationConstants.PositiveCheckmateDetectionLimit))
+                            Log(depth, "NegaMax end -> RFP: {ReturnScore}", returnScore);
+                        return returnScore;
+#pragma warning restore S3949 // Calculations should not overflow
                     }
 
                     // 🔍 Razoring - Strelka impl (CPW) - https://www.chessprogramming.org/Razoring#Strelka
@@ -161,9 +204,16 @@ public sealed partial class Engine
                             {
                                 var qSearchScore = QuiescenceSearch(ply, alpha, beta);
 
-                                return qSearchScore > score
+                                var returnScore = qSearchScore > score
                                     ? qSearchScore
                                     : score;
+
+                                if (returnScore % EvaluationConstants.CheckmateDepthFactor != 0
+                 && (returnScore < EvaluationConstants.NegativeCheckmateDetectionLimit
+                 || returnScore > EvaluationConstants.PositiveCheckmateDetectionLimit))
+                                    Log(depth, "NegaMax end -> razoring: {ReturnScore}", returnScore);
+
+                                return returnScore;
                             }
 
                             score += Configuration.EngineSettings.Razoring_NotDepth1Bonus;
@@ -173,9 +223,16 @@ public sealed partial class Engine
                                 var qSearchScore = QuiescenceSearch(ply, alpha, beta);
                                 if (qSearchScore < beta)    // Quiescence score also indicates fail-low node
                                 {
-                                    return qSearchScore > score
+                                    var returnScore = qSearchScore > score
                                         ? qSearchScore
                                         : score;
+
+                                    if (returnScore % EvaluationConstants.CheckmateDepthFactor != 0
+                                        && (returnScore < EvaluationConstants.NegativeCheckmateDetectionLimit
+                                        || returnScore > EvaluationConstants.PositiveCheckmateDetectionLimit))
+                                        Log(depth, "NegaMax end -> razoring: {ReturnScore}", returnScore);
+
+                                    return returnScore;
                                 }
                             }
                         }
@@ -208,6 +265,11 @@ public sealed partial class Engine
 
                     if (nmpScore >= beta)
                     {
+                        if (nmpScore % EvaluationConstants.CheckmateDepthFactor != 0
+                            && (nmpScore < EvaluationConstants.NegativeCheckmateDetectionLimit
+                            || nmpScore > EvaluationConstants.PositiveCheckmateDetectionLimit))
+                            Log(depth, "NegaMax end -> NMP: {ReturnScore}", nmpScore);
+
                         return nmpScore;
                     }
                 }
@@ -475,6 +537,11 @@ public sealed partial class Engine
 
                     _tt.RecordHash(position, staticEval, depth, ply, bestScore, NodeType.Beta, bestMove);
 
+                    if (bestScore % EvaluationConstants.CheckmateDepthFactor != 0
+                        && (bestScore < EvaluationConstants.NegativeCheckmateDetectionLimit
+                        || bestScore > EvaluationConstants.PositiveCheckmateDetectionLimit))
+                        Log(depth, "NegaMax end -> beta cutoff: {ReturnScore}, best move {BestMove}", bestScore, bestMove ?? 0);
+
                     return bestScore;
                 }
             }
@@ -489,12 +556,21 @@ public sealed partial class Engine
             var finalEval = Position.EvaluateFinalPosition(ply, isInCheck);
             _tt.RecordHash(position, staticEval, depth, ply, finalEval, NodeType.Exact);
 
+            if (finalEval % EvaluationConstants.CheckmateDepthFactor != 0
+                && (finalEval < EvaluationConstants.NegativeCheckmateDetectionLimit
+                || finalEval > EvaluationConstants.PositiveCheckmateDetectionLimit))
+                Log(depth, "NegaMax end -> final eval: {ReturnScore}", finalEval);
+
             return finalEval;
         }
 
         _tt.RecordHash(position, staticEval, depth, ply, bestScore, nodeType, bestMove);
 
         // Node fails low
+        if (bestScore % EvaluationConstants.CheckmateDepthFactor != 0
+           && (bestScore < EvaluationConstants.NegativeCheckmateDetectionLimit
+           || bestScore > EvaluationConstants.PositiveCheckmateDetectionLimit))
+            Log(depth, "NegaMax end -> fail low: {ReturnScore}, best move {BestMove}", bestScore, bestMove ?? 0);
         return bestScore;
     }
 
