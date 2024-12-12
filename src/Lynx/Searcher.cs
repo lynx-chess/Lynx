@@ -102,7 +102,7 @@ public sealed class Searcher
         var searchConstraints = TimeManager.CalculateTimeManagement(_mainEngine.Game, goCommand);
 
 #if MULTITHREAD_DEBUG
-        var sw = Stopwatch.StartNew();
+        var sw = System.Diagnostics.Stopwatch.StartNew();
         var lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
