@@ -67,21 +67,16 @@ public readonly struct TranspositionTable
         }
 
         var type = entry.Type;
-        var rawScore = entry.Score;
+        var rawScore = RecalculateMateScores(entry.Score, ply);
         var score = EvaluationConstants.NoHashEntry;
 
-        if (entry.Depth >= depth)
+        if (entry.Depth >= depth && (type == NodeType.Exact
+                || (type == NodeType.Alpha && rawScore <= alpha)
+                || (type == NodeType.Beta && rawScore >= beta)))
         {
-            var recalculatedScore = RecalculateMateScores(rawScore, ply);
-
-            if (type == NodeType.Exact
-                || (type == NodeType.Alpha && recalculatedScore <= alpha)
-                || (type == NodeType.Beta && recalculatedScore >= beta))
-            {
-                // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
-                // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
-                score = recalculatedScore;
-            }
+            // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
+            // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
+            score = rawScore;
         }
 
         return (score, entry.Move, entry.Type, rawScore, entry.StaticEval);
