@@ -190,13 +190,6 @@ public sealed partial class Engine
                 var oldScore = lastSearchResult?.Score ?? 0;
                 var lastSearchResultCandidate = UpdateLastSearchResult(lastSearchResult, bestScore, depth, mate);
 
-                //Debug.Assert(Math.Abs(mate) <= lastSearchResultCandidate.DepthReached / 2);
-                //if (Math.Abs(mate) > lastSearchResultCandidate.DepthReached / 2)
-                //{
-                //    _logger.Warn("Mate in {Mate} detected (score {Score}) after searching for depth {Depth} with a max depth reached of {MaxDepth}",
-                //        mate, bestScore, depth, lastSearchResultCandidate.DepthReached);
-                //}
-
                 if (lastSearchResultCandidate.BestMove == default)
                 {
                     _logger.Warn(
