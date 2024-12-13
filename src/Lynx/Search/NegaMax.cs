@@ -152,37 +152,6 @@ public sealed partial class Engine
                         return (staticEval + beta) / 2;
 #pragma warning restore S3949 // Calculations should not overflow
                     }
-
-                    // 🔍 Razoring - Strelka impl (CPW) - https://www.chessprogramming.org/Razoring#Strelka
-                    if (depth <= Configuration.EngineSettings.Razoring_MaxDepth)
-                    {
-                        var score = staticEval + Configuration.EngineSettings.Razoring_Depth1Bonus;
-
-                        if (score < beta)               // Static evaluation + bonus indicates fail-low node
-                        {
-                            if (depth == 1)
-                            {
-                                var qSearchScore = QuiescenceSearch(ply, alpha, beta);
-
-                                return qSearchScore > score
-                                    ? qSearchScore
-                                    : score;
-                            }
-
-                            score += Configuration.EngineSettings.Razoring_NotDepth1Bonus;
-
-                            if (score < beta)               // Static evaluation indicates fail-low node
-                            {
-                                var qSearchScore = QuiescenceSearch(ply, alpha, beta);
-                                if (qSearchScore < beta)    // Quiescence score also indicates fail-low node
-                                {
-                                    return qSearchScore > score
-                                        ? qSearchScore
-                                        : score;
-                                }
-                            }
-                        }
-                    }
                 }
 
                 var staticEvalBetaDiff = staticEval - beta;

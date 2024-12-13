@@ -124,8 +124,6 @@ _Beware, most of the provided links contain outdated information and don't refle
 
 - Static Exchange Evaluation (SEE) for move ordering, reduction and QSearch pruning
 
-- Razoring [[1](https://www.chessprogramming.org/Razoring)]
-
 - Killer heuristic [[1](https://www.chessprogramming.org/Killer_Heuristic)]
 
 - History heuristic: quiet history, capture history, continuation history, history malus [[1](https://www.chessprogramming.org/History_Heuristic)]
