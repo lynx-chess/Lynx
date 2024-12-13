@@ -1,4 +1,4 @@
-﻿using Lynx.Model;
+using Lynx.Model;
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
@@ -92,6 +92,9 @@ public sealed class Searcher
 
         if (searchResult is not null)
         {
+            // Final info command
+            _engineWriter.TryWrite(searchResult);
+
             // We always print best move, even in case of go ponder + stop, in which case IDEs are expected to ignore it
             _engineWriter.TryWrite(new BestMoveCommand(searchResult));
         }
