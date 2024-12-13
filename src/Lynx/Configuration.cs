@@ -187,13 +187,10 @@ public sealed class EngineSettings
     public int RFP_DepthScalingFactor { get; set; } = 52;
 
     [SPSA<int>(1, 10, 0.5)]
-    public int Razoring_MaxDepth { get; set; } = 2;
+    public int Razoring_MaxDepth { get; set; } = 4;
 
-    [SPSA<int>(1, 300, 15)]
-    public int Razoring_Depth1Bonus { get; set; } = 68;
-
-    [SPSA<int>(1, 300, 15)]
-    public int Razoring_NotDepth1Bonus { get; set; } = 208;
+    [SPSA<int>(100, 500, 25)]
+    public int RazoringMargin { get; set; } = 300;
 
     [SPSA<int>(1, 10, 0.5)]
     public int IIR_MinDepth { get; set; } = 4;
