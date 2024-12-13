@@ -126,8 +126,8 @@ public sealed partial class Engine
                     // are expected to happen at lower depths
                     int failHighReduction = 0;
 
-                    alpha = Math.Max(EvaluationConstants.MinEval, lastSearchResult.Score - window);
-                    beta = Math.Min(EvaluationConstants.MaxEval, lastSearchResult.Score + window);
+                    alpha = Math.Clamp(lastSearchResult.Score - window, EvaluationConstants.MinEval, EvaluationConstants.MaxEval);
+                    beta = Math.Clamp(lastSearchResult.Score + window, EvaluationConstants.MinEval, EvaluationConstants.MaxEval);
 
                     _logger.Info(
 #if MULTITHREAD_DEBUG
@@ -146,24 +146,25 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                            "Aspiration windows depth {Depth} ({DepthWithoutReduction} - {Reduction}): [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
-                            depthToSearch, depth, failHighReduction, alpha, beta, bestScore, _nodes);
+                            "Aspiration windows depth {Depth} ({DepthWithoutReduction} - {Reduction}), window {Window}: [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
+                            depthToSearch, depth, failHighReduction, window, alpha, beta, bestScore, _nodes);
 
                         bestScore = NegaMax(depth: depthToSearch, ply: 0, alpha, beta, cutnode: false);
+                        Debug.Assert(bestScore > EvaluationConstants.MinEval && bestScore < EvaluationConstants.MaxEval);
 
-                        // 13, 19, 28, 42, 63, 94, 141, 211, 316, 474, 711, 1066, 1599, 2398, 3597, 5395, 8092, 12138, 18207, 27310, |EvaluationConstants.MaxEval|, 40965
-                        window += window >> 1;   // window / 2
+                        // 13, 19, 28, 42, 63, 94, 141, 211, 316, 474, 711, 1066, 1599, 2398, 3597, 5395, 8092, 12138, 18207, 27310, EvaluationConstants.MaxEval
+                        window = Math.Min(EvaluationConstants.MaxEval, window + (window >> 1));   // window / 2
 
                         // Depth change: https://github.com/lynx-chess/Lynx/pull/440
                         if (alpha >= bestScore)     // Fail low
                         {
-                            alpha = Math.Max(bestScore - window, EvaluationConstants.MinEval);
+                            alpha = Math.Clamp(bestScore - window, EvaluationConstants.MinEval, EvaluationConstants.MaxEval);
                             beta = (alpha + beta) >> 1;  // (alpha + beta) / 2
                             failHighReduction = 0;
                         }
                         else if (beta <= bestScore)     // Fail high
                         {
-                            beta = Math.Min(bestScore + window, EvaluationConstants.MaxEval);
+                            beta = Math.Clamp(bestScore + window, EvaluationConstants.MinEval, EvaluationConstants.MaxEval);
                             if (failHighReduction <= depth - 2)
                             {
                                 ++failHighReduction;

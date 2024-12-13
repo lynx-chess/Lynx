@@ -148,6 +148,9 @@ public static class Utils
         }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int CalculateMateInX(int score) => CalculateMateInX(score, Math.Abs(score));
+
     /// <summary>
     /// Providing there's a checkmate detected in <paramref name="score"/>, returns in how many moves
     /// </summary>
