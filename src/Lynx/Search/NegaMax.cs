@@ -166,7 +166,7 @@ public sealed partial class Engine
 
                                 return qSearchScore > score
                                     ? qSearchScore
-                                    : score;
+                                    : staticEval;
                             }
 
                             score += Configuration.EngineSettings.Razoring_NotDepth1Bonus;
@@ -178,7 +178,7 @@ public sealed partial class Engine
                                 {
                                     return qSearchScore > score
                                         ? qSearchScore
-                                        : score;
+                                        : staticEval;
                                 }
                             }
                         }
