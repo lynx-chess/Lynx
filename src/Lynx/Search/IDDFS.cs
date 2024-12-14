@@ -165,7 +165,7 @@ public sealed partial class Engine
                         else if (beta <= bestScore)     // Fail high
                         {
                             beta = Math.Clamp(bestScore + window, EvaluationConstants.MinEval, EvaluationConstants.MaxEval);
-                            if (failHighReduction <= depth - 2)
+                            if (failHighReduction < 3)
                             {
                                 ++failHighReduction;
                             }
