@@ -104,9 +104,9 @@ public static class EvaluationConstants
     public const int MinEval = -32_000;    // -CheckMateBaseEvaluation - (Constants.AbsoluteMaxDepth + 45) * DepthCheckmateFactor;
 
     /// <summary>
-    /// This value combined with <see cref="PositiveCheckmateDetectionLimit"/> and <see cref="NegativeCheckmateDetectionLimit"/> should allows mates up to in <see cref="Constants.AbsoluteMaxDepth"/> moves.
+    /// This value combined with <see cref="PositiveCheckmateDetectionLimit"/> and <see cref="NegativeCheckmateDetectionLimit"/> should allow mates up to in <see cref="Constants.AbsoluteMaxDepth"/> moves.
     /// </summary>
-    public const int CheckmateDepthFactor = 10;
+    public const int CheckmateDepthFactor = 1;
 
     /// <summary>
     /// Minimum evaluation for a position to be White checkmate
