@@ -1,5 +1,4 @@
 ﻿using Lynx.Model;
-using NLog;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -133,7 +132,7 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                        "Aspiration windows depth {Depth}: [{Alpha}, {Beta}] for previous search score {Score}, nodes {Nodes}",
+                        "Depth {Depth}: Aspiration windows [{Alpha}, {Beta}] for previous search score {Score}, nodes {Nodes}",
                         depth, alpha, beta, lastSearchResult.Score, _nodes);
                     Debug.Assert(lastSearchResult.Mate == 0 && lastSearchResult.Score > EvaluationConstants.NegativeCheckmateDetectionLimit && lastSearchResult.Score < EvaluationConstants.PositiveCheckmateDetectionLimit);
 
@@ -165,13 +164,38 @@ public sealed partial class Engine
                         else if (beta <= bestScore)     // Fail high
                         {
                             beta = Math.Clamp(bestScore + window, EvaluationConstants.MinEval, EvaluationConstants.MaxEval);
-                            if (failHighReduction <= depth - 2)
+                            if (failHighReduction < 3)
                             {
                                 ++failHighReduction;
                             }
                         }
                         else
                         {
+                            break;
+                        }
+
+                        if (bestScore > EvaluationConstants.CheckMateBaseEvaluation)
+                        {
+                            _logger.Warn(
+#if MULTITHREAD_DEBUG
+                $"[#{_id}] " +
+#endif
+                                "Depth {Depth}: Potential +X checkmate detected, but score {BestScore} outside of the limits", depth, bestScore);
+                            bestScore = EvaluationConstants.PositiveCheckmateDetectionLimit + 1;
+
+                            break;
+                        }
+
+                        if (bestScore < -EvaluationConstants.CheckMateBaseEvaluation)
+                        {
+                            _logger.Warn(
+#if MULTITHREAD_DEBUG
+                $"[#{_id}] " +
+#endif
+                                "Depth {Depth}: Potential -X checkmate detected, but score {BestScore} outside of the limits", depth, bestScore);
+
+                            bestScore = EvaluationConstants.NegativeCheckmateDetectionLimit - 1;
+
                             break;
                         }
                     }
@@ -182,7 +206,7 @@ public sealed partial class Engine
                 Debug.Assert(bestScore != EvaluationConstants.MinEval);
 
                 var bestScoreAbs = Math.Abs(bestScore);
-                isMateDetected = bestScoreAbs > EvaluationConstants.PositiveCheckmateDetectionLimit;
+                isMateDetected = bestScoreAbs > EvaluationConstants.PositiveCheckmateDetectionLimit && bestScoreAbs < EvaluationConstants.CheckMateBaseEvaluation;
                 mate = isMateDetected
                     ? Utils.CalculateMateInX(bestScore, bestScoreAbs)
                     : 0;
@@ -197,7 +221,7 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                        "Search at depth {0} didn't produce a best move. Score {1} (mate in {2}) detected, and/but search continues", depth, bestScore, mate);
+                        "Depth {Depth}: Search didn't produce a best move. Score {Score} (mate in {Mate}) detected, and/but search continues", depth, bestScore, mate);
 
                     lastSearchResult = null;
                     _bestMoveStability = 0;
@@ -229,7 +253,7 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                "Search cancellation requested after {0}ms (depth {1}, nodes {2}), best move will be returned", _stopWatch.ElapsedMilliseconds, depth, _nodes);
+                "Depth {Depth}: Search cancellation requested after {Time}ms (nodes {Nodes}), best move will be returned", depth, _stopWatch.ElapsedMilliseconds, _nodes);
 #pragma warning restore S6667 // Logging in a catch clause should pass the caught exception as a parameter.
 
             for (int i = 0; i < lastSearchResult?.Moves.Length; ++i)
@@ -243,7 +267,7 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                "Unexpected error ocurred during the search of position {0} at depth {1}, best move will be returned\n{2}", Game.PositionBeforeLastSearch.FEN(), depth, e.StackTrace);
+                "Depth {Depth}: Unexpected error ocurred during the search of position {Position}, best move will be returned\n{StackTrace}", depth, Game.PositionBeforeLastSearch.FEN(), e.StackTrace);
         }
         finally
         {
@@ -271,13 +295,23 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                "Search continues, due to lack of best move at depth {0}", depth - 1);
+                "Depth {Depth}: Search continues, due to lack of best move", depth - 1);
 
             return true;
         }
 
         if (mate != 0)
         {
+            if (mate == EvaluationConstants.MaxMate || mate == EvaluationConstants.MinMate)
+            {
+                _logger.Info(
+#if MULTITHREAD_DEBUG
+                    $"[#{_id}] " +
+#endif
+                    "Depth {0}: mate in {1} detected, which is outside of our range. Stopping search", depth - 1, mate);
+                return false;
+            }
+
             var winningMateThreshold = (100 - Game.HalfMovesWithoutCaptureOrPawnMove) / 2;
             _logger.Info(
 #if MULTITHREAD_DEBUG
@@ -291,7 +325,7 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                    "Stopping search: mate is short enough");
+                    "Stopping search, mate is short enough");
                 return false;
             }
 
@@ -315,7 +349,7 @@ public sealed partial class Engine
 
             if (!shouldContinue)
             {
-                _logger.Info("Stopping at depth {0}: max. depth reached", depth - 1);
+                _logger.Info("Depth {Depth}: stopping, max. depth reached", depth - 1);
             }
 
             return shouldContinue;
