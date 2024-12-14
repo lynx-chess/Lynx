@@ -134,9 +134,15 @@ public sealed partial class Engine
             bool isNotGettingCheckmated = staticEval > EvaluationConstants.NegativeCheckmateDetectionLimit;
 
             // Fail-high pruning (moves with high scores) - prune more when improving
+            // We avoid doing it while being checkmated because we risk it affecting the mate scores, or worse, end up
+            //  with an empty PV - https://github.com/lynx-chess/Lynx/pull/1271
             if (isNotGettingCheckmated)
             {
-                if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
+                // If static eval is in mate range, both fail medium and the razoring bonus would affect the scores
+                bool isNotGivingCheckmate = staticEval < EvaluationConstants.PositiveCheckmateDetectionLimit;
+
+                if (depth <= Configuration.EngineSettings.RFP_MaxDepth
+                    && isNotGivingCheckmate)
                 {
                     // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
                     // Return formula by Ciekce, instead of just returning static eval
@@ -148,6 +154,7 @@ public sealed partial class Engine
 
                     if (staticEval - rfpThreshold >= beta)
                     {
+                        // Fail medium or 'retard'
 #pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
                         return (staticEval + beta) / 2;
 #pragma warning restore S3949 // Calculations should not overflow
