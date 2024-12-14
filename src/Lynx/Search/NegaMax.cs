@@ -1,4 +1,4 @@
-﻿using Lynx.Model;
+using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
@@ -108,7 +108,7 @@ public sealed partial class Engine
             {
                 Debug.Assert(ttStaticEval != int.MinValue);
 
-                staticEval = ttStaticEval;
+                staticEval = ttStaticEval;  // Also when checkmate?
                 phase = position.Phase();
             }
 
@@ -126,7 +126,7 @@ public sealed partial class Engine
             // If the score is outside what the current bounds are, but it did match flag and depth,
             // then we can trust that this score is more accurate than the current static evaluation,
             // and we can update our static evaluation for better accuracy in pruning
-            if (ttElementType != default && ttElementType != (ttRawScore > staticEval ? NodeType.Alpha : NodeType.Beta))
+            if (ttElementType != default && ttElementType != (ttRawScore > staticEval ? NodeType.Alpha : NodeType.Beta))    // TODO not do it while checkmating/ed
             {
                 staticEval = ttRawScore;
             }
@@ -136,7 +136,8 @@ public sealed partial class Engine
             // Fail-high pruning (moves with high scores) - prune more when improving
             if (isNotGettingCheckmated)
             {
-                if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
+                if (depth <= Configuration.EngineSettings.RFP_MaxDepth
+                    && staticEval < EvaluationConstants.PositiveCheckmateDetectionLimit)
                 {
                     // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
                     // Return formula by Ciekce, instead of just returning static eval
@@ -148,9 +149,8 @@ public sealed partial class Engine
 
                     if (staticEval - rfpThreshold >= beta)
                     {
-#pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
-                        return (staticEval + beta) / 2;
-#pragma warning restore S3949 // Calculations should not overflow
+                        // return (staticEval + beta) / 2; Also causes issues when beta is very high/low
+                        return staticEval;
                     }
 
                     // 🔍 Razoring - Strelka impl (CPW) - https://www.chessprogramming.org/Razoring#Strelka
@@ -166,7 +166,7 @@ public sealed partial class Engine
 
                                 return qSearchScore > score
                                     ? qSearchScore
-                                    : score;
+                                    : staticEval;
                             }
 
                             score += Configuration.EngineSettings.Razoring_NotDepth1Bonus;
@@ -178,7 +178,7 @@ public sealed partial class Engine
                                 {
                                     return qSearchScore > score
                                         ? qSearchScore
-                                        : score;
+                                        : staticEval;
                                 }
                             }
                         }

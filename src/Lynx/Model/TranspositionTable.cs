@@ -1,4 +1,4 @@
-﻿using NLog;
+using NLog;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -178,13 +178,28 @@ public readonly struct TranspositionTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static int RecalculateMateScores(int score, int ply)
     {
+        const int maxCheckMateScore = EvaluationConstants.CheckMateBaseEvaluation - (Constants.AbsoluteMaxDepth + Constants.ArrayDepthMargin) * EvaluationConstants.CheckmateDepthFactor;
+        const int minCheckMateScore = -EvaluationConstants.CheckMateBaseEvaluation + (Constants.AbsoluteMaxDepth + Constants.ArrayDepthMargin) * EvaluationConstants.CheckmateDepthFactor;
+
         if (score > EvaluationConstants.PositiveCheckmateDetectionLimit)
         {
-            return score - (EvaluationConstants.CheckmateDepthFactor * ply);
+            var newScore = score - (EvaluationConstants.CheckmateDepthFactor * ply);
+
+            if (newScore > maxCheckMateScore)
+            {
+                newScore = maxCheckMateScore;
+            }
+            return newScore;
         }
         else if (score < EvaluationConstants.NegativeCheckmateDetectionLimit)
         {
-            return score + (EvaluationConstants.CheckmateDepthFactor * ply);
+            var newScore = score + (EvaluationConstants.CheckmateDepthFactor * ply);
+
+            if (newScore < minCheckMateScore)
+            {
+                newScore = minCheckMateScore;
+            }
+            return newScore;
         }
 
         return score;
