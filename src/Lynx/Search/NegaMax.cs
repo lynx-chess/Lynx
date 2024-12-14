@@ -137,7 +137,7 @@ public sealed partial class Engine
             if (isNotGettingCheckmated)
             {
                 if (depth <= Configuration.EngineSettings.RFP_MaxDepth
-                    && staticEval < EvaluationConstants.PositiveCheckmateDetectionLimit)
+                    && staticEval < EvaluationConstants.PositiveCheckmateDetectionLimit)    // Fail retard and razoring bonuses mess with mate scores
                 {
                     // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
                     // Return formula by Ciekce, instead of just returning static eval
@@ -149,7 +149,8 @@ public sealed partial class Engine
 
                     if (staticEval - rfpThreshold >= beta)
                     {
-                        // return (staticEval + beta) / 2; Also causes issues when beta is very high/low
+                        // Fail medium, aka fail 'retard'
+                        //return (staticEval + beta) / 2; //Also causes issues when beta is very high/low
                         return staticEval;
                     }
 
@@ -166,7 +167,7 @@ public sealed partial class Engine
 
                                 return qSearchScore > score
                                     ? qSearchScore
-                                    : staticEval;
+                                    : score;
                             }
 
                             score += Configuration.EngineSettings.Razoring_NotDepth1Bonus;
@@ -178,7 +179,7 @@ public sealed partial class Engine
                                 {
                                     return qSearchScore > score
                                         ? qSearchScore
-                                        : staticEval;
+                                        : score;
                                 }
                             }
                         }
