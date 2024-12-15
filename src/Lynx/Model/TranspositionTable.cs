@@ -58,8 +58,8 @@ public readonly struct TranspositionTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public (int Score, ShortMove BestMove, NodeType NodeType, int RawScore, int StaticEval) ProbeHash(Position position, int depth, int ply, int alpha, int beta)
     {
-        var ttIndex = CalculateTTIndex(position.UniqueIdentifier);
-        var entry = _tt[ttIndex];
+        var ttIndex = (int)CalculateTTIndex(position.UniqueIdentifier);
+        var entry = Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_tt), ttIndex);
 
         if ((ushort)position.UniqueIdentifier != entry.Key)
         {
@@ -94,8 +94,8 @@ public readonly struct TranspositionTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void RecordHash(Position position, int staticEval, int depth, int ply, int score, NodeType nodeType, Move? move = null)
     {
-        var ttIndex = CalculateTTIndex(position.UniqueIdentifier);
-        ref var entry = ref _tt[ttIndex];
+        var ttIndex = (int)CalculateTTIndex(position.UniqueIdentifier);
+        ref var entry = ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_tt), ttIndex);
 
         //if (entry.Key != default && entry.Key != position.UniqueIdentifier)
         //{
