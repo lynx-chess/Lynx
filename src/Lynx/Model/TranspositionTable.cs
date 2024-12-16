@@ -180,11 +180,11 @@ public readonly struct TranspositionTable
     {
         if (score > EvaluationConstants.PositiveCheckmateDetectionLimit)
         {
-            return score - (EvaluationConstants.CheckmateDepthFactor * ply);
+            return score + (EvaluationConstants.CheckmateDepthFactor * ply);
         }
         else if (score < EvaluationConstants.NegativeCheckmateDetectionLimit)
         {
-            return score + (EvaluationConstants.CheckmateDepthFactor * ply);
+            return score - (EvaluationConstants.CheckmateDepthFactor * ply);
         }
 
         return score;

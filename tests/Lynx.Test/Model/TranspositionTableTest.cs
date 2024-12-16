@@ -14,14 +14,18 @@ public class TranspositionTableTests
     [TestCase(-10_000, 5, -10_000)]
     [TestCase(NegativeCheckmateDetectionLimit + 1, 5, NegativeCheckmateDetectionLimit + 1)]
 
-    [TestCase(CheckMateBaseEvaluation - (5 * CheckmateDepthFactor), 2, CheckMateBaseEvaluation - (7 * CheckmateDepthFactor))]
-    [TestCase(CheckMateBaseEvaluation - (2 * CheckmateDepthFactor), 4, CheckMateBaseEvaluation - (6 * CheckmateDepthFactor))]
+    [TestCase(CheckMateBaseEvaluation - (5 * CheckmateDepthFactor), -2, CheckMateBaseEvaluation - (7 * CheckmateDepthFactor))]
+    [TestCase(CheckMateBaseEvaluation - (5 * CheckmateDepthFactor), +2, CheckMateBaseEvaluation - (3 * CheckmateDepthFactor))]
+    [TestCase(CheckMateBaseEvaluation - (7 * CheckmateDepthFactor), -4, CheckMateBaseEvaluation - (11 * CheckmateDepthFactor))]
+    [TestCase(CheckMateBaseEvaluation - (7 * CheckmateDepthFactor), +4, CheckMateBaseEvaluation - (3 * CheckmateDepthFactor))]
 
-    [TestCase(-CheckMateBaseEvaluation + (5 * CheckmateDepthFactor), 2, -CheckMateBaseEvaluation + (7 * CheckmateDepthFactor))]
-    [TestCase(-CheckMateBaseEvaluation + (2 * CheckmateDepthFactor), 4, -CheckMateBaseEvaluation + (6 * CheckmateDepthFactor))]
-    public void RecalculateMateScores(int evaluation, int depth, int expectedEvaluation)
+    [TestCase(-CheckMateBaseEvaluation + (5 * CheckmateDepthFactor), -2, -CheckMateBaseEvaluation + (7 * CheckmateDepthFactor))]
+    [TestCase(-CheckMateBaseEvaluation + (5 * CheckmateDepthFactor), +2, -CheckMateBaseEvaluation + (3 * CheckmateDepthFactor))]
+    [TestCase(-CheckMateBaseEvaluation + (7 * CheckmateDepthFactor), -4, -CheckMateBaseEvaluation + (11 * CheckmateDepthFactor))]
+    [TestCase(-CheckMateBaseEvaluation + (7 * CheckmateDepthFactor), +4, -CheckMateBaseEvaluation + (3 * CheckmateDepthFactor))]
+    public void RecalculateMateScores(int evaluation, int ply, int expectedEvaluation)
     {
-        Assert.AreEqual(expectedEvaluation, TranspositionTable.RecalculateMateScores(evaluation, depth));
+        Assert.AreEqual(expectedEvaluation, TranspositionTable.RecalculateMateScores(evaluation, ply));
     }
 
     [TestCase(+19, NodeType.Alpha, +20, +30, +19)]
