@@ -313,7 +313,7 @@ public sealed partial class Engine
                     $"[#{_id}] " +
 #endif
                     "Depth {Depth}: mate outside of range detected, stopping search and playing best move {BestMove}",
-                    depth - 1, bestMove);
+                    depth - 1, bestMove.Value.UCIString());
 
                 return false;
             }
