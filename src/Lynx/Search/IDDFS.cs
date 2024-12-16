@@ -180,7 +180,9 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                                "Depth {Depth}: Potential +X checkmate detected, but score {BestScore} outside of the limits", depth, bestScore);
+                                "Depth {Depth}: Potential +X checkmate detected in position {Position}, but score {BestScore} outside of the limits",
+                                depth, Game.PositionBeforeLastSearch.FEN(), bestScore);
+
                             bestScore = EvaluationConstants.PositiveCheckmateDetectionLimit + 1;
 
                             break;
@@ -192,7 +194,8 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                                "Depth {Depth}: Potential -X checkmate detected, but score {BestScore} outside of the limits", depth, bestScore);
+                                "Depth {Depth}: Potential -X checkmate detected in position {Position}, but score {BestScore} outside of the limits",
+                                depth, Game.PositionBeforeLastSearch.FEN(), bestScore);
 
                             bestScore = EvaluationConstants.NegativeCheckmateDetectionLimit - 1;
 
@@ -221,9 +224,9 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                        "Depth {Depth}: Search didn't produce a best move. Score {Score} (mate in {Mate}) detected, and/but search continues", depth, bestScore, mate);
+                        "Depth {Depth}: Search didn't produce a best move for position {Position}. Score {Score} (mate in {Mate}?) detected",
+                        depth, Game.PositionBeforeLastSearch.FEN(), bestScore, mate);
 
-                    lastSearchResult = null;
                     _bestMoveStability = 0;
                     _scoreDelta = 0;
 
@@ -267,7 +270,8 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                "Depth {Depth}: Unexpected error ocurred during the search of position {Position}, best move will be returned\n{StackTrace}", depth, Game.PositionBeforeLastSearch.FEN(), e.StackTrace);
+                "Depth {Depth}: Unexpected error ocurred during the search of position {Position}, best move will be returned\n{StackTrace}",
+                depth, Game.PositionBeforeLastSearch.FEN(), e.StackTrace);
         }
         finally
         {
@@ -304,11 +308,13 @@ public sealed partial class Engine
         {
             if (mate == EvaluationConstants.MaxMate || mate == EvaluationConstants.MinMate)
             {
-                _logger.Info(
+                _logger.Warn(
 #if MULTITHREAD_DEBUG
                     $"[#{_id}] " +
 #endif
-                    "Depth {0}: mate in {1} detected, which is outside of our range. Stopping search", depth - 1, mate);
+                    "Depth {Depth}: mate outside of range detected, stopping search and playing best move {BestMove}",
+                    depth - 1, bestMove);
+
                 return false;
             }
 
@@ -317,7 +323,8 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                "Depth {0}: mate in {1} detected (score {2}, {3} moves until draw by repetition)", depth - 1, mate, bestScore, winningMateThreshold);
+                "Depth {Depth}: mate in {Mate} detected (score {Score}, {MateThreshold} moves until draw by repetition)",
+                depth - 1, mate, bestScore, winningMateThreshold);
 
             if (mate < 0 || mate + Constants.MateDistanceMarginToStopSearching < winningMateThreshold)
             {
@@ -326,6 +333,7 @@ public sealed partial class Engine
                 $"[#{_id}] " +
 #endif
                     "Stopping search, mate is short enough");
+
                 return false;
             }
 
@@ -338,7 +346,7 @@ public sealed partial class Engine
 
         if (depth >= Configuration.EngineSettings.MaxDepth)
         {
-            _logger.Info("Max depth reached: {0}", Configuration.EngineSettings.MaxDepth);
+            _logger.Info("Max depth reached: {MaxDepth}", Configuration.EngineSettings.MaxDepth);
             return false;
         }
 
@@ -479,7 +487,7 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                $"Search cancelled at depth {depth} with no result, choosing first found legal move as best one";
+                $"Depth {depth}: Search cancelled with no result for position {Game.CurrentPosition.FEN()} (hard limit {_searchConstraints.HardLimitTimeBound}ms, soft limit {_searchConstraints.SoftLimitTimeBound}ms). Choosing first found legal move as best one";
 
             // In the event of a quick ponderhit/stop while pondering because the opponent moved quickly, we don't want no warning triggered here
             //  when cancelling the pondering search
