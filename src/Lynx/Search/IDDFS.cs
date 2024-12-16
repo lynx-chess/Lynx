@@ -224,7 +224,7 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                        "Depth {Depth}: Search didn't produce a best move for position {Position}. Score {Score} (mate in {Mate}) detected, and/but search continues",
+                        "Depth {Depth}: Search didn't produce a best move for position {Position}. Score {Score} (mate in {Mate}?) detected",
                         depth, Game.PositionBeforeLastSearch.FEN(), bestScore, mate);
 
                     lastSearchResult = null;
