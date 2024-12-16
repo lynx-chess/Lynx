@@ -180,7 +180,9 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                                "Depth {Depth}: Potential +X checkmate detected, but score {BestScore} outside of the limits", depth, bestScore);
+                                "Depth {Depth}: Potential +X checkmate detected in position {Position}, but score {BestScore} outside of the limits",
+                                depth, Game.PositionBeforeLastSearch.FEN(), bestScore);
+
                             bestScore = EvaluationConstants.PositiveCheckmateDetectionLimit + 1;
 
                             break;
@@ -192,7 +194,8 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                                "Depth {Depth}: Potential -X checkmate detected, but score {BestScore} outside of the limits", depth, bestScore);
+                                "Depth {Depth}: Potential -X checkmate detected in position {Position}, but score {BestScore} outside of the limits",
+                                depth, Game.PositionBeforeLastSearch.FEN(), bestScore);
 
                             bestScore = EvaluationConstants.NegativeCheckmateDetectionLimit - 1;
 
@@ -221,7 +224,8 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                        "Depth {Depth}: Search didn't produce a best move. Score {Score} (mate in {Mate}) detected, and/but search continues", depth, bestScore, mate);
+                        "Depth {Depth}: Search didn't produce a best move for position {Position}. Score {Score} (mate in {Mate}) detected, and/but search continues",
+                        depth, Game.PositionBeforeLastSearch.FEN(), bestScore, mate);
 
                     lastSearchResult = null;
                     _bestMoveStability = 0;
@@ -267,7 +271,8 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                "Depth {Depth}: Unexpected error ocurred during the search of position {Position}, best move will be returned\n{StackTrace}", depth, Game.PositionBeforeLastSearch.FEN(), e.StackTrace);
+                "Depth {Depth}: Unexpected error ocurred during the search of position {Position}, best move will be returned\n{StackTrace}",
+                depth, Game.PositionBeforeLastSearch.FEN(), e.StackTrace);
         }
         finally
         {
@@ -304,11 +309,13 @@ public sealed partial class Engine
         {
             if (mate == EvaluationConstants.MaxMate || mate == EvaluationConstants.MinMate)
             {
-                _logger.Info(
+                _logger.Warn(
 #if MULTITHREAD_DEBUG
                     $"[#{_id}] " +
 #endif
-                    "Depth {0}: mate in {1} detected, which is outside of our range. Stopping search", depth - 1, mate);
+                    "Depth {0}: mate in {1} detected for position {Position}, which is outside of our range. Stopping search",
+                    depth - 1, mate, Game.PositionBeforeLastSearch.FEN());
+
                 return false;
             }
 
@@ -326,6 +333,7 @@ public sealed partial class Engine
                 $"[#{_id}] " +
 #endif
                     "Stopping search, mate is short enough");
+
                 return false;
             }
 
@@ -479,7 +487,7 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                $"Search cancelled at depth {depth} with no result, choosing first found legal move as best one";
+                $"Search cancelled at depth {depth} with no result (hard limit {_searchConstraints.HardLimitTimeBound}ms, soft limit {_searchConstraints.SoftLimitTimeBound}ms), choosing first found legal move as best one";
 
             // In the event of a quick ponderhit/stop while pondering because the opponent moved quickly, we don't want no warning triggered here
             //  when cancelling the pondering search
