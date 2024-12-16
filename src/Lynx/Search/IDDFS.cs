@@ -458,7 +458,7 @@ public sealed partial class Engine
         var pvTableSpan = _pVTable.AsSpan();
         var pvMoves = pvTableSpan[..pvTableSpan.IndexOf(0)].ToArray();
 
-        var maxDepthReached = _maxDepthReached.LastOrDefault(item => item != default);
+        var maxDepthReached = _maxDepthReached.Max();
 
         var elapsedSeconds = Utils.CalculateElapsedSeconds(_stopWatch);
 
