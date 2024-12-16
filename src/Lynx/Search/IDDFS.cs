@@ -313,8 +313,8 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                     $"[#{_id}] " +
 #endif
-                    "Depth {0}: mate in {1} detected for position {Position}, which is outside of our range. Stopping search",
-                    depth - 1, mate, Game.PositionBeforeLastSearch.FEN());
+                    "Depth {Depth}: mate outside of range detected, stopping search",
+                    depth - 1);
 
                 return false;
             }
@@ -324,7 +324,8 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                "Depth {0}: mate in {1} detected (score {2}, {3} moves until draw by repetition)", depth - 1, mate, bestScore, winningMateThreshold);
+                "Depth {Depth}: mate in {Mate} detected (score {Score}, {MateThreshold} moves until draw by repetition)",
+                depth - 1, mate, bestScore, winningMateThreshold);
 
             if (mate < 0 || mate + Constants.MateDistanceMarginToStopSearching < winningMateThreshold)
             {
@@ -346,7 +347,7 @@ public sealed partial class Engine
 
         if (depth >= Configuration.EngineSettings.MaxDepth)
         {
-            _logger.Info("Max depth reached: {0}", Configuration.EngineSettings.MaxDepth);
+            _logger.Info("Max depth reached: {MaxDepth}", Configuration.EngineSettings.MaxDepth);
             return false;
         }
 
