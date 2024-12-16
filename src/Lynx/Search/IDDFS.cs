@@ -132,7 +132,7 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                        "Depth {Depth}: Aspiration windows [{Alpha}, {Beta}] for previous search score {Score}, nodes {Nodes}",
+                        "Depth {Depth}: aspiration windows [{Alpha}, {Beta}] for previous search score {Score}, nodes {Nodes}",
                         depth, alpha, beta, lastSearchResult.Score, _nodes);
                     Debug.Assert(lastSearchResult.Mate == 0 && lastSearchResult.Score > EvaluationConstants.NegativeCheckmateDetectionLimit && lastSearchResult.Score < EvaluationConstants.PositiveCheckmateDetectionLimit);
 
@@ -180,7 +180,7 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                                "Depth {Depth}: Potential +X checkmate detected in position {Position}, but score {BestScore} outside of the limits",
+                                "Depth {Depth}: potential +X checkmate detected in position {Position}, but score {BestScore} outside of the limits",
                                 depth, Game.PositionBeforeLastSearch.FEN(), bestScore);
 
                             bestScore = EvaluationConstants.PositiveCheckmateDetectionLimit + 1;
@@ -194,7 +194,7 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                                "Depth {Depth}: Potential -X checkmate detected in position {Position}, but score {BestScore} outside of the limits",
+                                "Depth {Depth}: potential -X checkmate detected in position {Position}, but score {BestScore} outside of the limits",
                                 depth, Game.PositionBeforeLastSearch.FEN(), bestScore);
 
                             bestScore = EvaluationConstants.NegativeCheckmateDetectionLimit - 1;
@@ -224,7 +224,7 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                        "Depth {Depth}: Search didn't produce a best move for position {Position}. Score {Score} (mate in {Mate}?) detected",
+                        "Depth {Depth}: search didn't produce a best move for position {Position}. Score {Score} (mate in {Mate}?) detected",
                         depth, Game.PositionBeforeLastSearch.FEN(), bestScore, mate);
 
                     _bestMoveStability = 0;
@@ -256,7 +256,7 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                "Depth {Depth}: Search cancellation requested after {Time}ms (nodes {Nodes}), best move will be returned", depth, _stopWatch.ElapsedMilliseconds, _nodes);
+                "Depth {Depth}: search cancellation requested after {Time}ms (nodes {Nodes}), best move will be returned", depth, _stopWatch.ElapsedMilliseconds, _nodes);
 #pragma warning restore S6667 // Logging in a catch clause should pass the caught exception as a parameter.
 
             for (int i = 0; i < lastSearchResult?.Moves.Length; ++i)
@@ -270,7 +270,7 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                "Depth {Depth}: Unexpected error ocurred during the search of position {Position}, best move will be returned\n{StackTrace}",
+                "Depth {Depth}: unexpected error ocurred during the search of position {Position}, best move will be returned\n{StackTrace}",
                 depth, Game.PositionBeforeLastSearch.FEN(), e.StackTrace);
         }
         finally
@@ -299,7 +299,7 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                "Depth {Depth}: Search continues, due to lack of best move", depth - 1);
+                "Depth {Depth}: search continues, due to lack of best move", depth - 1);
 
             return true;
         }
@@ -487,7 +487,7 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                $"Depth {depth}: Search cancelled with no result for position {Game.CurrentPosition.FEN()} (hard limit {_searchConstraints.HardLimitTimeBound}ms, soft limit {_searchConstraints.SoftLimitTimeBound}ms). Choosing first found legal move as best one";
+                $"Depth {depth}: search cancelled with no result for position {Game.CurrentPosition.FEN()} (hard limit {_searchConstraints.HardLimitTimeBound}ms, soft limit {_searchConstraints.SoftLimitTimeBound}ms). Choosing first found legal move as best one";
 
             // In the event of a quick ponderhit/stop while pondering because the opponent moved quickly, we don't want no warning triggered here
             //  when cancelling the pondering search
