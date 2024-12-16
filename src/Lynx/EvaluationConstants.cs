@@ -114,9 +114,13 @@ public static class EvaluationConstants
     public const int PositiveCheckmateDetectionLimit = 26_000; // CheckMateBaseEvaluation - (Constants.AbsoluteMaxDepth + 45) * DepthCheckmateFactor;
 
     /// <summary>
-    /// Minimum evaluation for a position to be Black checkmate
+    /// Maximum evaluation for a position to be Black checkmate
     /// </summary>
     public const int NegativeCheckmateDetectionLimit = -26_000; // -CheckMateBaseEvaluation + (Constants.AbsoluteMaxDepth + 45) * DepthCheckmateFactor;
+
+    public const int MaxMate = 1500; // Utils.CalculateMateInX(PositiveCheckmateDetectionLimit + 1);
+
+    public const int MinMate = -1500; // Utils.CalculateMateInX(NegativeCheckmateDetectionLimit -1);
 
     /// <summary>
     /// Max static eval. It doesn't include checkmate values and it's below <see cref="PositiveCheckmateDetectionLimit"/>

@@ -47,10 +47,6 @@
     </AssemblyAttribute>
   </ItemGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\Lynx.Generator\Lynx.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    </ItemGroup>
-
   <PropertyGroup>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
