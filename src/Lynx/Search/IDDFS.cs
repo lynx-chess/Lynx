@@ -227,7 +227,6 @@ public sealed partial class Engine
                         "Depth {Depth}: Search didn't produce a best move for position {Position}. Score {Score} (mate in {Mate}?) detected",
                         depth, Game.PositionBeforeLastSearch.FEN(), bestScore, mate);
 
-                    lastSearchResult = null;
                     _bestMoveStability = 0;
                     _scoreDelta = 0;
 
