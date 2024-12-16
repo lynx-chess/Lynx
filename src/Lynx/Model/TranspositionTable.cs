@@ -31,6 +31,7 @@ public readonly struct TranspositionTable
         if (Sse.IsSupported)
         {
             var index = CalculateTTIndex(position.UniqueIdentifier);
+            Debug.Assert(index < _tt.Length);
 
             unsafe
             {
@@ -49,7 +50,7 @@ public readonly struct TranspositionTable
     /// 'Fixed-point multiplication trick', see https://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public readonly ulong CalculateTTIndex(ulong positionUniqueIdentifier) => (ulong)(((UInt128)positionUniqueIdentifier * (UInt128)_tt.Length) >> 64);
+    public readonly int CalculateTTIndex(ulong positionUniqueIdentifier) => (int)(((UInt128)positionUniqueIdentifier * (UInt128)_tt.Length) >> 64);
 
     /// <summary>
     /// Checks the transposition table and, if there's a eval value that can be deducted from it of there's a previously recorded <paramref name="position"/>, it's returned. <see cref="EvaluationConstants.NoHashEntry"/> is returned otherwise
@@ -58,7 +59,9 @@ public readonly struct TranspositionTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public (int Score, ShortMove BestMove, NodeType NodeType, int RawScore, int StaticEval) ProbeHash(Position position, int depth, int ply, int alpha, int beta)
     {
-        var ttIndex = (int)CalculateTTIndex(position.UniqueIdentifier);
+        var ttIndex = CalculateTTIndex(position.UniqueIdentifier);
+        Debug.Assert(ttIndex < _tt.Length);
+
         var entry = Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_tt), ttIndex);
 
         if ((ushort)position.UniqueIdentifier != entry.Key)
@@ -94,7 +97,9 @@ public readonly struct TranspositionTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void RecordHash(Position position, int staticEval, int depth, int ply, int score, NodeType nodeType, Move? move = null)
     {
-        var ttIndex = (int)CalculateTTIndex(position.UniqueIdentifier);
+        var ttIndex = CalculateTTIndex(position.UniqueIdentifier);
+        Debug.Assert(ttIndex < _tt.Length);
+
         ref var entry = ref Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_tt), ttIndex);
 
         //if (entry.Key != default && entry.Key != position.UniqueIdentifier)
