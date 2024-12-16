@@ -180,7 +180,7 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                                "Depth {Depth}: Potential +X checkmate detected in position {Position}, but score {BestScore} outside of the limits. Best move {BestMove}",
+                                "Depth {Depth}: Potential +X checkmate detected in position {Position}, but score {BestScore} outside of the limits",
                                 depth, Game.PositionBeforeLastSearch.FEN(), bestScore);
 
                             bestScore = EvaluationConstants.PositiveCheckmateDetectionLimit + 1;
