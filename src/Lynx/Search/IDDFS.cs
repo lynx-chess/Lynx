@@ -180,7 +180,7 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                                "Depth {Depth}: Potential +X checkmate detected in position {Position}, but score {BestScore} outside of the limits",
+                                "Depth {Depth}: Potential +X checkmate detected in position {Position}, but score {BestScore} outside of the limits. Best move {BestMove}",
                                 depth, Game.PositionBeforeLastSearch.FEN(), bestScore);
 
                             bestScore = EvaluationConstants.PositiveCheckmateDetectionLimit + 1;
@@ -312,8 +312,8 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                     $"[#{_id}] " +
 #endif
-                    "Depth {Depth}: mate outside of range detected, stopping search",
-                    depth - 1);
+                    "Depth {Depth}: mate outside of range detected, stopping search and playing best move {BestMove}",
+                    depth - 1, bestMove);
 
                 return false;
             }
