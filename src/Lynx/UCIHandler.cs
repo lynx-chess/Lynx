@@ -88,6 +88,10 @@ public sealed class UCIHandler
                     await HandleBench(rawCommand);
                     HandleQuit();
                     break;
+                case "verbosebench":
+                    await HandleVerboseBench(rawCommand);
+                    HandleQuit();
+                    break;
                 case "printsettings":
                     await HandleSettings();
                     break;
@@ -606,6 +610,18 @@ public sealed class UCIHandler
         }
 
         await _searcher.RunBench(depth);
+    }
+
+    private async ValueTask HandleVerboseBench(string rawCommand)
+    {
+        var items = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+        if (items.Length < 2 || !int.TryParse(items[1], out int depth))
+        {
+            depth = Configuration.EngineSettings.BenchDepth;
+        }
+
+        await _searcher.RunVerboseBench(depth);
     }
 
     private async ValueTask HandleSettings()
