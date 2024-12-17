@@ -21,7 +21,7 @@
   </ItemGroup >
 
   <PropertyGroup>
-    <Version>1.7.0</Version>
+    <Version>1.8.0</Version>
     <Authors>Eduardo Cáceres</Authors>
     <ApplicationIcon>$(MSBuildThisFileDirectory)resources\icon.ico</ApplicationIcon>
     <RepositoryUrl>https://github.com/lynx-chess/Lynx</RepositoryUrl>
