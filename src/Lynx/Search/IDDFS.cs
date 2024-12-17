@@ -332,9 +332,7 @@ public sealed partial class Engine
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                    "Stopping search, mate is short enough");
-
-                return false;
+                    "Could stop search, since mate is short enough");
             }
 
             _logger.Info(
