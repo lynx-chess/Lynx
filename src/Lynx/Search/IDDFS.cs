@@ -209,7 +209,7 @@ public sealed partial class Engine
                 Debug.Assert(bestScore != EvaluationConstants.MinEval);
 
                 var bestScoreAbs = Math.Abs(bestScore);
-                isMateDetected = bestScoreAbs > EvaluationConstants.PositiveCheckmateDetectionLimit && bestScoreAbs < EvaluationConstants.CheckMateBaseEvaluation;
+                isMateDetected = bestScoreAbs > EvaluationConstants.CheckMateMaxEvaluation;
                 mate = isMateDetected
                     ? Utils.CalculateMateInX(bestScore, bestScoreAbs)
                     : 0;
@@ -306,17 +306,17 @@ public sealed partial class Engine
 
         if (mate != 0)
         {
-            if (mate == EvaluationConstants.MaxMate || mate == EvaluationConstants.MinMate)
-            {
-                _logger.Warn(
-#if MULTITHREAD_DEBUG
-                    $"[#{_id}] " +
-#endif
-                    "Depth {Depth}: mate outside of range detected, stopping search and playing best move {BestMove}",
-                    depth - 1, bestMove.Value.UCIString());
+//            if (mate == EvaluationConstants.MaxMate || mate == EvaluationConstants.MinMate)
+//            {
+//                _logger.Warn(
+//#if MULTITHREAD_DEBUG
+//                    $"[#{_id}] " +
+//#endif
+//                    "Depth {Depth}: mate outside of range detected, stopping search and playing best move {BestMove}",
+//                    depth - 1, bestMove.Value.UCIString());
 
-                return false;
-            }
+//                return false;
+//            }
 
             var winningMateThreshold = (100 - Game.HalfMovesWithoutCaptureOrPawnMove) / 2;
             _logger.Info(
@@ -326,16 +326,16 @@ public sealed partial class Engine
                 "Depth {Depth}: mate in {Mate} detected (score {Score}, {MateThreshold} moves until draw by repetition)",
                 depth - 1, mate, bestScore, winningMateThreshold);
 
-            if (mate < 0 || mate + Constants.MateDistanceMarginToStopSearching < winningMateThreshold)
-            {
-                _logger.Info(
-#if MULTITHREAD_DEBUG
-                $"[#{_id}] " +
-#endif
-                    "Stopping search, mate is short enough");
+//            if (mate < 0 || mate + Constants.MateDistanceMarginToStopSearching < winningMateThreshold)
+//            {
+//                _logger.Info(
+//#if MULTITHREAD_DEBUG
+//                $"[#{_id}] " +
+//#endif
+//                    "Stopping search, mate is short enough");
 
-                return false;
-            }
+//                return false;
+//            }
 
             _logger.Info(
 #if MULTITHREAD_DEBUG

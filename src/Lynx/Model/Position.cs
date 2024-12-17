@@ -602,7 +602,7 @@ public class Position : IDisposable
         if (isInCheck)
         {
             // Checkmate evaluation, but not as bad/shallow as it looks like since we're already searching at a certain depth
-            return -CheckMateBaseEvaluation + (CheckmateDepthFactor * ply);
+            return -CheckMateBaseEvaluation + ply;
         }
         else
         {

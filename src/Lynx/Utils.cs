@@ -158,9 +158,9 @@ public static class Utils
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int CalculateMateInX(int score, int bestScoreAbs)
     {
-        int mate = (int)Math.Ceiling(0.5 * ((EvaluationConstants.CheckMateBaseEvaluation - bestScoreAbs) / EvaluationConstants.CheckmateDepthFactor));
-
-        return (int)Math.CopySign(mate, score);
+        return score > 0
+            ? (EvaluationConstants.CheckMateBaseEvaluation - score - 1) / 2
+            : -(EvaluationConstants.CheckMateBaseEvaluation + score) / 2;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

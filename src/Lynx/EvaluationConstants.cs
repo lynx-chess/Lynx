@@ -88,10 +88,6 @@ public static class EvaluationConstants
         0
     ];
 
-    /// <summary>
-    /// Base absolute checkmate evaluation value. Actual absolute evaluations are lower than this one by a number of <see cref="Position.DepthCheckmateFactor"/>
-    /// </summary>
-    public const int CheckMateBaseEvaluation = 29_000;
 
     /// <summary>
     /// Max eval, including checkmate values
@@ -102,6 +98,13 @@ public static class EvaluationConstants
     /// Min eval, including checkmate values
     /// </summary>
     public const int MinEval = -32_000;    // -CheckMateBaseEvaluation - (Constants.AbsoluteMaxDepth + 45) * DepthCheckmateFactor;
+
+    /// <summary>
+    /// Base absolute checkmate evaluation value. Actual absolute evaluations are lower than this one by a number of <see cref="Position.DepthCheckmateFactor"/>
+    /// </summary>
+    public const int CheckMateBaseEvaluation = MaxEval - 1;
+
+    public const int CheckMateMaxEvaluation = CheckMateBaseEvaluation - Constants.AbsoluteMaxDepth;
 
     /// <summary>
     /// This value combined with <see cref="PositiveCheckmateDetectionLimit"/> and <see cref="NegativeCheckmateDetectionLimit"/> should allow mates up to in <see cref="Constants.AbsoluteMaxDepth"/> moves.
