@@ -52,8 +52,6 @@ public sealed partial class Engine
 
     private SearchResult? _previousSearchResult;
 
-    private readonly Move _defaultMove;
-
     private int _bestMoveStability;
     private int _scoreDelta;
 

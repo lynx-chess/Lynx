@@ -222,7 +222,7 @@ public sealed class GoCommand : IGUIBaseCommand
             {
                 const string message = "searchmoves not supported in go command";
                 _logger.Error(message);
-                throw new NotImplementedException(message);
+                throw new NotSupportedException(message);
             }
             else
             {

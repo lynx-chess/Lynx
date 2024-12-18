@@ -10,7 +10,9 @@ public sealed class SilentChannelWriter<T> : ChannelWriter<T>
     /// Explicit static constructor to tell C# compiler not to mark type as beforefieldinit
     /// https://csharpindepth.com/articles/singleton
     /// </summary>
+#pragma warning disable S3253 // Constructor and destructor declarations should not be redundant
     static SilentChannelWriter() { }
+#pragma warning restore S3253 // Constructor and destructor declarations should not be redundant
 
     private SilentChannelWriter() { }
 

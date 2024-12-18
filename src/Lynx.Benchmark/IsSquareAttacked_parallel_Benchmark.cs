@@ -219,7 +219,7 @@ public class IsSquareAttacked_parallel_Benchmark : BaseBenchmark
                 var result = await resultTask;
                 if (result)
                 {
-                    cancellationTokenSource.Cancel();
+                    await cancellationTokenSource.CancelAsync();
                     return result;
                 }
             }

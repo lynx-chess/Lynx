@@ -62,7 +62,9 @@ public static class MagicNumberGenerator
             var magicNumber = GenerateMagicNumber();
 
             // Skip inappropriate magic numbers
+#pragma warning disable S3937 // Number patterns should be regular
             var n = (occupancyMask * magicNumber) & 0xFF000_000_000_000_00;
+#pragma warning restore S3937 // Number patterns should be regular
             if (n.CountBits() < 6)
             {
                 continue;

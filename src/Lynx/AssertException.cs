@@ -2,7 +2,7 @@
 
 public class AssertException : Exception
 {
-    public AssertException() : base()
+    public AssertException()
     {
     }
 

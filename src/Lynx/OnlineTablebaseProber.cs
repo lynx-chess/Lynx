@@ -4,6 +4,7 @@ using NLog;
 using Polly;
 using Polly.Extensions.Http;
 using Polly.Retry;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -11,7 +12,7 @@ using System.Text.Json.Serialization;
 
 namespace Lynx;
 
-#pragma warning disable CA1851 // Possible multiple enumerations of 'IEnumerable' collection
+#pragma warning disable CA1851, S2302 // Possible multiple enumerations of 'IEnumerable' collection
 
 /// <summary>
 /// https://syzygy-tables.info/ -
@@ -32,7 +33,7 @@ public static class OnlineTablebaseProber
     private readonly static HttpClient _client = new(
         new PolicyHttpMessageHandler(_retryPolicy)
         {
-            InnerHandler = new SocketsHttpHandler() { PooledConnectionLifetime = TimeSpan.FromMinutes(15) }
+            InnerHandler = new SocketsHttpHandler { PooledConnectionLifetime = TimeSpan.FromMinutes(15) }
         })
     {
         BaseAddress = new("http://tablebase.lichess.ovh/")
@@ -354,6 +355,7 @@ public static class OnlineTablebaseProber
         return (mate, parsedMove ?? 0);
     }
 
+    [Experimental("LYNX0")]
     public static int EvaluationSearch(Position position, int halfMovesWithoutCaptureOrPawnMove, CancellationToken cancellationToken)
     {
         if (!Configuration.EngineSettings.UseOnlineTablebaseInSearch || position.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
@@ -364,7 +366,9 @@ public static class OnlineTablebaseProber
         var fen = position.FEN(halfMovesWithoutCaptureOrPawnMove);
         _logger.Debug("[{0}] Querying online tb for position {1}", nameof(EvaluationSearch), fen);
 
+#pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
         var result = GetEvaluation(fen, cancellationToken).Result;
+#pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
 
 #pragma warning disable S3358 // Ternary operators should not be nested
         return result?.Category switch
@@ -413,4 +417,4 @@ public static class OnlineTablebaseProber
     }
 }
 
-#pragma warning restore CA1851 // Possible multiple enumerations of 'IEnumerable' collection
+#pragma warning restore CA1851, S2302 // Possible multiple enumerations of 'IEnumerable' collection

@@ -149,8 +149,8 @@ public sealed class UCIHandler
 
     private async Task HandleUCI(CancellationToken cancellationToken)
     {
-        await SendCommand(IdCommand.Name, cancellationToken);
-        await SendCommand(IdCommand.Version, cancellationToken);
+        await SendCommand(IdCommand.NameString, cancellationToken);
+        await SendCommand(IdCommand.VersionString, cancellationToken);
 
         foreach (var availableOption in OptionCommand.AvailableOptions)
         {
@@ -686,10 +686,12 @@ public sealed class UCIHandler
 
                 await _engineToUci.Writer.WriteAsync($"{line}: {eval}", cancellationToken);
 
+#pragma warning disable S881 // Increment (++) and decrement (--) operators should not be used in a method call or mixed with other operators in an expression
                 if (++lineCounter % 100 == 0)
                 {
                     Thread.Sleep(50);
                 }
+#pragma warning restore S881 // Increment (++) and decrement (--) operators should not be used in a method call or mixed with other operators in an expression
             }
         }
         catch (Exception e)
