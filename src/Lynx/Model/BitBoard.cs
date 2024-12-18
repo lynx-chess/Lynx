@@ -15,7 +15,9 @@ public static class BitBoardExtensions
 
     public static BitBoard Initialize(params BoardSquare[] occupiedSquares)
     {
+#pragma warning disable S3353 // Unchanged local variables should be "const" - FP https://community.sonarsource.com/t/fp-s3353-value-modified-in-ref-extension-method/132389
         BitBoard board = default;
+#pragma warning restore S3353 // Unchanged local variables should be "const"
 
         foreach (var square in occupiedSquares)
         {

@@ -139,7 +139,9 @@ public static class AttackGenerator
         BitBoard attacks = default;
 
         // Piece bitboard
+#pragma warning disable S3353 // Unchanged local variables should be "const" - FP https://community.sonarsource.com/t/fp-s3353-value-modified-in-ref-extension-method/132389
         BitBoard bitBoard = default;
+#pragma warning restore S3353 // Unchanged local variables should be "const"
 
         // Set piece on board
         bitBoard.SetBit(squareIndex);
