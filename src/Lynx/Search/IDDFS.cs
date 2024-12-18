@@ -98,11 +98,6 @@ public sealed partial class Engine
             // Not clearing _quietHistory on purpose
             // Not clearing _captureHistory on purpose
 
-            if (lastSearchResult is not null)
-            {
-                _engineWriter.TryWrite(lastSearchResult);
-            }
-
             int mate = 0;
 
             do
