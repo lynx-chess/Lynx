@@ -11,6 +11,8 @@ using System.Text.Json.Serialization;
 
 namespace Lynx;
 
+#pragma warning disable CA1851 // Possible multiple enumerations of 'IEnumerable' collection
+
 /// <summary>
 /// https://syzygy-tables.info/ -
 /// https://tablebase.lichess.ovh/
@@ -410,3 +412,5 @@ public static class OnlineTablebaseProber
         }
     }
 }
+
+#pragma warning restore CA1851 // Possible multiple enumerations of 'IEnumerable' collection

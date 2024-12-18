@@ -144,6 +144,8 @@ public static class MoveExtensions
     [Obsolete("Just intended for testing purposes")]
     public static bool TryParseFromUCIString(ReadOnlySpan<char> UCIString, Move[] moveList, [NotNullWhen(true)] out Move? move)
     {
+#pragma warning disable CA1851 // Possible multiple enumerations of 'IEnumerable' collection
+
         Utils.Assert(UCIString.Length == 4 || UCIString.Length == 5);
 
         var sourceSquare = (UCIString[0] - 'a') + ((8 - (UCIString[1] - '0')) * 8);
@@ -185,10 +187,12 @@ public static class MoveExtensions
                 return false;
             }
 
-            Utils.Assert(candidateMoves.Count() == 4);
-            Utils.Assert(candidateMoves.Count(predicate) == 1);
+            Debug.Assert(candidateMoves.Count() == 4);
+            Debug.Assert(candidateMoves.Count(predicate) == 1);
 
             return true;
+
+#pragma warning restore CA1851 // Possible multiple enumerations of 'IEnumerable' collection
         }
     }
 
