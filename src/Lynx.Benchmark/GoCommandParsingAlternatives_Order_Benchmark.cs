@@ -278,15 +278,15 @@ public class GoCommandParsingAlternatives_Order_Benchmark : BaseBenchmark
         }
     }
 
-    public List<string> SearchMoves { get; private set; } = default!;
+    public List<string> SearchMoves { get; } = default!;
     public int WhiteTime { get; private set; } = default!;
     public int BlackTime { get; private set; } = default!;
     public int WhiteIncrement { get; private set; } = default!;
     public int BlackIncrement { get; private set; } = default!;
     public int MovesToGo { get; private set; } = default!;
     public int Depth { get; private set; } = default!;
-    public int Nodes { get; private set; } = default!;
-    public int Mate { get; private set; } = default!;
+    public int Nodes { get; } = default!;
+    public int Mate { get; } = default!;
     public int MoveTime { get; private set; } = default!;
     public bool Infinite { get; private set; } = default!;
     public bool Ponder { get; private set; } = default!;

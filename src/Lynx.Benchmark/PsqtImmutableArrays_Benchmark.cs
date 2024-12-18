@@ -247,12 +247,6 @@ public class PsqtImmutableArrays_Benchmark : BaseBenchmark
             -94, -281, -297, -512, -936, 0
         ];
 
-        public static readonly ImmutableArray<int> GamePhaseByPiece =
-        [
-            0, 1, 1, 2, 4, 0,
-            0, 1, 1, 2, 4, 0
-        ];
-
         public static readonly ImmutableArray<int> MiddleGamePawnTable =
         [
               0, 0, 0, 0, 0, 0, 0, 0,

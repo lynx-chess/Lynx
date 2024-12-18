@@ -19,5 +19,4 @@ public readonly struct SearchConstraints
         SoftLimitTimeBound = softLimitTimeBound;
         MaxDepth = maxDepth;
     }
-
 }

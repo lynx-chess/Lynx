@@ -185,6 +185,9 @@ using ParseResult = (bool Success, ulong[] PieceBitBoards, ulong[] OccupancyBitB
             int HalfMoveClock, int FullMoveCounter);
 
 namespace Lynx.Benchmark;
+
+#pragma warning disable S112 // General or reserved exceptions should never be thrown
+
 public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
 {
     public static IEnumerable<string> Data =>
@@ -1505,3 +1508,5 @@ public partial class ParseFENBenchmark_Benchmark : BaseBenchmark
         }
     }
 }
+
+#pragma warning restore S112 // General or reserved exceptions should never be thrown
