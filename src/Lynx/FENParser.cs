@@ -39,7 +39,7 @@ public static class FENParser
 
             if (partsLength < 3)
             {
-                throw new($"Error parsing second half (after board) of fen {fen}");
+                throw new LynxException($"Error parsing second half (after board) of fen {fen}");
             }
 
             side = ParseSide(unparsedStringAsSpan[parts[0]]);
@@ -152,7 +152,7 @@ public static class FENParser
         {
             'w' or 'W' => Side.White,
             'b' or 'B' => Side.Black,
-            _ => throw new($"Unrecognized side: {side}")
+            _ => throw new LynxException($"Unrecognized side: {side}")
         };
     }
 
@@ -170,7 +170,7 @@ public static class FENParser
                 'k' => (byte)CastlingRights.BK,
                 'q' => (byte)CastlingRights.BQ,
                 '-' => castle,
-                _ => throw new($"Unrecognized castling char: {castling[i]}")
+                _ => throw new LynxException($"Unrecognized castling char: {castling[i]}")
             };
         }
 
