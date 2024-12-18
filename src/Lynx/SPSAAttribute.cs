@@ -7,7 +7,7 @@ using System.Text.Json.Nodes;
 namespace Lynx;
 
 #pragma warning disable IDE1006 // Naming Styles
-internal record WeatherFactoryOutput<T>(T value, T min_value, T max_value, double step);
+internal sealed record WeatherFactoryOutput<T>(T value, T min_value, T max_value, double step);
 #pragma warning restore IDE1006 // Naming Styles
 
 [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]

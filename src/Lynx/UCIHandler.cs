@@ -187,6 +187,7 @@ public sealed class UCIHandler
         Span<char> lowerCaseFirstWord = stackalloc char[command[commandItems[2]].Length];
         command[commandItems[2]].ToLowerInvariant(lowerCaseFirstWord);
 
+#pragma warning disable S1479 // "switch" statements should not have too many "case" clauses
         switch (lowerCaseFirstWord)
         {
             case "ponder":
@@ -565,6 +566,7 @@ public sealed class UCIHandler
                 _logger.Warn("Unsupported option: {0}", command.ToString());
                 break;
         }
+#pragma warning restore S1479 // "switch" statements should not have too many "case" clauses
     }
 
     private void HandleNewGame()
@@ -697,7 +699,10 @@ public sealed class UCIHandler
         }
         catch (Exception e)
         {
+#pragma warning disable S106 // Standard outputs should not be used directly to log anything
             Console.WriteLine(e.Message + e.StackTrace);
+#pragma warning restore S106 // Standard outputs should not be used directly to log anything
+
             await _engineToUci.Writer.WriteAsync(e.Message + e.StackTrace, cancellationToken);
         }
     }

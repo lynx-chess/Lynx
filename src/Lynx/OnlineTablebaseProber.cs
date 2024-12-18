@@ -366,9 +366,9 @@ public static class OnlineTablebaseProber
         var fen = position.FEN(halfMovesWithoutCaptureOrPawnMove);
         _logger.Debug("[{0}] Querying online tb for position {1}", nameof(EvaluationSearch), fen);
 
-#pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
+#pragma warning disable VSTHRD002, VSTHRD104 // Avoid problematic synchronous waits - experimental method
         var result = GetEvaluation(fen, cancellationToken).Result;
-#pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
+#pragma warning restore VSTHRD002, VSTHRD104 // Avoid problematic synchronous waits
 
 #pragma warning disable S3358 // Ternary operators should not be nested
         return result?.Category switch

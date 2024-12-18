@@ -2,9 +2,7 @@
 
 namespace Lynx;
 
-#pragma warning disable S4041 // Type names should not match namespaces
 public static class Configuration
-#pragma warning restore S4041 // Type names should not match namespaces
 {
     public static EngineSettings EngineSettings { get; set; } = new EngineSettings();
     public static GeneralSettings GeneralSettings { get; set; } = new GeneralSettings();
