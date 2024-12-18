@@ -665,7 +665,7 @@ public sealed class UCIHandler
             {
                 var fen = line[..line.IndexOfAny([';', '[', '"'])];
 
-                var position = new Position(fen);
+                using var position = new Position(fen);
                 if (!position.IsValid())
                 {
                     _logger.Warn("Position {0}, parsed as {1} and then {2} not valid, skipping it", line, fen, position.FEN());

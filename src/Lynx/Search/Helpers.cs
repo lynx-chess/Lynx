@@ -118,7 +118,7 @@ public sealed partial class Engine
             var move = _pVTable[i];
             TryParseMove(position, i, move);
 
-            var newPosition = new Position(position);
+            using var newPosition = new Position(position);
             newPosition.MakeMove(move);
             if (!newPosition.WasProduceByAValidMove())
             {

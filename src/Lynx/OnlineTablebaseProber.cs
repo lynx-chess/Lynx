@@ -125,7 +125,7 @@ public static class OnlineTablebaseProber
                             throw new AssertException($"{move!.Uci} should be parsable from position {fen}");
                         }
 
-                        var newPosition = new Position(position);
+                        using var newPosition = new Position(position);
                         newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
@@ -186,7 +186,7 @@ public static class OnlineTablebaseProber
                             throw new AssertException($"{move!.Uci} should be parsable from position {fen}");
                         }
 
-                        var newPosition = new Position(position);
+                        using var newPosition = new Position(position);
                         newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
@@ -249,7 +249,7 @@ public static class OnlineTablebaseProber
                             throw new AssertException($"{move!.Uci} should be parsable from position {fen}");
                         }
 
-                        var newPosition = new Position(position);
+                        using var newPosition = new Position(position);
                         newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
@@ -309,7 +309,7 @@ public static class OnlineTablebaseProber
                             throw new AssertException($"{move!.Uci} should be parsable from position {fen}");
                         }
 
-                        var newPosition = new Position(position);
+                        using var newPosition = new Position(position);
                         newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
