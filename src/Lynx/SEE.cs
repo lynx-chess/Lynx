@@ -25,9 +25,9 @@ public static class SEE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsGoodCapture(Position position, Move move, int threshold = 0)
     {
-        System.Diagnostics.Debug.Assert(move.IsCapture(), $"{nameof(IsGoodCapture)} doesn't handle non-capture moves");
-        System.Diagnostics.Debug.Assert(move.PromotedPiece() == default, $"{nameof(IsGoodCapture)} doesn't handle promotion moves");
-        System.Diagnostics.Debug.Assert(!move.IsEnPassant(), $"{nameof(IsGoodCapture)} potentially doesn't handle en-passant moves");
+        System.Diagnostics.Debug.Assert(move.IsCapture(), "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle non-capture moves");
+        System.Diagnostics.Debug.Assert(move.PromotedPiece() == default, "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle promotion moves");
+        System.Diagnostics.Debug.Assert(!move.IsEnPassant(), "Assert fail", $"{nameof(IsGoodCapture)} potentially doesn't handle en-passant moves");
 
         var sideToMove = position.Side;
 

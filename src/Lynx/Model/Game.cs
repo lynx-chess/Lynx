@@ -37,7 +37,7 @@ public sealed class Game : IDisposable
 
     public Game(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan, Span<Move> movePool)
     {
-        Debug.Assert(Constants.MaxNumberMovesInAGame <= 1024, "Need to customized ArrayPool due to desired array size requirements");
+        Debug.Assert(Constants.MaxNumberMovesInAGame <= 1024, "Assert fail", "Need to customized ArrayPool due to desired array size requirements");
         _positionHashHistory = ArrayPool<ulong>.Shared.Rent(Constants.MaxNumberMovesInAGame);
         _gameStack = ArrayPool<PlyStackEntry>.Shared.Rent(Constants.MaxNumberMovesInAGame);
 
