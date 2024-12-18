@@ -11,7 +11,7 @@ public readonly struct SearchConstraints
 
     public readonly int MaxDepth;
 
-    public static readonly SearchConstraints InfiniteSearchConstraint = new SearchConstraints(DefaultHardLimitTimeBound, DefaultSoftLimitTimeBound, -1);
+    public static readonly SearchConstraints InfiniteSearchConstraint = new(DefaultHardLimitTimeBound, DefaultSoftLimitTimeBound, -1);
 
     public SearchConstraints(int hardLimitTimeBound, int softLimitTimeBound, int maxDepth)
     {
