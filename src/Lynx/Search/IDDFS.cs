@@ -52,10 +52,10 @@ public sealed partial class Engine
 
     private SearchResult? _previousSearchResult;
 
-    private readonly Move _defaultMove = default;
+    private readonly Move _defaultMove;
 
-    private int _bestMoveStability = 0;
-    private int _scoreDelta = 0;
+    private int _bestMoveStability;
+    private int _scoreDelta;
 
     /// <summary>
     /// Iterative Deepening Depth-First Search (IDDFS) using alpha-beta pruning.

@@ -4,8 +4,6 @@ namespace Lynx;
 
 public sealed class SilentChannelWriter<T> : ChannelWriter<T>
 {
-    private static readonly ValueTask<bool> _defaultValueTask = new();
-
     public static SilentChannelWriter<T> Instance { get; } = new();
 
     /// <summary>
@@ -25,5 +23,5 @@ public sealed class SilentChannelWriter<T> : ChannelWriter<T>
     /// Returns a static <see cref="ValueTask"/> wrapping <see langword="true"/>
     /// </summary>
     /// <returns>A non-usable <see cref="ValueTask"/></returns>
-    public override ValueTask<bool> WaitToWriteAsync(CancellationToken cancellationToken = default) => _defaultValueTask;
+    public override ValueTask<bool> WaitToWriteAsync(CancellationToken cancellationToken = default) => default;
 }

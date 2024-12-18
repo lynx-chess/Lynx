@@ -7,9 +7,9 @@ public static class Configuration
     public static EngineSettings EngineSettings { get; set; } = new EngineSettings();
     public static GeneralSettings GeneralSettings { get; set; } = new GeneralSettings();
 
-    private static int _isDebug = 0;
+    private static int _isDebug;
 #pragma warning disable IDE1006 // Naming Styles
-    private static int _UCI_AnalyseMode = 0;
+    private static int _UCI_AnalyseMode;
 #pragma warning restore IDE1006 // Naming Styles
 
     public static bool IsDebug
@@ -53,9 +53,9 @@ public static class Configuration
 
 public sealed class GeneralSettings
 {
-    public bool EnableLogging { get; set; } = false;
+    public bool EnableLogging { get; set; }
 
-    public bool EnableTuning { get; set; } = false;
+    public bool EnableTuning { get; set; }
 }
 
 public sealed class EngineSettings
@@ -93,21 +93,21 @@ public sealed class EngineSettings
                 Constants.MaxThreadCount);
     }
 
-    public bool UseOnlineTablebaseInRootPositions { get; set; } = false;
+    public bool UseOnlineTablebaseInRootPositions { get; set; }
 
     /// <summary>
     /// Experimental, might misbehave due to tablebase API limits
     /// </summary>
-    public bool UseOnlineTablebaseInSearch { get; set; } = false;
+    public bool UseOnlineTablebaseInSearch { get; set; }
 
     /// <summary>
     /// This can also de used to reduce online probing
     /// </summary>
     public int OnlineTablebaseMaxSupportedPieces { get; set; } = 7;
 
-    public bool ShowWDL { get; set; } = false;
+    public bool ShowWDL { get; set; }
 
-    public bool IsPonder { get; set; } = false;
+    public bool IsPonder { get; set; }
 
     public double SPSA_OB_R_end { get; set; } = 0.02;
 
