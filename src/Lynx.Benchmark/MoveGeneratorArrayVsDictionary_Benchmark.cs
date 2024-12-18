@@ -102,7 +102,7 @@ public class MoveGeneratorArrayVsDictionary_Benchmark : BaseBenchmark
         (int origin, BitBoard _) => Attacks.KingAttacks[origin],
     ];
 
-    private static readonly IReadOnlyDictionary<int, Func<int, BitBoard, ulong>> _pieceAttacksDictionary = new Dictionary<int, Func<int, BitBoard, ulong>>
+    private static readonly Dictionary<int, Func<int, BitBoard, ulong>> _pieceAttacksDictionary = new Dictionary<int, Func<int, BitBoard, ulong>>
     {
         [(int)Piece.P] = (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.White][origin],
         [(int)Piece.p] = (int origin, BitBoard _) => Attacks.PawnAttacks[(int)Side.Black][origin],
