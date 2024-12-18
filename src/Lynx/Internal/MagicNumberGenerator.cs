@@ -2,6 +2,8 @@
 
 namespace Lynx.Internal;
 
+#pragma warning disable S106, S2228 // Standard outputs should not be used directly to log anything
+
 public static class MagicNumberGenerator
 {
     private static readonly Random _generator = new(1160218972);
@@ -11,7 +13,9 @@ public static class MagicNumberGenerator
         static ulong GenerateRandomNumber()
         {
             // Slicing 16 bits from MS1B side
+#pragma warning disable CA5394 // Do not use insecure randomness
             return ((ulong)_generator.Next()) & 0xFFFF;
+#pragma warning restore CA5394 // Do not use insecure randomness
         }
 
         // Define 4 random numbers
@@ -104,6 +108,7 @@ public static class MagicNumberGenerator
         }
 
         Console.WriteLine("Error generating magic numbers");
+
         return default;
     }
 
@@ -141,3 +146,5 @@ public static class MagicNumberGenerator
         Console.WriteLine("\n\t];\n");
     }
 }
+
+#pragma warning restore S106, S2228 // Standard outputs should not be used directly to log anything

@@ -11,7 +11,7 @@ internal record WeatherFactoryOutput<T>(T value, T min_value, T max_value, doubl
 #pragma warning restore IDE1006 // Naming Styles
 
 [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
-internal class SPSAAttribute<T> : Attribute
+internal sealed class SPSAAttribute<T> : Attribute
     where T : INumberBase<T>, IMultiplyOperators<T, T, T>, IConvertible, IParsable<T>, ISpanParsable<T>, IDivisionOperators<T, T, T>
 {
 #pragma warning disable S2743 // Static fields should not be used in generic types
@@ -26,9 +26,9 @@ internal class SPSAAttribute<T> : Attribute
     public T MaxValue { get; }
     public double Step { get; }
 
-#pragma warning disable S3963 // "static" fields should be initialized inline
+#pragma warning disable S3963, CA1810 // "static" fields should be initialized inline
     static SPSAAttribute()
-#pragma warning restore S3963 // "static" fields should be initialized inline
+#pragma warning restore S3963, CA1810 // "static" fields should be initialized inline
     {
         _hundred = T.Zero;
         for (int i = 0; i < 100; i++)

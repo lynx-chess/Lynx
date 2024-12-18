@@ -4,7 +4,9 @@ namespace Lynx;
 
 public sealed class SilentChannelWriter<T> : ChannelWriter<T>
 {
+#pragma warning disable CA1000 // Do not declare static members on generic types
     public static SilentChannelWriter<T> Instance { get; } = new();
+#pragma warning restore CA1000 // Do not declare static members on generic types
 
     /// <summary>
     /// Explicit static constructor to tell C# compiler not to mark type as beforefieldinit

@@ -686,12 +686,13 @@ public sealed class UCIHandler
 
                 await _engineToUci.Writer.WriteAsync($"{line}: {eval}", cancellationToken);
 
-#pragma warning disable S881 // Increment (++) and decrement (--) operators should not be used in a method call or mixed with other operators in an expression
-                if (++lineCounter % 100 == 0)
+                ++lineCounter;
+                if (lineCounter % 100 == 0)
                 {
+#pragma warning disable CA1849 // Call async methods when in an async method - intended
                     Thread.Sleep(50);
+#pragma warning restore CA1849 // Call async methods when in an async method
                 }
-#pragma warning restore S881 // Increment (++) and decrement (--) operators should not be used in a method call or mixed with other operators in an expression
             }
         }
         catch (Exception e)
