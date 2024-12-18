@@ -52,6 +52,10 @@ public sealed partial class Engine
 
     private SearchResult? _previousSearchResult;
 
+#pragma warning disable CA1805 // Do not initialize unnecessarily - Interferes with S3459
+    private readonly Move _defaultMove = 0;
+#pragma warning restore CA1805 // Do not initialize unnecessarily
+
     private int _bestMoveStability;
     private int _scoreDelta;
 
