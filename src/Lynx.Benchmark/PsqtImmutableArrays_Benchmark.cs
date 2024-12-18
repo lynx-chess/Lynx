@@ -465,19 +465,13 @@ public class PsqtImmutableArrays_Benchmark : BaseBenchmark
         [
         +82, +337, +365, +477, +1025, 0,
         -82, -337, -365, -477, -1025, 0,
-    ];
+        ];
 
         public static readonly int[] EndGamePieceValues =
         [
         +94, +281, +297, +512, +936, 0,
         -94, -281, -297, -512, -936, 0
-    ];
-
-        public static readonly int[] GamePhaseByPiece =
-        [
-        0, 1, 1, 2, 4, 0,
-        0, 1, 1, 2, 4, 0
-    ];
+        ];
 
         public static readonly int[] MiddleGamePawnTable =
         [
