@@ -90,6 +90,7 @@ public sealed partial class Engine
             if (OnlyOneLegalMove(ref firstLegalMove, out var onlyOneLegalMoveSearchResult))
             {
                 _engineWriter.TryWrite(onlyOneLegalMoveSearchResult);
+                _logger.Info("Single legal move detected in {Position}: {Move}", Game.CurrentPosition.FEN(), onlyOneLegalMoveSearchResult.BestMove.UCIString());
 
                 return onlyOneLegalMoveSearchResult;
             }

@@ -277,7 +277,11 @@ public sealed partial class Engine : IDisposable
         }
         catch (Exception e)
         {
-            _logger.Fatal(e, "Error in {0} while calculating BestMove", nameof(Search));
+            _logger.Fatal(e,
+#if MULTITHREAD_DEBUG
+                $"[#{_id}] " +
+#endif
+                "Error in {0} while calculating BestMove", nameof(Search));
             return null;
         }
         finally
