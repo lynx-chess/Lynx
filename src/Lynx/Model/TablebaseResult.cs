@@ -3,7 +3,9 @@ using System.Runtime.Serialization;
 
 namespace Lynx.Model;
 
+#pragma warning disable S4022 // Enumerations should have "Int32" storage
 public enum TablebaseEvaluationCategory : byte
+#pragma warning restore S4022 // Enumerations should have "Int32" storage
 {
     Unknown,
     Draw,

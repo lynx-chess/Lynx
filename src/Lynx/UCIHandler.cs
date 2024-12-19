@@ -699,9 +699,9 @@ public sealed class UCIHandler
         }
         catch (Exception e)
         {
-#pragma warning disable S106 // Standard outputs should not be used directly to log anything
+#pragma warning disable S106, S2228 // Standard outputs should not be used directly to log anything
             Console.WriteLine(e.Message + e.StackTrace);
-#pragma warning restore S106 // Standard outputs should not be used directly to log anything
+#pragma warning restore S106, S2228 // Standard outputs should not be used directly to log anything
 
             await _engineToUci.Writer.WriteAsync(e.Message + e.StackTrace, cancellationToken);
         }
