@@ -245,4 +245,4 @@ public sealed class EngineSettings
 [JsonSerializable(typeof(SPSAAttribute<double>))]
 [JsonSerializable(typeof(WeatherFactoryOutput<int>))]
 [JsonSerializable(typeof(WeatherFactoryOutput<double>))]
-internal partial class EngineSettingsJsonSerializerContext : JsonSerializerContext;
+internal sealed partial class EngineSettingsJsonSerializerContext : JsonSerializerContext;

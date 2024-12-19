@@ -10,7 +10,9 @@ public sealed class Game : IDisposable
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
 #if DEBUG
+#pragma warning disable CA1002 // Do not expose generic lists
     public List<Move> MoveHistory { get; }
+#pragma warning restore CA1002 // Do not expose generic lists
 #endif
 
     private int _positionHashHistoryPointer;
