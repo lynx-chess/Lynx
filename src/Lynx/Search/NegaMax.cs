@@ -29,6 +29,7 @@ public sealed partial class Engine
 
         _maxDepthReached[ply] = ply;
         _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
+        _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
 
         var pvIndex = PVTable.Indexes[ply];
         var nextPvIndex = PVTable.Indexes[ply + 1];
@@ -64,9 +65,6 @@ public sealed partial class Engine
                 --depth;
             }
         }
-
-        // Before any time-consuming operations
-        _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
 
         // 🔍 Improving heuristic: the current position has a better static evaluation than
         // the previous evaluation from the same side (ply - 2).

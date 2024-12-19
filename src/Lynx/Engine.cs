@@ -281,7 +281,7 @@ public sealed partial class Engine : IDisposable
 #if MULTITHREAD_DEBUG
                 $"[#{_id}] " +
 #endif
-                "Error in {0} while calculating BestMove", nameof(Search));
+                "Error in {0} for position {Position}", nameof(Search), Game.CurrentPosition.FEN());
             return null;
         }
         finally
