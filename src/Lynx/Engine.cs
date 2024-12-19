@@ -296,6 +296,7 @@ public sealed partial class Engine : IDisposable
     {
         _stopRequested = true;
         _absoluteSearchCancellationTokenSource.Cancel();
+        _searchConstraints = new(0, 0, 0);
     }
 
     public void FreeResources()
