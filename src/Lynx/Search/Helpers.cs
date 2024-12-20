@@ -103,7 +103,6 @@ public sealed partial class Engine
     [Conditional("DEBUG")]
     private void ValidatePVTable()
     {
-        return;
         var position = Game.CurrentPosition;
         for (int i = 0; i < PVTable.Indexes[1]; ++i)
         {
