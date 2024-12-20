@@ -1,7 +1,8 @@
 ﻿using Lynx.Model;
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
-using NLog;using System.Runtime.Intrinsics.X86;
+using NLog;
+using System.Runtime.Intrinsics.X86;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Channels;

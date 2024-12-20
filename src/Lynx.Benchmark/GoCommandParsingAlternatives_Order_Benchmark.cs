@@ -230,7 +230,6 @@
  */
 
 using BenchmarkDotNet.Attributes;
-using Microsoft.Diagnostics.Utilities;
 using NLog;
 
 namespace Lynx.Benchmark;
