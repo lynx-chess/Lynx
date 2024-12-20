@@ -42,9 +42,8 @@ public sealed partial class Engine : IDisposable
 
     public bool PendingConfirmation { get; set; }
 
-    private CancellationTokenSource _searchCancellationTokenSource;
-    private CancellationTokenSource _absoluteSearchCancellationTokenSource;
-
+    private CancellationToken _searchCancellationToken = CancellationToken.None;
+    private CancellationToken _absoluteSearchCancellationToken = CancellationToken.None;
     public Engine(ChannelWriter<object> engineWriter) : this("0", engineWriter, new()) { }
 
 #pragma warning disable RCS1163 // Unused parameter - used in Release mode
@@ -58,10 +57,7 @@ public sealed partial class Engine : IDisposable
         AverageDepth = 0;
         Game = new Game(Constants.InitialPositionFEN);
 
-        _searchCancellationTokenSource = new();
-        _absoluteSearchCancellationTokenSource = new();
         // Update ResetEngine() after any changes here
-
         _quietHistory = new int[12][];
         _moveNodeCount = new ulong[12][];
         for (int i = 0; i < _quietHistory.Length; ++i)
@@ -172,21 +168,13 @@ public sealed partial class Engine : IDisposable
     {
         _searchConstraints = searchConstrains;
 
-        _searchCancellationTokenSource = new();
-        _absoluteSearchCancellationTokenSource = new();
-
-        if (!_isPondering && searchConstrains.HardLimitTimeBound != SearchConstraints.DefaultHardLimitTimeBound)
-        {
-            _searchCancellationTokenSource.CancelAfter(searchConstrains.HardLimitTimeBound);
-        }
-
         SearchResult resultToReturn = IDDFS();
         //SearchResult resultToReturn = await SearchBestMove(maxDepth, decisionTime);
 
         Game.ResetCurrentPositionToBeforeSearchState();
         if (!_isPondering
             && resultToReturn.BestMove != default
-            && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
+            && !_absoluteSearchCancellationToken.IsCancellationRequested)
         {
             Game.MakeMove(resultToReturn.BestMove);
             Game.UpdateInitialPosition();
@@ -241,15 +229,22 @@ public sealed partial class Engine : IDisposable
         return tbResult ?? searchResult!;
     }
 
-    public SearchResult? Search(GoCommand goCommand, in SearchConstraints searchConstraints)
+    public SearchResult? Search(GoCommand goCommand, in SearchConstraints searchConstraints, CancellationToken absoluteSearchCancellationToken, CancellationToken searchCancellationToken)
     {
         if (_isSearching)
         {
             _logger.Warn("Search already in progress");
         }
+
         _isSearching = true;
+        _absoluteSearchCancellationToken = absoluteSearchCancellationToken;
+        _searchCancellationToken = searchCancellationToken;
 
         Thread.CurrentThread.Priority = ThreadPriority.Highest;
+
+        // TODO consider using linked cancellation token source
+        //using var jointCts = CancellationTokenSource.CreateLinkedTokenSource(absoluteSearchCancellationToken, searchCancellationToken);
+        //_absoluteSearchCancellationToken = jointCts.Token;
 
         try
         {
@@ -295,16 +290,11 @@ public sealed partial class Engine : IDisposable
     public void StopSearching()
     {
         _stopRequested = true;
-        _absoluteSearchCancellationTokenSource.Cancel();
-        _searchConstraints = new(0, 0, 0);
     }
 
     public void FreeResources()
     {
         Game.FreeResources();
-
-        _absoluteSearchCancellationTokenSource.Dispose();
-        _searchCancellationTokenSource.Dispose();
 
         _disposedValue = true;
     }

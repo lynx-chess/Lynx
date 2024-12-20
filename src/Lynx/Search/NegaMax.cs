@@ -28,8 +28,7 @@ public sealed partial class Engine
         }
 
         _maxDepthReached[ply] = ply;
-        _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
-        _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
+        _absoluteSearchCancellationToken.ThrowIfCancellationRequested();
 
         var pvIndex = PVTable.Indexes[ply];
         var nextPvIndex = PVTable.Indexes[ply + 1];
@@ -65,6 +64,9 @@ public sealed partial class Engine
                 --depth;
             }
         }
+
+                // Before any time-consuming operations
+        _searchCancellationToken.ThrowIfCancellationRequested();
 
         // 🔍 Improving heuristic: the current position has a better static evaluation than
         // the previous evaluation from the same side (ply - 2).
@@ -519,8 +521,8 @@ public sealed partial class Engine
     {
         var position = Game.CurrentPosition;
 
-        _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
-        _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
+        _absoluteSearchCancellationToken.ThrowIfCancellationRequested();
+        _searchCancellationToken.ThrowIfCancellationRequested();
 
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
