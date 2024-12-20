@@ -167,7 +167,7 @@ public class FENParserTest
         }
         else
         {
-            Assert.Throws<Exception>(() => FENParser.ParseFEN(fen));
+            Assert.Throws<LynxException>(() => FENParser.ParseFEN(fen));
         }
     }
 
@@ -201,7 +201,7 @@ public class FENParserTest
         else
         {
             // Act and Assert
-            Assert.Throws<Exception>(() => FENParser.ParseFEN(fen));
+            Assert.Throws<LynxException>(() => FENParser.ParseFEN(fen));
         }
     }
 
