@@ -19,6 +19,9 @@ public sealed class Searcher
     private Engine[] _extraEngines = [];
     private TranspositionTable _ttWrapper;
 
+    private CancellationTokenSource _searchCancellationTokenSource;
+    private CancellationTokenSource _absoluteSearchCancellationTokenSource;
+
     public Position CurrentPosition => _mainEngine.Game.CurrentPosition;
 
     public string FEN => _mainEngine.Game.FEN;
@@ -30,6 +33,8 @@ public sealed class Searcher
 
         _ttWrapper = new TranspositionTable();
         _mainEngine = new Engine(MainEngineId, _engineWriter, in _ttWrapper, warmup: true);
+        _absoluteSearchCancellationTokenSource = new();
+        _searchCancellationTokenSource = new();
 
         _searchThreadsCount = Configuration.EngineSettings.Threads;
         AllocateExtraEngines();
@@ -75,6 +80,18 @@ public sealed class Searcher
 
     private async Task OnGoCommand(GoCommand goCommand)
     {
+        if (!_absoluteSearchCancellationTokenSource.TryReset())
+        {
+            _absoluteSearchCancellationTokenSource.Dispose();
+            _absoluteSearchCancellationTokenSource = new();
+        }
+
+        if (!_searchCancellationTokenSource.TryReset())
+        {
+            _searchCancellationTokenSource.Dispose();
+            _searchCancellationTokenSource = new();
+        }
+
         if (_searchThreadsCount == 1)
         {
             SingleThreadedSearch(goCommand);
@@ -88,7 +105,13 @@ public sealed class Searcher
     private void SingleThreadedSearch(GoCommand goCommand)
     {
         var searchConstraints = TimeManager.CalculateTimeManagement(_mainEngine.Game, goCommand);
-        var searchResult = _mainEngine.Search(goCommand, searchConstraints);
+
+        if (!goCommand.Ponder && searchConstraints.HardLimitTimeBound != SearchConstraints.DefaultHardLimitTimeBound)
+        {
+            _searchCancellationTokenSource.CancelAfter(searchConstraints.HardLimitTimeBound);
+        }
+
+        var searchResult = _mainEngine.Search(goCommand, searchConstraints, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
 
         if (searchResult is not null)
         {
@@ -104,6 +127,11 @@ public sealed class Searcher
     {
         var searchConstraints = TimeManager.CalculateTimeManagement(_mainEngine.Game, goCommand);
 
+        if (!goCommand.Ponder && searchConstraints.HardLimitTimeBound != SearchConstraints.DefaultHardLimitTimeBound)
+        {
+            _searchCancellationTokenSource.CancelAfter(searchConstraints.HardLimitTimeBound);
+        }
+
 #if MULTITHREAD_DEBUG
         var sw = System.Diagnostics.Stopwatch.StartNew();
         var lastElapsed = sw.ElapsedMilliseconds;
@@ -116,7 +144,7 @@ public sealed class Searcher
 
         var tasks = _extraEngines
             .Select(engine =>
-                Task.Run(() => engine.Search(goCommand, extraEnginesSearchConstraint)))
+                Task.Run(() => engine.Search(goCommand, extraEnginesSearchConstraint, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
             .ToArray();
 
 #if MULTITHREAD_DEBUG
@@ -124,7 +152,7 @@ public sealed class Searcher
         lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
-        SearchResult? finalSearchResult = _mainEngine.Search(goCommand, searchConstraints);
+        SearchResult? finalSearchResult = _mainEngine.Search(goCommand, searchConstraints, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
 
 #if MULTITHREAD_DEBUG
         _logger.Debug("End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
@@ -135,6 +163,8 @@ public sealed class Searcher
         {
             engine.StopSearching();
         }
+
+        await _absoluteSearchCancellationTokenSource.CancelAsync();
 
         // We wait just for the node count, so there's room for improvement here with thread voting
         // and other strategies that take other thread results into account
@@ -181,6 +211,8 @@ public sealed class Searcher
         {
             engine.StopSearching();
         }
+
+        _absoluteSearchCancellationTokenSource.Cancel();
 
         _mainEngine.StopSearching();
     }

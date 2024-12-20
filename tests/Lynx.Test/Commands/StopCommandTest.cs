@@ -20,8 +20,11 @@ public class StopCommandTest
 
         // A command that guarantees that the search doesn't finish before the end of the test
         var goCommand = new GoCommand($"go depth {Configuration.EngineSettings.MaxDepth}");
+        var searchConstraints = TimeManager.CalculateTimeManagement(engine.Game, goCommand);
+        using var cts = new CancellationTokenSource();
+        cts.CancelAfter(10_000);
 
-        var resultTask = Task.Run(() => engine.BestMove(goCommand));
+        var resultTask = Task.Run(() => engine.Search(goCommand, searchConstraints, cts.Token, CancellationToken.None));
         // Wait 2s so that there's some best move available
         await Task.Delay(2000);
 
@@ -29,7 +32,9 @@ public class StopCommandTest
         engine.StopSearching();
 
         // Assert
-        Assert.AreNotEqual(default, (await resultTask).BestMove);
+        var result = await resultTask;
+        Assert.NotNull(result);
+        Assert.AreNotEqual(default, result?.BestMove);
 
         Assert.AreEqual(initialPositionFEN, engine.Game.CurrentPosition.FEN());
 
