@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <StaticAnalysisCodeType>NonProdExe</StaticAnalysisCodeType>
   </PropertyGroup>
 
   <ItemGroup>

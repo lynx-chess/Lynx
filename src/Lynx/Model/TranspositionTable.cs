@@ -10,7 +10,10 @@ public readonly struct TranspositionTable
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     private readonly TranspositionTableElement[] _tt = [];
+
+#pragma warning disable CA1051 // Do not declare visible instance fields
     public readonly int Size;
+#pragma warning restore CA1051 // Do not declare visible instance fields
 
     public TranspositionTable()
     {

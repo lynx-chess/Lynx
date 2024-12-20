@@ -10,7 +10,7 @@ public static class TimeManager
     /// <summary>
     /// Values from Stash
     /// </summary>
-    private static ReadOnlySpan<double> _bestMoveStabilityValues => [2.50, 1.20, 0.90, 0.80, 0.75];
+    private static ReadOnlySpan<double> BestMoveStabilityValues => [2.50, 1.20, 0.90, 0.80, 0.75];
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
@@ -103,9 +103,9 @@ public static class TimeManager
         scale *= nodeTmFactor;
 
         // Best move stability: The less best move changes, the less time we spend in the search
-        Debug.Assert(_bestMoveStabilityValues.Length > 0);
+        Debug.Assert(BestMoveStabilityValues.Length > 0);
 
-        double bestMoveStabilityFactor = _bestMoveStabilityValues[Math.Min(bestMoveStability, _bestMoveStabilityValues.Length - 1)];
+        double bestMoveStabilityFactor = BestMoveStabilityValues[Math.Min(bestMoveStability, BestMoveStabilityValues.Length - 1)];
         scale *= bestMoveStabilityFactor;
 
         if (depth >= Configuration.EngineSettings.ScoreStabiity_MinDepth)
