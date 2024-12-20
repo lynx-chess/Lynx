@@ -159,11 +159,6 @@ public sealed class Searcher
         lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
-        foreach (var engine in _extraEngines)
-        {
-            engine.StopSearching();
-        }
-
         await _absoluteSearchCancellationTokenSource.CancelAsync();
 
         // We wait just for the node count, so there's room for improvement here with thread voting
@@ -207,14 +202,7 @@ public sealed class Searcher
 
     public void StopSearching()
     {
-        foreach (var engine in _extraEngines)
-        {
-            engine.StopSearching();
-        }
-
         _absoluteSearchCancellationTokenSource.Cancel();
-
-        _mainEngine.StopSearching();
     }
 
     public void PonderHit()
