@@ -164,6 +164,8 @@ public sealed class Searcher
             engine.StopSearching();
         }
 
+        await _absoluteSearchCancellationTokenSource.CancelAsync();
+
         // We wait just for the node count, so there's room for improvement here with thread voting
         // and other strategies that take other thread results into account
         var extraResults = await Task.WhenAll(tasks);
