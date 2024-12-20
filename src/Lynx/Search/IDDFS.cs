@@ -261,7 +261,7 @@ public sealed partial class Engine
                 _pVTable[i] = lastSearchResult.Moves[i];
             }
         }
-        catch (Exception e) when (e is not AssertException)
+        catch (Exception e) when (e is not LynxException)
         {
             _logger.Error(e,
 #if MULTITHREAD_DEBUG

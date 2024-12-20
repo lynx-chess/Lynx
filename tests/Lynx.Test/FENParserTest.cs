@@ -227,7 +227,7 @@ public class FENParserTest
     [TestCase("8/8/8/1P6/p7/q7/8/8 b - b6 0 1", Description = "Wrong EnPassant square")]
     public void EnPassant_Error(string fen)
     {
-        Assert.Throws<AssertException>(() => FENParser.ParseFEN(fen));
+        Assert.Throws<LynxException>(() => FENParser.ParseFEN(fen));
     }
 
     [TestCase("8/8/8/8/8/8/8/8 w KQkq - 0 1", 0)]

@@ -122,7 +122,7 @@ public sealed partial class Engine
             newPosition.MakeMove(move);
             if (!newPosition.WasProduceByAValidMove())
             {
-                throw new AssertException($"Invalid position after move {move.UCIString()} from position {position.FEN()}");
+                throw new LynxException($"Invalid position after move {move.UCIString()} from position {position.FEN()}");
             }
             position = newPosition;
         }
@@ -138,7 +138,7 @@ public sealed partial class Engine
             {
                 var message = $"Unexpected PV move {i}: {move.UCIString()} from position {position.FEN()}";
                 _logger.Error(message);
-                throw new AssertException(message);
+                throw new LynxException(message);
             }
         }
     }

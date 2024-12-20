@@ -69,7 +69,7 @@ public static class FENParser
 
         return success
             ? (pieceBitBoards, occupancyBitBoards, board, side, castle, enPassant, halfMoveClock/*, fullMoveCounter*/)
-            : throw new AssertException($"Error parsing {fen.ToString()}");
+            : throw new LynxException($"Error parsing {fen.ToString()}");
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
