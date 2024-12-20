@@ -118,7 +118,9 @@ public sealed partial class Engine
             var move = _pVTable[i];
             TryParseMove(position, i, move);
 
-            using var newPosition = new Position(position);
+#pragma warning disable CA2000 // Dispose objects before losing scope - disposing it fixes the existing logic, and this is a debug-only method anyway
+            var newPosition = new Position(position);
+#pragma warning restore CA2000 // Dispose objects before losing scope
             newPosition.MakeMove(move);
             if (!newPosition.WasProduceByAValidMove())
             {
