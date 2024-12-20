@@ -90,13 +90,12 @@ public sealed partial class Engine : IDisposable
         _logger.Info("Warming up engine");
         var sw = Stopwatch.StartNew();
 
+        AdjustPosition(Constants.SuperLongPositionCommand);
+
         const string goWarmupCommand = "go depth 10";   // ~300 ms
         var command = new GoCommand(goWarmupCommand);
 
-        AdjustPosition(Constants.SuperLongPositionCommand);
-
-        var searchConstrains = TimeManager.CalculateTimeManagement(Game, command);
-        BestMove(in searchConstrains);
+        BestMove(command);
 
         Bench(2);
 
@@ -161,20 +160,23 @@ public sealed partial class Engine : IDisposable
     {
         var searchConstraints = TimeManager.CalculateTimeManagement(Game, goCommand);
 
-        return BestMove(in searchConstraints);
+        return BestMove(in searchConstraints, CancellationToken.None, CancellationToken.None);
     }
 
-    public SearchResult BestMove(in SearchConstraints searchConstrains)
+    public SearchResult BestMove(in SearchConstraints searchConstrains, CancellationToken absoluteSearchCancellationToken, CancellationToken searchCancellationToken)
     {
         _searchConstraints = searchConstrains;
+        // TODO consider using linked cancellation token source
 
-        SearchResult resultToReturn = IDDFS();
+        using var jointCts = CancellationTokenSource.CreateLinkedTokenSource(absoluteSearchCancellationToken, searchCancellationToken);
+
+        SearchResult resultToReturn = IDDFS(jointCts.Token);
         //SearchResult resultToReturn = await SearchBestMove(maxDepth, decisionTime);
 
         Game.ResetCurrentPositionToBeforeSearchState();
         if (!_isPondering
             && resultToReturn.BestMove != default
-            && !_absoluteSearchCancellationToken.IsCancellationRequested)
+            && !absoluteSearchCancellationToken.IsCancellationRequested)
         {
             Game.MakeMove(resultToReturn.BestMove);
             Game.UpdateInitialPosition();
@@ -186,12 +188,14 @@ public sealed partial class Engine : IDisposable
     }
 
 #pragma warning disable S1144 // Unused private types or members should be removed - wanna keep this around
-    private async ValueTask<SearchResult> SearchBestMove()
+    private async ValueTask<SearchResult> SearchBestMove(CancellationToken absoluteSearchCancellationToken, CancellationToken searchCancellationToken)
 #pragma warning restore S1144 // Unused private types or members should be removed
     {
+        using var jointCts = CancellationTokenSource.CreateLinkedTokenSource(absoluteSearchCancellationToken, searchCancellationToken);
+
         if (!Configuration.EngineSettings.UseOnlineTablebaseInRootPositions || Game.CurrentPosition.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
         {
-            return IDDFS()!;
+            return IDDFS(jointCts.Token)!;
         }
 
         // Local copy of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove so that it doesn't interfere with regular search
@@ -200,7 +204,7 @@ public sealed partial class Engine : IDisposable
         var tasks = new Task<SearchResult?>[] {
                 // Other copies of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove (same reason)
                 ProbeOnlineTablebase(Game.CurrentPosition, Game.CopyPositionHashHistory(),  Game.HalfMovesWithoutCaptureOrPawnMove),
-                Task.Run(()=>(SearchResult?)IDDFS())
+                Task.Run(()=>(SearchResult?)IDDFS(jointCts.Token))
             };
 
         var resultList = await Task.WhenAll(tasks);
@@ -242,14 +246,10 @@ public sealed partial class Engine : IDisposable
 
         Thread.CurrentThread.Priority = ThreadPriority.Highest;
 
-        // TODO consider using linked cancellation token source
-        //using var jointCts = CancellationTokenSource.CreateLinkedTokenSource(absoluteSearchCancellationToken, searchCancellationToken);
-        //_absoluteSearchCancellationToken = jointCts.Token;
-
         try
         {
             _isPondering = goCommand.Ponder;
-            var searchResult = BestMove(in searchConstraints);
+            var searchResult = BestMove(in searchConstraints, absoluteSearchCancellationToken, searchCancellationToken);
 
             if (_isPondering)
             {
@@ -264,7 +264,7 @@ public sealed partial class Engine : IDisposable
                     _isPonderHit = false;
                     _isPondering = false;
 
-                    searchResult = BestMove(in searchConstraints);
+                    searchResult = BestMove(in searchConstraints, absoluteSearchCancellationToken, searchCancellationToken);
                 }
             }
 

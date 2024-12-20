@@ -118,9 +118,7 @@ public partial class Engine
             stopwatch.Restart();
 
             var goCommand = new GoCommand($"go depth {depth}");
-            var searchConstraints = TimeManager.CalculateTimeManagement(Game, goCommand);
-
-            var result = BestMove(in searchConstraints);
+            var result = BestMove(goCommand);
 
             var elapsedSeconds = Utils.CalculateElapsedSeconds(_stopWatch);
             totalSeconds += elapsedSeconds;
