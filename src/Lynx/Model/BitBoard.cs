@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
 using System.Runtime.CompilerServices;
 
-#pragma warning disable S4136
+#pragma warning disable S4136, CA1045
 
 namespace Lynx.Model;
 
@@ -15,7 +15,9 @@ public static class BitBoardExtensions
 
     public static BitBoard Initialize(params BoardSquare[] occupiedSquares)
     {
+#pragma warning disable S3353 // Unchanged local variables should be "const" - FP https://community.sonarsource.com/t/fp-s3353-value-modified-in-ref-extension-method/132389
         BitBoard board = default;
+#pragma warning restore S3353 // Unchanged local variables should be "const"
 
         foreach (var square in occupiedSquares)
         {
@@ -27,6 +29,7 @@ public static class BitBoardExtensions
 
     internal static void Clear(this ref BitBoard board) => board = default;
 
+#pragma warning disable S106, S2228 // Standard outputs should not be used directly to log anything
     internal static void Print(this BitBoard board)
     {
         const string separator = "____________________________________________________";
@@ -54,6 +57,7 @@ public static class BitBoardExtensions
         Console.WriteLine($"\n    Bitboard: {board} (0x{board:X})");
         Console.WriteLine(separator);
     }
+#pragma warning restore S106,S2228 // Standard outputs should not be used directly to log anything
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool GetBit(this BitBoard board, int squareIndex)
@@ -63,6 +67,7 @@ public static class BitBoardExtensions
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static BitBoard SetBit(this ref BitBoard board, int square)
+#pragma warning restore CA1045 // Do not pass types by reference
     {
         return board |= (1UL << square);
     }
@@ -244,4 +249,4 @@ public static class BitBoardExtensions
     #endregion
 }
 
-#pragma warning restore S4136
+#pragma warning restore S4136, CA1045

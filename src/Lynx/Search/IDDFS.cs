@@ -52,10 +52,12 @@ public sealed partial class Engine
 
     private SearchResult? _previousSearchResult;
 
-    private readonly Move _defaultMove = default;
+#pragma warning disable CA1805 // Do not initialize unnecessarily - Interferes with S3459
+    private readonly Move _defaultMove = 0;
+#pragma warning restore CA1805 // Do not initialize unnecessarily
 
-    private int _bestMoveStability = 0;
-    private int _scoreDelta = 0;
+    private int _bestMoveStability;
+    private int _scoreDelta;
 
     /// <summary>
     /// Iterative Deepening Depth-First Search (IDDFS) using alpha-beta pruning.
@@ -63,7 +65,7 @@ public sealed partial class Engine
     /// </summary>
     /// <returns>Not null <see cref="SearchResult"/>, although made nullable in order to match online tb probing signature</returns>
     [SkipLocalsInit]
-    private SearchResult IDDFS()
+    private SearchResult IDDFS(CancellationToken cancellationToken)
     {
         // Cleanup
         _nodes = 0;
@@ -98,22 +100,17 @@ public sealed partial class Engine
             // Not clearing _quietHistory on purpose
             // Not clearing _captureHistory on purpose
 
-            if (lastSearchResult is not null)
-            {
-                _engineWriter.TryWrite(lastSearchResult);
-            }
-
             int mate = 0;
 
             do
             {
-                _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
-                _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
+                _absoluteSearchCancellationToken.ThrowIfCancellationRequested();
+                _searchCancellationToken.ThrowIfCancellationRequested();
 
                 if (depth < Configuration.EngineSettings.AspirationWindow_MinDepth
                     || lastSearchResult?.Score is null)
                 {
-                    bestScore = NegaMax(depth: depth, ply: 0, alpha, beta, cutnode: false);
+                    bestScore = NegaMax(depth: depth, ply: 0, alpha, beta, cutnode: false, cancellationToken);
                 }
                 else
                 {
@@ -148,7 +145,7 @@ public sealed partial class Engine
                             "Aspiration windows depth {Depth} ({DepthWithoutReduction} - {Reduction}), window {Window}: [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
                             depthToSearch, depth, failHighReduction, window, alpha, beta, bestScore, _nodes);
 
-                        bestScore = NegaMax(depth: depthToSearch, ply: 0, alpha, beta, cutnode: false);
+                        bestScore = NegaMax(depth: depthToSearch, ply: 0, alpha, beta, cutnode: false, cancellationToken);
                         Debug.Assert(bestScore > EvaluationConstants.MinEval && bestScore < EvaluationConstants.MaxEval);
 
                         // 13, 19, 28, 42, 63, 94, 141, 211, 316, 474, 711, 1066, 1599, 2398, 3597, 5395, 8092, 12138, 18207, 27310, EvaluationConstants.MaxEval
@@ -264,7 +261,7 @@ public sealed partial class Engine
                 _pVTable[i] = lastSearchResult.Moves[i];
             }
         }
-        catch (Exception e) when (e is not AssertException)
+        catch (Exception e) when (e is not LynxException)
         {
             _logger.Error(e,
 #if MULTITHREAD_DEBUG
@@ -278,17 +275,16 @@ public sealed partial class Engine
             _stopWatch.Stop();
         }
 
-        var finalSearchResult = GenerateFinalSearchResult(lastSearchResult, bestScore, depth, firstLegalMove);
+        //TODO revisit
+        //if (Configuration.EngineSettings.UseOnlineTablebaseInRootPositions
+        //    && isMateDetected
+        //    && (finalSearchResult.Mate * 2) + Game.HalfMovesWithoutCaptureOrPawnMove < Constants.MaxMateDistanceToStopSearching)
+        //{
+        //    _searchCancellationToken.Cancel();
+        //    _logger.Info("Engine search found a short enough mate, cancelling online tb probing if still active");
+        //}
 
-        if (Configuration.EngineSettings.UseOnlineTablebaseInRootPositions
-            && isMateDetected
-            && (finalSearchResult.Mate * 2) + Game.HalfMovesWithoutCaptureOrPawnMove < Constants.MaxMateDistanceToStopSearching)
-        {
-            _searchCancellationTokenSource.Cancel();
-            _logger.Info("Engine search found a short enough mate, cancelling online tb probing if still active");
-        }
-
-        return finalSearchResult;
+        return GenerateFinalSearchResult(lastSearchResult, bestScore, depth, firstLegalMove);
     }
 
     private bool StopSearchCondition(Move? bestMove, int depth, int mate, int bestScore)
