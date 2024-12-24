@@ -265,11 +265,7 @@ public sealed partial class Engine : IDisposable
         }
         catch (Exception e)
         {
-            _logger.Fatal(e,
-#if MULTITHREAD_DEBUG
-                $"[#{_id}] " +
-#endif
-                "Error in {0} for position {Position}", nameof(Search), Game.CurrentPosition.FEN());
+            _logger.Fatal(e, "[#{EngineId}] Error in {Method} for position {Position}", _id, nameof(Search), Game.CurrentPosition.FEN());
             return null;
         }
         finally
