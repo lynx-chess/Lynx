@@ -73,9 +73,12 @@ public sealed class GoCommand : IGUIBaseCommand
     public bool Infinite { get; }
     public bool Ponder { get; }
 
-    public static int Nodes => throw new NotImplementedException();
-    public static int Mate => throw new NotImplementedException();
-    public static List<string> SearchMoves => throw new NotImplementedException();
+    public static int Nodes => throw new NotSupportedException();
+    public static int Mate => throw new NotSupportedException();
+
+#pragma warning disable CA1002 // Do not expose generic lists
+    public static List<string> SearchMoves => throw new NotSupportedException();
+#pragma warning restore CA1002 // Do not expose generic lists
 
     public GoCommand(string command)
     {
@@ -222,7 +225,7 @@ public sealed class GoCommand : IGUIBaseCommand
             {
                 const string message = "searchmoves not supported in go command";
                 _logger.Error(message);
-                throw new NotImplementedException(message);
+                throw new NotSupportedException(message);
             }
             else
             {

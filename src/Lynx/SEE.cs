@@ -10,7 +10,7 @@ public static class SEE
 {
     #pragma warning disable IDE0055 // Discard formatting in this region
 
-    private static ReadOnlySpan<int> _pieceValues =>
+    private static ReadOnlySpan<int> PieceValues =>
     [
         100, 450, 450, 650, 1250, 0,
         100, 450, 450, 650, 1250, 0,
@@ -25,13 +25,13 @@ public static class SEE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsGoodCapture(Position position, Move move, int threshold = 0)
     {
-        System.Diagnostics.Debug.Assert(move.IsCapture(), $"{nameof(IsGoodCapture)} doesn't handle non-capture moves");
-        System.Diagnostics.Debug.Assert(move.PromotedPiece() == default, $"{nameof(IsGoodCapture)} doesn't handle promotion moves");
-        System.Diagnostics.Debug.Assert(!move.IsEnPassant(), $"{nameof(IsGoodCapture)} potentially doesn't handle en-passant moves");
+        System.Diagnostics.Debug.Assert(move.IsCapture(), "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle non-capture moves");
+        System.Diagnostics.Debug.Assert(move.PromotedPiece() == default, "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle promotion moves");
+        System.Diagnostics.Debug.Assert(!move.IsEnPassant(), "Assert fail", $"{nameof(IsGoodCapture)} potentially doesn't handle en-passant moves");
 
         var sideToMove = position.Side;
 
-        var score = _pieceValues[move.CapturedPiece()] - threshold;    // Gain() - threshold
+        var score = PieceValues[move.CapturedPiece()] - threshold;    // Gain() - threshold
 
         // If taking the opponent's piece without any risk is still negative
         if (score < 0)
@@ -40,7 +40,7 @@ public static class SEE
         }
 
         var next = move.Piece();
-        score -= _pieceValues[next];
+        score -= PieceValues[next];
 
         // If risking our piece being fully lost and the exchange value is still >= 0
         if (score >= 0)
@@ -87,7 +87,7 @@ public static class SEE
             // Removing used pieces from attackers
             attackers &= occupancy;
 
-            score = -score - 1 - _pieceValues[nextPiece];
+            score = -score - 1 - PieceValues[nextPiece];
             us = Utils.OppositeSide(us);
 
             if (score >= 0)
@@ -126,7 +126,7 @@ public static class SEE
             ? move.PromotedPiece()
             : move.Piece();
 
-        score -= _pieceValues[next];
+        score -= PieceValues[next];
 
         // If risking our piece being fully lost and the exchange value is still >= 0
         if (score >= 0)
@@ -173,7 +173,7 @@ public static class SEE
             // Removing used pieces from attackers
             attackers &= occupancy;
 
-            score = -score - 1 - _pieceValues[nextPiece];
+            score = -score - 1 - PieceValues[nextPiece];
             us = Utils.OppositeSide(us);
 
             if (score >= 0)
@@ -201,15 +201,15 @@ public static class SEE
         }
         else if (move.IsEnPassant())
         {
-            return _pieceValues[(int)Piece.P];
+            return PieceValues[(int)Piece.P];
         }
 
         var promotedPiece = move.PromotedPiece();
 
 #pragma warning disable S3358 // Ternary operators should not be nested
         return promotedPiece == default
-            ? _pieceValues[move.CapturedPiece()]
-            : _pieceValues[promotedPiece] - _pieceValues[(int)Piece.P] + (move.IsCapture() ? _pieceValues[move.CapturedPiece()] : 0);
+            ? PieceValues[move.CapturedPiece()]
+            : PieceValues[promotedPiece] - PieceValues[(int)Piece.P] + (move.IsCapture() ? PieceValues[move.CapturedPiece()] : 0);
 #pragma warning restore S3358 // Ternary operators should not be nested
     }
 

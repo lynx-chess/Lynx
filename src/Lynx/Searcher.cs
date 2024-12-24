@@ -277,7 +277,7 @@ public sealed class Searcher
 
     public async ValueTask RunBench(int depth)
     {
-        var engine = new Engine("bench", SilentChannelWriter<object>.Instance, in _ttWrapper, warmup: true);
+        using var engine = new Engine("bench", SilentChannelWriter<object>.Instance, in _ttWrapper, warmup: true);
         var results = engine.Bench(depth);
 
         // Can't use engine, or results won't be printed
@@ -286,7 +286,7 @@ public sealed class Searcher
 
     public async ValueTask RunVerboseBench(int depth)
     {
-        var engine = new Engine("verbosebench", _engineWriter, in _ttWrapper, warmup: true);
+        using var engine = new Engine("verbosebench", _engineWriter, in _ttWrapper, warmup: true);
         var results = engine.Bench(depth);
 
         await engine.PrintBenchResults(results);

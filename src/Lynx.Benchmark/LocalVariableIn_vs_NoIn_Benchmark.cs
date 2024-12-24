@@ -66,7 +66,9 @@ public static class BenchmarkLegacyMoveExtensions
     /// <param name="position">The position that precedes a move</param>
     /// <returns>The higher the score is, the more valuable is the captured piece and the less valuable is the piece that makes the such capture</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#pragma warning disable S2368 // Public methods should not have multidimensional array parameters
     public static int OldScore(this Move move, in Position position, int[,]? killerMoves = null, int? plies = null, int[,]? historyMoves = null)
+#pragma warning restore S2368 // Public methods should not have multidimensional array parameters
     {
         if (move.IsCapture())
         {

@@ -56,7 +56,7 @@ public class EncodeMove_Benchmark : BaseBenchmark
             EncodeMoveImplementation.EncodeMoveBool((int)BoardSquare.a7, (int)BoardSquare.a8, (int)Piece.K, promotedPiece: (int)Piece.N);
             EncodeMoveImplementation.EncodeMoveBool((int)BoardSquare.a7, (int)BoardSquare.b8, (int)Piece.K, promotedPiece: (int)Piece.N, isCapture: true);
             EncodeMoveImplementation.EncodeMoveBool((int)BoardSquare.e2, (int)BoardSquare.e4, (int)Piece.K, isDoublePawnPush: true);
-            EncodeMoveImplementation.EncodeMoveBool((int)BoardSquare.c7, (int)BoardSquare.b6, (int)Piece.K, enPassant: true, isCapture: true);
+            EncodeMoveImplementation.EncodeMoveBool((int)BoardSquare.c7, (int)BoardSquare.b6, (int)Piece.K, isCapture: true, enPassant: true);
             EncodeMoveImplementation.EncodeMoveBool((int)BoardSquare.e8, (int)BoardSquare.g8, (int)Piece.k, isCastle: true);
         }
     }
@@ -74,7 +74,7 @@ public class EncodeMove_Benchmark : BaseBenchmark
             EncodeMoveImplementation.EncodeMoveInt((int)BoardSquare.a7, (int)BoardSquare.a8, (int)Piece.K, promotedPiece: (int)Piece.N);
             EncodeMoveImplementation.EncodeMoveInt((int)BoardSquare.a7, (int)BoardSquare.b8, (int)Piece.K, promotedPiece: (int)Piece.N, isCapture: 1);
             EncodeMoveImplementation.EncodeMoveInt((int)BoardSquare.e2, (int)BoardSquare.e4, (int)Piece.K, isDoublePawnPush: 1);
-            EncodeMoveImplementation.EncodeMoveInt((int)BoardSquare.c7, (int)BoardSquare.b6, (int)Piece.K, enPassant: 1, isCapture: 1);
+            EncodeMoveImplementation.EncodeMoveInt((int)BoardSquare.c7, (int)BoardSquare.b6, (int)Piece.K, isCapture: 1, enPassant: 1);
             EncodeMoveImplementation.EncodeMoveInt((int)BoardSquare.e8, (int)BoardSquare.g8, (int)Piece.k, isCastle: 1);
         }
     }

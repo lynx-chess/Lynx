@@ -632,7 +632,7 @@ public partial class GoCommandParsingAlternatives_Benchmark : BaseBenchmark
 #pragma warning restore S127 // "for" loop stop conditions should be invariant
     }
 
-    private static readonly Dictionary<string, Action<GoCommandParsingAlternatives_Benchmark, int>> _commandActions = new Dictionary<string, Action<GoCommandParsingAlternatives_Benchmark, int>>
+    private static readonly Dictionary<string, Action<GoCommandParsingAlternatives_Benchmark, int>> _commandActions = new()
     {
         ["wtime"] = (command, value) => command.WhiteTime = value,
         ["btime"] = (command, value) => command.BlackTime = value,
