@@ -161,7 +161,9 @@ public class TryParseFromUCIString_Benchmark : BaseBenchmark
         }
         catch (Exception)
         {
+#pragma warning disable S112 // General or reserved exceptions should never be thrown
             throw new($"Error parsing position command '{positionCommandSpan.ToString()}'");
+#pragma warning restore S112 // General or reserved exceptions should never be thrown
         }
     }
 

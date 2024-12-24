@@ -106,7 +106,7 @@ public class MoveToEPDStringTest
                 return isLegal;
             })
             .Select(m => m.ToEPDString(position))
-            .OrderBy(m => m)
+            .Order()
             .ToList();
 
         Assert.AreEqual(m0, ambiguousMoves[0]);

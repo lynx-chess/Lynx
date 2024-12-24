@@ -7,11 +7,11 @@ using System.Text.Json.Nodes;
 namespace Lynx;
 
 #pragma warning disable IDE1006 // Naming Styles
-internal record WeatherFactoryOutput<T>(T value, T min_value, T max_value, double step);
+internal sealed record WeatherFactoryOutput<T>(T value, T min_value, T max_value, double step);
 #pragma warning restore IDE1006 // Naming Styles
 
 [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = false)]
-internal class SPSAAttribute<T> : Attribute
+internal sealed class SPSAAttribute<T> : Attribute
     where T : INumberBase<T>, IMultiplyOperators<T, T, T>, IConvertible, IParsable<T>, ISpanParsable<T>, IDivisionOperators<T, T, T>
 {
 #pragma warning disable S2743 // Static fields should not be used in generic types
@@ -26,9 +26,9 @@ internal class SPSAAttribute<T> : Attribute
     public T MaxValue { get; }
     public double Step { get; }
 
-#pragma warning disable S3963 // "static" fields should be initialized inline
+#pragma warning disable S3963, CA1810 // "static" fields should be initialized inline
     static SPSAAttribute()
-#pragma warning restore S3963 // "static" fields should be initialized inline
+#pragma warning restore S3963, CA1810 // "static" fields should be initialized inline
     {
         _hundred = T.Zero;
         for (int i = 0; i < 100; i++)
@@ -94,6 +94,8 @@ internal class SPSAAttribute<T> : Attribute
 
 public static class SPSAAttributeHelpers
 {
+    private const string PropertyHasMoreThanOne = "Property {0} has more than one [{1}]";
+    private const string PropertyHasAnUnsupportedType = "Property {0} has a [{1}] defined with unsupported type <{2}>";
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     public static IEnumerable<string> GenerateOpenBenchStrings()
@@ -101,12 +103,12 @@ public static class SPSAAttributeHelpers
         foreach (var property in typeof(EngineSettings).GetProperties())
         {
             var genericType = typeof(SPSAAttribute<>);
-            var spsaArray = property.GetCustomAttributes(genericType);
-            var count = spsaArray.Count();
+            var spsaArray = property.GetCustomAttributes(genericType).ToArray();
+            var count = spsaArray.Length;
 
             if (count > 1)
             {
-                _logger.Warn("Property {0} has more than one [{1}]", property.Name, genericType.Name);
+                _logger.Warn(PropertyHasMoreThanOne, property.Name, genericType.Name);
             }
 
             if (count == 0)
@@ -114,7 +116,7 @@ public static class SPSAAttributeHelpers
                 continue;
             }
 
-            var genericSpsa = spsaArray.First();
+            var genericSpsa = spsaArray[0];
             if (genericSpsa is SPSAAttribute<int> intSpsa)
             {
                 yield return intSpsa.ToOBString(property);
@@ -125,7 +127,7 @@ public static class SPSAAttributeHelpers
             }
             else
             {
-                _logger.Error("Property {0} has a [{1}] defined with unsupported type <{2}>", property.Name, genericSpsa);
+                _logger.Error(PropertyHasAnUnsupportedType, property.Name, genericSpsa);
             }
         }
     }
@@ -135,12 +137,12 @@ public static class SPSAAttributeHelpers
         foreach (var property in typeof(EngineSettings).GetProperties())
         {
             var genericType = typeof(SPSAAttribute<>);
-            var spsaArray = property.GetCustomAttributes(genericType);
-            var count = spsaArray.Count();
+            var spsaArray = property.GetCustomAttributes(genericType).ToArray();
+            var count = spsaArray.Length;
 
             if (count > 1)
             {
-                _logger.Warn("Property {0} has more than one [{1}]", property.Name, genericType.Name);
+                _logger.Warn(PropertyHasMoreThanOne, property.Name, genericType.Name);
             }
 
             if (count == 0)
@@ -148,7 +150,7 @@ public static class SPSAAttributeHelpers
                 continue;
             }
 
-            var genericSpsa = spsaArray.First();
+            var genericSpsa = spsaArray[0];
             if (genericSpsa is SPSAAttribute<int> intSpsa)
             {
                 yield return intSpsa.ToOBPrettyString(property);
@@ -159,7 +161,7 @@ public static class SPSAAttributeHelpers
             }
             else
             {
-                _logger.Error("Property {0} has a [{1}] defined with unsupported type <{2}>", property.Name, genericSpsa);
+                _logger.Error(PropertyHasAnUnsupportedType, property.Name, genericSpsa);
             }
         }
     }
@@ -169,12 +171,12 @@ public static class SPSAAttributeHelpers
         foreach (var property in typeof(EngineSettings).GetProperties())
         {
             var genericType = typeof(SPSAAttribute<>);
-            var spsaArray = property.GetCustomAttributes(genericType);
-            var count = spsaArray.Count();
+            var spsaArray = property.GetCustomAttributes(genericType).ToArray();
+            var count = spsaArray.Length;
 
             if (count > 1)
             {
-                _logger.Warn("Property {0} has more than one [{1}]", property.Name, genericType.Name);
+                _logger.Warn(PropertyHasMoreThanOne, property.Name, genericType.Name);
             }
 
             if (count == 0)
@@ -182,7 +184,7 @@ public static class SPSAAttributeHelpers
                 continue;
             }
 
-            var genericSpsa = spsaArray.First();
+            var genericSpsa = spsaArray[0];
             if (genericSpsa is SPSAAttribute<int> intSpsa)
             {
                 yield return intSpsa.ToWeatherFactoryString(property);
@@ -193,7 +195,7 @@ public static class SPSAAttributeHelpers
             }
             else
             {
-                _logger.Error("Property {0} has a [{1}] defined with unsupported type <{2}>", property.Name, genericSpsa);
+                _logger.Error(PropertyHasAnUnsupportedType, property.Name, genericSpsa);
             }
         }
     }
@@ -203,12 +205,12 @@ public static class SPSAAttributeHelpers
         foreach (var property in typeof(EngineSettings).GetProperties())
         {
             var genericType = typeof(SPSAAttribute<>);
-            var spsaArray = property.GetCustomAttributes(genericType);
-            var count = spsaArray.Count();
+            var spsaArray = property.GetCustomAttributes(genericType).ToArray();
+            var count = spsaArray.Length;
 
             if (count > 1)
             {
-                _logger.Warn("Property {0} has more than one [{1}]", property.Name, genericType.Name);
+                _logger.Warn(PropertyHasMoreThanOne, property.Name, genericType.Name);
             }
 
             if (count == 0)
@@ -216,7 +218,7 @@ public static class SPSAAttributeHelpers
                 continue;
             }
 
-            var genericSpsa = spsaArray.First();
+            var genericSpsa = spsaArray[0];
             if (genericSpsa is SPSAAttribute<int> intSpsa)
             {
                 int val = SPSAAttribute<int>.GetPropertyValue(property);
@@ -231,7 +233,7 @@ public static class SPSAAttributeHelpers
             }
             else
             {
-                _logger.Error("Property {0} has a [{1}] defined with unsupported type <{2}>", property.Name, genericSpsa);
+                _logger.Error(PropertyHasAnUnsupportedType, property.Name, genericSpsa);
             }
         }
     }
