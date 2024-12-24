@@ -28,6 +28,7 @@ public sealed partial class Engine
         }
 
         _maxDepthReached[ply] = ply;
+
         cancellationToken.ThrowIfCancellationRequested();
 
         var pvIndex = PVTable.Indexes[ply];

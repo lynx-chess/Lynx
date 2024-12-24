@@ -238,6 +238,10 @@ public sealed partial class Engine : IDisposable
 
         Thread.CurrentThread.Priority = ThreadPriority.Highest;
 
+        // TODO consider using linked cancellation token source
+        //using var jointCts = CancellationTokenSource.CreateLinkedTokenSource(absoluteSearchCancellationToken, searchCancellationToken);
+        //_absoluteSearchCancellationToken = jointCts.Token;
+
         try
         {
             _isPondering = goCommand.Ponder;
