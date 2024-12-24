@@ -305,14 +305,9 @@ public sealed partial class Engine : IDisposable
             if (disposing)
             {
                 FreeResources();
-                _absoluteSearchCancellationTokenSource.Dispose();
-                _searchCancellationTokenSource.Dispose();
             }
             _disposedValue = true;
         }
-
-        _absoluteSearchCancellationTokenSource.Dispose();
-        _searchCancellationTokenSource.Dispose();
     }
 
     public void Dispose()
