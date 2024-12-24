@@ -233,7 +233,7 @@ public static class Utils
         if (!value)
         {
             _logger.Error(errorMessage);
-            throw new AssertException(errorMessage);
+            throw new LynxException(errorMessage);
         }
     }
 }

@@ -63,7 +63,9 @@ public class Position : IDisposable
         Castle = parsedFEN.Castle;
         EnPassant = parsedFEN.EnPassant;
 
+#pragma warning disable S3366 // "this" should not be exposed from constructors
         UniqueIdentifier = ZobristTable.PositionHash(this);
+#pragma warning restore S3366 // "this" should not be exposed from constructors
     }
 
     /// <summary>
@@ -1124,6 +1126,8 @@ public class Position : IDisposable
         return sb.ToString();
     }
 
+#pragma warning disable S106, S2228 // Standard outputs should not be used directly to log anything
+
     /// <summary>
     /// Combines <see cref="PieceBitBoards"/>, <see cref="Side"/>, <see cref="Castle"/> and <see cref="EnPassant"/>
     /// into a human-friendly representation
@@ -1212,12 +1216,16 @@ public class Position : IDisposable
         Console.WriteLine(separator);
     }
 
+#pragma warning restore S106, S2228 // Standard outputs should not be used directly to log anything
+
     public void FreeResources()
     {
         ArrayPool<BitBoard>.Shared.Return(PieceBitBoards, clearArray: true);
         ArrayPool<BitBoard>.Shared.Return(OccupancyBitBoards, clearArray: true);
         // No need to clear, since we always have to initialize it to Piece.None after renting it anyway
+#pragma warning disable S3254 // Default parameter values should not be passed as arguments
         ArrayPool<int>.Shared.Return(Board, clearArray: false);
+#pragma warning restore S3254 // Default parameter values should not be passed as arguments
 
         _disposedValue = true;
     }

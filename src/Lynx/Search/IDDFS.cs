@@ -52,10 +52,12 @@ public sealed partial class Engine
 
     private SearchResult? _previousSearchResult;
 
-    private readonly Move _defaultMove = default;
+#pragma warning disable CA1805 // Do not initialize unnecessarily - Interferes with S3459
+    private readonly Move _defaultMove = 0;
+#pragma warning restore CA1805 // Do not initialize unnecessarily
 
-    private int _bestMoveStability = 0;
-    private int _scoreDelta = 0;
+    private int _bestMoveStability;
+    private int _scoreDelta;
 
     /// <summary>
     /// Iterative Deepening Depth-First Search (IDDFS) using alpha-beta pruning.
@@ -97,11 +99,6 @@ public sealed partial class Engine
             Array.Clear(_killerMoves);
             // Not clearing _quietHistory on purpose
             // Not clearing _captureHistory on purpose
-
-            if (lastSearchResult is not null)
-            {
-                _engineWriter.TryWrite(lastSearchResult);
-            }
 
             int mate = 0;
 
@@ -264,7 +261,7 @@ public sealed partial class Engine
                 _pVTable[i] = lastSearchResult.Moves[i];
             }
         }
-        catch (Exception e) when (e is not AssertException)
+        catch (Exception e) when (e is not LynxException)
         {
             _logger.Error(e,
 #if MULTITHREAD_DEBUG

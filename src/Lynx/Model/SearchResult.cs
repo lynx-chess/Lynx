@@ -10,7 +10,7 @@ public sealed class SearchResult
 
     public Move[] Moves { get; init; }
 
-    public (int WDLWin, int WDLDraw, int WDLLoss)? WDL { get; set; } = null;
+    public (int WDLWin, int WDLDraw, int WDLLoss)? WDL { get; set; }
 
     public ulong Nodes { get; set; }
 

@@ -94,9 +94,9 @@ public class MutableReadonlyBitBoard_Benchmark : BaseBenchmark
     }
 
 #pragma warning disable RCS1242 // Do not pass non-read-only struct by read-only reference. That's the purpose of the test
-    private ulong AddMutableByType(Mutable a, Mutable b) => a.Board + b.Board;
-    private ulong AddMutableByRef(in Mutable a, in Mutable b) => a.Board + b.Board;
-    private ulong AddMutableReadonlyByType(MutableReadonly a, MutableReadonly b) => a.Board + b.Board;
-    private ulong AddMutableReadonlyByRef(in MutableReadonly a, in MutableReadonly b) => a.Board + b.Board;
+    private static ulong AddMutableByType(Mutable a, Mutable b) => a.Board + b.Board;
+    private static ulong AddMutableByRef(in Mutable a, in Mutable b) => a.Board + b.Board;
+    private static ulong AddMutableReadonlyByType(MutableReadonly a, MutableReadonly b) => a.Board + b.Board;
+    private static ulong AddMutableReadonlyByRef(in MutableReadonly a, in MutableReadonly b) => a.Board + b.Board;
 #pragma warning restore RCS1242 // Do not pass non-read-only struct by read-only reference.
 }

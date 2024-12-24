@@ -8,7 +8,7 @@ public class EncodeDecodeMoveTest
     [Test]
     public void SpecialMoveTypeValues()
     {
-        foreach (var value in Enum.GetValues(typeof(SpecialMoveType)).Cast<int>())
+        foreach (var value in Enum.GetValues<SpecialMoveType>().Cast<int>())
         {
             Assert.LessOrEqual(value, 0b111, $"Need to change {MoveExtensions.SpecialMoveFlag} mask");
             Assert.LessOrEqual(value, (int)SpecialMoveType.LongCastle, $"Need to change {MoveExtensions.IsCastle}");

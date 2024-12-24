@@ -20,9 +20,9 @@ public class GoCommandTest
         Assert.AreEqual(60, goCommand.Depth);
         Assert.AreEqual(70, goCommand.MoveTime);
         Assert.True(goCommand.Ponder);
-        _ = Assert.Throws<NotImplementedException>(() => _ = GoCommand.Mate);
-        _ = Assert.Throws<NotImplementedException>(() => _ = GoCommand.Nodes);
-        _ = Assert.Throws<NotImplementedException>(() => _ = GoCommand.SearchMoves);
+        _ = Assert.Throws<NotSupportedException>(() => _ = GoCommand.Mate);
+        _ = Assert.Throws<NotSupportedException>(() => _ = GoCommand.Nodes);
+        _ = Assert.Throws<NotSupportedException>(() => _ = GoCommand.SearchMoves);
     }
 
     [TestCase("go wtime 10 btime 20 winc 30 binc 40 ponder")]

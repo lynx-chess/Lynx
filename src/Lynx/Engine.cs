@@ -70,7 +70,7 @@ public sealed partial class Engine : IDisposable
         if (warmup)
         {
             // Temporary channel so that no output is generated
-            _engineWriter = Channel.CreateUnbounded<object>(new UnboundedChannelOptions() { SingleReader = true, SingleWriter = false }).Writer;
+            _engineWriter = Channel.CreateUnbounded<object>(new UnboundedChannelOptions { SingleReader = true, SingleWriter = false }).Writer;
             WarmupEngine();
 
             _engineWriter = engineWriter;
@@ -295,7 +295,6 @@ public sealed partial class Engine : IDisposable
     public void FreeResources()
     {
         Game.FreeResources();
-
         _disposedValue = true;
     }
 
@@ -306,15 +305,22 @@ public sealed partial class Engine : IDisposable
             if (disposing)
             {
                 FreeResources();
+                _absoluteSearchCancellationTokenSource.Dispose();
+                _searchCancellationTokenSource.Dispose();
             }
             _disposedValue = true;
         }
+
+        _absoluteSearchCancellationTokenSource.Dispose();
+        _searchCancellationTokenSource.Dispose();
     }
 
     public void Dispose()
     {
         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         Dispose(disposing: true);
+#pragma warning disable S3234 // "GC.SuppressFinalize" should not be invoked for types without destructors - https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose
         GC.SuppressFinalize(this);
+#pragma warning restore S3234 // "GC.SuppressFinalize" should not be invoked for types without destructors
     }
 }
