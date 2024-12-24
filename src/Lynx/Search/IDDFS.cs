@@ -104,8 +104,8 @@ public sealed partial class Engine
 
             do
             {
-                _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
-                _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
+                _absoluteSearchCancellationToken.ThrowIfCancellationRequested();
+                _searchCancellationToken.ThrowIfCancellationRequested();
 
                 if (depth < Configuration.EngineSettings.AspirationWindow_MinDepth
                     || lastSearchResult?.Score is null)
@@ -275,17 +275,16 @@ public sealed partial class Engine
             _stopWatch.Stop();
         }
 
-        var finalSearchResult = GenerateFinalSearchResult(lastSearchResult, bestScore, depth, firstLegalMove);
+        //TODO revisit
+        //if (Configuration.EngineSettings.UseOnlineTablebaseInRootPositions
+        //    && isMateDetected
+        //    && (finalSearchResult.Mate * 2) + Game.HalfMovesWithoutCaptureOrPawnMove < Constants.MaxMateDistanceToStopSearching)
+        //{
+        //    _searchCancellationToken.Cancel();
+        //    _logger.Info("Engine search found a short enough mate, cancelling online tb probing if still active");
+        //}
 
-        if (Configuration.EngineSettings.UseOnlineTablebaseInRootPositions
-            && isMateDetected
-            && (finalSearchResult.Mate * 2) + Game.HalfMovesWithoutCaptureOrPawnMove < Constants.MaxMateDistanceToStopSearching)
-        {
-            _searchCancellationTokenSource.Cancel();
-            _logger.Info("Engine search found a short enough mate, cancelling online tb probing if still active");
-        }
-
-        return finalSearchResult;
+        return GenerateFinalSearchResult(lastSearchResult, bestScore, depth, firstLegalMove);
     }
 
     private bool StopSearchCondition(Move? bestMove, int depth, int mate, int bestScore)

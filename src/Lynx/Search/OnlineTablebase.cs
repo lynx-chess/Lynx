@@ -10,7 +10,7 @@ public sealed partial class Engine
 
         try
         {
-            var tablebaseResult = await OnlineTablebaseProber.RootSearch(position, positionHashHistory, halfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
+            var tablebaseResult = await OnlineTablebaseProber.RootSearch(position, positionHashHistory, halfMovesWithoutCaptureOrPawnMove, _searchCancellationToken);
 
             if (tablebaseResult.BestMove != 0)
             {
@@ -35,7 +35,7 @@ public sealed partial class Engine
                 };
 
                 await _engineWriter.WriteAsync(searchResult);
-                await _searchCancellationTokenSource.CancelAsync();
+                //await _searchCancellationTokenSource.CancelAsync();   // TODO revisit
 
                 return searchResult;
             }
