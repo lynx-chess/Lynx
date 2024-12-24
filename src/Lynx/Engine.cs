@@ -158,7 +158,6 @@ public sealed partial class Engine : IDisposable
     public SearchResult BestMove(in SearchConstraints searchConstrains, CancellationToken absoluteSearchCancellationToken, CancellationToken searchCancellationToken)
     {
         _searchConstraints = searchConstrains;
-        // TODO consider using linked cancellation token source
 
         using var jointCts = CancellationTokenSource.CreateLinkedTokenSource(absoluteSearchCancellationToken, searchCancellationToken);
 
