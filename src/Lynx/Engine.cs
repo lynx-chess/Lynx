@@ -31,11 +31,6 @@ public sealed partial class Engine : IDisposable
     /// </summary>
     private bool _isPondering;
 
-    /// <summary>
-    /// Stop requested during pondering
-    /// </summary>
-    private bool _stopRequested;
-
     public double AverageDepth { get; private set; }
 
     public Game Game { get; private set; }
@@ -133,7 +128,6 @@ public sealed partial class Engine : IDisposable
         AverageDepth = 0;
         Game.FreeResources();
         Game = new Game(Constants.InitialPositionFEN);
-        _stopRequested = false;
 
         ResetEngine();
     }
@@ -144,13 +138,11 @@ public sealed partial class Engine : IDisposable
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
         Game.FreeResources();
         Game = PositionCommand.ParseGame(rawPositionCommand, moves);
-        _stopRequested = false;
     }
 
     public void PonderHit()
     {
         _isPonderHit = true;
-        StopSearching();
     }
 
     /// <summary>
@@ -166,7 +158,6 @@ public sealed partial class Engine : IDisposable
     public SearchResult BestMove(in SearchConstraints searchConstrains, CancellationToken absoluteSearchCancellationToken, CancellationToken searchCancellationToken)
     {
         _searchConstraints = searchConstrains;
-        // TODO consider using linked cancellation token source
 
         using var jointCts = CancellationTokenSource.CreateLinkedTokenSource(absoluteSearchCancellationToken, searchCancellationToken);
 
@@ -259,11 +250,9 @@ public sealed partial class Engine : IDisposable
             {
                 // Avoiding the scenario where search finishes early (i.e. mate detected, max depth reached) and results comes
                 // before a potential ponderhit command
-                // _absoluteSearchCancellationTokenSource.IsCancellationRequested isn't reliable because
-                // if stop command is processed before go command, a new cancellation token sour
-                SpinWait.SpinUntil(() => _isPonderHit || _stopRequested);
+                SpinWait.SpinUntil(() => _isPonderHit || absoluteSearchCancellationToken.IsCancellationRequested);
 
-                if (_isPonderHit)
+                if (_isPonderHit && !absoluteSearchCancellationToken.IsCancellationRequested)
                 {
                     _isPonderHit = false;
                     _isPondering = false;
@@ -287,13 +276,7 @@ public sealed partial class Engine : IDisposable
         {
             _isSearching = false;
             _isPondering = false;
-            _stopRequested = false;
         }
-    }
-
-    public void StopSearching()
-    {
-        _stopRequested = true;
     }
 
     public void FreeResources()

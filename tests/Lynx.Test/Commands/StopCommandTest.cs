@@ -29,7 +29,7 @@ public class StopCommandTest
         await Task.Delay(2000);
 
         // Act
-        engine.StopSearching();
+        await cts.CancelAsync();
 
         // Assert
         var result = await resultTask;
