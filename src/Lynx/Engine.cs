@@ -1,4 +1,4 @@
-﻿using Lynx.Model;
+using Lynx.Model;
 using Lynx.UCI.Commands.GUI;
 using NLog;
 using System.Diagnostics;
@@ -226,6 +226,10 @@ public sealed partial class Engine : IDisposable
 
     public SearchResult? Search(GoCommand goCommand, in SearchConstraints searchConstraints, CancellationToken absoluteSearchCancellationToken, CancellationToken searchCancellationToken)
     {
+#if MULTITHREAD_DEBUG
+        _logger.Debug("[#{EngineId}] Starting search", _id);
+#endif
+
         if (_isSearching)
         {
             _logger.Warn("Search already in progress");
