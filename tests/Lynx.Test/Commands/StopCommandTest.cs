@@ -24,7 +24,7 @@ public class StopCommandTest
         using var cts = new CancellationTokenSource();
         cts.CancelAfter(10_000);
 
-        var resultTask = Task.Run(() => engine.Search(goCommand, searchConstraints, cts.Token, CancellationToken.None));
+        var resultTask = Task.Run(() => engine.Search(searchConstraints, isPondering: false, cts.Token, CancellationToken.None));
         // Wait 2s so that there's some best move available
         await Task.Delay(2000);
 
