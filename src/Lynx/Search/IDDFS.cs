@@ -77,19 +77,19 @@ public sealed partial class Engine
             Array.Clear(_moveNodeCount[i]);
         }
 
+        bool isMainThread = _id == Searcher.MainEngineId;
         int bestScore = 0;
         int alpha = EvaluationConstants.MinEval;
         int beta = EvaluationConstants.MaxEval;
         SearchResult? lastSearchResult = null;
         int depth = 1;
-        bool isMateDetected = false;
         Move firstLegalMove = default;
 
         _stopWatch.Restart();
 
         try
         {
-            if (OnlyOneLegalMove(ref firstLegalMove, out var onlyOneLegalMoveSearchResult))
+            if (isMainThread && OnlyOneLegalMove(ref firstLegalMove, out var onlyOneLegalMoveSearchResult))
             {
                 _engineWriter.TryWrite(onlyOneLegalMoveSearchResult);
 
@@ -194,7 +194,7 @@ public sealed partial class Engine
                 Debug.Assert(bestScore != EvaluationConstants.MinEval);
 
                 var bestScoreAbs = Math.Abs(bestScore);
-                isMateDetected = bestScoreAbs > EvaluationConstants.PositiveCheckmateDetectionLimit && bestScoreAbs < EvaluationConstants.CheckMateBaseEvaluation;
+                var isMateDetected = bestScoreAbs > EvaluationConstants.PositiveCheckmateDetectionLimit && bestScoreAbs < EvaluationConstants.CheckMateBaseEvaluation;
                 mate = isMateDetected
                     ? Utils.CalculateMateInX(bestScore, bestScoreAbs)
                     : 0;
@@ -216,20 +216,22 @@ public sealed partial class Engine
                 }
 
                 lastSearchResult = lastSearchResultCandidate;
-
-                if (oldBestMove == lastSearchResult.BestMove)
-                {
-                    ++_bestMoveStability;
-                }
-                else
-                {
-                    _bestMoveStability = 0;
-                }
-
-                _scoreDelta = oldScore - lastSearchResult.Score;
-
                 _engineWriter.TryWrite(lastSearchResult);
-            } while (StopSearchCondition(lastSearchResult?.BestMove, ++depth, mate, bestScore));
+
+                if (isMainThread)
+                {
+                    if (oldBestMove == lastSearchResult.BestMove)
+                    {
+                        ++_bestMoveStability;
+                    }
+                    else
+                    {
+                        _bestMoveStability = 0;
+                    }
+
+                    _scoreDelta = oldScore - lastSearchResult.Score;
+                }
+            } while (StopSearchCondition(lastSearchResult?.BestMove, ++depth, mate, bestScore, isMainThread));
         }
         catch (OperationCanceledException)
         {
@@ -267,7 +269,7 @@ public sealed partial class Engine
         return GenerateFinalSearchResult(lastSearchResult, bestScore, depth, firstLegalMove);
     }
 
-    private bool StopSearchCondition(Move? bestMove, int depth, int mate, int bestScore)
+    private bool StopSearchCondition(Move? bestMove, int depth, int mate, int bestScore, bool isMainThread)
     {
         if (bestMove is null || bestMove == 0)
         {
@@ -324,7 +326,7 @@ public sealed partial class Engine
             return shouldContinue;
         }
 
-        if (!_isPondering)
+        if (isMainThread && !_isPondering)
         {
             var elapsedMilliseconds = _stopWatch.ElapsedMilliseconds;
 
