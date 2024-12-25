@@ -16,7 +16,7 @@ public sealed partial class Engine
     /// Best score Side's to move's opponent can achieve, assuming best play by Side to move.
     /// </param>
     [SkipLocalsInit]
-    private int NegaMax(int depth, int ply, int alpha, int beta, bool cutnode, bool parentWasNullMove = false)
+    private int NegaMax(int depth, int ply, int alpha, int beta, bool cutnode, CancellationToken cancellationToken, bool parentWasNullMove = false)
     {
         var position = Game.CurrentPosition;
 
@@ -28,7 +28,8 @@ public sealed partial class Engine
         }
 
         _maxDepthReached[ply] = ply;
-        _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
+
+        cancellationToken.ThrowIfCancellationRequested();
 
         var pvIndex = PVTable.Indexes[ply];
         var nextPvIndex = PVTable.Indexes[ply + 1];
@@ -65,9 +66,6 @@ public sealed partial class Engine
             }
         }
 
-        // Before any time-consuming operations
-        _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
-
         // 🔍 Improving heuristic: the current position has a better static evaluation than
         // the previous evaluation from the same side (ply - 2).
         // When true, we can:
@@ -91,7 +89,7 @@ public sealed partial class Engine
         {
             if (MoveGenerator.CanGenerateAtLeastAValidMove(position))
             {
-                return QuiescenceSearch(ply, alpha, beta);
+                return QuiescenceSearch(ply, alpha, beta, cancellationToken);
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
@@ -162,7 +160,7 @@ public sealed partial class Engine
                         {
                             if (depth == 1)
                             {
-                                var qSearchScore = QuiescenceSearch(ply, alpha, beta);
+                                var qSearchScore = QuiescenceSearch(ply, alpha, beta, cancellationToken);
 
                                 return qSearchScore > score
                                     ? qSearchScore
@@ -173,7 +171,7 @@ public sealed partial class Engine
 
                             if (score < beta)               // Static evaluation indicates fail-low node
                             {
-                                var qSearchScore = QuiescenceSearch(ply, alpha, beta);
+                                var qSearchScore = QuiescenceSearch(ply, alpha, beta, cancellationToken);
                                 if (qSearchScore < beta)    // Quiescence score also indicates fail-low node
                                 {
                                     return qSearchScore > score
@@ -206,7 +204,7 @@ public sealed partial class Engine
                     //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
 
                     var gameState = position.MakeNullMove();
-                    var nmpScore = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, !cutnode, parentWasNullMove: true);
+                    var nmpScore = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, !cutnode, cancellationToken, parentWasNullMove: true);
                     position.UnMakeNullMove(gameState);
 
                     if (nmpScore >= beta)
@@ -300,7 +298,7 @@ public sealed partial class Engine
                 _tt.PrefetchTTEntry(position);
                 bool isCutNode = !pvNode && !cutnode;   // Linter 'simplification' of pvNode ? false : !cutnode
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
-                score = -NegaMax(depth - 1, ply + 1, -beta, -alpha, isCutNode);
+                score = -NegaMax(depth - 1, ply + 1, -beta, -alpha, isCutNode, cancellationToken);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
             }
             else
@@ -402,7 +400,7 @@ public sealed partial class Engine
 
                 cutnode = reduction > 0;
                 // Search with reduced depth
-                score = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha, cutnode);
+                score = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha, cutnode, cancellationToken);
 
                 // 🔍 Principal Variation Search (PVS)
                 if (score > alpha && reduction > 0)
@@ -412,14 +410,14 @@ public sealed partial class Engine
                     // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
 
                     // Search with full depth but narrowed score bandwidth
-                    score = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha, !cutnode);
+                    score = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha, !cutnode, cancellationToken);
                 }
 
                 if (score > alpha && score < beta)
                 {
                     // PVS Hypothesis invalidated -> search with full depth and full score bandwidth
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
-                    score = -NegaMax(depth - 1, ply + 1, -beta, -alpha, cutnode: false);
+                    score = -NegaMax(depth - 1, ply + 1, -beta, -alpha, cutnode: false, cancellationToken);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
                 }
             }
@@ -517,12 +515,11 @@ public sealed partial class Engine
     /// Defaults to the works possible score for Black, Int.MaxValue
     /// </param>
     [SkipLocalsInit]
-    public int QuiescenceSearch(int ply, int alpha, int beta)
+    public int QuiescenceSearch(int ply, int alpha, int beta, CancellationToken cancellationToken)
     {
         var position = Game.CurrentPosition;
 
-        _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
-        _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
+        cancellationToken.ThrowIfCancellationRequested();
 
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
@@ -619,7 +616,7 @@ public sealed partial class Engine
             Game.UpdateMoveinStack(ply, move);
 
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
-            int score = -QuiescenceSearch(ply + 1, -beta, -alpha);
+            int score = -QuiescenceSearch(ply + 1, -beta, -alpha, cancellationToken);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
             position.UnmakeMove(move, gameState);
 

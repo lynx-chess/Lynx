@@ -19,7 +19,7 @@ public sealed class IdCommand : IEngineBaseCommand
 
     public const string EngineAuthor = "Eduardo Caceres";
 
-    public static string GetVersion()
+    public static string GetLynxVersion()
     {
         return
             Assembly.GetAssembly(typeof(IdCommand))
@@ -28,7 +28,7 @@ public sealed class IdCommand : IEngineBaseCommand
                 ?? "Unknown";
     }
 
-    public static string Name => $"id name {EngineName} {GetVersion()}";
+    public static string NameString => $"id name {EngineName} {GetLynxVersion()}";
 
-    public static string Version => $"id author {EngineAuthor}";
+    public static string VersionString => $"id author {EngineAuthor}";
 }

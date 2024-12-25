@@ -2,7 +2,6 @@
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
-using System.Diagnostics;
 using System.Runtime.Intrinsics.X86;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -88,6 +87,10 @@ public sealed class UCIHandler
                     await HandleBench(rawCommand);
                     HandleQuit();
                     break;
+                case "verbosebench":
+                    await HandleVerboseBench(rawCommand);
+                    HandleQuit();
+                    break;
                 case "printsettings":
                     await HandleSettings();
                     break;
@@ -129,7 +132,7 @@ public sealed class UCIHandler
     private void HandlePosition(ReadOnlySpan<char> command)
     {
 #if DEBUG
-        var sw = Stopwatch.StartNew();
+        var sw = System.Diagnostics.Stopwatch.StartNew();
         _searcher.PrintCurrentPosition();
 #endif
 
@@ -145,8 +148,8 @@ public sealed class UCIHandler
 
     private async Task HandleUCI(CancellationToken cancellationToken)
     {
-        await SendCommand(IdCommand.Name, cancellationToken);
-        await SendCommand(IdCommand.Version, cancellationToken);
+        await SendCommand(IdCommand.NameString, cancellationToken);
+        await SendCommand(IdCommand.VersionString, cancellationToken);
 
         foreach (var availableOption in OptionCommand.AvailableOptions)
         {
@@ -183,6 +186,7 @@ public sealed class UCIHandler
         Span<char> lowerCaseFirstWord = stackalloc char[command[commandItems[2]].Length];
         command[commandItems[2]].ToLowerInvariant(lowerCaseFirstWord);
 
+#pragma warning disable S1479 // "switch" statements should not have too many "case" clauses
         switch (lowerCaseFirstWord)
         {
             case "ponder":
@@ -561,6 +565,7 @@ public sealed class UCIHandler
                 _logger.Warn("Unsupported option: {0}", command.ToString());
                 break;
         }
+#pragma warning restore S1479 // "switch" statements should not have too many "case" clauses
     }
 
     private void HandleNewGame()
@@ -608,6 +613,18 @@ public sealed class UCIHandler
         await _searcher.RunBench(depth);
     }
 
+    private async ValueTask HandleVerboseBench(string rawCommand)
+    {
+        var items = rawCommand.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+        if (items.Length < 2 || !int.TryParse(items[1], out int depth))
+        {
+            depth = Configuration.EngineSettings.BenchDepth;
+        }
+
+        await _searcher.RunVerboseBench(depth);
+    }
+
     private async ValueTask HandleSettings()
     {
         var engineSettings = JsonSerializer.Serialize(Configuration.EngineSettings, EngineSettingsJsonSerializerContext.Default.EngineSettings);
@@ -649,7 +666,7 @@ public sealed class UCIHandler
             {
                 var fen = line[..line.IndexOfAny([';', '[', '"'])];
 
-                var position = new Position(fen);
+                using var position = new Position(fen);
                 if (!position.IsValid())
                 {
                     _logger.Warn("Position {0}, parsed as {1} and then {2} not valid, skipping it", line, fen, position.FEN());
@@ -670,15 +687,21 @@ public sealed class UCIHandler
 
                 await _engineToUci.Writer.WriteAsync($"{line}: {eval}", cancellationToken);
 
-                if (++lineCounter % 100 == 0)
+                ++lineCounter;
+                if (lineCounter % 100 == 0)
                 {
+#pragma warning disable CA1849 // Call async methods when in an async method - intended
                     Thread.Sleep(50);
+#pragma warning restore CA1849 // Call async methods when in an async method
                 }
             }
         }
         catch (Exception e)
         {
+#pragma warning disable S106, S2228 // Standard outputs should not be used directly to log anything
             Console.WriteLine(e.Message + e.StackTrace);
+#pragma warning restore S106, S2228 // Standard outputs should not be used directly to log anything
+
             await _engineToUci.Writer.WriteAsync(e.Message + e.StackTrace, cancellationToken);
         }
     }

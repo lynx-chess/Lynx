@@ -31,20 +31,14 @@ public sealed partial class Engine : IDisposable
     /// </summary>
     private bool _isPondering;
 
-    /// <summary>
-    /// Stop requested during pondering
-    /// </summary>
-    private bool _stopRequested;
-
     public double AverageDepth { get; private set; }
 
     public Game Game { get; private set; }
 
     public bool PendingConfirmation { get; set; }
 
-    private CancellationTokenSource _searchCancellationTokenSource;
-    private CancellationTokenSource _absoluteSearchCancellationTokenSource;
-
+    private CancellationToken _searchCancellationToken = CancellationToken.None;
+    private CancellationToken _absoluteSearchCancellationToken = CancellationToken.None;
     public Engine(ChannelWriter<object> engineWriter) : this("0", engineWriter, new()) { }
 
 #pragma warning disable RCS1163 // Unused parameter - used in Release mode
@@ -58,10 +52,7 @@ public sealed partial class Engine : IDisposable
         AverageDepth = 0;
         Game = new Game(Constants.InitialPositionFEN);
 
-        _searchCancellationTokenSource = new();
-        _absoluteSearchCancellationTokenSource = new();
         // Update ResetEngine() after any changes here
-
         _quietHistory = new int[12][];
         _moveNodeCount = new ulong[12][];
         for (int i = 0; i < _quietHistory.Length; ++i)
@@ -74,7 +65,7 @@ public sealed partial class Engine : IDisposable
         if (warmup)
         {
             // Temporary channel so that no output is generated
-            _engineWriter = Channel.CreateUnbounded<object>(new UnboundedChannelOptions() { SingleReader = true, SingleWriter = false }).Writer;
+            _engineWriter = Channel.CreateUnbounded<object>(new UnboundedChannelOptions { SingleReader = true, SingleWriter = false }).Writer;
             WarmupEngine();
 
             _engineWriter = engineWriter;
@@ -94,13 +85,12 @@ public sealed partial class Engine : IDisposable
         _logger.Info("Warming up engine");
         var sw = Stopwatch.StartNew();
 
+        AdjustPosition(Constants.SuperLongPositionCommand);
+
         const string goWarmupCommand = "go depth 10";   // ~300 ms
         var command = new GoCommand(goWarmupCommand);
 
-        AdjustPosition(Constants.SuperLongPositionCommand);
-
-        var searchConstrains = TimeManager.CalculateTimeManagement(Game, command);
-        BestMove(in searchConstrains);
+        BestMove(command);
 
         Bench(2);
 
@@ -138,7 +128,6 @@ public sealed partial class Engine : IDisposable
         AverageDepth = 0;
         Game.FreeResources();
         Game = new Game(Constants.InitialPositionFEN);
-        _stopRequested = false;
 
         ResetEngine();
     }
@@ -149,13 +138,11 @@ public sealed partial class Engine : IDisposable
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
         Game.FreeResources();
         Game = PositionCommand.ParseGame(rawPositionCommand, moves);
-        _stopRequested = false;
     }
 
     public void PonderHit()
     {
         _isPonderHit = true;
-        StopSearching();
     }
 
     /// <summary>
@@ -165,28 +152,22 @@ public sealed partial class Engine : IDisposable
     {
         var searchConstraints = TimeManager.CalculateTimeManagement(Game, goCommand);
 
-        return BestMove(in searchConstraints);
+        return BestMove(in searchConstraints, CancellationToken.None, CancellationToken.None);
     }
 
-    public SearchResult BestMove(in SearchConstraints searchConstrains)
+    public SearchResult BestMove(in SearchConstraints searchConstrains, CancellationToken absoluteSearchCancellationToken, CancellationToken searchCancellationToken)
     {
         _searchConstraints = searchConstrains;
 
-        _searchCancellationTokenSource = new();
-        _absoluteSearchCancellationTokenSource = new();
+        using var jointCts = CancellationTokenSource.CreateLinkedTokenSource(absoluteSearchCancellationToken, searchCancellationToken);
 
-        if (!_isPondering && searchConstrains.HardLimitTimeBound != SearchConstraints.DefaultHardLimitTimeBound)
-        {
-            _searchCancellationTokenSource.CancelAfter(searchConstrains.HardLimitTimeBound);
-        }
-
-        SearchResult resultToReturn = IDDFS();
+        SearchResult resultToReturn = IDDFS(jointCts.Token);
         //SearchResult resultToReturn = await SearchBestMove(maxDepth, decisionTime);
 
         Game.ResetCurrentPositionToBeforeSearchState();
         if (!_isPondering
             && resultToReturn.BestMove != default
-            && !_absoluteSearchCancellationTokenSource.IsCancellationRequested)
+            && !absoluteSearchCancellationToken.IsCancellationRequested)
         {
             Game.MakeMove(resultToReturn.BestMove);
             Game.UpdateInitialPosition();
@@ -198,12 +179,14 @@ public sealed partial class Engine : IDisposable
     }
 
 #pragma warning disable S1144 // Unused private types or members should be removed - wanna keep this around
-    private async ValueTask<SearchResult> SearchBestMove()
+    private async ValueTask<SearchResult> SearchBestMove(CancellationToken absoluteSearchCancellationToken, CancellationToken searchCancellationToken)
 #pragma warning restore S1144 // Unused private types or members should be removed
     {
+        using var jointCts = CancellationTokenSource.CreateLinkedTokenSource(absoluteSearchCancellationToken, searchCancellationToken);
+
         if (!Configuration.EngineSettings.UseOnlineTablebaseInRootPositions || Game.CurrentPosition.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
         {
-            return IDDFS()!;
+            return IDDFS(jointCts.Token)!;
         }
 
         // Local copy of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove so that it doesn't interfere with regular search
@@ -212,7 +195,7 @@ public sealed partial class Engine : IDisposable
         var tasks = new Task<SearchResult?>[] {
                 // Other copies of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove (same reason)
                 ProbeOnlineTablebase(Game.CurrentPosition, Game.CopyPositionHashHistory(),  Game.HalfMovesWithoutCaptureOrPawnMove),
-                Task.Run(()=>(SearchResult?)IDDFS())
+                Task.Run(()=>(SearchResult?)IDDFS(jointCts.Token))
             };
 
         var resultList = await Task.WhenAll(tasks);
@@ -241,35 +224,40 @@ public sealed partial class Engine : IDisposable
         return tbResult ?? searchResult!;
     }
 
-    public SearchResult? Search(GoCommand goCommand, in SearchConstraints searchConstraints)
+    public SearchResult? Search(GoCommand goCommand, in SearchConstraints searchConstraints, CancellationToken absoluteSearchCancellationToken, CancellationToken searchCancellationToken)
     {
         if (_isSearching)
         {
             _logger.Warn("Search already in progress");
         }
+
         _isSearching = true;
+        _absoluteSearchCancellationToken = absoluteSearchCancellationToken;
+        _searchCancellationToken = searchCancellationToken;
 
         Thread.CurrentThread.Priority = ThreadPriority.Highest;
+
+        // TODO consider using linked cancellation token source
+        //using var jointCts = CancellationTokenSource.CreateLinkedTokenSource(absoluteSearchCancellationToken, searchCancellationToken);
+        //_absoluteSearchCancellationToken = jointCts.Token;
 
         try
         {
             _isPondering = goCommand.Ponder;
-            var searchResult = BestMove(in searchConstraints);
+            var searchResult = BestMove(in searchConstraints, absoluteSearchCancellationToken, searchCancellationToken);
 
             if (_isPondering)
             {
                 // Avoiding the scenario where search finishes early (i.e. mate detected, max depth reached) and results comes
                 // before a potential ponderhit command
-                // _absoluteSearchCancellationTokenSource.IsCancellationRequested isn't reliable because
-                // if stop command is processed before go command, a new cancellation token sour
-                SpinWait.SpinUntil(() => _isPonderHit || _stopRequested);
+                SpinWait.SpinUntil(() => _isPonderHit || absoluteSearchCancellationToken.IsCancellationRequested);
 
-                if (_isPonderHit)
+                if (_isPonderHit && !absoluteSearchCancellationToken.IsCancellationRequested)
                 {
                     _isPonderHit = false;
                     _isPondering = false;
 
-                    searchResult = BestMove(in searchConstraints);
+                    searchResult = BestMove(in searchConstraints, absoluteSearchCancellationToken, searchCancellationToken);
                 }
             }
 
@@ -277,30 +265,19 @@ public sealed partial class Engine : IDisposable
         }
         catch (Exception e)
         {
-            _logger.Fatal(e, "Error in {0} while calculating BestMove", nameof(Search));
+            _logger.Fatal(e, "[#{EngineId}] Error in {Method} for position {Position}", _id, nameof(Search), Game.CurrentPosition.FEN());
             return null;
         }
         finally
         {
             _isSearching = false;
             _isPondering = false;
-            _stopRequested = false;
         }
-    }
-
-    public void StopSearching()
-    {
-        _stopRequested = true;
-        _absoluteSearchCancellationTokenSource.Cancel();
     }
 
     public void FreeResources()
     {
         Game.FreeResources();
-
-        _absoluteSearchCancellationTokenSource.Dispose();
-        _searchCancellationTokenSource.Dispose();
-
         _disposedValue = true;
     }
 
@@ -320,6 +297,8 @@ public sealed partial class Engine : IDisposable
     {
         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         Dispose(disposing: true);
+#pragma warning disable S3234 // "GC.SuppressFinalize" should not be invoked for types without destructors - https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose
         GC.SuppressFinalize(this);
+#pragma warning restore S3234 // "GC.SuppressFinalize" should not be invoked for types without destructors
     }
 }

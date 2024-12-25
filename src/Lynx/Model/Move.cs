@@ -144,6 +144,8 @@ public static class MoveExtensions
     [Obsolete("Just intended for testing purposes")]
     public static bool TryParseFromUCIString(ReadOnlySpan<char> UCIString, Move[] moveList, [NotNullWhen(true)] out Move? move)
     {
+#pragma warning disable CA1851 // Possible multiple enumerations of 'IEnumerable' collection
+
         Utils.Assert(UCIString.Length == 4 || UCIString.Length == 5);
 
         var sourceSquare = (UCIString[0] - 'a') + ((8 - (UCIString[1] - '0')) * 8);
@@ -185,10 +187,12 @@ public static class MoveExtensions
                 return false;
             }
 
-            Utils.Assert(candidateMoves.Count() == 4);
-            Utils.Assert(candidateMoves.Count(predicate) == 1);
+            Debug.Assert(candidateMoves.Count() == 4);
+            Debug.Assert(candidateMoves.Count(predicate) == 1);
 
             return true;
+
+#pragma warning restore CA1851 // Possible multiple enumerations of 'IEnumerable' collection
         }
     }
 
@@ -229,9 +233,9 @@ public static class MoveExtensions
                         return true;
                     }
 
-                    Debug.Assert(moveList.Length >= 4, "There will be at least 4 moves that match sourceSquare and targetSquare when there is a promotion");
-                    Debug.Assert(moveList.ToArray().Count(m => m.PromotedPiece() != default) == 4 || moveList.ToArray().Count(m => m.PromotedPiece() != default) == 8, "There will be either 4 or 8 moves that are a promotion");
-                    Debug.Assert(moveList.ToArray().Count(m => m.SourceSquare() == sourceSquare && m.TargetSquare() == targetSquare && m.PromotedPiece() != default) == 4, "There will be 4 (and always 4) moves that match sourceSquare and targetSquare when there is a promotion");
+                    Debug.Assert(moveList.Length >= 4, "Assert fail", "There will be at least 4 moves that match sourceSquare and targetSquare when there is a promotion");
+                    Debug.Assert(moveList.ToArray().Count(m => m.PromotedPiece() != default) == 4 || moveList.ToArray().Count(m => m.PromotedPiece() != default) == 8, "Assert fail", "There will be either 4 or 8 moves that are a promotion");
+                    Debug.Assert(moveList.ToArray().Count(m => m.SourceSquare() == sourceSquare && m.TargetSquare() == targetSquare && m.PromotedPiece() != default) == 4, "Assert fail", "There will be 4 (and always 4) moves that match sourceSquare and targetSquare when there is a promotion");
                 }
             }
         }

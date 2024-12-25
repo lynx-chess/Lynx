@@ -4,6 +4,7 @@
     <IsPackable>false</IsPackable>
     <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
     <InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);Microsoft.Extensions.Configuration.Binder.SourceGeneration</InterceptorsPreviewNamespaces>
+    <StaticAnalysisCodeType>Test</StaticAnalysisCodeType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,7 +18,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
     <PackageReference Include="Moq" Version="4.18.4" />
-    <PackageReference Include="NUnit" Version="4.2.2" />
+    <PackageReference Include="NUnit" Version="4.3.1" />
     <!--<PackageReference Include="NUnit.Analyzers" Version="4.3.0" />-->
     <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
   </ItemGroup>
@@ -31,7 +32,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <NoWarn>$(NoWarn),CA1861,CS0618</NoWarn>
+    <NoWarn>$(NoWarn),LYNX0,CA1861,CS0618</NoWarn>
   </PropertyGroup>
 
 </Project>

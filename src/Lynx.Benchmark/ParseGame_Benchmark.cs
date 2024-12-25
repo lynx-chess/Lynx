@@ -144,6 +144,9 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
 namespace Lynx.Benchmark;
+
+#pragma warning disable S2139 // Exceptions should be either logged or rethrown but not both
+
 public partial class ParseGame_Benchmark : BaseBenchmark
 {
     public static IEnumerable<string> Data =>
@@ -705,5 +708,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
         }
     }
 
-#pragma warning restore RCS1169, S2933, S4487, IDE0044, IDE0052, RCS1170 // Readonly, not used
+#pragma warning restore RCS1169, S2933, S4487, IDE0044, IDE0052, RCS1170,  // Readonly, not used
 }
+
+#pragma warning restore S2139 // Exceptions should be either logged or rethrown but not both

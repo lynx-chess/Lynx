@@ -3,6 +3,8 @@ using System.Runtime.CompilerServices;
 
 namespace Lynx;
 
+#pragma warning disable CA5394 // Do not use insecure randomness
+
 public class LynxRandom : Random
 {
     private readonly XoshiroImpl _impl;
@@ -83,3 +85,5 @@ public class LynxRandom : Random
         }
     }
 }
+
+#pragma warning restore CA5394 // Do not use insecure randomness

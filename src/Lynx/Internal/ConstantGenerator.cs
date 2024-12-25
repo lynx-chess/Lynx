@@ -2,6 +2,9 @@
 
 namespace Lynx.Internal;
 
+#pragma warning disable S3353 // Unchanged local variables should be "const" - FP https://community.sonarsource.com/t/fp-s3353-value-modified-in-ref-extension-method/132389
+#pragma warning disable S106, S2228 // Standard outputs should not be used directly to log anything
+
 internal static class ConstantGenerator
 {
     public static BitBoard NotAFile()
@@ -141,3 +144,6 @@ internal static class ConstantGenerator
         }
     }
 }
+
+#pragma warning restore S3353 // Unchanged local variables should be "const"
+#pragma warning restore S106, S2228 // Standard outputs should not be used directly to log anything
