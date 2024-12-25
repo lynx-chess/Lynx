@@ -286,7 +286,7 @@ Lynx development would simply not have been possible without:
 I would also like to extend my gratitude to:
 
 - Engine Programming discord group. Without it, Lynx wouldn't be as strong as it is nowadays. Especial mention for Jamie Whiting
-([Akimbo](https://github.com/JacquesRW/akimbo)), Antares ([Altair](https://github.com/Alex2262/AltairChessEngine)), Ciekce ([Stormphrax](https://github.com/Ciekce/Stormphrax/)), Rak ([Mess](https://github.com/raklaptudirm/mess)), AspectOfTheNoob ([Sirius](https://github.com/mcthouacbb/Sirius)), CJ ([Alexandria](https://github.com/PGG106/Alexandria)), etc.
+([Akimbo](https://github.com/JacquesRW/akimbo)), Antares ([Altair](https://github.com/Alex2262/AltairChessEngine)), Ciekce ([Stormphrax](https://github.com/Ciekce/Stormphrax/)), Rak ([Mess](https://github.com/raklaptudirm/mess)), mcthouacbb ([Sirius](https://github.com/mcthouacbb/Sirius)), CJ ([Alexandria](https://github.com/PGG106/Alexandria)), etc.
 
 - The community Discord around [SebLague/Chess-Challenge](https://github.com/SebLague/Chess-Challenge/), which allowed me to discover EP discord and to revisit the basics, this time explained by very knowledgeable developers (such as the ones above) to people without any previous chess engine programming knowledge
 
