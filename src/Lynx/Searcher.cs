@@ -12,7 +12,7 @@ public sealed class Searcher
     private readonly ChannelWriter<object> _engineWriter;
     private readonly Logger _logger;
 
-    internal const string MainEngineId = "1";
+    internal const int MainEngineId = 1;
 
     private int _searchThreadsCount;
     private Engine _mainEngine;
@@ -277,7 +277,7 @@ public sealed class Searcher
 
     public async ValueTask RunBench(int depth)
     {
-        using var engine = new Engine("bench", SilentChannelWriter<object>.Instance, in _ttWrapper, warmup: true);
+        using var engine = new Engine(-1, SilentChannelWriter<object>.Instance, in _ttWrapper, warmup: true);
         var results = engine.Bench(depth);
 
         // Can't use engine, or results won't be printed
@@ -286,7 +286,7 @@ public sealed class Searcher
 
     public async ValueTask RunVerboseBench(int depth)
     {
-        using var engine = new Engine("verbosebench", _engineWriter, in _ttWrapper, warmup: true);
+        using var engine = new Engine(-1, _engineWriter, in _ttWrapper, warmup: true);
         var results = engine.Bench(depth);
 
         await engine.PrintBenchResults(results);
@@ -308,7 +308,7 @@ public sealed class Searcher
 
             for (int i = 0; i < _searchThreadsCount - mainEngineOffset; ++i)
             {
-                _extraEngines[i] = new Engine($"{i + 2}",
+                _extraEngines[i] = new Engine(i + 2,
 #if MULTITHREAD_DEBUG
                     _engineWriter,
 #else
