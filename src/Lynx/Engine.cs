@@ -227,7 +227,7 @@ public sealed partial class Engine : IDisposable
     public SearchResult? Search(GoCommand goCommand, in SearchConstraints searchConstraints, CancellationToken absoluteSearchCancellationToken, CancellationToken searchCancellationToken)
     {
 #if MULTITHREAD_DEBUG
-        _logger.Debug("[#{EngineId}] Starting search", _id);
+        _logger.Debug("[#{EngineId}] Starting search using thread {ThreadId}", _id, Environment.CurrentManagedThreadId);
 #endif
 
         if (_isSearching)
