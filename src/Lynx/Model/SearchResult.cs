@@ -5,7 +5,7 @@ namespace Lynx.Model;
 public sealed class SearchResult
 {
 #if MULTITHREAD_DEBUG
-    public string EngineId { get; init; }
+    public int EngineId { get; init; }
 #endif
 
     public Move[] Moves { get; init; }
@@ -32,14 +32,14 @@ public sealed class SearchResult
 
 #if MULTITHREAD_DEBUG
     public SearchResult(Move bestMove, int score, int targetDepth, Move[] moves, int mate = default)
-        : this("-1", bestMove, score, targetDepth, moves, mate)
+        : this(-2, bestMove, score, targetDepth, moves, mate)
     {
     }
 #endif
 
     public SearchResult(
 #if MULTITHREAD_DEBUG
-        string engineId,
+        int engineId,
 #endif
         Move bestMove, int score, int targetDepth, Move[] moves, int mate = default)
     {
