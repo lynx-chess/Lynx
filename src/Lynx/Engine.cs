@@ -150,7 +150,7 @@ public sealed partial class Engine : IDisposable
         Game.ResetCurrentPositionToBeforeSearchState();
         if (!isPondering
             && resultToReturn.BestMove != default
-            && !absoluteSearchCancellationToken.IsCancellationRequested)    // TODO check thread id, for multithread pondering case, since extra threads are always cancelled like this
+            && !absoluteSearchCancellationToken.IsCancellationRequested)    // Extra engines position never gets updated, but even if we tried to do it here, we can never guarantee to update it with the overall chosen move
         {
             Game.MakeMove(resultToReturn.BestMove);
             Game.UpdateInitialPosition();
