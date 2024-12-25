@@ -4,13 +4,13 @@ using System.Diagnostics;
 namespace Lynx;
 public sealed partial class Engine
 {
-    public async Task<SearchResult?> ProbeOnlineTablebase(Position position, ulong[] positionHashHistory, int halfMovesWithoutCaptureOrPawnMove)
+    public async Task<SearchResult?> ProbeOnlineTablebase(Position position, ulong[] positionHashHistory, int halfMovesWithoutCaptureOrPawnMove, CancellationToken cancellationToken)
     {
         var stopWatch = Stopwatch.StartNew();
 
         try
         {
-            var tablebaseResult = await OnlineTablebaseProber.RootSearch(position, positionHashHistory, halfMovesWithoutCaptureOrPawnMove, _searchCancellationToken);
+            var tablebaseResult = await OnlineTablebaseProber.RootSearch(position, positionHashHistory, halfMovesWithoutCaptureOrPawnMove, cancellationToken);
 
             if (tablebaseResult.BestMove != 0)
             {

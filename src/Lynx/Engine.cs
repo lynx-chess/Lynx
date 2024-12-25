@@ -175,10 +175,11 @@ public sealed partial class Engine : IDisposable
         // Local copy of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove so that it doesn't interfere with regular search
         var currentHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
 
+        var cancellationToken = jointCts.Token;
         var tasks = new Task<SearchResult?>[] {
                 // Other copies of positionHashHistory and HalfMovesWithoutCaptureOrPawnMove (same reason)
-                ProbeOnlineTablebase(Game.CurrentPosition, Game.CopyPositionHashHistory(),  Game.HalfMovesWithoutCaptureOrPawnMove),
-                Task.Run(()=>(SearchResult?)IDDFS(isPondering, jointCts.Token))
+                ProbeOnlineTablebase(Game.CurrentPosition, Game.CopyPositionHashHistory(),  Game.HalfMovesWithoutCaptureOrPawnMove, cancellationToken),
+                Task.Run(()=>(SearchResult?)IDDFS(isPondering, cancellationToken))
             };
 
         var resultList = await Task.WhenAll(tasks);

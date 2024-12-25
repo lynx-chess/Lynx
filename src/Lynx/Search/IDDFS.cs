@@ -103,8 +103,7 @@ public sealed partial class Engine
 
             do
             {
-                _absoluteSearchCancellationToken.ThrowIfCancellationRequested();
-                _searchCancellationToken.ThrowIfCancellationRequested();
+                cancellationToken.ThrowIfCancellationRequested();
 
                 if (depth < Configuration.EngineSettings.AspirationWindow_MinDepth
                     || lastSearchResult?.Score is null)
