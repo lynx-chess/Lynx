@@ -166,6 +166,8 @@ public sealed class Searcher
                     // Final info command
                     _engineWriter.TryWrite(searchResult);
                 }
+
+                _isPonderHit = false;
             }
 
             if (searchResult is not null)
@@ -189,8 +191,8 @@ public sealed class Searcher
             }
 
 #if MULTITHREAD_DEBUG
-        var sw = System.Diagnostics.Stopwatch.StartNew();
-        var lastElapsed = sw.ElapsedMilliseconds;
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            var lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
             // Basic lazy SMP implementation
@@ -204,15 +206,15 @@ public sealed class Searcher
                 .ToArray();
 
 #if MULTITHREAD_DEBUG
-        _logger.Debug("End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
-        lastElapsed = sw.ElapsedMilliseconds;
+            _logger.Debug("End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+            lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
             SearchResult? finalSearchResult = _mainEngine.Search(searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
 
 #if MULTITHREAD_DEBUG
-        _logger.Debug("End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
-        lastElapsed = sw.ElapsedMilliseconds;
+            _logger.Debug("End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+            lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
             await _absoluteSearchCancellationTokenSource.CancelAsync();
@@ -222,7 +224,7 @@ public sealed class Searcher
             var extraResults = await Task.WhenAll(tasks);
 
 #if MULTITHREAD_DEBUG
-        _logger.Debug("End of extra searches, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+            _logger.Debug("End of extra searches, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
 #endif
 
             if (finalSearchResult is not null)
@@ -235,7 +237,7 @@ public sealed class Searcher
                 finalSearchResult.NodesPerSecond = Utils.CalculateNps(finalSearchResult.Nodes, 0.001 * finalSearchResult.Time);
 
 #if MULTITHREAD_DEBUG
-            _logger.Debug("End of multithread calculations, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+                _logger.Debug("End of multithread calculations, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
 #endif
 
                 // Final info command
@@ -252,7 +254,7 @@ public sealed class Searcher
 
 #if MULTITHREAD_DEBUG
             var sw = System.Diagnostics.Stopwatch.StartNew();
-        var lastElapsed = sw.ElapsedMilliseconds;
+            var lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
             // Basic lazy SMP implementation
@@ -266,15 +268,15 @@ public sealed class Searcher
                 .ToArray();
 
 #if MULTITHREAD_DEBUG
-        _logger.Debug("[Pondering] End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
-        lastElapsed = sw.ElapsedMilliseconds;
+            _logger.Debug("[Pondering] End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+            lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
             SearchResult? finalSearchResult = _mainEngine.Search(searchConstraints, isPondering: true, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None);
 
 #if MULTITHREAD_DEBUG
-        _logger.Debug("[Pondering] End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
-        lastElapsed = sw.ElapsedMilliseconds;
+            _logger.Debug("[Pondering] End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+            lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
             await _absoluteSearchCancellationTokenSource.CancelAsync();
@@ -284,7 +286,7 @@ public sealed class Searcher
             var extraResults = await Task.WhenAll(tasks);
 
 #if MULTITHREAD_DEBUG
-        _logger.Debug("[Pondering] End of extra searches, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+            _logger.Debug("[Pondering] End of extra searches, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
 #endif
 
             if (finalSearchResult is not null)
@@ -297,7 +299,7 @@ public sealed class Searcher
                 finalSearchResult.NodesPerSecond = Utils.CalculateNps(finalSearchResult.Nodes, 0.001 * finalSearchResult.Time);
 
 #if MULTITHREAD_DEBUG
-            _logger.Debug("[Pondering] End of multithread calculations, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+                _logger.Debug("[Pondering] End of multithread calculations, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
 #endif
 
                 // Final info command
@@ -316,7 +318,7 @@ public sealed class Searcher
 
 #if MULTITHREAD_DEBUG
                 sw = System.Diagnostics.Stopwatch.StartNew();
-        lastElapsed = sw.ElapsedMilliseconds;
+                lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
                 // PonderHit cancelled the token from _absoluteSearchCancellationTokenSource
@@ -334,15 +336,15 @@ public sealed class Searcher
                     .ToArray();
 
 #if MULTITHREAD_DEBUG
-        _logger.Debug("End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
-        lastElapsed = sw.ElapsedMilliseconds;
+                _logger.Debug("End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+                lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
                 finalSearchResult = _mainEngine.Search(searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
 
 #if MULTITHREAD_DEBUG
-        _logger.Debug("End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
-        lastElapsed = sw.ElapsedMilliseconds;
+                _logger.Debug("End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+                lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
                 await _absoluteSearchCancellationTokenSource.CancelAsync();
@@ -352,7 +354,7 @@ public sealed class Searcher
                 extraResults = await Task.WhenAll(tasks);
 
 #if MULTITHREAD_DEBUG
-        _logger.Debug("End of extra searches, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+                _logger.Debug("End of extra searches, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
 #endif
 
                 if (finalSearchResult is not null)
@@ -365,12 +367,14 @@ public sealed class Searcher
                     finalSearchResult.NodesPerSecond = Utils.CalculateNps(finalSearchResult.Nodes, 0.001 * finalSearchResult.Time);
 
 #if MULTITHREAD_DEBUG
-            _logger.Debug("End of multithread calculations, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+                    _logger.Debug("End of multithread calculations, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
 #endif
 
                     // Final info command
                     _engineWriter.TryWrite(finalSearchResult);
                 }
+
+                _isPonderHit = false;
             }
 
             if (finalSearchResult is not null)

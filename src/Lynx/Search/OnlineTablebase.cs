@@ -34,7 +34,7 @@ public sealed partial class Engine
                         0)
                 };
 
-                await _engineWriter.WriteAsync(searchResult);
+                await _engineWriter.WriteAsync(searchResult, cancellationToken);
                 //await _searchCancellationTokenSource.CancelAsync();   // TODO revisit
 
                 return searchResult;
