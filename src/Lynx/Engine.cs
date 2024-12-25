@@ -1,4 +1,4 @@
-﻿using Lynx.Model;
+using Lynx.Model;
 using Lynx.UCI.Commands.GUI;
 using NLog;
 using System.Diagnostics;
@@ -12,7 +12,7 @@ public sealed partial class Engine : IDisposable
     internal const int DefaultMaxDepth = 5;
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-    private readonly string _id;
+    private readonly int _id;
     private readonly ChannelWriter<object> _engineWriter;
     private readonly TranspositionTable _tt;
     private SearchConstraints _searchConstraints;
@@ -27,10 +27,10 @@ public sealed partial class Engine : IDisposable
 
     public bool PendingConfirmation { get; set; }
 
-    public Engine(ChannelWriter<object> engineWriter) : this("0", engineWriter, new()) { }
+    public Engine(ChannelWriter<object> engineWriter) : this(0, engineWriter, new()) { }
 
 #pragma warning disable RCS1163 // Unused parameter - used in Release mode
-    public Engine(string id, ChannelWriter<object> engineWriter, in TranspositionTable tt, bool warmup = false)
+    public Engine(int id, ChannelWriter<object> engineWriter, in TranspositionTable tt, bool warmup = false)
 #pragma warning restore RCS1163 // Unused parameter
     {
         _id = id;
@@ -210,6 +210,10 @@ public sealed partial class Engine : IDisposable
 
     public SearchResult? Search(in SearchConstraints searchConstraints, bool isPondering, CancellationToken absoluteSearchCancellationToken, CancellationToken searchCancellationToken)
     {
+#if MULTITHREAD_DEBUG
+        _logger.Debug("[#{EngineId}] Starting search", _id);
+#endif
+
         if (_isSearching)
         {
             _logger.Warn("Search already in progress");
