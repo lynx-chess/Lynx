@@ -89,7 +89,7 @@ public sealed partial class Engine
         {
             if (MoveGenerator.CanGenerateAtLeastAValidMove(position))
             {
-                return QuiescenceSearch(ply, alpha, beta, cancellationToken);
+                return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
