@@ -148,7 +148,7 @@ public sealed class Searcher
                 _taskFactory.StartNew(
                     () => engine.Search(goCommand, extraEnginesSearchConstraint, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None),
                     CancellationToken.None,
-                    TaskCreationOptions.DenyChildAttach,
+                    TaskCreationOptions.LongRunning,
                     TaskScheduler.Default))
             .ToArray();
 
