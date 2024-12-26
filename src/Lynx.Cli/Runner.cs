@@ -1,6 +1,7 @@
 ﻿using Lynx.UCI.Commands.Engine;
 using NLog;
 using System.Threading.Channels;
+using static Lynx.Constants;
 
 namespace Lynx.Cli;
 
@@ -32,8 +33,8 @@ public static class Runner
 
         try
         {
-            Console.WriteLine($"{IdCommand.EngineName} {IdCommand.GetLynxVersion()} by {IdCommand.EngineAuthor}");
-            await Task.WhenAny(tasks);
+            Console.WriteLine($"{InitialMessage}");
+            //await Task.WhenAny(tasks);
         }
         catch (AggregateException ae)
         {

@@ -27,3 +27,5 @@ if (Configuration.GeneralSettings.EnableLogging)
 await Runner.Run(args);
 
 Thread.Sleep(2_000);
+
+Console.ReadKey();
