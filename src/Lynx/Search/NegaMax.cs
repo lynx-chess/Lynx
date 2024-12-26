@@ -553,6 +553,7 @@ public sealed partial class Engine
         {
             PrintMessage(ply - 1, "Pruning before starting quiescence search");
 
+            // Idea by Clover author
             if (!ttHit)
             {
                 _tt.RecordHash(position, staticEval, 0, ply, staticEval, NodeType.Beta);
