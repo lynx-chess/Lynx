@@ -124,6 +124,8 @@ public sealed class Searcher
         }
     }
 
+    private sealed record ThreadContext(Engine Engine, GoCommand GoCommand, in SearchConstraints SearchConstraints, CancellationToken CancellationToken);
+
     private async Task MultiThreadedSearch(GoCommand goCommand)
     {
         var searchConstraints = TimeManager.CalculateTimeManagement(_mainEngine.Game, goCommand);
@@ -146,9 +148,18 @@ public sealed class Searcher
         var tasks = _extraEngines
             .Select(engine =>
                 _taskFactory.StartNew(
-                    () => engine.Search(goCommand, extraEnginesSearchConstraint, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None),
+                    static (context) =>
+                    {
+                        if (context is ThreadContext threadContext)
+                        {
+                            return threadContext.Engine.Search(threadContext.GoCommand, threadContext.SearchConstraints, threadContext.CancellationToken, CancellationToken.None);
+                        }
+
+                        return null;
+                    },
+                    new ThreadContext(engine, goCommand, extraEnginesSearchConstraint, _absoluteSearchCancellationTokenSource.Token),
                     CancellationToken.None,
-                    TaskCreationOptions.LongRunning,
+                    TaskCreationOptions.DenyChildAttach,
                     TaskScheduler.Default))
             .ToArray();
 
