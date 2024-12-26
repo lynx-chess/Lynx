@@ -298,7 +298,7 @@ public sealed partial class Engine
                 _tt.PrefetchTTEntry(position);
                 bool isCutNode = !pvNode && !cutnode;   // Linter 'simplification' of pvNode ? false : !cutnode
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
-                score = -NegaMax(depth - 1, ply + 1, -beta, -alpha, isCutNode, cancellationToken);
+                score = -NegaMax(depth - 1, ply + 1, -beta, -alpha, cutnode: false, cancellationToken);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
             }
             else
