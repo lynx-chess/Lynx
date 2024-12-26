@@ -540,7 +540,9 @@ public sealed partial class Engine
 
         _maxDepthReached[ply] = ply;
 
-        var staticEval = ttProbeResult.NodeType != NodeType.Unknown
+        var ttHit = ttProbeResult.NodeType != NodeType.Unknown;
+
+        var staticEval = ttHit
             ? ttProbeResult.StaticEval
             : position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
 
@@ -550,6 +552,12 @@ public sealed partial class Engine
         if (staticEval >= beta)
         {
             PrintMessage(ply - 1, "Pruning before starting quiescence search");
+
+            if (!ttHit)
+            {
+                _tt.RecordHash(position, staticEval, 0, ply, staticEval, NodeType.Beta);
+            }
+
             return staticEval;
         }
 
