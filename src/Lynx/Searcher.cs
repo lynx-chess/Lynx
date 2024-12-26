@@ -11,6 +11,7 @@ public sealed class Searcher
     private readonly ChannelReader<string> _uciReader;
     private readonly ChannelWriter<object> _engineWriter;
     private readonly Logger _logger;
+    private readonly TaskFactory _taskFactory = new(TaskCreationOptions.LongRunning, TaskContinuationOptions.None);
 
     internal const int MainEngineId = 1;
 
@@ -144,7 +145,11 @@ public sealed class Searcher
 
         var tasks = _extraEngines
             .Select(engine =>
-                Task.Run(() => engine.Search(goCommand, extraEnginesSearchConstraint, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
+                _taskFactory.StartNew(
+                    () => engine.Search(goCommand, extraEnginesSearchConstraint, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None),
+                    CancellationToken.None,
+                    TaskCreationOptions.DenyChildAttach,
+                    TaskScheduler.Default))
             .ToArray();
 
 #if MULTITHREAD_DEBUG
