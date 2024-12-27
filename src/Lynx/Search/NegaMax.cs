@@ -328,7 +328,7 @@ public sealed partial class Engine
                     // once we find one with a history score too low
                     if (!isCapture
                         && moveScores[moveIndex] < EvaluationConstants.CounterMoveValue
-                        && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth    // TODO use LMR depth
+                        && lmrDepth < Configuration.EngineSettings.HistoryPrunning_MaxDepth    // TODO use LMR depth
                         && _quietHistory[move.Piece()][move.TargetSquare()] < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
                     {
                         RevertMove();
