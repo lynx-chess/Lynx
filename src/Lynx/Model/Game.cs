@@ -15,6 +15,7 @@ public sealed class Game : IDisposable
 #pragma warning restore CA1002 // Do not expose generic lists
 #endif
 
+    //private int _positionHashHistoryPointerBeforeLastSearch;
     private int _positionHashHistoryPointer;
     private readonly ulong[] _positionHashHistory;
 
@@ -78,6 +79,7 @@ public sealed class Game : IDisposable
         }
 
         PositionBeforeLastSearch = new Position(CurrentPosition);
+        //_positionHashHistoryPointerBeforeLastSearch = _positionHashHistoryPointer;
     }
 
     /// <summary>
@@ -218,6 +220,7 @@ public sealed class Game : IDisposable
     {
         CurrentPosition.FreeResources();
         CurrentPosition = new(PositionBeforeLastSearch);
+        //_positionHashHistoryPointer = _positionHashHistoryPointerBeforeLastSearch;    // TODO
     }
 
     public void UpdateInitialPosition()

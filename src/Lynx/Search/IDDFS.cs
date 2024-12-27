@@ -65,7 +65,7 @@ public sealed partial class Engine
     /// </summary>
     /// <returns>Not null <see cref="SearchResult"/>, although made nullable in order to match online tb probing signature</returns>
     [SkipLocalsInit]
-    private SearchResult IDDFS(CancellationToken cancellationToken)
+    private SearchResult IDDFS(bool isPondering, CancellationToken cancellationToken)
     {
         // Cleanup
         _nodes = 0;
@@ -103,8 +103,7 @@ public sealed partial class Engine
 
             do
             {
-                _absoluteSearchCancellationToken.ThrowIfCancellationRequested();
-                _searchCancellationToken.ThrowIfCancellationRequested();
+                cancellationToken.ThrowIfCancellationRequested();
 
                 if (depth < Configuration.EngineSettings.AspirationWindow_MinDepth
                     || lastSearchResult?.Score is null)
@@ -230,7 +229,7 @@ public sealed partial class Engine
 
                     _scoreDelta = oldScore - lastSearchResult.Score;
                 }
-            } while (StopSearchCondition(lastSearchResult?.BestMove, ++depth, mate, bestScore));
+            } while (StopSearchCondition(lastSearchResult?.BestMove, ++depth, mate, bestScore, isPondering));
         }
         catch (OperationCanceledException)
         {
@@ -265,10 +264,10 @@ public sealed partial class Engine
         //    _logger.Info("Engine search found a short enough mate, cancelling online tb probing if still active");
         //}
 
-        return GenerateFinalSearchResult(lastSearchResult, bestScore, depth, firstLegalMove);
+        return GenerateFinalSearchResult(lastSearchResult, bestScore, depth, firstLegalMove, isPondering);
     }
 
-    private bool StopSearchCondition(Move? bestMove, int depth, int mate, int bestScore)
+    private bool StopSearchCondition(Move? bestMove, int depth, int mate, int bestScore, bool isPondering)
     {
         if (bestMove is null || bestMove == 0)
         {
@@ -325,7 +324,7 @@ public sealed partial class Engine
             return shouldContinue;
         }
 
-        if (IsMainEngine && !_isPondering)
+        if (IsMainEngine && !isPondering)
         {
             var elapsedMilliseconds = _stopWatch.ElapsedMilliseconds;
 
@@ -436,7 +435,7 @@ public sealed partial class Engine
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private SearchResult GenerateFinalSearchResult(SearchResult? lastSearchResult,
-        int bestScore, int depth, Move firstLegalMove)
+        int bestScore, int depth, Move firstLegalMove, bool isPondering)
     {
         SearchResult finalSearchResult;
         if (lastSearchResult is null)
@@ -448,7 +447,7 @@ public sealed partial class Engine
             //  when cancelling the pondering search
             // The other condition reflects what happens in helper engines when a mate is quickly detected in the main:
             //  search in helper engines sometimes get cancelled before any meaningful result is found, so we don't want a warning either
-            if (_isPondering || !IsMainEngine)
+            if (isPondering || !IsMainEngine)
             {
                 _logger.Info(noDepth1Message);
             }
