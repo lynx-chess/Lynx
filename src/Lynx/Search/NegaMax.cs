@@ -337,7 +337,7 @@ public sealed partial class Engine
 
                     // 🔍 Futility Pruning (FP) - all quiet moves can be pruned
                     // once it's considered that they don't have potential to raise alpha
-                    if (depth <= Configuration.EngineSettings.FP_MaxDepth
+                    if (lmrDepth <= Configuration.EngineSettings.FP_MaxDepth
                         && staticEval + Configuration.EngineSettings.FP_Margin + (Configuration.EngineSettings.FP_DepthScalingFactor * depth) <= alpha)
                     {
                         RevertMove();
