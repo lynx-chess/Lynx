@@ -77,7 +77,6 @@ public sealed partial class Engine
             Array.Clear(_moveNodeCount[i]);
         }
 
-        bool isMainThread = _id == Searcher.MainEngineId;
         int bestScore = 0;
         int alpha = EvaluationConstants.MinEval;
         int beta = EvaluationConstants.MaxEval;
@@ -89,7 +88,7 @@ public sealed partial class Engine
 
         try
         {
-            if (isMainThread && OnlyOneLegalMove(ref firstLegalMove, out var onlyOneLegalMoveSearchResult))
+            if (OnlyOneLegalMove(ref firstLegalMove, out var onlyOneLegalMoveSearchResult))
             {
                 _engineWriter.TryWrite(onlyOneLegalMoveSearchResult);
 
@@ -218,7 +217,7 @@ public sealed partial class Engine
                 lastSearchResult = lastSearchResultCandidate;
                 _engineWriter.TryWrite(lastSearchResult);
 
-                if (isMainThread)
+                if (IsMainEngine)
                 {
                     if (oldBestMove == lastSearchResult.BestMove)
                     {
@@ -231,7 +230,7 @@ public sealed partial class Engine
 
                     _scoreDelta = oldScore - lastSearchResult.Score;
                 }
-            } while (StopSearchCondition(lastSearchResult?.BestMove, ++depth, mate, bestScore, isMainThread));
+            } while (StopSearchCondition(lastSearchResult?.BestMove, ++depth, mate, bestScore));
         }
         catch (OperationCanceledException)
         {
@@ -269,7 +268,7 @@ public sealed partial class Engine
         return GenerateFinalSearchResult(lastSearchResult, bestScore, depth, firstLegalMove);
     }
 
-    private bool StopSearchCondition(Move? bestMove, int depth, int mate, int bestScore, bool isMainThread)
+    private bool StopSearchCondition(Move? bestMove, int depth, int mate, int bestScore)
     {
         if (bestMove is null || bestMove == 0)
         {
@@ -326,7 +325,7 @@ public sealed partial class Engine
             return shouldContinue;
         }
 
-        if (isMainThread && !_isPondering)
+        if (IsMainEngine && !_isPondering)
         {
             var elapsedMilliseconds = _stopWatch.ElapsedMilliseconds;
 
@@ -449,7 +448,7 @@ public sealed partial class Engine
             //  when cancelling the pondering search
             // The other condition reflects what happens in helper engines when a mate is quickly detected in the main:
             //  search in helper engines sometimes get cancelled before any meaningful result is found, so we don't want a warning either
-            if (_isPondering || !IsMainEngine())
+            if (_isPondering || !IsMainEngine)
             {
                 _logger.Info(noDepth1Message);
             }

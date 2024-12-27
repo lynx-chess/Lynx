@@ -77,7 +77,7 @@ public sealed partial class Engine : IDisposable
         _logger.Info("Engine {0} initialized", _id);
     }
 
-    private bool IsMainEngine() => _id == Searcher.MainEngineId;
+    private bool IsMainEngine => _id == Searcher.MainEngineId;
 
 #pragma warning disable S1144 // Unused private types or members should be removed - used in Release mode
     private void WarmupEngine()
