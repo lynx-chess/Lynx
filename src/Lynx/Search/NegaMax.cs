@@ -40,17 +40,22 @@ public sealed partial class Engine
         ShortMove ttBestMove = default;
         NodeType ttElementType = default;
         int ttScore = default;
-        int ttRawScore = default;
         int ttStaticEval = int.MinValue;
+        int ttDepth = default;
 
         Debug.Assert(!pvNode || !cutnode);
 
         if (!isRoot)
         {
-            (ttScore, ttBestMove, ttElementType, ttRawScore, ttStaticEval) = _tt.ProbeHash(position, depth, ply, alpha, beta);
+            (ttScore, ttBestMove, ttElementType, ttStaticEval, ttDepth) = _tt.ProbeHash(position, ply);
 
             // TT cutoffs
-            if (!pvNode && ttScore != EvaluationConstants.NoHashEntry)
+            if (!pvNode
+                && ttScore != EvaluationConstants.NoHashEntry
+                && ttDepth >= depth
+                && (ttElementType == NodeType.Exact
+                    || (ttElementType == NodeType.Alpha && ttScore <= alpha)
+                    || (ttElementType == NodeType.Beta && ttScore >= beta)))
             {
                 return ttScore;
             }
@@ -124,9 +129,9 @@ public sealed partial class Engine
             // If the score is outside what the current bounds are, but it did match flag and depth,
             // then we can trust that this score is more accurate than the current static evaluation,
             // and we can update our static evaluation for better accuracy in pruning
-            if (ttElementType != default && ttElementType != (ttRawScore > staticEval ? NodeType.Alpha : NodeType.Beta))
+            if (ttElementType != default && ttElementType != (ttScore > staticEval ? NodeType.Alpha : NodeType.Beta))
             {
-                staticEval = ttRawScore;
+                staticEval = ttScore;
             }
 
             bool isNotGettingCheckmated = staticEval > EvaluationConstants.NegativeCheckmateDetectionLimit;
@@ -190,7 +195,7 @@ public sealed partial class Engine
                     && staticEvalBetaDiff >= 0
                     && !parentWasNullMove
                     && phase > 2   // Zugzwang risk reduction: pieces other than pawn presents
-                    && (ttElementType != NodeType.Alpha || ttRawScore >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
+                    && (ttElementType != NodeType.Alpha || ttScore >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
                 {
                     var nmpReduction = Configuration.EngineSettings.NMP_BaseDepthReduction
                         + ((depth + Configuration.EngineSettings.NMP_DepthIncrement) / Configuration.EngineSettings.NMP_DepthDivisor)   // Clarity
@@ -531,7 +536,7 @@ public sealed partial class Engine
         var nextPvIndex = PVTable.Indexes[ply + 1];
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
-        var ttProbeResult = _tt.ProbeHash(position, 0, ply, alpha, beta);
+        var ttProbeResult = _tt.ProbeHash(position, ply);
         if (ttProbeResult.Score != EvaluationConstants.NoHashEntry)
         {
             return ttProbeResult.Score;
