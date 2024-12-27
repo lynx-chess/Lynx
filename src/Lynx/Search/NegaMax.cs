@@ -303,6 +303,9 @@ public sealed partial class Engine
             }
             else
             {
+                var baseLMRReduction = EvaluationConstants.LMRReductions[depth][visitedMovesCounter];
+                var lmrDepth = Math.Max(0, depth - baseLMRReduction);
+
                 // If we prune while getting checmated, we risk not finding any move and having an empty PV
                 bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
 
@@ -357,7 +360,7 @@ public sealed partial class Engine
                                 ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_PV
                                 : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_NonPV))
                     {
-                        reduction = EvaluationConstants.LMRReductions[depth][visitedMovesCounter];
+                        reduction = baseLMRReduction;
 
                         if (pvNode)
                         {
