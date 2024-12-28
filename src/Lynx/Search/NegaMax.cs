@@ -537,15 +537,25 @@ public sealed partial class Engine
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
         var ttProbeResult = _tt.ProbeHash(position, ply);
-        if (ttProbeResult.Score != EvaluationConstants.NoHashEntry)
+        var ttScore = ttProbeResult.Score;
+        var ttNodeType = ttProbeResult.NodeType;
+        var ttHit = ttNodeType != NodeType.Unknown;
+
+        // QS TT cutoff
+        if (ttHit
+            && ttProbeResult.Depth >= 0
+            && (ttNodeType == NodeType.Exact
+                || (ttNodeType == NodeType.Alpha && ttScore <= alpha)
+                || (ttNodeType == NodeType.Beta && ttScore >= beta)))
         {
-            return ttProbeResult.Score;
+            return ttScore;
         }
+
         ShortMove ttBestMove = ttProbeResult.BestMove;
 
         _maxDepthReached[ply] = ply;
 
-        var staticEval = ttProbeResult.NodeType != NodeType.Unknown
+        var staticEval = ttHit // TODO check if static eval
             ? ttProbeResult.StaticEval
             : position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
 
