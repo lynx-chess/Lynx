@@ -542,8 +542,9 @@ public sealed partial class Engine
         var ttHit = ttNodeType != NodeType.Unknown;
 
         // QS TT cutoff
+        Debug.Assert(ttProbeResult.Depth >= 0, "Assertion failed", "We would need to add it as a TT cutoff condition");
+
         if (ttHit
-            && ttProbeResult.Depth >= 0
             && (ttNodeType == NodeType.Exact
                 || (ttNodeType == NodeType.Alpha && ttScore <= alpha)
                 || (ttNodeType == NodeType.Beta && ttScore >= beta)))
