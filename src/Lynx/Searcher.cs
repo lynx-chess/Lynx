@@ -124,7 +124,21 @@ public sealed class Searcher
         }
     }
 
-    private sealed record ThreadContext(Engine Engine, GoCommand GoCommand, in SearchConstraints SearchConstraints, CancellationToken CancellationToken);
+    private readonly struct ThreadContext
+    {
+        public readonly Engine Engine;
+        public readonly GoCommand GoCommand;
+        public readonly SearchConstraints SearchConstraints;
+        public readonly CancellationToken CancellationToken;
+
+        public ThreadContext(Engine engine, GoCommand goCommand, SearchConstraints searchConstraints, CancellationToken cancellationToken)
+        {
+            Engine = engine;
+            GoCommand = goCommand;
+            SearchConstraints = searchConstraints;
+            CancellationToken = cancellationToken;
+        }
+    }
 
     private async Task MultiThreadedSearch(GoCommand goCommand)
     {
