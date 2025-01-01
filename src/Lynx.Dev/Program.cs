@@ -1083,19 +1083,19 @@ static void TranspositionTableMethod()
     //var entry = transpositionTable.ProbeHash(position, maxDepth: 5, depth: 3, alpha: 1, beta: 2);
 
     transpositionTable.RecordHash(position, position.StaticEvaluation().Score, depth: 5, ply: 3, score: +19, nodeType: NodeType.Alpha, move: 1234);
-    var entry = transpositionTable.ProbeHash(position, depth: 5, ply: 3, alpha: 20, beta: 30);
+    var entry = transpositionTable.ProbeHash(position, ply: 3);
     Console.WriteLine(entry); // Expected 20
 
     transpositionTable.RecordHash(position, position.StaticEvaluation().Score, depth: 5, ply: 3, score: +21, nodeType: NodeType.Alpha, move: 1234);
-    entry = transpositionTable.ProbeHash(position, depth: 5, ply: 3, alpha: 20, beta: 30);
+    entry = transpositionTable.ProbeHash(position, ply: 3);
     Console.WriteLine(entry); // Expected 12_345_678
 
     transpositionTable.RecordHash(position, position.StaticEvaluation().Score, depth: 5, ply: 3, score: +29, nodeType: NodeType.Beta, move: 1234);
-    entry = transpositionTable.ProbeHash(position, depth: 5, ply: 3, alpha: 20, beta: 30);
+    entry = transpositionTable.ProbeHash(position, ply: 3);
     Console.WriteLine(entry); // Expected 12_345_678
 
     transpositionTable.RecordHash(position, position.StaticEvaluation().Score, depth: 5, ply: 3, score: +31, nodeType: NodeType.Beta, move: 1234);
-    entry = transpositionTable.ProbeHash(position, depth: 5, ply: 3, alpha: 20, beta: 30);
+    entry = transpositionTable.ProbeHash(position, ply: 3);
     Console.WriteLine(entry); // Expected 30
 }
 
