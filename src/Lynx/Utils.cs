@@ -148,6 +148,9 @@ public static class Utils
         }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int CalculateMateInX(int score) => CalculateMateInX(score, Math.Abs(score));
+
     /// <summary>
     /// Providing there's a checkmate detected in <paramref name="score"/>, returns in how many moves
     /// </summary>
@@ -163,7 +166,10 @@ public static class Utils
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong CalculateNps(ulong nodes, double elapsedSeconds)
     {
-        return Convert.ToUInt64(Math.Clamp(nodes / elapsedSeconds, 1, ulong.MaxValue));
+        // Adding double.Epsilon to avoid potential System.OverflowException
+        // i.e. when calculating multithreading aggregated stats in a single-move position:0
+        // the elapsed seconds are taken from existing SearchResult.Time, already rounded and therefore 0
+        return Convert.ToUInt64(Math.Clamp(nodes / (elapsedSeconds + double.Epsilon), 1, ulong.MaxValue));
     }
 
     /// <summary>
@@ -227,7 +233,7 @@ public static class Utils
         if (!value)
         {
             _logger.Error(errorMessage);
-            throw new AssertException(errorMessage);
+            throw new LynxException(errorMessage);
         }
     }
 }

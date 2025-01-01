@@ -3,7 +3,9 @@ using System.Runtime.Serialization;
 
 namespace Lynx.Model;
 
+#pragma warning disable S4022 // Enumerations should have "Int32" storage
 public enum TablebaseEvaluationCategory : byte
+#pragma warning restore S4022 // Enumerations should have "Int32" storage
 {
     Unknown,
     Draw,
@@ -38,7 +40,9 @@ public record class TablebaseEvaluation()
     [JsonPropertyName("stalemate")]
     public bool IsStalemate { get; init; }
 
+#pragma warning disable CA1002 // Do not expose generic lists
     public List<TablebaseEvalMove>? Moves { get; init; }
+#pragma warning restore CA1002 // Do not expose generic lists
 }
 
 public record class TablebaseEvalMove()
@@ -57,4 +61,4 @@ public record class TablebaseEvalMove()
 [JsonSourceGenerationOptions(
     GenerationMode = JsonSourceGenerationMode.Default)] // https://github.com/dotnet/runtime/issues/78602#issuecomment-1322004254
 [JsonSerializable(typeof(TablebaseEvaluation))]
-internal partial class SourceGenerationContext : JsonSerializerContext;
+internal sealed partial class SourceGenerationContext : JsonSerializerContext;

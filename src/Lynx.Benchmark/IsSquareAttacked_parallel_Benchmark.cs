@@ -198,7 +198,7 @@ public class IsSquareAttacked_parallel_Benchmark : BaseBenchmark
         {
             var offset = Utils.PieceOffset(sideToMove);
 
-            var cancellationTokenSource = new CancellationTokenSource();
+            using var cancellationTokenSource = new CancellationTokenSource();
             var token = cancellationTokenSource.Token;
 
             var tasks = new List<Task<bool>>
@@ -219,7 +219,7 @@ public class IsSquareAttacked_parallel_Benchmark : BaseBenchmark
                 var result = await resultTask;
                 if (result)
                 {
-                    cancellationTokenSource.Cancel();
+                    await cancellationTokenSource.CancelAsync();
                     return result;
                 }
             }

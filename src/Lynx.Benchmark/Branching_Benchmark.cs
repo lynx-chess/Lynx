@@ -121,7 +121,7 @@ public class Branching_Benchmark : BaseBenchmark
             return nodes + IfReturnImplBranchOpt(depth - 1, nodes);
         }
 
-        return ++nodes;
+        return nodes + 1;
     }
 
     private static long IfElseImpl(int depth, long nodes = 0)

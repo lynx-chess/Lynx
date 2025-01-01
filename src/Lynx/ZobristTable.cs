@@ -83,7 +83,7 @@ public static class ZobristTable
             (byte)CastlingRights.WK | (byte)CastlingRights.WQ | (byte)CastlingRights.BK | (byte)CastlingRights.BQ =>       // KQ   | kq
                 WK_Hash ^ WQ_Hash ^ BK_Hash ^ BQ_Hash,
 
-            _ => throw new($"Unexpected castle encoded number: {castle}")
+            _ => throw new LynxException($"Unexpected castle encoded number: {castle}")
         };
     }
 

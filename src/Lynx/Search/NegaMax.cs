@@ -1,8 +1,6 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Security.Authentication;
-using System.Xml.Linq;
 
 namespace Lynx;
 
@@ -18,7 +16,7 @@ public sealed partial class Engine
     /// Best score Side's to move's opponent can achieve, assuming best play by Side to move.
     /// </param>
     [SkipLocalsInit]
-    private int NegaMax(int depth, int ply, int alpha, int beta, bool cutnode, bool parentWasNullMove = false)
+    private int NegaMax(int depth, int ply, int alpha, int beta, bool cutnode, CancellationToken cancellationToken, bool parentWasNullMove = false)
     {
         var position = Game.CurrentPosition;
 
@@ -30,7 +28,8 @@ public sealed partial class Engine
         }
 
         _maxDepthReached[ply] = ply;
-        _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
+
+        cancellationToken.ThrowIfCancellationRequested();
 
         var pvIndex = PVTable.Indexes[ply];
         var nextPvIndex = PVTable.Indexes[ply + 1];
@@ -67,9 +66,6 @@ public sealed partial class Engine
             }
         }
 
-        // Before any time-consuming operations
-        _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
-
         // 🔍 Improving heuristic: the current position has a better static evaluation than
         // the previous evaluation from the same side (ply - 2).
         // When true, we can:
@@ -81,18 +77,19 @@ public sealed partial class Engine
         double improvingRate = 0;
 
         bool isInCheck = position.IsInCheck();
-        int staticEval = int.MaxValue;
+        int staticEval;
         int phase = int.MaxValue;
 
         if (isInCheck)
         {
             ++depth;
+            staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
         }
         else if (depth <= 0)
         {
             if (MoveGenerator.CanGenerateAtLeastAValidMove(position))
             {
-                return QuiescenceSearch(ply, alpha, beta);
+                return QuiescenceSearch(ply, alpha, beta, cancellationToken);
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
@@ -132,85 +129,94 @@ public sealed partial class Engine
                 staticEval = ttRawScore;
             }
 
+            bool isNotGettingCheckmated = staticEval > EvaluationConstants.NegativeCheckmateDetectionLimit;
+
             // Fail-high pruning (moves with high scores) - prune more when improving
-            if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
+            if (isNotGettingCheckmated)
             {
-                // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
-                // Return formula by Ciekce, instead of just returning static eval
-                // Improving impl. based on Potential's
-                var rfpMargin = improving ? 80 * (depth - 1) : 100 * depth;
-                var improvingFactor = improvingRate * (0.75 * depth);
-
-                var rfpThreshold = rfpMargin + improvingFactor;
-
-                if (staticEval - rfpThreshold >= beta)
+                if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
                 {
-#pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
-                    return (staticEval + beta) / 2;
-#pragma warning restore S3949 // Calculations should not overflow
-                }
+                    // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
+                    // Return formula by Ciekce, instead of just returning static eval
+                    // Improving impl. based on Potential's
+                    var rfpMargin = improving ? 80 * (depth - 1) : 100 * depth;
+                    var improvingFactor = improvingRate * (0.75 * depth);
 
-                // 🔍 Razoring - Strelka impl (CPW) - https://www.chessprogramming.org/Razoring#Strelka
-                if (depth <= Configuration.EngineSettings.Razoring_MaxDepth)
-                {
-                    var score = staticEval + Configuration.EngineSettings.Razoring_Depth1Bonus;
+                    var rfpThreshold = rfpMargin + improvingFactor;
 
-                    if (score < beta)               // Static evaluation + bonus indicates fail-low node
+                    if (staticEval - rfpThreshold >= beta)
                     {
-                        if (depth == 1)
+#pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
+                        return (staticEval + beta) / 2;
+#pragma warning restore S3949 // Calculations should not overflow
+                    }
+
+                    // 🔍 Razoring - Strelka impl (CPW) - https://www.chessprogramming.org/Razoring#Strelka
+                    if (depth <= Configuration.EngineSettings.Razoring_MaxDepth)
+                    {
+                        var score = staticEval + Configuration.EngineSettings.Razoring_Depth1Bonus;
+
+                        if (score < beta)               // Static evaluation + bonus indicates fail-low node
                         {
-                            var qSearchScore = QuiescenceSearch(ply, alpha, beta);
-
-                            return qSearchScore > score
-                                ? qSearchScore
-                                : score;
-                        }
-
-                        score += Configuration.EngineSettings.Razoring_NotDepth1Bonus;
-
-                        if (score < beta)               // Static evaluation indicates fail-low node
-                        {
-                            var qSearchScore = QuiescenceSearch(ply, alpha, beta);
-                            if (qSearchScore < beta)    // Quiescence score also indicates fail-low node
+                            if (depth == 1)
                             {
+                                var qSearchScore = QuiescenceSearch(ply, alpha, beta, cancellationToken);
+
                                 return qSearchScore > score
                                     ? qSearchScore
                                     : score;
                             }
+
+                            score += Configuration.EngineSettings.Razoring_NotDepth1Bonus;
+
+                            if (score < beta)               // Static evaluation indicates fail-low node
+                            {
+                                var qSearchScore = QuiescenceSearch(ply, alpha, beta, cancellationToken);
+                                if (qSearchScore < beta)    // Quiescence score also indicates fail-low node
+                                {
+                                    return qSearchScore > score
+                                        ? qSearchScore
+                                        : score;
+                                }
+                            }
                         }
                     }
                 }
-            }
 
-            var staticEvalBetaDiff = staticEval - beta;
+                var staticEvalBetaDiff = staticEval - beta;
 
-            // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
-            if (depth >= Configuration.EngineSettings.NMP_MinDepth
-                && staticEvalBetaDiff >= 0
-                && !parentWasNullMove
-                && phase > 2   // Zugzwang risk reduction: pieces other than pawn presents
-                && (ttElementType != NodeType.Alpha || ttScore >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
-            {
-                var nmpReduction = Configuration.EngineSettings.NMP_BaseDepthReduction
-                    + ((depth + Configuration.EngineSettings.NMP_DepthIncrement) / Configuration.EngineSettings.NMP_DepthDivisor)   // Clarity
-                    + Math.Min(
-                        Configuration.EngineSettings.NMP_StaticEvalBetaMaxReduction,
-                        staticEvalBetaDiff / Configuration.EngineSettings.NMP_StaticEvalBetaDivisor);
-
-                // TODO more advanced adaptative reduction, similar to what Ethereal and Stormphrax are doing
-                //var nmpReduction = Math.Min(
-                //    depth,
-                //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
-
-                var gameState = position.MakeNullMove();
-                var nmpScore = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, !cutnode, parentWasNullMove: true);
-                position.UnMakeNullMove(gameState);
-
-                if (nmpScore >= beta)
+                // 🔍 Null Move Pruning (NMP) - our position is so good that we can potentially afford giving our opponent a double move and still remain ahead of beta
+                if (depth >= Configuration.EngineSettings.NMP_MinDepth
+                    && staticEvalBetaDiff >= 0
+                    && !parentWasNullMove
+                    && phase > 2   // Zugzwang risk reduction: pieces other than pawn presents
+                    && (ttElementType != NodeType.Alpha || ttRawScore >= beta))   // TT suggests NMP will fail: entry must not be a fail-low entry with a score below beta - Stormphrax and Ethereal
                 {
-                    return nmpScore;
+                    var nmpReduction = Configuration.EngineSettings.NMP_BaseDepthReduction
+                        + ((depth + Configuration.EngineSettings.NMP_DepthIncrement) / Configuration.EngineSettings.NMP_DepthDivisor)   // Clarity
+                        + Math.Min(
+                            Configuration.EngineSettings.NMP_StaticEvalBetaMaxReduction,
+                            staticEvalBetaDiff / Configuration.EngineSettings.NMP_StaticEvalBetaDivisor);
+
+                    // TODO more advanced adaptative reduction, similar to what Ethereal and Stormphrax are doing
+                    //var nmpReduction = Math.Min(
+                    //    depth,
+                    //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
+
+                    var gameState = position.MakeNullMove();
+                    var nmpScore = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, !cutnode, cancellationToken, parentWasNullMove: true);
+                    position.UnMakeNullMove(gameState);
+
+                    if (nmpScore >= beta)
+                    {
+                        return nmpScore;
+                    }
                 }
             }
+        }
+        else
+        {
+            staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
         }
 
         // 🔍 IIR again - the return of the nonsense
@@ -302,7 +308,7 @@ public sealed partial class Engine
                 _tt.PrefetchTTEntry(position);
                 bool isCutNode = !pvNode && !cutnode;   // Linter 'simplification' of pvNode ? false : !cutnode
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
-                score = -NegaMax(depth - 1, ply + 1, -beta, -alpha, isCutNode);
+                score = -NegaMax(depth - 1, ply + 1, -beta, -alpha, isCutNode, cancellationToken);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
             }
             else
@@ -311,7 +317,9 @@ public sealed partial class Engine
                 bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
 
                 // Fail-low pruning (moves with low scores) - prune less when improving
-                if (!pvNode && !isInCheck && isNotGettingCheckmated
+                if (!pvNode
+                    && !isInCheck
+                    && isNotGettingCheckmated
                     && moveScores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue) // Quiet move
                 {
                     // 🔍 Late Move Pruning (LMP) - all quiet moves can be pruned
@@ -336,10 +344,7 @@ public sealed partial class Engine
 
                     // 🔍 Futility Pruning (FP) - all quiet moves can be pruned
                     // once it's considered that they don't have potential to raise alpha
-                    if (visitedMovesCounter > 0
-                        //&& alpha < EvaluationConstants.PositiveCheckmateDetectionLimit
-                        //&& beta > EvaluationConstants.NegativeCheckmateDetectionLimit
-                        && depth <= Configuration.EngineSettings.FP_MaxDepth
+                    if (depth <= Configuration.EngineSettings.FP_MaxDepth
                         && staticEval + Configuration.EngineSettings.FP_Margin + (Configuration.EngineSettings.FP_DepthScalingFactor * depth) <= alpha)
                     {
                         RevertMove();
@@ -405,7 +410,7 @@ public sealed partial class Engine
 
                 cutnode = reduction > 0;
                 // Search with reduced depth
-                score = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha, cutnode);
+                score = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha, cutnode, cancellationToken);
 
                 // 🔍 Principal Variation Search (PVS)
                 if (score > alpha && reduction > 0)
@@ -415,14 +420,14 @@ public sealed partial class Engine
                     // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
 
                     // Search with full depth but narrowed score bandwidth
-                    score = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha, !cutnode);
+                    score = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha, !cutnode, cancellationToken);
                 }
 
                 if (score > alpha && score < beta)
                 {
                     // PVS Hypothesis invalidated -> search with full depth and full score bandwidth
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
-                    score = -NegaMax(depth - 1, ply + 1, -beta, -alpha, cutnode: false);
+                    score = -NegaMax(depth - 1, ply + 1, -beta, -alpha, cutnode: false, cancellationToken);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
                 }
             }
@@ -497,7 +502,7 @@ public sealed partial class Engine
             Debug.Assert(bestMove is null);
 
             var finalEval = Position.EvaluateFinalPosition(ply, isInCheck);
-            _tt.RecordHash(position, staticEval, depth, ply, finalEval, NodeType.Exact);
+            _tt.RecordHash(position, finalEval, depth, ply, finalEval, NodeType.Exact);
 
             return finalEval;
         }
@@ -520,12 +525,11 @@ public sealed partial class Engine
     /// Defaults to the works possible score for Black, Int.MaxValue
     /// </param>
     [SkipLocalsInit]
-    public int QuiescenceSearch(int ply, int alpha, int beta)
+    public int QuiescenceSearch(int ply, int alpha, int beta, CancellationToken cancellationToken)
     {
         var position = Game.CurrentPosition;
 
-        _absoluteSearchCancellationTokenSource.Token.ThrowIfCancellationRequested();
-        _searchCancellationTokenSource.Token.ThrowIfCancellationRequested();
+        cancellationToken.ThrowIfCancellationRequested();
 
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
@@ -622,7 +626,7 @@ public sealed partial class Engine
             Game.UpdateMoveinStack(ply, move);
 
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
-            int score = -QuiescenceSearch(ply + 1, -beta, -alpha);
+            int score = -QuiescenceSearch(ply + 1, -beta, -alpha, cancellationToken);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
             position.UnmakeMove(move, gameState);
 
@@ -662,7 +666,7 @@ public sealed partial class Engine
             Debug.Assert(bestMove is null);
 
             var finalEval = Position.EvaluateFinalPosition(ply, position.IsInCheck());
-            _tt.RecordHash(position, staticEval, 0, ply, finalEval, NodeType.Exact);
+            _tt.RecordHash(position, finalEval, 0, ply, finalEval, NodeType.Exact);
 
             return finalEval;
         }

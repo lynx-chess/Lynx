@@ -1,7 +1,6 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Runtime.Intrinsics.X86;
 using System.Text;
 
 namespace Lynx;
@@ -119,11 +118,13 @@ public sealed partial class Engine
             var move = _pVTable[i];
             TryParseMove(position, i, move);
 
+#pragma warning disable CA2000 // Dispose objects before losing scope - disposing it fixes the existing logic, and this is a debug-only method anyway
             var newPosition = new Position(position);
+#pragma warning restore CA2000 // Dispose objects before losing scope
             newPosition.MakeMove(move);
             if (!newPosition.WasProduceByAValidMove())
             {
-                throw new AssertException($"Invalid position after move {move.UCIString()} from position {position.FEN()}");
+                throw new LynxException($"Invalid position after move {move.UCIString()} from position {position.FEN()}");
             }
             position = newPosition;
         }
@@ -139,7 +140,7 @@ public sealed partial class Engine
             {
                 var message = $"Unexpected PV move {i}: {move.UCIString()} from position {position.FEN()}";
                 _logger.Error(message);
-                throw new AssertException(message);
+                throw new LynxException(message);
             }
         }
     }
