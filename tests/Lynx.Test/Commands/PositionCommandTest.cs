@@ -20,10 +20,13 @@ public class PositionCommandTest
         var engine = new Engine(new Mock<ChannelWriter<object>>().Object);
         engine.NewGame();
         engine.AdjustPosition($"position fen {Constants.InitialPositionFEN} moves e2e4");
+        var goCommand = new GoCommand($"go depth {Engine.DefaultMaxDepth}");
+        var searchConstraints = TimeManager.CalculateTimeManagement(engine.Game, goCommand);
 
-        var resultTask = Task.Run(() => engine.BestMove(new($"go depth {Engine.DefaultMaxDepth}")));
+        using var cts = new CancellationTokenSource();
+        var resultTask = Task.Run(() => engine.BestMove(searchConstraints, isPondering: false, cts.Token, CancellationToken.None));
 
-        engine.StopSearching();
+        await cts.CancelAsync();
         await resultTask;
 
         // Act

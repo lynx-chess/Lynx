@@ -147,7 +147,9 @@ public static class Constants
     /// <summary>
     /// Covert ASCII character pieces to encoded constants
     /// </summary>
+#pragma warning disable S2386,S3887 // Mutable fields should not be "public static"
     public static readonly FrozenDictionary<char, Piece> PiecesByChar = new Dictionary<char, Piece>(12)
+#pragma warning restore S2386,S3887 // Mutable fields should not be "public static"
     {
         ['P'] = Piece.P,
         ['N'] = Piece.N,
@@ -310,6 +312,8 @@ public static class Constants
     public static int AbsoluteMaxTTSize => (int)((ulong)Array.MaxLength * TranspositionTableElement.Size / (1024 * 1024));
 
     public const int AbsoluteMinTTSize = 1;
+
+    public static readonly int MaxThreadCount = Array.MaxLength + 1;
 
     /// <summary>
     /// 218 or 224 seems to be the known limit

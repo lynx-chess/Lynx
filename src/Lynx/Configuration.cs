@@ -7,9 +7,9 @@ public static class Configuration
     public static EngineSettings EngineSettings { get; set; } = new EngineSettings();
     public static GeneralSettings GeneralSettings { get; set; } = new GeneralSettings();
 
-    private static int _isDebug = 0;
+    private static int _isDebug;
 #pragma warning disable IDE1006 // Naming Styles
-    private static int _UCI_AnalyseMode = 0;
+    private static int _UCI_AnalyseMode;
 #pragma warning restore IDE1006 // Naming Styles
 
     public static bool IsDebug
@@ -53,9 +53,9 @@ public static class Configuration
 
 public sealed class GeneralSettings
 {
-    public bool EnableLogging { get; set; } = false;
+    public bool EnableLogging { get; set; }
 
-    public bool EnableTuning { get; set; } = false;
+    public bool EnableTuning { get; set; }
 }
 
 public sealed class EngineSettings
@@ -82,21 +82,32 @@ public sealed class EngineSettings
                 Constants.AbsoluteMaxTTSize);
     }
 
-    public bool UseOnlineTablebaseInRootPositions { get; set; } = false;
+    private int _threads = 1;
+    public int Threads
+    {
+        get => _threads;
+        set => _threads =
+            Math.Clamp(
+                value,
+                1,
+                Constants.MaxThreadCount);
+    }
+
+    public bool UseOnlineTablebaseInRootPositions { get; set; }
 
     /// <summary>
     /// Experimental, might misbehave due to tablebase API limits
     /// </summary>
-    public bool UseOnlineTablebaseInSearch { get; set; } = false;
+    public bool UseOnlineTablebaseInSearch { get; set; }
 
     /// <summary>
     /// This can also de used to reduce online probing
     /// </summary>
     public int OnlineTablebaseMaxSupportedPieces { get; set; } = 7;
 
-    public bool ShowWDL { get; set; } = false;
+    public bool ShowWDL { get; set; }
 
-    public bool IsPonder { get; set; } = false;
+    public bool IsPonder { get; set; }
 
     public double SPSA_OB_R_end { get; set; } = 0.02;
 
@@ -135,6 +146,8 @@ public sealed class EngineSettings
     public int ScoreStabiity_MinDepth { get; set; } = 7;
 
     #endregion
+
+    #region Search
 
     [SPSA<int>(3, 10, 0.5)]
     public int LMR_MinDepth { get; set; } = 3;
@@ -238,6 +251,8 @@ public sealed class EngineSettings
 
     [SPSA<int>(-8192, 0, 512)]
     public int HistoryPrunning_Margin { get; set; } = -1940;
+
+    #endregion
 }
 
 [JsonSourceGenerationOptions(
@@ -247,4 +262,4 @@ public sealed class EngineSettings
 [JsonSerializable(typeof(SPSAAttribute<double>))]
 [JsonSerializable(typeof(WeatherFactoryOutput<int>))]
 [JsonSerializable(typeof(WeatherFactoryOutput<double>))]
-internal partial class EngineSettingsJsonSerializerContext : JsonSerializerContext;
+internal sealed partial class EngineSettingsJsonSerializerContext : JsonSerializerContext;

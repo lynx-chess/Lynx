@@ -1,5 +1,4 @@
-﻿using Lynx.Model;
-using System.Numerics;
+﻿using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics.X86;
 
@@ -33,7 +32,9 @@ public static class Attacks
     public static BitBoard[] KnightAttacks { get; }
     public static BitBoard[] KingAttacks { get; }
 
+#pragma warning disable CA1810 // Initialize reference type static fields inline
     static Attacks()
+#pragma warning restore CA1810 // Initialize reference type static fields inline
     {
         KingAttacks = AttackGenerator.InitializeKingAttacks();
         PawnAttacks = AttackGenerator.InitializePawnAttacks();

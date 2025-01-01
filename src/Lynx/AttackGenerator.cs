@@ -139,7 +139,9 @@ public static class AttackGenerator
         BitBoard attacks = default;
 
         // Piece bitboard
+#pragma warning disable S3353 // Unchanged local variables should be "const" - FP https://community.sonarsource.com/t/fp-s3353-value-modified-in-ref-extension-method/132389
         BitBoard bitBoard = default;
+#pragma warning restore S3353 // Unchanged local variables should be "const"
 
         // Set piece on board
         bitBoard.SetBit(squareIndex);
@@ -202,7 +204,9 @@ public static class AttackGenerator
         BitBoard attacks = default;
 
         // Piece bitboard
+#pragma warning disable S3353 // Unchanged local variables should be "const" - FP https://community.sonarsource.com/t/fp-s3353-value-modified-in-ref-extension-method/132389
         BitBoard bitBoard = default;
+#pragma warning restore S3353 // Unchanged local variables should be "const"
 
         // Set piece on board
         bitBoard.SetBit(squareIndex);
@@ -320,7 +324,9 @@ public static class AttackGenerator
         BitBoard attacks = default;
 
         // Piece bitboard
+#pragma warning disable S3353 // Unchanged local variables should be "const" - FP https://community.sonarsource.com/t/fp-s3353-value-modified-in-ref-extension-method/132389
         BitBoard bitBoard = default;
+#pragma warning restore S3353 // Unchanged local variables should be "const"
 
         // Set piece on board
         bitBoard.SetBit(squareIndex);
@@ -556,7 +562,10 @@ public static class AttackGenerator
     public static BitBoard SetBishopOrRookOccupancy(int index, BitBoard occupancyMask)
     {
         var bitsInMask = occupancyMask.CountBits();
-        var occupancy = new BitBoard();
+
+#pragma warning disable S3353 // Unchanged local variables should be "const" - FP https://community.sonarsource.com/t/fp-s3353-value-modified-in-ref-extension-method/132389
+        BitBoard occupancy = default;
+#pragma warning restore S3353 // Unchanged local variables should be "const"
 
         // Loop over the range of bits within attack mask
         for (int count = 0; count < bitsInMask; ++count)

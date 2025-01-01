@@ -1,6 +1,4 @@
-﻿using Lynx.Model;
-
-#pragma warning disable IDE1006 // Naming Styles
+﻿#pragma warning disable IDE1006 // Naming Styles
 
 namespace Lynx;
 
@@ -104,9 +102,9 @@ public static class EvaluationConstants
     public const int MinEval = -32_000;    // -CheckMateBaseEvaluation - (Constants.AbsoluteMaxDepth + 45) * DepthCheckmateFactor;
 
     /// <summary>
-    /// This value combined with <see cref="PositiveCheckmateDetectionLimit"/> and <see cref="NegativeCheckmateDetectionLimit"/> should allows mates up to in <see cref="Constants.AbsoluteMaxDepth"/> moves.
+    /// This value combined with <see cref="PositiveCheckmateDetectionLimit"/> and <see cref="NegativeCheckmateDetectionLimit"/> should allow mates up to in <see cref="Constants.AbsoluteMaxDepth"/> moves.
     /// </summary>
-    public const int CheckmateDepthFactor = 10;
+    public const int CheckmateDepthFactor = 1;
 
     /// <summary>
     /// Minimum evaluation for a position to be White checkmate
@@ -114,9 +112,13 @@ public static class EvaluationConstants
     public const int PositiveCheckmateDetectionLimit = 26_000; // CheckMateBaseEvaluation - (Constants.AbsoluteMaxDepth + 45) * DepthCheckmateFactor;
 
     /// <summary>
-    /// Minimum evaluation for a position to be Black checkmate
+    /// Maximum evaluation for a position to be Black checkmate
     /// </summary>
     public const int NegativeCheckmateDetectionLimit = -26_000; // -CheckMateBaseEvaluation + (Constants.AbsoluteMaxDepth + 45) * DepthCheckmateFactor;
+
+    public const int MaxMate = 1500; // Utils.CalculateMateInX(PositiveCheckmateDetectionLimit + 1);
+
+    public const int MinMate = -1500; // Utils.CalculateMateInX(NegativeCheckmateDetectionLimit -1);
 
     /// <summary>
     /// Max static eval. It doesn't include checkmate values and it's below <see cref="PositiveCheckmateDetectionLimit"/>

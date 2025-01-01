@@ -32,7 +32,7 @@ public static class Runner
 
         try
         {
-            Console.WriteLine($"{IdCommand.EngineName} {IdCommand.GetVersion()} by {IdCommand.EngineAuthor}");
+            Console.WriteLine($"{IdCommand.EngineName} {IdCommand.GetLynxVersion()} by {IdCommand.EngineAuthor}");
             await Task.WhenAny(tasks);
         }
         catch (AggregateException ae)
