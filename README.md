@@ -70,7 +70,7 @@ If you're a Linux user and are new to .NET ecosystem, the conversation in [this 
 
 ### Instructions
 
-- Clone the repo and preferably checkout one of the [tagged commits](https://github.com/lynx-chess/Lynx/tags).
+- Clone the repo, and preferably checkout one of the [released tags](https://github.com/lynx-chess/Lynx/releases).
 
 - Run `make` to build a self-contained binary similar to the pre-compiled ones.
 
