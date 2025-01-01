@@ -556,9 +556,11 @@ public sealed partial class Engine
 
         _maxDepthReached[ply] = ply;
 
-        var staticEval = ttHit // TODO check if static eval
+        var staticEval = ttHit
             ? ttProbeResult.StaticEval
             : position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
+
+        Debug.Assert(staticEval != EvaluationConstants.NoHashEntry, "Assertion failed", "All TT entries should have a static eval");
 
         Game.UpdateStaticEvalInStack(ply, staticEval);
 

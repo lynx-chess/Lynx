@@ -66,7 +66,7 @@ public readonly struct TranspositionTable
 
         if ((ushort)position.UniqueIdentifier != entry.Key)
         {
-            return (EvaluationConstants.NoHashEntry, default, default, default, default);
+            return (EvaluationConstants.NoHashEntry, default, default, EvaluationConstants.NoHashEntry, default);
         }
 
         // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
