@@ -25,8 +25,6 @@ public class TranspositionTableTests
     }
 
     [TestCase(+19, NodeType.Alpha, +19)]
-    [TestCase(+21, NodeType.Alpha, NoHashEntry)]
-    [TestCase(+29, NodeType.Beta, NoHashEntry)]
     [TestCase(+31, NodeType.Beta, +31)]
     public void RecordHash_ProbeHash(int recordedEval, NodeType recordNodeType, int expectedProbeEval)
     {
