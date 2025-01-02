@@ -113,19 +113,20 @@ public sealed class EngineSettings
 
     #region Time management
 
-    public double HardTimeBoundMultiplier { get; set; } = 0.52;
+    [SPSA<double>(0.1, 1, 0.1)]
+    public double HardTimeBoundMultiplier { get; set; } = 0.60;
 
-    public double SoftTimeBoundMultiplier { get; set; } = 1;
+    [SPSA<double>(0.5, 1.5, 0.1)]
+    public double SoftTimeBoundMultiplier { get; set; } = 1.04;
 
-    public double SoftTimeBaseIncrementMultiplier { get; set; } = 0.8;
+    [SPSA<double>(0.1, 2, 0.2)]
+    public double SoftTimeBaseIncrementMultiplier { get; set; } = 1.22;
 
-    [SPSA<double>(1, 3, 0.1)]
-    public double NodeTmBase { get; set; } = 2.4;
+    [SPSA<double>(1, 2, 0.2)]
+    public double NodeTmBase { get; set; } = 1.65;
 
-    [SPSA<double>(0.5, 2.5, 0.1)]
-    public double NodeTmScale { get; set; } = 1.65;
+    public int NodeTmScale { get; set; } = 1;
 
-    [SPSA<int>(1, 15, 1)]
     public int ScoreStabiity_MinDepth { get; set; } = 7;
 
     #endregion
