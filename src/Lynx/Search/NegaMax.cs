@@ -497,7 +497,7 @@ public sealed partial class Engine
             Debug.Assert(bestMove is null);
 
             var finalEval = Position.EvaluateFinalPosition(ply, isInCheck);
-            _tt.RecordHash(position, finalEval, depth, ply, finalEval, NodeType.Exact);
+            _tt.RecordHash(position, staticEval, depth, ply, finalEval, NodeType.Exact);
 
             return finalEval;
         }
@@ -556,13 +556,10 @@ public sealed partial class Engine
 
         _maxDepthReached[ply] = ply;
 
-        /*
         var staticEval = ttHit
             ? ttProbeResult.StaticEval
             : position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
-        */
 
-        var staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
         Debug.Assert(staticEval != EvaluationConstants.NoHashEntry, "Assertion failed", "All TT entries should have a static eval");
 
         Game.UpdateStaticEvalInStack(ply, staticEval);
@@ -677,7 +674,7 @@ public sealed partial class Engine
             Debug.Assert(bestMove is null);
 
             var finalEval = Position.EvaluateFinalPosition(ply, position.IsInCheck());
-            _tt.RecordHash(position, finalEval, 0, ply, finalEval, NodeType.Exact);
+            _tt.RecordHash(position, staticEval, 0, ply, finalEval, NodeType.Exact);
 
             return finalEval;
         }
