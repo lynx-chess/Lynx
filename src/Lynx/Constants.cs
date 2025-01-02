@@ -102,28 +102,28 @@ public static class Constants
     /// <summary>
     /// 8   0 0 0 0 0 0 0 0
     /// 7   0 0 0 0 0 0 0 0
-    /// 6   1 1 1 1 1 1 1 1
-    /// 5   1 1 1 1 1 1 1 1
-    /// 4   1 1 1 1 1 1 1 1
+    /// 6   0 1 1 1 1 1 1 0
+    /// 5   0 1 1 1 1 1 1 0
+    /// 4   0 1 1 1 1 1 1 0
     /// 3   0 0 0 0 0 0 0 0
     /// 2   0 0 0 0 0 0 0 0
     /// 1   0 0 0 0 0 0 0 0
     ///     a b c d e f g h
     /// </summary>
-    public const BitBoard KnightOutpostWhiteRanks = 0x187E7E7E7E3C;
+    public const BitBoard KnightOutpostWhiteRanks = 0x7E7E7E0000;
 
     /// <summary>
     /// 8   0 0 0 0 0 0 0 0
     /// 7   0 0 0 0 0 0 0 0
     /// 6   0 0 0 0 0 0 0 0
-    /// 6   1 1 1 1 1 1 1 1
-    /// 5   1 1 1 1 1 1 1 1
-    /// 3   1 1 1 1 1 1 1 1
+    /// 6   0 1 1 1 1 1 1 0
+    /// 5   0 1 1 1 1 1 1 0
+    /// 3   0 1 1 1 1 1 1 0
     /// 2   0 0 0 0 0 0 0 0
     /// 1   0 0 0 0 0 0 0 0
     ///     a b c d e f g h
     /// </summary>
-    public const BitBoard KnightOutpostBlackRanks = 0x3C7E7E7E7E180000;
+    public const BitBoard KnightOutpostBlackRanks = 0x7E7E7E000000;
 
     public static ReadOnlySpan<BitBoard> KnightOutpostRanksBySide => [KnightOutpostBlackRanks, KnightOutpostWhiteRanks];
 
