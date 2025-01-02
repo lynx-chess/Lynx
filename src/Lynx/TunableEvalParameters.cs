@@ -6050,7 +6050,7 @@ public static class EvaluationParams
 	/// </summary>
 	public const int BishopPairBonus = 4718622;
 
-	public const int KnightOutpostBonus = 1234;
+    public const int KnightOutpostBonus = 983052;
 
     /// <summary>
     /// <see cref="Utils.Pack(12, 15)"/>
