@@ -165,7 +165,9 @@ public static class Masks
     {
         InitializeMasks();
 
+#pragma warning disable S3353 // Unchanged local variables should be "const" - FP https://community.sonarsource.com/t/fp-s3353-value-modified-in-ref-extension-method/132389
         ulong whiteKnightOutpostMask = 0, blackKnightOutpostMask = 0;
+#pragma warning restore S3353 // Unchanged local variables should be "const"
         for (int rank = 0; rank < 8; ++rank)
         {
             for (int file = 0; file < 8; ++file)
@@ -238,7 +240,9 @@ public static class Masks
 
     private static BitBoard SetFileRankMask(int fileIndex, int rankIndex)
     {
+#pragma warning disable S3353 // Unchanged local variables should be "const" - FP https://community.sonarsource.com/t/fp-s3353-value-modified-in-ref-extension-method/132389
         BitBoard mask = 0;
+#pragma warning restore S3353 // Unchanged local variables should be "const"
 
         for (int rank = 0; rank < 8; ++rank)
         {

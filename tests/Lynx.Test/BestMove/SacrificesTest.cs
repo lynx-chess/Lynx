@@ -10,6 +10,6 @@ public class SacrificesTest : BaseTest
         Description = "Actual Bishop sacrifice - https://lichess.org/VaY6zfHI/white#84")]
     public void Sacrifices(string fen, string[]? allowedUCIMoveString, string[]? excludedUCIMoveString = null)
     {
-        TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 20);
+        TestBestMove(fen, allowedUCIMoveString, excludedUCIMoveString, depth: 25);
     }
 }

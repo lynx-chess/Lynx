@@ -1,31 +1,42 @@
-﻿using NLog;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace Lynx.Model;
 
+#pragma warning disable S4022 // Enumerations should have "Int32" storage - size matters
 public enum NodeType : byte
+#pragma warning restore S4022 // Enumerations should have "Int32" storage
 {
     Unknown,    // Making it 0 instead of -1 because of default struct initialization
+
     Exact,
+
+    /// <summary>
+    /// UpperBound
+    /// </summary>
     Alpha,
+
+    /// <summary>
+    /// LowerBound
+    /// </summary>
     Beta
 }
 
+/// <summary>
+/// 10 bytes
+/// </summary>
 public struct TranspositionTableElement
 {
-    private ushort _key;
+    private ushort _key;        // 2 bytes
 
-    private ShortMove _move;
+    private ShortMove _move;    // 2 bytes
 
-    private short _score;
+    private short _score;       // 2 bytes
 
-    private short _staticEval;
+    private short _staticEval;  // 2 bytes
 
-    private byte _depth;
+    private byte _depth;        // 1 byte
 
-    private NodeType _type;
+    private NodeType _type;     // 1 byte
 
     /// <summary>
     /// 16 MSB of Position's Zobrist key
@@ -63,7 +74,7 @@ public struct TranspositionTableElement
     /// <summary>
     /// Struct size in bytes
     /// </summary>
-    public static ulong Size => (ulong)Marshal.SizeOf(typeof(TranspositionTableElement));
+    public static ulong Size => (ulong)Marshal.SizeOf<TranspositionTableElement>();
 
     public void Update(ulong key, int score, int staticEval, int depth, NodeType nodeType, Move? move)
     {

@@ -383,4 +383,4 @@ tmp/
 
 # Exclude all source generators output but ours
 **/Generated/*
-!**/Generated/Lynx.Generator/
+#!**/Generated/Lynx.Generator/

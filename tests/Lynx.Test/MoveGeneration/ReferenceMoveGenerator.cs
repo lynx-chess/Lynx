@@ -195,6 +195,6 @@ public static class ReferenceMoveGenerator
             }
         }
 
-        throw new AssertException("No captured piece found");
+        throw new LynxException("No captured piece found");
     }
 }

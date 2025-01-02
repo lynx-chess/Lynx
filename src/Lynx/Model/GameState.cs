@@ -1,4 +1,7 @@
 ﻿namespace Lynx.Model;
+
+#pragma warning disable CA1051 // Do not declare visible instance fields
+
 public readonly struct GameState
 {
     public readonly ulong ZobristKey;
@@ -14,3 +17,5 @@ public readonly struct GameState
         Castle = castle;
     }
 }
+
+#pragma warning restore CA1051 // Do not declare visible instance fields
