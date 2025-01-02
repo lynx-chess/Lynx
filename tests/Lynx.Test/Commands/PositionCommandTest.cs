@@ -24,7 +24,7 @@ public class PositionCommandTest
         var searchConstraints = TimeManager.CalculateTimeManagement(engine.Game, goCommand);
 
         using var cts = new CancellationTokenSource();
-        var resultTask = Task.Run(() => engine.BestMove(searchConstraints, cts.Token, CancellationToken.None));
+        var resultTask = Task.Run(() => engine.BestMove(searchConstraints, isPondering: false, cts.Token, CancellationToken.None));
 
         await cts.CancelAsync();
         await resultTask;

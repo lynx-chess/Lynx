@@ -57,7 +57,7 @@ public sealed class UCIHandler
                     await HandleIsReady(cancellationToken);
                     break;
                 case PonderHitCommand.Id:
-                    HandlePonderHit();
+                    await HandlePonderHit();
                     break;
                 case PositionCommand.Id:
                     HandlePosition(rawCommand);
@@ -69,7 +69,7 @@ public sealed class UCIHandler
                     HandleSetOption(rawCommand);
                     break;
                 case StopCommand.Id:
-                    HandleStop();
+                    await HandleStop();
                     break;
                 case UCICommand.Id:
                     await HandleUCI(cancellationToken);
@@ -144,7 +144,7 @@ public sealed class UCIHandler
 #endif
     }
 
-    private void HandleStop() => _searcher.StopSearching();
+    private async Task HandleStop() => await _searcher.StopSearching();
 
     private async Task HandleUCI(CancellationToken cancellationToken)
     {
@@ -161,11 +161,11 @@ public sealed class UCIHandler
 
     private async Task HandleIsReady(CancellationToken cancellationToken) => await SendCommand(ReadyOKCommand.Id, cancellationToken);
 
-    private void HandlePonderHit()
+    private async Task HandlePonderHit()
     {
         if (Configuration.EngineSettings.IsPonder)
         {
-            _searcher.PonderHit();
+            await _searcher.PonderHit();
         }
         else
         {
