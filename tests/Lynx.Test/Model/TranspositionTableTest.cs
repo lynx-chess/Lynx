@@ -14,11 +14,11 @@ public class TranspositionTableTests
     [TestCase(-10_000, 5, -10_000)]
     [TestCase(NegativeCheckmateDetectionLimit + 1, 5, NegativeCheckmateDetectionLimit + 1)]
 
-    [TestCase(CheckMateBaseEvaluation - (5 * CheckmateDepthFactor), 2, CheckMateBaseEvaluation - (7 * CheckmateDepthFactor))]
-    [TestCase(CheckMateBaseEvaluation - (2 * CheckmateDepthFactor), 4, CheckMateBaseEvaluation - (6 * CheckmateDepthFactor))]
+    [TestCase(CheckMateBaseEvaluation - 5, 2, CheckMateBaseEvaluation - 7)]
+    [TestCase(CheckMateBaseEvaluation - 2, 4, CheckMateBaseEvaluation - 6)]
 
-    [TestCase(-CheckMateBaseEvaluation + (5 * CheckmateDepthFactor), 2, -CheckMateBaseEvaluation + (7 * CheckmateDepthFactor))]
-    [TestCase(-CheckMateBaseEvaluation + (2 * CheckmateDepthFactor), 4, -CheckMateBaseEvaluation + (6 * CheckmateDepthFactor))]
+    [TestCase(-CheckMateBaseEvaluation + 5, 2, -CheckMateBaseEvaluation + 7)]
+    [TestCase(-CheckMateBaseEvaluation + 2, 4, -CheckMateBaseEvaluation + 6)]
     public void RecalculateMateScores(int evaluation, int depth, int expectedEvaluation)
     {
         Assert.AreEqual(expectedEvaluation, TranspositionTable.RecalculateMateScores(evaluation, depth));
@@ -40,8 +40,8 @@ public class TranspositionTableTests
         Assert.AreEqual(staticEval, ttEntry.StaticEval);
     }
 
-    [TestCase(CheckMateBaseEvaluation - (8 * CheckmateDepthFactor))]
-    [TestCase(-CheckMateBaseEvaluation + (3 * CheckmateDepthFactor))]
+    [TestCase(CheckMateBaseEvaluation - 8)]
+    [TestCase(-CheckMateBaseEvaluation + 3)]
     public void RecordHash_ProbeHash_CheckmateSameDepth(int recordedEval)
     {
         const int sharedDepth = 5;
@@ -55,10 +55,10 @@ public class TranspositionTableTests
         Assert.AreEqual(recordedEval, ttEntry.StaticEval);
     }
 
-    [TestCase(CheckMateBaseEvaluation - (8 * CheckmateDepthFactor), 5, 4, CheckMateBaseEvaluation - (7 * CheckmateDepthFactor))]
-    [TestCase(CheckMateBaseEvaluation - (8 * CheckmateDepthFactor), 5, 6, CheckMateBaseEvaluation - (9 * CheckmateDepthFactor))]
-    [TestCase(-CheckMateBaseEvaluation + (8 * CheckmateDepthFactor), 5, 4, -CheckMateBaseEvaluation + (7 * CheckmateDepthFactor))]
-    [TestCase(-CheckMateBaseEvaluation + (8 * CheckmateDepthFactor), 5, 6, -CheckMateBaseEvaluation + (9 * CheckmateDepthFactor))]
+    [TestCase(CheckMateBaseEvaluation - 8, 5, 4, CheckMateBaseEvaluation - 7)]
+    [TestCase(CheckMateBaseEvaluation - 8, 5, 6, CheckMateBaseEvaluation - 9)]
+    [TestCase(-CheckMateBaseEvaluation + 8 , 5, 4, -CheckMateBaseEvaluation + 7)]
+    [TestCase(-CheckMateBaseEvaluation + 8 , 5, 6, -CheckMateBaseEvaluation + 9)]
     public void RecordHash_ProbeHash_CheckmateDifferentDepth(int recordedEval, int recordedDeph, int probeDepth, int expectedProbeEval)
     {
         var position = new Position(Constants.InitialPositionFEN);
