@@ -6013,8 +6013,6 @@ internal static class TunableEvalParameters
 
 public static class EvaluationParams
 {
-#pragma warning disable IDE0051, IDE0052, CS0169 // Remove unread private members
-
 	/// <summary>
 	/// <see cref="Utils.Pack(-17, -14)"/>
 	/// </summary>
@@ -6059,8 +6057,6 @@ public static class EvaluationParams
 	/// <see cref="Utils.Pack(-47, -33)"/>
 	/// </summary>
 	public const int PieceAttackedByPawnPenalty = -2162735;
-
-#pragma warning restore IDE0051, IDE0052, CS0169 // Remove unread private members
 
 	public static readonly TaperedEvaluationTermByRank PawnPhalanxBonus =
 	[
