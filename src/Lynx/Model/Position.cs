@@ -424,7 +424,11 @@ public class Position : IDisposable
             // Bitboard copy that we 'empty'
             var bitboard = PieceBitBoards[pieceIndex];
 
+            // Pieces protected by pawns bonus
             packedScore += PieceProtectedByPawnBonus[pieceIndex] * (whitePawnAttacks & bitboard).CountBits();
+
+            // Pieces attacked by pawns penalty
+            packedScore += PieceAttackedByPawnPenalty[pieceIndex] * (blackPawnAttacks & bitboard).CountBits();
 
             while (bitboard != default)
             {
@@ -446,8 +450,13 @@ public class Position : IDisposable
             // Bitboard copy that we 'empty'
             var bitboard = PieceBitBoards[pieceIndex];
 
+            var paramPieceIndex = pieceIndex - 6;
+
             // Pieces protected by pawns bonus
-            packedScore -= PieceProtectedByPawnBonus[pieceIndex - 6] * (blackPawnAttacks & bitboard).CountBits();
+            packedScore -= PieceProtectedByPawnBonus[paramPieceIndex] * (blackPawnAttacks & bitboard).CountBits();
+
+            // Pieces attacked by pawns penalty
+            packedScore -= PieceAttackedByPawnPenalty[paramPieceIndex] * (whitePawnAttacks & bitboard).CountBits();
 
             while (bitboard != default)
             {
@@ -481,11 +490,6 @@ public class Position : IDisposable
         {
             packedScore -= BishopPairBonus;
         }
-
-        // Pieces attacked by pawns bonus
-        packedScore += PieceAttackedByPawnPenalty
-            * ((blackPawnAttacks & OccupancyBitBoards[(int)Side.White] /* & (~whitePawns) */).CountBits()
-                - (whitePawnAttacks & OccupancyBitBoards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
 
         if (gamePhase > MaxPhase)    // Early promotions
         {

@@ -6048,11 +6048,6 @@ public static class EvaluationParams
 	/// </summary>
 	public const int BishopPairBonus = 4653086;
 
-	/// <summary>
-	/// <see cref="Utils.Pack(-48, -33)"/>
-	/// </summary>
-	public const int PieceAttackedByPawnPenalty = -2162736;
-
 	public static readonly int[] PieceProtectedByPawnBonus =
 	[
 		Pack(23, 16),
@@ -6062,7 +6057,17 @@ public static class EvaluationParams
 		Pack(-9, 21)
 	];
 
-	public static readonly TaperedEvaluationTermByRank PawnPhalanxBonus =
+    public static readonly int[] PieceAttackedByPawnPenalty =
+	[
+		Pack(1, 2),
+		Pack(3, 4),
+		Pack(5, 6),
+		Pack(7, 8),
+		Pack(9, 10),
+		Pack(11, 12)
+	];
+
+    public static readonly TaperedEvaluationTermByRank PawnPhalanxBonus =
 	[
 		Pack(0, 0),
 		Pack(3, 4),
