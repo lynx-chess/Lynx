@@ -118,7 +118,7 @@ public static class OnlineTablebaseProber
                 if (bestMoveList is not null)
                 {
 #pragma warning disable CS0618 // Type or member is obsolete
-                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position);
+                    allPossibleMoves ??= position.GenerateAllMoves();
 
                     foreach (var move in bestMoveList)
                     {
@@ -128,8 +128,7 @@ public static class OnlineTablebaseProber
                             throw new LynxException($"{move!.Uci} should be parsable from position {fen}");
                         }
 
-                        using var newPosition = new Position(position);
-                        newPosition.MakeMove(moveCandidate.Value);
+                        var newPosition = new Position(in position, moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
@@ -179,7 +178,7 @@ public static class OnlineTablebaseProber
                 if (bestMoveList is not null)
                 {
 #pragma warning disable CS0618 // Type or member is obsolete
-                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position);
+                    allPossibleMoves ??= position.GenerateAllMoves();
 
                     foreach (var move in bestMoveList)
                     {
@@ -189,8 +188,7 @@ public static class OnlineTablebaseProber
                             throw new LynxException($"{move!.Uci} should be parsable from position {fen}");
                         }
 
-                        using var newPosition = new Position(position);
-                        newPosition.MakeMove(moveCandidate.Value);
+                        var newPosition = new Position(in position, moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
@@ -242,7 +240,7 @@ public static class OnlineTablebaseProber
                 if (bestMoveList is not null)
                 {
 #pragma warning disable CS0618 // Type or member is obsolete
-                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position);
+                    allPossibleMoves ??= position.GenerateAllMoves();
 
                     foreach (var move in bestMoveList)
                     {
@@ -252,8 +250,7 @@ public static class OnlineTablebaseProber
                             throw new LynxException($"{move!.Uci} should be parsable from position {fen}");
                         }
 
-                        using var newPosition = new Position(position);
-                        newPosition.MakeMove(moveCandidate.Value);
+                        var newPosition = new Position(in position, moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
@@ -302,7 +299,7 @@ public static class OnlineTablebaseProber
                 if (bestMoveList is not null)
                 {
 #pragma warning disable CS0618 // Type or member is obsolete
-                    allPossibleMoves ??= MoveGenerator.GenerateAllMoves(position);
+                    allPossibleMoves ??= position.GenerateAllMoves();
 
                     foreach (var move in bestMoveList)
                     {
@@ -312,8 +309,7 @@ public static class OnlineTablebaseProber
                             throw new LynxException($"{move!.Uci} should be parsable from position {fen}");
                         }
 
-                        using var newPosition = new Position(position);
-                        newPosition.MakeMove(moveCandidate.Value);
+                        var newPosition = new Position(in position, moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
@@ -346,7 +342,7 @@ public static class OnlineTablebaseProber
 
         Move? parsedMove = 0;
 #pragma warning disable CS0618 // Type or member is obsolete
-        if (bestMove?.Uci is not null && !MoveExtensions.TryParseFromUCIString(bestMove.Uci, MoveGenerator.GenerateAllMoves(position), out parsedMove))
+        if (bestMove?.Uci is not null && !MoveExtensions.TryParseFromUCIString(bestMove.Uci, position.GenerateAllMoves(), out parsedMove))
         {
             throw new LynxException($"{bestMove.Uci} should be parsable from position {fen}");
         }
@@ -356,7 +352,7 @@ public static class OnlineTablebaseProber
     }
 
     [Experimental("LYNX0")]
-    public static int EvaluationSearch(Position position, int halfMovesWithoutCaptureOrPawnMove, CancellationToken cancellationToken)
+    public static int EvaluationSearch(in Position position, int halfMovesWithoutCaptureOrPawnMove, CancellationToken cancellationToken)
     {
         if (!Configuration.EngineSettings.UseOnlineTablebaseInSearch || position.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
         {

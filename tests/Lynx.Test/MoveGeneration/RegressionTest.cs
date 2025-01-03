@@ -9,7 +9,7 @@ public class MoveGeneratorRegressionTest : BaseTest
     {
         var position = new Position("r3k2r/pP1pqpb1/bn2pnp1/2pPN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq c6 0 1");
 
-        var moves = MoveGenerator.GenerateAllMoves(position).ToList();
+        var moves = position.GenerateAllMoves().ToList();
 
         Assert.True(moves.Exists(m => m.IsShortCastle()));
         Assert.True(moves.Exists(m => m.IsLongCastle()));
@@ -20,7 +20,7 @@ public class MoveGeneratorRegressionTest : BaseTest
         Assert.True(moves.Exists(m => m.IsDoublePawnPush()));
 
         Span<Move> moveSpan = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        var captures = MoveGenerator.GenerateAllCaptures(position, moveSpan).ToArray().ToList();
+        var captures = position.GenerateAllCaptures(moveSpan).ToArray().ToList();
 
         Assert.True(moves.Exists(m => m.IsShortCastle()));
         Assert.True(moves.Exists(m => m.IsLongCastle()));

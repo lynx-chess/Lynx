@@ -45,7 +45,7 @@ public static class MoveGenerator
     /// </summary>
     /// <param name="capturesOnly">Filters out all moves but captures</param>
     [Obsolete("dev and test only")]
-    internal static Move[] GenerateAllMoves(Position position, bool capturesOnly = false)
+    internal static Move[] GenerateAllMoves(this Position position, bool capturesOnly = false)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
 
@@ -58,7 +58,7 @@ public static class MoveGenerator
     /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Span<Move> GenerateAllMoves(Position position, Span<Move> movePool)
+    public static Span<Move> GenerateAllMoves(this Position position, Span<Move> movePool)
     {
         Debug.Assert(position.Side != Side.Both);
 
@@ -81,7 +81,7 @@ public static class MoveGenerator
     /// Generates all psuedo-legal captures from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Move[] GenerateAllCaptures(Position position, Move[] movePool)
+    public static Move[] GenerateAllCaptures(this Position position, Move[] movePool)
     {
         Debug.Assert(position.Side != Side.Both);
 
@@ -104,7 +104,7 @@ public static class MoveGenerator
     /// Generates all psuedo-legal captures from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Span<Move> GenerateAllCaptures(Position position, Span<Move> movePool)
+    public static Span<Move> GenerateAllCaptures(this Position position, Span<Move> movePool)
     {
         Debug.Assert(position.Side != Side.Both);
 
@@ -413,7 +413,7 @@ public static class MoveGenerator
     /// Generates all psuedo-legal moves from <paramref name="position"/>, ordered by <see cref="Move.Score(Position)"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool CanGenerateAtLeastAValidMove(Position position)
+    public static bool CanGenerateAtLeastAValidMove(this Position position)
     {
         Debug.Assert(position.Side != Side.Both);
 
@@ -423,13 +423,13 @@ public static class MoveGenerator
         try
         {
 #endif
-            return IsAnyPawnMoveValid(position, offset)
-                || IsAnyPieceMoveValid((int)Piece.K + offset, position)
-                || IsAnyPieceMoveValid((int)Piece.Q + offset, position)
-                || IsAnyPieceMoveValid((int)Piece.B + offset, position)
-                || IsAnyPieceMoveValid((int)Piece.N + offset, position)
-                || IsAnyPieceMoveValid((int)Piece.R + offset, position)
-                || IsAnyCastlingMoveValid(position);
+            return position.IsAnyPawnMoveValid(offset)
+                || position.IsAnyPieceMoveValid((int)Piece.K + offset)
+                || position.IsAnyPieceMoveValid((int)Piece.Q + offset)
+                || position.IsAnyPieceMoveValid((int)Piece.B + offset)
+                || position.IsAnyPieceMoveValid((int)Piece.N + offset)
+                || position.IsAnyPieceMoveValid((int)Piece.R + offset)
+                || position.IsAnyCastlingMoveValid();
 #if DEBUG
         }
         catch (Exception e)
@@ -441,7 +441,7 @@ public static class MoveGenerator
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsAnyPawnMoveValid(Position position, int offset)
+    private static bool IsAnyPawnMoveValid(this Position position, int offset)
     {
         int sourceSquare, targetSquare;
 
@@ -467,15 +467,15 @@ public static class MoveGenerator
                 var targetRank = (singlePushSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)  // Promotion
                 {
-                    if (IsValidMove(position, MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.Q + offset))
-                        || IsValidMove(position, MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.R + offset))
-                        || IsValidMove(position, MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.N + offset))
-                        || IsValidMove(position, MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.B + offset)))
+                    if (position.IsValidMove(MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.Q + offset))
+                        || position.IsValidMove(MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.R + offset))
+                        || position.IsValidMove(MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.N + offset))
+                        || position.IsValidMove(MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.B + offset)))
                     {
                         return true;
                     }
                 }
-                else if (IsValidMove(position, MoveExtensions.Encode(sourceSquare, singlePushSquare, piece)))
+                else if (position.IsValidMove(MoveExtensions.Encode(sourceSquare, singlePushSquare, piece)))
                 {
                     return true;
                 }
@@ -486,7 +486,7 @@ public static class MoveGenerator
                 var doublePushSquare = sourceSquare + (2 * pawnPush);
                 if (!position.OccupancyBitBoards[2].GetBit(doublePushSquare)
                     && ((sourceRank == 2 && position.Side == Side.Black) || (sourceRank == 7 && position.Side == Side.White))
-                    && IsValidMove(position, MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece)))
+                    && position.IsValidMove(MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece)))
                 {
                     return true;
                 }
@@ -497,7 +497,7 @@ public static class MoveGenerator
             // En passant
             if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant)
                 // We assume that position.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
-                && IsValidMove(position, MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece)))
+                && position.IsValidMove(MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece)))
             {
                 return true;
             }
@@ -513,15 +513,15 @@ public static class MoveGenerator
                 var targetRank = (targetSquare >> 3) + 1;
                 if (targetRank == 1 || targetRank == 8)  // Capture with promotion
                 {
-                    if (IsValidMove(position, MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.Q + offset, capturedPiece))
-                        || IsValidMove(position, MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.R + offset, capturedPiece))
-                        || IsValidMove(position, MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.N + offset, capturedPiece))
-                        || IsValidMove(position, MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.B + offset, capturedPiece)))
+                    if (position.IsValidMove(MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.Q + offset, capturedPiece))
+                        || position.IsValidMove(MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.R + offset, capturedPiece))
+                        || position.IsValidMove(MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.N + offset, capturedPiece))
+                        || position.IsValidMove(MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.B + offset, capturedPiece)))
                     {
                         return true;
                     }
                 }
-                else if (IsValidMove(position, MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece)))
+                else if (position.IsValidMove(MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece)))
                 {
                     return true;
                 }
@@ -536,7 +536,7 @@ public static class MoveGenerator
     /// see FEN position "8/8/8/2bbb3/2bKb3/2bbb3/8/8 w - - 0 1", where 4 legal moves (corners) are found
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsAnyCastlingMoveValid(Position position)
+    private static bool IsAnyCastlingMoveValid(this Position position)
     {
         if (position.Castle != default)
         {
@@ -550,7 +550,7 @@ public static class MoveGenerator
                     && !ise1Attacked
                     && !position.IsSquareAttackedBySide((int)BoardSquare.f1, Side.Black)
                     && !position.IsSquareAttackedBySide((int)BoardSquare.g1, Side.Black)
-                    && IsValidMove(position, WhiteShortCastle))
+                    && position.IsValidMove(WhiteShortCastle))
                 {
                     return true;
                 }
@@ -562,7 +562,7 @@ public static class MoveGenerator
                     && !ise1Attacked
                     && !position.IsSquareAttackedBySide((int)BoardSquare.d1, Side.Black)
                     && !position.IsSquareAttackedBySide((int)BoardSquare.c1, Side.Black)
-                    && IsValidMove(position, WhiteLongCastle))
+                    && position.IsValidMove(WhiteLongCastle))
                 {
                     return true;
                 }
@@ -577,7 +577,7 @@ public static class MoveGenerator
                     && !ise8Attacked
                     && !position.IsSquareAttackedBySide((int)BoardSquare.f8, Side.White)
                     && !position.IsSquareAttackedBySide((int)BoardSquare.g8, Side.White)
-                    && IsValidMove(position, BlackShortCastle))
+                    && position.IsValidMove(BlackShortCastle))
                 {
                     return true;
                 }
@@ -589,7 +589,7 @@ public static class MoveGenerator
                     && !ise8Attacked
                     && !position.IsSquareAttackedBySide((int)BoardSquare.d8, Side.White)
                     && !position.IsSquareAttackedBySide((int)BoardSquare.c8, Side.White)
-                    && IsValidMove(position, BlackLongCastle))
+                    && position.IsValidMove(BlackLongCastle))
                 {
                     return true;
                 }
@@ -604,7 +604,7 @@ public static class MoveGenerator
     /// </summary>
     /// <param name="piece"><see cref="Piece"/></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsAnyPieceMoveValid(int piece, Position position)
+    private static bool IsAnyPieceMoveValid(this Position position, int piece)
     {
         var bitboard = position.PieceBitBoards[piece];
         int sourceSquare, targetSquare;
@@ -624,12 +624,12 @@ public static class MoveGenerator
 
                 if (position.OccupancyBitBoards[(int)Side.Both].GetBit(targetSquare))
                 {
-                    if (IsValidMove(position, MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, position.Board[targetSquare])))
+                    if (position.IsValidMove(MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, position.Board[targetSquare])))
                     {
                         return true;
                     }
                 }
-                else if (IsValidMove(position, MoveExtensions.Encode(sourceSquare, targetSquare, piece)))
+                else if (position.IsValidMove(MoveExtensions.Encode(sourceSquare, targetSquare, piece)))
                 {
                     return true;
                 }
@@ -640,7 +640,7 @@ public static class MoveGenerator
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsValidMove(Position position, Move move)
+    private static bool IsValidMove(this Position position, Move move)
     {
 #if DEBUG
         // After introducing Position.Board, captured piece will always be populared here
@@ -656,11 +656,8 @@ public static class MoveGenerator
         }
 #endif
 
-        var gameState = position.MakeMove(move);
+        var newPosition = new Position(in position, move);
 
-        bool result = position.WasProduceByAValidMove();
-        position.UnmakeMove(move, gameState);
-
-        return result;
+        return newPosition.WasProduceByAValidMove();
     }
 }

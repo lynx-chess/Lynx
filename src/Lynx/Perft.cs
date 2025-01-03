@@ -10,7 +10,7 @@ namespace Lynx;
 /// </summary>
 public static class Perft
 {
-    public static void RunPerft(Position position, int depth, Action<string> write)
+    public static void RunPerft(this Position position, int depth, Action<string> write)
     {
         var sw = new Stopwatch();
         sw.Start();
@@ -20,7 +20,7 @@ public static class Perft
         PrintPerftResult(depth, nodes, Utils.CalculateElapsedSeconds(sw), write);
     }
 
-    public static void RunDivide(Position position, int depth, Action<string> write)
+    public static void RunDivide(this Position position, int depth, Action<string> write)
     {
         var sw = new Stopwatch();
         sw.Start();
@@ -34,20 +34,21 @@ public static class Perft
     /// Proper implementation, used by <see cref="DivideImpl(Position, int, long, Action{string})"/> as well
     /// </summary>
     [SkipLocalsInit]
-    internal static long PerftRecursiveImpl(Position position, int depth, long nodes)
+    internal static long PerftRecursiveImpl(this Position position, int depth, long nodes)
     {
         if (depth != 0)
         {
             Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-            foreach (var move in MoveGenerator.GenerateAllMoves(position, moves))
+            foreach (var move in position.GenerateAllMoves(moves))
             {
-                var state = position.MakeMove(move);
+                var oldPosition = position;
+                position = new Position(in position, move);
 
                 if (position.WasProduceByAValidMove())
                 {
                     nodes = PerftRecursiveImpl(position, depth - 1, nodes);
                 }
-                position.UnmakeMove(move, state);
+                position = oldPosition;
             }
 
             return nodes;
@@ -57,14 +58,15 @@ public static class Perft
     }
 
     [SkipLocalsInit]
-    private static long DivideImpl(Position position, int depth, long nodes, Action<string> write)
+    private static long DivideImpl(this Position position, int depth, long nodes, Action<string> write)
     {
         if (depth != 0)
         {
             Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-            foreach (var move in MoveGenerator.GenerateAllMoves(position, moves))
+            foreach (var move in position.GenerateAllMoves(moves))
             {
-                var state = position.MakeMove(move);
+                var oldPosition = position;
+                position = new Position(in position, move);
 
                 if (position.WasProduceByAValidMove())
                 {
@@ -74,7 +76,7 @@ public static class Perft
                     write($"{move.UCIString()}\t\t{nodes - accumulatedNodes}");
                 }
 
-                position.UnmakeMove(move, state);
+                position = oldPosition;
             }
 
             write(string.Empty);

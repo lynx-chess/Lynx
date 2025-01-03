@@ -23,7 +23,7 @@ public static class SEE
     /// Doesn't handle non-captures, promotions and en-passants
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsGoodCapture(Position position, Move move, int threshold = 0)
+    public static bool IsGoodCapture(this Position position, Move move, int threshold = 0)
     {
         System.Diagnostics.Debug.Assert(move.IsCapture(), "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle non-capture moves");
         System.Diagnostics.Debug.Assert(move.PromotedPiece() == default, "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle promotion moves");
@@ -110,7 +110,7 @@ public static class SEE
     /// Handles all kinds of moves
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool HasPositiveScore(Position position, Move move, int threshold = 0)
+    public static bool HasPositiveScore(this Position position, Move move, int threshold = 0)
     {
         var sideToMove = position.Side;
 
@@ -217,7 +217,7 @@ public static class SEE
     /// Returns only <see cref="Side.White"/> pieces
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int PopLeastValuableAttacker(Position position, ref BitBoard occupancy, BitBoard attackers, int color)
+    private static int PopLeastValuableAttacker(this Position position, ref BitBoard occupancy, BitBoard attackers, int color)
     {
         var offset = Utils.PieceOffset(color);
 

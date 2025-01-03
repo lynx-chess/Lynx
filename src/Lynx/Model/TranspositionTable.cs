@@ -29,7 +29,7 @@ public readonly struct TranspositionTable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void PrefetchTTEntry(Position position)
+    public void PrefetchTTEntry(in Position position)
     {
         if (Sse.IsSupported)
         {
@@ -59,7 +59,7 @@ public readonly struct TranspositionTable
     /// </summary>
     /// <param name="ply">Ply</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public (int Score, ShortMove BestMove, NodeType NodeType, int StaticEval, int Depth) ProbeHash(Position position, int ply)
+    public (int Score, ShortMove BestMove, NodeType NodeType, int StaticEval, int Depth) ProbeHash(in Position position, int ply)
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier);
         var entry = _tt[ttIndex];
@@ -81,7 +81,7 @@ public readonly struct TranspositionTable
     /// </summary>
     /// <param name="ply">Ply</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void RecordHash(Position position, int staticEval, int depth, int ply, int score, NodeType nodeType, Move? move = null)
+    public void RecordHash(in Position position, int staticEval, int depth, int ply, int score, NodeType nodeType, Move? move = null)
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier);
         ref var entry = ref _tt[ttIndex];

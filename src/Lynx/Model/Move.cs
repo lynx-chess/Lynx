@@ -393,16 +393,17 @@ public static class MoveExtensions
         var targetSquare = move.TargetSquare();
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves).ToArray();
+        var pseudoLegalMoves = position.GenerateAllMoves(moves).ToArray();
 
         var movesWithSameSimpleRepresentation = pseudoLegalMoves
             .Where(m => m != move && m.Piece() == piece && m.TargetSquare() == targetSquare)
             .Where(m =>
             {
                 // If any illegal moves exist with the same simple representation there's no need to disambiguate
-                var gameState = position.MakeMove(m);
+                var oldPosition = position;
+                position = new Position(in position, m);
                 var isLegal = position.WasProduceByAValidMove();
-                position.UnmakeMove(m, gameState);
+                position = oldPosition;
 
                 return isLegal;
             })

@@ -9,41 +9,39 @@ using static Lynx.EvaluationPSQTs;
 
 namespace Lynx.Model;
 
-public class Position : IDisposable
+public readonly struct Position
 {
-    private bool _disposedValue;
-
-    public ulong UniqueIdentifier { get; private set; }
+    public readonly ulong UniqueIdentifier;
 
     /// <summary>
     /// Use <see cref="Piece"/> as index
     /// </summary>
-    public BitBoard[] PieceBitBoards { get; }
+    public readonly BitBoard[] PieceBitBoards;
 
     /// <summary>
     /// Black, White, Both
     /// </summary>
-    public BitBoard[] OccupancyBitBoards { get; }
+    public readonly BitBoard[] OccupancyBitBoards;
 
     /// <summary>
     /// Piece location indexed by square
     /// </summary>
-    public int[] Board { get; }
+    public readonly int[] Board;
 
-    public Side Side { get; private set; }
+    public readonly Side Side;
 
-    public BoardSquare EnPassant { get; private set; }
+    public readonly BoardSquare EnPassant;
 
     /// <summary>
     /// See <see cref="<CastlingRights"/>
     /// </summary>
-    public byte Castle { get; private set; }
+    public readonly byte Castle;
 
-    public BitBoard Queens => PieceBitBoards[(int)Piece.Q] | PieceBitBoards[(int)Piece.q];
-    public BitBoard Rooks => PieceBitBoards[(int)Piece.R] | PieceBitBoards[(int)Piece.r];
-    public BitBoard Bishops => PieceBitBoards[(int)Piece.B] | PieceBitBoards[(int)Piece.b];
-    public BitBoard Knights => PieceBitBoards[(int)Piece.N] | PieceBitBoards[(int)Piece.n];
-    public BitBoard Kings => PieceBitBoards[(int)Piece.K] | PieceBitBoards[(int)Piece.k];
+    public readonly BitBoard Queens => PieceBitBoards[(int)Piece.Q] | PieceBitBoards[(int)Piece.q];
+    public readonly BitBoard Rooks => PieceBitBoards[(int)Piece.R] | PieceBitBoards[(int)Piece.r];
+    public readonly BitBoard Bishops => PieceBitBoards[(int)Piece.B] | PieceBitBoards[(int)Piece.b];
+    public readonly BitBoard Knights => PieceBitBoards[(int)Piece.N] | PieceBitBoards[(int)Piece.n];
+    public readonly BitBoard Kings => PieceBitBoards[(int)Piece.K] | PieceBitBoards[(int)Piece.k];
 
     /// <summary>
     /// Beware, half move counter isn't take into account
@@ -64,7 +62,7 @@ public class Position : IDisposable
         EnPassant = parsedFEN.EnPassant;
 
 #pragma warning disable S3366 // "this" should not be exposed from constructors
-        UniqueIdentifier = ZobristTable.PositionHash(this);
+        UniqueIdentifier = this.PositionHash();
 #pragma warning restore S3366 // "this" should not be exposed from constructors
     }
 
@@ -72,7 +70,7 @@ public class Position : IDisposable
     /// Clone constructor
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public Position(Position position)
+    public Position(in Position position)
     {
         UniqueIdentifier = position.UniqueIdentifier;
         PieceBitBoards = ArrayPool<BitBoard>.Shared.Rent(12);
@@ -89,15 +87,10 @@ public class Position : IDisposable
         EnPassant = position.EnPassant;
     }
 
-    #region Move making
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public GameState MakeMove(Move move)
+    public Position(in Position position, Move move)
+        : this(in position)
     {
-        byte castleCopy = Castle;
-        BoardSquare enpassantCopy = EnPassant;
-        var uniqueIdentifierCopy = UniqueIdentifier;
-
         var oldSide = (int)Side;
         var offset = Utils.PieceOffset(oldSide);
         var oppositeSide = Utils.OppositeSide(oldSide);
@@ -222,139 +215,28 @@ public class Position : IDisposable
         Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
 
         UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
-
-        return new GameState(uniqueIdentifierCopy, enpassantCopy, castleCopy);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void UnmakeMove(Move move, GameState gameState)
-    {
-        var oppositeSide = (int)Side;
-        var side = Utils.OppositeSide(oppositeSide);
-        Side = (Side)side;
-        var offset = Utils.PieceOffset(side);
-
-        int sourceSquare = move.SourceSquare();
-        int targetSquare = move.TargetSquare();
-        int piece = move.Piece();
-        int promotedPiece = move.PromotedPiece();
-
-        var newPiece = piece;
-        if (promotedPiece != default)
-        {
-            newPiece = promotedPiece;
-        }
-
-        PieceBitBoards[newPiece].PopBit(targetSquare);
-        OccupancyBitBoards[side].PopBit(targetSquare);
-        Board[targetSquare] = (int)Piece.None;
-
-        PieceBitBoards[piece].SetBit(sourceSquare);
-        OccupancyBitBoards[side].SetBit(sourceSquare);
-        Board[sourceSquare] = piece;
-
-        switch (move.SpecialMoveFlag())
-        {
-            case SpecialMoveType.None:
-                {
-                    if (move.IsCapture())
-                    {
-                        var capturedPiece = move.CapturedPiece();
-
-                        PieceBitBoards[capturedPiece].SetBit(targetSquare);
-                        OccupancyBitBoards[oppositeSide].SetBit(targetSquare);
-                        Board[targetSquare] = capturedPiece;
-                    }
-
-                    break;
-                }
-            case SpecialMoveType.ShortCastle:
-                {
-                    var rookSourceSquare = Utils.ShortCastleRookSourceSquare(side);
-                    var rookTargetSquare = Utils.ShortCastleRookTargetSquare(side);
-                    var rookIndex = (int)Piece.R + offset;
-
-                    PieceBitBoards[rookIndex].SetBit(rookSourceSquare);
-                    OccupancyBitBoards[side].SetBit(rookSourceSquare);
-                    Board[rookSourceSquare] = rookIndex;
-
-                    PieceBitBoards[rookIndex].PopBit(rookTargetSquare);
-                    OccupancyBitBoards[side].PopBit(rookTargetSquare);
-                    Board[rookTargetSquare] = (int)Piece.None;
-
-                    break;
-                }
-            case SpecialMoveType.LongCastle:
-                {
-                    var rookSourceSquare = Utils.LongCastleRookSourceSquare(side);
-                    var rookTargetSquare = Utils.LongCastleRookTargetSquare(side);
-                    var rookIndex = (int)Piece.R + offset;
-
-                    PieceBitBoards[rookIndex].SetBit(rookSourceSquare);
-                    OccupancyBitBoards[side].SetBit(rookSourceSquare);
-                    Board[rookSourceSquare] = rookIndex;
-
-                    PieceBitBoards[rookIndex].PopBit(rookTargetSquare);
-                    OccupancyBitBoards[side].PopBit(rookTargetSquare);
-                    Board[rookTargetSquare] = (int)Piece.None;
-
-                    break;
-                }
-            case SpecialMoveType.EnPassant:
-                {
-                    Debug.Assert(move.IsEnPassant());
-
-                    var oppositePawnIndex = (int)Piece.p - offset;
-                    var capturedPawnSquare = Constants.EnPassantCaptureSquares[targetSquare];
-
-                    Utils.Assert(OccupancyBitBoards[(int)Side.Both].GetBit(capturedPawnSquare) == default,
-                        $"Expected empty {capturedPawnSquare}");
-
-                    PieceBitBoards[oppositePawnIndex].SetBit(capturedPawnSquare);
-                    OccupancyBitBoards[oppositeSide].SetBit(capturedPawnSquare);
-                    Board[capturedPawnSquare] = oppositePawnIndex;
-
-                    break;
-                }
-        }
-
-        OccupancyBitBoards[2] = OccupancyBitBoards[1] | OccupancyBitBoards[0];
-
-        // Updating saved values
-        Castle = gameState.Castle;
-        EnPassant = gameState.EnPassant;
-        UniqueIdentifier = gameState.ZobristKey;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public GameState MakeNullMove()
+    public Position(in Position position, bool _)
+    : this(in position)
     {
         Side = (Side)Utils.OppositeSide(Side);
         var oldEnPassant = EnPassant;
-        var oldUniqueIdentifier = UniqueIdentifier;
         EnPassant = BoardSquare.noSquare;
 
         UniqueIdentifier ^=
             ZobristTable.SideHash()
             ^ ZobristTable.EnPassantHash((int)oldEnPassant);
-
-        return new GameState(oldUniqueIdentifier, oldEnPassant, byte.MaxValue);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void UnMakeNullMove(GameState gameState)
-    {
-        Side = (Side)Utils.OppositeSide(Side);
-        EnPassant = gameState.EnPassant;
-
-        UniqueIdentifier = gameState.ZobristKey;
-    }
+    #region Move making
 
     /// <summary>
     /// False if any of the kings has been captured, or if the opponent king is in check.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal bool IsValid()
+    internal readonly bool IsValid()
     {
         var offset = Utils.PieceOffset(Side);
 
@@ -375,7 +257,7 @@ public class Position : IDisposable
     /// i.e. it doesn't ensure that both kings are on the board
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool WasProduceByAValidMove()
+    public readonly bool WasProduceByAValidMove()
     {
         Debug.Assert(PieceBitBoards[(int)Piece.k - Utils.PieceOffset(Side)].CountBits() == 1);
         var oppositeKingSquare = PieceBitBoards[(int)Piece.k - Utils.PieceOffset(Side)].GetLS1BIndex();
@@ -392,7 +274,7 @@ public class Position : IDisposable
     /// That is, positive scores always favour playing <see cref="Side"/>.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public (int Score, int Phase) StaticEvaluation(int movesWithoutCaptureOrPawnMove = 0)
+    public readonly (int Score, int Phase) StaticEvaluation(int movesWithoutCaptureOrPawnMove = 0)
     {
         //var result = OnlineTablebaseProber.EvaluationSearch(this, movesWithoutCaptureOrPawnMove, cancellationToken);
         //Debug.Assert(result < CheckMateBaseEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
@@ -568,7 +450,7 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int Phase()
+    public readonly int Phase()
     {
         int gamePhase =
              ((PieceBitBoards[(int)Piece.N] | PieceBitBoards[(int)Piece.n]).CountBits() * GamePhaseByPiece[(int)Piece.N])
@@ -616,7 +498,7 @@ public class Position : IDisposable
     /// Doesn't include <see cref="Piece.K"/> and <see cref="Piece.k"/> evaluation
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int AdditionalPieceEvaluation(int bucket, int pieceSquareIndex, int pieceIndex, int pieceSide, int sameSideKingSquare, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+    internal readonly int AdditionalPieceEvaluation(int bucket, int pieceSquareIndex, int pieceIndex, int pieceSide, int sameSideKingSquare, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
     {
         return pieceIndex switch
         {
@@ -630,7 +512,7 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int PawnAdditionalEvaluation(int bucket, int squareIndex, int pieceIndex, int sameSideKingSquare, int oppositeSideKingSquare)
+    private readonly int PawnAdditionalEvaluation(int bucket, int squareIndex, int pieceIndex, int sameSideKingSquare, int oppositeSideKingSquare)
     {
         int packedBonus = 0;
 
@@ -680,7 +562,7 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int RookAdditionalEvaluation(int squareIndex, int pieceIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+    private readonly int RookAdditionalEvaluation(int squareIndex, int pieceIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
     {
         const int pawnToRookOffset = (int)Piece.R - (int)Piece.P;
 
@@ -716,7 +598,7 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int KnightAdditionalEvaluation(int squareIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+    private readonly int KnightAdditionalEvaluation(int squareIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
     {
         var attacks = Attacks.KnightAttacks[squareIndex];
 
@@ -738,7 +620,7 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int BishopAdditionalEvaluation(int squareIndex, int pieceIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+    private readonly int BishopAdditionalEvaluation(int squareIndex, int pieceIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
     {
         const int pawnToBishopOffset = (int)Piece.B - (int)Piece.P;
 
@@ -784,7 +666,7 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int QueenAdditionalEvaluation(int squareIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+    private readonly int QueenAdditionalEvaluation(int squareIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
     {
         var occupancy = OccupancyBitBoards[(int)Side.Both];
         var attacks = Attacks.QueenAttacks(squareIndex, occupancy);
@@ -807,7 +689,7 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int KingAdditionalEvaluation(int squareIndex, int pieceSide, BitBoard enemyPawnAttacks)
+    internal readonly int KingAdditionalEvaluation(int squareIndex, int pieceSide, BitBoard enemyPawnAttacks)
     {
         // Virtual mobility (as if Queen)
         var attacksCount =
@@ -856,7 +738,7 @@ public class Position : IDisposable
     /// <param name="rooks">Includes Queen bitboard</param>
     /// <param name="bishops">Includes Queen bitboard</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ulong AllAttackersTo(int square, BitBoard occupancy, BitBoard rooks, BitBoard bishops)
+    public readonly ulong AllAttackersTo(int square, BitBoard occupancy, BitBoard rooks, BitBoard bishops)
     {
         Debug.Assert(square != (int)BoardSquare.noSquare);
 
@@ -869,7 +751,7 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ulong AllAttackersTo(int square)
+    public readonly ulong AllAttackersTo(int square)
     {
         Debug.Assert(square != (int)BoardSquare.noSquare);
 
@@ -887,7 +769,7 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ulong AllSideAttackersTo(int square, int side)
+    public readonly ulong AllSideAttackersTo(int square, int side)
     {
         Debug.Assert(square != (int)BoardSquare.noSquare);
         Debug.Assert(side != (int)Side.Both);
@@ -907,10 +789,10 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsSquareAttackedBySide(int squaredIndex, Side sideToMove) => IsSquareAttacked(squaredIndex, sideToMove);
+    public readonly bool IsSquareAttackedBySide(int squaredIndex, Side sideToMove) => IsSquareAttacked(squaredIndex, sideToMove);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsSquareAttacked(int squareIndex, Side sideToMove)
+    public readonly bool IsSquareAttacked(int squareIndex, Side sideToMove)
     {
         Utils.Assert(sideToMove != Side.Both);
 
@@ -929,7 +811,7 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool IsInCheck()
+    public readonly bool IsInCheck()
     {
         var oppositeSideInt = Utils.OppositeSide(Side);
         var oppositeSideOffset = Utils.PieceOffset(oppositeSideInt);
@@ -948,7 +830,7 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool IsSquareAttackedByPawns(int squareIndex, int sideToMove, int offset)
+    private readonly bool IsSquareAttackedByPawns(int squareIndex, int sideToMove, int offset)
     {
         var oppositeColorIndex = sideToMove ^ 1;
 
@@ -956,33 +838,33 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool IsSquareAttackedByKnights(int squareIndex, int offset)
+    private readonly bool IsSquareAttackedByKnights(int squareIndex, int offset)
     {
         return (Attacks.KnightAttacks[squareIndex] & PieceBitBoards[(int)Piece.N + offset]) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool IsSquareAttackedByKing(int squareIndex, int offset)
+    private readonly bool IsSquareAttackedByKing(int squareIndex, int offset)
     {
         return (Attacks.KingAttacks[squareIndex] & PieceBitBoards[(int)Piece.K + offset]) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool IsSquareAttackedByBishops(int squareIndex, int offset, BitBoard bothSidesOccupancy, out BitBoard bishopAttacks)
+    private readonly bool IsSquareAttackedByBishops(int squareIndex, int offset, BitBoard bothSidesOccupancy, out BitBoard bishopAttacks)
     {
         bishopAttacks = Attacks.BishopAttacks(squareIndex, bothSidesOccupancy);
         return (bishopAttacks & PieceBitBoards[(int)Piece.B + offset]) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool IsSquareAttackedByRooks(int squareIndex, int offset, BitBoard bothSidesOccupancy, out BitBoard rookAttacks)
+    private readonly bool IsSquareAttackedByRooks(int squareIndex, int offset, BitBoard bothSidesOccupancy, out BitBoard rookAttacks)
     {
         rookAttacks = Attacks.RookAttacks(squareIndex, bothSidesOccupancy);
         return (rookAttacks & PieceBitBoards[(int)Piece.R + offset]) != default;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private bool IsSquareAttackedByQueens(int offset, BitBoard bishopAttacks, BitBoard rookAttacks)
+    private readonly bool IsSquareAttackedByQueens(int offset, BitBoard bishopAttacks, BitBoard rookAttacks)
     {
         var queenAttacks = Attacks.QueenAttacks(rookAttacks, bishopAttacks);
         return (queenAttacks & PieceBitBoards[(int)Piece.Q + offset]) != default;
@@ -991,13 +873,13 @@ public class Position : IDisposable
     #endregion
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int CountPieces() => PieceBitBoards.Sum(b => b.CountBits());
+    public readonly int CountPieces() => PieceBitBoards.Sum(b => b.CountBits());
 
     /// <summary>
     /// Based on Stormphrax
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int PieceAt(int square)
+    public readonly int PieceAt(int square)
     {
         var bit = BitBoardExtensions.SquareBit(square);
 
@@ -1032,7 +914,7 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public string FEN(int halfMovesWithoutCaptureOrPawnMove = 0, int fullMoveClock = 1)
+    public readonly string FEN(int halfMovesWithoutCaptureOrPawnMove = 0, int fullMoveClock = 1)
     {
         var sb = new StringBuilder(100);
 
@@ -1132,7 +1014,7 @@ public class Position : IDisposable
     /// Combines <see cref="PieceBitBoards"/>, <see cref="Side"/>, <see cref="Castle"/> and <see cref="EnPassant"/>
     /// into a human-friendly representation
     /// </summary>
-    public void Print()
+    public readonly void Print()
     {
         const string separator = "____________________________________________________";
         Console.WriteLine(separator + Environment.NewLine);
@@ -1186,7 +1068,7 @@ public class Position : IDisposable
         Console.WriteLine(separator);
     }
 
-    public void PrintAttackedSquares(Side sideToMove)
+    public readonly void PrintAttackedSquares(Side sideToMove)
     {
         const string separator = "____________________________________________________";
         Console.WriteLine(separator);
@@ -1225,27 +1107,6 @@ public class Position : IDisposable
         // No need to clear, since we always have to initialize it to Piece.None after renting it anyway
 #pragma warning disable S3254 // Default parameter values should not be passed as arguments
         ArrayPool<int>.Shared.Return(Board, clearArray: false);
-#pragma warning restore S3254 // Default parameter values should not be passed as arguments
-
-        _disposedValue = true;
-    }
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (!_disposedValue)
-        {
-            if (disposing)
-            {
-                FreeResources();
-            }
-            _disposedValue = true;
-        }
-    }
-
-    public void Dispose()
-    {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
+#pragma warning restore S3254 // Default parameter values should not be passed as arguments;
     }
 }

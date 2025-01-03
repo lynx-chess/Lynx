@@ -587,7 +587,7 @@ public sealed class UCIHandler
 
         if (items.Length >= 2 && int.TryParse(items[1], out int depth) && depth >= 1)
         {
-            Perft.RunPerft(_searcher.CurrentPosition, depth, str => _engineToUci.Writer.TryWrite(str));
+            _searcher.CurrentPosition.RunPerft(depth, str => _engineToUci.Writer.TryWrite(str));
         }
     }
 
@@ -597,7 +597,7 @@ public sealed class UCIHandler
 
         if (items.Length >= 2 && int.TryParse(items[1], out int depth) && depth >= 1)
         {
-            Perft.RunDivide(_searcher.CurrentPosition, depth, str => _engineToUci.Writer.TryWrite(str));
+            _searcher.CurrentPosition.RunDivide(depth, str => _engineToUci.Writer.TryWrite(str));
         }
     }
 
@@ -666,7 +666,7 @@ public sealed class UCIHandler
             {
                 var fen = line[..line.IndexOfAny([';', '[', '"'])];
 
-                using var position = new Position(fen);
+                var position = new Position(fen);
                 if (!position.IsValid())
                 {
                     _logger.Warn("Position {0}, parsed as {1} and then {2} not valid, skipping it", line, fen, position.FEN());

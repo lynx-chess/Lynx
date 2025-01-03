@@ -351,11 +351,10 @@ public sealed partial class Engine
         bool onlyOneLegalMove = false;
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, moves))
+        foreach (var move in Game.CurrentPosition.GenerateAllMoves(moves))
         {
-            var gameState = Game.CurrentPosition.MakeMove(move);
-            bool isPositionValid = Game.CurrentPosition.WasProduceByAValidMove();
-            Game.CurrentPosition.UnmakeMove(move, gameState);
+            var newPosition = new Position(Game.CurrentPosition, move);
+            bool isPositionValid = newPosition.WasProduceByAValidMove();
 
             if (isPositionValid)
             {

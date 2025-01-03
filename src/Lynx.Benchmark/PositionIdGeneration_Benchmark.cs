@@ -62,10 +62,10 @@ public class PositionIdGeneration_Benchmark : BaseBenchmark
     public static IEnumerable<Position> Data =>
     [
         //Constants.EmptyBoardFEN,
-        Positions[0].ClonePositionAndMakeMove(MoveGenerator.GenerateAllMoves(Positions[0])[0]),
-        Positions[1].ClonePositionAndMakeMove(MoveGenerator.GenerateAllMoves(Positions[1])[0]),
-        Positions[2].ClonePositionAndMakeMove(MoveGenerator.GenerateAllMoves(Positions[2])[0]),
-        Positions[3].ClonePositionAndMakeMove(MoveGenerator.GenerateAllMoves(Positions[3])[0])
+        Positions[0].ClonePositionAndMakeMove(Positions[0].GenerateAllMoves()[0]),
+        Positions[1].ClonePositionAndMakeMove(Positions[1].GenerateAllMoves()[0]),
+        Positions[2].ClonePositionAndMakeMove(Positions[2].GenerateAllMoves()[0]),
+        Positions[3].ClonePositionAndMakeMove(Positions[3].GenerateAllMoves()[0])
     ];
 }
 
@@ -73,7 +73,7 @@ internal static class PositionExtensions
 {
     public static Position ClonePositionAndMakeMove(this Position position, Move move)
     {
-        var newPosition = new Position(position);
+        var newPosition = new Position(in position);
         newPosition.MakeMove(move);
 
         return newPosition;

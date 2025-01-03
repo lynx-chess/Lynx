@@ -33,9 +33,9 @@ public class TranspositionTableTests
 
         var staticEval = position.StaticEvaluation().Score;
 
-        transpositionTable.RecordHash(position, staticEval, depth: 5, ply: 3, score: recordedEval, nodeType: recordNodeType, move: 1234);
+        transpositionTable.RecordHash(in position, staticEval, depth: 5, ply: 3, score: recordedEval, nodeType: recordNodeType, move: 1234);
 
-        var ttEntry = transpositionTable.ProbeHash(position, ply: 3);
+        var ttEntry = transpositionTable.ProbeHash(in position, ply: 3);
         Assert.AreEqual(expectedProbeEval, ttEntry.Score);
         Assert.AreEqual(staticEval, ttEntry.StaticEval);
     }
@@ -48,9 +48,9 @@ public class TranspositionTableTests
         var position = new Position(Constants.InitialPositionFEN);
         var transpositionTable = new TranspositionTable();
 
-        transpositionTable.RecordHash(position, recordedEval, depth: 10, ply: sharedDepth, score: recordedEval, nodeType: NodeType.Exact, move: 1234);
+        transpositionTable.RecordHash(in position, recordedEval, depth: 10, ply: sharedDepth, score: recordedEval, nodeType: NodeType.Exact, move: 1234);
 
-        var ttEntry = transpositionTable.ProbeHash(position, ply: sharedDepth);
+        var ttEntry = transpositionTable.ProbeHash(in position, ply: sharedDepth);
         Assert.AreEqual(recordedEval, ttEntry.Score);
         Assert.AreEqual(recordedEval, ttEntry.StaticEval);
     }
@@ -64,9 +64,9 @@ public class TranspositionTableTests
         var position = new Position(Constants.InitialPositionFEN);
         var transpositionTable = new TranspositionTable();
 
-        transpositionTable.RecordHash(position, recordedEval, depth: 10, ply: recordedDeph, score: recordedEval, nodeType: NodeType.Exact, move: 1234);
+        transpositionTable.RecordHash(in position, recordedEval, depth: 10, ply: recordedDeph, score: recordedEval, nodeType: NodeType.Exact, move: 1234);
 
-        var ttEntry = transpositionTable.ProbeHash(position, ply: probeDepth);
+        var ttEntry = transpositionTable.ProbeHash(in position, ply: probeDepth);
         Assert.AreEqual(expectedProbeEval, ttEntry.Score);
         Assert.AreEqual(recordedEval, ttEntry.StaticEval);
     }

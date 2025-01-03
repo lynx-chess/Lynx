@@ -20,7 +20,7 @@ public class PositionTest
         var position = new Position(fen);
         Assert.AreEqual(fen, position.FEN());
 
-        var newPosition = new Position(position);
+        var newPosition = new Position(in position);
         Assert.AreEqual(fen, newPosition.FEN());
     }
 
@@ -36,7 +36,7 @@ public class PositionTest
         var position = new Position(fen);
 
         // Act
-        var clonedPosition = new Position(position);
+        var clonedPosition = new Position(in position);
 
         // Assert
         Assert.AreEqual(position.FEN(), clonedPosition.FEN());
@@ -137,9 +137,9 @@ public class PositionTest
     {
         // Arrange
         var position = new Position(fen);
-        Assert.IsEmpty(MoveGenerator.GenerateAllMoves(position).Where(move =>
+        Assert.IsEmpty(position.GenerateAllMoves().Where(move =>
         {
-            var newPosition = new Position(position);
+            var newPosition = new Position(in position);
             newPosition.MakeMove(move);
             return newPosition.IsValid();
         }));

@@ -33,7 +33,7 @@ public class SingleLegalMoveTest : BaseTest
         const int depth = 61;
         Move? singleMove = null;
         var pos = new Position(fen);
-        foreach (var move in MoveGenerator.GenerateAllMoves(pos))
+        foreach (var move in pos.GenerateAllMoves())
         {
             var state = pos.MakeMove(move);
             if (pos.IsValid())

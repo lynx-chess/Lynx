@@ -91,7 +91,7 @@ public static class ZobristTable
     /// Calculates from scratch the hash of a position
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ulong PositionHash(Position position)
+    public static ulong PositionHash(this Position position)
     {
         ulong positionHash = 0;
 

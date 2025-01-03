@@ -79,18 +79,18 @@ public class SEETest
     {
         var position = new Position(fen);
 
-        var allMoves = MoveGenerator.GenerateAllMoves(position);
+        var allMoves = position.GenerateAllMoves();
         var move = allMoves.Single(m => m.UCIString() == moveUCIString);
 
         if (move.IsCapture() && move.PromotedPiece() == default && !move.IsEnPassant())
         {
             if (expectedScore >= 0)
             {
-                Assert.True(SEE.IsGoodCapture(position, move));
+                Assert.True(position.IsGoodCapture(move));
             }
             else
             {
-                Assert.False(SEE.IsGoodCapture(position, move));
+                Assert.False(position.IsGoodCapture(move));
             }
         }
     }
@@ -170,16 +170,16 @@ public class SEETest
     {
         var position = new Position(fen);
 
-        var allMoves = MoveGenerator.GenerateAllMoves(position);
+        var allMoves = position.GenerateAllMoves();
         var move = allMoves.Single(m => m.UCIString() == moveUCIString);
 
         if (expectedScore >= 0)
         {
-            Assert.True(SEE.HasPositiveScore(position, move));
+            Assert.True(position.HasPositiveScore(move));
         }
         else
         {
-            Assert.False(SEE.HasPositiveScore(position, move));
+            Assert.False(position.HasPositiveScore(move));
         }
     }
 }

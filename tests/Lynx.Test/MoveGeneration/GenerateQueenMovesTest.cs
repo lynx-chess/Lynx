@@ -8,13 +8,13 @@ public class GenerateQueenMovesTest
     private static IEnumerable<Move> GenerateQueenMoves(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        return MoveGenerator.GenerateAllMoves(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.Q || m.Piece() == (int)Piece.q);
+        return position.GenerateAllMoves(moves).ToArray().Where(m => m.Piece() == (int)Piece.Q || m.Piece() == (int)Piece.q);
     }
 
     private static IEnumerable<Move> GenerateQueenCaptures(Position position)
     {
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        return MoveGenerator.GenerateAllCaptures(position, moves).ToArray().Where(m => m.Piece() == (int)Piece.Q || m.Piece() == (int)Piece.q);
+        return position.GenerateAllCaptures(moves).ToArray().Where(m => m.Piece() == (int)Piece.Q || m.Piece() == (int)Piece.q);
     }
 
     [TestCase(Constants.EmptyBoardFEN, 0)]

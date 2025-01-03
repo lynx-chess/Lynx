@@ -18,13 +18,11 @@ public sealed partial class Engine
     [SkipLocalsInit]
     private int NegaMax(int depth, int ply, int alpha, int beta, bool cutnode, CancellationToken cancellationToken, bool parentWasNullMove = false)
     {
-        var position = Game.CurrentPosition;
-
         // Prevents runtime failure in case depth is increased due to check extension, since we're using ply when calculating pvTable index,
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
             _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
-            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
+            return Game.CurrentPosition.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
         }
 
         _maxDepthReached[ply] = ply;
@@ -47,7 +45,7 @@ public sealed partial class Engine
 
         if (!isRoot)
         {
-            (ttScore, ttBestMove, ttElementType, ttStaticEval, ttDepth) = _tt.ProbeHash(position, ply);
+            (ttScore, ttBestMove, ttElementType, ttStaticEval, ttDepth) = _tt.ProbeHash(Game.CurrentPosition, ply);
 
             // TT cutoffs
             if (!pvNode
@@ -81,38 +79,38 @@ public sealed partial class Engine
         // From Potential
         double improvingRate = 0;
 
-        bool isInCheck = position.IsInCheck();
+        bool isInCheck = Game.CurrentPosition.IsInCheck();
         int staticEval;
         int phase = int.MaxValue;
 
         if (isInCheck)
         {
             ++depth;
-            staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
+            staticEval = Game.CurrentPosition.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
         }
         else if (depth <= 0)
         {
-            if (MoveGenerator.CanGenerateAtLeastAValidMove(position))
+            if (Game.CurrentPosition.CanGenerateAtLeastAValidMove())
             {
                 return QuiescenceSearch(ply, alpha, beta, cancellationToken);
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
-            _tt.RecordHash(position, finalPositionEvaluation, depth, ply, finalPositionEvaluation, NodeType.Exact);
+            _tt.RecordHash(Game.CurrentPosition, finalPositionEvaluation, depth, ply, finalPositionEvaluation, NodeType.Exact);
             return finalPositionEvaluation;
         }
         else if (!pvNode)
         {
             if (ttElementType == default)
             {
-                (staticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
+                (staticEval, phase) = Game.CurrentPosition.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove);
             }
             else
             {
                 Debug.Assert(ttStaticEval != int.MinValue);
 
                 staticEval = ttStaticEval;
-                phase = position.Phase();
+                phase = Game.CurrentPosition.Phase();
             }
 
             Game.UpdateStaticEvalInStack(ply, staticEval);
@@ -208,9 +206,10 @@ public sealed partial class Engine
                     //    depth,
                     //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
 
-                    var gameState = position.MakeNullMove();
+                    var oldPosition = Game.CurrentPosition;
+                    Game.CurrentPosition = new Position(in oldPosition, _: true);
                     var nmpScore = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, !cutnode, cancellationToken, parentWasNullMove: true);
-                    position.UnMakeNullMove(gameState);
+                    Game.CurrentPosition = oldPosition;
 
                     if (nmpScore >= beta)
                     {
@@ -221,11 +220,11 @@ public sealed partial class Engine
         }
         else
         {
-            staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
+            staticEval = Game.CurrentPosition.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
         }
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves);
+        var pseudoLegalMoves = Game.CurrentPosition.GenerateAllMoves(moves);
 
         Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
 
@@ -257,11 +256,12 @@ public sealed partial class Engine
 
             var move = pseudoLegalMoves[moveIndex];
 
-            var gameState = position.MakeMove(move);
+            var oldPosition = Game.CurrentPosition;
+            Game.CurrentPosition = new Position(in oldPosition, move);
 
-            if (!position.WasProduceByAValidMove())
+            if (!Game.CurrentPosition.WasProduceByAValidMove())
             {
-                position.UnmakeMove(move, gameState);
+                Game.CurrentPosition = oldPosition;
                 continue;
             }
 
@@ -272,12 +272,12 @@ public sealed partial class Engine
             isAnyMoveValid = true;
             var isCapture = move.IsCapture();
 
-            PrintPreMove(position, ply, move);
+            PrintPreMove(Game.CurrentPosition, ply, move);
 
             // Before making a move
             var oldHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
             var canBeRepetition = Game.Update50movesRule(move, isCapture);
-            Game.AddToPositionHashHistory(position.UniqueIdentifier);
+            Game.AddToPositionHashHistory(Game.CurrentPosition.UniqueIdentifier);
             Game.UpdateMoveinStack(ply, move);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -285,7 +285,7 @@ public sealed partial class Engine
             {
                 Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
                 Game.RemoveFromPositionHashHistory();
-                position.UnmakeMove(move, gameState);
+                Game.CurrentPosition = oldPosition;
             }
 
             int score;
@@ -300,7 +300,7 @@ public sealed partial class Engine
             }
             else if (visitedMovesCounter == 0)
             {
-                _tt.PrefetchTTEntry(position);
+                _tt.PrefetchTTEntry(Game.CurrentPosition);
                 bool isCutNode = !pvNode && !cutnode;   // Linter 'simplification' of pvNode ? false : !cutnode
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
                 score = -NegaMax(depth - 1, ply + 1, -beta, -alpha, isCutNode, cancellationToken);
@@ -347,7 +347,7 @@ public sealed partial class Engine
                     }
                 }
 
-                _tt.PrefetchTTEntry(position);
+                _tt.PrefetchTTEntry(Game.CurrentPosition);
 
                 int reduction = 0;
 
@@ -369,7 +369,7 @@ public sealed partial class Engine
                             --reduction;
                         }
 
-                        if (position.IsInCheck())   // i.e. move gives check
+                        if (Game.CurrentPosition.IsInCheck())   // i.e. move gives check
                         {
                             --reduction;
                         }
@@ -435,7 +435,7 @@ public sealed partial class Engine
                 UpdateMoveNodeCount(move, nodesSpentInThisMove);
             }
 
-            PrintMove(position, ply, move, score);
+            PrintMove(Game.CurrentPosition, ply, move, score);
 
             if (score > bestScore)
             {
@@ -483,7 +483,7 @@ public sealed partial class Engine
                         UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(historyDepth, ply, visitedMoves, visitedMovesCounter, move, isRoot);
                     }
 
-                    _tt.RecordHash(position, staticEval, depth, ply, bestScore, NodeType.Beta, bestMove);
+                    _tt.RecordHash(Game.CurrentPosition, staticEval, depth, ply, bestScore, NodeType.Beta, bestMove);
 
                     return bestScore;
                 }
@@ -497,12 +497,12 @@ public sealed partial class Engine
             Debug.Assert(bestMove is null);
 
             var finalEval = Position.EvaluateFinalPosition(ply, isInCheck);
-            _tt.RecordHash(position, finalEval, depth, ply, finalEval, NodeType.Exact);
+            _tt.RecordHash(Game.CurrentPosition, finalEval, depth, ply, finalEval, NodeType.Exact);
 
             return finalEval;
         }
 
-        _tt.RecordHash(position, staticEval, depth, ply, bestScore, nodeType, bestMove);
+        _tt.RecordHash(Game.CurrentPosition, staticEval, depth, ply, bestScore, nodeType, bestMove);
 
         // Node fails low
         return bestScore;
@@ -522,21 +522,19 @@ public sealed partial class Engine
     [SkipLocalsInit]
     public int QuiescenceSearch(int ply, int alpha, int beta, CancellationToken cancellationToken)
     {
-        var position = Game.CurrentPosition;
-
         cancellationToken.ThrowIfCancellationRequested();
 
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
             _logger.Info("Max depth {0} reached", Configuration.EngineSettings.MaxDepth);
-            return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
+            return Game.CurrentPosition.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
         }
 
         var pvIndex = PVTable.Indexes[ply];
         var nextPvIndex = PVTable.Indexes[ply + 1];
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
-        var ttProbeResult = _tt.ProbeHash(position, ply);
+        var ttProbeResult = _tt.ProbeHash(Game.CurrentPosition, ply);
         var ttScore = ttProbeResult.Score;
         var ttNodeType = ttProbeResult.NodeType;
         var ttHit = ttNodeType != NodeType.Unknown;
@@ -562,7 +560,7 @@ public sealed partial class Engine
             : position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
         */
 
-        var staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
+        var staticEval = Game.CurrentPosition.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
         Debug.Assert(staticEval != EvaluationConstants.NoHashEntry, "Assertion failed", "All TT entries should have a static eval");
 
         Game.UpdateStaticEvalInStack(ply, staticEval);
@@ -581,7 +579,7 @@ public sealed partial class Engine
         }
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        var pseudoLegalMoves = MoveGenerator.GenerateAllCaptures(position, moves);
+        var pseudoLegalMoves = Game.CurrentPosition.GenerateAllCaptures(moves);
         if (pseudoLegalMoves.Length == 0)
         {
             // Checking if final position first: https://github.com/lynx-chess/Lynx/pull/358
@@ -621,17 +619,18 @@ public sealed partial class Engine
                 continue;
             }
 
-            var gameState = position.MakeMove(move);
-            if (!position.WasProduceByAValidMove())
+            var oldPosition = Game.CurrentPosition;
+            Game.CurrentPosition = new Position(in oldPosition, move);
+            if (!Game.CurrentPosition.WasProduceByAValidMove())
             {
-                position.UnmakeMove(move, gameState);
+                Game.CurrentPosition = oldPosition;
                 continue;
             }
 
             ++_nodes;
             isAnyCaptureValid = true;
 
-            PrintPreMove(position, ply, move, isQuiescence: true);
+            PrintPreMove(Game.CurrentPosition, ply, move, isQuiescence: true);
 
             // No need to check for threefold or 50 moves repetitions, since we're only searching captures, promotions, and castles
             Game.UpdateMoveinStack(ply, move);
@@ -639,9 +638,9 @@ public sealed partial class Engine
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
             int score = -QuiescenceSearch(ply + 1, -beta, -alpha, cancellationToken);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
-            position.UnmakeMove(move, gameState);
+            Game.CurrentPosition = oldPosition;
 
-            PrintMove(position, ply, move, score, isQuiescence: true);
+            PrintMove(in oldPosition, ply, move, score, isQuiescence: true);
 
             if (score > bestScore)
             {
@@ -652,7 +651,7 @@ public sealed partial class Engine
                 {
                     PrintMessage($"Pruning: {move} is enough to discard this line");
 
-                    _tt.RecordHash(position, staticEval, 0, ply, bestScore, NodeType.Beta, bestMove);
+                    _tt.RecordHash(in oldPosition, staticEval, 0, ply, bestScore, NodeType.Beta, bestMove);
 
                     return bestScore; // The refutation doesn't matter, since it'll be pruned
                 }
@@ -672,17 +671,17 @@ public sealed partial class Engine
         }
 
         if (!isAnyCaptureValid
-            && !MoveGenerator.CanGenerateAtLeastAValidMove(position)) // Bad captures can be pruned, so all moves need to be generated for now
+            && !Game.CurrentPosition.CanGenerateAtLeastAValidMove()) // Bad captures can be pruned, so all moves need to be generated for now
         {
             Debug.Assert(bestMove is null);
 
-            var finalEval = Position.EvaluateFinalPosition(ply, position.IsInCheck());
-            _tt.RecordHash(position, finalEval, 0, ply, finalEval, NodeType.Exact);
+            var finalEval = Position.EvaluateFinalPosition(ply, Game.CurrentPosition.IsInCheck());
+            _tt.RecordHash(Game.CurrentPosition, finalEval, 0, ply, finalEval, NodeType.Exact);
 
             return finalEval;
         }
 
-        _tt.RecordHash(position, staticEval, 0, ply, bestScore, nodeType, bestMove);
+        _tt.RecordHash(Game.CurrentPosition, staticEval, 0, ply, bestScore, nodeType, bestMove);
 
         return bestScore;
     }

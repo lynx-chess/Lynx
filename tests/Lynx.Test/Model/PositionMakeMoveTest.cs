@@ -35,12 +35,12 @@ public class PositionMakeMoveTest
         Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e4));
         Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.d5));
 
-        var moves = MoveGenerator.GenerateAllMoves(position);
+        var moves = position.GenerateAllMoves();
 
         var captureMove = moves.Single(m => m.IsCapture());
 
         // Act
-        var newPosition = new Position(position);
+        var newPosition = new Position(in position);
         newPosition.MakeMove(captureMove);
 
         // Assert
@@ -82,11 +82,11 @@ public class PositionMakeMoveTest
         Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.e4));
         Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.d5));
 
-        var moves = MoveGenerator.GenerateAllMoves(position);
+        var moves = position.GenerateAllMoves();
         var captureMove = moves.Single(m => m.IsCapture());
 
         // Act
-        var newPosition = new Position(position);
+        var newPosition = new Position(in position);
         newPosition.MakeMove(captureMove);
 
         // Assert
@@ -132,11 +132,11 @@ public class PositionMakeMoveTest
         Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b7));
         Assert.False(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b8));
 
-        var moves = MoveGenerator.GenerateAllMoves(position);
+        var moves = position.GenerateAllMoves();
         var promotionMove = moves.Single(m => m.PromotedPiece() == (int)Piece.N);
 
         // Act
-        var newPosition = new Position(position);
+        var newPosition = new Position(in position);
         newPosition.MakeMove(promotionMove);
 
         // Assert
@@ -176,11 +176,11 @@ public class PositionMakeMoveTest
         Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b2));
         Assert.False(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b1));
 
-        var moves = MoveGenerator.GenerateAllMoves(position);
+        var moves = position.GenerateAllMoves();
         var promotionMove = moves.Single(m => m.PromotedPiece() == (int)Piece.n);
 
         // Act
-        var newPosition = new Position(position);
+        var newPosition = new Position(in position);
         newPosition.MakeMove(promotionMove);
 
         // Assert
@@ -222,11 +222,11 @@ public class PositionMakeMoveTest
         Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b7));
         Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a8));
 
-        var moves = MoveGenerator.GenerateAllMoves(position);
+        var moves = position.GenerateAllMoves();
         var promotionMove = moves.Single(m => m.PromotedPiece() == (int)Piece.N);
 
         // Act
-        var newPosition = new Position(position);
+        var newPosition = new Position(in position);
         newPosition.MakeMove(promotionMove);
 
         // Assert
@@ -270,11 +270,11 @@ public class PositionMakeMoveTest
         Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b2));
         Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.a1));
 
-        var moves = MoveGenerator.GenerateAllMoves(position);
+        var moves = position.GenerateAllMoves();
         var promotionMove = moves.Single(m => m.PromotedPiece() == (int)Piece.n);
 
         // Act
-        var newPosition = new Position(position);
+        var newPosition = new Position(in position);
         newPosition.MakeMove(promotionMove);
 
         // Assert
@@ -309,11 +309,11 @@ public class PositionMakeMoveTest
         Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c4));
         Assert.False(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b4));
 
-        var moves = MoveGenerator.GenerateAllMoves(position);
+        var moves = position.GenerateAllMoves();
         var enPassant = moves.Single(m => m.IsDoublePawnPush());
 
         // Act
-        var newPosition = new Position(position);
+        var newPosition = new Position(in position);
         newPosition.MakeMove(enPassant);
 
         // Assert
@@ -349,11 +349,11 @@ public class PositionMakeMoveTest
         Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b5));
         Assert.False(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c5));
 
-        var moves = MoveGenerator.GenerateAllMoves(position);
+        var moves = position.GenerateAllMoves();
         var enPassant = moves.Single(m => m.IsDoublePawnPush());
 
         // Act
-        var newPosition = new Position(position);
+        var newPosition = new Position(in position);
         newPosition.MakeMove(enPassant);
 
         // Assert
@@ -393,11 +393,11 @@ public class PositionMakeMoveTest
         Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c5));
         Assert.False(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c6));
 
-        var moves = MoveGenerator.GenerateAllMoves(position);
+        var moves = position.GenerateAllMoves();
         var enPassant = moves.Single(m => m.IsEnPassant());
 
         // Act
-        var newPosition = new Position(position);
+        var newPosition = new Position(in position);
         newPosition.MakeMove(enPassant);
 
         // Assert
@@ -428,11 +428,11 @@ public class PositionMakeMoveTest
         Assert.True(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.c4));
         Assert.False(position.OccupancyBitBoards[(int)Side.Both].GetBit(BoardSquare.b3));
 
-        var moves = MoveGenerator.GenerateAllMoves(position);
+        var moves = position.GenerateAllMoves();
         var enPassant = moves.Single(m => m.IsEnPassant());
 
         // Act
-        var newPosition = new Position(position);
+        var newPosition = new Position(in position);
         newPosition.MakeMove(enPassant);
 
         // Assert
@@ -456,9 +456,9 @@ public class PositionMakeMoveTest
     {
         var position = new Position(fen);
 
-        foreach (var move in MoveGenerator.GenerateAllMoves(position).Where(m => m.IsDoublePawnPush()))
+        foreach (var move in position.GenerateAllMoves().Where(m => m.IsDoublePawnPush()))
         {
-            var newPosition = new Position(position);
+            var newPosition = new Position(in position);
             newPosition.MakeMove(move);
 
             Assert.AreNotEqual(position.EnPassant, newPosition.EnPassant);
@@ -477,9 +477,9 @@ public class PositionMakeMoveTest
 
         Assert.AreNotEqual(BoardSquare.noSquare, position.EnPassant);
 
-        foreach (var move in MoveGenerator.GenerateAllMoves(position).Where(m => !m.IsDoublePawnPush()))
+        foreach (var move in position.GenerateAllMoves().Where(m => !m.IsDoublePawnPush()))
         {
-            var newPosition = new Position(position);
+            var newPosition = new Position(in position);
             newPosition.MakeMove(move);
 
             Assert.AreEqual(BoardSquare.noSquare, newPosition.EnPassant);
@@ -509,11 +509,11 @@ public class PositionMakeMoveTest
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BK);
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BQ);
 
-        var moves = MoveGenerator.GenerateAllMoves(position);
+        var moves = position.GenerateAllMoves();
         var shortCastling = moves.Single(m => m.IsShortCastle());
 
         // Act
-        var newPosition = new Position(position);
+        var newPosition = new Position(in position);
         newPosition.MakeMove(shortCastling);
 
         // Assert - position and occupancy after castling
@@ -561,11 +561,11 @@ public class PositionMakeMoveTest
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BK);
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BQ);
 
-        var moves = MoveGenerator.GenerateAllMoves(position);
+        var moves = position.GenerateAllMoves();
         var shortCastling = moves.Single(m => m.IsLongCastle());
 
         // Act
-        var newPosition = new Position(position);
+        var newPosition = new Position(in position);
         newPosition.MakeMove(shortCastling);
 
         // Assert - position and occupancy after castling
@@ -613,11 +613,11 @@ public class PositionMakeMoveTest
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BK);
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BQ);
 
-        var moves = MoveGenerator.GenerateAllMoves(position);
+        var moves = position.GenerateAllMoves();
         var shortCastling = moves.Single(m => m.IsShortCastle());
 
         // Act
-        var newPosition = new Position(position);
+        var newPosition = new Position(in position);
         newPosition.MakeMove(shortCastling);
 
         // Assert - position and occupancy after castling
@@ -665,11 +665,11 @@ public class PositionMakeMoveTest
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BK);
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BQ);
 
-        var moves = MoveGenerator.GenerateAllMoves(position);
+        var moves = position.GenerateAllMoves();
         var shortCastling = moves.Single(m => m.IsLongCastle());
 
         // Act
-        var newPosition = new Position(position);
+        var newPosition = new Position(in position);
         newPosition.MakeMove(shortCastling);
 
         // Assert - position and occupancy after castling
@@ -708,11 +708,11 @@ public class PositionMakeMoveTest
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BK);
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BQ);
 
-        var moves = MoveGenerator.GenerateAllMoves(position);
+        var moves = position.GenerateAllMoves();
         var quietKingMove = moves.First(m => !m.IsCastle() && m.Piece() == (int)Piece.K + Utils.PieceOffset(position.Side));
 
         // Act
-        var newPosition = new Position(position);
+        var newPosition = new Position(in position);
         newPosition.MakeMove(quietKingMove);
 
         // Assert - Castling rights
@@ -732,11 +732,11 @@ public class PositionMakeMoveTest
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BK);
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BQ);
 
-        var moves = MoveGenerator.GenerateAllMoves(position);
+        var moves = position.GenerateAllMoves();
         var quietKingMove = moves.First(m => !m.IsCastle() && m.Piece() == (int)Piece.K + Utils.PieceOffset(position.Side));
 
         // Act
-        var newPosition = new Position(position);
+        var newPosition = new Position(in position);
         newPosition.MakeMove(quietKingMove);
 
         // Assert - Castling rights
@@ -756,14 +756,14 @@ public class PositionMakeMoveTest
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BK);
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BQ);
 
-        var moves = MoveGenerator.GenerateAllMoves(position);
+        var moves = position.GenerateAllMoves();
         var rookMove = moves.First(m =>
             m.Piece() == (int)Piece.R + Utils.PieceOffset(position.Side)
             && !m.IsCapture()
             && m.SourceSquare() == (int)BoardSquare.a8 + (7 * 8 * (int)position.Side));
 
         // Act
-        var newPosition = new Position(position);
+        var newPosition = new Position(in position);
         newPosition.MakeMove(rookMove);
 
         // Assert - Castling rights
@@ -783,14 +783,14 @@ public class PositionMakeMoveTest
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BK);
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BQ);
 
-        var moves = MoveGenerator.GenerateAllMoves(position);
+        var moves = position.GenerateAllMoves();
         var rookMove = moves.First(m =>
             m.Piece() == (int)Piece.R + Utils.PieceOffset(position.Side)
             && !m.IsCapture()
             && m.SourceSquare() == (int)BoardSquare.h8 + (7 * 8 * (int)position.Side));
 
         // Act
-        var newPosition = new Position(position);
+        var newPosition = new Position(in position);
         newPosition.MakeMove(rookMove);
 
         // Assert - Castling rights
@@ -810,14 +810,14 @@ public class PositionMakeMoveTest
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BK);
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BQ);
 
-        var moves = MoveGenerator.GenerateAllMoves(position);
+        var moves = position.GenerateAllMoves();
         var rookMove = moves.First(m =>
             m.Piece() == (int)Piece.R + Utils.PieceOffset(position.Side)
             && !m.IsCapture()
             && m.SourceSquare() == (int)BoardSquare.a8 + (7 * 8 * (int)position.Side));
 
         // Act
-        var newPosition = new Position(position);
+        var newPosition = new Position(in position);
         newPosition.MakeMove(rookMove);
 
         // Assert - Castling rights
@@ -837,14 +837,14 @@ public class PositionMakeMoveTest
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BK);
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BQ);
 
-        var moves = MoveGenerator.GenerateAllMoves(position);
+        var moves = position.GenerateAllMoves();
         var rookMove = moves.First(m =>
             m.Piece() == (int)Piece.R + Utils.PieceOffset(position.Side)
             && !m.IsCapture()
             && m.SourceSquare() == (int)BoardSquare.h8 + (7 * 8 * (int)position.Side));
 
         // Act
-        var newPosition = new Position(position);
+        var newPosition = new Position(in position);
         newPosition.MakeMove(rookMove);
 
         // Assert - Castling rights
@@ -864,7 +864,7 @@ public class PositionMakeMoveTest
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BK);
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BQ);
 
-        var moves = MoveGenerator.GenerateAllMoves(position);
+        var moves = position.GenerateAllMoves();
         var rookCapture = moves.First(m =>
             m.Piece() == (int)Piece.B + Utils.PieceOffset(position.Side)
             && m.IsCapture()
@@ -873,7 +873,7 @@ public class PositionMakeMoveTest
         Assert.AreEqual((int)BoardSquare.a8, rookCapture.TargetSquare());
 
         // Act
-        var newPosition = new Position(position);
+        var newPosition = new Position(in position);
         newPosition.MakeMove(rookCapture);
 
         // Assert - Castling rights
@@ -893,7 +893,7 @@ public class PositionMakeMoveTest
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BK);
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BQ);
 
-        var moves = MoveGenerator.GenerateAllMoves(position);
+        var moves = position.GenerateAllMoves();
         var rookCapture = moves.First(m =>
             m.Piece() == (int)Piece.B + Utils.PieceOffset(position.Side)
             && m.IsCapture()
@@ -902,7 +902,7 @@ public class PositionMakeMoveTest
         Assert.AreEqual((int)BoardSquare.h8, rookCapture.TargetSquare());
 
         // Act
-        var newPosition = new Position(position);
+        var newPosition = new Position(in position);
         newPosition.MakeMove(rookCapture);
 
         // Assert - Castling rights
@@ -922,7 +922,7 @@ public class PositionMakeMoveTest
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BK);
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BQ);
 
-        var moves = MoveGenerator.GenerateAllMoves(position);
+        var moves = position.GenerateAllMoves();
         var rookCapture = moves.First(m =>
             m.Piece() == (int)Piece.B + Utils.PieceOffset(position.Side)
             && m.IsCapture()
@@ -931,7 +931,7 @@ public class PositionMakeMoveTest
         Assert.AreEqual((int)BoardSquare.a1, rookCapture.TargetSquare());
 
         // Act
-        var newPosition = new Position(position);
+        var newPosition = new Position(in position);
         newPosition.MakeMove(rookCapture);
 
         // Assert - Castling rights
@@ -951,7 +951,7 @@ public class PositionMakeMoveTest
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BK);
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BQ);
 
-        var moves = MoveGenerator.GenerateAllMoves(position);
+        var moves = position.GenerateAllMoves();
         var rookCapture = moves.First(m =>
             m.Piece() == (int)Piece.B + Utils.PieceOffset(position.Side)
             && m.IsCapture()
@@ -960,7 +960,7 @@ public class PositionMakeMoveTest
         Assert.AreEqual((int)BoardSquare.h1, rookCapture.TargetSquare());
 
         // Act
-        var newPosition = new Position(position);
+        var newPosition = new Position(in position);
         newPosition.MakeMove(rookCapture);
 
         // Assert - Castling rights
@@ -994,14 +994,14 @@ public class PositionMakeMoveTest
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BK);
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BQ);
 
-        var moves = MoveGenerator.GenerateAllMoves(position);
+        var moves = position.GenerateAllMoves();
         var rookCapture = moves.First(m =>
             m.Piece() == (int)Piece.B + Utils.PieceOffset(position.Side)
             && m.IsCapture()
             && m.SourceSquare() == (int)BoardSquare.d5);
 
         // Act
-        var newPosition = new Position(position);
+        var newPosition = new Position(in position);
         newPosition.MakeMove(rookCapture);
 
         // Assert - Castling rights
@@ -1035,14 +1035,14 @@ public class PositionMakeMoveTest
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BK);
         Assert.AreNotEqual(default(int), position.Castle & (int)CastlingRights.BQ);
 
-        var moves = MoveGenerator.GenerateAllMoves(position);
+        var moves = position.GenerateAllMoves();
         var rookCapture = moves.First(m =>
             m.Piece() == (int)Piece.B + Utils.PieceOffset(position.Side)
             && m.IsCapture()
             && m.SourceSquare() == (int)BoardSquare.d5);
 
         // Act
-        var newPosition = new Position(position);
+        var newPosition = new Position(in position);
         newPosition.MakeMove(rookCapture);
 
         // Assert - Castling rights

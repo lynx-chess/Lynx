@@ -509,7 +509,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
         {
             foreach (var moveString in movesUCIString)
             {
-                var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition);
+                var moveList = CurrentPosition.GenerateAllMoves();
 
                 if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
                 {
@@ -574,7 +574,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
 
             PositionHashHistory = new(1024) { CurrentPosition.UniqueIdentifier };
             HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
-            _gameInitialPosition = new Position(CurrentPosition);
+            _gameInitialPosition = new Position(in CurrentPosition);
 #if DEBUG
             MoveHistory = new(1024);
 #endif
@@ -590,7 +590,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
                     break;
                 }
                 var moveString = rawMoves[range];
-                var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition);
+                var moveList = CurrentPosition.GenerateAllMoves();
 
                 if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
                 {
@@ -601,7 +601,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
                 MakeMove(parsedMove.Value);
             }
 
-            _gameInitialPosition = new Position(CurrentPosition);
+            _gameInitialPosition = new Position(in CurrentPosition);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -655,7 +655,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
 
             PositionHashHistory = new(1024) { CurrentPosition.UniqueIdentifier };
             HalfMovesWithoutCaptureOrPawnMove = parsedFen.HalfMoveClock;
-            _gameInitialPosition = new Position(CurrentPosition);
+            _gameInitialPosition = new Position(in CurrentPosition);
 #if DEBUG
             MoveHistory = new(1024);
 #endif
@@ -670,7 +670,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
                     break;
                 }
                 var moveString = rawMoves[rangeSpan[i]];
-                var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, movePool);
+                var moveList = CurrentPosition.GenerateAllMoves(movePool);
 
                 if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
                 {
@@ -681,7 +681,7 @@ public partial class ParseGame_Benchmark : BaseBenchmark
                 MakeMove(parsedMove.Value);
             }
 
-            _gameInitialPosition = new Position(CurrentPosition);
+            _gameInitialPosition = new Position(in CurrentPosition);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

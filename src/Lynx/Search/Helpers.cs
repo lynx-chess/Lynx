@@ -116,26 +116,24 @@ public sealed partial class Engine
             }
 
             var move = _pVTable[i];
-            TryParseMove(position, i, move);
+            TryParseMove(in position, i, move);
 
-#pragma warning disable CA2000 // Dispose objects before losing scope - disposing it fixes the existing logic, and this is a debug-only method anyway
-            var newPosition = new Position(position);
-#pragma warning restore CA2000 // Dispose objects before losing scope
-            newPosition.MakeMove(move);
-            if (!newPosition.WasProduceByAValidMove())
+            var oldPosition = position;
+            position = new Position(in position, move);
+            if (!position.WasProduceByAValidMove())
             {
                 throw new LynxException($"Invalid position after move {move.UCIString()} from position {position.FEN()}");
             }
-            position = newPosition;
+            position = oldPosition;
         }
 
-        static void TryParseMove(Position position, int i, int move)
+        static void TryParseMove(in Position position, int i, int move)
         {
             Span<Move> movePool = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
 
             if (!MoveExtensions.TryParseFromUCIString(
                move.UCIString(),
-               MoveGenerator.GenerateAllMoves(position, movePool),
+               position.GenerateAllMoves(movePool),
                out _))
             {
                 var message = $"Unexpected PV move {i}: {move.UCIString()} from position {position.FEN()}";
@@ -146,7 +144,7 @@ public sealed partial class Engine
     }
 
     [Conditional("DEBUG")]
-    private static void PrintPreMove(Position position, int plies, Move move, bool isQuiescence = false)
+    private static void PrintPreMove(in Position position, int plies, Move move, bool isQuiescence = false)
     {
         if (_logger.IsTraceEnabled)
         {
@@ -168,7 +166,7 @@ public sealed partial class Engine
     }
 
     [Conditional("DEBUG")]
-    private static void PrintMove(Position position, int plies, Move move, int evaluation, bool isQuiescence = false, bool prune = false)
+    private static void PrintMove(in Position position, int plies, Move move, int evaluation, bool isQuiescence = false, bool prune = false)
     {
         if (_logger.IsTraceEnabled)
         {

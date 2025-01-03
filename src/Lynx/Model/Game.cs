@@ -28,7 +28,7 @@ public sealed class Game : IDisposable
 
     public int HalfMovesWithoutCaptureOrPawnMove { get; set; }
 
-    public Position CurrentPosition { get; private set; }
+    public Position CurrentPosition { get; set; }
 
     public Position PositionBeforeLastSearch { get; private set; }
 
@@ -66,7 +66,7 @@ public sealed class Game : IDisposable
                 break;
             }
             var moveString = rawMoves[rangeSpan[i]];
-            var moveList = MoveGenerator.GenerateAllMoves(CurrentPosition, movePool);
+            var moveList = CurrentPosition.GenerateAllMoves(movePool);
 
             // TODO: consider creating moves on the fly
             if (!MoveExtensions.TryParseFromUCIString(moveString, moveList, out var parsedMove))
@@ -159,7 +159,7 @@ public sealed class Game : IDisposable
             return false;
         }
 
-        return !CurrentPosition.IsInCheck() || MoveGenerator.CanGenerateAtLeastAValidMove(CurrentPosition);
+        return !CurrentPosition.IsInCheck() || CurrentPosition.CanGenerateAtLeastAValidMove();
     }
 
     /// <summary>
@@ -190,9 +190,10 @@ public sealed class Game : IDisposable
     public static bool Is50MovesRepetition(int halfMovesWithoutCaptureOrPawnMove) => halfMovesWithoutCaptureOrPawnMove >= 100;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public GameState MakeMove(Move moveToPlay)
+    public Position MakeMove(Move moveToPlay)
     {
-        var gameState = CurrentPosition.MakeMove(moveToPlay);
+        var oldPosition = CurrentPosition;
+        CurrentPosition = new Position(CurrentPosition, moveToPlay);
 
         if (CurrentPosition.WasProduceByAValidMove())
         {
@@ -205,10 +206,10 @@ public sealed class Game : IDisposable
         else
         {
             _logger.Warn("Error trying to play {0}", moveToPlay.UCIString());
-            CurrentPosition.UnmakeMove(moveToPlay, gameState);
+            CurrentPosition = oldPosition;
         }
 
-        return gameState;
+        return oldPosition;
     }
 
     /// <summary>

@@ -383,7 +383,7 @@ static void _22_Generate_Moves()
     position.Print();
 
     //position.OccupancyBitBoards[2] |= 0b11100111UL << 8 * 4;
-    var moves = MoveGenerator.GenerateAllMoves(position);
+    var moves = position.GenerateAllMoves();
 
     foreach (var move in moves)
     {
@@ -394,7 +394,7 @@ static void _22_Generate_Moves()
     position.PieceBitBoards[0].Print();
     position.PieceBitBoards[6].Print();
     position.Print();
-    moves = MoveGenerator.GenerateAllMoves(position);
+    moves = position.GenerateAllMoves();
 
     foreach (var move in moves)
     {
@@ -423,10 +423,10 @@ static void _26_Piece_Moves()
     var position = new Position(TrickyPosition);
     position.Print();
 
-    var moves = MoveGenerator.GenerateAllMoves(position).Where(m => m.Piece() == (int)Piece.N || m.Piece() == (int)Piece.n).ToList();
+    var moves = position.GenerateAllMoves().Where(m => m.Piece() == (int)Piece.N || m.Piece() == (int)Piece.n).ToList();
     moves.ForEach(m => Console.WriteLine(m));
 
-    moves = [.. MoveGenerator.GenerateAllMoves(position)];
+    moves = [.. position.GenerateAllMoves()];
     Console.WriteLine($"Expected 48, found: {moves.Count}");
     foreach (var move in moves)
     {
@@ -482,16 +482,16 @@ static void PrintMoveList(IEnumerable<Move> moves)
 static void _29_Move_List()
 {
     var position = new Position(TrickyPosition);
-    var moves = MoveGenerator.GenerateAllMoves(position);
+    var moves = position.GenerateAllMoves();
     PrintMoveList(moves);
 
     position = new Position(TrickyPositionReversed);
-    moves = MoveGenerator.GenerateAllMoves(position);
+    moves = position.GenerateAllMoves();
     PrintMoveList(moves);
 
     position = new Position(KillerPosition);
     position.Print();
-    moves = MoveGenerator.GenerateAllMoves(position);
+    moves = position.GenerateAllMoves();
     PrintMoveList(moves);
 }
 
@@ -511,13 +511,13 @@ static void _32_Make_Move()
     //CastlingRightsTest(game);
     //CastlingRightsTest(reversedGame);
 
-    PrintMoveList(MoveGenerator.GenerateAllMoves(gameWithPromotion.CurrentPosition));
+    PrintMoveList(gameWithPromotion.CurrentPosition.GenerateAllMoves());
 
     GeneralMoveTest(gameWithPromotion);
 
     static void GeneralMoveTest(Game game)
     {
-        foreach (var move in MoveGenerator.GenerateAllMoves(game.CurrentPosition))
+        foreach (var move in game.CurrentPosition.GenerateAllMoves())
         {
             game.CurrentPosition.Print();
 
@@ -537,7 +537,7 @@ static void _32_Make_Move()
 
     static void CastlingRightsTest(Game game)
     {
-        foreach (var move in MoveGenerator.GenerateAllMoves(game.CurrentPosition))
+        foreach (var move in game.CurrentPosition.GenerateAllMoves())
         {
             if (move.Piece() == (int)Piece.R || (move.Piece() == (int)Piece.r)
              || move.Piece() == (int)Piece.K || (move.Piece() == (int)Piece.k))
@@ -561,7 +561,7 @@ static void _42_Perft()
 
     for (int depth = 0; depth < 7; ++depth)
     {
-        Perft.RunPerft(pos, depth, Console.WriteLine);
+        pos.RunPerft(depth, Console.WriteLine);
     }
 }
 
@@ -583,7 +583,7 @@ static void _49_Rudimetary_Evaluation()
 
     //foreach (var move in MoveGenerator.GenerateAllMoves(position))
     //{
-    //    var newBlackPosition = new Position(position, move);
+    //    var newBlackPosition = new Position(in position, move);
     //    if (newBlackPosition.IsValid())
     //    {
     //        var newWhitePosition = new Position(newBlackPosition, newBlackPosition.AllPossibleMoves()[0]);
@@ -698,7 +698,7 @@ static void _54_ScoreMove()
 
     var engine = new Engine(Channel.CreateBounded<object>(new BoundedChannelOptions(100) { SingleReader = true, SingleWriter = false }));
     engine.SetGame(new(position.FEN()));
-    foreach (var move in MoveGenerator.GenerateAllMoves(position, capturesOnly: true))
+    foreach (var move in position.GenerateAllMoves(capturesOnly: true))
     {
         Console.WriteLine($"{move} {engine.ScoreMove(move, default, default)}");
     }
@@ -707,7 +707,7 @@ static void _54_ScoreMove()
     position.Print();
 
     engine.SetGame(new(position.FEN()));
-    foreach (var move in MoveGenerator.GenerateAllMoves(position, capturesOnly: true))
+    foreach (var move in position.GenerateAllMoves(capturesOnly: true))
     {
         Console.WriteLine($"{move} {engine.ScoreMove(move, default, default)}");
     }
@@ -718,7 +718,7 @@ static void ZobristTable()
     var pos = new Position(KillerPosition);
     var zobristTable = InitializeZobristTable();
     var hash = CalculatePositionHash(zobristTable, pos);
-    var updatedHash = UpdatePositionHash(zobristTable, hash, MoveGenerator.GenerateAllMoves(pos)[0]);
+    var updatedHash = UpdatePositionHash(zobristTable, hash, pos.GenerateAllMoves()[0]);
 
     Console.WriteLine(updatedHash);
 }
@@ -1079,30 +1079,30 @@ static void TranspositionTableMethod()
 
     transpositionTable.Clear();
 
-    //transpositionTable.RecordHash(position, depth: 3, maxDepth: 5, move: 1234, eval: +5, nodeType: NodeType.Alpha);
-    //var entry = transpositionTable.ProbeHash(position, maxDepth: 5, depth: 3, alpha: 1, beta: 2);
+    //transpositionTable.RecordHash(in position, depth: 3, maxDepth: 5, move: 1234, eval: +5, nodeType: NodeType.Alpha);
+    //var entry = transpositionTable.ProbeHash(in position, maxDepth: 5, depth: 3, alpha: 1, beta: 2);
 
-    transpositionTable.RecordHash(position, position.StaticEvaluation().Score, depth: 5, ply: 3, score: +19, nodeType: NodeType.Alpha, move: 1234);
-    var entry = transpositionTable.ProbeHash(position, ply: 3);
+    transpositionTable.RecordHash(in position, position.StaticEvaluation().Score, depth: 5, ply: 3, score: +19, nodeType: NodeType.Alpha, move: 1234);
+    var entry = transpositionTable.ProbeHash(in position, ply: 3);
     Console.WriteLine(entry); // Expected 20
 
-    transpositionTable.RecordHash(position, position.StaticEvaluation().Score, depth: 5, ply: 3, score: +21, nodeType: NodeType.Alpha, move: 1234);
-    entry = transpositionTable.ProbeHash(position, ply: 3);
+    transpositionTable.RecordHash(in position, position.StaticEvaluation().Score, depth: 5, ply: 3, score: +21, nodeType: NodeType.Alpha, move: 1234);
+    entry = transpositionTable.ProbeHash(in position, ply: 3);
     Console.WriteLine(entry); // Expected 12_345_678
 
-    transpositionTable.RecordHash(position, position.StaticEvaluation().Score, depth: 5, ply: 3, score: +29, nodeType: NodeType.Beta, move: 1234);
-    entry = transpositionTable.ProbeHash(position, ply: 3);
+    transpositionTable.RecordHash(in position, position.StaticEvaluation().Score, depth: 5, ply: 3, score: +29, nodeType: NodeType.Beta, move: 1234);
+    entry = transpositionTable.ProbeHash(in position, ply: 3);
     Console.WriteLine(entry); // Expected 12_345_678
 
-    transpositionTable.RecordHash(position, position.StaticEvaluation().Score, depth: 5, ply: 3, score: +31, nodeType: NodeType.Beta, move: 1234);
-    entry = transpositionTable.ProbeHash(position, ply: 3);
+    transpositionTable.RecordHash(in position, position.StaticEvaluation().Score, depth: 5, ply: 3, score: +31, nodeType: NodeType.Beta, move: 1234);
+    entry = transpositionTable.ProbeHash(in position, ply: 3);
     Console.WriteLine(entry); // Expected 30
 }
 
 static void UnmakeMove()
 {
     var pos = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq");
-    var a = Perft.PerftRecursiveImpl(pos, 1, default);
+    var a = pos.PerftRecursiveImpl(1, default);
 
     TestMoveGen(Constants.InitialPositionFEN);
     TestMoveGen(Constants.TTPositionFEN);
@@ -1115,7 +1115,7 @@ static void UnmakeMove()
         var position = new Position(fen);
         Console.WriteLine($"**Position\t{position.FEN()}, Zobrist key {position.UniqueIdentifier}**");
 
-        var allMoves = MoveGenerator.GenerateAllMoves(position);
+        var allMoves = position.GenerateAllMoves();
 
         var oldZobristKey = position.UniqueIdentifier;
         foreach (var move in allMoves)
@@ -1123,7 +1123,7 @@ static void UnmakeMove()
             var epdMoveString = move.ToEPDString(position);
             Console.WriteLine($"Trying {epdMoveString} in\t{position.FEN()}");
 
-            var newPosition = new Position(position);
+            var newPosition = new Position(in position);
             newPosition.MakeMove(move);
             var savedState = position.MakeMove(move);
 
