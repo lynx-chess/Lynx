@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Diagnostics;
+using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -624,7 +625,7 @@ public class Position : IDisposable
             (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
             (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
             (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
-            (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
             _ => 0
         };
     }
@@ -784,8 +785,10 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int QueenAdditionalEvaluation(int squareIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+    private int QueenAdditionalEvaluation(int squareIndex, int pieceIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
     {
+        const int queenToRookOffset = (int)Piece.Q - (int)Piece.P;
+
         var occupancy = OccupancyBitBoards[(int)Side.Both];
         var attacks = Attacks.QueenAttacks(squareIndex, occupancy);
 
@@ -802,6 +805,22 @@ public class Position : IDisposable
         var checks = (attacks & enemyKingCheckThreats).CountBits();
 
         packedBonus += CheckBonus[(int)Piece.Q] * checks;
+
+        // Open/semi-open files when no rooks
+        if (PieceBitBoards[(int)Piece.R] == 0 && PieceBitBoards[(int)Piece.r] == 0)
+        {
+            // Open file
+            if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default)
+            {
+                packedBonus += OpenFileQueenBonus;
+            }
+            // Rook on semi-open file
+            else if ((PieceBitBoards[pieceIndex - queenToRookOffset] & Masks.FileMasks[squareIndex]) == default)
+            {
+                packedBonus += SemiOpenFileQueenBonus;
+            }
+        }
+
 
         return packedBonus;
     }

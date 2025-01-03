@@ -6041,6 +6041,16 @@ public static class EvaluationParams
 	public const int OpenFileKingPenalty = 131007;
 
 	/// <summary>
+	/// <see cref="Utils.Pack(-65, 2)"/>
+	/// </summary>
+	public const int OpenFileQueenBonus = 131007;
+
+	/// <summary>
+	/// <see cref="Utils.Pack(-65, 2)"/>
+	/// </summary>
+	public const int SemiOpenFileQueenBonus = 131007;
+
+	/// <summary>
 	/// <see cref="Utils.Pack(23, -3)"/>
 	/// </summary>
 	public const int KingShieldBonus = -196585;
