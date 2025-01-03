@@ -72,8 +72,9 @@ public readonly struct TranspositionTable
         // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
         // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
         var recalculatedScore = RecalculateMateScores(entry.Score, ply);
+        var recalculatedStaticEval = RecalculateMateScores(entry.StaticEval, ply);
 
-        return (recalculatedScore, entry.Move, entry.Type, entry.StaticEval, entry.Depth);
+        return (recalculatedScore, entry.Move, entry.Type, recalculatedStaticEval, entry.Depth);
     }
 
     /// <summary>
@@ -105,8 +106,9 @@ public readonly struct TranspositionTable
         // We want to store the distance to the checkmate position relative to the current node, independently from the root
         // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
         var recalculatedScore = RecalculateMateScores(score, -ply);
+        var recalculatedStaticEval = RecalculateMateScores(staticEval, -ply);
 
-        entry.Update(position.UniqueIdentifier, recalculatedScore, staticEval, depth, nodeType, move);
+        entry.Update(position.UniqueIdentifier, recalculatedScore, recalculatedStaticEval, depth, nodeType, move);
     }
 
     /// <summary>
