@@ -447,7 +447,7 @@ public class Position : IDisposable
             var bitboard = PieceBitBoards[pieceIndex];
 
             // Pieces protected by pawns bonus
-            packedScore += PieceProtectedByPawnBonus[pieceIndex - 6] * (blackPawnAttacks & bitboard).CountBits();
+            packedScore -= PieceProtectedByPawnBonus[pieceIndex - 6] * (blackPawnAttacks & bitboard).CountBits();
 
             while (bitboard != default)
             {
