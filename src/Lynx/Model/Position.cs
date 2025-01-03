@@ -807,7 +807,7 @@ public class Position : IDisposable
         packedBonus += CheckBonus[(int)Piece.Q] * checks;
 
         // Open/semi-open files when no rooks
-        if (PieceBitBoards[(int)Piece.R] == 0 && PieceBitBoards[(int)Piece.r] == 0)
+        if (PieceBitBoards[pieceIndex - 1] == 0)
         {
             // Open file
             if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default)
