@@ -482,6 +482,13 @@ public class Position : IDisposable
             packedScore -= BishopPairBonus;
         }
 
+        // Outposts
+        var whiteOutPosts = whitePawnAttacks & ~(blackPawnAttacks & blackPawnAttacks.ShiftDown(2) & blackPawnAttacks.ShiftDown(3));
+        var blackOutPosts = blackPawnAttacks & ~(whitePawnAttacks & whitePawnAttacks.ShiftUp(2) & whitePawnAttacks.ShiftUp(3));
+
+        packedScore += KnightOutpostBonus * (PieceBitBoards[(int)Piece.N] & whiteOutPosts).CountBits();
+        packedScore -= KnightOutpostBonus * (PieceBitBoards[(int)Piece.n] & blackOutPosts).CountBits();
+
         // Pieces attacked by pawns bonus
         packedScore += PieceAttackedByPawnPenalty
             * ((blackPawnAttacks & OccupancyBitBoards[(int)Side.White] /* & (~whitePawns) */).CountBits()
