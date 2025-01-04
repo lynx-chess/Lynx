@@ -196,7 +196,9 @@ public class ReadonlyStruct_vs_Tuple_Benchmark : BaseBenchmark
         }
     }
 
+#pragma warning disable S3260 // Non-derived "private" classes and records should be "sealed"
     private class Class
+#pragma warning restore S3260 // Non-derived "private" classes and records should be "sealed"
     {
         public int Evaluation { get; }
 

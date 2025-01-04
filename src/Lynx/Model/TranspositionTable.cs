@@ -10,7 +10,10 @@ public readonly struct TranspositionTable
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
     private readonly TranspositionTableElement[] _tt = [];
+
+#pragma warning disable CA1051 // Do not declare visible instance fields
     public readonly int Size;
+#pragma warning restore CA1051 // Do not declare visible instance fields
 
     public TranspositionTable()
     {
@@ -56,35 +59,21 @@ public readonly struct TranspositionTable
     /// </summary>
     /// <param name="ply">Ply</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public (int Score, ShortMove BestMove, NodeType NodeType, int RawScore, int StaticEval) ProbeHash(Position position, int depth, int ply, int alpha, int beta)
+    public (int Score, ShortMove BestMove, NodeType NodeType, int StaticEval, int Depth) ProbeHash(Position position, int ply)
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier);
         var entry = _tt[ttIndex];
 
         if ((ushort)position.UniqueIdentifier != entry.Key)
         {
-            return (EvaluationConstants.NoHashEntry, default, default, default, default);
+            return (EvaluationConstants.NoHashEntry, default, default, EvaluationConstants.NoHashEntry, default);
         }
 
-        var type = entry.Type;
-        var rawScore = entry.Score;
-        var score = EvaluationConstants.NoHashEntry;
+        // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
+        // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
+        var recalculatedScore = RecalculateMateScores(entry.Score, ply);
 
-        if (entry.Depth >= depth)
-        {
-            var recalculatedScore = RecalculateMateScores(rawScore, ply);
-
-            if (type == NodeType.Exact
-                || (type == NodeType.Alpha && recalculatedScore <= alpha)
-                || (type == NodeType.Beta && recalculatedScore >= beta))
-            {
-                // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
-                // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
-                score = recalculatedScore;
-            }
-        }
-
-        return (score, entry.Move, entry.Type, rawScore, entry.StaticEval);
+        return (recalculatedScore, entry.Move, entry.Type, entry.StaticEval, entry.Depth);
     }
 
     /// <summary>
@@ -180,11 +169,11 @@ public readonly struct TranspositionTable
     {
         if (score > EvaluationConstants.PositiveCheckmateDetectionLimit)
         {
-            return score - (EvaluationConstants.CheckmateDepthFactor * ply);
+            return score - ply;
         }
         else if (score < EvaluationConstants.NegativeCheckmateDetectionLimit)
         {
-            return score + (EvaluationConstants.CheckmateDepthFactor * ply);
+            return score + ply;
         }
 
         return score;
