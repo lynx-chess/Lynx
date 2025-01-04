@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
 using System.Runtime.CompilerServices;
 
-#pragma warning disable S4136, CA1045
+#pragma warning disable S4136
 
 namespace Lynx.Model;
 
@@ -67,7 +67,6 @@ public static class BitBoardExtensions
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static BitBoard SetBit(this ref BitBoard board, int square)
-#pragma warning restore CA1045 // Do not pass types by reference
     {
         return board |= (1UL << square);
     }
@@ -249,4 +248,4 @@ public static class BitBoardExtensions
     #endregion
 }
 
-#pragma warning restore S4136, CA1045
+#pragma warning restore S4136

@@ -23,13 +23,13 @@ public sealed partial class Engine
                     tablebaseResult.BestMove, score: 0, targetDepth: 0, [tablebaseResult.BestMove], mate: tablebaseResult.MateScore)
                 {
                     DepthReached = 0,
-                    Nodes = 666,                // In case some guis proritize the info command with biggest depth
+                    Depth = 666,                // In case some guis proritize the info command with biggest depth
                     Time = Utils.CalculateUCITime(elapsedSeconds),
                     NodesPerSecond = 0,
                     HashfullPermill = _tt.HashfullPermillApprox(),
                     WDL = WDL.WDLModel(
                         (int)Math.CopySign(
-                            EvaluationConstants.PositiveCheckmateDetectionLimit + (EvaluationConstants.CheckmateDepthFactor * tablebaseResult.MateScore),
+                            EvaluationConstants.PositiveCheckmateDetectionLimit + tablebaseResult.MateScore,
                             tablebaseResult.MateScore),
                         0)
                 };
