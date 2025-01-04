@@ -6059,7 +6059,7 @@ public static class EvaluationParams
 
 	public static readonly int[] PieceAttackedByPawnPenalty =
 	[
-		Pack(-25, 28),
+		Pack(0, 0),
 		Pack(-44, -37),
 		Pack(-58, -57),
 		Pack(-69, -6),
