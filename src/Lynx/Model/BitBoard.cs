@@ -122,9 +122,21 @@ public static class BitBoardExtensions
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static BitBoard ShiftUp(this BitBoard board, int n)
+    {
+        return board >> (8 * n);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static BitBoard ShiftDown(this BitBoard board)
     {
         return board << 8;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static BitBoard ShiftDown(this BitBoard board, int n)
+    {
+        return board << (8 * n);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
