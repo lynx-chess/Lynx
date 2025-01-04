@@ -4,12 +4,15 @@ using NLog;
 using Polly;
 using Polly.Extensions.Http;
 using Polly.Retry;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Lynx;
+
+#pragma warning disable CA1851, S2302 // Possible multiple enumerations of 'IEnumerable' collection
 
 /// <summary>
 /// https://syzygy-tables.info/ -
@@ -30,7 +33,7 @@ public static class OnlineTablebaseProber
     private readonly static HttpClient _client = new(
         new PolicyHttpMessageHandler(_retryPolicy)
         {
-            InnerHandler = new SocketsHttpHandler() { PooledConnectionLifetime = TimeSpan.FromMinutes(15) }
+            InnerHandler = new SocketsHttpHandler { PooledConnectionLifetime = TimeSpan.FromMinutes(15) }
         })
     {
         BaseAddress = new("http://tablebase.lichess.ovh/")
@@ -122,10 +125,10 @@ public static class OnlineTablebaseProber
                         if (!MoveExtensions.TryParseFromUCIString(move!.Uci, allPossibleMoves, out var moveCandidate))
 #pragma warning restore CS0618 // Type or member is obsolete
                         {
-                            throw new AssertException($"{move!.Uci} should be parsable from position {fen}");
+                            throw new LynxException($"{move!.Uci} should be parsable from position {fen}");
                         }
 
-                        var newPosition = new Position(position);
+                        using var newPosition = new Position(position);
                         newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
@@ -183,10 +186,10 @@ public static class OnlineTablebaseProber
                         if (!MoveExtensions.TryParseFromUCIString(move!.Uci, allPossibleMoves, out var moveCandidate))
 #pragma warning restore CS0618 // Type or member is obsolete
                         {
-                            throw new AssertException($"{move!.Uci} should be parsable from position {fen}");
+                            throw new LynxException($"{move!.Uci} should be parsable from position {fen}");
                         }
 
-                        var newPosition = new Position(position);
+                        using var newPosition = new Position(position);
                         newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
@@ -246,10 +249,10 @@ public static class OnlineTablebaseProber
                         if (!MoveExtensions.TryParseFromUCIString(move!.Uci, allPossibleMoves, out var moveCandidate))
 #pragma warning restore CS0618 // Type or member is obsolete
                         {
-                            throw new AssertException($"{move!.Uci} should be parsable from position {fen}");
+                            throw new LynxException($"{move!.Uci} should be parsable from position {fen}");
                         }
 
-                        var newPosition = new Position(position);
+                        using var newPosition = new Position(position);
                         newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
@@ -306,10 +309,10 @@ public static class OnlineTablebaseProber
                         if (!MoveExtensions.TryParseFromUCIString(move!.Uci, allPossibleMoves, out var moveCandidate))
 #pragma warning restore CS0618 // Type or member is obsolete
                         {
-                            throw new AssertException($"{move!.Uci} should be parsable from position {fen}");
+                            throw new LynxException($"{move!.Uci} should be parsable from position {fen}");
                         }
 
-                        var newPosition = new Position(position);
+                        using var newPosition = new Position(position);
                         newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
@@ -345,13 +348,14 @@ public static class OnlineTablebaseProber
 #pragma warning disable CS0618 // Type or member is obsolete
         if (bestMove?.Uci is not null && !MoveExtensions.TryParseFromUCIString(bestMove.Uci, MoveGenerator.GenerateAllMoves(position), out parsedMove))
         {
-            throw new AssertException($"{bestMove.Uci} should be parsable from position {fen}");
+            throw new LynxException($"{bestMove.Uci} should be parsable from position {fen}");
         }
 #pragma warning restore CS0618 // Type or member is obsolete
 
         return (mate, parsedMove ?? 0);
     }
 
+    [Experimental("LYNX0")]
     public static int EvaluationSearch(Position position, int halfMovesWithoutCaptureOrPawnMove, CancellationToken cancellationToken)
     {
         if (!Configuration.EngineSettings.UseOnlineTablebaseInSearch || position.CountPieces() > Configuration.EngineSettings.OnlineTablebaseMaxSupportedPieces)
@@ -362,7 +366,9 @@ public static class OnlineTablebaseProber
         var fen = position.FEN(halfMovesWithoutCaptureOrPawnMove);
         _logger.Debug("[{0}] Querying online tb for position {1}", nameof(EvaluationSearch), fen);
 
+#pragma warning disable VSTHRD002, VSTHRD104 // Avoid problematic synchronous waits - experimental method
         var result = GetEvaluation(fen, cancellationToken).Result;
+#pragma warning restore VSTHRD002, VSTHRD104 // Avoid problematic synchronous waits
 
 #pragma warning disable S3358 // Ternary operators should not be nested
         return result?.Category switch
@@ -375,14 +381,14 @@ public static class OnlineTablebaseProber
                 Math.Abs(result.DistanceToZero ?? 0) + halfMovesWithoutCaptureOrPawnMove > 100
                     ? 0
                     : result.DistanceToMate.HasValue
-                        ? EvaluationConstants.CheckMateBaseEvaluation - (EvaluationConstants.CheckmateDepthFactor * (int)Math.Ceiling(0.5 * Math.Abs(result.DistanceToMate.Value)))
-                    : EvaluationConstants.CheckMateBaseEvaluation - (49 * EvaluationConstants.CheckmateDepthFactor),
+                        ? EvaluationConstants.CheckMateBaseEvaluation - (int)Math.Ceiling(0.5 * Math.Abs(result.DistanceToMate.Value))
+                    : EvaluationConstants.CheckMateBaseEvaluation - 49,
             TablebaseEvaluationCategory.Loss or TablebaseEvaluationCategory.MaybeLoss =>
                 Math.Abs(result.DistanceToZero ?? 0) + halfMovesWithoutCaptureOrPawnMove > 100
                     ? 0
                     : result.DistanceToMate.HasValue
-                        ? -EvaluationConstants.CheckMateBaseEvaluation + (EvaluationConstants.CheckmateDepthFactor * (int)Math.Ceiling(0.5 * Math.Abs(result.DistanceToMate.Value)))
-                        : -EvaluationConstants.CheckMateBaseEvaluation + (49 * EvaluationConstants.CheckmateDepthFactor),
+                        ? -EvaluationConstants.CheckMateBaseEvaluation + (int)Math.Ceiling(0.5 * Math.Abs(result.DistanceToMate.Value))
+                        : -EvaluationConstants.CheckMateBaseEvaluation + 49,
             _ => NoResult
         };
 #pragma warning restore S3358 // Ternary operators should not be nested
@@ -410,3 +416,5 @@ public static class OnlineTablebaseProber
         }
     }
 }
+
+#pragma warning restore CA1851, S2302 // Possible multiple enumerations of 'IEnumerable' collection

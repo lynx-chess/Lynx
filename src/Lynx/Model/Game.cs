@@ -10,9 +10,12 @@ public sealed class Game : IDisposable
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
 #if DEBUG
+#pragma warning disable CA1002 // Do not expose generic lists
     public List<Move> MoveHistory { get; }
+#pragma warning restore CA1002 // Do not expose generic lists
 #endif
 
+    //private int _positionHashHistoryPointerBeforeLastSearch;
     private int _positionHashHistoryPointer;
     private readonly ulong[] _positionHashHistory;
 
@@ -37,7 +40,7 @@ public sealed class Game : IDisposable
 
     public Game(ReadOnlySpan<char> fen, ReadOnlySpan<char> rawMoves, Span<Range> rangeSpan, Span<Move> movePool)
     {
-        Debug.Assert(Constants.MaxNumberMovesInAGame <= 1024, "Need to customized ArrayPool due to desired array size requirements");
+        Debug.Assert(Constants.MaxNumberMovesInAGame <= 1024, "Assert fail", "Need to customized ArrayPool due to desired array size requirements");
         _positionHashHistory = ArrayPool<ulong>.Shared.Rent(Constants.MaxNumberMovesInAGame);
         _gameStack = ArrayPool<PlyStackEntry>.Shared.Rent(Constants.MaxNumberMovesInAGame);
 
@@ -76,6 +79,7 @@ public sealed class Game : IDisposable
         }
 
         PositionBeforeLastSearch = new Position(CurrentPosition);
+        //_positionHashHistoryPointerBeforeLastSearch = _positionHashHistoryPointer;
     }
 
     /// <summary>
@@ -216,6 +220,7 @@ public sealed class Game : IDisposable
     {
         CurrentPosition.FreeResources();
         CurrentPosition = new(PositionBeforeLastSearch);
+        //_positionHashHistoryPointer = _positionHashHistoryPointerBeforeLastSearch;    // TODO
     }
 
     public void UpdateInitialPosition()
@@ -280,6 +285,8 @@ public sealed class Game : IDisposable
     {
         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         Dispose(disposing: true);
+#pragma warning disable S3234 // "GC.SuppressFinalize" should not be invoked for types without destructors - https://learn.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose
         GC.SuppressFinalize(this);
+#pragma warning restore S3234 // "GC.SuppressFinalize" should not be invoked for types without destructors
     }
 }

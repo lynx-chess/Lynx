@@ -1,6 +1,4 @@
-﻿using Lynx.Model;
-
-#pragma warning disable IDE1006 // Naming Styles
+﻿#pragma warning disable IDE1006 // Naming Styles
 
 namespace Lynx;
 
@@ -89,34 +87,29 @@ public static class EvaluationConstants
     ];
 
     /// <summary>
-    /// Base absolute checkmate evaluation value. Actual absolute evaluations are lower than this one by a number of <see cref="Position.DepthCheckmateFactor"/>
+    /// Base absolute checkmate evaluation value. Actual absolute evaluations are lower than this one
     /// </summary>
     public const int CheckMateBaseEvaluation = 29_000;
 
     /// <summary>
     /// Max eval, including checkmate values
     /// </summary>
-    public const int MaxEval = 32_000;  // CheckMateBaseEvaluation + (Constants.AbsoluteMaxDepth + 45) * DepthCheckmateFactor;
+    public const int MaxEval = 32_000;  // CheckMateBaseEvaluation + (Constants.AbsoluteMaxDepth + 45) * 10;
 
     /// <summary>
     /// Min eval, including checkmate values
     /// </summary>
-    public const int MinEval = -32_000;    // -CheckMateBaseEvaluation - (Constants.AbsoluteMaxDepth + 45) * DepthCheckmateFactor;
-
-    /// <summary>
-    /// This value combined with <see cref="PositiveCheckmateDetectionLimit"/> and <see cref="NegativeCheckmateDetectionLimit"/> should allow mates up to in <see cref="Constants.AbsoluteMaxDepth"/> moves.
-    /// </summary>
-    public const int CheckmateDepthFactor = 1;
+    public const int MinEval = -32_000;    // -CheckMateBaseEvaluation - (Constants.AbsoluteMaxDepth + 45) * 10;
 
     /// <summary>
     /// Minimum evaluation for a position to be White checkmate
     /// </summary>
-    public const int PositiveCheckmateDetectionLimit = 26_000; // CheckMateBaseEvaluation - (Constants.AbsoluteMaxDepth + 45) * DepthCheckmateFactor;
+    public const int PositiveCheckmateDetectionLimit = 26_000; // CheckMateBaseEvaluation - (Constants.AbsoluteMaxDepth + 45) * 10;
 
     /// <summary>
     /// Maximum evaluation for a position to be Black checkmate
     /// </summary>
-    public const int NegativeCheckmateDetectionLimit = -26_000; // -CheckMateBaseEvaluation + (Constants.AbsoluteMaxDepth + 45) * DepthCheckmateFactor;
+    public const int NegativeCheckmateDetectionLimit = -26_000; // -CheckMateBaseEvaluation + (Constants.AbsoluteMaxDepth + 45) * 10;
 
     public const int MaxMate = 1500; // Utils.CalculateMateInX(PositiveCheckmateDetectionLimit + 1);
 

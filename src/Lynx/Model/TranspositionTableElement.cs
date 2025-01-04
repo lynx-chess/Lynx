@@ -2,11 +2,22 @@
 
 namespace Lynx.Model;
 
+#pragma warning disable S4022 // Enumerations should have "Int32" storage - size matters
 public enum NodeType : byte
+#pragma warning restore S4022 // Enumerations should have "Int32" storage
 {
     Unknown,    // Making it 0 instead of -1 because of default struct initialization
+
     Exact,
+
+    /// <summary>
+    /// UpperBound
+    /// </summary>
     Alpha,
+
+    /// <summary>
+    /// LowerBound
+    /// </summary>
     Beta
 }
 

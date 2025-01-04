@@ -4,13 +4,13 @@ using System.Diagnostics;
 namespace Lynx;
 public sealed partial class Engine
 {
-    public async Task<SearchResult?> ProbeOnlineTablebase(Position position, ulong[] positionHashHistory, int halfMovesWithoutCaptureOrPawnMove)
+    public async Task<SearchResult?> ProbeOnlineTablebase(Position position, ulong[] positionHashHistory, int halfMovesWithoutCaptureOrPawnMove, CancellationToken cancellationToken)
     {
         var stopWatch = Stopwatch.StartNew();
 
         try
         {
-            var tablebaseResult = await OnlineTablebaseProber.RootSearch(position, positionHashHistory, halfMovesWithoutCaptureOrPawnMove, _searchCancellationTokenSource.Token);
+            var tablebaseResult = await OnlineTablebaseProber.RootSearch(position, positionHashHistory, halfMovesWithoutCaptureOrPawnMove, cancellationToken);
 
             if (tablebaseResult.BestMove != 0)
             {
@@ -23,19 +23,19 @@ public sealed partial class Engine
                     tablebaseResult.BestMove, score: 0, targetDepth: 0, [tablebaseResult.BestMove], mate: tablebaseResult.MateScore)
                 {
                     DepthReached = 0,
-                    Nodes = 666,                // In case some guis proritize the info command with biggest depth
+                    Depth = 666,                // In case some guis proritize the info command with biggest depth
                     Time = Utils.CalculateUCITime(elapsedSeconds),
                     NodesPerSecond = 0,
                     HashfullPermill = _tt.HashfullPermillApprox(),
                     WDL = WDL.WDLModel(
                         (int)Math.CopySign(
-                            EvaluationConstants.PositiveCheckmateDetectionLimit + (EvaluationConstants.CheckmateDepthFactor * tablebaseResult.MateScore),
+                            EvaluationConstants.PositiveCheckmateDetectionLimit + tablebaseResult.MateScore,
                             tablebaseResult.MateScore),
                         0)
                 };
 
-                await _engineWriter.WriteAsync(searchResult);
-                await _searchCancellationTokenSource.CancelAsync();
+                await _engineWriter.WriteAsync(searchResult, cancellationToken);
+                //await _searchCancellationTokenSource.CancelAsync();   // TODO revisit
 
                 return searchResult;
             }

@@ -158,7 +158,7 @@ public static class Utils
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int CalculateMateInX(int score, int bestScoreAbs)
     {
-        int mate = (int)Math.Ceiling(0.5 * ((EvaluationConstants.CheckMateBaseEvaluation - bestScoreAbs) / EvaluationConstants.CheckmateDepthFactor));
+        int mate = (int)Math.Ceiling(0.5 * (EvaluationConstants.CheckMateBaseEvaluation - bestScoreAbs));
 
         return (int)Math.CopySign(mate, score);
     }
@@ -233,7 +233,7 @@ public static class Utils
         if (!value)
         {
             _logger.Error(errorMessage);
-            throw new AssertException(errorMessage);
+            throw new LynxException(errorMessage);
         }
     }
 }

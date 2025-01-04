@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <StaticAnalysisCodeType>ProxExe</StaticAnalysisCodeType>
     <!--<DefineConstants>MULTITHREAD_DEBUG</DefineConstants>-->
   </PropertyGroup>
 

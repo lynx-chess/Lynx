@@ -24,7 +24,7 @@ public class EvaluationConstantsTest
     [Test]
     public void PositiveCheckmateDetectionLimitTest()
     {
-        Assert.Greater(CheckMateBaseEvaluation - ((Constants.AbsoluteMaxDepth + 10) * CheckmateDepthFactor),
+        Assert.Greater(CheckMateBaseEvaluation - (Constants.AbsoluteMaxDepth + 10),
             PositiveCheckmateDetectionLimit);
 
         Assert.Greater(PositiveCheckmateDetectionLimit, _sensibleEvaluation);
@@ -35,7 +35,7 @@ public class EvaluationConstantsTest
     [Test]
     public void NegativeCheckmateDetectionLimitTest()
     {
-        Assert.Less(-(CheckMateBaseEvaluation - ((Constants.AbsoluteMaxDepth + 10) * CheckmateDepthFactor)),
+        Assert.Less(-(CheckMateBaseEvaluation - (Constants.AbsoluteMaxDepth + 10)),
             NegativeCheckmateDetectionLimit);
 
         Assert.Less(NegativeCheckmateDetectionLimit, -_sensibleEvaluation);
@@ -46,14 +46,14 @@ public class EvaluationConstantsTest
     [Test]
     public void CheckmateDepthFactorTest()
     {
-        var maxCheckmateValue = CheckMateBaseEvaluation - (Constants.AbsoluteMaxDepth * CheckmateDepthFactor);
+        const int maxCheckmateValue = CheckMateBaseEvaluation - Constants.AbsoluteMaxDepth ;
         Assert.Less(maxCheckmateValue, MaxEval);
         Assert.Greater(maxCheckmateValue, MinEval);
 
         Assert.Greater(maxCheckmateValue, PositiveCheckmateDetectionLimit);
         Assert.Greater(maxCheckmateValue, NegativeCheckmateDetectionLimit);
 
-        var minCheckmateValue = -CheckMateBaseEvaluation + (Constants.AbsoluteMaxDepth * CheckmateDepthFactor);
+        const int minCheckmateValue = -CheckMateBaseEvaluation + Constants.AbsoluteMaxDepth;
         Assert.Less(minCheckmateValue, MaxEval);
         Assert.Greater(minCheckmateValue, MinEval);
 
@@ -92,8 +92,8 @@ public class EvaluationConstantsTest
     [Test]
     public void MaxEvalTest()
     {
-        Assert.Greater(MaxEval, PositiveCheckmateDetectionLimit + ((Constants.AbsoluteMaxDepth + 10) * CheckmateDepthFactor));
-        Assert.Greater(MaxEval, CheckMateBaseEvaluation + ((Constants.AbsoluteMaxDepth + 10) * CheckmateDepthFactor));
+        Assert.Greater(MaxEval, PositiveCheckmateDetectionLimit + Constants.AbsoluteMaxDepth + 10);
+        Assert.Greater(MaxEval, CheckMateBaseEvaluation + Constants.AbsoluteMaxDepth + 10);
         Assert.Greater(MaxEval, TranspositionTable.RecalculateMateScores(CheckMateBaseEvaluation, Constants.AbsoluteMaxDepth));
         Assert.Greater(MaxEval, TranspositionTable.RecalculateMateScores(CheckMateBaseEvaluation, -Constants.AbsoluteMaxDepth));
         Assert.Less(MaxEval, short.MaxValue);
@@ -102,8 +102,8 @@ public class EvaluationConstantsTest
     [Test]
     public void MinEvalTest()
     {
-        Assert.Less(MinEval, NegativeCheckmateDetectionLimit - ((Constants.AbsoluteMaxDepth + 10) * CheckmateDepthFactor));
-        Assert.Less(MinEval, -CheckMateBaseEvaluation - ((Constants.AbsoluteMaxDepth + 10) * CheckmateDepthFactor));
+        Assert.Less(MinEval, NegativeCheckmateDetectionLimit - (Constants.AbsoluteMaxDepth + 10));
+        Assert.Less(MinEval, -CheckMateBaseEvaluation - (Constants.AbsoluteMaxDepth + 10));
         Assert.Less(MinEval, TranspositionTable.RecalculateMateScores(-CheckMateBaseEvaluation, Constants.AbsoluteMaxDepth));
         Assert.Less(MinEval, TranspositionTable.RecalculateMateScores(-CheckMateBaseEvaluation, -Constants.AbsoluteMaxDepth));
         Assert.Greater(MinEval, short.MinValue);
