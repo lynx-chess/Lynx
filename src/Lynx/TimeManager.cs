@@ -10,7 +10,14 @@ public static class TimeManager
     /// <summary>
     /// Values from Stash
     /// </summary>
-    private static ReadOnlySpan<double> BestMoveStabilityValues => [2.50, 1.20, 0.90, 0.80, 0.75];
+    private static readonly double[] BestMoveStabilityValues =
+    [
+        Configuration.EngineSettings.BM_Stability_0,
+        Configuration.EngineSettings.BM_Stability_1,
+        Configuration.EngineSettings.BM_Stability_2,
+        Configuration.EngineSettings.BM_Stability_3,
+        Configuration.EngineSettings.BM_Stability_4
+    ];
 
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
