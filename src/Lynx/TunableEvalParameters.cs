@@ -6039,11 +6039,6 @@ public static class EvaluationParams
 	public const int OpenFileKingPenalty = 131008;
 
 	/// <summary>
-	/// <see cref="Utils.Pack(23, -3)"/>
-	/// </summary>
-	public const int KingShieldBonus = -196585;
-
-	/// <summary>
 	/// <see cref="Utils.Pack(30, 71)"/>
 	/// </summary>
 	public const int BishopPairBonus = 4653086;
@@ -6052,6 +6047,15 @@ public static class EvaluationParams
 	/// <see cref="Utils.Pack(-48, -33)"/>
 	/// </summary>
 	public const int PieceAttackedByPawnPenalty = -2162736;
+
+	public static readonly int[] KingShieldBonus =
+	[
+		Pack(23, 16),
+		Pack(1, 15),
+		Pack(8, 22),
+		Pack(3, 13),
+		Pack(-9, 21)
+	];
 
 	public static readonly int[] PieceProtectedByPawnBonus =
 	[

@@ -415,6 +415,9 @@ public class Position : IDisposable
         var whiteKing = PieceBitBoards[(int)Piece.K].GetLS1BIndex();
         var blackKing = PieceBitBoards[(int)Piece.k].GetLS1BIndex();
 
+        BitBoard whiteKingAttacks = Attacks.KingAttacks[whiteKing];
+        BitBoard blackKingAttacks = Attacks.KingAttacks[blackKing];
+
         var whiteBucket = PSQTBucketLayout[whiteKing];
         var blackBucket = PSQTBucketLayout[blackKing ^ 56];
 
@@ -424,7 +427,11 @@ public class Position : IDisposable
             // Bitboard copy that we 'empty'
             var bitboard = PieceBitBoards[pieceIndex];
 
+            // Pieces protected by pawns bonus
             packedScore += PieceProtectedByPawnBonus[pieceIndex] * (whitePawnAttacks & bitboard).CountBits();
+
+            // King shield bonus
+            packedScore += KingShieldBonus[pieceIndex] * (whiteKingAttacks & bitboard).CountBits();
 
             while (bitboard != default)
             {
@@ -443,11 +450,16 @@ public class Position : IDisposable
         // Black pieces PSQTs and additional eval, except king
         for (int pieceIndex = (int)Piece.p; pieceIndex < (int)Piece.k; ++pieceIndex)
         {
+            int paramPieceIndex = pieceIndex - 6;
+
             // Bitboard copy that we 'empty'
             var bitboard = PieceBitBoards[pieceIndex];
 
             // Pieces protected by pawns bonus
-            packedScore -= PieceProtectedByPawnBonus[pieceIndex - 6] * (blackPawnAttacks & bitboard).CountBits();
+            packedScore -= PieceProtectedByPawnBonus[paramPieceIndex] * (blackPawnAttacks & bitboard).CountBits();
+
+            // King shield bonus
+            packedScore -= KingShieldBonus[paramPieceIndex] * (blackKingAttacks & bitboard).CountBits();
 
             while (bitboard != default)
             {
@@ -832,10 +844,7 @@ public class Position : IDisposable
             }
         }
 
-        // King shield
-        var ownPiecesAroundCount = (Attacks.KingAttacks[squareIndex] & PieceBitBoards[(int)Piece.P + kingSideOffset]).CountBits();
-
-        return packedBonus + (ownPiecesAroundCount * KingShieldBonus);
+        return packedBonus;
     }
 
     /// <summary>
