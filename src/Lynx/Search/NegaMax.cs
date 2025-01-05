@@ -148,8 +148,10 @@ public sealed partial class Engine
                     var improvingFactor = improvingRate * (0.75 * depth);
 
                     var rfpThreshold = rfpMargin + improvingFactor;
+                    var previousMove = Game.ReadMoveFromStack(ply - 1);
+                    var previousMoveHistory = _quietHistory[previousMove.Piece()][previousMove.TargetSquare()];
 
-                    if (staticEval - rfpThreshold >= beta)
+                    if (staticEval - rfpThreshold >= beta + previousMoveHistory / Configuration.EngineSettings.RFP_HistoryDivisor)
                     {
 #pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
                         return (staticEval + beta) / 2;
