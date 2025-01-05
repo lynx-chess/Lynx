@@ -79,6 +79,9 @@ public static class EvaluationConstants
         /* k */ [1000, 3500, 4001, 5000, 11000, 0,     0,    0,    0,    0,     0 ], // 0]
     ];
 
+    /// <summary>
+    /// Initial values taken from Viri author, planning to SPSA them
+    /// </summary>
     public static ReadOnlySpan<int> MVV_PieceValues =>
     [
         0, 2500, 2500, 5000, 10000, 0,
