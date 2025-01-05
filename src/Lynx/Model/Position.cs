@@ -482,6 +482,17 @@ public class Position : IDisposable
             packedScore -= BishopPairBonus;
         }
 
+        // Rook pair bonus
+        if (PieceBitBoards[(int)Piece.R].CountBits() == 2)
+        {
+            packedScore += RookPairBonus;
+        }
+
+        if (PieceBitBoards[(int)Piece.r].CountBits() == 2)
+        {
+            packedScore -= RookPairBonus;
+        }
+
         // Pieces attacked by pawns bonus
         packedScore += PieceAttackedByPawnPenalty
             * ((blackPawnAttacks & OccupancyBitBoards[(int)Side.White] /* & (~whitePawns) */).CountBits()
