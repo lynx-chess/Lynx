@@ -838,8 +838,14 @@ public class Position : IDisposable
 
         // King shield
         var ownPiecesAroundCount = (Attacks.KingAttacks[squareIndex] & PieceBitBoards[(int)Piece.P + kingSideOffset]).CountBits();
+        packedBonus += (ownPiecesAroundCount * KingShieldBonus);
 
-        return packedBonus + (ownPiecesAroundCount * KingShieldBonus);
+        if (enemyPawnAttacks.GetBit(squareIndex))
+        {
+            packedBonus += PieceAttackedByPawnPenalty[(int)Piece.K];
+        }
+
+        return packedBonus;
     }
 
     /// <summary>

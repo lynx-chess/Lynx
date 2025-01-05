@@ -6063,7 +6063,8 @@ public static class EvaluationParams
 		Pack(-44, -37),
 		Pack(-58, -57),
 		Pack(-69, -6),
-		Pack(-49, 28)
+		Pack(-49, 28),
+		Pack(10, 11)
 	];
 
 	public static readonly TaperedEvaluationTermByRank PawnPhalanxBonus =
