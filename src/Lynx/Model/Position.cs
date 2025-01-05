@@ -482,16 +482,6 @@ public class Position : IDisposable
             packedScore -= BishopPairBonus;
         }
 
-        // Pieces attacked by pawns bonus
-        packedScore += PieceAttackedByPawnPenalty
-            * ((blackPawnAttacks & OccupancyBitBoards[(int)Side.White] /* & (~whitePawns) */).CountBits()
-                - (whitePawnAttacks & OccupancyBitBoards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
-
-        if (gamePhase > MaxPhase)    // Early promotions
-        {
-            gamePhase = MaxPhase;
-        }
-
         int totalPawnsCount = whitePawns.CountBits() + blackPawns.CountBits();
 
         // Pawnless endgames with few pieces
