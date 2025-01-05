@@ -427,9 +427,6 @@ public class Position : IDisposable
             // Pieces protected by pawns bonus
             packedScore += PieceProtectedByPawnBonus[pieceIndex] * (whitePawnAttacks & bitboard).CountBits();
 
-            // Pieces attacked by pawns penalty
-            packedScore += PieceAttackedByPawnPenalty[pieceIndex] * (blackPawnAttacks & bitboard).CountBits();
-
             while (bitboard != default)
             {
                 var pieceSquareIndex = bitboard.GetLS1BIndex();
@@ -454,9 +451,6 @@ public class Position : IDisposable
 
             // Pieces protected by pawns bonus
             packedScore -= PieceProtectedByPawnBonus[paramPieceIndex] * (blackPawnAttacks & bitboard).CountBits();
-
-            // Pieces attacked by pawns penalty
-            packedScore -= PieceAttackedByPawnPenalty[paramPieceIndex] * (whitePawnAttacks & bitboard).CountBits();
 
             while (bitboard != default)
             {
@@ -716,6 +710,12 @@ public class Position : IDisposable
 
         packedBonus += CheckBonus[(int)Piece.R] * checks;
 
+        // Pieces attacked by pawns penalty
+        if (enemyPawnAttacks.GetBit(squareIndex))
+        {
+            packedBonus += PieceAttackedByPawnPenalty[(int)Piece.R];
+        }
+
         return packedBonus;
     }
 
@@ -737,6 +737,12 @@ public class Position : IDisposable
         var checks = (attacks & enemyKingCheckThreats).CountBits();
 
         packedBonus += CheckBonus[(int)Piece.N] * checks;
+
+        // Pieces attacked by pawns penalty
+        if (enemyPawnAttacks.GetBit(squareIndex))
+        {
+            packedBonus += PieceAttackedByPawnPenalty[(int)Piece.N];
+        }
 
         return packedBonus;
     }
@@ -783,6 +789,12 @@ public class Position : IDisposable
         var checks = (attacks & enemyKingCheckThreats).CountBits();
 
         packedBonus += CheckBonus[(int)Piece.B] * checks;
+
+        // Pieces attacked by pawns penalty
+        if (enemyPawnAttacks.GetBit(squareIndex))
+        {
+            packedBonus += PieceAttackedByPawnPenalty[(int)Piece.B];
+        }
 
         return packedBonus;
     }
@@ -839,11 +851,6 @@ public class Position : IDisposable
         // King shield
         var ownPiecesAroundCount = (Attacks.KingAttacks[squareIndex] & PieceBitBoards[(int)Piece.P + kingSideOffset]).CountBits();
         packedBonus += (ownPiecesAroundCount * KingShieldBonus);
-
-        if (enemyPawnAttacks.GetBit(squareIndex))
-        {
-            packedBonus += PieceAttackedByPawnPenalty[(int)Piece.K];
-        }
 
         return packedBonus;
     }
