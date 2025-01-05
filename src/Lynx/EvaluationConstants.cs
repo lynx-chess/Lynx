@@ -79,10 +79,10 @@ public static class EvaluationConstants
         /* k */ [1000, 3500, 4001, 5000, 11000, 0,     0,    0,    0,    0,     0 ], // 0]
     ];
 
-    public static ReadOnlySpan<int> MVV_PieceValues =>
+    public static readonly int[] MVV_PieceValues =
     [
-        0, 2500, 2500, 5000, 10000, 0,
-        0, 2500, 2500, 5000, 10000, 0,
+        Configuration.EngineSettings.MVV_Pawn, Configuration.EngineSettings.MVV_Knight, Configuration.EngineSettings.MVV_Bishop, Configuration.EngineSettings.MVV_Rook, Configuration.EngineSettings.MVV_Queen, 0,
+        Configuration.EngineSettings.MVV_Pawn, Configuration.EngineSettings.MVV_Knight, Configuration.EngineSettings.MVV_Bishop, Configuration.EngineSettings.MVV_Rook, Configuration.EngineSettings.MVV_Queen, 0,
         0
     ];
 

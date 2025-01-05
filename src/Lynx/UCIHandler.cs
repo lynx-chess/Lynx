@@ -559,6 +559,47 @@ public sealed class UCIHandler
                     break;
                 }
 
+            case "mvv_pawn":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.MVV_Pawn = value;
+                    }
+                    break;
+                }
+            case "mvv_knight":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.MVV_Knight = value;
+                    }
+                    break;
+                }
+            case "mvv_bishop":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.MVV_Bishop = value;
+                    }
+                    break;
+                }
+            case "mvv_rook":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.MVV_Rook = value;
+                    }
+                    break;
+                }
+            case "mvv_queen":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.MVV_Queen = value;
+                    }
+                    break;
+                }
+
             #endregion
 
             default:
