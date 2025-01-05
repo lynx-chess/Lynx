@@ -237,20 +237,20 @@ public sealed class EngineSettings
 
     #endregion
 
-    [SPSA<int>(0, 15000, 500)]
-    public int MVV_Pawn { get; set; } = 1_000;
+    [SPSA<int>(0, 2000, 100)]
+    public int MVV_Pawn { get; set; } = 0;
 
-    [SPSA<int>(0, 15000, 500)]
-    public int MVV_Knight { get; set; } = 3_000;
+    [SPSA<int>(2000, 4000, 100)]
+    public int MVV_Knight { get; set; } = 2500;
 
-    [SPSA<int>(0, 15000, 500)]
-    public int MVV_Bishop { get; set; } = 3_500;
+    [SPSA<int>(2000, 4000, 100)]
+    public int MVV_Bishop { get; set; } = 2500;
 
-    [SPSA<int>(0, 15000, 500)]
+    [SPSA<int>(4000, 6000, 100)]
     public int MVV_Rook { get; set; } = 5_000;
 
-    [SPSA<int>(0, 15000, 500)]
-    public int MVV_Queen { get; set; } = 11_000;
+    [SPSA<int>(9000, 11000, 100)]
+    public int MVV_Queen { get; set; } = 10_000;
 }
 
 [JsonSourceGenerationOptions(
