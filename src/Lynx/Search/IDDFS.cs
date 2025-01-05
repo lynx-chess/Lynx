@@ -293,9 +293,7 @@ public sealed partial class Engine
 
             if (mate < 0 || mate + Constants.MateDistanceMarginToStopSearching < winningMateThreshold)
             {
-                _logger.Info("[#{EngineId}] Stopping search, mate is short enough", _id);
-
-                return false;
+                _logger.Info("[#{EngineId}] Could stop search, since mate is short enough", _id);
             }
 
             _logger.Info("[#{EngineId}] Search continues, hoping to find a faster mate", _id);
