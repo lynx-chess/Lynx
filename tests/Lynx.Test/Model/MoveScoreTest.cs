@@ -16,7 +16,7 @@ public class MoveScoreTest : BaseTest
     /// 2   P P P B B P P P
     /// 1   R . . . K . . R
     ///     a b c d e f g h
-    /// This tests indirectly <see cref="EvaluationConstants.MostValueableVictimLeastValuableAttacker"/>
+    /// This tests indirectly <see cref="EvaluationConstants.MostValueableVictimLeastValuableAttacker"/> and <see cref="MVV_PieceValues"/>
     /// </summary>
     [TestCase(Constants.TrickyTestPositionFEN)]
     public void MoveScore(string fen)
@@ -61,6 +61,6 @@ public class MoveScoreTest : BaseTest
         var allMoves = MoveGenerator.GenerateAllMoves(engine.Game.CurrentPosition).OrderByDescending(move => engine.ScoreMove(move, default, default)).ToList();
 
         Assert.AreEqual(moveWithHighestScore, allMoves[0].UCIString());
-        Assert.AreEqual(EvaluationConstants.GoodCaptureMoveBaseScoreValue + EvaluationConstants.MostValueableVictimLeastValuableAttacker[0][6], engine.ScoreMove(allMoves[0], default, default));
+        Assert.AreEqual(EvaluationConstants.GoodCaptureMoveBaseScoreValue + EvaluationConstants.MVV_PieceValues[0], engine.ScoreMove(allMoves[0], default, default));
     }
 }
