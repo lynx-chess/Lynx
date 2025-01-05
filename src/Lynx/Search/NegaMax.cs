@@ -403,7 +403,6 @@ public sealed partial class Engine
                     }
                 }
 
-                cutnode = reduction > 0;
                 // Search with reduced depth and zero window
                 score = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha, cutnode: true, cancellationToken);
 
