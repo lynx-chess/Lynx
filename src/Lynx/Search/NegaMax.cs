@@ -47,6 +47,16 @@ public sealed partial class Engine
 
         if (!isRoot)
         {
+            // 🔍 Mate distance pruning
+            // Once a mate in X is detected, prune branches that can't deliver mate in at least X
+            alpha = Math.Max(alpha, -EvaluationConstants.CheckMateBaseEvaluation + ply);
+            beta = Math.Min(beta, +EvaluationConstants.CheckMateBaseEvaluation - ply - 1);
+
+            if (alpha >= beta)
+            {
+                return alpha;
+            }
+              
             (ttScore, ttBestMove, ttElementType, ttStaticEval, ttDepth) = _tt.ProbeHash(position, ply);
 
             // TT cutoffs
@@ -60,7 +70,7 @@ public sealed partial class Engine
                 return ttScore;
             }
 
-            // Internal iterative reduction (IIR)
+            // 🔍 Internal iterative reduction (IIR)
             // If this position isn't found in TT, it has never been searched before,
             // so the search will be potentially expensive.
             // Therefore, we search with reduced depth for now, expecting to record a TT move
