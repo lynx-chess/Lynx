@@ -399,7 +399,7 @@ public sealed partial class Engine
                         && moveScores[moveIndex] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
                     {
                         reduction += Configuration.EngineSettings.SEE_BadCaptureReduction;
-                        reduction = Math.Clamp(reduction, 0, depth - 1);
+                        reduction = Math.Min(reduction, depth - 2);
                     }
                 }
 
