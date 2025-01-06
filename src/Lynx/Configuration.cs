@@ -55,7 +55,7 @@ public sealed class GeneralSettings
 {
     public bool EnableLogging { get; set; }
 
-    public bool EnableTuning { get; set; } = true;
+    public bool EnableTuning { get; set; }
 }
 
 public sealed class EngineSettings
@@ -238,19 +238,19 @@ public sealed class EngineSettings
     #endregion
 
     [SPSA<int>(0, 2000, 200)]
-    public int MVV_Pawn { get; set; } = 0;
+    public int MVV_Pawn { get; set; } = 63;
 
     [SPSA<int>(2000, 4000, 200)]
-    public int MVV_Knight { get; set; } = 2500;
+    public int MVV_Knight { get; set; } = 2958;
 
     [SPSA<int>(2000, 4000, 200)]
-    public int MVV_Bishop { get; set; } = 2500;
+    public int MVV_Bishop { get; set; } = 2938;
 
     [SPSA<int>(4000, 6000, 200)]
-    public int MVV_Rook { get; set; } = 5_000;
+    public int MVV_Rook { get; set; } = 5865;
 
     [SPSA<int>(9000, 11000, 200)]
-    public int MVV_Queen { get; set; } = 10_000;
+    public int MVV_Queen { get; set; } = 9644;
 }
 
 [JsonSourceGenerationOptions(
