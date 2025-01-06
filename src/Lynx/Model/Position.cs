@@ -673,7 +673,7 @@ public class Position : IDisposable
         // Pawn phalanx
         if (Constants.File[squareIndex] != 7 && PieceBitBoards[pieceIndex].GetBit(squareIndex + 1))
         {
-            packedBonus += PawnPhalanxBonus[rank];
+            packedBonus += PawnPhalanxBonus[bucket][rank];
         }
 
         return packedBonus;
