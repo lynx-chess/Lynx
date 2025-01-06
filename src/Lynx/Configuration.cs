@@ -237,19 +237,19 @@ public sealed class EngineSettings
 
     #endregion
 
-    [SPSA<int>(0, 2000, 200)]
+    [SPSA<int>(0, 1000, 100)]
     public int MVV_Pawn { get; set; } = 63;
 
-    [SPSA<int>(2000, 4000, 200)]
+    [SPSA<int>(2500, 3500, 100)]
     public int MVV_Knight { get; set; } = 2958;
 
-    [SPSA<int>(2000, 4000, 200)]
+    [SPSA<int>(2500, 3500, 100)]
     public int MVV_Bishop { get; set; } = 2938;
 
-    [SPSA<int>(4000, 6000, 200)]
+    [SPSA<int>(5000, 6500, 100)]
     public int MVV_Rook { get; set; } = 5865;
 
-    [SPSA<int>(9000, 11000, 200)]
+    [SPSA<int>(9000, 10500, 100)]
     public int MVV_Queen { get; set; } = 9644;
 }
 
