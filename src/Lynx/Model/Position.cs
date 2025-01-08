@@ -424,7 +424,7 @@ public class Position : IDisposable
             // Bitboard copy that we 'empty'
             var bitboard = PieceBitBoards[pieceIndex];
 
-            packedScore += PieceProtectedByPawnBonus[pieceIndex] * (whitePawnAttacks & bitboard).CountBits();
+            packedScore += PieceProtectedByPawnBonus[whiteBucket][pieceIndex] * (whitePawnAttacks & bitboard).CountBits();
 
             while (bitboard != default)
             {
@@ -447,7 +447,7 @@ public class Position : IDisposable
             var bitboard = PieceBitBoards[pieceIndex];
 
             // Pieces protected by pawns bonus
-            packedScore -= PieceProtectedByPawnBonus[pieceIndex - 6] * (blackPawnAttacks & bitboard).CountBits();
+            packedScore -= PieceProtectedByPawnBonus[blackBucket][pieceIndex - 6] * (blackPawnAttacks & bitboard).CountBits();
 
             while (bitboard != default)
             {
