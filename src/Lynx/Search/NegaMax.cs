@@ -52,12 +52,18 @@ public sealed partial class Engine
             // TT cutoffs
             if (!pvNode
                 && ttScore != EvaluationConstants.NoHashEntry
-                && ttDepth >= depth
-                && (ttElementType == NodeType.Exact
-                    || (ttElementType == NodeType.Alpha && ttScore <= alpha)
-                    || (ttElementType == NodeType.Beta && ttScore >= beta)))
+                && ttDepth >= depth)
             {
-                return ttScore;
+                if (ttElementType == NodeType.Exact
+                    || (ttElementType == NodeType.Alpha && ttScore <= alpha)
+                    || (ttElementType == NodeType.Beta && ttScore >= beta))
+                {
+                    return ttScore;
+                }
+                else if (depth <= 6)
+                {
+                    ++depth;
+                }
             }
 
             // Internal iterative reduction (IIR)
