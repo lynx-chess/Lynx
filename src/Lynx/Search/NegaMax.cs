@@ -37,6 +37,8 @@ public sealed partial class Engine
 
         bool isRoot = ply == 0;
         bool pvNode = beta - alpha > 1;
+        int extension = 0;
+
         ShortMove ttBestMove = default;
         NodeType ttElementType = default;
         int ttScore = default;
@@ -63,7 +65,7 @@ public sealed partial class Engine
                 else if (depth <= Configuration.EngineSettings.TTHit_NoCutoffExtension_MaxDepth)
                 {
                     // Extension idea from Stormphrax
-                    ++depth;
+                    ++extension;
                 }
             }
 
@@ -74,7 +76,7 @@ public sealed partial class Engine
             // which we'll be able to use later for the full depth search
             if (ttElementType == default && depth >= Configuration.EngineSettings.IIR_MinDepth)
             {
-                --depth;
+                --extension;
             }
         }
 
@@ -94,10 +96,10 @@ public sealed partial class Engine
 
         if (isInCheck)
         {
-            ++depth;
+            ++extension;
             staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove).Score;
         }
-        else if (depth <= 0)
+        else if (depth + extension <= 0)
         {
             if (MoveGenerator.CanGenerateAtLeastAValidMove(position))
             {
@@ -170,7 +172,7 @@ public sealed partial class Engine
 
                         if (score < beta)               // Static evaluation + bonus indicates fail-low node
                         {
-                            if (depth == 1)
+                            if (depth + extension == 1) // TODO extension
                             {
                                 var qSearchScore = QuiescenceSearch(ply, alpha, beta, cancellationToken);
 
@@ -216,7 +218,7 @@ public sealed partial class Engine
                     //    3 + (depth / 3) + Math.Min((staticEval - beta) / 200, 3));
 
                     var gameState = position.MakeNullMove();
-                    var nmpScore = -NegaMax(depth - 1 - nmpReduction, ply + 1, -beta, -beta + 1, !cutnode, cancellationToken, parentWasNullMove: true);
+                    var nmpScore = -NegaMax(depth + extension - 1 - nmpReduction, ply + 1, -beta, -beta + 1, !cutnode, cancellationToken, parentWasNullMove: true);
                     position.UnMakeNullMove(gameState);
 
                     if (nmpScore >= beta)
@@ -310,7 +312,7 @@ public sealed partial class Engine
                 _tt.PrefetchTTEntry(position);
                 bool isCutNode = !pvNode && !cutnode;   // Linter 'simplification' of pvNode ? false : !cutnode
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
-                score = -NegaMax(depth - 1, ply + 1, -beta, -alpha, isCutNode, cancellationToken);
+                score = -NegaMax(depth + extension - 1, ply + 1, -beta, -alpha, isCutNode, cancellationToken);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
             }
             else
@@ -360,6 +362,9 @@ public sealed partial class Engine
 
                 // 🔍 Late Move Reduction (LMR) - search with reduced depth
                 // Impl. based on Ciekce (Stormphrax) and Martin (Motor) advice, and Stormphrax & Akimbo implementations
+                var newDepth = depth - 1 + extension;
+                int reducedDepth = newDepth;
+
                 if (isNotGettingCheckmated)
                 {
                     if (!isCapture
@@ -396,7 +401,7 @@ public sealed partial class Engine
 
                         // Don't allow LMR to drop into qsearch or increase the depth
                         // depth - 1 - depth +2 = 1, min depth we want
-                        reduction = Math.Clamp(reduction, 0, depth - 2);
+                        reduction = Math.Clamp(reduction, 0, newDepth - 1);
                     }
 
                     // 🔍 Static Exchange Evaluation (SEE) reduction
@@ -406,12 +411,15 @@ public sealed partial class Engine
                         && moveScores[moveIndex] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
                     {
                         reduction += Configuration.EngineSettings.SEE_BadCaptureReduction;
-                        reduction = Math.Clamp(reduction, 0, depth - 1);
+                        reduction = Math.Clamp(reduction, 0, newDepth);
                     }
+
+                    // Don't allow LMR to drop into qsearch or increase the depth
+                    reducedDepth -= reduction;
                 }
 
                 // Search with reduced depth and zero window
-                score = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha, cutnode: true, cancellationToken);
+                score = -NegaMax(reducedDepth, ply + 1, -alpha - 1, -alpha, cutnode: true, cancellationToken);
 
                 // 🔍 Principal Variation Search (PVS)
                 if (score > alpha && reduction > 0)
@@ -421,14 +429,14 @@ public sealed partial class Engine
                     // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
 
                     // Search with full depth but narrowed score bandwidth
-                    score = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha, !cutnode, cancellationToken);
+                    score = -NegaMax(newDepth, ply + 1, -alpha - 1, -alpha, !cutnode, cancellationToken);
                 }
 
                 if (score > alpha && score < beta)
                 {
                     // PVS Hypothesis invalidated -> search with full depth and full score bandwidth
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
-                    score = -NegaMax(depth - 1, ply + 1, -beta, -alpha, cutnode: false, cancellationToken);
+                    score = -NegaMax(newDepth, ply + 1, -beta, -alpha, cutnode: false, cancellationToken);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
                 }
             }
