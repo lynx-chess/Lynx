@@ -714,7 +714,14 @@ public class Position : IDisposable
 
         if ((attacks & PieceBitBoards[pieceIndex]).CountBits() >= 2)
         {
-            packedBonus += ConnectedRooksBonus;
+            var rank = Constants.Rank[squareIndex];
+
+            if (pieceIndex == (int)Piece.r)
+            {
+                rank = 7 - rank;
+            }
+
+            packedBonus += ConnectedRooksBonus[rank];
         }
 
         return packedBonus;
