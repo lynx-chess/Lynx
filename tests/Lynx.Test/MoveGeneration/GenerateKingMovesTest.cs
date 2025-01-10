@@ -18,16 +18,16 @@ public class GenerateKingMovesTest
     }
 
     [TestCase(Constants.InitialPositionFEN, 0)]
-    [TestCase("8/8/8/2PPP3/2PKP3/2P1P3/8/8 w - - 0 1", 1)]
-    [TestCase("8/8/8/2PPP3/2PKP3/3PP3/8/8 w - - 0 1", 1)]
-    [TestCase("8/8/8/2PPP3/2PKP3/2PP4/8/8 w - - 0 1", 1)]
-    [TestCase("8/8/8/2PPP3/2PKP3/3P4/8/8 w - - 0 1", 2)]
-    [TestCase("8/8/8/2PPP3/2PKP3/8/8/8 w - - 0 1", 3)]
-    [TestCase("8/8/8/2PPP3/2PK4/8/8/8 w - - 0 1", 4)]
-    [TestCase("8/8/8/2PPP3/3K4/8/8/8 w - - 0 1", 5)]
-    [TestCase("8/8/8/2P1P3/3K4/8/8/8 w - - 0 1", 6)]
-    [TestCase("8/8/8/4P3/3K4/8/8/8 w - - 0 1", 7)]
-    [TestCase("8/8/8/8/3K4/8/8/8 w - - 0 1", 8)]
+    [TestCase("1k6/8/8/2PPP3/2PKP3/2P1P3/8/8 w - - 0 1", 1)]
+    [TestCase("1k6/8/8/2PPP3/2PKP3/3PP3/8/8 w - - 0 1", 1)]
+    [TestCase("1k6/8/8/2PPP3/2PKP3/2PP4/8/8 w - - 0 1", 1)]
+    [TestCase("1k6/8/8/2PPP3/2PKP3/3P4/8/8 w - - 0 1", 2)]
+    [TestCase("1k6/8/8/2PPP3/2PKP3/8/8/8 w - - 0 1", 3)]
+    [TestCase("1k6/8/8/2PPP3/2PK4/8/8/8 w - - 0 1", 4)]
+    [TestCase("1k6/8/8/2PPP3/3K4/8/8/8 w - - 0 1", 5)]
+    [TestCase("1k6/8/8/2P1P3/3K4/8/8/8 w - - 0 1", 6)]
+    [TestCase("1k6/8/8/4P3/3K4/8/8/8 w - - 0 1", 7)]
+    [TestCase("1k6/8/8/8/3K4/8/8/8 w - - 0 1", 8)]
     public void KingMoves_Count(string fen, int expectedMoves)
     {
         var position = new Position(fen);
