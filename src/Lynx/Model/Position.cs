@@ -70,8 +70,7 @@ public class Position : IDisposable
         UniqueIdentifier = ZobristTable.PositionHash(this);
 #pragma warning restore S3366 // "this" should not be exposed from constructors
 
-        _isIncrementalEval = true;
-        _incrementalEvalAccumulator = InitialIncrementalStaticEvaluation();
+        _isIncrementalEval = false;
     }
 
     /// <summary>
@@ -537,59 +536,6 @@ public class Position : IDisposable
     #region Evaluation
 
     /// <summary>
-    /// Base incremental evaluation for the position.
-    /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int InitialIncrementalStaticEvaluation()
-    {
-        int packedScore = 0;
-
-        var whiteKing = PieceBitBoards[(int)Piece.K].GetLS1BIndex();
-        var blackKing = PieceBitBoards[(int)Piece.k].GetLS1BIndex();
-
-        var whiteBucket = PSQTBucketLayout[whiteKing];
-        var blackBucket = PSQTBucketLayout[blackKing ^ 56];
-
-        // White pieces PSQTs, except king
-        for (int pieceIndex = (int)Piece.P; pieceIndex < (int)Piece.K; ++pieceIndex)
-        {
-            var bitboard = PieceBitBoards[pieceIndex];
-
-            while (bitboard != default)
-            {
-                var pieceSquareIndex = bitboard.GetLS1BIndex();
-                bitboard.ResetLS1B();
-
-                packedScore += PSQT(0, whiteBucket, pieceIndex, pieceSquareIndex)
-                             + PSQT(1, blackBucket, pieceIndex, pieceSquareIndex);
-            }
-        }
-
-        // Black pieces PSQTs, except king
-        for (int pieceIndex = (int)Piece.p; pieceIndex < (int)Piece.k; ++pieceIndex)
-        {
-            var bitboard = PieceBitBoards[pieceIndex];
-
-            while (bitboard != default)
-            {
-                var pieceSquareIndex = bitboard.GetLS1BIndex();
-                bitboard.ResetLS1B();
-
-                packedScore += PSQT(0, blackBucket, pieceIndex, pieceSquareIndex)
-                             + PSQT(1, whiteBucket, pieceIndex, pieceSquareIndex);
-            }
-        }
-
-        // Kings
-        packedScore += PSQT(0, whiteBucket, (int)Piece.K, whiteKing)
-            + PSQT(0, blackBucket, (int)Piece.k, blackKing)
-            + PSQT(1, blackBucket, (int)Piece.K, whiteKing)
-            + PSQT(1, whiteBucket, (int)Piece.k, blackKing);
-
-        return packedScore;
-    }
-
-    /// <summary>
     /// Evaluates material and position in a NegaMax style.
     /// That is, positive scores always favour playing <see cref="Side"/>.
     /// </summary>
@@ -663,6 +609,8 @@ public class Position : IDisposable
         }
         else
         {
+            _incrementalEvalAccumulator = 0;
+
             // White pieces PSQTs and additional eval, except king
             for (int pieceIndex = (int)Piece.P; pieceIndex < (int)Piece.K; ++pieceIndex)
             {
@@ -676,8 +624,8 @@ public class Position : IDisposable
                     var pieceSquareIndex = bitboard.GetLS1BIndex();
                     bitboard.ResetLS1B();
 
-                    packedScore += PSQT(0, whiteBucket, pieceIndex, pieceSquareIndex)
-                                 + PSQT(1, blackBucket, pieceIndex, pieceSquareIndex);
+                    _incrementalEvalAccumulator += PSQT(0, whiteBucket, pieceIndex, pieceSquareIndex)
+                                                + PSQT(1, blackBucket, pieceIndex, pieceSquareIndex);
 
                     gamePhase += GamePhaseByPiece[pieceIndex];
 
@@ -699,8 +647,8 @@ public class Position : IDisposable
                     var pieceSquareIndex = bitboard.GetLS1BIndex();
                     bitboard.ResetLS1B();
 
-                    packedScore += PSQT(0, blackBucket, pieceIndex, pieceSquareIndex)
-                                 + PSQT(1, whiteBucket, pieceIndex, pieceSquareIndex);
+                    _incrementalEvalAccumulator += PSQT(0, blackBucket, pieceIndex, pieceSquareIndex)
+                                                + PSQT(1, whiteBucket, pieceIndex, pieceSquareIndex);
 
                     gamePhase += GamePhaseByPiece[pieceIndex];
 
@@ -709,11 +657,14 @@ public class Position : IDisposable
             }
 
             // Kings
-            packedScore +=
+            _incrementalEvalAccumulator +=
                 PSQT(0, whiteBucket, (int)Piece.K, whiteKing)
                 + PSQT(1, blackBucket, (int)Piece.K, whiteKing)
                 + PSQT(0, blackBucket, (int)Piece.k, blackKing)
                 + PSQT(1, whiteBucket, (int)Piece.k, blackKing);
+
+            packedScore += _incrementalEvalAccumulator;
+            _isIncrementalEval = true;
         }
 
         packedScore +=
