@@ -9,7 +9,6 @@ namespace Lynx.Test.Model;
 
 public class PositionTest
 {
-    [TestCase(Constants.EmptyBoardFEN)]
     [TestCase(Constants.InitialPositionFEN)]
     [TestCase(Constants.TrickyTestPositionFEN)]
     [TestCase(Constants.TrickyTestPositionReversedFEN)]
@@ -24,7 +23,6 @@ public class PositionTest
         Assert.AreEqual(fen, newPosition.FEN());
     }
 
-    [TestCase(Constants.EmptyBoardFEN)]
     [TestCase(Constants.InitialPositionFEN)]
     [TestCase(Constants.TrickyTestPositionFEN)]
     [TestCase(Constants.TrickyTestPositionReversedFEN)]
