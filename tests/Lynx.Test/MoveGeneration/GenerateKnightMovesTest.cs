@@ -18,7 +18,7 @@ public class GenerateKnightMovesTest
     }
 
     [TestCase(Constants.InitialPositionFEN, 4)]
-    [TestCase("1K1k3/8/8/8/8/P1P2P1P/PPPPPPPP/RNBQKBNR w KQkq - 0 1", 0)]
+    [TestCase("1k6/8/8/8/8/P1P2P1P/PPPPPPPP/RNBQKBNR w KQkq - 0 1", 0)]
     [TestCase("rnbqkbnr/pppppppp/p1p2p1p/8/8/8/8/1K6 b KQkq - 0 1", 0)]
     [TestCase("1K1k3/8/2P1P3/1P3P2/3N4/1P3P2/2P1P3/8 w - - 0 1", 0)]
     [TestCase("1K1k3/8/2p1p3/1p3p2/3N4/1p3p2/2p1p3/8 w - - 0 1", 8)]
