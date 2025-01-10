@@ -663,6 +663,8 @@ public class Position : IDisposable
         }
         else
         {
+            _incrementalEvalAccumulator = 0;
+
             // White pieces PSQTs and additional eval, except king
             for (int pieceIndex = (int)Piece.P; pieceIndex < (int)Piece.K; ++pieceIndex)
             {
@@ -676,8 +678,8 @@ public class Position : IDisposable
                     var pieceSquareIndex = bitboard.GetLS1BIndex();
                     bitboard.ResetLS1B();
 
-                    packedScore += PSQT(0, whiteBucket, pieceIndex, pieceSquareIndex)
-                                 + PSQT(1, blackBucket, pieceIndex, pieceSquareIndex);
+                    _incrementalEvalAccumulator += PSQT(0, whiteBucket, pieceIndex, pieceSquareIndex)
+                                                + PSQT(1, blackBucket, pieceIndex, pieceSquareIndex);
 
                     gamePhase += GamePhaseByPiece[pieceIndex];
 
@@ -699,8 +701,8 @@ public class Position : IDisposable
                     var pieceSquareIndex = bitboard.GetLS1BIndex();
                     bitboard.ResetLS1B();
 
-                    packedScore += PSQT(0, blackBucket, pieceIndex, pieceSquareIndex)
-                                 + PSQT(1, whiteBucket, pieceIndex, pieceSquareIndex);
+                    _incrementalEvalAccumulator += PSQT(0, blackBucket, pieceIndex, pieceSquareIndex)
+                                                + PSQT(1, whiteBucket, pieceIndex, pieceSquareIndex);
 
                     gamePhase += GamePhaseByPiece[pieceIndex];
 
@@ -709,11 +711,14 @@ public class Position : IDisposable
             }
 
             // Kings
-            packedScore +=
+            _incrementalEvalAccumulator +=
                 PSQT(0, whiteBucket, (int)Piece.K, whiteKing)
                 + PSQT(1, blackBucket, (int)Piece.K, whiteKing)
                 + PSQT(0, blackBucket, (int)Piece.k, blackKing)
                 + PSQT(1, whiteBucket, (int)Piece.k, blackKing);
+
+            packedScore += _incrementalEvalAccumulator;
+            _isIncrementalEval = true;
         }
 
         packedScore +=
