@@ -163,11 +163,8 @@ public class Position : IDisposable
                 (sameSideBucket, opposideSideBucket) = (opposideSideBucket, sameSideBucket);
             }
 
-            _incrementalEvalAccumulator -= PSQT(0, sameSideBucket, piece, sourceSquare);
-            _incrementalEvalAccumulator -= PSQT(1, opposideSideBucket, piece, sourceSquare);
-
-            _incrementalEvalAccumulator += PSQT(0, sameSideBucket, newPiece, targetSquare);
-            _incrementalEvalAccumulator += PSQT(1, opposideSideBucket, newPiece, targetSquare);
+            _incrementalEvalAccumulator -= PSQTFriendEnemy(sameSideBucket, opposideSideBucket, piece, sourceSquare);
+            _incrementalEvalAccumulator += PSQTFriendEnemy(sameSideBucket, opposideSideBucket, newPiece, targetSquare);
 
             switch (move.SpecialMoveFlag())
             {
@@ -182,8 +179,7 @@ public class Position : IDisposable
                             OccupancyBitBoards[oppositeSide].PopBit(capturedSquare);
                             UniqueIdentifier ^= ZobristTable.PieceHash(capturedSquare, capturedPiece);
 
-                            _incrementalEvalAccumulator -= PSQT(0, opposideSideBucket, capturedPiece, capturedSquare);
-                            _incrementalEvalAccumulator -= PSQT(1, sameSideBucket, capturedPiece, capturedSquare);
+                            _incrementalEvalAccumulator -= PSQTFriendEnemy(opposideSideBucket, sameSideBucket, capturedPiece, capturedSquare);
                         }
 
                         break;
@@ -217,11 +213,8 @@ public class Position : IDisposable
                             ZobristTable.PieceHash(rookSourceSquare, rookIndex)
                             ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
 
-                        _incrementalEvalAccumulator -= PSQT(0, sameSideBucket, rookIndex, rookSourceSquare);
-                        _incrementalEvalAccumulator -= PSQT(1, opposideSideBucket, rookIndex, rookSourceSquare);
-
-                        _incrementalEvalAccumulator += PSQT(0, sameSideBucket, rookIndex, rookTargetSquare);
-                        _incrementalEvalAccumulator += PSQT(1, opposideSideBucket, rookIndex, rookTargetSquare);
+                        _incrementalEvalAccumulator -= PSQTFriendEnemy(sameSideBucket, opposideSideBucket, rookIndex, rookSourceSquare);
+                        _incrementalEvalAccumulator += PSQTFriendEnemy(sameSideBucket, opposideSideBucket, rookIndex, rookTargetSquare);
 
                         break;
                     }
@@ -243,11 +236,8 @@ public class Position : IDisposable
                             ZobristTable.PieceHash(rookSourceSquare, rookIndex)
                             ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
 
-                        _incrementalEvalAccumulator -= PSQT(0, sameSideBucket, rookIndex, rookSourceSquare);
-                        _incrementalEvalAccumulator -= PSQT(1, opposideSideBucket, rookIndex, rookSourceSquare);
-
-                        _incrementalEvalAccumulator += PSQT(0, sameSideBucket, rookIndex, rookTargetSquare);
-                        _incrementalEvalAccumulator += PSQT(1, opposideSideBucket, rookIndex, rookTargetSquare);
+                        _incrementalEvalAccumulator -= PSQTFriendEnemy(sameSideBucket, opposideSideBucket, rookIndex, rookSourceSquare);
+                        _incrementalEvalAccumulator += PSQTFriendEnemy(sameSideBucket, opposideSideBucket, rookIndex, rookTargetSquare);
 
                         break;
                     }
@@ -264,8 +254,7 @@ public class Position : IDisposable
                         Board[capturedSquare] = (int)Piece.None;
                         UniqueIdentifier ^= ZobristTable.PieceHash(capturedSquare, capturedPiece);
 
-                        _incrementalEvalAccumulator -= PSQT(0, opposideSideBucket, capturedPiece, capturedSquare);
-                        _incrementalEvalAccumulator -= PSQT(1, sameSideBucket, capturedPiece, capturedSquare);
+                        _incrementalEvalAccumulator -= PSQTFriendEnemy(opposideSideBucket, sameSideBucket, capturedPiece, capturedSquare);
 
                         break;
                     }
@@ -624,8 +613,7 @@ public class Position : IDisposable
                     var pieceSquareIndex = bitboard.GetLS1BIndex();
                     bitboard.ResetLS1B();
 
-                    _incrementalEvalAccumulator += PSQT(0, whiteBucket, pieceIndex, pieceSquareIndex)
-                                                + PSQT(1, blackBucket, pieceIndex, pieceSquareIndex);
+                    _incrementalEvalAccumulator += PSQTFriendEnemy(whiteBucket, blackBucket, pieceIndex, pieceSquareIndex);
 
                     gamePhase += GamePhaseByPiece[pieceIndex];
 
@@ -647,8 +635,7 @@ public class Position : IDisposable
                     var pieceSquareIndex = bitboard.GetLS1BIndex();
                     bitboard.ResetLS1B();
 
-                    _incrementalEvalAccumulator += PSQT(0, blackBucket, pieceIndex, pieceSquareIndex)
-                                                + PSQT(1, whiteBucket, pieceIndex, pieceSquareIndex);
+                    _incrementalEvalAccumulator += PSQTFriendEnemy(blackBucket, whiteBucket, pieceIndex, pieceSquareIndex);
 
                     gamePhase += GamePhaseByPiece[pieceIndex];
 
@@ -658,10 +645,8 @@ public class Position : IDisposable
 
             // Kings
             _incrementalEvalAccumulator +=
-                PSQT(0, whiteBucket, (int)Piece.K, whiteKing)
-                + PSQT(1, blackBucket, (int)Piece.K, whiteKing)
-                + PSQT(0, blackBucket, (int)Piece.k, blackKing)
-                + PSQT(1, whiteBucket, (int)Piece.k, blackKing);
+                PSQTFriendEnemy(whiteBucket, blackBucket, (int)Piece.K, whiteKing)
+                + PSQTFriendEnemy(blackBucket, whiteBucket, (int)Piece.k, blackKing);
 
             packedScore += _incrementalEvalAccumulator;
             _isIncrementalEval = true;

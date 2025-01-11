@@ -109,6 +109,24 @@ public static class EvaluationPSQTs
     /// [2][PSQTBucketCount][12][64]
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int PSQTFriendEnemy(int friendBucket, int enemyBucket, int piece, int square)
+    {
+        var friendIndex = PSQTIndex(0, friendBucket, piece, square);
+        var enemyIndex = PSQTIndex(1, enemyBucket, piece, square);
+
+        Debug.Assert(friendIndex >= 0 && friendIndex < _packedPSQT.Length);
+        Debug.Assert(enemyBucket >= 0 && enemyBucket < _packedPSQT.Length);
+
+        ref var refArray = ref MemoryMarshal.GetArrayDataReference(_packedPSQT);
+
+        return Unsafe.Add(ref refArray, friendIndex)
+            + Unsafe.Add(ref refArray, enemyIndex);
+    }
+
+    /// <summary>
+    /// [2][PSQTBucketCount][12][64]
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int PSQTIndex(int friendEnemy, int bucket, int piece, int square)
     {
         const int friendEnemyOffset = PSQTBucketCount * 12 * 64;
