@@ -624,8 +624,8 @@ public class Position : IDisposable
                     var pieceSquareIndex = bitboard.GetLS1BIndex();
                     bitboard.ResetLS1B();
 
-                    _incrementalEvalAccumulator += PSQT(0, whiteBucket, pieceIndex, pieceSquareIndex)
-                                                + PSQT(1, blackBucket, pieceIndex, pieceSquareIndex);
+                    _incrementalEvalAccumulator += PSQT(0, whiteBucket, pieceIndex, pieceSquareIndex);
+                    _incrementalEvalAccumulator += PSQT(1, blackBucket, pieceIndex, pieceSquareIndex);
 
                     gamePhase += GamePhaseByPiece[pieceIndex];
 
@@ -647,8 +647,8 @@ public class Position : IDisposable
                     var pieceSquareIndex = bitboard.GetLS1BIndex();
                     bitboard.ResetLS1B();
 
-                    _incrementalEvalAccumulator += PSQT(0, blackBucket, pieceIndex, pieceSquareIndex)
-                                                + PSQT(1, whiteBucket, pieceIndex, pieceSquareIndex);
+                    _incrementalEvalAccumulator += PSQT(0, blackBucket, pieceIndex, pieceSquareIndex);
+                    _incrementalEvalAccumulator += PSQT(1, whiteBucket, pieceIndex, pieceSquareIndex);
 
                     gamePhase += GamePhaseByPiece[pieceIndex];
 
@@ -657,19 +657,17 @@ public class Position : IDisposable
             }
 
             // Kings
-            _incrementalEvalAccumulator +=
-                PSQT(0, whiteBucket, (int)Piece.K, whiteKing)
-                + PSQT(1, blackBucket, (int)Piece.K, whiteKing)
-                + PSQT(0, blackBucket, (int)Piece.k, blackKing)
-                + PSQT(1, whiteBucket, (int)Piece.k, blackKing);
+            _incrementalEvalAccumulator += PSQT(0, whiteBucket, (int)Piece.K, whiteKing);
+            _incrementalEvalAccumulator += PSQT(1, blackBucket, (int)Piece.K, whiteKing);
+            _incrementalEvalAccumulator += PSQT(0, blackBucket, (int)Piece.k, blackKing);
+            _incrementalEvalAccumulator += PSQT(1, whiteBucket, (int)Piece.k, blackKing);
 
             packedScore += _incrementalEvalAccumulator;
             _isIncrementalEval = true;
         }
 
-        packedScore +=
-            KingAdditionalEvaluation(whiteKing, (int)Side.White, blackPawnAttacks)
-            - KingAdditionalEvaluation(blackKing, (int)Side.Black, whitePawnAttacks);
+        packedScore += KingAdditionalEvaluation(whiteKing, (int)Side.White, blackPawnAttacks);
+        packedScore -= KingAdditionalEvaluation(blackKing, (int)Side.Black, whitePawnAttacks);
 
         // Bishop pair bonus
         if (PieceBitBoards[(int)Piece.B].CountBits() >= 2)
