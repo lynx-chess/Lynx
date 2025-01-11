@@ -846,7 +846,7 @@ public class Position : IDisposable
         // Isolated pawn
         if ((PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default)
         {
-            packedBonus += IsolatedPawnPenalty;
+            packedBonus += IsolatedPawnPenalty[PawnBucketLayout[squareIndex]];
         }
 
         // Passed pawn
