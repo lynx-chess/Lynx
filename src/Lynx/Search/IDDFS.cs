@@ -126,7 +126,10 @@ public sealed partial class Engine
                     _logger.Info(
                         "[#{EngineId}] Depth {Depth}: aspiration windows [{Alpha}, {Beta}] for previous search score {Score}, nodes {Nodes}",
                         _id, depth, alpha, beta, lastSearchResult.Score, _nodes);
-                    Debug.Assert(lastSearchResult.Mate == 0 && lastSearchResult.Score > EvaluationConstants.NegativeCheckmateDetectionLimit && lastSearchResult.Score < EvaluationConstants.PositiveCheckmateDetectionLimit);
+                    Debug.Assert(
+                        lastSearchResult.Mate == 0
+                            ? lastSearchResult.Score < EvaluationConstants.PositiveCheckmateDetectionLimit && lastSearchResult.Score > EvaluationConstants.NegativeCheckmateDetectionLimit
+                            : Math.Abs(lastSearchResult.Score) < EvaluationConstants.CheckMateBaseEvaluation && (lastSearchResult.Score > EvaluationConstants.PositiveCheckmateDetectionLimit || lastSearchResult.Score < EvaluationConstants.NegativeCheckmateDetectionLimit));
 
                     while (true)
                     {
@@ -293,9 +296,7 @@ public sealed partial class Engine
 
             if (mate < 0 || mate + Constants.MateDistanceMarginToStopSearching < winningMateThreshold)
             {
-                _logger.Info("[#{EngineId}] Stopping search, mate is short enough", _id);
-
-                return false;
+                _logger.Info("[#{EngineId}] Could stop search, since mate is short enough", _id);
             }
 
             _logger.Info("[#{EngineId}] Search continues, hoping to find a faster mate", _id);
