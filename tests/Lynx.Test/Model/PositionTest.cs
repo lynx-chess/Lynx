@@ -210,7 +210,7 @@ public class PositionTest
     {
         Position position = new Position(fen);
         int evaluation = AdditionalPieceEvaluation(position, Piece.P)
-            - AdditionalPieceEvaluation(position, Piece.p);
+            + AdditionalPieceEvaluation(position, Piece.p);
 
         if (position.Side == Side.Black)
         {
@@ -390,7 +390,7 @@ public class PositionTest
     {
         var position = new Position(fen);
         int evaluation = AdditionalPieceEvaluation(position, Piece.P)
-            - AdditionalPieceEvaluation(position, Piece.p);
+            + AdditionalPieceEvaluation(position, Piece.p);
 
         var rank = Constants.Rank[(int)square];
         var pieceIndex = (int)Piece.P;
@@ -451,7 +451,7 @@ public class PositionTest
     {
         Position position = new Position(fen);
         int evaluation = AdditionalPieceEvaluation(position, Piece.R)
-            - AdditionalPieceEvaluation(position, Piece.r);
+            + AdditionalPieceEvaluation(position, Piece.r);
 
         if (position.Side == Side.Black)
         {
@@ -483,7 +483,7 @@ public class PositionTest
     {
         Position position = new Position(fen);
         int evaluation = AdditionalPieceEvaluation(position, Piece.R)
-            - AdditionalPieceEvaluation(position, Piece.r);
+            + AdditionalPieceEvaluation(position, Piece.r);
 
         if (position.Side == Side.Black)
         {
@@ -514,7 +514,7 @@ public class PositionTest
     {
         Position position = new Position(fen);
         int evaluation = AdditionalPieceEvaluation(position, Piece.R)
-            - AdditionalPieceEvaluation(position, Piece.r);
+            + AdditionalPieceEvaluation(position, Piece.r);
 
         if (position.Side == Side.Black)
         {
@@ -546,7 +546,7 @@ public class PositionTest
     {
         Position position = new Position(fen);
         int evaluation = AdditionalPieceEvaluation(position, Piece.R)
-            - AdditionalPieceEvaluation(position, Piece.r);
+            + AdditionalPieceEvaluation(position, Piece.r);
 
         if (position.Side == Side.Black)
         {
@@ -580,7 +580,7 @@ public class PositionTest
     {
         Position position = new Position(fen);
         int evaluation = AdditionalKingEvaluation(position, Piece.K)
-            - AdditionalKingEvaluation(position, Piece.k);
+            + AdditionalKingEvaluation(position, Piece.k);
 
         if (position.Side == Side.Black)
         {
@@ -610,7 +610,7 @@ public class PositionTest
     {
         Position position = new Position(fen);
         int evaluation = AdditionalKingEvaluation(position, Piece.K)
-            - AdditionalKingEvaluation(position, Piece.k);
+            + AdditionalKingEvaluation(position, Piece.k);
 
         if (position.Side == Side.Black)
         {
@@ -642,7 +642,7 @@ public class PositionTest
     {
         Position position = new Position(fen);
         int evaluation = AdditionalKingEvaluation(position, Piece.K)
-            - AdditionalKingEvaluation(position, Piece.k);
+            + AdditionalKingEvaluation(position, Piece.k);
 
         if (position.Side == Side.Black)
         {
@@ -674,7 +674,7 @@ public class PositionTest
     {
         Position position = new Position(fen);
         int evaluation = AdditionalKingEvaluation(position, Piece.K)
-            - AdditionalKingEvaluation(position, Piece.k);
+            + AdditionalKingEvaluation(position, Piece.k);
 
         if (position.Side == Side.Black)
         {
@@ -722,7 +722,7 @@ public class PositionTest
     {
         Position position = new Position(fen);
         int evaluation = AdditionalKingEvaluation(position, Piece.K)
-            - AdditionalKingEvaluation(position, Piece.k);
+            + AdditionalKingEvaluation(position, Piece.k);
 
         if (position.Side == Side.Black)
         {
@@ -768,7 +768,7 @@ public class PositionTest
     {
         Position position = new Position(fen);
         int evaluation = AdditionalPieceEvaluation(position, Piece.B)
-            - AdditionalPieceEvaluation(position, Piece.b);
+            + AdditionalPieceEvaluation(position, Piece.b);
 
         if (position.Side == Side.Black)
         {
@@ -862,7 +862,7 @@ public class PositionTest
     {
         Position position = new Position(fen);
         int evaluation = AdditionalPieceEvaluation(position, Piece.Q)
-            - AdditionalPieceEvaluation(position, Piece.q);
+            + AdditionalPieceEvaluation(position, Piece.q);
 
         BitBoard whitePawnAttacks = position.PieceBitBoards[(int)Piece.P].ShiftUpRight() | position.PieceBitBoards[(int)Piece.P].ShiftUpLeft();
         BitBoard blackPawnAttacks = position.PieceBitBoards[(int)Piece.p].ShiftDownRight() | position.PieceBitBoards[(int)Piece.p].ShiftDownLeft();
@@ -982,9 +982,7 @@ public class PositionTest
             ? blackPawnAttacks
             : whitePawnAttacks;
 
-        var pieceSide = (int)piece <= (int)Piece.K
-            ? (int)Side.White
-            : (int)Side.Black;
+        int pìeceInt = (int)piece;
 
         var bitBoard = position.PieceBitBoards[(int)piece];
         int eval = 0;
@@ -993,7 +991,7 @@ public class PositionTest
         {
             var pieceSquareIndex = bitBoard.GetLS1BIndex();
             bitBoard.ResetLS1B();
-            eval += UnpackMG(position.AdditionalPieceEvaluation(0, pieceSquareIndex, (int)piece, sameSideKingSquare, oppositeSideKingSquare, oppositeSidePawnAttacks));
+            eval += UnpackMG(position.AdditionalPieceEvaluation(0, pieceSquareIndex, pìeceInt, sameSideKingSquare, oppositeSideKingSquare, oppositeSidePawnAttacks));
         }
 
         return eval;
@@ -1018,7 +1016,7 @@ public class PositionTest
 
         return UnpackEG(piece == Piece.K
             ? position.KingAdditionalEvaluation(bitBoard, (int)Side.White, blackPawnAttacks)
-            : position.KingAdditionalEvaluation(bitBoard, (int)Side.Black, whitePawnAttacks));
+            : -position.KingAdditionalEvaluation(bitBoard, (int)Side.Black, whitePawnAttacks));
     }
 
     private static void EvaluateDrawOrNotDraw(string fen, bool isDrawExpected, int expectedPhase)
