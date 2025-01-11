@@ -584,7 +584,7 @@ public class Position : IDisposable
                     bitboard.ResetLS1B();
 
                     gamePhase += GamePhaseByPiece[pieceIndex];
-                    packedScore += AdditionalPieceEvaluation(whiteBucket, pieceSquareIndex, pieceIndex, (int)Side.White, whiteKing, blackKing, blackPawnAttacks);
+                    packedScore += AdditionalPieceEvaluation(whiteBucket, blackBucket, pieceSquareIndex, pieceIndex, (int)Side.White, whiteKing, blackKing, blackPawnAttacks);
                 }
             }
 
@@ -603,7 +603,7 @@ public class Position : IDisposable
                     bitboard.ResetLS1B();
 
                     gamePhase += GamePhaseByPiece[pieceIndex];
-                    packedScore -= AdditionalPieceEvaluation(blackBucket, pieceSquareIndex, pieceIndex, (int)Side.Black, blackKing, whiteKing, whitePawnAttacks);
+                    packedScore -= AdditionalPieceEvaluation(blackBucket, whiteBucket, pieceSquareIndex, pieceIndex, (int)Side.Black, blackKing, whiteKing, whitePawnAttacks);
                 }
             }
         }
@@ -629,7 +629,7 @@ public class Position : IDisposable
 
                     gamePhase += GamePhaseByPiece[pieceIndex];
 
-                    packedScore += AdditionalPieceEvaluation(whiteBucket, blackBucket pieceSquareIndex, pieceIndex, whiteKing, blackKing, blackPawnAttacks);
+                    packedScore += AdditionalPieceEvaluation(whiteBucket, blackBucket, pieceSquareIndex, pieceIndex, (int)Side.White, whiteKing, blackKing, blackPawnAttacks);
                 }
             }
 
@@ -652,7 +652,7 @@ public class Position : IDisposable
 
                     gamePhase += GamePhaseByPiece[pieceIndex];
 
-                    packedScore -= AdditionalPieceEvaluation(blackBucket, whiteBucket pieceSquareIndex, pieceIndex, blackKing, whiteKing, whitePawnAttacks);
+                    packedScore -= AdditionalPieceEvaluation(blackBucket, whiteBucket, pieceSquareIndex, pieceIndex, (int)Side.Black, blackKing, whiteKing, whitePawnAttacks);
                 }
             }
 
