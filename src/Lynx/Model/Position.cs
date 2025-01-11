@@ -129,6 +129,18 @@ public class Position : IDisposable
         if (promotedPiece != default)
         {
             newPiece = promotedPiece;
+
+            //if (_isIncrementalEval && PieceBitBoards[(int)Piece.B + offset] != 0)
+            //{
+            //    if (promotedPiece == (int)Piece.B)
+            //    {
+            //        _incrementalEvalAccumulator += BishopPairBonus;
+            //    }
+            //    else if (promotedPiece == (int)Piece.b)
+            //    {
+            //        _incrementalEvalAccumulator -= BishopPairBonus;
+            //    }
+            //}
         }
 
         PieceBitBoards[piece].PopBit(sourceSquare);
@@ -184,6 +196,23 @@ public class Position : IDisposable
 
                             _incrementalEvalAccumulator -= PSQT(0, opposideSideBucket, capturedPiece, capturedSquare);
                             _incrementalEvalAccumulator -= PSQT(1, sameSideBucket, capturedPiece, capturedSquare);
+
+                            // Remove bishop bonus when a bishop is captured and the other bishop is still on the board
+                            // We'll ignote bishop promotions for now
+                            if (capturedPiece == (int)Piece.B)
+                            {
+                                if (PieceBitBoards[capturedPiece] != 0)
+                                {
+                                    _incrementalEvalAccumulator -= BishopPairBonus;
+                                }
+                            }
+                            else if (capturedPiece == (int)Piece.b)
+                            {
+                                if (PieceBitBoards[capturedPiece] != 0)
+                                {
+                                    _incrementalEvalAccumulator += BishopPairBonus;
+                                }
+                            }
                         }
 
                         break;
@@ -663,6 +692,17 @@ public class Position : IDisposable
                 + PSQT(0, blackBucket, (int)Piece.k, blackKing)
                 + PSQT(1, whiteBucket, (int)Piece.k, blackKing);
 
+            // Bishop pair bonus
+            if (PieceBitBoards[(int)Piece.B].CountBits() >= 2)
+            {
+                _incrementalEvalAccumulator += BishopPairBonus;
+            }
+
+            if (PieceBitBoards[(int)Piece.b].CountBits() >= 2)
+            {
+                _incrementalEvalAccumulator -= BishopPairBonus;
+            }
+
             packedScore += _incrementalEvalAccumulator;
             _isIncrementalEval = true;
         }
@@ -670,17 +710,6 @@ public class Position : IDisposable
         packedScore +=
             KingAdditionalEvaluation(whiteKing, (int)Side.White, blackPawnAttacks)
             - KingAdditionalEvaluation(blackKing, (int)Side.Black, whitePawnAttacks);
-
-        // Bishop pair bonus
-        if (PieceBitBoards[(int)Piece.B].CountBits() >= 2)
-        {
-            packedScore += BishopPairBonus;
-        }
-
-        if (PieceBitBoards[(int)Piece.b].CountBits() >= 2)
-        {
-            packedScore -= BishopPairBonus;
-        }
 
         // Pieces attacked by pawns bonus
         packedScore += PieceAttackedByPawnPenalty
