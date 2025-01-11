@@ -584,7 +584,7 @@ public class Position : IDisposable
                     bitboard.ResetLS1B();
 
                     gamePhase += GamePhaseByPiece[pieceIndex];
-                    packedScore += AdditionalPieceEvaluation(whiteBucket, pieceSquareIndex, pieceIndex, (int)Side.White, whiteKing, blackKing, blackPawnAttacks);
+                    packedScore += AdditionalPieceEvaluation(whiteBucket, pieceSquareIndex, pieceIndex, whiteKing, blackKing, blackPawnAttacks);
                 }
             }
 
@@ -603,7 +603,7 @@ public class Position : IDisposable
                     bitboard.ResetLS1B();
 
                     gamePhase += GamePhaseByPiece[pieceIndex];
-                    packedScore -= AdditionalPieceEvaluation(blackBucket, pieceSquareIndex, pieceIndex, (int)Side.Black, blackKing, whiteKing, whitePawnAttacks);
+                    packedScore -= AdditionalPieceEvaluation(blackBucket, pieceSquareIndex, pieceIndex, blackKing, whiteKing, whitePawnAttacks);
                 }
             }
         }
