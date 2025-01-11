@@ -1,11 +1,12 @@
 using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 
 using static Lynx.EvaluationConstants;
 using static Lynx.EvaluationParams;
-using static Lynx.EvaluationPSQTs;
+using static Lynx.PSQT;
 
 namespace Lynx.Model;
 
@@ -163,11 +164,13 @@ public class Position : IDisposable
                 (sameSideBucket, opposideSideBucket) = (opposideSideBucket, sameSideBucket);
             }
 
-            _incrementalEvalAccumulator -= PSQT(0, sameSideBucket, piece, sourceSquare);
-            _incrementalEvalAccumulator -= PSQT(1, opposideSideBucket, piece, sourceSquare);
+            ref var psqtBase = ref MemoryMarshal.GetArrayDataReference(PSQTArray);
 
-            _incrementalEvalAccumulator += PSQT(0, sameSideBucket, newPiece, targetSquare);
-            _incrementalEvalAccumulator += PSQT(1, opposideSideBucket, newPiece, targetSquare);
+            _incrementalEvalAccumulator -= Unsafe.Add(ref psqtBase, PSQTIndex(0, sameSideBucket, piece, sourceSquare));
+            _incrementalEvalAccumulator -= Unsafe.Add(ref psqtBase, PSQTIndex(1, opposideSideBucket, piece, sourceSquare));
+
+            _incrementalEvalAccumulator += Unsafe.Add(ref psqtBase, PSQTIndex(0, sameSideBucket, newPiece, targetSquare));
+            _incrementalEvalAccumulator += Unsafe.Add(ref psqtBase, PSQTIndex(1, opposideSideBucket, newPiece, targetSquare));
 
             switch (move.SpecialMoveFlag())
             {
@@ -182,8 +185,8 @@ public class Position : IDisposable
                             OccupancyBitBoards[oppositeSide].PopBit(capturedSquare);
                             UniqueIdentifier ^= ZobristTable.PieceHash(capturedSquare, capturedPiece);
 
-                            _incrementalEvalAccumulator -= PSQT(0, opposideSideBucket, capturedPiece, capturedSquare);
-                            _incrementalEvalAccumulator -= PSQT(1, sameSideBucket, capturedPiece, capturedSquare);
+                            _incrementalEvalAccumulator -= Unsafe.Add(ref psqtBase, PSQTIndex(0, opposideSideBucket, capturedPiece, capturedSquare));
+                            _incrementalEvalAccumulator -= Unsafe.Add(ref psqtBase, PSQTIndex(1, sameSideBucket, capturedPiece, capturedSquare));
                         }
 
                         break;
@@ -217,11 +220,11 @@ public class Position : IDisposable
                             ZobristTable.PieceHash(rookSourceSquare, rookIndex)
                             ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
 
-                        _incrementalEvalAccumulator -= PSQT(0, sameSideBucket, rookIndex, rookSourceSquare);
-                        _incrementalEvalAccumulator -= PSQT(1, opposideSideBucket, rookIndex, rookSourceSquare);
+                        _incrementalEvalAccumulator -= Unsafe.Add(ref psqtBase, PSQTIndex(0, sameSideBucket, rookIndex, rookSourceSquare));
+                        _incrementalEvalAccumulator -= Unsafe.Add(ref psqtBase, PSQTIndex(1, opposideSideBucket, rookIndex, rookSourceSquare));
 
-                        _incrementalEvalAccumulator += PSQT(0, sameSideBucket, rookIndex, rookTargetSquare);
-                        _incrementalEvalAccumulator += PSQT(1, opposideSideBucket, rookIndex, rookTargetSquare);
+                        _incrementalEvalAccumulator += Unsafe.Add(ref psqtBase, PSQTIndex(0, sameSideBucket, rookIndex, rookTargetSquare));
+                        _incrementalEvalAccumulator += Unsafe.Add(ref psqtBase, PSQTIndex(1, opposideSideBucket, rookIndex, rookTargetSquare));
 
                         break;
                     }
@@ -243,11 +246,11 @@ public class Position : IDisposable
                             ZobristTable.PieceHash(rookSourceSquare, rookIndex)
                             ^ ZobristTable.PieceHash(rookTargetSquare, rookIndex);
 
-                        _incrementalEvalAccumulator -= PSQT(0, sameSideBucket, rookIndex, rookSourceSquare);
-                        _incrementalEvalAccumulator -= PSQT(1, opposideSideBucket, rookIndex, rookSourceSquare);
+                        _incrementalEvalAccumulator -= Unsafe.Add(ref psqtBase, PSQTIndex(0, sameSideBucket, rookIndex, rookSourceSquare));
+                        _incrementalEvalAccumulator -= Unsafe.Add(ref psqtBase, PSQTIndex(1, opposideSideBucket, rookIndex, rookSourceSquare));
 
-                        _incrementalEvalAccumulator += PSQT(0, sameSideBucket, rookIndex, rookTargetSquare);
-                        _incrementalEvalAccumulator += PSQT(1, opposideSideBucket, rookIndex, rookTargetSquare);
+                        _incrementalEvalAccumulator += Unsafe.Add(ref psqtBase, PSQTIndex(0, sameSideBucket, rookIndex, rookTargetSquare));
+                        _incrementalEvalAccumulator += Unsafe.Add(ref psqtBase, PSQTIndex(1, opposideSideBucket, rookIndex, rookTargetSquare));
 
                         break;
                     }
@@ -264,8 +267,8 @@ public class Position : IDisposable
                         Board[capturedSquare] = (int)Piece.None;
                         UniqueIdentifier ^= ZobristTable.PieceHash(capturedSquare, capturedPiece);
 
-                        _incrementalEvalAccumulator -= PSQT(0, opposideSideBucket, capturedPiece, capturedSquare);
-                        _incrementalEvalAccumulator -= PSQT(1, sameSideBucket, capturedPiece, capturedSquare);
+                        _incrementalEvalAccumulator -= Unsafe.Add(ref psqtBase, PSQTIndex(0, opposideSideBucket, capturedPiece, capturedSquare));
+                        _incrementalEvalAccumulator -= Unsafe.Add(ref psqtBase, PSQTIndex(1, sameSideBucket, capturedPiece, capturedSquare));
 
                         break;
                     }
@@ -610,6 +613,7 @@ public class Position : IDisposable
         else
         {
             _incrementalEvalAccumulator = 0;
+            ref var psqtBase = ref MemoryMarshal.GetArrayDataReference(PSQTArray);
 
             // White pieces PSQTs and additional eval, except king
             for (int pieceIndex = (int)Piece.P; pieceIndex < (int)Piece.K; ++pieceIndex)
@@ -624,8 +628,8 @@ public class Position : IDisposable
                     var pieceSquareIndex = bitboard.GetLS1BIndex();
                     bitboard.ResetLS1B();
 
-                    _incrementalEvalAccumulator += PSQT(0, whiteBucket, pieceIndex, pieceSquareIndex)
-                                                + PSQT(1, blackBucket, pieceIndex, pieceSquareIndex);
+                    _incrementalEvalAccumulator += Unsafe.Add(ref psqtBase, PSQTIndex(0, whiteBucket, pieceIndex, pieceSquareIndex))
+                                                + Unsafe.Add(ref psqtBase, PSQTIndex(1, blackBucket, pieceIndex, pieceSquareIndex));
 
                     gamePhase += GamePhaseByPiece[pieceIndex];
 
@@ -647,8 +651,8 @@ public class Position : IDisposable
                     var pieceSquareIndex = bitboard.GetLS1BIndex();
                     bitboard.ResetLS1B();
 
-                    _incrementalEvalAccumulator += PSQT(0, blackBucket, pieceIndex, pieceSquareIndex)
-                                                + PSQT(1, whiteBucket, pieceIndex, pieceSquareIndex);
+                    _incrementalEvalAccumulator += Unsafe.Add(ref psqtBase, PSQTIndex(0, blackBucket, pieceIndex, pieceSquareIndex))
+                                                + Unsafe.Add(ref psqtBase, PSQTIndex(1, whiteBucket, pieceIndex, pieceSquareIndex));
 
                     gamePhase += GamePhaseByPiece[pieceIndex];
 
@@ -658,10 +662,10 @@ public class Position : IDisposable
 
             // Kings
             _incrementalEvalAccumulator +=
-                PSQT(0, whiteBucket, (int)Piece.K, whiteKing)
-                + PSQT(1, blackBucket, (int)Piece.K, whiteKing)
-                + PSQT(0, blackBucket, (int)Piece.k, blackKing)
-                + PSQT(1, whiteBucket, (int)Piece.k, blackKing);
+                Unsafe.Add(ref psqtBase, PSQTIndex(0, whiteBucket, (int)Piece.K, whiteKing))
+                + Unsafe.Add(ref psqtBase, PSQTIndex(1, blackBucket, (int)Piece.K, whiteKing))
+                + Unsafe.Add(ref psqtBase, PSQTIndex(0, blackBucket, (int)Piece.k, blackKing))
+                + Unsafe.Add(ref psqtBase, PSQTIndex(1, whiteBucket, (int)Piece.k, blackKing));
 
             packedScore += _incrementalEvalAccumulator;
             _isIncrementalEval = true;

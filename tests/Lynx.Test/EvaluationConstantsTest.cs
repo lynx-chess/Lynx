@@ -3,7 +3,7 @@ using NUnit.Framework;
 
 using static Lynx.EvaluationConstants;
 using static Lynx.EvaluationParams;
-using static Lynx.EvaluationPSQTs;
+using static Lynx.PSQT;
 using static Lynx.TunableEvalParameters;
 using static Lynx.Utils;
 

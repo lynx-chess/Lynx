@@ -218,7 +218,7 @@ public class ArrayCopy_Benchmark : BaseBenchmark
         Enumerable.Range(0,256).ToArray(),
         Enumerable.Range(0,512).ToArray(),
         Enumerable.Range(0,1024).ToArray(),
-        EvaluationPSQTs._packedPSQT
+        PSQT.PSQTArray
     ];
 #pragma warning restore S2365 // Properties should not make collection or array copies
 

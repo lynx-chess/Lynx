@@ -6,7 +6,7 @@ using static Lynx.TunableEvalParameters;
 
 namespace Lynx;
 
-public static class EvaluationPSQTs
+public static class PSQT
 {
     public const int PSQTBucketCount = 23;
 
@@ -27,9 +27,9 @@ public static class EvaluationPSQTs
     /// <summary>
     /// 2 x PSQTBucketCount x 12 x 64
     /// </summary>
-    internal static readonly int[] _packedPSQT = GC.AllocateArray<int>(2 * PSQTBucketCount * 12 * 64, pinned: true);
+    public static readonly int[] PSQTArray = GC.AllocateArray<int>(2 * PSQTBucketCount * 12 * 64, pinned: true);
 
-    static EvaluationPSQTs()
+    static PSQT()
     {
         short[][][][] mgPositionalTables =
         [
@@ -80,11 +80,11 @@ public static class EvaluationPSQTs
                 {
                     for (int sq = 0; sq < 64; ++sq)
                     {
-                        _packedPSQT[PSQTIndex(friendEnemy, bucket, piece, sq)] = Utils.Pack(
+                        PSQTArray[PSQTIndex(friendEnemy, bucket, piece, sq)] = Utils.Pack(
                             (short)(MiddleGamePieceValues[friendEnemy][bucket][piece] + mgPositionalTables[friendEnemy][piece][bucket][sq]),
                             (short)(EndGamePieceValues[friendEnemy][bucket][piece] + egPositionalTables[friendEnemy][piece][bucket][sq]));
 
-                        _packedPSQT[PSQTIndex(friendEnemy, bucket, piece + 6, sq)] = Utils.Pack(
+                        PSQTArray[PSQTIndex(friendEnemy, bucket, piece + 6, sq)] = Utils.Pack(
                             (short)(MiddleGamePieceValues[friendEnemy][bucket][piece + 6] - mgPositionalTables[friendEnemy][piece][bucket][sq ^ 56]),
                             (short)(EndGamePieceValues[friendEnemy][bucket][piece + 6] - egPositionalTables[friendEnemy][piece][bucket][sq ^ 56]));
                     }
@@ -97,12 +97,12 @@ public static class EvaluationPSQTs
     /// [2][PSQTBucketCount][12][64]
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int PSQT(int friendEnemy, int bucket, int piece, int square)
+    public static int GetElement(int friendEnemy, int bucket, int piece, int square)
     {
         var index = PSQTIndex(friendEnemy, bucket, piece, square);
-        Debug.Assert(index >= 0 && index < _packedPSQT.Length);
+        Debug.Assert(index >= 0 && index < PSQTArray.Length);
 
-        return Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(_packedPSQT), index);
+        return Unsafe.Add(ref MemoryMarshal.GetArrayDataReference(PSQTArray), index);
     }
 
     /// <summary>
