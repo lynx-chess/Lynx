@@ -993,7 +993,7 @@ public class PositionTest
         {
             var pieceSquareIndex = bitBoard.GetLS1BIndex();
             bitBoard.ResetLS1B();
-            eval += UnpackMG(position.AdditionalPieceEvaluation(0, pieceSquareIndex, (int)piece, pieceSide, sameSideKingSquare, oppositeSideKingSquare, oppositeSidePawnAttacks));
+            eval += UnpackMG(position.AdditionalPieceEvaluation(0, pieceSquareIndex, (int)piece, sameSideKingSquare, oppositeSideKingSquare, oppositeSidePawnAttacks));
         }
 
         return eval;

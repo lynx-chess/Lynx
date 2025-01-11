@@ -584,7 +584,7 @@ public class Position : IDisposable
                     bitboard.ResetLS1B();
 
                     gamePhase += GamePhaseByPiece[pieceIndex];
-                    packedScore += AdditionalPieceEvaluation(whiteBucket, pieceSquareIndex, pieceIndex, (int)Side.White, whiteKing, blackKing, blackPawnAttacks);
+                    packedScore += AdditionalPieceEvaluation(whiteBucket, pieceSquareIndex, pieceIndex, whiteKing, blackKing, blackPawnAttacks);
                 }
             }
 
@@ -603,7 +603,7 @@ public class Position : IDisposable
                     bitboard.ResetLS1B();
 
                     gamePhase += GamePhaseByPiece[pieceIndex];
-                    packedScore -= AdditionalPieceEvaluation(blackBucket, pieceSquareIndex, pieceIndex, (int)Side.Black, blackKing, whiteKing, whitePawnAttacks);
+                    packedScore += AdditionalPieceEvaluation(blackBucket, pieceSquareIndex, pieceIndex, blackKing, whiteKing, whitePawnAttacks);
                 }
             }
         }
@@ -629,7 +629,7 @@ public class Position : IDisposable
 
                     gamePhase += GamePhaseByPiece[pieceIndex];
 
-                    packedScore += AdditionalPieceEvaluation(whiteBucket, pieceSquareIndex, pieceIndex, (int)Side.White, whiteKing, blackKing, blackPawnAttacks);
+                    packedScore += AdditionalPieceEvaluation(whiteBucket, pieceSquareIndex, pieceIndex, whiteKing, blackKing, blackPawnAttacks);
                 }
             }
 
@@ -652,7 +652,7 @@ public class Position : IDisposable
 
                     gamePhase += GamePhaseByPiece[pieceIndex];
 
-                    packedScore -= AdditionalPieceEvaluation(blackBucket, pieceSquareIndex, pieceIndex, (int)Side.Black, blackKing, whiteKing, whitePawnAttacks);
+                    packedScore += AdditionalPieceEvaluation(blackBucket, pieceSquareIndex, pieceIndex, blackKing, whiteKing, whitePawnAttacks);
                 }
             }
 
@@ -816,15 +816,28 @@ public class Position : IDisposable
     /// Doesn't include <see cref="Piece.K"/> and <see cref="Piece.k"/> evaluation
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int AdditionalPieceEvaluation(int bucket, int pieceSquareIndex, int pieceIndex, int pieceSide, int sameSideKingSquare, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+    internal int AdditionalPieceEvaluation(int bucket, int pieceSquareIndex, int pieceIndex, int sameSideKingSquare, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
     {
         return pieceIndex switch
         {
-            (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(bucket, pieceSquareIndex, pieceIndex, sameSideKingSquare, oppositeSideKingSquare),
-            (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
-            (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
-            (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
-            (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.P => PawnAdditionalEvaluation(bucket, pieceSquareIndex, (int)Piece.P, sameSideKingSquare, oppositeSideKingSquare),
+            (int)Piece.p => -PawnAdditionalEvaluation(bucket, pieceSquareIndex, (int)Piece.p, sameSideKingSquare, oppositeSideKingSquare),
+
+            (int)Piece.R => RookAdditionalEvaluation(pieceSquareIndex, (int)Piece.R, (int)Side.White, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.r => -RookAdditionalEvaluation(pieceSquareIndex, (int)Piece.r, (int)Side.Black, oppositeSideKingSquare, enemyPawnAttacks),
+
+            (int)Piece.B => BishopAdditionalEvaluation(pieceSquareIndex, (int)Piece.B, (int)Side.White, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.b => -BishopAdditionalEvaluation(pieceSquareIndex, (int)Piece.b, (int)Side.Black, oppositeSideKingSquare, enemyPawnAttacks),
+
+            (int)Piece.N => KnightAdditionalEvaluation(pieceSquareIndex, (int)Side.White, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.n => -KnightAdditionalEvaluation(pieceSquareIndex, (int)Side.Black, oppositeSideKingSquare, enemyPawnAttacks),
+
+            (int)Piece.Q => QueenAdditionalEvaluation(pieceSquareIndex, (int)Side.White, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.q => -QueenAdditionalEvaluation(pieceSquareIndex, (int)Side.Black, oppositeSideKingSquare, enemyPawnAttacks),
+
+            (int)Piece.K => KingAdditionalEvaluation(pieceSquareIndex, (int)Side.White, enemyPawnAttacks),
+            (int)Piece.k => -KingAdditionalEvaluation(pieceSquareIndex, (int)Side.Black, enemyPawnAttacks),
+
             _ => 0
         };
     }
