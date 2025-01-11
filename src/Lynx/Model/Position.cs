@@ -836,17 +836,19 @@ public class Position : IDisposable
 
         var rank = Constants.Rank[squareIndex];
         var oppositeSide = (int)Side.Black;
+        var pawnBucketIndex = squareIndex;
 
         if (pieceIndex == (int)Piece.p)
         {
             rank = 7 - rank;
             oppositeSide = (int)Side.White;
+            pawnBucketIndex ^= 56;
         }
 
         // Isolated pawn
         if ((PieceBitBoards[pieceIndex] & Masks.IsolatedPawnMasks[squareIndex]) == default)
         {
-            packedBonus += IsolatedPawnPenalty[PawnBucketLayout[squareIndex]];
+            packedBonus += IsolatedPawnPenalty[PawnBucketLayout[pawnBucketIndex]];
         }
 
         // Passed pawn
