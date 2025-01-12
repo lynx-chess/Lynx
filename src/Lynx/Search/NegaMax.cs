@@ -74,7 +74,7 @@ public sealed partial class Engine
             // which we'll be able to use later for the full depth search
             if (ttElementType == default && depth >= Configuration.EngineSettings.IIR_MinDepth)
             {
-                --depth;
+                depth -= 2;
             }
         }
 
