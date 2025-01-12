@@ -16,7 +16,12 @@ public class Position : IDisposable
     private int _incrementalEvalAccumulator;
     private bool _isIncrementalEval;
 
-    public ulong UniqueIdentifier { get; private set; }
+    private ulong? _uniqueIdentifier;
+    public ulong UniqueIdentifier
+    {
+        get => _uniqueIdentifier ??= ZobristTable.PositionHash(this);
+        private set => _uniqueIdentifier = value;
+    }
 
     /// <summary>
     /// Use <see cref="Piece"/> as index
