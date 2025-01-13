@@ -116,6 +116,43 @@ public static class ZobristTable
     }
 
     /// <summary>
+    /// Calculates from scratch the pawn structure hash of a position
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ulong PawnKingHash(Position position)
+    {
+        ulong pawnKingHash = 0;
+
+        var whitePawns = position.PieceBitBoards[(int)Piece.P];
+        while (whitePawns != default)
+        {
+            var pieceSquareIndex = whitePawns.GetLS1BIndex();
+            whitePawns.ResetLS1B();
+
+            pawnKingHash ^= PieceHash(pieceSquareIndex, (int)Piece.P);
+        }
+
+        var blackPawns = position.PieceBitBoards[(int)Piece.p];
+        while (blackPawns != default)
+        {
+            var pieceSquareIndex = blackPawns.GetLS1BIndex();
+            blackPawns.ResetLS1B();
+
+            pawnKingHash ^= PieceHash(pieceSquareIndex, (int)Piece.p);
+        }
+
+        var whiteKing = position.PieceBitBoards[(int)Piece.K].GetLS1BIndex();
+        pawnKingHash ^= PieceHash(whiteKing, (int)Piece.K);
+
+        var blackKing = position.PieceBitBoards[(int)Piece.k].GetLS1BIndex();
+        pawnKingHash ^= PieceHash(blackKing, (int)Piece.k);
+
+        pawnKingHash ^= SideHash();
+
+        return pawnKingHash;
+    }
+
+    /// <summary>
     /// Initializes Zobrist table (long[64][12])
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

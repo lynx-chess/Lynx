@@ -49,6 +49,8 @@ public sealed partial class Engine : IDisposable
             _moveNodeCount[i] = new ulong[64];
         }
 
+        Array.Fill(_kingPawnHashTable, Constants.DefaultKingPawnValue);
+
 #if !DEBUG
         if (warmup)
         {
@@ -101,6 +103,9 @@ public sealed partial class Engine : IDisposable
         Array.Clear(_captureHistory);
         Array.Clear(_continuationHistory);
         Array.Clear(_counterMoves);
+
+        // Array.Clear() would set it to 0
+        Array.Fill(_kingPawnHashTable, Constants.DefaultKingPawnValue);
 
         // No need to clear killer move or pv table because they're cleared on every search (IDDFS)
     }

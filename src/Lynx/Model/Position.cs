@@ -18,6 +18,8 @@ public class Position : IDisposable
 
     public ulong UniqueIdentifier { get; private set; }
 
+    public ulong KingPawnUniqueIdentifier { get; private set; }
+
     /// <summary>
     /// Use <see cref="Piece"/> as index
     /// </summary>
@@ -68,6 +70,7 @@ public class Position : IDisposable
 
 #pragma warning disable S3366 // "this" should not be exposed from constructors
         UniqueIdentifier = ZobristTable.PositionHash(this);
+        KingPawnUniqueIdentifier = ZobristTable.PawnKingHash(this);
 #pragma warning restore S3366 // "this" should not be exposed from constructors
 
         _isIncrementalEval = false;
@@ -80,6 +83,7 @@ public class Position : IDisposable
     public Position(Position position)
     {
         UniqueIdentifier = position.UniqueIdentifier;
+        KingPawnUniqueIdentifier = position.KingPawnUniqueIdentifier;
         PieceBitBoards = ArrayPool<BitBoard>.Shared.Rent(12);
         Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
 
@@ -105,6 +109,7 @@ public class Position : IDisposable
         byte castleCopy = Castle;
         BoardSquare enpassantCopy = EnPassant;
         ulong uniqueIdentifierCopy = UniqueIdentifier;
+        ulong kingPawnKeyUniqueIdentifierCopy = KingPawnUniqueIdentifier;
         int incrementalEvalAccumulatorCopy = _incrementalEvalAccumulator;
         // We also save a copy of _isIncrementalEval, so that current move doesn't affect 'sibling' moves exploration
         bool isIncrementalEvalCopy = _isIncrementalEval;
@@ -368,7 +373,7 @@ public class Position : IDisposable
 
         UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
 
-        return new GameState(uniqueIdentifierCopy, incrementalEvalAccumulatorCopy, enpassantCopy, castleCopy, isIncrementalEvalCopy);
+        return new GameState(uniqueIdentifierCopy, kingPawnKeyUniqueIdentifierCopy, incrementalEvalAccumulatorCopy, enpassantCopy, castleCopy, isIncrementalEvalCopy);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -469,6 +474,7 @@ public class Position : IDisposable
         Castle = gameState.Castle;
         EnPassant = gameState.EnPassant;
         UniqueIdentifier = gameState.ZobristKey;
+        KingPawnUniqueIdentifier = gameState.KingPawnKey;
         _incrementalEvalAccumulator = gameState.IncremetalEvalAccumulator;
         _isIncrementalEval = gameState.IsIncrementalEval;
     }
@@ -479,6 +485,7 @@ public class Position : IDisposable
         Side = (Side)Utils.OppositeSide(Side);
         var oldEnPassant = EnPassant;
         var oldUniqueIdentifier = UniqueIdentifier;
+        var oldKingPawnUniqueIdentifier = KingPawnUniqueIdentifier;
         EnPassant = BoardSquare.noSquare;
 
         UniqueIdentifier ^=
@@ -494,6 +501,7 @@ public class Position : IDisposable
         Side = (Side)Utils.OppositeSide(Side);
         EnPassant = gameState.EnPassant;
         UniqueIdentifier = gameState.ZobristKey;
+        KingPawnUniqueIdentifier = gameState.KingPawnKey;
         _incrementalEvalAccumulator = gameState.IncremetalEvalAccumulator;
         _isIncrementalEval = gameState.IsIncrementalEval;
     }

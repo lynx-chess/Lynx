@@ -48,6 +48,11 @@ public sealed partial class Engine
 
     private readonly int[] _maxDepthReached = GC.AllocateArray<int>(Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin, pinned: true);
 
+    /// <summary>
+    /// <see cref="Constants.KingPawnHashSize"/>
+    /// </summary>
+    private readonly int[] _kingPawnHashTable = GC.AllocateArray<int>(Constants.KingPawnHashSize, pinned: true);
+
     private ulong _nodes;
 
     private SearchResult? _previousSearchResult;
