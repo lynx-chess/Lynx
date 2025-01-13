@@ -51,7 +51,7 @@ public sealed partial class Engine
     /// <summary>
     /// <see cref="Constants.KingPawnHashSize"/>
     /// </summary>
-    private readonly int[] _kingPawnHashTable = GC.AllocateArray<int>(Constants.KingPawnHashSize, pinned: true);
+    private readonly PawnTableElement[] _pawnEvalTable = GC.AllocateArray<PawnTableElement>(Constants.KingPawnHashSize, pinned: true);
 
     private ulong _nodes;
 
