@@ -1064,10 +1064,10 @@ public class Position : IDisposable
         if ((PieceBitBoards[(int)Piece.p - pieceIndex] & passedPawnsMask) == default)
         {
             // Passed pawn without opponent pieces ahead (in its passed pawn mask)
-            if ((passedPawnsMask & OccupancyBitBoards[oppositeSide]) == 0)
-            {
-                packedBonus += PassedPawnBonusNoEnemiesAheadBonus[bucket][rank];
-            }
+            //if ((passedPawnsMask & OccupancyBitBoards[oppositeSide]) == 0)
+            //{
+            //    packedBonus += PassedPawnBonusNoEnemiesAheadBonus[bucket][rank];
+            //}
 
             // King distance to passed pawn
             var friendlyKingDistance = Constants.ChebyshevDistance[squareIndex][sameSideKingSquare];
