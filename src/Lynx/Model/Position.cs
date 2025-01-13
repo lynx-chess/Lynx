@@ -154,30 +154,34 @@ public class Position : IDisposable
         OccupancyBitBoards[oldSide].SetBit(targetSquare);
         Board[targetSquare] = newPiece;
 
+        var sourcePieceHash = ZobristTable.PieceHash(sourceSquare, piece);
+        var targetPieceHash = ZobristTable.PieceHash(targetSquare, newPiece);
+        var sideHash = ZobristTable.SideHash();
+
         UniqueIdentifier ^=
-            ZobristTable.SideHash()
-            ^ ZobristTable.PieceHash(sourceSquare, piece)
-            ^ ZobristTable.PieceHash(targetSquare, newPiece)
+            sideHash
+            ^ sourcePieceHash
+            ^ targetPieceHash
             ^ ZobristTable.EnPassantHash((int)EnPassant)            // We clear the existing enpassant square, if any
             ^ ZobristTable.CastleHash(Castle);                      // We clear the existing castle rights
 
-        KingPawnUniqueIdentifier ^= ZobristTable.SideHash();
+        KingPawnUniqueIdentifier ^= sideHash;
 
         if (piece == (int)Piece.P || piece == (int)Piece.p)
         {
-            KingPawnUniqueIdentifier ^= ZobristTable.PieceHash(sourceSquare, piece);
+            KingPawnUniqueIdentifier ^= sourcePieceHash;
 
             // In case of promotion, the promoted piece won't be a pawn or a king, so no need to update the key with it
             if (promotedPiece == default)
             {
-                KingPawnUniqueIdentifier ^= ZobristTable.PieceHash(targetSquare, piece);
+                KingPawnUniqueIdentifier ^= targetPieceHash;
             }
         }
         else if (piece == (int)Piece.K || piece == (int)Piece.k)
         {
             KingPawnUniqueIdentifier ^=
-                ZobristTable.PieceHash(sourceSquare, piece)
-                ^ ZobristTable.PieceHash(targetSquare, piece);
+                sourcePieceHash
+                ^ targetPieceHash;
         }
 
         EnPassant = BoardSquare.noSquare;
@@ -214,12 +218,14 @@ public class Position : IDisposable
 
                             PieceBitBoards[capturedPiece].PopBit(capturedSquare);
                             OccupancyBitBoards[oppositeSide].PopBit(capturedSquare);
-                            UniqueIdentifier ^= ZobristTable.PieceHash(capturedSquare, capturedPiece);
+
+                            var capturedPieceHash = ZobristTable.PieceHash(capturedSquare, capturedPiece);
+                            UniqueIdentifier ^= capturedPieceHash;
 
                             // Kings can't be captured
                             if (capturedPiece == (int)Piece.P || capturedPiece == (int)Piece.p)
                             {
-                                KingPawnUniqueIdentifier ^= ZobristTable.PieceHash(capturedSquare, capturedPiece);
+                                KingPawnUniqueIdentifier ^= capturedPieceHash;
                             }
 
                             _incrementalEvalAccumulator -= PSQT(0, opposideSideBucket, capturedPiece, capturedSquare);
@@ -302,8 +308,10 @@ public class Position : IDisposable
                         PieceBitBoards[capturedPiece].PopBit(capturedSquare);
                         OccupancyBitBoards[oppositeSide].PopBit(capturedSquare);
                         Board[capturedSquare] = (int)Piece.None;
-                        UniqueIdentifier ^= ZobristTable.PieceHash(capturedSquare, capturedPiece);
-                        KingPawnUniqueIdentifier ^= ZobristTable.PieceHash(capturedSquare, capturedPiece);
+
+                        var capturedPawnHash = ZobristTable.PieceHash(capturedSquare, capturedPiece);
+                        UniqueIdentifier ^= capturedPawnHash;
+                        KingPawnUniqueIdentifier ^= capturedPawnHash;
 
                         _incrementalEvalAccumulator -= PSQT(0, opposideSideBucket, capturedPiece, capturedSquare);
                         _incrementalEvalAccumulator -= PSQT(1, sameSideBucket, capturedPiece, capturedSquare);
@@ -326,12 +334,14 @@ public class Position : IDisposable
 
                             PieceBitBoards[capturedPiece].PopBit(capturedSquare);
                             OccupancyBitBoards[oppositeSide].PopBit(capturedSquare);
-                            UniqueIdentifier ^= ZobristTable.PieceHash(capturedSquare, capturedPiece);
+
+                            ulong capturedPieceHash = ZobristTable.PieceHash(capturedSquare, capturedPiece);
+                            UniqueIdentifier ^= capturedPieceHash;
 
                             // Kings can't be captured
                             if (capturedPiece == (int)Piece.P || capturedPiece == (int)Piece.p)
                             {
-                                KingPawnUniqueIdentifier ^= ZobristTable.PieceHash(capturedSquare, capturedPiece);
+                                KingPawnUniqueIdentifier ^= capturedPieceHash;
                             }
                         }
 
@@ -399,8 +409,10 @@ public class Position : IDisposable
                         PieceBitBoards[capturedPiece].PopBit(capturedSquare);
                         OccupancyBitBoards[oppositeSide].PopBit(capturedSquare);
                         Board[capturedSquare] = (int)Piece.None;
-                        UniqueIdentifier ^= ZobristTable.PieceHash(capturedSquare, capturedPiece);
-                        KingPawnUniqueIdentifier ^= ZobristTable.PieceHash(capturedSquare, capturedPiece);
+
+                        ulong capturedPawnHash = ZobristTable.PieceHash(capturedSquare, capturedPiece);
+                        UniqueIdentifier ^= capturedPawnHash;
+                        KingPawnUniqueIdentifier ^= capturedPawnHash;
 
                         break;
                     }
