@@ -140,7 +140,7 @@ public class Position : IDisposable
         Board[targetSquare] = newPiece;
 
         UniqueIdentifier ^=
-            ZobristTable.SideHash()
+            ZobristTable.IncrementalSideHash()
             ^ ZobristTable.PieceHash(sourceSquare, piece)
             ^ ZobristTable.PieceHash(targetSquare, newPiece)
             ^ ZobristTable.EnPassantHash((int)EnPassant)            // We clear the existing enpassant square, if any
@@ -367,7 +367,7 @@ public class Position : IDisposable
         Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
 
         UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
-
+        
         return new GameState(uniqueIdentifierCopy, incrementalEvalAccumulatorCopy, enpassantCopy, castleCopy, isIncrementalEvalCopy);
     }
 
@@ -482,7 +482,7 @@ public class Position : IDisposable
         EnPassant = BoardSquare.noSquare;
 
         UniqueIdentifier ^=
-            ZobristTable.SideHash()
+            ZobristTable.IncrementalSideHash()
             ^ ZobristTable.EnPassantHash((int)oldEnPassant);
 
         return new GameState(oldUniqueIdentifier, _incrementalEvalAccumulator, oldEnPassant, byte.MaxValue, _isIncrementalEval);
