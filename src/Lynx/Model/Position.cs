@@ -602,8 +602,7 @@ public class Position : IDisposable
     /// That is, positive scores always favour playing <see cref="Side"/>.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public (int Score, int Phase) StaticEvaluation()
-        => StaticEvaluation(0, []);
+    public (int Score, int Phase) StaticEvaluation() => StaticEvaluation(0);
 
     /// <summary>
     /// Evaluates material and position in a NegaMax style.
