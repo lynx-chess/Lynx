@@ -19,6 +19,7 @@ public static class ZobristTable
     private static readonly ulong WQ_Hash = _table[(int)BoardSquare.b8][(int)Piece.p];
     private static readonly ulong BK_Hash = _table[(int)BoardSquare.c8][(int)Piece.p];
     private static readonly ulong BQ_Hash = _table[(int)BoardSquare.d8][(int)Piece.p];
+    private static readonly ulong[] Side_Hash = [0, _table[(int)BoardSquare.d8][(int)Piece.p]];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong PieceHash(int boardSquare, int piece) => _table[boardSquare][piece];
@@ -48,7 +49,17 @@ public static class ZobristTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong SideHash()
     {
-        return _table[(int)BoardSquare.h8][(int)Piece.p];
+        return Side_Hash[1];
+    }
+
+    /// <summary>
+    /// Uses <see cref="Piece.p"/> and <see cref="BoardSquare.h8"/>.
+    /// Differenciates white and black sides
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static ulong SideHash(int side)
+    {
+        return Side_Hash[side];
     }
 
     /// <summary>
@@ -109,7 +120,7 @@ public static class ZobristTable
         }
 
         positionHash ^= EnPassantHash((int)position.EnPassant)
-            ^ SideHash()
+            ^ SideHash((int)position.Side)
             ^ CastleHash(position.Castle);
 
         return positionHash;
