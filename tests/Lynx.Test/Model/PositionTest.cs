@@ -418,6 +418,7 @@ public class PositionTest
         if ((passedPawnsMask & position.OccupancyBitBoards[OppositeSide(position.Side)]) == 0)
         {
             expectedEval += UnpackMG(PassedPawnBonusNoEnemiesAheadBonus[0][rank]);
+            expectedEval += UnpackMG(PassedPawnBonusNoEnemiesAheadEnemyBonus[0][rank]);
         }
 
         Assert.AreEqual(
@@ -425,6 +426,7 @@ public class PositionTest
             //(-4 * Configuration.EngineSettings.DoubledPawnPenalty.MG)
             + UnpackMG(IsolatedPawnPenalty)
             + UnpackMG(PassedPawnBonus[0][rank])
+            + UnpackMG(PassedPawnEnemyBonus[0][rank])
             + UnpackMG(FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance])
             + UnpackMG(EnemyKingDistanceToPassedPawnPenalty[enemyKingDistance]),
 
@@ -993,7 +995,7 @@ public class PositionTest
         {
             var pieceSquareIndex = bitBoard.GetLS1BIndex();
             bitBoard.ResetLS1B();
-            eval += UnpackMG(position.AdditionalPieceEvaluation_Test(0, pieceSquareIndex, (int)piece, pieceSide, sameSideKingSquare, oppositeSideKingSquare, oppositeSidePawnAttacks));
+            eval += UnpackMG(position.AdditionalPieceEvaluation(0, 0, pieceSquareIndex, (int)piece, pieceSide, sameSideKingSquare, oppositeSideKingSquare, oppositeSidePawnAttacks));
         }
 
         return eval;
