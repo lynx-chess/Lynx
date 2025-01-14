@@ -4,9 +4,9 @@
 
 public struct PawnTableElement
 {
-    public int PackedScore;
-
     public ulong Key;
+
+    public int PackedScore;
 
     public void Update(ulong key, int packedScore)
     {

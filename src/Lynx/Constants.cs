@@ -511,14 +511,11 @@ public static class Constants
     ];
 
     /// <summary>
-    /// 262_144 * 8 / 1024 = 4MB
-    /// 4 -> sizeof(int)
+    /// 262_144 * Marshal.SizeOf<PawnTableElement>() / 1024 = 4MB
     /// </summary>
     public const int KingPawnHashSize = 262_144;
 
     public const int KingPawnHashMask = KingPawnHashSize - 1;
-
-    public const int DefaultKingPawnValue =  -32_000;
 }
 
 #pragma warning restore IDE0055
