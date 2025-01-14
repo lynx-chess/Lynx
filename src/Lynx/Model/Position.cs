@@ -658,13 +658,12 @@ public class Position : IDisposable
             var kingPawnIndex = _kingPawnUniqueIdentifier & Constants.KingPawnHashMask;
             ref var entry = ref pawnEvalTable[kingPawnIndex];
 
-            // kingPawnHashTable hit: We can reuse kingPawnHashTable value for pawn additional evaluation + PieceProtectedByPawnBonus
-            // Under _isIncrementalEval to ensure king buckets didn't change
+            // pawnEvalTable hit: We can reuse cached eval for pawn additional evaluation + PieceProtectedByPawnBonus
             if (entry.Key == _kingPawnUniqueIdentifier)
             {
                 packedScore += entry.PackedScore;
             }
-            // Not hit in kingPawnHashTable table
+            // Not hit in pawnEvalTable table
             else
             {
                 var pawnScore = 0;
@@ -745,8 +744,7 @@ public class Position : IDisposable
             var kingPawnIndex = _kingPawnUniqueIdentifier & Constants.KingPawnHashMask;
             ref var entry = ref pawnEvalTable[kingPawnIndex];
 
-            // kingPawnHashTable hit: We can reuse kingPawnHashTable value for pawn additional evaluation + PieceProtectedByPawnBonus
-            // Under _isIncrementalEval to ensure king buckets didn't change
+            // pawnTable hit: We can reuse cached eval for pawn additional evaluation + PieceProtectedByPawnBonus
             if (entry.Key == _kingPawnUniqueIdentifier)
             {
                 packedScore += entry.PackedScore;
@@ -783,7 +781,7 @@ public class Position : IDisposable
                     // No incremental eval - included in pawn table | packedScore -= AdditionalPieceEvaluation(...);
                 }
             }
-            // Not hit in kingPawnHashTable table
+            // Not hit in pawnTable table
             else
             {
                 var pawnScore = 0;
@@ -791,6 +789,7 @@ public class Position : IDisposable
                 // White pawns
                 // Pieces protected by pawns bonus
                 pawnScore += PieceProtectedByPawnBonus[whiteBucket][(int)Piece.P] * (whitePawnAttacks & whitePawns).CountBits();
+
                 // Bitboard copy that we 'empty'
                 var whitePawnsCopy = PieceBitBoards[(int)Piece.P];
                 while (whitePawnsCopy != default)
