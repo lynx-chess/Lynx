@@ -147,8 +147,6 @@ public static class ZobristTable
         var blackKing = position.PieceBitBoards[(int)Piece.k].GetLS1BIndex();
         pawnKingHash ^= PieceHash(blackKing, (int)Piece.k);
 
-        pawnKingHash ^= SideHash();
-
         return pawnKingHash;
     }
 
