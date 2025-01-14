@@ -1280,6 +1280,8 @@ public class Position : IDisposable
             }
         }
 
+        // Pawn king shield included next to pawn additional eval
+
         return packedBonus;
     }
 
