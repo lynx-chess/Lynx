@@ -46,7 +46,7 @@ public static class ZobristTable
     /// Uses <see cref="Piece.p"/> and <see cref="BoardSquare.h8"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ulong IncrementalSideHash()
+    public static ulong SideHash()
     {
         return _table[(int)BoardSquare.d8][(int)Piece.p];
     }
