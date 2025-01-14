@@ -48,7 +48,7 @@ public static class ZobristTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ulong SideHash()
     {
-        return _table[(int)BoardSquare.d8][(int)Piece.p];
+        return _table[(int)BoardSquare.h8][(int)Piece.p];
     }
 
     /// <summary>
@@ -58,7 +58,7 @@ public static class ZobristTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static ulong SideHash(ulong side)
     {
-        return side * _table[(int)BoardSquare.d8][(int)Piece.p];
+        return side * _table[(int)BoardSquare.h8][(int)Piece.p];
     }
 
     /// <summary>
