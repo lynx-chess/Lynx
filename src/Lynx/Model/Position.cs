@@ -688,7 +688,7 @@ public class Position : IDisposable
                     var pieceSquareIndex = whitePawnsCopy.GetLS1BIndex();
                     whitePawnsCopy.ResetLS1B();
 
-                    pawnScore += AdditionalPieceEvaluation(whiteBucket, pieceSquareIndex, (int)Piece.P, (int)Side.White, whiteKing, blackKing, blackPawnAttacks);
+                    pawnScore += PawnAdditionalEvaluation(whiteBucket, pieceSquareIndex, (int)Piece.P, whiteKing, blackKing);
                 }
 
                 // Black pawns
@@ -702,7 +702,7 @@ public class Position : IDisposable
                     var pieceSquareIndex = blackPawnsCopy.GetLS1BIndex();
                     blackPawnsCopy.ResetLS1B();
 
-                    pawnScore -= AdditionalPieceEvaluation(blackBucket, pieceSquareIndex, (int)Piece.p, (int)Side.Black, blackKing, whiteKing, whitePawnAttacks);
+                    pawnScore -= PawnAdditionalEvaluation(blackBucket, pieceSquareIndex, (int)Piece.p, blackKing, whiteKing);
                 }
 
                 entry.Update(KingPawnUniqueIdentifier, pawnScore);
@@ -723,7 +723,7 @@ public class Position : IDisposable
                     bitboard.ResetLS1B();
 
                     gamePhase += GamePhaseByPiece[pieceIndex];
-                    packedScore += AdditionalPieceEvaluation(whiteBucket, pieceSquareIndex, pieceIndex, (int)Side.White, whiteKing, blackKing, blackPawnAttacks);
+                    packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.White, blackKing, blackPawnAttacks);
                 }
             }
 
@@ -742,7 +742,7 @@ public class Position : IDisposable
                     bitboard.ResetLS1B();
 
                     gamePhase += GamePhaseByPiece[pieceIndex];
-                    packedScore -= AdditionalPieceEvaluation(blackBucket, pieceSquareIndex, pieceIndex, (int)Side.Black, blackKing, whiteKing, whitePawnAttacks);
+                    packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.Black, whiteKing, whitePawnAttacks);
                 }
             }
         }
@@ -809,7 +809,7 @@ public class Position : IDisposable
                     _incrementalEvalAccumulator += PSQT(0, whiteBucket, (int)Piece.P, pieceSquareIndex)
                                                 + PSQT(1, blackBucket, (int)Piece.P, pieceSquareIndex);
 
-                    pawnScore += AdditionalPieceEvaluation(whiteBucket, pieceSquareIndex, (int)Piece.P, (int)Side.White, whiteKing, blackKing, blackPawnAttacks);
+                    pawnScore += PawnAdditionalEvaluation(whiteBucket, pieceSquareIndex, (int)Piece.P, whiteKing, blackKing);
                 }
 
                 // Black pawns
@@ -826,7 +826,7 @@ public class Position : IDisposable
                     _incrementalEvalAccumulator += PSQT(0, blackBucket, (int)Piece.p, pieceSquareIndex)
                                                 + PSQT(1, whiteBucket, (int)Piece.p, pieceSquareIndex);
 
-                    pawnScore -= AdditionalPieceEvaluation(blackBucket, pieceSquareIndex, (int)Piece.p, (int)Side.Black, blackKing, whiteKing, whitePawnAttacks);
+                    pawnScore -= PawnAdditionalEvaluation(blackBucket, pieceSquareIndex, (int)Piece.p, blackKing, whiteKing);
                 }
 
                 entry.Update(KingPawnUniqueIdentifier, pawnScore);
@@ -851,7 +851,7 @@ public class Position : IDisposable
 
                     gamePhase += GamePhaseByPiece[pieceIndex];
 
-                    packedScore += AdditionalPieceEvaluation(whiteBucket, pieceSquareIndex, pieceIndex, (int)Side.White, whiteKing, blackKing, blackPawnAttacks);
+                    packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.White, blackKing, blackPawnAttacks);
                 }
             }
 
@@ -874,7 +874,7 @@ public class Position : IDisposable
 
                     gamePhase += GamePhaseByPiece[pieceIndex];
 
-                    packedScore -= AdditionalPieceEvaluation(blackBucket, pieceSquareIndex, pieceIndex, (int)Side.Black, blackKing, whiteKing, whitePawnAttacks);
+                    packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.Black, whiteKing, whitePawnAttacks);
                 }
             }
 
@@ -1037,12 +1037,28 @@ public class Position : IDisposable
     /// <summary>
     /// Doesn't include <see cref="Piece.K"/> and <see cref="Piece.k"/> evaluation
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int AdditionalPieceEvaluation(int bucket, int pieceSquareIndex, int pieceIndex, int pieceSide, int sameSideKingSquare, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+    [Obsolete("Test only")]
+    internal int AdditionalPieceEvaluation_Test(int bucket, int pieceSquareIndex, int pieceIndex, int pieceSide, int sameSideKingSquare, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
     {
         return pieceIndex switch
         {
             (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(bucket, pieceSquareIndex, pieceIndex, sameSideKingSquare, oppositeSideKingSquare),
+            (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
+            _ => 0
+        };
+    }
+
+    /// <summary>
+    /// Doesn't include <see cref="Piece.P"/>, <see cref="Piece.p"/>, <see cref="Piece.K"/> and <see cref="Piece.k"/> evaluation
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int AdditionalPieceEvaluation(int pieceSquareIndex, int pieceIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+    {
+        return pieceIndex switch
+        {
             (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
             (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
             (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
