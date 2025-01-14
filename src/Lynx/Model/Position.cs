@@ -156,16 +156,13 @@ public class Position : IDisposable
 
         var sourcePieceHash = ZobristTable.PieceHash(sourceSquare, piece);
         var targetPieceHash = ZobristTable.PieceHash(targetSquare, newPiece);
-        var sideHash = ZobristTable.SideHash();
 
         UniqueIdentifier ^=
-            sideHash
+            ZobristTable.SideHash()
             ^ sourcePieceHash
             ^ targetPieceHash
             ^ ZobristTable.EnPassantHash((int)EnPassant)            // We clear the existing enpassant square, if any
             ^ ZobristTable.CastleHash(Castle);                      // We clear the existing castle rights
-
-        _kingPawnUniqueIdentifier ^= sideHash;
 
         if (piece == (int)Piece.P || piece == (int)Piece.p)
         {
@@ -549,16 +546,13 @@ public class Position : IDisposable
         Side = (Side)Utils.OppositeSide(Side);
         var oldEnPassant = EnPassant;
         var oldUniqueIdentifier = UniqueIdentifier;
-        var oldKingPawnUniqueIdentifier = _kingPawnUniqueIdentifier;
         EnPassant = BoardSquare.noSquare;
 
         UniqueIdentifier ^=
             ZobristTable.SideHash()
             ^ ZobristTable.EnPassantHash((int)oldEnPassant);
 
-        _kingPawnUniqueIdentifier ^= ZobristTable.SideHash();
-
-        return new GameState(oldUniqueIdentifier, oldKingPawnUniqueIdentifier, _incrementalEvalAccumulator, oldEnPassant, byte.MaxValue, _isIncrementalEval);
+        return new GameState(oldUniqueIdentifier, _kingPawnUniqueIdentifier, _incrementalEvalAccumulator, oldEnPassant, byte.MaxValue, _isIncrementalEval);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
