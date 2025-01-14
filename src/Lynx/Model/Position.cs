@@ -835,12 +835,14 @@ public class Position : IDisposable
         int packedBonus = 0;
 
         var rank = Constants.Rank[squareIndex];
+        var semiRank = SemiRank[squareIndex];
         var oppositeSide = (int)Side.Black;
 
         if (pieceIndex == (int)Piece.p)
         {
             rank = 7 - rank;
             oppositeSide = (int)Side.White;
+            semiRank = SemiRank[squareIndex ^ 56];
         }
 
         // Isolated pawn
@@ -856,8 +858,8 @@ public class Position : IDisposable
             // Passed pawn without opponent pieces ahead (in its passed pawn mask)
             if ((passedPawnsMask & OccupancyBitBoards[oppositeSide]) == 0)
             {
-                packedBonus += PassedPawnBonusNoEnemiesAheadBonus[bucket][rank];
-                packedBonus += PassedPawnBonusNoEnemiesAheadEnemyBonus[oppositeSideBucket][rank];
+                packedBonus += PassedPawnBonusNoEnemiesAheadBonus[bucket][semiRank];
+                packedBonus += PassedPawnBonusNoEnemiesAheadEnemyBonus[oppositeSideBucket][semiRank];
             }
 
             // King distance to passed pawn
@@ -866,8 +868,8 @@ public class Position : IDisposable
             // Enemy king distance to passed pawn
             var enemyKingDistance = Constants.ChebyshevDistance[squareIndex][oppositeSideKingSquare];
 
-            packedBonus += PassedPawnBonus[bucket][rank]
-                + PassedPawnEnemyBonus[oppositeSideBucket][rank]
+            packedBonus += PassedPawnBonus[bucket][semiRank]
+                + PassedPawnEnemyBonus[oppositeSideBucket][semiRank]
                 + FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance]
                 + EnemyKingDistanceToPassedPawnPenalty[enemyKingDistance];
         }

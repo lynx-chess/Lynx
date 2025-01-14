@@ -10,7 +10,6 @@ public static class EvaluationPSQTs
 {
     public const int PSQTBucketCount = 23;
 
-#pragma warning disable S4663 // Comments should not be empty - comes from C++
     public static ReadOnlySpan<int> PSQTBucketLayout =>
     [
         15, 16, 17, 18, 19, 20, 21, 22,
@@ -20,9 +19,20 @@ public static class EvaluationPSQTs
         15, 8, 9, 10, 11, 12, 13, 14,
         15, 8, 9, 10, 11, 12, 13, 14,
         0, 8, 9, 10, 11, 12, 13, 14,
-        0, 1, 2, 3, 4, 5, 6, 7, //
+        0, 1, 2, 3, 4, 5, 6, 7
     ];
-#pragma warning restore S4663 // Comments should not be empty
+
+    public static ReadOnlySpan<int> SemiRank =>
+    [
+        -1, -1, -1, -1, -1, -1, -1, -1,
+        10, 10, 10, 10, 11, 11, 11, 11,
+        8, 8, 8, 8, 9, 9, 9, 9,
+        6, 6, 6, 6, 7, 7, 7, 7,
+        4, 4, 4, 4, 5, 5, 5, 5,
+        2, 2, 2, 2, 3, 3, 3, 3,
+        0, 0, 0, 0, 1, 1, 1, 1, 1,
+        -1, -1, -1, -1, -1, -1, -1,
+    ];
 
     /// <summary>
     /// 2 x PSQTBucketCount x 12 x 64
