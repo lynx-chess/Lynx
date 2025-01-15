@@ -52,6 +52,16 @@ public static class ZobristTable
     }
 
     /// <summary>
+    /// Uses <see cref="Piece.p"/> and <see cref="BoardSquare.h8"/>.
+    /// Differenciates white and black sides
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static ulong SideHash(ulong side)
+    {
+        return side * _table[(int)BoardSquare.h8][(int)Piece.p];
+    }
+
+    /// <summary>
     /// Uses <see cref="Piece.p"/> and
     /// <see cref="BoardSquare.a8"/> for <see cref="CastlingRights.WK"/>, <see cref="BoardSquare.b8"/> for <see cref="CastlingRights.WQ"/>
     /// <see cref="BoardSquare.c8"/> for <see cref="CastlingRights.BK"/>, <see cref="BoardSquare.d8"/> for <see cref="CastlingRights.BQ"/>
@@ -109,7 +119,7 @@ public static class ZobristTable
         }
 
         positionHash ^= EnPassantHash((int)position.EnPassant)
-            ^ SideHash()
+            ^ SideHash((ulong)position.Side)
             ^ CastleHash(position.Castle);
 
         return positionHash;

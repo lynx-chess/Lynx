@@ -367,7 +367,7 @@ public class Position : IDisposable
         Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
 
         UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
-
+        
         return new GameState(uniqueIdentifierCopy, incrementalEvalAccumulatorCopy, enpassantCopy, castleCopy, isIncrementalEvalCopy);
     }
 
