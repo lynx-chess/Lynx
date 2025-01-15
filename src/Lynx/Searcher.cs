@@ -359,12 +359,22 @@ public sealed class Searcher
 
                 if (finalSearchResult is not null)
                 {
+                    var totalNodes = finalSearchResult.Nodes;
+                    var totalTime = finalSearchResult.Time;
+
                     foreach (var extraResult in extraResults)
                     {
-                        finalSearchResult.Nodes += extraResult?.Nodes ?? 0;
+                        totalNodes += extraResult?.Nodes ?? 0;
+
+                        if (extraResult?.Depth > finalSearchResult.Depth
+                            && extraResult.BestMove != 0)
+                        {
+                            finalSearchResult = extraResult;
+                        }
                     }
 
-                    finalSearchResult.NodesPerSecond = Utils.CalculateNps(finalSearchResult.Nodes, 0.001 * finalSearchResult.Time);
+                    finalSearchResult.Nodes = totalNodes;
+                    finalSearchResult.NodesPerSecond = Utils.CalculateNps(totalNodes, 0.001 * totalTime);
 
 #if MULTITHREAD_DEBUG
                     _logger.Debug("End of multithread calculations, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
