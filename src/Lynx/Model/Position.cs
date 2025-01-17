@@ -123,13 +123,6 @@ public class Position : IDisposable
         int piece = move.Piece();
         int promotedPiece = move.PromotedPiece();
 
-        // King (and castling) moves require calculating king buckets twice, so skipping incremetal eval for those cases for now
-        _isIncrementalEval = _isIncrementalEval
-            && !(piece == (int)Piece.K
-                || piece == (int)Piece.k
-                //|| move.IsCastle()    // Not needed for now, see CastlingMovesAreKingMoves test
-                );
-
         var newPiece = piece;
         if (promotedPiece != default)
         {
@@ -166,6 +159,10 @@ public class Position : IDisposable
         }
         else if (piece == (int)Piece.K || piece == (int)Piece.k)
         {
+            // King (and castling) moves require calculating king buckets twice and recalculating all related parameters, so skipping incremental eval for those cases for now
+            // No need to check for move.IsCastle(), see CastlingMovesAreKingMoves test
+            _isIncrementalEval = false;
+
             _kingPawnUniqueIdentifier ^=
                 sourcePieceHash
                 ^ targetPieceHash;
