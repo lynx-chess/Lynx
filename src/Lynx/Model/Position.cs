@@ -18,6 +18,8 @@ public class Position : IDisposable
 
     public ulong UniqueIdentifier { get; private set; }
 
+    private ulong _kingPawnUniqueIdentifier;
+
     /// <summary>
     /// Use <see cref="Piece"/> as index
     /// </summary>
@@ -68,6 +70,7 @@ public class Position : IDisposable
 
 #pragma warning disable S3366 // "this" should not be exposed from constructors
         UniqueIdentifier = ZobristTable.PositionHash(this);
+        _kingPawnUniqueIdentifier = ZobristTable.PawnKingHash(this);
 #pragma warning restore S3366 // "this" should not be exposed from constructors
 
         _isIncrementalEval = false;
@@ -80,6 +83,7 @@ public class Position : IDisposable
     public Position(Position position)
     {
         UniqueIdentifier = position.UniqueIdentifier;
+        _kingPawnUniqueIdentifier = position._kingPawnUniqueIdentifier;
         PieceBitBoards = ArrayPool<BitBoard>.Shared.Rent(12);
         Array.Copy(position.PieceBitBoards, PieceBitBoards, position.PieceBitBoards.Length);
 
@@ -105,6 +109,7 @@ public class Position : IDisposable
         byte castleCopy = Castle;
         BoardSquare enpassantCopy = EnPassant;
         ulong uniqueIdentifierCopy = UniqueIdentifier;
+        ulong kingPawnKeyUniqueIdentifierCopy = _kingPawnUniqueIdentifier;
         int incrementalEvalAccumulatorCopy = _incrementalEvalAccumulator;
         // We also save a copy of _isIncrementalEval, so that current move doesn't affect 'sibling' moves exploration
         bool isIncrementalEvalCopy = _isIncrementalEval;
@@ -139,12 +144,32 @@ public class Position : IDisposable
         OccupancyBitBoards[oldSide].SetBit(targetSquare);
         Board[targetSquare] = newPiece;
 
+        var sourcePieceHash = ZobristTable.PieceHash(sourceSquare, piece);
+        var targetPieceHash = ZobristTable.PieceHash(targetSquare, newPiece);
+
         UniqueIdentifier ^=
             ZobristTable.SideHash()
-            ^ ZobristTable.PieceHash(sourceSquare, piece)
-            ^ ZobristTable.PieceHash(targetSquare, newPiece)
+            ^ sourcePieceHash
+            ^ targetPieceHash
             ^ ZobristTable.EnPassantHash((int)EnPassant)            // We clear the existing enpassant square, if any
             ^ ZobristTable.CastleHash(Castle);                      // We clear the existing castle rights
+
+        if (piece == (int)Piece.P || piece == (int)Piece.p)
+        {
+            _kingPawnUniqueIdentifier ^= sourcePieceHash;
+
+            // In case of promotion, the promoted piece won't be a pawn or a king, so no need to update the key with it
+            if (promotedPiece == default)
+            {
+                _kingPawnUniqueIdentifier ^= targetPieceHash;
+            }
+        }
+        else if (piece == (int)Piece.K || piece == (int)Piece.k)
+        {
+            _kingPawnUniqueIdentifier ^=
+                sourcePieceHash
+                ^ targetPieceHash;
+        }
 
         EnPassant = BoardSquare.noSquare;
 
@@ -180,7 +205,15 @@ public class Position : IDisposable
 
                             PieceBitBoards[capturedPiece].PopBit(capturedSquare);
                             OccupancyBitBoards[oppositeSide].PopBit(capturedSquare);
-                            UniqueIdentifier ^= ZobristTable.PieceHash(capturedSquare, capturedPiece);
+
+                            var capturedPieceHash = ZobristTable.PieceHash(capturedSquare, capturedPiece);
+                            UniqueIdentifier ^= capturedPieceHash;
+
+                            // Kings can't be captured
+                            if (capturedPiece == (int)Piece.P || capturedPiece == (int)Piece.p)
+                            {
+                                _kingPawnUniqueIdentifier ^= capturedPieceHash;
+                            }
 
                             _incrementalEvalAccumulator -= PSQT(0, opposideSideBucket, capturedPiece, capturedSquare);
                             _incrementalEvalAccumulator -= PSQT(1, sameSideBucket, capturedPiece, capturedSquare);
@@ -262,7 +295,10 @@ public class Position : IDisposable
                         PieceBitBoards[capturedPiece].PopBit(capturedSquare);
                         OccupancyBitBoards[oppositeSide].PopBit(capturedSquare);
                         Board[capturedSquare] = (int)Piece.None;
-                        UniqueIdentifier ^= ZobristTable.PieceHash(capturedSquare, capturedPiece);
+
+                        var capturedPawnHash = ZobristTable.PieceHash(capturedSquare, capturedPiece);
+                        UniqueIdentifier ^= capturedPawnHash;
+                        _kingPawnUniqueIdentifier ^= capturedPawnHash;
 
                         _incrementalEvalAccumulator -= PSQT(0, opposideSideBucket, capturedPiece, capturedSquare);
                         _incrementalEvalAccumulator -= PSQT(1, sameSideBucket, capturedPiece, capturedSquare);
@@ -285,7 +321,15 @@ public class Position : IDisposable
 
                             PieceBitBoards[capturedPiece].PopBit(capturedSquare);
                             OccupancyBitBoards[oppositeSide].PopBit(capturedSquare);
-                            UniqueIdentifier ^= ZobristTable.PieceHash(capturedSquare, capturedPiece);
+
+                            ulong capturedPieceHash = ZobristTable.PieceHash(capturedSquare, capturedPiece);
+                            UniqueIdentifier ^= capturedPieceHash;
+
+                            // Kings can't be captured
+                            if (capturedPiece == (int)Piece.P || capturedPiece == (int)Piece.p)
+                            {
+                                _kingPawnUniqueIdentifier ^= capturedPieceHash;
+                            }
                         }
 
                         break;
@@ -352,7 +396,10 @@ public class Position : IDisposable
                         PieceBitBoards[capturedPiece].PopBit(capturedSquare);
                         OccupancyBitBoards[oppositeSide].PopBit(capturedSquare);
                         Board[capturedSquare] = (int)Piece.None;
-                        UniqueIdentifier ^= ZobristTable.PieceHash(capturedSquare, capturedPiece);
+
+                        ulong capturedPawnHash = ZobristTable.PieceHash(capturedSquare, capturedPiece);
+                        UniqueIdentifier ^= capturedPawnHash;
+                        _kingPawnUniqueIdentifier ^= capturedPawnHash;
 
                         break;
                     }
@@ -367,8 +414,12 @@ public class Position : IDisposable
         Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
 
         UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
-        
-        return new GameState(uniqueIdentifierCopy, incrementalEvalAccumulatorCopy, enpassantCopy, castleCopy, isIncrementalEvalCopy);
+
+        // Asserts won't work due to PassedPawnBonusNoEnemiesAheadBonus
+        //Debug.Assert(ZobristTable.PositionHash(this) != UniqueIdentifier && WasProduceByAValidMove());
+        //Debug.Assert(ZobristTable.PawnKingHash(this) != _kingPawnUniqueIdentifier && WasProduceByAValidMove());
+
+        return new GameState(uniqueIdentifierCopy, kingPawnKeyUniqueIdentifierCopy, incrementalEvalAccumulatorCopy, enpassantCopy, castleCopy, isIncrementalEvalCopy);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -469,6 +520,7 @@ public class Position : IDisposable
         Castle = gameState.Castle;
         EnPassant = gameState.EnPassant;
         UniqueIdentifier = gameState.ZobristKey;
+        _kingPawnUniqueIdentifier = gameState.KingPawnKey;
         _incrementalEvalAccumulator = gameState.IncremetalEvalAccumulator;
         _isIncrementalEval = gameState.IsIncrementalEval;
     }
@@ -485,7 +537,7 @@ public class Position : IDisposable
             ZobristTable.SideHash()
             ^ ZobristTable.EnPassantHash((int)oldEnPassant);
 
-        return new GameState(oldUniqueIdentifier, _incrementalEvalAccumulator, oldEnPassant, byte.MaxValue, _isIncrementalEval);
+        return new GameState(oldUniqueIdentifier, _kingPawnUniqueIdentifier, _incrementalEvalAccumulator, oldEnPassant, byte.MaxValue, _isIncrementalEval);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -494,6 +546,7 @@ public class Position : IDisposable
         Side = (Side)Utils.OppositeSide(Side);
         EnPassant = gameState.EnPassant;
         UniqueIdentifier = gameState.ZobristKey;
+        _kingPawnUniqueIdentifier = gameState.KingPawnKey;
         _incrementalEvalAccumulator = gameState.IncremetalEvalAccumulator;
         _isIncrementalEval = gameState.IsIncrementalEval;
     }
@@ -539,8 +592,25 @@ public class Position : IDisposable
     /// Evaluates material and position in a NegaMax style.
     /// That is, positive scores always favour playing <see cref="Side"/>.
     /// </summary>
+    public (int Score, int Phase) StaticEvaluation() => StaticEvaluation(0);
+
+    /// <summary>
+    /// Evaluates material and position in a NegaMax style.
+    /// That is, positive scores always favour playing <see cref="Side"/>.
+    /// </summary>
+    public (int Score, int Phase) StaticEvaluation(int movesWithoutCaptureOrPawnMove)
+    {
+        var kingPawnTable = new PawnTableElement[Constants.KingPawnHashSize];
+
+        return StaticEvaluation(movesWithoutCaptureOrPawnMove, kingPawnTable);
+    }
+
+    /// <summary>
+    /// Evaluates material and position in a NegaMax style.
+    /// That is, positive scores always favour playing <see cref="Side"/>.
+    /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public (int Score, int Phase) StaticEvaluation(int movesWithoutCaptureOrPawnMove = 0)
+    public (int Score, int Phase) StaticEvaluation(int movesWithoutCaptureOrPawnMove, PawnTableElement[] pawnEvalTable)
     {
         //var result = OnlineTablebaseProber.EvaluationSearch(this, movesWithoutCaptureOrPawnMove, cancellationToken);
         //Debug.Assert(result < CheckMateBaseEvaluation, $"position {FEN()} returned tb eval out of bounds: {result}");
@@ -570,8 +640,61 @@ public class Position : IDisposable
         {
             packedScore = _incrementalEvalAccumulator;
 
-            // White pieces additional eval, except king
-            for (int pieceIndex = (int)Piece.P; pieceIndex < (int)Piece.K; ++pieceIndex)
+            var kingPawnIndex = _kingPawnUniqueIdentifier & Constants.KingPawnHashMask;
+            ref var entry = ref pawnEvalTable[kingPawnIndex];
+
+            // pawnEvalTable hit: We can reuse cached eval for pawn additional evaluation + PieceProtectedByPawnBonus + KingShieldBonus
+            if (entry.Key == _kingPawnUniqueIdentifier)
+            {
+                packedScore += entry.PackedScore;
+            }
+            // Not hit in pawnEvalTable table
+            else
+            {
+                var pawnScore = 0;
+
+                // White pawns
+
+                // King pawn shield bonus
+                pawnScore += KingPawnShield(whiteKing, whitePawns);
+
+                // Pieces protected by pawns bonus
+                pawnScore += PieceProtectedByPawnBonus[whiteBucket][(int)Piece.P] * (whitePawnAttacks & whitePawns).CountBits();
+
+                // Bitboard copy that we 'empty'
+                var whitePawnsCopy = whitePawns;
+                while (whitePawnsCopy != default)
+                {
+                    var pieceSquareIndex = whitePawnsCopy.GetLS1BIndex();
+                    whitePawnsCopy.ResetLS1B();
+
+                    pawnScore += PawnAdditionalEvaluation(whiteBucket, blackBucket, pieceSquareIndex, (int)Piece.P, whiteKing, blackKing);
+                }
+
+                // Black pawns
+
+                // King pawn shield bonus
+                pawnScore -= KingPawnShield(blackKing, blackPawns);
+
+                // Pieces protected by pawns bonus
+                pawnScore -= PieceProtectedByPawnBonus[blackBucket][(int)Piece.P] * (blackPawnAttacks & blackPawns).CountBits();
+
+                // Bitboard copy that we 'empty'
+                var blackPawnsCopy = blackPawns;
+                while (blackPawnsCopy != default)
+                {
+                    var pieceSquareIndex = blackPawnsCopy.GetLS1BIndex();
+                    blackPawnsCopy.ResetLS1B();
+
+                    pawnScore -= PawnAdditionalEvaluation(blackBucket, whiteBucket, pieceSquareIndex, (int)Piece.p, blackKing, whiteKing);
+                }
+
+                entry.Update(_kingPawnUniqueIdentifier, pawnScore);
+                packedScore += pawnScore;
+            }
+
+            // White pieces additional eval and pawn attacks, except pawn and king
+            for (int pieceIndex = (int)Piece.N; pieceIndex < (int)Piece.K; ++pieceIndex)
             {
                 // Bitboard copy that we 'empty'
                 var bitboard = PieceBitBoards[pieceIndex];
@@ -584,12 +707,12 @@ public class Position : IDisposable
                     bitboard.ResetLS1B();
 
                     gamePhase += GamePhaseByPiece[pieceIndex];
-                    packedScore += AdditionalPieceEvaluation(whiteBucket, blackBucket, pieceSquareIndex, pieceIndex, (int)Side.White, whiteKing, blackKing, blackPawnAttacks);
+                    packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.White, blackKing, blackPawnAttacks);
                 }
             }
 
-            // Black pieces additional eval, except king
-            for (int pieceIndex = (int)Piece.p; pieceIndex < (int)Piece.k; ++pieceIndex)
+            // Black pieces additional eval and pawn attacks, except pawn and king
+            for (int pieceIndex = (int)Piece.n; pieceIndex < (int)Piece.k; ++pieceIndex)
             {
                 // Bitboard copy that we 'empty'
                 var bitboard = PieceBitBoards[pieceIndex];
@@ -603,7 +726,7 @@ public class Position : IDisposable
                     bitboard.ResetLS1B();
 
                     gamePhase += GamePhaseByPiece[pieceIndex];
-                    packedScore -= AdditionalPieceEvaluation(blackBucket, whiteBucket, pieceSquareIndex, pieceIndex, (int)Side.Black, blackKing, whiteKing, whitePawnAttacks);
+                    packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.Black, whiteKing, whitePawnAttacks);
                 }
             }
         }
@@ -611,8 +734,99 @@ public class Position : IDisposable
         {
             _incrementalEvalAccumulator = 0;
 
-            // White pieces PSQTs and additional eval, except king
-            for (int pieceIndex = (int)Piece.P; pieceIndex < (int)Piece.K; ++pieceIndex)
+            var kingPawnIndex = _kingPawnUniqueIdentifier & Constants.KingPawnHashMask;
+            ref var entry = ref pawnEvalTable[kingPawnIndex];
+
+            // pawnTable hit: We can reuse cached eval for pawn additional evaluation + PieceProtectedByPawnBonus + KingShieldBonus
+            if (entry.Key == _kingPawnUniqueIdentifier)
+            {
+                packedScore += entry.PackedScore;
+
+                // White pawns
+                // No PieceProtectedByPawnBonus - included in pawn table | packedScore += PieceProtectedByPawnBonus[...]
+
+                // Bitboard copy that we 'empty'
+                var whitePawnsCopy = PieceBitBoards[(int)Piece.P];
+                while (whitePawnsCopy != default)
+                {
+                    var pieceSquareIndex = whitePawnsCopy.GetLS1BIndex();
+                    whitePawnsCopy.ResetLS1B();
+
+                    _incrementalEvalAccumulator += PSQT(0, whiteBucket, (int)Piece.P, pieceSquareIndex)
+                                                + PSQT(1, blackBucket, (int)Piece.P, pieceSquareIndex);
+
+                    // No incremental eval - included in pawn table | packedScore += AdditionalPieceEvaluation(...);
+                }
+
+                // Black pawns
+                // No PieceProtectedByPawnBonus - included in pawn table | packedScore -= PieceProtectedByPawnBonus .Length[...]
+
+                // Bitboard copy that we 'empty'
+                var blackPawnsCopy = PieceBitBoards[(int)Piece.p];
+                while (blackPawnsCopy != default)
+                {
+                    var pieceSquareIndex = blackPawnsCopy.GetLS1BIndex();
+                    blackPawnsCopy.ResetLS1B();
+
+                    _incrementalEvalAccumulator += PSQT(0, blackBucket, (int)Piece.p, pieceSquareIndex)
+                                                + PSQT(1, whiteBucket, (int)Piece.p, pieceSquareIndex);
+
+                    // No incremental eval - included in pawn table | packedScore -= AdditionalPieceEvaluation(...);
+                }
+            }
+            // Not hit in pawnTable table
+            else
+            {
+                var pawnScore = 0;
+
+                // White pawns
+
+                // King pawn shield bonus
+                pawnScore += KingPawnShield(whiteKing, whitePawns);
+
+                // Pieces protected by pawns bonus
+                pawnScore += PieceProtectedByPawnBonus[whiteBucket][(int)Piece.P] * (whitePawnAttacks & whitePawns).CountBits();
+
+                // Bitboard copy that we 'empty'
+                var whitePawnsCopy = PieceBitBoards[(int)Piece.P];
+                while (whitePawnsCopy != default)
+                {
+                    var pieceSquareIndex = whitePawnsCopy.GetLS1BIndex();
+                    whitePawnsCopy.ResetLS1B();
+
+                    _incrementalEvalAccumulator += PSQT(0, whiteBucket, (int)Piece.P, pieceSquareIndex)
+                                                + PSQT(1, blackBucket, (int)Piece.P, pieceSquareIndex);
+
+                    pawnScore += PawnAdditionalEvaluation(whiteBucket, blackBucket, pieceSquareIndex, (int)Piece.P, whiteKing, blackKing);
+                }
+
+                // Black pawns
+
+                // King pawn shield bonus
+                pawnScore -= KingPawnShield(blackKing, blackPawns);
+
+                // Pieces protected by pawns bonus
+                pawnScore -= PieceProtectedByPawnBonus[blackBucket][(int)Piece.P] * (blackPawnAttacks & blackPawns).CountBits();
+
+                // Bitboard copy that we 'empty'
+                var blackPawnsCopy = PieceBitBoards[(int)Piece.p];
+                while (blackPawnsCopy != default)
+                {
+                    var pieceSquareIndex = blackPawnsCopy.GetLS1BIndex();
+                    blackPawnsCopy.ResetLS1B();
+
+                    _incrementalEvalAccumulator += PSQT(0, blackBucket, (int)Piece.p, pieceSquareIndex)
+                                                + PSQT(1, whiteBucket, (int)Piece.p, pieceSquareIndex);
+
+                    pawnScore -= PawnAdditionalEvaluation(blackBucket, whiteBucket, pieceSquareIndex, (int)Piece.p, blackKing, whiteKing);
+                }
+
+                entry.Update(_kingPawnUniqueIdentifier, pawnScore);
+                packedScore += pawnScore;
+            }
+
+            // White pieces PSQTs and additional eval and pawn attacks, except king and pawn
+            for (int pieceIndex = (int)Piece.N; pieceIndex < (int)Piece.K; ++pieceIndex)
             {
                 // Bitboard copy that we 'empty'
                 var bitboard = PieceBitBoards[pieceIndex];
@@ -629,12 +843,12 @@ public class Position : IDisposable
 
                     gamePhase += GamePhaseByPiece[pieceIndex];
 
-                    packedScore += AdditionalPieceEvaluation(whiteBucket, blackBucket, pieceSquareIndex, pieceIndex, (int)Side.White, whiteKing, blackKing, blackPawnAttacks);
+                    packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.White, blackKing, blackPawnAttacks);
                 }
             }
 
-            // Black pieces PSQTs and additional eval, except king
-            for (int pieceIndex = (int)Piece.p; pieceIndex < (int)Piece.k; ++pieceIndex)
+            // Black pieces PSQTs and additional eval and pawn attacks, except king and pawn
+            for (int pieceIndex = (int)Piece.n; pieceIndex < (int)Piece.k; ++pieceIndex)
             {
                 // Bitboard copy that we 'empty'
                 var bitboard = PieceBitBoards[pieceIndex];
@@ -652,7 +866,7 @@ public class Position : IDisposable
 
                     gamePhase += GamePhaseByPiece[pieceIndex];
 
-                    packedScore -= AdditionalPieceEvaluation(blackBucket, whiteBucket, pieceSquareIndex, pieceIndex, (int)Side.Black, blackKing, whiteKing, whitePawnAttacks);
+                    packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.Black, whiteKing, whitePawnAttacks);
                 }
             }
 
@@ -813,14 +1027,31 @@ public class Position : IDisposable
     }
 
     /// <summary>
-    /// Doesn't include <see cref="Piece.K"/> and <see cref="Piece.k"/> evaluation
+    /// Doesn't include <see cref="Piece.P"/>, <see cref="Piece.p"/>, <see cref="Piece.K"/> and <see cref="Piece.k"/> evaluation
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int AdditionalPieceEvaluation(int pieceSquareIndex, int pieceIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+    {
+        return pieceIndex switch
+        {
+            (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
+            _ => 0
+        };
+    }
+
+    /// <summary>
+    /// Doesn't include <see cref="Piece.K"/> and <see cref="Piece.k"/> evaluation
+    /// </summary>
+    [Obsolete("Test only")]
     internal int AdditionalPieceEvaluation(int bucket, int oppositeSideBucket, int pieceSquareIndex, int pieceIndex, int pieceSide, int sameSideKingSquare, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
     {
         return pieceIndex switch
         {
             (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(bucket, oppositeSideBucket, pieceSquareIndex, pieceIndex, sameSideKingSquare, oppositeSideKingSquare),
+
             (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
             (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
             (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
@@ -1034,10 +1265,17 @@ public class Position : IDisposable
             }
         }
 
-        // King shield
-        var ownPiecesAroundCount = (Attacks.KingAttacks[squareIndex] & PieceBitBoards[(int)Piece.P + kingSideOffset]).CountBits();
+        // Pawn king shield included next to pawn additional eval
 
-        return packedBonus + (ownPiecesAroundCount * KingShieldBonus);
+        return packedBonus;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int KingPawnShield(int squareIndex, BitBoard sameSidePawns)
+    {
+        var ownPawnsAroundKingCount = (Attacks.KingAttacks[squareIndex] & sameSidePawns).CountBits();
+
+        return ownPawnsAroundKingCount * KingShieldBonus;
     }
 
     /// <summary>
