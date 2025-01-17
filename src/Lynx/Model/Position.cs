@@ -658,7 +658,7 @@ public class Position : IDisposable
             var kingPawnIndex = _kingPawnUniqueIdentifier & Constants.KingPawnHashMask;
             ref var entry = ref pawnEvalTable[kingPawnIndex];
 
-            // pawnEvalTable hit: We can reuse cached eval for pawn additional evaluation + PieceProtectedByPawnBonus
+            // pawnEvalTable hit: We can reuse cached eval for pawn additional evaluation + PieceProtectedByPawnBonus + KingShieldBonus
             if (entry.Key == _kingPawnUniqueIdentifier)
             {
                 packedScore += entry.PackedScore;
@@ -669,6 +669,10 @@ public class Position : IDisposable
                 var pawnScore = 0;
 
                 // White pawns
+
+                // King pawn shield bonus
+                pawnScore += KingPawnShield(whiteKing, whitePawns);
+
                 // Pieces protected by pawns bonus
                 pawnScore += PieceProtectedByPawnBonus[whiteBucket][(int)Piece.P] * (whitePawnAttacks & whitePawns).CountBits();
 
@@ -683,6 +687,10 @@ public class Position : IDisposable
                 }
 
                 // Black pawns
+
+                // King pawn shield bonus
+                pawnScore -= KingPawnShield(blackKing, blackPawns);
+
                 // Pieces protected by pawns bonus
                 pawnScore -= PieceProtectedByPawnBonus[blackBucket][(int)Piece.P] * (blackPawnAttacks & blackPawns).CountBits();
 
@@ -744,7 +752,7 @@ public class Position : IDisposable
             var kingPawnIndex = _kingPawnUniqueIdentifier & Constants.KingPawnHashMask;
             ref var entry = ref pawnEvalTable[kingPawnIndex];
 
-            // pawnTable hit: We can reuse cached eval for pawn additional evaluation + PieceProtectedByPawnBonus
+            // pawnTable hit: We can reuse cached eval for pawn additional evaluation + PieceProtectedByPawnBonus + KingShieldBonus
             if (entry.Key == _kingPawnUniqueIdentifier)
             {
                 packedScore += entry.PackedScore;
@@ -787,6 +795,10 @@ public class Position : IDisposable
                 var pawnScore = 0;
 
                 // White pawns
+
+                // King pawn shield bonus
+                pawnScore += KingPawnShield(whiteKing, whitePawns);
+
                 // Pieces protected by pawns bonus
                 pawnScore += PieceProtectedByPawnBonus[whiteBucket][(int)Piece.P] * (whitePawnAttacks & whitePawns).CountBits();
 
@@ -804,6 +816,10 @@ public class Position : IDisposable
                 }
 
                 // Black pawns
+
+                // King pawn shield bonus
+                pawnScore -= KingPawnShield(blackKing, blackPawns);
+
                 // Pieces protected by pawns bonus
                 pawnScore -= PieceProtectedByPawnBonus[blackBucket][(int)Piece.P] * (blackPawnAttacks & blackPawns).CountBits();
 
@@ -1264,10 +1280,17 @@ public class Position : IDisposable
             }
         }
 
-        // King shield
-        var ownPiecesAroundCount = (Attacks.KingAttacks[squareIndex] & PieceBitBoards[(int)Piece.P + kingSideOffset]).CountBits();
+        // Pawn king shield included next to pawn additional eval
 
-        return packedBonus + (ownPiecesAroundCount * KingShieldBonus);
+        return packedBonus;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int KingPawnShield(int squareIndex, BitBoard sameSidePawns)
+    {
+        var ownPawnsAroundKingCount = (Attacks.KingAttacks[squareIndex] & sameSidePawns).CountBits();
+
+        return ownPawnsAroundKingCount * KingShieldBonus;
     }
 
     /// <summary>
