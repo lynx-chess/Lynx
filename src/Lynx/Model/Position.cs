@@ -97,7 +97,7 @@ public class Position : IDisposable
         Castle = position.Castle;
         EnPassant = position.EnPassant;
 
-        _isIncrementalEval = true;
+        _isIncrementalEval = position._isIncrementalEval;
         _incrementalEvalAccumulator = position._incrementalEvalAccumulator;
     }
 
