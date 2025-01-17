@@ -160,8 +160,8 @@ public class Position : IDisposable
         else if (piece == (int)Piece.K || piece == (int)Piece.k)
         {
             // King (and castling) moves require calculating king buckets twice and recalculating all related parameters, so skipping incremental eval for those cases for now
-            // Not needed to check for move.IsCastle(), see CastlingMovesAreKingMoves test
-            _isIncrementalEval = false; //|| move.IsCastle()
+            // No need to check for move.IsCastle(), see CastlingMovesAreKingMoves test
+            _isIncrementalEval = false;
 
             _kingPawnUniqueIdentifier ^=
                 sourcePieceHash
