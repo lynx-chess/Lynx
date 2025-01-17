@@ -10,20 +10,30 @@ public readonly struct GameState
 
     public readonly int IncremetalEvalAccumulator;
 
+    public readonly int KingPawnStructureEval;
+
     public readonly BoardSquare EnPassant;
 
     public readonly byte Castle;
 
     public readonly bool IsIncrementalEval;
 
-    public GameState(ulong zobristKey, ulong kingPawnKey, int incrementalEvalAccumulator, BoardSquare enpassant, byte castle, bool isIncrementalEval)
+    public readonly bool IsSameKingPawnStructure;
+
+    public GameState(
+        ulong zobristKey, ulong kingPawnKey,
+        int incrementalEvalAccumulator, int kingPawnStructureEval,
+        BoardSquare enpassant, byte castle,
+        bool isIncrementalEval, bool isSameKingPawnStructure)
     {
         ZobristKey = zobristKey;
         KingPawnKey = kingPawnKey;
         IncremetalEvalAccumulator = incrementalEvalAccumulator;
+        KingPawnStructureEval = kingPawnStructureEval;
         EnPassant = enpassant;
         Castle = castle;
         IsIncrementalEval = isIncrementalEval;
+        IsSameKingPawnStructure = isSameKingPawnStructure;
     }
 }
 
