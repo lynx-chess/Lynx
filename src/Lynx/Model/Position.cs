@@ -690,9 +690,8 @@ public class Position : IDisposable
                 }
 
                 // Doubled pawns (white and black)
-                pawnScore += DoubledPawnPenalty * (
-                    (whitePawns & whitePawns.ShiftUp()).CountBits()
-                    - (blackPawns & blackPawns.ShiftUp()).CountBits());
+                pawnScore += (DoubledPawnPenalty[whiteBucket] * (whitePawns & whitePawns.ShiftUp()).CountBits())
+                    - (DoubledPawnPenalty[blackBucket] * (blackPawns & blackPawns.ShiftUp()).CountBits());
 
                 entry.Update(_kingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
@@ -827,9 +826,8 @@ public class Position : IDisposable
                 }
 
                 // Doubled pawns (white and black)
-                pawnScore += DoubledPawnPenalty * (
-                    (whitePawns & whitePawns.ShiftUp()).CountBits()
-                    - (blackPawns & blackPawns.ShiftUp()).CountBits());
+                pawnScore += (DoubledPawnPenalty[whiteBucket] * (whitePawns & whitePawns.ShiftUp()).CountBits())
+                    - (DoubledPawnPenalty[blackBucket] * (blackPawns & blackPawns.ShiftUp()).CountBits());
 
                 entry.Update(_kingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
