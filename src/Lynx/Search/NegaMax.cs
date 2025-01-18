@@ -559,15 +559,13 @@ public sealed partial class Engine
         }
 
         ShortMove ttBestMove = ttProbeResult.BestMove;
-
         _maxDepthReached[ply] = ply;
 
         /*
-        var staticEval = ttHit
-            ? ttProbeResult.StaticEval
-            : position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _kingPawnHashTable).Score;
+            var staticEval = ttHit
+                ? ttProbeResult.StaticEval
+                : position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _kingPawnHashTable).Score;
         */
-
         var staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
         Debug.Assert(staticEval != EvaluationConstants.NoHashEntry, "Assertion failed", "All TT entries should have a static eval");
 
@@ -580,11 +578,16 @@ public sealed partial class Engine
             ? ttScore
             : staticEval;
 
-        // Beta-cutoff (updating alpha after this check)
-        if (eval >= beta)
+        var isInCheck = position.IsInCheck();
+
+        if (!isInCheck)
         {
-            PrintMessage(ply - 1, "Pruning before starting quiescence search");
-            return eval;
+            // Standing pat beta-cutoff (updating alpha after this check)
+            if (eval >= beta)
+            {
+                PrintMessage(ply - 1, "Pruning before starting quiescence search");
+                return eval;
+            }
         }
 
         // Better move
