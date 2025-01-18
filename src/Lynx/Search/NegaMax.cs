@@ -558,8 +558,8 @@ public sealed partial class Engine
             return ttScore;
         }
 
-        _maxDepthReached[ply] = ply;
         ShortMove ttBestMove = ttProbeResult.BestMove;
+        _maxDepthReached[ply] = ply;
 
         /*
             var staticEval = ttHit
@@ -571,15 +571,14 @@ public sealed partial class Engine
 
         Game.UpdateStaticEvalInStack(ply, staticEval);
 
-        //int eval = -EvaluationConstants.CheckMateBaseEvaluation + ply;
-        var isInCheck = position.IsInCheck();
-
         int eval =
             (ttNodeType == NodeType.Exact
                 || (ttNodeType == NodeType.Alpha && ttScore < staticEval)
                 || (ttNodeType == NodeType.Beta && ttScore > staticEval))
             ? ttScore
             : staticEval;
+
+        var isInCheck = position.IsInCheck();
 
         if (!isInCheck)
         {
