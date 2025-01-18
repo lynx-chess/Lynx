@@ -572,9 +572,10 @@ public sealed partial class Engine
         Debug.Assert(staticEval != EvaluationConstants.NoHashEntry, "Assertion failed", "All TT entries should have a static eval");
 
         Game.UpdateStaticEvalInStack(ply, staticEval);
+        bool isInCheck = position.IsInCheck();
 
-        // Beta-cutoff (updating alpha after this check)
-        if (staticEval >= beta)
+        // Standing pat beta-cutoff (updating alpha after this check)
+        if (!isInCheck && staticEval >= beta)
         {
             PrintMessage(ply - 1, "Pruning before starting quiescence search");
             return staticEval;
@@ -682,7 +683,7 @@ public sealed partial class Engine
         {
             Debug.Assert(bestMove is null);
 
-            var finalEval = Position.EvaluateFinalPosition(ply, position.IsInCheck());
+            var finalEval = Position.EvaluateFinalPosition(ply, isInCheck);
             _tt.RecordHash(position, finalEval, 0, ply, finalEval, NodeType.Exact);
 
             return finalEval;
