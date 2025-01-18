@@ -575,16 +575,19 @@ public sealed partial class Engine
         bool isInCheck = position.IsInCheck();
 
         // Standing pat beta-cutoff (updating alpha after this check)
-        if (!isInCheck && staticEval >= beta)
+        if (!isInCheck)
         {
-            PrintMessage(ply - 1, "Pruning before starting quiescence search");
-            return staticEval;
-        }
+            if (staticEval >= beta)
+            {
+                PrintMessage(ply - 1, "Pruning before starting quiescence search");
+                return staticEval;
+            }
 
-        // Better move
-        if (staticEval > alpha)
-        {
-            alpha = staticEval;
+            // Better move
+            if (staticEval > alpha)
+            {
+                alpha = staticEval;
+            }
         }
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
