@@ -588,12 +588,12 @@ public sealed partial class Engine
                 PrintMessage(ply - 1, "Pruning before starting quiescence search");
                 return eval;
             }
-        }
 
-        // Better move
-        if (eval > alpha)
-        {
-            alpha = eval;
+            // Better move
+            if (eval > alpha)
+            {
+                alpha = eval;
+            }
         }
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
