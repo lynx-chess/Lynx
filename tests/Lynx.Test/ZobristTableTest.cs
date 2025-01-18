@@ -160,7 +160,7 @@ public class ZobristTableTest
         }
 
         positionHash ^= ZobristTable.EnPassantHash((int)position.EnPassant)
-            ^ ZobristTable.SideHash()
+            ^ ZobristTable.SideHash() * (ulong)position.Side
             ^ ZobristTable.CastleHash(position.Castle);
 
         return positionHash;

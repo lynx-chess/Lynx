@@ -1,6 +1,5 @@
 ﻿using Lynx.Model;
 using NUnit.Framework;
-
 using static Lynx.EvaluationConstants;
 using static Lynx.EvaluationParams;
 using static Lynx.EvaluationPSQTs;
@@ -361,5 +360,15 @@ public class EvaluationConstantsTest
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// If this fails after a change, pawn eval calculations should be revisited, because phase isn't being added there
+    /// </summary>
+    [Test]
+    public void GamePhaseByPiece_ForPawns_ShouldBeZero()
+    {
+        Assert.Zero(GamePhaseByPiece[(int)Piece.P]);
+        Assert.Zero(GamePhaseByPiece[(int)Piece.p]);
     }
 }
