@@ -571,29 +571,31 @@ public sealed partial class Engine
 
         Game.UpdateStaticEvalInStack(ply, staticEval);
 
-        int eval =
-            (ttNodeType == NodeType.Exact
-                || (ttNodeType == NodeType.Alpha && ttScore < staticEval)
-                || (ttNodeType == NodeType.Beta && ttScore > staticEval))
-            ? ttScore
-            : staticEval;
+        int eval = -EvaluationConstants.CheckMateBaseEvaluation + ply;
 
         var isInCheck = position.IsInCheck();
 
         if (!isInCheck)
         {
+            eval =
+                (ttNodeType == NodeType.Exact
+                    || (ttNodeType == NodeType.Alpha && ttScore < staticEval)
+                    || (ttNodeType == NodeType.Beta && ttScore > staticEval))
+                ? ttScore
+                : staticEval;
+
             // Standing pat beta-cutoff (updating alpha after this check)
             if (eval >= beta)
             {
                 PrintMessage(ply - 1, "Pruning before starting quiescence search");
                 return eval;
             }
-        }
 
-        // Better move
-        if (eval > alpha)
-        {
-            alpha = eval;
+            // Better move
+            if (eval > alpha)
+            {
+                alpha = eval;
+            }
         }
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
