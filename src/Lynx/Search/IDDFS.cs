@@ -253,8 +253,8 @@ public sealed partial class Engine
         catch (Exception e) when (e is not LynxException)
         {
             _logger.Error(e,
-                "[#{EngineId}] Depth {Depth}: unexpected error ocurred during the search of position {Position}, best move will be returned\n{StackTrace}",
-                _id, depth, Game.PositionBeforeLastSearch.FEN(), e.StackTrace);
+                "[#{EngineId}] Depth {Depth}: unexpected error ocurred during the search of position {Position}, best move will be returned\n",
+                _id, depth, Game.PositionBeforeLastSearch.FEN());
         }
         finally
         {
