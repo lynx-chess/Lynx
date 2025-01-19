@@ -1148,6 +1148,10 @@ public class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int KnightAdditionalEvaluation(int squareIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
     {
+        var offset = Utils.PieceOffset(pieceSide);
+        var oppositeRooksIndex = (int)Piece.r - offset;
+        var oppositeQueensIndex = (int)Piece.q - offset;
+
         var attacks = Attacks.KnightAttacks[squareIndex];
 
         // Mobility
@@ -1163,6 +1167,9 @@ public class Position : IDisposable
         var checks = (attacks & enemyKingCheckThreats).CountBits();
 
         packedBonus += CheckBonus[(int)Piece.N] * checks;
+
+        // Major threads
+        packedBonus += MinorMajorThreatsBonus * (PieceBitBoards[oppositeRooksIndex] | PieceBitBoards[oppositeQueensIndex]).CountBits();
 
         return packedBonus;
     }
