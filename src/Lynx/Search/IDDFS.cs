@@ -87,19 +87,11 @@ public sealed partial class Engine
         int beta = EvaluationConstants.MaxEval;
         SearchResult? lastSearchResult = null;
         int depth = 1;
-        Move firstLegalMove = default;
 
         _stopWatch.Restart();
 
         try
         {
-            if (OnlyOneLegalMove(ref firstLegalMove, out var onlyOneLegalMoveSearchResult))
-            {
-                _engineWriter.TryWrite(onlyOneLegalMoveSearchResult);
-
-                return onlyOneLegalMoveSearchResult;
-            }
-
             Array.Clear(_killerMoves);
             // Not clearing _quietHistory on purpose
             // Not clearing _captureHistory on purpose
@@ -270,7 +262,7 @@ public sealed partial class Engine
         //    _logger.Info("Engine search found a short enough mate, cancelling online tb probing if still active");
         //}
 
-        return GenerateFinalSearchResult(lastSearchResult, bestScore, depth, firstLegalMove, isPondering);
+        return GenerateFinalSearchResult(lastSearchResult, bestScore, depth, isPondering);
     }
 
     private bool StopSearchCondition(Move? bestMove, int depth, int mate, int bestScore, bool isPondering)
@@ -438,8 +430,7 @@ public sealed partial class Engine
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private SearchResult GenerateFinalSearchResult(SearchResult? lastSearchResult,
-        int bestScore, int depth, Move firstLegalMove, bool isPondering)
+    private SearchResult GenerateFinalSearchResult(SearchResult? lastSearchResult, int bestScore, int depth, bool isPondering)
     {
         SearchResult finalSearchResult;
         if (lastSearchResult is null)
@@ -458,6 +449,22 @@ public sealed partial class Engine
             else
             {
                 _logger.Warn(noDepth1Message);
+            }
+
+            int firstLegalMove = 0;
+            Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+
+            foreach (var move in MoveGenerator.GenerateAllMoves(Game.CurrentPosition, moves))
+            {
+                var gameState = Game.CurrentPosition.MakeMove(move);
+                bool isPositionValid = Game.CurrentPosition.WasProduceByAValidMove();
+                Game.CurrentPosition.UnmakeMove(move, gameState);
+
+                if (isPositionValid)
+                {
+                    firstLegalMove = move;
+                    break;
+                }
             }
 
             finalSearchResult = new(
