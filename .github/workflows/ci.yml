@@ -93,7 +93,6 @@ jobs:
         name: Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}-${{ matrix.runtime-identifier }}
         path: |
           artifacts/${{ matrix.runtime-identifier }}/
-          !artifacts/**/*.pdb
         if-no-files-found: error
 
     - name: Publish library
