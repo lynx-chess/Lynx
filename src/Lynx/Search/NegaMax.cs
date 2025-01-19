@@ -119,6 +119,7 @@ public sealed partial class Engine
             else
             {
                 Debug.Assert(ttStaticEval != int.MinValue);
+                Debug.Assert(ttStaticEval != EvaluationConstants.NoHashEntry);
 
                 staticEval = ttStaticEval;
                 phase = position.Phase();
@@ -554,24 +555,26 @@ public sealed partial class Engine
         // QS TT cutoff
         Debug.Assert(ttProbeResult.Depth >= 0, "Assertion failed", "We would need to add it as a TT cutoff condition");
 
-        if (ttHit
-            && (ttNodeType == NodeType.Exact
-                || (ttNodeType == NodeType.Alpha && ttScore <= alpha)
-                || (ttNodeType == NodeType.Beta && ttScore >= beta)))
+        int staticEval;
+        if (ttHit)
         {
-            return ttScore;
+            if (ttNodeType == NodeType.Exact
+                || (ttNodeType == NodeType.Alpha && ttScore <= alpha)
+                || (ttNodeType == NodeType.Beta && ttScore >= beta))
+            {
+                return ttScore;
+            }
+
+            staticEval = ttProbeResult.StaticEval;
+            Debug.Assert(staticEval != EvaluationConstants.NoHashEntry, "Assertion failed", "All TT entries should have a static eval");
+        }
+        else
+        {
+            staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
         }
 
         ShortMove ttBestMove = ttProbeResult.BestMove;
         _maxDepthReached[ply] = ply;
-
-        /*
-            var staticEval = ttHit
-                ? ttProbeResult.StaticEval
-                : position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _kingPawnHashTable).Score;
-        */
-        var staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
-        Debug.Assert(staticEval != EvaluationConstants.NoHashEntry, "Assertion failed", "All TT entries should have a static eval");
 
         Game.UpdateStaticEvalInStack(ply, staticEval);
 
