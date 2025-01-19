@@ -93,7 +93,8 @@ public sealed partial class Engine
 
         try
         {
-            if (OnlyOneLegalMove(ref firstLegalMove, out var onlyOneLegalMoveSearchResult))
+            if (_searchConstraints.SoftLimitTimeBound < Configuration.EngineSettings.OneLegalMove_MaxTime
+                && OnlyOneLegalMove(ref firstLegalMove, out var onlyOneLegalMoveSearchResult))
             {
                 _engineWriter.TryWrite(onlyOneLegalMoveSearchResult);
 

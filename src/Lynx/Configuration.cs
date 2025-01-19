@@ -128,6 +128,8 @@ public sealed class EngineSettings
     [SPSA<int>(1, 15, 1)]
     public int ScoreStabiity_MinDepth { get; set; } = 7;
 
+    public int OneLegalMove_MaxTime { get; set; } = 250;
+
     #endregion
 
     #region Search
