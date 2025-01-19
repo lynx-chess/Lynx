@@ -301,7 +301,15 @@ public sealed partial class Engine
 
             if (mate < 0 || mate + Constants.MateDistanceMarginToStopSearching < winningMateThreshold)
             {
-                _logger.Info("[#{EngineId}] Could stop search, since mate is short enough", _id);
+                var newSoftLimitBound = _searchConstraints.SoftLimitTimeBound * 3 / 4;
+
+                _logger.Debug("[#{EngineId}] Could stop search, since mate is short enough. Reducing soft limit time bound instead ({CurrentLimit}) -> ({NewLimit})",
+                    _id, _searchConstraints.SoftLimitTimeBound, newSoftLimitBound);
+
+                _searchConstraints = new SearchConstraints(
+                    _searchConstraints.HardLimitTimeBound,
+                    newSoftLimitBound,
+                    _searchConstraints.MaxDepth);
             }
 
             _logger.Info("[#{EngineId}] Search continues, hoping to find a faster mate", _id);
