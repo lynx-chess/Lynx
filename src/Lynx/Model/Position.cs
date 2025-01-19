@@ -1,3 +1,4 @@
+using Polly.Caching;
 using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -161,7 +162,7 @@ public class Position : IDisposable
         {
             // King (and castling) moves require calculating king buckets twice and recalculating all related parameters,
             // so skipping incremental eval whenever buckets change
-            _isIncrementalEval = PSQTBucketLayout[sourceSquare] == PSQTBucketLayout[targetSquare];
+            _isIncrementalEval = PSQTBucketLayout[sourceSquare] == PSQTBucketLayout[targetSquare] && !move.IsCapture() && !move.IsCastle();
 
             _kingPawnUniqueIdentifier ^=
                 sourcePieceHash
