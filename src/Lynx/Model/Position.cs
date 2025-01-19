@@ -157,11 +157,11 @@ public class Position : IDisposable
                 _kingPawnUniqueIdentifier ^= targetPieceHash;
             }
         }
-        else if (piece == (int)Piece.K || piece == (int)Piece.k)
+        else if (piece == (int)Piece.K || piece == (int)Piece.k)    // No need to check for move.IsCastle(), see CastlingMovesAreKingMoves test
         {
-            // King (and castling) moves require calculating king buckets twice and recalculating all related parameters, so skipping incremental eval for those cases for now
-            // No need to check for move.IsCastle(), see CastlingMovesAreKingMoves test
-            _isIncrementalEval = false;
+            // King (and castling) moves require calculating king buckets twice and recalculating all related parameters,
+            // so skipping incremental eval whenever buckets change
+            _isIncrementalEval = PSQTBucketLayout[sourceSquare] == PSQTBucketLayout[targetSquare];
 
             _kingPawnUniqueIdentifier ^=
                 sourcePieceHash
