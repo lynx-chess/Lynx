@@ -128,7 +128,7 @@ public sealed partial class Engine
                     alpha = Math.Clamp(lastSearchResult.Score - window, EvaluationConstants.MinEval, EvaluationConstants.MaxEval);
                     beta = Math.Clamp(lastSearchResult.Score + window, EvaluationConstants.MinEval, EvaluationConstants.MaxEval);
 
-                    _logger.Info(
+                    _logger.Debug(
                         "[#{EngineId}] Depth {Depth}: aspiration windows [{Alpha}, {Beta}] for previous search score {Score}, nodes {Nodes}",
                         _id, depth, alpha, beta, lastSearchResult.Score, _nodes);
                     Debug.Assert(
@@ -141,7 +141,7 @@ public sealed partial class Engine
                         var depthToSearch = depth - failHighReduction;
                         Debug.Assert(depthToSearch > 0);
 
-                        _logger.Info(
+                        _logger.Debug(
                             "[#{EngineId}] Aspiration windows depth {Depth} ({DepthWithoutReduction} - {Reduction}), window {Window}: [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
                             _id, depthToSearch, depth, failHighReduction, window, alpha, beta, bestScore, _nodes);
 
