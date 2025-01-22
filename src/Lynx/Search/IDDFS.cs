@@ -275,8 +275,6 @@ public sealed partial class Engine
 
     private bool StopSearchCondition(Move? bestMove, int depth, int mate, int bestScore, bool isPondering)
     {
-        bool shortOnTime = _searchConstraints.SoftLimitTimeBound < Configuration.EngineSettings.SoftTimeBoundLimitOnMate;
-
         if (bestMove is null || bestMove == 0)
         {
             _logger.Warn(
@@ -303,7 +301,7 @@ public sealed partial class Engine
 
             if (mate < 0 || mate + Constants.MateDistanceMarginToStopSearching < winningMateThreshold)
             {
-                if (shortOnTime)
+                if (_searchConstraints.SoftLimitTimeBound < Configuration.EngineSettings.SoftTimeBoundLimitOnMate)
                 {
                     _logger.Info("[#{EngineId}] Stopping, since mate is short enough and we're short on time: soft limit {SoftLimit}ms",
                         _id, _searchConstraints.SoftLimitTimeBound);
@@ -343,10 +341,8 @@ public sealed partial class Engine
         {
             var elapsedMilliseconds = _stopWatch.ElapsedMilliseconds;
 
-            var scaledSoftLimitTimeBound = shortOnTime
-                ? _searchConstraints.SoftLimitTimeBound
-                : TimeManager.SoftLimit(_searchConstraints, depth - 1, _moveNodeCount[bestMove.Value.Piece()][bestMove.Value.TargetSquare()], _nodes, _bestMoveStability, _scoreDelta);
-
+            var bestMoveNodeCount = _moveNodeCount[bestMove.Value.Piece()][bestMove.Value.TargetSquare()];
+            var scaledSoftLimitTimeBound = TimeManager.SoftLimit(_searchConstraints, depth - 1, bestMoveNodeCount, _nodes, _bestMoveStability, _scoreDelta);
             _logger.Info(
                 "[#{EngineId}] [TM] Depth {Depth}: hard limit {HardLimit}, base soft limit {BaseSoftLimit}, scaled soft limit {ScaledSoftLimit}",
                 _id, depth - 1, _searchConstraints.HardLimitTimeBound, _searchConstraints.SoftLimitTimeBound, scaledSoftLimitTimeBound);
