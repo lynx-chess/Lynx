@@ -57,11 +57,17 @@ public static class FENParser
             //{
             //    _logger.Debug("No full move counter detected");
             //}
+
+            if (pieceBitBoards[(int)Piece.K].CountBits() != 1
+                || pieceBitBoards[(int)Piece.k].CountBits() != 1)
+            {
+                throw new LynxException("Missing or extra kings");
+            }
         }
 #pragma warning disable S2139 // Exceptions should be either logged or rethrown but not both - meh
         catch (Exception e)
         {
-            _logger.Error(e, "Error parsing FEN");
+            _logger.Error(e, "Error parsing FEN {Fen}", fen.ToString());
             success = false;
             throw;
         }

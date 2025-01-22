@@ -558,6 +558,14 @@ public sealed class UCIHandler
                     }
                     break;
                 }
+            case "tthit_nocutoffextension_maxdepth":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.TTHit_NoCutoffExtension_MaxDepth = value;
+                    }
+                    break;
+                }
 
             #endregion
 

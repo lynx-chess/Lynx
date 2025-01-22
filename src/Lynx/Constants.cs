@@ -509,6 +509,13 @@ public static class Constants
         [7, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 5, 6, 5, 4, 4, 4, 4, 4, 4, 6, 5, 4, 3, 3, 3, 3, 3, 6, 5, 4, 3, 2, 2, 2, 2, 6, 5, 4, 3, 2, 1, 1, 1, 6, 5, 4, 3, 2, 1, 0, 1],
         [7, 7, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 7, 6, 5, 5, 5, 5, 5, 5, 7, 6, 5, 4, 4, 4, 4, 4, 7, 6, 5, 4, 3, 3, 3, 3, 7, 6, 5, 4, 3, 2, 2, 2, 7, 6, 5, 4, 3, 2, 1, 1, 7, 6, 5, 4, 3, 2, 1, 0]
     ];
+
+    /// <summary>
+    /// 262_144 * Marshal.SizeOf<PawnTableElement>() / 1024 = 4MB
+    /// </summary>
+    public const int KingPawnHashSize = 262_144;
+
+    public const int KingPawnHashMask = KingPawnHashSize - 1;
 }
 
 #pragma warning restore IDE0055

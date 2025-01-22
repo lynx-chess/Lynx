@@ -6,15 +6,24 @@ public readonly struct GameState
 {
     public readonly ulong ZobristKey;
 
+    public readonly ulong KingPawnKey;
+
+    public readonly int IncremetalEvalAccumulator;
+
     public readonly BoardSquare EnPassant;
 
     public readonly byte Castle;
 
-    public GameState(ulong zobristKey, BoardSquare enpassant, byte castle)
+    public readonly bool IsIncrementalEval;
+
+    public GameState(ulong zobristKey, ulong kingPawnKey, int incrementalEvalAccumulator, BoardSquare enpassant, byte castle, bool isIncrementalEval)
     {
         ZobristKey = zobristKey;
+        KingPawnKey = kingPawnKey;
+        IncremetalEvalAccumulator = incrementalEvalAccumulator;
         EnPassant = enpassant;
         Castle = castle;
+        IsIncrementalEval = isIncrementalEval;
     }
 }
 

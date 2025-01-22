@@ -102,6 +102,8 @@ public sealed partial class Engine : IDisposable
         Array.Clear(_continuationHistory);
         Array.Clear(_counterMoves);
 
+        Array.Clear(_pawnEvalTable);
+
         // No need to clear killer move or pv table because they're cleared on every search (IDDFS)
     }
 

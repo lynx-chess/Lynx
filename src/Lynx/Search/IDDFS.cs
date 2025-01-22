@@ -48,6 +48,11 @@ public sealed partial class Engine
 
     private readonly int[] _maxDepthReached = GC.AllocateArray<int>(Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin, pinned: true);
 
+    /// <summary>
+    /// <see cref="Constants.KingPawnHashSize"/>
+    /// </summary>
+    private readonly PawnTableElement[] _pawnEvalTable = GC.AllocateArray<PawnTableElement>(Constants.KingPawnHashSize, pinned: true);
+
     private ulong _nodes;
 
     private SearchResult? _previousSearchResult;
@@ -88,7 +93,7 @@ public sealed partial class Engine
 
         try
         {
-            if (OnlyOneLegalMove(ref firstLegalMove, out var onlyOneLegalMoveSearchResult))
+            if (!isPondering && OnlyOneLegalMove(ref firstLegalMove, out var onlyOneLegalMoveSearchResult))
             {
                 _engineWriter.TryWrite(onlyOneLegalMoveSearchResult);
 
@@ -123,17 +128,20 @@ public sealed partial class Engine
                     alpha = Math.Clamp(lastSearchResult.Score - window, EvaluationConstants.MinEval, EvaluationConstants.MaxEval);
                     beta = Math.Clamp(lastSearchResult.Score + window, EvaluationConstants.MinEval, EvaluationConstants.MaxEval);
 
-                    _logger.Info(
+                    _logger.Debug(
                         "[#{EngineId}] Depth {Depth}: aspiration windows [{Alpha}, {Beta}] for previous search score {Score}, nodes {Nodes}",
                         _id, depth, alpha, beta, lastSearchResult.Score, _nodes);
-                    Debug.Assert(lastSearchResult.Mate == 0 && lastSearchResult.Score > EvaluationConstants.NegativeCheckmateDetectionLimit && lastSearchResult.Score < EvaluationConstants.PositiveCheckmateDetectionLimit);
+                    Debug.Assert(
+                        lastSearchResult.Mate == 0
+                            ? lastSearchResult.Score < EvaluationConstants.PositiveCheckmateDetectionLimit && lastSearchResult.Score > EvaluationConstants.NegativeCheckmateDetectionLimit
+                            : Math.Abs(lastSearchResult.Score) < EvaluationConstants.CheckMateBaseEvaluation && (lastSearchResult.Score > EvaluationConstants.PositiveCheckmateDetectionLimit || lastSearchResult.Score < EvaluationConstants.NegativeCheckmateDetectionLimit));
 
                     while (true)
                     {
                         var depthToSearch = depth - failHighReduction;
                         Debug.Assert(depthToSearch > 0);
 
-                        _logger.Info(
+                        _logger.Debug(
                             "[#{EngineId}] Aspiration windows depth {Depth} ({DepthWithoutReduction} - {Reduction}), window {Window}: [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
                             _id, depthToSearch, depth, failHighReduction, window, alpha, beta, bestScore, _nodes);
 
@@ -247,8 +255,8 @@ public sealed partial class Engine
         catch (Exception e) when (e is not LynxException)
         {
             _logger.Error(e,
-                "[#{EngineId}] Depth {Depth}: unexpected error ocurred during the search of position {Position}, best move will be returned\n{StackTrace}",
-                _id, depth, Game.PositionBeforeLastSearch.FEN(), e.StackTrace);
+                "[#{EngineId}] Depth {Depth}: unexpected error ocurred during the search of position {Position}, best move will be returned\n",
+                _id, depth, Game.PositionBeforeLastSearch.FEN());
         }
         finally
         {
@@ -295,9 +303,7 @@ public sealed partial class Engine
 
             if (mate < 0 || mate + Constants.MateDistanceMarginToStopSearching < winningMateThreshold)
             {
-                _logger.Info("[#{EngineId}] Stopping search, mate is short enough", _id);
-
-                return false;
+                _logger.Info("[#{EngineId}] Could stop search, since mate is short enough", _id);
             }
 
             _logger.Info("[#{EngineId}] Search continues, hoping to find a faster mate", _id);
