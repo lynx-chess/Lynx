@@ -21,6 +21,7 @@ public sealed partial class Engine : IDisposable
 
     private bool _isSearching;
     private readonly bool _isMainEngine;
+    private readonly bool _isMainOrBenchEngine;
 
     public double AverageDepth { get; private set; }
 
@@ -36,6 +37,7 @@ public sealed partial class Engine : IDisposable
     {
         _id = id;
         _isMainEngine = _id == Searcher.MainEngineId;
+        _isMainOrBenchEngine = _isMainEngine || _id == Searcher.MainEngineId;
         _engineWriter = engineWriter;
         _tt = tt;
 

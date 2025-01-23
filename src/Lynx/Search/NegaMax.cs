@@ -302,7 +302,7 @@ public sealed partial class Engine
             {
                 score = 0;
 
-                if (_isMainEngine)
+                if (_isMainOrBenchEngine)
                 {
                     // We don't need to evaluate further down to know it's a draw.
                     // Since we won't be evaluating further down, we need to clear the PV table because those moves there
@@ -458,7 +458,7 @@ public sealed partial class Engine
                     alpha = score;
                     bestMove = move;
 
-                    if (_isMainEngine && pvNode)
+                    if (_isMainOrBenchEngine && pvNode)
                     {
                         _pVTable[pvIndex] = move;
                         CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
@@ -686,7 +686,7 @@ public sealed partial class Engine
                     alpha = score;
                     bestMove = move;
 
-                    if (_isMainEngine)
+                    if (_isMainOrBenchEngine)
                     {
                         _pVTable[pvIndex] = move;
                         CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);

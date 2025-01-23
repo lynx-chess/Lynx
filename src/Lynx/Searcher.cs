@@ -13,6 +13,7 @@ public sealed class Searcher
     private readonly Logger _logger;
 
     internal const int MainEngineId = 1;
+    internal const int BenchEngineId = -1;
 
     private bool _isProcessingGoCommand;
     private bool _isPonderHit;
@@ -478,7 +479,7 @@ public sealed class Searcher
 
     public async ValueTask RunBench(int depth)
     {
-        using var engine = new Engine(-1, SilentChannelWriter<object>.Instance, in _ttWrapper, warmup: true);
+        using var engine = new Engine(BenchEngineId, SilentChannelWriter<object>.Instance, in _ttWrapper, warmup: true);
         var results = engine.Bench(depth);
 
         // Can't use engine, or results won't be printed

@@ -205,7 +205,7 @@ public sealed partial class Engine
                     ? Utils.CalculateMateInX(bestScore, bestScoreAbs)
                     : 0;
 
-                if (_isMainEngine)
+                if (_isMainOrBenchEngine)
                 {
                     var oldBestMove = lastSearchResult?.BestMove;
                     var oldScore = lastSearchResult?.Score ?? 0;
@@ -238,6 +238,10 @@ public sealed partial class Engine
                     _scoreDelta = oldScore - lastSearchResult.Score;
 
                     _engineWriter.TryWrite(lastSearchResult);
+                }
+                else
+                {
+                    lastSearchResult = new(0, bestScore, 0, []);
                 }
             } while (StopSearchCondition(lastSearchResult?.BestMove, ++depth, mate, bestScore, isPondering));
         }
@@ -287,7 +291,20 @@ public sealed partial class Engine
             return false;
         }
 
-        if (_isMainEngine)
+        var maxDepth = _searchConstraints.MaxDepth;
+        if (maxDepth > 0)
+        {
+            var shouldContinue = depth <= maxDepth;
+
+            if (!shouldContinue)
+            {
+                _logger.Info("[#{EngineId}] Depth {Depth}: stopping, max. depth reached", _id, depth - 1);
+            }
+
+            return shouldContinue;
+        }
+
+        if (_isMainOrBenchEngine)
         {
             if (bestMove is null || bestMove == 0)
             {
@@ -319,19 +336,6 @@ public sealed partial class Engine
                 }
 
                 _logger.Info("[#{EngineId}] Search continues, hoping to find a faster mate", _id);
-            }
-
-            var maxDepth = _searchConstraints.MaxDepth;
-            if (maxDepth > 0)
-            {
-                var shouldContinue = depth <= maxDepth;
-
-                if (!shouldContinue)
-                {
-                    _logger.Info("[#{EngineId}] Depth {Depth}: stopping, max. depth reached", _id, depth - 1);
-                }
-
-                return shouldContinue;
             }
 
             if (!isPondering)
