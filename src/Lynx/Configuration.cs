@@ -145,13 +145,13 @@ public sealed class EngineSettings
     /// Value originally from Stormphrax, who apparently took it from Viridithas
     /// </summary>
     [SPSA<double>(0.1, 2, 0.1)]
-    public double LMR_Base { get; set; } = 0.75;
+    public double LMR_Base { get; set; } = 0.60;
 
     /// <summary>
     /// Value originally from Akimbo
     /// </summary>
     [SPSA<double>(1, 5, 0.1)]
-    public double LMR_Divisor { get; set; } = 3.49;
+    public double LMR_Divisor { get; set; } = 3.21;
 
     [SPSA<int>(1, 10, 0.5)]
     public int NMP_MinDepth { get; set; } = 3;
