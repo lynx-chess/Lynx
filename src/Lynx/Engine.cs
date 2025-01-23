@@ -20,6 +20,7 @@ public sealed partial class Engine : IDisposable
     private bool _disposedValue;
 
     private bool _isSearching;
+    private readonly bool _isMainEngine;
 
     public double AverageDepth { get; private set; }
 
@@ -34,6 +35,7 @@ public sealed partial class Engine : IDisposable
 #pragma warning restore RCS1163 // Unused parameter
     {
         _id = id;
+        _isMainEngine = _id == Searcher.MainEngineId;
         _engineWriter = engineWriter;
         _tt = tt;
 
@@ -64,8 +66,6 @@ public sealed partial class Engine : IDisposable
 
         _logger.Info("Engine {0} initialized", _id);
     }
-
-    private bool IsMainEngine() => _id == Searcher.MainEngineId;
 
 #pragma warning disable S1144 // Unused private types or members should be removed - used in Release mode
     private void WarmupEngine()

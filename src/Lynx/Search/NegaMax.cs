@@ -302,10 +302,13 @@ public sealed partial class Engine
             {
                 score = 0;
 
-                // We don't need to evaluate further down to know it's a draw.
-                // Since we won't be evaluating further down, we need to clear the PV table because those moves there
-                // don't belong to this line and if this move were to beat alpha, they'd incorrectly copied to pv line.
-                Array.Clear(_pVTable, nextPvIndex, _pVTable.Length - nextPvIndex);
+                if (_isMainEngine)
+                {
+                    // We don't need to evaluate further down to know it's a draw.
+                    // Since we won't be evaluating further down, we need to clear the PV table because those moves there
+                    // don't belong to this line and if this move were to beat alpha, they'd incorrectly copied to pv line.
+                    Array.Clear(_pVTable, nextPvIndex, _pVTable.Length - nextPvIndex);
+                }
             }
             else if (visitedMovesCounter == 0)
             {
@@ -455,7 +458,7 @@ public sealed partial class Engine
                     alpha = score;
                     bestMove = move;
 
-                    if (pvNode)
+                    if (_isMainEngine && pvNode)
                     {
                         _pVTable[pvIndex] = move;
                         CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
@@ -683,8 +686,11 @@ public sealed partial class Engine
                     alpha = score;
                     bestMove = move;
 
-                    _pVTable[pvIndex] = move;
-                    CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
+                    if (_isMainEngine)
+                    {
+                        _pVTable[pvIndex] = move;
+                        CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
+                    }
 
                     nodeType = NodeType.Exact;
                 }
