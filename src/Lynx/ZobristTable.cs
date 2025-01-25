@@ -129,7 +129,7 @@ public static class ZobristTable
     /// Calculates from scratch the pawn structure hash of a position
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ulong PawnKingHash(Position position)
+    public static ulong PawnHash(Position position)
     {
         ulong pawnKingHash = 0;
 
@@ -150,12 +150,6 @@ public static class ZobristTable
 
             pawnKingHash ^= PieceHash(pieceSquareIndex, (int)Piece.p);
         }
-
-        var whiteKing = position.PieceBitBoards[(int)Piece.K].GetLS1BIndex();
-        pawnKingHash ^= PieceHash(whiteKing, (int)Piece.K);
-
-        var blackKing = position.PieceBitBoards[(int)Piece.k].GetLS1BIndex();
-        pawnKingHash ^= PieceHash(blackKing, (int)Piece.k);
 
         return pawnKingHash;
     }
