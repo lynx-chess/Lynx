@@ -903,6 +903,9 @@ public class Position : IDisposable
             gamePhase = MaxPhase;
         }
 
+        // Threats
+        packedScore += Threats(0) - Threats(6);
+
         int totalPawnsCount = whitePawns.CountBits() + blackPawns.CountBits();
 
         // Pawnless endgames with few pieces
@@ -1273,6 +1276,24 @@ public class Position : IDisposable
         var ownPawnsAroundKingCount = (Attacks.KingAttacks[squareIndex] & sameSidePawns).CountBits();
 
         return ownPawnsAroundKingCount * KingShieldBonus;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int Threats(int offset)
+    {
+        ulong knightAttacks = 0;
+        var knights = PieceBitBoards[(int)Piece.N + offset];
+        while (knights != 0)
+        {
+            var pieceSquareIndex = knights.GetLS1BIndex();
+            knights.ResetLS1B();
+
+            knightAttacks |= Attacks.KnightAttacks[pieceSquareIndex];
+        }
+
+        var majorPieces = PieceBitBoards[(int)Piece.q - offset] | PieceBitBoards[(int)Piece.r - offset];
+
+        return (knightAttacks & majorPieces).CountBits() * KnightThreatsBonus;
     }
 
     /// <summary>
