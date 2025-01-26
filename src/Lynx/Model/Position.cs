@@ -1282,18 +1282,18 @@ public class Position : IDisposable
     private int Threats(int offset)
     {
         ulong knightAttacks = 0;
-        var knights = PieceBitBoards[(int)Piece.N + offset];
-        while (knights != 0)
+        var bishops = PieceBitBoards[(int)Piece.B + offset];
+        while (bishops != 0)
         {
-            var pieceSquareIndex = knights.GetLS1BIndex();
-            knights.ResetLS1B();
+            var pieceSquareIndex = bishops.GetLS1BIndex();
+            bishops.ResetLS1B();
 
-            knightAttacks |= Attacks.KnightAttacks[pieceSquareIndex];
+            knightAttacks |= Attacks.BishopAttacks(pieceSquareIndex, OccupancyBitBoards[(int)Side.Both]);
         }
 
         var majorPieces = PieceBitBoards[(int)Piece.q - offset] | PieceBitBoards[(int)Piece.r - offset];
 
-        return (knightAttacks & majorPieces).CountBits() * KnightThreatsBonus;
+        return (knightAttacks & majorPieces).CountBits() * BishopThreatsBonus;
     }
 
     /// <summary>
