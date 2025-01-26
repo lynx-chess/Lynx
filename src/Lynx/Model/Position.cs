@@ -1281,19 +1281,33 @@ public class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int Threats(int offset)
     {
+        int packedScore = 0;
+
+        var majorPieces = PieceBitBoards[(int)Piece.q - offset] | PieceBitBoards[(int)Piece.r - offset];
+
         ulong knightAttacks = 0;
+        var knights = PieceBitBoards[(int)Piece.N + offset];
+        while (knights != 0)
+        {
+            var pieceSquareIndex = knights.GetLS1BIndex();
+            knights.ResetLS1B();
+
+            knightAttacks |= Attacks.KnightAttacks[pieceSquareIndex];
+        }
+        packedScore += (knightAttacks & majorPieces).CountBits() * KnightMajorThreatsBonus;
+
+        ulong bishopAttacks = 0;
         var bishops = PieceBitBoards[(int)Piece.B + offset];
         while (bishops != 0)
         {
             var pieceSquareIndex = bishops.GetLS1BIndex();
             bishops.ResetLS1B();
 
-            knightAttacks |= Attacks.BishopAttacks(pieceSquareIndex, OccupancyBitBoards[(int)Side.Both]);
+            bishopAttacks |= Attacks.BishopAttacks(pieceSquareIndex, OccupancyBitBoards[(int)Side.Both]);
         }
+        packedScore += (bishopAttacks & majorPieces).CountBits() * BishopMajorThreatsBonus;
 
-        var majorPieces = PieceBitBoards[(int)Piece.q - offset] | PieceBitBoards[(int)Piece.r - offset];
-
-        return (knightAttacks & majorPieces).CountBits() * BishopThreatsBonus;
+        return packedScore;
     }
 
     /// <summary>

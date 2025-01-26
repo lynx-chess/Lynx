@@ -6051,7 +6051,12 @@ public static class EvaluationParams
 	/// <summary>
 	/// <see cref="Utils.Pack(30, 72)"/>
 	/// </summary>
-	public const int BishopThreatsBonus = 4718622;
+	public const int KnightMajorThreatsBonus = 4718622;
+
+	/// <summary>
+	/// <see cref="Utils.Pack(-48, -33)"/>
+	/// </summary>
+	public const int BishopMajorThreatsBonus = -2162736;
 
 	/// <summary>
 	/// <see cref="Utils.Pack(-48, -33)"/>
