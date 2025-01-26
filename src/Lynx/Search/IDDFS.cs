@@ -93,7 +93,7 @@ public sealed partial class Engine
 
         try
         {
-            if (OnlyOneLegalMove(ref firstLegalMove, out var onlyOneLegalMoveSearchResult))
+            if (!isPondering && OnlyOneLegalMove(ref firstLegalMove, out var onlyOneLegalMoveSearchResult))
             {
                 _engineWriter.TryWrite(onlyOneLegalMoveSearchResult);
 
