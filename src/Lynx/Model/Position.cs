@@ -127,9 +127,11 @@ public class Position : IDisposable
         int promotedPiece = move.PromotedPiece();
 
         var newPiece = piece;
+        int extraPhaseIfIncremental = 0;
         if (promotedPiece != default)
         {
             newPiece = promotedPiece;
+            extraPhaseIfIncremental = GamePhaseByPiece[promotedPiece]; // - GamePhaseByPiece[piece];
         }
 
         PieceBitBoards[piece].PopBit(sourceSquare);
@@ -194,10 +196,7 @@ public class Position : IDisposable
             _incrementalEvalAccumulator += PSQT(0, sameSideBucket, newPiece, targetSquare);
             _incrementalEvalAccumulator += PSQT(1, opposideSideBucket, newPiece, targetSquare);
 
-            if (promotedPiece != default)
-            {
-                _incrementalPhaseAccumulator += GamePhaseByPiece[promotedPiece];// - GamePhaseByPiece[piece];
-            }
+            _incrementalPhaseAccumulator += extraPhaseIfIncremental;
 
             switch (move.SpecialMoveFlag())
             {
