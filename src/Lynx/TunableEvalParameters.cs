@@ -6048,17 +6048,18 @@ public static class EvaluationParams
 	/// </summary>
 	public const int BishopPairBonus = 4718622;
 
-	/// <summary>
-	/// <see cref="Utils.Pack(43, 8)"/>
-	/// </summary>
-	public const int MinorMajorThreatsBonus = 524331;
+    /// <summary>
+    /// <see cref="Utils.Pack(-48, -33)"/>
+    /// </summary>
+    public const int PieceAttackedByPawnPenalty = -2162736;
 
-	/// <summary>
-	/// <see cref="Utils.Pack(-48, -33)"/>
-	/// </summary>
-	public const int PieceAttackedByPawnPenalty = -2162736;
+    public static readonly TaperedEvaluationTermByRank MinorMajorThreatsBonus =
+	[
+		Pack(0, 2),
+		Pack(1, 3),
+	];
 
-	public static readonly TaperedEvaluationTermByRank PawnPhalanxBonus =
+    public static readonly TaperedEvaluationTermByRank PawnPhalanxBonus =
 	[
 		Pack(0, 0),
 		Pack(4, 4),

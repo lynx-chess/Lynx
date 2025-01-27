@@ -1223,7 +1223,14 @@ public class Position : IDisposable
 
         // Major threats
         var majorPieces = PieceBitBoards[oppositeRooksIndex] | PieceBitBoards[oppositeQueensIndex];
-        packedBonus += MinorMajorThreatsBonus * (attacks & majorPieces).CountBits();
+        var threats = attacks & majorPieces;
+
+        var defendedThreats = threats & enemyPawnAttacks;
+        var defendedThreatsCount = defendedThreats.CountBits();
+        packedBonus += MinorMajorThreatsBonus[1] * defendedThreatsCount;
+
+        var undefendedThreatsCount = threats.CountBits() - defendedThreatsCount;
+        packedBonus += MinorMajorThreatsBonus[0] * undefendedThreatsCount;
 
         return packedBonus;
     }
