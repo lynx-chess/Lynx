@@ -16,6 +16,17 @@ public readonly struct GameState
 
     public readonly bool IsIncrementalEval;
 
+    /// <summary>
+    /// Null moves
+    /// </summary>
+    /// <param name="zobristKey"></param>
+    /// <param name="enpassant"></param>
+    public GameState(ulong zobristKey, BoardSquare enpassant)
+    {
+        ZobristKey = zobristKey;
+        EnPassant = enpassant;
+    }
+
     public GameState(ulong zobristKey, ulong kingPawnKey, int incrementalEvalAccumulator, BoardSquare enpassant, byte castle, bool isIncrementalEval)
     {
         ZobristKey = zobristKey;
