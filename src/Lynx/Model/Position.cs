@@ -1247,19 +1247,15 @@ public class Position : IDisposable
 
         var kingSideOffset = Utils.PieceOffset(pieceSide);
 
-        // Opposite side rooks or queens on the board
-        if (PieceBitBoards[(int)Piece.r - kingSideOffset] + PieceBitBoards[(int)Piece.q - kingSideOffset] != 0)
+        // King on open file
+        if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == 0)
         {
-            // King on open file
-            if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == 0)
-            {
-                packedBonus += OpenFileKingPenalty;
-            }
-            // King on semi-open file
-            else if ((PieceBitBoards[(int)Piece.P + kingSideOffset] & Masks.FileMasks[squareIndex]) == 0)
-            {
-                packedBonus += SemiOpenFileKingPenalty;
-            }
+            packedBonus += OpenFileKingPenalty;
+        }
+        // King on semi-open file
+        else if ((PieceBitBoards[(int)Piece.P + kingSideOffset] & Masks.FileMasks[squareIndex]) == 0)
+        {
+            packedBonus += SemiOpenFileKingPenalty;
         }
 
         // Pawn king shield included next to pawn additional eval
