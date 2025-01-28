@@ -1169,8 +1169,8 @@ public class Position : IDisposable
         packedBonus += CheckBonus[(int)Piece.N] * checks;
 
         // Major threats
-        var majorPieces = PieceBitBoards[oppositeRooksIndex] | PieceBitBoards[oppositeQueensIndex];
-        packedBonus += MinorMajorThreatsBonus * (attacks & majorPieces).CountBits();
+        packedBonus += KnightRookThreatsBonus * (attacks & PieceBitBoards[oppositeRooksIndex]).CountBits();
+        packedBonus += KnightQueenThreatsBonus * (attacks & PieceBitBoards[oppositeQueensIndex]).CountBits();
 
         return packedBonus;
     }
