@@ -1180,8 +1180,6 @@ public class Position : IDisposable
         const int pawnToBishopOffset = (int)Piece.B - (int)Piece.P;
 
         var offset = Utils.PieceOffset(pieceSide);
-        var oppositeRooksIndex = (int)Piece.r - offset;
-        var oppositeQueensIndex = (int)Piece.q - offset;
 
         var occupancy = OccupancyBitBoards[(int)Side.Both];
         var attacks = Attacks.BishopAttacks(squareIndex, occupancy);
@@ -1221,9 +1219,12 @@ public class Position : IDisposable
 
         packedBonus += CheckBonus[(int)Piece.B] * checks;
 
-        // Major threats
-        var majorPieces = PieceBitBoards[oppositeRooksIndex] | PieceBitBoards[oppositeQueensIndex];
-        packedBonus += BishopMajorThreatsBonus * (attacks & majorPieces).CountBits();
+        // Threats
+        for (int i = (int)Piece.p; i < (int)Piece.k; ++i)
+        {
+            var therats = attacks & PieceBitBoards[i - offset];
+            packedBonus += BishopThreatsBonus[i - 6] * therats.CountBits();
+        }
 
         return packedBonus;
     }
