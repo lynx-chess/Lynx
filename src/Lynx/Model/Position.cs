@@ -1223,7 +1223,7 @@ public class Position : IDisposable
 
         // Major threats
         var majorPieces = PieceBitBoards[oppositeRooksIndex] | PieceBitBoards[oppositeQueensIndex];
-        packedBonus += MinorMajorThreatsBonus * (attacks & majorPieces).CountBits();
+        packedBonus += BishopMajorThreatsBonus * (attacks & majorPieces).CountBits();
 
         return packedBonus;
     }
