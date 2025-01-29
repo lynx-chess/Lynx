@@ -740,7 +740,7 @@ public class Position : IDisposable
             //    // Bitboard copy that we 'empty'
             //    var bitboard = PieceBitBoards[pieceIndex];
 
-            //    packedScore += PieceProtectedByPawnBonus[whiteBucket][pieceIndex] * (whitePawnAttacks & bitboard).CountBits();
+            //    //packedScore += PieceProtectedByPawnBonus[whiteBucket][pieceIndex] * (whitePawnAttacks & bitboard).CountBits();
 
             //    while (bitboard != default)
             //    {
@@ -758,14 +758,14 @@ public class Position : IDisposable
             //    var bitboard = PieceBitBoards[pieceIndex];
 
             //    // Pieces protected by pawns bonus
-            //    packedScore -= PieceProtectedByPawnBonus[blackBucket][pieceIndex - 6] * (blackPawnAttacks & bitboard).CountBits();
+            //    //packedScore -= PieceProtectedByPawnBonus[blackBucket][pieceIndex - 6] * (blackPawnAttacks & bitboard).CountBits();
 
             //    while (bitboard != default)
             //    {
             //        var pieceSquareIndex = bitboard.GetLS1BIndex();
             //        bitboard.ResetLS1B();
 
-            //        packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.Black, whiteKing, whitePawnAttacks);
+            //        packedScore += AdditionalPieceEvaluationSigned(pieceSquareIndex, pieceIndex, (int)Side.Black, whiteKing, whitePawnAttacks);
             //    }
             //}
         }
@@ -883,7 +883,7 @@ public class Position : IDisposable
 
                     _incrementalPhaseAccumulator += GamePhaseByPiece[pieceIndex];
 
-                    packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.White, blackKing, blackPawnAttacks);
+                    _incrementalEvalAccumulator += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.White, blackKing, blackPawnAttacks);
                 }
             }
 
@@ -906,7 +906,7 @@ public class Position : IDisposable
 
                     _incrementalPhaseAccumulator += GamePhaseByPiece[pieceIndex];
 
-                    packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.Black, whiteKing, whitePawnAttacks);
+                    _incrementalEvalAccumulator -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.Black, whiteKing, whitePawnAttacks);
                 }
             }
 
