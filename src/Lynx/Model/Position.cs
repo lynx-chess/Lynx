@@ -176,6 +176,12 @@ public class Position : IDisposable
 
         EnPassant = BoardSquare.noSquare;
 
+        //if (move.IsCapture())
+        //{
+        //    _isIncrementalEval = false;
+        //}
+
+        // _incrementalEvalAccumulator updates
         if (_isIncrementalEval)
         {
             var whitePawns = PieceBitBoards[(int)Piece.P];
@@ -205,7 +211,6 @@ public class Position : IDisposable
 
             _incrementalEvalAccumulator += PSQT(0, sameSideBucket, newPiece, targetSquare);
             _incrementalEvalAccumulator += PSQT(1, opposideSideBucket, newPiece, targetSquare);
-            _incrementalEvalAccumulator += AdditionalPieceEvaluationSigned(targetSquare, newPiece, (int)Side, oppositeSideKing, oppositeSidePawnAttacks);
 
             _incrementalPhaseAccumulator += extraPhaseIfIncremental;
 
@@ -224,17 +229,29 @@ public class Position : IDisposable
                             var capturedPieceHash = ZobristTable.PieceHash(capturedSquare, capturedPiece);
                             UniqueIdentifier ^= capturedPieceHash;
 
-                            // Kings can't be captured
-                            if (capturedPiece == (int)Piece.P || capturedPiece == (int)Piece.p)
-                            {
-                                _kingPawnUniqueIdentifier ^= capturedPieceHash;
-                            }
 
                             _incrementalEvalAccumulator -= PSQT(0, opposideSideBucket, capturedPiece, capturedSquare);
                             _incrementalEvalAccumulator -= PSQT(1, sameSideBucket, capturedPiece, capturedSquare);
                             _incrementalEvalAccumulator -= AdditionalPieceEvaluationSigned(capturedSquare, capturedPiece, oppositeSide, sameSideKing, sameSidePawnAttacks);
 
                             _incrementalPhaseAccumulator -= GamePhaseByPiece[capturedPiece];
+
+                            // Kings can't be captured
+                            if (capturedPiece == (int)Piece.P)
+                            {
+                                _kingPawnUniqueIdentifier ^= capturedPieceHash;
+
+                                // Pawn attacks recalculation
+                                //sameSidePawnAttacks = whitePawns.ShiftUpRight() | whitePawns.ShiftUpLeft();       // Not used any more
+                                oppositeSidePawnAttacks = blackPawns.ShiftDownRight() | blackPawns.ShiftDownLeft();
+                            }
+                            else if (capturedPiece == (int)Piece.p)
+                            {
+                                _kingPawnUniqueIdentifier ^= capturedPieceHash;
+
+                                //sameSidePawnAttacks = blackPawns.ShiftDownRight() | blackPawns.ShiftDownLeft();   // Not used any more
+                                oppositeSidePawnAttacks = whitePawns.ShiftUpRight() | whitePawns.ShiftUpLeft();
+                            }
                         }
 
                         break;
@@ -325,11 +342,25 @@ public class Position : IDisposable
                         _incrementalEvalAccumulator -= PSQT(0, opposideSideBucket, capturedPiece, capturedSquare);
                         _incrementalEvalAccumulator -= PSQT(1, sameSideBucket, capturedPiece, capturedSquare);
                         _incrementalEvalAccumulator -= AdditionalPieceEvaluationSigned(capturedSquare, capturedPiece, oppositeSide, sameSideKing, sameSidePawnAttacks);
-
                         //_incrementalPhaseAccumulator -= GamePhaseByPiece[capturedPiece];
+
+                        // Pawn attacks recalculation
+                        sameSidePawnAttacks = whitePawns.ShiftUpRight() | whitePawns.ShiftUpLeft();
+                        oppositeSidePawnAttacks = blackPawns.ShiftDownRight() | blackPawns.ShiftDownLeft();
+
+                        if (Side == Side.Black)
+                        {
+                            oppositeSidePawnAttacks = sameSidePawnAttacks;
+                            // sameSidePawnAttacks not used any more
+                            //(sameSidePawnAttacks, oppositeSidePawnAttacks) = (oppositeSidePawnAttacks, sameSidePawnAttacks);
+                        }
+
                         break;
                     }
             }
+
+            // After pawn captures and therefore oppositeSidePawnAttacks recalculations
+            _incrementalEvalAccumulator += AdditionalPieceEvaluationSigned(targetSquare, newPiece, (int)Side, oppositeSideKing, oppositeSidePawnAttacks);
         }
         // No _incrementalEvalAccumulator updates
         else
@@ -680,8 +711,7 @@ public class Position : IDisposable
             {
                 var pawnScore = 0;
                 // We use it to keep pawn table updated, but we don't add it to the packed score
-                int additionalPawnScore = 0;
-
+                var additionalPawnScore = 0;
                 // White pawns
 
                 // King pawn shield bonus
