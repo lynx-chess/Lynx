@@ -175,16 +175,7 @@ public class Position : IDisposable
         }
 
         EnPassant = BoardSquare.noSquare;
-        //if (Side == Side.Black
-        //    || piece == (int)Piece.N
-        //    || piece == (int)Piece.B
-        //    || piece == (int)Piece.R
-        //        //|| piece == (int)Piece.Q
-        //        ||move.IsCapture() || move.SpecialMoveFlag() != SpecialMoveType.None || move.PromotedPiece() != default)
-        //{
-        //    _isIncrementalEval = false;
-        //}
-        // _incrementalEvalAccumulator updates
+
         if (_isIncrementalEval)
         {
             var whitePawns = PieceBitBoards[(int)Piece.P];
