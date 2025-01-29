@@ -705,7 +705,7 @@ public class Position : IDisposable
             {
                 var pawnScore = 0;
                 // We use it to keep pawn table updated, but we don't add it to the packed score
-                //var additionalPawnScore = 0;
+                var additionalPawnScore = 0;
                 // White pawns
 
                 // King pawn shield bonus
@@ -715,14 +715,14 @@ public class Position : IDisposable
                 pawnScore += PieceProtectedByPawnBonus[whiteBucket][(int)Piece.P] * (whitePawnAttacks & whitePawns).CountBits();
 
                 // Bitboard copy that we 'empty'
-                //var whitePawnsCopy = whitePawns;
-                //while (whitePawnsCopy != default)
-                //{
-                //    var pieceSquareIndex = whitePawnsCopy.GetLS1BIndex();
-                //    whitePawnsCopy.ResetLS1B();
+                var whitePawnsCopy = whitePawns;
+                while (whitePawnsCopy != default)
+                {
+                    var pieceSquareIndex = whitePawnsCopy.GetLS1BIndex();
+                    whitePawnsCopy.ResetLS1B();
 
-                //    additionalPawnScore += PawnAdditionalEvaluation(whiteBucket, blackBucket, pieceSquareIndex, (int)Piece.P, whiteKing, blackKing);
-                //}
+                    additionalPawnScore += PawnAdditionalEvaluation(whiteBucket, blackBucket, pieceSquareIndex, (int)Piece.P, whiteKing, blackKing);
+                }
 
                 // Black pawns
 
@@ -733,16 +733,16 @@ public class Position : IDisposable
                 pawnScore -= PieceProtectedByPawnBonus[blackBucket][(int)Piece.P] * (blackPawnAttacks & blackPawns).CountBits();
 
                 // Bitboard copy that we 'empty'
-                //var blackPawnsCopy = blackPawns;
-                //while (blackPawnsCopy != default)
-                //{
-                //    var pieceSquareIndex = blackPawnsCopy.GetLS1BIndex();
-                //    blackPawnsCopy.ResetLS1B();
+                var blackPawnsCopy = blackPawns;
+                while (blackPawnsCopy != default)
+                {
+                    var pieceSquareIndex = blackPawnsCopy.GetLS1BIndex();
+                    blackPawnsCopy.ResetLS1B();
 
-                //    additionalPawnScore -= PawnAdditionalEvaluation(blackBucket, whiteBucket, pieceSquareIndex, (int)Piece.p, blackKing, whiteKing);
-                //}
+                    additionalPawnScore -= PawnAdditionalEvaluation(blackBucket, whiteBucket, pieceSquareIndex, (int)Piece.p, blackKing, whiteKing);
+                }
 
-                entry.Update(_kingPawnUniqueIdentifier, pawnScore);
+                entry.Update(_kingPawnUniqueIdentifier, pawnScore + additionalPawnScore);
                 packedScore += pawnScore;
             }
 
@@ -824,8 +824,7 @@ public class Position : IDisposable
                     _incrementalEvalAccumulator += PSQT(0, whiteBucket, (int)Piece.P, pieceSquareIndex)
                                                 + PSQT(1, blackBucket, (int)Piece.P, pieceSquareIndex);
 
-                    _incrementalEvalAccumulator += PawnAdditionalEvaluation(whiteBucket, blackBucket, pieceSquareIndex, (int)Piece.P, whiteKing, blackKing);
-                    // pawnScore
+                    pawnScore += PawnAdditionalEvaluation(whiteBucket, blackBucket, pieceSquareIndex, (int)Piece.P, whiteKing, blackKing);
                 }
 
                 // Black pawns
@@ -846,8 +845,7 @@ public class Position : IDisposable
                     _incrementalEvalAccumulator += PSQT(0, blackBucket, (int)Piece.p, pieceSquareIndex)
                                                 + PSQT(1, whiteBucket, (int)Piece.p, pieceSquareIndex);
 
-                    _incrementalEvalAccumulator -= PawnAdditionalEvaluation(blackBucket, whiteBucket, pieceSquareIndex, (int)Piece.p, blackKing, whiteKing);
-                    // pawnScore
+                    pawnScore -= PawnAdditionalEvaluation(blackBucket, whiteBucket, pieceSquareIndex, (int)Piece.p, blackKing, whiteKing);
                 }
 
                 entry.Update(_kingPawnUniqueIdentifier, pawnScore);
