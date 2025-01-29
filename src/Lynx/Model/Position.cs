@@ -155,7 +155,7 @@ public class Position : IDisposable
         if (piece == (int)Piece.P || piece == (int)Piece.p)
         {
             _kingPawnUniqueIdentifier ^= sourcePieceHash;
-            _isIncrementalEval = false; // TODO Neeeded?
+            //_isIncrementalEval = false; // TODO Neeeded?
 
             // In case of promotion, the promoted piece won't be a pawn or a king, so no need to update the key with it
             if (promotedPiece == default)
@@ -175,10 +175,15 @@ public class Position : IDisposable
         }
 
         EnPassant = BoardSquare.noSquare;
-        if(move.IsCapture() || move.SpecialMoveFlag() != SpecialMoveType.None || move.PromotedPiece() != default)
-        {
-            _isIncrementalEval = false;
-        }
+        //if (Side == Side.Black
+        //    || piece == (int)Piece.N
+        //    || piece == (int)Piece.B
+        //    || piece == (int)Piece.R
+        //        //|| piece == (int)Piece.Q
+        //        ||move.IsCapture() || move.SpecialMoveFlag() != SpecialMoveType.None || move.PromotedPiece() != default)
+        //{
+        //    _isIncrementalEval = false;
+        //}
         // _incrementalEvalAccumulator updates
         if (_isIncrementalEval)
         {
@@ -683,6 +688,8 @@ public class Position : IDisposable
             else
             {
                 var pawnScore = 0;
+                // We use it to keep pawn table updated, but we don't add it to the packed score
+                int additionalPawnScore = 0;
 
                 // White pawns
 
@@ -699,7 +706,7 @@ public class Position : IDisposable
                     var pieceSquareIndex = whitePawnsCopy.GetLS1BIndex();
                     whitePawnsCopy.ResetLS1B();
 
-                    pawnScore += PawnAdditionalEvaluation(whiteBucket, blackBucket, pieceSquareIndex, (int)Piece.P, whiteKing, blackKing);
+                    additionalPawnScore += PawnAdditionalEvaluation(whiteBucket, blackBucket, pieceSquareIndex, (int)Piece.P, whiteKing, blackKing);
                 }
 
                 // Black pawns
@@ -717,10 +724,10 @@ public class Position : IDisposable
                     var pieceSquareIndex = blackPawnsCopy.GetLS1BIndex();
                     blackPawnsCopy.ResetLS1B();
 
-                    pawnScore -= PawnAdditionalEvaluation(blackBucket, whiteBucket, pieceSquareIndex, (int)Piece.p, blackKing, whiteKing);
+                    additionalPawnScore -= PawnAdditionalEvaluation(blackBucket, whiteBucket, pieceSquareIndex, (int)Piece.p, blackKing, whiteKing);
                 }
 
-                entry.Update(_kingPawnUniqueIdentifier, pawnScore);
+                entry.Update(_kingPawnUniqueIdentifier, pawnScore + additionalPawnScore);
                 packedScore += pawnScore;
             }
 
