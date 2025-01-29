@@ -731,48 +731,48 @@ public class Position : IDisposable
         {
             _incrementalEvalAccumulator = 0;
 
-            var kingPawnIndex = _kingPawnUniqueIdentifier & Constants.KingPawnHashMask;
-            ref var entry = ref pawnEvalTable[kingPawnIndex];
+            //var kingPawnIndex = _kingPawnUniqueIdentifier & Constants.KingPawnHashMask;
+            //ref var entry = ref pawnEvalTable[kingPawnIndex];
 
             // pawnTable hit: We can reuse cached eval for pawn additional evaluation + PieceProtectedByPawnBonus + KingShieldBonus
-            if (entry.Key == _kingPawnUniqueIdentifier)
-            {
-                packedScore += entry.PackedScore;
+            //if (entry.Key == _kingPawnUniqueIdentifier)
+            //{
+            //    packedScore += entry.PackedScore;
 
-                // White pawns
-                // No PieceProtectedByPawnBonus - included in pawn table | packedScore += PieceProtectedByPawnBonus[...]
+            //    // White pawns
+            //    // No PieceProtectedByPawnBonus - included in pawn table | packedScore += PieceProtectedByPawnBonus[...]
 
-                // Bitboard copy that we 'empty'
-                var whitePawnsCopy = PieceBitBoards[(int)Piece.P];
-                while (whitePawnsCopy != default)
-                {
-                    var pieceSquareIndex = whitePawnsCopy.GetLS1BIndex();
-                    whitePawnsCopy.ResetLS1B();
+            //    // Bitboard copy that we 'empty'
+            //    var whitePawnsCopy = PieceBitBoards[(int)Piece.P];
+            //    while (whitePawnsCopy != default)
+            //    {
+            //        var pieceSquareIndex = whitePawnsCopy.GetLS1BIndex();
+            //        whitePawnsCopy.ResetLS1B();
 
-                    _incrementalEvalAccumulator += PSQT(0, whiteBucket, (int)Piece.P, pieceSquareIndex)
-                                                + PSQT(1, blackBucket, (int)Piece.P, pieceSquareIndex);
+            //        _incrementalEvalAccumulator += PSQT(0, whiteBucket, (int)Piece.P, pieceSquareIndex)
+            //                                    + PSQT(1, blackBucket, (int)Piece.P, pieceSquareIndex);
 
-                    // No incremental eval - included in pawn table | packedScore += AdditionalPieceEvaluation(...);
-                }
+            //        // No incremental eval - included in pawn table | packedScore += AdditionalPieceEvaluation(...);
+            //    }
 
-                // Black pawns
-                // No PieceProtectedByPawnBonus - included in pawn table | packedScore -= PieceProtectedByPawnBonus .Length[...]
+            //    // Black pawns
+            //    // No PieceProtectedByPawnBonus - included in pawn table | packedScore -= PieceProtectedByPawnBonus .Length[...]
 
-                // Bitboard copy that we 'empty'
-                var blackPawnsCopy = PieceBitBoards[(int)Piece.p];
-                while (blackPawnsCopy != default)
-                {
-                    var pieceSquareIndex = blackPawnsCopy.GetLS1BIndex();
-                    blackPawnsCopy.ResetLS1B();
+            //    // Bitboard copy that we 'empty'
+            //    var blackPawnsCopy = PieceBitBoards[(int)Piece.p];
+            //    while (blackPawnsCopy != default)
+            //    {
+            //        var pieceSquareIndex = blackPawnsCopy.GetLS1BIndex();
+            //        blackPawnsCopy.ResetLS1B();
 
-                    _incrementalEvalAccumulator += PSQT(0, blackBucket, (int)Piece.p, pieceSquareIndex)
-                                                + PSQT(1, whiteBucket, (int)Piece.p, pieceSquareIndex);
+            //        _incrementalEvalAccumulator += PSQT(0, blackBucket, (int)Piece.p, pieceSquareIndex)
+            //                                    + PSQT(1, whiteBucket, (int)Piece.p, pieceSquareIndex);
 
-                    // No incremental eval - included in pawn table | packedScore -= AdditionalPieceEvaluation(...);
-                }
-            }
-            // Not hit in pawnTable table
-            else
+            //        // No incremental eval - included in pawn table | packedScore -= AdditionalPieceEvaluation(...);
+            //    }
+            //}
+            //// Not hit in pawnTable table
+            //else
             {
                 var pawnScore = 0;
 
@@ -818,7 +818,7 @@ public class Position : IDisposable
                     pawnScore -= PawnAdditionalEvaluation(blackBucket, whiteBucket, pieceSquareIndex, (int)Piece.p, blackKing, whiteKing);
                 }
 
-                entry.Update(_kingPawnUniqueIdentifier, pawnScore);
+                //entry.Update(_kingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
             }
 
