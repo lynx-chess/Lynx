@@ -740,41 +740,6 @@ public class Position : IDisposable
             packedScore -= PieceProtectedByPawnBonus[blackBucket][(int)Piece.B] * (blackPawnAttacks & PieceBitBoards[(int)Piece.b]).CountBits();
             packedScore -= PieceProtectedByPawnBonus[blackBucket][(int)Piece.R] * (blackPawnAttacks & PieceBitBoards[(int)Piece.r]).CountBits();
             packedScore -= PieceProtectedByPawnBonus[blackBucket][(int)Piece.Q] * (blackPawnAttacks & PieceBitBoards[(int)Piece.q]).CountBits();
-
-            //// White pieces additional eval, except pawn and king
-            //for (int pieceIndex = (int)Piece.N; pieceIndex < (int)Piece.K; ++pieceIndex)
-            //{
-            //    // Bitboard copy that we 'empty'
-            //    var bitboard = PieceBitBoards[pieceIndex];
-
-            //    //packedScore += PieceProtectedByPawnBonus[whiteBucket][pieceIndex] * (whitePawnAttacks & bitboard).CountBits();
-
-            //    while (bitboard != default)
-            //    {
-            //        var pieceSquareIndex = bitboard.GetLS1BIndex();
-            //        bitboard.ResetLS1B();
-
-            //        packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.White, blackKing, blackPawnAttacks);
-            //    }
-            //}
-
-            //// Black pieces additional eval , except pawn and king
-            //for (int pieceIndex = (int)Piece.n; pieceIndex < (int)Piece.k; ++pieceIndex)
-            //{
-            //    // Bitboard copy that we 'empty'
-            //    var bitboard = PieceBitBoards[pieceIndex];
-
-            //    // Pieces protected by pawns bonus
-            //    //packedScore -= PieceProtectedByPawnBonus[blackBucket][pieceIndex - 6] * (blackPawnAttacks & bitboard).CountBits();
-
-            //    while (bitboard != default)
-            //    {
-            //        var pieceSquareIndex = bitboard.GetLS1BIndex();
-            //        bitboard.ResetLS1B();
-
-            //        packedScore += AdditionalPieceEvaluationSigned(pieceSquareIndex, pieceIndex, (int)Side.Black, whiteKing, whitePawnAttacks);
-            //    }
-            //}
         }
         else
         {
