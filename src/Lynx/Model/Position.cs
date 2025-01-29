@@ -241,15 +241,14 @@ public class Position : IDisposable
                             {
                                 _kingPawnUniqueIdentifier ^= capturedPieceHash;
 
-                                // Pawn attacks recalculation
-                                //sameSidePawnAttacks = whitePawns.ShiftUpRight() | whitePawns.ShiftUpLeft();       // Not used any more
+                                // Opponent pawn attacks recalculation (same side pawns not sure any more)
                                 oppositeSidePawnAttacks = blackPawns.ShiftDownRight() | blackPawns.ShiftDownLeft();
                             }
                             else if (capturedPiece == (int)Piece.p)
                             {
                                 _kingPawnUniqueIdentifier ^= capturedPieceHash;
 
-                                //sameSidePawnAttacks = blackPawns.ShiftDownRight() | blackPawns.ShiftDownLeft();   // Not used any more
+                                // Opponent pawn attacks recalculation (same side pawns not sure any more)
                                 oppositeSidePawnAttacks = whitePawns.ShiftUpRight() | whitePawns.ShiftUpLeft();
                             }
                         }
@@ -344,16 +343,11 @@ public class Position : IDisposable
                         _incrementalEvalAccumulator -= AdditionalPieceEvaluationSigned(capturedSquare, capturedPiece, oppositeSide, sameSideKing, sameSidePawnAttacks);
                         //_incrementalPhaseAccumulator -= GamePhaseByPiece[capturedPiece];
 
-                        // Pawn attacks recalculation
-                        sameSidePawnAttacks = whitePawns.ShiftUpRight() | whitePawns.ShiftUpLeft();
-                        oppositeSidePawnAttacks = blackPawns.ShiftDownRight() | blackPawns.ShiftDownLeft();
-
-                        if (Side == Side.Black)
-                        {
-                            oppositeSidePawnAttacks = sameSidePawnAttacks;
-                            // sameSidePawnAttacks not used any more
-                            //(sameSidePawnAttacks, oppositeSidePawnAttacks) = (oppositeSidePawnAttacks, sameSidePawnAttacks);
-                        }
+                        // Opponent pawn attacks recalculation (same side pawns not sure any more)
+                        oppositeSidePawnAttacks =
+                            Side == Side.White
+                            ? blackPawns.ShiftDownRight() | blackPawns.ShiftDownLeft()
+                            : whitePawns.ShiftUpRight() | whitePawns.ShiftUpLeft();
 
                         break;
                     }
