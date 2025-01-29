@@ -155,7 +155,7 @@ public class Position : IDisposable
         if (piece == (int)Piece.P || piece == (int)Piece.p)
         {
             _kingPawnUniqueIdentifier ^= sourcePieceHash;
-            //_isIncrementalEval = false; // TODO Neeeded?
+            _isIncrementalEval = false; // TODO Neeeded?
 
             // In case of promotion, the promoted piece won't be a pawn or a king, so no need to update the key with it
             if (promotedPiece == default)
@@ -175,7 +175,10 @@ public class Position : IDisposable
         }
 
         EnPassant = BoardSquare.noSquare;
-
+        if(move.IsCapture() || move.SpecialMoveFlag() != SpecialMoveType.None || move.PromotedPiece() != default)
+        {
+            _isIncrementalEval = false;
+        }
         // _incrementalEvalAccumulator updates
         if (_isIncrementalEval)
         {
@@ -202,11 +205,11 @@ public class Position : IDisposable
 
             _incrementalEvalAccumulator -= PSQT(0, sameSideBucket, piece, sourceSquare);
             _incrementalEvalAccumulator -= PSQT(1, opposideSideBucket, piece, sourceSquare);
-            _incrementalEvalAccumulator -= AdditionalPieceEvaluation(sourceSquare, piece, (int)Side, oppositeSideKing, oppositeSidePawnAttacks);
+            _incrementalEvalAccumulator -= AdditionalPieceEvaluationSigned(sourceSquare, piece, (int)Side, oppositeSideKing, oppositeSidePawnAttacks);
 
             _incrementalEvalAccumulator += PSQT(0, sameSideBucket, newPiece, targetSquare);
             _incrementalEvalAccumulator += PSQT(1, opposideSideBucket, newPiece, targetSquare);
-            _incrementalEvalAccumulator += AdditionalPieceEvaluation(targetSquare, newPiece, (int)Side, oppositeSideKing, oppositeSidePawnAttacks);
+            _incrementalEvalAccumulator += AdditionalPieceEvaluationSigned(targetSquare, newPiece, (int)Side, oppositeSideKing, oppositeSidePawnAttacks);
 
             _incrementalPhaseAccumulator += extraPhaseIfIncremental;
 
@@ -233,7 +236,7 @@ public class Position : IDisposable
 
                             _incrementalEvalAccumulator -= PSQT(0, opposideSideBucket, capturedPiece, capturedSquare);
                             _incrementalEvalAccumulator -= PSQT(1, sameSideBucket, capturedPiece, capturedSquare);
-                            _incrementalEvalAccumulator -= AdditionalPieceEvaluation(capturedSquare, capturedPiece, oppositeSide, sameSideKing, sameSidePawnAttacks);
+                            _incrementalEvalAccumulator -= AdditionalPieceEvaluationSigned(capturedSquare, capturedPiece, oppositeSide, sameSideKing, sameSidePawnAttacks);
 
                             _incrementalPhaseAccumulator -= GamePhaseByPiece[capturedPiece];
                         }
@@ -271,11 +274,11 @@ public class Position : IDisposable
 
                         _incrementalEvalAccumulator -= PSQT(0, sameSideBucket, rookIndex, rookSourceSquare);
                         _incrementalEvalAccumulator -= PSQT(1, opposideSideBucket, rookIndex, rookSourceSquare);
-                        _incrementalEvalAccumulator -= AdditionalPieceEvaluation(rookSourceSquare, rookIndex, (int)Side, oppositeSideKing, oppositeSidePawnAttacks);
+                        _incrementalEvalAccumulator -= AdditionalPieceEvaluationSigned(rookSourceSquare, rookIndex, (int)Side, oppositeSideKing, oppositeSidePawnAttacks);
 
                         _incrementalEvalAccumulator += PSQT(0, sameSideBucket, rookIndex, rookTargetSquare);
                         _incrementalEvalAccumulator += PSQT(1, opposideSideBucket, rookIndex, rookTargetSquare);
-                        _incrementalEvalAccumulator += AdditionalPieceEvaluation(rookTargetSquare, rookIndex, (int)Side, oppositeSideKing, oppositeSidePawnAttacks);
+                        _incrementalEvalAccumulator += AdditionalPieceEvaluationSigned(rookTargetSquare, rookIndex, (int)Side, oppositeSideKing, oppositeSidePawnAttacks);
 
                         break;
                     }
@@ -299,11 +302,11 @@ public class Position : IDisposable
 
                         _incrementalEvalAccumulator -= PSQT(0, sameSideBucket, rookIndex, rookSourceSquare);
                         _incrementalEvalAccumulator -= PSQT(1, opposideSideBucket, rookIndex, rookSourceSquare);
-                        _incrementalEvalAccumulator -= AdditionalPieceEvaluation(rookSourceSquare, rookIndex, (int)Side, oppositeSideKing, oppositeSidePawnAttacks);
+                        _incrementalEvalAccumulator -= AdditionalPieceEvaluationSigned(rookSourceSquare, rookIndex, (int)Side, oppositeSideKing, oppositeSidePawnAttacks);
 
                         _incrementalEvalAccumulator += PSQT(0, sameSideBucket, rookIndex, rookTargetSquare);
                         _incrementalEvalAccumulator += PSQT(1, opposideSideBucket, rookIndex, rookTargetSquare);
-                        _incrementalEvalAccumulator += AdditionalPieceEvaluation(rookTargetSquare, rookIndex, (int)Side, oppositeSideKing, oppositeSidePawnAttacks);
+                        _incrementalEvalAccumulator += AdditionalPieceEvaluationSigned(rookTargetSquare, rookIndex, (int)Side, oppositeSideKing, oppositeSidePawnAttacks);
 
                         break;
                     }
@@ -325,7 +328,7 @@ public class Position : IDisposable
 
                         _incrementalEvalAccumulator -= PSQT(0, opposideSideBucket, capturedPiece, capturedSquare);
                         _incrementalEvalAccumulator -= PSQT(1, sameSideBucket, capturedPiece, capturedSquare);
-                        _incrementalEvalAccumulator -= AdditionalPieceEvaluation(capturedSquare, capturedPiece, oppositeSide, sameSideKing, sameSidePawnAttacks);
+                        _incrementalEvalAccumulator -= AdditionalPieceEvaluationSigned(capturedSquare, capturedPiece, oppositeSide, sameSideKing, sameSidePawnAttacks);
 
                         //_incrementalPhaseAccumulator -= GamePhaseByPiece[capturedPiece];
                         break;
@@ -721,11 +724,23 @@ public class Position : IDisposable
                 packedScore += pawnScore;
             }
 
+            packedScore += PieceProtectedByPawnBonus[whiteBucket][(int)Piece.N] * (whitePawnAttacks & PieceBitBoards[(int)Piece.N]).CountBits();
+            packedScore += PieceProtectedByPawnBonus[whiteBucket][(int)Piece.B] * (whitePawnAttacks & PieceBitBoards[(int)Piece.B]).CountBits();
+            packedScore += PieceProtectedByPawnBonus[whiteBucket][(int)Piece.R] * (whitePawnAttacks & PieceBitBoards[(int)Piece.R]).CountBits();
+            packedScore += PieceProtectedByPawnBonus[whiteBucket][(int)Piece.Q] * (whitePawnAttacks & PieceBitBoards[(int)Piece.Q]).CountBits();
+
+            packedScore -= PieceProtectedByPawnBonus[blackBucket][(int)Piece.N] * (blackPawnAttacks & PieceBitBoards[(int)Piece.n]).CountBits();
+            packedScore -= PieceProtectedByPawnBonus[blackBucket][(int)Piece.B] * (blackPawnAttacks & PieceBitBoards[(int)Piece.b]).CountBits();
+            packedScore -= PieceProtectedByPawnBonus[blackBucket][(int)Piece.R] * (blackPawnAttacks & PieceBitBoards[(int)Piece.r]).CountBits();
+            packedScore -= PieceProtectedByPawnBonus[blackBucket][(int)Piece.Q] * (blackPawnAttacks & PieceBitBoards[(int)Piece.q]).CountBits();
+
             //// White pieces additional eval, except pawn and king
             //for (int pieceIndex = (int)Piece.N; pieceIndex < (int)Piece.K; ++pieceIndex)
             //{
             //    // Bitboard copy that we 'empty'
             //    var bitboard = PieceBitBoards[pieceIndex];
+
+            //    packedScore += PieceProtectedByPawnBonus[whiteBucket][pieceIndex] * (whitePawnAttacks & bitboard).CountBits();
 
             //    while (bitboard != default)
             //    {
@@ -753,15 +768,6 @@ public class Position : IDisposable
             //        packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.Black, whiteKing, whitePawnAttacks);
             //    }
             //}
-
-            packedScore += PieceProtectedByPawnBonus[whiteBucket][(int)Piece.N] * (whitePawnAttacks & PieceBitBoards[(int)Piece.N]).CountBits();
-            packedScore += PieceProtectedByPawnBonus[whiteBucket][(int)Piece.B] * (whitePawnAttacks & PieceBitBoards[(int)Piece.B]).CountBits();
-            packedScore += PieceProtectedByPawnBonus[whiteBucket][(int)Piece.R] * (whitePawnAttacks & PieceBitBoards[(int)Piece.R]).CountBits();
-            packedScore += PieceProtectedByPawnBonus[whiteBucket][(int)Piece.Q] * (whitePawnAttacks & PieceBitBoards[(int)Piece.Q]).CountBits();
-            packedScore -= PieceProtectedByPawnBonus[blackBucket][(int)Piece.N] * (blackPawnAttacks & PieceBitBoards[(int)Piece.n]).CountBits();
-            packedScore -= PieceProtectedByPawnBonus[blackBucket][(int)Piece.B] * (blackPawnAttacks & PieceBitBoards[(int)Piece.b]).CountBits();
-            packedScore -= PieceProtectedByPawnBonus[blackBucket][(int)Piece.R] * (blackPawnAttacks & PieceBitBoards[(int)Piece.r]).CountBits();
-            packedScore -= PieceProtectedByPawnBonus[blackBucket][(int)Piece.Q] * (blackPawnAttacks & PieceBitBoards[(int)Piece.q]).CountBits();
         }
         else
         {
@@ -1073,6 +1079,26 @@ public class Position : IDisposable
             (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
             (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
             (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
+            _ => 0
+        };
+    }
+
+    /// <summary>
+    /// Doesn't include <see cref="Piece.P"/>, <see cref="Piece.p"/>, <see cref="Piece.K"/> and <see cref="Piece.k"/> evaluation
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int AdditionalPieceEvaluationSigned(int pieceSquareIndex, int pieceIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+    {
+        return pieceIndex switch
+        {
+            (int)Piece.R => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.r => -RookAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.B => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.b => -BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.N => KnightAdditionalEvaluation(pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.n => -KnightAdditionalEvaluation(pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.Q => QueenAdditionalEvaluation(pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.q => -QueenAdditionalEvaluation(pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
             _ => 0
         };
     }
