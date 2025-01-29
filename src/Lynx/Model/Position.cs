@@ -155,7 +155,7 @@ public class Position : IDisposable
         if (piece == (int)Piece.P || piece == (int)Piece.p)
         {
             _kingPawnUniqueIdentifier ^= sourcePieceHash;
-            //_isIncrementalEval = false; // TODO Neeeded?
+            _isIncrementalEval = false; // TODO Neeeded?
 
             // In case of promotion, the promoted piece won't be a pawn or a king, so no need to update the key with it
             if (promotedPiece == default)
@@ -343,11 +343,12 @@ public class Position : IDisposable
                         _incrementalEvalAccumulator -= AdditionalPieceEvaluationSigned(capturedSquare, capturedPiece, oppositeSide, sameSideKing, sameSidePawnAttacks);
                         //_incrementalPhaseAccumulator -= GamePhaseByPiece[capturedPiece];
 
+                        // No incremental eval on en-passant pawns
                         // Opponent pawn attacks recalculation (same side pawns not sure any more)
-                        oppositeSidePawnAttacks =
-                            Side == Side.White
-                            ? blackPawns.ShiftDownRight() | blackPawns.ShiftDownLeft()
-                            : whitePawns.ShiftUpRight() | whitePawns.ShiftUpLeft();
+                        //oppositeSidePawnAttacks =
+                        //    Side == Side.White
+                        //    ? blackPawns.ShiftDownRight() | blackPawns.ShiftDownLeft()
+                        //    : whitePawns.ShiftUpRight() | whitePawns.ShiftUpLeft();
 
                         break;
                     }
@@ -704,8 +705,7 @@ public class Position : IDisposable
             else
             {
                 var pawnScore = 0;
-                // We use it to keep pawn table updated, but we don't add it to the packed score
-                var additionalPawnScore = 0;
+
                 // White pawns
 
                 // King pawn shield bonus
@@ -721,7 +721,7 @@ public class Position : IDisposable
                     var pieceSquareIndex = whitePawnsCopy.GetLS1BIndex();
                     whitePawnsCopy.ResetLS1B();
 
-                    additionalPawnScore += PawnAdditionalEvaluation(whiteBucket, blackBucket, pieceSquareIndex, (int)Piece.P, whiteKing, blackKing);
+                    pawnScore += PawnAdditionalEvaluation(whiteBucket, blackBucket, pieceSquareIndex, (int)Piece.P, whiteKing, blackKing);
                 }
 
                 // Black pawns
@@ -739,10 +739,10 @@ public class Position : IDisposable
                     var pieceSquareIndex = blackPawnsCopy.GetLS1BIndex();
                     blackPawnsCopy.ResetLS1B();
 
-                    additionalPawnScore -= PawnAdditionalEvaluation(blackBucket, whiteBucket, pieceSquareIndex, (int)Piece.p, blackKing, whiteKing);
+                    pawnScore -= PawnAdditionalEvaluation(blackBucket, whiteBucket, pieceSquareIndex, (int)Piece.p, blackKing, whiteKing);
                 }
 
-                entry.Update(_kingPawnUniqueIdentifier, pawnScore + additionalPawnScore);
+                entry.Update(_kingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
             }
 
