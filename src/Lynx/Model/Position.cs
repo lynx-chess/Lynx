@@ -290,11 +290,9 @@ public class Position : IDisposable
 
                         _incrementalEvalAccumulator -= PSQT(0, sameSideBucket, rookIndex, rookSourceSquare);
                         _incrementalEvalAccumulator -= PSQT(1, opposideSideBucket, rookIndex, rookSourceSquare);
-                        _incrementalEvalAccumulator -= AdditionalPieceEvaluationSigned(rookSourceSquare, rookIndex, (int)Side, oppositeSideKing, oppositeSidePawnAttacks);
 
                         _incrementalEvalAccumulator += PSQT(0, sameSideBucket, rookIndex, rookTargetSquare);
                         _incrementalEvalAccumulator += PSQT(1, opposideSideBucket, rookIndex, rookTargetSquare);
-                        _incrementalEvalAccumulator += AdditionalPieceEvaluationSigned(rookTargetSquare, rookIndex, (int)Side, oppositeSideKing, oppositeSidePawnAttacks);
 
                         break;
                     }
@@ -318,11 +316,9 @@ public class Position : IDisposable
 
                         _incrementalEvalAccumulator -= PSQT(0, sameSideBucket, rookIndex, rookSourceSquare);
                         _incrementalEvalAccumulator -= PSQT(1, opposideSideBucket, rookIndex, rookSourceSquare);
-                        _incrementalEvalAccumulator -= AdditionalPieceEvaluationSigned(rookSourceSquare, rookIndex, (int)Side, oppositeSideKing, oppositeSidePawnAttacks);
 
                         _incrementalEvalAccumulator += PSQT(0, sameSideBucket, rookIndex, rookTargetSquare);
                         _incrementalEvalAccumulator += PSQT(1, opposideSideBucket, rookIndex, rookTargetSquare);
-                        _incrementalEvalAccumulator += AdditionalPieceEvaluationSigned(rookTargetSquare, rookIndex, (int)Side, oppositeSideKing, oppositeSidePawnAttacks);
 
                         break;
                     }
@@ -344,15 +340,6 @@ public class Position : IDisposable
 
                         _incrementalEvalAccumulator -= PSQT(0, opposideSideBucket, capturedPiece, capturedSquare);
                         _incrementalEvalAccumulator -= PSQT(1, sameSideBucket, capturedPiece, capturedSquare);
-                        _incrementalEvalAccumulator -= AdditionalPieceEvaluationSigned(capturedSquare, capturedPiece, oppositeSide, sameSideKing, sameSidePawnAttacks);
-                        //_incrementalPhaseAccumulator -= GamePhaseByPiece[capturedPiece];
-
-                        // No incremental eval on en-passant pawns
-                        // Opponent pawn attacks recalculation (same side pawns not sure any more)
-                        //oppositeSidePawnAttacks =
-                        //    Side == Side.White
-                        //    ? blackPawns.ShiftDownRight() | blackPawns.ShiftDownLeft()
-                        //    : whitePawns.ShiftUpRight() | whitePawns.ShiftUpLeft();
 
                         break;
                     }
