@@ -229,16 +229,15 @@ public class Position : IDisposable
                             var capturedPieceHash = ZobristTable.PieceHash(capturedSquare, capturedPiece);
                             UniqueIdentifier ^= capturedPieceHash;
 
-
                             _incrementalEvalAccumulator -= PSQT(0, opposideSideBucket, capturedPiece, capturedSquare);
                             _incrementalEvalAccumulator -= PSQT(1, sameSideBucket, capturedPiece, capturedSquare);
-                            _incrementalEvalAccumulator -= AdditionalPieceEvaluationSigned(capturedSquare, capturedPiece, oppositeSide, sameSideKing, sameSidePawnAttacks);
 
                             _incrementalPhaseAccumulator -= GamePhaseByPiece[capturedPiece];
 
                             // Kings can't be captured
                             if (capturedPiece == (int)Piece.P)
                             {
+                                _incrementalEvalAccumulator -= PawnAdditionalEvaluation(opposideSideBucket, sameSideBucket, capturedSquare, capturedPiece, oppositeSideKing, sameSideKing);
                                 _kingPawnUniqueIdentifier ^= capturedPieceHash;
 
                                 // Opponent pawn attacks recalculation (same side pawns not sure any more)
@@ -247,11 +246,16 @@ public class Position : IDisposable
                             }
                             else if (capturedPiece == (int)Piece.p)
                             {
+                                _incrementalEvalAccumulator += PawnAdditionalEvaluation(opposideSideBucket, sameSideBucket, capturedSquare, capturedPiece, oppositeSideKing, sameSideKing);
                                 _kingPawnUniqueIdentifier ^= capturedPieceHash;
 
                                 // Opponent pawn attacks recalculation (same side pawns not sure any more)
                                 blackPawns = PieceBitBoards[(int)Piece.p];
                                 oppositeSidePawnAttacks = blackPawns.ShiftDownRight() | blackPawns.ShiftDownLeft();
+                            }
+                            else
+                            {
+                                _incrementalEvalAccumulator -= AdditionalPieceEvaluationSigned(capturedSquare, capturedPiece, oppositeSide, sameSideKing, sameSidePawnAttacks);
                             }
                         }
 
