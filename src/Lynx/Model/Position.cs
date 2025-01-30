@@ -237,7 +237,6 @@ public class Position : IDisposable
                             // Kings can't be captured
                             if (capturedPiece == (int)Piece.P)
                             {
-                                _incrementalEvalAccumulator -= PawnAdditionalEvaluation(opposideSideBucket, sameSideBucket, capturedSquare, capturedPiece, oppositeSideKing, sameSideKing);
                                 _kingPawnUniqueIdentifier ^= capturedPieceHash;
 
                                 // Opponent pawn attacks recalculation (same side pawns not sure any more)
@@ -246,7 +245,6 @@ public class Position : IDisposable
                             }
                             else if (capturedPiece == (int)Piece.p)
                             {
-                                _incrementalEvalAccumulator += PawnAdditionalEvaluation(opposideSideBucket, sameSideBucket, capturedSquare, capturedPiece, oppositeSideKing, sameSideKing);
                                 _kingPawnUniqueIdentifier ^= capturedPieceHash;
 
                                 // Opponent pawn attacks recalculation (same side pawns not sure any more)
