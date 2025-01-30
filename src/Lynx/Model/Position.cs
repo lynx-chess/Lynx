@@ -821,10 +821,10 @@ public class Position : IDisposable
                     }
                 }
 
-                packedScore += _incrementalAdditionalEvalAccumulator;
-
                 _isIncrementalAdditionalEval = true;
             }
+
+            packedScore += _incrementalAdditionalEvalAccumulator;
         }
         else
         {
