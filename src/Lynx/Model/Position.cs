@@ -242,14 +242,16 @@ public class Position : IDisposable
                                 _kingPawnUniqueIdentifier ^= capturedPieceHash;
 
                                 // Opponent pawn attacks recalculation (same side pawns not sure any more)
-                                oppositeSidePawnAttacks = blackPawns.ShiftDownRight() | blackPawns.ShiftDownLeft();
+                                whitePawns = PieceBitBoards[(int)Piece.P];
+                                oppositeSidePawnAttacks = whitePawns.ShiftUpRight() | whitePawns.ShiftUpLeft();
                             }
                             else if (capturedPiece == (int)Piece.p)
                             {
                                 _kingPawnUniqueIdentifier ^= capturedPieceHash;
 
                                 // Opponent pawn attacks recalculation (same side pawns not sure any more)
-                                oppositeSidePawnAttacks = whitePawns.ShiftUpRight() | whitePawns.ShiftUpLeft();
+                                blackPawns = PieceBitBoards[(int)Piece.p];
+                                oppositeSidePawnAttacks = blackPawns.ShiftDownRight() | blackPawns.ShiftDownLeft();
                             }
                         }
 
