@@ -278,6 +278,10 @@ public class Position : IDisposable
                                     oppositeSidePawnAttacks = blackPawns.ShiftDownRight() | blackPawns.ShiftDownLeft();
                                 }
                             }
+                            else
+                            {
+                                _incrementalAdditionalEvalAccumulator -= AdditionalPieceEvaluationSigned(capturedSquare, capturedPiece, oppositeSide, sameSideKing, sameSidePawnAttacks);
+                            }
                         }
 
                         break;
