@@ -867,16 +867,16 @@ public class Position : IDisposable
                 }
             }
 
-            // Kings
-            _incrementalEvalAccumulator +=
-                PSQT(0, whiteBucket, (int)Piece.K, whiteKing)
-                + PSQT(1, blackBucket, (int)Piece.K, whiteKing)
-                + PSQT(0, blackBucket, (int)Piece.k, blackKing)
-                + PSQT(1, whiteBucket, (int)Piece.k, blackKing);
-
             packedScore += _incrementalEvalAccumulator;
             _isIncrementalEval = true;
         }
+
+        // Kings - they can't be incremental due to the king buckets
+        packedScore +=
+            PSQT(0, whiteBucket, (int)Piece.K, whiteKing)
+            + PSQT(1, blackBucket, (int)Piece.K, whiteKing)
+            + PSQT(0, blackBucket, (int)Piece.k, blackKing)
+            + PSQT(1, whiteBucket, (int)Piece.k, blackKing);
 
         packedScore +=
             KingAdditionalEvaluation(whiteKing, (int)Side.White, blackPawnAttacks)
