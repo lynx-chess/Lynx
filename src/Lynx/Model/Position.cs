@@ -687,7 +687,7 @@ public class Position : IDisposable
                 }
 
                 // Pawn islands
-                pawnScore += PawnIslandsBonus[PawnIslands(whitePawns)] - PawnIslandsBonus[PawnIslands(blackPawns)];
+                pawnScore += PawnIslands(whitePawns, blackPawns);
 
                 entry.Update(_kingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
@@ -822,7 +822,7 @@ public class Position : IDisposable
                 }
 
                 // Pawn islands
-                pawnScore += PawnIslandsBonus[PawnIslands(whitePawns)] - PawnIslandsBonus[PawnIslands(blackPawns)];
+                pawnScore += PawnIslands(whitePawns, blackPawns);
 
                 entry.Update(_kingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
@@ -1297,40 +1297,60 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int PawnIslands(ulong bitboard)
+    public static int PawnIslands(BitBoard whitePawns, BitBoard blackPawns)
     {
-        var islandCount = 0;
-        var isIsland = false;
+        var whiteIslandCount = 0;
+        var blackIslandCount = 0;
+
+        var isWhiteIsland = false;
+        var isBlackIsland = false;
 
         for (int file = 0; file < 8; ++file)
         {
-            var pawnInRank = false;
+            var whitePawnInRank = false;
+            var blackPawnInRank = false;
 
             for (int rank = 1; rank < 7; ++rank)
             {
                 var squareIndex = (rank * 8) + file;
 
-                if (bitboard.GetBit(squareIndex))
+                if (!whitePawnInRank && whitePawns.GetBit(squareIndex))
                 {
-                    pawnInRank = true;
+                    whitePawnInRank = true;
 
-                    if (!isIsland)
+                    if (!isWhiteIsland)
                     {
-                        isIsland = true;
-                        ++islandCount;
+                        isWhiteIsland = true;
+                        ++whiteIslandCount;
                     }
 
-                    break;
+                    continue;
+                }
+
+                if (!blackPawnInRank && blackPawns.GetBit(squareIndex))
+                {
+                    blackPawnInRank = true;
+
+                    if (!isBlackIsland)
+                    {
+                        isBlackIsland = true;
+                        ++blackIslandCount;
+                    }
                 }
             }
 
-            if (!pawnInRank)
+            if (!whitePawnInRank)
             {
-                isIsland = false;
+                isWhiteIsland = false;
+            }
+
+            if (!blackPawnInRank)
+            {
+                isBlackIsland = false;
             }
         }
 
-        return islandCount;
+        return PawnIslandsBonus[whiteIslandCount] - PawnIslandsBonus[blackIslandCount];
     }
 
     /// <summary>
