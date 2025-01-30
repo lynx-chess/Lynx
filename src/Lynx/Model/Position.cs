@@ -898,6 +898,9 @@ public class Position : IDisposable
             * ((blackPawnAttacks & OccupancyBitBoards[(int)Side.White] /* & (~whitePawns) */).CountBits()
                 - (whitePawnAttacks & OccupancyBitBoards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
 
+        // Pawn islands
+        packedScore += PawnIslandsBonus[PawnIslands(whitePawns)] - PawnIslandsBonus[PawnIslands(blackPawns)];
+
         if (gamePhase > MaxPhase)    // Early promotions
         {
             gamePhase = MaxPhase;
@@ -1288,6 +1291,43 @@ public class Position : IDisposable
         var ownPawnsAroundKingCount = (Attacks.KingAttacks[squareIndex] & sameSidePawns).CountBits();
 
         return ownPawnsAroundKingCount * KingShieldBonus;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int PawnIslands(ulong bitboard)
+    {
+        var islandCount = 0;
+        var isIsland = false;
+
+        for (int file = 0; file < 8; ++file)
+        {
+            var pawnInRank = false;
+
+            for (int rank = 1; rank < 7; ++rank)
+            {
+                var squareIndex = (rank * 8) + file;
+
+                if (bitboard.GetBit(squareIndex))
+                {
+                    pawnInRank = true;
+
+                    if (!isIsland)
+                    {
+                        isIsland = true;
+                        ++islandCount;
+                    }
+
+                    break;
+                }
+            }
+
+            if (!pawnInRank)
+            {
+                isIsland = false;
+            }
+        }
+
+        return islandCount;
     }
 
     /// <summary>
