@@ -687,7 +687,7 @@ public class Position : IDisposable
                 }
 
                 // Pawn islands
-                pawnScore += PawnIslandsBonus[PawnIslands(whitePawns)] - PawnIslandsBonus[PawnIslands(blackPawns)];
+                pawnScore += PawnIslandsBonus[-PawnIslands(blackPawns) + PawnIslands(whitePawns) + 4];
 
                 entry.Update(_kingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
@@ -822,7 +822,7 @@ public class Position : IDisposable
                 }
 
                 // Pawn islands
-                pawnScore += PawnIslandsBonus[PawnIslands(whitePawns)] - PawnIslandsBonus[PawnIslands(blackPawns)];
+                pawnScore += PawnIslandsBonus[-PawnIslands(blackPawns) + PawnIslands(whitePawns) + 4];
 
                 entry.Update(_kingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
