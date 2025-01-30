@@ -607,7 +607,9 @@ public class Position : IDisposable
             ZobristTable.SideHash()
             ^ ZobristTable.EnPassantHash((int)oldEnPassant);
 
-        return new GameState(oldUniqueIdentifier, _kingPawnUniqueIdentifier, _incrementalEvalAccumulator, _incrementalAdditionalEvalAccumulator, _incrementalPhaseAccumulator, oldEnPassant, byte.MaxValue, _isIncrementalEval, _isIncrementalAdditionalEval);
+        return new GameState(oldUniqueIdentifier, _kingPawnUniqueIdentifier,
+            _incrementalEvalAccumulator, _incrementalAdditionalEvalAccumulator, _incrementalPhaseAccumulator, oldEnPassant, byte.MaxValue,
+            _isIncrementalEval, _isIncrementalAdditionalEval);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -620,7 +622,9 @@ public class Position : IDisposable
         _incrementalEvalAccumulator = gameState.IncremetalEvalAccumulator;
         _incrementalAdditionalEvalAccumulator = gameState.IncrementalAdditionalEvalAccumulator;
         _incrementalPhaseAccumulator = gameState.IncrementalPhaseAccumulator;
+
         _isIncrementalEval = gameState.IsIncrementalEval;
+        _isIncrementalAdditionalEval = gameState.IsIncrementalAdditionalEval;
     }
 
     /// <summary>
