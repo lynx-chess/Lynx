@@ -731,10 +731,10 @@ public class Position : IDisposable
         {
             _incrementalEvalAccumulator = 0;
 
-            //var kingPawnIndex = _kingPawnUniqueIdentifier & Constants.KingPawnHashMask;
-            //ref var entry = ref pawnEvalTable[kingPawnIndex];
+            var kingPawnIndex = _kingPawnUniqueIdentifier & Constants.KingPawnHashMask;
+            ref var entry = ref pawnEvalTable[kingPawnIndex];
 
-            // pawnTable hit: We can reuse cached eval for pawn additional evaluation + PieceProtectedByPawnBonus + KingShieldBonus
+            //pawnTable hit: We can reuse cached eval for pawn additional evaluation + PieceProtectedByPawnBonus + KingShieldBonus
             //if (entry.Key == _kingPawnUniqueIdentifier)
             //{
             //    packedScore += entry.PackedScore;
@@ -818,7 +818,7 @@ public class Position : IDisposable
                     pawnScore -= PawnAdditionalEvaluation(blackBucket, whiteBucket, pieceSquareIndex, (int)Piece.p, blackKing, whiteKing);
                 }
 
-                //entry.Update(_kingPawnUniqueIdentifier, pawnScore);
+                entry.Update(_kingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
             }
 
