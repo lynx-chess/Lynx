@@ -258,8 +258,6 @@ public class Position : IDisposable
 
                                 if (_isIncrementalAdditionalEval)
                                 {
-                                    _incrementalAdditionalEvalAccumulator -= PawnAdditionalEvaluation(opposideSideBucket, sameSideBucket, capturedSquare, capturedPiece, oppositeSideKing, sameSideKing);
-
                                     // Opponent pawn attacks recalculation (same side pawns not sure any more)
                                     whitePawns = PieceBitBoards[(int)Piece.P];
                                     oppositeSidePawnAttacks = whitePawns.ShiftUpRight() | whitePawns.ShiftUpLeft();
@@ -271,8 +269,6 @@ public class Position : IDisposable
 
                                 if (_isIncrementalAdditionalEval)
                                 {
-                                    _incrementalAdditionalEvalAccumulator += PawnAdditionalEvaluation(opposideSideBucket, sameSideBucket, capturedSquare, capturedPiece, oppositeSideKing, sameSideKing);
-
                                     // Opponent pawn attacks recalculation (same side pawns not sure any more)
                                     blackPawns = PieceBitBoards[(int)Piece.p];
                                     oppositeSidePawnAttacks = blackPawns.ShiftDownRight() | blackPawns.ShiftDownLeft();
