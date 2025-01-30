@@ -313,11 +313,11 @@ public class Position : IDisposable
 
                         _incrementalEvalAccumulator -= PSQT(0, sameSideBucket, rookIndex, rookSourceSquare);
                         _incrementalEvalAccumulator -= PSQT(1, opposideSideBucket, rookIndex, rookSourceSquare);
-                        _incrementalEvalAccumulator -= AdditionalPieceEvaluationSigned(rookSourceSquare, rookIndex, (int)Side, oppositeSideKing, oppositeSidePawnAttacks);
 
                         _incrementalEvalAccumulator += PSQT(0, sameSideBucket, rookIndex, rookTargetSquare);
                         _incrementalEvalAccumulator += PSQT(1, opposideSideBucket, rookIndex, rookTargetSquare);
-                        _incrementalEvalAccumulator += AdditionalPieceEvaluationSigned(rookTargetSquare, rookIndex, (int)Side, oppositeSideKing, oppositeSidePawnAttacks);
+
+                        Debug.Assert(!_isIncrementalAdditionalEval);
 
                         break;
                     }
@@ -341,11 +341,11 @@ public class Position : IDisposable
 
                         _incrementalEvalAccumulator -= PSQT(0, sameSideBucket, rookIndex, rookSourceSquare);
                         _incrementalEvalAccumulator -= PSQT(1, opposideSideBucket, rookIndex, rookSourceSquare);
-                        _incrementalEvalAccumulator -= AdditionalPieceEvaluationSigned(rookSourceSquare, rookIndex, (int)Side, oppositeSideKing, oppositeSidePawnAttacks);
 
                         _incrementalEvalAccumulator += PSQT(0, sameSideBucket, rookIndex, rookTargetSquare);
                         _incrementalEvalAccumulator += PSQT(1, opposideSideBucket, rookIndex, rookTargetSquare);
-                        _incrementalEvalAccumulator += AdditionalPieceEvaluationSigned(rookTargetSquare, rookIndex, (int)Side, oppositeSideKing, oppositeSidePawnAttacks);
+
+                        Debug.Assert(!_isIncrementalAdditionalEval);
 
                         break;
                     }
@@ -367,7 +367,7 @@ public class Position : IDisposable
 
                         _incrementalEvalAccumulator -= PSQT(0, opposideSideBucket, capturedPiece, capturedSquare);
                         _incrementalEvalAccumulator -= PSQT(1, sameSideBucket, capturedPiece, capturedSquare);
-                        // No incremental eval on en-passant
+
                         Debug.Assert(!_isIncrementalAdditionalEval);
                         break;
                     }
