@@ -482,7 +482,9 @@ public class Position : IDisposable
         //Debug.Assert(ZobristTable.PositionHash(this) != UniqueIdentifier && WasProduceByAValidMove());
         //Debug.Assert(ZobristTable.PawnKingHash(this) != _kingPawnUniqueIdentifier && WasProduceByAValidMove());
 
-        return new GameState(uniqueIdentifierCopy, kingPawnKeyUniqueIdentifierCopy, incrementalEvalAccumulatorCopy, _incrementalAdditionalEvalAccumulator, incrementalPhaseAccumulatorCopy, enpassantCopy, castleCopy, isIncrementalEvalCopy, isIncrementalAdditionalEvalCopy);
+        return new GameState(uniqueIdentifierCopy, kingPawnKeyUniqueIdentifierCopy,
+            incrementalEvalAccumulatorCopy, incrementalAdditionalEvalAccumulatorCopy, incrementalPhaseAccumulatorCopy, enpassantCopy, castleCopy,
+            isIncrementalEvalCopy, isIncrementalAdditionalEvalCopy);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
