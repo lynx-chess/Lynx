@@ -686,6 +686,9 @@ public class Position : IDisposable
                     pawnScore -= PawnAdditionalEvaluation(blackBucket, whiteBucket, pieceSquareIndex, (int)Piece.p, blackKing, whiteKing);
                 }
 
+                // Pawn islands
+                pawnScore += PawnIslandsBonus[PawnIslands(whitePawns)] - PawnIslandsBonus[PawnIslands(blackPawns)];
+
                 entry.Update(_kingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
             }
@@ -818,6 +821,9 @@ public class Position : IDisposable
                     pawnScore -= PawnAdditionalEvaluation(blackBucket, whiteBucket, pieceSquareIndex, (int)Piece.p, blackKing, whiteKing);
                 }
 
+                // Pawn islands
+                pawnScore += PawnIslandsBonus[PawnIslands(whitePawns)] - PawnIslandsBonus[PawnIslands(blackPawns)];
+
                 entry.Update(_kingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
             }
@@ -897,9 +903,6 @@ public class Position : IDisposable
         packedScore += PieceAttackedByPawnPenalty
             * ((blackPawnAttacks & OccupancyBitBoards[(int)Side.White] /* & (~whitePawns) */).CountBits()
                 - (whitePawnAttacks & OccupancyBitBoards[(int)Side.Black] /* & (~blackPawns) */).CountBits());
-
-        // Pawn islands
-        packedScore += PawnIslandsBonus[PawnIslands(whitePawns)] - PawnIslandsBonus[PawnIslands(blackPawns)];
 
         if (gamePhase > MaxPhase)    // Early promotions
         {
