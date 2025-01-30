@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Diagnostics;
+using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -184,6 +185,14 @@ public class Position : IDisposable
                 ^ targetPieceHash;
         }
 
+        //if (move.IsCapture() || move.SpecialMoveFlag() != SpecialMoveType.None)
+        //{
+        //    _isIncrementalEval = false;
+        //    _isIncrementalAdditionalEval = false;
+        //}
+
+        //_isIncrementalAdditionalEval = false;
+
         EnPassant = BoardSquare.noSquare;
 
         // _incrementalEvalAccumulator updates
@@ -249,7 +258,7 @@ public class Position : IDisposable
 
                                 if (_isIncrementalAdditionalEval)
                                 {
-                                    _incrementalAdditionalEvalAccumulator -= AdditionalPieceEvaluationSigned(capturedSquare, capturedPiece, oppositeSide, sameSideKing, sameSidePawnAttacks);
+                                    _incrementalAdditionalEvalAccumulator -= PawnAdditionalEvaluation(opposideSideBucket, sameSideBucket, capturedSquare, capturedPiece, oppositeSideKing, sameSideKing);
 
                                     // Opponent pawn attacks recalculation (same side pawns not sure any more)
                                     whitePawns = PieceBitBoards[(int)Piece.P];
@@ -262,7 +271,7 @@ public class Position : IDisposable
 
                                 if (_isIncrementalAdditionalEval)
                                 {
-                                    _incrementalAdditionalEvalAccumulator -= AdditionalPieceEvaluationSigned(capturedSquare, capturedPiece, oppositeSide, sameSideKing, sameSidePawnAttacks);
+                                    _incrementalAdditionalEvalAccumulator += PawnAdditionalEvaluation(opposideSideBucket, sameSideBucket, capturedSquare, capturedPiece, oppositeSideKing, sameSideKing);
 
                                     // Opponent pawn attacks recalculation (same side pawns not sure any more)
                                     blackPawns = PieceBitBoards[(int)Piece.p];
@@ -373,6 +382,8 @@ public class Position : IDisposable
         // No _incrementalEvalAccumulator or _incrementalAdditionalEvalAccumulator updates
         else
         {
+            Debug.Assert(!_isIncrementalAdditionalEval);
+
             switch (move.SpecialMoveFlag())
             {
                 case SpecialMoveType.None:
@@ -831,6 +842,8 @@ public class Position : IDisposable
             _incrementalEvalAccumulator = 0;
             _incrementalPhaseAccumulator = 0;
 
+            // When king moves, additional eval can't be incremental because it depends or may depend on king buckets
+            Debug.Assert(!_isIncrementalAdditionalEval);
             _incrementalAdditionalEvalAccumulator = 0;
 
             var kingPawnIndex = _kingPawnUniqueIdentifier & Constants.KingPawnHashMask;
@@ -923,9 +936,6 @@ public class Position : IDisposable
                 entry.Update(_kingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
             }
-
-            // When king moves, additional eval can't be incremental because it depends or may depend on king buckets
-            Debug.Assert(!_isIncrementalAdditionalEval);
 
             // White pieces PSQTs and additional eval and pawn attacks, except king and pawn
             for (int pieceIndex = (int)Piece.N; pieceIndex < (int)Piece.K; ++pieceIndex)
@@ -1164,7 +1174,7 @@ public class Position : IDisposable
             (int)Piece.n => -KnightAdditionalEvaluation(pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
             (int)Piece.Q => QueenAdditionalEvaluation(pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
             (int)Piece.q => -QueenAdditionalEvaluation(pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
-            _ => 0
+            _ => throw new()
         };
     }
 
