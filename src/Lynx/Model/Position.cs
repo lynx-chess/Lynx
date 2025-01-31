@@ -1228,8 +1228,19 @@ public class Position : IDisposable
         packedBonus += CheckBonus[(int)Piece.B] * checks;
 
         // Major threats
-        packedBonus += BishopRookThreatsBonus * (attacks & PieceBitBoards[oppositeRooksIndex]).CountBits();
-        packedBonus += BishopQueenThreatsBonus * (attacks & PieceBitBoards[oppositeQueensIndex]).CountBits();
+        var rookThreats = attacks & PieceBitBoards[oppositeRooksIndex];
+        var defendedRookThreats = (rookThreats & enemyPawnAttacks).CountBits();
+        var undefendedRookThreats = rookThreats.CountBits() - defendedRookThreats;
+
+        packedBonus += (BishopRookThreatsBonus[0] * undefendedRookThreats)
+            + (BishopRookThreatsBonus[1] * defendedRookThreats);
+
+        var queenThreats = attacks & PieceBitBoards[oppositeQueensIndex];
+        var defendedQueenThreats = (queenThreats & enemyPawnAttacks).CountBits();
+        var undefendedQueenThreats = queenThreats.CountBits() - defendedQueenThreats;
+
+        packedBonus += (BishopQueenThreatsBonus[0] * undefendedQueenThreats)
+            + (BishopQueenThreatsBonus[1] * defendedQueenThreats);
 
         return packedBonus;
     }
