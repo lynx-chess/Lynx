@@ -1302,7 +1302,8 @@ public class Position : IDisposable
         var whiteIslandCount = IdentifyIslands(whitePawns);
         var blackIslandCount = IdentifyIslands(blackPawns);
 
-        return PawnIslandsBonus[whiteIslandCount] - PawnIslandsBonus[blackIslandCount];
+        return (PawnIslandsBonus[whiteIslandCount] * (8 - whitePawns.CountBits()))
+            - (PawnIslandsBonus[blackIslandCount] * (8 - blackPawns.CountBits()));
 
         static int IdentifyIslands(BitBoard pawns)
         {
