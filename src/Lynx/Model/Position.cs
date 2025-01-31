@@ -686,6 +686,9 @@ public class Position : IDisposable
                     pawnScore -= PawnAdditionalEvaluation(blackBucket, whiteBucket, pieceSquareIndex, (int)Piece.p, blackKing, whiteKing);
                 }
 
+                // Pawn islands
+                pawnScore += PawnIslands(whitePawns, blackPawns);
+
                 entry.Update(_kingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
             }
@@ -817,6 +820,9 @@ public class Position : IDisposable
 
                     pawnScore -= PawnAdditionalEvaluation(blackBucket, whiteBucket, pieceSquareIndex, (int)Piece.p, blackKing, whiteKing);
                 }
+
+                // Pawn islands
+                pawnScore += PawnIslands(whitePawns, blackPawns);
 
                 entry.Update(_kingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
@@ -1288,6 +1294,49 @@ public class Position : IDisposable
         var ownPawnsAroundKingCount = (Attacks.KingAttacks[squareIndex] & sameSidePawns).CountBits();
 
         return ownPawnsAroundKingCount * KingShieldBonus;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int PawnIslands(BitBoard whitePawns, BitBoard blackPawns)
+    {
+        var whiteIslandCount = IdentifyIslands(whitePawns);
+        var blackIslandCount = IdentifyIslands(blackPawns);
+
+        return PawnIslandsBonus[whiteIslandCount] - PawnIslandsBonus[blackIslandCount];
+
+        static int IdentifyIslands(BitBoard pawns)
+        {
+            Span<int> files = stackalloc int[8];
+
+            while (pawns != default)
+            {
+                var squareIndex = pawns.GetLS1BIndex();
+                pawns.ResetLS1B();
+
+                files[Constants.File[squareIndex]] = 1;
+            }
+
+            var islandCount = 0;
+            var isIsland = false;
+
+            for (int file = 0; file < 8; ++file)
+            {
+                if (files[file] == 1)
+                {
+                    if (!isIsland)
+                    {
+                        isIsland = true;
+                        ++islandCount;
+                    }
+                }
+                else
+                {
+                    isIsland = false;
+                }
+            }
+
+            return islandCount;
+        }
     }
 
     /// <summary>
