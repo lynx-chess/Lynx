@@ -1347,8 +1347,6 @@ public class Position : IDisposable
     {
         int packedScore = 0;
 
-        var majorPieces = PieceBitBoards[(int)Piece.q - offset] | PieceBitBoards[(int)Piece.r - offset];
-
         ulong knightAttacks = 0;
         var knights = PieceBitBoards[(int)Piece.N + offset];
         while (knights != 0)
@@ -1358,18 +1356,8 @@ public class Position : IDisposable
 
             knightAttacks |= Attacks.KnightAttacks[pieceSquareIndex];
         }
-        packedScore += (knightAttacks & majorPieces).CountBits() * KnightMajorThreatsBonus;
-
-        ulong bishopAttacks = 0;
-        var bishops = PieceBitBoards[(int)Piece.B + offset];
-        while (bishops != 0)
-        {
-            var pieceSquareIndex = bishops.GetLS1BIndex();
-            bishops.ResetLS1B();
-
-            bishopAttacks |= Attacks.BishopAttacks(pieceSquareIndex, OccupancyBitBoards[(int)Side.Both]);
-        }
-        packedScore += (bishopAttacks & majorPieces).CountBits() * BishopMajorThreatsBonus;
+        packedScore += (knightAttacks & PieceBitBoards[(int)Piece.r - offset]).CountBits() * KnightRookThreatsBonus;
+        packedScore += (knightAttacks & PieceBitBoards[(int)Piece.q - offset]).CountBits() * KnightQueenThreatsBonus;
 
         return packedScore;
     }

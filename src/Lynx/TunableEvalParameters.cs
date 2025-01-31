@@ -6059,6 +6059,16 @@ public static class EvaluationParams
 	public const int BishopQueenThreatsBonus = 3276836;
 
 	/// <summary>
+	/// <see cref="Utils.Pack(44, 5)"/>
+	/// </summary>
+	public const int KnightRookThreatsBonus = 327724;
+
+	/// <summary>
+	/// <see cref="Utils.Pack(36, 50)"/>
+	/// </summary>
+	public const int KnightQueenThreatsBonus = 3276836;
+
+	/// <summary>
 	/// <see cref="Utils.Pack(-48, -33)"/>
 	/// </summary>
 	public const int PieceAttackedByPawnPenalty = -2162736;
