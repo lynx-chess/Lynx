@@ -5,10 +5,12 @@ namespace Lynx.Test.PregeneratedAttacks;
 
 public class IsAttackedSquareTest
 {
+    private const string ValidFEN = "K1k5/8/8/8/8/8/8/8 w - - 0 1";
+
     [Test]
     public void IsAttackedByBlackPawn()
     {
-        var position = new Position(Constants.EmptyBoardFEN);
+        var position = new Position(ValidFEN);
         const int square = (int)BoardSquare.e4;
 
         position.PieceBitBoards[(int)Piece.p].SetBit(BoardSquare.d3);
@@ -25,7 +27,7 @@ public class IsAttackedSquareTest
     [Test]
     public void IsAttackedByWhitePawn()
     {
-        var position = new Position(Constants.EmptyBoardFEN);
+        var position = new Position(ValidFEN);
         const int square = (int)BoardSquare.e4;
 
         position.PieceBitBoards[(int)Piece.P].SetBit(BoardSquare.d5);
@@ -42,7 +44,7 @@ public class IsAttackedSquareTest
     [Test]
     public void IsAttackedByBlackKnight()
     {
-        var position = new Position(Constants.EmptyBoardFEN);
+        var position = new Position(ValidFEN);
         const int square = (int)BoardSquare.e4;
 
         position.PieceBitBoards[(int)Piece.n].SetBit(BoardSquare.e7);
@@ -59,7 +61,8 @@ public class IsAttackedSquareTest
     [Test]
     public void IsAttackedByWhiteKnight()
     {
-        var position = new Position(Constants.EmptyBoardFEN);
+        var position = new Position(ValidFEN);
+
         const int square = (int)BoardSquare.e4;
 
         position.PieceBitBoards[(int)Piece.N].SetBit(BoardSquare.d3);
@@ -76,7 +79,8 @@ public class IsAttackedSquareTest
     [Test]
     public void IsAttackedByBlackBishop()
     {
-        var position = new Position(Constants.EmptyBoardFEN);
+        var position = new Position(ValidFEN);
+
         const int square = (int)BoardSquare.e5;
 
         position.PieceBitBoards[(int)Piece.b].SetBit(BoardSquare.b7);
@@ -93,7 +97,7 @@ public class IsAttackedSquareTest
     [Test]
     public void IsAttackedByWhiteBishop()
     {
-        var position = new Position(Constants.EmptyBoardFEN);
+        var position = new Position(ValidFEN);
         const int square = (int)BoardSquare.e5;
 
         position.PieceBitBoards[(int)Piece.B].SetBit(BoardSquare.a2);
@@ -110,7 +114,7 @@ public class IsAttackedSquareTest
     [Test]
     public void IsAttackedByBlackRook()
     {
-        var position = new Position(Constants.EmptyBoardFEN);
+        var position = new Position(ValidFEN);
         const int square = (int)BoardSquare.e5;
 
         position.PieceBitBoards[(int)Piece.r].SetBit(BoardSquare.d7);
@@ -127,7 +131,7 @@ public class IsAttackedSquareTest
     [Test]
     public void IsAttackedByWhiteRook()
     {
-        var position = new Position(Constants.EmptyBoardFEN);
+        var position = new Position(ValidFEN);
         const int square = (int)BoardSquare.e5;
 
         position.PieceBitBoards[(int)Piece.R].SetBit(BoardSquare.d1);
@@ -144,7 +148,7 @@ public class IsAttackedSquareTest
     [Test]
     public void IsAttackedByBlackQueen()
     {
-        var position = new Position(Constants.EmptyBoardFEN);
+        var position = new Position(ValidFEN);
         const int square1 = (int)BoardSquare.e5;
         const int square2 = (int)BoardSquare.a5;
 
@@ -176,7 +180,7 @@ public class IsAttackedSquareTest
     [Test]
     public void IsAttackedByWhiteQueen()
     {
-        var position = new Position(Constants.EmptyBoardFEN);
+        var position = new Position(ValidFEN);
         const int square1 = (int)BoardSquare.e5;
         const int square2 = (int)BoardSquare.a5;
 
@@ -208,13 +212,15 @@ public class IsAttackedSquareTest
     [Test]
     public void IsAttackedByBlackKing()
     {
-        var position = new Position(Constants.EmptyBoardFEN);
+        var position = new Position(ValidFEN);
         const int square = (int)BoardSquare.e5;
 
+        position.PieceBitBoards[(int)Piece.k] = 0;
         position.PieceBitBoards[(int)Piece.k].SetBit(BoardSquare.e3);
         Assert.False(position.IsSquareAttacked(square, Side.Black));
         Assert.False(position.IsSquareAttacked(square, Side.White));
 
+        position.PieceBitBoards[(int)Piece.k] = 0;
         position.PieceBitBoards[(int)Piece.k].SetBit(BoardSquare.e4);
         Assert.True(position.IsSquareAttacked(square, Side.Black));
         Assert.False(position.IsSquareAttacked(square, Side.White));
@@ -225,13 +231,15 @@ public class IsAttackedSquareTest
     [Test]
     public void IsAttackedByWhiteKing()
     {
-        var position = new Position(Constants.EmptyBoardFEN);
+        var position = new Position(ValidFEN);
         const int square = (int)BoardSquare.e5;
 
+        position.PieceBitBoards[(int)Piece.K] = 0;
         position.PieceBitBoards[(int)Piece.K].SetBit(BoardSquare.e3);
         Assert.False(position.IsSquareAttacked(square, Side.Black));
         Assert.False(position.IsSquareAttacked(square, Side.White));
 
+        position.PieceBitBoards[(int)Piece.k] = 0;
         position.PieceBitBoards[(int)Piece.K].SetBit(BoardSquare.e4);
         Assert.False(position.IsSquareAttacked(square, Side.Black));
         Assert.True(position.IsSquareAttacked(square, Side.White));

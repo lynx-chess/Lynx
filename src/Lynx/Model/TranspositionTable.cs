@@ -126,11 +126,15 @@ public readonly struct TranspositionTable
     public readonly int HashfullPermillApprox()
     {
         int items = 0;
-        for (int i = 0; i < 1000; ++i)
+
+        if (_tt.Length >= 1_000)
         {
-            if (_tt[i].Key != default)
+            for (int i = 0; i < 1_000; ++i)
             {
-                ++items;
+                if (_tt[i].Key != default)
+                {
+                    ++items;
+                }
             }
         }
 
