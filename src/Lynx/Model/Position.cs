@@ -1304,30 +1304,38 @@ public class Position : IDisposable
 
         return PawnIslandsBonus[whiteIslandCount] - PawnIslandsBonus[blackIslandCount];
 
+        [SkipLocalsInit]
         static int IdentifyIslands(BitBoard pawns)
         {
+            var pawnsCount = pawns.CountBits();
+
             Span<int> files = stackalloc int[8];
+            files.Clear();
 
             while (pawns != default)
             {
                 var squareIndex = pawns.GetLS1BIndex();
                 pawns.ResetLS1B();
 
-                files[Constants.File[squareIndex]] = 1;
+                files[Constants.File[squareIndex]] += 1;
             }
 
             var islandCount = 0;
             var isIsland = false;
 
-            for (int file = 0; file < 8; ++file)
+            var exploredPawns = 0;
+            for (int file = 0; file < 8 && exploredPawns < pawnsCount; ++file)
             {
-                if (files[file] == 1)
+                var pawnsOnThatFile = files[file];
+                if (pawnsOnThatFile > 0)
                 {
                     if (!isIsland)
                     {
                         isIsland = true;
                         ++islandCount;
                     }
+
+                    exploredPawns += pawnsOnThatFile;
                 }
                 else
                 {
