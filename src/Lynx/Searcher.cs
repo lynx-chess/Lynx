@@ -14,6 +14,7 @@ public sealed class Searcher
 
     internal const int MainEngineId = 1;
 
+    private bool _isProcessingGoCommand;
     private bool _isPonderHit;
 
     private int _searchThreadsCount;
@@ -82,6 +83,8 @@ public sealed class Searcher
 
     private async Task OnGoCommand(GoCommand goCommand)
     {
+        _isProcessingGoCommand = true;
+
         if (!_absoluteSearchCancellationTokenSource.TryReset())
         {
             _absoluteSearchCancellationTokenSource.Dispose();
@@ -102,6 +105,8 @@ public sealed class Searcher
         {
             await MultiThreadedSearch(goCommand);
         }
+
+        _isProcessingGoCommand = false;
     }
 
     private void SingleThreadedSearch(GoCommand goCommand)
@@ -387,6 +392,11 @@ public sealed class Searcher
 
     public void AdjustPosition(ReadOnlySpan<char> command)
     {
+        // Can't update MainEngine.Game until previous search is completed
+        // Some GUIs wait until a bestmove is sent before sending a new position + go command (cutechess)
+        // but some others don't (WinBoard)
+        SpinWait.SpinUntil(() => !_isProcessingGoCommand);
+
         _mainEngine.AdjustPosition(command);
 
         foreach (var engine in _extraEngines)
