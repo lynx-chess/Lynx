@@ -1148,7 +1148,7 @@ public class Position : IDisposable
 
         packedBonus += CheckBonus[(int)Piece.R] * checks;
 
-        if ((attacks & PieceBitBoards[pieceIndex]).CountBits() >= 2)
+        if ((attacks & PieceBitBoards[pieceIndex]).CountBits() >= 1)
         {
             packedBonus += ConnectedRooksBonus;
         }
