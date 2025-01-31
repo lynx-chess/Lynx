@@ -687,7 +687,7 @@ public class Position : IDisposable
                 }
 
                 // Pawn islands
-                pawnScore += PawnIslandsBonus[PawnIslands(whitePawns)] - PawnIslandsBonus[PawnIslands(blackPawns)];
+                pawnScore += PawnIslands(whitePawns, blackPawns);
 
                 entry.Update(_kingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
@@ -822,7 +822,7 @@ public class Position : IDisposable
                 }
 
                 // Pawn islands
-                pawnScore += PawnIslandsBonus[PawnIslands(whitePawns)] - PawnIslandsBonus[PawnIslands(blackPawns)];
+                pawnScore += PawnIslands(whitePawns, blackPawns);
 
                 entry.Update(_kingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
@@ -1228,8 +1228,8 @@ public class Position : IDisposable
         packedBonus += CheckBonus[(int)Piece.B] * checks;
 
         // Major threats
-        var majorPieces = PieceBitBoards[oppositeRooksIndex] | PieceBitBoards[oppositeQueensIndex];
-        packedBonus += BishopMajorThreatsBonus * (attacks & majorPieces).CountBits();
+        packedBonus += BishopRookThreatsBonus * (attacks & PieceBitBoards[oppositeRooksIndex]).CountBits();
+        packedBonus += BishopQueenThreatsBonus * (attacks & PieceBitBoards[oppositeQueensIndex]).CountBits();
 
         return packedBonus;
     }
@@ -1297,40 +1297,46 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int PawnIslands(ulong bitboard)
+    public static int PawnIslands(BitBoard whitePawns, BitBoard blackPawns)
     {
-        var islandCount = 0;
-        var isIsland = false;
+        var whiteIslandCount = IdentifyIslands(whitePawns);
+        var blackIslandCount = IdentifyIslands(blackPawns);
 
-        for (int file = 0; file < 8; ++file)
+        return PawnIslandsBonus[whiteIslandCount] - PawnIslandsBonus[blackIslandCount];
+
+        static int IdentifyIslands(BitBoard pawns)
         {
-            var pawnInRank = false;
+            Span<int> files = stackalloc int[8];
 
-            for (int rank = 1; rank < 7; ++rank)
+            while (pawns != default)
             {
-                var squareIndex = (rank * 8) + file;
+                var squareIndex = pawns.GetLS1BIndex();
+                pawns.ResetLS1B();
 
-                if (bitboard.GetBit(squareIndex))
+                files[Constants.File[squareIndex]] = 1;
+            }
+
+            var islandCount = 0;
+            var isIsland = false;
+
+            for (int file = 0; file < 8; ++file)
+            {
+                if (files[file] == 1)
                 {
-                    pawnInRank = true;
-
                     if (!isIsland)
                     {
                         isIsland = true;
                         ++islandCount;
                     }
-
-                    break;
+                }
+                else
+                {
+                    isIsland = false;
                 }
             }
 
-            if (!pawnInRank)
-            {
-                isIsland = false;
-            }
+            return islandCount;
         }
-
-        return islandCount;
     }
 
     /// <summary>
