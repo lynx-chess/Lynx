@@ -1142,6 +1142,18 @@ public class Position : IDisposable
             packedBonus += SemiOpenFileRookBonus;
         }
 
+        // Rook on seventh rank
+        var rank = Constants.Rank[squareIndex];
+        if(pieceSide == (int)Side.Black)
+        {
+            rank = 7 - rank;
+        }
+
+        if(rank == 6)
+        {
+            packedBonus += RookOn7thRankBonus;
+        }
+
         // Checks
         var enemyKingCheckThreats = Attacks.RookAttacks(oppositeSideKingSquare, occupancy);
         var checks = (attacks & enemyKingCheckThreats).CountBits();

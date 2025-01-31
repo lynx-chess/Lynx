@@ -6046,6 +6046,11 @@ public static class EvaluationParams
 	/// <summary>
 	/// <see cref="Utils.Pack(30, 71)"/>
 	/// </summary>
+	public const int RookOn7thRankBonus = 4653086;
+
+	/// <summary>
+	/// <see cref="Utils.Pack(30, 71)"/>
+	/// </summary>
 	public const int BishopPairBonus = 4653086;
 
 	/// <summary>
