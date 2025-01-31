@@ -1299,58 +1299,44 @@ public class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int PawnIslands(BitBoard whitePawns, BitBoard blackPawns)
     {
-        var whiteIslandCount = 0;
-        var blackIslandCount = 0;
-
-        var isWhiteIsland = false;
-        var isBlackIsland = false;
-
-        for (int file = 0; file < 8; ++file)
-        {
-            var whitePawnInRank = false;
-            var blackPawnInRank = false;
-
-            for (int rank = 1; rank < 7; ++rank)
-            {
-                var squareIndex = (rank * 8) + file;
-
-                if (!whitePawnInRank && whitePawns.GetBit(squareIndex))
-                {
-                    whitePawnInRank = true;
-
-                    if (!isWhiteIsland)
-                    {
-                        isWhiteIsland = true;
-                        ++whiteIslandCount;
-                    }
-
-                    continue;
-                }
-
-                if (!blackPawnInRank && blackPawns.GetBit(squareIndex))
-                {
-                    blackPawnInRank = true;
-
-                    if (!isBlackIsland)
-                    {
-                        isBlackIsland = true;
-                        ++blackIslandCount;
-                    }
-                }
-            }
-
-            if (!whitePawnInRank)
-            {
-                isWhiteIsland = false;
-            }
-
-            if (!blackPawnInRank)
-            {
-                isBlackIsland = false;
-            }
-        }
+        var whiteIslandCount = IdentifyIslands(whitePawns);
+        var blackIslandCount = IdentifyIslands(blackPawns);
 
         return PawnIslandsBonus[whiteIslandCount] - PawnIslandsBonus[blackIslandCount];
+
+        static int IdentifyIslands(BitBoard pawns)
+        {
+            Span<int> files = stackalloc int[8];
+
+            while (pawns != default)
+            {
+                var squareIndex = pawns.GetLS1BIndex();
+                pawns.ResetLS1B();
+
+                files[Constants.File[squareIndex]] = 1;
+            }
+
+            var islandCount = 0;
+            var isIsland = false;
+
+            for (int file = 0; file < 8; ++file)
+            {
+                if (files[file] == 1)
+                {
+                    if (!isIsland)
+                    {
+                        isIsland = true;
+                        ++islandCount;
+                    }
+                }
+                else
+                {
+                    isIsland = false;
+                }
+            }
+
+            return islandCount;
+        }
     }
 
     /// <summary>
