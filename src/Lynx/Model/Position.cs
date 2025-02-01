@@ -1148,6 +1148,18 @@ public class Position : IDisposable
 
         packedBonus += CheckBonus[(int)Piece.R] * checks;
 
+        if ((attacks & PieceBitBoards[pieceIndex]).CountBits() >= 1)
+        {
+            var rank = Constants.Rank[squareIndex];
+
+            if (pieceIndex == (int)Piece.r)
+            {
+                rank = 7 - rank;
+            }
+
+            packedBonus += ConnectedRooksBonus[rank];
+        }
+
         return packedBonus;
     }
 
