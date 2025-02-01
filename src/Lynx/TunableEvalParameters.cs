@@ -6051,7 +6051,7 @@ public static class EvaluationParams
 	/// <summary>
 	/// <see cref="Utils.Pack(34, 27)"/>
 	/// </summary>
-	public const int BishopInLongDiagonalBonus = 1769506;
+	public const int BishopInUnblockedLongDiagonalBonus = 1769506;
 
 	/// <summary>
 	/// <see cref="Utils.Pack(44, 5)"/>
