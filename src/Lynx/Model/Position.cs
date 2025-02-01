@@ -687,7 +687,7 @@ public class Position : IDisposable
                 }
 
                 // Pawn islands
-                pawnScore += PawnIslands(whitePawns, blackPawns);
+                pawnScore += PawnIslands();
 
                 entry.Update(_kingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
@@ -822,7 +822,7 @@ public class Position : IDisposable
                 }
 
                 // Pawn islands
-                pawnScore += PawnIslands(whitePawns, blackPawns);
+                pawnScore += PawnIslands();
 
                 entry.Update(_kingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
@@ -1297,10 +1297,10 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static int PawnIslands(BitBoard whitePawns, BitBoard blackPawns)
+    public int PawnIslands()
     {
-        var whiteIslandCount = CountPawnIslands(whitePawns);
-        var blackIslandCount = CountPawnIslands(blackPawns);
+        var whiteIslandCount = CountPawnIslands(PieceBitBoards[(int)Piece.P]);
+        var blackIslandCount = CountPawnIslands(PieceBitBoards[(int)Piece.p]);
 
         return PawnIslandsBonus[whiteIslandCount] - PawnIslandsBonus[blackIslandCount];
     }
