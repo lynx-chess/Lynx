@@ -349,6 +349,18 @@ public static class Constants
         0, 1, 2, 3, 4, 5, 6, 7
     ];
 
+    public static ReadOnlySpan<byte> ByteFile =>
+    [
+        0, 1, 2, 3, 4, 5, 6, 7,
+        0, 1, 2, 3, 4, 5, 6, 7,
+        0, 1, 2, 3, 4, 5, 6, 7,
+        0, 1, 2, 3, 4, 5, 6, 7,
+        0, 1, 2, 3, 4, 5, 6, 7,
+        0, 1, 2, 3, 4, 5, 6, 7,
+        0, 1, 2, 3, 4, 5, 6, 7,
+        0, 1, 2, 3, 4, 5, 6, 7
+    ];
+
     public static ReadOnlySpan<int> LightSquares =>
     [
         1, 0, 1, 0, 1, 0, 1, 0,

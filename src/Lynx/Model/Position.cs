@@ -1299,46 +1299,27 @@ public class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int PawnIslands(BitBoard whitePawns, BitBoard blackPawns)
     {
-        var whiteIslandCount = IdentifyIslands(whitePawns);
-        var blackIslandCount = IdentifyIslands(blackPawns);
+        var whiteIslandCount = CountPawnIslands(whitePawns);
+        var blackIslandCount = CountPawnIslands(blackPawns);
 
         return PawnIslandsBonus[whiteIslandCount] - PawnIslandsBonus[blackIslandCount];
+    }
 
-        static int IdentifyIslands(BitBoard pawns)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static int CountPawnIslands(BitBoard pawns)
+    {
+        byte pawnFileBitBoard = 0;
+
+        while (pawns != default)
         {
-            const int n = 1;
+            var squareIndex = pawns.GetLS1BIndex();
+            pawns.ResetLS1B();
 
-            Span<int> files = stackalloc int[8];
-
-            while (pawns != default)
-            {
-                var squareIndex = pawns.GetLS1BIndex();
-                pawns.ResetLS1B();
-
-                files[Constants.File[squareIndex]] = n;
-            }
-
-            var islandCount = 0;
-            var isIsland = false;
-
-            for (int file = 0; file < files.Length; ++file)
-            {
-                if (files[file] == n)
-                {
-                    if (!isIsland)
-                    {
-                        isIsland = true;
-                        ++islandCount;
-                    }
-                }
-                else
-                {
-                    isIsland = false;
-                }
-            }
-
-            return islandCount;
+            // BitBoard.SetBit equivalent but for byte instead of ulong
+            pawnFileBitBoard |= (byte)(1 << Constants.File[squareIndex]);
         }
+
+        return PawnIslandsCount[pawnFileBitBoard];
     }
 
     /// <summary>

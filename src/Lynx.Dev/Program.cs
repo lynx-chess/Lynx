@@ -1,5 +1,5 @@
 ﻿using Lynx;
-using Lynx.Internal;
+using Lynx.ConstantGenerator;
 using Lynx.Model;
 using System.Diagnostics;
 using System.Numerics;
@@ -53,7 +53,8 @@ using static Lynx.TunableEvalParameters;
 //UnmakeMove();
 //PieceSquareTables();
 //NewMasks();
-DarkLightSquares();
+//DarkLightSquares();
+PawnIslands();
 
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
 const string TrickyPosition = Constants.TrickyTestPositionFEN;
@@ -1228,4 +1229,9 @@ static void DarkLightSquares()
     {
         Debug.Assert(Constants.DarkSquaresBitBoard.GetBit(i) ^ Constants.LightSquaresBitBoard.GetBit(i));
     }
+}
+
+static void PawnIslands()
+{
+    PawnIslandsGenerator.GeneratePawnIslands();
 }

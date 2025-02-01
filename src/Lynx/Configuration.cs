@@ -153,8 +153,10 @@ public sealed class EngineSettings
     //[SPSA<int>(1, 5, 0.5)]
     public int NMP_BaseDepthReduction { get; set; } = 2;
 
+#pragma warning disable CA1805 // Do not initialize unnecessarily
     //[SPSA<int>(0, 10, 0.5)]
     public int NMP_DepthIncrement { get; set; } = 0;
+#pragma warning restore CA1805 // Do not initialize unnecessarily
 
     //[SPSA<int>(1, 10, 0.5)]
     public int NMP_DepthDivisor { get; set; } = 3;

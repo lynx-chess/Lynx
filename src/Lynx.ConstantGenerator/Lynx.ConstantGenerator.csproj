@@ -1,18 +1,17 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
     <StaticAnalysisCodeType>NonProdExe</StaticAnalysisCodeType>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Lynx.ConstantGenerator\Lynx.ConstantGenerator.csproj" />
     <ProjectReference Include="..\Lynx\Lynx.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
-    <NoWarn>CS8321,S125,S1481,CS0618</NoWarn>
+    <NoWarn>$(NoWarn),CS8321,S125,S1481,CS0618,CS1591</NoWarn>
   </PropertyGroup>
+
 
 </Project>
