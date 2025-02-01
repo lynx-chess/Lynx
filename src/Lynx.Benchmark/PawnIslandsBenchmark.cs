@@ -40,10 +40,11 @@
 
 using BenchmarkDotNet.Attributes;
 using Lynx.Model;
+using System.Runtime.CompilerServices;
 
 namespace Lynx.Benchmark;
 
-public class PawnIslandsBenchmark: BaseBenchmark
+public class PawnIslandsBenchmark : BaseBenchmark
 {
     private static readonly string[] Data = Engine._benchmarkFens;
 
@@ -63,6 +64,21 @@ public class PawnIslandsBenchmark: BaseBenchmark
     }
 
     [Benchmark]
+    public int Original_SkipLocalsInit()
+    {
+        var sum = 0;
+
+        foreach (var fen in Engine._benchmarkFens)
+        {
+            var pieces = FENParser.ParseFEN(fen).PieceBitBoards;
+            BitBoard whitePawns = pieces[(int)Piece.P];
+            sum += Original_SkipLocalsInit(whitePawns);
+        }
+
+        return sum;
+    }
+
+    [Benchmark]
     public int BitBoard()
     {
         var sum = 0;
@@ -72,6 +88,21 @@ public class PawnIslandsBenchmark: BaseBenchmark
             var pieces = FENParser.ParseFEN(fen).PieceBitBoards;
             BitBoard whitePawns = pieces[(int)Piece.P];
             sum += BitBoard(whitePawns);
+        }
+
+        return sum;
+    }
+
+    [Benchmark]
+    public int BitBoard_NoFileArray()
+    {
+        var sum = 0;
+
+        foreach (var fen in Data)
+        {
+            var pieces = FENParser.ParseFEN(fen).PieceBitBoards;
+            BitBoard whitePawns = pieces[(int)Piece.P];
+            sum += BitBoard_NoFileArray(whitePawns);
         }
 
         return sum;
@@ -113,9 +144,47 @@ public class PawnIslandsBenchmark: BaseBenchmark
         return islandCount;
     }
 
+    [SkipLocalsInit]
+    private static int Original_SkipLocalsInit(BitBoard pawns)
+    {
+        const int n = 1;
+
+        Span<int> files = stackalloc int[8];
+        files.Clear();
+
+        while (pawns != default)
+        {
+            var squareIndex = pawns.GetLS1BIndex();
+            pawns.ResetLS1B();
+
+            files[Constants.File[squareIndex]] = n;
+        }
+
+        var islandCount = 0;
+        var isIsland = false;
+
+        for (int file = 0; file < files.Length; ++file)
+        {
+            if (files[file] == n)
+            {
+                if (!isIsland)
+                {
+                    isIsland = true;
+                    ++islandCount;
+                }
+            }
+            else
+            {
+                isIsland = false;
+            }
+        }
+
+        return islandCount;
+    }
+
     private static int BitBoard(BitBoard pawns)
     {
-        byte pawnFileBitBoard = 0;
+        int pawnFileBitBoard = 0;
 
         while (pawns != default)
         {
@@ -123,7 +192,23 @@ public class PawnIslandsBenchmark: BaseBenchmark
             pawns.ResetLS1B();
 
             // BitBoard.SetBit equivalent but for byte instead of ulong
-            pawnFileBitBoard |= (byte)(1 << Constants.File[squareIndex]);
+            pawnFileBitBoard |= (1 << Constants.File[squareIndex]);
+        }
+
+        return PawnIslandsCount[pawnFileBitBoard];
+    }
+
+    private static int BitBoard_NoFileArray(BitBoard pawns)
+    {
+        int pawnFileBitBoard = 0;
+
+        while (pawns != default)
+        {
+            var squareIndex = pawns.GetLS1BIndex();
+            pawns.ResetLS1B();
+
+            // BitBoard.SetBit equivalent but for byte instead of ulong
+            pawnFileBitBoard |= (1 << (squareIndex % 8));
         }
 
         return PawnIslandsCount[pawnFileBitBoard];
@@ -159,5 +244,4 @@ public class PawnIslandsBenchmark: BaseBenchmark
         2, 2, 1, 2, 1,
         1
     ];
-
 }
