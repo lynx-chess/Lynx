@@ -9,9 +9,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
     <NoWarn>$(NoWarn),CS8321,S125,S1481,CS0618,CS1591</NoWarn>
   </PropertyGroup>
-
 
 </Project>
