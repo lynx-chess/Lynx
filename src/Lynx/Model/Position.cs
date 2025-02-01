@@ -888,23 +888,16 @@ public class Position : IDisposable
             KingAdditionalEvaluation(whiteKing, (int)Side.White, blackPawnAttacks)
             - KingAdditionalEvaluation(blackKing, (int)Side.Black, whitePawnAttacks);
 
-        var whiteBishops = PieceBitBoards[(int)Piece.B];
-        var blackBishops = PieceBitBoards[(int)Piece.b];
-
         // Bishop pair bonus
-        if (whiteBishops.CountBits() >= 2)
+        if (PieceBitBoards[(int)Piece.B].CountBits() >= 2)
         {
             packedScore += BishopPairBonus;
         }
 
-        if (blackBishops.CountBits() >= 2)
+        if (PieceBitBoards[(int)Piece.b].CountBits() >= 2)
         {
             packedScore -= BishopPairBonus;
         }
-
-        // Bishop in long diagonals
-        var bishopInLongDiagonalsDelta = (whiteBishops & Constants.LongDiagonals).CountBits() - (blackBishops & Constants.LongDiagonals).CountBits();
-        packedScore += bishopInLongDiagonalsDelta * BishopInLongDiagonalBonus;
 
         // Pieces attacked by pawns bonus
         packedScore += PieceAttackedByPawnPenalty
