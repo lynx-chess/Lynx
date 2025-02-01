@@ -1315,23 +1315,23 @@ public class Position : IDisposable
         var blackIslandCount = CountPawnIslands(blackPawns);
 
         return PawnIslandsBonus[whiteIslandCount] - PawnIslandsBonus[blackIslandCount];
-    }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static int CountPawnIslands(BitBoard pawns)
-    {
-        int pawnFileBitBoard = 0;
-
-        while (pawns != default)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static int CountPawnIslands(BitBoard pawns)
         {
-            var squareIndex = pawns.GetLS1BIndex();
-            pawns.ResetLS1B();
+            int pawnFileBitBoard = 0;
 
-            // BitBoard.SetBit equivalent but for byte instead of ulong
-            pawnFileBitBoard |= (1 << Constants.File[squareIndex]);
+            while (pawns != default)
+            {
+                var squareIndex = pawns.GetLS1BIndex();
+                pawns.ResetLS1B();
+
+                // BitBoard.SetBit equivalent but for byte instead of ulong
+                pawnFileBitBoard |= (1 << Constants.File[squareIndex]);
+            }
+
+            return PawnIslandsCount[pawnFileBitBoard];
         }
-
-        return PawnIslandsCount[pawnFileBitBoard];
     }
 
     /// <summary>

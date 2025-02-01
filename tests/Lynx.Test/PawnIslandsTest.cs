@@ -54,7 +54,26 @@ public class PawnIslandsTest
         Assert.AreEqual(expectedPawnIslands, pawnIslands, "Error in the original method");
 
         // Generator test
-        pawnIslands = Position.CountPawnIslands(whitePawns);
-        Assert.AreEqual(expectedPawnIslands, pawnIslands, "Error in the generator/prod logic");
+        pawnIslands = CountPawnIslands(whitePawns);
+        Assert.AreEqual(expectedPawnIslands, pawnIslands, "Error in the generator");
+
+        var pawnIslandsBonus = Position.PawnIslands(whitePawns, pieces[(int)Piece.p]);
+        Assert.AreEqual(EvaluationParams.PawnIslandsBonus[expectedPawnIslands] - EvaluationParams.PawnIslandsBonus[0], pawnIslandsBonus, "Error in the Position implementation");
+    }
+
+    private static int CountPawnIslands(BitBoard pawns)
+    {
+        int pawnFileBitBoard = 0;
+
+        while (pawns != default)
+        {
+            var squareIndex = pawns.GetLS1BIndex();
+            pawns.ResetLS1B();
+
+            // BitBoard.SetBit equivalent but for byte instead of ulong
+            pawnFileBitBoard |= (1 << Constants.File[squareIndex]);
+        }
+
+        return PawnIslandsGenerator.PawnIslandsCount[pawnFileBitBoard];
     }
 }
