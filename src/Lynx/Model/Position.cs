@@ -1308,7 +1308,7 @@ public class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static int CountPawnIslands(BitBoard pawns)
     {
-        byte pawnFileBitBoard = 0;
+        int pawnFileBitBoard = 0;
 
         while (pawns != default)
         {
@@ -1316,7 +1316,7 @@ public class Position : IDisposable
             pawns.ResetLS1B();
 
             // BitBoard.SetBit equivalent but for byte instead of ulong
-            pawnFileBitBoard |= (byte)(1 << Constants.File[squareIndex]);
+            pawnFileBitBoard |= (1 << Constants.File[squareIndex]);
         }
 
         return PawnIslandsCount[pawnFileBitBoard];
