@@ -1304,9 +1304,11 @@ public class Position : IDisposable
 
         return PawnIslandsBonus[whiteIslandCount] - PawnIslandsBonus[blackIslandCount];
 
+        [SkipLocalsInit]
         static int IdentifyIslands(BitBoard pawns)
         {
             Span<int> files = stackalloc int[8];
+            files.Clear();
 
             while (pawns != default)
             {
