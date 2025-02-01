@@ -1,7 +1,48 @@
-﻿using BenchmarkDotNet.Attributes;
+﻿/*
+ *
+ *  BenchmarkDotNet v0.14.0, Windows 10 (10.0.20348.3091) (Hyper-V)
+ *  AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
+ *  .NET SDK 9.0.102
+ *    [Host]     : .NET 9.0.1 (9.0.124.61010), X64 RyuJIT AVX2
+ *    DefaultJob : .NET 9.0.1 (9.0.124.61010), X64 RyuJIT AVX2
+ *
+ *  | Method   | Mean     | Error    | StdDev   | Ratio | Gen0   | Allocated | Alloc Ratio |
+ *  |--------- |---------:|---------:|---------:|------:|-------:|----------:|------------:|
+ *  | Original | 41.69 us | 0.139 us | 0.123 us |  1.00 | 2.9907 |  49.63 KB |        1.00 |
+ *  | BitBoard | 41.26 us | 0.234 us | 0.195 us |  0.99 | 2.9907 |  49.63 KB |        1.00 |
+ *
+ *
+ *  BenchmarkDotNet v0.14.0, macOS Sonoma 14.7.2 (23H311) [Darwin 23.6.0]
+ *  Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
+ *  .NET SDK 9.0.102
+ *    [Host]     : .NET 9.0.1 (9.0.124.61010), Arm64 RyuJIT AdvSIMD
+ *    DefaultJob : .NET 9.0.1 (9.0.124.61010), Arm64 RyuJIT AdvSIMD
+ *
+ *  | Method   | Mean     | Error    | StdDev   | Ratio | RatioSD | Gen0   | Allocated | Alloc Ratio |
+ *  |--------- |---------:|---------:|---------:|------:|--------:|-------:|----------:|------------:|
+ *  | Original | 30.15 us | 0.376 us | 0.333 us |  1.00 |    0.02 | 8.0872 |  49.64 KB |        1.00 |
+ *  | BitBoard | 29.31 us | 0.405 us | 0.338 us |  0.97 |    0.02 | 8.0872 |  49.64 KB |        1.00 |
+ *
+ *
+ *  BenchmarkDotNet v0.14.0, macOS Ventura 13.7.2 (22H313) [Darwin 22.6.0]
+ *  Intel Core i7-8700B CPU 3.20GHz (Max: 3.19GHz) (Coffee Lake), 1 CPU, 4 logical and 4 physical cores
+ *  .NET SDK 9.0.102
+ *    [Host]     : .NET 9.0.1 (9.0.124.61010), X64 RyuJIT AVX2
+ *    DefaultJob : .NET 9.0.1 (9.0.124.61010), X64 RyuJIT AVX2
+ *
+ *  | Method   | Mean     | Error    | StdDev   | Ratio | RatioSD | Gen0   | Allocated | Alloc Ratio |
+ *  |--------- |---------:|---------:|---------:|------:|--------:|-------:|----------:|------------:|
+ *  | Original | 53.74 us | 0.864 us | 0.766 us |  1.00 |    0.02 | 8.0566 |  49.64 KB |        1.00 |
+ *  | BitBoard | 55.06 us | 1.050 us | 1.078 us |  1.02 |    0.02 | 8.0566 |  49.64 KB |        1.00 |
+ *
+ *
+*/
+
+using BenchmarkDotNet.Attributes;
 using Lynx.Model;
 
 namespace Lynx.Benchmark;
+
 public class PawnIslandsBenchmark: BaseBenchmark
 {
     private static readonly string[] Data = Engine._benchmarkFens;
