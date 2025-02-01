@@ -2,7 +2,7 @@
 using Lynx.Model;
 
 namespace Lynx.Benchmark;
-internal class PawnIslandsBenchmark: BaseBenchmark
+public class PawnIslandsBenchmark: BaseBenchmark
 {
     private static readonly string[] Data = Engine._benchmarkFens;
 
