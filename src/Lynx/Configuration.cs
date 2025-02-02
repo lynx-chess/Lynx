@@ -113,6 +113,18 @@ public sealed class EngineSettings
 
     #region Time management
 
+    /// <summary>
+    /// Time overhead to take into account engine-gui communication process overhead
+    /// </summary>
+    public int EngineGuiCommunicationTimeOverhead { get; set; } = 50;
+
+    /// <summary>
+    /// Min milliseconds left after substracting <see cref="EngineGuiCommunicationTimeOverhead"/>
+    /// from wtime/btime or movetime. This min value is used to avoid 0 or negative time left.
+    /// Resulting milliseconds left are later used to calculate hard and soft time bounds
+    /// </summary>
+    public int MinSearchTime { get; set; } = 50;
+
     public double HardTimeBoundMultiplier { get; set; } = 0.52;
 
     public double SoftTimeBoundMultiplier { get; set; } = 1;
