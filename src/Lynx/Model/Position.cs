@@ -1164,7 +1164,7 @@ public class Position : IDisposable
         var friendlyKingDistance = Constants.ChebyshevDistance[squareIndex][sameSideKingSquare];
         if (friendlyKingDistance >= 4)
         {
-            packedBonus += FriendlyKingDistanceToRookBonus[friendlyKingDistance];
+            packedBonus += FriendlyKingDistanceToRookPenalty;
         }
 
         return packedBonus;
@@ -1196,7 +1196,7 @@ public class Position : IDisposable
         var friendlyKingDistance = Constants.ChebyshevDistance[squareIndex][sameSideKingSquare];
         if (friendlyKingDistance >= 4)
         {
-            packedBonus += FriendlyKingDistanceToKnightBonus[friendlyKingDistance];
+            packedBonus += FriendlyKingDistanceToKnightPenalty;
         }
 
         return packedBonus;
@@ -1262,7 +1262,7 @@ public class Position : IDisposable
         var friendlyKingDistance = Constants.ChebyshevDistance[squareIndex][sameSideKingSquare];
         if (friendlyKingDistance >= 4)
         {
-            packedBonus += FriendlyKingDistanceToBishopBonus[friendlyKingDistance];
+            packedBonus += FriendlyKingDistanceToBishopPenalty;
         }
 
         return packedBonus;
@@ -1291,7 +1291,7 @@ public class Position : IDisposable
         var friendlyKingDistance = Constants.ChebyshevDistance[squareIndex][sameSideKingSquare];
         if (friendlyKingDistance >= 4)
         {
-            packedBonus += FriendlyKingDistanceToQueenBonus[friendlyKingDistance];
+            packedBonus += FriendlyKingDistanceToQueenPenalty;
         }
 
         return packedBonus;
