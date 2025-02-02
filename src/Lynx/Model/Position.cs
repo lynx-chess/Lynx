@@ -1165,6 +1165,18 @@ public class Position : IDisposable
 
         packedBonus += CheckBonus[(int)Piece.R] * checks;
 
+        if ((attacks & PieceBitBoards[pieceIndex]).CountBits() >= 1)
+        {
+            var rank = Constants.Rank[squareIndex];
+
+            if (pieceIndex == (int)Piece.r)
+            {
+                rank = 7 - rank;
+            }
+
+            packedBonus += ConnectedRooksBonus[rank];
+        }
+
         return packedBonus;
     }
 
@@ -1323,6 +1335,8 @@ public class Position : IDisposable
 
         static int IdentifyIslands(BitBoard pawns)
         {
+            const int n = 1;
+
             Span<int> files = stackalloc int[8];
 
             while (pawns != default)
@@ -1330,15 +1344,15 @@ public class Position : IDisposable
                 var squareIndex = pawns.GetLS1BIndex();
                 pawns.ResetLS1B();
 
-                files[Constants.File[squareIndex]] = 1;
+                files[Constants.File[squareIndex]] = n;
             }
 
             var islandCount = 0;
             var isIsland = false;
 
-            for (int file = 0; file < 8; ++file)
+            for (int file = 0; file < files.Length; ++file)
             {
-                if (files[file] == 1)
+                if (files[file] == n)
                 {
                     if (!isIsland)
                     {
