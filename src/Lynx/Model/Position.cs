@@ -707,7 +707,7 @@ public class Position : IDisposable
                     bitboard.ResetLS1B();
 
                     gamePhase += GamePhaseByPiece[pieceIndex];
-                    packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.White, blackKing, blackPawnAttacks);
+                    packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.White, whiteKing, blackKing, blackPawnAttacks);
                 }
             }
 
@@ -726,7 +726,7 @@ public class Position : IDisposable
                     bitboard.ResetLS1B();
 
                     gamePhase += GamePhaseByPiece[pieceIndex];
-                    packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.Black, whiteKing, whitePawnAttacks);
+                    packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.Black, blackKing, whiteKing, whitePawnAttacks);
                 }
             }
         }
@@ -846,7 +846,7 @@ public class Position : IDisposable
 
                     gamePhase += GamePhaseByPiece[pieceIndex];
 
-                    packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.White, blackKing, blackPawnAttacks);
+                    packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.White, whiteKing, blackKing, blackPawnAttacks);
                 }
             }
 
@@ -869,7 +869,7 @@ public class Position : IDisposable
 
                     gamePhase += GamePhaseByPiece[pieceIndex];
 
-                    packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.Black, whiteKing, whitePawnAttacks);
+                    packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.Black, blackKing, whiteKing, whitePawnAttacks);
                 }
             }
 
@@ -1033,14 +1033,14 @@ public class Position : IDisposable
     /// Doesn't include <see cref="Piece.P"/>, <see cref="Piece.p"/>, <see cref="Piece.K"/> and <see cref="Piece.k"/> evaluation
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int AdditionalPieceEvaluation(int pieceSquareIndex, int pieceIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+    private int AdditionalPieceEvaluation(int pieceSquareIndex, int pieceIndex, int pieceSide, int sameSideKingSquare, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
     {
         return pieceIndex switch
         {
-            (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
-            (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
-            (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
-            (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, sameSideKingSquare, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, sameSideKingSquare, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(pieceSquareIndex, pieceSide, sameSideKingSquare, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex, pieceSide, sameSideKingSquare, oppositeSideKingSquare, enemyPawnAttacks),
             _ => 0
         };
     }
@@ -1055,10 +1055,10 @@ public class Position : IDisposable
         {
             (int)Piece.P or (int)Piece.p => PawnAdditionalEvaluation(bucket, oppositeSideBucket, pieceSquareIndex, pieceIndex, sameSideKingSquare, oppositeSideKingSquare),
 
-            (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
-            (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
-            (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
-            (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.R or (int)Piece.r => RookAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, sameSideKingSquare, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.B or (int)Piece.b => BishopAdditionalEvaluation(pieceSquareIndex, pieceIndex, pieceSide, sameSideKingSquare, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.N or (int)Piece.n => KnightAdditionalEvaluation(pieceSquareIndex, pieceSide, sameSideKingSquare, oppositeSideKingSquare, enemyPawnAttacks),
+            (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex, pieceSide, sameSideKingSquare, oppositeSideKingSquare, enemyPawnAttacks),
             _ => 0
         };
     }
@@ -1116,7 +1116,7 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int RookAdditionalEvaluation(int squareIndex, int pieceIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+    private int RookAdditionalEvaluation(int squareIndex, int pieceIndex, int pieceSide, int sameSideKingSquare, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
     {
         const int pawnToRookOffset = (int)Piece.R - (int)Piece.P;
 
@@ -1145,9 +1145,9 @@ public class Position : IDisposable
         // Checks
         var enemyKingCheckThreats = Attacks.RookAttacks(oppositeSideKingSquare, occupancy);
         var checks = (attacks & enemyKingCheckThreats).CountBits();
-
         packedBonus += CheckBonus[(int)Piece.R] * checks;
 
+        // Connected rooks
         if ((attacks & PieceBitBoards[pieceIndex]).CountBits() >= 1)
         {
             var rank = Constants.Rank[squareIndex];
@@ -1160,11 +1160,15 @@ public class Position : IDisposable
             packedBonus += ConnectedRooksBonus[rank];
         }
 
+        // Distance to friendly king
+        var friendlyKingDistance = Constants.ChebyshevDistance[squareIndex][sameSideKingSquare];
+        packedBonus += FriendlyKingDistanceToRookBonus[friendlyKingDistance];
+
         return packedBonus;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int KnightAdditionalEvaluation(int squareIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+    private int KnightAdditionalEvaluation(int squareIndex, int pieceSide, int sameSideKingSquare, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
     {
         //var offset = Utils.PieceOffset(pieceSide);
         //var oppositeRooksIndex = (int)Piece.r - offset;
@@ -1183,17 +1187,17 @@ public class Position : IDisposable
         // Checks
         var enemyKingCheckThreats = Attacks.KnightAttacks[oppositeSideKingSquare];
         var checks = (attacks & enemyKingCheckThreats).CountBits();
-
         packedBonus += CheckBonus[(int)Piece.N] * checks;
 
-        // Major threats
-        //packedBonus += MinorMajorThreatsBonus * (PieceBitBoards[oppositeRooksIndex] | PieceBitBoards[oppositeQueensIndex]).CountBits();
+        // Distance to friendly king
+        var friendlyKingDistance = Constants.ChebyshevDistance[squareIndex][sameSideKingSquare];
+        packedBonus += FriendlyKingDistanceToKnightBonus[friendlyKingDistance];
 
         return packedBonus;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int BishopAdditionalEvaluation(int squareIndex, int pieceIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+    private int BishopAdditionalEvaluation(int squareIndex, int pieceIndex, int pieceSide, int sameSideKingSquare, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
     {
         const int pawnToBishopOffset = (int)Piece.B - (int)Piece.P;
 
@@ -1236,18 +1240,21 @@ public class Position : IDisposable
         // Checks
         var enemyKingCheckThreats = Attacks.BishopAttacks(oppositeSideKingSquare, occupancy);
         var checks = (attacks & enemyKingCheckThreats).CountBits();
-
         packedBonus += CheckBonus[(int)Piece.B] * checks;
 
         // Major threats
         packedBonus += BishopRookThreatsBonus * (attacks & PieceBitBoards[oppositeRooksIndex]).CountBits();
         packedBonus += BishopQueenThreatsBonus * (attacks & PieceBitBoards[oppositeQueensIndex]).CountBits();
 
+        // Distance to friendly king
+        var friendlyKingDistance = Constants.ChebyshevDistance[squareIndex][sameSideKingSquare];
+        packedBonus += FriendlyKingDistanceToBishopBonus[friendlyKingDistance];
+
         return packedBonus;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private int QueenAdditionalEvaluation(int squareIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
+    private int QueenAdditionalEvaluation(int squareIndex, int pieceSide, int sameSideKingSquare, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
     {
         var occupancy = OccupancyBitBoards[(int)Side.Both];
         var attacks = Attacks.QueenAttacks(squareIndex, occupancy);
@@ -1263,8 +1270,11 @@ public class Position : IDisposable
         // Checks
         var enemyKingCheckThreats = Attacks.QueenAttacks(oppositeSideKingSquare, occupancy);
         var checks = (attacks & enemyKingCheckThreats).CountBits();
-
         packedBonus += CheckBonus[(int)Piece.Q] * checks;
+
+        // Distance to friendly king
+        var friendlyKingDistance = Constants.ChebyshevDistance[squareIndex][sameSideKingSquare];
+        packedBonus += FriendlyKingDistanceToQueenBonus[friendlyKingDistance];
 
         return packedBonus;
     }
