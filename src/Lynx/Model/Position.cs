@@ -1143,13 +1143,18 @@ public class Position : IDisposable
         }
 
         // Rook on seventh rank
-        var rank = Constants.Rank[squareIndex];
-        if(pieceSide == (int)Side.Black)
+        var rookRank = Constants.Rank[squareIndex];
+        var opponentKingRank = Constants.Rank[oppositeSideKingSquare];
+
+        var lastRank = 7;
+        var seventhRank = 6;
+        if (pieceSide == (int)Side.Black)
         {
-            rank = 7 - rank;
+            lastRank = 0;
+            seventhRank = 1;
         }
 
-        if(rank == 6)
+        if (rookRank == seventhRank && opponentKingRank == lastRank)
         {
             packedBonus += RookOn7thRankBonus;
         }
