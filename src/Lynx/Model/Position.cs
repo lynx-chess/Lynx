@@ -1162,10 +1162,9 @@ public class Position : IDisposable
 
         // Distance to friendly king
         var friendlyKingDistance = Constants.ChebyshevDistance[squareIndex][sameSideKingSquare];
-        if (friendlyKingDistance >= 4)
-        {
-            packedBonus += FriendlyKingDistanceToRookBonus[friendlyKingDistance];
-        }
+        packedBonus += friendlyKingDistance >= 4
+            ? FriendlyKingDistanceToRookBonus[friendlyKingDistance]
+            : FriendlyKingDistanceToRookBonus[3];
 
         return packedBonus;
     }
@@ -1194,10 +1193,9 @@ public class Position : IDisposable
 
         // Distance to friendly king
         var friendlyKingDistance = Constants.ChebyshevDistance[squareIndex][sameSideKingSquare];
-        if (friendlyKingDistance >= 4)
-        {
-            packedBonus += FriendlyKingDistanceToKnightBonus[friendlyKingDistance];
-        }
+        packedBonus += friendlyKingDistance >= 4
+            ? FriendlyKingDistanceToKnightBonus[friendlyKingDistance]
+            : FriendlyKingDistanceToKnightBonus[3];
 
         return packedBonus;
     }
@@ -1260,10 +1258,9 @@ public class Position : IDisposable
 
         // Distance to friendly king
         var friendlyKingDistance = Constants.ChebyshevDistance[squareIndex][sameSideKingSquare];
-        if (friendlyKingDistance >= 4)
-        {
-            packedBonus += FriendlyKingDistanceToBishopBonus[friendlyKingDistance];
-        }
+        packedBonus += friendlyKingDistance >= 4
+            ? FriendlyKingDistanceToBishopBonus[friendlyKingDistance]
+            : FriendlyKingDistanceToBishopBonus[3];
 
         return packedBonus;
     }
@@ -1289,10 +1286,9 @@ public class Position : IDisposable
 
         // Distance to friendly king
         var friendlyKingDistance = Constants.ChebyshevDistance[squareIndex][sameSideKingSquare];
-        if (friendlyKingDistance >= 4)
-        {
-            packedBonus += FriendlyKingDistanceToQueenBonus[friendlyKingDistance];
-        }
+        packedBonus += friendlyKingDistance >= 4
+            ? FriendlyKingDistanceToQueenBonus[friendlyKingDistance]
+            : FriendlyKingDistanceToQueenBonus[3];
 
         return packedBonus;
     }
