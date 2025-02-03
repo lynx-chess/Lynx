@@ -394,7 +394,7 @@ public sealed partial class Engine
                         }
 
                         // -= history/(maxHistory/2)
-                        reduction -= 2 * _quietHistory[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.History_MaxMoveValue;
+                        reduction -= 2 * _quietHistory[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.QuietHistory_MaxValue;
 
                         // Don't allow LMR to drop into qsearch or increase the depth
                         // depth - 1 - depth +2 = 1, min depth we want

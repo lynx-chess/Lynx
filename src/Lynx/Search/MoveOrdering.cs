@@ -170,7 +170,8 @@ public sealed partial class Engine
 
         _quietHistory[piece][targetSquare] = ScoreHistoryMove(
             _quietHistory[piece][targetSquare],
-            HistoryBonus[depth]);
+            HistoryBonus[depth],
+            Configuration.EngineSettings.QuietHistory_MaxValue);
 
         int continuationHistoryIndex;
         int previousMovePiece = -1;
@@ -190,7 +191,8 @@ public sealed partial class Engine
 
             _continuationHistory[continuationHistoryIndex] = ScoreHistoryMove(
                 _continuationHistory[continuationHistoryIndex],
-                HistoryBonus[depth]);
+                HistoryBonus[depth],
+                Configuration.EngineSettings.ContinuationHistory_MaxValue);
 
             //    var previousPreviousMove = Game.MoveStack[ply - 2];
             //    var previousPreviousMovePiece = previousPreviousMove.Piece();
@@ -214,7 +216,8 @@ public sealed partial class Engine
                 // When a quiet move fails high, penalize previous visited quiet moves
                 _quietHistory[visitedMovePiece][visitedMoveTargetSquare] = ScoreHistoryMove(
                     _quietHistory[visitedMovePiece][visitedMoveTargetSquare],
-                    -HistoryBonus[depth]);
+                    -HistoryBonus[depth],
+                    Configuration.EngineSettings.QuietHistory_MaxValue);
 
                 if (!isRoot)
                 {
@@ -223,7 +226,8 @@ public sealed partial class Engine
 
                     _continuationHistory[continuationHistoryIndex] = ScoreHistoryMove(
                         _continuationHistory[continuationHistoryIndex],
-                        -HistoryBonus[depth]);
+                        -HistoryBonus[depth],
+                        Configuration.EngineSettings.ContinuationHistory_MaxValue);
                 }
             }
         }
@@ -263,7 +267,8 @@ public sealed partial class Engine
         var captureHistoryIndex = CaptureHistoryIndex(piece, targetSquare, capturedPiece);
         _captureHistory[captureHistoryIndex] = ScoreHistoryMove(
             _captureHistory[captureHistoryIndex],
-            HistoryBonus[depth]);
+            HistoryBonus[depth],
+            Configuration.EngineSettings.CaptureHistory_MaxValue);
 
         // 🔍 Capture history penalty/malus
         // When a capture fails high, penalize previous visited captures
@@ -281,7 +286,8 @@ public sealed partial class Engine
 
                 _captureHistory[captureHistoryIndex] = ScoreHistoryMove(
                     _captureHistory[captureHistoryIndex],
-                    -HistoryBonus[depth]);
+                    -HistoryBonus[depth],
+                    Configuration.EngineSettings.CaptureHistory_MaxValue);
             }
         }
     }
@@ -291,8 +297,10 @@ public sealed partial class Engine
     /// Formula taken from EP discord, https://discord.com/channels/1132289356011405342/1132289356447625298/1141102105847922839
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int ScoreHistoryMove(int score, int rawHistoryBonus)
+    private static int ScoreHistoryMove(int score, int rawHistoryBonus, int maxHistoryValue)
     {
-        return score + rawHistoryBonus - (score * Math.Abs(rawHistoryBonus) / Configuration.EngineSettings.History_MaxMoveValue);
+        Debug.Assert(rawHistoryBonus <= maxHistoryValue);
+
+        return score + rawHistoryBonus - (score * Math.Abs(rawHistoryBonus) / maxHistoryValue);
     }
 }

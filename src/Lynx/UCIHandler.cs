@@ -486,11 +486,27 @@ public sealed class UCIHandler
                     }
                     break;
                 }
-            case "history_maxmovevalue":
+            case "history_maxvalue":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
-                        Configuration.EngineSettings.History_MaxMoveValue = value;
+                        Configuration.EngineSettings.QuietHistory_MaxValue = value;
+                    }
+                    break;
+                }
+            case "capturehistory_maxvalue":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.CaptureHistory_MaxValue = value;
+                    }
+                    break;
+                }
+            case "continuationhistory_maxvalue":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.ContinuationHistory_MaxValue = value;
                     }
                     break;
                 }
