@@ -293,8 +293,7 @@ public sealed partial class Engine
     }
 
     /// <summary>
-    /// Soft caps history score
-    /// Formula taken from EP discord, https://discord.com/channels/1132289356011405342/1132289356447625298/1141102105847922839
+    /// History gravity: soft cap of history score
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int ScoreHistoryMove(int score, int rawHistoryBonus, int maxHistoryValue)
