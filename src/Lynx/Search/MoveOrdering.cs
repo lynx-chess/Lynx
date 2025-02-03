@@ -298,8 +298,12 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int ScoreHistoryMove(int score, int rawHistoryBonus, int maxHistoryValue)
     {
-        Debug.Assert(rawHistoryBonus <= maxHistoryValue);
+        Debug.Assert(Math.Abs(rawHistoryBonus) <= maxHistoryValue);
 
-        return score + rawHistoryBonus - (score * Math.Abs(rawHistoryBonus) / maxHistoryValue);
+        score = score + rawHistoryBonus - (score * Math.Abs(rawHistoryBonus) / maxHistoryValue);
+
+        Debug.Assert(Math.Abs(score) <= maxHistoryValue);
+
+        return score;
     }
 }
