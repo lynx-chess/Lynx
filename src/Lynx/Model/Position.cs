@@ -1120,6 +1120,8 @@ public class Position : IDisposable
     {
         const int pawnToRookOffset = (int)Piece.R - (int)Piece.P;
 
+        var offset = Utils.PieceOffset(pieceSide);
+        var oppositeQueensIndex = (int)Piece.q - offset;
         var occupancy = OccupancyBitBoards[(int)Side.Both];
         var attacks = Attacks.RookAttacks(squareIndex, occupancy);
 
@@ -1148,6 +1150,9 @@ public class Position : IDisposable
 
         packedBonus += CheckBonus[(int)Piece.R] * checks;
 
+        packedBonus += RookQueenThreatsBonus * (attacks & PieceBitBoards[oppositeQueensIndex]).CountBits();
+
+        // Connected rooks
         if ((attacks & PieceBitBoards[pieceIndex]).CountBits() >= 1)
         {
             var rank = Constants.Rank[squareIndex];
