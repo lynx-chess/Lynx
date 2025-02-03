@@ -1234,7 +1234,7 @@ public class Position : IDisposable
         packedBonus += BadBishop_BlockedCentralPawnsPenalty[pawnBlockers.CountBits()];
 
         // Bishop in unblocked long diagonals
-        if((attacks & Constants.CentralSquares).CountBits() == 2)
+        if ((attacks & Constants.CentralSquares).CountBits() == 2)
         {
             packedBonus += BishopInUnblockedLongDiagonalBonus;
         }
