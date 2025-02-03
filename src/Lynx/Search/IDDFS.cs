@@ -461,7 +461,7 @@ public sealed partial class Engine
                 _logger.Warn(noDepth1Message);
             }
 
-            finalSearchResult = EmergencyMove(firstLegalMove);
+            finalSearchResult = BestMoveRoot(firstLegalMove);
         }
         else
         {
@@ -484,11 +484,9 @@ public sealed partial class Engine
     }
 
     /// <summary>
-    /// Uses TT move, the move with highest score or the first legal move found in that order
+    /// Find the best move without searching, based on TT and <see cref="ScoreMove(int, int, short)"/>
     /// </summary>
-    /// <param name="firstLegalMove"></param>
-    /// <returns></returns>
-    private SearchResult EmergencyMove(Move firstLegalMove)
+    private SearchResult BestMoveRoot(Move firstLegalMove)
     {
         var score = 0;
         ShortMove ttBestMove = default;
