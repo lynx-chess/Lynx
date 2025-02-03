@@ -518,6 +518,10 @@ public static class Constants
     public const int KingPawnHashSize = 262_144;
 
     public const int KingPawnHashMask = KingPawnHashSize - 1;
+
+    public const int PawnHistoryKeyLength = 16_384;
+
+    public const ulong PawnHistoryMask = PawnHistoryKeyLength - 1;
 }
 
 #pragma warning restore IDE0055

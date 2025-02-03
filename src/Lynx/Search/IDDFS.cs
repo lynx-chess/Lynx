@@ -28,6 +28,12 @@ public sealed partial class Engine
     private readonly int[][] _quietHistory;
 
     /// <summary>
+    /// <see cref="Constants.PawnHistoryKeyLength"/> x 12 x 64
+    /// pawn key x piece x target square
+    /// </summary>
+    private readonly int[][][] _quietPawnHistory;
+
+    /// <summary>
     /// 12 x 64 x 12,
     /// piece x target square x captured piece
     /// </summary>

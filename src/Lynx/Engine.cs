@@ -49,6 +49,16 @@ public sealed partial class Engine : IDisposable
             _moveNodeCount[i] = new ulong[64];
         }
 
+        _quietPawnHistory = new int[Constants.PawnHistoryKeyLength][][];
+        for (int i = 0; i < _quietPawnHistory.Length; ++i)
+        {
+            _quietPawnHistory[i] = new int[12][];
+            for (int j = 0; j < _quietPawnHistory[i].Length; ++j)
+            {
+                _quietPawnHistory[i][j] = new int[64];
+            }
+        }
+
 #if !DEBUG
         if (warmup)
         {
@@ -96,6 +106,14 @@ public sealed partial class Engine : IDisposable
         {
             Array.Clear(_quietHistory[i]);
             Array.Clear(_moveNodeCount[i]);
+        }
+
+        for (int i = 0; i < _quietPawnHistory.Length; ++i)
+        {
+            for (int j = 0; j < _quietPawnHistory[i].Length; ++j)
+            {
+                Array.Clear(_quietPawnHistory[i][j]);
+            }
         }
 
         Array.Clear(_captureHistory);

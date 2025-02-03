@@ -9,7 +9,9 @@ namespace Lynx;
 public sealed partial class Engine
 {
     /// <summary>
-    /// Returns the score evaluation of a move taking into account <paramref name="bestMoveTTCandidate"/>, <see cref="MostValueableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_quietHistory"/>
+    /// Returns the score evaluation of a move taking into account <paramref name="bestMoveTTCandidate"/>,
+    /// <see cref="MostValueableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/>,
+    /// <see cref="_quietHistory"/>, <see cref="_quietPawnHistory"/> and <see cref="_captureHistory"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal int ScoreMove(Move move, int ply, ShortMove bestMoveTTCandidate = default)
@@ -95,12 +97,14 @@ public sealed partial class Engine
             // Counter move history
             return BaseMoveScore
                 + _quietHistory[move.Piece()][move.TargetSquare()]
+                + _quietPawnHistory[Game.CurrentPosition._kingPawnUniqueIdentifier & Constants.PawnHistoryMask][move.Piece()][move.TargetSquare()]
                 + _continuationHistory[ContinuationHistoryIndex(move.Piece(), move.TargetSquare(), previousMovePiece, previousMoveTargetSquare, 0)];
         }
 
         // History move or 0 if not found
         return BaseMoveScore
-            + _quietHistory[move.Piece()][move.TargetSquare()];
+            + _quietHistory[move.Piece()][move.TargetSquare()]
+            + _quietPawnHistory[Game.CurrentPosition._kingPawnUniqueIdentifier & Constants.PawnHistoryMask][move.Piece()][move.TargetSquare()];
     }
 
     /// <summary>
@@ -159,17 +163,23 @@ public sealed partial class Engine
 
     /// <summary>
     /// Quiet history, contination history, killers and counter moves
+    /// Doing this only in beta cutoffs (instead of when eval > alpha) was suggested by Sirius author
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(int depth, int ply, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move, bool isRoot)
     {
-        // 🔍 Quiet history moves
-        // Doing this only in beta cutoffs (instead of when eval > alpha) was suggested by Sirius author
         var piece = move.Piece();
         var targetSquare = move.TargetSquare();
+        var pawnHistoryKey = Game.CurrentPosition._kingPawnUniqueIdentifier & Constants.PawnHistoryMask;
 
+        // 🔍 Quiet history
         _quietHistory[piece][targetSquare] = ScoreHistoryMove(
             _quietHistory[piece][targetSquare],
+            HistoryBonus[depth]);
+
+        // 🔍 Quiet pawn history
+        _quietPawnHistory[pawnHistoryKey][piece][targetSquare] = ScoreHistoryMove(
+            _quietPawnHistory[pawnHistoryKey][piece][targetSquare],
             HistoryBonus[depth]);
 
         int continuationHistoryIndex;
@@ -214,6 +224,11 @@ public sealed partial class Engine
                 // When a quiet move fails high, penalize previous visited quiet moves
                 _quietHistory[visitedMovePiece][visitedMoveTargetSquare] = ScoreHistoryMove(
                     _quietHistory[visitedMovePiece][visitedMoveTargetSquare],
+                    -HistoryBonus[depth]);
+
+                // 🔍 Quiet pawn history penalty / malus
+                _quietPawnHistory[pawnHistoryKey][visitedMovePiece][visitedMoveTargetSquare] = ScoreHistoryMove(
+                    _quietPawnHistory[pawnHistoryKey][visitedMovePiece][visitedMoveTargetSquare],
                     -HistoryBonus[depth]);
 
                 if (!isRoot)
