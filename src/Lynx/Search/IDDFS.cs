@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -445,7 +446,7 @@ public sealed partial class Engine
         if (lastSearchResult is null)
         {
             var noDepth1Message =
-                $"[#{_id}] Depth {depth}: search cancelled with no result for position {Game.CurrentPosition.FEN()} (hard limit {_searchConstraints.HardLimitTimeBound}ms, soft limit {_searchConstraints.SoftLimitTimeBound}ms). Choosing first found legal move as best one";
+                $"[#{_id}] Depth {depth}: search cancelled with no result for position {Game.CurrentPosition.FEN()} (hard limit {_searchConstraints.HardLimitTimeBound}ms, soft limit {_searchConstraints.SoftLimitTimeBound}ms). Choosing an emergency move";
 
             // In the event of a quick ponderhit/stop while pondering because the opponent moved quickly, we don't want no warning triggered here
             //  when cancelling the pondering search
@@ -460,11 +461,7 @@ public sealed partial class Engine
                 _logger.Warn(noDepth1Message);
             }
 
-            finalSearchResult = new(
-#if MULTITHREAD_DEBUG
-                _id,
-#endif
-                firstLegalMove, 0, 0, [firstLegalMove]);
+            finalSearchResult = EmergencyMove(firstLegalMove);
         }
         else
         {
@@ -484,5 +481,74 @@ public sealed partial class Engine
         }
 
         return finalSearchResult;
+    }
+
+    /// <summary>
+    /// Uses TT move, the move with highest score or the first legal move found in that order
+    /// </summary>
+    /// <param name="firstLegalMove"></param>
+    /// <returns></returns>
+    private SearchResult EmergencyMove(Move firstLegalMove)
+    {
+        var score = 0;
+        ShortMove ttBestMove = default;
+
+        var position = Game.CurrentPosition;
+        var ttEntry = _tt.ProbeHash(position, ply: 0);
+
+        if (ttEntry.NodeType != NodeType.Unknown)
+        {
+            ttBestMove = ttEntry.BestMove;
+            score = ttEntry.Score;
+
+            if (ttEntry.Score == EvaluationConstants.NoHashEntry)
+            {
+                score = ttEntry.StaticEval;
+            }
+        }
+
+        Span<Move> pseudoLegalMoves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        pseudoLegalMoves = MoveGenerator.GenerateAllMoves(Game.CurrentPosition, pseudoLegalMoves);
+
+        Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
+        for (int i = 0; i < pseudoLegalMoves.Length; ++i)
+        {
+            moveScores[i] = ScoreMove(pseudoLegalMoves[i], 0, ttBestMove);
+        }
+
+        for (int i = 0; i < pseudoLegalMoves.Length; ++i)
+        {
+            // Incremental move sorting
+            for (int j = i + 1; j < pseudoLegalMoves.Length; j++)
+            {
+                if (moveScores[j] > moveScores[i])
+                {
+                    (moveScores[i], moveScores[j], pseudoLegalMoves[i], pseudoLegalMoves[j]) = (moveScores[j], moveScores[i], pseudoLegalMoves[j], pseudoLegalMoves[i]);
+                }
+            }
+
+            var move = pseudoLegalMoves[i];
+
+            var gameState = position.MakeMove(move);
+            if (!position.WasProduceByAValidMove())
+            {
+                position.UnmakeMove(move, gameState);
+                continue;
+            }
+
+            return new SearchResult(
+#if MULTITHREAD_DEBUG
+                _id,
+#endif
+                move, moveScores[i], 0, [move]);
+        }
+
+        _logger.Error("No valid move found while looking for an emergency move for position {Fen}", position.FEN());
+
+        return new(
+#if MULTITHREAD_DEBUG
+                _id,
+#endif
+            firstLegalMove, 0, 0, [firstLegalMove]);
     }
 }
