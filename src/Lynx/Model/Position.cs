@@ -1162,7 +1162,7 @@ public class Position : IDisposable
 
         // Distance to friendly king
         var friendlyKingDistance = Constants.ChebyshevDistance[squareIndex][sameSideKingSquare];
-        if (friendlyKingDistance >= 4)
+        if (friendlyKingDistance >= 5)
         {
             packedBonus += FriendlyKingDistanceToRookBonus[friendlyKingDistance];
         }
@@ -1194,7 +1194,7 @@ public class Position : IDisposable
 
         // Distance to friendly king
         var friendlyKingDistance = Constants.ChebyshevDistance[squareIndex][sameSideKingSquare];
-        if (friendlyKingDistance >= 4)
+        if (friendlyKingDistance >= 5)
         {
             packedBonus += FriendlyKingDistanceToKnightBonus[friendlyKingDistance];
         }
@@ -1260,7 +1260,7 @@ public class Position : IDisposable
 
         // Distance to friendly king
         var friendlyKingDistance = Constants.ChebyshevDistance[squareIndex][sameSideKingSquare];
-        if (friendlyKingDistance >= 4)
+        if (friendlyKingDistance >= 5)
         {
             packedBonus += FriendlyKingDistanceToBishopBonus[friendlyKingDistance];
         }
@@ -1289,7 +1289,7 @@ public class Position : IDisposable
 
         // Distance to friendly king
         var friendlyKingDistance = Constants.ChebyshevDistance[squareIndex][sameSideKingSquare];
-        if (friendlyKingDistance >= 4)
+        if (friendlyKingDistance >= 5)
         {
             packedBonus += FriendlyKingDistanceToQueenBonus[friendlyKingDistance];
         }
