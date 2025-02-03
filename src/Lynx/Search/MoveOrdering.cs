@@ -242,7 +242,7 @@ public sealed partial class Engine
             _killerMoves[thisPlyKillerMovesBaseIndex + 1] = firstKillerMove;
             _killerMoves[thisPlyKillerMovesBaseIndex] = move;
 
-            if (!isRoot && (depth >= 3 || pvNode))
+            if (!isRoot && (depth >= Configuration.EngineSettings.CounterMoves_MinDepth || pvNode))
             {
                 // 🔍 Countermoves - fails to fix the bug and remove killer moves condition, see  https://github.com/lynx-chess/Lynx/pull/944
                 _counterMoves[CounterMoveIndex(previousMovePiece, previousTargetSquare)] = move;
