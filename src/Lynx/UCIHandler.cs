@@ -39,9 +39,9 @@ public sealed class UCIHandler
 
         try
         {
-            if (_logger.IsDebugEnabled)
+            if (_logger.IsInfoEnabled)
             {
-                _logger.Debug("[GUI]\t{0}", rawCommand);
+                _logger.Info("[GUI]\t{0}", rawCommand);
             }
 
             switch (ExtractCommandItems(rawCommand))
