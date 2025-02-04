@@ -1317,45 +1317,26 @@ public class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int PawnIslands(BitBoard whitePawns, BitBoard blackPawns)
     {
-        var whiteIslandCount = IdentifyIslands(whitePawns);
-        var blackIslandCount = IdentifyIslands(blackPawns);
+        var whiteIslandCount = CountPawnIslands(whitePawns);
+        var blackIslandCount = CountPawnIslands(blackPawns);
 
         return PawnIslandsBonus[whiteIslandCount] - PawnIslandsBonus[blackIslandCount];
 
-        static int IdentifyIslands(BitBoard pawns)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static int CountPawnIslands(BitBoard pawns)
         {
-            const int n = 1;
-
-            Span<int> files = stackalloc int[8];
+            int pawnFileBitBoard = 0;
 
             while (pawns != default)
             {
                 var squareIndex = pawns.GetLS1BIndex();
                 pawns.ResetLS1B();
 
-                files[Constants.File[squareIndex]] = n;
+                // BitBoard.SetBit equivalent but for byte instead of ulong
+                pawnFileBitBoard |= (1 << Constants.File[squareIndex]);
             }
 
-            var islandCount = 0;
-            var isIsland = false;
-
-            for (int file = 0; file < files.Length; ++file)
-            {
-                if (files[file] == n)
-                {
-                    if (!isIsland)
-                    {
-                        isIsland = true;
-                        ++islandCount;
-                    }
-                }
-                else
-                {
-                    isIsland = false;
-                }
-            }
-
-            return islandCount;
+            return PawnIslandsCount[pawnFileBitBoard];
         }
     }
 

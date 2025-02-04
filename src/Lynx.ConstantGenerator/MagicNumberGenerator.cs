@@ -1,6 +1,6 @@
 ﻿using Lynx.Model;
 
-namespace Lynx.Internal;
+namespace Lynx.ConstantGenerator;
 
 #pragma warning disable S106, S2228 // Standard outputs should not be used directly to log anything
 
@@ -113,7 +113,7 @@ public static class MagicNumberGenerator
     }
 
     /// <summary>
-    /// Used to generate <see cref="Constants.RookMagicNumbers"/> and <see cref="Constants.BishopMagicNumbers">
+    /// Used to generate <see cref="Constants.RookMagicNumbers"/> and <see cref="Constants.BishopMagicNumbers"/>
     /// </summary>
     public static void InitializeMagicNumbers()
     {
