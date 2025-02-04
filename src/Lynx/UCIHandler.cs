@@ -268,6 +268,14 @@ public sealed class UCIHandler
                 }
 
             #region Time management
+            case "engineguicommunicationtimeoverhead":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.EngineGuiCommunicationTimeOverhead = value;
+                    }
+                    break;
+                }
             case "nodetmbase":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))

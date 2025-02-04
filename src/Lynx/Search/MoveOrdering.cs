@@ -166,7 +166,7 @@ public sealed partial class Engine
     /// Doing this only in beta cutoffs (instead of when eval > alpha) was suggested by Sirius author
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(int depth, int ply, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move, bool isRoot)
+    private void UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(int depth, int ply, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move, bool isRoot, bool pvNode)
     {
         var piece = move.Piece();
         var targetSquare = move.TargetSquare();
@@ -257,7 +257,7 @@ public sealed partial class Engine
             _killerMoves[thisPlyKillerMovesBaseIndex + 1] = firstKillerMove;
             _killerMoves[thisPlyKillerMovesBaseIndex] = move;
 
-            if (!isRoot)
+            if (!isRoot && (depth >= Configuration.EngineSettings.CounterMoves_MinDepth || pvNode))
             {
                 // 🔍 Countermoves - fails to fix the bug and remove killer moves condition, see  https://github.com/lynx-chess/Lynx/pull/944
                 _counterMoves[CounterMoveIndex(previousMovePiece, previousTargetSquare)] = move;
