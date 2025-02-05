@@ -123,7 +123,7 @@ public sealed class EngineSettings
     /// from wtime/btime or movetime. This min value is used to avoid 0 or negative time left.
     /// Resulting milliseconds left are later used to calculate hard and soft time bounds
     /// </summary>
-    public int MinSearchTime { get; set; } = 50;
+    public int MinSearchTime { get; set; } = 10;
 
     public double HardTimeBoundMultiplier { get; set; } = 0.52;
 
