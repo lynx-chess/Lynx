@@ -661,85 +661,17 @@ public class Position : IDisposable
             // Not hit in pawnEvalTable table
             else
             {
-                var pawnScore = 0;
-
-                // White pawns
-
-                // King pawn shield bonus
-                pawnScore += KingPawnShield(whiteKing, whitePawns);
-
-                // Pieces protected by pawns bonus
-                pawnScore += PieceProtectedByPawnBonus[whiteBucket][(int)Piece.P] * (whitePawnAttacks & whitePawns).CountBits();
-
-                // Bitboard copy that we 'empty'
-                var whitePawnsCopy = whitePawns;
-                while (whitePawnsCopy != default)
-                {
-                    var pieceSquareIndex = whitePawnsCopy.GetLS1BIndex();
-                    whitePawnsCopy.ResetLS1B();
-
-                    pawnScore += PawnAdditionalEvaluation(whiteBucket, blackBucket, pieceSquareIndex, (int)Piece.P, whiteKing, blackKing);
-                }
-
-                // Black pawns
-
-                // King pawn shield bonus
-                pawnScore -= KingPawnShield(blackKing, blackPawns);
-
-                // Pieces protected by pawns bonus
-                pawnScore -= PieceProtectedByPawnBonus[blackBucket][(int)Piece.P] * (blackPawnAttacks & blackPawns).CountBits();
-
-                // Bitboard copy that we 'empty'
-                var blackPawnsCopy = blackPawns;
-                while (blackPawnsCopy != default)
-                {
-                    var pieceSquareIndex = blackPawnsCopy.GetLS1BIndex();
-                    blackPawnsCopy.ResetLS1B();
-
-                    pawnScore -= PawnAdditionalEvaluation(blackBucket, whiteBucket, pieceSquareIndex, (int)Piece.p, blackKing, whiteKing);
-                }
-
-                // Pawn islands
-                pawnScore += PawnIslands(whitePawns, blackPawns);
+                var pawnScore = PawnAdditionalEvaluation_All(whiteBucket, blackBucket, whiteKing, blackKing, whitePawnAttacks, blackPawnAttacks);
 
                 entry.Update(_kingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
             }
 
-            // White pieces additional eval and pawn attacks, except pawn and king
-            for (int pieceIndex = (int)Piece.N; pieceIndex < (int)Piece.K; ++pieceIndex)
-            {
-                // Bitboard copy that we 'empty'
-                var bitboard = PieceBitBoards[pieceIndex];
 
-                packedScore += PieceProtectedByPawnBonus[whiteBucket][pieceIndex] * (whitePawnAttacks & bitboard).CountBits();
-
-                while (bitboard != default)
-                {
-                    var pieceSquareIndex = bitboard.GetLS1BIndex();
-                    bitboard.ResetLS1B();
-
-                    packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.White, blackKing, blackPawnAttacks);
-                }
-            }
-
-            // Black pieces additional eval and pawn attacks, except pawn and king
-            for (int pieceIndex = (int)Piece.n; pieceIndex < (int)Piece.k; ++pieceIndex)
-            {
-                // Bitboard copy that we 'empty'
-                var bitboard = PieceBitBoards[pieceIndex];
-
-                // Pieces protected by pawns bonus
-                packedScore -= PieceProtectedByPawnBonus[blackBucket][pieceIndex - 6] * (blackPawnAttacks & bitboard).CountBits();
-
-                while (bitboard != default)
-                {
-                    var pieceSquareIndex = bitboard.GetLS1BIndex();
-                    bitboard.ResetLS1B();
-
-                    packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.Black, whiteKing, whitePawnAttacks);
-                }
-            }
+            packedScore += KnightAdditionalEvaluation_All(whiteBucket, blackBucket, whiteKing, blackKing, whitePawnAttacks, blackPawnAttacks);
+            packedScore += BishopAdditionalEvaluation_All(whiteBucket, blackBucket, whiteKing, blackKing, whitePawnAttacks, blackPawnAttacks);
+            packedScore += RookAdditionalEvaluation_All(whiteBucket, blackBucket, whiteKing, blackKing, whitePawnAttacks, blackPawnAttacks);
+            packedScore += QueenAdditionalEvaluation_All(whiteBucket, blackBucket, whiteKing, blackKing, whitePawnAttacks, blackPawnAttacks);
         }
         else
         {
@@ -1077,6 +1009,52 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int PawnAdditionalEvaluation_All(int whiteBucket, int blackBucket, int whiteKingSquare, int blackKingSquare, BitBoard whitePawnAttacks, BitBoard blackPawnAttacks)
+    {
+        var score = 0;
+
+        const int whitePawnIndex = (int)Piece.P;
+        const int blackPawnIndex = (int)Piece.p;
+
+        var whitePawns = PieceBitBoards[whitePawnIndex];
+        var blackPawns = PieceBitBoards[blackPawnIndex];
+
+        // Before modifying whitePawns and blackPawns:
+
+        // Pieces protected by pawns bonus
+        score += PieceProtectedByPawnBonus[whiteBucket][whitePawnIndex] * (whitePawnAttacks & whitePawns).CountBits();
+        score -= PieceProtectedByPawnBonus[blackBucket][whitePawnIndex] * (blackPawnAttacks & blackPawns).CountBits();
+
+        // King pawn shield bonus
+        score += KingPawnShield(whiteKingSquare, whitePawns);
+        score -= KingPawnShield(blackKingSquare, blackPawns);
+
+        // Pawn islands
+        score += PawnIslands(whitePawns, blackPawns);
+
+        // White pawns
+        while (whitePawns != default)
+        {
+            // TODO: add 0b111111111 o 0b000000000  & PSQT, so that hopefully PSQT just doesn't get executed
+            var pieceSquareIndex = whitePawns.GetLS1BIndex();
+            whitePawns.ResetLS1B();
+
+            score += PawnAdditionalEvaluation(whiteBucket, blackBucket, pieceSquareIndex, whitePawnIndex, whiteKingSquare, blackKingSquare);
+        }
+
+        // Black pawns
+        while (blackPawns != default)
+        {
+            var pieceSquareIndex = blackPawns.GetLS1BIndex();
+            blackPawns.ResetLS1B();
+
+            score -= PawnAdditionalEvaluation(blackBucket, whiteBucket, pieceSquareIndex, blackPawnIndex, blackKingSquare, whiteKingSquare);
+        }
+
+        return score;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int PawnAdditionalEvaluation(int bucket, int oppositeSideBucket, int squareIndex, int pieceIndex, int sameSideKingSquare, int oppositeSideKingSquare)
     {
         int packedBonus = 0;
@@ -1129,6 +1107,40 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int RookAdditionalEvaluation_All(int whiteBucket, int blackBucket, int whiteKingSquare, int blackKingSquare, BitBoard whitePawnAttacks, BitBoard blackPawnAttacks)
+    {
+        var score = 0;
+
+        const int whitePieceIndex = (int)Piece.R;
+        const int blackPieceIndex = (int)Piece.r;
+
+        var whitePieces = PieceBitBoards[whitePieceIndex];
+        var blackPieces = PieceBitBoards[blackPieceIndex];
+
+        // Pieces protected by pawns bonus
+        score += PieceProtectedByPawnBonus[whiteBucket][whitePieceIndex] * (whitePawnAttacks & whitePieces).CountBits();
+        score -= PieceProtectedByPawnBonus[blackBucket][whitePieceIndex] * (blackPawnAttacks & blackPieces).CountBits();
+
+        while (whitePieces != default)
+        {
+            var pieceSquareIndex = whitePieces.GetLS1BIndex();
+            whitePieces.ResetLS1B();
+
+            score += RookAdditionalEvaluation(pieceSquareIndex, whitePieceIndex, (int)Side.White, blackKingSquare, blackPawnAttacks);
+        }
+
+        while (blackPieces != default)
+        {
+            var pieceSquareIndex = blackPieces.GetLS1BIndex();
+            blackPieces.ResetLS1B();
+
+            score -= RookAdditionalEvaluation(pieceSquareIndex, blackPieceIndex, (int)Side.Black, whiteKingSquare, whitePawnAttacks);
+        }
+
+        return score;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int RookAdditionalEvaluation(int squareIndex, int pieceIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
     {
         const int pawnToRookOffset = (int)Piece.R - (int)Piece.P;
@@ -1177,6 +1189,40 @@ public class Position : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int KnightAdditionalEvaluation_All(int whiteBucket, int blackBucket, int whiteKingSquare, int blackKingSquare, BitBoard whitePawnAttacks, BitBoard blackPawnAttacks)
+    {
+        var score = 0;
+
+        const int whitePieceIndex = (int)Piece.N;
+        const int blackPieceIndex = (int)Piece.n;
+
+        var whitePieces = PieceBitBoards[whitePieceIndex];
+        var blackPieces = PieceBitBoards[blackPieceIndex];
+
+        // Pieces protected by pawns bonus
+        score += PieceProtectedByPawnBonus[whiteBucket][whitePieceIndex] * (whitePawnAttacks & whitePieces).CountBits();
+        score -= PieceProtectedByPawnBonus[blackBucket][whitePieceIndex] * (blackPawnAttacks & blackPieces).CountBits();
+
+        while (whitePieces != default)
+        {
+            var pieceSquareIndex = whitePieces.GetLS1BIndex();
+            whitePieces.ResetLS1B();
+
+            score += KnightAdditionalEvaluation(pieceSquareIndex, (int)Side.White, blackKingSquare, blackPawnAttacks);
+        }
+
+        while (blackPieces != default)
+        {
+            var pieceSquareIndex = blackPieces.GetLS1BIndex();
+            blackPieces.ResetLS1B();
+
+            score -= KnightAdditionalEvaluation(pieceSquareIndex, (int)Side.Black, whiteKingSquare, whitePawnAttacks);
+        }
+
+        return score;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int KnightAdditionalEvaluation(int squareIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
     {
         //var offset = Utils.PieceOffset(pieceSide);
@@ -1203,6 +1249,40 @@ public class Position : IDisposable
         //packedBonus += MinorMajorThreatsBonus * (PieceBitBoards[oppositeRooksIndex] | PieceBitBoards[oppositeQueensIndex]).CountBits();
 
         return packedBonus;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int BishopAdditionalEvaluation_All(int whiteBucket, int blackBucket, int whiteKingSquare, int blackKingSquare, BitBoard whitePawnAttacks, BitBoard blackPawnAttacks)
+    {
+        var score = 0;
+
+        const int whitePieceIndex = (int)Piece.B;
+        const int blackPieceIndex = (int)Piece.b;
+
+        var whitePieces = PieceBitBoards[whitePieceIndex];
+        var blackPieces = PieceBitBoards[blackPieceIndex];
+
+        // Pieces protected by pawns bonus
+        score += PieceProtectedByPawnBonus[whiteBucket][whitePieceIndex] * (whitePawnAttacks & whitePieces).CountBits();
+        score -= PieceProtectedByPawnBonus[blackBucket][whitePieceIndex] * (blackPawnAttacks & blackPieces).CountBits();
+
+        while (whitePieces != default)
+        {
+            var pieceSquareIndex = whitePieces.GetLS1BIndex();
+            whitePieces.ResetLS1B();
+
+            score += BishopAdditionalEvaluation(pieceSquareIndex, whitePieceIndex, (int)Side.White, blackKingSquare, blackPawnAttacks);
+        }
+
+        while (blackPieces != default)
+        {
+            var pieceSquareIndex = blackPieces.GetLS1BIndex();
+            blackPieces.ResetLS1B();
+
+            score -= BishopAdditionalEvaluation(pieceSquareIndex, blackPieceIndex, (int)Side.Black, whiteKingSquare, whitePawnAttacks);
+        }
+
+        return score;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1263,6 +1343,40 @@ public class Position : IDisposable
         packedBonus += BishopQueenThreatsBonus * (attacks & PieceBitBoards[oppositeQueensIndex]).CountBits();
 
         return packedBonus;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int QueenAdditionalEvaluation_All(int whiteBucket, int blackBucket, int whiteKingSquare, int blackKingSquare, BitBoard whitePawnAttacks, BitBoard blackPawnAttacks)
+    {
+        var score = 0;
+
+        const int whitePieceIndex = (int)Piece.Q;
+        const int blackPieceIndex = (int)Piece.q;
+
+        var whitePieces = PieceBitBoards[whitePieceIndex];
+        var blackPieces = PieceBitBoards[blackPieceIndex];
+
+        // Pieces protected by pawns bonus
+        score += PieceProtectedByPawnBonus[whiteBucket][whitePieceIndex] * (whitePawnAttacks & whitePieces).CountBits();
+        score -= PieceProtectedByPawnBonus[blackBucket][whitePieceIndex] * (blackPawnAttacks & blackPieces).CountBits();
+
+        while (whitePieces != default)
+        {
+            var pieceSquareIndex = whitePieces.GetLS1BIndex();
+            whitePieces.ResetLS1B();
+
+            score += QueenAdditionalEvaluation(pieceSquareIndex, (int)Side.White, blackKingSquare, blackPawnAttacks);
+        }
+
+        while (blackPieces != default)
+        {
+            var pieceSquareIndex = blackPieces.GetLS1BIndex();
+            blackPieces.ResetLS1B();
+
+            score -= QueenAdditionalEvaluation(pieceSquareIndex, (int)Side.Black, whiteKingSquare, whitePawnAttacks);
+        }
+
+        return score;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
