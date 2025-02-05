@@ -23,9 +23,9 @@ public sealed class Writer
                 var str = output.ToString();
                 Console.WriteLine(str);
 
-                if (_logger.IsDebugEnabled)
+                if (_logger.IsInfoEnabled)
                 {
-                    _logger.Debug("[Lynx]\t{0}", str);
+                    _logger.Info("[Lynx]\t{0}", str);
                 }
             }
         }

@@ -39,9 +39,9 @@ public sealed class UCIHandler
 
         try
         {
-            if (_logger.IsDebugEnabled)
+            if (_logger.IsInfoEnabled)
             {
-                _logger.Debug("[GUI]\t{0}", rawCommand);
+                _logger.Info("[GUI]\t{0}", rawCommand);
             }
 
             switch (ExtractCommandItems(rawCommand))
@@ -268,6 +268,14 @@ public sealed class UCIHandler
                 }
 
             #region Time management
+            case "engineguicommunicationtimeoverhead":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.EngineGuiCommunicationTimeOverhead = value;
+                    }
+                    break;
+                }
             case "nodetmbase":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
