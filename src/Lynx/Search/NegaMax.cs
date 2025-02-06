@@ -639,7 +639,7 @@ public sealed partial class Engine
                 ref int innerMove = ref pseudoLegalMoves[j];
                 ref int innerMoveScore = ref moveScores[j];
 
-                if (moveScores[j] > moveScores[i])
+                if (innerMoveScore > outerMoveScore)
                 {
                     (outerMoveScore, innerMoveScore, outerMove, innerMove) = (innerMoveScore, outerMoveScore, innerMove, outerMove);
                 }
