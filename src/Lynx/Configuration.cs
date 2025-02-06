@@ -215,21 +215,21 @@ public sealed class EngineSettings
     //[SPSA<int>(0, 10, 0.5)]
     public int LMP_MovesDepthMultiplier { get; set; } = 3;
 
-    [SPSA<int>(1_896, 16384, 512)]
-    public int QuietHistory_MaxValue { get; set; } = 8_192;
+    [SPSA<int>(1_896, 16384, 1024)]
+    public int QuietHistory_MaxValue { get; set; } = 9_086;
 
-    [SPSA<int>(1_896, 16384, 512)]
-    public int CaptureHistory_MaxValue { get; set; } = 8_192;
+    [SPSA<int>(1_896, 16384, 1024)]
+    public int CaptureHistory_MaxValue { get; set; } = 7_477;
 
-    [SPSA<int>(1_896, 16384, 512)]
-    public int ContinuationHistory_MaxValue { get; set; } = 8_192;
+    [SPSA<int>(1_896, 16384, 1024)]
+    public int ContinuationHistory_MaxValue { get; set; } = 6_829;
 
     /// <summary>
     /// 1896: constant from depth 12
     /// </summary>
     public int History_MaxMoveRawBonus { get; set; } = 1_896;
 
-    public int CounterMoves_MinDepth { get;set; } = 3;
+    public int CounterMoves_MinDepth { get; set; } = 3;
 
     [SPSA<int>(0, 200, 10)]
     public int History_BestScoreBetaMargin { get; set; } = 60;
