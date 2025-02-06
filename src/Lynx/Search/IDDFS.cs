@@ -445,7 +445,7 @@ public sealed partial class Engine
         if (lastSearchResult is null)
         {
             var noDepth1Message =
-                $"[#{_id}] Depth {depth}: search cancelled with no result for position {Game.CurrentPosition.FEN()} (hard limit {_searchConstraints.HardLimitTimeBound}ms, soft limit {_searchConstraints.SoftLimitTimeBound}ms). Choosing an emergency move";
+                $"[#{_id}] Depth {depth}: search cancelled with no result for position {Game.PositionBeforeLastSearch.FEN()} (hard limit {_searchConstraints.HardLimitTimeBound}ms, soft limit {_searchConstraints.SoftLimitTimeBound}ms). Choosing an emergency move";
 
             // In the event of a quick ponderhit/stop while pondering because the opponent moved quickly, we don't want no warning triggered here
             //  when cancelling the pondering search
@@ -490,7 +490,7 @@ public sealed partial class Engine
         var score = 0;
         ShortMove ttBestMove = default;
 
-        var position = Game.CurrentPosition;
+        var position = Game.PositionBeforeLastSearch;
         var ttEntry = _tt.ProbeHash(position, ply: 0);
 
         if (ttEntry.NodeType != NodeType.Unknown)
@@ -505,7 +505,7 @@ public sealed partial class Engine
         }
 
         Span<Move> pseudoLegalMoves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
-        pseudoLegalMoves = MoveGenerator.GenerateAllMoves(Game.CurrentPosition, pseudoLegalMoves);
+        pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, pseudoLegalMoves);
 
         Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
