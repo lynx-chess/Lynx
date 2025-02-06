@@ -258,9 +258,11 @@ public sealed partial class Engine
             // So just find the first unsearched one with the best score and try it
             for (int j = moveIndex + 1; j < pseudoLegalMoves.Length; j++)
             {
-                if (moveScores[j] > moveScores[moveIndex])
+                ref int outerMoveScore = ref moveScores[moveIndex];
+                ref int innerMoveScore = ref moveScores[j];
+                if (innerMoveScore > outerMoveScore)
                 {
-                    (moveScores[moveIndex], moveScores[j], pseudoLegalMoves[moveIndex], pseudoLegalMoves[j]) = (moveScores[j], moveScores[moveIndex], pseudoLegalMoves[j], pseudoLegalMoves[moveIndex]);
+                    (outerMoveScore, innerMoveScore, pseudoLegalMoves[moveIndex], pseudoLegalMoves[j]) = (innerMoveScore, outerMoveScore, pseudoLegalMoves[j], pseudoLegalMoves[moveIndex]);
                 }
             }
 
@@ -627,9 +629,11 @@ public sealed partial class Engine
             // So just find the first unsearched one with the best score and try it
             for (int j = i + 1; j < pseudoLegalMoves.Length; j++)
             {
+                ref int outerMoveScore = ref moveScores[i];
+                ref int innerMoveScore = ref moveScores[j];
                 if (moveScores[j] > moveScores[i])
                 {
-                    (moveScores[i], moveScores[j], pseudoLegalMoves[i], pseudoLegalMoves[j]) = (moveScores[j], moveScores[i], pseudoLegalMoves[j], pseudoLegalMoves[i]);
+                    (outerMoveScore, innerMoveScore, pseudoLegalMoves[i], pseudoLegalMoves[j]) = (innerMoveScore, outerMoveScore, pseudoLegalMoves[j], pseudoLegalMoves[i]);
                 }
             }
 
