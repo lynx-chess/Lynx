@@ -253,20 +253,24 @@ public sealed partial class Engine
 
         for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
         {
+            ref int outerMove = ref pseudoLegalMoves[moveIndex];
+            ref int outerMoveScore = ref moveScores[moveIndex];
+
             // Incremental move sorting, inspired by https://github.com/jw1912/Chess-Challenge and suggested by toanth
             // There's no need to sort all the moves since most of them don't get checked anyway
             // So just find the first unsearched one with the best score and try it
             for (int j = moveIndex + 1; j < pseudoLegalMoves.Length; j++)
             {
-                ref int outerMoveScore = ref moveScores[moveIndex];
+                ref int innerMove = ref pseudoLegalMoves[j];
                 ref int innerMoveScore = ref moveScores[j];
+
                 if (innerMoveScore > outerMoveScore)
                 {
                     (outerMoveScore, innerMoveScore, pseudoLegalMoves[moveIndex], pseudoLegalMoves[j]) = (innerMoveScore, outerMoveScore, pseudoLegalMoves[j], pseudoLegalMoves[moveIndex]);
                 }
             }
 
-            var move = pseudoLegalMoves[moveIndex];
+            var move = outerMove;
 
             var gameState = position.MakeMove(move);
 
@@ -624,20 +628,24 @@ public sealed partial class Engine
 
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
+            ref int outerMove = ref pseudoLegalMoves[i];
+            ref int outerMoveScore = ref moveScores[i];
+
             // Incremental move sorting, inspired by https://github.com/jw1912/Chess-Challenge and suggested by toanth
             // There's no need to sort all the moves since most of them don't get checked anyway
             // So just find the first unsearched one with the best score and try it
             for (int j = i + 1; j < pseudoLegalMoves.Length; j++)
             {
-                ref int outerMoveScore = ref moveScores[i];
+                ref int innerMove = ref pseudoLegalMoves[j];
                 ref int innerMoveScore = ref moveScores[j];
+
                 if (moveScores[j] > moveScores[i])
                 {
-                    (outerMoveScore, innerMoveScore, pseudoLegalMoves[i], pseudoLegalMoves[j]) = (innerMoveScore, outerMoveScore, pseudoLegalMoves[j], pseudoLegalMoves[i]);
+                    (outerMoveScore, innerMoveScore, outerMove, innerMove) = (innerMoveScore, outerMoveScore, innerMove, outerMove);
                 }
             }
 
-            var move = pseudoLegalMoves[i];
+            var move = outerMove;
 
             // 🔍 QSearch SEE pruning: pruning bad captures
             if (moveScores[i] < EvaluationConstants.PromotionMoveScoreValue && moveScores[i] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
