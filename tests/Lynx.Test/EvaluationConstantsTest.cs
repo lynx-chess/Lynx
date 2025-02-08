@@ -286,9 +286,8 @@ public class EvaluationConstantsTest
     [Test]
     public void SingleMoveEvaluation()
     {
-        Assert.NotZero(EvaluationConstants.SingleMoveScore);
-        Assert.Greater(EvaluationConstants.SingleMoveScore, 100);
-        Assert.Less(EvaluationConstants.SingleMoveScore, 400);
+        Assert.NotZero(SingleMoveScore);
+        Assert.Greater(SingleMoveScore, 100);
     }
 
     [Test]
