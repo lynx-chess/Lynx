@@ -265,6 +265,7 @@ public sealed partial class Engine
             }
 
             var move = pseudoLegalMoves[moveIndex];
+            var moveScore = moveScores[moveIndex];
 
             var gameState = position.MakeMove(move);
 
@@ -324,7 +325,7 @@ public sealed partial class Engine
                 if (!pvNode
                     && !isInCheck
                     && isNotGettingCheckmated
-                    && moveScores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue) // Quiet move
+                    && moveScore < EvaluationConstants.PromotionMoveScoreValue) // Quiet move
                 {
                     // 🔍 Late Move Pruning (LMP) - all quiet moves can be pruned
                     // after searching the first few given by the move ordering algorithm
@@ -338,7 +339,7 @@ public sealed partial class Engine
                     // 🔍 History pruning -  all quiet moves can be pruned
                     // once we find one with a history score too low
                     if (!isCapture
-                        && moveScores[moveIndex] < EvaluationConstants.CounterMoveValue
+                        && moveScore < EvaluationConstants.CounterMoveValue
                         && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth    // TODO use LMR depth
                         && _quietHistory[move.Piece()][move.TargetSquare()] < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
                     {
@@ -404,8 +405,8 @@ public sealed partial class Engine
                     // 🔍 Static Exchange Evaluation (SEE) reduction
                     // Bad captures are reduced more
                     if (!isInCheck
-                        && moveScores[moveIndex] < EvaluationConstants.PromotionMoveScoreValue
-                        && moveScores[moveIndex] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
+                        && moveScore < EvaluationConstants.PromotionMoveScoreValue
+                        && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
                     {
                         reduction += Configuration.EngineSettings.SEE_BadCaptureReduction;
                         reduction = Math.Clamp(reduction, 0, depth - 1);
@@ -488,7 +489,7 @@ public sealed partial class Engine
                     }
                     else
                     {
-                        UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(historyDepth, ply, visitedMoves, visitedMovesCounter, move, isRoot);
+                        UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(historyDepth, ply, visitedMoves, visitedMovesCounter, move, isRoot, pvNode);
                     }
 
                     _tt.RecordHash(position, staticEval, depth, ply, bestScore, NodeType.Beta, bestMove);
@@ -620,23 +621,24 @@ public sealed partial class Engine
             moveScores[i] = ScoreMoveQSearch(pseudoLegalMoves[i], ttBestMove);
         }
 
-        for (int i = 0; i < pseudoLegalMoves.Length; ++i)
+        for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
         {
             // Incremental move sorting, inspired by https://github.com/jw1912/Chess-Challenge and suggested by toanth
             // There's no need to sort all the moves since most of them don't get checked anyway
             // So just find the first unsearched one with the best score and try it
-            for (int j = i + 1; j < pseudoLegalMoves.Length; j++)
+            for (int j = moveIndex + 1; j < pseudoLegalMoves.Length; j++)
             {
-                if (moveScores[j] > moveScores[i])
+                if (moveScores[j] > moveScores[moveIndex])
                 {
-                    (moveScores[i], moveScores[j], pseudoLegalMoves[i], pseudoLegalMoves[j]) = (moveScores[j], moveScores[i], pseudoLegalMoves[j], pseudoLegalMoves[i]);
+                    (moveScores[moveIndex], moveScores[j], pseudoLegalMoves[moveIndex], pseudoLegalMoves[j]) = (moveScores[j], moveScores[moveIndex], pseudoLegalMoves[j], pseudoLegalMoves[moveIndex]);
                 }
             }
 
-            var move = pseudoLegalMoves[i];
+            var move = pseudoLegalMoves[moveIndex];
+            var moveScore = moveScores[moveIndex];
 
             // 🔍 QSearch SEE pruning: pruning bad captures
-            if (moveScores[i] < EvaluationConstants.PromotionMoveScoreValue && moveScores[i] >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
+            if (moveScore < EvaluationConstants.PromotionMoveScoreValue && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
             {
                 continue;
             }

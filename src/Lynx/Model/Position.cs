@@ -14,6 +14,7 @@ public class Position : IDisposable
     private bool _disposedValue;
 
     private int _incrementalEvalAccumulator;
+    private int _incrementalPhaseAccumulator;
     private bool _isIncrementalEval;
 
     public ulong UniqueIdentifier { get; private set; }
@@ -99,6 +100,7 @@ public class Position : IDisposable
 
         _isIncrementalEval = position._isIncrementalEval;
         _incrementalEvalAccumulator = position._incrementalEvalAccumulator;
+        _incrementalPhaseAccumulator = position._incrementalPhaseAccumulator;
     }
 
     #region Move making
@@ -111,6 +113,7 @@ public class Position : IDisposable
         ulong uniqueIdentifierCopy = UniqueIdentifier;
         ulong kingPawnKeyUniqueIdentifierCopy = _kingPawnUniqueIdentifier;
         int incrementalEvalAccumulatorCopy = _incrementalEvalAccumulator;
+        int incrementalPhaseAccumulatorCopy = _incrementalPhaseAccumulator;
         // We also save a copy of _isIncrementalEval, so that current move doesn't affect 'sibling' moves exploration
         bool isIncrementalEvalCopy = _isIncrementalEval;
 
@@ -124,9 +127,11 @@ public class Position : IDisposable
         int promotedPiece = move.PromotedPiece();
 
         var newPiece = piece;
+        int extraPhaseIfIncremental = 0;
         if (promotedPiece != default)
         {
             newPiece = promotedPiece;
+            extraPhaseIfIncremental = GamePhaseByPiece[promotedPiece]; // - GamePhaseByPiece[piece];
         }
 
         PieceBitBoards[piece].PopBit(sourceSquare);
@@ -191,6 +196,8 @@ public class Position : IDisposable
             _incrementalEvalAccumulator += PSQT(0, sameSideBucket, newPiece, targetSquare);
             _incrementalEvalAccumulator += PSQT(1, opposideSideBucket, newPiece, targetSquare);
 
+            _incrementalPhaseAccumulator += extraPhaseIfIncremental;
+
             switch (move.SpecialMoveFlag())
             {
                 case SpecialMoveType.None:
@@ -214,6 +221,8 @@ public class Position : IDisposable
 
                             _incrementalEvalAccumulator -= PSQT(0, opposideSideBucket, capturedPiece, capturedSquare);
                             _incrementalEvalAccumulator -= PSQT(1, sameSideBucket, capturedPiece, capturedSquare);
+
+                            _incrementalPhaseAccumulator -= GamePhaseByPiece[capturedPiece];
                         }
 
                         break;
@@ -300,6 +309,7 @@ public class Position : IDisposable
                         _incrementalEvalAccumulator -= PSQT(0, opposideSideBucket, capturedPiece, capturedSquare);
                         _incrementalEvalAccumulator -= PSQT(1, sameSideBucket, capturedPiece, capturedSquare);
 
+                        //_incrementalPhaseAccumulator -= GamePhaseByPiece[capturedPiece];
                         break;
                     }
             }
@@ -416,7 +426,7 @@ public class Position : IDisposable
         //Debug.Assert(ZobristTable.PositionHash(this) != UniqueIdentifier && WasProduceByAValidMove());
         //Debug.Assert(ZobristTable.PawnKingHash(this) != _kingPawnUniqueIdentifier && WasProduceByAValidMove());
 
-        return new GameState(uniqueIdentifierCopy, kingPawnKeyUniqueIdentifierCopy, incrementalEvalAccumulatorCopy, enpassantCopy, castleCopy, isIncrementalEvalCopy);
+        return new GameState(uniqueIdentifierCopy, kingPawnKeyUniqueIdentifierCopy, incrementalEvalAccumulatorCopy, incrementalPhaseAccumulatorCopy, enpassantCopy, castleCopy, isIncrementalEvalCopy);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -519,6 +529,7 @@ public class Position : IDisposable
         UniqueIdentifier = gameState.ZobristKey;
         _kingPawnUniqueIdentifier = gameState.KingPawnKey;
         _incrementalEvalAccumulator = gameState.IncremetalEvalAccumulator;
+        _incrementalPhaseAccumulator = gameState.IncrementalPhaseAccumulator;
         _isIncrementalEval = gameState.IsIncrementalEval;
     }
 
@@ -534,7 +545,7 @@ public class Position : IDisposable
             ZobristTable.SideHash()
             ^ ZobristTable.EnPassantHash((int)oldEnPassant);
 
-        return new GameState(oldUniqueIdentifier, _kingPawnUniqueIdentifier, _incrementalEvalAccumulator, oldEnPassant, byte.MaxValue, _isIncrementalEval);
+        return new GameState(oldUniqueIdentifier, _kingPawnUniqueIdentifier, _incrementalEvalAccumulator, _incrementalPhaseAccumulator, oldEnPassant, byte.MaxValue, _isIncrementalEval);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -545,6 +556,7 @@ public class Position : IDisposable
         UniqueIdentifier = gameState.ZobristKey;
         _kingPawnUniqueIdentifier = gameState.KingPawnKey;
         _incrementalEvalAccumulator = gameState.IncremetalEvalAccumulator;
+        _incrementalPhaseAccumulator = gameState.IncrementalPhaseAccumulator;
         _isIncrementalEval = gameState.IsIncrementalEval;
     }
 
@@ -636,6 +648,7 @@ public class Position : IDisposable
         if (_isIncrementalEval)
         {
             packedScore = _incrementalEvalAccumulator;
+            gamePhase = _incrementalPhaseAccumulator;
 
             var kingPawnIndex = _kingPawnUniqueIdentifier & Constants.KingPawnHashMask;
             ref var entry = ref pawnEvalTable[kingPawnIndex];
@@ -706,7 +719,6 @@ public class Position : IDisposable
                     var pieceSquareIndex = bitboard.GetLS1BIndex();
                     bitboard.ResetLS1B();
 
-                    gamePhase += GamePhaseByPiece[pieceIndex];
                     packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.White, blackKing, blackPawnAttacks);
                 }
             }
@@ -725,7 +737,6 @@ public class Position : IDisposable
                     var pieceSquareIndex = bitboard.GetLS1BIndex();
                     bitboard.ResetLS1B();
 
-                    gamePhase += GamePhaseByPiece[pieceIndex];
                     packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.Black, whiteKing, whitePawnAttacks);
                 }
             }
@@ -733,6 +744,7 @@ public class Position : IDisposable
         else
         {
             _incrementalEvalAccumulator = 0;
+            _incrementalPhaseAccumulator = 0;
 
             var kingPawnIndex = _kingPawnUniqueIdentifier & Constants.KingPawnHashMask;
             ref var entry = ref pawnEvalTable[kingPawnIndex];
@@ -844,7 +856,7 @@ public class Position : IDisposable
                     _incrementalEvalAccumulator += PSQT(0, whiteBucket, pieceIndex, pieceSquareIndex)
                                                 + PSQT(1, blackBucket, pieceIndex, pieceSquareIndex);
 
-                    gamePhase += GamePhaseByPiece[pieceIndex];
+                    _incrementalPhaseAccumulator += GamePhaseByPiece[pieceIndex];
 
                     packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.White, blackKing, blackPawnAttacks);
                 }
@@ -867,13 +879,14 @@ public class Position : IDisposable
                     _incrementalEvalAccumulator += PSQT(0, blackBucket, pieceIndex, pieceSquareIndex)
                                                 + PSQT(1, whiteBucket, pieceIndex, pieceSquareIndex);
 
-                    gamePhase += GamePhaseByPiece[pieceIndex];
+                    _incrementalPhaseAccumulator += GamePhaseByPiece[pieceIndex];
 
                     packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.Black, whiteKing, whitePawnAttacks);
                 }
             }
 
             packedScore += _incrementalEvalAccumulator;
+            gamePhase += _incrementalPhaseAccumulator;
             _isIncrementalEval = true;
         }
 
@@ -1232,6 +1245,12 @@ public class Position : IDisposable
         var pawnBlockers = pawnBlockerSquares & OccupancyBitBoards[Utils.OppositeSide(pieceSide)];
 
         packedBonus += BadBishop_BlockedCentralPawnsPenalty[pawnBlockers.CountBits()];
+
+        // Bishop in unblocked long diagonals
+        if ((attacks & Constants.CentralSquares).CountBits() == 2)
+        {
+            packedBonus += BishopInUnblockedLongDiagonalBonus;
+        }
 
         // Checks
         var enemyKingCheckThreats = Attacks.BishopAttacks(oppositeSideKingSquare, occupancy);
