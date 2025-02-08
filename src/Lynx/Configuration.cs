@@ -216,13 +216,13 @@ public sealed class EngineSettings
     public int LMP_MovesDepthMultiplier { get; set; } = 3;
 
     [SPSA<int>(1_896, 16384, 1024)]
-    public int QuietHistory_MaxValue { get; set; } = 9_086;
+    public int QuietHistory_MaxValue { get; set; } = 8_192;
 
     [SPSA<int>(1_896, 16384, 1024)]
-    public int CaptureHistory_MaxValue { get; set; } = 7_477;
+    public int CaptureHistory_MaxValue { get; set; } = 16_384;
 
     [SPSA<int>(1_896, 16384, 1024)]
-    public int ContinuationHistory_MaxValue { get; set; } = 6_829;
+    public int ContinuationHistory_MaxValue { get; set; } = 16_384;
 
     /// <summary>
     /// 1896: constant from depth 12
