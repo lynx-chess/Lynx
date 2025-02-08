@@ -1444,16 +1444,17 @@ public class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int PawnIslands(BitBoard whitePawns, BitBoard blackPawns)
     {
-        var whiteIslandCount = IdentifyIslands(whitePawns);
-        var blackIslandCount = IdentifyIslands(blackPawns);
+        var whiteIslandCount = CountPawnIslands(whitePawns);
+        var blackIslandCount = CountPawnIslands(blackPawns);
 
         return PawnIslandsBonus[whiteIslandCount] - PawnIslandsBonus[blackIslandCount];
 
-        static int IdentifyIslands(BitBoard pawns)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static int CountPawnIslands(BitBoard pawns)
         {
             const int n = 1;
-
             Span<int> files = stackalloc int[8];
+
 
             while (pawns != default)
             {

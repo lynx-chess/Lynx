@@ -3,6 +3,7 @@ using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
 using System.Runtime.Intrinsics.X86;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Channels;
@@ -714,11 +715,28 @@ public sealed class UCIHandler
         }
         catch (Exception e)
         {
+            var sb = new StringBuilder(1_024);
+            var errorMessage = ComposeExceptionMessage(e, sb).ToString();
+
 #pragma warning disable S106, S2228 // Standard outputs should not be used directly to log anything
-            Console.WriteLine(e.Message + e.StackTrace);
+            Console.WriteLine(errorMessage);
 #pragma warning restore S106, S2228 // Standard outputs should not be used directly to log anything
 
-            await _engineToUci.Writer.WriteAsync(e.Message + e.StackTrace, cancellationToken);
+            await _engineToUci.Writer.WriteAsync(errorMessage, cancellationToken);
+
+            static StringBuilder ComposeExceptionMessage(Exception e, StringBuilder sb)
+            {
+                sb.AppendLine();
+                sb.AppendLine(e.Message);
+                sb.AppendLine(e.StackTrace);
+
+                if (e.InnerException is not null)
+                {
+                    ComposeExceptionMessage(e.InnerException, sb);
+                }
+
+                return sb;
+            }
         }
     }
 
