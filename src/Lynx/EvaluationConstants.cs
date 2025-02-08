@@ -133,7 +133,7 @@ public static class EvaluationConstants
     /// <summary>
     /// Evaluation to be returned when there's one single legal move
     /// </summary>
-    public const int SingleMoveScore = 200;
+    public const int SingleMoveScore = 666;
 
     #region Move ordering
 
