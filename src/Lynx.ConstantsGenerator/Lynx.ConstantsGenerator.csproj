@@ -9,7 +9,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <NoWarn>$(NoWarn),CS8321,S125,S1481,CS0618,CS1591</NoWarn>
+    <NoWarn>$(NoWarn),CS8321,S125,S1481,CS0618,CS1591,S3353,S106,S2228</NoWarn>
   </PropertyGroup>
 
 </Project>

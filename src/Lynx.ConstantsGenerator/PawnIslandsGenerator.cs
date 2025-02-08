@@ -1,6 +1,6 @@
 ﻿using Lynx.Model;
 
-namespace Lynx.ConstantGenerator;
+namespace Lynx.ConstantsGenerator;
 
 public static class PawnIslandsGenerator
 {

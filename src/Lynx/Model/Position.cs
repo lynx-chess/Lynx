@@ -1319,18 +1319,38 @@ public class Position : IDisposable
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static int CountPawnIslands(BitBoard pawns)
         {
-            int pawnFileBitBoard = 0;
+            const int n = 1;
+            Span<int> files = stackalloc int[8];
+
 
             while (pawns != default)
             {
                 var squareIndex = pawns.GetLS1BIndex();
                 pawns.ResetLS1B();
 
-                // BitBoard.SetBit equivalent but for byte instead of ulong
-                pawnFileBitBoard |= (1 << Constants.File[squareIndex]);
+                files[Constants.File[squareIndex]] = n;
             }
 
-            return PawnIslandsCount[pawnFileBitBoard];
+            var islandCount = 0;
+            var isIsland = false;
+
+            for (int file = 0; file < files.Length; ++file)
+            {
+                if (files[file] == n)
+                {
+                    if (!isIsland)
+                    {
+                        isIsland = true;
+                        ++islandCount;
+                    }
+                }
+                else
+                {
+                    isIsland = false;
+                }
+            }
+
+            return islandCount;
         }
     }
 

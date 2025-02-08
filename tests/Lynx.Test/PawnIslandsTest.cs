@@ -1,4 +1,4 @@
-﻿using Lynx.ConstantGenerator;
+﻿using Lynx.ConstantsGenerator;
 using Lynx.Model;
 using NUnit.Framework;
 

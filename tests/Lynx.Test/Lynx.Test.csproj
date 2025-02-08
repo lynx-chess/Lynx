@@ -29,7 +29,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Lynx.Cli\Lynx.Cli.csproj" />
-    <ProjectReference Include="..\..\src\Lynx.ConstantGenerator\Lynx.ConstantGenerator.csproj" />
+    <ProjectReference Include="..\..\src\Lynx.ConstantsGenerator\Lynx.ConstantsGenerator.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

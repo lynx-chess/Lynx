@@ -1,6 +1,6 @@
 ﻿using Lynx.Model;
 
-namespace Lynx.ConstantGenerator;
+namespace Lynx.ConstantsGenerator;
 
 #pragma warning disable S106, S2228 // Standard outputs should not be used directly to log anything
 

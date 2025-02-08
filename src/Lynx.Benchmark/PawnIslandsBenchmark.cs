@@ -43,7 +43,7 @@
 */
 
 using BenchmarkDotNet.Attributes;
-using Lynx.ConstantGenerator;
+using Lynx.ConstantsGenerator;
 using Lynx.Model;
 using System.Runtime.CompilerServices;
 

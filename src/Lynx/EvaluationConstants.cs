@@ -87,41 +87,6 @@ public static class EvaluationConstants
     ];
 
     /// <summary>
-    /// Indexed by the bitboard resulting of storing the files of a <see cref="BitBoard"/> that have at least a pawn.
-    /// Generated using Lynx.ConstantGenerator.PawnIslandsGenerator
-    /// </summary>
-    public static ReadOnlySpan<int> PawnIslandsCount =>
-        [
-            0, 1, 1, 1, 1, 2, 1, 1, 1, 2,
-            2, 2, 1, 2, 1, 1, 1, 2, 2, 2,
-            2, 3, 2, 2, 1, 2, 2, 2, 1, 2,
-            1, 1, 1, 2, 2, 2, 2, 3, 2, 2,
-            2, 3, 3, 3, 2, 3, 2, 2, 1, 2,
-            2, 2, 2, 3, 2, 2, 1, 2, 2, 2,
-            1, 2, 1, 1, 1, 2, 2, 2, 2, 3,
-            2, 2, 2, 3, 3, 3, 2, 3, 2, 2,
-            2, 3, 3, 3, 3, 4, 3, 3, 2, 3,
-            3, 3, 2, 3, 2, 2, 1, 2, 2, 2,
-            2, 3, 2, 2, 2, 3, 3, 3, 2, 3,
-            2, 2, 1, 2, 2, 2, 2, 3, 2, 2,
-            1, 2, 2, 2, 1, 2, 1, 1, 1, 2,
-            2, 2, 2, 3, 2, 2, 2, 3, 3, 3,
-            2, 3, 2, 2, 2, 3, 3, 3, 3, 4,
-            3, 3, 2, 3, 3, 3, 2, 3, 2, 2,
-            2, 3, 3, 3, 3, 4, 3, 3, 3, 4,
-            4, 4, 3, 4, 3, 3, 2, 3, 3, 3,
-            3, 4, 3, 3, 2, 3, 3, 3, 2, 3,
-            2, 2, 1, 2, 2, 2, 2, 3, 2, 2,
-            2, 3, 3, 3, 2, 3, 2, 2, 2, 3,
-            3, 3, 3, 4, 3, 3, 2, 3, 3, 3,
-            2, 3, 2, 2, 1, 2, 2, 2, 2, 3,
-            2, 2, 2, 3, 3, 3, 2, 3, 2, 2,
-            1, 2, 2, 2, 2, 3, 2, 2, 1, 2,
-            2, 2, 1, 2, 1,
-            1
-        ];
-
-    /// <summary>
     /// Base absolute checkmate evaluation value. Actual absolute evaluations are lower than this one
     /// </summary>
     public const int CheckMateBaseEvaluation = 29_000;
