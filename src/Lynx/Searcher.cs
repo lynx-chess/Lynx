@@ -121,7 +121,7 @@ public sealed class Searcher
                 _searchCancellationTokenSource.CancelAfter(searchConstraints.HardLimitTimeBound);
             }
 
-            var searchResult = _mainEngine.Search(searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
+            var searchResult = _mainEngine.Search(in searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
 
             if (searchResult is not null)
             {
@@ -137,7 +137,7 @@ public sealed class Searcher
             // Pondering
             _logger.Debug("Pondering");
 
-            var searchResult = _mainEngine.Search(searchConstraints, isPondering: true, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None);
+            var searchResult = _mainEngine.Search(in searchConstraints, isPondering: true, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None);
 
             if (searchResult is not null)
             {
@@ -164,7 +164,7 @@ public sealed class Searcher
                     _searchCancellationTokenSource.CancelAfter(searchConstraints.HardLimitTimeBound);
                 }
 
-                searchResult = _mainEngine.Search(searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
+                searchResult = _mainEngine.Search(in searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
 
                 if (searchResult is not null)
                 {
@@ -207,7 +207,7 @@ public sealed class Searcher
 
             var tasks = _extraEngines
                 .Select(engine =>
-                    Task.Run(() => engine.Search(extraEnginesSearchConstraint, isPondering: false, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
+                    Task.Run(() => engine.Search(in extraEnginesSearchConstraint, isPondering: false, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
                 .ToArray();
 
 #if MULTITHREAD_DEBUG
@@ -215,7 +215,7 @@ public sealed class Searcher
             lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
-            SearchResult? finalSearchResult = _mainEngine.Search(searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
+            SearchResult? finalSearchResult = _mainEngine.Search(in searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
 
 #if MULTITHREAD_DEBUG
             _logger.Debug("End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
@@ -269,7 +269,7 @@ public sealed class Searcher
 
             var tasks = _extraEngines
                 .Select(engine =>
-                    Task.Run(() => engine.Search(extraEnginesSearchConstraint, isPondering: true, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
+                    Task.Run(() => engine.Search(in extraEnginesSearchConstraint, isPondering: true, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
                 .ToArray();
 
 #if MULTITHREAD_DEBUG
@@ -277,7 +277,7 @@ public sealed class Searcher
             lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
-            SearchResult? finalSearchResult = _mainEngine.Search(searchConstraints, isPondering: true, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None);
+            SearchResult? finalSearchResult = _mainEngine.Search(in searchConstraints, isPondering: true, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None);
 
 #if MULTITHREAD_DEBUG
             _logger.Debug("[Pondering] End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
@@ -337,7 +337,7 @@ public sealed class Searcher
 
                 tasks = _extraEngines
                     .Select(engine =>
-                        Task.Run(() => engine.Search(extraEnginesSearchConstraint, isPondering: false, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
+                        Task.Run(() => engine.Search(in extraEnginesSearchConstraint, isPondering: false, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
                     .ToArray();
 
 #if MULTITHREAD_DEBUG
@@ -345,7 +345,7 @@ public sealed class Searcher
                 lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
-                finalSearchResult = _mainEngine.Search(searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
+                finalSearchResult = _mainEngine.Search(in searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
 
 #if MULTITHREAD_DEBUG
                 _logger.Debug("End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
