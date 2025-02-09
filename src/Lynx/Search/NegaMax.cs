@@ -42,8 +42,9 @@ public sealed partial class Engine
         ShortMove ttBestMove = default;
         NodeType ttElementType = default;
         int ttScore = default;
-        int ttStaticEval = int.MinValue;
+        int ttStaticEval = EvaluationConstants.NoHashEntry;
         int ttDepth = default;
+        bool ttHit = false;
 
         Debug.Assert(!pvNode || !cutnode);
 
@@ -69,12 +70,14 @@ public sealed partial class Engine
                 }
             }
 
+            ttHit = ttElementType != NodeType.Unknown;
+
             // Internal iterative reduction (IIR)
             // If this position isn't found in TT, it has never been searched before,
             // so the search will be potentially expensive.
             // Therefore, we search with reduced depth for now, expecting to record a TT move
             // which we'll be able to use later for the full depth search
-            if (ttElementType == default && depth >= Configuration.EngineSettings.IIR_MinDepth)
+            if (!ttHit && depth >= Configuration.EngineSettings.IIR_MinDepth)
             {
                 --depth;
             }
@@ -92,19 +95,25 @@ public sealed partial class Engine
 
         bool isInCheck = position.IsInCheck();
         int staticEval;
+        int phase;
+
+        if (ttStaticEval == EvaluationConstants.NoHashEntry)
+        {
+            (staticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable);
+        }
+        else
+        {
+            staticEval = ttStaticEval;
+            phase = position.Phase();
+        }
+
+        Debug.Assert(staticEval != EvaluationConstants.NoHashEntry);
+
+        Game.UpdateStaticEvalInStack(ply, staticEval);
 
         if (isInCheck)
         {
             ++depth;
-
-            if (ttElementType == default || ttStaticEval == EvaluationConstants.NoHashEntry)
-            {
-                staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
-            }
-            else
-            {
-                staticEval = ttStaticEval;
-            }
         }
         else if (depth <= 0)
         {
@@ -114,28 +123,12 @@ public sealed partial class Engine
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
-            _tt.RecordHash(position, EvaluationConstants.NoHashEntry, depth, ply, finalPositionEvaluation, NodeType.Exact);
+            _tt.RecordHash(position, staticEval, depth, ply, finalPositionEvaluation, NodeType.Exact);
 
             return finalPositionEvaluation;
         }
         else if (!pvNode)
         {
-            int phase = int.MaxValue;
-
-            if (ttElementType == default || ttStaticEval == EvaluationConstants.NoHashEntry)
-            {
-                (staticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable);
-            }
-            else
-            {
-                Debug.Assert(ttStaticEval != int.MinValue);
-                Debug.Assert(ttStaticEval != EvaluationConstants.NoHashEntry);
-
-                staticEval = ttStaticEval;
-                phase = position.Phase();
-            }
-
-            Game.UpdateStaticEvalInStack(ply, staticEval);
 
             if (ply >= 2)
             {
@@ -149,8 +142,9 @@ public sealed partial class Engine
             // If the score is outside what the current bounds are, but it did match flag and depth,
             // then we can trust that this score is more accurate than the current static evaluation,
             // and we can update our static evaluation for better accuracy in pruning
-            if (ttElementType != default && ttElementType != (ttScore > staticEval ? NodeType.Alpha : NodeType.Beta))
+            if (ttHit && ttElementType != (ttScore > staticEval ? NodeType.Alpha : NodeType.Beta))
             {
+                Debug.Assert(ttScore != EvaluationConstants.NoHashEntry);
                 staticEval = ttScore;
             }
 
@@ -237,17 +231,6 @@ public sealed partial class Engine
                         return nmpScore;
                     }
                 }
-            }
-        }
-        else
-        {
-            if (ttElementType == default || ttStaticEval == EvaluationConstants.NoHashEntry)
-            {
-                staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
-            }
-            else
-            {
-                staticEval = ttStaticEval;
             }
         }
 
