@@ -36,7 +36,15 @@ public struct TranspositionTableElement
 
     private byte _depth;        // 1 byte
 
-    private NodeType _type;     // 1 byte
+    /// <summary>
+    /// 1 byte
+    /// Binary move bits    Hexadecimal
+    /// 0000 0001              0x1           Was PV (0-1)
+    /// 0000 1110              0xE           NodeType (0-3)
+    /// </summary>
+    private byte _type_WasPv;
+
+    private const int NodeTypeOffset = 1;
 
     /// <summary>
     /// 16 MSB of Position's Zobrist key
@@ -69,20 +77,22 @@ public struct TranspositionTableElement
     /// <see cref="NodeType.Alpha"/>: &lt;= <see cref="Score"/>,
     /// <see cref="NodeType.Beta"/>: &gt;= <see cref="Score"/>
     /// </summary>
-    public readonly NodeType Type => _type;
+    public readonly NodeType Type => (NodeType)(_type_WasPv >> 0xE);
+
+    public readonly bool WasPv => (_type_WasPv >> 1) == 1;
 
     /// <summary>
     /// Struct size in bytes
     /// </summary>
     public static ulong Size => (ulong)Marshal.SizeOf<TranspositionTableElement>();
 
-    public void Update(ulong key, int score, int staticEval, int depth, NodeType nodeType, Move? move)
+    public void Update(ulong key, int score, int staticEval, int depth, NodeType nodeType, int wasPv, Move? move)
     {
         _key = (ushort)key;
         _score = (short)score;
         _staticEval = (short)staticEval;
         _depth = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref depth, 1))[0];
-        _type = nodeType;
+        _type_WasPv = (byte)(wasPv | ((int)nodeType << NodeTypeOffset));
         _move = move != null ? (ShortMove)move : Move;    // Suggested by cj5716 instead of 0. https://github.com/lynx-chess/Lynx/pull/462
     }
 }

@@ -44,12 +44,13 @@ public sealed partial class Engine
         int ttScore = default;
         int ttStaticEval = int.MinValue;
         int ttDepth = default;
+        bool ttWasPv = false;
 
         Debug.Assert(!pvNode || !cutnode);
 
         if (!isRoot)
         {
-            (ttScore, ttBestMove, ttElementType, ttStaticEval, ttDepth) = _tt.ProbeHash(position, ply);
+            (ttScore, ttBestMove, ttElementType, ttStaticEval, ttDepth, ttWasPv) = _tt.ProbeHash(position, ply);
 
             // TT cutoffs
             if (!pvNode
@@ -80,6 +81,8 @@ public sealed partial class Engine
             }
         }
 
+        var ttPv = pvNode || ttWasPv;
+
         // 🔍 Improving heuristic: the current position has a better static evaluation than
         // the previous evaluation from the same side (ply - 2).
         // When true, we can:
@@ -103,11 +106,11 @@ public sealed partial class Engine
         {
             if (MoveGenerator.CanGenerateAtLeastAValidMove(position))
             {
-                return QuiescenceSearch(ply, alpha, beta, cancellationToken);
+                return QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
-            _tt.RecordHash(position, finalPositionEvaluation, depth, ply, finalPositionEvaluation, NodeType.Exact);
+            _tt.RecordHash(position, finalPositionEvaluation, depth, ply, finalPositionEvaluation, NodeType.Exact, ttPv);
             return finalPositionEvaluation;
         }
         else if (!pvNode)
@@ -174,7 +177,7 @@ public sealed partial class Engine
                         {
                             if (depth == 1)
                             {
-                                var qSearchScore = QuiescenceSearch(ply, alpha, beta, cancellationToken);
+                                var qSearchScore = QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
 
                                 return qSearchScore > score
                                     ? qSearchScore
@@ -185,7 +188,7 @@ public sealed partial class Engine
 
                             if (score < beta)               // Static evaluation indicates fail-low node
                             {
-                                var qSearchScore = QuiescenceSearch(ply, alpha, beta, cancellationToken);
+                                var qSearchScore = QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
                                 if (qSearchScore < beta)    // Quiescence score also indicates fail-low node
                                 {
                                     return qSearchScore > score
@@ -492,7 +495,7 @@ public sealed partial class Engine
                         UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(historyDepth, ply, visitedMoves, visitedMovesCounter, move, isRoot, pvNode);
                     }
 
-                    _tt.RecordHash(position, staticEval, depth, ply, bestScore, NodeType.Beta, bestMove);
+                    _tt.RecordHash(position, staticEval, depth, ply, bestScore, NodeType.Beta, ttPv, bestMove);
 
                     return bestScore;
                 }
@@ -506,12 +509,12 @@ public sealed partial class Engine
             Debug.Assert(bestMove is null);
 
             var finalEval = Position.EvaluateFinalPosition(ply, isInCheck);
-            _tt.RecordHash(position, finalEval, depth, ply, finalEval, NodeType.Exact);
+            _tt.RecordHash(position, finalEval, depth, ply, finalEval, NodeType.Exact, ttPv);
 
             return finalEval;
         }
 
-        _tt.RecordHash(position, staticEval, depth, ply, bestScore, nodeType, bestMove);
+        _tt.RecordHash(position, staticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);
 
         // Node fails low
         return bestScore;
@@ -529,7 +532,7 @@ public sealed partial class Engine
     /// Defaults to the works possible score for Black, Int.MaxValue
     /// </param>
     [SkipLocalsInit]
-    public int QuiescenceSearch(int ply, int alpha, int beta, CancellationToken cancellationToken)
+    public int QuiescenceSearch(int ply, int alpha, int beta, bool pvNode, CancellationToken cancellationToken)
     {
         var position = Game.CurrentPosition;
 
@@ -551,6 +554,7 @@ public sealed partial class Engine
         var ttScore = ttProbeResult.Score;
         var ttNodeType = ttProbeResult.NodeType;
         var ttHit = ttNodeType != NodeType.Unknown;
+        var ttPv = pvNode || ttProbeResult.WasPv;
 
         // QS TT cutoff
         Debug.Assert(ttProbeResult.Depth >= 0, "Assertion failed", "We would need to add it as a TT cutoff condition");
@@ -659,7 +663,7 @@ public sealed partial class Engine
             Game.UpdateMoveinStack(ply, move);
 
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
-            int score = -QuiescenceSearch(ply + 1, -beta, -alpha, cancellationToken);
+            int score = -QuiescenceSearch(ply + 1, -beta, -alpha, pvNode, cancellationToken);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
             position.UnmakeMove(move, gameState);
 
@@ -674,7 +678,7 @@ public sealed partial class Engine
                 {
                     PrintMessage($"Pruning: {move} is enough to discard this line");
 
-                    _tt.RecordHash(position, staticEval, 0, ply, bestScore, NodeType.Beta, bestMove);
+                    _tt.RecordHash(position, staticEval, 0, ply, bestScore, NodeType.Beta, ttPv, bestMove);
 
                     return bestScore; // The refutation doesn't matter, since it'll be pruned
                 }
@@ -699,12 +703,12 @@ public sealed partial class Engine
             Debug.Assert(bestMove is null);
 
             var finalEval = Position.EvaluateFinalPosition(ply, position.IsInCheck());
-            _tt.RecordHash(position, finalEval, 0, ply, finalEval, NodeType.Exact);
+            _tt.RecordHash(position, finalEval, 0, ply, finalEval, NodeType.Exact, ttPv);
 
             return finalEval;
         }
 
-        _tt.RecordHash(position, staticEval, 0, ply, bestScore, nodeType, bestMove);
+        _tt.RecordHash(position, staticEval, 0, ply, bestScore, nodeType, ttPv, bestMove);
 
         return bestScore;
     }
