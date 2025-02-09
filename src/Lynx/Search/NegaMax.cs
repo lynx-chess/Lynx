@@ -109,8 +109,6 @@ public sealed partial class Engine
 
         Debug.Assert(staticEval != EvaluationConstants.NoHashEntry);
 
-        Game.UpdateStaticEvalInStack(ply, staticEval);
-
         if (isInCheck)
         {
             ++depth;
@@ -129,6 +127,7 @@ public sealed partial class Engine
         }
         else if (!pvNode)
         {
+            Game.UpdateStaticEvalInStack(ply, staticEval);
 
             if (ply >= 2)
             {
