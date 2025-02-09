@@ -95,7 +95,7 @@ public readonly struct TranspositionTable
             entry.Key == 0                                      // No actual entry
             || (position.UniqueIdentifier >> 48) != entry.Key   // Different key: collision
             || nodeType == NodeType.Exact                       // Entering PV data
-            || depth >= entry.Depth;                            // Higher depth
+            || depth + Configuration.EngineSettings.TTReplacement_DepthOffset >= entry.Depth;                            // Higher depth
 
         if (!shouldReplace)
         {
