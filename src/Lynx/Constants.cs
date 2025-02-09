@@ -349,6 +349,18 @@ public static class Constants
         0, 1, 2, 3, 4, 5, 6, 7
     ];
 
+    public static ReadOnlySpan<byte> ByteFile =>
+    [
+        0, 1, 2, 3, 4, 5, 6, 7,
+        0, 1, 2, 3, 4, 5, 6, 7,
+        0, 1, 2, 3, 4, 5, 6, 7,
+        0, 1, 2, 3, 4, 5, 6, 7,
+        0, 1, 2, 3, 4, 5, 6, 7,
+        0, 1, 2, 3, 4, 5, 6, 7,
+        0, 1, 2, 3, 4, 5, 6, 7,
+        0, 1, 2, 3, 4, 5, 6, 7
+    ];
+
     public static ReadOnlySpan<int> LightSquares =>
     [
         1, 0, 1, 0, 1, 0, 1, 0,
@@ -411,6 +423,8 @@ public static class Constants
     ///     a b c d e f g h
     /// </summary>
     public const BitBoard CentralFiles = 0x3c3c3c3c3c3c3c3c;
+
+    public const BitBoard CentralSquares = 0x1818000000;
 
     public static ReadOnlySpan<char> FileString => [ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' ];
 

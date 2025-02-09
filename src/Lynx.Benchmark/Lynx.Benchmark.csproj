@@ -11,11 +11,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Lynx.ConstantsGenerator\Lynx.ConstantsGenerator.csproj" />
     <ProjectReference Include="..\Lynx\Lynx.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
-    <NoWarn>S125,CA1822,CA1806,RCS1090,S101,CS0618</NoWarn>
+    <NoWarn>>$(NoWarn),CA1822,CA1806,CS0618</NoWarn>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
