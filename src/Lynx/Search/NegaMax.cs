@@ -92,12 +92,19 @@ public sealed partial class Engine
 
         bool isInCheck = position.IsInCheck();
         int staticEval;
-        int phase = int.MaxValue;
 
         if (isInCheck)
         {
             ++depth;
-            staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
+
+            if (ttElementType == default || ttStaticEval == EvaluationConstants.NoHashEntry)
+            {
+                staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
+            }
+            else
+            {
+                staticEval = ttStaticEval;
+            }
         }
         else if (depth <= 0)
         {
@@ -107,18 +114,22 @@ public sealed partial class Engine
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
-            _tt.RecordHash(position, finalPositionEvaluation, depth, ply, finalPositionEvaluation, NodeType.Exact);
+            _tt.RecordHash(position, EvaluationConstants.NoHashEntry, depth, ply, finalPositionEvaluation, NodeType.Exact);
+
             return finalPositionEvaluation;
         }
         else if (!pvNode)
         {
-            if (ttElementType == default)
+            int phase = int.MaxValue;
+
+            if (ttElementType == default || ttStaticEval == EvaluationConstants.NoHashEntry)
             {
                 (staticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable);
             }
             else
             {
                 Debug.Assert(ttStaticEval != int.MinValue);
+                Debug.Assert(ttStaticEval != EvaluationConstants.NoHashEntry);
 
                 staticEval = ttStaticEval;
                 phase = position.Phase();
@@ -230,7 +241,14 @@ public sealed partial class Engine
         }
         else
         {
-            staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
+            if (ttElementType == default || ttStaticEval == EvaluationConstants.NoHashEntry)
+            {
+                staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
+            }
+            else
+            {
+                staticEval = ttStaticEval;
+            }
         }
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
@@ -506,7 +524,7 @@ public sealed partial class Engine
             Debug.Assert(bestMove is null);
 
             var finalEval = Position.EvaluateFinalPosition(ply, isInCheck);
-            _tt.RecordHash(position, finalEval, depth, ply, finalEval, NodeType.Exact);
+            _tt.RecordHash(position, finalEval, depth, ply, staticEval, NodeType.Exact);
 
             return finalEval;
         }
@@ -566,12 +584,10 @@ public sealed partial class Engine
         ShortMove ttBestMove = ttProbeResult.BestMove;
         _maxDepthReached[ply] = ply;
 
-        /*
-            var staticEval = ttHit
-                ? ttProbeResult.StaticEval
-                : position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _kingPawnHashTable).Score;
-        */
-        var staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
+        var staticEval = ttHit && ttProbeResult.StaticEval != EvaluationConstants.NoHashEntry
+            ? ttProbeResult.StaticEval
+            : position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
+
         Debug.Assert(staticEval != EvaluationConstants.NoHashEntry, "Assertion failed", "All TT entries should have a static eval");
 
         Game.UpdateStaticEvalInStack(ply, staticEval);
@@ -699,7 +715,7 @@ public sealed partial class Engine
             Debug.Assert(bestMove is null);
 
             var finalEval = Position.EvaluateFinalPosition(ply, position.IsInCheck());
-            _tt.RecordHash(position, finalEval, 0, ply, finalEval, NodeType.Exact);
+            _tt.RecordHash(position, staticEval, 0, ply, finalEval, NodeType.Exact);
 
             return finalEval;
         }
