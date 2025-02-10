@@ -99,7 +99,7 @@ public readonly struct TranspositionTable
             || nodeType == NodeType.Exact                       // Entering PV data
             || depth
                 + Configuration.EngineSettings.TTReplacement_DepthOffset
-                + (Configuration.EngineSettings.TTReplacement_TTPVDepthOffset * 2 * wasPvInt) >= entry.Depth;           // Higher depth
+                + (Configuration.EngineSettings.TTReplacement_TTPVDepthOffset * wasPvInt) >= entry.Depth;           // Higher depth
 
         if (!shouldReplace)
         {
