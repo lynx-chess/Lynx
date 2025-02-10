@@ -382,9 +382,9 @@ public sealed partial class Engine
                             --reduction;
                         }
 
-                        if (ttPv)
+                        if (!ttPv)
                         {
-                            --reduction;
+                            ++reduction;
                         }
 
                         if (position.IsInCheck())   // i.e. move gives check
