@@ -106,7 +106,7 @@ public sealed partial class Engine
         {
             if (MoveGenerator.CanGenerateAtLeastAValidMove(position))
             {
-                return QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
+                return QuiescenceSearch(ply, alpha, beta, cancellationToken);
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
@@ -177,7 +177,7 @@ public sealed partial class Engine
                         {
                             if (depth == 1)
                             {
-                                var qSearchScore = QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
+                                var qSearchScore = QuiescenceSearch(ply, alpha, beta, cancellationToken);
 
                                 return qSearchScore > score
                                     ? qSearchScore
@@ -188,7 +188,7 @@ public sealed partial class Engine
 
                             if (score < beta)               // Static evaluation indicates fail-low node
                             {
-                                var qSearchScore = QuiescenceSearch(ply, alpha, beta, pvNode, cancellationToken);
+                                var qSearchScore = QuiescenceSearch(ply, alpha, beta, cancellationToken);
                                 if (qSearchScore < beta)    // Quiescence score also indicates fail-low node
                                 {
                                     return qSearchScore > score
@@ -532,7 +532,7 @@ public sealed partial class Engine
     /// Defaults to the works possible score for Black, Int.MaxValue
     /// </param>
     [SkipLocalsInit]
-    public int QuiescenceSearch(int ply, int alpha, int beta, bool pvNode, CancellationToken cancellationToken)
+    public int QuiescenceSearch(int ply, int alpha, int beta, CancellationToken cancellationToken)
     {
         var position = Game.CurrentPosition;
 
@@ -554,7 +554,7 @@ public sealed partial class Engine
         var ttScore = ttProbeResult.Score;
         var ttNodeType = ttProbeResult.NodeType;
         var ttHit = ttNodeType != NodeType.Unknown;
-        var ttPv = pvNode || ttProbeResult.WasPv;
+        const bool ttPv = false;
 
         // QS TT cutoff
         Debug.Assert(ttProbeResult.Depth >= 0, "Assertion failed", "We would need to add it as a TT cutoff condition");
@@ -663,7 +663,7 @@ public sealed partial class Engine
             Game.UpdateMoveinStack(ply, move);
 
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
-            int score = -QuiescenceSearch(ply + 1, -beta, -alpha, pvNode, cancellationToken);
+            int score = -QuiescenceSearch(ply + 1, -beta, -alpha, cancellationToken);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
             position.UnmakeMove(move, gameState);
 
