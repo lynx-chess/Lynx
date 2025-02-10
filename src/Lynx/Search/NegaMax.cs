@@ -382,6 +382,11 @@ public sealed partial class Engine
                             --reduction;
                         }
 
+                        if (ttPv)
+                        {
+                            --reduction;
+                        }
+
                         if (position.IsInCheck())   // i.e. move gives check
                         {
                             --reduction;
