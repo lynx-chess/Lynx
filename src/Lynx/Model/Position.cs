@@ -1341,7 +1341,6 @@ public class Position : IDisposable
             const int n = 1;
             Span<int> files = stackalloc int[8];
 
-
             while (pawns != default)
             {
                 var squareIndex = pawns.GetLS1BIndex();
