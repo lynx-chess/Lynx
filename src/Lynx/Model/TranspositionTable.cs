@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics.X86;
 
 namespace Lynx.Model;
-public readonly struct TranspositionTable
+public struct TranspositionTable
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
@@ -15,8 +15,11 @@ public readonly struct TranspositionTable
     public readonly int Size;
 #pragma warning restore CA1051 // Do not declare visible instance fields
 
+    private int _ttAge;
+
     public TranspositionTable()
     {
+        _ttAge = 0;
         Size = Configuration.EngineSettings.TranspositionTableSize;
 
         var ttLength = CalculateLength(Size);
@@ -25,11 +28,17 @@ public readonly struct TranspositionTable
 
     public void Clear()
     {
+        _ttAge = 0;
         Array.Clear(_tt);
     }
 
+    public void Age()
+    {
+        _ttAge = (_ttAge + 1) % (1 << TranspositionTableElement.NodeTypeOffset);
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void PrefetchTTEntry(Position position)
+    public readonly void PrefetchTTEntry(Position position)
     {
         if (Sse.IsSupported)
         {
@@ -59,7 +68,7 @@ public readonly struct TranspositionTable
     /// </summary>
     /// <param name="ply">Ply</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public (int Score, ShortMove BestMove, NodeType NodeType, int StaticEval, int Depth) ProbeHash(Position position, int ply)
+    public readonly (int Score, ShortMove BestMove, NodeType NodeType, int StaticEval, int Depth) ProbeHash(Position position, int ply)
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier);
         var entry = _tt[ttIndex];
@@ -81,7 +90,7 @@ public readonly struct TranspositionTable
     /// </summary>
     /// <param name="ply">Ply</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void RecordHash(Position position, int staticEval, int depth, int ply, int score, NodeType nodeType, Move? move = null)
+    public readonly void RecordHash(Position position, int staticEval, int depth, int ply, int score, NodeType nodeType, Move? move = null)
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier);
         ref var entry = ref _tt[ttIndex];
@@ -95,7 +104,8 @@ public readonly struct TranspositionTable
             entry.Key == 0                                      // No actual entry
             || (position.UniqueIdentifier >> 48) != entry.Key   // Different key: collision
             || nodeType == NodeType.Exact                       // Entering PV data
-            || depth >= entry.Depth;                            // Higher depth
+            || _ttAge != entry.Age                               // Newer data
+            || depth + Configuration.EngineSettings.TTReplacement_DepthOffset >= entry.Depth;    // Higher depth
 
         if (!shouldReplace)
         {
@@ -106,7 +116,7 @@ public readonly struct TranspositionTable
         // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
         var recalculatedScore = RecalculateMateScores(score, -ply);
 
-        entry.Update(position.UniqueIdentifier, recalculatedScore, staticEval, depth, nodeType, move);
+        entry.Update(position.UniqueIdentifier, recalculatedScore, staticEval, depth, nodeType, _ttAge, move);
     }
 
     /// <summary>
@@ -114,7 +124,7 @@ public readonly struct TranspositionTable
     /// </summary>
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int HashfullPermill() => _tt.Length > 0
+    public readonly int HashfullPermill() => _tt.Length > 0
         ? (int)(1000L * PopulatedItemsCount() / _tt.LongLength)
         : 0;
 
@@ -199,7 +209,7 @@ public readonly struct TranspositionTable
     }
 
     [Conditional("DEBUG")]
-    private void Stats()
+    private readonly void Stats()
     {
         int items = 0;
         for (int i = 0; i < _tt.Length; ++i)

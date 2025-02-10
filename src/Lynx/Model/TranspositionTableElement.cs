@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace Lynx.Model;
 
@@ -36,7 +37,15 @@ public struct TranspositionTableElement
 
     private byte _depth;        // 1 byte
 
-    private NodeType _type;     // 1 byte
+    /// <summary>
+    /// 1 byte
+    /// Binary move bits    Hexadecimal
+    /// 0011 1111              0x3F           Age (0-63)
+    /// 1100 0000              0xC0           NodeType (0-3)
+    /// </summary>
+    private byte _ageType;
+
+    public const int NodeTypeOffset = 6;
 
     /// <summary>
     /// 16 MSB of Position's Zobrist key
@@ -63,26 +72,30 @@ public struct TranspositionTableElement
     /// </summary>
     public readonly int Depth => _depth;
 
+    public readonly int Age => _ageType & 0x3F;
+
     /// <summary>
     /// Node (position) type:
     /// <see cref="NodeType.Exact"/>: == <see cref="Score"/>,
     /// <see cref="NodeType.Alpha"/>: &lt;= <see cref="Score"/>,
     /// <see cref="NodeType.Beta"/>: &gt;= <see cref="Score"/>
     /// </summary>
-    public readonly NodeType Type => _type;
+    public readonly NodeType Type => (NodeType)((_ageType & 0xC0) >> NodeTypeOffset);
 
     /// <summary>
     /// Struct size in bytes
     /// </summary>
     public static ulong Size => (ulong)Marshal.SizeOf<TranspositionTableElement>();
 
-    public void Update(ulong key, int score, int staticEval, int depth, NodeType nodeType, Move? move)
+    public void Update(ulong key, int score, int staticEval, int depth, NodeType nodeType, int age, Move? move)
     {
+        Debug.Assert(age < (1 << NodeTypeOffset));
+
         _key = (ushort)key;
         _score = (short)score;
         _staticEval = (short)staticEval;
         _depth = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref depth, 1))[0];
-        _type = nodeType;
+        _ageType = (byte)(age | ((int)nodeType << NodeTypeOffset));
         _move = move != null ? (ShortMove)move : Move;    // Suggested by cj5716 instead of 0. https://github.com/lynx-chess/Lynx/pull/462
     }
 }

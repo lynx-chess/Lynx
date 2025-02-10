@@ -29,10 +29,29 @@ public sealed partial class Engine : IDisposable
 
     private bool IsMainEngine => _id == Searcher.MainEngineId;
 
-    public Engine(ChannelWriter<object> engineWriter) : this(0, engineWriter, new()) { }
+    public Engine(ChannelWriter<object> engineWriter)
+    {
+        _id = 0;
+        _engineWriter = engineWriter;
+        _tt = new();
+
+        AverageDepth = 0;
+        Game = new Game(Constants.InitialPositionFEN);
+
+        // Update ResetEngine() after any changes here
+        _quietHistory = new int[12][];
+        _moveNodeCount = new ulong[12][];
+        for (int i = 0; i < _quietHistory.Length; ++i)
+        {
+            _quietHistory[i] = new int[64];
+            _moveNodeCount[i] = new ulong[64];
+        }
+
+        _logger.Info("Engine {0} initialized", _id);
+    }
 
 #pragma warning disable RCS1163 // Unused parameter - used in Release mode
-    public Engine(int id, ChannelWriter<object> engineWriter, in TranspositionTable tt, bool warmup = false)
+    public Engine(int id, ChannelWriter<object> engineWriter, ref TranspositionTable tt, bool warmup = false)
 #pragma warning restore RCS1163 // Unused parameter
     {
         _id = id;
@@ -135,6 +154,7 @@ public sealed partial class Engine : IDisposable
     /// </summary>
     public SearchResult BestMove(GoCommand goCommand)
     {
+        _tt.Age();
         var searchConstraints = TimeManager.CalculateTimeManagement(Game, goCommand);
 
         return BestMove(in searchConstraints, isPondering: false, CancellationToken.None, CancellationToken.None);

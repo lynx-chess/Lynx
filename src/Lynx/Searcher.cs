@@ -35,7 +35,7 @@ public sealed class Searcher
         _engineWriter = engineWriter;
 
         _ttWrapper = new TranspositionTable();
-        _mainEngine = new Engine(MainEngineId, _engineWriter, in _ttWrapper, warmup: true);
+        _mainEngine = new Engine(MainEngineId, _engineWriter, ref _ttWrapper, warmup: true);
         _absoluteSearchCancellationTokenSource = new();
         _searchCancellationTokenSource = new();
 
@@ -443,7 +443,7 @@ public sealed class Searcher
             _ttWrapper = new TranspositionTable();
 
             _mainEngine.FreeResources();
-            _mainEngine = new Engine(MainEngineId, _engineWriter, in _ttWrapper, warmup: true);
+            _mainEngine = new Engine(MainEngineId, _engineWriter, ref _ttWrapper, warmup: true);
 
             AllocateExtraEngines();
         }
@@ -478,7 +478,7 @@ public sealed class Searcher
 
     public async ValueTask RunBench(int depth)
     {
-        using var engine = new Engine(-1, SilentChannelWriter<object>.Instance, in _ttWrapper, warmup: true);
+        using var engine = new Engine(-1, SilentChannelWriter<object>.Instance, ref _ttWrapper, warmup: true);
         var results = engine.Bench(depth);
 
         // Can't use engine, or results won't be printed
@@ -487,7 +487,7 @@ public sealed class Searcher
 
     public async ValueTask RunVerboseBench(int depth)
     {
-        using var engine = new Engine(-1, _engineWriter, in _ttWrapper, warmup: true);
+        using var engine = new Engine(-1, _engineWriter, ref _ttWrapper, warmup: true);
         var results = engine.Bench(depth);
 
         await engine.PrintBenchResults(results);
@@ -515,7 +515,7 @@ public sealed class Searcher
 #else
                     SilentChannelWriter<object>.Instance,
 #endif
-                    in _ttWrapper, warmup: false);
+                    ref _ttWrapper, warmup: false);
             }
         }
         else

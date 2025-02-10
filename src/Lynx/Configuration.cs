@@ -248,6 +248,9 @@ public sealed class EngineSettings
     //[SPSA<int>(0, 10, 0.5)]
     public int TTHit_NoCutoffExtension_MaxDepth { get; set; } = 6;
 
+    //[SPSA<int>(0, 6, 0.5)]
+    public int TTReplacement_DepthOffset { get; set; } = 6;
+
     #endregion
 }
 
