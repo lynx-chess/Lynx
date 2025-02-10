@@ -85,6 +85,8 @@ public sealed class Searcher
     {
         _isProcessingGoCommand = true;
 
+        _ttWrapper.Age();
+
         if (!_absoluteSearchCancellationTokenSource.TryReset())
         {
             _absoluteSearchCancellationTokenSource.Dispose();

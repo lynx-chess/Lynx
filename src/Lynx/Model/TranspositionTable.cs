@@ -34,6 +34,7 @@ public struct TranspositionTable
 
     public void Age()
     {
+        // Circular buffer
         _ttAge = (_ttAge + 1) % (1 << TranspositionTableElement.AgeBitCount);
     }
 

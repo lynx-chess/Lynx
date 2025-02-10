@@ -39,17 +39,17 @@ public struct TranspositionTableElement
     private byte _depth;            // 1 byte
 
     /// <summary>
-    /// 1 byte
+    ///                             // 1 byte
     /// Binary bits        Hexadecimal
-    /// 0001 1111              0x1F         Age (0-53)
-    /// 0010 0000              0x20         Was PV (0-1)
-    /// 1100 0000              0xC0         NodeType (0-3)
+    /// 0001 1111              0x1F         Age         (0-31)
+    /// 0010 0000              0x20         Was PV      (0-1)
+    /// 1100 0000              0xC0         NodeType    (0-3)
     /// </summary>
-    private byte _typeWasPvAge;   // 1 byte
+    private byte _typeWasPvAge;
 
     public const int AgeBitCount = 5;
-    public const int NodeTypeOffset = 6;
-    public const int WasPvOffset = 5;
+    public const int WasPvOffset = AgeBitCount;
+    public const int NodeTypeOffset = AgeBitCount + 1;
 
     /// <summary>
     /// 16 MSB of Position's Zobrist key
@@ -81,8 +81,8 @@ public struct TranspositionTableElement
     /// <summary>
     /// Node (position) type:
     /// <see cref="NodeType.Exact"/>: == <see cref="Score"/>,
-    /// <see cref="NodeType.Alpha"/>: &lt;= <see cref="Score"/>,
-    /// <see cref="NodeType.Beta"/>: &gt;= <see cref="Score"/>
+    /// <see cref="NodeType.Alpha"/>: &lt;= <see cref="Score"/> (upperbound),
+    /// <see cref="NodeType.Beta"/>: &gt;= <see cref="Score"/> (lowerbound).
     /// </summary>
     public readonly NodeType Type => (NodeType)((_typeWasPvAge & 0xC0) >> NodeTypeOffset);
 
@@ -102,6 +102,7 @@ public struct TranspositionTableElement
         _staticEval = (short)staticEval;
         _depth = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref depth, 1))[0];
         _move = move != null ? (ShortMove)move : Move;    // Suggested by cj5716 instead of 0. https://github.com/lynx-chess/Lynx/pull/462
+
         _typeWasPvAge = (byte)(
             ttAge
             | (wasPv << WasPvOffset)

@@ -154,7 +154,6 @@ public sealed partial class Engine : IDisposable
     /// </summary>
     public SearchResult BestMove(GoCommand goCommand)
     {
-        _tt.Age();
         var searchConstraints = TimeManager.CalculateTimeManagement(Game, goCommand);
 
         return BestMove(in searchConstraints, isPondering: false, CancellationToken.None, CancellationToken.None);
