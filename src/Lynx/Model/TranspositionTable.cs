@@ -91,13 +91,15 @@ public readonly struct TranspositionTable
         //    _logger.Warn("TT collision");
         //}
 
+        var wasPvInt = wasPv ? 1 : 0;
+
         bool shouldReplace =
             entry.Key == 0                                      // No actual entry
             || (position.UniqueIdentifier >> 48) != entry.Key   // Different key: collision
             || nodeType == NodeType.Exact                       // Entering PV data
             || depth
                 //+ Configuration.EngineSettings.TTReplacement_DepthOffset
-                + (Configuration.EngineSettings.TTReplacement_TTPVDepthOffset * (wasPv ? 1 : 0)) >= entry.Depth;           // Higher depth
+                + (Configuration.EngineSettings.TTReplacement_TTPVDepthOffset * wasPvInt) >= entry.Depth;           // Higher depth
 
         if (!shouldReplace)
         {
