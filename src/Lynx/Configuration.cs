@@ -250,7 +250,7 @@ public sealed class EngineSettings
 
     //[SPSA<int>(0, 6, 0.5)]
 #pragma warning disable CA1805 // Do not initialize unnecessarily
-    public int TTReplacement_DepthOffset { get; set; } = 2;
+    public int TTReplacement_DepthOffset { get; set; } = 4;
 #pragma warning restore CA1805 // Do not initialize unnecessarily
 
     //[SPSA<int>(0, 10, 0.5)]
