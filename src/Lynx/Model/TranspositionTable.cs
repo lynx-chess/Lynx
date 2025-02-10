@@ -34,7 +34,7 @@ public struct TranspositionTable
 
     public void Age()
     {
-        _ttAge = (_ttAge + 1) % (1 << TranspositionTableElement.NodeTypeOffset);
+        _ttAge = (_ttAge + 1) % (1 << TranspositionTableElement.AgeBitCount);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
