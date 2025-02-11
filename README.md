@@ -153,7 +153,13 @@ _Beware, most of the provided links contain outdated information and don't refle
 
 - Bishop penalty for blocked central pawns
 
+- Bishop -> rook and bishop -> queen threats
+
+- Bishop in non-blocked long diagonal
+
 - Rook in open and semi-open files
+
+- Connected rooks
 
 - King pawn shield, king virtual mobility, king in open and semi-open files
 
@@ -162,6 +168,8 @@ _Beware, most of the provided links contain outdated information and don't refle
 - Passed pawns, including bonus for not opponent pieces ahead and friend/opponent king distance to it
 
 - Pawn phalanx
+
+- Pawn islands
 
 - Pieces protected and attacked by pawns
 
