@@ -329,19 +329,35 @@ public sealed class UCIHandler
                     }
                     break;
                 }
-            case "lmr_base":
+            case "lmr_quiet_base":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
-                        Configuration.EngineSettings.LMR_Base = value * 0.01;
+                        Configuration.EngineSettings.LMR_Quiet_Base = value * 0.01;
                     }
                     break;
                 }
-            case "lmr_divisor":
+            case "lmr_quiet_divisor":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
-                        Configuration.EngineSettings.LMR_Divisor = value * 0.01;
+                        Configuration.EngineSettings.LMR_Quiet_Divisor = value * 0.01;
+                    }
+                    break;
+                }
+            case "lmr_noisy_base":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_Noisy_Base = value * 0.01;
+                    }
+                    break;
+                }
+            case "lmr_noisy_divisor":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_Noisy_Divisor = value * 0.01;
                     }
                     break;
                 }
