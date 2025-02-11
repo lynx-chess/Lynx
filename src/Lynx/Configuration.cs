@@ -218,6 +218,18 @@ public sealed class EngineSettings
     public int History_MaxMoveValue { get; set; } = 8_192;
 
     /// <summary>
+    /// <see cref="History_MaxMoveValue"/> / 2
+    /// </summary>
+    [SPSA<int>(1, 8192, 128)]
+    public int History_QuietLMRDivisor { get; set; } = 4096;
+
+    /// <summary>
+    /// <see cref="History_MaxMoveValue"/> / 2 * (3 / 4)
+    /// </summary>
+    [SPSA<int>(1, 8192, 128)]
+    public int History_NoisyLMRDivisor { get; set; } = 3072;
+
+    /// <summary>
     /// 1896: constant from depth 12
     /// </summary>
     public int History_MaxMoveRawBonus { get; set; } = 1_896;
