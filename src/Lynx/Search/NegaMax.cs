@@ -409,11 +409,11 @@ public sealed partial class Engine
 
                             // -= history/(maxHistory/2)
                             reduction -= _quietHistory[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.History_QuietLMRDivisor;
-
-                            // Don't allow LMR to drop into qsearch or increase the depth
-                            // depth - 1 - depth +2 = 1, min depth we want
-                            reduction = Math.Clamp(reduction, 0, depth - 2);
                         }
+
+                        // Don't allow LMR to drop into qsearch or increase the depth
+                        // depth - 1 - depth +2 = 1, min depth we want
+                        reduction = Math.Clamp(reduction, 0, depth - 2);
                     }
 
                     // 🔍 Static Exchange Evaluation (SEE) reduction
