@@ -378,7 +378,8 @@ public sealed partial class Engine
                         {
                             reduction = EvaluationConstants.LMRReductions[1][depth][visitedMovesCounter];
 
-                            reduction -= 2 * _captureHistory[CaptureHistoryIndex(move.Piece(), move.TargetSquare(), move.CapturedPiece())] / Configuration.EngineSettings.History_MaxMoveValue;
+                            // ~ history/(0.75 * maxHistory/2/)
+                            reduction -= _captureHistory[CaptureHistoryIndex(move.Piece(), move.TargetSquare(), move.CapturedPiece())] / Configuration.EngineSettings.LMR_Noisy_History_Divisor;
                         }
                         else
                         {
@@ -409,8 +410,8 @@ public sealed partial class Engine
                                 ++reduction;
                             }
 
-                            // -= history/(maxHistory/2)
-                            reduction -= 2 * _quietHistory[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.History_MaxMoveValue;
+                            // ~ history/(maxHistory/2)
+                            reduction -= _quietHistory[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.LMR_QuietHistory_Divisor;
 
                         }
 
@@ -418,6 +419,8 @@ public sealed partial class Engine
                         // depth - 1 - depth +2 = 1, min depth we want
                         reduction = Math.Clamp(reduction, 0, depth - 2);
                     }
+
+                    // TODO move inside of depth conditions
                     // 🔍 Static Exchange Evaluation (SEE) reduction
                     // Bad captures are reduced more
                     if (!isInCheck

@@ -165,6 +165,18 @@ public sealed class EngineSettings
     [SPSA<double>(1, 5, 0.1)]
     public double LMR_Noisy_Divisor { get; set; } = 3.21;
 
+    /// <summary>
+    /// <see cref="History_MaxMoveValue"/> / 2
+    /// </summary>
+    [SPSA<int>(1, 8192, 128)]
+    public int LMR_QuietHistory_Divisor { get; set; } = 4096;
+
+    /// <summary>
+    /// <see cref="History_MaxMoveValue"/> / 2 * (3 / 4)
+    /// </summary>
+    [SPSA<int>(1, 8192, 128)]
+    public int LMR_Noisy_History_Divisor { get; set; } = 3072;
+
     //[SPSA<int>(1, 10, 0.5)]
     public int NMP_MinDepth { get; set; } = 3;
 

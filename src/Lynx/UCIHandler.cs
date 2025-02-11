@@ -361,6 +361,22 @@ public sealed class UCIHandler
                     }
                     break;
                 }
+            case "lmr_quiethistory_divisor":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_QuietHistory_Divisor = value;
+                    }
+                    break;
+                }
+            case "lmr_noisy_history_divisor":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_Noisy_History_Divisor = value;
+                    }
+                    break;
+                }
 
             case "nmp_mindepth":
                 {
