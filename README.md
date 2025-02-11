@@ -179,6 +179,10 @@ _Beware, most of the provided links contain outdated information and don't refle
 
 - 50 moves rule eval scaling
 
+- Incremental evaluation (partially at least)
+
+- King + pawn structure hash table
+
 ### Time management
 
 - Hard/soft time limits
