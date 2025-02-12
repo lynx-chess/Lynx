@@ -1390,7 +1390,7 @@ public class Position : IDisposable
     /// <param name="rooks">Includes Queen bitboard</param>
     /// <param name="bishops">Includes Queen bitboard</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ulong AllAttackersTo(int square, BitBoard occupancy, BitBoard rooks, BitBoard bishops)
+    public BitBoard AllAttackersTo(int square, BitBoard occupancy, BitBoard rooks, BitBoard bishops)
     {
         Debug.Assert(square != (int)BoardSquare.noSquare);
 
@@ -1533,7 +1533,7 @@ public class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int PieceAt(int square)
     {
-        var bit = BitBoardExtensions.SquareBit(square);
+        var bit = BitBoard.SquareBit(square);
 
         Side color;
 
@@ -1680,7 +1680,7 @@ public class Position : IDisposable
                     Console.Write($"{8 - rank}  ");
                 }
 
-                var squareIndex = BitBoardExtensions.SquareIndex(rank, file);
+                var squareIndex = BitBoard.SquareIndex(rank, file);
 
                 var piece = -1;
 
@@ -1734,7 +1734,7 @@ public class Position : IDisposable
                     Console.Write($"{8 - rank}  ");
                 }
 
-                var squareIndex = BitBoardExtensions.SquareIndex(rank, file);
+                var squareIndex = BitBoard.SquareIndex(rank, file);
 
                 var pieceRepresentation = IsSquareAttacked(squareIndex, sideToMove)
                     ? '1'

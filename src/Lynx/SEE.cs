@@ -51,8 +51,8 @@ public static class SEE
         var targetSquare = move.TargetSquare();
 
         var occupancy = position.OccupancyBitBoards[(int)Side.Both]
-            ^ BitBoardExtensions.SquareBit(move.SourceSquare())
-            ^ BitBoardExtensions.SquareBit(targetSquare);
+            ^ BitBoard.SquareBit(move.SourceSquare())
+            ^ BitBoard.SquareBit(targetSquare);
 
         var queens = position.Queens;
         var bishops = queens | position.Bishops;
@@ -137,8 +137,8 @@ public static class SEE
         var targetSquare = move.TargetSquare();
 
         var occupancy = position.OccupancyBitBoards[(int)Side.Both]
-            ^ BitBoardExtensions.SquareBit(move.SourceSquare())
-            ^ BitBoardExtensions.SquareBit(targetSquare);
+            ^ BitBoard.SquareBit(move.SourceSquare())
+            ^ BitBoard.SquareBit(targetSquare);
 
         var queens = position.Queens;
         var bishops = queens | position.Bishops;

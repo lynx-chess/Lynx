@@ -4,7 +4,7 @@ using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-using ParseResult = (ulong[] PieceBitBoards, ulong[] OccupancyBitBoards, int[] board, Lynx.Model.Side Side, byte Castle, Lynx.Model.BoardSquare EnPassant,
+using ParseResult = (Lynx.Model.BitBoard[] PieceBitBoards, Lynx.Model.BitBoard[] OccupancyBitBoards, int[] board, Lynx.Model.Side Side, byte Castle, Lynx.Model.BoardSquare EnPassant,
             int HalfMoveClock/*, int FullMoveCounter*/);
 
 namespace Lynx;
@@ -126,8 +126,8 @@ public static class FENParser
 
                 if (piece != Piece.None)
                 {
-                    var square = BitBoardExtensions.SquareIndex(rankIndex, fileIndex);
-                    pieceBitBoards[(int)piece] = pieceBitBoards[(int)piece].SetBit(square);
+                    var square = BitBoard.SquareIndex(rankIndex, fileIndex);
+                    pieceBitBoards[(int)piece].SetBit(square);
                     board[square] = (int)piece;
                     ++fileIndex;
                 }

@@ -224,7 +224,7 @@ public class PieceAtSquare_Benchmark : BaseBenchmark
     /// </summary>
     private static int PieceAt(Position position, int targetSquare)
     {
-        var bit = BitBoardExtensions.SquareBit(targetSquare);
+        var bit = BitBoard.SquareBit(targetSquare);
 
         Side color;
 

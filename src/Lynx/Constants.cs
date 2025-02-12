@@ -19,7 +19,7 @@ public static class Constants
     /// 1   1 1 1 1 1 1 1 1
     ///     a b c d e f g h
     /// </summary>
-    public const BitBoard FullBoard = ulong.MaxValue;
+    public const ulong FullBoard = ulong.MaxValue;
 
     /// <summary>
     /// 8   1 0 0 0 0 0 0 0
@@ -32,7 +32,7 @@ public static class Constants
     /// 1   1 0 0 0 0 0 0 0
     ///     a b c d e f g h
     /// </summary>
-    public const BitBoard AFile = 0x101010101010101;
+    public const ulong AFile = 0x101010101010101;
 
     /// <summary>
     /// 8   0 1 1 1 1 1 1 1
@@ -45,7 +45,7 @@ public static class Constants
     /// 1   0 1 1 1 1 1 1 1
     ///     a b c d e f g h
     /// </summary>
-    public const BitBoard NotAFile = 0xFEFEFEFEFEFEFEFE;
+    public const ulong NotAFile = 0xFEFEFEFEFEFEFEFE;
 
     /// <summary>
     /// 8   0 0 0 0 0 0 0 1
@@ -58,7 +58,7 @@ public static class Constants
     /// 1   0 0 0 0 0 0 0 1
     ///     a b c d e f g h
     /// </summary>
-    public const BitBoard HFile = 0x8080808080808080;
+    public const ulong HFile = 0x8080808080808080;
 
     /// <summary>
     /// 8   1 1 1 1 1 1 1 0
@@ -71,7 +71,7 @@ public static class Constants
     /// 1   1 1 1 1 1 1 1 0
     ///     a b c d e f g h
     /// </summary>
-    public const BitBoard NotHFile = 0x7F7F7F7F7F7F7F7F;
+    public const ulong NotHFile = 0x7F7F7F7F7F7F7F7F;
 
     /// <summary>
     /// 8   1 1 1 1 1 1 0 0
@@ -84,7 +84,7 @@ public static class Constants
     /// 1   1 1 1 1 1 1 0 0
     ///     a b c d e f g h
     /// </summary>
-    public const BitBoard NotHGFiles = 0x3F3F3F3F3F3F3F3F;
+    public const ulong NotHGFiles = 0x3F3F3F3F3F3F3F3F;
 
     /// <summary>
     /// 8   0 0 1 1 1 1 1 1
@@ -97,7 +97,7 @@ public static class Constants
     /// 1   0 0 1 1 1 1 1 1
     ///     a b c d e f g h
     /// </summary>
-    public const BitBoard NotABFiles = 0xFCFCFCFCFCFCFCFC;
+    public const ulong NotABFiles = 0xFCFCFCFCFCFCFCFC;
 
     public static readonly string[] Coordinates =
     [
@@ -196,7 +196,7 @@ public static class Constants
         12, 11, 11, 11, 11, 11, 11, 12
     ];
 
-    public static ReadOnlySpan<BitBoard> RookMagicNumbers =>
+    public static ReadOnlySpan<ulong> RookMagicNumbers =>
     [
         0x8080104000208000,   0xa240004020021004,   0x880200080081000,    0x2080058010010800,   0x1001001020408008,   0x4200011042000884,   0x6001c020002c805,    0x2000100802a0044,
         0x20800020804000,     0x5000c00020005000,   0x801000802002,       0x8005001001002208,   0x2000412000820,      0x23000218140100,     0x100a002600081401,   0x2520800060800100,
@@ -208,7 +208,7 @@ public static class Constants
         0x8096800102104025,   0x8004204204110082,   0xd042200011000843,   0x422208c0900f001,    0x61001002080005,     0x4002001028218422,   0x2040104088020104,   0x300108b104064082,
     ];
 
-    public static ReadOnlySpan<BitBoard> BishopMagicNumbers =>
+    public static ReadOnlySpan<ulong> BishopMagicNumbers =>
     [
         0x10440804a02200,     0x2002241404004050,   0x808008c10800204,    0x8204848201002,      0x8411104001420404,   0x422080208050010,    0x8002020120880e44,   0x3084800880800,
         0x1904210042080,      0x1004103018888888,   0x20264802404a0000,   0x21042402800002,     0x8400840420400002,   0x4102042220901800,   0x840004108201004,    0x40008404010501,
@@ -396,7 +396,7 @@ public static class Constants
     /// 1   0 1 0 1 0 1 0 1
     ///     a b c d e f g h
     /// </summary>
-    public const BitBoard LightSquaresBitBoard = 0xAA55AA55AA55AA55UL;
+    public static readonly BitBoard LightSquaresBitBoard = new(0xAA55AA55AA55AA55UL);
 
     /// <summary>
     /// 8   0 1 0 1 0 1 0 1
@@ -409,7 +409,7 @@ public static class Constants
     /// 1   1 0 1 0 1 0 1 0
     ///     a b c d e f g h
     /// </summary>
-    public const BitBoard DarkSquaresBitBoard = 0x55AA55AA55AA55AAUL;
+    public static readonly BitBoard DarkSquaresBitBoard = new(0x55AA55AA55AA55AAUL);
 
     /// <summary>
     /// 8   0 0 1 1 1 1 0 0
@@ -422,9 +422,9 @@ public static class Constants
     /// 1   0 0 1 1 1 1 0 0
     ///     a b c d e f g h
     /// </summary>
-    public const BitBoard CentralFiles = 0x3c3c3c3c3c3c3c3c;
+    public static readonly BitBoard CentralFiles = new(0x3c3c3c3c3c3c3c3c);
 
-    public const BitBoard CentralSquares = 0x1818000000;
+    public static readonly BitBoard CentralSquares = new(0x1818000000);
 
     public static ReadOnlySpan<char> FileString => [ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' ];
 

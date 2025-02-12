@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using Lynx.Model;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics.X86;
 
@@ -45,9 +46,9 @@ public static class Attacks
 
         if (Bmi2.X64.IsSupported)
         {
-            _pextAttacks = GC.AllocateArray<BitBoard>(5248 + 102400, pinned: true);
-            _pextBishopOffset = GC.AllocateArray<BitBoard>(64, pinned: true);
-            _pextRookOffset = GC.AllocateArray<BitBoard>(64, pinned: true);
+            _pextAttacks = GC.AllocateArray<ulong>(5248 + 102400, pinned: true);
+            _pextBishopOffset = GC.AllocateArray<ulong>(64, pinned: true);
+            _pextRookOffset = GC.AllocateArray<ulong>(64, pinned: true);
 
             InitializeBishopAndRookPextAttacks();
         }
@@ -63,7 +64,7 @@ public static class Attacks
     public static BitBoard BishopAttacks(int squareIndex, BitBoard occupancy)
     {
         return Bmi2.X64.IsSupported
-            ? _pextAttacks[_pextBishopOffset[squareIndex] + Bmi2.X64.ParallelBitExtract(occupancy, _bishopOccupancyMasks[squareIndex])]
+            ? new(_pextAttacks[_pextBishopOffset[squareIndex] + Bmi2.X64.ParallelBitExtract(occupancy, _bishopOccupancyMasks[squareIndex])])
             : MagicNumbersBishopAttacks(squareIndex, occupancy);
     }
 
@@ -74,7 +75,7 @@ public static class Attacks
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static BitBoard MagicNumbersBishopAttacks(int squareIndex, BitBoard occupancy)
     {
-        var occ = occupancy & _bishopOccupancyMasks[squareIndex];
+        ulong occ = occupancy & _bishopOccupancyMasks[squareIndex];
         occ *= Constants.BishopMagicNumbers[squareIndex];
         occ >>= (64 - Constants.BishopRelevantOccupancyBits[squareIndex]);
 
@@ -89,14 +90,14 @@ public static class Attacks
     public static BitBoard RookAttacks(int squareIndex, BitBoard occupancy)
     {
         return Bmi2.IsSupported
-            ? _pextAttacks[_pextRookOffset[squareIndex] + Bmi2.X64.ParallelBitExtract(occupancy, _rookOccupancyMasks[squareIndex])]
+            ? new(_pextAttacks[_pextRookOffset[squareIndex] + Bmi2.X64.ParallelBitExtract(occupancy, _rookOccupancyMasks[squareIndex])])
             : MagicNumbersRookAttacks(squareIndex, occupancy);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static BitBoard MagicNumbersRookAttacks(int squareIndex, BitBoard occupancy)
     {
-        var occ = occupancy & _rookOccupancyMasks[squareIndex];
+        ulong occ = occupancy & _rookOccupancyMasks[squareIndex];
         occ *= Constants.RookMagicNumbers[squareIndex];
         occ >>= (64 - Constants.RookRelevantOccupancyBits[squareIndex]);
 
@@ -140,7 +141,7 @@ public static class Attacks
 
             for (ulong i = 0; i < patterns; i++)
             {
-                ulong occupation = Bmi2.X64.ParallelBitDeposit(i, bishopMask);
+                BitBoard occupation = new(Bmi2.X64.ParallelBitDeposit(i, bishopMask));
                 _pextAttacks[index++] = MagicNumbersBishopAttacks(square, occupation);
             }
         }
@@ -154,7 +155,7 @@ public static class Attacks
 
             for (ulong i = 0; i < patterns; i++)
             {
-                ulong occupation = Bmi2.X64.ParallelBitDeposit(i, rookMask);
+                BitBoard occupation = new(Bmi2.X64.ParallelBitDeposit(i, rookMask));
                 _pextAttacks[index++] = MagicNumbersRookAttacks(square, occupation);
             }
         }

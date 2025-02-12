@@ -65,7 +65,7 @@ const string CmkPosition = Constants.CmkTestPositionFEN;
 
 static void _2_GettingStarted()
 {
-    var board = 4UL;
+    BitBoard board = new(4UL);
     board.SetBit(BoardSquare.e4);
     board.Print();
     board.PopBit(BoardSquare.e4);
@@ -146,7 +146,7 @@ static void _8_Slider_Pieces_Attacks()
     block.Print();
     bishopAttacks.Print();
 
-    block = BitBoardExtensions.Initialize(BoardSquare.d3, BoardSquare.b4, BoardSquare.d7, BoardSquare.h4);
+    block = new(BoardSquare.d3, BoardSquare.b4, BoardSquare.d7, BoardSquare.h4);
 
     var rookAttacks = AttackGenerator.GenerateRookAttacksOnTheFly((int)BoardSquare.d4, block);
     block.Print();
@@ -155,12 +155,12 @@ static void _8_Slider_Pieces_Attacks()
 
 static void _9_BitCount()
 {
-    BitBoard bitBoard = BitBoardExtensions.Initialize(BoardSquare.d5, BoardSquare.e4);
+    BitBoard bitBoard = new(BoardSquare.d5, BoardSquare.e4);
 
     bitBoard.ResetLS1B();
     bitBoard.Print();
 
-    var bb = BitBoardExtensions.Initialize(BoardSquare.d5, BoardSquare.e4);
+    BitBoard bb = new(BoardSquare.d5, BoardSquare.e4);
 
     Console.WriteLine(bb.GetLS1BIndex());
     Console.WriteLine(bb.GetLS1BIndex());
@@ -205,7 +205,7 @@ static void _11_OccupancyBitCountLookupTables()
     {
         for (var file = 0; file < 8; ++file)
         {
-            int square = BitBoardExtensions.SquareIndex(rank, file);
+            int square = BitBoard.SquareIndex(rank, file);
 
             var bishopOccupancy = AttackGenerator.MaskBishopOccupancy(square);
             Console.Write($"{bishopOccupancy.CountBits()}, ");
@@ -218,7 +218,7 @@ static void _11_OccupancyBitCountLookupTables()
     {
         for (var file = 0; file < 8; ++file)
         {
-            int square = BitBoardExtensions.SquareIndex(rank, file);
+            int square = BitBoard.SquareIndex(rank, file);
 
             var bishopOccupancy = AttackGenerator.MaskRookOccupancy(square);
             Console.Write($"{bishopOccupancy.CountBits()}, ");
@@ -240,12 +240,12 @@ static void _13_GeneratingMagicNumbersCandidates()
     // int(uint really), which is 32 bits -> ulong, 64 bits leaves the seconf half of the board empty
     // The slicing leaves the second quarter empty as well
     var randomBoard = randomNumber;
-    randomBoard.Print();
+    new BitBoard(randomBoard).Print();
 
     var candidate = MagicNumberGenerator.GenerateMagicNumber();
 
     var board = candidate;
-    board.Print();
+    new BitBoard(board).Print();
 }
 
 static void _14_GeneratingMagicNumbersByBruteForce()
@@ -1172,7 +1172,7 @@ static void PieceSquareTables()
                     Console.Write($"{8 - rank}  ");
                 }
 
-                var squareIndex = BitBoardExtensions.SquareIndex(rank, file);
+                var squareIndex = BitBoard.SquareIndex(rank, file);
 
                 Console.Write($" {bitboard[squareIndex]}\t");
             }
@@ -1195,9 +1195,9 @@ static void NewMasks()
     Masks.WhiteKnightOutpostMask.Print();
     Masks.BlackKnightOutpostMask.Print();
 
-    Masks.LightSquaresMask.Print();
-    Masks.DarkSquaresMask.Print();
-    (Masks.DarkSquaresMask ^ Masks.LightSquaresMask).Print();
+    new BitBoard(Masks.LightSquaresMask).Print();
+    new BitBoard(Masks.DarkSquaresMask).Print();
+    new BitBoard(Masks.DarkSquaresMask ^ Masks.LightSquaresMask).Print();
 
     Console.WriteLine(((Masks.LightSquaresMask >> (int)BoardSquare.h1) & 1) != 0);
     Console.WriteLine((((9 * (int)BoardSquare.h1) + 8) & 8) != 0);
@@ -1205,7 +1205,7 @@ static void NewMasks()
     Console.WriteLine((((9 * (int)BoardSquare.a1) + 8) & 8) != 0);
 }
 
-static void PrintBitBoardArray(ulong[] bb)
+static void PrintBitBoardArray(BitBoard[] bb)
 {
     for (int i = 0; i < 64; ++i)
     {
@@ -1222,12 +1222,12 @@ static void PrintBitBoardArray(ulong[] bb)
 
 static void DarkLightSquares()
 {
-    Constants.DarkSquaresBitBoard.Print();
-    Constants.LightSquaresBitBoard.Print();
+    new BitBoard(Constants.DarkSquaresBitBoard).Print();
+    new BitBoard(Constants.LightSquaresBitBoard).Print();
 
     for (int i = 0; i < 64; ++i)
     {
-        Debug.Assert(Constants.DarkSquaresBitBoard.GetBit(i) ^ Constants.LightSquaresBitBoard.GetBit(i));
+        Debug.Assert(new BitBoard(Constants.DarkSquaresBitBoard).GetBit(i) ^ new BitBoard(Constants.LightSquaresBitBoard).GetBit(i));
     }
 }
 
