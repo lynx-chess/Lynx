@@ -137,6 +137,8 @@ _Beware, most of the provided links contain outdated information and don't refle
 
 - Improving [[1](https://www.chessprogramming.org/Improving)]
 
+- TT PV / wasPv
+
 ### Evaluation
 
 - Piece-Square Tables (PSQT) [[1](https://www.chessprogramming.org/Piece-Square_Tables)]
@@ -153,7 +155,13 @@ _Beware, most of the provided links contain outdated information and don't refle
 
 - Bishop penalty for blocked central pawns
 
+- Bishop -> rook and bishop -> queen threats
+
+- Bishop in non-blocked long diagonal
+
 - Rook in open and semi-open files
+
+- Connected rooks
 
 - King pawn shield, king virtual mobility, king in open and semi-open files
 
@@ -163,6 +171,8 @@ _Beware, most of the provided links contain outdated information and don't refle
 
 - Pawn phalanx
 
+- Pawn islands
+
 - Pieces protected and attacked by pawns
 
 - Pieces capable of deliverying checks
@@ -170,6 +180,10 @@ _Beware, most of the provided links contain outdated information and don't refle
 - Eval scaling with pawn count and 50 moves rule
 
 - 50 moves rule eval scaling
+
+- Incremental evaluation (partially at least)
+
+- King + pawn structure hash table
 
 ### Time management
 
