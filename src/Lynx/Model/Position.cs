@@ -1083,11 +1083,17 @@ public class Position : IDisposable
 
         var rank = Constants.Rank[squareIndex];
         var oppositeSide = (int)Side.Black;
+        ulong passedPawnsMask;
 
         if (pieceIndex == (int)Piece.p)
         {
             rank = 7 - rank;
             oppositeSide = (int)Side.White;
+            passedPawnsMask = Masks.BlackPassedPawnMasks[squareIndex];
+        }
+        else
+        {
+            passedPawnsMask = Masks.WhitePassedPawnMasks[squareIndex];
         }
 
         // Isolated pawn
@@ -1097,7 +1103,6 @@ public class Position : IDisposable
         }
 
         // Passed pawn
-        ulong passedPawnsMask = Masks.PassedPawns[pieceIndex][squareIndex];
         if ((PieceBitBoards[(int)Piece.p - pieceIndex] & passedPawnsMask) == default)
         {
             // Passed pawn without opponent pieces ahead (in its passed pawn mask)
