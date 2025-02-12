@@ -134,22 +134,6 @@ public static class Masks
 
     public static BitBoard[] BlackBehindPawnMask { get; } = new BitBoard[64];
 
-    public static readonly BitBoard[][] BehindPawnMask =
-    [
-        WhiteBehindPawnMask,
-        [],
-        [],
-        [],
-        [],
-        [],
-        BlackBehindPawnMask,
-        [],
-        [],
-        [],
-        [],
-        [],
-    ];
-
     /// <summary>
     /// __builtin_bswap64(<see cref="LightSquaresMask"/>)
     /// </summary>
