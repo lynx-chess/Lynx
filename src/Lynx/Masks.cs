@@ -142,36 +142,21 @@ public static class Masks
 
     static Masks()
     {
-        InitializeMasks();
-
-#pragma warning disable S3353 // Unchanged local variables should be "const" - FP https://community.sonarsource.com/t/fp-s3353-value-modified-in-ref-extension-method/132389
+#pragma warning disable S3353, RCS1118 // Unchanged local variables should be "const" - FP https://community.sonarsource.com/t/fp-s3353-value-modified-in-ref-extension-method/132389
         ulong whiteKnightOutpostMask = 0, blackKnightOutpostMask = 0;
-#pragma warning restore S3353 // Unchanged local variables should be "const"
-        for (int rank = 0; rank < 8; ++rank)
-        {
-            for (int file = 0; file < 8; ++file)
-            {
-                if (rank < 4 && file > 0 && file < 7)
-                {
-                    var squareIndex = BitBoardExtensions.SquareIndex(rank, file);
+#pragma warning restore S3353, RCS1118 // Unchanged local variables should be "const"
 
-                    whiteKnightOutpostMask.SetBit(squareIndex);
-                    blackKnightOutpostMask.SetBit(squareIndex ^ 56);
-                }
-            }
-        }
-
-        WhiteKnightOutpostMask = whiteKnightOutpostMask;
-        BlackKnightOutpostMask = blackKnightOutpostMask;
-    }
-
-    private static void InitializeMasks()
-    {
         for (int rank = 0; rank < 8; ++rank)
         {
             for (int file = 0; file < 8; ++file)
             {
                 var squareIndex = BitBoardExtensions.SquareIndex(rank, file);
+
+                if (rank < 4 && file > 0 && file < 7)
+                {
+                    whiteKnightOutpostMask.SetBit(squareIndex);
+                    blackKnightOutpostMask.SetBit(squareIndex ^ 56);
+                }
 
                 FileMasks[squareIndex] |= SetFileRankMask(file, -1);
                 RankMasks[squareIndex] |= SetFileRankMask(-1, rank);
@@ -213,6 +198,9 @@ public static class Masks
                 }
             }
         }
+
+        WhiteKnightOutpostMask = whiteKnightOutpostMask;
+        BlackKnightOutpostMask = blackKnightOutpostMask;
     }
 
 #pragma warning disable S1066 // Collapsible "if" statements should be merged - init only code, clarity over speed here
