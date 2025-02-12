@@ -415,8 +415,6 @@ public class PositionTest
             ? blackKingDistance
             : whiteKingDistance;
 
-        ulong passedPawnsMask = Masks.PassedPawns[pieceIndex][(int)square];
-
         var expectedEval = 0;
         if ((passedPawnsMask & position.OccupancyBitBoards[OppositeSide(position.Side)]) == 0)
         {
