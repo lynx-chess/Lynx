@@ -75,25 +75,6 @@ public static class Masks
     public static BitBoard[] BlackPassedPawnMasks { get; } = new BitBoard[64];
 
     /// <summary>
-    /// [12][64]
-    /// </summary>
-    public static readonly BitBoard[][] PassedPawns =
-    [
-        WhitePassedPawnMasks,
-        [],
-        [],
-        [],
-        [],
-        [],
-        BlackPassedPawnMasks,
-        [],
-        [],
-        [],
-        [],
-        [],
-    ];
-
-    /// <summary>
     /// Passed 'side' pawn mask for square c4
     /// 8  0 1 0 1 0 0 0 0
     /// 7  0 1 0 1 0 0 0 0
