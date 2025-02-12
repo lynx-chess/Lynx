@@ -6028,6 +6028,11 @@ public static class EvaluationParams
 	/// </summary>
 	public const int SemiOpenFileRookBonus = 589837;
 
+    /// <summary>
+    /// <see cref="Utils.Pack(13, 9)"/>
+    /// </summary>
+    public const int RookBehindPassedPawnBonus = 589837;
+
 	/// <summary>
 	/// <see cref="Utils.Pack(-21, 4)"/>
 	/// </summary>

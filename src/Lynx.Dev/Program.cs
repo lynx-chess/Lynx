@@ -54,7 +54,8 @@ using static Lynx.TunableEvalParameters;
 //PieceSquareTables();
 //NewMasks();
 //DarkLightSquares();
-PawnIslands();
+//PawnIslands();
+BehindPawnMasks();
 
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
 const string TrickyPosition = Constants.TrickyTestPositionFEN;
@@ -1234,4 +1235,20 @@ static void DarkLightSquares()
 static void PawnIslands()
 {
     PawnIslandsGenerator.GeneratePawnIslands();
+}
+
+static void BehindPawnMasks()
+{
+    Masks.WhiteBehindPawnMask[(int)BoardSquare.e4].Print();
+    Masks.BlackBehindPawnMask[(int)BoardSquare.e4].Print();
+
+    Masks.WhiteBehindPawnMask[(int)BoardSquare.a6].Print();
+    Masks.BlackBehindPawnMask[(int)BoardSquare.a6].Print();
+
+    Masks.WhiteBehindPawnMask[(int)BoardSquare.h2].Print();
+    Masks.BlackBehindPawnMask[(int)BoardSquare.h2].Print();
+
+    PrintBitBoardArray(Masks.WhiteBehindPawnMask);
+    Console.WriteLine("-------------------");
+    PrintBitBoardArray(Masks.BlackBehindPawnMask);
 }
