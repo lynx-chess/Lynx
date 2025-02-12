@@ -1117,6 +1117,19 @@ public class Position : IDisposable
                 + PassedPawnEnemyBonus[oppositeSideBucket][rank]
                 + FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance]
                 + EnemyKingDistanceToPassedPawnPenalty[enemyKingDistance];
+
+            // Rook behind passed pawn
+            var whiteRookBehindPawn = PieceBitBoards[(int)Piece.R] & Masks.WhiteBehindPawnMask[squareIndex];
+            if (whiteRookBehindPawn != 0)
+            {
+                packedBonus += RookBehindPassedPawnBonus;
+            }
+
+            var blackRookRookBehindPawn = PieceBitBoards[(int)Piece.r] & Masks.BlackBehindPawnMask[squareIndex];
+            if (blackRookRookBehindPawn != 0)
+            {
+                packedBonus -= RookBehindPassedPawnBonus;
+            }
         }
 
         // Pawn phalanx

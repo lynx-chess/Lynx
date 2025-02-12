@@ -149,6 +149,26 @@ public static class Masks
     /// </summary>
     public static BitBoard[] BlackSidePassedPawnMasks { get; } = new BitBoard[64];
 
+    public static BitBoard[] WhiteBehindPawnMask { get; } = new BitBoard[64];
+
+    public static BitBoard[] BlackBehindPawnMask { get; } = new BitBoard[64];
+
+    public static readonly BitBoard[][] BehindPawnMask =
+    [
+        WhiteBehindPawnMask,
+        [],
+        [],
+        [],
+        [],
+        [],
+        BlackBehindPawnMask,
+        [],
+        [],
+        [],
+        [],
+        [],
+    ];
+
     /// <summary>
     /// __builtin_bswap64(<see cref="LightSquaresMask"/>)
     /// </summary>
@@ -197,7 +217,12 @@ public static class Masks
                         WhitePassedPawnMasks[squareIndex].PopBit(BitBoardExtensions.SquareIndex(i, j));
                         WhiteSidePassedPawnMasks[squareIndex].PopBit(BitBoardExtensions.SquareIndex(i, j));
                     }
+
+                    WhiteBehindPawnMask[squareIndex].SetBit(BitBoardExtensions.SquareIndex(i, file));
                 }
+
+                // Make sure the square doesn't count
+                WhiteBehindPawnMask[squareIndex].PopBit(BitBoardExtensions.SquareIndex(rank, file));
 
                 BlackPassedPawnMasks[squareIndex] |= SetFileRankMask(file - 1, -1);
                 BlackPassedPawnMasks[squareIndex] |= SetFileRankMask(file, -1);
@@ -214,7 +239,12 @@ public static class Masks
                         BlackPassedPawnMasks[squareIndex].PopBit(BitBoardExtensions.SquareIndex(i, j));
                         BlackSidePassedPawnMasks[squareIndex].PopBit(BitBoardExtensions.SquareIndex(i, j));
                     }
+
+                    BlackBehindPawnMask[squareIndex].SetBit(BitBoardExtensions.SquareIndex(i, file));
                 }
+
+                // Make sure the square doesn't count
+                BlackBehindPawnMask[squareIndex].PopBit(BitBoardExtensions.SquareIndex(rank, file));
             }
         }
 
