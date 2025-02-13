@@ -23,9 +23,9 @@ public static class EvaluationConstants
     public const int MaxPhase = 24;
 
     /// <summary>
-    /// <see cref="Constants.AbsoluteMaxDepth"/> x <see cref="Constants.MaxNumberOfPossibleMovesInAPosition"/>
+    /// 2 x <see cref="Constants.AbsoluteMaxDepth"/> x <see cref="Constants.MaxNumberOfPossibleMovesInAPosition"/>
     /// </summary>
-    public static readonly int[][] LMRReductions = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin][];
+    public static readonly int[][][] LMRReductions = new int[2][][];
 
     /// <summary>
     /// [0, 4, 136, 276, 424, 580, 744, 916, 1096, 1284, 1480, 1684, 1896, 1896, 1896, 1896, ...]
@@ -34,14 +34,21 @@ public static class EvaluationConstants
 
     static EvaluationConstants()
     {
+        var quietReductions = LMRReductions[0] = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin][];
+        var noisyReductions = LMRReductions[1] = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin][];
+
         for (int searchDepth = 1; searchDepth < Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin; ++searchDepth)    // Depth > 0 or we'd be in QSearch
         {
-            LMRReductions[searchDepth] = new int[Constants.MaxNumberOfPossibleMovesInAPosition];
+            quietReductions[searchDepth] = new int[Constants.MaxNumberOfPossibleMovesInAPosition];
+            noisyReductions[searchDepth] = new int[Constants.MaxNumberOfPossibleMovesInAPosition];
 
             for (int movesSearchedCount = 1; movesSearchedCount < Constants.MaxNumberOfPossibleMovesInAPosition; ++movesSearchedCount) // movesSearchedCount > 0 or we wouldn't be applying LMR
             {
-                LMRReductions[searchDepth][movesSearchedCount] = Convert.ToInt32(Math.Round(
-                    Configuration.EngineSettings.LMR_Base + (Math.Log(movesSearchedCount) * Math.Log(searchDepth) / Configuration.EngineSettings.LMR_Divisor)));
+                quietReductions[searchDepth][movesSearchedCount] = Convert.ToInt32(Math.Round(
+                    Configuration.EngineSettings.LMR_Quiet_Base + (Math.Log(movesSearchedCount) * Math.Log(searchDepth) / Configuration.EngineSettings.LMR_Quiet_Divisor)));
+
+                noisyReductions[searchDepth][movesSearchedCount] = Convert.ToInt32(Math.Round(
+                    Configuration.EngineSettings.LMR_Noisy_Base + (Math.Log(movesSearchedCount) * Math.Log(searchDepth) / Configuration.EngineSettings.LMR_Noisy_Divisor)));
             }
 
             HistoryBonus[searchDepth] = Math.Min(
