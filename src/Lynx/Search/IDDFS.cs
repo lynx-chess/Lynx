@@ -445,13 +445,13 @@ public sealed partial class Engine
         if (lastSearchResult is null)
         {
             var noDepth1Message =
-                $"[#{_id}] Depth {depth}: search cancelled with no result for position {Game.CurrentPosition.FEN()} (hard limit {_searchConstraints.HardLimitTimeBound}ms, soft limit {_searchConstraints.SoftLimitTimeBound}ms). Choosing first found legal move as best one";
+                $"[#{_id}] Depth {depth}: search cancelled with no result for position {Game.PositionBeforeLastSearch.FEN()} (hard limit {_searchConstraints.HardLimitTimeBound}ms, soft limit {_searchConstraints.SoftLimitTimeBound}ms). Choosing an emergency move";
 
             // In the event of a quick ponderhit/stop while pondering because the opponent moved quickly, we don't want no warning triggered here
             //  when cancelling the pondering search
             // The other condition reflects what happens in helper engines when a mate is quickly detected in the main:
             //  search in helper engines sometimes get cancelled before any meaningful result is found, so we don't want a warning either
-            if (isPondering || !IsMainEngine())
+            if (isPondering || !IsMainEngine)
             {
                 _logger.Info(noDepth1Message);
             }
@@ -460,11 +460,7 @@ public sealed partial class Engine
                 _logger.Warn(noDepth1Message);
             }
 
-            finalSearchResult = new(
-#if MULTITHREAD_DEBUG
-                _id,
-#endif
-                firstLegalMove, 0, 0, [firstLegalMove]);
+            finalSearchResult = BestMoveRoot(firstLegalMove);
         }
         else
         {
@@ -484,5 +480,72 @@ public sealed partial class Engine
         }
 
         return finalSearchResult;
+    }
+
+    /// <summary>
+    /// Find the best move without searching, based on TT and <see cref="ScoreMove(int, int, short)"/>
+    /// </summary>
+    private SearchResult BestMoveRoot(Move firstLegalMove)
+    {
+        var score = 0;
+        ShortMove ttBestMove = default;
+
+        var position = Game.PositionBeforeLastSearch;
+        var ttEntry = _tt.ProbeHash(position, ply: 0);
+
+        if (ttEntry.NodeType != NodeType.Unknown)
+        {
+            ttBestMove = ttEntry.BestMove;
+            score = ttEntry.Score;
+
+            if (ttEntry.Score == EvaluationConstants.NoHashEntry)
+            {
+                score = ttEntry.StaticEval;
+            }
+        }
+
+        Span<Move> pseudoLegalMoves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
+        pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, pseudoLegalMoves);
+
+        Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
+        for (int i = 0; i < pseudoLegalMoves.Length; ++i)
+        {
+            moveScores[i] = ScoreMove(pseudoLegalMoves[i], 0, ttBestMove);
+        }
+
+        for (int i = 0; i < pseudoLegalMoves.Length; ++i)
+        {
+            // Incremental move sorting
+            for (int j = i + 1; j < pseudoLegalMoves.Length; j++)
+            {
+                if (moveScores[j] > moveScores[i])
+                {
+                    (moveScores[i], moveScores[j], pseudoLegalMoves[i], pseudoLegalMoves[j]) = (moveScores[j], moveScores[i], pseudoLegalMoves[j], pseudoLegalMoves[i]);
+                }
+            }
+
+            var move = pseudoLegalMoves[i];
+
+            var gameState = position.MakeMove(move);
+            if (!position.WasProduceByAValidMove())
+            {
+                position.UnmakeMove(move, gameState);
+                continue;
+            }
+
+            return new SearchResult(
+#if MULTITHREAD_DEBUG
+                _id,
+#endif
+                move, moveScores[i], 0, [move]);
+        }
+
+        _logger.Error("No valid move found while looking for an emergency move for position {Fen}", position.FEN());
+
+        return new(
+#if MULTITHREAD_DEBUG
+                _id,
+#endif
+            firstLegalMove, 0, 0, [firstLegalMove]);
     }
 }

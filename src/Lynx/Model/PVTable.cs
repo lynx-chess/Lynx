@@ -8,7 +8,7 @@ public static class PVTable
 
     private static ImmutableArray<int> Initialize()
     {
-        var indexes = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
+        Span<int> indexes = stackalloc int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
         int previousPVIndex = 0;
         indexes[0] = previousPVIndex;
 
