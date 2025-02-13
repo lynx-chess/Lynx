@@ -1118,23 +1118,17 @@ public class Position : IDisposable
             // Enemy king distance to passed pawn
             var enemyKingDistance = Constants.ChebyshevDistance[squareIndex][oppositeSideKingSquare];
 
+            // Rook behind passed pawn
+            var whiteRookBehindPawn = (PieceBitBoards[(int)Piece.R] & Masks.WhiteBehindPawnMask[squareIndex]).CountBits();
+            var blackRookBehindPawn = (PieceBitBoards[(int)Piece.r] & Masks.BlackBehindPawnMask[squareIndex]).CountBits();
+
             packedBonus += PassedPawnBonus[bucket][rank]
                 + PassedPawnEnemyBonus[oppositeSideBucket][rank]
                 + FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance]
-                + EnemyKingDistanceToPassedPawnPenalty[enemyKingDistance];
+                + EnemyKingDistanceToPassedPawnPenalty[enemyKingDistance]
+                + RookBehindPassedPawnBonus[whiteRookBehindPawn]
+                - RookBehindPassedPawnBonus[blackRookBehindPawn];
 
-            // Rook behind passed pawn
-            var whiteRookBehindPawn = PieceBitBoards[(int)Piece.R] & Masks.WhiteBehindPawnMask[squareIndex];
-            if (whiteRookBehindPawn != 0)
-            {
-                packedBonus += RookBehindPassedPawnBonus;
-            }
-
-            var blackRookRookBehindPawn = PieceBitBoards[(int)Piece.r] & Masks.BlackBehindPawnMask[squareIndex];
-            if (blackRookRookBehindPawn != 0)
-            {
-                packedBonus -= RookBehindPassedPawnBonus;
-            }
         }
 
         // Pawn phalanx

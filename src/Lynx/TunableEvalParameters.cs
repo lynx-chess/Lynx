@@ -6028,15 +6028,25 @@ public static class EvaluationParams
 	/// </summary>
 	public const int SemiOpenFileRookBonus = 524301;
 
-	/// <summary>
-	/// <see cref="Utils.Pack(6, 8)"/>
-	/// </summary>
-	public const int RookBehindPassedPawnBonus = 524294;
+    public static readonly TaperedEvaluationTermByRank RookBehindPassedPawnBonus =
+	[
+		Pack(0, 0),
+		Pack(6, 8),
+		Pack(6, 8),
+		Pack(6, 8),
+		Pack(6, 8),
+		Pack(6, 8),
+		Pack(6, 8),
+		Pack(6, 8),
+		Pack(6, 8),
+		Pack(6, 8),
+		Pack(6, 8),
+	];
 
-	/// <summary>
-	/// <see cref="Utils.Pack(-21, 4)"/>
-	/// </summary>
-	public const int SemiOpenFileKingPenalty = 262123;
+    /// <summary>
+    /// <see cref="Utils.Pack(-21, 4)"/>
+    /// </summary>
+    public const int SemiOpenFileKingPenalty = 262123;
 
 	/// <summary>
 	/// <see cref="Utils.Pack(-63, 2)"/>
