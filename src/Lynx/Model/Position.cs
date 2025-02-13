@@ -1262,10 +1262,19 @@ public class Position : IDisposable
         packedBonus += CheckBonus[(int)Piece.B] * checks;
 
         // Threats
-        for (int i = (int)Piece.p; i < (int)Piece.k; ++i)
+        var oppositeSide = Utils.OppositeSide(pieceSide);
+        var oppositeSideOffset = 6 - offset;
+        var threats = attacks & OccupancyBitBoards[oppositeSide];
+
+        while (threats != default)
         {
-            var therats = attacks & PieceBitBoards[i - offset];
-            packedBonus += BishopThreatsBonus[i - 6] * therats.CountBits();
+            var threatSquareIndex = threats.GetLS1BIndex();
+            threats.ResetLS1B();
+
+            var opponentPieceIndex = Board[threatSquareIndex] - oppositeSideOffset;
+            Debug.Assert(opponentPieceIndex <= (int)Piece.K);
+
+            packedBonus += BishopThreatsBonus[opponentPieceIndex];
         }
 
         return packedBonus;
