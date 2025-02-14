@@ -132,10 +132,10 @@ public sealed class EngineSettings
     public double SoftTimeBaseIncrementMultiplier { get; set; } = 0.8;
 
     [SPSA<double>(1, 3, 0.1)]
-    public double NodeTmBase { get; set; } = 2.47;
+    public double NodeTmBase { get; set; } = 2.34;
 
     [SPSA<double>(0.5, 2.5, 0.1)]
-    public double NodeTmScale { get; set; } = 1.77;
+    public double NodeTmScale { get; set; } = 1.70;
 
     //[SPSA<int>(1, 15, 1)]
     public int ScoreStabiity_MinDepth { get; set; } = 7;
