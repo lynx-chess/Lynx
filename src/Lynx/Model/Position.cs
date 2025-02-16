@@ -661,46 +661,7 @@ public class Position : IDisposable
             // Not hit in pawnEvalTable table
             else
             {
-                var pawnScore = 0;
-
-                // White pawns
-
-                // King pawn shield bonus
-                pawnScore += KingPawnShield(whiteKing, whitePawns);
-
-                // Pieces protected by pawns bonus
-                pawnScore += PieceProtectedByPawnBonus[whiteBucket][(int)Piece.P] * (whitePawnAttacks & whitePawns).CountBits();
-
-                // Bitboard copy that we 'empty'
-                var whitePawnsCopy = whitePawns;
-                while (whitePawnsCopy != default)
-                {
-                    var pieceSquareIndex = whitePawnsCopy.GetLS1BIndex();
-                    whitePawnsCopy.ResetLS1B();
-
-                    pawnScore += PawnAdditionalEvaluation(whiteBucket, blackBucket, pieceSquareIndex, (int)Piece.P, whiteKing, blackKing);
-                }
-
-                // Black pawns
-
-                // King pawn shield bonus
-                pawnScore -= KingPawnShield(blackKing, blackPawns);
-
-                // Pieces protected by pawns bonus
-                pawnScore -= PieceProtectedByPawnBonus[blackBucket][(int)Piece.P] * (blackPawnAttacks & blackPawns).CountBits();
-
-                // Bitboard copy that we 'empty'
-                var blackPawnsCopy = blackPawns;
-                while (blackPawnsCopy != default)
-                {
-                    var pieceSquareIndex = blackPawnsCopy.GetLS1BIndex();
-                    blackPawnsCopy.ResetLS1B();
-
-                    pawnScore -= PawnAdditionalEvaluation(blackBucket, whiteBucket, pieceSquareIndex, (int)Piece.p, blackKing, whiteKing);
-                }
-
-                // Pawn islands
-                pawnScore += PawnIslands(whitePawns, blackPawns);
+                var pawnScore = PawnAdditionalEvaluation_All(whiteBucket, blackBucket, whiteKing, blackKing, whitePawnAttacks, blackPawnAttacks);
 
                 entry.Update(_kingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
@@ -1074,6 +1035,48 @@ public class Position : IDisposable
             (int)Piece.Q or (int)Piece.q => QueenAdditionalEvaluation(pieceSquareIndex, pieceSide, oppositeSideKingSquare, enemyPawnAttacks),
             _ => 0
         };
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private int PawnAdditionalEvaluation_All(int whiteBucket, int blackBucket, int whiteKingSquare, int blackKingSquare, BitBoard whitePawnAttacks, BitBoard blackPawnAttacks)
+    {
+        var score = 0;
+
+        // White pawns
+        var whitePawns = PieceBitBoards[(int)Piece.P];
+        var whiteBitBoardCopy = whitePawns;
+        while (whiteBitBoardCopy != default)
+        {
+            // TODO: add 0b111111111 o 0b000000000  & PSQT, so that hopefully PSQT just doesn't get executed
+            var pieceSquareIndex = whiteBitBoardCopy.GetLS1BIndex();
+            whiteBitBoardCopy.ResetLS1B();
+
+            score += PawnAdditionalEvaluation(whiteBucket, blackBucket, pieceSquareIndex, (int)Piece.P, whiteKingSquare, blackKingSquare);
+        }
+
+        // Black pawns
+        var blackPawns = PieceBitBoards[(int)Piece.p];
+        var blackPawnsCopy = blackPawns;
+        while (blackPawnsCopy != default)
+        {
+            var pieceSquareIndex = blackPawnsCopy.GetLS1BIndex();
+            blackPawnsCopy.ResetLS1B();
+
+            score -= PawnAdditionalEvaluation(blackBucket, whiteBucket, pieceSquareIndex, (int)Piece.p, blackKingSquare, whiteKingSquare);
+        }
+
+        // King pawn shield bonus
+        score += KingPawnShield(whiteKingSquare, whitePawns);
+        score -= KingPawnShield(blackKingSquare, blackPawns);
+
+        // Pieces protected by pawns bonus
+        score += PieceProtectedByPawnBonus[whiteBucket][(int)Piece.P] * (whitePawnAttacks & whitePawns).CountBits();
+        score -= PieceProtectedByPawnBonus[blackBucket][(int)Piece.P] * (blackPawnAttacks & blackPawns).CountBits();
+
+        // Pawn islands
+        score += PawnIslands(whitePawns, blackPawns);
+
+        return score;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
