@@ -159,6 +159,21 @@ public sealed class EngineSettings
     [SPSA<double>(1, 5, 0.1)]
     public double LMR_Divisor { get; set; } = 3.21;
 
+    [SPSA<int>(25, 300, 10)]
+    public int LMR_Improving { get; set; } = 100;
+
+    [SPSA<int>(25, 300, 10)]
+    public int LMR_Cutnode { get; set; } = 100;
+
+    [SPSA<int>(25, 300, 10)]
+    public int LMR_TTPV { get; set; } = 100;
+
+    [SPSA<int>(25, 300, 10)]
+    public int LMR_PVNode { get; set; } = 100;
+
+    [SPSA<int>(25, 300, 10)]
+    public int LMR_InCheck { get; set; } = 100;
+
     //[SPSA<int>(1, 10, 0.5)]
     public int NMP_MinDepth { get; set; } = 3;
 
@@ -222,7 +237,7 @@ public sealed class EngineSettings
     /// </summary>
     public int History_MaxMoveRawBonus { get; set; } = 1_896;
 
-    public int CounterMoves_MinDepth { get;set; } = 3;
+    public int CounterMoves_MinDepth { get; set; } = 3;
 
     [SPSA<int>(0, 200, 10)]
     public int History_BestScoreBetaMargin { get; set; } = 60;
