@@ -81,7 +81,7 @@ public sealed partial class Engine
                 --depth;
             }
 
-            ttMoveCapture = ttBestMove != default && position.Board[((Move)ttBestMove).TargetSquare()] != default;
+            ttMoveCapture = ttBestMove != default && position.Board[((Move)ttBestMove).TargetSquare()] != (int)Piece.None;
         }
 
         var ttPv = pvNode || ttWasPv;
