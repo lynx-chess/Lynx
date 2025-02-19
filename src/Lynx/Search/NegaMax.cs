@@ -45,6 +45,7 @@ public sealed partial class Engine
         int ttStaticEval = int.MinValue;
         int ttDepth = default;
         bool ttWasPv = false;
+        bool ttMoveCapture = false;
 
         Debug.Assert(!pvNode || !cutnode);
 
@@ -79,6 +80,8 @@ public sealed partial class Engine
             {
                 --depth;
             }
+
+            ttMoveCapture = ttBestMove != default && position.Board[((Move)ttBestMove).TargetSquare()] != default;
         }
 
         var ttPv = pvNode || ttWasPv;
@@ -398,6 +401,11 @@ public sealed partial class Engine
                         }
 
                         if (cutnode)
+                        {
+                            ++reduction;
+                        }
+
+                        if(ttMoveCapture)
                         {
                             ++reduction;
                         }
