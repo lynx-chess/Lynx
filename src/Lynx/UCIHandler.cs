@@ -719,7 +719,7 @@ public sealed class UCIHandler
             }
 
             int lineCounter = 0;
-            foreach (var line in await File.ReadAllLinesAsync(fullPath, cancellationToken))
+            await foreach (var line in File.ReadLinesAsync(fullPath, cancellationToken))
             {
                 var fen = line[..line.IndexOfAny([';', '[', '"'])];
 
