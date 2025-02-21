@@ -1,6 +1,5 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
-using System.Reflection.PortableExecutable;
 using System.Runtime.CompilerServices;
 
 namespace Lynx;
@@ -378,35 +377,32 @@ public sealed partial class Engine
                     {
                         reduction = EvaluationConstants.LMRReductions[depth][visitedMovesCounter];
 
-                        var extraReduction = 0;
-
                         if (!improving)
                         {
-                            extraReduction += Configuration.EngineSettings.LMR_Improving;
+                            reduction += Configuration.EngineSettings.LMR_Improving;
                         }
 
                         if (cutnode)
                         {
-                            extraReduction += Configuration.EngineSettings.LMR_Cutnode;
+                            reduction += Configuration.EngineSettings.LMR_Cutnode;
                         }
 
                         if (!ttPv)
                         {
-                            extraReduction += Configuration.EngineSettings.LMR_TTPV;
+                            reduction += Configuration.EngineSettings.LMR_TTPV;
                         }
 
                         if (pvNode)
                         {
-                            extraReduction -= Configuration.EngineSettings.LMR_PVNode;
+                            reduction -= Configuration.EngineSettings.LMR_PVNode;
                         }
 
                         if (position.IsInCheck())   // i.e. move gives check
                         {
-                            extraReduction -= Configuration.EngineSettings.LMR_InCheck;
+                            reduction -= Configuration.EngineSettings.LMR_InCheck;
                         }
 
-                        extraReduction /= 100;
-                        reduction += extraReduction;
+                        reduction /= EvaluationConstants.LMRScaleFactor;
 
                         // -= history/(maxHistory/2)
                         reduction -= 2 * _quietHistory[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.History_MaxMoveValue;

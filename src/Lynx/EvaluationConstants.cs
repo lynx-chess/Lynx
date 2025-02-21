@@ -32,6 +32,8 @@ public static class EvaluationConstants
     /// </summary>
     public static readonly int[] HistoryBonus = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
 
+    public const int LMRScaleFactor = 100;
+
     static EvaluationConstants()
     {
         for (int searchDepth = 1; searchDepth < Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin; ++searchDepth)    // Depth > 0 or we'd be in QSearch
@@ -41,7 +43,8 @@ public static class EvaluationConstants
             for (int movesSearchedCount = 1; movesSearchedCount < Constants.MaxNumberOfPossibleMovesInAPosition; ++movesSearchedCount) // movesSearchedCount > 0 or we wouldn't be applying LMR
             {
                 LMRReductions[searchDepth][movesSearchedCount] = Convert.ToInt32(Math.Round(
-                    Configuration.EngineSettings.LMR_Base + (Math.Log(movesSearchedCount) * Math.Log(searchDepth) / Configuration.EngineSettings.LMR_Divisor)));
+                    LMRScaleFactor *
+                    (Configuration.EngineSettings.LMR_Base + (Math.Log(movesSearchedCount) * Math.Log(searchDepth) / Configuration.EngineSettings.LMR_Divisor))));
             }
 
             HistoryBonus[searchDepth] = Math.Min(

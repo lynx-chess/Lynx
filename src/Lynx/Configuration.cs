@@ -159,18 +159,33 @@ public sealed class EngineSettings
     [SPSA<double>(1, 5, 0.1)]
     public double LMR_Divisor { get; set; } = 3.21;
 
+    /// <summary>
+    /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
+    /// </summary>
     [SPSA<int>(25, 300, 10)]
     public int LMR_Improving { get; set; } = 100;
 
+    /// <summary>
+    /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
+    /// </summary>
     [SPSA<int>(25, 300, 10)]
     public int LMR_Cutnode { get; set; } = 100;
 
+    /// <summary>
+    /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
+    /// </summary>
     [SPSA<int>(25, 300, 10)]
     public int LMR_TTPV { get; set; } = 100;
 
+    /// <summary>
+    /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
+    /// </summary>
     [SPSA<int>(25, 300, 10)]
     public int LMR_PVNode { get; set; } = 100;
 
+    /// <summary>
+    /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
+    /// </summary>
     [SPSA<int>(25, 300, 10)]
     public int LMR_InCheck { get; set; } = 100;
 
