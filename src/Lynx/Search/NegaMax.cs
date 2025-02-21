@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using NLog.Config;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
@@ -430,6 +431,18 @@ public sealed partial class Engine
                     // Optimistic search, validating that the rest of the moves are worse than bestmove.
                     // It should produce more cutoffs and therefore be faster.
                     // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
+
+                    var deeper = score > bestScore + Configuration.EngineSettings.LMR_DeeperBase + (Configuration.EngineSettings.LMR_DeeperDepthMultiplier * depth);
+                    var shallower = score < bestScore + depth;
+
+                    if (deeper && !shallower)
+                    {
+                        ++depth;
+                    }
+                    else if (shallower && !deeper)
+                    {
+                        --depth;
+                    }
 
                     // Search with full depth but narrowed score bandwidth
                     score = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha, !cutnode, cancellationToken);

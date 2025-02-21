@@ -159,6 +159,12 @@ public sealed class EngineSettings
     [SPSA<double>(1, 5, 0.1)]
     public double LMR_Divisor { get; set; } = 3.21;
 
+    [SPSA<int>(20, 100, 5)]
+    public int LMR_DeeperBase { get; set; } = 38;
+
+    //[SPSA<int>(1, 10, 1)]
+    public int LMR_DeeperDepthMultiplier { get; set; } = 2;
+
     //[SPSA<int>(1, 10, 0.5)]
     public int NMP_MinDepth { get; set; } = 3;
 
