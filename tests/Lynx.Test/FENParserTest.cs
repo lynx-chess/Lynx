@@ -109,7 +109,7 @@ public class FENParserTest
         Assert.True(pieceBitBoards[(int)Piece.K].GetBit(BoardSquare.e1));
     }
 
-    [TestCase("8/8/8/8/8/8/8/8 w - - 0 1")]
+    [TestCase("K1k5/8/8/8/8/8/8/8 w - - 0 1")]
     [TestCase("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 ")]
     [TestCase(Constants.TrickyTestPositionFEN)]
     [TestCase(Constants.KillerTestPositionFEN)]
@@ -187,7 +187,7 @@ public class FENParserTest
     {
         // Arrange
         // Make sure a previous Fen doesn't change anything
-        const string previuosFen = "8/8/8/8/8/8/8/8 w KQkq - 0 1";
+        const string previuosFen = "K15k/8/8/8/8/8/8/8 w KQkq - 0 1";
         Assert.DoesNotThrow(() => FENParser.ParseFEN(previuosFen));
 
         if (expectedCastleResult >= 0)
@@ -230,9 +230,9 @@ public class FENParserTest
         Assert.Throws<LynxException>(() => FENParser.ParseFEN(fen));
     }
 
-    [TestCase("8/8/8/8/8/8/8/8 w KQkq - 0 1", 0)]
-    [TestCase("8/8/8/8/8/8/8/8 w KQkq - 1 1", 1)]
-    [TestCase("8/8/8/8/8/8/8/8 w KQkq - 51 1", 51)]
+    [TestCase("K1k/8/8/8/8/8/8/8 w KQkq - 0 1", 0)]
+    [TestCase("K1k/8/8/8/8/8/8/8 w KQkq - 1 1", 1)]
+    [TestCase("K1k/8/8/8/8/8/8/8 w KQkq - 51 1", 51)]
     public void HalfMoveClock(string fen, int expectedHalfMoves)
     {
         var result = FENParser.ParseFEN(fen);

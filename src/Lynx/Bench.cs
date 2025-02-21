@@ -5,7 +5,7 @@ namespace Lynx;
 
 public partial class Engine
 {
-    private static readonly string[] _benchmarkFens =
+    internal static readonly string[] _benchmarkFens =
     [
         "r3k2r/2pb1ppp/2pp1q2/p7/1nP1B3/1P2P3/P2N1PPP/R2QK2R w KQkq a6 0 14",
         "4rrk1/2p1b1p1/p1p3q1/4p3/2P2n1p/1P1NR2P/PB3PP1/3R1QK1 b - - 2 24",
@@ -70,7 +70,7 @@ public partial class Engine
         "3qr2k/1p3rbp/2p3p1/p7/P2pBNn1/1P3n2/6P1/B1Q1RR1K b - - 1 30",
         "3qk1b1/1p4r1/1n4r1/2P1b2B/p3N2p/P2Q3P/8/1R3R1K w - - 2 39",
 
-        "6RR/4bP2/8/8/5r2/3K4/5p2/4k3 w - - 0 0",                       // SEE test suite - regular promotion
+        "6RR/4bP2/8/8/5r2/3K4/5p2/4k3 w - - 0 1",                       // SEE test suite - regular promotion
         "1n2kb1r/p1P4p/2qb4/5pP1/4n2Q/8/PP1PPP1P/RNB1KBNR w KQk - 0 1", // SEE test suite - promotion with capture
         "6Q1/8/1kp4P/2q1p3/2PpP3/2nP2P1/p7/5BK1 b - - 1 35",            // Fischer vs Petrosian - double promotion
         "5R2/2k3PK/8/5N2/7P/5q2/8/q7 w - - 0 69",                       // McShane - Aronian 2012 - knight promotion

@@ -59,14 +59,14 @@ public class GeneratePawnMovesTest
         Assert.AreEqual(blackMoves.Count(), ReferenceMoveGenerator.GeneratePawnMovesForReference(position, 6).Count());
     }
 
-    [TestCase("8/8/8/8/8/p1p1p1p1/P1P1P1P1/8 w - - 0 1", 0)]
-    [TestCase("8/8/8/8/8/R1R1R1R1/P1P1P1P1/8 w - - 0 1", 0)]
-    [TestCase("8/8/8/8/p1p1p1p1/8/P1P1P1P1/8 w - - 0 1", 4)]
-    [TestCase("8/8/8/8/R1R1R1R1/8/P1P1P1P1/8 w - - 0 1", 4)]
-    [TestCase("8/p1p1p1p1/P1P1P1P1/8/8/8/8/8 b - - 0 1", 0)]
-    [TestCase("8/p1p1p1p1/r1r1r1r1/8/8/8/8/8 b - - 0 1", 0)]
-    [TestCase("8/p1p1p1p1/8/P1P1P1P1/8/8/8/8 b - - 0 1", 4)]
-    [TestCase("8/p1p1p1p1/8/r1r1r1r1/8/8/8/8 b - - 0 1", 4)]
+    [TestCase("K1k5/8/8/8/8/p1p1p1p1/P1P1P1P1/8 w - - 0 1", 0)]
+    [TestCase("K1k5/8/8/8/8/R1R1R1R1/P1P1P1P1/8 w - - 0 1", 0)]
+    [TestCase("K1k5/8/8/8/p1p1p1p1/8/P1P1P1P1/8 w - - 0 1", 4)]
+    [TestCase("K1k5/8/8/8/R1R1R1R1/8/P1P1P1P1/8 w - - 0 1", 4)]
+    [TestCase("8/p1p1p1p1/P1P1P1P1/8/8/8/8/K1k5 b - - 0 1", 0)]
+    [TestCase("8/p1p1p1p1/r1r1r1r1/8/8/8/8/K1k5 b - - 0 1", 0)]
+    [TestCase("8/p1p1p1p1/8/P1P1P1P1/8/8/8/K1k5 b - - 0 1", 4)]
+    [TestCase("8/p1p1p1p1/8/r1r1r1r1/8/8/8/K1k5 b - - 0 1", 4)]
     public void QuietMoves_NoDoublePush(string fen, int expectedMoves)
     {
         var position = new Position(fen);
@@ -77,7 +77,7 @@ public class GeneratePawnMovesTest
     [Test]
     public void PawnCaptures()
     {
-        var position = new Position("8/8/8/8/8/1n6/PPP5/8 w - - 0 1");
+        var position = new Position("K1k5/8/8/8/8/1n6/PPP5/8 w - - 0 1");
 
         var whiteMoves = GeneratePawnMoves(position).ToList();
 
@@ -104,7 +104,7 @@ public class GeneratePawnMovesTest
             && m.TargetSquare() == (int)BoardSquare.b3
             && m.IsCapture()));
 
-        position = new Position("8/ppp/1B6/8/8/8/8/8 b - - 0 1");
+        position = new Position("8/ppp/1B6/8/8/8/8/K1k5 b - - 0 1");
 
         var blackMoves = GeneratePawnMoves(position).ToList();
         Assert.AreEqual(6, blackMoves.Count);
@@ -134,7 +134,7 @@ public class GeneratePawnMovesTest
     [Test]
     public void PromotionsWithoutCapturing()
     {
-        var position = new Position("8/P6P/8/8/8/8/p6p/8 w - - 0 1");
+        var position = new Position("8/P6P/8/8/K1k5/8/p6p/8 w - - 0 1");
         var offset = Utils.PieceOffset(position.Side);
         var whiteMoves = GeneratePawnMoves(position).ToList();
 
@@ -146,7 +146,7 @@ public class GeneratePawnMovesTest
         Assert.AreEqual(4, whiteMoves.Count(m => m.TargetSquare() == (int)BoardSquare.a8));
         Assert.AreEqual(4, whiteMoves.Count(m => m.TargetSquare() == (int)BoardSquare.h8));
 
-        position = new Position("8/P6P/8/8/8/8/p6p/8 b - - 0 1");
+        position = new Position("8/P6P/8/8/K1k5/8/p6p/8 b - - 0 1");
         offset = Utils.PieceOffset(position.Side);
         var blackMoves = GeneratePawnMoves(position).ToList();
 
@@ -162,7 +162,7 @@ public class GeneratePawnMovesTest
     [Test]
     public void PromotionsCapturing()
     {
-        var position = new Position("BqB2BqB/P6P/8/8/8/8/p6p/bQb2bQb w - - 0 1");
+        var position = new Position("BqB2BqB/P6P/8/K1k5/8/8/p6p/bQb2bQb w - - 0 1");
         var offset = Utils.PieceOffset(position.Side);
         var whiteMoves = GeneratePawnMoves(position).ToList();
 
@@ -184,7 +184,7 @@ public class GeneratePawnMovesTest
         Assert.AreEqual(4, whiteMoves.Count(m => m.TargetSquare() == (int)BoardSquare.b8));
         Assert.AreEqual(4, whiteMoves.Count(m => m.TargetSquare() == (int)BoardSquare.g8));
 
-        position = new Position("BqB2BqB/P6P/8/8/8/8/p6p/bQb2bQb b - - 0 1");
+        position = new Position("BqB2BqB/P6P/8/8/K1k5/8/p6p/bQb2bQb b - - 0 1");
         offset = Utils.PieceOffset(position.Side);
         var blackMoves = GeneratePawnMoves(position).ToList();
 
@@ -233,10 +233,10 @@ public class GeneratePawnMovesTest
         Assert.AreEqual(2, moves.Count(m => m.IsEnPassant() && m.IsCapture()));
     }
 
-    [TestCase("8/8/8/p1p1p1p1/PpPpPpPp/1P1P1P1P/8/8 w - - 0 1", Description = "Blocked position")]
-    [TestCase("8/8/8/p1p1p1p1/PpPpPpPp/1P1P1P1P/8/8 b - - 0 1", Description = "Blocked position")]
-    [TestCase("8/8/8/N7/P7/1p6/8/8 w - - 0 1", Description = "Backwards/inverse capture")]
-    [TestCase("8/8/8/1P6/p7/n7/8/8 b - - 0 1", Description = "Backwards/inverse capture")]
+    [TestCase("K1k5/8/8/p1p1p1p1/PpPpPpPp/1P1P1P1P/8/8 w - - 0 1", Description = "Blocked position")]
+    [TestCase("K1k5/8/8/p1p1p1p1/PpPpPpPp/1P1P1P1P/8/8 b - - 0 1", Description = "Blocked position")]
+    [TestCase("K1k5/8/8/N7/P7/1p6/8/8 w - - 0 1", Description = "Backwards/inverse capture")]
+    [TestCase("K1k5/8/8/1P6/p7/n7/8/8 b - - 0 1", Description = "Backwards/inverse capture")]
     public void ShouldNotGenerateMoves(string fen)
     {
         var position = new Position(fen);

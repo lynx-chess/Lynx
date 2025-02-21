@@ -349,6 +349,18 @@ public static class Constants
         0, 1, 2, 3, 4, 5, 6, 7
     ];
 
+    public static ReadOnlySpan<byte> ByteFile =>
+    [
+        0, 1, 2, 3, 4, 5, 6, 7,
+        0, 1, 2, 3, 4, 5, 6, 7,
+        0, 1, 2, 3, 4, 5, 6, 7,
+        0, 1, 2, 3, 4, 5, 6, 7,
+        0, 1, 2, 3, 4, 5, 6, 7,
+        0, 1, 2, 3, 4, 5, 6, 7,
+        0, 1, 2, 3, 4, 5, 6, 7,
+        0, 1, 2, 3, 4, 5, 6, 7
+    ];
+
     public static ReadOnlySpan<int> LightSquares =>
     [
         1, 0, 1, 0, 1, 0, 1, 0,
@@ -412,6 +424,8 @@ public static class Constants
     /// </summary>
     public const BitBoard CentralFiles = 0x3c3c3c3c3c3c3c3c;
 
+    public const BitBoard CentralSquares = 0x1818000000;
+
     public static ReadOnlySpan<char> FileString => [ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' ];
 
     public const int AbsoluteMaxDepth = 255;
@@ -442,7 +456,7 @@ public static class Constants
     /// <summary>
     /// 64 x 64
     /// </summary>
-    public static readonly int[][] ChebyshevDistance=
+    public static readonly int[][] ChebyshevDistance =
     [
         [0, 1, 2, 3, 4, 5, 6, 7, 1, 1, 2, 3, 4, 5, 6, 7, 2, 2, 2, 3, 4, 5, 6, 7, 3, 3, 3, 3, 4, 5, 6, 7, 4, 4, 4, 4, 4, 5, 6, 7, 5, 5, 5, 5, 5, 5, 6, 7, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7],
         [1, 0, 1, 2, 3, 4, 5, 6, 1, 1, 1, 2, 3, 4, 5, 6, 2, 2, 2, 2, 3, 4, 5, 6, 3, 3, 3, 3, 3, 4, 5, 6, 4, 4, 4, 4, 4, 4, 5, 6, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7],
@@ -509,6 +523,13 @@ public static class Constants
         [7, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5, 5, 5, 5, 5, 5, 5, 6, 5, 4, 4, 4, 4, 4, 4, 6, 5, 4, 3, 3, 3, 3, 3, 6, 5, 4, 3, 2, 2, 2, 2, 6, 5, 4, 3, 2, 1, 1, 1, 6, 5, 4, 3, 2, 1, 0, 1],
         [7, 7, 7, 7, 7, 7, 7, 7, 7, 6, 6, 6, 6, 6, 6, 6, 7, 6, 5, 5, 5, 5, 5, 5, 7, 6, 5, 4, 4, 4, 4, 4, 7, 6, 5, 4, 3, 3, 3, 3, 7, 6, 5, 4, 3, 2, 2, 2, 7, 6, 5, 4, 3, 2, 1, 1, 7, 6, 5, 4, 3, 2, 1, 0]
     ];
+
+    /// <summary>
+    /// 262_144 * Marshal.SizeOf<PawnTableElement>() / 1024 = 4MB
+    /// </summary>
+    public const int KingPawnHashSize = 262_144;
+
+    public const int KingPawnHashMask = KingPawnHashSize - 1;
 }
 
 #pragma warning restore IDE0055

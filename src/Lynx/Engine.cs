@@ -27,6 +27,8 @@ public sealed partial class Engine : IDisposable
 
     public bool PendingConfirmation { get; set; }
 
+    private bool IsMainEngine => _id == Searcher.MainEngineId;
+
     public Engine(ChannelWriter<object> engineWriter) : this(0, engineWriter, new()) { }
 
 #pragma warning disable RCS1163 // Unused parameter - used in Release mode
@@ -65,8 +67,6 @@ public sealed partial class Engine : IDisposable
         _logger.Info("Engine {0} initialized", _id);
     }
 
-    private bool IsMainEngine() => _id == Searcher.MainEngineId;
-
 #pragma warning disable S1144 // Unused private types or members should be removed - used in Release mode
     private void WarmupEngine()
     {
@@ -101,6 +101,8 @@ public sealed partial class Engine : IDisposable
         Array.Clear(_captureHistory);
         Array.Clear(_continuationHistory);
         Array.Clear(_counterMoves);
+
+        Array.Clear(_pawnEvalTable);
 
         // No need to clear killer move or pv table because they're cleared on every search (IDDFS)
     }

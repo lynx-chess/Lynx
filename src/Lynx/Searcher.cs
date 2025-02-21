@@ -14,6 +14,7 @@ public sealed class Searcher
 
     internal const int MainEngineId = 1;
 
+    private bool _isProcessingGoCommand;
     private bool _isPonderHit;
 
     private int _searchThreadsCount;
@@ -82,6 +83,8 @@ public sealed class Searcher
 
     private async Task OnGoCommand(GoCommand goCommand)
     {
+        _isProcessingGoCommand = true;
+
         if (!_absoluteSearchCancellationTokenSource.TryReset())
         {
             _absoluteSearchCancellationTokenSource.Dispose();
@@ -102,6 +105,8 @@ public sealed class Searcher
         {
             await MultiThreadedSearch(goCommand);
         }
+
+        _isProcessingGoCommand = false;
     }
 
     private void SingleThreadedSearch(GoCommand goCommand)
@@ -116,7 +121,7 @@ public sealed class Searcher
                 _searchCancellationTokenSource.CancelAfter(searchConstraints.HardLimitTimeBound);
             }
 
-            var searchResult = _mainEngine.Search(searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
+            var searchResult = _mainEngine.Search(in searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
 
             if (searchResult is not null)
             {
@@ -132,7 +137,7 @@ public sealed class Searcher
             // Pondering
             _logger.Debug("Pondering");
 
-            var searchResult = _mainEngine.Search(searchConstraints, isPondering: true, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None);
+            var searchResult = _mainEngine.Search(in searchConstraints, isPondering: true, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None);
 
             if (searchResult is not null)
             {
@@ -159,7 +164,7 @@ public sealed class Searcher
                     _searchCancellationTokenSource.CancelAfter(searchConstraints.HardLimitTimeBound);
                 }
 
-                searchResult = _mainEngine.Search(searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
+                searchResult = _mainEngine.Search(in searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
 
                 if (searchResult is not null)
                 {
@@ -202,7 +207,7 @@ public sealed class Searcher
 
             var tasks = _extraEngines
                 .Select(engine =>
-                    Task.Run(() => engine.Search(extraEnginesSearchConstraint, isPondering: false, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
+                    Task.Run(() => engine.Search(in extraEnginesSearchConstraint, isPondering: false, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
                 .ToArray();
 
 #if MULTITHREAD_DEBUG
@@ -210,7 +215,7 @@ public sealed class Searcher
             lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
-            SearchResult? finalSearchResult = _mainEngine.Search(searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
+            SearchResult? finalSearchResult = _mainEngine.Search(in searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
 
 #if MULTITHREAD_DEBUG
             _logger.Debug("End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
@@ -264,7 +269,7 @@ public sealed class Searcher
 
             var tasks = _extraEngines
                 .Select(engine =>
-                    Task.Run(() => engine.Search(extraEnginesSearchConstraint, isPondering: true, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
+                    Task.Run(() => engine.Search(in extraEnginesSearchConstraint, isPondering: true, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
                 .ToArray();
 
 #if MULTITHREAD_DEBUG
@@ -272,7 +277,7 @@ public sealed class Searcher
             lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
-            SearchResult? finalSearchResult = _mainEngine.Search(searchConstraints, isPondering: true, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None);
+            SearchResult? finalSearchResult = _mainEngine.Search(in searchConstraints, isPondering: true, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None);
 
 #if MULTITHREAD_DEBUG
             _logger.Debug("[Pondering] End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
@@ -332,7 +337,7 @@ public sealed class Searcher
 
                 tasks = _extraEngines
                     .Select(engine =>
-                        Task.Run(() => engine.Search(extraEnginesSearchConstraint, isPondering: false, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
+                        Task.Run(() => engine.Search(in extraEnginesSearchConstraint, isPondering: false, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
                     .ToArray();
 
 #if MULTITHREAD_DEBUG
@@ -340,7 +345,7 @@ public sealed class Searcher
                 lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
-                finalSearchResult = _mainEngine.Search(searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
+                finalSearchResult = _mainEngine.Search(in searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
 
 #if MULTITHREAD_DEBUG
                 _logger.Debug("End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
@@ -387,6 +392,11 @@ public sealed class Searcher
 
     public void AdjustPosition(ReadOnlySpan<char> command)
     {
+        // Can't update MainEngine.Game until previous search is completed
+        // Some GUIs wait until a bestmove is sent before sending a new position + go command (cutechess)
+        // but some others don't (WinBoard)
+        SpinWait.SpinUntil(() => !_isProcessingGoCommand);
+
         _mainEngine.AdjustPosition(command);
 
         foreach (var engine in _extraEngines)

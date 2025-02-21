@@ -5,10 +5,10 @@ namespace Lynx.Test;
 
 internal class MasksTest
 {
-    [TestCase(BoardSquare.a8, "P7/P7/P7/P7/P7/P7/P7/P7 w - - 0 1")]
-    [TestCase(BoardSquare.a6, "P7/P7/P7/P7/P7/P7/P7/P7 w - - 0 1")]
-    [TestCase(BoardSquare.b5, "1P6/1P6/1P6/1P6/1P6/1P6/1P6/1P6 w - - 0 1")]
-    [TestCase(BoardSquare.b1, "1P6/1P6/1P6/1P6/1P6/1P6/1P6/1P6 w - - 0 1")]
+    [TestCase(BoardSquare.a8, "P7/P7/P7/P7/P7/P7/P7/P4K1k w - - 0 1")]
+    [TestCase(BoardSquare.a6, "P7/P7/P7/P7/P7/P7/P7/P4K1k w - - 0 1")]
+    [TestCase(BoardSquare.b5, "1P6/1P6/1P6/1P6/1P6/1P6/1P6/1P3K1k w - - 0 1")]
+    [TestCase(BoardSquare.b1, "1P6/1P6/1P6/1P6/1P6/1P6/1P6/1P3K1k w - - 0 1")]
     public void FileMasks(BoardSquare square, string fen)
     {
         var position = new Position(fen);
@@ -19,10 +19,10 @@ internal class MasksTest
         Assert.AreEqual(expectedBitBoard, actualBitBoard);
     }
 
-    [TestCase(BoardSquare.a8, "PPPPPPPP/8/8/8/8/8/8/8 w - - 0 1")]
-    [TestCase(BoardSquare.c8, "PPPPPPPP/8/8/8/8/8/8/8 w - - 0 1")]
-    [TestCase(BoardSquare.b2, "8/8/8/8/8/8/PPPPPPPP/8 w - - 0 1")]
-    [TestCase(BoardSquare.h2, "8/8/8/8/8/8/PPPPPPPP/8 w - - 0 1")]
+    [TestCase(BoardSquare.a8, "PPPPPPPP/8/8/8/8/8/8/K1k5 w - - 0 1")]
+    [TestCase(BoardSquare.c8, "PPPPPPPP/8/8/8/8/8/8/K1k5 w - - 0 1")]
+    [TestCase(BoardSquare.b2, "K1k5/8/8/8/8/8/PPPPPPPP/8 w - - 0 1")]
+    [TestCase(BoardSquare.h2, "K1k5/8/8/8/8/8/PPPPPPPP/8 w - - 0 1")]
     public void RankMasks(BoardSquare square, string fen)
     {
         var position = new Position(fen);
@@ -33,12 +33,12 @@ internal class MasksTest
         Assert.AreEqual(expectedBitBoard, actualBitBoard);
     }
 
-    [TestCase(BoardSquare.a1, "1p6/1p6/1p6/1p6/1p6/1p6/1p6/1p6 w - - 0 1")]
-    [TestCase(BoardSquare.a8, "1p6/1p6/1p6/1p6/1p6/1p6/1p6/1p6 w - - 0 1")]
-    [TestCase(BoardSquare.a5, "1p6/1p6/1p6/1p6/1p6/1p6/1p6/1p6 w - - 0 1")]
-    [TestCase(BoardSquare.b2, "p1p5/p1p5/p1p5/p1p5/p1p5/p1p5/p1p5/p1p5 w - - 0 1")]
-    [TestCase(BoardSquare.b5, "p1p5/p1p5/p1p5/p1p5/p1p5/p1p5/p1p5/p1p5 w - - 0 1")]
-    [TestCase(BoardSquare.b7, "p1p5/p1p5/p1p5/p1p5/p1p5/p1p5/p1p5/p1p5 w - - 0 1")]
+    [TestCase(BoardSquare.a1, "1p6/1p6/1p6/1p6/1p6/1p6/1p6/1p3K1k w - - 0 1")]
+    [TestCase(BoardSquare.a8, "1p6/1p6/1p6/1p6/1p6/1p6/1p6/1p3K1k w - - 0 1")]
+    [TestCase(BoardSquare.a5, "1p6/1p6/1p6/1p6/1p6/1p6/1p6/1p3K1k w - - 0 1")]
+    [TestCase(BoardSquare.b2, "p1p5/p1p5/p1p5/p1p5/p1p5/p1p5/p1p5/p1p2K1k w - - 0 1")]
+    [TestCase(BoardSquare.b5, "p1p5/p1p5/p1p5/p1p5/p1p5/p1p5/p1p5/p1p2K1k w - - 0 1")]
+    [TestCase(BoardSquare.b7, "p1p5/p1p5/p1p5/p1p5/p1p5/p1p5/p1p5/p1p2K1k w - - 0 1")]
     public void IsolatedPawnMasks(BoardSquare square, string fen)
     {
         var position = new Position(fen);
@@ -49,14 +49,14 @@ internal class MasksTest
         Assert.AreEqual(expectedBitBoard, actualBitBoard);
     }
 
-    [TestCase(BoardSquare.e4, "3ppp2/3ppp2/3ppp2/3ppp2/8/8/8/8 w - - 0 1")]
-    [TestCase(BoardSquare.e5, "3ppp2/3ppp2/3ppp2/8/8/8/8/8 w - - 0 1")]
-    [TestCase(BoardSquare.e7, "3ppp2/8/8/8/8/8/8/8 w - - 0 1")]
-    [TestCase(BoardSquare.a7, "pp6/8/8/8/8/8/8/8 w - - 0 1")]
-    [TestCase(BoardSquare.a2, "pp6/pp6/pp6/pp6/pp6/pp6/8/8 w - - 0 1")]
-    [TestCase(BoardSquare.h3, "6pp/6pp/6pp/6pp/6pp/8/8/8 w - - 0 1")]
-    [TestCase(BoardSquare.h1, "6pp/6pp/6pp/6pp/6pp/6pp/6pp/8 w - - 0 1")]
-    [TestCase(BoardSquare.h8, "8/8/8/8/8/8/8/8 w - - 0 1")]
+    [TestCase(BoardSquare.e4, "3ppp2/3ppp2/3ppp2/3ppp2/8/8/8/K1k5 w - - 0 1")]
+    [TestCase(BoardSquare.e5, "3ppp2/3ppp2/3ppp2/8/8/8/8/K1k5 w - - 0 1")]
+    [TestCase(BoardSquare.e7, "3ppp2/8/8/8/8/8/8/K1k5 w - - 0 1")]
+    [TestCase(BoardSquare.a7, "pp6/8/8/8/8/8/8/K1k5 w - - 0 1")]
+    [TestCase(BoardSquare.a2, "pp6/pp6/pp6/pp6/pp6/pp6/8/K1k5 w - - 0 1")]
+    [TestCase(BoardSquare.h3, "6pp/6pp/6pp/6pp/6pp/8/8/K1k5 w - - 0 1")]
+    [TestCase(BoardSquare.h1, "6pp/6pp/6pp/6pp/6pp/6pp/6pp/K1k5 w - - 0 1")]
+    [TestCase(BoardSquare.h8, "8/8/8/8/8/8/8/K1k5 w - - 0 1")]
     public void WhitePassedPawnMasks(BoardSquare square, string fen)
     {
         var position = new Position(fen);
@@ -67,14 +67,14 @@ internal class MasksTest
         Assert.AreEqual(expectedBitBoard, actualBitBoard);
     }
 
-    [TestCase(BoardSquare.e4, "8/8/8/8/8/3ppp2/3ppp2/3ppp2 w - - 0 1")]
-    [TestCase(BoardSquare.e5, "8/8/8/8/3ppp2/3ppp2/3ppp2/3ppp2 w - - 0 1")]
-    [TestCase(BoardSquare.e2, "8/8/8/8/8/8/8/3ppp2 w - - 0 1")]
-    [TestCase(BoardSquare.a7, "8/8/pp6/pp6/pp6/pp6/pp6/pp6 w - - 0 1")]
-    [TestCase(BoardSquare.a2, "8/8/8/8/8/8/8/pp6 w - - 0 1")]
-    [TestCase(BoardSquare.h3, "8/8/8/8/8/8/6pp/6pp w - - 0 1")]
-    [TestCase(BoardSquare.h8, "8/6pp/6pp/6pp/6pp/6pp/6pp/6pp w - - 0 1")]
-    [TestCase(BoardSquare.h1, "8/8/8/8/8/8/8/8 w - - 0 1")]
+    [TestCase(BoardSquare.e4, "K1k5/8/8/8/8/3ppp2/3ppp2/3ppp2 w - - 0 1")]
+    [TestCase(BoardSquare.e5, "K1k5/8/8/8/3ppp2/3ppp2/3ppp2/3ppp2 w - - 0 1")]
+    [TestCase(BoardSquare.e2, "K1k5/8/8/8/8/8/8/3ppp2 w - - 0 1")]
+    [TestCase(BoardSquare.a7, "K1k5/8/pp6/pp6/pp6/pp6/pp6/pp6 w - - 0 1")]
+    [TestCase(BoardSquare.a2, "K1k5/8/8/8/8/8/8/pp6 w - - 0 1")]
+    [TestCase(BoardSquare.h3, "K1k5/8/8/8/8/8/6pp/6pp w - - 0 1")]
+    [TestCase(BoardSquare.h8, "K1k5/6pp/6pp/6pp/6pp/6pp/6pp/6pp w - - 0 1")]
+    [TestCase(BoardSquare.h1, "K1k5/8/8/8/8/8/8/8 w - - 0 1")]
     public void BlackPassedPawnMasks(BoardSquare square, string fen)
     {
         var position = new Position(fen);
@@ -85,14 +85,14 @@ internal class MasksTest
         Assert.AreEqual(expectedBitBoard, actualBitBoard);
     }
 
-    [TestCase(BoardSquare.e4, "3p1p2/3p1p2/3p1p2/3p1p2/8/8/8/8 w - - 0 1")]
-    [TestCase(BoardSquare.e5, "3p1p2/3p1p2/3p1p2/8/8/8/8/8 w - - 0 1")]
-    [TestCase(BoardSquare.e7, "3p1p2/8/8/8/8/8/8/8 w - - 0 1")]
-    [TestCase(BoardSquare.a7, "1p6/8/8/8/8/8/8/8 w - - 0 1")]
-    [TestCase(BoardSquare.a2, "1p6/1p6/1p6/1p6/1p6/1p6/8/8 w - - 0 1")]
-    [TestCase(BoardSquare.h3, "6p1/6p1/6p1/6p1/6p1/8/8/8 w - - 0 1")]
-    [TestCase(BoardSquare.h1, "6p1/6p1/6p1/6p1/6p1/6p1/6p1/8 w - - 0 1")]
-    [TestCase(BoardSquare.h8, "8/8/8/8/8/8/8/8 w - - 0 1")]
+    [TestCase(BoardSquare.e4, "3p1p2/3p1p2/3p1p2/3p1p2/8/8/8/5K1k w - - 0 1")]
+    [TestCase(BoardSquare.e5, "3p1p2/3p1p2/3p1p2/8/8/8/8/5K1k w - - 0 1")]
+    [TestCase(BoardSquare.e7, "3p1p2/8/8/8/8/8/8/5K1k w - - 0 1")]
+    [TestCase(BoardSquare.a7, "1p6/8/8/8/8/8/8/5K1k w - - 0 1")]
+    [TestCase(BoardSquare.a2, "1p6/1p6/1p6/1p6/1p6/1p6/8/5K1k w - - 0 1")]
+    [TestCase(BoardSquare.h3, "6p1/6p1/6p1/6p1/6p1/8/8/5K1k w - - 0 1")]
+    [TestCase(BoardSquare.h1, "6p1/6p1/6p1/6p1/6p1/6p1/6p1/K1k5 w - - 0 1")]
+    [TestCase(BoardSquare.h8, "8/8/8/8/8/8/8/5K1k w - - 0 1")]
     public void WhiteSidePassedPawnMask(BoardSquare square, string fen)
     {
         var position = new Position(fen);
@@ -103,14 +103,14 @@ internal class MasksTest
         Assert.AreEqual(expectedBitBoard, actualBitBoard);
     }
 
-    [TestCase(BoardSquare.e4, "8/8/8/8/8/3p1p2/3p1p2/3p1p2 w - - 0 1")]
-    [TestCase(BoardSquare.e5, "8/8/8/8/3p1p2/3p1p2/3p1p2/3p1p2 w - - 0 1")]
-    [TestCase(BoardSquare.e2, "8/8/8/8/8/8/8/3p1p2 w - - 0 1")]
-    [TestCase(BoardSquare.a7, "8/8/1p6/1p6/1p6/1p6/1p6/1p6 w - - 0 1")]
-    [TestCase(BoardSquare.a2, "8/8/8/8/8/8/8/1p6 w - - 0 1")]
-    [TestCase(BoardSquare.h3, "8/8/8/8/8/8/6p1/6p1 w - - 0 1")]
-    [TestCase(BoardSquare.h8, "8/6p1/6p1/6p1/6p1/6p1/6p1/6p1 w - - 0 1")]
-    [TestCase(BoardSquare.h1, "8/8/8/8/8/8/8/8 w - - 0 1")]
+    [TestCase(BoardSquare.e4, "5K1k/8/8/8/8/3p1p2/3p1p2/3p1p2 w - - 0 1")]
+    [TestCase(BoardSquare.e5, "5K1k/8/8/8/3p1p2/3p1p2/3p1p2/3p1p2 w - - 0 1")]
+    [TestCase(BoardSquare.e2, "5K1k/8/8/8/8/8/8/3p1p2 w - - 0 1")]
+    [TestCase(BoardSquare.a7, "5K1k/8/1p6/1p6/1p6/1p6/1p6/1p6 w - - 0 1")]
+    [TestCase(BoardSquare.a2, "5K1k/8/8/8/8/8/8/1p6 w - - 0 1")]
+    [TestCase(BoardSquare.h3, "5K1k/8/8/8/8/8/6p1/6p1 w - - 0 1")]
+    [TestCase(BoardSquare.h8, "5K1k/6p1/6p1/6p1/6p1/6p1/6p1/6p1 w - - 0 1")]
+    [TestCase(BoardSquare.h1, "5K1k/8/8/8/8/8/8/8 w - - 0 1")]
     public void BlackSidePassedPawnMasks(BoardSquare square, string fen)
     {
         var position = new Position(fen);
