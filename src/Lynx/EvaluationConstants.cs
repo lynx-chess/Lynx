@@ -33,6 +33,7 @@ public static class EvaluationConstants
     public static readonly int[] HistoryBonus = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
 
     public const int LMRScaleFactor = 100;
+    public const int HalfLMRScaleFactor = LMRScaleFactor / 2;
 
     static EvaluationConstants()
     {

@@ -402,7 +402,8 @@ public sealed partial class Engine
                             reduction -= Configuration.EngineSettings.LMR_InCheck;
                         }
 
-                        reduction /= EvaluationConstants.LMRScaleFactor;
+                        // 'Manual' rounding
+                        reduction = (reduction + EvaluationConstants.HalfLMRScaleFactor) / EvaluationConstants.LMRScaleFactor;
 
                         // -= history/(maxHistory/2)
                         reduction -= 2 * _quietHistory[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.History_MaxMoveValue;
