@@ -160,19 +160,19 @@ public sealed class EngineSettings
     public double LMR_Divisor { get; set; } = 3.21;
 
     [SPSA<int>(25, 300, 10)]
-    public int LMR_Improving { get; set; } = 100;
+    public int LMR_Improving { get; set; } = 94;
 
     [SPSA<int>(25, 300, 10)]
-    public int LMR_Cutnode { get; set; } = 100;
+    public int LMR_Cutnode { get; set; } = 109;
 
     [SPSA<int>(25, 300, 10)]
-    public int LMR_TTPV { get; set; } = 100;
+    public int LMR_TTPV { get; set; } = 90;
 
     [SPSA<int>(25, 300, 10)]
-    public int LMR_PVNode { get; set; } = 100;
+    public int LMR_PVNode { get; set; } = 107;
 
     [SPSA<int>(25, 300, 10)]
-    public int LMR_InCheck { get; set; } = 100;
+    public int LMR_InCheck { get; set; } = 120;
 
     //[SPSA<int>(1, 10, 0.5)]
     public int NMP_MinDepth { get; set; } = 3;
