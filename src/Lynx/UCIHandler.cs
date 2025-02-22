@@ -583,6 +583,14 @@ public sealed class UCIHandler
                     }
                     break;
                 }
+            case "ttreplacement_ttpvdepthoffset":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.TTReplacement_TTPVDepthOffset = value;
+                    }
+                    break;
+                }
 
             #endregion
 
