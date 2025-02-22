@@ -154,34 +154,34 @@ public sealed class EngineSettings
     public int LMR_MinFullDepthSearchedMoves_NonPV { get; set; } = 2;
 
     [SPSA<double>(0.1, 2, 0.1)]
-    public double LMR_Base { get; set; } = 0.92;
+    public double LMR_Base { get; set; } = 0.68;
 
     [SPSA<double>(1, 5, 0.1)]
-    public double LMR_Divisor { get; set; } = 2.93;
+    public double LMR_Divisor { get; set; } = 3.15;
 
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
     /// </summary>
     [SPSA<int>(25, 300, 10)]
-    public int LMR_Improving { get; set; } = 115;
+    public int LMR_Improving { get; set; } = 74;
 
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
     /// </summary>
     [SPSA<int>(25, 300, 10)]
-    public int LMR_Cutnode { get; set; } = 101;
+    public int LMR_Cutnode { get; set; } = 93;
 
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
     /// </summary>
     [SPSA<int>(25, 300, 10)]
-    public int LMR_TTPV { get; set; } = 108;
+    public int LMR_TTPV { get; set; } = 117;
 
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
     /// </summary>
     [SPSA<int>(25, 300, 10)]
-    public int LMR_PVNode { get; set; } = 107;
+    public int LMR_PVNode { get; set; } = 92;
 
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
