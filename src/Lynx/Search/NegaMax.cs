@@ -428,7 +428,7 @@ public sealed partial class Engine
                     // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
                     score = -NegaMax(reducedDepth, ply + 1, -alpha - 1, -alpha, cutnode: true, cancellationToken);
 
-                    if (score > alpha && reducedDepth > newDepth)
+                    if (score > alpha && reducedDepth < newDepth)
                     {
                         // Search with full depth but narrowed score bandwidth
                         score = -NegaMax(newDepth, ply + 1, -alpha - 1, -alpha, !cutnode, cancellationToken);
