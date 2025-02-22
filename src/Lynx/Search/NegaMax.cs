@@ -500,9 +500,9 @@ public sealed partial class Engine
                         UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(historyDepth, ply, visitedMoves, visitedMovesCounter, move, isRoot, pvNode);
                     }
 
-                    _tt.RecordHash(position, staticEval, depth, ply, bestScore, NodeType.Beta, ttPv, bestMove);
+                    nodeType = NodeType.Beta;
 
-                    return bestScore;
+                    break;
                 }
             }
 
@@ -513,15 +513,14 @@ public sealed partial class Engine
         {
             Debug.Assert(bestMove is null);
 
-            var finalEval = Position.EvaluateFinalPosition(ply, isInCheck);
-            _tt.RecordHash(position, finalEval, depth, ply, finalEval, NodeType.Exact, ttPv);
+            bestScore = Position.EvaluateFinalPosition(ply, isInCheck);
 
-            return finalEval;
+            nodeType = NodeType.Exact;
+            staticEval = bestScore;
         }
 
         _tt.RecordHash(position, staticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);
 
-        // Node fails low
         return bestScore;
     }
 
@@ -683,9 +682,8 @@ public sealed partial class Engine
                 {
                     PrintMessage($"Pruning: {move} is enough to discard this line");
 
-                    _tt.RecordHash(position, staticEval, 0, ply, bestScore, NodeType.Beta, ttPv, bestMove);
-
-                    return bestScore; // The refutation doesn't matter, since it'll be pruned
+                    nodeType = NodeType.Beta;
+                    break;
                 }
 
                 // Improving alpha
@@ -707,10 +705,10 @@ public sealed partial class Engine
         {
             Debug.Assert(bestMove is null);
 
-            var finalEval = Position.EvaluateFinalPosition(ply, position.IsInCheck());
-            _tt.RecordHash(position, finalEval, 0, ply, finalEval, NodeType.Exact, ttPv);
+            bestScore = Position.EvaluateFinalPosition(ply, position.IsInCheck());
 
-            return finalEval;
+            nodeType = NodeType.Exact;
+            staticEval = bestScore;
         }
 
         _tt.RecordHash(position, staticEval, 0, ply, bestScore, nodeType, ttPv, bestMove);
