@@ -329,19 +329,51 @@ public sealed class UCIHandler
                     }
                     break;
                 }
-            case "lmr_base":
+            case "lmr_base_quiet":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
-                        Configuration.EngineSettings.LMR_Base = value * 0.01;
+                        Configuration.EngineSettings.LMR_Base_Quiet = value * 0.01;
                     }
                     break;
                 }
-            case "lmr_divisor":
+            case "lmr_base_noisy":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
-                        Configuration.EngineSettings.LMR_Divisor = value * 0.01;
+                        Configuration.EngineSettings.LMR_Base_Noisy = value * 0.01;
+                    }
+                    break;
+                }
+            case "lmr_divisor_quiet":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_Divisor_Quiet = value * 0.01;
+                    }
+                    break;
+                }
+            case "lmr_divisor_noisy":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_Divisor_Noisy = value * 0.01;
+                    }
+                    break;
+                }
+            case "lmr_history_divisor_quiet":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_History_Divisor_Quiet = value;
+                    }
+                    break;
+                }
+            case "lmr_history_divisor_noisy":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_History_Divisor_Noisy = value;
                     }
                     break;
                 }
@@ -620,6 +652,14 @@ public sealed class UCIHandler
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
                         Configuration.EngineSettings.TTReplacement_DepthOffset = value;
+                    }
+                    break;
+                }
+            case "ttreplacement_ttpvdepthoffset":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.TTReplacement_TTPVDepthOffset = value;
                     }
                     break;
                 }
