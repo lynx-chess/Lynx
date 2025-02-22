@@ -367,50 +367,56 @@ public sealed partial class Engine
                 // 🔍 Late Move Reduction (LMR) - search with reduced depth
                 // Impl. based on Ciekce (Stormphrax) and Martin (Motor) advice, and Stormphrax & Akimbo implementations
                 if (isNotGettingCheckmated
-                    && !isCapture
                     && depth >= Configuration.EngineSettings.LMR_MinDepth
                     && visitedMovesCounter >=
                         (pvNode
                             ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_PV
                             : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_NonPV))
                 {
-                    var reduction = EvaluationConstants.LMRReductions[depth][visitedMovesCounter];
+                    var reduction = 0;
 
-                    if (pvNode)
+                    if (!isCapture)
                     {
-                        --reduction;
+                        reduction = EvaluationConstants.LMRReductions[depth][visitedMovesCounter];
+
+                        if (pvNode)
+                        {
+                            --reduction;
+                        }
+
+                        if (!ttPv)
+                        {
+                            ++reduction;
+                        }
+
+                        if (position.IsInCheck())   // i.e. move gives check
+                        {
+                            --reduction;
+                        }
+
+                        if (!improving)
+                        {
+                            ++reduction;
+                        }
+
+                        if (cutnode)
+                        {
+                            ++reduction;
+                        }
+
+                        // -= history/(maxHistory/2)
+                        reduction -= 2 * _quietHistory[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.History_MaxMoveValue;
                     }
-
-                    if (!ttPv)
+                    else
                     {
-                        ++reduction;
-                    }
-
-                    if (position.IsInCheck())   // i.e. move gives check
-                    {
-                        --reduction;
-                    }
-
-                    if (!improving)
-                    {
-                        ++reduction;
-                    }
-
-                    if (cutnode)
-                    {
-                        ++reduction;
-                    }
-
-                    // -= history/(maxHistory/2)
-                    reduction -= 2 * _quietHistory[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.History_MaxMoveValue;
-
-                    // 🔍 Static Exchange Evaluation (SEE) reduction
-                    // Bad captures are reduced more
-                    if (!isInCheck
-                        && moveScore < EvaluationConstants.PromotionMoveScoreValue
-                        && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
-                    {
-                        reduction += Configuration.EngineSettings.SEE_BadCaptureReduction;
+                        // 🔍 Static Exchange Evaluation (SEE) reduction
+                        // Bad captures are reduced more
+                        if (!isInCheck
+                            && moveScore < EvaluationConstants.PromotionMoveScoreValue
+                            && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
+                        {
+                            reduction += Configuration.EngineSettings.SEE_BadCaptureReduction;
+                        }
                     }
 
                     var reducedDepth = Math.Clamp(newDepth - reduction, 0, newDepth - 1);
@@ -437,7 +443,7 @@ public sealed partial class Engine
                     score = -NegaMax(newDepth, ply + 1, -alpha - 1, -alpha, cutnode: true, cancellationToken);
                 }
 
-                if (pvNode && score > alpha && score < beta)
+                if (pvNode && score > alpha)
                 {
                     // PVS Hypothesis invalidated -> alpha was raised by a previous zero-windows search
                     // We do a search with full depth and full score bandwidth
