@@ -301,7 +301,7 @@ public sealed partial class Engine
                 position.UnmakeMove(move, gameState);
             }
 
-            int score = int.MinValue;
+            int score;
             if (canBeRepetition && (Game.IsThreefoldRepetition() || Game.Is50MovesRepetition()))
             {
                 score = 0;
@@ -421,7 +421,7 @@ public sealed partial class Engine
                     // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
                     score = -NegaMax(newDepth, ply + 1, -alpha - 1, -alpha, cutnode: true, cancellationToken);
                 }
-                else if (!pvNode /*|| visitedMovesCounter >= 1*/)
+                else
                 {
                     // Search with full depth zero window when skipping LMR
                     // Optimistic search, validating that the rest of the moves are worse than bestmove.
