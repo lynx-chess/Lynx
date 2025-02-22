@@ -154,16 +154,16 @@ public sealed class EngineSettings
     public int LMR_MinFullDepthSearchedMoves_NonPV { get; set; } = 2;
 
     [SPSA<double>(0.1, 2, 0.1)]
-    public double LMR_Base_Quiet { get; set; } = 0.92;
+    public double LMR_Base_Quiet { get; set; } = 1.10;
 
     [SPSA<double>(0.1, 2, 0.1)]
-    public double LMR_Base_Noisy { get; set; } = 0.92;
+    public double LMR_Base_Noisy { get; set; } = 0.60;
 
     [SPSA<double>(1, 5, 0.1)]
-    public double LMR_Divisor_Quiet { get; set; } = 2.93;
+    public double LMR_Divisor_Quiet { get; set; } = 2.70;
 
     [SPSA<double>(1, 5, 0.1)]
-    public double LMR_Divisor_Noisy { get; set; } = 2.93;
+    public double LMR_Divisor_Noisy { get; set; } = 2.85;
 
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
@@ -199,13 +199,13 @@ public sealed class EngineSettings
     /// Tuned from ~<see cref="History_MaxMoveValue"/> / 2
     /// </summary>
     [SPSA<int>(1, 8192, 128)]
-    public int LMR_History_Divisor_Quiet { get; set; } = 4096;
+    public int LMR_History_Divisor_Quiet { get; set; } = 3750;
 
     /// <summary>
     /// Tuned from ~<see cref="History_MaxMoveValue"/> / 2 * (3 / 4)
     /// </summary>
     [SPSA<int>(1, 8192, 128)]
-    public int LMR_History_Divisor_Noisy { get; set; } = 3072;
+    public int LMR_History_Divisor_Noisy { get; set; } = 3200;
 
     //[SPSA<int>(1, 10, 0.5)]
     public int NMP_MinDepth { get; set; } = 3;
