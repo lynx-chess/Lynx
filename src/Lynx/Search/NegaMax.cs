@@ -378,49 +378,53 @@ public sealed partial class Engine
                         {
                             reduction = EvaluationConstants.LMRReductions[1][depth][visitedMovesCounter];
 
+                            reduction /= EvaluationConstants.LMRScaleFactor;
+
                             // ~ history/(0.75 * maxHistory/2/)
-                            reduction -= _captureHistory[CaptureHistoryIndex(move.Piece(), move.TargetSquare(), move.CapturedPiece())] / Configuration.EngineSettings.LMR_Noisy_History_Divisor;
+                            reduction -= _captureHistory[CaptureHistoryIndex(move.Piece(), move.TargetSquare(), move.CapturedPiece())] / Configuration.EngineSettings.LMR_History_Divisor_Noisy;
                         }
                         else
                         {
                             reduction = EvaluationConstants.LMRReductions[0][depth][visitedMovesCounter];
 
-                            if (pvNode)
-                            {
-                                --reduction;
-                            }
-
-                            if (!ttPv)
-                            {
-                                ++reduction;
-                            }
-
-                            if (position.IsInCheck())   // i.e. move gives check
-                            {
-                                --reduction;
-                            }
-
                             if (!improving)
                             {
-                                ++reduction;
+                                reduction += Configuration.EngineSettings.LMR_Improving;
                             }
 
                             if (cutnode)
                             {
-                                ++reduction;
+                                reduction += Configuration.EngineSettings.LMR_Cutnode;
                             }
 
-                            // ~ history/(maxHistory/2)
-                            reduction -= _quietHistory[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.LMR_QuietHistory_Divisor;
+                            if (!ttPv)
+                            {
+                                reduction += Configuration.EngineSettings.LMR_TTPV;
+                            }
 
+                            if (pvNode)
+                            {
+                                reduction -= Configuration.EngineSettings.LMR_PVNode;
+                            }
+
+                            if (position.IsInCheck())   // i.e. move gives check
+                            {
+                                reduction -= Configuration.EngineSettings.LMR_InCheck;
+                            }
+
+                            reduction /= EvaluationConstants.LMRScaleFactor;
+
+                            // -= history/(maxHistory/2)
+                            reduction -= 2 * _quietHistory[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.LMR_History_Divisor_Quiet;
+
+                            // Don't allow LMR to drop into qsearch or increase the depth
+                            // depth - 1 - depth +2 = 1, min depth we want
+                            reduction = Math.Clamp(reduction, 0, depth - 2);
                         }
-
-                        // Don't allow LMR to drop into qsearch or increase the depth
-                        // depth - 1 - depth +2 = 1, min depth we want
-                        reduction = Math.Clamp(reduction, 0, depth - 2);
                     }
 
                     // TODO move inside of depth conditions
+
                     // 🔍 Static Exchange Evaluation (SEE) reduction
                     // Bad captures are reduced more
                     if (!isInCheck

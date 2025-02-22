@@ -32,6 +32,8 @@ public static class EvaluationConstants
     /// </summary>
     public static readonly int[] HistoryBonus = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin];
 
+    public const int LMRScaleFactor = 100;
+
     static EvaluationConstants()
     {
         var quietReductions = LMRReductions[0] = new int[Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin][];
@@ -45,10 +47,12 @@ public static class EvaluationConstants
             for (int movesSearchedCount = 1; movesSearchedCount < Constants.MaxNumberOfPossibleMovesInAPosition; ++movesSearchedCount) // movesSearchedCount > 0 or we wouldn't be applying LMR
             {
                 quietReductions[searchDepth][movesSearchedCount] = Convert.ToInt32(Math.Round(
-                    Configuration.EngineSettings.LMR_Quiet_Base + (Math.Log(movesSearchedCount) * Math.Log(searchDepth) / Configuration.EngineSettings.LMR_Quiet_Divisor)));
+                    LMRScaleFactor *
+                    (Configuration.EngineSettings.LMR_Base_Quiet + (Math.Log(movesSearchedCount) * Math.Log(searchDepth) / Configuration.EngineSettings.LMR_Divisor_Quiet))));
 
                 noisyReductions[searchDepth][movesSearchedCount] = Convert.ToInt32(Math.Round(
-                    Configuration.EngineSettings.LMR_Noisy_Base + (Math.Log(movesSearchedCount) * Math.Log(searchDepth) / Configuration.EngineSettings.LMR_Noisy_Divisor)));
+                    LMRScaleFactor *
+                    (Configuration.EngineSettings.LMR_Base_Noisy + (Math.Log(movesSearchedCount) * Math.Log(searchDepth) / Configuration.EngineSettings.LMR_Divisor_Noisy))));
             }
 
             HistoryBonus[searchDepth] = Math.Min(
