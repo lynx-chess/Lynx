@@ -377,30 +377,35 @@ public sealed partial class Engine
                     {
                         reduction = EvaluationConstants.LMRReductions[depth][visitedMovesCounter];
 
-                        if (pvNode)
-                        {
-                            --reduction;
-                        }
-
-                        if (!ttPv)
-                        {
-                            ++reduction;
-                        }
-
-                        if (position.IsInCheck())   // i.e. move gives check
-                        {
-                            --reduction;
-                        }
+                        var extraReduction = 0;
 
                         if (!improving)
                         {
-                            ++reduction;
+                            extraReduction += Configuration.EngineSettings.LMR_Improving;
                         }
 
                         if (cutnode)
                         {
-                            ++reduction;
+                            extraReduction += Configuration.EngineSettings.LMR_Cutnode;
                         }
+
+                        if (!ttPv)
+                        {
+                            extraReduction += Configuration.EngineSettings.LMR_TTPV;
+                        }
+
+                        if (pvNode)
+                        {
+                            extraReduction -= Configuration.EngineSettings.LMR_PVNode;
+                        }
+
+                        if (position.IsInCheck())   // i.e. move gives check
+                        {
+                            extraReduction -= Configuration.EngineSettings.LMR_InCheck;
+                        }
+
+                        extraReduction /= 100;
+                        reduction += extraReduction;
 
                         // -= history/(maxHistory/2)
                         reduction -= 2 * _quietHistory[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.History_MaxMoveValue;

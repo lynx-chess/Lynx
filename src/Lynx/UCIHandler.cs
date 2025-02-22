@@ -345,6 +345,46 @@ public sealed class UCIHandler
                     }
                     break;
                 }
+            case "lmr_improving":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_Improving = value;
+                    }
+                    break;
+                }
+            case "lmr_cutnode":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_Cutnode = value;
+                    }
+                    break;
+                }
+            case "LMR_TTPV":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_TTPV = value;
+                    }
+                    break;
+                }
+            case "lmr_pvnode":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_PVNode = value;
+                    }
+                    break;
+                }
+            case "lmr_incheck":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_InCheck = value;
+                    }
+                    break;
+                }
 
             case "nmp_mindepth":
                 {
