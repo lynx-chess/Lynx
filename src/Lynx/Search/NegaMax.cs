@@ -413,7 +413,7 @@ public sealed partial class Engine
                         reduction += Configuration.EngineSettings.SEE_BadCaptureReduction;
                     }
 
-                    newDepth = Math.Clamp(newDepth - reduction, 1, newDepth - 1);
+                    newDepth = Math.Clamp(newDepth - reduction, 0, newDepth - 1);
 
                     // Search with reduced depth and zero window
                     // Optimistic search, validating that the rest of the moves are worse than bestmove.
