@@ -413,13 +413,20 @@ public sealed partial class Engine
                         reduction += Configuration.EngineSettings.SEE_BadCaptureReduction;
                     }
 
-                    newDepth = Math.Clamp(newDepth - reduction, 0, newDepth - 1);
+                    var reducedDepth = Math.Clamp(newDepth - reduction, 0, newDepth - 1);
 
+                    // 🔍 Principal Variation Search (PVS)
                     // Search with reduced depth and zero window
                     // Optimistic search, validating that the rest of the moves are worse than bestmove.
                     // It should produce more cutoffs and therefore be faster.
                     // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
-                    score = -NegaMax(newDepth, ply + 1, -alpha - 1, -alpha, cutnode: true, cancellationToken);
+                    score = -NegaMax(reducedDepth, ply + 1, -alpha - 1, -alpha, cutnode: true, cancellationToken);
+
+                    if (score > alpha && reducedDepth > newDepth)
+                    {
+                        // Search with full depth but narrowed score bandwidth
+                        score = -NegaMax(newDepth, ply + 1, -alpha - 1, -alpha, !cutnode, cancellationToken);
+                    }
                 }
                 else
                 {
