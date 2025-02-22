@@ -591,7 +591,30 @@ public sealed class UCIHandler
                     }
                     break;
                 }
-
+            case "se_mindepth":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.SE_MinDepth = value;
+                    }
+                    break;
+                }
+            case "se_ttdepthoffset":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.SE_TTDepthOffset = value;
+                    }
+                    break;
+                }
+            case "se_singularbetadepthmultiplier":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.SE_SingularBetaDepthMultiplier = value;
+                    }
+                    break;
+                }
             #endregion
 
             default:

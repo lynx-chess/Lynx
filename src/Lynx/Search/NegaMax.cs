@@ -16,7 +16,8 @@ public sealed partial class Engine
     /// Best score Side's to move's opponent can achieve, assuming best play by Side to move.
     /// </param>
     [SkipLocalsInit]
-    private int NegaMax(int depth, int ply, int alpha, int beta, bool cutnode, CancellationToken cancellationToken, bool parentWasNullMove = false)
+    private int NegaMax(int depth, int ply, int alpha, int beta, bool cutnode, CancellationToken cancellationToken,
+        bool parentWasNullMove = false, Move excludedMove = default)
     {
         var position = Game.CurrentPosition;
 
@@ -45,10 +46,11 @@ public sealed partial class Engine
         int ttStaticEval = int.MinValue;
         int ttDepth = default;
         bool ttWasPv = false;
+        bool isVerifyingSE = excludedMove != default;
 
         Debug.Assert(!pvNode || !cutnode);
 
-        if (!isRoot)
+        if (!isRoot && !isVerifyingSE)
         {
             (ttScore, ttBestMove, ttElementType, ttStaticEval, ttDepth, ttWasPv) = _tt.ProbeHash(position, ply);
 
@@ -98,6 +100,7 @@ public sealed partial class Engine
         int phase = int.MaxValue;
 
         if (isInCheck)
+            //&& !isVerifyingSE // TODO
         {
             ++depth;
             staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
@@ -141,7 +144,7 @@ public sealed partial class Engine
             // If the score is outside what the current bounds are, but it did match flag and depth,
             // then we can trust that this score is more accurate than the current static evaluation,
             // and we can update our static evaluation for better accuracy in pruning
-            if (ttElementType != default && ttElementType != (ttScore > staticEval ? NodeType.Alpha : NodeType.Beta))
+            if (!isVerifyingSE && ttElementType != default && ttElementType != (ttScore > staticEval ? NodeType.Alpha : NodeType.Beta))
             {
                 staticEval = ttScore;
             }
@@ -149,7 +152,7 @@ public sealed partial class Engine
             bool isNotGettingCheckmated = staticEval > EvaluationConstants.NegativeCheckmateDetectionLimit;
 
             // Fail-high pruning (moves with high scores) - prune more when improving
-            if (isNotGettingCheckmated)
+            if (isNotGettingCheckmated && !isVerifyingSE)
             {
                 if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
                 {
@@ -268,6 +271,13 @@ public sealed partial class Engine
             }
 
             var move = pseudoLegalMoves[moveIndex];
+            Debug.Assert(move != default);
+
+            if (move == excludedMove)
+            {
+                continue;
+            }
+
             var moveScore = moveScores[moveIndex];
 
             var gameState = position.MakeMove(move);
@@ -358,6 +368,37 @@ public sealed partial class Engine
                         RevertMove();
                         break;
                     }
+                }
+
+                // 🔍 Singular extensions (SE) - extend TT move when it looks better than every other move.
+                // We check if that's the case by doing a reduced-depth using a nullwindow around a 'singular beta' score,
+                // and excluding the TT move from that search
+
+                if (
+                    // visitedMove > 0      // Implicit
+                    !isVerifyingSE        // Implicit, otherwise the move would have been skipped already
+                    && isNotGettingCheckmated
+                    && move == ttBestMove      // Ensures !isRoot and TT hit
+                    && depth >= Configuration.EngineSettings.SE_MinDepth
+                    && ttDepth + Configuration.EngineSettings.SE_TTDepthOffset >= depth
+                    //&& Math.Abs(ttScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
+                    && ttElementType != NodeType.Alpha)
+                {
+                    RevertMove();
+
+                    var verificationDepth = (depth - 1) / 2;    // TODO tune?
+                    var singularBeta = ttScore - (depth * Configuration.EngineSettings.SE_SingularBetaDepthMultiplier);
+                    //var singularBeta = Math.Max(EvaluationConstants.NegativeCheckmateDetectionLimit, ttScore - depth);
+
+                    var singularScore = NegaMax(verificationDepth, ply, singularBeta - 1, singularBeta, cutnode, cancellationToken, excludedMove: move);
+                    if (singularScore < singularBeta)
+                    {
+                        ++depth;
+                    }
+
+                    gameState = position.MakeMove(move);
+                    _ = Game.Update50movesRule(move, isCapture);
+                    Game.AddToPositionHashHistory(position.UniqueIdentifier);
                 }
 
                 _tt.PrefetchTTEntry(position);

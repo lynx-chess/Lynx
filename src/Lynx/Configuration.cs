@@ -256,6 +256,15 @@ public sealed class EngineSettings
     //[SPSA<int>(0, 10, 0.5)]
     public int TTReplacement_TTPVDepthOffset { get; set; } = 2;
 
+    //[SPSA<int>(1, 10, 0.5)]
+    public int SE_MinDepth { get; set; } = 7;
+
+    //[SPSA<int>(1, 10, 0.5)]
+    public int SE_TTDepthOffset { get; set; } = 3;
+
+    //[SPSA<int>(1, 10, 0.5)]
+    public int SE_SingularBetaDepthMultiplier { get; set; } = 2;
+
     #endregion
 }
 
