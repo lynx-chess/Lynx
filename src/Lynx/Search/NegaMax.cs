@@ -437,7 +437,7 @@ public sealed partial class Engine
                     score = -NegaMax(newDepth, ply + 1, -alpha - 1, -alpha, cutnode: true, cancellationToken);
                 }
 
-                if (pvNode && score > alpha /*&& score < beta*/)
+                if (pvNode && score > alpha && score < beta)
                 {
                     // PVS Hypothesis invalidated -> alpha was raised by a previous zero-windows search
                     // We do a search with full depth and full score bandwidth
