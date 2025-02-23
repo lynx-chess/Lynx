@@ -341,7 +341,7 @@ public sealed partial class Engine
                 }
             }
 
-            int score = 0;
+            int score = int.MinValue;
 
             if (canBeRepetition && (Game.IsThreefoldRepetition() || Game.Is50MovesRepetition()))
             {
