@@ -1,7 +1,6 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
 
 namespace Lynx;
 
@@ -377,13 +376,14 @@ public sealed partial class Engine
                 // 🔍 Singular extensions (SE) - extend TT move when it looks better than every other move.
                 // We check if that's the case by doing a reduced-depth using a nullwindow around a 'singular beta' score,
                 // and excluding the TT move from that search
-                if (!isVerifyingSE        // Implicit, otherwise the move would have been skipped already
-                    && isNotGettingCheckmated
+                if (
+                    //visitedMovesCounter == 0    // Shortcut, since TT move will always be the first one
+                    !isVerifyingSE        // Implicit, otherwise the move would have been skipped already
                     && !isRoot
-                    && move == ttBestMove      // Ensures !isRoot and TT hit
+                    && (ShortMove)move == ttBestMove      // Ensures !isRoot and TT hit
                     && depth >= Configuration.EngineSettings.SE_MinDepth
                     && ttDepth + Configuration.EngineSettings.SE_TTDepthOffset >= depth
-                    //&& Math.Abs(ttScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
+                    && Math.Abs(ttScore) < EvaluationConstants.PositiveCheckmateDetectionLimit
                     && ttElementType != NodeType.Alpha)
                 {
                     RevertMove();
