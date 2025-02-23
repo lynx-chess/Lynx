@@ -368,47 +368,62 @@ public sealed partial class Engine
                 // Impl. based on Ciekce (Stormphrax) and Martin (Motor) advice, and Stormphrax & Akimbo implementations
                 if (isNotGettingCheckmated)
                 {
-                    if (!isCapture
-                        && depth >= Configuration.EngineSettings.LMR_MinDepth
+                    if (depth >= Configuration.EngineSettings.LMR_MinDepth
                         && visitedMovesCounter >=
                             (pvNode
                                 ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_PV
                                 : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_NonPV))
                     {
-                        reduction = EvaluationConstants.LMRReductions[depth][visitedMovesCounter];
-
-                        if (pvNode)
+                        if (isCapture)
                         {
-                            --reduction;
-                        }
+                            reduction = EvaluationConstants.LMRReductions[1][depth][visitedMovesCounter];
 
-                        if (!ttPv)
+                            reduction /= EvaluationConstants.LMRScaleFactor;
+
+                            // ~ history/(0.75 * maxHistory/2/)
+                            reduction -= _captureHistory[CaptureHistoryIndex(move.Piece(), move.TargetSquare(), move.CapturedPiece())] / Configuration.EngineSettings.LMR_History_Divisor_Noisy;
+                        }
+                        else
                         {
-                            ++reduction;
+                            reduction = EvaluationConstants.LMRReductions[0][depth][visitedMovesCounter];
+
+                            if (!improving)
+                            {
+                                reduction += Configuration.EngineSettings.LMR_Improving;
+                            }
+
+                            if (cutnode)
+                            {
+                                reduction += Configuration.EngineSettings.LMR_Cutnode;
+                            }
+
+                            if (!ttPv)
+                            {
+                                reduction += Configuration.EngineSettings.LMR_TTPV;
+                            }
+
+                            if (pvNode)
+                            {
+                                reduction -= Configuration.EngineSettings.LMR_PVNode;
+                            }
+
+                            if (position.IsInCheck())   // i.e. move gives check
+                            {
+                                reduction -= Configuration.EngineSettings.LMR_InCheck;
+                            }
+
+                            reduction /= EvaluationConstants.LMRScaleFactor;
+
+                            // -= history/(maxHistory/2)
+                            reduction -= 2 * _quietHistory[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.LMR_History_Divisor_Quiet;
+
+                            // Don't allow LMR to drop into qsearch or increase the depth
+                            // depth - 1 - depth +2 = 1, min depth we want
+                            reduction = Math.Clamp(reduction, 0, depth - 2);
                         }
-
-                        if (position.IsInCheck())   // i.e. move gives check
-                        {
-                            --reduction;
-                        }
-
-                        if (!improving)
-                        {
-                            ++reduction;
-                        }
-
-                        if (cutnode)
-                        {
-                            ++reduction;
-                        }
-
-                        // -= history/(maxHistory/2)
-                        reduction -= 2 * _quietHistory[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.History_MaxMoveValue;
-
-                        // Don't allow LMR to drop into qsearch or increase the depth
-                        // depth - 1 - depth +2 = 1, min depth we want
-                        reduction = Math.Clamp(reduction, 0, depth - 2);
                     }
+
+                    // TODO move inside of depth conditions
 
                     // 🔍 Static Exchange Evaluation (SEE) reduction
                     // Bad captures are reduced more
