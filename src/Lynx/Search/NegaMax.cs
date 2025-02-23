@@ -446,14 +446,15 @@ public sealed partial class Engine
                         // It should produce more cutoffs and therefore be faster.
                         // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
 
-                        // Search with full depth but narrowed score bandwidth
+                        // Search with full depth but narrowed score bandwidth (zero-window search)
                         score = -NegaMax(newDepth, ply + 1, -alpha - 1, -alpha, !cutnode, cancellationToken);
                     }
                 }
 
+                // First searched move is always searched with full depth and full score bandwidth
+                // Same if PVS hypothesis is invalidated
                 if (visitedMovesCounter == 0 || (score > alpha && score < beta))
                 {
-                    // PVS Hypothesis invalidated -> search with full depth and full score bandwidth
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
                     score = -NegaMax(newDepth, ply + 1, -beta, -alpha, cutnode: false, cancellationToken);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
