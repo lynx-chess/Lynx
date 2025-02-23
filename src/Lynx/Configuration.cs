@@ -140,6 +140,8 @@ public sealed class EngineSettings
     //[SPSA<int>(1, 15, 1)]
     public int ScoreStabiity_MinDepth { get; set; } = 7;
 
+    public int SoftTimeBoundLimitOnMate { get; set; } = 1_000;
+
     #endregion
 
     #region Search
