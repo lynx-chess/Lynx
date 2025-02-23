@@ -52,7 +52,7 @@ Here are the ones 'properly' rated over at least a few hundred of games:
 
 \* Not enough games
 
-<sup>2</sup> Progress estimation based on 40+0.4 games vs previous engine version using a balanced book
+<sup>1</sup> Progress estimation based on 40+0.4 games vs previous engine version using a balanced book
 
 <sup>2</sup> Elo estimation based on 40+0.4 gauntlets vs other engines using a balanced book, and calculated using CCRL Blitz ratings
 
