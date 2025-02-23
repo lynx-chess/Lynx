@@ -329,19 +329,91 @@ public sealed class UCIHandler
                     }
                     break;
                 }
-            case "lmr_base":
+            case "lmr_base_quiet":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
-                        Configuration.EngineSettings.LMR_Base = value * 0.01;
+                        Configuration.EngineSettings.LMR_Base_Quiet = value * 0.01;
                     }
                     break;
                 }
-            case "lmr_divisor":
+            case "lmr_base_noisy":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
-                        Configuration.EngineSettings.LMR_Divisor = value * 0.01;
+                        Configuration.EngineSettings.LMR_Base_Noisy = value * 0.01;
+                    }
+                    break;
+                }
+            case "lmr_divisor_quiet":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_Divisor_Quiet = value * 0.01;
+                    }
+                    break;
+                }
+            case "lmr_divisor_noisy":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_Divisor_Noisy = value * 0.01;
+                    }
+                    break;
+                }
+            case "lmr_history_divisor_quiet":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_History_Divisor_Quiet = value;
+                    }
+                    break;
+                }
+            case "lmr_history_divisor_noisy":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_History_Divisor_Noisy = value;
+                    }
+                    break;
+                }
+            case "lmr_improving":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_Improving = value;
+                    }
+                    break;
+                }
+            case "lmr_cutnode":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_Cutnode = value;
+                    }
+                    break;
+                }
+            case "LMR_TTPV":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_TTPV = value;
+                    }
+                    break;
+                }
+            case "lmr_pvnode":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_PVNode = value;
+                    }
+                    break;
+                }
+            case "lmr_incheck":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_InCheck = value;
                     }
                     break;
                 }
