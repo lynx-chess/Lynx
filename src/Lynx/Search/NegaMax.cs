@@ -100,7 +100,7 @@ public sealed partial class Engine
         int phase = int.MaxValue;
 
         if (isInCheck)
-            //&& !isVerifyingSE // TODO
+        //&& !isVerifyingSE // TODO
         {
             ++depth;
             staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
@@ -560,7 +560,10 @@ public sealed partial class Engine
             staticEval = bestScore;
         }
 
-        _tt.RecordHash(position, staticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);
+        if (!isVerifyingSE)
+        {
+            _tt.RecordHash(position, staticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);
+        }
 
         return bestScore;
     }
