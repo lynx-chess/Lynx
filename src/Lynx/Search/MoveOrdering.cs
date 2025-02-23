@@ -82,20 +82,22 @@ public sealed partial class Engine
         if (ply >= 1)
         {
             var previousMove = Game.ReadMoveFromStack(ply - 1);
-            Debug.Assert(previousMove != 0);
-            var previousMovePiece = previousMove.Piece();
-            var previousMoveTargetSquare = previousMove.TargetSquare();
-
-            // Countermove
-            if (_counterMoves[CounterMoveIndex(previousMovePiece, previousMoveTargetSquare)] == move)
+            if (previousMove != 0)   // Null move
             {
-                return CounterMoveValue;
-            }
+                var previousMovePiece = previousMove.Piece();
+                var previousMoveTargetSquare = previousMove.TargetSquare();
 
-            // Counter move history
-            return BaseMoveScore
-                + _quietHistory[move.Piece()][move.TargetSquare()]
-                + _continuationHistory[ContinuationHistoryIndex(move.Piece(), move.TargetSquare(), previousMovePiece, previousMoveTargetSquare, 0)];
+                // Countermove
+                if (_counterMoves[CounterMoveIndex(previousMovePiece, previousMoveTargetSquare)] == move)
+                {
+                    return CounterMoveValue;
+                }
+
+                // Counter move history
+                return BaseMoveScore
+                    + _quietHistory[move.Piece()][move.TargetSquare()]
+                    + _continuationHistory[ContinuationHistoryIndex(move.Piece(), move.TargetSquare(), previousMovePiece, previousMoveTargetSquare, 0)];
+            }
         }
 
         // History move or 0 if not found
