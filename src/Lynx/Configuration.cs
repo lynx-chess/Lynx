@@ -252,7 +252,7 @@ public sealed class EngineSettings
     public int Razoring_NotDepth1Bonus { get; set; } = 220;
 
     //[SPSA<int>(1, 10, 0.5)]
-    public int IIR_MinDepth { get; set; } = 4;
+    public int IIR_MinDepth { get; set; } = 6;
 
     //[SPSA<int>(1, 10, 0.5)]
     public int LMP_MaxDepth { get; set; } = 8;
