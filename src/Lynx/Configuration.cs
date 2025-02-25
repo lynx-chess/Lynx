@@ -255,7 +255,7 @@ public sealed class EngineSettings
     public int IIR_MinDepth { get; set; } = 4;
 
     //[SPSA<int>(1, 10, 0.5)]
-    public int IIR_TTDepthOffset { get; set; } = 4;
+    public int IIR_TTDepthOffset { get; set; } = 3;
 
     //[SPSA<int>(1, 10, 0.5)]
     public int LMP_MaxDepth { get; set; } = 8;
