@@ -309,7 +309,7 @@ public sealed partial class Engine
                 && !pvNode
                 && !isInCheck
                 && isNotGettingCheckmated
-                && moveScore < EvaluationConstants.PromotionMoveScoreValue) // Quiet move
+                && moveScore < EvaluationConstants.BadCaptureMoveBaseScoreValue) // Quiet move
             {
                 // 🔍 Late Move Pruning (LMP) - all quiet moves can be pruned
                 // after searching the first few given by the move ordering algorithm
@@ -322,8 +322,7 @@ public sealed partial class Engine
 
                 // 🔍 History pruning -  all quiet moves can be pruned
                 // once we find one with a history score too low
-                if (!isCapture
-                    && moveScore < EvaluationConstants.CounterMoveValue
+                if (moveScore < EvaluationConstants.CounterMoveValue
                     && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth    // TODO use LMR depth
                     && _quietHistory[move.Piece()][move.TargetSquare()] < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
                 {
