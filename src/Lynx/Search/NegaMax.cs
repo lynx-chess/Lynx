@@ -317,7 +317,7 @@ public sealed partial class Engine
 
                 if (!SEE.HasPositiveScore(position, move, threshold))
                 {
-                    break;
+                    continue;
                 }
             }
 
