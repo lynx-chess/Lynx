@@ -276,11 +276,13 @@ public sealed partial class Engine
             bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
 
             // Fail-low pruning (moves with low scores) - prune less when improving
+            // LMP, HP and FP can happen either before after MakeMove
+            // PVS SEE pruning needs to happen before MakeMove in a make-unmake framework (it needs original position)
             if (visitedMovesCounter > 0
                 && !pvNode
                 && !isInCheck
                 && isNotGettingCheckmated
-                && moveScore < EvaluationConstants.PromotionMoveScoreValue) // Quiet move
+                && moveScore < EvaluationConstants.PromotionMoveScoreValue) // Quiet or bad capture
             {
                 // 🔍 Late Move Pruning (LMP) - all quiet moves can be pruned
                 // after searching the first few given by the move ordering algorithm
@@ -304,6 +306,16 @@ public sealed partial class Engine
                 // once it's considered that they don't have potential to raise alpha
                 if (depth <= Configuration.EngineSettings.FP_MaxDepth
                     && staticEval + Configuration.EngineSettings.FP_Margin + (Configuration.EngineSettings.FP_DepthScalingFactor * depth) <= alpha)
+                {
+                    break;
+                }
+
+                // 🔍 PVS SEE pruning
+                var threshold = isCapture
+                    ? Configuration.EngineSettings.PVS_SEE_Threshold_Noisy * depth * depth
+                    : Configuration.EngineSettings.PVS_SEE_Threshold_Quiet * depth;
+
+                if (!SEE.HasPositiveScore(position, move, threshold))
                 {
                     break;
                 }
