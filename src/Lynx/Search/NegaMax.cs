@@ -270,37 +270,7 @@ public sealed partial class Engine
 
             var move = pseudoLegalMoves[moveIndex];
             var moveScore = moveScores[moveIndex];
-
-            var gameState = position.MakeMove(move);
-
-            if (!position.WasProduceByAValidMove())
-            {
-                position.UnmakeMove(move, gameState);
-                continue;
-            }
-
-            var previousNodes = _nodes;
-            visitedMoves[visitedMovesCounter] = move;
-
-            ++_nodes;
-            isAnyMoveValid = true;
             var isCapture = move.IsCapture();
-
-            PrintPreMove(position, ply, move);
-
-            // Before making a move
-            var oldHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
-            var canBeRepetition = Game.Update50movesRule(move, isCapture);
-            Game.AddToPositionHashHistory(position.UniqueIdentifier);
-            Game.UpdateMoveinStack(ply, move);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            void RevertMove()
-            {
-                Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
-                Game.RemoveFromPositionHashHistory();
-                position.UnmakeMove(move, gameState);
-            }
 
             // If we prune while getting checmated, we risk not finding any move and having an empty PV
             bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
@@ -317,7 +287,6 @@ public sealed partial class Engine
                 if (depth <= Configuration.EngineSettings.LMP_MaxDepth
                     && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth * (improving ? 2 : 1))) // Based on formula suggested by Antares
                 {
-                    RevertMove();
                     break;
                 }
 
@@ -328,7 +297,6 @@ public sealed partial class Engine
                     && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth    // TODO use LMR depth
                     && _quietHistory[move.Piece()][move.TargetSquare()] < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
                 {
-                    RevertMove();
                     break;
                 }
 
@@ -337,9 +305,38 @@ public sealed partial class Engine
                 if (depth <= Configuration.EngineSettings.FP_MaxDepth
                     && staticEval + Configuration.EngineSettings.FP_Margin + (Configuration.EngineSettings.FP_DepthScalingFactor * depth) <= alpha)
                 {
-                    RevertMove();
                     break;
                 }
+            }
+
+            var gameState = position.MakeMove(move);
+
+            if (!position.WasProduceByAValidMove())
+            {
+                position.UnmakeMove(move, gameState);
+                continue;
+            }
+
+            var previousNodes = _nodes;
+            visitedMoves[visitedMovesCounter] = move;
+
+            ++_nodes;
+            isAnyMoveValid = true;
+
+            PrintPreMove(position, ply, move);
+
+            // Before making a move
+            var oldHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
+            var canBeRepetition = Game.Update50movesRule(move, isCapture);
+            Game.AddToPositionHashHistory(position.UniqueIdentifier);
+            Game.UpdateMoveinStack(ply, move);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            void RevertMove()
+            {
+                Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
+                Game.RemoveFromPositionHashHistory();
+                position.UnmakeMove(move, gameState);
             }
 
             int score = 0;
