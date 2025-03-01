@@ -393,14 +393,12 @@ public class PositionTest
             - AdditionalPieceEvaluation(position, Piece.p);
 
         var rank = Constants.Rank[(int)square];
-        var pieceIndex = (int)Piece.P;
         var passedPawnsMask = Masks.WhitePassedPawnMasks[(int)square];
 
         if (position.Side == Side.Black)
         {
             evaluation = -evaluation;
             rank = 7 - rank;
-            pieceIndex = (int)Piece.p;
             passedPawnsMask = Masks.BlackPassedPawnMasks[(int)square];
         }
 
