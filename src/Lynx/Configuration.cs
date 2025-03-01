@@ -304,6 +304,12 @@ public sealed class EngineSettings
     //[SPSA<int>(0, 10, 0.5)]
     public int TTReplacement_TTPVDepthOffset { get; set; } = 2;
 
+    [SPSA<int>(-100, -10, 10)]
+    public int PVS_SEE_Threshold_Quiet { get; set; } = -15;
+
+    [SPSA<int>(-150, -50, 10)]
+    public int PVS_SEE_Threshold_Noisy { get; set; } = -110;
+
     #endregion
 }
 

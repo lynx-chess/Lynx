@@ -664,6 +664,23 @@ public sealed class UCIHandler
                     break;
                 }
 
+            case "pvs_see_threshold_quiet":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.PVS_SEE_Threshold_Quiet = value;
+                    }
+                    break;
+                }
+            case "pvs_see_threshold_noisy":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.PVS_SEE_Threshold_Noisy = value;
+                    }
+                    break;
+                }
+
             #endregion
 
             default:
