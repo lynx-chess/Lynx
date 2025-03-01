@@ -139,6 +139,8 @@ _Beware, most of the provided links contain outdated information and don't refle
 
 - TT PV / wasPv
 
+- PVS SEE pruning
+
 ### Evaluation
 
 - Piece-Square Tables (PSQT) [[1](https://www.chessprogramming.org/Piece-Square_Tables)]
