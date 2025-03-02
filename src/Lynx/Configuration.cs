@@ -153,17 +153,17 @@ public sealed class EngineSettings
     //[SPSA<int>(1, 10, 0.5)]
     public int LMR_MinFullDepthSearchedMoves_NonPV { get; set; } = 2;
 
-    [SPSA<double>(0.1, 2, 0.2)]
-    public double LMR_Base_Quiet { get; set; } = 1.22;
+    [SPSA<double>(0.1, 2, 0.1)]
+    public double LMR_Base_Quiet { get; set; } = 1.10;
 
-    [SPSA<double>(0.1, 2, 0.2)]
-    public double LMR_Base_Noisy { get; set; } = 0.53;
+    [SPSA<double>(0.1, 2, 0.1)]
+    public double LMR_Base_Noisy { get; set; } = 0.60;
 
-    [SPSA<double>(1, 5, 0.4)]
-    public double LMR_Divisor_Quiet { get; set; } = 3.95;
+    [SPSA<double>(1, 5, 0.1)]
+    public double LMR_Divisor_Quiet { get; set; } = 2.70;
 
-    [SPSA<double>(1, 5, 0.4)]
-    public double LMR_Divisor_Noisy { get; set; } = 2.30;
+    [SPSA<double>(1, 5, 0.1)]
+    public double LMR_Divisor_Noisy { get; set; } = 2.85;
 
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
