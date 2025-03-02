@@ -311,13 +311,23 @@ public sealed partial class Engine
                 }
 
                 // 🔍 PVS SEE pruning
-                var threshold = isCapture
-                    ? Configuration.EngineSettings.PVS_SEE_Threshold_Noisy * depth * depth
-                    : Configuration.EngineSettings.PVS_SEE_Threshold_Quiet * depth;
-
-                if (!SEE.HasPositiveScore(position, move, threshold))
+                if (isCapture)
                 {
-                    continue;
+                    var threshold = Configuration.EngineSettings.PVS_SEE_Threshold_Noisy * depth * depth;
+
+                    if (!SEE.IsGoodCapture(position, move, threshold))
+                    {
+                        continue;
+                    }
+                }
+                else
+                {
+                    var threshold = Configuration.EngineSettings.PVS_SEE_Threshold_Quiet * depth;
+
+                    if (!SEE.HasPositiveScore(position, move, threshold))
+                    {
+                        continue;
+                    }
                 }
             }
 
