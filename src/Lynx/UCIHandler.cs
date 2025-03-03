@@ -393,7 +393,7 @@ public sealed class UCIHandler
                     }
                     break;
                 }
-            case "LMR_TTPV":
+            case "lmr_ttpv":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
