@@ -98,10 +98,21 @@ public sealed partial class Engine
         int staticEval;
         int phase = int.MaxValue;
 
+        if (ttElementType == default)
+        {
+            (staticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable);
+        }
+        else
+        {
+            Debug.Assert(ttStaticEval != int.MinValue);
+
+            staticEval = ttStaticEval;
+            phase = position.Phase();
+        }
+
         if (isInCheck)
         {
             ++depth;
-            staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
         }
         else if (depth <= 0)
         {
@@ -112,22 +123,11 @@ public sealed partial class Engine
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
             _tt.RecordHash(position, finalPositionEvaluation, depth, ply, finalPositionEvaluation, NodeType.Exact, ttPv);
+
             return finalPositionEvaluation;
         }
         else if (!pvNode)
         {
-            if (ttElementType == default)
-            {
-                (staticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable);
-            }
-            else
-            {
-                Debug.Assert(ttStaticEval != int.MinValue);
-
-                staticEval = ttStaticEval;
-                phase = position.Phase();
-            }
-
             Game.UpdateStaticEvalInStack(ply, staticEval);
 
             if (ply >= 2)
@@ -231,10 +231,6 @@ public sealed partial class Engine
                     }
                 }
             }
-        }
-        else
-        {
-            staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
         }
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
