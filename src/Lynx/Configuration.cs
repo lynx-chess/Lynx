@@ -239,8 +239,8 @@ public sealed class EngineSettings
     //[SPSA<int>(1, 10, 0.5)]
     public int RFP_MaxDepth { get; set; } = 7;
 
-    [SPSA<int>(1, 300, 15)]
-    public int RFP_DepthScalingFactor { get; set; } = 55;
+    //[SPSA<int>(1, 300, 15)]
+    //public int RFP_DepthScalingFactor { get; set; } = 55;
 
     //[SPSA<int>(1, 10, 0.5)]
     public int Razoring_MaxDepth { get; set; } = 2;

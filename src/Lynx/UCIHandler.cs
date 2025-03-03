@@ -500,14 +500,14 @@ public sealed class UCIHandler
                     }
                     break;
                 }
-            case "rfp_depthscalingfactor":
-                {
-                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
-                    {
-                        Configuration.EngineSettings.RFP_DepthScalingFactor = value;
-                    }
-                    break;
-                }
+            //case "rfp_depthscalingfactor":
+            //    {
+            //        if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+            //        {
+            //            Configuration.EngineSettings.RFP_DepthScalingFactor = value;
+            //        }
+            //        break;
+            //    }
 
             case "razoring_maxdepth":
                 {
