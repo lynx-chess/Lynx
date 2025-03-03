@@ -45,6 +45,7 @@ public sealed partial class Engine
         int ttStaticEval = int.MinValue;
         int ttDepth = default;
         bool ttWasPv = false;
+        bool ttMoveIsCapture = false;
 
         Debug.Assert(!pvNode || !cutnode);
 
@@ -69,6 +70,8 @@ public sealed partial class Engine
                     ++depth;
                 }
             }
+
+            ttMoveIsCapture = ttElementType != default && ttBestMove != default && position.Board[((int)ttBestMove).TargetSquare()] != (int)Piece.None;
 
             // Internal iterative reduction (IIR)
             // If this position isn't found in TT, it has never been searched before,
@@ -420,6 +423,11 @@ public sealed partial class Engine
                                 if (!ttPv)
                                 {
                                     reduction += Configuration.EngineSettings.LMR_TTPV;
+                                }
+
+                                if (!isCapture && ttMoveIsCapture)
+                                {
+                                    reduction += Configuration.EngineSettings.LMR_TTCapture;
                                 }
 
                                 if (pvNode)
