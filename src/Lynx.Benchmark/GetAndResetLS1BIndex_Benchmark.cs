@@ -142,10 +142,34 @@ public class GetAndResetLS1BIndex_Benchmark : BaseBenchmark
         {
             var bitboard = position.PieceBitBoards[pieceIndex];
 
-            var square = bitboard.GetLS1BIndex();
-            bitboard.ResetLS1B();
+            while (!bitboard.Empty())
+            {
+                var square = bitboard.GetLS1BIndex();
+                bitboard.ResetLS1B();
 
-            result += square;
+                result += square;
+            }
+        }
+
+        return result;
+    }
+
+    [Benchmark]
+    [ArgumentsSource(nameof(Data))]
+    public int WithoutLS1B_OutIndex(Position position)
+    {
+        int result = 0;
+
+        for (int pieceIndex = (int)Piece.P; pieceIndex <= (int)Piece.k; ++pieceIndex)
+        {
+            var bitboard = position.PieceBitBoards[pieceIndex];
+
+            while (!bitboard.Empty())
+            {
+                bitboard = bitboard.WithoutLS1B_OutIndex(out var square);
+
+                result += square;
+            }
         }
 
         return result;
@@ -161,9 +185,12 @@ public class GetAndResetLS1BIndex_Benchmark : BaseBenchmark
         {
             var bitboard = position.PieceBitBoards[pieceIndex];
 
-            var square = bitboard.GetLS1BIndexAndPopIt();
+            while (!bitboard.Empty())
+            {
+                var square = bitboard.GetLS1BIndexAndPopIt();
 
-            result += square;
+                result += square;
+            }
         }
 
         return result;
@@ -179,9 +206,12 @@ public class GetAndResetLS1BIndex_Benchmark : BaseBenchmark
         {
             var bitboard = position.PieceBitBoards[pieceIndex];
 
-            var square = bitboard.GetLS1BIndexAndToggleIt();
+            while (!bitboard.Empty())
+            {
+                var square = bitboard.GetLS1BIndexAndToggleIt();
 
-            result += square;
+                result += square;
+            }
         }
 
         return result;
@@ -207,8 +237,11 @@ internal static class BitBoardExtensions_GetAndResetLS1BIndex_Benchmark
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int GetLS1BIndexAndPopIt(this ref BitBoard board)
     {
-        var index = GetLS1BIndex(board);
-        board.PopBit(index);
+        //var index = GetLS1BIndex(board);
+        var index = BitOperations.TrailingZeroCount(board);
+
+        // board.PopBit(index);
+        board &= ~(1UL << index);
 
         return index;
     }
@@ -216,9 +249,21 @@ internal static class BitBoardExtensions_GetAndResetLS1BIndex_Benchmark
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int GetLS1BIndexAndToggleIt(this ref BitBoard board)
     {
-        var index = GetLS1BIndex(board);
-        board.ToggleBit(index);
+        //var index = GetLS1BIndex(board);
+        var index = BitOperations.TrailingZeroCount(board);
+
+        //board.ToggleBit(index);
+        board ^= 1ul << index;
 
         return index;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static BitBoard WithoutLS1B_OutIndex(this BitBoard board, out int index)
+    {
+        index = BitOperations.TrailingZeroCount(board);
+
+        // board.WithoutLSQ1B();
+        return board & (board - 1);
     }
 }
