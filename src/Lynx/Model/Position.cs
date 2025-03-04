@@ -675,8 +675,7 @@ public class Position : IDisposable
                 var whitePawnsCopy = whitePawns;
                 while (whitePawnsCopy != default)
                 {
-                    var pieceSquareIndex = whitePawnsCopy.GetLS1BIndex();
-                    whitePawnsCopy.ResetLS1B();
+                    whitePawnsCopy = whitePawnsCopy.WithoutLS1B(out var pieceSquareIndex);
 
                     pawnScore += PawnAdditionalEvaluation(whiteBucket, blackBucket, pieceSquareIndex, (int)Piece.P, whiteKing, blackKing);
                 }
@@ -693,8 +692,7 @@ public class Position : IDisposable
                 var blackPawnsCopy = blackPawns;
                 while (blackPawnsCopy != default)
                 {
-                    var pieceSquareIndex = blackPawnsCopy.GetLS1BIndex();
-                    blackPawnsCopy.ResetLS1B();
+                    blackPawnsCopy = blackPawnsCopy.WithoutLS1B(out var pieceSquareIndex);
 
                     pawnScore -= PawnAdditionalEvaluation(blackBucket, whiteBucket, pieceSquareIndex, (int)Piece.p, blackKing, whiteKing);
                 }
@@ -716,8 +714,7 @@ public class Position : IDisposable
 
                 while (bitboard != default)
                 {
-                    var pieceSquareIndex = bitboard.GetLS1BIndex();
-                    bitboard.ResetLS1B();
+                    bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
 
                     packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.White, blackKing, blackPawnAttacks);
                 }
@@ -734,8 +731,7 @@ public class Position : IDisposable
 
                 while (bitboard != default)
                 {
-                    var pieceSquareIndex = bitboard.GetLS1BIndex();
-                    bitboard.ResetLS1B();
+                    bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
 
                     packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.Black, whiteKing, whitePawnAttacks);
                 }
@@ -761,8 +757,7 @@ public class Position : IDisposable
                 var whitePawnsCopy = PieceBitBoards[(int)Piece.P];
                 while (whitePawnsCopy != default)
                 {
-                    var pieceSquareIndex = whitePawnsCopy.GetLS1BIndex();
-                    whitePawnsCopy.ResetLS1B();
+                    whitePawnsCopy = whitePawnsCopy.WithoutLS1B(out var pieceSquareIndex);
 
                     _incrementalEvalAccumulator += PSQT(0, whiteBucket, (int)Piece.P, pieceSquareIndex)
                                                 + PSQT(1, blackBucket, (int)Piece.P, pieceSquareIndex);
@@ -777,8 +772,7 @@ public class Position : IDisposable
                 var blackPawnsCopy = PieceBitBoards[(int)Piece.p];
                 while (blackPawnsCopy != default)
                 {
-                    var pieceSquareIndex = blackPawnsCopy.GetLS1BIndex();
-                    blackPawnsCopy.ResetLS1B();
+                    blackPawnsCopy = blackPawnsCopy.WithoutLS1B(out var pieceSquareIndex);
 
                     _incrementalEvalAccumulator += PSQT(0, blackBucket, (int)Piece.p, pieceSquareIndex)
                                                 + PSQT(1, whiteBucket, (int)Piece.p, pieceSquareIndex);
@@ -803,8 +797,7 @@ public class Position : IDisposable
                 var whitePawnsCopy = PieceBitBoards[(int)Piece.P];
                 while (whitePawnsCopy != default)
                 {
-                    var pieceSquareIndex = whitePawnsCopy.GetLS1BIndex();
-                    whitePawnsCopy.ResetLS1B();
+                    whitePawnsCopy = whitePawnsCopy.WithoutLS1B(out var pieceSquareIndex);
 
                     _incrementalEvalAccumulator += PSQT(0, whiteBucket, (int)Piece.P, pieceSquareIndex)
                                                 + PSQT(1, blackBucket, (int)Piece.P, pieceSquareIndex);
@@ -824,8 +817,7 @@ public class Position : IDisposable
                 var blackPawnsCopy = PieceBitBoards[(int)Piece.p];
                 while (blackPawnsCopy != default)
                 {
-                    var pieceSquareIndex = blackPawnsCopy.GetLS1BIndex();
-                    blackPawnsCopy.ResetLS1B();
+                    blackPawnsCopy = blackPawnsCopy.WithoutLS1B(out var pieceSquareIndex);
 
                     _incrementalEvalAccumulator += PSQT(0, blackBucket, (int)Piece.p, pieceSquareIndex)
                                                 + PSQT(1, whiteBucket, (int)Piece.p, pieceSquareIndex);
@@ -850,8 +842,7 @@ public class Position : IDisposable
 
                 while (bitboard != default)
                 {
-                    var pieceSquareIndex = bitboard.GetLS1BIndex();
-                    bitboard.ResetLS1B();
+                    bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
 
                     _incrementalEvalAccumulator += PSQT(0, whiteBucket, pieceIndex, pieceSquareIndex)
                                                 + PSQT(1, blackBucket, pieceIndex, pieceSquareIndex);
@@ -873,8 +864,7 @@ public class Position : IDisposable
 
                 while (bitboard != default)
                 {
-                    var pieceSquareIndex = bitboard.GetLS1BIndex();
-                    bitboard.ResetLS1B();
+                    bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
 
                     _incrementalEvalAccumulator += PSQT(0, blackBucket, pieceIndex, pieceSquareIndex)
                                                 + PSQT(1, whiteBucket, pieceIndex, pieceSquareIndex);
@@ -1348,8 +1338,7 @@ public class Position : IDisposable
 
             while (pawns != default)
             {
-                var squareIndex = pawns.GetLS1BIndex();
-                pawns.ResetLS1B();
+                pawns = pawns.WithoutLS1B(out var squareIndex);
 
                 files[Constants.File[squareIndex]] = n;
             }
