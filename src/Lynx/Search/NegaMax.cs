@@ -141,7 +141,7 @@ public sealed partial class Engine
 
                 if (cutnode)
                 {
-                    improvingRate /= 2;
+                    improvingRate -= improvingRate / 4;
                 }
             }
 
