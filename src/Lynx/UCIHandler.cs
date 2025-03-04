@@ -401,6 +401,14 @@ public sealed class UCIHandler
                     }
                     break;
                 }
+            case "lmr_ttcapture":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_TTCapture = value;
+                    }
+                    break;
+                }
             case "lmr_pvnode":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))

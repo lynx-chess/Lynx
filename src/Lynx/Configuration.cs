@@ -187,6 +187,12 @@ public sealed class EngineSettings
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
     /// </summary>
     [SPSA<int>(25, 300, 30)]
+    public int LMR_TTCapture { get; set; } = 100;
+
+    /// <summary>
+    /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
+    /// </summary>
+    [SPSA<int>(25, 300, 30)]
     public int LMR_PVNode { get; set; } = 107;
 
     /// <summary>
