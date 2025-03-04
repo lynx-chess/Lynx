@@ -1,5 +1,4 @@
 ﻿using Lynx.Model;
-using NLog.Config;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
