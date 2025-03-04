@@ -1,115 +1,139 @@
 ﻿/*
 *
-*  BenchmarkDotNet v0.14.0, Ubuntu 22.04.4 LTS (Jammy Jellyfish)
-*  AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
-*  .NET SDK 8.0.401
-*    [Host]     : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
-*    DefaultJob : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
+*   BenchmarkDotNet v0.14.0, Ubuntu 22.04.5 LTS (Jammy Jellyfish)
+*   AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
+*   .NET SDK 9.0.200
+*     [Host]     : .NET 9.0.2 (9.0.225.6610), X64 RyuJIT AVX2
+*     DefaultJob : .NET 9.0.2 (9.0.225.6610), X64 RyuJIT AVX2
 *
-*  | Method                  | position            | Mean      | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
-*  |------------------------ |-------------------- |----------:|----------:|----------:|------:|----------:|------------:|
-*  | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 11.184 ns | 0.0806 ns | 0.0673 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 11.185 ns | 0.1310 ns | 0.1226 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 11.192 ns | 0.0601 ns | 0.0533 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 11.165 ns | 0.0120 ns | 0.0100 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 11.103 ns | 0.1859 ns | 0.1451 ns |  0.99 |         - |          NA |
-*  | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 11.156 ns | 0.0328 ns | 0.0291 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndexAndPopIt    | Lynx.Model.Position |  7.673 ns | 0.1576 ns | 0.1475 ns |  0.69 |         - |          NA |
-*  | GetLS1BIndexAndPopIt    | Lynx.Model.Position |  7.666 ns | 0.1749 ns | 0.1636 ns |  0.69 |         - |          NA |
-*  | GetLS1BIndexAndPopIt    | Lynx.Model.Position |  6.922 ns | 0.0195 ns | 0.0163 ns |  0.62 |         - |          NA |
-*  | GetLS1BIndexAndPopIt    | Lynx.Model.Position |  6.964 ns | 0.0591 ns | 0.0553 ns |  0.62 |         - |          NA |
-*  | GetLS1BIndexAndPopIt    | Lynx.Model.Position |  6.944 ns | 0.0608 ns | 0.0539 ns |  0.62 |         - |          NA |
-*  | GetLS1BIndexAndPopIt    | Lynx.Model.Position |  6.922 ns | 0.0620 ns | 0.0518 ns |  0.62 |         - |          NA |
-*  | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 11.137 ns | 0.1436 ns | 0.1343 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 11.168 ns | 0.0694 ns | 0.0649 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 11.146 ns | 0.0610 ns | 0.0571 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 11.124 ns | 0.0118 ns | 0.0099 ns |  0.99 |         - |          NA |
-*  | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 11.140 ns | 0.1277 ns | 0.1132 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 11.141 ns | 0.1154 ns | 0.1079 ns |  1.00 |         - |          NA |
-*
-*
-*  BenchmarkDotNet v0.14.0, Windows 10 (10.0.20348.2655) (Hyper-V)
-*  AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
-*  .NET SDK 8.0.401
-*    [Host]     : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
-*    DefaultJob : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
-*
-*  | Method                  | position            | Mean      | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
-*  |------------------------ |-------------------- |----------:|----------:|----------:|------:|----------:|------------:|
-*  | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 11.157 ns | 0.0323 ns | 0.0252 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 11.129 ns | 0.0350 ns | 0.0292 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 11.111 ns | 0.0974 ns | 0.0863 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 11.134 ns | 0.0261 ns | 0.0231 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 11.155 ns | 0.0308 ns | 0.0273 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 11.122 ns | 0.0658 ns | 0.0549 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndexAndPopIt    | Lynx.Model.Position |  7.286 ns | 0.0387 ns | 0.0343 ns |  0.65 |         - |          NA |
-*  | GetLS1BIndexAndPopIt    | Lynx.Model.Position |  7.291 ns | 0.0307 ns | 0.0287 ns |  0.65 |         - |          NA |
-*  | GetLS1BIndexAndPopIt    | Lynx.Model.Position |  7.269 ns | 0.0352 ns | 0.0294 ns |  0.65 |         - |          NA |
-*  | GetLS1BIndexAndPopIt    | Lynx.Model.Position |  7.281 ns | 0.0363 ns | 0.0321 ns |  0.65 |         - |          NA |
-*  | GetLS1BIndexAndPopIt    | Lynx.Model.Position |  7.260 ns | 0.0351 ns | 0.0328 ns |  0.65 |         - |          NA |
-*  | GetLS1BIndexAndPopIt    | Lynx.Model.Position |  7.268 ns | 0.0346 ns | 0.0324 ns |  0.65 |         - |          NA |
-*  | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 11.163 ns | 0.0685 ns | 0.0607 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 11.184 ns | 0.0287 ns | 0.0255 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 11.160 ns | 0.0820 ns | 0.0767 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 11.168 ns | 0.0552 ns | 0.0461 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 11.151 ns | 0.0727 ns | 0.0644 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 11.172 ns | 0.0460 ns | 0.0384 ns |  1.00 |         - |          NA |
+*   | Method                  | position            | Mean     | Error    | StdDev   | Ratio | Allocated | Alloc Ratio |
+*   |------------------------ |-------------------- |---------:|---------:|---------:|------:|----------:|------------:|
+*   | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 20.09 ns | 0.027 ns | 0.021 ns |  1.00 |         - |          NA |
+*   | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 20.12 ns | 0.057 ns | 0.048 ns |  1.00 |         - |          NA |
+*   | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 20.18 ns | 0.115 ns | 0.107 ns |  1.00 |         - |          NA |
+*   | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 20.15 ns | 0.107 ns | 0.095 ns |  1.00 |         - |          NA |
+*   | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 20.08 ns | 0.086 ns | 0.080 ns |  1.00 |         - |          NA |
+*   | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 19.88 ns | 0.148 ns | 0.123 ns |  0.99 |         - |          NA |
+*   | WithoutLS1B_OutIndex    | Lynx.Model.Position | 21.41 ns | 0.158 ns | 0.132 ns |  1.07 |         - |          NA |
+*   | WithoutLS1B_OutIndex    | Lynx.Model.Position | 21.30 ns | 0.097 ns | 0.086 ns |  1.06 |         - |          NA |
+*   | WithoutLS1B_OutIndex    | Lynx.Model.Position | 21.28 ns | 0.149 ns | 0.132 ns |  1.06 |         - |          NA |
+*   | WithoutLS1B_OutIndex    | Lynx.Model.Position | 21.37 ns | 0.112 ns | 0.104 ns |  1.06 |         - |          NA |
+*   | WithoutLS1B_OutIndex    | Lynx.Model.Position | 21.27 ns | 0.095 ns | 0.089 ns |  1.06 |         - |          NA |
+*   | WithoutLS1B_OutIndex    | Lynx.Model.Position | 20.86 ns | 0.063 ns | 0.056 ns |  1.04 |         - |          NA |
+*   | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 23.06 ns | 0.129 ns | 0.114 ns |  1.15 |         - |          NA |
+*   | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 23.02 ns | 0.103 ns | 0.097 ns |  1.15 |         - |          NA |
+*   | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 22.95 ns | 0.054 ns | 0.048 ns |  1.14 |         - |          NA |
+*   | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 23.00 ns | 0.104 ns | 0.097 ns |  1.15 |         - |          NA |
+*   | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 23.03 ns | 0.105 ns | 0.099 ns |  1.15 |         - |          NA |
+*   | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 22.40 ns | 0.112 ns | 0.099 ns |  1.11 |         - |          NA |
+*   | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 22.13 ns | 0.013 ns | 0.010 ns |  1.10 |         - |          NA |
+*   | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 22.19 ns | 0.080 ns | 0.075 ns |  1.10 |         - |          NA |
+*   | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 22.21 ns | 0.104 ns | 0.092 ns |  1.11 |         - |          NA |
+*   | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 22.18 ns | 0.087 ns | 0.081 ns |  1.10 |         - |          NA |
+*   | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 22.18 ns | 0.064 ns | 0.057 ns |  1.10 |         - |          NA |
+*   | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 22.35 ns | 0.070 ns | 0.059 ns |  1.11 |         - |          NA |
 *
 *
-*  BenchmarkDotNet v0.14.0, macOS Sonoma 14.6.1 (23G93) [Darwin 23.6.0]
-*  Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
-*  .NET SDK 8.0.401
-*    [Host]     : .NET 8.0.8 (8.0.824.36612), Arm64 RyuJIT AdvSIMD
-*    DefaultJob : .NET 8.0.8 (8.0.824.36612), Arm64 RyuJIT AdvSIMD
+*   BenchmarkDotNet v0.14.0, Windows 10 (10.0.20348.3207) (Hyper-V)
+*   AMD EPYC 7763, 1 CPU, 4 logical and 2 physical cores
+*   .NET SDK 9.0.200
+*     [Host]     : .NET 9.0.2 (9.0.225.6610), X64 RyuJIT AVX2
+*     DefaultJob : .NET 9.0.2 (9.0.225.6610), X64 RyuJIT AVX2
 *
-*  | Method                  | position            | Mean     | Error     | StdDev    | Ratio | Allocated | Alloc Ratio |
-*  |------------------------ |-------------------- |---------:|----------:|----------:|------:|----------:|------------:|
-*  | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 5.356 ns | 0.0117 ns | 0.0097 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 5.353 ns | 0.0116 ns | 0.0096 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 5.358 ns | 0.0132 ns | 0.0103 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 5.359 ns | 0.0096 ns | 0.0085 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 5.360 ns | 0.0121 ns | 0.0101 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 5.360 ns | 0.0146 ns | 0.0122 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 5.347 ns | 0.0060 ns | 0.0051 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 5.382 ns | 0.0295 ns | 0.0261 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 5.356 ns | 0.0070 ns | 0.0058 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 5.372 ns | 0.0256 ns | 0.0227 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 5.357 ns | 0.0079 ns | 0.0070 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 5.351 ns | 0.0057 ns | 0.0048 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 5.355 ns | 0.0081 ns | 0.0076 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 5.368 ns | 0.0359 ns | 0.0300 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 5.353 ns | 0.0080 ns | 0.0067 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 5.357 ns | 0.0080 ns | 0.0063 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 5.357 ns | 0.0028 ns | 0.0023 ns |  1.00 |         - |          NA |
-*  | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 5.353 ns | 0.0111 ns | 0.0087 ns |  1.00 |         - |          NA |
+*   | Method                  | position            | Mean     | Error    | StdDev   | Ratio | Allocated | Alloc Ratio |
+*   |------------------------ |-------------------- |---------:|---------:|---------:|------:|----------:|------------:|
+*   | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 21.48 ns | 0.266 ns | 0.236 ns |  1.00 |         - |          NA |
+*   | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 20.05 ns | 0.020 ns | 0.019 ns |  0.93 |         - |          NA |
+*   | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 20.06 ns | 0.037 ns | 0.033 ns |  0.93 |         - |          NA |
+*   | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 20.05 ns | 0.019 ns | 0.015 ns |  0.93 |         - |          NA |
+*   | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 20.05 ns | 0.022 ns | 0.019 ns |  0.93 |         - |          NA |
+*   | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 19.73 ns | 0.016 ns | 0.014 ns |  0.92 |         - |          NA |
+*   | WithoutLS1B_OutIndex    | Lynx.Model.Position | 20.06 ns | 0.021 ns | 0.020 ns |  0.93 |         - |          NA |
+*   | WithoutLS1B_OutIndex    | Lynx.Model.Position | 21.24 ns | 0.212 ns | 0.188 ns |  0.99 |         - |          NA |
+*   | WithoutLS1B_OutIndex    | Lynx.Model.Position | 21.15 ns | 0.232 ns | 0.194 ns |  0.98 |         - |          NA |
+*   | WithoutLS1B_OutIndex    | Lynx.Model.Position | 21.20 ns | 0.176 ns | 0.165 ns |  0.99 |         - |          NA |
+*   | WithoutLS1B_OutIndex    | Lynx.Model.Position | 21.33 ns | 0.248 ns | 0.232 ns |  0.99 |         - |          NA |
+*   | WithoutLS1B_OutIndex    | Lynx.Model.Position | 20.13 ns | 0.168 ns | 0.149 ns |  0.94 |         - |          NA |
+*   | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 23.19 ns | 0.024 ns | 0.020 ns |  1.08 |         - |          NA |
+*   | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 23.25 ns | 0.024 ns | 0.022 ns |  1.08 |         - |          NA |
+*   | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 23.24 ns | 0.025 ns | 0.023 ns |  1.08 |         - |          NA |
+*   | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 23.06 ns | 0.033 ns | 0.027 ns |  1.07 |         - |          NA |
+*   | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 23.27 ns | 0.038 ns | 0.032 ns |  1.08 |         - |          NA |
+*   | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 22.93 ns | 0.019 ns | 0.018 ns |  1.07 |         - |          NA |
+*   | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 24.01 ns | 0.056 ns | 0.053 ns |  1.12 |         - |          NA |
+*   | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 23.94 ns | 0.044 ns | 0.039 ns |  1.11 |         - |          NA |
+*   | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 23.19 ns | 0.028 ns | 0.025 ns |  1.08 |         - |          NA |
+*   | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 23.77 ns | 0.061 ns | 0.054 ns |  1.11 |         - |          NA |
+*   | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 23.92 ns | 0.058 ns | 0.051 ns |  1.11 |         - |          NA |
+*   | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 23.34 ns | 0.081 ns | 0.072 ns |  1.09 |         - |          NA |
 *
 *
-*  BenchmarkDotNet v0.14.0, macOS Ventura 13.6.9 (22G830) [Darwin 22.6.0]
-*  Intel Core i7-8700B CPU 3.20GHz (Max: 3.19GHz) (Coffee Lake), 1 CPU, 4 logical and 4 physical cores
-*  .NET SDK 8.0.401
-*    [Host]     : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
-*    DefaultJob : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
+*   BenchmarkDotNet v0.14.0, macOS Sonoma 14.7.2 (23H311) [Darwin 23.6.0]
+*   Apple M1 (Virtual), 1 CPU, 3 logical and 3 physical cores
+*   .NET SDK 9.0.200
+*     [Host]     : .NET 9.0.2 (9.0.225.6610), Arm64 RyuJIT AdvSIMD
+*     DefaultJob : .NET 9.0.2 (9.0.225.6610), Arm64 RyuJIT AdvSIMD
 *
-*  | Method                  | position            | Mean     | Error     | StdDev    | Ratio | RatioSD | Allocated | Alloc Ratio |
-*  |------------------------ |-------------------- |---------:|----------:|----------:|------:|--------:|----------:|------------:|
-*  | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 5.258 ns | 0.0381 ns | 0.0338 ns |  1.00 |    0.01 |         - |          NA |
-*  | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 5.254 ns | 0.0173 ns | 0.0153 ns |  1.00 |    0.01 |         - |          NA |
-*  | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 5.301 ns | 0.0546 ns | 0.0456 ns |  1.01 |    0.01 |         - |          NA |
-*  | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 5.274 ns | 0.0475 ns | 0.0444 ns |  1.00 |    0.01 |         - |          NA |
-*  | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 5.280 ns | 0.0532 ns | 0.0444 ns |  1.00 |    0.01 |         - |          NA |
-*  | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 5.282 ns | 0.0443 ns | 0.0414 ns |  1.00 |    0.01 |         - |          NA |
-*  | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 5.993 ns | 0.1501 ns | 0.1787 ns |  1.14 |    0.03 |         - |          NA |
-*  | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 5.991 ns | 0.1493 ns | 0.1778 ns |  1.14 |    0.03 |         - |          NA |
-*  | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 5.827 ns | 0.1073 ns | 0.1004 ns |  1.11 |    0.02 |         - |          NA |
-*  | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 5.790 ns | 0.0721 ns | 0.0639 ns |  1.10 |    0.01 |         - |          NA |
-*  | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 5.766 ns | 0.0737 ns | 0.0653 ns |  1.10 |    0.01 |         - |          NA |
-*  | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 5.850 ns | 0.1006 ns | 0.0840 ns |  1.11 |    0.02 |         - |          NA |
-*  | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 5.789 ns | 0.1451 ns | 0.1670 ns |  1.10 |    0.03 |         - |          NA |
-*  | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 5.763 ns | 0.0807 ns | 0.0630 ns |  1.10 |    0.01 |         - |          NA |
-*  | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 6.019 ns | 0.1452 ns | 0.2797 ns |  1.14 |    0.05 |         - |          NA |
-*  | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 5.926 ns | 0.1450 ns | 0.2126 ns |  1.13 |    0.04 |         - |          NA |
-*  | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 5.935 ns | 0.1145 ns | 0.1881 ns |  1.13 |    0.04 |         - |          NA |
-*  | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 5.909 ns | 0.1409 ns | 0.1623 ns |  1.12 |    0.03 |         - |          NA |
+*   | Method                  | position            | Mean     | Error    | StdDev   | Ratio | RatioSD | Allocated | Alloc Ratio |
+*   |------------------------ |-------------------- |---------:|---------:|---------:|------:|--------:|----------:|------------:|
+*   | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 27.16 ns | 0.497 ns | 0.441 ns |  1.00 |    0.02 |         - |          NA |
+*   | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 25.75 ns | 0.535 ns | 0.965 ns |  0.95 |    0.04 |         - |          NA |
+*   | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 25.42 ns | 0.540 ns | 0.682 ns |  0.94 |    0.03 |         - |          NA |
+*   | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 24.18 ns | 0.082 ns | 0.064 ns |  0.89 |    0.01 |         - |          NA |
+*   | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 24.61 ns | 0.497 ns | 0.464 ns |  0.91 |    0.02 |         - |          NA |
+*   | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 24.12 ns | 0.491 ns | 0.525 ns |  0.89 |    0.02 |         - |          NA |
+*   | WithoutLS1B_OutIndex    | Lynx.Model.Position | 25.05 ns | 0.441 ns | 0.507 ns |  0.92 |    0.02 |         - |          NA |
+*   | WithoutLS1B_OutIndex    | Lynx.Model.Position | 24.77 ns | 0.507 ns | 0.449 ns |  0.91 |    0.02 |         - |          NA |
+*   | WithoutLS1B_OutIndex    | Lynx.Model.Position | 25.05 ns | 0.399 ns | 0.373 ns |  0.92 |    0.02 |         - |          NA |
+*   | WithoutLS1B_OutIndex    | Lynx.Model.Position | 25.87 ns | 0.499 ns | 0.467 ns |  0.95 |    0.02 |         - |          NA |
+*   | WithoutLS1B_OutIndex    | Lynx.Model.Position | 24.68 ns | 0.497 ns | 0.488 ns |  0.91 |    0.02 |         - |          NA |
+*   | WithoutLS1B_OutIndex    | Lynx.Model.Position | 23.07 ns | 0.395 ns | 0.513 ns |  0.85 |    0.02 |         - |          NA |
+*   | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 24.36 ns | 0.482 ns | 0.574 ns |  0.90 |    0.03 |         - |          NA |
+*   | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 24.05 ns | 0.032 ns | 0.030 ns |  0.89 |    0.01 |         - |          NA |
+*   | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 23.99 ns | 0.027 ns | 0.021 ns |  0.88 |    0.01 |         - |          NA |
+*   | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 24.07 ns | 0.066 ns | 0.059 ns |  0.89 |    0.01 |         - |          NA |
+*   | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 24.10 ns | 0.023 ns | 0.021 ns |  0.89 |    0.01 |         - |          NA |
+*   | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 22.54 ns | 0.020 ns | 0.016 ns |  0.83 |    0.01 |         - |          NA |
+*   | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 23.76 ns | 0.032 ns | 0.025 ns |  0.88 |    0.01 |         - |          NA |
+*   | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 23.94 ns | 0.028 ns | 0.025 ns |  0.88 |    0.01 |         - |          NA |
+*   | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 24.08 ns | 0.126 ns | 0.105 ns |  0.89 |    0.01 |         - |          NA |
+*   | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 24.13 ns | 0.029 ns | 0.026 ns |  0.89 |    0.01 |         - |          NA |
+*   | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 24.11 ns | 0.035 ns | 0.029 ns |  0.89 |    0.01 |         - |          NA |
+*   | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 24.59 ns | 0.493 ns | 0.587 ns |  0.91 |    0.03 |         - |          NA |
+*
+*
+*   BenchmarkDotNet v0.14.0, macOS Ventura 13.7.4 (22H420) [Darwin 22.6.0]
+*   Intel Core i7-8700B CPU 3.20GHz (Max: 3.19GHz) (Coffee Lake), 1 CPU, 4 logical and 4 physical cores
+*   .NET SDK 9.0.200
+*     [Host]     : .NET 9.0.2 (9.0.225.6610), X64 RyuJIT AVX2
+*     DefaultJob : .NET 9.0.2 (9.0.225.6610), X64 RyuJIT AVX2
+*
+*   | Method                  | position            | Mean     | Error    | StdDev   | Ratio | RatioSD | Allocated | Alloc Ratio |
+*   |------------------------ |-------------------- |---------:|---------:|---------:|------:|--------:|----------:|------------:|
+*   | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 18.26 ns | 0.312 ns | 0.437 ns |  1.00 |    0.03 |         - |          NA |
+*   | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 18.37 ns | 0.328 ns | 0.322 ns |  1.01 |    0.03 |         - |          NA |
+*   | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 18.56 ns | 0.394 ns | 0.387 ns |  1.02 |    0.03 |         - |          NA |
+*   | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 18.15 ns | 0.226 ns | 0.211 ns |  0.99 |    0.03 |         - |          NA |
+*   | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 18.08 ns | 0.182 ns | 0.161 ns |  0.99 |    0.02 |         - |          NA |
+*   | GetLS1BIndex_ResetLS1B  | Lynx.Model.Position | 16.57 ns | 0.081 ns | 0.072 ns |  0.91 |    0.02 |         - |          NA |
+*   | WithoutLS1B_OutIndex    | Lynx.Model.Position | 14.17 ns | 0.116 ns | 0.103 ns |  0.78 |    0.02 |         - |          NA |
+*   | WithoutLS1B_OutIndex    | Lynx.Model.Position | 14.15 ns | 0.054 ns | 0.048 ns |  0.78 |    0.02 |         - |          NA |
+*   | WithoutLS1B_OutIndex    | Lynx.Model.Position | 14.19 ns | 0.143 ns | 0.119 ns |  0.78 |    0.02 |         - |          NA |
+*   | WithoutLS1B_OutIndex    | Lynx.Model.Position | 14.16 ns | 0.096 ns | 0.090 ns |  0.78 |    0.02 |         - |          NA |
+*   | WithoutLS1B_OutIndex    | Lynx.Model.Position | 14.18 ns | 0.095 ns | 0.074 ns |  0.78 |    0.02 |         - |          NA |
+*   | WithoutLS1B_OutIndex    | Lynx.Model.Position | 13.77 ns | 0.107 ns | 0.094 ns |  0.75 |    0.02 |         - |          NA |
+*   | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 19.90 ns | 0.175 ns | 0.155 ns |  1.09 |    0.03 |         - |          NA |
+*   | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 20.09 ns | 0.176 ns | 0.147 ns |  1.10 |    0.03 |         - |          NA |
+*   | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 20.00 ns | 0.164 ns | 0.153 ns |  1.10 |    0.03 |         - |          NA |
+*   | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 20.01 ns | 0.133 ns | 0.118 ns |  1.10 |    0.03 |         - |          NA |
+*   | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 20.15 ns | 0.280 ns | 0.262 ns |  1.10 |    0.03 |         - |          NA |
+*   | GetLS1BIndexAndPopIt    | Lynx.Model.Position | 19.43 ns | 0.109 ns | 0.097 ns |  1.06 |    0.02 |         - |          NA |
+*   | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 24.55 ns | 0.465 ns | 0.388 ns |  1.35 |    0.04 |         - |          NA |
+*   | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 24.75 ns | 0.509 ns | 0.523 ns |  1.36 |    0.04 |         - |          NA |
+*   | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 24.59 ns | 0.517 ns | 0.553 ns |  1.35 |    0.04 |         - |          NA |
+*   | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 24.29 ns | 0.292 ns | 0.259 ns |  1.33 |    0.03 |         - |          NA |
+*   | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 24.79 ns | 0.510 ns | 0.501 ns |  1.36 |    0.04 |         - |          NA |
+*   | GetLS1BIndexAndToggleIt | Lynx.Model.Position | 24.38 ns | 0.360 ns | 0.370 ns |  1.34 |    0.04 |         - |          NA |
 *
 */
 
