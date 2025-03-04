@@ -393,12 +393,13 @@ public class PositionTest
             - AdditionalPieceEvaluation(position, Piece.p);
 
         var rank = Constants.Rank[(int)square];
-        var pieceIndex = (int)Piece.P;
+        var passedPawnsMask = Masks.WhitePassedPawnMasks[(int)square];
+
         if (position.Side == Side.Black)
         {
             evaluation = -evaluation;
             rank = 7 - rank;
-            pieceIndex = (int)Piece.p;
+            passedPawnsMask = Masks.BlackPassedPawnMasks[(int)square];
         }
 
         var whiteKingDistance = Constants.ChebyshevDistance[(int)square][position.PieceBitBoards[(int)Piece.K].GetLS1BIndex()];
@@ -411,8 +412,6 @@ public class PositionTest
         var enemyKingDistance = position.Side == Side.White
             ? blackKingDistance
             : whiteKingDistance;
-
-        ulong passedPawnsMask = Masks.PassedPawns[pieceIndex][(int)square];
 
         var expectedEval = 0;
         if ((passedPawnsMask & position.OccupancyBitBoards[OppositeSide(position.Side)]) == 0)

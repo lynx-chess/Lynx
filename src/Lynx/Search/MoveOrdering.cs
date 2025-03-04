@@ -5,13 +5,14 @@ using System.Runtime.CompilerServices;
 using static Lynx.EvaluationConstants;
 
 namespace Lynx;
+
 public sealed partial class Engine
 {
     /// <summary>
     /// Returns the score evaluation of a move taking into account <paramref name="bestMoveTTCandidate"/>, <see cref="MostValueableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_quietHistory"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal int ScoreMove(Move move, int ply, bool isNotQSearch, ShortMove bestMoveTTCandidate = default)
+    internal int ScoreMove(Move move, int ply, ShortMove bestMoveTTCandidate = default)
     {
         if ((ShortMove)move == bestMoveTTCandidate)
         {
@@ -58,50 +59,99 @@ public sealed partial class Engine
             return PromotionMoveScoreValue;
         }
 
-        if (isNotQSearch)
+        var thisPlyKillerMovesBaseIndex = ply * 3;
+
+        // 1st killer move
+        if (_killerMoves[thisPlyKillerMovesBaseIndex] == move)
         {
-            var thisPlyKillerMovesBaseIndex = ply * 3;
+            return FirstKillerMoveValue;
+        }
 
-            // 1st killer move
-            if (_killerMoves[thisPlyKillerMovesBaseIndex] == move)
+        // 2nd killer move
+        if (_killerMoves[thisPlyKillerMovesBaseIndex + 1] == move)
+        {
+            return SecondKillerMoveValue;
+        }
+
+        // 3rd killer move
+        if (_killerMoves[thisPlyKillerMovesBaseIndex + 2] == move)
+        {
+            return ThirdKillerMoveValue;
+        }
+
+        if (ply >= 1)
+        {
+            var previousMove = Game.ReadMoveFromStack(ply - 1);
+            Debug.Assert(previousMove != 0);
+            var previousMovePiece = previousMove.Piece();
+            var previousMoveTargetSquare = previousMove.TargetSquare();
+
+            // Countermove
+            if (_counterMoves[CounterMoveIndex(previousMovePiece, previousMoveTargetSquare)] == move)
             {
-                return FirstKillerMoveValue;
+                return CounterMoveValue;
             }
 
-            // 2nd killer move
-            if (_killerMoves[thisPlyKillerMovesBaseIndex + 1] == move)
-            {
-                return SecondKillerMoveValue;
-            }
-
-            // 3rd killer move
-            if (_killerMoves[thisPlyKillerMovesBaseIndex + 2] == move)
-            {
-                return ThirdKillerMoveValue;
-            }
-
-            if (ply >= 1)
-            {
-                var previousMove = Game.ReadMoveFromStack(ply - 1);
-                Debug.Assert(previousMove != 0);
-                var previousMovePiece = previousMove.Piece();
-                var previousMoveTargetSquare = previousMove.TargetSquare();
-
-                // Countermove
-                if (_counterMoves[CounterMoveIndex(previousMovePiece, previousMoveTargetSquare)] == move)
-                {
-                    return CounterMoveValue;
-                }
-
-                // Counter move history
-                return BaseMoveScore
-                    + _quietHistory[move.Piece()][move.TargetSquare()]
-                    + _continuationHistory[ContinuationHistoryIndex(move.Piece(), move.TargetSquare(), previousMovePiece, previousMoveTargetSquare, 0)];
-            }
-
-            // History move or 0 if not found
+            // Counter move history
             return BaseMoveScore
-                + _quietHistory[move.Piece()][move.TargetSquare()];
+                + _quietHistory[move.Piece()][move.TargetSquare()]
+                + _continuationHistory[ContinuationHistoryIndex(move.Piece(), move.TargetSquare(), previousMovePiece, previousMoveTargetSquare, 0)];
+        }
+
+        // History move or 0 if not found
+        return BaseMoveScore
+            + _quietHistory[move.Piece()][move.TargetSquare()];
+    }
+
+    /// <summary>
+    /// Returns the score evaluation of a move taking into account <paramref name="bestMoveTTCandidate"/>, <see cref="MostValueableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_quietHistory"/>
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal int ScoreMoveQSearch(Move move, ShortMove bestMoveTTCandidate = default)
+    {
+        if ((ShortMove)move == bestMoveTTCandidate)
+        {
+            return TTMoveScoreValue;
+        }
+
+        var promotedPiece = move.PromotedPiece();
+        var isPromotion = promotedPiece != default;
+        var isCapture = move.IsCapture();
+
+        // Queen promotion
+        if ((promotedPiece + 2) % 6 == 0)
+        {
+            if (isCapture)
+            {
+                return QueenPromotionWithCaptureBaseValue + move.CapturedPiece();
+            }
+
+            return PromotionMoveScoreValue
+                + (SEE.HasPositiveScore(Game.CurrentPosition, move)
+                    ? GoodCaptureMoveBaseScoreValue
+                    : BadCaptureMoveBaseScoreValue);
+        }
+
+        if (isCapture)
+        {
+            var baseCaptureScore = (isPromotion || move.IsEnPassant() || SEE.IsGoodCapture(Game.CurrentPosition, move))
+                ? GoodCaptureMoveBaseScoreValue
+                : BadCaptureMoveBaseScoreValue;
+
+            var piece = move.Piece();
+            var capturedPiece = move.CapturedPiece();
+
+            Debug.Assert(capturedPiece != (int)Piece.K && capturedPiece != (int)Piece.k, $"{move.UCIString()} capturing king is generated in position {Game.CurrentPosition.FEN()}");
+
+            return baseCaptureScore
+                + MostValueableVictimLeastValuableAttacker[piece][capturedPiece]
+                //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
+                + _captureHistory[CaptureHistoryIndex(piece, move.TargetSquare(), capturedPiece)];
+        }
+
+        if (isPromotion)
+        {
+            return PromotionMoveScoreValue;
         }
 
         return BaseMoveScore;
@@ -111,7 +161,7 @@ public sealed partial class Engine
     /// Quiet history, contination history, killers and counter moves
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(int depth, int ply, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move, bool isRoot)
+    private void UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(int depth, int ply, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move, bool isRoot, bool pvNode)
     {
         // 🔍 Quiet history moves
         // Doing this only in beta cutoffs (instead of when eval > alpha) was suggested by Sirius author
@@ -192,7 +242,7 @@ public sealed partial class Engine
             _killerMoves[thisPlyKillerMovesBaseIndex + 1] = firstKillerMove;
             _killerMoves[thisPlyKillerMovesBaseIndex] = move;
 
-            if (!isRoot)
+            if (!isRoot && (depth >= Configuration.EngineSettings.CounterMoves_MinDepth || pvNode))
             {
                 // 🔍 Countermoves - fails to fix the bug and remove killer moves condition, see  https://github.com/lynx-chess/Lynx/pull/944
                 _counterMoves[CounterMoveIndex(previousMovePiece, previousTargetSquare)] = move;

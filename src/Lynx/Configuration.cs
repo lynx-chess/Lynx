@@ -113,6 +113,18 @@ public sealed class EngineSettings
 
     #region Time management
 
+    /// <summary>
+    /// Time overhead to take into account engine-gui communication process overhead
+    /// </summary>
+    public int EngineGuiCommunicationTimeOverhead { get; set; } = 50;
+
+    /// <summary>
+    /// Min milliseconds left after substracting <see cref="EngineGuiCommunicationTimeOverhead"/>
+    /// from wtime/btime or movetime. This min value is used to avoid 0 or negative time left.
+    /// Resulting milliseconds left are later used to calculate hard and soft time bounds
+    /// </summary>
+    public int MinSearchTime { get; set; } = 50;
+
     public double HardTimeBoundMultiplier { get; set; } = 0.52;
 
     public double SoftTimeBoundMultiplier { get; set; } = 1;
@@ -120,12 +132,12 @@ public sealed class EngineSettings
     public double SoftTimeBaseIncrementMultiplier { get; set; } = 0.8;
 
     [SPSA<double>(1, 3, 0.1)]
-    public double NodeTmBase { get; set; } = 2.4;
+    public double NodeTmBase { get; set; } = 2.47;
 
     [SPSA<double>(0.5, 2.5, 0.1)]
-    public double NodeTmScale { get; set; } = 1.65;
+    public double NodeTmScale { get; set; } = 1.77;
 
-    [SPSA<int>(1, 15, 1)]
+    //[SPSA<int>(1, 15, 1)]
     public int ScoreStabiity_MinDepth { get; set; } = 7;
 
     public int SoftTimeBoundLimitOnMate { get; set; } = 1_000;
@@ -134,79 +146,129 @@ public sealed class EngineSettings
 
     #region Search
 
-    [SPSA<int>(3, 10, 0.5)]
+    //[SPSA<int>(3, 10, 0.5)]
     public int LMR_MinDepth { get; set; } = 3;
 
-    [SPSA<int>(1, 10, 0.5)]
+    //[SPSA<int>(1, 10, 0.5)]
     public int LMR_MinFullDepthSearchedMoves_PV { get; set; } = 5;
 
-    [SPSA<int>(1, 10, 0.5)]
+    //[SPSA<int>(1, 10, 0.5)]
     public int LMR_MinFullDepthSearchedMoves_NonPV { get; set; } = 2;
 
-    /// <summary>
-    /// Value originally from Stormphrax, who apparently took it from Viridithas
-    /// </summary>
-    [SPSA<double>(0.1, 2, 0.1)]
-    public double LMR_Base { get; set; } = 0.75;
+    [SPSA<double>(0.1, 2, 0.2)]
+    public double LMR_Base_Quiet { get; set; } = 1.10;
+
+    [SPSA<double>(0.1, 2, 0.2)]
+    public double LMR_Base_Noisy { get; set; } = 0.60;
+
+    [SPSA<double>(1, 5, 0.2)]
+    public double LMR_Divisor_Quiet { get; set; } = 2.70;
+
+    [SPSA<double>(1, 5, 0.2)]
+    public double LMR_Divisor_Noisy { get; set; } = 2.85;
 
     /// <summary>
-    /// Value originally from Akimbo
+    /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
     /// </summary>
-    [SPSA<double>(1, 5, 0.1)]
-    public double LMR_Divisor { get; set; } = 3.49;
+    [SPSA<int>(25, 300, 30)]
+    public int LMR_Improving { get; set; } = 115;
 
-    [SPSA<int>(1, 10, 0.5)]
+    /// <summary>
+    /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
+    /// </summary>
+    [SPSA<int>(25, 300, 30)]
+    public int LMR_Cutnode { get; set; } = 101;
+
+    /// <summary>
+    /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
+    /// </summary>
+    [SPSA<int>(25, 300, 30)]
+    public int LMR_TTPV { get; set; } = 108;
+
+    /// <summary>
+    /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
+    /// </summary>
+    [SPSA<int>(25, 300, 30)]
+    public int LMR_TTCapture { get; set; } = 100;
+
+    /// <summary>
+    /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
+    /// </summary>
+    [SPSA<int>(25, 300, 30)]
+    public int LMR_PVNode { get; set; } = 107;
+
+    /// <summary>
+    /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
+    /// </summary>
+    [SPSA<int>(25, 300, 30)]
+    public int LMR_InCheck { get; set; } = 112;
+
+    /// <summary>
+    /// Tuned from ~<see cref="History_MaxMoveValue"/> / 2
+    /// </summary>
+    [SPSA<int>(1, 8192, 512)]
+    public int LMR_History_Divisor_Quiet { get; set; } = 3750;
+
+    /// <summary>
+    /// Tuned from ~<see cref="History_MaxMoveValue"/> / 2 * (3 / 4)
+    /// </summary>
+    [SPSA<int>(1, 8192, 512)]
+    public int LMR_History_Divisor_Noisy { get; set; } = 3200;
+
+    //[SPSA<int>(1, 10, 0.5)]
     public int NMP_MinDepth { get; set; } = 3;
 
-    [SPSA<int>(1, 5, 0.5)]
+    //[SPSA<int>(1, 5, 0.5)]
     public int NMP_BaseDepthReduction { get; set; } = 2;
 
-    [SPSA<int>(0, 10, 0.5)]
+#pragma warning disable CA1805 // Do not initialize unnecessarily
+    //[SPSA<int>(0, 10, 0.5)]
     public int NMP_DepthIncrement { get; set; } = 0;
+#pragma warning restore CA1805 // Do not initialize unnecessarily
 
-    [SPSA<int>(1, 10, 0.5)]
+    //[SPSA<int>(1, 10, 0.5)]
     public int NMP_DepthDivisor { get; set; } = 3;
 
     [SPSA<int>(50, 350, 15)]
-    public int NMP_StaticEvalBetaDivisor { get; set; } = 100;
+    public int NMP_StaticEvalBetaDivisor { get; set; } = 111;
 
-    [SPSA<int>(1, 10, 0.5)]
+    //[SPSA<int>(1, 10, 0.5)]
     public int NMP_StaticEvalBetaMaxReduction { get; set; } = 3;
 
     [SPSA<int>(5, 30, 1)]
-    public int AspirationWindow_Base { get; set; } = 13;
+    public int AspirationWindow_Base { get; set; } = 11;
 
     //[SPSA<int>(5, 30, 1)]
     //public int AspirationWindow_Delta { get; set; } = 13;
 
-    [SPSA<int>(1, 20, 1)]
+    //[SPSA<int>(1, 20, 1)]
     public int AspirationWindow_MinDepth { get; set; } = 8;
 
-    [SPSA<int>(1, 10, 0.5)]
+    //[SPSA<int>(1, 10, 0.5)]
     public int RFP_MaxDepth { get; set; } = 7;
 
-    [SPSA<int>(1, 300, 15)]
-    public int RFP_DepthScalingFactor { get; set; } = 52;
+    //[SPSA<int>(1, 300, 15)]
+    //public int RFP_DepthScalingFactor { get; set; } = 55;
 
-    [SPSA<int>(1, 10, 0.5)]
+    //[SPSA<int>(1, 10, 0.5)]
     public int Razoring_MaxDepth { get; set; } = 2;
 
     [SPSA<int>(1, 300, 15)]
-    public int Razoring_Depth1Bonus { get; set; } = 68;
+    public int Razoring_Depth1Bonus { get; set; } = 87;
 
     [SPSA<int>(1, 300, 15)]
-    public int Razoring_NotDepth1Bonus { get; set; } = 208;
+    public int Razoring_NotDepth1Bonus { get; set; } = 220;
 
-    [SPSA<int>(1, 10, 0.5)]
+    //[SPSA<int>(1, 10, 0.5)]
     public int IIR_MinDepth { get; set; } = 4;
 
-    [SPSA<int>(1, 10, 0.5)]
+    //[SPSA<int>(1, 10, 0.5)]
     public int LMP_MaxDepth { get; set; } = 8;
 
-    [SPSA<int>(0, 10, 0.5)]
+    //[SPSA<int>(0, 10, 0.5)]
     public int LMP_BaseMovesToTry { get; set; } = 1;
 
-    [SPSA<int>(0, 10, 0.5)]
+    //[SPSA<int>(0, 10, 0.5)]
     public int LMP_MovesDepthMultiplier { get; set; } = 3;
 
     public int History_MaxMoveValue { get; set; } = 8_192;
@@ -216,29 +278,45 @@ public sealed class EngineSettings
     /// </summary>
     public int History_MaxMoveRawBonus { get; set; } = 1_896;
 
-    //[SPSA<int>(0, 200, 10)]
+    public int CounterMoves_MinDepth { get; set; } = 3;
+
+    [SPSA<int>(0, 200, 10)]
     public int History_BestScoreBetaMargin { get; set; } = 60;
 
-    [SPSA<int>(0, 6, 0.5)]
+    //[SPSA<int>(0, 6, 0.5)]
     public int SEE_BadCaptureReduction { get; set; } = 2;
 
-    [SPSA<int>(1, 10, 0.5)]
+    //[SPSA<int>(1, 10, 0.5)]
     public int FP_MaxDepth { get; set; } = 7;
 
     [SPSA<int>(1, 200, 10)]
-    public int FP_DepthScalingFactor { get; set; } = 73;
+    public int FP_DepthScalingFactor { get; set; } = 87;
 
     [SPSA<int>(0, 500, 25)]
-    public int FP_Margin { get; set; } = 218;
+    public int FP_Margin { get; set; } = 167;
 
-    [SPSA<int>(0, 10, 0.5)]
+    //[SPSA<int>(0, 10, 0.5)]
     public int HistoryPrunning_MaxDepth { get; set; } = 5;
 
     [SPSA<int>(-8192, 0, 512)]
-    public int HistoryPrunning_Margin { get; set; } = -1940;
+    public int HistoryPrunning_Margin { get; set; } = -1345;
 
-    [SPSA<int>(0, 10, 0.5)]
+    //[SPSA<int>(0, 10, 0.5)]
     public int TTHit_NoCutoffExtension_MaxDepth { get; set; } = 6;
+
+    //[SPSA<int>(0, 6, 0.5)]
+#pragma warning disable CA1805 // Do not initialize unnecessarily
+    public int TTReplacement_DepthOffset { get; set; } = 0;
+#pragma warning restore CA1805 // Do not initialize unnecessarily
+
+    //[SPSA<int>(0, 10, 0.5)]
+    public int TTReplacement_TTPVDepthOffset { get; set; } = 2;
+
+    [SPSA<int>(-100, -10, 10)]
+    public int PVS_SEE_Threshold_Quiet { get; set; } = -15;
+
+    [SPSA<int>(-150, -50, 10)]
+    public int PVS_SEE_Threshold_Noisy { get; set; } = -110;
 
     #endregion
 }
