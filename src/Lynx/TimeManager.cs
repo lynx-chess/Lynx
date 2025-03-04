@@ -34,11 +34,11 @@ public static class TimeManager
         }
 
         // Inspired by Alexandria: time overhead to avoid timing out in the engine-gui communication process
-       var engineGuiCommunicationTimeOverhead = Configuration.EngineSettings.EngineGuiCommunicationTimeOverhead;
+        var engineGuiCommunicationTimeOverhead = Configuration.EngineSettings.EngineGuiCommunicationTimeOverhead;
 
         if (goCommand.WhiteTime != 0 || goCommand.BlackTime != 0)  // Cutechess sometimes sends negative wtime/btime
         {
-            var movesDivisor = goCommand.MovesToGo == 0
+            var movesDivisor = goCommand.MovesToGo <= 0
                 ? MovesDivisor(ExpectedMovesLeft(game.PositionHashHistoryLength()))
                 : goCommand.MovesToGo;
 

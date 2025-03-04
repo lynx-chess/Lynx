@@ -46,6 +46,7 @@ public sealed partial class Engine
         int ttStaticEval = int.MinValue;
         int ttDepth = default;
         bool ttWasPv = false;
+        bool ttMoveIsCapture = false;
 
         Debug.Assert(!pvNode || !cutnode);
 
@@ -71,12 +72,15 @@ public sealed partial class Engine
                 }
             }
 
+            ttMoveIsCapture = ttElementType != default && ttBestMove != default && position.Board[((int)ttBestMove).TargetSquare()] != (int)Piece.None;
+
             // Internal iterative reduction (IIR)
             // If this position isn't found in TT, it has never been searched before,
             // so the search will be potentially expensive.
             // Therefore, we search with reduced depth for now, expecting to record a TT move
             // which we'll be able to use later for the full depth search
-            if (ttElementType == default && depth >= Configuration.EngineSettings.IIR_MinDepth)
+            if (depth >= Configuration.EngineSettings.IIR_MinDepth
+                && (ttElementType == default || ttBestMove == default))
             {
                 --depth;
             }
@@ -270,6 +274,66 @@ public sealed partial class Engine
 
             var move = pseudoLegalMoves[moveIndex];
             var moveScore = moveScores[moveIndex];
+            var isCapture = move.IsCapture();
+
+            // If we prune while getting checmated, we risk not finding any move and having an empty PV
+            bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
+
+            // Fail-low pruning (moves with low scores) - prune less when improving
+            // LMP, HP and FP can happen either before after MakeMove
+            // PVS SEE pruning needs to happen before MakeMove in a make-unmake framework (it needs original position)
+            if (visitedMovesCounter > 0
+                && !pvNode
+                && !isInCheck
+                && isNotGettingCheckmated
+                && moveScore < EvaluationConstants.PromotionMoveScoreValue) // Quiet or bad capture
+            {
+                // 🔍 Late Move Pruning (LMP) - all quiet moves can be pruned
+                // after searching the first few given by the move ordering algorithm
+                if (depth <= Configuration.EngineSettings.LMP_MaxDepth
+                    && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth * (improving ? 2 : 1))) // Based on formula suggested by Antares
+                {
+                    break;
+                }
+
+                // 🔍 History pruning -  all quiet moves can be pruned
+                // once we find one with a history score too low
+                if (!isCapture
+                    && moveScore < EvaluationConstants.CounterMoveValue
+                    && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth    // TODO use LMR depth
+                    && _quietHistory[move.Piece()][move.TargetSquare()] < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
+                {
+                    break;
+                }
+
+                // 🔍 Futility Pruning (FP) - all quiet moves can be pruned
+                // once it's considered that they don't have potential to raise alpha
+                if (depth <= Configuration.EngineSettings.FP_MaxDepth
+                    && staticEval + Configuration.EngineSettings.FP_Margin + (Configuration.EngineSettings.FP_DepthScalingFactor * depth) <= alpha)
+                {
+                    break;
+                }
+
+                // 🔍 PVS SEE pruning
+                if (isCapture)
+                {
+                    var threshold = Configuration.EngineSettings.PVS_SEE_Threshold_Noisy * depth * depth;
+
+                    if (!SEE.IsGoodCapture(position, move, threshold))
+                    {
+                        continue;
+                    }
+                }
+                else
+                {
+                    var threshold = Configuration.EngineSettings.PVS_SEE_Threshold_Quiet * depth;
+
+                    if (!SEE.HasPositiveScore(position, move, threshold))
+                    {
+                        continue;
+                    }
+                }
+            }
 
             var gameState = position.MakeMove(move);
 
@@ -284,7 +348,6 @@ public sealed partial class Engine
 
             ++_nodes;
             isAnyMoveValid = true;
-            var isCapture = move.IsCapture();
 
             PrintPreMove(position, ply, move);
 
@@ -302,7 +365,8 @@ public sealed partial class Engine
                 position.UnmakeMove(move, gameState);
             }
 
-            int score;
+            int score = 0;
+
             if (canBeRepetition && (Game.IsThreefoldRepetition() || Game.Is50MovesRepetition()))
             {
                 score = 0;
@@ -312,147 +376,128 @@ public sealed partial class Engine
                 // don't belong to this line and if this move were to beat alpha, they'd incorrectly copied to pv line.
                 Array.Clear(_pVTable, nextPvIndex, _pVTable.Length - nextPvIndex);
             }
-            else if (visitedMovesCounter == 0)
-            {
-                _tt.PrefetchTTEntry(position);
-                bool isCutNode = !pvNode && !cutnode;   // Linter 'simplification' of pvNode ? false : !cutnode
-#pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
-                score = -NegaMax(depth - 1, ply + 1, -beta, -alpha, isCutNode, cancellationToken);
-#pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
-            }
             else
             {
-                // If we prune while getting checmated, we risk not finding any move and having an empty PV
-                bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
-
-                // Fail-low pruning (moves with low scores) - prune less when improving
-                if (!pvNode
-                    && !isInCheck
-                    && isNotGettingCheckmated
-                    && moveScore < EvaluationConstants.PromotionMoveScoreValue) // Quiet move
-                {
-                    // 🔍 Late Move Pruning (LMP) - all quiet moves can be pruned
-                    // after searching the first few given by the move ordering algorithm
-                    if (depth <= Configuration.EngineSettings.LMP_MaxDepth
-                        && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth * (improving ? 2 : 1))) // Based on formula suggested by Antares
-                    {
-                        RevertMove();
-                        break;
-                    }
-
-                    // 🔍 History pruning -  all quiet moves can be pruned
-                    // once we find one with a history score too low
-                    if (!isCapture
-                        && moveScore < EvaluationConstants.CounterMoveValue
-                        && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth    // TODO use LMR depth
-                        && _quietHistory[move.Piece()][move.TargetSquare()] < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
-                    {
-                        RevertMove();
-                        break;
-                    }
-
-                    // 🔍 Futility Pruning (FP) - all quiet moves can be pruned
-                    // once it's considered that they don't have potential to raise alpha
-                    if (depth <= Configuration.EngineSettings.FP_MaxDepth
-                        && staticEval + Configuration.EngineSettings.FP_Margin + (Configuration.EngineSettings.FP_DepthScalingFactor * depth) <= alpha)
-                    {
-                        RevertMove();
-                        break;
-                    }
-                }
-
                 _tt.PrefetchTTEntry(position);
 
-                int reduction = 0;
+                bool isCutNode = !pvNode && !cutnode;   // Linter 'simplification' of pvNode ? false : !cutnode
+
+                var newDepth = depth - 1;
 
                 // 🔍 Late Move Reduction (LMR) - search with reduced depth
                 // Impl. based on Ciekce (Stormphrax) and Martin (Motor) advice, and Stormphrax & Akimbo implementations
-                if (isNotGettingCheckmated)
+                if (visitedMovesCounter > 0)
                 {
-                    if (!isCapture
-                        && depth >= Configuration.EngineSettings.LMR_MinDepth
-                        && visitedMovesCounter >=
-                            (pvNode
-                                ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_PV
-                                : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_NonPV))
+                    int reduction = 0;
+
+                    if (isNotGettingCheckmated)
                     {
-                        reduction = EvaluationConstants.LMRReductions[depth][visitedMovesCounter];
-
-                        if (pvNode)
+                        if (depth >= Configuration.EngineSettings.LMR_MinDepth
+                            && visitedMovesCounter >=
+                                (pvNode
+                                    ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_PV
+                                    : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_NonPV))
                         {
-                            --reduction;
+                            if (isCapture)
+                            {
+                                reduction = EvaluationConstants.LMRReductions[1][depth][visitedMovesCounter];
+
+                                reduction /= EvaluationConstants.LMRScaleFactor;
+
+                                // ~ history/(0.75 * maxHistory/2/)
+                                reduction -= _captureHistory[CaptureHistoryIndex(move.Piece(), move.TargetSquare(), move.CapturedPiece())] / Configuration.EngineSettings.LMR_History_Divisor_Noisy;
+                            }
+                            else
+                            {
+                                reduction = EvaluationConstants.LMRReductions[0][depth][visitedMovesCounter];
+
+                                if (!improving)
+                                {
+                                    reduction += Configuration.EngineSettings.LMR_Improving;
+                                }
+
+                                if (cutnode)
+                                {
+                                    reduction += Configuration.EngineSettings.LMR_Cutnode;
+                                }
+
+                                if (!ttPv)
+                                {
+                                    reduction += Configuration.EngineSettings.LMR_TTPV;
+                                }
+
+                                if (!isCapture && ttMoveIsCapture)
+                                {
+                                    reduction += Configuration.EngineSettings.LMR_TTCapture;
+                                }
+
+                                if (pvNode)
+                                {
+                                    reduction -= Configuration.EngineSettings.LMR_PVNode;
+                                }
+
+                                if (position.IsInCheck())   // i.e. move gives check
+                                {
+                                    reduction -= Configuration.EngineSettings.LMR_InCheck;
+                                }
+
+                                reduction /= EvaluationConstants.LMRScaleFactor;
+
+                                // -= history/(maxHistory/2)
+                                reduction -= 2 * _quietHistory[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.LMR_History_Divisor_Quiet;
+
+                                // Don't allow LMR to drop into qsearch or increase the depth
+                                // depth - 1 - depth +2 = 1, min depth we want
+                                reduction = Math.Clamp(reduction, 0, depth - 2);
+                            }
                         }
 
-                        if (!ttPv)
+                        // TODO move inside of depth conditions
+
+                        // 🔍 Static Exchange Evaluation (SEE) reduction
+                        // Bad captures are reduced more
+                        if (!isInCheck
+                            && moveScore < EvaluationConstants.PromotionMoveScoreValue
+                            && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
                         {
-                            ++reduction;
+                            reduction += Configuration.EngineSettings.SEE_BadCaptureReduction;
+                            reduction = Math.Clamp(reduction, 0, depth - 1);
                         }
-
-                        if (position.IsInCheck())   // i.e. move gives check
-                        {
-                            --reduction;
-                        }
-
-                        if (!improving)
-                        {
-                            ++reduction;
-                        }
-
-                        if (cutnode)
-                        {
-                            ++reduction;
-                        }
-
-                        // -= history/(maxHistory/2)
-                        reduction -= 2 * _quietHistory[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.History_MaxMoveValue;
-
-                        // Don't allow LMR to drop into qsearch or increase the depth
-                        // depth - 1 - depth +2 = 1, min depth we want
-                        reduction = Math.Clamp(reduction, 0, depth - 2);
                     }
 
-                    // 🔍 Static Exchange Evaluation (SEE) reduction
-                    // Bad captures are reduced more
-                    if (!isInCheck
-                        && moveScore < EvaluationConstants.PromotionMoveScoreValue
-                        && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
+                    // Search with reduced depth and zero window
+                    score = -NegaMax(newDepth - reduction, ply + 1, -alpha - 1, -alpha, cutnode: true, cancellationToken);
+
+                    // 🔍 Principal Variation Search (PVS)
+                    if (score > alpha && reduction > 0)
                     {
-                        reduction += Configuration.EngineSettings.SEE_BadCaptureReduction;
-                        reduction = Math.Clamp(reduction, 0, depth - 1);
+                        // Optimistic search, validating that the rest of the moves are worse than bestmove.
+                        // It should produce more cutoffs and therefore be faster.
+                        // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
+
+                        var deeper = score > bestScore + Configuration.EngineSettings.LMR_DeeperBase + (Configuration.EngineSettings.LMR_DeeperDepthMultiplier * depth);
+                        var shallower = score < bestScore + depth;
+
+                        if (deeper && !shallower && depth < Configuration.EngineSettings.MaxDepth)
+                        {
+                            ++depth;
+                        }
+                        else if (shallower && !deeper && depth > 1)
+                        {
+                            --depth;
+                        }
+
+                        // Search with full depth but narrowed score bandwidth (zero-window search)
+                        score = -NegaMax(newDepth, ply + 1, -alpha - 1, -alpha, !cutnode, cancellationToken);
                     }
                 }
 
-                // Search with reduced depth and zero window
-                score = -NegaMax(depth - 1 - reduction, ply + 1, -alpha - 1, -alpha, cutnode: true, cancellationToken);
-
-                // 🔍 Principal Variation Search (PVS)
-                if (score > alpha && reduction > 0)
+                // First searched move is always searched with full depth and full score bandwidth
+                // Same if PVS hypothesis is invalidated
+                if (visitedMovesCounter == 0 || (score > alpha && score < beta))
                 {
-                    // Optimistic search, validating that the rest of the moves are worse than bestmove.
-                    // It should produce more cutoffs and therefore be faster.
-                    // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
-
-                    var deeper = score > bestScore + Configuration.EngineSettings.LMR_DeeperBase + (Configuration.EngineSettings.LMR_DeeperDepthMultiplier * depth);
-                    var shallower = score < bestScore + depth;
-
-                    if (deeper && !shallower && depth < Configuration.EngineSettings.MaxDepth)
-                    {
-                        ++depth;
-                    }
-                    else if (shallower && !deeper && depth > 1)
-                    {
-                        --depth;
-                    }
-
-                    // Search with full depth but narrowed score bandwidth
-                    score = -NegaMax(depth - 1, ply + 1, -alpha - 1, -alpha, !cutnode, cancellationToken);
-                }
-
-                if (score > alpha && score < beta)
-                {
-                    // PVS Hypothesis invalidated -> search with full depth and full score bandwidth
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
-                    score = -NegaMax(depth - 1, ply + 1, -beta, -alpha, cutnode: false, cancellationToken);
+                    score = -NegaMax(newDepth, ply + 1, -beta, -alpha, cutnode: false, cancellationToken);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
                 }
             }
@@ -513,9 +558,9 @@ public sealed partial class Engine
                         UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(historyDepth, ply, visitedMoves, visitedMovesCounter, move, isRoot, pvNode);
                     }
 
-                    _tt.RecordHash(position, staticEval, depth, ply, bestScore, NodeType.Beta, ttPv, bestMove);
+                    nodeType = NodeType.Beta;
 
-                    return bestScore;
+                    break;
                 }
             }
 
@@ -526,15 +571,14 @@ public sealed partial class Engine
         {
             Debug.Assert(bestMove is null);
 
-            var finalEval = Position.EvaluateFinalPosition(ply, isInCheck);
-            _tt.RecordHash(position, finalEval, depth, ply, finalEval, NodeType.Exact, ttPv);
+            bestScore = Position.EvaluateFinalPosition(ply, isInCheck);
 
-            return finalEval;
+            nodeType = NodeType.Exact;
+            staticEval = bestScore;
         }
 
         _tt.RecordHash(position, staticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);
 
-        // Node fails low
         return bestScore;
     }
 
@@ -696,9 +740,8 @@ public sealed partial class Engine
                 {
                     PrintMessage($"Pruning: {move} is enough to discard this line");
 
-                    _tt.RecordHash(position, staticEval, 0, ply, bestScore, NodeType.Beta, ttPv, bestMove);
-
-                    return bestScore; // The refutation doesn't matter, since it'll be pruned
+                    nodeType = NodeType.Beta;
+                    break;
                 }
 
                 // Improving alpha
@@ -720,10 +763,10 @@ public sealed partial class Engine
         {
             Debug.Assert(bestMove is null);
 
-            var finalEval = Position.EvaluateFinalPosition(ply, position.IsInCheck());
-            _tt.RecordHash(position, finalEval, 0, ply, finalEval, NodeType.Exact, ttPv);
+            bestScore = Position.EvaluateFinalPosition(ply, position.IsInCheck());
 
-            return finalEval;
+            nodeType = NodeType.Exact;
+            staticEval = bestScore;
         }
 
         _tt.RecordHash(position, staticEval, 0, ply, bestScore, nodeType, ttPv, bestMove);
