@@ -302,7 +302,7 @@ public sealed partial class Engine
                 // once we find one with a history score too low
                 if (!isCapture
                     && moveScore < EvaluationConstants.CounterMoveValue
-                    && lmrDepth < Configuration.EngineSettings.HistoryPrunning_MaxDepth
+                    && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth
                     && _quietHistory[move.Piece()][move.TargetSquare()] < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
                 {
                     break;
@@ -319,7 +319,7 @@ public sealed partial class Engine
                 // 🔍 PVS SEE pruning
                 if (isCapture)
                 {
-                    var threshold = Configuration.EngineSettings.PVS_SEE_Threshold_Noisy * depth * depth;
+                    var threshold = Configuration.EngineSettings.PVS_SEE_Threshold_Noisy * lmrDepth * lmrDepth;
 
                     if (!SEE.IsGoodCapture(position, move, threshold))
                     {
