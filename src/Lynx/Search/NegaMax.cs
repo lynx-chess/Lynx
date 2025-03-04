@@ -278,6 +278,9 @@ public sealed partial class Engine
             // If we prune while getting checmated, we risk not finding any move and having an empty PV
             bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
 
+            int baseLmr = EvaluationConstants.LMRReductions[isCapture ? 1 : 0][depth][visitedMovesCounter];
+            int lmrDepth = Math.Max(0, depth - (baseLmr / EvaluationConstants.LMRScaleFactor));
+
             // Fail-low pruning (moves with low scores) - prune less when improving
             // LMP, HP and FP can happen either before after MakeMove
             // PVS SEE pruning needs to happen before MakeMove in a make-unmake framework (it needs original position)
@@ -299,7 +302,7 @@ public sealed partial class Engine
                 // once we find one with a history score too low
                 if (!isCapture
                     && moveScore < EvaluationConstants.CounterMoveValue
-                    && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth    // TODO use LMR depth
+                    && lmrDepth < Configuration.EngineSettings.HistoryPrunning_MaxDepth
                     && _quietHistory[move.Piece()][move.TargetSquare()] < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
                 {
                     break;
@@ -397,10 +400,10 @@ public sealed partial class Engine
                                     ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_PV
                                     : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_NonPV))
                         {
+                            reduction = baseLmr;
+
                             if (isCapture)
                             {
-                                reduction = EvaluationConstants.LMRReductions[1][depth][visitedMovesCounter];
-
                                 reduction /= EvaluationConstants.LMRScaleFactor;
 
                                 // ~ history/(0.75 * maxHistory/2/)
@@ -408,8 +411,6 @@ public sealed partial class Engine
                             }
                             else
                             {
-                                reduction = EvaluationConstants.LMRReductions[0][depth][visitedMovesCounter];
-
                                 if (!improving)
                                 {
                                     reduction += Configuration.EngineSettings.LMR_Improving;
