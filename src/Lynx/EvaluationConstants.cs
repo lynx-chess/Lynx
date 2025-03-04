@@ -44,6 +44,9 @@ public static class EvaluationConstants
             quietReductions[searchDepth] = new int[Constants.MaxNumberOfPossibleMovesInAPosition];
             noisyReductions[searchDepth] = new int[Constants.MaxNumberOfPossibleMovesInAPosition];
 
+            quietReductions[searchDepth][0] = 0;
+            noisyReductions[searchDepth][0] = 0;
+
             for (int movesSearchedCount = 1; movesSearchedCount < Constants.MaxNumberOfPossibleMovesInAPosition; ++movesSearchedCount) // movesSearchedCount > 0 or we wouldn't be applying LMR
             {
                 quietReductions[searchDepth][movesSearchedCount] = Convert.ToInt32(Math.Round(
@@ -59,6 +62,9 @@ public static class EvaluationConstants
                 Configuration.EngineSettings.History_MaxMoveRawBonus,
                 (4 * searchDepth * searchDepth) + (120 * searchDepth) - 120);   // Sirius, originally from Berserk
         }
+
+        quietReductions[0] = new int[Constants.MaxNumberOfPossibleMovesInAPosition];
+        noisyReductions[0] = new int[Constants.MaxNumberOfPossibleMovesInAPosition];
     }
 
     /// <summary>
