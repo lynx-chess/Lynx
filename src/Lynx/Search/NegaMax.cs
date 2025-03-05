@@ -464,18 +464,35 @@ public sealed partial class Engine
                         }
                     }
 
+                    var reducedDepth = newDepth - reduction;
+
                     // Search with reduced depth and zero window
-                    score = -NegaMax(newDepth - reduction, ply + 1, -alpha - 1, -alpha, cutnode: true, cancellationToken);
+                    score = -NegaMax(reducedDepth, ply + 1, -alpha - 1, -alpha, cutnode: true, cancellationToken);
 
                     // 🔍 Principal Variation Search (PVS)
-                    if (score > alpha && reduction > 0)
+                    if (score > alpha && newDepth > reducedDepth)
                     {
                         // Optimistic search, validating that the rest of the moves are worse than bestmove.
                         // It should produce more cutoffs and therefore be faster.
                         // https://web.archive.org/web/20071030220825/http://www.brucemo.com/compchess/programming/pvs.htm
 
-                        // Search with full depth but narrowed score bandwidth (zero-window search)
-                        score = -NegaMax(newDepth, ply + 1, -alpha - 1, -alpha, !cutnode, cancellationToken);
+                        var deeper = score > bestScore + Configuration.EngineSettings.LMR_DeeperBase + (Configuration.EngineSettings.LMR_DeeperDepthMultiplier * depth);
+                        var shallower = score < bestScore + depth;
+
+                        if (deeper && !shallower && depth < Configuration.EngineSettings.MaxDepth)
+                        {
+                            ++newDepth;
+                        }
+                        else if (shallower && !deeper && depth > 1)
+                        {
+                            --newDepth;
+                        }
+
+                        if (newDepth > reducedDepth)
+                        {
+                            // Search with full depth but narrowed score bandwidth (zero-window search)
+                            score = -NegaMax(newDepth, ply + 1, -alpha - 1, -alpha, !cutnode, cancellationToken);
+                        }
                     }
                 }
 
