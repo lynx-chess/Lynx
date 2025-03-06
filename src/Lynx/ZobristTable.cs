@@ -183,7 +183,15 @@ public static class ZobristTable
 
     static ZobristTable()
     {
-        for (int i = 0; i < _50mrTable.Length; i += Configuration.EngineSettings.TT_50MR_Step)
+        const int InitialMoves = 60;
+
+        var initialVal = _random.NextUInt64();
+        for (int i = 0; i < InitialMoves; ++i)
+        {
+            _50mrTable[i] = initialVal;
+        }
+
+        for (int i = InitialMoves; i < _50mrTable.Length; i += Configuration.EngineSettings.TT_50MR_Step)
         {
             var val = _random.NextUInt64();
 
