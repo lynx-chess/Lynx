@@ -334,7 +334,7 @@ public sealed partial class Engine
                 }
             }
 
-            var gameState = position.MakeMove(move);
+            var gameState = position.MakeMove(move, Game.HalfMovesWithoutCaptureOrPawnMove);
 
             if (!position.WasProduceByAValidMove())
             {
@@ -713,7 +713,7 @@ public sealed partial class Engine
                 continue;
             }
 
-            var gameState = position.MakeMove(move);
+            var gameState = position.MakeMove(move, Game.HalfMovesWithoutCaptureOrPawnMove);
             if (!position.WasProduceByAValidMove())
             {
                 position.UnmakeMove(move, gameState);

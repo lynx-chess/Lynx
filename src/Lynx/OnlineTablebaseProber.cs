@@ -129,7 +129,7 @@ public static class OnlineTablebaseProber
                         }
 
                         using var newPosition = new Position(position);
-                        newPosition.MakeMove(moveCandidate.Value);
+                        newPosition.MakeMove(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
@@ -190,7 +190,7 @@ public static class OnlineTablebaseProber
                         }
 
                         using var newPosition = new Position(position);
-                        newPosition.MakeMove(moveCandidate.Value);
+                        newPosition.MakeMove(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
@@ -253,7 +253,7 @@ public static class OnlineTablebaseProber
                         }
 
                         using var newPosition = new Position(position);
-                        newPosition.MakeMove(moveCandidate.Value);
+                        newPosition.MakeMove(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
@@ -313,7 +313,7 @@ public static class OnlineTablebaseProber
                         }
 
                         using var newPosition = new Position(position);
-                        newPosition.MakeMove(moveCandidate.Value);
+                        newPosition.MakeMove(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);

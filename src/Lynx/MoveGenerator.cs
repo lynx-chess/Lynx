@@ -644,7 +644,7 @@ public static class MoveGenerator
         }
 #endif
 
-        var gameState = position.MakeMove(move);
+        var gameState = position.MakeMove(move, 0);
 
         bool result = position.WasProduceByAValidMove();
         position.UnmakeMove(move, gameState);

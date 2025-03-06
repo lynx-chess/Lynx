@@ -60,7 +60,7 @@ public class Position : IDisposable
     }
 
     public Position((BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, int[] Board, Side Side, byte Castle, BoardSquare EnPassant,
-        int _/*, int FullMoveCounter*/) parsedFEN)
+        int HalfMovesWithoutCaptureOrPawnMove/*, int FullMoveCounter*/) parsedFEN)
     {
         PieceBitBoards = parsedFEN.PieceBitBoards;
         OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
@@ -70,7 +70,7 @@ public class Position : IDisposable
         EnPassant = parsedFEN.EnPassant;
 
 #pragma warning disable S3366 // "this" should not be exposed from constructors
-        UniqueIdentifier = ZobristTable.PositionHash(this);
+        UniqueIdentifier = ZobristTable.PositionHash(this, parsedFEN.HalfMovesWithoutCaptureOrPawnMove);
         _kingPawnUniqueIdentifier = ZobristTable.PawnKingHash(this);
 #pragma warning restore S3366 // "this" should not be exposed from constructors
 
@@ -106,7 +106,7 @@ public class Position : IDisposable
     #region Move making
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public GameState MakeMove(Move move)
+    public GameState MakeMove(Move move, int halfMovesWithoutCaptureOrPawnMove)
     {
         byte castleCopy = Castle;
         BoardSquare enpassantCopy = EnPassant;
@@ -150,7 +150,8 @@ public class Position : IDisposable
             ^ sourcePieceHash
             ^ targetPieceHash
             ^ ZobristTable.EnPassantHash((int)EnPassant)            // We clear the existing enpassant square, if any
-            ^ ZobristTable.CastleHash(Castle);                      // We clear the existing castle rights
+            ^ ZobristTable.CastleHash(Castle)                       // We clear the existing castle rights
+            ^ ZobristTable.HalfMovesWithoutCaptureOrPawnMoveHash(halfMovesWithoutCaptureOrPawnMove);
 
         if (piece == (int)Piece.P || piece == (int)Piece.p)
         {
