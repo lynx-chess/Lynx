@@ -301,7 +301,16 @@ public sealed partial class Engine
 
             if (mate < 0 || mate + Constants.MateDistanceMarginToStopSearching < winningMateThreshold)
             {
-                _logger.Info("[#{EngineId}] Could stop search, since mate is short enough", _id);
+                if (_searchConstraints.SoftLimitTimeBound < Configuration.EngineSettings.SoftTimeBoundLimitOnMate)
+                {
+                    _logger.Info("[#{EngineId}] Stopping, since mate is short enough and we're short on time: soft limit {SoftLimit}ms",
+                        _id, _searchConstraints.SoftLimitTimeBound);
+
+                    return false;
+                }
+
+                _logger.Info("[#{EngineId}] Could stop search, since mate is short enough",
+                    _id, _searchConstraints.SoftLimitTimeBound);
             }
 
             _logger.Info("[#{EngineId}] Search continues, hoping to find a faster mate", _id);
@@ -334,7 +343,7 @@ public sealed partial class Engine
 
             var bestMoveNodeCount = _moveNodeCount[bestMove.Value.Piece()][bestMove.Value.TargetSquare()];
             var scaledSoftLimitTimeBound = TimeManager.SoftLimit(_searchConstraints, depth - 1, bestMoveNodeCount, _nodes, _bestMoveStability, _scoreDelta);
-            _logger.Debug(
+            _logger.Info(
                 "[#{EngineId}] [TM] Depth {Depth}: hard limit {HardLimit}, base soft limit {BaseSoftLimit}, scaled soft limit {ScaledSoftLimit}",
                 _id, depth - 1, _searchConstraints.HardLimitTimeBound, _searchConstraints.SoftLimitTimeBound, scaledSoftLimitTimeBound);
 
@@ -451,7 +460,7 @@ public sealed partial class Engine
             //  when cancelling the pondering search
             // The other condition reflects what happens in helper engines when a mate is quickly detected in the main:
             //  search in helper engines sometimes get cancelled before any meaningful result is found, so we don't want a warning either
-            if (isPondering || !IsMainEngine())
+            if (isPondering || !IsMainEngine)
             {
                 _logger.Info(noDepth1Message);
             }

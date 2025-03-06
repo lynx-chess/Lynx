@@ -111,8 +111,7 @@ public static class ZobristTable
 
             while (bitboard != default)
             {
-                var pieceSquareIndex = bitboard.GetLS1BIndex();
-                bitboard.ResetLS1B();
+                bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
 
                 positionHash ^= PieceHash(pieceSquareIndex, pieceIndex);
             }
@@ -136,8 +135,7 @@ public static class ZobristTable
         var whitePawns = position.PieceBitBoards[(int)Piece.P];
         while (whitePawns != default)
         {
-            var pieceSquareIndex = whitePawns.GetLS1BIndex();
-            whitePawns.ResetLS1B();
+            whitePawns = whitePawns.WithoutLS1B(out var pieceSquareIndex);
 
             pawnKingHash ^= PieceHash(pieceSquareIndex, (int)Piece.P);
         }
@@ -145,8 +143,7 @@ public static class ZobristTable
         var blackPawns = position.PieceBitBoards[(int)Piece.p];
         while (blackPawns != default)
         {
-            var pieceSquareIndex = blackPawns.GetLS1BIndex();
-            blackPawns.ResetLS1B();
+            blackPawns = blackPawns.WithoutLS1B(out var pieceSquareIndex);
 
             pawnKingHash ^= PieceHash(pieceSquareIndex, (int)Piece.p);
         }
