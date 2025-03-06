@@ -324,6 +324,9 @@ public sealed class EngineSettings
     [SPSA<int>(-150, -50, 10)]
     public int PVS_SEE_Threshold_Noisy { get; set; } = -117;
 
+    [SPSA<int>(5, 25, 5)]
+    public int TT_50MR_Step { get; set; } = 10;
+
     #endregion
 }
 
