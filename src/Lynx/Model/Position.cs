@@ -1468,11 +1468,11 @@ public class Position : IDisposable
 
         // I tried to order them from most to least likely - not tested
         return
-            IsSquareAttackedByRooks(kingSquare, oppositeSideOffset, bothSidesOccupancy, out var rookAttacks)
-            || IsSquareAttackedByBishops(kingSquare, oppositeSideOffset, bothSidesOccupancy, out var bishopAttacks)
-            || IsSquareAttackedByQueens(oppositeSideOffset, bishopAttacks, rookAttacks)
+            IsSquareAttackedByPawns(kingSquare, oppositeSideInt, oppositeSideOffset)
             || IsSquareAttackedByKnights(kingSquare, oppositeSideOffset)
-            || IsSquareAttackedByPawns(kingSquare, oppositeSideInt, oppositeSideOffset);
+            || IsSquareAttackedByRooks(kingSquare, oppositeSideOffset, bothSidesOccupancy, out var rookAttacks)
+            || IsSquareAttackedByBishops(kingSquare, oppositeSideOffset, bothSidesOccupancy, out var bishopAttacks)
+            || IsSquareAttackedByQueens(oppositeSideOffset, bishopAttacks, rookAttacks);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
