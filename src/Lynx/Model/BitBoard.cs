@@ -185,6 +185,21 @@ public static class BitBoardExtensions
     }
 
     /// <summary>
+    /// Assumes that <paramref name="board"/> != default
+    /// https://www.chessprogramming.org/General_Setwise_Operations#Separation.
+    /// Cannot use (Board & -Board) - 1 due to limitation applying unary - to ulong.
+    /// https://www.chessprogramming.org/General_Setwise_Operations#LS1BReset
+    /// </summary>
+    /// <returns>Bitboard</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static BitBoard WithoutLS1B(this BitBoard board, out int index)
+    {
+        index = BitOperations.TrailingZeroCount(board);
+
+        return board & (board - 1);
+    }
+
+    /// <summary>
     /// https://www.chessprogramming.org/General_Setwise_Operations#LS1BReset
     /// </summary>
     /// <returns>Bitboard</returns>

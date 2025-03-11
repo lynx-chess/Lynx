@@ -15,7 +15,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest, macOS-13]
+        os: [ubuntu-22.04, windows-latest, macOS-latest, macOS-13]
       fail-fast: false
 
     env:
@@ -26,7 +26,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@4.2.0
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
 
