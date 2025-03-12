@@ -172,7 +172,7 @@ public static class EvaluationConstants
     /// <summary>
     /// Negative offset to ensure history move scores don't reach other move ordering values
     /// </summary>
-    public const int BaseMoveScore = int.MinValue / 2;
+    public const int BaseMoveScore = -1000000000;
 
     #endregion
 

@@ -107,6 +107,102 @@ public sealed partial class Engine
     /// Returns the score evaluation of a move taking into account <paramref name="bestMoveTTCandidate"/>, <see cref="MostValueableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_quietHistory"/>
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal int ScoreMoveNoTT(Move move, int ply, ShortMove bestMoveTTCandidate = default)
+    {
+        if ((ShortMove)move == bestMoveTTCandidate)
+        {
+            return int.MinValue;
+            return -TTMoveScoreValue;
+        }
+
+        var promotedPiece = move.PromotedPiece();
+        var isPromotion = promotedPiece != default;
+        var isCapture = move.IsCapture();
+
+        // Queen promotion
+        if ((promotedPiece + 2) % 6 == 0)
+        {
+            if (isCapture)
+            {
+                return QueenPromotionWithCaptureBaseValue + move.CapturedPiece();
+            }
+
+            return PromotionMoveScoreValue
+                + (SEE.HasPositiveScore(Game.CurrentPosition, move)
+                    ? GoodCaptureMoveBaseScoreValue
+                    : BadCaptureMoveBaseScoreValue);
+        }
+
+        if (isCapture)
+        {
+            var baseCaptureScore = (isPromotion || move.IsEnPassant() || SEE.IsGoodCapture(Game.CurrentPosition, move))
+                ? GoodCaptureMoveBaseScoreValue
+                : BadCaptureMoveBaseScoreValue;
+
+            var piece = move.Piece();
+            var capturedPiece = move.CapturedPiece();
+
+            Debug.Assert(capturedPiece != (int)Piece.K && capturedPiece != (int)Piece.k, $"{move.UCIString()} capturing king is generated in position {Game.CurrentPosition.FEN()}");
+
+            return baseCaptureScore
+                + MostValueableVictimLeastValuableAttacker[piece][capturedPiece]
+                //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
+                + _captureHistory[CaptureHistoryIndex(piece, move.TargetSquare(), capturedPiece)];
+        }
+
+        if (isPromotion)
+        {
+            return PromotionMoveScoreValue;
+        }
+
+        var thisPlyKillerMovesBaseIndex = ply * 3;
+
+        // 1st killer move
+        if (_killerMoves[thisPlyKillerMovesBaseIndex] == move)
+        {
+            return FirstKillerMoveValue;
+        }
+
+        // 2nd killer move
+        if (_killerMoves[thisPlyKillerMovesBaseIndex + 1] == move)
+        {
+            return SecondKillerMoveValue;
+        }
+
+        // 3rd killer move
+        if (_killerMoves[thisPlyKillerMovesBaseIndex + 2] == move)
+        {
+            return ThirdKillerMoveValue;
+        }
+
+        if (ply >= 1)
+        {
+            var previousMove = Game.ReadMoveFromStack(ply - 1);
+            Debug.Assert(previousMove != 0);
+            var previousMovePiece = previousMove.Piece();
+            var previousMoveTargetSquare = previousMove.TargetSquare();
+
+            // Countermove
+            if (_counterMoves[CounterMoveIndex(previousMovePiece, previousMoveTargetSquare)] == move)
+            {
+                return CounterMoveValue;
+            }
+
+            // Counter move history
+            return BaseMoveScore
+                + _quietHistory[move.Piece()][move.TargetSquare()]
+                + _continuationHistory[ContinuationHistoryIndex(move.Piece(), move.TargetSquare(), previousMovePiece, previousMoveTargetSquare, 0)];
+        }
+
+        // History move or 0 if not found
+        return BaseMoveScore
+            + _quietHistory[move.Piece()][move.TargetSquare()];
+    }
+
+    /// <summary>
+    /// Returns the score evaluation of a move taking into account <paramref name="bestMoveTTCandidate"/>, <see cref="MostValueableVictimLeastValuableAttacker"/>, <see cref="_killerMoves"/> and <see cref="_quietHistory"/>
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal int ScoreMoveQSearch(Move move, ShortMove bestMoveTTCandidate = default)
     {
         if ((ShortMove)move == bestMoveTTCandidate)

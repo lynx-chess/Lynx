@@ -248,10 +248,9 @@ public sealed partial class Engine
         var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves);
 
         Span<int> moveScores = stackalloc int[pseudoLegalMoves.Length];
-
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            moveScores[i] = ScoreMove(pseudoLegalMoves[i], ply, ttBestMove);
+            moveScores[i] = ScoreMoveNoTT(pseudoLegalMoves[i], ply, ttBestMove);
         }
 
         var nodeType = NodeType.Alpha;
@@ -262,21 +261,54 @@ public sealed partial class Engine
         Span<Move> visitedMoves = stackalloc Move[pseudoLegalMoves.Length];
         int visitedMovesCounter = 0;
 
-        for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
+        // -1 to avoid the last move, which will be the duplicated TT one of it exists
+        for (int moveIndex = -1; moveIndex < pseudoLegalMoves.Length - 1; ++moveIndex)
         {
-            // Incremental move sorting, inspired by https://github.com/jw1912/Chess-Challenge and suggested by toanth
-            // There's no need to sort all the moves since most of them don't get checked anyway
-            // So just find the first unsearched one with the best score and try it
-            for (int j = moveIndex + 1; j < pseudoLegalMoves.Length; j++)
+            Move move = default;
+            int moveScore = EvaluationConstants.TTMoveScoreValue;
+
+            if (moveIndex == -1 && ttBestMove != default)
             {
-                if (moveScores[j] > moveScores[moveIndex])
+                move = MoveGenerator.GenerateMove(position, ttBestMove);
+
+                Debug.Assert(move == default || pseudoLegalMoves.Contains(move), "Error", "Incorrectly generated TT move");
+            }
+
+            if (move == default)
+            {
+                if (moveIndex == -1)
                 {
-                    (moveScores[moveIndex], moveScores[j], pseudoLegalMoves[moveIndex], pseudoLegalMoves[j]) = (moveScores[j], moveScores[moveIndex], pseudoLegalMoves[j], pseudoLegalMoves[moveIndex]);
+                    ++moveIndex;
+                }
+
+                // Incremental move sorting, inspired by https://github.com/jw1912/Chess-Challenge and suggested by toanth
+                // There's no need to sort all the moves since most of them don't get checked anyway
+                // So just find the first unsearched one with the best score and try it
+                for (int j = moveIndex + 1; j < pseudoLegalMoves.Length; j++)
+                {
+                    if (moveScores[j] > moveScores[moveIndex])
+                    {
+                        (moveScores[moveIndex], moveScores[j], pseudoLegalMoves[moveIndex], pseudoLegalMoves[j]) = (moveScores[j], moveScores[moveIndex], pseudoLegalMoves[j], pseudoLegalMoves[moveIndex]);
+                    }
+                }
+
+                move = pseudoLegalMoves[moveIndex];
+                moveScore = moveScores[moveIndex];
+            }
+            else
+            {
+                if (!pseudoLegalMoves.Contains(move))
+                {
+                    throw new();
                 }
             }
 
-            var move = pseudoLegalMoves[moveIndex];
-            var moveScore = moveScores[moveIndex];
+            Debug.Assert(!((ShortMove)move == ttBestMove && moveIndex != -1), "Error", "Visiting TT best move twice");
+            if((ShortMove)move == ttBestMove && moveIndex != -1)
+            {
+                throw new();
+            }
+
             var isCapture = move.IsCapture();
             var isNoisy = isCapture || (move.PromotedPiece() != default);
 
