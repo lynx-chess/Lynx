@@ -240,6 +240,10 @@ public sealed partial class Engine
             staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
         }
 
+        //if (ttBestMove != default)
+        //{
+        //    var m = MoveGenerator.GenerateMove(position, ttBestMove);
+        //}
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
         var pseudoLegalMoves = MoveGenerator.GenerateAllMoves(position, moves);
 
@@ -274,6 +278,7 @@ public sealed partial class Engine
             var move = pseudoLegalMoves[moveIndex];
             var moveScore = moveScores[moveIndex];
             var isCapture = move.IsCapture();
+            var isNoisy = isCapture || (move.PromotedPiece() != default);
 
             // If we prune while getting checmated, we risk not finding any move and having an empty PV
             bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
