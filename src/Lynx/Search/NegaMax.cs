@@ -274,7 +274,9 @@ public sealed partial class Engine
             var move = pseudoLegalMoves[moveIndex];
             var moveScore = moveScores[moveIndex];
             var isCapture = move.IsCapture();
-            var quietMoveHistory = new Lazy<int>(() => _quietHistory[move.Piece()][move.TargetSquare()]);
+            var quietMoveHistory = new Lazy<int>(
+                () => _quietHistory[move.Piece()][move.TargetSquare()],
+                isThreadSafe: false);
 
             // If we prune while getting checmated, we risk not finding any move and having an empty PV
             bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
