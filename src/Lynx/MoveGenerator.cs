@@ -399,6 +399,7 @@ public static class MoveGenerator
             {
                 return MoveExtensions.Encode(sourceSquare, singlePushSquare, piece);
             }
+
             return default;
         }
 
@@ -407,6 +408,7 @@ public static class MoveGenerator
         if (targetSquare == doublePushSquare)
         {
             if (position.Board[targetSquare] == (int)Piece.None
+                && position.Board[singlePushSquare] == (int)Piece.None
                 && ((sourceRank == 2 && position.Side == Side.Black) || (sourceRank == 7 && position.Side == Side.White)))
             {
                 return MoveExtensions.Encode(sourceSquare, singlePushSquare, piece);

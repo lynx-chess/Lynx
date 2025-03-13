@@ -261,8 +261,7 @@ public sealed partial class Engine
         Span<Move> visitedMoves = stackalloc Move[pseudoLegalMoves.Length];
         int visitedMovesCounter = 0;
 
-        // -1 to avoid the last move, which will be the duplicated TT one of it exists
-        for (int moveIndex = -1; moveIndex < pseudoLegalMoves.Length - 1; ++moveIndex)
+        for (int moveIndex = -1; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
         {
             Move move = default;
             int moveScore = EvaluationConstants.TTMoveScoreValue;
@@ -272,12 +271,22 @@ public sealed partial class Engine
                 move = MoveGenerator.GenerateMove(position, ttBestMove);
 
                 Debug.Assert(move == default || pseudoLegalMoves.Contains(move), "Error", "Incorrectly generated TT move");
+                if (move != default && !pseudoLegalMoves.Contains(move))
+                {
+                    throw new();
+                }
             }
 
             if (move == default)
             {
                 if (moveIndex == -1)
                 {
+                    if(pseudoLegalMoves.ToArray().Any(i => (ShortMove)i == ttBestMove))
+                    {
+                        throw new();
+                        ;
+                    }
+
                     ++moveIndex;
                 }
 
@@ -294,17 +303,16 @@ public sealed partial class Engine
 
                 move = pseudoLegalMoves[moveIndex];
                 moveScore = moveScores[moveIndex];
-            }
-            else
-            {
-                if (!pseudoLegalMoves.Contains(move))
+
+                // If there's a best move, we've already visited it first
+                if (moveScore == EvaluationConstants.NegativeTTMoveScoreValue)
                 {
-                    throw new();
+                    break;
                 }
             }
 
             Debug.Assert(!((ShortMove)move == ttBestMove && moveIndex != -1), "Error", "Visiting TT best move twice");
-            if((ShortMove)move == ttBestMove && moveIndex != -1)
+            if ((ShortMove)move == ttBestMove && moveIndex != -1)
             {
                 throw new();
             }

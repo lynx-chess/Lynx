@@ -149,6 +149,7 @@ public static class EvaluationConstants
     #region Move ordering
 
     public const int TTMoveScoreValue = 2_097_152;
+    public const int NegativeTTMoveScoreValue = BaseMoveScore - TTMoveScoreValue;
 
     public const int QueenPromotionWithCaptureBaseValue = GoodCaptureMoveBaseScoreValue + PromotionMoveScoreValue;
 
