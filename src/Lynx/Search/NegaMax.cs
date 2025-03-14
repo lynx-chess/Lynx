@@ -41,8 +41,8 @@ public sealed partial class Engine
         bool pvNode = beta - alpha > 1;
 
         ShortMove ttBestMove = default;
-        NodeType ttElementType = default;
-        int ttScore = default;
+        NodeType ttElementType = NodeType.Unknown;
+        int ttScore = EvaluationConstants.NoHashEntry;
         int ttStaticEval = int.MinValue;
         int ttDepth = default;
         bool ttWasPv = false;
@@ -57,7 +57,9 @@ public sealed partial class Engine
         {
             (ttScore, ttBestMove, ttElementType, ttStaticEval, ttDepth, ttWasPv) = _tt.ProbeHash(position, ply);
 
-            ttHit = ttScore != EvaluationConstants.NoHashEntry;
+            // ttScore shouldn't be used, since it'll be 0 for default structs
+            ttHit = ttElementType != NodeType.Unknown;
+
             ttEntryHasBestMove = ttBestMove != default;
 
             // TT cutoffs
@@ -633,7 +635,7 @@ public sealed partial class Engine
         var ttProbeResult = _tt.ProbeHash(position, ply);
         var ttScore = ttProbeResult.Score;
         var ttNodeType = ttProbeResult.NodeType;
-        var ttHit = ttScore != EvaluationConstants.NoHashEntry;
+        var ttHit = ttNodeType != NodeType.Unknown;
         var ttPv = pvNode || ttProbeResult.WasPv;
 
         // QS TT cutoff
