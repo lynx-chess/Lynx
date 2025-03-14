@@ -254,6 +254,7 @@ public sealed partial class Engine
         int bestScore = EvaluationConstants.MinEval;
         Move? bestMove = null;
         bool isAnyMoveValid = false;
+        var previousMove = Game.ReadMoveFromStack(ply - 1);
 
         Span<Move> visitedMoves = stackalloc Move[pseudoLegalMoves.Length];
         int visitedMovesCounter = 0;
@@ -299,7 +300,8 @@ public sealed partial class Engine
                 if (!isCapture
                     && moveScore < EvaluationConstants.CounterMoveValue
                     && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth    // TODO use LMR depth
-                    && _quietHistory[move.Piece()][move.TargetSquare()] < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
+                    && (_quietHistory[move.Piece()][move.TargetSquare()] + _continuationHistory[ContinuationHistoryIndex(move.Piece(), move.TargetSquare(), previousMove.Piece(), previousMove.TargetSquare(), 0)])
+                        < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
                 {
                     break;
                 }
@@ -442,7 +444,9 @@ public sealed partial class Engine
                                 reduction /= EvaluationConstants.LMRScaleFactor;
 
                                 // -= history/(maxHistory/2)
-                                reduction -= 2 * _quietHistory[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.LMR_History_Divisor_Quiet;
+                                reduction -= (
+                                    _quietHistory[move.Piece()][move.TargetSquare()] + _continuationHistory[ContinuationHistoryIndex(move.Piece(), move.TargetSquare(), previousMove.Piece(), previousMove.TargetSquare(), 0)])
+                                        / Configuration.EngineSettings.LMR_History_Divisor_Quiet;
 
                                 // Don't allow LMR to drop into qsearch or increase the depth
                                 // depth - 1 - depth +2 = 1, min depth we want
