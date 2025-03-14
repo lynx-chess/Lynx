@@ -39,12 +39,16 @@ public sealed partial class Engine
 
         bool isRoot = ply == 0;
         bool pvNode = beta - alpha > 1;
+
         ShortMove ttBestMove = default;
         NodeType ttElementType = default;
         int ttScore = default;
         int ttStaticEval = int.MinValue;
         int ttDepth = default;
         bool ttWasPv = false;
+
+        bool ttHit = false;
+        bool ttEntryHasBestMove = false;
         bool ttMoveIsCapture = false;
 
         Debug.Assert(!pvNode || !cutnode);
@@ -53,9 +57,12 @@ public sealed partial class Engine
         {
             (ttScore, ttBestMove, ttElementType, ttStaticEval, ttDepth, ttWasPv) = _tt.ProbeHash(position, ply);
 
+            ttHit = ttScore != EvaluationConstants.NoHashEntry;
+            ttEntryHasBestMove = ttBestMove != default;
+
             // TT cutoffs
             if (!pvNode
-                && ttScore != EvaluationConstants.NoHashEntry
+                && ttHit
                 && ttDepth >= depth)
             {
                 if (ttElementType == NodeType.Exact
@@ -71,7 +78,7 @@ public sealed partial class Engine
                 }
             }
 
-            ttMoveIsCapture = ttElementType != default && ttBestMove != default && position.Board[((int)ttBestMove).TargetSquare()] != (int)Piece.None;
+            ttMoveIsCapture = ttHit && ttEntryHasBestMove && position.Board[((int)ttBestMove).TargetSquare()] != (int)Piece.None;
 
             // Internal iterative reduction (IIR)
             // If this position isn't found in TT, it has never been searched before,
@@ -79,7 +86,7 @@ public sealed partial class Engine
             // Therefore, we search with reduced depth for now, expecting to record a TT move
             // which we'll be able to use later for the full depth search
             if (depth >= Configuration.EngineSettings.IIR_MinDepth
-                && (ttElementType == default || ttBestMove == default))
+                && (!ttHit || !ttEntryHasBestMove))
             {
                 --depth;
             }
@@ -119,7 +126,7 @@ public sealed partial class Engine
         }
         else if (!pvNode)
         {
-            if (ttElementType == default)
+            if (!ttHit)
             {
                 (staticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable);
             }
@@ -145,7 +152,7 @@ public sealed partial class Engine
             // If the score is outside what the current bounds are, but it did match flag and depth,
             // then we can trust that this score is more accurate than the current static evaluation,
             // and we can update our static evaluation for better accuracy in pruning
-            if (ttElementType != default && ttElementType != (ttScore > staticEval ? NodeType.Alpha : NodeType.Beta))
+            if (ttHit && ttElementType != (ttScore > staticEval ? NodeType.Alpha : NodeType.Beta))
             {
                 staticEval = ttScore;
             }
@@ -622,7 +629,7 @@ public sealed partial class Engine
         var ttProbeResult = _tt.ProbeHash(position, ply);
         var ttScore = ttProbeResult.Score;
         var ttNodeType = ttProbeResult.NodeType;
-        var ttHit = ttNodeType != NodeType.Unknown;
+        var ttHit = ttScore != EvaluationConstants.NoHashEntry;
         var ttPv = pvNode || ttProbeResult.WasPv;
 
         // QS TT cutoff
