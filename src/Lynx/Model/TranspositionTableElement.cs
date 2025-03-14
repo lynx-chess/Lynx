@@ -19,7 +19,12 @@ public enum NodeType : byte
     /// <summary>
     /// LowerBound
     /// </summary>
-    Beta
+    Beta,
+
+    /// <summary>
+    /// i.e. when storing only static evaluation
+    /// </summary>
+    None
 }
 
 /// <summary>
