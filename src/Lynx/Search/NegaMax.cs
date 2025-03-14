@@ -276,6 +276,12 @@ public sealed partial class Engine
             var moveScore = moveScores[moveIndex];
             var isCapture = move.IsCapture();
 
+            int? quietHistory = null;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            int QuietHistory() => quietHistory ??=
+                _quietHistory[move.Piece()][move.TargetSquare()] + _continuationHistory[ContinuationHistoryIndex(move.Piece(), move.TargetSquare(), previousMove.Piece(), previousMove.TargetSquare(), 0)];
+
             // If we prune while getting checmated, we risk not finding any move and having an empty PV
             bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
 
@@ -300,8 +306,7 @@ public sealed partial class Engine
                 if (!isCapture
                     && moveScore < EvaluationConstants.CounterMoveValue
                     && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth    // TODO use LMR depth
-                    && (_quietHistory[move.Piece()][move.TargetSquare()] + _continuationHistory[ContinuationHistoryIndex(move.Piece(), move.TargetSquare(), previousMove.Piece(), previousMove.TargetSquare(), 0)])
-                        < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
+                    && QuietHistory() < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
                 {
                     break;
                 }
@@ -444,9 +449,8 @@ public sealed partial class Engine
                                 reduction /= EvaluationConstants.LMRScaleFactor;
 
                                 // -= history/(maxHistory/2)
-                                reduction -= (
-                                    _quietHistory[move.Piece()][move.TargetSquare()] + _continuationHistory[ContinuationHistoryIndex(move.Piece(), move.TargetSquare(), previousMove.Piece(), previousMove.TargetSquare(), 0)])
-                                        / Configuration.EngineSettings.LMR_History_Divisor_Quiet;
+
+                                reduction -= QuietHistory() / Configuration.EngineSettings.LMR_History_Divisor_Quiet;
 
                                 // Don't allow LMR to drop into qsearch or increase the depth
                                 // depth - 1 - depth +2 = 1, min depth we want
