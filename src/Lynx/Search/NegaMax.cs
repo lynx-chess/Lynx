@@ -131,6 +131,7 @@ public sealed partial class Engine
             if (!ttHit)
             {
                 (staticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable);
+                _tt.SaveStaticEval(position, staticEval, ttPv);
             }
             else
             {
@@ -247,6 +248,10 @@ public sealed partial class Engine
         else
         {
             staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
+            if (!ttHit)
+            {
+                _tt.SaveStaticEval(position, staticEval, ttPv);
+            }
         }
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
@@ -673,6 +678,11 @@ public sealed partial class Engine
 
         if (!isInCheck)
         {
+            if (!ttHit)
+            {
+                _tt.SaveStaticEval(position, staticEval, ttPv);
+            }
+
             // Standing pat beta-cutoff (updating alpha after this check)
             if (eval >= beta)
             {
