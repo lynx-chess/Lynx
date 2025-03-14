@@ -59,7 +59,7 @@ public sealed partial class Engine
             return PromotionMoveScoreValue;
         }
 
-        var thisPlyKillerMovesBaseIndex = ply * 3;
+        var thisPlyKillerMovesBaseIndex = ply * 2;
 
         // 1st killer move
         if (_killerMoves[thisPlyKillerMovesBaseIndex] == move)
@@ -71,12 +71,6 @@ public sealed partial class Engine
         if (_killerMoves[thisPlyKillerMovesBaseIndex + 1] == move)
         {
             return SecondKillerMoveValue;
-        }
-
-        // 3rd killer move
-        if (_killerMoves[thisPlyKillerMovesBaseIndex + 2] == move)
-        {
-            return ThirdKillerMoveValue;
         }
 
         if (ply >= 1)
@@ -228,7 +222,7 @@ public sealed partial class Engine
             }
         }
 
-        var thisPlyKillerMovesBaseIndex = ply * 3;
+        var thisPlyKillerMovesBaseIndex = ply * 2;
         var firstKillerMove = _killerMoves[thisPlyKillerMovesBaseIndex];
 
         if (move.PromotedPiece() == default && move != firstKillerMove)
@@ -236,10 +230,9 @@ public sealed partial class Engine
             // 🔍 Killer moves
             if (move != _killerMoves[thisPlyKillerMovesBaseIndex + 1])
             {
-                _killerMoves[thisPlyKillerMovesBaseIndex + 2] = _killerMoves[thisPlyKillerMovesBaseIndex + 1];
+                _killerMoves[thisPlyKillerMovesBaseIndex + 1] = firstKillerMove;
             }
 
-            _killerMoves[thisPlyKillerMovesBaseIndex + 1] = firstKillerMove;
             _killerMoves[thisPlyKillerMovesBaseIndex] = move;
 
             if (!isRoot && (depth >= Configuration.EngineSettings.CounterMoves_MinDepth || pvNode))
