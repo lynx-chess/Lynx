@@ -215,11 +215,11 @@ public sealed class EngineSettings
     [SPSA<int>(1, 8192, 512)]
     public int LMR_History_Divisor_Noisy { get; set; } = 3451;
 
-    [SPSA<int>(20, 100, 8)]
-    public int LMR_DeeperBase { get; set; } = 38;
+    [SPSA<int>(20, 100, 5)]
+    public int LMR_DeeperBase { get; set; } = 50;
 
     //[SPSA<int>(1, 10, 1)]
-    public int LMR_DeeperDepthMultiplier { get; set; } = 2;
+    public int LMR_DeeperDepthMultiplier { get; set; } = 8;
 
     //[SPSA<int>(1, 10, 0.5)]
     public int NMP_MinDepth { get; set; } = 3;
