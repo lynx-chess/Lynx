@@ -7,7 +7,12 @@ namespace Lynx.Model;
 public enum NodeType : byte
 #pragma warning restore S4022 // Enumerations should have "Int32" storage
 {
-    Unknown,    // It needs to be 0 because of default struct initialization
+    Unknown = 0,    // It needs to be 0 because of default struct initialization
+
+    /// <summary>
+    /// i.e. when storing only static evaluation
+    /// </summary>
+    None = 1,
 
     Exact,
 
@@ -19,12 +24,7 @@ public enum NodeType : byte
     /// <summary>
     /// LowerBound
     /// </summary>
-    Beta,
-
-    /// <summary>
-    /// i.e. when storing only static evaluation
-    /// </summary>
-    None
+    Beta
 }
 
 /// <summary>

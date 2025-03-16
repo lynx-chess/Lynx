@@ -58,7 +58,7 @@ public sealed partial class Engine
             (ttScore, ttBestMove, ttElementType, ttStaticEval, ttDepth, ttWasPv) = _tt.ProbeHash(position, ply);
 
             // ttScore shouldn't be used, since it'll be 0 for default structs
-            ttHit = ttElementType != NodeType.Unknown && ttElementType != NodeType.None;
+            ttHit = ttElementType > NodeType.None;
 
             ttEntryHasBestMove = ttBestMove != default;
 
@@ -640,7 +640,7 @@ public sealed partial class Engine
         var ttProbeResult = _tt.ProbeHash(position, ply);
         var ttScore = ttProbeResult.Score;
         var ttNodeType = ttProbeResult.NodeType;
-        var ttHit = ttNodeType != NodeType.Unknown && ttNodeType != NodeType.None;
+        var ttHit = ttNodeType > NodeType.None;
         var ttPv = pvNode || ttProbeResult.WasPv;
 
         // QS TT cutoff
