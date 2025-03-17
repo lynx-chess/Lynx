@@ -17,11 +17,6 @@ public sealed partial class Engine
 
     /// <summary>
     /// 12 x 64
-    /// </summary>
-    private readonly int[] _counterMoves = GC.AllocateArray<int>(12 * 64, pinned: true);
-
-    /// <summary>
-    /// 12 x 64
     /// piece x target square
     /// </summary>
     private readonly int[][] _quietHistory;

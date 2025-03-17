@@ -80,12 +80,6 @@ public sealed partial class Engine
             var previousMovePiece = previousMove.Piece();
             var previousMoveTargetSquare = previousMove.TargetSquare();
 
-            // Countermove
-            if (_counterMoves[CounterMoveIndex(previousMovePiece, previousMoveTargetSquare)] == move)
-            {
-                return CounterMoveValue;
-            }
-
             // Counter move history
             return BaseMoveScore
                 + _quietHistory[move.Piece()][move.TargetSquare()]
@@ -155,7 +149,7 @@ public sealed partial class Engine
     /// Quiet history, contination history, killers and counter moves
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(int depth, int ply, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move, bool isRoot, bool pvNode)
+    private void UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(int depth, int ply, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move, bool isRoot)
     {
         // 🔍 Quiet history moves
         // Doing this only in beta cutoffs (instead of when eval > alpha) was suggested by Sirius author
@@ -234,12 +228,6 @@ public sealed partial class Engine
             }
 
             _killerMoves[thisPlyKillerMovesBaseIndex] = move;
-
-            if (!isRoot && (depth >= Configuration.EngineSettings.CounterMoves_MinDepth || pvNode))
-            {
-                // 🔍 Countermoves - fails to fix the bug and remove killer moves condition, see  https://github.com/lynx-chess/Lynx/pull/944
-                _counterMoves[CounterMoveIndex(previousMovePiece, previousTargetSquare)] = move;
-            }
         }
     }
 
