@@ -20,7 +20,6 @@ public static class Masks
     /// </summary>
     public static BitBoard[] FileMasks { get; } = new BitBoard[64];
 
-
     /// <summary>
     /// Rank mask for square a6 (same one for b6, c6, etc.)
     /// 8  0 0 0 0 0 0 0 0
