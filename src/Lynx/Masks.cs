@@ -4,6 +4,8 @@ namespace Lynx;
 
 public static class Masks
 {
+    public static BitBoard FileMask(int square) => Constants.AFile << (square % 8);
+
     /// <summary>
     /// File mask for square f2 (same one as f3, f4, etc.)
     ///  8  0 0 0 0 0 1 0 0
@@ -17,6 +19,7 @@ public static class Masks
     ///     a b c d e f g h
     /// </summary>
     public static BitBoard[] FileMasks { get; } = new BitBoard[64];
+
 
     /// <summary>
     /// Rank mask for square a6 (same one for b6, c6, etc.)
