@@ -207,13 +207,13 @@ public sealed class EngineSettings
     /// Tuned from ~<see cref="History_MaxMoveValue"/> / 2
     /// </summary>
     [SPSA<int>(1, 8192, 512)]
-    public int LMR_History_Divisor_Quiet { get; set; } = 3107;
+    public int LMR_History_Divisor_Quiet { get; set; } = 2907;
 
     /// <summary>
     /// Tuned from ~<see cref="History_MaxMoveValue"/> / 2 * (3 / 4)
     /// </summary>
     [SPSA<int>(1, 8192, 512)]
-    public int LMR_History_Divisor_Noisy { get; set; } = 3451;
+    public int LMR_History_Divisor_Noisy { get; set; } = 3414;
 
     [SPSA<int>(20, 100, 8)]
     public int LMR_DeeperBase { get; set; } = 38;
@@ -302,7 +302,7 @@ public sealed class EngineSettings
     public int HistoryPrunning_MaxDepth { get; set; } = 5;
 
     [SPSA<int>(-8192, 0, 512)]
-    public int HistoryPrunning_Margin { get; set; } = -643;
+    public int HistoryPrunning_Margin { get; set; } = -661;
 
     //[SPSA<int>(0, 10, 0.5)]
     public int TTHit_NoCutoffExtension_MaxDepth { get; set; } = 6;
