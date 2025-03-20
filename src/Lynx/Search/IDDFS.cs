@@ -549,7 +549,7 @@ public sealed partial class Engine
                 move, moveScores[i], 0, [move]);
         }
 
-        _logger.Error("No valid move found while looking for an emergency move for position {Fen}", position.FEN());
+        _logger.Error("No valid move found while looking for an emergency move for position {Fen}", position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove));
 
         return new(
 #if MULTITHREAD_DEBUG
