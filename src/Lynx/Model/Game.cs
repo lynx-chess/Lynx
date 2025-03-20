@@ -205,7 +205,7 @@ public sealed class Game : IDisposable
         else
         {
             CurrentPosition.UnmakeMove(moveToPlay, gameState);
-            _logger.Warn("Error trying to play move {0} in {1}", moveToPlay.UCIString(), CurrentPosition.FEN());
+            _logger.Warn("Error trying to play move {0} in {1}", moveToPlay.UCIString(), CurrentPosition.FEN(HalfMovesWithoutCaptureOrPawnMove));
         }
 
         return gameState;
