@@ -1,9 +1,11 @@
 ﻿using Lynx.Model;
+using System.Runtime.CompilerServices;
 
 namespace Lynx;
 
 public static class Masks
 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static BitBoard FileMask(int square) => Constants.AFile << (square % 8);
 
     /// <summary>
