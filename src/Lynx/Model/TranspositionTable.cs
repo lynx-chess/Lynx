@@ -121,12 +121,12 @@ public readonly struct TranspositionTable
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier);
         ref var entry = ref _tt[ttIndex];
 
-        // These extra checks might make sense in a MT environment, TODO check
-        //if (entry.Key == 0                                      // No actual entry
-        //    || (position.UniqueIdentifier >> 48) != entry.Key)   // Different key: collision
-        //{
+        // These extra checks might make sense in a MT environment
+        if (entry.Key == 0                                          // No actual entry
+            || (position.UniqueIdentifier >> 48) != entry.Key)      // Different key: collision
+        {
             entry.Update(position.UniqueIdentifier, EvaluationConstants.NoHashEntry, staticEval, depth: -1, NodeType.None, wasPv ? 1 : 0, null);
-        //}
+        }
     }
 
     /// <summary>
