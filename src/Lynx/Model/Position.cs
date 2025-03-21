@@ -1161,17 +1161,6 @@ public class Position : IDisposable
 
         var file = Masks.FileMask(squareIndex);
 
-        // Rook on open file
-        if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & file) == default)
-        {
-            packedBonus += OpenFileRookBonus;
-        }
-        // Rook on semi-open file
-        else if ((PieceBitBoards[pieceIndex - pawnToRookOffset] & file) == default)
-        {
-            packedBonus += SemiOpenFileRookBonus;
-        }
-
         // Checks
         var enemyKingCheckThreats = Attacks.RookAttacks(oppositeSideKingSquare, occupancy);
         var checks = (attacks & enemyKingCheckThreats).CountBits();
