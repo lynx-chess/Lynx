@@ -977,7 +977,6 @@ static void FileAndRankMasks()
     const int square = (int)BoardSquare.e4;
 
     Masks.RankMasks[square].Print();
-    Masks.FileMasks[square].Print();
     Masks.IsolatedPawnMasks[square].Print();
     Masks.WhitePassedPawnMasks[square].Print();
     Masks.BlackPassedPawnMasks[square].Print();

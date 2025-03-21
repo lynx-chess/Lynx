@@ -526,7 +526,7 @@ public sealed class Searcher
         _ = PVTable.Indexes[0];
         _ = Attacks.KingAttacks;
         _ = ZobristTable.SideHash();
-        _ = Masks.FileMasks;
+        _ = Masks.IsolatedPawnMasks;
         _ = EvaluationConstants.HistoryBonus[1];
         _ = MoveGenerator.Init();
         _ = GoCommand.Init();

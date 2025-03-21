@@ -3,22 +3,8 @@ using NUnit.Framework;
 
 namespace Lynx.Test;
 
-internal class MasksTest
+public class MasksTest
 {
-    [TestCase(BoardSquare.a8, "P7/P7/P7/P7/P7/P7/P7/P4K1k w - - 0 1")]
-    [TestCase(BoardSquare.a6, "P7/P7/P7/P7/P7/P7/P7/P4K1k w - - 0 1")]
-    [TestCase(BoardSquare.b5, "1P6/1P6/1P6/1P6/1P6/1P6/1P6/1P3K1k w - - 0 1")]
-    [TestCase(BoardSquare.b1, "1P6/1P6/1P6/1P6/1P6/1P6/1P6/1P3K1k w - - 0 1")]
-    public void FileMasks(BoardSquare square, string fen)
-    {
-        var position = new Position(fen);
-
-        var expectedBitBoard = position.PieceBitBoards[(int)Piece.P] | position.PieceBitBoards[(int)Piece.p];
-        var actualBitBoard = Masks.FileMasks[(int)square];
-
-        Assert.AreEqual(expectedBitBoard, actualBitBoard);
-    }
-
     [TestCase(BoardSquare.a8, "PPPPPPPP/8/8/8/8/8/8/K1k5 w - - 0 1")]
     [TestCase(BoardSquare.c8, "PPPPPPPP/8/8/8/8/8/8/K1k5 w - - 0 1")]
     [TestCase(BoardSquare.b2, "K1k5/8/8/8/8/8/PPPPPPPP/8 w - - 0 1")]
