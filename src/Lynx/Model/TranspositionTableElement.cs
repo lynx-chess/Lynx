@@ -91,7 +91,6 @@ public struct TranspositionTableElement
     /// <summary>
     /// How deep the recorded search went. For us this numberis targetDepth - ply
     /// </summary>
-
     public readonly int Depth
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
