@@ -1,6 +1,5 @@
 using System.Buffers;
 using System.Diagnostics;
-using System.IO.Pipelines;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -718,6 +717,11 @@ public class Position : IDisposable
                     bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
 
                     packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.White, blackKing, blackPawnAttacks);
+
+                    if ((Masks.FileMask(pieceSquareIndex) & whitePawns) == 0)
+                    {
+                        packedScore += SemiOpenFileBonus[pieceIndex];
+                    }
                 }
             }
 
@@ -735,6 +739,11 @@ public class Position : IDisposable
                     bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
 
                     packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.Black, whiteKing, whitePawnAttacks);
+
+                    if ((Masks.FileMask(pieceSquareIndex) & blackPawns) == 0)
+                    {
+                        packedScore += SemiOpenFileBonus[pieceIndex - 6];
+                    }
                 }
             }
         }
@@ -854,7 +863,7 @@ public class Position : IDisposable
 
                     if ((Masks.FileMask(pieceSquareIndex) & whitePawns) == 0)
                     {
-                        _incrementalEvalAccumulator += SemiOpenFileBonus[pieceIndex];
+                        packedScore += SemiOpenFileBonus[pieceIndex];
                     }
                 }
             }
@@ -881,7 +890,7 @@ public class Position : IDisposable
 
                     if ((Masks.FileMask(pieceSquareIndex) & blackPawns) == 0)
                     {
-                        _incrementalEvalAccumulator += SemiOpenFileBonus[pieceIndex - 6];
+                        packedScore += SemiOpenFileBonus[pieceIndex - 6];
                     }
                 }
             }
