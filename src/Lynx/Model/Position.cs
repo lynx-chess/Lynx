@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Diagnostics;
+using System.IO.Pipelines;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -850,6 +851,11 @@ public class Position : IDisposable
                     _incrementalPhaseAccumulator += GamePhaseByPiece[pieceIndex];
 
                     packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.White, blackKing, blackPawnAttacks);
+
+                    if ((Masks.FileMask(pieceSquareIndex) & whitePawns) == 0)
+                    {
+                        _incrementalEvalAccumulator += SemiOpenFileBonus[pieceIndex];
+                    }
                 }
             }
 
@@ -872,6 +878,11 @@ public class Position : IDisposable
                     _incrementalPhaseAccumulator += GamePhaseByPiece[pieceIndex];
 
                     packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.Black, whiteKing, whitePawnAttacks);
+
+                    if ((Masks.FileMask(pieceSquareIndex) & blackPawns) == 0)
+                    {
+                        _incrementalEvalAccumulator += SemiOpenFileBonus[pieceIndex - 6];
+                    }
                 }
             }
 
