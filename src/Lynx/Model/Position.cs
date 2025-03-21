@@ -1,6 +1,5 @@
 using System.Buffers;
 using System.Diagnostics;
-using System.IO.Pipelines;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -1146,8 +1145,6 @@ public class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int RookAdditionalEvaluation(int squareIndex, int pieceIndex, int pieceSide, int oppositeSideKingSquare, BitBoard enemyPawnAttacks)
     {
-        const int pawnToRookOffset = (int)Piece.R - (int)Piece.P;
-
         var occupancy = OccupancyBitBoards[(int)Side.Both];
         var attacks = Attacks.RookAttacks(squareIndex, occupancy);
 
@@ -1158,8 +1155,6 @@ public class Position : IDisposable
             .CountBits();
 
         var packedBonus = RookMobilityBonus[attacksCount];
-
-        var file = Masks.FileMask(squareIndex);
 
         // Checks
         var enemyKingCheckThreats = Attacks.RookAttacks(oppositeSideKingSquare, occupancy);
