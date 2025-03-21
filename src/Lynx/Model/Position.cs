@@ -857,6 +857,10 @@ public class Position : IDisposable
                     {
                         _incrementalEvalAccumulator += OpenFileBonus[pieceIndex];
                     }
+                    else if ((Masks.FileMask(pieceSquareIndex) & whitePawns) == 0)
+                    {
+                        _incrementalEvalAccumulator += SemiOpenFileBonus[pieceIndex];
+                    }
                 }
             }
 
@@ -883,6 +887,10 @@ public class Position : IDisposable
                     if ((Masks.FileMask(pieceSquareIndex) & allPawns) == 0)
                     {
                         _incrementalEvalAccumulator += OpenFileBonus[pieceIndex - 6];
+                    }
+                    else if ((Masks.FileMask(pieceSquareIndex) & blackPawns) == 0)
+                    {
+                        _incrementalEvalAccumulator += SemiOpenFileBonus[pieceIndex - 6];
                     }
                 }
             }

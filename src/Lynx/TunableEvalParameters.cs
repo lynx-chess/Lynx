@@ -6077,6 +6077,15 @@ public static class EvaluationParams
 		Pack(7, 8),
 	];
 
+	public static readonly int[] SemiOpenFileBonus =
+	[
+		Pack(0, 0),
+		Pack(1, 2),
+		Pack(3, 4),
+		Pack(5, 6),
+		Pack(7, 8),
+	];
+
 	public static readonly TaperedEvaluationTermByRank PawnPhalanxBonus =
 	[
 		Pack(0, 0),
