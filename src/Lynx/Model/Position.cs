@@ -719,6 +719,11 @@ public class Position : IDisposable
                     bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
 
                     packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.White, blackKing, blackPawnAttacks);
+
+                    if ((Masks.FileMask(pieceIndex) & allPawns) == 0)
+                    {
+                        _incrementalEvalAccumulator += OpenFileBonus[pieceIndex];
+                    }
                 }
             }
 
@@ -736,6 +741,11 @@ public class Position : IDisposable
                     bitboard = bitboard.WithoutLS1B(out var pieceSquareIndex);
 
                     packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.Black, whiteKing, whitePawnAttacks);
+
+                    if ((Masks.FileMask(pieceSquareIndex) & allPawns) == 0)
+                    {
+                        _incrementalEvalAccumulator += OpenFileBonus[pieceIndex];
+                    }
                 }
             }
         }
