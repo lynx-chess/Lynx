@@ -165,7 +165,7 @@ public sealed partial class Engine
             // Fail-high pruning (moves with high scores) - prune more when improving
             if (isNotGettingCheckmated)
             {
-                if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
+                if (depth <= Configuration.EngineSettings.RFP_MaxDepth && ttBestMove == default)
                 {
                     // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
                     // Return formula by Ciekce, instead of just returning static eval
@@ -175,7 +175,7 @@ public sealed partial class Engine
 
                     var rfpThreshold = rfpMargin + improvingFactor;
 
-                    if (staticEval - rfpThreshold >= beta)
+                    if (staticEval - rfpThreshold >= beta && ttBestMove == default)
                     {
 #pragma warning disable S3949 // Calculations should not overflow - value is being set at the beginning of the else if (!pvNode)
                         return (staticEval + beta) / 2;
