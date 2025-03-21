@@ -333,10 +333,9 @@ public sealed class Searcher
                     _searchCancellationTokenSource.CancelAfter(searchConstraints.HardLimitTimeBound);
                 }
 
-                tasks = _extraEngines
+                tasks = [.. _extraEngines
                     .Select(engine =>
-                        Task.Run(() => engine.Search(in extraEnginesSearchConstraint, isPondering: false, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
-                    .ToArray();
+                        Task.Run(() => engine.Search(in extraEnginesSearchConstraint, isPondering: false, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))];
 
 #if MULTITHREAD_DEBUG
                 _logger.Debug("End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
