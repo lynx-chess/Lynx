@@ -722,7 +722,7 @@ public class Position : IDisposable
 
                     if ((Masks.FileMask(pieceIndex) & allPawns) == 0)
                     {
-                        _incrementalEvalAccumulator += OpenFileBonus[pieceIndex];
+                        packedScore += OpenFileBonus[pieceIndex];
                     }
                 }
             }
@@ -744,7 +744,7 @@ public class Position : IDisposable
 
                     if ((Masks.FileMask(pieceSquareIndex) & allPawns) == 0)
                     {
-                        _incrementalEvalAccumulator += OpenFileBonus[pieceIndex];
+                        packedScore += OpenFileBonus[pieceIndex - 6];
                     }
                 }
             }
@@ -865,7 +865,7 @@ public class Position : IDisposable
 
                     if ((Masks.FileMask(pieceSquareIndex) & allPawns) == 0)
                     {
-                        _incrementalEvalAccumulator += OpenFileBonus[pieceIndex];
+                        packedScore += OpenFileBonus[pieceIndex];
                     }
                 }
             }
@@ -892,7 +892,7 @@ public class Position : IDisposable
 
                     if ((Masks.FileMask(pieceSquareIndex) & allPawns) == 0)
                     {
-                        _incrementalEvalAccumulator += OpenFileBonus[pieceIndex - 6];
+                        packedScore += OpenFileBonus[pieceIndex - 6];
                     }
                 }
             }
