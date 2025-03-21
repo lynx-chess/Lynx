@@ -636,6 +636,7 @@ public class Position : IDisposable
 
         var whitePawns = PieceBitBoards[(int)Piece.P];
         var blackPawns = PieceBitBoards[(int)Piece.p];
+        var allPawns = whitePawns | blackPawns;
 
         BitBoard whitePawnAttacks = whitePawns.ShiftUpRight() | whitePawns.ShiftUpLeft();
         BitBoard blackPawnAttacks = blackPawns.ShiftDownRight() | blackPawns.ShiftDownLeft();
@@ -852,9 +853,9 @@ public class Position : IDisposable
 
                     packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.White, blackKing, blackPawnAttacks);
 
-                    if ((Masks.FileMask(pieceSquareIndex) & whitePawns) == 0)
+                    if ((Masks.FileMask(pieceSquareIndex) & allPawns) == 0)
                     {
-                        _incrementalEvalAccumulator += SemiOpenFileBonus[pieceIndex];
+                        _incrementalEvalAccumulator += OpenFileBonus[pieceIndex];
                     }
                 }
             }
@@ -879,9 +880,9 @@ public class Position : IDisposable
 
                     packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.Black, whiteKing, whitePawnAttacks);
 
-                    if ((Masks.FileMask(pieceSquareIndex) & blackPawns) == 0)
+                    if ((Masks.FileMask(pieceSquareIndex) & allPawns) == 0)
                     {
-                        _incrementalEvalAccumulator += SemiOpenFileBonus[pieceIndex - 6];
+                        _incrementalEvalAccumulator += OpenFileBonus[pieceIndex - 6];
                     }
                 }
             }

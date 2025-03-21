@@ -6068,7 +6068,7 @@ public static class EvaluationParams
 	/// </summary>
 	public const int PieceAttackedByPawnPenalty = -2162736;
 
-	public static readonly int[] SemiOpenFileBonus =
+	public static readonly int[] OpenFileBonus =
 	[
 		Pack(0, 0),
 		Pack(1, 2),
