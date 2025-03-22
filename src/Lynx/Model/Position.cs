@@ -720,11 +720,11 @@ public class Position : IDisposable
                     packedScore += AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.White, blackKing, blackPawnAttacks);
                     if ((Masks.FileMask(pieceSquareIndex) & allPawns) == 0)
                     {
-                        _incrementalEvalAccumulator += OpenFileBonus[pieceIndex];
+                        packedScore += OpenFileBonus[pieceIndex];
                     }
                     else if ((Masks.FileMask(pieceSquareIndex) & whitePawns) == 0)
                     {
-                        _incrementalEvalAccumulator += SemiOpenFileBonus[pieceIndex];
+                        packedScore += SemiOpenFileBonus[pieceIndex];
                     }
                 }
             }
@@ -745,11 +745,11 @@ public class Position : IDisposable
                     packedScore -= AdditionalPieceEvaluation(pieceSquareIndex, pieceIndex, (int)Side.Black, whiteKing, whitePawnAttacks);
                     if ((Masks.FileMask(pieceSquareIndex) & allPawns) == 0)
                     {
-                        _incrementalEvalAccumulator += OpenFileBonus[pieceIndex - 6];
+                        packedScore -= OpenFileBonus[pieceIndex - 6];
                     }
                     else if ((Masks.FileMask(pieceSquareIndex) & blackPawns) == 0)
                     {
-                        _incrementalEvalAccumulator += SemiOpenFileBonus[pieceIndex - 6];
+                        packedScore -= SemiOpenFileBonus[pieceIndex - 6];
                     }
                 }
             }
@@ -870,11 +870,11 @@ public class Position : IDisposable
 
                     if ((Masks.FileMask(pieceSquareIndex) & allPawns) == 0)
                     {
-                        _incrementalEvalAccumulator += OpenFileBonus[pieceIndex];
+                        packedScore += OpenFileBonus[pieceIndex];
                     }
                     else if ((Masks.FileMask(pieceSquareIndex) & whitePawns) == 0)
                     {
-                        _incrementalEvalAccumulator += SemiOpenFileBonus[pieceIndex];
+                        packedScore += SemiOpenFileBonus[pieceIndex];
                     }
                 }
             }
@@ -901,11 +901,11 @@ public class Position : IDisposable
 
                     if ((Masks.FileMask(pieceSquareIndex) & allPawns) == 0)
                     {
-                        _incrementalEvalAccumulator += OpenFileBonus[pieceIndex - 6];
+                        packedScore -= OpenFileBonus[pieceIndex - 6];
                     }
                     else if ((Masks.FileMask(pieceSquareIndex) & blackPawns) == 0)
                     {
-                        _incrementalEvalAccumulator += SemiOpenFileBonus[pieceIndex - 6];
+                        packedScore -= SemiOpenFileBonus[pieceIndex - 6];
                     }
                 }
             }
