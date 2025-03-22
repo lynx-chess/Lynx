@@ -742,7 +742,7 @@ public class Position : IDisposable
 
                     if ((Masks.FileMask(pieceSquareIndex) & blackPawns) == 0)
                     {
-                        packedScore += SemiOpenFileBonus[pieceIndex - 6];
+                        packedScore -= SemiOpenFileBonus[pieceIndex - 6];
                     }
                 }
             }
@@ -890,7 +890,7 @@ public class Position : IDisposable
 
                     if ((Masks.FileMask(pieceSquareIndex) & blackPawns) == 0)
                     {
-                        packedScore += SemiOpenFileBonus[pieceIndex - 6];
+                        packedScore -= SemiOpenFileBonus[pieceIndex - 6];
                     }
                 }
             }
