@@ -1073,12 +1073,14 @@ public class Position : IDisposable
 
         var rank = Constants.Rank[squareIndex];
         var oppositeSide = (int)Side.Black;
+        var sameSidePawns = PieceBitBoards[(int)Piece.P];
         ulong passedPawnsMask;
 
         if (pieceIndex == (int)Piece.p)
         {
             rank = 7 - rank;
             oppositeSide = (int)Side.White;
+            sameSidePawns = PieceBitBoards[(int)Piece.p];
             passedPawnsMask = Masks.BlackPassedPawnMasks[squareIndex];
         }
         else
@@ -1091,6 +1093,10 @@ public class Position : IDisposable
         {
             packedBonus += IsolatedPawnPenalty;
         }
+
+        // Doubled pawn
+        packedBonus +=
+            DoubledPawnPenalty * (Masks.FileMask(squareIndex) & ~(1UL << squareIndex) & sameSidePawns).CountBits();
 
         // Passed pawn
         if ((PieceBitBoards[(int)Piece.p - pieceIndex] & passedPawnsMask) == default)
