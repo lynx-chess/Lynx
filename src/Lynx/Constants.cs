@@ -349,6 +349,18 @@ public static class Constants
         0, 1, 2, 3, 4, 5, 6, 7
     ];
 
+    public static ReadOnlySpan<byte> ByteFile =>
+    [
+        0, 1, 2, 3, 4, 5, 6, 7,
+        0, 1, 2, 3, 4, 5, 6, 7,
+        0, 1, 2, 3, 4, 5, 6, 7,
+        0, 1, 2, 3, 4, 5, 6, 7,
+        0, 1, 2, 3, 4, 5, 6, 7,
+        0, 1, 2, 3, 4, 5, 6, 7,
+        0, 1, 2, 3, 4, 5, 6, 7,
+        0, 1, 2, 3, 4, 5, 6, 7
+    ];
+
     public static ReadOnlySpan<int> LightSquares =>
     [
         1, 0, 1, 0, 1, 0, 1, 0,
@@ -412,6 +424,8 @@ public static class Constants
     /// </summary>
     public const BitBoard CentralFiles = 0x3c3c3c3c3c3c3c3c;
 
+    public const BitBoard CentralSquares = 0x1818000000;
+
     public static ReadOnlySpan<char> FileString => [ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' ];
 
     public const int AbsoluteMaxDepth = 255;
@@ -442,7 +456,7 @@ public static class Constants
     /// <summary>
     /// 64 x 64
     /// </summary>
-    public static readonly int[][] ChebyshevDistance=
+    public static readonly int[][] ChebyshevDistance =
     [
         [0, 1, 2, 3, 4, 5, 6, 7, 1, 1, 2, 3, 4, 5, 6, 7, 2, 2, 2, 3, 4, 5, 6, 7, 3, 3, 3, 3, 4, 5, 6, 7, 4, 4, 4, 4, 4, 5, 6, 7, 5, 5, 5, 5, 5, 5, 6, 7, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7],
         [1, 0, 1, 2, 3, 4, 5, 6, 1, 1, 1, 2, 3, 4, 5, 6, 2, 2, 2, 2, 3, 4, 5, 6, 3, 3, 3, 3, 3, 4, 5, 6, 4, 4, 4, 4, 4, 4, 5, 6, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7],

@@ -59,21 +59,21 @@ public readonly struct TranspositionTable
     /// </summary>
     /// <param name="ply">Ply</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public (int Score, ShortMove BestMove, NodeType NodeType, int StaticEval, int Depth) ProbeHash(Position position, int ply)
+    public (int Score, ShortMove BestMove, NodeType NodeType, int StaticEval, int Depth, bool WasPv) ProbeHash(Position position, int ply)
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier);
         var entry = _tt[ttIndex];
 
         if ((ushort)position.UniqueIdentifier != entry.Key)
         {
-            return (EvaluationConstants.NoHashEntry, default, default, EvaluationConstants.NoHashEntry, default);
+            return (EvaluationConstants.NoHashEntry, default, default, EvaluationConstants.NoHashEntry, default, default);
         }
 
         // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
         // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
         var recalculatedScore = RecalculateMateScores(entry.Score, ply);
 
-        return (recalculatedScore, entry.Move, entry.Type, entry.StaticEval, entry.Depth);
+        return (recalculatedScore, entry.Move, entry.Type, entry.StaticEval, entry.Depth, entry.WasPv);
     }
 
     /// <summary>
@@ -81,7 +81,7 @@ public readonly struct TranspositionTable
     /// </summary>
     /// <param name="ply">Ply</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void RecordHash(Position position, int staticEval, int depth, int ply, int score, NodeType nodeType, Move? move = null)
+    public void RecordHash(Position position, int staticEval, int depth, int ply, int score, NodeType nodeType, bool wasPv, Move? move = null)
     {
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier);
         ref var entry = ref _tt[ttIndex];
@@ -91,11 +91,17 @@ public readonly struct TranspositionTable
         //    _logger.Warn("TT collision");
         //}
 
+        var wasPvInt = wasPv ? 1 : 0;
+
         bool shouldReplace =
             entry.Key == 0                                      // No actual entry
             || (position.UniqueIdentifier >> 48) != entry.Key   // Different key: collision
             || nodeType == NodeType.Exact                       // Entering PV data
-            || depth >= entry.Depth;                            // Higher depth
+            || depth
+                //+ Configuration.EngineSettings.TTReplacement_DepthOffset
+                + (Configuration.EngineSettings.TTReplacement_TTPVDepthOffset * wasPvInt) >= entry.Depth    // Higher depth
+                ;
+        // || entry.Type == NodeType.None not needed, since depth condition is always true for those cases
 
         if (!shouldReplace)
         {
@@ -106,7 +112,17 @@ public readonly struct TranspositionTable
         // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
         var recalculatedScore = RecalculateMateScores(score, -ply);
 
-        entry.Update(position.UniqueIdentifier, recalculatedScore, staticEval, depth, nodeType, move);
+        entry.Update(position.UniqueIdentifier, recalculatedScore, staticEval, depth, nodeType, wasPvInt, move);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void SaveStaticEval(Position position, int staticEval, bool wasPv)
+    {
+        var ttIndex = CalculateTTIndex(position.UniqueIdentifier);
+        ref var entry = ref _tt[ttIndex];
+
+        // Extra key checks here (right before saving) failed for MT in https://github.com/lynx-chess/Lynx/pull/1566
+        entry.Update(position.UniqueIdentifier, EvaluationConstants.NoHashEntry, staticEval, depth: -1, NodeType.None, wasPv ? 1 : 0, null);
     }
 
     /// <summary>

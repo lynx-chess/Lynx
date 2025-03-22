@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Lynx;
@@ -25,9 +26,9 @@ public static class SEE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsGoodCapture(Position position, Move move, int threshold = 0)
     {
-        System.Diagnostics.Debug.Assert(move.IsCapture(), "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle non-capture moves");
-        System.Diagnostics.Debug.Assert(move.PromotedPiece() == default, "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle promotion moves");
-        System.Diagnostics.Debug.Assert(!move.IsEnPassant(), "Assert fail", $"{nameof(IsGoodCapture)} potentially doesn't handle en-passant moves");
+        Debug.Assert(move.IsCapture(), "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle non-capture moves");
+        Debug.Assert(move.PromotedPiece() == default, "Assert fail", $"{nameof(IsGoodCapture)} doesn't handle promotion moves");
+        Debug.Assert(!move.IsEnPassant(), "Assert fail", $"{nameof(IsGoodCapture)} potentially doesn't handle en-passant moves");
 
         var sideToMove = position.Side;
 
@@ -160,7 +161,7 @@ public static class SEE
             var nextPiece = PopLeastValuableAttacker(position, ref occupancy, ourAttackers, us);
 
             // After removing an attacker, there could be a sliding piece attack
-            if ((nextPiece & 0x01) == 0)    // Equivalent to nextPiece % 2 == 0): true for P, B, Q, p, b and q
+            if ((nextPiece & 0x01) == 0)    // Equivalent to nextPiece % 2 == 0): true for P, B, Q (and p, b, q, should PopLeastValuableAttacker also return black pieces ever gain)
             {
                 attackers |= Attacks.BishopAttacks(targetSquare, occupancy) & bishops;
             }

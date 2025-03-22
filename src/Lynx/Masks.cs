@@ -1,22 +1,12 @@
 ﻿using Lynx.Model;
+using System.Runtime.CompilerServices;
 
 namespace Lynx;
 
 public static class Masks
 {
-    /// <summary>
-    /// File mask for square f2 (same one as f3, f4, etc.)
-    ///  8  0 0 0 0 0 1 0 0
-    ///  7  0 0 0 0 0 1 0 0
-    ///  6  0 0 0 0 0 1 0 0
-    ///  5  0 0 0 0 0 1 0 0
-    ///  4  0 0 0 0 0 1 0 0
-    ///  3  0 0 0 0 0 1 0 0
-    ///  2  0 0 0 0 0 1 0 0
-    ///  1  0 0 0 0 0 1 0 0
-    ///     a b c d e f g h
-    /// </summary>
-    public static BitBoard[] FileMasks { get; } = new BitBoard[64];
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static BitBoard FileMask(int square) => Constants.AFile << (square % 8);
 
     /// <summary>
     /// Rank mask for square a6 (same one for b6, c6, etc.)
@@ -73,25 +63,6 @@ public static class Masks
     ///    a b c d e f g h
     /// </summary>
     public static BitBoard[] BlackPassedPawnMasks { get; } = new BitBoard[64];
-
-    /// <summary>
-    /// [12][64]
-    /// </summary>
-    public static readonly BitBoard[][] PassedPawns =
-    [
-        WhitePassedPawnMasks,
-        [],
-        [],
-        [],
-        [],
-        [],
-        BlackPassedPawnMasks,
-        [],
-        [],
-        [],
-        [],
-        [],
-    ];
 
     /// <summary>
     /// Passed 'side' pawn mask for square c4
@@ -161,38 +132,22 @@ public static class Masks
 
     static Masks()
     {
-        InitializeMasks();
-
-#pragma warning disable S3353 // Unchanged local variables should be "const" - FP https://community.sonarsource.com/t/fp-s3353-value-modified-in-ref-extension-method/132389
+#pragma warning disable S3353, RCS1118 // Unchanged local variables should be "const" - FP https://community.sonarsource.com/t/fp-s3353-value-modified-in-ref-extension-method/132389
         ulong whiteKnightOutpostMask = 0, blackKnightOutpostMask = 0;
-#pragma warning restore S3353 // Unchanged local variables should be "const"
-        for (int rank = 0; rank < 8; ++rank)
-        {
-            for (int file = 0; file < 8; ++file)
-            {
-                if (rank < 4 && file > 0 && file < 7)
-                {
-                    var squareIndex = BitBoardExtensions.SquareIndex(rank, file);
+#pragma warning restore S3353, RCS1118 // Unchanged local variables should be "const"
 
-                    whiteKnightOutpostMask.SetBit(squareIndex);
-                    blackKnightOutpostMask.SetBit(squareIndex ^ 56);
-                }
-            }
-        }
-
-        WhiteKnightOutpostMask = whiteKnightOutpostMask;
-        BlackKnightOutpostMask = blackKnightOutpostMask;
-    }
-
-    private static void InitializeMasks()
-    {
         for (int rank = 0; rank < 8; ++rank)
         {
             for (int file = 0; file < 8; ++file)
             {
                 var squareIndex = BitBoardExtensions.SquareIndex(rank, file);
 
-                FileMasks[squareIndex] |= SetFileRankMask(file, -1);
+                if (rank < 4 && file > 0 && file < 7)
+                {
+                    whiteKnightOutpostMask.SetBit(squareIndex);
+                    blackKnightOutpostMask.SetBit(squareIndex ^ 56);
+                }
+
                 RankMasks[squareIndex] |= SetFileRankMask(-1, rank);
                 IsolatedPawnMasks[squareIndex] |= SetFileRankMask(file - 1, -1);
                 IsolatedPawnMasks[squareIndex] |= SetFileRankMask(file + 1, -1);
@@ -232,6 +187,9 @@ public static class Masks
                 }
             }
         }
+
+        WhiteKnightOutpostMask = whiteKnightOutpostMask;
+        BlackKnightOutpostMask = blackKnightOutpostMask;
     }
 
 #pragma warning disable S1066 // Collapsible "if" statements should be merged - init only code, clarity over speed here

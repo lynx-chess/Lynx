@@ -44,13 +44,7 @@ jobs:
       working-directory: ./src/Lynx.Benchmark
 
     - name: Run ${{ github.event.inputs.benchmark_name }} benchmark
-      if: matrix.os == 'windows-latest'
       run: dotnet run -c Release --no-build --filter '${{ github.event.inputs.benchmark_name }}'
-      working-directory: ./src/Lynx.Benchmark
-
-    - name: Run ${{ github.event.inputs.benchmark_name }} benchmark with sudo
-      if: matrix.os != 'windows-latest'
-      run: sudo dotnet run -c Release --no-build --filter '${{ github.event.inputs.benchmark_name }}'
       working-directory: ./src/Lynx.Benchmark
 
     - name: 'Upload ${{ matrix.os }} artifacts'

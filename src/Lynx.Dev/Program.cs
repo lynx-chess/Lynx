@@ -1,5 +1,5 @@
 ﻿using Lynx;
-using Lynx.Internal;
+using Lynx.ConstantsGenerator;
 using Lynx.Model;
 using System.Diagnostics;
 using System.Numerics;
@@ -53,7 +53,8 @@ using static Lynx.TunableEvalParameters;
 //UnmakeMove();
 //PieceSquareTables();
 //NewMasks();
-DarkLightSquares();
+//DarkLightSquares();
+PawnIslands();
 
 #pragma warning disable IDE0059 // Unnecessary assignment of a value
 const string TrickyPosition = Constants.TrickyTestPositionFEN;
@@ -976,7 +977,6 @@ static void FileAndRankMasks()
     const int square = (int)BoardSquare.e4;
 
     Masks.RankMasks[square].Print();
-    Masks.FileMasks[square].Print();
     Masks.IsolatedPawnMasks[square].Print();
     Masks.WhitePassedPawnMasks[square].Print();
     Masks.BlackPassedPawnMasks[square].Print();
@@ -1082,19 +1082,19 @@ static void TranspositionTableMethod()
     //transpositionTable.RecordHash(position, depth: 3, maxDepth: 5, move: 1234, eval: +5, nodeType: NodeType.Alpha);
     //var entry = transpositionTable.ProbeHash(position, maxDepth: 5, depth: 3, alpha: 1, beta: 2);
 
-    transpositionTable.RecordHash(position, position.StaticEvaluation().Score, depth: 5, ply: 3, score: +19, nodeType: NodeType.Alpha, move: 1234);
+    transpositionTable.RecordHash(position, position.StaticEvaluation().Score, depth: 5, ply: 3, score: +19, nodeType: NodeType.Alpha, false, move: 1234);
     var entry = transpositionTable.ProbeHash(position, ply: 3);
     Console.WriteLine(entry); // Expected 20
 
-    transpositionTable.RecordHash(position, position.StaticEvaluation().Score, depth: 5, ply: 3, score: +21, nodeType: NodeType.Alpha, move: 1234);
+    transpositionTable.RecordHash(position, position.StaticEvaluation().Score, depth: 5, ply: 3, score: +21, nodeType: NodeType.Alpha, false, move: 1234);
     entry = transpositionTable.ProbeHash(position, ply: 3);
     Console.WriteLine(entry); // Expected 12_345_678
 
-    transpositionTable.RecordHash(position, position.StaticEvaluation().Score, depth: 5, ply: 3, score: +29, nodeType: NodeType.Beta, move: 1234);
+    transpositionTable.RecordHash(position, position.StaticEvaluation().Score, depth: 5, ply: 3, score: +29, nodeType: NodeType.Beta, false, move: 1234);
     entry = transpositionTable.ProbeHash(position, ply: 3);
     Console.WriteLine(entry); // Expected 12_345_678
 
-    transpositionTable.RecordHash(position, position.StaticEvaluation().Score, depth: 5, ply: 3, score: +31, nodeType: NodeType.Beta, move: 1234);
+    transpositionTable.RecordHash(position, position.StaticEvaluation().Score, depth: 5, ply: 3, score: +31, nodeType: NodeType.Beta, false, move: 1234);
     entry = transpositionTable.ProbeHash(position, ply: 3);
     Console.WriteLine(entry); // Expected 30
 }
@@ -1151,8 +1151,8 @@ static void UnmakeMove()
 
 static void PieceSquareTables()
 {
-    short[] middleGamePawnTableBlack = MiddleGamePawnTable.Select((_, index) => (short)-MiddleGamePawnTable[0][index ^ 56]).ToArray();
-    short[] endGamePawnTableBlack = EndGamePawnTable.Select((_, index) => (short)-EndGamePawnTable[0][index ^ 56]).ToArray();
+    short[] middleGamePawnTableBlack = [.. MiddleGamePawnTable.Select((_, index) => (short)-MiddleGamePawnTable[0][index ^ 56])];
+    short[] endGamePawnTableBlack = [.. EndGamePawnTable.Select((_, index) => (short)-EndGamePawnTable[0][index ^ 56])];
 
     PrintBitBoard(MiddleGamePawnTable);
     PrintBitBoard(middleGamePawnTableBlack);
@@ -1228,4 +1228,9 @@ static void DarkLightSquares()
     {
         Debug.Assert(Constants.DarkSquaresBitBoard.GetBit(i) ^ Constants.LightSquaresBitBoard.GetBit(i));
     }
+}
+
+static void PawnIslands()
+{
+    PawnIslandsGenerator.GeneratePawnIslands();
 }
