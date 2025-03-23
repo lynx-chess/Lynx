@@ -1393,7 +1393,7 @@ public class Position : IDisposable
 
                 // TODO try to limit it, i.e. Math.Max(4, Constants.ChebyshevDistance[oppositeSideKingSquare][stormPawn]);
                 var stormPawnDistance = Constants.ChebyshevDistance[oppositeSideKing][stormPawn];
-                packedBonus += stormPawn;// PawnStormBonus[stormPawnDistance];
+                packedBonus += PawnStormBonus[stormPawnDistance];
             }
 
             return packedBonus;
