@@ -6100,6 +6100,17 @@ public static class EvaluationParams
 		Pack(-36, 38)
 	];
 
+	public static readonly int[] PawnStormBonus =
+	[
+		Pack(0, 0),
+		Pack(1,2),
+		Pack(3,4),
+		Pack(5,6),
+		Pack(7,8),
+		Pack(9,10),
+		Pack(11,12),
+	];
+
 	public static readonly TaperedEvaluationTermByCount8 BadBishop_SameColorPawnsPenalty =
 	[
 		Pack(133, 162),

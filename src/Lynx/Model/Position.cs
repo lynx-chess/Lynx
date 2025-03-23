@@ -700,6 +700,9 @@ public class Position : IDisposable
                 // Pawn islands
                 pawnScore += PawnIslands(whitePawns, blackPawns);
 
+                // Pawn storms
+                pawnScore += PawnStorms(whitePawns, blackPawns, whiteKing, blackKing);
+
                 entry.Update(_kingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
             }
@@ -827,6 +830,9 @@ public class Position : IDisposable
 
                 // Pawn islands
                 pawnScore += PawnIslands(whitePawns, blackPawns);
+
+                // Pawn storms
+                pawnScore += PawnStorms(whitePawns, blackPawns, whiteKing, blackKing);
 
                 entry.Update(_kingPawnUniqueIdentifier, pawnScore);
                 packedScore += pawnScore;
@@ -1370,13 +1376,37 @@ public class Position : IDisposable
         }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int PawnStorms(BitBoard whitePawns, BitBoard blackPawns, int whiteKing, int blackKing)
+    {
+        return PawnStorm(blackKing, whitePawns & Masks.BlackPassedPawnMasks[blackKing])
+            - PawnStorm(whiteKing, blackPawns & Masks.WhitePassedPawnMasks[whiteKing]);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static int PawnStorm(int oppositeSideKing, BitBoard sameSidePawnsInFrontOfEnemyKing)
+        {
+            int packedBonus = 0;
+
+            while (sameSidePawnsInFrontOfEnemyKing != 0)
+            {
+                sameSidePawnsInFrontOfEnemyKing = sameSidePawnsInFrontOfEnemyKing.WithoutLS1B(out var stormPawn);
+
+                // TODO try to limit it, i.e. Math.Max(4, Constants.ChebyshevDistance[oppositeSideKingSquare][stormPawn]);
+                var stormPawnDistance = Constants.ChebyshevDistance[oppositeSideKing][stormPawn];
+                packedBonus += stormPawn;// PawnStormBonus[stormPawnDistance];
+            }
+
+            return packedBonus;
+        }
+    }
+
     /// <summary>
     /// Scales <paramref name="eval"/> with <paramref name="movesWithoutCaptureOrPawnMove"/>, so that
     /// an eval with 100 halfmove counter is half of the value of one with 0 halfmove counter
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static int ScaleEvalWith50MovesDrawDistance(int eval, int movesWithoutCaptureOrPawnMove) =>
-        eval * (200 - movesWithoutCaptureOrPawnMove) / 200;
+    eval * (200 - movesWithoutCaptureOrPawnMove) / 200;
 
     #endregion
 
