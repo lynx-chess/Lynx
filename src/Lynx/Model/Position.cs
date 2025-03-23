@@ -1391,12 +1391,8 @@ public class Position : IDisposable
             {
                 sameSidePawnsInFrontOfEnemyKing = sameSidePawnsInFrontOfEnemyKing.WithoutLS1B(out var stormPawn);
 
-                // TODO try to limit it, i.e. Math.Max(4, Constants.ChebyshevDistance[oppositeSideKingSquare][stormPawn]);
                 var stormPawnDistance = Constants.ChebyshevDistance[oppositeSideKing][stormPawn];
-                if (stormPawnDistance <= 4)
-                {
-                    packedBonus += PawnStormBonus[stormPawnDistance];
-                }
+                packedBonus += PawnStormBonus[Math.Min(4, stormPawnDistance)];
             }
 
             return packedBonus;
