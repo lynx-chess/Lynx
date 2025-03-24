@@ -735,7 +735,7 @@ public sealed partial class Engine
             var moveScore = moveScores[moveIndex];
 
             // 🔍 QSearch LMP: prune all moves once a number of them have been visited
-            if (visitedMovesCounter >= Configuration.EngineSettings.LMP_QSearch_MovesToTry)
+            if (!isInCheck && visitedMovesCounter >= Configuration.EngineSettings.LMP_QSearch_MovesToTry)
             {
                 break;
             }
