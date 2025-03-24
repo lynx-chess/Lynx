@@ -705,6 +705,9 @@ public sealed partial class Engine
             return staticEval;
         }
 
+        Debug.Assert(ply > 0);
+        var previousMoveTargetSquare = Game.ReadMoveFromStack(ply - 1).TargetSquare();
+
         var nodeType = NodeType.Alpha;
         Move? bestMove = null;
         int bestScore = eval;
@@ -732,9 +735,12 @@ public sealed partial class Engine
 
             var move = pseudoLegalMoves[moveIndex];
             var moveScore = moveScores[moveIndex];
+            bool isRecapture = previousMoveTargetSquare == move.TargetSquare();
 
             // 🔍 QSearch SEE pruning: pruning bad captures
-            if (moveScore < EvaluationConstants.PromotionMoveScoreValue && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
+            if (!isRecapture
+                && moveScore < EvaluationConstants.PromotionMoveScoreValue
+                && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
             {
                 continue;
             }
