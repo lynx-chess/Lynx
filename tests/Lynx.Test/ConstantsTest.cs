@@ -146,4 +146,13 @@ public class ConstantsTest
         Assert.AreEqual(0, LightSquares[(int)BoardSquare.a1]);
         Assert.AreEqual(0, LightSquares[(int)BoardSquare.h8]);
     }
+
+    [Test]
+    public void Rank()
+    {
+        for (int sq = 0; sq < 64; ++sq)
+        {
+            Assert.AreEqual((sq >> 3) + 1, 8 - Constants.Rank[sq]);
+        }
+    }
 }
