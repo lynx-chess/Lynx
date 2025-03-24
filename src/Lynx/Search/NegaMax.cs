@@ -734,7 +734,7 @@ public sealed partial class Engine
             var moveScore = moveScores[moveIndex];
 
             // 🔍 QSearch SEE pruning: pruning bad captures
-            if (moveScore < EvaluationConstants.PromotionMoveScoreValue && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
+            if (!isInCheck && moveScore < EvaluationConstants.PromotionMoveScoreValue && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
             {
                 continue;
             }
