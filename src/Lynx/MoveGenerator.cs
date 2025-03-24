@@ -229,7 +229,6 @@ public static class MoveGenerator
             var targetRank = (singlePushSquare >> 3) + 1;
             Debug.Assert(sourceRank != 1 && sourceRank != 8, $"There's a non-promoted {position.Side} pawn in rank {sourceRank})");
 
-
             var attacks = Attacks.PawnAttacks[(int)position.Side][sourceSquare];
             var attackedSquares = attacks & position.OccupancyBitBoards[oppositeSide];
 
