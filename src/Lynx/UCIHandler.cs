@@ -567,6 +567,14 @@ public sealed class UCIHandler
                     }
                     break;
                 }
+            case "lmp_qsearch_movestotry":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMP_QSearch_MovesToTry = value;
+                    }
+                    break;
+                }
             case "history_maxmovevalue":
                 {
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))

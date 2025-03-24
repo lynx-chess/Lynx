@@ -717,6 +717,7 @@ public sealed partial class Engine
             moveScores[i] = ScoreMoveQSearch(pseudoLegalMoves[i], ttBestMove);
         }
 
+        int visitedMovesCounter = 0;
         for (int moveIndex = 0; moveIndex < pseudoLegalMoves.Length; ++moveIndex)
         {
             // Incremental move sorting, inspired by https://github.com/jw1912/Chess-Challenge and suggested by toanth
@@ -732,6 +733,12 @@ public sealed partial class Engine
 
             var move = pseudoLegalMoves[moveIndex];
             var moveScore = moveScores[moveIndex];
+
+            // 🔍 QSearch LMP: prune all moves once a number of them have been visited
+            if (visitedMovesCounter >= Configuration.EngineSettings.LMP_QSearch_MovesToTry)
+            {
+                break;
+            }
 
             // 🔍 QSearch SEE pruning: pruning bad captures
             if (moveScore < EvaluationConstants.PromotionMoveScoreValue && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
@@ -786,6 +793,8 @@ public sealed partial class Engine
                     nodeType = NodeType.Exact;
                 }
             }
+
+            ++visitedMovesCounter;
         }
 
         if (!isAnyCaptureValid

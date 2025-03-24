@@ -274,6 +274,9 @@ public sealed class EngineSettings
     //[SPSA<int>(0, 10, 0.5)]
     public int LMP_MovesDepthMultiplier { get; set; } = 3;
 
+    //[SPSA<int>(1, 5, 0.5)]
+    public int LMP_QSearch_MovesToTry { get; set; } = 2;
+
     public int History_MaxMoveValue { get; set; } = 8_192;
 
     /// <summary>
@@ -320,6 +323,8 @@ public sealed class EngineSettings
 
     [SPSA<int>(-150, -50, 10)]
     public int PVS_SEE_Threshold_Noisy { get; set; } = -117;
+
+    public int QS_
 
     #endregion
 }
