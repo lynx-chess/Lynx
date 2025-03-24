@@ -137,25 +137,44 @@ public static class MoveGenerator
         {
             bitboard = bitboard.WithoutLS1B(out sourceSquare);
 
+            var singlePushSquare = sourceSquare + pawnPush;
             var sourceRank = (sourceSquare >> 3) + 1;
-
+            var targetRank = (singlePushSquare >> 3) + 1;
             Debug.Assert(sourceRank != 1 && sourceRank != 8, $"There's a non-promoted {position.Side} pawn in rank {sourceRank})");
 
-            // Pawn pushes
-            var singlePushSquare = sourceSquare + pawnPush;
-            if (!position.OccupancyBitBoards[2].GetBit(singlePushSquare))
+            var attacks = Attacks.PawnAttacks[(int)position.Side][sourceSquare];
+            var attackedSquares = attacks & position.OccupancyBitBoards[oppositeSide];
+
+            // Promotions
+            if (targetRank == 1 || targetRank == 8)
             {
-                // Single pawn push
-                var targetRank = (singlePushSquare >> 3) + 1;
-                if (targetRank == 1 || targetRank == 8)  // Promotion
+                // Single pawn push - promotion
+                if (!position.OccupancyBitBoards[2].GetBit(singlePushSquare))
                 {
                     movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.Q + offset);
                     movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.R + offset);
                     movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.N + offset);
                     movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.B + offset);
                 }
-                else
+
+                // Captures with promotion
+                while (attackedSquares != default)
                 {
+                    attackedSquares = attackedSquares.WithoutLS1B(out targetSquare);
+                    var capturedPiece = position.Board[targetSquare];
+
+                    movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.Q + offset, capturedPiece);
+                    movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.R + offset, capturedPiece);
+                    movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.N + offset, capturedPiece);
+                    movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.B + offset, capturedPiece);
+                }
+            }
+            else
+            {
+                // Pawn pushes
+                if (!position.OccupancyBitBoards[2].GetBit(singlePushSquare))
+                {
+                    // Single pawn push
                     movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, singlePushSquare, piece);
 
                     // Double pawn push
@@ -171,34 +190,20 @@ public static class MoveGenerator
                         }
                     }
                 }
-            }
 
-            var attacks = Attacks.PawnAttacks[(int)position.Side][sourceSquare];
-
-            // En passant
-            if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
-            // We assume that position.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
-            {
-                movePool[localIndex++] = MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece, capturedPiece: (int)Piece.p - offset);
-            }
-
-            // Captures
-            var attackedSquares = attacks & position.OccupancyBitBoards[oppositeSide];
-            while (attackedSquares != default)
-            {
-                attackedSquares = attackedSquares.WithoutLS1B(out targetSquare);
-                var capturedPiece = position.Board[targetSquare];
-
-                var targetRank = (targetSquare >> 3) + 1;
-                if (targetRank == 1 || targetRank == 8)  // Capture with promotion
+                // En passant capture
+                if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
+                // We assume that position.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
                 {
-                    movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.Q + offset, capturedPiece);
-                    movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.R + offset, capturedPiece);
-                    movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.N + offset, capturedPiece);
-                    movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.B + offset, capturedPiece);
+                    movePool[localIndex++] = MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece, capturedPiece: (int)Piece.p - offset);
                 }
-                else
+
+                // Captures
+                while (attackedSquares != default)
                 {
+                    attackedSquares = attackedSquares.WithoutLS1B(out targetSquare);
+                    var capturedPiece = position.Board[targetSquare];
+
                     movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece);
                 }
             }
@@ -219,51 +224,54 @@ public static class MoveGenerator
         {
             bitboard = bitboard.WithoutLS1B(out sourceSquare);
 
+            var singlePushSquare = sourceSquare + pawnPush;
             var sourceRank = (sourceSquare >> 3) + 1;
-
+            var targetRank = (singlePushSquare >> 3) + 1;
             Debug.Assert(sourceRank != 1 && sourceRank != 8, $"There's a non-promoted {position.Side} pawn in rank {sourceRank})");
 
-            // Pawn pushes
-            var singlePushSquare = sourceSquare + pawnPush;
-            if (!position.OccupancyBitBoards[2].GetBit(singlePushSquare))
+
+            var attacks = Attacks.PawnAttacks[(int)position.Side][sourceSquare];
+            var attackedSquares = attacks & position.OccupancyBitBoards[oppositeSide];
+
+            // Promotions
+            if (targetRank == 1 || targetRank == 8)
             {
-                // Single pawn push
-                var targetRank = (singlePushSquare >> 3) + 1;
-                if (targetRank == 1 || targetRank == 8)  // Promotion
+                // Single pawn push - promotions
+                if (!position.OccupancyBitBoards[2].GetBit(singlePushSquare))
                 {
                     movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.Q + offset);
                     movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.R + offset);
                     movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.N + offset);
                     movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, singlePushSquare, piece, promotedPiece: (int)Piece.B + offset);
                 }
-            }
 
-            var attacks = Attacks.PawnAttacks[(int)position.Side][sourceSquare];
-
-            // En passant
-            if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
-            // We assume that position.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
-            {
-                movePool[localIndex++] = MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece, capturedPiece: (int)Piece.p - offset);
-            }
-
-            // Captures
-            var attackedSquares = attacks & position.OccupancyBitBoards[oppositeSide];
-            while (attackedSquares != default)
-            {
-                attackedSquares = attackedSquares.WithoutLS1B(out targetSquare);
-                var capturedPiece = position.Board[targetSquare];
-
-                var targetRank = (targetSquare >> 3) + 1;
-                if (targetRank == 1 || targetRank == 8)  // Capture with promotion
+                // Captures with promotion
+                while (attackedSquares != default)
                 {
+                    attackedSquares = attackedSquares.WithoutLS1B(out targetSquare);
+                    var capturedPiece = position.Board[targetSquare];
+
                     movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.Q + offset, capturedPiece: capturedPiece);
                     movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.R + offset, capturedPiece: capturedPiece);
                     movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.N + offset, capturedPiece: capturedPiece);
                     movePool[localIndex++] = MoveExtensions.EncodePromotion(sourceSquare, targetSquare, piece, promotedPiece: (int)Piece.B + offset, capturedPiece: capturedPiece);
                 }
-                else
+            }
+            else
+            {
+                // En passant capture
+                if (position.EnPassant != BoardSquare.noSquare && attacks.GetBit(position.EnPassant))
+                // We assume that position.OccupancyBitBoards[oppositeOccupancy].GetBit(targetSquare + singlePush) == true
                 {
+                    movePool[localIndex++] = MoveExtensions.EncodeEnPassant(sourceSquare, (int)position.EnPassant, piece, capturedPiece: (int)Piece.p - offset);
+                }
+
+                // Regular captures
+                while (attackedSquares != default)
+                {
+                    attackedSquares = attackedSquares.WithoutLS1B(out targetSquare);
+                    var capturedPiece = position.Board[targetSquare];
+
                     movePool[localIndex++] = MoveExtensions.EncodeCapture(sourceSquare, targetSquare, piece, capturedPiece: capturedPiece);
                 }
             }
