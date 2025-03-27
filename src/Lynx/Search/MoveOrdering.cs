@@ -162,9 +162,17 @@ public sealed partial class Engine
         var piece = move.Piece();
         var targetSquare = move.TargetSquare();
 
+        try
+        {
+
         _quietHistory[piece][targetSquare] = ScoreHistoryMove(
             _quietHistory[piece][targetSquare],
             HistoryBonus[depth]);
+        }
+        catch(Exception e)
+        {
+            ;
+        }
 
         int continuationHistoryIndex;
         int previousMovePiece = -1;
