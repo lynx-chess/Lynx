@@ -321,7 +321,7 @@ public static class Constants
     /// </summary>
     public const int MaxNumberOfPossibleMovesInAPosition = 250;
 
-    public const int MaxNumberMovesInAGame = 1024;
+    public const int MaxNumberMovesInAGame = 2048;
 
     public static readonly int SideLimit = Enum.GetValues<Piece>().Length / 2;
 
