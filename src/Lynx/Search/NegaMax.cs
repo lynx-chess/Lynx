@@ -146,7 +146,7 @@ public sealed partial class Engine
             if (ply >= 2)
             {
                 var evalDiff = staticEval - Game.ReadStaticEvalFromStack(ply - 2);
-                improving = evalDiff >= 0;
+                improving = evalDiff > 0;
                 improvingRate = evalDiff / 50.0;
             }
 
