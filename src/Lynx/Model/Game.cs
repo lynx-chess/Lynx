@@ -1,6 +1,5 @@
 ﻿using NLog;
 using System.Buffers;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace Lynx.Model;
@@ -235,13 +234,13 @@ public sealed class Game : IDisposable
     public Move ReadMoveFromStack(int n) => _gameStack[n + EvaluationConstants.ContinuationHistoryPlyCount].Move;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int ReadStaticEvalFromStack(int n) => _gameStack[n].StaticEval;
+    public int ReadStaticEvalFromStack(int n) => _gameStack[n + EvaluationConstants.ContinuationHistoryPlyCount].StaticEval;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int UpdateStaticEvalInStack(int n, int value) => _gameStack[n].StaticEval = value;
+    public int UpdateStaticEvalInStack(int n, int value) => _gameStack[n + EvaluationConstants.ContinuationHistoryPlyCount].StaticEval = value;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ref PlyStackEntry GameStack(int n) => ref _gameStack[n];
+    public ref PlyStackEntry GameStack(int n) => ref _gameStack[n + EvaluationConstants.ContinuationHistoryPlyCount];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int PositionHashHistoryLength() => _positionHashHistoryPointer;
