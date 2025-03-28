@@ -166,10 +166,6 @@ public sealed partial class Engine
             _quietHistory[piece][targetSquare],
             HistoryBonus[depth]);
 
-        int continuationHistoryIndex;
-        int previousMovePiece = -1;
-        int previousTargetSquare = -1;
-
         if (!isRoot)
         {
             // 🔍 Continuation history
@@ -177,14 +173,8 @@ public sealed partial class Engine
             var previousMove = Game.ReadMoveFromStack(ply - 1);
             Debug.Assert(previousMove != 0);
 
-            previousMovePiece = previousMove.Piece();
-            previousTargetSquare = previousMove.TargetSquare();
-
-            continuationHistoryIndex = ContinuationHistoryIndex(piece, targetSquare, previousMovePiece, previousTargetSquare, 0);
-
-            _continuationHistory[continuationHistoryIndex] = ScoreHistoryMove(
-                _continuationHistory[continuationHistoryIndex],
-                HistoryBonus[depth]);
+            ref var continuationHistoryEntry = ref ContinuationHistoryEntry(piece, targetSquare, ply - 1);
+            continuationHistoryEntry = ScoreHistoryMove(continuationHistoryEntry, HistoryBonus[depth]);
 
             //    var previousPreviousMove = Game.MoveStack[ply - 2];
             //    var previousPreviousMovePiece = previousPreviousMove.Piece();
@@ -213,11 +203,8 @@ public sealed partial class Engine
                 if (!isRoot)
                 {
                     // 🔍 Continuation history penalty / malus
-                    continuationHistoryIndex = ContinuationHistoryIndex(visitedMovePiece, visitedMoveTargetSquare, previousMovePiece, previousTargetSquare, 0);
-
-                    _continuationHistory[continuationHistoryIndex] = ScoreHistoryMove(
-                        _continuationHistory[continuationHistoryIndex],
-                        -HistoryBonus[depth]);
+                    ref var continuationHistoryEntry = ref ContinuationHistoryEntry(visitedMovePiece, visitedMoveTargetSquare, ply - 1);
+                    continuationHistoryEntry = ScoreHistoryMove(continuationHistoryEntry, -HistoryBonus[depth]);
                 }
             }
         }
@@ -238,7 +225,8 @@ public sealed partial class Engine
             if (!isRoot && (depth >= Configuration.EngineSettings.CounterMoves_MinDepth || pvNode))
             {
                 // 🔍 Countermoves - fails to fix the bug and remove killer moves condition, see  https://github.com/lynx-chess/Lynx/pull/944
-                _counterMoves[CounterMoveIndex(previousMovePiece, previousTargetSquare)] = move;
+                var previousMove = Game.ReadMoveFromStack(ply - 1);
+                _counterMoves[CounterMoveIndex(previousMove.Piece(), previousMove.TargetSquare())] = move;
             }
         }
     }
