@@ -207,7 +207,7 @@ public sealed partial class Engine
                 rawHistoryBonus);
 
             // - Follow-up history (continuation history, ply - 2)
-            if (ply > 2)
+            if (ply >= 2)
             {
                 var previousPreviousMove = Game.ReadMoveFromStack(ply - 2);
                 Debug.Assert(previousPreviousMove != 0);
