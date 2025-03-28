@@ -424,7 +424,7 @@ public sealed partial class Engine
                                 reduction /= EvaluationConstants.LMRScaleFactor;
 
                                 // ~ history/(0.75 * maxHistory/2/)
-                                reduction -= _captureHistory[CaptureHistoryIndex(move.Piece(), move.TargetSquare(), move.CapturedPiece())] / Configuration.EngineSettings.LMR_History_Divisor_Noisy;
+                                reduction -= CaptureHistoryEntry(move) / Configuration.EngineSettings.LMR_History_Divisor_Noisy;
                             }
                             else
                             {

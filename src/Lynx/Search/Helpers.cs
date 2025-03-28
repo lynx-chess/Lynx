@@ -49,32 +49,15 @@ public sealed partial class Engine
     /// [12][64][12]
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int CaptureHistoryIndex(int piece, int targetSquare, int capturedPiece)
+    private ref int CaptureHistoryEntry(Move move)
     {
         const int pieceOffset = 64 * 12;
         const int targetSquareOffset = 12;
 
-        return (piece * pieceOffset)
-            + (targetSquare * targetSquareOffset)
-            + capturedPiece;
-    }
-
-    /// <summary>
-    /// [12][64][12][64][ContinuationHistoryPlyCount]
-    /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int ContinuationHistoryIndex(int piece, int targetSquare, int previousMovePiece, int previousMoveTargetSquare, int ply)
-    {
-        const int pieceOffset = 64 * 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount;
-        const int targetSquareOffset = 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount;
-        const int previousMovePieceOffset = 64 * EvaluationConstants.ContinuationHistoryPlyCount;
-        const int previousMoveTargetSquareOffset = EvaluationConstants.ContinuationHistoryPlyCount;
-
-        return (piece * pieceOffset)
-            + (targetSquare * targetSquareOffset)
-            + (previousMovePiece * previousMovePieceOffset)
-            + (previousMoveTargetSquare * previousMoveTargetSquareOffset)
-            + ply;
+        return ref _captureHistory[
+            (move.Piece() * pieceOffset)
+            + (move.TargetSquare() * targetSquareOffset)
+            + move.CapturedPiece()];
     }
 
     /// <summary>
@@ -99,15 +82,18 @@ public sealed partial class Engine
     }
 
     /// <summary>
-    /// [64][64]
+    /// [12][64]
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static int CounterMoveIndex(int previousMoveSourceSquare, int previousMoveTargetSquare)
+    private ref Move CounterMove(int ply)
     {
         const int sourceSquareOffset = 64;
 
-        return (previousMoveSourceSquare * sourceSquareOffset)
-            + previousMoveTargetSquare;
+        var previousMove = Game.ReadMoveFromStack(ply);
+
+        return ref _counterMoves[
+            (previousMove.Piece() * sourceSquareOffset)
+            + previousMove.TargetSquare()];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

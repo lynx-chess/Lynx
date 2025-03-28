@@ -51,7 +51,7 @@ public sealed partial class Engine
             return baseCaptureScore
                 + MostValueableVictimLeastValuableAttacker[piece][capturedPiece]
                 //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
-                + _captureHistory[CaptureHistoryIndex(piece, move.TargetSquare(), capturedPiece)];
+                + CaptureHistoryEntry(move);
         }
 
         if (isPromotion)
@@ -81,7 +81,7 @@ public sealed partial class Engine
             var previousMoveTargetSquare = previousMove.TargetSquare();
 
             // Countermove
-            if (_counterMoves[CounterMoveIndex(previousMovePiece, previousMoveTargetSquare)] == move)
+            if (CounterMove(ply - 1) == move)
             {
                 return CounterMoveValue;
             }
@@ -89,7 +89,7 @@ public sealed partial class Engine
             // Counter move history
             return BaseMoveScore
                 + _quietHistory[move.Piece()][move.TargetSquare()]
-                + _continuationHistory[ContinuationHistoryIndex(move.Piece(), move.TargetSquare(), previousMovePiece, previousMoveTargetSquare, 0)];
+                + ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply - 1);
         }
 
         // History move or 0 if not found
@@ -140,7 +140,7 @@ public sealed partial class Engine
             return baseCaptureScore
                 + MostValueableVictimLeastValuableAttacker[piece][capturedPiece]
                 //+ EvaluationConstants.MVV_PieceValues[capturedPiece]
-                + _captureHistory[CaptureHistoryIndex(piece, move.TargetSquare(), capturedPiece)];
+                + CaptureHistoryEntry(move);
         }
 
         if (isPromotion)
@@ -225,8 +225,8 @@ public sealed partial class Engine
             if (!isRoot && (depth >= Configuration.EngineSettings.CounterMoves_MinDepth || pvNode))
             {
                 // 🔍 Countermoves - fails to fix the bug and remove killer moves condition, see  https://github.com/lynx-chess/Lynx/pull/944
-                var previousMove = Game.ReadMoveFromStack(ply - 1);
-                _counterMoves[CounterMoveIndex(previousMove.Piece(), previousMove.TargetSquare())] = move;
+                ref var counterMove = ref CounterMove(ply - 1);
+                counterMove = move;
             }
         }
     }
@@ -237,14 +237,8 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void UpdateMoveOrderingHeuristicsOnCaptureBetaCutoff(int depth, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move)
     {
-        var piece = move.Piece();
-        var targetSquare = move.TargetSquare();
-        var capturedPiece = move.CapturedPiece();
-
-        var captureHistoryIndex = CaptureHistoryIndex(piece, targetSquare, capturedPiece);
-        _captureHistory[captureHistoryIndex] = ScoreHistoryMove(
-            _captureHistory[captureHistoryIndex],
-            HistoryBonus[depth]);
+        ref var captureHistoryEntry = ref CaptureHistoryEntry(move);
+        captureHistoryEntry = ScoreHistoryMove(captureHistoryEntry, HistoryBonus[depth]);
 
         // 🔍 Capture history penalty/malus
         // When a capture fails high, penalize previous visited captures
@@ -254,15 +248,8 @@ public sealed partial class Engine
 
             if (visitedMove.IsCapture())
             {
-                var visitedMovePiece = visitedMove.Piece();
-                var visitedMoveTargetSquare = visitedMove.TargetSquare();
-                var visitedMoveCapturedPiece = visitedMove.CapturedPiece();
-
-                captureHistoryIndex = CaptureHistoryIndex(visitedMovePiece, visitedMoveTargetSquare, visitedMoveCapturedPiece);
-
-                _captureHistory[captureHistoryIndex] = ScoreHistoryMove(
-                    _captureHistory[captureHistoryIndex],
-                    -HistoryBonus[depth]);
+                ref var captureHistoryVisitedMove = ref CaptureHistoryEntry(visitedMove);
+                captureHistoryVisitedMove = ScoreHistoryMove(captureHistoryVisitedMove, -HistoryBonus[depth]);
             }
         }
     }
