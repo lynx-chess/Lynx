@@ -268,7 +268,6 @@ public sealed partial class Engine
         int bestScore = EvaluationConstants.MinEval;
         Move? bestMove = null;
         bool isAnyMoveValid = false;
-        var previousMove = Game.ReadMoveFromStack(ply - 1);
 
         Span<Move> visitedMoves = stackalloc Move[pseudoLegalMoves.Length];
         int visitedMovesCounter = 0;
@@ -294,7 +293,8 @@ public sealed partial class Engine
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             int QuietHistory() => quietHistory ??=
-                _quietHistory[move.Piece()][move.TargetSquare()] + _continuationHistory[ContinuationHistoryIndex(move.Piece(), move.TargetSquare(), previousMove.Piece(), previousMove.TargetSquare(), 0)];
+                _quietHistory[move.Piece()][move.TargetSquare()]
+                + ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply - 1);
 
             // If we prune while getting checmated, we risk not finding any move and having an empty PV
             bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
@@ -424,7 +424,7 @@ public sealed partial class Engine
                                 reduction /= EvaluationConstants.LMRScaleFactor;
 
                                 // ~ history/(0.75 * maxHistory/2/)
-                                reduction -= _captureHistory[CaptureHistoryIndex(move.Piece(), move.TargetSquare(), move.CapturedPiece())] / Configuration.EngineSettings.LMR_History_Divisor_Noisy;
+                                reduction -= CaptureHistoryEntry(move) / Configuration.EngineSettings.LMR_History_Divisor_Noisy;
                             }
                             else
                             {
