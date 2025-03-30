@@ -477,10 +477,14 @@ public sealed partial class Engine
                         {
                             reduction += Configuration.EngineSettings.SEE_BadCaptureReduction;
                         }
+
+                        // Don't allow LMR to drop into qsearch or increase the depth: min depth 1
+                        // (depth - 1) - depth + 2 = 1, min depth we want
+                        // newDepth - newDepth + 1 = 1, min depth we want
+                        reduction = Math.Max(0, Math.Min(reduction, newDepth - 1));
                     }
 
-                    // Don't allow LMR to drop into qsearch or increase the depth
-                    var reducedDepth = Math.Clamp(newDepth - reduction, 0, newDepth);
+                    var reducedDepth = newDepth - reduction;
 
                     // Search with reduced depth and zero window
                     score = -NegaMax(reducedDepth, ply + 1, -alpha - 1, -alpha, cutnode: true, cancellationToken);
