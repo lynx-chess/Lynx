@@ -294,7 +294,8 @@ public sealed partial class Engine
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             int QuietHistory() => quietHistory ??=
                 _quietHistory[move.Piece()][move.TargetSquare()]
-                + ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply - 1);
+                + CounterMoveHistoryEntry(move.Piece(), move.TargetSquare(), ply)
+                + FollowUpHistoryEntry(move.Piece(), move.TargetSquare(), ply);
 
             // If we prune while getting checmated, we risk not finding any move and having an empty PV
             bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
