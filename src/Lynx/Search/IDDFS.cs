@@ -11,9 +11,9 @@ public sealed partial class Engine
     private readonly Move[] _pVTable = GC.AllocateArray<Move>(Configuration.EngineSettings.MaxDepth * (Configuration.EngineSettings.MaxDepth + 1) / 2, pinned: true);
 
     /// <summary>
-    /// 3 x (<see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/>)
+    /// 2 x (<see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/>)
     /// </summary>
-    private readonly int[] _killerMoves = GC.AllocateArray<int>(3 * (Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin), pinned: true);
+    private readonly int[] _killerMoves = GC.AllocateArray<int>(2 * (Configuration.EngineSettings.MaxDepth + Constants.ArrayDepthMargin), pinned: true);
 
     /// <summary>
     /// 12 x 64
@@ -549,7 +549,7 @@ public sealed partial class Engine
                 move, moveScores[i], 0, [move]);
         }
 
-        _logger.Error("No valid move found while looking for an emergency move for position {Fen}", position.FEN());
+        _logger.Error("No valid move found while looking for an emergency move for position {Fen}", position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove));
 
         return new(
 #if MULTITHREAD_DEBUG

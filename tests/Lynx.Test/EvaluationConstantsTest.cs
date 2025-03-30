@@ -181,7 +181,7 @@ public class EvaluationConstantsTest
 #pragma warning disable S3949 // Calculations should not overflow - well, we're adding checked just in case
             Assert.Less(FirstKillerMoveValue, minMVVLVAMoveValue + GoodCaptureMoveBaseScoreValue);
             Assert.Less(maxMVVLVAMoveValue + BadCaptureMoveBaseScoreValue, FirstKillerMoveValue);
-            Assert.Less(minMVVLVAMoveValue + BadCaptureMoveBaseScoreValue, ThirdKillerMoveValue);
+            Assert.Less(minMVVLVAMoveValue + BadCaptureMoveBaseScoreValue, SecondKillerMoveValue);
 #pragma warning restore S3949 // Calculations should not overflow
         }
 
@@ -223,41 +223,6 @@ public class EvaluationConstantsTest
         Assert.Less(SecondKillerMoveValue, FirstKillerMoveValue);
 
         Assert.Greater(SecondKillerMoveValue, default);
-    }
-
-    [Test]
-    public void ThirdKillerMoveValueConstant()
-    {
-        var minMVVLVAMoveValue = int.MaxValue;
-        var maxMVVLVAMoveValue = int.MinValue;
-
-        for (int s = (int)Piece.P; s <= (int)Piece.r; ++s)
-        {
-            for (int t = (int)Piece.P; t <= (int)Piece.r; ++t)
-            {
-                if (MostValueableVictimLeastValuableAttacker[s][t] < minMVVLVAMoveValue)
-                {
-                    minMVVLVAMoveValue = MostValueableVictimLeastValuableAttacker[s][t];
-                }
-
-                if (MostValueableVictimLeastValuableAttacker[s][t] > maxMVVLVAMoveValue)
-                {
-                    maxMVVLVAMoveValue = MostValueableVictimLeastValuableAttacker[s][t];
-                }
-            }
-        }
-
-        checked
-        {
-#pragma warning disable S3949 // Calculations should not overflow - well, we're adding checked just in case
-            Assert.Less(ThirdKillerMoveValue, minMVVLVAMoveValue + GoodCaptureMoveBaseScoreValue);
-            Assert.Less(maxMVVLVAMoveValue + BadCaptureMoveBaseScoreValue, ThirdKillerMoveValue);
-#pragma warning restore S3949 // Calculations should not overflow
-        }
-
-        Assert.Less(ThirdKillerMoveValue, SecondKillerMoveValue);
-
-        Assert.Greater(ThirdKillerMoveValue, default);
     }
 
     [Test]

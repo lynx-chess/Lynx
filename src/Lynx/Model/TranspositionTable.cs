@@ -99,7 +99,9 @@ public readonly struct TranspositionTable
             || nodeType == NodeType.Exact                       // Entering PV data
             || depth
                 //+ Configuration.EngineSettings.TTReplacement_DepthOffset
-                + (Configuration.EngineSettings.TTReplacement_TTPVDepthOffset * wasPvInt) >= entry.Depth;           // Higher depth
+                + (Configuration.EngineSettings.TTReplacement_TTPVDepthOffset * wasPvInt) >= entry.Depth    // Higher depth
+                ;
+        // || entry.Type == NodeType.None not needed, since depth condition is always true for those cases
 
         if (!shouldReplace)
         {
@@ -111,6 +113,16 @@ public readonly struct TranspositionTable
         var recalculatedScore = RecalculateMateScores(score, -ply);
 
         entry.Update(position.UniqueIdentifier, recalculatedScore, staticEval, depth, nodeType, wasPvInt, move);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void SaveStaticEval(Position position, int staticEval, bool wasPv)
+    {
+        var ttIndex = CalculateTTIndex(position.UniqueIdentifier);
+        ref var entry = ref _tt[ttIndex];
+
+        // Extra key checks here (right before saving) failed for MT in https://github.com/lynx-chess/Lynx/pull/1566
+        entry.Update(position.UniqueIdentifier, EvaluationConstants.NoHashEntry, staticEval, depth: -1, NodeType.None, wasPv ? 1 : 0, null);
     }
 
     /// <summary>

@@ -977,7 +977,6 @@ static void FileAndRankMasks()
     const int square = (int)BoardSquare.e4;
 
     Masks.RankMasks[square].Print();
-    Masks.FileMasks[square].Print();
     Masks.IsolatedPawnMasks[square].Print();
     Masks.WhitePassedPawnMasks[square].Print();
     Masks.BlackPassedPawnMasks[square].Print();
@@ -1152,8 +1151,8 @@ static void UnmakeMove()
 
 static void PieceSquareTables()
 {
-    short[] middleGamePawnTableBlack = MiddleGamePawnTable.Select((_, index) => (short)-MiddleGamePawnTable[0][index ^ 56]).ToArray();
-    short[] endGamePawnTableBlack = EndGamePawnTable.Select((_, index) => (short)-EndGamePawnTable[0][index ^ 56]).ToArray();
+    short[] middleGamePawnTableBlack = [.. MiddleGamePawnTable.Select((_, index) => (short)-MiddleGamePawnTable[0][index ^ 56])];
+    short[] endGamePawnTableBlack = [.. EndGamePawnTable.Select((_, index) => (short)-EndGamePawnTable[0][index ^ 56])];
 
     PrintBitBoard(MiddleGamePawnTable);
     PrintBitBoard(middleGamePawnTableBlack);

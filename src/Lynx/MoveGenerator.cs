@@ -157,15 +157,19 @@ public static class MoveGenerator
                 else
                 {
                     movePool[localIndex++] = MoveExtensions.Encode(sourceSquare, singlePushSquare, piece);
-                }
 
-                // Double pawn push
-                // Inside of the if because singlePush square cannot be occupied either
-                var doublePushSquare = sourceSquare + (2 * pawnPush);
-                if (!position.OccupancyBitBoards[2].GetBit(doublePushSquare)
-                    && ((sourceRank == 2 && position.Side == Side.Black) || (sourceRank == 7 && position.Side == Side.White)))
-                {
-                    movePool[localIndex++] = MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece);
+                    // Double pawn push
+                    // Inside of the single pawn push if because singlePush square cannot be occupied either
+                    if ((sourceRank == 2 && position.Side == Side.Black)
+                        || (sourceRank == 7 && position.Side == Side.White))
+                    {
+                        var doublePushSquare = sourceSquare + (2 * pawnPush);
+
+                        if (!position.OccupancyBitBoards[2].GetBit(doublePushSquare))
+                        {
+                            movePool[localIndex++] = MoveExtensions.EncodeDoublePawnPush(sourceSquare, doublePushSquare, piece);
+                        }
+                    }
                 }
             }
 

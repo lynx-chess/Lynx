@@ -39,12 +39,16 @@ public sealed partial class Engine
 
         bool isRoot = ply == 0;
         bool pvNode = beta - alpha > 1;
+
         ShortMove ttBestMove = default;
-        NodeType ttElementType = default;
-        int ttScore = default;
+        NodeType ttElementType = NodeType.Unknown;
+        int ttScore = EvaluationConstants.NoHashEntry;
         int ttStaticEval = int.MinValue;
         int ttDepth = default;
         bool ttWasPv = false;
+
+        bool ttHit = false;
+        bool ttEntryHasBestMove = false;
         bool ttMoveIsCapture = false;
 
         Debug.Assert(!pvNode || !cutnode);
@@ -53,9 +57,14 @@ public sealed partial class Engine
         {
             (ttScore, ttBestMove, ttElementType, ttStaticEval, ttDepth, ttWasPv) = _tt.ProbeHash(position, ply);
 
+            // ttScore shouldn't be used, since it'll be 0 for default structs
+            ttHit = ttElementType != NodeType.Unknown && ttElementType != NodeType.None;
+
+            ttEntryHasBestMove = ttBestMove != default;
+
             // TT cutoffs
             if (!pvNode
-                && ttScore != EvaluationConstants.NoHashEntry
+                && ttHit
                 && ttDepth >= depth)
             {
                 if (ttElementType == NodeType.Exact
@@ -71,7 +80,7 @@ public sealed partial class Engine
                 }
             }
 
-            ttMoveIsCapture = ttElementType != default && ttBestMove != default && position.Board[((int)ttBestMove).TargetSquare()] != (int)Piece.None;
+            ttMoveIsCapture = ttHit && ttEntryHasBestMove && position.Board[((int)ttBestMove).TargetSquare()] != (int)Piece.None;
 
             // Internal iterative reduction (IIR)
             // If this position isn't found in TT, it has never been searched before,
@@ -79,7 +88,7 @@ public sealed partial class Engine
             // Therefore, we search with reduced depth for now, expecting to record a TT move
             // which we'll be able to use later for the full depth search
             if (depth >= Configuration.EngineSettings.IIR_MinDepth
-                && (ttElementType == default || ttBestMove == default))
+                && (!ttHit || !ttEntryHasBestMove))
             {
                 --depth;
             }
@@ -119,16 +128,17 @@ public sealed partial class Engine
         }
         else if (!pvNode)
         {
-            if (ttElementType == default)
-            {
-                (staticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable);
-            }
-            else
+            if (ttElementType != NodeType.Unknown)   // Equivalent to ttHit || ttElementType == NodeType.None
             {
                 Debug.Assert(ttStaticEval != int.MinValue);
 
                 staticEval = ttStaticEval;
                 phase = position.Phase();
+            }
+            else
+            {
+                (staticEval, phase) = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable);
+                _tt.SaveStaticEval(position, staticEval, ttPv);
             }
 
             Game.UpdateStaticEvalInStack(ply, staticEval);
@@ -145,7 +155,7 @@ public sealed partial class Engine
             // If the score is outside what the current bounds are, but it did match flag and depth,
             // then we can trust that this score is more accurate than the current static evaluation,
             // and we can update our static evaluation for better accuracy in pruning
-            if (ttElementType != default && ttElementType != (ttScore > staticEval ? NodeType.Alpha : NodeType.Beta))
+            if (ttHit && ttElementType != (ttScore > staticEval ? NodeType.Alpha : NodeType.Beta))
             {
                 staticEval = ttScore;
             }
@@ -238,6 +248,10 @@ public sealed partial class Engine
         else
         {
             staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
+            if (!ttHit)
+            {
+                _tt.SaveStaticEval(position, staticEval, ttPv);
+            }
         }
 
         Span<Move> moves = stackalloc Move[Constants.MaxNumberOfPossibleMovesInAPosition];
@@ -275,6 +289,13 @@ public sealed partial class Engine
             var moveScore = moveScores[moveIndex];
             var isCapture = move.IsCapture();
 
+            int? quietHistory = null;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            int QuietHistory() => quietHistory ??=
+                _quietHistory[move.Piece()][move.TargetSquare()]
+                + ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply - 1);
+
             // If we prune while getting checmated, we risk not finding any move and having an empty PV
             bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
 
@@ -289,8 +310,7 @@ public sealed partial class Engine
             {
                 // 🔍 Late Move Pruning (LMP) - all quiet moves can be pruned
                 // after searching the first few given by the move ordering algorithm
-                if (depth <= Configuration.EngineSettings.LMP_MaxDepth
-                    && moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth * (improving ? 2 : 1))) // Based on formula suggested by Antares
+                if (moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth * (improving ? 2 : 1))) // Based on formula suggested by Antares
                 {
                     break;
                 }
@@ -300,7 +320,7 @@ public sealed partial class Engine
                 if (!isCapture
                     && moveScore < EvaluationConstants.CounterMoveValue
                     && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth    // TODO use LMR depth
-                    && _quietHistory[move.Piece()][move.TargetSquare()] < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
+                    && QuietHistory() < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
                 {
                     break;
                 }
@@ -404,7 +424,7 @@ public sealed partial class Engine
                                 reduction /= EvaluationConstants.LMRScaleFactor;
 
                                 // ~ history/(0.75 * maxHistory/2/)
-                                reduction -= _captureHistory[CaptureHistoryIndex(move.Piece(), move.TargetSquare(), move.CapturedPiece())] / Configuration.EngineSettings.LMR_History_Divisor_Noisy;
+                                reduction -= CaptureHistoryEntry(move) / Configuration.EngineSettings.LMR_History_Divisor_Noisy;
                             }
                             else
                             {
@@ -443,25 +463,25 @@ public sealed partial class Engine
                                 reduction /= EvaluationConstants.LMRScaleFactor;
 
                                 // -= history/(maxHistory/2)
-                                reduction -= 2 * _quietHistory[move.Piece()][move.TargetSquare()] / Configuration.EngineSettings.LMR_History_Divisor_Quiet;
 
-                                // Don't allow LMR to drop into qsearch or increase the depth
-                                // depth - 1 - depth +2 = 1, min depth we want
-                                reduction = Math.Clamp(reduction, 0, depth - 2);
+                                reduction -= QuietHistory() / Configuration.EngineSettings.LMR_History_Divisor_Quiet;
                             }
                         }
 
-                        // TODO move inside of depth conditions
-
                         // 🔍 Static Exchange Evaluation (SEE) reduction
                         // Bad captures are reduced more
+                        // Last attempt to move it inside of LMR conditions was https://github.com/lynx-chess/Lynx/pull/1589
                         if (!isInCheck
                             && moveScore < EvaluationConstants.PromotionMoveScoreValue
                             && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
                         {
                             reduction += Configuration.EngineSettings.SEE_BadCaptureReduction;
-                            reduction = Math.Clamp(reduction, 0, depth - 1);
                         }
+
+                        // Don't allow LMR to drop into qsearch or increase the depth: min depth 1
+                        // (depth - 1) - depth + 2 = 1, min depth we want
+                        // newDepth - newDepth + 1 = 1, min depth we want
+                        reduction = Math.Max(0, Math.Min(reduction, newDepth - 1));
                     }
 
                     var reducedDepth = newDepth - reduction;
@@ -619,7 +639,7 @@ public sealed partial class Engine
         var ttProbeResult = _tt.ProbeHash(position, ply);
         var ttScore = ttProbeResult.Score;
         var ttNodeType = ttProbeResult.NodeType;
-        var ttHit = ttNodeType != NodeType.Unknown;
+        var ttHit = ttNodeType != NodeType.Unknown && ttNodeType != NodeType.None;
         var ttPv = pvNode || ttProbeResult.WasPv;
 
         // QS TT cutoff
@@ -657,6 +677,11 @@ public sealed partial class Engine
 
         if (!isInCheck)
         {
+            if (!ttHit)
+            {
+                _tt.SaveStaticEval(position, staticEval, ttPv);
+            }
+
             // Standing pat beta-cutoff (updating alpha after this check)
             if (eval >= beta)
             {

@@ -1140,13 +1140,15 @@ public class Position : IDisposable
 
         var packedBonus = RookMobilityBonus[attacksCount];
 
+        var file = Masks.FileMask(squareIndex);
+
         // Rook on open file
-        if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == default)
+        if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & file) == default)
         {
             packedBonus += OpenFileRookBonus;
         }
         // Rook on semi-open file
-        else if ((PieceBitBoards[pieceIndex - pawnToRookOffset] & Masks.FileMasks[squareIndex]) == default)
+        else if ((PieceBitBoards[pieceIndex - pawnToRookOffset] & file) == default)
         {
             packedBonus += SemiOpenFileRookBonus;
         }
@@ -1298,13 +1300,15 @@ public class Position : IDisposable
         // Opposite side rooks or queens on the board
         if (PieceBitBoards[(int)Piece.r - kingSideOffset] + PieceBitBoards[(int)Piece.q - kingSideOffset] != 0)
         {
+            var file = Masks.FileMask(squareIndex);
+
             // King on open file
-            if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & Masks.FileMasks[squareIndex]) == 0)
+            if (((PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]) & file) == 0)
             {
                 packedBonus += OpenFileKingPenalty;
             }
             // King on semi-open file
-            else if ((PieceBitBoards[(int)Piece.P + kingSideOffset] & Masks.FileMasks[squareIndex]) == 0)
+            else if ((PieceBitBoards[(int)Piece.P + kingSideOffset] & file) == 0)
             {
                 packedBonus += SemiOpenFileKingPenalty;
             }
