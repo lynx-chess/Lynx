@@ -466,10 +466,6 @@ public sealed partial class Engine
                                 // -= history/(maxHistory/2)
 
                                 reduction -= QuietHistory() / Configuration.EngineSettings.LMR_History_Divisor_Quiet;
-
-                                // Don't allow LMR to drop into qsearch or increase the depth
-                                // depth - 1 - depth +2 = 1, min depth we want
-                                reduction = Math.Clamp(reduction, 0, depth - 2);
                             }
                         }
 
@@ -481,8 +477,12 @@ public sealed partial class Engine
                             && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
                         {
                             reduction += Configuration.EngineSettings.SEE_BadCaptureReduction;
-                            reduction = Math.Clamp(reduction, 0, depth - 1);
                         }
+
+                        // Don't allow LMR to drop into qsearch or increase the depth: min depth 1
+                        // (depth - 1) - depth + 2 = 1, min depth we want
+                        // newDepth - newDepth + 1 = 1, min depth we want
+                        reduction = Math.Max(0, Math.Min(reduction, newDepth - 1));
                     }
 
                     var reducedDepth = newDepth - reduction;
