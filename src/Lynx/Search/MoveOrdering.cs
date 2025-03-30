@@ -167,19 +167,8 @@ public sealed partial class Engine
         {
             // 🔍 Continuation history
             // - Counter move history (continuation history, ply - 1)
-            var previousMove = Game.ReadMoveFromStack(ply - 1);
-            Debug.Assert(previousMove != 0);
-
             ref var continuationHistoryEntry = ref ContinuationHistoryEntry(piece, targetSquare, ply - 1);
             continuationHistoryEntry = ScoreHistoryMove(continuationHistoryEntry, rawHistoryBonus);
-
-            //    var previousPreviousMove = Game.MoveStack[ply - 2];
-            //    var previousPreviousMovePiece = previousPreviousMove.Piece();
-            //    var previousPreviousMoveTargetSquare = previousPreviousMove.TargetSquare();
-
-            //    _continuationHistory[piece][targetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare] = ScoreHistoryMove(
-            //        _continuationHistory[piece][targetSquare][1][previousPreviousMovePiece][previousPreviousMoveTargetSquare],
-            //        EvaluationConstants.HistoryBonus[depth]);
         }
 
         for (int i = 0; i < visitedMovesCounter - 1; ++i)
@@ -193,7 +182,6 @@ public sealed partial class Engine
 
                 // 🔍 Quiet history penalty / malus
                 // When a quiet move fails high, penalize previous visited quiet moves
-
                 ref var quietHistoryEntry = ref _quietHistory[visitedMovePiece][visitedMoveTargetSquare];
                 quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, -rawHistoryBonus);
 
