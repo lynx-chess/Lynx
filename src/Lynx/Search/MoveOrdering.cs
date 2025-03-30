@@ -75,11 +75,6 @@ public sealed partial class Engine
 
         if (ply >= 1)
         {
-            var previousMove = Game.ReadMoveFromStack(ply - 1);
-            Debug.Assert(previousMove != 0);
-            var previousMovePiece = previousMove.Piece();
-            var previousMoveTargetSquare = previousMove.TargetSquare();
-
             // Countermove
             if (CounterMove(ply - 1) == move)
             {
@@ -162,9 +157,11 @@ public sealed partial class Engine
         var piece = move.Piece();
         var targetSquare = move.TargetSquare();
 
+        int rawHistoryBonus = HistoryBonus[depth];
+
         _quietHistory[piece][targetSquare] = ScoreHistoryMove(
             _quietHistory[piece][targetSquare],
-            HistoryBonus[depth]);
+            rawHistoryBonus);
 
         if (!isRoot)
         {
@@ -174,7 +171,7 @@ public sealed partial class Engine
             Debug.Assert(previousMove != 0);
 
             ref var continuationHistoryEntry = ref ContinuationHistoryEntry(piece, targetSquare, ply - 1);
-            continuationHistoryEntry = ScoreHistoryMove(continuationHistoryEntry, HistoryBonus[depth]);
+            continuationHistoryEntry = ScoreHistoryMove(continuationHistoryEntry, rawHistoryBonus);
 
             //    var previousPreviousMove = Game.MoveStack[ply - 2];
             //    var previousPreviousMovePiece = previousPreviousMove.Piece();
@@ -196,15 +193,15 @@ public sealed partial class Engine
 
                 // 🔍 Quiet history penalty / malus
                 // When a quiet move fails high, penalize previous visited quiet moves
-                _quietHistory[visitedMovePiece][visitedMoveTargetSquare] = ScoreHistoryMove(
-                    _quietHistory[visitedMovePiece][visitedMoveTargetSquare],
-                    -HistoryBonus[depth]);
+
+                ref var quietHistoryEntry = ref _quietHistory[visitedMovePiece][visitedMoveTargetSquare];
+                quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, -rawHistoryBonus);
 
                 if (!isRoot)
                 {
                     // 🔍 Continuation history penalty / malus
                     ref var continuationHistoryEntry = ref ContinuationHistoryEntry(visitedMovePiece, visitedMoveTargetSquare, ply - 1);
-                    continuationHistoryEntry = ScoreHistoryMove(continuationHistoryEntry, -HistoryBonus[depth]);
+                    continuationHistoryEntry = ScoreHistoryMove(continuationHistoryEntry, -rawHistoryBonus);
                 }
             }
         }
