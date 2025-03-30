@@ -75,21 +75,6 @@ public sealed partial class Engine
         var piece = move.Piece();
         var targetSquare = move.TargetSquare();
 
-        if (ply >= 2)
-        {
-            // Countermove
-            if (CounterMove(ply - 1) == move)
-            {
-                return CounterMoveValue;
-            }
-
-            // Countermove + follow-up history
-            return BaseMoveScore
-                + _quietHistory[piece][targetSquare]
-                + CounterMoveHistoryEntry(piece, targetSquare, ply)
-                + FollowUpHistoryEntry(piece, targetSquare, ply);
-        }
-
         if (ply >= 1)
         {
             // Countermove
