@@ -1,5 +1,6 @@
 ﻿using Lynx.Model;
 using NUnit.Framework;
+using System.Buffers;
 using System.Collections.Frozen;
 using static Lynx.Constants;
 
@@ -154,5 +155,11 @@ public class ConstantsTest
         {
             Assert.AreEqual((sq >> 3) + 1, 8 - Constants.Rank[sq]);
         }
+    }
+
+    [Test]
+    public void MaxNumberMovesInAGame()
+    {
+        Assert.Less(Constants.MaxNumberMovesInAGame, 1024 * 1024, "We'd need to customize ArrayPool due to desired array size requirements");
     }
 }
