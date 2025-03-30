@@ -472,10 +472,9 @@ public sealed partial class Engine
                             }
                         }
 
-                        // TODO move inside of depth conditions
-
                         // 🔍 Static Exchange Evaluation (SEE) reduction
                         // Bad captures are reduced more
+                        // Last attempt to move it inside of LMR conditions was https://github.com/lynx-chess/Lynx/pull/1589
                         if (!isInCheck
                             && moveScore < EvaluationConstants.PromotionMoveScoreValue
                             && moveScore >= EvaluationConstants.BadCaptureMoveBaseScoreValue)
