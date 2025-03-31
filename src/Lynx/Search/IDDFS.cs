@@ -8,7 +8,7 @@ namespace Lynx;
 public sealed partial class Engine
 {
     private readonly Stopwatch _stopWatch = new();
-    private readonly Move[] _pVTable = GC.AllocateArray<Move>(Configuration.EngineSettings.MaxDepth * (Configuration.EngineSettings.MaxDepth + 1) / 2, pinned: true);
+    private readonly Move[] _pVTable = GC.AllocateArray<Move>(Configuration.EngineSettings.MaxDepth * (Configuration.EngineSettings.MaxDepth + 1 + Constants.ArrayDepthMargin) / 2, pinned: true);
 
     /// <summary>
     /// 2 x (<see cref="Configuration.EngineSettings.MaxDepth"/> + <see cref="Constants.ArrayDepthMargin"/>)
@@ -175,7 +175,7 @@ public sealed partial class Engine
                         {
                             _logger.Warn(
                                 "[#{EngineId}] Depth {Depth}: potential +X checkmate detected in position {Position}, but score {BestScore} outside of the limits",
-                                _id, depth, Game.PositionBeforeLastSearch.FEN(), bestScore);
+                                _id, depth, Game.PositionBeforeLastSearch.FEN(Game.HalfMovesWithoutCaptureOrPawnMove), bestScore);
 
                             bestScore = EvaluationConstants.PositiveCheckmateDetectionLimit + 1;
 
@@ -186,7 +186,7 @@ public sealed partial class Engine
                         {
                             _logger.Warn(
                                 "[#{EngineId}] Depth {Depth}: potential -X checkmate detected in position {Position}, but score {BestScore} outside of the limits",
-                                _id, depth, Game.PositionBeforeLastSearch.FEN(), bestScore);
+                                _id, depth, Game.PositionBeforeLastSearch.FEN(Game.HalfMovesWithoutCaptureOrPawnMove), bestScore);
 
                             bestScore = EvaluationConstants.NegativeCheckmateDetectionLimit - 1;
 
@@ -213,7 +213,7 @@ public sealed partial class Engine
                 {
                     _logger.Warn(
                         "[#{EngineId}] Depth {Depth}: search didn't produce a best move for position {Position}. Score {Score} (mate in {Mate}?) detected",
-                        _id, depth, Game.PositionBeforeLastSearch.FEN(), bestScore, mate);
+                        _id, depth, Game.PositionBeforeLastSearch.FEN(Game.HalfMovesWithoutCaptureOrPawnMove), bestScore, mate);
 
                     _bestMoveStability = 0;
                     _scoreDelta = 0;
@@ -254,7 +254,7 @@ public sealed partial class Engine
         {
             _logger.Error(e,
                 "[#{EngineId}] Depth {Depth}: unexpected error ocurred during the search of position {Position}, best move will be returned\n",
-                _id, depth, Game.PositionBeforeLastSearch.FEN());
+                _id, depth, Game.PositionBeforeLastSearch.FEN(Game.HalfMovesWithoutCaptureOrPawnMove));
         }
         finally
         {
