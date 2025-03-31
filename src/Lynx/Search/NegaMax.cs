@@ -764,15 +764,6 @@ public sealed partial class Engine
             {
                 bestScore = score;
 
-                // Beta-cutoff
-                if (score >= beta)
-                {
-                    PrintMessage($"Pruning: {move} is enough to discard this line");
-
-                    nodeType = NodeType.Beta;
-                    break;
-                }
-
                 // Improving alpha
                 if (score > alpha)
                 {
@@ -783,6 +774,15 @@ public sealed partial class Engine
                     CopyPVTableMoves(pvIndex + 1, nextPvIndex, Configuration.EngineSettings.MaxDepth - ply - 1);
 
                     nodeType = NodeType.Exact;
+                }
+
+                // Beta-cutoff
+                if (score >= beta)
+                {
+                    PrintMessage($"Pruning: {move} is enough to discard this line");
+
+                    nodeType = NodeType.Beta;
+                    break;
                 }
             }
         }
