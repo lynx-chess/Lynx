@@ -95,7 +95,7 @@ public sealed class Game : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool Update50movesRule(Move moveToPlay, bool isCapture)
     {
-        if (isCapture)
+        if (isCapture || moveToPlay.IsCastle())
         {
             if (HalfMovesWithoutCaptureOrPawnMove < 100)
             {
