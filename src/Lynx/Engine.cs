@@ -230,7 +230,7 @@ public sealed partial class Engine : IDisposable
         }
         catch (Exception e)
         {
-            _logger.Fatal(e, "[#{EngineId}] Error in {Method} for position {Position}", _id, nameof(Search), Game.CurrentPosition.FEN());
+            _logger.Fatal(e, "[#{EngineId}] Error in {Method} for position {Position}", _id, nameof(Search), Game.CurrentPosition.FEN(Game.HalfMovesWithoutCaptureOrPawnMove));
             return null;
         }
         finally
