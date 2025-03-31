@@ -43,7 +43,7 @@ public static class EvaluationConstants
         + (4 * MaterialScalingPieceValues[(int)Piece.R])
         + (2 * MaterialScalingPieceValues[(int)Piece.Q]);
 
-    public static readonly int MaterialScalingDivisor = MaterialScaling_Total / MaterialScalingDiff;
+    public static readonly double MaterialScalingDivisor = (double)MaterialScaling_Total / MaterialScalingDiff;
 
     /// <summary>
     /// 2 x <see cref="Constants.AbsoluteMaxDepth"/> x <see cref="Constants.MaxNumberOfPossibleMovesInAPosition"/>

@@ -1377,7 +1377,7 @@ public class Position : IDisposable
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static int ScaleEvalWith50MovesDrawDistance(int eval, int movesWithoutCaptureOrPawnMove) =>
-        eval * (200 - movesWithoutCaptureOrPawnMove) / 200;
+        (int)(eval * (200 - movesWithoutCaptureOrPawnMove) / 200.0);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal int ScaleEvalWithMaterialLeft(int eval)
@@ -1397,7 +1397,7 @@ public class Position : IDisposable
 
         var scale = MaterialScalingBase + (weigthedMaterialCount / MaterialScalingDivisor);
 
-        return eval * scale / MaterialScalingTotal;
+        return (int)(eval * scale / MaterialScalingTotal);
     }
 
     #endregion
