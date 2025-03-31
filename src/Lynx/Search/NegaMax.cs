@@ -428,7 +428,8 @@ public sealed partial class Engine
                             }
                             else
                             {
-                                reduction = EvaluationConstants.LMRReductions[0][depth][visitedMovesCounter];
+                                reduction = EvaluationConstants.LMRReductions[0][depth][visitedMovesCounter]
+                                    + 1;    // Quiet LMR
 
                                 if (!improving)
                                 {
