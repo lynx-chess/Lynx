@@ -1,5 +1,7 @@
 ﻿#pragma warning disable IDE1006 // Naming Styles
 
+using Lynx.Model;
+
 namespace Lynx;
 
 public static class EvaluationConstants
@@ -21,6 +23,27 @@ public static class EvaluationConstants
     ];
 
     public const int MaxPhase = 24;
+
+    public const int MaterialScalingTotal = 1024;
+
+    public const int MaterialScalingDiff = 50;
+
+    public const int MaterialScalingBase = MaterialScalingTotal - MaterialScalingDiff;
+
+    public static ReadOnlySpan<int> MaterialScalingPieceValues =>
+    [
+        0, 300, 300, 500, 900, 0,
+        0, 300, 300, 500, 900, 0,
+    ];
+
+    public static readonly int MaterialScaling_Total =
+        (16 * MaterialScalingPieceValues[(int)Piece.P])
+        + (4 * MaterialScalingPieceValues[(int)Piece.N])
+        + (4 * MaterialScalingPieceValues[(int)Piece.B])
+        + (4 * MaterialScalingPieceValues[(int)Piece.R])
+        + (2 * MaterialScalingPieceValues[(int)Piece.Q]);
+
+    public static readonly int MaterialScalingDivisor = MaterialScaling_Total / MaterialScalingDiff;
 
     /// <summary>
     /// 2 x <see cref="Constants.AbsoluteMaxDepth"/> x <see cref="Constants.MaxNumberOfPossibleMovesInAPosition"/>

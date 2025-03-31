@@ -976,6 +976,7 @@ public class Position : IDisposable
         // Endgame scaling with pawn count, formula yoinked from Sirius
         eval = (int)(eval * ((80 + (totalPawnsCount * 7)) / 128.0));
 
+        eval = ScaleEvalWithMaterialLeft(eval);
         eval = ScaleEvalWith50MovesDrawDistance(eval, movesWithoutCaptureOrPawnMove);
 
         eval = Math.Clamp(eval, MinStaticEval, MaxStaticEval);
@@ -1377,6 +1378,27 @@ public class Position : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static int ScaleEvalWith50MovesDrawDistance(int eval, int movesWithoutCaptureOrPawnMove) =>
         eval * (200 - movesWithoutCaptureOrPawnMove) / 200;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal int ScaleEvalWithMaterialLeft(int eval)
+    {
+        //var pawnCount = (PieceBitBoards[(int)Piece.P] | PieceBitBoards[(int)Piece.p]).CountBits();
+        var knightCount = (PieceBitBoards[(int)Piece.N] | PieceBitBoards[(int)Piece.n]).CountBits();
+        var bishopCount = (PieceBitBoards[(int)Piece.B] | PieceBitBoards[(int)Piece.b]).CountBits();
+        var rookCount = (PieceBitBoards[(int)Piece.R] | PieceBitBoards[(int)Piece.r]).CountBits();
+        var queenCount = (PieceBitBoards[(int)Piece.Q] | PieceBitBoards[(int)Piece.q]).CountBits();
+
+        var weigthedMaterialCount =
+            //(pawnCount * MaterialScalingPieceValues[(int)Piece.P])
+            (knightCount * MaterialScalingPieceValues[(int)Piece.N])
+            + (bishopCount * MaterialScalingPieceValues[(int)Piece.B])
+            + (rookCount * MaterialScalingPieceValues[(int)Piece.R])
+            + (queenCount * MaterialScalingPieceValues[(int)Piece.Q]);
+
+        var scale = MaterialScalingBase + (weigthedMaterialCount / MaterialScalingDivisor);
+
+        return eval * scale / MaterialScalingTotal;
+    }
 
     #endregion
 
