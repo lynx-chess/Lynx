@@ -429,7 +429,7 @@ public sealed partial class Engine
                             else
                             {
                                 reduction = EvaluationConstants.LMRReductions[0][depth][visitedMovesCounter]
-                                    + 1;    // Quiet LMR
+                                    + Configuration.EngineSettings.LMR_Quiet;    // Quiet LMR
 
                                 if (!improving)
                                 {
