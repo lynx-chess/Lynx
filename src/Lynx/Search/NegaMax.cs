@@ -1,6 +1,7 @@
 ﻿using Lynx.Model;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 
 namespace Lynx;
 
@@ -745,17 +746,24 @@ public sealed partial class Engine
                 continue;
             }
 
+            // Before making a move
+            // No need to check for threefold or 50 moves repetitions, since we're only searching captures, promotions, and castles
+            var oldHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
+            _ = Game.Update50movesRule(move, move.IsCapture());
+            //Game.AddToPositionHashHistory(position.UniqueIdentifier);
+            Game.UpdateMoveinStack(ply, move);
+
             ++_nodes;
             isAnyCaptureValid = true;
 
             PrintPreMove(position, ply, move, isQuiescence: true);
 
-            // No need to check for threefold or 50 moves repetitions, since we're only searching captures, promotions, and castles
-            Game.UpdateMoveinStack(ply, move);
-
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
             int score = -QuiescenceSearch(ply + 1, -beta, -alpha, pvNode, cancellationToken);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
+
+            Game.HalfMovesWithoutCaptureOrPawnMove = oldHalfMovesWithoutCaptureOrPawnMove;
+            //Game.RemoveFromPositionHashHistory();
             position.UnmakeMove(move, gameState);
 
             PrintMove(position, ply, move, score, isQuiescence: true);
