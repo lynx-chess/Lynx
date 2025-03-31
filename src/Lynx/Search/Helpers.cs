@@ -131,7 +131,7 @@ public sealed partial class Engine
             newPosition.MakeMove(move);
             if (!newPosition.WasProduceByAValidMove())
             {
-                throw new LynxException($"Invalid position after move {move.UCIString()} from position {position.FEN()}");
+                throw new LynxException($"Invalid position after move {move.UCIString()} from position {position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove)}");
             }
             position = newPosition;
         }
