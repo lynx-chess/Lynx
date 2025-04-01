@@ -430,7 +430,8 @@ public sealed partial class Engine
                             }
                             else
                             {
-                                reduction = EvaluationConstants.LMRReductions[0][depth][visitedMovesCounter];
+                                reduction = EvaluationConstants.LMRReductions[0][depth][visitedMovesCounter]
+                                    + Configuration.EngineSettings.LMR_Quiet;    // Quiet LMR
 
                                 if (!improving)
                                 {
@@ -447,7 +448,7 @@ public sealed partial class Engine
                                     reduction += Configuration.EngineSettings.LMR_TTPV;
                                 }
 
-                                if (!isCapture && ttMoveIsCapture)
+                                if (ttMoveIsCapture)    // Move isn't a capture but TT move is
                                 {
                                     reduction += Configuration.EngineSettings.LMR_TTCapture;
                                 }
