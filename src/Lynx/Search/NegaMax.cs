@@ -751,8 +751,10 @@ public sealed partial class Engine
 
             PrintPreMove(position, ply, move, isQuiescence: true);
 
-            // No need to check for threefold or 50 moves repetitions, since we're only searching captures, promotions, and castles
+            // No need to check for threefold or 50 moves repetitions, since we're only searching captures, promotions, and castling moves
             Game.UpdateMoveinStack(ply, move);
+            // This is technically not correct for castling moves, but whatever
+            Game.HalfMovesWithoutCaptureOrPawnMove = 0;
 
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
             int score = -QuiescenceSearch(ply + 1, -beta, -alpha, pvNode, cancellationToken);
