@@ -10,12 +10,14 @@ namespace Lynx;
 /// </summary>
 public static class ZobristTable
 {
-    private static readonly LynxRandom _random = new(int.MaxValue);
+    internal const int Seed = int.MaxValue;
+
+    private static readonly LynxRandom _random = new(Seed);
 
     /// <summary>
     /// 64x12
     /// </summary>
-    private static readonly ulong[][] _table = Initialize();
+    private static readonly ulong[][] _table = Initialize(_random);
     private static readonly ulong[] _50mrTable = GC.AllocateArray<ulong>(Constants.MaxNumberMovesInAGame, pinned: true);
 
     private static readonly ulong WK_Hash = _table[(int)BoardSquare.a8][(int)Piece.p];
@@ -118,8 +120,7 @@ public static class ZobristTable
 
         positionHash ^= EnPassantHash((int)position.EnPassant)
             ^ SideHash((ulong)position.Side)
-            ^ CastleHash(position.Castle)
-            ^ _50mrTable[halfMovesWithoutCaptureOrPawnMove];
+            ^ CastleHash(position.Castle);
 
         return positionHash;
     }
@@ -165,7 +166,7 @@ public static class ZobristTable
     /// Initializes Zobrist table (long[64][12])
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static ulong[][] Initialize()
+    internal static ulong[][] Initialize(LynxRandom random)
     {
         var zobristTable = new ulong[64][];
 
@@ -174,7 +175,7 @@ public static class ZobristTable
             zobristTable[squareIndex] = new ulong[12];
             for (int pieceIndex = 0; pieceIndex < 12; ++pieceIndex)
             {
-                zobristTable[squareIndex][pieceIndex] = _random.NextUInt64();
+                zobristTable[squareIndex][pieceIndex] = random.NextUInt64();
             }
         }
 

@@ -1,12 +1,20 @@
 ﻿using Lynx.Model;
 using NUnit.Framework;
+using System;
 
 namespace Lynx.Test;
 
 public class ZobristTableTest
 {
-    private readonly LynxRandom _random = new();
-    private readonly ulong[][] _zobristTable = ZobristTable.Initialize();
+    private LynxRandom _random = null!;
+    private ulong[][] _zobristTable = null!;
+
+    [SetUp]
+    public void Setup()
+    {
+        _random = new LynxRandom(ZobristTable.Seed);
+        _zobristTable = ZobristTable.Initialize(_random);
+    }
 
     [Test]
     public void XorBehavior()
@@ -31,7 +39,8 @@ public class ZobristTableTest
     [Test]
     public void ReproducibleZobristTable()
     {
-        var anotherZobristTable = ZobristTable.Initialize();
+        var random = new LynxRandom(ZobristTable.Seed);
+        var anotherZobristTable = ZobristTable.Initialize(random);
 
         for (int squareIndex = 0; squareIndex < 64; ++squareIndex)
         {

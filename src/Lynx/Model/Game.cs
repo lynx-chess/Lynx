@@ -201,7 +201,6 @@ public sealed class Game : IDisposable
 
             var oldHalfMovesWithoutCaptureOrPawnMove = HalfMovesWithoutCaptureOrPawnMove;
             Update50movesRule(moveToPlay, moveToPlay.IsCapture());
-            CurrentPosition.UpdateUniqueIdentifierWith50mr(oldHalfMovesWithoutCaptureOrPawnMove, HalfMovesWithoutCaptureOrPawnMove);
         }
         else
         {

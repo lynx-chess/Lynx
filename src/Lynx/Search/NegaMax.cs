@@ -55,7 +55,8 @@ public sealed partial class Engine
 
         if (!isRoot)
         {
-            (ttScore, ttBestMove, ttElementType, ttStaticEval, ttDepth, ttWasPv) = _tt.ProbeHash(position, ply);
+            (ttScore, ttBestMove, ttElementType, ttStaticEval, ttDepth, ttWasPv) =
+                _tt.ProbeHash(position, ply, Game.HalfMovesWithoutCaptureOrPawnMove);
 
             // ttScore shouldn't be used, since it'll be 0 for default structs
             ttHit = ttElementType != NodeType.Unknown && ttElementType != NodeType.None;
@@ -123,7 +124,7 @@ public sealed partial class Engine
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
-            _tt.RecordHash(position, finalPositionEvaluation, depth, ply, finalPositionEvaluation, NodeType.Exact, ttPv);
+            _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, finalPositionEvaluation, depth, ply, finalPositionEvaluation, NodeType.Exact, ttPv);
             return finalPositionEvaluation;
         }
         else if (!pvNode)
@@ -373,7 +374,6 @@ public sealed partial class Engine
             // Before making a move
             var oldHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
             var canBeRepetition = Game.Update50movesRule(move, isCapture);
-            position.UpdateUniqueIdentifierWith50mr(oldHalfMovesWithoutCaptureOrPawnMove, Game.HalfMovesWithoutCaptureOrPawnMove);
 
             Game.AddToPositionHashHistory(position.UniqueIdentifier);
             Game.UpdateMoveinStack(ply, move);
@@ -604,7 +604,7 @@ public sealed partial class Engine
             staticEval = bestScore;
         }
 
-        _tt.RecordHash(position, staticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);
+        _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, staticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);
 
         return bestScore;
     }
@@ -639,7 +639,7 @@ public sealed partial class Engine
         var nextPvIndex = PVTable.Indexes[ply + 1];
         _pVTable[pvIndex] = _defaultMove;   // Nulling the first value before any returns
 
-        var ttProbeResult = _tt.ProbeHash(position, ply);
+        var ttProbeResult = _tt.ProbeHash(position, ply, Game.HalfMovesWithoutCaptureOrPawnMove);
         var ttScore = ttProbeResult.Score;
         var ttNodeType = ttProbeResult.NodeType;
         var ttHit = ttNodeType != NodeType.Unknown && ttNodeType != NodeType.None;
@@ -755,7 +755,6 @@ public sealed partial class Engine
 
             // No need to check for threefold or 50 moves repetitions, since we're only searching captures, promotions, and castles
             Game.UpdateMoveinStack(ply, move);
-            position.UpdateUniqueIdentifierWith50mr(Game.HalfMovesWithoutCaptureOrPawnMove, 0);
             Game.HalfMovesWithoutCaptureOrPawnMove = 0;
 
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
@@ -803,7 +802,7 @@ public sealed partial class Engine
             staticEval = bestScore;
         }
 
-        _tt.RecordHash(position, staticEval, 0, ply, bestScore, nodeType, ttPv, bestMove);
+        _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, staticEval, 0, ply, bestScore, nodeType, ttPv, bestMove);
 
         return bestScore;
     }

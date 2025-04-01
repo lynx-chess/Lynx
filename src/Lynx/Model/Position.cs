@@ -19,6 +19,8 @@ public class Position : IDisposable
 
     public ulong UniqueIdentifier { get; private set; }
 
+    public ulong UniqueIdentifierWith50mr(int halfMovesWithoutCaptureOrPawnMove) => UniqueIdentifier ^ ZobristTable.HalfMovesWithoutCaptureOrPawnMoveHash(halfMovesWithoutCaptureOrPawnMove);
+
     private ulong _kingPawnUniqueIdentifier;
 
     /// <summary>
@@ -427,14 +429,6 @@ public class Position : IDisposable
         //Debug.Assert(ZobristTable.PawnKingHash(this) != _kingPawnUniqueIdentifier && WasProduceByAValidMove());
 
         return new GameState(uniqueIdentifierCopy, kingPawnKeyUniqueIdentifierCopy, incrementalEvalAccumulatorCopy, incrementalPhaseAccumulatorCopy, enpassantCopy, castleCopy, isIncrementalEvalCopy);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void UpdateUniqueIdentifierWith50mr(int oldHalfMovesWithoutCaptureOrPawnMove, int halfMovesWithoutCaptureOrPawnMove)
-    {
-        UniqueIdentifier ^=
-            ZobristTable.HalfMovesWithoutCaptureOrPawnMoveHash(oldHalfMovesWithoutCaptureOrPawnMove)    // We clear the existing 50mr counter
-            ^ ZobristTable.HalfMovesWithoutCaptureOrPawnMoveHash(halfMovesWithoutCaptureOrPawnMove);    // And set the new one
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
