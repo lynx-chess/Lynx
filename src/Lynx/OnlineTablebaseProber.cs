@@ -133,7 +133,6 @@ public static class OnlineTablebaseProber
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
-
                         bool isFiftyMovesRepetition = Game.Is50MovesRepetition(halfMovesWithoutCaptureOrPawnMove);
                         halfMovesWithoutCaptureOrPawnMove = oldValue;
 
@@ -195,7 +194,6 @@ public static class OnlineTablebaseProber
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
-
                         bool isFiftyMovesRepetition = Game.Is50MovesRepetition(halfMovesWithoutCaptureOrPawnMove);
                         halfMovesWithoutCaptureOrPawnMove = oldValue;
 
@@ -259,7 +257,6 @@ public static class OnlineTablebaseProber
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
-
                         bool isFiftyMovesRepetition = Game.Is50MovesRepetition(halfMovesWithoutCaptureOrPawnMove);
                         halfMovesWithoutCaptureOrPawnMove = oldValue;
 
@@ -320,7 +317,6 @@ public static class OnlineTablebaseProber
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
-
                         bool isFiftyMovesRepetition = Game.Is50MovesRepetition(halfMovesWithoutCaptureOrPawnMove);
                         halfMovesWithoutCaptureOrPawnMove = oldValue;
 
