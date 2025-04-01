@@ -354,7 +354,7 @@ public sealed partial class Engine
                 }
             }
 
-            var gameState = position.MakeMove(move, Game.HalfMovesWithoutCaptureOrPawnMove);
+            var gameState = position.MakeMove(move);
 
             if (!position.WasProduceByAValidMove())
             {
@@ -373,6 +373,8 @@ public sealed partial class Engine
             // Before making a move
             var oldHalfMovesWithoutCaptureOrPawnMove = Game.HalfMovesWithoutCaptureOrPawnMove;
             var canBeRepetition = Game.Update50movesRule(move, isCapture);
+            position.UpdateUniqueIdentifierWith50mr(oldHalfMovesWithoutCaptureOrPawnMove, Game.HalfMovesWithoutCaptureOrPawnMove);
+
             Game.AddToPositionHashHistory(position.UniqueIdentifier);
             Game.UpdateMoveinStack(ply, move);
 
@@ -738,7 +740,7 @@ public sealed partial class Engine
                 continue;
             }
 
-            var gameState = position.MakeMove(move, Game.HalfMovesWithoutCaptureOrPawnMove);
+            var gameState = position.MakeMove(move);
             if (!position.WasProduceByAValidMove())
             {
                 position.UnmakeMove(move, gameState);
@@ -752,6 +754,8 @@ public sealed partial class Engine
 
             // No need to check for threefold or 50 moves repetitions, since we're only searching captures, promotions, and castles
             Game.UpdateMoveinStack(ply, move);
+            position.UpdateUniqueIdentifierWith50mr(Game.HalfMovesWithoutCaptureOrPawnMove, 0);
+            Game.HalfMovesWithoutCaptureOrPawnMove = 0;
 
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
             int score = -QuiescenceSearch(ply + 1, -beta, -alpha, pvNode, cancellationToken);

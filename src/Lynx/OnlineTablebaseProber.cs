@@ -129,10 +129,12 @@ public static class OnlineTablebaseProber
                         }
 
                         using var newPosition = new Position(position);
-                        newPosition.MakeMove(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
+                        newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
+                        newPosition.UpdateUniqueIdentifierWith50mr(oldValue, halfMovesWithoutCaptureOrPawnMove);
+
                         bool isFiftyMovesRepetition = Game.Is50MovesRepetition(halfMovesWithoutCaptureOrPawnMove);
                         halfMovesWithoutCaptureOrPawnMove = oldValue;
 
@@ -190,10 +192,12 @@ public static class OnlineTablebaseProber
                         }
 
                         using var newPosition = new Position(position);
-                        newPosition.MakeMove(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
+                        newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
+                        newPosition.UpdateUniqueIdentifierWith50mr(oldValue, halfMovesWithoutCaptureOrPawnMove);
+
                         bool isFiftyMovesRepetition = Game.Is50MovesRepetition(halfMovesWithoutCaptureOrPawnMove);
                         halfMovesWithoutCaptureOrPawnMove = oldValue;
 
@@ -253,10 +257,12 @@ public static class OnlineTablebaseProber
                         }
 
                         using var newPosition = new Position(position);
-                        newPosition.MakeMove(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
+                        newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
+                        newPosition.UpdateUniqueIdentifierWith50mr(oldValue, halfMovesWithoutCaptureOrPawnMove);
+
                         bool isFiftyMovesRepetition = Game.Is50MovesRepetition(halfMovesWithoutCaptureOrPawnMove);
                         halfMovesWithoutCaptureOrPawnMove = oldValue;
 
@@ -313,10 +319,12 @@ public static class OnlineTablebaseProber
                         }
 
                         using var newPosition = new Position(position);
-                        newPosition.MakeMove(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
+                        newPosition.MakeMove(moveCandidate.Value);
 
                         var oldValue = halfMovesWithoutCaptureOrPawnMove;
                         halfMovesWithoutCaptureOrPawnMove = Utils.Update50movesRule(moveCandidate.Value, halfMovesWithoutCaptureOrPawnMove);
+                        newPosition.UpdateUniqueIdentifierWith50mr(oldValue, halfMovesWithoutCaptureOrPawnMove);
+
                         bool isFiftyMovesRepetition = Game.Is50MovesRepetition(halfMovesWithoutCaptureOrPawnMove);
                         halfMovesWithoutCaptureOrPawnMove = oldValue;
 

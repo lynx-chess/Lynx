@@ -190,7 +190,7 @@ public sealed class Game : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public GameState MakeMove(Move moveToPlay)
     {
-        var gameState = CurrentPosition.MakeMove(moveToPlay, HalfMovesWithoutCaptureOrPawnMove);
+        var gameState = CurrentPosition.MakeMove(moveToPlay);
 
         if (CurrentPosition.WasProduceByAValidMove())
         {
@@ -198,7 +198,10 @@ public sealed class Game : IDisposable
             MoveHistory.Add(moveToPlay);
 #endif
             AddToPositionHashHistory(CurrentPosition.UniqueIdentifier);
+
+            var oldHalfMovesWithoutCaptureOrPawnMove = HalfMovesWithoutCaptureOrPawnMove;
             Update50movesRule(moveToPlay, moveToPlay.IsCapture());
+            CurrentPosition.UpdateUniqueIdentifierWith50mr(oldHalfMovesWithoutCaptureOrPawnMove, HalfMovesWithoutCaptureOrPawnMove);
         }
         else
         {

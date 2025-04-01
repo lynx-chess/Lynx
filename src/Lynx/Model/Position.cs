@@ -106,7 +106,7 @@ public class Position : IDisposable
     #region Move making
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public GameState MakeMove(Move move, int old50mrCounter, int new50mrCounter)
+    public GameState MakeMove(Move move)
     {
         byte castleCopy = Castle;
         BoardSquare enpassantCopy = EnPassant;
@@ -150,8 +150,7 @@ public class Position : IDisposable
             ^ sourcePieceHash
             ^ targetPieceHash
             ^ ZobristTable.EnPassantHash((int)EnPassant)            // We clear the existing enpassant square, if any
-            ^ ZobristTable.CastleHash(Castle)                       // We clear the existing castle rights
-            ^ ZobristTable.HalfMovesWithoutCaptureOrPawnMoveHash(old50mrCounter);   // We clear the existing 50mr counter
+            ^ ZobristTable.CastleHash(Castle);                      // We clear the existing castle rights
 
         if (piece == (int)Piece.P || piece == (int)Piece.p)
         {
@@ -421,15 +420,21 @@ public class Position : IDisposable
         Castle &= Constants.CastlingRightsUpdateConstants[sourceSquare];
         Castle &= Constants.CastlingRightsUpdateConstants[targetSquare];
 
-        UniqueIdentifier ^=
-            ZobristTable.CastleHash(Castle)
-            ^ ZobristTable.HalfMovesWithoutCaptureOrPawnMoveHash(new50mrCounter);
+        UniqueIdentifier ^= ZobristTable.CastleHash(Castle);
 
         // Asserts won't work due to PassedPawnBonusNoEnemiesAheadBonus
         //Debug.Assert(ZobristTable.PositionHash(this) != UniqueIdentifier && WasProduceByAValidMove());
         //Debug.Assert(ZobristTable.PawnKingHash(this) != _kingPawnUniqueIdentifier && WasProduceByAValidMove());
 
         return new GameState(uniqueIdentifierCopy, kingPawnKeyUniqueIdentifierCopy, incrementalEvalAccumulatorCopy, incrementalPhaseAccumulatorCopy, enpassantCopy, castleCopy, isIncrementalEvalCopy);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void UpdateUniqueIdentifierWith50mr(int oldHalfMovesWithoutCaptureOrPawnMove, int halfMovesWithoutCaptureOrPawnMove)
+    {
+        UniqueIdentifier ^=
+            ZobristTable.HalfMovesWithoutCaptureOrPawnMoveHash(oldHalfMovesWithoutCaptureOrPawnMove)    // We clear the existing 50mr counter
+            ^ ZobristTable.HalfMovesWithoutCaptureOrPawnMoveHash(halfMovesWithoutCaptureOrPawnMove);    // And set the new one
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -128,7 +128,7 @@ public sealed partial class Engine
 #pragma warning disable CA2000 // Dispose objects before losing scope - disposing it fixes the existing logic, and this is a debug-only method anyway
             var newPosition = new Position(position);
 #pragma warning restore CA2000 // Dispose objects before losing scope
-            newPosition.MakeMove(move, Game.HalfMovesWithoutCaptureOrPawnMove);
+            newPosition.MakeMove(move);
             if (!newPosition.WasProduceByAValidMove())
             {
                 throw new LynxException($"Invalid position after move {move.UCIString()} from position {position.FEN()}");
