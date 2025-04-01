@@ -123,6 +123,26 @@ public static class TimeManager
         return newSoftTimeLimit;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static int PonderHitSoftLimit(int originalSoftLimit, GoCommand goCommand, SearchResult? ponderingSearchResult, bool isWhite)
+    {
+        int ourTimeLeft = goCommand.WhiteTime;
+        int opponentTimeLeft = goCommand.BlackTime;
+
+        if (!isWhite)
+        {
+            (ourTimeLeft, opponentTimeLeft) = (opponentTimeLeft, ourTimeLeft);
+        }
+
+        var timeAdvantage = ourTimeLeft / opponentTimeLeft;
+
+        // Our time 2, opponent's time 1 -> time advantage 2 -> we use twice the time, to catch up
+        // Our time 1, opponent's time 2 -> time advantagee 0.5 -> we use half of the time
+        var newSoftLimit = originalSoftLimit * timeAdvantage;
+
+        return newSoftLimit;
+    }
+
     /// <summary>
     /// Implementation based on Stash's
     /// When new score is higher than old score (negative <paramref name="scoreDelta"/>),

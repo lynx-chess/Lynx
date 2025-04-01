@@ -164,7 +164,11 @@ public sealed class Searcher
                     _searchCancellationTokenSource.CancelAfter(searchConstraints.HardLimitTimeBound);
                 }
 
-                searchResult = _mainEngine.Search(in searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
+                // Soft limit tweak
+                var newSoftLimit = TimeManager.PonderHitSoftLimit(searchConstraints.SoftLimitTimeBound, goCommand, searchResult, _mainEngine.Game.PositionBeforeLastSearch.Side == Side.White);
+                var ponderHitSearchContraints = new SearchConstraints(searchConstraints.HardLimitTimeBound, newSoftLimit, searchConstraints.MaxDepth);
+
+                searchResult = _mainEngine.Search(in ponderHitSearchContraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
 
                 if (searchResult is not null)
                 {
@@ -337,12 +341,16 @@ public sealed class Searcher
                     .Select(engine =>
                         Task.Run(() => engine.Search(in extraEnginesSearchConstraint, isPondering: false, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))];
 
+                // Soft limit tweak
+                var newSoftLimit = TimeManager.PonderHitSoftLimit(searchConstraints.SoftLimitTimeBound, goCommand, finalSearchResult, _mainEngine.Game.PositionBeforeLastSearch.Side == Side.White);
+                var ponderHitSearchContraints = new SearchConstraints(searchConstraints.HardLimitTimeBound, newSoftLimit, searchConstraints.MaxDepth);
+
 #if MULTITHREAD_DEBUG
                 _logger.Debug("End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
                 lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
-                finalSearchResult = _mainEngine.Search(in searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
+                finalSearchResult = _mainEngine.Search(in ponderHitSearchContraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
 
 #if MULTITHREAD_DEBUG
                 _logger.Debug("End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
