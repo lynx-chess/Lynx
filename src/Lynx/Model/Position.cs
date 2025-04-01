@@ -72,7 +72,7 @@ public class Position : IDisposable
         EnPassant = parsedFEN.EnPassant;
 
 #pragma warning disable S3366 // "this" should not be exposed from constructors
-        UniqueIdentifier = ZobristTable.PositionHash(this, parsedFEN.HalfMovesWithoutCaptureOrPawnMove);
+        UniqueIdentifier = ZobristTable.PositionHash(this);
         _kingPawnUniqueIdentifier = ZobristTable.PawnKingHash(this);
 #pragma warning restore S3366 // "this" should not be exposed from constructors
 

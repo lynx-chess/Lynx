@@ -97,10 +97,10 @@ public class ZobristTableTest
     public void CastleHash(string fen)
     {
         var positionWithoutCastlingRights = new Position("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b - - 0 1");
-        var positionWithoutCastlingRightsHash = ZobristTable.PositionHash(positionWithoutCastlingRights, 0);
+        var positionWithoutCastlingRightsHash = ZobristTable.PositionHash(positionWithoutCastlingRights);
 
         var position = new Position(fen);
-        var positionHash = ZobristTable.PositionHash(position, 0);
+        var positionHash = ZobristTable.PositionHash(position);
 
         var castleHash = ZobristTable.CastleHash(position.Castle);
 
@@ -121,7 +121,7 @@ public class ZobristTableTest
         var position = new Position(fen);
 
         var originalHash = OriginalPositionHash(position);
-        var currentHash = ZobristTable.PositionHash(position, 0);
+        var currentHash = ZobristTable.PositionHash(position);
 
         Assert.AreEqual(originalHash, currentHash);
     }
