@@ -26,7 +26,7 @@ public static class EvaluationConstants
 
     public const int MaterialScalingTotal = 1024;
 
-    public const int MaterialScalingDiff = 50;
+    public const int MaterialScalingDiff = 100;
 
     public const int MaterialScalingBase = MaterialScalingTotal - MaterialScalingDiff;
 
