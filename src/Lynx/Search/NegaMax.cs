@@ -755,7 +755,6 @@ public sealed partial class Engine
 
             // No need to check for threefold or 50 moves repetitions, since we're only searching captures, promotions, and castles
             Game.UpdateMoveinStack(ply, move);
-            Game.HalfMovesWithoutCaptureOrPawnMove = 0;
 
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
             int score = -QuiescenceSearch(ply + 1, -beta, -alpha, pvNode, cancellationToken);
@@ -802,7 +801,7 @@ public sealed partial class Engine
             staticEval = bestScore;
         }
 
-        _tt.RecordHash(position, Game.HalfMovesWithoutCaptureOrPawnMove, staticEval, 0, ply, bestScore, nodeType, ttPv, bestMove);
+        _tt.RecordHash(position, 0, staticEval, 0, ply, bestScore, nodeType, ttPv, bestMove);
 
         return bestScore;
     }
