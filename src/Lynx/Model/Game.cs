@@ -198,8 +198,6 @@ public sealed class Game : IDisposable
             MoveHistory.Add(moveToPlay);
 #endif
             AddToPositionHashHistory(CurrentPosition.UniqueIdentifier);
-
-            var oldHalfMovesWithoutCaptureOrPawnMove = HalfMovesWithoutCaptureOrPawnMove;
             Update50movesRule(moveToPlay, moveToPlay.IsCapture());
         }
         else
