@@ -445,7 +445,7 @@ public sealed partial class Engine
                                     reduction += Configuration.EngineSettings.LMR_TTPV;
                                 }
 
-                                if (!isCapture && ttMoveIsCapture)
+                                if (ttMoveIsCapture)    // Move isn't a capture but TT move is
                                 {
                                     reduction += Configuration.EngineSettings.LMR_TTCapture;
                                 }
