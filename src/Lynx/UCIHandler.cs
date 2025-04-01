@@ -425,6 +425,14 @@ public sealed class UCIHandler
                     }
                     break;
                 }
+            case "lmr_quiet":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.LMR_Quiet = value;
+                    }
+                    break;
+                }
 
             case "nmp_mindepth":
                 {
