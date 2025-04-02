@@ -499,7 +499,7 @@ public sealed partial class Engine
         var score = 0;
         ShortMove ttBestMove = default;
 
-        var position = Game.PositionBeforeLastSearch;
+        using var position = new Position(Game.PositionBeforeLastSearch);
         var ttEntry = _tt.ProbeHash(position, ply: 0);
 
         if (ttEntry.NodeType != NodeType.Unknown)
