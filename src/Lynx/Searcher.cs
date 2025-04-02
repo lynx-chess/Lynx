@@ -155,13 +155,13 @@ public sealed class Searcher
             {
                 // PonderHit cancelled the token from _absoluteSearchCancellationTokenSource
                 _absoluteSearchCancellationTokenSource.Dispose();
+                _absoluteSearchCancellationTokenSource = new();
 
                 if (searchResult is null
                     || searchConstraints.HardLimitTimeBound >= Configuration.EngineSettings.PonderHitMinTimeToContinueSearch
                     || searchResult.Depth < Configuration.EngineSettings.PonderHitMinDepthToStopSearch)
                 {
                     _logger.Debug("Ponder hit - restarting search now with time constraints");
-                    _absoluteSearchCancellationTokenSource = new();
 
                     if (searchConstraints.HardLimitTimeBound != SearchConstraints.DefaultHardLimitTimeBound)
                     {
@@ -328,13 +328,13 @@ public sealed class Searcher
             {
                 // PonderHit cancelled the token from _absoluteSearchCancellationTokenSource
                 _absoluteSearchCancellationTokenSource.Dispose();
+                _absoluteSearchCancellationTokenSource = new();
 
                 if (finalSearchResult is null
                     || searchConstraints.HardLimitTimeBound >= Configuration.EngineSettings.PonderHitMinTimeToContinueSearch
                     || finalSearchResult.Depth < Configuration.EngineSettings.PonderHitMinDepthToStopSearch)
                 {
                     _logger.Debug("Ponder hit - restarting search now with time constraints");
-                    _absoluteSearchCancellationTokenSource = new();
 
 #if MULTITHREAD_DEBUG
                 sw = System.Diagnostics.Stopwatch.StartNew();
