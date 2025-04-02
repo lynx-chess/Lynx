@@ -301,6 +301,30 @@ public sealed class UCIHandler
                     }
                     break;
                 }
+            case "softtimeboundlimitonmate":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.SoftTimeBoundLimitOnMate = value;
+                    }
+                    break;
+                }
+            case "ponderhitmintimetocontinuesearch":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.PonderHitMinTimeToContinueSearch = value;
+                    }
+                    break;
+                }
+            case "ponderhitmindepthtostopsearch":
+                {
+                    if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
+                    {
+                        Configuration.EngineSettings.PonderHitMinDepthToStopSearch = value;
+                    }
+                    break;
+                }
             #endregion
 
             #region Search tuning

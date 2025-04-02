@@ -153,18 +153,27 @@ public sealed class Searcher
 
             if (_isPonderHit)
             {
-                _logger.Debug("Ponder hit - restarting search now with time constraints");
-
                 // PonderHit cancelled the token from _absoluteSearchCancellationTokenSource
                 _absoluteSearchCancellationTokenSource.Dispose();
-                _absoluteSearchCancellationTokenSource = new();
 
-                if (searchConstraints.HardLimitTimeBound != SearchConstraints.DefaultHardLimitTimeBound)
+                if (searchResult is null
+                    || searchConstraints.HardLimitTimeBound >= Configuration.EngineSettings.PonderHitMinTimeToContinueSearch
+                    || searchResult.Depth < Configuration.EngineSettings.PonderHitMinDepthToStopSearch)
                 {
-                    _searchCancellationTokenSource.CancelAfter(searchConstraints.HardLimitTimeBound);
-                }
+                    _logger.Debug("Ponder hit - restarting search now with time constraints");
+                    _absoluteSearchCancellationTokenSource = new();
 
-                searchResult = _mainEngine.Search(in searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
+                    if (searchConstraints.HardLimitTimeBound != SearchConstraints.DefaultHardLimitTimeBound)
+                    {
+                        _searchCancellationTokenSource.CancelAfter(searchConstraints.HardLimitTimeBound);
+                    }
+
+                    searchResult = _mainEngine.Search(in searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
+                }
+                else
+                {
+                    _logger.Info("Ponder hit - settling for initial pondering search result due to low hard limit: {HardLimitTimeBound}ms (depth: {Depth})", searchConstraints.HardLimitTimeBound, searchResult.Depth);
+                }
 
                 if (searchResult is not null)
                 {
@@ -317,23 +326,27 @@ public sealed class Searcher
 
             if (_isPonderHit)
             {
-                _logger.Debug("Ponder hit - restarting search now with time constraints");
+                // PonderHit cancelled the token from _absoluteSearchCancellationTokenSource
+                _absoluteSearchCancellationTokenSource.Dispose();
+
+                if (finalSearchResult is null
+                    || searchConstraints.HardLimitTimeBound >= Configuration.EngineSettings.PonderHitMinTimeToContinueSearch
+                    || finalSearchResult.Depth < Configuration.EngineSettings.PonderHitMinDepthToStopSearch)
+                {
+                    _logger.Debug("Ponder hit - restarting search now with time constraints");
+                    _absoluteSearchCancellationTokenSource = new();
 
 #if MULTITHREAD_DEBUG
                 sw = System.Diagnostics.Stopwatch.StartNew();
                 lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
-                // PonderHit cancelled the token from _absoluteSearchCancellationTokenSource
-                _absoluteSearchCancellationTokenSource.Dispose();
-                _absoluteSearchCancellationTokenSource = new();
+                    if (searchConstraints.HardLimitTimeBound != SearchConstraints.DefaultHardLimitTimeBound)
+                    {
+                        _searchCancellationTokenSource.CancelAfter(searchConstraints.HardLimitTimeBound);
+                    }
 
-                if (searchConstraints.HardLimitTimeBound != SearchConstraints.DefaultHardLimitTimeBound)
-                {
-                    _searchCancellationTokenSource.CancelAfter(searchConstraints.HardLimitTimeBound);
-                }
-
-                tasks = [.. _extraEngines
+                    tasks = [.. _extraEngines
                     .Select(engine =>
                         Task.Run(() => engine.Search(in extraEnginesSearchConstraint, isPondering: false, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))];
 
@@ -342,35 +355,43 @@ public sealed class Searcher
                 lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
-                finalSearchResult = _mainEngine.Search(in searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
+                    finalSearchResult = _mainEngine.Search(in searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
 
 #if MULTITHREAD_DEBUG
                 _logger.Debug("End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
                 lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
-                await _absoluteSearchCancellationTokenSource.CancelAsync();
+                    await _absoluteSearchCancellationTokenSource.CancelAsync();
 
-                // We wait just for the node count, so there's room for improvement here with thread voting
-                // and other strategies that take other thread results into account
-                extraResults = await Task.WhenAll(tasks);
+                    // We wait just for the node count, so there's room for improvement here with thread voting
+                    // and other strategies that take other thread results into account
+                    extraResults = await Task.WhenAll(tasks);
 
 #if MULTITHREAD_DEBUG
                 _logger.Debug("End of extra searches, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
 #endif
 
-                if (finalSearchResult is not null)
-                {
-                    foreach (var extraResult in extraResults)
+                    if (finalSearchResult is not null)
                     {
-                        finalSearchResult.Nodes += extraResult?.Nodes ?? 0;
-                    }
+                        foreach (var extraResult in extraResults)
+                        {
+                            finalSearchResult.Nodes += extraResult?.Nodes ?? 0;
+                        }
 
-                    finalSearchResult.NodesPerSecond = Utils.CalculateNps(finalSearchResult.Nodes, 0.001 * finalSearchResult.Time);
+                        finalSearchResult.NodesPerSecond = Utils.CalculateNps(finalSearchResult.Nodes, 0.001 * finalSearchResult.Time);
 
 #if MULTITHREAD_DEBUG
                     _logger.Debug("End of multithread calculations, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
 #endif
+
+                        // Final info command
+                        _engineWriter.TryWrite(finalSearchResult);
+                    }
+                }
+                else
+                {
+                    _logger.Info("Ponder hit - settling for initial pondering search result due to low hard limit: {HardLimitTimeBound}ms (depth: {Depth})", searchConstraints.HardLimitTimeBound, finalSearchResult.Depth);
 
                     // Final info command
                     _engineWriter.TryWrite(finalSearchResult);

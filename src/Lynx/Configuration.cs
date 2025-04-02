@@ -142,6 +142,10 @@ public sealed class EngineSettings
 
     public int SoftTimeBoundLimitOnMate { get; set; } = 1_000;
 
+    public int PonderHitMinTimeToContinueSearch { get; set; } = 100;
+
+    public int PonderHitMinDepthToStopSearch { get; set; } = 5;
+
     #endregion
 
     #region Search
