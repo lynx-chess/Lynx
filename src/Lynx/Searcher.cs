@@ -179,7 +179,9 @@ public sealed class Searcher
                 }
                 else
                 {
-                    _logger.Info("Ponder hit - settling for initial pondering search result due to low hard limit: {HardLimitTimeBound}ms (depth: {Depth})", searchConstraints.HardLimitTimeBound, searchResult.Depth);
+                    _logger.Info("Ponder hit - settling for initial pondering search result due to low hard limit: " +
+                        "{HardLimitTimeBound}ms (< {MinTime}ms), depth: {Depth} (>= {MaxDepth})",
+                        searchConstraints.HardLimitTimeBound, Configuration.EngineSettings.PonderHitMinTimeToContinueSearch, searchResult.Depth, Configuration.EngineSettings.PonderHitMinDepthToStopSearch);
                 }
 
                 if (searchResult is not null)
@@ -401,7 +403,9 @@ public sealed class Searcher
                 }
                 else
                 {
-                    _logger.Info("Ponder hit - settling for initial pondering search result due to low hard limit: {HardLimitTimeBound}ms (depth: {Depth})", searchConstraints.HardLimitTimeBound, finalSearchResult.Depth);
+                    _logger.Info("Ponder hit - settling for initial pondering search result due to low hard limit: " +
+                        "{HardLimitTimeBound}ms (< {MinTime}ms), depth: {Depth} (>= {MaxDepth})",
+                        searchConstraints.HardLimitTimeBound, Configuration.EngineSettings.PonderHitMinTimeToContinueSearch, finalSearchResult.Depth, Configuration.EngineSettings.PonderHitMinDepthToStopSearch);
 
                     // Final info command
                     _engineWriter.TryWrite(finalSearchResult);
