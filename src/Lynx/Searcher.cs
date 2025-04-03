@@ -137,14 +137,21 @@ public sealed class Searcher
             // Pondering
             _logger.Debug("Pondering");
 
-            var searchResult = _mainEngine.Search(in searchConstraints, isPondering: true, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None);
+            SearchResult? searchResult = null;
 
-            if (searchResult is not null)
+            // This check takes care of early ponderhits that may have cancelled the ct
+            // before it was reset in OnGoCommand and therefore stay undetected
+            if (!_isPonderHit)
             {
-                // Final info command
-                _engineWriter.TryWrite(searchResult);
+                searchResult = _mainEngine.Search(in searchConstraints, isPondering: true, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None);
 
-                // We don't print bestmove command when ponder + ponderhit though
+                if (searchResult is not null)
+                {
+                    // Final info command
+                    _engineWriter.TryWrite(searchResult);
+
+                    // We don't print bestmove command when ponder + ponderhit though
+                }
             }
 
             // Avoiding the scenario where search finishes early (i.e. mate detected, max depth reached) and results comes
@@ -194,6 +201,11 @@ public sealed class Searcher
 
     private async Task MultiThreadedSearch(GoCommand goCommand)
     {
+        // Basic lazy SMP implementation
+        // Extra engines run in "go infinite" mode and their purpose is to populate the TT
+        // Not UCI output is produced by them nor their search results are taken into account
+        var extraEnginesSearchConstraints = SearchConstraints.InfiniteSearchConstraint;
+
         var searchConstraints = TimeManager.CalculateTimeManagement(_mainEngine.Game, goCommand);
         var isPondering = Configuration.EngineSettings.IsPonder && goCommand.Ponder;
 
@@ -209,14 +221,9 @@ public sealed class Searcher
             var lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
-            // Basic lazy SMP implementation
-            // Extra engines run in "go infinite" mode and their purpose is to populate the TT
-            // Not UCI output is produced by them nor their search results are taken into account
-            var extraEnginesSearchConstraint = SearchConstraints.InfiniteSearchConstraint;
-
             var tasks = _extraEngines
                 .Select(engine =>
-                    Task.Run(() => engine.Search(in extraEnginesSearchConstraint, isPondering: false, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
+                    Task.Run(() => engine.Search(in extraEnginesSearchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
                 .ToArray();
 
 #if MULTITHREAD_DEBUG
@@ -264,60 +271,62 @@ public sealed class Searcher
             // Pondering
             _logger.Debug("Pondering");
 
-#if MULTITHREAD_DEBUG
-            var sw = System.Diagnostics.Stopwatch.StartNew();
-            var lastElapsed = sw.ElapsedMilliseconds;
-#endif
+            SearchResult? finalSearchResult = null;
 
-            // Basic lazy SMP implementation
-            // Extra engines run in "go infinite" mode and their purpose is to populate the TT
-            // Not UCI output is produced by them nor their search results are taken into account
-            var extraEnginesSearchConstraint = SearchConstraints.InfiniteSearchConstraint;
-
-            var tasks = _extraEngines
-                .Select(engine =>
-                    Task.Run(() => engine.Search(in extraEnginesSearchConstraint, isPondering: true, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
-                .ToArray();
-
-#if MULTITHREAD_DEBUG
-            _logger.Debug("[Pondering] End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
-            lastElapsed = sw.ElapsedMilliseconds;
-#endif
-
-            SearchResult? finalSearchResult = _mainEngine.Search(in searchConstraints, isPondering: true, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None);
-
-#if MULTITHREAD_DEBUG
-            _logger.Debug("[Pondering] End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
-            lastElapsed = sw.ElapsedMilliseconds;
-#endif
-
-            await _absoluteSearchCancellationTokenSource.CancelAsync();
-
-            // We wait just for the node count, so there's room for improvement here with thread voting
-            // and other strategies that take other thread results into account
-            var extraResults = await Task.WhenAll(tasks);
-
-#if MULTITHREAD_DEBUG
-            _logger.Debug("[Pondering] End of extra searches, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
-#endif
-
-            if (finalSearchResult is not null)
+            // This check takes care of early ponderhits that may have cancelled the ct
+            // before it was reset in OnGoCommand and therefore stay undetected
+            if (!_isPonderHit)
             {
-                foreach (var extraResult in extraResults)
-                {
-                    finalSearchResult.Nodes += extraResult?.Nodes ?? 0;
-                }
-
-                finalSearchResult.NodesPerSecond = Utils.CalculateNps(finalSearchResult.Nodes, 0.001 * finalSearchResult.Time);
-
 #if MULTITHREAD_DEBUG
-                _logger.Debug("[Pondering] End of multithread calculations, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+                var sw = System.Diagnostics.Stopwatch.StartNew();
+                var lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
-                // Final info command
-                _engineWriter.TryWrite(finalSearchResult);
+                var tasks = _extraEngines
+                    .Select(engine =>
+                        Task.Run(() => engine.Search(in extraEnginesSearchConstraints, isPondering: true, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
+                    .ToArray();
 
-                // We don't print bestmove command when ponder + ponderhit though
+#if MULTITHREAD_DEBUG
+                _logger.Debug("[Pondering] End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+                lastElapsed = sw.ElapsedMilliseconds;
+#endif
+
+                finalSearchResult = _mainEngine.Search(in searchConstraints, isPondering: true, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None);
+
+#if MULTITHREAD_DEBUG
+                _logger.Debug("[Pondering] End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+                lastElapsed = sw.ElapsedMilliseconds;
+#endif
+
+                await _absoluteSearchCancellationTokenSource.CancelAsync();
+
+                // We wait just for the node count, so there's room for improvement here with thread voting
+                // and other strategies that take other thread results into account
+                var extraResults = await Task.WhenAll(tasks);
+
+#if MULTITHREAD_DEBUG
+                _logger.Debug("[Pondering] End of extra searches, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+#endif
+
+                if (finalSearchResult is not null)
+                {
+                    foreach (var extraResult in extraResults)
+                    {
+                        finalSearchResult.Nodes += extraResult?.Nodes ?? 0;
+                    }
+
+                    finalSearchResult.NodesPerSecond = Utils.CalculateNps(finalSearchResult.Nodes, 0.001 * finalSearchResult.Time);
+
+#if MULTITHREAD_DEBUG
+                    _logger.Debug("[Pondering] End of multithread calculations, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+#endif
+
+                    // Final info command
+                    _engineWriter.TryWrite(finalSearchResult);
+
+                    // We don't print bestmove command when ponder + ponderhit though
+                }
             }
 
             // Avoiding the scenario where search finishes early (i.e. mate detected, max depth reached) and results comes
@@ -346,9 +355,10 @@ public sealed class Searcher
                         _searchCancellationTokenSource.CancelAfter(searchConstraints.HardLimitTimeBound);
                     }
 
-                    tasks = [.. _extraEngines
-                    .Select(engine =>
-                        Task.Run(() => engine.Search(in extraEnginesSearchConstraint, isPondering: false, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))];
+                    var tasks = _extraEngines
+                        .Select(engine =>
+                            Task.Run(() => engine.Search(in extraEnginesSearchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
+                        .ToArray();
 
 #if MULTITHREAD_DEBUG
                 _logger.Debug("End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
@@ -366,7 +376,7 @@ public sealed class Searcher
 
                     // We wait just for the node count, so there's room for improvement here with thread voting
                     // and other strategies that take other thread results into account
-                    extraResults = await Task.WhenAll(tasks);
+                    var extraResults = await Task.WhenAll(tasks);
 
 #if MULTITHREAD_DEBUG
                 _logger.Debug("End of extra searches, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
