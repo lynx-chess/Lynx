@@ -754,6 +754,8 @@ public sealed partial class Engine
             // No need to check for threefold or 50 moves repetitions, since we're only searching captures, promotions, and castles
             Game.UpdateMoveinStack(ply, move);
 
+            _tt.PrefetchTTEntry(position);
+
 #pragma warning disable S2234 // Arguments should be passed in the same order as the method parameters
             int score = -QuiescenceSearch(ply + 1, -beta, -alpha, pvNode, cancellationToken);
 #pragma warning restore S2234 // Arguments should be passed in the same order as the method parameters
