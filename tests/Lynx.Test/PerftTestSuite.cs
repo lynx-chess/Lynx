@@ -764,6 +764,12 @@ public class PerftTestSuite
     [TestCase("n1n5/PPPk4/8/8/8/8/4Kppp/5N1N b - - 0 1", 4, 182838)]
     [TestCase("n1n5/PPPk4/8/8/8/8/4Kppp/5N1N b - - 0 1", 5, 3605103)]
     [TestCase("n1n5/PPPk4/8/8/8/8/4Kppp/5N1N b - - 0 1", 6, 71179139)]
+
+    // https://github.com/AndyGrant/Ethereal/blob/master/src/perft/standard.epd
+    [TestCase("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1", 4, 43238)]
+    [TestCase("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1", 5, 674624)]
+    [TestCase("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1", 6, 11030083)]
+    [TestCase("rnbqkb1r/ppppp1pp/7n/4Pp2/8/8/PPPP1PPP/RNBQKBNR w KQkq f6 0 3", 5, 11139762)]
     public void Suite(string fen, int depth, long expectedNumberOfNodes)
     {
         Validate(fen, depth, expectedNumberOfNodes);
