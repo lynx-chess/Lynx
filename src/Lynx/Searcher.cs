@@ -165,8 +165,8 @@ public sealed class Searcher
                 _absoluteSearchCancellationTokenSource = new();
 
                 if (searchResult is null
-                    || searchConstraints.HardLimitTimeBound >= Configuration.EngineSettings.PonderHitMinTimeToContinueSearch
-                    || searchResult.Depth < Configuration.EngineSettings.PonderHitMinDepthToStopSearch)
+                    || searchResult.Depth < Configuration.EngineSettings.PonderHitMinDepthToStopSearch
+                    || searchConstraints.HardLimitTimeBound >= Configuration.EngineSettings.PonderHitMinTimeToContinueSearch)
                 {
                     _logger.Debug("Ponder hit - restarting search now with time constraints");
 
@@ -340,8 +340,8 @@ public sealed class Searcher
                 _absoluteSearchCancellationTokenSource = new();
 
                 if (finalSearchResult is null
-                    || searchConstraints.HardLimitTimeBound >= Configuration.EngineSettings.PonderHitMinTimeToContinueSearch
-                    || finalSearchResult.Depth < Configuration.EngineSettings.PonderHitMinDepthToStopSearch)
+                    || finalSearchResult.Depth < Configuration.EngineSettings.PonderHitMinDepthToStopSearch
+                    || searchConstraints.HardLimitTimeBound >= Configuration.EngineSettings.PonderHitMinTimeToContinueSearch)
                 {
                     _logger.Debug("Ponder hit - restarting search now with time constraints");
 
