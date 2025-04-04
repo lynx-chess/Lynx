@@ -1119,7 +1119,7 @@ public class Position : IDisposable
             // King in front of passed pawn
             if (sameSideKingRank > rank)
             {
-                packedBonus += FriendlyKingInFrontOfPassedPawnBonus[rank];
+                packedBonus += FriendlyKingInFrontOfPassedPawnBonus[sameSideKingRank];
             }
         }
 
