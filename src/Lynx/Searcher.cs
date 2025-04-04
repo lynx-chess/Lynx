@@ -29,6 +29,8 @@ public sealed class Searcher
 
     public string FEN => _mainEngine.Game.FEN;
 
+    private bool _firstRun;
+
     public Searcher(ChannelReader<string> uciReader, ChannelWriter<object> engineWriter)
     {
         InitializeStaticClasses();
@@ -53,6 +55,8 @@ public sealed class Searcher
 #endif
 
         _ttWrapper.Clear();
+        _firstRun = true;
+
         ForceGCCollection();
     }
 
@@ -500,7 +504,11 @@ public sealed class Searcher
             AllocateExtraEngines();
         }
 
-        _ttWrapper.Clear();
+        if (!_firstRun)
+        {
+            _ttWrapper.Clear();
+        }
+        _firstRun = false;
 
         ForceGCCollection();
     }
