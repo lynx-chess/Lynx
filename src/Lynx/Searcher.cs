@@ -48,13 +48,11 @@ public sealed class Searcher
 
         AllocateExtraEngines();
 
-        //#if !DEBUG
-#pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
-        Warmup().Wait();
-#pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
-        //#endif
-        _ttWrapper.Clear();
+#if !DEBUG
+        Warmup();
+#endif
 
+        _ttWrapper.Clear();
         ForceGCCollection();
     }
 
@@ -583,26 +581,23 @@ public sealed class Searcher
 #pragma warning restore S1215 // "GC.Collect" should not be called
     }
 
-    private async Task Warmup()
+#pragma warning disable S1144, RCS1213 // Unused private types or members should be removed - used in Release mode
+    private void Warmup()
     {
         _logger.Debug("Warming-up engine");
         var sw = System.Diagnostics.Stopwatch.StartNew();
 
         var warmupCount = Math.Min(8, _extraEngines.Length + 1);
 
-        var silentEngineWriter = Channel.CreateUnbounded<object>(new UnboundedChannelOptions { SingleReader = true, SingleWriter = false }).Writer;
-
-        Engine[] engines = new Engine[warmupCount];
-
-        for (int i = 1; i <= warmupCount; ++i)
+        Parallel.For(0, warmupCount, i =>
         {
-            engines[i - 1] = new Engine(-i, silentEngineWriter, in _ttWrapper);
-        }
+            var silentEngineWriter = Channel.CreateUnbounded<object>(new UnboundedChannelOptions { SingleReader = true, SingleWriter = false }).Writer;
+            var engine = new Engine(-i, silentEngineWriter, in _ttWrapper);
 
-        Task[] warmupTasks = engines.Select(e => Task.Run(() => e.Warmup())).ToArray();
-
-        await Task.WhenAll(warmupTasks);
+            engine.Warmup();
+        });
 
         _logger.Info("Warm-up time:\t{0} ms", sw.ElapsedMilliseconds);
     }
+#pragma warning restore S1144, RCS1213 // Unused private types or members should be removed
 }
