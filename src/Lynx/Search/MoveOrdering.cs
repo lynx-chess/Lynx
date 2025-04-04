@@ -154,16 +154,15 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(int depth, int ply, ReadOnlySpan<int> visitedMoves, int visitedMovesCounter, int move, bool isRoot, bool pvNode)
     {
-        // 🔍 Quiet history moves
-        // Doing this only in beta cutoffs (instead of when eval > alpha) was suggested by Sirius author
         var piece = move.Piece();
         var targetSquare = move.TargetSquare();
 
+        // 🔍 Quiet history moves
+        // Doing this only in beta cutoffs (instead of when eval > alpha) was suggested by Sirius author
         int rawHistoryBonus = HistoryBonus[depth];
 
-        _quietHistory[piece][targetSquare] = ScoreHistoryMove(
-            _quietHistory[piece][targetSquare],
-            rawHistoryBonus);
+        ref var quietHistoryEntry = ref _quietHistory[piece][targetSquare];
+        quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, rawHistoryBonus);
 
         if (!isRoot)
         {
@@ -184,7 +183,7 @@ public sealed partial class Engine
 
                 // 🔍 Quiet history penalty / malus
                 // When a quiet move fails high, penalize previous visited quiet moves
-                ref var quietHistoryEntry = ref _quietHistory[visitedMovePiece][visitedMoveTargetSquare];
+                quietHistoryEntry = ref _quietHistory[visitedMovePiece][visitedMoveTargetSquare];
                 quietHistoryEntry = ScoreHistoryMove(quietHistoryEntry, -rawHistoryBonus);
 
                 if (!isRoot)
