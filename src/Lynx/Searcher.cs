@@ -35,6 +35,7 @@ public sealed class Searcher
     {
         InitializeStaticClasses();
 
+        _firstRun = true;
         _uciReader = uciReader;
         _engineWriter = engineWriter;
 
@@ -55,7 +56,6 @@ public sealed class Searcher
 #endif
 
         _ttWrapper.Clear();
-        _firstRun = true;
 
         ForceGCCollection();
     }
