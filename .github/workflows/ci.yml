@@ -81,6 +81,13 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-nuget-
 
+    - name: Update engine version to <current_version>-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}
+      shell: pwsh
+      run: |
+        $input_path = "Directory.Build.props"
+        $regex = "(?<=<Version>).*(?=</Version>)"
+        (Get-Content $input_path) -Replace $regex, "`$0-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }}" | Out-File $input_path
+
     - name: Build
       run: dotnet build -c Release src/Lynx.Cli/Lynx.Cli.csproj /p:DeterministicBuild=true
 

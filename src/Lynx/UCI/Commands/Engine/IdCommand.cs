@@ -30,5 +30,5 @@ public sealed class IdCommand : IEngineBaseCommand
 
     public static string NameString => $"id name {EngineName} {GetLynxVersion()}";
 
-    public static string VersionString => $"id author {EngineAuthor}";
+    public static string AuthorString => $"id author {EngineAuthor}";
 }

@@ -150,7 +150,7 @@ public sealed class UCIHandler
     private async Task HandleUCI(CancellationToken cancellationToken)
     {
         await SendCommand(IdCommand.NameString, cancellationToken);
-        await SendCommand(IdCommand.VersionString, cancellationToken);
+        await SendCommand(IdCommand.AuthorString, cancellationToken);
 
         foreach (var availableOption in OptionCommand.AvailableOptions)
         {
