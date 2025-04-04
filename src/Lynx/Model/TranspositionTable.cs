@@ -25,10 +25,32 @@ public readonly struct TranspositionTable
         _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
     }
 
+    /// <summary>
+    /// Multithreaded clearing of the transposition table
+    /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Clear()
     {
-        Array.Clear(_tt);
+        _logger.Debug("Clearing TT");
+        var sw = Stopwatch.StartNew();
+
+        var tt = _tt;
+        var ttLength = tt.Length;
+        var threadCount = Configuration.EngineSettings.Threads;
+        var sizePerThread = ttLength / threadCount;
+
+        // Instead of just doing Array.Clear(_tt):
+        Parallel.For(0, threadCount, i =>
+        {
+            var start = i * sizePerThread;
+            var length = (i == threadCount - 1)
+                ? ttLength - start
+                : sizePerThread;
+
+            Array.Clear(tt, start, length);
+        });
+
+        _logger.Info("TT clearing time:\t{0} ms", sw.ElapsedMilliseconds);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
