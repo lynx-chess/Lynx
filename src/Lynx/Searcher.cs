@@ -31,21 +31,29 @@ public sealed class Searcher
 
     public Searcher(ChannelReader<string> uciReader, ChannelWriter<object> engineWriter)
     {
+        InitializeStaticClasses();
+
         _uciReader = uciReader;
         _engineWriter = engineWriter;
 
         _ttWrapper = new TranspositionTable();
-        _mainEngine = new Engine(MainEngineId, _engineWriter, in _ttWrapper, warmup: true);
+        _mainEngine = new Engine(MainEngineId, _engineWriter, in _ttWrapper);
         _absoluteSearchCancellationTokenSource = new();
         _searchCancellationTokenSource = new();
 
         _searchThreadsCount = Configuration.EngineSettings.Threads;
-        AllocateExtraEngines();
 
         _logger = LogManager.GetCurrentClassLogger();
         _logger.Info("Threads:\t{0}", _searchThreadsCount);
 
-        InitializeStaticClasses();
+        AllocateExtraEngines();
+
+        //#if !DEBUG
+#pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
+        Warmup().Wait();
+#pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
+        //#endif
+        _ttWrapper.Clear();
 
         ForceGCCollection();
     }
@@ -270,6 +278,11 @@ public sealed class Searcher
         }
         else
         {
+#if MULTITHREAD_DEBUG
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            var lastElapsed = sw.ElapsedMilliseconds;
+#endif
+
             // Pondering
             _logger.Debug("Pondering");
 
@@ -279,11 +292,6 @@ public sealed class Searcher
             // before it was reset in OnGoCommand and therefore stay undetected
             if (!_isPonderHit)
             {
-#if MULTITHREAD_DEBUG
-                var sw = System.Diagnostics.Stopwatch.StartNew();
-                var lastElapsed = sw.ElapsedMilliseconds;
-#endif
-
                 var tasks = _extraEngines
                     .Select(engine =>
                         Task.Run(() => engine.Search(in extraEnginesSearchConstraints, isPondering: true, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
@@ -459,8 +467,6 @@ public sealed class Searcher
         // Hash update
         if (_ttWrapper.Size == Configuration.EngineSettings.TranspositionTableSize)
         {
-            _ttWrapper.Clear();
-
             _mainEngine.NewGame();
 
             foreach (var engine in _extraEngines)
@@ -475,7 +481,7 @@ public sealed class Searcher
             _ttWrapper = new TranspositionTable();
 
             _mainEngine.FreeResources();
-            _mainEngine = new Engine(MainEngineId, _engineWriter, in _ttWrapper, warmup: true);
+            _mainEngine = new Engine(MainEngineId, _engineWriter, in _ttWrapper);
 
             AllocateExtraEngines();
         }
@@ -496,6 +502,8 @@ public sealed class Searcher
             AllocateExtraEngines();
         }
 
+        _ttWrapper.Clear();
+
         ForceGCCollection();
     }
 
@@ -510,7 +518,7 @@ public sealed class Searcher
 
     public async ValueTask RunBench(int depth)
     {
-        using var engine = new Engine(-1, SilentChannelWriter<object>.Instance, in _ttWrapper, warmup: true);
+        using var engine = new Engine(-1, SilentChannelWriter<object>.Instance, in _ttWrapper);
         var results = engine.Bench(depth);
 
         // Can't use engine, or results won't be printed
@@ -519,7 +527,7 @@ public sealed class Searcher
 
     public async ValueTask RunVerboseBench(int depth)
     {
-        using var engine = new Engine(-1, _engineWriter, in _ttWrapper, warmup: true);
+        using var engine = new Engine(-1, _engineWriter, in _ttWrapper);
         var results = engine.Bench(depth);
 
         await engine.PrintBenchResults(results);
@@ -547,7 +555,7 @@ public sealed class Searcher
 #else
                     SilentChannelWriter<object>.Instance,
 #endif
-                    in _ttWrapper, warmup: false);
+                    in _ttWrapper);
             }
         }
         else
@@ -573,5 +581,28 @@ public sealed class Searcher
         GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced);
         GC.WaitForPendingFinalizers();
 #pragma warning restore S1215 // "GC.Collect" should not be called
+    }
+
+    private async Task Warmup()
+    {
+        _logger.Debug("Warming-up engine");
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+
+        var warmupCount = Math.Min(8, _extraEngines.Length + 1);
+
+        var silentEngineWriter = Channel.CreateUnbounded<object>(new UnboundedChannelOptions { SingleReader = true, SingleWriter = false }).Writer;
+
+        Engine[] engines = new Engine[warmupCount];
+
+        for (int i = 1; i <= warmupCount; ++i)
+        {
+            engines[i - 1] = new Engine(-i, silentEngineWriter, in _ttWrapper);
+        }
+
+        Task[] warmupTasks = engines.Select(e => Task.Run(() => e.Warmup())).ToArray();
+
+        await Task.WhenAll(warmupTasks);
+
+        _logger.Info("Warm-up time:\t{0} ms", sw.ElapsedMilliseconds);
     }
 }

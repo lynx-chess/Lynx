@@ -70,4 +70,39 @@ public class TranspositionTableTests
         Assert.AreEqual(expectedProbeEval, ttEntry.Score);
         Assert.AreEqual(recordedEval, ttEntry.StaticEval);
     }
+
+    [Test]
+    [Explicit]
+    [NonParallelizable]
+    [Category(Categories.LongRunning)]
+    public void ClearTT()
+    {
+        Configuration.EngineSettings.TranspositionTableSize = 31;
+        Configuration.EngineSettings.Threads = 7;
+
+        var tt = new TranspositionTable();
+
+        Assert.AreNotEqual(0, tt.Length % Configuration.EngineSettings.Threads, "We want to test the edge case where the last thread clears more items than the rest");
+
+        for(int index = 0; index < tt.Length; ++index)
+        {
+            ref var ttEntry = ref tt.Get(index);
+            ttEntry.Update(1, 2, 3, 4, NodeType.Exact, 5, 6);
+        }
+
+        tt.Clear();
+
+        for (int index = 0; index < tt.Length; ++index)
+        {
+            var ttEntry = tt.Get(index);
+
+            Assert.AreEqual(0, ttEntry.Score);
+            Assert.AreEqual(0, ttEntry.StaticEval);
+            Assert.AreEqual(0, ttEntry.Depth);
+            Assert.AreEqual(NodeType.Unknown, ttEntry.Type);
+            Assert.AreEqual(false, ttEntry.WasPv);
+            Assert.AreEqual(0, ttEntry.Move);
+            Assert.AreEqual(0, ttEntry.Key);
+        }
+    }
 }
