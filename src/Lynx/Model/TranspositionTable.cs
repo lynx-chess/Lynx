@@ -25,9 +25,6 @@ public readonly struct TranspositionTable
         _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
     }
 
-    /// <summary>
-    /// Multithreaded clearing of the transposition table
-    /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Clear()
     {
