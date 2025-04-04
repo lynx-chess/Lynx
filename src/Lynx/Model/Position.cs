@@ -1104,10 +1104,10 @@ public class Position : IDisposable
                 packedBonus += PassedPawnBonusNoEnemiesAheadEnemyBonus[oppositeSideBucket][rank];
             }
 
-            // King distance to passed pawn
-            var friendlyKingDistance = Constants.ChebyshevDistance[pushSquareIndex][sameSideKingSquare];
+            // King distance to passed pawn (to protect it)
+            var friendlyKingDistance = Constants.ChebyshevDistance[pushSquareIndex][squareIndex];
 
-            // Enemy king distance to passed pawn
+            // Enemy king distance to passed pawn push square (to stop it)
             var enemyKingDistance = Constants.ChebyshevDistance[pushSquareIndex][oppositeSideKingSquare];
 
             packedBonus += PassedPawnBonus[bucket][rank]
