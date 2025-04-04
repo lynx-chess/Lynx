@@ -15,6 +15,8 @@ public readonly struct TranspositionTable
     public readonly int Size;
 #pragma warning restore CA1051 // Do not declare visible instance fields
 
+    public int Length => _tt.Length;
+
     public TranspositionTable()
     {
         Size = Configuration.EngineSettings.TranspositionTableSize;
@@ -23,6 +25,7 @@ public readonly struct TranspositionTable
         _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Clear()
     {
         Array.Clear(_tt);
@@ -213,6 +216,9 @@ public readonly struct TranspositionTable
 
         return items;
     }
+
+    [Obsolete("Only tests")]
+    internal ref TranspositionTableElement Get(int index) => ref _tt[index];
 
     [Conditional("DEBUG")]
     private void Stats()
