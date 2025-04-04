@@ -1105,7 +1105,7 @@ public class Position : IDisposable
             }
 
             // King distance to passed pawn (to protect it)
-            var friendlyKingDistance = Constants.ChebyshevDistance[pushSquareIndex][squareIndex];
+            var friendlyKingDistance = Constants.ChebyshevDistance[squareIndex][sameSideKingSquare];
 
             // Enemy king distance to passed pawn push square (to stop it)
             var enemyKingDistance = Constants.ChebyshevDistance[pushSquareIndex][oppositeSideKingSquare];
