@@ -84,11 +84,10 @@ jobs:
     - name: Update engine version to development one
       shell: pwsh
       run: |
-        $ci_engine_version = git describe --always #<tag>-g<short commit hash>
-        $ci_engine_version = $ci_engine_version.substring(1) # Removing the initial 'v' from the tag
+        $short_commit_hash = git log -1 --pretty=format:%h
         $input_path = "Directory.Build.props"
         $regex = "(?<=<Version>).*(?=</Version>)"
-        (Get-Content $input_path) -Replace $regex, $ci_engine_version | Out-File $input_path
+        (Get-Content $input_path) -Replace $regex, "`$0-$short_commit_hash" | Out-File $input_path
 
     - name: Build
       run: dotnet build -c Release src/Lynx.Cli/Lynx.Cli.csproj /p:DeterministicBuild=true
