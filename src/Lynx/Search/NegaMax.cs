@@ -261,7 +261,7 @@ public sealed partial class Engine
 
         for (int i = 0; i < pseudoLegalMoves.Length; ++i)
         {
-            moveScores[i] = ScoreMove(pseudoLegalMoves[i], ply, ttBestMove);
+            moveScores[i] = ScoreMove(pseudoLegalMoves[i], ply, position.KingPawnUniqueIdentifier, ttBestMove);
         }
 
         var nodeType = NodeType.Alpha;
@@ -292,8 +292,9 @@ public sealed partial class Engine
             int? quietHistory = null;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            int QuietHistory() => quietHistory ??=
+            int QuietHistory(Position position) => quietHistory ??=
                 _quietHistory[move.Piece()][move.TargetSquare()]
+                + PawnHistoryEntry(position.KingPawnUniqueIdentifier, move.Piece(), move.TargetSquare())
                 + ContinuationHistoryEntry(move.Piece(), move.TargetSquare(), ply - 1);
 
             // If we prune while getting checmated, we risk not finding any move and having an empty PV
@@ -320,7 +321,7 @@ public sealed partial class Engine
                 if (!isCapture
                     && moveScore < EvaluationConstants.CounterMoveValue
                     && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth    // TODO use LMR depth
-                    && QuietHistory() < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
+                    && QuietHistory(position) < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
                 {
                     break;
                 }
@@ -465,7 +466,7 @@ public sealed partial class Engine
 
                                 // -= history/(maxHistory/2)
 
-                                reduction -= QuietHistory() / Configuration.EngineSettings.LMR_History_Divisor_Quiet;
+                                reduction -= QuietHistory(position) / Configuration.EngineSettings.LMR_History_Divisor_Quiet;
                             }
                         }
 
@@ -580,7 +581,7 @@ public sealed partial class Engine
                     }
                     else
                     {
-                        UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(historyDepth, ply, visitedMoves, visitedMovesCounter, move, isRoot, pvNode);
+                        UpdateMoveOrderingHeuristicsOnQuietBetaCutoff(position, historyDepth, ply, visitedMoves, visitedMovesCounter, move, isRoot, pvNode);
                     }
 
                     nodeType = NodeType.Beta;
