@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Diagnostics;
+using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -1072,12 +1073,14 @@ public class Position : IDisposable
         int packedBonus = 0;
 
         var rank = Constants.Rank[squareIndex];
+        var sameSideKingRank = Constants.Rank[sameSideKingSquare];
         var oppositeSide = (int)Side.Black;
         ulong passedPawnsMask;
 
         if (pieceIndex == (int)Piece.p)
         {
             rank = 7 - rank;
+            sameSideKingRank = 7 - sameSideKingRank;
             oppositeSide = (int)Side.White;
             passedPawnsMask = Masks.BlackPassedPawnMasks[squareIndex];
         }
@@ -1112,6 +1115,12 @@ public class Position : IDisposable
                 + PassedPawnEnemyBonus[oppositeSideBucket][rank]
                 + FriendlyKingDistanceToPassedPawnBonus[friendlyKingDistance]
                 + EnemyKingDistanceToPassedPawnPenalty[enemyKingDistance];
+
+            // King in front of passed pawn
+            if (sameSideKingRank > rank)
+            {
+                packedBonus += FriendlyKingInFrontOfPassedPawnBonus;
+            }
         }
 
         // Pawn phalanx
