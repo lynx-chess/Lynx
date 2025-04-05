@@ -1073,12 +1073,14 @@ public class Position : IDisposable
 
         var rank = Constants.Rank[squareIndex];
         var oppositeSide = (int)Side.Black;
+        var pushSquareIndex = squareIndex - 8;
         ulong passedPawnsMask;
 
         if (pieceIndex == (int)Piece.p)
         {
             rank = 7 - rank;
             oppositeSide = (int)Side.White;
+            pushSquareIndex = squareIndex + 8;
             passedPawnsMask = Masks.BlackPassedPawnMasks[squareIndex];
         }
         else
@@ -1102,11 +1104,11 @@ public class Position : IDisposable
                 packedBonus += PassedPawnBonusNoEnemiesAheadEnemyBonus[oppositeSideBucket][rank];
             }
 
-            // King distance to passed pawn
+            // King distance to passed pawn (to protect it)
             var friendlyKingDistance = Constants.ChebyshevDistance[squareIndex][sameSideKingSquare];
 
-            // Enemy king distance to passed pawn
-            var enemyKingDistance = Constants.ChebyshevDistance[squareIndex][oppositeSideKingSquare];
+            // Enemy king distance to passed pawn push square (to stop it)
+            var enemyKingDistance = Constants.ChebyshevDistance[pushSquareIndex][oppositeSideKingSquare];
 
             packedBonus += PassedPawnBonus[bucket][rank]
                 + PassedPawnEnemyBonus[oppositeSideBucket][rank]
