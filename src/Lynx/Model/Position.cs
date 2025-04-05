@@ -19,6 +19,8 @@ public class Position : IDisposable
 
     public ulong UniqueIdentifier { get; private set; }
 
+    public ulong UniqueIdentifierWith50mr(int halfMovesWithoutCaptureOrPawnMove) => UniqueIdentifier ^ ZobristTable.HalfMovesWithoutCaptureOrPawnMoveHash(halfMovesWithoutCaptureOrPawnMove);
+
     private ulong _kingPawnUniqueIdentifier;
 
     /// <summary>
@@ -60,7 +62,7 @@ public class Position : IDisposable
     }
 
     public Position((BitBoard[] PieceBitBoards, BitBoard[] OccupancyBitBoards, int[] Board, Side Side, byte Castle, BoardSquare EnPassant,
-        int _/*, int FullMoveCounter*/) parsedFEN)
+        int HalfMovesWithoutCaptureOrPawnMove/*, int FullMoveCounter*/) parsedFEN)
     {
         PieceBitBoards = parsedFEN.PieceBitBoards;
         OccupancyBitBoards = parsedFEN.OccupancyBitBoards;
