@@ -281,8 +281,8 @@ public sealed class Searcher
         else
         {
 #if MULTITHREAD_DEBUG
-            var sw = System.Diagnostics.Stopwatch.StartNew();
-            var lastElapsed = sw.ElapsedMilliseconds;
+                var sw = System.Diagnostics.Stopwatch.StartNew();
+                var lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
             // Pondering
