@@ -57,7 +57,7 @@ public static class EvaluationConstants
 
             HistoryBonus[searchDepth] = Math.Min(
                 Configuration.EngineSettings.History_MaxMoveRawBonus,
-                (4 * searchDepth * searchDepth) + (120 * searchDepth) - 120);   // Sirius, originally from Berserk
+                (16 * searchDepth * searchDepth) + (32 * searchDepth) + 16);   // Quanticade
         }
     }
 
