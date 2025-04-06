@@ -123,7 +123,9 @@ public sealed partial class Engine
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
-            _tt.RecordHash(position, finalPositionEvaluation, depth, ply, finalPositionEvaluation, NodeType.Exact, ttPv);
+            staticEval = Math.Clamp(finalPositionEvaluation, EvaluationConstants.MinStaticEval , EvaluationConstants.MaxStaticEval);
+
+            _tt.RecordHash(position, staticEval, depth, ply, finalPositionEvaluation, NodeType.Exact, ttPv);
             return finalPositionEvaluation;
         }
         else if (!pvNode)
@@ -599,7 +601,7 @@ public sealed partial class Engine
             bestScore = Position.EvaluateFinalPosition(ply, isInCheck);
 
             nodeType = NodeType.Exact;
-            staticEval = bestScore;
+            staticEval = Math.Clamp(bestScore, EvaluationConstants.MinStaticEval , EvaluationConstants.MaxStaticEval);;
         }
 
         _tt.RecordHash(position, staticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);
@@ -796,7 +798,7 @@ public sealed partial class Engine
             bestScore = Position.EvaluateFinalPosition(ply, position.IsInCheck());
 
             nodeType = NodeType.Exact;
-            staticEval = bestScore;
+            staticEval = Math.Clamp(bestScore, EvaluationConstants.MinStaticEval , EvaluationConstants.MaxStaticEval);
         }
 
         _tt.RecordHash(position, staticEval, 0, ply, bestScore, nodeType, ttPv, bestMove);
