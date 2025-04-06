@@ -115,26 +115,27 @@ public static class EvaluationConstants
     /// <summary>
     /// Minimum evaluation for a position to be White checkmate
     /// </summary>
-    public const int PositiveCheckmateDetectionLimit = 26_000; // CheckMateBaseEvaluation - (Constants.AbsoluteMaxDepth + 45) * 10;
+    public const int PositiveCheckmateDetectionLimit = CheckMateBaseEvaluation - Constants.AbsoluteMaxDepth - Constants.ArrayDepthMargin;
 
     /// <summary>
     /// Maximum evaluation for a position to be Black checkmate
     /// </summary>
-    public const int NegativeCheckmateDetectionLimit = -26_000; // -CheckMateBaseEvaluation + (Constants.AbsoluteMaxDepth + 45) * 10;
+    public const int NegativeCheckmateDetectionLimit = -PositiveCheckmateDetectionLimit;
 
-    public const int MaxMate = 1500; // Utils.CalculateMateInX(PositiveCheckmateDetectionLimit + 1);
+    public const int MaxMate = +137; // Utils.CalculateMateInX(PositiveCheckmateDetectionLimit + 1);
 
-    public const int MinMate = -1500; // Utils.CalculateMateInX(NegativeCheckmateDetectionLimit -1);
+    public const int MinMate = -MaxMate;
 
     /// <summary>
-    /// Max static eval. It doesn't include checkmate values and it's below <see cref="PositiveCheckmateDetectionLimit"/>
+    /// Max static eval. It doesn't include checkmate values and it's below <see cref="PositiveCheckmateDetectionLimit"/>.
     /// </summary>
-    public const int MaxStaticEval = PositiveCheckmateDetectionLimit - 1;
+    public const int MaxStaticEval = PositiveCheckmateDetectionLimit
+        - (CheckMateBaseEvaluation - PositiveCheckmateDetectionLimit) * 4;
 
     /// <summary>
     /// Min static eval. It doesn't include checkmate values and it's above <see cref="NegativeCheckmateDetectionLimit"/>
     /// </summary>
-    public const int MinStaticEval = NegativeCheckmateDetectionLimit + 1;
+    public const int MinStaticEval = -MaxStaticEval;
 
     /// <summary>
     /// Outside of the evaluation ranges (higher than any sensible evaluation, lower than <see cref="PositiveCheckmateDetectionLimit"/>)
