@@ -43,7 +43,7 @@ public sealed partial class Engine
         ShortMove ttBestMove = default;
         NodeType ttElementType = NodeType.Unknown;
         int ttScore = EvaluationConstants.NoHashEntry;
-        int ttStaticEval = int.MinValue;
+        int ttStaticEval = EvaluationConstants.NoHashEntry;
         int ttDepth = default;
         bool ttWasPv = false;
 
@@ -123,17 +123,14 @@ public sealed partial class Engine
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
-            staticEval = Math.Clamp(finalPositionEvaluation, EvaluationConstants.MinStaticEval , EvaluationConstants.MaxStaticEval);
 
-            _tt.RecordHash(position, staticEval, depth, ply, finalPositionEvaluation, NodeType.Exact, ttPv);
+            _tt.RecordHash(position, EvaluationConstants.NoHashEntry, depth, ply, finalPositionEvaluation, NodeType.Exact, ttPv);
             return finalPositionEvaluation;
         }
         else if (!pvNode)
         {
-            if (ttElementType != NodeType.Unknown)   // Equivalent to ttHit || ttElementType == NodeType.None
+            if (ttElementType != NodeType.Unknown && ttStaticEval != EvaluationConstants.NoHashEntry)   // Equivalent to ttHit || ttElementType == NodeType.None
             {
-                Debug.Assert(ttStaticEval != int.MinValue);
-
                 staticEval = ttStaticEval;
                 phase = position.Phase();
             }
@@ -157,7 +154,9 @@ public sealed partial class Engine
             // If the score is outside what the current bounds are, but it did match flag and depth,
             // then we can trust that this score is more accurate than the current static evaluation,
             // and we can update our static evaluation for better accuracy in pruning
-            if (ttHit && ttElementType != (ttStaticEval > staticEval ? NodeType.Alpha : NodeType.Beta))
+            if (ttHit
+                && ttStaticEval != EvaluationConstants.NoHashEntry
+                && ttElementType != (ttStaticEval > staticEval ? NodeType.Alpha : NodeType.Beta))
             {
                 staticEval = ttStaticEval;
             }
@@ -601,7 +600,6 @@ public sealed partial class Engine
             bestScore = Position.EvaluateFinalPosition(ply, isInCheck);
 
             nodeType = NodeType.Exact;
-            staticEval = Math.Clamp(bestScore, EvaluationConstants.MinStaticEval , EvaluationConstants.MaxStaticEval);;
         }
 
         _tt.RecordHash(position, staticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);
@@ -798,7 +796,6 @@ public sealed partial class Engine
             bestScore = Position.EvaluateFinalPosition(ply, position.IsInCheck());
 
             nodeType = NodeType.Exact;
-            staticEval = Math.Clamp(bestScore, EvaluationConstants.MinStaticEval , EvaluationConstants.MaxStaticEval);
         }
 
         _tt.RecordHash(position, staticEval, 0, ply, bestScore, nodeType, ttPv, bestMove);
