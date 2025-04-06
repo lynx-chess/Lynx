@@ -123,7 +123,9 @@ public sealed partial class Engine
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
-            _tt.RecordHash(position, finalPositionEvaluation, depth, ply, finalPositionEvaluation, NodeType.Exact, ttPv);
+            staticEval = Math.Clamp(finalPositionEvaluation, EvaluationConstants.MinStaticEval, EvaluationConstants.MaxStaticEval);
+
+            _tt.RecordHash(position, staticEval, depth, ply, finalPositionEvaluation, NodeType.Exact, ttPv);
             return finalPositionEvaluation;
         }
         else if (!pvNode)
@@ -133,6 +135,14 @@ public sealed partial class Engine
                 Debug.Assert(ttStaticEval != int.MinValue);
 
                 staticEval = ttStaticEval;
+
+                if (ttStaticEval > EvaluationConstants.MaxStaticEval || ttStaticEval < EvaluationConstants.MinStaticEval)
+                {
+                    _logger.Warn("TT static eval {StaticEval} for position {FEN} at ply {Ply}", ttStaticEval, position.FEN(), ply);
+                }
+
+                // With this it doesn't fail
+                //staticEval = position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
                 phase = position.Phase();
             }
             else
@@ -155,9 +165,9 @@ public sealed partial class Engine
             // If the score is outside what the current bounds are, but it did match flag and depth,
             // then we can trust that this score is more accurate than the current static evaluation,
             // and we can update our static evaluation for better accuracy in pruning
-            if (ttHit && ttElementType != (ttScore > staticEval ? NodeType.Alpha : NodeType.Beta))
+            if (ttHit && ttElementType != (ttStaticEval > staticEval ? NodeType.Alpha : NodeType.Beta))
             {
-                staticEval = ttScore;
+                staticEval = ttStaticEval;
             }
 
             bool isNotGettingCheckmated = staticEval > EvaluationConstants.NegativeCheckmateDetectionLimit;
@@ -165,6 +175,11 @@ public sealed partial class Engine
             // Fail-high pruning (moves with high scores) - prune more when improving
             if (isNotGettingCheckmated)
             {
+                if (staticEval > EvaluationConstants.MaxStaticEval)
+                {
+                    _logger.Warn("Static eval {StaticEval} > {Max} for position {FEN} at ply {Ply} in fail high pruning", ttStaticEval, EvaluationConstants.MaxStaticEval, position.FEN(), ply);
+                }
+
                 if (depth <= Configuration.EngineSettings.RFP_MaxDepth)
                 {
                     // 🔍 Reverse Futility Pruning (RFP) - https://www.chessprogramming.org/Reverse_Futility_Pruning
@@ -299,61 +314,6 @@ public sealed partial class Engine
             // If we prune while getting checmated, we risk not finding any move and having an empty PV
             bool isNotGettingCheckmated = bestScore > EvaluationConstants.NegativeCheckmateDetectionLimit;
 
-            // Fail-low pruning (moves with low scores) - prune less when improving
-            // LMP, HP and FP can happen either before after MakeMove
-            // PVS SEE pruning needs to happen before MakeMove in a make-unmake framework (it needs original position)
-            if (visitedMovesCounter > 0
-                && !pvNode
-                && !isInCheck
-                && isNotGettingCheckmated
-                && moveScore < EvaluationConstants.PromotionMoveScoreValue) // Quiet or bad capture
-            {
-                // 🔍 Late Move Pruning (LMP) - all quiet moves can be pruned
-                // after searching the first few given by the move ordering algorithm
-                if (moveIndex >= Configuration.EngineSettings.LMP_BaseMovesToTry + (Configuration.EngineSettings.LMP_MovesDepthMultiplier * depth * (improving ? 2 : 1))) // Based on formula suggested by Antares
-                {
-                    break;
-                }
-
-                // 🔍 History pruning -  all quiet moves can be pruned
-                // once we find one with a history score too low
-                if (!isCapture
-                    && moveScore < EvaluationConstants.CounterMoveValue
-                    && depth < Configuration.EngineSettings.HistoryPrunning_MaxDepth    // TODO use LMR depth
-                    && QuietHistory() < Configuration.EngineSettings.HistoryPrunning_Margin * (depth - 1))
-                {
-                    break;
-                }
-
-                // 🔍 Futility Pruning (FP) - all quiet moves can be pruned
-                // once it's considered that they don't have potential to raise alpha
-                if (depth <= Configuration.EngineSettings.FP_MaxDepth
-                    && staticEval + Configuration.EngineSettings.FP_Margin + (Configuration.EngineSettings.FP_DepthScalingFactor * depth) <= alpha)
-                {
-                    break;
-                }
-
-                // 🔍 PVS SEE pruning
-                if (isCapture)
-                {
-                    var threshold = Configuration.EngineSettings.PVS_SEE_Threshold_Noisy * depth * depth;
-
-                    if (!SEE.IsGoodCapture(position, move, threshold))
-                    {
-                        continue;
-                    }
-                }
-                else
-                {
-                    var threshold = Configuration.EngineSettings.PVS_SEE_Threshold_Quiet * depth;
-
-                    if (!SEE.HasPositiveScore(position, move, threshold))
-                    {
-                        continue;
-                    }
-                }
-            }
-
             var gameState = position.MakeMove(move);
 
             if (!position.WasProduceByAValidMove())
@@ -411,6 +371,11 @@ public sealed partial class Engine
 
                     if (isNotGettingCheckmated)
                     {
+                        if (staticEval > EvaluationConstants.MaxStaticEval)
+                        {
+                            _logger.Warn("Static eval {StaticEval} > {Max} for position {FEN} at ply {Ply} in LMR", ttStaticEval, EvaluationConstants.MaxStaticEval, position.FEN(), ply);
+                        }
+
                         if (depth >= Configuration.EngineSettings.LMR_MinDepth
                             && visitedMovesCounter >=
                                 (pvNode
@@ -599,7 +564,7 @@ public sealed partial class Engine
             bestScore = Position.EvaluateFinalPosition(ply, isInCheck);
 
             nodeType = NodeType.Exact;
-            staticEval = bestScore;
+            staticEval = Math.Clamp(bestScore, EvaluationConstants.MinStaticEval, EvaluationConstants.MaxStaticEval);
         }
 
         _tt.RecordHash(position, staticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);
@@ -796,7 +761,7 @@ public sealed partial class Engine
             bestScore = Position.EvaluateFinalPosition(ply, position.IsInCheck());
 
             nodeType = NodeType.Exact;
-            staticEval = bestScore;
+            staticEval = Math.Clamp(bestScore, EvaluationConstants.MinStaticEval, EvaluationConstants.MaxStaticEval);
         }
 
         _tt.RecordHash(position, staticEval, 0, ply, bestScore, nodeType, ttPv, bestMove);
