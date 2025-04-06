@@ -96,7 +96,7 @@ public readonly struct TranspositionTable
 
         // We want to translate the checkmate position relative to the saved node to our root position from which we're searching
         // If the recorded score is a checkmate in 3 and we are at depth 5, we want to read checkmate in 8
-        var recalculatedScore = RecalculateMateScores(entry.Score, ply);
+        var recalculatedScore = MateScoreFromTT(position, entry.Score, ply);
 
         return (recalculatedScore, entry.Move, entry.Type, entry.StaticEval, entry.Depth, entry.WasPv);
     }
@@ -108,6 +108,11 @@ public readonly struct TranspositionTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void RecordHash(Position position, int staticEval, int depth, int ply, int score, NodeType nodeType, bool wasPv, Move? move = null)
     {
+        if(staticEval > EvaluationConstants.MaxStaticEval || staticEval< EvaluationConstants.MinStaticEval)
+        {
+            _logger.Warn("Static eval {StaticEval} > {Max} for position {FEN} at ply {Ply} in LMR", staticEval, EvaluationConstants.MaxStaticEval, position.FEN(), ply);
+        }
+
         var ttIndex = CalculateTTIndex(position.UniqueIdentifier);
         ref var entry = ref _tt[ttIndex];
 
@@ -135,7 +140,7 @@ public readonly struct TranspositionTable
 
         // We want to store the distance to the checkmate position relative to the current node, independently from the root
         // If the evaluated score is a checkmate in 8 and we're at depth 5, we want to store checkmate value in 3
-        var recalculatedScore = RecalculateMateScores(score, -ply);
+        var recalculatedScore = MateScoreToTT(position, score, ply);
 
         entry.Update(position.UniqueIdentifier, recalculatedScore, staticEval, depth, nodeType, wasPvInt, move);
     }
@@ -219,6 +224,73 @@ public readonly struct TranspositionTable
         else if (score < EvaluationConstants.NegativeCheckmateDetectionLimit)
         {
             return score + ply;
+        }
+
+        return score;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static int MateScoreToTT(Position position, int score, int ply)
+    {
+        if (score > EvaluationConstants.PositiveCheckmateDetectionLimit)
+        {
+            var newMateScore = score + ply;
+
+            if (score > EvaluationConstants.CheckMateBaseEvaluation)
+            {
+                _logger.Warn("MateScoreToTT: score {Score} > 29000 for position {FEN}, ply {Ply}",
+                    score, position.FEN(), ply);
+            }
+
+            return newMateScore;
+        }
+        else if (score < EvaluationConstants.NegativeCheckmateDetectionLimit)
+        {
+            var newMateScore = score - ply;
+
+            if (score < -EvaluationConstants.CheckMateBaseEvaluation)
+            {
+                _logger.Warn("MateScoreToTT: score {Score} < -29000 for position {FEN}, ply {Ply}",
+                    score, position.FEN(), ply);
+            }
+
+            return newMateScore;
+        }
+
+        return score;
+    }
+
+    /// <summary>
+    /// If playing side is giving checkmate, decrease checkmate score (increase n in checkmate in n moves) due to being searching at a given depth already when this position is found.
+    /// The opposite if the playing side is getting checkmated.
+    /// Logic for when to pass +depth or -depth for the desired effect in https://www.talkchess.com/forum3/viewtopic.php?f=7&t=74411 and https://talkchess.com/forum3/viewtopic.php?p=861852#p861852
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static int MateScoreFromTT(Position position, int score, int ply)
+    {
+        if (score > EvaluationConstants.PositiveCheckmateDetectionLimit)
+        {
+            var newMateScore = score - ply;
+
+            if (newMateScore > EvaluationConstants.CheckMateBaseEvaluation)
+            {
+                _logger.Warn("MateScoreFromTT: score {Score} > 29000 for position {FEN}, ply {Ply}",
+                    newMateScore, position.FEN(), ply);
+            }
+
+            return newMateScore;
+        }
+        else if (score < EvaluationConstants.NegativeCheckmateDetectionLimit)
+        {
+            var newMateScore = score + ply;
+
+            if (newMateScore < -EvaluationConstants.CheckMateBaseEvaluation)
+            {
+                _logger.Warn("MateScoreFromTT: score {Score} < -29000 for position {FEN}, ply {Ply}",
+                    newMateScore, position.FEN(), ply);
+            }
+
+            return newMateScore;
         }
 
         return score;
