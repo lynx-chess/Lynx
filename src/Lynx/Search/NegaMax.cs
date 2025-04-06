@@ -157,7 +157,7 @@ public sealed partial class Engine
             // and we can update our static evaluation for better accuracy in pruning
             if (ttHit && ttElementType != (ttScore > staticEval ? NodeType.Alpha : NodeType.Beta))
             {
-                staticEval = ttScore;
+                staticEval = Math.Clamp(ttScore, EvaluationConstants.MinStaticEval, EvaluationConstants.MaxStaticEval);
             }
 
             bool isNotGettingCheckmated = staticEval > EvaluationConstants.NegativeCheckmateDetectionLimit;
