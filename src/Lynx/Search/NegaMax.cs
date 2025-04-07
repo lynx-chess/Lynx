@@ -132,7 +132,7 @@ public sealed partial class Engine
             {
                 Debug.Assert(ttStaticEval != int.MinValue);
 
-                staticEval = ttStaticEval;
+                staticEval = Math.Clamp(ttStaticEval, EvaluationConstants.MinStaticEval, EvaluationConstants.MaxStaticEval);
                 phase = position.Phase();
             }
             else
