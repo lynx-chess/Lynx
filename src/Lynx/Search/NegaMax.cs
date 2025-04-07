@@ -417,7 +417,7 @@ public sealed partial class Engine
                                     ? Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_PV
                                     : Configuration.EngineSettings.LMR_MinFullDepthSearchedMoves_NonPV))
                         {
-                            if (isCapture)
+                            if (isCapture && !ttPv) // !ttPv idea from Clover
                             {
                                 reduction = EvaluationConstants.LMRReductions[1][depth][visitedMovesCounter];
 
