@@ -1121,13 +1121,13 @@ public class Position : IDisposable
             // King in front of passed pawn
             if (sameSideKingRank > rank)
             {
-                packedBonus += FriendlyKingInFrontOfPassedPawnBonus[rank];
+                packedBonus += FriendlyKingInFrontOfPassedPawnBonus[sameSideKingRank];
             }
 
             // Enemy king in front of passed pawn
             if (oppositeSideKingRank > rank)
             {
-                packedBonus += EnemyKingInFrontOfPassedPawnPenalty[rank];
+                packedBonus += EnemyKingInFrontOfPassedPawnPenalty[oppositeSideKingRank];
             }
         }
 
