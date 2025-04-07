@@ -1074,6 +1074,7 @@ public class Position : IDisposable
 
         var rank = Constants.Rank[squareIndex];
         var sameSideKingRank = Constants.Rank[sameSideKingSquare];
+        var oppositeSideKingRank = Constants.Rank[oppositeSideKingSquare];
         var oppositeSide = (int)Side.Black;
         ulong passedPawnsMask;
 
@@ -1081,6 +1082,7 @@ public class Position : IDisposable
         {
             rank = 7 - rank;
             sameSideKingRank = 7 - sameSideKingRank;
+            oppositeSideKingRank = 7 - oppositeSideKingRank;
             oppositeSide = (int)Side.White;
             passedPawnsMask = Masks.BlackPassedPawnMasks[squareIndex];
         }
@@ -1119,7 +1121,13 @@ public class Position : IDisposable
             // King in front of passed pawn
             if (sameSideKingRank > rank)
             {
-                packedBonus += FriendlyKingInFrontOfPassedPawnBonus[sameSideKingRank];
+                packedBonus += FriendlyKingInFrontOfPassedPawnBonus[rank];
+            }
+
+            // Enemy king in front of passed pawn
+            if (oppositeSideKingRank > rank)
+            {
+                packedBonus += EnemyKingInFrontOfPassedPawnPenalty[rank];
             }
         }
 
