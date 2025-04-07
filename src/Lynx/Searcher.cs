@@ -334,8 +334,8 @@ public sealed class Searcher
                             totalNodes += extraResult.Nodes;
 
                             if (extraResult.BestMove != default
-                                && extraResult.Depth >= finalSearchResult.Depth
-                                && extraResult.Score >= finalSearchResult.Score)
+                                && ((extraResult.Depth > finalSearchResult.Depth && finalSearchResult.Mate == default)
+                                    || (extraResult.Depth == finalSearchResult.Depth && extraResult.Score > finalSearchResult.Score)))
                             {
                                 finalSearchResult = extraResult;
                             }
