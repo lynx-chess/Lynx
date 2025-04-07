@@ -9,7 +9,6 @@
 
   <PropertyGroup>
     <StaticAnalysisCodeType>ProxExe</StaticAnalysisCodeType>
-    <!--<DefineConstants>MULTITHREAD_DEBUG</DefineConstants>-->
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Optimized.ToLower())'=='true'">
