@@ -89,7 +89,7 @@ jobs:
         (Get-Content $input_path) -Replace $regex, '${{ github.event.inputs.new_engine_version }}' | Out-File $input_path
 
     - name: Publish ${{ matrix.runtime-identifier }} version
-      run: dotnet publish src/Lynx.Cli/Lynx.Cli.csproj -c Release --runtime ${{ matrix.runtime-identifier }} --self-contained /p:Optimized=true /p:DeterministicBuild=true /p:ReleaseBuild=true -o artifacts/${{ matrix.runtime-identifier }}
+      run: dotnet publish src/Lynx.Cli/Lynx.Cli.csproj --runtime ${{ matrix.runtime-identifier }} --self-contained /p:Optimized=true /p:DeterministicBuild=true /p:ReleaseBuild=true -o artifacts/${{ matrix.runtime-identifier }}
 
     - name: Upload Lynx-${{ matrix.runtime-identifier }} artifact
       if: github.event.inputs.new_engine_version != ''
@@ -117,7 +117,7 @@ jobs:
 
     - name: Pack NuGet package
       if: matrix.runtime-identifier == 'linux-x64'
-      run: dotnet pack -c Release --no-build src/Lynx/Lynx.csproj --include-symbols -o artifacts/nuget
+      run: dotnet pack --no-build src/Lynx/Lynx.csproj --include-symbols -o artifacts/nuget
 
     - name: Upload Lynx-${{ env.GITHUB_REF_SLUG }}-${{ github.run_number }} NuGet package
       if: matrix.runtime-identifier == 'linux-x64' && github.event.inputs.new_engine_version != ''

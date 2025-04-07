@@ -42,10 +42,10 @@ build:
 	dotnet build -c Release
 
 test:
-	dotnet test -c Release & dotnet test -c Release --filter "TestCategory=LongRunning" & dotnet test -c Release --filter "TestCategory=Perft"
+	dotnet test -c Release  & dotnet test -c Release --filter "TestCategory=Configuration" & dotnet test -c Release --filter "TestCategory=LongRunning" & dotnet test -c Release --filter "TestCategory=Perft"
 
 publish:
-	dotnet publish src/Lynx.Cli/Lynx.Cli.csproj -c Release --runtime ${RUNTIME} --self-contained /p:Optimized=true /p:ExecutableName=$(EXE) -o ${OUTPUT_DIR}
+	dotnet publish src/Lynx.Cli/Lynx.Cli.csproj --runtime ${RUNTIME} --self-contained /p:Optimized=true /p:ExecutableName=$(EXE) -o ${OUTPUT_DIR}
 
 run:
 	dotnet run --project src/Lynx.Cli/Lynx.Cli.csproj -c Release --runtime ${RUNTIME}

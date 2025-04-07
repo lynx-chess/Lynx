@@ -85,8 +85,8 @@ If you're a Linux user and are new to .NET ecosystem, the conversation in [this 
   Examples:
 
   ```bash
-  dotnet publish src/Lynx.Cli/Lynx.Cli.csproj -c Release --runtime linux-x64 --self-contained /p:Optimized=true -o /home/your_user/engines/Lynx
-  dotnet publish src/Lynx.Cli/Lynx.Cli.csproj -c Release --runtime win-x64 --self-contained /p:Optimized=true -o C:/Users/your_user/engines/Lynx
+  dotnet publish src/Lynx.Cli/Lynx.Cli.csproj --runtime linux-x64 --self-contained /p:Optimized=true -o /home/your_user/engines/Lynx
+  dotnet publish src/Lynx.Cli/Lynx.Cli.csproj --runtime win-x64 --self-contained /p:Optimized=true -o C:/Users/your_user/engines/Lynx
   ```
 
 - The previous steps will generate an executable named `Lynx.Cli(.exe)` and a settings file named `appsettings.json`, which are enough to run Lynx chess engine.
