@@ -451,9 +451,9 @@ public sealed partial class Engine
                                     reduction += Configuration.EngineSettings.LMR_TTCapture;
                                 }
 
-                                if (pvNode)
+                                if (!pvNode)
                                 {
-                                    reduction -= Configuration.EngineSettings.LMR_PVNode;
+                                    reduction += Configuration.EngineSettings.LMR_PVNode;
                                 }
 
                                 if (position.IsInCheck())   // i.e. move gives check
