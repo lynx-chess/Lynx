@@ -330,20 +330,35 @@ public sealed class Searcher
                     {
                         if (extraResult is not null)
                         {
-                            finalSearchResult.Nodes += extraResult.Nodes;
                             totalNodes += extraResult.Nodes;
+                            totalTime += extraResult.Time;
 
-                            if (extraResult.BestMove != default
-                                && (Math.Abs(extraResult.Mate) < Math.Abs(finalSearchResult.Mate)
-                                    || (extraResult.Depth > finalSearchResult.Depth && extraResult.Mate == finalSearchResult.Mate)
-                                    || (extraResult.Depth == finalSearchResult.Depth && (extraResult.Score > finalSearchResult.Score))))
+                            // Thread voting, original impl sligtly corrected based on by Heimdall's (based on Berserk's)
+                            if (extraResult.BestMove != default)
                             {
-                                finalSearchResult = extraResult;
+                                if (finalSearchResult.Mate == 0)                        // No mate detected in main thread:
+                                {                                                           // Extra thread:
+                                    if (extraResult.Mate > 0                                    // +Mate
+                                        || extraResult.Depth > finalSearchResult.Depth          // Higher depth
+                                        || (extraResult.Depth == finalSearchResult.Depth        // Same depth, better score
+                                            && (extraResult.Score > finalSearchResult.Score)))
+                                    {
+                                        finalSearchResult = extraResult;
+                                    }
+                                }
+                                else if (                                               // Mate detected in main thread:
+                                    extraResult.Mate < finalSearchResult.Mate               // Faster +Mate, or slower -Mate
+                                    || extraResult.Depth > finalSearchResult.Depth)         // Higher depth
+                                {
+                                    finalSearchResult = extraResult;
+                                }
                             }
                         }
                     }
 
                     finalSearchResult.Nodes = totalNodes;
+                    finalSearchResult.Time = totalTime;
+
                     finalSearchResult.NodesPerSecond = Utils.CalculateNps(finalSearchResult.Nodes, 0.001 * finalSearchResult.Time);
 
 #if MULTITHREAD_DEBUG
