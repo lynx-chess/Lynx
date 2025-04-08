@@ -2,7 +2,6 @@ using Lynx.Model;
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
-using System.Runtime.ConstrainedExecution;
 using System.Threading.Channels;
 
 namespace Lynx;
