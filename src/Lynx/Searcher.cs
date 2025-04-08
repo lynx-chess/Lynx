@@ -321,12 +321,63 @@ public sealed class Searcher
                 _logger.Debug("[Pondering] End of extra searches, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
 #endif
 
+                var totalNodes = finalSearchResult?.Nodes ?? 0;
+                var totalTime = finalSearchResult?.Time ?? 0;
+
+                foreach (var extraResult in extraResults)
+                {
+                    if (extraResult is not null)
+                    {
+                        totalNodes += extraResult.Nodes;
+                        totalTime += extraResult.Time;
+
+                        if (finalSearchResult is null)
+                        {
+                            finalSearchResult = extraResult;
+                            continue;
+                        }
+
+                        // Thread voting, original impl sligtly corrected based on by Heimdall's (based on Berserk's)
+                        if (extraResult.BestMove != default)
+                        {
+                            finalSearchResult = finalSearchResult.Mate switch
+                            {
+                                0                                                                       // No mate detected in main thread:
+                                    when                                                                //      Extra thread:
+                                        extraResult.Mate > 0                                            //          Mate
+                                            || extraResult.Depth > finalSearchResult.Depth              //          ||  Higher depth
+                                            || (extraResult.Depth == finalSearchResult.Depth            //          ||  Same depth, better score
+                                                && extraResult.Score > finalSearchResult.Score)
+
+                                        => extraResult,
+                                > 0                                                                     // Mating in main thread:
+                                    when                                                                //      Extra thread:
+                                        extraResult.Mate > 0                                            //          Still mating
+                                            && (extraResult.Mate < finalSearchResult.Mate               //          &&  (But faster (shorter mate)
+                                                || (extraResult.Mate == finalSearchResult.Mate          //              || Same mating distance, but higher depth)
+                                                    && extraResult.Depth > finalSearchResult.Depth))
+
+                                        => extraResult,
+
+                                < 0                                                                     // Mated in main thread:
+                                    when                                                                //      Extra thread:
+                                        extraResult.Mate >= 0                                           //          No mated any more, or even mating
+                                            || extraResult.Depth > finalSearchResult.Depth              //              || Still mated, but higher depth
+                                            || (extraResult.Depth == finalSearchResult.Depth            //              || Still mated, same depth, but longer mate
+                                                && extraResult.Mate < finalSearchResult.Mate)
+
+                                        => extraResult,
+
+                                _ => finalSearchResult
+                            };
+                        }
+                    }
+                }
+
                 if (finalSearchResult is not null)
                 {
-                    foreach (var extraResult in extraResults)
-                    {
-                        finalSearchResult.Nodes += extraResult?.Nodes ?? 0;
-                    }
+                    finalSearchResult.Nodes = totalNodes;
+                    finalSearchResult.Time = totalTime;
 
                     finalSearchResult.NodesPerSecond = Utils.CalculateNps(finalSearchResult.Nodes, 0.001 * finalSearchResult.Time);
 
