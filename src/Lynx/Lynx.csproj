@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <StaticAnalysisCodeType>ProdLib</StaticAnalysisCodeType>
-    <!--<DefineConstants>MULTITHREAD_DEBUG</DefineConstants>-->
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
