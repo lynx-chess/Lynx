@@ -353,18 +353,18 @@ public sealed class Searcher
                                 > 0                                                                     // Mating in main thread:
                                     when                                                                //      Extra thread:
                                         extraResult.Mate > 0                                            //          Still mating
-                                            && (extraResult.Mate < finalSearchResult.Mate               //          &&  (But faster (shorter mate)
-                                                || (extraResult.Mate == finalSearchResult.Mate          //              || Same mating distance, but higher depth)
+                                            && (extraResult.Mate < finalSearchResult.Mate               //          &&  [But faster (shorter mate)
+                                                || (extraResult.Mate == finalSearchResult.Mate          //              || Same mating distance, but higher depth]
                                                     && extraResult.Depth > finalSearchResult.Depth))
 
                                         => extraResult,
 
                                 < 0                                                                     // Mated in main thread:
                                     when                                                                //      Extra thread:
-                                        extraResult.Mate >= 0                                           //          No mated any more, or even mating
-                                            || extraResult.Depth > finalSearchResult.Depth              //              || Still mated, but higher depth
-                                            || (extraResult.Depth == finalSearchResult.Depth            //              || Still mated, same depth, but longer mate
-                                                && extraResult.Mate < finalSearchResult.Mate)
+                                        extraResult.Depth > finalSearchResult.Depth                     //          Higher depth
+                                            || (extraResult.Depth == finalSearchResult.Depth            //          || Same depth
+                                                && (extraResult.Mate >= 0                               //              && [But mating or at least not mated any more
+                                                    || extraResult.Mate < finalSearchResult.Mate))      //                  || Still mated, but longer mate]
 
                                         => extraResult,
 
