@@ -348,7 +348,7 @@ public sealed class Searcher
                                 }
                                 else if (                                               // Mate detected in main thread:
                                     extraResult.Mate < finalSearchResult.Mate               // Faster +Mate, or slower -Mate
-                                    || extraResult.Depth > finalSearchResult.Depth)         // Higher depth
+                                        || extraResult.Depth > finalSearchResult.Depth)     // Higher depth
                                 {
                                     finalSearchResult = extraResult;
                                 }
