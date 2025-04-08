@@ -350,7 +350,7 @@ MigrationBackup/
 .ionide/
 
 # global.json
-global.json
+#global.json
 
 *.profraw
 
