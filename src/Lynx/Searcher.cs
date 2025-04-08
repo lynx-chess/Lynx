@@ -386,19 +386,17 @@ public sealed class Searcher
 
                     await _absoluteSearchCancellationTokenSource.CancelAsync();
 
-                    // We wait just for the node count, so there's room for improvement here with thread voting
-                    // and other strategies that take other thread results into account
-                    var extraResults = await Task.WhenAll(tasks);
-
 #if MULTITHREAD_DEBUG
                     _logger.Debug("End of extra searches, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
 #endif
 
                     if (finalSearchResult is not null)
                     {
-                        foreach (var extraResult in extraResults)
+                        // We wait just for the node count, so there's room for improvement here with thread voting
+                        // and other strategies that take other thread results into account
+                        await foreach (var extraResult in Task.WhenEach(tasks))
                         {
-                            finalSearchResult.Nodes += extraResult?.Nodes ?? 0;
+                            finalSearchResult.Nodes += (await extraResult)?.Nodes ?? 0;
                         }
 
                         finalSearchResult.NodesPerSecond = Utils.CalculateNps(finalSearchResult.Nodes, 0.001 * finalSearchResult.Time);
