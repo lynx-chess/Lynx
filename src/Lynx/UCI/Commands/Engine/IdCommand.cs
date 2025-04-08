@@ -32,7 +32,7 @@ public sealed class IdCommand : IEngineBaseCommand
 #else
         return parts?.Length switch
         {
-            >= 2 => $"{parts[0]}-dev-{parts[1][..Math.Min(7, parts[1].Length)]}",
+            >= 2 => $"{parts[0]}-dev-{parts[1][..Math.Min(8, parts[1].Length)]}",
             1 => parts[0],
             _ => "Unknown"
         };
