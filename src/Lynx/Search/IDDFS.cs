@@ -184,7 +184,8 @@ public sealed partial class Engine
 
                         if (bestScore < -EvaluationConstants.CheckMateBaseEvaluation)
                         {
-                            _logger.Warn(
+                            //_logger.Warn( // TODO bug
+                            _logger.Info(
                                 "[#{EngineId}] Depth {Depth}: potential -X checkmate detected in position {Position}, but score {BestScore} outside of the limits",
                                 _id, depth, Game.PositionBeforeLastSearch.FEN(Game.HalfMovesWithoutCaptureOrPawnMove), bestScore);
 
@@ -287,9 +288,10 @@ public sealed partial class Engine
         {
             if (mate == EvaluationConstants.MaxMate || mate == EvaluationConstants.MinMate)
             {
-                _logger.Warn(
-                    "[#{EngineId}] Depth {Depth}: mate outside of range detected, stopping search and playing best move {BestMove}",
-                    _id, depth - 1, bestMove.Value.UCIString());
+                //_logger.Warn( // TODO bug
+                _logger.Info(
+                    "[#{EngineId}] Depth {Depth}: mate {Mate} outside of range detected, stopping search and playing best move so far: {BestMove}",
+                    _id, depth - 1, mate, bestMove.Value.UCIString());
 
                 return false;
             }
