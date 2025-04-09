@@ -245,15 +245,15 @@ public sealed partial class Engine
             if (IsMainEngine)
             {
                 _logger.Info(
-                    "[#{EngineId}] Depth {Depth}: main search cancellation requested after {Time}ms (nodes {Nodes}), best move will be returned",
-                    _id, depth, _stopWatch.ElapsedMilliseconds, _nodes);
+                    "[#{EngineId}] Depth {Depth}: main search cancellation requested after {Time}ms (>= {HardLimitTime}ms). Nodes {Nodes}), best move will be returned",
+                    _id, depth, _stopWatch.ElapsedMilliseconds, _searchConstraints.HardLimitTimeBound, _nodes);
             }
 #if MULTITHREAD_DEBUG
             else
             {
-                _logger.Info(
-                    "[#{EngineId}] Depth {Depth}: search cancellation requested after {Time}ms (nodes {Nodes}), best move will be returned",
-                    _id, depth, _stopWatch.ElapsedMilliseconds, _nodes);
+                _logger.Debug(
+                    "[#{EngineId}] Depth {Depth}: search cancellation requested after {Time}ms (>= {HardLimitTime}ms). Nodes {Nodes}), best move will be returned",
+                    _id, depth, _stopWatch.ElapsedMilliseconds, _searchConstraints.HardLimitTimeBound, _nodes);
             }
 #endif
 
