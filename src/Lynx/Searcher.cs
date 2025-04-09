@@ -532,7 +532,10 @@ public sealed class Searcher
             {
                 _extraEngines[i] = new Engine(i + 2,
 #if MULTITHREAD_DEBUG
-                    _engineWriter,
+                    // Only for low level debugging
+                    //_engineWriter,
+
+                    SilentChannelWriter<object>.Instance,
 #else
                     SilentChannelWriter<object>.Instance,
 #endif
