@@ -370,6 +370,7 @@ public sealed class Searcher
 
 #if MULTITHREAD_DEBUG
         _logger.Info("End of extra searches, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+        lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
         if (finalSearchResult is not null)
