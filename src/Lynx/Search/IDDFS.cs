@@ -241,9 +241,22 @@ public sealed partial class Engine
         catch (OperationCanceledException)
         {
 #pragma warning disable S6667 // Logging in a catch clause should pass the caught exception as a parameter - expected exception we want to ignore
-            _logger.Info(
-                "[#{EngineId}] Depth {Depth}: search cancellation requested after {Time}ms (nodes {Nodes}), best move will be returned",
-                _id, depth, _stopWatch.ElapsedMilliseconds, _nodes);
+
+            if (IsMainEngine)
+            {
+                _logger.Info(
+                    "[#{EngineId}] Depth {Depth}: main search cancellation requested after {Time}ms (nodes {Nodes}), best move will be returned",
+                    _id, depth, _stopWatch.ElapsedMilliseconds, _nodes);
+            }
+#if MULTITHREAD_DEBUG
+            else
+            {
+                _logger.Info(
+                    "[#{EngineId}] Depth {Depth}: search cancellation requested after {Time}ms (nodes {Nodes}), best move will be returned",
+                    _id, depth, _stopWatch.ElapsedMilliseconds, _nodes);
+            }
+#endif
+
 #pragma warning restore S6667 // Logging in a catch clause should pass the caught exception as a parameter.
 
             for (int i = 0; i < lastSearchResult?.Moves.Length; ++i)
