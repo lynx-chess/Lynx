@@ -160,79 +160,79 @@ public sealed class EngineSettings
     public int LMR_MinFullDepthSearchedMoves_NonPV { get; set; } = 2;
 
     [SPSA<double>(0.1, 2, 0.2)]
-    public double LMR_Base_Quiet { get; set; } = 0.85;
+    public double LMR_Base_Quiet { get; set; } = 0.56;
 
     [SPSA<double>(0.1, 2, 0.2)]
-    public double LMR_Base_Noisy { get; set; } = 0.52;
+    public double LMR_Base_Noisy { get; set; } = 0.43;
 
     [SPSA<double>(1, 5, 0.2)]
-    public double LMR_Divisor_Quiet { get; set; } = 2.70;
+    public double LMR_Divisor_Quiet { get; set; } = 2.20;
 
     [SPSA<double>(1, 5, 0.2)]
-    public double LMR_Divisor_Noisy { get; set; } = 2.67;
+    public double LMR_Divisor_Noisy { get; set; } = 2.58;
 
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
     /// </summary>
     [SPSA<int>(25, 300, 30)]
-    public int LMR_Improving { get; set; } = 75;
+    public int LMR_Improving { get; set; } = 124;
 
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
     /// </summary>
     [SPSA<int>(25, 300, 30)]
-    public int LMR_Cutnode { get; set; } = 141;
+    public int LMR_Cutnode { get; set; } = 86;
 
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
     /// </summary>
     [SPSA<int>(25, 300, 30)]
-    public int LMR_TTPV { get; set; } = 82;
+    public int LMR_TTPV { get; set; } = 98;
 
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
     /// </summary>
     [SPSA<int>(25, 300, 30)]
-    public int LMR_TTCapture { get; set; } = 100;
+    public int LMR_TTCapture { get; set; } = 31;
 
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
     /// </summary>
     [SPSA<int>(25, 300, 30)]
-    public int LMR_PVNode { get; set; } = 60;
+    public int LMR_PVNode { get; set; } = 112;
 
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
     /// </summary>
     [SPSA<int>(25, 300, 30)]
-    public int LMR_InCheck { get; set; } = 79;
+    public int LMR_InCheck { get; set; } = 95;
 
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
     /// </summary>
     [SPSA<int>(25, 300, 30)]
-    public int LMR_Quiet { get; set; } = 100;
+    public int LMR_Quiet { get; set; } = 137;
 
     /// <summary>
     /// Needs to be re-scaled dividing by <see cref="EvaluationConstants.LMRScaleFactor"/>
     /// </summary>
     [SPSA<int>(25, 300, 30)]
-    public int LMR_FailLowTTPV { get; set; } = 100;
+    public int LMR_FailLowTTPV { get; set; } = 109;
 
     /// <summary>
     /// Tuned from ~<see cref="History_MaxMoveValue"/> / 2
     /// </summary>
     [SPSA<int>(1, 8192, 512)]
-    public int LMR_History_Divisor_Quiet { get; set; } = 3107;
+    public int LMR_History_Divisor_Quiet { get; set; } = 2074;
 
     /// <summary>
     /// Tuned from ~<see cref="History_MaxMoveValue"/> / 2 * (3 / 4)
     /// </summary>
     [SPSA<int>(1, 8192, 512)]
-    public int LMR_History_Divisor_Noisy { get; set; } = 3451;
+    public int LMR_History_Divisor_Noisy { get; set; } = 4003;
 
     [SPSA<int>(20, 100, 8)]
-    public int LMR_DeeperBase { get; set; } = 38;
+    public int LMR_DeeperBase { get; set; } = 31;
 
     //[SPSA<int>(1, 10, 1)]
     public int LMR_DeeperDepthMultiplier { get; set; } = 2;
@@ -252,13 +252,13 @@ public sealed class EngineSettings
     public int NMP_DepthDivisor { get; set; } = 3;
 
     [SPSA<int>(50, 350, 15)]
-    public int NMP_StaticEvalBetaDivisor { get; set; } = 113;
+    public int NMP_StaticEvalBetaDivisor { get; set; } = 107;
 
     //[SPSA<int>(1, 10, 0.5)]
     public int NMP_StaticEvalBetaMaxReduction { get; set; } = 3;
 
     [SPSA<int>(5, 30, 1)]
-    public int AspirationWindow_Base { get; set; } = 10;
+    public int AspirationWindow_Base { get; set; } = 11;
 
     //[SPSA<int>(5, 30, 1)]
     //public int AspirationWindow_Delta { get; set; } = 13;
@@ -276,10 +276,10 @@ public sealed class EngineSettings
     public int Razoring_MaxDepth { get; set; } = 2;
 
     [SPSA<int>(1, 300, 15)]
-    public int Razoring_Depth1Bonus { get; set; } = 104;
+    public int Razoring_Depth1Bonus { get; set; } = 143;
 
     [SPSA<int>(1, 300, 15)]
-    public int Razoring_NotDepth1Bonus { get; set; } = 190;
+    public int Razoring_NotDepth1Bonus { get; set; } = 213;
 
     //[SPSA<int>(1, 10, 0.5)]
     public int IIR_MinDepth { get; set; } = 4;
@@ -300,7 +300,7 @@ public sealed class EngineSettings
     public int CounterMoves_MinDepth { get; set; } = 3;
 
     [SPSA<int>(0, 200, 10)]
-    public int History_BestScoreBetaMargin { get; set; } = 86;
+    public int History_BestScoreBetaMargin { get; set; } = 93;
 
     //[SPSA<int>(0, 6, 0.5)]
     public int SEE_BadCaptureReduction { get; set; } = 2;
@@ -309,16 +309,16 @@ public sealed class EngineSettings
     public int FP_MaxDepth { get; set; } = 7;
 
     [SPSA<int>(1, 200, 10)]
-    public int FP_DepthScalingFactor { get; set; } = 105;
+    public int FP_DepthScalingFactor { get; set; } = 112;
 
     [SPSA<int>(0, 500, 25)]
-    public int FP_Margin { get; set; } = 108;
+    public int FP_Margin { get; set; } = 119;
 
     //[SPSA<int>(0, 10, 0.5)]
     public int HistoryPrunning_MaxDepth { get; set; } = 5;
 
     [SPSA<int>(-8192, 0, 512)]
-    public int HistoryPrunning_Margin { get; set; } = -643;
+    public int HistoryPrunning_Margin { get; set; } = -362;
 
     //[SPSA<int>(0, 10, 0.5)]
     public int TTHit_NoCutoffExtension_MaxDepth { get; set; } = 6;
@@ -332,10 +332,10 @@ public sealed class EngineSettings
     public int TTReplacement_TTPVDepthOffset { get; set; } = 2;
 
     [SPSA<int>(-100, -10, 10)]
-    public int PVS_SEE_Threshold_Quiet { get; set; } = -42;
+    public int PVS_SEE_Threshold_Quiet { get; set; } = -40;
 
     [SPSA<int>(-150, -50, 10)]
-    public int PVS_SEE_Threshold_Noisy { get; set; } = -117;
+    public int PVS_SEE_Threshold_Noisy { get; set; } = -123;
 
     #endregion
 }
