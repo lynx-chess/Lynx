@@ -346,8 +346,8 @@ public sealed partial class Engine
             var bestMoveNodeCount = _moveNodeCount[bestMove.Value.Piece()][bestMove.Value.TargetSquare()];
             var scaledSoftLimitTimeBound = TimeManager.SoftLimit(_searchConstraints, depth - 1, bestMoveNodeCount, _nodes, _bestMoveStability, _scoreDelta);
             _logger.Info(
-                "[#{EngineId}] [TM] Depth {Depth}: hard limit {HardLimit}, base soft limit {BaseSoftLimit}, scaled soft limit {ScaledSoftLimit}",
-                _id, depth - 1, _searchConstraints.HardLimitTimeBound, _searchConstraints.SoftLimitTimeBound, scaledSoftLimitTimeBound);
+                    "[#{EngineId}] [TM] {ElapsedMilliseconds}ms | Depth {Depth}: hard limit {HardLimit}, base soft limit {BaseSoftLimit}ms, scaled soft limit {ScaledSoftLimit}ms",
+                    _id, elapsedMilliseconds, depth - 1, _searchConstraints.HardLimitTimeBound, _searchConstraints.SoftLimitTimeBound, scaledSoftLimitTimeBound);
 
             if (elapsedMilliseconds > scaledSoftLimitTimeBound)
             {
