@@ -223,60 +223,7 @@ public sealed class Searcher
 
         if (!isPondering)
         {
-            if (searchConstraints.HardLimitTimeBound != SearchConstraints.DefaultHardLimitTimeBound)
-            {
-                _searchCancellationTokenSource.CancelAfter(searchConstraints.HardLimitTimeBound);
-            }
-
-#if MULTITHREAD_DEBUG
-            var sw = System.Diagnostics.Stopwatch.StartNew();
-            var lastElapsed = sw.ElapsedMilliseconds;
-#endif
-
-            var tasks = _extraEngines
-                .Select(engine =>
-                    Task.Run(() => engine.Search(in extraEnginesSearchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
-                .ToArray();
-
-#if MULTITHREAD_DEBUG
-            _logger.Debug("End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
-            lastElapsed = sw.ElapsedMilliseconds;
-#endif
-
-            SearchResult? finalSearchResult = _mainEngine.Search(in searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
-
-#if MULTITHREAD_DEBUG
-            _logger.Debug("End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
-            lastElapsed = sw.ElapsedMilliseconds;
-#endif
-
-            await _absoluteSearchCancellationTokenSource.CancelAsync();
-
-#if MULTITHREAD_DEBUG
-            _logger.Debug("End of extra searches, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
-#endif
-
-            if (finalSearchResult is not null)
-            {
-                // We wait just for the node count, so there's room for improvement here with thread voting
-                // and other strategies that take other thread results into account
-                await foreach (var extraResult in Task.WhenEach(tasks))
-                {
-                    finalSearchResult.Nodes += (await extraResult)?.Nodes ?? 0;
-                }
-
-                finalSearchResult.NodesPerSecond = Utils.CalculateNps(finalSearchResult.Nodes, 0.001 * finalSearchResult.Time);
-
-#if MULTITHREAD_DEBUG
-                _logger.Debug("End of multithread calculations, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
-#endif
-
-                // Final info command
-                _engineWriter.TryWrite(finalSearchResult);
-
-                // bestmove command
-                _engineWriter.TryWrite(new BestMoveCommand(finalSearchResult));
-            }
+            var finalSearchResult = MultithreadedSearch(searchConstraints, extraEnginesSearchConstraints);
         }
         else
         {
@@ -313,19 +260,17 @@ public sealed class Searcher
 
                 await _absoluteSearchCancellationTokenSource.CancelAsync();
 
-                // We wait just for the node count, so there's room for improvement here with thread voting
-                // and other strategies that take other thread results into account
-                var extraResults = await Task.WhenAll(tasks);
-
 #if MULTITHREAD_DEBUG
                 _logger.Debug("[Pondering] End of extra searches, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
 #endif
 
                 if (finalSearchResult is not null)
                 {
-                    foreach (var extraResult in extraResults)
+                    // We wait just for the node count, so there's room for improvement here with thread voting
+                    // and other strategies that take other thread results into account
+                    await foreach (var extraResult in Task.WhenEach(tasks))
                     {
-                        finalSearchResult.Nodes += extraResult?.Nodes ?? 0;
+                        finalSearchResult.Nodes += (await extraResult)?.Nodes ?? 0;
                     }
 
                     finalSearchResult.NodesPerSecond = Utils.CalculateNps(finalSearchResult.Nodes, 0.001 * finalSearchResult.Time);
@@ -357,59 +302,12 @@ public sealed class Searcher
                 {
                     _logger.Debug("Ponder hit - restarting search now with time constraints");
 
-#if MULTITHREAD_DEBUG
-                    sw = System.Diagnostics.Stopwatch.StartNew();
-                    lastElapsed = sw.ElapsedMilliseconds;
-#endif
-
                     if (searchConstraints.HardLimitTimeBound != SearchConstraints.DefaultHardLimitTimeBound)
                     {
                         _searchCancellationTokenSource.CancelAfter(searchConstraints.HardLimitTimeBound);
                     }
 
-                    var tasks = _extraEngines
-                        .Select(engine =>
-                            Task.Run(() => engine.Search(in extraEnginesSearchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
-                        .ToArray();
-
-#if MULTITHREAD_DEBUG
-                    _logger.Debug("End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
-                    lastElapsed = sw.ElapsedMilliseconds;
-#endif
-
-                    finalSearchResult = _mainEngine.Search(in searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
-
-#if MULTITHREAD_DEBUG
-                    _logger.Debug("End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
-                    lastElapsed = sw.ElapsedMilliseconds;
-#endif
-
-                    await _absoluteSearchCancellationTokenSource.CancelAsync();
-
-                    // We wait just for the node count, so there's room for improvement here with thread voting
-                    // and other strategies that take other thread results into account
-                    var extraResults = await Task.WhenAll(tasks);
-
-#if MULTITHREAD_DEBUG
-                    _logger.Debug("End of extra searches, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
-#endif
-
-                    if (finalSearchResult is not null)
-                    {
-                        foreach (var extraResult in extraResults)
-                        {
-                            finalSearchResult.Nodes += extraResult?.Nodes ?? 0;
-                        }
-
-                        finalSearchResult.NodesPerSecond = Utils.CalculateNps(finalSearchResult.Nodes, 0.001 * finalSearchResult.Time);
-
-#if MULTITHREAD_DEBUG
-                        _logger.Debug("End of multithread calculations, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
-#endif
-
-                        // Final info command
-                        _engineWriter.TryWrite(finalSearchResult);
-                    }
+                    finalSearchResult = await MultithreadedSearch(searchConstraints, extraEnginesSearchConstraints);
                 }
                 else
                 {
@@ -419,17 +317,84 @@ public sealed class Searcher
 
                     // Final info command
                     _engineWriter.TryWrite(finalSearchResult);
+
+                    // bestmove command
+                    _engineWriter.TryWrite(new BestMoveCommand(finalSearchResult));
                 }
 
                 _isPonderHit = false;
             }
-
-            if (finalSearchResult is not null)
+            else
             {
-                // We print best move even in case of go ponder + stop, in which case IDEs are expected to ignore it
-                _engineWriter.TryWrite(new BestMoveCommand(finalSearchResult));
+                if (finalSearchResult is not null)
+                {
+                    // We print best move even in case of go ponder + stop, in which case IDEs are expected to ignore it
+                    _engineWriter.TryWrite(new BestMoveCommand(finalSearchResult));
+                }
             }
         }
+    }
+
+    private async Task<SearchResult?> MultithreadedSearch(SearchConstraints searchConstraints, SearchConstraints extraEnginesSearchConstraints)
+    {
+#if MULTITHREAD_DEBUG
+                    sw = System.Diagnostics.Stopwatch.StartNew();
+                    lastElapsed = sw.ElapsedMilliseconds;
+#endif
+
+        if (searchConstraints.HardLimitTimeBound != SearchConstraints.DefaultHardLimitTimeBound)
+        {
+            _searchCancellationTokenSource.CancelAfter(searchConstraints.HardLimitTimeBound);
+        }
+
+        SearchResult? finalSearchResult = null;
+
+        var tasks = _extraEngines
+            .Select(engine =>
+                Task.Run(() => engine.Search(in extraEnginesSearchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, CancellationToken.None)))
+            .ToArray();
+
+#if MULTITHREAD_DEBUG
+                    _logger.Debug("End of extra searches prep, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+                    lastElapsed = sw.ElapsedMilliseconds;
+#endif
+
+        finalSearchResult = _mainEngine.Search(in searchConstraints, isPondering: false, _absoluteSearchCancellationTokenSource.Token, _searchCancellationTokenSource.Token);
+
+#if MULTITHREAD_DEBUG
+                    _logger.Debug("End of main search, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+                    lastElapsed = sw.ElapsedMilliseconds;
+#endif
+
+        await _absoluteSearchCancellationTokenSource.CancelAsync();
+
+#if MULTITHREAD_DEBUG
+                    _logger.Debug("End of extra searches, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+#endif
+
+        if (finalSearchResult is not null)
+        {
+            // We wait just for the node count, so there's room for improvement here with thread voting
+            // and other strategies that take other thread results into account
+            await foreach (var extraResult in Task.WhenEach(tasks))
+            {
+                finalSearchResult.Nodes += (await extraResult)?.Nodes ?? 0;
+            }
+
+            finalSearchResult.NodesPerSecond = Utils.CalculateNps(finalSearchResult.Nodes, 0.001 * finalSearchResult.Time);
+
+#if MULTITHREAD_DEBUG
+                        _logger.Debug("End of multithread calculations, {0} ms", sw.ElapsedMilliseconds - lastElapsed);
+#endif
+
+            // Final info command
+            _engineWriter.TryWrite(finalSearchResult);
+
+            // bestmove command
+            _engineWriter.TryWrite(new BestMoveCommand(finalSearchResult));
+        }
+
+        return finalSearchResult;
     }
 
     public void AdjustPosition(ReadOnlySpan<char> command)
