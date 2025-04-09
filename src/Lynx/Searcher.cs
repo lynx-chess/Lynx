@@ -373,15 +373,24 @@ public sealed class Searcher
         lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
+        var totalNodes = finalSearchResult?.Nodes ?? 0;
+
+        // We wait just for the node count, so there's room for improvement here with thread voting
+        // and other strategies that take other thread results into account
+        await foreach (var task in Task.WhenEach(tasks))
+        {
+            var extraResult = await task;
+
+            if (extraResult != null)
+            {
+                totalNodes += extraResult.Nodes;
+                finalSearchResult ??= extraResult;
+            }
+        }
+
         if (finalSearchResult is not null)
         {
-            // We wait just for the node count, so there's room for improvement here with thread voting
-            // and other strategies that take other thread results into account
-            await foreach (var extraResult in Task.WhenEach(tasks))
-            {
-                finalSearchResult.Nodes += (await extraResult)?.Nodes ?? 0;
-            }
-
+            finalSearchResult.Nodes = totalNodes;
             finalSearchResult.NodesPerSecond = Utils.CalculateNps(finalSearchResult.Nodes, 0.001 * finalSearchResult.Time);
 
 #if MULTITHREAD_DEBUG
