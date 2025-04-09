@@ -245,14 +245,14 @@ public sealed partial class Engine
             if (IsMainEngine)
             {
                 _logger.Info(
-                    "[#{EngineId}] Depth {Depth}: main search cancellation requested after {Time}ms (>= {HardLimitTime}ms). Nodes {Nodes}), best move will be returned",
+                    "[#{EngineId}] Depth {Depth}: main search cancellation requested after {Time}ms (>= {HardLimitTime}ms). Nodes {Nodes}, best move will be returned",
                     _id, depth, _stopWatch.ElapsedMilliseconds, _searchConstraints.HardLimitTimeBound, _nodes);
             }
 #if MULTITHREAD_DEBUG
             else
             {
                 _logger.Debug(
-                    "[#{EngineId}] Depth {Depth}: search cancellation requested after {Time}ms (>= {HardLimitTime}ms). Nodes {Nodes}), best move will be returned",
+                    "[#{EngineId}] Depth {Depth}: search cancellation requested after {Time}ms (>= {HardLimitTime}ms). Nodes {Nodes}, best move will be returned",
                     _id, depth, _stopWatch.ElapsedMilliseconds, _searchConstraints.HardLimitTimeBound, _nodes);
             }
 #endif
@@ -561,11 +561,22 @@ public sealed partial class Engine
                 continue;
             }
 
+            // We don't have or need any eval, and we don't want to return 0 or a negative eval that
+            // could make the GUI resign or take a draw from this position.
+            // Since this only happens in root, we don't really care about being more precise for raising
+            // alphas or betas of parent moves, so let's just return +-2 pawns depending on the side to move
+            var singleMoveEval = Game.CurrentPosition.Side == Side.White
+                ? +EvaluationConstants.SingleMoveScore
+                : -EvaluationConstants.SingleMoveScore;
+
             return new SearchResult(
 #if MULTITHREAD_DEBUG
                 _id,
 #endif
-                move, moveScores[i], 0, [move]);
+                move, singleMoveEval, 0, [move])
+            {
+                DepthReached = 0
+            };
         }
 
         _logger.Error("No valid move found while looking for an emergency move for position {Fen}", position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove));
