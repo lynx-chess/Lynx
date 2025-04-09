@@ -373,7 +373,7 @@ public sealed class Searcher
 #endif
 
         var totalNodes = finalSearchResult?.Nodes ?? 0;
-        var totalTime = finalSearchResult?.Time ?? 0;
+        var finalTime = finalSearchResult?.Time ?? 0;
 
         await foreach (var task in Task.WhenEach(tasks))
         {
@@ -382,11 +382,11 @@ public sealed class Searcher
             if (extraResult is not null)
             {
                 totalNodes += extraResult.Nodes;
-                totalTime += extraResult.Time;
 
                 if (finalSearchResult is null)
                 {
                     finalSearchResult = extraResult;
+                    finalTime = extraResult.Time;
                     continue;
                 }
 
@@ -430,7 +430,7 @@ public sealed class Searcher
         if (finalSearchResult is not null)
         {
             finalSearchResult.Nodes = totalNodes;
-            finalSearchResult.Time = totalTime;
+            finalSearchResult.Time = finalTime;
 
             finalSearchResult.NodesPerSecond = Utils.CalculateNps(finalSearchResult.Nodes, 0.001 * finalSearchResult.Time);
 
