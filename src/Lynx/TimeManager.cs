@@ -50,13 +50,13 @@ public static class TimeManager
             var softLimitBase = (millisecondsLeft / movesDivisor) + (millisecondsIncrement * Configuration.EngineSettings.SoftTimeBaseIncrementMultiplier);
             softLimitTimeBound = Math.Min(hardLimitTimeBound, (int)(softLimitBase * Configuration.EngineSettings.SoftTimeBoundMultiplier));
 
-            _logger.Info("[TM] Soft time bound: {0}s", 0.001 * softLimitTimeBound);
-            _logger.Info("[TM] Hard time bound: {0}s", 0.001 * hardLimitTimeBound);
+            _logger.Info("[TM] Soft time bound: {0}ms", softLimitTimeBound);
+            _logger.Info("[TM] Hard time bound: {0}ms", hardLimitTimeBound);
         }
         else if (goCommand.MoveTime > 0)
         {
             softLimitTimeBound = hardLimitTimeBound = goCommand.MoveTime - engineGuiCommunicationTimeOverhead;
-            _logger.Info("Time to move: {0}s", 0.001 * hardLimitTimeBound);
+            _logger.Info("Time to move: {0}ms", hardLimitTimeBound);
         }
         else if (goCommand.Depth > 0)
         {
