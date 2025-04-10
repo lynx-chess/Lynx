@@ -9,20 +9,49 @@ public readonly struct TranspositionTable
 {
     private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
-    private readonly TranspositionTableElement[] _tt = [];
+    private readonly ulong _totalTTLength;
+    private readonly int _ttArrayCount;
+    private readonly TranspositionTableElement[][] _tt = [];
 
 #pragma warning disable CA1051 // Do not declare visible instance fields
     public readonly int Size;
 #pragma warning restore CA1051 // Do not declare visible instance fields
 
-    public int Length => _tt.Length;
+    public ulong Length => _totalTTLength;
 
     public TranspositionTable()
     {
         Size = Configuration.EngineSettings.TranspositionTableSize;
 
         var ttLength = CalculateLength(Size);
-        _tt = GC.AllocateArray<TranspositionTableElement>(ttLength, pinned: true);
+        _totalTTLength = ttLength;
+
+        ulong fullArrayCount = (ttLength / (ulong)Array.MaxLength);
+        int itemsLeft = (int)(ttLength % (ulong)Array.MaxLength);
+
+        var totalArrayCount = fullArrayCount
+            + (itemsLeft == 0
+            ? 0UL
+            : 1UL);
+
+        if (totalArrayCount > (ulong)Array.MaxLength)
+        {
+            var ttLengthGB = (double)ttLength / 1024 / 1024 / 1024;
+            throw new ArgumentException($"Invalid transpositon table (Hash) size: {ttLengthGB}GB, {ttLength} values (> Array.MaxLength, {Array.MaxLength})");
+        }
+
+        _ttArrayCount = (int)totalArrayCount;
+
+        _tt = GC.AllocateArray<TranspositionTableElement[]>(_ttArrayCount, pinned: true);
+        for (int i = 0; i < (int)fullArrayCount; ++i)
+        {
+            _tt[i] = GC.AllocateArray<TranspositionTableElement>(Array.MaxLength, pinned: true);
+        }
+
+        if (itemsLeft != 0)
+        {
+            _tt[_ttArrayCount - 1] = GC.AllocateArray<TranspositionTableElement>(itemsLeft, pinned: true);
+        }
     }
 
     /// <summary>
@@ -34,21 +63,25 @@ public readonly struct TranspositionTable
         _logger.Debug("Clearing TT");
         var sw = Stopwatch.StartNew();
 
-        var tt = _tt;
-        var ttLength = tt.Length;
-        var threadCount = Configuration.EngineSettings.Threads;
-        var sizePerThread = ttLength / threadCount;
-
-        // Instead of just doing Array.Clear(_tt):
-        Parallel.For(0, threadCount, i =>
+        // TODO: better division of work, it's probably better
+        // not to go from sub-tt into sub-tt
+        foreach (var tt in _tt)
         {
-            var start = i * sizePerThread;
-            var length = (i == threadCount - 1)
-                ? ttLength - start
-                : sizePerThread;
+            var ttLength = tt.Length;
+            var threadCount = Configuration.EngineSettings.Threads;
+            var sizePerThread = ttLength / threadCount;
 
-            Array.Clear(tt, start, length);
-        });
+            // Instead of just doing Array.Clear(_tt):
+            Parallel.For(0, threadCount, i =>
+            {
+                var start = i * sizePerThread;
+                var length = (i == threadCount - 1)
+                    ? ttLength - start
+                    : sizePerThread;
+
+                Array.Clear(tt, start, length);
+            });
+        }
 
         _logger.Info("TT clearing time:\t{0} ms", sw.ElapsedMilliseconds);
     }
@@ -58,16 +91,16 @@ public readonly struct TranspositionTable
     {
         if (Sse.IsSupported)
         {
-            var index = CalculateTTIndex(position.UniqueIdentifier);
+            (var ttIndex, var entryIndex) = CalculateTTIndexes(position.UniqueIdentifier);
 
             unsafe
             {
                 // Since _tt is a pinned array
                 // This is no-op pinning as it does not influence the GC compaction
                 // https://tooslowexception.com/pinned-object-heap-in-net-5/
-                fixed (TranspositionTableElement* ttPtr = _tt)
+                fixed (TranspositionTableElement* ttPtr = _tt[ttIndex])
                 {
-                    Sse.Prefetch0(ttPtr + index);
+                    Sse.Prefetch0(ttPtr + entryIndex);
                 }
             }
         }
@@ -77,7 +110,18 @@ public readonly struct TranspositionTable
     /// 'Fixed-point multiplication trick', see https://lemire.me/blog/2016/06/27/a-fast-alternative-to-the-modulo-reduction/
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public readonly ulong CalculateTTIndex(ulong positionUniqueIdentifier) => (ulong)(((UInt128)positionUniqueIdentifier * (UInt128)_tt.Length) >> 64);
+    public readonly ulong CalculateTTIndex(ulong positionUniqueIdentifier) => (ulong)(((UInt128)positionUniqueIdentifier * (UInt128)_totalTTLength) >> 64);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public readonly (int, int) CalculateTTIndexes(ulong positionUniqueIdentifier)
+    {
+        var globalIndex = CalculateTTIndex(positionUniqueIdentifier);
+
+        var ttIndex = (int)(globalIndex / (ulong)Array.MaxLength);
+        var itemIndex = (int)(globalIndex % (ulong)Array.MaxLength);
+
+        return (ttIndex, itemIndex);
+    }
 
     /// <summary>
     /// Checks the transposition table and, if there's a eval value that can be deducted from it of there's a previously recorded <paramref name="position"/>, it's returned. <see cref="EvaluationConstants.NoHashEntry"/> is returned otherwise
@@ -86,8 +130,8 @@ public readonly struct TranspositionTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public (int Score, ShortMove BestMove, NodeType NodeType, int StaticEval, int Depth, bool WasPv) ProbeHash(Position position, int ply)
     {
-        var ttIndex = CalculateTTIndex(position.UniqueIdentifier);
-        var entry = _tt[ttIndex];
+        (var ttIndex, var entryIndex) = CalculateTTIndexes(position.UniqueIdentifier);
+        var entry = _tt[ttIndex][entryIndex];
 
         if ((ushort)position.UniqueIdentifier != entry.Key)
         {
@@ -108,8 +152,8 @@ public readonly struct TranspositionTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void RecordHash(Position position, int staticEval, int depth, int ply, int score, NodeType nodeType, bool wasPv, Move? move = null)
     {
-        var ttIndex = CalculateTTIndex(position.UniqueIdentifier);
-        ref var entry = ref _tt[ttIndex];
+        (var ttIndex, var entryIndex) = CalculateTTIndexes(position.UniqueIdentifier);
+        ref var entry = ref _tt[ttIndex][entryIndex];
 
         //if (entry.Key != default && entry.Key != position.UniqueIdentifier)
         //{
@@ -143,8 +187,8 @@ public readonly struct TranspositionTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SaveStaticEval(Position position, int staticEval, bool wasPv)
     {
-        var ttIndex = CalculateTTIndex(position.UniqueIdentifier);
-        ref var entry = ref _tt[ttIndex];
+        (var ttIndex, var entryIndex) = CalculateTTIndexes(position.UniqueIdentifier);
+        ref var entry = ref _tt[ttIndex][entryIndex];
 
         // Extra key checks here (right before saving) failed for MT in https://github.com/lynx-chess/Lynx/pull/1566
         entry.Update(position.UniqueIdentifier, EvaluationConstants.NoHashEntry, staticEval, depth: -1, NodeType.None, wasPv ? 1 : 0, null);
@@ -156,7 +200,7 @@ public readonly struct TranspositionTable
     /// <returns></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int HashfullPermill() => _tt.Length > 0
-        ? (int)(1000L * PopulatedItemsCount() / _tt.LongLength)
+        ? (int)(1000L * (PopulatedItemsCount() / (ulong)_tt.LongLength))
         : 0;
 
     /// <summary>
@@ -168,11 +212,11 @@ public readonly struct TranspositionTable
     {
         int items = 0;
 
-        if (_tt.Length >= 1_000)
+        if (_tt[0].Length >= 1_000)
         {
             for (int i = 0; i < 1_000; ++i)
             {
-                if (_tt[i].Key != default)
+                if (_tt[0][i].Key != default)
                 {
                     ++items;
                 }
@@ -183,25 +227,25 @@ public readonly struct TranspositionTable
         return items;
     }
 
-    internal static int CalculateLength(int size)
+    internal static ulong CalculateLength(int size)
     {
         var ttEntrySize = TranspositionTableElement.Size;
 
         ulong sizeBytes = (ulong)size * 1024ul * 1024ul;
         ulong ttLength = sizeBytes / ttEntrySize;
-        var ttLengthMb = (double)ttLength / 1024 / 1024;
+        var ttLengthMB = (double)ttLength / 1024 / 1024;
 
         if (ttLength > (ulong)Array.MaxLength)
         {
-            throw new ArgumentException($"Invalid transpositon table (Hash) size: {ttLengthMb}Mb, {ttLength} values (> Array.MaxLength, {Array.MaxLength})");
+            _logger.Info($"More than one TT array will be used for transpositon table (Hash) size: {ttLengthMB * ttEntrySize / 1024}GB, {ttLength} values (> Array.MaxLength, {Array.MaxLength})");
         }
 
         _logger.Info("Hash value:\t{0} MB", size);
-        _logger.Info("TT memory:\t{0} MB", (ttLengthMb * ttEntrySize).ToString("F"));
+        _logger.Info("TT memory:\t{0} MB", (ttLengthMB * ttEntrySize).ToString("F"));
         _logger.Info("TT length:\t{0} items", ttLength);
         _logger.Info("TT entry:\t{0} bytes", ttEntrySize);
 
-        return (int)ttLength;
+        return ttLength;
     }
 
     /// <summary>
@@ -224,15 +268,18 @@ public readonly struct TranspositionTable
         return score;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private readonly int PopulatedItemsCount()
+¡   [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private readonly ulong PopulatedItemsCount()
     {
-        int items = 0;
+        ulong items = 0;
         for (int i = 0; i < _tt.Length; ++i)
         {
-            if (_tt[i].Key != default)
+            for (int j = 0; j < _tt[i].Length; ++j)
             {
-                ++items;
+                if (_tt[i][j].Key != default)
+                {
+                    ++items;
+                }
             }
         }
 
@@ -240,7 +287,7 @@ public readonly struct TranspositionTable
     }
 
     [Obsolete("Only tests")]
-    internal ref TranspositionTableElement Get(int index) => ref _tt[index];
+    internal ref TranspositionTableElement Get(int index) => ref _tt[0][index];
 
     [Conditional("DEBUG")]
     private void Stats()
@@ -248,13 +295,16 @@ public readonly struct TranspositionTable
         int items = 0;
         for (int i = 0; i < _tt.Length; ++i)
         {
-            if (_tt[i].Key != default)
+            for (int j = 0; j < _tt[i].Length; ++j)
             {
-                ++items;
+                if (_tt[i][j].Key != default)
+                {
+                    ++items;
+                }
             }
         }
         _logger.Info("TT Occupancy:\t{0}% ({1}MB)",
-            100 * PopulatedItemsCount() / _tt.Length,
+            100 * PopulatedItemsCount() / (ulong)_tt.Length,
             _tt.Length * Marshal.SizeOf<TranspositionTableElement>() / 1024 / 1024);
     }
 
@@ -264,9 +314,13 @@ public readonly struct TranspositionTable
         Console.WriteLine("Transposition table content:");
         for (int i = 0; i < _tt.Length; ++i)
         {
-            if (_tt[i].Key != default)
+            for (int j = 0; j < _tt[i].Length; ++j)
             {
-                Console.WriteLine($"{i}: Key = {_tt[i].Key}, Depth: {_tt[i].Depth}, Score: {_tt[i].Score}, Move: {(_tt[i].Move != 0 ? ((Move)_tt[i].Move).UCIString() : "-")} {_tt[i].Type}");
+                if (_tt[i][j].Key != default)
+                {
+                    var entry = _tt[i][j];
+                    Console.WriteLine($"{i}: Key = {entry.Key}, Depth: {entry.Depth}, Score: entry.Score}, Move: {(entry.Move != 0 ? ((Move)entry.Move).UCIString() : " - ")} {_tt[i].Type}");
+                }
             }
         }
         Console.WriteLine("");

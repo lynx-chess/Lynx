@@ -82,9 +82,9 @@ public class TranspositionTableTests
 
         var tt = new TranspositionTable();
 
-        Assert.AreNotEqual(0, tt.Length % Configuration.EngineSettings.Threads, "We want to test the edge case where the last thread clears more items than the rest");
+        Assert.AreNotEqual(0, (int)tt.Length % Configuration.EngineSettings.Threads, "We want to test the edge case where the last thread clears more items than the rest");
 
-        for(int index = 0; index < tt.Length; ++index)
+        for(int index = 0; index < (int)tt.Length; ++index)
         {
             ref var ttEntry = ref tt.Get(index);
             ttEntry.Update(1, 2, 3, 4, NodeType.Exact, 5, 6);
@@ -92,7 +92,7 @@ public class TranspositionTableTests
 
         tt.Clear();
 
-        for (int index = 0; index < tt.Length; ++index)
+        for (int index = 0; index < (int)tt.Length; ++index)
         {
             var ttEntry = tt.Get(index);
 
