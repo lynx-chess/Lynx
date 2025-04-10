@@ -131,14 +131,14 @@ public sealed partial class Engine
                     if (IsMainEngine)
                     {
                         _logger.Debug(
-                            "[#{EngineId}] Depth {Depth}: aspiration windows [{Alpha}, {Beta}] for previous search score {Score}, nodes {Nodes}",
+                            "[#{EngineId}] Depth {Depth}: asp-win [{Alpha}, {Beta}] for previous search score {Score}, nodes {Nodes}",
                             _id, depth, alpha, beta, lastSearchResult.Score, _nodes);
                     }
 #if MULTITHREAD_DEBUG
                     else
                     {
                         _logger.Trace(
-                            "[#{EngineId}] Depth {Depth}: aspiration windows [{Alpha}, {Beta}] for previous search score {Score}, nodes {Nodes}",
+                            "[#{EngineId}] Depth {Depth}: asp-win [{Alpha}, {Beta}] for previous search score {Score}, nodes {Nodes}",
                             _id, depth, alpha, beta, lastSearchResult.Score, _nodes);
                     }
 #endif
@@ -155,14 +155,14 @@ public sealed partial class Engine
                         if (IsMainEngine)
                         {
                             _logger.Debug(
-                            "[#{EngineId}] Aspiration windows depth {Depth} ({DepthWithoutReduction} - {Reduction}), window {Window}: [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
+                            "[#{EngineId}] Asp-win depth {Depth} ({DepthWithoutReduction} - {Reduction}), window {Window}: [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
                             _id, depthToSearch, depth, failHighReduction, window, alpha, beta, bestScore, _nodes);
                         }
 #if MULTITHREAD_DEBUG
                         else
                         {
                             _logger.Trace(
-                                "[#{EngineId}] Aspiration windows depth {Depth} ({DepthWithoutReduction} - {Reduction}), window {Window}: [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
+                                "[#{EngineId}] Asp-win depth {Depth} ({DepthWithoutReduction} - {Reduction}), window {Window}: [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
                                 _id, depthToSearch, depth, failHighReduction, window, alpha, beta, bestScore, _nodes);
                         }
 #endif
