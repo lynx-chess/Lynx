@@ -270,7 +270,7 @@ public readonly struct TranspositionTable
         return score;
     }
 
-¡   [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private readonly ulong PopulatedItemsCount()
     {
         ulong items = 0;
@@ -321,7 +321,7 @@ public readonly struct TranspositionTable
                 if (_tt[i][j].Key != default)
                 {
                     var entry = _tt[i][j];
-                    Console.WriteLine($"{i}: Key = {entry.Key}, Depth: {entry.Depth}, Score: entry.Score}, Move: {(entry.Move != 0 ? ((Move)entry.Move).UCIString() : " - ")} {_tt[i].Type}");
+                    Console.WriteLine($"{i}: Key = {entry.Key}, Depth: {entry.Depth}, Score: {entry.Score}, Move: {(entry.Move != 0 ? ((Move)entry.Move).UCIString() : " - ")} {entry.Type}");
                 }
             }
         }
