@@ -435,10 +435,8 @@ public sealed partial class Engine
         {
             _logger.Debug("One single move found");
 
-            // We don't have or need any eval, and we don't want to return 0 or a negative eval that
-            // could make the GUI resign or take a draw from this position.
-            // Since this only happens in root, we don't really care about being more precise for raising
-            // alphas or betas of parent moves, so let's just return +-2 pawns depending on the side to move
+            // We don't have or need any eval, and we return a fake but recognizable one
+            // See constant XML for details
             var score = Game.CurrentPosition.Side == Side.White
                 ? +EvaluationConstants.SingleMoveScore
                 : -EvaluationConstants.SingleMoveScore;
@@ -588,8 +586,8 @@ public sealed partial class Engine
             // Since this only happens in root, we don't really care about being more precise for raising
             // alphas or betas of parent moves, so let's just return +-2 pawns depending on the side to move
             var singleMoveEval = Game.CurrentPosition.Side == Side.White
-                ? +EvaluationConstants.SingleMoveScore
-                : -EvaluationConstants.SingleMoveScore;
+                ? EvaluationConstants.EmergencyMoveScore        // -0.66
+                : -EvaluationConstants.EmergencyMoveScore;      // +0.66
 
             return new SearchResult(
 #if MULTITHREAD_DEBUG
