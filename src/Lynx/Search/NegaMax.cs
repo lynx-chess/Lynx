@@ -132,7 +132,9 @@ public sealed partial class Engine
             }
 
             var finalPositionEvaluation = Position.EvaluateFinalPosition(ply, isInCheck);
-            _tt.RecordHash(position, finalPositionEvaluation, depth, ply, finalPositionEvaluation, NodeType.Exact, ttPv);
+            staticEval = Math.Clamp(finalPositionEvaluation, EvaluationConstants.MinStaticEval , EvaluationConstants.MaxStaticEval);
+
+            _tt.RecordHash(position, staticEval, depth, ply, finalPositionEvaluation, NodeType.Exact, ttPv);
             return finalPositionEvaluation;
         }
         else if (!pvNode)
@@ -164,9 +166,9 @@ public sealed partial class Engine
             // If the score is outside what the current bounds are, but it did match flag and depth,
             // then we can trust that this score is more accurate than the current static evaluation,
             // and we can update our static evaluation for better accuracy in pruning
-            if (ttHit && ttElementType != (ttScore > staticEval ? NodeType.Alpha : NodeType.Beta))
+            if (ttHit && ttElementType != (ttStaticEval > staticEval ? NodeType.Alpha : NodeType.Beta))
             {
-                staticEval = ttScore;
+                staticEval = ttStaticEval;
             }
 
             bool isNotGettingCheckmated = staticEval > EvaluationConstants.NegativeCheckmateDetectionLimit;
@@ -608,7 +610,7 @@ public sealed partial class Engine
             bestScore = Position.EvaluateFinalPosition(ply, isInCheck);
 
             nodeType = NodeType.Exact;
-            staticEval = bestScore;
+            staticEval = Math.Clamp(bestScore, EvaluationConstants.MinStaticEval , EvaluationConstants.MaxStaticEval);;
         }
 
         _tt.RecordHash(position, staticEval, depth, ply, bestScore, nodeType, ttPv, bestMove);
@@ -814,7 +816,7 @@ public sealed partial class Engine
             bestScore = Position.EvaluateFinalPosition(ply, position.IsInCheck());
 
             nodeType = NodeType.Exact;
-            staticEval = bestScore;
+            staticEval = Math.Clamp(bestScore, EvaluationConstants.MinStaticEval , EvaluationConstants.MaxStaticEval);
         }
 
         _tt.RecordHash(position, staticEval, 0, ply, bestScore, nodeType, ttPv, bestMove);
