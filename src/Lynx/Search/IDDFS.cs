@@ -128,9 +128,20 @@ public sealed partial class Engine
                     alpha = Math.Clamp(lastSearchResult.Score - window, EvaluationConstants.MinEval, EvaluationConstants.MaxEval);
                     beta = Math.Clamp(lastSearchResult.Score + window, EvaluationConstants.MinEval, EvaluationConstants.MaxEval);
 
-                    _logger.Debug(
-                        "[#{EngineId}] Depth {Depth}: aspiration windows [{Alpha}, {Beta}] for previous search score {Score}, nodes {Nodes}",
-                        _id, depth, alpha, beta, lastSearchResult.Score, _nodes);
+                    if (IsMainEngine)
+                    {
+                        _logger.Debug(
+                            "[#{EngineId}] Depth {Depth}: asp-win [{Alpha}, {Beta}] for previous search score {Score}, nodes {Nodes}",
+                            _id, depth, alpha, beta, lastSearchResult.Score, _nodes);
+                    }
+#if MULTITHREAD_DEBUG
+                    else
+                    {
+                        _logger.Trace(
+                            "[#{EngineId}] Depth {Depth}: asp-win [{Alpha}, {Beta}] for previous search score {Score}, nodes {Nodes}",
+                            _id, depth, alpha, beta, lastSearchResult.Score, _nodes);
+                    }
+#endif
                     Debug.Assert(
                         lastSearchResult.Mate == 0
                             ? lastSearchResult.Score < EvaluationConstants.PositiveCheckmateDetectionLimit && lastSearchResult.Score > EvaluationConstants.NegativeCheckmateDetectionLimit
@@ -141,9 +152,20 @@ public sealed partial class Engine
                         var depthToSearch = depth - failHighReduction;
                         Debug.Assert(depthToSearch > 0);
 
-                        _logger.Debug(
-                            "[#{EngineId}] Aspiration windows depth {Depth} ({DepthWithoutReduction} - {Reduction}), window {Window}: [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
+                        if (IsMainEngine)
+                        {
+                            _logger.Debug(
+                            "[#{EngineId}] Asp-win depth {Depth} ({DepthWithoutReduction} - {Reduction}), window {Window}: [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
                             _id, depthToSearch, depth, failHighReduction, window, alpha, beta, bestScore, _nodes);
+                        }
+#if MULTITHREAD_DEBUG
+                        else
+                        {
+                            _logger.Trace(
+                                "[#{EngineId}] Asp-win depth {Depth} ({DepthWithoutReduction} - {Reduction}), window {Window}: [{Alpha}, {Beta}] for score {Score}, nodes {Nodes}",
+                                _id, depthToSearch, depth, failHighReduction, window, alpha, beta, bestScore, _nodes);
+                        }
+#endif
 
                         bestScore = NegaMax(depth: depthToSearch, ply: 0, alpha, beta, cutnode: false, cancellationToken);
                         Debug.Assert(bestScore > EvaluationConstants.MinEval && bestScore < EvaluationConstants.MaxEval);

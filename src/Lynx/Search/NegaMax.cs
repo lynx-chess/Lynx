@@ -23,9 +23,18 @@ public sealed partial class Engine
         // Prevents runtime failure in case depth is increased due to check extension, since we're using ply when calculating pvTable index,
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
-            _logger.Debug("[#{EngineId}] Max depth {Depth} reached while searching position {FEN}",
+            if (IsMainEngine)
+            {
+                _logger.Debug("[#{EngineId}] Max depth {Depth} reached - position {FEN}",
+                    _id, Configuration.EngineSettings.MaxDepth, position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove));
+            }
+#if MULTITHREAD_DEBUG
+            else
+            {
+                _logger.Trace("[#{EngineId}] Max depth {Depth} reached - position {FEN}",
                 _id, Configuration.EngineSettings.MaxDepth, position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove));
-
+            }
+#endif
             return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
         }
 
@@ -627,9 +636,18 @@ public sealed partial class Engine
 
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
-            _logger.Debug("[#{EngineId}] Max depth {Depth} reached in qsearch while searching position {FEN}",
+            if (IsMainEngine)
+            {
+                _logger.Debug("[#{EngineId}] Max depth {Depth} reached in qsearch - position {FEN}",
                 _id, Configuration.EngineSettings.MaxDepth, position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove));
-
+            }
+#if MULTITHREAD_DEBUG
+            else
+            {
+                _logger.Trace("[#{EngineId}] Max depth {Depth} reached in qsearch - position {FEN}",
+                _id, Configuration.EngineSettings.MaxDepth, position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove));
+            }
+#endif
             return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
         }
 
