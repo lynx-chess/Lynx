@@ -1043,7 +1043,7 @@ static void TranspositionTableMethod()
     static void TesSize(int size)
     {
         Console.WriteLine("Hash: {0} MB", size);
-        var length = TranspositionTable.CalculateLength(size);
+        var length = (int)TranspositionTable.CalculateLength(size);
 
         var lengthMb = length / 1024 / 1024;
 
