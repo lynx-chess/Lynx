@@ -18,20 +18,21 @@ public sealed partial class Engine
     [SkipLocalsInit]
     private int NegaMax(int depth, int ply, int alpha, int beta, bool cutnode, CancellationToken cancellationToken, bool parentWasNullMove = false)
     {
+        // Don't move after max. depth check
+        cancellationToken.ThrowIfCancellationRequested();
+
         var position = Game.CurrentPosition;
 
         // Prevents runtime failure in case depth is increased due to check extension, since we're using ply when calculating pvTable index,
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
-            _logger.Debug("[#{EngineId}] Max depth {Depth} reached",
-                _id, Configuration.EngineSettings.MaxDepth);
+            _logger.Debug("[#{EngineId}] Max depth {Depth} reached while searching position {FEN}",
+                _id, Configuration.EngineSettings.MaxDepth, position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove));
 
             return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
         }
 
         _maxDepthReached[ply] = ply;
-
-        cancellationToken.ThrowIfCancellationRequested();
 
         var pvIndex = PVTable.Indexes[ply];
         var nextPvIndex = PVTable.Indexes[ply + 1];
@@ -621,14 +622,15 @@ public sealed partial class Engine
     [SkipLocalsInit]
     public int QuiescenceSearch(int ply, int alpha, int beta, bool pvNode, CancellationToken cancellationToken)
     {
-        var position = Game.CurrentPosition;
-
+        // Don't move after max. depth check
         cancellationToken.ThrowIfCancellationRequested();
+
+        var position = Game.CurrentPosition;
 
         if (ply >= Configuration.EngineSettings.MaxDepth)
         {
-            _logger.Debug("[#{EngineId}] Max depth {Depth} reached in qsearch",
-                _id, Configuration.EngineSettings.MaxDepth);
+            _logger.Debug("[#{EngineId}] Max depth {Depth} reached in qsearch while searching position {FEN}",
+                _id, Configuration.EngineSettings.MaxDepth, position.FEN(Game.HalfMovesWithoutCaptureOrPawnMove));
 
             return position.StaticEvaluation(Game.HalfMovesWithoutCaptureOrPawnMove, _pawnEvalTable).Score;
         }
