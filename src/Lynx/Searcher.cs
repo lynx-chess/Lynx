@@ -342,7 +342,6 @@ public sealed class Searcher
         var lastElapsed = sw.ElapsedMilliseconds;
 #endif
 
-        _logger.Info("[MultithreadedSearch] HardLimitTimeBound {HardLimitTimeBound}", searchConstraints.HardLimitTimeBound);
         if (searchConstraints.HardLimitTimeBound != SearchConstraints.DefaultHardLimitTimeBound)
         {
             _logger.Info("Configuring hard limit cancellaton to {HardTimeBound}ms for main thread", searchConstraints.HardLimitTimeBound);
