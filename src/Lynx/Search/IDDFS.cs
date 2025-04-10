@@ -141,7 +141,7 @@ public sealed partial class Engine
                             "[#{EngineId}] Depth {Depth}: aspiration windows [{Alpha}, {Beta}] for previous search score {Score}, nodes {Nodes}",
                             _id, depth, alpha, beta, lastSearchResult.Score, _nodes);
                     }
-
+#endif
                     Debug.Assert(
                         lastSearchResult.Mate == 0
                             ? lastSearchResult.Score < EvaluationConstants.PositiveCheckmateDetectionLimit && lastSearchResult.Score > EvaluationConstants.NegativeCheckmateDetectionLimit
