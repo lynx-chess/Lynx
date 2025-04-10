@@ -309,26 +309,29 @@ public sealed partial class Engine
                 return false;
             }
 
-            var winningMateThreshold = (100 - Game.HalfMovesWithoutCaptureOrPawnMove) / 2;
-            _logger.Info(
-                "[#{EngineId}] Depth {Depth}: mate in {Mate} detected (score {Score}, {MateThreshold} moves until draw by repetition)",
-                _id, depth - 1, mate, bestScore, winningMateThreshold);
-
-            if (mate < 0 || mate + Constants.MateDistanceMarginToStopSearching < winningMateThreshold)
+            if (IsMainEngine)
             {
-                if (_searchConstraints.SoftLimitTimeBound < Configuration.EngineSettings.SoftTimeBoundLimitOnMate)
-                {
-                    _logger.Info("[#{EngineId}] Stopping, since mate is short enough and we're short on time: soft limit {SoftLimit}ms",
-                        _id, _searchConstraints.SoftLimitTimeBound);
+                var winningMateThreshold = (100 - Game.HalfMovesWithoutCaptureOrPawnMove) / 2;
+                _logger.Info(
+                    "[#{EngineId}] Depth {Depth}: mate in {Mate} detected (score {Score}, {MateThreshold} moves until draw by repetition)",
+                    _id, depth - 1, mate, bestScore, winningMateThreshold);
 
-                    return false;
+                if (mate < 0 || mate + Constants.MateDistanceMarginToStopSearching < winningMateThreshold)
+                {
+                    if (_searchConstraints.SoftLimitTimeBound < Configuration.EngineSettings.SoftTimeBoundLimitOnMate)
+                    {
+                        _logger.Info("[#{EngineId}] Stopping, since mate is short enough and we're short on time: soft limit {SoftLimit}ms",
+                            _id, _searchConstraints.SoftLimitTimeBound);
+
+                        return false;
+                    }
+
+                    _logger.Info("[#{EngineId}] Could stop search, since mate is short enough",
+                        _id, _searchConstraints.SoftLimitTimeBound);
                 }
 
-                _logger.Info("[#{EngineId}] Could stop search, since mate is short enough",
-                    _id, _searchConstraints.SoftLimitTimeBound);
+                _logger.Info("[#{EngineId}] Search continues, hoping to find a faster mate", _id);
             }
-
-            _logger.Info("[#{EngineId}] Search continues, hoping to find a faster mate", _id);
         }
 
         if (depth >= Configuration.EngineSettings.MaxDepth)
