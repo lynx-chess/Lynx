@@ -92,6 +92,8 @@ public readonly struct TranspositionTable
         if (Sse.IsSupported)
         {
             (var ttIndex, var entryIndex) = CalculateTTIndexes(position.UniqueIdentifier);
+            Debug.Assert(ttIndex < _ttArrayCount);
+            Debug.Assert(entryIndex < Array.MaxLength);
 
             unsafe
             {
