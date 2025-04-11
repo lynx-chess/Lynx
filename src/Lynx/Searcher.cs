@@ -55,6 +55,9 @@ public sealed class Searcher
         Warmup();
 #endif
 
+        // Even if we didn't have Warmup(), this .Clear() zeroes the otherwise lazily zero-ed memory (due to using GC.AllocateArray instead of AllocateUninitializedArray)
+        // It might help performance though due to preventing that zeroing from happenning during search
+        // See https://stackoverflow.com/questions/2688466/why-mallocmemset-is-slower-than-calloc/2688522#2688522
         _ttWrapper.Clear();
 
         ForceGCCollection();
@@ -456,6 +459,11 @@ public sealed class Searcher
             _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _ttWrapper.Size, Configuration.EngineSettings.TranspositionTableSize);
 
             _ttWrapper = new TranspositionTable();
+
+            // This .Clear() zeroes the otherwise lazily zero-ed memory (due to using GC.AllocateArray instead of AllocateUninitializedArray), but isn't functional
+            // It might impact performance though, due to preventing that zeroing from happenning during search
+            // See https://stackoverflow.com/questions/2688466/why-mallocmemset-is-slower-than-calloc/2688522#2688522
+            _ttWrapper.Clear();
 
             _mainEngine.FreeResources();
             _mainEngine = new Engine(MainEngineId, _engineWriter, in _ttWrapper);
