@@ -456,6 +456,7 @@ public sealed class Searcher
             _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _ttWrapper.Size, Configuration.EngineSettings.TranspositionTableSize);
 
             _ttWrapper = new TranspositionTable();
+            _ttWrapper.Clear();
 
             _mainEngine.FreeResources();
             _mainEngine = new Engine(MainEngineId, _engineWriter, in _ttWrapper);
