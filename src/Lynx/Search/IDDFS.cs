@@ -250,8 +250,14 @@ public sealed partial class Engine
         }
         catch (OperationCanceledException)
         {
-            // Here we want Info for main thread and Debug for extre threads
-            var higherLogLevel = LogLevel.FromOrdinal(logLevel.Ordinal + 1);
+            // One degree higher than log level, but can't add 1 to Off
+            var higherLogLevel = IsMainEngine
+                ? LogLevel.Info
+#if MULTITHREAD_DEBUG
+                : LogLevel.Debug;
+#else
+                : LogLevel.Off;
+#endif
 
 #pragma warning disable S6667 // Logging in a catch clause should pass the caught exception as a parameter - expected exception we want to ignore
             _logger.Log(higherLogLevel,
