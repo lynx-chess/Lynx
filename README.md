@@ -293,7 +293,7 @@ The following non-standard UCI commands are supported:
 
 - `eval`: shows the current position's static evaluation.
 
-- `printsysteminfo`: shows some internal behavior based on the system where Lynx is running.
+- `runtimeconfig`: shows CPU flags, some internal behavior based on them and GC settings.
 
 ## Credits
 
