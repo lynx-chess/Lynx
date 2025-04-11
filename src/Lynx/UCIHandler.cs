@@ -211,6 +211,7 @@ public sealed class UCIHandler
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
                         Configuration.Hash = value;
+                        _searcher.UpdateHash();
                     }
                     break;
                 }
@@ -255,6 +256,7 @@ public sealed class UCIHandler
                     if (length > 4 && int.TryParse(command[commandItems[4]], out var value))
                     {
                         Configuration.EngineSettings.Threads = value;
+                        _searcher.UpdateThreads();
                     }
                     break;
 #pragma warning restore S1066 // Collapsible "if" statements should be merged

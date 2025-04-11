@@ -2,6 +2,7 @@ using Lynx.Model;
 using Lynx.UCI.Commands.Engine;
 using Lynx.UCI.Commands.GUI;
 using NLog;
+using System.Diagnostics;
 using System.Threading.Channels;
 
 namespace Lynx;
@@ -438,23 +439,74 @@ public sealed class Searcher
 
     public void NewGame()
     {
+        var sw = Stopwatch.StartNew();
+
         var averageDepth = _mainEngine.AverageDepth;
         if (averageDepth > 0 && averageDepth < int.MaxValue)
         {
             _logger.Info("Average depth: {0}", averageDepth);
         }
 
-        // Hash update
-        if (_ttWrapper.Size == Configuration.EngineSettings.TranspositionTableSize)
+        // Threads update - before hash update to take advantage of multithreaded TT initialization (clearing)
+        // if .Clear() is ever moved to TranspositionTable constructor.
+        var threadsUpdated = UpdateThreads();
+        if (threadsUpdated)
         {
-            _mainEngine.NewGame();
-
-            foreach (var engine in _extraEngines)
-            {
-                engine.NewGame();
-            }
+            _logger.Warn("Unexpected threads update - should have happened on 'setoption'");
         }
-        else
+
+        // Hash update - after hash update to potentially take advantage of multithreaded TT
+        // initialization (clearing/zeroing), if .Clear() is ever moved to TranspositionTable constructor.
+        var hashUpdated = UpdateHash();
+        if (hashUpdated)
+        {
+            _logger.Warn("Unexpected hash update - should have happened on 'setoption'\");");
+        }
+
+        // We don't need to reset the main engine in case of hash update
+        // because it was alredy reset there, but whetever
+        _mainEngine.NewGame();
+
+        // We don't need to reset the extra engines in case of hash or threads update
+        // because they were alredy reset there, but whetever
+        foreach (var engine in _extraEngines)
+        {
+            engine.NewGame();
+        }
+
+        // During the first run, TT is cleared at the end of the constructor
+        if (!_firstRun && !hashUpdated)
+        {
+            _ttWrapper.Clear();
+        }
+        _firstRun = false;
+
+        sw.Stop();
+        _logger.Info("ucinewgame duration: {Time}ms", sw.ElapsedMilliseconds);
+
+        ForceGCCollection();
+    }
+
+    public bool UpdateThreads()
+    {
+        if (_searchThreadsCount != Configuration.EngineSettings.Threads)
+        {
+            _logger.Info("Updating search threads count ({CurrentCount} threads -> {NewCount} threads)", _searchThreadsCount, Configuration.EngineSettings.Threads);
+
+            // Before invoking AllocateExtraEngines
+            _searchThreadsCount = Configuration.EngineSettings.Threads;
+
+            AllocateExtraEngines();
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public bool UpdateHash()
+    {
+        if (_ttWrapper.Size != Configuration.EngineSettings.TranspositionTableSize)
         {
             _logger.Info("Resizing TT ({CurrentSize} MB -> {NewSize} MB)", _ttWrapper.Size, Configuration.EngineSettings.TranspositionTableSize);
 
@@ -468,32 +520,13 @@ public sealed class Searcher
             _mainEngine.FreeResources();
             _mainEngine = new Engine(MainEngineId, _engineWriter, in _ttWrapper);
 
+            // We need extra engines to know about the nwe TT
             AllocateExtraEngines();
+
+            return true;
         }
 
-        // Threads update
-        if (_searchThreadsCount == Configuration.EngineSettings.Threads)
-        {
-            foreach (var engine in _extraEngines)
-            {
-                engine.NewGame();
-            }
-        }
-        else
-        {
-            _logger.Info("Updating search threads count ({CurrentCount} threads -> {NewCount} threads)", _searchThreadsCount, Configuration.EngineSettings.Threads);
-            _searchThreadsCount = Configuration.EngineSettings.Threads;
-
-            AllocateExtraEngines();
-        }
-
-        if (!_firstRun)
-        {
-            _ttWrapper.Clear();
-        }
-        _firstRun = false;
-
-        ForceGCCollection();
+        return false;
     }
 
     public void Quit()
@@ -522,6 +555,9 @@ public sealed class Searcher
         await engine.PrintBenchResults(results);
     }
 
+    /// <summary>
+    /// Removes existing <see cref="_extraEngines"/> and allocates new ones baed on <see cref="_searchThreadsCount"/>
+    /// </summary>
     private void AllocateExtraEngines()
     {
         // _searchThreadsCount includes _mainEngine
