@@ -36,12 +36,13 @@ public readonly struct TranspositionTable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Clear()
     {
-        _logger.Debug("Clearing TT");
+        var threadCount = Configuration.EngineSettings.Threads;
+
+        _logger.Debug("Zeroing TT using {ThreadCount} thread(s)", threadCount);
         var sw = Stopwatch.StartNew();
 
         var tt = _tt;
         var ttLength = tt.Length;
-        var threadCount = Configuration.EngineSettings.Threads;
         var sizePerThread = ttLength / threadCount;
 
         // Instead of just doing Array.Clear(_tt):
