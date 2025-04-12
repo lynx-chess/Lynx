@@ -90,9 +90,9 @@ public readonly struct TranspositionTable
     /// </summary>
     /// <param name="ply">Ply</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public (int Score, ShortMove BestMove, NodeType NodeType, int StaticEval, int Depth, bool WasPv) ProbeHash(Position position, int ply)
+    public (int Score, ShortMove BestMove, NodeType NodeType, int StaticEval, int Depth, bool WasPv) ProbeHash(Position position, int ply, int halfMovesWithoutCaptureOrPawnMove)
     {
-        var ttIndex = CalculateTTIndex(position.UniqueIdentifier);
+        var ttIndex = CalculateTTIndex(position.UniqueIdentifierWith50mr(halfMovesWithoutCaptureOrPawnMove));
         var entry = _tt[ttIndex];
 
         if ((ushort)position.UniqueIdentifier != entry.Key)
@@ -112,9 +112,9 @@ public readonly struct TranspositionTable
     /// </summary>
     /// <param name="ply">Ply</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void RecordHash(Position position, int staticEval, int depth, int ply, int score, NodeType nodeType, bool wasPv, Move? move = null)
+    public void RecordHash(Position position, int halfMovesWithoutCaptureOrPawnMove, int staticEval, int depth, int ply, int score, NodeType nodeType, bool wasPv, Move? move = null)
     {
-        var ttIndex = CalculateTTIndex(position.UniqueIdentifier);
+        var ttIndex = CalculateTTIndex(position.UniqueIdentifierWith50mr(halfMovesWithoutCaptureOrPawnMove));
         ref var entry = ref _tt[ttIndex];
 
         //if (entry.Key != default && entry.Key != position.UniqueIdentifier)
