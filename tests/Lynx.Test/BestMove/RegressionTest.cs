@@ -67,10 +67,10 @@ public class RegressionTest : BaseTest
 
         switch (depth)
         {
-            case 5 when bestResult.Moves.Length >= 5:
+            case 5 when bestResult.PVLength >= 5:
                 Assert.AreNotEqual("f6e4", bestResult.Moves[4].UCIString());
                 break;
-            case 6 when bestResult.Moves.Length >= 6:
+            case 6 when bestResult.PVLength >= 6:
                 Assert.AreNotEqual("f3e5", bestResult.Moves[5].UCIString());
                 break;
         }
@@ -85,7 +85,7 @@ public class RegressionTest : BaseTest
         var engine = GetEngine(fen);
         var bestResult = engine.BestMove(goCommand);
 
-        if (bestResult.Moves.Length > depth)
+        if (bestResult.PVLength > depth)
         {
             Assert.AreNotEqual(notExpectedMove, bestResult.Moves[depth].UCIString());
         }
@@ -246,7 +246,7 @@ public class RegressionTest : BaseTest
 
         var bestMove = engine.BestMove(new GoCommand($"go depth {5}"));
         Assert.Zero(bestMove.Score);
-        Assert.AreEqual(1, bestMove.Moves.Length);
+        Assert.AreEqual(1, bestMove.PVLength);
         Assert.AreEqual("b8c7", bestMove.BestMove.UCIString());
     }
 

@@ -8,6 +8,12 @@ public sealed class SearchResult
     public int EngineId { get; init; }
 #endif
 
+    /// <summary>
+    /// Since <see cref="Moves"/> is a rented array, size might be bigger
+    /// than the actual number of moves
+    /// </summary>
+    public int PVLength { get; set; }
+
     public Move[] Moves { get; init; }
 
     public (int WDLWin, int WDLDraw, int WDLLoss)? WDL { get; set; }
@@ -41,7 +47,7 @@ public sealed class SearchResult
 #if MULTITHREAD_DEBUG
         int engineId,
 #endif
-        Move bestMove, int score, int targetDepth, Move[] moves, int mate = default)
+        Move bestMove, int score, int targetDepth, int pvLength, Move[] moves, int mate = default)
     {
 #if MULTITHREAD_DEBUG
         EngineId = engineId;
@@ -49,6 +55,7 @@ public sealed class SearchResult
         BestMove = bestMove;
         Score = score;
         Depth = targetDepth;
+        PVLength = pvLength;
         Moves = moves;
         Mate = mate;
     }
@@ -84,13 +91,13 @@ public sealed class SearchResult
         }
 
         sb.Append(" pv ");
-        foreach (var move in Moves)
+        for (int i = 0; i < PVLength; i++)
         {
-            sb.Append(move.UCIStringMemoized()).Append(' ');
+            sb.Append(Moves[i].UCIStringMemoized()).Append(' ');
         }
 
         // Remove the trailing space
-        if (Moves.Length > 0)
+        if (PVLength > 0)
         {
             sb.Length--;
         }

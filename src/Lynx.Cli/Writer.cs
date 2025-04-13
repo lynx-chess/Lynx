@@ -1,4 +1,6 @@
-﻿using NLog;
+﻿using Lynx.Model;
+using NLog;
+using System.Buffers;
 using System.Threading.Channels;
 
 namespace Lynx.Cli;
@@ -26,6 +28,11 @@ public sealed class Writer
                 if (_logger.IsInfoEnabled)
                 {
                     _logger.Info("[Lynx]\t{0}", str);
+                }
+
+                if (output is SearchResult searchResult)
+                {
+                    ArrayPool<Move>.Shared.Return(searchResult.Moves);
                 }
             }
         }

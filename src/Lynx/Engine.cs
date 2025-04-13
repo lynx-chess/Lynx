@@ -166,14 +166,16 @@ public sealed partial class Engine : IDisposable
 
         if (searchResult is not null)
         {
+            // TakeWhile shouldn't be used if we ever recover this code
             _logger.Info("Search evaluation result - score: {0}, mate: {1}, depth: {2}, pv: {3}",
-                searchResult.Score, searchResult.Mate, searchResult.Depth, string.Join(", ", searchResult.Moves.Select(m => m.UCIString())));
+                searchResult.Score, searchResult.Mate, searchResult.Depth, string.Join(", ", searchResult.Moves.TakeWhile(m => m != 0).Select(m => m.UCIString())));
         }
 
         if (tbResult is not null)
         {
+            // TakeWhile shouldn't be used if we ever recover this code
             _logger.Info("Online tb probing result - mate: {0}, moves: {1}",
-                tbResult.Mate, string.Join(", ", tbResult.Moves.Select(m => m.UCIString())));
+                tbResult.Mate, string.Join(", ", tbResult.Moves.TakeWhile(m => m != 0).Select(m => m.UCIString())));
 
             if (searchResult?.Mate > 0 && searchResult.Mate <= tbResult.Mate && searchResult.Mate + currentHalfMovesWithoutCaptureOrPawnMove < 96)
             {

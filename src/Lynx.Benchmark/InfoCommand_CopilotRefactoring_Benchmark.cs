@@ -83,10 +83,10 @@ public class InfoCommand_CopilotRefactoring_Benchmark : BaseBenchmark
 {
     public static IEnumerable<SearchResult> Data =>
     [
-        new SearchResult(33592128, 27, 20, [33592128]),
-        new SearchResult(33592128, 27, 20, [33591088, 33975472, 112608, 480352, 109456, 477200, 47968, 495952, 187344, 417008, 24220320, 18256304]),
-        new SearchResult(33592128, 27, 20, [33592128, 33974432, 112608, 477200, 109456, 33976512, 166864, 412848, 44848, 536656, 101055424, 480352, 93856, 18312528, 24276512, 101390400, 43808, 544800, 177056, 19426624]),
-        new SearchResult(33592128, 27, 20, [352512, 684368, 345472, 691648, 344336, 675376, 353536, 699696, 345488, 701104, 344336, 709312, 345344, 706368, 346384, 699152, 345376, 689824, 344336, 688656, 345344, 697856, 344336, 705168, 345344, 714496, 338192, 671632, 345248, 678128, 353552, 714080, 346512, 693136, 345376, 676416, 352528, 717120, 345472]),
+        new SearchResult(33592128, 27, 20, 1, [33592128]),
+        new SearchResult(33592128, 27, 20, 12, [33591088, 33975472, 112608, 480352, 109456, 477200, 47968, 495952, 187344, 417008, 24220320, 18256304]),
+        new SearchResult(33592128, 27, 20, 20, [33592128, 33974432, 112608, 477200, 109456, 33976512, 166864, 412848, 44848, 536656, 101055424, 480352, 93856, 18312528, 24276512, 101390400, 43808, 544800, 177056, 19426624]),
+        new SearchResult(33592128, 27, 20, 39, [352512, 684368, 345472, 691648, 344336, 675376, 353536, 699696, 345488, 701104, 344336, 709312, 345344, 706368, 346384, 699152, 345376, 689824, 344336, 688656, 345344, 697856, 344336, 705168, 345344, 714496, 338192, 671632, 345248, 678128, 353552, 714080, 346512, 693136, 345376, 676416, 352528, 717120, 345472]),
     ];
 
     [Benchmark(Baseline = true)]
@@ -129,7 +129,7 @@ public class InfoCommand_CopilotRefactoring_Benchmark : BaseBenchmark
                     .Append(searchResult.WDL.Value.WDLLoss);
             }
 
-            sb.Append(" pv ").AppendJoin(" ", searchResult.Moves.Select(move => move.UCIString()));
+            sb.Append(" pv ").AppendJoin(" ", searchResult.Moves.TakeWhile(m => m != 0).Select(move => move.UCIString()));
 
             return sb.ToString();
         }
@@ -161,13 +161,13 @@ public class InfoCommand_CopilotRefactoring_Benchmark : BaseBenchmark
             }
 
             sb.Append(" pv ");
-            foreach (var move in searchResult.Moves)
+            for (int i = 0; i < searchResult.PVLength; ++i)
             {
-                sb.Append(move.UCIString()).Append(' ');
+                sb.Append(searchResult.Moves[i].UCIString()).Append(' ');
             }
 
             // Remove the trailing space
-            if (searchResult.Moves.Length > 0)
+            if (searchResult.PVLength > 0)
             {
                 sb.Length--;
             }
