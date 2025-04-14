@@ -104,7 +104,11 @@ public sealed partial class Engine
 
         var sideUlong = (ulong)position.Side;
         var pawnHash = position._kingPawnUniqueIdentifier;
-        var nonPawnHash = position.UniqueIdentifier ^ pawnHash ^ ZobristTable.SideHash(sideUlong);
+        var nonPawnHash = position.UniqueIdentifier
+            ^ pawnHash
+            ^ ZobristTable.SideHash(sideUlong)
+            ^ ZobristTable.PieceHash(position.WhiteKingSqure, (int)Piece.K)
+            ^ ZobristTable.PieceHash(position.BlackKingSquare, (int)Piece.k);
 
         ref var pawnCorrHistEntry = ref _pawnCorrHistory[
             ((pawnHash & Constants.PawnCorrHistoryMask) * 2)
@@ -141,7 +145,11 @@ public sealed partial class Engine
         var sideUlong = (ulong)position.Side;
 
         var pawnHash = position._kingPawnUniqueIdentifier;
-        var nonPawnHash = position.UniqueIdentifier ^ pawnHash ^ ZobristTable.SideHash(sideUlong);
+        var nonPawnHash = position.UniqueIdentifier
+            ^ pawnHash
+            ^ ZobristTable.SideHash(sideUlong)
+            ^ ZobristTable.PieceHash(position.WhiteKingSqure, (int)Piece.K)
+            ^ ZobristTable.PieceHash(position.BlackKingSquare, (int)Piece.k);
 
         var pawnCorrHistory = _pawnCorrHistory[
             ((pawnHash & Constants.PawnCorrHistoryMask) * 2)

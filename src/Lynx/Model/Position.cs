@@ -52,6 +52,9 @@ public class Position : IDisposable
     public BitBoard Knights => PieceBitBoards[(int)Piece.N] | PieceBitBoards[(int)Piece.n];
     public BitBoard Kings => PieceBitBoards[(int)Piece.K] | PieceBitBoards[(int)Piece.k];
 
+    public int WhiteKingSqure => PieceBitBoards[(int)Piece.K].GetLS1BIndex();
+    public int BlackKingSquare => PieceBitBoards[(int)Piece.k].GetLS1BIndex();
+
     /// <summary>
     /// Beware, half move counter isn't take into account
     /// Use alternative constructor instead and set it externally if relevant
