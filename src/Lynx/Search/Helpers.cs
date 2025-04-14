@@ -102,21 +102,19 @@ public sealed partial class Engine
         var scaledBonus = evaluationDelta * Constants.CorrectionHistoryScale;
         var weight = 2 * Math.Min(16, depth + 1);
 
-        var sideInt = (int)position.Side;
+        var sideUlong = (ulong)position.Side;
         var pawnHash = position._kingPawnUniqueIdentifier;
-        var fullHash = position.UniqueIdentifier;
+        var nonPawnHash = position.UniqueIdentifier ^ pawnHash ^ ZobristTable.SideHash(sideUlong);
 
         ref var pawnCorrHistEntry = ref _pawnCorrHistory[
-            ((int)(pawnHash & Constants.PawnCorrHistoryMask) * 2)
-            + sideInt];
-
+            ((pawnHash & Constants.PawnCorrHistoryMask) * 2)
+            + sideUlong];
         pawnCorrHistEntry = UpdateCorrectionHistory(pawnCorrHistEntry, scaledBonus, weight);
 
         ref var nonPawnCorreHistEntry = ref _nonPawnCorrHistory[
-            ((int)((fullHash ^ pawnHash) & Constants.NonPawnCorrHistoryMask) * 2 /** 2*/)
+            ((nonPawnHash & Constants.NonPawnCorrHistoryMask) * 2 /** 2*/)
             //+ (sideInt * 2)
-            + sideInt];
-
+            + sideUlong];
         nonPawnCorreHistEntry = UpdateCorrectionHistory(nonPawnCorreHistEntry, scaledBonus, weight);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -140,19 +138,19 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int CorrectStaticEvaluation(Position position, int staticEvaluation)
     {
-        var sideInt = (int)position.Side;
+        var sideUlong = (ulong)position.Side;
 
         var pawnHash = position._kingPawnUniqueIdentifier;
-        var fullHash = position.UniqueIdentifier;
+        var nonPawnHash = position.UniqueIdentifier ^ pawnHash ^ ZobristTable.SideHash(sideUlong);
 
         var pawnCorrHistory = _pawnCorrHistory[
-            ((int)(pawnHash & Constants.PawnCorrHistoryMask) * 2)
-            + sideInt];
+            ((pawnHash & Constants.PawnCorrHistoryMask) * 2)
+            + sideUlong];
 
         var nonPawnCorreHistory = _nonPawnCorrHistory[
-            ((int)((fullHash ^ pawnHash) & Constants.NonPawnCorrHistoryMask) * 2 /** 2*/)
+            ((nonPawnHash & Constants.NonPawnCorrHistoryMask) * 2 /** 2*/)
             //+ (sideInt * 2)
-            + sideInt];
+            + sideUlong];
 
         var totalCorrection = pawnCorrHistory + nonPawnCorreHistory;
 

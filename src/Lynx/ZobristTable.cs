@@ -56,7 +56,7 @@ public static class ZobristTable
     /// Differenciates white and black sides
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static ulong SideHash(ulong side)
+    public static ulong SideHash(ulong side)
     {
         return side * _table[(int)BoardSquare.h8][(int)Piece.p];
     }
