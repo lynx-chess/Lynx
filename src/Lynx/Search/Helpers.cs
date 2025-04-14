@@ -129,7 +129,7 @@ public sealed partial class Engine
         var correction = _pawnCorrHistory[position._kingPawnUniqueIdentifier & Constants.PawnCorrHistoryMask];
         var correctStaticEval = staticEvaluation + (correction / Constants.CorrectionHistoryScale);
 
-        return Math.Clamp(correctStaticEval, EvaluationConstants.MinEval, EvaluationConstants.MaxStaticEval);
+        return Math.Clamp(correctStaticEval, EvaluationConstants.MinStaticEval, EvaluationConstants.MaxStaticEval);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
