@@ -1,5 +1,4 @@
 ﻿using Lynx.Model;
-using Microsoft.Extensions.Options;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
