@@ -528,12 +528,13 @@ public static class Constants
     /// 262_144 * Marshal.SizeOf<PawnTableElement>() / 1024 = 4MB
     /// </summary>
     public const int KingPawnHashSize = 262_144;
-
     public const int KingPawnHashMask = KingPawnHashSize - 1;
 
     public const int PawnCorrHistorySize = 16_384;
-
     public const int PawnCorrHistoryMask = PawnCorrHistorySize - 1;
+
+    public const int NonPawnCorrHistorySize = 16_384;
+    public const int NonPawnCorrHistoryMask = PawnCorrHistorySize - 1;
 
     public const int CorrectionHistoryScale = 256;
 }

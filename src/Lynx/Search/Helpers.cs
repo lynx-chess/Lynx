@@ -102,8 +102,22 @@ public sealed partial class Engine
         var scaledBonus = evaluationDelta * Constants.CorrectionHistoryScale;
         var weight = 2 * Math.Min(16, depth + 1);
 
-        ref var pawnCorrHistEntry = ref _pawnCorrHistory[(2 * (int)(position._kingPawnUniqueIdentifier & Constants.PawnCorrHistoryMask)) + (int)position.Side];
+        var sideInt = (int)position.Side;
+        var pawnHash = position._kingPawnUniqueIdentifier;
+        var fullHash = position.UniqueIdentifier;
+
+        ref var pawnCorrHistEntry = ref _pawnCorrHistory[
+            ((int)(pawnHash & Constants.PawnCorrHistoryMask) * 2)
+            + sideInt];
+
         pawnCorrHistEntry = UpdateCorrectionHistory(pawnCorrHistEntry, scaledBonus, weight);
+
+        ref var nonPawnCorreHistEntry = ref _nonPawnCorrHistory[
+            ((int)((fullHash ^ pawnHash) & Constants.NonPawnCorrHistoryMask) * 2 /** 2*/)
+            //+ (sideInt * 2)
+            + sideInt];
+
+        nonPawnCorreHistEntry = UpdateCorrectionHistory(nonPawnCorreHistEntry, scaledBonus, weight);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static int UpdateCorrectionHistory(int previousCorrectedScore, int scaledBonus, int weight)
@@ -126,8 +140,23 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int CorrectStaticEvaluation(Position position, int staticEvaluation)
     {
-        var correction = _pawnCorrHistory[(2 * (int)(position._kingPawnUniqueIdentifier & Constants.PawnCorrHistoryMask)) + (int)position.Side];
-        var correctStaticEval = staticEvaluation + (correction / Constants.CorrectionHistoryScale);
+        var sideInt = (int)position.Side;
+
+        var pawnHash = position._kingPawnUniqueIdentifier;
+        var fullHash = position.UniqueIdentifier;
+
+        var pawnCorrHistory = _pawnCorrHistory[
+            ((int)(pawnHash & Constants.PawnCorrHistoryMask) * 2)
+            + sideInt];
+
+        var nonPawnCorreHistory = _nonPawnCorrHistory[
+            ((int)((fullHash ^ pawnHash) & Constants.NonPawnCorrHistoryMask) * 2 /** 2*/)
+            //+ (sideInt * 2)
+            + sideInt];
+
+        var totalCorrection = pawnCorrHistory + nonPawnCorreHistory;
+
+        var correctStaticEval = staticEvaluation + (totalCorrection / Constants.CorrectionHistoryScale);
 
         return Math.Clamp(correctStaticEval, EvaluationConstants.MinStaticEval, EvaluationConstants.MaxStaticEval);
     }
