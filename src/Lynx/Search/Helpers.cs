@@ -1,4 +1,5 @@
 ﻿using Lynx.Model;
+using Microsoft.Extensions.Options;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -102,7 +103,7 @@ public sealed partial class Engine
         var scaledBonus = evaluationDelta * Constants.CorrectionHistoryScale;
         var weight = 2 * Math.Min(16, depth + 1);
 
-        ref var pawnCorrHistEntry = ref _pawnCorrHistory[position._kingPawnUniqueIdentifier & Constants.PawnCorrHistoryMask];
+        ref var pawnCorrHistEntry = ref _pawnCorrHistory[(2 * (int)(position._kingPawnUniqueIdentifier & Constants.PawnCorrHistoryMask)) + (int)position.Side];
         pawnCorrHistEntry = UpdateCorrectionHistory(pawnCorrHistEntry, scaledBonus, weight);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -126,7 +127,7 @@ public sealed partial class Engine
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private int CorrectStaticEvaluation(Position position, int staticEvaluation)
     {
-        var correction = _pawnCorrHistory[position._kingPawnUniqueIdentifier & Constants.PawnCorrHistoryMask];
+        var correction = _pawnCorrHistory[(2 * (int)(position._kingPawnUniqueIdentifier & Constants.PawnCorrHistoryMask)) + (int)position.Side];
         var correctStaticEval = staticEvaluation + (correction / Constants.CorrectionHistoryScale);
 
         return Math.Clamp(correctStaticEval, EvaluationConstants.MinStaticEval, EvaluationConstants.MaxStaticEval);
