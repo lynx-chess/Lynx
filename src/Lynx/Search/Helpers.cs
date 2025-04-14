@@ -105,8 +105,9 @@ public sealed partial class Engine
         var pawnHash = position._kingPawnUniqueIdentifier
             ^ ZobristTable.PieceHash(position.WhiteKing, (int)Piece.K)
             ^ ZobristTable.PieceHash(position.BlackKing, (int)Piece.k);
+        var pawnIndex = pawnHash & Constants.PawnCorrHistoryMask;
 
-        ref var pawnCorrHistEntry = ref _pawnCorrHistory[pawnHash & Constants.PawnCorrHistoryMask];
+        ref var pawnCorrHistEntry = ref _pawnCorrHistory[(2 * pawnIndex) + (ulong)position.Side];
         pawnCorrHistEntry = UpdateCorrectionHistory(pawnCorrHistEntry, scaledBonus, weight);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -133,8 +134,9 @@ public sealed partial class Engine
         var pawnHash = position._kingPawnUniqueIdentifier
             ^ ZobristTable.PieceHash(position.WhiteKing, (int)Piece.K)
             ^ ZobristTable.PieceHash(position.BlackKing, (int)Piece.k);
+        var pawnIndex = pawnHash & Constants.PawnCorrHistoryMask;
 
-        var correction = _pawnCorrHistory[pawnHash & Constants.PawnCorrHistoryMask];
+        var correction = _pawnCorrHistory[(2 * pawnIndex) + (ulong)position.Side];
         var correctStaticEval = staticEvaluation + (correction / Constants.CorrectionHistoryScale);
 
         return Math.Clamp(correctStaticEval, EvaluationConstants.MinStaticEval, EvaluationConstants.MaxStaticEval);
