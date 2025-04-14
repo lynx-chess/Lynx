@@ -41,6 +41,8 @@ public sealed partial class Engine
     /// </summary>
     private readonly int[] _continuationHistory = GC.AllocateArray<int>(12 * 64 * 12 * 64 * EvaluationConstants.ContinuationHistoryPlyCount, pinned: true);
 
+    private readonly int[] _pawnCorrHistory = GC.AllocateArray<int>(Constants.PawnCorrHistorySize, pinned: true);
+
     /// <summary>
     /// 12 x 64
     /// piece x target square
